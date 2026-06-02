@@ -64,9 +64,8 @@ const propertyData = {
   accordion_3_rating:"",
   accordion_3_text:  "Built in 2018 by a family that outgrew the space, this property has never been rented — preserving its material quality and finish integrity across all rooms.",
 
-  // Broker
-  broker_name:       "Alexander Vance",
-  broker_email:      "avance@scoutit.ph",
+  broker_name:       "Miguel Torres, REB",
+  broker_email:      "mtorres@scoutit.ph",
   broker_phone:      "+63 917 000 0000",
 
   // Photos — bright premium architectural hero images

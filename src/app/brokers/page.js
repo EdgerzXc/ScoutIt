@@ -5,7 +5,7 @@ import Header from "@/components/Header";
 const DUMMY_BROKERS = [
   {
     id: "br-01",
-    name: "Alexander Vance",
+    name: "Miguel Torres, REB",
     title: "Principal Strategist",
     specialty: "Ultra-Luxury Residential",
     location: "BGC Focus",
@@ -17,7 +17,7 @@ const DUMMY_BROKERS = [
   },
   {
     id: "br-02",
-    name: "Elena Rostova",
+    name: "Elena Santos, REB",
     title: "Global Capital Manager",
     specialty: "Grade A Office Spaces",
     location: "Makati Core",
@@ -29,7 +29,7 @@ const DUMMY_BROKERS = [
   },
   {
     id: "br-03",
-    name: "Marcus Chen",
+    name: "Marco Reyes, REB",
     title: "Lead Arbitrage Analyst",
     specialty: "STR & Resort Properties",
     location: "STR Sector",

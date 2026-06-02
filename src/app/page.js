@@ -109,7 +109,7 @@ export default function Home() {
           {/* Left Menu Panel */}
           <div className="property-menu">
             <div className="menu-header">
-              <span className="vector-label">Vector 01</span>
+              <span className="vector-label">Layer 01 // Asset Discovery</span>
               <h2>Asset Classes</h2>
               <p>Select a sector to preview intelligence parameters.</p>
             </div>
@@ -242,7 +242,7 @@ export default function Home() {
           {/* Left Menu Panel */}
           <div className="property-menu">
             <div className="menu-header">
-              <span className="vector-label">Vector 02</span>
+              <span className="vector-label">Layer 02 // Active Intel Feed</span>
               <h2>Active Intelligence Feed</h2>
               <p>Select a sector to preview live discovery streams.</p>
             </div>
@@ -316,21 +316,43 @@ export default function Home() {
       <section className="snap-section section-brokers">
         <div className="brokers-content">
           <header className="section-header-center">
-            <span className="vector-label">Vector 03</span>
+            <span className="vector-label">Layer 03 // Partner Network</span>
             <h2>Intelligence Roster</h2>
             <p>Connect with elite space intelligence advisors across the archipelago.</p>
           </header>
           
           <div className="brokers-blur-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px', maxWidth: '1200px', margin: '0 auto' }}>
             {[
-              { name: "Alexander Vance", status: "Principal Strategist", rating: "★ 4.98 / 5.00", history: "History: 140+ Secured Transactions // BGC Focus", image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&q=80" },
-              { name: "Elena Rostova", status: "Global Capital Manager", rating: "★ 4.95 / 5.00", history: "History: 92+ Elite Placements // Makati Core", image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=80" },
-              { name: "Marcus Chen", status: "Lead Arbitrage Analyst", rating: "★ 4.99 / 5.00", history: "History: 210+ Syndicated Deals // STR Sector", image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&q=80" }
+              { name: "Miguel Torres, REB", status: "Principal Strategist", history: "3 Verified Closures // BGC Focus", image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&q=80", metrics: [
+                { label: "Active Retentions", value: "14 this quarter" },
+                { label: "Stewardship Velocity", value: "38 avg. days" },
+                { label: "Continuity Score", value: "89% repeat" }
+              ] },
+              { name: "Elena Santos, REB", status: "Global Capital Manager", history: "2 Verified Closures // Makati Core", image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=80", metrics: [
+                { label: "Active Retentions", value: "18 this quarter" },
+                { label: "Stewardship Velocity", value: "42 avg. days" },
+                { label: "Continuity Score", value: "92% repeat" }
+              ] },
+              { name: "Marco Reyes, REB", status: "Lead Arbitrage Analyst", history: "4 Verified Closures // STR Sector", image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&q=80", metrics: [
+                { label: "Active Retentions", value: "22 this quarter" },
+                { label: "Stewardship Velocity", value: "35 avg. days" },
+                { label: "Continuity Score", value: "95% repeat" }
+              ] }
             ].map((broker, i) => (
               <div key={i} className="broker-preview-card" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border-solid)', borderRadius: '8px', padding: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', transition: 'all 0.3s ease', cursor: 'default' }}>
                 <div style={{ width: '80px', height: '80px', borderRadius: '50%', backgroundImage: `url(${broker.image})`, backgroundSize: 'cover', backgroundPosition: 'center', filter: 'grayscale(100%) contrast(1.2)', marginBottom: '16px', border: '2px solid var(--border-solid)' }}></div>
                 <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: '#fff', marginBottom: '4px' }}>{broker.name} <span style={{ color: 'var(--text-muted)', fontSize: '12px', fontWeight: 'normal', fontFamily: 'var(--font-mono)' }}>// {broker.status}</span></h3>
-                <div style={{ color: 'var(--accent)', fontSize: '14px', fontFamily: 'var(--font-mono)', marginBottom: '16px', letterSpacing: '0.05em' }}>{broker.rating}</div>
+                
+                {/* 3-metric trust analytics block */}
+                <div style={{ display: 'flex', gap: '8px', width: '100%', marginBottom: '16px', marginTop: '12px' }}>
+                  {broker.metrics.map((m, idx) => (
+                    <div key={idx} style={{ flex: 1, background: '#0e0e0e', border: '1px solid #262626', padding: '16px 8px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                      <span style={{ color: 'var(--text-muted)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: '500', display: 'block', textAlign: 'center', lineHeight: '1.2' }}>{m.label}</span>
+                      <span style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: '#f0ede8', display: 'block', textAlign: 'center', lineHeight: '1.1' }}>{m.value}</span>
+                    </div>
+                  ))}
+                </div>
+
                 <div style={{ color: 'var(--text-secondary)', fontSize: '12px', background: 'rgba(0,0,0,0.5)', padding: '8px 12px', borderRadius: '4px', width: '100%' }}>{broker.history}</div>
               </div>
             ))}
@@ -350,13 +372,13 @@ export default function Home() {
           
           {/* Left Column: The Manifesto */}
           <div className="wishlist-manifesto" style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-            <span className="vector-label" style={{ marginBottom: '16px' }}>Vector 04</span>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '48px', color: 'var(--text-primary)', marginBottom: '24px' }}>Personal Ledger</h2>
+            <span className="vector-label" style={{ marginBottom: '16px' }}>Layer 04 // Your Board</span>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '48px', color: 'var(--text-primary)', marginBottom: '24px' }}>Your Board</h2>
             <p style={{ color: 'var(--text-secondary)', fontSize: '16px', lineHeight: '1.8', marginBottom: '40px', maxWidth: '480px' }}>
               Architect your future. Your personal ledger functions as a secure, private command vault. Add your dream properties here to map spatial densities, compare visual DNA, and log live structural telemetries—no account required.
             </p>
-            <Link href="/wishlist" className="prominent-action-link" style={{ marginTop: 'auto' }}>
-              OPEN PERSONAL LEDGER →
+            <Link href="/wishlist" className="prominent-action-link" style={{ marginTop: 'auto', background: 'transparent', border: '1px solid #c8a96e', color: '#c8a96e', padding: '12px 24px', borderRadius: '0' }}>
+              Start Exploring →
             </Link>
           </div>
 
@@ -371,8 +393,11 @@ export default function Home() {
               <rect x="6" y="10" width="4" height="4"></rect>
               <rect x="14" y="10" width="4" height="4"></rect>
             </svg>
-            <div style={{ color: 'var(--accent)', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-              [ AWAITING TARGET INPUT // CAPTURE YOUR FIRST ASSET FROM VECTOR 01 OR 02 ]
+            <div style={{ fontFamily: 'Georgia, serif', fontSize: '28px', color: '#f0ede8', lineHeight: '1.2' }}>
+              Your dreams live here.
+            </div>
+            <div style={{ fontFamily: 'system-ui', fontSize: '14px', color: '#8a8a8a', marginTop: '8px' }}>
+              Dreaming is free. This is your inspiration board.
             </div>
           </div>
           
@@ -383,7 +408,6 @@ export default function Home() {
       <section className="snap-section section-about">
         <div className="about-content">
           <header className="section-header-center">
-            <span className="vector-label">Vector 05</span>
             <h2>The ScoutIt Manifesto</h2>
           </header>
           

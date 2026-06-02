@@ -134,7 +134,7 @@ export default function PropertyClient() {
               <div className="broker-link">
                 <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&q=80" alt="Broker" className="broker-mini-avatar"/>
                 <div>
-                  <h4>Alexander Vance</h4>
+                  <h4>Miguel Torres, REB</h4>
                   <p>Principal Strategist (Sector Alpha)</p>
                 </div>
               </div>
