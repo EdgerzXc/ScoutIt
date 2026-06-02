@@ -116,10 +116,43 @@ body {
 .photo-count { position: relative; bottom: auto; right: auto; font-size: 11px; color: rgba(240,237,232,0.55); letter-spacing: 0.08em; flex-shrink: 0; }
 .zone-nav { flex: 0 0 72px; background: var(--surface); border-top: 0.5px solid var(--border); border-bottom: 0.5px solid var(--border); display: flex; align-items: stretch; position: relative; overflow: visible; flex-shrink: 0; }
 .zone-nav::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb), 0.3), transparent); }
-.nav-inner { display: flex; align-items: stretch; width: 100%; overflow-x: auto; scrollbar-width: none; scroll-behavior: smooth; }
-.nav-inner::-webkit-scrollbar { display: none; }
-.nav-chapter { flex: 0 0 22vw; min-width: 145px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0 14px; position: relative; cursor: grab; gap: 6px; transition: background 0.25s; white-space: nowrap; user-select: none; }
-.nav-chapter--cta { flex: 0 0 22vw; min-width: 145px; background: rgba(var(--accent-rgb), 0.14); border-left: 0.5px solid rgba(var(--accent-rgb), 0.2); border-right: 0.5px solid rgba(var(--accent-rgb), 0.2); }
+.nav-inner {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  scroll-behavior: smooth;
+}
+.nav-inner::-webkit-scrollbar {
+  display: none;
+}
+.nav-chapter {
+  flex: 0 0 22vw !important;
+  min-width: 145px !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 14px;
+  position: relative;
+  cursor: grab;
+  gap: 6px;
+  transition: background 0.25s;
+  white-space: nowrap;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+.nav-chapter--cta {
+  flex: 0 0 22vw !important;
+  min-width: 145px !important;
+  background: rgba(var(--accent-rgb), 0.14);
+  border-left: 0.5px solid rgba(var(--accent-rgb), 0.2);
+  border-right: 0.5px solid rgba(var(--accent-rgb), 0.2);
+}
 .nav-chapter--cta .chapter-label { color: var(--accent); font-weight: 600; }
 .nav-chapter--cta .chapter-icon { opacity: 1; color: var(--accent); }
 .nav-chapter--cta.active .chapter-icon { color: #0e0e0e; }
