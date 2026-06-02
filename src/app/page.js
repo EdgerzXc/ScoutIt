@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
 export default function Home() {
   const [activePropertyType, setActivePropertyType] = useState("Residential");
@@ -88,18 +88,173 @@ export default function Home() {
     ]
   };
 
+  // ── Sparkle glitters — upper zone (4-point stars) ──────────────
+  const STAR_POSITIONS = [
+    { top: '6%',  left: '8%',  type: 'tiny'   },
+    { top: '11%', left: '22%', type: 'medium'  },
+    { top: '4%',  left: '38%', type: 'tiny'    },
+    { top: '8%',  left: '55%', type: 'hero'    },
+    { top: '13%', left: '68%', type: 'medium'  },
+    { top: '5%',  left: '80%', type: 'tiny'    },
+    { top: '10%', left: '92%', type: 'medium'  },
+    { top: '18%', left: '12%', type: 'medium'  },
+    { top: '22%', left: '30%', type: 'tiny'    },
+    { top: '16%', left: '47%', type: 'tiny'    },
+    { top: '20%', left: '62%', type: 'hero'    },
+    { top: '15%', left: '75%', type: 'medium'  },
+    { top: '24%', left: '88%', type: 'tiny'    },
+    { top: '28%', left: '5%',  type: 'hero'    },
+    { top: '30%', left: '18%', type: 'tiny'    },
+    { top: '26%', left: '42%', type: 'medium'  },
+    { top: '32%', left: '72%', type: 'tiny'    },
+    { top: '29%', left: '95%', type: 'medium'  },
+  ];
+
+  // ── Background dot-stars — CSS twinkle, staggered delays ─────
+  const BG_STAR_POSITIONS = [
+    { top: '8%',  left: '4%',  cls: 'star-fast', delay: 0.3  },
+    { top: '45%', left: '3%',  cls: 'star-slow', delay: 2.1  },
+    { top: '70%', left: '7%',  cls: 'star-med',  delay: 1.4  },
+    { top: '85%', left: '14%', cls: 'star-fast', delay: 3.7  },
+    { top: '55%', left: '24%', cls: 'star-slow', delay: 0.8  },
+    { top: '80%', left: '31%', cls: 'star-med',  delay: 4.2  },
+    { top: '38%', left: '40%', cls: 'star-fast', delay: 1.9  },
+    { top: '65%', left: '44%', cls: 'star-slow', delay: 5.5  },
+    { top: '92%', left: '51%', cls: 'star-med',  delay: 0.6  },
+    { top: '75%', left: '64%', cls: 'star-fast', delay: 3.1  },
+    { top: '52%', left: '77%', cls: 'star-slow', delay: 6.8  },
+    { top: '88%', left: '83%', cls: 'star-med',  delay: 2.4  },
+    { top: '42%', left: '13%', cls: 'star-fast', delay: 7.2  },
+    { top: '68%', left: '54%', cls: 'star-slow', delay: 1.1  },
+    { top: '78%', left: '41%', cls: 'star-med',  delay: 4.9  },
+    { top: '25%', left: '90%', cls: 'star-fast', delay: 0.4  },
+    { top: '60%', left: '11%', cls: 'star-slow', delay: 8.3  },
+    { top: '35%', left: '57%', cls: 'star-med',  delay: 2.7  },
+    { top: '82%', left: '59%', cls: 'star-fast', delay: 5.1  },
+    { top: '48%', left: '34%', cls: 'star-slow', delay: 1.6  },
+    { top: '72%', left: '19%', cls: 'star-med',  delay: 6.4  },
+    { top: '62%', left: '89%', cls: 'star-fast', delay: 3.3  },
+    { top: '90%', left: '27%', cls: 'star-slow', delay: 9.1  },
+    { top: '40%', left: '73%', cls: 'star-med',  delay: 0.9  },
+    { top: '55%', left: '97%', cls: 'star-fast', delay: 4.6  },
+    { top: '15%', left: '53%', cls: 'star-slow', delay: 7.8  },
+    { top: '95%', left: '69%', cls: 'star-med',  delay: 2.2  },
+    { top: '33%', left: '86%', cls: 'star-fast', delay: 5.9  },
+    { top: '18%', left: '77%', cls: 'star-slow', delay: 1.3  },
+    { top: '50%', left: '48%', cls: 'star-med',  delay: 8.7  },
+  ];
+
+  const [activeStars, setActiveStars] = useState({});
+  const starTimers = useRef([]);
+
+  // Glitter sparkles (upper zone — JS random timer)
+  useEffect(() => {
+    const scheduleNext = (idx) => {
+      const delay = 2000 + Math.random() * 7000;
+      const t = setTimeout(() => {
+        setActiveStars(prev => ({ ...prev, [idx]: true }));
+        const hideT = setTimeout(() => {
+          setActiveStars(prev => ({ ...prev, [idx]: false }));
+          scheduleNext(idx);
+        }, 1800 + Math.random() * 600);
+        starTimers.current.push(hideT);
+      }, delay);
+      starTimers.current.push(t);
+    };
+    STAR_POSITIONS.forEach((_, idx) => {
+      const t = setTimeout(() => scheduleNext(idx), Math.random() * 5000);
+      starTimers.current.push(t);
+    });
+    return () => starTimers.current.forEach(clearTimeout);
+  }, []);
+  // bg-stars now use pure CSS twinkle animations (no JS timers needed)
+
   return (
     <main className="cinematic-container">
-      {/* SECTION 1: THE HOOK */}
+      {/* SECTION 1: SPACE HERO */}
       <section className="snap-section section-hook">
         <div className="grain"></div>
-        <div className="hook-content">
-          <h1 className="hook-title">SCOUTIT</h1>
-          <p className="hook-subtitle">The Space Intelligence Matrix of the Philippines</p>
-          <div className="hook-scroll-indicator">
-            <span className="scroll-text">Scroll to Initialize</span>
-            <div className="scroll-line"></div>
+
+        {/* Deep space nebula background */}
+        <div className="nebula-bg"></div>
+
+        {/* Background dot-stars — CSS infinite twinkle, staggered */}
+        {BG_STAR_POSITIONS.map((pos, idx) => (
+          <div
+            key={`bg-star-${idx}`}
+            className={`bg-star ${pos.cls}`}
+            style={{ top: pos.top, left: pos.left, animationDelay: `${pos.delay}s` }}
+          />
+        ))}
+
+        {/* Occasional sparkle glitters — upper zone */}
+        {STAR_POSITIONS.map((pos, idx) => (
+          <div
+            key={`glitter-${idx}`}
+            className={`glitter glitter-${pos.type} ${activeStars[idx] ? 'glitter-active' : ''}`}
+            style={{ top: pos.top, left: pos.left }}
+          >
+            <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M10 0 L11.2 8.8 L20 10 L11.2 11.2 L10 20 L8.8 11.2 L0 10 L8.8 8.8 Z"
+                fill={pos.type === 'hero' ? '#e8d5a3' : pos.type === 'medium' ? '#f0ebe0' : '#ffffff'}
+              />
+            </svg>
           </div>
+        ))}
+
+        {/* Main hook content */}
+        <div className="hook-content">
+
+          {/* Animated SCOUTIT wordmark */}
+          <div className="scoutit-wordmark" aria-label="SCOUTIT">
+            {/* S — comet trail draw */}
+            <span className="letter letter-s" style={{ animationDelay: '0s' }}>S</span>
+            {/* C — eclipse reveal */}
+            <span className="letter letter-c" style={{ animationDelay: '0.55s' }}>C</span>
+            {/* O — planet orbit */}
+            <span className="letter letter-o" style={{ animationDelay: '1.0s' }}>
+              O
+              <span className="orbit-ring"></span>
+            </span>
+            {/* U — signal fill */}
+            <span className="letter letter-u" style={{ animationDelay: '1.45s' }}>U</span>
+            {/* T — satellite arms */}
+            <span className="letter letter-t1" style={{ animationDelay: '1.9s' }}>T</span>
+
+            {/* I — normal letter, UFO anchored above via two wrapper layers:
+                  ufo-anchor = static centering (never animated)
+                  ufo-float  = animation only (translateY, never touches X) */}
+            <span className="letter letter-i" style={{ animationDelay: '2.3s' }}>
+              I
+              <span className="ufo-anchor">
+                <span className="ufo-float">
+                  <span className="ufo">
+                    <span className="ufo-dome"></span>
+                    <span className="ufo-disc">
+                      <span className="ufo-light ufo-light-1"></span>
+                      <span className="ufo-light ufo-light-2"></span>
+                      <span className="ufo-light ufo-light-3"></span>
+                    </span>
+                  </span>
+                </span>
+              </span>
+            </span>
+
+            {/* T — targeting reticle */}
+            <span className="letter letter-t2" style={{ animationDelay: '3.5s' }}>
+              T
+              <span className="reticle-ring reticle-1"></span>
+              <span className="reticle-ring reticle-2"></span>
+            </span>
+          </div>
+
+          <p className="hook-subtitle">The Space Intelligence Matrix of the Philippines</p>
+        </div>
+
+        {/* Scroll indicator — direct child of section so absolute bottom works */}
+        <div className="hook-scroll-indicator">
+          <span className="scroll-text">Scroll to Initialize</span>
+          <div className="scroll-line"></div>
         </div>
       </section>
 
@@ -480,39 +635,291 @@ export default function Home() {
           margin-top: 48px;
         }
 
-        /* SECTION 1: THE HOOK */
+        /* ═══ SECTION 1: SPACE HERO ══════════════════════════════════ */
         .section-hook {
           display: flex;
           align-items: center;
           justify-content: center;
-          background: #0e0e0e;
+          background: #07071a;
+          overflow: hidden;
         }
 
+        /* Deep nebula background gradient */
+        .nebula-bg {
+          position: absolute;
+          inset: 0;
+          background:
+            radial-gradient(ellipse 80% 50% at 50% 0%, rgba(30,20,80,0.7) 0%, transparent 70%),
+            radial-gradient(ellipse 60% 40% at 20% 80%, rgba(10,30,60,0.5) 0%, transparent 60%),
+            radial-gradient(ellipse 40% 30% at 80% 60%, rgba(20,10,50,0.4) 0%, transparent 50%);
+          pointer-events: none;
+          z-index: 0;
+        }
+
+        /* ── Background dot-stars — CSS infinite twinkle ─────────── */
+        .bg-star {
+          position: absolute;
+          width: 2px;
+          height: 2px;
+          border-radius: 50%;
+          background: #fff;
+          opacity: 0;
+          pointer-events: none;
+          z-index: 1;
+        }
+
+        /* Fast twinkling stars — blink in/out every ~2s */
+        .star-fast {
+          animation: twinkleFast 2.2s ease-in-out infinite;
+        }
+
+        /* Medium twinkling stars — every ~4s */
+        .star-med {
+          animation: twinkleMed 4.1s ease-in-out infinite;
+        }
+
+        /* Slow, deep-space stars — every ~7s */
+        .star-slow {
+          animation: twinkleSlow 7.4s ease-in-out infinite;
+        }
+
+
+        /* ── Occasional sparkle glitters ──────────────────────────── */
+        .glitter {
+          position: absolute;
+          z-index: 2;
+          opacity: 0;
+          transform: scale(0) rotate(0deg);
+          transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+          pointer-events: none;
+          filter: drop-shadow(0 0 4px rgba(255,255,255,0.8));
+        }
+
+        .glitter-active {
+          opacity: 1;
+          transform: scale(1) rotate(15deg);
+          transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+        }
+
+        .glitter-tiny  { width: 8px;  height: 8px; }
+        .glitter-medium { width: 12px; height: 12px; filter: drop-shadow(0 0 6px rgba(240,235,224,0.9)); }
+        .glitter-hero  { width: 18px; height: 18px; filter: drop-shadow(0 0 10px rgba(232,213,163,1)); }
+
+        /* ── Main wordmark container ─────────────────────────────── */
         .hook-content {
           text-align: center;
           z-index: 10;
+          position: relative;
         }
 
-        .hook-title {
+        .scoutit-wordmark {
+          display: flex;
+          align-items: flex-end;
+          justify-content: center;
+          gap: 0.04em;
+          margin-bottom: 24px;
+          line-height: 1;
+        }
+
+        /* Base letter style */
+        .letter {
           font-family: var(--font-display);
           font-size: 8vw;
-          letter-spacing: 0.15em;
+          letter-spacing: 0.05em;
           color: var(--accent);
-          margin-bottom: 16px;
-          animation: fadeUp 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+          display: inline-block;
+          position: relative;
           opacity: 0;
-          transform: translateY(20px);
         }
 
+        /* ── S: Comet Trail ───────────────────────────── */
+        .letter-s {
+          animation: cometDraw 0.7s cubic-bezier(0.4,0,0.2,1) forwards;
+          text-shadow: 4px -2px 12px rgba(200,169,110,0.8), 8px -4px 20px rgba(200,169,110,0.4);
+        }
+
+        /* ── C: Eclipse Reveal ────────────────────────── */
+        .letter-c {
+          animation: eclipseReveal 0.65s ease forwards;
+          clip-path: inset(0 100% 0 0);
+        }
+
+        /* ── O: Planet + Orbit Ring ───────────────────── */
+        .letter-o {
+          animation: planetPulse 0.6s ease forwards;
+        }
+
+        .orbit-ring {
+          position: absolute;
+          top: 50%; left: 50%;
+          width: 120%; height: 35%;
+          border: 1px solid rgba(200,169,110,0.5);
+          border-radius: 50%;
+          transform: translate(-50%, -50%) rotateX(65deg);
+          animation: orbitSweep 1.4s ease-out 1.0s forwards;
+          opacity: 0;
+          pointer-events: none;
+        }
+
+        /* -- U: Signal Dish Fill -- */
+        .letter-u {
+          animation: signalFill 0.55s ease forwards;
+        }
+
+        /* ── T1: Satellite Arms ───────────────────────── */
+        .letter-t1 {
+          animation: satelliteArms 0.55s ease forwards;
+          transform-origin: center center;
+        }
+
+        /* I — normal letter, just needs position:relative for the UFO anchor */
+        .letter-i {
+          animation: fadeIn 0.4s ease forwards;
+          position: relative;
+        }
+
+        /* UFO ANCHOR — static centering, never animated.
+           ::after drops the green cognition beam down through the I */
+        .ufo-anchor {
+          position: absolute;
+          bottom: 100%;
+          left: 50%;
+          transform: translateX(-50%);
+          pointer-events: none;
+          margin-bottom: 0.08em;
+        }
+
+        .ufo-anchor::after {
+          content: '';
+          position: absolute;
+          top: 100%;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 3px;
+          height: 1.1em;
+          background: linear-gradient(to bottom, rgba(34,197,94,0.35), transparent);
+          animation: beamGlow 2.2s ease-in-out 3.5s infinite;
+          opacity: 0;
+          animation-fill-mode: forwards;
+          border-radius: 0 0 2px 2px;
+        }
+
+        /* UFO FLOAT — only translateY animated, horizontal centering untouched */
+        .ufo-float {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          opacity: 0;
+          animation:
+            ufoDescend 1.0s cubic-bezier(0.22,1,0.36,1) 2.3s forwards,
+            float       3.5s ease-in-out 3.4s infinite;
+        }
+
+        /* GREEN UFO disc */
+        .ufo-disc {
+          width: 0.5em;
+          height: 0.11em;
+          background: linear-gradient(180deg, #6eff8a 0%, #1faa3a 100%);
+          border-radius: 50%;
+          box-shadow: 0 0 10px rgba(0,220,80,0.7), 0 0 22px rgba(0,220,80,0.3);
+          position: relative;
+          display: flex;
+          align-items: center;
+          justify-content: space-evenly;
+          padding: 0 6%;
+        }
+
+        .ufo-disc::after {
+          content: '';
+          position: absolute;
+          inset: -2px;
+          border-radius: 50%;
+          background: transparent;
+          box-shadow: 0 0 14px rgba(0,220,80,0.5);
+          animation: discGlow 2.5s ease-in-out 3.5s infinite;
+        }
+
+        /* GREEN UFO dome */
+        .ufo-dome {
+          width: 0.22em;
+          height: 0.12em;
+          background: linear-gradient(180deg, rgba(80,255,120,0.2) 0%, rgba(0,200,60,0.08) 100%);
+          border: 1px solid rgba(80,255,120,0.5);
+          border-bottom: none;
+          border-radius: 50% 50% 0 0;
+        }
+
+        /* GREEN UFO lights */
+        .ufo-light {
+          width: 0.04em;
+          height: 0.04em;
+          min-width: 3px;
+          min-height: 3px;
+          border-radius: 50%;
+          background: #a8ffb8;
+          box-shadow: 0 0 5px #50ff80;
+        }
+
+
+        .ufo {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          position: relative;
+        }
+
+
+        .ufo-light-1 { animation: blinkLight 1.2s ease-in-out 3.5s infinite; }
+        .ufo-light-2 { animation: blinkLight 1.8s ease-in-out 3.9s infinite; }
+        .ufo-light-3 { animation: blinkLight 1.5s ease-in-out 4.3s infinite; }
+
+        /* Tractor beam (vertical stroke of I) */
+        .ufo-beam {
+          width: 0.08em;
+          min-width: 4px;
+          flex: 1;
+          min-height: 0.55em;
+          background: linear-gradient(to bottom, rgba(200,169,110,0.7) 0%, rgba(200,169,110,0.15) 100%);
+          clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%);
+          animation: beamPulse 2s ease-in-out 3.4s infinite;
+          opacity: 0;
+          animation-fill-mode: forwards;
+        }
+
+        /* ── T2: Targeting Reticle ────────────────────── */
+        .letter-t2 {
+          animation: targetLock 0.6s ease forwards;
+          position: relative;
+        }
+
+        .reticle-ring {
+          position: absolute;
+          top: 50%; left: 50%;
+          border-radius: 50%;
+          border: 1px solid rgba(200,169,110,0.5);
+          transform: translate(-50%, -50%) scale(2);
+          opacity: 0;
+          pointer-events: none;
+        }
+
+        .reticle-1 {
+          width: 1.4em; height: 1.4em;
+          animation: reticleContract 0.5s ease 3.5s forwards;
+        }
+        .reticle-2 {
+          width: 2.2em; height: 2.2em;
+          animation: reticleContract 0.5s ease 3.65s forwards;
+        }
+
+        /* ── Subtitle ─────────────────────────────────── */
         .hook-subtitle {
           font-family: var(--font-mono);
-          font-size: 14px;
+          font-size: 13px;
           text-transform: uppercase;
           letter-spacing: 0.25em;
           color: var(--text-muted);
-          animation: fadeUp 1.5s cubic-bezier(0.4, 0, 0.2, 1) 0.3s forwards;
+          animation: fadeUp 1s ease 4.0s forwards;
           opacity: 0;
-          transform: translateY(20px);
         }
 
         .hook-scroll-indicator {
@@ -524,7 +931,7 @@ export default function Home() {
           flex-direction: column;
           align-items: center;
           gap: 16px;
-          animation: fadeIn 2s ease 1s forwards;
+          animation: fadeIn 1.5s ease 4.5s forwards;
           opacity: 0;
         }
 
@@ -540,6 +947,130 @@ export default function Home() {
           height: 60px;
           background: linear-gradient(to bottom, var(--accent) 0%, transparent 100%);
           animation: pulseLine 2s infinite;
+        }
+
+        /* KEYFRAMES ═══════════════════════════════════════════════════ */
+
+        /* S — comet: draws left-to-right with trailing glow */
+        @keyframes cometDraw {
+          0%   { opacity: 0; clip-path: inset(0 100% 0 0); }
+          30%  { opacity: 1; clip-path: inset(0 60% 0 0); }
+          100% { opacity: 1; clip-path: inset(0 0% 0 0); }
+        }
+
+        /* C — eclipse reveal */
+        @keyframes eclipseReveal {
+          0%   { opacity: 0; clip-path: inset(0 100% 0 0); }
+          100% { opacity: 1; clip-path: inset(0 0% 0 0); }
+        }
+
+        /* O — planet pulse */
+        @keyframes planetPulse {
+          0%   { opacity: 0; transform: scale(0.6); filter: blur(4px); }
+          60%  { opacity: 1; transform: scale(1.08); filter: blur(0); }
+          100% { opacity: 1; transform: scale(1); }
+        }
+
+        /* O orbit ring sweep */
+        @keyframes orbitSweep {
+          0%   { opacity: 0.8; transform: translate(-50%, -50%) rotateX(65deg) rotateZ(0deg); }
+          100% { opacity: 0;   transform: translate(-50%, -50%) rotateX(65deg) rotateZ(360deg); }
+        }
+
+        /* U — signal fill from bottom */
+        @keyframes signalFill {
+          0%   { opacity: 0; transform: translateY(10px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+
+        /* T1 — satellite arms extend */
+        @keyframes satelliteArms {
+          0%   { opacity: 0; transform: scaleX(0.1); }
+          50%  { opacity: 1; transform: scaleX(1.1); }
+          100% { opacity: 1; transform: scaleX(1); }
+        }
+
+        /* UFO: drops from above into dot position */
+        @keyframes ufoDescend {
+          0%   { opacity: 0; transform: translateY(-180px); }
+          60%  { opacity: 1; transform: translateY(4px); }
+          80%  { transform: translateY(-2px); }
+          100% { opacity: 1; transform: translateY(0px); }
+        }
+
+        /* UFO: idle vertical bob */
+        @keyframes ufoHoverBob {
+          0%, 100% { transform: translateY(0px); }
+          50%       { transform: translateY(-6px); }
+        }
+
+        /* UFO: idle horizontal sway */
+        @keyframes ufoHoverSway {
+          0%, 100% { margin-left: 0px; }
+          33%       { margin-left: -3px; }
+          66%       { margin-left: 3px; }
+        }
+
+        /* UFO disc glow pulse */
+        @keyframes discGlow {
+          0%, 100% { box-shadow: 0 0 12px rgba(200,169,110,0.4); }
+          50%       { box-shadow: 0 0 22px rgba(200,169,110,0.9), 0 0 40px rgba(200,169,110,0.2); }
+        }
+
+        /* UFO lights blink */
+        @keyframes blinkLight {
+          0%, 85%, 100% { opacity: 1; }
+          88%, 97%       { opacity: 0.1; }
+        }
+
+        /* Tractor beam pulse */
+        @keyframes beamPulse {
+          0%   { opacity: 0.5; }
+          50%  { opacity: 0.8; }
+          100% { opacity: 0.5; }
+        }
+
+        /* T2 — reticle contract */
+        @keyframes reticleContract {
+          0%   { opacity: 0.8; transform: translate(-50%, -50%) scale(2); }
+          100% { opacity: 0;   transform: translate(-50%, -50%) scale(0.9); }
+        }
+
+        /* T2 — target lock-in */
+        @keyframes targetLock {
+          0%   { opacity: 0; transform: scale(1.3); filter: blur(3px); }
+          70%  { opacity: 1; transform: scale(0.95); }
+          100% { opacity: 1; transform: scale(1); filter: blur(0); }
+        }
+
+        /* UFO gentle float bob ─────────────────── */
+        @keyframes float {
+          0%, 100% { transform: translateY(-3px); }
+          50%       { transform: translateY(3px); }
+        }
+
+        /* Green cognition beam pulse ───────────── */
+        @keyframes beamGlow {
+          0%, 100% { opacity: 0.4; }
+          50%       { opacity: 0.8; }
+        }
+
+        /* Star twinkle — fast (bright, quick blink) */
+        @keyframes twinkleFast {
+          0%, 100% { opacity: 0;    transform: scale(0.8); }
+          40%, 60% { opacity: 0.75; transform: scale(1.2); }
+        }
+
+        /* Star twinkle — medium */
+        @keyframes twinkleMed {
+          0%, 100% { opacity: 0;   transform: scale(0.9); }
+          45%, 55% { opacity: 0.5; transform: scale(1.1); }
+        }
+
+        /* Star twinkle — slow (dim, deep-space) */
+        @keyframes twinkleSlow {
+          0%, 100% { opacity: 0;    }
+          40%, 60% { opacity: 0.35; }
         }
 
         /* SECTION 2: PROPERTY LAYER */
