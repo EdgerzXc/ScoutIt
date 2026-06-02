@@ -1,0 +1,20 @@
+import DiscoverClient from "./DiscoverClient";
+import Header from "@/components/Header";
+import { Suspense } from "react";
+
+export const metadata = {
+  title: "Discover Matrix",
+  description:
+    "Browse intelligent property briefings across major Philippine hubs. Filter by city and structural specifications.",
+};
+
+export default function DiscoverPage() {
+  return (
+    <>
+      <Header />
+      <Suspense fallback={<div style={{ padding: '60px', color: '#c8a96e', background: '#0e0e0e', height: '100vh', fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Loading Discovery Engine Matrix...</div>}>
+        <DiscoverClient />
+      </Suspense>
+    </>
+  );
+}

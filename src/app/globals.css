@@ -1,0 +1,170 @@
+/* ═══════════════════════════════════════════════════════════════
+   SCOUTIT — GLOBAL DESIGN TOKENS & BASE STYLES
+   Visual DNA v6 · Space Intelligence Platform
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── RESET ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── ROOT DESIGN TOKENS ── */
+:root {
+  /* Canvas & Surfaces */
+  --bg: #0e0e0e;
+  --surface: #161616;
+  --surface2: #1e1e1e;
+  --surface3: #242424;
+
+  /* Borders */
+  --border: rgba(255, 255, 255, 0.07);
+  --border-mid: rgba(255, 255, 255, 0.13);
+  --border-solid: #262626;
+
+  /* Typography Colors */
+  --text-primary: #f0ede8;
+  --text-secondary: rgba(240, 237, 232, 0.62);
+  --text-muted: rgba(240, 237, 232, 0.38);
+
+  /* Brand Identity */
+  --brand: #1a1814;
+  --brand-overlay: rgba(12, 11, 9, 0.92);
+
+  /* Accent — Champagne Gold */
+  --accent: #c8a96e;
+  --accent-rgb: 200, 169, 110;
+  --accent-dim: rgba(200, 169, 110, 0.12);
+  --accent-border: rgba(200, 169, 110, 0.28);
+
+  /* Semantic State Colors */
+  --green: #4caf7d;
+  --green-dim: rgba(76, 175, 125, 0.12);
+  --yellow: #e8c84a;
+  --yellow-dim: rgba(232, 200, 74, 0.12);
+  --red: #e8644a;
+  --red-dim: rgba(232, 100, 74, 0.12);
+
+  /* Typography Stacks */
+  --font-display: Georgia, 'Times New Roman', serif;
+  --font-body: var(--font-geist-sans), system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: var(--font-geist-mono), 'Courier New', monospace;
+
+  /* Motion */
+  --transition: 0.38s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fast: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Spacing Scale */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+  --space-3xl: 64px;
+
+  /* Border Radius */
+  --radius-sm: 3px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+  --radius-xl: 12px;
+  --radius-pill: 20px;
+  --radius-full: 50%;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.45);
+  --shadow-glow: 0 0 24px rgba(200, 169, 110, 0.08);
+}
+
+/* ── BASE ELEMENTS ── */
+html {
+  height: 100%;
+  color-scheme: dark;
+}
+
+body {
+  height: 100%;
+  min-height: 100dvh;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* ── LINKS ── */
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--accent);
+}
+
+/* ── SCROLLBAR THEMING ── */
+::-webkit-scrollbar {
+  width: 3px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-mid);
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-mid) transparent;
+}
+
+/* ── FILM GRAIN TEXTURE ── */
+.grain {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 128px;
+}
+
+/* ── SELECTION ── */
+::selection {
+  background: rgba(200, 169, 110, 0.25);
+  color: var(--text-primary);
+}
+
+/* ── FOCUS STATES ── */
+:focus-visible {
+  outline: 1.5px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ── UTILITY CLASSES ── */
+.text-accent { color: var(--accent); }
+.text-secondary { color: var(--text-secondary); }
+.text-muted { color: var(--text-muted); }
+.text-green { color: var(--green); }
+.text-yellow { color: var(--yellow); }
+.text-red { color: var(--red); }
+
+.bg-surface { background: var(--surface); }
+.bg-surface2 { background: var(--surface2); }
+
+.font-display { font-family: var(--font-display); }
+.font-body { font-family: var(--font-body); }

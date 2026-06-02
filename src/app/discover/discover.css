@@ -1,0 +1,621 @@
+/* ScoutIt Discover Page — Discovery Engine Blueprint Layout (v6 DNA) */
+
+/* Layout Framework */
+.discoverLayout {
+  min-height: 100vh;
+  background: #0e0e0e; /* --bg */
+  position: relative;
+}
+
+/* 1. Left Sidebar Navigation Strip */
+.catSidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 160px;
+  background: #161616; /* --surface */
+  border-right: 1px solid #262626; /* --border */
+  display: flex;
+  flex-direction: column;
+  padding: 40px 16px;
+  z-index: 100;
+}
+
+.brandLogo {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: #c8a96e; /* --accent */
+  text-transform: uppercase;
+  margin-bottom: 48px;
+  padding-left: 8px;
+}
+
+.navLinks {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.navLink {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(240, 237, 232, 0.62);
+  padding: 12px 8px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.navLink:hover {
+  color: #c8a96e;
+  background: rgba(200, 169, 110, 0.05);
+}
+
+.navLink.active {
+  color: #0e0e0e;
+  background: #c8a96e;
+  font-weight: 600;
+}
+
+/* 2. Main Content Frame */
+.engineContainer {
+  padding-left: 160px; /* Accommodate Left Sidebar */
+}
+
+.engineFrame {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+
+/* Zones Titles */
+.sectionHeader {
+  margin-bottom: 20px;
+}
+
+.sectionTitle {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 400;
+  color: #f0ede8;
+}
+
+.sectionSubtitle {
+  font-size: 11px;
+  color: rgba(240, 237, 232, 0.38);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-top: 4px;
+}
+
+/* 3. Zone 1: Horizontal Spotlight Matrix */
+.spotlightMatrix {
+  overflow-x: auto;
+  display: flex;
+  gap: 24px;
+  padding-bottom: 16px;
+  scroll-behavior: smooth;
+  cursor: grab;
+  user-select: none;
+}
+
+.spotlightMatrix:active {
+  cursor: grabbing;
+}
+
+.spotlightMatrix::-webkit-scrollbar {
+  height: 3px;
+}
+
+.spotlightMatrix::-webkit-scrollbar-thumb {
+  background: rgba(200, 169, 110, 0.2);
+}
+
+.spotlightCard {
+  flex: 0 0 320px;
+  width: 320px;
+  height: 420px;
+  background: #161616;
+  border: 1px solid #262626;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: width 0.48s cubic-bezier(0.4, 0, 0.2, 1), border-color var(--transition), box-shadow var(--transition);
+  cursor: pointer;
+  position: relative;
+  display: flex;
+}
+
+.spotlightCard:hover {
+  border-color: rgba(200, 169, 110, 0.3);
+}
+
+.spotlightCard.spotlight {
+  width: 580px;
+  flex: 0 0 580px;
+  border-color: #c8a96e;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 24px rgba(200, 169, 110, 0.08);
+}
+
+/* Inside Card Layout split */
+.cardVisual {
+  width: 320px;
+  flex: 0 0 320px;
+  height: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.visualBg {
+  position: absolute;
+  inset: 0;
+  opacity: 0.75;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.spotlightCard:hover .visualBg {
+  transform: scale(1.03);
+}
+
+.visualContent {
+  position: relative;
+  z-index: 2;
+  padding: 24px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: linear-gradient(180deg, rgba(14, 14, 14, 0.4) 0%, rgba(14, 14, 14, 0.95) 100%);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.cityBadge {
+  background: rgba(14, 14, 14, 0.85);
+  border: 1px solid #262626;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 10px;
+  color: #c8a96e;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.cardBody {
+  margin-top: auto;
+}
+
+.cardTitleText {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 400;
+  color: #f0ede8;
+  line-height: 1.3;
+}
+
+.cardSpecTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.specBadge {
+  font-size: 10px;
+  color: rgba(240, 237, 232, 0.62);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+}
+
+/* Expanded Card Panel */
+.expandedIntel {
+  flex: 1 1 auto;
+  width: 260px;
+  height: 100%;
+  background: #1c1c1c;
+  border-left: 1px solid #262626;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  overflow: hidden;
+}
+
+.spotlightCard.spotlight .expandedIntel {
+  opacity: 1;
+}
+
+.intelHeader {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+}
+
+.intelTitle {
+  font-size: 10px;
+  color: #c8a96e;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 600;
+}
+
+.affinityParams {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.affinityRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+}
+
+.affinityLabel {
+  color: rgba(240, 237, 232, 0.38);
+}
+
+.affinityValue {
+  color: #f0ede8;
+  font-family: var(--font-mono);
+}
+
+.spotlightIntentContainer {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-top: auto;
+}
+
+.spotlightIntentBtn {
+  background: #161616;
+  border: 1px solid #262626;
+  border-radius: var(--radius-sm);
+  color: rgba(240, 237, 232, 0.62);
+  font-size: 10px;
+  font-weight: 500;
+  padding: 10px 4px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-align: center;
+}
+
+.spotlightIntentBtn:hover {
+  background: #242424;
+  color: #f0ede8;
+}
+
+.spotlightIntentBtn.active {
+  background: rgba(200, 169, 110, 0.12);
+  color: #c8a96e;
+  border-color: rgba(200, 169, 110, 0.28);
+}
+
+.chronologicalNewsRow {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  padding-bottom: 16px;
+  cursor: grab;
+  user-select: none;
+}
+
+.chronologicalNewsRow:active {
+  cursor: grabbing;
+}
+
+.chronologicalNewsRow::-webkit-scrollbar {
+  height: 3px;
+}
+
+.chronologicalNewsRow::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.newsCapsule {
+  flex: 0 0 340px;
+  background: #161616;
+  border: 1px solid #262626;
+  border-radius: var(--radius-sm);
+  padding: 20px;
+  transition: border-color var(--transition), background var(--transition);
+}
+
+.newsCapsule:hover {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: #1e1e1e;
+}
+
+.capsuleMeta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #c8a96e;
+  margin-bottom: 10px;
+}
+
+.capsuleTitle {
+  font-family: var(--font-display);
+  font-size: 15px;
+  line-height: 1.35;
+  color: #f0ede8;
+  margin-bottom: 8px;
+}
+
+.capsuleSnippet {
+  font-size: 12px;
+  line-height: 1.45;
+  color: rgba(240, 237, 232, 0.62);
+}
+
+/* 5. Zone 3: 10-Space Context Grids (Horizontal Slider) */
+.contextGrid {
+  display: flex;
+  gap: 24px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  width: 100%;
+  padding-bottom: 16px;
+  cursor: grab;
+  user-select: none;
+}
+
+.contextGrid:active {
+  cursor: grabbing;
+}
+
+.contextGrid::-webkit-scrollbar {
+  height: 3px;
+}
+
+.contextGrid::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.contextCell {
+  flex: 0 0 300px;
+  width: 300px;
+  background: #161616;
+  border: 1px solid #262626;
+  border-radius: var(--radius-sm);
+  padding: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.contextCell:hover {
+  background: #1e1e1e;
+  border-color: rgba(200, 169, 110, 0.3);
+}
+
+.contextLabelBlock {
+  display: flex;
+  flex-direction: column;
+}
+
+.contextCode {
+  font-size: 10px;
+  color: rgba(240, 237, 232, 0.38);
+  font-family: var(--font-mono);
+}
+
+.contextName {
+  font-family: var(--font-display);
+  font-size: 16px;
+  color: #f0ede8;
+  margin-top: 4px;
+}
+
+.contextArrow {
+  color: #c8a96e;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+/* 6. The Popup Drawer Panel Engine */
+.popupOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.38s ease, visibility 0.38s ease;
+}
+
+.popupOverlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.popupDrawer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 75vh;
+  background: rgba(22, 22, 22, 0.95);
+  border-top: 1px solid #262626;
+  border-top-left-radius: var(--radius-xl);
+  border-top-right-radius: var(--radius-xl);
+  transform: translateY(100%);
+  transition: transform 0.38s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.5);
+}
+
+.popupOverlay.open .popupDrawer {
+  transform: translateY(0);
+}
+
+.drawerHead {
+  padding: 24px 40px;
+  border-bottom: 1px solid #262626;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.drawerTitleBlock {
+  display: flex;
+  flex-direction: column;
+}
+
+.drawerTitleText {
+  font-family: var(--font-display);
+  font-size: 20px;
+  color: #f0ede8;
+}
+
+.drawerSubtitleText {
+  font-size: 11px;
+  color: rgba(240, 237, 232, 0.38);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-top: 4px;
+}
+
+.drawerCloseBtnText {
+  background: transparent;
+  border: none;
+  color: #c8a96e;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  padding: 8px;
+}
+
+.drawerBody {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 40px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+.briefProfileCard {
+  background: #161616;
+  border: 1px solid #262626;
+  border-radius: var(--radius-md);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.briefProfileHeader {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-display);
+  font-size: 16px;
+  color: #f0ede8;
+}
+
+.briefProfileNum {
+  font-size: 11px;
+  color: #c8a96e;
+  font-family: var(--font-mono);
+}
+
+.briefProfileSpecs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.briefProfileSpec {
+  font-size: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid #262626;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  color: rgba(240, 237, 232, 0.62);
+}
+
+/* ────────────────────────────────────────────────────────────────
+   MOBILE BREAKPOINT
+   ──────────────────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .catSidebar {
+    position: relative;
+    width: 100%;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid #262626;
+    padding: 20px;
+  }
+
+  .brandLogo {
+    margin-bottom: 16px;
+  }
+
+  .navLinks {
+    flex-direction: row;
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+
+  .navLink {
+    white-space: nowrap;
+    padding: 8px 12px;
+  }
+
+  .engineContainer {
+    padding-left: 0;
+  }
+
+  .engineFrame {
+    padding: 20px;
+    gap: 32px;
+  }
+
+  .spotlightCard.spotlight {
+    width: 320px;
+    flex: 0 0 320px;
+  }
+
+  .expandedIntel {
+    display: none;
+  }
+
+  .contextGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .drawerBody {
+    grid-template-columns: 1fr;
+    padding: 20px;
+  }
+}
