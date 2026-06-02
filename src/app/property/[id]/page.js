@@ -1,3 +1,4 @@
+// Case-sensitivity routing diagnostics trigger
 import PropertyDetailClient from "./PropertyDetailClient";
 
 export async function generateMetadata({ params }) {
