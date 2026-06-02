@@ -1,19 +1,19 @@
-// Case-sensitivity routing diagnostics trigger
+// Case-sensitivity routing diagnostics trigger and async params fix
 import PropertyDetailClient from "./PropertyDetailClient";
 
 export async function generateMetadata({ params }) {
-  // We can fetch from API for metadata if needed, but keeping it simple
+  const resolvedParams = await params;
   return {
-    title: "Property Intel — ScoutIt",
+    title: `Property Intel — ${resolvedParams.id} — ScoutIt`,
     description: "Property Intelligence Vector"
   };
 }
 
-export default function PropertyRoute({ params }) {
-  // Use params.id
+export default async function PropertyRoute({ params }) {
+  const resolvedParams = await params;
   return (
     <main>
-      <PropertyDetailClient slug={params.id} />
+      <PropertyDetailClient slug={resolvedParams.id} />
     </main>
   );
 }
