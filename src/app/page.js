@@ -4,6 +4,27 @@ import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import ReactionButtons from "@/components/ReactionButtons";
 
+// Sci-Fi character-by-character text writer effect
+function TypewriterText({ text }) {
+  const [displayText, setDisplayText] = useState("");
+
+  useEffect(() => {
+    let index = 0;
+    setDisplayText("");
+    const timer = setInterval(() => {
+      setDisplayText((prev) => prev + text.charAt(index));
+      index++;
+      if (index >= text.length) {
+        clearInterval(timer);
+      }
+    }, 12); // Speed of character typing in ms
+
+    return () => clearInterval(timer);
+  }, [text]);
+
+  return <span>{displayText}</span>;
+}
+
 const SPACE_STARS = [
   { top: '15%', left: '12%', size: '1.5px', opacity: 0.15 },
   { top: '8%', left: '34%', size: '2px', opacity: 0.25 },
@@ -140,6 +161,229 @@ export default function Home() {
   const [activeDiscoverType, setActiveDiscoverType] = useState("Residential");
   const [driftingRocks, setDriftingRocks] = useState([]);
   const containerRef = useRef(null);
+
+  // Scanner UI States
+  const [ufoDragging, setUfoDragging] = useState(false);
+  const [ufoPos, setUfoPos] = useState({ x: 0, y: 0 });
+  const [points, setPoints] = useState([]);
+  const [isScanning, setIsScanning] = useState(false);
+  const [scanResult, setScanResult] = useState(null);
+  const [hudOpen, setHudOpen] = useState(false);
+  const [ufoReturning, setUfoReturning] = useState(false);
+  const [hasScannedOnce, setHasScannedOnce] = useState(false);
+  const canvasRef = useRef(null);
+
+  const handleDragStart = (e) => {
+    e.preventDefault();
+    const x = e.clientX;
+    const y = e.clientY;
+    setUfoPos({ x, y });
+    setPoints([{ x, y }]);
+    setUfoDragging(true);
+    setUfoReturning(false);
+    setIsScanning(false);
+    setScanResult(null);
+    setHudOpen(false);
+    setHasScannedOnce(true);
+
+    // Freeze page scrolling during drag/draw
+    document.body.style.overflow = 'hidden';
+  };
+
+  const handlePointerMove = (e) => {
+    if (!ufoDragging || ufoReturning) return;
+    const x = e.clientX;
+    const y = e.clientY;
+    setUfoPos({ x, y });
+    setPoints((prev) => [...prev, { x, y }]);
+  };
+
+  const handlePointerUp = () => {
+    if (!ufoDragging || ufoReturning) return;
+
+    if (points.length < 5) {
+      flyBackHome();
+      return;
+    }
+
+    const minX = Math.min(...points.map(p => p.x));
+    const maxX = Math.max(...points.map(p => p.x));
+    const minY = Math.min(...points.map(p => p.y));
+    const maxY = Math.max(...points.map(p => p.y));
+    const width = maxX - minX;
+    const height = maxY - minY;
+
+    if (width < 25 || height < 25) {
+      flyBackHome();
+      return;
+    }
+
+    // Enter scanning phase
+    setIsScanning(true);
+
+    // Calculate center of drawn circle
+    const centerX = minX + width / 2;
+    const centerY = minY + height / 2;
+
+    const result = runScannerCollisionCheck(minX, maxX, minY, maxY, centerX, centerY);
+    setScanResult(result);
+
+    // Hold scanning overlay for 1.5s, then return UFO and display HUD console
+    setTimeout(() => {
+      setIsScanning(false);
+      flyBackHome(() => {
+        setHudOpen(true);
+      });
+    }, 1500);
+  };
+
+  const flyBackHome = (callback) => {
+    setUfoReturning(true);
+
+    const anchor = document.querySelector('.ufo-anchor');
+    if (anchor) {
+      const rect = anchor.getBoundingClientRect();
+      const targetViewportX = rect.left + rect.width / 2;
+      const targetViewportY = rect.top;
+      
+      setUfoPos({ x: targetViewportX, y: targetViewportY });
+    }
+
+    setTimeout(() => {
+      setUfoDragging(false);
+      setUfoReturning(false);
+      setPoints([]);
+      document.body.style.overflow = '';
+      if (callback) callback();
+    }, 700);
+  };
+
+  const runScannerCollisionCheck = (minX, maxX, minY, maxY, centerX, centerY) => {
+    // 1. Check Broker Cards
+    const brokerCards = document.querySelectorAll('.broker-preview-card');
+    for (let el of brokerCards) {
+      const rect = el.getBoundingClientRect();
+      const elCX = rect.left + rect.width / 2;
+      const elCY = rect.top + rect.height / 2;
+      if (elCX >= minX && elCX <= maxX && elCY >= minY && elCY <= maxY) {
+        const nameEl = el.querySelector('h3');
+        const name = nameEl ? nameEl.textContent.trim() : 'Broker';
+        return {
+          title: `SCAN: ADVISOR [${name.toUpperCase()}]`,
+          intel: `Encrypted dossier retrieved for ${name}. Verified placements: High volume transactions. Specialty sectors active. Select full profile to view telemetry.`
+        };
+      }
+    }
+
+    // 2. Check Property Cards
+    const propertyCards = document.querySelectorAll('.preview-card');
+    for (let el of propertyCards) {
+      const rect = el.getBoundingClientRect();
+      const elCX = rect.left + rect.width / 2;
+      const elCY = rect.top + rect.height / 2;
+      if (elCX >= minX && elCX <= maxX && elCY >= minY && elCY <= maxY) {
+        const titleEl = el.querySelector('h3');
+        const title = titleEl ? titleEl.textContent.trim() : 'Asset';
+        return {
+          title: `SCAN: PROPERTY BLOCK [${title.toUpperCase()}]`,
+          intel: `Metadata scan for ${title} complete. Design aesthetic: Verified. Spatial density rating: Standard. Location coordinate verified. Select element to open portal link.`
+        };
+      }
+    }
+
+    // 3. Check Layer 4 Ledger (Your Board)
+    const ledgerEl = document.querySelector('.property-split');
+    if (ledgerEl) {
+      const rect = ledgerEl.getBoundingClientRect();
+      const elCX = rect.left + rect.width / 2;
+      const elCY = rect.top + rect.height / 2;
+      if (elCX >= minX && elCX <= maxX && elCY >= minY && elCY <= maxY) {
+        return {
+          title: "SCAN: LEDGER PIPELINE",
+          intel: "Scanned Layer 04 (Personal Board). Local tracking matrix active. Sync integrity: 100%. Allows visual staging of wishlist parameters without server metadata leaks."
+        };
+      }
+    }
+
+    // 4. Check Layer 2 Discovery Grid
+    const discoverEl = document.querySelector('.discover-preview-grid');
+    if (discoverEl) {
+      const rect = discoverEl.getBoundingClientRect();
+      const elCX = rect.left + rect.width / 2;
+      const elCY = rect.top + rect.height / 2;
+      if (elCX >= minX && elCX <= maxX && elCY >= minY && elCY <= maxY) {
+        return {
+          title: "SCAN: DISCOVERY ENGINE",
+          intel: "Scanned Layer 02 (Zoning Grid). Sub-systems active: Residential, Commercial, and STR sectors. Spatial filters initialized. Relational indices are fully operational."
+        };
+      }
+    }
+
+    // 5. Fallback based on Center Point coordinates (over which section)
+    const elements = document.elementsFromPoint(centerX, centerY);
+    for (let el of elements) {
+      const sec = el.closest('section');
+      if (sec) {
+        if (sec.classList.contains('section-hook')) {
+          return {
+            title: "SCAN: PORTAL CORE",
+            intel: "Main header vector scanned. Engine state: Standing by. User directive: Drag scanner node downwards to analyze dynamic layers below."
+          };
+        }
+        if (sec.classList.contains('section-discover')) {
+          return {
+            title: "SCAN: EXPLORATION ZONE",
+            intel: "Layer 02 environment scanned. Area consists of property zones. Drag and release directly over specific zone cards for detail telemetry."
+          };
+        }
+        if (sec.classList.contains('section-advisory')) {
+          return {
+            title: "SCAN: ADVISORY GRID",
+            intel: "Layer 03 environment scanned. Active broker registry discovered. Drag scanner node directly over broker avatars to access dossier metrics."
+          };
+        }
+        if (sec.classList.contains('section-wishlist')) {
+          return {
+            title: "SCAN: YOUR BOARD",
+            intel: "Layer 04 environment scanned. Core systems: Personal Wishlist Ledger. Drag and release directly over infographics for workflow specs."
+          };
+        }
+      }
+    }
+
+    return {
+      title: "SCAN: SECTOR INTEL",
+      intel: "General ambient coordinates parsed. Interface mesh stable. Drag scanner node onto active cards or sections to extract metadata."
+    };
+  };
+
+  // Canvas draw effect
+  useEffect(() => {
+    if (!ufoDragging || !canvasRef.current || points.length === 0) return;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = window.innerWidth * dpr;
+    canvas.height = window.innerHeight * dpr;
+    ctx.scale(dpr, dpr);
+    
+    ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    
+    ctx.strokeStyle = '#22c55e';
+    ctx.lineWidth = 3;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.shadowColor = '#22c55e';
+    ctx.shadowBlur = 8;
+    
+    ctx.beginPath();
+    ctx.moveTo(points[0].x, points[0].y);
+    for (let i = 1; i < points.length; i++) {
+      ctx.lineTo(points[i].x, points[i].y);
+    }
+    ctx.stroke();
+  }, [points, ufoDragging]);
 
   // Restore scroll position from sessionStorage
   useEffect(() => {
@@ -437,9 +681,23 @@ export default function Home() {
                   ufo-float  = animation only (translateY, never touches X) */}
             <span className="letter letter-i" style={{ animationDelay: '2.3s' }}>
               I
-              <span className="ufo-anchor">
+              <span className="ufo-anchor" style={{ opacity: ufoDragging ? 0 : 1, transition: 'opacity 0.25s ease' }}>
                 <span className="ufo-float">
-                  <span className="ufo">
+                  {/* Onboarding Tooltip Badge */}
+                  {!hasScannedOnce && (
+                    <span className="ufo-tooltip-onboarding">
+                      [ DRAG TO SCAN ]
+                    </span>
+                  )}
+                  {/* Pulsing Sonar Ring for Interactivity Onboarding */}
+                  {!hasScannedOnce && (
+                    <span className="sonar-pulse-ring"></span>
+                  )}
+                  <span 
+                    className="ufo interactive-ufo-node"
+                    onPointerDown={handleDragStart}
+                    style={{ touchAction: 'none' }}
+                  >
                     <span className="ufo-dome"></span>
                     <span className="ufo-disc">
                       <span className="ufo-light ufo-light-1"></span>
@@ -2365,12 +2623,332 @@ export default function Home() {
           }
         }
 
+        /* Draggable UFO and Radar scanner styles */
+        .interactive-ufo-node {
+          cursor: grab;
+          transition: transform 0.2s ease;
+        }
+        .interactive-ufo-node:hover {
+          transform: scale(1.15);
+        }
+        .interactive-ufo-node:active {
+          cursor: grabbing;
+        }
+
+        /* Onboarding Tooltip */
+        .ufo-tooltip-onboarding {
+          position: absolute;
+          bottom: 160%;
+          left: 50%;
+          transform: translateX(-50%);
+          background: rgba(14, 14, 14, 0.95);
+          border: 1px solid #22c55e;
+          color: #22c55e;
+          font-family: var(--font-mono);
+          font-size: 9px;
+          font-weight: 600;
+          letter-spacing: 0.1em;
+          padding: 4px 8px;
+          border-radius: 4px;
+          white-space: nowrap;
+          box-shadow: 0 0 10px rgba(34, 197, 94, 0.3);
+          pointer-events: none;
+          animation: floatTooltip 2.5s ease-in-out infinite alternate;
+          z-index: 100;
+        }
+        @keyframes floatTooltip {
+          0% { transform: translate(-50%, 0); }
+          100% { transform: translate(-50%, -4px); }
+        }
+
+        /* Sonar ring pulse */
+        .sonar-pulse-ring {
+          position: absolute;
+          top: 50%; left: 50%;
+          transform: translate(-50%, -50%);
+          width: 2em;
+          height: 2em;
+          border: 1.5px solid rgba(34, 197, 94, 0.6);
+          border-radius: 50%;
+          pointer-events: none;
+          animation: sonarRingPulse 2.5s cubic-bezier(0.215, 0.610, 0.355, 1) infinite;
+          z-index: 99;
+        }
+        @keyframes sonarRingPulse {
+          0% {
+            width: 1em;
+            height: 1em;
+            opacity: 0.8;
+          }
+          100% {
+            width: 3.5em;
+            height: 3.5em;
+            opacity: 0;
+          }
+        }
+
+        /* Glowing green beam below active dragging UFO */
+        .ufo-scan-beam-active {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 0.25em;
+          height: 80vh;
+          background: linear-gradient(to bottom, rgba(34, 197, 94, 0.45) 0%, rgba(34, 197, 94, 0.02) 100%);
+          filter: blur(2px);
+          pointer-events: none;
+          border-radius: 50%;
+          animation: laserPulse 1.5s ease-in-out infinite alternate;
+        }
+        @keyframes laserPulse {
+          0% { opacity: 0.6; width: 0.2em; }
+          100% { opacity: 1; width: 0.35em; }
+        }
+
+        /* Expand pulse scanning wave when released */
+        .scan-pulse-wave {
+          position: fixed;
+          border: 2px solid #22c55e;
+          border-radius: 50%;
+          pointer-events: none;
+          transform: translate(-50%, -50%);
+          z-index: 99998;
+          animation: scanExplode 1.5s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+        }
+        @keyframes scanExplode {
+          0% {
+            width: 0px;
+            height: 0px;
+            opacity: 1;
+            box-shadow: inset 0 0 15px rgba(34,197,94,0.8), 0 0 15px rgba(34,197,94,0.8);
+          }
+          100% {
+            width: 600px;
+            height: 600px;
+            opacity: 0;
+            box-shadow: inset 0 0 40px rgba(34,197,94,0), 0 0 40px rgba(34,197,94,0);
+          }
+        }
+
+        /* HUD Scanner Console styles */
+        .hud-scanner-console {
+          position: fixed;
+          top: 0;
+          right: -380px;
+          width: 350px;
+          height: 100vh;
+          background: rgba(14, 14, 14, 0.9);
+          border-left: 1px solid var(--accent);
+          backdrop-filter: blur(20px);
+          box-shadow: -10px 0 40px rgba(0,0,0,0.8);
+          z-index: 100001;
+          display: flex;
+          flex-direction: column;
+          transition: right 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .hud-scanner-console.open {
+          right: 0;
+        }
+
+        .hud-console-header {
+          display: flex;
+          align-items: center;
+          padding: 20px 24px;
+          border-bottom: 1px solid rgba(200, 169, 110, 0.2);
+        }
+        .hud-status-led {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: #22c55e;
+          box-shadow: 0 0 8px #22c55e;
+          margin-right: 12px;
+          animation: ledBlink 1.5s infinite alternate;
+        }
+        @keyframes ledBlink {
+          0% { opacity: 0.4; }
+          100% { opacity: 1; }
+        }
+        .hud-header-title {
+          font-family: var(--font-mono);
+          font-size: 11px;
+          letter-spacing: 0.2em;
+          color: var(--accent);
+          font-weight: bold;
+          flex-grow: 1;
+        }
+        .hud-close-btn {
+          background: none;
+          border: none;
+          color: var(--text-secondary);
+          font-size: 24px;
+          cursor: pointer;
+          transition: color 0.2s;
+          line-height: 1;
+          padding: 0;
+        }
+        .hud-close-btn:hover {
+          color: var(--accent);
+        }
+
+        .hud-console-body {
+          flex-grow: 1;
+          padding: 32px 24px;
+          display: flex;
+          flex-direction: column;
+        }
+        .hud-scan-title {
+          font-family: var(--font-mono);
+          font-size: 13px;
+          letter-spacing: 0.1em;
+          color: #22c55e;
+          margin: 0 0 16px 0;
+        }
+        .hud-scan-divider {
+          width: 30px;
+          height: 2px;
+          background: #22c55e;
+          margin-bottom: 24px;
+          box-shadow: 0 0 6px #22c55e;
+        }
+        .hud-scan-intel {
+          font-family: var(--font-body);
+          font-size: 14px;
+          line-height: 1.6;
+          color: rgba(240, 237, 232, 0.85);
+          margin: 0;
+        }
+
+        .hud-console-footer {
+          padding: 24px;
+          border-top: 1px solid rgba(200, 169, 110, 0.15);
+          background: rgba(200, 169, 110, 0.02);
+        }
+        .hud-action-btn {
+          width: 100%;
+          padding: 14px;
+          background: transparent;
+          border: 1px solid var(--accent);
+          color: var(--accent);
+          font-family: var(--font-mono);
+          font-size: 11px;
+          font-weight: 600;
+          letter-spacing: 0.25em;
+          cursor: pointer;
+          transition: all 0.25s;
+        }
+        .hud-action-btn:hover {
+          background: var(--accent);
+          color: #0e0e0e;
+          box-shadow: 0 0 15px rgba(200, 169, 110, 0.3);
+        }
+
         @media (max-width: 640px) {
           .flow-grid {
             grid-template-columns: 1fr;
           }
+          .hud-scanner-console {
+            top: auto;
+            bottom: -50vh;
+            right: 0;
+            width: 100%;
+            height: 45vh;
+            border-left: none;
+            border-top: 1px solid var(--accent);
+            transition: bottom 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+            border-radius: 12px 12px 0 0;
+          }
+          .hud-scanner-console.open {
+            bottom: 0;
+          }
         }
       `}</style>
+
+      {/* UFO Circle to Search dragging canvas overlay */}
+      {ufoDragging && (
+        <canvas
+          ref={canvasRef}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            width: '100vw',
+            height: '100vh',
+            zIndex: 99999,
+            touchAction: 'none',
+            background: 'transparent',
+            cursor: 'crosshair',
+          }}
+        />
+      )}
+
+      {/* Dragging UFO overlay */}
+      {ufoDragging && (
+        <div 
+          className={`ufo-drag-overlay ${ufoReturning ? 'returning' : ''}`}
+          style={{
+            position: 'fixed',
+            left: ufoPos.x,
+            top: ufoPos.y,
+            transform: 'translate(-50%, -50%)',
+            pointerEvents: 'none',
+            zIndex: 100000,
+            transition: ufoReturning ? 'all 0.7s cubic-bezier(0.25, 1, 0.5, 1)' : 'none'
+          }}
+        >
+          {/* Laser scanning beam below active UFO */}
+          {!ufoReturning && (
+            <div className="ufo-scan-beam-active"></div>
+          )}
+          
+          <span className="ufo floating-ufo">
+            <span className="ufo-dome"></span>
+            <span className="ufo-disc">
+              <span className="ufo-light ufo-light-1"></span>
+              <span className="ufo-light ufo-light-2"></span>
+              <span className="ufo-light ufo-light-3"></span>
+            </span>
+          </span>
+        </div>
+      )}
+
+      {/* Expanding Scan Pulse shockwave on release */}
+      {isScanning && (
+        <div 
+          className="scan-pulse-wave"
+          style={{
+            left: ufoPos.x,
+            top: ufoPos.y
+          }}
+        />
+      )}
+
+      {/* Holographic Slide-out Scan Console */}
+      <div className={`hud-scanner-console ${hudOpen ? 'open' : ''}`}>
+        <div className="hud-console-header">
+          <span className="hud-status-led"></span>
+          <span className="hud-header-title">INTEL DECRYPTOR</span>
+          <button className="hud-close-btn" onClick={() => setHudOpen(false)}>×</button>
+        </div>
+        
+        {scanResult && hudOpen && (
+          <div className="hud-console-body">
+            <h3 className="hud-scan-title">{scanResult.title}</h3>
+            <div className="hud-scan-divider"></div>
+            <p className="hud-scan-intel">
+              <TypewriterText text={scanResult.intel} />
+            </p>
+          </div>
+        )}
+        
+        <div className="hud-console-footer">
+          <button className="hud-action-btn" onClick={() => setHudOpen(false)}>
+            DISMISS INTEL
+          </button>
+        </div>
+      </div>
     </main>
   );
 }
