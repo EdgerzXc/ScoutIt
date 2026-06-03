@@ -724,7 +724,6 @@ export default function Home() {
 
     setTimeout(() => {
       setScannerState('DOCKED');
-      setPoints([]);
       document.body.style.overflow = '';
       if (callback) callback();
     }, 700);
