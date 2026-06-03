@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import ReactionButtons from "@/components/ReactionButtons";
 import "./discover.css";
 
 const CATEGORIES = ["Residential", "Commercial", "STR", "Restaurants"];
@@ -77,76 +78,15 @@ export default function DiscoverClient() {
   const searchParams = useSearchParams();
   const typeParam = searchParams.get("type") || "residential";
   const matchedCategory = CATEGORIES.find(c => c.toLowerCase() === typeParam.toLowerCase()) || "Residential";
-
   const [properties, setProperties] = useState(DISCOVER_PROPERTIES[matchedCategory]);
   const [intel, setIntel] = useState(DISCOVER_INTEL[matchedCategory]);
   const [activeSpotlightId, setActiveSpotlightId] = useState(DISCOVER_PROPERTIES[matchedCategory]?.[0]?.id);
-  const [reactionStates, setReactionStates] = useState({});
 
   useEffect(() => {
     setProperties(DISCOVER_PROPERTIES[matchedCategory] || []);
     setIntel(DISCOVER_INTEL[matchedCategory] || []);
     setActiveSpotlightId(DISCOVER_PROPERTIES[matchedCategory]?.[0]?.id || null);
   }, [matchedCategory]);
-
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem("scoutit_reactions");
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) {
-          const mapped = {};
-          parsed.forEach((item) => {
-            mapped[item.property_id] = item.reaction_type;
-          });
-          setReactionStates(mapped);
-        }
-      }
-    } catch (e) {}
-  }, []);
-
-  const handleReactionClick = (property, reactionType) => {
-    try {
-      const raw = localStorage.getItem("scoutit_reactions") || "[]";
-      let parsed = JSON.parse(raw);
-      if (!Array.isArray(parsed)) parsed = [];
-
-      const index = parsed.findIndex((item) => item.property_id === property.id);
-
-      if (reactionStates[property.id] === reactionType) {
-        // Toggle off
-        if (index > -1) {
-          parsed.splice(index, 1);
-        }
-        setReactionStates((prev) => {
-          const next = { ...prev };
-          delete next[property.id];
-          return next;
-        });
-      } else {
-        // Toggle on or switch
-        const newItem = {
-          property_id: property.id,
-          property_title: property.title,
-          city: property.city,
-          category: matchedCategory,
-          reaction_type: reactionType,
-          timestamp: Date.now()
-        };
-
-        if (index > -1) {
-          parsed[index] = newItem;
-        } else {
-          parsed.push(newItem);
-        }
-        setReactionStates((prev) => ({
-          ...prev,
-          [property.id]: reactionType
-        }));
-      }
-      localStorage.setItem("scoutit_reactions", JSON.stringify(parsed));
-    } catch (e) {}
-  };
 
   return (
     <div className="discoverLayout">
@@ -238,23 +178,13 @@ export default function DiscoverClient() {
                         </div>
                       </div>
 
-                      <div className="spotlightIntentContainer">
-                        {["Save", "Inspired Me", "Potential Fit", "Interested"].map((type) => {
-                          const isActive = reactionStates[property.id] === type;
-                          return (
-                            <button
-                              key={type}
-                              type="button"
-                              className={`spotlightIntentBtn ${isActive ? "active" : ""}`}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleReactionClick(property, type);
-                              }}
-                            >
-                              {isActive ? `✓ ${type}` : `[ ${type} ]`}
-                            </button>
-                          );
-                        })}
+                      <div className="discover-reaction-buttons-container" style={{ marginTop: "16px", width: "100%" }} onClick={(e) => e.stopPropagation()}>
+                        <ReactionButtons
+                          propertyId={property.id}
+                          propertyTitle={property.title}
+                          category={matchedCategory}
+                          city={property.city}
+                        />
                       </div>
                     </div>
                   </article>

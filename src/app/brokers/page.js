@@ -243,7 +243,7 @@ export default function BrokersPage() {
 
         .vector-label {
           font-family: var(--font-mono);
-          font-size: 10px;
+          font-size: 12px;
           color: var(--accent);
           letter-spacing: 0.15em;
           text-transform: uppercase;

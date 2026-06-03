@@ -3,6 +3,7 @@
 import Header from "@/components/Header";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { ReactionBadge } from "@/components/ReactionButtons";
 
 const REACTION_ORDER = ["Potential Fit", "Interested", "Inspired Me", "Save"];
 
@@ -85,6 +86,9 @@ export default function WishlistPage() {
                       key={item.timestamp}
                       className={`board-card ${fadingOut.has(item.timestamp) ? "fading" : ""}`}
                     >
+                      <div className="badge-corner">
+                        <ReactionBadge reactionType={item.reaction_type} />
+                      </div>
                       <div className="card-body">
                         <h3 className="card-title">{item.property_title}</h3>
                         <div className="card-meta">
@@ -139,7 +143,7 @@ export default function WishlistPage() {
         .layer-label {
           display: block;
           font-family: system-ui, sans-serif;
-          font-size: 11px;
+          font-size: 12px;
           text-transform: uppercase;
           letter-spacing: 3px;
           color: #c8a96e;
@@ -243,6 +247,14 @@ export default function WishlistPage() {
           border: 1px solid #262626;
           padding: 16px 20px;
           transition: opacity 0.3s ease, transform 0.3s ease;
+          position: relative;
+        }
+
+        .badge-corner {
+          position: absolute;
+          top: -8px;
+          right: -8px;
+          z-index: 10;
         }
 
         .board-card.fading {
@@ -257,8 +269,8 @@ export default function WishlistPage() {
 
         .card-title {
           font-family: Georgia, serif;
-          font-size: 16px;
-          font-weight: normal;
+          font-size: 20px;
+          font-weight: 500;
           color: #f0ede8;
           margin: 0 0 4px;
         }

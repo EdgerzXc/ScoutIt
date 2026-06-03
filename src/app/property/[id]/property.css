@@ -234,7 +234,7 @@ body {
 .rating-fill { height: 100%; border-radius: 2px; background: var(--accent); transition: width 0.6s cubic-bezier(0.4,0,0.2,1); }
 .rating-fill.green { background: var(--green); }
 .rating-val { font-size: 10px; color: var(--text-secondary); width: 22px; text-align: right; flex-shrink: 0; }
-.story-text { font-family: var(--font-display); font-size: 15px; font-weight: 300; line-height: 1.75; color: var(--text-secondary); }
+.story-text { font-family: var(--font-display); font-size: 18px; font-weight: 400; line-height: 1.75; color: var(--text-secondary); }
 .story-text strong { color: var(--accent); font-weight: 400; }
 .sidebar-block { display: flex; flex-direction: column; gap: 6px; }
 .sidebar-label { font-size: 9px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-muted); }
@@ -279,7 +279,7 @@ body {
 .verdict-header { display: flex; align-items: center; gap: 10px; }
 .verdict-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
 .verdict-title { font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--green); }
-.verdict-text { font-family: var(--font-display); font-size: 16px; font-weight: 300; line-height: 1.6; color: var(--text-secondary); }
+.verdict-text { font-family: var(--font-display); font-size: 18px; font-weight: 400; line-height: 1.75; color: var(--text-secondary); }
 .verdict-text strong { color: var(--text-primary); font-weight: 400; }
 .verdict-score { display: flex; gap: 8px; flex-wrap: wrap; }
 .verdict-pill { font-size: 10px; font-weight: 500; padding: 4px 10px; border-radius: 12px; background: var(--green-dim); color: var(--green); border: 0.5px solid rgba(76,175,125,0.25); }

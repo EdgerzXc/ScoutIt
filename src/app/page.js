@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
+import ReactionButtons from "@/components/ReactionButtons";
 
 export default function Home() {
   const [activePropertyType, setActivePropertyType] = useState("Residential");
@@ -359,13 +360,26 @@ export default function Home() {
                   );
                 }
 
-                return filtered.map((item) => (
-                  <div key={item.id} className="mini-preview-card">
-                    <div className="mini-card-visual">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={item.image} alt={item.title} className="mini-card-image" />
-                    </div>
-                    <div className="mini-card-body">
+                return filtered.map((item) => {
+                  const locationTag = item.tags[2] || "";
+                  const city = locationTag.replace("Location: ", "") || "Quezon City";
+                  return (
+                    <div key={item.id} className="mini-preview-card">
+                      <div className="mini-card-visual">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={item.image} alt={item.title} className="mini-card-image" />
+                      </div>
+                      
+                      <div className="home-card-reaction-overlay">
+                        <ReactionButtons
+                          propertyId={item.id}
+                          propertyTitle={item.title}
+                          category={activePropertyType}
+                          city={city}
+                        />
+                      </div>
+
+                      <div className="mini-card-body">
                       <h4>{item.title}</h4>
                       <div className="mini-card-tags">
                         {item.tags.map((tag, idx) => {
@@ -380,8 +394,9 @@ export default function Home() {
                       </div>
                     </div>
                   </div>
-                ));
-              })()}
+                );
+              });
+            })()}
             </div>
             
             <div className="matrix-legend-caption">
@@ -1105,7 +1120,7 @@ export default function Home() {
 
         .vector-label {
           font-family: var(--font-mono);
-          font-size: 10px;
+          font-size: 12px;
           text-transform: uppercase;
           letter-spacing: 0.15em;
           color: var(--accent);
@@ -1283,13 +1298,26 @@ export default function Home() {
           opacity: 1;
         }
 
+        .home-card-reaction-overlay {
+          opacity: 0;
+          transition: opacity 0.3s ease;
+          width: 100%;
+          margin-top: 12px;
+          padding: 0 20px;
+        }
+
+        .mini-preview-card:hover .home-card-reaction-overlay {
+          opacity: 1;
+        }
+
         .mini-card-body {
           padding: 20px;
         }
 
         .mini-card-body h4 {
           font-family: var(--font-display);
-          font-size: 18px;
+          font-size: 20px;
+          font-weight: 500;
           color: var(--text-primary);
           margin-bottom: 12px;
         }

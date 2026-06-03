@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import ReactionButtons from "@/components/ReactionButtons";
 import "./property.css";
 
 // ═══════════════════════════════════════════════════
@@ -147,60 +148,7 @@ export default function PropertyDetailClient({ slug }) {
   const convScoreText  = `${d.convenience_score} / 10`;
   const brokerInitials = d.broker_name.split(" ").map(p => p[0]).join("").slice(0, 2).toUpperCase();
 
-  const [currentReaction, setCurrentReaction] = useState(null);
-  const [reactionConfirmed, setReactionConfirmed] = useState(false);
 
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem("scoutit_reactions");
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) {
-          const match = parsed.find(item => item.property_id === slug || item.property_id === "batasan-hills");
-          if (match) {
-            setCurrentReaction(match.reaction_type);
-          }
-        }
-      }
-    } catch (e) {}
-  }, [slug]);
-
-  const handleReaction = (type) => {
-    try {
-      const raw = localStorage.getItem("scoutit_reactions") || "[]";
-      let parsed = JSON.parse(raw);
-      if (!Array.isArray(parsed)) parsed = [];
-
-      const index = parsed.findIndex(item => item.property_id === slug || item.property_id === "batasan-hills");
-
-      if (currentReaction === type) {
-        if (index > -1) {
-          parsed.splice(index, 1);
-        }
-        setCurrentReaction(null);
-        setReactionConfirmed(false);
-      } else {
-        const newItem = {
-          property_id: slug || "batasan-hills",
-          property_title: d.title,
-          city: d.city,
-          category: d.property_type,
-          reaction_type: type,
-          timestamp: Date.now()
-        };
-
-        if (index > -1) {
-          parsed[index] = newItem;
-        } else {
-          parsed.push(newItem);
-        }
-        setCurrentReaction(type);
-        setReactionConfirmed(true);
-        setTimeout(() => setReactionConfirmed(false), 3000);
-      }
-      localStorage.setItem("scoutit_reactions", JSON.stringify(parsed));
-    } catch (e) {}
-  };
 
   // ── Photo navigation ──────────────────────────
   const goPrev = () => setCurrentImageIndex(i => (i === 0 ? photos.length - 1 : i - 1));
@@ -817,24 +765,15 @@ export default function PropertyDetailClient({ slug }) {
               </h2>
               
               <div className="reactions-container" style={{marginTop:"16px", display:"flex", flexDirection:"column", gap:"10px"}}>
-                <p className="sidebar-label">How does this space make you feel?</p>
-                <div className="reaction-buttons-grid" style={{display:"grid", gridTemplateColumns:"1fr 1fr", gap:"8px"}}>
-                  {["Save", "Inspired Me", "Potential Fit", "Interested"].map((type) => (
-                    <button
-                      key={type}
-                      type="button"
-                      onClick={() => handleReaction(type)}
-                      className={`reaction-action-btn ${currentReaction === type ? "active" : ""}`}
-                    >
-                      {type}
-                    </button>
-                  ))}
-                </div>
-                {reactionConfirmed && (
-                  <p style={{fontSize:"12px", color:"var(--accent)", fontStyle:"italic", marginTop:"4px"}}>
-                    Saved to Your Board.
-                  </p>
-                )}
+                <p style={{ fontSize: "11px", textTransform: "uppercase", letterSpacing: "2px", color: "#8a8a8a", marginBottom: "16px" }}>
+                  HOW DOES THIS SPACE MAKE YOU FEEL?
+                </p>
+                <ReactionButtons
+                  propertyId={slug || "batasan-hills"}
+                  propertyTitle={d.title}
+                  category={d.property_type}
+                  city={d.city}
+                />
               </div>
 
               <div className="where-category" style={{marginTop:"16px"}}>
