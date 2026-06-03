@@ -825,10 +825,10 @@ export default function Home() {
             <div className="wishlist-infographics" style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
               
               {/* Connected Flow Steps */}
-              <div className="flow-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
+              <div className="flow-grid">
                 
                 {/* Step 1: Scan */}
-                <div className="flow-card" style={{ background: '#111111', border: '1px solid #222222', padding: '24px 20px', borderRadius: '4px', display: 'flex', flexDirection: 'column', gap: '16px', position: 'relative' }}>
+                <div className="flow-card">
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--accent)', border: '1px solid rgba(200,169,110,0.2)', padding: '2px 6px', borderRadius: '2px' }}>PHASE 01</span>
                     <span style={{ fontSize: '24px', fontWeight: '800', fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.05)' }}>01</span>
@@ -851,7 +851,7 @@ export default function Home() {
                 </div>
 
                 {/* Step 2: Tag */}
-                <div className="flow-card" style={{ background: '#111111', border: '1px solid #222222', padding: '24px 20px', borderRadius: '4px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div className="flow-card">
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--accent)', border: '1px solid rgba(200,169,110,0.2)', padding: '2px 6px', borderRadius: '2px' }}>PHASE 02</span>
                     <span style={{ fontSize: '24px', fontWeight: '800', fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.05)' }}>02</span>
@@ -874,7 +874,7 @@ export default function Home() {
                 </div>
 
                 {/* Step 3: Archive */}
-                <div className="flow-card" style={{ background: '#111111', border: '1px solid #222222', padding: '24px 20px', borderRadius: '4px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div className="flow-card">
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--accent)', border: '1px solid rgba(200,169,110,0.2)', padding: '2px 6px', borderRadius: '2px' }}>PHASE 03</span>
                     <span style={{ fontSize: '24px', fontWeight: '800', fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.05)' }}>03</span>
@@ -895,7 +895,7 @@ export default function Home() {
                 </div>
 
                 {/* Step 4: Route */}
-                <div className="flow-card" style={{ background: '#111111', border: '1px solid #222222', padding: '24px 20px', borderRadius: '4px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div className="flow-card">
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--accent)', border: '1px solid rgba(200,169,110,0.2)', padding: '2px 6px', borderRadius: '2px' }}>PHASE 04</span>
                     <span style={{ fontSize: '24px', fontWeight: '800', fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.05)' }}>04</span>
@@ -1821,6 +1821,29 @@ export default function Home() {
           grid-column: 1 / -1;
         }
 
+        .flow-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 20px;
+        }
+
+        .flow-card {
+          background: #111111;
+          border: 1px solid #222222;
+          padding: 24px 20px;
+          border-radius: 4px;
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+          position: relative;
+          transition: border-color var(--transition-fast), transform var(--transition-fast);
+        }
+
+        .flow-card:hover {
+          border-color: var(--accent);
+          transform: translateY(-4px);
+        }
+
         .mini-cards-grid {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -2238,6 +2261,9 @@ export default function Home() {
 
         /* Mobile Adjustments */
         @media (max-width: 1024px) {
+          .flow-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
           .property-split {
             flex-direction: column;
             height: auto;
@@ -2281,6 +2307,12 @@ export default function Home() {
           }
           .hook-title {
             font-size: 12vw;
+          }
+        }
+
+        @media (max-width: 640px) {
+          .flow-grid {
+            grid-template-columns: 1fr;
           }
         }
       `}</style>
