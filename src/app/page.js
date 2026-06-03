@@ -1548,8 +1548,7 @@ export default function Home() {
           padding: 120px 48px;
           display: flex;
           flex-direction: column;
-          overflow-y: auto;
-          overscroll-behavior-y: contain;
+          overflow: visible;
         }
 
         .pane-header {
