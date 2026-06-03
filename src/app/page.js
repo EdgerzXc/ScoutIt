@@ -473,91 +473,116 @@ export default function Home() {
   const containerRef = useRef(null);
 
   // Scanner UI States
-  const [scannerState, setScannerState] = useState('DOCKED'); // 'DOCKED', 'HOVER_FOLLOW', 'DRAWING', 'SCANNING'
+  const [scannerState, setScannerState] = useState('DOCKED'); // 'DOCKED', 'HOVER_FOLLOW'
   const [ufoPos, setUfoPos] = useState({ x: 0, y: 0 });
-  const [points, setPoints] = useState([]);
-  const [isScanning, setIsScanning] = useState(false);
   const [scanResult, setScanResult] = useState(null);
   const [hudOpen, setHudOpen] = useState(false);
   const [hasScannedOnce, setHasScannedOnce] = useState(false);
   const [isUfoSticky, setIsUfoSticky] = useState(false);
-  const canvasRef = useRef(null);
+  const [currentScannedId, setCurrentScannedId] = useState("");
 
   const handleUfoActivate = (e) => {
     e.preventDefault();
     e.stopPropagation();
     
+    if (scannerState === 'HOVER_FOLLOW') {
+      handleUfoDeactivate();
+      return;
+    }
+
     const x = e.clientX;
     const y = e.clientY;
     
     setUfoPos({ x, y });
-    setPoints([]);
     setScannerState('HOVER_FOLLOW');
-    setScanResult(null);
-    setHudOpen(false);
+    setScanResult({
+      title: "SCAN: SYSTEM ACTIVE",
+      intel: "Hover tractor beam scanner initialized. Sweep cursor over active cards or page blocks to retrieve real-time design telemetry."
+    });
+    setHudOpen(true);
     setHasScannedOnce(true);
   };
 
-  const handleGlobalPointerMove = (e) => {
-    if (scannerState === 'DOCKED' || scannerState === 'SCANNING') return;
-    const x = e.clientX;
-    const y = e.clientY;
-    setUfoPos({ x, y });
-    if (scannerState === 'DRAWING') {
-      setPoints((prev) => [...prev, { x, y }]);
-    }
+  const handleUfoDeactivate = () => {
+    flyBackHome(() => {
+      setHudOpen(false);
+      setCurrentScannedId("");
+    });
   };
 
-  const handleGlobalPointerDown = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    const x = e.clientX;
-    const y = e.clientY;
+  // Listen to global pointer move for Hover scanning
+  useEffect(() => {
+    if (scannerState !== 'HOVER_FOLLOW') return;
 
-    if (scannerState === 'HOVER_FOLLOW') {
-      // Start freehand drawing the circle selection
-      setPoints([{ x, y }]);
-      setScannerState('DRAWING');
-      
-      // Freeze page scrolling during active drawing phase
-      document.body.style.overflow = 'hidden';
-    } 
-    else if (scannerState === 'DRAWING') {
-      // Execute the search scan!
-      setScannerState('SCANNING');
-      setIsScanning(true);
-      
-      // Calculate bounding box bounds of the user's custom circled path
-      const minX = Math.min(...points.map(p => p.x));
-      const maxX = Math.max(...points.map(p => p.x));
-      const minY = Math.min(...points.map(p => p.y));
-      const maxY = Math.max(...points.map(p => p.y));
-      const width = maxX - minX;
-      const height = maxY - minY;
-      
-      if (points.length < 4 || (width < 20 && height < 20)) {
-        flyBackHome();
-        return;
+    const handleMove = (e) => {
+      const x = e.clientX;
+      const y = e.clientY;
+      setUfoPos({ x, y });
+
+      // Run Hover Scanner check
+      const elements = document.elementsFromPoint(x, y);
+      let matchedEl = null;
+      let matchedLayer = null;
+
+      for (let el of elements) {
+        if (el.hasAttribute('data-intel-id')) {
+          matchedEl = el;
+          break;
+        }
+        if (el.hasAttribute('data-intel-layer') && matchedLayer === null) {
+          matchedLayer = el.getAttribute('data-intel-layer');
+        }
       }
-      
-      // Derive center and radius from the custom drawn shape bounding box
-      const centerX = minX + width / 2;
-      const centerY = minY + height / 2;
-      const radius = Math.max(width, height) / 2;
-      
-      const result = runScannerCollisionCheck(centerX, centerY, radius);
-      setScanResult(result);
-      
-      // Hold scanning animation for 1.5s, then return UFO and display HUD console
-      setTimeout(() => {
-        setIsScanning(false);
-        flyBackHome(() => {
-          setHudOpen(true);
-        });
-      }, 1500);
-    }
-  };
+
+      if (matchedEl) {
+        const id = matchedEl.getAttribute('data-intel-id');
+        if (id !== currentScannedId) {
+          setCurrentScannedId(id);
+          const data = HOMEPAGE_INTEL_DB[id];
+          if (data) {
+            setScanResult(data);
+          }
+        }
+      } else if (matchedLayer !== null) {
+        const id = `layer-${matchedLayer}`;
+        if (id !== currentScannedId) {
+          setCurrentScannedId(id);
+          const layerTitles = [
+            "SCAN: PORTAL CORE [LAYER 00]",
+            "SCAN: CURATED SECTORS [LAYER 01]",
+            "SCAN: DISCOVERY ENGINE [LAYER 02]",
+            "SCAN: ADVISORY GRID [LAYER 03]",
+            "SCAN: YOUR BOARD [LAYER 04]",
+            "SCAN: MANIFESTO CORE [LAYER 05]"
+          ];
+          const layerIntels = [
+            "Main header space-hero core scanned. Current state: Ambient drift active. Sweep the tractor beam over specific text blocks or button nodes to access cognitive telemetry.",
+            "Scanned Layer 01 property experience deck. Current sub-systems online: Curated Category selection menu, Search Parser input, and individual property experience preview assets.",
+            "Scanned Layer 02 Discovery Engine. Real-time regional feed indices stable. Hover the tractor beam over spotlight cards, news blocks, or curated collections tags to read telemetry.",
+            "Scanned Layer 03 Advisory Network. Active broker registries decrypted. Hover the tractor beam directly over advisor cards to load agent bio dossiers.",
+            "Scanned Layer 04 Personal Board. Staging matrix for client-side storage ledger checked. Safe from central cloud syncing channels.",
+            "Scanned Layer 05 Manifesto. ScoutIt core philosophy matrix online. Inspect individual lead text blocks to review the platform's vision blueprint."
+          ];
+          const layerIndex = parseInt(matchedLayer, 10);
+          setScanResult({
+            title: layerTitles[layerIndex] || "SCAN: LAYER DETECTED",
+            intel: layerIntels[layerIndex] || "Section coordinates parsed. General layer environment stable. Hover over sub-elements for targeted telemetry details."
+          });
+        }
+      } else {
+        if (currentScannedId !== "ambient") {
+          setCurrentScannedId("ambient");
+          setScanResult({
+            title: "SCAN: SYSTEM ACTIVE",
+            intel: "Hover tractor beam scanner initialized. Sweep cursor over active cards or page blocks to retrieve real-time design telemetry."
+          });
+        }
+      }
+    };
+
+    window.addEventListener('pointermove', handleMove);
+    return () => window.removeEventListener('pointermove', handleMove);
+  }, [scannerState, currentScannedId]);
 
   const flyBackHome = (callback) => {
     const stickyDockEl = document.querySelector('.floating-ufo-scanner-dock .interactive-ufo-node');
@@ -582,139 +607,7 @@ export default function Home() {
     }, 700);
   };
 
-  const runScannerCollisionCheck = (centerX, centerY, radius) => {
-    const getDistance = (x1, y1, x2, y2) => {
-      const dx = x2 - x1;
-      const dy = y2 - y1;
-      return Math.sqrt(dx * dx + dy * dy);
-    };
 
-    // Find all targetable elements with data-intel-id on the page
-    const elementsWithIntel = document.querySelectorAll('[data-intel-id]');
-    const candidates = [];
-
-    for (let el of elementsWithIntel) {
-      const rect = el.getBoundingClientRect();
-      const elCX = rect.left + rect.width / 2;
-      const elCY = rect.top + rect.height / 2;
-      const dist = getDistance(centerX, centerY, elCX, elCY);
-      
-      // Check if the center of this element is inside the circled scanning radius
-      if (dist <= radius) {
-        candidates.push({
-          element: el,
-          id: el.getAttribute('data-intel-id'),
-          name: el.getAttribute('data-intel-name') || '',
-          area: rect.width * rect.height,
-          distance: dist
-        });
-      }
-    }
-
-    // Sort candidates by physical distance from circle center, breaking ties with bounding box area
-    if (candidates.length > 0) {
-      candidates.sort((a, b) => {
-        // If the distance difference is significant (more than 30px), select the closer one
-        if (Math.abs(a.distance - b.distance) > 30) {
-          return a.distance - b.distance;
-        }
-        // If they share a similar center, select the smaller container (smaller area)
-        return a.area - b.area;
-      });
-      const match = candidates[0];
-      const data = HOMEPAGE_INTEL_DB[match.id];
-      if (data) {
-        return data;
-      }
-    }
-
-    // Fallback: Check Layer (Section) intersections
-    const sections = document.querySelectorAll('section[data-intel-layer]');
-    const sectionCandidates = [];
-    for (let sec of sections) {
-      const rect = sec.getBoundingClientRect();
-      const layerId = sec.getAttribute('data-intel-layer');
-      
-      // If the circle's center is within this section's vertical viewport bounding bounds,
-      // or if the section overlaps the circle center.
-      if (centerY >= rect.top && centerY <= rect.bottom) {
-        sectionCandidates.push({
-          layer: layerId,
-          height: rect.height,
-          top: rect.top
-        });
-      }
-    }
-
-    if (sectionCandidates.length > 0) {
-      // Pick the layer containing the circle center
-      const currentLayer = sectionCandidates[0].layer;
-      const layerTitles = [
-        "SCAN: PORTAL CORE [LAYER 00]",
-        "SCAN: CURATED SECTORS [LAYER 01]",
-        "SCAN: DISCOVERY ENGINE [LAYER 02]",
-        "SCAN: ADVISORY GRID [LAYER 03]",
-        "SCAN: YOUR BOARD [LAYER 04]",
-        "SCAN: MANIFESTO CORE [LAYER 05]"
-      ];
-      const layerIntels = [
-        "Main header space-hero core scanned. Current state: Ambient drift active. Circle specific text blocks or button nodes to access cognitive telemetry.",
-        "Scanned Layer 01 property experience deck. Current sub-systems online: Curated Category selection menu, Search Parser input, and individual property preview assets.",
-        "Scanned Layer 02 Discovery Engine. Real-time regional feed indices stable. Access editorial reports by circling spotlight cards or curations.",
-        "Scanned Layer 03 Advisory Network. Active broker registries decrypted. Drag scanner directly over advisor card items for individual dossier readouts.",
-        "Scanned Layer 04 Personal Board. Staging matrix for client-side storage ledger checked. Safe from central cloud syncing channels.",
-        "Scanned Layer 05 Manifesto. ScoutIt core philosophy matrix online. Inspect individual lead text blocks to review the platform's vision blueprint."
-      ];
-
-      return {
-        title: layerTitles[currentLayer] || "SCAN: LAYER DETECTED",
-        intel: layerIntels[currentLayer] || "Section coordinates parsed. General layer environment stable. Inspect sub-elements for targeted telemetry details."
-      };
-    }
-
-    return {
-      title: "SCAN: SECTOR COORDS",
-      intel: "Ambient coordinates parsed. Interface mesh stable. Drag and release the scanner node directly over specific cards or text blocks to extract intelligence readouts."
-    };
-  };
-
-  // Canvas draw effect for custom freehand drawing circle
-  useEffect(() => {
-    if (scannerState !== 'DRAWING' || !canvasRef.current || points.length === 0) return;
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = window.innerWidth * dpr;
-    canvas.height = window.innerHeight * dpr;
-    ctx.scale(dpr, dpr);
-    
-    ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-    
-    // Draw the user's custom circled trail path
-    ctx.strokeStyle = '#22c55e';
-    ctx.lineWidth = 3;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.shadowColor = '#22c55e';
-    ctx.shadowBlur = 10;
-    ctx.setLineDash([]);
-    
-    ctx.beginPath();
-    ctx.moveTo(points[0].x, points[0].y);
-    for (let i = 1; i < points.length; i++) {
-      ctx.lineTo(points[i].x, points[i].y);
-    }
-    ctx.stroke();
-    
-    // Draw initial center anchor dot at click-start
-    ctx.strokeStyle = 'rgba(34, 197, 94, 0.5)';
-    ctx.lineWidth = 1.5;
-    ctx.shadowBlur = 0;
-    ctx.beginPath();
-    ctx.arc(points[0].x, points[0].y, 4, 0, 2 * Math.PI);
-    ctx.stroke();
-  }, [points, ufoPos, scannerState]);
 
   // Restore scroll position from sessionStorage
   useEffect(() => {
@@ -3261,60 +3154,21 @@ export default function Home() {
         }
       `}</style>
 
-      {/* UFO global interaction overlays */}
-      {scannerState !== 'DOCKED' && (
+      {/* Active dragging/hovering UFO overlay with Laser scan beam */}
+      {scannerState === 'HOVER_FOLLOW' && (
         <div 
-          className="ufo-global-click-overlay"
-          onPointerMove={handleGlobalPointerMove}
-          onPointerDown={handleGlobalPointerDown}
-          style={{
-            position: 'fixed',
-            inset: 0,
-            width: '100vw',
-            height: '100vh',
-            zIndex: 99998,
-            touchAction: 'none',
-            background: 'transparent',
-            cursor: scannerState === 'HOVER_FOLLOW' ? 'cell' : 'crosshair'
-          }}
-        />
-      )}
-
-      {/* Circle to Search selection canvas overlay */}
-      {scannerState === 'DRAWING' && (
-        <canvas
-          ref={canvasRef}
-          style={{
-            position: 'fixed',
-            inset: 0,
-            width: '100vw',
-            height: '100vh',
-            zIndex: 99997,
-            touchAction: 'none',
-            pointerEvents: 'none',
-            background: 'transparent'
-          }}
-        />
-      )}
-
-      {/* Active dragging/hovering UFO overlay */}
-      {scannerState !== 'DOCKED' && (
-        <div 
-          className={`ufo-drag-overlay ${scannerState === 'SCANNING' ? 'returning' : ''}`}
+          className="ufo-drag-overlay"
           style={{
             position: 'fixed',
             left: ufoPos.x,
             top: ufoPos.y,
             transform: 'translate(-50%, -50%)',
             pointerEvents: 'none',
-            zIndex: 100000,
-            transition: scannerState === 'SCANNING' ? 'all 0.7s cubic-bezier(0.25, 1, 0.5, 1)' : 'none'
+            zIndex: 100000
           }}
         >
           {/* Laser scanning beam below active UFO */}
-          {scannerState === 'DRAWING' && (
-            <div className="ufo-scan-beam-active"></div>
-          )}
+          <div className="ufo-scan-beam-active"></div>
           
           <span className="ufo floating-ufo">
             <span className="ufo-dome"></span>
@@ -3327,23 +3181,12 @@ export default function Home() {
         </div>
       )}
 
-      {/* Expanding Scan Pulse shockwave on release */}
-      {isScanning && points.length > 0 && (
-        <div 
-          className="scan-pulse-wave"
-          style={{
-            left: Math.min(...points.map(p => p.x)) + (Math.max(...points.map(p => p.x)) - Math.min(...points.map(p => p.x))) / 2,
-            top: Math.min(...points.map(p => p.y)) + (Math.max(...points.map(p => p.y)) - Math.min(...points.map(p => p.y))) / 2
-          }}
-        />
-      )}
-
       {/* Holographic Slide-out Scan Console */}
       <div className={`hud-scanner-console ${hudOpen ? 'open' : ''}`}>
         <div className="hud-console-header">
           <span className="hud-status-led"></span>
           <span className="hud-header-title">INTEL DECRYPTOR</span>
-          <button className="hud-close-btn" onClick={() => setHudOpen(false)}>×</button>
+          <button className="hud-close-btn" onClick={handleUfoDeactivate}>×</button>
         </div>
         
         {scanResult && hudOpen && (
@@ -3357,7 +3200,7 @@ export default function Home() {
         )}
         
         <div className="hud-console-footer">
-          <button className="hud-action-btn" onClick={() => setHudOpen(false)}>
+          <button className="hud-action-btn" onClick={handleUfoDeactivate}>
             DISMISS INTEL
           </button>
         </div>
