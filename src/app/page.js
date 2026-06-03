@@ -611,10 +611,16 @@ export default function Home() {
       }
     }
 
-    // If we have candidates, sort them by bounding box area ascending.
-    // This ensures that nested smaller elements (boxes) are chosen over larger containers.
+    // Sort candidates by physical distance from circle center, breaking ties with bounding box area
     if (candidates.length > 0) {
-      candidates.sort((a, b) => a.area - b.area);
+      candidates.sort((a, b) => {
+        // If the distance difference is significant (more than 30px), select the closer one
+        if (Math.abs(a.distance - b.distance) > 30) {
+          return a.distance - b.distance;
+        }
+        // If they share a similar center, select the smaller container (smaller area)
+        return a.area - b.area;
+      });
       const match = candidates[0];
       const data = HOMEPAGE_INTEL_DB[match.id];
       if (data) {
