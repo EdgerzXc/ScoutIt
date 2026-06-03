@@ -730,7 +730,7 @@ export default function Home() {
             <p>Connect with advisors who understand space, design, and architecture.</p>
           </header>
           
-          <div className="brokers-blur-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '32px', maxWidth: '1200px', margin: '0 auto' }}>
+          <div className="brokers-blur-grid">
             {[
               { name: "Miguel Torres, REB", status: "Lead Design Advisor", history: "Specializes in BGC architectural modernism", image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&q=80", metrics: [
                 { label: "Curations", value: "14 Spaces" },
@@ -748,14 +748,14 @@ export default function Home() {
                 { label: "Curator Style", value: "Minimalist" }
               ] }
             ].map((broker, i) => (
-              <div key={i} className="broker-preview-card" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border-solid)', borderRadius: '8px', padding: '32px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', transition: 'all 0.3s ease', cursor: 'default' }}>
+              <div key={i} className="broker-preview-card">
                 <div style={{ width: '80px', height: '80px', borderRadius: '50%', backgroundImage: `url(${broker.image})`, backgroundSize: 'cover', backgroundPosition: 'center', filter: 'grayscale(100%) contrast(1.2)', marginBottom: '16px', border: '2px solid var(--border-solid)' }}></div>
                 <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: '#fff', marginBottom: '4px' }}>{broker.name} <span style={{ color: 'var(--text-muted)', fontSize: '12px', fontWeight: 'normal', fontFamily: 'var(--font-mono)', display: 'block', marginTop: '4px' }}>{broker.status}</span></h3>
                 
                 {/* 3-metric trust analytics block */}
-                <div className="broker-metrics-block" style={{ display: 'flex', gap: '8px', width: '100%', marginBottom: '16px', marginTop: '16px' }}>
+                <div className="broker-metrics-block">
                   {broker.metrics.map((m, idx) => (
-                    <div key={idx} style={{ flex: 1, background: '#0e0e0e', border: '1px solid #262626', padding: '16px 8px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                    <div key={idx} className="broker-metric-item">
                       <span style={{ color: 'var(--text-muted)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: '500', display: 'block', textAlign: 'center', lineHeight: '1.2' }}>{m.label}</span>
                       <span style={{ fontFamily: 'Georgia, serif', fontSize: '16px', color: '#f0ede8', display: 'block', textAlign: 'center', lineHeight: '1.1' }}>{m.value}</span>
                     </div>
@@ -2089,8 +2089,50 @@ export default function Home() {
 
         .brokers-blur-grid {
           display: grid;
-          grid-template-columns: repeat(3, 1fr);
+          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
           gap: 32px;
+          max-width: 1200px;
+          margin: 0 auto;
+          width: 100%;
+        }
+
+        .broker-preview-card {
+          background: rgba(255,255,255,0.02);
+          border: 1px solid var(--border-solid);
+          border-radius: 8px;
+          padding: 32px 24px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          transition: all 0.3s ease;
+          cursor: default;
+        }
+
+        .broker-preview-card:hover {
+          border-color: var(--accent);
+          transform: translateY(-4px);
+        }
+
+        .broker-metrics-block {
+          display: flex;
+          gap: 8px;
+          width: 100%;
+          margin-bottom: 16px;
+          margin-top: 16px;
+        }
+
+        .broker-metric-item {
+          flex: 1;
+          background: #0e0e0e;
+          border: 1px solid #262626;
+          padding: 16px 8px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          min-width: 0;
         }
 
         .broker-ghost-card {
