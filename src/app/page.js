@@ -190,7 +190,12 @@ export default function Home() {
 
   const handleGlobalPointerMove = (e) => {
     if (scannerState === 'DOCKED' || scannerState === 'SCANNING') return;
-    setUfoPos({ x: e.clientX, y: e.clientY });
+    const x = e.clientX;
+    const y = e.clientY;
+    setUfoPos({ x, y });
+    if (scannerState === 'DRAWING') {
+      setPoints((prev) => [...prev, { x, y }]);
+    }
   };
 
   const handleGlobalPointerDown = (e) => {
@@ -201,7 +206,7 @@ export default function Home() {
     const y = e.clientY;
 
     if (scannerState === 'HOVER_FOLLOW') {
-      // Anchor center point of the search circle
+      // Start freehand drawing the circle selection
       setPoints([{ x, y }]);
       setScannerState('DRAWING');
       
@@ -213,17 +218,25 @@ export default function Home() {
       setScannerState('SCANNING');
       setIsScanning(true);
       
-      const startPoint = points[0];
-      const dx = x - startPoint.x;
-      const dy = y - startPoint.y;
-      const radius = Math.sqrt(dx * dx + dy * dy);
+      // Calculate bounding box bounds of the user's custom circled path
+      const minX = Math.min(...points.map(p => p.x));
+      const maxX = Math.max(...points.map(p => p.x));
+      const minY = Math.min(...points.map(p => p.y));
+      const maxY = Math.max(...points.map(p => p.y));
+      const width = maxX - minX;
+      const height = maxY - minY;
       
-      if (radius < 15) {
+      if (points.length < 4 || (width < 20 && height < 20)) {
         flyBackHome();
         return;
       }
       
-      const result = runScannerCollisionCheck(startPoint.x, startPoint.y, radius);
+      // Derive center and radius from the custom drawn shape bounding box
+      const centerX = minX + width / 2;
+      const centerY = minY + height / 2;
+      const radius = Math.max(width, height) / 2;
+      
+      const result = runScannerCollisionCheck(centerX, centerY, radius);
       setScanResult(result);
       
       // Hold scanning animation for 1.5s, then return UFO and display HUD console
@@ -364,7 +377,7 @@ export default function Home() {
     };
   };
 
-  // Canvas draw effect
+  // Canvas draw effect for custom freehand drawing circle
   useEffect(() => {
     if (scannerState !== 'DRAWING' || !canvasRef.current || points.length === 0) return;
     const canvas = canvasRef.current;
@@ -377,46 +390,28 @@ export default function Home() {
     
     ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
     
-    const startPoint = points[0];
-    const currentPoint = ufoPos;
-    
-    const dx = currentPoint.x - startPoint.x;
-    const dy = currentPoint.y - startPoint.y;
-    const radius = Math.sqrt(dx * dx + dy * dy);
-    
-    // Draw radar sweep dash lines
-    ctx.strokeStyle = 'rgba(34, 197, 94, 0.15)';
-    ctx.lineWidth = 1;
-    ctx.setLineDash([5, 5]);
-    ctx.beginPath();
-    ctx.arc(startPoint.x, startPoint.y, radius, 0, 2 * Math.PI);
-    ctx.stroke();
-    
-    // Draw outer scan boundary ring
+    // Draw the user's custom circled trail path
     ctx.strokeStyle = '#22c55e';
-    ctx.lineWidth = 2;
-    ctx.setLineDash([]);
+    ctx.lineWidth = 3;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
     ctx.shadowColor = '#22c55e';
     ctx.shadowBlur = 10;
+    ctx.setLineDash([]);
+    
     ctx.beginPath();
-    ctx.arc(startPoint.x, startPoint.y, radius, 0, 2 * Math.PI);
+    ctx.moveTo(points[0].x, points[0].y);
+    for (let i = 1; i < points.length; i++) {
+      ctx.lineTo(points[i].x, points[i].y);
+    }
     ctx.stroke();
     
-    // Draw semi-transparent inner scanning fill
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = 'rgba(34, 197, 94, 0.05)';
-    ctx.beginPath();
-    ctx.arc(startPoint.x, startPoint.y, radius, 0, 2 * Math.PI);
-    ctx.fill();
-    
-    // Draw scanner center crosshair
-    ctx.strokeStyle = 'rgba(34, 197, 94, 0.4)';
+    // Draw initial center anchor dot at click-start
+    ctx.strokeStyle = 'rgba(34, 197, 94, 0.5)';
     ctx.lineWidth = 1.5;
+    ctx.shadowBlur = 0;
     ctx.beginPath();
-    ctx.moveTo(startPoint.x, startPoint.y - 12);
-    ctx.lineTo(startPoint.x, startPoint.y + 12);
-    ctx.moveTo(startPoint.x - 12, startPoint.y);
-    ctx.lineTo(startPoint.x + 12, startPoint.y);
+    ctx.arc(points[0].x, points[0].y, 4, 0, 2 * Math.PI);
     ctx.stroke();
   }, [points, ufoPos, scannerState]);
 
@@ -3033,8 +3028,8 @@ export default function Home() {
         <div 
           className="scan-pulse-wave"
           style={{
-            left: points[0].x,
-            top: points[0].y
+            left: Math.min(...points.map(p => p.x)) + (Math.max(...points.map(p => p.x)) - Math.min(...points.map(p => p.x))) / 2,
+            top: Math.min(...points.map(p => p.y)) + (Math.max(...points.map(p => p.y)) - Math.min(...points.map(p => p.y))) / 2
           }}
         />
       )}
