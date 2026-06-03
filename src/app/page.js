@@ -89,86 +89,7 @@ export default function Home() {
     ]
   };
 
-  // ── Sparkle glitters — upper zone (4-point stars) ──────────────
-  const STAR_POSITIONS = [
-    { top: '6%',  left: '8%',  type: 'tiny'   },
-    { top: '11%', left: '22%', type: 'medium'  },
-    { top: '4%',  left: '38%', type: 'tiny'    },
-    { top: '8%',  left: '55%', type: 'hero'    },
-    { top: '13%', left: '68%', type: 'medium'  },
-    { top: '5%',  left: '80%', type: 'tiny'    },
-    { top: '10%', left: '92%', type: 'medium'  },
-    { top: '18%', left: '12%', type: 'medium'  },
-    { top: '22%', left: '30%', type: 'tiny'    },
-    { top: '16%', left: '47%', type: 'tiny'    },
-    { top: '20%', left: '62%', type: 'hero'    },
-    { top: '15%', left: '75%', type: 'medium'  },
-    { top: '24%', left: '88%', type: 'tiny'    },
-    { top: '28%', left: '5%',  type: 'hero'    },
-    { top: '30%', left: '18%', type: 'tiny'    },
-    { top: '26%', left: '42%', type: 'medium'  },
-    { top: '32%', left: '72%', type: 'tiny'    },
-    { top: '29%', left: '95%', type: 'medium'  },
-  ];
-
-  // ── Background dot-stars — CSS twinkle, staggered delays ─────
-  const BG_STAR_POSITIONS = [
-    { top: '8%',  left: '4%',  cls: 'star-fast', delay: 0.3  },
-    { top: '45%', left: '3%',  cls: 'star-slow', delay: 2.1  },
-    { top: '70%', left: '7%',  cls: 'star-med',  delay: 1.4  },
-    { top: '85%', left: '14%', cls: 'star-fast', delay: 3.7  },
-    { top: '55%', left: '24%', cls: 'star-slow', delay: 0.8  },
-    { top: '80%', left: '31%', cls: 'star-med',  delay: 4.2  },
-    { top: '38%', left: '40%', cls: 'star-fast', delay: 1.9  },
-    { top: '65%', left: '44%', cls: 'star-slow', delay: 5.5  },
-    { top: '92%', left: '51%', cls: 'star-med',  delay: 0.6  },
-    { top: '75%', left: '64%', cls: 'star-fast', delay: 3.1  },
-    { top: '52%', left: '77%', cls: 'star-slow', delay: 6.8  },
-    { top: '88%', left: '83%', cls: 'star-med',  delay: 2.4  },
-    { top: '42%', left: '13%', cls: 'star-fast', delay: 7.2  },
-    { top: '68%', left: '54%', cls: 'star-slow', delay: 1.1  },
-    { top: '78%', left: '41%', cls: 'star-med',  delay: 4.9  },
-    { top: '25%', left: '90%', cls: 'star-fast', delay: 0.4  },
-    { top: '60%', left: '11%', cls: 'star-slow', delay: 8.3  },
-    { top: '35%', left: '57%', cls: 'star-med',  delay: 2.7  },
-    { top: '82%', left: '59%', cls: 'star-fast', delay: 5.1  },
-    { top: '48%', left: '34%', cls: 'star-slow', delay: 1.6  },
-    { top: '72%', left: '19%', cls: 'star-med',  delay: 6.4  },
-    { top: '62%', left: '89%', cls: 'star-fast', delay: 3.3  },
-    { top: '90%', left: '27%', cls: 'star-slow', delay: 9.1  },
-    { top: '40%', left: '73%', cls: 'star-med',  delay: 0.9  },
-    { top: '55%', left: '97%', cls: 'star-fast', delay: 4.6  },
-    { top: '15%', left: '53%', cls: 'star-slow', delay: 7.8  },
-    { top: '95%', left: '69%', cls: 'star-med',  delay: 2.2  },
-    { top: '33%', left: '86%', cls: 'star-fast', delay: 5.9  },
-    { top: '18%', left: '77%', cls: 'star-slow', delay: 1.3  },
-    { top: '50%', left: '48%', cls: 'star-med',  delay: 8.7  },
-  ];
-
-  const [activeStars, setActiveStars] = useState({});
-  const starTimers = useRef([]);
-
-  // Glitter sparkles (upper zone — JS random timer)
-  useEffect(() => {
-    const scheduleNext = (idx) => {
-      const delay = 2000 + Math.random() * 7000;
-      const t = setTimeout(() => {
-        setActiveStars(prev => ({ ...prev, [idx]: true }));
-        const hideT = setTimeout(() => {
-          setActiveStars(prev => ({ ...prev, [idx]: false }));
-          scheduleNext(idx);
-        }, 1800 + Math.random() * 600);
-        starTimers.current.push(hideT);
-      }, delay);
-      starTimers.current.push(t);
-    };
-    STAR_POSITIONS.forEach((_, idx) => {
-      const t = setTimeout(() => scheduleNext(idx), Math.random() * 5000);
-      starTimers.current.push(t);
-    });
-    return () => starTimers.current.forEach(clearTimeout);
-  }, []);
-  // bg-stars now use pure CSS twinkle animations (no JS timers needed)
+  // Stars and glitters particle arrays removed for clean cinematic hero redesign
 
   return (
     <main className="cinematic-container">
@@ -176,32 +97,11 @@ export default function Home() {
       <section className="snap-section section-hook">
         <div className="grain"></div>
 
-        {/* Deep space nebula background */}
-        <div className="nebula-bg"></div>
-
-        {/* Background dot-stars — CSS infinite twinkle, staggered */}
-        {BG_STAR_POSITIONS.map((pos, idx) => (
-          <div
-            key={`bg-star-${idx}`}
-            className={`bg-star ${pos.cls}`}
-            style={{ top: pos.top, left: pos.left, animationDelay: `${pos.delay}s` }}
-          />
-        ))}
-
-        {/* Occasional sparkle glitters — upper zone */}
-        {STAR_POSITIONS.map((pos, idx) => (
-          <div
-            key={`glitter-${idx}`}
-            className={`glitter glitter-${pos.type} ${activeStars[idx] ? 'glitter-active' : ''}`}
-            style={{ top: pos.top, left: pos.left }}
-          >
-            <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M10 0 L11.2 8.8 L20 10 L11.2 11.2 L10 20 L8.8 11.2 L0 10 L8.8 8.8 Z"
-                fill={pos.type === 'hero' ? '#e8d5a3' : pos.type === 'medium' ? '#f0ebe0' : '#ffffff'}
-              />
-            </svg>
-          </div>
-        ))}
+        {/* Cinematic Property Background with Slow Zoom */}
+        <div className="hero-bg-container">
+          <div className="hero-bg-image"></div>
+          <div className="hero-overlay"></div>
+        </div>
 
         {/* Main hook content */}
         <div className="hook-content">
@@ -391,7 +291,7 @@ export default function Home() {
                       <h4>{item.title}</h4>
                       <div className="mini-card-tags">
                         {item.tags.map((tag, idx) => {
-                          const labels = ["The Space", "Daily Life", "Location Story"];
+                          const labels = ["The Space", "Daily Life Reality", "Location Story"];
                           return (
                             <div key={idx} className="mini-tag-wrapper">
                               <span className="mini-tag-label">{labels[idx]}</span>
@@ -445,46 +345,30 @@ export default function Home() {
           {/* Right Visual Canvas */}
           <div className="matrix-preview-pane">
             <header className="pane-header">
-              <h3>{activeDiscoverType} Intelligence</h3>
-              <p>Active Discovery Feed Preview</p>
+              <h3>{activeDiscoverType} Archive</h3>
+              <p>Narratives, design trends, and local guides</p>
             </header>
             
-            <div className="discover-feed-preview" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              <div className="preview-card matrix-preview" style={{ height: '120px' }}>
+            <div className="discover-feed-preview" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              <div className="preview-card matrix-preview" style={{ height: '180px' }}>
                 <div className="preview-card-bg matrix-bg"></div>
                 <div className="preview-card-content" style={{ position: 'relative', zIndex: 10 }}>
-                  <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', color: '#fff', marginBottom: '4px' }}>Curated Collections</h3>
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>Explore showcases of unique architectural character</p>
+                  <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', color: '#fff', marginBottom: '8px' }}>Curated Collections</h3>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Explore showcases of unique architectural character</p>
                 </div>
               </div>
               
-              <div className="preview-card news-preview" style={{ height: '110px' }}>
+              <div className="preview-card news-preview" style={{ height: '180px' }}>
                 <div className="preview-card-bg news-bg"></div>
                 <div className="preview-card-content" style={{ position: 'relative', zIndex: 10 }}>
-                  <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', color: '#fff', marginBottom: '4px' }}>Stories &amp; Places</h3>
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>Regional stories and narratives for {activeDiscoverType.toLowerCase()}</p>
+                  <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', color: '#fff', marginBottom: '8px' }}>Stories &amp; Places</h3>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Regional stories and narratives for {activeDiscoverType.toLowerCase()}</p>
                 </div>
               </div>
-
-              <Link 
-                href={`/discover?type=${activeDiscoverType.toLowerCase()}&focus=location`} 
-                style={{ textDecoration: 'none', display: 'block' }}
-              >
-                <div className="preview-card location-preview" style={{ height: '110px', cursor: 'pointer', transition: 'transform 0.3s ease' }}
-                     onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.01)'}
-                     onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                >
-                  <div className="preview-card-bg location-bg"></div>
-                  <div className="preview-card-content" style={{ position: 'relative', zIndex: 10 }}>
-                    <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', color: '#fff', marginBottom: '4px' }}>Recommended Spaces by Location</h3>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>Discover properties selected for their unique architectural feel.</p>
-                  </div>
-                </div>
-              </Link>
             </div>
 
             <div className="matrix-legend-caption">
-              Inspiration Note: We track neighborhood narratives and architectural design hotspots across the archipelago.
+              Our editors trace design movements and regional narratives across the Philippine islands.
             </div>
           </div>
         </div>
@@ -495,34 +379,34 @@ export default function Home() {
         <div className="brokers-content">
           <header className="section-header-center">
             <span className="vector-label">Layer 03 // Trusted Guides</span>
-            <h2>Advisory Guild</h2>
+            <h2>The Advisory</h2>
             <p>Connect with advisors who understand space, design, and architecture.</p>
           </header>
           
-          <div className="brokers-blur-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px', maxWidth: '1200px', margin: '0 auto' }}>
+          <div className="brokers-blur-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '32px', maxWidth: '1200px', margin: '0 auto' }}>
             {[
-              { name: "Miguel Torres, REB", status: "Principal Strategist", history: "Specializes in BGC architectural modernism", image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&q=80", metrics: [
+              { name: "Miguel Torres, REB", status: "Lead Design Advisor", history: "Specializes in BGC architectural modernism", image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&q=80", metrics: [
                 { label: "Curations", value: "14 Spaces" },
                 { label: "Experience", value: "8+ Years" },
                 { label: "Curator Style", value: "Modernist" }
               ] },
-              { name: "Elena Santos, REB", status: "Global Capital Manager", history: "Specializes in QC quiet luxury estates", image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=80", metrics: [
+              { name: "Elena Santos, REB", status: "Quiet Luxury Specialist", history: "Specializes in QC quiet luxury estates", image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=80", metrics: [
                 { label: "Curations", value: "18 Spaces" },
                 { label: "Experience", value: "10+ Years" },
                 { label: "Curator Style", value: "Quiet Luxury" }
               ] },
-              { name: "Marco Reyes, REB", status: "Lead Arbitrage Analyst", history: "Specializes in Siargao & island minimalist retreats", image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&q=80", metrics: [
+              { name: "Marco Reyes, REB", status: "Island Retreats Curator", history: "Specializes in Siargao & island minimalist retreats", image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&q=80", metrics: [
                 { label: "Curations", value: "22 Spaces" },
                 { label: "Experience", value: "7+ Years" },
                 { label: "Curator Style", value: "Minimalist" }
               ] }
             ].map((broker, i) => (
-              <div key={i} className="broker-preview-card" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border-solid)', borderRadius: '8px', padding: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', transition: 'all 0.3s ease', cursor: 'default' }}>
+              <div key={i} className="broker-preview-card" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border-solid)', borderRadius: '8px', padding: '32px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', transition: 'all 0.3s ease', cursor: 'default' }}>
                 <div style={{ width: '80px', height: '80px', borderRadius: '50%', backgroundImage: `url(${broker.image})`, backgroundSize: 'cover', backgroundPosition: 'center', filter: 'grayscale(100%) contrast(1.2)', marginBottom: '16px', border: '2px solid var(--border-solid)' }}></div>
-                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: '#fff', marginBottom: '4px' }}>{broker.name} <span style={{ color: 'var(--text-muted)', fontSize: '12px', fontWeight: 'normal', fontFamily: 'var(--font-mono)' }}>// {broker.status}</span></h3>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: '#fff', marginBottom: '4px' }}>{broker.name} <span style={{ color: 'var(--text-muted)', fontSize: '12px', fontWeight: 'normal', fontFamily: 'var(--font-mono)', display: 'block', marginTop: '4px' }}>{broker.status}</span></h3>
                 
                 {/* 3-metric trust analytics block */}
-                <div className="broker-metrics-block" style={{ display: 'flex', gap: '8px', width: '100%', marginBottom: '16px', marginTop: '12px' }}>
+                <div className="broker-metrics-block" style={{ display: 'flex', gap: '8px', width: '100%', marginBottom: '16px', marginTop: '16px' }}>
                   {broker.metrics.map((m, idx) => (
                     <div key={idx} style={{ flex: 1, background: '#0e0e0e', border: '1px solid #262626', padding: '16px 8px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
                       <span style={{ color: 'var(--text-muted)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: '500', display: 'block', textAlign: 'center', lineHeight: '1.2' }}>{m.label}</span>
@@ -545,7 +429,7 @@ export default function Home() {
       </section>
 
       {/* SECTION 5: THE WISHLIST LAYER */}
-      <section className="snap-section section-wishlist" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 40px' }}>
+      <section className="snap-section section-wishlist" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div className="wishlist-content" style={{ width: '100%', maxWidth: '1200px', margin: '0 auto', display: 'flex', gap: '80px', alignItems: 'center' }}>
           
           {/* Left Column: The Manifesto */}
@@ -591,16 +475,16 @@ export default function Home() {
           
           <div className="about-manifesto-preview">
             <p className="manifesto-lead">
-              ScoutIt is an editorial archive of spaces. We believe looking for a property should feel like reading a high-end architectural magazine.
+              We believe a home is more than a list of specifications. It is a space where your life unfolds. ScoutIt is an editorial archive created for the Philippine property dreamer.
             </p>
             <p className="manifesto-secondary">
-              Instead of cluttered listings and pressure-driven sales, we curate spatial intelligence, architectural DNA, and neighborhood narratives to help you find spaces you'll truly love.
+              Instead of pressure-driven listings and corporate jargon, we curate architectural DNA, design history, and local narratives to help you discover spaces you'll truly love.
             </p>
           </div>
 
           <div className="section-action-footer">
             <Link href="/about" className="prominent-action-link">
-              READ OUR FULL STORY →
+              Read Our Full Story →
             </Link>
           </div>
         </div>
@@ -664,70 +548,45 @@ export default function Home() {
           display: flex;
           align-items: center;
           justify-content: center;
-          background: #07071a;
+          background: #0e0e0e;
+          overflow: hidden;
+          position: relative;
+        }
+
+        .hero-bg-container {
+          position: absolute;
+          inset: 0;
+          z-index: 0;
           overflow: hidden;
         }
 
-        /* Deep nebula background gradient */
-        .nebula-bg {
+        .hero-bg-image {
+          width: 100%;
+          height: 100%;
+          background-image: url('/cinematic_hero_bg.png');
+          background-size: cover;
+          background-position: center;
+          opacity: 0.38;
+          filter: brightness(0.65) contrast(1.1) saturate(0.85);
+          transform: scale(1.02);
+          animation: slowZoom 25s ease-in-out infinite alternate;
+        }
+
+        .hero-overlay {
           position: absolute;
           inset: 0;
-          background:
-            radial-gradient(ellipse 80% 50% at 50% 0%, rgba(30,20,80,0.7) 0%, transparent 70%),
-            radial-gradient(ellipse 60% 40% at 20% 80%, rgba(10,30,60,0.5) 0%, transparent 60%),
-            radial-gradient(ellipse 40% 30% at 80% 60%, rgba(20,10,50,0.4) 0%, transparent 50%);
-          pointer-events: none;
-          z-index: 0;
+          background: linear-gradient(
+            to bottom,
+            rgba(14, 14, 14, 0.4) 0%,
+            rgba(14, 14, 14, 0.8) 75%,
+            #0e0e0e 100%
+          );
         }
 
-        /* ── Background dot-stars — CSS infinite twinkle ─────────── */
-        .bg-star {
-          position: absolute;
-          width: 2px;
-          height: 2px;
-          border-radius: 50%;
-          background: #fff;
-          opacity: 0;
-          pointer-events: none;
-          z-index: 1;
+        @keyframes slowZoom {
+          0% { transform: scale(1); }
+          100% { transform: scale(1.08); }
         }
-
-        /* Fast twinkling stars — blink in/out every ~2s */
-        .star-fast {
-          animation: twinkleFast 2.2s ease-in-out infinite;
-        }
-
-        /* Medium twinkling stars — every ~4s */
-        .star-med {
-          animation: twinkleMed 4.1s ease-in-out infinite;
-        }
-
-        /* Slow, deep-space stars — every ~7s */
-        .star-slow {
-          animation: twinkleSlow 7.4s ease-in-out infinite;
-        }
-
-
-        /* ── Occasional sparkle glitters ──────────────────────────── */
-        .glitter {
-          position: absolute;
-          z-index: 2;
-          opacity: 0;
-          transform: scale(0) rotate(0deg);
-          transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
-          pointer-events: none;
-          filter: drop-shadow(0 0 4px rgba(255,255,255,0.8));
-        }
-
-        .glitter-active {
-          opacity: 1;
-          transform: scale(1) rotate(15deg);
-          transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
-        }
-
-        .glitter-tiny  { width: 8px;  height: 8px; }
-        .glitter-medium { width: 12px; height: 12px; filter: drop-shadow(0 0 6px rgba(240,235,224,0.9)); }
-        .glitter-hero  { width: 18px; height: 18px; filter: drop-shadow(0 0 10px rgba(232,213,163,1)); }
 
         /* ── Main wordmark container ─────────────────────────────── */
         .hook-content {
@@ -741,14 +600,14 @@ export default function Home() {
           align-items: flex-end;
           justify-content: center;
           gap: 0.04em;
-          margin-bottom: 24px;
+          margin-bottom: 48px;
           line-height: 1;
         }
 
         /* Base letter style */
         .letter {
           font-family: var(--font-display);
-          font-size: 8vw;
+          font-size: clamp(24px, 3.5vw, 42px);
           letter-spacing: 0.05em;
           color: var(--accent);
           display: inline-block;
@@ -975,28 +834,30 @@ export default function Home() {
 
         .hero-tagline {
           font-family: var(--font-display);
-          font-size: clamp(32px, 5.5vw, 68px);
-          font-weight: 350;
-          line-height: 1.15;
-          letter-spacing: -0.02em;
+          font-size: clamp(36px, 5vw, 68px);
+          font-weight: 700;
+          line-height: 1.2;
+          letter-spacing: -0.015em;
           color: var(--text-primary);
-          margin-top: 24px;
+          margin-top: 0;
+          margin-bottom: 24px;
           max-width: 18em;
           margin-left: auto;
           margin-right: auto;
-          text-shadow: 0 2px 24px rgba(0,0,0,0.55);
+          text-shadow: 0 2px 30px rgba(0,0,0,0.8);
           animation: fadeUp 1.2s ease 2.8s forwards;
           opacity: 0;
         }
 
         .hero-subheadline {
           font-family: var(--font-body);
-          font-size: clamp(14px, 1.8vw, 20px);
-          font-weight: 400;
-          color: rgba(240, 237, 232, 0.7);
-          margin-top: 16px;
-          letter-spacing: 0.02em;
-          text-shadow: 0 1px 12px rgba(0,0,0,0.5);
+          font-size: clamp(16px, 2.2vw, 22px);
+          font-weight: 300;
+          color: rgba(240, 237, 232, 0.85);
+          margin-top: 0;
+          margin-bottom: 48px;
+          letter-spacing: 0.04em;
+          text-shadow: 0 1px 15px rgba(0,0,0,0.8);
           animation: fadeUp 1.2s ease 3.2s forwards;
           opacity: 0;
         }
@@ -1007,23 +868,22 @@ export default function Home() {
           font-size: 13px;
           font-weight: 600;
           text-transform: uppercase;
-          letter-spacing: 0.2em;
-          color: #0e0e0e;
-          background: var(--accent);
+          letter-spacing: 0.25em;
+          color: var(--accent);
+          background: transparent;
           border: 1px solid var(--accent);
-          padding: 18px 36px;
-          border-radius: 4px;
-          margin-top: 36px;
+          padding: 20px 48px;
+          border-radius: 2px;
           cursor: pointer;
-          transition: all var(--transition-fast);
+          transition: all var(--transition);
           animation: fadeUp 1.2s ease 3.6s forwards;
           opacity: 0;
         }
 
         .hero-cta-btn:hover {
-          background: transparent;
-          color: var(--accent);
-          box-shadow: 0 0 30px rgba(200, 169, 110, 0.35);
+          background: var(--accent);
+          color: #0e0e0e;
+          box-shadow: 0 0 35px rgba(200, 169, 110, 0.45);
           transform: translateY(-2px);
         }
 
@@ -1166,7 +1026,7 @@ export default function Home() {
           display: flex;
           flex-direction: column;
           justify-content: space-between;
-          padding: 80px 32px;
+          padding: 120px 40px;
           z-index: 10;
         }
 
@@ -1234,7 +1094,7 @@ export default function Home() {
         .matrix-preview-pane {
           flex: 1;
           background: #121212;
-          padding: 80px 48px;
+          padding: 120px 48px;
           display: flex;
           flex-direction: column;
           overflow-y: auto;
@@ -1535,7 +1395,7 @@ export default function Home() {
           flex-direction: column;
           justify-content: center;
           align-items: center;
-          padding: 60px;
+          padding: 120px 40px;
         }
         
         .brokers-content {
@@ -1618,10 +1478,9 @@ export default function Home() {
         .section-wishlist {
           background: var(--bg);
           display: flex;
-          flex-direction: column;
-          justify-content: center;
           align-items: center;
-          padding: 60px;
+          justify-content: center;
+          padding: 120px 40px;
         }
 
         .wishlist-content {
@@ -1680,7 +1539,7 @@ export default function Home() {
           flex-direction: column;
           justify-content: center;
           align-items: center;
-          padding: 60px;
+          padding: 120px 40px;
         }
 
         .about-content {
