@@ -245,12 +245,41 @@ export default function PropertyDetailClient({ slug }) {
 
           {/* Platform Nav */}
           <nav className="platform-nav" ref={menuRef}>
-            <a href="/" className="platform-home-btn">Home</a>
+            <button
+              onClick={() => {
+                if (window.history.length > 1) {
+                  window.history.back();
+                } else {
+                  window.location.href = "/";
+                }
+              }}
+              className="platform-back-btn"
+              style={{
+                cursor: 'pointer',
+                fontFamily: 'var(--font-body)',
+                fontSize: '12px',
+                fontWeight: 500,
+                letterSpacing: '0.06em',
+                background: 'var(--brand-overlay)',
+                backdropFilter: 'blur(12px)',
+                color: 'var(--text-primary)',
+                border: '0.5px solid var(--border-mid)',
+                borderRadius: '20px',
+                height: '40px',
+                padding: '0 16px',
+                display: 'flex',
+                alignItems: 'center',
+                transition: 'background 0.25s, border-color 0.25s'
+              }}
+            >
+              ← Go Back
+            </button>
             <button
               className="platform-menu-btn"
               type="button"
               aria-expanded={menuOpen}
               onClick={() => setMenuOpen(v => !v)}
+              aria-label="Menu"
             >
               <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
                 <path d="M2 4h12M2 8h12M2 12h12"/>
@@ -258,9 +287,12 @@ export default function PropertyDetailClient({ slug }) {
             </button>
             <div className={`platform-dropdown ${menuOpen ? "open" : ""}`}>
               <div className="dropdown-brand">ScoutIt</div>
-              <a href="/intel">News</a>
-              <a href="/brokers">Brokers</a>
-              <a href="/about">About</a>
+              <Link href="/">Home</Link>
+              <Link href="/discover">Discover</Link>
+              <Link href="/intel">News</Link>
+              <Link href="/brokers">Brokers</Link>
+              <Link href="/wishlist">Your Board</Link>
+              <Link href="/about">About</Link>
             </div>
           </nav>
 
