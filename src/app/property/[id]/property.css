@@ -22,12 +22,7 @@
  --yellow: #e8c84a;
  --yellow-dim: rgba(232, 200, 74, 0.12);
  --red: #e8644a;
- --red-dim: rgba(232, 100, 74, 0.12); } html, body { height: 100%; }
-body {
- background: var(--bg);
- color: var(--text-primary);
- font-family: var(--font-body);
- overflow: hidden; }
+ --red-dim: rgba(232, 100, 74, 0.12); }
 .grain { position: fixed; inset: 0;
  pointer-events: none; z-index: 999;
  opacity: 0.03;
