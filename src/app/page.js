@@ -147,7 +147,7 @@ export default function Home() {
       
       const id = Math.random().toString(36).substr(2, 9);
       
-      // Select type: 50% rock, 30% comet, 20% neutron star
+      // Select type: 80% rock, 10% comet, 10% neutron star
       const rand = Math.random();
       let type = 'rock';
       let size = '6px';
@@ -185,18 +185,18 @@ export default function Home() {
       const dy = (50 - startY_pct) * (h / 100);
       const angle = Math.atan2(dy, dx) * 180 / Math.PI;
 
-      if (rand < 0.5) {
+      if (rand < 0.8) {
         type = 'rock';
-        size = Math.floor(4 + Math.random() * 6) + "px"; // 4px to 10px
+        size = Math.floor(4 + Math.random() * 5) + "px"; // 4px to 8px
         scale = parseFloat((0.8 + Math.random() * 0.4).toFixed(2));
         borderRadius = `${Math.floor(30 + Math.random()*20)}% ${Math.floor(40 + Math.random()*20)}% ${Math.floor(30 + Math.random()*20)}% ${Math.floor(30 + Math.random()*20)}%`;
-      } else if (rand < 0.8) {
+      } else if (rand < 0.9) {
         type = 'comet';
-        size = Math.floor(4 + Math.random() * 3) + "px"; // 4px to 6px
+        size = Math.floor(3 + Math.random() * 3) + "px"; // 3px to 5px (smaller head)
         scale = parseFloat((0.9 + Math.random() * 0.3).toFixed(2));
       } else {
         type = 'neutron';
-        size = Math.floor(6 + Math.random() * 4) + "px"; // 6px to 10px
+        size = Math.floor(14 + Math.random() * 8) + "px"; // 14px to 22px (bigger than stones & comets!)
         scale = parseFloat((0.9 + Math.random() * 0.3).toFixed(2));
       }
 
@@ -994,17 +994,17 @@ export default function Home() {
             opacity: 0;
           }
           15% {
-            opacity: 0.75; /* Good visibility during flight */
+            opacity: 0.85; /* Bright and visible during flight */
           }
-          85% {
-            opacity: 0.45;
+          90% {
+            opacity: 0.85; /* Stays bright and visible for longer, including the tail */
           }
           100% {
             left: 50%;
             top: 50%;
-            transform: scale(0.1);
+            transform: scale(0.05); /* Sucked fully into the horizon */
             opacity: 0;
-            filter: blur(1.5px);
+            filter: blur(2.5px);
           }
         }
 
@@ -1019,12 +1019,13 @@ export default function Home() {
         }
         .comet-tail {
           position: absolute;
-          right: calc(100% - 1px);
+          right: calc(100% - 2px);
           top: 50%;
           transform: translateY(-50%);
-          width: 55px;
-          height: 1.5px;
-          background: linear-gradient(to left, rgba(200, 169, 110, 0.7), transparent);
+          width: 90px; /* Longer, highly noticeable tail */
+          height: 3px; /* Thicker head connection */
+          background: linear-gradient(to left, #ffffff 0%, rgba(200, 169, 110, 0.6) 30%, rgba(200, 169, 110, 0.15) 75%, transparent 100%);
+          clip-path: polygon(0 50%, 100% 0, 100% 100%); /* Elegant taper wedge shape */
           pointer-events: none;
         }
 
@@ -1035,22 +1036,22 @@ export default function Home() {
           background: #e0f2fe;
           border-radius: 50%;
           box-shadow: 
-            0 0 8px rgba(224, 242, 254, 0.8), 
-            0 0 16px rgba(200, 169, 110, 0.5);
+            0 0 12px rgba(224, 242, 254, 0.9), 
+            0 0 24px rgba(200, 169, 110, 0.6);
           animation: pulseNeutronDrifting 2.5s ease-in-out infinite alternate;
         }
         @keyframes pulseNeutronDrifting {
           0% {
             transform: scale(0.85);
             box-shadow: 
-              0 0 6px rgba(224, 242, 254, 0.6), 
-              0 0 12px rgba(200, 169, 110, 0.3);
+              0 0 8px rgba(224, 242, 254, 0.7), 
+              0 0 16px rgba(200, 169, 110, 0.4);
           }
           100% {
             transform: scale(1.15);
             box-shadow: 
-              0 0 12px rgba(224, 242, 254, 0.9), 
-              0 0 24px rgba(200, 169, 110, 0.6);
+              0 0 16px rgba(224, 242, 254, 0.95), 
+              0 0 32px rgba(200, 169, 110, 0.75);
           }
         }
 
