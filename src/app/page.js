@@ -202,19 +202,18 @@ export default function Home() {
   const handlePointerUp = () => {
     if (!ufoDragging || ufoReturning) return;
 
-    if (points.length < 5) {
+    if (points.length < 2) {
       flyBackHome();
       return;
     }
 
-    const minX = Math.min(...points.map(p => p.x));
-    const maxX = Math.max(...points.map(p => p.x));
-    const minY = Math.min(...points.map(p => p.y));
-    const maxY = Math.max(...points.map(p => p.y));
-    const width = maxX - minX;
-    const height = maxY - minY;
+    const startPoint = points[0];
+    const currentPoint = points[points.length - 1];
+    const dx = currentPoint.x - startPoint.x;
+    const dy = currentPoint.y - startPoint.y;
+    const radius = Math.sqrt(dx * dx + dy * dy);
 
-    if (width < 25 || height < 25) {
+    if (radius < 15) {
       flyBackHome();
       return;
     }
@@ -222,11 +221,7 @@ export default function Home() {
     // Enter scanning phase
     setIsScanning(true);
 
-    // Calculate center of drawn circle
-    const centerX = minX + width / 2;
-    const centerY = minY + height / 2;
-
-    const result = runScannerCollisionCheck(minX, maxX, minY, maxY, centerX, centerY);
+    const result = runScannerCollisionCheck(startPoint.x, startPoint.y, radius);
     setScanResult(result);
 
     // Hold scanning overlay for 1.5s, then return UFO and display HUD console
@@ -265,14 +260,20 @@ export default function Home() {
     }, 700);
   };
 
-  const runScannerCollisionCheck = (minX, maxX, minY, maxY, centerX, centerY) => {
+  const runScannerCollisionCheck = (centerX, centerY, radius) => {
+    const getDistance = (x1, y1, x2, y2) => {
+      const dx = x2 - x1;
+      const dy = y2 - y1;
+      return Math.sqrt(dx * dx + dy * dy);
+    };
+
     // 1. Check Broker Cards
     const brokerCards = document.querySelectorAll('.broker-preview-card');
     for (let el of brokerCards) {
       const rect = el.getBoundingClientRect();
       const elCX = rect.left + rect.width / 2;
       const elCY = rect.top + rect.height / 2;
-      if (elCX >= minX && elCX <= maxX && elCY >= minY && elCY <= maxY) {
+      if (getDistance(centerX, centerY, elCX, elCY) <= radius) {
         const nameEl = el.querySelector('h3');
         const name = nameEl ? nameEl.textContent.trim() : 'Broker';
         return {
@@ -288,7 +289,7 @@ export default function Home() {
       const rect = el.getBoundingClientRect();
       const elCX = rect.left + rect.width / 2;
       const elCY = rect.top + rect.height / 2;
-      if (elCX >= minX && elCX <= maxX && elCY >= minY && elCY <= maxY) {
+      if (getDistance(centerX, centerY, elCX, elCY) <= radius) {
         const titleEl = el.querySelector('h3');
         const title = titleEl ? titleEl.textContent.trim() : 'Asset';
         return {
@@ -304,7 +305,7 @@ export default function Home() {
       const rect = ledgerEl.getBoundingClientRect();
       const elCX = rect.left + rect.width / 2;
       const elCY = rect.top + rect.height / 2;
-      if (elCX >= minX && elCX <= maxX && elCY >= minY && elCY <= maxY) {
+      if (getDistance(centerX, centerY, elCX, elCY) <= radius) {
         return {
           title: "SCAN: LEDGER PIPELINE",
           intel: "Scanned Layer 04 (Personal Board). Local tracking matrix active. Sync integrity: 100%. Allows visual staging of wishlist parameters without server metadata leaks."
@@ -318,7 +319,7 @@ export default function Home() {
       const rect = discoverEl.getBoundingClientRect();
       const elCX = rect.left + rect.width / 2;
       const elCY = rect.top + rect.height / 2;
-      if (elCX >= minX && elCX <= maxX && elCY >= minY && elCY <= maxY) {
+      if (getDistance(centerX, centerY, elCX, elCY) <= radius) {
         return {
           title: "SCAN: DISCOVERY ENGINE",
           intel: "Scanned Layer 02 (Zoning Grid). Sub-systems active: Residential, Commercial, and STR sectors. Spatial filters initialized. Relational indices are fully operational."
@@ -366,7 +367,7 @@ export default function Home() {
 
   // Canvas draw effect
   useEffect(() => {
-    if (!ufoDragging || !canvasRef.current || points.length === 0) return;
+    if (!ufoDragging || !canvasRef.current || points.length < 2) return;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     
@@ -377,18 +378,46 @@ export default function Home() {
     
     ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
     
-    ctx.strokeStyle = '#22c55e';
-    ctx.lineWidth = 3;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.shadowColor = '#22c55e';
-    ctx.shadowBlur = 8;
+    const startPoint = points[0];
+    const currentPoint = points[points.length - 1];
     
+    const dx = currentPoint.x - startPoint.x;
+    const dy = currentPoint.y - startPoint.y;
+    const radius = Math.sqrt(dx * dx + dy * dy);
+    
+    // Draw radar sweep dash lines
+    ctx.strokeStyle = 'rgba(34, 197, 94, 0.15)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([5, 5]);
     ctx.beginPath();
-    ctx.moveTo(points[0].x, points[0].y);
-    for (let i = 1; i < points.length; i++) {
-      ctx.lineTo(points[i].x, points[i].y);
-    }
+    ctx.arc(startPoint.x, startPoint.y, radius, 0, 2 * Math.PI);
+    ctx.stroke();
+    
+    // Draw outer scan boundary ring
+    ctx.strokeStyle = '#22c55e';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([]);
+    ctx.shadowColor = '#22c55e';
+    ctx.shadowBlur = 10;
+    ctx.beginPath();
+    ctx.arc(startPoint.x, startPoint.y, radius, 0, 2 * Math.PI);
+    ctx.stroke();
+    
+    // Draw semi-transparent inner scanning fill
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = 'rgba(34, 197, 94, 0.05)';
+    ctx.beginPath();
+    ctx.arc(startPoint.x, startPoint.y, radius, 0, 2 * Math.PI);
+    ctx.fill();
+    
+    // Draw scanner center crosshair
+    ctx.strokeStyle = 'rgba(34, 197, 94, 0.4)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(startPoint.x, startPoint.y - 12);
+    ctx.lineTo(startPoint.x, startPoint.y + 12);
+    ctx.moveTo(startPoint.x - 12, startPoint.y);
+    ctx.lineTo(startPoint.x + 12, startPoint.y);
     ctx.stroke();
   }, [points, ufoDragging]);
 
@@ -2984,12 +3013,12 @@ export default function Home() {
       )}
 
       {/* Expanding Scan Pulse shockwave on release */}
-      {isScanning && (
+      {isScanning && points.length > 0 && (
         <div 
           className="scan-pulse-wave"
           style={{
-            left: ufoPos.x,
-            top: ufoPos.y
+            left: points[0].x,
+            top: points[0].y
           }}
         />
       )}
