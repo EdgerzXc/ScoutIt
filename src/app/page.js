@@ -138,6 +138,55 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
   const [activeDiscoverType, setActiveDiscoverType] = useState("Residential");
+  const [driftingRocks, setDriftingRocks] = useState([]);
+
+  useEffect(() => {
+    let active = true;
+    const spawnRock = () => {
+      if (!active) return;
+      
+      const id = Math.random().toString(36).substr(2, 9);
+      const size = Math.floor(3 + Math.random() * 5) + "px"; // 3px to 7px
+      const opacity = (0.12 + Math.random() * 0.22).toFixed(2); // very subtle
+      const duration = Math.floor(18 + Math.random() * 12); // slow
+      const borderRadius = `${Math.floor(30 + Math.random()*20)}% ${Math.floor(40 + Math.random()*20)}% ${Math.floor(30 + Math.random()*20)}% ${Math.floor(30 + Math.random()*20)}%`;
+      
+      const side = Math.floor(Math.random() * 3);
+      let startX, startY, deltaX, deltaY;
+      
+      if (side === 0) {
+        startX = "-5vw";
+        const yVal = Math.floor(10 + Math.random() * 80);
+        startY = `${yVal}vh`;
+        deltaX = "55vw";
+        deltaY = `${50 - yVal}vh`;
+      } else if (side === 1) {
+        startX = "105vw";
+        const yVal = Math.floor(10 + Math.random() * 80);
+        startY = `${yVal}vh`;
+        deltaX = "-55vw";
+        deltaY = `${50 - yVal}vh`;
+      } else {
+        const xVal = Math.floor(10 + Math.random() * 80);
+        startX = `${xVal}vw`;
+        startY = "-5vh";
+        deltaX = `${50 - xVal}vw`;
+        deltaY = "55vh";
+      }
+
+      setDriftingRocks(prev => [...prev, { id, startX, startY, deltaX, deltaY, size, opacity, duration, borderRadius }]);
+
+      const nextDelay = 15000 + Math.random() * 20000;
+      timerId = setTimeout(spawnRock, nextDelay);
+    };
+
+    let timerId = setTimeout(spawnRock, 3000);
+
+    return () => {
+      active = false;
+      clearTimeout(timerId);
+    };
+  }, []);
   
   const propertyTypes = ["Residential", "Commercial", "STR", "Restaurants"];
 
@@ -254,12 +303,33 @@ export default function Home() {
           <div className="event-horizon"></div>
           <div className="event-horizon-swirl"></div>
 
-          {/* Faint Drifting Rock Particles */}
-          <div className="particle particle-1"></div>
-          <div className="particle particle-2"></div>
-          <div className="particle particle-3"></div>
-          <div className="particle particle-4"></div>
-          <div className="particle particle-5"></div>
+          {/* Faint Drifting Rock Particles (Occasional) */}
+          {driftingRocks.map((rock) => (
+            <div
+              key={rock.id}
+              className="drifting-rock"
+              style={{
+                position: 'absolute',
+                top: rock.startY,
+                left: rock.startX,
+                width: rock.size,
+                height: rock.size,
+                borderRadius: rock.borderRadius,
+                background: 'rgba(240, 237, 232, 0.25)',
+                opacity: rock.opacity,
+                filter: 'blur(0.5px)',
+                animation: `driftToHorizon ${rock.duration}s linear forwards`,
+                transformOrigin: 'center center',
+                pointerEvents: 'none',
+                zIndex: 2,
+                '--delta-x': rock.deltaX,
+                '--delta-y': rock.deltaY
+              }}
+              onAnimationEnd={() => {
+                setDriftingRocks((prev) => prev.filter((r) => r.id !== rock.id));
+              }}
+            />
+          ))}
 
           {/* Subtle Pulsing Neutron Star */}
           <div className="neutron-star-static"></div>
@@ -858,83 +928,27 @@ export default function Home() {
           to { transform: translate(-50%, -50%) rotate(360deg); }
         }
 
-        @keyframes twinkleSpace {
-          0% { opacity: 0.08; }
-          100% { opacity: 0.35; }
+        /* ── Faint drifting rock fragments / meteors (Occasional) ──── */
+        .drifting-rock {
+          animation: driftToHorizon 20s linear forwards;
         }
 
-        /* ── Faint drifting rock fragments / meteors ──────────── */
-        .particle {
-          position: absolute;
-          width: 4px;
-          height: 4px;
-          background: rgba(240, 237, 232, 0.22);
-          border-radius: 40% 60% 50% 50%;
-          filter: blur(0.5px);
-          pointer-events: none;
-          z-index: 2;
-          opacity: 0;
-        }
-        
-        .particle-1 {
-          top: 15%; left: 20%;
-          animation: driftIn1 28s linear infinite;
-          animation-delay: 0s;
-        }
-        .particle-2 {
-          top: 80%; left: 15%;
-          width: 3px; height: 5px;
-          animation: driftIn2 35s linear infinite;
-          animation-delay: 4s;
-        }
-        .particle-3 {
-          top: 25%; left: 85%;
-          width: 5px; height: 3px;
-          animation: driftIn3 32s linear infinite;
-          animation-delay: 8s;
-        }
-        .particle-4 {
-          top: 75%; left: 80%;
-          width: 3px; height: 3px;
-          animation: driftIn4 40s linear infinite;
-          animation-delay: 2s;
-        }
-        .particle-5 {
-          top: 10%; left: 75%;
-          width: 4px; height: 4px;
-          animation: driftIn5 30s linear infinite;
-          animation-delay: 6s;
-        }
-
-        @keyframes driftIn1 {
-          0% { transform: translate(0, 0) scale(1); opacity: 0; }
-          10% { opacity: 0.25; }
-          90% { opacity: 0.15; }
-          100% { transform: translate(30vw, 35vh) scale(0.2); opacity: 0; filter: blur(2px); }
-        }
-        @keyframes driftIn2 {
-          0% { transform: translate(0, 0) scale(1); opacity: 0; }
-          10% { opacity: 0.22; }
-          90% { opacity: 0.12; }
-          100% { transform: translate(35vw, -30vh) scale(0.2); opacity: 0; filter: blur(2px); }
-        }
-        @keyframes driftIn3 {
-          0% { transform: translate(0, 0) scale(1); opacity: 0; }
-          10% { opacity: 0.25; }
-          90% { opacity: 0.15; }
-          100% { transform: translate(-35vw, 25vh) scale(0.2); opacity: 0; filter: blur(2px); }
-        }
-        @keyframes driftIn4 {
-          0% { transform: translate(0, 0) scale(1); opacity: 0; }
-          10% { opacity: 0.2; }
-          90% { opacity: 0.1; }
-          100% { transform: translate(-30vw, -25vh) scale(0.2); opacity: 0; filter: blur(2px); }
-        }
-        @keyframes driftIn5 {
-          0% { transform: translate(0, 0) scale(1); opacity: 0; }
-          10% { opacity: 0.24; }
-          90% { opacity: 0.14; }
-          100% { transform: translate(-25vw, 40vh) scale(0.2); opacity: 0; filter: blur(2px); }
+        @keyframes driftToHorizon {
+          0% {
+            transform: translate(0, 0) scale(1);
+            opacity: 0;
+          }
+          10% {
+            opacity: 0.35;
+          }
+          85% {
+            opacity: 0.2;
+          }
+          100% {
+            transform: translate(var(--delta-x), var(--delta-y)) scale(0.15);
+            opacity: 0;
+            filter: blur(1.5px);
+          }
         }
 
         /* ── Subtle Pulsing Neutron Star ────────────────── */
