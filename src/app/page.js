@@ -157,310 +157,310 @@ const discoveryFeedData = {
 const HOMEPAGE_INTEL_DB = {
   // Layer 00: Hero (Portal Core)
   "scoutit-wordmark": {
-    title: "SCAN: VECTOR LOGO [SCOUTIT]",
-    intel: "ScoutIt system signature parsed. Telemetry check: Comet-trail geometry (S), stellar eclipse aperture (C), planetary orbital path (O), signal collector (U), physical satellite solar grids (T), hovering cognition node (I), and target reticle lock-on (T). Signal integrity: Nominal."
+    title: "SCOUTIT WORDMARK",
+    intel: "The official logo of ScoutIt, representing our focus on spatial intelligence and architectural appreciation."
   },
   "hero-tagline": {
-    title: "SCAN: CORE AESTHETIC DIRECTIVE",
-    intel: "Directive analysis: 'Get lost in spaces that actually inspire you.' Neural mapping indicates this is the platform's emotional directive anchor. It filters out standard property grid commoditization in favor of high-concept design, flow, and spatial poetry."
+    title: "EMOTIONAL DIRECTIVE",
+    intel: "The platform's core message, guiding users to discover spaces that inspire them beyond standard specifications."
   },
   "hero-subheadline": {
-    title: "SCAN: DOMAIN PARAGRAPH BOUNDS",
-    intel: "Subheadline parameters: 'Space Intelligence for the Philippine property dreamer.' Geographical filters locked to active sectors in the Philippine archipelago (BGC, Makati, Siargao, Palawan, Tagaytay). Focus index: High-end architectural curations."
+    title: "PLATFORM SCOPE",
+    intel: "Curated spatial intelligence tailored specifically for high-end properties in key areas of the Philippines."
   },
   "hero-cta-btn": {
-    title: "SCAN: PROPULSION TRIGGER",
-    intel: "Action trigger detected: 'Begin Exploring'. Function: Initiates a smooth gravitational descent to Layer 01 (Curated Sectors). Energy status: Charged."
+    title: "EXPLORATION TRIGGER",
+    intel: "Clicking this button triggers a smooth scroll descent down to the curated property sectors below."
   },
   "scroll-indicator": {
-    title: "SCAN: GRAV-NAV METRIC",
-    intel: "Guidance metric: 'Scroll to explore'. Confirms vertical trackpad/mouse scroll mechanics. Anchors user coordinate tracking system to coordinate vertical grid values."
+    title: "SCROLL INDICATOR",
+    intel: "Prompts you to scroll down using your mouse or trackpad to explore the property experiences."
   },
 
   // Layer 01: Property Experiences (Curated Sectors)
   "l1-menu-header": {
-    title: "SCAN: LAYER 01 // PROPERTY SECTOR INDEX",
-    intel: "Curated Sectors registry. Active tracking node for premium property experiences. Sub-divides database search pipelines into four distinct behavioral paradigms: Residential, Commercial, Short-Term Rental, and Design-Forward Restaurants."
+    title: "CURATED SECTORS INDEX",
+    intel: "Organizes verified properties into four design-focused categories: Residential, Commercial, Short-Term Rental, and Restaurants."
   },
   "l1-menu-btn-residential": {
-    title: "SCAN: RESIDENTIAL FREQUENCY",
-    intel: "Active Sector Tab [Residential]. Filters for low-density vertical housing, modernist villas, and high-concept living towers in urban centers like Bonifacio Global City and Makati CBD."
+    title: "RESIDENTIAL SECTOR",
+    intel: "Filters properties to showcase low-density skyscrapers, modern villas, and quiet luxury homes."
   },
   "l1-menu-btn-commercial": {
-    title: "SCAN: COMMERCIAL FREQUENCY",
-    intel: "Active Sector Tab [Commercial]. Filters for sustainable corporate office landmarks, LEED-certified high-rises, and design-led boutique corporate spaces in metro hubs."
+    title: "COMMERCIAL SECTOR",
+    intel: "Filters properties to showcase sustainable offices, eco-certified workspaces, and green commercial buildings."
   },
   "l1-menu-btn-str": {
-    title: "SCAN: SHORT-TERM RENTAL FREQUENCY",
-    intel: "Active Sector Tab [Short-Term Rental]. Filters for coastal minimalist pavilions, off-grid bamboo cottages, and solar-powered tropical island retreats in Cloud 9 Siargao or El Nido Palawan."
+    title: "SHORT-TERM RENTALS",
+    intel: "Filters properties to showcase coastal pavilions, beach villas, and off-grid retreats in Siargao and Palawan."
   },
   "l1-menu-btn-restaurants": {
-    title: "SCAN: CULINARY ARCHITECTURE FREQUENCY",
-    intel: "Active Sector Tab [Restaurants]. Filters for design-first dining venues, industrial warehouses repurposed for culinary arts, and glass ridge pavilions."
+    title: "DESIGN-FORWARD DINING",
+    intel: "Filters properties to showcase restaurants built with unique layouts, adaptive reuse, and scenic glass views."
   },
   "l1-search-input": {
-    title: "SCAN: REAL-TIME PARSER GRID",
-    intel: "Interface search bar. Active keyboard input node. Queries live database array indices for exact match tags against Name, Location (e.g. BGC, Makati, QC, Siargao), and Aesthetic Styles (e.g. Modernist, Brutalist, Tropical)."
+    title: "REAL-TIME PROPERTIES SEARCH",
+    intel: "Instantly filters properties by searching names, locations (like BGC, Makati, Siargao), or architectural styles."
   },
   "l1-showcase-link": {
-    title: "SCAN: WARP PORTAL [SHOWCASE]",
-    intel: "Hyperlink target resolved: '/property/batasan-hills'. Redirects cognitive interface to a deep architectural showcase detailing a modernist forest sanctuary in Quezon City."
+    title: "SHOWCASE SANCTUARY",
+    intel: "A portal link directing you to a detailed overview of Batasan Hills, a modernist forest home in Quezon City."
   },
   // Layer 01 Property Cards
   "l1-card-res-1": {
-    title: "SCAN: ASSET [AURELIA RESIDENCES]",
-    intel: "Telemetry check: Low-density luxury residential skyscraper in BGC Core. Architectural blueprint: Modern Tropical high-rise. Key specs: Double-glazed glass facade, custom bronze metalwork detailing, private lift lobby, and high-efficiency spatial ventilation zones."
+    title: "AURELIA RESIDENCES (BGC)",
+    intel: "A low-density luxury high-rise in BGC featuring a modern tropical design, double-glazed glass wrap, and elegant bronze solar shades."
   },
   "l1-card-res-2": {
-    title: "SCAN: ASSET [THE ESTATE MAKATI]",
-    intel: "Telemetry check: Brutalist Luxury high-rise located in Makati Central. Designed by Foster + Partners. Architectural features: Cruciform column-free floor plate maximizing spatial efficiency, custom structural double-cantilevers, and high thermal insulation envelope."
+    title: "THE ESTATE MAKATI",
+    intel: "A brutalist luxury tower on Ayala Avenue designed by Foster + Partners. Features column-free spaces and angled windows to block sun glare."
   },
   "l1-card-res-3": {
-    title: "SCAN: ASSET [PARK CENTRAL TOWERS]",
-    intel: "Telemetry check: Glass Minimalist tower complex in Roxas Triangle. High spatial density rating. Integrates triple-height sky terraces, structural steel bracing, and specialized acoustic glazing buffers."
+    title: "PARK CENTRAL TOWERS (MAKATI)",
+    intel: "A minimalist glass residential tower complex in Roxas Triangle featuring sky terraces and high-performance acoustic glass."
   },
   "l1-card-com-1": {
-    title: "SCAN: ASSET [ZUELLIG BUILDING]",
-    intel: "Telemetry check: Sustainable glass skyscraper in Makati CBD. Certification: LEED Platinum. Key engineering: Double-paned low-emissivity glass envelope, automated light-sensing blinds, rain harvesting micro-filtration, and dynamic floor plate temperature control."
+    title: "ZUELLIG BUILDING (MAKATI)",
+    intel: "A LEED Platinum certified green skyscraper in Makati CBD featuring double-paned low-emissivity glass and rainwater recycling."
   },
   "l1-card-com-2": {
-    title: "SCAN: ASSET [ARTHALAND CENTURY PACIFIC]",
-    intel: "Telemetry check: Eco-Corporate premium office tower in BGC North. Engineering specs: Zero-waste management system, solar panel roof array, energy-recovery ventilators, and localized indoor air quality optimization grid."
+    title: "ARTHALAND CENTURY PACIFIC (BGC)",
+    intel: "A premium eco-friendly office tower in BGC North with rooftop solar panels, energy recovery ventilation, and zero waste management."
   },
   "l1-card-str-1": {
-    title: "SCAN: ASSET [SIARGAO TROPICAL VILLA]",
-    intel: "Telemetry check: Island Minimalist beachfront pavilion in Cloud 9, Siargao. Construction: Locally sourced coco-wood framing, high-pitched traditional thatch roof, open-plan natural wind convection, and a private sea-water dipping pool."
+    title: "SIARGAO TROPICAL VILLA",
+    intel: "An island-minimalist pavilion in Cloud 9 constructed with local coco-wood, high-pitched thatch roofing, and open breeze flow."
   },
   "l1-card-str-2": {
-    title: "SCAN: ASSET [PALAWAN ECO-RETREAT]",
-    intel: "Telemetry check: Native Modern beachfront villas in El Nido Lio. Core mechanics: 100% solar microgrid powered, reclaimed old-growth teak framing, rain capture tanks, and passive cooling native bamboo screens."
+    title: "PALAWAN ECO-RETREAT (EL NIDO)",
+    intel: "Beachfront villas in El Nido running on a 100% solar microgrid, built with reclaimed teakwood and bamboo wind screens."
   },
   "l1-card-rest-1": {
-    title: "SCAN: ASSET [GALLERY BY CHELE]",
-    intel: "Telemetry check: Wood & Steel culinary concept space in BGC Central. Design parameters: Industrial minimalist interior layout, custom warm natural wood ceilings, structural steel partitions, and focal accent mood illumination."
+    title: "GALLERY BY CHELE (BGC)",
+    intel: "An industrial dining space in BGC combining warm natural wood ceilings, raw steel partitions, and cozy ambient lighting."
   },
   "l1-card-rest-2": {
-    title: "SCAN: ASSET [ANTONIO'S TAGAYTAY]",
-    intel: "Telemetry check: Heritage Colonial dining estate on Tagaytay Ridge. Structural features: Black-and-white tiling, colonial support columns, botanical greenhouse corridors, and sliding glass wall frames capturing panoramic views."
+    title: "ANTONIO'S TAGAYTAY",
+    intel: "A heritage colonial dining estate on Tagaytay Ridge, featuring botanical gardens, Capiz shell accents, and scenic view windows."
   },
 
   // Layer 02: Discovery & Intelligence (Discovery Feed)
   "l2-menu-header": {
-    title: "SCAN: LAYER 02 // DISCOVERY FEED OVERVIEW",
-    intel: "Discovery Feed compiler. Main interface for real-time editorial spatial reporting, regional stories, and architectural collections. Aggregates narrative streams across the Philippine archipelago."
+    title: "DISCOVERY FEED COMPILER",
+    intel: "Compiles narrative stories, regional design highlights, and curated architectural collections across the Philippines."
   },
   "l2-menu-btn-residential": {
-    title: "SCAN: RESIDENTIAL DISCOVERY REGISTRY",
-    intel: "Zoning sector toggle [Residential]. Restricts discovery updates to metropolitan housing design trends, penthouses, and suburban low-density residential narratives."
+    title: "RESIDENTIAL UPDATES",
+    intel: "Filters the Discovery Feed to focus on metropolitan penthouses, architectural homes, and vertical housing trends."
   },
   "l2-menu-btn-commercial": {
-    title: "SCAN: COMMERCIAL DISCOVERY REGISTRY",
-    intel: "Zoning sector toggle [Commercial]. Restricts discovery updates to sustainable workspace standards, premium office buildings, and green commercial corridors."
+    title: "COMMERCIAL UPDATES",
+    intel: "Filters the Discovery Feed to focus on corporate workspace certifications, green building standards, and urban layouts."
   },
   "l2-menu-btn-str": {
-    title: "SCAN: STR DISCOVERY REGISTRY",
-    intel: "Zoning sector toggle [Short-Term Rental]. Restricts discovery updates to off-grid resort developments, island surf shacks, and eco-retreat construction logs."
+    title: "RENTAL & RESORT LOGS",
+    intel: "Filters the Discovery Feed to focus on sustainable eco-resorts, island villas, and off-grid construction designs."
   },
   "l2-menu-btn-restaurants": {
-    title: "SCAN: RESTAURANT DISCOVERY REGISTRY",
-    intel: "Zoning sector toggle [Restaurants]. Restricts discovery updates to design-first dining venues, poblacion adaptive warehouse reuse projects, and tagaytay glass pavilions."
+    title: "DINING DESIGN FEED",
+    intel: "Filters the Discovery Feed to focus on adaptive reuse restaurant projects, culinary hubs, and glass ridge cafes."
   },
   "l2-discover-link": {
-    title: "SCAN: EXPLORATION PORTAL",
-    intel: "Hyperlink target resolved: '/discover'. Initiates connection path to the full interactive Discovery Matrix search app, pre-filtered to the currently selected property type."
+    title: "DISCOVERY MATRIX",
+    intel: "Launches the full interactive Discovery search engine, pre-filtered to show properties matching your active category."
   },
   // Layer 02 Spotlights (Dynamic based on Category)
   "l2-spotlight-aurelia-residences": {
-    title: "SCAN: SPOTLIGHT [AURELIA RESIDENCES]",
-    intel: "Live spotlight scan: BGC Core property. Low-density footprint. Editorial notes highlight the custom bronze screen overlays that act as structural solar shades while creating elegant shadows inside."
+    title: "SPOTLIGHT: AURELIA RESIDENCES",
+    intel: "A low-density BGC tower highlighted for its custom bronze screen overlays that act as solar shades while creating elegant shadows inside."
   },
   "l2-spotlight-the-estate-makati": {
-    title: "SCAN: SPOTLIGHT [THE ESTATE MAKATI]",
-    intel: "Live spotlight scan: Makati Central property. Brutalist luxury design. Editorial analysis details the floor-to-ceiling double-glazed windows angled downwards to block direct midday sun while maximizing city views."
+    title: "SPOTLIGHT: THE ESTATE MAKATI",
+    intel: "Makati Central's signature brutalist luxury tower, noted for floor-to-ceiling angled glass windows that prevent heat build-up."
   },
   "l2-spotlight-zuellig-building": {
-    title: "SCAN: SPOTLIGHT [ZUELLIG BUILDING]",
-    intel: "Live spotlight scan: Makati CBD green office landmark. Sustainable glass architecture. Features low-emissivity ceramic fritted glass panel envelope reducing heat transmission by 50%."
+    title: "SPOTLIGHT: ZUELLIG BUILDING",
+    intel: "A premium green office tower in Makati, utilizing high-efficiency ceramic fritted glass panels to block 50% of external solar heat."
   },
   "l2-spotlight-arthaland-century-pacific": {
-    title: "SCAN: SPOTLIGHT [ARTHALAND CENTURY PACIFIC]",
-    intel: "Live spotlight scan: BGC North office hub. LEED Gold/Platinum double rating. Monitored parameters: Triple-filtered indoor air circulation and zero-potable water usage for landscaping."
+    title: "SPOTLIGHT: ARTHALAND CENTURY PACIFIC",
+    intel: "A BGC corporate tower certified for eco-sustainability, featuring triple-filtered air circulation and low water consumption."
   },
   "l2-spotlight-siargao-tropical-villa": {
-    title: "SCAN: SPOTLIGHT [SIARGAO TROPICAL VILLA]",
-    intel: "Live spotlight scan: Cloud 9 Siargao. Island minimalist style. Editorial focuses on the integration of passive natural cross-ventilation, avoiding artificial cooling systems entirely."
+    title: "SPOTLIGHT: SIARGAO VILLA",
+    intel: "An island-minimalist beachfront pavilion designed to maximize natural sea breeze ventilation, reducing the need for AC."
   },
   "l2-spotlight-palawan-eco-retreat": {
-    title: "SCAN: SPOTLIGHT [PALAWAN ECO-RETREAT]",
-    intel: "Live spotlight scan: El Nido Lio. Native modern architecture. Utilizes solar-powered induction cooling loops and local thatch to insulate under intense tropical sun conditions."
+    title: "SPOTLIGHT: PALAWAN RETREAT",
+    intel: "Eco-villas in El Nido utilizing cooling induction loops and organic thatch insulation to maintain cool indoor temperatures."
   },
   "l2-spotlight-gallery-by-chele": {
-    title: "SCAN: SPOTLIGHT [GALLERY BY CHELE]",
-    intel: "Live spotlight scan: BGC Central restaurant. Industrial modern aesthetics. Design notes detail the acoustics dampening panels hidden behind rustic wood slats to preserve a cozy dining atmosphere."
+    title: "SPOTLIGHT: GALLERY BY CHELE",
+    intel: "A modern BGC restaurant space incorporating custom sound-dampening panels hidden behind natural wood slats to lower noise levels."
   },
   "l2-spotlight-antonio-s-tagaytay": {
-    title: "SCAN: SPOTLIGHT [ANTONIO'S TAGAYTAY]",
-    intel: "Live spotlight scan: Tagaytay Ridge estate. Heritage Colonial style. Features passive cooling currents drawn directly from the Taal lake basin up the ridge side and through the dining halls."
+    title: "SPOTLIGHT: ANTONIO'S TAGAYTAY",
+    intel: "A heritage colonial dining space using sliding wall panels to channel cool mountain breezes directly from the Taal ridge."
   },
   // Layer 02 News Items
   "l2-news-item-bgc-spatial-movement": {
-    title: "SCAN: SIGNAL [BGC SPATIAL MOVEMENT]",
-    intel: "Editorial intelligence: Published June 2026. Trend mapping indicates a 14.2% rise in demand for low-density vertical residences, driven by buyer preferences for custom fresh air filters and private lobbies."
+    title: "SIGNAL: BGC SPATIAL TRENDS",
+    intel: "A reported 14.2% increase in demand for low-density residences in BGC, highlighting a growing preference for private lobbies and fresh air."
   },
   "l2-news-item-the-return-of-quiet-luxury": {
-    title: "SCAN: SIGNAL [THE RETURN OF QUIET LUXURY]",
-    intel: "Editorial intelligence: Published May 2026. Identifies a design shift where local buyers favor hidden, high-security estates in Quezon City over high-profile towers in commercial business districts."
+    title: "SIGNAL: QC QUIET LUXURY",
+    intel: "A notable shift in Quezon City, where buyers increasingly seek private, high-security family compounds over commercial towers."
   },
   "l2-news-item-green-office-demand": {
-    title: "SCAN: SIGNAL [GREEN OFFICE DEMAND]",
-    intel: "Editorial intelligence: Published June 2026. Reports that global technology firms renting spaces in Metro Manila now mandate LEED or WELL certifications for all operational facilities."
+    title: "SIGNAL: ECO-OFFICE MANDATES",
+    intel: "Global tech firms operating in Metro Manila are increasingly mandating LEED and WELL eco-certifications for their workspace leases."
   },
   "l2-news-item-bgc-commercial-corridors": {
-    title: "SCAN: SIGNAL [BGC COMMERCIAL CORRIDORS]",
-    intel: "Editorial intelligence: Published April 2026. Details the transition of retail podiums to include vertical gardens, rain capture fountains, and open-air walking zones."
+    title: "SIGNAL: BGC GREEN PODIUMS",
+    intel: "Details the transition of BGC retail podiums to include green vertical gardens, open walking areas, and rainwater fountains."
   },
   "l2-news-item-surf-front-land-rush": {
-    title: "SCAN: SIGNAL [SURF-FRONT LAND RUSH]",
-    intel: "Editorial intelligence: Published June 2026. Tracks land parcel acquisition along Siargao's coastline. High density concentration of boutique ecological resort planning."
+    title: "SIGNAL: SIARGAO COASTAL RUSH",
+    intel: "Tracks high developer interest along Siargao's coastline, focusing on ecological low-footprint villa planning and beachfront lots."
   },
   "l2-news-item-off-grid-island-living": {
-    title: "SCAN: SIGNAL [OFF-GRID ISLAND LIVING]",
-    intel: "Editorial intelligence: Published May 2026. Analyzes the financial feasibility transition of Palawan resort developments converting to independent solar microgrids."
+    title: "SIGNAL: PALAWAN OFF-GRID TRANSITION",
+    intel: "Analyzes Palawan resort developments transitioning entirely to independent solar microgrids for energy self-sufficiency."
   },
   "l2-news-item-poblacion-food-architecture": {
-    title: "SCAN: SIGNAL [POBLACION FOOD ARCHITECTURE]",
-    intel: "Editorial intelligence: Published June 2026. Highlights the adaptive reuse of residential warehouses in Makati Poblacion as high-design multi-concept culinary spaces."
+    title: "SIGNAL: POBLACION REUSE PROJECTS",
+    intel: "Highlights the adaptive design reuse of old residential warehouses in Makati Poblacion as premium multi-concept dining venues."
   },
   "l2-news-item-design-first-ridge-dining": {
-    title: "SCAN: SIGNAL [DESIGN-FIRST RIDGE DINING]",
-    intel: "Editorial intelligence: Published May 2026. Documents Tagaytay restaurants building suspended glass cantilevers over the ridge line to capture unobstructed volcano vistas."
+    title: "SIGNAL: TAGAYTAY RIDGELINE DINING",
+    intel: "Documents Tagaytay restaurants building suspended glass pavilions over the ridge to offer unobstructed views of the volcano."
   },
   // Layer 02 Curated Collections
   "l2-collection-btn-modernist-penthouses": {
-    title: "SCAN: COLLECTION [MODERNIST PENTHOUSES]",
-    intel: "Curated collection parameters: High-altitude low-density properties. Highlights BGC and Makati rooftop villas containing open-air swimming pools and panoramic skyline views."
+    title: "COLLECTION: MODERN PENTHOUSES",
+    intel: "Curated rooftop penthouses in BGC and Makati featuring open sky pools and panoramic skyline views."
   },
   "l2-collection-btn-qc-quiet-luxury-estates": {
-    title: "SCAN: COLLECTION [QC QUIET LUXURY ESTATES]",
-    intel: "Curated collection parameters: Private residential estates in Quezon City. Focuses on modernist concrete compounds featuring high security walls, green courtyards, and clean water wells."
+    title: "COLLECTION: QC LUXURY COMPOUNDS",
+    intel: "Secure modernist compounds in Quezon City featuring clean private wells, security perimeter walls, and interior gardens."
   },
   "l2-collection-btn-tropical-modern-estates": {
-    title: "SCAN: COLLECTION [TROPICAL MODERN ESTATES]",
-    intel: "Curated collection parameters: Luxury residences designed specifically to blend native timber, natural light shafts, and cooling wind channels in suburban Metro Manila."
+    title: "COLLECTION: TROPICAL MODERN HOMES",
+    intel: "Metro Manila residences designed with natural timber accents, central light shafts, and cooling airflow channels."
   },
   "l2-collection-btn-leed-platinum-towers": {
-    title: "SCAN: COLLECTION [LEED PLATINUM TOWERS]",
-    intel: "Curated collection parameters: Eco-certified skyscrapers. Features office structures containing rain recycling loops, carbon filtration, and double-insulated solar glass panels."
+    title: "COLLECTION: LEED PLATINUM BUILDINGS",
+    intel: "High-efficiency skyscrapers equipped with rainwater recycling, active carbon air filtering, and double-paned solar glass."
   },
   "l2-collection-btn-bgc-premium-workspaces": {
-    title: "SCAN: COLLECTION [BGC PREMIUM WORKSPACES]",
-    intel: "Curated collection parameters: High-efficiency corporate headquarter properties. Highlights column-free office structures containing automated lighting and ergonomic layouts."
+    title: "COLLECTION: BGC WORKSPACES",
+    intel: "Column-free corporate suites in BGC optimized with smart LED layouts and ergonomic floor configurations."
   },
   "l2-collection-btn-creative-studio-hubs": {
-    title: "SCAN: COLLECTION [CREATIVE STUDIO HUBS]",
-    intel: "Curated collection parameters: Low-density commercial lofts, featuring exposed ductwork, brick walls, skylights, and modular partition designs suitable for tech startups and designers."
+    title: "COLLECTION: CREATIVE DESIGN LOFTS",
+    intel: "Commercial lofts featuring exposed steel ductwork, skylights, and modular sliding dividers for creative design teams."
   },
   "l2-collection-btn-coastal-surf-retreats": {
-    title: "SCAN: COLLECTION [COASTAL SURF RETREATS]",
-    intel: "Curated collection parameters: Beachfront properties in Siargao and Baler. Focuses on direct beach access, storage for sports equipment, and open-plan decks."
+    title: "COLLECTION: BEACHFRONT RETREATS",
+    intel: "Properties in Siargao and Baler featuring direct shoreline access, board storage docks, and wide viewing decks."
   },
   "l2-collection-btn-off-grid-bamboo-pavilions": {
-    title: "SCAN: COLLECTION [OFF-GRID BAMBOO PAVILIONS]",
-    intel: "Curated collection parameters: Native material estates. Features properties utilizing processed giant bamboo (dendrocalamus asper) for structural load frames and off-grid solar generators."
+    title: "COLLECTION: BAMBOO ECO-ESTATES",
+    intel: "Villas built using processed giant bamboo structural frames and independent solar battery arrays."
   },
   "l2-collection-btn-luxury-glamping-tents": {
-    title: "SCAN: COLLECTION [LUXURY GLAMPING TENTS]",
-    intel: "Curated collection parameters: Semi-permanent canvas eco-resorts. Tracks properties integrating membrane roofs, timber deck supports, and private solar-powered cooling fans."
+    title: "COLLECTION: GLAMPING RETREATS",
+    intel: "Semi-permanent eco-resort tents integrating durable membrane roofs, wooden deck support, and solar ventilation."
   },
   "l2-collection-btn-industrial-culinary-hubs": {
-    title: "SCAN: COLLECTION [INDUSTRIAL CULINARY HUBS]",
-    intel: "Curated collection parameters: Repurposed industrial units converted into dining rooms, featuring open kitchens, raw concrete floors, and black metal frameworks."
+    title: "COLLECTION: CULINARY WAREHOUSES",
+    intel: "Repurposed industrial spaces transformed into dining rooms featuring open kitchens and black steel framing."
   },
   "l2-collection-btn-heritage-estate-dining": {
-    title: "SCAN: COLLECTION [HERITAGE ESTATE DINING]",
-    intel: "Curated collection parameters: Classic colonial mansions converted to high-design restaurants, preserving original plaster, capiz shell windows, and brick vaults."
+    title: "COLLECTION: HERITAGE DINING ESTATES",
+    intel: "Colonial mansion restorations preserved as fine dining spaces, retaining original plaster, capiz shell windows, and brick walls."
   },
   "l2-collection-btn-minimalist-coffee-spots": {
-    title: "SCAN: COLLECTION [MINIMALIST COFFEE SPOTS]",
-    intel: "Curated collection parameters: Micro-cafe structures, featuring white plaster, concrete benches, minimal seating footprint, and dedicated acoustic dampening."
+    title: "COLLECTION: MINIMALIST COFFEE BAR",
+    intel: "Coffee shops designed with clean white plaster walls, raw concrete benches, and integrated acoustic sound dampening."
   },
 
   // Layer 03: Trusted Guides (The Advisory)
   "l3-advisory-header": {
-    title: "SCAN: LAYER 03 // THE ADVISORY NETWORK",
-    intel: "Advisory Network Node check. Classifies licensed real estate advisors who specialize in design, architecture, and spatial investment telemetry. Current nodes online: 3."
+    title: "THE ADVISORY NETWORK",
+    intel: "A curated roster of licensed real estate advisors specializing in design, architecture, and premium residential investments."
   },
   "l3-broker-card-miguel-torres-reb": {
-    title: "SCAN: DOSSIER [MIGUEL TORRES, REB]",
-    intel: "Advisor dossier parsed: Lead Design Advisor. Experience: 8+ Years. Specialty: Urban Modernism in BGC Core and Makati CBD. Verified placements: 14 High-concept spaces. Architectural focus: Column-free structures and smart facade ventilation."
+    title: "DOSSIER: MIGUEL TORRES, REB",
+    intel: "Lead Design Advisor with 8+ years experience. Specializes in BGC and Makati CBD luxury towers, with a focus on smart facade engineering."
   },
   "l3-broker-card-elena-santos-reb": {
-    title: "SCAN: DOSSIER [ELENA SANTOS, REB]",
-    intel: "Advisor dossier parsed: Quiet Luxury Specialist. Experience: 10+ Years. Specialty: Hidden compounds and residential estates in Quezon City. Verified placements: 18 premium homes. Architectural focus: passive security and private courtyards."
+    title: "DOSSIER: ELENA SANTOS, REB",
+    intel: "Quiet Luxury Specialist with 10+ years experience. Specializes in secure family compounds, private estates, and gardens in Quezon City."
   },
   "l3-broker-card-marco-reyes-reb": {
-    title: "SCAN: DOSSIER [MARCO REYES, REB]",
-    intel: "Advisor dossier parsed: Island Retreats Curator. Experience: 7+ Years. Specialty: Sustainable constructions and beach lots in Siargao & Palawan. Verified placements: 22 island retreats. Architectural focus: timber framing and solar microgrids."
+    title: "DOSSIER: MARCO REYES, REB",
+    intel: "Island Properties Curator with 7+ years experience. Specializes in solar microgrids, timber structures, and coastal lots in Siargao and Palawan."
   },
   "l3-brokers-link": {
-    title: "SCAN: ADVISOR CHANNEL LINK",
-    intel: "Hyperlink target resolved: '/brokers'. Connects interface stream to the full directory database of design-vetted real estate advisors for scheduling deep consultation handshakes."
+    title: "ADVISORY ROSTER DIRECTORY",
+    intel: "Connects you directly to the full directory of vetted real estate advisors to schedule a detailed spatial consultation."
   },
 
   // Layer 04: Your Board (Personal Ledger)
   "l4-board-header": {
-    title: "SCAN: LAYER 04 // PERSONAL LEDGER SYSTEM",
-    intel: "Your Board Header. Configures the user's localized visual board layout. Displays collected designs, wishlist items, and staging data. Tracking integrity: Stable."
+    title: "PERSONAL BOARD OVERVIEW",
+    intel: "Your private dashboard to review saved designs, wishlist properties, and custom reaction tallies."
   },
   "l4-tags-guide": {
-    title: "SCAN: LEDGER INDEX KEY",
-    intel: "Index matrix of reaction tags: (1) Potential Fit (parameters matching), (2) Interested (actionable candidates), (3) Inspired Me (design/style styling), (4) Save (cryptographic memory logging)."
+    title: "BOARD REACTION LEGEND",
+    intel: "Guides you through the four color-coded buttons: Potential Fit (gold), Interested (green), Inspired Me (yellow), and Save (red)."
   },
   "l4-wishlist-link": {
-    title: "SCAN: DECRYPTION GATE",
-    intel: "Hyperlink target resolved: '/wishlist'. Directs display node to your decrypted Local Board Ledger to view saved listings, notes, and reaction tallies."
+    title: "PERSONAL BOARD LEDGER",
+    intel: "Opens your Local Board Ledger, where all saved properties and design notes are safely stored on your device."
   },
   "l4-flow-card-1": {
-    title: "SCAN: PIPELINE PHASE 01 // SCAN ARCHITECTURE",
-    intel: "Analysis flow step 1. User circles homepage items or reads property profiles. System extracts spatial aesthetics, ventilation indices, and design parameters into localized volatile memory."
+    title: "LEDGER FLOW: 01. SCAN DESIGN",
+    intel: "Scan active homepage items using the tractor beam. Telemetry coordinates and design parameters are loaded into browser memory."
   },
   "l4-flow-card-2": {
-    title: "SCAN: PIPELINE PHASE 02 // APPLY REACTION",
-    intel: "Analysis flow step 2. User categorizes properties using four color-coded buttons. Each reaction serves as a parameter weights filter for subsequent discovery recommendations."
+    title: "LEDGER FLOW: 02. CATEGORIZE",
+    intel: "Classify properties using color-coded buttons. Reactions help organize and weight listings to match your aesthetic goals."
   },
   "l4-flow-card-3": {
-    title: "SCAN: PIPELINE PHASE 03 // SECURE VAULT",
-    intel: "Analysis flow step 3. The platform converts tags and selections into JSON, storing them in your local browser storage. The connection is completely disconnected from cloud siphons."
+    title: "LEDGER FLOW: 03. CLIENT STORAGE",
+    intel: "Your selections are stored directly on your browser using local storage API, keeping your searches private from third-party servers."
   },
   "l4-flow-card-4": {
-    title: "SCAN: PIPELINE PHASE 04 // INITIALIZE HANDSHAKE",
-    intel: "Analysis flow step 4. When ready, the user pushes the decrypted wishlist to a design advisor (Miguel, Elena, or Marco) to schedule a site review. The advisor receives it directly."
+    title: "LEDGER FLOW: 04. ADVISOR HANDSHAKE",
+    intel: "Export your curated board ledger directly to an advisor (Miguel, Elena, or Marco) to review your top design choices together."
   },
   "l4-policy-block": {
-    title: "SCAN: POLICY BLOCK // DECENTRALIZED DATA MANAGEMENT",
-    intel: "Privacy system diagnostics. ScoutIt operates on zero tracking principles. Search histories, clicked cards, and reactions are stored client-side. Leak vulnerability: 0%."
+    title: "POLICY: DECENTRALIZED DATA",
+    intel: "ScoutIt values your privacy. Your search selections, visited links, and saved properties are stored locally, with zero tracking."
   },
   "l4-parameters-block": {
-    title: "SCAN: LEDGER ENVIRONMENT PARAMETERS",
-    intel: "Ledger status: Active. Storage mechanism: LocalStorage API. Data sink: Client-side sandbox. Cloud sync: Disabled. Cryptographic footprint: Local device bounds only."
+    title: "LEDGER SYSTEM STATUS",
+    intel: "Storage System: LocalStorage API. Network Connection: Standalone Sandbox. Cloud Syncing: Deactivated for maximum privacy."
   },
 
   // Layer 05: About Us (The Manifesto)
   "l5-manifesto-header": {
-    title: "SCAN: LAYER 05 // PHILOSOPHICAL MANIFESTO CORE",
-    intel: "ScoutIt Manifesto Header. Represents the core philosophy of ScoutIt: moving away from speculative commercial volume towards high-fidelity spatial design and architectural appreciation."
+    title: "MANIFESTO CORE",
+    intel: "Outlines the values of ScoutIt, focusing on structural design, architecture, and local narratives over commercial pressure."
   },
   "l5-manifesto-lead": {
-    title: "SCAN: DESIGN POLICY CORE [LEAD]",
-    intel: "Manifesto Core Statement: 'We believe a home is more than a list of specifications.' Rejects corporate property jargon in favor of organic design DNA, room flow, lighting, and cultural integration."
+    title: "CORE DESIGN VALUES",
+    intel: "We believe a home is more than just square meters. We highlight room flow, lighting, native materials, and design DNA."
   },
   "l5-manifesto-secondary": {
-    title: "SCAN: EDITORIAL STANCE [SECONDARY]",
-    intel: "Stance analysis: Curating architectural blueprints and local stories rather than pressure-driven listings. Targets conscious property searchers who prioritize space quality over standard area size metrics."
+    title: "EDITORIAL VALUES",
+    intel: "We focus on custom architectural blueprints and regional stories, catering to buyers who prioritize spatial quality."
   },
   "l5-about-link": {
-    title: "SCAN: ORIGIN CHANNELS PORTAL",
-    intel: "Hyperlink target resolved: '/about'. Connects interface channel to the complete ScoutIt history log, developer credentials, and design mission timeline."
+    title: "ABOUT SCOUTIT",
+    intel: "Warp portal directing you to our history page, listing developer credentials and platform goals."
   }
 };
 
@@ -506,8 +506,8 @@ export default function Home() {
   };
 
   const handleUfoDeactivate = () => {
+    setHudOpen(false); // Close HUD console immediately for instant visual feedback
     flyBackHome(() => {
-      setHudOpen(false);
       setCurrentScannedId("");
       setIsLocked(false);
       setLockedLinkUrl("");
@@ -552,25 +552,25 @@ export default function Home() {
         if (id !== currentScannedId) {
           setCurrentScannedId(id);
           const layerTitles = [
-            "SCAN: PORTAL CORE [LAYER 00]",
-            "SCAN: CURATED SECTORS [LAYER 01]",
-            "SCAN: DISCOVERY ENGINE [LAYER 02]",
-            "SCAN: ADVISORY GRID [LAYER 03]",
-            "SCAN: YOUR BOARD [LAYER 04]",
-            "SCAN: MANIFESTO CORE [LAYER 05]"
+            "PORTAL HERO LAYER [00]",
+            "CURATED PROPERTY SECTORS [01]",
+            "DISCOVERY & INTELLIGENCE [02]",
+            "ADVISORY NETWORK [03]",
+            "PERSONAL BOARD LEDGER [04]",
+            "MANIFESTO CORE [05]"
           ];
           const layerIntels = [
-            "Main header space-hero core scanned. Current state: Ambient drift active. Sweep the tractor beam over specific text blocks or button nodes to access cognitive telemetry.",
-            "Scanned Layer 01 property experience deck. Current sub-systems online: Curated Category selection menu, Search Parser input, and individual property experience preview assets.",
-            "Scanned Layer 02 Discovery Engine. Real-time regional feed indices stable. Hover the tractor beam over spotlight cards, news blocks, or curated collections tags to read telemetry.",
-            "Scanned Layer 03 Advisory Network. Active broker registries decrypted. Hover the tractor beam directly over advisor cards to load agent bio dossiers.",
-            "Scanned Layer 04 Personal Board. Staging matrix for client-side storage ledger checked. Safe from central cloud syncing channels.",
-            "Scanned Layer 05 Manifesto. ScoutIt core philosophy matrix online. Inspect individual lead text blocks to review the platform's vision blueprint."
+            "Main header section of the page. Move the tractor beam over titles, the tagline, or the explore button to view specific descriptions.",
+            "This section showcases curated property experience cards, the search input, and category navigation.",
+            "This section highlights real-time property updates, regional news, and curated collections across the Philippines.",
+            "This section displays certified real estate advisors. Hover or click on the cards to view advisor dossiers.",
+            "This section explains our secure local storage pipeline. Your selections are kept 100% private on your device.",
+            "Outlines the values of ScoutIt, focusing on design quality and spatial appreciation over commercial listing pressure."
           ];
           const layerIndex = parseInt(matchedLayer, 10);
           setScanResult({
-            title: layerTitles[layerIndex] || "SCAN: LAYER DETECTED",
-            intel: layerIntels[layerIndex] || "Section coordinates parsed. General layer environment stable. Hover over sub-elements for targeted telemetry details."
+            title: layerTitles[layerIndex] || "LAYER DETECTED",
+            intel: layerIntels[layerIndex] || "General layer section coordinates parsed. Hover over sub-elements for detailed telemetry."
           });
         }
       }
@@ -641,25 +641,25 @@ export default function Home() {
 
           const layerId = matchedLayer.getAttribute('data-intel-layer');
           const layerTitles = [
-            "SCAN: PORTAL CORE [LAYER 00]",
-            "SCAN: CURATED SECTORS [LAYER 01]",
-            "SCAN: DISCOVERY ENGINE [LAYER 02]",
-            "SCAN: ADVISORY GRID [LAYER 03]",
-            "SCAN: YOUR BOARD [LAYER 04]",
-            "SCAN: MANIFESTO CORE [LAYER 05]"
+            "PORTAL HERO LAYER [00]",
+            "CURATED PROPERTY SECTORS [01]",
+            "DISCOVERY & INTELLIGENCE [02]",
+            "ADVISORY NETWORK [03]",
+            "PERSONAL BOARD LEDGER [04]",
+            "MANIFESTO CORE [05]"
           ];
           const layerIntels = [
-            "Main header space-hero core scanned. Current state: Ambient drift active. Sweep the tractor beam over specific text blocks or button nodes to access cognitive telemetry.",
-            "Scanned Layer 01 property experience deck. Current sub-systems online: Curated Category selection menu, Search Parser input, and individual property experience preview assets.",
-            "Scanned Layer 02 Discovery Engine. Real-time regional feed indices stable. Hover the tractor beam over spotlight cards, news blocks, or curated collections tags to read telemetry.",
-            "Scanned Layer 03 Advisory Network. Active broker registries decrypted. Hover the tractor beam directly over advisor cards to load agent bio dossiers.",
-            "Scanned Layer 04 Personal Board. Staging matrix for client-side storage ledger checked. Safe from central cloud syncing channels.",
-            "Scanned Layer 05 Manifesto. ScoutIt core philosophy matrix online. Inspect individual lead text blocks to review the platform's vision blueprint."
+            "Main header section of the page. Move the tractor beam over titles, the tagline, or the explore button to view specific descriptions.",
+            "This section showcases curated property experience cards, the search input, and category navigation.",
+            "This section highlights real-time property updates, regional news, and curated collections across the Philippines.",
+            "This section displays certified real estate advisors. Hover or click on the cards to view advisor dossiers.",
+            "This section explains our secure local storage pipeline. Your selections are kept 100% private on your device.",
+            "Outlines the values of ScoutIt, focusing on design quality and spatial appreciation over commercial listing pressure."
           ];
           const layerIndex = parseInt(layerId, 10);
           const data = {
-            title: layerTitles[layerIndex] || "SCAN: LAYER DETECTED",
-            intel: layerIntels[layerIndex] || "Section coordinates parsed. General layer environment stable. Hover over sub-elements for targeted telemetry details."
+            title: layerTitles[layerIndex] || "LAYER DETECTED",
+            intel: layerIntels[layerIndex] || "General layer section coordinates parsed. Hover over sub-elements for detailed telemetry."
           };
           setScanResult(data);
           setCurrentScannedId(`layer-${layerId}`);
