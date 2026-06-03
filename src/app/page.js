@@ -776,40 +776,133 @@ export default function Home() {
       </section>
 
       {/* SECTION 5: THE WISHLIST LAYER */}
-      <section className="snap-section section-wishlist" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div className="wishlist-content" style={{ width: '100%', maxWidth: '1200px', margin: '0 auto', display: 'flex', gap: '80px', alignItems: 'center' }}>
+      <section className="snap-section section-wishlist" style={{ padding: 0 }}>
+        <div className="property-split">
           
-          {/* Left Column: The Manifesto */}
-          <div className="wishlist-manifesto" style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-            <span className="vector-label" style={{ marginBottom: '16px' }}>Layer 04 // Your Board</span>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '48px', color: 'var(--text-primary)', marginBottom: '24px' }}>Your Board</h2>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '16px', lineHeight: '1.8', marginBottom: '40px', maxWidth: '480px' }}>
-              Your dreams live here. Save the spaces that move you — no account needed. Come back to them anytime.
-            </p>
-            <Link href="/wishlist" className="prominent-action-link" style={{ marginTop: 'auto', background: 'transparent', border: '1px solid #c8a96e', color: '#c8a96e', padding: '12px 24px', borderRadius: '0' }}>
-              Find the One →
-            </Link>
+          {/* Left Menu Panel */}
+          <div className="property-menu">
+            <div className="menu-header">
+              <span className="vector-label">Layer 04 // Your Board</span>
+              <h2>Your Board</h2>
+              <p>Your inspiration archive. Collect design ideas, preferred cities, and target layouts.</p>
+            </div>
+            
+            <div className="menu-nav" style={{ gap: '12px' }}>
+              <div style={{ color: 'var(--text-secondary)', fontSize: '13px', lineHeight: '1.6' }}>
+                Your board acts as a local cryptographic ledger. Mark properties with four distinct reaction tags:
+              </div>
+              <ul style={{ listStyle: 'none', padding: 0, margin: '8px 0 0 0', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {[
+                  { tag: "Potential Fit", desc: "Properties matching parameters" },
+                  { tag: "Interested", desc: "Strong candidates for contact" },
+                  { tag: "Inspired Me", desc: "Design & styling inspiration" },
+                  { tag: "Save", desc: "Saved to your ledger" }
+                ].map((item, idx) => (
+                  <li key={idx} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '12px' }}>
+                    <span style={{ color: 'var(--accent)', fontFamily: 'var(--font-mono)', border: '1px solid rgba(200, 169, 110, 0.3)', padding: '2px 8px', borderRadius: '2px', fontSize: '10px', textTransform: 'uppercase' }}>
+                      {item.tag}
+                    </span>
+                    <span style={{ color: 'var(--text-muted)' }}>{item.desc}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="menu-footer">
+              <Link href="/wishlist" className="prominent-action-link">
+                Open Your Ledger →
+              </Link>
+            </div>
           </div>
 
-          {/* Right Column: Preview Matrix Placeholder */}
-          <div className="wishlist-preview-matrix" style={{ flex: 1, width: '100%', background: '#121212', border: '1px dashed #222222', padding: '40px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', height: '350px', borderRadius: '4px' }}>
-            {/* Minimalist Glowing Blueprint Icon */}
-            <svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="rgba(200, 169, 110, 0.5)" strokeWidth="0.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: '32px', filter: 'drop-shadow(0 0 12px rgba(200, 169, 110, 0.2))' }}>
-              <path d="M2 22h20"></path>
-              <path d="M4 22V6l8-4 8 4v16"></path>
-              <path d="M9 22v-8h6v8"></path>
-              <path d="M2 10l10-6 10 6"></path>
-              <rect x="6" y="10" width="4" height="4"></rect>
-              <rect x="14" y="10" width="4" height="4"></rect>
-            </svg>
-            <div style={{ fontFamily: 'Georgia, serif', fontSize: '28px', color: '#f0ede8', lineHeight: '1.2' }}>
-              Your dreams live here.
+          {/* Right Visual Canvas */}
+          <div className="matrix-preview-pane">
+            <header className="pane-header">
+              <h3>Personal Ledger Showcase</h3>
+              <p>Previewing how saved properties populate your inspiration matrix.</p>
+            </header>
+
+            <div className="wishlist-showcase-matrix" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+              
+              <div>
+                <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', textTransform: 'uppercase', color: 'var(--accent)', letterSpacing: '0.1em', marginBottom: '16px' }}>
+                  ACTIVE INSIGHT MATRIX (MOCKUP PREVIEW)
+                </h4>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+                  {[
+                    {
+                      title: "Siargao Tropical Villa",
+                      city: "Siargao",
+                      category: "STR / Resort",
+                      reaction: "Inspired Me",
+                      desc: "Raw concrete framing combined with local coco-wood and native thatch. Visual style notes saved.",
+                      image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=400&q=80"
+                    },
+                    {
+                      title: "Batasan Hills House & Lot",
+                      city: "Quezon City",
+                      category: "Residential",
+                      reaction: "Potential Fit",
+                      desc: "Brutalist residential footprint with passive cooling vents. Architectural brief saved.",
+                      image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=400&q=80"
+                    }
+                  ].map((item, idx) => (
+                    <div key={idx} style={{ background: '#161616', border: '1px solid #262626', borderRadius: '4px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                      <div style={{ height: '140px', overflow: 'hidden', position: 'relative' }}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={item.image} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <span style={{ position: 'absolute', bottom: '12px', left: '12px', background: 'rgba(0,0,0,0.7)', color: 'var(--accent)', fontFamily: 'var(--font-mono)', fontSize: '10px', padding: '4px 8px', border: '1px solid var(--accent-border)', borderRadius: '2px' }}>
+                          {item.reaction}
+                        </span>
+                      </div>
+                      <div style={{ padding: '16px' }}>
+                        <h5 style={{ fontSize: '16px', fontWeight: '500', color: '#fff', marginBottom: '4px', fontFamily: 'var(--font-display)' }}>{item.title}</h5>
+                        <span style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block', marginBottom: '8px' }}>Location: {item.city} &middot; {item.category}</span>
+                        <p style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>{item.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', borderTop: '1px solid #262626', paddingTop: '24px' }}>
+                <div>
+                  <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', textTransform: 'uppercase', color: 'var(--accent)', letterSpacing: '0.1em', marginBottom: '16px' }}>
+                    How It Works
+                  </h4>
+                  <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: '1.6' }}>
+                    As you browse the spatial catalog, click the reaction badges below any property. No logins, accounts, or cookies required—everything remains privately archived on this device's memory ledger.
+                  </p>
+                </div>
+                
+                <div>
+                  <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', textTransform: 'uppercase', color: 'var(--accent)', letterSpacing: '0.1em', marginBottom: '16px' }}>
+                    Board Ledger Stats
+                  </h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {[
+                      { metric: "Storage Mode", val: "LocalStorage (Private)" },
+                      { metric: "Access Credentials", val: "Anonymous Ledger" },
+                      { metric: "Syncd Advisors", val: "Secure Handshake Link" }
+                    ].map((st, idx) => (
+                      <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed #222', paddingBottom: '6px' }}>
+                        <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{st.metric}</span>
+                        <span style={{ fontSize: '12px', fontFamily: 'var(--font-mono)', color: '#fff' }}>{st.val}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+              </div>
+
             </div>
-            <div style={{ fontFamily: 'system-ui', fontSize: '14px', color: '#8a8a8a', marginTop: '8px' }}>
-              Dreaming is free. This is your inspiration board.
+
+            <div className="matrix-legend-caption" style={{ borderTop: '1px solid #262626', paddingTop: '24px', marginTop: '24px' }}>
+              Your private collection of Philippine architectural inspirations. Keep them secure, revisit them anytime.
             </div>
+
           </div>
-          
+
         </div>
       </section>
 
