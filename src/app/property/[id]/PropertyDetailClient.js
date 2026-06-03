@@ -114,7 +114,6 @@ export default function PropertyDetailClient({ slug }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [photoMode,         setPhotoMode]         = useState("natural");
   const [activeTab,         setActiveTab]         = useState("space");
-  const [unitsOpen,  setUnitsOpen]  = useState(false);
   const [menuOpen,   setMenuOpen]   = useState(false);
 
   // Per-panel accordion state (independent per section)
@@ -397,7 +396,7 @@ export default function PropertyDetailClient({ slug }) {
             {/* Units */}
             <div
               className={`nav-chapter ${activeTab === "units" ? "active" : ""}`}
-              onClick={() => { setActiveTab("units"); setUnitsOpen(v => !v); }}
+              onClick={() => setActiveTab("units")}
             >
               <svg className="chapter-icon" viewBox="0 0 20 20" fill="none">
                 <rect x="3"  y="3"  width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.3"/>
@@ -450,24 +449,6 @@ export default function PropertyDetailClient({ slug }) {
             </div>
 
           </div>{/* /nav-inner */}
-
-          {/* Units dropdown */}
-          <div className={`units-panel ${unitsOpen ? "open" : ""}`} onClick={e => e.stopPropagation()}>
-            <div className="units-panel-inner">
-              {[
-                { name:"Balcony",    preview:"45 sqm · Open Air · 360° View" },
-                { name:"Room 1",     preview:"28 sqm · 1 Queen Bed · 1 Aircon" },
-                { name:"Room 2",     preview:"22 sqm · 2 Single Beds · 1 Aircon" },
-                { name:"Bathroom 1", preview:"8 sqm · Standing Shower · Glass Enclosure" },
-                { name:"Bathroom 2", preview:"6 sqm · Bathtub · Hot & Cold" },
-              ].map(u => (
-                <div className="unit-nav-row" key={u.name}>
-                  <span className="unit-nav-name">{u.name}</span>
-                  <span className="unit-nav-preview">{u.preview}</span>
-                </div>
-              ))}
-            </div>
-          </div>
 
         </div>{/* /zone-nav */}
 
