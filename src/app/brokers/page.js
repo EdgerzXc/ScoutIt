@@ -9,9 +9,9 @@ const DUMMY_BROKERS = [
     title: "Principal Strategist",
     specialty: "Ultra-Luxury Residential",
     location: "BGC Focus",
-    bio: "With over a decade of experience in the prime Manila market, Alexander specializes in bespoke residential estates and penthouse acquisitions.",
+    bio: "With over a decade of experience in BGC and the greater Manila market, Miguel specializes in industrial-modern residential estates and adaptive reuse projects.",
     image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=800&q=80",
-    deals: 140,
+    closures: "3 Verified Closures // BGC Focus",
     managedProperties: ["Aurelia Residences", "The Estate Makati", "Park Central Towers"],
     clearanceTier: "Tier 1 - Alpha"
   },
@@ -23,7 +23,7 @@ const DUMMY_BROKERS = [
     location: "Makati Core",
     bio: "Elena provides structural insights for institutional clients, guiding commercial acquisitions and corporate relocations.",
     image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=800&q=80",
-    deals: 92,
+    closures: "2 Verified Closures // QC Residential",
     managedProperties: ["Zuellig Building", "Arthaland Century Pacific", "PBCom Tower"],
     clearanceTier: "Tier 2 - Omega"
   },
@@ -33,9 +33,9 @@ const DUMMY_BROKERS = [
     title: "Lead Arbitrage Analyst",
     specialty: "STR & Resort Properties",
     location: "STR Sector",
-    bio: "Marcus connects visionary operators with prime coastal assets and boutique hospitality opportunities across the archipelago.",
+    bio: "Marco connects visionary operators with prime coastal assets and boutique hospitality opportunities across the archipelago, specializing in modern tropical STR architecture.",
     image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=800&q=80",
-    deals: 210,
+    closures: "4 Verified Closures // STR Sector",
     managedProperties: ["Siargao Tropical Villa", "Palawan Eco-Retreat", "Boracay Grand"],
     clearanceTier: "Tier 1 - Alpha"
   },
@@ -47,7 +47,7 @@ const DUMMY_BROKERS = [
     location: "Laguna & Batangas",
     bio: "Focusing on the expanding industrial corridors south of Manila, Julian engineers strategic acquisitions for logistics hubs.",
     image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80",
-    deals: 56,
+    closures: "2 Verified Closures // Laguna & Batangas",
     managedProperties: ["Laguna Technopark", "Batangas Port Terminal"],
     clearanceTier: "Tier 3 - Beta"
   },
@@ -59,7 +59,7 @@ const DUMMY_BROKERS = [
     location: "Quezon City",
     bio: "An advocate for adaptive reuse, Camille brokers the transfer and restoration of culturally significant structures.",
     image: "https://images.unsplash.com/photo-1598550874175-4d0ef436c909?w=800&q=80",
-    deals: 18,
+    closures: "1 Verified Closure // Quezon City",
     managedProperties: ["New Manila Mansions", "Capitol Hills Estates"],
     clearanceTier: "Tier 2 - Omega"
   },
@@ -71,7 +71,7 @@ const DUMMY_BROKERS = [
     location: "Tagaytay & South",
     bio: "Sofia identifies pre-development opportunities in rising economic zones, advising private equity on long-term holds.",
     image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=800&q=80",
-    deals: 34,
+    closures: "2 Verified Closures // Tagaytay & South",
     managedProperties: ["Antonio's Tagaytay", "Gallery by Chele (South Branch)"],
     clearanceTier: "Tier 3 - Beta"
   },
@@ -96,7 +96,7 @@ export default function BrokersPage() {
       <Header />
       <main className="brokers-main">
         <header className="page-header">
-          <span className="vector-label">Vector 03</span>
+          <span className="vector-label">LAYER 03 // PARTNER NETWORK</span>
           <h1 className="page-title">Intelligence Roster</h1>
           <p className="page-subtitle">Directory of elite Space Intelligence advisors across the Philippines.</p>
         </header>
@@ -130,8 +130,7 @@ export default function BrokersPage() {
                   
                   <div className="broker-footer">
                     <div className="broker-stats">
-                      <span className="stat-value">{broker.deals}+</span>
-                      <span className="stat-label">Transactions</span>
+                      <span className="stat-value" style={{ fontSize: '12px' }}>{broker.closures}</span>
                     </div>
                     <button className="btn-contact">Focus →</button>
                   </div>
@@ -161,7 +160,7 @@ export default function BrokersPage() {
                   <h3>{activeBroker.title} // {activeBroker.clearanceTier}</h3>
                   <div className="panel-tags">
                     <span>{activeBroker.location}</span>
-                    <span>{activeBroker.deals}+ Placements</span>
+                    <span>{activeBroker.closures}</span>
                   </div>
                 </div>
               </div>

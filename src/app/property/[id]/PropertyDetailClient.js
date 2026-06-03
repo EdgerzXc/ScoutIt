@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
 import "./property.css";
 
 // ═══════════════════════════════════════════════════
@@ -42,13 +43,6 @@ const propertyData = {
   lifestyle_vibe:           "Quiet & Family-Oriented",
   best_for:                 "Families · WFH Professionals · Long-term Investors",
 
-  // Financials
-  price_min:         24500000,
-  price_display:     "24.5M",
-  price_note:        "Asking price · Negotiable",
-  price_monthly:     "₱60,000",
-  hoa_dues:          null, // no HOA — private lot
-
   // Risk / scores
   flood_risk_score:  2,    // low risk
   convenience_score: 7.5,
@@ -65,8 +59,6 @@ const propertyData = {
   accordion_3_text:  "Built in 2018 by a family that outgrew the space, this property has never been rented — preserving its material quality and finish integrity across all rooms.",
 
   broker_name:       "Miguel Torres, REB",
-  broker_email:      "mtorres@scoutit.ph",
-  broker_phone:      "+63 917 000 0000",
 
   // Photos — bright premium architectural hero images
   photos: [
@@ -96,11 +88,6 @@ const propertyData = {
 // ═══════════════════════════════════════════════════
 // HELPER UTILITIES
 // ═══════════════════════════════════════════════════
-function formatPeso(num) {
-  if (!num) return "₱—";
-  return "₱" + Number(num).toLocaleString();
-}
-
 function floodText(score) {
   if (score <= 1) return "No flood history";
   if (score <= 3) return "Minimal risk";
@@ -156,13 +143,65 @@ export default function PropertyDetailClient({ slug }) {
   // ── Derived values from local data slots ──────
   const d           = propertyData;   // short alias
   const photos      = d.photos;
-  const ppsm        = d.floor_sqm > 0 ? Math.round(d.price_min / d.floor_sqm) : null;
-  const downPayment = Math.round(d.price_min * 0.2);
-  const hoaText     = d.hoa_dues ? formatPeso(d.hoa_dues) + " / mo" : "None";
   const floodRiskText  = floodText(d.flood_risk_score);
   const floodRiskScore = `Score: ${d.flood_risk_score}/10`;
   const convScoreText  = `${d.convenience_score} / 10`;
   const brokerInitials = d.broker_name.split(" ").map(p => p[0]).join("").slice(0, 2).toUpperCase();
+
+  const [currentReaction, setCurrentReaction] = useState(null);
+  const [reactionConfirmed, setReactionConfirmed] = useState(false);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("scoutit_reactions");
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          const match = parsed.find(item => item.property_id === slug || item.property_id === "batasan-hills");
+          if (match) {
+            setCurrentReaction(match.reaction_type);
+          }
+        }
+      }
+    } catch (e) {}
+  }, [slug]);
+
+  const handleReaction = (type) => {
+    try {
+      const raw = localStorage.getItem("scoutit_reactions") || "[]";
+      let parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) parsed = [];
+
+      const index = parsed.findIndex(item => item.property_id === slug || item.property_id === "batasan-hills");
+
+      if (currentReaction === type) {
+        if (index > -1) {
+          parsed.splice(index, 1);
+        }
+        setCurrentReaction(null);
+        setReactionConfirmed(false);
+      } else {
+        const newItem = {
+          property_id: slug || "batasan-hills",
+          property_title: d.title,
+          city: d.city,
+          category: d.property_type,
+          reaction_type: type,
+          timestamp: Date.now()
+        };
+
+        if (index > -1) {
+          parsed[index] = newItem;
+        } else {
+          parsed.push(newItem);
+        }
+        setCurrentReaction(type);
+        setReactionConfirmed(true);
+        setTimeout(() => setReactionConfirmed(false), 3000);
+      }
+      localStorage.setItem("scoutit_reactions", JSON.stringify(parsed));
+    } catch (e) {}
+  };
 
   // ── Photo navigation ──────────────────────────
   const goPrev = () => setCurrentImageIndex(i => (i === 0 ? photos.length - 1 : i - 1));
@@ -741,11 +780,7 @@ export default function PropertyDetailClient({ slug }) {
             <div className="panel-content">
               <div className="chapter-tag"><div className="tag-line"/><span className="tag-text">Property Universe</span></div>
               <div className="display-heading">The full<br/><em>picture</em></div>
-              <div>
-                <div className="universe-price">&#8369;<em>{d.price_display}</em></div>
-                <div className="universe-price-label">Asking price &middot; Negotiable</div>
-              </div>
-              <table className="universe-table"><tbody>
+              <table className="universe-table" style={{marginTop: "16px"}}><tbody>
                 <tr><td>Property type</td><td>{d.property_type}</td></tr>
                 <tr><td>Tenure</td><td>{d.tenure}</td></tr>
                 <tr><td>Floor area</td><td>{d.floor_sqm} sqm</td></tr>
@@ -755,27 +790,10 @@ export default function PropertyDetailClient({ slug }) {
                 <tr><td>Parking slots</td><td>{d.parking} covered</td></tr>
                 <tr><td>Furnishing</td><td>{d.furnishing}</td></tr>
                 <tr><td>Year built</td><td>{d.year_built}</td></tr>
-                <tr><td>HOA dues</td><td>{hoaText}</td></tr>
                 <tr><td>Title status</td><td>{d.title_status}</td></tr>
-                <tr><td>Price per sqm</td><td>{formatPeso(ppsm)}</td></tr>
               </tbody></table>
 
               <div className="accordion">
-                <div className={`accordion-item ${accUniverse === "value" ? "open" : ""}`}>
-                  <div className="accordion-header" onClick={() => tog(setAccUniverse, accUniverse, "value")}>
-                    <div className="accordion-left">
-                      <div className="accordion-icon-wrap"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"><path d="M7 1v12M4 4h4.5a2.5 2.5 0 010 5H4"/><path d="M4 3h5"/></svg></div>
-                      <div><div className="accordion-title">Price vs Value</div><div className="accordion-subtitle">Is this a good deal?</div></div>
-                    </div>
-                    <div className="accordion-right"><span className="accordion-tag tag-green">Good Value</span><div className="accordion-chevron"/></div>
-                  </div>
-                  <div className="accordion-body"><div className="accordion-content">
-                    <div className="detail-row"><span className="detail-key">Asking price</span><span className="detail-val">{d.price_display}</span></div>
-                    <div className="detail-row"><span className="detail-key">Price per sqm</span><span className="detail-val">{formatPeso(ppsm)}</span></div>
-                    <div className="detail-row"><span className="detail-key">Negotiation room</span><span className="detail-val green">Yes · Open</span></div>
-                  </div></div>
-                </div>
-
                 <div className={`accordion-item ${accUniverse === "resale" ? "open" : ""}`}>
                   <div className="accordion-header" onClick={() => tog(setAccUniverse, accUniverse, "resale")}>
                     <div className="accordion-left">
@@ -786,8 +804,8 @@ export default function PropertyDetailClient({ slug }) {
                   </div>
                   <div className="accordion-body"><div className="accordion-content">
                     <div className="detail-row"><span className="detail-key">Resale potential</span><span className="detail-val green">High · Growing area</span></div>
-                    <div className="detail-row"><span className="detail-key">Rental yield est.</span><span className="detail-val">~5–6% annually</span></div>
-                    <div className="detail-row"><span className="detail-key">Monthly rent est.</span><span className="detail-val">{d.price_monthly}</span></div>
+                    <div className="detail-row"><span className="detail-key">Rental yield est.</span><span className="detail-val">Contact broker for details</span></div>
+                    <div className="detail-row"><span className="detail-key">Monthly rent est.</span><span className="detail-val">Contact broker for details</span></div>
                     <div className="detail-row"><span className="detail-key">MRT-7 impact</span><span className="detail-val green">Positive outlook</span></div>
                     <div className="detail-row"><span className="detail-key">Area trend</span><span className="detail-val green">Appreciating since 2022</span></div>
                   </div></div>
@@ -804,9 +822,7 @@ export default function PropertyDetailClient({ slug }) {
             </div>
 
             <div className="panel-sidebar">
-              <div className="sidebar-block"><div className="sidebar-accent-line"/><div className="sidebar-label">Price per sqm</div><div className="sidebar-value">{formatPeso(ppsm)}</div><div className="sidebar-sub">Floor area basis</div></div>
-              <div className="sidebar-block"><div className="sidebar-label">HOA dues</div><div className="sidebar-value">{hoaText}</div></div>
-              <div className="sidebar-block"><div className="sidebar-label">Title status</div><div className="sidebar-value">{d.title_status}</div></div>
+              <div className="sidebar-block"><div className="sidebar-accent-line"/><div className="sidebar-label">Title status</div><div className="sidebar-value">{d.title_status}</div></div>
               <div className="sidebar-block"><div className="sidebar-label">Verdict</div><div className="sidebar-value" style={{color:"var(--green)"}}>{d.scoutit_verdict}</div></div>
             </div>
           </div>{/* /panel-universe */}
@@ -815,64 +831,55 @@ export default function PropertyDetailClient({ slug }) {
           <div className={`chapter-panel ${activeTab === "yourmove" ? "active" : ""}`} id="panel-yourmove">
             <div className="panel-content">
               <div className="chapter-tag"><div className="tag-line"/><span className="tag-text">Your Move</span></div>
-              <div className="display-heading">Ready when<br/><em>you</em> are</div>
-              <div className="move-price-block">
-                <div className="move-price">&#8369;<em>{d.price_display}</em></div>
-                <p className="move-price-note">{d.price_note}</p>
+              <h2 className="display-heading" style={{fontFamily:"var(--font-display)", fontWeight: 300}}>
+                When you're ready, we'll make the introduction.
+              </h2>
+              
+              <div className="reactions-container" style={{marginTop:"16px", display:"flex", flexDirection:"column", gap:"10px"}}>
+                <p className="sidebar-label">How does this space make you feel?</p>
+                <div className="reaction-buttons-grid" style={{display:"grid", gridTemplateColumns:"1fr 1fr", gap:"8px"}}>
+                  {["Save", "Inspired Me", "Potential Fit", "Interested"].map((type) => (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() => handleReaction(type)}
+                      className={`reaction-action-btn ${currentReaction === type ? "active" : ""}`}
+                    >
+                      {type}
+                    </button>
+                  ))}
+                </div>
+                {reactionConfirmed && (
+                  <p style={{fontSize:"12px", color:"var(--accent)", fontStyle:"italic", marginTop:"4px"}}>
+                    Saved to Your Board.
+                  </p>
+                )}
               </div>
-              <div className="move-grid">
-                <div className="move-stat-card"><div className="move-stat-val">20<span>%</span></div><div className="move-stat-label">Typical down payment</div></div>
-                <div className="move-stat-card"><div className="move-stat-val">{d.price_monthly}</div><div className="move-stat-label">Est. monthly rent</div></div>
-                <div className="move-stat-card"><div className="move-stat-val">47</div><div className="move-stat-label">ScoutIt briefings this month</div></div>
-                <div className="move-stat-card"><div className="move-stat-val">12</div><div className="move-stat-label">Leads assisted (area avg.)</div></div>
-              </div>
-              <div className="where-category">
-                <div className="where-cat-label">Listed with</div>
+
+              <div className="where-category" style={{marginTop:"16px"}}>
+                <div className="where-cat-label">Assigned Representative</div>
                 <div className="broker-card">
                   <div className="broker-avatar">{brokerInitials}</div>
                   <div className="broker-info">
                     <div className="broker-name-el">{d.broker_name}</div>
                     <div className="broker-meta">Direct Listing</div>
-                    <div className="broker-rating">&#9733; Verified broker</div>
+                    <div className="broker-rating" style={{color: "var(--green)"}}>Verified broker</div>
                   </div>
                 </div>
               </div>
-              <div className="accordion">
-                <div className={`accordion-item ${accMove === "payment" ? "open" : ""}`}>
-                  <div className="accordion-header" onClick={() => tog(setAccMove, accMove, "payment")}>
-                    <div className="accordion-left">
-                      <div className="accordion-icon-wrap"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"><path d="M7 1v12M4 4h4.5a2.5 2.5 0 010 5H4"/></svg></div>
-                      <div><div className="accordion-title">Payment Overview</div><div className="accordion-subtitle">Financing paths &amp; ballpark figures</div></div>
-                    </div>
-                    <div className="accordion-right"><div className="accordion-chevron"/></div>
-                  </div>
-                  <div className="accordion-body"><div className="accordion-content">
-                    <div className="detail-row"><span className="detail-key">Cash price</span><span className="detail-val">{d.price_display}</span></div>
-                    <div className="detail-row"><span className="detail-key">Down (20% est.)</span><span className="detail-val">{formatPeso(downPayment)}</span></div>
-                    <div className="detail-row"><span className="detail-key">Bank financing</span><span className="detail-val green">Pre-approval friendly</span></div>
-                    <div className="detail-row"><span className="detail-key">HOA dues</span><span className="detail-val">{hoaText}</span></div>
-                  </div></div>
-                </div>
-              </div>
-              <button type="button" className="move-cta">Reserve interest &middot; ScoutIt briefing</button>
-              <button type="button" className="move-cta move-cta-secondary">Schedule property consultation</button>
-              <div className="contact-block">
-                <div><div className="contact-name">{d.broker_name}</div><div className="contact-role">Direct Listing</div></div>
-                <div className="contact-method">
-                  <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="var(--accent)" strokeWidth="1.3"><path d="M2 3h10a1 1 0 011 1v6a1 1 0 01-1 1H2a1 1 0 01-1-1V4a1 1 0 011-1z"/><path d="M1 4l6 4 6-4"/></svg>
-                  <span>{d.broker_email}</span>
-                </div>
-                <div className="contact-method">
-                  <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="var(--accent)" strokeWidth="1.3" strokeLinecap="round"><path d="M2 2h3l1.5 3L5 6.5a8 8 0 003.8 3.8l1.2-2L14 10v4a1 1 0 01-1 1C5.8 14.3 0 8.5 0 2a1 1 0 011-1z" transform="scale(0.9) translate(1,1)"/></svg>
-                  <span>{d.broker_phone}</span>
-                </div>
-              </div>
+
+              <Link href={`/property/${slug || "batasan-hills"}/brokers`} className="move-cta" style={{textDecoration: "none", marginTop: "16px"}}>
+                Connect with an Authorized Broker →
+              </Link>
+
+              <p style={{fontSize:"10px", color:"var(--text-muted)", lineHeight:"1.5", marginTop:"16px"}}>
+                ScoutIt is a spatial intelligence archive. In compliance with R.A. 9646, all site walks, direct inquiries, and purchase offers are facilitated exclusively by licensed, authorized real estate brokers.
+              </p>
             </div>
 
             <div className="panel-sidebar">
               <div className="sidebar-block"><div className="sidebar-accent-line"/><div className="sidebar-label">Acquisition</div><div className="sidebar-value">{d.tenure}</div><div className="sidebar-sub">{d.title_status}</div></div>
               <div className="sidebar-block"><div className="sidebar-label">ScoutIt verdict</div><div className="sidebar-value" style={{color:"var(--green)"}}>{d.scoutit_verdict}</div></div>
-              <div className="sidebar-block"><div className="sidebar-label">Down payment est.</div><div className="sidebar-value">{formatPeso(downPayment)}</div><div className="sidebar-sub">Based on 20%</div></div>
             </div>
           </div>{/* /panel-yourmove */}
 
@@ -987,10 +994,10 @@ export default function PropertyDetailClient({ slug }) {
                   </div>
                   <div className="accordion-body">
                     <div className="accordion-content">
-                      <div className="detail-row"><span className="detail-key">Last sold</span><span className="detail-val">2018 · Off-market</span></div>
-                      <div className="detail-row"><span className="detail-key">Prior price</span><span className="detail-val">₱18.2M</span></div>
-                      <div className="detail-row"><span className="detail-key">Appreciation</span><span className="detail-val green">+34.6% since 2018</span></div>
-                      <div className="detail-row"><span className="detail-key">Ownership transfers</span><span className="detail-val">1 — Original Owner</span></div>
+                      <div className="detail-row"><span className="detail-key">Last sold</span><span className="detail-val" style={{color:"#8a8a8a"}}>🔒 Available to verified scouts</span></div>
+                      <div className="detail-row"><span className="detail-key">Prior price</span><span className="detail-val" style={{color:"#8a8a8a"}}>🔒 Available to verified scouts</span></div>
+                      <div className="detail-row"><span className="detail-key">Appreciation</span><span className="detail-val" style={{color:"#8a8a8a"}}>🔒 Available to verified scouts</span></div>
+                      <div className="detail-row"><span className="detail-key">Ownership transfers</span><span className="detail-val" style={{color:"#8a8a8a"}}>🔒 Available to verified scouts</span></div>
                     </div>
                   </div>
                 </div>
@@ -1008,9 +1015,9 @@ export default function PropertyDetailClient({ slug }) {
                   </div>
                   <div className="accordion-body">
                     <div className="accordion-content">
-                      <div className="detail-row"><span className="detail-key">Area avg. cap rate</span><span className="detail-val">5.2%</span></div>
-                      <div className="detail-row"><span className="detail-key">This asset est.</span><span className="detail-val green">5.8–6.1%</span></div>
-                      <div className="detail-row"><span className="detail-key">Gross yield (rent)</span><span className="detail-val">~5.9% / yr</span></div>
+                      <div className="detail-row"><span className="detail-key">Area avg. cap rate</span><span className="detail-val" style={{color:"#8a8a8a"}}>🔒 Available to verified scouts</span></div>
+                      <div className="detail-row"><span className="detail-key">This asset est.</span><span className="detail-val" style={{color:"#8a8a8a"}}>🔒 Available to verified scouts</span></div>
+                      <div className="detail-row"><span className="detail-key">Gross yield (rent)</span><span className="detail-val" style={{color:"#8a8a8a"}}>🔒 Available to verified scouts</span></div>
                       <div className="detail-row"><span className="detail-key">Demand tier</span><span className="detail-val green">High — QC Residential</span></div>
                     </div>
                   </div>
@@ -1029,8 +1036,8 @@ export default function PropertyDetailClient({ slug }) {
                   </div>
                   <div className="accordion-body">
                     <div className="accordion-content">
-                      <div className="detail-row"><span className="detail-key">MRT-7 corridor effect</span><span className="detail-val green">+8–12% uplift est.</span></div>
-                      <div className="detail-row"><span className="detail-key">12-mo price trend</span><span className="detail-val green">↑ Appreciating</span></div>
+                      <div className="detail-row"><span className="detail-key">MRT-7 corridor effect</span><span className="detail-val" style={{color:"#8a8a8a"}}>🔒 Available to verified scouts</span></div>
+                      <div className="detail-row"><span className="detail-key">12-mo price trend</span><span className="detail-val" style={{color:"#8a8a8a"}}>🔒 Available to verified scouts</span></div>
                       <div className="detail-row"><span className="detail-key">Supply pressure</span><span className="detail-val yellow">Moderate</span></div>
                       <div className="detail-row"><span className="detail-key">Demand signal</span><span className="detail-val green">High — End-user &amp; investor</span></div>
                     </div>
@@ -1039,9 +1046,9 @@ export default function PropertyDetailClient({ slug }) {
               </div>
             </div>
             <div className="panel-sidebar">
-              <div className="sidebar-block"><div className="sidebar-accent-line"/><div className="sidebar-label">Cap rate est.</div><div className="sidebar-value" style={{color:"var(--green)"}}>5.8–6.1%</div><div className="sidebar-sub">Above area average</div></div>
-              <div className="sidebar-block"><div className="sidebar-label">Price trend</div><div className="sidebar-value" style={{color:"var(--green)"}}>↑ Appreciating</div></div>
-              <div className="sidebar-block"><div className="sidebar-label">Ownership history</div><div className="sidebar-value">Single owner</div><div className="sidebar-sub">Since build — 2018</div></div>
+              <div className="sidebar-block"><div className="sidebar-accent-line"/><div className="sidebar-label">Cap rate est.</div><div className="sidebar-value" style={{color:"#8a8a8a"}}>🔒 Locked</div><div className="sidebar-sub">Above area average</div></div>
+              <div className="sidebar-block"><div className="sidebar-label">Price trend</div><div className="sidebar-value" style={{color:"#8a8a8a"}}>🔒 Locked</div></div>
+              <div className="sidebar-block"><div className="sidebar-label">Ownership history</div><div className="sidebar-value" style={{color:"#8a8a8a"}}>🔒 Locked</div><div className="sidebar-sub">Since build — 2018</div></div>
               <div className="sidebar-block"><div className="sidebar-label">Intel source</div><div className="sidebar-value">ScoutIt Verified</div><div className="sidebar-sub">Internal + Registry Data</div></div>
             </div>
           </div>{/* /panel-hiddenintel */}
@@ -1072,7 +1079,7 @@ export default function PropertyDetailClient({ slug }) {
             </div>
             <div className="panel-sidebar">
               <div className="sidebar-block"><div className="sidebar-accent-line" style={{background:"var(--accent)"}}/><div className="sidebar-label">Pipeline status</div><div className="sidebar-value" style={{color:"var(--accent)"}}>V7 Compiling</div></div>
-              <div className="sidebar-block"><div className="sidebar-label">ETA</div><div className="sidebar-value">Q3 2025</div></div>
+              <div className="sidebar-block"><div className="sidebar-label">ETA</div><div className="sidebar-value">Incoming</div></div>
               <div className="sidebar-block"><div className="sidebar-label">Features queued</div><div className="sidebar-value">5</div><div className="sidebar-sub">See panel for list</div></div>
             </div>
           </div>{/* /panel-expansion */}

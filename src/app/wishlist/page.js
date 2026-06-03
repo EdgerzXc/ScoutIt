@@ -1,224 +1,322 @@
 "use client";
 
 import Header from "@/components/Header";
-import { useState } from "react";
+import Link from "next/link";
+import { useState, useEffect } from "react";
 
-const DUMMY_WISHLIST = [
-  {
-    id: "w-01",
-    name: "The Estate Makati - Penthouse",
-    location: "Ayala Avenue, Makati",
-    added: "2 days ago",
-    status: "Priority",
-    notes: "Checking availability for Q3 2026. Await floorplans.",
-  },
-  {
-    id: "w-02",
-    name: "Aurelia Residences - 3BR",
-    location: "Bonifacio Global City, Taguig",
-    added: "1 week ago",
-    status: "Monitoring",
-    notes: "West-facing unit with Manila Golf Club views preferred.",
-  },
-  {
-    id: "w-03",
-    name: "Park Central Towers",
-    location: "Makati CBD",
-    added: "2 weeks ago",
-    status: "Archived",
-    notes: "Waitlisted. Potential resale opportunity.",
-  },
-];
+const REACTION_ORDER = ["Potential Fit", "Interested", "Inspired Me", "Save"];
 
 export default function WishlistPage() {
-  const [wishlist, setWishlist] = useState(DUMMY_WISHLIST);
+  const [items, setItems] = useState([]);
+  const [loaded, setLoaded] = useState(false);
+  const [fadingOut, setFadingOut] = useState(new Set());
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("scoutit_reactions");
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setItems(parsed);
+        }
+      }
+    } catch (e) {
+      // silently ignore corrupt data
+    }
+    setLoaded(true);
+  }, []);
+
+  const removeItem = (timestamp) => {
+    setFadingOut((prev) => new Set([...prev, timestamp]));
+    setTimeout(() => {
+      setItems((prev) => {
+        const updated = prev.filter((item) => item.timestamp !== timestamp);
+        localStorage.setItem("scoutit_reactions", JSON.stringify(updated));
+        return updated;
+      });
+      setFadingOut((prev) => {
+        const next = new Set(prev);
+        next.delete(timestamp);
+        return next;
+      });
+    }, 300);
+  };
+
+  const grouped = REACTION_ORDER.map((type) => ({
+    type,
+    items: items.filter((item) => item.reaction_type === type),
+  })).filter((group) => group.items.length > 0);
+
+  const isEmpty = loaded && items.length === 0;
 
   return (
     <div className="page-wrapper">
       <Header />
       <main className="wishlist-main">
         <header className="page-header">
-          <span className="vector-label">Vector 04</span>
-          <h1 className="page-title">Personal Ledger</h1>
-          <p className="page-subtitle">Track micro-conversion affinity bookmarks and saved properties.</p>
+          <span className="layer-label">LAYER 04 // YOUR BOARD</span>
+          <h1 className="page-title">Your Board</h1>
         </header>
 
-        <section className="ledger-container">
-          <div className="ledger-header">
-            <span>Asset</span>
-            <span>Location</span>
-            <span>Status</span>
-            <span>Date Added</span>
-            <span className="text-right">Action</span>
+        {!loaded && (
+          <div className="loading-state">Loading...</div>
+        )}
+
+        {isEmpty && (
+          <div className="empty-state">
+            <div className="empty-heading">Your dreams live here.</div>
+            <div className="empty-subtitle">
+              Dreaming is free. This is your inspiration board.
+            </div>
+            <Link href="/discover" className="empty-cta">
+              Start Exploring →
+            </Link>
           </div>
-          
-          <div className="ledger-body">
-            {wishlist.map((item) => (
-              <div key={item.id} className="ledger-row">
-                <div className="cell-asset">
-                  <h3>{item.name}</h3>
-                  <p>{item.notes}</p>
+        )}
+
+        {loaded && items.length > 0 && (
+          <div className="board-content">
+            {grouped.map((group) => (
+              <section key={group.type} className="reaction-group">
+                <h2 className="group-label">{group.type}</h2>
+                <div className="cards-grid">
+                  {group.items.map((item) => (
+                    <div
+                      key={item.timestamp}
+                      className={`board-card ${fadingOut.has(item.timestamp) ? "fading" : ""}`}
+                    >
+                      <div className="card-body">
+                        <h3 className="card-title">{item.property_title}</h3>
+                        <div className="card-meta">
+                          {item.city && <span>{item.city}</span>}
+                          {item.category && (
+                            <>
+                              <span className="meta-dot">·</span>
+                              <span>{item.category}</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      <div className="card-actions">
+                        <span className="reaction-badge">{item.reaction_type}</span>
+                        <button
+                          className="remove-btn"
+                          onClick={() => removeItem(item.timestamp)}
+                          aria-label="Remove from board"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <div className="cell-location">{item.location}</div>
-                <div className="cell-status">
-                  <span className={`status-badge ${item.status.toLowerCase()}`}>{item.status}</span>
-                </div>
-                <div className="cell-date">{item.added}</div>
-                <div className="cell-action text-right">
-                  <button className="btn-remove">Remove</button>
-                </div>
-              </div>
+              </section>
             ))}
+            <div className="board-footer">
+              Your board is saved on this device.
+            </div>
           </div>
-        </section>
+        )}
       </main>
 
-      <style>{`
+      <style jsx>{`
         .page-wrapper {
-          background: var(--bg);
-          color: var(--text-primary);
           min-height: 100vh;
+          background: #0e0e0e;
+          color: #f0ede8;
         }
 
         .wishlist-main {
-          padding: 60px 40px;
-          max-width: 1200px;
+          max-width: 900px;
           margin: 0 auto;
+          padding: 120px 24px 80px;
         }
 
         .page-header {
-          text-align: center;
-          margin-bottom: 64px;
+          margin-bottom: 48px;
         }
 
-        .vector-label {
-          font-family: var(--font-mono);
-          font-size: 10px;
-          color: var(--accent);
-          letter-spacing: 0.15em;
+        .layer-label {
+          display: block;
+          font-family: system-ui, sans-serif;
+          font-size: 11px;
           text-transform: uppercase;
+          letter-spacing: 3px;
+          color: #c8a96e;
+          margin-bottom: 16px;
         }
 
         .page-title {
-          font-family: var(--font-display);
-          font-size: 42px;
-          margin: 12px 0;
-          color: var(--text-primary);
+          font-family: Georgia, serif;
+          font-size: 40px;
+          font-weight: normal;
+          color: #f0ede8;
+          margin: 0;
         }
 
-        .page-subtitle {
+        /* Empty state */
+        .empty-state {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+          padding: 120px 0;
+        }
+
+        .empty-heading {
+          font-family: Georgia, serif;
+          font-size: 32px;
+          color: #f0ede8;
+        }
+
+        .empty-subtitle {
+          font-family: system-ui, sans-serif;
           font-size: 14px;
-          color: var(--text-muted);
-          letter-spacing: 0.05em;
+          color: #8a8a8a;
+          margin-top: 8px;
         }
 
-        .ledger-container {
-          background: var(--surface);
-          border: 1px solid var(--border-solid);
-          border-radius: var(--radius-md);
-          overflow: hidden;
+        .empty-cta {
+          display: inline-block;
+          margin-top: 32px;
+          background: transparent;
+          border: 1px solid #c8a96e;
+          color: #c8a96e;
+          padding: 12px 28px;
+          font-size: 13px;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          text-decoration: none;
+          font-family: system-ui, sans-serif;
+          transition: background 0.2s, color 0.2s;
         }
 
-        .ledger-header {
-          display: grid;
-          grid-template-columns: 2.5fr 1.5fr 1fr 1fr 1fr;
-          padding: 16px 24px;
-          border-bottom: 1px solid var(--border-solid);
+        .empty-cta:hover {
+          background: #c8a96e;
+          color: #0e0e0e;
+        }
+
+        /* Loading */
+        .loading-state {
+          text-align: center;
+          padding: 120px 0;
+          color: #8a8a8a;
+          font-size: 14px;
+        }
+
+        /* Board content */
+        .board-content {
+          display: flex;
+          flex-direction: column;
+          gap: 40px;
+        }
+
+        .reaction-group {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+
+        .group-label {
+          font-family: system-ui, sans-serif;
           font-size: 11px;
           text-transform: uppercase;
-          letter-spacing: 0.1em;
-          color: var(--text-muted);
-          background: rgba(0,0,0,0.2);
+          letter-spacing: 2px;
+          color: #c8a96e;
+          margin: 0 0 4px;
+          padding-bottom: 8px;
+          border-bottom: 1px solid #262626;
         }
 
-        .ledger-row {
-          display: grid;
-          grid-template-columns: 2.5fr 1.5fr 1fr 1fr 1fr;
-          padding: 24px;
-          border-bottom: 1px solid var(--border-solid);
+        .cards-grid {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+
+        .board-card {
+          display: flex;
           align-items: center;
-          transition: background 0.25s ease;
+          justify-content: space-between;
+          background: #161616;
+          border: 1px solid #262626;
+          padding: 16px 20px;
+          transition: opacity 0.3s ease, transform 0.3s ease;
         }
 
-        .ledger-row:last-child {
-          border-bottom: none;
+        .board-card.fading {
+          opacity: 0;
+          transform: translateX(-20px);
         }
 
-        .ledger-row:hover {
-          background: var(--surface2);
+        .card-body {
+          flex: 1;
+          min-width: 0;
         }
 
-        .cell-asset h3 {
-          font-family: var(--font-display);
-          font-size: 18px;
-          color: var(--text-primary);
-          margin-bottom: 4px;
+        .card-title {
+          font-family: Georgia, serif;
+          font-size: 16px;
+          font-weight: normal;
+          color: #f0ede8;
+          margin: 0 0 4px;
         }
 
-        .cell-asset p {
+        .card-meta {
+          font-family: system-ui, sans-serif;
           font-size: 12px;
-          color: var(--text-secondary);
+          color: #8a8a8a;
+          display: flex;
+          align-items: center;
+          gap: 4px;
         }
 
-        .cell-location {
-          font-size: 13px;
-          color: var(--text-secondary);
+        .meta-dot {
+          color: #444;
         }
 
-        .cell-date {
-          font-family: var(--font-mono);
-          font-size: 12px;
-          color: var(--text-muted);
+        .card-actions {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          flex-shrink: 0;
         }
 
-        .status-badge {
-          display: inline-block;
-          padding: 4px 10px;
-          border-radius: 20px;
+        .reaction-badge {
+          font-family: system-ui, sans-serif;
           font-size: 10px;
           text-transform: uppercase;
-          letter-spacing: 0.1em;
-          font-weight: 600;
-        }
-
-        .status-badge.priority {
-          background: rgba(200, 169, 110, 0.1);
-          color: var(--accent);
+          letter-spacing: 1px;
+          color: #c8a96e;
           border: 1px solid rgba(200, 169, 110, 0.3);
+          padding: 4px 10px;
+          white-space: nowrap;
         }
 
-        .status-badge.monitoring {
-          background: rgba(240, 237, 232, 0.05);
-          color: var(--text-secondary);
-          border: 1px solid var(--border-solid);
-        }
-
-        .status-badge.archived {
-          background: rgba(0,0,0,0.3);
-          color: var(--text-muted);
-          border: 1px dashed var(--border-solid);
-        }
-
-        .text-right {
-          text-align: right;
-        }
-
-        .btn-remove {
-          background: transparent;
-          border: 1px solid var(--border-solid);
-          color: var(--text-muted);
-          font-size: 11px;
-          text-transform: uppercase;
-          letter-spacing: 0.1em;
-          padding: 6px 12px;
+        .remove-btn {
+          background: none;
+          border: 1px solid #262626;
+          color: #8a8a8a;
+          font-size: 12px;
           cursor: pointer;
-          transition: all 0.25s ease;
-          border-radius: 2px;
+          padding: 4px 8px;
+          transition: color 0.2s, border-color 0.2s;
+          font-family: system-ui, sans-serif;
         }
 
-        .btn-remove:hover {
-          border-color: #ff4a4a;
-          color: #ff4a4a;
+        .remove-btn:hover {
+          color: #f0ede8;
+          border-color: #f0ede8;
+        }
+
+        .board-footer {
+          font-family: system-ui, sans-serif;
+          font-size: 11px;
+          color: #8a8a8a;
+          text-align: center;
+          padding-top: 24px;
+          border-top: 1px solid #262626;
         }
       `}</style>
     </div>

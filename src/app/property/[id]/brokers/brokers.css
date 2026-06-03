@@ -1,0 +1,394 @@
+.brokers-wrapper {
+  min-height: 100vh;
+  background: #0e0e0e;
+  color: #f0ede8;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.brokers-sticky-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #0e0e0e;
+  border-bottom: 1px solid #262626;
+  padding: 16px 24px;
+}
+
+.nav-back-link {
+  color: #c8a96e;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.nav-back-link:hover {
+  text-decoration: underline;
+}
+
+.nav-brand-logo {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: #f0ede8;
+}
+
+.nav-prop-info {
+  font-size: 12px;
+  color: #8a8a8a;
+}
+
+.brokers-main-content {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 60px 24px 80px;
+}
+
+.brokers-page-header {
+  margin-bottom: 40px;
+}
+
+.gold-section-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: #c8a96e;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.brokers-page-title {
+  font-family: Georgia, serif;
+  font-size: 36px;
+  font-weight: 400;
+  margin: 0 0 8px;
+}
+
+.brokers-page-subtitle {
+  font-family: Georgia, serif;
+  font-size: 16px;
+  font-style: italic;
+  color: #8a8a8a;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.brokers-section-group {
+  margin-bottom: 32px;
+}
+
+.section-group-heading {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #c8a96e;
+  border-bottom: 1px solid #262626;
+  padding-bottom: 10px;
+  margin: 0 0 20px;
+}
+
+.brokers-cards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.broker-item-card {
+  background: #161616;
+  border: 1px solid #262626;
+  border-radius: 4px;
+  padding: 24px;
+  position: relative;
+  transition: border-color 0.25s;
+}
+
+.broker-item-card:hover {
+  border-color: #363636;
+}
+
+.featured-card {
+  border-top: 3px solid #c8a96e;
+}
+
+.scoutit-pick-badge {
+  position: absolute;
+  top: 12px;
+  right: 24px;
+  background: rgba(200, 169, 110, 0.15);
+  color: #c8a96e;
+  border: 0.5px solid rgba(200, 169, 110, 0.3);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  padding: 4px 10px;
+  border-radius: 2px;
+}
+
+.broker-main-row {
+  display: flex;
+  gap: 20px;
+  align-items: start;
+}
+
+.broker-avatar-img {
+  width: 64px;
+  height: 64px;
+  border-radius: 4px;
+  background-size: cover;
+  background-position: center;
+  border: 1px solid #262626;
+  flex-shrink: 0;
+}
+
+.broker-detail-col {
+  flex: 1;
+  min-width: 0;
+}
+
+.broker-name-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.broker-name-txt {
+  font-family: Georgia, serif;
+  font-size: 20px;
+  font-weight: 400;
+  margin: 0;
+}
+
+.leris-badge {
+  background: rgba(76, 175, 125, 0.12);
+  color: #4caf7d;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  padding: 2px 8px;
+  border-radius: 2px;
+  border: 0.5px solid rgba(76, 175, 125, 0.2);
+}
+
+.broker-license-txt {
+  font-size: 12px;
+  color: #8a8a8a;
+  margin: 4px 0 2px;
+}
+
+.broker-closures-txt {
+  font-size: 13px;
+  color: #f0ede8;
+  margin: 4px 0 10px;
+}
+
+.niche-pills-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.niche-pill-tag {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid #262626;
+  color: #8a8a8a;
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 4px;
+}
+
+.broker-rating-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #262626;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 8px 12px;
+  border-radius: 4px;
+  min-width: 90px;
+  flex-shrink: 0;
+}
+
+.rating-num {
+  font-family: Georgia, serif;
+  font-size: 28px;
+  font-weight: 400;
+  color: #c8a96e;
+  line-height: 1;
+}
+
+.rating-lbl {
+  font-size: 8px;
+  font-weight: 600;
+  color: #8a8a8a;
+  letter-spacing: 1px;
+  margin-top: 4px;
+  text-align: center;
+}
+
+.broker-actions-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+  border-top: 1px solid #262626;
+  padding-top: 16px;
+}
+
+.action-profile-btn {
+  background: transparent;
+  border: 1px solid #262626;
+  color: #8a8a8a;
+  padding: 10px 20px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.action-profile-btn:hover {
+  color: #f0ede8;
+  border-color: #8a8a8a;
+}
+
+.action-retain-btn {
+  background: #c8a96e;
+  border: none;
+  color: #0e0e0e;
+  padding: 10px 20px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.action-retain-btn:hover {
+  background: #d4b87a;
+}
+
+.action-retain-btn.active {
+  background: #262626;
+  color: #f0ede8;
+  border: 1px solid #363636;
+}
+
+/* Intent Form styling */
+.inline-intent-form-container {
+  margin-top: 20px;
+  border-top: 1px dashed #262626;
+  padding-top: 20px;
+}
+
+.form-success-alert {
+  background: rgba(76, 175, 125, 0.08);
+  border: 1px solid rgba(76, 175, 125, 0.2);
+  color: #4caf7d;
+  padding: 14px;
+  border-radius: 4px;
+  font-size: 13px;
+  text-align: center;
+}
+
+.intent-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.form-title {
+  font-family: Georgia, serif;
+  font-size: 15px;
+  font-weight: 400;
+  color: #c8a96e;
+  margin: 0 0 4px;
+}
+
+.form-fields-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.form-fields-grid textarea {
+  grid-column: span 2;
+}
+
+.form-input-field,
+.form-textarea-field {
+  background: #0e0e0e;
+  border: 1px solid #262626;
+  color: #f0ede8;
+  padding: 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: system-ui, sans-serif;
+  outline: none;
+}
+
+.form-input-field:focus,
+.form-textarea-field:focus {
+  border-color: #c8a96e;
+}
+
+.form-submit-btn {
+  align-self: flex-start;
+  background: transparent;
+  border: 1px solid #c8a96e;
+  color: #c8a96e;
+  padding: 10px 24px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.form-submit-btn:hover {
+  background: #c8a96e;
+  color: #0e0e0e;
+}
+
+.brokers-compliance-footer {
+  margin-top: 60px;
+  border-top: 1px solid #262626;
+  padding-top: 24px;
+}
+
+.brokers-compliance-footer p {
+  font-size: 11px;
+  color: #8a8a8a;
+  line-height: 1.6;
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .brokers-sticky-nav {
+    padding: 12px 16px;
+  }
+  .brokers-main-content {
+    padding: 40px 16px 60px;
+  }
+  .broker-main-row {
+    flex-direction: column;
+    gap: 16px;
+  }
+  .broker-rating-box {
+    align-self: flex-start;
+  }
+  .form-fields-grid {
+    grid-template-columns: 1fr;
+  }
+  .form-fields-grid textarea {
+    grid-column: span 1;
+  }
+}

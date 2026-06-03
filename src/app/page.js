@@ -285,7 +285,7 @@ export default function Home() {
             </nav>
             <div className="menu-footer">
               <Link href="/property/batasan-hills" className="prominent-action-link">
-                INITIALIZE PROPERTY MATRIX →
+                Discover Your Next Space →
               </Link>
             </div>
           </div>
@@ -385,7 +385,7 @@ export default function Home() {
             </div>
             
             <div className="matrix-legend-caption">
-              Telemetry Stream Note: Selecting alternative vectors (Commercial, STR, Restaurants) updates the localized zone ribbons dynamically. Initialize the core matrix below to interact with real-time sliding tracks and popup briefs.
+              Selecting alternative categories (Commercial, STR, Restaurants) updates the localized zone ribbons dynamically. Explore the discovery layer below to interact with live property tracks and intel briefs.
             </div>
           </div>
         </div>
@@ -414,7 +414,7 @@ export default function Home() {
             </nav>
             <div className="menu-footer">
               <Link href={`/discover?type=${activeDiscoverType.toLowerCase()}`} className="prominent-action-link">
-                LAUNCH DISCOVERY MATRIX →
+                Begin Your Search →
               </Link>
             </div>
           </div>
@@ -483,7 +483,7 @@ export default function Home() {
                 { label: "Stewardship Velocity", value: "38 avg. days" },
                 { label: "Continuity Score", value: "89% repeat" }
               ] },
-              { name: "Elena Santos, REB", status: "Global Capital Manager", history: "2 Verified Closures // Makati Core", image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=80", metrics: [
+              { name: "Elena Santos, REB", status: "Global Capital Manager", history: "2 Verified Closures // QC Residential", image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=80", metrics: [
                 { label: "Active Retentions", value: "18 this quarter" },
                 { label: "Stewardship Velocity", value: "42 avg. days" },
                 { label: "Continuity Score", value: "92% repeat" }
@@ -530,10 +530,10 @@ export default function Home() {
             <span className="vector-label" style={{ marginBottom: '16px' }}>Layer 04 // Your Board</span>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '48px', color: 'var(--text-primary)', marginBottom: '24px' }}>Your Board</h2>
             <p style={{ color: 'var(--text-secondary)', fontSize: '16px', lineHeight: '1.8', marginBottom: '40px', maxWidth: '480px' }}>
-              Architect your future. Your personal ledger functions as a secure, private command vault. Add your dream properties here to map spatial densities, compare visual DNA, and log live structural telemetries—no account required.
+              Your dreams live here. Save the spaces that move you — no account needed. Come back to them anytime.
             </p>
             <Link href="/wishlist" className="prominent-action-link" style={{ marginTop: 'auto', background: 'transparent', border: '1px solid #c8a96e', color: '#c8a96e', padding: '12px 24px', borderRadius: '0' }}>
-              Start Exploring →
+              Find the One →
             </Link>
           </div>
 

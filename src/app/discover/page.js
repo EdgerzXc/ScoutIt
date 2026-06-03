@@ -2,6 +2,8 @@ import DiscoverClient from "./DiscoverClient";
 import Header from "@/components/Header";
 import { Suspense } from "react";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Discover Matrix",
   description:
