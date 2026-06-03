@@ -771,12 +771,12 @@ export default function Home() {
             circle,
             #000000 0%,
             #000000 35%,
-            rgba(200, 169, 110, 0.015) 45%,
-            rgba(200, 169, 110, 0.04) 55%,
-            transparent 70%
+            rgba(200, 169, 110, 0.04) 45%,
+            rgba(200, 169, 110, 0.12) 55%,
+            transparent 75%
           );
-          border: 1px solid rgba(200, 169, 110, 0.035);
-          box-shadow: 0 0 100px rgba(200, 169, 110, 0.03);
+          border: 1px solid rgba(200, 169, 110, 0.18);
+          box-shadow: 0 0 120px rgba(200, 169, 110, 0.14), inset 0 0 40px rgba(200, 169, 110, 0.08);
           pointer-events: none;
           z-index: 1;
           animation: slowOrbit 60s linear infinite;
@@ -793,11 +793,11 @@ export default function Home() {
           border-radius: 50%;
           background: conic-gradient(
             from 0deg,
-            rgba(200, 169, 110, 0.04) 0%,
+            rgba(200, 169, 110, 0.12) 0%,
             transparent 25%,
-            rgba(200, 169, 110, 0.06) 50%,
+            rgba(200, 169, 110, 0.18) 50%,
             transparent 75%,
-            rgba(200, 169, 110, 0.04) 100%
+            rgba(200, 169, 110, 0.12) 100%
           );
           filter: blur(35px);
           animation: slowSwirl 45s linear infinite;
@@ -815,8 +815,8 @@ export default function Home() {
           border-radius: 50% 50% 0 0;
           background: radial-gradient(
             ellipse at top,
-            rgba(200, 169, 110, 0.08) 0%,
-            rgba(200, 169, 110, 0.02) 40%,
+            rgba(200, 169, 110, 0.22) 0%,
+            rgba(200, 169, 110, 0.06) 40%,
             transparent 70%
           );
           filter: blur(40px);
@@ -835,11 +835,11 @@ export default function Home() {
           border-radius: 50%;
           background: conic-gradient(
             from 180deg,
-            rgba(200, 169, 110, 0.03) 0%,
+            rgba(200, 169, 110, 0.09) 0%,
             transparent 30%,
-            rgba(200, 169, 110, 0.05) 50%,
+            rgba(200, 169, 110, 0.15) 50%,
             transparent 80%,
-            rgba(200, 169, 110, 0.03) 100%
+            rgba(200, 169, 110, 0.09) 100%
           );
           filter: blur(50px);
           animation: slowSwirl 90s linear infinite reverse;
