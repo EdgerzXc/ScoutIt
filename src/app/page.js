@@ -787,7 +787,7 @@ export default function Home() {
               <p>Your inspiration archive. Collect design ideas, preferred cities, and target layouts.</p>
             </div>
             
-            <div className="menu-nav" style={{ gap: '12px' }}>
+            <div className="ledger-tags-guide" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <div style={{ color: 'var(--text-secondary)', fontSize: '13px', lineHeight: '1.6' }}>
                 Your board acts as a local cryptographic ledger. Mark properties with four distinct reaction tags:
               </div>
