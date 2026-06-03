@@ -7,7 +7,7 @@ import "./brokers.css";
 const BROKERS_DATA = {
   verified: [
     {
-      id: "miguel-torres",
+      id: "br-01",
       name: "Miguel Torres, REB",
       role: "Licensed Real Estate Broker",
       license: "PRC REB License No. 0019284",
@@ -17,7 +17,7 @@ const BROKERS_DATA = {
       avatar: "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=150&q=80",
     },
     {
-      id: "elena-santos",
+      id: "br-02",
       name: "Elena Santos, REB",
       role: "Licensed Real Estate Broker",
       license: "PRC REB License No. 0021485",
@@ -27,17 +27,49 @@ const BROKERS_DATA = {
       avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=150&q=80",
     }
   ],
-  featured: [
+  highestRated: [
     {
-      id: "marco-reyes",
+      id: "br-06",
+      name: "Sofia Araneta",
+      role: "Licensed Real Estate Broker",
+      license: "PRC REB License No. 0016839",
+      rating: 95,
+      closures: "2 Verified Closures // Tagaytay & South",
+      niche: ["Boutique Hotels", "Culinary Acreage", "Private Equity Holds"],
+      avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=150&q=80",
+      scoutitPick: true,
+    },
+    {
+      id: "br-03",
       name: "Marco Reyes, REB",
-      role: "Senior Partner & Broker",
+      role: "Licensed Real Estate Broker",
       license: "PRC REB License No. 0011593",
       rating: 92,
       closures: "4 Verified Closures // STR Sector",
       niche: ["Short Term Rentals", "Yield Optimization", "Siargao/BGC"],
-      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&q=80",
-      scoutitPick: true,
+      avatar: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=150&q=80",
+    }
+  ],
+  suggested: [
+    {
+      id: "br-05",
+      name: "Camille Laurel",
+      role: "Licensed Real Estate Broker",
+      license: "PRC REB License No. 0020184",
+      rating: 90,
+      closures: "1 Verified Closure // Quezon City",
+      niche: ["Heritage Transfer", "Adaptive Reuse", "Conservation Consulting"],
+      avatar: "https://images.unsplash.com/photo-1598550874175-4d0ef436c909?auto=format&fit=crop&w=150&q=80",
+    },
+    {
+      id: "br-04",
+      name: "Julian Sy",
+      role: "Licensed Real Estate Broker",
+      license: "PRC REB License No. 0014902",
+      rating: 88,
+      closures: "2 Verified Closures // Laguna & Batangas",
+      niche: ["Logistics Hubs", "Industrial Land", "Supply Chain Planning"],
+      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80",
     }
   ]
 };
@@ -107,9 +139,9 @@ export default function BrokersClient({ slug }) {
         </div>
 
         <div className="broker-actions-row">
-          <button type="button" className="action-profile-btn">
+          <Link href={`/brokers/${broker.id}`} className="action-profile-btn" style={{ textDecoration: 'none', display: 'inline-block' }}>
             View Full Profile →
-          </button>
+          </Link>
           <button
             type="button"
             className={`action-retain-btn ${isFormOpen ? "active" : ""}`}
@@ -190,19 +222,27 @@ export default function BrokersClient({ slug }) {
           </p>
         </header>
 
-        {/* Section 1 */}
+        {/* Section 1: Verified Brokers */}
         <section className="brokers-section-group">
-          <h2 className="section-group-heading">Verified for this Space</h2>
+          <h2 className="section-group-heading">Verified Brokers</h2>
           <div className="brokers-cards-list">
             {BROKERS_DATA.verified.map((b) => renderBrokerCard(b, false))}
           </div>
         </section>
 
-        {/* Section 2 */}
+        {/* Section 2: Highest Rated Brokers */}
         <section className="brokers-section-group" style={{ marginTop: "40px" }}>
-          <h2 className="section-group-heading">Featured Partners</h2>
+          <h2 className="section-group-heading">Highest Ratings Brokers</h2>
           <div className="brokers-cards-list">
-            {BROKERS_DATA.featured.map((b) => renderBrokerCard(b, true))}
+            {BROKERS_DATA.highestRated.map((b) => renderBrokerCard(b, true))}
+          </div>
+        </section>
+
+        {/* Section 3: Suggested Brokers */}
+        <section className="brokers-section-group" style={{ marginTop: "40px" }}>
+          <h2 className="section-group-heading">Suggested Brokers</h2>
+          <div className="brokers-cards-list">
+            {BROKERS_DATA.suggested.map((b) => renderBrokerCard(b, false))}
           </div>
         </section>
 
