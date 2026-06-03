@@ -146,34 +146,72 @@ export default function Home() {
       if (!active) return;
       
       const id = Math.random().toString(36).substr(2, 9);
-      const size = Math.floor(4 + Math.random() * 6) + "px"; // 4px to 10px, slightly more visible
-      const duration = Math.floor(10 + Math.random() * 10); // 10s to 20s, a bit faster and more noticeable
-      const borderRadius = `${Math.floor(30 + Math.random()*20)}% ${Math.floor(40 + Math.random()*20)}% ${Math.floor(30 + Math.random()*20)}% ${Math.floor(30 + Math.random()*20)}%`;
+      
+      // Select type: 50% rock, 30% comet, 20% neutron star
+      const rand = Math.random();
+      let type = 'rock';
+      let size = '6px';
+      let scale = 1.0;
+      let borderRadius = '50%';
       
       const side = Math.floor(Math.random() * 4);
-      let startX, startY;
+      let startX_pct, startY_pct;
       
       if (side === 0) {
         // Left
-        startX = "-5vw";
-        startY = `${Math.floor(10 + Math.random() * 80)}vh`;
+        startX_pct = -5;
+        startY_pct = Math.floor(10 + Math.random() * 80);
       } else if (side === 1) {
         // Right
-        startX = "105vw";
-        startY = `${Math.floor(10 + Math.random() * 80)}vh`;
+        startX_pct = 105;
+        startY_pct = Math.floor(10 + Math.random() * 80);
       } else if (side === 2) {
         // Top
-        startX = `${Math.floor(10 + Math.random() * 80)}vw`;
-        startY = "-5vh";
+        startX_pct = Math.floor(10 + Math.random() * 80);
+        startY_pct = -5;
       } else {
         // Bottom
-        startX = `${Math.floor(10 + Math.random() * 80)}vw`;
-        startY = "105vh";
+        startX_pct = Math.floor(10 + Math.random() * 80);
+        startY_pct = 105;
       }
 
-      setDriftingRocks(prev => [...prev, { id, startX, startY, size, duration, borderRadius }]);
+      const startX = `${startX_pct}vw`;
+      const startY = `${startY_pct}vh`;
 
-      const nextDelay = 4000 + Math.random() * 6000; // spawn every 4 to 10 seconds
+      // Angle calculation towards center (50%, 50%) taking screen aspect ratio into account
+      const w = typeof window !== 'undefined' ? window.innerWidth : 1920;
+      const h = typeof window !== 'undefined' ? window.innerHeight : 1080;
+      const dx = (50 - startX_pct) * (w / 100);
+      const dy = (50 - startY_pct) * (h / 100);
+      const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+
+      if (rand < 0.5) {
+        type = 'rock';
+        size = Math.floor(4 + Math.random() * 6) + "px"; // 4px to 10px
+        scale = parseFloat((0.8 + Math.random() * 0.4).toFixed(2));
+        borderRadius = `${Math.floor(30 + Math.random()*20)}% ${Math.floor(40 + Math.random()*20)}% ${Math.floor(30 + Math.random()*20)}% ${Math.floor(30 + Math.random()*20)}%`;
+      } else if (rand < 0.8) {
+        type = 'comet';
+        size = Math.floor(4 + Math.random() * 3) + "px"; // 4px to 6px
+        scale = parseFloat((0.9 + Math.random() * 0.3).toFixed(2));
+      } else {
+        type = 'neutron';
+        size = Math.floor(6 + Math.random() * 4) + "px"; // 6px to 10px
+        scale = parseFloat((0.9 + Math.random() * 0.3).toFixed(2));
+      }
+
+      let duration = 12;
+      if (type === 'comet') {
+        duration = Math.floor(6 + Math.random() * 6); // 6s to 12s, fast
+      } else if (type === 'neutron') {
+        duration = Math.floor(16 + Math.random() * 8); // 16s to 24s, slow
+      } else {
+        duration = Math.floor(10 + Math.random() * 8); // 10s to 18s, medium
+      }
+
+      setDriftingRocks(prev => [...prev, { id, type, startX, startY, size, duration, borderRadius, angle, scale }]);
+
+      const nextDelay = 4000 + Math.random() * 5000; // spawn every 4 to 9 seconds
       timerId = setTimeout(spawnRock, nextDelay);
     };
 
@@ -300,30 +338,56 @@ export default function Home() {
           <div className="event-horizon"></div>
           <div className="event-horizon-swirl"></div>
 
-          {/* Faint Drifting Rock Particles (Occasional) */}
+          {/* Faint Drifting Cosmic Elements (Occasional Rocks, Comets, Neutron Stars) */}
           {driftingRocks.map((rock) => (
             <div
               key={rock.id}
-              className="drifting-rock"
+              className="drifting-container"
               style={{
                 position: 'absolute',
                 top: rock.startY,
                 left: rock.startX,
                 width: rock.size,
                 height: rock.size,
-                borderRadius: rock.borderRadius,
-                background: 'rgba(200, 169, 110, 0.5)', // Gold-tinted to match theme, higher visibility
-                boxShadow: '0 0 8px rgba(200, 169, 110, 0.3)',
-                filter: 'blur(0.5px)',
                 animation: `driftToCenter ${rock.duration}s linear forwards`,
-                transformOrigin: 'center center',
                 pointerEvents: 'none',
                 zIndex: 2
               }}
               onAnimationEnd={() => {
                 setDriftingRocks((prev) => prev.filter((r) => r.id !== rock.id));
               }}
-            />
+            >
+              <div
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  transform: `rotate(${rock.angle}deg) scale(${rock.scale})`,
+                  transformOrigin: 'center center',
+                  pointerEvents: 'none'
+                }}
+              >
+                {rock.type === 'rock' && (
+                  <div
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      borderRadius: rock.borderRadius,
+                      background: 'rgba(200, 169, 110, 0.55)', // Gold-tinted to match theme
+                      boxShadow: '0 0 6px rgba(200, 169, 110, 0.25)',
+                      filter: 'blur(0.5px)'
+                    }}
+                  />
+                )}
+                {rock.type === 'comet' && (
+                  <div className="comet-head">
+                    <div className="comet-tail"></div>
+                  </div>
+                )}
+                {rock.type === 'neutron' && (
+                  <div className="neutron-star-drifting" />
+                )}
+              </div>
+            </div>
           ))}
 
           {/* Subtle Pulsing Neutron Star */}
@@ -941,6 +1005,52 @@ export default function Home() {
             transform: scale(0.1);
             opacity: 0;
             filter: blur(1.5px);
+          }
+        }
+
+        /* ── Comet Elements ── */
+        .comet-head {
+          width: 100%;
+          height: 100%;
+          background: #ffffff;
+          border-radius: 50%;
+          box-shadow: 0 0 10px rgba(255, 255, 255, 0.9), 0 0 20px rgba(200, 169, 110, 0.4);
+          position: relative;
+        }
+        .comet-tail {
+          position: absolute;
+          right: calc(100% - 1px);
+          top: 50%;
+          transform: translateY(-50%);
+          width: 55px;
+          height: 1.5px;
+          background: linear-gradient(to left, rgba(200, 169, 110, 0.7), transparent);
+          pointer-events: none;
+        }
+
+        /* ── Drifting Neutron Star ── */
+        .neutron-star-drifting {
+          width: 100%;
+          height: 100%;
+          background: #e0f2fe;
+          border-radius: 50%;
+          box-shadow: 
+            0 0 8px rgba(224, 242, 254, 0.8), 
+            0 0 16px rgba(200, 169, 110, 0.5);
+          animation: pulseNeutronDrifting 2.5s ease-in-out infinite alternate;
+        }
+        @keyframes pulseNeutronDrifting {
+          0% {
+            transform: scale(0.85);
+            box-shadow: 
+              0 0 6px rgba(224, 242, 254, 0.6), 
+              0 0 12px rgba(200, 169, 110, 0.3);
+          }
+          100% {
+            transform: scale(1.15);
+            box-shadow: 
+              0 0 12px rgba(224, 242, 254, 0.9), 
+              0 0 24px rgba(200, 169, 110, 0.6);
           }
         }
 
