@@ -163,80 +163,80 @@ export default function Home() {
   const containerRef = useRef(null);
 
   // Scanner UI States
-  const [ufoDragging, setUfoDragging] = useState(false);
+  const [scannerState, setScannerState] = useState('DOCKED'); // 'DOCKED', 'HOVER_FOLLOW', 'DRAWING', 'SCANNING'
   const [ufoPos, setUfoPos] = useState({ x: 0, y: 0 });
   const [points, setPoints] = useState([]);
   const [isScanning, setIsScanning] = useState(false);
   const [scanResult, setScanResult] = useState(null);
   const [hudOpen, setHudOpen] = useState(false);
-  const [ufoReturning, setUfoReturning] = useState(false);
   const [hasScannedOnce, setHasScannedOnce] = useState(false);
   const [isUfoSticky, setIsUfoSticky] = useState(false);
   const canvasRef = useRef(null);
 
-  const handleDragStart = (e) => {
+  const handleUfoActivate = (e) => {
     e.preventDefault();
+    e.stopPropagation();
+    
     const x = e.clientX;
     const y = e.clientY;
+    
     setUfoPos({ x, y });
-    setPoints([{ x, y }]);
-    setUfoDragging(true);
-    setUfoReturning(false);
-    setIsScanning(false);
+    setPoints([]);
+    setScannerState('HOVER_FOLLOW');
     setScanResult(null);
     setHudOpen(false);
     setHasScannedOnce(true);
-
-    // Freeze page scrolling during drag/draw
-    document.body.style.overflow = 'hidden';
   };
 
-  const handlePointerMove = (e) => {
-    if (!ufoDragging || ufoReturning) return;
+  const handleGlobalPointerMove = (e) => {
+    if (scannerState === 'DOCKED' || scannerState === 'SCANNING') return;
+    setUfoPos({ x: e.clientX, y: e.clientY });
+  };
+
+  const handleGlobalPointerDown = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
     const x = e.clientX;
     const y = e.clientY;
-    setUfoPos({ x, y });
-    setPoints((prev) => [...prev, { x, y }]);
-  };
 
-  const handlePointerUp = () => {
-    if (!ufoDragging || ufoReturning) return;
-
-    if (points.length < 2) {
-      flyBackHome();
-      return;
+    if (scannerState === 'HOVER_FOLLOW') {
+      // Anchor center point of the search circle
+      setPoints([{ x, y }]);
+      setScannerState('DRAWING');
+      
+      // Freeze page scrolling during active drawing phase
+      document.body.style.overflow = 'hidden';
+    } 
+    else if (scannerState === 'DRAWING') {
+      // Execute the search scan!
+      setScannerState('SCANNING');
+      setIsScanning(true);
+      
+      const startPoint = points[0];
+      const dx = x - startPoint.x;
+      const dy = y - startPoint.y;
+      const radius = Math.sqrt(dx * dx + dy * dy);
+      
+      if (radius < 15) {
+        flyBackHome();
+        return;
+      }
+      
+      const result = runScannerCollisionCheck(startPoint.x, startPoint.y, radius);
+      setScanResult(result);
+      
+      // Hold scanning animation for 1.5s, then return UFO and display HUD console
+      setTimeout(() => {
+        setIsScanning(false);
+        flyBackHome(() => {
+          setHudOpen(true);
+        });
+      }, 1500);
     }
-
-    const startPoint = points[0];
-    const currentPoint = points[points.length - 1];
-    const dx = currentPoint.x - startPoint.x;
-    const dy = currentPoint.y - startPoint.y;
-    const radius = Math.sqrt(dx * dx + dy * dy);
-
-    if (radius < 15) {
-      flyBackHome();
-      return;
-    }
-
-    // Enter scanning phase
-    setIsScanning(true);
-
-    const result = runScannerCollisionCheck(startPoint.x, startPoint.y, radius);
-    setScanResult(result);
-
-    // Hold scanning overlay for 1.5s, then return UFO and display HUD console
-    setTimeout(() => {
-      setIsScanning(false);
-      flyBackHome(() => {
-        setHudOpen(true);
-      });
-    }, 1500);
   };
 
   const flyBackHome = (callback) => {
-    setUfoReturning(true);
-
-    // If sticky, fly back to the floating scanner dock; otherwise fly to the logo anchor
     const stickyDockEl = document.querySelector('.floating-ufo-scanner-dock .interactive-ufo-node');
     const logoAnchorEl = document.querySelector('.ufo-anchor');
     
@@ -252,8 +252,7 @@ export default function Home() {
     }
 
     setTimeout(() => {
-      setUfoDragging(false);
-      setUfoReturning(false);
+      setScannerState('DOCKED');
       setPoints([]);
       document.body.style.overflow = '';
       if (callback) callback();
@@ -367,7 +366,7 @@ export default function Home() {
 
   // Canvas draw effect
   useEffect(() => {
-    if (!ufoDragging || !canvasRef.current || points.length < 2) return;
+    if (scannerState !== 'DRAWING' || !canvasRef.current || points.length === 0) return;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     
@@ -379,7 +378,7 @@ export default function Home() {
     ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
     
     const startPoint = points[0];
-    const currentPoint = points[points.length - 1];
+    const currentPoint = ufoPos;
     
     const dx = currentPoint.x - startPoint.x;
     const dy = currentPoint.y - startPoint.y;
@@ -419,7 +418,7 @@ export default function Home() {
     ctx.moveTo(startPoint.x - 12, startPoint.y);
     ctx.lineTo(startPoint.x + 12, startPoint.y);
     ctx.stroke();
-  }, [points, ufoDragging]);
+  }, [points, ufoPos, scannerState]);
 
   // Restore scroll position from sessionStorage
   useEffect(() => {
@@ -727,12 +726,12 @@ export default function Home() {
                   ufo-float  = animation only (translateY, never touches X) */}
             <span className="letter letter-i" style={{ animationDelay: '2.3s' }}>
               I
-              <span className="ufo-anchor" style={{ opacity: ufoDragging ? 0 : 1, transition: 'opacity 0.25s ease' }}>
+              <span className="ufo-anchor" style={{ opacity: scannerState !== 'DOCKED' ? 0 : 1, transition: 'opacity 0.25s ease' }}>
                 <span className="ufo-float">
                   {/* Onboarding Tooltip Badge */}
                   {!hasScannedOnce && (
                     <span className="ufo-tooltip-onboarding">
-                      [ DRAG TO SCAN ]
+                      [ CLICK TO SCAN ]
                     </span>
                   )}
                   {/* Pulsing Sonar Ring for Interactivity Onboarding */}
@@ -741,7 +740,7 @@ export default function Home() {
                   )}
                   <span 
                     className="ufo interactive-ufo-node"
-                    onPointerDown={handleDragStart}
+                    onPointerDown={handleUfoActivate}
                     style={{ touchAction: 'none' }}
                   >
                     <span className="ufo-dome"></span>
@@ -2963,29 +2962,46 @@ export default function Home() {
         }
       `}</style>
 
-      {/* UFO Circle to Search dragging canvas overlay */}
-      {ufoDragging && (
-        <canvas
-          ref={canvasRef}
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
+      {/* UFO global interaction overlays */}
+      {scannerState !== 'DOCKED' && (
+        <div 
+          className="ufo-global-click-overlay"
+          onPointerMove={handleGlobalPointerMove}
+          onPointerDown={handleGlobalPointerDown}
           style={{
             position: 'fixed',
             inset: 0,
             width: '100vw',
             height: '100vh',
-            zIndex: 99999,
+            zIndex: 99998,
             touchAction: 'none',
             background: 'transparent',
-            cursor: 'crosshair',
+            cursor: scannerState === 'HOVER_FOLLOW' ? 'cell' : 'crosshair'
           }}
         />
       )}
 
-      {/* Dragging UFO overlay */}
-      {ufoDragging && (
+      {/* Circle to Search selection canvas overlay */}
+      {scannerState === 'DRAWING' && (
+        <canvas
+          ref={canvasRef}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            width: '100vw',
+            height: '100vh',
+            zIndex: 99997,
+            touchAction: 'none',
+            pointerEvents: 'none',
+            background: 'transparent'
+          }}
+        />
+      )}
+
+      {/* Active dragging/hovering UFO overlay */}
+      {scannerState !== 'DOCKED' && (
         <div 
-          className={`ufo-drag-overlay ${ufoReturning ? 'returning' : ''}`}
+          className={`ufo-drag-overlay ${scannerState === 'SCANNING' ? 'returning' : ''}`}
           style={{
             position: 'fixed',
             left: ufoPos.x,
@@ -2993,11 +3009,11 @@ export default function Home() {
             transform: 'translate(-50%, -50%)',
             pointerEvents: 'none',
             zIndex: 100000,
-            transition: ufoReturning ? 'all 0.7s cubic-bezier(0.25, 1, 0.5, 1)' : 'none'
+            transition: scannerState === 'SCANNING' ? 'all 0.7s cubic-bezier(0.25, 1, 0.5, 1)' : 'none'
           }}
         >
           {/* Laser scanning beam below active UFO */}
-          {!ufoReturning && (
+          {scannerState === 'DRAWING' && (
             <div className="ufo-scan-beam-active"></div>
           )}
           
@@ -3049,16 +3065,16 @@ export default function Home() {
       </div>
 
       {/* Floating UFO scanner when scrolled down */}
-      {isUfoSticky && !ufoDragging && (
+      {isUfoSticky && scannerState === 'DOCKED' && (
         <div 
           className="floating-ufo-scanner-dock interactive-ufo-node"
-          onPointerDown={handleDragStart}
-          style={{ touchAction: 'none', cursor: 'grab' }}
+          onPointerDown={handleUfoActivate}
+          style={{ touchAction: 'none', cursor: 'pointer' }}
         >
           {/* Sonar and tooltip badge */}
           {!hasScannedOnce && (
             <span className="ufo-tooltip-onboarding sticky-tooltip">
-              [ DRAG TO SCAN ]
+              [ CLICK TO SCAN ]
             </span>
           )}
           {!hasScannedOnce && (
