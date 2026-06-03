@@ -818,72 +818,125 @@ export default function Home() {
           {/* Right Visual Canvas */}
           <div className="matrix-preview-pane">
             <header className="pane-header">
-              <h3>Personal Ledger Showcase</h3>
-              <p>Previewing how saved properties populate your inspiration matrix.</p>
+              <h3>Personal Ledger System</h3>
+              <p>Cryptographic flow mechanics of your private spatial archive.</p>
             </header>
 
-            <div className="wishlist-showcase-matrix" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+            <div className="wishlist-infographics" style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
               
-              <div>
-                <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', textTransform: 'uppercase', color: 'var(--accent)', letterSpacing: '0.1em', marginBottom: '16px' }}>
-                  ACTIVE INSIGHT MATRIX (MOCKUP PREVIEW)
-                </h4>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
-                  {[
-                    {
-                      title: "Siargao Tropical Villa",
-                      city: "Siargao",
-                      category: "STR / Resort",
-                      reaction: "Inspired Me",
-                      desc: "Raw concrete framing combined with local coco-wood and native thatch. Visual style notes saved.",
-                      image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=400&q=80"
-                    },
-                    {
-                      title: "Batasan Hills House & Lot",
-                      city: "Quezon City",
-                      category: "Residential",
-                      reaction: "Potential Fit",
-                      desc: "Brutalist residential footprint with passive cooling vents. Architectural brief saved.",
-                      image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=400&q=80"
-                    }
-                  ].map((item, idx) => (
-                    <div key={idx} style={{ background: '#161616', border: '1px solid #262626', borderRadius: '4px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-                      <div style={{ height: '140px', overflow: 'hidden', position: 'relative' }}>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={item.image} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        <span style={{ position: 'absolute', bottom: '12px', left: '12px', background: 'rgba(0,0,0,0.7)', color: 'var(--accent)', fontFamily: 'var(--font-mono)', fontSize: '10px', padding: '4px 8px', border: '1px solid var(--accent-border)', borderRadius: '2px' }}>
-                          {item.reaction}
-                        </span>
-                      </div>
-                      <div style={{ padding: '16px' }}>
-                        <h5 style={{ fontSize: '16px', fontWeight: '500', color: '#fff', marginBottom: '4px', fontFamily: 'var(--font-display)' }}>{item.title}</h5>
-                        <span style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block', marginBottom: '8px' }}>Location: {item.city} &middot; {item.category}</span>
-                        <p style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>{item.desc}</p>
-                      </div>
-                    </div>
-                  ))}
+              {/* Connected Flow Steps */}
+              <div className="flow-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
+                
+                {/* Step 1: Scan */}
+                <div className="flow-card" style={{ background: '#111111', border: '1px solid #222222', padding: '24px 20px', borderRadius: '4px', display: 'flex', flexDirection: 'column', gap: '16px', position: 'relative' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--accent)', border: '1px solid rgba(200,169,110,0.2)', padding: '2px 6px', borderRadius: '2px' }}>PHASE 01</span>
+                    <span style={{ fontSize: '24px', fontWeight: '800', fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.05)' }}>01</span>
+                  </div>
+                  
+                  {/* Schematic Graphic: Mini Grid */}
+                  <div style={{ height: '70px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px dashed #262626', background: 'rgba(0,0,0,0.3)', borderRadius: '2px' }}>
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="rgba(200, 169, 110, 0.4)" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="3" width="7" height="9"></rect>
+                      <rect x="14" y="3" width="7" height="5"></rect>
+                      <rect x="14" y="12" width="7" height="9"></rect>
+                      <rect x="3" y="16" width="7" height="5"></rect>
+                    </svg>
+                  </div>
+                  
+                  <div>
+                    <h4 style={{ fontSize: '13px', textTransform: 'uppercase', color: '#fff', letterSpacing: '0.05em', margin: '0 0 6px 0', fontFamily: 'var(--font-display)' }}>Scan Architecture</h4>
+                    <p style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: '1.5', margin: 0 }}>Filter and search deep editorial briefings of premium local properties.</p>
+                  </div>
                 </div>
+
+                {/* Step 2: Tag */}
+                <div className="flow-card" style={{ background: '#111111', border: '1px solid #222222', padding: '24px 20px', borderRadius: '4px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--accent)', border: '1px solid rgba(200,169,110,0.2)', padding: '2px 6px', borderRadius: '2px' }}>PHASE 02</span>
+                    <span style={{ fontSize: '24px', fontWeight: '800', fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.05)' }}>02</span>
+                  </div>
+                  
+                  {/* Schematic Graphic: Floating Badges */}
+                  <div style={{ height: '70px', display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'center', justifyContent: 'center', border: '1px dashed #262626', background: 'rgba(0,0,0,0.3)', borderRadius: '2px', padding: '0 10px' }}>
+                    <div style={{ display: 'flex', gap: '4px' }}>
+                      <span style={{ fontSize: '8px', color: 'var(--accent)', border: '1px solid var(--accent)', padding: '2px 4px', borderRadius: '2px', opacity: 0.8 }}>FIT</span>
+                      <span style={{ fontSize: '8px', color: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.1)', padding: '2px 4px', borderRadius: '2px' }}>INT</span>
+                      <span style={{ fontSize: '8px', color: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.1)', padding: '2px 4px', borderRadius: '2px' }}>INS</span>
+                      <span style={{ fontSize: '8px', color: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.1)', padding: '2px 4px', borderRadius: '2px' }}>SAV</span>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h4 style={{ fontSize: '13px', textTransform: 'uppercase', color: '#fff', letterSpacing: '0.05em', margin: '0 0 6px 0', fontFamily: 'var(--font-display)' }}>Apply Reaction</h4>
+                    <p style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: '1.5', margin: 0 }}>Mark listings with custom tags reflecting your evaluation phase.</p>
+                  </div>
+                </div>
+
+                {/* Step 3: Archive */}
+                <div className="flow-card" style={{ background: '#111111', border: '1px solid #222222', padding: '24px 20px', borderRadius: '4px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--accent)', border: '1px solid rgba(200,169,110,0.2)', padding: '2px 6px', borderRadius: '2px' }}>PHASE 03</span>
+                    <span style={{ fontSize: '24px', fontWeight: '800', fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.05)' }}>03</span>
+                  </div>
+                  
+                  {/* Schematic Graphic: Vault lock */}
+                  <div style={{ height: '70px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px dashed #262626', background: 'rgba(0,0,0,0.3)', borderRadius: '2px' }}>
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="rgba(200, 169, 110, 0.4)" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                  </div>
+                  
+                  <div>
+                    <h4 style={{ fontSize: '13px', textTransform: 'uppercase', color: '#fff', letterSpacing: '0.05em', margin: '0 0 6px 0', fontFamily: 'var(--font-display)' }}>Secure Vault</h4>
+                    <p style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: '1.5', margin: 0 }}>Data is saved locally to your device's browser memory in complete isolation.</p>
+                  </div>
+                </div>
+
+                {/* Step 4: Route */}
+                <div className="flow-card" style={{ background: '#111111', border: '1px solid #222222', padding: '24px 20px', borderRadius: '4px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--accent)', border: '1px solid rgba(200,169,110,0.2)', padding: '2px 6px', borderRadius: '2px' }}>PHASE 04</span>
+                    <span style={{ fontSize: '24px', fontWeight: '800', fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.05)' }}>04</span>
+                  </div>
+                  
+                  {/* Schematic Graphic: Handshake signal */}
+                  <div style={{ height: '70px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px dashed #262626', background: 'rgba(0,0,0,0.3)', borderRadius: '2px' }}>
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="rgba(200, 169, 110, 0.4)" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                      <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                    </svg>
+                  </div>
+                  
+                  <div>
+                    <h4 style={{ fontSize: '13px', textTransform: 'uppercase', color: '#fff', letterSpacing: '0.05em', margin: '0 0 6px 0', fontFamily: 'var(--font-display)' }}>Initialize Handshake</h4>
+                    <p style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: '1.5', margin: 0 }}>Connect with vetted space intelligence advisors to deploy your plans.</p>
+                  </div>
+                </div>
+
               </div>
 
+              {/* Infographic Stats / Architecture Details */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', borderTop: '1px solid #262626', paddingTop: '24px' }}>
                 <div>
                   <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', textTransform: 'uppercase', color: 'var(--accent)', letterSpacing: '0.1em', marginBottom: '16px' }}>
-                    How It Works
+                    Anonymous Ledger Policy
                   </h4>
-                  <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: '1.6' }}>
-                    As you browse the spatial catalog, click the reaction badges below any property. No logins, accounts, or cookies required—everything remains privately archived on this device's memory ledger.
+                  <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: '1.6', margin: 0 }}>
+                    ScoutIt operates on a zero-tracking architecture. We do not store your search habits, cookies, or personal metrics on any central cloud server. Your board remains entirely yours—securely encrypted on your device.
                   </p>
                 </div>
                 
                 <div>
                   <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', textTransform: 'uppercase', color: 'var(--accent)', letterSpacing: '0.1em', marginBottom: '16px' }}>
-                    Board Ledger Stats
+                    Memory Ledger Parameters
                   </h4>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     {[
-                      { metric: "Storage Mode", val: "LocalStorage (Private)" },
-                      { metric: "Access Credentials", val: "Anonymous Ledger" },
-                      { metric: "Syncd Advisors", val: "Secure Handshake Link" }
+                      { metric: "Storage Technology", val: "LocalStorage API" },
+                      { metric: "Data Encryption", val: "Decentralized (On-Device)" },
+                      { metric: "Cloud Sinks", val: "None (Zero Server Sync)" }
                     ].map((st, idx) => (
                       <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed #222', paddingBottom: '6px' }}>
                         <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{st.metric}</span>
