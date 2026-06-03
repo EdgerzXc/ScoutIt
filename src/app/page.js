@@ -2261,6 +2261,17 @@ export default function Home() {
 
         /* Mobile Adjustments */
         @media (max-width: 1024px) {
+          .cinematic-container {
+            scroll-snap-type: none;
+            height: auto;
+            overflow-y: visible;
+          }
+          .snap-section {
+            scroll-snap-align: none;
+            height: auto !important;
+            min-height: 100vh;
+            overflow: visible;
+          }
           .flow-grid {
             grid-template-columns: repeat(2, 1fr);
           }
@@ -2297,6 +2308,7 @@ export default function Home() {
           }
           .matrix-preview-pane {
             padding: 32px 24px;
+            overflow-y: visible !important;
           }
           .discover-preview-grid, .brokers-blur-grid {
             grid-template-columns: 1fr;
