@@ -139,6 +139,26 @@ export default function Home() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [activeDiscoverType, setActiveDiscoverType] = useState("Residential");
   const [driftingRocks, setDriftingRocks] = useState([]);
+  const containerRef = useRef(null);
+
+  // Restore scroll position from sessionStorage
+  useEffect(() => {
+    const savedScroll = sessionStorage.getItem("homepage_scroll");
+    if (savedScroll && containerRef.current) {
+      const timer = setTimeout(() => {
+        if (containerRef.current) {
+          containerRef.current.scrollTop = parseInt(savedScroll, 10);
+        }
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  const handleScroll = (e) => {
+    if (e.currentTarget) {
+      sessionStorage.setItem("homepage_scroll", e.currentTarget.scrollTop.toString());
+    }
+  };
 
   useEffect(() => {
     let active = true;
@@ -305,7 +325,7 @@ export default function Home() {
   // Stars and glitters particle arrays removed for clean cinematic hero redesign
 
   return (
-    <main className="cinematic-container">
+    <main ref={containerRef} onScroll={handleScroll} className="cinematic-container">
       {/* SECTION 1: SPACE HERO */}
       <section className="snap-section section-hook">
         <div className="grain"></div>
