@@ -1,115 +1,24 @@
 import { NextResponse } from "next/server";
 
-// Mock collections to fallback on if Airtable parameters are absent
-const MOCK_PROPERTIES = [
-  {
-    id: "rec1",
-    title: "Batasan Hills Architectural Estate",
-    city: "Quezon City",
-    location: "Quezon City, Metro Manila",
-    specs: ["360 sqm Lot", "4 Bedrooms", "Smart Home Integration"],
-    gradient: "linear-gradient(135deg, #1f1c18 0%, #100f0d 100%)"
-  },
-  {
-    id: "rec2",
-    title: "Aura Premium Sky Penthouse",
-    city: "Bonifacio Global City",
-    location: "Taguig, Metro Manila",
-    specs: ["240 sqm Living", "3 Bedrooms", "Panoramic Views"],
-    gradient: "linear-gradient(135deg, #181d1f 0%, #0d0f10 100%)"
-  },
-  {
-    id: "rec3",
-    title: "Legaspi Executive Loft Residences",
-    city: "Makati",
-    location: "Makati City, Metro Manila",
-    specs: ["120 sqm Studio", "1 Bedroom", "Near Greenbelt"],
-    gradient: "linear-gradient(135deg, #19181f 0%, #0e0d10 100%)"
-  },
-  {
-    id: "rec4",
-    title: "Versailles Luxury Courtyard Villa",
-    city: "Alabang",
-    location: "Muntinlupa, Metro Manila",
-    specs: ["450 sqm Lot", "5 Bedrooms", "Private Pool"],
-    gradient: "linear-gradient(135deg, #1f1818 0%, #100d0d 100%)"
-  },
-  {
-    id: "rec5",
-    title: "Sierra Madre Urban Sanctuary",
-    city: "Mandaluyong",
-    location: "Mandaluyong, Metro Manila",
-    specs: ["95 sqm Condo", "2 Bedrooms", "BGC Skyline Views"],
-    gradient: "linear-gradient(135deg, #181f19 0%, #0d100d 100%)"
-  },
-  {
-    id: "rec6",
-    title: "Marina Bay High-Rise Suite",
-    city: "Pasay",
-    location: "Pasay City, Metro Manila",
-    specs: ["180 sqm Suite", "2 Bedrooms", "Manila Bay Sunset"],
-    gradient: "linear-gradient(135deg, #1f1c1f 0%, #100e10 100%)"
-  }
-];
+import { getProperties, getArticles } from "@/data/mockDb";
 
-const MOCK_INTEL = [
-  {
-    id: "intel1",
-    title: "Batasan Hills Infrastructure Expansion Set for Q4",
-    city: "Quezon City",
-    category: "Infrastructure Briefing",
-    snippet: "Proposed MRT-7 feeder routes will enhance transit connectivity to major Quezon City hubs, boosting value projections.",
-    date: "June 2026"
-  },
-  {
-    id: "intel2",
-    title: "Quezon City Commercial Hub Reaches Record Valuation",
-    city: "Quezon City",
-    category: "Market Pulse",
-    snippet: "BPO expansion drives massive leasing volume across East Triangle zones, signaling tight premium supply.",
-    date: "May 2026"
-  },
-  {
-    id: "intel3",
-    title: "BGC Commercial Zoning Reforms Announced",
-    city: "Bonifacio Global City",
-    category: "Regulatory Shift",
-    snippet: "Local government relaxes FAR limitations for select mixed-use complexes, allowing vertical extensions.",
-    date: "June 2026"
-  },
-  {
-    id: "intel4",
-    title: "Makati Office Space Demand Shifts to Green Buildings",
-    city: "Makati",
-    category: "Sustainability Review",
-    snippet: "Over 80% of new MNC tenants mandate LEED Gold certifications for office leasing in Legaspi and Salcedo villages.",
-    date: "June 2026"
-  },
-  {
-    id: "intel5",
-    title: "Alabang Residential Tax Revisions Approved",
-    city: "Alabang",
-    category: "Fiscal Intel",
-    snippet: "Property tax concessions for gated enclaves are set to expire, shifting developer focus toward boutique smart-estates.",
-    date: "May 2026"
-  },
-  {
-    id: "intel6",
-    title: "Mandaluyong Infrastructure Project Enters Phase 3",
-    city: "Mandaluyong",
-    category: "Infrastructure Briefing",
-    snippet: "The new bridge project linking Pioneer District to Pasig river developments is now 75% complete.",
-    date: "June 2026"
-  },
-  {
-    id: "intel7",
-    title: "Pasay Entertainment City Licensing Adjustments",
-    city: "Pasay",
-    category: "Regulatory Shift",
-    snippet: "Integrated resort spaces secure flexible operations frameworks, stimulating secondary luxury residential markets.",
-    date: "April 2026"
-  }
-];
+const MOCK_PROPERTIES = getProperties().map(p => ({
+  id: p.slug,
+  title: p.title,
+  city: p.city,
+  location: p.location,
+  specs: [p.property_type, `${p.beds} Bedrooms`, p.furnishing],
+  gradient: "linear-gradient(135deg, #1f1c18 0%, #100f0d 100%)"
+}));
+
+const MOCK_INTEL = getArticles().map((art, idx) => ({
+  id: `intel${idx + 1}`,
+  title: art.title,
+  city: art.category === "Residential" ? "Quezon City" : (art.category === "Commercial" ? "Bonifacio Global City" : "Siargao"),
+  category: art.category,
+  snippet: art.excerpt,
+  date: art.date
+}));
 
 export async function GET(request) {
   const apiKey = process.env.AIRTABLE_API_KEY;

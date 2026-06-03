@@ -2,81 +2,9 @@
 
 import Header from "@/components/Header";
 import Link from "next/link";
+import { getBrokers } from "@/data/mockDb";
 
-const DUMMY_BROKERS = [
-  {
-    id: "br-01",
-    name: "Miguel Torres, REB",
-    title: "Principal Strategist",
-    specialty: "Ultra-Luxury Residential",
-    location: "BGC Focus",
-    bio: "With over a decade of experience in BGC and the greater Manila market, Miguel specializes in industrial-modern residential estates and adaptive reuse projects.",
-    image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=800&q=80",
-    closures: "3 Verified Closures // BGC Focus",
-    managedProperties: ["Aurelia Residences", "The Estate Makati", "Park Central Towers"],
-    clearanceTier: "Tier 1 - Alpha"
-  },
-  {
-    id: "br-02",
-    name: "Elena Santos, REB",
-    title: "Global Capital Manager",
-    specialty: "Grade A Office Spaces",
-    location: "Makati Core",
-    bio: "Elena provides structural insights for institutional clients, guiding commercial acquisitions and corporate relocations.",
-    image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=800&q=80",
-    closures: "2 Verified Closures // QC Residential",
-    managedProperties: ["Zuellig Building", "Arthaland Century Pacific", "PBCom Tower"],
-    clearanceTier: "Tier 2 - Omega"
-  },
-  {
-    id: "br-03",
-    name: "Marco Reyes, REB",
-    title: "Lead Arbitrage Analyst",
-    specialty: "STR & Resort Properties",
-    location: "STR Sector",
-    bio: "Marco connects visionary operators with prime coastal assets and boutique hospitality opportunities across the archipelago, specializing in modern tropical STR architecture.",
-    image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=800&q=80",
-    closures: "4 Verified Closures // STR Sector",
-    managedProperties: ["Siargao Tropical Villa", "Palawan Eco-Retreat", "Boracay Grand"],
-    clearanceTier: "Tier 1 - Alpha"
-  },
-  {
-    id: "br-04",
-    name: "Julian Sy",
-    title: "Industrial & Logistics",
-    specialty: "Warehousing & Supply Chain",
-    location: "Laguna & Batangas",
-    bio: "Focusing on the expanding industrial corridors south of Manila, Julian engineers strategic acquisitions for logistics hubs.",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80",
-    closures: "2 Verified Closures // Laguna & Batangas",
-    managedProperties: ["Laguna Technopark", "Batangas Port Terminal"],
-    clearanceTier: "Tier 3 - Beta"
-  },
-  {
-    id: "br-05",
-    name: "Camille Laurel",
-    title: "Architectural Asset Advisor",
-    specialty: "Heritage & Conservation",
-    location: "Quezon City",
-    bio: "An advocate for adaptive reuse, Camille brokers the transfer and restoration of culturally significant structures.",
-    image: "https://images.unsplash.com/photo-1598550874175-4d0ef436c909?w=800&q=80",
-    closures: "1 Verified Closure // Quezon City",
-    managedProperties: ["New Manila Mansions", "Capitol Hills Estates"],
-    clearanceTier: "Tier 2 - Omega"
-  },
-  {
-    id: "br-06",
-    name: "Sofia Araneta",
-    title: "Boutique Hospitality Specialist",
-    specialty: "Culinary Estates",
-    location: "Tagaytay & South",
-    bio: "Sofia identifies pre-development opportunities in rising economic zones, advising private equity on long-term holds.",
-    image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=800&q=80",
-    closures: "2 Verified Closures // Tagaytay & South",
-    managedProperties: ["Antonio's Tagaytay", "Gallery by Chele (South Branch)"],
-    clearanceTier: "Tier 3 - Beta"
-  },
-];
+const DUMMY_BROKERS = getBrokers();
 
 import { useState } from "react";
 
@@ -87,7 +15,7 @@ export default function BrokersPage() {
     const term = searchTerm.toLowerCase();
     const matchLocation = broker.location.toLowerCase().includes(term);
     const matchName = broker.name.toLowerCase().includes(term);
-    const matchProperties = broker.managedProperties.some(p => p.toLowerCase().includes(term));
+    const matchProperties = broker.managedProperties.some(p => p.title.toLowerCase().includes(term));
     return matchLocation || matchName || matchProperties;
   });
 

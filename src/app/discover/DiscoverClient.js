@@ -8,71 +8,7 @@ import "./discover.css";
 
 const CATEGORIES = ["Residential", "Commercial", "STR", "Restaurants"];
 
-const DISCOVER_PROPERTIES = {
-  Residential: [
-    {
-      id: "batasan-hills",
-      title: "Batasan Hills House & Lot",
-      city: "Quezon City",
-      location: "Quezon City",
-      image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&q=80",
-      density: "3 Bedrooms · 180 sqm"
-    }
-  ],
-  Commercial: [
-    {
-      id: "gridwork-studio",
-      title: "The Gridwork Studio",
-      city: "Bonifacio Global City",
-      location: "Bonifacio Global City",
-      image: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80",
-      density: "Open Layout · 150 sqm"
-    }
-  ],
-  STR: [
-    {
-      id: "pacific-edge-villa",
-      title: "Pacific Edge Villa",
-      city: "Siargao",
-      location: "Siargao",
-      image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80",
-      density: "Beachfront · 250 sqm"
-    }
-  ],
-  Restaurants: [
-    {
-      id: "gallery-by-chele",
-      title: "Gallery by Chele",
-      city: "Bonifacio Global City",
-      location: "Bonifacio Global City",
-      image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80",
-      density: "Intimate Layout · 250 sqm"
-    }
-  ]
-};
-
-const DISCOVER_INTEL = {
-  Residential: [
-    { id: "n1", category: "NEWS", date: "Q3 2026", title: "BGC Condo Yields Rise", snippet: "Premium residential spaces see 4.2% YoY growth." },
-    { id: "n2", category: "INSIGHT", date: "Q3 2026", title: "Makati Central Resurgence", snippet: "Older luxury buildings undergoing massive renovations." },
-    { id: "n3", category: "BLOG", date: "Q3 2026", title: "Mastering the QC Market", snippet: "What to look for in QC subdivision residences." }
-  ],
-  Commercial: [
-    { id: "n4", category: "NEWS", date: "Q3 2026", title: "New BPO Headquarters", snippet: "Global tech firms securing massive floor plates." },
-    { id: "n5", category: "INSIGHT", date: "Q3 2026", title: "High Street Expansion", snippet: "Retail spaces are fully occupied for the next 24 months." },
-    { id: "n6", category: "BLOG", date: "Q3 2026", title: "BGC Commercial Outlook", snippet: "Corporate spatial requirements shifting to flexible hubs." }
-  ],
-  STR: [
-    { id: "n7", category: "NEWS", date: "Q3 2026", title: "Siargao Villa Boom", snippet: "Short term rentals operating at 95% occupancy." },
-    { id: "n8", category: "INSIGHT", date: "Q3 2026", title: "Palawan Eco-resorts", snippet: "Sustainable tourism driving massive development." },
-    { id: "n9", category: "BLOG", date: "Q3 2026", title: "STR Management Strategies", snippet: "Optimizing yields on seasonal beach properties." }
-  ],
-  Restaurants: [
-    { id: "n10", category: "NEWS", date: "Q3 2026", title: "Michelin Guide Entry", snippet: "High-end dining spaces are highly contested." },
-    { id: "n11", category: "INSIGHT", date: "Q3 2026", title: "Ridge Dining Surge", snippet: "Al fresco estate dining commands premium rates." },
-    { id: "n12", category: "BLOG", date: "Q3 2026", title: "Restaurant Space Layouts", snippet: "How spatial density affects kitchen efficiency." }
-  ]
-};
+import { DISCOVER_PROPERTIES, DISCOVER_INTEL } from "@/data/mockDb";
 
 export default function DiscoverClient() {
   const searchParams = useSearchParams();
@@ -201,11 +137,11 @@ export default function DiscoverClient() {
             </div>
             <div className="chronologicalNewsRow" style={{ cursor: "default" }}>
               {intel.map((news) => (
-                <div
+                <Link
                   key={news.id}
+                  href={`/intel/${news.slug}`}
                   className="newsCapsule"
-                  onClick={() => console.log(news.title)}
-                  style={{ cursor: "pointer" }}
+                  style={{ display: "block", textDecoration: "none" }}
                 >
                   <div className="capsuleMeta">
                     <span className="where-badge">{news.category}</span>
@@ -213,7 +149,7 @@ export default function DiscoverClient() {
                   </div>
                   <h3 className="capsuleTitle">{news.title}</h3>
                   <p className="capsuleSnippet">{news.snippet}</p>
-                </div>
+                </Link>
               ))}
             </div>
           </section>

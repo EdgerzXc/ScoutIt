@@ -4,134 +4,14 @@ import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import ReactionButtons from "@/components/ReactionButtons";
 
-const SPACE_STARS = [
-  { top: '15%', left: '12%', size: '1.5px', opacity: 0.15 },
-  { top: '8%', left: '34%', size: '2px', opacity: 0.25 },
-  { top: '22%', left: '55%', size: '1px', opacity: 0.1 },
-  { top: '5%', left: '78%', size: '2px', opacity: 0.2 },
-  { top: '28%', left: '92%', size: '1.5px', opacity: 0.18 },
-  { top: '45%', left: '8%', size: '2px', opacity: 0.15 },
-  { top: '38%', left: '26%', size: '1px', opacity: 0.12 },
-  { top: '52%', left: '44%', size: '2.5px', opacity: 0.2 },
-  { top: '48%', left: '72%', size: '1.5px', opacity: 0.15 },
-  { top: '65%', left: '88%', size: '2px', opacity: 0.22 },
-  { top: '78%', left: '15%', size: '1px', opacity: 0.1 },
-  { top: '88%', left: '38%', size: '2px', opacity: 0.18 },
-  { top: '82%', left: '64%', size: '1.5px', opacity: 0.15 },
-  { top: '72%', left: '82%', size: '2px', opacity: 0.2 },
-  { top: '92%', left: '95%', size: '1px', opacity: 0.12 }
-];
+import { 
+  SPACE_STARS, 
+  getDISCOVERY_FEED, 
+  getDISCOVER_HUBS, 
+  getCATEGORY_PREVIEWS 
+} from "@/data/mockDb";
 
-const discoveryFeedData = {
-  Residential: {
-    spotlights: [
-      {
-        title: "Aurelia Residences",
-        location: "BGC Core",
-        style: "Modern Tropical",
-        image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=400&q=80",
-        desc: "Low density luxury high-rise featuring double-glazed glass wrap and custom bronze details."
-      },
-      {
-        title: "The Estate Makati",
-        location: "Makati Central",
-        style: "Brutalist Luxury",
-        image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=400&q=80",
-        desc: "Designed by Foster + Partners. Cruciform structure maximizing floor plate efficiency and natural daylight."
-      }
-    ],
-    news: [
-      { title: "BGC Spatial Movement", date: "June 2026", excerpt: "A rise in demand for low-density residences drives modernist villa acquisitions." },
-      { title: "The Return of Quiet Luxury", date: "May 2026", excerpt: "Local buyers favor hidden properties in Quezon City over flashy estates." }
-    ],
-    collections: [
-      "Modernist Penthouses",
-      "QC Quiet Luxury Estates",
-      "Tropical Modern Estates"
-    ]
-  },
-  Commercial: {
-    spotlights: [
-      {
-        title: "Zuellig Building",
-        location: "Makati CBD",
-        style: "Sustainable Glass",
-        image: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&q=80",
-        desc: "LEED Platinum certified skyscraper utilizing low-emissivity glass and rain harvesting systems."
-      },
-      {
-        title: "Arthaland Century Pacific",
-        location: "BGC North",
-        style: "Eco-Corporate",
-        image: "https://images.unsplash.com/photo-1582653291997-079a1c04e5d1?w=400&q=80",
-        desc: "A boutique commercial landmark combining zero-waste technology and premium workspace layouts."
-      }
-    ],
-    news: [
-      { title: "Green Office Demand", date: "June 2026", excerpt: "Global firms in Manila mandate LEED-certified workspaces for all future operations." },
-      { title: "BGC Commercial Corridors", date: "April 2026", excerpt: "Retail podiums are evolving to include open-air gardens and wellness zones." }
-    ],
-    collections: [
-      "LEED Platinum Towers",
-      "BGC Premium Workspaces",
-      "Creative Studio Hubs"
-    ]
-  },
-  STR: {
-    spotlights: [
-      {
-        title: "Siargao Tropical Villa",
-        location: "Cloud 9",
-        style: "Island Minimalist",
-        image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&q=80",
-        desc: "Open-plan coco-wood pavilion with high-pitched thatch roofs and private sea pools."
-      },
-      {
-        title: "Palawan Eco-Retreat",
-        location: "El Nido Lio",
-        style: "Native Modern",
-        image: "https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?w=400&q=80",
-        desc: "Solar-powered beachfront cabins utilizing locally-sourced bamboo and reclaimed teak structures."
-      }
-    ],
-    news: [
-      { title: "Surf-Front Land Rush", date: "June 2026", excerpt: "Boutique developers scramble to acquire land along General Luna's extended coast." },
-      { title: "Off-Grid Island Living", date: "May 2026", excerpt: "Palawan resort developers transition fully to solar microgrids and composting systems." }
-    ],
-    collections: [
-      "Coastal Surf Retreats",
-      "Off-Grid Bamboo Pavilions",
-      "Luxury Glamping Tents"
-    ]
-  },
-  Restaurants: {
-    spotlights: [
-      {
-        title: "Gallery by Chele",
-        location: "BGC Central",
-        style: "Wood & Steel",
-        image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&q=80",
-        desc: "Industrial minimalist space with warm natural wood overlays and dramatic mood lighting."
-      },
-      {
-        title: "Antonio's Tagaytay",
-        location: "Tagaytay Ridge",
-        style: "Heritage Colonial",
-        image: "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=400&q=80",
-        desc: "Grand estate dining hall displaying black-and-white tiles, colonial pillars, and lush greenhouse corridors."
-      }
-    ],
-    news: [
-      { title: "Poblacion Food Architecture", date: "June 2026", excerpt: "Abandoned residential warehouses are reborn as high-design multi-concept culinary spots." },
-      { title: "Design-First Ridge Dining", date: "May 2026", excerpt: "Tagaytay restaurants design glass pavilions to capture panoramic Taal lake vistas." }
-    ],
-    collections: [
-      "Industrial Culinary Hubs",
-      "Heritage Estate Dining",
-      "Minimalist Coffee Spots"
-    ]
-  }
-};
+const discoveryFeedData = getDISCOVERY_FEED();
 
 export default function Home() {
   const [activePropertyType, setActivePropertyType] = useState("Residential");
@@ -250,77 +130,9 @@ export default function Home() {
     "Quezon Province", "Alabang", "Siargao"
   ];
 
-  const discoverHubs = {
-    Residential: ["BGC Alpha", "Makati Core", "Arca South", "Nuvali Estate", "Forbes Park"],
-    Commercial: ["Makati CBD", "Ortigas Center", "BGC North", "Alabang CBD", "Bay Area"],
-    STR: ["Siargao Cloud 9", "El Nido Lio", "Boracay Station 1", "Panglao Island", "Coron Town"],
-    Restaurants: ["BGC High Street", "Salcedo Village", "Tagaytay Ridge", "Poblacion", "Tomas Morato"]
-  };
+  const discoverHubs = getDISCOVER_HUBS();
 
-  const categoryPreviews = {
-    Residential: [
-      {
-        id: "res-1",
-        title: "Aurelia Residences",
-        image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80",
-        tags: ["Aesthetic: Modern Tropical", "Spatial Density: Low", "Location: BGC Core"],
-      },
-      {
-        id: "res-2",
-        title: "The Estate Makati",
-        image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&q=80",
-        tags: ["Aesthetic: Brutalist Luxury", "Spatial Density: Medium", "Location: Makati Central"],
-      },
-      {
-        id: "res-3",
-        title: "Park Central Towers",
-        image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80",
-        tags: ["Aesthetic: Glass Minimalist", "Spatial Density: High", "Location: Roxas Triangle"],
-      }
-    ],
-    Commercial: [
-      {
-        id: "com-1",
-        title: "Zuellig Building",
-        image: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80",
-        tags: ["Aesthetic: Sustainable Glass", "Zoning: Premium IT", "Location: Makati CBD"],
-      },
-      {
-        id: "com-2",
-        title: "Arthaland Century Pacific",
-        image: "https://images.unsplash.com/photo-1582653291997-079a1c04e5d1?w=800&q=80",
-        tags: ["Aesthetic: Eco-Corporate", "Zoning: Mixed-Use", "Location: BGC North"],
-      }
-    ],
-    STR: [
-      {
-        id: "str-1",
-        title: "Siargao Tropical Villa",
-        image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80",
-        tags: ["Aesthetic: Island Minimalist", "Yield: High Velocity", "Location: Cloud 9"],
-      },
-      {
-        id: "str-2",
-        title: "Palawan Eco-Retreat",
-        image: "https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?w=800&q=80",
-        tags: ["Aesthetic: Native Modern", "Yield: Seasonal Peak", "Location: El Nido"],
-      }
-    ],
-    Restaurants: [
-      {
-        id: "rest-1",
-        title: "Gallery by Chele",
-        image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80",
-        tags: ["Aesthetic: Wood & Steel", "Capacity: Intimate", "Location: BGC Central"],
-      },
-      {
-        id: "rest-2",
-        title: "Antonio's Tagaytay",
-        image: "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&q=80",
-        tags: ["Aesthetic: Heritage Colonial", "Capacity: Estate", "Location: Tagaytay Ridge"],
-      }
-    ]
-  };
+  const categoryPreviews = getCATEGORY_PREVIEWS();
 
   // Stars and glitters particle arrays removed for clean cinematic hero redesign
 
@@ -688,13 +500,17 @@ export default function Home() {
                   <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', textTransform: 'uppercase', color: 'var(--accent)', letterSpacing: '0.1em', marginBottom: '16px' }}>News &amp; Stories</h4>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                     {discoveryFeedData[activeDiscoverType].news.map((item, idx) => (
-                      <div key={idx} style={{ borderBottom: '1px solid #1e1e1e', paddingBottom: '12px' }}>
+                      <Link
+                        key={idx}
+                        href={`/intel/${item.slug}`}
+                        className="discover-news-item-link"
+                      >
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                          <h5 style={{ fontSize: '13px', fontWeight: '500', color: '#f0ede8' }}>{item.title}</h5>
+                          <h5 className="news-item-title">{item.title}</h5>
                           <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>{item.date}</span>
                         </div>
-                        <p style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>{item.excerpt}</p>
-                      </div>
+                        <p style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.5', margin: 0 }}>{item.excerpt}</p>
+                      </Link>
                     ))}
                   </div>
                 </div>
@@ -1733,6 +1549,7 @@ export default function Home() {
           display: flex;
           flex-direction: column;
           overflow-y: auto;
+          overscroll-behavior-y: contain;
         }
 
         .pane-header {
@@ -1953,6 +1770,31 @@ export default function Home() {
           border-color: var(--accent) !important;
           transform: translateX(4px);
           box-shadow: 0 0 12px rgba(200, 169, 110, 0.08);
+        }
+
+        .discover-news-item-link {
+          display: block;
+          border-bottom: 1px solid #1e1e1e;
+          padding: 12px;
+          margin: 0 -12px;
+          border-radius: 4px;
+          transition: all var(--transition-fast);
+          text-decoration: none;
+        }
+        .discover-news-item-link:hover {
+          background: rgba(200, 169, 110, 0.03);
+          border-color: rgba(200, 169, 110, 0.15) !important;
+          transform: translateX(4px);
+        }
+        .news-item-title {
+          font-size: 13px;
+          font-weight: 500;
+          color: #f0ede8;
+          transition: color var(--transition-fast);
+          margin: 0;
+        }
+        .discover-news-item-link:hover .news-item-title {
+          color: var(--accent);
         }
 
         /* SECTION 3: DISCOVER LAYER */

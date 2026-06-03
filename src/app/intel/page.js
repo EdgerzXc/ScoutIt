@@ -4,72 +4,9 @@ import Header from "@/components/Header";
 import Link from "next/link";
 import { useState } from "react";
 
-const ARTICLES = [
-  {
-    slug: "bgc-spatial-movement",
-    title: "BGC Spatial Movement",
-    category: "Residential",
-    date: "June 2026",
-    excerpt: "A rise in demand for low-density residences drives modernist villa acquisitions across Bonifacio Global City core.",
-    image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80"
-  },
-  {
-    slug: "return-of-quiet-luxury",
-    title: "The Return of Quiet Luxury",
-    category: "Residential",
-    date: "May 2026",
-    excerpt: "Local high-net-worth buyers increasingly favor hidden properties in Quezon City over flashy, visible estates.",
-    image: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&q=80"
-  },
-  {
-    slug: "green-office-demand",
-    title: "Green Office Demand",
-    category: "Commercial",
-    date: "June 2026",
-    excerpt: "Global firms in Manila mandate LEED-certified workspaces, shaping future skyscraper architectural footprints.",
-    image: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80"
-  },
-  {
-    slug: "bgc-commercial-corridors",
-    title: "BGC Commercial Corridors",
-    category: "Commercial",
-    date: "April 2026",
-    excerpt: "Retail podiums and commercial corridors evolve to incorporate open-air sky parks and wellness zones.",
-    image: "https://images.unsplash.com/photo-1582653291997-079a1c04e5d1?w=800&q=80"
-  },
-  {
-    slug: "surf-front-land-rush",
-    title: "Surf-Front Land Rush",
-    category: "Hospitality",
-    date: "June 2026",
-    excerpt: "Boutique island developers scramble to acquire coastal land along General Luna's extended surf breaks.",
-    image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80"
-  },
-  {
-    slug: "off-grid-island-living",
-    title: "Off-Grid Island Living",
-    category: "Hospitality",
-    date: "May 2026",
-    excerpt: "Resort developers in Palawan shift fully to off-grid solar microgrids, green water treatment, and teak designs.",
-    image: "https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?w=800&q=80"
-  },
-  {
-    slug: "poblacion-food-architecture",
-    title: "Poblacion Food Architecture",
-    category: "Culinary",
-    date: "June 2026",
-    excerpt: "Industrial modernist overlays reshape abandoned residential warehouses into multi-concept culinary destinations.",
-    image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80"
-  },
-  {
-    slug: "design-first-ridge-dining",
-    title: "Design-First Ridge Dining",
-    category: "Culinary",
-    date: "May 2026",
-    excerpt: "Tagaytay culinary spaces design glass-enclosed structures that maximize views of the Taal Volcano ridge.",
-    image: "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&q=80"
-  }
-];
+import { getArticles } from "@/data/mockDb";
+
+const ARTICLES = getArticles();
 
 export default function IntelPage() {
   const [filter, setFilter] = useState("All");

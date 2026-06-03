@@ -10,81 +10,7 @@ import "./property.css";
 // Replace with a CMS/API call later by swapping this
 // object with a server fetch or props from page.js
 // ═══════════════════════════════════════════════════
-const propertyData = {
-  // Hero
-  title:             "Batasan Hills House & Lot",
-  location:          "Batasan Hills, Quezon City",
-  hook:              "Positioned within one of QC's fastest-evolving residential corridors.",
-  city:              "Quezon City",
-
-  // Specs
-  property_type:     "House & Lot",
-  tenure:            "For Sale",
-  year_built:        "2018",
-  furnishing:        "Bare",
-  beds:              3,
-  baths:             2,
-  floor_sqm:         120,
-  lot_sqm:           180,
-  parking:           1,
-  floors:            "2 Storey",
-
-  // Comfort ratings (out of 10)
-  comfort_level:     8.5,
-  natural_light:     9.0,
-  privacy:           8.0,
-  space_feel:        8.7,
-
-  // Descriptive fields
-  noise_level_text:         "Low / Minimal",
-  ventilation:              "Excellent cross-ventilation",
-  ceiling_height_text:      "3.2 meters",
-  outdoor_description:      "Spacious multi-use courtyard area",
-  street_type:              "Concrete subdivision road",
-  lifestyle_vibe:           "Quiet & Family-Oriented",
-  best_for:                 "Families · WFH Professionals · Long-term Investors",
-
-  // Risk / scores
-  flood_risk_score:  2,    // low risk
-  convenience_score: 7.5,
-
-  // Verdicts & meta
-  title_status:      "TCT — Free & Clear",
-  scoutit_verdict:   "Highly Recommended — AAA Asset Tier",
-  accordion_1_title: "Home Feel & Comfort",
-  accordion_1_rating:"High",
-  accordion_2_title: "Space Usability",
-  accordion_2_rating:"Efficient",
-  accordion_3_title: "Story of This Space",
-  accordion_3_rating:"",
-  accordion_3_text:  "Built in 2018 by a family that outgrew the space, this property has never been rented — preserving its material quality and finish integrity across all rooms.",
-
-  broker_name:       "Miguel Torres, REB",
-
-  // Photos — bright premium architectural hero images
-  photos: [
-    "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80",
-    "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80",
-    "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=80",
-    "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
-    "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1200&q=80",
-  ],
-
-  // Where To proximity data
-  whereTo: [
-    { category: "Education",  name: "University of the Philippines Diliman",  distance: "8 min drive" },
-    { category: "Education",  name: "Batasan Hills National HS",               distance: "4 min walk"  },
-    { category: "Healthcare", name: "Quirino Memorial Medical Center",          distance: "12 min drive"},
-    { category: "Healthcare", name: "St. Luke's QC",                           distance: "18 min drive"},
-    { category: "Essentials", name: "SM Fairview",                             distance: "9 min drive" },
-    { category: "Essentials", name: "Puregold Batasan",                        distance: "4 min drive" },
-    { category: "Transit",    name: "MRT-7 North Ave (Phase 1)",               distance: "12 min drive"},
-    { category: "Transit",    name: "Commonwealth jeepney stops",              distance: "3 min walk"  },
-  ],
-
-  // Best For pills
-  bestForTags: ["Families", "WFH Professionals", "Long-term Hold"],
-};
+import { getPropertyBySlug } from "@/data/mockDb";
 
 // ═══════════════════════════════════════════════════
 // HELPER UTILITIES
@@ -141,7 +67,7 @@ export default function PropertyDetailClient({ slug }) {
   }, []);
 
   // ── Derived values from local data slots ──────
-  const d           = propertyData;   // short alias
+  const d           = getPropertyBySlug(slug);   // short alias
   const photos      = d.photos;
   const floodRiskText  = floodText(d.flood_risk_score);
   const floodRiskScore = `Score: ${d.flood_risk_score}/10`;
