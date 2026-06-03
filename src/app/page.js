@@ -4,6 +4,135 @@ import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import ReactionButtons from "@/components/ReactionButtons";
 
+const SPACE_STARS = [
+  { top: '15%', left: '12%', size: '1.5px', opacity: 0.15 },
+  { top: '8%', left: '34%', size: '2px', opacity: 0.25 },
+  { top: '22%', left: '55%', size: '1px', opacity: 0.1 },
+  { top: '5%', left: '78%', size: '2px', opacity: 0.2 },
+  { top: '28%', left: '92%', size: '1.5px', opacity: 0.18 },
+  { top: '45%', left: '8%', size: '2px', opacity: 0.15 },
+  { top: '38%', left: '26%', size: '1px', opacity: 0.12 },
+  { top: '52%', left: '44%', size: '2.5px', opacity: 0.2 },
+  { top: '48%', left: '72%', size: '1.5px', opacity: 0.15 },
+  { top: '65%', left: '88%', size: '2px', opacity: 0.22 },
+  { top: '78%', left: '15%', size: '1px', opacity: 0.1 },
+  { top: '88%', left: '38%', size: '2px', opacity: 0.18 },
+  { top: '82%', left: '64%', size: '1.5px', opacity: 0.15 },
+  { top: '72%', left: '82%', size: '2px', opacity: 0.2 },
+  { top: '92%', left: '95%', size: '1px', opacity: 0.12 }
+];
+
+const discoveryFeedData = {
+  Residential: {
+    spotlights: [
+      {
+        title: "Aurelia Residences",
+        location: "BGC Core",
+        style: "Modern Tropical",
+        image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=400&q=80",
+        desc: "Low density luxury high-rise featuring double-glazed glass wrap and custom bronze details."
+      },
+      {
+        title: "The Estate Makati",
+        location: "Makati Central",
+        style: "Brutalist Luxury",
+        image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=400&q=80",
+        desc: "Designed by Foster + Partners. Cruciform structure maximizing floor plate efficiency and natural daylight."
+      }
+    ],
+    news: [
+      { title: "BGC Spatial Movement", date: "June 2026", excerpt: "A rise in demand for low-density residences drives modernist villa acquisitions." },
+      { title: "The Return of Quiet Luxury", date: "May 2026", excerpt: "Local buyers favor hidden properties in Quezon City over flashy estates." }
+    ],
+    collections: [
+      "Modernist Penthouses",
+      "QC Quiet Luxury Estates",
+      "Tropical Modern Estates"
+    ]
+  },
+  Commercial: {
+    spotlights: [
+      {
+        title: "Zuellig Building",
+        location: "Makati CBD",
+        style: "Sustainable Glass",
+        image: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&q=80",
+        desc: "LEED Platinum certified skyscraper utilizing low-emissivity glass and rain harvesting systems."
+      },
+      {
+        title: "Arthaland Century Pacific",
+        location: "BGC North",
+        style: "Eco-Corporate",
+        image: "https://images.unsplash.com/photo-1582653291997-079a1c04e5d1?w=400&q=80",
+        desc: "A boutique commercial landmark combining zero-waste technology and premium workspace layouts."
+      }
+    ],
+    news: [
+      { title: "Green Office Demand", date: "June 2026", excerpt: "Global firms in Manila mandate LEED-certified workspaces for all future operations." },
+      { title: "BGC Commercial Corridors", date: "April 2026", excerpt: "Retail podiums are evolving to include open-air gardens and wellness zones." }
+    ],
+    collections: [
+      "LEED Platinum Towers",
+      "BGC Premium Workspaces",
+      "Creative Studio Hubs"
+    ]
+  },
+  STR: {
+    spotlights: [
+      {
+        title: "Siargao Tropical Villa",
+        location: "Cloud 9",
+        style: "Island Minimalist",
+        image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&q=80",
+        desc: "Open-plan coco-wood pavilion with high-pitched thatch roofs and private sea pools."
+      },
+      {
+        title: "Palawan Eco-Retreat",
+        location: "El Nido Lio",
+        style: "Native Modern",
+        image: "https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?w=400&q=80",
+        desc: "Solar-powered beachfront cabins utilizing locally-sourced bamboo and reclaimed teak structures."
+      }
+    ],
+    news: [
+      { title: "Surf-Front Land Rush", date: "June 2026", excerpt: "Boutique developers scramble to acquire land along General Luna's extended coast." },
+      { title: "Off-Grid Island Living", date: "May 2026", excerpt: "Palawan resort developers transition fully to solar microgrids and composting systems." }
+    ],
+    collections: [
+      "Coastal Surf Retreats",
+      "Off-Grid Bamboo Pavilions",
+      "Luxury Glamping Tents"
+    ]
+  },
+  Restaurants: {
+    spotlights: [
+      {
+        title: "Gallery by Chele",
+        location: "BGC Central",
+        style: "Wood & Steel",
+        image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&q=80",
+        desc: "Industrial minimalist space with warm natural wood overlays and dramatic mood lighting."
+      },
+      {
+        title: "Antonio's Tagaytay",
+        location: "Tagaytay Ridge",
+        style: "Heritage Colonial",
+        image: "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=400&q=80",
+        desc: "Grand estate dining hall displaying black-and-white tiles, colonial pillars, and lush greenhouse corridors."
+      }
+    ],
+    news: [
+      { title: "Poblacion Food Architecture", date: "June 2026", excerpt: "Abandoned residential warehouses are reborn as high-design multi-concept culinary spots." },
+      { title: "Design-First Ridge Dining", date: "May 2026", excerpt: "Tagaytay restaurants design glass pavilions to capture panoramic Taal lake vistas." }
+    ],
+    collections: [
+      "Industrial Culinary Hubs",
+      "Heritage Estate Dining",
+      "Minimalist Coffee Spots"
+    ]
+  }
+};
+
 export default function Home() {
   const [activePropertyType, setActivePropertyType] = useState("Residential");
   const [searchQuery, setSearchQuery] = useState("");
@@ -97,10 +226,31 @@ export default function Home() {
       <section className="snap-section section-hook">
         <div className="grain"></div>
 
-        {/* Cinematic Property Background with Slow Zoom */}
-        <div className="hero-bg-container">
-          <div className="hero-bg-image"></div>
-          <div className="hero-overlay"></div>
+        {/* Cinematic Cosmic Space Background */}
+        <div className="space-bg-container">
+          {SPACE_STARS.map((star, idx) => (
+            <div
+              key={`space-star-${idx}`}
+              className="space-star"
+              style={{
+                position: 'absolute',
+                top: star.top,
+                left: star.left,
+                width: star.size,
+                height: star.size,
+                borderRadius: '50%',
+                backgroundColor: '#ffffff',
+                opacity: star.opacity,
+                boxShadow: star.opacity > 0.18 ? '0 0 8px rgba(255,255,255,0.6)' : 'none',
+                animation: 'twinkleSpace 6s ease-in-out infinite alternate',
+                animationDelay: `${idx * 0.4}s`
+              }}
+            />
+          ))}
+          {/* Subtle Gravitational accretion core */}
+          <div className="black-hole-core"></div>
+          {/* Subtle Event Horizon curved glow at the bottom */}
+          <div className="event-horizon"></div>
         </div>
 
         {/* Main hook content */}
@@ -320,9 +470,9 @@ export default function Home() {
           {/* Left Menu Panel */}
           <div className="property-menu">
             <div className="menu-header">
-              <span className="vector-label">Layer 02 // Inspired Exploration</span>
-              <h2>Inspiration &amp; Briefings</h2>
-              <p>Find your narrative. Dive into curated spatial stories and local briefs.</p>
+              <span className="vector-label">Layer 02 // Discovery &amp; Intelligence</span>
+              <h2>Discovery Feed</h2>
+              <p>Explore real-time spatial reports, regional stories, and architectural curations.</p>
             </div>
             <nav className="menu-nav">
               {propertyTypes.map((type) => (
@@ -345,29 +495,66 @@ export default function Home() {
           {/* Right Visual Canvas */}
           <div className="matrix-preview-pane">
             <header className="pane-header">
-              <h3>{activeDiscoverType} Archive</h3>
-              <p>Narratives, design trends, and local guides</p>
+              <h3>{activeDiscoverType} Feed</h3>
+              <p>Live Property Intel &amp; Discoveries</p>
             </header>
             
-            <div className="discover-feed-preview" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '24px' }}>
-              <div className="preview-card matrix-preview" style={{ height: '180px' }}>
-                <div className="preview-card-bg matrix-bg"></div>
-                <div className="preview-card-content" style={{ position: 'relative', zIndex: 10 }}>
-                  <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', color: '#fff', marginBottom: '8px' }}>Curated Collections</h3>
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Explore showcases of unique architectural character</p>
+            <div className="discover-feed-preview" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+              {/* Part 1: Property Spotlights */}
+              <div>
+                <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', textTransform: 'uppercase', color: 'var(--accent)', letterSpacing: '0.1em', marginBottom: '16px' }}>Property Spotlights</h4>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+                  {discoveryFeedData[activeDiscoverType].spotlights.map((spot, idx) => (
+                    <div key={idx} style={{ background: '#161616', border: '1px solid #262626', borderRadius: '4px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                      <div style={{ height: '140px', overflow: 'hidden', position: 'relative' }}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={spot.image} alt={spot.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <span style={{ position: 'absolute', bottom: '12px', left: '12px', background: 'rgba(0,0,0,0.7)', color: 'var(--accent)', fontFamily: 'var(--font-mono)', fontSize: '10px', padding: '4px 8px', border: '1px solid var(--accent-border)', borderRadius: '2px' }}>{spot.style}</span>
+                      </div>
+                      <div style={{ padding: '16px' }}>
+                        <h5 style={{ fontSize: '16px', fontWeight: '500', color: '#fff', marginBottom: '4px', fontFamily: 'var(--font-display)' }}>{spot.title}</h5>
+                        <span style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block', marginBottom: '8px' }}>Location: {spot.location}</span>
+                        <p style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>{spot.desc}</p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
-              
-              <div className="preview-card news-preview" style={{ height: '180px' }}>
-                <div className="preview-card-bg news-bg"></div>
-                <div className="preview-card-content" style={{ position: 'relative', zIndex: 10 }}>
-                  <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', color: '#fff', marginBottom: '8px' }}>Stories &amp; Places</h3>
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Regional stories and narratives for {activeDiscoverType.toLowerCase()}</p>
+
+              {/* Part 2: Split News & Collections */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', borderTop: '1px solid #262626', paddingTop: '24px' }}>
+                {/* News & Stories */}
+                <div>
+                  <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', textTransform: 'uppercase', color: 'var(--accent)', letterSpacing: '0.1em', marginBottom: '16px' }}>News &amp; Stories</h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    {discoveryFeedData[activeDiscoverType].news.map((item, idx) => (
+                      <div key={idx} style={{ borderBottom: '1px solid #1e1e1e', paddingBottom: '12px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                          <h5 style={{ fontSize: '13px', fontWeight: '500', color: '#f0ede8' }}>{item.title}</h5>
+                          <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>{item.date}</span>
+                        </div>
+                        <p style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>{item.excerpt}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Curated Collections */}
+                <div>
+                  <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', textTransform: 'uppercase', color: 'var(--accent)', letterSpacing: '0.1em', marginBottom: '16px' }}>Curated Collections</h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {discoveryFeedData[activeDiscoverType].collections.map((coll, idx) => (
+                      <div key={idx} className="curated-collection-btn" style={{ background: '#161616', border: '1px solid #262626', padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', transition: 'all 0.3s ease', borderRadius: '4px' }}>
+                        <span style={{ fontSize: '13px', color: '#fff' }}>{coll}</span>
+                        <span style={{ color: 'var(--accent)', fontSize: '12px' }}>Explore →</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div className="matrix-legend-caption">
+            <div className="matrix-legend-caption" style={{ borderTop: '1px solid #262626', paddingTop: '24px', marginTop: '24px' }}>
               Our editors trace design movements and regional narratives across the Philippine islands.
             </div>
           </div>
@@ -548,44 +735,68 @@ export default function Home() {
           display: flex;
           align-items: center;
           justify-content: center;
-          background: #0e0e0e;
+          background: #000000;
           overflow: hidden;
           position: relative;
         }
 
-        .hero-bg-container {
+        .space-bg-container {
           position: absolute;
           inset: 0;
           z-index: 0;
           overflow: hidden;
         }
 
-        .hero-bg-image {
-          width: 100%;
-          height: 100%;
-          background-image: url('/cinematic_hero_bg.png');
-          background-size: cover;
-          background-position: center;
-          opacity: 0.38;
-          filter: brightness(0.65) contrast(1.1) saturate(0.85);
-          transform: scale(1.02);
-          animation: slowZoom 25s ease-in-out infinite alternate;
-        }
-
-        .hero-overlay {
+        .black-hole-core {
           position: absolute;
-          inset: 0;
-          background: linear-gradient(
-            to bottom,
-            rgba(14, 14, 14, 0.4) 0%,
-            rgba(14, 14, 14, 0.8) 75%,
-            #0e0e0e 100%
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 600px;
+          height: 600px;
+          border-radius: 50%;
+          background: radial-gradient(
+            circle,
+            #000000 0%,
+            #000000 35%,
+            rgba(200, 169, 110, 0.012) 45%,
+            rgba(200, 169, 110, 0.035) 55%,
+            transparent 70%
           );
+          border: 1px solid rgba(200, 169, 110, 0.025);
+          box-shadow: 0 0 100px rgba(200, 169, 110, 0.02);
+          pointer-events: none;
+          z-index: 1;
+          animation: slowOrbit 60s linear infinite;
         }
 
-        @keyframes slowZoom {
-          0% { transform: scale(1); }
-          100% { transform: scale(1.08); }
+        .event-horizon {
+          position: absolute;
+          bottom: -150px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 140vw;
+          height: 350px;
+          border-radius: 50% 50% 0 0;
+          background: radial-gradient(
+            ellipse at top,
+            rgba(200, 169, 110, 0.06) 0%,
+            rgba(200, 169, 110, 0.015) 40%,
+            transparent 70%
+          );
+          filter: blur(40px);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        @keyframes slowOrbit {
+          from { transform: translate(-50%, -50%) rotate(0deg); }
+          to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        @keyframes twinkleSpace {
+          0% { opacity: 0.08; }
+          100% { opacity: 0.35; }
         }
 
         /* ── Main wordmark container ─────────────────────────────── */
@@ -1286,6 +1497,15 @@ export default function Home() {
           color: var(--text-muted);
           font-size: 12px;
           line-height: 1.5;
+        }
+
+        .curated-collection-btn {
+          transition: all var(--transition-fast);
+        }
+        .curated-collection-btn:hover {
+          border-color: var(--accent) !important;
+          transform: translateX(4px);
+          box-shadow: 0 0 12px rgba(200, 169, 110, 0.08);
         }
 
         /* SECTION 3: DISCOVER LAYER */
