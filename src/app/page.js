@@ -171,6 +171,7 @@ export default function Home() {
   const [hudOpen, setHudOpen] = useState(false);
   const [ufoReturning, setUfoReturning] = useState(false);
   const [hasScannedOnce, setHasScannedOnce] = useState(false);
+  const [isUfoSticky, setIsUfoSticky] = useState(false);
   const canvasRef = useRef(null);
 
   const handleDragStart = (e) => {
@@ -240,13 +241,19 @@ export default function Home() {
   const flyBackHome = (callback) => {
     setUfoReturning(true);
 
-    const anchor = document.querySelector('.ufo-anchor');
-    if (anchor) {
-      const rect = anchor.getBoundingClientRect();
+    // If sticky, fly back to the floating scanner dock; otherwise fly to the logo anchor
+    const stickyDockEl = document.querySelector('.floating-ufo-scanner-dock .interactive-ufo-node');
+    const logoAnchorEl = document.querySelector('.ufo-anchor');
+    
+    const targetEl = isUfoSticky ? stickyDockEl : logoAnchorEl;
+    if (targetEl) {
+      const rect = targetEl.getBoundingClientRect();
       const targetViewportX = rect.left + rect.width / 2;
       const targetViewportY = rect.top;
       
       setUfoPos({ x: targetViewportX, y: targetViewportY });
+    } else {
+      setUfoPos({ x: window.innerWidth - 80, y: 150 });
     }
 
     setTimeout(() => {
@@ -389,9 +396,13 @@ export default function Home() {
   useEffect(() => {
     const savedScroll = sessionStorage.getItem("homepage_scroll");
     if (savedScroll && containerRef.current) {
+      const scrollVal = parseInt(savedScroll, 10);
       const timer = setTimeout(() => {
         if (containerRef.current) {
-          containerRef.current.scrollTop = parseInt(savedScroll, 10);
+          containerRef.current.scrollTop = scrollVal;
+          if (scrollVal > 300) {
+            setIsUfoSticky(true);
+          }
         }
       }, 150);
       return () => clearTimeout(timer);
@@ -400,7 +411,13 @@ export default function Home() {
 
   const handleScroll = (e) => {
     if (e.currentTarget) {
-      sessionStorage.setItem("homepage_scroll", e.currentTarget.scrollTop.toString());
+      const top = e.currentTarget.scrollTop;
+      sessionStorage.setItem("homepage_scroll", top.toString());
+      if (top > 300) {
+        setIsUfoSticky(true);
+      } else {
+        setIsUfoSticky(false);
+      }
     }
   };
 
@@ -2627,6 +2644,56 @@ export default function Home() {
         .interactive-ufo-node {
           cursor: grab;
           transition: transform 0.2s ease;
+          pointer-events: auto !important;
+        }
+
+        /* Floating UFO scanner when scrolled down */
+        .floating-ufo-scanner-dock {
+          position: fixed;
+          top: 100px;
+          right: 24px;
+          z-index: 9999;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          background: rgba(14, 14, 14, 0.85);
+          border: 1px solid rgba(200, 169, 110, 0.3);
+          border-radius: 50%;
+          width: 60px;
+          height: 60px;
+          justify-content: center;
+          backdrop-filter: blur(12px);
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), 0 0 15px rgba(34, 197, 94, 0.15);
+          animation: floatStickyDock 3.5s ease-in-out infinite alternate;
+          transition: border-color 0.3s;
+        }
+        .floating-ufo-scanner-dock:hover {
+          border-color: #22c55e;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), 0 0 20px rgba(34, 197, 94, 0.3);
+        }
+        @keyframes floatStickyDock {
+          0% { transform: translateY(0); }
+          100% { transform: translateY(-6px); }
+        }
+
+        .floating-ufo-scanner-dock .dock-label {
+          font-family: var(--font-mono);
+          font-size: 7px;
+          letter-spacing: 0.1em;
+          color: var(--accent);
+          margin-top: 4px;
+          position: absolute;
+          bottom: -15px;
+          white-space: nowrap;
+          pointer-events: none;
+        }
+        
+        .sticky-tooltip {
+          bottom: 120% !important;
+        }
+        .sticky-sonar {
+          width: 3.5em !important;
+          height: 3.5em !important;
         }
         .interactive-ufo-node:hover {
           transform: scale(1.15);
@@ -2949,6 +3016,35 @@ export default function Home() {
           </button>
         </div>
       </div>
+
+      {/* Floating UFO scanner when scrolled down */}
+      {isUfoSticky && !ufoDragging && (
+        <div className="floating-ufo-scanner-dock">
+          {/* Sonar and tooltip badge */}
+          {!hasScannedOnce && (
+            <span className="ufo-tooltip-onboarding sticky-tooltip">
+              [ DRAG TO SCAN ]
+            </span>
+          )}
+          {!hasScannedOnce && (
+            <span className="sonar-pulse-ring sticky-sonar"></span>
+          )}
+          
+          <span 
+            className="ufo interactive-ufo-node"
+            onPointerDown={handleDragStart}
+            style={{ touchAction: 'none' }}
+          >
+            <span className="ufo-dome"></span>
+            <span className="ufo-disc">
+              <span className="ufo-light ufo-light-1"></span>
+              <span className="ufo-light ufo-light-2"></span>
+              <span className="ufo-light ufo-light-3"></span>
+            </span>
+          </span>
+          <div className="dock-label">SCANNER</div>
+        </div>
+      )}
     </main>
   );
 }
