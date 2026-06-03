@@ -249,25 +249,33 @@ export default function Home() {
             </span>
           </div>
 
-          <p className="hook-subtitle">The Space Intelligence Matrix of the Philippines</p>
+          <h1 className="hero-tagline">Get lost in spaces that actually inspire you.</h1>
+          <p className="hero-subheadline">Space Intelligence for the Philippine property dreamer.</p>
+          
+          <button 
+            onClick={() => document.getElementById("property-section")?.scrollIntoView({ behavior: "smooth" })}
+            className="hero-cta-btn"
+          >
+            Begin Exploring
+          </button>
         </div>
 
-        {/* Scroll indicator — direct child of section so absolute bottom works */}
+        {/* Scroll indicator */}
         <div className="hook-scroll-indicator">
-          <span className="scroll-text">Scroll to Initialize</span>
+          <span className="scroll-text">Scroll to explore</span>
           <div className="scroll-line"></div>
         </div>
       </section>
 
-      {/* SECTION 2: THE PROPERTY LAYER */}
-      <section className="snap-section section-property">
+      {/* SECTION 2: Layer 01 */}
+      <section className="snap-section section-property" id="property-section">
         <div className="property-split">
           {/* Left Menu Panel */}
           <div className="property-menu">
             <div className="menu-header">
-              <span className="vector-label">Layer 01 // Asset Discovery</span>
-              <h2>Asset Classes</h2>
-              <p>Select a sector to preview intelligence parameters.</p>
+              <span className="vector-label">Layer 01 // Property Experiences</span>
+              <h2>Curated Sectors</h2>
+              <p>Select a category to begin your exploration.</p>
             </div>
             <nav className="menu-nav">
               {propertyTypes.map((type) => (
@@ -286,7 +294,7 @@ export default function Home() {
             </nav>
             <div className="menu-footer">
               <Link href="/property/batasan-hills" className="prominent-action-link">
-                Discover Your Next Space →
+                View Showcase Space →
               </Link>
             </div>
           </div>
@@ -303,7 +311,7 @@ export default function Home() {
                 <input 
                   type="text" 
                   className="vector-search-input"
-                  placeholder="SEARCH ARCHITECTURAL CODES (BY NAME, REGION...)" 
+                  placeholder="Search spaces by name, city, or style..." 
                   value={searchQuery}
                   onChange={(e) => {
                     setSearchQuery(e.target.value);
@@ -383,7 +391,7 @@ export default function Home() {
                       <h4>{item.title}</h4>
                       <div className="mini-card-tags">
                         {item.tags.map((tag, idx) => {
-                          const labels = ["LAYER 01 // VISUAL DNA", "LAYER 02 // VOLUMETRIC METRIC", "ZONE MATRIX // TARGET COORDINATE"];
+                          const labels = ["The Space", "Daily Life", "Location Story"];
                           return (
                             <div key={idx} className="mini-tag-wrapper">
                               <span className="mini-tag-label">{labels[idx]}</span>
@@ -400,21 +408,21 @@ export default function Home() {
             </div>
             
             <div className="matrix-legend-caption">
-              Selecting alternative categories (Commercial, STR, Restaurants) updates the localized zone ribbons dynamically. Explore the discovery layer below to interact with live property tracks and intel briefs.
+              Explore different spaces by clicking the categories. Tap any space to view its deep briefing page.
             </div>
           </div>
         </div>
       </section>
 
-      {/* SECTION 3: THE DISCOVER LAYER */}
+      {/* SECTION 3: Layer 02 */}
       <section className="snap-section section-discover" style={{ padding: 0 }}>
         <div className="property-split">
           {/* Left Menu Panel */}
           <div className="property-menu">
             <div className="menu-header">
-              <span className="vector-label">Layer 02 // Active Intel Feed</span>
-              <h2>Active Intelligence Feed</h2>
-              <p>Select a sector to preview live discovery streams.</p>
+              <span className="vector-label">Layer 02 // Inspired Exploration</span>
+              <h2>Inspiration &amp; Briefings</h2>
+              <p>Find your narrative. Dive into curated spatial stories and local briefs.</p>
             </div>
             <nav className="menu-nav">
               {propertyTypes.map((type) => (
@@ -429,7 +437,7 @@ export default function Home() {
             </nav>
             <div className="menu-footer">
               <Link href={`/discover?type=${activeDiscoverType.toLowerCase()}`} className="prominent-action-link">
-                Begin Your Search →
+                Begin Exploring →
               </Link>
             </div>
           </div>
@@ -445,16 +453,16 @@ export default function Home() {
               <div className="preview-card matrix-preview" style={{ height: '120px' }}>
                 <div className="preview-card-bg matrix-bg"></div>
                 <div className="preview-card-content" style={{ position: 'relative', zIndex: 10 }}>
-                  <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', color: '#fff', marginBottom: '4px' }}>Spotlight Matrix</h3>
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>Explore exclusive {activeDiscoverType.toLowerCase()} showcases</p>
+                  <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', color: '#fff', marginBottom: '4px' }}>Curated Collections</h3>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>Explore showcases of unique architectural character</p>
                 </div>
               </div>
               
               <div className="preview-card news-preview" style={{ height: '110px' }}>
                 <div className="preview-card-bg news-bg"></div>
                 <div className="preview-card-content" style={{ position: 'relative', zIndex: 10 }}>
-                  <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', color: '#fff', marginBottom: '4px' }}>Chronological News</h3>
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>Regional intelligence briefs for {activeDiscoverType.toLowerCase()}</p>
+                  <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', color: '#fff', marginBottom: '4px' }}>Stories &amp; Places</h3>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>Regional stories and narratives for {activeDiscoverType.toLowerCase()}</p>
                 </div>
               </div>
 
@@ -468,45 +476,45 @@ export default function Home() {
                 >
                   <div className="preview-card-bg location-bg"></div>
                   <div className="preview-card-content" style={{ position: 'relative', zIndex: 10 }}>
-                    <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', color: '#fff', marginBottom: '4px' }}>Top 10 Recommended Properties by Location</h3>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>Access deep architectural matrices filtered by geographical tiering.</p>
+                    <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', color: '#fff', marginBottom: '4px' }}>Recommended Spaces by Location</h3>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>Discover properties selected for their unique architectural feel.</p>
                   </div>
                 </div>
               </Link>
             </div>
 
             <div className="matrix-legend-caption">
-              Telemetry Stream Note: The Discovery Matrix tracks macro-economic trends and specific architectural hotspots across the archipelago.
+              Inspiration Note: We track neighborhood narratives and architectural design hotspots across the archipelago.
             </div>
           </div>
         </div>
       </section>
 
-      {/* SECTION 4: THE BROKERS LAYER */}
+      {/* SECTION 4: Layer 03 */}
       <section className="snap-section section-brokers">
         <div className="brokers-content">
           <header className="section-header-center">
-            <span className="vector-label">Layer 03 // Partner Network</span>
-            <h2>Intelligence Roster</h2>
-            <p>Connect with elite space intelligence advisors across the archipelago.</p>
+            <span className="vector-label">Layer 03 // Trusted Guides</span>
+            <h2>Advisory Guild</h2>
+            <p>Connect with advisors who understand space, design, and architecture.</p>
           </header>
           
           <div className="brokers-blur-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px', maxWidth: '1200px', margin: '0 auto' }}>
             {[
-              { name: "Miguel Torres, REB", status: "Principal Strategist", history: "3 Verified Closures // BGC Focus", image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&q=80", metrics: [
-                { label: "Active Retentions", value: "14 this quarter" },
-                { label: "Stewardship Velocity", value: "38 avg. days" },
-                { label: "Continuity Score", value: "89% repeat" }
+              { name: "Miguel Torres, REB", status: "Principal Strategist", history: "Specializes in BGC architectural modernism", image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&q=80", metrics: [
+                { label: "Curations", value: "14 Spaces" },
+                { label: "Experience", value: "8+ Years" },
+                { label: "Curator Style", value: "Modernist" }
               ] },
-              { name: "Elena Santos, REB", status: "Global Capital Manager", history: "2 Verified Closures // QC Residential", image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=80", metrics: [
-                { label: "Active Retentions", value: "18 this quarter" },
-                { label: "Stewardship Velocity", value: "42 avg. days" },
-                { label: "Continuity Score", value: "92% repeat" }
+              { name: "Elena Santos, REB", status: "Global Capital Manager", history: "Specializes in QC quiet luxury estates", image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=80", metrics: [
+                { label: "Curations", value: "18 Spaces" },
+                { label: "Experience", value: "10+ Years" },
+                { label: "Curator Style", value: "Quiet Luxury" }
               ] },
-              { name: "Marco Reyes, REB", status: "Lead Arbitrage Analyst", history: "4 Verified Closures // STR Sector", image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&q=80", metrics: [
-                { label: "Active Retentions", value: "22 this quarter" },
-                { label: "Stewardship Velocity", value: "35 avg. days" },
-                { label: "Continuity Score", value: "95% repeat" }
+              { name: "Marco Reyes, REB", status: "Lead Arbitrage Analyst", history: "Specializes in Siargao & island minimalist retreats", image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&q=80", metrics: [
+                { label: "Curations", value: "22 Spaces" },
+                { label: "Experience", value: "7+ Years" },
+                { label: "Curator Style", value: "Minimalist" }
               ] }
             ].map((broker, i) => (
               <div key={i} className="broker-preview-card" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border-solid)', borderRadius: '8px', padding: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', transition: 'all 0.3s ease', cursor: 'default' }}>
@@ -514,11 +522,11 @@ export default function Home() {
                 <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: '#fff', marginBottom: '4px' }}>{broker.name} <span style={{ color: 'var(--text-muted)', fontSize: '12px', fontWeight: 'normal', fontFamily: 'var(--font-mono)' }}>// {broker.status}</span></h3>
                 
                 {/* 3-metric trust analytics block */}
-                <div style={{ display: 'flex', gap: '8px', width: '100%', marginBottom: '16px', marginTop: '12px' }}>
+                <div className="broker-metrics-block" style={{ display: 'flex', gap: '8px', width: '100%', marginBottom: '16px', marginTop: '12px' }}>
                   {broker.metrics.map((m, idx) => (
                     <div key={idx} style={{ flex: 1, background: '#0e0e0e', border: '1px solid #262626', padding: '16px 8px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
                       <span style={{ color: 'var(--text-muted)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: '500', display: 'block', textAlign: 'center', lineHeight: '1.2' }}>{m.label}</span>
-                      <span style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: '#f0ede8', display: 'block', textAlign: 'center', lineHeight: '1.1' }}>{m.value}</span>
+                      <span style={{ fontFamily: 'Georgia, serif', fontSize: '16px', color: '#f0ede8', display: 'block', textAlign: 'center', lineHeight: '1.1' }}>{m.value}</span>
                     </div>
                   ))}
                 </div>
@@ -530,7 +538,7 @@ export default function Home() {
 
           <div className="section-action-footer">
             <Link href="/brokers" className="prominent-action-link">
-              ACCESS ROSTER DIRECTORY →
+              CONNECT WITH AN ADVISOR →
             </Link>
           </div>
         </div>
@@ -583,16 +591,16 @@ export default function Home() {
           
           <div className="about-manifesto-preview">
             <p className="manifesto-lead">
-              ScoutIt is not a marketplace. We are a space intelligence platform engineering the acquisition and transfer of prime real estate assets across the Philippine archipelago.
+              ScoutIt is an editorial archive of spaces. We believe looking for a property should feel like reading a high-end architectural magazine.
             </p>
             <p className="manifesto-secondary">
-              In a fragmented market, information asymmetry dictates value. Our platform aggregates and synthesizes spatial data into a unified, high-fidelity matrix.
+              Instead of cluttered listings and pressure-driven sales, we curate spatial intelligence, architectural DNA, and neighborhood narratives to help you find spaces you'll truly love.
             </p>
           </div>
 
           <div className="section-action-footer">
             <Link href="/about" className="prominent-action-link">
-              READ THE CORE DNA →
+              READ OUR FULL STORY →
             </Link>
           </div>
         </div>
@@ -643,11 +651,12 @@ export default function Home() {
           background: var(--accent);
           color: #000;
           box-shadow: 0 0 24px rgba(200, 169, 110, 0.2);
+          transform: translateY(-2px);
         }
 
         .section-action-footer {
           text-align: center;
-          margin-top: 48px;
+          margin-top: 64px;
         }
 
         /* ═══ SECTION 1: SPACE HERO ══════════════════════════════════ */
@@ -964,6 +973,60 @@ export default function Home() {
           animation: pulseLine 2s infinite;
         }
 
+        .hero-tagline {
+          font-family: var(--font-display);
+          font-size: clamp(32px, 5.5vw, 68px);
+          font-weight: 350;
+          line-height: 1.15;
+          letter-spacing: -0.02em;
+          color: var(--text-primary);
+          margin-top: 24px;
+          max-width: 18em;
+          margin-left: auto;
+          margin-right: auto;
+          text-shadow: 0 2px 24px rgba(0,0,0,0.55);
+          animation: fadeUp 1.2s ease 2.8s forwards;
+          opacity: 0;
+        }
+
+        .hero-subheadline {
+          font-family: var(--font-body);
+          font-size: clamp(14px, 1.8vw, 20px);
+          font-weight: 400;
+          color: rgba(240, 237, 232, 0.7);
+          margin-top: 16px;
+          letter-spacing: 0.02em;
+          text-shadow: 0 1px 12px rgba(0,0,0,0.5);
+          animation: fadeUp 1.2s ease 3.2s forwards;
+          opacity: 0;
+        }
+
+        .hero-cta-btn {
+          display: inline-block;
+          font-family: var(--font-body);
+          font-size: 13px;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.2em;
+          color: #0e0e0e;
+          background: var(--accent);
+          border: 1px solid var(--accent);
+          padding: 18px 36px;
+          border-radius: 4px;
+          margin-top: 36px;
+          cursor: pointer;
+          transition: all var(--transition-fast);
+          animation: fadeUp 1.2s ease 3.6s forwards;
+          opacity: 0;
+        }
+
+        .hero-cta-btn:hover {
+          background: transparent;
+          color: var(--accent);
+          box-shadow: 0 0 30px rgba(200, 169, 110, 0.35);
+          transform: translateY(-2px);
+        }
+
         /* KEYFRAMES ═══════════════════════════════════════════════════ */
 
         /* S — comet: draws left-to-right with trailing glow */
@@ -1096,13 +1159,14 @@ export default function Home() {
         }
 
         .property-menu {
-          width: 450px;
+          width: 22%;
+          min-width: 280px;
           background: var(--surface);
           border-right: 1px solid var(--border-solid);
           display: flex;
           flex-direction: column;
           justify-content: space-between;
-          padding: 60px 40px;
+          padding: 80px 32px;
           z-index: 10;
         }
 
@@ -1146,15 +1210,19 @@ export default function Home() {
         }
 
         .menu-btn:hover {
-          color: var(--text-primary);
-          padding-left: 32px;
+          color: var(--accent);
+          transform: scale(1.03);
+          box-shadow: 0 0 20px rgba(200, 169, 110, 0.1);
+          border-color: rgba(200, 169, 110, 0.25);
+          padding-left: 28px;
         }
 
         .menu-btn.active {
           color: var(--accent);
           background: var(--surface2);
-          border-color: var(--border-solid);
-          padding-left: 32px;
+          border-color: var(--accent);
+          box-shadow: 0 0 15px rgba(200, 169, 110, 0.05);
+          padding-left: 28px;
         }
 
         .menu-footer {
@@ -1166,7 +1234,7 @@ export default function Home() {
         .matrix-preview-pane {
           flex: 1;
           background: #121212;
-          padding: 40px;
+          padding: 80px 48px;
           display: flex;
           flex-direction: column;
           overflow-y: auto;
@@ -1407,13 +1475,13 @@ export default function Home() {
           border: 1px solid var(--border-solid);
           display: flex;
           align-items: flex-end;
-          padding: 32px;
+          padding: 40px;
           transition: all var(--transition);
         }
 
         .preview-card:hover {
           border-color: var(--accent);
-          transform: translateY(-10px);
+          transform: translateY(-4px);
           box-shadow: var(--shadow-lg);
         }
 
@@ -1670,13 +1738,37 @@ export default function Home() {
         @media (max-width: 1024px) {
           .property-split {
             flex-direction: column;
+            height: auto;
           }
           .property-menu {
             width: 100%;
-            height: 40vh;
-            padding: 24px;
+            padding: 32px 24px;
             border-right: none;
             border-bottom: 1px solid var(--border-solid);
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+          }
+          .menu-nav {
+            flex-direction: row;
+            overflow-x: auto;
+            scrollbar-width: none;
+            gap: 12px;
+            width: 100%;
+          }
+          .menu-nav::-webkit-scrollbar {
+            display: none;
+          }
+          .menu-btn {
+            font-size: 18px;
+            padding: 10px 16px;
+            white-space: nowrap;
+          }
+          .menu-btn:hover, .menu-btn.active {
+            padding-left: 16px;
+          }
+          .matrix-preview-pane {
+            padding: 32px 24px;
           }
           .discover-preview-grid, .brokers-blur-grid {
             grid-template-columns: 1fr;
