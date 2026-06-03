@@ -4,6 +4,27 @@ import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import ReactionButtons from "@/components/ReactionButtons";
 
+// Sci-Fi character-by-character text writer effect
+function TypewriterText({ text }) {
+  const [displayText, setDisplayText] = useState("");
+
+  useEffect(() => {
+    let index = 0;
+    setDisplayText("");
+    const timer = setInterval(() => {
+      setDisplayText((prev) => prev + text.charAt(index));
+      index++;
+      if (index >= text.length) {
+        clearInterval(timer);
+      }
+    }, 12); // Speed of character typing in ms
+
+    return () => clearInterval(timer);
+  }, [text]);
+
+  return <span>{displayText}</span>;
+}
+
 const SPACE_STARS = [
   { top: '15%', left: '12%', size: '1.5px', opacity: 0.15 },
   { top: '8%', left: '34%', size: '2px', opacity: 0.25 },
@@ -133,6 +154,316 @@ const discoveryFeedData = {
   }
 };
 
+const HOMEPAGE_INTEL_DB = {
+  // Layer 00: Hero (Portal Core)
+  "scoutit-wordmark": {
+    title: "SCOUTIT WORDMARK",
+    intel: "The official logo of ScoutIt, representing our focus on spatial intelligence and architectural appreciation."
+  },
+  "hero-tagline": {
+    title: "EMOTIONAL DIRECTIVE",
+    intel: "The platform's core message, guiding users to discover spaces that inspire them beyond standard specifications."
+  },
+  "hero-subheadline": {
+    title: "PLATFORM SCOPE",
+    intel: "Curated spatial intelligence tailored specifically for high-end properties in key areas of the Philippines."
+  },
+  "hero-cta-btn": {
+    title: "EXPLORATION TRIGGER",
+    intel: "Clicking this button triggers a smooth scroll descent down to the curated property sectors below."
+  },
+  "scroll-indicator": {
+    title: "SCROLL INDICATOR",
+    intel: "Prompts you to scroll down using your mouse or trackpad to explore the property experiences."
+  },
+
+  // Layer 01: Property Experiences (Curated Sectors)
+  "l1-menu-header": {
+    title: "CURATED SECTORS INDEX",
+    intel: "Organizes verified properties into four design-focused categories: Residential, Commercial, Short-Term Rental, and Restaurants."
+  },
+  "l1-menu-btn-residential": {
+    title: "RESIDENTIAL SECTOR",
+    intel: "Filters properties to showcase low-density skyscrapers, modern villas, and quiet luxury homes."
+  },
+  "l1-menu-btn-commercial": {
+    title: "COMMERCIAL SECTOR",
+    intel: "Filters properties to showcase sustainable offices, eco-certified workspaces, and green commercial buildings."
+  },
+  "l1-menu-btn-str": {
+    title: "SHORT-TERM RENTALS",
+    intel: "Filters properties to showcase coastal pavilions, beach villas, and off-grid retreats in Siargao and Palawan."
+  },
+  "l1-menu-btn-restaurants": {
+    title: "DESIGN-FORWARD DINING",
+    intel: "Filters properties to showcase restaurants built with unique layouts, adaptive reuse, and scenic glass views."
+  },
+  "l1-search-input": {
+    title: "REAL-TIME PROPERTIES SEARCH",
+    intel: "Instantly filters properties by searching names, locations (like BGC, Makati, Siargao), or architectural styles."
+  },
+  "l1-showcase-link": {
+    title: "SHOWCASE SANCTUARY",
+    intel: "A portal link directing you to a detailed overview of Batasan Hills, a modernist forest home in Quezon City."
+  },
+  // Layer 01 Property Cards
+  "l1-card-res-1": {
+    title: "AURELIA RESIDENCES (BGC)",
+    intel: "A low-density luxury high-rise in BGC featuring a modern tropical design, double-glazed glass wrap, and elegant bronze solar shades."
+  },
+  "l1-card-res-2": {
+    title: "THE ESTATE MAKATI",
+    intel: "A brutalist luxury tower on Ayala Avenue designed by Foster + Partners. Features column-free spaces and angled windows to block sun glare."
+  },
+  "l1-card-res-3": {
+    title: "PARK CENTRAL TOWERS (MAKATI)",
+    intel: "A minimalist glass residential tower complex in Roxas Triangle featuring sky terraces and high-performance acoustic glass."
+  },
+  "l1-card-com-1": {
+    title: "ZUELLIG BUILDING (MAKATI)",
+    intel: "A LEED Platinum certified green skyscraper in Makati CBD featuring double-paned low-emissivity glass and rainwater recycling."
+  },
+  "l1-card-com-2": {
+    title: "ARTHALAND CENTURY PACIFIC (BGC)",
+    intel: "A premium eco-friendly office tower in BGC North with rooftop solar panels, energy recovery ventilation, and zero waste management."
+  },
+  "l1-card-str-1": {
+    title: "SIARGAO TROPICAL VILLA",
+    intel: "An island-minimalist pavilion in Cloud 9 constructed with local coco-wood, high-pitched thatch roofing, and open breeze flow."
+  },
+  "l1-card-str-2": {
+    title: "PALAWAN ECO-RETREAT (EL NIDO)",
+    intel: "Beachfront villas in El Nido running on a 100% solar microgrid, built with reclaimed teakwood and bamboo wind screens."
+  },
+  "l1-card-rest-1": {
+    title: "GALLERY BY CHELE (BGC)",
+    intel: "An industrial dining space in BGC combining warm natural wood ceilings, raw steel partitions, and cozy ambient lighting."
+  },
+  "l1-card-rest-2": {
+    title: "ANTONIO'S TAGAYTAY",
+    intel: "A heritage colonial dining estate on Tagaytay Ridge, featuring botanical gardens, Capiz shell accents, and scenic view windows."
+  },
+
+  // Layer 02: Discovery & Intelligence (Discovery Feed)
+  "l2-menu-header": {
+    title: "DISCOVERY FEED COMPILER",
+    intel: "Compiles narrative stories, regional design highlights, and curated architectural collections across the Philippines."
+  },
+  "l2-menu-btn-residential": {
+    title: "RESIDENTIAL UPDATES",
+    intel: "Filters the Discovery Feed to focus on metropolitan penthouses, architectural homes, and vertical housing trends."
+  },
+  "l2-menu-btn-commercial": {
+    title: "COMMERCIAL UPDATES",
+    intel: "Filters the Discovery Feed to focus on corporate workspace certifications, green building standards, and urban layouts."
+  },
+  "l2-menu-btn-str": {
+    title: "RENTAL & RESORT LOGS",
+    intel: "Filters the Discovery Feed to focus on sustainable eco-resorts, island villas, and off-grid construction designs."
+  },
+  "l2-menu-btn-restaurants": {
+    title: "DINING DESIGN FEED",
+    intel: "Filters the Discovery Feed to focus on adaptive reuse restaurant projects, culinary hubs, and glass ridge cafes."
+  },
+  "l2-discover-link": {
+    title: "DISCOVERY MATRIX",
+    intel: "Launches the full interactive Discovery search engine, pre-filtered to show properties matching your active category."
+  },
+  // Layer 02 Spotlights (Dynamic based on Category)
+  "l2-spotlight-aurelia-residences": {
+    title: "SPOTLIGHT: AURELIA RESIDENCES",
+    intel: "A low-density BGC tower highlighted for its custom bronze screen overlays that act as solar shades while creating elegant shadows inside."
+  },
+  "l2-spotlight-the-estate-makati": {
+    title: "SPOTLIGHT: THE ESTATE MAKATI",
+    intel: "Makati Central's signature brutalist luxury tower, noted for floor-to-ceiling angled glass windows that prevent heat build-up."
+  },
+  "l2-spotlight-zuellig-building": {
+    title: "SPOTLIGHT: ZUELLIG BUILDING",
+    intel: "A premium green office tower in Makati, utilizing high-efficiency ceramic fritted glass panels to block 50% of external solar heat."
+  },
+  "l2-spotlight-arthaland-century-pacific": {
+    title: "SPOTLIGHT: ARTHALAND CENTURY PACIFIC",
+    intel: "A BGC corporate tower certified for eco-sustainability, featuring triple-filtered air circulation and low water consumption."
+  },
+  "l2-spotlight-siargao-tropical-villa": {
+    title: "SPOTLIGHT: SIARGAO VILLA",
+    intel: "An island-minimalist beachfront pavilion designed to maximize natural sea breeze ventilation, reducing the need for AC."
+  },
+  "l2-spotlight-palawan-eco-retreat": {
+    title: "SPOTLIGHT: PALAWAN RETREAT",
+    intel: "Eco-villas in El Nido utilizing cooling induction loops and organic thatch insulation to maintain cool indoor temperatures."
+  },
+  "l2-spotlight-gallery-by-chele": {
+    title: "SPOTLIGHT: GALLERY BY CHELE",
+    intel: "A modern BGC restaurant space incorporating custom sound-dampening panels hidden behind natural wood slats to lower noise levels."
+  },
+  "l2-spotlight-antonio-s-tagaytay": {
+    title: "SPOTLIGHT: ANTONIO'S TAGAYTAY",
+    intel: "A heritage colonial dining space using sliding wall panels to channel cool mountain breezes directly from the Taal ridge."
+  },
+  // Layer 02 News Items
+  "l2-news-item-bgc-spatial-movement": {
+    title: "SIGNAL: BGC SPATIAL TRENDS",
+    intel: "A reported 14.2% increase in demand for low-density residences in BGC, highlighting a growing preference for private lobbies and fresh air."
+  },
+  "l2-news-item-the-return-of-quiet-luxury": {
+    title: "SIGNAL: QC QUIET LUXURY",
+    intel: "A notable shift in Quezon City, where buyers increasingly seek private, high-security family compounds over commercial towers."
+  },
+  "l2-news-item-green-office-demand": {
+    title: "SIGNAL: ECO-OFFICE MANDATES",
+    intel: "Global tech firms operating in Metro Manila are increasingly mandating LEED and WELL eco-certifications for their workspace leases."
+  },
+  "l2-news-item-bgc-commercial-corridors": {
+    title: "SIGNAL: BGC GREEN PODIUMS",
+    intel: "Details the transition of BGC retail podiums to include green vertical gardens, open walking areas, and rainwater fountains."
+  },
+  "l2-news-item-surf-front-land-rush": {
+    title: "SIGNAL: SIARGAO COASTAL RUSH",
+    intel: "Tracks high developer interest along Siargao's coastline, focusing on ecological low-footprint villa planning and beachfront lots."
+  },
+  "l2-news-item-off-grid-island-living": {
+    title: "SIGNAL: PALAWAN OFF-GRID TRANSITION",
+    intel: "Analyzes Palawan resort developments transitioning entirely to independent solar microgrids for energy self-sufficiency."
+  },
+  "l2-news-item-poblacion-food-architecture": {
+    title: "SIGNAL: POBLACION REUSE PROJECTS",
+    intel: "Highlights the adaptive design reuse of old residential warehouses in Makati Poblacion as premium multi-concept dining venues."
+  },
+  "l2-news-item-design-first-ridge-dining": {
+    title: "SIGNAL: TAGAYTAY RIDGELINE DINING",
+    intel: "Documents Tagaytay restaurants building suspended glass pavilions over the ridge to offer unobstructed views of the volcano."
+  },
+  // Layer 02 Curated Collections
+  "l2-collection-btn-modernist-penthouses": {
+    title: "COLLECTION: MODERN PENTHOUSES",
+    intel: "Curated rooftop penthouses in BGC and Makati featuring open sky pools and panoramic skyline views."
+  },
+  "l2-collection-btn-qc-quiet-luxury-estates": {
+    title: "COLLECTION: QC LUXURY COMPOUNDS",
+    intel: "Secure modernist compounds in Quezon City featuring clean private wells, security perimeter walls, and interior gardens."
+  },
+  "l2-collection-btn-tropical-modern-estates": {
+    title: "COLLECTION: TROPICAL MODERN HOMES",
+    intel: "Metro Manila residences designed with natural timber accents, central light shafts, and cooling airflow channels."
+  },
+  "l2-collection-btn-leed-platinum-towers": {
+    title: "COLLECTION: LEED PLATINUM BUILDINGS",
+    intel: "High-efficiency skyscrapers equipped with rainwater recycling, active carbon air filtering, and double-paned solar glass."
+  },
+  "l2-collection-btn-bgc-premium-workspaces": {
+    title: "COLLECTION: BGC WORKSPACES",
+    intel: "Column-free corporate suites in BGC optimized with smart LED layouts and ergonomic floor configurations."
+  },
+  "l2-collection-btn-creative-studio-hubs": {
+    title: "COLLECTION: CREATIVE DESIGN LOFTS",
+    intel: "Commercial lofts featuring exposed steel ductwork, skylights, and modular sliding dividers for creative design teams."
+  },
+  "l2-collection-btn-coastal-surf-retreats": {
+    title: "COLLECTION: BEACHFRONT RETREATS",
+    intel: "Properties in Siargao and Baler featuring direct shoreline access, board storage docks, and wide viewing decks."
+  },
+  "l2-collection-btn-off-grid-bamboo-pavilions": {
+    title: "COLLECTION: BAMBOO ECO-ESTATES",
+    intel: "Villas built using processed giant bamboo structural frames and independent solar battery arrays."
+  },
+  "l2-collection-btn-luxury-glamping-tents": {
+    title: "COLLECTION: GLAMPING RETREATS",
+    intel: "Semi-permanent eco-resort tents integrating durable membrane roofs, wooden deck support, and solar ventilation."
+  },
+  "l2-collection-btn-industrial-culinary-hubs": {
+    title: "COLLECTION: CULINARY WAREHOUSES",
+    intel: "Repurposed industrial spaces transformed into dining rooms featuring open kitchens and black steel framing."
+  },
+  "l2-collection-btn-heritage-estate-dining": {
+    title: "COLLECTION: HERITAGE DINING ESTATES",
+    intel: "Colonial mansion restorations preserved as fine dining spaces, retaining original plaster, capiz shell windows, and brick walls."
+  },
+  "l2-collection-btn-minimalist-coffee-spots": {
+    title: "COLLECTION: MINIMALIST COFFEE BAR",
+    intel: "Coffee shops designed with clean white plaster walls, raw concrete benches, and integrated acoustic sound dampening."
+  },
+
+  // Layer 03: Trusted Guides (The Advisory)
+  "l3-advisory-header": {
+    title: "THE ADVISORY NETWORK",
+    intel: "A curated roster of licensed real estate advisors specializing in design, architecture, and premium residential investments."
+  },
+  "l3-broker-card-miguel-torres-reb": {
+    title: "DOSSIER: MIGUEL TORRES, REB",
+    intel: "Lead Design Advisor with 8+ years experience. Specializes in BGC and Makati CBD luxury towers, with a focus on smart facade engineering."
+  },
+  "l3-broker-card-elena-santos-reb": {
+    title: "DOSSIER: ELENA SANTOS, REB",
+    intel: "Quiet Luxury Specialist with 10+ years experience. Specializes in secure family compounds, private estates, and gardens in Quezon City."
+  },
+  "l3-broker-card-marco-reyes-reb": {
+    title: "DOSSIER: MARCO REYES, REB",
+    intel: "Island Properties Curator with 7+ years experience. Specializes in solar microgrids, timber structures, and coastal lots in Siargao and Palawan."
+  },
+  "l3-brokers-link": {
+    title: "ADVISORY ROSTER DIRECTORY",
+    intel: "Connects you directly to the full directory of vetted real estate advisors to schedule a detailed spatial consultation."
+  },
+
+  // Layer 04: Your Board (Personal Ledger)
+  "l4-board-header": {
+    title: "PERSONAL BOARD OVERVIEW",
+    intel: "Your private dashboard to review saved designs, wishlist properties, and custom reaction tallies."
+  },
+  "l4-tags-guide": {
+    title: "BOARD REACTION LEGEND",
+    intel: "Guides you through the four color-coded buttons: Potential Fit (gold), Interested (green), Inspired Me (yellow), and Save (red)."
+  },
+  "l4-wishlist-link": {
+    title: "PERSONAL BOARD LEDGER",
+    intel: "Opens your Local Board Ledger, where all saved properties and design notes are safely stored on your device."
+  },
+  "l4-flow-card-1": {
+    title: "LEDGER FLOW: 01. SCAN DESIGN",
+    intel: "Scan active homepage items using the tractor beam. Telemetry coordinates and design parameters are loaded into browser memory."
+  },
+  "l4-flow-card-2": {
+    title: "LEDGER FLOW: 02. CATEGORIZE",
+    intel: "Classify properties using color-coded buttons. Reactions help organize and weight listings to match your aesthetic goals."
+  },
+  "l4-flow-card-3": {
+    title: "LEDGER FLOW: 03. CLIENT STORAGE",
+    intel: "Your selections are stored directly on your browser using local storage API, keeping your searches private from third-party servers."
+  },
+  "l4-flow-card-4": {
+    title: "LEDGER FLOW: 04. ADVISOR HANDSHAKE",
+    intel: "Export your curated board ledger directly to an advisor (Miguel, Elena, or Marco) to review your top design choices together."
+  },
+  "l4-policy-block": {
+    title: "POLICY: DECENTRALIZED DATA",
+    intel: "ScoutIt values your privacy. Your search selections, visited links, and saved properties are stored locally, with zero tracking."
+  },
+  "l4-parameters-block": {
+    title: "LEDGER SYSTEM STATUS",
+    intel: "Storage System: LocalStorage API. Network Connection: Standalone Sandbox. Cloud Syncing: Deactivated for maximum privacy."
+  },
+
+  // Layer 05: About Us (The Manifesto)
+  "l5-manifesto-header": {
+    title: "MANIFESTO CORE",
+    intel: "Outlines the values of ScoutIt, focusing on structural design, architecture, and local narratives over commercial pressure."
+  },
+  "l5-manifesto-lead": {
+    title: "CORE DESIGN VALUES",
+    intel: "We believe a home is more than just square meters. We highlight room flow, lighting, native materials, and design DNA."
+  },
+  "l5-manifesto-secondary": {
+    title: "EDITORIAL VALUES",
+    intel: "We focus on custom architectural blueprints and regional stories, catering to buyers who prioritize spatial quality."
+  },
+  "l5-about-link": {
+    title: "ABOUT SCOUTIT",
+    intel: "Warp portal directing you to our history page, listing developer credentials and platform goals."
+  }
+};
+
 export default function Home() {
   const [activePropertyType, setActivePropertyType] = useState("Residential");
   const [searchQuery, setSearchQuery] = useState("");
@@ -141,13 +472,276 @@ export default function Home() {
   const [driftingRocks, setDriftingRocks] = useState([]);
   const containerRef = useRef(null);
 
+  // Scanner UI States
+  const [scannerState, setScannerState] = useState('DOCKED'); // 'DOCKED', 'HOVER_FOLLOW'
+  const [ufoPos, setUfoPos] = useState({ x: 0, y: 0 });
+  const [scanResult, setScanResult] = useState(null);
+  const [hudOpen, setHudOpen] = useState(false);
+  const [hasScannedOnce, setHasScannedOnce] = useState(false);
+  const [isUfoSticky, setIsUfoSticky] = useState(false);
+  const [currentScannedId, setCurrentScannedId] = useState("");
+  const [isLocked, setIsLocked] = useState(false);
+  const [lockedLinkUrl, setLockedLinkUrl] = useState("");
+
+  const handleUfoActivate = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (scannerState === 'HOVER_FOLLOW' || isLocked) {
+      handleUfoDeactivate();
+      return;
+    }
+
+    const x = e.clientX;
+    const y = e.clientY;
+    
+    setUfoPos({ x, y });
+    setScannerState('HOVER_FOLLOW');
+    setScanResult({
+      title: "SCAN: SYSTEM ACTIVE",
+      intel: "Hover tractor beam scanner initialized. Sweep cursor over active cards or page blocks to retrieve real-time design telemetry."
+    });
+    setHudOpen(true);
+    setHasScannedOnce(true);
+  };
+
+  const handleUfoDeactivate = () => {
+    setHudOpen(false); // Close HUD console immediately for instant visual feedback
+    flyBackHome(() => {
+      setCurrentScannedId("");
+      setIsLocked(false);
+      setLockedLinkUrl("");
+    });
+  };
+
+  // Listen to global pointer move for Hover scanning
+  useEffect(() => {
+    if (scannerState !== 'HOVER_FOLLOW' || isLocked) return;
+
+    const handleMove = (e) => {
+      const x = e.clientX;
+      const y = e.clientY;
+      setUfoPos({ x, y });
+
+      // Run Hover Scanner check
+      const elements = document.elementsFromPoint(x, y);
+      let matchedEl = null;
+      let matchedLayer = null;
+
+      for (let el of elements) {
+        if (el.hasAttribute('data-intel-id')) {
+          matchedEl = el;
+          break;
+        }
+        if (el.hasAttribute('data-intel-layer') && matchedLayer === null) {
+          matchedLayer = el.getAttribute('data-intel-layer');
+        }
+      }
+
+      if (matchedEl) {
+        const id = matchedEl.getAttribute('data-intel-id');
+        if (id !== currentScannedId) {
+          setCurrentScannedId(id);
+          const data = HOMEPAGE_INTEL_DB[id];
+          if (data) {
+            setScanResult(data);
+          }
+        }
+      } else if (matchedLayer !== null) {
+        const id = `layer-${matchedLayer}`;
+        if (id !== currentScannedId) {
+          setCurrentScannedId(id);
+          const layerTitles = [
+            "PORTAL HERO LAYER [00]",
+            "CURATED PROPERTY SECTORS [01]",
+            "DISCOVERY & INTELLIGENCE [02]",
+            "ADVISORY NETWORK [03]",
+            "PERSONAL BOARD LEDGER [04]",
+            "MANIFESTO CORE [05]"
+          ];
+          const layerIntels = [
+            "Main header section of the page. Move the tractor beam over titles, the tagline, or the explore button to view specific descriptions.",
+            "This section showcases curated property experience cards, the search input, and category navigation.",
+            "This section highlights real-time property updates, regional news, and curated collections across the Philippines.",
+            "This section displays certified real estate advisors. Hover or click on the cards to view advisor dossiers.",
+            "This section explains our secure local storage pipeline. Your selections are kept 100% private on your device.",
+            "Outlines the values of ScoutIt, focusing on design quality and spatial appreciation over commercial listing pressure."
+          ];
+          const layerIndex = parseInt(matchedLayer, 10);
+          setScanResult({
+            title: layerTitles[layerIndex] || "LAYER DETECTED",
+            intel: layerIntels[layerIndex] || "General layer section coordinates parsed. Hover over sub-elements for detailed telemetry."
+          });
+        }
+      }
+    };
+
+    window.addEventListener('pointermove', handleMove);
+    return () => window.removeEventListener('pointermove', handleMove);
+  }, [scannerState, currentScannedId, isLocked]);
+
+  // Global click interceptor for Click-to-Lock and click scanning triggers
+  useEffect(() => {
+    const handleGlobalClick = (e) => {
+      // Find if we clicked on a target with data-intel-id or data-intel-layer
+      let target = e.target;
+      let matchedEl = null;
+      let matchedLayer = null;
+
+      while (target && target !== document.body) {
+        if (target.hasAttribute && target.hasAttribute('data-intel-id')) {
+          matchedEl = target;
+          break;
+        }
+        if (target.hasAttribute && target.hasAttribute('data-intel-layer') && matchedLayer === null) {
+          matchedLayer = target;
+        }
+        target = target.parentNode;
+      }
+
+      // If we clicked a close button or action button inside the HUD console, do not intercept
+      if (e.target.closest('.hud-scanner-console')) {
+        return;
+      }
+
+      // If the scanner is active (HOVER_FOLLOW) or if we click directly on an intel target
+      if (scannerState === 'HOVER_FOLLOW' || matchedEl || matchedLayer) {
+        if (matchedEl) {
+          e.preventDefault();
+          e.stopPropagation();
+
+          const id = matchedEl.getAttribute('data-intel-id');
+          const data = HOMEPAGE_INTEL_DB[id];
+          if (data) {
+            setScanResult(data);
+            setCurrentScannedId(id);
+            setIsLocked(true);
+            setScannerState('HOVER_FOLLOW'); // Ensure scanner is active
+            setHudOpen(true);
+            setHasScannedOnce(true);
+            
+            // Position UFO on the clicked element
+            const rect = matchedEl.getBoundingClientRect();
+            setUfoPos({ x: rect.left + rect.width / 2, y: rect.top });
+
+            // Extract href if the clicked element or its parent is a link
+            let linkEl = matchedEl;
+            if (matchedEl.tagName !== 'A') {
+              linkEl = matchedEl.closest('a');
+            }
+            if (linkEl && linkEl.getAttribute('href')) {
+              setLockedLinkUrl(linkEl.getAttribute('href'));
+            } else {
+              setLockedLinkUrl("");
+            }
+          }
+        } else if (matchedLayer) {
+          e.preventDefault();
+          e.stopPropagation();
+
+          const layerId = matchedLayer.getAttribute('data-intel-layer');
+          const layerTitles = [
+            "PORTAL HERO LAYER [00]",
+            "CURATED PROPERTY SECTORS [01]",
+            "DISCOVERY & INTELLIGENCE [02]",
+            "ADVISORY NETWORK [03]",
+            "PERSONAL BOARD LEDGER [04]",
+            "MANIFESTO CORE [05]"
+          ];
+          const layerIntels = [
+            "Main header section of the page. Move the tractor beam over titles, the tagline, or the explore button to view specific descriptions.",
+            "This section showcases curated property experience cards, the search input, and category navigation.",
+            "This section highlights real-time property updates, regional news, and curated collections across the Philippines.",
+            "This section displays certified real estate advisors. Hover or click on the cards to view advisor dossiers.",
+            "This section explains our secure local storage pipeline. Your selections are kept 100% private on your device.",
+            "Outlines the values of ScoutIt, focusing on design quality and spatial appreciation over commercial listing pressure."
+          ];
+          const layerIndex = parseInt(layerId, 10);
+          const data = {
+            title: layerTitles[layerIndex] || "LAYER DETECTED",
+            intel: layerIntels[layerIndex] || "General layer section coordinates parsed. Hover over sub-elements for detailed telemetry."
+          };
+          setScanResult(data);
+          setCurrentScannedId(`layer-${layerId}`);
+          setIsLocked(true);
+          setScannerState('HOVER_FOLLOW');
+          setHudOpen(true);
+          setHasScannedOnce(true);
+          
+          // Position UFO over the section
+          const rect = matchedLayer.getBoundingClientRect();
+          setUfoPos({ x: rect.left + rect.width / 2, y: rect.top + 50 }); // 50px offset from section top
+          setLockedLinkUrl("");
+        }
+      }
+    };
+
+    window.addEventListener('click', handleGlobalClick, true);
+    return () => window.removeEventListener('click', handleGlobalClick, true);
+  }, [scannerState]);
+
+  // Keep locked UFO pinned to target element during scrolling
+  useEffect(() => {
+    if (!isLocked || !currentScannedId) return;
+
+    const handleScroll = () => {
+      let el = null;
+      if (currentScannedId.startsWith('layer-')) {
+        const layerId = currentScannedId.replace('layer-', '');
+        el = document.querySelector(`[data-intel-layer="${layerId}"]`);
+      } else {
+        el = document.querySelector(`[data-intel-id="${currentScannedId}"]`);
+      }
+
+      if (el) {
+        const rect = el.getBoundingClientRect();
+        if (currentScannedId.startsWith('layer-')) {
+          setUfoPos({ x: rect.left + rect.width / 2, y: rect.top + 50 });
+        } else {
+          setUfoPos({ x: rect.left + rect.width / 2, y: rect.top });
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isLocked, currentScannedId]);
+
+  const flyBackHome = (callback) => {
+    const stickyDockEl = document.querySelector('.floating-ufo-scanner-dock .interactive-ufo-node');
+    const logoAnchorEl = document.querySelector('.ufo-anchor');
+    
+    const targetEl = isUfoSticky ? stickyDockEl : logoAnchorEl;
+    if (targetEl) {
+      const rect = targetEl.getBoundingClientRect();
+      const targetViewportX = rect.left + rect.width / 2;
+      const targetViewportY = rect.top;
+      
+      setUfoPos({ x: targetViewportX, y: targetViewportY });
+    } else {
+      setUfoPos({ x: window.innerWidth - 80, y: 150 });
+    }
+
+    setTimeout(() => {
+      setScannerState('DOCKED');
+      document.body.style.overflow = '';
+      if (callback) callback();
+    }, 700);
+  };
+
+
+
   // Restore scroll position from sessionStorage
   useEffect(() => {
     const savedScroll = sessionStorage.getItem("homepage_scroll");
     if (savedScroll && containerRef.current) {
+      const scrollVal = parseInt(savedScroll, 10);
       const timer = setTimeout(() => {
         if (containerRef.current) {
-          containerRef.current.scrollTop = parseInt(savedScroll, 10);
+          containerRef.current.scrollTop = scrollVal;
+          if (scrollVal > 300) {
+            setIsUfoSticky(true);
+          }
         }
       }, 150);
       return () => clearTimeout(timer);
@@ -156,7 +750,13 @@ export default function Home() {
 
   const handleScroll = (e) => {
     if (e.currentTarget) {
-      sessionStorage.setItem("homepage_scroll", e.currentTarget.scrollTop.toString());
+      const top = e.currentTarget.scrollTop;
+      sessionStorage.setItem("homepage_scroll", top.toString());
+      if (top > 300) {
+        setIsUfoSticky(true);
+      } else {
+        setIsUfoSticky(false);
+      }
     }
   };
 
@@ -327,7 +927,7 @@ export default function Home() {
   return (
     <main ref={containerRef} onScroll={handleScroll} className="cinematic-container">
       {/* SECTION 1: SPACE HERO */}
-      <section className="snap-section section-hook">
+      <section className="snap-section section-hook" data-intel-layer="0">
         <div className="grain"></div>
 
         {/* Cinematic Cosmic Space Background */}
@@ -417,7 +1017,7 @@ export default function Home() {
         <div className="hook-content">
 
           {/* Animated SCOUTIT wordmark */}
-          <div className="scoutit-wordmark" aria-label="SCOUTIT">
+          <div className="scoutit-wordmark" aria-label="SCOUTIT" data-intel-id="scoutit-wordmark">
             {/* S — comet trail draw */}
             <span className="letter letter-s" style={{ animationDelay: '0s' }}>S</span>
             {/* C — eclipse reveal */}
@@ -437,9 +1037,23 @@ export default function Home() {
                   ufo-float  = animation only (translateY, never touches X) */}
             <span className="letter letter-i" style={{ animationDelay: '2.3s' }}>
               I
-              <span className="ufo-anchor">
+              <span className="ufo-anchor" style={{ opacity: scannerState !== 'DOCKED' ? 0 : 1, transition: 'opacity 0.25s ease' }}>
                 <span className="ufo-float">
-                  <span className="ufo">
+                  {/* Onboarding Tooltip Badge */}
+                  {!hasScannedOnce && (
+                    <span className="ufo-tooltip-onboarding">
+                      [ CLICK TO SCAN ]
+                    </span>
+                  )}
+                  {/* Pulsing Sonar Ring for Interactivity Onboarding */}
+                  {!hasScannedOnce && (
+                    <span className="sonar-pulse-ring"></span>
+                  )}
+                  <span 
+                    className="ufo interactive-ufo-node"
+                    onPointerDown={handleUfoActivate}
+                    style={{ touchAction: 'none' }}
+                  >
                     <span className="ufo-dome"></span>
                     <span className="ufo-disc">
                       <span className="ufo-light ufo-light-1"></span>
@@ -459,30 +1073,31 @@ export default function Home() {
             </span>
           </div>
 
-          <h1 className="hero-tagline">Get lost in spaces that actually inspire you.</h1>
-          <p className="hero-subheadline">Space Intelligence for the Philippine property dreamer.</p>
+          <h1 className="hero-tagline" data-intel-id="hero-tagline">Get lost in spaces that actually inspire you.</h1>
+          <p className="hero-subheadline" data-intel-id="hero-subheadline">Space Intelligence for the Philippine property dreamer.</p>
           
           <button 
             onClick={() => document.getElementById("property-section")?.scrollIntoView({ behavior: "smooth" })}
             className="hero-cta-btn"
+            data-intel-id="hero-cta-btn"
           >
             Begin Exploring
           </button>
         </div>
 
         {/* Scroll indicator */}
-        <div className="hook-scroll-indicator">
+        <div className="hook-scroll-indicator" data-intel-id="scroll-indicator">
           <span className="scroll-text">Scroll to explore</span>
           <div className="scroll-line"></div>
         </div>
       </section>
 
       {/* SECTION 2: Layer 01 */}
-      <section className="snap-section section-property" id="property-section">
+      <section className="snap-section section-property" id="property-section" data-intel-layer="1">
         <div className="property-split">
           {/* Left Menu Panel */}
           <div className="property-menu">
-            <div className="menu-header">
+            <div className="menu-header" data-intel-id="l1-menu-header">
               <span className="vector-label">Layer 01 // Property Experiences</span>
               <h2>Curated Sectors</h2>
               <p>Select a category to begin your exploration.</p>
@@ -492,6 +1107,7 @@ export default function Home() {
                 <button
                   key={type}
                   className={`menu-btn ${activePropertyType === type ? "active" : ""}`}
+                  data-intel-id={`l1-menu-btn-${type.toLowerCase()}`}
                   onClick={() => {
                     setActivePropertyType(type);
                     setSearchQuery("");
@@ -503,7 +1119,7 @@ export default function Home() {
               ))}
             </nav>
             <div className="menu-footer">
-              <Link href="/property/batasan-hills" className="prominent-action-link">
+              <Link href="/property/batasan-hills" className="prominent-action-link" data-intel-id="l1-showcase-link">
                 View Showcase Space →
               </Link>
             </div>
@@ -516,7 +1132,7 @@ export default function Home() {
               <p>Live active preview stream</p>
             </header>
             
-            <div className="search-container">
+            <div className="search-container" data-intel-id="l1-search-input">
               <div className="search-input-wrapper">
                 <input 
                   type="text" 
@@ -582,7 +1198,7 @@ export default function Home() {
                   const locationTag = item.tags[2] || "";
                   const city = locationTag.replace("Location: ", "") || "Quezon City";
                   return (
-                    <div key={item.id} className="mini-preview-card">
+                    <div key={item.id} className="mini-preview-card" data-intel-id={`l1-card-${item.id}`}>
                       <div className="mini-card-visual">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={item.image} alt={item.title} className="mini-card-image" />
@@ -625,11 +1241,11 @@ export default function Home() {
       </section>
 
       {/* SECTION 3: Layer 02 */}
-      <section className="snap-section section-discover" style={{ padding: 0 }}>
+      <section className="snap-section section-discover" style={{ padding: 0 }} data-intel-layer="2">
         <div className="property-split">
           {/* Left Menu Panel */}
           <div className="property-menu">
-            <div className="menu-header">
+            <div className="menu-header" data-intel-id="l2-menu-header">
               <span className="vector-label">Layer 02 // Discovery &amp; Intelligence</span>
               <h2>Discovery Feed</h2>
               <p>Explore real-time spatial reports, regional stories, and architectural curations.</p>
@@ -639,6 +1255,7 @@ export default function Home() {
                 <button
                   key={type}
                   className={`menu-btn ${activeDiscoverType === type ? "active" : ""}`}
+                  data-intel-id={`l2-menu-btn-${type.toLowerCase()}`}
                   onClick={() => setActiveDiscoverType(type)}
                 >
                   {type}
@@ -646,7 +1263,7 @@ export default function Home() {
               ))}
             </nav>
             <div className="menu-footer">
-              <Link href={`/discover?type=${activeDiscoverType.toLowerCase()}`} className="prominent-action-link">
+              <Link href={`/discover?type=${activeDiscoverType.toLowerCase()}`} className="prominent-action-link" data-intel-id="l2-discover-link">
                 Begin Exploring →
               </Link>
             </div>
@@ -665,7 +1282,7 @@ export default function Home() {
                 <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', textTransform: 'uppercase', color: 'var(--accent)', letterSpacing: '0.1em', marginBottom: '16px' }}>Property Spotlights</h4>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
                   {discoveryFeedData[activeDiscoverType].spotlights.map((spot, idx) => (
-                    <div key={idx} style={{ background: '#161616', border: '1px solid #262626', borderRadius: '4px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                    <div key={idx} data-intel-id={`l2-spotlight-${spot.title.toLowerCase().replace(/\s+/g, '-')}`} style={{ background: '#161616', border: '1px solid #262626', borderRadius: '4px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                       <div style={{ height: '140px', overflow: 'hidden', position: 'relative' }}>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={spot.image} alt={spot.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -688,7 +1305,7 @@ export default function Home() {
                   <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', textTransform: 'uppercase', color: 'var(--accent)', letterSpacing: '0.1em', marginBottom: '16px' }}>News &amp; Stories</h4>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                     {discoveryFeedData[activeDiscoverType].news.map((item, idx) => (
-                      <div key={idx} style={{ borderBottom: '1px solid #1e1e1e', paddingBottom: '12px' }}>
+                      <div key={idx} data-intel-id={`l2-news-item-${item.title.toLowerCase().replace(/\s+/g, '-')}`} style={{ borderBottom: '1px solid #1e1e1e', paddingBottom: '12px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
                           <h5 style={{ fontSize: '13px', fontWeight: '500', color: '#f0ede8' }}>{item.title}</h5>
                           <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>{item.date}</span>
@@ -704,7 +1321,7 @@ export default function Home() {
                   <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', textTransform: 'uppercase', color: 'var(--accent)', letterSpacing: '0.1em', marginBottom: '16px' }}>Curated Collections</h4>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                     {discoveryFeedData[activeDiscoverType].collections.map((coll, idx) => (
-                      <div key={idx} className="curated-collection-btn" style={{ background: '#161616', border: '1px solid #262626', padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', transition: 'all 0.3s ease', borderRadius: '4px' }}>
+                      <div key={idx} className="curated-collection-btn" data-intel-id={`l2-collection-btn-${coll.toLowerCase().replace(/\s+/g, '-')}`} style={{ background: '#161616', border: '1px solid #262626', padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', transition: 'all 0.3s ease', borderRadius: '4px' }}>
                         <span style={{ fontSize: '13px', color: '#fff' }}>{coll}</span>
                         <span style={{ color: 'var(--accent)', fontSize: '12px' }}>Explore →</span>
                       </div>
@@ -722,9 +1339,9 @@ export default function Home() {
       </section>
 
       {/* SECTION 4: Layer 03 */}
-      <section className="snap-section section-brokers">
+      <section className="snap-section section-brokers" data-intel-layer="3">
         <div className="brokers-content">
-          <header className="section-header-center">
+          <header className="section-header-center" data-intel-id="l3-advisory-header">
             <span className="vector-label">Layer 03 // Trusted Guides</span>
             <h2>The Advisory</h2>
             <p>Connect with advisors who understand space, design, and architecture.</p>
@@ -748,7 +1365,7 @@ export default function Home() {
                 { label: "Curator Style", value: "Minimalist" }
               ] }
             ].map((broker, i) => (
-              <div key={i} className="broker-preview-card">
+              <div key={i} className="broker-preview-card" data-intel-id={`l3-broker-card-${broker.name.toLowerCase().replace(/\s+/g, '-').replace(/,/g, '')}`}>
                 <div style={{ width: '80px', height: '80px', borderRadius: '50%', backgroundImage: `url(${broker.image})`, backgroundSize: 'cover', backgroundPosition: 'center', filter: 'grayscale(100%) contrast(1.2)', marginBottom: '16px', border: '2px solid var(--border-solid)' }}></div>
                 <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: '#fff', marginBottom: '4px' }}>{broker.name} <span style={{ color: 'var(--text-muted)', fontSize: '12px', fontWeight: 'normal', fontFamily: 'var(--font-mono)', display: 'block', marginTop: '4px' }}>{broker.status}</span></h3>
                 
@@ -768,7 +1385,7 @@ export default function Home() {
           </div>
 
           <div className="section-action-footer">
-            <Link href="/brokers" className="prominent-action-link">
+            <Link href="/brokers" className="prominent-action-link" data-intel-id="l3-brokers-link">
               CONNECT WITH AN ADVISOR →
             </Link>
           </div>
@@ -776,18 +1393,18 @@ export default function Home() {
       </section>
 
       {/* SECTION 5: THE WISHLIST LAYER */}
-      <section className="snap-section section-wishlist" style={{ padding: 0 }}>
+      <section className="snap-section section-wishlist" style={{ padding: 0 }} data-intel-layer="4">
         <div className="property-split">
           
           {/* Left Menu Panel */}
           <div className="property-menu">
-            <div className="menu-header">
+            <div className="menu-header" data-intel-id="l4-board-header">
               <span className="vector-label">Layer 04 // Your Board</span>
               <h2>Your Board</h2>
               <p>Your inspiration archive. Collect design ideas, preferred cities, and target layouts.</p>
             </div>
             
-            <div className="ledger-tags-guide" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div className="ledger-tags-guide" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }} data-intel-id="l4-tags-guide">
               <div style={{ color: 'var(--text-secondary)', fontSize: '13px', lineHeight: '1.6' }}>
                 Your board acts as a local cryptographic ledger. Mark properties with four distinct reaction tags:
               </div>
@@ -809,7 +1426,7 @@ export default function Home() {
             </div>
 
             <div className="menu-footer">
-              <Link href="/wishlist" className="prominent-action-link">
+              <Link href="/wishlist" className="prominent-action-link" data-intel-id="l4-wishlist-link">
                 Open Your Ledger →
               </Link>
             </div>
@@ -828,7 +1445,7 @@ export default function Home() {
               <div className="flow-grid">
                 
                 {/* Step 1: Scan */}
-                <div className="flow-card">
+                <div className="flow-card" data-intel-id="l4-flow-card-1">
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--accent)', border: '1px solid rgba(200,169,110,0.2)', padding: '2px 6px', borderRadius: '2px' }}>PHASE 01</span>
                     <span style={{ fontSize: '24px', fontWeight: '800', fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.05)' }}>01</span>
@@ -851,7 +1468,7 @@ export default function Home() {
                 </div>
 
                 {/* Step 2: Tag */}
-                <div className="flow-card">
+                <div className="flow-card" data-intel-id="l4-flow-card-2">
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--accent)', border: '1px solid rgba(200,169,110,0.2)', padding: '2px 6px', borderRadius: '2px' }}>PHASE 02</span>
                     <span style={{ fontSize: '24px', fontWeight: '800', fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.05)' }}>02</span>
@@ -874,7 +1491,7 @@ export default function Home() {
                 </div>
 
                 {/* Step 3: Archive */}
-                <div className="flow-card">
+                <div className="flow-card" data-intel-id="l4-flow-card-3">
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--accent)', border: '1px solid rgba(200,169,110,0.2)', padding: '2px 6px', borderRadius: '2px' }}>PHASE 03</span>
                     <span style={{ fontSize: '24px', fontWeight: '800', fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.05)' }}>03</span>
@@ -895,7 +1512,7 @@ export default function Home() {
                 </div>
 
                 {/* Step 4: Route */}
-                <div className="flow-card">
+                <div className="flow-card" data-intel-id="l4-flow-card-4">
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--accent)', border: '1px solid rgba(200,169,110,0.2)', padding: '2px 6px', borderRadius: '2px' }}>PHASE 04</span>
                     <span style={{ fontSize: '24px', fontWeight: '800', fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.05)' }}>04</span>
@@ -919,7 +1536,7 @@ export default function Home() {
 
               {/* Infographic Stats / Architecture Details */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', borderTop: '1px solid #262626', paddingTop: '24px' }}>
-                <div>
+                <div data-intel-id="l4-policy-block">
                   <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', textTransform: 'uppercase', color: 'var(--accent)', letterSpacing: '0.1em', marginBottom: '16px' }}>
                     Anonymous Ledger Policy
                   </h4>
@@ -928,7 +1545,7 @@ export default function Home() {
                   </p>
                 </div>
                 
-                <div>
+                <div data-intel-id="l4-parameters-block">
                   <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', textTransform: 'uppercase', color: 'var(--accent)', letterSpacing: '0.1em', marginBottom: '16px' }}>
                     Memory Ledger Parameters
                   </h4>
@@ -960,23 +1577,23 @@ export default function Home() {
       </section>
 
       {/* SECTION 6: THE ABOUT US LAYER */}
-      <section className="snap-section section-about">
+      <section className="snap-section section-about" data-intel-layer="5">
         <div className="about-content">
-          <header className="section-header-center">
+          <header className="section-header-center" data-intel-id="l5-manifesto-header">
             <h2>The ScoutIt Manifesto</h2>
           </header>
           
           <div className="about-manifesto-preview">
-            <p className="manifesto-lead">
+            <p className="manifesto-lead" data-intel-id="l5-manifesto-lead">
               We believe a home is more than a list of specifications. It is a space where your life unfolds. ScoutIt is an editorial archive created for the Philippine property dreamer.
             </p>
-            <p className="manifesto-secondary">
+            <p className="manifesto-secondary" data-intel-id="l5-manifesto-secondary">
               Instead of pressure-driven listings and corporate jargon, we curate architectural DNA, design history, and local narratives to help you discover spaces you'll truly love.
             </p>
           </div>
 
           <div className="section-action-footer">
-            <Link href="/about" className="prominent-action-link">
+            <Link href="/about" className="prominent-action-link" data-intel-id="l5-about-link">
               Read Our Full Story →
             </Link>
           </div>
@@ -2365,12 +2982,411 @@ export default function Home() {
           }
         }
 
+        /* Draggable UFO and Radar scanner styles */
+        .interactive-ufo-node {
+          cursor: grab;
+          transition: transform 0.2s ease;
+          pointer-events: auto !important;
+        }
+
+        /* Floating UFO scanner when scrolled down */
+        .floating-ufo-scanner-dock {
+          position: fixed;
+          top: 120px;
+          right: 24px;
+          z-index: 9999;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          background: rgba(14, 14, 14, 0.85);
+          border: 1px solid rgba(200, 169, 110, 0.3);
+          border-radius: 50%;
+          width: 72px;
+          height: 72px;
+          font-size: 48px;
+          justify-content: center;
+          backdrop-filter: blur(12px);
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), 0 0 15px rgba(34, 197, 94, 0.15);
+          animation: floatStickyDock 3.5s ease-in-out infinite alternate;
+          transition: border-color 0.3s, box-shadow 0.3s;
+          pointer-events: auto !important;
+        }
+        .floating-ufo-scanner-dock:hover {
+          border-color: #22c55e;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), 0 0 25px rgba(34, 197, 94, 0.45);
+        }
+        @keyframes floatStickyDock {
+          0% { transform: translateY(0); }
+          100% { transform: translateY(-6px); }
+        }
+
+        .floating-ufo-scanner-dock .dock-label {
+          font-family: var(--font-mono);
+          font-size: 7px;
+          letter-spacing: 0.1em;
+          color: var(--accent);
+          margin-top: 4px;
+          position: absolute;
+          bottom: -15px;
+          white-space: nowrap;
+          pointer-events: none;
+        }
+        
+        .sticky-tooltip {
+          bottom: 120% !important;
+        }
+        .sticky-sonar {
+          width: 3.5em !important;
+          height: 3.5em !important;
+        }
+        .interactive-ufo-node:hover {
+          transform: scale(1.15);
+        }
+        .interactive-ufo-node:active {
+          cursor: grabbing;
+        }
+
+        /* Onboarding Tooltip */
+        .ufo-tooltip-onboarding {
+          position: absolute;
+          bottom: 160%;
+          left: 50%;
+          transform: translateX(-50%);
+          background: rgba(14, 14, 14, 0.95);
+          border: 1px solid #22c55e;
+          color: #22c55e;
+          font-family: var(--font-mono);
+          font-size: 9px;
+          font-weight: 600;
+          letter-spacing: 0.1em;
+          padding: 4px 8px;
+          border-radius: 4px;
+          white-space: nowrap;
+          box-shadow: 0 0 10px rgba(34, 197, 94, 0.3);
+          pointer-events: none;
+          animation: floatTooltip 2.5s ease-in-out infinite alternate;
+          z-index: 100;
+        }
+        @keyframes floatTooltip {
+          0% { transform: translate(-50%, 0); }
+          100% { transform: translate(-50%, -4px); }
+        }
+
+        /* Sonar ring pulse */
+        .sonar-pulse-ring {
+          position: absolute;
+          top: 50%; left: 50%;
+          transform: translate(-50%, -50%);
+          width: 2em;
+          height: 2em;
+          border: 1.5px solid rgba(34, 197, 94, 0.6);
+          border-radius: 50%;
+          pointer-events: none;
+          animation: sonarRingPulse 2.5s cubic-bezier(0.215, 0.610, 0.355, 1) infinite;
+          z-index: 99;
+        }
+        @keyframes sonarRingPulse {
+          0% {
+            width: 1em;
+            height: 1em;
+            opacity: 0.8;
+          }
+          100% {
+            width: 3.5em;
+            height: 3.5em;
+            opacity: 0;
+          }
+        }
+
+        /* Glowing green beam below active dragging UFO */
+        .ufo-scan-beam-active {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 0.25em;
+          height: 80vh;
+          background: linear-gradient(to bottom, rgba(34, 197, 94, 0.45) 0%, rgba(34, 197, 94, 0.02) 100%);
+          filter: blur(2px);
+          pointer-events: none;
+          border-radius: 50%;
+          animation: laserPulse 1.5s ease-in-out infinite alternate;
+        }
+        @keyframes laserPulse {
+          0% { opacity: 0.6; width: 0.2em; }
+          100% { opacity: 1; width: 0.35em; }
+        }
+
+        /* Expand pulse scanning wave when released */
+        .scan-pulse-wave {
+          position: fixed;
+          border: 2px solid #22c55e;
+          border-radius: 50%;
+          pointer-events: none;
+          transform: translate(-50%, -50%);
+          z-index: 99998;
+          animation: scanExplode 1.5s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+        }
+        @keyframes scanExplode {
+          0% {
+            width: 0px;
+            height: 0px;
+            opacity: 1;
+            box-shadow: inset 0 0 15px rgba(34,197,94,0.8), 0 0 15px rgba(34,197,94,0.8);
+          }
+          100% {
+            width: 600px;
+            height: 600px;
+            opacity: 0;
+            box-shadow: inset 0 0 40px rgba(34,197,94,0), 0 0 40px rgba(34,197,94,0);
+          }
+        }
+
+        /* HUD Scanner Console styles */
+        .hud-scanner-console {
+          position: fixed;
+          top: 0;
+          right: -380px;
+          width: 350px;
+          height: 100vh;
+          background: rgba(14, 14, 14, 0.9);
+          border-left: 1px solid var(--accent);
+          backdrop-filter: blur(20px);
+          box-shadow: -10px 0 40px rgba(0,0,0,0.8);
+          z-index: 100001;
+          display: flex;
+          flex-direction: column;
+          transition: right 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .hud-scanner-console.open {
+          right: 0;
+        }
+
+        .hud-console-header {
+          display: flex;
+          align-items: center;
+          padding: 20px 24px;
+          border-bottom: 1px solid rgba(200, 169, 110, 0.2);
+        }
+        .hud-status-led {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: #22c55e;
+          box-shadow: 0 0 8px #22c55e;
+          margin-right: 12px;
+          animation: ledBlink 1.5s infinite alternate;
+        }
+        @keyframes ledBlink {
+          0% { opacity: 0.4; }
+          100% { opacity: 1; }
+        }
+        .hud-header-title {
+          font-family: var(--font-mono);
+          font-size: 11px;
+          letter-spacing: 0.2em;
+          color: var(--accent);
+          font-weight: bold;
+          flex-grow: 1;
+        }
+        .hud-close-btn {
+          background: none;
+          border: none;
+          color: var(--text-secondary);
+          font-size: 24px;
+          cursor: pointer;
+          transition: color 0.2s;
+          line-height: 1;
+          padding: 0;
+        }
+        .hud-close-btn:hover {
+          color: var(--accent);
+        }
+
+        .hud-console-body {
+          flex-grow: 1;
+          padding: 32px 24px;
+          display: flex;
+          flex-direction: column;
+        }
+        .hud-scan-title {
+          font-family: var(--font-mono);
+          font-size: 13px;
+          letter-spacing: 0.1em;
+          color: #22c55e;
+          margin: 0 0 16px 0;
+        }
+        .hud-scan-divider {
+          width: 30px;
+          height: 2px;
+          background: #22c55e;
+          margin-bottom: 24px;
+          box-shadow: 0 0 6px #22c55e;
+        }
+        .hud-scan-intel {
+          font-family: var(--font-body);
+          font-size: 14px;
+          line-height: 1.6;
+          color: rgba(240, 237, 232, 0.85);
+          margin: 0;
+        }
+
+        .hud-console-footer {
+          padding: 24px;
+          border-top: 1px solid rgba(200, 169, 110, 0.15);
+          background: rgba(200, 169, 110, 0.02);
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+        .hud-portal-btn {
+          display: block;
+          width: 100%;
+          padding: 14px;
+          background: var(--accent);
+          border: 1px solid var(--accent);
+          color: #0e0e0e;
+          font-family: var(--font-mono);
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.25em;
+          text-align: center;
+          text-decoration: none;
+          cursor: pointer;
+          transition: all 0.25s;
+          box-shadow: 0 0 10px rgba(200, 169, 110, 0.2);
+        }
+        .hud-portal-btn:hover {
+          background: #ffffff;
+          border-color: #ffffff;
+          color: #0e0e0e;
+          box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+        }
+        .hud-action-btn {
+          width: 100%;
+          padding: 14px;
+          background: transparent;
+          border: 1px solid var(--accent);
+          color: var(--accent);
+          font-family: var(--font-mono);
+          font-size: 11px;
+          font-weight: 600;
+          letter-spacing: 0.25em;
+          cursor: pointer;
+          transition: all 0.25s;
+        }
+        .hud-action-btn:hover {
+          background: var(--accent);
+          color: #0e0e0e;
+          box-shadow: 0 0 15px rgba(200, 169, 110, 0.3);
+        }
+
         @media (max-width: 640px) {
           .flow-grid {
             grid-template-columns: 1fr;
           }
+          .hud-scanner-console {
+            top: auto;
+            bottom: -50vh;
+            right: 0;
+            width: 100%;
+            height: 45vh;
+            border-left: none;
+            border-top: 1px solid var(--accent);
+            transition: bottom 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+            border-radius: 12px 12px 0 0;
+          }
+          .hud-scanner-console.open {
+            bottom: 0;
+          }
         }
       `}</style>
+
+      {/* Active dragging/hovering UFO overlay with Laser scan beam */}
+      {scannerState === 'HOVER_FOLLOW' && (
+        <div 
+          className="ufo-drag-overlay"
+          style={{
+            position: 'fixed',
+            left: ufoPos.x,
+            top: ufoPos.y,
+            transform: 'translate(-50%, -50%)',
+            pointerEvents: 'none',
+            zIndex: 100000
+          }}
+        >
+          {/* Laser scanning beam below active UFO */}
+          <div className="ufo-scan-beam-active"></div>
+          
+          <span className="ufo floating-ufo">
+            <span className="ufo-dome"></span>
+            <span className="ufo-disc">
+              <span className="ufo-light ufo-light-1"></span>
+              <span className="ufo-light ufo-light-2"></span>
+              <span className="ufo-light ufo-light-3"></span>
+            </span>
+          </span>
+        </div>
+      )}
+
+      {/* Holographic Slide-out Scan Console */}
+      <div className={`hud-scanner-console ${hudOpen ? 'open' : ''}`}>
+        <div className="hud-console-header">
+          <span className="hud-status-led"></span>
+          <span className="hud-header-title">INTEL DECRYPTOR</span>
+          <button className="hud-close-btn" onClick={handleUfoDeactivate}>×</button>
+        </div>
+        
+        {scanResult && hudOpen && (
+          <div className="hud-console-body">
+            <h3 className="hud-scan-title">{scanResult.title}</h3>
+            <div className="hud-scan-divider"></div>
+            <p className="hud-scan-intel">
+              <TypewriterText text={scanResult.intel} />
+            </p>
+          </div>
+        )}
+        
+        <div className="hud-console-footer">
+          {lockedLinkUrl && (
+            <Link href={lockedLinkUrl} className="hud-portal-btn" onClick={handleUfoDeactivate}>
+              ENTER PORTAL
+            </Link>
+          )}
+          <button className="hud-action-btn" onClick={handleUfoDeactivate}>
+            DISMISS INTEL
+          </button>
+        </div>
+      </div>
+
+      {/* Floating UFO scanner when scrolled down */}
+      {isUfoSticky && scannerState === 'DOCKED' && (
+        <div 
+          className="floating-ufo-scanner-dock interactive-ufo-node"
+          onPointerDown={handleUfoActivate}
+          style={{ touchAction: 'none', cursor: 'pointer' }}
+        >
+          {/* Sonar and tooltip badge */}
+          {!hasScannedOnce && (
+            <span className="ufo-tooltip-onboarding sticky-tooltip">
+              [ CLICK TO SCAN ]
+            </span>
+          )}
+          {!hasScannedOnce && (
+            <span className="sonar-pulse-ring sticky-sonar"></span>
+          )}
+          
+          <span className="ufo">
+            <span className="ufo-dome"></span>
+            <span className="ufo-disc">
+              <span className="ufo-light ufo-light-1"></span>
+              <span className="ufo-light ufo-light-2"></span>
+              <span className="ufo-light ufo-light-3"></span>
+            </span>
+          </span>
+          <div className="dock-label">SCANNER</div>
+        </div>
+      )}
     </main>
   );
 }
