@@ -1241,7 +1241,7 @@ export default function Home() {
         /* Base letter style */
         .letter {
           font-family: var(--font-display);
-          font-size: clamp(24px, 3.5vw, 42px);
+          font-size: clamp(36px, 5.5vw, 64px);
           letter-spacing: 0.05em;
           color: var(--accent);
           display: inline-block;
@@ -1252,7 +1252,7 @@ export default function Home() {
         /* ── S: Comet Trail ───────────────────────────── */
         .letter-s {
           animation: cometDraw 0.7s cubic-bezier(0.4,0,0.2,1) forwards;
-          text-shadow: 4px -2px 12px rgba(200,169,110,0.8), 8px -4px 20px rgba(200,169,110,0.4);
+          text-shadow: 0 0 12px rgba(200, 169, 110, 0.5);
         }
 
         /* ── C: Eclipse Reveal ────────────────────────── */
@@ -1312,7 +1312,8 @@ export default function Home() {
           top: 100%;
           left: 50%;
           transform: translateX(-50%);
-          width: 3px;
+          width: 0.06em;
+          min-width: 3px;
           height: 1.1em;
           background: linear-gradient(to bottom, rgba(34,197,94,0.35), transparent);
           animation: beamGlow 2.2s ease-in-out 3.5s infinite;
