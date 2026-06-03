@@ -480,12 +480,14 @@ export default function Home() {
   const [hasScannedOnce, setHasScannedOnce] = useState(false);
   const [isUfoSticky, setIsUfoSticky] = useState(false);
   const [currentScannedId, setCurrentScannedId] = useState("");
+  const [isLocked, setIsLocked] = useState(false);
+  const [lockedLinkUrl, setLockedLinkUrl] = useState("");
 
   const handleUfoActivate = (e) => {
     e.preventDefault();
     e.stopPropagation();
     
-    if (scannerState === 'HOVER_FOLLOW') {
+    if (scannerState === 'HOVER_FOLLOW' || isLocked) {
       handleUfoDeactivate();
       return;
     }
@@ -507,12 +509,14 @@ export default function Home() {
     flyBackHome(() => {
       setHudOpen(false);
       setCurrentScannedId("");
+      setIsLocked(false);
+      setLockedLinkUrl("");
     });
   };
 
   // Listen to global pointer move for Hover scanning
   useEffect(() => {
-    if (scannerState !== 'HOVER_FOLLOW') return;
+    if (scannerState !== 'HOVER_FOLLOW' || isLocked) return;
 
     const handleMove = (e) => {
       const x = e.clientX;
@@ -569,20 +573,139 @@ export default function Home() {
             intel: layerIntels[layerIndex] || "Section coordinates parsed. General layer environment stable. Hover over sub-elements for targeted telemetry details."
           });
         }
-      } else {
-        if (currentScannedId !== "ambient") {
-          setCurrentScannedId("ambient");
-          setScanResult({
-            title: "SCAN: SYSTEM ACTIVE",
-            intel: "Hover tractor beam scanner initialized. Sweep cursor over active cards or page blocks to retrieve real-time design telemetry."
-          });
-        }
       }
     };
 
     window.addEventListener('pointermove', handleMove);
     return () => window.removeEventListener('pointermove', handleMove);
-  }, [scannerState, currentScannedId]);
+  }, [scannerState, currentScannedId, isLocked]);
+
+  // Global click interceptor for Click-to-Lock and click scanning triggers
+  useEffect(() => {
+    const handleGlobalClick = (e) => {
+      // Find if we clicked on a target with data-intel-id or data-intel-layer
+      let target = e.target;
+      let matchedEl = null;
+      let matchedLayer = null;
+
+      while (target && target !== document.body) {
+        if (target.hasAttribute && target.hasAttribute('data-intel-id')) {
+          matchedEl = target;
+          break;
+        }
+        if (target.hasAttribute && target.hasAttribute('data-intel-layer') && matchedLayer === null) {
+          matchedLayer = target;
+        }
+        target = target.parentNode;
+      }
+
+      // If we clicked a close button or action button inside the HUD console, do not intercept
+      if (e.target.closest('.hud-scanner-console')) {
+        return;
+      }
+
+      // If the scanner is active (HOVER_FOLLOW) or if we click directly on an intel target
+      if (scannerState === 'HOVER_FOLLOW' || matchedEl || matchedLayer) {
+        if (matchedEl) {
+          e.preventDefault();
+          e.stopPropagation();
+
+          const id = matchedEl.getAttribute('data-intel-id');
+          const data = HOMEPAGE_INTEL_DB[id];
+          if (data) {
+            setScanResult(data);
+            setCurrentScannedId(id);
+            setIsLocked(true);
+            setScannerState('HOVER_FOLLOW'); // Ensure scanner is active
+            setHudOpen(true);
+            setHasScannedOnce(true);
+            
+            // Position UFO on the clicked element
+            const rect = matchedEl.getBoundingClientRect();
+            setUfoPos({ x: rect.left + rect.width / 2, y: rect.top });
+
+            // Extract href if the clicked element or its parent is a link
+            let linkEl = matchedEl;
+            if (matchedEl.tagName !== 'A') {
+              linkEl = matchedEl.closest('a');
+            }
+            if (linkEl && linkEl.getAttribute('href')) {
+              setLockedLinkUrl(linkEl.getAttribute('href'));
+            } else {
+              setLockedLinkUrl("");
+            }
+          }
+        } else if (matchedLayer) {
+          e.preventDefault();
+          e.stopPropagation();
+
+          const layerId = matchedLayer.getAttribute('data-intel-layer');
+          const layerTitles = [
+            "SCAN: PORTAL CORE [LAYER 00]",
+            "SCAN: CURATED SECTORS [LAYER 01]",
+            "SCAN: DISCOVERY ENGINE [LAYER 02]",
+            "SCAN: ADVISORY GRID [LAYER 03]",
+            "SCAN: YOUR BOARD [LAYER 04]",
+            "SCAN: MANIFESTO CORE [LAYER 05]"
+          ];
+          const layerIntels = [
+            "Main header space-hero core scanned. Current state: Ambient drift active. Sweep the tractor beam over specific text blocks or button nodes to access cognitive telemetry.",
+            "Scanned Layer 01 property experience deck. Current sub-systems online: Curated Category selection menu, Search Parser input, and individual property experience preview assets.",
+            "Scanned Layer 02 Discovery Engine. Real-time regional feed indices stable. Hover the tractor beam over spotlight cards, news blocks, or curated collections tags to read telemetry.",
+            "Scanned Layer 03 Advisory Network. Active broker registries decrypted. Hover the tractor beam directly over advisor cards to load agent bio dossiers.",
+            "Scanned Layer 04 Personal Board. Staging matrix for client-side storage ledger checked. Safe from central cloud syncing channels.",
+            "Scanned Layer 05 Manifesto. ScoutIt core philosophy matrix online. Inspect individual lead text blocks to review the platform's vision blueprint."
+          ];
+          const layerIndex = parseInt(layerId, 10);
+          const data = {
+            title: layerTitles[layerIndex] || "SCAN: LAYER DETECTED",
+            intel: layerIntels[layerIndex] || "Section coordinates parsed. General layer environment stable. Hover over sub-elements for targeted telemetry details."
+          };
+          setScanResult(data);
+          setCurrentScannedId(`layer-${layerId}`);
+          setIsLocked(true);
+          setScannerState('HOVER_FOLLOW');
+          setHudOpen(true);
+          setHasScannedOnce(true);
+          
+          // Position UFO over the section
+          const rect = matchedLayer.getBoundingClientRect();
+          setUfoPos({ x: rect.left + rect.width / 2, y: rect.top + 50 }); // 50px offset from section top
+          setLockedLinkUrl("");
+        }
+      }
+    };
+
+    window.addEventListener('click', handleGlobalClick, true);
+    return () => window.removeEventListener('click', handleGlobalClick, true);
+  }, [scannerState]);
+
+  // Keep locked UFO pinned to target element during scrolling
+  useEffect(() => {
+    if (!isLocked || !currentScannedId) return;
+
+    const handleScroll = () => {
+      let el = null;
+      if (currentScannedId.startsWith('layer-')) {
+        const layerId = currentScannedId.replace('layer-', '');
+        el = document.querySelector(`[data-intel-layer="${layerId}"]`);
+      } else {
+        el = document.querySelector(`[data-intel-id="${currentScannedId}"]`);
+      }
+
+      if (el) {
+        const rect = el.getBoundingClientRect();
+        if (currentScannedId.startsWith('layer-')) {
+          setUfoPos({ x: rect.left + rect.width / 2, y: rect.top + 50 });
+        } else {
+          setUfoPos({ x: rect.left + rect.width / 2, y: rect.top });
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isLocked, currentScannedId]);
 
   const flyBackHome = (callback) => {
     const stickyDockEl = document.querySelector('.floating-ufo-scanner-dock .interactive-ufo-node');
@@ -3113,6 +3236,32 @@ export default function Home() {
           padding: 24px;
           border-top: 1px solid rgba(200, 169, 110, 0.15);
           background: rgba(200, 169, 110, 0.02);
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+        .hud-portal-btn {
+          display: block;
+          width: 100%;
+          padding: 14px;
+          background: var(--accent);
+          border: 1px solid var(--accent);
+          color: #0e0e0e;
+          font-family: var(--font-mono);
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.25em;
+          text-align: center;
+          text-decoration: none;
+          cursor: pointer;
+          transition: all 0.25s;
+          box-shadow: 0 0 10px rgba(200, 169, 110, 0.2);
+        }
+        .hud-portal-btn:hover {
+          background: #ffffff;
+          border-color: #ffffff;
+          color: #0e0e0e;
+          box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
         }
         .hud-action-btn {
           width: 100%;
@@ -3200,6 +3349,11 @@ export default function Home() {
         )}
         
         <div className="hud-console-footer">
+          {lockedLinkUrl && (
+            <Link href={lockedLinkUrl} className="hud-portal-btn" onClick={handleUfoDeactivate}>
+              ENTER PORTAL
+            </Link>
+          )}
           <button className="hud-action-btn" onClick={handleUfoDeactivate}>
             DISMISS INTEL
           </button>
