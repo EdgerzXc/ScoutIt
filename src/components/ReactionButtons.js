@@ -166,8 +166,8 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
 
         .shape-wrapper {
           position: relative;
-          width: 80px;
-          height: 80px;
+          width: 52px;
+          height: 52px;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -180,18 +180,19 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
           width: 100%;
           height: 100%;
           fill: #1c1c1c;
-          stroke: #262626;
-          stroke-width: 1.5;
+          stroke: #4a4a4a;
+          stroke-width: 3px;
           transition: all 0.25s ease;
         }
 
         .icon-overlay {
           position: relative;
           z-index: 2;
-          font-size: 14px;
+          font-size: 11px;
+          opacity: 0.7;
           color: #8a8a8a;
           user-select: none;
-          transition: color 0.25s ease;
+          transition: all 0.25s ease;
         }
 
         /* Hover states */
@@ -201,26 +202,29 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
 
         .reaction-tile:hover .shape-wrapper :global(svg) {
           stroke: #c8a96e;
+          stroke-width: 3px;
         }
 
         /* Active states */
         .reaction-tile.active .shape-wrapper :global(svg) {
           fill: #c8a96e;
           stroke: #c8a96e;
+          stroke-width: 3px;
         }
 
         .reaction-tile.active .icon-overlay {
           color: #0e0e0e;
+          opacity: 1;
         }
 
         /* Label styling */
         .tile-label {
           font-family: system-ui, -apple-system, sans-serif;
-          font-size: 10px;
+          font-size: 9px;
           text-transform: uppercase;
-          letter-spacing: 1.5px;
-          color: #8a8a8a;
-          margin-top: 8px;
+          letter-spacing: 1px;
+          color: #6a6a6a;
+          margin-top: 6px;
           transition: color 0.25s ease;
           text-align: center;
         }
@@ -248,15 +252,16 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
 
         @media (max-width: 640px) {
           .shape-wrapper {
-            width: 64px;
-            height: 64px;
+            width: 52px;
+            height: 52px;
           }
           .icon-overlay {
-            font-size: 12px;
+            font-size: 11px;
           }
           .tile-label {
             font-size: 9px;
             letter-spacing: 1px;
+            margin-top: 6px;
           }
         }
       `}</style>
