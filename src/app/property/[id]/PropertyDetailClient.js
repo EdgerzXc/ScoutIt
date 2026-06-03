@@ -765,7 +765,7 @@ export default function PropertyDetailClient({ slug }) {
               </h2>
               
               <div className="reactions-container" style={{marginTop:"16px", display:"flex", flexDirection:"column", gap:"10px"}}>
-                <p style={{ fontSize: "11px", textTransform: "uppercase", letterSpacing: "2px", color: "#8a8a8a", marginBottom: "16px" }}>
+                <p style={{ fontSize: "12px", textTransform: "uppercase", letterSpacing: "2px", color: "#8a8a8a", marginBottom: "16px" }}>
                   HOW DOES THIS SPACE MAKE YOU FEEL?
                 </p>
                 <ReactionButtons
@@ -792,7 +792,7 @@ export default function PropertyDetailClient({ slug }) {
                 Connect with an Authorized Broker →
               </Link>
 
-              <p style={{fontSize:"10px", color:"var(--text-muted)", lineHeight:"1.5", marginTop:"16px"}}>
+              <p style={{fontSize:"15px", color:"#8a8a8a", lineHeight:"1.65", marginTop:"16px"}}>
                 ScoutIt is a spatial intelligence archive. In compliance with R.A. 9646, all site walks, direct inquiries, and purchase offers are facilitated exclusively by licensed, authorized real estate brokers.
               </p>
             </div>
@@ -983,7 +983,7 @@ export default function PropertyDetailClient({ slug }) {
                   <div className="verdict-dot" style={{background:"var(--accent)"}}/>
                   <div className="verdict-title" style={{color:"var(--accent)"}}>Layer V7 — Pipeline Active</div>
                 </div>
-                <p className="verdict-text" style={{fontFamily:"var(--font-body)", fontSize:"11px", letterSpacing:"0.1em", textTransform:"uppercase", color:"var(--text-muted)"}}>
+                <p className="verdict-text" style={{fontFamily:"var(--font-body)", fontSize:"12px", letterSpacing:"0.1em", textTransform:"uppercase", color:"var(--text-muted)"}}>
                   [ ENGINES COMPILING // LAYER V7 PIPELINE INJECTS COMING SOON ]
                 </p>
               </div>
@@ -991,8 +991,8 @@ export default function PropertyDetailClient({ slug }) {
                 {["Comparative Market Analysis Engine","AR Property Visualization Layer","AI-Powered Space Scoring Matrix","Macro Investment Signal Feed","Live Broker Negotiation Tracker"].map((item, i) => (
                   <div key={i} style={{display:"flex", alignItems:"center", gap:"12px", padding:"12px 16px", background:"var(--surface)", border:"0.5px solid var(--border)", borderRadius:"4px", opacity: 0.45}}>
                     <div style={{width:"6px", height:"6px", borderRadius:"50%", background:"var(--accent)", flexShrink:0}}/>
-                    <span style={{fontSize:"12px", color:"var(--text-secondary)", letterSpacing:"0.04em"}}>{item}</span>
-                    <span style={{marginLeft:"auto", fontSize:"9px", fontWeight:600, letterSpacing:"0.1em", color:"var(--text-muted)", textTransform:"uppercase"}}>Soon</span>
+                    <span style={{fontSize:"15px", color:"#8a8a8a", lineHeight:"1.65", letterSpacing:"0.04em"}}>{item}</span>
+                    <span style={{marginLeft:"auto", fontSize:"12px", fontWeight:600, letterSpacing:"0.1em", color:"var(--text-muted)", textTransform:"uppercase"}}>Soon</span>
                   </div>
                 ))}
               </div>
