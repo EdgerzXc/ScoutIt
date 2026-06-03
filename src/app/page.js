@@ -146,41 +146,38 @@ export default function Home() {
       if (!active) return;
       
       const id = Math.random().toString(36).substr(2, 9);
-      const size = Math.floor(3 + Math.random() * 5) + "px"; // 3px to 7px
-      const opacity = (0.12 + Math.random() * 0.22).toFixed(2); // very subtle
-      const duration = Math.floor(18 + Math.random() * 12); // slow
+      const size = Math.floor(4 + Math.random() * 6) + "px"; // 4px to 10px, slightly more visible
+      const duration = Math.floor(10 + Math.random() * 10); // 10s to 20s, a bit faster and more noticeable
       const borderRadius = `${Math.floor(30 + Math.random()*20)}% ${Math.floor(40 + Math.random()*20)}% ${Math.floor(30 + Math.random()*20)}% ${Math.floor(30 + Math.random()*20)}%`;
       
-      const side = Math.floor(Math.random() * 3);
-      let startX, startY, deltaX, deltaY;
+      const side = Math.floor(Math.random() * 4);
+      let startX, startY;
       
       if (side === 0) {
+        // Left
         startX = "-5vw";
-        const yVal = Math.floor(10 + Math.random() * 80);
-        startY = `${yVal}vh`;
-        deltaX = "55vw";
-        deltaY = `${50 - yVal}vh`;
+        startY = `${Math.floor(10 + Math.random() * 80)}vh`;
       } else if (side === 1) {
+        // Right
         startX = "105vw";
-        const yVal = Math.floor(10 + Math.random() * 80);
-        startY = `${yVal}vh`;
-        deltaX = "-55vw";
-        deltaY = `${50 - yVal}vh`;
-      } else {
-        const xVal = Math.floor(10 + Math.random() * 80);
-        startX = `${xVal}vw`;
+        startY = `${Math.floor(10 + Math.random() * 80)}vh`;
+      } else if (side === 2) {
+        // Top
+        startX = `${Math.floor(10 + Math.random() * 80)}vw`;
         startY = "-5vh";
-        deltaX = `${50 - xVal}vw`;
-        deltaY = "55vh";
+      } else {
+        // Bottom
+        startX = `${Math.floor(10 + Math.random() * 80)}vw`;
+        startY = "105vh";
       }
 
-      setDriftingRocks(prev => [...prev, { id, startX, startY, deltaX, deltaY, size, opacity, duration, borderRadius }]);
+      setDriftingRocks(prev => [...prev, { id, startX, startY, size, duration, borderRadius }]);
 
-      const nextDelay = 15000 + Math.random() * 20000;
+      const nextDelay = 4000 + Math.random() * 6000; // spawn every 4 to 10 seconds
       timerId = setTimeout(spawnRock, nextDelay);
     };
 
-    let timerId = setTimeout(spawnRock, 3000);
+    let timerId = setTimeout(spawnRock, 2000); // initial spawn after 2 seconds
 
     return () => {
       active = false;
@@ -315,15 +312,13 @@ export default function Home() {
                 width: rock.size,
                 height: rock.size,
                 borderRadius: rock.borderRadius,
-                background: 'rgba(240, 237, 232, 0.25)',
-                opacity: rock.opacity,
+                background: 'rgba(200, 169, 110, 0.5)', // Gold-tinted to match theme, higher visibility
+                boxShadow: '0 0 8px rgba(200, 169, 110, 0.3)',
                 filter: 'blur(0.5px)',
-                animation: `driftToHorizon ${rock.duration}s linear forwards`,
+                animation: `driftToCenter ${rock.duration}s linear forwards`,
                 transformOrigin: 'center center',
                 pointerEvents: 'none',
-                zIndex: 2,
-                '--delta-x': rock.deltaX,
-                '--delta-y': rock.deltaY
+                zIndex: 2
               }}
               onAnimationEnd={() => {
                 setDriftingRocks((prev) => prev.filter((r) => r.id !== rock.id));
@@ -929,23 +924,21 @@ export default function Home() {
         }
 
         /* ── Faint drifting rock fragments / meteors (Occasional) ──── */
-        .drifting-rock {
-          animation: driftToHorizon 20s linear forwards;
-        }
-
-        @keyframes driftToHorizon {
+        @keyframes driftToCenter {
           0% {
-            transform: translate(0, 0) scale(1);
+            transform: scale(1);
             opacity: 0;
           }
-          10% {
-            opacity: 0.35;
+          15% {
+            opacity: 0.75; /* Good visibility during flight */
           }
           85% {
-            opacity: 0.2;
+            opacity: 0.45;
           }
           100% {
-            transform: translate(var(--delta-x), var(--delta-y)) scale(0.15);
+            left: 50%;
+            top: 50%;
+            transform: scale(0.1);
             opacity: 0;
             filter: blur(1.5px);
           }
