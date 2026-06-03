@@ -222,29 +222,31 @@ export default function BrokersClient({ slug }) {
           </p>
         </header>
 
-        {/* Section 1: Verified Brokers */}
-        <section className="brokers-section-group">
-          <h2 className="section-group-heading">Verified Brokers</h2>
-          <div className="brokers-cards-list">
-            {BROKERS_DATA.verified.map((b) => renderBrokerCard(b, false))}
-          </div>
-        </section>
+        <div className="brokers-columns-container">
+          {/* Column 1: Verified Brokers */}
+          <section className="brokers-section-group">
+            <h2 className="section-group-heading">Verified Brokers</h2>
+            <div className="brokers-cards-list">
+              {BROKERS_DATA.verified.map((b) => renderBrokerCard(b, false))}
+            </div>
+          </section>
 
-        {/* Section 2: Highest Rated Brokers */}
-        <section className="brokers-section-group" style={{ marginTop: "40px" }}>
-          <h2 className="section-group-heading">Highest Ratings Brokers</h2>
-          <div className="brokers-cards-list">
-            {BROKERS_DATA.highestRated.map((b) => renderBrokerCard(b, true))}
-          </div>
-        </section>
+          {/* Column 2: Highest Rated Brokers */}
+          <section className="brokers-section-group">
+            <h2 className="section-group-heading">Highest Ratings Brokers</h2>
+            <div className="brokers-cards-list">
+              {BROKERS_DATA.highestRated.map((b) => renderBrokerCard(b, true))}
+            </div>
+          </section>
 
-        {/* Section 3: Suggested Brokers */}
-        <section className="brokers-section-group" style={{ marginTop: "40px" }}>
-          <h2 className="section-group-heading">Suggested Brokers</h2>
-          <div className="brokers-cards-list">
-            {BROKERS_DATA.suggested.map((b) => renderBrokerCard(b, false))}
-          </div>
-        </section>
+          {/* Column 3: Suggested Brokers */}
+          <section className="brokers-section-group">
+            <h2 className="section-group-heading">Suggested Brokers</h2>
+            <div className="brokers-cards-list">
+              {BROKERS_DATA.suggested.map((b) => renderBrokerCard(b, false))}
+            </div>
+          </section>
+        </div>
 
         <footer className="brokers-compliance-footer">
           <p>

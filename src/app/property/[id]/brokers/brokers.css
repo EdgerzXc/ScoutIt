@@ -41,9 +41,24 @@
 }
 
 .brokers-main-content {
-  max-width: 800px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 60px 24px 80px;
+}
+
+.brokers-columns-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  align-items: start;
+  margin-top: 40px;
+}
+
+@media (max-width: 1024px) {
+  .brokers-columns-container {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
 }
 
 .brokers-page-header {
@@ -145,6 +160,7 @@
 .broker-detail-col {
   flex: 1;
   min-width: 0;
+  padding-right: 80px;
 }
 
 .broker-name-header {
@@ -200,15 +216,18 @@
 }
 
 .broker-rating-box {
+  position: absolute;
+  top: 24px;
+  right: 24px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   border: 1px solid #262626;
   background: rgba(255, 255, 255, 0.02);
-  padding: 8px 12px;
+  padding: 6px 10px;
   border-radius: 4px;
-  min-width: 90px;
+  min-width: 70px;
   flex-shrink: 0;
 }
 
@@ -382,7 +401,12 @@
     flex-direction: column;
     gap: 16px;
   }
+  .broker-detail-col {
+    padding-right: 0;
+  }
   .broker-rating-box {
+    position: static;
+    margin-top: 12px;
     align-self: flex-start;
   }
   .form-fields-grid {
