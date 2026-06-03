@@ -390,8 +390,7 @@ export default function Home() {
             </div>
           ))}
 
-          {/* Subtle Pulsing Neutron Star */}
-          <div className="neutron-star-static"></div>
+          {/* Static pulsing star removed per user request */}
         </div>
 
         {/* Main hook content */}
@@ -1055,40 +1054,7 @@ export default function Home() {
           }
         }
 
-        /* ── Subtle Pulsing Neutron Star ────────────────── */
-        .neutron-star-static {
-          position: absolute;
-          top: 18%;
-          right: 12%;
-          width: 8px;
-          height: 8px;
-          border-radius: 50%;
-          background: #e0f2fe;
-          box-shadow: 
-            0 0 10px rgba(224, 242, 254, 0.6), 
-            0 0 20px rgba(200, 169, 110, 0.4);
-          opacity: 0.45;
-          pointer-events: none;
-          z-index: 2;
-          animation: pulseNeutron 8s ease-in-out infinite alternate;
-        }
-
-        @keyframes pulseNeutron {
-          0% {
-            opacity: 0.3;
-            box-shadow: 
-              0 0 8px rgba(224, 242, 254, 0.5), 
-              0 0 16px rgba(200, 169, 110, 0.3);
-            transform: scale(0.95);
-          }
-          100% {
-            opacity: 0.65;
-            box-shadow: 
-              0 0 16px rgba(224, 242, 254, 0.8), 
-              0 0 30px rgba(200, 169, 110, 0.6);
-            transform: scale(1.05);
-          }
-        }
+        /* Static pulsing star styling removed per user request */
 
         /* ── Main wordmark container ─────────────────────────────── */
         .hook-content {
