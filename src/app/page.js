@@ -249,8 +249,20 @@ export default function Home() {
           ))}
           {/* Subtle Gravitational accretion core */}
           <div className="black-hole-core"></div>
+          <div className="accretion-disk-outer"></div>
           {/* Subtle Event Horizon curved glow at the bottom */}
           <div className="event-horizon"></div>
+          <div className="event-horizon-swirl"></div>
+
+          {/* Faint Drifting Rock Particles */}
+          <div className="particle particle-1"></div>
+          <div className="particle particle-2"></div>
+          <div className="particle particle-3"></div>
+          <div className="particle particle-4"></div>
+          <div className="particle particle-5"></div>
+
+          {/* Subtle Pulsing Neutron Star */}
+          <div className="neutron-star-static"></div>
         </div>
 
         {/* Main hook content */}
@@ -759,15 +771,38 @@ export default function Home() {
             circle,
             #000000 0%,
             #000000 35%,
-            rgba(200, 169, 110, 0.012) 45%,
-            rgba(200, 169, 110, 0.035) 55%,
+            rgba(200, 169, 110, 0.015) 45%,
+            rgba(200, 169, 110, 0.04) 55%,
             transparent 70%
           );
-          border: 1px solid rgba(200, 169, 110, 0.025);
-          box-shadow: 0 0 100px rgba(200, 169, 110, 0.02);
+          border: 1px solid rgba(200, 169, 110, 0.035);
+          box-shadow: 0 0 100px rgba(200, 169, 110, 0.03);
           pointer-events: none;
           z-index: 1;
           animation: slowOrbit 60s linear infinite;
+        }
+
+        /* Swirling accretion disk layer */
+        .accretion-disk-outer {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 750px;
+          height: 750px;
+          border-radius: 50%;
+          background: conic-gradient(
+            from 0deg,
+            rgba(200, 169, 110, 0.04) 0%,
+            transparent 25%,
+            rgba(200, 169, 110, 0.06) 50%,
+            transparent 75%,
+            rgba(200, 169, 110, 0.04) 100%
+          );
+          filter: blur(35px);
+          animation: slowSwirl 45s linear infinite;
+          z-index: 1;
+          pointer-events: none;
         }
 
         .event-horizon {
@@ -780,8 +815,8 @@ export default function Home() {
           border-radius: 50% 50% 0 0;
           background: radial-gradient(
             ellipse at top,
-            rgba(200, 169, 110, 0.06) 0%,
-            rgba(200, 169, 110, 0.015) 40%,
+            rgba(200, 169, 110, 0.08) 0%,
+            rgba(200, 169, 110, 0.02) 40%,
             transparent 70%
           );
           filter: blur(40px);
@@ -789,7 +824,36 @@ export default function Home() {
           z-index: 2;
         }
 
+        /* Swirling glow for event horizon */
+        .event-horizon-swirl {
+          position: absolute;
+          bottom: -180px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 150vw;
+          height: 400px;
+          border-radius: 50%;
+          background: conic-gradient(
+            from 180deg,
+            rgba(200, 169, 110, 0.03) 0%,
+            transparent 30%,
+            rgba(200, 169, 110, 0.05) 50%,
+            transparent 80%,
+            rgba(200, 169, 110, 0.03) 100%
+          );
+          filter: blur(50px);
+          animation: slowSwirl 90s linear infinite reverse;
+          z-index: 2;
+          pointer-events: none;
+        }
+
+        /* Distant stars twinkling animation */
         @keyframes slowOrbit {
+          from { transform: translate(-50%, -50%) rotate(0deg); }
+          to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        @keyframes slowSwirl {
           from { transform: translate(-50%, -50%) rotate(0deg); }
           to { transform: translate(-50%, -50%) rotate(360deg); }
         }
@@ -797,6 +861,115 @@ export default function Home() {
         @keyframes twinkleSpace {
           0% { opacity: 0.08; }
           100% { opacity: 0.35; }
+        }
+
+        /* ── Faint drifting rock fragments / meteors ──────────── */
+        .particle {
+          position: absolute;
+          width: 4px;
+          height: 4px;
+          background: rgba(240, 237, 232, 0.22);
+          border-radius: 40% 60% 50% 50%;
+          filter: blur(0.5px);
+          pointer-events: none;
+          z-index: 2;
+          opacity: 0;
+        }
+        
+        .particle-1 {
+          top: 15%; left: 20%;
+          animation: driftIn1 28s linear infinite;
+          animation-delay: 0s;
+        }
+        .particle-2 {
+          top: 80%; left: 15%;
+          width: 3px; height: 5px;
+          animation: driftIn2 35s linear infinite;
+          animation-delay: 4s;
+        }
+        .particle-3 {
+          top: 25%; left: 85%;
+          width: 5px; height: 3px;
+          animation: driftIn3 32s linear infinite;
+          animation-delay: 8s;
+        }
+        .particle-4 {
+          top: 75%; left: 80%;
+          width: 3px; height: 3px;
+          animation: driftIn4 40s linear infinite;
+          animation-delay: 2s;
+        }
+        .particle-5 {
+          top: 10%; left: 75%;
+          width: 4px; height: 4px;
+          animation: driftIn5 30s linear infinite;
+          animation-delay: 6s;
+        }
+
+        @keyframes driftIn1 {
+          0% { transform: translate(0, 0) scale(1); opacity: 0; }
+          10% { opacity: 0.25; }
+          90% { opacity: 0.15; }
+          100% { transform: translate(30vw, 35vh) scale(0.2); opacity: 0; filter: blur(2px); }
+        }
+        @keyframes driftIn2 {
+          0% { transform: translate(0, 0) scale(1); opacity: 0; }
+          10% { opacity: 0.22; }
+          90% { opacity: 0.12; }
+          100% { transform: translate(35vw, -30vh) scale(0.2); opacity: 0; filter: blur(2px); }
+        }
+        @keyframes driftIn3 {
+          0% { transform: translate(0, 0) scale(1); opacity: 0; }
+          10% { opacity: 0.25; }
+          90% { opacity: 0.15; }
+          100% { transform: translate(-35vw, 25vh) scale(0.2); opacity: 0; filter: blur(2px); }
+        }
+        @keyframes driftIn4 {
+          0% { transform: translate(0, 0) scale(1); opacity: 0; }
+          10% { opacity: 0.2; }
+          90% { opacity: 0.1; }
+          100% { transform: translate(-30vw, -25vh) scale(0.2); opacity: 0; filter: blur(2px); }
+        }
+        @keyframes driftIn5 {
+          0% { transform: translate(0, 0) scale(1); opacity: 0; }
+          10% { opacity: 0.24; }
+          90% { opacity: 0.14; }
+          100% { transform: translate(-25vw, 40vh) scale(0.2); opacity: 0; filter: blur(2px); }
+        }
+
+        /* ── Subtle Pulsing Neutron Star ────────────────── */
+        .neutron-star-static {
+          position: absolute;
+          top: 18%;
+          right: 12%;
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: #e0f2fe;
+          box-shadow: 
+            0 0 10px rgba(224, 242, 254, 0.6), 
+            0 0 20px rgba(200, 169, 110, 0.4);
+          opacity: 0.45;
+          pointer-events: none;
+          z-index: 2;
+          animation: pulseNeutron 8s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulseNeutron {
+          0% {
+            opacity: 0.3;
+            box-shadow: 
+              0 0 8px rgba(224, 242, 254, 0.5), 
+              0 0 16px rgba(200, 169, 110, 0.3);
+            transform: scale(0.95);
+          }
+          100% {
+            opacity: 0.65;
+            box-shadow: 
+              0 0 16px rgba(224, 242, 254, 0.8), 
+              0 0 30px rgba(200, 169, 110, 0.6);
+            transform: scale(1.05);
+          }
         }
 
         /* ── Main wordmark container ─────────────────────────────── */
