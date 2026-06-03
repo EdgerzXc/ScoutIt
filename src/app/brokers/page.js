@@ -1,6 +1,7 @@
 "use client";
 
 import Header from "@/components/Header";
+import Link from "next/link";
 
 const DUMMY_BROKERS = [
   {
@@ -81,7 +82,6 @@ import { useState } from "react";
 
 export default function BrokersPage() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [activeBroker, setActiveBroker] = useState(null);
 
   const filteredBrokers = DUMMY_BROKERS.filter(broker => {
     const term = searchTerm.toLowerCase();
@@ -114,7 +114,7 @@ export default function BrokersPage() {
         <section className="grid-container">
           <div className="brokers-grid">
             {filteredBrokers.map((broker) => (
-              <div key={broker.id} className="broker-card" onClick={() => setActiveBroker(broker)}>
+              <Link href={`/brokers/${broker.id}`} key={broker.id} className="broker-card" style={{ textDecoration: 'none' }}>
                 <div className="broker-image-container">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={broker.image} alt={broker.name} className="broker-image" />
@@ -132,10 +132,10 @@ export default function BrokersPage() {
                     <div className="broker-stats">
                       <span className="stat-value" style={{ fontSize: '12px' }}>{broker.closures}</span>
                     </div>
-                    <button className="btn-contact">Focus →</button>
+                    <span className="btn-contact">Focus →</span>
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
             {filteredBrokers.length === 0 && (
               <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '60px 0', color: 'var(--text-muted)' }}>
@@ -146,54 +146,7 @@ export default function BrokersPage() {
         </section>
       </main>
 
-      {/* Deep Focus Mode Panel */}
-      <div className={`broker-focus-overlay ${activeBroker ? 'open' : ''}`} onClick={() => setActiveBroker(null)}>
-        <div className="broker-focus-panel" onClick={(e) => e.stopPropagation()}>
-          {activeBroker && (
-            <>
-              <button className="close-panel-btn" onClick={() => setActiveBroker(null)}>✕ CLOSE</button>
-              
-              <div className="panel-header">
-                <div className="panel-avatar" style={{ backgroundImage: `url(${activeBroker.image})` }}></div>
-                <div className="panel-title-block">
-                  <h2>{activeBroker.name}</h2>
-                  <h3>{activeBroker.title} // {activeBroker.clearanceTier}</h3>
-                  <div className="panel-tags">
-                    <span>{activeBroker.location}</span>
-                    <span>{activeBroker.closures}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="panel-body">
-                <div className="panel-section">
-                  <h4>Operational Profile</h4>
-                  <p>{activeBroker.bio}</p>
-                </div>
-
-                <div className="panel-section">
-                  <h4>Historical Asset Placement Chart</h4>
-                  <ul className="asset-list">
-                    {activeBroker.managedProperties.map((prop, idx) => (
-                      <li key={idx}><span className="asset-code">ASSET-{idx + 1}</span> {prop}</li>
-                    ))}
-                  </ul>
-                </div>
-
-                <div className="panel-section form-section">
-                  <h4>Request Contact Portal Clearance</h4>
-                  <form className="clearance-form" onSubmit={(e) => e.preventDefault()}>
-                    <input type="text" placeholder="YOUR IDENTIFICATION ALIAS" required />
-                    <input type="email" placeholder="SECURE COMM LINK (EMAIL)" required />
-                    <textarea placeholder="STATE YOUR ACQUISITION INTENT..." rows="3" required></textarea>
-                    <button type="submit" className="submit-clearance-btn">INITIALIZE HANDSHAKE</button>
-                  </form>
-                </div>
-              </div>
-            </>
-          )}
-        </div>
-      </div>
+      {/* Dynamic details drawer removed in favor of full public details pages */}
 
       <style>{`
         .page-wrapper {
