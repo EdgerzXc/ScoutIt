@@ -54,7 +54,7 @@ export default function Header() {
           <div className="dropdown-brand">ScoutIt</div>
           <Link href="/">Home</Link>
           <Link href="/discover">Discover</Link>
-          <Link href="/intel">News</Link>
+          <Link href="/discover">News</Link>
           <Link href="/brokers">Brokers</Link>
           <Link href="/wishlist">Your Board</Link>
           <Link href="/about">About</Link>
