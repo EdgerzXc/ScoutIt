@@ -2650,7 +2650,7 @@ export default function Home() {
         /* Floating UFO scanner when scrolled down */
         .floating-ufo-scanner-dock {
           position: fixed;
-          top: 100px;
+          top: 120px;
           right: 24px;
           z-index: 9999;
           display: flex;
@@ -2659,17 +2659,19 @@ export default function Home() {
           background: rgba(14, 14, 14, 0.85);
           border: 1px solid rgba(200, 169, 110, 0.3);
           border-radius: 50%;
-          width: 60px;
-          height: 60px;
+          width: 72px;
+          height: 72px;
+          font-size: 48px;
           justify-content: center;
           backdrop-filter: blur(12px);
           box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), 0 0 15px rgba(34, 197, 94, 0.15);
           animation: floatStickyDock 3.5s ease-in-out infinite alternate;
-          transition: border-color 0.3s;
+          transition: border-color 0.3s, box-shadow 0.3s;
+          pointer-events: auto !important;
         }
         .floating-ufo-scanner-dock:hover {
           border-color: #22c55e;
-          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), 0 0 20px rgba(34, 197, 94, 0.3);
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), 0 0 25px rgba(34, 197, 94, 0.45);
         }
         @keyframes floatStickyDock {
           0% { transform: translateY(0); }
@@ -3019,7 +3021,11 @@ export default function Home() {
 
       {/* Floating UFO scanner when scrolled down */}
       {isUfoSticky && !ufoDragging && (
-        <div className="floating-ufo-scanner-dock">
+        <div 
+          className="floating-ufo-scanner-dock interactive-ufo-node"
+          onPointerDown={handleDragStart}
+          style={{ touchAction: 'none', cursor: 'grab' }}
+        >
           {/* Sonar and tooltip badge */}
           {!hasScannedOnce && (
             <span className="ufo-tooltip-onboarding sticky-tooltip">
@@ -3030,11 +3036,7 @@ export default function Home() {
             <span className="sonar-pulse-ring sticky-sonar"></span>
           )}
           
-          <span 
-            className="ufo interactive-ufo-node"
-            onPointerDown={handleDragStart}
-            style={{ touchAction: 'none' }}
-          >
+          <span className="ufo">
             <span className="ufo-dome"></span>
             <span className="ufo-disc">
               <span className="ufo-light ufo-light-1"></span>
