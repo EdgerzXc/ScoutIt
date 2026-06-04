@@ -621,6 +621,59 @@ export default function Home() {
         </div>
       </section>
 
+      {/* SECTION: Ecosystem Services */}
+      <section className="snap-section section-services">
+        <div className="services-content">
+          <header className="section-header-center">
+            <span className="vector-label">Platform Services // Ecosystem</span>
+            <h2>Ecosystem Services</h2>
+            <p>Access our curated network of vetted professionals supporting every phase of space discovery, listings, and planning.</p>
+          </header>
+
+          <div className="services-grid">
+            <Link href="/brokers" className="service-card live-card">
+              <div className="service-card-inner">
+                <div className="service-icon-wrapper">🏢</div>
+                <div className="service-status-badge live-badge">LIVE</div>
+                <h3 className="service-title">Verified Advisors</h3>
+                <p className="service-desc">Our network of licensed Space Intelligence advisors who guide you through acquisitions and curation.</p>
+                <span className="service-cta">CONNECT WITH ADVISOR →</span>
+              </div>
+            </Link>
+
+            <Link href="/photographers" className="service-card coming-soon-card">
+              <div className="service-card-inner">
+                <div className="service-icon-wrapper">📸</div>
+                <div className="service-status-badge soon-badge">COMING SOON</div>
+                <h3 className="service-title">Space Photography</h3>
+                <p className="service-desc">Professional interior and architectural photographers vetted to capture listing spaces at elite quality.</p>
+                <span className="service-cta">EXPLORE ROSTER →</span>
+              </div>
+            </Link>
+
+            <Link href="/researchers" className="service-card coming-soon-card">
+              <div className="service-card-inner">
+                <div className="service-icon-wrapper">🔍</div>
+                <div className="service-status-badge soon-badge">COMING SOON</div>
+                <h3 className="service-title">Site Research</h3>
+                <p className="service-desc">On-ground due diligence, market analytics, and neighborhood profiling before you commit to a property.</p>
+                <span className="service-cta">EXPLORE ROSTER →</span>
+              </div>
+            </Link>
+
+            <Link href="/event-planners" className="service-card coming-soon-card">
+              <div className="service-card-inner">
+                <div className="service-icon-wrapper">🎪</div>
+                <div className="service-status-badge soon-badge">COMING SOON</div>
+                <h3 className="service-title">Event Design</h3>
+                <p className="service-desc">Certified planners, stylists, and designers specializing in transforming and coordinating event spaces.</p>
+                <span className="service-cta">EXPLORE ROSTER →</span>
+              </div>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* SECTION 3: Layer 02 */}
       <section className="snap-section section-discover" style={{ padding: 0 }}>
         <div className="property-split">
@@ -2240,6 +2293,137 @@ export default function Home() {
           border-radius: 2px;
         }
 
+        /* SECTION: SERVICES LAYER */
+        .section-services {
+          background: #070707;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          padding: 120px 40px;
+        }
+
+        .services-content {
+          width: 100%;
+          max-width: 1200px;
+          display: flex;
+          flex-direction: column;
+          gap: 60px;
+        }
+
+        .services-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 24px;
+          width: 100%;
+        }
+
+        @media (max-width: 1024px) {
+          .services-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
+
+        @media (max-width: 640px) {
+          .services-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+
+        .service-card {
+          background: rgba(255, 255, 255, 0.02);
+          border: 1px solid var(--border-solid);
+          border-radius: 8px;
+          text-decoration: none;
+          display: block;
+          transition: all 0.3s ease;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .service-card-inner {
+          padding: 32px 24px;
+          display: flex;
+          flex-direction: column;
+          height: 100%;
+        }
+
+        .service-icon-wrapper {
+          font-size: 32px;
+          margin-bottom: 24px;
+        }
+
+        .service-status-badge {
+          font-family: var(--font-mono);
+          font-size: 9px;
+          font-weight: 700;
+          letter-spacing: 0.1em;
+          padding: 4px 8px;
+          border-radius: 3px;
+          align-self: flex-start;
+          margin-bottom: 16px;
+        }
+
+        .live-badge {
+          background: rgba(16, 185, 129, 0.1);
+          color: #10b981;
+          border: 0.5px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .soon-badge {
+          background: rgba(200, 169, 110, 0.1);
+          color: var(--accent);
+          border: 0.5px solid rgba(200, 169, 110, 0.3);
+        }
+
+        .service-title {
+          font-family: var(--font-display);
+          font-size: 20px;
+          color: #fff;
+          margin-bottom: 12px;
+          font-weight: 600;
+          letter-spacing: 0.02em;
+        }
+
+        .service-desc {
+          font-size: 13px;
+          color: var(--text-secondary);
+          line-height: 1.6;
+          margin-bottom: 24px;
+          flex-grow: 1;
+        }
+
+        .service-cta {
+          font-family: var(--font-body);
+          font-size: 11px;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+          color: var(--text-muted);
+          transition: color 0.2s ease;
+          margin-top: auto;
+        }
+
+        .live-card:hover {
+          border-color: #10b981;
+          background: rgba(16, 185, 129, 0.02);
+          transform: translateY(-4px);
+        }
+
+        .live-card:hover .service-cta {
+          color: #10b981;
+        }
+
+        .coming-soon-card:hover {
+          border-color: var(--accent-border);
+          background: rgba(200, 169, 110, 0.02);
+          transform: translateY(-4px);
+        }
+
+        .coming-soon-card:hover .service-cta {
+          color: var(--accent);
+        }
+
         /* SECTION 5: WISHLIST LAYER */
         .section-wishlist {
           background: var(--bg);
@@ -2425,6 +2609,40 @@ export default function Home() {
         @media (max-width: 640px) {
           .flow-grid {
             grid-template-columns: 1fr;
+          }
+          /* Tap target and mobile compliance rules */
+          .menu-btn {
+            min-height: 48px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            touch-action: manipulation;
+          }
+          .prominent-action-link {
+            min-height: 48px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 24px;
+            touch-action: manipulation;
+          }
+          .service-card {
+            touch-action: manipulation;
+          }
+          .cinematic-container {
+            padding-bottom: env(safe-area-inset-bottom);
+          }
+        }
+
+        @media (max-width: 480px) {
+          .section-header-center h2 {
+            font-size: 32px;
+          }
+          .section-header-center p {
+            font-size: 13px;
+          }
+          .services-content, .brokers-content, .wishlist-content {
+            gap: 36px;
           }
         }
       `}</style>

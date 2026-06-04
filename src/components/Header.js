@@ -56,6 +56,9 @@ export default function Header() {
           <Link href="/discover">Discover</Link>
           <Link href="/discover">News</Link>
           <Link href="/brokers">Brokers</Link>
+          <Link href="/photographers">Photographers</Link>
+          <Link href="/researchers">Researchers</Link>
+          <Link href="/event-planners">Event Planners</Link>
           <Link href="/wishlist">Your Board</Link>
           <Link href="/about">About</Link>
         </div>

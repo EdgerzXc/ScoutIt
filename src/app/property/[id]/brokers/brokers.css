@@ -555,4 +555,17 @@
   .recommended-card .broker-name-txt {
     font-size: 20px;
   }
+  .action-profile-btn, .action-retain-btn, .form-submit-btn {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    touch-action: manipulation;
+  }
+  .form-input-field, .form-textarea-field {
+    min-height: 44px;
+    font-size: 16px; /* Prevents auto-zoom on iOS */
+    touch-action: manipulation;
+  }
 }
+

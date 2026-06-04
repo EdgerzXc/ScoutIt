@@ -620,7 +620,49 @@
   }
 }
 
+@media (max-width: 640px) {
+  /* Mobile-first enhancements for PWA/PlayStore compliance */
+  .navLink {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    touch-action: manipulation;
+  }
+  .spotlightCard {
+    width: 290px;
+    flex: 0 0 290px;
+  }
+  .spotlightCard.spotlight {
+    width: 290px;
+    flex: 0 0 290px;
+  }
+  .cardVisual {
+    width: 290px;
+    flex: 0 0 290px;
+  }
+  .spotlightIntentBtn {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    touch-action: manipulation;
+  }
+  .drawerCloseBtnText {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    touch-action: manipulation;
+  }
+  .engineFrame {
+    padding: 16px;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom));
+  }
+}
+
 .discover-briefing-btn:hover {
   background: rgba(200, 169, 110, 0.08) !important;
   border-color: #c8a96e !important;
 }
+
