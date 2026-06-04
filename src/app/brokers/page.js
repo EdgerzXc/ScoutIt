@@ -4,9 +4,18 @@ import Header from "@/components/Header";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { getBrokers } from "@/data/mockDb";
+import "../property/property.css";
 
 // ── Tier label → number map (mirrors airtable.js) ──────────────
 const TIER_MAP = { Diamond: 1, Platinum: 2, Gold: 3, Silver: 4, Bronze: 5 };
+
+const TIERS = [
+  { value: 1, label: "Diamond Partner" },
+  { value: 2, label: "Platinum Partner" },
+  { value: 3, label: "Gold Partner" },
+  { value: 4, label: "Silver Partner" },
+  { value: 5, label: "Bronze Partner" },
+];
 
 function normalizeTier(broker) {
   // Airtable data uses subscriptionTier (number) directly
@@ -16,11 +25,27 @@ function normalizeTier(broker) {
   return TIER_MAP[broker.subscriptionLabel] ?? 5;
 }
 
+function getClosureCount(closuresStr) {
+  if (!closuresStr) return 0;
+  const match = String(closuresStr).match(/(\d+)/);
+  return match ? parseInt(match[1], 10) : 0;
+}
+
 export default function BrokersPage() {
   const [brokers, setBrokers]     = useState([]);
   const [loading, setLoading]     = useState(true);
   const [source, setSource]       = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+
+  // Filters State
+  const [selectedTiers, setSelectedTiers] = useState([]);
+  const [selectedLocations, setSelectedLocations] = useState([]);
+  const [minClosures, setMinClosures] = useState(0); // 0 means show all
+  const [openFilters, setOpenFilters] = useState({
+    tiers: true,
+    closures: true,
+    locations: true,
+  });
 
   useEffect(() => {
     async function load() {
@@ -48,95 +73,286 @@ export default function BrokersPage() {
     load();
   }, []);
 
+  const toggleFilterSection = (section) => {
+    setOpenFilters((prev) => ({ ...prev, [section]: !prev[section] }));
+  };
+
+  const handleCheckboxChange = (val, state, setState) => {
+    if (state.includes(val)) {
+      setState(state.filter((item) => item !== val));
+    } else {
+      setState([...state, val]);
+    }
+  };
+
+  // Compile active locations list dynamically
+  const locationsList = Array.from(
+    new Set(brokers.map((b) => b.location).filter(Boolean))
+  ).sort();
+
+  // Calculate agent counts per location for the hotmap
+  const locationCounts = {};
+  locationsList.forEach((loc) => {
+    locationCounts[loc] = brokers.filter((b) => b.location === loc).length;
+  });
+
+  const handleHotmapClick = (loc) => {
+    handleCheckboxChange(loc, selectedLocations, setSelectedLocations);
+  };
+
+  // Filter brokers dynamically
   const filteredBrokers = brokers.filter((broker) => {
-    const term = searchTerm.toLowerCase();
-    return (
-      (broker.location  || "").toLowerCase().includes(term) ||
-      (broker.name      || "").toLowerCase().includes(term) ||
-      (broker.specialty || "").toLowerCase().includes(term)
-    );
+    // 1. Search Query filter
+    if (searchTerm.trim() !== "") {
+      const q = searchTerm.toLowerCase();
+      const matchName = (broker.name || "").toLowerCase().includes(q);
+      const matchLocation = (broker.location || "").toLowerCase().includes(q);
+      const matchTitle = (broker.title || "").toLowerCase().includes(q);
+      const matchSpecialty = (broker.specialty || "").toLowerCase().includes(q);
+      const matchBio = (broker.bio || "").toLowerCase().includes(q);
+      const matchNiche = (broker.niche || []).some((n) => n.toLowerCase().includes(q));
+      if (!matchName && !matchLocation && !matchTitle && !matchSpecialty && !matchBio && !matchNiche) {
+        return false;
+      }
+    }
+
+    // 2. Tier filter
+    const tier = normalizeTier(broker);
+    if (selectedTiers.length > 0 && !selectedTiers.includes(tier)) {
+      return false;
+    }
+
+    // 3. Location filter
+    if (selectedLocations.length > 0 && !selectedLocations.includes(broker.location)) {
+      return false;
+    }
+
+    // 4. Closures filter
+    if (minClosures > 0) {
+      const count = getClosureCount(broker.closures);
+      if (count < minClosures) {
+        return false;
+      }
+    }
+
+    return true;
   });
 
   return (
-    <div className="page-wrapper">
+    <div className="directory-layout">
       <Header />
       <main className="brokers-main">
-        <header className="page-header">
+        <header className="directory-header">
           <span className="vector-label">LAYER 03 // PARTNER NETWORK</span>
           <h1 className="page-title">Intelligence Roster</h1>
-          <p className="page-subtitle">Directory of elite Space Intelligence advisors across the Philippines.</p>
+          <p className="page-subtitle">Directory of elite Space Intelligence advisors across prime corridors.</p>
         </header>
 
-        <section className="search-section">
-          <input
-            type="text"
-            className="roster-search-input"
-            placeholder="FILTER AGENT DIRECTORY BY GEOGRAPHICAL LOCATION OR SPECIFIC ASSET CODE..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </section>
+        {loading ? (
+          <div style={{ display: "flex", justifyContent: "center", padding: "80px 0" }}>
+            <h3 style={{ fontFamily: "var(--font-mono)", color: "var(--accent)" }}>LOADING INTELLIGENCE ROSTER...</h3>
+          </div>
+        ) : (
+          <div className="directory-container">
+            {/* Sidebar Filters */}
+            <aside className="filters-sidebar">
+              {/* Filter Section: Tiers */}
+              <div className="filter-card">
+                <button className="filter-trigger" onClick={() => toggleFilterSection("tiers")}>
+                  Partnership Tiers
+                  <span className={`filter-chevron ${openFilters.tiers ? "open" : ""}`}>▼</span>
+                </button>
+                {openFilters.tiers && (
+                  <div className="filter-options">
+                    {TIERS.map((tier) => (
+                      <label key={tier.value} className="filter-checkbox-label">
+                        <input
+                          type="checkbox"
+                          className="filter-checkbox"
+                          checked={selectedTiers.includes(tier.value)}
+                          onChange={() => handleCheckboxChange(tier.value, selectedTiers, setSelectedTiers)}
+                        />
+                        {tier.label}
+                      </label>
+                    ))}
+                  </div>
+                )}
+              </div>
 
-        <section className="grid-container">
-          {loading ? (
-            <div style={{ textAlign: "center", padding: "80px 0", color: "var(--text-muted)", fontSize: "13px", letterSpacing: "0.1em" }}>
-              LOADING INTELLIGENCE ROSTER...
-            </div>
-          ) : (
-            <div className="brokers-grid">
-              {filteredBrokers.map((broker) => {
-                const tier = normalizeTier(broker);
-                let tierClass = "";
-                let tierBadgeText = "";
-                switch (tier) {
-                  case 1: tierClass = "tier-1-card diamond-card";  tierBadgeText = "DIAMOND PARTNER";  break;
-                  case 2: tierClass = "tier-2-card platinum-card"; tierBadgeText = "PLATINUM PARTNER"; break;
-                  case 3: tierClass = "tier-3-card gold-card";     tierBadgeText = "GOLD PARTNER";     break;
-                  case 4: tierClass = "tier-4-card silver-card";   tierBadgeText = "SILVER PARTNER";   break;
-                  case 5: tierClass = "tier-5-card bronze-card";   tierBadgeText = "BRONZE PARTNER";   break;
-                  default: break;
-                }
+              {/* Filter Section: Closures */}
+              <div className="filter-card">
+                <button className="filter-trigger" onClick={() => toggleFilterSection("closures")}>
+                  Closures Activity
+                  <span className={`filter-chevron ${openFilters.closures ? "open" : ""}`}>▼</span>
+                </button>
+                {openFilters.closures && (
+                  <div className="filter-options">
+                    <label className="filter-radio-label">
+                      <input
+                        type="radio"
+                        name="minClosures"
+                        className="filter-radio"
+                        checked={minClosures === 0}
+                        onChange={() => setMinClosures(0)}
+                      />
+                      Show All
+                    </label>
+                    <label className="filter-radio-label">
+                      <input
+                        type="radio"
+                        name="minClosures"
+                        className="filter-radio"
+                        checked={minClosures === 1}
+                        onChange={() => setMinClosures(1)}
+                      />
+                      1+ Closures
+                    </label>
+                    <label className="filter-radio-label">
+                      <input
+                        type="radio"
+                        name="minClosures"
+                        className="filter-radio"
+                        checked={minClosures === 2}
+                        onChange={() => setMinClosures(2)}
+                      />
+                      2+ Closures
+                    </label>
+                    <label className="filter-radio-label">
+                      <input
+                        type="radio"
+                        name="minClosures"
+                        className="filter-radio"
+                        checked={minClosures === 3}
+                        onChange={() => setMinClosures(3)}
+                      />
+                      3+ Closures
+                    </label>
+                  </div>
+                )}
+              </div>
 
-                return (
-                  <Link
-                    href={`/brokers/${broker.id}`}
-                    key={broker.id}
-                    className={`broker-card ${tierClass}`}
-                    style={{ textDecoration: "none", position: "relative" }}
-                  >
-                    {tierBadgeText && (
-                      <div className="general-tier-badge-label">{tierBadgeText}</div>
-                    )}
-                    <div className="broker-image-container">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={broker.image} alt={broker.name} className="broker-image" />
-                      <div className="image-overlay" />
-                    </div>
-                    <div className="broker-content">
-                      <span className="broker-location">{broker.location}</span>
-                      <h2 className="broker-name">{broker.name}</h2>
-                      <p className="broker-title">{broker.title}</p>
-                      <p className="broker-specialty">Specialty: <span>{broker.specialty}</span></p>
-                      <p className="broker-bio">{broker.bio}</p>
-                      <div className="broker-footer">
-                        <div className="broker-stats">
-                          <span className="stat-value" style={{ fontSize: "12px" }}>{broker.closures}</span>
+              {/* Filter Section: Locations */}
+              <div className="filter-card">
+                <button className="filter-trigger" onClick={() => toggleFilterSection("locations")}>
+                  Locations Focus
+                  <span className={`filter-chevron ${openFilters.locations ? "open" : ""}`}>▼</span>
+                </button>
+                {openFilters.locations && (
+                  <div className="filter-options">
+                    {locationsList.map((loc) => (
+                      <label key={loc} className="filter-checkbox-label">
+                        <input
+                          type="checkbox"
+                          className="filter-checkbox"
+                          checked={selectedLocations.includes(loc)}
+                          onChange={() => handleCheckboxChange(loc, selectedLocations, setSelectedLocations)}
+                        />
+                        {loc}
+                      </label>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Dynamic Sidebar Widget: Location Hotmap */}
+              <div className="intel-widget">
+                <div className="intel-widget-header">Location Hotmap</div>
+                <div className="hotmap-container">
+                  {locationsList.map((loc) => {
+                    const count = locationCounts[loc] || 0;
+                    const total = brokers.length || 1;
+                    const percent = Math.round((count / total) * 100);
+                    const isSelected = selectedLocations.includes(loc);
+
+                    return (
+                      <div
+                        key={loc}
+                        className={`hotmap-row ${isSelected ? "active" : ""}`}
+                        onClick={() => handleHotmapClick(loc)}
+                      >
+                        <div className="hotmap-label-row">
+                          <span className="hotmap-dot"></span>
+                          <span className="hotmap-name">{loc}</span>
+                          <span className="hotmap-stat">{count} AGENT{count !== 1 ? 'S' : ''} ({percent}%)</span>
                         </div>
-                        <span className="btn-contact">Focus →</span>
+                        <div className="hotmap-bar-outer">
+                          <div className="hotmap-bar-inner" style={{ width: `${percent}%` }}></div>
+                        </div>
                       </div>
-                    </div>
-                  </Link>
-                );
-              })}
-
-              {!loading && filteredBrokers.length === 0 && (
-                <div style={{ gridColumn: "1 / -1", textAlign: "center", padding: "60px 0", color: "var(--text-muted)" }}>
-                  No intelligence advisors found matching your criteria.
+                    );
+                  })}
                 </div>
-              )}
-            </div>
-          )}
-        </section>
+              </div>
+            </aside>
+
+            {/* Right Section: Search & Cards Grid */}
+            <section style={{ display: "flex", flexDirection: "column", flexGrow: 1 }}>
+              <div className="search-wrapper">
+                <input
+                  type="text"
+                  className="global-search-input"
+                  placeholder="FILTER AGENT DIRECTORY BY GEOGRAPHICAL LOCATION OR SPECIFIC ASSET CODE..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+
+              <div className="brokers-grid">
+                {filteredBrokers.map((broker) => {
+                  const tier = normalizeTier(broker);
+                  let tierClass = "";
+                  let tierBadgeText = "";
+                  switch (tier) {
+                    case 1: tierClass = "tier-1-card diamond-card";  tierBadgeText = "DIAMOND PARTNER";  break;
+                    case 2: tierClass = "tier-2-card platinum-card"; tierBadgeText = "PLATINUM PARTNER"; break;
+                    case 3: tierClass = "tier-3-card gold-card";     tierBadgeText = "GOLD PARTNER";     break;
+                    case 4: tierClass = "tier-4-card silver-card";   tierBadgeText = "SILVER PARTNER";   break;
+                    case 5: tierClass = "tier-5-card bronze-card";   tierBadgeText = "BRONZE PARTNER";   break;
+                    default: break;
+                  }
+
+                  return (
+                    <Link
+                      href={`/brokers/${broker.id}`}
+                      key={broker.id}
+                      className={`broker-card ${tierClass}`}
+                      style={{ textDecoration: "none", position: "relative" }}
+                    >
+                      {tierBadgeText && (
+                        <div className="general-tier-badge-label">{tierBadgeText}</div>
+                      )}
+                      <div className="broker-image-container">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={broker.image} alt={broker.name} className="broker-image" />
+                        <div className="image-overlay" />
+                      </div>
+                      <div className="broker-content">
+                        <span className="broker-location">{broker.location}</span>
+                        <h2 className="broker-name">{broker.name}</h2>
+                        <p className="broker-title">{broker.title}</p>
+                        <p className="broker-specialty">Specialty: <span>{broker.specialty}</span></p>
+                        <p className="broker-bio">{broker.bio}</p>
+                        <div className="broker-footer">
+                          <div className="broker-stats">
+                            <span className="stat-value" style={{ fontSize: "12px" }}>{broker.closures}</span>
+                          </div>
+                          <span className="btn-contact">Focus →</span>
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
+
+                {filteredBrokers.length === 0 && (
+                  <div className="directory-empty">
+                    <h3>No matching intelligence advisors found</h3>
+                    <p>Try clearing some filters or refining your search parameters.</p>
+                  </div>
+                )}
+              </div>
+            </section>
+          </div>
+        )}
 
         {/* Dev source indicator — remove before final prod */}
         {source && process.env.NODE_ENV === "development" && (
@@ -147,84 +363,159 @@ export default function BrokersPage() {
       </main>
 
       <style>{`
-        .page-wrapper {
-          background: var(--bg);
-          color: var(--text-primary);
-          min-height: 100vh;
-        }
-
         .brokers-main {
-          padding: 60px 40px;
+          padding: 40px 45px;
           max-width: 1400px;
           margin: 0 auto;
         }
 
-        .page-header {
-          text-align: center;
-          margin-bottom: 40px;
-        }
-
-        .search-section {
-          max-width: 800px;
-          margin: 0 auto 64px auto;
-        }
-
-        .roster-search-input {
-          width: 100%;
-          background: #1a1a1a;
-          border: 1px solid #333333;
-          padding: 16px 24px;
-          color: var(--text-primary);
-          font-family: var(--font-body);
-          font-size: 13px;
-          letter-spacing: 0.05em;
-          outline: none;
-          transition: border-color 0.3s ease, box-shadow 0.3s ease;
-          border-radius: 4px;
-        }
-
-        .roster-search-input:focus {
-          border-color: #c8a96e;
-          box-shadow: 0 0 12px rgba(200, 169, 110, 0.15);
-        }
-
-        .roster-search-input::placeholder {
-          color: #666666;
-        }
-
-        .vector-label {
-          font-family: var(--font-mono);
-          font-size: 12px;
-          color: var(--accent);
-          letter-spacing: 0.15em;
-          text-transform: uppercase;
-        }
-
         .page-title {
           font-family: var(--font-display);
-          font-size: 42px;
-          margin: 12px 0;
-          color: var(--text-primary);
-        }
-
-        .page-subtitle {
-          font-size: 14px;
-          color: var(--text-muted);
-          letter-spacing: 0.05em;
+          font-size: 38px;
+          letter-spacing: 0.02em;
+          color: #fff;
+          margin: 8px 0;
         }
 
         .brokers-grid {
           display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 32px;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 24px;
         }
 
         @media (max-width: 1024px) {
-          .brokers-grid { grid-template-columns: repeat(2, 1fr); }
+          .brokers-grid { grid-template-columns: 1fr; }
         }
 
-        @media (max-width: 768px) {
-          .brokers-grid { grid-template-columns: 1fr; }
+        /* Location Hotmap Styles */
+        .hotmap-container {
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+        }
+
+        .hotmap-row {
+          cursor: pointer;
+          transition: transform var(--transition-fast, 0.2s) ease;
+        }
+
+        .hotmap-row:hover {
+          transform: translateX(4px);
+        }
+
+        .hotmap-label-row {
+          display: flex;
+          align-items: center;
+          margin-bottom: 6px;
+          font-family: var(--font-mono), monospace;
+          font-size: 11px;
+        }
+
+        .hotmap-dot {
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background: var(--text-muted, rgba(240, 237, 232, 0.38));
+          margin-right: 8px;
+          transition: background 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .hotmap-row.active .hotmap-dot {
+          background: var(--accent, #c8a96e);
+          box-shadow: 0 0 8px var(--accent, #c8a96e);
+        }
+
+        .hotmap-name {
+          color: var(--text-secondary, rgba(240, 237, 232, 0.62));
+          flex-grow: 1;
+          transition: color 0.3s ease;
+        }
+
+        .hotmap-row.active .hotmap-name {
+          color: #fff;
+          font-weight: 600;
+        }
+
+        .hotmap-stat {
+          color: var(--text-muted, rgba(240, 237, 232, 0.38));
+          font-size: 9px;
+          letter-spacing: 0.05em;
+        }
+
+        .hotmap-row.active .hotmap-stat {
+          color: var(--accent, #c8a96e);
+        }
+
+        .hotmap-bar-outer {
+          height: 3px;
+          background: rgba(255, 255, 255, 0.05);
+          border-radius: 2px;
+          overflow: hidden;
+          position: relative;
+        }
+
+        .hotmap-bar-inner {
+          height: 100%;
+          background: rgba(255, 255, 255, 0.15);
+          border-radius: 2px;
+          transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s ease;
+        }
+
+        .hotmap-row.active .hotmap-bar-inner {
+          background: var(--accent, #c8a96e);
+          box-shadow: 0 0 4px rgba(200, 169, 110, 0.5);
+        }
+
+        .hotmap-row:hover .hotmap-bar-inner {
+          background: rgba(255, 255, 255, 0.3);
+        }
+
+        .hotmap-row.active:hover .hotmap-bar-inner {
+          background: #e5c388;
+        }
+
+        /* Radio buttons and inputs */
+        .filter-radio-label {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          font-size: 12px;
+          color: var(--text-secondary, rgba(240, 237, 232, 0.62));
+          cursor: pointer;
+          transition: color var(--transition-fast, 0.2s);
+        }
+
+        .filter-radio-label:hover {
+          color: var(--accent, #c8a96e);
+        }
+
+        .filter-radio {
+          appearance: none;
+          width: 16px;
+          height: 16px;
+          border: 1px solid var(--border-solid, #262626);
+          border-radius: 50%;
+          background: #0e0e0e;
+          cursor: pointer;
+          position: relative;
+          transition: border-color var(--transition-fast, 0.2s), background var(--transition-fast, 0.2s);
+        }
+
+        .filter-radio:checked {
+          background: var(--accent, #c8a96e);
+          border-color: var(--accent, #c8a96e);
+        }
+
+        .filter-radio:checked::after {
+          content: '';
+          position: absolute;
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background: #0e0e0e;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
         }
 
         .broker-card {
@@ -330,13 +621,6 @@ export default function BrokersPage() {
           font-family: var(--font-display);
           font-size: 24px;
           color: var(--text-primary);
-        }
-
-        .stat-label {
-          font-size: 10px;
-          text-transform: uppercase;
-          letter-spacing: 0.1em;
-          color: var(--text-muted);
         }
 
         .btn-contact {
