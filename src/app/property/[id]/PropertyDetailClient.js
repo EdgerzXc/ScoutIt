@@ -42,6 +42,7 @@ export default function PropertyDetailClient({ slug }) {
   const [menuOpen,   setMenuOpen]   = useState(false);
   const [propertyData, setPropertyData] = useState(null);
   const [dataLoading,  setDataLoading]  = useState(true);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
   // Per-panel accordion state (independent per section)
   const [accSpace,    setAccSpace]    = useState(null);
@@ -91,6 +92,18 @@ export default function PropertyDetailClient({ slug }) {
     document.addEventListener("mousedown", onClickOutside);
     return () => document.removeEventListener("mousedown", onClickOutside);
   }, []);
+
+  // Keyboard navigation for fullscreen photo lightbox
+  useEffect(() => {
+    if (!isLightboxOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") setIsLightboxOpen(false);
+      if (e.key === "ArrowLeft") goPrev();
+      if (e.key === "ArrowRight") goNext();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isLightboxOpen, photos.length]);
 
   // ── Loading guard ─────────────────────────────
   if (dataLoading || !propertyData) {
@@ -182,7 +195,11 @@ export default function PropertyDetailClient({ slug }) {
             <div
               key={i}
               className={`photo-slide ${photoMode} ${currentImageIndex === i ? "active" : ""}`}
-              style={{ backgroundImage: `url(${url})` }}
+              style={{ 
+                backgroundImage: `url(${url})`,
+                cursor: currentImageIndex === i ? "zoom-in" : "default"
+              }}
+              onClick={currentImageIndex === i ? () => setIsLightboxOpen(true) : undefined}
             />
           ))}
 
@@ -214,37 +231,22 @@ export default function PropertyDetailClient({ slug }) {
             <p className="hero-hook">{d.hook}</p>
           </div>
 
-          {/* Platform Nav */}
+          {/* Go Back Button (Top Left) */}
+          <button
+            onClick={() => {
+              if (window.history.length > 1) {
+                window.history.back();
+              } else {
+                window.location.href = "/";
+              }
+            }}
+            className="platform-back-btn"
+          >
+            ← Go Back
+          </button>
+
+          {/* Platform Nav (Top Right - Menu only) */}
           <nav className="platform-nav" ref={menuRef}>
-            <button
-              onClick={() => {
-                if (window.history.length > 1) {
-                  window.history.back();
-                } else {
-                  window.location.href = "/";
-                }
-              }}
-              className="platform-back-btn"
-              style={{
-                cursor: 'pointer',
-                fontFamily: 'var(--font-body)',
-                fontSize: '12px',
-                fontWeight: 500,
-                letterSpacing: '0.06em',
-                background: 'var(--brand-overlay)',
-                backdropFilter: 'blur(12px)',
-                color: 'var(--text-primary)',
-                border: '0.5px solid var(--border-mid)',
-                borderRadius: '20px',
-                height: '40px',
-                padding: '0 16px',
-                display: 'flex',
-                alignItems: 'center',
-                transition: 'background 0.25s, border-color 0.25s'
-              }}
-            >
-              ← Go Back
-            </button>
             <button
               className="platform-menu-btn"
               type="button"
@@ -1067,6 +1069,50 @@ export default function PropertyDetailClient({ slug }) {
 
         </div>{/* /zone-story */}
       </div>{/* /page */}
+
+      {/* Lightbox / Fullscreen Modal */}
+      {isLightboxOpen && (
+        <div className="lightbox-overlay" onClick={() => setIsLightboxOpen(false)}>
+          <button 
+            className="lightbox-close" 
+            onClick={(e) => { e.stopPropagation(); setIsLightboxOpen(false); }}
+            aria-label="Close fullscreen"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+              <path d="M18 6L6 18M6 6l12 12"/>
+            </svg>
+          </button>
+          
+          <button 
+            className="lightbox-arrow left" 
+            onClick={(e) => { e.stopPropagation(); goPrev(); }}
+            aria-label="Previous photo"
+          >
+            <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5"><polyline points="9,2 4,7 9,12"/></svg>
+          </button>
+
+          <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img 
+              src={photos[currentImageIndex]} 
+              alt={`${d.title} fullscreen view`} 
+              className={`lightbox-image ${photoMode}`} 
+            />
+          </div>
+
+          <button 
+            className="lightbox-arrow right" 
+            onClick={(e) => { e.stopPropagation(); goNext(); }}
+            aria-label="Next photo"
+          >
+            <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5"><polyline points="5,2 10,7 5,12"/></svg>
+          </button>
+
+          <div className="lightbox-counter">
+            {currentImageIndex + 1} / {photos.length}
+          </div>
+        </div>
+      )}
     </>
   );
 }
