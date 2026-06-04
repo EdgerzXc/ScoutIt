@@ -52,6 +52,7 @@ export default function Home() {
         ];
         
         airtableProperties.forEach((p) => {
+          if (!p.title || !p.slug || !p.spaceCategory) return;
           const category = p.spaceCategory;
           if (updatedPreviews[category]) {
             if (!updatedPreviews[category].some(x => x.id === p.id || x.id === p.slug)) {
@@ -90,6 +91,7 @@ export default function Home() {
         };
         
         airtableProperties.forEach((p) => {
+          if (!p.title || !p.slug || !p.spaceCategory) return;
           const category = p.spaceCategory;
           if (updatedFeed[category]) {
             if (!updatedFeed[category].spotlights.some(x => x.slug === p.slug || x.id === p.id)) {

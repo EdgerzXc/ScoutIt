@@ -84,6 +84,7 @@ function PropertyDirectoryContent() {
 
         const mergedProperties = [...baseProperties];
         airtableProperties.forEach(p => {
+          if (!p.title || !p.slug || !p.spaceCategory) return;
           if (!mergedProperties.some(x => x.slug === p.slug || x.id === p.id)) {
             mergedProperties.unshift({
               id: p.id,

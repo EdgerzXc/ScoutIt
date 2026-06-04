@@ -40,6 +40,7 @@ export default function DiscoverClient() {
         };
         
         airtableProperties.forEach(p => {
+          if (!p.title || !p.slug || !p.spaceCategory) return;
           const cat = p.spaceCategory;
           if (nextProps[cat]) {
             if (!nextProps[cat].some(x => x.id === p.id || x.id === p.slug || x.slug === p.slug)) {

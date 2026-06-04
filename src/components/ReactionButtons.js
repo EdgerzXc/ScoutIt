@@ -160,7 +160,7 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
         }
 
         .reaction-tiles-row.small .icon-overlay {
-          font-size: 8px;
+          font-size: 13px;
         }
 
         .reaction-tiles-row.small .tile-label {
@@ -209,8 +209,8 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
         .icon-overlay {
           position: relative;
           z-index: 2;
-          font-size: 11px;
-          opacity: 0.7;
+          font-size: 18px;
+          opacity: 0.85;
           color: #8a8a8a;
           user-select: none;
           transition: all 0.25s ease;
@@ -277,7 +277,7 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
             height: 52px;
           }
           .icon-overlay {
-            font-size: 11px;
+            font-size: 16px;
           }
           .tile-label {
             font-size: 9px;
