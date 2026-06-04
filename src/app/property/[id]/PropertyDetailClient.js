@@ -256,11 +256,40 @@ export default function PropertyDetailClient({ slug }) {
   const tog = (setter, current, key) => setter(current === key ? null : key);
 
   // ── Where To renderer ─────────────────────────
+  // Extract sidebar location values dynamically from whereTo array
+  const nearestMallObj = d.whereTo?.find(p => p.category?.toLowerCase() === "essentials" || p.category?.toLowerCase() === "business" || p.name?.toLowerCase().includes("mall") || p.name?.toLowerCase().includes("shop"));
+  const nearestHospitalObj = d.whereTo?.find(p => p.category?.toLowerCase() === "healthcare" || p.name?.toLowerCase().includes("hospital") || p.name?.toLowerCase().includes("medical"));
+  const publicTransitObj = d.whereTo?.find(p => p.category?.toLowerCase() === "transit" || p.name?.toLowerCase().includes("mrt") || p.name?.toLowerCase().includes("lrt") || p.name?.toLowerCase().includes("bus") || p.name?.toLowerCase().includes("station"));
+  
+  const hasWalk = d.whereTo?.some(p => p.distance?.toLowerCase().includes("walk"));
+  const walkabilitySub = hasWalk ? "Essentials within walking distance" : "Vehicle recommended for errands";
+
+  // ── Where To renderer ─────────────────────────
   const renderWhereTo = () => {
+    if (!d.whereTo || d.whereTo.length === 0) {
+      return (
+        <div style={{
+          padding: "32px",
+          background: "var(--surface)",
+          border: "0.5px dashed var(--border-mid)",
+          borderRadius: "4px",
+          textAlign: "center",
+          fontFamily: "var(--font-mono)",
+          fontSize: "12px",
+          color: "var(--text-muted)",
+          letterSpacing: "0.1em",
+          gridColumn: "1 / -1"
+        }}>
+          [ LOCATION BRIEFING N/A — NO DATA IN CMS ]
+        </div>
+      );
+    }
+
     const groups = {};
     d.whereTo.forEach(p => {
-      if (!groups[p.category]) groups[p.category] = [];
-      groups[p.category].push(p);
+      const cat = p.category || "General";
+      if (!groups[cat]) groups[cat] = [];
+      groups[cat].push(p);
     });
     return Object.entries(groups).map(([cat, items]) => (
       <div className="where-category" key={cat}>
@@ -800,11 +829,28 @@ export default function PropertyDetailClient({ slug }) {
               <div className="display-heading">Everything<br/>within <em>reach</em></div>
               <div id="where-to-content">{renderWhereTo()}</div>
             </div>
-            <div className="panel-sidebar">
-              <div className="sidebar-block"><div className="sidebar-accent-line"/><div className="sidebar-label">Nearest mall</div><div className="sidebar-value">SM Fairview</div><div className="sidebar-sub">9 min drive</div></div>
-              <div className="sidebar-block"><div className="sidebar-label">Nearest hospital</div><div className="sidebar-value">QMMC</div><div className="sidebar-sub">12 min drive</div></div>
-              <div className="sidebar-block"><div className="sidebar-label">Public transit</div><div className="sidebar-value">Good</div><div className="sidebar-sub">Multiple routes</div></div>
-              <div className="sidebar-block"><div className="sidebar-label">Walkability</div><div className="sidebar-value">Moderate</div><div className="sidebar-sub">Essentials 10 min</div></div>
+             <div className="panel-sidebar">
+              <div className="sidebar-block">
+                <div className="sidebar-accent-line"/>
+                <div className="sidebar-label">Nearest mall</div>
+                <div className="sidebar-value">{nearestMallObj ? nearestMallObj.name : "N/A"}</div>
+                <div className="sidebar-sub">{nearestMallObj ? nearestMallObj.distance : "Not specified"}</div>
+              </div>
+              <div className="sidebar-block">
+                <div className="sidebar-label">Nearest hospital</div>
+                <div className="sidebar-value">{nearestHospitalObj ? nearestHospitalObj.name : "N/A"}</div>
+                <div className="sidebar-sub">{nearestHospitalObj ? nearestHospitalObj.distance : "Not specified"}</div>
+              </div>
+              <div className="sidebar-block">
+                <div className="sidebar-label">Public transit</div>
+                <div className="sidebar-value">{publicTransitObj ? publicTransitObj.name : "N/A"}</div>
+                <div className="sidebar-sub">{publicTransitObj ? publicTransitObj.distance : "Not specified"}</div>
+              </div>
+              <div className="sidebar-block">
+                <div className="sidebar-label">Walkability</div>
+                <div className="sidebar-value">{d.whereTo && d.whereTo.length > 0 ? (hasWalk ? "Good" : "Moderate") : "N/A"}</div>
+                <div className="sidebar-sub">{d.whereTo && d.whereTo.length > 0 ? walkabilitySub : "Not specified"}</div>
+              </div>
             </div>
           </div>{/* /panel-whereto */}
 
