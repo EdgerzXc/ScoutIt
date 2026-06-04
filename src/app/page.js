@@ -588,6 +588,7 @@ export default function Home() {
                           propertyTitle={item.title}
                           category={activePropertyType}
                           city={city}
+                          small={true}
                         />
                       </div>
 

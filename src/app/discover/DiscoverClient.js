@@ -229,6 +229,7 @@ export default function DiscoverClient() {
                           propertyTitle={property.title}
                           category={matchedCategory}
                           city={property.city}
+                          small={true}
                         />
                       </div>
                     </div>

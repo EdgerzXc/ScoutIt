@@ -379,6 +379,7 @@ function PropertyDirectoryContent() {
                             propertyTitle={p.title}
                             category={p.spaceCategory}
                             city={p.city}
+                            small={true}
                           />
                           <span className="property-action-btn">Enter Showcase →</span>
                         </div>

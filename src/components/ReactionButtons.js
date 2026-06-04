@@ -41,7 +41,7 @@ const REACTION_SHAPES = {
   }
 };
 
-export default function ReactionButtons({ propertyId, propertyTitle, category, city }) {
+export default function ReactionButtons({ propertyId, propertyTitle, category, city, small = false }) {
   const [activeReaction, setActiveReaction] = useState(null);
   const [showConfirm, setShowConfirm] = useState(false);
 
@@ -117,8 +117,8 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
   }, [showConfirm]);
 
   return (
-    <div className="reaction-buttons-wrapper">
-      <div className="reaction-tiles-row">
+    <div className={`reaction-buttons-wrapper ${small ? "small" : ""}`}>
+      <div className={`reaction-tiles-row ${small ? "small" : ""}`}>
         {Object.entries(REACTION_SHAPES).map(([type, data]) => {
           const isActive = activeReaction === type;
           return (
@@ -147,6 +147,27 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
           flex-direction: column;
           align-items: center;
           width: 100%;
+        }
+
+        .reaction-tiles-row.small {
+          gap: 12px;
+          flex-wrap: nowrap;
+        }
+
+        .reaction-tiles-row.small .shape-wrapper {
+          width: 32px;
+          height: 32px;
+        }
+
+        .reaction-tiles-row.small .icon-overlay {
+          font-size: 8px;
+        }
+
+        .reaction-tiles-row.small .tile-label {
+          font-size: 7px;
+          letter-spacing: 0.04em;
+          margin-top: 3px;
+          white-space: nowrap;
         }
 
         .reaction-tiles-row {

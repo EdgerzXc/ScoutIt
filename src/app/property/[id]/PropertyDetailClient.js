@@ -103,7 +103,7 @@ export default function PropertyDetailClient({ slug }) {
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isLightboxOpen, photos.length]);
+  }, [isLightboxOpen, propertyData]);
 
   // ── Loading guard ─────────────────────────────
   if (dataLoading || !propertyData) {
