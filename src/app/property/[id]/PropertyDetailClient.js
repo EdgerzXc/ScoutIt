@@ -221,6 +221,7 @@ export default function PropertyDetailClient({ slug }) {
           </div>
 
           <div className="photo-fade-top" />
+          <div className="photo-fade-left" />
           <div className="photo-fade-bottom" />
 
           {/* Hero Intel */}
