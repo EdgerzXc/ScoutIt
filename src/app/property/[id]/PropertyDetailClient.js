@@ -43,6 +43,7 @@ export default function PropertyDetailClient({ slug }) {
   const [propertyData, setPropertyData] = useState(null);
   const [dataLoading,  setDataLoading]  = useState(true);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [selectedUnit, setSelectedUnit] = useState("Balcony");
 
   // Per-panel accordion state (independent per section)
   const [accSpace,    setAccSpace]    = useState(null);
@@ -879,7 +880,24 @@ export default function PropertyDetailClient({ slug }) {
                   { name:"Bathroom 1", specs:["8 sqm","Standing shower","Glass enclosure","Hot & cold"] },
                   { name:"Bathroom 2", specs:["6 sqm","Bathtub","Hot & cold shower","Exhaust fan"] },
                 ].map(u => (
-                  <div className="unit-z3-row" key={u.name}>
+                  <div 
+                    className={`unit-z3-row ${selectedUnit === u.name ? "selected" : ""}`} 
+                    key={u.name}
+                    onClick={() => {
+                      setSelectedUnit(u.name);
+                      const unitPhotoMap = {
+                        "Room 1": 1,
+                        "Room 2": 2,
+                        "Balcony": 3,
+                        "Bathroom 1": 4,
+                        "Bathroom 2": 0
+                      };
+                      if (photos && photos.length > 0) {
+                        const targetIndex = (unitPhotoMap[u.name] ?? 0) % photos.length;
+                        setCurrentImageIndex(targetIndex);
+                      }
+                    }}
+                  >
                     <div className="unit-z3-name">{u.name}</div>
                     <div className="unit-z3-specs">
                       {u.specs.map(s => <span key={s} className="unit-z3-spec">{s}</span>)}
