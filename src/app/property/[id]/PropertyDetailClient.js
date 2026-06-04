@@ -43,7 +43,7 @@ export default function PropertyDetailClient({ slug }) {
   const [propertyData, setPropertyData] = useState(null);
   const [dataLoading,  setDataLoading]  = useState(true);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
-  const [selectedUnit, setSelectedUnit] = useState("Balcony");
+  const [selectedUnit, setSelectedUnit] = useState(null);
 
   // Per-panel accordion state (independent per section)
   const [accSpace,    setAccSpace]    = useState(null);
@@ -132,6 +132,101 @@ export default function PropertyDetailClient({ slug }) {
   const floodRiskScore = `Score: ${d.flood_risk_score}/10`;
   const convScoreText  = `${d.convenience_score} / 10`;
   const brokerInitials = (d.broker_name || "SA").split(" ").map(p => p[0]).join("").slice(0, 2).toUpperCase();
+
+  // ── Build Dynamic Units List ───────────────────
+  const dynamicUnits = [];
+  const isCommercial = 
+    d.property_type?.toLowerCase().includes("commercial") || 
+    d.property_type?.toLowerCase().includes("restaurant") || 
+    d.property_type?.toLowerCase().includes("office") ||
+    d.property_type?.toLowerCase().includes("retail");
+
+  // 1. Outdoor/Lobby/Pool
+  if (d.outdoor_description && d.outdoor_description !== "None" && d.outdoor_description !== "") {
+    let name = "Balcony";
+    if (d.outdoor_description.toLowerCase().includes("pool") || d.outdoor_description.toLowerCase().includes("beach")) {
+      name = "Pool & Beach";
+    } else if (d.outdoor_description.toLowerCase().includes("lobby") || d.outdoor_description.toLowerCase().includes("foyer") || d.outdoor_description.toLowerCase().includes("waiting")) {
+      name = "Lobby & Entrance";
+    } else if (d.outdoor_description.toLowerCase().includes("garden") || d.outdoor_description.toLowerCase().includes("walkway")) {
+      name = "Gardens & Walkways";
+    } else if (d.outdoor_description.toLowerCase().includes("courtyard")) {
+      name = "Courtyard";
+    }
+    
+    dynamicUnits.push({
+      name,
+      specs: [
+        d.outdoor_description,
+        "Open Air / Access Space",
+        "Safe & Maintained"
+      ]
+    });
+  }
+
+  // 2. Main Spaces (for Commercial) or Rooms (for Residential/STR)
+  if (isCommercial) {
+    dynamicUnits.push({
+      name: "Main Hall / Space",
+      specs: [
+        `${d.floor_sqm ? Math.round(d.floor_sqm * 0.6) : 150} sqm est.`,
+        "Open layout configuration",
+        "Central lighting & acoustics",
+        `${d.ceiling_height_text || "3.8m ceiling"}`
+      ]
+    });
+    dynamicUnits.push({
+      name: "Kitchen & Utilities",
+      specs: [
+        `${d.floor_sqm ? Math.round(d.floor_sqm * 0.25) : 50} sqm est.`,
+        "High load power ready",
+        "Fresh air intake systems",
+        "Water supply integration"
+      ]
+    });
+  } else {
+    const bedsCount = Number(d.beds || 0);
+    for (let i = 1; i <= bedsCount; i++) {
+      dynamicUnits.push({
+        name: i === 1 ? "Master Suite" : `Room ${i}`,
+        specs: [
+          `${bedsCount > 0 ? Math.round((d.floor_sqm * 0.6) / bedsCount) : 25} sqm est.`,
+          "Premium ventilation & lighting",
+          "Aircon integration ready",
+          i === 1 ? "Large layout double-bed space" : "Single/Twin bed sizing",
+          `${d.ceiling_height_text || "3.2m ceiling"}`
+        ]
+      });
+    }
+  }
+
+  // 3. Bathrooms / Washrooms
+  const bathsCount = Number(d.baths || 0);
+  if (bathsCount > 0) {
+    if (isCommercial) {
+      dynamicUnits.push({
+        name: "Washrooms",
+        specs: [
+          `${bathsCount} separate units`,
+          "Modern plumbing fixtures",
+          "High flow exhaust fans",
+          "Dedicated wash stations"
+        ]
+      });
+    } else {
+      for (let i = 1; i <= bathsCount; i++) {
+        dynamicUnits.push({
+          name: i === 1 ? "Master Bath" : `Bathroom ${i}`,
+          specs: [
+            "Standing shower installation",
+            "Hot & cold utility water",
+            "Exhaust system integrated",
+            i === 1 ? "Dual vanity ready" : "Single vanity sizing"
+          ]
+        });
+      }
+    }
+  }
 
 
 
@@ -348,20 +443,23 @@ export default function PropertyDetailClient({ slug }) {
             <div className="nav-section-divider" />
 
             {/* Units */}
-            <div
-              className={`nav-chapter ${activeTab === "units" ? "active" : ""}`}
-              onClick={() => setActiveTab("units")}
-            >
-              <svg className="chapter-icon" viewBox="0 0 20 20" fill="none">
-                <rect x="3"  y="3"  width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.3"/>
-                <rect x="11" y="3"  width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.3"/>
-                <rect x="3"  y="11" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.3"/>
-                <rect x="11" y="11" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.3"/>
-              </svg>
-              <span className="chapter-label">Units</span>
-            </div>
-
-            <div className="nav-divider" />
+            {dynamicUnits.length > 0 && (
+              <>
+                <div
+                  className={`nav-chapter ${activeTab === "units" ? "active" : ""}`}
+                  onClick={() => setActiveTab("units")}
+                >
+                  <svg className="chapter-icon" viewBox="0 0 20 20" fill="none">
+                    <rect x="3"  y="3"  width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.3"/>
+                    <rect x="11" y="3"  width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.3"/>
+                    <rect x="3"  y="11" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.3"/>
+                    <rect x="11" y="11" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.3"/>
+                  </svg>
+                  <span className="chapter-label">Units</span>
+                </div>
+                <div className="nav-divider" />
+              </>
+            )}
 
             {/* Universe */}
             <div
@@ -873,44 +971,65 @@ export default function PropertyDetailClient({ slug }) {
               <div className="chapter-tag"><div className="tag-line"/><span className="tag-text">Units</span></div>
               <div className="display-heading">Every<br/><em>space</em> detailed</div>
               <div className="units-z3-list">
-                {[
-                  { name:"Balcony",    specs:["45 sqm","Open Air","360° View","Safe with railings","Tiled flooring"] },
-                  { name:"Room 1",     specs:["28 sqm","3 Windows","1 Aircon","1 Queen Size Bed","3.2m ceiling"] },
-                  { name:"Room 2",     specs:["22 sqm","2 Windows","1 Aircon","2 Single Beds","3.2m ceiling"] },
-                  { name:"Bathroom 1", specs:["8 sqm","Standing shower","Glass enclosure","Hot & cold"] },
-                  { name:"Bathroom 2", specs:["6 sqm","Bathtub","Hot & cold shower","Exhaust fan"] },
-                ].map(u => (
-                  <div 
-                    className={`unit-z3-row ${selectedUnit === u.name ? "selected" : ""}`} 
-                    key={u.name}
-                    onClick={() => {
-                      setSelectedUnit(u.name);
-                      const unitPhotoMap = {
-                        "Room 1": 1,
-                        "Room 2": 2,
-                        "Balcony": 3,
-                        "Bathroom 1": 4,
-                        "Bathroom 2": 0
-                      };
-                      if (photos && photos.length > 0) {
-                        const targetIndex = (unitPhotoMap[u.name] ?? 0) % photos.length;
-                        setCurrentImageIndex(targetIndex);
-                      }
-                    }}
-                  >
-                    <div className="unit-z3-name">{u.name}</div>
-                    <div className="unit-z3-specs">
-                      {u.specs.map(s => <span key={s} className="unit-z3-spec">{s}</span>)}
+                {dynamicUnits.map(u => {
+                  const activeUnit = selectedUnit || (dynamicUnits.length > 0 ? dynamicUnits[0].name : "");
+                  return (
+                    <div 
+                      className={`unit-z3-row ${activeUnit === u.name ? "selected" : ""}`} 
+                      key={u.name}
+                      onClick={() => {
+                        setSelectedUnit(u.name);
+                        let targetIndex = 0;
+                        if (u.name.toLowerCase().includes("suite") || u.name.toLowerCase().includes("master")) {
+                          targetIndex = 1 % photos.length;
+                        } else if (u.name.toLowerCase().includes("room")) {
+                          const num = parseInt(u.name.replace(/\D/g, ""), 10);
+                          targetIndex = (isNaN(num) ? 1 : num) % photos.length;
+                        } else if (u.name.toLowerCase().includes("bath") || u.name.toLowerCase().includes("washroom")) {
+                          targetIndex = (photos.length - 1) % photos.length;
+                        } else if (u.name.toLowerCase().includes("hall") || u.name.toLowerCase().includes("space")) {
+                          targetIndex = 0;
+                        } else if (u.name.toLowerCase().includes("kitchen") || u.name.toLowerCase().includes("utility")) {
+                          targetIndex = 1 % photos.length;
+                        } else {
+                          targetIndex = 2 % photos.length;
+                        }
+                        if (photos && photos.length > 0) {
+                          setCurrentImageIndex(targetIndex);
+                        }
+                      }}
+                    >
+                      <div className="unit-z3-name">{u.name}</div>
+                      <div className="unit-z3-specs">
+                        {u.specs.map(s => <span key={s} className="unit-z3-spec">{s}</span>)}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
             <div className="panel-sidebar">
-              <div className="sidebar-block"><div className="sidebar-accent-line"/><div className="sidebar-label">Total Units</div><div className="sidebar-value">5</div><div className="sidebar-sub">Click a unit to preview photos</div></div>
-              <div className="sidebar-block"><div className="sidebar-label">Bedrooms</div><div className="sidebar-value">{d.beds} rooms</div></div>
-              <div className="sidebar-block"><div className="sidebar-label">Bathrooms</div><div className="sidebar-value">{d.baths} baths</div></div>
-              <div className="sidebar-block"><div className="sidebar-label">Outdoor</div><div className="sidebar-value">Balcony</div><div className="sidebar-sub">45 sqm · Open Air</div></div>
+              <div className="sidebar-block">
+                <div className="sidebar-accent-line"/>
+                <div className="sidebar-label">Total Areas</div>
+                <div className="sidebar-value">{dynamicUnits.length}</div>
+                <div className="sidebar-sub">Click an area to preview photos</div>
+              </div>
+              <div className="sidebar-block">
+                <div className="sidebar-label">Bedrooms</div>
+                <div className="sidebar-value">{d.beds || 0} rooms</div>
+              </div>
+              <div className="sidebar-block">
+                <div className="sidebar-label">Bathrooms</div>
+                <div className="sidebar-value">{d.baths || 0} baths</div>
+              </div>
+              {d.outdoor_description && d.outdoor_description !== "None" && d.outdoor_description !== "" && (
+                <div className="sidebar-block">
+                  <div className="sidebar-label">Outdoor Space</div>
+                  <div className="sidebar-value">Available</div>
+                  <div className="sidebar-sub">{d.outdoor_description}</div>
+                </div>
+              )}
             </div>
           </div>{/* /panel-units */}
 
