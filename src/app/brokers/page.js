@@ -144,7 +144,7 @@ export default function BrokersPage() {
       <Header />
       <main className="brokers-main">
         <header className="directory-header">
-          <span className="vector-label">LAYER 03 // PARTNER NETWORK</span>
+          <span className="vector-label">LAYER 03.1 // VERIFIED ADVISORS</span>
           <h1 className="page-title">Intelligence Roster</h1>
           <p className="page-subtitle">Directory of elite Space Intelligence advisors across prime corridors.</p>
         </header>

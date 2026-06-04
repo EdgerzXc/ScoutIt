@@ -108,7 +108,7 @@ export default function EventPlannersPage() {
         </div>
 
         <header className="directory-header">
-          <span className="vector-label">LAYER 06 // EVENT DESIGN</span>
+          <span className="vector-label">LAYER 03.4 // EVENT DESIGN</span>
           <h1 className="page-title">Design Roster</h1>
           <p className="page-subtitle">Certified planners and event creatives who specialize in styling and coordinating spaces.</p>
         </header>

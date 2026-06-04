@@ -621,59 +621,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SECTION: Ecosystem Services */}
-      <section className="snap-section section-services">
-        <div className="services-content">
-          <header className="section-header-center">
-            <span className="vector-label">Platform Services // Ecosystem</span>
-            <h2>Ecosystem Services</h2>
-            <p>Access our curated network of vetted professionals supporting every phase of space discovery, listings, and planning.</p>
-          </header>
-
-          <div className="services-grid">
-            <Link href="/brokers" className="service-card live-card">
-              <div className="service-card-inner">
-                <div className="service-icon-wrapper">🏢</div>
-                <div className="service-status-badge live-badge">LIVE</div>
-                <h3 className="service-title">Verified Advisors</h3>
-                <p className="service-desc">Our network of licensed Space Intelligence advisors who guide you through acquisitions and curation.</p>
-                <span className="service-cta">CONNECT WITH ADVISOR →</span>
-              </div>
-            </Link>
-
-            <Link href="/photographers" className="service-card coming-soon-card">
-              <div className="service-card-inner">
-                <div className="service-icon-wrapper">📸</div>
-                <div className="service-status-badge soon-badge">COMING SOON</div>
-                <h3 className="service-title">Space Photography</h3>
-                <p className="service-desc">Professional interior and architectural photographers vetted to capture listing spaces at elite quality.</p>
-                <span className="service-cta">EXPLORE ROSTER →</span>
-              </div>
-            </Link>
-
-            <Link href="/researchers" className="service-card coming-soon-card">
-              <div className="service-card-inner">
-                <div className="service-icon-wrapper">🔍</div>
-                <div className="service-status-badge soon-badge">COMING SOON</div>
-                <h3 className="service-title">Site Research</h3>
-                <p className="service-desc">On-ground due diligence, market analytics, and neighborhood profiling before you commit to a property.</p>
-                <span className="service-cta">EXPLORE ROSTER →</span>
-              </div>
-            </Link>
-
-            <Link href="/event-planners" className="service-card coming-soon-card">
-              <div className="service-card-inner">
-                <div className="service-icon-wrapper">🎪</div>
-                <div className="service-status-badge soon-badge">COMING SOON</div>
-                <h3 className="service-title">Event Design</h3>
-                <p className="service-desc">Certified planners, stylists, and designers specializing in transforming and coordinating event spaces.</p>
-                <span className="service-cta">EXPLORE ROSTER →</span>
-              </div>
-            </Link>
-          </div>
-        </div>
-      </section>
-
       {/* SECTION 3: Layer 02 */}
       <section className="snap-section section-discover" style={{ padding: 0 }}>
         <div className="property-split">
@@ -807,54 +754,53 @@ export default function Home() {
       </section>
 
       {/* SECTION 4: Layer 03 */}
-      <section className="snap-section section-brokers">
-        <div className="brokers-content">
+      <section className="snap-section section-services">
+        <div className="services-content">
           <header className="section-header-center">
-            <span className="vector-label">Layer 03 // Trusted Guides</span>
-            <h2>The Advisory</h2>
-            <p>Connect with advisors who understand space, design, and architecture.</p>
+            <span className="vector-label">Layer 03 // Ecosystem Services</span>
+            <h2>Ecosystem Services</h2>
+            <p>Access our curated network of vetted professionals supporting every phase of space discovery, listings, and planning.</p>
           </header>
-          
-          <div className="brokers-blur-grid">
-            {[
-              { name: "Miguel Torres, REB", status: "Lead Design Advisor", history: "Specializes in BGC architectural modernism", image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&q=80", metrics: [
-                { label: "Curations", value: "14 Spaces" },
-                { label: "Experience", value: "8+ Years" },
-                { label: "Curator Style", value: "Modernist" }
-              ] },
-              { name: "Elena Santos, REB", status: "Quiet Luxury Specialist", history: "Specializes in QC quiet luxury estates", image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=80", metrics: [
-                { label: "Curations", value: "18 Spaces" },
-                { label: "Experience", value: "10+ Years" },
-                { label: "Curator Style", value: "Quiet Luxury" }
-              ] },
-              { name: "Marco Reyes, REB", status: "Island Retreats Curator", history: "Specializes in Siargao & island minimalist retreats", image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&q=80", metrics: [
-                { label: "Curations", value: "22 Spaces" },
-                { label: "Experience", value: "7+ Years" },
-                { label: "Curator Style", value: "Minimalist" }
-              ] }
-            ].map((broker, i) => (
-              <div key={i} className="broker-preview-card">
-                <div style={{ width: '80px', height: '80px', borderRadius: '50%', backgroundImage: `url(${broker.image})`, backgroundSize: 'cover', backgroundPosition: 'center', filter: 'grayscale(100%) contrast(1.2)', marginBottom: '16px', border: '2px solid var(--border-solid)' }}></div>
-                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: '#fff', marginBottom: '4px' }}>{broker.name} <span style={{ color: 'var(--text-muted)', fontSize: '12px', fontWeight: 'normal', fontFamily: 'var(--font-mono)', display: 'block', marginTop: '4px' }}>{broker.status}</span></h3>
-                
-                {/* 3-metric trust analytics block */}
-                <div className="broker-metrics-block">
-                  {broker.metrics.map((m, idx) => (
-                    <div key={idx} className="broker-metric-item">
-                      <span style={{ color: 'var(--text-muted)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: '500', display: 'block', textAlign: 'center', lineHeight: '1.2' }}>{m.label}</span>
-                      <span style={{ fontFamily: 'Georgia, serif', fontSize: '16px', color: '#f0ede8', display: 'block', textAlign: 'center', lineHeight: '1.1' }}>{m.value}</span>
-                    </div>
-                  ))}
-                </div>
 
-                <div style={{ color: 'var(--text-secondary)', fontSize: '12px', background: 'rgba(0,0,0,0.5)', padding: '8px 12px', borderRadius: '4px', width: '100%' }}>{broker.history}</div>
+          <div className="services-grid">
+            <Link href="/brokers" className="service-card live-card">
+              <div className="service-card-inner">
+                <div className="service-icon-wrapper">🏢</div>
+                <div className="service-status-badge live-badge">LIVE</div>
+                <h3 className="service-title">Verified Advisors</h3>
+                <p className="service-desc">Our network of licensed Space Intelligence advisors who guide you through acquisitions and curation.</p>
+                <span className="service-cta">CONNECT WITH ADVISOR →</span>
               </div>
-            ))}
-          </div>
+            </Link>
 
-          <div className="section-action-footer">
-            <Link href="/brokers" className="prominent-action-link">
-              CONNECT WITH AN ADVISOR →
+            <Link href="/photographers" className="service-card coming-soon-card">
+              <div className="service-card-inner">
+                <div className="service-icon-wrapper">📸</div>
+                <div className="service-status-badge soon-badge">COMING SOON</div>
+                <h3 className="service-title">Space Photography</h3>
+                <p className="service-desc">Professional interior and architectural photographers vetted to capture listing spaces at elite quality.</p>
+                <span className="service-cta">EXPLORE ROSTER →</span>
+              </div>
+            </Link>
+
+            <Link href="/researchers" className="service-card coming-soon-card">
+              <div className="service-card-inner">
+                <div className="service-icon-wrapper">🔍</div>
+                <div className="service-status-badge soon-badge">COMING SOON</div>
+                <h3 className="service-title">Site Research</h3>
+                <p className="service-desc">On-ground due diligence, market analytics, and neighborhood profiling before you commit to a property.</p>
+                <span className="service-cta">EXPLORE ROSTER →</span>
+              </div>
+            </Link>
+
+            <Link href="/event-planners" className="service-card coming-soon-card">
+              <div className="service-card-inner">
+                <div className="service-icon-wrapper">🎪</div>
+                <div className="service-status-badge soon-badge">COMING SOON</div>
+                <h3 className="service-title">Event Design</h3>
+                <p className="service-desc">Certified planners, stylists, and designers specializing in transforming and coordinating event spaces.</p>
+                <span className="service-cta">EXPLORE ROSTER →</span>
+              </div>
             </Link>
           </div>
         </div>
@@ -1048,6 +994,7 @@ export default function Home() {
       <section className="snap-section section-about">
         <div className="about-content">
           <header className="section-header-center">
+            <span className="vector-label">Layer 05 // About Us</span>
             <h2>The ScoutIt Manifesto</h2>
           </header>
           

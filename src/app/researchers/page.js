@@ -90,7 +90,7 @@ export default function ResearchersPage() {
         </div>
 
         <header className="directory-header">
-          <span className="vector-label">LAYER 05 // SITE INTELLIGENCE</span>
+          <span className="vector-label">LAYER 03.3 // SITE INTELLIGENCE</span>
           <h1 className="page-title">Research Roster</h1>
           <p className="page-subtitle">On-ground specialists who deliver the complete picture before you commit to a space.</p>
         </header>

@@ -97,7 +97,7 @@ export default function PhotographersPage() {
         </div>
 
         <header className="directory-header">
-          <span className="vector-label">LAYER 04 // SPACE PHOTOGRAPHY</span>
+          <span className="vector-label">LAYER 03.2 // SPACE PHOTOGRAPHY</span>
           <h1 className="page-title">Lens Roster</h1>
           <p className="page-subtitle">Verified photographers who specialize in capturing spaces that command attention.</p>
         </header>
