@@ -20,7 +20,8 @@ const MOCK_CATEGORIES = {
   "siargao-tropical-villa": "STR",
   "palawan-eco-retreat": "STR",
   "gallery-by-chele": "Restaurants",
-  "antonios-tagaytay": "Restaurants"
+  "antonios-tagaytay": "Restaurants",
+  "the-glasshouse-bgc": "Commercial"
 };
 
 function PropertyDirectoryContent() {

@@ -133,97 +133,284 @@ export default function PropertyDetailClient({ slug }) {
   const convScoreText  = `${d.convenience_score} / 10`;
   const brokerInitials = (d.broker_name || "SA").split(" ").map(p => p[0]).join("").slice(0, 2).toUpperCase();
 
+  // ── Category Detection & Custom Labels ──────────
+  const cat = (d.spaceCategory || "").toLowerCase() || (d.property_type || "").toLowerCase();
+  const isRestaurant = cat.includes("restaurant") || cat.includes("culinary");
+  const isHospitality = cat.includes("str") || cat.includes("hospitality");
+  const isVenue = cat.includes("venue") || cat.includes("event");
+
+  // Determine brief label
+  let briefLabel = "Residential Briefing";
+  if (isRestaurant) {
+    briefLabel = "Culinary Briefing";
+  } else if (isHospitality) {
+    briefLabel = "Hospitality Briefing";
+  } else if (isVenue) {
+    briefLabel = "Venue Briefing";
+  } else if (d.property_type?.toLowerCase().includes("commercial") || d.property_type?.toLowerCase().includes("office") || d.property_type?.toLowerCase().includes("retail") || cat.includes("commercial")) {
+    briefLabel = "Commercial Briefing";
+  }
+
+  // ── Spec Pills Dynamic Curators ────────────────
+  let pill1Val = d.beds;
+  let pill1Label = "Bedrooms";
+  let pill1Icon = <><path d="M1 9V5a2 2 0 012-2h8a2 2 0 012 2v4" strokeLinecap="round"/><path d="M1 9h12" strokeLinecap="round"/></>;
+
+  let pill2Val = d.baths;
+  let pill2Label = "Bathrooms";
+  let pill2Icon = <><path d="M2 8h10M2 8V5a2 2 0 012-2v0a1 1 0 011 1v4" strokeLinecap="round"/><path d="M12 8v3" strokeLinecap="round"/></>;
+
+  if (isRestaurant) {
+    pill1Val = d.seating_capacity || "80 Seats";
+    pill1Label = "Seating Capacity";
+    pill1Icon = <><path d="M3 2h8v5H3V2zm0 5h8v4.5C11 12.3 10.3 13 9.5 13H4.5C3.7 13 3 12.3 3 11.5V7zM1 13h12" strokeLinecap="round"/></>;
+
+    pill2Val = d.kitchen_grade || "Commercial AAA";
+    pill2Label = "Kitchen Grade";
+    pill2Icon = <><circle cx="6" cy="6" r="4"/><path d="M10 6h3" strokeLinecap="round"/><path d="M6 10v3" strokeLinecap="round"/></>;
+  } else if (isHospitality) {
+    pill1Val = d.accommodations || "2 Beach Suites";
+    pill1Label = "Accommodations";
+    pill1Icon = <><rect x="2" y="2" width="10" height="10" rx="1.5"/><circle cx="7" cy="7" r="1.5"/><path d="M3 5h4" strokeLinecap="round"/></>;
+
+    pill2Val = d.hosting_capacity || "15 Guests";
+    pill2Label = "Hosting Capacity";
+    pill2Icon = <><circle cx="5" cy="4" r="2"/><circle cx="9" cy="4" r="2"/><path d="M2 11c0-2 2-3 3-3s3 1 3 3M7 11c0-2 2-3 3-3s3 1 3 3"/></>;
+  } else if (isVenue) {
+    pill1Val = d.seating_capacity || "350 Capacity";
+    pill1Label = "Guest Capacity";
+    pill1Icon = <><path d="M2 12a4 4 0 018 0" strokeLinecap="round"/><circle cx="6" cy="5" r="3"/><circle cx="12" cy="7" r="1.5"/><path d="M10 12a2 2 0 013-1" strokeLinecap="round"/></>;
+
+    pill2Val = d.setup_grade || "Premium A/V";
+    pill2Label = "Setup Grade";
+    pill2Icon = <><circle cx="7" cy="7" r="5"/><path d="M7 2v2M7 10v2M2 7h2M10 7h2" strokeLinecap="round"/></>;
+  }
+
   // ── Build Dynamic Units List ───────────────────
   const dynamicUnits = [];
   const isCommercial = 
     d.property_type?.toLowerCase().includes("commercial") || 
     d.property_type?.toLowerCase().includes("restaurant") || 
     d.property_type?.toLowerCase().includes("office") ||
-    d.property_type?.toLowerCase().includes("retail");
+    d.property_type?.toLowerCase().includes("retail") ||
+    isVenue;
 
-  // 1. Outdoor/Lobby/Pool
-  if (d.outdoor_description && d.outdoor_description !== "None" && d.outdoor_description !== "") {
-    let name = "Balcony";
-    if (d.outdoor_description.toLowerCase().includes("pool") || d.outdoor_description.toLowerCase().includes("beach")) {
-      name = "Pool & Beach";
-    } else if (d.outdoor_description.toLowerCase().includes("lobby") || d.outdoor_description.toLowerCase().includes("foyer") || d.outdoor_description.toLowerCase().includes("waiting")) {
-      name = "Lobby & Entrance";
-    } else if (d.outdoor_description.toLowerCase().includes("garden") || d.outdoor_description.toLowerCase().includes("walkway")) {
-      name = "Gardens & Walkways";
-    } else if (d.outdoor_description.toLowerCase().includes("courtyard")) {
-      name = "Courtyard";
-    }
-    
+  if (isRestaurant) {
+    // 1. Dining Area
     dynamicUnits.push({
-      name,
+      name: "Main Dining Area",
       specs: [
-        d.outdoor_description,
-        "Open Air / Access Space",
-        "Safe & Maintained"
+        `${d.floor_sqm ? Math.round(d.floor_sqm * 0.6) : 150} sqm dining layout`,
+        "Curated ambient lighting & interior acoustics",
+        `Capacity: ${d.seating_capacity || "80 seats"}`,
+        "Fitted furniture & custom seating plan"
       ]
     });
-  }
-
-  // 2. Main Spaces (for Commercial) or Rooms (for Residential/STR)
-  if (isCommercial) {
+    // 2. Prep Kitchen
     dynamicUnits.push({
-      name: "Main Hall / Space",
+      name: "Prep Kitchen",
       specs: [
-        `${d.floor_sqm ? Math.round(d.floor_sqm * 0.6) : 150} sqm est.`,
-        "Open layout configuration",
-        "Central lighting & acoustics",
-        `${d.ceiling_height_text || "3.8m ceiling"}`
+        "High electrical load capacity ready",
+        "Dedicated HVAC & exhaust air integration",
+        "Fresh water supply & commercial drainage lines",
+        `Grade: ${d.kitchen_grade || "Commercial AAA"}`
       ]
     });
+    // 3. Specialties / Menus
     dynamicUnits.push({
-      name: "Kitchen & Utilities",
+      name: "Secret Recipes & Menus",
       specs: [
-        `${d.floor_sqm ? Math.round(d.floor_sqm * 0.25) : 50} sqm est.`,
-        "High load power ready",
-        "Fresh air intake systems",
-        "Water supply integration"
+        "Signature menu concept integration",
+        "Locally-sourced organic supplier chain",
+        "Award-winning recipe alignments",
+        "Optimized food delivery flow"
       ]
     });
-  } else {
-    const bedsCount = Number(d.beds || 0);
-    for (let i = 1; i <= bedsCount; i++) {
-      dynamicUnits.push({
-        name: i === 1 ? "Master Suite" : `Room ${i}`,
-        specs: [
-          `${bedsCount > 0 ? Math.round((d.floor_sqm * 0.6) / bedsCount) : 25} sqm est.`,
-          "Premium ventilation & lighting",
-          "Aircon integration ready",
-          i === 1 ? "Large layout double-bed space" : "Single/Twin bed sizing",
-          `${d.ceiling_height_text || "3.2m ceiling"}`
-        ]
-      });
-    }
-  }
-
-  // 3. Bathrooms / Washrooms
-  const bathsCount = Number(d.baths || 0);
-  if (bathsCount > 0) {
-    if (isCommercial) {
+    // 4. Washrooms
+    const bathsCount = Number(d.baths || 0);
+    if (bathsCount > 0) {
       dynamicUnits.push({
         name: "Washrooms",
         specs: [
-          `${bathsCount} separate units`,
-          "Modern plumbing fixtures",
-          "High flow exhaust fans",
-          "Dedicated wash stations"
+          `${bathsCount} fitted guest washrooms`,
+          "Exhaust system integrated",
+          "Premium plumbing fixtures"
+        ]
+      });
+    }
+  } else if (isHospitality) {
+    // 1. Main Guest Pavilion
+    dynamicUnits.push({
+      name: "Main Lounge & Pavilion",
+      specs: [
+        `${d.floor_sqm ? Math.round(d.floor_sqm * 0.5) : 80} sqm central pavilion`,
+        "High-vaulted ceiling with natural sea drafts",
+        "Polished concrete & local coco-lumber columns",
+        "Seamless indoor/outdoor integration"
+      ]
+    });
+    // 2. Guest Suites
+    dynamicUnits.push({
+      name: "Guest Suites",
+      specs: [
+        `Accommodations: ${d.accommodations || "2 Luxury Suites"}`,
+        "Premium ocean breeze ventilation",
+        "En-suite bathroom & standing shower",
+        "Private veranda access ready"
+      ]
+    });
+    // 3. Wellness & Pool
+    dynamicUnits.push({
+      name: "Wellness & Pool Zones",
+      specs: [
+        "Saltwater pool integration",
+        "Lush tropical manicured gardens",
+        "Dedicated spa / massage pavilions",
+        "Eco-friendly zero-footprint structures"
+      ]
+    });
+    // 4. Washrooms
+    const bathsCount = Number(d.baths || 0);
+    if (bathsCount > 0) {
+      dynamicUnits.push({
+        name: "Washrooms",
+        specs: [
+          `${bathsCount} separate guest washrooms`,
+          "Exhaust system integrated",
+          "Hot & cold utility water"
+        ]
+      });
+    }
+  } else if (isVenue) {
+    // 1. Ballroom / Pavilion
+    dynamicUnits.push({
+      name: "Grand Ballroom / Glasshouse",
+      specs: [
+        `${d.floor_sqm ? Math.round(d.floor_sqm * 0.7) : 400} sqm event floor`,
+        `Ceiling clearance: ${d.ceiling_height_text || "6.5 meters"}`,
+        "Reinforced overhead rigging points",
+        "Smart acoustic ceiling clouds"
+      ]
+    });
+    // 2. Dressing Suite
+    dynamicUnits.push({
+      name: "VIP Holding & Dressing Suite",
+      specs: [
+        "Dedicated vanity mirrors & makeup console",
+        "Private en-suite restroom & lounge seating",
+        "Secure card-key access control",
+        "Acoustical isolation from main floor"
+      ]
+    });
+    // 3. Service Bay
+    dynamicUnits.push({
+      name: "Catering Prep & Service Bay",
+      specs: [
+        "Direct utility access & loading dock corridor",
+        "Dedicated high flow wastewater line",
+        "High load power outlets for cooling/cooking",
+        "Easy ingress/egress for vendor teams"
+      ]
+    });
+    // 4. Washrooms
+    const bathsCount = Number(d.baths || 0);
+    if (bathsCount > 0) {
+      dynamicUnits.push({
+        name: "Washrooms",
+        specs: [
+          `${bathsCount} separate washrooms`,
+          "Modern high-traffic plumbing fixtures",
+          "Dedicated makeup counter & wash basins",
+          "Exhaust system integrated"
+        ]
+      });
+    }
+  } else {
+    // Traditional Fallback
+    // 1. Outdoor/Lobby/Pool
+    if (d.outdoor_description && d.outdoor_description !== "None" && d.outdoor_description !== "") {
+      let name = "Balcony";
+      if (d.outdoor_description.toLowerCase().includes("pool") || d.outdoor_description.toLowerCase().includes("beach")) {
+        name = "Pool & Beach";
+      } else if (d.outdoor_description.toLowerCase().includes("lobby") || d.outdoor_description.toLowerCase().includes("foyer") || d.outdoor_description.toLowerCase().includes("waiting")) {
+        name = "Lobby & Entrance";
+      } else if (d.outdoor_description.toLowerCase().includes("garden") || d.outdoor_description.toLowerCase().includes("walkway")) {
+        name = "Gardens & Walkways";
+      } else if (d.outdoor_description.toLowerCase().includes("courtyard")) {
+        name = "Courtyard";
+      }
+      
+      dynamicUnits.push({
+        name,
+        specs: [
+          d.outdoor_description,
+          "Open Air / Access Space",
+          "Safe & Maintained"
+        ]
+      });
+    }
+
+    // 2. Main Spaces (for Commercial) or Rooms (for Residential/STR)
+    if (isCommercial) {
+      dynamicUnits.push({
+        name: "Main Hall / Space",
+        specs: [
+          `${d.floor_sqm ? Math.round(d.floor_sqm * 0.6) : 150} sqm est.`,
+          "Open layout configuration",
+          "Central lighting & acoustics",
+          `${d.ceiling_height_text || "3.8m ceiling"}`
+        ]
+      });
+      dynamicUnits.push({
+        name: "Kitchen & Utilities",
+        specs: [
+          `${d.floor_sqm ? Math.round(d.floor_sqm * 0.25) : 50} sqm est.`,
+          "High load power ready",
+          "Fresh air intake systems",
+          "Water supply integration"
         ]
       });
     } else {
-      for (let i = 1; i <= bathsCount; i++) {
+      const bedsCount = Number(d.beds || 0);
+      for (let i = 1; i <= bedsCount; i++) {
         dynamicUnits.push({
-          name: i === 1 ? "Master Bath" : `Bathroom ${i}`,
+          name: i === 1 ? "Master Suite" : `Room ${i}`,
           specs: [
-            "Standing shower installation",
-            "Hot & cold utility water",
-            "Exhaust system integrated",
-            i === 1 ? "Dual vanity ready" : "Single vanity sizing"
+            `${bedsCount > 0 ? Math.round((d.floor_sqm * 0.6) / bedsCount) : 25} sqm est.`,
+            "Premium ventilation & lighting",
+            "Aircon integration ready",
+            i === 1 ? "Large layout double-bed space" : "Single/Twin bed sizing",
+            `${d.ceiling_height_text || "3.2m ceiling"}`
           ]
         });
+      }
+    }
+
+    // 3. Bathrooms / Washrooms
+    const bathsCount = Number(d.baths || 0);
+    if (bathsCount > 0) {
+      if (isCommercial) {
+        dynamicUnits.push({
+          name: "Washrooms",
+          specs: [
+            `${bathsCount} separate units`,
+            "Modern plumbing fixtures",
+            "High flow exhaust fans",
+            "Dedicated wash stations"
+          ]
+        });
+      } else {
+        for (let i = 1; i <= bathsCount; i++) {
+          dynamicUnits.push({
+            name: i === 1 ? "Master Bath" : `Bathroom ${i}`,
+            specs: [
+              "Standing shower installation",
+              "Hot & cold utility water",
+              "Exhaust system integrated",
+              i === 1 ? "Dual vanity ready" : "Single vanity sizing"
+            ]
+          });
+        }
       }
     }
   }
@@ -349,7 +536,7 @@ export default function PropertyDetailClient({ slug }) {
 
           {/* Hero Intel */}
           <div className="hero-intel">
-            <p className="hero-label">ScoutIt &middot; Residential Briefing</p>
+            <p className="hero-label">ScoutIt &middot; {briefLabel}</p>
             <h1 className="hero-title">{d.title}</h1>
             <p className="hero-location">{d.location}</p>
             <p className="hero-hook">{d.hook}</p>
@@ -547,8 +734,8 @@ export default function PropertyDetailClient({ slug }) {
 
               <div className="spec-pills">
                 {[
-                  { val: d.beds,      label: "Bedrooms",  icon: <><path d="M1 9V5a2 2 0 012-2h8a2 2 0 012 2v4" strokeLinecap="round"/><path d="M1 9h12" strokeLinecap="round"/></> },
-                  { val: d.baths,     label: "Bathrooms", icon: <><path d="M2 8h10M2 8V5a2 2 0 012-2v0a1 1 0 011 1v4" strokeLinecap="round"/><path d="M12 8v3" strokeLinecap="round"/></> },
+                  { val: pill1Val,    label: pill1Label,  icon: pill1Icon },
+                  { val: pill2Val,    label: pill2Label,  icon: pill2Icon },
                   { val: d.floor_sqm, label: "sqm floor", icon: <><rect x="2" y="2" width="10" height="10" rx="1"/><path d="M5 2v10M9 2v10M2 5h10M2 9h10" strokeLinecap="round"/></> },
                   { val: d.parking,   label: "Parking",   icon: <><rect x="1" y="6" width="12" height="6" rx="1"/><path d="M3 6V4a3 3 0 016 0v2" strokeLinecap="round"/></> },
                   { val: d.lot_sqm,   label: "Lot Area",  icon: <><rect x="2" y="4" width="10" height="8" rx="1"/><path d="M2 8h10" strokeLinecap="round"/></> },
@@ -722,16 +909,51 @@ export default function PropertyDetailClient({ slug }) {
                   <div className="accordion-header" onClick={() => tog(setAccLocation, accLocation, "daily")}>
                     <div className="accordion-left">
                       <div className="accordion-icon-wrap"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"><path d="M7 1v2M7 11v2M1 7h2M11 7h2M3 3l1.4 1.4M9.6 9.6L11 11M3 11l1.4-1.4M9.6 4.4L11 3"/></svg></div>
-                      <div><div className="accordion-title">Daily Life Reality</div><div className="accordion-subtitle">Is my daily routine easy here?</div></div>
+                      <div>
+                        <div className="accordion-title">
+                          {isRestaurant ? "Operations Reality" : isHospitality ? "Guest Experience Reality" : isVenue ? "Event Logistics Reality" : "Daily Life Reality"}
+                        </div>
+                        <div className="accordion-subtitle">
+                          {isRestaurant ? "Is running restaurant operations easy here?" : isHospitality ? "Is guest accessibility easy here?" : isVenue ? "Are event setups and load-ins easy here?" : "Is my daily routine easy here?"}
+                        </div>
+                      </div>
                     </div>
                     <div className="accordion-right"><span className="accordion-tag tag-green">Convenient</span><div className="accordion-chevron"/></div>
                   </div>
                   <div className="accordion-body"><div className="accordion-content">
-                    <div className="detail-row"><span className="detail-key">Grocery access</span><span className="detail-val green">4 min drive</span></div>
-                    <div className="detail-row"><span className="detail-key">Nearest hospital</span><span className="detail-val">12 min · QMMC</span></div>
-                    <div className="detail-row"><span className="detail-key">Schools nearby</span><span className="detail-val">3 within 10 min</span></div>
-                    <div className="detail-row"><span className="detail-key">Commute to CBD</span><span className="detail-val yellow">35–45 min</span></div>
-                    <div className="detail-row"><span className="detail-key">Public transport</span><span className="detail-val green">Good coverage</span></div>
+                    {isRestaurant && (
+                      <>
+                        <div className="detail-row"><span className="detail-key">Food supplier access</span><span className="detail-val green">Direct delivery route</span></div>
+                        <div className="detail-row"><span className="detail-key">Foot traffic density</span><span className="detail-val">High · Commercial zone</span></div>
+                        <div className="detail-row"><span className="detail-key">Nearest transit hub</span><span className="detail-val">4 min walk</span></div>
+                        <div className="detail-row"><span className="detail-key">Parking convenience</span><span className="detail-val green">Valet option available</span></div>
+                      </>
+                    )}
+                    {isHospitality && (
+                      <>
+                        <div className="detail-row"><span className="detail-key">Beach / activity access</span><span className="detail-val green">2 min walk to sea</span></div>
+                        <div className="detail-row"><span className="detail-key">Airport commute</span><span className="detail-val">35 min drive</span></div>
+                        <div className="detail-row"><span className="detail-key">Local food options</span><span className="detail-val green">Excellent coverage</span></div>
+                        <div className="detail-row"><span className="detail-key">Security presence</span><span className="detail-val">Guarded subdivision</span></div>
+                      </>
+                    )}
+                    {isVenue && (
+                      <>
+                        <div className="detail-row"><span className="detail-key">Acoustic insulation</span><span className="detail-val green">Sound dampening shell</span></div>
+                        <div className="detail-row"><span className="detail-key">Load-in dock access</span><span className="detail-val green">Direct service entry</span></div>
+                        <div className="detail-row"><span className="detail-key">Visitor parking</span><span className="detail-val">25 slots + valet</span></div>
+                        <div className="detail-row"><span className="detail-key">Egress capacity</span><span className="detail-val green">Meets standard safety code</span></div>
+                      </>
+                    )}
+                    {!isRestaurant && !isHospitality && !isVenue && (
+                      <>
+                        <div className="detail-row"><span className="detail-key">Grocery access</span><span className="detail-val green">4 min drive</span></div>
+                        <div className="detail-row"><span className="detail-key">Nearest hospital</span><span className="detail-val">12 min · QMMC</span></div>
+                        <div className="detail-row"><span className="detail-key">Schools nearby</span><span className="detail-val">3 within 10 min</span></div>
+                        <div className="detail-row"><span className="detail-key">Commute to CBD</span><span className="detail-val yellow">35–45 min</span></div>
+                        <div className="detail-row"><span className="detail-key">Public transport</span><span className="detail-val green">Good coverage</span></div>
+                      </>
+                    )}
                   </div></div>
                 </div>
 
@@ -867,8 +1089,27 @@ export default function PropertyDetailClient({ slug }) {
                 <tr><td>Tenure</td><td>{d.tenure}</td></tr>
                 <tr><td>Floor area</td><td>{d.floor_sqm} sqm</td></tr>
                 <tr><td>Lot area</td><td>{d.lot_sqm} sqm</td></tr>
-                <tr><td>Bedrooms</td><td>{d.beds}</td></tr>
-                <tr><td>Bathrooms</td><td>{d.baths}</td></tr>
+                {isRestaurant ? (
+                  <>
+                    <tr><td>Dining Capacity</td><td>{pill1Val}</td></tr>
+                    <tr><td>Kitchen Grade</td><td>{pill2Val}</td></tr>
+                  </>
+                ) : isHospitality ? (
+                  <>
+                    <tr><td>Accommodations</td><td>{pill1Val}</td></tr>
+                    <tr><td>Hosting Capacity</td><td>{pill2Val}</td></tr>
+                  </>
+                ) : isVenue ? (
+                  <>
+                    <tr><td>Guest Capacity</td><td>{pill1Val}</td></tr>
+                    <tr><td>Setup Grade</td><td>{pill2Val}</td></tr>
+                  </>
+                ) : (
+                  <>
+                    <tr><td>Bedrooms</td><td>{d.beds}</td></tr>
+                    <tr><td>Bathrooms</td><td>{d.baths}</td></tr>
+                  </>
+                )}
                 <tr><td>Parking slots</td><td>{d.parking} covered</td></tr>
                 <tr><td>Furnishing</td><td>{d.furnishing}</td></tr>
                 <tr><td>Year built</td><td>{d.year_built}</td></tr>
@@ -1064,14 +1305,51 @@ export default function PropertyDetailClient({ slug }) {
                 <div className="sidebar-value">{dynamicUnits.length}</div>
                 <div className="sidebar-sub">Click an area to preview photos</div>
               </div>
-              <div className="sidebar-block">
-                <div className="sidebar-label">Bedrooms</div>
-                <div className="sidebar-value">{d.beds || 0} rooms</div>
-              </div>
-              <div className="sidebar-block">
-                <div className="sidebar-label">Bathrooms</div>
-                <div className="sidebar-value">{d.baths || 0} baths</div>
-              </div>
+              {isRestaurant ? (
+                <>
+                  <div className="sidebar-block">
+                    <div className="sidebar-label">Dining Capacity</div>
+                    <div className="sidebar-value">{pill1Val}</div>
+                  </div>
+                  <div className="sidebar-block">
+                    <div className="sidebar-label">Kitchen Grade</div>
+                    <div className="sidebar-value">{pill2Val}</div>
+                  </div>
+                </>
+              ) : isHospitality ? (
+                <>
+                  <div className="sidebar-block">
+                    <div className="sidebar-label">Accommodations</div>
+                    <div className="sidebar-value">{pill1Val}</div>
+                  </div>
+                  <div className="sidebar-block">
+                    <div className="sidebar-label">Hosting Capacity</div>
+                    <div className="sidebar-value">{pill2Val}</div>
+                  </div>
+                </>
+              ) : isVenue ? (
+                <>
+                  <div className="sidebar-block">
+                    <div className="sidebar-label">Guest Capacity</div>
+                    <div className="sidebar-value">{pill1Val}</div>
+                  </div>
+                  <div className="sidebar-block">
+                    <div className="sidebar-label">Setup Grade</div>
+                    <div className="sidebar-value">{pill2Val}</div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="sidebar-block">
+                    <div className="sidebar-label">Bedrooms</div>
+                    <div className="sidebar-value">{d.beds || 0} rooms</div>
+                  </div>
+                  <div className="sidebar-block">
+                    <div className="sidebar-label">Bathrooms</div>
+                    <div className="sidebar-value">{d.baths || 0} baths</div>
+                  </div>
+                </>
+              )}
               {d.outdoor_description && d.outdoor_description !== "None" && d.outdoor_description !== "" && (
                 <div className="sidebar-block">
                   <div className="sidebar-label">Outdoor Space</div>
