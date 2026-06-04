@@ -1713,14 +1713,15 @@ export default function Home() {
           display: flex;
           flex-direction: column;
           justify-content: space-between;
-          padding: 120px 40px;
+          padding: 60px 40px;
           z-index: 10;
+          overflow: hidden;
         }
 
         .menu-header h2 {
           font-family: var(--font-display);
-          font-size: 36px;
-          margin: 12px 0;
+          font-size: 28px;
+          margin: 8px 0;
           color: var(--text-primary);
         }
 
@@ -1740,7 +1741,10 @@ export default function Home() {
         .menu-nav {
           display: flex;
           flex-direction: column;
-          gap: 16px;
+          gap: 6px;
+          flex: 1;
+          overflow-y: auto;
+          padding-right: 4px;
         }
 
         .menu-btn {
@@ -1748,12 +1752,15 @@ export default function Home() {
           background: transparent;
           border: 1px solid transparent;
           color: var(--text-secondary);
-          font-size: 28px;
+          font-size: 22px;
           font-family: var(--font-display);
-          padding: 20px 24px;
+          padding: 13px 24px;
           cursor: pointer;
           transition: all var(--transition);
           border-radius: var(--radius-sm);
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
 
         .menu-btn:hover {
