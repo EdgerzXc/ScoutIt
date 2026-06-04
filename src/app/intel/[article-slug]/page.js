@@ -1,12 +1,71 @@
 import Header from "@/components/Header";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-
 import { getArticleBySlug, getArticles } from "@/data/mockDb";
+import { fetchIntel } from "@/lib/airtable";
+
+async function getLiveArticle(slug) {
+  const apiKey = process.env.AIRTABLE_API_KEY;
+  const baseId = process.env.AIRTABLE_BASE_ID;
+  
+  if (apiKey && baseId) {
+    try {
+      const airtableArticles = await fetchIntel(apiKey, baseId);
+      const matched = airtableArticles.find(a => a.slug === slug);
+      if (matched) {
+        let category = matched.category || "Residential";
+        if (category.toLowerCase() === "hospitality") category = "Hospitality";
+        if (category.toLowerCase() === "culinary") category = "Culinary";
+        return {
+          ...matched,
+          category
+        };
+      }
+    } catch (e) {
+      console.error("Failed to load article from Airtable:", e);
+    }
+  }
+  return getArticleBySlug(slug);
+}
+
+async function getLiveRelated(slug) {
+  const apiKey = process.env.AIRTABLE_API_KEY;
+  const baseId = process.env.AIRTABLE_BASE_ID;
+  
+  const baseArticles = [...getArticles()];
+  
+  if (apiKey && baseId) {
+    try {
+      const airtableArticles = await fetchIntel(apiKey, baseId);
+      airtableArticles.forEach(item => {
+        if (!baseArticles.some(x => x.slug === item.slug)) {
+          let category = item.category || "Residential";
+          if (category.toLowerCase() === "hospitality") category = "Hospitality";
+          if (category.toLowerCase() === "culinary") category = "Culinary";
+          
+          baseArticles.unshift({
+            slug: item.slug || item.id,
+            title: item.title,
+            category,
+            date: item.date || "Just Now",
+            excerpt: item.excerpt || "",
+            image: item.image || ""
+          });
+        }
+      });
+    } catch (e) {
+      console.error("Failed to load related articles from Airtable:", e);
+    }
+  }
+  
+  return baseArticles
+    .filter(art => art.slug !== slug)
+    .slice(0, 3);
+}
 
 export async function generateMetadata({ params }) {
   const { "article-slug": slug } = await params;
-  const article = getArticleBySlug(slug);
+  const article = await getLiveArticle(slug);
   return {
     title: article ? `${article.title} &middot; Intel Briefing` : "Intel Briefing",
     description: article ? article.lead : "Real estate news and intelligence."
@@ -15,16 +74,13 @@ export async function generateMetadata({ params }) {
 
 export default async function IntelArticlePage({ params }) {
   const { "article-slug": slug } = await params;
-  const article = getArticleBySlug(slug);
+  const article = await getLiveArticle(slug);
 
   if (!article) {
     notFound();
   }
 
-  // Get related articles (any other articles in the same category, or just random ones)
-  const related = getArticles()
-    .filter(art => art.slug !== slug)
-    .slice(0, 3);
+  const related = await getLiveRelated(slug);
 
   return (
     <div className="page-wrapper">

@@ -11,8 +11,6 @@ import {
   getCATEGORY_PREVIEWS 
 } from "@/data/mockDb";
 
-const discoveryFeedData = getDISCOVERY_FEED();
-
 export default function Home() {
   const [activePropertyType, setActivePropertyType] = useState("Residential");
   const [searchQuery, setSearchQuery] = useState("");
@@ -20,6 +18,120 @@ export default function Home() {
   const [activeDiscoverType, setActiveDiscoverType] = useState("Residential");
   const [driftingRocks, setDriftingRocks] = useState([]);
   const containerRef = useRef(null);
+
+  const [discoveryFeed, setDiscoveryFeed] = useState(getDISCOVERY_FEED());
+  const [categoryPreviews, setCategoryPreviews] = useState(getCATEGORY_PREVIEWS());
+  const [locations, setLocations] = useState([
+    "BGC Core", "Makati Central", "Roxas Triangle", "Quezon City", 
+    "Quezon Province", "Alabang", "Siargao"
+  ]);
+
+  // Fetch live CMS data from Airtable
+  useEffect(() => {
+    async function loadCMSData() {
+      try {
+        const res = await fetch("/api/cms");
+        if (!res.ok) return;
+        const data = await res.json();
+        
+        // 1. Group/format Properties for categoryPreviews
+        const airtableProperties = data.properties || [];
+        const basePreviews = getCATEGORY_PREVIEWS();
+        
+        const updatedPreviews = {
+          Residential: [...basePreviews.Residential],
+          Commercial: [...basePreviews.Commercial],
+          STR: [...basePreviews.STR],
+          Restaurants: [...basePreviews.Restaurants],
+        };
+        
+        const newLocations = [
+          "BGC Core", "Makati Central", "Roxas Triangle", "Quezon City", 
+          "Quezon Province", "Alabang", "Siargao"
+        ];
+        
+        airtableProperties.forEach((p) => {
+          const category = p.spaceCategory;
+          if (updatedPreviews[category]) {
+            if (!updatedPreviews[category].some(x => x.id === p.id || x.id === p.slug)) {
+              updatedPreviews[category].unshift({
+                id: p.slug || p.id,
+                slug: p.slug || p.id,
+                title: p.title,
+                image: p.image || (p.photos?.[0]) || "",
+                tags: [
+                  `Aesthetic: ${p.aestheticTag || "Modernist"}`,
+                  `Spatial Density: ${p.spatialDensity || "Low"}`,
+                  `Location: ${p.location || p.city}`
+                ]
+              });
+            }
+          }
+          
+          if (p.city && !newLocations.includes(p.city)) {
+            newLocations.push(p.city);
+          }
+          if (p.location && !newLocations.includes(p.location)) {
+            newLocations.push(p.location);
+          }
+        });
+        
+        setCategoryPreviews(updatedPreviews);
+        setLocations(newLocations);
+        
+        // 2. Group/format Properties & Intel for discoveryFeed
+        const baseFeed = getDISCOVERY_FEED();
+        const updatedFeed = {
+          Residential: { ...baseFeed.Residential, spotlights: [...baseFeed.Residential.spotlights], news: [...baseFeed.Residential.news], collections: [...baseFeed.Residential.collections] },
+          Commercial: { ...baseFeed.Commercial, spotlights: [...baseFeed.Commercial.spotlights], news: [...baseFeed.Commercial.news], collections: [...baseFeed.Commercial.collections] },
+          STR: { ...baseFeed.STR, spotlights: [...baseFeed.STR.spotlights], news: [...baseFeed.STR.news], collections: [...baseFeed.STR.collections] },
+          Restaurants: { ...baseFeed.Restaurants, spotlights: [...baseFeed.Restaurants.spotlights], news: [...baseFeed.Restaurants.news], collections: [...baseFeed.Restaurants.collections] },
+        };
+        
+        airtableProperties.forEach((p) => {
+          const category = p.spaceCategory;
+          if (updatedFeed[category]) {
+            if (!updatedFeed[category].spotlights.some(x => x.slug === p.slug || x.id === p.id)) {
+              updatedFeed[category].spotlights.unshift({
+                id: p.id,
+                slug: p.slug || p.id,
+                title: p.title,
+                location: p.location || p.city,
+                style: p.aestheticTag || "Modernist",
+                image: p.image || (p.photos?.[0]) || "",
+                desc: p.hook || ""
+              });
+            }
+          }
+        });
+        
+        const airtableIntel = data.intel || [];
+        airtableIntel.forEach((item) => {
+          let category = item.category || "Residential";
+          if (category.toLowerCase() === "hospitality") category = "STR";
+          if (category.toLowerCase() === "culinary") category = "Restaurants";
+          
+          if (updatedFeed[category]) {
+            if (!updatedFeed[category].news.some(x => x.slug === item.slug)) {
+              updatedFeed[category].news.unshift({
+                slug: item.slug || item.id,
+                title: item.title,
+                date: item.date || "Just Now",
+                excerpt: item.excerpt || ""
+              });
+            }
+          }
+        });
+        
+        setDiscoveryFeed(updatedFeed);
+        
+      } catch (err) {
+        console.error("Failed to load CMS data on homepage:", err);
+      }
+    }
+    
+    loadCMSData();
+  }, []);
 
   // Restore scroll position from sessionStorage
   useEffect(() => {
@@ -125,14 +237,7 @@ export default function Home() {
   
   const propertyTypes = ["Residential", "Commercial", "STR", "Restaurants"];
 
-  const locationDictionary = [
-    "BGC Core", "Makati Central", "Roxas Triangle", "Quezon City", 
-    "Quezon Province", "Alabang", "Siargao"
-  ];
-
   const discoverHubs = getDISCOVER_HUBS();
-
-  const categoryPreviews = getCATEGORY_PREVIEWS();
 
   // Stars and glitters particle arrays removed for clean cinematic hero redesign
 
@@ -344,7 +449,7 @@ export default function Home() {
                 />
                 {showDropdown && searchQuery.trim() !== "" && (
                   (() => {
-                    const matchedLocations = locationDictionary.filter(loc => 
+                    const matchedLocations = locations.filter(loc => 
                       loc.toLowerCase().includes(searchQuery.toLowerCase().trim())
                     );
                     
@@ -394,13 +499,13 @@ export default function Home() {
                   const locationTag = item.tags[2] || "";
                   const city = locationTag.replace("Location: ", "") || "Quezon City";
                   return (
-                    <div key={item.id} className="mini-preview-card">
+                    <Link href={`/property/${item.slug || item.id}`} key={item.id} className="mini-preview-card" style={{ textDecoration: 'none', color: 'inherit' }}>
                       <div className="mini-card-visual">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={item.image} alt={item.title} className="mini-card-image" />
                       </div>
                       
-                      <div className="home-card-reaction-overlay">
+                      <div className="home-card-reaction-overlay" onClick={(e) => e.stopPropagation()}>
                         <ReactionButtons
                           propertyId={item.id}
                           propertyTitle={item.title}
@@ -423,7 +528,7 @@ export default function Home() {
                         })}
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 );
               });
             })()}
@@ -476,8 +581,8 @@ export default function Home() {
               <div>
                 <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', textTransform: 'uppercase', color: 'var(--accent)', letterSpacing: '0.1em', marginBottom: '16px' }}>Property Spotlights</h4>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
-                  {discoveryFeedData[activeDiscoverType].spotlights.map((spot, idx) => (
-                    <div key={idx} style={{ background: '#161616', border: '1px solid #262626', borderRadius: '4px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                  {discoveryFeed[activeDiscoverType].spotlights.map((spot, idx) => (
+                    <Link href={`/property/${spot.slug || spot.id}`} key={idx} style={{ background: '#161616', border: '1px solid #262626', borderRadius: '4px', overflow: 'hidden', display: 'flex', flexDirection: 'column', textDecoration: 'none', color: 'inherit' }} className="discover-spotlight-card-link">
                       <div style={{ height: '140px', overflow: 'hidden', position: 'relative' }}>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={spot.image} alt={spot.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -488,7 +593,7 @@ export default function Home() {
                         <span style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block', marginBottom: '8px' }}>Location: {spot.location}</span>
                         <p style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>{spot.desc}</p>
                       </div>
-                    </div>
+                    </Link>
                   ))}
                 </div>
               </div>
@@ -499,7 +604,7 @@ export default function Home() {
                 <div>
                   <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', textTransform: 'uppercase', color: 'var(--accent)', letterSpacing: '0.1em', marginBottom: '16px' }}>News &amp; Stories</h4>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                    {discoveryFeedData[activeDiscoverType].news.map((item, idx) => (
+                    {discoveryFeed[activeDiscoverType].news.map((item, idx) => (
                       <Link
                         key={idx}
                         href={`/intel/${item.slug}`}
@@ -519,7 +624,7 @@ export default function Home() {
                 <div>
                   <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', textTransform: 'uppercase', color: 'var(--accent)', letterSpacing: '0.1em', marginBottom: '16px' }}>Curated Collections</h4>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    {discoveryFeedData[activeDiscoverType].collections.map((coll, idx) => (
+                    {discoveryFeed[activeDiscoverType].collections.map((coll, idx) => (
                       <div key={idx} className="curated-collection-btn" style={{ background: '#161616', border: '1px solid #262626', padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', transition: 'all 0.3s ease', borderRadius: '4px' }}>
                         <span style={{ fontSize: '13px', color: '#fff' }}>{coll}</span>
                         <span style={{ color: 'var(--accent)', fontSize: '12px' }}>Explore →</span>

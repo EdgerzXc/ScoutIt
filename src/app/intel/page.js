@@ -5,17 +5,51 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { getArticles } from "@/data/mockDb";
-
-const ARTICLES = getArticles();
+import { useEffect } from "react";
 
 export default function IntelPage() {
   const [filter, setFilter] = useState("All");
+  const [articles, setArticles] = useState(getArticles());
+
+  useEffect(() => {
+    async function loadArticles() {
+      try {
+        const res = await fetch("/api/cms");
+        if (!res.ok) return;
+        const data = await res.json();
+        
+        const airtableIntel = data.intel || [];
+        const baseArticles = [...getArticles()];
+        
+        airtableIntel.forEach(item => {
+          if (!baseArticles.some(x => x.slug === item.slug)) {
+            let category = item.category || "Residential";
+            if (category.toLowerCase() === "hospitality") category = "Hospitality";
+            if (category.toLowerCase() === "culinary") category = "Culinary";
+            
+            baseArticles.unshift({
+              slug: item.slug || item.id,
+              title: item.title,
+              category,
+              date: item.date || "Just Now",
+              excerpt: item.excerpt || "",
+              image: item.image || ""
+            });
+          }
+        });
+        setArticles(baseArticles);
+      } catch (err) {
+        console.error("Intel page CMS load error:", err);
+      }
+    }
+    loadArticles();
+  }, []);
 
   const categories = ["All", "Residential", "Commercial", "Hospitality", "Culinary"];
 
   const filteredArticles = filter === "All"
-    ? ARTICLES
-    : ARTICLES.filter(art => art.category === filter);
+    ? articles
+    : articles.filter(art => art.category === filter);
 
   return (
     <div className="page-wrapper">
@@ -41,20 +75,20 @@ export default function IntelPage() {
         </section>
 
         {/* Featured Hero Article */}
-        {filter === "All" && ARTICLES[0] && (
+        {filter === "All" && articles[0] && (
           <section className="featured-section">
-            <Link href={`/intel/${ARTICLES[0].slug}`} className="featured-card">
+            <Link href={`/intel/${articles[0].slug}`} className="featured-card">
               <div className="featured-image-container">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={ARTICLES[0].image} alt={ARTICLES[0].title} className="featured-image" />
+                <img src={articles[0].image} alt={articles[0].title} className="featured-image" />
                 <div className="featured-overlay"></div>
               </div>
               <div className="featured-content">
-                <span className="featured-tag">{ARTICLES[0].category} &middot; Featured Briefing</span>
-                <h2>{ARTICLES[0].title}</h2>
-                <p className="featured-excerpt">{ARTICLES[0].excerpt}</p>
+                <span className="featured-tag">{articles[0].category} &middot; Featured Briefing</span>
+                <h2>{articles[0].title}</h2>
+                <p className="featured-excerpt">{articles[0].excerpt}</p>
                 <div className="featured-footer">
-                  <span className="featured-date">{ARTICLES[0].date}</span>
+                  <span className="featured-date">{articles[0].date}</span>
                   <span className="featured-link">Read Deep Analysis →</span>
                 </div>
               </div>

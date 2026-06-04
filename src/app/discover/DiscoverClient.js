@@ -14,15 +14,102 @@ export default function DiscoverClient() {
   const searchParams = useSearchParams();
   const typeParam = searchParams.get("type") || "residential";
   const matchedCategory = CATEGORIES.find(c => c.toLowerCase() === typeParam.toLowerCase()) || "Residential";
-  const [properties, setProperties] = useState(DISCOVER_PROPERTIES[matchedCategory]);
-  const [intel, setIntel] = useState(DISCOVER_INTEL[matchedCategory]);
-  const [activeSpotlightId, setActiveSpotlightId] = useState(DISCOVER_PROPERTIES[matchedCategory]?.[0]?.id);
 
+  const [allProperties, setAllProperties] = useState(DISCOVER_PROPERTIES);
+  const [allIntel, setAllIntel] = useState(DISCOVER_INTEL);
+  
+  const [properties, setProperties] = useState([]);
+  const [intel, setIntel] = useState([]);
+  const [activeSpotlightId, setActiveSpotlightId] = useState(null);
+
+  // Fetch live CMS data from Airtable
   useEffect(() => {
-    setProperties(DISCOVER_PROPERTIES[matchedCategory] || []);
-    setIntel(DISCOVER_INTEL[matchedCategory] || []);
-    setActiveSpotlightId(DISCOVER_PROPERTIES[matchedCategory]?.[0]?.id || null);
-  }, [matchedCategory]);
+    async function fetchCMS() {
+      try {
+        const res = await fetch("/api/cms");
+        if (!res.ok) return;
+        const data = await res.json();
+        
+        // 1. Format and prepend properties
+        const airtableProperties = data.properties || [];
+        const nextProps = {
+          Residential: [...DISCOVER_PROPERTIES.Residential],
+          Commercial: [...DISCOVER_PROPERTIES.Commercial],
+          STR: [...DISCOVER_PROPERTIES.STR],
+          Restaurants: [...DISCOVER_PROPERTIES.Restaurants]
+        };
+        
+        airtableProperties.forEach(p => {
+          const cat = p.spaceCategory;
+          if (nextProps[cat]) {
+            if (!nextProps[cat].some(x => x.id === p.id || x.id === p.slug || x.slug === p.slug)) {
+              let density = "";
+              if (cat === "Residential") {
+                density = `${p.beds || 0} Bedrooms · ${p.floor_sqm || 0} sqm`;
+              } else {
+                density = `${p.property_type || "Premium Space"} · ${p.floor_sqm || 0} sqm`;
+              }
+              nextProps[cat].unshift({
+                id: p.slug || p.id,
+                slug: p.slug || p.id,
+                title: p.title,
+                city: p.city || "",
+                location: p.location || "",
+                image: p.image || p.photos?.[0] || "",
+                density
+              });
+            }
+          }
+        });
+        setAllProperties(nextProps);
+        
+        // 2. Format and prepend intel
+        const airtableIntel = data.intel || [];
+        const nextIntel = {
+          Residential: [...DISCOVER_INTEL.Residential],
+          Commercial: [...DISCOVER_INTEL.Commercial],
+          STR: [...DISCOVER_INTEL.STR],
+          Restaurants: [...DISCOVER_INTEL.Restaurants]
+        };
+        
+        airtableIntel.forEach(item => {
+          let cat = item.category || "Residential";
+          if (cat.toLowerCase() === "hospitality") cat = "STR";
+          if (cat.toLowerCase() === "culinary") cat = "Restaurants";
+          
+          if (nextIntel[cat]) {
+            if (!nextIntel[cat].some(x => x.slug === item.slug)) {
+              nextIntel[cat].unshift({
+                id: item.id,
+                slug: item.slug || item.id,
+                category: item.intelType || "BRIEFING",
+                date: item.date || "Just Now",
+                title: item.title,
+                snippet: item.excerpt || ""
+              });
+            }
+          }
+        });
+        setAllIntel(nextIntel);
+      } catch (err) {
+        console.error("Discover page CMS load error:", err);
+      }
+    }
+    
+    fetchCMS();
+  }, []);
+
+  // Update filtered selection on category change or live data load
+  useEffect(() => {
+    const list = allProperties[matchedCategory] || [];
+    setProperties(list);
+    setIntel(allIntel[matchedCategory] || []);
+    setActiveSpotlightId(prev => {
+      // Keep existing active item if it is still in the new list, otherwise select the first item
+      if (prev && list.some(x => x.id === prev)) return prev;
+      return list[0]?.id || null;
+    });
+  }, [matchedCategory, allProperties, allIntel]);
 
   return (
     <div className="discoverLayout">
@@ -112,6 +199,28 @@ export default function DiscoverClient() {
                             <span className="affinityValue">{property.density}</span>
                           </div>
                         </div>
+                      </div>
+
+                      <div style={{ marginTop: "12px", display: "flex", justifyContent: "flex-start" }} onClick={(e) => e.stopPropagation()}>
+                        <Link
+                          href={`/property/${property.slug || property.id}`}
+                          className="discover-briefing-btn"
+                          style={{
+                            display: "inline-block",
+                            fontFamily: "var(--font-mono)",
+                            fontSize: "11px",
+                            color: "var(--accent)",
+                            textDecoration: "none",
+                            border: "1px solid rgba(200, 169, 110, 0.4)",
+                            padding: "6px 14px",
+                            borderRadius: "2px",
+                            transition: "all var(--transition-fast) ease",
+                            textTransform: "uppercase",
+                            letterSpacing: "0.05em"
+                          }}
+                        >
+                          VIEW FULL BRIEFING →
+                        </Link>
                       </div>
 
                       <div className="discover-reaction-buttons-container" style={{ marginTop: "16px", width: "100%" }} onClick={(e) => e.stopPropagation()}>

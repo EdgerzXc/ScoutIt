@@ -619,3 +619,8 @@
     padding: 20px;
   }
 }
+
+.discover-briefing-btn:hover {
+  background: rgba(200, 169, 110, 0.08) !important;
+  border-color: #c8a96e !important;
+}
