@@ -564,7 +564,7 @@ export default function Home() {
                   const locationTag = item.tags[2] ? item.tags[2].toLowerCase() : "";
                   const locMatch = locationTag.includes(q);
                   return titleMatch || locMatch;
-                });
+                }).slice(0, 4);
 
                 if (filtered.length === 0) {
                   return (
@@ -1921,7 +1921,7 @@ export default function Home() {
           transition: opacity 0.3s ease;
           width: 100%;
           margin-top: 12px;
-          padding: 0 20px;
+          padding: 0 8px;
         }
 
         .mini-preview-card:hover .home-card-reaction-overlay {

@@ -150,23 +150,23 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
         }
 
         .reaction-tiles-row.small {
-          gap: 12px;
+          gap: 14px;
           flex-wrap: nowrap;
         }
 
         .reaction-tiles-row.small .shape-wrapper {
-          width: 32px;
-          height: 32px;
+          width: 40px;
+          height: 40px;
         }
 
         .reaction-tiles-row.small .icon-overlay {
-          font-size: 13px;
+          font-size: 16px;
         }
 
         .reaction-tiles-row.small .tile-label {
-          font-size: 7px;
-          letter-spacing: 0.04em;
-          margin-top: 3px;
+          font-size: 8px;
+          letter-spacing: 0.01em;
+          margin-top: 4px;
           white-space: nowrap;
         }
 
