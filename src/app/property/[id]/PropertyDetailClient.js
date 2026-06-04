@@ -189,17 +189,15 @@ export default function PropertyDetailClient({ slug }) {
       <div className="page">
 
         {/* ════ ZONE 1 – PHOTO ════ */}
-        <div className="zone-photo" id="photoZone">
+        <div className="zone-photo" id="photoZone" onClick={() => setIsLightboxOpen(true)}>
 
           {photos.map((url, i) => (
             <div
               key={i}
               className={`photo-slide ${photoMode} ${currentImageIndex === i ? "active" : ""}`}
               style={{ 
-                backgroundImage: `url(${url})`,
-                cursor: currentImageIndex === i ? "zoom-in" : "default"
+                backgroundImage: `url(${url})`
               }}
-              onClick={currentImageIndex === i ? () => setIsLightboxOpen(true) : undefined}
             />
           ))}
 
@@ -234,7 +232,8 @@ export default function PropertyDetailClient({ slug }) {
 
           {/* Go Back Button (Top Left) */}
           <button
-            onClick={() => {
+            onClick={(e) => {
+              e.stopPropagation();
               if (window.history.length > 1) {
                 window.history.back();
               } else {
@@ -247,7 +246,7 @@ export default function PropertyDetailClient({ slug }) {
           </button>
 
           {/* Platform Nav (Top Right - Menu only) */}
-          <nav className="platform-nav" ref={menuRef}>
+          <nav className="platform-nav" ref={menuRef} onClick={(e) => e.stopPropagation()}>
             <button
               className="platform-menu-btn"
               type="button"
@@ -271,15 +270,15 @@ export default function PropertyDetailClient({ slug }) {
           </nav>
 
           {/* Arrows */}
-          <div className="photo-arrow left"  onClick={goPrev}>
+          <div className="photo-arrow left"  onClick={(e) => { e.stopPropagation(); goPrev(); }}>
             <svg className="arrow-svg" viewBox="0 0 14 14"><polyline points="9,2 4,7 9,12"/></svg>
           </div>
-          <div className="photo-arrow right" onClick={goNext}>
+          <div className="photo-arrow right" onClick={(e) => { e.stopPropagation(); goNext(); }}>
             <svg className="arrow-svg" viewBox="0 0 14 14"><polyline points="5,2 10,7 5,12"/></svg>
           </div>
 
           {/* Controls */}
-          <div className="photo-controls">
+          <div className="photo-controls" onClick={(e) => e.stopPropagation()}>
             <div className="photo-controls-left">
               <div className="photo-toggle">
                 <button
