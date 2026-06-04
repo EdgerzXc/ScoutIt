@@ -497,8 +497,8 @@ export default function Home() {
               ))}
             </nav>
             <div className="menu-footer">
-              <Link href="/property/batasan-hills" className="prominent-action-link">
-                View Showcase Space →
+              <Link href={`/property?type=${activePropertyType.toLowerCase()}`} className="prominent-action-link">
+                Begin Exploring →
               </Link>
             </div>
           </div>
@@ -640,7 +640,7 @@ export default function Home() {
               ))}
             </nav>
             <div className="menu-footer">
-              <Link href={`/discover?type=${activeDiscoverType.toLowerCase()}`} className="prominent-action-link">
+              <Link href="/intel" className="prominent-action-link">
                 Begin Exploring →
               </Link>
             </div>
