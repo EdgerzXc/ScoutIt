@@ -90,10 +90,19 @@ export default function WishlistPage() {
                         <ReactionBadge reactionType={item.reaction_type} />
                       </div>
                       <div className="card-body">
-                        <h3 className="card-title">{item.property_title}</h3>
+                        {item.is_broker ? (
+                          <Link href={`/brokers/${item.property_id}`} style={{ textDecoration: "none" }}>
+                            <h3 className="card-title">{item.property_title}</h3>
+                          </Link>
+                        ) : (
+                          <Link href={`/property/${item.property_id}`} style={{ textDecoration: "none" }}>
+                            <h3 className="card-title">{item.property_title}</h3>
+                          </Link>
+                        )}
                         <div className="card-meta">
+                          {item.is_broker && <span className="advisor-badge">ADVISOR</span>}
                           {item.city && <span>{item.city}</span>}
-                          {item.category && (
+                          {item.category && !item.is_broker && (
                             <>
                               <span className="meta-dot">·</span>
                               <span>{item.category}</span>
@@ -273,6 +282,11 @@ export default function WishlistPage() {
           font-weight: 500;
           color: #f0ede8;
           margin: 0 0 4px;
+          transition: color 0.2s ease;
+        }
+
+        .card-title:hover {
+          color: #c8a96e;
         }
 
         .card-meta {
@@ -282,6 +296,19 @@ export default function WishlistPage() {
           display: flex;
           align-items: center;
           gap: 4px;
+        }
+
+        .advisor-badge {
+          background: rgba(200, 169, 110, 0.1);
+          border: 1px solid rgba(200, 169, 110, 0.3);
+          color: #c8a96e;
+          font-size: 8px;
+          font-weight: 700;
+          letter-spacing: 1px;
+          padding: 2px 6px;
+          border-radius: 2px;
+          font-family: var(--font-mono), monospace;
+          margin-right: 6px;
         }
 
         .meta-dot {

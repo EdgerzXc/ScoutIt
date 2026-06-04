@@ -41,7 +41,7 @@ const REACTION_SHAPES = {
   }
 };
 
-export default function ReactionButtons({ propertyId, propertyTitle, category, city, small = false }) {
+export default function ReactionButtons({ propertyId, propertyTitle, category, city, small = false, isBroker = false }) {
   const [activeReaction, setActiveReaction] = useState(null);
   const [showConfirm, setShowConfirm] = useState(false);
 
@@ -86,6 +86,7 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
           category: category,
           city: city,
           reaction_type: type,
+          is_broker: isBroker,
           timestamp: Date.now()
         };
 

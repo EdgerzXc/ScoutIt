@@ -4,6 +4,7 @@ import Header from "@/components/Header";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { getBrokers } from "@/data/mockDb";
+import ReactionButtons from "@/components/ReactionButtons";
 import "../property/property.css";
 
 // ── Tier label → number map (mirrors airtable.js) ──────────────
@@ -332,6 +333,16 @@ export default function BrokersPage() {
                         <p className="broker-title">{broker.title}</p>
                         <p className="broker-specialty">Specialty: <span>{broker.specialty}</span></p>
                         <p className="broker-bio">{broker.bio}</p>
+                        <div className="broker-reactions-wrap" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+                          <ReactionButtons
+                            propertyId={broker.id}
+                            propertyTitle={broker.name}
+                            category="Advisor"
+                            city={broker.location}
+                            small={true}
+                            isBroker={true}
+                          />
+                        </div>
                         <div className="broker-footer">
                           <div className="broker-stats">
                             <span className="stat-value" style={{ fontSize: "12px" }}>{broker.closures}</span>
@@ -603,8 +614,13 @@ export default function BrokersPage() {
           font-size: 14px;
           line-height: 1.6;
           color: var(--text-secondary);
-          margin-bottom: 32px;
+          margin-bottom: 16px;
           flex: 1;
+        }
+
+        .broker-reactions-wrap {
+          margin-top: auto;
+          margin-bottom: 24px;
         }
 
         .broker-footer {

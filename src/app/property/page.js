@@ -374,14 +374,16 @@ function PropertyDirectoryContent() {
                           {p.floor_sqm > 0 && <span className="property-spec-badge">{p.floor_sqm} sqm</span>}
                         </div>
 
-                        <div className="property-card-footer" onClick={(e) => e.stopPropagation()}>
-                          <ReactionButtons
-                            propertyId={p.id}
-                            propertyTitle={p.title}
-                            category={p.spaceCategory}
-                            city={p.city}
-                            small={true}
-                          />
+                        <div className="property-card-footer">
+                          <div onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+                            <ReactionButtons
+                              propertyId={p.id}
+                              propertyTitle={p.title}
+                              category={p.spaceCategory}
+                              city={p.city}
+                              small={true}
+                            />
+                          </div>
                           <span className="property-action-btn">Enter Showcase →</span>
                         </div>
                       </div>
