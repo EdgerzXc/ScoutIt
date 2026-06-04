@@ -2,31 +2,68 @@
 
 import Header from "@/components/Header";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { getArticles, getProperties } from "@/data/mockDb";
 
-import { getArticles } from "@/data/mockDb";
-import { useEffect } from "react";
+const MOCK_CATEGORIES = {
+  "batasan-hills": "Residential",
+  "aurelia-residences": "Residential",
+  "the-estate-makati": "Residential",
+  "gridwork-studio": "Commercial",
+  "zuellig-building": "Commercial",
+  "arthaland-century-pacific": "Commercial",
+  "pacific-edge-villa": "STR",
+  "siargao-tropical-villa": "STR",
+  "palawan-eco-retreat": "STR",
+  "gallery-by-chele": "Restaurants",
+  "antonios-tagaytay": "Restaurants"
+};
 
 export default function IntelPage() {
+  const router = useRouter();
   const [filter, setFilter] = useState("All");
+  const [searchQuery, setSearchQuery] = useState("");
   const [articles, setArticles] = useState(getArticles());
+  const [propertiesList, setPropertiesList] = useState([]);
 
   useEffect(() => {
-    async function loadArticles() {
+    async function loadCMSData() {
       try {
         const res = await fetch("/api/cms");
-        if (!res.ok) return;
+        if (!res.ok) throw new Error();
         const data = await res.json();
-        
+
+        // 1. Setup properties for asset back-linking
+        const airtableProperties = data.properties || [];
+        const baseProperties = getProperties().map(p => ({
+          slug: p.slug,
+          title: p.title,
+          city: p.city,
+          spaceCategory: MOCK_CATEGORIES[p.slug] || "Residential"
+        }));
+        const mergedProperties = [...baseProperties];
+        airtableProperties.forEach(p => {
+          if (!mergedProperties.some(x => x.slug === p.slug)) {
+            mergedProperties.push({
+              slug: p.slug || p.id,
+              title: p.title,
+              city: p.city || "",
+              spaceCategory: p.spaceCategory || "Residential"
+            });
+          }
+        });
+        setPropertiesList(mergedProperties);
+
+        // 2. Setup intel reports
         const airtableIntel = data.intel || [];
         const baseArticles = [...getArticles()];
-        
         airtableIntel.forEach(item => {
           if (!baseArticles.some(x => x.slug === item.slug)) {
             let category = item.category || "Residential";
             if (category.toLowerCase() === "hospitality") category = "Hospitality";
             if (category.toLowerCase() === "culinary") category = "Culinary";
-            
+
             baseArticles.unshift({
               slug: item.slug || item.id,
               title: item.title,
@@ -42,14 +79,51 @@ export default function IntelPage() {
         console.error("Intel page CMS load error:", err);
       }
     }
-    loadArticles();
+    loadCMSData();
   }, []);
 
   const categories = ["All", "Residential", "Commercial", "Hospitality", "Culinary"];
 
-  const filteredArticles = filter === "All"
-    ? articles
-    : articles.filter(art => art.category === filter);
+  // Match and fetch property link dynamically
+  const getLinkedProperty = (article) => {
+    // Match by exact city name
+    if (article.city) {
+      const match = propertiesList.find(p => p.city.toLowerCase().includes(article.city.toLowerCase()));
+      if (match) return match;
+    }
+    // Match by slug keywords
+    const matchSlug = propertiesList.find(p => article.slug.toLowerCase().includes(p.slug.toLowerCase()) || p.slug.toLowerCase().includes(article.slug.toLowerCase()));
+    if (matchSlug) return matchSlug;
+
+    // Match by category mapping
+    let mappedCat = article.category || "";
+    if (mappedCat.toLowerCase() === "hospitality") mappedCat = "STR";
+    if (mappedCat.toLowerCase() === "culinary") mappedCat = "Restaurants";
+    const matchCat = propertiesList.find(p => p.spaceCategory.toLowerCase() === mappedCat.toLowerCase());
+    return matchCat || null;
+  };
+
+  // Filter and search articles dynamically
+  const filteredArticles = articles.filter(art => {
+    // Category check
+    if (filter !== "All" && art.category !== filter) {
+      return false;
+    }
+    // Search query check
+    if (searchQuery.trim() !== "") {
+      const q = searchQuery.toLowerCase();
+      const matchTitle = art.title.toLowerCase().includes(q);
+      const matchExcerpt = art.excerpt && art.excerpt.toLowerCase().includes(q);
+      const matchCat = art.category.toLowerCase().includes(q);
+      return matchTitle || matchExcerpt || matchCat;
+    }
+    return true;
+  });
+
+  // Top picks for split hero
+  const featuredArticle = filteredArticles[0];
+  const trendingArticles = filteredArticles.slice(1, 4);
+  const remainingArticles = filteredArticles.slice(featuredArticle ? 1 : 0);
 
   return (
     <div className="page-wrapper">
@@ -61,62 +135,123 @@ export default function IntelPage() {
           <p className="page-subtitle">Tracing architectural shifts, spatial design, and development movements.</p>
         </header>
 
-        {/* Filter Navigation */}
-        <section className="filter-section">
-          {categories.map(cat => (
-            <button
-              key={cat}
-              onClick={() => setFilter(cat)}
-              className={`filter-btn ${filter === cat ? "active" : ""}`}
-            >
-              {cat}
-            </button>
-          ))}
-        </section>
-
-        {/* Featured Hero Article */}
-        {filter === "All" && articles[0] && (
-          <section className="featured-section">
-            <Link href={`/intel/${articles[0].slug}`} className="featured-card">
-              <div className="featured-image-container">
+        {/* Featured Split Hero (Only shown when filter is All and search is empty) */}
+        {filter === "All" && searchQuery.trim() === "" && featuredArticle && (
+          <section className="featured-trending-split">
+            {/* Left Featured Card */}
+            <Link href={`/intel/${featuredArticle.slug}`} className="featured-card-new">
+              <div className="featured-image-wrapper">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={articles[0].image} alt={articles[0].title} className="featured-image" />
-                <div className="featured-overlay"></div>
+                <img src={featuredArticle.image} alt={featuredArticle.title} className="featured-image-new" />
+                <div className="featured-overlay-new"></div>
               </div>
-              <div className="featured-content">
-                <span className="featured-tag">{articles[0].category} &middot; Featured Briefing</span>
-                <h2>{articles[0].title}</h2>
-                <p className="featured-excerpt">{articles[0].excerpt}</p>
-                <div className="featured-footer">
-                  <span className="featured-date">{articles[0].date}</span>
-                  <span className="featured-link">Read Deep Analysis →</span>
+              <div className="featured-content-new">
+                <span className="featured-tag-new">{featuredArticle.category} &middot; Featured Briefing</span>
+                <h2>{featuredArticle.title}</h2>
+                <p className="featured-excerpt-new">{featuredArticle.excerpt}</p>
+                <div className="featured-footer-new">
+                  <span className="featured-date-new">{featuredArticle.date}</span>
+                  <span className="featured-link-new">Read Deep Analysis →</span>
                 </div>
               </div>
             </Link>
+
+            {/* Right Trending List */}
+            <div className="trending-list">
+              <span className="vector-label" style={{ marginBottom: "8px", display: "block" }}>Trending Briefings</span>
+              {trendingArticles.length > 0 ? (
+                trendingArticles.map((art, idx) => (
+                  <Link href={`/intel/${art.slug}`} key={art.slug} className="trending-dispatch-card">
+                    <span className="trending-meta">0{idx + 1} &middot; {art.category} &middot; {art.date}</span>
+                    <h3 className="trending-title">{art.title}</h3>
+                    <p className="trending-excerpt">{art.excerpt}</p>
+                  </Link>
+                ))
+              ) : (
+                <div className="trending-dispatch-card" style={{ justifyContent: "center", alignItems: "center", height: "100%" }}>
+                  <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>No trending dispatches.</span>
+                </div>
+              )}
+            </div>
           </section>
         )}
 
-        {/* Roster Grid */}
+        {/* Search & Filter Section */}
+        <section className="controls-section">
+          <div className="search-bar-wrapper">
+            <input
+              type="text"
+              className="articles-search-input"
+              placeholder="SEARCH BRIEFINGS BY TOPIC, HEADLINE, OR DESIGN KEYWORDS..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <div className="filter-tabs-wrapper">
+            {categories.map(cat => (
+              <button
+                key={cat}
+                onClick={() => setFilter(cat)}
+                className={`filter-btn ${filter === cat ? "active" : ""}`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {/* Articles Feed */}
         <section className="grid-container">
           <div className="articles-grid">
-            {filteredArticles.slice(filter === "All" ? 1 : 0).map((art) => (
-              <Link href={`/intel/${art.slug}`} key={art.slug} className="article-card">
-                <div className="article-image-container">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={art.image} alt={art.title} className="article-image" />
-                  <div className="image-overlay"></div>
-                </div>
-                <div className="article-content">
-                  <div className="article-header">
-                    <span className="article-category">{art.category}</span>
-                    <span className="article-date">{art.date}</span>
+            {remainingArticles.length > 0 ? (
+              remainingArticles.map((art) => (
+                <Link href={`/intel/${art.slug}`} key={art.slug} className="article-card">
+                  <div className="article-image-container">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={art.image} alt={art.title} className="article-image" />
+                    <div className="image-overlay"></div>
                   </div>
-                  <h3 className="article-title">{art.title}</h3>
-                  <p className="article-excerpt">{art.excerpt}</p>
-                  <span className="read-more-btn">Read Briefing →</span>
-                </div>
-              </Link>
-            ))}
+                  <div className="article-content">
+                    <div className="article-header">
+                      <span className="article-category">{art.category}</span>
+                      <span className="article-date">{art.date}</span>
+                    </div>
+                    <h3 className="article-title">{art.title}</h3>
+                    <p className="article-excerpt">{art.excerpt}</p>
+                    
+                    {/* Featured Asset Back-link Tag */}
+                    {(() => {
+                      const linkedProp = getLinkedProperty(art);
+                      if (!linkedProp) return null;
+                      return (
+                        <div style={{ marginTop: "12px", borderTop: "1px dashed rgba(255,255,255,0.08)", paddingTop: "12px" }}>
+                          <span style={{ fontSize: "10px", fontFamily: "var(--font-mono)", color: "var(--accent)" }}>
+                            FEATURED SPACE:{" "}
+                            <span 
+                              onClick={(e) => { 
+                                e.preventDefault(); 
+                                e.stopPropagation(); 
+                                router.push(`/property/${linkedProp.slug}`); 
+                              }} 
+                              style={{ textDecoration: "underline", cursor: "pointer" }}
+                            >
+                              {linkedProp.title}
+                            </span>
+                          </span>
+                        </div>
+                      );
+                    })()}
+
+                    <span className="read-more-btn" style={{ marginTop: "16px", display: "inline-block" }}>Read Briefing →</span>
+                  </div>
+                </Link>
+              ))
+            ) : (
+              <div className="articles-empty-state" style={{ gridColumn: "1 / -1", textAlign: "center", padding: "60px 20px" }}>
+                <h3 style={{ fontFamily: "var(--font-display)", color: "#fff", fontSize: "20px" }}>No Briefings Found</h3>
+                <p style={{ color: "var(--text-secondary)", fontSize: "12px", marginTop: "8px" }}>Try refining your search terms or selecting a different sector filter.</p>
+              </div>
+            )}
           </div>
         </section>
       </main>
@@ -136,7 +271,7 @@ export default function IntelPage() {
 
         .page-header {
           text-align: center;
-          margin-bottom: 40px;
+          margin-bottom: 48px;
         }
 
         .vector-label {
@@ -160,13 +295,197 @@ export default function IntelPage() {
           letter-spacing: 0.02em;
         }
 
-        .filter-section {
+        /* Split Hero */
+        .featured-trending-split {
+          display: grid;
+          grid-template-columns: 1.6fr 1fr;
+          gap: 32px;
+          margin-bottom: 64px;
+        }
+
+        .featured-card-new {
           display: flex;
-          justify-content: center;
+          flex-direction: column;
+          background: var(--surface);
+          border: 1px solid var(--border-solid);
+          border-radius: var(--radius-md);
+          overflow: hidden;
+          transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+          text-decoration: none;
+          height: 480px;
+        }
+
+        .featured-card-new:hover {
+          border-color: var(--accent-border);
+          box-shadow: var(--shadow-lg);
+        }
+
+        .featured-image-wrapper {
+          height: 240px;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .featured-image-new {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          filter: grayscale(40%) contrast(1.1);
+          transition: transform var(--transition-slow), filter var(--transition-slow);
+        }
+
+        .featured-card-new:hover .featured-image-new {
+          transform: scale(1.03);
+          filter: grayscale(0%) contrast(1.1);
+        }
+
+        .featured-overlay-new {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(to top, var(--surface) 0%, transparent 100%);
+        }
+
+        .featured-content-new {
+          padding: 24px;
+          display: flex;
+          flex-direction: column;
+          flex-grow: 1;
+        }
+
+        .featured-tag-new {
+          font-family: var(--font-mono);
+          font-size: 10px;
+          color: var(--accent);
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+          margin-bottom: 12px;
+        }
+
+        .featured-content-new h2 {
+          font-family: var(--font-display);
+          font-size: 24px;
+          color: #fff;
+          margin-bottom: 12px;
+          line-height: 1.3;
+        }
+
+        .featured-excerpt-new {
+          font-size: 13px;
+          line-height: 1.6;
+          color: var(--text-secondary);
+          margin-bottom: 20px;
+          flex-grow: 1;
+        }
+
+        .featured-footer-new {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          border-top: 1px solid rgba(255, 255, 255, 0.05);
+          padding-top: 16px;
+        }
+
+        .featured-date-new {
+          font-size: 12px;
+          color: var(--text-muted);
+        }
+
+        .featured-link-new {
+          font-size: 12px;
+          font-weight: bold;
+          color: var(--accent);
+        }
+
+        .trending-list {
+          display: flex;
+          flex-direction: column;
           gap: 16px;
-          margin-bottom: 56px;
-          border-bottom: 1px solid var(--border-solid);
-          padding-bottom: 16px;
+        }
+
+        .trending-dispatch-card {
+          background: var(--surface);
+          border: 1px solid var(--border-solid);
+          border-radius: var(--radius-md);
+          padding: 20px;
+          text-decoration: none;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          transition: all var(--transition-fast);
+          flex-grow: 1;
+        }
+
+        .trending-dispatch-card:hover {
+          border-color: var(--accent-border);
+          transform: translateX(4px);
+          box-shadow: var(--shadow-sm);
+        }
+
+        .trending-meta {
+          font-family: var(--font-mono);
+          font-size: 9px;
+          color: var(--accent);
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          margin-bottom: 8px;
+        }
+
+        .trending-title {
+          font-family: var(--font-display);
+          font-size: 15px;
+          color: #fff;
+          line-height: 1.35;
+          margin-bottom: 6px;
+        }
+
+        .trending-excerpt {
+          font-size: 11px;
+          color: var(--text-secondary);
+          line-height: 1.45;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+
+        /* Controls Section */
+        .controls-section {
+          background: var(--surface);
+          border: 1px solid var(--border-solid);
+          border-radius: var(--radius-md);
+          padding: 24px;
+          margin-bottom: 48px;
+          display: flex;
+          flex-direction: column;
+          gap: 20px;
+        }
+
+        .search-bar-wrapper {
+          width: 100%;
+        }
+
+        .articles-search-input {
+          width: 100%;
+          background: #0e0e0e;
+          border: 1px solid var(--border-solid);
+          border-radius: var(--radius-sm);
+          padding: 14px 20px;
+          font-size: 13px;
+          color: #fff;
+          font-family: var(--font-mono);
+          transition: border-color var(--transition-fast);
+        }
+
+        .articles-search-input:focus {
+          outline: none;
+          border-color: var(--accent);
+        }
+
+        .filter-tabs-wrapper {
+          display: flex;
+          justify-content: flex-start;
+          gap: 12px;
+          flex-wrap: wrap;
         }
 
         .filter-btn {
@@ -193,105 +512,6 @@ export default function IntelPage() {
           background: rgba(200, 169, 110, 0.08);
         }
 
-        /* Featured Card */
-        .featured-section {
-          margin-bottom: 64px;
-        }
-
-        .featured-card {
-          display: flex;
-          background: var(--surface);
-          border: 1px solid var(--border-solid);
-          border-radius: var(--radius-md);
-          overflow: hidden;
-          transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
-          text-decoration: none;
-          height: 380px;
-        }
-
-        .featured-card:hover {
-          border-color: var(--accent-border);
-          box-shadow: var(--shadow-lg);
-        }
-
-        .featured-image-container {
-          flex: 1.2;
-          position: relative;
-          overflow: hidden;
-          height: 100%;
-        }
-
-        .featured-image {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          filter: grayscale(40%) contrast(1.1);
-          transition: transform var(--transition-slow), filter var(--transition-slow);
-        }
-
-        .featured-card:hover .featured-image {
-          transform: scale(1.03);
-          filter: grayscale(0%) contrast(1.1);
-        }
-
-        .featured-overlay {
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(to right, transparent 60%, var(--surface) 100%);
-        }
-
-        .featured-content {
-          flex: 1;
-          padding: 40px;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-        }
-
-        .featured-tag {
-          font-family: var(--font-mono);
-          font-size: 10px;
-          color: var(--accent);
-          text-transform: uppercase;
-          letter-spacing: 0.1em;
-          margin-bottom: 16px;
-        }
-
-        .featured-content h2 {
-          font-family: var(--font-display);
-          font-size: 32px;
-          color: #fff;
-          margin-bottom: 16px;
-          line-height: 1.2;
-        }
-
-        .featured-excerpt {
-          font-size: 14px;
-          line-height: 1.7;
-          color: var(--text-secondary);
-          margin-bottom: 32px;
-        }
-
-        .featured-footer {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          border-top: 1px solid var(--border-solid);
-          padding-top: 16px;
-        }
-
-        .featured-date {
-          font-size: 12px;
-          color: var(--text-muted);
-        }
-
-        .featured-link {
-          font-size: 12px;
-          font-weight: bold;
-          color: var(--accent);
-          letter-spacing: 0.05em;
-        }
-
         /* Grid */
         .articles-grid {
           display: grid;
@@ -303,15 +523,12 @@ export default function IntelPage() {
           .articles-grid {
             grid-template-columns: repeat(2, 1fr);
           }
-          .featured-card {
-            flex-direction: column;
+          .featured-trending-split {
+            grid-template-columns: 1fr;
+            gap: 24px;
+          }
+          .featured-card-new {
             height: auto;
-          }
-          .featured-image-container {
-            height: 240px;
-          }
-          .featured-overlay {
-            background: linear-gradient(to top, var(--surface) 0%, transparent 100%);
           }
         }
 
@@ -329,6 +546,7 @@ export default function IntelPage() {
           display: flex;
           flex-direction: column;
           transition: transform var(--transition-fast), border-color var(--transition-fast);
+          text-decoration: none;
         }
 
         .article-card:hover {

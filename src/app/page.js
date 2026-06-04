@@ -8,7 +8,8 @@ import {
   SPACE_STARS, 
   getDISCOVERY_FEED, 
   getDISCOVER_HUBS, 
-  getCATEGORY_PREVIEWS 
+  getCATEGORY_PREVIEWS,
+  getArticles
 } from "@/data/mockDb";
 
 export default function Home() {
@@ -122,11 +123,87 @@ export default function Home() {
             }
           }
         });
+
+        // Dynamic Spotlight Match Logic
+        const allArticles = [
+          ...airtableIntel.map(item => {
+            let category = item.category || "Residential";
+            if (category.toLowerCase() === "hospitality") category = "STR";
+            if (category.toLowerCase() === "culinary") category = "Restaurants";
+            return { ...item, category };
+          }),
+          ...getArticles().map(art => {
+            let category = art.category || "Residential";
+            if (category.toLowerCase() === "hospitality") category = "STR";
+            if (category.toLowerCase() === "culinary") category = "Restaurants";
+            return { slug: art.slug, title: art.title, category, excerpt: art.excerpt };
+          })
+        ];
+
+        const findNewsForSpotlight = (spot, category) => {
+          const matchCity = allArticles.find(art => {
+            const spotLoc = spot.location || "";
+            const artCity = art.city || "";
+            return spotLoc && artCity && (spotLoc.toLowerCase().includes(artCity.toLowerCase()) || artCity.toLowerCase().includes(spotLoc.toLowerCase()));
+          });
+          if (matchCity) return matchCity;
+          
+          const matchCategory = allArticles.find(art => art.category === category);
+          return matchCategory || null;
+        };
+
+        for (const cat in updatedFeed) {
+          updatedFeed[cat].spotlights = updatedFeed[cat].spotlights.map(spot => {
+            const news = findNewsForSpotlight(spot, cat);
+            return {
+              ...spot,
+              newsTitle: news ? news.title : null,
+              newsSlug: news ? news.slug : null,
+              newsExcerpt: news ? (news.excerpt || news.lead || "") : null
+            };
+          });
+        }
         
         setDiscoveryFeed(updatedFeed);
         
       } catch (err) {
         console.error("Failed to load CMS data on homepage:", err);
+        // Fallback matching for base feed
+        const baseFeed = getDISCOVERY_FEED();
+        const updatedFeed = {
+          Residential: { ...baseFeed.Residential, spotlights: [...baseFeed.Residential.spotlights], news: [...baseFeed.Residential.news], collections: [...baseFeed.Residential.collections] },
+          Commercial: { ...baseFeed.Commercial, spotlights: [...baseFeed.Commercial.spotlights], news: [...baseFeed.Commercial.news], collections: [...baseFeed.Commercial.collections] },
+          STR: { ...baseFeed.STR, spotlights: [...baseFeed.STR.spotlights], news: [...baseFeed.STR.news], collections: [...baseFeed.STR.collections] },
+          Restaurants: { ...baseFeed.Restaurants, spotlights: [...baseFeed.Restaurants.spotlights], news: [...baseFeed.Restaurants.news], collections: [...baseFeed.Restaurants.collections] },
+        };
+        const allArticles = getArticles().map(art => {
+          let category = art.category || "Residential";
+          if (category.toLowerCase() === "hospitality") category = "STR";
+          if (category.toLowerCase() === "culinary") category = "Restaurants";
+          return { slug: art.slug, title: art.title, category, excerpt: art.excerpt };
+        });
+        const findNewsForSpotlight = (spot, category) => {
+          const matchCity = allArticles.find(art => {
+            const spotLoc = spot.location || "";
+            const artCity = art.city || "";
+            return spotLoc && artCity && (spotLoc.toLowerCase().includes(artCity.toLowerCase()) || artCity.toLowerCase().includes(spotLoc.toLowerCase()));
+          });
+          if (matchCity) return matchCity;
+          const matchCategory = allArticles.find(art => art.category === category);
+          return matchCategory || null;
+        };
+        for (const cat in updatedFeed) {
+          updatedFeed[cat].spotlights = updatedFeed[cat].spotlights.map(spot => {
+            const news = findNewsForSpotlight(spot, cat);
+            return {
+              ...spot,
+              newsTitle: news ? news.title : null,
+              newsSlug: news ? news.slug : null,
+              newsExcerpt: news ? (news.excerpt || "") : null
+            };
+          });
+        }
+        setDiscoveryFeed(updatedFeed);
       }
     }
     
@@ -588,10 +665,41 @@ export default function Home() {
                         <img src={spot.image} alt={spot.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         <span style={{ position: 'absolute', bottom: '12px', left: '12px', background: 'rgba(0,0,0,0.7)', color: 'var(--accent)', fontFamily: 'var(--font-mono)', fontSize: '10px', padding: '4px 8px', border: '1px solid var(--accent-border)', borderRadius: '2px' }}>{spot.style}</span>
                       </div>
-                      <div style={{ padding: '16px' }}>
+                      <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
                         <h5 style={{ fontSize: '16px', fontWeight: '500', color: '#fff', marginBottom: '4px', fontFamily: 'var(--font-display)' }}>{spot.title}</h5>
                         <span style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block', marginBottom: '8px' }}>Location: {spot.location}</span>
-                        <p style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>{spot.desc}</p>
+                        <p style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.5', marginBottom: '12px', flexGrow: 1 }}>{spot.desc}</p>
+                        
+                        {/* Asset-Intel Bridge News Segment */}
+                        {spot.newsTitle && (
+                          <div 
+                            style={{ 
+                              borderTop: "1px dashed rgba(255,255,255,0.08)", 
+                              paddingTop: "12px", 
+                              marginTop: "12px" 
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <span style={{ fontFamily: "var(--font-mono)", fontSize: "9px", color: "var(--accent)", textTransform: "uppercase", display: "block", marginBottom: "4px" }}>Linked Intelligence</span>
+                            <Link 
+                              href={`/intel/${spot.newsSlug}`}
+                              style={{ 
+                                fontSize: "12px", 
+                                color: "#fff", 
+                                fontWeight: "600",
+                                display: "block",
+                                lineHeight: "1.3",
+                                textDecoration: "underline",
+                                marginBottom: "4px"
+                              }}
+                            >
+                              {spot.newsTitle}
+                            </Link>
+                            <p style={{ fontSize: "11px", color: "var(--text-secondary)", lineHeight: "1.4", margin: 0, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+                              {spot.newsExcerpt}
+                            </p>
+                          </div>
+                        )}
                       </div>
                     </Link>
                   ))}
