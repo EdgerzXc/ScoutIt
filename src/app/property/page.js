@@ -18,10 +18,15 @@ const MOCK_CATEGORIES = {
   "arthaland-century-pacific": "Commercial",
   "pacific-edge-villa": "STR",
   "siargao-tropical-villa": "STR",
+  "boracay-bamboo-hideaway": "STR",
   "palawan-eco-retreat": "Hospitality",
+  "coron-island-resort": "Hospitality",
+  "bohol-treehouse-lodge": "Hospitality",
   "gallery-by-chele": "Restaurants",
   "antonios-tagaytay": "Restaurants",
-  "the-glasshouse-bgc": "Venues"
+  "the-glasshouse-bgc": "Venues",
+  "solaire-grand-ballroom": "Venues",
+  "sky-pavilion-makati": "Venues"
 };
 
 function PropertyDirectoryContent() {
