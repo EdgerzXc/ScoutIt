@@ -150,21 +150,23 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
         }
 
         .reaction-tiles-row.small {
-          gap: 12px;
+          gap: 16px;
           flex-wrap: nowrap;
+          width: 100%;
+          justify-content: space-between;
         }
 
         .reaction-tiles-row.small .shape-wrapper {
-          width: 46px;
-          height: 46px;
+          width: 52px;
+          height: 52px;
         }
 
         .reaction-tiles-row.small .icon-overlay {
-          font-size: 18px;
+          font-size: 22px;
         }
 
         .reaction-tiles-row.small .tile-label {
-          font-size: 8.5px;
+          font-size: 9px;
           letter-spacing: 0.01em;
           margin-top: 4px;
           white-space: nowrap;
@@ -209,7 +211,7 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
         .icon-overlay {
           position: relative;
           z-index: 2;
-          font-size: 18px;
+          font-size: 22px;
           opacity: 0.85;
           color: #8a8a8a;
           user-select: none;
@@ -277,7 +279,7 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
             height: 52px;
           }
           .icon-overlay {
-            font-size: 16px;
+            font-size: 20px;
           }
           .tile-label {
             font-size: 9px;
