@@ -40,7 +40,7 @@ export async function fetchBrokers(apiKey, baseId) {
   const records = await fetchTable("BROKERS_CMS", apiKey, baseId);
 
   return records
-    .filter((r) => r.fields.Approved_For_Live_Site) // only published brokers
+    .filter((r) => r.fields.Approved_For_Live_Site && r.fields.Name) // only published brokers with a name
     .map((r) => {
       const f = r.fields;
       const labelRaw = f.SubscriptionLabel || "Bronze";
@@ -87,7 +87,7 @@ export async function fetchProperties(apiKey, baseId) {
   const records = await fetchTable("PROPERTIES_CMS", apiKey, baseId);
 
   return records
-    .filter((r) => r.fields.Approved_For_ScoutIt) // only approved properties
+    .filter((r) => r.fields.Approved_For_ScoutIt && r.fields.Title && r.fields.Slug) // only approved properties with a title and slug
     .map((r) => {
       const f = r.fields;
 
@@ -155,7 +155,7 @@ export async function fetchIntel(apiKey, baseId) {
   const records = await fetchTable("INTEL_CMS", apiKey, baseId);
 
   return records
-    .filter((r) => r.fields.Approved_For_Live_Site)
+    .filter((r) => r.fields.Approved_For_Live_Site && r.fields.Title && r.fields.Slug)
     .map((r) => {
       const f = r.fields;
       return {
