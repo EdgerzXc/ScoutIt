@@ -678,9 +678,27 @@ export default function PropertyDetailClient({ slug }) {
                 <tr><td>Furnishing</td><td>{d.furnishing}</td></tr>
                 <tr><td>Year built</td><td>{d.year_built}</td></tr>
                 <tr><td>Title status</td><td>{d.title_status}</td></tr>
+                <tr><td>Asking price</td><td style={{color:"var(--text-muted)", fontStyle:"italic"}}>Price Upon Request</td></tr>
+                <tr><td>Price per sqm</td><td style={{color:"var(--text-muted)", fontStyle:"italic"}}>Inquire with broker</td></tr>
               </tbody></table>
 
               <div className="accordion">
+                <div className={`accordion-item ${accUniverse === "priceval" ? "open" : ""}`}>
+                  <div className="accordion-header" onClick={() => tog(setAccUniverse, accUniverse, "priceval")}>
+                    <div className="accordion-left">
+                      <div className="accordion-icon-wrap"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"><path d="M7 1v12M4 4h4.5a2.5 2.5 0 010 5H4"/><path d="M4 3h5"/></svg></div>
+                      <div><div className="accordion-title">Price vs Value</div><div className="accordion-subtitle">Investment positioning context</div></div>
+                    </div>
+                    <div className="accordion-right"><span className="accordion-tag tag-neutral">On Request</span><div className="accordion-chevron"/></div>
+                  </div>
+                  <div className="accordion-body"><div className="accordion-content">
+                    <div className="detail-row"><span className="detail-key">Asking price</span><span className="detail-val" style={{color:"var(--text-muted)", fontStyle:"italic"}}>Contact broker to confirm</span></div>
+                    <div className="detail-row"><span className="detail-key">Price per sqm</span><span className="detail-val" style={{color:"var(--text-muted)", fontStyle:"italic"}}>Area range estimate only</span></div>
+                    <div className="detail-row"><span className="detail-key">Sqm range est.</span><span className="detail-val">Est. ₱180K–₱220K / sqm range</span></div>
+                    <div className="detail-row"><span className="detail-key">Negotiation room</span><span className="detail-val green">Yes · Open</span></div>
+                    <div className="detail-row"><span className="detail-key">How to confirm</span><span className="detail-val">Inquire directly with listed advisor</span></div>
+                  </div></div>
+                </div>
                 <div className={`accordion-item ${accUniverse === "resale" ? "open" : ""}`}>
                   <div className="accordion-header" onClick={() => tog(setAccUniverse, accUniverse, "resale")}>
                     <div className="accordion-left">
@@ -691,8 +709,8 @@ export default function PropertyDetailClient({ slug }) {
                   </div>
                   <div className="accordion-body"><div className="accordion-content">
                     <div className="detail-row"><span className="detail-key">Resale potential</span><span className="detail-val green">High · Growing area</span></div>
-                    <div className="detail-row"><span className="detail-key">Rental yield est.</span><span className="detail-val">Contact broker for details</span></div>
-                    <div className="detail-row"><span className="detail-key">Monthly rent est.</span><span className="detail-val">Contact broker for details</span></div>
+                    <div className="detail-row"><span className="detail-key">Rental yield est.</span><span className="detail-val">~5–6% annually</span></div>
+                    <div className="detail-row"><span className="detail-key">Monthly rent est.</span><span className="detail-val">₱60,000 / month</span></div>
                     <div className="detail-row"><span className="detail-key">MRT-7 impact</span><span className="detail-val green">Positive outlook</span></div>
                     <div className="detail-row"><span className="detail-key">Area trend</span><span className="detail-val green">Appreciating since 2022</span></div>
                   </div></div>
@@ -718,11 +736,34 @@ export default function PropertyDetailClient({ slug }) {
           <div className={`chapter-panel ${activeTab === "yourmove" ? "active" : ""}`} id="panel-yourmove">
             <div className="panel-content">
               <div className="chapter-tag"><div className="tag-line"/><span className="tag-text">Your Move</span></div>
-              <h2 className="display-heading" style={{fontFamily:"var(--font-display)", fontWeight: 300}}>
-                When you're ready, we'll make the introduction.
-              </h2>
-              
-              <div className="reactions-container" style={{marginTop:"16px", display:"flex", flexDirection:"column", gap:"10px"}}>
+
+              {/* Price Upon Inquiry block — replaces any specific price hero figure */}
+              <div style={{
+                margin: "20px 0 24px",
+                padding: "20px 24px",
+                background: "var(--surface)",
+                border: "0.5px solid var(--border-mid)",
+                borderRadius: "6px",
+                display: "flex",
+                flexDirection: "column",
+                gap: "6px"
+              }}>
+                <div style={{
+                  fontFamily: "var(--font-display)",
+                  fontSize: "clamp(22px, 3vw, 30px)",
+                  fontWeight: 300,
+                  letterSpacing: "0.04em",
+                  color: "var(--text-primary)"
+                }}>Price Upon Inquiry</div>
+                <div style={{
+                  fontSize: "12px",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.12em",
+                  color: "var(--text-muted)"
+                }}>Confirmed directly with the listed advisor</div>
+              </div>
+
+              <div className="reactions-container" style={{marginTop:"0", display:"flex", flexDirection:"column", gap:"10px"}}>
                 <p style={{ fontSize: "12px", textTransform: "uppercase", letterSpacing: "2px", color: "#8a8a8a", marginBottom: "16px" }}>
                   HOW DOES THIS SPACE MAKE YOU FEEL?
                 </p>
@@ -734,7 +775,13 @@ export default function PropertyDetailClient({ slug }) {
                 />
               </div>
 
-              <div className="where-category" style={{marginTop:"16px"}}>
+              {/* HOA standalone fact row */}
+              <div className="detail-row" style={{marginTop: "16px"}}>
+                <span className="detail-key">HOA dues</span>
+                <span className="detail-val">None</span>
+              </div>
+
+              <div className="where-category" style={{marginTop:"20px"}}>
                 <div className="where-cat-label">Assigned Representative</div>
                 <div className="broker-card">
                   <div className="broker-avatar">{brokerInitials}</div>
@@ -747,10 +794,21 @@ export default function PropertyDetailClient({ slug }) {
               </div>
 
               <Link href={`/property/${slug || "batasan-hills"}/brokers`} className="move-cta" style={{textDecoration: "none", marginTop: "16px"}}>
-                Connect with an Authorized Broker →
+                Inquire with Advisor →
               </Link>
 
-              <p style={{fontSize:"15px", color:"#8a8a8a", lineHeight:"1.65", marginTop:"16px"}}>
+              {/* Philippine real estate disclosure compliance notice */}
+              <p style={{
+                fontSize: "11px",
+                color: "var(--text-muted)",
+                lineHeight: "1.7",
+                marginTop: "14px",
+                letterSpacing: "0.02em"
+              }}>
+                Pricing is not displayed on ScoutIt in compliance with Philippine real estate disclosure standards. Contact the listed advisor or owner directly to confirm the current asking price, payment terms, and availability.
+              </p>
+
+              <p style={{fontSize:"15px", color:"#8a8a8a", lineHeight:"1.65", marginTop:"12px"}}>
                 ScoutIt is a spatial intelligence archive. In compliance with R.A. 9646, all site walks, direct inquiries, and purchase offers are facilitated exclusively by licensed, authorized real estate brokers.
               </p>
             </div>
