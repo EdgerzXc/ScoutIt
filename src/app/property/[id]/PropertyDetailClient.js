@@ -6,9 +6,7 @@ import ReactionButtons from "@/components/ReactionButtons";
 import "./property.css";
 
 // ═══════════════════════════════════════════════════
-// LOCAL DATA SLOTS — temporary database
-// Replace with a CMS/API call later by swapping this
-// object with a server fetch or props from page.js
+// DATA — Airtable CMS first, mockDb fallback
 // ═══════════════════════════════════════════════════
 import { getPropertyBySlug } from "@/data/mockDb";
 
@@ -42,6 +40,8 @@ export default function PropertyDetailClient({ slug }) {
   const [photoMode,         setPhotoMode]         = useState("natural");
   const [activeTab,         setActiveTab]         = useState("space");
   const [menuOpen,   setMenuOpen]   = useState(false);
+  const [propertyData, setPropertyData] = useState(null);
+  const [dataLoading,  setDataLoading]  = useState(true);
 
   // Per-panel accordion state (independent per section)
   const [accSpace,    setAccSpace]    = useState(null);
@@ -57,6 +57,32 @@ export default function PropertyDetailClient({ slug }) {
   const scrollStart  = useRef(0);
   const menuRef      = useRef(null);
 
+  // ── Fetch property from Airtable → fallback to mockDb ──
+  useEffect(() => {
+    async function loadProperty() {
+      try {
+        const res  = await fetch("/api/cms");
+        const data = await res.json();
+        if (data.properties && data.properties.length > 0) {
+          const match = data.properties.find(
+            (p) => p.slug && p.slug.toLowerCase() === (slug || "").toLowerCase()
+          );
+          if (match) {
+            // Merge Airtable data over mockDb so missing fields gracefully fall back
+            const mock = getPropertyBySlug(slug);
+            setPropertyData({ ...mock, ...match });
+            setDataLoading(false);
+            return;
+          }
+        }
+      } catch { /* network error — fall through to mockDb */ }
+      // Fallback: use local mockDb
+      setPropertyData(getPropertyBySlug(slug));
+      setDataLoading(false);
+    }
+    loadProperty();
+  }, [slug]);
+
   // Close platform menu on outside click
   useEffect(() => {
     function onClickOutside(e) {
@@ -66,13 +92,32 @@ export default function PropertyDetailClient({ slug }) {
     return () => document.removeEventListener("mousedown", onClickOutside);
   }, []);
 
-  // ── Derived values from local data slots ──────
-  const d           = getPropertyBySlug(slug);   // short alias
-  const photos      = d.photos;
+  // ── Loading guard ─────────────────────────────
+  if (dataLoading || !propertyData) {
+    return (
+      <div style={{
+        minHeight: "100vh",
+        background: "var(--bg)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontFamily: "var(--font-mono)",
+        fontSize: "12px",
+        letterSpacing: "0.15em",
+        color: "var(--text-muted)"
+      }}>
+        LOADING SPACE INTELLIGENCE...
+      </div>
+    );
+  }
+
+  // ── Derived values ────────────────────────────
+  const d           = propertyData;   // short alias
+  const photos      = d.photos && d.photos.length > 0 ? d.photos : (d.image ? [d.image] : [""]);
   const floodRiskText  = floodText(d.flood_risk_score);
   const floodRiskScore = `Score: ${d.flood_risk_score}/10`;
   const convScoreText  = `${d.convenience_score} / 10`;
-  const brokerInitials = d.broker_name.split(" ").map(p => p[0]).join("").slice(0, 2).toUpperCase();
+  const brokerInitials = (d.broker_name || "SA").split(" ").map(p => p[0]).join("").slice(0, 2).toUpperCase();
 
 
 
