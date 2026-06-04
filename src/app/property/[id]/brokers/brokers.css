@@ -29,7 +29,7 @@
 }
 
 .nav-brand-logo {
-  font-size: 14px;
+  size: 14px;
   font-weight: 700;
   letter-spacing: 3px;
   color: #f0ede8;
@@ -48,7 +48,7 @@
 
 .brokers-columns-container {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: 1fr 1.6fr;
   gap: 32px;
   align-items: start;
   margin-top: 40px;
@@ -116,15 +116,11 @@
   border-radius: 4px;
   padding: 24px;
   position: relative;
-  transition: border-color 0.25s;
+  transition: border-color 0.25s, box-shadow 0.25s;
 }
 
 .broker-item-card:hover {
   border-color: #363636;
-}
-
-.featured-card {
-  border-top: 3px solid #c8a96e;
 }
 
 .scoutit-pick-badge {
@@ -390,6 +386,140 @@
   margin: 0;
 }
 
+/* Recommended Cards & Tiers System */
+.recommended-card {
+  padding: 32px;
+  border-radius: 6px;
+}
+
+.recommended-card .broker-avatar-img {
+  width: 84px;
+  height: 84px;
+}
+
+.recommended-card .broker-name-txt {
+  font-size: 24px;
+}
+
+.recommended-card .broker-closures-txt {
+  font-size: 14px;
+}
+
+.recommended-card .broker-detail-col {
+  padding-right: 120px;
+}
+
+.tier-badge-label {
+  position: absolute;
+  top: 12px;
+  right: 24px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  padding: 4px 10px;
+  border-radius: 2px;
+  font-family: var(--font-mono), monospace;
+  z-index: 10;
+}
+
+/* Diamond Card (Tier 1) - Animating Glowing Gradient Border */
+.diamond-card {
+  background: #111111;
+  border: 1px solid transparent !important;
+  box-shadow: 0 8px 32px rgba(0, 242, 254, 0.12);
+}
+
+.diamond-card::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  border-radius: 5px;
+  background: linear-gradient(90deg, #00f2fe, #4facfe, #b19ffb, #00f2fe);
+  background-size: 300% 300%;
+  animation: diamondGlow 6s linear infinite;
+}
+
+@keyframes diamondGlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.diamond-card .tier-badge-label {
+  background: linear-gradient(135deg, #00f2fe 0%, #b19ffb 100%);
+  color: #0e0e0e;
+  box-shadow: 0 0 10px rgba(0, 242, 254, 0.4);
+}
+
+.diamond-card .rating-num {
+  color: #00f2fe;
+}
+
+/* Platinum Card (Tier 2) */
+.platinum-card {
+  border-color: #a5c2d9 !important;
+  box-shadow: 0 4px 20px rgba(165, 194, 217, 0.08);
+}
+
+.platinum-card .tier-badge-label {
+  background: linear-gradient(135deg, #a5c2d9 0%, #eef3f7 100%);
+  color: #0e0e0e;
+}
+
+.platinum-card .rating-num {
+  color: #a5c2d9;
+}
+
+/* Gold Card (Tier 3) */
+.gold-card {
+  border-color: #c8a96e !important;
+  box-shadow: 0 4px 20px rgba(200, 169, 110, 0.08);
+}
+
+.gold-card .tier-badge-label {
+  background: linear-gradient(135deg, #c8a96e 0%, #f7ebd3 100%);
+  color: #0e0e0e;
+}
+
+.gold-card .rating-num {
+  color: #c8a96e;
+}
+
+/* Silver Card (Tier 4) */
+.silver-card {
+  border-color: #8a8a8a !important;
+}
+
+.silver-card .tier-badge-label {
+  background: linear-gradient(135deg, #8a8a8a 0%, #dcdcdc 100%);
+  color: #0e0e0e;
+}
+
+.silver-card .rating-num {
+  color: #dcdcdc;
+}
+
+/* Bronze Card (Tier 5) */
+.bronze-card {
+  border-color: #cd7f32 !important;
+}
+
+.bronze-card .tier-badge-label {
+  background: linear-gradient(135deg, #a05a2c 0%, #cd7f32 100%);
+  color: #ffffff;
+}
+
+.bronze-card .rating-num {
+  color: #cd7f32;
+}
+
+@media (max-width: 1024px) {
+  .recommended-card .broker-detail-col {
+    padding-right: 0;
+  }
+}
+
 @media (max-width: 640px) {
   .brokers-sticky-nav {
     padding: 12px 16px;
@@ -414,5 +544,15 @@
   }
   .form-fields-grid textarea {
     grid-column: span 1;
+  }
+  .recommended-card {
+    padding: 20px;
+  }
+  .recommended-card .broker-avatar-img {
+    width: 64px;
+    height: 64px;
+  }
+  .recommended-card .broker-name-txt {
+    font-size: 20px;
   }
 }

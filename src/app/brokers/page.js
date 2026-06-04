@@ -41,30 +41,68 @@ export default function BrokersPage() {
 
         <section className="grid-container">
           <div className="brokers-grid">
-            {filteredBrokers.map((broker) => (
-              <Link href={`/brokers/${broker.id}`} key={broker.id} className="broker-card" style={{ textDecoration: 'none' }}>
-                <div className="broker-image-container">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={broker.image} alt={broker.name} className="broker-image" />
-                  <div className="image-overlay"></div>
-                </div>
-                <div className="broker-content">
-                  <span className="broker-location">{broker.location}</span>
-                  <h2 className="broker-name">{broker.name}</h2>
-                  <p className="broker-title">{broker.title}</p>
-                  <p className="broker-specialty">Specialty: <span>{broker.specialty}</span></p>
-                  
-                  <p className="broker-bio">{broker.bio}</p>
-                  
-                  <div className="broker-footer">
-                    <div className="broker-stats">
-                      <span className="stat-value" style={{ fontSize: '12px' }}>{broker.closures}</span>
-                    </div>
-                    <span className="btn-contact">Focus →</span>
+            {filteredBrokers.map((broker) => {
+              // Determine Tier Badge and styling classes
+              let tierClass = "";
+              let tierBadgeText = "";
+              switch (broker.subscriptionTier) {
+                case 1:
+                  tierClass = "tier-1-card diamond-card";
+                  tierBadgeText = "DIAMOND PARTNER";
+                  break;
+                case 2:
+                  tierClass = "tier-2-card platinum-card";
+                  tierBadgeText = "PLATINUM PARTNER";
+                  break;
+                case 3:
+                  tierClass = "tier-3-card gold-card";
+                  tierBadgeText = "GOLD PARTNER";
+                  break;
+                case 4:
+                  tierClass = "tier-4-card silver-card";
+                  tierBadgeText = "SILVER PARTNER";
+                  break;
+                case 5:
+                  tierClass = "tier-5-card bronze-card";
+                  tierBadgeText = "BRONZE PARTNER";
+                  break;
+                default:
+                  break;
+              }
+
+              return (
+                <Link
+                  href={`/brokers/${broker.id}`}
+                  key={broker.id}
+                  className={`broker-card ${tierClass}`}
+                  style={{ textDecoration: 'none', position: 'relative' }}
+                >
+                  {tierBadgeText && (
+                    <div className="general-tier-badge-label">{tierBadgeText}</div>
+                  )}
+                  <div className="broker-image-container">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={broker.image} alt={broker.name} className="broker-image" />
+                    <div className="image-overlay"></div>
                   </div>
-                </div>
-              </Link>
-            ))}
+                  <div className="broker-content">
+                    <span className="broker-location">{broker.location}</span>
+                    <h2 className="broker-name">{broker.name}</h2>
+                    <p className="broker-title">{broker.title}</p>
+                    <p className="broker-specialty">Specialty: <span>{broker.specialty}</span></p>
+                    
+                    <p className="broker-bio">{broker.bio}</p>
+                    
+                    <div className="broker-footer">
+                      <div className="broker-stats">
+                        <span className="stat-value" style={{ fontSize: '12px' }}>{broker.closures}</span>
+                      </div>
+                      <span className="btn-contact">Focus →</span>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
             {filteredBrokers.length === 0 && (
               <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '60px 0', color: 'var(--text-muted)' }}>
                 No intelligence advisors found matching your criteria.
@@ -504,6 +542,96 @@ export default function BrokersPage() {
         .submit-clearance-btn:hover {
           transform: translateY(-2px);
           box-shadow: 0 4px 12px rgba(200, 169, 110, 0.3);
+        }
+
+        .general-tier-badge-label {
+          position: absolute;
+          top: 12px;
+          right: 12px;
+          font-size: 8px;
+          font-weight: 700;
+          letter-spacing: 1px;
+          padding: 3px 8px;
+          border-radius: 2px;
+          font-family: var(--font-mono), monospace;
+          z-index: 10;
+        }
+
+        /* Tier styling for general directory cards */
+        .tier-1-card {
+          border-color: transparent !important;
+          box-shadow: 0 8px 32px rgba(0, 242, 254, 0.08);
+          position: relative;
+        }
+        .tier-1-card::before {
+          content: "";
+          position: absolute;
+          inset: -1px;
+          z-index: -1;
+          border-radius: 6px;
+          background: linear-gradient(90deg, #00f2fe, #4facfe, #b19ffb, #00f2fe);
+          background-size: 300% 300%;
+          animation: diamondGlow 6s linear infinite;
+        }
+        .tier-1-card .general-tier-badge-label {
+          background: linear-gradient(135deg, #00f2fe 0%, #b19ffb 100%);
+          color: #0e0e0e;
+          box-shadow: 0 0 8px rgba(0, 242, 254, 0.3);
+        }
+        .tier-1-card .broker-location {
+          color: #00f2fe;
+        }
+
+        .tier-2-card {
+          border-color: #a5c2d9 !important;
+          box-shadow: 0 4px 16px rgba(165, 194, 217, 0.04);
+        }
+        .tier-2-card .general-tier-badge-label {
+          background: linear-gradient(135deg, #a5c2d9 0%, #eef3f7 100%);
+          color: #0e0e0e;
+        }
+        .tier-2-card .broker-location {
+          color: #a5c2d9;
+        }
+
+        .tier-3-card {
+          border-color: #c8a96e !important;
+          box-shadow: 0 4px 16px rgba(200, 169, 110, 0.04);
+        }
+        .tier-3-card .general-tier-badge-label {
+          background: linear-gradient(135deg, #c8a96e 0%, #f7ebd3 100%);
+          color: #0e0e0e;
+        }
+        .tier-3-card .broker-location {
+          color: #c8a96e;
+        }
+
+        .tier-4-card {
+          border-color: #8a8a8a !important;
+        }
+        .tier-4-card .general-tier-badge-label {
+          background: linear-gradient(135deg, #8a8a8a 0%, #dcdcdc 100%);
+          color: #0e0e0e;
+        }
+        .tier-4-card .broker-location {
+          color: #dcdcdc;
+        }
+
+        .tier-5-card {
+          border-color: #cd7f32 !important;
+        }
+        .tier-5-card .general-tier-badge-label {
+          background: linear-gradient(135deg, #a05a2c 0%, #cd7f32 100%);
+          color: #ffffff;
+        }
+        .tier-5-card .broker-location {
+          color: #cd7f32;
+        }
+
+        @keyframes diamondGlow {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
         }
       `}</style>
     </div>

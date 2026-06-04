@@ -2,77 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { getBrokers } from "@/data/mockDb";
 import "./brokers.css";
-
-const BROKERS_DATA = {
-  verified: [
-    {
-      id: "br-01",
-      name: "Miguel Torres, REB",
-      role: "Licensed Real Estate Broker",
-      license: "PRC REB License No. 0019284",
-      rating: 84,
-      closures: "3 Verified Closures // BGC Focus",
-      niche: ["Industrial Modern", "BGC Residential", "Asset Valuation"],
-      avatar: "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=150&q=80",
-    },
-    {
-      id: "br-02",
-      name: "Elena Santos, REB",
-      role: "Licensed Real Estate Broker",
-      license: "PRC REB License No. 0021485",
-      rating: 76,
-      closures: "2 Verified Closures // QC Residential",
-      niche: ["QC Luxury Estates", "Family Homes", "Negotiation"],
-      avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=150&q=80",
-    }
-  ],
-  highestRated: [
-    {
-      id: "br-06",
-      name: "Sofia Araneta",
-      role: "Licensed Real Estate Broker",
-      license: "PRC REB License No. 0016839",
-      rating: 95,
-      closures: "2 Verified Closures // Tagaytay & South",
-      niche: ["Boutique Hotels", "Culinary Acreage", "Private Equity Holds"],
-      avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=150&q=80",
-      scoutitPick: true,
-    },
-    {
-      id: "br-03",
-      name: "Marco Reyes, REB",
-      role: "Licensed Real Estate Broker",
-      license: "PRC REB License No. 0011593",
-      rating: 92,
-      closures: "4 Verified Closures // STR Sector",
-      niche: ["Short Term Rentals", "Yield Optimization", "Siargao/BGC"],
-      avatar: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=150&q=80",
-    }
-  ],
-  suggested: [
-    {
-      id: "br-05",
-      name: "Camille Laurel",
-      role: "Licensed Real Estate Broker",
-      license: "PRC REB License No. 0020184",
-      rating: 90,
-      closures: "1 Verified Closure // Quezon City",
-      niche: ["Heritage Transfer", "Adaptive Reuse", "Conservation Consulting"],
-      avatar: "https://images.unsplash.com/photo-1598550874175-4d0ef436c909?auto=format&fit=crop&w=150&q=80",
-    },
-    {
-      id: "br-04",
-      name: "Julian Sy",
-      role: "Licensed Real Estate Broker",
-      license: "PRC REB License No. 0014902",
-      rating: 88,
-      closures: "2 Verified Closures // Laguna & Batangas",
-      niche: ["Logistics Hubs", "Industrial Land", "Supply Chain Planning"],
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80",
-    }
-  ]
-};
 
 export default function BrokersClient({ slug }) {
   const [activeFormBroker, setActiveFormBroker] = useState(null);
@@ -99,21 +30,66 @@ export default function BrokersClient({ slug }) {
     }, 4000);
   };
 
-  const renderBrokerCard = (broker, isFeatured = false) => {
+  const brokers = getBrokers();
+
+  // Top Rated: Sorted strictly by rating descending
+  const topRatedBrokers = [...brokers].sort((a, b) => b.rating - a.rating);
+
+  // Recommended: Sorted by subscriptionTier ascending (1 to 5), then by rating descending
+  const recommendedBrokers = [...brokers].sort((a, b) => {
+    if (a.subscriptionTier !== b.subscriptionTier) {
+      return a.subscriptionTier - b.subscriptionTier;
+    }
+    return b.rating - a.rating;
+  });
+
+  const renderBrokerCard = (broker, isRecommended = false) => {
     const isFormOpen = activeFormBroker === broker.id;
     const isSuccess = submittedBrokerId === broker.id;
+
+    // Determine Tier Badge and styling classes
+    let tierClass = "";
+    let tierBadgeText = "";
+    if (isRecommended) {
+      switch (broker.subscriptionTier) {
+        case 1:
+          tierClass = "tier-1-card diamond-card";
+          tierBadgeText = "DIAMOND PARTNER";
+          break;
+        case 2:
+          tierClass = "tier-2-card platinum-card";
+          tierBadgeText = "PLATINUM PARTNER";
+          break;
+        case 3:
+          tierClass = "tier-3-card gold-card";
+          tierBadgeText = "GOLD PARTNER";
+          break;
+        case 4:
+          tierClass = "tier-4-card silver-card";
+          tierBadgeText = "SILVER PARTNER";
+          break;
+        case 5:
+          tierClass = "tier-5-card bronze-card";
+          tierBadgeText = "BRONZE PARTNER";
+          break;
+        default:
+          break;
+      }
+    }
 
     return (
       <div
         key={broker.id}
-        className={`broker-item-card ${isFeatured ? "featured-card" : ""} ${isFormOpen ? "form-expanded" : ""}`}
+        className={`broker-item-card ${isRecommended ? "recommended-card" : "top-rated-card"} ${tierClass} ${isFormOpen ? "form-expanded" : ""}`}
       >
-        {broker.scoutitPick && <div className="scoutit-pick-badge">SCOUTIT PICK</div>}
+        {isRecommended && tierBadgeText && (
+          <div className="tier-badge-label">{tierBadgeText}</div>
+        )}
         
         <div className="broker-main-row">
           <div
             className="broker-avatar-img"
-            style={{ backgroundImage: `url(${broker.avatar})` }}
+            style={{ backgroundImage: `url(${broker.image})` }}
           />
           <div className="broker-detail-col">
             <div className="broker-name-header">
@@ -223,27 +199,19 @@ export default function BrokersClient({ slug }) {
         </header>
 
         <div className="brokers-columns-container">
-          {/* Column 1: Verified Brokers */}
-          <section className="brokers-section-group">
-            <h2 className="section-group-heading">Verified Brokers</h2>
+          {/* Column 1: Top Rated Brokers */}
+          <section className="brokers-section-group top-rated-section">
+            <h2 className="section-group-heading">Top Rated Brokers</h2>
             <div className="brokers-cards-list">
-              {BROKERS_DATA.verified.map((b) => renderBrokerCard(b, false))}
+              {topRatedBrokers.map((b) => renderBrokerCard(b, false))}
             </div>
           </section>
 
-          {/* Column 2: Highest Rated Brokers */}
-          <section className="brokers-section-group">
-            <h2 className="section-group-heading">Highest Ratings Brokers</h2>
+          {/* Column 2: Recommended Brokers */}
+          <section className="brokers-section-group recommended-section">
+            <h2 className="section-group-heading">Recommended Brokers</h2>
             <div className="brokers-cards-list">
-              {BROKERS_DATA.highestRated.map((b) => renderBrokerCard(b, true))}
-            </div>
-          </section>
-
-          {/* Column 3: Suggested Brokers */}
-          <section className="brokers-section-group">
-            <h2 className="section-group-heading">Suggested Brokers</h2>
-            <div className="brokers-cards-list">
-              {BROKERS_DATA.suggested.map((b) => renderBrokerCard(b, false))}
+              {recommendedBrokers.map((b) => renderBrokerCard(b, true))}
             </div>
           </section>
         </div>
