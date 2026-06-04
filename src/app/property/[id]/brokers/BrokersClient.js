@@ -1,14 +1,42 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { getBrokers } from "@/data/mockDb";
 import "./brokers.css";
 
+const TIER_MAP = { Diamond: 1, Platinum: 2, Gold: 3, Silver: 4, Bronze: 5 };
+
+function normalizeTier(broker) {
+  if (typeof broker.subscriptionTier === "number") return broker.subscriptionTier;
+  return TIER_MAP[broker.subscriptionLabel] ?? 5;
+}
+
 export default function BrokersClient({ slug }) {
+  const [brokers, setBrokers]             = useState([]);
+  const [loading, setLoading]             = useState(true);
   const [activeFormBroker, setActiveFormBroker] = useState(null);
-  const [formData, setFormData] = useState({ name: "", phone: "", message: "" });
+  const [formData, setFormData]           = useState({ name: "", phone: "", message: "" });
   const [submittedBrokerId, setSubmittedBrokerId] = useState(null);
+
+  useEffect(() => {
+    async function loadBrokers() {
+      try {
+        const res  = await fetch("/api/cms");
+        const data = await res.json();
+        if (data.brokers && data.brokers.length > 0) {
+          setBrokers(data.brokers);
+        } else {
+          setBrokers(getBrokers());
+        }
+      } catch {
+        setBrokers(getBrokers());
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadBrokers();
+  }, []);
 
   const handleRetainClick = (brokerId) => {
     setActiveFormBroker(activeFormBroker === brokerId ? null : brokerId);
@@ -30,50 +58,32 @@ export default function BrokersClient({ slug }) {
     }, 4000);
   };
 
-  const brokers = getBrokers();
-
-  // Top Rated: Sorted strictly by rating descending
+  // Top Rated: sort by rating descending
   const topRatedBrokers = [...brokers].sort((a, b) => b.rating - a.rating);
 
-  // Recommended: Sorted by subscriptionTier ascending (1 to 5), then by rating descending
+  // Recommended: sort by subscriptionTier ascending then rating descending
   const recommendedBrokers = [...brokers].sort((a, b) => {
-    if (a.subscriptionTier !== b.subscriptionTier) {
-      return a.subscriptionTier - b.subscriptionTier;
-    }
+    const ta = normalizeTier(a);
+    const tb = normalizeTier(b);
+    if (ta !== tb) return ta - tb;
     return b.rating - a.rating;
   });
 
   const renderBrokerCard = (broker, isRecommended = false) => {
     const isFormOpen = activeFormBroker === broker.id;
-    const isSuccess = submittedBrokerId === broker.id;
+    const isSuccess  = submittedBrokerId === broker.id;
 
-    // Determine Tier Badge and styling classes
     let tierClass = "";
     let tierBadgeText = "";
     if (isRecommended) {
-      switch (broker.subscriptionTier) {
-        case 1:
-          tierClass = "tier-1-card diamond-card";
-          tierBadgeText = "DIAMOND PARTNER";
-          break;
-        case 2:
-          tierClass = "tier-2-card platinum-card";
-          tierBadgeText = "PLATINUM PARTNER";
-          break;
-        case 3:
-          tierClass = "tier-3-card gold-card";
-          tierBadgeText = "GOLD PARTNER";
-          break;
-        case 4:
-          tierClass = "tier-4-card silver-card";
-          tierBadgeText = "SILVER PARTNER";
-          break;
-        case 5:
-          tierClass = "tier-5-card bronze-card";
-          tierBadgeText = "BRONZE PARTNER";
-          break;
-        default:
-          break;
+      const tier = normalizeTier(broker);
+      switch (tier) {
+        case 1: tierClass = "tier-1-card diamond-card";  tierBadgeText = "DIAMOND PARTNER";  break;
+        case 2: tierClass = "tier-2-card platinum-card"; tierBadgeText = "PLATINUM PARTNER"; break;
+        case 3: tierClass = "tier-3-card gold-card";     tierBadgeText = "GOLD PARTNER";     break;
+        case 4: tierClass = "tier-4-card silver-card";   tierBadgeText = "SILVER PARTNER";   break;
+        case 5: tierClass = "tier-5-card bronze-card";   tierBadgeText = "BRONZE PARTNER";   break;
+        default: break;
       }
     }
 
@@ -199,21 +209,29 @@ export default function BrokersClient({ slug }) {
         </header>
 
         <div className="brokers-columns-container">
-          {/* Column 1: Top Rated Brokers */}
-          <section className="brokers-section-group top-rated-section">
-            <h2 className="section-group-heading">Top Rated Brokers</h2>
-            <div className="brokers-cards-list">
-              {topRatedBrokers.map((b) => renderBrokerCard(b, false))}
+          {loading ? (
+            <div style={{ gridColumn: "1 / -1", textAlign: "center", padding: "80px 0", color: "var(--text-muted)", fontSize: "13px", letterSpacing: "0.1em" }}>
+              LOADING VERIFIED BROKERS...
             </div>
-          </section>
+          ) : (
+            <>
+              {/* Column 1: Top Rated Brokers */}
+              <section className="brokers-section-group top-rated-section">
+                <h2 className="section-group-heading">Top Rated Brokers</h2>
+                <div className="brokers-cards-list">
+                  {topRatedBrokers.map((b) => renderBrokerCard(b, false))}
+                </div>
+              </section>
 
-          {/* Column 2: Recommended Brokers */}
-          <section className="brokers-section-group recommended-section">
-            <h2 className="section-group-heading">Recommended Brokers</h2>
-            <div className="brokers-cards-list">
-              {recommendedBrokers.map((b) => renderBrokerCard(b, true))}
-            </div>
-          </section>
+              {/* Column 2: Recommended Brokers */}
+              <section className="brokers-section-group recommended-section">
+                <h2 className="section-group-heading">Recommended Brokers</h2>
+                <div className="brokers-cards-list">
+                  {recommendedBrokers.map((b) => renderBrokerCard(b, true))}
+                </div>
+              </section>
+            </>
+          )}
         </div>
 
         <footer className="brokers-compliance-footer">

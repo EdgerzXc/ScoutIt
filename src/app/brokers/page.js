@@ -2,21 +2,59 @@
 
 import Header from "@/components/Header";
 import Link from "next/link";
+import { useState, useEffect } from "react";
 import { getBrokers } from "@/data/mockDb";
 
-const DUMMY_BROKERS = getBrokers();
+// ── Tier label → number map (mirrors airtable.js) ──────────────
+const TIER_MAP = { Diamond: 1, Platinum: 2, Gold: 3, Silver: 4, Bronze: 5 };
 
-import { useState } from "react";
+function normalizeTier(broker) {
+  // Airtable data uses subscriptionTier (number) directly
+  // Mock data also uses subscriptionTier (number)
+  // Guard: if somehow only label is present, convert
+  if (typeof broker.subscriptionTier === "number") return broker.subscriptionTier;
+  return TIER_MAP[broker.subscriptionLabel] ?? 5;
+}
 
 export default function BrokersPage() {
+  const [brokers, setBrokers]     = useState([]);
+  const [loading, setLoading]     = useState(true);
+  const [source, setSource]       = useState("");
   const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredBrokers = DUMMY_BROKERS.filter(broker => {
+  useEffect(() => {
+    async function load() {
+      try {
+        const res  = await fetch("/api/cms");
+        const data = await res.json();
+
+        // If Airtable returned brokers, use them; otherwise fall through to mockDb
+        if (data.brokers && data.brokers.length > 0) {
+          setBrokers(data.brokers);
+          setSource(data.source);
+        } else {
+          // Airtable table is empty or not yet populated — use local mock
+          setBrokers(getBrokers());
+          setSource("mock_empty_table");
+        }
+      } catch {
+        // Network error — use local mock
+        setBrokers(getBrokers());
+        setSource("mock_network_error");
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
+  }, []);
+
+  const filteredBrokers = brokers.filter((broker) => {
     const term = searchTerm.toLowerCase();
-    const matchLocation = broker.location.toLowerCase().includes(term);
-    const matchName = broker.name.toLowerCase().includes(term);
-    const matchProperties = broker.managedProperties.some(p => p.title.toLowerCase().includes(term));
-    return matchLocation || matchName || matchProperties;
+    return (
+      (broker.location  || "").toLowerCase().includes(term) ||
+      (broker.name      || "").toLowerCase().includes(term) ||
+      (broker.specialty || "").toLowerCase().includes(term)
+    );
   });
 
   return (
@@ -30,8 +68,8 @@ export default function BrokersPage() {
         </header>
 
         <section className="search-section">
-          <input 
-            type="text" 
+          <input
+            type="text"
             className="roster-search-input"
             placeholder="FILTER AGENT DIRECTORY BY GEOGRAPHICAL LOCATION OR SPECIFIC ASSET CODE..."
             value={searchTerm}
@@ -40,79 +78,73 @@ export default function BrokersPage() {
         </section>
 
         <section className="grid-container">
-          <div className="brokers-grid">
-            {filteredBrokers.map((broker) => {
-              // Determine Tier Badge and styling classes
-              let tierClass = "";
-              let tierBadgeText = "";
-              switch (broker.subscriptionTier) {
-                case 1:
-                  tierClass = "tier-1-card diamond-card";
-                  tierBadgeText = "DIAMOND PARTNER";
-                  break;
-                case 2:
-                  tierClass = "tier-2-card platinum-card";
-                  tierBadgeText = "PLATINUM PARTNER";
-                  break;
-                case 3:
-                  tierClass = "tier-3-card gold-card";
-                  tierBadgeText = "GOLD PARTNER";
-                  break;
-                case 4:
-                  tierClass = "tier-4-card silver-card";
-                  tierBadgeText = "SILVER PARTNER";
-                  break;
-                case 5:
-                  tierClass = "tier-5-card bronze-card";
-                  tierBadgeText = "BRONZE PARTNER";
-                  break;
-                default:
-                  break;
-              }
+          {loading ? (
+            <div style={{ textAlign: "center", padding: "80px 0", color: "var(--text-muted)", fontSize: "13px", letterSpacing: "0.1em" }}>
+              LOADING INTELLIGENCE ROSTER...
+            </div>
+          ) : (
+            <div className="brokers-grid">
+              {filteredBrokers.map((broker) => {
+                const tier = normalizeTier(broker);
+                let tierClass = "";
+                let tierBadgeText = "";
+                switch (tier) {
+                  case 1: tierClass = "tier-1-card diamond-card";  tierBadgeText = "DIAMOND PARTNER";  break;
+                  case 2: tierClass = "tier-2-card platinum-card"; tierBadgeText = "PLATINUM PARTNER"; break;
+                  case 3: tierClass = "tier-3-card gold-card";     tierBadgeText = "GOLD PARTNER";     break;
+                  case 4: tierClass = "tier-4-card silver-card";   tierBadgeText = "SILVER PARTNER";   break;
+                  case 5: tierClass = "tier-5-card bronze-card";   tierBadgeText = "BRONZE PARTNER";   break;
+                  default: break;
+                }
 
-              return (
-                <Link
-                  href={`/brokers/${broker.id}`}
-                  key={broker.id}
-                  className={`broker-card ${tierClass}`}
-                  style={{ textDecoration: 'none', position: 'relative' }}
-                >
-                  {tierBadgeText && (
-                    <div className="general-tier-badge-label">{tierBadgeText}</div>
-                  )}
-                  <div className="broker-image-container">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={broker.image} alt={broker.name} className="broker-image" />
-                    <div className="image-overlay"></div>
-                  </div>
-                  <div className="broker-content">
-                    <span className="broker-location">{broker.location}</span>
-                    <h2 className="broker-name">{broker.name}</h2>
-                    <p className="broker-title">{broker.title}</p>
-                    <p className="broker-specialty">Specialty: <span>{broker.specialty}</span></p>
-                    
-                    <p className="broker-bio">{broker.bio}</p>
-                    
-                    <div className="broker-footer">
-                      <div className="broker-stats">
-                        <span className="stat-value" style={{ fontSize: '12px' }}>{broker.closures}</span>
-                      </div>
-                      <span className="btn-contact">Focus →</span>
+                return (
+                  <Link
+                    href={`/brokers/${broker.id}`}
+                    key={broker.id}
+                    className={`broker-card ${tierClass}`}
+                    style={{ textDecoration: "none", position: "relative" }}
+                  >
+                    {tierBadgeText && (
+                      <div className="general-tier-badge-label">{tierBadgeText}</div>
+                    )}
+                    <div className="broker-image-container">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={broker.image} alt={broker.name} className="broker-image" />
+                      <div className="image-overlay" />
                     </div>
-                  </div>
-                </Link>
-              );
-            })}
-            {filteredBrokers.length === 0 && (
-              <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '60px 0', color: 'var(--text-muted)' }}>
-                No intelligence advisors found matching your criteria.
-              </div>
-            )}
-          </div>
-        </section>
-      </main>
+                    <div className="broker-content">
+                      <span className="broker-location">{broker.location}</span>
+                      <h2 className="broker-name">{broker.name}</h2>
+                      <p className="broker-title">{broker.title}</p>
+                      <p className="broker-specialty">Specialty: <span>{broker.specialty}</span></p>
+                      <p className="broker-bio">{broker.bio}</p>
+                      <div className="broker-footer">
+                        <div className="broker-stats">
+                          <span className="stat-value" style={{ fontSize: "12px" }}>{broker.closures}</span>
+                        </div>
+                        <span className="btn-contact">Focus →</span>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
 
-      {/* Dynamic details drawer removed in favor of full public details pages */}
+              {!loading && filteredBrokers.length === 0 && (
+                <div style={{ gridColumn: "1 / -1", textAlign: "center", padding: "60px 0", color: "var(--text-muted)" }}>
+                  No intelligence advisors found matching your criteria.
+                </div>
+              )}
+            </div>
+          )}
+        </section>
+
+        {/* Dev source indicator — remove before final prod */}
+        {source && process.env.NODE_ENV === "development" && (
+          <div style={{ textAlign: "center", padding: "16px", fontSize: "11px", color: "#444", fontFamily: "monospace" }}>
+            data source: {source}
+          </div>
+        )}
+      </main>
 
       <style>{`
         .page-wrapper {
@@ -188,15 +220,11 @@ export default function BrokersPage() {
         }
 
         @media (max-width: 1024px) {
-          .brokers-grid {
-            grid-template-columns: repeat(2, 1fr);
-          }
+          .brokers-grid { grid-template-columns: repeat(2, 1fr); }
         }
 
         @media (max-width: 768px) {
-          .brokers-grid {
-            grid-template-columns: 1fr;
-          }
+          .brokers-grid { grid-template-columns: 1fr; }
         }
 
         .broker-card {
@@ -278,9 +306,7 @@ export default function BrokersPage() {
           margin-bottom: 16px;
         }
 
-        .broker-specialty span {
-          color: var(--text-primary);
-        }
+        .broker-specialty span { color: var(--text-primary); }
 
         .broker-bio {
           font-size: 14px;
@@ -298,10 +324,7 @@ export default function BrokersPage() {
           padding-top: 16px;
         }
 
-        .broker-stats {
-          display: flex;
-          flex-direction: column;
-        }
+        .broker-stats { display: flex; flex-direction: column; }
 
         .stat-value {
           font-family: var(--font-display);
@@ -335,215 +358,6 @@ export default function BrokersPage() {
           color: #000;
         }
 
-        /* Focus Panel Styles */
-        .broker-focus-overlay {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100vw;
-          height: 100vh;
-          background: rgba(0,0,0,0.8);
-          backdrop-filter: blur(8px);
-          z-index: 1000;
-          display: flex;
-          justify-content: flex-end;
-          opacity: 0;
-          pointer-events: none;
-          transition: opacity 0.4s ease;
-        }
-
-        .broker-focus-overlay.open {
-          opacity: 1;
-          pointer-events: auto;
-        }
-
-        .broker-focus-panel {
-          width: 100%;
-          max-width: 600px;
-          height: 100%;
-          background: #121212;
-          border-left: 1px solid var(--border-solid);
-          transform: translateX(100%);
-          transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
-          display: flex;
-          flex-direction: column;
-          overflow-y: auto;
-          position: relative;
-        }
-
-        .broker-focus-overlay.open .broker-focus-panel {
-          transform: translateX(0);
-        }
-
-        .close-panel-btn {
-          position: absolute;
-          top: 24px;
-          right: 24px;
-          background: rgba(255,255,255,0.05);
-          border: 1px solid var(--border-solid);
-          color: var(--text-secondary);
-          padding: 8px 12px;
-          font-family: var(--font-mono);
-          font-size: 10px;
-          cursor: pointer;
-          border-radius: 4px;
-          transition: all 0.2s;
-          z-index: 10;
-        }
-
-        .close-panel-btn:hover {
-          background: var(--accent);
-          color: #000;
-          border-color: var(--accent);
-        }
-
-        .panel-header {
-          padding: 60px 40px 40px 40px;
-          border-bottom: 1px solid var(--border-solid);
-          background: linear-gradient(180deg, #1a1a1a 0%, #121212 100%);
-          display: flex;
-          align-items: flex-end;
-          gap: 24px;
-        }
-
-        .panel-avatar {
-          width: 120px;
-          height: 120px;
-          border-radius: 4px;
-          background-size: cover;
-          background-position: center;
-          border: 1px solid var(--border-solid);
-          filter: grayscale(100%);
-        }
-
-        .panel-title-block h2 {
-          font-family: var(--font-display);
-          font-size: 32px;
-          color: #fff;
-          margin: 0 0 8px 0;
-        }
-
-        .panel-title-block h3 {
-          font-family: var(--font-mono);
-          font-size: 12px;
-          color: var(--accent);
-          text-transform: uppercase;
-          letter-spacing: 0.1em;
-          margin: 0 0 16px 0;
-          font-weight: 400;
-        }
-
-        .panel-tags {
-          display: flex;
-          gap: 12px;
-        }
-
-        .panel-tags span {
-          background: rgba(255,255,255,0.05);
-          padding: 4px 12px;
-          border-radius: 4px;
-          font-size: 11px;
-          font-family: var(--font-mono);
-          color: var(--text-secondary);
-          text-transform: uppercase;
-        }
-
-        .panel-body {
-          padding: 40px;
-          display: flex;
-          flex-direction: column;
-          gap: 40px;
-        }
-
-        .panel-section h4 {
-          font-family: var(--font-display);
-          font-size: 18px;
-          color: #fff;
-          margin-bottom: 16px;
-          border-bottom: 1px solid rgba(255,255,255,0.1);
-          padding-bottom: 8px;
-        }
-
-        .panel-section p {
-          color: var(--text-secondary);
-          line-height: 1.6;
-          font-size: 14px;
-        }
-
-        .asset-list {
-          list-style: none;
-          padding: 0;
-          margin: 0;
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-        }
-
-        .asset-list li {
-          background: #1a1a1a;
-          border: 1px solid #333333;
-          padding: 16px;
-          border-radius: 4px;
-          font-size: 14px;
-          color: var(--text-primary);
-          display: flex;
-          align-items: center;
-        }
-
-        .asset-code {
-          font-family: var(--font-mono);
-          font-size: 10px;
-          color: var(--accent);
-          margin-right: 16px;
-          background: rgba(200, 169, 110, 0.1);
-          padding: 4px 8px;
-          border-radius: 2px;
-        }
-
-        .clearance-form {
-          display: flex;
-          flex-direction: column;
-          gap: 16px;
-        }
-
-        .clearance-form input,
-        .clearance-form textarea {
-          background: rgba(0,0,0,0.3);
-          border: 1px solid #333;
-          padding: 16px;
-          color: #fff;
-          font-family: var(--font-mono);
-          font-size: 12px;
-          border-radius: 4px;
-          transition: border-color 0.3s;
-          outline: none;
-        }
-
-        .clearance-form input:focus,
-        .clearance-form textarea:focus {
-          border-color: var(--accent);
-        }
-
-        .submit-clearance-btn {
-          background: var(--accent);
-          color: #000;
-          border: none;
-          padding: 16px;
-          font-family: var(--font-mono);
-          font-size: 12px;
-          font-weight: 600;
-          text-transform: uppercase;
-          letter-spacing: 0.1em;
-          border-radius: 4px;
-          cursor: pointer;
-          transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .submit-clearance-btn:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(200, 169, 110, 0.3);
-        }
-
         .general-tier-badge-label {
           position: absolute;
           top: 12px;
@@ -557,80 +371,30 @@ export default function BrokersPage() {
           z-index: 10;
         }
 
-        /* Tier styling for general directory cards */
-        .tier-1-card {
-          border-color: transparent !important;
-          box-shadow: 0 8px 32px rgba(0, 242, 254, 0.08);
-          position: relative;
-        }
-        .tier-1-card::before {
-          content: "";
-          position: absolute;
-          inset: -1px;
-          z-index: -1;
-          border-radius: 6px;
-          background: linear-gradient(90deg, #00f2fe, #4facfe, #b19ffb, #00f2fe);
-          background-size: 300% 300%;
-          animation: diamondGlow 6s linear infinite;
-        }
-        .tier-1-card .general-tier-badge-label {
-          background: linear-gradient(135deg, #00f2fe 0%, #b19ffb 100%);
-          color: #0e0e0e;
-          box-shadow: 0 0 8px rgba(0, 242, 254, 0.3);
-        }
-        .tier-1-card .broker-location {
-          color: #00f2fe;
-        }
+        .tier-1-card { border-color: transparent !important; box-shadow: 0 8px 32px rgba(0,242,254,0.08); position: relative; }
+        .tier-1-card::before { content: ""; position: absolute; inset: -1px; z-index: -1; border-radius: 6px; background: linear-gradient(90deg, #00f2fe, #4facfe, #b19ffb, #00f2fe); background-size: 300% 300%; animation: diamondGlow 6s linear infinite; }
+        .tier-1-card .general-tier-badge-label { background: linear-gradient(135deg, #00f2fe 0%, #b19ffb 100%); color: #0e0e0e; box-shadow: 0 0 8px rgba(0,242,254,0.3); }
+        .tier-1-card .broker-location { color: #00f2fe; }
 
-        .tier-2-card {
-          border-color: #a5c2d9 !important;
-          box-shadow: 0 4px 16px rgba(165, 194, 217, 0.04);
-        }
-        .tier-2-card .general-tier-badge-label {
-          background: linear-gradient(135deg, #a5c2d9 0%, #eef3f7 100%);
-          color: #0e0e0e;
-        }
-        .tier-2-card .broker-location {
-          color: #a5c2d9;
-        }
+        .tier-2-card { border-color: #a5c2d9 !important; box-shadow: 0 4px 16px rgba(165,194,217,0.04); }
+        .tier-2-card .general-tier-badge-label { background: linear-gradient(135deg, #a5c2d9 0%, #eef3f7 100%); color: #0e0e0e; }
+        .tier-2-card .broker-location { color: #a5c2d9; }
 
-        .tier-3-card {
-          border-color: #c8a96e !important;
-          box-shadow: 0 4px 16px rgba(200, 169, 110, 0.04);
-        }
-        .tier-3-card .general-tier-badge-label {
-          background: linear-gradient(135deg, #c8a96e 0%, #f7ebd3 100%);
-          color: #0e0e0e;
-        }
-        .tier-3-card .broker-location {
-          color: #c8a96e;
-        }
+        .tier-3-card { border-color: #c8a96e !important; box-shadow: 0 4px 16px rgba(200,169,110,0.04); }
+        .tier-3-card .general-tier-badge-label { background: linear-gradient(135deg, #c8a96e 0%, #f7ebd3 100%); color: #0e0e0e; }
+        .tier-3-card .broker-location { color: #c8a96e; }
 
-        .tier-4-card {
-          border-color: #8a8a8a !important;
-        }
-        .tier-4-card .general-tier-badge-label {
-          background: linear-gradient(135deg, #8a8a8a 0%, #dcdcdc 100%);
-          color: #0e0e0e;
-        }
-        .tier-4-card .broker-location {
-          color: #dcdcdc;
-        }
+        .tier-4-card { border-color: #8a8a8a !important; }
+        .tier-4-card .general-tier-badge-label { background: linear-gradient(135deg, #8a8a8a 0%, #dcdcdc 100%); color: #0e0e0e; }
+        .tier-4-card .broker-location { color: #dcdcdc; }
 
-        .tier-5-card {
-          border-color: #cd7f32 !important;
-        }
-        .tier-5-card .general-tier-badge-label {
-          background: linear-gradient(135deg, #a05a2c 0%, #cd7f32 100%);
-          color: #ffffff;
-        }
-        .tier-5-card .broker-location {
-          color: #cd7f32;
-        }
+        .tier-5-card { border-color: #cd7f32 !important; }
+        .tier-5-card .general-tier-badge-label { background: linear-gradient(135deg, #a05a2c 0%, #cd7f32 100%); color: #ffffff; }
+        .tier-5-card .broker-location { color: #cd7f32; }
 
         @keyframes diamondGlow {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
+          0%   { background-position: 0% 50%; }
+          50%  { background-position: 100% 50%; }
           100% { background-position: 0% 50%; }
         }
       `}</style>
