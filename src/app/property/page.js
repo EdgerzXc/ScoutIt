@@ -18,10 +18,10 @@ const MOCK_CATEGORIES = {
   "arthaland-century-pacific": "Commercial",
   "pacific-edge-villa": "STR",
   "siargao-tropical-villa": "STR",
-  "palawan-eco-retreat": "STR",
+  "palawan-eco-retreat": "Hospitality",
   "gallery-by-chele": "Restaurants",
   "antonios-tagaytay": "Restaurants",
-  "the-glasshouse-bgc": "Commercial"
+  "the-glasshouse-bgc": "Venues"
 };
 
 function PropertyDirectoryContent() {
@@ -49,8 +49,9 @@ function PropertyDirectoryContent() {
   // Pre-filter on URL category parameters
   useEffect(() => {
     if (initialType) {
-      const matched = ["Residential", "Commercial", "STR", "Restaurants"].find(
-        s => s.toLowerCase() === initialType.toLowerCase()
+      const matched = ["Residential", "Commercial", "STR", "Hospitality", "Restaurants", "Venues/Events"].find(
+        s => s.toLowerCase() === initialType.toLowerCase() || 
+             (s === "Venues/Events" && (initialType.toLowerCase() === "venues" || initialType.toLowerCase() === "venues/events" || initialType.toLowerCase() === "events"))
       );
       if (matched) {
         setSelectedSectors([matched]);
@@ -68,32 +69,36 @@ function PropertyDirectoryContent() {
 
         // 1. Group and format properties
         const airtableProperties = data.properties || [];
-        const baseProperties = getProperties().map(p => ({
-          id: p.slug,
-          slug: p.slug,
-          title: p.title,
-          city: p.city,
-          location: p.location,
-          spaceCategory: MOCK_CATEGORIES[p.slug] || "Residential",
-          aestheticTag: p.aestheticTag || "Modernist",
-          beds: p.beds,
-          baths: p.baths,
-          floor_sqm: p.floor_sqm,
-          image: p.photos?.[0] || p.image || "",
-          hook: p.hook || "Premium curated property briefing."
-        }));
+        const baseProperties = getProperties().map(p => {
+          let cat = MOCK_CATEGORIES[p.slug] || p.spaceCategory || "Residential";
+          return {
+            id: p.slug,
+            slug: p.slug,
+            title: p.title,
+            city: p.city,
+            location: p.location,
+            spaceCategory: cat,
+            aestheticTag: p.aestheticTag || "Modernist",
+            beds: p.beds,
+            baths: p.baths,
+            floor_sqm: p.floor_sqm,
+            image: p.photos?.[0] || p.image || "",
+            hook: p.hook || "Premium curated property briefing."
+          };
+        });
 
         const mergedProperties = [...baseProperties];
         airtableProperties.forEach(p => {
           if (!p.title || !p.slug || !p.spaceCategory) return;
           if (!mergedProperties.some(x => x.slug === p.slug || x.id === p.id)) {
+            let cat = p.spaceCategory || "Residential";
             mergedProperties.unshift({
               id: p.id,
               slug: p.slug || p.id,
               title: p.title,
               city: p.city || "",
               location: p.location || "",
-              spaceCategory: p.spaceCategory || "Residential",
+              spaceCategory: cat,
               aestheticTag: p.aestheticTag || "Modernist",
               beds: p.beds,
               baths: p.baths,
@@ -110,8 +115,10 @@ function PropertyDirectoryContent() {
         const airtableIntel = data.intel || [];
         const baseIntel = getArticles().map(art => {
           let category = art.category || "Residential";
-          if (category.toLowerCase() === "hospitality") category = "STR";
-          if (category.toLowerCase() === "culinary") category = "Restaurants";
+          if (category.toLowerCase() === "hospitality") category = "Hospitality";
+          if (category.toLowerCase() === "str") category = "STR";
+          if (category.toLowerCase() === "culinary" || category.toLowerCase() === "restaurants") category = "Restaurants";
+          if (category.toLowerCase() === "venues" || category.toLowerCase() === "events") category = "Venues";
           return {
             slug: art.slug,
             title: art.title,
@@ -124,8 +131,10 @@ function PropertyDirectoryContent() {
         airtableIntel.forEach(item => {
           if (!mergedIntel.some(x => x.slug === item.slug)) {
             let category = item.category || "Residential";
-            if (category.toLowerCase() === "hospitality") category = "STR";
-            if (category.toLowerCase() === "culinary") category = "Restaurants";
+            if (category.toLowerCase() === "hospitality") category = "Hospitality";
+            if (category.toLowerCase() === "str") category = "STR";
+            if (category.toLowerCase() === "culinary" || category.toLowerCase() === "restaurants") category = "Restaurants";
+            if (category.toLowerCase() === "venues" || category.toLowerCase() === "events") category = "Venues";
             mergedIntel.unshift({
               slug: item.slug || item.id,
               title: item.title,
@@ -138,26 +147,31 @@ function PropertyDirectoryContent() {
         setRawIntel(mergedIntel);
       } catch (err) {
         // Fallback strictly to local mockDb
-        const baseProperties = getProperties().map(p => ({
-          id: p.slug,
-          slug: p.slug,
-          title: p.title,
-          city: p.city,
-          location: p.location,
-          spaceCategory: MOCK_CATEGORIES[p.slug] || "Residential",
-          aestheticTag: p.aestheticTag || "Modernist",
-          beds: p.beds,
-          baths: p.baths,
-          floor_sqm: p.floor_sqm,
-          image: p.photos?.[0] || p.image || "",
-          hook: p.hook || "Premium curated property briefing."
-        }));
+        const baseProperties = getProperties().map(p => {
+          let cat = MOCK_CATEGORIES[p.slug] || p.spaceCategory || "Residential";
+          return {
+            id: p.slug,
+            slug: p.slug,
+            title: p.title,
+            city: p.city,
+            location: p.location,
+            spaceCategory: cat,
+            aestheticTag: p.aestheticTag || "Modernist",
+            beds: p.beds,
+            baths: p.baths,
+            floor_sqm: p.floor_sqm,
+            image: p.photos?.[0] || p.image || "",
+            hook: p.hook || "Premium curated property briefing."
+          };
+        });
         setRawProperties(baseProperties);
 
         const baseIntel = getArticles().map(art => {
           let category = art.category || "Residential";
-          if (category.toLowerCase() === "hospitality") category = "STR";
-          if (category.toLowerCase() === "culinary") category = "Restaurants";
+          if (category.toLowerCase() === "hospitality") category = "Hospitality";
+          if (category.toLowerCase() === "str") category = "STR";
+          if (category.toLowerCase() === "culinary" || category.toLowerCase() === "restaurants") category = "Restaurants";
+          if (category.toLowerCase() === "venues" || category.toLowerCase() === "events") category = "Venues";
           return {
             slug: art.slug,
             title: art.title,
@@ -179,7 +193,7 @@ function PropertyDirectoryContent() {
   };
 
   // Compile filter choices dynamically based on loaded property options
-  const sectors = ["Residential", "Commercial", "STR", "Restaurants"];
+  const sectors = ["Residential", "Commercial", "STR", "Hospitality", "Restaurants", "Venues/Events"];
   const locations = Array.from(new Set(rawProperties.map(p => p.city).filter(Boolean)));
   const aesthetics = Array.from(new Set(rawProperties.map(p => p.aestheticTag).filter(Boolean)));
 
@@ -194,8 +208,15 @@ function PropertyDirectoryContent() {
   // Filter properties dynamically
   const filteredProperties = rawProperties.filter(p => {
     // Sector filter
-    if (selectedSectors.length > 0 && !selectedSectors.includes(p.spaceCategory)) {
-      return false;
+    if (selectedSectors.length > 0) {
+      const mappedSectors = selectedSectors.map(s => {
+        if (s === "Venues/Events") return "Venues";
+        return s;
+      });
+      let cat = p.spaceCategory;
+      if (!mappedSectors.includes(cat)) {
+        return false;
+      }
     }
     // Location filter
     if (selectedLocations.length > 0 && !selectedLocations.includes(p.city)) {
@@ -226,7 +247,14 @@ function PropertyDirectoryContent() {
     }
     if (selectedSectors.length > 0) {
       // Find articles matching selected sectors
-      return rawIntel.filter(art => selectedSectors.includes(art.category));
+      const mappedSectors = selectedSectors.map(s => {
+        if (s === "Venues/Events") return "Venues";
+        return s;
+      });
+      return rawIntel.filter(art => {
+        let cat = art.category;
+        return mappedSectors.includes(cat);
+      });
     }
     // Return newest general articles
     return rawIntel.slice(0, 3);

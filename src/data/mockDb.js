@@ -83,7 +83,18 @@ export const DISCOVERY_FEED = {
         style: "Island Minimalist",
         image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&q=80",
         desc: "Open-plan coco-wood pavilion with high-pitched thatch roofs and private sea pools."
-      },
+      }
+    ],
+    news: [
+      { slug: "surf-front-land-rush", title: "Surf-Front Land Rush", date: "June 2026", excerpt: "Boutique developers scramble to acquire land along General Luna's extended coast." }
+    ],
+    collections: [
+      "Coastal Surf Retreats",
+      "Off-Grid Bamboo Pavilions"
+    ]
+  },
+  Hospitality: {
+    spotlights: [
       {
         title: "Palawan Eco-Retreat",
         location: "El Nido Lio",
@@ -93,12 +104,9 @@ export const DISCOVERY_FEED = {
       }
     ],
     news: [
-      { slug: "surf-front-land-rush", title: "Surf-Front Land Rush", date: "June 2026", excerpt: "Boutique developers scramble to acquire land along General Luna's extended coast." },
       { slug: "off-grid-island-living", title: "Off-Grid Island Living", date: "May 2026", excerpt: "Palawan resort developers transition fully to solar microgrids and composting systems." }
     ],
     collections: [
-      "Coastal Surf Retreats",
-      "Off-Grid Bamboo Pavilions",
       "Luxury Glamping Tents"
     ]
   },
@@ -128,14 +136,35 @@ export const DISCOVERY_FEED = {
       "Heritage Estate Dining",
       "Minimalist Coffee Spots"
     ]
+  },
+  Venues: {
+    spotlights: [
+      {
+        title: "The Glasshouse BGC",
+        location: "Bonifacio Global City",
+        style: "Steel & Glass",
+        image: "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=400&q=80",
+        desc: "Minimalist steel-framed glass pavilion designed for premier social and corporate events."
+      }
+    ],
+    news: [
+      { slug: "manila-venue-trends", title: "Manila Venue Trends", date: "June 2026", excerpt: "Premium corporate venues shift toward light-filled glass atrium spaces." }
+    ],
+    collections: [
+      "Prestige Event Venues",
+      "Glass Pavilions",
+      "BGC Event Spaces"
+    ]
   }
 };
 
 export const DISCOVER_HUBS = {
   Residential: ["BGC Alpha", "Makati Core", "Arca South", "Nuvali Estate", "Forbes Park"],
   Commercial: ["Makati CBD", "Ortigas Center", "BGC North", "Alabang CBD", "Bay Area"],
-  STR: ["Siargao Cloud 9", "El Nido Lio", "Boracay Station 1", "Panglao Island", "Coron Town"],
-  Restaurants: ["BGC High Street", "Salcedo Village", "Tagaytay Ridge", "Poblacion", "Tomas Morato"]
+  STR: ["Siargao Cloud 9", "Boracay Station 1", "Panglao Island"],
+  Hospitality: ["El Nido Lio", "Coron Town"],
+  Restaurants: ["BGC High Street", "Salcedo Village", "Tagaytay Ridge", "Poblacion", "Tomas Morato"],
+  Venues: ["BGC Core", "Makati Central", "Quezon City"]
 };
 
 export const CATEGORY_PREVIEWS = {
@@ -179,7 +208,9 @@ export const CATEGORY_PREVIEWS = {
       title: "Siargao Tropical Villa",
       image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80",
       tags: ["Aesthetic: Island Minimalist", "Yield: High Velocity", "Location: Cloud 9"],
-    },
+    }
+  ],
+  Hospitality: [
     {
       id: "palawan-eco-retreat",
       title: "Palawan Eco-Retreat",
@@ -199,6 +230,14 @@ export const CATEGORY_PREVIEWS = {
       title: "Antonio's Tagaytay",
       image: "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&q=80",
       tags: ["Aesthetic: Heritage Colonial", "Capacity: Estate", "Location: Tagaytay Ridge"],
+    }
+  ],
+  Venues: [
+    {
+      id: "the-glasshouse-bgc",
+      title: "The Glasshouse BGC",
+      image: "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=800&q=80",
+      tags: ["Aesthetic: Steel & Glass", "Capacity: 350 Guest", "Location: BGC Core"],
     }
   ]
 };
@@ -239,14 +278,6 @@ export const DISCOVER_PROPERTIES = {
       image: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80",
       density: "Sustainable Glass · 500 sqm"
     },
-    {
-      id: "the-glasshouse-bgc",
-      title: "The Glasshouse BGC",
-      city: "Bonifacio Global City",
-      location: "Bonifacio Global City",
-      image: "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=800&q=80",
-      density: "Event Venue · 600 sqm"
-    }
   ],
   STR: [
     {
@@ -266,6 +297,16 @@ export const DISCOVER_PROPERTIES = {
       density: "Surf Beachfront · 150 sqm"
     }
   ],
+  Hospitality: [
+    {
+      id: "palawan-eco-retreat",
+      title: "Palawan Eco-Retreat Lodge",
+      city: "El Nido",
+      location: "El Nido Lio, Palawan",
+      image: "https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?w=800&q=80",
+      density: "Eco Resort / Cabins · 300 sqm"
+    }
+  ],
   Restaurants: [
     {
       id: "gallery-by-chele",
@@ -283,6 +324,16 @@ export const DISCOVER_PROPERTIES = {
       image: "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&q=80",
       density: "Heritage Colonial · 800 sqm"
     }
+  ],
+  Venues: [
+    {
+      id: "the-glasshouse-bgc",
+      title: "The Glasshouse BGC",
+      city: "Bonifacio Global City",
+      location: "Bonifacio Global City",
+      image: "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=800&q=80",
+      density: "Event Venue · 600 sqm"
+    }
   ]
 };
 
@@ -299,13 +350,18 @@ export const DISCOVER_INTEL = {
   ],
   STR: [
     { id: "n7", slug: "siargao-villa-boom", category: "NEWS", date: "Q3 2026", title: "Siargao Villa Boom", snippet: "Short term rentals operating at 95% occupancy." },
-    { id: "n8", slug: "palawan-eco-resorts", category: "INSIGHT", date: "Q3 2026", title: "Palawan Eco-resorts", snippet: "Sustainable tourism driving massive development." },
     { id: "n9", slug: "str-management-strategies", category: "BLOG", date: "Q3 2026", title: "STR Management Strategies", snippet: "Optimizing yields on seasonal beach properties." }
+  ],
+  Hospitality: [
+    { id: "n8", slug: "palawan-eco-resorts", category: "INSIGHT", date: "Q3 2026", title: "Palawan Eco-resorts", snippet: "Sustainable tourism driving massive development." }
   ],
   Restaurants: [
     { id: "n10", slug: "michelin-guide-entry", category: "NEWS", date: "Q3 2026", title: "Michelin Guide Entry", snippet: "High-end dining spaces are highly contested." },
     { id: "n11", slug: "ridge-dining-surge", category: "INSIGHT", date: "Q3 2026", title: "Ridge Dining Surge", snippet: "Al fresco estate dining commands premium rates." },
     { id: "n12", slug: "restaurant-space-layouts", category: "BLOG", date: "Q3 2026", title: "Restaurant Space Layouts", snippet: "How spatial density affects kitchen efficiency." }
+  ],
+  Venues: [
+    { id: "n13", slug: "manila-venue-trends", category: "NEWS", date: "Q3 2026", title: "Manila Venue Trends", snippet: "Premium corporate venues shift toward light-filled glass atrium spaces." }
   ]
 };
 
@@ -362,24 +418,24 @@ export const DUMMY_BROKERS = [
     id: "br-03",
     name: "Marco Reyes, REB",
     title: "Lead Arbitrage Analyst",
-    specialty: "STR & Resort Properties",
-    location: "STR Sector",
-    bio: "Marco connects visionary operators with prime coastal assets and hospitality opportunities across the archipelago, specializing in modern tropical STR architecture.",
+    specialty: "Hospitality & Resort Properties",
+    location: "Hospitality Sector",
+    bio: "Marco connects visionary operators with prime coastal assets and hospitality opportunities across the archipelago, specializing in modern tropical hospitality architecture.",
     image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=800&q=80",
-    closures: "4 Verified Closures // STR Sector",
+    closures: "4 Verified Closures // Hospitality Sector",
     clearanceTier: "Tier 1 - Alpha",
     rating: 92,
     license: "PRC REB License No. 0011593",
     subscriptionTier: 2,
-    niche: ["Short Term Rentals", "Yield Optimization", "Siargao/BGC"],
+    niche: ["Hospitality", "Yield Optimization", "Siargao/BGC"],
     metrics: [
       { label: "Roster Rank", value: "Lead Analyst" },
       { label: "Clearance", value: "Tier 1" },
       { label: "Roster Status", value: "Active" }
     ],
     managedProperties: [
-      { slug: "siargao-tropical-villa", title: "Siargao Tropical Villa", category: "STR / Resort", image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=400&q=80" },
-      { slug: "palawan-eco-retreat", title: "Palawan Eco-Retreat", category: "STR / Resort", image: "https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?auto=format&fit=crop&w=400&q=80" }
+      { slug: "siargao-tropical-villa", title: "Siargao Tropical Villa", category: "Hospitality / Resort", image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=400&q=80" },
+      { slug: "palawan-eco-retreat", title: "Palawan Eco-Retreat", category: "Hospitality / Resort", image: "https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?auto=format&fit=crop&w=400&q=80" }
     ]
   },
   {
@@ -485,7 +541,7 @@ export const ARTICLES = [
   {
     slug: "surf-front-land-rush",
     title: "Surf-Front Land Rush",
-    category: "Hospitality",
+    category: "STR",
     date: "June 2026",
     excerpt: "Boutique island developers scramble to acquire coastal land along General Luna's extended surf breaks.",
     image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80"
@@ -497,6 +553,14 @@ export const ARTICLES = [
     date: "May 2026",
     excerpt: "Resort developers in Palawan shift fully to off-grid solar microgrids, green water treatment, and teak designs.",
     image: "https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?w=800&q=80"
+  },
+  {
+    slug: "manila-venue-trends",
+    title: "Manila Venue Trends",
+    category: "Venues",
+    date: "June 2026",
+    excerpt: "Premium corporate venues shift toward light-filled glass atrium spaces.",
+    image: "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=800&q=80"
   },
   {
     slug: "poblacion-food-architecture",
@@ -565,7 +629,7 @@ export const ARTICLES = [
   {
     slug: "siargao-villa-boom",
     title: "Siargao Villa Boom",
-    category: "Hospitality",
+    category: "STR",
     date: "Q3 2026",
     excerpt: "Short term rentals operating at 95% occupancy.",
     image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80"
@@ -581,7 +645,7 @@ export const ARTICLES = [
   {
     slug: "str-management-strategies",
     title: "STR Management Strategies",
-    category: "Hospitality",
+    category: "STR",
     date: "Q3 2026",
     excerpt: "Optimizing yields on seasonal beach properties.",
     image: "https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?w=800&q=80"
@@ -667,7 +731,7 @@ export const ARTICLE_DB = {
   },
   "surf-front-land-rush": {
     title: "Surf-Front Land Rush",
-    category: "Hospitality",
+    category: "STR",
     date: "June 2026",
     image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=1200&q=80",
     lead: "Siargao's rapid economic expansion is pushing boutique resort developers further down the coast. The search for raw coastal frontage is entering a critical phase.",
@@ -716,6 +780,19 @@ export const ARTICLE_DB = {
       "This architectural evolution has positioned Tagaytay as a premium destination for design-driven culinary tourism, drawing high-income weekend crowds from the capital."
     ],
     recommendation: "Focus on cantilevered steel-framed structures that have completed verified geological soil checks along the Tagaytay ridge line."
+  },
+  "manila-venue-trends": {
+    title: "Manila Venue Trends",
+    category: "Venues",
+    date: "June 2026",
+    image: "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=1200&q=80",
+    lead: "A major transformation is underway in Metro Manila's high-end social and corporate event sectors, with a major design shift toward light-filled glass atrium spaces.",
+    body: [
+      "Event organizers and corporate hosts are moving away from traditional, windowless hotel ballrooms. Instead, they seek modular pavilions that merge indoor safety with the visual beauty of the outdoor elements.",
+      "These structures integrate double-glazed high-efficiency glass panes, load-bearing steel arches, and high acoustic ceiling clouds to permit premium stage setups while maintaining absolute thermal and acoustic isolation from the urban buzz.",
+      "According to ScoutIt registry analytics, occupancy and lease inquiries for architectural venues featuring natural daylight integration have grown by 65% year-on-year."
+    ],
+    recommendation: "Acquire or lease event spaces designed with integrated pre-function outdoor spaces and modern rigging/sound proofing."
   }
 };
 
@@ -939,7 +1016,7 @@ export const PROPERTIES_DETAILS = {
     hook:              "Solar-powered beachfront cabins utilizing locally-sourced bamboo and reclaimed teak.",
     city:              "El Nido",
     property_type:     "Eco Resort / Cabins",
-    spaceCategory:     "STR",
+    spaceCategory:     "Hospitality",
     tenure:            "For Sale",
     year_built:        "2023",
     furnishing:        "Fully Furnished",

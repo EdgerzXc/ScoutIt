@@ -15,9 +15,10 @@ const MOCK_CATEGORIES = {
   "arthaland-century-pacific": "Commercial",
   "pacific-edge-villa": "STR",
   "siargao-tropical-villa": "STR",
-  "palawan-eco-retreat": "STR",
+  "palawan-eco-retreat": "Hospitality",
   "gallery-by-chele": "Restaurants",
-  "antonios-tagaytay": "Restaurants"
+  "antonios-tagaytay": "Restaurants",
+  "the-glasshouse-bgc": "Venues"
 };
 
 export default function IntelPage() {
@@ -36,20 +37,24 @@ export default function IntelPage() {
 
         // 1. Setup properties for asset back-linking
         const airtableProperties = data.properties || [];
-        const baseProperties = getProperties().map(p => ({
-          slug: p.slug,
-          title: p.title,
-          city: p.city,
-          spaceCategory: MOCK_CATEGORIES[p.slug] || "Residential"
-        }));
+        const baseProperties = getProperties().map(p => {
+          let cat = MOCK_CATEGORIES[p.slug] || p.spaceCategory || "Residential";
+          return {
+            slug: p.slug,
+            title: p.title,
+            city: p.city,
+            spaceCategory: cat
+          };
+        });
         const mergedProperties = [...baseProperties];
         airtableProperties.forEach(p => {
           if (!mergedProperties.some(x => x.slug === p.slug)) {
+            let cat = p.spaceCategory || "Residential";
             mergedProperties.push({
               slug: p.slug || p.id,
               title: p.title,
               city: p.city || "",
-              spaceCategory: p.spaceCategory || "Residential"
+              spaceCategory: cat
             });
           }
         });
@@ -62,7 +67,9 @@ export default function IntelPage() {
           if (!baseArticles.some(x => x.slug === item.slug)) {
             let category = item.category || "Residential";
             if (category.toLowerCase() === "hospitality") category = "Hospitality";
-            if (category.toLowerCase() === "culinary") category = "Culinary";
+            if (category.toLowerCase() === "str") category = "STR";
+            if (category.toLowerCase() === "culinary" || category.toLowerCase() === "restaurants") category = "Culinary";
+            if (category.toLowerCase() === "venues" || category.toLowerCase() === "events") category = "Venues";
 
             baseArticles.unshift({
               slug: item.slug || item.id,
@@ -82,7 +89,7 @@ export default function IntelPage() {
     loadCMSData();
   }, []);
 
-  const categories = ["All", "Residential", "Commercial", "Hospitality", "Culinary"];
+  const categories = ["All", "Residential", "Commercial", "STR", "Hospitality", "Culinary", "Venues"];
 
   // Match and fetch property link dynamically
   const getLinkedProperty = (article) => {
@@ -97,8 +104,10 @@ export default function IntelPage() {
 
     // Match by category mapping
     let mappedCat = article.category || "";
-    if (mappedCat.toLowerCase() === "hospitality") mappedCat = "STR";
-    if (mappedCat.toLowerCase() === "culinary") mappedCat = "Restaurants";
+    if (mappedCat.toLowerCase() === "hospitality") mappedCat = "Hospitality";
+    if (mappedCat.toLowerCase() === "str") mappedCat = "STR";
+    if (mappedCat.toLowerCase() === "culinary" || mappedCat.toLowerCase() === "restaurants") mappedCat = "Restaurants";
+    if (mappedCat.toLowerCase() === "venues" || mappedCat.toLowerCase() === "events") mappedCat = "Venues";
     const matchCat = propertiesList.find(p => p.spaceCategory.toLowerCase() === mappedCat.toLowerCase());
     return matchCat || null;
   };

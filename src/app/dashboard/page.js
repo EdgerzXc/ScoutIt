@@ -383,7 +383,9 @@ export default function BrokerWorkspace() {
                     <option>Residential</option>
                     <option>Commercial</option>
                     <option>STR</option>
+                    <option>Hospitality</option>
                     <option>Restaurants</option>
+                    <option>Venues/Events</option>
                   </select>
                 </div>
                 <div className="form-group">

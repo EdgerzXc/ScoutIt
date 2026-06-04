@@ -6,7 +6,12 @@ import Link from "next/link";
 import ReactionButtons from "@/components/ReactionButtons";
 import "./discover.css";
 
-const CATEGORIES = ["Residential", "Commercial", "STR", "Restaurants"];
+const CATEGORIES = ["Residential", "Commercial", "STR", "Hospitality", "Restaurants", "Venues/Events"];
+
+function getDBCategory(cat) {
+  if (cat === "Venues/Events") return "Venues";
+  return cat;
+}
 
 import { DISCOVER_PROPERTIES, DISCOVER_INTEL } from "@/data/mockDb";
 
@@ -36,12 +41,14 @@ export default function DiscoverClient() {
           Residential: [...DISCOVER_PROPERTIES.Residential],
           Commercial: [...DISCOVER_PROPERTIES.Commercial],
           STR: [...DISCOVER_PROPERTIES.STR],
-          Restaurants: [...DISCOVER_PROPERTIES.Restaurants]
+          Hospitality: [...DISCOVER_PROPERTIES.Hospitality],
+          Restaurants: [...DISCOVER_PROPERTIES.Restaurants],
+          Venues: [...DISCOVER_PROPERTIES.Venues]
         };
         
         airtableProperties.forEach(p => {
           if (!p.title || !p.slug || !p.spaceCategory) return;
-          const cat = p.spaceCategory;
+          let cat = p.spaceCategory;
           if (nextProps[cat]) {
             if (!nextProps[cat].some(x => x.id === p.id || x.id === p.slug || x.slug === p.slug)) {
               let density = "";
@@ -70,13 +77,17 @@ export default function DiscoverClient() {
           Residential: [...DISCOVER_INTEL.Residential],
           Commercial: [...DISCOVER_INTEL.Commercial],
           STR: [...DISCOVER_INTEL.STR],
-          Restaurants: [...DISCOVER_INTEL.Restaurants]
+          Hospitality: [...DISCOVER_INTEL.Hospitality],
+          Restaurants: [...DISCOVER_INTEL.Restaurants],
+          Venues: [...DISCOVER_INTEL.Venues]
         };
         
         airtableIntel.forEach(item => {
           let cat = item.category || "Residential";
-          if (cat.toLowerCase() === "hospitality") cat = "STR";
-          if (cat.toLowerCase() === "culinary") cat = "Restaurants";
+          if (cat.toLowerCase() === "hospitality") cat = "Hospitality";
+          if (cat.toLowerCase() === "str") cat = "STR";
+          if (cat.toLowerCase() === "culinary" || cat.toLowerCase() === "restaurants") cat = "Restaurants";
+          if (cat.toLowerCase() === "venues" || cat.toLowerCase() === "events") cat = "Venues";
           
           if (nextIntel[cat]) {
             if (!nextIntel[cat].some(x => x.slug === item.slug)) {
@@ -102,9 +113,10 @@ export default function DiscoverClient() {
 
   // Update filtered selection on category change or live data load
   useEffect(() => {
-    const list = allProperties[matchedCategory] || [];
+    const dbCategory = getDBCategory(matchedCategory);
+    const list = allProperties[dbCategory] || [];
     setProperties(list);
-    setIntel(allIntel[matchedCategory] || []);
+    setIntel(allIntel[dbCategory] || []);
     setActiveSpotlightId(prev => {
       // Keep existing active item if it is still in the new list, otherwise select the first item
       if (prev && list.some(x => x.id === prev)) return prev;
@@ -228,7 +240,7 @@ export default function DiscoverClient() {
                         <ReactionButtons
                           propertyId={property.id}
                           propertyTitle={property.title}
-                          category={matchedCategory}
+                          category={getDBCategory(matchedCategory)}
                           city={property.city}
                           small={true}
                         />

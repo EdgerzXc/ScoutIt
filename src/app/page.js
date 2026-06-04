@@ -12,6 +12,11 @@ import {
   getArticles
 } from "@/data/mockDb";
 
+function getDBCategory(cat) {
+  if (cat === "Venues/Events") return "Venues";
+  return cat;
+}
+
 export default function Home() {
   const [activePropertyType, setActivePropertyType] = useState("Residential");
   const [searchQuery, setSearchQuery] = useState("");
@@ -43,7 +48,9 @@ export default function Home() {
           Residential: [...basePreviews.Residential],
           Commercial: [...basePreviews.Commercial],
           STR: [...basePreviews.STR],
+          Hospitality: [...basePreviews.Hospitality],
           Restaurants: [...basePreviews.Restaurants],
+          Venues: [...basePreviews.Venues],
         };
         
         const newLocations = [
@@ -53,7 +60,7 @@ export default function Home() {
         
         airtableProperties.forEach((p) => {
           if (!p.title || !p.slug || !p.spaceCategory) return;
-          const category = p.spaceCategory;
+          let category = p.spaceCategory;
           if (updatedPreviews[category]) {
             if (!updatedPreviews[category].some(x => x.id === p.id || x.id === p.slug)) {
               updatedPreviews[category].unshift({
@@ -87,12 +94,14 @@ export default function Home() {
           Residential: { ...baseFeed.Residential, spotlights: [...baseFeed.Residential.spotlights], news: [...baseFeed.Residential.news], collections: [...baseFeed.Residential.collections] },
           Commercial: { ...baseFeed.Commercial, spotlights: [...baseFeed.Commercial.spotlights], news: [...baseFeed.Commercial.news], collections: [...baseFeed.Commercial.collections] },
           STR: { ...baseFeed.STR, spotlights: [...baseFeed.STR.spotlights], news: [...baseFeed.STR.news], collections: [...baseFeed.STR.collections] },
+          Hospitality: { ...baseFeed.Hospitality, spotlights: [...baseFeed.Hospitality.spotlights], news: [...baseFeed.Hospitality.news], collections: [...baseFeed.Hospitality.collections] },
           Restaurants: { ...baseFeed.Restaurants, spotlights: [...baseFeed.Restaurants.spotlights], news: [...baseFeed.Restaurants.news], collections: [...baseFeed.Restaurants.collections] },
+          Venues: { ...baseFeed.Venues, spotlights: [...baseFeed.Venues.spotlights], news: [...baseFeed.Venues.news], collections: [...baseFeed.Venues.collections] },
         };
         
         airtableProperties.forEach((p) => {
           if (!p.title || !p.slug || !p.spaceCategory) return;
-          const category = p.spaceCategory;
+          let category = p.spaceCategory;
           if (updatedFeed[category]) {
             if (!updatedFeed[category].spotlights.some(x => x.slug === p.slug || x.id === p.id)) {
               updatedFeed[category].spotlights.unshift({
@@ -111,8 +120,10 @@ export default function Home() {
         const airtableIntel = data.intel || [];
         airtableIntel.forEach((item) => {
           let category = item.category || "Residential";
-          if (category.toLowerCase() === "hospitality") category = "STR";
-          if (category.toLowerCase() === "culinary") category = "Restaurants";
+          if (category.toLowerCase() === "hospitality") category = "Hospitality";
+          if (category.toLowerCase() === "str") category = "STR";
+          if (category.toLowerCase() === "culinary" || category.toLowerCase() === "restaurants") category = "Restaurants";
+          if (category.toLowerCase() === "venues" || category.toLowerCase() === "events") category = "Venues";
           
           if (updatedFeed[category]) {
             if (!updatedFeed[category].news.some(x => x.slug === item.slug)) {
@@ -125,23 +136,27 @@ export default function Home() {
             }
           }
         });
-
+ 
         // Dynamic Spotlight Match Logic
         const allArticles = [
           ...airtableIntel.map(item => {
             let category = item.category || "Residential";
-            if (category.toLowerCase() === "hospitality") category = "STR";
-            if (category.toLowerCase() === "culinary") category = "Restaurants";
+            if (category.toLowerCase() === "hospitality") category = "Hospitality";
+            if (category.toLowerCase() === "str") category = "STR";
+            if (category.toLowerCase() === "culinary" || category.toLowerCase() === "restaurants") category = "Restaurants";
+            if (category.toLowerCase() === "venues" || category.toLowerCase() === "events") category = "Venues";
             return { ...item, category };
           }),
           ...getArticles().map(art => {
             let category = art.category || "Residential";
-            if (category.toLowerCase() === "hospitality") category = "STR";
-            if (category.toLowerCase() === "culinary") category = "Restaurants";
+            if (category.toLowerCase() === "hospitality") category = "Hospitality";
+            if (category.toLowerCase() === "str") category = "STR";
+            if (category.toLowerCase() === "culinary" || category.toLowerCase() === "restaurants") category = "Restaurants";
+            if (category.toLowerCase() === "venues" || category.toLowerCase() === "events") category = "Venues";
             return { slug: art.slug, title: art.title, category, excerpt: art.excerpt };
           })
         ];
-
+ 
         const findNewsForSpotlight = (spot, category) => {
           const matchCity = allArticles.find(art => {
             const spotLoc = spot.location || "";
@@ -153,7 +168,7 @@ export default function Home() {
           const matchCategory = allArticles.find(art => art.category === category);
           return matchCategory || null;
         };
-
+ 
         for (const cat in updatedFeed) {
           updatedFeed[cat].spotlights = updatedFeed[cat].spotlights.map(spot => {
             const news = findNewsForSpotlight(spot, cat);
@@ -176,12 +191,16 @@ export default function Home() {
           Residential: { ...baseFeed.Residential, spotlights: [...baseFeed.Residential.spotlights], news: [...baseFeed.Residential.news], collections: [...baseFeed.Residential.collections] },
           Commercial: { ...baseFeed.Commercial, spotlights: [...baseFeed.Commercial.spotlights], news: [...baseFeed.Commercial.news], collections: [...baseFeed.Commercial.collections] },
           STR: { ...baseFeed.STR, spotlights: [...baseFeed.STR.spotlights], news: [...baseFeed.STR.news], collections: [...baseFeed.STR.collections] },
+          Hospitality: { ...baseFeed.Hospitality, spotlights: [...baseFeed.Hospitality.spotlights], news: [...baseFeed.Hospitality.news], collections: [...baseFeed.Hospitality.collections] },
           Restaurants: { ...baseFeed.Restaurants, spotlights: [...baseFeed.Restaurants.spotlights], news: [...baseFeed.Restaurants.news], collections: [...baseFeed.Restaurants.collections] },
+          Venues: { ...baseFeed.Venues, spotlights: [...baseFeed.Venues.spotlights], news: [...baseFeed.Venues.news], collections: [...baseFeed.Venues.collections] },
         };
         const allArticles = getArticles().map(art => {
           let category = art.category || "Residential";
-          if (category.toLowerCase() === "hospitality") category = "STR";
-          if (category.toLowerCase() === "culinary") category = "Restaurants";
+          if (category.toLowerCase() === "hospitality") category = "Hospitality";
+          if (category.toLowerCase() === "str") category = "STR";
+          if (category.toLowerCase() === "culinary" || category.toLowerCase() === "restaurants") category = "Restaurants";
+          if (category.toLowerCase() === "venues" || category.toLowerCase() === "events") category = "Venues";
           return { slug: art.slug, title: art.title, category, excerpt: art.excerpt };
         });
         const findNewsForSpotlight = (spot, category) => {
@@ -314,7 +333,7 @@ export default function Home() {
     };
   }, []);
   
-  const propertyTypes = ["Residential", "Commercial", "STR", "Restaurants"];
+  const propertyTypes = ["Residential", "Commercial", "STR", "Hospitality", "Restaurants", "Venues/Events"];
 
   const discoverHubs = getDISCOVER_HUBS();
 
@@ -558,7 +577,7 @@ export default function Home() {
             <div className="mini-cards-grid" key={activePropertyType}>
               {(() => {
                 const q = searchQuery.toLowerCase().trim();
-                const filtered = categoryPreviews[activePropertyType].filter(item => {
+                const filtered = categoryPreviews[getDBCategory(activePropertyType)].filter(item => {
                   if (!q) return true;
                   const titleMatch = item.title.toLowerCase().includes(q);
                   const locationTag = item.tags[2] ? item.tags[2].toLowerCase() : "";
@@ -588,7 +607,7 @@ export default function Home() {
                         <ReactionButtons
                           propertyId={item.id}
                           propertyTitle={item.title}
-                          category={activePropertyType}
+                          category={getDBCategory(activePropertyType)}
                           city={city}
                           small={true}
                         />
@@ -661,7 +680,7 @@ export default function Home() {
               <div>
                 <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', textTransform: 'uppercase', color: 'var(--accent)', letterSpacing: '0.1em', marginBottom: '16px' }}>Property Spotlights</h4>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
-                  {discoveryFeed[activeDiscoverType].spotlights.map((spot, idx) => (
+                  {discoveryFeed[getDBCategory(activeDiscoverType)].spotlights.map((spot, idx) => (
                     <Link href={`/property/${spot.slug || spot.id}`} key={idx} style={{ background: '#161616', border: '1px solid #262626', borderRadius: '4px', overflow: 'hidden', display: 'flex', flexDirection: 'column', textDecoration: 'none', color: 'inherit' }} className="discover-spotlight-card-link">
                       <div style={{ height: '140px', overflow: 'hidden', position: 'relative' }}>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -687,6 +706,7 @@ export default function Home() {
                             <Link 
                               href={`/intel/${spot.newsSlug}`}
                               style={{ 
+                                // eslint-disable-next-line react/jsx-no-comment-textnodes
                                 fontSize: "12px", 
                                 color: "#fff", 
                                 fontWeight: "600",
@@ -715,7 +735,7 @@ export default function Home() {
                 <div>
                   <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', textTransform: 'uppercase', color: 'var(--accent)', letterSpacing: '0.1em', marginBottom: '16px' }}>News &amp; Stories</h4>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                    {discoveryFeed[activeDiscoverType].news.map((item, idx) => (
+                    {discoveryFeed[getDBCategory(activeDiscoverType)].news.map((item, idx) => (
                       <Link
                         key={idx}
                         href={`/intel/${item.slug}`}
@@ -735,7 +755,7 @@ export default function Home() {
                 <div>
                   <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', textTransform: 'uppercase', color: 'var(--accent)', letterSpacing: '0.1em', marginBottom: '16px' }}>Curated Collections</h4>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    {discoveryFeed[activeDiscoverType].collections.map((coll, idx) => (
+                    {discoveryFeed[getDBCategory(activeDiscoverType)].collections.map((coll, idx) => (
                       <div key={idx} className="curated-collection-btn" style={{ background: '#161616', border: '1px solid #262626', padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', transition: 'all 0.3s ease', borderRadius: '4px' }}>
                         <span style={{ fontSize: '13px', color: '#fff' }}>{coll}</span>
                         <span style={{ color: 'var(--accent)', fontSize: '12px' }}>Explore →</span>
@@ -1764,7 +1784,8 @@ export default function Home() {
           padding: 120px 48px;
           display: flex;
           flex-direction: column;
-          overflow: visible;
+          overflow-y: auto;
+          max-height: 100vh;
         }
 
         .pane-header {
