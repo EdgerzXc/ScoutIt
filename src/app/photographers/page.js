@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 import "../property/property.css";
 
-import { getPhotographers } from "@/data/mockDb";
+import { getPhotographers } from "@/data/mockPhotographers";
 
 const DUMMY_PHOTOGRAPHERS = getPhotographers();
 

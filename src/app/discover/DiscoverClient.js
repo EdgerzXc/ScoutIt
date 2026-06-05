@@ -13,7 +13,8 @@ function getDBCategory(cat) {
   return cat;
 }
 
-import { DISCOVER_PROPERTIES, DISCOVER_INTEL } from "@/data/mockDb";
+import { DISCOVER_PROPERTIES } from "@/data/mockProperties";
+import { DISCOVER_INTEL } from "@/data/mockArticles";
 
 export default function DiscoverClient() {
   const searchParams = useSearchParams();

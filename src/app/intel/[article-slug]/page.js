@@ -1,7 +1,7 @@
 import Header from "@/components/Header";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getArticleBySlug, getArticles } from "@/data/mockDb";
+import { getArticleBySlug, getArticles } from "@/data/mockArticles";
 import { fetchIntel } from "@/lib/airtable";
 
 async function getLiveArticle(slug) {

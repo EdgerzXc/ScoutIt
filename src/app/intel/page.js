@@ -4,7 +4,8 @@ import Header from "@/components/Header";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { getArticles, getProperties } from "@/data/mockDb";
+import { getArticles } from "@/data/mockArticles";
+import { getProperties } from "@/data/mockProperties";
 
 const MOCK_CATEGORIES = {
   "batasan-hills": "Residential",

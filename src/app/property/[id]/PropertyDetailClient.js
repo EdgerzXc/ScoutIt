@@ -3,12 +3,14 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import ReactionButtons from "@/components/ReactionButtons";
+import VicinityRadar from "@/components/VicinityRadar";
+import InteractiveMap from "@/components/InteractiveMap";
 import "./property.css";
 
 // ═══════════════════════════════════════════════════
 // DATA — Airtable CMS first, mockDb fallback
 // ═══════════════════════════════════════════════════
-import { getPropertyBySlug } from "@/data/mockDb";
+import { getPropertyBySlug } from "@/data/mockProperties";
 
 // ═══════════════════════════════════════════════════
 // HELPER UTILITIES
@@ -44,6 +46,10 @@ export default function PropertyDetailClient({ slug }) {
   const [dataLoading,  setDataLoading]  = useState(true);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [selectedUnit, setSelectedUnit] = useState(null);
+  const [whereToTab,        setWhereToTab]        = useState("radar");
+  const [isSubscribed,      setIsSubscribed]      = useState(false);
+  const [showStreetView,    setShowStreetView]    = useState(false);
+  const [paywallActive,     setPaywallActive]     = useState(false);
 
   // Per-panel accordion state (independent per section)
   const [accSpace,    setAccSpace]    = useState(null);
@@ -1052,7 +1058,166 @@ export default function PropertyDetailClient({ slug }) {
             <div className="panel-content">
               <div className="chapter-tag"><div className="tag-line"/><span className="tag-text">Where To?</span></div>
               <div className="display-heading">Everything<br/>within <em>reach</em></div>
-              <div id="where-to-content">{renderWhereTo()}</div>
+              
+              {/* View Switcher buttons */}
+              <div className="whereto-tabs">
+                <button 
+                  className={`whereto-tab-btn ${whereToTab === "radar" ? "active" : ""}`}
+                  onClick={() => setWhereToTab("radar")}
+                >
+                  <span className="btn-pulse" />
+                  Radar HUD
+                </button>
+                <button 
+                  className={`whereto-tab-btn ${whereToTab === "map" ? "active" : ""}`}
+                  onClick={() => setWhereToTab("map")}
+                >
+                  Spatial Map {!isSubscribed && "🔒"}
+                </button>
+                <button 
+                  className={`whereto-tab-btn ${whereToTab === "list" ? "active" : ""}`}
+                  onClick={() => setWhereToTab("list")}
+                >
+                  Directory List
+                </button>
+
+                {/* Simulated subscription debug switcher */}
+                <button
+                  className="dev-subscription-toggle"
+                  onClick={() => setIsSubscribed(s => !s)}
+                  title="Toggle subscriber simulation status"
+                >
+                  [Simulate Subscriber: {isSubscribed ? "Unlocked" : "Locked"}]
+                </button>
+              </div>
+
+              {/* Conditional view panel */}
+              <div className="whereto-view-container" style={{ position: "relative", width: "100%", minHeight: "380px" }}>
+                {whereToTab === "list" && (
+                  <div id="where-to-content">{renderWhereTo()}</div>
+                )}
+                
+                {whereToTab === "radar" && (
+                  <VicinityRadar data={d.whereTo} />
+                )}
+
+                {whereToTab === "map" && (
+                  showStreetView ? (
+                    <div className="paywall-lock-wrapper" style={{ height: "380px" }}>
+                      <div 
+                        style={{
+                          position: "absolute",
+                          inset: 0,
+                          backgroundImage: "url('https://images.unsplash.com/photo-1570129476815-ba368ac77013?w=1200&q=80')",
+                          backgroundSize: "cover",
+                          backgroundPosition: "center",
+                          filter: "brightness(0.65)"
+                        }}
+                      />
+                      
+                      {/* AR Spatial Tag items overlay */}
+                      <div style={{ position: "absolute", top: "30%", left: "20%", transform: "translate(-50%, -50%)" }}>
+                        <div style={{ background: "rgba(22, 22, 22, 0.85)", border: "0.5px solid var(--accent)", padding: "8px 12px", borderRadius: "4px", backdropFilter: "blur(6px)" }}>
+                          <span style={{ fontSize: "8px", color: "var(--accent)", display: "block", fontFamily: "var(--font-mono)", letterSpacing: "1px" }}>NEAREST TRANSIT</span>
+                          <span style={{ fontSize: "11px", fontWeight: "bold", color: "#fff" }}>Kalayaan Flyover Entrance</span>
+                          <span style={{ fontSize: "9px", color: "#aaa", display: "block", marginTop: "2px" }}>Distance: 5 min drive</span>
+                        </div>
+                        <div style={{ width: "2px", height: "30px", background: "linear-gradient(to bottom, var(--accent), transparent)", margin: "0 auto" }} />
+                      </div>
+
+                      <div style={{ position: "absolute", top: "45%", left: "70%", transform: "translate(-50%, -50%)" }}>
+                        <div style={{ background: "rgba(22, 22, 22, 0.85)", border: "0.5px solid var(--accent)", padding: "8px 12px", borderRadius: "4px", backdropFilter: "blur(6px)" }}>
+                          <span style={{ fontSize: "8px", color: "var(--accent)", display: "block", fontFamily: "var(--font-mono)", letterSpacing: "1px" }}>HEALTHCARE</span>
+                          <span style={{ fontSize: "11px", fontWeight: "bold", color: "#fff" }}>St. Luke's Medical BGC</span>
+                          <span style={{ fontSize: "9px", color: "#aaa", display: "block", marginTop: "2px" }}>Distance: 6 min drive</span>
+                        </div>
+                        <div style={{ width: "2px", height: "30px", background: "linear-gradient(to bottom, var(--accent), transparent)", margin: "0 auto" }} />
+                      </div>
+
+                      {/* exit street view button */}
+                      <button 
+                        className="paywall-action-btn"
+                        onClick={() => setShowStreetView(false)}
+                        style={{ position: "absolute", bottom: "16px", right: "16px", zIndex: 10, background: "rgba(22, 22, 22, 0.95)", border: "0.5px solid #444", color: "#fff" }}
+                      >
+                        Exit Street View
+                      </button>
+
+                      <div style={{ position: "absolute", top: "16px", left: "16px", zIndex: 10 }}>
+                        <div style={{ background: "rgba(10, 10, 10, 0.8)", padding: "6px 12px", borderRadius: "4px", border: "0.5px solid #222", fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--accent)" }}>
+                          🎥 3D STREET HUD MODE &middot; ACTIVE
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{ position: "relative", width: "100%", height: "380px" }}>
+                      <InteractiveMap 
+                        lat={d.lat || d.latitude || 14.5547} 
+                        lng={d.lng || d.longitude || 121.0244} 
+                        propertyTitle={d.title} 
+                        vicinityData={d.whereTo} 
+                      />
+                      
+                      {/* Street View Activator button */}
+                      <div style={{ position: "absolute", bottom: "16px", left: "16px", zIndex: 1000 }}>
+                        <button 
+                          className="whereto-tab-btn" 
+                          onClick={() => {
+                            if (isSubscribed) {
+                              setShowStreetView(true);
+                            } else {
+                              setPaywallActive(true);
+                            }
+                          }}
+                          style={{ background: "rgba(14, 14, 14, 0.95)", borderColor: "var(--accent)", boxShadow: "0 4px 12px rgba(0,0,0,0.5)" }}
+                        >
+                          🎥 Activate 3D Street View HUD 🔒
+                        </button>
+                      </div>
+
+                      {/* paywall check */}
+                      {paywallActive && (
+                        <div className="paywall-lock-wrapper" style={{ position: "absolute", inset: 0, zIndex: 2000, background: "rgba(10, 9, 8, 0.75)", backdropFilter: "blur(8px)" }}>
+                          <button 
+                            onClick={() => setPaywallActive(false)}
+                            style={{ position: "absolute", top: "16px", right: "16px", background: "transparent", border: "none", color: "#8a8a8a", fontSize: "18px", cursor: "pointer", zIndex: 10 }}
+                            title="Close panel"
+                          >
+                            ✕
+                          </button>
+                          <div className="paywall-glass-card">
+                            <div className="paywall-lock-symbol">🔒</div>
+                            <div className="paywall-hud-title">ROSTER CLEARANCE REQUIRED</div>
+                            <p className="paywall-hud-desc">
+                              Subscription credential clearance is required to activate the Google 3D Street View and routing vectors HUD.
+                            </p>
+                            <div style={{ display: "flex", gap: "8px", width: "100%" }}>
+                              <button 
+                                className="paywall-action-btn" 
+                                style={{ flex: 1 }}
+                                onClick={() => {
+                                  setIsSubscribed(true);
+                                  setPaywallActive(false);
+                                  setShowStreetView(true);
+                                }}
+                              >
+                                Clear Channel
+                              </button>
+                              <button 
+                                className="paywall-action-btn" 
+                                style={{ flex: 1, background: "rgba(255,255,255,0.05)", border: "0.5px solid #444", color: "#aaa" }}
+                                onClick={() => setPaywallActive(false)}
+                              >
+                                Keep Free
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )
+                )}
+              </div>
             </div>
              <div className="panel-sidebar">
               <div className="sidebar-block">

@@ -4,7 +4,7 @@ import Header from "@/components/Header";
 import { useState } from "react";
 import "../property/property.css";
 import Link from "next/link";
-import { getResearchers } from "@/data/mockDb";
+import { getResearchers } from "@/data/mockResearchers";
 
 const DUMMY_RESEARCHERS = getResearchers();
 

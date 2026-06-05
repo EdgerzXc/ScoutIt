@@ -5,7 +5,8 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Header from "@/components/Header";
 import ReactionButtons from "@/components/ReactionButtons";
-import { getProperties, getArticles } from "@/data/mockDb";
+import { getProperties } from "@/data/mockProperties";
+import { getArticles } from "@/data/mockArticles";
 import "./property.css";
 
 // Dictionary mapping local mockDb slugs to correct UI SpaceCategories

@@ -4,7 +4,7 @@ import Header from "@/components/Header";
 import { useState } from "react";
 import "../property/property.css";
 import Link from "next/link";
-import { getEventPlanners } from "@/data/mockDb";
+import { getEventPlanners } from "@/data/mockEventPlanners";
 
 const DUMMY_PLANNERS = getEventPlanners();
 

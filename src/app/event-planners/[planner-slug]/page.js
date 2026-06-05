@@ -2,7 +2,7 @@ import Header from "@/components/Header";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import ServiceConnectionPortal from "@/components/ServiceConnectionPortal";
-import { getEventPlanners } from "@/data/mockDb";
+import { getEventPlanners } from "@/data/mockEventPlanners";
 
 const DUMMY_PLANNERS = getEventPlanners();
 

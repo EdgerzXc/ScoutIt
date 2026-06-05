@@ -1,7 +1,3 @@
-// Centralized Mock Database for ScoutIt Space Intelligence
-// This file serves as the local database fallback. 
-// Swap this file's functions with live CMS API calls (e.g. Airtable) to transition.
-
 export const SPACE_STARS = [
   { top: '15%', left: '12%', size: '1.5px', opacity: 0.15 },
   { top: '8%', left: '34%', size: '2px', opacity: 0.25 },
@@ -435,727 +431,12 @@ export const DISCOVER_PROPERTIES = {
   ]
 };
 
-export const DISCOVER_INTEL = {
-  Residential: [
-    { id: "n1", slug: "bgc-condo-yields-rise", category: "NEWS", date: "Q3 2026", title: "BGC Condo Yields Rise", snippet: "Premium residential spaces see 4.2% YoY growth." },
-    { id: "n2", slug: "makati-central-resurgence", category: "INSIGHT", date: "Q3 2026", title: "Makati Central Resurgence", snippet: "Older luxury buildings undergoing massive renovations." },
-    { id: "n3", slug: "mastering-qc-market", category: "BLOG", date: "Q3 2026", title: "Mastering the QC Market", snippet: "What to look for in QC subdivision residences." }
-  ],
-  Commercial: [
-    { id: "n4", slug: "new-bpo-headquarters", category: "NEWS", date: "Q3 2026", title: "New BPO Headquarters", snippet: "Global tech firms securing massive floor plates." },
-    { id: "n5", slug: "high-street-expansion", category: "INSIGHT", date: "Q3 2026", title: "High Street Expansion", snippet: "Retail spaces are fully occupied for the next 24 months." },
-    { id: "n6", slug: "bgc-commercial-outlook", category: "BLOG", date: "Q3 2026", title: "BGC Commercial Outlook", snippet: "Corporate spatial requirements shifting to flexible hubs." }
-  ],
-  STR: [
-    { id: "n7", slug: "siargao-villa-boom", category: "NEWS", date: "Q3 2026", title: "Siargao Villa Boom", snippet: "Short term rentals operating at 95% occupancy across General Luna." },
-    { id: "n9", slug: "str-management-strategies", category: "BLOG", date: "Q3 2026", title: "STR Management Strategies", snippet: "Optimizing yields on seasonal beach properties through dynamic pricing." },
-    { id: "n14", slug: "surf-front-land-rush", category: "INSIGHT", date: "Q3 2026", title: "Surf-Front Land Rush", snippet: "Boracay and Siargao developers compete for remaining coastal frontage." }
-  ],
-  Hospitality: [
-    { id: "n8", slug: "palawan-eco-resorts", category: "INSIGHT", date: "Q3 2026", title: "Palawan Eco-resorts", snippet: "Sustainable tourism driving massive eco-lodge development in El Nido." },
-    { id: "n15", slug: "off-grid-island-living", category: "BLOG", date: "Q3 2026", title: "Off-Grid Island Living", snippet: "Palawan resorts go fully solar — a new standard for island hospitality." },
-    { id: "n16", slug: "coron-resort-surge", category: "NEWS", date: "Q3 2026", title: "Coron Resort Surge", snippet: "Overwater villas in Coron achieve highest ADR in the archipelago." }
-  ],
-  Restaurants: [
-    { id: "n10", slug: "michelin-guide-entry", category: "NEWS", date: "Q3 2026", title: "Michelin Guide Entry", snippet: "High-end dining spaces in BGC and Makati are highly contested." },
-    { id: "n11", slug: "ridge-dining-surge", category: "INSIGHT", date: "Q3 2026", title: "Ridge Dining Surge", snippet: "Al fresco estate dining commands premium Tagaytay rates." },
-    { id: "n12", slug: "restaurant-space-layouts", category: "BLOG", date: "Q3 2026", title: "Restaurant Space Layouts", snippet: "How spatial density affects kitchen efficiency and chef performance." }
-  ],
-  Venues: [
-    { id: "n13", slug: "manila-venue-trends", category: "NEWS", date: "Q3 2026", title: "Manila Venue Trends", snippet: "Premium corporate venues shift toward light-filled glass atrium spaces." },
-    { id: "n17", slug: "rooftop-events-boom", category: "INSIGHT", date: "Q3 2026", title: "Rooftop Events Boom", snippet: "Skyline venues in Makati and BGC post record bookings for 2026 season." },
-    { id: "n18", slug: "venue-tech-integration", category: "BLOG", date: "Q3 2026", title: "Venue Tech Integration", snippet: "Smart A/V systems and dynamic lighting transform the corporate event game." }
-  ]
-};
-
-export const DUMMY_BROKERS = [
-  {
-    id: "br-01",
-    name: "Miguel Torres, REB",
-    title: "Principal Strategist",
-    specialty: "Ultra-Luxury Residential",
-    location: "BGC Focus",
-    bio: "With over a decade of experience in BGC and the greater Manila market, Miguel specializes in industrial-modern residential estates and adaptive reuse projects.",
-    image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=800&q=80",
-    closures: "3 Verified Closures // BGC Focus",
-    clearanceTier: "Tier 1 - Alpha",
-    rating: 84,
-    license: "PRC REB License No. 0019284",
-    subscriptionTier: 4,
-    niche: ["Industrial Modern", "BGC Residential", "Asset Valuation"],
-    metrics: [
-      { label: "Roster Rank", value: "Principal" },
-      { label: "Clearance", value: "Tier 1" },
-      { label: "Roster Status", value: "Active" }
-    ],
-    managedProperties: [
-      { slug: "batasan-hills", title: "Batasan Hills House & Lot", category: "Residential", image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=400&q=80" },
-      { slug: "aurelia-residences", title: "Aurelia Residences Penthouse", category: "Residential", image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=400&q=80" }
-    ]
-  },
-  {
-    id: "br-02",
-    name: "Elena Santos, REB",
-    title: "Global Capital Manager",
-    specialty: "Grade A Office Spaces",
-    location: "Makati Core",
-    bio: "Elena provides structural insights for institutional clients, guiding commercial acquisitions and corporate relocations.",
-    image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=800&q=80",
-    closures: "2 Verified Closures // QC Residential",
-    clearanceTier: "Tier 2 - Omega",
-    rating: 76,
-    license: "PRC REB License No. 0021485",
-    subscriptionTier: 5,
-    niche: ["QC Luxury Estates", "Family Homes", "Negotiation"],
-    metrics: [
-      { label: "Roster Rank", value: "Manager" },
-      { label: "Clearance", value: "Tier 2" },
-      { label: "Roster Status", value: "Active" }
-    ],
-    managedProperties: [
-      { slug: "zuellig-building", title: "Zuellig Commercial Tower", category: "Commercial", image: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=400&q=80" },
-      { slug: "arthaland-century-pacific", title: "Arthaland Century Plaza", category: "Commercial", image: "https://images.unsplash.com/photo-1582653291997-079a1c04e5d1?auto=format&fit=crop&w=400&q=80" }
-    ]
-  },
-  {
-    id: "br-03",
-    name: "Marco Reyes, REB",
-    title: "Lead Arbitrage Analyst",
-    specialty: "Hospitality & Resort Properties",
-    location: "Hospitality Sector",
-    bio: "Marco connects visionary operators with prime coastal assets and hospitality opportunities across the archipelago, specializing in modern tropical hospitality architecture.",
-    image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=800&q=80",
-    closures: "4 Verified Closures // Hospitality Sector",
-    clearanceTier: "Tier 1 - Alpha",
-    rating: 92,
-    license: "PRC REB License No. 0011593",
-    subscriptionTier: 2,
-    niche: ["Hospitality", "Yield Optimization", "Siargao/BGC"],
-    metrics: [
-      { label: "Roster Rank", value: "Lead Analyst" },
-      { label: "Clearance", value: "Tier 1" },
-      { label: "Roster Status", value: "Active" }
-    ],
-    managedProperties: [
-      { slug: "siargao-tropical-villa", title: "Siargao Tropical Villa", category: "Hospitality / Resort", image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=400&q=80" },
-      { slug: "palawan-eco-retreat", title: "Palawan Eco-Retreat", category: "Hospitality / Resort", image: "https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?auto=format&fit=crop&w=400&q=80" }
-    ]
-  },
-  {
-    id: "br-04",
-    name: "Julian Sy",
-    title: "Industrial & Logistics Advisor",
-    specialty: "Warehousing & Supply Chain",
-    location: "Laguna Focus",
-    bio: "Focusing on the expanding industrial corridors south of Manila, Julian engineers strategic acquisitions for logistics hubs.",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80",
-    closures: "2 Verified Closures // Laguna & Batangas",
-    clearanceTier: "Tier 3 - Beta",
-    rating: 88,
-    license: "PRC REB License No. 0014902",
-    subscriptionTier: 5,
-    niche: ["Logistics Hubs", "Industrial Land", "Supply Chain Planning"],
-    metrics: [
-      { label: "Roster Rank", value: "Specialist" },
-      { label: "Clearance", value: "Tier 3" },
-      { label: "Roster Status", value: "Active" }
-    ],
-    managedProperties: []
-  },
-  {
-    id: "br-05",
-    name: "Camille Laurel",
-    title: "Architectural Asset Advisor",
-    specialty: "Heritage & Conservation",
-    location: "Quezon City Focus",
-    bio: "An advocate for adaptive reuse, Camille brokers the transfer and restoration of culturally significant structures.",
-    image: "https://images.unsplash.com/photo-1598550874175-4d0ef436c909?w=800&q=80",
-    closures: "1 Verified Closure // Quezon City",
-    clearanceTier: "Tier 2 - Omega",
-    rating: 90,
-    license: "PRC REB License No. 0020184",
-    subscriptionTier: 3,
-    niche: ["Heritage Transfer", "Adaptive Reuse", "Conservation Consulting"],
-    metrics: [
-      { label: "Roster Rank", value: "Advisor" },
-      { label: "Clearance", value: "Tier 2" },
-      { label: "Roster Status", value: "Active" }
-    ],
-    managedProperties: []
-  },
-  {
-    id: "br-06",
-    name: "Sofia Araneta",
-    title: "Boutique Hospitality Specialist",
-    specialty: "Culinary Estates",
-    location: "Tagaytay Focus",
-    bio: "Sofia identifies pre-development opportunities in rising economic zones, advising private equity on long-term holds.",
-    image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=800&q=80",
-    closures: "2 Verified Closures // Tagaytay & South",
-    clearanceTier: "Tier 3 - Beta",
-    rating: 95,
-    license: "PRC REB License No. 0016839",
-    subscriptionTier: 1,
-    niche: ["Boutique Hotels", "Culinary Acreage", "Private Equity Holds"],
-    metrics: [
-      { label: "Roster Rank", value: "Specialist" },
-      { label: "Clearance", value: "Tier 3" },
-      { label: "Roster Status", value: "Active" }
-    ],
-    managedProperties: [
-      { slug: "antonios-tagaytay", title: "Antonio's Tagaytay Estate", category: "Restaurants", image: "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?auto=format&fit=crop&w=400&q=80" }
-    ]
-  }
-];
-
-export const DUMMY_PHOTOGRAPHERS = [
-  {
-    id: "ph-001",
-    name: "Marco Reyes",
-    location: "BGC, Taguig",
-    title: "Architectural & Interior Photographer",
-    specialty: "Interior Architecture",
-    equipment: "Sony A7R V · Tilt-Shift 24mm · Profoto B10",
-    style: "Clean, high-contrast natural light with minimal staging",
-    rate: "Starting at ₱8,500 / session",
-    shoots: "42 Space Shoots",
-    bio: "Seven years documenting Metro Manila's most compelling interiors. Trusted by developers, architects, and private sellers who need photos that move properties.",
-    image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=800&q=80",
-    tier: 1,
-    license: "Licensed Architectural Photographer · BGC Guild",
-    clearanceTier: "Tier 1 - Elite Creator",
-    rating: 94,
-    niche: ["Interior Design", "BGC Commercial", "Natural Light Focus"],
-    metrics: [
-      { label: "Roster Rank", value: "Principal Artist" },
-      { label: "Clearance", value: "Tier 1" },
-      { label: "Roster Status", value: "Active" }
-    ],
-    managedProperties: [
-      { slug: "aurelia-residences", title: "Aurelia Residences Penthouse", category: "Residential", image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=400&q=80" },
-      { slug: "gridwork-studio", title: "The Gridwork Studio", category: "Commercial", image: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=400&q=80" }
-    ]
-  },
-  {
-    id: "ph-002",
-    name: "Alicia Tan",
-    location: "Makati, Metro Manila",
-    title: "Aerial & Lifestyle Property Photographer",
-    specialty: "Drone Aerial + Lifestyle",
-    equipment: "DJI Mavic 3 Pro · Canon R5 · Godox AD400 Pro",
-    style: "Golden hour cinematic with wide environmental context",
-    rate: "Starting at ₱12,000 / session",
-    shoots: "61 Space Shoots",
-    bio: "CAA-licensed drone operator and lifestyle photographer. Specializes in resort, STR, and luxury residential where the surrounding environment is part of the story.",
-    image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=800&q=80",
-    tier: 2,
-    license: "CAA UAS Pilot License No. 0089281",
-    clearanceTier: "Tier 2 - Alpha",
-    rating: 91,
-    niche: ["Resort Aerials", "STR Cinematic", "Lifestyle Property"],
-    metrics: [
-      { label: "Roster Rank", value: "Lead Pilot" },
-      { label: "Clearance", value: "Tier 2" },
-      { label: "Roster Status", value: "Active" }
-    ],
-    managedProperties: [
-      { slug: "siargao-tropical-villa", title: "Siargao Tropical Villa", category: "STR", image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=400&q=80" },
-      { slug: "palawan-eco-retreat", title: "Palawan Eco-Retreat", category: "Hospitality", image: "https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?auto=format&fit=crop&w=400&q=80" }
-    ]
-  },
-  {
-    id: "ph-003",
-    name: "Daniel Flores",
-    location: "Cebu City",
-    title: "Commercial Space & Restaurant Photographer",
-    specialty: "Commercial & F&B",
-    equipment: "Nikon Z8 · 14–24mm f/2.8 · Elinchrom ELB 500",
-    style: "Warm editorial tones, ambiance-forward with texture and depth",
-    rate: "Starting at ₱6,000 / session",
-    shoots: "28 Space Shoots",
-    bio: "Cebu-based specialist in restaurants, cafés, and boutique commercial spaces. Delivers gallery-ready images within 48 hours.",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80",
-    tier: 3,
-    license: "Certified Commercial Photographer · Visayas Association",
-    clearanceTier: "Tier 3 - Beta",
-    rating: 88,
-    niche: ["F&B Spaces", "Cafe Ambiance", "Visayas Regional"],
-    metrics: [
-      { label: "Roster Rank", value: "Commercial Specialist" },
-      { label: "Clearance", value: "Tier 3" },
-      { label: "Roster Status", value: "Active" }
-    ],
-    managedProperties: [
-      { slug: "gallery-by-chele", title: "Gallery by Chele", category: "Restaurants", image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=400&q=80" },
-      { slug: "antonios-tagaytay", title: "Antonio's Tagaytay Estate", category: "Restaurants", image: "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?auto=format&fit=crop&w=400&q=80" }
-    ]
-  }
-];
-
-export const DUMMY_RESEARCHERS = [
-  {
-    id: "sr-001",
-    name: "Patricia Lim",
-    location: "Metro Manila",
-    title: "Senior Space Intelligence Researcher",
-    focus: "Residential Due Diligence",
-    markets: "BGC · Makati · Ortigas · Eastwood",
-    turnaround: "5–7 Business Days",
-    reports: "84 Reports Delivered",
-    bio: "Former property appraiser with 9 years of field experience. Specializes in pre-purchase residential due diligence — title verification, structural assessment coordination, neighborhood pattern analysis, and comparable sales mapping.",
-    image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=800&q=80",
-    tier: 1,
-    deliverables: ["Title chain verification", "On-site structural walkthrough", "Neighborhood livability report", "Comparable sales within 500m", "Developer track record analysis"],
-    license: "PRC Licensed Appraiser No. 0092184",
-    clearanceTier: "Tier 1 - Lead Inspector",
-    rating: 95,
-    niche: ["Title Chain Verification", "Structural Coordination", "BGC Due Diligence"],
-    metrics: [
-      { label: "Roster Rank", value: "Senior Researcher" },
-      { label: "Clearance", value: "Tier 1" },
-      { label: "Roster Status", value: "Active" }
-    ],
-    managedProperties: [
-      { slug: "batasan-hills", title: "Batasan Hills House & Lot", category: "Residential", image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=400&q=80" },
-      { slug: "aurelia-residences", title: "Aurelia Residences Penthouse", category: "Residential", image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=400&q=80" }
-    ]
-  },
-  {
-    id: "sr-002",
-    name: "Kristoffer Navarro",
-    location: "Cebu & Visayas",
-    title: "Commercial & Investment Researcher",
-    focus: "Commercial Investment Analysis",
-    markets: "Cebu City · Lapu-Lapu · Mandaue · Dumaguete",
-    turnaround: "7–10 Business Days",
-    reports: "37 Reports Delivered",
-    bio: "Commercial real estate analyst with background in urban planning. Focuses on ROI feasibility, zoning compliance, and foot traffic pattern studies for retail, office, and mixed-use acquisitions in the Visayas.",
-    image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=800&q=80",
-    tier: 2,
-    deliverables: ["Zoning & land use verification", "ROI feasibility worksheet", "Foot traffic data (3-month avg)", "Competing tenant analysis", "Infrastructure & utilities report"],
-    license: "Licensed Urban Planner No. 0019283",
-    clearanceTier: "Tier 2 - Alpha Analyst",
-    rating: 89,
-    niche: ["Zoning & Compliance", "Foot Traffic Studies", "Visayas Mixed-Use"],
-    metrics: [
-      { label: "Roster Rank", value: "Urban Planner" },
-      { label: "Clearance", value: "Tier 2" },
-      { label: "Roster Status", value: "Active" }
-    ],
-    managedProperties: [
-      { slug: "zuellig-building", title: "Zuellig Commercial Tower", category: "Commercial", image: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=400&q=80" },
-      { slug: "bohol-treehouse-lodge", title: "Bohol Treehouse Lodge", category: "Hospitality", image: "https://images.unsplash.com/photo-1510798831971-661eb04b3739?auto=format&fit=crop&w=400&q=80" }
-    ]
-  },
-  {
-    id: "sr-003",
-    name: "Sunshine Ramos",
-    location: "Davao & Mindanao",
-    title: "Hospitality & STR Researcher",
-    focus: "Short-Term Rental & Hospitality",
-    markets: "Davao City · Siargao · General Santos · Bukidnon",
-    turnaround: "6–8 Business Days",
-    reports: "21 Reports Delivered",
-    bio: "Tourism industry background combined with STR market expertise. Delivers occupancy benchmarking, revenue potential estimates, and compliance checks for Airbnb, resort, and boutique hotel acquisitions in Mindanao.",
-    image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=800&q=80",
-    tier: 3,
-    deliverables: ["Occupancy rate benchmarking", "Revenue potential estimate", "Barangay permit & compliance check", "STR saturation analysis", "Tourism corridor outlook"],
-    license: "Certified STR Yield Analyst · Davao Guild",
-    clearanceTier: "Tier 3 - Beta",
-    rating: 91,
-    niche: ["Occupancy Benchmarking", "Mindanao Saturation", "Siargao STR"],
-    metrics: [
-      { label: "Roster Rank", value: "Hospitality Specialist" },
-      { label: "Clearance", value: "Tier 3" },
-      { label: "Roster Status", value: "Active" }
-    ],
-    managedProperties: [
-      { slug: "siargao-tropical-villa", title: "Siargao Tropical Villa", category: "STR", image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=400&q=80" },
-      { slug: "palawan-eco-retreat", title: "Palawan Eco-Retreat", category: "Hospitality", image: "https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?auto=format&fit=crop&w=400&q=80" }
-    ]
-  }
-];
-
-export const DUMMY_EVENT_PLANNERS = [
-  {
-    id: "ep-001",
-    name: "Isabella Cruz",
-    location: "Metro Manila",
-    title: "Luxury Event Designer & Planner",
-    specialty: "Wedding & Luxury Events",
-    style: "Modern, opulent, floral-forward design with custom lighting",
-    venues: "The Peninsula Manila · Shangri-La The Fort · Enderun Tent",
-    rate: "Starting at ₱150,000 / event",
-    events: "120+ Events",
-    bio: "Over a decade of creating bespoke luxury weddings and high-profile social galas. Specializes in transforming raw spaces into breathtaking immersive environments.",
-    image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&q=80",
-    tier: 1,
-    license: "Professional Event Organizer Guild ID 20281",
-    clearanceTier: "Tier 1 - Elite Designer",
-    rating: 96,
-    niche: ["Luxury Weddings", "Galas & Socials", "Immersive Lighting"],
-    metrics: [
-      { label: "Roster Rank", value: "Elite Designer" },
-      { label: "Clearance", value: "Tier 1" },
-      { label: "Roster Status", value: "Active" }
-    ],
-    managedProperties: [
-      { slug: "the-glasshouse-bgc", title: "The Glasshouse BGC", category: "Venues", image: "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=400&q=80" },
-      { slug: "solaire-grand-ballroom", title: "Solaire Grand Ballroom", category: "Venues", image: "https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?auto=format&fit=crop&w=400&q=80" }
-    ]
-  },
-  {
-    id: "ep-002",
-    name: "James Villanueva",
-    location: "Cebu & Visayas",
-    title: "Corporate Experience & Brand Designer",
-    specialty: "Corporate & Brand Events",
-    style: "Sleek, tech-integrated, high-energy experiential production",
-    venues: "Jpark Island Resort · Oakridge Pavilion · Radisson Blu Cebu",
-    rate: "Starting at ₱85,000 / event",
-    events: "74 Events",
-    bio: "Specializes in product launches, brand activations, and corporate retreats across the Visayas. Blends modern aesthetics with seamless event logistics.",
-    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800&q=80",
-    tier: 2,
-    license: "Visayas Event Organizers Guild ID 00192",
-    clearanceTier: "Tier 2 - Alpha Producer",
-    rating: 90,
-    niche: ["Product Launches", "Corporate Retreats", "Visayas Regional"],
-    metrics: [
-      { label: "Roster Rank", value: "Lead Producer" },
-      { label: "Clearance", value: "Tier 2" },
-      { label: "Roster Status", value: "Active" }
-    ],
-    managedProperties: [
-      { slug: "sky-pavilion-makati", title: "Sky Pavilion Makati", category: "Venues", image: "https://images.unsplash.com/photo-1587825140708-dfaf72ae4b04?auto=format&fit=crop&w=400&q=80" },
-      { slug: "zuellig-building", title: "Zuellig Commercial Tower", category: "Commercial", image: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=400&q=80" }
-    ]
-  },
-  {
-    id: "ep-003",
-    name: "Maria Santos",
-    location: "Davao & Mindanao",
-    title: "Boutique & Social Celebrations Planner",
-    specialty: "Birthdays & Intimate Celebrations",
-    style: "Chic, warm, minimalist rustic and bohemian aesthetics",
-    venues: "Dusit Thani Lubi Plantation · Waterfront Insular Davao",
-    rate: "Starting at ₱45,000 / event",
-    events: "38 Events",
-    bio: "Davao-based planner specializing in intimate weddings, milestone birthdays, and boutique social gatherings. Passionate about personalized, detail-rich celebrations.",
-    image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=800&q=80",
-    tier: 3,
-    license: "Mindanao Celebrations Association No. 00812",
-    clearanceTier: "Tier 3 - Beta",
-    rating: 92,
-    niche: ["Intimate Weddings", "Bohemian Aesthetics", "Mindanao Boutique"],
-    metrics: [
-      { label: "Roster Rank", value: "Boutique Designer" },
-      { label: "Clearance", value: "Tier 3" },
-      { label: "Roster Status", value: "Active" }
-    ],
-    managedProperties: [
-      { slug: "boracay-bamboo-hideaway", title: "Boracay Bamboo Hideaway", category: "STR", image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=400&q=80" },
-      { slug: "bohol-treehouse-lodge", title: "Bohol Treehouse Lodge", category: "Hospitality", image: "https://images.unsplash.com/photo-1510798831971-661eb04b3739?auto=format&fit=crop&w=400&q=80" }
-    ]
-  }
-];
-
-export const ARTICLES = [
-  {
-    slug: "bgc-spatial-movement",
-    title: "BGC Spatial Movement",
-    category: "Residential",
-    date: "June 2026",
-    excerpt: "A rise in demand for low-density residences drives modernist villa acquisitions across Bonifacio Global City core.",
-    image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80"
-  },
-  {
-    slug: "return-of-quiet-luxury",
-    title: "The Return of Quiet Luxury",
-    category: "Residential",
-    date: "May 2026",
-    excerpt: "Local high-net-worth buyers increasingly favor hidden properties in Quezon City over flashy, visible estates.",
-    image: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&q=80"
-  },
-  {
-    slug: "green-office-demand",
-    title: "Green Office Demand",
-    category: "Commercial",
-    date: "June 2026",
-    excerpt: "Global firms in Manila mandate LEED-certified workspaces, shaping future skyscraper architectural footprints.",
-    image: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80"
-  },
-  {
-    slug: "bgc-commercial-corridors",
-    title: "BGC Commercial Corridors",
-    category: "Commercial",
-    date: "April 2026",
-    excerpt: "Retail podiums and commercial corridors evolve to incorporate open-air sky parks and wellness zones.",
-    image: "https://images.unsplash.com/photo-1582653291997-079a1c04e5d1?w=800&q=80"
-  },
-  {
-    slug: "surf-front-land-rush",
-    title: "Surf-Front Land Rush",
-    category: "STR",
-    date: "June 2026",
-    excerpt: "Boutique island developers scramble to acquire coastal land along General Luna's extended surf breaks.",
-    image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80"
-  },
-  {
-    slug: "off-grid-island-living",
-    title: "Off-Grid Island Living",
-    category: "Hospitality",
-    date: "May 2026",
-    excerpt: "Resort developers in Palawan shift fully to off-grid solar microgrids, green water treatment, and teak designs.",
-    image: "https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?w=800&q=80"
-  },
-  {
-    slug: "manila-venue-trends",
-    title: "Manila Venue Trends",
-    category: "Venues",
-    date: "June 2026",
-    excerpt: "Premium corporate venues shift toward light-filled glass atrium spaces.",
-    image: "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=800&q=80"
-  },
-  {
-    slug: "poblacion-food-architecture",
-    title: "Poblacion Food Architecture",
-    category: "Culinary",
-    date: "June 2026",
-    excerpt: "Industrial modernist overlays reshape abandoned residential warehouses into multi-concept culinary destinations.",
-    image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80"
-  },
-  {
-    slug: "design-first-ridge-dining",
-    title: "Design-First Ridge Dining",
-    category: "Culinary",
-    date: "May 2026",
-    excerpt: "Tagaytay culinary spaces design glass-enclosed structures that maximize views of the Taal Volcano ridge.",
-    image: "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&q=80"
-  },
-  {
-    slug: "bgc-condo-yields-rise",
-    title: "BGC Condo Yields Rise",
-    category: "Residential",
-    date: "Q3 2026",
-    excerpt: "Premium residential spaces see 4.2% YoY growth.",
-    image: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&q=80"
-  },
-  {
-    slug: "makati-central-resurgence",
-    title: "Makati Central Resurgence",
-    category: "Residential",
-    date: "Q3 2026",
-    excerpt: "Older luxury buildings undergoing massive renovations.",
-    image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&q=80"
-  },
-  {
-    slug: "mastering-qc-market",
-    title: "Mastering the QC Market",
-    category: "Residential",
-    date: "Q3 2026",
-    excerpt: "What to look for in QC subdivision residences.",
-    image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80"
-  },
-  {
-    slug: "new-bpo-headquarters",
-    title: "New BPO Headquarters",
-    category: "Commercial",
-    date: "Q3 2026",
-    excerpt: "Global tech firms securing massive floor plates.",
-    image: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80"
-  },
-  {
-    slug: "high-street-expansion",
-    title: "High Street Expansion",
-    category: "Commercial",
-    date: "Q3 2026",
-    excerpt: "Retail spaces are fully occupied for the next 24 months.",
-    image: "https://images.unsplash.com/photo-1582653291997-079a1c04e5d1?w=800&q=80"
-  },
-  {
-    slug: "bgc-commercial-outlook",
-    title: "BGC Commercial Outlook",
-    category: "Commercial",
-    date: "Q3 2026",
-    excerpt: "Corporate spatial requirements shifting to flexible hubs.",
-    image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80"
-  },
-  {
-    slug: "siargao-villa-boom",
-    title: "Siargao Villa Boom",
-    category: "STR",
-    date: "Q3 2026",
-    excerpt: "Short term rentals operating at 95% occupancy.",
-    image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80"
-  },
-  {
-    slug: "palawan-eco-resorts",
-    title: "Palawan Eco-resorts",
-    category: "Hospitality",
-    date: "Q3 2026",
-    excerpt: "Sustainable tourism driving massive development.",
-    image: "https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?w=800&q=80"
-  },
-  {
-    slug: "str-management-strategies",
-    title: "STR Management Strategies",
-    category: "STR",
-    date: "Q3 2026",
-    excerpt: "Optimizing yields on seasonal beach properties.",
-    image: "https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?w=800&q=80"
-  },
-  {
-    slug: "michelin-guide-entry",
-    title: "Michelin Guide Entry",
-    category: "Culinary",
-    date: "Q3 2026",
-    excerpt: "High-end dining spaces are highly contested.",
-    image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80"
-  },
-  {
-    slug: "ridge-dining-surge",
-    title: "Ridge Dining Surge",
-    category: "Culinary",
-    date: "Q3 2026",
-    excerpt: "Al fresco estate dining commands premium rates.",
-    image: "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&q=80"
-  },
-  {
-    slug: "restaurant-space-layouts",
-    title: "Restaurant Space Layouts",
-    category: "Culinary",
-    date: "Q3 2026",
-    excerpt: "How spatial density affects kitchen efficiency.",
-    image: "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&q=80"
-  }
-];
-
-export const ARTICLE_DB = {
-  "bgc-spatial-movement": {
-    title: "BGC Spatial Movement",
-    category: "Residential",
-    date: "June 2026",
-    image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1200&q=80",
-    lead: "Bonifacio Global City's central core is witnessing a rapid structural migration. High-net-worth capital is shifting away from dense skyscrapers toward boutique, low-density modernist villas.",
-    body: [
-      "As structural requirements for urban living undergo a dramatic realignment, BGC's premier residential sectors are experiencing unprecedented demand. Modern tropical designs, characterized by double-glazed glass enclosures, natural cross-ventilation, and private pocket gardens, have emerged as the absolute standard for low-density luxury.",
-      "Voters of private capital are increasingly targeting low-rise properties that offer acoustic isolation and spatial control. This migration is not merely a lifestyle adjustment; it is a long-term capital placement strategy focused on assets that retain value through architectural distinction and location-based density limits.",
-      "According to ScoutIt transaction registries, the average listing-to-contract duration for properties featuring private spatial buffers has compressed by over 40% in the last quarter, signaling an urgent, highly concentrated acquisition wave."
-    ],
-    recommendation: "Target properties in BGC Core that offer private outdoor space, cross-ventilation designs, and low-density layouts (e.g., fewer than 4 units per floor plate)."
-  },
-  "return-of-quiet-luxury": {
-    title: "The Return of Quiet Luxury",
-    category: "Residential",
-    date: "May 2026",
-    image: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1200&q=80",
-    lead: "A quiet, highly private revolution is reshaping Quezon City's elite residential market. Flashy suburban estates are being bypassed in favor of architecturally hidden residences.",
-    body: [
-      "In Quezon City's traditional luxury pockets, developers are responding to a subtle yet powerful demand shift. Buyers are no longer interested in massive, visible facades. Instead, they seek 'invisible luxury'—structures that blend seamlessly with their natural surroundings, offering complete privacy from the street while presenting spectacular spatial volume internally.",
-      "These properties prioritize high-quality raw materials—reclaimed hardwoods, exposed structural concrete, and matte bronze fixtures—over ornate decorations. The focus is on natural light manipulation, double-height ceilings, and interior courtyards that serve as private sanctuaries.",
-      "ScoutIt market analysts track a growing roster of transactions executed entirely off-market, highlighting the premium placed on absolute privacy and discretion in this sector."
-    ],
-    recommendation: "Prioritize New Manila and Batasan Hills off-market curations that feature high perimeter wall integration and inward-facing courtyard architecture."
-  },
-  "green-office-demand": {
-    title: "Green Office Demand",
-    category: "Commercial",
-    date: "June 2026",
-    image: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=1200&q=80",
-    lead: "Global multinational corporations are forcing a design evolution in Manila's business districts. Non-compliant commercial properties are experiencing rapid capital flight.",
-    body: [
-      "Tenant mandates have shifted permanently toward carbon-neutral, LEED-certified environments. Major international conglomerates operating in Makati and BGC now enforce strict green requirements for all future leases, leaving traditional high-rise buildings with rising vacancies.",
-      "Developers are scrambling to retrofit older glass structures with low-emissivity glazing, smart energy grids, and water reclamation systems. New developments, however, are building eco-corporate DNA directly into their layout, using double-skin facades that reduce air conditioning reliance and rain harvesting systems that power entire cooling towers.",
-      "ScoutIt research reveals premium grade-A properties that hold LEED Platinum credentials are capturing rental premiums of up to 25% over non-certified assets in the same district, proving sustainability is now directly tied to investment yield."
-    ],
-    recommendation: "Acquire or lease office spaces that hold at least LEED Gold certifications and verify local utility integration (e.g. graywater recycling pipelines)."
-  },
-  "bgc-commercial-corridors": {
-    title: "BGC Commercial Corridors",
-    category: "Commercial",
-    date: "April 2026",
-    image: "https://images.unsplash.com/photo-1582653291997-079a1c04e5d1?w=1200&q=80",
-    lead: "High-density retail environments are giving way to open-air sky parks. The evolution of BGC's commercial plazas points toward integrated, design-first urban gardens.",
-    body: [
-      "Traditional commercial layouts are being remodeled to meet a consumer demand for wellness and space. Plazas and high-density shopping structures are integrating massive, glass-domed green zones, open-air pedestrian avenues, and micro-climate gardens that actively cool the surroundings.",
-      "This shift is changing how commercial properties are valued. Ground-floor frontage, once the absolute standard for premium rents, is now sharing value with upper-level 'garden zones' that host premier culinary and social spaces in open-air settings.",
-      "Transaction structures for commercial space are reflecting this design change, with brands prioritizing layouts that offer outdoor seating, natural ventilation, and direct green-corridor connectivity."
-    ],
-    recommendation: "Prioritize acquisitions in mixed-use commercial developments that feature rooftop green integration and a ratio of at least 20% dedicated green open space."
-  },
-  "surf-front-land-rush": {
-    title: "Surf-Front Land Rush",
-    category: "STR",
-    date: "June 2026",
-    image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=1200&q=80",
-    lead: "Siargao's rapid economic expansion is pushing boutique resort developers further down the coast. The search for raw coastal frontage is entering a critical phase.",
-    body: [
-      "The global focus on Siargao has created an active land grab along the General Luna coastline. With prime Cloud 9 spots fully saturated, boutique operators and international hospitality brands are acquiring land in neighboring towns, bringing island minimalist design principles with them.",
-      "The architectural standard in these new sectors focuses heavily on native materials integrated with modern engineering. Coco-wood framing, high-pitched thatch roofs designed for heavy tropical rainfall, and polished concrete floor plates are the visual markers of these high-yield retreats.",
-      "ScoutIt land records show land valuation along the extended northern coast has appreciated by over 80% year-on-year, driven by buyers seeking boutique resort layouts."
-    ],
-    recommendation: "Target parcels located within 10 minutes of the new surf breaks that feature natural sand dune protection and secure access corridors."
-  },
-  "off-grid-island-living": {
-    title: "Off-Grid Island Living",
-    category: "Hospitality",
-    date: "May 2026",
-    image: "https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?w=1200&q=80",
-    lead: "Palawan's remote eco-resorts are setting the global standard for luxury off-grid infrastructure, combining raw bamboo builds with advanced solar microgrids.",
-    body: [
-      "As environmental regulations tighten, Palawan developers are abandoning traditional grid connections entirely. Ultra-luxury resorts are designing structures that are 100% self-sustaining, utilizing solar microgrids, advanced battery storage, and localized composting water treatment facilities.",
-      "Architecturally, this requires a deep respect for local geography. Buildings are raised on structural stilts to preserve coastal ecosystems, using reclaimed teak and structurally treated bamboo that naturally flexes during weather events.",
-      "This off-grid luxury model is capturing high-velocity yields as global travelers seek locations that offer premium comforts alongside a zero-footprint environment."
-    ],
-    recommendation: "Ensure any island acquisition has a certified independent fresh-water source and a solar installation footprint that supports peak cooling loads."
-  },
-  "poblacion-food-architecture": {
-    title: "Poblacion Food Architecture",
-    category: "Culinary",
-    date: "June 2026",
-    image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1200&q=80",
-    lead: "Makati's creative culinary scene is breathing new life into old structures. Industrial-minimalist designs are converting abandoned warehouses into premier dining spots.",
-    body: [
-      "Poblacion's architectural landscape is evolving from residential grids to experimental culinary architecture. Old warehouse frames and low-rise apartments are being preserved externally while their interiors are completely gutted to reveal steel trusses, raw brick, and high ceilings.",
-      "These industrial spaces host multi-concept culinary dining halls and micro-roasteries. The design highlights raw textures—exposed iron beams, concrete counters, and warm mood lighting—creating a distinct architectural vibe that appeals to Manila's design-conscious diners.",
-      "The rent-per-square-meter metric in these repurposed spaces has risen sharply, reflecting the premium value created by design-first renovations."
-    ],
-    recommendation: "Evaluate properties with high structural ceiling clearance (4m+) that permit mezzanine integration and feature structural load-bearing steel."
-  },
-  "design-first-ridge-dining": {
-    title: "Design-First Ridge Dining",
-    category: "Culinary",
-    date: "May 2026",
-    image: "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=1200&q=80",
-    lead: "Tagaytay's famous ridge is undergoing a glass-enclosed architectural evolution, framing the Taal Lake panorama within minimalist structures.",
-    body: [
-      "Tagaytay Ridge dining is no longer about simple rustic viewing decks. Architects are deploying cantilevered glass pavilions and modernist steel-framed structures that extend over the ridge, offering uninterrupted, cinematic views of Taal Volcano.",
-      "These spaces integrate indoor dining with natural cliff-side flora, using retractable glass walls that allow mountain breezes to circulate during cooler months. The lighting design is kept highly subtle to ensure the natural nighttime panorama remains the primary focus.",
-      "This architectural evolution has positioned Tagaytay as a premium destination for design-driven culinary tourism, drawing high-income weekend crowds from the capital."
-    ],
-    recommendation: "Focus on cantilevered steel-framed structures that have completed verified geological soil checks along the Tagaytay ridge line."
-  },
-  "manila-venue-trends": {
-    title: "Manila Venue Trends",
-    category: "Venues",
-    date: "June 2026",
-    image: "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=1200&q=80",
-    lead: "A major transformation is underway in Metro Manila's high-end social and corporate event sectors, with a major design shift toward light-filled glass atrium spaces.",
-    body: [
-      "Event organizers and corporate hosts are moving away from traditional, windowless hotel ballrooms. Instead, they seek modular pavilions that merge indoor safety with the visual beauty of the outdoor elements.",
-      "These structures integrate double-glazed high-efficiency glass panes, load-bearing steel arches, and high acoustic ceiling clouds to permit premium stage setups while maintaining absolute thermal and acoustic isolation from the urban buzz.",
-      "According to ScoutIt registry analytics, occupancy and lease inquiries for architectural venues featuring natural daylight integration have grown by 65% year-on-year."
-    ],
-    recommendation: "Acquire or lease event spaces designed with integrated pre-function outdoor spaces and modern rigging/sound proofing."
-  }
-};
-
-// Raw properties data dictionary used on details pages
 export const PROPERTIES_DETAILS = {
   "batasan-hills": {
     title:             "Batasan Hills House & Lot",
     location:          "Batasan Hills, Quezon City",
+    lat:               14.6853,
+    lng:               121.0934,
     hook:              "Positioned within one of QC's fastest-evolving residential corridors.",
     city:              "Quezon City",
     property_type:     "House & Lot",
@@ -1214,6 +495,8 @@ export const PROPERTIES_DETAILS = {
   "aurelia-residences": {
     title:             "Aurelia Residences Penthouse",
     location:          "BGC Core, Bonifacio Global City",
+    lat:               14.5502,
+    lng:               121.0494,
     hook:              "Low density luxury high-rise featuring double-glazed glass wrap.",
     city:              "Bonifacio Global City",
     property_type:     "Penthouse Condo",
@@ -1266,6 +549,8 @@ export const PROPERTIES_DETAILS = {
   "the-estate-makati": {
     title:             "The Estate Makati Suite",
     location:          "Ayala Avenue, Makati Central",
+    lat:               14.5562,
+    lng:               121.0246,
     hook:              "Cruciform structure designed by Foster + Partners to maximize natural daylight.",
     city:              "Makati Central",
     property_type:     "Premium Condominium",
@@ -1316,6 +601,8 @@ export const PROPERTIES_DETAILS = {
   "siargao-tropical-villa": {
     title:             "Siargao Tropical Beachfront Villa",
     location:          "Cloud 9, General Luna, Siargao",
+    lat:               9.8055,
+    lng:               126.1622,
     hook:              "Open-plan coco-wood pavilion with high-pitched thatch roofs.",
     city:              "Siargao",
     property_type:     "Beachfront Villa",
@@ -1368,6 +655,8 @@ export const PROPERTIES_DETAILS = {
   "palawan-eco-retreat": {
     title:             "Palawan Eco-Retreat Lodge",
     location:          "El Nido Lio, Palawan",
+    lat:               11.1962,
+    lng:               119.3956,
     hook:              "Solar-powered beachfront cabins utilizing locally-sourced bamboo and reclaimed teak.",
     city:              "El Nido",
     property_type:     "Eco Resort / Cabins",
@@ -1420,6 +709,8 @@ export const PROPERTIES_DETAILS = {
   "gallery-by-chele": {
     title:             "Gallery by Chele Space",
     location:          "BGC Central, Bonifacio Global City",
+    lat:               14.5482,
+    lng:               121.0478,
     hook:              "Industrial minimalist space with warm natural wood overlays.",
     city:              "Bonifacio Global City",
     property_type:     "Commercial / Restaurant",
@@ -1472,6 +763,8 @@ export const PROPERTIES_DETAILS = {
   "antonios-tagaytay": {
     title:             "Antonio's Tagaytay Heritage Estate",
     location:          "Tagaytay Ridge, Cavite",
+    lat:               14.1206,
+    lng:               120.9064,
     hook:              "Grand colonial estate dining hall with black-and-white tiles.",
     city:              "Tagaytay Ridge",
     property_type:     "Heritage Commercial / Land",
@@ -1524,6 +817,8 @@ export const PROPERTIES_DETAILS = {
   "the-glasshouse-bgc": {
     title:             "The Glasshouse BGC Event Space",
     location:          "BGC Core, Bonifacio Global City",
+    lat:               14.5518,
+    lng:               121.0435,
     hook:              "Minimalist steel-framed glass pavilion designed for premier social and corporate events.",
     city:              "Bonifacio Global City",
     property_type:     "Event Venue",
@@ -1576,6 +871,8 @@ export const PROPERTIES_DETAILS = {
   "boracay-bamboo-hideaway": {
     title:             "Boracay Bamboo Hideaway",
     location:          "Station 1, Boracay Island",
+    lat:               11.9674,
+    lng:               121.9184,
     hook:              "Off-grid bamboo villa steps from the whitest sand beach in the Philippines.",
     city:              "Boracay",
     property_type:     "Boutique STR Villa",
@@ -1628,6 +925,8 @@ export const PROPERTIES_DETAILS = {
   "coron-island-resort": {
     title:             "Coron Island Resort",
     location:          "Coron Bay, Palawan",
+    lat:               11.9962,
+    lng:               120.2031,
     hook:              "Overwater villas above crystal-clear Coron Bay with direct lagoon diving access.",
     city:              "Coron",
     property_type:     "Island Resort",
@@ -1681,6 +980,8 @@ export const PROPERTIES_DETAILS = {
   "bohol-treehouse-lodge": {
     title:             "Bohol Treehouse Lodge",
     location:          "Panglao Island, Bohol",
+    lat:               9.5672,
+    lng:               123.7712,
     hook:              "Elevated jungle canopy lodge overlooking untouched rainforest and the Chocolate Hills.",
     city:              "Panglao",
     property_type:     "Eco-Lodge",
@@ -1734,6 +1035,8 @@ export const PROPERTIES_DETAILS = {
   "solaire-grand-ballroom": {
     title:             "Solaire Grand Ballroom",
     location:          "Entertainment City, Parañaque",
+    lat:               14.5222,
+    lng:               120.9782,
     hook:              "Crystal-lit luxury ballroom within Manila's premier integrated resort complex.",
     city:              "Parañaque",
     property_type:     "Luxury Ballroom",
@@ -1786,6 +1089,8 @@ export const PROPERTIES_DETAILS = {
   "sky-pavilion-makati": {
     title:             "Sky Pavilion Makati",
     location:          "Ayala CBD, Makati",
+    lat:               14.5555,
+    lng:               121.0215,
     hook:              "Open-air rooftop pavilion with 270-degree Makati skyline panorama.",
     city:              "Makati",
     property_type:     "Rooftop Event Venue",
@@ -1837,7 +1142,6 @@ export const PROPERTIES_DETAILS = {
   }
 };
 
-// Client and server side helper utility functions for fetching data
 export function getSPACE_STARS() {
   return SPACE_STARS;
 }
@@ -1925,61 +1229,3 @@ export function getPropertyBySlug(slug) {
   };
 }
 
-export function getBrokers() {
-  return DUMMY_BROKERS;
-}
-
-export function getBrokerById(id) {
-  return DUMMY_BROKERS.find(b => b.id === id) || null;
-}
-
-export function getPhotographers() {
-  return DUMMY_PHOTOGRAPHERS;
-}
-
-export function getPhotographerById(id) {
-  return DUMMY_PHOTOGRAPHERS.find(p => p.id === id) || null;
-}
-
-export function getResearchers() {
-  return DUMMY_RESEARCHERS;
-}
-
-export function getResearcherById(id) {
-  return DUMMY_RESEARCHERS.find(r => r.id === id) || null;
-}
-
-export function getEventPlanners() {
-  return DUMMY_EVENT_PLANNERS;
-}
-
-export function getEventPlannerById(id) {
-  return DUMMY_EVENT_PLANNERS.find(ep => ep.id === id) || null;
-}
-
-export function getArticles(category = "All") {
-  if (category === "All") {
-    return ARTICLES;
-  }
-  return ARTICLES.filter(art => art.category.toLowerCase() === category.toLowerCase() || art.category === category);
-}
-
-export function getArticleBySlug(slug) {
-  const details = ARTICLE_DB[slug];
-  if (details) return details;
-  
-  // Try to find raw metadata
-  const meta = ARTICLES.find(a => a.slug === slug);
-  if (meta) {
-    return {
-      title: meta.title,
-      category: meta.category,
-      date: meta.date,
-      image: meta.image,
-      lead: meta.excerpt,
-      body: ["Details for this editorial briefing are loaded dynamically. Contact your Space Intelligence advisor for details."],
-      recommendation: "Request full catalog briefing via advisory network."
-    };
-  }
-  return null;
-}

@@ -2,7 +2,7 @@ import Header from "@/components/Header";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import ServiceConnectionPortal from "@/components/ServiceConnectionPortal";
-import { getResearchers } from "@/data/mockDb";
+import { getResearchers } from "@/data/mockResearchers";
 
 const DUMMY_RESEARCHERS = getResearchers();
 

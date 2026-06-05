@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { getBrokers } from "@/data/mockDb";
+import { getBrokers } from "@/data/mockBrokers";
 import "./brokers.css";
 
 const TIER_MAP = { Diamond: 1, Platinum: 2, Gold: 3, Silver: 4, Bronze: 5 };

@@ -136,6 +136,8 @@ export async function fetchProperties(apiKey, baseId) {
         accordion_3_text:     f.SpaceStory   || "",
         image:                f.Image        || "",
         gradient:             f.Gradient     || "linear-gradient(135deg, #1f1c18 0%, #100f0d 100%)",
+        latitude:             f.Latitude ? Number(f.Latitude) : null,
+        longitude:            f.Longitude ? Number(f.Longitude) : null,
         // WhereTo stored as JSON string in Airtable
         whereTo: (() => {
           try { return JSON.parse(f.WhereTo || "[]"); } catch { return []; }

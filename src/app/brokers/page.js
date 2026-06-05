@@ -3,7 +3,7 @@
 import Header from "@/components/Header";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { getBrokers } from "@/data/mockDb";
+import { getBrokers } from "@/data/mockBrokers";
 import ReactionButtons from "@/components/ReactionButtons";
 import "../property/property.css";
 

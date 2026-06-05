@@ -1,9 +1,9 @@
 import Header from "@/components/Header";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import ConnectionPortal from "./ConnectionPortal";
+import ConnectionPortal from "@/components/ConnectionPortal";
 
-import { getBrokers } from "@/data/mockDb";
+import { getBrokers } from "@/data/mockBrokers";
 
 const DUMMY_BROKERS = getBrokers();
 

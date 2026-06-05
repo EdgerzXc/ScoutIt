@@ -4,13 +4,8 @@ import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import ReactionButtons from "@/components/ReactionButtons";
 
-import { 
-  SPACE_STARS, 
-  getDISCOVERY_FEED, 
-  getDISCOVER_HUBS, 
-  getCATEGORY_PREVIEWS,
-  getArticles
-} from "@/data/mockDb";
+import { SPACE_STARS, getDISCOVERY_FEED, getDISCOVER_HUBS, getCATEGORY_PREVIEWS } from "@/data/mockProperties";
+import { getArticles } from "@/data/mockArticles";
 
 function getDBCategory(cat) {
   if (cat === "Venues/Events") return "Venues";

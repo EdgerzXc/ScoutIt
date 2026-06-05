@@ -5,7 +5,9 @@ import {
   fetchIntel,
   fetchHomepageConfig,
 } from "@/lib/airtable";
-import { getProperties, getArticles, getBrokers } from "@/data/mockDb";
+import { getProperties } from "@/data/mockProperties";
+import { getArticles } from "@/data/mockArticles";
+import { getBrokers } from "@/data/mockBrokers";
 
 // ── Mock fallback builders ───────────────────────────────────────
 function buildMockPayload() {
