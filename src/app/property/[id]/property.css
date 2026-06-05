@@ -395,6 +395,12 @@
 .unit-nav-name { font-size: 12px; font-weight: 600; color: var(--accent); min-width: 100px; }
 .unit-nav-preview { font-size: 11px; color: var(--text-muted); }
 .panel-sidebar { overflow-y: auto; overflow-x: hidden; }
+
+/* Mobile-only Hero Intel Wrapper */
+.mobile-hero-intel {
+  display: none;
+}
+
 @media (max-width: 768px) {
   .page {
     height: auto;
@@ -406,7 +412,47 @@
     min-height: 280px;
     width: 100%;
     flex: none;
+    overflow: hidden;
   }
+  .zone-photo .hero-intel {
+    display: none !important;
+  }
+  
+  .mobile-hero-intel {
+    display: block;
+    padding: 20px 20px 12px;
+    background: #0e0e0e;
+    border-bottom: 1px solid #262626;
+  }
+  .mobile-hero-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .mobile-hero-title {
+    font-family: Georgia, serif;
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 1.2;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+  }
+  .mobile-hero-location {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+  }
+  .mobile-hero-hook {
+    font-family: Georgia, serif;
+    font-size: 15px;
+    font-style: italic;
+    line-height: 1.5;
+    color: var(--text-secondary);
+  }
+
   .photo-fade-left {
     width: 100%;
     background: linear-gradient(
@@ -416,9 +462,6 @@
       rgba(14,13,11,0.5) 100%
     );
   }
-  .hero-intel { padding: 68px 72px 12px 16px; gap: 4px; }
-  .hero-hook { font-size: 15px; margin-top: 4px; }
-  .hero-title { font-size: 24px; }
   .zone-nav {
     position: sticky;
     top: 0;
@@ -462,19 +505,17 @@
     width: 100%;
   }
   .panel-sidebar {
-    width: 100%;
-    border-left: none;
-    border-top: 1px solid #262626;
-    padding: 14px 16px;
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 12px;
-    flex-shrink: 0;
-    overflow-y: visible;
-    overflow-x: auto;
-    height: auto;
-    margin-top: 32px;
-    padding-top: 24px;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 16px !important;
+    border-left: none !important;
+    border-top: 1px solid #262626 !important;
+    padding: 20px 16px !important;
+    background: var(--surface) !important;
+    width: 100% !important;
+    margin-top: 24px !important;
+    height: auto !important;
+    overflow: visible !important;
   }
   .panel-inner,
   .chapter-layout,
@@ -482,17 +523,94 @@
     flex-direction: column;
     gap: 0;
   }
-  .sidebar-block { min-width: 80px; flex: 1; }
-  .mini-map { display: none; }
+  
+  .sidebar-block {
+    min-width: 0 !important;
+    flex: none !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 8px;
+  }
+  .sidebar-accent-line {
+    display: none !important;
+  }
+  .sidebar-label {
+    font-size: 10px !important;
+    margin-bottom: 2px !important;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #8a8a8a;
+  }
+  .sidebar-value {
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    color: #f0ede8;
+  }
+  .sidebar-sub {
+    font-size: 11px !important;
+    color: #8a8a8a;
+  }
+  .mini-map {
+    display: none !important;
+  }
+
   .display-heading { font-size: 28px; }
-  .spec-pills { gap: 6px; }
-  .spec-pill { padding: 7px 10px; gap: 7px; }
-  .pill-val { font-size: 16px; }
+  
+  .spec-pills {
+    display: flex;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    gap: 8px;
+    width: 100%;
+    padding-bottom: 4px;
+  }
+  .spec-pills::-webkit-scrollbar {
+    display: none;
+  }
+  .spec-pill {
+    flex: 0 0 auto;
+    padding: 8px 12px;
+    gap: 8px;
+    min-width: 0;
+  }
+  .pill-icon-wrap {
+    width: 24px;
+    height: 24px;
+  }
+  .pill-icon-wrap svg {
+    width: 12px;
+    height: 12px;
+  }
+  .pill-val {
+    font-size: 14px;
+  }
+  .pill-label {
+    font-size: 10px;
+    margin-top: 1px;
+  }
+
   .location-grid { grid-template-columns: 1fr; }
   .life-stat-row { flex-wrap: wrap; }
   .life-stat { min-width: 80px; }
   .universe-price { font-size: 36px; }
-  .accordion-title { font-size: 11px; }
+  
+  .accordion-title {
+    font-size: 14px !important;
+  }
+  .accordion-subtitle {
+    font-size: 12px !important;
+  }
+  .detail-row {
+    padding: 6px 0 !important;
+    font-size: 14px !important;
+  }
+  .detail-key {
+    font-size: 14px !important;
+  }
+  .detail-val {
+    font-size: 14px !important;
+  }
 }
 
 /* Reaction Action Buttons */

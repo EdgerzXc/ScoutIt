@@ -685,6 +685,14 @@ export default function PropertyDetailClient({ slug }) {
 
         </div>{/* /zone-photo */}
 
+        {/* Mobile-only Hero Intel (visible on mobile viewport, hidden on desktop) */}
+        <div className="mobile-hero-intel">
+          <p className="mobile-hero-label">ScoutIt &middot; {briefLabel}</p>
+          <h1 className="mobile-hero-title">{d.title}</h1>
+          <p className="mobile-hero-location">{d.location}</p>
+          <p className="mobile-hero-hook">{d.hook}</p>
+        </div>
+
         {/* ════ ZONE 2 – NAV (drag-to-scroll) ════ */}
         <div className={`zone-nav ${canScrollLeft ? "can-scroll-left" : ""} ${canScrollRight ? "can-scroll-right" : ""}`}>
           <div
