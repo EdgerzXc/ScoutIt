@@ -8,6 +8,7 @@ export default function MapboxMap({ lat, lng, propertyTitle, vicinityData = [] }
   const hoveredRef = useRef(null);
   
   const [mapLoaded, setMapLoaded] = useState(false);
+  const [loadError, setLoadError] = useState(null);
   const [propertyPixel, setPropertyPixel] = useState({ x: 0, y: 0 });
   const [hoveredAmenity, setHoveredAmenity] = useState(null);
   const [hoveredPixel, setHoveredPixel] = useState(null);
@@ -43,6 +44,8 @@ export default function MapboxMap({ lat, lng, propertyTitle, vicinityData = [] }
       document.head.appendChild(script);
     }
 
+    let loadTimeout;
+
     const startMapbox = () => {
       if (!window.mapboxgl || !mapRef.current || mapInstance.current) return;
 
@@ -68,6 +71,7 @@ export default function MapboxMap({ lat, lng, propertyTitle, vicinityData = [] }
         });
       } catch (e) {
         console.error("Mapbox failed to load:", e);
+        setLoadError("Mapbox constructor failed. Verify token configuration.");
         return;
       }
 
@@ -146,11 +150,25 @@ export default function MapboxMap({ lat, lng, propertyTitle, vicinityData = [] }
       // Hook render event for perfect smooth pixel updates on movement
       map.on("render", updatePositions);
 
+      // Handle map error events (like 401 Unauthorized token)
+      map.on("error", (err) => {
+        console.error("Mapbox GL error:", err);
+        setLoadError("Mapbox API rejected token or style request. Verify your credentials.");
+      });
+
       // Set map instance and update state
       map.on("load", () => {
+        if (loadTimeout) clearTimeout(loadTimeout);
         setTimeout(updatePositions, 100);
         setMapLoaded(true);
       });
+
+      // Timeout fallback if the map remains in loading state infinitely
+      loadTimeout = setTimeout(() => {
+        if (!map.loaded() && !loadError) {
+          setLoadError("Connection timed out. Check environment token configurations.");
+        }
+      }, 5000);
 
       mapInstance.current = map;
     };
@@ -162,6 +180,7 @@ export default function MapboxMap({ lat, lng, propertyTitle, vicinityData = [] }
     }
 
     return () => {
+      if (loadTimeout) clearTimeout(loadTimeout);
       // Map cleanup
       if (mapInstance.current) {
         mapInstance.current.off("render");
@@ -179,10 +198,10 @@ export default function MapboxMap({ lat, lng, propertyTitle, vicinityData = [] }
 
   return (
     <div className="map-view-wrapper">
-      <div ref={mapRef} className="mapbox-map-node" />
+      <div ref={mapRef} className="mapbox-map-node" style={{ display: loadError ? "none" : "block" }} />
       
       {/* HUD Overlay */}
-      {mapLoaded && (
+      {mapLoaded && !loadError && (
         <svg className="hud-radar-svg-overlay">
           {/* Concentric rings centered on property pin */}
           <circle cx={propertyPixel.x} cy={propertyPixel.y} r="50" className="mapbox-radar-ring" />
@@ -221,24 +240,38 @@ export default function MapboxMap({ lat, lng, propertyTitle, vicinityData = [] }
       )}
 
       {/* Floating HUD Card Info */}
-      <div className={`map-hud-card ${hoveredAmenity ? "visible" : ""}`}>
-        {hoveredAmenity && (
-          <>
-            <div className="hud-card-top">
-              <span className="hud-card-cat">{hoveredAmenity.category}</span>
-              <span className="hud-card-dist">{hoveredAmenity.distance}</span>
-            </div>
-            <div className="hud-card-name">{hoveredAmenity.name}</div>
-            <div className="hud-card-coords">
-              BEARING LOCK: {Math.round((hoveredAmenity.id * (360 / vicinityData.length) + 45) % 360)}° NNE
-            </div>
-          </>
-        )}
-      </div>
+      {mapLoaded && !loadError && (
+        <div className={`map-hud-card ${hoveredAmenity ? "visible" : ""}`}>
+          {hoveredAmenity && (
+            <>
+              <div className="hud-card-top">
+                <span className="hud-card-cat">{hoveredAmenity.category}</span>
+                <span className="hud-card-dist">{hoveredAmenity.distance}</span>
+              </div>
+              <div className="hud-card-name">{hoveredAmenity.name}</div>
+              <div className="hud-card-coords">
+                BEARING LOCK: {Math.round((hoveredAmenity.id * (360 / vicinityData.length) + 45) % 360)}° NNE
+              </div>
+            </>
+          )}
+        </div>
+      )}
 
-      {!mapLoaded && (
+      {!mapLoaded && !loadError && (
         <div className="map-fallback-overlay">
           CONNECTING TO PREMIUM VECTOR GRID...
+        </div>
+      )}
+
+      {loadError && (
+        <div className="map-fallback-overlay error-state" style={{ color: "#ff4d4d", padding: "24px", textAlign: "center", display: "flex", flexDirection: "column", gap: "10px", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ fontSize: "12px", fontWeight: "600", fontFamily: "var(--font-mono)", letterSpacing: "1.5px" }}>⚠️ 3D SPATIAL MAP OFFLINE</div>
+          <div style={{ fontSize: "9px", fontFamily: "var(--font-mono)", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "1px", lineHeight: "1.6", maxWidth: "280px" }}>
+            {loadError}
+          </div>
+          <div style={{ fontSize: "9px", fontFamily: "var(--font-mono)", border: "0.5px dashed #444", padding: "8px 12px", background: "rgba(255,255,255,0.02)", color: "#aaa", marginTop: "8px", maxWidth: "280px", cursor: "pointer", transition: "border-color 0.2s" }} onClick={() => window.open("https://vercel.com", "_blank")}>
+            Click here to open Vercel Settings &middot; Configure NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN &middot; Redeploy
+          </div>
         </div>
       )}
 
