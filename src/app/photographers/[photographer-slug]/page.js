@@ -125,7 +125,7 @@ export default async function PhotographerDetailPage({ params }) {
 
         .broker-detail-main {
           padding: 60px 45px 80px 45px;
-          max-width: 1200px;
+          max-width: 1400px;
           margin: 0 auto;
           display: flex;
           flex-direction: column;

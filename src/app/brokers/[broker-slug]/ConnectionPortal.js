@@ -144,12 +144,11 @@ export default function ConnectionPortal({ brokerName }) {
               />
             </div>
           </div>
-          
-          <div className="form-group-item">
+              <div className="form-group-item">
             <label>Acquisition Intent Brief</label>
             <textarea 
               placeholder="Outline your acquisition criteria, spatial sectors, and target deployment timeline..."
-              rows="3" 
+              rows="5" 
               value={intent}
               onChange={(e) => setIntent(e.target.value)}
               required
@@ -166,8 +165,8 @@ export default function ConnectionPortal({ brokerName }) {
         .connection-portal-container {
           display: flex;
           flex-direction: column;
-          gap: 24px;
-          max-width: 800px;
+          gap: 48px;
+          max-width: 1400px;
           margin: 0 auto;
           width: 100%;
         }
@@ -176,59 +175,65 @@ export default function ConnectionPortal({ brokerName }) {
           background: var(--surface);
           border: 1px solid var(--border-solid);
           border-radius: var(--radius-md);
-          padding: 40px;
+          padding: 60px 64px;
           width: 100%;
         }
 
         .portal-header {
-          margin-bottom: 24px;
+          margin-bottom: 40px;
           border-bottom: 1px solid rgba(255,255,255,0.03);
-          padding-bottom: 12px;
+          padding-bottom: 24px;
         }
 
         .portal-header h4 {
           font-family: var(--font-display);
-          font-size: 20px;
+          font-size: 34px;
           color: #fff;
-          margin: 0 0 6px 0;
+          margin: 0 0 12px 0;
+          letter-spacing: 0.01em;
         }
 
         .portal-header p {
-          font-size: 12px;
+          font-size: 18px;
           color: var(--text-secondary);
           margin: 0;
+          line-height: 1.65;
         }
 
         .portal-form {
           display: flex;
           flex-direction: column;
-          gap: 20px;
+          gap: 32px;
         }
 
         .form-row {
           display: grid;
           grid-template-columns: 1fr 1fr;
-          gap: 20px;
+          gap: 32px;
         }
 
-        @media (max-width: 600px) {
+        @media (max-width: 768px) {
           .form-row {
             grid-template-columns: 1fr;
+            gap: 24px;
+          }
+          .connection-portal-card {
+            padding: 40px 32px;
           }
         }
 
         .form-group-item {
           display: flex;
           flex-direction: column;
-          gap: 8px;
+          gap: 12px;
         }
 
         .form-group-item label {
           font-family: var(--font-mono);
-          font-size: 9px;
+          font-size: 13px;
           color: var(--accent);
           text-transform: uppercase;
-          letter-spacing: 0.1em;
+          letter-spacing: 0.12em;
           font-weight: bold;
         }
 
@@ -236,13 +241,14 @@ export default function ConnectionPortal({ brokerName }) {
         .form-group-item textarea {
           background: rgba(0,0,0,0.3);
           border: 1px solid #333;
-          border-radius: 4px;
-          padding: 12px 16px;
+          border-radius: 6px;
+          padding: 18px 24px;
           color: #fff;
           font-family: var(--font-body);
-          font-size: 13px;
+          font-size: 18px;
           outline: none;
           transition: border-color var(--transition-fast);
+          line-height: 1.65;
         }
 
         .form-group-item input:focus,
@@ -254,13 +260,13 @@ export default function ConnectionPortal({ brokerName }) {
           background: var(--accent);
           color: #0e0e0e;
           border: none;
-          padding: 14px 28px;
+          padding: 18px 44px;
           border-radius: 4px;
           font-family: var(--font-mono);
-          font-size: 11px;
-          font-weight: 600;
+          font-size: 14px;
+          font-weight: 700;
           text-transform: uppercase;
-          letter-spacing: 0.05em;
+          letter-spacing: 0.08em;
           cursor: pointer;
           align-self: flex-start;
           transition: transform var(--transition-fast), box-shadow var(--transition-fast);
@@ -268,63 +274,69 @@ export default function ConnectionPortal({ brokerName }) {
 
         .portal-submit-btn:hover {
           transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(200,169,110,0.3);
+          box-shadow: 0 4px 16px rgba(200,169,110,0.35);
         }
 
         /* Safety Warning Disclaimer Styles */
         .safety-disclaimer-box {
-          background: linear-gradient(135deg, rgba(245, 158, 11, 0.05) 0%, rgba(14, 14, 14, 0.6) 100%);
-          border: 1px solid rgba(245, 158, 11, 0.25);
+          background: linear-gradient(135deg, rgba(245, 158, 11, 0.06) 0%, rgba(14, 14, 14, 0.7) 100%);
+          border: 1px solid rgba(245, 158, 11, 0.3);
           border-radius: 8px;
-          padding: 32px;
+          padding: 60px 64px;
           display: flex;
           flex-direction: column;
-          gap: 20px;
-          margin-top: 24px;
-          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+          gap: 32px;
+          box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
           transition: border-color 0.3s ease, box-shadow 0.3s ease;
+          width: 100%;
+        }
+
+        @media (max-width: 768px) {
+          .safety-disclaimer-box {
+            padding: 40px 32px;
+          }
         }
 
         .safety-disclaimer-box:hover {
-          border-color: rgba(245, 158, 11, 0.4);
-          box-shadow: 0 8px 32px rgba(245, 158, 11, 0.05);
+          border-color: rgba(245, 158, 11, 0.45);
+          box-shadow: 0 12px 40px rgba(245, 158, 11, 0.08);
         }
 
         .disclaimer-header {
           display: flex;
           align-items: center;
-          gap: 12px;
-          border-bottom: 1px solid rgba(245, 158, 11, 0.15);
-          padding-bottom: 12px;
+          gap: 18px;
+          border-bottom: 1px solid rgba(245, 158, 11, 0.2);
+          padding-bottom: 20px;
         }
 
         .disclaimer-icon {
-          font-size: 22px;
+          font-size: 34px;
           line-height: 1;
-          filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.6));
+          filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.7));
         }
 
         .disclaimer-header h5 {
           font-family: var(--font-mono), monospace;
-          font-size: 13px;
+          font-size: 20px;
           font-weight: 700;
           color: #f59e0b; /* Amber */
-          letter-spacing: 0.1em;
+          letter-spacing: 0.12em;
           margin: 0;
         }
 
         .disclaimer-content {
           display: flex;
           flex-direction: column;
-          gap: 16px;
+          gap: 24px;
         }
 
         .disclaimer-paragraph {
-          font-size: 14px;
-          line-height: 1.8;
-          color: rgba(240, 237, 232, 0.8);
+          font-size: 18px;
+          line-height: 1.9;
+          color: rgba(240, 237, 232, 0.9);
           margin: 0;
-          letter-spacing: 0.02em;
+          letter-spacing: 0.025em;
         }
 
         .disclaimer-paragraph strong {
@@ -344,14 +356,13 @@ export default function ConnectionPortal({ brokerName }) {
 
         .disclaimer-footer-compliance {
           font-family: var(--font-mono), monospace;
-          font-size: 11px;
-          line-height: 1.6;
-          color: rgba(240, 237, 232, 0.5);
-          border-top: 1px solid rgba(255, 255, 255, 0.05);
-          padding-top: 12px;
-          margin-top: 8px;
-        }
-      `}</style>
+          font-size: 14px;
+          line-height: 1.7;
+          color: rgba(240, 237, 232, 0.6);
+          border-top: 1px solid rgba(255, 255, 255, 0.08);
+          padding-top: 20px;
+          margin-top: 16px;
+        }      `}</style>
     </div>
   );
 }
