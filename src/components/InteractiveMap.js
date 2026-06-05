@@ -5,7 +5,24 @@ import { useEffect, useRef, useState } from "react";
 export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData = [] }) {
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
+  const hoveredRef = useRef(null);
+  
   const [mapLoaded, setMapLoaded] = useState(false);
+  const [propertyPixel, setPropertyPixel] = useState({ x: 0, y: 0 });
+  const [hoveredAmenity, setHoveredAmenity] = useState(null);
+  const [hoveredPixel, setHoveredPixel] = useState(null);
+  const [sweepAngle, setSweepAngle] = useState(0);
+
+  // Smooth radar sweep animation loop
+  useEffect(() => {
+    let frame;
+    const animate = () => {
+      setSweepAngle((a) => (a + 1.2) % 360);
+      frame = requestAnimationFrame(animate);
+    };
+    frame = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(frame);
+  }, []);
 
   useEffect(() => {
     // 1. Dynamically append Leaflet CSS
@@ -79,12 +96,53 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
           iconAnchor: [6, 6]
         });
 
-        window.L.marker(itemPosition, { icon: amenityIcon })
-          .addTo(map)
-          .bindPopup(`<strong>${item.name}</strong><br/><span style="color:#8a8a8a">${item.category} &middot; ${item.distance}</span>`, {
-            className: "custom-leaflet-popup"
-          });
+        const marker = window.L.marker(itemPosition, { icon: amenityIcon })
+          .addTo(map);
+
+        // Bind custom popup & mouseover HUD trigger
+        marker.bindPopup(`<strong>${item.name}</strong><br/><span style="color:#8a8a8a">${item.category} &middot; ${item.distance}</span>`, {
+          className: "custom-leaflet-popup"
+        });
+
+        marker.on("mouseover", () => {
+          const itemPoint = map.latLngToContainerPoint(itemPosition);
+          const data = {
+            id: index,
+            name: item.name,
+            category: item.category,
+            distance: item.distance,
+            latlng: itemPosition
+          };
+          hoveredRef.current = data;
+          setHoveredAmenity(data);
+          setHoveredPixel({ x: itemPoint.x, y: itemPoint.y });
+        });
+
+        marker.on("mouseout", () => {
+          hoveredRef.current = null;
+          setHoveredAmenity(null);
+          setHoveredPixel(null);
+        });
       });
+
+      // Update HUD Overlay positioning dynamically on Map Movement
+      const updatePositions = () => {
+        const pPoint = map.latLngToContainerPoint(position);
+        setPropertyPixel({ x: pPoint.x, y: pPoint.y });
+
+        if (hoveredRef.current) {
+          const tPoint = map.latLngToContainerPoint(hoveredRef.current.latlng);
+          setHoveredPixel({ x: tPoint.x, y: tPoint.y });
+        }
+      };
+
+      // Set initial positions
+      map.whenReady(() => {
+        setTimeout(updatePositions, 100);
+      });
+
+      map.on("move", updatePositions);
+      map.on("zoomend", updatePositions);
 
       mapInstance.current = map;
       setMapLoaded(true);
@@ -99,19 +157,82 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
     return () => {
       // Map cleanup
       if (mapInstance.current) {
+        mapInstance.current.off("move");
+        mapInstance.current.off("zoomend");
         mapInstance.current.remove();
         mapInstance.current = null;
       }
     };
   }, [lat, lng, propertyTitle, vicinityData]);
 
+  // Compute sweep line coordinates based on animation angle
+  const sweepRad = (sweepAngle * Math.PI) / 180;
+  const sweepLength = 150; // Sweeps up to outer ring radius
+  const sweepX2 = propertyPixel.x + sweepLength * Math.cos(sweepRad);
+  const sweepY2 = propertyPixel.y + sweepLength * Math.sin(sweepRad);
+
   return (
     <div className="map-view-wrapper">
       <div ref={mapRef} className="leaflet-map-node" />
       
+      {/* 100% Free Transparent HUD Overlay (Blocks no pointer clicks) */}
+      {mapLoaded && (
+        <svg className="hud-radar-svg-overlay">
+          {/* Concentric rings centered on property pin */}
+          <circle cx={propertyPixel.x} cy={propertyPixel.y} r="50" className="leaflet-radar-ring" />
+          <circle cx={propertyPixel.x} cy={propertyPixel.y} r="100" className="leaflet-radar-ring" />
+          <circle cx={propertyPixel.x} cy={propertyPixel.y} r="150" className="leaflet-radar-ring" />
+          <circle cx={propertyPixel.x} cy={propertyPixel.y} r="150" className="leaflet-radar-ring outer" strokeDasharray="1 3" />
+
+          {/* Sweeper sweep line */}
+          <line 
+            x1={propertyPixel.x} 
+            y1={propertyPixel.y} 
+            x2={sweepX2} 
+            y2={sweepY2} 
+            className="leaflet-radar-sweep" 
+          />
+
+          {/* Target lock dashed vector line to hovered target pin */}
+          {hoveredAmenity && hoveredPixel && (
+            <>
+              <line
+                x1={propertyPixel.x}
+                y1={propertyPixel.y}
+                x2={hoveredPixel.x}
+                y2={hoveredPixel.y}
+                className="leaflet-radar-lock-line"
+              />
+              <circle
+                cx={hoveredPixel.x}
+                cy={hoveredPixel.y}
+                r="10"
+                className="leaflet-radar-lock-ring"
+              />
+            </>
+          )}
+        </svg>
+      )}
+
+      {/* Floating HUD Card Info */}
+      <div className={`map-hud-card ${hoveredAmenity ? "visible" : ""}`}>
+        {hoveredAmenity && (
+          <>
+            <div className="hud-card-top">
+              <span className="hud-card-cat">{hoveredAmenity.category}</span>
+              <span className="hud-card-dist">{hoveredAmenity.distance}</span>
+            </div>
+            <div className="hud-card-name">{hoveredAmenity.name}</div>
+            <div className="hud-card-coords">
+              BEARING LOCK: {Math.round((hoveredAmenity.id * (360 / vicinityData.length) + 45) % 360)}° NNE
+            </div>
+          </>
+        )}
+      </div>
+
       {!mapLoaded && (
         <div className="map-fallback-overlay">
-          LOADING GEOGRAPHIC SATELLITE...
+          LAUNCHING GEOGRAPHIC SATELLITE...
         </div>
       )}
 
@@ -132,6 +253,119 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
           z-index: 1;
         }
 
+        /* HUD SVG overlays styling */
+        .hud-radar-svg-overlay {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          z-index: 10;
+          pointer-events: none; /* Passes all clicks directly to Leaflet Map underlying */
+          overflow: visible;
+        }
+
+        .leaflet-radar-ring {
+          fill: none;
+          stroke: rgba(200, 169, 110, 0.12);
+          stroke-width: 0.5;
+        }
+
+        .leaflet-radar-ring.outer {
+          stroke: rgba(200, 169, 110, 0.22);
+          stroke-width: 0.6;
+        }
+
+        .leaflet-radar-sweep {
+          stroke: rgba(200, 169, 110, 0.25);
+          stroke-width: 0.6;
+        }
+
+        .leaflet-radar-lock-line {
+          stroke: #c8a96e;
+          stroke-width: 0.75;
+          stroke-dasharray: 2 2;
+        }
+
+        .leaflet-radar-lock-ring {
+          fill: none;
+          stroke: #c8a96e;
+          stroke-width: 0.5;
+          animation: leafletLockPulse 1.2s ease-out infinite;
+          transform-origin: center;
+        }
+
+        @keyframes leafletLockPulse {
+          0% { transform: scale(0.6); opacity: 1; }
+          100% { transform: scale(1.6); opacity: 0; }
+        }
+
+        /* Floating HUD Card overlay */
+        .map-hud-card {
+          position: absolute;
+          top: 16px;
+          left: 16px;
+          width: 200px;
+          background: rgba(14, 14, 14, 0.88);
+          border: 0.5px solid #2d2a24;
+          border-radius: 4px;
+          padding: 8px 12px;
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+          opacity: 0;
+          visibility: hidden;
+          transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+          z-index: 100;
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+          pointer-events: none;
+          backdrop-filter: blur(12px);
+        }
+
+        .map-hud-card.visible {
+          opacity: 1;
+          visibility: visible;
+        }
+
+        .hud-card-top {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .hud-card-cat {
+          font-family: var(--font-mono);
+          font-size: 7.5px;
+          color: #c8a96e;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+        }
+
+        .hud-card-dist {
+          font-family: var(--font-mono);
+          font-size: 8.5px;
+          color: #f0ede8;
+          font-weight: 600;
+        }
+
+        .hud-card-name {
+          font-family: system-ui, -apple-system, sans-serif;
+          font-size: 10px;
+          color: #f0ede8;
+          font-weight: 500;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .hud-card-coords {
+          font-family: var(--font-mono);
+          font-size: 7.5px;
+          color: #5a5a5a;
+          margin-top: 2px;
+          border-top: 0.5px solid #222;
+          padding-top: 2px;
+        }
+
         .map-fallback-overlay {
           position: absolute;
           inset: 0;
@@ -146,7 +380,7 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
           z-index: 2;
         }
 
-        /* Marker Styles */
+        /* Marker Pin adjustments */
         .custom-leaflet-marker {
           display: flex;
           align-items: center;
@@ -201,7 +435,7 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
           box-shadow: 0 0 8px #c8a96e;
         }
 
-        /* Custom Popup Styles to match Dark Mode */
+        /* Custom Popup Styles */
         .custom-leaflet-popup .leaflet-popup-content-wrapper {
           background: #121212 !important;
           color: #f0ede8 !important;
@@ -218,7 +452,6 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
           border-bottom: 0.5px solid #2d2a24 !important;
         }
 
-        /* Zoom Control customization */
         .leaflet-bar {
           border: 0.5px solid #262626 !important;
           box-shadow: none !important;
