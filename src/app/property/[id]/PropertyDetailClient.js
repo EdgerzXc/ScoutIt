@@ -1650,22 +1650,6 @@ export default function PropertyDetailClient({ slug }) {
 
          </div>{/* /zone-story */}
 
-         <div className="mobile-action-bar">
-           <div className="action-bar-left">
-             <div className="action-bar-label">
-               Price Upon Inquiry
-             </div>
-             <div className="action-bar-sublabel">
-               {d.city} · {d.spaceCategory || d.property_type}
-             </div>
-           </div>
-           <a 
-             href={`/property/${slug}/brokers`}
-             className="action-bar-cta"
-           >
-             Connect with a Broker
-           </a>
-         </div>
 
        </div>{/* /page */}
 

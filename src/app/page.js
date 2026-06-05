@@ -2556,6 +2556,7 @@ export default function Home() {
             font-size: 18px;
             padding: 10px 16px;
             white-space: nowrap;
+            flex-shrink: 0;
           }
           .menu-btn:hover, .menu-btn.active {
             padding-left: 16px;

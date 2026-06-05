@@ -143,10 +143,30 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
 
       map.on("move", updatePositions);
       map.on("zoomend", updatePositions);
+      map.on("resize", updatePositions);
 
       mapInstance.current = map;
       setMapLoaded(true);
+
+      // Set up ResizeObserver to handle tab changes or visibility switches cleanly
+      if (typeof window !== "undefined" && window.ResizeObserver) {
+        resizeObserver = new window.ResizeObserver(() => {
+          if (mapInstance.current) {
+            // Slight delay allows CSS transitions/layouts to settle
+            setTimeout(() => {
+              if (mapInstance.current) {
+                mapInstance.current.invalidateSize();
+              }
+            }, 100);
+          }
+        });
+        if (mapRef.current) {
+          resizeObserver.observe(mapRef.current);
+        }
+      }
     };
+
+    let resizeObserver;
 
     if (window.L) {
       startLeafletMap();
@@ -155,10 +175,14 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
     }
 
     return () => {
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+      }
       // Map cleanup
       if (mapInstance.current) {
         mapInstance.current.off("move");
         mapInstance.current.off("zoomend");
+        mapInstance.current.off("resize");
         mapInstance.current.remove();
         mapInstance.current = null;
       }
