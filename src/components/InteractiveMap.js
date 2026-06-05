@@ -25,140 +25,138 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
   }, []);
 
   useEffect(() => {
-    // 1. Dynamically append Leaflet CSS
-    if (!document.getElementById("leaflet-css")) {
+    // 1. Dynamically append Mapbox CSS
+    if (!document.getElementById("mapbox-css")) {
       const link = document.createElement("link");
-      link.id = "leaflet-css";
+      link.id = "mapbox-css";
       link.rel = "stylesheet";
-      link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
+      link.href = "https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.css";
       document.head.appendChild(link);
     }
 
-    // 2. Dynamically append Leaflet JS
-    let script = document.getElementById("leaflet-js");
+    // 2. Dynamically append Mapbox JS
+    let script = document.getElementById("mapbox-js");
     if (!script) {
       script = document.createElement("script");
-      script.id = "leaflet-js";
-      script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
+      script.id = "mapbox-js";
+      script.src = "https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.js";
       document.head.appendChild(script);
     }
 
-    const startLeafletMap = () => {
-      if (!window.L || !mapRef.current || mapInstance.current) return;
+    const startMapbox = () => {
+      if (!window.mapboxgl || !mapRef.current || mapInstance.current) return;
 
-      const position = [lat || 14.5547, lng || 121.0244];
+      const position = [lng || 121.0244, lat || 14.5547]; // Mapbox order: [lng, lat]
+
+      // Set Access Token
+      window.mapboxgl.accessToken = 
+        process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || 
+        "";
 
       // Initialize Map
-      const map = window.L.map(mapRef.current, {
+      const map = new window.mapboxgl.Map({
+        container: mapRef.current,
+        style: "mapbox://styles/mapbox/dark-v11",
         center: position,
-        zoom: 15,
-        zoomControl: false,
+        zoom: 14,
         attributionControl: false
       });
 
-      // Add CartoDB Dark Matter tile layer
-      window.L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-        maxZoom: 20
-      }).addTo(map);
+      // Add Zoom Navigation control without compass
+      map.addControl(new window.mapboxgl.NavigationControl({ showCompass: false }), "top-right");
 
-      // Custom Leaflet Zoom buttons positioned cleanly
-      window.L.control.zoom({ position: "topright" }).addTo(map);
-
-      // Create Custom HTML DivIcon for main property
-      const mainPropertyIcon = window.L.divIcon({
-        className: "custom-leaflet-marker property",
-        html: `
-          <div class="marker-outer-pulse"></div>
-          <div class="marker-inner-dot"></div>
-        `,
-        iconSize: [24, 24],
-        iconAnchor: [12, 12]
-      });
+      // Custom HTML main property element
+      const mainPropertyEl = document.createElement("div");
+      mainPropertyEl.className = "custom-mapbox-marker property";
+      mainPropertyEl.innerHTML = `
+        <div class="marker-outer-pulse"></div>
+        <div class="marker-inner-dot"></div>
+      `;
 
       // Add Main Property Marker
-      window.L.marker(position, { icon: mainPropertyIcon })
-        .addTo(map)
-        .bindPopup(`<strong style="color:#c8a96e">${propertyTitle || "ScoutIt Property"}</strong><br/><span style="color:#8a8a8a">Target Location</span>`, {
-          className: "custom-leaflet-popup"
-        });
+      new window.mapboxgl.Marker(mainPropertyEl)
+        .setLngLat(position)
+        .addTo(map);
 
-      // Plot random offsets for vicinity indicators for visual representation
+      // Plot vicinity indicators on the map
       vicinityData.forEach((item, index) => {
         // Generate small random offset within vicinity (approx 500m)
         const offsetLat = (Math.sin(index * 2.3) * 0.005);
         const offsetLng = (Math.cos(index * 1.9) * 0.005);
-        const itemPosition = [position[0] + offsetLat, position[1] + offsetLng];
+        const itemPosition = [position[0] + offsetLng, position[1] + offsetLat]; // [lng, lat]
 
-        const amenityIcon = window.L.divIcon({
-          className: "custom-leaflet-marker amenity",
-          html: `<div class="amenity-dot"></div>`,
-          iconSize: [12, 12],
-          iconAnchor: [6, 6]
-        });
+        const amenityEl = document.createElement("div");
+        amenityEl.className = "custom-mapbox-marker amenity";
+        amenityEl.innerHTML = `<div class="amenity-dot"></div>`;
 
-        const marker = window.L.marker(itemPosition, { icon: amenityIcon })
+        const marker = new window.mapboxgl.Marker(amenityEl)
+          .setLngLat(itemPosition)
           .addTo(map);
 
-        // Bind custom popup & mouseover HUD trigger
-        marker.bindPopup(`<strong>${item.name}</strong><br/><span style="color:#8a8a8a">${item.category} &middot; ${item.distance}</span>`, {
-          className: "custom-leaflet-popup"
-        });
+        // Bind custom popup
+        const popup = new window.mapboxgl.Popup({
+          offset: 12,
+          closeButton: false,
+          className: "custom-mapbox-popup"
+        }).setHTML(`<strong>${item.name}</strong><br/><span style="color:#8a8a8a">${item.category} &middot; ${item.distance}</span>`);
 
-        marker.on("mouseover", () => {
-          const itemPoint = map.latLngToContainerPoint(itemPosition);
+        // Mouse hover interactions for the custom marker DOM element
+        amenityEl.addEventListener("mouseenter", () => {
+          popup.setLngLat(itemPosition).addTo(map);
+          const pixel = map.project(itemPosition);
           const data = {
             id: index,
             name: item.name,
             category: item.category,
             distance: item.distance,
-            latlng: itemPosition
+            lnglat: itemPosition
           };
           hoveredRef.current = data;
           setHoveredAmenity(data);
-          setHoveredPixel({ x: itemPoint.x, y: itemPoint.y });
+          setHoveredPixel({ x: pixel.x, y: pixel.y });
         });
 
-        marker.on("mouseout", () => {
+        amenityEl.addEventListener("mouseleave", () => {
+          popup.remove();
           hoveredRef.current = null;
           setHoveredAmenity(null);
           setHoveredPixel(null);
         });
       });
 
-      // Update HUD Overlay positioning dynamically on Map Movement
+      // Update HUD Overlay positioning dynamically on Map movement/renders
       const updatePositions = () => {
-        const pPoint = map.latLngToContainerPoint(position);
+        const pPoint = map.project(position);
         setPropertyPixel({ x: pPoint.x, y: pPoint.y });
 
         if (hoveredRef.current) {
-          const tPoint = map.latLngToContainerPoint(hoveredRef.current.latlng);
+          const tPoint = map.project(hoveredRef.current.lnglat);
           setHoveredPixel({ x: tPoint.x, y: tPoint.y });
         }
       };
 
-      // Set initial positions
-      map.whenReady(() => {
+      // Hook render event for perfect smooth pixel updates on movement
+      map.on("render", updatePositions);
+
+      // Set map instance and update state
+      map.on("load", () => {
         setTimeout(updatePositions, 100);
+        setMapLoaded(true);
       });
 
-      map.on("move", updatePositions);
-      map.on("zoomend", updatePositions);
-
       mapInstance.current = map;
-      setMapLoaded(true);
     };
 
-    if (window.L) {
-      startLeafletMap();
+    if (window.mapboxgl) {
+      startMapbox();
     } else {
-      script.addEventListener("load", startLeafletMap);
+      script.addEventListener("load", startMapbox);
     }
 
     return () => {
       // Map cleanup
       if (mapInstance.current) {
-        mapInstance.current.off("move");
-        mapInstance.current.off("zoomend");
+        mapInstance.current.off("render");
         mapInstance.current.remove();
         mapInstance.current = null;
       }
@@ -173,16 +171,16 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
 
   return (
     <div className="map-view-wrapper">
-      <div ref={mapRef} className="leaflet-map-node" />
+      <div ref={mapRef} className="mapbox-map-node" />
       
       {/* 100% Free Transparent HUD Overlay (Blocks no pointer clicks) */}
       {mapLoaded && (
         <svg className="hud-radar-svg-overlay">
           {/* Concentric rings centered on property pin */}
-          <circle cx={propertyPixel.x} cy={propertyPixel.y} r="50" className="leaflet-radar-ring" />
-          <circle cx={propertyPixel.x} cy={propertyPixel.y} r="100" className="leaflet-radar-ring" />
-          <circle cx={propertyPixel.x} cy={propertyPixel.y} r="150" className="leaflet-radar-ring" />
-          <circle cx={propertyPixel.x} cy={propertyPixel.y} r="150" className="leaflet-radar-ring outer" strokeDasharray="1 3" />
+          <circle cx={propertyPixel.x} cy={propertyPixel.y} r="50" className="mapbox-radar-ring" />
+          <circle cx={propertyPixel.x} cy={propertyPixel.y} r="100" className="mapbox-radar-ring" />
+          <circle cx={propertyPixel.x} cy={propertyPixel.y} r="150" className="mapbox-radar-ring" />
+          <circle cx={propertyPixel.x} cy={propertyPixel.y} r="150" className="mapbox-radar-ring outer" strokeDasharray="1 3" />
 
           {/* Sweeper sweep line */}
           <line 
@@ -190,7 +188,7 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
             y1={propertyPixel.y} 
             x2={sweepX2} 
             y2={sweepY2} 
-            className="leaflet-radar-sweep" 
+            className="mapbox-radar-sweep" 
           />
 
           {/* Target lock dashed vector line to hovered target pin */}
@@ -201,13 +199,13 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
                 y1={propertyPixel.y}
                 x2={hoveredPixel.x}
                 y2={hoveredPixel.y}
-                className="leaflet-radar-lock-line"
+                className="mapbox-radar-lock-line"
               />
               <circle
                 cx={hoveredPixel.x}
                 cy={hoveredPixel.y}
                 r="10"
-                className="leaflet-radar-lock-ring"
+                className="mapbox-radar-lock-ring"
               />
             </>
           )}
@@ -247,7 +245,7 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
           background: #0d0d0d;
         }
 
-        .leaflet-map-node {
+        .mapbox-map-node {
           width: 100%;
           height: 100%;
           z-index: 1;
@@ -260,41 +258,41 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
           width: 100%;
           height: 100%;
           z-index: 10;
-          pointer-events: none; /* Passes all clicks directly to Leaflet Map underlying */
+          pointer-events: none; /* Passes all clicks directly to Mapbox Map underlying */
           overflow: visible;
         }
 
-        .leaflet-radar-ring {
+        .mapbox-radar-ring {
           fill: none;
           stroke: rgba(200, 169, 110, 0.12);
           stroke-width: 0.5;
         }
 
-        .leaflet-radar-ring.outer {
+        .mapbox-radar-ring.outer {
           stroke: rgba(200, 169, 110, 0.22);
           stroke-width: 0.6;
         }
 
-        .leaflet-radar-sweep {
+        .mapbox-radar-sweep {
           stroke: rgba(200, 169, 110, 0.25);
           stroke-width: 0.6;
         }
 
-        .leaflet-radar-lock-line {
+        .mapbox-radar-lock-line {
           stroke: #c8a96e;
           stroke-width: 0.75;
           stroke-dasharray: 2 2;
         }
 
-        .leaflet-radar-lock-ring {
+        .mapbox-radar-lock-ring {
           fill: none;
           stroke: #c8a96e;
           stroke-width: 0.5;
-          animation: leafletLockPulse 1.2s ease-out infinite;
+          animation: mapboxLockPulse 1.2s ease-out infinite;
           transform-origin: center;
         }
 
-        @keyframes leafletLockPulse {
+        @keyframes mapboxLockPulse {
           0% { transform: scale(0.6); opacity: 1; }
           100% { transform: scale(1.6); opacity: 0; }
         }
@@ -381,26 +379,26 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
         }
 
         /* Marker Pin adjustments */
-        .custom-leaflet-marker {
+        .custom-mapbox-marker {
           display: flex;
           align-items: center;
           justify-content: center;
         }
 
-        .custom-leaflet-marker.property {
+        .custom-mapbox-marker.property {
           position: relative;
         }
 
-        .marker-outer-pulse {
+        .custom-mapbox-marker.property .marker-outer-pulse {
           position: absolute;
           width: 24px;
           height: 24px;
           border-radius: 50%;
           border: 1px solid #c8a96e;
-          animation: leafletPulse 2s ease-out infinite;
+          animation: mapboxPulse 2s ease-out infinite;
         }
 
-        .marker-inner-dot {
+        .custom-mapbox-marker.property .marker-inner-dot {
           width: 8px;
           height: 8px;
           border-radius: 50%;
@@ -408,7 +406,7 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
           box-shadow: 0 0 10px #c8a96e;
         }
 
-        @keyframes leafletPulse {
+        @keyframes mapboxPulse {
           0% {
             transform: scale(0.5);
             opacity: 1;
@@ -419,7 +417,7 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
           }
         }
 
-        .custom-leaflet-marker.amenity .amenity-dot {
+        .custom-mapbox-marker.amenity .amenity-dot {
           width: 6px;
           height: 6px;
           border-radius: 50%;
@@ -427,16 +425,17 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
           border: 1px solid #1a1a1a;
           box-shadow: 0 0 4px rgba(255, 255, 255, 0.4);
           transition: all 0.2s ease;
+          cursor: pointer;
         }
 
-        .custom-leaflet-marker.amenity:hover .amenity-dot {
+        .custom-mapbox-marker.amenity:hover .amenity-dot {
           background: #c8a96e;
           transform: scale(1.5);
           box-shadow: 0 0 8px #c8a96e;
         }
 
-        /* Custom Popup Styles */
-        .custom-leaflet-popup .leaflet-popup-content-wrapper {
+        /* Custom Popup Styles to match Dark Mode */
+        .custom-mapbox-popup .mapboxgl-popup-content {
           background: #121212 !important;
           color: #f0ede8 !important;
           border: 0.5px solid #2d2a24 !important;
@@ -444,29 +443,34 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
           font-family: system-ui, -apple-system, sans-serif !important;
           font-size: 11px !important;
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
+          padding: 8px 12px !important;
         }
 
-        .custom-leaflet-popup .leaflet-popup-tip {
-          background: #121212 !important;
-          border-left: 0.5px solid #2d2a24 !important;
-          border-bottom: 0.5px solid #2d2a24 !important;
+        .custom-mapbox-popup .mapboxgl-popup-tip {
+          border-bottom-color: #2d2a24 !important;
+          border-top-color: #2d2a24 !important;
+          border-left-color: transparent !important;
+          border-right-color: transparent !important;
         }
 
-        .leaflet-bar {
+        .mapboxgl-ctrl-group {
+          background-color: #121212 !important;
           border: 0.5px solid #262626 !important;
           box-shadow: none !important;
         }
 
-        .leaflet-bar a {
-          background-color: #121212 !important;
-          color: #8a8a8a !important;
+        .mapboxgl-ctrl-group button {
+          width: 29px !important;
+          height: 29px !important;
           border-bottom: 0.5px solid #262626 !important;
-          transition: all 0.2s ease;
         }
 
-        .leaflet-bar a:hover {
+        .mapboxgl-ctrl-group button span {
+          filter: invert(1) brightness(0.7) !important;
+        }
+
+        .mapboxgl-ctrl-group button:hover {
           background-color: #1a1a1a !important;
-          color: #c8a96e !important;
         }
       `}</style>
     </div>
