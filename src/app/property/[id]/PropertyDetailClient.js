@@ -60,6 +60,7 @@ export default function PropertyDetailClient({ slug }) {
   const startX       = useRef(0);
   const scrollStart  = useRef(0);
   const menuRef      = useRef(null);
+  const touchStartX  = useRef(0);
 
   // ── Fetch property from Airtable → fallback to mockDb ──
   useEffect(() => {
@@ -86,6 +87,34 @@ export default function PropertyDetailClient({ slug }) {
     }
     loadProperty();
   }, [slug]);
+
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+
+  // Detect horizontal navigation scroll to toggle fade masks
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    const checkScroll = () => {
+      const { scrollLeft, clientWidth, scrollWidth } = el;
+      setCanScrollLeft(scrollLeft > 5);
+      setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 5);
+    };
+
+    el.addEventListener("scroll", checkScroll);
+    checkScroll();
+
+    // Check again if page elements settle or window size changes
+    window.addEventListener("resize", checkScroll);
+    const timer = setTimeout(checkScroll, 300);
+
+    return () => {
+      el.removeEventListener("scroll", checkScroll);
+      window.removeEventListener("resize", checkScroll);
+      clearTimeout(timer);
+    };
+  }, [propertyData]);
 
   // Close platform menu on outside click
   useEffect(() => {
@@ -423,6 +452,20 @@ export default function PropertyDetailClient({ slug }) {
   const goPrev = () => setCurrentImageIndex(i => (i === 0 ? photos.length - 1 : i - 1));
   const goNext = () => setCurrentImageIndex(i => (i + 1) % photos.length);
 
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e) => {
+    const touchEndX = e.changedTouches[0].clientX;
+    const diff = touchEndX - touchStartX.current;
+    if (diff > 50) {
+      goPrev();
+    } else if (diff < -50) {
+      goNext();
+    }
+  };
+
   // ── Drag-to-scroll handlers ───────────────────
   const onDragStart = (e) => {
     isDragging.current  = true;
@@ -443,6 +486,20 @@ export default function PropertyDetailClient({ slug }) {
 
   // ── Accordion toggle ──────────────────────────
   const tog = (setter, current, key) => setter(current === key ? null : key);
+
+  // Smooth scroll page to chapter content on mobile tab selection
+  const handleTabClick = (tabId) => {
+    setActiveTab(tabId);
+    if (window.innerWidth <= 768) {
+      setTimeout(() => {
+        document.querySelector('.zone-story')
+          ?.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'start' 
+          });
+      }, 50);
+    }
+  };
 
   // ── Where To renderer ─────────────────────────
   // Extract sidebar location values dynamically from whereTo array
@@ -503,7 +560,13 @@ export default function PropertyDetailClient({ slug }) {
       <div className="page">
 
         {/* ════ ZONE 1 – PHOTO ════ */}
-        <div className="zone-photo" id="photoZone" onClick={() => setIsLightboxOpen(true)}>
+        <div 
+          className="zone-photo" 
+          id="photoZone" 
+          onClick={() => setIsLightboxOpen(true)}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+        >
 
           {photos.map((url, i) => (
             <div
@@ -623,7 +686,7 @@ export default function PropertyDetailClient({ slug }) {
         </div>{/* /zone-photo */}
 
         {/* ════ ZONE 2 – NAV (drag-to-scroll) ════ */}
-        <div className="zone-nav">
+        <div className={`zone-nav ${canScrollLeft ? "can-scroll-left" : ""} ${canScrollRight ? "can-scroll-right" : ""}`}>
           <div
             className="nav-inner"
             ref={scrollRef}
@@ -652,7 +715,7 @@ export default function PropertyDetailClient({ slug }) {
               <span key={tab.id} style={{display:"contents"}}>
                 <div
                   className={`nav-chapter ${activeTab === tab.id ? "active" : ""}`}
-                  onClick={() => setActiveTab(tab.id)}
+                  onClick={() => handleTabClick(tab.id)}
                 >
                   {tab.icon}
                   <span className="chapter-label">{tab.label}</span>
@@ -668,7 +731,7 @@ export default function PropertyDetailClient({ slug }) {
               <>
                 <div
                   className={`nav-chapter ${activeTab === "units" ? "active" : ""}`}
-                  onClick={() => setActiveTab("units")}
+                  onClick={() => handleTabClick("units")}
                 >
                   <svg className="chapter-icon" viewBox="0 0 20 20" fill="none">
                     <rect x="3"  y="3"  width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.3"/>
@@ -685,7 +748,7 @@ export default function PropertyDetailClient({ slug }) {
             {/* Universe */}
             <div
               className={`nav-chapter ${activeTab === "universe" ? "active" : ""}`}
-              onClick={() => setActiveTab("universe")}
+              onClick={() => handleTabClick("universe")}
             >
               <svg className="chapter-icon" viewBox="0 0 20 20" fill="none">
                 <rect x="3" y="6" width="14" height="11" rx="1.5" stroke="currentColor" strokeWidth="1.3"/>
@@ -700,7 +763,7 @@ export default function PropertyDetailClient({ slug }) {
             {/* Expansion Node */}
             <div
               className={`nav-chapter nav-chapter--expansion ${activeTab === "expansion" ? "active" : ""}`}
-              onClick={() => setActiveTab("expansion")}
+              onClick={() => handleTabClick("expansion")}
             >
               <svg className="chapter-icon" viewBox="0 0 20 20" fill="none">
                 <text x="50%" y="58%" dominantBaseline="middle" textAnchor="middle" fontSize="13" fill="currentColor" fontFamily="Georgia, serif" fontStyle="italic">?</text>
@@ -713,7 +776,7 @@ export default function PropertyDetailClient({ slug }) {
             {/* Your Move — CTA */}
             <div
               className={`nav-chapter nav-chapter--cta ${activeTab === "yourmove" ? "active" : ""}`}
-              onClick={() => setActiveTab("yourmove")}
+              onClick={() => handleTabClick("yourmove")}
             >
               <svg className="chapter-icon" viewBox="0 0 20 20" fill="none">
                 <path d="M4 10h10M11 7l3 3-3 3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
@@ -1526,6 +1589,16 @@ export default function PropertyDetailClient({ slug }) {
                     </div>
                   </div>
                 </div>
+
+                <div className="intel-locked-item" style={{ marginTop: "12px", padding: "14px 16px", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "4px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span className="intel-item-label" style={{ fontSize: "15px", color: "var(--text-primary)" }}>
+                    Street View &amp; Spatial Walkthrough
+                  </span>
+                  <span className="intel-locked-value" style={{ fontSize: "12px", color: "#8a8a8a" }}>
+                    🔒 Available to verified scouts
+                  </span>
+                </div>
+
               </div>
             </div>
             <div className="panel-sidebar">
@@ -1567,8 +1640,26 @@ export default function PropertyDetailClient({ slug }) {
             </div>
           </div>{/* /panel-expansion */}
 
-        </div>{/* /zone-story */}
-      </div>{/* /page */}
+         </div>{/* /zone-story */}
+
+         <div className="mobile-action-bar">
+           <div className="action-bar-left">
+             <div className="action-bar-label">
+               Price Upon Inquiry
+             </div>
+             <div className="action-bar-sublabel">
+               {d.city} · {d.spaceCategory || d.property_type}
+             </div>
+           </div>
+           <a 
+             href={`/property/${slug}/brokers`}
+             className="action-bar-cta"
+           >
+             Connect with a Broker
+           </a>
+         </div>
+
+       </div>{/* /page */}
 
       {/* Lightbox / Fullscreen Modal */}
       {isLightboxOpen && (

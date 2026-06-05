@@ -119,7 +119,7 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
 
   return (
     <div className={`reaction-buttons-wrapper ${small ? "small" : ""}`}>
-      <div className={`reaction-tiles-row ${small ? "small" : ""}`}>
+      <div className={`reaction-tiles-row reaction-row ${small ? "small" : ""}`}>
         {Object.entries(REACTION_SHAPES).map(([type, data]) => {
           const isActive = activeReaction === type;
           return (
