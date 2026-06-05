@@ -347,13 +347,62 @@
 @media (max-width: 900px) {
   .directory-container {
     grid-template-columns: 1fr;
-    gap: 32px;
+    gap: 24px;
   }
   .directory-grid {
     grid-template-columns: 1fr;
   }
   .directory-main {
     padding: 30px 20px;
+  }
+
+  /* Compact floating filters row on mobile */
+  .filters-sidebar {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 12px;
+    position: relative;
+    z-index: 150;
+  }
+  
+  .filter-card {
+    flex: 1 1 120px;
+    position: relative;
+    overflow: visible;
+  }
+
+  .filter-trigger {
+    padding: 12px 14px;
+    font-size: 11px;
+    border-radius: 4px;
+    background: #161616;
+    border: 1px solid #262626;
+  }
+
+  .filter-options {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 260px;
+    max-width: calc(100vw - 40px);
+    z-index: 500;
+    background: #161616;
+    border: 1px solid #262626;
+    border-radius: 4px;
+    padding: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7);
+    margin-top: 4px;
+  }
+
+  .filter-card:last-of-type .filter-options {
+    left: auto;
+    right: 0;
+  }
+
+  /* Hide secondary widgets on mobile to save vertical space */
+  .intel-widget {
+    display: none !important;
   }
 }
 

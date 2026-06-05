@@ -357,6 +357,32 @@ export default function WishlistPage() {
           padding-top: 24px;
           border-top: 1px solid #262626;
         }
+
+        @media (max-width: 768px) {
+          .wishlist-main {
+            padding: 80px 16px 40px;
+          }
+          .page-title {
+            font-size: 30px;
+          }
+          .board-card {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 12px;
+            padding: 16px;
+          }
+          .card-actions {
+            justify-content: space-between;
+            width: 100%;
+            border-top: 1px dashed #262626;
+            padding-top: 10px;
+            margin-top: 4px;
+          }
+          .badge-corner {
+            top: -6px;
+            right: -6px;
+          }
+        }
       `}</style>
     </div>
   );

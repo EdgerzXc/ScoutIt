@@ -585,11 +585,16 @@
     flex-direction: row;
     overflow-x: auto;
     padding-bottom: 8px;
+    scrollbar-width: none;
+  }
+  .navLinks::-webkit-scrollbar {
+    display: none;
   }
 
   .navLink {
     white-space: nowrap;
     padding: 8px 12px;
+    flex-shrink: 0;
   }
 
   .engineContainer {

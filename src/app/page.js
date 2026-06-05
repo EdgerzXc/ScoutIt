@@ -2532,6 +2532,7 @@ export default function Home() {
           .property-split {
             flex-direction: column;
             height: auto;
+            overflow: visible;
           }
           .property-menu {
             width: 100%;
@@ -2563,6 +2564,9 @@ export default function Home() {
           }
           .matrix-preview-pane {
             padding: 32px 24px;
+            max-height: none !important;
+            height: auto !important;
+            overflow: visible !important;
             overflow-y: visible !important;
           }
           .discover-preview-grid, .brokers-blur-grid {
