@@ -83,8 +83,38 @@ export default function ConnectionPortal({ brokerName }) {
       </div>
     );
   }
+
   return (
     <div className="connection-portal-container">
+      {/* Safety Notice Box FIRST */}
+      <div className="safety-disclaimer-box">
+        <div className="disclaimer-header">
+          <span className="disclaimer-icon">⚠️</span>
+          <h5>TRANSACTION INTEGRITY &amp; SECURITY PROTOCOL</h5>
+        </div>
+        <div className="disclaimer-content">
+          <p className="disclaimer-paragraph">
+            <strong>ScoutIt operates exclusively as a spatial intelligence platform and verified service provider index.</strong> All partner profiles, credentials, and license numbers displayed on this platform undergo baseline verification at the time of onboarding. However, <span className="highlight-warning">this verification does not constitute an endorsement, guarantee of performance, or warranty of any kind.</span>
+          </p>
+          <p className="disclaimer-paragraph">
+            <strong>Users are solely responsible for conducting independent due diligence</strong> prior to entering into any financial transaction, contractual agreement, or professional engagement with any broker, photographer, researcher, or service provider listed on this platform.
+          </p>
+          <p className="disclaimer-paragraph">
+            <span className="highlight-critical">ScoutIt does not facilitate, process, store, or hold any client payments, escrow arrangements, deposit agreements, or project contracts.</span> ScoutIt assumes <strong>no liability</strong> for the outcome, quality, or legality of any engagement initiated through this platform.
+          </p>
+          <p className="disclaimer-paragraph">
+            By submitting an inquiry through ScoutIt, you acknowledge that your communication is directed solely to the listed service provider and that ScoutIt serves only as the introduction channel. <strong>All negotiations, agreements, and transactions occur exclusively between the user and the service provider.</strong>
+          </p>
+          <p className="disclaimer-paragraph">
+            For disputes arising from any engagement, users are advised to seek independent legal counsel.
+          </p>
+          <div className="disclaimer-footer-compliance">
+            ScoutIt is a display-only platform operating in compliance with <strong>Republic Act No. 9646 (Real Estate Service Act of the Philippines)</strong>.
+          </div>
+        </div>
+      </div>
+
+      {/* Connection Portal Card LAST */}
       <div className="connection-portal-card">
         <div className="portal-header">
           <h4>Request Contact Portal Clearance</h4>
@@ -130,34 +160,6 @@ export default function ConnectionPortal({ brokerName }) {
             Initialize Roster Handshake
           </button>
         </form>
-      </div>
-
-      {/* Safety Notice Box */}
-      <div className="safety-disclaimer-box">
-        <div className="disclaimer-header">
-          <span className="disclaimer-icon">⚠️</span>
-          <h5>TRANSACTION INTEGRITY &amp; SECURITY PROTOCOL</h5>
-        </div>
-        <div className="disclaimer-content">
-          <p className="disclaimer-paragraph">
-            <strong>ScoutIt operates exclusively as a spatial intelligence platform and verified service provider index.</strong> All partner profiles, credentials, and license numbers displayed on this platform undergo baseline verification at the time of onboarding. However, <span className="highlight-warning">this verification does not constitute an endorsement, guarantee of performance, or warranty of any kind.</span>
-          </p>
-          <p className="disclaimer-paragraph">
-            <strong>Users are solely responsible for conducting independent due diligence</strong> prior to entering into any financial transaction, contractual agreement, or professional engagement with any broker, photographer, researcher, or service provider listed on this platform.
-          </p>
-          <p className="disclaimer-paragraph">
-            <span className="highlight-critical">ScoutIt does not facilitate, process, store, or hold any client payments, escrow arrangements, deposit agreements, or project contracts.</span> ScoutIt assumes <strong>no liability</strong> for the outcome, quality, or legality of any engagement initiated through this platform.
-          </p>
-          <p className="disclaimer-paragraph">
-            By submitting an inquiry through ScoutIt, you acknowledge that your communication is directed solely to the listed service provider and that ScoutIt serves only as the introduction channel. <strong>All negotiations, agreements, and transactions occur exclusively between the user and the service provider.</strong>
-          </p>
-          <p className="disclaimer-paragraph">
-            For disputes arising from any engagement, users are advised to seek independent legal counsel.
-          </p>
-          <div className="disclaimer-footer-compliance">
-            ScoutIt is a display-only platform operating in compliance with <strong>Republic Act No. 9646 (Real Estate Service Act of the Philippines)</strong>.
-          </div>
-        </div>
       </div>
 
       <style>{`
