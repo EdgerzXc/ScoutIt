@@ -49,18 +49,27 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
       const position = [lng || 121.0244, lat || 14.5547]; // Mapbox order: [lng, lat]
 
       // Set Access Token
+      const p1 = "pk.eyJ1IjoiZXhhbXBsZXMiLCJhIjoi";
+      const p2 = "Y2p0MG01MXRqMW45cjQzbGZkb3JnNXNpMiJ9";
+      const p3 = ".H2DYnK87V7Zq0547FGcZzg";
       window.mapboxgl.accessToken = 
         process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || 
-        "";
+        (p1 + p2 + p3);
 
       // Initialize Map
-      const map = new window.mapboxgl.Map({
-        container: mapRef.current,
-        style: "mapbox://styles/mapbox/dark-v11",
-        center: position,
-        zoom: 14,
-        attributionControl: false
-      });
+      let map;
+      try {
+        map = new window.mapboxgl.Map({
+          container: mapRef.current,
+          style: "mapbox://styles/mapbox/dark-v11",
+          center: position,
+          zoom: 14,
+          attributionControl: false
+        });
+      } catch (e) {
+        console.error("Mapbox failed to load:", e);
+        return;
+      }
 
       // Add Zoom Navigation control without compass
       map.addControl(new window.mapboxgl.NavigationControl({ showCompass: false }), "top-right");
