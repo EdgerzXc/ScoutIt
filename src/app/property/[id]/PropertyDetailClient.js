@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import ReactionButtons from "@/components/ReactionButtons";
 import InteractiveMap from "@/components/InteractiveMap";
+import MapboxMap from "@/components/MapboxMap";
 import "./property.css";
 
 // ═══════════════════════════════════════════════════
@@ -1065,6 +1066,12 @@ export default function PropertyDetailClient({ slug }) {
                   Tactical Map
                 </button>
                 <button 
+                  className={`whereto-tab-btn ${whereToTab === "mapbox" ? "active" : ""}`}
+                  onClick={() => setWhereToTab("mapbox")}
+                >
+                  3D Spatial Map
+                </button>
+                <button 
                   className={`whereto-tab-btn ${whereToTab === "list" ? "active" : ""}`}
                   onClick={() => setWhereToTab("list")}
                 >
@@ -1081,6 +1088,17 @@ export default function PropertyDetailClient({ slug }) {
                 {whereToTab === "map" && (
                   <div style={{ position: "relative", width: "100%", height: "380px" }}>
                     <InteractiveMap 
+                      lat={d.lat || d.latitude || 14.5547} 
+                      lng={d.lng || d.longitude || 121.0244} 
+                      propertyTitle={d.title} 
+                      vicinityData={d.whereTo} 
+                    />
+                  </div>
+                )}
+
+                {whereToTab === "mapbox" && (
+                  <div style={{ position: "relative", width: "100%", height: "380px" }}>
+                    <MapboxMap 
                       lat={d.lat || d.latitude || 14.5547} 
                       lng={d.lng || d.longitude || 121.0244} 
                       propertyTitle={d.title} 
