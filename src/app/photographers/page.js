@@ -5,50 +5,9 @@ import Link from "next/link";
 import { useState } from "react";
 import "../property/property.css";
 
-const DUMMY_PHOTOGRAPHERS = [
-  {
-    id: "ph-001",
-    name: "Marco Reyes",
-    location: "BGC, Taguig",
-    title: "Architectural & Interior Photographer",
-    specialty: "Interior Architecture",
-    equipment: "Sony A7R V · Tilt-Shift 24mm · Profoto B10",
-    style: "Clean, high-contrast natural light with minimal staging",
-    rate: "Starting at ₱8,500 / session",
-    shoots: "42 Space Shoots",
-    bio: "Seven years documenting Metro Manila's most compelling interiors. Trusted by developers, architects, and private sellers who need photos that move properties.",
-    image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&q=80",
-    tier: 1,
-  },
-  {
-    id: "ph-002",
-    name: "Alicia Tan",
-    location: "Makati, Metro Manila",
-    title: "Aerial & Lifestyle Property Photographer",
-    specialty: "Drone Aerial + Lifestyle",
-    equipment: "DJI Mavic 3 Pro · Canon R5 · Godox AD400 Pro",
-    style: "Golden hour cinematic with wide environmental context",
-    rate: "Starting at ₱12,000 / session",
-    shoots: "61 Space Shoots",
-    bio: "CAA-licensed drone operator and lifestyle photographer. Specializes in resort, STR, and luxury residential where the surrounding environment is part of the story.",
-    image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&q=80",
-    tier: 2,
-  },
-  {
-    id: "ph-003",
-    name: "Daniel Flores",
-    location: "Cebu City",
-    title: "Commercial Space & Restaurant Photographer",
-    specialty: "Commercial & F&B",
-    equipment: "Nikon Z8 · 14–24mm f/2.8 · Elinchrom ELB 500",
-    style: "Warm editorial tones, ambiance-forward with texture and depth",
-    rate: "Starting at ₱6,000 / session",
-    shoots: "28 Space Shoots",
-    bio: "Cebu-based specialist in restaurants, cafés, and boutique commercial spaces. Delivers gallery-ready images within 48 hours.",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80",
-    tier: 3,
-  },
-];
+import { getPhotographers } from "@/data/mockDb";
+
+const DUMMY_PHOTOGRAPHERS = getPhotographers();
 
 const SPECIALTIES = ["Interior Architecture", "Drone Aerial + Lifestyle", "Commercial & F&B", "Minimalist Residential", "Luxury & High-End"];
 const LOCATIONS = ["BGC, Taguig", "Makati, Metro Manila", "Cebu City", "Quezon City", "Alabang"];
@@ -179,9 +138,14 @@ export default function PhotographersPage() {
                 const tierClass = ph.tier === 1 ? "tier-1-card diamond-card" : ph.tier === 2 ? "tier-2-card platinum-card" : "tier-3-card gold-card";
                 const tierLabel = ph.tier === 1 ? "DIAMOND PARTNER" : ph.tier === 2 ? "PLATINUM PARTNER" : "GOLD PARTNER";
                 return (
-                  <div key={ph.id} className={`broker-card ${tierClass}`} style={{ position: "relative", cursor: "default" }}>
+                  <Link
+                    href={`/photographers/${ph.id}`}
+                    key={ph.id}
+                    className={`broker-card ${tierClass}`}
+                    style={{ textDecoration: "none", position: "relative" }}
+                  >
                     <div className="general-tier-badge-label">{tierLabel}</div>
-                    <div className="coming-soon-card-overlay">PREVIEW</div>
+                    <div className="coming-soon-card-overlay">PREVIEW CHANNEL</div>
                     <div className="broker-image-container">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={ph.image} alt={ph.name} className="broker-image" />
@@ -199,10 +163,10 @@ export default function PhotographersPage() {
                           <span className="stat-value" style={{ fontSize: "12px" }}>{ph.shoots}</span>
                           <span style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "2px" }}>{ph.rate}</span>
                         </div>
-                        <span className="btn-contact" style={{ opacity: 0.4, cursor: "not-allowed" }}>Coming Soon</span>
+                        <span className="btn-contact">Focus →</span>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 );
               })}
             </div>

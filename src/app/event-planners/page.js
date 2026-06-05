@@ -3,51 +3,10 @@
 import Header from "@/components/Header";
 import { useState } from "react";
 import "../property/property.css";
+import Link from "next/link";
+import { getEventPlanners } from "@/data/mockDb";
 
-const DUMMY_PLANNERS = [
-  {
-    id: "ep-001",
-    name: "Isabella Cruz",
-    location: "Metro Manila",
-    title: "Luxury Event Designer & Planner",
-    specialty: "Wedding & Luxury Events",
-    style: "Modern, opulent, floral-forward design with custom lighting",
-    venues: "The Peninsula Manila · Shangri-La The Fort · Enderun Tent",
-    rate: "Starting at ₱150,000 / event",
-    events: "120+ Events",
-    bio: "Over a decade of creating bespoke luxury weddings and high-profile social galas. Specializes in transforming raw spaces into breathtaking immersive environments.",
-    image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&q=80",
-    tier: 1,
-  },
-  {
-    id: "ep-002",
-    name: "James Villanueva",
-    location: "Cebu & Visayas",
-    title: "Corporate Experience & Brand Designer",
-    specialty: "Corporate & Brand Events",
-    style: "Sleek, tech-integrated, high-energy experiential production",
-    venues: "Jpark Island Resort · Oakridge Pavilion · Radisson Blu Cebu",
-    rate: "Starting at ₱85,000 / event",
-    events: "74 Events",
-    bio: "Specializes in product launches, brand activations, and corporate retreats across the Visayas. Blends modern aesthetics with seamless event logistics.",
-    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&q=80",
-    tier: 2,
-  },
-  {
-    id: "ep-003",
-    name: "Maria Santos",
-    location: "Davao & Mindanao",
-    title: "Boutique & Social Celebrations Planner",
-    specialty: "Birthdays & Intimate Celebrations",
-    style: "Chic, warm, minimalist rustic and bohemian aesthetics",
-    venues: "Dusit Thani Lubi Plantation · Waterfront Insular Davao",
-    rate: "Starting at ₱45,000 / event",
-    events: "38 Events",
-    bio: "Davao-based planner specializing in intimate weddings, milestone birthdays, and boutique social gatherings. Passionate about personalized, detail-rich celebrations.",
-    image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&q=80",
-    tier: 3,
-  },
-];
+const DUMMY_PLANNERS = getEventPlanners();
 
 const SPECIALTIES = [
   "Wedding & Luxury Events",
@@ -206,9 +165,14 @@ export default function EventPlannersPage() {
                     ? "PLATINUM PARTNER"
                     : "GOLD PARTNER";
                 return (
-                  <div key={ep.id} className={`broker-card ${tierClass}`} style={{ position: "relative", cursor: "default" }}>
+                  <Link
+                    href={`/event-planners/${ep.id}`}
+                    key={ep.id}
+                    className={`broker-card ${tierClass}`}
+                    style={{ textDecoration: "none", position: "relative" }}
+                  >
                     <div className="general-tier-badge-label">{tierLabel}</div>
-                    <div className="coming-soon-card-overlay">PREVIEW</div>
+                    <div className="coming-soon-card-overlay">PREVIEW CHANNEL</div>
                     <div className="broker-image-container">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={ep.image} alt={ep.name} className="broker-image" />
@@ -227,10 +191,10 @@ export default function EventPlannersPage() {
                           <span className="stat-value" style={{ fontSize: "12px" }}>{ep.events}</span>
                           <span style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "2px" }}>{ep.rate}</span>
                         </div>
-                        <span className="btn-contact" style={{ opacity: 0.4, cursor: "not-allowed" }}>Coming Soon</span>
+                        <span className="btn-contact">Focus →</span>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 );
               })}
             </div>

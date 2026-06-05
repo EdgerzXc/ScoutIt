@@ -608,6 +608,258 @@ export const DUMMY_BROKERS = [
   }
 ];
 
+export const DUMMY_PHOTOGRAPHERS = [
+  {
+    id: "ph-001",
+    name: "Marco Reyes",
+    location: "BGC, Taguig",
+    title: "Architectural & Interior Photographer",
+    specialty: "Interior Architecture",
+    equipment: "Sony A7R V · Tilt-Shift 24mm · Profoto B10",
+    style: "Clean, high-contrast natural light with minimal staging",
+    rate: "Starting at ₱8,500 / session",
+    shoots: "42 Space Shoots",
+    bio: "Seven years documenting Metro Manila's most compelling interiors. Trusted by developers, architects, and private sellers who need photos that move properties.",
+    image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=800&q=80",
+    tier: 1,
+    license: "Licensed Architectural Photographer · BGC Guild",
+    clearanceTier: "Tier 1 - Elite Creator",
+    rating: 94,
+    niche: ["Interior Design", "BGC Commercial", "Natural Light Focus"],
+    metrics: [
+      { label: "Roster Rank", value: "Principal Artist" },
+      { label: "Clearance", value: "Tier 1" },
+      { label: "Roster Status", value: "Active" }
+    ],
+    managedProperties: [
+      { slug: "aurelia-residences", title: "Aurelia Residences Penthouse", category: "Residential", image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=400&q=80" },
+      { slug: "gridwork-studio", title: "The Gridwork Studio", category: "Commercial", image: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=400&q=80" }
+    ]
+  },
+  {
+    id: "ph-002",
+    name: "Alicia Tan",
+    location: "Makati, Metro Manila",
+    title: "Aerial & Lifestyle Property Photographer",
+    specialty: "Drone Aerial + Lifestyle",
+    equipment: "DJI Mavic 3 Pro · Canon R5 · Godox AD400 Pro",
+    style: "Golden hour cinematic with wide environmental context",
+    rate: "Starting at ₱12,000 / session",
+    shoots: "61 Space Shoots",
+    bio: "CAA-licensed drone operator and lifestyle photographer. Specializes in resort, STR, and luxury residential where the surrounding environment is part of the story.",
+    image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=800&q=80",
+    tier: 2,
+    license: "CAA UAS Pilot License No. 0089281",
+    clearanceTier: "Tier 2 - Alpha",
+    rating: 91,
+    niche: ["Resort Aerials", "STR Cinematic", "Lifestyle Property"],
+    metrics: [
+      { label: "Roster Rank", value: "Lead Pilot" },
+      { label: "Clearance", value: "Tier 2" },
+      { label: "Roster Status", value: "Active" }
+    ],
+    managedProperties: [
+      { slug: "siargao-tropical-villa", title: "Siargao Tropical Villa", category: "STR", image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=400&q=80" },
+      { slug: "palawan-eco-retreat", title: "Palawan Eco-Retreat", category: "Hospitality", image: "https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?auto=format&fit=crop&w=400&q=80" }
+    ]
+  },
+  {
+    id: "ph-003",
+    name: "Daniel Flores",
+    location: "Cebu City",
+    title: "Commercial Space & Restaurant Photographer",
+    specialty: "Commercial & F&B",
+    equipment: "Nikon Z8 · 14–24mm f/2.8 · Elinchrom ELB 500",
+    style: "Warm editorial tones, ambiance-forward with texture and depth",
+    rate: "Starting at ₱6,000 / session",
+    shoots: "28 Space Shoots",
+    bio: "Cebu-based specialist in restaurants, cafés, and boutique commercial spaces. Delivers gallery-ready images within 48 hours.",
+    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80",
+    tier: 3,
+    license: "Certified Commercial Photographer · Visayas Association",
+    clearanceTier: "Tier 3 - Beta",
+    rating: 88,
+    niche: ["F&B Spaces", "Cafe Ambiance", "Visayas Regional"],
+    metrics: [
+      { label: "Roster Rank", value: "Commercial Specialist" },
+      { label: "Clearance", value: "Tier 3" },
+      { label: "Roster Status", value: "Active" }
+    ],
+    managedProperties: [
+      { slug: "gallery-by-chele", title: "Gallery by Chele", category: "Restaurants", image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=400&q=80" },
+      { slug: "antonios-tagaytay", title: "Antonio's Tagaytay Estate", category: "Restaurants", image: "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?auto=format&fit=crop&w=400&q=80" }
+    ]
+  }
+];
+
+export const DUMMY_RESEARCHERS = [
+  {
+    id: "sr-001",
+    name: "Patricia Lim",
+    location: "Metro Manila",
+    title: "Senior Space Intelligence Researcher",
+    focus: "Residential Due Diligence",
+    markets: "BGC · Makati · Ortigas · Eastwood",
+    turnaround: "5–7 Business Days",
+    reports: "84 Reports Delivered",
+    bio: "Former property appraiser with 9 years of field experience. Specializes in pre-purchase residential due diligence — title verification, structural assessment coordination, neighborhood pattern analysis, and comparable sales mapping.",
+    image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=800&q=80",
+    tier: 1,
+    deliverables: ["Title chain verification", "On-site structural walkthrough", "Neighborhood livability report", "Comparable sales within 500m", "Developer track record analysis"],
+    license: "PRC Licensed Appraiser No. 0092184",
+    clearanceTier: "Tier 1 - Lead Inspector",
+    rating: 95,
+    niche: ["Title Chain Verification", "Structural Coordination", "BGC Due Diligence"],
+    metrics: [
+      { label: "Roster Rank", value: "Senior Researcher" },
+      { label: "Clearance", value: "Tier 1" },
+      { label: "Roster Status", value: "Active" }
+    ],
+    managedProperties: [
+      { slug: "batasan-hills", title: "Batasan Hills House & Lot", category: "Residential", image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=400&q=80" },
+      { slug: "aurelia-residences", title: "Aurelia Residences Penthouse", category: "Residential", image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=400&q=80" }
+    ]
+  },
+  {
+    id: "sr-002",
+    name: "Kristoffer Navarro",
+    location: "Cebu & Visayas",
+    title: "Commercial & Investment Researcher",
+    focus: "Commercial Investment Analysis",
+    markets: "Cebu City · Lapu-Lapu · Mandaue · Dumaguete",
+    turnaround: "7–10 Business Days",
+    reports: "37 Reports Delivered",
+    bio: "Commercial real estate analyst with background in urban planning. Focuses on ROI feasibility, zoning compliance, and foot traffic pattern studies for retail, office, and mixed-use acquisitions in the Visayas.",
+    image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=800&q=80",
+    tier: 2,
+    deliverables: ["Zoning & land use verification", "ROI feasibility worksheet", "Foot traffic data (3-month avg)", "Competing tenant analysis", "Infrastructure & utilities report"],
+    license: "Licensed Urban Planner No. 0019283",
+    clearanceTier: "Tier 2 - Alpha Analyst",
+    rating: 89,
+    niche: ["Zoning & Compliance", "Foot Traffic Studies", "Visayas Mixed-Use"],
+    metrics: [
+      { label: "Roster Rank", value: "Urban Planner" },
+      { label: "Clearance", value: "Tier 2" },
+      { label: "Roster Status", value: "Active" }
+    ],
+    managedProperties: [
+      { slug: "zuellig-building", title: "Zuellig Commercial Tower", category: "Commercial", image: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=400&q=80" },
+      { slug: "bohol-treehouse-lodge", title: "Bohol Treehouse Lodge", category: "Hospitality", image: "https://images.unsplash.com/photo-1510798831971-661eb04b3739?auto=format&fit=crop&w=400&q=80" }
+    ]
+  },
+  {
+    id: "sr-003",
+    name: "Sunshine Ramos",
+    location: "Davao & Mindanao",
+    title: "Hospitality & STR Researcher",
+    focus: "Short-Term Rental & Hospitality",
+    markets: "Davao City · Siargao · General Santos · Bukidnon",
+    turnaround: "6–8 Business Days",
+    reports: "21 Reports Delivered",
+    bio: "Tourism industry background combined with STR market expertise. Delivers occupancy benchmarking, revenue potential estimates, and compliance checks for Airbnb, resort, and boutique hotel acquisitions in Mindanao.",
+    image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=800&q=80",
+    tier: 3,
+    deliverables: ["Occupancy rate benchmarking", "Revenue potential estimate", "Barangay permit & compliance check", "STR saturation analysis", "Tourism corridor outlook"],
+    license: "Certified STR Yield Analyst · Davao Guild",
+    clearanceTier: "Tier 3 - Beta",
+    rating: 91,
+    niche: ["Occupancy Benchmarking", "Mindanao Saturation", "Siargao STR"],
+    metrics: [
+      { label: "Roster Rank", value: "Hospitality Specialist" },
+      { label: "Clearance", value: "Tier 3" },
+      { label: "Roster Status", value: "Active" }
+    ],
+    managedProperties: [
+      { slug: "siargao-tropical-villa", title: "Siargao Tropical Villa", category: "STR", image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=400&q=80" },
+      { slug: "palawan-eco-retreat", title: "Palawan Eco-Retreat", category: "Hospitality", image: "https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?auto=format&fit=crop&w=400&q=80" }
+    ]
+  }
+];
+
+export const DUMMY_EVENT_PLANNERS = [
+  {
+    id: "ep-001",
+    name: "Isabella Cruz",
+    location: "Metro Manila",
+    title: "Luxury Event Designer & Planner",
+    specialty: "Wedding & Luxury Events",
+    style: "Modern, opulent, floral-forward design with custom lighting",
+    venues: "The Peninsula Manila · Shangri-La The Fort · Enderun Tent",
+    rate: "Starting at ₱150,000 / event",
+    events: "120+ Events",
+    bio: "Over a decade of creating bespoke luxury weddings and high-profile social galas. Specializes in transforming raw spaces into breathtaking immersive environments.",
+    image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&q=80",
+    tier: 1,
+    license: "Professional Event Organizer Guild ID 20281",
+    clearanceTier: "Tier 1 - Elite Designer",
+    rating: 96,
+    niche: ["Luxury Weddings", "Galas & Socials", "Immersive Lighting"],
+    metrics: [
+      { label: "Roster Rank", value: "Elite Designer" },
+      { label: "Clearance", value: "Tier 1" },
+      { label: "Roster Status", value: "Active" }
+    ],
+    managedProperties: [
+      { slug: "the-glasshouse-bgc", title: "The Glasshouse BGC", category: "Venues", image: "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=400&q=80" },
+      { slug: "solaire-grand-ballroom", title: "Solaire Grand Ballroom", category: "Venues", image: "https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?auto=format&fit=crop&w=400&q=80" }
+    ]
+  },
+  {
+    id: "ep-002",
+    name: "James Villanueva",
+    location: "Cebu & Visayas",
+    title: "Corporate Experience & Brand Designer",
+    specialty: "Corporate & Brand Events",
+    style: "Sleek, tech-integrated, high-energy experiential production",
+    venues: "Jpark Island Resort · Oakridge Pavilion · Radisson Blu Cebu",
+    rate: "Starting at ₱85,000 / event",
+    events: "74 Events",
+    bio: "Specializes in product launches, brand activations, and corporate retreats across the Visayas. Blends modern aesthetics with seamless event logistics.",
+    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800&q=80",
+    tier: 2,
+    license: "Visayas Event Organizers Guild ID 00192",
+    clearanceTier: "Tier 2 - Alpha Producer",
+    rating: 90,
+    niche: ["Product Launches", "Corporate Retreats", "Visayas Regional"],
+    metrics: [
+      { label: "Roster Rank", value: "Lead Producer" },
+      { label: "Clearance", value: "Tier 2" },
+      { label: "Roster Status", value: "Active" }
+    ],
+    managedProperties: [
+      { slug: "sky-pavilion-makati", title: "Sky Pavilion Makati", category: "Venues", image: "https://images.unsplash.com/photo-1587825140708-dfaf72ae4b04?auto=format&fit=crop&w=400&q=80" },
+      { slug: "zuellig-building", title: "Zuellig Commercial Tower", category: "Commercial", image: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=400&q=80" }
+    ]
+  },
+  {
+    id: "ep-003",
+    name: "Maria Santos",
+    location: "Davao & Mindanao",
+    title: "Boutique & Social Celebrations Planner",
+    specialty: "Birthdays & Intimate Celebrations",
+    style: "Chic, warm, minimalist rustic and bohemian aesthetics",
+    venues: "Dusit Thani Lubi Plantation · Waterfront Insular Davao",
+    rate: "Starting at ₱45,000 / event",
+    events: "38 Events",
+    bio: "Davao-based planner specializing in intimate weddings, milestone birthdays, and boutique social gatherings. Passionate about personalized, detail-rich celebrations.",
+    image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=800&q=80",
+    tier: 3,
+    license: "Mindanao Celebrations Association No. 00812",
+    clearanceTier: "Tier 3 - Beta",
+    rating: 92,
+    niche: ["Intimate Weddings", "Bohemian Aesthetics", "Mindanao Boutique"],
+    metrics: [
+      { label: "Roster Rank", value: "Boutique Designer" },
+      { label: "Clearance", value: "Tier 3" },
+      { label: "Roster Status", value: "Active" }
+    ],
+    managedProperties: [
+      { slug: "boracay-bamboo-hideaway", title: "Boracay Bamboo Hideaway", category: "STR", image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=400&q=80" },
+      { slug: "bohol-treehouse-lodge", title: "Bohol Treehouse Lodge", category: "Hospitality", image: "https://images.unsplash.com/photo-1510798831971-661eb04b3739?auto=format&fit=crop&w=400&q=80" }
+    ]
+  }
+];
+
 export const ARTICLES = [
   {
     slug: "bgc-spatial-movement",
@@ -1679,6 +1931,30 @@ export function getBrokers() {
 
 export function getBrokerById(id) {
   return DUMMY_BROKERS.find(b => b.id === id) || null;
+}
+
+export function getPhotographers() {
+  return DUMMY_PHOTOGRAPHERS;
+}
+
+export function getPhotographerById(id) {
+  return DUMMY_PHOTOGRAPHERS.find(p => p.id === id) || null;
+}
+
+export function getResearchers() {
+  return DUMMY_RESEARCHERS;
+}
+
+export function getResearcherById(id) {
+  return DUMMY_RESEARCHERS.find(r => r.id === id) || null;
+}
+
+export function getEventPlanners() {
+  return DUMMY_EVENT_PLANNERS;
+}
+
+export function getEventPlannerById(id) {
+  return DUMMY_EVENT_PLANNERS.find(ep => ep.id === id) || null;
 }
 
 export function getArticles(category = "All") {

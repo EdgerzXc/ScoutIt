@@ -3,51 +3,10 @@
 import Header from "@/components/Header";
 import { useState } from "react";
 import "../property/property.css";
+import Link from "next/link";
+import { getResearchers } from "@/data/mockDb";
 
-const DUMMY_RESEARCHERS = [
-  {
-    id: "sr-001",
-    name: "Patricia Lim",
-    location: "Metro Manila",
-    title: "Senior Space Intelligence Researcher",
-    focus: "Residential Due Diligence",
-    markets: "BGC · Makati · Ortigas · Eastwood",
-    turnaround: "5–7 Business Days",
-    reports: "84 Reports Delivered",
-    bio: "Former property appraiser with 9 years of field experience. Specializes in pre-purchase residential due diligence — title verification, structural assessment coordination, neighborhood pattern analysis, and comparable sales mapping.",
-    image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=80",
-    tier: 1,
-    deliverables: ["Title chain verification", "On-site structural walkthrough", "Neighborhood livability report", "Comparable sales within 500m", "Developer track record analysis"],
-  },
-  {
-    id: "sr-002",
-    name: "Kristoffer Navarro",
-    location: "Cebu & Visayas",
-    title: "Commercial & Investment Researcher",
-    focus: "Commercial Investment Analysis",
-    markets: "Cebu City · Lapu-Lapu · Mandaue · Dumaguete",
-    turnaround: "7–10 Business Days",
-    reports: "37 Reports Delivered",
-    bio: "Commercial real estate analyst with background in urban planning. Focuses on ROI feasibility, zoning compliance, and foot traffic pattern studies for retail, office, and mixed-use acquisitions in the Visayas.",
-    image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&q=80",
-    tier: 2,
-    deliverables: ["Zoning & land use verification", "ROI feasibility worksheet", "Foot traffic data (3-month avg)", "Competing tenant analysis", "Infrastructure & utilities report"],
-  },
-  {
-    id: "sr-003",
-    name: "Sunshine Ramos",
-    location: "Davao & Mindanao",
-    title: "Hospitality & STR Researcher",
-    focus: "Short-Term Rental & Hospitality",
-    markets: "Davao City · Siargao · General Santos · Bukidnon",
-    turnaround: "6–8 Business Days",
-    reports: "21 Reports Delivered",
-    bio: "Tourism industry background combined with STR market expertise. Delivers occupancy benchmarking, revenue potential estimates, and compliance checks for Airbnb, resort, and boutique hotel acquisitions in Mindanao.",
-    image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&q=80",
-    tier: 3,
-    deliverables: ["Occupancy rate benchmarking", "Revenue potential estimate", "Barangay permit & compliance check", "STR saturation analysis", "Tourism corridor outlook"],
-  },
-];
+const DUMMY_RESEARCHERS = getResearchers();
 
 const FOCUS_AREAS = ["Residential Due Diligence", "Commercial Investment Analysis", "Short-Term Rental & Hospitality", "Land Acquisition", "Industrial & Logistics"];
 const MARKETS = ["Metro Manila", "Cebu & Visayas", "Davao & Mindanao", "Clark & Central Luzon", "Iloilo & Western Visayas"];
@@ -160,9 +119,14 @@ export default function ResearchersPage() {
                 const tierClass = r.tier === 1 ? "tier-1-card diamond-card" : r.tier === 2 ? "tier-2-card platinum-card" : "tier-3-card gold-card";
                 const tierLabel = r.tier === 1 ? "DIAMOND PARTNER" : r.tier === 2 ? "PLATINUM PARTNER" : "GOLD PARTNER";
                 return (
-                  <div key={r.id} className={`broker-card ${tierClass}`} style={{ position: "relative", cursor: "default" }}>
+                  <Link
+                    href={`/researchers/${r.id}`}
+                    key={r.id}
+                    className={`broker-card ${tierClass}`}
+                    style={{ textDecoration: "none", position: "relative" }}
+                  >
                     <div className="general-tier-badge-label">{tierLabel}</div>
-                    <div className="coming-soon-card-overlay">PREVIEW</div>
+                    <div className="coming-soon-card-overlay">PREVIEW CHANNEL</div>
                     <div className="broker-image-container">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={r.image} alt={r.name} className="broker-image" />
@@ -190,10 +154,10 @@ export default function ResearchersPage() {
                           <span className="stat-value" style={{ fontSize: "12px" }}>{r.reports}</span>
                           <span style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "2px" }}>Avg: {r.turnaround}</span>
                         </div>
-                        <span className="btn-contact" style={{ opacity: 0.4, cursor: "not-allowed" }}>Coming Soon</span>
+                        <span className="btn-contact">Focus →</span>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 );
               })}
             </div>
