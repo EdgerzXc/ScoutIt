@@ -74,7 +74,7 @@ export default async function PhotographerDetailPage({ params }) {
                   <span className="focus-pill">Specialty: {ph.specialty}</span>
                   <span className="focus-pill">Equipment: {ph.equipment}</span>
                   <span className="focus-pill">Style: {ph.style}</span>
-                  <span className="focus-pill">Rate: {ph.rate}</span>
+                  <span className="focus-pill">Sessions: {ph.sessions}</span>
                   <span className="focus-pill">Credentials: {ph.license}</span>
                 </div>
               </div>

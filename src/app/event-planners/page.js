@@ -189,7 +189,6 @@ export default function EventPlannersPage() {
                       <div className="broker-footer">
                         <div className="broker-stats">
                           <span className="stat-value" style={{ fontSize: "12px" }}>{ep.events}</span>
-                          <span style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "2px" }}>{ep.rate}</span>
                         </div>
                         <span className="btn-contact">Focus →</span>
                       </div>

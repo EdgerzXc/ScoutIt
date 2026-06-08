@@ -33,9 +33,9 @@ function getClosureCount(closuresStr) {
 }
 
 export default function BrokersPage() {
-  const [brokers, setBrokers]     = useState([]);
-  const [loading, setLoading]     = useState(true);
-  const [source, setSource]       = useState("");
+  const [brokers, setBrokers]     = useState(() => getBrokers());
+  const [loading, setLoading]     = useState(false);
+  const [source, setSource]       = useState("mock_local");
   const [searchTerm, setSearchTerm] = useState("");
 
   // Filters State
@@ -52,24 +52,13 @@ export default function BrokersPage() {
     async function load() {
       try {
         const res  = await fetch("/api/cms");
+        if (!res.ok) return;
         const data = await res.json();
-
-        // If Airtable returned brokers, use them; otherwise fall through to mockDb
         if (data.brokers && data.brokers.length > 0) {
           setBrokers(data.brokers);
           setSource(data.source);
-        } else {
-          // Airtable table is empty or not yet populated — use local mock
-          setBrokers(getBrokers());
-          setSource("mock_empty_table");
         }
-      } catch {
-        // Network error — use local mock
-        setBrokers(getBrokers());
-        setSource("mock_network_error");
-      } finally {
-        setLoading(false);
-      }
+      } catch { /* stay on mock data */ }
     }
     load();
   }, []);
@@ -149,12 +138,7 @@ export default function BrokersPage() {
           <p className="page-subtitle">Directory of elite Space Intelligence advisors across prime corridors.</p>
         </header>
 
-        {loading ? (
-          <div style={{ display: "flex", justifyContent: "center", padding: "80px 0" }}>
-            <h3 style={{ fontFamily: "var(--font-mono)", color: "var(--accent)" }}>LOADING INTELLIGENCE ROSTER...</h3>
-          </div>
-        ) : (
-          <div className="directory-container">
+        <div className="directory-container">
             {/* Sidebar Filters */}
             <aside className="filters-sidebar">
               {/* Filter Section: Tiers */}
@@ -371,7 +355,6 @@ export default function BrokersPage() {
               </div>
             </section>
           </div>
-        )}
 
         {/* Dev source indicator — remove before final prod */}
         {source && process.env.NODE_ENV === "development" && (

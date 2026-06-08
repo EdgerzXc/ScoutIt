@@ -41,8 +41,8 @@ export default function PropertyDetailClient({ slug }) {
   const [photoMode,         setPhotoMode]         = useState("natural");
   const [activeTab,         setActiveTab]         = useState("space");
   const [menuOpen,   setMenuOpen]   = useState(false);
-  const [propertyData, setPropertyData] = useState(null);
-  const [dataLoading,  setDataLoading]  = useState(true);
+  const [propertyData, setPropertyData] = useState(() => getPropertyBySlug(slug));
+  const [dataLoading,  setDataLoading]  = useState(false);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [selectedUnit, setSelectedUnit] = useState(null);
   const [whereToTab,        setWhereToTab]        = useState("map");
@@ -62,28 +62,23 @@ export default function PropertyDetailClient({ slug }) {
   const menuRef      = useRef(null);
   const touchStartX  = useRef(0);
 
-  // ── Fetch property from Airtable → fallback to mockDb ──
+  // ── Fetch from Airtable in background; mock data already shown ──
   useEffect(() => {
     async function loadProperty() {
       try {
         const res  = await fetch("/api/cms");
+        if (!res.ok) return;
         const data = await res.json();
         if (data.properties && data.properties.length > 0) {
           const match = data.properties.find(
             (p) => p.slug && p.slug.toLowerCase() === (slug || "").toLowerCase()
           );
           if (match) {
-            // Merge Airtable data over mockDb so missing fields gracefully fall back
             const mock = getPropertyBySlug(slug);
             setPropertyData({ ...mock, ...match });
-            setDataLoading(false);
-            return;
           }
         }
-      } catch { /* network error — fall through to mockDb */ }
-      // Fallback: use local mockDb
-      setPropertyData(getPropertyBySlug(slug));
-      setDataLoading(false);
+      } catch { /* stay on mock data */ }
     }
     loadProperty();
   }, [slug]);
@@ -126,8 +121,23 @@ export default function PropertyDetailClient({ slug }) {
   }, []);
 
   // Keyboard navigation for fullscreen photo lightbox
+  // Also lock/unlock viewport on mobile when lightbox opens/closes
   useEffect(() => {
-    if (!isLightboxOpen) return;
+    if (!isLightboxOpen) {
+      // Remove viewport lock when lightbox closes
+      document.documentElement.classList.remove('lightbox-open');
+      document.body.classList.remove('lightbox-open');
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.height = '';
+      return;
+    }
+    
+    // Lock viewport when lightbox opens
+    document.documentElement.classList.add('lightbox-open');
+    document.body.classList.add('lightbox-open');
+    
     const handleKeyDown = (e) => {
       if (e.key === "Escape") setIsLightboxOpen(false);
       if (e.key === "ArrowLeft") goPrev();

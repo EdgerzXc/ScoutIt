@@ -20,6 +20,7 @@ export const DISCOVERY_FEED = {
   Residential: {
     spotlights: [
       {
+        slug: "aurelia-residences",
         title: "Aurelia Residences",
         location: "BGC Core",
         style: "Modern Tropical",
@@ -27,6 +28,7 @@ export const DISCOVERY_FEED = {
         desc: "Low density luxury high-rise featuring double-glazed glass wrap and custom bronze details."
       },
       {
+        slug: "the-estate-makati",
         title: "The Estate Makati",
         location: "Makati Central",
         style: "Brutalist Luxury",
@@ -47,6 +49,7 @@ export const DISCOVERY_FEED = {
   Commercial: {
     spotlights: [
       {
+        slug: "zuellig-building",
         title: "Zuellig Building",
         location: "Makati CBD",
         style: "Sustainable Glass",
@@ -54,6 +57,7 @@ export const DISCOVERY_FEED = {
         desc: "LEED Platinum certified skyscraper utilizing low-emissivity glass and rain harvesting systems."
       },
       {
+        slug: "arthaland-century-pacific",
         title: "Arthaland Century Pacific",
         location: "BGC North",
         style: "Eco-Corporate",
@@ -74,6 +78,7 @@ export const DISCOVERY_FEED = {
   STR: {
     spotlights: [
       {
+        slug: "siargao-tropical-villa",
         title: "Siargao Tropical Villa",
         location: "Cloud 9",
         style: "Island Minimalist",
@@ -92,6 +97,7 @@ export const DISCOVERY_FEED = {
   Hospitality: {
     spotlights: [
       {
+        slug: "palawan-eco-retreat",
         title: "Palawan Eco-Retreat",
         location: "El Nido Lio",
         style: "Native Modern",
@@ -109,6 +115,7 @@ export const DISCOVERY_FEED = {
   Restaurants: {
     spotlights: [
       {
+        slug: "gallery-by-chele",
         title: "Gallery by Chele",
         location: "BGC Central",
         style: "Wood & Steel",
@@ -116,6 +123,7 @@ export const DISCOVERY_FEED = {
         desc: "Industrial minimalist space with warm natural wood overlays and dramatic mood lighting."
       },
       {
+        slug: "antonios-tagaytay",
         title: "Antonio's Tagaytay",
         location: "Tagaytay Ridge",
         style: "Heritage Colonial",
@@ -136,6 +144,7 @@ export const DISCOVERY_FEED = {
   Venues: {
     spotlights: [
       {
+        slug: "the-glasshouse-bgc",
         title: "The Glasshouse BGC",
         location: "Bonifacio Global City",
         style: "Steel & Glass",

@@ -72,6 +72,7 @@ export default function Header() {
           padding: 16px 24px;
           background: rgba(14, 14, 14, 0.85);
           backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
           border-bottom: 1px solid var(--border-solid);
           position: sticky;
           top: 0;
@@ -91,6 +92,10 @@ export default function Header() {
           border-radius: 20px;
           cursor: pointer;
           transition: all 0.25s ease;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-height: 44px; /* Mobile touch target compliance */
         }
 
         .header-back-btn:hover {
@@ -110,6 +115,7 @@ export default function Header() {
           transform: translateX(-50%);
           text-decoration: none;
           transition: text-shadow 0.3s ease;
+          white-space: nowrap;
         }
 
         .header-brand:hover {
@@ -122,8 +128,8 @@ export default function Header() {
         }
 
         .header-menu-btn {
-          width: 36px;
-          height: 36px;
+          width: 44px;
+          height: 44px;
           border-radius: 50%;
           border: 1px solid var(--border-mid);
           background: var(--brand-overlay);
@@ -132,6 +138,7 @@ export default function Header() {
           align-items: center;
           justify-content: center;
           transition: all 0.25s ease;
+          touch-action: manipulation;
         }
 
         .header-menu-btn:hover {
@@ -155,11 +162,13 @@ export default function Header() {
           border-radius: 6px;
           padding: 8px;
           backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
           box-shadow: 0 12px 40px rgba(0,0,0,0.5);
           opacity: 0;
           visibility: hidden;
           transform: translateY(-6px);
           transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+          z-index: 1001;
         }
 
         .header-dropdown.open {
@@ -170,8 +179,8 @@ export default function Header() {
 
         .header-dropdown a {
           display: block;
-          padding: 10px 14px;
-          font-size: 12px;
+          padding: 12px 14px;
+          font-size: 13px;
           font-weight: 500;
           color: var(--text-secondary);
           text-decoration: none;
@@ -196,7 +205,152 @@ export default function Header() {
           border-bottom: 1px solid rgba(255, 255, 255, 0.05);
           margin-bottom: 6px;
         }
+
+        /* ── MOBILE OPTIMIZATIONS ── */
+        @media (max-width: 768px) {
+          .global-header {
+            padding: 10px 16px;
+          }
+          
+          .header-brand {
+            font-size: 14px;
+            letter-spacing: 0.12em;
+          }
+          
+          .header-back-btn {
+            font-size: 10px;
+            padding: 0 12px;
+            min-height: 38px;
+          }
+          
+          .header-menu-btn {
+            width: 38px;
+            height: 38px;
+          }
+          
+          .header-dropdown {
+            min-width: 160px;
+            padding: 6px;
+          }
+          
+          .header-dropdown a {
+            padding: 10px 12px;
+            font-size: 12px;
+          }
+        }
+        
+        @media (max-width: 640px) {
+          .global-header {
+            padding: 8px 14px;
+            gap: 8px;
+          }
+          
+          .header-brand {
+            font-size: 13px;
+            letter-spacing: 0.1em;
+          }
+          
+          .header-back-btn {
+            font-size: 9px;
+            padding: 0 10px;
+            min-height: 36px;
+            white-space: nowrap;
+          }
+          
+          .header-menu-btn {
+            width: 36px;
+            height: 36px;
+          }
+          
+          .header-dropdown {
+            position: fixed;
+            top: auto;
+            bottom: 0;
+            right: 0;
+            left: 0;
+            min-width: 100%;
+            border-radius: 12px 12px 0 0;
+            border-left: none;
+            border-right: none;
+            border-bottom: none;
+            max-height: 60vh;
+            overflow-y: auto;
+            padding: 12px;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.6);
+          }
+          
+          .header-dropdown.open {
+            animation: slideUpMobile 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          }
+          
+          .header-dropdown a {
+            padding: 14px 12px;
+            font-size: 13px;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            border-radius: 6px;
+          }
+          
+          .header-dropdown a:active {
+            background: rgba(200, 169, 110, 0.15);
+          }
+          
+          .header-dropdown .dropdown-brand {
+            font-size: 8px;
+            padding: 8px 12px 4px;
+            margin-bottom: 8px;
+          }
+        }
+        
+        @media (max-width: 480px) {
+          .header-back-btn {
+            font-size: 8px;
+            padding: 0 8px;
+            min-height: 36px;
+          }
+          
+          .header-brand {
+            font-size: 12px;
+            margin: 0 4px;
+          }
+          
+          .header-menu-btn {
+            width: 36px;
+            height: 36px;
+          }
+          
+          .header-menu-btn svg {
+            width: 14px;
+            height: 14px;
+          }
+        }
+        
+        /* Animation for mobile dropdown */
+        @keyframes slideUpMobile {
+          from {
+            transform: translateY(100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateY(0);
+            opacity: 1;
+          }
+        }
+        
+        /* Touch-friendly active state */
+        @media (hover: none) and (pointer: coarse) {
+          .header-dropdown a {
+            min-height: 48px;
+          }
+          
+          .header-menu-btn,
+          .header-back-btn {
+            -webkit-tap-highlight-color: rgba(200, 169, 110, 0.15);
+          }
+        }
       `}</style>
     </header>
   );
 }
+

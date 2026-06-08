@@ -773,8 +773,38 @@
   cursor: zoom-in;
 }
 
+/* ── VIEWPORT LOCKING FOR LIGHTBOX ── */
+/* Lock viewport when lightbox is open on mobile */
+body.lightbox-open {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+  height: 100vh;
+}
+
+html.lightbox-open {
+  overflow: hidden;
+}
+
 /* Responsive lightbox adjustments */
 @media (max-width: 768px) {
+  .lightbox-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+  }
+  
+  .lightbox-content {
+    max-width: 95vw;
+    max-height: 90vh;
+    border-radius: 0;
+  }
+  
+  .lightbox-image {
+    max-width: 95vw;
+    max-height: 90vh;
+  }
+  
   .lightbox-arrow {
     width: 40px;
     height: 40px;
@@ -790,6 +820,12 @@
     right: 16px;
     width: 44px;
     height: 44px;
+  }
+  .lightbox-counter {
+    bottom: 16px;
+    font-size: 12px;
+    left: 50%;
+    transform: translateX(-50%);
   }
   .platform-menu-btn {
     width: 44px;
@@ -808,6 +844,39 @@
   .move-cta {
     min-height: 48px;
     touch-action: manipulation;
+  }
+}
+
+@media (max-width: 480px) {
+  .lightbox-overlay {
+    background: rgba(0, 0, 0, 0.98);
+  }
+  
+  .lightbox-content {
+    border: none;
+    box-shadow: none;
+  }
+  
+  .lightbox-close {
+    top: 12px;
+    right: 12px;
+    width: 40px;
+    height: 40px;
+  }
+  
+  .lightbox-close svg {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .lightbox-arrow {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .lightbox-counter {
+    bottom: 12px;
+    font-size: 11px;
   }
 }
 

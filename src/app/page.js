@@ -247,8 +247,24 @@ export default function Home() {
 
   useEffect(() => {
     let active = true;
+    
+    // Detect mobile and reduced-motion preferences for performance optimization
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+    const prefersReducedMotion = typeof window !== 'undefined' && 
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    
+    // Disable animations if reduced motion is preferred or on very small mobile
+    if (prefersReducedMotion || (isMobile && window.innerWidth < 480)) {
+      setDriftingRocks([]);
+      return;
+    }
+    
     const spawnRock = () => {
       if (!active) return;
+      
+      // Limit max particles on mobile
+      const maxParticles = isMobile ? 3 : 8;
+      if (driftingRocks.length >= maxParticles) return;
       
       const id = Math.random().toString(36).substr(2, 9);
       
@@ -316,17 +332,20 @@ export default function Home() {
 
       setDriftingRocks(prev => [...prev, { id, type, startX, startY, size, duration, borderRadius, angle, scale }]);
 
-      const nextDelay = 4000 + Math.random() * 5000; // spawn every 4 to 9 seconds
+      // Mobile: spawn slower for performance; Desktop: spawn faster for impact
+      const nextDelay = isMobile ? 
+        (6000 + Math.random() * 4000) :  // 6-10s on mobile
+        (4000 + Math.random() * 5000);   // 4-9s on desktop
       timerId = setTimeout(spawnRock, nextDelay);
     };
 
-    let timerId = setTimeout(spawnRock, 2000); // initial spawn after 2 seconds
+    let timerId = setTimeout(spawnRock, isMobile ? 3000 : 2000); // delay animation start on mobile
 
     return () => {
       active = false;
       clearTimeout(timerId);
     };
-  }, []);
+  }, [driftingRocks.length]);
   
   const propertyTypes = ["Residential", "Commercial", "STR", "Hospitality", "Restaurants", "Venues/Events"];
 
@@ -2618,6 +2637,735 @@ export default function Home() {
           }
           .services-content, .brokers-content, .wishlist-content {
             gap: 36px;
+          }
+        }
+
+        @media (max-width: 768px) {
+          /* 1. Layer 01: Horizontally scrollable property preview grid */
+          .mini-cards-grid {
+            display: flex !important;
+            flex-direction: row !important;
+            overflow-x: auto !important;
+            scrollbar-width: none !important;
+            gap: 16px !important;
+            width: 100% !important;
+            scroll-snap-type: x mandatory !important;
+            padding-bottom: 8px !important;
+          }
+          .mini-cards-grid::-webkit-scrollbar {
+            display: none !important;
+          }
+          .mini-preview-card {
+            flex: 0 0 280px !important;
+            width: 280px !important;
+            scroll-snap-align: center !important;
+          }
+          
+          /* Shorten card box to fit in 1 scroll */
+          .mini-card-visual {
+            height: 120px !important;
+          }
+          .mini-card-body {
+            padding: 12px 16px !important;
+          }
+          .mini-card-body h4 {
+            font-size: 16px !important;
+            margin-bottom: 8px !important;
+          }
+          .mini-tag-label {
+            font-size: 8px !important;
+          }
+          .mini-tag {
+            font-size: 10px !important;
+            padding: 2px 6px !important;
+          }
+
+          /* 2. Layer 02: Horizontally scrollable spotlights list */
+          .discover-feed-preview > div:first-child > div {
+            display: flex !important;
+            flex-direction: row !important;
+            overflow-x: auto !important;
+            scrollbar-width: none !important;
+            gap: 16px !important;
+            width: 100% !important;
+            scroll-snap-type: x mandatory !important;
+            padding-bottom: 8px !important;
+          }
+          .discover-feed-preview > div:first-child > div::-webkit-scrollbar {
+            display: none !important;
+          }
+          .discover-spotlight-card-link {
+            flex: 0 0 260px !important;
+            width: 260px !important;
+            scroll-snap-align: center !important;
+          }
+          .discover-spotlight-card-link > div:first-child {
+            height: 100px !important;
+          }
+          .discover-spotlight-card-link p {
+            display: none !important;
+          }
+          
+          /* Horizontally scrollable news and collections in Layer 02 */
+          .discover-feed-preview > div:last-child {
+            display: flex !important;
+            flex-direction: row !important;
+            overflow-x: auto !important;
+            scrollbar-width: none !important;
+            gap: 16px !important;
+            width: 100% !important;
+            scroll-snap-type: x mandatory !important;
+            padding-bottom: 8px !important;
+          }
+          .discover-feed-preview > div:last-child::-webkit-scrollbar {
+            display: none !important;
+          }
+          .discover-feed-preview > div:last-child > div {
+            flex: 0 0 260px !important;
+            width: 260px !important;
+            scroll-snap-align: center !important;
+          }
+
+          /* 3. Layer 03: Horizontal row showing 2 cards side-by-side */
+          .services-grid {
+            display: flex !important;
+            flex-direction: row !important;
+            overflow-x: auto !important;
+            scrollbar-width: none !important;
+            gap: 12px !important;
+            width: 100% !important;
+            scroll-snap-type: x mandatory !important;
+            padding-bottom: 8px !important;
+          }
+          .services-grid::-webkit-scrollbar {
+            display: none !important;
+          }
+          .service-card {
+            flex: 0 0 145px !important;
+            width: 145px !important;
+            scroll-snap-align: start !important;
+          }
+          .service-card-inner {
+            padding: 16px 12px !important;
+          }
+          .service-icon-wrapper {
+            font-size: 20px !important;
+            margin-bottom: 12px !important;
+          }
+          .service-status-badge {
+            font-size: 7.5px !important;
+            padding: 2px 4px !important;
+            margin-bottom: 10px !important;
+          }
+          .service-title {
+            font-size: 13px !important;
+            margin-bottom: 8px !important;
+          }
+          .service-desc {
+            display: none !important;
+          }
+          .service-cta {
+            font-size: 8px !important;
+          }
+
+          /* 4. Layer 04: Horizontally draggable flow cards */
+          .flow-grid {
+            display: flex !important;
+            flex-direction: row !important;
+            overflow-x: auto !important;
+            scrollbar-width: none !important;
+            gap: 16px !important;
+            width: 100% !important;
+            scroll-snap-type: x mandatory !important;
+            padding-bottom: 8px !important;
+          }
+          .flow-grid::-webkit-scrollbar {
+            display: none !important;
+          }
+          .flow-card {
+            flex: 0 0 220px !important;
+            width: 220px !important;
+            scroll-snap-align: center !important;
+            padding: 16px !important;
+          }
+          .flow-card h4 {
+            font-size: 12px !important;
+          }
+          .flow-card p {
+            font-size: 10px !important;
+          }
+          .flow-card svg {
+            width: 32px !important;
+            height: 32px !important;
+          }
+        }
+
+        /* ════════════════════════════════════════════════════════════
+           MOBILE-FIRST COMPREHENSIVE OPTIMIZATIONS
+           ════════════════════════════════════════════════════════════ */
+
+        /* TABLET & MEDIUM MOBILE (768px - 900px) */
+        @media (max-width: 900px) {
+          .cinematic-container {
+            scroll-snap-type: none;
+          }
+
+          .snap-section {
+            height: auto;
+            min-height: 100vh;
+            scroll-snap-align: none;
+          }
+
+          .section-hook {
+            min-height: 70vh;
+            padding: 40px 0;
+          }
+
+          .property-split {
+            flex-direction: column;
+            height: auto;
+          }
+
+          .property-menu {
+            width: 100%;
+            min-width: auto;
+            border-right: none;
+            border-bottom: 1px solid var(--border-solid);
+            padding: 40px 20px;
+            max-height: 300px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            flex-direction: row;
+            justify-content: flex-start;
+            align-items: center;
+            gap: 20px;
+          }
+
+          .menu-nav {
+            flex-direction: row;
+            flex: 0;
+            padding-right: 0;
+            gap: 12px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+            width: 100%;
+          }
+
+          .matrix-preview-pane {
+            padding: 40px 20px;
+            max-height: none;
+          }
+
+          .menu-btn {
+            font-size: 16px;
+            padding: 10px 16px;
+            white-space: nowrap;
+            flex-shrink: 0;
+          }
+
+          .letter {
+            font-size: clamp(28px, 4.5vw, 48px);
+          }
+
+          .hero-tagline {
+            font-size: clamp(24px, 3.5vw, 48px);
+          }
+
+          .hero-subheadline {
+            font-size: clamp(14px, 1.8vw, 18px);
+          }
+        }
+
+        /* SMALL MOBILE (640px - 768px) */
+        @media (max-width: 768px) {
+          .cinematic-container {
+            height: auto;
+            overflow-y: auto;
+            scroll-snap-type: none;
+          }
+
+          .snap-section {
+            height: auto;
+            min-height: 100vh;
+          }
+
+          .section-hook {
+            min-height: 65vh;
+            padding: 30px 16px;
+            justify-content: flex-start;
+            align-items: flex-end;
+            padding-bottom: 60px;
+          }
+
+          .hook-content {
+            text-align: center;
+          }
+
+          .scoutit-wordmark {
+            margin-bottom: 36px;
+          }
+
+          .letter {
+            font-size: clamp(24px, 4vw, 40px);
+          }
+
+          .hero-tagline {
+            font-size: clamp(20px, 3vw, 36px);
+            margin-bottom: 16px;
+          }
+
+          .hero-subheadline {
+            font-size: clamp(13px, 1.5vw, 16px);
+            margin-bottom: 32px;
+          }
+
+          .hero-cta-btn {
+            padding: 16px 32px;
+            font-size: 12px;
+            min-height: 44px;
+          }
+
+          .hook-scroll-indicator {
+            bottom: 20px;
+            gap: 10px;
+          }
+
+          .scroll-line {
+            height: 40px;
+          }
+
+          .property-menu {
+            padding: 32px 16px;
+            max-height: 250px;
+            gap: 12px;
+          }
+
+          .matrix-preview-pane {
+            padding: 32px 16px;
+          }
+
+          .pane-header {
+            margin-bottom: 24px;
+          }
+
+          .pane-header h3 {
+            font-size: 24px;
+          }
+
+          .pane-header p {
+            font-size: 11px;
+          }
+
+          .menu-nav {
+            gap: 8px;
+          }
+
+          .menu-btn {
+            font-size: 15px;
+            padding: 12px 16px;
+          }
+
+          .menu-btn:hover {
+            padding-left: 16px;
+          }
+
+          .menu-btn.active {
+            padding-left: 16px;
+          }
+
+          .search-input-wrapper {
+            max-width: 100%;
+          }
+
+          .vector-search-input {
+            padding: 14px 16px;
+            font-size: 14px;
+            min-height: 44px;
+          }
+
+          .section-action-footer {
+            margin-top: 48px;
+          }
+
+          .prominent-action-link {
+            display: block;
+            width: 100%;
+            padding: 16px 24px;
+            min-height: 48px;
+            font-size: 12px;
+          }
+        }
+
+        /* EXTRA SMALL MOBILE (480px - 640px) */
+        @media (max-width: 640px) {
+          .cinematic-container {
+            height: auto;
+          }
+
+          .snap-section {
+            height: auto;
+            min-height: auto;
+            padding: 24px 14px !important;
+          }
+
+          .section-hook {
+            min-height: 55vh;
+            padding: 24px 12px;
+          }
+
+          .scoutit-wordmark {
+            margin-bottom: 28px;
+            gap: 0.02em;
+          }
+
+          .letter {
+            font-size: clamp(18px, 3.5vw, 32px);
+          }
+
+          .hero-tagline {
+            font-size: clamp(18px, 2.8vw, 32px);
+            margin-bottom: 12px;
+            max-width: 15em;
+          }
+
+          .hero-subheadline {
+            font-size: clamp(12px, 1.3vw, 14px);
+            margin-bottom: 24px;
+          }
+
+          .hook-subtitle {
+            font-size: 11px;
+            letter-spacing: 0.15em;
+          }
+
+          .hero-cta-btn {
+            padding: 14px 24px;
+            font-size: 11px;
+            min-height: 44px;
+            letter-spacing: 0.15em;
+          }
+
+          .hook-scroll-indicator {
+            bottom: 16px;
+            gap: 8px;
+          }
+
+          .scroll-text {
+            font-size: 9px;
+          }
+
+          .scroll-line {
+            height: 30px;
+          }
+
+          .property-split {
+            min-height: auto;
+          }
+
+          .property-menu {
+            padding: 24px 12px;
+            max-height: 220px;
+            gap: 8px;
+            border-bottom: 1px solid var(--border-solid);
+          }
+
+          .menu-header h2 {
+            font-size: 22px;
+          }
+
+          .menu-header p {
+            font-size: 12px;
+          }
+
+          .vector-label {
+            font-size: 10px;
+          }
+
+          .matrix-preview-pane {
+            padding: 24px 12px;
+            max-height: none;
+          }
+
+          .pane-header {
+            margin-bottom: 20px;
+          }
+
+          .pane-header h3 {
+            font-size: 20px;
+          }
+
+          .pane-header p {
+            font-size: 10px;
+          }
+
+          .menu-nav {
+            gap: 6px;
+            font-size: 14px;
+          }
+
+          .menu-btn {
+            font-size: 14px;
+            padding: 12px 14px;
+            min-height: 44px;
+          }
+
+          .search-container {
+            margin-bottom: 20px;
+          }
+
+          .vector-search-input {
+            padding: 12px 14px;
+            font-size: 14px;
+            min-height: 44px;
+            border-radius: 4px;
+          }
+
+          .prominent-action-link {
+            font-size: 11px;
+            padding: 14px 20px;
+            min-height: 44px;
+            width: 100%;
+            letter-spacing: 0.15em;
+          }
+
+          .discover-spotlight-card-link {
+            border-radius: 6px !important;
+          }
+
+          .discover-spotlight-card-link h5 {
+            font-size: 14px !important;
+          }
+
+          .discover-spotlight-card-link p {
+            font-size: 12px !important;
+          }
+
+          /* Ensure buttons are properly sized for touch */
+          button, [role="button"], .menu-btn, .header-menu-btn, .header-back-btn {
+            min-height: 44px !important;
+          }
+        }
+
+        /* TINY MOBILE (< 480px) */
+        @media (max-width: 480px) {
+          .cinematic-container {
+            height: auto;
+          }
+
+          .snap-section {
+            height: auto;
+            min-height: auto;
+            padding: 20px 10px !important;
+          }
+
+          .section-hook {
+            min-height: 50vh;
+            padding: 20px 10px 40px;
+          }
+
+          .black-hole-core {
+            width: 300px;
+            height: 300px;
+          }
+
+          .scoutit-wordmark {
+            margin-bottom: 24px;
+            gap: 0;
+          }
+
+          .letter {
+            font-size: clamp(16px, 3vw, 28px);
+          }
+
+          .hero-tagline {
+            font-size: clamp(16px, 2.5vw, 28px);
+            margin-bottom: 12px;
+            max-width: 13em;
+          }
+
+          .hero-subheadline {
+            font-size: clamp(12px, 1.1vw, 13px);
+            margin-bottom: 20px;
+          }
+
+          .hook-subtitle {
+            font-size: 10px;
+            letter-spacing: 0.1em;
+          }
+
+          .hero-cta-btn {
+            padding: 12px 20px;
+            font-size: 10px;
+            min-height: 42px;
+            letter-spacing: 0.1em;
+          }
+
+          .hook-scroll-indicator {
+            display: none;
+          }
+
+          .property-menu {
+            padding: 20px 10px;
+            max-height: 200px;
+            gap: 6px;
+          }
+
+          .menu-header h2 {
+            font-size: 20px;
+            margin: 4px 0;
+          }
+
+          .menu-header p {
+            font-size: 11px;
+          }
+
+          .menu-nav {
+            gap: 4px;
+          }
+
+          .menu-btn {
+            font-size: 13px;
+            padding: 10px 12px;
+            min-height: 42px;
+          }
+
+          .menu-btn:hover {
+            transform: none;
+            padding-left: 12px;
+          }
+
+          .matrix-preview-pane {
+            padding: 20px 10px;
+          }
+
+          .pane-header {
+            margin-bottom: 16px;
+          }
+
+          .pane-header h3 {
+            font-size: 18px;
+            margin-bottom: 2px;
+          }
+
+          .pane-header p {
+            font-size: 9px;
+          }
+
+          .vector-label {
+            font-size: 9px;
+          }
+
+          .search-container {
+            margin-bottom: 16px;
+          }
+
+          .vector-search-input {
+            padding: 10px 12px;
+            font-size: 14px;
+            min-height: 42px;
+            border-radius: 4px;
+          }
+
+          .prominent-action-link {
+            font-size: 10px;
+            padding: 12px 16px;
+            min-height: 42px;
+            width: 100%;
+            letter-spacing: 0.1em;
+          }
+
+          .section-action-footer {
+            margin-top: 40px;
+          }
+
+          /* Hide secondary elements on tiny screens */
+          .drifting-container {
+            display: none !important;
+          }
+
+          .accretion-disk-outer {
+            width: 400px;
+            height: 400px;
+          }
+
+          .event-horizon {
+            height: 250px;
+            width: 120vw;
+          }
+
+          /* Compact card styles */
+          .discover-spotlight-card-link {
+            border-radius: 4px !important;
+          }
+
+          .discover-spotlight-card-link h5 {
+            font-size: 13px !important;
+          }
+
+          .discover-spotlight-card-link p {
+            font-size: 11px !important;
+          }
+
+          .mini-preview-card {
+            padding: 10px !important;
+          }
+        }
+
+        /* ── PERFORMANCE: Disable animations on reduced motion ── */
+        @media (prefers-reduced-motion: reduce) {
+          * {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+          }
+
+          .letter,
+          .hero-tagline,
+          .hero-subheadline,
+          .hero-cta-btn,
+          .hook-scroll-indicator {
+            animation: none !important;
+            opacity: 1 !important;
+          }
+
+          .black-hole-core,
+          .accretion-disk-outer,
+          .event-horizon-swirl {
+            animation: none !important;
+          }
+        }
+
+        /* ── LANDSCAPE ORIENTATION ── */
+        @media (max-height: 600px) and (orientation: landscape) {
+          .section-hook {
+            min-height: 100vh;
+            padding: 20px 16px;
+          }
+
+          .scoutit-wordmark {
+            margin-bottom: 20px;
+          }
+
+          .letter {
+            font-size: clamp(20px, 3vw, 36px);
+          }
+
+          .hero-tagline {
+            font-size: clamp(14px, 2.5vw, 24px);
+            margin-bottom: 8px;
+          }
+
+          .hero-subheadline {
+            margin-bottom: 16px;
+          }
+
+          .hook-scroll-indicator {
+            display: none;
+          }
+
+          .hero-cta-btn {
+            padding: 12px 28px;
           }
         }
       `}</style>

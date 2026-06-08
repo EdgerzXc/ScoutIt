@@ -74,7 +74,6 @@ export default async function EventPlannerDetailPage({ params }) {
                   <span className="focus-pill">Specialty: {ep.specialty}</span>
                   <span className="focus-pill">Design Style: {ep.style}</span>
                   <span className="focus-pill">Preferred Venues: {ep.venues}</span>
-                  <span className="focus-pill">Rate: {ep.rate}</span>
                   <span className="focus-pill">Credentials: {ep.license}</span>
                 </div>
               </div>
