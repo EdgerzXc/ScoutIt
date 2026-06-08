@@ -14,15 +14,6 @@ import { getPropertyBySlug } from "@/data/mockProperties";
 // ═══════════════════════════════════════════════════
 // HELPER UTILITIES
 // ═══════════════════════════════════════════════════
-function floodText(score) {
-  if (score <= 1) return "No flood history";
-  if (score <= 3) return "Minimal risk";
-  if (score <= 5) return "Low risk";
-  if (score <= 7) return "Moderate risk";
-  if (score <= 9) return "High risk";
-  return "Extremely dangerous";
-}
-
 function ratingTagClass(val) {
   const v = String(val || "").toLowerCase();
   if (["high", "efficient", "excellent", "safe", "strong", "good value", "convenient"].includes(v))
@@ -169,9 +160,6 @@ export default function PropertyDetailClient({ slug }) {
   // ── Derived values ────────────────────────────
   const d           = propertyData;   // short alias
   const photos      = d.photos && d.photos.length > 0 ? d.photos : (d.image ? [d.image] : [""]);
-  const floodRiskText  = floodText(d.flood_risk_score);
-  const floodRiskScore = `Score: ${d.flood_risk_score}/10`;
-  const convScoreText  = `${d.convenience_score} / 10`;
   const brokerInitials = (d.broker_name || "SA").split(" ").map(p => p[0]).join("").slice(0, 2).toUpperCase();
 
   // ── Category Detection & Custom Labels ──────────
@@ -822,7 +810,7 @@ export default function PropertyDetailClient({ slug }) {
                   { val: d.floor_sqm, label: "sqm floor", icon: <><rect x="2" y="2" width="10" height="10" rx="1"/><path d="M5 2v10M9 2v10M2 5h10M2 9h10" strokeLinecap="round"/></> },
                   { val: d.parking,   label: "Parking",   icon: <><rect x="1" y="6" width="12" height="6" rx="1"/><path d="M3 6V4a3 3 0 016 0v2" strokeLinecap="round"/></> },
                   { val: d.lot_sqm,   label: "Lot Area",  icon: <><rect x="2" y="4" width="10" height="8" rx="1"/><path d="M2 8h10" strokeLinecap="round"/></> },
-                ].map(pill => (
+                ].filter(pill => pill.val != null && pill.val !== "" && pill.val !== 0).map(pill => (
                   <div className="spec-pill" key={pill.label}>
                     <div className="pill-icon-wrap">
                       <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4">{pill.icon}</svg>
@@ -859,25 +847,23 @@ export default function PropertyDetailClient({ slug }) {
                   </div>
                   <div className="accordion-body">
                     <div className="accordion-content">
-                      <div className="rating-bar-wrap">
-                        {[
-                          { label: "Comfort level", val: d.comfort_level,  green: false },
-                          { label: "Natural light",  val: d.natural_light,  green: false },
-                          { label: "Privacy",        val: d.privacy,        green: true  },
-                          { label: "Space feel",     val: d.space_feel,     green: false },
-                        ].map(r => (
-                          <div className="rating-row" key={r.label}>
-                            <span className="rating-label">{r.label}</span>
-                            <div className="rating-bar">
-                              <div className={`rating-fill ${r.green ? "green" : ""}`} style={{width: `${r.val * 10}%`}}/>
+                      <div style={{position:"relative", padding:"12px 16px", background:"rgba(200,169,110,0.04)", border:"0.5px solid rgba(200,169,110,0.15)", borderRadius:"4px", marginBottom:"12px", overflow:"hidden"}}>
+                        <div style={{filter:"blur(5px)", pointerEvents:"none", userSelect:"none", display:"flex", flexDirection:"column", gap:"10px"}}>
+                          {["Comfort level","Natural light","Privacy","Space feel"].map(label => (
+                            <div key={label} style={{display:"flex", alignItems:"center", gap:"10px"}}>
+                              <span style={{fontSize:"12px", color:"var(--text-secondary)", minWidth:"100px"}}>{label}</span>
+                              <div style={{flex:1, height:"3px", background:"var(--border-solid)", borderRadius:"2px"}}><div style={{width:"75%", height:"100%", background:"var(--text-muted)", borderRadius:"2px"}}/></div>
+                              <span style={{fontSize:"11px", color:"var(--text-muted)", width:"28px", textAlign:"right"}}>—</span>
                             </div>
-                            <span className="rating-val">{r.val.toFixed(1)}</span>
-                          </div>
-                        ))}
+                          ))}
+                        </div>
+                        <div style={{position:"absolute", inset:0, display:"flex", alignItems:"center", justifyContent:"center", background:"rgba(14,14,14,0.65)"}}>
+                          <span style={{fontSize:"10px", color:"#c8a96e", letterSpacing:"0.12em", textTransform:"uppercase", fontFamily:"var(--font-mono)"}}>🔒 Unlock with Verified Scout</span>
+                        </div>
                       </div>
-                      <div className="detail-row"><span className="detail-key">Noise level</span><span className="detail-val green">{d.noise_level_text}</span></div>
-                      <div className="detail-row"><span className="detail-key">Ventilation</span><span className="detail-val">{d.ventilation}</span></div>
-                      <div className="detail-row"><span className="detail-key">Ceiling height</span><span className="detail-val">{d.ceiling_height_text}</span></div>
+                      {d.noise_level_text && <div className="detail-row"><span className="detail-key">Noise level</span><span className="detail-val green">{d.noise_level_text}</span></div>}
+                      {d.ventilation && <div className="detail-row"><span className="detail-key">Ventilation</span><span className="detail-val">{d.ventilation}</span></div>}
+                      {d.ceiling_height_text && <div className="detail-row"><span className="detail-key">Ceiling height</span><span className="detail-val">{d.ceiling_height_text}</span></div>}
                     </div>
                   </div>
                 </div>
@@ -904,11 +890,11 @@ export default function PropertyDetailClient({ slug }) {
                   </div>
                   <div className="accordion-body">
                     <div className="accordion-content">
-                      <div className="detail-row"><span className="detail-key">Floor area</span><span className="detail-val">{d.floor_sqm} sqm</span></div>
-                      <div className="detail-row"><span className="detail-key">Lot area</span><span className="detail-val">{d.lot_sqm} sqm</span></div>
-                      <div className="detail-row"><span className="detail-key">Outdoor usable</span><span className="detail-val green">{d.outdoor_description}</span></div>
-                      <div className="detail-row"><span className="detail-key">Furnishing</span><span className="detail-val">{d.furnishing}</span></div>
-                      <div className="detail-row"><span className="detail-key">Floors</span><span className="detail-val">{d.floors}</span></div>
+                      {d.floor_sqm > 0 && <div className="detail-row"><span className="detail-key">Floor area</span><span className="detail-val">{d.floor_sqm} sqm</span></div>}
+                      {d.lot_sqm > 0 && <div className="detail-row"><span className="detail-key">Lot area</span><span className="detail-val">{d.lot_sqm} sqm</span></div>}
+                      {d.outdoor_description && d.outdoor_description !== "None" && <div className="detail-row"><span className="detail-key">Outdoor usable</span><span className="detail-val green">{d.outdoor_description}</span></div>}
+                      {d.furnishing && <div className="detail-row"><span className="detail-key">Furnishing</span><span className="detail-val">{d.furnishing}</span></div>}
+                      {d.floors > 0 && <div className="detail-row"><span className="detail-key">Floors</span><span className="detail-val">{d.floors}</span></div>}
                     </div>
                   </div>
                 </div>
@@ -955,10 +941,10 @@ export default function PropertyDetailClient({ slug }) {
                 <div className="map-road-v" style={{left:"30%"}}/><div className="map-road-v" style={{left:"55%"}}/><div className="map-road-v" style={{left:"78%"}}/>
                 <div className="map-pulse"/><div className="map-pin"/>
               </div>
-              <div className="sidebar-block"><div className="sidebar-label">Type</div><div className="sidebar-value">{d.property_type}</div></div>
-              <div className="sidebar-block"><div className="sidebar-label">Tenure</div><div className="sidebar-value">{d.tenure}</div></div>
-              <div className="sidebar-block"><div className="sidebar-label">Year Built</div><div className="sidebar-value">{d.year_built}</div></div>
-              <div className="sidebar-block"><div className="sidebar-label">Furnishing</div><div className="sidebar-value">{d.furnishing}</div></div>
+              {d.property_type && <div className="sidebar-block"><div className="sidebar-label">Type</div><div className="sidebar-value">{d.property_type}</div></div>}
+              {d.tenure && <div className="sidebar-block"><div className="sidebar-label">Tenure</div><div className="sidebar-value">{d.tenure}</div></div>}
+              {d.year_built && <div className="sidebar-block"><div className="sidebar-label">Year Built</div><div className="sidebar-value">{d.year_built}</div></div>}
+              {d.furnishing && <div className="sidebar-block"><div className="sidebar-label">Furnishing</div><div className="sidebar-value">{d.furnishing}</div></div>}
             </div>
           </div>{/* /panel-space */}
 
@@ -1049,13 +1035,21 @@ export default function PropertyDetailClient({ slug }) {
                     <div className="accordion-right"><span className="accordion-tag tag-green">Safe</span><div className="accordion-chevron"/></div>
                   </div>
                   <div className="accordion-body"><div className="accordion-content">
-                    <div className="rating-bar-wrap">
-                      <div className="rating-row"><span className="rating-label">Daytime safety</span><div className="rating-bar"><div className="rating-fill green" style={{width:"88%"}}/></div><span className="rating-val">8.8</span></div>
-                      <div className="rating-row"><span className="rating-label">Night safety</span><div className="rating-bar"><div className="rating-fill" style={{width:"72%"}}/></div><span className="rating-val">7.2</span></div>
+                    <div style={{position:"relative", padding:"12px 16px", background:"rgba(200,169,110,0.04)", border:"0.5px solid rgba(200,169,110,0.15)", borderRadius:"4px", marginBottom:"12px", overflow:"hidden"}}>
+                      <div style={{filter:"blur(5px)", pointerEvents:"none", userSelect:"none", display:"flex", flexDirection:"column", gap:"10px"}}>
+                        {["Daytime safety","Night safety"].map(label => (
+                          <div key={label} style={{display:"flex", alignItems:"center", gap:"10px"}}>
+                            <span style={{fontSize:"12px", color:"var(--text-secondary)", minWidth:"100px"}}>{label}</span>
+                            <div style={{flex:1, height:"3px", background:"var(--border-solid)", borderRadius:"2px"}}><div style={{width:"80%", height:"100%", background:"var(--text-muted)", borderRadius:"2px"}}/></div>
+                            <span style={{fontSize:"11px", color:"var(--text-muted)", width:"28px", textAlign:"right"}}>—</span>
+                          </div>
+                        ))}
+                      </div>
+                      <div style={{position:"absolute", inset:0, display:"flex", alignItems:"center", justifyContent:"center", background:"rgba(14,14,14,0.65)"}}>
+                        <span style={{fontSize:"10px", color:"#c8a96e", letterSpacing:"0.12em", textTransform:"uppercase", fontFamily:"var(--font-mono)"}}>🔒 Unlock with Verified Scout</span>
+                      </div>
                     </div>
-                    <div className="detail-row"><span className="detail-key">Street lighting</span><span className="detail-val green">Good</span></div>
-                    <div className="detail-row"><span className="detail-key">Area type</span><span className="detail-val">Established subdivision</span></div>
-                    <div className="detail-row"><span className="detail-key">Street type</span><span className="detail-val">{d.street_type}</span></div>
+                    {d.street_type && <div className="detail-row"><span className="detail-key">Street type</span><span className="detail-val">{d.street_type}</span></div>}
                   </div></div>
                 </div>
               </div>
@@ -1068,8 +1062,7 @@ export default function PropertyDetailClient({ slug }) {
                 <div className="map-road-v" style={{left:"30%"}}/><div className="map-road-v" style={{left:"60%"}}/>
                 <div className="map-pulse"/><div className="map-pin"/>
               </div>
-              <div className="sidebar-block"><div className="sidebar-label">Street type</div><div className="sidebar-value">{d.street_type}</div></div>
-              <div className="sidebar-block"><div className="sidebar-label">Flood risk</div><div className="sidebar-value">{floodRiskText}</div><div className="sidebar-sub">{floodRiskScore}</div></div>
+              {d.street_type && <div className="sidebar-block"><div className="sidebar-label">Street type</div><div className="sidebar-value">{d.street_type}</div></div>}
             </div>
           </div>{/* /panel-location */}
 
@@ -1107,14 +1100,22 @@ export default function PropertyDetailClient({ slug }) {
                       <div className="accordion-icon-wrap"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"><path d="M1 3h12M1 7h12M1 11h8"/></svg></div>
                       <div><div className="accordion-title">Convenience Score</div><div className="accordion-subtitle">Errands &amp; daily needs within reach</div></div>
                     </div>
-                    <div className="accordion-right"><span className="accordion-tag tag-neutral">{convScoreText}</span><div className="accordion-chevron"/></div>
+                    <div className="accordion-right"><span className="accordion-tag tag-neutral" style={{color:"#c8a96e", fontSize:"9px"}}>🔒 Verified Scout</span><div className="accordion-chevron"/></div>
                   </div>
                   <div className="accordion-body"><div className="accordion-content">
-                    <div className="rating-bar-wrap">
-                      <div className="rating-row"><span className="rating-label">Food access</span><div className="rating-bar"><div className="rating-fill green" style={{width:"85%"}}/></div><span className="rating-val">8.5</span></div>
-                      <div className="rating-row"><span className="rating-label">Shopping</span><div className="rating-bar"><div className="rating-fill" style={{width:"75%"}}/></div><span className="rating-val">7.5</span></div>
-                      <div className="rating-row"><span className="rating-label">Healthcare</span><div className="rating-bar"><div className="rating-fill" style={{width:"70%"}}/></div><span className="rating-val">7.0</span></div>
-                      <div className="rating-row"><span className="rating-label">Recreation</span><div className="rating-bar"><div className="rating-fill" style={{width:"65%"}}/></div><span className="rating-val">6.5</span></div>
+                    <div style={{position:"relative", padding:"12px 16px", background:"rgba(200,169,110,0.04)", border:"0.5px solid rgba(200,169,110,0.15)", borderRadius:"4px", overflow:"hidden"}}>
+                      <div style={{filter:"blur(5px)", pointerEvents:"none", userSelect:"none", display:"flex", flexDirection:"column", gap:"10px"}}>
+                        {["Food access","Shopping","Healthcare","Recreation"].map(label => (
+                          <div key={label} style={{display:"flex", alignItems:"center", gap:"10px"}}>
+                            <span style={{fontSize:"12px", color:"var(--text-secondary)", minWidth:"100px"}}>{label}</span>
+                            <div style={{flex:1, height:"3px", background:"var(--border-solid)", borderRadius:"2px"}}><div style={{width:"75%", height:"100%", background:"var(--text-muted)", borderRadius:"2px"}}/></div>
+                            <span style={{fontSize:"11px", color:"var(--text-muted)", width:"28px", textAlign:"right"}}>—</span>
+                          </div>
+                        ))}
+                      </div>
+                      <div style={{position:"absolute", inset:0, display:"flex", alignItems:"center", justifyContent:"center", background:"rgba(14,14,14,0.65)"}}>
+                        <span style={{fontSize:"10px", color:"#c8a96e", letterSpacing:"0.12em", textTransform:"uppercase", fontFamily:"var(--font-mono)"}}>🔒 Unlock with Verified Scout</span>
+                      </div>
                     </div>
                   </div></div>
                 </div>
@@ -1122,11 +1123,10 @@ export default function PropertyDetailClient({ slug }) {
             </div>
 
             <div className="panel-sidebar">
-              <div className="sidebar-block"><div className="sidebar-accent-line"/><div className="sidebar-label">Vibe</div><div className="sidebar-value">{d.lifestyle_vibe}</div></div>
-              <div className="sidebar-block"><div className="sidebar-label">Best for</div><div className="sidebar-value">{d.best_for}</div></div>
-              <div className="sidebar-block"><div className="sidebar-label">Street type</div><div className="sidebar-value">{d.street_type}</div></div>
-              <div className="sidebar-block"><div className="sidebar-label">Outdoor</div><div className="sidebar-value">{d.outdoor_description}</div></div>
-              <div className="sidebar-block"><div className="sidebar-label">Convenience</div><div className="sidebar-value" style={{color:"var(--green)"}}>{convScoreText}</div></div>
+              {d.lifestyle_vibe && <div className="sidebar-block"><div className="sidebar-accent-line"/><div className="sidebar-label">Vibe</div><div className="sidebar-value">{d.lifestyle_vibe}</div></div>}
+              {d.best_for && <div className="sidebar-block"><div className="sidebar-label">Best for</div><div className="sidebar-value">{d.best_for}</div></div>}
+              {d.street_type && <div className="sidebar-block"><div className="sidebar-label">Street type</div><div className="sidebar-value">{d.street_type}</div></div>}
+              {d.outdoor_description && d.outdoor_description !== "None" && <div className="sidebar-block"><div className="sidebar-label">Outdoor</div><div className="sidebar-value">{d.outdoor_description}</div></div>}
             </div>
           </div>{/* /panel-life */}
 
@@ -1202,37 +1202,35 @@ export default function PropertyDetailClient({ slug }) {
               <div className="chapter-tag"><div className="tag-line"/><span className="tag-text">Property Universe</span></div>
               <div className="display-heading">The full<br/><em>picture</em></div>
               <table className="universe-table" style={{marginTop: "16px"}}><tbody>
-                <tr><td>Property type</td><td>{d.property_type}</td></tr>
-                <tr><td>Tenure</td><td>{d.tenure}</td></tr>
-                <tr><td>Floor area</td><td>{d.floor_sqm} sqm</td></tr>
-                <tr><td>Lot area</td><td>{d.lot_sqm} sqm</td></tr>
+                {d.property_type && <tr><td>Property type</td><td>{d.property_type}</td></tr>}
+                {d.tenure && <tr><td>Tenure</td><td>{d.tenure}</td></tr>}
+                {d.floor_sqm > 0 && <tr><td>Floor area</td><td>{d.floor_sqm} sqm</td></tr>}
+                {d.lot_sqm > 0 && <tr><td>Lot area</td><td>{d.lot_sqm} sqm</td></tr>}
                 {isRestaurant ? (
                   <>
-                    <tr><td>Dining Capacity</td><td>{pill1Val}</td></tr>
-                    <tr><td>Kitchen Grade</td><td>{pill2Val}</td></tr>
+                    {pill1Val && <tr><td>Dining Capacity</td><td>{pill1Val}</td></tr>}
+                    {pill2Val && <tr><td>Kitchen Grade</td><td>{pill2Val}</td></tr>}
                   </>
                 ) : isHospitality ? (
                   <>
-                    <tr><td>Accommodations</td><td>{pill1Val}</td></tr>
-                    <tr><td>Hosting Capacity</td><td>{pill2Val}</td></tr>
+                    {pill1Val && <tr><td>Accommodations</td><td>{pill1Val}</td></tr>}
+                    {pill2Val && <tr><td>Hosting Capacity</td><td>{pill2Val}</td></tr>}
                   </>
                 ) : isVenue ? (
                   <>
-                    <tr><td>Guest Capacity</td><td>{pill1Val}</td></tr>
-                    <tr><td>Setup Grade</td><td>{pill2Val}</td></tr>
+                    {pill1Val && <tr><td>Guest Capacity</td><td>{pill1Val}</td></tr>}
+                    {pill2Val && <tr><td>Setup Grade</td><td>{pill2Val}</td></tr>}
                   </>
                 ) : (
                   <>
-                    <tr><td>Bedrooms</td><td>{d.beds}</td></tr>
-                    <tr><td>Bathrooms</td><td>{d.baths}</td></tr>
+                    {d.beds > 0 && <tr><td>Bedrooms</td><td>{d.beds}</td></tr>}
+                    {d.baths > 0 && <tr><td>Bathrooms</td><td>{d.baths}</td></tr>}
                   </>
                 )}
-                <tr><td>Parking slots</td><td>{d.parking} covered</td></tr>
-                <tr><td>Furnishing</td><td>{d.furnishing}</td></tr>
-                <tr><td>Year built</td><td>{d.year_built}</td></tr>
-                <tr><td>Title status</td><td>{d.title_status}</td></tr>
-                <tr><td>Asking price</td><td style={{color:"var(--text-muted)", fontStyle:"italic"}}>Price Upon Request</td></tr>
-                <tr><td>Price per sqm</td><td style={{color:"var(--text-muted)", fontStyle:"italic"}}>Inquire with broker</td></tr>
+                {d.parking > 0 && <tr><td>Parking slots</td><td>{d.parking} covered</td></tr>}
+                {d.furnishing && <tr><td>Furnishing</td><td>{d.furnishing}</td></tr>}
+                {d.year_built && <tr><td>Year built</td><td>{d.year_built}</td></tr>}
+                {d.title_status && <tr><td>Title status</td><td>{d.title_status}</td></tr>}
               </tbody></table>
 
               <div className="accordion">
@@ -1246,9 +1244,6 @@ export default function PropertyDetailClient({ slug }) {
                   </div>
                   <div className="accordion-body"><div className="accordion-content">
                     <div className="detail-row"><span className="detail-key">Asking price</span><span className="detail-val" style={{color:"var(--text-muted)", fontStyle:"italic"}}>Contact broker to confirm</span></div>
-                    <div className="detail-row"><span className="detail-key">Price per sqm</span><span className="detail-val" style={{color:"var(--text-muted)", fontStyle:"italic"}}>Area range estimate only</span></div>
-                    <div className="detail-row"><span className="detail-key">Sqm range est.</span><span className="detail-val">Est. ₱180K–₱220K / sqm range</span></div>
-                    <div className="detail-row"><span className="detail-key">Negotiation room</span><span className="detail-val green">Yes · Open</span></div>
                     <div className="detail-row"><span className="detail-key">How to confirm</span><span className="detail-val">Inquire directly with listed advisor</span></div>
                   </div></div>
                 </div>
@@ -1262,10 +1257,20 @@ export default function PropertyDetailClient({ slug }) {
                   </div>
                   <div className="accordion-body"><div className="accordion-content">
                     <div className="detail-row"><span className="detail-key">Resale potential</span><span className="detail-val green">High · Growing area</span></div>
-                    <div className="detail-row"><span className="detail-key">Rental yield est.</span><span className="detail-val">~5–6% annually</span></div>
-                    <div className="detail-row"><span className="detail-key">Monthly rent est.</span><span className="detail-val">₱60,000 / month</span></div>
-                    <div className="detail-row"><span className="detail-key">MRT-7 impact</span><span className="detail-val green">Positive outlook</span></div>
-                    <div className="detail-row"><span className="detail-key">Area trend</span><span className="detail-val green">Appreciating since 2022</span></div>
+                    <div style={{position:"relative", padding:"12px 16px", background:"rgba(200,169,110,0.04)", border:"0.5px solid rgba(200,169,110,0.15)", borderRadius:"4px", marginTop:"8px", overflow:"hidden"}}>
+                      <div style={{filter:"blur(5px)", pointerEvents:"none", userSelect:"none", display:"flex", flexDirection:"column", gap:"8px"}}>
+                        {["Rental yield est.","Monthly rent est.","Area cap rate"].map(label => (
+                          <div key={label} className="detail-row">
+                            <span className="detail-key">{label}</span>
+                            <span className="detail-val" style={{color:"var(--text-muted)"}}>██████</span>
+                          </div>
+                        ))}
+                      </div>
+                      <div style={{position:"absolute", inset:0, display:"flex", alignItems:"center", justifyContent:"center", background:"rgba(14,14,14,0.65)"}}>
+                        <span style={{fontSize:"10px", color:"#c8a96e", letterSpacing:"0.12em", textTransform:"uppercase", fontFamily:"var(--font-mono)"}}>🔒 Unlock with Verified Scout</span>
+                      </div>
+                    </div>
+                    <div className="detail-row" style={{marginTop:"8px"}}><span className="detail-key">Area trend</span><span className="detail-val green">Appreciating since 2022</span></div>
                   </div></div>
                 </div>
               </div>
