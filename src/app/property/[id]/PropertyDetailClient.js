@@ -14,13 +14,42 @@ import { getPropertyBySlug } from "@/data/mockProperties";
 // ═══════════════════════════════════════════════════
 // HELPER UTILITIES
 // ═══════════════════════════════════════════════════
-function ratingTagClass(val) {
-  const v = String(val || "").toLowerCase();
-  if (["high", "efficient", "excellent", "safe", "strong", "good value", "convenient"].includes(v))
-    return "tag-green";
-  if (["moderate", "medium", "fair"].includes(v)) return "tag-yellow";
-  if (["low", "poor", "high risk"].includes(v))   return "tag-red";
-  return "tag-neutral";
+function DeepIntelWidget({ open, onToggle, fields }) {
+  if (!fields || fields.length === 0) return null;
+  return (
+    <div style={{marginTop:"32px"}}>
+      <div style={{height:"1px", background:"#262626", marginBottom:"16px"}}/>
+      <button
+        onClick={onToggle}
+        style={{width:"100%", background:"#161616", border:"0.5px solid #262626", padding:"14px 20px", cursor:"pointer", display:"flex", justifyContent:"space-between", alignItems:"center", borderRadius:"2px"}}
+      >
+        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8a96e", letterSpacing:"0.18em", textTransform:"uppercase"}}>
+          DEEP INTELLIGENCE // VERIFIED SCOUT
+        </span>
+        <svg viewBox="0 0 10 6" width="10" height="6" fill="none" stroke="#c8a96e" strokeWidth="1.5">
+          <path d={open ? "M1 5L5 1L9 5" : "M1 1L5 5L9 1"}/>
+        </svg>
+      </button>
+      {open && (
+        <div style={{background:"#161616", border:"0.5px solid #262626", borderTop:"none", padding:"20px", position:"relative", borderRadius:"0 0 2px 2px"}}>
+          <div style={{filter:"blur(4px)", pointerEvents:"none", userSelect:"none", display:"flex", flexDirection:"column"}}>
+            {fields.map((field, i) => (
+              <div key={i} style={{display:"flex", justifyContent:"space-between", alignItems:"center", padding:"11px 0", borderBottom: i < fields.length - 1 ? "1px solid #262626" : "none"}}>
+                <span style={{fontFamily:"Georgia,serif", fontSize:"13px", color:"#8a8a8a"}}>{field}</span>
+                <span style={{fontFamily:"'Courier New',monospace", fontSize:"12px", color:"#3a3a3a", letterSpacing:"0.1em"}}>████████</span>
+              </div>
+            ))}
+          </div>
+          <div style={{position:"absolute", inset:0, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:"14px", background:"rgba(22,22,22,0.88)", borderRadius:"0 0 2px 2px"}}>
+            <span style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#c8a96e", letterSpacing:"0.25em", textTransform:"uppercase"}}>VERIFIED SCOUT ONLY</span>
+            <button style={{fontFamily:"Georgia,serif", fontSize:"13px", color:"#0e0e0e", background:"#c8a96e", border:"none", padding:"10px 24px", borderRadius:"2px", cursor:"pointer", letterSpacing:"0.04em"}}>
+              Unlock Full Intelligence →
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 // ═══════════════════════════════════════════════════
@@ -44,6 +73,7 @@ export default function PropertyDetailClient({ slug }) {
   const [accLife,     setAccLife]     = useState(null);
   const [accUniverse, setAccUniverse] = useState(null);
   const [accMove,     setAccMove]     = useState(null);
+  const [widgets,     setWidgets]     = useState({});
 
   // ── Drag-to-scroll refs ───────────────────────
   const scrollRef    = useRef(null);
@@ -797,266 +827,170 @@ export default function PropertyDetailClient({ slug }) {
         {/* ════ ZONE 3 – STORY ════ */}
         <div className="zone-story">
 
-          {/* ── THE SPACE ── */}
+          {/* ── THE SPACE (Ch. 1) ── */}
           <div className={`chapter-panel ${activeTab === "space" ? "active" : ""}`} id="panel-space">
             <div className="panel-content">
-              <div className="chapter-tag"><div className="tag-line"/><span className="tag-text">The Space</span></div>
-              <div className="display-heading">Where <em>light</em><br/>finds its home</div>
 
-              <div className="spec-pills">
-                {[
-                  { val: pill1Val,    label: pill1Label,  icon: pill1Icon },
-                  { val: pill2Val,    label: pill2Label,  icon: pill2Icon },
-                  { val: d.floor_sqm, label: "sqm floor", icon: <><rect x="2" y="2" width="10" height="10" rx="1"/><path d="M5 2v10M9 2v10M2 5h10M2 9h10" strokeLinecap="round"/></> },
-                  { val: d.parking,   label: "Parking",   icon: <><rect x="1" y="6" width="12" height="6" rx="1"/><path d="M3 6V4a3 3 0 016 0v2" strokeLinecap="round"/></> },
-                  { val: d.lot_sqm,   label: "Lot Area",  icon: <><rect x="2" y="4" width="10" height="8" rx="1"/><path d="M2 8h10" strokeLinecap="round"/></> },
-                ].filter(pill => pill.val != null && pill.val !== "" && pill.val !== 0).map(pill => (
-                  <div className="spec-pill" key={pill.label}>
-                    <div className="pill-icon-wrap">
-                      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4">{pill.icon}</svg>
-                    </div>
-                    <div>
-                      <div className="pill-val">{pill.val}</div>
-                      <div className="pill-label">{pill.label}</div>
-                    </div>
-                  </div>
-                ))}
+              <div style={{marginBottom:"32px"}}>
+                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>01 — The Space</div>
+                <div style={{height:"1px", background:"#262626"}}/>
               </div>
 
-              <div className="accordion">
-
-                {/* Accordion 1 — Home Feel & Comfort */}
-                <div className={`accordion-item ${accSpace === "comfort" ? "open" : ""}`}>
-                  <div className="accordion-header" onClick={() => tog(setAccSpace, accSpace, "comfort")}>
-                    <div className="accordion-left">
-                      <div className="accordion-icon-wrap">
-                        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round">
-                          <path d="M1 9V5.5C1 4.12 2.12 3 3.5 3h7C11.88 3 13 4.12 13 5.5V9"/>
-                          <path d="M1 9h12"/><path d="M3 9v2M11 9v2"/>
-                        </svg>
-                      </div>
-                      <div>
-                        <div className="accordion-title">{d.accordion_1_title}</div>
-                        <div className="accordion-subtitle">Can I live here comfortably?</div>
-                      </div>
-                    </div>
-                    <div className="accordion-right">
-                      <span className={`accordion-tag ${ratingTagClass(d.accordion_1_rating)}`}>{d.accordion_1_rating}</span>
-                      <div className="accordion-chevron"/>
-                    </div>
-                  </div>
-                  <div className="accordion-body">
-                    <div className="accordion-content">
-                      <div style={{position:"relative", padding:"12px 16px", background:"rgba(200,169,110,0.04)", border:"0.5px solid rgba(200,169,110,0.15)", borderRadius:"4px", marginBottom:"12px", overflow:"hidden"}}>
-                        <div style={{filter:"blur(5px)", pointerEvents:"none", userSelect:"none", display:"flex", flexDirection:"column", gap:"10px"}}>
-                          {["Comfort level","Natural light","Privacy","Space feel"].map(label => (
-                            <div key={label} style={{display:"flex", alignItems:"center", gap:"10px"}}>
-                              <span style={{fontSize:"12px", color:"var(--text-secondary)", minWidth:"100px"}}>{label}</span>
-                              <div style={{flex:1, height:"3px", background:"var(--border-solid)", borderRadius:"2px"}}><div style={{width:"75%", height:"100%", background:"var(--text-muted)", borderRadius:"2px"}}/></div>
-                              <span style={{fontSize:"11px", color:"var(--text-muted)", width:"28px", textAlign:"right"}}>—</span>
-                            </div>
-                          ))}
-                        </div>
-                        <div style={{position:"absolute", inset:0, display:"flex", alignItems:"center", justifyContent:"center", background:"rgba(14,14,14,0.65)"}}>
-                          <span style={{fontSize:"10px", color:"#c8a96e", letterSpacing:"0.12em", textTransform:"uppercase", fontFamily:"var(--font-mono)"}}>🔒 Unlock with Verified Scout</span>
-                        </div>
-                      </div>
-                      {d.noise_level_text && <div className="detail-row"><span className="detail-key">Noise level</span><span className="detail-val green">{d.noise_level_text}</span></div>}
-                      {d.ventilation && <div className="detail-row"><span className="detail-key">Ventilation</span><span className="detail-val">{d.ventilation}</span></div>}
-                      {d.ceiling_height_text && <div className="detail-row"><span className="detail-key">Ceiling height</span><span className="detail-val">{d.ceiling_height_text}</span></div>}
-                    </div>
-                  </div>
+              {(d.aesthetic_tag || d.accordion_3_rating) && (
+                <div style={{marginBottom:"28px"}}>
+                  <span style={{fontFamily:"Georgia,serif", fontSize:"13px", color:"#c8a96e", border:"0.5px solid rgba(200,169,110,0.35)", padding:"5px 14px", borderRadius:"2px", letterSpacing:"0.06em"}}>
+                    {d.aesthetic_tag || d.accordion_3_rating}
+                  </span>
                 </div>
+              )}
 
-                {/* Accordion 2 — Space Usability */}
-                <div className={`accordion-item ${accSpace === "efficiency" ? "open" : ""}`}>
-                  <div className="accordion-header" onClick={() => tog(setAccSpace, accSpace, "efficiency")}>
-                    <div className="accordion-left">
-                      <div className="accordion-icon-wrap">
-                        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round">
-                          <rect x="2" y="2" width="10" height="10" rx="1"/>
-                          <path d="M5 2v10M2 6h3M2 9h3M9 2v4M9 8v4"/>
-                        </svg>
-                      </div>
-                      <div>
-                        <div className="accordion-title">{d.accordion_2_title}</div>
-                        <div className="accordion-subtitle">Layout &amp; room efficiency</div>
-                      </div>
-                    </div>
-                    <div className="accordion-right">
-                      <span className={`accordion-tag ${ratingTagClass(d.accordion_2_rating)}`}>{d.accordion_2_rating}</span>
-                      <div className="accordion-chevron"/>
-                    </div>
+              <div style={{display:"flex", flexWrap:"wrap", gap:"28px 52px", margin:"0 0 32px"}}>
+                {pill1Val && pill1Val !== 0 && (
+                  <div>
+                    <div style={{fontFamily:"Georgia,serif", fontSize:"clamp(40px,5vw,60px)", fontWeight:400, color:"#f0ede8", lineHeight:1}}>{pill1Val}</div>
+                    <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#8a8a8a", letterSpacing:"0.22em", textTransform:"uppercase", marginTop:"8px"}}>{pill1Label}</div>
                   </div>
-                  <div className="accordion-body">
-                    <div className="accordion-content">
-                      {d.floor_sqm > 0 && <div className="detail-row"><span className="detail-key">Floor area</span><span className="detail-val">{d.floor_sqm} sqm</span></div>}
-                      {d.lot_sqm > 0 && <div className="detail-row"><span className="detail-key">Lot area</span><span className="detail-val">{d.lot_sqm} sqm</span></div>}
-                      {d.outdoor_description && d.outdoor_description !== "None" && <div className="detail-row"><span className="detail-key">Outdoor usable</span><span className="detail-val green">{d.outdoor_description}</span></div>}
-                      {d.furnishing && <div className="detail-row"><span className="detail-key">Furnishing</span><span className="detail-val">{d.furnishing}</span></div>}
-                      {d.floors > 0 && <div className="detail-row"><span className="detail-key">Floors</span><span className="detail-val">{d.floors}</span></div>}
-                    </div>
+                )}
+                {pill2Val && pill2Val !== 0 && (
+                  <div>
+                    <div style={{fontFamily:"Georgia,serif", fontSize:"clamp(40px,5vw,60px)", fontWeight:400, color:"#f0ede8", lineHeight:1}}>{pill2Val}</div>
+                    <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#8a8a8a", letterSpacing:"0.22em", textTransform:"uppercase", marginTop:"8px"}}>{pill2Label}</div>
                   </div>
-                </div>
+                )}
+                {d.floor_sqm > 0 && (
+                  <div>
+                    <div style={{fontFamily:"Georgia,serif", fontSize:"clamp(40px,5vw,60px)", fontWeight:400, color:"#f0ede8", lineHeight:1}}>{d.floor_sqm}</div>
+                    <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#8a8a8a", letterSpacing:"0.22em", textTransform:"uppercase", marginTop:"8px"}}>sqm floor</div>
+                  </div>
+                )}
+                {d.parking > 0 && (
+                  <div>
+                    <div style={{fontFamily:"Georgia,serif", fontSize:"clamp(40px,5vw,60px)", fontWeight:400, color:"#f0ede8", lineHeight:1}}>{d.parking}</div>
+                    <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#8a8a8a", letterSpacing:"0.22em", textTransform:"uppercase", marginTop:"8px"}}>Parking Slots</div>
+                  </div>
+                )}
+                {d.lot_sqm > 0 && (
+                  <div>
+                    <div style={{fontFamily:"Georgia,serif", fontSize:"clamp(40px,5vw,60px)", fontWeight:400, color:"#f0ede8", lineHeight:1}}>{d.lot_sqm}</div>
+                    <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#8a8a8a", letterSpacing:"0.22em", textTransform:"uppercase", marginTop:"8px"}}>Lot sqm</div>
+                  </div>
+                )}
+              </div>
 
-                {/* Accordion 3 — Story of This Space */}
-                <div className={`accordion-item ${accSpace === "story" ? "open" : ""}`}>
-                  <div className="accordion-header" onClick={() => tog(setAccSpace, accSpace, "story")}>
-                    <div className="accordion-left">
-                      <div className="accordion-icon-wrap">
-                        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round">
-                          <path d="M2 3h10M2 6h8M2 9h6M2 12h4"/>
-                        </svg>
-                      </div>
-                      <div>
-                        <div className="accordion-title">{d.accordion_3_title}</div>
-                        <div className="accordion-subtitle">Feel before figures</div>
-                      </div>
-                    </div>
-                    <div className="accordion-right">
-                      <span className="accordion-tag tag-neutral">{d.accordion_3_rating}</span>
-                      <div className="accordion-chevron"/>
-                    </div>
-                  </div>
-                  <div className="accordion-body">
-                    <div className="accordion-content">
-                      <p className="story-text">{d.accordion_3_text}</p>
-                    </div>
-                  </div>
-                </div>
+              <div style={{height:"1px", background:"#262626", margin:"0 0 28px"}}/>
 
-              </div>{/* /accordion */}
-            </div>{/* /panel-content */}
+              {d.accordion_3_text && (
+                <p style={{fontFamily:"Georgia,serif", fontSize:"16px", color:"#f0ede8", lineHeight:1.85, margin:"0 0 28px", maxWidth:"560px"}}>
+                  {d.accordion_3_text}
+                </p>
+              )}
 
-            {/* Sidebar — The Space */}
+              <div style={{display:"flex", flexDirection:"column"}}>
+                {d.noise_level_text && (
+                  <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626"}}>
+                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Noise Level</span>
+                    <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right", maxWidth:"55%"}}>{d.noise_level_text}</span>
+                  </div>
+                )}
+                {d.ventilation && (
+                  <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626"}}>
+                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Ventilation</span>
+                    <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right", maxWidth:"55%"}}>{d.ventilation}</span>
+                  </div>
+                )}
+                {d.ceiling_height_text && (
+                  <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626"}}>
+                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Ceiling Height</span>
+                    <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{d.ceiling_height_text}</span>
+                  </div>
+                )}
+                {d.furnishing && (
+                  <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626"}}>
+                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Furnishing</span>
+                    <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{d.furnishing}</span>
+                  </div>
+                )}
+                {d.outdoor_description && d.outdoor_description !== "None" && (
+                  <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626"}}>
+                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Outdoor</span>
+                    <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right", maxWidth:"55%"}}>{d.outdoor_description}</span>
+                  </div>
+                )}
+              </div>
+
+              <DeepIntelWidget
+                open={widgets.space}
+                onToggle={() => setWidgets(w => ({...w, space: !w.space}))}
+                fields={["Comfort Level Score","Natural Light Index","Privacy Rating","Space Feel Assessment","Layout Efficiency Grade"]}
+              />
+
+            </div>
+
             <div className="panel-sidebar">
-              <div className="sidebar-block">
-                <div className="sidebar-accent-line"/>
-                <div className="sidebar-label">Location</div>
-                <div className="sidebar-value">{d.city}</div>
-                <div className="sidebar-sub">{d.location}</div>
-              </div>
-              <div className="mini-map">
-                <div className="map-road-h" style={{top:"33%"}}/><div className="map-road-h" style={{top:"55%"}}/><div className="map-road-h" style={{top:"75%"}}/>
-                <div className="map-road-v" style={{left:"30%"}}/><div className="map-road-v" style={{left:"55%"}}/><div className="map-road-v" style={{left:"78%"}}/>
-                <div className="map-pulse"/><div className="map-pin"/>
-              </div>
+              {d.city && <div className="sidebar-block"><div className="sidebar-accent-line"/><div className="sidebar-label">Location</div><div className="sidebar-value">{d.city}</div>{d.location && <div className="sidebar-sub">{d.location}</div>}</div>}
               {d.property_type && <div className="sidebar-block"><div className="sidebar-label">Type</div><div className="sidebar-value">{d.property_type}</div></div>}
               {d.tenure && <div className="sidebar-block"><div className="sidebar-label">Tenure</div><div className="sidebar-value">{d.tenure}</div></div>}
               {d.year_built && <div className="sidebar-block"><div className="sidebar-label">Year Built</div><div className="sidebar-value">{d.year_built}</div></div>}
-              {d.furnishing && <div className="sidebar-block"><div className="sidebar-label">Furnishing</div><div className="sidebar-value">{d.furnishing}</div></div>}
+              {d.title_status && <div className="sidebar-block"><div className="sidebar-label">Title</div><div className="sidebar-value">{d.title_status}</div></div>}
             </div>
-          </div>{/* /panel-space */}
+          </div>
 
-          {/* ── LOCATION ── */}
+          {/* ── LOCATION (Ch. 2) ── */}
           <div className={`chapter-panel ${activeTab === "location" ? "active" : ""}`} id="panel-location">
             <div className="panel-content">
-              <div className="chapter-tag"><div className="tag-line"/><span className="tag-text">The Location</span></div>
-              <div className="display-heading">A city within<br/>a <em>neighborhood</em></div>
-              <div className="location-grid">
-                {[
-                  { title: d.city,               desc: "Established residential enclave in NCR." },
-                  { title: "Commonwealth Corridor", desc: "Direct route to Fairview, Philcoa, and EDSA." },
-                  { title: "Commute Access",       desc: "MRT-7 North Ave terminus within 12 mins. Multiple jeepney routes." },
-                  { title: "Area Growth",          desc: "Property values trending upward since 2022. Active development nearby." },
-                ].map(c => (
-                  <div className="location-card" key={c.title}>
-                    <div className="location-card-icon">
-                      <svg viewBox="0 0 13 13" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round">
-                        <path d="M6.5 1C4.01 1 2 3.01 2 5.5c0 3.5 4.5 7.5 4.5 7.5S11 9 11 5.5C11 3.01 8.99 1 6.5 1z"/>
-                        <circle cx="6.5" cy="5.5" r="1.5"/>
-                      </svg>
-                    </div>
-                    <div className="location-card-title">{c.title}</div>
-                    <div className="location-card-desc">{c.desc}</div>
-                  </div>
-                ))}
+
+              <div style={{marginBottom:"32px"}}>
+                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>02 — Location</div>
+                <div style={{height:"1px", background:"#262626"}}/>
               </div>
 
-              <div className="accordion">
-                <div className={`accordion-item ${accLocation === "daily" ? "open" : ""}`}>
-                  <div className="accordion-header" onClick={() => tog(setAccLocation, accLocation, "daily")}>
-                    <div className="accordion-left">
-                      <div className="accordion-icon-wrap"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"><path d="M7 1v2M7 11v2M1 7h2M11 7h2M3 3l1.4 1.4M9.6 9.6L11 11M3 11l1.4-1.4M9.6 4.4L11 3"/></svg></div>
-                      <div>
-                        <div className="accordion-title">
-                          {isRestaurant ? "Operations Reality" : isHospitality ? "Guest Experience Reality" : isVenue ? "Event Logistics Reality" : "Daily Life Reality"}
-                        </div>
-                        <div className="accordion-subtitle">
-                          {isRestaurant ? "Is running restaurant operations easy here?" : isHospitality ? "Is guest accessibility easy here?" : isVenue ? "Are event setups and load-ins easy here?" : "Is my daily routine easy here?"}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="accordion-right"><span className="accordion-tag tag-green">Convenient</span><div className="accordion-chevron"/></div>
+              {d.city && (
+                <div style={{margin:"0 0 24px"}}>
+                  <div style={{fontFamily:"Georgia,serif", fontSize:"clamp(28px,4.5vw,52px)", fontWeight:400, color:"#f0ede8", lineHeight:1.1}}>
+                    {d.city}
                   </div>
-                  <div className="accordion-body"><div className="accordion-content">
-                    {isRestaurant && (
-                      <>
-                        <div className="detail-row"><span className="detail-key">Food supplier access</span><span className="detail-val green">Direct delivery route</span></div>
-                        <div className="detail-row"><span className="detail-key">Foot traffic density</span><span className="detail-val">High · Commercial zone</span></div>
-                        <div className="detail-row"><span className="detail-key">Nearest transit hub</span><span className="detail-val">4 min walk</span></div>
-                        <div className="detail-row"><span className="detail-key">Parking convenience</span><span className="detail-val green">Valet option available</span></div>
-                      </>
-                    )}
-                    {isHospitality && (
-                      <>
-                        <div className="detail-row"><span className="detail-key">Beach / activity access</span><span className="detail-val green">2 min walk to sea</span></div>
-                        <div className="detail-row"><span className="detail-key">Airport commute</span><span className="detail-val">35 min drive</span></div>
-                        <div className="detail-row"><span className="detail-key">Local food options</span><span className="detail-val green">Excellent coverage</span></div>
-                        <div className="detail-row"><span className="detail-key">Security presence</span><span className="detail-val">Guarded subdivision</span></div>
-                      </>
-                    )}
-                    {isVenue && (
-                      <>
-                        <div className="detail-row"><span className="detail-key">Acoustic insulation</span><span className="detail-val green">Sound dampening shell</span></div>
-                        <div className="detail-row"><span className="detail-key">Load-in dock access</span><span className="detail-val green">Direct service entry</span></div>
-                        <div className="detail-row"><span className="detail-key">Visitor parking</span><span className="detail-val">25 slots + valet</span></div>
-                        <div className="detail-row"><span className="detail-key">Egress capacity</span><span className="detail-val green">Meets standard safety code</span></div>
-                      </>
-                    )}
-                    {!isRestaurant && !isHospitality && !isVenue && (
-                      <>
-                        <div className="detail-row"><span className="detail-key">Grocery access</span><span className="detail-val green">4 min drive</span></div>
-                        <div className="detail-row"><span className="detail-key">Nearest hospital</span><span className="detail-val">12 min · QMMC</span></div>
-                        <div className="detail-row"><span className="detail-key">Schools nearby</span><span className="detail-val">3 within 10 min</span></div>
-                        <div className="detail-row"><span className="detail-key">Commute to CBD</span><span className="detail-val yellow">35–45 min</span></div>
-                        <div className="detail-row"><span className="detail-key">Public transport</span><span className="detail-val green">Good coverage</span></div>
-                      </>
-                    )}
-                  </div></div>
+                  {d.location && (
+                    <div style={{fontFamily:"'Courier New',monospace", fontSize:"11px", color:"#8a8a8a", letterSpacing:"0.14em", marginTop:"10px", textTransform:"uppercase"}}>
+                      {d.location}
+                    </div>
+                  )}
                 </div>
+              )}
 
-                <div className={`accordion-item ${accLocation === "safety" ? "open" : ""}`}>
-                  <div className="accordion-header" onClick={() => tog(setAccLocation, accLocation, "safety")}>
-                    <div className="accordion-left">
-                      <div className="accordion-icon-wrap"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"><path d="M7 1L2 3.5v4C2 10.5 4.5 12.5 7 13c2.5-.5 5-2.5 5-5.5v-4L7 1z"/></svg></div>
-                      <div><div className="accordion-title">Safety Perception</div><div className="accordion-subtitle">Day &amp; night security feel</div></div>
-                    </div>
-                    <div className="accordion-right"><span className="accordion-tag tag-green">Safe</span><div className="accordion-chevron"/></div>
-                  </div>
-                  <div className="accordion-body"><div className="accordion-content">
-                    <div style={{position:"relative", padding:"12px 16px", background:"rgba(200,169,110,0.04)", border:"0.5px solid rgba(200,169,110,0.15)", borderRadius:"4px", marginBottom:"12px", overflow:"hidden"}}>
-                      <div style={{filter:"blur(5px)", pointerEvents:"none", userSelect:"none", display:"flex", flexDirection:"column", gap:"10px"}}>
-                        {["Daytime safety","Night safety"].map(label => (
-                          <div key={label} style={{display:"flex", alignItems:"center", gap:"10px"}}>
-                            <span style={{fontSize:"12px", color:"var(--text-secondary)", minWidth:"100px"}}>{label}</span>
-                            <div style={{flex:1, height:"3px", background:"var(--border-solid)", borderRadius:"2px"}}><div style={{width:"80%", height:"100%", background:"var(--text-muted)", borderRadius:"2px"}}/></div>
-                            <span style={{fontSize:"11px", color:"var(--text-muted)", width:"28px", textAlign:"right"}}>—</span>
-                          </div>
-                        ))}
-                      </div>
-                      <div style={{position:"absolute", inset:0, display:"flex", alignItems:"center", justifyContent:"center", background:"rgba(14,14,14,0.65)"}}>
-                        <span style={{fontSize:"10px", color:"#c8a96e", letterSpacing:"0.12em", textTransform:"uppercase", fontFamily:"var(--font-mono)"}}>🔒 Unlock with Verified Scout</span>
-                      </div>
-                    </div>
-                    {d.street_type && <div className="detail-row"><span className="detail-key">Street type</span><span className="detail-val">{d.street_type}</span></div>}
-                  </div></div>
-                </div>
+              <div style={{height:"340px", borderRadius:"2px", overflow:"hidden", border:"0.5px solid #262626", marginBottom:"24px"}}>
+                <InteractiveMap
+                  lat={d.lat || d.latitude || 14.5547}
+                  lng={d.lng || d.longitude || 121.0244}
+                  propertyTitle={d.title}
+                  vicinityData={d.whereTo}
+                />
               </div>
+
+              <div style={{display:"flex", flexDirection:"column"}}>
+                {d.street_type && (
+                  <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626"}}>
+                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Street Type</span>
+                    <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{d.street_type}</span>
+                  </div>
+                )}
+                {d.tenure && (
+                  <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626"}}>
+                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Tenure Type</span>
+                    <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{d.tenure}</span>
+                  </div>
+                )}
+              </div>
+
+              <DeepIntelWidget
+                open={widgets.location}
+                onToggle={() => setWidgets(w => ({...w, location: !w.location}))}
+                fields={["Flood Risk Assessment","Safety Perception Index","Daytime Security Score","Night Security Score","Area Growth Projection"]}
+              />
+
             </div>
 
             <div className="panel-sidebar">
-              <div className="sidebar-block"><div className="sidebar-accent-line"/><div className="sidebar-label">District</div><div className="sidebar-value">{d.city}</div><div className="sidebar-sub">NCR</div></div>
+              {d.city && <div className="sidebar-block"><div className="sidebar-accent-line"/><div className="sidebar-label">District</div><div className="sidebar-value">{d.city}</div><div className="sidebar-sub">NCR</div></div>}
               <div className="mini-map">
                 <div className="map-road-h" style={{top:"33%"}}/><div className="map-road-h" style={{top:"55%"}}/>
                 <div className="map-road-v" style={{left:"30%"}}/><div className="map-road-v" style={{left:"60%"}}/>
@@ -1064,114 +998,116 @@ export default function PropertyDetailClient({ slug }) {
               </div>
               {d.street_type && <div className="sidebar-block"><div className="sidebar-label">Street type</div><div className="sidebar-value">{d.street_type}</div></div>}
             </div>
-          </div>{/* /panel-location */}
+          </div>
 
-          {/* ── LIFE HERE ── */}
+          {/* ── LIFE HERE (Ch. 3) ── */}
           <div className={`chapter-panel ${activeTab === "life" ? "active" : ""}`} id="panel-life">
             <div className="panel-content">
-              <div className="chapter-tag"><div className="tag-line"/><span className="tag-text">The Life Here</span></div>
-              <div className="display-heading">Quiet mornings,<br/><em>real</em> evenings</div>
-              <div className="life-stat-row">
-                <div className="life-stat"><div className="life-stat-number">6<span>am</span></div><div className="life-stat-label">When light hits the kitchen. No alarm needed.</div></div>
-                <div className="life-stat"><div className="life-stat-number">3<span>min</span></div><div className="life-stat-label">Walk to sari-sari and morning pan de sal.</div></div>
-                <div className="life-stat"><div className="life-stat-number">0</div><div className="life-stat-label">Condo rules. No HOA telling you what to do.</div></div>
-              </div>
-              <div className="accordion">
-                <div className={`accordion-item ${accLife === "vibe" ? "open" : ""}`}>
-                  <div className="accordion-header" onClick={() => tog(setAccLife, accLife, "vibe")}>
-                    <div className="accordion-left">
-                      <div className="accordion-icon-wrap"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"><circle cx="7" cy="7" r="5"/><path d="M5 8.5s.8 1.5 2 1.5 2-1.5 2-1.5M5.5 5.5h.01M8.5 5.5h.01"/></svg></div>
-                      <div><div className="accordion-title">Lifestyle Vibe</div><div className="accordion-subtitle">Community type &amp; atmosphere</div></div>
-                    </div>
-                    <div className="accordion-right"><span className="accordion-tag tag-neutral">{d.lifestyle_vibe}</span><div className="accordion-chevron"/></div>
-                  </div>
-                  <div className="accordion-body"><div className="accordion-content">
-                    <div className="detail-row"><span className="detail-key">Lifestyle pace</span><span className="detail-val">{d.lifestyle_vibe}</span></div>
-                    <div className="detail-row"><span className="detail-key">Best for</span><span className="detail-val">{d.best_for}</span></div>
-                    <div className="detail-row"><span className="detail-key">WFH suitability</span><span className="detail-val green">Excellent</span></div>
-                    <div className="detail-row"><span className="detail-key">Street noise</span><span className="detail-val">{d.noise_level_text}</span></div>
-                    <div className="detail-row"><span className="detail-key">Outdoor space</span><span className="detail-val">{d.outdoor_description}</span></div>
-                  </div></div>
-                </div>
 
-                <div className={`accordion-item ${accLife === "convenience" ? "open" : ""}`}>
-                  <div className="accordion-header" onClick={() => tog(setAccLife, accLife, "convenience")}>
-                    <div className="accordion-left">
-                      <div className="accordion-icon-wrap"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"><path d="M1 3h12M1 7h12M1 11h8"/></svg></div>
-                      <div><div className="accordion-title">Convenience Score</div><div className="accordion-subtitle">Errands &amp; daily needs within reach</div></div>
-                    </div>
-                    <div className="accordion-right"><span className="accordion-tag tag-neutral" style={{color:"#c8a96e", fontSize:"9px"}}>🔒 Verified Scout</span><div className="accordion-chevron"/></div>
-                  </div>
-                  <div className="accordion-body"><div className="accordion-content">
-                    <div style={{position:"relative", padding:"12px 16px", background:"rgba(200,169,110,0.04)", border:"0.5px solid rgba(200,169,110,0.15)", borderRadius:"4px", overflow:"hidden"}}>
-                      <div style={{filter:"blur(5px)", pointerEvents:"none", userSelect:"none", display:"flex", flexDirection:"column", gap:"10px"}}>
-                        {["Food access","Shopping","Healthcare","Recreation"].map(label => (
-                          <div key={label} style={{display:"flex", alignItems:"center", gap:"10px"}}>
-                            <span style={{fontSize:"12px", color:"var(--text-secondary)", minWidth:"100px"}}>{label}</span>
-                            <div style={{flex:1, height:"3px", background:"var(--border-solid)", borderRadius:"2px"}}><div style={{width:"75%", height:"100%", background:"var(--text-muted)", borderRadius:"2px"}}/></div>
-                            <span style={{fontSize:"11px", color:"var(--text-muted)", width:"28px", textAlign:"right"}}>—</span>
-                          </div>
-                        ))}
-                      </div>
-                      <div style={{position:"absolute", inset:0, display:"flex", alignItems:"center", justifyContent:"center", background:"rgba(14,14,14,0.65)"}}>
-                        <span style={{fontSize:"10px", color:"#c8a96e", letterSpacing:"0.12em", textTransform:"uppercase", fontFamily:"var(--font-mono)"}}>🔒 Unlock with Verified Scout</span>
-                      </div>
-                    </div>
-                  </div></div>
-                </div>
+              <div style={{marginBottom:"32px"}}>
+                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>03 — Life Here</div>
+                <div style={{height:"1px", background:"#262626"}}/>
               </div>
+
+              {d.lifestyle_vibe && (
+                <p style={{fontFamily:"Georgia,serif", fontSize:"22px", fontWeight:400, color:"#f0ede8", lineHeight:1.5, margin:"0 0 16px", maxWidth:"540px"}}>
+                  {d.lifestyle_vibe}
+                </p>
+              )}
+              {d.best_for && (
+                <p style={{fontFamily:"Georgia,serif", fontSize:"15px", color:"#a0a0a0", lineHeight:1.75, margin:"0 0 8px"}}>
+                  Best suited for {d.best_for}.
+                </p>
+              )}
+
+              <div style={{height:"1px", background:"#262626", margin:"24px 0"}}/>
+
+              <div style={{display:"flex", flexDirection:"column"}}>
+                {d.outdoor_description && d.outdoor_description !== "None" && (
+                  <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626"}}>
+                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Outdoor Space</span>
+                    <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right", maxWidth:"55%"}}>{d.outdoor_description}</span>
+                  </div>
+                )}
+                {d.noise_level_text && (
+                  <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626"}}>
+                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Noise Character</span>
+                    <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{d.noise_level_text}</span>
+                  </div>
+                )}
+              </div>
+
+              <DeepIntelWidget
+                open={widgets.life}
+                onToggle={() => setWidgets(w => ({...w, life: !w.life}))}
+                fields={["Convenience Score","Food Access Rating","Healthcare Proximity Index","Recreation Score","WFH Suitability Grade"]}
+              />
+
             </div>
 
             <div className="panel-sidebar">
               {d.lifestyle_vibe && <div className="sidebar-block"><div className="sidebar-accent-line"/><div className="sidebar-label">Vibe</div><div className="sidebar-value">{d.lifestyle_vibe}</div></div>}
               {d.best_for && <div className="sidebar-block"><div className="sidebar-label">Best for</div><div className="sidebar-value">{d.best_for}</div></div>}
               {d.street_type && <div className="sidebar-block"><div className="sidebar-label">Street type</div><div className="sidebar-value">{d.street_type}</div></div>}
-              {d.outdoor_description && d.outdoor_description !== "None" && <div className="sidebar-block"><div className="sidebar-label">Outdoor</div><div className="sidebar-value">{d.outdoor_description}</div></div>}
             </div>
-          </div>{/* /panel-life */}
+          </div>
 
-          {/* ── WHERE TO? ── */}
+          {/* ── WHERE TO? (Ch. 4) ── */}
           <div className={`chapter-panel ${activeTab === "whereto" ? "active" : ""}`} id="panel-whereto">
             <div className="panel-content">
-              <div className="chapter-tag"><div className="tag-line"/><span className="tag-text">Where To?</span></div>
-              <div className="display-heading">Everything<br/>within <em>reach</em></div>
-              
-              {/* View Switcher buttons */}
-              <div className="whereto-tabs">
-                <button 
-                  className={`whereto-tab-btn ${whereToTab === "map" ? "active" : ""}`}
-                  onClick={() => setWhereToTab("map")}
-                >
-                  <span className="btn-pulse" />
-                  Tactical Map
+
+              <div style={{marginBottom:"32px"}}>
+                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>04 — Where To?</div>
+                <div style={{height:"1px", background:"#262626"}}/>
+              </div>
+
+              <div className="whereto-tabs" style={{marginBottom:"20px"}}>
+                <button className={`whereto-tab-btn ${whereToTab === "map" ? "active" : ""}`} onClick={() => setWhereToTab("map")}>
+                  <span className="btn-pulse"/>Tactical Map
                 </button>
-                <button 
-                  className={`whereto-tab-btn ${whereToTab === "list" ? "active" : ""}`}
-                  onClick={() => setWhereToTab("list")}
-                >
+                <button className={`whereto-tab-btn ${whereToTab === "list" ? "active" : ""}`} onClick={() => setWhereToTab("list")}>
                   Directory List
                 </button>
               </div>
 
-              {/* Conditional view panel */}
-              <div className="whereto-view-container" style={{ position: "relative", width: "100%", minHeight: "380px" }}>
-                {whereToTab === "list" && (
-                  <div id="where-to-content">{renderWhereTo()}</div>
-                )}
+              {whereToTab === "map" && (
+                <div style={{height:"340px", borderRadius:"2px", overflow:"hidden", border:"0.5px solid #262626", marginBottom:"24px"}}>
+                  <InteractiveMap lat={d.lat || d.latitude || 14.5547} lng={d.lng || d.longitude || 121.0244} propertyTitle={d.title} vicinityData={d.whereTo}/>
+                </div>
+              )}
 
-                {whereToTab === "map" && (
-                  <div style={{ position: "relative", width: "100%", height: "380px" }}>
-                    <InteractiveMap 
-                      lat={d.lat || d.latitude || 14.5547} 
-                      lng={d.lng || d.longitude || 121.0244} 
-                      propertyTitle={d.title} 
-                      vicinityData={d.whereTo} 
-                    />
-                  </div>
-                )}
-              </div>
+              {whereToTab === "list" && d.whereTo && d.whereTo.length > 0 && (
+                <div style={{display:"flex", flexDirection:"column", marginBottom:"24px"}}>
+                  {d.whereTo.map((item, idx) => (
+                    <div key={idx} style={{display:"flex", justifyContent:"space-between", alignItems:"center", padding:"13px 0", borderBottom:"1px solid #262626"}}>
+                      <div style={{display:"flex", alignItems:"center", gap:"12px"}}>
+                        <div style={{width:"5px", height:"5px", borderRadius:"50%", background:"#c8a96e", flexShrink:0}}/>
+                        <div>
+                          <div style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{item.name}</div>
+                          {item.category && <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#8a8a8a", letterSpacing:"0.1em", textTransform:"uppercase", marginTop:"2px"}}>{item.category}</div>}
+                        </div>
+                      </div>
+                      <span style={{fontFamily:"'Courier New',monospace", fontSize:"11px", color:"#8a8a8a", letterSpacing:"0.1em", flexShrink:0}}>{item.distance}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {whereToTab === "list" && (!d.whereTo || d.whereTo.length === 0) && (
+                <div style={{padding:"32px", background:"#161616", border:"0.5px dashed #262626", borderRadius:"2px", textAlign:"center", fontFamily:"'Courier New',monospace", fontSize:"11px", color:"#8a8a8a", letterSpacing:"0.12em", marginBottom:"24px"}}>
+                  [ LOCATION BRIEFING N/A — NO DATA IN CMS ]
+                </div>
+              )}
+
+              <DeepIntelWidget
+                open={widgets.whereto}
+                onToggle={() => setWidgets(w => ({...w, whereto: !w.whereto}))}
+                fields={["Walkability Score","Transit Frequency Analysis","Peak Hour Commute Data","Zoning Classification","Development Pipeline"]}
+              />
+
             </div>
-             <div className="panel-sidebar">
+
+            <div className="panel-sidebar">
               <div className="sidebar-block">
                 <div className="sidebar-accent-line"/>
                 <div className="sidebar-label">Nearest mall</div>
@@ -1188,227 +1124,107 @@ export default function PropertyDetailClient({ slug }) {
                 <div className="sidebar-value">{publicTransitObj ? publicTransitObj.name : "N/A"}</div>
                 <div className="sidebar-sub">{publicTransitObj ? publicTransitObj.distance : "Not specified"}</div>
               </div>
-              <div className="sidebar-block">
-                <div className="sidebar-label">Walkability</div>
-                <div className="sidebar-value">{d.whereTo && d.whereTo.length > 0 ? (hasWalk ? "Good" : "Moderate") : "N/A"}</div>
-                <div className="sidebar-sub">{d.whereTo && d.whereTo.length > 0 ? walkabilitySub : "Not specified"}</div>
-              </div>
             </div>
-          </div>{/* /panel-whereto */}
+          </div>
 
-          {/* ── UNIVERSE ── */}
-          <div className={`chapter-panel ${activeTab === "universe" ? "active" : ""}`} id="panel-universe">
+          {/* ── BUILD PLANS (Ch. 5) ── */}
+          <div className={`chapter-panel ${activeTab === "buildplans" ? "active" : ""}`} id="panel-buildplans">
             <div className="panel-content">
-              <div className="chapter-tag"><div className="tag-line"/><span className="tag-text">Property Universe</span></div>
-              <div className="display-heading">The full<br/><em>picture</em></div>
-              <table className="universe-table" style={{marginTop: "16px"}}><tbody>
-                {d.property_type && <tr><td>Property type</td><td>{d.property_type}</td></tr>}
-                {d.tenure && <tr><td>Tenure</td><td>{d.tenure}</td></tr>}
-                {d.floor_sqm > 0 && <tr><td>Floor area</td><td>{d.floor_sqm} sqm</td></tr>}
-                {d.lot_sqm > 0 && <tr><td>Lot area</td><td>{d.lot_sqm} sqm</td></tr>}
-                {isRestaurant ? (
-                  <>
-                    {pill1Val && <tr><td>Dining Capacity</td><td>{pill1Val}</td></tr>}
-                    {pill2Val && <tr><td>Kitchen Grade</td><td>{pill2Val}</td></tr>}
-                  </>
-                ) : isHospitality ? (
-                  <>
-                    {pill1Val && <tr><td>Accommodations</td><td>{pill1Val}</td></tr>}
-                    {pill2Val && <tr><td>Hosting Capacity</td><td>{pill2Val}</td></tr>}
-                  </>
-                ) : isVenue ? (
-                  <>
-                    {pill1Val && <tr><td>Guest Capacity</td><td>{pill1Val}</td></tr>}
-                    {pill2Val && <tr><td>Setup Grade</td><td>{pill2Val}</td></tr>}
-                  </>
-                ) : (
-                  <>
-                    {d.beds > 0 && <tr><td>Bedrooms</td><td>{d.beds}</td></tr>}
-                    {d.baths > 0 && <tr><td>Bathrooms</td><td>{d.baths}</td></tr>}
-                  </>
-                )}
-                {d.parking > 0 && <tr><td>Parking slots</td><td>{d.parking} covered</td></tr>}
-                {d.furnishing && <tr><td>Furnishing</td><td>{d.furnishing}</td></tr>}
-                {d.year_built && <tr><td>Year built</td><td>{d.year_built}</td></tr>}
-                {d.title_status && <tr><td>Title status</td><td>{d.title_status}</td></tr>}
-              </tbody></table>
 
-              <div className="accordion">
-                <div className={`accordion-item ${accUniverse === "priceval" ? "open" : ""}`}>
-                  <div className="accordion-header" onClick={() => tog(setAccUniverse, accUniverse, "priceval")}>
-                    <div className="accordion-left">
-                      <div className="accordion-icon-wrap"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"><path d="M7 1v12M4 4h4.5a2.5 2.5 0 010 5H4"/><path d="M4 3h5"/></svg></div>
-                      <div><div className="accordion-title">Price vs Value</div><div className="accordion-subtitle">Investment positioning context</div></div>
-                    </div>
-                    <div className="accordion-right"><span className="accordion-tag tag-neutral">On Request</span><div className="accordion-chevron"/></div>
-                  </div>
-                  <div className="accordion-body"><div className="accordion-content">
-                    <div className="detail-row"><span className="detail-key">Asking price</span><span className="detail-val" style={{color:"var(--text-muted)", fontStyle:"italic"}}>Contact broker to confirm</span></div>
-                    <div className="detail-row"><span className="detail-key">How to confirm</span><span className="detail-val">Inquire directly with listed advisor</span></div>
-                  </div></div>
-                </div>
-                <div className={`accordion-item ${accUniverse === "resale" ? "open" : ""}`}>
-                  <div className="accordion-header" onClick={() => tog(setAccUniverse, accUniverse, "resale")}>
-                    <div className="accordion-left">
-                      <div className="accordion-icon-wrap"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="1,9 4,5 7,7 10,3 13,5"/><path d="M13 3h-3v3"/></svg></div>
-                      <div><div className="accordion-title">Resale &amp; Rental Potential</div><div className="accordion-subtitle">Future value outlook</div></div>
-                    </div>
-                    <div className="accordion-right"><span className="accordion-tag tag-green">Strong</span><div className="accordion-chevron"/></div>
-                  </div>
-                  <div className="accordion-body"><div className="accordion-content">
-                    <div className="detail-row"><span className="detail-key">Resale potential</span><span className="detail-val green">High · Growing area</span></div>
-                    <div style={{position:"relative", padding:"12px 16px", background:"rgba(200,169,110,0.04)", border:"0.5px solid rgba(200,169,110,0.15)", borderRadius:"4px", marginTop:"8px", overflow:"hidden"}}>
-                      <div style={{filter:"blur(5px)", pointerEvents:"none", userSelect:"none", display:"flex", flexDirection:"column", gap:"8px"}}>
-                        {["Rental yield est.","Monthly rent est.","Area cap rate"].map(label => (
-                          <div key={label} className="detail-row">
-                            <span className="detail-key">{label}</span>
-                            <span className="detail-val" style={{color:"var(--text-muted)"}}>██████</span>
-                          </div>
-                        ))}
-                      </div>
-                      <div style={{position:"absolute", inset:0, display:"flex", alignItems:"center", justifyContent:"center", background:"rgba(14,14,14,0.65)"}}>
-                        <span style={{fontSize:"10px", color:"#c8a96e", letterSpacing:"0.12em", textTransform:"uppercase", fontFamily:"var(--font-mono)"}}>🔒 Unlock with Verified Scout</span>
-                      </div>
-                    </div>
-                    <div className="detail-row" style={{marginTop:"8px"}}><span className="detail-key">Area trend</span><span className="detail-val green">Appreciating since 2022</span></div>
-                  </div></div>
-                </div>
+              <div style={{marginBottom:"32px"}}>
+                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>05 — Build Plans</div>
+                <div style={{height:"1px", background:"#262626"}}/>
               </div>
 
-              <div className="verdict-block">
-                <div className="verdict-header"><div className="verdict-dot"/><div className="verdict-title">Space Intelligence Verdict</div></div>
-                <p className="verdict-text">{d.scoutit_verdict}</p>
-                <div className="verdict-score">
-                  {d.bestForTags.map((t, i) => <span key={i} className="verdict-pill">{t}</span>)}
-                </div>
+              <p style={{fontFamily:"Georgia,serif", fontSize:"16px", color:"#f0ede8", lineHeight:1.8, margin:"0 0 28px", maxWidth:"520px"}}>
+                Structural layout frameworks, permit certifications, and asset load diagnostics verified by ScoutIt&apos;s technical team.
+              </p>
+
+              <div style={{display:"flex", flexDirection:"column"}}>
+                {[
+                  { label:"Floor Plan", value:"Available", note:"Full multi-floor layout" },
+                  { label:"Structural Report", value:"Certified", note:"Foundation & beam diagnostics" },
+                  { label:"Permit Status", value:"Complete", note:"Building & occupancy certifications" },
+                  { label:"Year Assessed", value:"2022", note:"Last technical assessment" },
+                ].map(row => (
+                  <div key={row.label} style={{display:"flex", justifyContent:"space-between", alignItems:"center", padding:"13px 0", borderBottom:"1px solid #262626"}}>
+                    <div>
+                      <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>{row.label}</div>
+                      <div style={{fontFamily:"Georgia,serif", fontSize:"11px", color:"#6a6a6a", marginTop:"2px"}}>{row.note}</div>
+                    </div>
+                    <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#4caf7d"}}>{row.value}</span>
+                  </div>
+                ))}
               </div>
+
+              <DeepIntelWidget
+                open={widgets.buildplans}
+                onToggle={() => setWidgets(w => ({...w, buildplans: !w.buildplans}))}
+                fields={["Floor Plan Document Access","Structural Engineering Report","Occupancy Certificate","CCTV & Fire Safety Certification","Material Grade Assessment"]}
+              />
+
             </div>
 
             <div className="panel-sidebar">
-              <div className="sidebar-block"><div className="sidebar-accent-line"/><div className="sidebar-label">Title status</div><div className="sidebar-value">{d.title_status}</div></div>
-              <div className="sidebar-block"><div className="sidebar-label">Verdict</div><div className="sidebar-value" style={{color:"var(--green)"}}>{d.scoutit_verdict}</div></div>
+              <div className="sidebar-block"><div className="sidebar-accent-line"/><div className="sidebar-label">Floor plan</div><div className="sidebar-value">Available</div><div className="sidebar-sub">Full layout</div></div>
+              <div className="sidebar-block"><div className="sidebar-label">Permit status</div><div className="sidebar-value" style={{color:"#4caf7d"}}>Complete</div></div>
+              <div className="sidebar-block"><div className="sidebar-label">Structure</div><div className="sidebar-value">Reinforced concrete</div></div>
             </div>
-          </div>{/* /panel-universe */}
+          </div>
 
-          {/* ── YOUR MOVE ── */}
-          <div className={`chapter-panel ${activeTab === "yourmove" ? "active" : ""}`} id="panel-yourmove">
+          {/* ── HIDDEN INTEL (Ch. 6) ── */}
+          <div className={`chapter-panel ${activeTab === "hiddenintel" ? "active" : ""}`} id="panel-hiddenintel">
             <div className="panel-content">
-              <div className="chapter-tag"><div className="tag-line"/><span className="tag-text">Your Move</span></div>
 
-              {/* Price Upon Inquiry block — replaces any specific price hero figure */}
-              <div style={{
-                margin: "20px 0 24px",
-                padding: "20px 24px",
-                background: "var(--surface)",
-                border: "0.5px solid var(--border-mid)",
-                borderRadius: "6px",
-                display: "flex",
-                flexDirection: "column",
-                gap: "6px"
-              }}>
-                <div style={{
-                  fontFamily: "var(--font-display)",
-                  fontSize: "clamp(22px, 3vw, 30px)",
-                  fontWeight: 300,
-                  letterSpacing: "0.04em",
-                  color: "var(--text-primary)"
-                }}>Price Upon Inquiry</div>
-                <div style={{
-                  fontSize: "12px",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.12em",
-                  color: "var(--text-muted)"
-                }}>Confirmed directly with the listed advisor</div>
+              <div style={{marginBottom:"32px"}}>
+                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>06 — Hidden Intel</div>
+                <div style={{height:"1px", background:"#262626"}}/>
               </div>
 
-              <div className="reactions-container" style={{marginTop:"0", display:"flex", flexDirection:"column", gap:"10px"}}>
-                <p style={{ fontSize: "12px", textTransform: "uppercase", letterSpacing: "2px", color: "#8a8a8a", marginBottom: "16px" }}>
-                  HOW DOES THIS SPACE MAKE YOU FEEL?
-                </p>
-                <ReactionButtons
-                  propertyId={slug || "batasan-hills"}
-                  propertyTitle={d.title}
-                  category={d.property_type}
-                  city={d.city}
-                />
-              </div>
-
-              {/* HOA standalone fact row */}
-              <div className="detail-row" style={{marginTop: "16px"}}>
-                <span className="detail-key">HOA dues</span>
-                <span className="detail-val">None</span>
-              </div>
-
-              <div className="where-category" style={{marginTop:"20px"}}>
-                <div className="where-cat-label">Assigned Representative</div>
-                <div className="broker-card">
-                  <div className="broker-avatar">{brokerInitials}</div>
-                  <div className="broker-info">
-                    <div className="broker-name-el">{d.broker_name}</div>
-                    <div className="broker-meta">Direct Listing</div>
-                    <div className="broker-rating" style={{color: "var(--green)"}}>Verified broker</div>
-                  </div>
-                </div>
-              </div>
-
-              <Link href={`/property/${slug || "batasan-hills"}/brokers`} className="move-cta" style={{textDecoration: "none", marginTop: "16px"}}>
-                Inquire with Advisor →
-              </Link>
-
-              {/* Philippine real estate disclosure compliance notice */}
-              <p style={{
-                fontSize: "11px",
-                color: "var(--text-muted)",
-                lineHeight: "1.7",
-                marginTop: "14px",
-                letterSpacing: "0.02em"
-              }}>
-                Pricing is not displayed on ScoutIt in compliance with Philippine real estate disclosure standards. Contact the listed advisor or owner directly to confirm the current asking price, payment terms, and availability.
+              <p style={{fontFamily:"Georgia,serif", fontSize:"16px", color:"#f0ede8", lineHeight:1.8, margin:"0 0 28px", maxWidth:"520px"}}>
+                Off-market transaction histories, neighborhood capitalization yields, and macro trend forecasts available to Verified Scouts.
               </p>
 
-              <p style={{fontSize:"15px", color:"#8a8a8a", lineHeight:"1.65", marginTop:"12px"}}>
-                ScoutIt is a spatial intelligence archive. In compliance with R.A. 9646, all site walks, direct inquiries, and purchase offers are facilitated exclusively by licensed, authorized real estate brokers.
-              </p>
+              <DeepIntelWidget
+                open={widgets.hiddenintel}
+                onToggle={() => setWidgets(w => ({...w, hiddenintel: !w.hiddenintel}))}
+                fields={["Last Transaction Date","Prior Sale Price","Ownership Transfer History","Area Average Cap Rate","Gross Rental Yield Estimate","12-Month Price Trend","MRT-7 Corridor Impact Analysis","Street View & Spatial Walkthrough"]}
+              />
+
             </div>
 
             <div className="panel-sidebar">
-              <div className="sidebar-block"><div className="sidebar-accent-line"/><div className="sidebar-label">Acquisition</div><div className="sidebar-value">{d.tenure}</div><div className="sidebar-sub">{d.title_status}</div></div>
-              <div className="sidebar-block"><div className="sidebar-label">ScoutIt verdict</div><div className="sidebar-value" style={{color:"var(--green)"}}>{d.scoutit_verdict}</div></div>
+              <div className="sidebar-block"><div className="sidebar-accent-line" style={{background:"#c8a96e"}}/><div className="sidebar-label">Cap rate est.</div><div className="sidebar-value" style={{color:"#8a8a8a"}}>🔒 Locked</div></div>
+              <div className="sidebar-block"><div className="sidebar-label">Price trend</div><div className="sidebar-value" style={{color:"#8a8a8a"}}>🔒 Locked</div></div>
+              <div className="sidebar-block"><div className="sidebar-label">Intel source</div><div className="sidebar-value">ScoutIt Verified</div></div>
             </div>
-          </div>{/* /panel-yourmove */}
+          </div>
 
-          {/* ── UNITS ── */}
+          {/* ── UNITS (Ch. 7) ── */}
           <div className={`chapter-panel ${activeTab === "units" ? "active" : ""}`} id="panel-units">
             <div className="panel-content">
-              <div className="chapter-tag"><div className="tag-line"/><span className="tag-text">Units</span></div>
-              <div className="display-heading">Every<br/><em>space</em> detailed</div>
+
+              <div style={{marginBottom:"32px"}}>
+                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>07 — Units &amp; Spaces</div>
+                <div style={{height:"1px", background:"#262626"}}/>
+              </div>
+
               <div className="units-z3-list">
                 {dynamicUnits.map(u => {
                   const activeUnit = selectedUnit || (dynamicUnits.length > 0 ? dynamicUnits[0].name : "");
                   return (
-                    <div 
-                      className={`unit-z3-row ${activeUnit === u.name ? "selected" : ""}`} 
+                    <div
+                      className={`unit-z3-row ${activeUnit === u.name ? "selected" : ""}`}
                       key={u.name}
                       onClick={() => {
                         setSelectedUnit(u.name);
                         let targetIndex = 0;
-                        if (u.name.toLowerCase().includes("suite") || u.name.toLowerCase().includes("master")) {
-                          targetIndex = 1 % photos.length;
-                        } else if (u.name.toLowerCase().includes("room")) {
-                          const num = parseInt(u.name.replace(/\D/g, ""), 10);
-                          targetIndex = (isNaN(num) ? 1 : num) % photos.length;
-                        } else if (u.name.toLowerCase().includes("bath") || u.name.toLowerCase().includes("washroom")) {
-                          targetIndex = (photos.length - 1) % photos.length;
-                        } else if (u.name.toLowerCase().includes("hall") || u.name.toLowerCase().includes("space")) {
-                          targetIndex = 0;
-                        } else if (u.name.toLowerCase().includes("kitchen") || u.name.toLowerCase().includes("utility")) {
-                          targetIndex = 1 % photos.length;
-                        } else {
-                          targetIndex = 2 % photos.length;
-                        }
-                        if (photos && photos.length > 0) {
-                          setCurrentImageIndex(targetIndex);
-                        }
+                        if (u.name.toLowerCase().includes("suite") || u.name.toLowerCase().includes("master")) { targetIndex = 1 % photos.length; }
+                        else if (u.name.toLowerCase().includes("room")) { const num = parseInt(u.name.replace(/\D/g, ""), 10); targetIndex = (isNaN(num) ? 1 : num) % photos.length; }
+                        else if (u.name.toLowerCase().includes("bath") || u.name.toLowerCase().includes("washroom")) { targetIndex = (photos.length - 1) % photos.length; }
+                        else if (u.name.toLowerCase().includes("kitchen") || u.name.toLowerCase().includes("utility")) { targetIndex = 1 % photos.length; }
+                        else { targetIndex = 2 % photos.length; }
+                        if (photos && photos.length > 0) setCurrentImageIndex(targetIndex);
                       }}
                     >
                       <div className="unit-z3-name">{u.name}</div>
@@ -1419,249 +1235,164 @@ export default function PropertyDetailClient({ slug }) {
                   );
                 })}
               </div>
+
             </div>
+
             <div className="panel-sidebar">
-              <div className="sidebar-block">
-                <div className="sidebar-accent-line"/>
-                <div className="sidebar-label">Total Areas</div>
-                <div className="sidebar-value">{dynamicUnits.length}</div>
-                <div className="sidebar-sub">Click an area to preview photos</div>
-              </div>
+              <div className="sidebar-block"><div className="sidebar-accent-line"/><div className="sidebar-label">Total Areas</div><div className="sidebar-value">{dynamicUnits.length}</div><div className="sidebar-sub">Click to preview photos</div></div>
               {isRestaurant ? (
-                <>
-                  <div className="sidebar-block">
-                    <div className="sidebar-label">Dining Capacity</div>
-                    <div className="sidebar-value">{pill1Val}</div>
-                  </div>
-                  <div className="sidebar-block">
-                    <div className="sidebar-label">Kitchen Grade</div>
-                    <div className="sidebar-value">{pill2Val}</div>
-                  </div>
-                </>
+                <>{pill1Val && <div className="sidebar-block"><div className="sidebar-label">Dining Capacity</div><div className="sidebar-value">{pill1Val}</div></div>}{pill2Val && <div className="sidebar-block"><div className="sidebar-label">Kitchen Grade</div><div className="sidebar-value">{pill2Val}</div></div>}</>
               ) : isHospitality ? (
-                <>
-                  <div className="sidebar-block">
-                    <div className="sidebar-label">Accommodations</div>
-                    <div className="sidebar-value">{pill1Val}</div>
-                  </div>
-                  <div className="sidebar-block">
-                    <div className="sidebar-label">Hosting Capacity</div>
-                    <div className="sidebar-value">{pill2Val}</div>
-                  </div>
-                </>
+                <>{pill1Val && <div className="sidebar-block"><div className="sidebar-label">Accommodations</div><div className="sidebar-value">{pill1Val}</div></div>}{pill2Val && <div className="sidebar-block"><div className="sidebar-label">Hosting Capacity</div><div className="sidebar-value">{pill2Val}</div></div>}</>
               ) : isVenue ? (
-                <>
-                  <div className="sidebar-block">
-                    <div className="sidebar-label">Guest Capacity</div>
-                    <div className="sidebar-value">{pill1Val}</div>
-                  </div>
-                  <div className="sidebar-block">
-                    <div className="sidebar-label">Setup Grade</div>
-                    <div className="sidebar-value">{pill2Val}</div>
-                  </div>
-                </>
+                <>{pill1Val && <div className="sidebar-block"><div className="sidebar-label">Guest Capacity</div><div className="sidebar-value">{pill1Val}</div></div>}{pill2Val && <div className="sidebar-block"><div className="sidebar-label">Setup Grade</div><div className="sidebar-value">{pill2Val}</div></div>}</>
               ) : (
+                <>{d.beds > 0 && <div className="sidebar-block"><div className="sidebar-label">Bedrooms</div><div className="sidebar-value">{d.beds} rooms</div></div>}{d.baths > 0 && <div className="sidebar-block"><div className="sidebar-label">Bathrooms</div><div className="sidebar-value">{d.baths} baths</div></div>}</>
+              )}
+            </div>
+          </div>
+
+          {/* ── UNIVERSE (Ch. 8) ── */}
+          <div className={`chapter-panel ${activeTab === "universe" ? "active" : ""}`} id="panel-universe">
+            <div className="panel-content">
+
+              <div style={{marginBottom:"32px"}}>
+                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>08 — Property Universe</div>
+                <div style={{height:"1px", background:"#262626"}}/>
+              </div>
+
+              <div style={{display:"flex", flexDirection:"column", marginBottom:"28px"}}>
+                {d.property_type && <div style={{display:"flex", justifyContent:"space-between", padding:"11px 0", borderBottom:"1px solid #262626"}}><span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Property Type</span><span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{d.property_type}</span></div>}
+                {d.tenure && <div style={{display:"flex", justifyContent:"space-between", padding:"11px 0", borderBottom:"1px solid #262626"}}><span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Tenure</span><span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{d.tenure}</span></div>}
+                {d.floor_sqm > 0 && <div style={{display:"flex", justifyContent:"space-between", padding:"11px 0", borderBottom:"1px solid #262626"}}><span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Floor Area</span><span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{d.floor_sqm} sqm</span></div>}
+                {d.lot_sqm > 0 && <div style={{display:"flex", justifyContent:"space-between", padding:"11px 0", borderBottom:"1px solid #262626"}}><span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Lot Area</span><span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{d.lot_sqm} sqm</span></div>}
+                {isRestaurant && pill1Val && <div style={{display:"flex", justifyContent:"space-between", padding:"11px 0", borderBottom:"1px solid #262626"}}><span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Dining Capacity</span><span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{pill1Val}</span></div>}
+                {isHospitality && pill1Val && <div style={{display:"flex", justifyContent:"space-between", padding:"11px 0", borderBottom:"1px solid #262626"}}><span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Accommodations</span><span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{pill1Val}</span></div>}
+                {isVenue && pill1Val && <div style={{display:"flex", justifyContent:"space-between", padding:"11px 0", borderBottom:"1px solid #262626"}}><span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Guest Capacity</span><span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{pill1Val}</span></div>}
+                {!isRestaurant && !isHospitality && !isVenue && d.beds > 0 && <div style={{display:"flex", justifyContent:"space-between", padding:"11px 0", borderBottom:"1px solid #262626"}}><span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Bedrooms</span><span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{d.beds}</span></div>}
+                {!isRestaurant && !isHospitality && !isVenue && d.baths > 0 && <div style={{display:"flex", justifyContent:"space-between", padding:"11px 0", borderBottom:"1px solid #262626"}}><span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Bathrooms</span><span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{d.baths}</span></div>}
+                {d.parking > 0 && <div style={{display:"flex", justifyContent:"space-between", padding:"11px 0", borderBottom:"1px solid #262626"}}><span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Parking</span><span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{d.parking} covered</span></div>}
+                {d.furnishing && <div style={{display:"flex", justifyContent:"space-between", padding:"11px 0", borderBottom:"1px solid #262626"}}><span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Furnishing</span><span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{d.furnishing}</span></div>}
+                {d.year_built && <div style={{display:"flex", justifyContent:"space-between", padding:"11px 0", borderBottom:"1px solid #262626"}}><span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Year Built</span><span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{d.year_built}</span></div>}
+                {d.title_status && <div style={{display:"flex", justifyContent:"space-between", padding:"11px 0", borderBottom:"1px solid #262626"}}><span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Title Status</span><span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#4caf7d"}}>{d.title_status}</span></div>}
+              </div>
+
+              {d.scoutit_verdict && (
                 <>
-                  <div className="sidebar-block">
-                    <div className="sidebar-label">Bedrooms</div>
-                    <div className="sidebar-value">{d.beds || 0} rooms</div>
-                  </div>
-                  <div className="sidebar-block">
-                    <div className="sidebar-label">Bathrooms</div>
-                    <div className="sidebar-value">{d.baths || 0} baths</div>
+                  <div style={{height:"1px", background:"#262626", margin:"0 0 20px"}}/>
+                  <div className="verdict-block">
+                    <div className="verdict-header"><div className="verdict-dot"/><div className="verdict-title">Space Intelligence Verdict</div></div>
+                    <p className="verdict-text">{d.scoutit_verdict}</p>
+                    {d.bestForTags && d.bestForTags.length > 0 && (
+                      <div className="verdict-score">
+                        {d.bestForTags.map((t, i) => <span key={i} className="verdict-pill">{t}</span>)}
+                      </div>
+                    )}
                   </div>
                 </>
               )}
-              {d.outdoor_description && d.outdoor_description !== "None" && d.outdoor_description !== "" && (
-                <div className="sidebar-block">
-                  <div className="sidebar-label">Outdoor Space</div>
-                  <div className="sidebar-value">Available</div>
-                  <div className="sidebar-sub">{d.outdoor_description}</div>
-                </div>
-              )}
-            </div>
-          </div>{/* /panel-units */}
 
-          {/* ── BUILD PLANS ── */}
-          <div className={`chapter-panel ${activeTab === "buildplans" ? "active" : ""}`} id="panel-buildplans">
-            <div className="panel-content">
-              <div className="chapter-tag"><div className="tag-line"/><span className="tag-text">Build Plans</span></div>
-              <div className="display-heading">Structural<br/><em>blueprints</em></div>
-              <p className="story-text">High-fidelity structural layout frameworks and asset load diagnostics.</p>
-              <div className="accordion">
-                <div className="accordion-item">
-                  <div className="accordion-header">
-                    <div className="accordion-left">
-                      <div className="accordion-icon-wrap">
-                        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round">
-                          <rect x="2" y="1" width="10" height="12" rx="1"/>
-                          <path d="M4 4h6M4 7h6M4 10h3"/>
-                        </svg>
-                      </div>
-                      <div><div className="accordion-title">Floor Plan Matrix</div><div className="accordion-subtitle">Spatial load &amp; room distribution</div></div>
-                    </div>
-                    <div className="accordion-right"><span className="accordion-tag tag-neutral">Available</span></div>
-                  </div>
-                </div>
-                <div className="accordion-item">
-                  <div className="accordion-header">
-                    <div className="accordion-left">
-                      <div className="accordion-icon-wrap">
-                        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round">
-                          <rect x="1" y="1" width="12" height="12" rx="1"/>
-                          <path d="M4 1v12M1 5h3M1 9h3M4 3h7M4 7h7M4 11h4"/>
-                        </svg>
-                      </div>
-                      <div><div className="accordion-title">Structural Load Report</div><div className="accordion-subtitle">Foundation &amp; beam diagnostics</div></div>
-                    </div>
-                    <div className="accordion-right"><span className="accordion-tag tag-green">Certified</span></div>
-                  </div>
-                </div>
-                <div className="accordion-item">
-                  <div className="accordion-header">
-                    <div className="accordion-left">
-                      <div className="accordion-icon-wrap">
-                        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round">
-                          <circle cx="7" cy="7" r="5"/>
-                          <path d="M7 4v3l2 1.5"/>
-                        </svg>
-                      </div>
-                      <div><div className="accordion-title">Permit Timeline</div><div className="accordion-subtitle">Building &amp; occupancy certifications</div></div>
-                    </div>
-                    <div className="accordion-right"><span className="accordion-tag tag-green">Complete</span></div>
-                  </div>
-                </div>
-              </div>
+              <DeepIntelWidget
+                open={widgets.universe}
+                onToggle={() => setWidgets(w => ({...w, universe: !w.universe}))}
+                fields={["Resale Potential Assessment","Rental Yield Estimate","Area Cap Rate Benchmark","MRT-7 Impact Analysis","5-Year Appreciation Trend"]}
+              />
+
             </div>
+
             <div className="panel-sidebar">
-              <div className="sidebar-block"><div className="sidebar-accent-line"/><div className="sidebar-label">Floor plan</div><div className="sidebar-value">Available</div><div className="sidebar-sub">Full 2-floor layout</div></div>
-              <div className="sidebar-block"><div className="sidebar-label">Permit status</div><div className="sidebar-value" style={{color:"var(--green)"}}>Complete</div></div>
-              <div className="sidebar-block"><div className="sidebar-label">Structure</div><div className="sidebar-value">Reinforced concrete</div></div>
-              <div className="sidebar-block"><div className="sidebar-label">Year assessed</div><div className="sidebar-value">2022</div></div>
+              {d.title_status && <div className="sidebar-block"><div className="sidebar-accent-line"/><div className="sidebar-label">Title status</div><div className="sidebar-value">{d.title_status}</div></div>}
+              {d.scoutit_verdict && <div className="sidebar-block"><div className="sidebar-label">Verdict</div><div className="sidebar-value" style={{color:"#4caf7d", fontSize:"12px", lineHeight:1.4}}>{d.scoutit_verdict}</div></div>}
             </div>
-          </div>{/* /panel-buildplans */}
-
-          {/* ── HIDDEN INTEL ── */}
-          <div className={`chapter-panel ${activeTab === "hiddenintel" ? "active" : ""}`} id="panel-hiddenintel">
-            <div className="panel-content">
-              <div className="chapter-tag"><div className="tag-line"/><span className="tag-text">Hidden Intel</span></div>
-              <div className="display-heading">Off-market<br/><em>intelligence</em></div>
-              <p className="story-text">Off-market transaction histories, neighborhood capitalization yields, and macro trend forecasts.</p>
-              <div className="accordion">
-                <div className="accordion-item">
-                  <div className="accordion-header">
-                    <div className="accordion-left">
-                      <div className="accordion-icon-wrap">
-                        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
-                          <polyline points="1,10 4,6 7,8 10,4 13,6"/>
-                          <path d="M13 4h-3v3"/>
-                        </svg>
-                      </div>
-                      <div><div className="accordion-title">Transaction History</div><div className="accordion-subtitle">Prior sales &amp; off-market closings</div></div>
-                    </div>
-                    <div className="accordion-right"><span className="accordion-tag tag-green">Verified</span></div>
-                  </div>
-                  <div className="accordion-body">
-                    <div className="accordion-content">
-                      <div className="detail-row"><span className="detail-key">Last sold</span><span className="detail-val" style={{color:"#8a8a8a"}}>🔒 Available to verified scouts</span></div>
-                      <div className="detail-row"><span className="detail-key">Prior price</span><span className="detail-val" style={{color:"#8a8a8a"}}>🔒 Available to verified scouts</span></div>
-                      <div className="detail-row"><span className="detail-key">Appreciation</span><span className="detail-val" style={{color:"#8a8a8a"}}>🔒 Available to verified scouts</span></div>
-                      <div className="detail-row"><span className="detail-key">Ownership transfers</span><span className="detail-val" style={{color:"#8a8a8a"}}>🔒 Available to verified scouts</span></div>
-                    </div>
-                  </div>
-                </div>
-                <div className="accordion-item">
-                  <div className="accordion-header">
-                    <div className="accordion-left">
-                      <div className="accordion-icon-wrap">
-                        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round">
-                          <path d="M7 1v12M4 4h4.5a2.5 2.5 0 010 5H4"/><path d="M4 3h5"/>
-                        </svg>
-                      </div>
-                      <div><div className="accordion-title">Cap Rate Intelligence</div><div className="accordion-subtitle">Neighborhood yield benchmarks</div></div>
-                    </div>
-                    <div className="accordion-right"><span className="accordion-tag tag-green">Strong</span></div>
-                  </div>
-                  <div className="accordion-body">
-                    <div className="accordion-content">
-                      <div className="detail-row"><span className="detail-key">Area avg. cap rate</span><span className="detail-val" style={{color:"#8a8a8a"}}>🔒 Available to verified scouts</span></div>
-                      <div className="detail-row"><span className="detail-key">This asset est.</span><span className="detail-val" style={{color:"#8a8a8a"}}>🔒 Available to verified scouts</span></div>
-                      <div className="detail-row"><span className="detail-key">Gross yield (rent)</span><span className="detail-val" style={{color:"#8a8a8a"}}>🔒 Available to verified scouts</span></div>
-                      <div className="detail-row"><span className="detail-key">Demand tier</span><span className="detail-val green">High — QC Residential</span></div>
-                    </div>
-                  </div>
-                </div>
-                <div className="accordion-item">
-                  <div className="accordion-header">
-                    <div className="accordion-left">
-                      <div className="accordion-icon-wrap">
-                        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round">
-                          <circle cx="7" cy="7" r="5"/><path d="M7 4v2.5L9 8"/>
-                        </svg>
-                      </div>
-                      <div><div className="accordion-title">Macro Trend Forecast</div><div className="accordion-subtitle">12–36 month outlook window</div></div>
-                    </div>
-                    <div className="accordion-right"><span className="accordion-tag tag-green">Bullish</span></div>
-                  </div>
-                  <div className="accordion-body">
-                    <div className="accordion-content">
-                      <div className="detail-row"><span className="detail-key">MRT-7 corridor effect</span><span className="detail-val" style={{color:"#8a8a8a"}}>🔒 Available to verified scouts</span></div>
-                      <div className="detail-row"><span className="detail-key">12-mo price trend</span><span className="detail-val" style={{color:"#8a8a8a"}}>🔒 Available to verified scouts</span></div>
-                      <div className="detail-row"><span className="detail-key">Supply pressure</span><span className="detail-val yellow">Moderate</span></div>
-                      <div className="detail-row"><span className="detail-key">Demand signal</span><span className="detail-val green">High — End-user &amp; investor</span></div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="intel-locked-item" style={{ marginTop: "12px", padding: "14px 16px", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "4px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span className="intel-item-label" style={{ fontSize: "15px", color: "var(--text-primary)" }}>
-                    Street View &amp; Spatial Walkthrough
-                  </span>
-                  <span className="intel-locked-value" style={{ fontSize: "12px", color: "#8a8a8a" }}>
-                    🔒 Available to verified scouts
-                  </span>
-                </div>
-
-              </div>
-            </div>
-            <div className="panel-sidebar">
-              <div className="sidebar-block"><div className="sidebar-accent-line"/><div className="sidebar-label">Cap rate est.</div><div className="sidebar-value" style={{color:"#8a8a8a"}}>🔒 Locked</div><div className="sidebar-sub">Above area average</div></div>
-              <div className="sidebar-block"><div className="sidebar-label">Price trend</div><div className="sidebar-value" style={{color:"#8a8a8a"}}>🔒 Locked</div></div>
-              <div className="sidebar-block"><div className="sidebar-label">Ownership history</div><div className="sidebar-value" style={{color:"#8a8a8a"}}>🔒 Locked</div><div className="sidebar-sub">Since build — 2018</div></div>
-              <div className="sidebar-block"><div className="sidebar-label">Intel source</div><div className="sidebar-value">ScoutIt Verified</div><div className="sidebar-sub">Internal + Registry Data</div></div>
-            </div>
-          </div>{/* /panel-hiddenintel */}
+          </div>
 
           {/* ── EXPANSION NODE ── */}
           <div className={`chapter-panel ${activeTab === "expansion" ? "active" : ""}`} id="panel-expansion">
             <div className="panel-content">
-              <div className="chapter-tag"><div className="tag-line"/><span className="tag-text">Expansion Node</span></div>
-              <div className="display-heading"><em>?</em><br/>Incoming</div>
-              <div className="verdict-block" style={{marginTop: "8px"}}>
-                <div className="verdict-header">
-                  <div className="verdict-dot" style={{background:"var(--accent)"}}/>
-                  <div className="verdict-title" style={{color:"var(--accent)"}}>Layer V7 — Pipeline Active</div>
-                </div>
-                <p className="verdict-text" style={{fontFamily:"var(--font-body)", fontSize:"12px", letterSpacing:"0.1em", textTransform:"uppercase", color:"var(--text-muted)"}}>
+
+              <div style={{marginBottom:"32px"}}>
+                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>09 — Expansion Node</div>
+                <div style={{height:"1px", background:"#262626"}}/>
+              </div>
+
+              <div className="verdict-block" style={{marginTop:"8px"}}>
+                <div className="verdict-header"><div className="verdict-dot" style={{background:"#c8a96e"}}/><div className="verdict-title" style={{color:"#c8a96e"}}>Layer V7 — Pipeline Active</div></div>
+                <p className="verdict-text" style={{fontFamily:"'Courier New',monospace", fontSize:"11px", letterSpacing:"0.12em", textTransform:"uppercase", color:"#8a8a8a"}}>
                   [ ENGINES COMPILING // LAYER V7 PIPELINE INJECTS COMING SOON ]
                 </p>
               </div>
-              <div style={{display:"flex", flexDirection:"column", gap:"8px", marginTop:"8px"}}>
+
+              <div style={{display:"flex", flexDirection:"column", gap:"8px", marginTop:"16px"}}>
                 {["Comparative Market Analysis Engine","AR Property Visualization Layer","AI-Powered Space Scoring Matrix","Macro Investment Signal Feed","Live Broker Negotiation Tracker"].map((item, i) => (
-                  <div key={i} style={{display:"flex", alignItems:"center", gap:"12px", padding:"12px 16px", background:"var(--surface)", border:"0.5px solid var(--border)", borderRadius:"4px", opacity: 0.45}}>
-                    <div style={{width:"6px", height:"6px", borderRadius:"50%", background:"var(--accent)", flexShrink:0}}/>
-                    <span style={{fontSize:"15px", color:"#8a8a8a", lineHeight:"1.65", letterSpacing:"0.04em"}}>{item}</span>
-                    <span style={{marginLeft:"auto", fontSize:"12px", fontWeight:600, letterSpacing:"0.1em", color:"var(--text-muted)", textTransform:"uppercase"}}>Soon</span>
+                  <div key={i} style={{display:"flex", alignItems:"center", gap:"12px", padding:"12px 16px", background:"#161616", border:"0.5px solid #262626", borderRadius:"2px", opacity:0.5}}>
+                    <div style={{width:"5px", height:"5px", borderRadius:"50%", background:"#c8a96e", flexShrink:0}}/>
+                    <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#8a8a8a", lineHeight:1.5}}>{item}</span>
+                    <span style={{marginLeft:"auto", fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.1em", textTransform:"uppercase"}}>Soon</span>
                   </div>
                 ))}
               </div>
+
             </div>
+
             <div className="panel-sidebar">
-              <div className="sidebar-block"><div className="sidebar-accent-line" style={{background:"var(--accent)"}}/><div className="sidebar-label">Pipeline status</div><div className="sidebar-value" style={{color:"var(--accent)"}}>V7 Compiling</div></div>
+              <div className="sidebar-block"><div className="sidebar-accent-line" style={{background:"#c8a96e"}}/><div className="sidebar-label">Pipeline status</div><div className="sidebar-value" style={{color:"#c8a96e"}}>V7 Compiling</div></div>
               <div className="sidebar-block"><div className="sidebar-label">ETA</div><div className="sidebar-value">Incoming</div></div>
-              <div className="sidebar-block"><div className="sidebar-label">Features queued</div><div className="sidebar-value">5</div><div className="sidebar-sub">See panel for list</div></div>
+              <div className="sidebar-block"><div className="sidebar-label">Features queued</div><div className="sidebar-value">5</div></div>
             </div>
-          </div>{/* /panel-expansion */}
+          </div>
+
+          {/* ── YOUR MOVE ── */}
+          <div className={`chapter-panel ${activeTab === "yourmove" ? "active" : ""}`} id="panel-yourmove">
+            <div className="panel-content">
+
+              <div style={{marginBottom:"32px"}}>
+                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>10 — Your Move</div>
+                <div style={{height:"1px", background:"#262626"}}/>
+              </div>
+
+              <div style={{margin:"20px 0 28px", padding:"20px 24px", background:"#161616", border:"0.5px solid #262626", borderRadius:"2px"}}>
+                <div style={{fontFamily:"Georgia,serif", fontSize:"clamp(22px,3vw,30px)", fontWeight:400, letterSpacing:"0.04em", color:"#f0ede8"}}>Price Upon Inquiry</div>
+                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", textTransform:"uppercase", letterSpacing:"0.16em", color:"#8a8a8a", marginTop:"8px"}}>Confirmed directly with the listed advisor</div>
+              </div>
+
+              <div className="reactions-container" style={{marginTop:"0", display:"flex", flexDirection:"column", gap:"10px"}}>
+                <p style={{fontFamily:"'Courier New',monospace", fontSize:"10px", textTransform:"uppercase", letterSpacing:"0.2em", color:"#8a8a8a", marginBottom:"16px"}}>HOW DOES THIS SPACE MAKE YOU FEEL?</p>
+                <ReactionButtons propertyId={slug || "batasan-hills"} propertyTitle={d.title} category={d.property_type} city={d.city}/>
+              </div>
+
+              <div style={{height:"1px", background:"#262626", margin:"24px 0"}}/>
+
+              <div style={{marginTop:"0"}}>
+                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.15em", textTransform:"uppercase", marginBottom:"12px"}}>Assigned Representative</div>
+                <div className="broker-card">
+                  <div className="broker-avatar">{brokerInitials}</div>
+                  <div className="broker-info">
+                    <div className="broker-name-el">{d.broker_name}</div>
+                    <div className="broker-meta">Direct Listing</div>
+                    <div className="broker-rating" style={{color:"#4caf7d"}}>Verified broker</div>
+                  </div>
+                </div>
+              </div>
+
+              <Link href={`/property/${slug || "batasan-hills"}/brokers`} className="move-cta" style={{textDecoration:"none", marginTop:"16px"}}>
+                Inquire with Advisor →
+              </Link>
+
+              <p style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", lineHeight:"1.8", marginTop:"20px", letterSpacing:"0.06em"}}>
+                Pricing is not displayed on ScoutIt in compliance with Philippine real estate disclosure standards. Contact the listed advisor or owner directly to confirm the current asking price, payment terms, and availability.
+              </p>
+
+              <p style={{fontFamily:"Georgia,serif", fontSize:"13px", color:"#8a8a8a", lineHeight:1.7, marginTop:"12px"}}>
+                ScoutIt is a spatial intelligence archive. In compliance with R.A. 9646, all site walks, direct inquiries, and purchase offers are facilitated exclusively by licensed, authorized real estate brokers.
+              </p>
+
+            </div>
+
+            <div className="panel-sidebar">
+              {d.tenure && <div className="sidebar-block"><div className="sidebar-accent-line"/><div className="sidebar-label">Acquisition</div><div className="sidebar-value">{d.tenure}</div>{d.title_status && <div className="sidebar-sub">{d.title_status}</div>}</div>}
+              {d.scoutit_verdict && <div className="sidebar-block"><div className="sidebar-label">ScoutIt verdict</div><div className="sidebar-value" style={{color:"#4caf7d", fontSize:"12px", lineHeight:1.4}}>{d.scoutit_verdict}</div></div>}
+            </div>
+          </div>
 
          </div>{/* /zone-story */}
 
