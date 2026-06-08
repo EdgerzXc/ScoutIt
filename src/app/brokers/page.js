@@ -347,6 +347,14 @@ export default function BrokersPage() {
                           <div className="broker-stats">
                             <span className="stat-value" style={{ fontSize: "12px" }}>{broker.closures}</span>
                           </div>
+                          {broker.scoutRating != null && (
+                            <div className="scout-rating-badge">
+                              <span className="scout-rating-label">Scout Rating</span>
+                              <span className="scout-rating-value" style={{ color: broker.scoutRating >= 85 ? "#4caf7d" : "#c8a96e" }}>
+                                {broker.scoutRating}/100
+                              </span>
+                            </div>
+                          )}
                           <span className="btn-contact">Focus →</span>
                         </div>
                       </div>
@@ -629,6 +637,29 @@ export default function BrokersPage() {
           align-items: flex-end;
           border-top: 1px solid var(--border-solid);
           padding-top: 16px;
+          gap: 12px;
+          flex-wrap: wrap;
+        }
+
+        .scout-rating-badge {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+
+        .scout-rating-label {
+          font-family: var(--font-mono);
+          font-size: 8px;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          color: var(--text-muted);
+          margin-bottom: 2px;
+        }
+
+        .scout-rating-value {
+          font-family: var(--font-mono);
+          font-size: 14px;
+          font-weight: 700;
         }
 
         .broker-stats { display: flex; flex-direction: column; }

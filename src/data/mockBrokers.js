@@ -138,8 +138,22 @@ export const DUMMY_BROKERS = [
   }
 ];
 
+// Scout Rating = (activeRetentions * 0.4) + (continuityScore * 0.4) + (stewardshipVelocity * 0.2)
+// All components are derived from the broker's closure count and tier to produce a 0-100 score.
+function computeScoutRating(broker) {
+  const closureCount = parseInt((broker.closures || "0").match(/\d+/)?.[0] || "0");
+  const tierBonus = (6 - broker.subscriptionTier) * 4; // Diamond=20, Bronze=4
+  const activeRetentions = Math.min(100, closureCount * 18 + tierBonus);
+  const continuityScore = Math.min(100, broker.rating || 80);
+  const stewardshipVelocity = Math.min(100, closureCount * 12 + tierBonus + 10);
+  return Math.round(activeRetentions * 0.4 + continuityScore * 0.4 + stewardshipVelocity * 0.2);
+}
+
 export function getBrokers() {
-  return DUMMY_BROKERS;
+  return DUMMY_BROKERS.map(b => ({
+    ...b,
+    scoutRating: computeScoutRating(b),
+  }));
 }
 
 export function getBrokerById(id) {

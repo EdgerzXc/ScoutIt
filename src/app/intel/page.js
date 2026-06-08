@@ -33,6 +33,7 @@ export default function IntelPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [articles, setArticles] = useState(getArticles());
   const [propertiesList, setPropertiesList] = useState([]);
+  const [sidePanelArticle, setSidePanelArticle] = useState(null);
 
   useEffect(() => {
     async function loadCMSData() {
@@ -95,7 +96,7 @@ export default function IntelPage() {
     loadCMSData();
   }, []);
 
-  const categories = ["All", "Residential", "Commercial", "STR", "Hospitality", "Culinary", "Venues"];
+  const categories = ["All", "Residential", "Commercial", "STR", "Hospitality", "Culinary", "Venues", "Summary"];
 
   // Match and fetch property link dynamically
   const getLinkedProperty = (article) => {
@@ -220,7 +221,12 @@ export default function IntelPage() {
           <div className="articles-grid">
             {remainingArticles.length > 0 ? (
               remainingArticles.map((art) => (
-                <Link href={`/intel/${art.slug}`} key={art.slug} className="article-card">
+                <div
+                  key={art.slug}
+                  className="article-card"
+                  onClick={() => setSidePanelArticle(art)}
+                  style={{ cursor: "pointer" }}
+                >
                   <div className="article-image-container">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={art.image} alt={art.title} className="article-image" />
@@ -233,7 +239,7 @@ export default function IntelPage() {
                     </div>
                     <h3 className="article-title">{art.title}</h3>
                     <p className="article-excerpt">{art.excerpt}</p>
-                    
+
                     {/* Featured Asset Back-link Tag */}
                     {(() => {
                       const linkedProp = getLinkedProperty(art);
@@ -242,12 +248,12 @@ export default function IntelPage() {
                         <div style={{ marginTop: "12px", borderTop: "1px dashed rgba(255,255,255,0.08)", paddingTop: "12px" }}>
                           <span style={{ fontSize: "10px", fontFamily: "var(--font-mono)", color: "var(--accent)" }}>
                             FEATURED SPACE:{" "}
-                            <span 
-                              onClick={(e) => { 
-                                e.preventDefault(); 
-                                e.stopPropagation(); 
-                                router.push(`/property/${linkedProp.slug}`); 
-                              }} 
+                            <span
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                router.push(`/property/${linkedProp.slug}`);
+                              }}
                               style={{ textDecoration: "underline", cursor: "pointer" }}
                             >
                               {linkedProp.title}
@@ -259,7 +265,7 @@ export default function IntelPage() {
 
                     <span className="read-more-btn" style={{ marginTop: "16px", display: "inline-block" }}>Read Briefing →</span>
                   </div>
-                </Link>
+                </div>
               ))
             ) : (
               <div className="articles-empty-state" style={{ gridColumn: "1 / -1", textAlign: "center", padding: "60px 20px" }}>
@@ -270,6 +276,32 @@ export default function IntelPage() {
           </div>
         </section>
       </main>
+
+      {/* Intel Side Panel */}
+      {sidePanelArticle && (
+        <div className="side-panel-overlay" onClick={() => setSidePanelArticle(null)}>
+          <div className="side-panel" onClick={(e) => e.stopPropagation()}>
+            <button className="side-panel-close" onClick={() => setSidePanelArticle(null)}>✕</button>
+            {sidePanelArticle.image && (
+              <div className="side-panel-image" style={{ backgroundImage: `url(${sidePanelArticle.image})` }}></div>
+            )}
+            <div className="side-panel-body">
+              <span className="side-panel-cat">{sidePanelArticle.category} &middot; {sidePanelArticle.date}</span>
+              {["INSIGHT", "Insight"].includes(sidePanelArticle.category) && (
+                <div className="side-panel-insight-note">
+                  <span>ScoutIt Insight</span>
+                  <p>A projection based on available data, not a verified fact.</p>
+                </div>
+              )}
+              <h2 className="side-panel-title">{sidePanelArticle.title}</h2>
+              <p className="side-panel-excerpt">{sidePanelArticle.excerpt}</p>
+              <Link href={`/intel/${sidePanelArticle.slug}`} className="side-panel-cta">
+                Read Full Briefing →
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
 
       <style>{`
         .page-wrapper {
@@ -643,6 +675,147 @@ export default function IntelPage() {
           color: var(--accent);
           text-transform: uppercase;
           letter-spacing: 0.05em;
+        }
+
+        /* Intel Side Panel */
+        .side-panel-overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(0,0,0,0.6);
+          backdrop-filter: blur(4px);
+          z-index: 1000;
+        }
+
+        .side-panel {
+          position: fixed;
+          top: 0;
+          right: 0;
+          height: 100vh;
+          width: 420px;
+          max-width: 95vw;
+          background: #111111;
+          border-left: 1px solid var(--border-solid);
+          display: flex;
+          flex-direction: column;
+          overflow-y: auto;
+          animation: slideInRight 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        @keyframes slideInRight {
+          from { transform: translateX(100%); }
+          to { transform: translateX(0); }
+        }
+
+        .side-panel-close {
+          position: absolute;
+          top: 20px;
+          right: 20px;
+          background: transparent;
+          border: 1px solid var(--border-solid);
+          color: var(--text-muted);
+          font-size: 14px;
+          width: 32px;
+          height: 32px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          border-radius: 2px;
+          transition: all 0.2s ease;
+          z-index: 2;
+        }
+
+        .side-panel-close:hover {
+          border-color: var(--accent);
+          color: var(--accent);
+        }
+
+        .side-panel-image {
+          width: 100%;
+          height: 220px;
+          background-size: cover;
+          background-position: center;
+          filter: grayscale(40%) contrast(1.1);
+          flex-shrink: 0;
+        }
+
+        .side-panel-body {
+          padding: 32px 28px;
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+        }
+
+        .side-panel-cat {
+          font-family: var(--font-mono);
+          font-size: 10px;
+          color: var(--accent);
+          text-transform: uppercase;
+          letter-spacing: 0.12em;
+        }
+
+        .side-panel-insight-note {
+          background: rgba(200,169,110,0.07);
+          border: 1px solid rgba(200,169,110,0.3);
+          border-left: 3px solid #c8a96e;
+          border-radius: 4px;
+          padding: 12px 16px;
+        }
+
+        .side-panel-insight-note span {
+          font-family: var(--font-mono);
+          font-size: 9px;
+          color: #c8a96e;
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+          font-weight: 700;
+          display: block;
+          margin-bottom: 4px;
+        }
+
+        .side-panel-insight-note p {
+          font-size: 12px;
+          color: #c8a96e;
+          margin: 0;
+          opacity: 0.8;
+        }
+
+        .side-panel-title {
+          font-family: var(--font-display);
+          font-size: 24px;
+          color: #fff;
+          line-height: 1.3;
+          margin: 0;
+        }
+
+        .side-panel-excerpt {
+          font-size: 14px;
+          line-height: 1.7;
+          color: var(--text-secondary);
+          margin: 0;
+        }
+
+        .side-panel-cta {
+          display: inline-block;
+          margin-top: 8px;
+          padding: 12px 24px;
+          background: transparent;
+          border: 1px solid var(--accent);
+          color: var(--accent);
+          font-family: var(--font-mono);
+          font-size: 11px;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          text-decoration: none;
+          border-radius: 4px;
+          transition: all 0.2s ease;
+          align-self: flex-start;
+        }
+
+        .side-panel-cta:hover {
+          background: var(--accent);
+          color: #0e0e0e;
         }
       `}</style>
     </div>

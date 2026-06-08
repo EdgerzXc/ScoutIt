@@ -50,9 +50,21 @@ export default async function BrokerDetailPage({ params }) {
             </div>
 
             <div className="detail-closures-box">
-              <span className="icon-badge">🔒 SECURE ROSTER LINK</span>
+              <span className="icon-badge">SECURE ROSTER LINK</span>
               <p>{broker.closures}</p>
             </div>
+
+            {broker.scoutRating != null && (
+              <div className="scout-rating-box">
+                <span className="scout-rating-box-label">Scout Rating</span>
+                <span className="scout-rating-box-score" style={{ color: broker.scoutRating >= 85 ? "#4caf7d" : "#c8a96e" }}>
+                  {broker.scoutRating}<span style={{ fontSize: "16px", color: "var(--text-muted)" }}>/100</span>
+                </span>
+                <div className="scout-rating-breakdown">
+                  <span>Active Retentions 40% &middot; Continuity 40% &middot; Stewardship 20%</span>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Right Column: Bio & Specialties */}
@@ -234,6 +246,41 @@ export default async function BrokerDetailPage({ params }) {
           font-size: 12px;
           color: var(--text-secondary);
           margin: 0;
+        }
+
+        .scout-rating-box {
+          background: rgba(0,0,0,0.4);
+          border: 1px solid var(--border-solid);
+          border-radius: 4px;
+          padding: 20px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 6px;
+          margin-top: 8px;
+        }
+
+        .scout-rating-box-label {
+          font-family: var(--font-mono);
+          font-size: 9px;
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+          color: var(--text-muted);
+        }
+
+        .scout-rating-box-score {
+          font-family: var(--font-display);
+          font-size: 40px;
+          font-weight: bold;
+          line-height: 1;
+        }
+
+        .scout-rating-breakdown {
+          font-family: var(--font-mono);
+          font-size: 8px;
+          color: var(--text-muted);
+          text-align: center;
+          letter-spacing: 0.05em;
         }
 
         /* Right Column */

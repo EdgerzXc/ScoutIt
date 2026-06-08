@@ -2,7 +2,8 @@ export const DISCOVER_INTEL = {
   Residential: [
     { id: "n1", slug: "bgc-condo-yields-rise", category: "NEWS", date: "Q3 2026", title: "BGC Condo Yields Rise", snippet: "Premium residential spaces see 4.2% YoY growth." },
     { id: "n2", slug: "makati-central-resurgence", category: "INSIGHT", date: "Q3 2026", title: "Makati Central Resurgence", snippet: "Older luxury buildings undergoing massive renovations." },
-    { id: "n3", slug: "mastering-qc-market", category: "BLOG", date: "Q3 2026", title: "Mastering the QC Market", snippet: "What to look for in QC subdivision residences." }
+    { id: "n3", slug: "mastering-qc-market", category: "BLOG", date: "Q3 2026", title: "Mastering the QC Market", snippet: "What to look for in QC subdivision residences." },
+    { id: "n19", slug: "qc-residential-summary", category: "SUMMARY", date: "Q3 2026", title: "QC Residential Summary", snippet: "A consolidated overview of Quezon City residential sector movements this quarter." }
   ],
   Commercial: [
     { id: "n4", slug: "new-bpo-headquarters", category: "NEWS", date: "Q3 2026", title: "New BPO Headquarters", snippet: "Global tech firms securing massive floor plates." },
@@ -199,6 +200,22 @@ export const ARTICLES = [
     date: "Q3 2026",
     excerpt: "How spatial density affects kitchen efficiency.",
     image: "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&q=80"
+  },
+  {
+    slug: "qc-residential-summary",
+    title: "QC Residential Summary",
+    category: "Summary",
+    date: "Q3 2026",
+    excerpt: "A consolidated overview of Quezon City residential sector movements this quarter.",
+    image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80"
+  },
+  {
+    slug: "bgc-commercial-summary",
+    title: "BGC Commercial Summary",
+    category: "Summary",
+    date: "Q3 2026",
+    excerpt: "Quarterly digest of commercial space performance across Bonifacio Global City corridors.",
+    image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80"
   }
 ];
 

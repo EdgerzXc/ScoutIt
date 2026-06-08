@@ -100,9 +100,16 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
 
       localStorage.setItem("scoutit_reactions", JSON.stringify(parsed));
       setActiveReaction(nextReaction);
-
-      // Trigger confirmation text fade logic
       setShowConfirm(true);
+
+      // Fire anonymous POST to analytics API
+      if (nextReaction) {
+        fetch("/api/reactions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ property_id: propertyId, reaction_type: nextReaction, city, category }),
+        }).catch(() => {});
+      }
     } catch (e) {
       // ignore
     }
@@ -151,26 +158,23 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
         }
 
         .reaction-tiles-row.small {
-          gap: 16px;
+          gap: 8px;
           flex-wrap: nowrap;
           width: 100%;
-          justify-content: space-between;
+          justify-content: space-around;
         }
 
         .reaction-tiles-row.small .shape-wrapper {
-          width: 52px;
-          height: 52px;
+          width: 34px;
+          height: 34px;
         }
 
         .reaction-tiles-row.small .icon-overlay {
-          font-size: 22px;
+          font-size: 14px;
         }
 
         .reaction-tiles-row.small .tile-label {
-          font-size: 9px;
-          letter-spacing: 0.01em;
-          margin-top: 4px;
-          white-space: nowrap;
+          display: none;
         }
 
         .reaction-tiles-row {

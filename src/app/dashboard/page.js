@@ -57,7 +57,7 @@ export default function BrokerWorkspace() {
   // Form editing state
   const [formData, setFormData] = useState(INITIAL_PROFILE);
   const [notification, setNotification] = useState("");
-  const [activeTab, setActiveTab] = useState("curator"); // 'curator', 'leads', 'assets'
+  const [activeTab, setActiveTab] = useState("curator"); // 'curator', 'leads', 'assets', 'id'
 
   // Modal / Add asset form states
   const [showAddModal, setShowAddModal] = useState(false);
@@ -166,11 +166,17 @@ export default function BrokerWorkspace() {
           >
             Inbound Comm Links ({leads.length})
           </button>
-          <button 
+          <button
             className={`tab-btn ${activeTab === "assets" ? "active" : ""}`}
             onClick={() => setActiveTab("assets")}
           >
             Curated Spaces ({curations.length})
+          </button>
+          <button
+            className={`tab-btn ${activeTab === "id" ? "active" : ""}`}
+            onClick={() => setActiveTab("id")}
+          >
+            Digital ID Card
           </button>
         </nav>
 
@@ -346,6 +352,86 @@ export default function BrokerWorkspace() {
                     Zero assets curated. Use the button above to link properties.
                   </div>
                 )}
+              </div>
+            </div>
+          )}
+
+          {/* PANEL 4: DIGITAL ID CARD */}
+          {activeTab === "id" && (
+            <div className="panel-card fade-in">
+              <div className="panel-header">
+                <h3>Digital ID Card</h3>
+                <p>Your verifiable advisor credential. Download or share to establish trust with clients.</p>
+              </div>
+
+              <div className="id-card-wrapper">
+                <div className="id-card" id="broker-id-card">
+                  <div className="id-card-header">
+                    <span className="id-card-platform">ScoutIt</span>
+                    <span className="id-card-type">VERIFIED ADVISOR</span>
+                  </div>
+                  <div className="id-card-avatar" style={{ backgroundImage: `url(${profile.image})` }}></div>
+                  <div className="id-card-name">{profile.name}</div>
+                  <div className="id-card-title">{profile.title}</div>
+                  <div className="id-card-specialty">{profile.specialty}</div>
+
+                  <div className="id-card-divider"></div>
+
+                  <div className="id-card-fields">
+                    <div className="id-card-field">
+                      <span className="id-field-label">PRC License</span>
+                      <span className="id-field-value">REB License No. 0019284</span>
+                    </div>
+                    <div className="id-card-field">
+                      <span className="id-field-label">DHSUD Registration</span>
+                      <span className="id-field-value">Registered Broker</span>
+                    </div>
+                    <div className="id-card-field">
+                      <span className="id-field-label">LERIS Status</span>
+                      <span className="id-field-value" style={{ color: "#4caf7d" }}>Active &amp; Compliant</span>
+                    </div>
+                    <div className="id-card-field">
+                      <span className="id-field-label">Clearance</span>
+                      <span className="id-field-value">{profile.clearance}</span>
+                    </div>
+                    <div className="id-card-field">
+                      <span className="id-field-label">Status</span>
+                      <span className="id-field-value" style={{ color: "#4caf7d" }}>{profile.status}</span>
+                    </div>
+                  </div>
+
+                  <div className="id-card-divider"></div>
+
+                  <div className="id-card-footer">
+                    <div className="id-qr-placeholder">
+                      <div className="qr-grid">
+                        {Array.from({ length: 25 }).map((_, i) => (
+                          <div key={i} className={`qr-cell ${Math.random() > 0.5 ? "filled" : ""}`}></div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="id-card-compliance">
+                      <span>RA 9646 Compliant</span>
+                      <span>ScoutIt Space Intelligence</span>
+                      <span style={{ fontFamily: "var(--font-mono)", fontSize: "9px", color: "var(--text-muted)" }}>scout-it.vercel.app</span>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  className="download-id-btn"
+                  onClick={() => {
+                    const card = document.getElementById("broker-id-card");
+                    if (card) {
+                      const printWindow = window.open("", "_blank");
+                      printWindow.document.write(`<html><head><title>ScoutIt Digital ID</title><style>body{margin:0;background:#0e0e0e;display:flex;align-items:center;justify-content:center;min-height:100vh;}${card.style.cssText}</style></head><body>${card.outerHTML}</body></html>`);
+                      printWindow.document.close();
+                      printWindow.print();
+                    }
+                  }}
+                >
+                  Download / Print ID Card
+                </button>
               </div>
             </div>
           )}
@@ -998,6 +1084,179 @@ export default function BrokerWorkspace() {
           font-size: 12px;
           color: var(--text-secondary);
           margin: 0;
+        }
+
+        /* Digital ID Card */
+        .id-card-wrapper {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 32px;
+        }
+
+        .id-card {
+          width: 340px;
+          background: #0a0a0a;
+          border: 1px solid var(--accent-border);
+          border-radius: 4px;
+          padding: 32px 28px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 12px;
+        }
+
+        .id-card-header {
+          width: 100%;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 8px;
+        }
+
+        .id-card-platform {
+          font-family: var(--font-display);
+          font-size: 18px;
+          color: var(--accent);
+          font-weight: bold;
+          letter-spacing: 0.05em;
+        }
+
+        .id-card-type {
+          font-family: var(--font-mono);
+          font-size: 8px;
+          color: #4caf7d;
+          text-transform: uppercase;
+          letter-spacing: 0.15em;
+          border: 1px solid #4caf7d;
+          padding: 3px 7px;
+          border-radius: 2px;
+        }
+
+        .id-card-avatar {
+          width: 80px;
+          height: 80px;
+          border-radius: 2px;
+          background-size: cover;
+          background-position: center;
+          border: 1px solid var(--border-solid);
+          filter: grayscale(100%) contrast(1.1);
+        }
+
+        .id-card-name {
+          font-family: var(--font-display);
+          font-size: 20px;
+          color: #fff;
+          text-align: center;
+        }
+
+        .id-card-title {
+          font-size: 12px;
+          color: var(--text-muted);
+          text-align: center;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+        }
+
+        .id-card-specialty {
+          font-size: 11px;
+          color: var(--accent);
+          text-align: center;
+          font-family: var(--font-mono);
+        }
+
+        .id-card-divider {
+          width: 100%;
+          height: 1px;
+          background: var(--border-solid);
+          margin: 4px 0;
+        }
+
+        .id-card-fields {
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        .id-card-field {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .id-field-label {
+          font-family: var(--font-mono);
+          font-size: 9px;
+          color: var(--text-muted);
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+        }
+
+        .id-field-value {
+          font-size: 11px;
+          color: var(--text-primary);
+          text-align: right;
+        }
+
+        .id-card-footer {
+          width: 100%;
+          display: flex;
+          gap: 16px;
+          align-items: center;
+        }
+
+        .id-qr-placeholder {
+          flex-shrink: 0;
+        }
+
+        .qr-grid {
+          display: grid;
+          grid-template-columns: repeat(5, 10px);
+          grid-template-rows: repeat(5, 10px);
+          gap: 2px;
+        }
+
+        .qr-cell {
+          width: 10px;
+          height: 10px;
+          background: transparent;
+        }
+
+        .qr-cell.filled {
+          background: var(--accent);
+        }
+
+        .id-card-compliance {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+
+        .id-card-compliance span {
+          font-family: var(--font-mono);
+          font-size: 10px;
+          color: var(--text-secondary);
+        }
+
+        .download-id-btn {
+          background: transparent;
+          border: 1px solid var(--accent);
+          color: var(--accent);
+          font-family: var(--font-mono);
+          font-size: 11px;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          padding: 14px 28px;
+          border-radius: 4px;
+          cursor: pointer;
+          transition: all var(--transition-fast);
+        }
+
+        .download-id-btn:hover {
+          background: var(--accent);
+          color: #0e0e0e;
         }
 
         /* Fade Animation */

@@ -100,6 +100,13 @@ export default async function IntelArticlePage({ params }) {
         {/* Article Body */}
         <section className="article-body-container">
           <div className="article-content-wrapper">
+            {/* Insight disclaimer banner */}
+            {["INSIGHT", "Insight"].includes(article.category) || ["INSIGHT", "Insight"].includes(article.intelType) || ["INSIGHT", "Insight"].includes(article.type) ? (
+              <div className="insight-disclaimer-banner">
+                <span className="insight-disclaimer-label">ScoutIt Insight</span>
+                <p className="insight-disclaimer-text">This is a ScoutIt Insight — a projection based on available data, not a verified fact.</p>
+              </div>
+            ) : null}
             <p className="article-lead-text">{article.lead}</p>
             
             <div className="article-paragraphs">
@@ -266,6 +273,35 @@ export default async function IntelArticlePage({ params }) {
           line-height: 1.6;
           color: var(--text-primary);
           margin: 0;
+        }
+
+        /* Insight Disclaimer */
+        .insight-disclaimer-banner {
+          background: rgba(200, 169, 110, 0.07);
+          border: 1px solid rgba(200, 169, 110, 0.35);
+          border-left: 3px solid #c8a96e;
+          border-radius: 4px;
+          padding: 20px 24px;
+          margin-bottom: 36px;
+        }
+
+        .insight-disclaimer-label {
+          font-family: var(--font-mono);
+          font-size: 10px;
+          color: #c8a96e;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          font-weight: 700;
+          display: block;
+          margin-bottom: 6px;
+        }
+
+        .insight-disclaimer-text {
+          font-size: 13px;
+          color: #c8a96e;
+          margin: 0;
+          opacity: 0.85;
+          line-height: 1.5;
         }
 
         /* Related Section */
