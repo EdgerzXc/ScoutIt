@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import ReactionButtons from "@/components/ReactionButtons";
 
 import { SPACE_STARS, getDISCOVERY_FEED, getDISCOVER_HUBS, getCATEGORY_PREVIEWS } from "@/data/mockProperties";
@@ -23,14 +23,37 @@ export default function Home() {
   const containerRef = useRef(null);
   const eventHorizonRef = useRef(null);
 
-  // Title-screen sequence: 0 idle → 1 beam fires (1.8s) → 2 wordmark lights (+0.8s) → 3 CTAs appear (+0.4s)
-  const [heroPhase, setHeroPhase] = useState(0);
-  useEffect(() => {
-    const t1 = setTimeout(() => setHeroPhase(1), 1800);
-    const t2 = setTimeout(() => setHeroPhase(2), 2600);
-    const t3 = setTimeout(() => setHeroPhase(3), 3000);
-    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
+  // Title-screen beam interaction (auto-fires on load + on UFO click)
+  const [fireId, setFireId]   = useState(0);   // remounts the beam to replay its animation
+  const [flashId, setFlashId] = useState(0);   // remounts the wordmark impact flash
+  const [wordLit, setWordLit] = useState(false);
+  const [powering, setPowering] = useState(false);
+  const beamTimers = useRef([]);
+
+  const fireBeam = useCallback((withPower) => {
+    beamTimers.current.forEach(clearTimeout);
+    beamTimers.current = [];
+    const push = (fn, ms) => beamTimers.current.push(setTimeout(fn, ms));
+    const launch = () => {
+      setFireId((id) => id + 1);                                    // (re)play beam
+      push(() => { setWordLit(true); setFlashId((f) => f + 1); }, 600); // beam reaches wordmark
+      push(() => setWordLit(false), 1600);                          // hold, then 2s glow fade-back
+    };
+    if (withPower) {
+      setPowering(true);
+      push(() => { setPowering(false); launch(); }, 500);           // power-up flash, then fire
+    } else {
+      launch();
+    }
   }, []);
+
+  // Auto-fire once, 2s after load
+  useEffect(() => {
+    const t = setTimeout(() => fireBeam(false), 2000);
+    return () => clearTimeout(t);
+  }, [fireBeam]);
+  // Clear any pending beam timers on unmount
+  useEffect(() => () => beamTimers.current.forEach(clearTimeout), []);
 
   // ── Event-horizon pull field (canvas) ──────────────────────────
   useEffect(() => {
@@ -42,6 +65,8 @@ export default function Home() {
     const rand = (min, max) => min + Math.random() * (max - min);
     let w = 0, h = 0, cx = 0, cy = 0, maxR = 0, dpr = 1;
     let stars = [], bodies = [], dust = [], rings = [], comets = [];
+    let pulseRings = [];
+    let nextPulseAt = 2.5;
     let raf = 0;
     let t = 0;
 
@@ -96,6 +121,8 @@ export default function Home() {
       bodies = Array.from({ length: bodyCount }, initBody);
       dust = Array.from({ length: dustCount }, initDust);
       comets = Array.from({ length: Math.round(rand(4, 6)) }, () => initComet(true));
+      pulseRings = [];
+      nextPulseAt = t + rand(2, 3);
       const base = Math.min(w, h);
       rings = [0.16, 0.27, 0.4, 0.56].map((f, i) => ({
         r: base * f,
@@ -121,6 +148,36 @@ export default function Home() {
     const draw = (dt) => {
       t += dt;
       ctx.clearRect(0, 0, w, h);
+
+      // Inner core breath — central glow opacity oscillates (~4s cycle)
+      const coreOp = 0.08 + 0.04 * Math.sin(t * 1.5);
+      const coreR = Math.min(w, h) * 0.22;
+      const coreGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, coreR);
+      coreGrad.addColorStop(0, `rgba(200,169,110,${coreOp.toFixed(3)})`);
+      coreGrad.addColorStop(1, "rgba(200,169,110,0)");
+      ctx.beginPath();
+      ctx.arc(cx, cy, coreR, 0, Math.PI * 2);
+      ctx.fillStyle = coreGrad;
+      ctx.fill();
+
+      // Pulse shockwave rings — emanate every 3-4s, decelerating as they expand
+      if (t >= nextPulseAt) {
+        pulseRings.push({ age: 0 });
+        nextPulseAt = t + rand(3, 4);
+      }
+      for (let i = pulseRings.length - 1; i >= 0; i--) {
+        const pr = pulseRings[i];
+        pr.age += dt;
+        const p = pr.age / 2.5;
+        if (p >= 1) { pulseRings.splice(i, 1); continue; }
+        const eased = 1 - Math.pow(1 - p, 2);          // shockwave: fast then slows
+        const r = 40 + (300 - 40) * eased;
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(200,169,110,${(0.12 * (1 - p)).toFixed(3)})`;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
 
       // Event-horizon rings (subtle breathing) + rotating lensing arc
       rings.forEach((ring) => {
@@ -670,22 +727,39 @@ export default function Home() {
         {/* Main hook content */}
         <div className="hook-content">
 
-          {/* UFO hovering above the wordmark + tractor beam */}
+          {/* UFO (clickable easter egg) hovering above the wordmark + tractor beam */}
           <div className="title-ufo-zone">
-            <span className="title-ufo">
-              <span className="title-ufo-dome"></span>
-              <span className="title-ufo-disc">
-                <span className="title-ufo-light"></span>
-                <span className="title-ufo-light"></span>
-                <span className="title-ufo-light"></span>
-              </span>
+            <span
+              className={`title-ufo ${powering ? "powering" : ""}`}
+              onClick={() => fireBeam(true)}
+              role="presentation"
+            >
+              <span className="title-ufo-underglow" />
+              <svg className="title-ufo-svg" viewBox="0 0 90 54" fill="none" xmlns="http://www.w3.org/2000/svg">
+                {/* underside glow ring */}
+                <ellipse cx="45" cy="35" rx="33" ry="6" stroke="#c8a96e" strokeWidth="0.5" opacity="0.55" />
+                {/* saucer body */}
+                <ellipse cx="45" cy="32" rx="40" ry="9" fill="#1a1a1a" stroke="#c8a96e" strokeWidth="1.5" />
+                {/* dome / cockpit */}
+                <path d="M30 27 Q45 7 60 27 Z" fill="#1e1e1e" stroke="#c8a96e" strokeWidth="0.8" />
+                {/* porthole windows — blink independently */}
+                <circle className="porthole porthole-1" cx="38" cy="20" r="2.2" />
+                <circle className="porthole porthole-2" cx="45" cy="17.5" r="2.2" />
+                <circle className="porthole porthole-3" cx="52" cy="20" r="2.2" />
+                {/* underside lights — static gold glow */}
+                <circle className="ufo-belly" cx="28" cy="36" r="1.6" />
+                <circle className="ufo-belly" cx="39" cy="37.5" r="1.6" />
+                <circle className="ufo-belly" cx="51" cy="37.5" r="1.6" />
+                <circle className="ufo-belly" cx="62" cy="36" r="1.6" />
+              </svg>
             </span>
-            <span className={`title-beam ${heroPhase >= 1 ? "fire" : ""}`}></span>
+            {fireId > 0 && <span key={fireId} className="title-beam" />}
           </div>
 
           {/* ScoutIT wordmark */}
-          <div className={`scoutit-wordmark ${heroPhase >= 2 ? "lit" : ""}`} aria-label="ScoutIT">
+          <div className={`scoutit-wordmark ${wordLit ? "lit" : ""}`} aria-label="ScoutIT">
             <span className="word-scout">Scout</span><span className="word-it">IT</span>
+            {flashId > 0 && <span key={`flash-${flashId}`} className="title-impact" />}
           </div>
 
           {/* Discipline badge */}
@@ -697,22 +771,6 @@ export default function Home() {
           {/* Taglines */}
           <p className="title-tagline-1">Get lost in spaces that actually inspire you.</p>
           <div className="title-tagline-2">SPACE INTELLIGENCE · PHILIPPINE PROPERTY</div>
-
-          {/* CTA buttons — appear after the beam fires */}
-          <div className={`title-cta-row ${heroPhase >= 3 ? "show" : ""}`}>
-            <button
-              className="title-cta title-cta-primary"
-              onClick={() => document.getElementById("property-section")?.scrollIntoView({ behavior: "smooth" })}
-            >
-              ↓ Initiate Scout
-            </button>
-            <button
-              className="title-cta title-cta-secondary"
-              onClick={() => document.getElementById("discover-section")?.scrollIntoView({ behavior: "smooth" })}
-            >
-              Enter Platform →
-            </button>
-          </div>
         </div>
 
         {/* Scroll indicator */}
@@ -1524,39 +1582,60 @@ export default function Home() {
 
         /* ════════════ TITLE SCREEN — WORDMARK REDESIGN ════════════ */
         .scoutit-wordmark {
+          position: relative;
           display: flex;
           align-items: baseline;
           justify-content: center;
-          margin: 0 0 18px;
+          margin: 0 0 20px;
           line-height: 1;
         }
         .scoutit-wordmark .word-scout,
         .scoutit-wordmark .word-it {
           font-family: Georgia, 'Times New Roman', serif;
           font-weight: 400;
-          font-size: clamp(60px, 9vw, 112px);
-          letter-spacing: 8px;
+          font-size: clamp(64px, 10vw, 120px);
+          letter-spacing: 4px;
           line-height: 1;
-          transition: color 0.6s ease, text-shadow 0.6s ease;
+          /* slow fade-back to resting state (2s) when the lit class is removed */
+          transition: color 2s ease, text-shadow 2s ease;
         }
-        .scoutit-wordmark .word-scout { color: #f0ede8; }
-        .scoutit-wordmark .word-it    { color: #c8a96e; margin-right: -8px; }
+        .scoutit-wordmark .word-scout { color: #ffffff; }
+        .scoutit-wordmark .word-it    { color: #c8a96e; margin-right: -4px; }
+        /* beam-hit illumination snaps on fast, then fades back slowly via base transition */
         .scoutit-wordmark.lit .word-scout {
           color: #ffffff;
-          text-shadow: 0 0 40px rgba(200, 169, 110, 0.6);
+          text-shadow: 0 0 60px rgba(200, 169, 110, 0.8), 0 0 120px rgba(200, 169, 110, 0.3);
+          transition: color 0.15s ease, text-shadow 0.15s ease;
         }
         .scoutit-wordmark.lit .word-it {
           color: #c8a96e;
-          text-shadow: 0 0 40px rgba(200, 169, 110, 0.85);
+          text-shadow: 0 0 60px rgba(200, 169, 110, 0.9), 0 0 120px rgba(200, 169, 110, 0.4);
+          transition: color 0.15s ease, text-shadow 0.15s ease;
         }
 
-        /* ── UFO hovering above the wordmark ── */
+        /* Impact flash burst at the wordmark when the beam lands */
+        .title-impact {
+          position: absolute;
+          left: 50%;
+          top: 50%;
+          width: 220px;
+          height: 220px;
+          border-radius: 50%;
+          background: radial-gradient(circle, rgba(200, 169, 110, 0.6) 0%, rgba(200, 169, 110, 0) 60%);
+          transform: translate(-50%, -50%) scale(0.3);
+          pointer-events: none;
+          opacity: 0;
+          z-index: -1;
+          animation: titleImpact 0.3s ease-out forwards;
+        }
+
+        /* ── UFO (clickable easter egg) hovering above the wordmark ── */
         .title-ufo-zone {
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: flex-start;
-          height: 92px;
+          height: 120px;
           margin-bottom: 10px;
         }
         .title-ufo {
@@ -1566,68 +1645,51 @@ export default function Home() {
           align-items: center;
           animation: titleUfoFloat 3s ease-in-out infinite;
         }
-        /* Soft gold underglow — UFO emitting faint light down onto the wordmark */
-        .title-ufo::after {
-          content: '';
+        .title-ufo.powering { animation: none; }   /* stop floating during power-up */
+        /* Soft gold underglow — UFO emits faint warmth downward */
+        .title-ufo-underglow {
           position: absolute;
-          top: 70%;
+          top: 64%;
           left: 50%;
           transform: translateX(-50%);
-          width: 150px;
-          height: 70px;
-          background: radial-gradient(ellipse at top, rgba(200, 169, 110, 0.15), rgba(200, 169, 110, 0) 70%);
+          width: 160px;
+          height: 80px;
+          background: radial-gradient(ellipse at top, rgba(200, 169, 110, 0.12), rgba(200, 169, 110, 0) 70%);
           pointer-events: none;
           z-index: -1;
         }
-        .title-ufo-dome {
-          width: 32px;
-          height: 17px;
-          background: #161616;
-          border: 1.5px solid #c8a96e;
-          border-bottom: none;
-          border-radius: 50% 50% 0 0;
-        }
-        .title-ufo-disc {
-          width: 80px;
-          height: 22px;
-          background: #161616;
-          border: 1.5px solid #c8a96e;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: space-evenly;
-          box-shadow: 0 0 16px rgba(200, 169, 110, 0.4);
+        .title-ufo-svg {
+          width: 90px;
+          height: auto;
+          display: block;
           animation: titleSaucerTilt 9s ease-in-out infinite;
         }
-        .title-ufo-light {
-          width: 5px;
-          height: 5px;
-          border-radius: 50%;
-          background: #c8a96e;
-          box-shadow: 0 0 5px #c8a96e;
-        }
+        .title-ufo-svg .porthole { fill: #00ff88; }
+        .title-ufo-svg .porthole-1 { animation: portBlink 0.8s steps(1, end) infinite; }
+        .title-ufo-svg .porthole-2 { animation: portBlink 1.3s steps(1, end) infinite; }
+        .title-ufo-svg .porthole-3 { animation: portBlink 1.7s steps(1, end) infinite; }
+        .title-ufo.powering .porthole { animation: portPower 0.12s steps(1, end) infinite; }
+        .title-ufo-svg .ufo-belly { fill: rgba(200, 169, 110, 0.5); }
 
-        /* ── Tractor beam ── */
+        /* ── Tractor beam: 4px → 8px trapezoid, extend → hold → fade ── */
         .title-beam {
-          width: 3px;
-          height: 46px;
+          width: 8px;
+          height: 58px;
           margin-top: 3px;
           background: linear-gradient(to bottom, #c8a96e 0%, rgba(200, 169, 110, 0) 100%);
-          transform: scaleY(0);
+          clip-path: polygon(25% 0, 75% 0, 100% 100%, 0 100%);
           transform-origin: top center;
           opacity: 0;
-        }
-        .title-beam.fire {
-          animation: titleBeamFire 0.8s ease-out forwards;
+          animation: titleBeamSeq 1.3s ease-out forwards;
         }
 
         /* ── Discipline badge ── */
         .title-badge {
           font-family: 'Courier New', monospace;
-          font-size: 11px;
-          letter-spacing: 5px;
+          font-size: 13px;
+          letter-spacing: 6px;
           text-transform: uppercase;
-          color: #888888;
+          color: #777777;
           margin-bottom: 22px;
         }
 
@@ -1643,14 +1705,14 @@ export default function Home() {
         .title-tagline-1 {
           font-family: Georgia, serif;
           font-style: italic;
-          font-size: 18px;
-          color: #9a9a9a;
+          font-size: 20px;
+          color: #aaaaaa;
           text-align: center;
           margin: 0 0 10px;
         }
         .title-tagline-2 {
           font-family: 'Courier New', monospace;
-          font-size: 10px;
+          font-size: 11px;
           letter-spacing: 4px;
           text-transform: uppercase;
           color: #666666;
@@ -1658,50 +1720,34 @@ export default function Home() {
           margin: 0 0 34px;
         }
 
-        /* ── CTA buttons (revealed after the beam fires) ── */
-        .title-cta-row {
-          display: flex;
-          gap: 16px;
-          justify-content: center;
-          flex-wrap: wrap;
-          opacity: 0;
-          transform: translateY(12px);
-          transition: opacity 0.6s ease, transform 0.6s ease;
-          pointer-events: none;
-        }
-        .title-cta-row.show {
-          opacity: 1;
-          transform: translateY(0);
-          pointer-events: auto;
-        }
-        .title-cta {
-          font-family: 'Courier New', monospace;
-          font-size: 11px;
-          letter-spacing: 3px;
-          text-transform: uppercase;
-          padding: 12px 28px;
-          border-radius: 2px;
-          background: transparent;
-          cursor: pointer;
-          transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease;
-        }
-        .title-cta-primary { border: 1px solid #c8a96e; color: #c8a96e; }
-        .title-cta-primary:hover { background: #c8a96e; color: #0e0e0e; }
-        .title-cta-secondary { border: 1px solid #2a2a2a; color: #8a8a8a; }
-        .title-cta-secondary:hover { border-color: #444; color: #f0ede8; }
-
         @keyframes titleUfoFloat {
           0%, 100% { transform: translateY(0); }
-          50%      { transform: translateY(-6px); }
+          50%      { transform: translateY(-8px); }
         }
         @keyframes titleSaucerTilt {
           0%, 100% { transform: rotate(-2.5deg); }
           50%      { transform: rotate(2.5deg); }
         }
-        @keyframes titleBeamFire {
+        @keyframes portBlink {
+          0%, 84% { opacity: 1; }
+          90%     { opacity: 0.2; }
+          100%    { opacity: 1; }
+        }
+        @keyframes portPower {
+          0%, 100% { opacity: 1; }
+          50%      { opacity: 0.15; }
+        }
+        @keyframes titleBeamSeq {
           0%   { transform: scaleY(0); opacity: 0; }
-          15%  { opacity: 1; }
-          100% { transform: scaleY(1); opacity: 1; }
+          8%   { opacity: 1; }
+          46%  { transform: scaleY(1); opacity: 1; }   /* extended (~0.6s) */
+          69%  { transform: scaleY(1); opacity: 1; }   /* hold (~0.3s) */
+          100% { transform: scaleY(1); opacity: 0; }   /* fade out (~0.4s) */
+        }
+        @keyframes titleImpact {
+          0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.3); }
+          40%  { opacity: 1; }
+          100% { opacity: 0; transform: translate(-50%, -50%) scale(1.15); }
         }
         /* ════════════ END TITLE SCREEN ════════════ */
 
