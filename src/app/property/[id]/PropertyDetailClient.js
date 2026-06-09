@@ -910,8 +910,10 @@ export default function PropertyDetailClient({ slug }) {
                   d.lot_sqm > 0 ? { icon: "🌿", val: d.lot_sqm, label: "Lot sqm" } : null,
                 ].filter(Boolean).map((stat, i) => (
                   <div key={i}>
-                    <div style={{fontSize:"30px", lineHeight:1, marginBottom:"14px"}}>{stat.icon}</div>
-                    <div style={{fontFamily:"Georgia,serif", fontSize:"clamp(44px,5vw,64px)", fontWeight:400, color:"#f0ede8", lineHeight:1}}>{stat.val}</div>
+                    <div style={{display:"flex", alignItems:"center", gap:"12px"}}>
+                      <span style={{fontSize:"26px", lineHeight:1, flexShrink:0}}>{stat.icon}</span>
+                      <span style={{fontFamily:"Georgia,serif", fontSize:"clamp(40px,4.6vw,58px)", fontWeight:400, color:"#f0ede8", lineHeight:1}}>{stat.val}</span>
+                    </div>
                     <div style={{fontFamily:"'Courier New',monospace", fontSize:"12px", color:"#8a8a8a", letterSpacing:"0.16em", textTransform:"uppercase", marginTop:"12px"}}>{stat.label}</div>
                   </div>
                 ))}
