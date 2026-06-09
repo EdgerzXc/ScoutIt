@@ -149,10 +149,11 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
             // Prefer the caller-supplied display label
             const destName = routeLabel || routeDestination || "Nearest transit hub";
 
-            // 2. Driving directions from property → destination
+            // 2. Driving directions FROM the transit hub TO the property
+            //    (this map answers "how do I get to this property?")
             const dirUrl =
               `https://api.mapbox.com/directions/v5/mapbox/driving/` +
-              `${position[1]},${position[0]};${destLng},${destLat}` +
+              `${destLng},${destLat};${position[1]},${position[0]}` +
               `?geometries=geojson&overview=full&access_token=${mapboxToken}`;
             const dirRes = await fetch(dirUrl);
             const dirData = await dirRes.json();
@@ -172,17 +173,17 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
             }).addTo(map);
             routeLayerRef.current = routeLine;
 
-            // 4. Destination marker (gold)
-            const destIcon = window.L.divIcon({
+            // 4. Origin marker at the transit hub (where the journey begins)
+            const originIcon = window.L.divIcon({
               className: "custom-leaflet-marker amenity",
-              html: `<div class="amenity-dot" style="background:#c8a96e;box-shadow:0 0 8px #c8a96e"></div>`,
-              iconSize: [12, 12],
-              iconAnchor: [6, 6],
+              html: `<div class="route-origin-dot"></div>`,
+              iconSize: [16, 16],
+              iconAnchor: [8, 8],
             });
-            window.L.marker([destLat, destLng], { icon: destIcon })
+            window.L.marker([destLat, destLng], { icon: originIcon })
               .addTo(map)
               .bindPopup(
-                `<strong style="color:#c8a96e">${destName}</strong><br/><span style="color:#8a8a8a">Nearest transit hub</span>`,
+                `<strong style="color:#c8a96e">${destName}</strong><br/><span style="color:#8a8a8a">Transit hub · route start</span>`,
                 { className: "custom-leaflet-popup" }
               );
 
@@ -213,6 +214,19 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
         }
       };
 
+      // Recompute size after a visibility/size change and re-frame the view
+      // so the property stays centered (fixes maps that mount while hidden).
+      const recenter = () => {
+        if (!mapInstance.current) return;
+        mapInstance.current.invalidateSize();
+        if (routeLayerRef.current) {
+          mapInstance.current.fitBounds(routeLayerRef.current.getBounds(), { padding: [55, 55], maxZoom: 15 });
+        } else {
+          mapInstance.current.setView(position, mapInstance.current.getZoom() || 15);
+        }
+        updatePositions();
+      };
+
       // Set initial positions
       map.whenReady(() => {
         setTimeout(updatePositions, 100);
@@ -225,16 +239,15 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
       mapInstance.current = map;
       setMapLoaded(true);
 
+      // Re-center a few times after mount to catch late layout/visibility settling
+      [150, 400, 900].forEach((ms) => setTimeout(recenter, ms));
+
       // Set up ResizeObserver to handle tab changes or visibility switches cleanly
       if (typeof window !== "undefined" && window.ResizeObserver) {
         resizeObserver = new window.ResizeObserver(() => {
           if (mapInstance.current) {
             // Slight delay allows CSS transitions/layouts to settle
-            setTimeout(() => {
-              if (mapInstance.current) {
-                mapInstance.current.invalidateSize();
-              }
-            }, 100);
+            setTimeout(recenter, 100);
           }
         });
         if (mapRef.current) {
@@ -335,8 +348,8 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
       {routeInfo && (
         <div className="map-route-label">
           <span className="route-dot" />
+          <span className="route-dest">from {routeInfo.destName}</span>
           <span className="route-time">{routeInfo.minutes} min</span>
-          <span className="route-dest">to {routeInfo.destName}</span>
           <span className="route-km">· {routeInfo.km} km</span>
         </div>
       )}
@@ -586,6 +599,16 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
           border: 1px solid #1a1a1a;
           box-shadow: 0 0 4px rgba(255, 255, 255, 0.4);
           transition: all 0.2s ease;
+        }
+
+        /* Route origin (transit hub) — gold ring marking where the journey starts */
+        .custom-leaflet-marker .route-origin-dot {
+          width: 14px;
+          height: 14px;
+          border-radius: 50%;
+          background: #0e0e0e;
+          border: 2px solid #c8a96e;
+          box-shadow: 0 0 8px rgba(200, 169, 110, 0.7);
         }
 
         .custom-leaflet-marker.amenity:hover .amenity-dot {
