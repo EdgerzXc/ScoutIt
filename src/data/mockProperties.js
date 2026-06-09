@@ -498,6 +498,10 @@ export const PROPERTIES_DETAILS = {
     architect_designer:       "Arch. Lance Reyes · LR Atelier",                        // Airtable: ArchitectDesigner
     building_style:           "Tropical Modernist",                                    // Airtable: BuildingStyle
     universe_summary:         "Batasan Hills House & Lot is a quietly confident family home that trades flash for longevity — 120 sqm of well-ventilated, light-filled space on a 180 sqm elevated lot in one of Quezon City's most stable residential corridors. Its tropical-modernist frame, clean title, and room to expand make it equally compelling as a forever home or a long-hold appreciating asset. This is a space that rewards living in it as much as owning it.", // Airtable: UniverseSummary
+    // ── Ch.10 price (authorized, display-only) ──────
+    listed_price:             "₱18,500,000",                                       // Airtable: Listed_Price
+    price_source:             "Owner",                                             // Airtable: Price_Source
+    price_notes:              "Negotiable for cash buyers; clean title ready for immediate transfer.", // Airtable: Price_Notes
     accordion_1_title: "Home Feel & Comfort",
     accordion_1_rating:"High",
     accordion_2_title: "Space Usability",
@@ -1217,9 +1221,11 @@ export const NEW_CMS_FIELD_DEFAULTS = {
   architect_designer:     "", // ArchitectDesigner
   building_style:         "", // BuildingStyle
   universe_summary:       "", // UniverseSummary
-  // Ch.10 — only render a price when an authorized party has provided one
-  authorized_price:       "", // AuthorizedPrice  (e.g. "₱18,500,000")
-  price_source:           "", // PriceSource      (e.g. "Owner", "Property Manager")
+  // Ch.10 — only render a price when an authorized party has provided one.
+  // "N/A" or "" both suppress the price section.
+  listed_price:           "", // Listed_Price  (e.g. "₱8,500,000" or "N/A")
+  price_source:           "", // Price_Source  (e.g. "Owner", "Authorized Broker", "Property Manager")
+  price_notes:            "", // Price_Notes   (free-text context)
 };
 
 export function getProperties(category = null) {

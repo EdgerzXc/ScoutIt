@@ -12,6 +12,36 @@ import "./property.css";
 import { getPropertyBySlug } from "@/data/mockProperties";
 
 // ═══════════════════════════════════════════════════
+// TRANSIT HUBS — module-scope so coordinate references stay
+// referentially stable across renders (avoids effect-dep loops).
+// ═══════════════════════════════════════════════════
+const TRANSIT_HUBS = [
+  { keys: ["north ave", "mrt-7", "mrt 7"], coords: [14.6527, 121.0324] }, // North Avenue (MRT-3/MRT-7)
+  { keys: ["quezon ave"],                  coords: [14.6427, 121.0388] }, // Quezon Avenue (MRT-3)
+  { keys: ["cubao", "araneta"],            coords: [14.6190, 121.0530] }, // Cubao (MRT-3/LRT-2)
+  { keys: ["ortigas"],                     coords: [14.5876, 121.0563] }, // Ortigas (MRT-3)
+  { keys: ["shaw"],                        coords: [14.5810, 121.0537] }, // Shaw Blvd (MRT-3)
+  { keys: ["ayala"],                       coords: [14.5494, 121.0280] }, // Ayala (MRT-3)
+  { keys: ["taft", "edsa"],                coords: [14.5378, 120.9947] }, // Taft/EDSA (MRT-3/LRT-1)
+  { keys: ["recto"],                       coords: [14.6038, 120.9822] }, // Recto (LRT-2)
+  { keys: ["katipunan"],                   coords: [14.6306, 121.0730] }, // Katipunan (LRT-2)
+];
+const CITY_HUB = {
+  "quezon city": [14.6527, 121.0324],           // North Avenue
+  "bonifacio global city": [14.5494, 121.0280], // Ayala (nearest rail to BGC)
+  "makati": [14.5494, 121.0280],                // Ayala
+  "pasig": [14.5876, 121.0563],                 // Ortigas
+  "mandaluyong": [14.5810, 121.0537],           // Shaw
+  "manila": [14.6038, 120.9822],                // Recto
+};
+function resolveTransitHub(transitLabel, city) {
+  const name = (transitLabel || "").toLowerCase();
+  const byName = TRANSIT_HUBS.find(h => h.keys.some(k => name.includes(k)));
+  if (byName) return byName.coords;
+  return CITY_HUB[(city || "").toLowerCase()] || null;
+}
+
+// ═══════════════════════════════════════════════════
 // HELPER UTILITIES
 // ═══════════════════════════════════════════════════
 function DeepIntelWidget({ open, onToggle, fields }) {
@@ -557,6 +587,8 @@ export default function PropertyDetailClient({ slug }) {
         .replace(/\bAve\b/gi, "Avenue")
         .trim()}, ${d.city || "Metro Manila"}, Philippines`
     : "";
+  const transitDestCoords = resolveTransitHub(transitLabel, d.city);
+
   const commuteCards = [
     { label: "BGC",     value: d.commute_bgc },
     { label: "Makati",  value: d.commute_makati },
@@ -869,7 +901,7 @@ export default function PropertyDetailClient({ slug }) {
                 </div>
               )}
 
-              <div style={{display:"flex", flexWrap:"wrap", gap:"30px 56px", margin:"0 0 32px"}}>
+              <div style={{display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(120px, 1fr))", gap:"28px 20px", margin:"0 0 36px", width:"100%"}}>
                 {[
                   pill1Val && pill1Val !== 0 ? { icon: pill1Emoji, val: pill1Val, label: pill1Label } : null,
                   pill2Val && pill2Val !== 0 ? { icon: pill2Emoji, val: pill2Val, label: pill2Label } : null,
@@ -878,9 +910,9 @@ export default function PropertyDetailClient({ slug }) {
                   d.lot_sqm > 0 ? { icon: "🌿", val: d.lot_sqm, label: "Lot sqm" } : null,
                 ].filter(Boolean).map((stat, i) => (
                   <div key={i}>
-                    <div style={{fontSize:"18px", lineHeight:1, marginBottom:"12px", opacity:0.9}}>{stat.icon}</div>
-                    <div style={{fontFamily:"Georgia,serif", fontSize:"clamp(42px,5vw,62px)", fontWeight:400, color:"#f0ede8", lineHeight:1}}>{stat.val}</div>
-                    <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#8a8a8a", letterSpacing:"0.22em", textTransform:"uppercase", marginTop:"8px"}}>{stat.label}</div>
+                    <div style={{fontSize:"30px", lineHeight:1, marginBottom:"14px"}}>{stat.icon}</div>
+                    <div style={{fontFamily:"Georgia,serif", fontSize:"clamp(44px,5vw,64px)", fontWeight:400, color:"#f0ede8", lineHeight:1}}>{stat.val}</div>
+                    <div style={{fontFamily:"'Courier New',monospace", fontSize:"12px", color:"#8a8a8a", letterSpacing:"0.16em", textTransform:"uppercase", marginTop:"12px"}}>{stat.label}</div>
                   </div>
                 ))}
               </div>
@@ -1022,13 +1054,14 @@ export default function PropertyDetailClient({ slug }) {
               </div>
 
               {locTab === "map" && (
-                <div style={{height:"360px", borderRadius:"4px", overflow:"hidden", border:"0.5px solid #262626", marginBottom:"8px"}}>
+                <div style={{height:"clamp(420px, 52vh, 480px)", borderRadius:"4px", overflow:"hidden", border:"0.5px solid #262626", marginBottom:"8px"}}>
                   <InteractiveMap
                     lat={d.lat || d.latitude || 14.5547}
                     lng={d.lng || d.longitude || 121.0244}
                     propertyTitle={d.title}
                     vicinityData={d.whereTo}
                     routeDestination={transitDestination}
+                    routeDestCoords={transitDestCoords}
                     routeLabel={transitLabel}
                     mapboxToken={mapboxToken}
                   />
@@ -1153,7 +1186,7 @@ export default function PropertyDetailClient({ slug }) {
               </div>
 
               {whereToTab === "map" && (
-                <div style={{height:"340px", borderRadius:"2px", overflow:"hidden", border:"0.5px solid #262626", marginBottom:"24px"}}>
+                <div style={{height:"clamp(460px, 64vh, 600px)", borderRadius:"4px", overflow:"hidden", border:"0.5px solid #262626", marginBottom:"24px"}}>
                   <InteractiveMap lat={d.lat || d.latitude || 14.5547} lng={d.lng || d.longitude || 121.0244} propertyTitle={d.title} vicinityData={d.whereTo}/>
                 </div>
               )}
@@ -1327,6 +1360,7 @@ export default function PropertyDetailClient({ slug }) {
                     <div
                       className={`unit-z3-row ${activeUnit === u.name ? "selected" : ""}`}
                       key={u.name}
+                      id={`unit-row-${ui}`}
                       onClick={() => {
                         setSelectedUnit(u.name);
                         let targetIndex = 0;
@@ -1338,10 +1372,12 @@ export default function PropertyDetailClient({ slug }) {
                         if (photos && photos.length > 0) setCurrentImageIndex(targetIndex);
                       }}
                     >
-                      <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#8a8a8a", letterSpacing:"0.18em", textTransform:"uppercase", marginBottom:"6px"}}>
-                        UNIT {String(ui + 1).padStart(2, "0")}
+                      <div>
+                        <div style={{fontFamily:"'Courier New',monospace", fontSize:"11px", color: activeUnit === u.name ? "#c8a96e" : "#8a8a8a", letterSpacing:"0.18em", textTransform:"uppercase", marginBottom:"8px"}}>
+                          UNIT {String(ui + 1).padStart(2, "0")}
+                        </div>
+                        <div className="unit-z3-name">{u.name}</div>
                       </div>
-                      <div className="unit-z3-name">{u.name}</div>
                       <div className="unit-z3-specs">
                         {u.specs.map(s => <span key={s} className="unit-z3-spec">{s}</span>)}
                       </div>
@@ -1359,15 +1395,54 @@ export default function PropertyDetailClient({ slug }) {
             </div>
 
             <div className="panel-sidebar">
-              <div className="sidebar-block"><div className="sidebar-accent-line"/><div className="sidebar-label">Total Areas</div><div className="sidebar-value">{dynamicUnits.length}</div><div className="sidebar-sub">Click to preview photos</div></div>
-              {isRestaurant ? (
-                <>{pill1Val && <div className="sidebar-block"><div className="sidebar-label">Dining Capacity</div><div className="sidebar-value">{pill1Val}</div></div>}{pill2Val && <div className="sidebar-block"><div className="sidebar-label">Kitchen Grade</div><div className="sidebar-value">{pill2Val}</div></div>}</>
-              ) : isHospitality ? (
-                <>{pill1Val && <div className="sidebar-block"><div className="sidebar-label">Accommodations</div><div className="sidebar-value">{pill1Val}</div></div>}{pill2Val && <div className="sidebar-block"><div className="sidebar-label">Hosting Capacity</div><div className="sidebar-value">{pill2Val}</div></div>}</>
-              ) : isVenue ? (
-                <>{pill1Val && <div className="sidebar-block"><div className="sidebar-label">Guest Capacity</div><div className="sidebar-value">{pill1Val}</div></div>}{pill2Val && <div className="sidebar-block"><div className="sidebar-label">Setup Grade</div><div className="sidebar-value">{pill2Val}</div></div>}</>
-              ) : (
-                <>{d.beds > 0 && <div className="sidebar-block"><div className="sidebar-label">Bedrooms</div><div className="sidebar-value">{d.beds} rooms</div></div>}{d.baths > 0 && <div className="sidebar-block"><div className="sidebar-label">Bathrooms</div><div className="sidebar-value">{d.baths} baths</div></div>}</>
+              <div className="sidebar-block"><div className="sidebar-accent-line"/><div className="sidebar-label">Total Areas</div><div className="sidebar-value">{dynamicUnits.length}</div></div>
+
+              {/* Photo preview thumbnail */}
+              {photos && photos.length > 0 && photos[0] && (
+                <div style={{width:"100%", height:"120px", minHeight:"120px", flexShrink:0, borderRadius:"4px", overflow:"hidden", border:"0.5px solid #262626", backgroundImage:`url(${photos[currentImageIndex] || photos[0]})`, backgroundSize:"cover", backgroundPosition:"center"}}/>
+              )}
+
+              {/* Totals */}
+              <div style={{display:"flex", flexDirection:"column", gap:"2px"}}>
+                {isRestaurant ? (
+                  <>{pill1Val && <div className="sidebar-block"><div className="sidebar-label">Dining Capacity</div><div className="sidebar-value">{pill1Val}</div></div>}{pill2Val && <div className="sidebar-block"><div className="sidebar-label">Kitchen Grade</div><div className="sidebar-value">{pill2Val}</div></div>}</>
+                ) : isHospitality ? (
+                  <>{pill1Val && <div className="sidebar-block"><div className="sidebar-label">Accommodations</div><div className="sidebar-value">{pill1Val}</div></div>}{pill2Val && <div className="sidebar-block"><div className="sidebar-label">Hosting Capacity</div><div className="sidebar-value">{pill2Val}</div></div>}</>
+                ) : isVenue ? (
+                  <>{pill1Val && <div className="sidebar-block"><div className="sidebar-label">Guest Capacity</div><div className="sidebar-value">{pill1Val}</div></div>}{pill2Val && <div className="sidebar-block"><div className="sidebar-label">Setup Grade</div><div className="sidebar-value">{pill2Val}</div></div>}</>
+                ) : (
+                  <>
+                    {d.beds > 0 && <div className="sidebar-block"><div className="sidebar-label">Total Bedrooms</div><div className="sidebar-value">{d.beds}</div></div>}
+                    {d.baths > 0 && <div className="sidebar-block"><div className="sidebar-label">Total Bathrooms</div><div className="sidebar-value">{d.baths}</div></div>}
+                  </>
+                )}
+                {d.floor_sqm > 0 && <div className="sidebar-block"><div className="sidebar-label">Total Floor Area</div><div className="sidebar-value">{d.floor_sqm} sqm</div></div>}
+              </div>
+
+              {/* Clickable unit index */}
+              {dynamicUnits.length > 0 && (
+                <div className="sidebar-block">
+                  <div className="sidebar-label" style={{marginBottom:"10px"}}>Unit Index</div>
+                  <div style={{display:"flex", flexDirection:"column", gap:"2px"}}>
+                    {dynamicUnits.map((u, ui) => {
+                      const activeUnit = selectedUnit || dynamicUnits[0].name;
+                      return (
+                        <button
+                          key={u.name}
+                          onClick={() => {
+                            setSelectedUnit(u.name);
+                            const el = document.getElementById(`unit-row-${ui}`);
+                            if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+                          }}
+                          style={{display:"flex", alignItems:"baseline", gap:"10px", width:"100%", textAlign:"left", background:"none", border:"none", borderBottom:"1px solid #262626", padding:"9px 0", cursor:"pointer"}}
+                        >
+                          <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color: activeUnit === u.name ? "#c8a96e" : "#6a6a6a", letterSpacing:"0.12em", flexShrink:0}}>{String(ui + 1).padStart(2, "0")}</span>
+                          <span style={{fontFamily:"Georgia,serif", fontSize:"13px", color: activeUnit === u.name ? "#f0ede8" : "#8a8a8a", lineHeight:1.3}}>{u.name}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               )}
             </div>
           </div>
@@ -1397,7 +1472,7 @@ export default function PropertyDetailClient({ slug }) {
               )}
 
               {d.universe_summary && (
-                <p style={{fontFamily:"Georgia,serif", fontSize:"clamp(18px,2.2vw,22px)", color:"#f0ede8", lineHeight:1.85, margin:"0 0 8px", maxWidth:"620px"}}>
+                <p style={{fontFamily:"Georgia,serif", fontSize:"clamp(20px,2.5vw,26px)", color:"#f0ede8", lineHeight:1.85, margin:"0 0 8px", maxWidth:"640px"}}>
                   {d.universe_summary}
                 </p>
               )}
@@ -1426,9 +1501,19 @@ export default function PropertyDetailClient({ slug }) {
             </div>
 
             <div className="panel-sidebar">
-              {d.building_style && <div className="sidebar-block"><div className="sidebar-accent-line"/><div className="sidebar-label">Building style</div><div className="sidebar-value">{d.building_style}</div></div>}
-              {d.architect_designer && <div className="sidebar-block"><div className="sidebar-label">Architect</div><div className="sidebar-value">{d.architect_designer}</div></div>}
-              {d.scoutit_verdict && <div className="sidebar-block"><div className="sidebar-label">Verdict</div><div className="sidebar-value" style={{color:"#4caf7d", fontSize:"12px", lineHeight:1.4}}>{d.scoutit_verdict}</div></div>}
+              {/* Verdict — the ScoutIt editorial stamp, premium & final */}
+              {d.scoutit_verdict && (
+                <div className="sidebar-block" style={{paddingBottom:"22px", borderBottom:"1px solid #262626", marginBottom:"4px"}}>
+                  <div className="sidebar-accent-line" style={{background:"#c8a96e"}}/>
+                  <div style={{fontFamily:"'Courier New',monospace", fontSize:"11px", color:"#c8a96e", letterSpacing:"0.18em", textTransform:"uppercase", marginBottom:"10px"}}>ScoutIt Verdict</div>
+                  <div style={{fontFamily:"Georgia,serif", fontSize:"20px", color:"#c8a96e", lineHeight:1.35}}>{d.scoutit_verdict}</div>
+                </div>
+              )}
+              {d.building_style && <div className="sidebar-block"><div style={{fontFamily:"'Courier New',monospace", fontSize:"11px", color:"#8a8a8a", letterSpacing:"0.16em", textTransform:"uppercase", marginBottom:"7px"}}>Building Style</div><div style={{fontFamily:"Georgia,serif", fontSize:"17px", color:"#f0ede8"}}>{d.building_style}</div></div>}
+              {d.architect_designer && <div className="sidebar-block"><div style={{fontFamily:"'Courier New',monospace", fontSize:"11px", color:"#8a8a8a", letterSpacing:"0.16em", textTransform:"uppercase", marginBottom:"7px"}}>Architect</div><div style={{fontFamily:"Georgia,serif", fontSize:"17px", color:"#f0ede8"}}>{d.architect_designer}</div></div>}
+              {d.year_built && <div className="sidebar-block"><div style={{fontFamily:"'Courier New',monospace", fontSize:"11px", color:"#8a8a8a", letterSpacing:"0.16em", textTransform:"uppercase", marginBottom:"7px"}}>Year Built</div><div style={{fontFamily:"Georgia,serif", fontSize:"17px", color:"#f0ede8"}}>{d.year_built}</div></div>}
+              {d.title_status && <div className="sidebar-block"><div style={{fontFamily:"'Courier New',monospace", fontSize:"11px", color:"#8a8a8a", letterSpacing:"0.16em", textTransform:"uppercase", marginBottom:"7px"}}>Title Status</div><div style={{fontFamily:"Georgia,serif", fontSize:"17px", color:"#4caf7d"}}>{d.title_status}</div></div>}
+              {d.spaceCategory && <div className="sidebar-block"><div style={{fontFamily:"'Courier New',monospace", fontSize:"11px", color:"#8a8a8a", letterSpacing:"0.16em", textTransform:"uppercase", marginBottom:"7px"}}>Space Category</div><div style={{fontFamily:"Georgia,serif", fontSize:"17px", color:"#f0ede8"}}>{d.spaceCategory}</div></div>}
             </div>
           </div>
 
@@ -1494,23 +1579,35 @@ export default function PropertyDetailClient({ slug }) {
                 <ReactionButtons propertyId={slug || "batasan-hills"} propertyTitle={d.title} category={d.property_type} city={d.city}/>
               </div>
 
-              {/* Price — only when an authorized party has provided one */}
-              {d.authorized_price && (
-                <>
-                  <div style={{height:"1px", background:"#262626", margin:"28px 0 24px"}}/>
-                  <div style={{padding:"20px 24px", background:"#161616", border:"0.5px solid #262626", borderRadius:"4px"}}>
-                    <div style={{fontFamily:"Georgia,serif", fontSize:"clamp(24px,3.4vw,34px)", fontWeight:400, color:"#f0ede8"}}>{d.authorized_price}</div>
-                    {d.price_source && (
-                      <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", textTransform:"uppercase", letterSpacing:"0.12em", color:"#8a8a8a", marginTop:"8px"}}>
-                        Price indicated by {d.price_source}
+              {/* Price — only when an authorized party has provided one ("N/A"/empty suppresses it) */}
+              {(() => {
+                const hasPrice = d.listed_price && d.listed_price.trim().toUpperCase() !== "N/A";
+                return (
+                  <>
+                    <div style={{height:"1px", background:"#262626", margin:"28px 0 24px"}}/>
+                    {hasPrice ? (
+                      <div style={{padding:"22px 24px", background:"#161616", border:"0.5px solid #262626", borderRadius:"4px"}}>
+                        <div style={{fontFamily:"Georgia,serif", fontSize:"clamp(30px,4.2vw,44px)", fontWeight:400, color:"#f0ede8", lineHeight:1.1}}>{d.listed_price}</div>
+                        {d.price_source && (
+                          <div style={{fontFamily:"'Courier New',monospace", fontSize:"11px", letterSpacing:"0.1em", color:"#8a8a8a", marginTop:"10px"}}>
+                            Price indicated by {d.price_source}
+                          </div>
+                        )}
+                        {d.price_notes && (
+                          <div style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#a0a0a0", lineHeight:1.6, marginTop:"10px"}}>{d.price_notes}</div>
+                        )}
+                        <p style={{fontFamily:"system-ui,-apple-system,sans-serif", fontSize:"11.5px", color:"#8a8a8a", lineHeight:1.7, marginTop:"16px"}}>
+                          Price estimates are provided solely by authorized sellers, owners, or licensed property managers. ScoutIt does not set, verify, or guarantee any stated price. For inquiries, speak directly with an authorized representative.
+                        </p>
                       </div>
+                    ) : (
+                      <Link href={`/property/${slug || "batasan-hills"}/brokers`} style={{display:"inline-block", fontFamily:"Georgia,serif", fontSize:"17px", color:"#c8a96e", textDecoration:"none", letterSpacing:"0.01em"}}>
+                        For pricing, connect with an authorized broker →
+                      </Link>
                     )}
-                    <p style={{fontFamily:"system-ui,-apple-system,sans-serif", fontSize:"11px", color:"#6a6a6a", lineHeight:1.7, marginTop:"14px"}}>
-                      Price estimates are provided solely by authorized sellers, owners, or licensed property managers. ScoutIt does not set, verify, or guarantee any stated price. All transactions are subject to RA 9646 (RESA Law Philippines). ScoutIt connects — brokers close.
-                    </p>
-                  </div>
-                </>
-              )}
+                  </>
+                );
+              })()}
 
               <div style={{height:"1px", background:"#262626", margin:"28px 0 24px"}}/>
 

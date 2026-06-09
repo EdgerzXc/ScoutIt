@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
-export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData = [], routeDestination = "", routeLabel = "", mapboxToken = "" }) {
+export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData = [], routeDestination = "", routeDestCoords = null, routeLabel = "", mapboxToken = "" }) {
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
   const hoveredRef = useRef(null);
@@ -127,20 +127,27 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
         });
       });
 
-      // ── Optional: Mapbox geocode + Directions gold route line ──
-      if (routeDestination && mapboxToken) {
+      // ── Optional: Mapbox Directions gold route line ──
+      // Uses explicit destination coordinates when provided (reliable),
+      // otherwise falls back to geocoding the destination name.
+      if ((routeDestCoords || routeDestination) && mapboxToken) {
         (async () => {
           try {
-            // 1. Geocode the destination name, biased to the property's vicinity (PH only)
-            const geoUrl =
-              `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(routeDestination)}.json` +
-              `?proximity=${position[1]},${position[0]}&country=ph&limit=1&access_token=${mapboxToken}`;
-            const geoRes = await fetch(geoUrl);
-            const geoData = await geoRes.json();
-            if (!geoData.features || geoData.features.length === 0) return;
-            const [destLng, destLat] = geoData.features[0].center;
-            // Prefer the caller-supplied display label over the geocoder's guess
-            const destName = routeLabel || geoData.features[0].text || routeDestination;
+            let destLat, destLng;
+            if (Array.isArray(routeDestCoords) && routeDestCoords.length === 2) {
+              [destLat, destLng] = routeDestCoords;
+            } else {
+              // Geocode the destination name, biased to the property's vicinity (PH only)
+              const geoUrl =
+                `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(routeDestination)}.json` +
+                `?proximity=${position[1]},${position[0]}&country=ph&limit=1&access_token=${mapboxToken}`;
+              const geoRes = await fetch(geoUrl);
+              const geoData = await geoRes.json();
+              if (!geoData.features || geoData.features.length === 0) return;
+              [destLng, destLat] = geoData.features[0].center;
+            }
+            // Prefer the caller-supplied display label
+            const destName = routeLabel || routeDestination || "Nearest transit hub";
 
             // 2. Driving directions from property → destination
             const dirUrl =
@@ -257,7 +264,7 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
         mapInstance.current = null;
       }
     };
-  }, [lat, lng, propertyTitle, vicinityData, routeDestination, routeLabel, mapboxToken]);
+  }, [lat, lng, propertyTitle, vicinityData, routeDestination, routeDestCoords, routeLabel, mapboxToken]);
 
   // Compute sweep line coordinates based on animation angle
   const sweepRad = (sweepAngle * Math.PI) / 180;
@@ -344,7 +351,8 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
         .map-view-wrapper {
           position: relative;
           width: 100%;
-          height: 380px;
+          height: 100%;
+          min-height: 360px;
           border: 0.5px solid #262626;
           border-radius: 8px;
           overflow: hidden;

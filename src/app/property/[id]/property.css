@@ -378,12 +378,12 @@
 .move-cta-secondary:hover { background: var(--accent-dim); transform: none; }
 .zone-story::after { content: ''; position: absolute; bottom: -80px; left: 15%; width: 45%; height: 160px; background: radial-gradient(ellipse, rgba(var(--accent-rgb), 0.04) 0%, transparent 70%); pointer-events: none; }
 .units-z3-list { display: flex; flex-direction: column; gap: 8px; }
-.unit-z3-row { display: grid; grid-template-columns: 1fr 3fr; gap: 16px; align-items: start; padding: 14px 18px; border-radius: 5px; background: var(--surface); border: 0.5px solid var(--border); cursor: pointer; transition: background 0.2s, border-color 0.2s; }
+.unit-z3-row { display: grid; grid-template-columns: 1fr 2.4fr; gap: 20px; align-items: start; padding: 20px 22px; border-radius: 5px; background: var(--surface); border: 0.5px solid var(--border); cursor: pointer; transition: background 0.2s, border-color 0.2s; scroll-margin-top: 120px; }
 .unit-z3-row:hover { background: var(--surface2); border-color: var(--border-mid); }
 .unit-z3-row.selected { background: var(--accent-dim); border-color: var(--accent); border-left: 3px solid var(--accent); }
-.unit-z3-name { font-size: 16px; font-weight: 500; color: #f0ede8; padding-top: 2px; }
-.unit-z3-specs { display: flex; flex-wrap: wrap; gap: 8px; }
-.unit-z3-spec { font-size: 12px; color: var(--text-secondary); background: var(--surface3); padding: 4px 10px; border-radius: 12px; border: 0.5px solid var(--border); }
+.unit-z3-name { font-family: Georgia, serif; font-size: 22px; font-weight: 500; color: #f0ede8; padding-top: 2px; letter-spacing: 0.01em; }
+.unit-z3-specs { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 4px; }
+.unit-z3-spec { font-size: 14px; color: var(--text-secondary); background: var(--surface3); padding: 8px 15px; border-radius: 4px; border: 0.5px solid var(--border); line-height: 1.3; }
 .unit-z3-row.selected .unit-z3-spec { background: rgba(var(--accent-rgb), 0.08); border-color: var(--accent-border); color: var(--text-primary); }
 .units-panel { position: absolute; top: 72px; left: 0; right: 0; background: var(--surface); border-bottom: 0.5px solid var(--border-mid); border-top: 0.5px solid var(--accent-border); z-index: 50; max-height: 0; overflow: hidden; transition: max-height 0.3s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease; opacity: 0; pointer-events: none; }
 .units-panel.open { max-height: 200px; opacity: 1; pointer-events: all; }
