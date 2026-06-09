@@ -130,6 +130,7 @@ export default function Home() {
         speed: rand(0.4, 0.9),
         lo: 0.03, hi: 0.07,
         inner: i === 0,
+        outer: i === 3,
       }));
     };
 
@@ -160,6 +161,19 @@ export default function Home() {
       ctx.fillStyle = coreGrad;
       ctx.fill();
 
+      // Black-hole darkness pulse — expands to pull light in, contracts to release it.
+      // 5s cycle, offset 2.5s from the outer ring so they alternate (dark center while
+      // outer ring brightens, then center glows while outer ring dims).
+      const darkF = 0.5 + 0.5 * Math.sin((t - 2.5) * (2 * Math.PI / 5));
+      const darkR = Math.min(w, h) * (0.10 + 0.14 * darkF);
+      const darkGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, darkR);
+      darkGrad.addColorStop(0, `rgba(0,0,0,${(0.7 * darkF).toFixed(3)})`);
+      darkGrad.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.beginPath();
+      ctx.arc(cx, cy, darkR, 0, Math.PI * 2);
+      ctx.fillStyle = darkGrad;
+      ctx.fill();
+
       // Pulse shockwave rings — emanate every 3-4s, decelerating as they expand
       if (t >= nextPulseAt) {
         pulseRings.push({ age: 0 });
@@ -181,11 +195,19 @@ export default function Home() {
 
       // Event-horizon rings (subtle breathing) + rotating lensing arc
       rings.forEach((ring) => {
-        const op = ring.lo + (ring.hi - ring.lo) * (0.5 + 0.5 * Math.sin(t * ring.speed + ring.phase));
+        let op, lw = 1;
+        if (ring.outer) {
+          // Bold 4s breathe: opacity 0.05→0.35, stroke 1→2.5px
+          const f = 0.5 + 0.5 * Math.sin(t * (2 * Math.PI / 4));
+          op = 0.05 + 0.30 * f;
+          lw = 1 + 1.5 * f;
+        } else {
+          op = ring.lo + (ring.hi - ring.lo) * (0.5 + 0.5 * Math.sin(t * ring.speed + ring.phase));
+        }
         ctx.beginPath();
         ctx.arc(cx, cy, ring.r, 0, Math.PI * 2);
         ctx.strokeStyle = `rgba(200,169,110,${op.toFixed(3)})`;
-        ctx.lineWidth = 1;
+        ctx.lineWidth = lw;
         ctx.stroke();
         if (ring.inner) {
           const a0 = (t * 0.25) % (Math.PI * 2);
@@ -735,22 +757,28 @@ export default function Home() {
               role="presentation"
             >
               <span className="title-ufo-underglow" />
-              <svg className="title-ufo-svg" viewBox="0 0 90 54" fill="none" xmlns="http://www.w3.org/2000/svg">
-                {/* underside glow ring */}
-                <ellipse cx="45" cy="35" rx="33" ry="6" stroke="#c8a96e" strokeWidth="0.5" opacity="0.55" />
-                {/* saucer body */}
-                <ellipse cx="45" cy="32" rx="40" ry="9" fill="#1a1a1a" stroke="#c8a96e" strokeWidth="1.5" />
-                {/* dome / cockpit */}
-                <path d="M30 27 Q45 7 60 27 Z" fill="#1e1e1e" stroke="#c8a96e" strokeWidth="0.8" />
-                {/* porthole windows — blink independently */}
-                <circle className="porthole porthole-1" cx="38" cy="20" r="2.2" />
-                <circle className="porthole porthole-2" cx="45" cy="17.5" r="2.2" />
-                <circle className="porthole porthole-3" cx="52" cy="20" r="2.2" />
-                {/* underside lights — static gold glow */}
-                <circle className="ufo-belly" cx="28" cy="36" r="1.6" />
-                <circle className="ufo-belly" cx="39" cy="37.5" r="1.6" />
-                <circle className="ufo-belly" cx="51" cy="37.5" r="1.6" />
-                <circle className="ufo-belly" cx="62" cy="36" r="1.6" />
+              <span className="title-ufo-ping" />
+              <svg className="title-ufo-svg" viewBox="0 0 120 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <filter id="ufoRimGlow" x="-30%" y="-30%" width="160%" height="160%">
+                    <feDropShadow dx="0" dy="0" stdDeviation="3" floodColor="#c8a96e" floodOpacity="0.55" />
+                  </filter>
+                </defs>
+                {/* saucer body — wide disc */}
+                <ellipse cx="60" cy="44" rx="55" ry="13" fill="#1a1a1a" stroke="#c8a96e" strokeWidth="2" filter="url(#ufoRimGlow)" />
+                {/* belly — slightly lighter underside */}
+                <ellipse cx="60" cy="48" rx="40" ry="8" fill="#222222" />
+                {/* belly lights — 4 evenly spaced gold dots */}
+                <circle className="ufo-belly" cx="36" cy="49" r="2.2" />
+                <circle className="ufo-belly" cx="52" cy="51" r="2.2" />
+                <circle className="ufo-belly" cx="68" cy="51" r="2.2" />
+                <circle className="ufo-belly" cx="84" cy="49" r="2.2" />
+                {/* dome / cockpit — prominent, green-tinted */}
+                <path d="M37 38 Q60 4 83 38 Z" fill="#1e2a1e" stroke="#c8a96e" strokeWidth="1" />
+                {/* porthole windows — sequential 1-2-3 blink */}
+                <circle className="porthole porthole-1" cx="49" cy="28" r="4" />
+                <circle className="porthole porthole-2" cx="60" cy="24" r="4" />
+                <circle className="porthole porthole-3" cx="71" cy="28" r="4" />
               </svg>
             </span>
             {fireId > 0 && <span key={fireId} className="title-beam" />}
@@ -776,7 +804,10 @@ export default function Home() {
         {/* Scroll indicator */}
         <div className="hook-scroll-indicator">
           <span className="scroll-text">Scroll to explore</span>
-          <div className="scroll-line"></div>
+          <div className="scroll-chevrons">
+            <span className="scroll-chev scroll-chev-1">↓</span>
+            <span className="scroll-chev scroll-chev-2">↓</span>
+          </div>
         </div>
       </section>
 
@@ -1635,7 +1666,7 @@ export default function Home() {
           flex-direction: column;
           align-items: center;
           justify-content: flex-start;
-          height: 120px;
+          height: 150px;
           margin-bottom: 10px;
         }
         .title-ufo {
@@ -1643,41 +1674,60 @@ export default function Home() {
           display: flex;
           flex-direction: column;
           align-items: center;
+          padding: 16px 24px;          /* generous, reliable click target around the saucer */
+          cursor: pointer;
+          z-index: 5;
           animation: titleUfoFloat 3s ease-in-out infinite;
         }
         .title-ufo.powering { animation: none; }   /* stop floating during power-up */
         /* Soft gold underglow — UFO emits faint warmth downward */
         .title-ufo-underglow {
           position: absolute;
-          top: 64%;
+          top: 60%;
           left: 50%;
           transform: translateX(-50%);
-          width: 160px;
-          height: 80px;
+          width: 180px;
+          height: 90px;
           background: radial-gradient(ellipse at top, rgba(200, 169, 110, 0.12), rgba(200, 169, 110, 0) 70%);
           pointer-events: none;
           z-index: -1;
         }
+        /* Faint gold "I'm alive" pulse ring beneath the saucer every 4s */
+        .title-ufo-ping {
+          position: absolute;
+          top: 56%;
+          left: 50%;
+          width: 60px;
+          height: 60px;
+          margin: -30px 0 0 -30px;
+          border-radius: 50%;
+          border: 1px solid rgba(200, 169, 110, 0.5);
+          pointer-events: none;
+          opacity: 0;
+          z-index: -1;
+          animation: ufoPing 4s ease-out infinite;
+        }
         .title-ufo-svg {
-          width: 90px;
+          width: 104px;
           height: auto;
           display: block;
           animation: titleSaucerTilt 9s ease-in-out infinite;
         }
         .title-ufo-svg .porthole { fill: #00ff88; }
-        .title-ufo-svg .porthole-1 { animation: portBlink 0.8s steps(1, end) infinite; }
-        .title-ufo-svg .porthole-2 { animation: portBlink 1.3s steps(1, end) infinite; }
-        .title-ufo-svg .porthole-3 { animation: portBlink 1.7s steps(1, end) infinite; }
-        .title-ufo.powering .porthole { animation: portPower 0.12s steps(1, end) infinite; }
-        .title-ufo-svg .ufo-belly { fill: rgba(200, 169, 110, 0.5); }
+        /* sequential 1-2-3 blink (delays stagger the same keyframe) */
+        .title-ufo-svg .porthole-1 { animation: portSeq 1.4s linear infinite; animation-delay: 0s; }
+        .title-ufo-svg .porthole-2 { animation: portSeq 1.4s linear infinite; animation-delay: 0.2s; }
+        .title-ufo-svg .porthole-3 { animation: portSeq 1.4s linear infinite; animation-delay: 0.4s; }
+        /* power-up: all three flash together, rapidly, 3x over ~0.5s */
+        .title-ufo.powering .porthole { animation: portPower 0.166s ease-in-out 3; }
+        .title-ufo-svg .ufo-belly { fill: rgba(200, 169, 110, 0.6); }
 
-        /* ── Tractor beam: 4px → 8px trapezoid, extend → hold → fade ── */
+        /* ── Tractor beam: 4px gold, fades to transparent, extend → hold → fade ── */
         .title-beam {
-          width: 8px;
-          height: 58px;
-          margin-top: 3px;
+          width: 4px;
+          height: 60px;
+          margin-top: 2px;
           background: linear-gradient(to bottom, #c8a96e 0%, rgba(200, 169, 110, 0) 100%);
-          clip-path: polygon(25% 0, 75% 0, 100% 100%, 0 100%);
           transform-origin: top center;
           opacity: 0;
           animation: titleBeamSeq 1.3s ease-out forwards;
@@ -1728,14 +1778,23 @@ export default function Home() {
           0%, 100% { transform: rotate(-2.5deg); }
           50%      { transform: rotate(2.5deg); }
         }
-        @keyframes portBlink {
-          0%, 84% { opacity: 1; }
-          90%     { opacity: 0.2; }
-          100%    { opacity: 1; }
+        /* sequential porthole: ON ~0.2s within a 1.4s cycle, staggered by delay */
+        @keyframes portSeq {
+          0%   { opacity: 0.15; }
+          5%   { opacity: 1; }
+          14%  { opacity: 1; }
+          20%  { opacity: 0.15; }
+          100% { opacity: 0.15; }
         }
         @keyframes portPower {
           0%, 100% { opacity: 1; }
           50%      { opacity: 0.15; }
+        }
+        @keyframes ufoPing {
+          0%   { transform: scale(0.5); opacity: 0; }
+          4%   { opacity: 0.6; }
+          25%  { transform: scale(1); opacity: 0; }
+          100% { transform: scale(1); opacity: 0; }
         }
         @keyframes titleBeamSeq {
           0%   { transform: scaleY(0); opacity: 0; }
@@ -1961,23 +2020,43 @@ export default function Home() {
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 16px;
-          animation: fadeIn 1.5s ease 4.5s forwards;
-          opacity: 0;
+          gap: 8px;
+          animation: scrollPulse 2.5s ease-in-out infinite;
+          opacity: 1;
         }
 
         .scroll-text {
-          font-size: 10px;
+          font-family: 'Courier New', monospace;
+          font-size: 11px;
           text-transform: uppercase;
-          letter-spacing: 0.2em;
-          color: #555555;
+          letter-spacing: 4px;
+          color: #888888;
         }
 
-        .scroll-line {
-          width: 1px;
-          height: 60px;
-          background: linear-gradient(to bottom, var(--accent) 0%, transparent 100%);
-          animation: pulseLine 2s infinite;
+        /* Pulsing downward chevrons (top fades in first, then bottom) */
+        .scroll-chevrons {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          line-height: 0.65;
+        }
+        .scroll-chev {
+          font-size: 13px;
+          color: #c8a96e;
+          opacity: 0;
+        }
+        .scroll-chev-1 { animation: chevSeq 1.5s ease-in-out infinite; }
+        .scroll-chev-2 { animation: chevSeq 1.5s ease-in-out infinite; animation-delay: 0.2s; }
+
+        @keyframes scrollPulse {
+          0%, 100% { opacity: 0.5; }
+          50%      { opacity: 1; }
+        }
+        @keyframes chevSeq {
+          0%   { opacity: 0; }
+          30%  { opacity: 0.6; }
+          60%  { opacity: 0.6; }
+          100% { opacity: 0; }
         }
 
         .hero-tagline {
