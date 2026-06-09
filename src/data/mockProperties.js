@@ -474,6 +474,30 @@ export const PROPERTIES_DETAILS = {
     convenience_score: 7.5,
     title_status:      "TCT — Free & Clear",
     scoutit_verdict:   "Highly Recommended — AAA Asset Tier",
+
+    // ── Ch.1 aesthetic ── (Airtable: AestheticTag) ──
+    aesthetic_tag:            "Modern Tropical Filipino",
+    // ── Ch.2 location intelligence ──────────────────
+    flood_zone_status:        "Low-risk zone · Elevated lot, no recorded flooding", // Airtable: FloodZoneStatus
+    zoning_classification:    "R-2 Medium-Density Residential",                       // Airtable: ZoningClassification
+    nearest_highway:          "Commonwealth Avenue · 4 min drive",                    // Airtable: NearestHighway
+    commute_bgc:              "45–60 min",                                            // Airtable: CommuteBGC
+    commute_makati:           "50–65 min",                                            // Airtable: CommuteMakati
+    commute_ortigas:          "30–40 min",                                            // Airtable: CommuteOrtigas
+    public_transport:         "Commonwealth jeepney routes and UV Express vans run along the main corridor, with MRT-7 (under construction) set to add a North Avenue rail link serving the district.", // Airtable: PublicTransport
+    // ── Ch.3 life here ── (Airtable: SafetyPerception / CommunityFeel) ──
+    safety_perception:        "The barangay maintains active community watch and gated subdivision entries. Residents describe the streets as calm and walkable well into the evening, with a steady but unobtrusive security presence.",
+    community_feel:           "A settled, multi-generational neighborhood where families have lived for decades. Sari-sari stores, weekend basketball, and neighborhood chapels anchor a close-knit, low-turnover community.",
+    // ── Ch.5 build plans ────────────────────────────
+    expansion_potential:      "The 180 sqm lot leaves generous setback room for a rear extension or a third-storey addition, with the existing reinforced-concrete frame already engineered to carry an added floor.", // Airtable: ExpansionPotential
+    zoning_type:              "R-2 Residential",                                       // Airtable: ZoningType
+    developer_name:           "Owner-built (private commission)",                      // Airtable: DeveloperName
+    developer_notes:          "Built under direct owner supervision with an independent structural engineer; not part of a mass-housing tract.", // Airtable: DeveloperNotes
+    structural_notes:         "Reinforced concrete frame on isolated footings, CHB walls, long-span steel trusses over the living area.", // Airtable: StructuralNotes
+    // ── Ch.8 universe ───────────────────────────────
+    architect_designer:       "Arch. Lance Reyes · LR Atelier",                        // Airtable: ArchitectDesigner
+    building_style:           "Tropical Modernist",                                    // Airtable: BuildingStyle
+    universe_summary:         "Batasan Hills House & Lot is a quietly confident family home that trades flash for longevity — 120 sqm of well-ventilated, light-filled space on a 180 sqm elevated lot in one of Quezon City's most stable residential corridors. Its tropical-modernist frame, clean title, and room to expand make it equally compelling as a forever home or a long-hold appreciating asset. This is a space that rewards living in it as much as owning it.", // Airtable: UniverseSummary
     accordion_1_title: "Home Feel & Comfort",
     accordion_1_rating:"High",
     accordion_2_title: "Space Usability",
@@ -1167,10 +1191,42 @@ export function getCATEGORY_PREVIEWS() {
   return CATEGORY_PREVIEWS;
 }
 
+// ═══════════════════════════════════════════════════════════════
+// NEW CMS FIELDS (Chapter Redesign) — blank defaults applied to every
+// property so empty-field suppression works uniformly. To surface any
+// of these in the live CMS, add the matching Airtable column to
+// PROPERTIES_CMS (Airtable name in the comment) and map it in
+// src/lib/airtable.js → fetchProperties().
+// ═══════════════════════════════════════════════════════════════
+export const NEW_CMS_FIELD_DEFAULTS = {
+  aesthetic_tag:          "", // AestheticTag
+  flood_zone_status:      "", // FloodZoneStatus
+  zoning_classification:  "", // ZoningClassification
+  nearest_highway:        "", // NearestHighway
+  commute_bgc:            "", // CommuteBGC
+  commute_makati:         "", // CommuteMakati
+  commute_ortigas:        "", // CommuteOrtigas
+  public_transport:       "", // PublicTransport
+  safety_perception:      "", // SafetyPerception
+  community_feel:         "", // CommunityFeel
+  expansion_potential:    "", // ExpansionPotential
+  zoning_type:            "", // ZoningType
+  developer_name:         "", // DeveloperName
+  developer_notes:        "", // DeveloperNotes
+  structural_notes:       "", // StructuralNotes
+  architect_designer:     "", // ArchitectDesigner
+  building_style:         "", // BuildingStyle
+  universe_summary:       "", // UniverseSummary
+  // Ch.10 — only render a price when an authorized party has provided one
+  authorized_price:       "", // AuthorizedPrice  (e.g. "₱18,500,000")
+  price_source:           "", // PriceSource      (e.g. "Owner", "Property Manager")
+};
+
 export function getProperties(category = null) {
   if (!category) {
     return Object.keys(PROPERTIES_DETAILS).map(slug => ({
       slug,
+      ...NEW_CMS_FIELD_DEFAULTS,
       ...PROPERTIES_DETAILS[slug]
     }));
   }
@@ -1180,6 +1236,7 @@ export function getProperties(category = null) {
     .filter(slug => PROPERTIES_DETAILS[slug].city.toLowerCase().includes(cleanCat) || PROPERTIES_DETAILS[slug].property_type.toLowerCase().includes(cleanCat))
     .map(slug => ({
       slug,
+      ...NEW_CMS_FIELD_DEFAULTS,
       ...PROPERTIES_DETAILS[slug]
     }));
 }
@@ -1187,7 +1244,7 @@ export function getProperties(category = null) {
 export function getPropertyBySlug(slug) {
   const normSlug = slug ? slug.toLowerCase().trim() : "";
   const entry = PROPERTIES_DETAILS[normSlug];
-  if (entry) return entry;
+  if (entry) return { ...NEW_CMS_FIELD_DEFAULTS, ...entry };
   
   // Return a generic fallback if slug is not matched
   return {

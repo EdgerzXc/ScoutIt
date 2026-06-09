@@ -66,6 +66,7 @@ export default function PropertyDetailClient({ slug }) {
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [selectedUnit, setSelectedUnit] = useState(null);
   const [whereToTab,        setWhereToTab]        = useState("map");
+  const [locTab,            setLocTab]            = useState("map");
 
   // Per-panel accordion state (independent per section)
   const [accSpace,    setAccSpace]    = useState(null);
@@ -244,6 +245,13 @@ export default function PropertyDetailClient({ slug }) {
     pill2Label = "Setup Grade";
     pill2Icon = <><circle cx="7" cy="7" r="5"/><path d="M7 2v2M7 10v2M2 7h2M10 7h2" strokeLinecap="round"/></>;
   }
+
+  // Emoji icons for the Chapter 1 editorial stat block
+  let pill1Emoji = "🛏";
+  let pill2Emoji = "🚿";
+  if (isRestaurant)      { pill1Emoji = "🍽"; pill2Emoji = "🔪"; }
+  else if (isHospitality){ pill1Emoji = "🛎"; pill2Emoji = "👥"; }
+  else if (isVenue)      { pill1Emoji = "👥"; pill2Emoji = "🎚"; }
 
   // ── Build Dynamic Units List ───────────────────
   const dynamicUnits = [];
@@ -538,6 +546,23 @@ export default function PropertyDetailClient({ slug }) {
   const hasWalk = d.whereTo?.some(p => p.distance?.toLowerCase().includes("walk"));
   const walkabilitySub = hasWalk ? "Essentials within walking distance" : "Vehicle recommended for errands";
 
+  // ── Chapter 2 — Mapbox route to nearest transit ──
+  const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || "";
+  const transitLabel = publicTransitObj?.name || "";
+  // Clean the name for geocoding: drop parentheticals, "stops", normalize "Ave"
+  const transitDestination = transitLabel
+    ? `${transitLabel
+        .replace(/\(.*?\)/g, "")
+        .replace(/\b(jeepney|bus)?\s*stops?\b/gi, "")
+        .replace(/\bAve\b/gi, "Avenue")
+        .trim()}, ${d.city || "Metro Manila"}, Philippines`
+    : "";
+  const commuteCards = [
+    { label: "BGC",     value: d.commute_bgc },
+    { label: "Makati",  value: d.commute_makati },
+    { label: "Ortigas", value: d.commute_ortigas },
+  ].filter(c => c.value);
+
   // ── Where To renderer ─────────────────────────
   const renderWhereTo = () => {
     if (!d.whereTo || d.whereTo.length === 0) {
@@ -796,15 +821,15 @@ export default function PropertyDetailClient({ slug }) {
 
             <div className="nav-divider" />
 
-            {/* Expansion Node */}
+            {/* Services */}
             <div
-              className={`nav-chapter nav-chapter--expansion ${activeTab === "expansion" ? "active" : ""}`}
-              onClick={() => handleTabClick("expansion")}
+              className={`nav-chapter ${activeTab === "services" ? "active" : ""}`}
+              onClick={() => handleTabClick("services")}
             >
               <svg className="chapter-icon" viewBox="0 0 20 20" fill="none">
-                <text x="50%" y="58%" dominantBaseline="middle" textAnchor="middle" fontSize="13" fill="currentColor" fontFamily="Georgia, serif" fontStyle="italic">?</text>
+                <path d="M10 2.5l1.9 3.9 4.3.6-3.1 3 .7 4.3L10 16.3 6.3 17.3l.7-4.3-3.1-3 4.3-.6z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/>
               </svg>
-              <span className="chapter-label">Expansion</span>
+              <span className="chapter-label">Services</span>
             </div>
 
             <div className="nav-divider" />
@@ -837,67 +862,32 @@ export default function PropertyDetailClient({ slug }) {
               </div>
 
               {(d.aesthetic_tag || d.accordion_3_rating) && (
-                <div style={{marginBottom:"28px"}}>
-                  <span style={{fontFamily:"Georgia,serif", fontSize:"13px", color:"#c8a96e", border:"0.5px solid rgba(200,169,110,0.35)", padding:"5px 14px", borderRadius:"2px", letterSpacing:"0.06em"}}>
+                <div style={{marginBottom:"30px"}}>
+                  <span style={{fontFamily:"Georgia,serif", fontStyle:"italic", fontSize:"clamp(22px,3vw,30px)", fontWeight:400, color:"#c8a96e", letterSpacing:"0.01em", lineHeight:1.2}}>
                     {d.aesthetic_tag || d.accordion_3_rating}
                   </span>
                 </div>
               )}
 
-              <div style={{display:"flex", flexWrap:"wrap", gap:"28px 52px", margin:"0 0 32px"}}>
-                {pill1Val && pill1Val !== 0 && (
-                  <div>
-                    <div style={{fontFamily:"Georgia,serif", fontSize:"clamp(40px,5vw,60px)", fontWeight:400, color:"#f0ede8", lineHeight:1}}>{pill1Val}</div>
-                    <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#8a8a8a", letterSpacing:"0.22em", textTransform:"uppercase", marginTop:"8px"}}>{pill1Label}</div>
+              <div style={{display:"flex", flexWrap:"wrap", gap:"30px 56px", margin:"0 0 32px"}}>
+                {[
+                  pill1Val && pill1Val !== 0 ? { icon: pill1Emoji, val: pill1Val, label: pill1Label } : null,
+                  pill2Val && pill2Val !== 0 ? { icon: pill2Emoji, val: pill2Val, label: pill2Label } : null,
+                  d.floor_sqm > 0 ? { icon: "📐", val: d.floor_sqm, label: "sqm floor" } : null,
+                  d.parking > 0 ? { icon: "🚗", val: d.parking, label: "Parking Slots" } : null,
+                  d.lot_sqm > 0 ? { icon: "🌿", val: d.lot_sqm, label: "Lot sqm" } : null,
+                ].filter(Boolean).map((stat, i) => (
+                  <div key={i}>
+                    <div style={{fontSize:"18px", lineHeight:1, marginBottom:"12px", opacity:0.9}}>{stat.icon}</div>
+                    <div style={{fontFamily:"Georgia,serif", fontSize:"clamp(42px,5vw,62px)", fontWeight:400, color:"#f0ede8", lineHeight:1}}>{stat.val}</div>
+                    <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#8a8a8a", letterSpacing:"0.22em", textTransform:"uppercase", marginTop:"8px"}}>{stat.label}</div>
                   </div>
-                )}
-                {pill2Val && pill2Val !== 0 && (
-                  <div>
-                    <div style={{fontFamily:"Georgia,serif", fontSize:"clamp(40px,5vw,60px)", fontWeight:400, color:"#f0ede8", lineHeight:1}}>{pill2Val}</div>
-                    <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#8a8a8a", letterSpacing:"0.22em", textTransform:"uppercase", marginTop:"8px"}}>{pill2Label}</div>
-                  </div>
-                )}
-                {d.floor_sqm > 0 && (
-                  <div>
-                    <div style={{fontFamily:"Georgia,serif", fontSize:"clamp(40px,5vw,60px)", fontWeight:400, color:"#f0ede8", lineHeight:1}}>{d.floor_sqm}</div>
-                    <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#8a8a8a", letterSpacing:"0.22em", textTransform:"uppercase", marginTop:"8px"}}>sqm floor</div>
-                  </div>
-                )}
-                {d.parking > 0 && (
-                  <div>
-                    <div style={{fontFamily:"Georgia,serif", fontSize:"clamp(40px,5vw,60px)", fontWeight:400, color:"#f0ede8", lineHeight:1}}>{d.parking}</div>
-                    <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#8a8a8a", letterSpacing:"0.22em", textTransform:"uppercase", marginTop:"8px"}}>Parking Slots</div>
-                  </div>
-                )}
-                {d.lot_sqm > 0 && (
-                  <div>
-                    <div style={{fontFamily:"Georgia,serif", fontSize:"clamp(40px,5vw,60px)", fontWeight:400, color:"#f0ede8", lineHeight:1}}>{d.lot_sqm}</div>
-                    <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#8a8a8a", letterSpacing:"0.22em", textTransform:"uppercase", marginTop:"8px"}}>Lot sqm</div>
-                  </div>
-                )}
+                ))}
               </div>
 
-              <div style={{height:"1px", background:"#262626", margin:"0 0 28px"}}/>
-
-              {d.accordion_3_text && (
-                <p style={{fontFamily:"Georgia,serif", fontSize:"16px", color:"#f0ede8", lineHeight:1.85, margin:"0 0 28px", maxWidth:"560px"}}>
-                  {d.accordion_3_text}
-                </p>
-              )}
+              <div style={{height:"1px", background:"#262626", margin:"0 0 24px"}}/>
 
               <div style={{display:"flex", flexDirection:"column"}}>
-                {d.noise_level_text && (
-                  <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626"}}>
-                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Noise Level</span>
-                    <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right", maxWidth:"55%"}}>{d.noise_level_text}</span>
-                  </div>
-                )}
-                {d.ventilation && (
-                  <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626"}}>
-                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Ventilation</span>
-                    <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right", maxWidth:"55%"}}>{d.ventilation}</span>
-                  </div>
-                )}
                 {d.ceiling_height_text && (
                   <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626"}}>
                     <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Ceiling Height</span>
@@ -912,16 +902,22 @@ export default function PropertyDetailClient({ slug }) {
                 )}
                 {d.outdoor_description && d.outdoor_description !== "None" && (
                   <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626"}}>
-                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Outdoor</span>
+                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Outdoor Space</span>
                     <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right", maxWidth:"55%"}}>{d.outdoor_description}</span>
                   </div>
                 )}
               </div>
 
+              {d.accordion_3_text && (
+                <p style={{fontFamily:"Georgia,serif", fontSize:"17px", color:"#f0ede8", lineHeight:1.9, margin:"26px 0 0", maxWidth:"580px"}}>
+                  {d.accordion_3_text}
+                </p>
+              )}
+
               <DeepIntelWidget
                 open={widgets.space}
                 onToggle={() => setWidgets(w => ({...w, space: !w.space}))}
-                fields={["Comfort Level Score","Natural Light Index","Privacy Rating","Space Feel Assessment","Layout Efficiency Grade"]}
+                fields={["Ventilation Quality","Noise Level Score","Natural Light Score","Privacy Score","Acoustic Baseline"]}
               />
 
             </div>
@@ -944,47 +940,122 @@ export default function PropertyDetailClient({ slug }) {
                 <div style={{height:"1px", background:"#262626"}}/>
               </div>
 
-              {d.city && (
-                <div style={{margin:"0 0 24px"}}>
-                  <div style={{fontFamily:"Georgia,serif", fontSize:"clamp(28px,4.5vw,52px)", fontWeight:400, color:"#f0ede8", lineHeight:1.1}}>
-                    {d.city}
+              {(d.location || d.city) && (
+                <div style={{margin:"0 0 28px"}}>
+                  <div style={{fontFamily:"Georgia,serif", fontSize:"clamp(28px,4.5vw,52px)", fontWeight:400, color:"#f0ede8", lineHeight:1.12}}>
+                    {d.location || d.city}
                   </div>
-                  {d.location && (
+                  {d.city && d.location && d.location !== d.city && (
                     <div style={{fontFamily:"'Courier New',monospace", fontSize:"11px", color:"#8a8a8a", letterSpacing:"0.14em", marginTop:"10px", textTransform:"uppercase"}}>
-                      {d.location}
+                      {d.city} · NCR
                     </div>
                   )}
                 </div>
               )}
 
-              <div style={{height:"340px", borderRadius:"2px", overflow:"hidden", border:"0.5px solid #262626", marginBottom:"24px"}}>
-                <InteractiveMap
-                  lat={d.lat || d.latitude || 14.5547}
-                  lng={d.lng || d.longitude || 121.0244}
-                  propertyTitle={d.title}
-                  vicinityData={d.whereTo}
-                />
+              {/* Free location facts */}
+              <div style={{display:"flex", flexDirection:"column", marginBottom:"24px"}}>
+                {d.flood_zone_status && (
+                  <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", gap:"20px"}}>
+                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Flood Zone</span>
+                    <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right"}}>{d.flood_zone_status}</span>
+                  </div>
+                )}
+                {d.zoning_classification && (
+                  <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", gap:"20px"}}>
+                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Zoning</span>
+                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"12px", color:"#f0ede8", textAlign:"right", letterSpacing:"0.04em"}}>{d.zoning_classification}</span>
+                  </div>
+                )}
+                {publicTransitObj && (
+                  <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", gap:"20px"}}>
+                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Nearest Transit</span>
+                    <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right"}}>{publicTransitObj.name} · {publicTransitObj.distance}</span>
+                  </div>
+                )}
+                {d.nearest_highway && (
+                  <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", gap:"20px"}}>
+                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Major Road</span>
+                    <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right"}}>{d.nearest_highway}</span>
+                  </div>
+                )}
+                {d.street_type && (
+                  <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", gap:"20px"}}>
+                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Street Type</span>
+                    <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right"}}>{d.street_type}</span>
+                  </div>
+                )}
               </div>
 
-              <div style={{display:"flex", flexDirection:"column"}}>
-                {d.street_type && (
-                  <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626"}}>
-                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Street Type</span>
-                    <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{d.street_type}</span>
+              {/* Commute context cards */}
+              {commuteCards.length > 0 && (
+                <>
+                  <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#8a8a8a", letterSpacing:"0.2em", textTransform:"uppercase", marginBottom:"12px"}}>Commute Context</div>
+                  <div style={{display:"flex", flexWrap:"wrap", gap:"10px", marginBottom:"28px"}}>
+                    {commuteCards.map(c => (
+                      <div key={c.label} style={{flex:"1 1 120px", background:"#161616", border:"0.5px solid #262626", borderRadius:"4px", padding:"14px 16px"}}>
+                        <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#8a8a8a", letterSpacing:"0.16em", textTransform:"uppercase", marginBottom:"8px"}}>To {c.label}</div>
+                        <div style={{fontFamily:"Georgia,serif", fontSize:"18px", color:"#f0ede8"}}>{c.value}</div>
+                      </div>
+                    ))}
                   </div>
-                )}
-                {d.tenure && (
-                  <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626"}}>
-                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Tenure Type</span>
-                    <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{d.tenure}</span>
-                  </div>
-                )}
+                </>
+              )}
+
+              {/* Public transport editorial */}
+              {d.public_transport && (
+                <p style={{fontFamily:"Georgia,serif", fontSize:"15px", color:"#f0ede8", lineHeight:1.85, margin:"0 0 28px", maxWidth:"580px"}}>
+                  {d.public_transport}
+                </p>
+              )}
+
+              <div style={{height:"1px", background:"#262626", margin:"0 0 20px"}}/>
+
+              {/* Map / List toggle */}
+              <div className="whereto-tabs" style={{marginBottom:"20px"}}>
+                <button className={`whereto-tab-btn ${locTab === "map" ? "active" : ""}`} onClick={() => setLocTab("map")}>
+                  <span className="btn-pulse"/>Tactical Map
+                </button>
+                <button className={`whereto-tab-btn ${locTab === "list" ? "active" : ""}`} onClick={() => setLocTab("list")}>
+                  Directory List
+                </button>
               </div>
+
+              {locTab === "map" && (
+                <div style={{height:"360px", borderRadius:"4px", overflow:"hidden", border:"0.5px solid #262626", marginBottom:"8px"}}>
+                  <InteractiveMap
+                    lat={d.lat || d.latitude || 14.5547}
+                    lng={d.lng || d.longitude || 121.0244}
+                    propertyTitle={d.title}
+                    vicinityData={d.whereTo}
+                    routeDestination={transitDestination}
+                    routeLabel={transitLabel}
+                    mapboxToken={mapboxToken}
+                  />
+                </div>
+              )}
+
+              {locTab === "list" && d.whereTo && d.whereTo.length > 0 && (
+                <div style={{display:"flex", flexDirection:"column", marginBottom:"8px"}}>
+                  {d.whereTo.map((item, idx) => (
+                    <div key={idx} style={{display:"flex", justifyContent:"space-between", alignItems:"center", padding:"13px 0", borderBottom:"1px solid #262626"}}>
+                      <div style={{display:"flex", alignItems:"center", gap:"12px"}}>
+                        <div style={{width:"5px", height:"5px", borderRadius:"50%", background:"#c8a96e", flexShrink:0}}/>
+                        <div>
+                          <div style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{item.name}</div>
+                          {item.category && <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#8a8a8a", letterSpacing:"0.1em", textTransform:"uppercase", marginTop:"2px"}}>{item.category}</div>}
+                        </div>
+                      </div>
+                      <span style={{fontFamily:"'Courier New',monospace", fontSize:"11px", color:"#8a8a8a", letterSpacing:"0.1em", flexShrink:0}}>{item.distance}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
 
               <DeepIntelWidget
                 open={widgets.location}
                 onToggle={() => setWidgets(w => ({...w, location: !w.location}))}
-                fields={["Flood Risk Assessment","Safety Perception Index","Daytime Security Score","Night Security Score","Area Growth Projection"]}
+                fields={["Solar Orientation","Pedestrian Flow Metrics","Office Density Data","Development Pipeline"]}
               />
 
             </div>
@@ -1009,38 +1080,49 @@ export default function PropertyDetailClient({ slug }) {
                 <div style={{height:"1px", background:"#262626"}}/>
               </div>
 
+              {/* Best Suited For — gold chips, first thing shown */}
+              {(() => {
+                const tags = (d.bestForTags && d.bestForTags.length > 0)
+                  ? d.bestForTags
+                  : (d.best_for ? d.best_for.split("·").map(s => s.trim()).filter(Boolean) : []);
+                if (tags.length === 0) return null;
+                return (
+                  <div style={{marginBottom:"28px"}}>
+                    <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#8a8a8a", letterSpacing:"0.2em", textTransform:"uppercase", marginBottom:"14px"}}>Best Suited For</div>
+                    <div style={{display:"flex", flexWrap:"wrap", gap:"10px"}}>
+                      {tags.map((t, i) => (
+                        <span key={i} style={{fontFamily:"Georgia,serif", fontSize:"15px", color:"#c8a96e", border:"0.5px solid rgba(200,169,110,0.4)", padding:"7px 18px", borderRadius:"4px", letterSpacing:"0.02em"}}>{t}</span>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
+
               {d.lifestyle_vibe && (
-                <p style={{fontFamily:"Georgia,serif", fontSize:"22px", fontWeight:400, color:"#f0ede8", lineHeight:1.5, margin:"0 0 16px", maxWidth:"540px"}}>
+                <p style={{fontFamily:"Georgia,serif", fontStyle:"italic", fontSize:"clamp(20px,2.6vw,26px)", fontWeight:400, color:"#f0ede8", lineHeight:1.45, margin:"0 0 24px", maxWidth:"560px"}}>
                   {d.lifestyle_vibe}
                 </p>
               )}
-              {d.best_for && (
-                <p style={{fontFamily:"Georgia,serif", fontSize:"15px", color:"#a0a0a0", lineHeight:1.75, margin:"0 0 8px"}}>
-                  Best suited for {d.best_for}.
+
+              {d.community_feel && (
+                <p style={{fontFamily:"Georgia,serif", fontSize:"16px", color:"#f0ede8", lineHeight:1.9, margin:"0 0 20px", maxWidth:"580px"}}>
+                  {d.community_feel}
                 </p>
               )}
 
-              <div style={{height:"1px", background:"#262626", margin:"24px 0"}}/>
-
-              <div style={{display:"flex", flexDirection:"column"}}>
-                {d.outdoor_description && d.outdoor_description !== "None" && (
-                  <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626"}}>
-                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Outdoor Space</span>
-                    <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right", maxWidth:"55%"}}>{d.outdoor_description}</span>
-                  </div>
-                )}
-                {d.noise_level_text && (
-                  <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626"}}>
-                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Noise Character</span>
-                    <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{d.noise_level_text}</span>
-                  </div>
-                )}
-              </div>
+              {d.safety_perception && (
+                <>
+                  <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#8a8a8a", letterSpacing:"0.2em", textTransform:"uppercase", margin:"4px 0 12px"}}>Safety Perception</div>
+                  <p style={{fontFamily:"Georgia,serif", fontSize:"16px", color:"#f0ede8", lineHeight:1.9, margin:"0", maxWidth:"580px"}}>
+                    {d.safety_perception}
+                  </p>
+                </>
+              )}
 
               <DeepIntelWidget
                 open={widgets.life}
                 onToggle={() => setWidgets(w => ({...w, life: !w.life}))}
-                fields={["Convenience Score","Food Access Rating","Healthcare Proximity Index","Recreation Score","WFH Suitability Grade"]}
+                fields={["Noise Decibel Readings","Lighting Color Temperature","Privacy Score Details","Peak Hour Crowd Data"]}
               />
 
             </div>
@@ -1136,39 +1218,53 @@ export default function PropertyDetailClient({ slug }) {
                 <div style={{height:"1px", background:"#262626"}}/>
               </div>
 
-              <p style={{fontFamily:"Georgia,serif", fontSize:"16px", color:"#f0ede8", lineHeight:1.8, margin:"0 0 28px", maxWidth:"520px"}}>
-                Structural layout frameworks, permit certifications, and asset load diagnostics verified by ScoutIt&apos;s technical team.
-              </p>
+              {d.expansion_potential && (
+                <>
+                  <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#8a8a8a", letterSpacing:"0.2em", textTransform:"uppercase", marginBottom:"12px"}}>Expansion Potential</div>
+                  <p style={{fontFamily:"Georgia,serif", fontSize:"17px", color:"#f0ede8", lineHeight:1.9, margin:"0 0 28px", maxWidth:"580px"}}>
+                    {d.expansion_potential}
+                  </p>
+                </>
+              )}
 
-              <div style={{display:"flex", flexDirection:"column"}}>
-                {[
-                  { label:"Floor Plan", value:"Available", note:"Full multi-floor layout" },
-                  { label:"Structural Report", value:"Certified", note:"Foundation & beam diagnostics" },
-                  { label:"Permit Status", value:"Complete", note:"Building & occupancy certifications" },
-                  { label:"Year Assessed", value:"2022", note:"Last technical assessment" },
-                ].map(row => (
-                  <div key={row.label} style={{display:"flex", justifyContent:"space-between", alignItems:"center", padding:"13px 0", borderBottom:"1px solid #262626"}}>
-                    <div>
-                      <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>{row.label}</div>
-                      <div style={{fontFamily:"Georgia,serif", fontSize:"11px", color:"#6a6a6a", marginTop:"2px"}}>{row.note}</div>
-                    </div>
-                    <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#4caf7d"}}>{row.value}</span>
-                  </div>
-                ))}
-              </div>
+              {d.zoning_type && (
+                <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", marginBottom:"24px", gap:"20px"}}>
+                  <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Zoning Type</span>
+                  <span style={{fontFamily:"'Courier New',monospace", fontSize:"12px", color:"#f0ede8", letterSpacing:"0.04em", textAlign:"right"}}>{d.zoning_type}</span>
+                </div>
+              )}
+
+              {d.developer_name && (
+                <div style={{background:"#161616", border:"0.5px solid #262626", borderRadius:"4px", padding:"18px 20px", marginBottom:"24px"}}>
+                  <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#8a8a8a", letterSpacing:"0.18em", textTransform:"uppercase", marginBottom:"8px"}}>Developer</div>
+                  <div style={{fontFamily:"Georgia,serif", fontSize:"18px", color:"#f0ede8", marginBottom: d.developer_notes ? "8px" : "0"}}>{d.developer_name}</div>
+                  {d.developer_notes && (
+                    <div style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#a0a0a0", lineHeight:1.7}}>{d.developer_notes}</div>
+                  )}
+                </div>
+              )}
+
+              {d.structural_notes && (
+                <>
+                  <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#8a8a8a", letterSpacing:"0.2em", textTransform:"uppercase", marginBottom:"12px"}}>Structural Notes</div>
+                  <p style={{fontFamily:"Georgia,serif", fontSize:"15px", color:"#f0ede8", lineHeight:1.85, margin:"0", maxWidth:"580px"}}>
+                    {d.structural_notes}
+                  </p>
+                </>
+              )}
 
               <DeepIntelWidget
                 open={widgets.buildplans}
                 onToggle={() => setWidgets(w => ({...w, buildplans: !w.buildplans}))}
-                fields={["Floor Plan Document Access","Structural Engineering Report","Occupancy Certificate","CCTV & Fire Safety Certification","Material Grade Assessment"]}
+                fields={["MEP Specifications","Electrical Load Capacity","Kitchen-to-Dining Floor Ratio","Ventilation Routing","Structural Calculations"]}
               />
 
             </div>
 
             <div className="panel-sidebar">
-              <div className="sidebar-block"><div className="sidebar-accent-line"/><div className="sidebar-label">Floor plan</div><div className="sidebar-value">Available</div><div className="sidebar-sub">Full layout</div></div>
-              <div className="sidebar-block"><div className="sidebar-label">Permit status</div><div className="sidebar-value" style={{color:"#4caf7d"}}>Complete</div></div>
-              <div className="sidebar-block"><div className="sidebar-label">Structure</div><div className="sidebar-value">Reinforced concrete</div></div>
+              {d.zoning_type && <div className="sidebar-block"><div className="sidebar-accent-line"/><div className="sidebar-label">Zoning</div><div className="sidebar-value">{d.zoning_type}</div></div>}
+              {d.developer_name && <div className="sidebar-block"><div className="sidebar-label">Developer</div><div className="sidebar-value">{d.developer_name}</div></div>}
+              {d.year_built && <div className="sidebar-block"><div className="sidebar-label">Year built</div><div className="sidebar-value">{d.year_built}</div></div>}
             </div>
           </div>
 
@@ -1181,15 +1277,30 @@ export default function PropertyDetailClient({ slug }) {
                 <div style={{height:"1px", background:"#262626"}}/>
               </div>
 
-              <p style={{fontFamily:"Georgia,serif", fontSize:"16px", color:"#f0ede8", lineHeight:1.8, margin:"0 0 28px", maxWidth:"520px"}}>
-                Off-market transaction histories, neighborhood capitalization yields, and macro trend forecasts available to Verified Scouts.
+              <p style={{fontFamily:"Georgia,serif", fontSize:"16px", color:"#f0ede8", lineHeight:1.85, margin:"0 0 28px", maxWidth:"540px"}}>
+                Market and investment intelligence for this asset — transaction history, capitalization rates, and appreciation modelling — is reserved for Verified Scouts.
               </p>
 
-              <DeepIntelWidget
-                open={widgets.hiddenintel}
-                onToggle={() => setWidgets(w => ({...w, hiddenintel: !w.hiddenintel}))}
-                fields={["Last Transaction Date","Prior Sale Price","Ownership Transfer History","Area Average Cap Rate","Gross Rental Yield Estimate","12-Month Price Trend","MRT-7 Corridor Impact Analysis","Street View & Spatial Walkthrough"]}
-              />
+              {/* Tier 3 — fully paywalled market panel */}
+              <div style={{position:"relative", background:"#161616", border:"0.5px solid #262626", borderRadius:"4px", overflow:"hidden"}}>
+                <div style={{filter:"blur(5px)", pointerEvents:"none", userSelect:"none", padding:"20px"}}>
+                  {["Cap Rate (Area Benchmark)","Transaction History","Appreciation Projection","Price History","Competitive Density","Market Position Index"].map((label, i, arr) => (
+                    <div key={label} style={{display:"flex", justifyContent:"space-between", alignItems:"center", padding:"13px 0", borderBottom: i < arr.length - 1 ? "1px solid #262626" : "none"}}>
+                      <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#8a8a8a"}}>{label}</span>
+                      <span style={{fontFamily:"'Courier New',monospace", fontSize:"12px", color:"#3a3a3a", letterSpacing:"0.1em"}}>████████</span>
+                    </div>
+                  ))}
+                </div>
+                <div style={{position:"absolute", inset:0, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:"16px", background:"rgba(22,22,22,0.9)"}}>
+                  <div style={{display:"flex", alignItems:"center", gap:"8px"}}>
+                    <span style={{fontSize:"15px"}}>🔒</span>
+                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#c8a96e", letterSpacing:"0.25em", textTransform:"uppercase"}}>Market Intelligence · Locked</span>
+                  </div>
+                  <button style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#0e0e0e", background:"#c8a96e", border:"none", padding:"11px 28px", borderRadius:"4px", cursor:"pointer", letterSpacing:"0.03em"}}>
+                    Unlock with Verified Scout →
+                  </button>
+                </div>
+              </div>
 
             </div>
 
@@ -1210,7 +1321,7 @@ export default function PropertyDetailClient({ slug }) {
               </div>
 
               <div className="units-z3-list">
-                {dynamicUnits.map(u => {
+                {dynamicUnits.map((u, ui) => {
                   const activeUnit = selectedUnit || (dynamicUnits.length > 0 ? dynamicUnits[0].name : "");
                   return (
                     <div
@@ -1227,6 +1338,9 @@ export default function PropertyDetailClient({ slug }) {
                         if (photos && photos.length > 0) setCurrentImageIndex(targetIndex);
                       }}
                     >
+                      <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#8a8a8a", letterSpacing:"0.18em", textTransform:"uppercase", marginBottom:"6px"}}>
+                        UNIT {String(ui + 1).padStart(2, "0")}
+                      </div>
                       <div className="unit-z3-name">{u.name}</div>
                       <div className="unit-z3-specs">
                         {u.specs.map(s => <span key={s} className="unit-z3-spec">{s}</span>)}
@@ -1235,6 +1349,12 @@ export default function PropertyDetailClient({ slug }) {
                   );
                 })}
               </div>
+
+              <DeepIntelWidget
+                open={widgets.units}
+                onToggle={() => setWidgets(w => ({...w, units: !w.units}))}
+                fields={["Precise Room Dimensions","Technical Asset Manifest","Fixed Equipment Specs","Finish & Material Schedule","Utility Point Mapping"]}
+              />
 
             </div>
 
@@ -1261,25 +1381,30 @@ export default function PropertyDetailClient({ slug }) {
                 <div style={{height:"1px", background:"#262626"}}/>
               </div>
 
-              <div style={{display:"flex", flexDirection:"column", marginBottom:"28px"}}>
-                {d.property_type && <div style={{display:"flex", justifyContent:"space-between", padding:"11px 0", borderBottom:"1px solid #262626"}}><span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Property Type</span><span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{d.property_type}</span></div>}
-                {d.tenure && <div style={{display:"flex", justifyContent:"space-between", padding:"11px 0", borderBottom:"1px solid #262626"}}><span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Tenure</span><span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{d.tenure}</span></div>}
-                {d.floor_sqm > 0 && <div style={{display:"flex", justifyContent:"space-between", padding:"11px 0", borderBottom:"1px solid #262626"}}><span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Floor Area</span><span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{d.floor_sqm} sqm</span></div>}
-                {d.lot_sqm > 0 && <div style={{display:"flex", justifyContent:"space-between", padding:"11px 0", borderBottom:"1px solid #262626"}}><span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Lot Area</span><span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{d.lot_sqm} sqm</span></div>}
-                {isRestaurant && pill1Val && <div style={{display:"flex", justifyContent:"space-between", padding:"11px 0", borderBottom:"1px solid #262626"}}><span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Dining Capacity</span><span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{pill1Val}</span></div>}
-                {isHospitality && pill1Val && <div style={{display:"flex", justifyContent:"space-between", padding:"11px 0", borderBottom:"1px solid #262626"}}><span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Accommodations</span><span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{pill1Val}</span></div>}
-                {isVenue && pill1Val && <div style={{display:"flex", justifyContent:"space-between", padding:"11px 0", borderBottom:"1px solid #262626"}}><span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Guest Capacity</span><span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{pill1Val}</span></div>}
-                {!isRestaurant && !isHospitality && !isVenue && d.beds > 0 && <div style={{display:"flex", justifyContent:"space-between", padding:"11px 0", borderBottom:"1px solid #262626"}}><span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Bedrooms</span><span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{d.beds}</span></div>}
-                {!isRestaurant && !isHospitality && !isVenue && d.baths > 0 && <div style={{display:"flex", justifyContent:"space-between", padding:"11px 0", borderBottom:"1px solid #262626"}}><span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Bathrooms</span><span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{d.baths}</span></div>}
-                {d.parking > 0 && <div style={{display:"flex", justifyContent:"space-between", padding:"11px 0", borderBottom:"1px solid #262626"}}><span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Parking</span><span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{d.parking} covered</span></div>}
-                {d.furnishing && <div style={{display:"flex", justifyContent:"space-between", padding:"11px 0", borderBottom:"1px solid #262626"}}><span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Furnishing</span><span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{d.furnishing}</span></div>}
-                {d.year_built && <div style={{display:"flex", justifyContent:"space-between", padding:"11px 0", borderBottom:"1px solid #262626"}}><span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Year Built</span><span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{d.year_built}</span></div>}
-                {d.title_status && <div style={{display:"flex", justifyContent:"space-between", padding:"11px 0", borderBottom:"1px solid #262626"}}><span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Title Status</span><span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#4caf7d"}}>{d.title_status}</span></div>}
-              </div>
+              {d.building_style && (
+                <div style={{marginBottom:"24px"}}>
+                  <span style={{fontFamily:"Georgia,serif", fontStyle:"italic", fontSize:"clamp(22px,3vw,30px)", fontWeight:400, color:"#c8a96e", letterSpacing:"0.01em"}}>
+                    {d.building_style}
+                  </span>
+                </div>
+              )}
+
+              {d.architect_designer && (
+                <div style={{background:"#161616", border:"0.5px solid #262626", borderRadius:"4px", padding:"16px 20px", marginBottom:"28px"}}>
+                  <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#8a8a8a", letterSpacing:"0.18em", textTransform:"uppercase", marginBottom:"8px"}}>Architect / Designer</div>
+                  <div style={{fontFamily:"Georgia,serif", fontSize:"18px", color:"#f0ede8"}}>{d.architect_designer}</div>
+                </div>
+              )}
+
+              {d.universe_summary && (
+                <p style={{fontFamily:"Georgia,serif", fontSize:"clamp(18px,2.2vw,22px)", color:"#f0ede8", lineHeight:1.85, margin:"0 0 8px", maxWidth:"620px"}}>
+                  {d.universe_summary}
+                </p>
+              )}
 
               {d.scoutit_verdict && (
                 <>
-                  <div style={{height:"1px", background:"#262626", margin:"0 0 20px"}}/>
+                  <div style={{height:"1px", background:"#262626", margin:"28px 0 20px"}}/>
                   <div className="verdict-block">
                     <div className="verdict-header"><div className="verdict-dot"/><div className="verdict-title">Space Intelligence Verdict</div></div>
                     <p className="verdict-text">{d.scoutit_verdict}</p>
@@ -1295,49 +1420,59 @@ export default function PropertyDetailClient({ slug }) {
               <DeepIntelWidget
                 open={widgets.universe}
                 onToggle={() => setWidgets(w => ({...w, universe: !w.universe}))}
-                fields={["Resale Potential Assessment","Rental Yield Estimate","Area Cap Rate Benchmark","MRT-7 Impact Analysis","5-Year Appreciation Trend"]}
+                fields={["Detailed Historical Transaction Records","Architectural Heritage Notes","Original Permit & Blueprint Archive","Provenance & Ownership Lineage"]}
               />
 
             </div>
 
             <div className="panel-sidebar">
-              {d.title_status && <div className="sidebar-block"><div className="sidebar-accent-line"/><div className="sidebar-label">Title status</div><div className="sidebar-value">{d.title_status}</div></div>}
+              {d.building_style && <div className="sidebar-block"><div className="sidebar-accent-line"/><div className="sidebar-label">Building style</div><div className="sidebar-value">{d.building_style}</div></div>}
+              {d.architect_designer && <div className="sidebar-block"><div className="sidebar-label">Architect</div><div className="sidebar-value">{d.architect_designer}</div></div>}
               {d.scoutit_verdict && <div className="sidebar-block"><div className="sidebar-label">Verdict</div><div className="sidebar-value" style={{color:"#4caf7d", fontSize:"12px", lineHeight:1.4}}>{d.scoutit_verdict}</div></div>}
             </div>
           </div>
 
-          {/* ── EXPANSION NODE ── */}
-          <div className={`chapter-panel ${activeTab === "expansion" ? "active" : ""}`} id="panel-expansion">
+          {/* ── SERVICES (Ch. 9) ── */}
+          <div className={`chapter-panel ${activeTab === "services" ? "active" : ""}`} id="panel-services">
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>09 — Expansion Node</div>
+                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>09 — Services</div>
                 <div style={{height:"1px", background:"#262626"}}/>
               </div>
 
-              <div className="verdict-block" style={{marginTop:"8px"}}>
-                <div className="verdict-header"><div className="verdict-dot" style={{background:"#c8a96e"}}/><div className="verdict-title" style={{color:"#c8a96e"}}>Layer V7 — Pipeline Active</div></div>
-                <p className="verdict-text" style={{fontFamily:"'Courier New',monospace", fontSize:"11px", letterSpacing:"0.12em", textTransform:"uppercase", color:"#8a8a8a"}}>
-                  [ ENGINES COMPILING // LAYER V7 PIPELINE INJECTS COMING SOON ]
-                </p>
-              </div>
+              <p style={{fontFamily:"Georgia,serif", fontSize:"16px", color:"#f0ede8", lineHeight:1.85, margin:"0 0 28px", maxWidth:"560px"}}>
+                Commission a ScoutIt ecosystem partner to go deeper on this space — from spatial renders to full due-diligence research.
+              </p>
 
-              <div style={{display:"flex", flexDirection:"column", gap:"8px", marginTop:"16px"}}>
-                {["Comparative Market Analysis Engine","AR Property Visualization Layer","AI-Powered Space Scoring Matrix","Macro Investment Signal Feed","Live Broker Negotiation Tracker"].map((item, i) => (
-                  <div key={i} style={{display:"flex", alignItems:"center", gap:"12px", padding:"12px 16px", background:"#161616", border:"0.5px solid #262626", borderRadius:"2px", opacity:0.5}}>
-                    <div style={{width:"5px", height:"5px", borderRadius:"50%", background:"#c8a96e", flexShrink:0}}/>
-                    <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#8a8a8a", lineHeight:1.5}}>{item}</span>
-                    <span style={{marginLeft:"auto", fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.1em", textTransform:"uppercase"}}>Soon</span>
-                  </div>
+              <div style={{display:"flex", flexDirection:"column", gap:"10px"}}>
+                {[
+                  { icon:"🗺️", title:"Curated 3D Map",     desc:"Get a spatial 3D rendering of this property.",            href:"/photographers" },
+                  { icon:"🎨", title:"Pre-Design Concept",  desc:"See this space redesigned to your preferences.",          href:"/event-planners" },
+                  { icon:"🔍", title:"Site Research",       desc:"Commission a full due-diligence report on this property.", href:"/researchers" },
+                  { icon:"📸", title:"Space Photography",   desc:"Get professional architectural photos taken.",            href:"/photographers" },
+                  { icon:"🏢", title:"Verified Advisor",    desc:"Connect with an authorized space intelligence advisor.",  href:"/brokers" },
+                ].map(svc => (
+                  <Link
+                    key={svc.title}
+                    href={svc.href}
+                    style={{textDecoration:"none", display:"flex", alignItems:"center", gap:"16px", padding:"18px 20px", background:"#161616", border:"0.5px solid #262626", borderRadius:"4px", transition:"border-color 0.2s ease"}}
+                  >
+                    <span style={{fontSize:"22px", flexShrink:0, lineHeight:1}}>{svc.icon}</span>
+                    <span style={{flex:1, minWidth:0}}>
+                      <span style={{display:"block", fontFamily:"Georgia,serif", fontSize:"17px", color:"#f0ede8", marginBottom:"3px"}}>{svc.title}</span>
+                      <span style={{display:"block", fontFamily:"system-ui,-apple-system,sans-serif", fontSize:"12.5px", color:"#8a8a8a", lineHeight:1.5}}>{svc.desc}</span>
+                    </span>
+                    <span style={{fontFamily:"Georgia,serif", fontSize:"16px", color:"#c8a96e", flexShrink:0}}>→</span>
+                  </Link>
                 ))}
               </div>
 
             </div>
 
             <div className="panel-sidebar">
-              <div className="sidebar-block"><div className="sidebar-accent-line" style={{background:"#c8a96e"}}/><div className="sidebar-label">Pipeline status</div><div className="sidebar-value" style={{color:"#c8a96e"}}>V7 Compiling</div></div>
-              <div className="sidebar-block"><div className="sidebar-label">ETA</div><div className="sidebar-value">Incoming</div></div>
-              <div className="sidebar-block"><div className="sidebar-label">Features queued</div><div className="sidebar-value">5</div></div>
+              <div className="sidebar-block"><div className="sidebar-accent-line" style={{background:"#c8a96e"}}/><div className="sidebar-label">Ecosystem</div><div className="sidebar-value">5 services live</div><div className="sidebar-sub">Vetted ScoutIt partners</div></div>
+              <div className="sidebar-block"><div className="sidebar-label">Fulfilment</div><div className="sidebar-value">Partner-direct</div></div>
             </div>
           </div>
 
@@ -1350,17 +1485,34 @@ export default function PropertyDetailClient({ slug }) {
                 <div style={{height:"1px", background:"#262626"}}/>
               </div>
 
-              <div style={{margin:"20px 0 28px", padding:"20px 24px", background:"#161616", border:"0.5px solid #262626", borderRadius:"2px"}}>
-                <div style={{fontFamily:"Georgia,serif", fontSize:"clamp(22px,3vw,30px)", fontWeight:400, letterSpacing:"0.04em", color:"#f0ede8"}}>Price Upon Inquiry</div>
-                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", textTransform:"uppercase", letterSpacing:"0.16em", color:"#8a8a8a", marginTop:"8px"}}>Confirmed directly with the listed advisor</div>
-              </div>
+              <h2 style={{fontFamily:"Georgia,serif", fontWeight:400, fontSize:"clamp(26px,3.6vw,40px)", color:"#f0ede8", lineHeight:1.25, margin:"4px 0 28px", maxWidth:"600px"}}>
+                When you&apos;re ready, we&apos;ll make the introduction.
+              </h2>
 
               <div className="reactions-container" style={{marginTop:"0", display:"flex", flexDirection:"column", gap:"10px"}}>
                 <p style={{fontFamily:"'Courier New',monospace", fontSize:"10px", textTransform:"uppercase", letterSpacing:"0.2em", color:"#8a8a8a", marginBottom:"16px"}}>HOW DOES THIS SPACE MAKE YOU FEEL?</p>
                 <ReactionButtons propertyId={slug || "batasan-hills"} propertyTitle={d.title} category={d.property_type} city={d.city}/>
               </div>
 
-              <div style={{height:"1px", background:"#262626", margin:"24px 0"}}/>
+              {/* Price — only when an authorized party has provided one */}
+              {d.authorized_price && (
+                <>
+                  <div style={{height:"1px", background:"#262626", margin:"28px 0 24px"}}/>
+                  <div style={{padding:"20px 24px", background:"#161616", border:"0.5px solid #262626", borderRadius:"4px"}}>
+                    <div style={{fontFamily:"Georgia,serif", fontSize:"clamp(24px,3.4vw,34px)", fontWeight:400, color:"#f0ede8"}}>{d.authorized_price}</div>
+                    {d.price_source && (
+                      <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", textTransform:"uppercase", letterSpacing:"0.12em", color:"#8a8a8a", marginTop:"8px"}}>
+                        Price indicated by {d.price_source}
+                      </div>
+                    )}
+                    <p style={{fontFamily:"system-ui,-apple-system,sans-serif", fontSize:"11px", color:"#6a6a6a", lineHeight:1.7, marginTop:"14px"}}>
+                      Price estimates are provided solely by authorized sellers, owners, or licensed property managers. ScoutIt does not set, verify, or guarantee any stated price. All transactions are subject to RA 9646 (RESA Law Philippines). ScoutIt connects — brokers close.
+                    </p>
+                  </div>
+                </>
+              )}
+
+              <div style={{height:"1px", background:"#262626", margin:"28px 0 24px"}}/>
 
               <div style={{marginTop:"0"}}>
                 <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.15em", textTransform:"uppercase", marginBottom:"12px"}}>Assigned Representative</div>
@@ -1375,14 +1527,16 @@ export default function PropertyDetailClient({ slug }) {
               </div>
 
               <Link href={`/property/${slug || "batasan-hills"}/brokers`} className="move-cta" style={{textDecoration:"none", marginTop:"16px"}}>
-                Inquire with Advisor →
+                Connect with an Authorized Broker →
               </Link>
 
-              <p style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", lineHeight:"1.8", marginTop:"20px", letterSpacing:"0.06em"}}>
-                Pricing is not displayed on ScoutIt in compliance with Philippine real estate disclosure standards. Contact the listed advisor or owner directly to confirm the current asking price, payment terms, and availability.
-              </p>
+              {/* RA 9646 compliance badge */}
+              <div style={{display:"inline-flex", alignItems:"center", gap:"8px", marginTop:"20px", padding:"8px 14px", border:"0.5px solid rgba(76,175,125,0.4)", borderRadius:"4px", background:"rgba(76,175,125,0.06)"}}>
+                <span style={{width:"7px", height:"7px", borderRadius:"50%", background:"#4caf7d", flexShrink:0}}/>
+                <span style={{fontFamily:"'Courier New',monospace", fontSize:"9.5px", color:"#4caf7d", letterSpacing:"0.14em", textTransform:"uppercase"}}>RA 9646 Compliant · Display-Only</span>
+              </div>
 
-              <p style={{fontFamily:"Georgia,serif", fontSize:"13px", color:"#8a8a8a", lineHeight:1.7, marginTop:"12px"}}>
+              <p style={{fontFamily:"Georgia,serif", fontSize:"13px", color:"#8a8a8a", lineHeight:1.7, marginTop:"16px", maxWidth:"600px"}}>
                 ScoutIt is a spatial intelligence archive. In compliance with R.A. 9646, all site walks, direct inquiries, and purchase offers are facilitated exclusively by licensed, authorized real estate brokers.
               </p>
 

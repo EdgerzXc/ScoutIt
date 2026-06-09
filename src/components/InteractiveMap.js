@@ -2,16 +2,18 @@
 
 import { useEffect, useRef, useState } from "react";
 
-export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData = [] }) {
+export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData = [], routeDestination = "", routeLabel = "", mapboxToken = "" }) {
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
   const hoveredRef = useRef(null);
-  
+  const routeLayerRef = useRef(null);
+
   const [mapLoaded, setMapLoaded] = useState(false);
   const [propertyPixel, setPropertyPixel] = useState({ x: 0, y: 0 });
   const [hoveredAmenity, setHoveredAmenity] = useState(null);
   const [hoveredPixel, setHoveredPixel] = useState(null);
   const [sweepAngle, setSweepAngle] = useState(0);
+  const [routeInfo, setRouteInfo] = useState(null);
 
   // Smooth radar sweep animation loop
   useEffect(() => {
@@ -125,6 +127,74 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
         });
       });
 
+      // ── Optional: Mapbox geocode + Directions gold route line ──
+      if (routeDestination && mapboxToken) {
+        (async () => {
+          try {
+            // 1. Geocode the destination name, biased to the property's vicinity (PH only)
+            const geoUrl =
+              `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(routeDestination)}.json` +
+              `?proximity=${position[1]},${position[0]}&country=ph&limit=1&access_token=${mapboxToken}`;
+            const geoRes = await fetch(geoUrl);
+            const geoData = await geoRes.json();
+            if (!geoData.features || geoData.features.length === 0) return;
+            const [destLng, destLat] = geoData.features[0].center;
+            // Prefer the caller-supplied display label over the geocoder's guess
+            const destName = routeLabel || geoData.features[0].text || routeDestination;
+
+            // 2. Driving directions from property → destination
+            const dirUrl =
+              `https://api.mapbox.com/directions/v5/mapbox/driving/` +
+              `${position[1]},${position[0]};${destLng},${destLat}` +
+              `?geometries=geojson&overview=full&access_token=${mapboxToken}`;
+            const dirRes = await fetch(dirUrl);
+            const dirData = await dirRes.json();
+            if (!dirData.routes || dirData.routes.length === 0) return;
+            const route = dirData.routes[0];
+            const latlngs = route.geometry.coordinates.map((c) => [c[1], c[0]]);
+
+            if (!mapInstance.current) return;
+
+            // 3. Draw the gold route polyline
+            const routeLine = window.L.polyline(latlngs, {
+              color: "#c8a96e",
+              weight: 3,
+              opacity: 0.9,
+              lineJoin: "round",
+              lineCap: "round",
+            }).addTo(map);
+            routeLayerRef.current = routeLine;
+
+            // 4. Destination marker (gold)
+            const destIcon = window.L.divIcon({
+              className: "custom-leaflet-marker amenity",
+              html: `<div class="amenity-dot" style="background:#c8a96e;box-shadow:0 0 8px #c8a96e"></div>`,
+              iconSize: [12, 12],
+              iconAnchor: [6, 6],
+            });
+            window.L.marker([destLat, destLng], { icon: destIcon })
+              .addTo(map)
+              .bindPopup(
+                `<strong style="color:#c8a96e">${destName}</strong><br/><span style="color:#8a8a8a">Nearest transit hub</span>`,
+                { className: "custom-leaflet-popup" }
+              );
+
+            // 5. Frame both endpoints
+            map.fitBounds(routeLine.getBounds(), { padding: [55, 55], maxZoom: 15 });
+            setTimeout(updatePositions, 120);
+
+            // 6. Surface the real travel time
+            setRouteInfo({
+              destName,
+              minutes: Math.max(1, Math.round(route.duration / 60)),
+              km: (route.distance / 1000).toFixed(1),
+            });
+          } catch {
+            /* network/geocode failure → no route line, map still renders */
+          }
+        })();
+      }
+
       // Update HUD Overlay positioning dynamically on Map Movement
       const updatePositions = () => {
         const pPoint = map.latLngToContainerPoint(position);
@@ -187,7 +257,7 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
         mapInstance.current = null;
       }
     };
-  }, [lat, lng, propertyTitle, vicinityData]);
+  }, [lat, lng, propertyTitle, vicinityData, routeDestination, routeLabel, mapboxToken]);
 
   // Compute sweep line coordinates based on animation angle
   const sweepRad = (sweepAngle * Math.PI) / 180;
@@ -253,6 +323,16 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
           </>
         )}
       </div>
+
+      {/* Gold route travel-time label */}
+      {routeInfo && (
+        <div className="map-route-label">
+          <span className="route-dot" />
+          <span className="route-time">{routeInfo.minutes} min</span>
+          <span className="route-dest">to {routeInfo.destName}</span>
+          <span className="route-km">· {routeInfo.km} km</span>
+        </div>
+      )}
 
       {!mapLoaded && (
         <div className="map-fallback-overlay">
@@ -402,6 +482,53 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
           letter-spacing: 0.15em;
           color: #6a6a6a;
           z-index: 2;
+        }
+
+        /* Gold route travel-time label */
+        .map-route-label {
+          position: absolute;
+          bottom: 14px;
+          left: 14px;
+          z-index: 100;
+          display: flex;
+          align-items: center;
+          gap: 7px;
+          background: rgba(14, 14, 14, 0.9);
+          border: 0.5px solid rgba(200, 169, 110, 0.4);
+          border-radius: 4px;
+          padding: 7px 12px;
+          backdrop-filter: blur(12px);
+          max-width: calc(100% - 28px);
+        }
+        .map-route-label .route-dot {
+          width: 7px;
+          height: 7px;
+          border-radius: 50%;
+          background: #c8a96e;
+          box-shadow: 0 0 6px #c8a96e;
+          flex-shrink: 0;
+        }
+        .map-route-label .route-time {
+          font-family: var(--font-mono);
+          font-size: 11px;
+          color: #c8a96e;
+          font-weight: 600;
+          letter-spacing: 0.04em;
+          white-space: nowrap;
+        }
+        .map-route-label .route-dest {
+          font-family: system-ui, -apple-system, sans-serif;
+          font-size: 11px;
+          color: #f0ede8;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .map-route-label .route-km {
+          font-family: var(--font-mono);
+          font-size: 10px;
+          color: #8a8a8a;
+          white-space: nowrap;
         }
 
         /* Marker Pin adjustments */
