@@ -1056,7 +1056,7 @@ export default function PropertyDetailClient({ slug }) {
               </div>
 
               {locTab === "map" && (
-                <div style={{height:"clamp(420px, 52vh, 480px)", borderRadius:"4px", overflow:"hidden", border:"0.5px solid #262626", marginBottom:"8px"}}>
+                <div style={{height:"clamp(420px, 52vh, 480px)", minHeight:"420px", flexShrink:0, borderRadius:"4px", overflow:"hidden", border:"0.5px solid #262626", marginBottom:"8px"}}>
                   <InteractiveMap
                     lat={d.lat || d.latitude || 14.5547}
                     lng={d.lng || d.longitude || 121.0244}
@@ -1188,7 +1188,7 @@ export default function PropertyDetailClient({ slug }) {
               </div>
 
               {whereToTab === "map" && (
-                <div style={{height:"clamp(460px, 64vh, 600px)", borderRadius:"4px", overflow:"hidden", border:"0.5px solid #262626", marginBottom:"24px"}}>
+                <div style={{height:"clamp(460px, 64vh, 600px)", minHeight:"460px", flexShrink:0, borderRadius:"4px", overflow:"hidden", border:"0.5px solid #262626", marginBottom:"24px"}}>
                   <InteractiveMap lat={d.lat || d.latitude || 14.5547} lng={d.lng || d.longitude || 121.0244} propertyTitle={d.title} vicinityData={d.whereTo}/>
                 </div>
               )}
