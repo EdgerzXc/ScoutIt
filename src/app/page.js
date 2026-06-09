@@ -41,7 +41,7 @@ export default function Home() {
 
     const rand = (min, max) => min + Math.random() * (max - min);
     let w = 0, h = 0, cx = 0, cy = 0, maxR = 0, dpr = 1;
-    let stars = [], bodies = [], dust = [], rings = [];
+    let stars = [], bodies = [], dust = [], rings = [], comets = [];
     let raf = 0;
     let t = 0;
 
@@ -77,6 +77,16 @@ export default function Home() {
       pull: rand(0.0004, 0.0011),
       warm: Math.random() > 0.5,
     });
+    const initComet = (spread = true) => ({
+      angle: rand(0, Math.PI * 2),
+      // spread along the path on first build so arrivals are staggered
+      radius: spread ? rand(maxR * 0.45, maxR * 1.05) : edgeRadius(),
+      speed: rand(0.8, 2),                                   // px per frame @60fps
+      tail: rand(40, 100),
+      size: rand(1.5, 2.5),
+      angVel: Math.random() < 0.5 ? rand(-0.001, 0.001) : 0, // some curve slightly
+      delay: rand(0, 5),                                     // stagger first appearance (s)
+    });
 
     const buildScene = () => {
       const starCount = Math.round(rand(150, 180));
@@ -85,6 +95,7 @@ export default function Home() {
       stars = Array.from({ length: starCount }, initStar);
       bodies = Array.from({ length: bodyCount }, initBody);
       dust = Array.from({ length: dustCount }, initDust);
+      comets = Array.from({ length: Math.round(rand(4, 6)) }, () => initComet(true));
       const base = Math.min(w, h);
       rings = [0.16, 0.27, 0.4, 0.56].map((f, i) => ({
         r: base * f,
@@ -179,6 +190,38 @@ export default function Home() {
         ctx.arc(x, y, b.size, 0, Math.PI * 2);
         ctx.fillStyle = b.color;
         ctx.fill();
+      });
+
+      // Comets — bright heads with gold tails, pulled straight toward center
+      comets.forEach((c) => {
+        if (c.delay > 0) { c.delay -= dt; return; }
+        c.radius -= c.speed * dt * 60;
+        c.angle += c.angVel;
+        if (c.radius < 30) {
+          Object.assign(c, initComet(false), { delay: rand(0.5, 4) });
+          return;
+        }
+        const hx = cx + Math.cos(c.angle) * c.radius;
+        const hy = cy + Math.sin(c.angle) * c.radius;
+        const tx = cx + Math.cos(c.angle) * (c.radius + c.tail);
+        const ty = cy + Math.sin(c.angle) * (c.radius + c.tail);
+        const grad = ctx.createLinearGradient(hx, hy, tx, ty);
+        grad.addColorStop(0, "rgba(200,169,110,0.8)");
+        grad.addColorStop(1, "rgba(200,169,110,0)");
+        ctx.beginPath();
+        ctx.moveTo(hx, hy);
+        ctx.lineTo(tx, ty);
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = 1.4;
+        ctx.lineCap = "round";
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(hx, hy, c.size, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(255,250,235,0.95)";
+        ctx.shadowColor = "rgba(200,169,110,0.9)";
+        ctx.shadowBlur = 6;
+        ctx.fill();
+        ctx.shadowBlur = 0;
       });
     };
 
@@ -1491,7 +1534,7 @@ export default function Home() {
         .scoutit-wordmark .word-it {
           font-family: Georgia, 'Times New Roman', serif;
           font-weight: 400;
-          font-size: clamp(46px, 8vw, 100px);
+          font-size: clamp(60px, 9vw, 112px);
           letter-spacing: 8px;
           line-height: 1;
           transition: color 0.6s ease, text-shadow 0.6s ease;
@@ -1513,48 +1556,62 @@ export default function Home() {
           flex-direction: column;
           align-items: center;
           justify-content: flex-start;
-          height: 62px;
-          margin-bottom: 8px;
+          height: 92px;
+          margin-bottom: 10px;
         }
         .title-ufo {
+          position: relative;
           display: flex;
           flex-direction: column;
           align-items: center;
           animation: titleUfoFloat 3s ease-in-out infinite;
         }
+        /* Soft gold underglow — UFO emitting faint light down onto the wordmark */
+        .title-ufo::after {
+          content: '';
+          position: absolute;
+          top: 70%;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 150px;
+          height: 70px;
+          background: radial-gradient(ellipse at top, rgba(200, 169, 110, 0.15), rgba(200, 169, 110, 0) 70%);
+          pointer-events: none;
+          z-index: -1;
+        }
         .title-ufo-dome {
-          width: 16px;
-          height: 9px;
+          width: 32px;
+          height: 17px;
           background: #161616;
-          border: 1px solid #c8a96e;
+          border: 1.5px solid #c8a96e;
           border-bottom: none;
           border-radius: 50% 50% 0 0;
         }
         .title-ufo-disc {
-          width: 40px;
-          height: 11px;
+          width: 80px;
+          height: 22px;
           background: #161616;
-          border: 1px solid #c8a96e;
+          border: 1.5px solid #c8a96e;
           border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: space-evenly;
-          box-shadow: 0 0 10px rgba(200, 169, 110, 0.35);
+          box-shadow: 0 0 16px rgba(200, 169, 110, 0.4);
           animation: titleSaucerTilt 9s ease-in-out infinite;
         }
         .title-ufo-light {
-          width: 3px;
-          height: 3px;
+          width: 5px;
+          height: 5px;
           border-radius: 50%;
           background: #c8a96e;
-          box-shadow: 0 0 4px #c8a96e;
+          box-shadow: 0 0 5px #c8a96e;
         }
 
         /* ── Tractor beam ── */
         .title-beam {
           width: 3px;
-          height: 40px;
-          margin-top: 2px;
+          height: 46px;
+          margin-top: 3px;
           background: linear-gradient(to bottom, #c8a96e 0%, rgba(200, 169, 110, 0) 100%);
           transform: scaleY(0);
           transform-origin: top center;
@@ -1567,10 +1624,10 @@ export default function Home() {
         /* ── Discipline badge ── */
         .title-badge {
           font-family: 'Courier New', monospace;
-          font-size: 9px;
+          font-size: 11px;
           letter-spacing: 5px;
           text-transform: uppercase;
-          color: #666666;
+          color: #888888;
           margin-bottom: 22px;
         }
 
@@ -1586,17 +1643,17 @@ export default function Home() {
         .title-tagline-1 {
           font-family: Georgia, serif;
           font-style: italic;
-          font-size: 16px;
-          color: #8a8a8a;
+          font-size: 18px;
+          color: #9a9a9a;
           text-align: center;
           margin: 0 0 10px;
         }
         .title-tagline-2 {
           font-family: 'Courier New', monospace;
-          font-size: 9px;
+          font-size: 10px;
           letter-spacing: 4px;
           text-transform: uppercase;
-          color: #555555;
+          color: #666666;
           text-align: center;
           margin: 0 0 34px;
         }
@@ -1619,7 +1676,7 @@ export default function Home() {
         }
         .title-cta {
           font-family: 'Courier New', monospace;
-          font-size: 10px;
+          font-size: 11px;
           letter-spacing: 3px;
           text-transform: uppercase;
           padding: 12px 28px;
@@ -1635,7 +1692,7 @@ export default function Home() {
 
         @keyframes titleUfoFloat {
           0%, 100% { transform: translateY(0); }
-          50%      { transform: translateY(-7px); }
+          50%      { transform: translateY(-6px); }
         }
         @keyframes titleSaucerTilt {
           0%, 100% { transform: rotate(-2.5deg); }
@@ -1867,7 +1924,7 @@ export default function Home() {
           font-size: 10px;
           text-transform: uppercase;
           letter-spacing: 0.2em;
-          color: var(--accent);
+          color: #555555;
         }
 
         .scroll-line {
