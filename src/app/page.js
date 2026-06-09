@@ -21,6 +21,184 @@ export default function Home() {
   const [activeDiscoverType, setActiveDiscoverType] = useState("Residential");
   const [driftingRocks, setDriftingRocks] = useState([]);
   const containerRef = useRef(null);
+  const eventHorizonRef = useRef(null);
+
+  // Title-screen sequence: 0 idle → 1 beam fires (1.8s) → 2 wordmark lights (+0.8s) → 3 CTAs appear (+0.4s)
+  const [heroPhase, setHeroPhase] = useState(0);
+  useEffect(() => {
+    const t1 = setTimeout(() => setHeroPhase(1), 1800);
+    const t2 = setTimeout(() => setHeroPhase(2), 2600);
+    const t3 = setTimeout(() => setHeroPhase(3), 3000);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
+  }, []);
+
+  // ── Event-horizon pull field (canvas) ──────────────────────────
+  useEffect(() => {
+    const canvas = eventHorizonRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const rand = (min, max) => min + Math.random() * (max - min);
+    let w = 0, h = 0, cx = 0, cy = 0, maxR = 0, dpr = 1;
+    let stars = [], bodies = [], dust = [], rings = [];
+    let raf = 0;
+    let t = 0;
+
+    const edgeRadius = () => maxR * rand(0.75, 1.05);
+
+    const initStar = () => ({
+      angle: rand(0, Math.PI * 2),
+      radius: edgeRadius(),
+      size: rand(0.4, 1.8),
+      baseOpacity: rand(0.3, 0.9),
+      pull: rand(0.0003, 0.0012),
+      twPhase: rand(0, Math.PI * 2),
+      twSpeed: rand(0.6, 1.8),
+    });
+    const BODY_COLORS = [
+      () => `rgba(200,169,110,${rand(0.3, 0.6).toFixed(2)})`,   // gold
+      () => `rgba(240,237,232,${rand(0.2, 0.4).toFixed(2)})`,   // warm white
+      () => `rgba(136,136,170,${rand(0.2, 0.4).toFixed(2)})`,   // cool blue
+    ];
+    const initBody = () => ({
+      angle: rand(0, Math.PI * 2),
+      radius: edgeRadius(),
+      size: rand(2, 6),
+      pull: rand(0.0004, 0.0009),
+      angVel: rand(-0.0009, 0.0009),     // gentle arc / lensing curve
+      color: BODY_COLORS[Math.floor(Math.random() * BODY_COLORS.length)](),
+    });
+    const initDust = () => ({
+      angle: rand(0, Math.PI * 2),
+      radius: edgeRadius(),
+      length: rand(8, 20),
+      opacity: rand(0.1, 0.2),
+      pull: rand(0.0004, 0.0011),
+      warm: Math.random() > 0.5,
+    });
+
+    const buildScene = () => {
+      const starCount = Math.round(rand(150, 180));
+      const bodyCount = Math.round(rand(8, 10));
+      const dustCount = Math.round(rand(4, 6));
+      stars = Array.from({ length: starCount }, initStar);
+      bodies = Array.from({ length: bodyCount }, initBody);
+      dust = Array.from({ length: dustCount }, initDust);
+      const base = Math.min(w, h);
+      rings = [0.16, 0.27, 0.4, 0.56].map((f, i) => ({
+        r: base * f,
+        phase: rand(0, Math.PI * 2),
+        speed: rand(0.4, 0.9),
+        lo: 0.03, hi: 0.07,
+        inner: i === 0,
+      }));
+    };
+
+    const resize = () => {
+      const rect = canvas.getBoundingClientRect();
+      w = rect.width; h = rect.height;
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.max(1, Math.round(w * dpr));
+      canvas.height = Math.max(1, Math.round(h * dpr));
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      cx = w / 2; cy = h / 2;
+      maxR = Math.hypot(w, h) / 2 * 1.05;
+      buildScene();
+    };
+
+    const draw = (dt) => {
+      t += dt;
+      ctx.clearRect(0, 0, w, h);
+
+      // Event-horizon rings (subtle breathing) + rotating lensing arc
+      rings.forEach((ring) => {
+        const op = ring.lo + (ring.hi - ring.lo) * (0.5 + 0.5 * Math.sin(t * ring.speed + ring.phase));
+        ctx.beginPath();
+        ctx.arc(cx, cy, ring.r, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(200,169,110,${op.toFixed(3)})`;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        if (ring.inner) {
+          const a0 = (t * 0.25) % (Math.PI * 2);
+          ctx.beginPath();
+          ctx.arc(cx, cy, ring.r, a0, a0 + Math.PI * 0.6);
+          ctx.strokeStyle = `rgba(200,169,110,${(op * 2.4).toFixed(3)})`;
+          ctx.lineWidth = 1.4;
+          ctx.stroke();
+        }
+      });
+
+      // Dust trails — radial streaks, fading as they fall in
+      dust.forEach((d) => {
+        d.radius *= (1 - d.pull);
+        if (d.radius < 30) Object.assign(d, initDust(), { radius: edgeRadius() });
+        const x = cx + Math.cos(d.angle) * d.radius;
+        const y = cy + Math.sin(d.angle) * d.radius;
+        const x2 = cx + Math.cos(d.angle) * (d.radius + d.length);
+        const y2 = cy + Math.sin(d.angle) * (d.radius + d.length);
+        const fade = Math.min(1, d.radius / (maxR * 0.6));
+        ctx.beginPath();
+        ctx.moveTo(x, y); ctx.lineTo(x2, y2);
+        ctx.strokeStyle = d.warm
+          ? `rgba(240,237,232,${(d.opacity * fade).toFixed(3)})`
+          : `rgba(200,169,110,${(d.opacity * fade).toFixed(3)})`;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      });
+
+      // Stars — slow straight pull toward center + gentle twinkle
+      stars.forEach((s) => {
+        s.radius *= (1 - s.pull);
+        if (s.radius < 30) Object.assign(s, initStar(), { radius: edgeRadius() });
+        const x = cx + Math.cos(s.angle) * s.radius;
+        const y = cy + Math.sin(s.angle) * s.radius;
+        const tw = 0.75 + 0.25 * Math.sin(t * s.twSpeed + s.twPhase);
+        ctx.beginPath();
+        ctx.arc(x, y, s.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(240,237,232,${(s.baseOpacity * tw).toFixed(3)})`;
+        ctx.fill();
+      });
+
+      // Heavenly bodies — curved (spiral) infall with soft glow halo
+      bodies.forEach((b) => {
+        b.radius *= (1 - b.pull);
+        b.angle += b.angVel;
+        if (b.radius < 30) Object.assign(b, initBody(), { radius: edgeRadius() });
+        const x = cx + Math.cos(b.angle) * b.radius;
+        const y = cy + Math.sin(b.angle) * b.radius;
+        const haloR = b.size * 2.5;
+        const grad = ctx.createRadialGradient(x, y, 0, x, y, haloR);
+        grad.addColorStop(0, b.color);
+        grad.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.beginPath();
+        ctx.arc(x, y, haloR, 0, Math.PI * 2);
+        ctx.fillStyle = grad;
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(x, y, b.size, 0, Math.PI * 2);
+        ctx.fillStyle = b.color;
+        ctx.fill();
+      });
+    };
+
+    let last = performance.now();
+    const loop = (now) => {
+      const dt = Math.min(0.05, (now - last) / 1000);
+      last = now;
+      draw(dt);
+      raf = requestAnimationFrame(loop);
+    };
+
+    resize();
+    draw(0);                 // paint one frame immediately (no blank flash before rAF)
+    raf = requestAnimationFrame(loop);
+    window.addEventListener("resize", resize);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("resize", resize);
+    };
+  }, []);
 
   const [discoveryFeed, setDiscoveryFeed] = useState(getDISCOVERY_FEED());
   const [categoryPreviews, setCategoryPreviews] = useState(getCATEGORY_PREVIEWS());
@@ -363,6 +541,8 @@ export default function Home() {
 
         {/* Cinematic Cosmic Space Background */}
         <div className="space-bg-container">
+          {/* Event-horizon pull field (stars, heavenly bodies, dust, rings) */}
+          <canvas ref={eventHorizonRef} className="event-horizon-canvas" aria-hidden="true" />
           {SPACE_STARS.map((star, idx) => (
             <div
               key={`space-star-${idx}`}
@@ -447,58 +627,49 @@ export default function Home() {
         {/* Main hook content */}
         <div className="hook-content">
 
-          {/* Animated SCOUTIT wordmark */}
-          <div className="scoutit-wordmark" aria-label="SCOUTIT">
-            {/* S — comet trail draw */}
-            <span className="letter letter-s" style={{ animationDelay: '0s' }}>S</span>
-            {/* C — eclipse reveal */}
-            <span className="letter letter-c" style={{ animationDelay: '0.55s' }}>C</span>
-            {/* O — planet orbit */}
-            <span className="letter letter-o" style={{ animationDelay: '1.0s' }}>
-              O
-              <span className="orbit-ring"></span>
-            </span>
-            {/* U — signal fill */}
-            <span className="letter letter-u" style={{ animationDelay: '1.45s' }}>U</span>
-            {/* T — satellite arms */}
-            <span className="letter letter-t1" style={{ animationDelay: '1.9s' }}>T</span>
-
-            {/* I — normal letter, UFO anchored above via two wrapper layers:
-                  ufo-anchor = static centering (never animated)
-                  ufo-float  = animation only (translateY, never touches X) */}
-            <span className="letter letter-i" style={{ animationDelay: '2.3s' }}>
-              I
-              <span className="ufo-anchor">
-                <span className="ufo-float">
-                  <span className="ufo">
-                    <span className="ufo-dome"></span>
-                    <span className="ufo-disc">
-                      <span className="ufo-light ufo-light-1"></span>
-                      <span className="ufo-light ufo-light-2"></span>
-                      <span className="ufo-light ufo-light-3"></span>
-                    </span>
-                  </span>
-                </span>
+          {/* UFO hovering above the wordmark + tractor beam */}
+          <div className="title-ufo-zone">
+            <span className="title-ufo">
+              <span className="title-ufo-dome"></span>
+              <span className="title-ufo-disc">
+                <span className="title-ufo-light"></span>
+                <span className="title-ufo-light"></span>
+                <span className="title-ufo-light"></span>
               </span>
             </span>
-
-            {/* T — targeting reticle */}
-            <span className="letter letter-t2" style={{ animationDelay: '3.5s' }}>
-              T
-              <span className="reticle-ring reticle-1"></span>
-              <span className="reticle-ring reticle-2"></span>
-            </span>
+            <span className={`title-beam ${heroPhase >= 1 ? "fire" : ""}`}></span>
           </div>
 
-          <h1 className="hero-tagline">Get lost in spaces that actually inspire you.</h1>
-          <p className="hero-subheadline">Space Intelligence for the Philippine property dreamer.</p>
-          
-          <button 
-            onClick={() => document.getElementById("property-section")?.scrollIntoView({ behavior: "smooth" })}
-            className="hero-cta-btn"
-          >
-            Begin Exploring
-          </button>
+          {/* ScoutIT wordmark */}
+          <div className={`scoutit-wordmark ${heroPhase >= 2 ? "lit" : ""}`} aria-label="ScoutIT">
+            <span className="word-scout">Scout</span><span className="word-it">IT</span>
+          </div>
+
+          {/* Discipline badge */}
+          <div className="title-badge">SPACE · INTELLIGENCE · TECHNOLOGY</div>
+
+          {/* Divider */}
+          <div className="title-divider"></div>
+
+          {/* Taglines */}
+          <p className="title-tagline-1">Get lost in spaces that actually inspire you.</p>
+          <div className="title-tagline-2">SPACE INTELLIGENCE · PHILIPPINE PROPERTY</div>
+
+          {/* CTA buttons — appear after the beam fires */}
+          <div className={`title-cta-row ${heroPhase >= 3 ? "show" : ""}`}>
+            <button
+              className="title-cta title-cta-primary"
+              onClick={() => document.getElementById("property-section")?.scrollIntoView({ behavior: "smooth" })}
+            >
+              ↓ Initiate Scout
+            </button>
+            <button
+              className="title-cta title-cta-secondary"
+              onClick={() => document.getElementById("discover-section")?.scrollIntoView({ behavior: "smooth" })}
+            >
+              Enter Platform →
+            </button>
+          </div>
         </div>
 
         {/* Scroll indicator */}
@@ -657,7 +828,7 @@ export default function Home() {
       </section>
 
       {/* SECTION 3: Layer 02 */}
-      <section className="snap-section section-discover" style={{ padding: 0 }}>
+      <section className="snap-section section-discover" id="discover-section" style={{ padding: 0 }}>
         <div className="property-split">
           {/* Left Menu Panel */}
           <div className="property-menu">
@@ -1297,14 +1468,185 @@ export default function Home() {
           position: relative;
         }
 
+        /* Event-horizon canvas — full-cover, behind all hero content */
+        .event-horizon-canvas {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          z-index: 1;
+          pointer-events: none;
+          display: block;
+        }
+
+        /* ════════════ TITLE SCREEN — WORDMARK REDESIGN ════════════ */
         .scoutit-wordmark {
           display: flex;
-          align-items: flex-end;
+          align-items: baseline;
           justify-content: center;
-          gap: 0.04em;
-          margin-bottom: 48px;
+          margin: 0 0 18px;
           line-height: 1;
         }
+        .scoutit-wordmark .word-scout,
+        .scoutit-wordmark .word-it {
+          font-family: Georgia, 'Times New Roman', serif;
+          font-weight: 400;
+          font-size: clamp(46px, 8vw, 100px);
+          letter-spacing: 8px;
+          line-height: 1;
+          transition: color 0.6s ease, text-shadow 0.6s ease;
+        }
+        .scoutit-wordmark .word-scout { color: #f0ede8; }
+        .scoutit-wordmark .word-it    { color: #c8a96e; margin-right: -8px; }
+        .scoutit-wordmark.lit .word-scout {
+          color: #ffffff;
+          text-shadow: 0 0 40px rgba(200, 169, 110, 0.6);
+        }
+        .scoutit-wordmark.lit .word-it {
+          color: #c8a96e;
+          text-shadow: 0 0 40px rgba(200, 169, 110, 0.85);
+        }
+
+        /* ── UFO hovering above the wordmark ── */
+        .title-ufo-zone {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: flex-start;
+          height: 62px;
+          margin-bottom: 8px;
+        }
+        .title-ufo {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          animation: titleUfoFloat 3s ease-in-out infinite;
+        }
+        .title-ufo-dome {
+          width: 16px;
+          height: 9px;
+          background: #161616;
+          border: 1px solid #c8a96e;
+          border-bottom: none;
+          border-radius: 50% 50% 0 0;
+        }
+        .title-ufo-disc {
+          width: 40px;
+          height: 11px;
+          background: #161616;
+          border: 1px solid #c8a96e;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: space-evenly;
+          box-shadow: 0 0 10px rgba(200, 169, 110, 0.35);
+          animation: titleSaucerTilt 9s ease-in-out infinite;
+        }
+        .title-ufo-light {
+          width: 3px;
+          height: 3px;
+          border-radius: 50%;
+          background: #c8a96e;
+          box-shadow: 0 0 4px #c8a96e;
+        }
+
+        /* ── Tractor beam ── */
+        .title-beam {
+          width: 3px;
+          height: 40px;
+          margin-top: 2px;
+          background: linear-gradient(to bottom, #c8a96e 0%, rgba(200, 169, 110, 0) 100%);
+          transform: scaleY(0);
+          transform-origin: top center;
+          opacity: 0;
+        }
+        .title-beam.fire {
+          animation: titleBeamFire 0.8s ease-out forwards;
+        }
+
+        /* ── Discipline badge ── */
+        .title-badge {
+          font-family: 'Courier New', monospace;
+          font-size: 9px;
+          letter-spacing: 5px;
+          text-transform: uppercase;
+          color: #666666;
+          margin-bottom: 22px;
+        }
+
+        /* ── Divider ── */
+        .title-divider {
+          width: 32px;
+          height: 1px;
+          background: rgba(200, 169, 110, 0.35);
+          margin: 0 auto 22px;
+        }
+
+        /* ── Taglines ── */
+        .title-tagline-1 {
+          font-family: Georgia, serif;
+          font-style: italic;
+          font-size: 16px;
+          color: #8a8a8a;
+          text-align: center;
+          margin: 0 0 10px;
+        }
+        .title-tagline-2 {
+          font-family: 'Courier New', monospace;
+          font-size: 9px;
+          letter-spacing: 4px;
+          text-transform: uppercase;
+          color: #555555;
+          text-align: center;
+          margin: 0 0 34px;
+        }
+
+        /* ── CTA buttons (revealed after the beam fires) ── */
+        .title-cta-row {
+          display: flex;
+          gap: 16px;
+          justify-content: center;
+          flex-wrap: wrap;
+          opacity: 0;
+          transform: translateY(12px);
+          transition: opacity 0.6s ease, transform 0.6s ease;
+          pointer-events: none;
+        }
+        .title-cta-row.show {
+          opacity: 1;
+          transform: translateY(0);
+          pointer-events: auto;
+        }
+        .title-cta {
+          font-family: 'Courier New', monospace;
+          font-size: 10px;
+          letter-spacing: 3px;
+          text-transform: uppercase;
+          padding: 12px 28px;
+          border-radius: 2px;
+          background: transparent;
+          cursor: pointer;
+          transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+        }
+        .title-cta-primary { border: 1px solid #c8a96e; color: #c8a96e; }
+        .title-cta-primary:hover { background: #c8a96e; color: #0e0e0e; }
+        .title-cta-secondary { border: 1px solid #2a2a2a; color: #8a8a8a; }
+        .title-cta-secondary:hover { border-color: #444; color: #f0ede8; }
+
+        @keyframes titleUfoFloat {
+          0%, 100% { transform: translateY(0); }
+          50%      { transform: translateY(-7px); }
+        }
+        @keyframes titleSaucerTilt {
+          0%, 100% { transform: rotate(-2.5deg); }
+          50%      { transform: rotate(2.5deg); }
+        }
+        @keyframes titleBeamFire {
+          0%   { transform: scaleY(0); opacity: 0; }
+          15%  { opacity: 1; }
+          100% { transform: scaleY(1); opacity: 1; }
+        }
+        /* ════════════ END TITLE SCREEN ════════════ */
 
         /* Base letter style */
         .letter {
