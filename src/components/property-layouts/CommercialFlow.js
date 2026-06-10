@@ -1471,14 +1471,37 @@ export default function CommercialFlow({ slug }) {
             </div>
           </div>
 
-          {/* ── WHERE TO? (Ch. 4) ── */}
+          {/* ── WHERE TO? (Ch. 4) — Around the Table / Guest Radius for restaurants/venues ── */}
           <div className={`chapter-panel ${activeTab === "whereto" ? "active" : ""}`} id="panel-whereto">
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>04 — Where To?</div>
+                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>{ch['whereto']?.chapterNumber || '04'} — {ch['whereto']?.chapterLabel || 'Where To?'}</div>
                 <div style={{height:"1px", background:"#262626"}}/>
               </div>
+
+              {/* Cell 9: Demand Anchors for restaurants and venues */}
+              {(isRestaurant || isVenue) && d.demand_anchors && (
+                <div style={{marginBottom:"28px"}}>
+                  <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#8a8a8a", letterSpacing:"0.2em", textTransform:"uppercase", marginBottom:"14px"}}>
+                    {isRestaurant ? "Demand Anchors — What Drives Cover Count" : "Demand Anchors — Event Traffic Sources"}
+                  </div>
+                  <div style={{display:"flex", flexWrap:"wrap", gap:"8px", marginBottom:"20px"}}>
+                    {(Array.isArray(d.demand_anchors)
+                      ? d.demand_anchors
+                      : d.demand_anchors.split(",").map(s => s.trim()).filter(Boolean)
+                    ).map((anchor, i) => (
+                      <span key={i} style={{
+                        fontFamily:"'Courier New',monospace", fontSize:"10px",
+                        color:"#f0ede8", background:"#1a1a1a",
+                        border:"0.5px solid #2e2e2e", padding:"6px 14px",
+                        borderRadius:"2px", letterSpacing:"0.1em", textTransform:"uppercase"
+                      }}>{anchor}</span>
+                    ))}
+                  </div>
+                  <div style={{height:"1px", background:"#262626", margin:"0 0 24px"}}/>
+                </div>
+              )}
 
               <div className="whereto-tabs" style={{marginBottom:"20px"}}>
                 <button className={`whereto-tab-btn ${whereToTab === "map" ? "active" : ""}`} onClick={() => setWhereToTab("map")}>
@@ -1491,7 +1514,13 @@ export default function CommercialFlow({ slug }) {
 
               {whereToTab === "map" && (
                 <div style={{height:"clamp(460px, 64vh, 600px)", minHeight:"460px", flexShrink:0, borderRadius:"4px", overflow:"hidden", border:"0.5px solid #262626", marginBottom:"24px"}}>
-                  <InteractiveMap lat={d.lat || d.latitude || 14.5547} lng={d.lng || d.longitude || 121.0244} propertyTitle={d.title} vicinityData={d.whereTo}/>
+                  <InteractiveMap
+                    lat={d.lat || d.latitude || 14.5547}
+                    lng={d.lng || d.longitude || 121.0244}
+                    propertyTitle={d.title}
+                    vicinityData={d.whereTo}
+                    mapboxToken={mapboxToken}
+                  />
                 </div>
               )}
 
@@ -1521,7 +1550,12 @@ export default function CommercialFlow({ slug }) {
               <DeepIntelWidget
                 open={widgets.whereto}
                 onToggle={() => setWidgets(w => ({...w, whereto: !w.whereto}))}
-                fields={["Walkability Score","Transit Frequency Analysis","Peak Hour Commute Data","Zoning Classification","Development Pipeline"]}
+                fields={isRestaurant
+                  ? ["Peak Dining Hour Traffic","Foot Traffic Score","Pre/Post-Dinner Venue Flow","Delivery Zone Coverage"]
+                  : isVenue
+                  ? ["Event Traffic Flow Analysis","Hotel Proximity Score","Transport Node Coverage","Airport Transfer Index"]
+                  : ["Walkability Score","Transit Frequency Analysis","Peak Hour Commute Data","Zoning Classification","Development Pipeline"]
+                }
               />
 
             </div>
