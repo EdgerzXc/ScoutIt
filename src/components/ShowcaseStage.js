@@ -225,7 +225,6 @@ export default function ShowcaseStage({ mode = "full" }) {
   const bgRef = useRef(null);
   const warpRef = useRef(null);
   const cardRef = useRef(null);
-  const dragRef = useRef(null);
   const menuRef = useRef(null);
 
   const sceneRef = useRef(null);
@@ -257,6 +256,29 @@ export default function ShowcaseStage({ mode = "full" }) {
     document.addEventListener("mousedown", onDown);
     return () => document.removeEventListener("mousedown", onDown);
   }, []);
+
+  // Drag-to-reposition any card on the stage; it stays where you drop it.
+  const [cardPos, setCardPos] = useState({});
+  const dragRef = useRef(null);
+  const movedRef = useRef(false);
+  useEffect(() => {
+    const onMove = (e) => {
+      const d = dragRef.current; if (!d) return;
+      const dx = e.clientX - d.sx, dy = e.clientY - d.sy;
+      if (Math.abs(dx) > 4 || Math.abs(dy) > 4) movedRef.current = true;
+      setCardPos((p) => ({ ...p, [d.id]: { x: d.ox + dx, y: d.oy + dy } }));
+    };
+    const onUp = () => { dragRef.current = null; };
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    return () => { window.removeEventListener("pointermove", onMove); window.removeEventListener("pointerup", onUp); };
+  }, []);
+  const startDrag = (id, e) => { movedRef.current = false; const cur = cardPos[id] || { x: 0, y: 0 }; dragRef.current = { id, sx: e.clientX, sy: e.clientY, ox: cur.x, oy: cur.y }; };
+  const swallowDragClick = (e) => { if (movedRef.current) { e.preventDefault(); e.stopPropagation(); return true; } return false; };
+  const posStyle = (id, extra) => {
+    const p = cardPos[id];
+    return p ? { ...extra, transform: `translate(${p.x}px, ${p.y}px)`, animation: "none" } : extra;
+  };
 
   const ranked = useMemo(() => rankBoard(entries, { award, category }), [entries, award, category]);
   const active = ranked.find((e) => e.rank === activeRank) || ranked[0] || null;
@@ -372,15 +394,10 @@ export default function ShowcaseStage({ mode = "full" }) {
     tierRef.current = "universe";
     setActiveTier("universe");
     setActiveRank(1);
+    setCardPos({});
     transRef.current = null;
     sceneRef.current = BUILDERS.universe(dimRef.current.W || 1, dimRef.current.H || 1);
   }, [award, category, entries]);
-
-  // Drag-to-scroll for the bottom row
-  const dragState = useRef({ down: false, x: 0, sl: 0 });
-  const onDragDown = (e) => { dragState.current = { down: true, x: e.pageX ?? e.touches?.[0]?.pageX ?? 0, sl: dragRef.current.scrollLeft }; };
-  const onDragMove = (e) => { if (!dragState.current.down) return; const px = e.pageX ?? e.touches?.[0]?.pageX ?? 0; dragRef.current.scrollLeft = dragState.current.sl - (px - dragState.current.x) * 1.4; };
-  const onDragUp = () => { dragState.current.down = false; };
 
   const tierMeta = TIERS[activeTier] || TIERS.universe;
 
@@ -456,10 +473,11 @@ export default function ShowcaseStage({ mode = "full" }) {
           <div className="sc-rank-badge" style={{ borderColor: `rgba(${tierMeta.rgb},0.6)`, color: tierMeta.color }}>
             #{active.rank} · {active.award_type} · {tierMeta.badge}
           </div>
-          <div className="sc-card" ref={cardRef} style={{ borderColor: `rgba(${tierMeta.rgb},0.65)`, "--tg": `rgba(${tierMeta.rgb},0.5)` }}>
+          <div className="sc-card" ref={cardRef} onPointerDown={(e) => startDrag("spotlight", e)}
+            style={posStyle("spotlight", { borderColor: `rgba(${tierMeta.rgb},0.65)`, "--tg": `rgba(${tierMeta.rgb},0.5)` })}>
             <div className="sc-photo" style={active.photo ? { backgroundImage: `url(${active.photo})` } : undefined}>
               {!active.photo && <span className="sc-photo-txt">Property Photo</span>}
-              <span className="sc-card-cue" style={{ color: tierMeta.color, borderColor: `rgba(${tierMeta.rgb},0.6)` }}>Showcase It →</span>
+              <span className="sc-card-cue" style={{ color: tierMeta.color, borderColor: `rgba(${tierMeta.rgb},0.6)` }}>Drag to place ✦</span>
             </div>
             <div className="sc-body">
               <div className="sc-cat" style={{ color: tierMeta.color }}>{active.category}</div>
@@ -471,7 +489,7 @@ export default function ShowcaseStage({ mode = "full" }) {
                   <div className="sc-stat" key={l}><div className="sc-stat-num" style={{ color: tierMeta.color }}>{v}</div><div className="sc-stat-lbl">{l}</div></div>
                 ))}
               </div>
-              <Link href={`/property/${active.property_slug}`} className="sc-cta">View Full Briefing <span>→</span></Link>
+              <Link href={`/property/${active.property_slug}`} className="sc-cta" onClick={swallowDragClick}>View Full Briefing <span>→</span></Link>
             </div>
           </div>
           <div className="sc-platform" style={{ borderColor: `rgba(${tierMeta.rgb},0.25)`, boxShadow: `0 0 22px rgba(${tierMeta.rgb},0.22)` }} />
@@ -506,7 +524,11 @@ export default function ShowcaseStage({ mode = "full" }) {
               {restRanks.map((e) => {
                 const m = TIERS[e.tier];
                 return (
-                  <button key={e.rank} draggable={false} className={`sc-rest-card ${active && active.rank === e.rank ? "on" : ""}`} onClick={() => selectRank(e.rank)} style={{ "--tc": m.color, "--tg": `rgba(${m.rgb},0.5)` }}>
+                  <button key={e.rank} draggable={false}
+                    className={`sc-rest-card ${active && active.rank === e.rank ? "on" : ""}`}
+                    onPointerDown={(ev) => startDrag(`rest-${e.rank}`, ev)}
+                    onClick={(ev) => { if (swallowDragClick(ev)) return; selectRank(e.rank); }}
+                    style={posStyle(`rest-${e.rank}`, { "--tc": m.color, "--tg": `rgba(${m.rgb},0.5)` })}>
                     <div className="sc-rest-photo" style={e.photo ? { backgroundImage: `url(${e.photo})` } : undefined}>
                       <span className="sc-rest-rank">#{String(e.rank).padStart(2, "0")}</span>
                       <span className="sc-rest-showcase">Showcase →</span>
@@ -596,8 +618,9 @@ export default function ShowcaseStage({ mode = "full" }) {
         .sc-overlay { position: absolute; inset: 0; z-index: 3; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding-bottom: 240px; pointer-events: none; }
         .sc-empty { font-family: Georgia, serif; font-style: italic; font-size: 22px; color: #666; }
         .sc-rank-badge { font-family: 'Courier New', monospace; font-size: 13px; letter-spacing: 0.28em; padding: 8px 22px; text-transform: uppercase; border: 1px solid; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); }
-        .sc-card { width: 330px; border: 1px solid; background: rgba(6,6,7,0.6); backdrop-filter: blur(16px); overflow: hidden; pointer-events: all; user-select: none; animation: scFloat 4.5s ease-in-out infinite; transition: box-shadow 0.3s ease; }
+        .sc-card { width: 330px; border: 1px solid; background: rgba(6,6,7,0.6); backdrop-filter: blur(16px); overflow: hidden; pointer-events: all; user-select: none; cursor: grab; touch-action: none; animation: scFloat 4.5s ease-in-out infinite; transition: box-shadow 0.3s ease; }
         .sc-card:hover { animation-play-state: paused; box-shadow: 0 0 0 1px var(--tg), 0 24px 60px -22px var(--tg); }
+        .sc-card:active { cursor: grabbing; }
         @keyframes scFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
         .sc-photo { position: relative; width: 100%; height: 184px; background: rgba(10,10,10,0.6); background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center; overflow: hidden; transition: transform 0.55s ease; -webkit-user-drag: none; }
         .sc-card:hover .sc-photo { transform: scale(1.05); }
@@ -624,9 +647,9 @@ export default function ShowcaseStage({ mode = "full" }) {
         .sc-pill { font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; padding: 8px 18px; border: 1px solid; cursor: pointer; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); transition: all 0.3s; }
         .sc-rest { width: 100%; max-width: 1120px; pointer-events: all; }
         .sc-rest-label { font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 0.22em; color: #666; text-transform: uppercase; margin-bottom: 9px; text-align: center; }
-        .sc-rest-row { display: flex; gap: 12px; justify-content: flex-start; overflow-x: auto; scrollbar-width: none; padding: 2px 4px 6px; }
-        .sc-rest-row::-webkit-scrollbar { display: none; }
-        .sc-rest-card { flex: 0 0 auto; width: 176px; text-align: left; background: rgba(10,10,12,0.85); backdrop-filter: blur(8px); border: 1px solid rgba(120,120,120,0.25); padding: 0; overflow: hidden; cursor: pointer; user-select: none; -webkit-user-drag: none; transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease; }
+        .sc-rest-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; overflow: visible; padding: 2px 4px 6px; }
+        .sc-rest-card { flex: 0 0 auto; width: 176px; text-align: left; background: rgba(10,10,12,0.85); backdrop-filter: blur(8px); border: 1px solid rgba(120,120,120,0.25); padding: 0; overflow: hidden; cursor: grab; user-select: none; -webkit-user-drag: none; touch-action: none; transition: border-color 0.25s ease, box-shadow 0.25s ease; }
+        .sc-rest-card:active { cursor: grabbing; }
         .sc-rest-card:hover { transform: translateY(-4px); border-color: var(--tg); box-shadow: 0 14px 32px -16px var(--tg); }
         .sc-rest-card.on { border-color: var(--tc); }
         .sc-rest-photo { position: relative; height: 84px; background: #161616; background-size: cover; background-position: center; overflow: hidden; transition: transform 0.45s ease; }
