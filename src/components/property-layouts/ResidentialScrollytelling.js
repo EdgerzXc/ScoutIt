@@ -1249,7 +1249,7 @@ export default function ResidentialScrollytelling({ slug }) {
             </div>
           </div>
 
-          {/* ── BUILD PLANS (Ch. 5) ── */}
+          {/* ── BUILD PLANS (Ch. 5) — Operating Context for STR, defaults for Residential ── */}
           <div className={`chapter-panel ${activeTab === "buildplans" ? "active" : ""}`} id="panel-buildplans">
             <div className="panel-content">
 
@@ -1258,53 +1258,126 @@ export default function ResidentialScrollytelling({ slug }) {
                 <div style={{height:"1px", background:"#262626"}}/>
               </div>
 
-              {d.expansion_potential && (
+              {isHospitality ? (
+                /* Cell 4: STR Operating Context — short-let legality block */
                 <>
-                  <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#8a8a8a", letterSpacing:"0.2em", textTransform:"uppercase", marginBottom:"12px"}}>Expansion Potential</div>
-                  <p style={{fontFamily:"Georgia,serif", fontSize:"17px", color:"#f0ede8", lineHeight:1.9, margin:"0 0 28px", maxWidth:"580px"}}>
-                    {d.expansion_potential}
+                  <p style={{fontFamily:"Georgia,serif", fontSize:"16px", color:"#f0ede8", lineHeight:1.85, margin:"0 0 28px", maxWidth:"560px"}}>
+                    Before committing to a short-term rental operation, understand the regulatory context governing this unit.
                   </p>
-                </>
-              )}
 
-              {d.zoning_type && (
-                <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", marginBottom:"24px", gap:"20px"}}>
-                  <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Zoning Type</span>
-                  <span style={{fontFamily:"'Courier New',monospace", fontSize:"12px", color:"#f0ede8", letterSpacing:"0.04em", textAlign:"right"}}>{d.zoning_type}</span>
-                </div>
-              )}
-
-              {d.developer_name && (
-                <div style={{background:"#161616", border:"0.5px solid #262626", borderRadius:"4px", padding:"18px 20px", marginBottom:"24px"}}>
-                  <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#8a8a8a", letterSpacing:"0.18em", textTransform:"uppercase", marginBottom:"8px"}}>Developer</div>
-                  <div style={{fontFamily:"Georgia,serif", fontSize:"18px", color:"#f0ede8", marginBottom: d.developer_notes ? "8px" : "0"}}>{d.developer_name}</div>
-                  {d.developer_notes && (
-                    <div style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#a0a0a0", lineHeight:1.7}}>{d.developer_notes}</div>
+                  {/* STR Legality Status — the most critical field */}
+                  {d.short_let_legal && (
+                    <div style={{marginBottom:"24px"}}>
+                      <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#8a8a8a", letterSpacing:"0.2em", textTransform:"uppercase", marginBottom:"12px"}}>Short-Let Legal Status</div>
+                      <div style={{
+                        display:"inline-flex", alignItems:"center", gap:"10px",
+                        padding:"12px 18px", borderRadius:"2px",
+                        background: d.short_let_legal.includes("Permitted") && !d.short_let_legal.includes("Not")
+                          ? "rgba(76,175,125,0.08)" : d.short_let_legal.includes("Not")
+                          ? "rgba(200,80,80,0.08)" : "rgba(200,169,110,0.08)",
+                        border: `0.5px solid ${
+                          d.short_let_legal.includes("Permitted") && !d.short_let_legal.includes("Not")
+                            ? "rgba(76,175,125,0.4)" : d.short_let_legal.includes("Not")
+                            ? "rgba(200,80,80,0.4)" : "rgba(200,169,110,0.4)"}`
+                      }}>
+                        <span style={{
+                          width:"8px", height:"8px", borderRadius:"50%", flexShrink:0,
+                          background: d.short_let_legal.includes("Permitted") && !d.short_let_legal.includes("Not")
+                            ? "#4caf7d" : d.short_let_legal.includes("Not")
+                            ? "#c85050" : "#c8a96e"
+                        }}/>
+                        <span style={{fontFamily:"Georgia,serif", fontSize:"17px", color:"#f0ede8"}}>{d.short_let_legal}</span>
+                      </div>
+                      {d.short_let_verified_date && (
+                        <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#6a6a6a", letterSpacing:"0.12em", marginTop:"10px"}}>
+                          Verified as of {d.short_let_verified_date} · Researcher-verified
+                        </div>
+                      )}
+                    </div>
                   )}
-                </div>
-              )}
 
-              {d.structural_notes && (
-                <>
-                  <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#8a8a8a", letterSpacing:"0.2em", textTransform:"uppercase", marginBottom:"12px"}}>Structural Notes</div>
-                  <p style={{fontFamily:"Georgia,serif", fontSize:"15px", color:"#f0ede8", lineHeight:1.85, margin:"0", maxWidth:"580px"}}>
-                    {d.structural_notes}
+                  <div style={{display:"flex", flexDirection:"column", marginBottom:"28px"}}>
+                    {d.expansion_potential && (
+                      <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", gap:"20px"}}>
+                        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>HOA / Building Rules</span>
+                        <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right"}}>{d.expansion_potential}</span>
+                      </div>
+                    )}
+                    {d.zoning_type && (
+                      <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", gap:"20px"}}>
+                        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Zoning</span>
+                        <span style={{fontFamily:"'Courier New',monospace", fontSize:"12px", color:"#f0ede8", textAlign:"right", letterSpacing:"0.04em"}}>{d.zoning_type}</span>
+                      </div>
+                    )}
+                    {d.structural_notes && (
+                      <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", gap:"20px"}}>
+                        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Permit Notes</span>
+                        <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right", maxWidth:"55%"}}>{d.structural_notes}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <p style={{fontFamily:"system-ui,-apple-system,sans-serif", fontSize:"11.5px", color:"#6a6a6a", lineHeight:1.7, maxWidth:"560px"}}>
+                    Legality status is researcher-verified and reviewed quarterly. Short-let compliance changes frequently — confirm current rules with building management and the local government unit before listing.
                   </p>
                 </>
+              ) : (
+                /* Default: Build Plans for Residential */
+                <>
+                  {d.expansion_potential && (
+                    <>
+                      <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#8a8a8a", letterSpacing:"0.2em", textTransform:"uppercase", marginBottom:"12px"}}>Expansion Potential</div>
+                      <p style={{fontFamily:"Georgia,serif", fontSize:"17px", color:"#f0ede8", lineHeight:1.9, margin:"0 0 28px", maxWidth:"580px"}}>
+                        {d.expansion_potential}
+                      </p>
+                    </>
+                  )}
+                  {d.zoning_type && (
+                    <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", marginBottom:"24px", gap:"20px"}}>
+                      <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Zoning Type</span>
+                      <span style={{fontFamily:"'Courier New',monospace", fontSize:"12px", color:"#f0ede8", letterSpacing:"0.04em", textAlign:"right"}}>{d.zoning_type}</span>
+                    </div>
+                  )}
+                  {d.developer_name && (
+                    <div style={{background:"#161616", border:"0.5px solid #262626", borderRadius:"4px", padding:"18px 20px", marginBottom:"24px"}}>
+                      <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#8a8a8a", letterSpacing:"0.18em", textTransform:"uppercase", marginBottom:"8px"}}>Developer</div>
+                      <div style={{fontFamily:"Georgia,serif", fontSize:"18px", color:"#f0ede8", marginBottom: d.developer_notes ? "8px" : "0"}}>{d.developer_name}</div>
+                      {d.developer_notes && (
+                        <div style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#a0a0a0", lineHeight:1.7}}>{d.developer_notes}</div>
+                      )}
+                    </div>
+                  )}
+                  {d.structural_notes && (
+                    <>
+                      <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#8a8a8a", letterSpacing:"0.2em", textTransform:"uppercase", marginBottom:"12px"}}>Structural Notes</div>
+                      <p style={{fontFamily:"Georgia,serif", fontSize:"15px", color:"#f0ede8", lineHeight:1.85, margin:"0", maxWidth:"580px"}}>
+                        {d.structural_notes}
+                      </p>
+                    </>
+                  )}
+                  <DeepIntelWidget
+                    open={widgets.buildplans}
+                    onToggle={() => setWidgets(w => ({...w, buildplans: !w.buildplans}))}
+                    fields={["MEP Specifications","Electrical Load Capacity","Kitchen-to-Dining Floor Ratio","Ventilation Routing","Structural Calculations"]}
+                  />
+                </>
               )}
-
-              <DeepIntelWidget
-                open={widgets.buildplans}
-                onToggle={() => setWidgets(w => ({...w, buildplans: !w.buildplans}))}
-                fields={["MEP Specifications","Electrical Load Capacity","Kitchen-to-Dining Floor Ratio","Ventilation Routing","Structural Calculations"]}
-              />
 
             </div>
 
             <div className="panel-sidebar">
-              {d.zoning_type && <div className="sidebar-block"><div className="sidebar-accent-line"/><div className="sidebar-label">Zoning</div><div className="sidebar-value">{d.zoning_type}</div></div>}
-              {d.developer_name && <div className="sidebar-block"><div className="sidebar-label">Developer</div><div className="sidebar-value">{d.developer_name}</div></div>}
-              {d.year_built && <div className="sidebar-block"><div className="sidebar-label">Year built</div><div className="sidebar-value">{d.year_built}</div></div>}
+              {isHospitality ? (
+                <>
+                  {d.short_let_legal && <div className="sidebar-block"><div className="sidebar-accent-line" style={{background: d.short_let_legal.includes("Permitted") && !d.short_let_legal.includes("Not") ? "#4caf7d" : d.short_let_legal.includes("Not") ? "#c85050" : "#c8a96e"}}/><div className="sidebar-label">Short-Let Status</div><div className="sidebar-value" style={{fontSize:"13px", lineHeight:1.4}}>{d.short_let_legal}</div></div>}
+                  {d.zoning_type && <div className="sidebar-block"><div className="sidebar-label">Zoning</div><div className="sidebar-value">{d.zoning_type}</div></div>}
+                </>
+              ) : (
+                <>
+                  {d.zoning_type && <div className="sidebar-block"><div className="sidebar-accent-line"/><div className="sidebar-label">Zoning</div><div className="sidebar-value">{d.zoning_type}</div></div>}
+                  {d.developer_name && <div className="sidebar-block"><div className="sidebar-label">Developer</div><div className="sidebar-value">{d.developer_name}</div></div>}
+                  {d.year_built && <div className="sidebar-block"><div className="sidebar-label">Year built</div><div className="sidebar-value">{d.year_built}</div></div>}
+                </>
+              )}
             </div>
           </div>
 

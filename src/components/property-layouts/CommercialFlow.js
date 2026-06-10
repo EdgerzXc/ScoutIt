@@ -84,6 +84,136 @@ function DeepIntelWidget({ open, onToggle, fields }) {
 }
 
 // ═══════════════════════════════════════════════════
+// ENGINE ROOM PANEL (Cell 3 — Restaurants only)
+// Collapsed by default. Operator-facing. Onlookers skip.
+// ═══════════════════════════════════════════════════
+function EngineRoomPanel({ property: d }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div style={{marginBottom:"24px"}}>
+      {/* Collapsed toggle — visible to all */}
+      <button
+        onClick={() => setOpen(v => !v)}
+        style={{
+          width:"100%", background:"#161616", border:"0.5px solid #2a2a2a",
+          padding:"14px 20px", cursor:"pointer", display:"flex",
+          justifyContent:"space-between", alignItems:"center", borderRadius:"2px",
+          marginBottom: open ? "0" : "0"
+        }}
+      >
+        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8a96e", letterSpacing:"0.18em", textTransform:"uppercase"}}>
+          For Operators — Technical Specs
+        </span>
+        <svg viewBox="0 0 10 6" width="10" height="6" fill="none" stroke="#c8a96e" strokeWidth="1.5">
+          <path d={open ? "M1 5L5 1L9 5" : "M1 1L5 5L9 1"}/>
+        </svg>
+      </button>
+
+      {open && (
+        <div style={{background:"#161616", border:"0.5px solid #2a2a2a", borderTop:"none", padding:"20px", borderRadius:"0 0 2px 2px"}}>
+          <div style={{display:"flex", flexDirection:"column"}}>
+            {d.structural_notes && (
+              <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", gap:"20px"}}>
+                <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Ventilation / Exhaust</span>
+                <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right"}}>{d.structural_notes}</span>
+              </div>
+            )}
+            {d.expansion_potential && (
+              <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", gap:"20px"}}>
+                <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Electrical Load</span>
+                <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right"}}>{d.expansion_potential}</span>
+              </div>
+            )}
+            {d.zoning_type && (
+              <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", gap:"20px"}}>
+                <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Zoning Classification</span>
+                <span style={{fontFamily:"'Courier New',monospace", fontSize:"12px", color:"#f0ede8", textAlign:"right", letterSpacing:"0.04em"}}>{d.zoning_type}</span>
+              </div>
+            )}
+            {d.ceiling_height_text && (
+              <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", gap:"20px"}}>
+                <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Ceiling Clearance</span>
+                <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right"}}>{d.ceiling_height_text}</span>
+              </div>
+            )}
+            {d.developer_name && (
+              <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", gap:"20px"}}>
+                <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Building Owner / Developer</span>
+                <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right"}}>{d.developer_name}</span>
+              </div>
+            )}
+          </div>
+          <p style={{fontFamily:"system-ui,-apple-system,sans-serif", fontSize:"11.5px", color:"#6a6a6a", lineHeight:1.7, marginTop:"20px"}}>
+            Technical specifications are provided by the space operator or building management. Verify independently before committing to a fit-out.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════
+// BACK OF HOUSE PANEL (Venues only)
+// Collapsed by default. Operator-facing.
+// ═══════════════════════════════════════════════════
+function BackOfHousePanel({ property: d }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div style={{marginBottom:"24px"}}>
+      <button
+        onClick={() => setOpen(v => !v)}
+        style={{
+          width:"100%", background:"#161616", border:"0.5px solid #2a2a2a",
+          padding:"14px 20px", cursor:"pointer", display:"flex",
+          justifyContent:"space-between", alignItems:"center", borderRadius:"2px"
+        }}
+      >
+        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8a96e", letterSpacing:"0.18em", textTransform:"uppercase"}}>
+          For Operators — Back of House
+        </span>
+        <svg viewBox="0 0 10 6" width="10" height="6" fill="none" stroke="#c8a96e" strokeWidth="1.5">
+          <path d={open ? "M1 5L5 1L9 5" : "M1 1L5 5L9 1"}/>
+        </svg>
+      </button>
+
+      {open && (
+        <div style={{background:"#161616", border:"0.5px solid #2a2a2a", borderTop:"none", padding:"20px", borderRadius:"0 0 2px 2px"}}>
+          <div style={{display:"flex", flexDirection:"column"}}>
+            {d.structural_notes && (
+              <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", gap:"20px"}}>
+                <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Load-In / Load-Out</span>
+                <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right"}}>{d.structural_notes}</span>
+              </div>
+            )}
+            {d.expansion_potential && (
+              <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", gap:"20px"}}>
+                <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Rigging Notes</span>
+                <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right"}}>{d.expansion_potential}</span>
+              </div>
+            )}
+            {d.zoning_type && (
+              <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", gap:"20px"}}>
+                <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Zoning Classification</span>
+                <span style={{fontFamily:"'Courier New',monospace", fontSize:"12px", color:"#f0ede8", textAlign:"right", letterSpacing:"0.04em"}}>{d.zoning_type}</span>
+              </div>
+            )}
+            {d.ceiling_height_text && (
+              <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", gap:"20px"}}>
+                <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Ceiling Clearance</span>
+                <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right"}}>{d.ceiling_height_text}</span>
+              </div>
+            )}
+          </div>
+          <p style={{fontFamily:"system-ui,-apple-system,sans-serif", fontSize:"11.5px", color:"#6a6a6a", lineHeight:1.7, marginTop:"20px"}}>
+            BOH specifications provided by venue management. Confirm rigging certifications, vendor exclusivity terms, and permit requirements before booking.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════
 // MAIN COMPONENT
 // ═══════════════════════════════════════════════════
 export default function CommercialFlow({ slug }) {
@@ -898,65 +1028,172 @@ export default function CommercialFlow({ slug }) {
                 <div style={{height:"1px", background:"#262626"}}/>
               </div>
 
-              {(d.aesthetic_tag || d.accordion_3_rating) && (
-                <div style={{marginBottom:"30px"}}>
-                  <span style={{fontFamily:"Georgia,serif", fontStyle:"italic", fontSize:"clamp(22px,3vw,30px)", fontWeight:400, color:"#c8a96e", letterSpacing:"0.01em", lineHeight:1.2}}>
-                    {d.aesthetic_tag || d.accordion_3_rating}
-                  </span>
-                </div>
-              )}
-
-              <div style={{display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(120px, 1fr))", gap:"28px 20px", margin:"0 0 36px", width:"100%"}}>
-                {[
-                  pill1Val && pill1Val !== 0 ? { icon: pill1Emoji, val: pill1Val, label: pill1Label } : null,
-                  pill2Val && pill2Val !== 0 ? { icon: pill2Emoji, val: pill2Val, label: pill2Label } : null,
-                  d.floor_sqm > 0 ? { icon: "📐", val: d.floor_sqm, label: "sqm floor" } : null,
-                  d.parking > 0 ? { icon: "🚗", val: d.parking, label: "Parking Slots" } : null,
-                  d.lot_sqm > 0 ? { icon: "🌿", val: d.lot_sqm, label: "Lot sqm" } : null,
-                ].filter(Boolean).map((stat, i) => (
-                  <div key={i}>
-                    <div style={{display:"flex", alignItems:"center", gap:"12px"}}>
-                      <span style={{fontSize:"26px", lineHeight:1, flexShrink:0}}>{stat.icon}</span>
-                      <span style={{fontFamily:"Georgia,serif", fontSize:"clamp(40px,4.6vw,58px)", fontWeight:400, color:"#f0ede8", lineHeight:1}}>{stat.val}</span>
+              {/* ── STAT BLOCK: category-aware ── */}
+              {isRestaurant ? (
+                /* Cell 1: The Kitchen & Dining Room stat block */
+                <div style={{marginBottom:"36px"}}>
+                  {d.aesthetic_tag && (
+                    <div style={{marginBottom:"24px"}}>
+                      <span style={{fontFamily:"Georgia,serif", fontStyle:"italic", fontSize:"clamp(22px,3vw,30px)", fontWeight:400, color:"#c8a96e", letterSpacing:"0.01em", lineHeight:1.2}}>
+                        {d.aesthetic_tag || d.accordion_3_rating}
+                      </span>
                     </div>
-                    <div style={{fontFamily:"'Courier New',monospace", fontSize:"12px", color:"#8a8a8a", letterSpacing:"0.16em", textTransform:"uppercase", marginTop:"12px"}}>{stat.label}</div>
+                  )}
+                  <div style={{display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(140px, 1fr))", gap:"28px 20px", margin:"0 0 32px", width:"100%"}}>
+                    {[
+                      d.seating_capacity || d.cover_count ? { icon:"🍽", val: d.seating_capacity || d.cover_count, label:"Cover Count" } : null,
+                      d.kitchen_grade                     ? { icon:"🔪", val: d.kitchen_grade, label:"Kitchen Grade" } : null,
+                      d.floor_sqm > 0                     ? { icon:"📐", val: d.floor_sqm, label:"sqm total" } : null,
+                      d.parking > 0                       ? { icon:"🚗", val: d.parking, label:"Parking Slots" } : null,
+                    ].filter(Boolean).map((stat, i) => (
+                      <div key={i}>
+                        <div style={{display:"flex", alignItems:"center", gap:"12px"}}>
+                          <span style={{fontSize:"26px", lineHeight:1, flexShrink:0}}>{stat.icon}</span>
+                          <span style={{fontFamily:"Georgia,serif", fontSize:"clamp(36px,4.2vw,52px)", fontWeight:400, color:"#f0ede8", lineHeight:1}}>{stat.val}</span>
+                        </div>
+                        <div style={{fontFamily:"'Courier New',monospace", fontSize:"12px", color:"#8a8a8a", letterSpacing:"0.16em", textTransform:"uppercase", marginTop:"12px"}}>{stat.label}</div>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-
-              <div style={{height:"1px", background:"#262626", margin:"0 0 24px"}}/>
-
-              <div style={{display:"flex", flexDirection:"column"}}>
-                {d.ceiling_height_text && (
-                  <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626"}}>
-                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Ceiling Height</span>
-                    <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{d.ceiling_height_text}</span>
+                  <div style={{height:"1px", background:"#262626", margin:"0 0 24px"}}/>
+                  <div style={{display:"flex", flexDirection:"column"}}>
+                    {d.seating_breakdown && (
+                      <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626"}}>
+                        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Seating Breakdown</span>
+                        <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right", maxWidth:"55%"}}>{d.seating_breakdown}</span>
+                      </div>
+                    )}
+                    {d.ceiling_height_text && (
+                      <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626"}}>
+                        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Ceiling Clearance</span>
+                        <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{d.ceiling_height_text}</span>
+                      </div>
+                    )}
+                    {d.outdoor_description && d.outdoor_description !== "None" && (
+                      <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626"}}>
+                        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Al Fresco / Outdoor</span>
+                        <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right", maxWidth:"55%"}}>{d.outdoor_description}</span>
+                      </div>
+                    )}
                   </div>
-                )}
-                {d.furnishing && (
-                  <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626"}}>
-                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Furnishing</span>
-                    <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{d.furnishing}</span>
+                  {d.accordion_3_text && (
+                    <p style={{fontFamily:"Georgia,serif", fontSize:"17px", color:"#f0ede8", lineHeight:1.9, margin:"26px 0 0", maxWidth:"580px"}}>
+                      {d.accordion_3_text}
+                    </p>
+                  )}
+                </div>
+              ) : isVenue ? (
+                /* Cell 2: Production Capacity stat block */
+                <div style={{marginBottom:"36px"}}>
+                  {d.aesthetic_tag && (
+                    <div style={{marginBottom:"24px"}}>
+                      <span style={{fontFamily:"Georgia,serif", fontStyle:"italic", fontSize:"clamp(22px,3vw,30px)", fontWeight:400, color:"#c8a96e", letterSpacing:"0.01em", lineHeight:1.2}}>
+                        {d.aesthetic_tag || d.accordion_3_rating}
+                      </span>
+                    </div>
+                  )}
+                  <div style={{display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(140px, 1fr))", gap:"28px 20px", margin:"0 0 32px", width:"100%"}}>
+                    {[
+                      d.seating_capacity ? { icon:"🪑", val: d.seating_capacity, label:"Seated Capacity" } : null,
+                      d.standing_capacity ? { icon:"👥", val: d.standing_capacity, label:"Standing Capacity" } : null,
+                      d.setup_grade      ? { icon:"🎚", val: d.setup_grade, label:"Setup Grade" } : null,
+                      d.floor_sqm > 0    ? { icon:"📐", val: d.floor_sqm, label:"sqm floor" } : null,
+                    ].filter(Boolean).map((stat, i) => (
+                      <div key={i}>
+                        <div style={{display:"flex", alignItems:"center", gap:"12px"}}>
+                          <span style={{fontSize:"26px", lineHeight:1, flexShrink:0}}>{stat.icon}</span>
+                          <span style={{fontFamily:"Georgia,serif", fontSize:"clamp(36px,4.2vw,52px)", fontWeight:400, color:"#f0ede8", lineHeight:1}}>{stat.val}</span>
+                        </div>
+                        <div style={{fontFamily:"'Courier New',monospace", fontSize:"12px", color:"#8a8a8a", letterSpacing:"0.16em", textTransform:"uppercase", marginTop:"12px"}}>{stat.label}</div>
+                      </div>
+                    ))}
                   </div>
-                )}
-                {d.outdoor_description && d.outdoor_description !== "None" && (
-                  <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626"}}>
-                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Outdoor Space</span>
-                    <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right", maxWidth:"55%"}}>{d.outdoor_description}</span>
+                  <div style={{height:"1px", background:"#262626", margin:"0 0 24px"}}/>
+                  <div style={{display:"flex", flexDirection:"column"}}>
+                    {d.ceiling_height_text && (
+                      <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626"}}>
+                        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Ceiling Clearance</span>
+                        <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{d.ceiling_height_text}</span>
+                      </div>
+                    )}
+                    {d.outdoor_description && d.outdoor_description !== "None" && (
+                      <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626"}}>
+                        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Outdoor / Covered</span>
+                        <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right", maxWidth:"55%"}}>{d.outdoor_description}</span>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-
-              {d.accordion_3_text && (
-                <p style={{fontFamily:"Georgia,serif", fontSize:"17px", color:"#f0ede8", lineHeight:1.9, margin:"26px 0 0", maxWidth:"580px"}}>
-                  {d.accordion_3_text}
-                </p>
+                  {d.accordion_3_text && (
+                    <p style={{fontFamily:"Georgia,serif", fontSize:"17px", color:"#f0ede8", lineHeight:1.9, margin:"26px 0 0", maxWidth:"580px"}}>
+                      {d.accordion_3_text}
+                    </p>
+                  )}
+                </div>
+              ) : (
+                /* Default: generic stat block (Commercial, STR, Hospitality) */
+                <>
+                  {(d.aesthetic_tag || d.accordion_3_rating) && (
+                    <div style={{marginBottom:"30px"}}>
+                      <span style={{fontFamily:"Georgia,serif", fontStyle:"italic", fontSize:"clamp(22px,3vw,30px)", fontWeight:400, color:"#c8a96e", letterSpacing:"0.01em", lineHeight:1.2}}>
+                        {d.aesthetic_tag || d.accordion_3_rating}
+                      </span>
+                    </div>
+                  )}
+                  <div style={{display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(120px, 1fr))", gap:"28px 20px", margin:"0 0 36px", width:"100%"}}>
+                    {[
+                      pill1Val && pill1Val !== 0 ? { icon: pill1Emoji, val: pill1Val, label: pill1Label } : null,
+                      pill2Val && pill2Val !== 0 ? { icon: pill2Emoji, val: pill2Val, label: pill2Label } : null,
+                      d.floor_sqm > 0 ? { icon: "📐", val: d.floor_sqm, label: "sqm floor" } : null,
+                      d.parking > 0 ? { icon: "🚗", val: d.parking, label: "Parking Slots" } : null,
+                      d.lot_sqm > 0 ? { icon: "🌿", val: d.lot_sqm, label: "Lot sqm" } : null,
+                    ].filter(Boolean).map((stat, i) => (
+                      <div key={i}>
+                        <div style={{display:"flex", alignItems:"center", gap:"12px"}}>
+                          <span style={{fontSize:"26px", lineHeight:1, flexShrink:0}}>{stat.icon}</span>
+                          <span style={{fontFamily:"Georgia,serif", fontSize:"clamp(40px,4.6vw,58px)", fontWeight:400, color:"#f0ede8", lineHeight:1}}>{stat.val}</span>
+                        </div>
+                        <div style={{fontFamily:"'Courier New',monospace", fontSize:"12px", color:"#8a8a8a", letterSpacing:"0.16em", textTransform:"uppercase", marginTop:"12px"}}>{stat.label}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <div style={{height:"1px", background:"#262626", margin:"0 0 24px"}}/>
+                  <div style={{display:"flex", flexDirection:"column"}}>
+                    {d.ceiling_height_text && (
+                      <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626"}}>
+                        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Ceiling Height</span>
+                        <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{d.ceiling_height_text}</span>
+                      </div>
+                    )}
+                    {d.furnishing && (
+                      <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626"}}>
+                        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Furnishing</span>
+                        <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{d.furnishing}</span>
+                      </div>
+                    )}
+                    {d.outdoor_description && d.outdoor_description !== "None" && (
+                      <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626"}}>
+                        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Outdoor Space</span>
+                        <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right", maxWidth:"55%"}}>{d.outdoor_description}</span>
+                      </div>
+                    )}
+                  </div>
+                  {d.accordion_3_text && (
+                    <p style={{fontFamily:"Georgia,serif", fontSize:"17px", color:"#f0ede8", lineHeight:1.9, margin:"26px 0 0", maxWidth:"580px"}}>
+                      {d.accordion_3_text}
+                    </p>
+                  )}
+                </>
               )}
 
               <DeepIntelWidget
                 open={widgets.space}
                 onToggle={() => setWidgets(w => ({...w, space: !w.space}))}
-                fields={["Ventilation Quality","Noise Level Score","Natural Light Score","Privacy Score","Acoustic Baseline"]}
+                fields={isRestaurant
+                  ? ["Kitchen-to-Dining Ratio","Acoustic Baseline Score","Ambient Light Temperature","Ventilation Capacity"]
+                  : isVenue
+                  ? ["Rigging Load Ratings","Floor Load Limit","Acoustic Treatment Grade","Sound Isolation Rating"]
+                  : ["Ventilation Quality","Noise Level Score","Natural Light Score","Privacy Score","Acoustic Baseline"]
+                }
               />
 
             </div>
@@ -1111,16 +1348,16 @@ export default function CommercialFlow({ slug }) {
             </div>
           </div>
 
-          {/* ── LIFE HERE (Ch. 3) ── */}
+           {/* ── LIFE HERE (Ch. 3) — category-specific vibe framing ── */}
           <div className={`chapter-panel ${activeTab === "life" ? "active" : ""}`} id="panel-life">
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>03 — Life Here</div>
+                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>{ch['life']?.chapterNumber || '03'} — {ch['life']?.chapterLabel || 'Life Here'}</div>
                 <div style={{height:"1px", background:"#262626"}}/>
               </div>
 
-              {/* Best Suited For — gold chips, first thing shown */}
+              {/* Best Suited For — gold chips */}
               {(() => {
                 const tags = (d.bestForTags && d.bestForTags.length > 0)
                   ? d.bestForTags
@@ -1128,7 +1365,9 @@ export default function CommercialFlow({ slug }) {
                 if (tags.length === 0) return null;
                 return (
                   <div style={{marginBottom:"28px"}}>
-                    <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#8a8a8a", letterSpacing:"0.2em", textTransform:"uppercase", marginBottom:"14px"}}>Best Suited For</div>
+                    <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#8a8a8a", letterSpacing:"0.2em", textTransform:"uppercase", marginBottom:"14px"}}>
+                      {isRestaurant ? "Best For" : isVenue ? "Ideal Events" : "Best Suited For"}
+                    </div>
                     <div style={{display:"flex", flexWrap:"wrap", gap:"10px"}}>
                       {tags.map((t, i) => (
                         <span key={i} style={{fontFamily:"Georgia,serif", fontSize:"15px", color:"#c8a96e", border:"0.5px solid rgba(200,169,110,0.4)", padding:"7px 18px", borderRadius:"4px", letterSpacing:"0.02em"}}>{t}</span>
@@ -1138,39 +1377,97 @@ export default function CommercialFlow({ slug }) {
                 );
               })()}
 
+              {/* Editorial lead quote — lifestyle_vibe doubles as acoustic/vibe descriptor for restaurants */}
               {d.lifestyle_vibe && (
                 <p style={{fontFamily:"Georgia,serif", fontStyle:"italic", fontSize:"clamp(20px,2.6vw,26px)", fontWeight:400, color:"#f0ede8", lineHeight:1.45, margin:"0 0 24px", maxWidth:"560px"}}>
                   {d.lifestyle_vibe}
                 </p>
               )}
 
-              {d.community_feel && (
-                <p style={{fontFamily:"Georgia,serif", fontSize:"16px", color:"#f0ede8", lineHeight:1.9, margin:"0 0 20px", maxWidth:"580px"}}>
-                  {d.community_feel}
-                </p>
+              {/* Category-specific detail rows */}
+              {isRestaurant && (
+                /* Cell 7: The Vibe — acoustic profile, lighting, table intimacy */
+                <div style={{display:"flex", flexDirection:"column", marginBottom:"20px"}}>
+                  {d.acoustic_profile && (
+                    <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", gap:"20px"}}>
+                      <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Acoustic Profile</span>
+                      <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right"}}>{d.acoustic_profile}</span>
+                    </div>
+                  )}
+                  {d.lighting_temperature && (
+                    <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", gap:"20px"}}>
+                      <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Lighting</span>
+                      <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right"}}>{d.lighting_temperature}</span>
+                    </div>
+                  )}
+                  {d.community_feel && (
+                    <p style={{fontFamily:"Georgia,serif", fontSize:"16px", color:"#f0ede8", lineHeight:1.9, margin:"20px 0 0", maxWidth:"580px"}}>
+                      {d.community_feel}
+                    </p>
+                  )}
+                </div>
               )}
 
-              {d.safety_perception && (
+              {isVenue && (
+                /* Cell 8: Event Atmosphere — sound isolation, acoustic treatment, lighting */
+                <div style={{display:"flex", flexDirection:"column", marginBottom:"20px"}}>
+                  {d.acoustic_profile && (
+                    <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", gap:"20px"}}>
+                      <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Sound Isolation</span>
+                      <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right"}}>{d.acoustic_profile}</span>
+                    </div>
+                  )}
+                  {d.lighting_temperature && (
+                    <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", gap:"20px"}}>
+                      <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Lighting Capability</span>
+                      <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right"}}>{d.lighting_temperature}</span>
+                    </div>
+                  )}
+                  {d.community_feel && (
+                    <p style={{fontFamily:"Georgia,serif", fontSize:"16px", color:"#f0ede8", lineHeight:1.9, margin:"20px 0 0", maxWidth:"580px"}}>
+                      {d.community_feel}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {!isRestaurant && !isVenue && (
+                /* Fallback: generic community / safety content for Commercial, STR, Hospitality */
                 <>
-                  <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#8a8a8a", letterSpacing:"0.2em", textTransform:"uppercase", margin:"4px 0 12px"}}>Safety Perception</div>
-                  <p style={{fontFamily:"Georgia,serif", fontSize:"16px", color:"#f0ede8", lineHeight:1.9, margin:"0", maxWidth:"580px"}}>
-                    {d.safety_perception}
-                  </p>
+                  {d.community_feel && (
+                    <p style={{fontFamily:"Georgia,serif", fontSize:"16px", color:"#f0ede8", lineHeight:1.9, margin:"0 0 20px", maxWidth:"580px"}}>
+                      {d.community_feel}
+                    </p>
+                  )}
+                  {d.safety_perception && (
+                    <>
+                      <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#8a8a8a", letterSpacing:"0.2em", textTransform:"uppercase", margin:"4px 0 12px"}}>Safety Perception</div>
+                      <p style={{fontFamily:"Georgia,serif", fontSize:"16px", color:"#f0ede8", lineHeight:1.9, margin:"0", maxWidth:"580px"}}>
+                        {d.safety_perception}
+                      </p>
+                    </>
+                  )}
                 </>
               )}
 
               <DeepIntelWidget
                 open={widgets.life}
                 onToggle={() => setWidgets(w => ({...w, life: !w.life}))}
-                fields={["Noise Decibel Readings","Lighting Color Temperature","Privacy Score Details","Peak Hour Crowd Data"]}
+                fields={isRestaurant
+                  ? ["Noise Decibel Baseline","Lighting Color Temperature Score","Table Intimacy Rating","Peak Dining Hour Data"]
+                  : isVenue
+                  ? ["Acoustic Treatment Grade","Blackout Capability","Sound Spillage Rating","Lighting Rig Load"]
+                  : ["Noise Decibel Readings","Lighting Color Temperature","Privacy Score Details","Peak Hour Crowd Data"]
+                }
               />
 
             </div>
 
             <div className="panel-sidebar">
-              {d.lifestyle_vibe && <div className="sidebar-block"><div className="sidebar-accent-line"/><div className="sidebar-label">Vibe</div><div className="sidebar-value">{d.lifestyle_vibe}</div></div>}
-              {d.best_for && <div className="sidebar-block"><div className="sidebar-label">Best for</div><div className="sidebar-value">{d.best_for}</div></div>}
-              {d.street_type && <div className="sidebar-block"><div className="sidebar-label">Street type</div><div className="sidebar-value">{d.street_type}</div></div>}
+              {d.lifestyle_vibe && <div className="sidebar-block"><div className="sidebar-accent-line"/><div className="sidebar-label">{isRestaurant ? 'Vibe' : isVenue ? 'Atmosphere' : 'Vibe'}</div><div className="sidebar-value">{d.lifestyle_vibe}</div></div>}
+              {d.best_for && <div className="sidebar-block"><div className="sidebar-label">{isRestaurant ? 'Best For' : isVenue ? 'Ideal For' : 'Best for'}</div><div className="sidebar-value">{d.best_for}</div></div>}
+              {d.acoustic_profile && <div className="sidebar-block"><div className="sidebar-label">Acoustics</div><div className="sidebar-value">{d.acoustic_profile}</div></div>}
+              {!isRestaurant && !isVenue && d.street_type && <div className="sidebar-block"><div className="sidebar-label">Street type</div><div className="sidebar-value">{d.street_type}</div></div>}
             </div>
           </div>
 
@@ -1249,62 +1546,84 @@ export default function CommercialFlow({ slug }) {
             </div>
           </div>
 
-          {/* ── BUILD PLANS (Ch. 5) ── */}
+          {/* ── BUILD PLANS (Ch. 5) — Engine Room for restaurants/venues, default for others ── */}
           <div className={`chapter-panel ${activeTab === "buildplans" ? "active" : ""}`} id="panel-buildplans">
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>05 — Build Plans</div>
+                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>{ch['buildplans']?.chapterNumber || '05'} — {ch['buildplans']?.chapterLabel || 'Build Plans'}</div>
                 <div style={{height:"1px", background:"#262626"}}/>
               </div>
 
-              {d.expansion_potential && (
+              {isRestaurant ? (
+                /* Cell 3: The Engine Room — collapsed by default, operator-facing */
+                <EngineRoomPanel property={d} />
+              ) : isVenue ? (
+                /* Back of House — collapsed by default */
+                <BackOfHousePanel property={d} />
+              ) : (
+                /* Default: Build Plans for Commercial, STR, Hospitality */
                 <>
-                  <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#8a8a8a", letterSpacing:"0.2em", textTransform:"uppercase", marginBottom:"12px"}}>Expansion Potential</div>
-                  <p style={{fontFamily:"Georgia,serif", fontSize:"17px", color:"#f0ede8", lineHeight:1.9, margin:"0 0 28px", maxWidth:"580px"}}>
-                    {d.expansion_potential}
-                  </p>
-                </>
-              )}
-
-              {d.zoning_type && (
-                <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", marginBottom:"24px", gap:"20px"}}>
-                  <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Zoning Type</span>
-                  <span style={{fontFamily:"'Courier New',monospace", fontSize:"12px", color:"#f0ede8", letterSpacing:"0.04em", textAlign:"right"}}>{d.zoning_type}</span>
-                </div>
-              )}
-
-              {d.developer_name && (
-                <div style={{background:"#161616", border:"0.5px solid #262626", borderRadius:"4px", padding:"18px 20px", marginBottom:"24px"}}>
-                  <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#8a8a8a", letterSpacing:"0.18em", textTransform:"uppercase", marginBottom:"8px"}}>Developer</div>
-                  <div style={{fontFamily:"Georgia,serif", fontSize:"18px", color:"#f0ede8", marginBottom: d.developer_notes ? "8px" : "0"}}>{d.developer_name}</div>
-                  {d.developer_notes && (
-                    <div style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#a0a0a0", lineHeight:1.7}}>{d.developer_notes}</div>
+                  {d.expansion_potential && (
+                    <>
+                      <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#8a8a8a", letterSpacing:"0.2em", textTransform:"uppercase", marginBottom:"12px"}}>Expansion Potential</div>
+                      <p style={{fontFamily:"Georgia,serif", fontSize:"17px", color:"#f0ede8", lineHeight:1.9, margin:"0 0 28px", maxWidth:"580px"}}>
+                        {d.expansion_potential}
+                      </p>
+                    </>
                   )}
-                </div>
-              )}
-
-              {d.structural_notes && (
-                <>
-                  <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#8a8a8a", letterSpacing:"0.2em", textTransform:"uppercase", marginBottom:"12px"}}>Structural Notes</div>
-                  <p style={{fontFamily:"Georgia,serif", fontSize:"15px", color:"#f0ede8", lineHeight:1.85, margin:"0", maxWidth:"580px"}}>
-                    {d.structural_notes}
-                  </p>
+                  {d.zoning_type && (
+                    <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", marginBottom:"24px", gap:"20px"}}>
+                      <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Zoning Type</span>
+                      <span style={{fontFamily:"'Courier New',monospace", fontSize:"12px", color:"#f0ede8", letterSpacing:"0.04em", textAlign:"right"}}>{d.zoning_type}</span>
+                    </div>
+                  )}
+                  {d.developer_name && (
+                    <div style={{background:"#161616", border:"0.5px solid #262626", borderRadius:"4px", padding:"18px 20px", marginBottom:"24px"}}>
+                      <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#8a8a8a", letterSpacing:"0.18em", textTransform:"uppercase", marginBottom:"8px"}}>Developer</div>
+                      <div style={{fontFamily:"Georgia,serif", fontSize:"18px", color:"#f0ede8", marginBottom: d.developer_notes ? "8px" : "0"}}>{d.developer_name}</div>
+                      {d.developer_notes && (
+                        <div style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#a0a0a0", lineHeight:1.7}}>{d.developer_notes}</div>
+                      )}
+                    </div>
+                  )}
+                  {d.structural_notes && (
+                    <>
+                      <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#8a8a8a", letterSpacing:"0.2em", textTransform:"uppercase", marginBottom:"12px"}}>Structural Notes</div>
+                      <p style={{fontFamily:"Georgia,serif", fontSize:"15px", color:"#f0ede8", lineHeight:1.85, margin:"0", maxWidth:"580px"}}>
+                        {d.structural_notes}
+                      </p>
+                    </>
+                  )}
+                  <DeepIntelWidget
+                    open={widgets.buildplans}
+                    onToggle={() => setWidgets(w => ({...w, buildplans: !w.buildplans}))}
+                    fields={["MEP Specifications","Electrical Load Capacity","Kitchen-to-Dining Floor Ratio","Ventilation Routing","Structural Calculations"]}
+                  />
                 </>
               )}
-
-              <DeepIntelWidget
-                open={widgets.buildplans}
-                onToggle={() => setWidgets(w => ({...w, buildplans: !w.buildplans}))}
-                fields={["MEP Specifications","Electrical Load Capacity","Kitchen-to-Dining Floor Ratio","Ventilation Routing","Structural Calculations"]}
-              />
 
             </div>
 
             <div className="panel-sidebar">
-              {d.zoning_type && <div className="sidebar-block"><div className="sidebar-accent-line"/><div className="sidebar-label">Zoning</div><div className="sidebar-value">{d.zoning_type}</div></div>}
-              {d.developer_name && <div className="sidebar-block"><div className="sidebar-label">Developer</div><div className="sidebar-value">{d.developer_name}</div></div>}
-              {d.year_built && <div className="sidebar-block"><div className="sidebar-label">Year built</div><div className="sidebar-value">{d.year_built}</div></div>}
+              {isRestaurant ? (
+                <>
+                  {d.kitchen_grade && <div className="sidebar-block"><div className="sidebar-accent-line"/><div className="sidebar-label">Kitchen Grade</div><div className="sidebar-value">{d.kitchen_grade}</div></div>}
+                  {d.seating_capacity && <div className="sidebar-block"><div className="sidebar-label">Cover Count</div><div className="sidebar-value">{d.seating_capacity}</div></div>}
+                  {d.zoning_type && <div className="sidebar-block"><div className="sidebar-label">Zoning</div><div className="sidebar-value">{d.zoning_type}</div></div>}
+                </>
+              ) : isVenue ? (
+                <>
+                  {d.setup_grade && <div className="sidebar-block"><div className="sidebar-accent-line"/><div className="sidebar-label">Setup Grade</div><div className="sidebar-value">{d.setup_grade}</div></div>}
+                  {d.zoning_type && <div className="sidebar-block"><div className="sidebar-label">Zoning</div><div className="sidebar-value">{d.zoning_type}</div></div>}
+                </>
+              ) : (
+                <>
+                  {d.zoning_type && <div className="sidebar-block"><div className="sidebar-accent-line"/><div className="sidebar-label">Zoning</div><div className="sidebar-value">{d.zoning_type}</div></div>}
+                  {d.developer_name && <div className="sidebar-block"><div className="sidebar-label">Developer</div><div className="sidebar-value">{d.developer_name}</div></div>}
+                  {d.year_built && <div className="sidebar-block"><div className="sidebar-label">Year built</div><div className="sidebar-value">{d.year_built}</div></div>}
+                </>
+              )}
             </div>
           </div>
 
