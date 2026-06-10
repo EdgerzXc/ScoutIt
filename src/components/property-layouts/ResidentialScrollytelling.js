@@ -916,10 +916,10 @@ export default function ResidentialScrollytelling({ slug }) {
                 ].filter(Boolean).map((stat, i) => (
                   <div key={i}>
                     <div style={{display:"flex", alignItems:"center", gap:"12px"}}>
-                      <span style={{fontSize:"26px", lineHeight:1, flexShrink:0}}>{stat.icon}</span>
-                      <span style={{fontFamily:"Georgia,serif", fontSize:"clamp(40px,4.6vw,58px)", fontWeight:400, color:"#f0ede8", lineHeight:1}}>{stat.val}</span>
+                      <span style={{fontSize:"24px", lineHeight:1, flexShrink:0}}>{stat.icon}</span>
+                      <span style={{fontFamily:"var(--font-body)", fontSize:"clamp(20px,2.5vw,26px)", fontWeight:500, color:"#f0ede8", lineHeight:1.2}}>{stat.val}</span>
                     </div>
-                    <div style={{fontFamily:"'Courier New',monospace", fontSize:"12px", color:"#8a8a8a", letterSpacing:"0.16em", textTransform:"uppercase", marginTop:"12px"}}>{stat.label}</div>
+                    <div style={{fontFamily:"var(--font-body)", fontSize:"10px", fontWeight:600, color:"#8a8a8a", letterSpacing:"0.08em", textTransform:"uppercase", marginTop:"6px"}}>{stat.label}</div>
                   </div>
                 ))}
               </div>
@@ -1595,11 +1595,11 @@ export default function ResidentialScrollytelling({ slug }) {
                   <div style={{fontFamily:"Georgia,serif", fontSize:"20px", color:"#c8a96e", lineHeight:1.35}}>{d.scoutit_verdict}</div>
                 </div>
               )}
-              {d.building_style && <div className="sidebar-block"><div style={{fontFamily:"'Courier New',monospace", fontSize:"11px", color:"#8a8a8a", letterSpacing:"0.16em", textTransform:"uppercase", marginBottom:"7px"}}>Building Style</div><div style={{fontFamily:"Georgia,serif", fontSize:"17px", color:"#f0ede8"}}>{d.building_style}</div></div>}
-              {d.architect_designer && <div className="sidebar-block"><div style={{fontFamily:"'Courier New',monospace", fontSize:"11px", color:"#8a8a8a", letterSpacing:"0.16em", textTransform:"uppercase", marginBottom:"7px"}}>Architect</div><div style={{fontFamily:"Georgia,serif", fontSize:"17px", color:"#f0ede8"}}>{d.architect_designer}</div></div>}
-              {d.year_built && <div className="sidebar-block"><div style={{fontFamily:"'Courier New',monospace", fontSize:"11px", color:"#8a8a8a", letterSpacing:"0.16em", textTransform:"uppercase", marginBottom:"7px"}}>Year Built</div><div style={{fontFamily:"Georgia,serif", fontSize:"17px", color:"#f0ede8"}}>{d.year_built}</div></div>}
-              {d.title_status && <div className="sidebar-block"><div style={{fontFamily:"'Courier New',monospace", fontSize:"11px", color:"#8a8a8a", letterSpacing:"0.16em", textTransform:"uppercase", marginBottom:"7px"}}>Title Status</div><div style={{fontFamily:"Georgia,serif", fontSize:"17px", color:"#4caf7d"}}>{d.title_status}</div></div>}
-              {d.spaceCategory && <div className="sidebar-block"><div style={{fontFamily:"'Courier New',monospace", fontSize:"11px", color:"#8a8a8a", letterSpacing:"0.16em", textTransform:"uppercase", marginBottom:"7px"}}>Space Category</div><div style={{fontFamily:"Georgia,serif", fontSize:"17px", color:"#f0ede8"}}>{d.spaceCategory}</div></div>}
+              {d.building_style && <div className="sidebar-block"><div className="sidebar-label">Building Style</div><div className="sidebar-value">{d.building_style}</div></div>}
+              {d.architect_designer && <div className="sidebar-block"><div className="sidebar-label">Architect</div><div className="sidebar-value">{d.architect_designer}</div></div>}
+              {d.year_built && <div className="sidebar-block"><div className="sidebar-label">Year Built</div><div className="sidebar-value">{d.year_built}</div></div>}
+              {d.title_status && <div className="sidebar-block"><div className="sidebar-label">Title Status</div><div className="sidebar-value" style={{color:"#4caf7d"}}>{d.title_status}</div></div>}
+              {d.spaceCategory && <div className="sidebar-block"><div className="sidebar-label">Space Category</div><div className="sidebar-value">{d.spaceCategory}</div></div>}
             </div>
           </div>
 
