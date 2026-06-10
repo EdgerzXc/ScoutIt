@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import ReactionButtons from "@/components/ReactionButtons";
 import InteractiveMap from "@/components/InteractiveMap";
-import "./property.css";
+import "@/app/property/[id]/property.css";
 
 // ═══════════════════════════════════════════════════
 // DATA — Airtable CMS first, mockDb fallback
@@ -85,7 +85,7 @@ function DeepIntelWidget({ open, onToggle, fields }) {
 // ═══════════════════════════════════════════════════
 // MAIN COMPONENT
 // ═══════════════════════════════════════════════════
-export default function PropertyDetailClient({ slug }) {
+export default function CommercialFlow({ slug }) {
   // ── Interactive UI states ──────────────────────
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [photoMode,         setPhotoMode]         = useState("natural");
