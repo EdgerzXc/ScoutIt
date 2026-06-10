@@ -14,7 +14,7 @@ const TIER = {
 function BoardCard({ e, variant }) {
   const t = TIER[e.tier] || TIER.starry;
   return (
-    <Link href={`/property/${e.property_slug}`} className={`bp-card bp-${variant}`} style={{ borderColor: `rgba(${t.rgb},0.6)`, "--tg": `rgba(${t.rgb},0.55)`, "--tc": t.color }}>
+    <Link href="/showcase" className={`bp-card bp-${variant}`} style={{ borderColor: `rgba(${t.rgb},0.6)`, "--tg": `rgba(${t.rgb},0.55)`, "--tc": t.color }}>
       <div className="bp-photo" style={e.photo ? { backgroundImage: `url(${e.photo})` } : undefined}>
         <span className="bp-rank" style={{ color: t.color, borderColor: `rgba(${t.rgb},0.65)` }}>#{String(e.rank).padStart(2, "0")}</span>
         {variant === "hero" && <span className="bp-tier-tag" style={{ color: t.color, borderColor: `rgba(${t.rgb},0.5)` }}>{e.tier === "universe" ? "Champion" : e.tier === "cluster" ? "Runner-up" : e.tier === "solar" ? "Podium" : "Contender"}</span>}

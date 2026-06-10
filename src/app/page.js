@@ -1006,7 +1006,7 @@ export default function Home() {
                 <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', textTransform: 'uppercase', color: 'var(--accent)', letterSpacing: '0.1em', marginBottom: '16px' }}>Property Spotlights</h4>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
                   {discoveryFeed[getDBCategory(activeDiscoverType)].spotlights.map((spot, idx) => (
-                    <div role="link" tabIndex={0} onClick={() => router.push(`/property/${spot.slug || spot.id}`)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); router.push(`/property/${spot.slug || spot.id}`); } }} key={idx} style={{ background: '#161616', border: '1px solid #262626', borderRadius: '4px', overflow: 'hidden', display: 'flex', flexDirection: 'column', textDecoration: 'none', color: 'inherit', cursor: 'pointer' }} className="discover-spotlight-card-link">
+                    <div role="link" tabIndex={0} onClick={() => router.push(`/discover`)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); router.push(`/discover`); } }} key={idx} style={{ background: '#161616', border: '1px solid #262626', borderRadius: '4px', overflow: 'hidden', display: 'flex', flexDirection: 'column', textDecoration: 'none', color: 'inherit', cursor: 'pointer' }} className="discover-spotlight-card-link">
                       <div style={{ height: '140px', overflow: 'hidden', position: 'relative' }}>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={spot.image} alt={spot.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
