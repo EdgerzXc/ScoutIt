@@ -149,6 +149,11 @@ export default function IntelPage() {
           <span className="vector-label">Layer 02 // Editorial Briefings</span>
           <h1 className="page-title">News &amp; Intelligence</h1>
           <p className="page-subtitle">Tracing architectural shifts, spatial design, and development movements.</p>
+          <Link href="/discover" className="mode-jump-box">
+            <span className="jump-here">News &amp; Intelligence</span>
+            <span className="jump-arrow">→</span>
+            <span className="jump-there">Discover</span>
+          </Link>
         </header>
 
         {/* Featured Split Hero (Only shown when filter is All and search is empty) */}
@@ -340,6 +345,43 @@ export default function IntelPage() {
           font-size: 14px;
           color: var(--text-secondary);
           letter-spacing: 0.02em;
+        }
+
+        .mode-jump-box {
+          display: inline-flex;
+          align-items: center;
+          gap: 12px;
+          margin-top: 20px;
+          text-decoration: none;
+          border: 1px solid var(--border-solid);
+          border-radius: 999px;
+          padding: 10px 20px;
+          background: #141414;
+          transition: all var(--transition-fast);
+        }
+        .mode-jump-box:hover {
+          border-color: var(--accent-border);
+          background: rgba(200, 169, 110, 0.06);
+        }
+        .mode-jump-box .jump-here {
+          font-family: var(--font-mono);
+          font-size: 11px;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          color: var(--accent);
+        }
+        .mode-jump-box .jump-arrow {
+          color: var(--text-muted);
+          font-size: 13px;
+          transition: transform var(--transition-fast);
+        }
+        .mode-jump-box:hover .jump-arrow { transform: translateX(3px); }
+        .mode-jump-box .jump-there {
+          font-family: var(--font-mono);
+          font-size: 11px;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          color: var(--text-secondary);
         }
 
         /* Split Hero */

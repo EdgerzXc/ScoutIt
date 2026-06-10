@@ -1,34 +1,34 @@
 export const DISCOVER_INTEL = {
   Residential: [
-    { id: "n1", slug: "bgc-condo-yields-rise", category: "NEWS", date: "Q3 2026", title: "BGC Condo Yields Rise", snippet: "Premium residential spaces see 4.2% YoY growth." },
-    { id: "n2", slug: "makati-central-resurgence", category: "INSIGHT", date: "Q3 2026", title: "Makati Central Resurgence", snippet: "Older luxury buildings undergoing massive renovations." },
-    { id: "n3", slug: "mastering-qc-market", category: "BLOG", date: "Q3 2026", title: "Mastering the QC Market", snippet: "What to look for in QC subdivision residences." },
-    { id: "n19", slug: "qc-residential-summary", category: "SUMMARY", date: "Q3 2026", title: "QC Residential Summary", snippet: "A consolidated overview of Quezon City residential sector movements this quarter." }
+    { id: "n1", slug: "bgc-condo-yields-rise", category: "NEWS", date: "Q3 2026", region: "BGC", title: "BGC Condo Yields Rise", snippet: "Premium residential spaces see 4.2% YoY growth." },
+    { id: "n2", slug: "makati-central-resurgence", category: "INSIGHT", date: "Q3 2026", region: "Makati", title: "Makati Central Resurgence", snippet: "Older luxury buildings undergoing massive renovations." },
+    { id: "n3", slug: "mastering-qc-market", category: "BLOG", date: "Q3 2026", region: "Quezon City", title: "Mastering the QC Market", snippet: "What to look for in QC subdivision residences." },
+    { id: "n19", slug: "qc-residential-summary", category: "SUMMARY", date: "Q3 2026", region: "Quezon City", title: "QC Residential Summary", snippet: "A consolidated overview of Quezon City residential sector movements this quarter." }
   ],
   Commercial: [
-    { id: "n4", slug: "new-bpo-headquarters", category: "NEWS", date: "Q3 2026", title: "New BPO Headquarters", snippet: "Global tech firms securing massive floor plates." },
-    { id: "n5", slug: "high-street-expansion", category: "INSIGHT", date: "Q3 2026", title: "High Street Expansion", snippet: "Retail spaces are fully occupied for the next 24 months." },
-    { id: "n6", slug: "bgc-commercial-outlook", category: "BLOG", date: "Q3 2026", title: "BGC Commercial Outlook", snippet: "Corporate spatial requirements shifting to flexible hubs." }
+    { id: "n4", slug: "new-bpo-headquarters", category: "NEWS", date: "Q3 2026", region: "BGC", title: "New BPO Headquarters", snippet: "Global tech firms securing massive floor plates." },
+    { id: "n5", slug: "high-street-expansion", category: "INSIGHT", date: "Q3 2026", region: "BGC", title: "High Street Expansion", snippet: "Retail spaces are fully occupied for the next 24 months." },
+    { id: "n6", slug: "bgc-commercial-outlook", category: "BLOG", date: "Q3 2026", region: "BGC", title: "BGC Commercial Outlook", snippet: "Corporate spatial requirements shifting to flexible hubs." }
   ],
   STR: [
-    { id: "n7", slug: "siargao-villa-boom", category: "NEWS", date: "Q3 2026", title: "Siargao Villa Boom", snippet: "Short term rentals operating at 95% occupancy across General Luna." },
-    { id: "n9", slug: "str-management-strategies", category: "BLOG", date: "Q3 2026", title: "STR Management Strategies", snippet: "Optimizing yields on seasonal beach properties through dynamic pricing." },
-    { id: "n14", slug: "surf-front-land-rush", category: "INSIGHT", date: "Q3 2026", title: "Surf-Front Land Rush", snippet: "Boracay and Siargao developers compete for remaining coastal frontage." }
+    { id: "n7", slug: "siargao-villa-boom", category: "NEWS", date: "Q3 2026", region: "Siargao", title: "Siargao Villa Boom", snippet: "Short term rentals operating at 95% occupancy across General Luna." },
+    { id: "n9", slug: "str-management-strategies", category: "BLOG", date: "Q3 2026", region: "Siargao", title: "STR Management Strategies", snippet: "Optimizing yields on seasonal beach properties through dynamic pricing." },
+    { id: "n14", slug: "surf-front-land-rush", category: "INSIGHT", date: "Q3 2026", region: "Boracay", title: "Surf-Front Land Rush", snippet: "Boracay and Siargao developers compete for remaining coastal frontage." }
   ],
   Hospitality: [
-    { id: "n8", slug: "palawan-eco-resorts", category: "INSIGHT", date: "Q3 2026", title: "Palawan Eco-resorts", snippet: "Sustainable tourism driving massive eco-lodge development in El Nido." },
-    { id: "n15", slug: "off-grid-island-living", category: "BLOG", date: "Q3 2026", title: "Off-Grid Island Living", snippet: "Palawan resorts go fully solar — a new standard for island hospitality." },
-    { id: "n16", slug: "coron-resort-surge", category: "NEWS", date: "Q3 2026", title: "Coron Resort Surge", snippet: "Overwater villas in Coron achieve highest ADR in the archipelago." }
+    { id: "n8", slug: "palawan-eco-resorts", category: "INSIGHT", date: "Q3 2026", region: "Palawan", title: "Palawan Eco-resorts", snippet: "Sustainable tourism driving massive eco-lodge development in El Nido." },
+    { id: "n15", slug: "off-grid-island-living", category: "BLOG", date: "Q3 2026", region: "Palawan", title: "Off-Grid Island Living", snippet: "Palawan resorts go fully solar — a new standard for island hospitality." },
+    { id: "n16", slug: "coron-resort-surge", category: "NEWS", date: "Q3 2026", region: "Palawan", title: "Coron Resort Surge", snippet: "Overwater villas in Coron achieve highest ADR in the archipelago." }
   ],
   Restaurants: [
-    { id: "n10", slug: "michelin-guide-entry", category: "NEWS", date: "Q3 2026", title: "Michelin Guide Entry", snippet: "High-end dining spaces in BGC and Makati are highly contested." },
-    { id: "n11", slug: "ridge-dining-surge", category: "INSIGHT", date: "Q3 2026", title: "Ridge Dining Surge", snippet: "Al fresco estate dining commands premium Tagaytay rates." },
-    { id: "n12", slug: "restaurant-space-layouts", category: "BLOG", date: "Q3 2026", title: "Restaurant Space Layouts", snippet: "How spatial density affects kitchen efficiency and chef performance." }
+    { id: "n10", slug: "michelin-guide-entry", category: "NEWS", date: "Q3 2026", region: "Makati", title: "Michelin Guide Entry", snippet: "High-end dining spaces in BGC and Makati are highly contested." },
+    { id: "n11", slug: "ridge-dining-surge", category: "INSIGHT", date: "Q3 2026", region: "Tagaytay", title: "Ridge Dining Surge", snippet: "Al fresco estate dining commands premium Tagaytay rates." },
+    { id: "n12", slug: "restaurant-space-layouts", category: "BLOG", date: "Q3 2026", region: "BGC", title: "Restaurant Space Layouts", snippet: "How spatial density affects kitchen efficiency and chef performance." }
   ],
   Venues: [
-    { id: "n13", slug: "manila-venue-trends", category: "NEWS", date: "Q3 2026", title: "Manila Venue Trends", snippet: "Premium corporate venues shift toward light-filled glass atrium spaces." },
-    { id: "n17", slug: "rooftop-events-boom", category: "INSIGHT", date: "Q3 2026", title: "Rooftop Events Boom", snippet: "Skyline venues in Makati and BGC post record bookings for 2026 season." },
-    { id: "n18", slug: "venue-tech-integration", category: "BLOG", date: "Q3 2026", title: "Venue Tech Integration", snippet: "Smart A/V systems and dynamic lighting transform the corporate event game." }
+    { id: "n13", slug: "manila-venue-trends", category: "NEWS", date: "Q3 2026", region: "Parañaque", title: "Manila Venue Trends", snippet: "Premium corporate venues shift toward light-filled glass atrium spaces." },
+    { id: "n17", slug: "rooftop-events-boom", category: "INSIGHT", date: "Q3 2026", region: "Makati", title: "Rooftop Events Boom", snippet: "Skyline venues in Makati and BGC post record bookings for 2026 season." },
+    { id: "n18", slug: "venue-tech-integration", category: "BLOG", date: "Q3 2026", region: "BGC", title: "Venue Tech Integration", snippet: "Smart A/V systems and dynamic lighting transform the corporate event game." }
   ]
 };
 

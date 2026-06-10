@@ -5,7 +5,7 @@ import { Suspense } from "react";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Discover Matrix",
+  title: "Discover",
   description:
     "Browse intelligent property briefings across major Philippine hubs. Filter by city and structural specifications.",
 };

@@ -671,3 +671,84 @@
   border-color: #c8a96e !important;
 }
 
+/* ── Top bar: title + jump box ── */
+.discoverTopBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 40px;
+}
+.discoverTitleBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.discoverKicker {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.discoverTitle {
+  font-family: var(--font-display);
+  color: var(--text-primary);
+  font-size: 34px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* The single box that jumps Discover ↔ News & Intelligence */
+.modeJumpBox {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  border: 1px solid #262626;
+  border-radius: 999px;
+  padding: 10px 20px;
+  background: #141414;
+  transition: all var(--transition);
+}
+.modeJumpBox:hover {
+  border-color: rgba(200, 169, 110, 0.5);
+  background: rgba(200, 169, 110, 0.06);
+}
+.modeJumpBox .jumpHere {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.modeJumpBox .jumpArrow {
+  color: rgba(240, 237, 232, 0.4);
+  font-size: 13px;
+  transition: transform var(--transition);
+}
+.modeJumpBox:hover .jumpArrow { transform: translateX(3px); }
+.modeJumpBox .jumpThere {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(240, 237, 232, 0.7);
+}
+
+/* Active region cell + empty news state */
+.contextCell.regionActive {
+  border-color: rgba(200, 169, 110, 0.6);
+  background: rgba(200, 169, 110, 0.08);
+}
+.contextCell.regionActive .contextName { color: var(--accent); }
+.newsEmpty {
+  font-family: Georgia, serif;
+  font-style: italic;
+  color: rgba(240, 237, 232, 0.4);
+  font-size: 15px;
+  padding: 24px 4px;
+}
+

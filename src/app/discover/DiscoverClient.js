@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import ReactionButtons from "@/components/ReactionButtons";
@@ -13,6 +13,21 @@ function getDBCategory(cat) {
   return cat;
 }
 
+// Shared city → simplified region bucket (kept in sync with news `region` tags)
+function cityToRegion(city = "") {
+  const c = (city || "").toLowerCase();
+  if (c.includes("bonifacio") || c.includes("bgc")) return "BGC";
+  if (c.includes("makati")) return "Makati";
+  if (c.includes("quezon")) return "Quezon City";
+  if (c.includes("siargao")) return "Siargao";
+  if (c.includes("boracay")) return "Boracay";
+  if (c.includes("el nido") || c.includes("coron") || c.includes("palawan")) return "Palawan";
+  if (c.includes("panglao") || c.includes("bohol")) return "Bohol";
+  if (c.includes("tagaytay")) return "Tagaytay";
+  if (c.includes("parañaque") || c.includes("paranaque")) return "Parañaque";
+  return city || null;
+}
+
 import { DISCOVER_PROPERTIES } from "@/data/mockProperties";
 import { DISCOVER_INTEL } from "@/data/mockArticles";
 
@@ -23,10 +38,11 @@ export default function DiscoverClient() {
 
   const [allProperties, setAllProperties] = useState(DISCOVER_PROPERTIES);
   const [allIntel, setAllIntel] = useState(DISCOVER_INTEL);
-  
+
   const [properties, setProperties] = useState([]);
   const [intel, setIntel] = useState([]);
   const [activeSpotlightId, setActiveSpotlightId] = useState(null);
+  const [activeRegion, setActiveRegion] = useState(null); // null = all regions
 
   // Fetch live CMS data from Airtable
   useEffect(() => {
@@ -35,8 +51,7 @@ export default function DiscoverClient() {
         const res = await fetch("/api/cms");
         if (!res.ok) return;
         const data = await res.json();
-        
-        // 1. Format and prepend properties
+
         const airtableProperties = data.properties || [];
         const nextProps = {
           Residential: [...DISCOVER_PROPERTIES.Residential],
@@ -46,7 +61,7 @@ export default function DiscoverClient() {
           Restaurants: [...DISCOVER_PROPERTIES.Restaurants],
           Venues: [...DISCOVER_PROPERTIES.Venues]
         };
-        
+
         airtableProperties.forEach(p => {
           if (!p.title || !p.slug || !p.spaceCategory) return;
           let cat = p.spaceCategory;
@@ -71,8 +86,7 @@ export default function DiscoverClient() {
           }
         });
         setAllProperties(nextProps);
-        
-        // 2. Format and prepend intel
+
         const airtableIntel = data.intel || [];
         const nextIntel = {
           Residential: [...DISCOVER_INTEL.Residential],
@@ -82,14 +96,14 @@ export default function DiscoverClient() {
           Restaurants: [...DISCOVER_INTEL.Restaurants],
           Venues: [...DISCOVER_INTEL.Venues]
         };
-        
+
         airtableIntel.forEach(item => {
           let cat = item.category || "Residential";
           if (cat.toLowerCase() === "hospitality") cat = "Hospitality";
           if (cat.toLowerCase() === "str") cat = "STR";
           if (cat.toLowerCase() === "culinary" || cat.toLowerCase() === "restaurants") cat = "Restaurants";
           if (cat.toLowerCase() === "venues" || cat.toLowerCase() === "events") cat = "Venues";
-          
+
           if (nextIntel[cat]) {
             if (!nextIntel[cat].some(x => x.slug === item.slug)) {
               nextIntel[cat].unshift({
@@ -97,6 +111,7 @@ export default function DiscoverClient() {
                 slug: item.slug || item.id,
                 category: item.intelType || "BRIEFING",
                 date: item.date || "Just Now",
+                region: cityToRegion(item.city || item.location || ""),
                 title: item.title,
                 snippet: item.excerpt || ""
               });
@@ -108,7 +123,7 @@ export default function DiscoverClient() {
         console.error("Discover page CMS load error:", err);
       }
     }
-    
+
     fetchCMS();
   }, []);
 
@@ -119,11 +134,65 @@ export default function DiscoverClient() {
     setProperties(list);
     setIntel(allIntel[dbCategory] || []);
     setActiveSpotlightId(prev => {
-      // Keep existing active item if it is still in the new list, otherwise select the first item
-      if (prev && list.some(x => x.id === prev)) return prev;
-      return list[0]?.id || null;
+      const keep = prev && list.some(x => x.id === prev) ? prev : (list[0]?.id || null);
+      const sel = list.find(x => x.id === keep);
+      setActiveRegion(sel ? cityToRegion(sel.city) : null);
+      return keep;
     });
   }, [matchedCategory, allProperties, allIntel]);
+
+  // Regions available in the current category (derived from spotlight cities)
+  const regions = useMemo(() => {
+    const seen = [];
+    properties.forEach(p => {
+      const r = cityToRegion(p.city);
+      if (r && !seen.includes(r)) seen.push(r);
+    });
+    return seen;
+  }, [properties]);
+
+  // News feed filtered to the active region (graceful fallback to all)
+  const filteredIntel = useMemo(() => {
+    if (!activeRegion) return intel;
+    const matched = intel.filter(n => n.region === activeRegion);
+    return matched.length ? matched : intel;
+  }, [intel, activeRegion]);
+
+  // Selecting a spotlight drives the active region for the news feed
+  const selectSpotlight = (property) => {
+    setActiveSpotlightId(property.id);
+    setActiveRegion(cityToRegion(property.city));
+  };
+
+  // ── Drag-to-scroll the spotlight row (left/right) ──
+  const matrixRef = useRef(null);
+  const dragState = useRef(null);
+  const movedRef = useRef(false);
+
+  const onMatrixPointerDown = (e) => {
+    const el = matrixRef.current;
+    if (!el) return;
+    dragState.current = { startX: e.clientX, scrollLeft: el.scrollLeft };
+    movedRef.current = false;
+  };
+
+  useEffect(() => {
+    const onMove = (e) => {
+      const d = dragState.current;
+      const el = matrixRef.current;
+      if (!d || !el) return;
+      const dx = e.clientX - d.startX;
+      if (Math.abs(dx) > 4) movedRef.current = true;
+      el.scrollLeft = d.scrollLeft - dx;
+    };
+    const onUp = () => { dragState.current = null; };
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    return () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+    };
+  }, []);
 
   return (
     <div className="discoverLayout">
@@ -149,27 +218,38 @@ export default function DiscoverClient() {
       {/* 2. Main Content Frame */}
       <main className="engineContainer">
         <div className="engineFrame">
-          
-          <div style={{ textAlign: "center", marginBottom: "40px" }}>
-            <h1 style={{ fontFamily: "var(--font-display)", color: "var(--text-primary)", fontSize: "32px", letterSpacing: "0.05em", textTransform: "uppercase" }}>
-              {matchedCategory} Discovery Matrix
-            </h1>
+
+          {/* Title + cross-link to News & Intelligence */}
+          <div className="discoverTopBar">
+            <div className="discoverTitleBlock">
+              <span className="discoverKicker">Discover</span>
+              <h1 className="discoverTitle">{matchedCategory}</h1>
+            </div>
+            <Link href="/intel" className="modeJumpBox">
+              <span className="jumpHere">Discover</span>
+              <span className="jumpArrow">→</span>
+              <span className="jumpThere">News &amp; Intelligence</span>
+            </Link>
           </div>
-          
-          {/* Zone 1: Spotlight Matrix */}
+
+          {/* Zone 1: Spotlights */}
           <section>
             <div className="sectionHeader">
-              <h2 className="sectionTitle">Spotlight Matrix</h2>
-              <p className="sectionSubtitle">Active space showcases · Tap to expand briefs</p>
+              <h2 className="sectionTitle">Spotlights</h2>
+              <p className="sectionSubtitle">Drag left & right · Tap a space to load its local news</p>
             </div>
-            <div className="spotlightMatrix" style={{ cursor: "default" }}>
+            <div
+              className="spotlightMatrix"
+              ref={matrixRef}
+              onPointerDown={onMatrixPointerDown}
+            >
               {properties.map((property) => {
                 const isSpotlight = activeSpotlightId === property.id;
                 return (
                   <article
                     key={property.id}
                     className={`spotlightCard ${isSpotlight ? "spotlight" : ""}`}
-                    onClick={() => setActiveSpotlightId(property.id)}
+                    onClick={() => { if (!movedRef.current) selectSpotlight(property); }}
                     style={{ cursor: "pointer" }}
                   >
                     <div className="cardVisual">
@@ -252,15 +332,19 @@ export default function DiscoverClient() {
               })}
             </div>
           </section>
- 
-          {/* Zone 2: Chronological News Row */}
+
+          {/* Zone 2: News Feed (location-linked) */}
           <section style={{ marginTop: "40px" }}>
             <div className="sectionHeader">
-              <h2 className="sectionTitle">Chronological News Feed</h2>
-              <p className="sectionSubtitle">Dynamic intelligence briefs bridging selection</p>
+              <h2 className="sectionTitle">News Feed</h2>
+              <p className="sectionSubtitle">
+                {activeRegion ? `Latest in ${activeRegion} · newest first` : "Latest across all regions · newest first"}
+              </p>
             </div>
             <div className="chronologicalNewsRow" style={{ cursor: "default" }}>
-              {intel.map((news) => (
+              {filteredIntel.length === 0 ? (
+                <div className="newsEmpty">No news for this region yet.</div>
+              ) : filteredIntel.map((news) => (
                 <Link
                   key={news.id}
                   href={`/intel/${news.slug}`}
@@ -269,7 +353,7 @@ export default function DiscoverClient() {
                 >
                   <div className="capsuleMeta">
                     <span className="where-badge">{news.category}</span>
-                    <span>{news.date}</span>
+                    <span>{news.region || news.date}</span>
                   </div>
                   <h3 className="capsuleTitle">{news.title}</h3>
                   <p className="capsuleSnippet">{news.snippet}</p>
@@ -278,27 +362,34 @@ export default function DiscoverClient() {
             </div>
           </section>
 
-          {/* Zone 3: Regional Location Track */}
+          {/* Zone 3: Regions (drives the News Feed location) */}
           <section style={{ marginTop: "40px" }}>
             <div className="sectionHeader" style={{ marginBottom: "16px" }}>
-              <h2 className="sectionTitle">Regional Location Track</h2>
-              <p className="sectionSubtitle">Filter matrices by geographical tiering</p>
+              <h2 className="sectionTitle">Regions</h2>
+              <p className="sectionSubtitle">Switch the location feeding the News Feed</p>
             </div>
-            <div className="contextGrid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "24px" }}>
-              {[
-                { name: "Quezon City", code: "01" },
-                { name: "Bonifacio Global City", code: "02" },
-                { name: "Siargao", code: "03" }
-              ].map((city) => (
-                <div 
-                  key={city.name} 
-                  className="contextCell" 
-                  onClick={() => console.log(city.name)}
+            <div className="contextGrid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "24px" }}>
+              <div
+                className={`contextCell ${activeRegion === null ? "regionActive" : ""}`}
+                onClick={() => setActiveRegion(null)}
+                style={{ cursor: "pointer" }}
+              >
+                <div className="contextLabelBlock">
+                  <span className="contextCode">00</span>
+                  <span className="contextName">All Regions</span>
+                </div>
+                <span className="contextArrow">→</span>
+              </div>
+              {regions.map((region, i) => (
+                <div
+                  key={region}
+                  className={`contextCell ${activeRegion === region ? "regionActive" : ""}`}
+                  onClick={() => setActiveRegion(region)}
                   style={{ cursor: "pointer" }}
                 >
                   <div className="contextLabelBlock">
-                    <span className="contextCode">{city.code}</span>
-                    <span className="contextName">{city.name}</span>
+                    <span className="contextCode">{String(i + 1).padStart(2, "0")}</span>
+                    <span className="contextName">{region}</span>
                   </div>
                   <span className="contextArrow">→</span>
                 </div>
