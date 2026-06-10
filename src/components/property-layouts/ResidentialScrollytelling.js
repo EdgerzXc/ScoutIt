@@ -5,6 +5,7 @@ import Link from "next/link";
 import ReactionButtons from "@/components/ReactionButtons";
 import InteractiveMap from "@/components/InteractiveMap";
 import "@/app/property/[id]/property.css";
+import { getChapterConfig } from "./chapterConfig";
 
 // ═══════════════════════════════════════════════════
 // DATA — Airtable CMS first, mockDb fallback
@@ -228,6 +229,10 @@ export default function ResidentialScrollytelling({ slug }) {
   const isRestaurant = cat.includes("restaurant") || cat.includes("culinary");
   const isHospitality = cat.includes("str") || cat.includes("hospitality");
   const isVenue = cat.includes("venue") || cat.includes("event");
+
+  // ── Chapter config (drives nav labels & chapter headings) ──
+  const chapterConfig = getChapterConfig(d);
+  const ch = Object.fromEntries(chapterConfig.map(c => [c.id, c]));
 
   // Determine brief label
   let briefLabel = "Residential Briefing";
@@ -798,11 +803,11 @@ export default function ResidentialScrollytelling({ slug }) {
                 icon: <svg className="chapter-icon" viewBox="0 0 20 20" fill="none"><path d="M10 2C7.24 2 5 4.24 5 7c0 4.5 5 11 5 11s5-6.5 5-11c0-2.76-2.24-5-5-5z" stroke="currentColor" strokeWidth="1.3"/><circle cx="10" cy="7" r="2" stroke="currentColor" strokeWidth="1.3"/></svg> },
               { id: "life",     label: "Life Here",
                 icon: <svg className="chapter-icon" viewBox="0 0 20 20" fill="none"><path d="M10 3C8 3 5 5 5 8c0 2 1 3.5 2.5 4.5L10 17l2.5-4.5C14 11.5 15 10 15 8c0-3-3-5-5-5z" stroke="currentColor" strokeWidth="1.3"/><circle cx="10" cy="8" r="1.5" fill="currentColor" stroke="none"/></svg> },
-              { id: "whereto",  label: "Where To?",
+              { id: "whereto",  label: ch['whereto']?.navLabel || "Where To?",
                 icon: <svg className="chapter-icon" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="currentColor" strokeWidth="1.3"/><path d="M10 6v4l3 2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg> },
-              { id: "buildplans", label: "Build Plans",
+              { id: "buildplans", label: ch['buildplans']?.navLabel || "Build Plans",
                 icon: <svg className="chapter-icon" viewBox="0 0 20 20" fill="none"><rect x="3" y="2" width="14" height="16" rx="1" stroke="currentColor" strokeWidth="1.3"/><path d="M6 6h8M6 9h8M6 12h5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/><path d="M13 14l2 2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/><rect x="12" y="12" width="4" height="4" rx="0.5" stroke="currentColor" strokeWidth="1.1"/></svg> },
-              { id: "hiddenintel", label: "Hidden Intel",
+              { id: "hiddenintel", label: ch['hiddenintel']?.navLabel || "The Fine Print",
                 icon: <svg className="chapter-icon" viewBox="0 0 20 20" fill="none"><path d="M10 4C5.5 4 2 10 2 10s3.5 6 8 6 8-6 8-6-3.5-6-8-6z" stroke="currentColor" strokeWidth="1.3"/><circle cx="10" cy="10" r="2.5" stroke="currentColor" strokeWidth="1.3"/><path d="M3 3l14 14" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" opacity="0.4"/></svg> },
             ].map((tab, idx, arr) => (
               <span key={tab.id} style={{display:"contents"}}>
@@ -889,7 +894,7 @@ export default function ResidentialScrollytelling({ slug }) {
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>01 — The Space</div>
+                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>{ch['space']?.chapterNumber || '01'} — {ch['space']?.chapterLabel || 'The Space'}</div>
                 <div style={{height:"1px", background:"#262626"}}/>
               </div>
 
@@ -970,7 +975,7 @@ export default function ResidentialScrollytelling({ slug }) {
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>02 — Location</div>
+                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>{ch['location']?.chapterNumber || '02'} — {ch['location']?.chapterLabel || 'Location'}</div>
                 <div style={{height:"1px", background:"#262626"}}/>
               </div>
 
@@ -1111,7 +1116,7 @@ export default function ResidentialScrollytelling({ slug }) {
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>03 — Life Here</div>
+                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>{ch['life']?.chapterNumber || '03'} — {ch['life']?.chapterLabel || 'Life Here'}</div>
                 <div style={{height:"1px", background:"#262626"}}/>
               </div>
 
@@ -1174,7 +1179,7 @@ export default function ResidentialScrollytelling({ slug }) {
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>04 — Where To?</div>
+                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>{ch['whereto']?.chapterNumber || '04'} — {ch['whereto']?.chapterLabel || 'Where To?'}</div>
                 <div style={{height:"1px", background:"#262626"}}/>
               </div>
 
@@ -1249,7 +1254,7 @@ export default function ResidentialScrollytelling({ slug }) {
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>05 — Build Plans</div>
+                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>{ch['buildplans']?.chapterNumber || '05'} — {ch['buildplans']?.chapterLabel || 'Build Plans'}</div>
                 <div style={{height:"1px", background:"#262626"}}/>
               </div>
 
@@ -1308,7 +1313,7 @@ export default function ResidentialScrollytelling({ slug }) {
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>06 — Hidden Intel</div>
+                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>{ch['hiddenintel']?.chapterNumber || '06'} — {ch['hiddenintel']?.chapterLabel || 'The Fine Print'}</div>
                 <div style={{height:"1px", background:"#262626"}}/>
               </div>
 
@@ -1351,7 +1356,7 @@ export default function ResidentialScrollytelling({ slug }) {
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>07 — Units &amp; Spaces</div>
+                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>{ch['units']?.chapterNumber || '07'} — {ch['units']?.chapterLabel || 'Units & Spaces'}</div>
                 <div style={{height:"1px", background:"#262626"}}/>
               </div>
 
@@ -1454,7 +1459,7 @@ export default function ResidentialScrollytelling({ slug }) {
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>08 — Property Universe</div>
+                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>{ch['universe']?.chapterNumber || '08'} — {ch['universe']?.chapterLabel || 'Property Universe'}</div>
                 <div style={{height:"1px", background:"#262626"}}/>
               </div>
 
@@ -1524,7 +1529,7 @@ export default function ResidentialScrollytelling({ slug }) {
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>09 — Services</div>
+                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>{ch['services']?.chapterNumber || '09'} — {ch['services']?.chapterLabel || 'Services'}</div>
                 <div style={{height:"1px", background:"#262626"}}/>
               </div>
 
@@ -1568,7 +1573,7 @@ export default function ResidentialScrollytelling({ slug }) {
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>10 — Your Move</div>
+                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>{ch['yourmove']?.chapterNumber || '10'} — {ch['yourmove']?.chapterLabel || 'Your Move'}</div>
                 <div style={{height:"1px", background:"#262626"}}/>
               </div>
 

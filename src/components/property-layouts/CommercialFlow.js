@@ -5,6 +5,7 @@ import Link from "next/link";
 import ReactionButtons from "@/components/ReactionButtons";
 import InteractiveMap from "@/components/InteractiveMap";
 import "@/app/property/[id]/property.css";
+import { getChapterConfig } from "./chapterConfig";
 
 // ═══════════════════════════════════════════════════
 // DATA — Airtable CMS first, mockDb fallback
@@ -228,6 +229,10 @@ export default function CommercialFlow({ slug }) {
   const isRestaurant = cat.includes("restaurant") || cat.includes("culinary");
   const isHospitality = cat.includes("str") || cat.includes("hospitality");
   const isVenue = cat.includes("venue") || cat.includes("event");
+
+  // ── Chapter config (drives nav labels & chapter headings) ──
+  const chapterConfig = getChapterConfig(d);
+  const ch = Object.fromEntries(chapterConfig.map(c => [c.id, c]));
 
   // Determine brief label
   let briefLabel = "Residential Briefing";
