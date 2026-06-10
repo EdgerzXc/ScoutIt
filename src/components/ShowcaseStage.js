@@ -226,6 +226,7 @@ export default function ShowcaseStage({ mode = "full" }) {
   const warpRef = useRef(null);
   const cardRef = useRef(null);
   const dragRef = useRef(null);
+  const menuRef = useRef(null);
 
   const sceneRef = useRef(null);
   const tierRef = useRef("universe");
@@ -240,12 +241,21 @@ export default function ShowcaseStage({ mode = "full" }) {
   const [promoOpen, setPromoOpen] = useState(false);
   const [activeRank, setActiveRank] = useState(1);
   const [activeTier, setActiveTier] = useState("universe");
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [listOpen, setListOpen] = useState(false);
 
   // Load showcase entries
   useEffect(() => {
     let alive = true;
     fetch("/api/showcase").then((r) => r.json()).then((d) => { if (alive && d.entries) setEntries(d.entries); }).catch(() => {});
     return () => { alive = false; };
+  }, []);
+
+  // Close the platform menu on outside click
+  useEffect(() => {
+    const onDown = (e) => { if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false); };
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
   }, []);
 
   const ranked = useMemo(() => rankBoard(entries, { award, category }), [entries, award, category]);
@@ -379,10 +389,27 @@ export default function ShowcaseStage({ mode = "full" }) {
       <canvas ref={bgRef} className="sc-canvas-bg" />
       <canvas ref={warpRef} className="sc-canvas-warp" />
 
-      {/* Top bar */}
+      {/* Top bar: context (left) · logo (center) · menu (right) */}
       <div className="sc-topbar">
-        <span className="sc-topbar-left">SCOUTIT · THE BOARD</span>
         <span className="sc-topbar-cat" style={{ color: tierMeta.color }}>{category === "All" ? "Overall" : category} · {award}</span>
+        <Link href="/" className="sc-logo"><span className="sc-logo-scout">Scout</span><span className="sc-logo-it">IT</span></Link>
+        <nav className="sc-menu" ref={menuRef}>
+          <button className="sc-menu-btn" aria-label="Menu" aria-expanded={menuOpen} onClick={() => setMenuOpen((v) => !v)}>
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M2 4h12M2 8h12M2 12h12" /></svg>
+          </button>
+          <div className={`sc-menu-drop ${menuOpen ? "open" : ""}`}>
+            <span className="sc-menu-brand">ScoutIT</span>
+            <Link href="/">Home</Link>
+            <Link href="/discover">Discover</Link>
+            <Link href="/showcase">The Board</Link>
+            <Link href="/brokers">Brokers</Link>
+            <Link href="/photographers">Photographers</Link>
+            <Link href="/researchers">Researchers</Link>
+            <Link href="/event-planners">Event Planners</Link>
+            <Link href="/wishlist">Your Board</Link>
+            <Link href="/about">About</Link>
+          </div>
+        </nav>
       </div>
 
       {/* LEFT — filter toggle + sliding panel (awards horizontal, categories vertical) */}
@@ -470,7 +497,8 @@ export default function ShowcaseStage({ mode = "full" }) {
           </button>
         </div>
 
-        {restRanks.length > 0 && (
+        {/* Ranks 4-10 — collapsed by default; Next/Prev is the primary nav */}
+        {listOpen && restRanks.length > 0 && (
           <div className="sc-rest">
             <div className="sc-rest-label">The Contenders · Ranks 4–{ranked.length}</div>
             <div className="sc-rest-row" ref={dragRef}
@@ -496,13 +524,20 @@ export default function ShowcaseStage({ mode = "full" }) {
           </div>
         )}
 
-        {ranked.length > 1 && (
-          <div className="sc-arrows">
-            <button className="sc-arrow" onClick={() => step(-1)} disabled={!active || active.rank <= 1}>← Prev</button>
-            <span className="sc-arrow-count">{active ? active.rank : 0} / {ranked.length}</span>
-            <button className="sc-arrow" onClick={() => step(1)} disabled={!active || active.rank >= ranked.length}>Next →</button>
-          </div>
-        )}
+        <div className="sc-controls">
+          {ranked.length > 1 && (
+            <>
+              <button className="sc-arrow" onClick={() => step(-1)} disabled={!active || active.rank <= 1}>← Prev</button>
+              <span className="sc-arrow-count">{active ? active.rank : 0} / {ranked.length}</span>
+              <button className="sc-arrow" onClick={() => step(1)} disabled={!active || active.rank >= ranked.length}>Next →</button>
+            </>
+          )}
+          {restRanks.length > 0 && (
+            <button className={`sc-list-toggle ${listOpen ? "on" : ""}`} onClick={() => setListOpen((v) => !v)}>
+              {listOpen ? "Hide Ranks ▴" : `All Ranks 4–${ranked.length} ▾`}
+            </button>
+          )}
+        </div>
       </div>
 
       {mode === "homepage" && <Link href="/showcase" className="sc-seeall">See Full Board →</Link>}
@@ -512,9 +547,20 @@ export default function ShowcaseStage({ mode = "full" }) {
         .sc-canvas-bg, .sc-canvas-warp { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
         .sc-canvas-warp { z-index: 2; pointer-events: none; }
 
-        .sc-topbar { position: absolute; top: 0; left: 0; width: 100%; z-index: 7; display: flex; align-items: center; justify-content: space-between; padding: 18px 26px; background: linear-gradient(to bottom, rgba(0,0,0,0.7), rgba(0,0,0,0)); pointer-events: none; }
-        .sc-topbar-left { font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 0.3em; color: #555; text-transform: uppercase; }
-        .sc-topbar-cat { font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; }
+        .sc-topbar { position: absolute; top: 0; left: 0; width: 100%; z-index: 7; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 16px 24px; background: linear-gradient(to bottom, rgba(0,0,0,0.72), rgba(0,0,0,0)); pointer-events: none; }
+        .sc-topbar-cat { justify-self: start; font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; }
+        .sc-logo { justify-self: center; font-family: Georgia, serif; font-size: 22px; letter-spacing: 2px; text-decoration: none; pointer-events: auto; }
+        .sc-logo-scout { color: #f5f3ee; }
+        .sc-logo-it { color: #c8a96e; }
+        .sc-menu { justify-self: end; position: relative; pointer-events: auto; }
+        .sc-menu-btn { width: 42px; height: 42px; border-radius: 50%; border: 1px solid #2a2a2a; background: rgba(0,0,0,0.5); color: #c8a96e; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
+        .sc-menu-btn svg { width: 17px; height: 17px; }
+        .sc-menu-btn:hover { border-color: rgba(200,169,110,0.5); background: rgba(200,169,110,0.08); }
+        .sc-menu-drop { position: absolute; top: 50px; right: 0; min-width: 188px; background: rgba(8,8,9,0.96); backdrop-filter: blur(14px); border: 1px solid #1a1a1a; padding: 10px 0; display: flex; flex-direction: column; opacity: 0; visibility: hidden; transform: translateY(-6px); transition: opacity 0.2s, transform 0.2s, visibility 0.2s; }
+        .sc-menu-drop.open { opacity: 1; visibility: visible; transform: translateY(0); }
+        .sc-menu-brand { font-family: Georgia, serif; font-size: 16px; color: #c8a96e; padding: 6px 18px 10px; border-bottom: 1px solid #1a1a1a; margin-bottom: 6px; }
+        .sc-menu-drop :global(a) { font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #999; text-decoration: none; padding: 9px 18px; transition: color 0.15s, background 0.15s; }
+        .sc-menu-drop :global(a):hover { color: #f0ede8; background: rgba(255,255,255,0.03); }
 
         /* Edge toggle tabs */
         .sc-edge { position: absolute; top: 50%; transform: translateY(-50%); z-index: 9; writing-mode: vertical-rl; text-orientation: mixed; font-family: 'Courier New', monospace; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; padding: 20px 9px; background: rgba(0,0,0,0.62); backdrop-filter: blur(8px); border: 1px solid #1f1f1f; color: #aaa; cursor: pointer; transition: color 0.2s, background 0.2s; }
@@ -588,8 +634,10 @@ export default function ShowcaseStage({ mode = "full" }) {
         .sc-rest-cat { font-family: 'Courier New', monospace; font-size: 8px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--tc); margin-bottom: 5px; }
         .sc-rest-name { font-family: Georgia, serif; font-size: 15px; color: #e8e6e2; line-height: 1.25; }
         .sc-rest-stat { font-family: 'Courier New', monospace; font-size: 9px; color: #666; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 6px; }
-        .sc-arrows { display: flex; align-items: center; gap: 18px; pointer-events: all; }
+        .sc-controls { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; justify-content: center; pointer-events: all; }
         .sc-arrow { font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #999; background: none; border: 1px solid #2a2a2a; padding: 9px 18px; cursor: pointer; transition: all 0.2s; }
+        .sc-list-toggle { font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: #888; background: rgba(0,0,0,0.4); border: 1px solid #2a2a2a; padding: 9px 16px; cursor: pointer; transition: all 0.2s; }
+        .sc-list-toggle:hover, .sc-list-toggle.on { color: #c8a96e; border-color: rgba(200,169,110,0.5); }
         .sc-arrow:hover:not(:disabled) { color: #c8a96e; border-color: rgba(200,169,110,0.5); }
         .sc-arrow:disabled { opacity: 0.3; cursor: default; }
         .sc-arrow-count { font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 0.1em; color: #777; }
