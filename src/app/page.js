@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef, useCallback } from "react";
 import ReactionButtons from "@/components/ReactionButtons";
+import ShowcaseStage from "@/components/ShowcaseStage";
 
 import { SPACE_STARS, getDISCOVERY_FEED, getDISCOVER_HUBS, getCATEGORY_PREVIEWS } from "@/data/mockProperties";
 import { getArticles } from "@/data/mockArticles";
@@ -811,13 +812,21 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SECTION 2: Layer 01 */}
+      {/* SECTION 2: Layer 01 — The Board (Showcase) */}
+      <section className="snap-section section-board" id="board-section" style={{ padding: 0, position: "relative", overflow: "hidden" }}>
+        <div style={{ position: "absolute", top: "16px", left: "22px", zIndex: 8, fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.18em", color: "var(--accent)", textTransform: "uppercase" }}>
+          Layer 01 // The Board
+        </div>
+        <ShowcaseStage mode="homepage" />
+      </section>
+
+      {/* SECTION 3: Layer 02 */}
       <section className="snap-section section-property" id="property-section">
         <div className="property-split">
           {/* Left Menu Panel */}
           <div className="property-menu">
             <div className="menu-header">
-              <span className="vector-label">Layer 01 // Property Experiences</span>
+              <span className="vector-label">Layer 02 // Property Experiences</span>
               <h2>Curated Sectors</h2>
               <p>Select a category to begin your exploration.</p>
             </div>
@@ -965,7 +974,7 @@ export default function Home() {
           {/* Left Menu Panel */}
           <div className="property-menu">
             <div className="menu-header">
-              <span className="vector-label">Layer 02 // Discovery &amp; Intelligence</span>
+              <span className="vector-label">Layer 03 // Discovery &amp; Intelligence</span>
               <h2>Discovery Feed</h2>
               <p>Explore real-time spatial reports, regional stories, and architectural curations.</p>
             </div>
@@ -1096,7 +1105,7 @@ export default function Home() {
       <section className="snap-section section-services">
         <div className="services-content">
           <header className="section-header-center">
-            <span className="vector-label">Layer 03 // Ecosystem Services</span>
+            <span className="vector-label">Layer 04 // Ecosystem Services</span>
             <h2>Ecosystem Services</h2>
             <p>Access our curated network of vetted professionals supporting every phase of space discovery, listings, and planning.</p>
           </header>
@@ -1152,7 +1161,7 @@ export default function Home() {
           {/* Left Menu Panel */}
           <div className="property-menu">
             <div className="menu-header">
-              <span className="vector-label">Layer 04 // Your Board</span>
+              <span className="vector-label">Layer 05 // Your Board</span>
               <h2>Your Board</h2>
               <p>Your inspiration archive. Collect design ideas, preferred cities, and target layouts.</p>
             </div>
@@ -1333,7 +1342,7 @@ export default function Home() {
       <section className="snap-section section-about">
         <div className="about-content">
           <header className="section-header-center">
-            <span className="vector-label">Layer 05 // About Us</span>
+            <span className="vector-label">Layer 06 // About Us</span>
             <h2>The ScoutIt Manifesto</h2>
           </header>
           
