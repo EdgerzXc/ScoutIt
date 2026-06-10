@@ -1,28 +1,30 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { rankBoard, BOARD_CATEGORIES } from "@/data/mockShowcase";
 
 const TIER = {
-  1: { color: "#c8a96e", rgb: "200,169,110", label: "Universe" },
-  2: { color: "#C0C0C0", rgb: "192,192,192", label: "Cluster" },
-  3: { color: "#CD7F32", rgb: "205,127,50", label: "Solar" },
-  rest: { color: "#888888", rgb: "136,136,136", label: "Starry" },
+  universe: { color: "#c8a96e", rgb: "200,169,110" },
+  cluster: { color: "#C0C0C0", rgb: "192,192,192" },
+  solar: { color: "#CD7F32", rgb: "205,127,50" },
+  starry: { color: "#8a8a8a", rgb: "138,138,138" },
 };
-const tierFor = (rank) => TIER[rank] || TIER.rest;
 
-function BoardCard({ e, size }) {
-  const t = tierFor(e.rank);
+function BoardCard({ e, variant }) {
+  const t = TIER[e.tier] || TIER.starry;
   return (
-    <Link href={`/property/${e.property_slug}`} className={`bp-card bp-${size}`} style={{ borderColor: `rgba(${t.rgb},0.55)` }}>
+    <Link href={`/property/${e.property_slug}`} className={`bp-card bp-${variant}`} style={{ borderColor: `rgba(${t.rgb},0.6)`, "--tg": `rgba(${t.rgb},0.55)`, "--tc": t.color }}>
       <div className="bp-photo" style={e.photo ? { backgroundImage: `url(${e.photo})` } : undefined}>
-        <span className="bp-rank" style={{ color: t.color, borderColor: `rgba(${t.rgb},0.6)` }}>#{String(e.rank).padStart(2, "0")}</span>
+        <span className="bp-rank" style={{ color: t.color, borderColor: `rgba(${t.rgb},0.65)` }}>#{String(e.rank).padStart(2, "0")}</span>
+        {variant === "hero" && <span className="bp-tier-tag" style={{ color: t.color, borderColor: `rgba(${t.rgb},0.5)` }}>{e.tier === "universe" ? "Champion" : e.tier === "cluster" ? "Runner-up" : e.tier === "solar" ? "Podium" : "Contender"}</span>}
+        <span className="bp-showcase">Showcase →</span>
       </div>
       <div className="bp-body">
         {e.category && <div className="bp-cat" style={{ color: t.color }}>{e.category}</div>}
         <div className="bp-name">{e.name}</div>
         {e.location && <div className="bp-loc">{e.location}</div>}
-        {size !== "mini" && (
+        {variant === "hero" && (
           <>
             <div className="bp-divider" />
             <div className="bp-stats">
@@ -30,10 +32,9 @@ function BoardCard({ e, size }) {
                 <div className="bp-stat" key={l}><span className="bp-num" style={{ color: t.color }}>{v}</span><span className="bp-lbl">{l}</span></div>
               ))}
             </div>
-            <div className="bp-cta">View Full Briefing <span>→</span></div>
           </>
         )}
-        {size === "mini" && e.inquiry_count != null && (
+        {variant !== "hero" && (
           <div className="bp-mini-stat"><span style={{ color: t.color }}>{e.inquiry_count}</span> inquiries</div>
         )}
       </div>
@@ -43,112 +44,140 @@ function BoardCard({ e, size }) {
 
 export default function BoardPodium() {
   const [entries, setEntries] = useState([]);
+  const [category, setCategory] = useState("All");
 
   useEffect(() => {
     let alive = true;
-    fetch("/api/showcase").then((r) => r.json()).then((d) => {
-      if (alive && d.showcase) setEntries(d.showcase["Most Inquired"] || []);
-    }).catch(() => {});
+    fetch("/api/showcase").then((r) => r.json()).then((d) => { if (alive && d.entries) setEntries(d.entries); }).catch(() => {});
     return () => { alive = false; };
   }, []);
 
-  const byRank = (r) => entries.find((e) => e.rank === r);
-  const top1 = byRank(1), top2 = byRank(2), top3 = byRank(3);
-  const rest = entries.filter((e) => e.rank >= 4);
+  const ranked = useMemo(() => rankBoard(entries, { award: "Most Inquired", category }).slice(0, 4), [entries, category]);
+  const hero = ranked[0];
+  const rest = ranked.slice(1);
 
   return (
-    <div className="board-layer">
-      <div className="board-head">
-        <div className="board-head-l">
+    <div className="board-split">
+      {/* LEFT — menu */}
+      <aside className="board-menu">
+        <div>
           <span className="board-kicker">Layer 01 // The Board</span>
-          <h2 className="board-title">Most Inquired</h2>
+          <h2 className="board-title">The Board</h2>
           <p className="board-sub">The properties Manila is watching — ranked by real inquiry demand.</p>
+          <nav className="board-nav">
+            {BOARD_CATEGORIES.map((c) => (
+              <button key={c} className={`board-cat ${category === c ? "on" : ""}`} onClick={() => setCategory(c)}>
+                {c === "All" ? "All Properties" : c}
+              </button>
+            ))}
+          </nav>
         </div>
-        <Link href="/showcase" className="board-seeall">See Full Board →</Link>
-      </div>
+        <Link href="/showcase" className="board-seeall">See The Showcase →</Link>
+      </aside>
 
-      <div className="board-podium">
-        {top1 && <BoardCard e={top1} size="hero" />}
-        <div className="board-mids">
-          {top2 && <BoardCard e={top2} size="mid" />}
-          {top3 && <BoardCard e={top3} size="mid" />}
+      {/* RIGHT — leaderboard preview */}
+      <div className="board-content">
+        <div className="board-content-head">
+          <h3 className="board-content-title">{category === "All" ? "Overall" : category} · Most Inquired</h3>
+          <div className="board-content-sub">Live Leaderboard — Updated Monthly</div>
         </div>
-      </div>
 
-      {rest.length > 0 && (
-        <div className="board-rest-wrap">
-          <div className="board-rest-label">Ranks 4–10</div>
-          <div className="board-rest">
-            {rest.map((e) => <BoardCard key={e.rank} e={e} size="mini" />)}
+        {ranked.length === 0 ? (
+          <div className="board-empty">No ranked spaces in this category yet.</div>
+        ) : (
+          <div className="board-podium">
+            {hero && <BoardCard e={hero} variant="hero" />}
+            <div className="board-runners">
+              {rest.map((e, i) => <BoardCard key={e.rank} e={e} variant={i === 0 ? "mid" : "mini"} />)}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       <style jsx>{`
-        .board-layer {
+        .board-split {
           width: 100%; min-height: 100%;
+          display: grid; grid-template-columns: 320px 1fr;
           background:
-            radial-gradient(ellipse at 50% 30%, rgba(200,169,110,0.05), transparent 55%),
-            #0c0c0e;
-          display: flex; flex-direction: column; justify-content: center;
-          padding: clamp(28px, 5vh, 56px) clamp(20px, 5vw, 64px);
-          gap: 24px; overflow: hidden;
+            radial-gradient(ellipse at 80% 20%, rgba(200,169,110,0.05), transparent 55%),
+            #0b0b0d;
         }
-        .board-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; flex-wrap: wrap; }
-        .board-kicker { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.2em; color: var(--accent); text-transform: uppercase; }
-        .board-title { font-family: var(--font-display); font-weight: 400; font-size: clamp(26px, 4vw, 42px); color: #f0ede8; margin: 8px 0 4px; }
-        .board-sub { font-family: Georgia, serif; font-style: italic; font-size: 14px; color: #8a8a8a; }
-        .board-seeall { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); text-decoration: none; border: 1px solid rgba(200,169,110,0.4); padding: 10px 18px; white-space: nowrap; transition: background 0.2s; }
+        .board-menu {
+          display: flex; flex-direction: column; justify-content: space-between;
+          padding: clamp(36px, 6vh, 64px) 36px;
+          border-right: 1px solid #1a1a1a;
+        }
+        .board-kicker { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.2em; color: var(--accent); text-transform: uppercase; }
+        .board-title { font-family: var(--font-display); font-weight: 400; font-size: clamp(34px, 4vw, 48px); color: #f0ede8; margin: 12px 0 8px; }
+        .board-sub { font-family: Georgia, serif; font-style: italic; font-size: 14px; color: #8a8a8a; line-height: 1.6; margin-bottom: 28px; }
+        .board-nav { display: flex; flex-direction: column; gap: 2px; }
+        .board-cat {
+          text-align: left; font-family: Georgia, serif; font-size: 17px; color: #8a8a8a;
+          background: none; border: 1px solid transparent; padding: 13px 16px; cursor: pointer;
+          border-radius: 4px; transition: all 0.2s;
+        }
+        .board-cat:hover { color: #f0ede8; }
+        .board-cat.on { color: var(--accent); border-color: rgba(200,169,110,0.4); background: rgba(200,169,110,0.06); }
+        .board-seeall {
+          font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase;
+          color: var(--accent); text-decoration: none; border: 1px solid rgba(200,169,110,0.5);
+          padding: 16px; text-align: center; transition: background 0.2s; margin-top: 28px;
+        }
         .board-seeall:hover { background: rgba(200,169,110,0.12); }
 
-        .board-podium { display: grid; grid-template-columns: 1.3fr 1fr; gap: 18px; align-items: start; }
-        .board-mids { display: grid; grid-auto-rows: 1fr; gap: 18px; }
+        .board-content { padding: clamp(36px, 6vh, 64px) clamp(28px, 4vw, 56px); display: flex; flex-direction: column; min-width: 0; }
+        .board-content-head { margin-bottom: 28px; }
+        .board-content-title { font-family: var(--font-display); font-weight: 400; font-size: clamp(28px, 3.4vw, 40px); color: #f0ede8; }
+        .board-content-sub { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.22em; color: #555; text-transform: uppercase; margin-top: 8px; }
+        .board-empty { font-family: Georgia, serif; font-style: italic; color: #666; font-size: 18px; padding: 60px 0; }
+
+        .board-podium { display: grid; grid-template-columns: 1.45fr 1fr; gap: 18px; align-items: start; }
+        .board-runners { display: flex; flex-direction: column; gap: 18px; }
 
         :global(.bp-card) {
-          display: flex; background: rgba(18,18,20,0.9); border: 1px solid; border-radius: 4px;
-          overflow: hidden; text-decoration: none; transition: transform 0.25s, border-color 0.25s;
+          position: relative; display: flex; background: rgba(18,18,20,0.92);
+          border: 1px solid; border-radius: 5px; overflow: hidden; text-decoration: none;
+          transition: transform 0.28s ease, box-shadow 0.28s ease;
         }
-        :global(.bp-card:hover) { transform: translateY(-3px); }
-        :global(.bp-hero) { flex-direction: column; min-height: 360px; }
-        :global(.bp-mid) { flex-direction: row; min-height: 171px; }
-        :global(.bp-photo) { position: relative; background: #161616; background-size: cover; background-position: center; flex-shrink: 0; }
-        :global(.bp-hero .bp-photo) { width: 100%; height: 200px; }
-        :global(.bp-mid .bp-photo) { width: 42%; min-width: 110px; }
-        :global(.bp-rank) { position: absolute; top: 10px; left: 10px; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em; padding: 3px 9px; border: 1px solid; background: rgba(0,0,0,0.6); backdrop-filter: blur(6px); }
-        :global(.bp-body) { padding: 16px; display: flex; flex-direction: column; flex: 1; min-width: 0; }
-        :global(.bp-cat) { font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 6px; }
+        :global(.bp-card:hover) { transform: translateY(-4px); box-shadow: 0 0 0 1px var(--tg), 0 16px 44px -18px var(--tg); }
+        :global(.bp-hero) { flex-direction: column; min-height: 392px; }
+        :global(.bp-mid) { flex-direction: row; min-height: 188px; }
+        :global(.bp-mini) { flex-direction: row; min-height: 150px; }
+        :global(.bp-photo) { position: relative; background: #161616; background-size: cover; background-position: center; flex-shrink: 0; overflow: hidden; transition: transform 0.5s ease; }
+        :global(.bp-hero .bp-photo) { width: 100%; height: 210px; }
+        :global(.bp-mid .bp-photo), :global(.bp-mini .bp-photo) { width: 44%; min-width: 120px; height: auto; }
+        :global(.bp-card:hover .bp-photo) { transform: scale(1.05); }
+        :global(.bp-rank) { position: absolute; top: 12px; left: 12px; font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.08em; padding: 4px 11px; border: 1px solid; background: rgba(0,0,0,0.62); backdrop-filter: blur(6px); }
+        :global(.bp-tier-tag) { position: absolute; top: 12px; right: 12px; font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; padding: 4px 10px; border: 1px solid; background: rgba(0,0,0,0.55); backdrop-filter: blur(6px); }
+        :global(.bp-showcase) { position: absolute; bottom: 12px; right: 12px; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: #fff; background: rgba(0,0,0,0.6); padding: 5px 11px; opacity: 0; transform: translateY(6px); transition: all 0.28s ease; }
+        :global(.bp-card:hover .bp-showcase) { opacity: 1; transform: translateY(0); }
+        :global(.bp-body) { padding: 18px; display: flex; flex-direction: column; flex: 1; min-width: 0; }
+        :global(.bp-cat) { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 7px; }
         :global(.bp-name) { font-family: Georgia, serif; color: #f0ede8; line-height: 1.25; }
-        :global(.bp-hero .bp-name) { font-size: 24px; }
-        :global(.bp-mid .bp-name) { font-size: 16px; }
-        :global(.bp-loc) { font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; color: #666; margin-top: 4px; }
-        :global(.bp-divider) { height: 1px; background: #222; margin: 12px 0; }
-        :global(.bp-stats) { display: flex; gap: 18px; margin-bottom: auto; }
+        :global(.bp-hero .bp-name) { font-size: 26px; }
+        :global(.bp-mid .bp-name) { font-size: 18px; }
+        :global(.bp-mini .bp-name) { font-size: 16px; }
+        :global(.bp-loc) { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: #666; margin-top: 5px; }
+        :global(.bp-divider) { height: 1px; background: #232323; margin: 16px 0; }
+        :global(.bp-stats) { display: flex; gap: 22px; }
         :global(.bp-stat) { display: flex; flex-direction: column; }
-        :global(.bp-num) { font-family: Georgia, serif; font-size: 18px; }
-        :global(.bp-lbl) { font-family: var(--font-mono); font-size: 7px; letter-spacing: 0.15em; text-transform: uppercase; color: #555; }
-        :global(.bp-cta) { font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.18em; text-transform: uppercase; color: #888; display: flex; justify-content: space-between; margin-top: 14px; padding-top: 10px; border-top: 1px solid #1a1a1a; }
-        :global(.bp-card:hover .bp-cta) { color: var(--accent); }
+        :global(.bp-num) { font-family: Georgia, serif; font-size: 22px; }
+        :global(.bp-lbl) { font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.16em; text-transform: uppercase; color: #555; margin-top: 2px; }
+        :global(.bp-mini-stat) { font-family: var(--font-mono); font-size: 10px; color: #555; letter-spacing: 0.1em; text-transform: uppercase; margin-top: auto; }
+        :global(.bp-mini-stat span) { font-family: Georgia, serif; font-size: 16px; }
 
-        .board-rest-wrap { flex-shrink: 0; }
-        .board-rest-label { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.2em; color: #555; text-transform: uppercase; margin-bottom: 10px; }
-        .board-rest { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: none; }
-        .board-rest::-webkit-scrollbar { display: none; }
-        :global(.bp-mini) { flex-direction: column; width: 150px; flex: 0 0 auto; }
-        :global(.bp-mini .bp-photo) { width: 100%; height: 72px; }
-        :global(.bp-mini .bp-body) { padding: 10px; }
-        :global(.bp-mini .bp-name) { font-size: 13px; }
-        :global(.bp-mini .bp-rank) { font-size: 9px; padding: 2px 7px; }
-        :global(.bp-mini-stat) { font-family: var(--font-mono); font-size: 9px; color: #555; letter-spacing: 0.1em; text-transform: uppercase; margin-top: 8px; }
-        :global(.bp-mini-stat span) { font-family: Georgia, serif; font-size: 13px; }
-
-        @media (max-width: 900px) {
-          .board-podium { grid-template-columns: 1fr; }
-          .board-mids { grid-template-rows: none; grid-template-columns: 1fr 1fr; }
+        @media (max-width: 1024px) {
+          .board-split { grid-template-columns: 260px 1fr; }
         }
-        @media (max-width: 600px) {
-          .board-mids { grid-template-columns: 1fr; }
-          :global(.bp-mid) { flex-direction: column; }
-          :global(.bp-mid .bp-photo) { width: 100%; height: 120px; }
+        @media (max-width: 820px) {
+          .board-split { grid-template-columns: 1fr; }
+          .board-menu { border-right: none; border-bottom: 1px solid #1a1a1a; }
+          .board-nav { flex-direction: row; flex-wrap: wrap; }
+          .board-podium { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 560px) {
+          :global(.bp-mid), :global(.bp-mini) { flex-direction: column; }
+          :global(.bp-mid .bp-photo), :global(.bp-mini .bp-photo) { width: 100%; height: 120px; }
         }
       `}</style>
     </div>

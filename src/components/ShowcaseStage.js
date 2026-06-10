@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
+import { rankBoard, BOARD_CATEGORIES, BOARD_AWARDS } from "@/data/mockShowcase";
 
 // ════════════════════════════════════════════════════════════════
 // Tier definitions
@@ -232,35 +233,25 @@ export default function ShowcaseStage({ mode = "full" }) {
   const transRef = useRef(null);      // active transition state
   const warpParticles = useRef([]);
 
-  const [data, setData] = useState(null);
+  const [entries, setEntries] = useState([]);
   const [award, setAward] = useState("Most Inquired");
-  const [filter, setFilter] = useState("All Properties");
+  const [category, setCategory] = useState("All");
   const [filterOpen, setFilterOpen] = useState(false);
+  const [promoOpen, setPromoOpen] = useState(false);
   const [activeRank, setActiveRank] = useState(1);
   const [activeTier, setActiveTier] = useState("universe");
 
-  const AWARD_TABS = ["Most Inquired", "Top Rated", "New This Month", "Staff Pick"];
-  const CATEGORY_FILTERS = ["All Properties", "Residential", "Commercial", "STR"];
-  const SERVICE_FILTERS = ["Brokers", "Photographers", "Researchers"];
-  const isService = SERVICE_FILTERS.includes(filter);
-
-  // Load showcase data
+  // Load showcase entries
   useEffect(() => {
     let alive = true;
-    fetch("/api/showcase").then((r) => r.json()).then((d) => { if (alive && d.showcase) setData(d.showcase); }).catch(() => {});
+    fetch("/api/showcase").then((r) => r.json()).then((d) => { if (alive && d.entries) setEntries(d.entries); }).catch(() => {});
     return () => { alive = false; };
   }, []);
 
-  // Apply category filter, then re-rank + re-tier by position so the stage stays consistent
-  const rawEntries = (data && data[award]) || [];
-  const filteredRaw = isService
-    ? []
-    : filter === "All Properties"
-      ? rawEntries
-      : rawEntries.filter((e) => e.category === filter);
-  const entries = filteredRaw.map((e, i) => ({ ...e, rank: i + 1, tier: tierForRank(i + 1) }));
-  const active = entries.find((e) => e.rank === activeRank) || entries[0] || null;
-  const dragEntries = entries.filter((e) => e.rank >= 4);
+  const ranked = useMemo(() => rankBoard(entries, { award, category }), [entries, award, category]);
+  const active = ranked.find((e) => e.rank === activeRank) || ranked[0] || null;
+  const restRanks = ranked.filter((e) => e.rank >= 4);
+  const promoUnlocked = !!active && active.rank <= 3;
 
   // Resize canvases to the stage
   const sizeCanvases = useCallback(() => {
@@ -355,19 +346,25 @@ export default function ShowcaseStage({ mode = "full" }) {
   }, [activeRank]);
 
   const selectRank = useCallback((rank) => {
-    const e = entries.find((x) => x.rank === rank); if (!e) return;
+    const e = ranked.find((x) => x.rank === rank); if (!e) return;
     goToTier(e.tier, rank);
-  }, [entries, goToTier]);
+  }, [ranked, goToTier]);
 
-  // Reset to rank 1 (Universe) when the award tab or filter changes
+  const step = useCallback((dir) => {
+    if (!active) return;
+    const next = Math.min(Math.max(active.rank + dir, 1), ranked.length);
+    if (next !== active.rank) selectRank(next);
+  }, [active, ranked.length, selectRank]);
+
+  // Reset to rank 1 (Universe) when the award or category changes
   useEffect(() => {
-    if (!data || isService) return;
+    if (entries.length === 0) return;
     tierRef.current = "universe";
     setActiveTier("universe");
     setActiveRank(1);
     transRef.current = null;
     sceneRef.current = BUILDERS.universe(dimRef.current.W || 1, dimRef.current.H || 1);
-  }, [award, filter, data, isService]);
+  }, [award, category, entries]);
 
   // Drag-to-scroll for the bottom row
   const dragState = useRef({ down: false, x: 0, sl: 0 });
@@ -375,48 +372,59 @@ export default function ShowcaseStage({ mode = "full" }) {
   const onDragMove = (e) => { if (!dragState.current.down) return; const px = e.pageX ?? e.touches?.[0]?.pageX ?? 0; dragRef.current.scrollLeft = dragState.current.sl - (px - dragState.current.x) * 1.4; };
   const onDragUp = () => { dragState.current.down = false; };
 
-  const tierMeta = TIERS[activeTier];
-  const dragShown = mode === "homepage" ? dragEntries.slice(0, 4) : dragEntries;
+  const tierMeta = TIERS[activeTier] || TIERS.universe;
 
   return (
     <div className={`sc-stage ${mode}`} ref={stageRef}>
       <canvas ref={bgRef} className="sc-canvas-bg" />
       <canvas ref={warpRef} className="sc-canvas-warp" />
 
-      {/* Top bar (full page only) */}
-      {mode === "full" && (
-        <div className="sc-topbar">
-          <div className="sc-topbar-left">SCOUTIT · THE BOARD</div>
-          <div className="sc-topbar-tabs">
-            {AWARD_TABS.map((a) => (
-              <button key={a} className={`sc-tab ${award === a ? "on" : ""}`} onClick={() => setAward(a)}>{a}</button>
-            ))}
-          </div>
-          <div className="sc-topbar-right">
-            <button className="sc-filter-btn" onClick={() => setFilterOpen((v) => !v)}>Filter ▾</button>
-            {filterOpen && (
-              <div className="sc-filter-menu" onMouseLeave={() => setFilterOpen(false)}>
-                <div className="sc-filter-group">Properties</div>
-                {CATEGORY_FILTERS.map((f) => (
-                  <button key={f} className={`sc-filter-item ${filter === f ? "on" : ""}`} onClick={() => { setFilter(f); setFilterOpen(false); }}>{f}</button>
-                ))}
-                <div className="sc-filter-group">Services</div>
-                {SERVICE_FILTERS.map((f) => (
-                  <button key={f} className={`sc-filter-item ${filter === f ? "on" : ""}`} onClick={() => { setFilter(f); setFilterOpen(false); }}>{f}</button>
-                ))}
-              </div>
-            )}
-          </div>
+      {/* Top bar */}
+      <div className="sc-topbar">
+        <span className="sc-topbar-left">SCOUTIT · THE BOARD</span>
+        <span className="sc-topbar-cat" style={{ color: tierMeta.color }}>{category === "All" ? "Overall" : category} · {award}</span>
+      </div>
+
+      {/* LEFT — filter toggle + sliding panel (awards horizontal, categories vertical) */}
+      <button className={`sc-edge sc-edge-left ${filterOpen ? "on" : ""}`} onClick={() => setFilterOpen((v) => !v)}>
+        {filterOpen ? "✕ Close" : "≡ Filter"}
+      </button>
+      <div className={`sc-filter-panel ${filterOpen ? "open" : ""}`}>
+        <div className="sc-fp-title">Award</div>
+        <div className="sc-fp-awards">
+          {BOARD_AWARDS.map((a) => (
+            <button key={a} className={`sc-fp-award ${award === a ? "on" : ""}`} onClick={() => setAward(a)}>{a}</button>
+          ))}
         </div>
+        <div className="sc-fp-title">Category</div>
+        <div className="sc-fp-cats">
+          {BOARD_CATEGORIES.map((c) => (
+            <button key={c} className={`sc-fp-cat ${category === c ? "on" : ""}`} onClick={() => setCategory(c)}>{c === "All" ? "All Properties" : c}</button>
+          ))}
+        </div>
+      </div>
+
+      {/* RIGHT — promo toggle (privilege of the peak: top 3 only) */}
+      {promoUnlocked && (
+        <>
+          <button className={`sc-edge sc-edge-right ${promoOpen ? "on" : ""}`} onClick={() => setPromoOpen((v) => !v)} style={{ color: tierMeta.color, borderColor: `rgba(${tierMeta.rgb},0.6)` }}>
+            {promoOpen ? "✕ Close" : "▶ Showcase"}
+          </button>
+          <div className={`sc-promo-panel ${promoOpen ? "open" : ""}`}>
+            <div className="sc-promo-head" style={{ color: tierMeta.color }}>▶ Showcase Reel · #{active.rank} {tierMeta.badge}</div>
+            {active.walkthrough_url ? (
+              <div className="sc-promo-embed"><iframe src={active.walkthrough_url} title="Showcase reel" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen /></div>
+            ) : (
+              <div className="sc-promo-soon">This podium spot has earned a showcase reel — coming soon.</div>
+            )}
+            <Link href={`/property/${active.property_slug}`} className="sc-promo-cta">View Full Briefing →</Link>
+            <Link href={`/property/${active.property_slug}/brokers`} className="sc-promo-cta">Connect with Broker →</Link>
+          </div>
+        </>
       )}
 
-      {/* Services section — no mock data yet */}
-      {isService && (
-        <div className="sc-overlay"><div className="sc-service-soon">{filter} board — coming soon.</div></div>
-      )}
-
-      {/* Centered card */}
-      {!isService && active && (
+      {/* Spotlight card */}
+      {active ? (
         <div className="sc-overlay">
           <div className="sc-rank-badge" style={{ borderColor: `rgba(${tierMeta.rgb},0.6)`, color: tierMeta.color }}>
             #{active.rank} · {active.award_type} · {tierMeta.badge}
@@ -438,132 +446,161 @@ export default function ShowcaseStage({ mode = "full" }) {
               <Link href={`/property/${active.property_slug}`} className="sc-cta">View Full Briefing <span>→</span></Link>
             </div>
           </div>
-          <div className="sc-platform" style={{ borderColor: `rgba(${tierMeta.rgb},0.25)`, boxShadow: `0 0 18px rgba(${tierMeta.rgb},0.2)` }} />
+          <div className="sc-platform" style={{ borderColor: `rgba(${tierMeta.rgb},0.25)`, boxShadow: `0 0 22px rgba(${tierMeta.rgb},0.22)` }} />
         </div>
+      ) : (
+        <div className="sc-overlay"><div className="sc-empty">No ranked spaces in this filter yet.</div></div>
       )}
 
-      {/* Walkthrough panel (top 3 with a URL) — full mode only */}
-      {mode === "full" && active && active.rank <= 3 && (
-        <div className="sc-walk">
-          <div className="sc-walk-label">▶ Watch Walkthrough</div>
-          {active.walkthrough_url ? (
-            <div className="sc-walk-embed"><iframe src={active.walkthrough_url} title="Walkthrough" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen /></div>
-          ) : (
-            <div className="sc-walk-soon">Walkthrough coming soon.</div>
-          )}
-          <Link href={`/property/${active.property_slug}`} className="sc-walk-cta">View Full Briefing →</Link>
-          <Link href={`/property/${active.property_slug}/brokers`} className="sc-walk-cta">Connect with Broker →</Link>
-        </div>
-      )}
-
-      {/* Tier nav pills */}
-      <div className="sc-tier-nav">
-        {["universe", "cluster", "solar"].map((t, i) => {
-          const m = TIERS[t]; const on = activeTier === t;
-          return (
-            <button key={t} className="sc-pill" onClick={() => selectRank(i + 1)}
-              style={{ color: on ? m.color : `rgba(${m.rgb},0.4)`, borderColor: on ? `rgba(${m.rgb},0.7)` : `rgba(${m.rgb},0.2)` }}>
-              {m.label}
-            </button>
-          );
-        })}
-        {(mode === "full") && (
+      {/* Bottom cluster: tier pills → ranks 4-10 → prev/next */}
+      <div className="sc-bottom">
+        <div className="sc-tier-nav">
+          {["universe", "cluster", "solar"].map((t, i) => {
+            const m = TIERS[t]; const on = activeTier === t;
+            return (
+              <button key={t} className="sc-pill" onClick={() => selectRank(i + 1)}
+                style={{ color: on ? m.color : `rgba(${m.rgb},0.45)`, borderColor: on ? `rgba(${m.rgb},0.7)` : `rgba(${m.rgb},0.22)` }}>
+                {m.label}
+              </button>
+            );
+          })}
           <button className="sc-pill" onClick={() => selectRank(4)}
-            style={{ color: activeTier === "starry" ? TIERS.starry.color : "rgba(136,136,136,0.4)", borderColor: activeTier === "starry" ? "rgba(136,136,136,0.6)" : "rgba(136,136,136,0.2)" }}>
+            style={{ color: activeTier === "starry" ? TIERS.starry.color : "rgba(138,138,138,0.45)", borderColor: activeTier === "starry" ? "rgba(138,138,138,0.6)" : "rgba(138,138,138,0.22)" }}>
             ④–⑩ Starry
           </button>
+        </div>
+
+        {restRanks.length > 0 && (
+          <div className="sc-rest">
+            <div className="sc-rest-label">The Contenders · Ranks 4–{ranked.length}</div>
+            <div className="sc-rest-row" ref={dragRef}
+              onMouseDown={onDragDown} onMouseMove={onDragMove} onMouseUp={onDragUp} onMouseLeave={onDragUp}
+              onTouchStart={onDragDown} onTouchMove={onDragMove} onTouchEnd={onDragUp}>
+              {restRanks.map((e) => {
+                const m = TIERS[e.tier];
+                return (
+                  <button key={e.rank} className={`sc-rest-card ${active && active.rank === e.rank ? "on" : ""}`} onClick={() => selectRank(e.rank)} style={{ "--tc": m.color, "--tg": `rgba(${m.rgb},0.5)` }}>
+                    <div className="sc-rest-photo" style={e.photo ? { backgroundImage: `url(${e.photo})` } : undefined}>
+                      <span className="sc-rest-rank">#{String(e.rank).padStart(2, "0")}</span>
+                      <span className="sc-rest-showcase">Showcase →</span>
+                    </div>
+                    <div className="sc-rest-info">
+                      <div className="sc-rest-cat">{e.category}</div>
+                      <div className="sc-rest-name">{e.name}</div>
+                      <div className="sc-rest-stat">{e.inquiry_count} inquiries</div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {ranked.length > 1 && (
+          <div className="sc-arrows">
+            <button className="sc-arrow" onClick={() => step(-1)} disabled={!active || active.rank <= 1}>← Prev</button>
+            <span className="sc-arrow-count">{active ? active.rank : 0} / {ranked.length}</span>
+            <button className="sc-arrow" onClick={() => step(1)} disabled={!active || active.rank >= ranked.length}>Next →</button>
+          </div>
         )}
       </div>
 
-      {/* Bottom drag row (ranks 4-10) */}
-      {dragShown.length > 0 && (
-        <div className="sc-drag-wrap">
-          <div className="sc-drag-label">Ranks 4–10 · Drag to Explore →</div>
-          <div className="sc-drag-row" ref={dragRef}
-            onMouseDown={onDragDown} onMouseMove={onDragMove} onMouseUp={onDragUp} onMouseLeave={onDragUp}
-            onTouchStart={onDragDown} onTouchMove={onDragMove} onTouchEnd={onDragUp}>
-            {dragShown.map((e) => (
-              <button key={e.rank} className="sc-drag-card" onClick={() => selectRank(e.rank)}>
-                <div className="sc-drag-rank">#{String(e.rank).padStart(2, "0")}</div>
-                <div className="sc-drag-name">{e.name}</div>
-                {e.location && <div className="sc-drag-loc">{e.location}</div>}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Homepage CTA */}
-      {mode === "homepage" && (
-        <Link href="/showcase" className="sc-seeall">See Full Board →</Link>
-      )}
+      {mode === "homepage" && <Link href="/showcase" className="sc-seeall">See Full Board →</Link>}
 
       <style jsx>{`
         .sc-stage { position: relative; width: 100%; height: 100%; background: #000; overflow: hidden; }
         .sc-canvas-bg, .sc-canvas-warp { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
         .sc-canvas-warp { z-index: 2; pointer-events: none; }
-        .sc-overlay { position: absolute; inset: 0; z-index: 3; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; pointer-events: none; }
-        .sc-rank-badge { font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 4px; padding: 5px 18px; text-transform: uppercase; border: 1px solid; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); }
-        .sc-card { width: 240px; border: 1px solid; background: rgba(4,4,4,0.55); backdrop-filter: blur(16px); overflow: hidden; pointer-events: all; animation: scFloat 4.5s ease-in-out infinite; }
+
+        .sc-topbar { position: absolute; top: 0; left: 0; width: 100%; z-index: 7; display: flex; align-items: center; justify-content: space-between; padding: 18px 26px; background: linear-gradient(to bottom, rgba(0,0,0,0.7), rgba(0,0,0,0)); pointer-events: none; }
+        .sc-topbar-left { font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 0.3em; color: #555; text-transform: uppercase; }
+        .sc-topbar-cat { font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; }
+
+        /* Edge toggle tabs */
+        .sc-edge { position: absolute; top: 50%; transform: translateY(-50%); z-index: 9; writing-mode: vertical-rl; text-orientation: mixed; font-family: 'Courier New', monospace; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; padding: 20px 9px; background: rgba(0,0,0,0.62); backdrop-filter: blur(8px); border: 1px solid #1f1f1f; color: #aaa; cursor: pointer; transition: color 0.2s, background 0.2s; }
+        .sc-edge:hover { background: rgba(0,0,0,0.8); color: #f0ede8; }
+        .sc-edge-left { left: 0; border-left: none; }
+        .sc-edge-right { right: 0; border-right: none; }
+        .sc-edge.on { color: #c8a96e; }
+
+        /* Filter panel (slides from left) */
+        .sc-filter-panel { position: absolute; top: 0; left: 0; height: 100%; width: 300px; z-index: 8; background: rgba(8,8,9,0.95); backdrop-filter: blur(18px); border-right: 1px solid #1a1a1a; padding: 78px 26px 28px; transform: translateX(-100%); transition: transform 0.38s cubic-bezier(0.16,1,0.3,1); overflow-y: auto; }
+        .sc-filter-panel.open { transform: translateX(0); }
+        .sc-fp-title { font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 0.22em; color: #555; text-transform: uppercase; margin: 20px 0 12px; }
+        .sc-fp-awards { display: flex; flex-wrap: wrap; gap: 8px; }
+        .sc-fp-award { font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: #888; background: none; border: 1px solid #242424; padding: 9px 12px; cursor: pointer; transition: all 0.2s; }
+        .sc-fp-award:hover { color: #f0ede8; }
+        .sc-fp-award.on { color: #c8a96e; border-color: rgba(200,169,110,0.6); background: rgba(200,169,110,0.08); }
+        .sc-fp-cats { display: flex; flex-direction: column; gap: 2px; }
+        .sc-fp-cat { text-align: left; font-family: Georgia, serif; font-size: 17px; color: #8a8a8a; background: none; border-left: 2px solid transparent; padding: 11px 14px; cursor: pointer; transition: all 0.2s; }
+        .sc-fp-cat:hover { color: #f0ede8; }
+        .sc-fp-cat.on { color: #c8a96e; border-left-color: #c8a96e; background: rgba(200,169,110,0.06); }
+
+        /* Promo panel (slides from right) */
+        .sc-promo-panel { position: absolute; top: 0; right: 0; height: 100%; width: 360px; z-index: 8; background: rgba(8,8,9,0.95); backdrop-filter: blur(18px); border-left: 1px solid #1a1a1a; padding: 78px 26px 28px; transform: translateX(100%); transition: transform 0.38s cubic-bezier(0.16,1,0.3,1); display: flex; flex-direction: column; gap: 14px; }
+        .sc-promo-panel.open { transform: translateX(0); }
+        .sc-promo-head { font-family: 'Courier New', monospace; font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; }
+        .sc-promo-embed { position: relative; width: 100%; aspect-ratio: 16/9; background: #000; }
+        .sc-promo-embed :global(iframe) { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+        .sc-promo-soon { font-family: Georgia, serif; font-style: italic; font-size: 15px; color: #777; padding: 30px 4px; text-align: center; line-height: 1.6; }
+        .sc-promo-cta { font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #999; text-decoration: none; }
+        .sc-promo-cta:hover { color: #c8a96e; }
+
+        /* Spotlight card (enlarged) */
+        .sc-overlay { position: absolute; inset: 0; z-index: 3; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding-bottom: 240px; pointer-events: none; }
+        .sc-empty { font-family: Georgia, serif; font-style: italic; font-size: 22px; color: #666; }
+        .sc-rank-badge { font-family: 'Courier New', monospace; font-size: 13px; letter-spacing: 0.28em; padding: 8px 22px; text-transform: uppercase; border: 1px solid; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); }
+        .sc-card { width: 330px; border: 1px solid; background: rgba(6,6,7,0.6); backdrop-filter: blur(16px); overflow: hidden; pointer-events: all; animation: scFloat 4.5s ease-in-out infinite; }
         @keyframes scFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-        .sc-photo { width: 100%; height: 130px; background: rgba(10,10,10,0.6); background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center; }
-        .sc-photo-txt { font-family: 'Courier New', monospace; font-size: 7px; letter-spacing: 2px; color: #2a2a2a; text-transform: uppercase; }
-        .sc-body { padding: 14px; }
-        .sc-cat { font-family: 'Courier New', monospace; font-size: 8px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 5px; }
-        .sc-name { font-family: Georgia, serif; font-size: 17px; color: #f0ede8; margin-bottom: 3px; line-height: 1.3; }
-        .sc-loc { font-family: 'Courier New', monospace; font-size: 8px; color: #666; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; }
-        .sc-divider { height: 1px; background: #1a1a1a; margin-bottom: 10px; }
-        .sc-stats { display: flex; gap: 18px; margin-bottom: 12px; }
+        .sc-photo { width: 100%; height: 184px; background: rgba(10,10,10,0.6); background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center; }
+        .sc-photo-txt { font-family: 'Courier New', monospace; font-size: 9px; letter-spacing: 2px; color: #2a2a2a; text-transform: uppercase; }
+        .sc-body { padding: 22px; }
+        .sc-cat { font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 8px; }
+        .sc-name { font-family: Georgia, serif; font-size: 25px; color: #f0ede8; margin-bottom: 4px; line-height: 1.25; }
+        .sc-loc { font-family: 'Courier New', monospace; font-size: 10px; color: #666; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 14px; }
+        .sc-divider { height: 1px; background: #222; margin-bottom: 14px; }
+        .sc-stats { display: flex; gap: 26px; margin-bottom: 16px; }
         .sc-stat { display: flex; flex-direction: column; gap: 2px; }
-        .sc-stat-num { font-family: Georgia, serif; font-size: 19px; }
-        .sc-stat-lbl { font-family: 'Courier New', monospace; font-size: 7px; color: #444; letter-spacing: 2px; text-transform: uppercase; }
-        .sc-cta { font-family: 'Courier New', monospace; font-size: 8px; letter-spacing: 2px; color: #888; text-transform: uppercase; cursor: pointer; display: flex; justify-content: space-between; padding-top: 8px; border-top: 1px solid #1a1a1a; text-decoration: none; }
+        .sc-stat-num { font-family: Georgia, serif; font-size: 27px; }
+        .sc-stat-lbl { font-family: 'Courier New', monospace; font-size: 9px; color: #555; letter-spacing: 0.18em; text-transform: uppercase; }
+        .sc-cta { font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 0.16em; color: #999; text-transform: uppercase; cursor: pointer; display: flex; justify-content: space-between; padding-top: 12px; border-top: 1px solid #1c1c1c; text-decoration: none; }
         .sc-cta:hover { color: #c8a96e; }
-        .sc-platform { width: 260px; height: 11px; border-radius: 50%; border: 1px solid; background: transparent; margin-top: 4px; animation: scPlat 3s ease-in-out infinite; }
+        .sc-platform { width: 330px; height: 13px; border-radius: 50%; border: 1px solid; background: transparent; margin-top: 6px; animation: scPlat 3s ease-in-out infinite; }
         @keyframes scPlat { 0%,100% { opacity: 0.6; } 50% { opacity: 1; } }
 
-        .sc-walk { position: absolute; top: 50%; right: 24px; transform: translateY(-50%); z-index: 4; width: 300px; background: rgba(8,8,8,0.88); backdrop-filter: blur(14px); border: 1px solid rgba(200,169,110,0.25); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-        .sc-walk-label { font-family: 'Courier New', monospace; font-size: 9px; letter-spacing: 3px; color: #c8a96e; text-transform: uppercase; }
-        .sc-walk-embed { position: relative; width: 100%; aspect-ratio: 16/9; background: #000; }
-        .sc-walk-embed :global(iframe) { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
-        .sc-walk-soon { font-family: Georgia, serif; font-style: italic; font-size: 13px; color: #666; padding: 24px 0; text-align: center; }
-        .sc-walk-cta { font-family: 'Courier New', monospace; font-size: 9px; letter-spacing: 2px; color: #888; text-transform: uppercase; text-decoration: none; }
-        .sc-walk-cta:hover { color: #c8a96e; }
-
-        .sc-tier-nav { position: absolute; bottom: ${mode === "homepage" ? "20px" : "74px"}; left: 50%; transform: translateX(-50%); z-index: 5; display: flex; gap: 14px; }
-        .sc-pill { font-family: 'Courier New', monospace; font-size: 8px; letter-spacing: 3px; text-transform: uppercase; padding: 5px 14px; border: 1px solid; cursor: pointer; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); transition: all 0.3s; }
-
-        .sc-drag-wrap { position: absolute; bottom: ${mode === "homepage" ? "60px" : "120px"}; left: 0; width: 100%; z-index: 4; padding: 0 20px; pointer-events: none; }
-        .sc-drag-label { font-family: 'Courier New', monospace; font-size: 8px; letter-spacing: 3px; color: #555; text-transform: uppercase; margin-bottom: 8px; padding-left: 4px; }
-        .sc-drag-row { display: flex; gap: 10px; overflow-x: auto; pointer-events: all; cursor: grab; scrollbar-width: none; padding-bottom: 4px; }
-        .sc-drag-row::-webkit-scrollbar { display: none; }
-        .sc-drag-card { flex: 0 0 auto; width: 96px; text-align: left; background: rgba(8,8,8,0.75); backdrop-filter: blur(8px); border: 1px solid rgba(100,100,100,0.25); padding: 10px; cursor: pointer; transition: border-color 0.25s; }
-        .sc-drag-card:hover { border-color: rgba(200,169,110,0.25); }
-        .sc-drag-rank { font-family: 'Courier New', monospace; font-size: 9px; color: #c8a96e; letter-spacing: 1px; margin-bottom: 6px; }
-        .sc-drag-name { font-family: Georgia, serif; font-size: 11px; color: #aaa; line-height: 1.25; margin-bottom: 3px; }
-        .sc-drag-loc { font-family: 'Courier New', monospace; font-size: 7px; color: #555; letter-spacing: 1px; text-transform: uppercase; }
+        /* Bottom cluster */
+        .sc-bottom { position: absolute; bottom: 0; left: 0; width: 100%; z-index: 5; display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 18px 20px 22px; background: linear-gradient(to top, rgba(0,0,0,0.88) 55%, transparent); pointer-events: none; }
+        .sc-tier-nav { display: flex; gap: 14px; pointer-events: all; }
+        .sc-pill { font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; padding: 8px 18px; border: 1px solid; cursor: pointer; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); transition: all 0.3s; }
+        .sc-rest { width: 100%; max-width: 1120px; pointer-events: all; }
+        .sc-rest-label { font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 0.22em; color: #666; text-transform: uppercase; margin-bottom: 9px; text-align: center; }
+        .sc-rest-row { display: flex; gap: 12px; justify-content: flex-start; overflow-x: auto; cursor: grab; scrollbar-width: none; padding: 2px 4px 6px; }
+        .sc-rest-row::-webkit-scrollbar { display: none; }
+        .sc-rest-card { flex: 0 0 auto; width: 176px; text-align: left; background: rgba(10,10,12,0.85); backdrop-filter: blur(8px); border: 1px solid rgba(120,120,120,0.25); padding: 0; overflow: hidden; cursor: pointer; transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease; }
+        .sc-rest-card:hover { transform: translateY(-4px); border-color: var(--tg); box-shadow: 0 14px 32px -16px var(--tg); }
+        .sc-rest-card.on { border-color: var(--tc); }
+        .sc-rest-photo { position: relative; height: 84px; background: #161616; background-size: cover; background-position: center; overflow: hidden; transition: transform 0.45s ease; }
+        .sc-rest-card:hover .sc-rest-photo { transform: scale(1.07); }
+        .sc-rest-rank { position: absolute; top: 8px; left: 8px; font-family: 'Courier New', monospace; font-size: 12px; color: var(--tc); background: rgba(0,0,0,0.62); padding: 2px 8px; }
+        .sc-rest-showcase { position: absolute; bottom: 7px; right: 7px; font-family: 'Courier New', monospace; font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase; color: #fff; background: rgba(0,0,0,0.6); padding: 3px 7px; opacity: 0; transition: opacity 0.25s; }
+        .sc-rest-card:hover .sc-rest-showcase { opacity: 1; }
+        .sc-rest-info { padding: 11px 12px 13px; }
+        .sc-rest-cat { font-family: 'Courier New', monospace; font-size: 8px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--tc); margin-bottom: 5px; }
+        .sc-rest-name { font-family: Georgia, serif; font-size: 15px; color: #e8e6e2; line-height: 1.25; }
+        .sc-rest-stat { font-family: 'Courier New', monospace; font-size: 9px; color: #666; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 6px; }
+        .sc-arrows { display: flex; align-items: center; gap: 18px; pointer-events: all; }
+        .sc-arrow { font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #999; background: none; border: 1px solid #2a2a2a; padding: 9px 18px; cursor: pointer; transition: all 0.2s; }
+        .sc-arrow:hover:not(:disabled) { color: #c8a96e; border-color: rgba(200,169,110,0.5); }
+        .sc-arrow:disabled { opacity: 0.3; cursor: default; }
+        .sc-arrow-count { font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 0.1em; color: #777; }
 
         .sc-seeall { position: absolute; top: 18px; right: 22px; z-index: 6; font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 3px; color: #c8a96e; text-transform: uppercase; text-decoration: none; border: 1px solid rgba(200,169,110,0.4); padding: 8px 16px; background: rgba(0,0,0,0.5); }
         .sc-seeall:hover { background: rgba(200,169,110,0.12); }
 
-        .sc-topbar { position: absolute; top: 0; left: 0; width: 100%; z-index: 7; display: flex; align-items: center; justify-content: space-between; padding: 14px 22px; background: linear-gradient(to bottom, rgba(0,0,0,0.75), rgba(0,0,0,0)); }
-        .sc-topbar-left { font-family: 'Courier New', monospace; font-size: 8px; letter-spacing: 4px; color: #333; text-transform: uppercase; flex: 1; }
-        .sc-topbar-tabs { display: flex; gap: 18px; }
-        .sc-tab { font-family: 'Courier New', monospace; font-size: 8px; letter-spacing: 2px; text-transform: uppercase; color: #555; background: none; border: none; padding: 4px 0; cursor: pointer; border-bottom: 1px solid transparent; transition: color 0.2s, border-color 0.2s; }
-        .sc-tab.on { color: #c8a96e; border-bottom-color: #c8a96e; }
-        .sc-topbar-right { flex: 1; display: flex; justify-content: flex-end; position: relative; }
-        .sc-filter-btn { font-family: 'Courier New', monospace; font-size: 8px; letter-spacing: 2px; text-transform: uppercase; color: #888; background: rgba(0,0,0,0.4); border: 1px solid #1a1a1a; padding: 6px 12px; cursor: pointer; }
-        .sc-filter-menu { position: absolute; top: 32px; right: 0; min-width: 170px; background: rgba(8,8,8,0.95); backdrop-filter: blur(12px); border: 1px solid #1a1a1a; padding: 8px 0; z-index: 9; }
-        .sc-filter-group { font-family: 'Courier New', monospace; font-size: 7px; letter-spacing: 2px; color: #444; text-transform: uppercase; padding: 8px 14px 4px; }
-        .sc-filter-item { display: block; width: 100%; text-align: left; font-family: 'Courier New', monospace; font-size: 9px; letter-spacing: 1px; color: #999; background: none; border: none; border-left: 2px solid transparent; padding: 7px 14px; cursor: pointer; }
-        .sc-filter-item:hover { color: #f0ede8; }
-        .sc-filter-item.on { color: #c8a96e; border-left-color: #c8a96e; }
-        .sc-service-soon { font-family: Georgia, serif; font-style: italic; font-size: 20px; color: #666; }
-
         @media (max-width: 768px) {
-          .sc-walk { display: none; }
-          .sc-card { width: 210px; }
-          .sc-topbar-tabs { display: none; }
+          .sc-filter-panel, .sc-promo-panel { width: 86%; }
+          .sc-card { width: 290px; }
+          .sc-rest-row { justify-content: flex-start; }
         }
       `}</style>
     </div>
