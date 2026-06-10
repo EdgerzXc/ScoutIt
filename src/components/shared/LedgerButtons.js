@@ -28,12 +28,20 @@ export default function LedgerButtons() {
   if (!id) return null;
 
   return (
-    <ReactionButtons 
-      propertyId={id} 
-      propertyTitle={propertyInfo.title} 
-      category={propertyInfo.category} 
-      city={propertyInfo.city} 
-      small={false} 
-    />
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }} className="ledger-floating-sidebar">
+      <ReactionButtons 
+        propertyId={id} 
+        propertyTitle={propertyInfo.title} 
+        category={propertyInfo.category} 
+        city={propertyInfo.city} 
+        small={true} 
+      />
+      <style jsx global>{`
+        .ledger-floating-sidebar .reaction-tiles-row.small {
+          flex-direction: column !important;
+          gap: 16px !important;
+        }
+      `}</style>
+    </div>
   );
 }

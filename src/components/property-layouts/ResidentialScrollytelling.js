@@ -1576,11 +1576,6 @@ export default function ResidentialScrollytelling({ slug }) {
                 When you&apos;re ready, we&apos;ll make the introduction.
               </h2>
 
-              <div className="reactions-container" style={{marginTop:"0", display:"flex", flexDirection:"column", gap:"10px"}}>
-                <p style={{fontFamily:"'Courier New',monospace", fontSize:"10px", textTransform:"uppercase", letterSpacing:"0.2em", color:"#8a8a8a", marginBottom:"16px"}}>HOW DOES THIS SPACE MAKE YOU FEEL?</p>
-                <ReactionButtons propertyId={slug || "batasan-hills"} propertyTitle={d.title} category={d.property_type} city={d.city}/>
-              </div>
-
               {/* Price — only when an authorized party has provided one ("N/A"/empty suppresses it) */}
               {(() => {
                 const hasPrice = d.listed_price && d.listed_price.trim().toUpperCase() !== "N/A";
