@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import ReactionButtons from "@/components/ReactionButtons";
+import { cityToRegion, regionOf } from "@/lib/regions";
 import "./discover.css";
 
 const CATEGORIES = ["Residential", "Commercial", "STR", "Hospitality", "Restaurants", "Venues/Events"];
@@ -11,21 +12,6 @@ const CATEGORIES = ["Residential", "Commercial", "STR", "Hospitality", "Restaura
 function getDBCategory(cat) {
   if (cat === "Venues/Events") return "Venues";
   return cat;
-}
-
-// Shared city → simplified region bucket (kept in sync with news `region` tags)
-function cityToRegion(city = "") {
-  const c = (city || "").toLowerCase();
-  if (c.includes("bonifacio") || c.includes("bgc")) return "BGC";
-  if (c.includes("makati")) return "Makati";
-  if (c.includes("quezon")) return "Quezon City";
-  if (c.includes("siargao")) return "Siargao";
-  if (c.includes("boracay")) return "Boracay";
-  if (c.includes("el nido") || c.includes("coron") || c.includes("palawan")) return "Palawan";
-  if (c.includes("panglao") || c.includes("bohol")) return "Bohol";
-  if (c.includes("tagaytay")) return "Tagaytay";
-  if (c.includes("parañaque") || c.includes("paranaque")) return "Parañaque";
-  return city || null;
 }
 
 import { DISCOVER_PROPERTIES } from "@/data/mockProperties";
@@ -78,6 +64,7 @@ export default function DiscoverClient() {
                 slug: p.slug || p.id,
                 title: p.title,
                 city: p.city || "",
+                region: p.region || cityToRegion(p.city || ""),
                 location: p.location || "",
                 image: p.image || p.photos?.[0] || "",
                 density
@@ -111,7 +98,7 @@ export default function DiscoverClient() {
                 slug: item.slug || item.id,
                 category: item.intelType || "BRIEFING",
                 date: item.date || "Just Now",
-                region: cityToRegion(item.city || item.location || ""),
+                region: item.region || cityToRegion(item.city || item.location || ""),
                 title: item.title,
                 snippet: item.excerpt || ""
               });
@@ -136,20 +123,29 @@ export default function DiscoverClient() {
     setActiveSpotlightId(prev => {
       const keep = prev && list.some(x => x.id === prev) ? prev : (list[0]?.id || null);
       const sel = list.find(x => x.id === keep);
-      setActiveRegion(sel ? cityToRegion(sel.city) : null);
+      setActiveRegion(sel ? regionOf(sel) : null);
       return keep;
     });
+    setRegionQuery("");
   }, [matchedCategory, allProperties, allIntel]);
 
-  // Regions available in the current category (derived from spotlight cities)
+  // Regions available in the current category (derived from spotlight records)
   const regions = useMemo(() => {
     const seen = [];
     properties.forEach(p => {
-      const r = cityToRegion(p.city);
+      const r = regionOf(p);
       if (r && !seen.includes(r)) seen.push(r);
     });
     return seen;
   }, [properties]);
+
+  // Region search (only surfaced when the list grows)
+  const [regionQuery, setRegionQuery] = useState("");
+  const shownRegions = useMemo(() => {
+    const q = regionQuery.trim().toLowerCase();
+    if (!q) return regions;
+    return regions.filter(r => r.toLowerCase().includes(q));
+  }, [regions, regionQuery]);
 
   // News feed filtered to the active region (graceful fallback to all)
   const filteredIntel = useMemo(() => {
@@ -161,29 +157,26 @@ export default function DiscoverClient() {
   // Selecting a spotlight drives the active region for the news feed
   const selectSpotlight = (property) => {
     setActiveSpotlightId(property.id);
-    setActiveRegion(cityToRegion(property.city));
+    setActiveRegion(regionOf(property));
   };
 
-  // ── Drag-to-scroll the spotlight row (left/right) ──
-  const matrixRef = useRef(null);
+  // ── Drag-to-scroll for any horizontal row (Spotlights + News Feed) ──
   const dragState = useRef(null);
   const movedRef = useRef(false);
 
-  const onMatrixPointerDown = (e) => {
-    const el = matrixRef.current;
-    if (!el) return;
-    dragState.current = { startX: e.clientX, scrollLeft: el.scrollLeft };
+  const onRowPointerDown = (e) => {
+    const el = e.currentTarget;
+    dragState.current = { el, startX: e.clientX, scrollLeft: el.scrollLeft };
     movedRef.current = false;
   };
 
   useEffect(() => {
     const onMove = (e) => {
       const d = dragState.current;
-      const el = matrixRef.current;
-      if (!d || !el) return;
+      if (!d) return;
       const dx = e.clientX - d.startX;
       if (Math.abs(dx) > 4) movedRef.current = true;
-      el.scrollLeft = d.scrollLeft - dx;
+      d.el.scrollLeft = d.scrollLeft - dx;
     };
     const onUp = () => { dragState.current = null; };
     window.addEventListener("pointermove", onMove);
@@ -240,8 +233,7 @@ export default function DiscoverClient() {
             </div>
             <div
               className="spotlightMatrix"
-              ref={matrixRef}
-              onPointerDown={onMatrixPointerDown}
+              onPointerDown={onRowPointerDown}
             >
               {properties.map((property) => {
                 const isSpotlight = activeSpotlightId === property.id;
@@ -341,7 +333,7 @@ export default function DiscoverClient() {
                 {activeRegion ? `Latest in ${activeRegion} · newest first` : "Latest across all regions · newest first"}
               </p>
             </div>
-            <div className="chronologicalNewsRow" style={{ cursor: "default" }}>
+            <div className="chronologicalNewsRow" onPointerDown={onRowPointerDown}>
               {filteredIntel.length === 0 ? (
                 <div className="newsEmpty">No news for this region yet.</div>
               ) : filteredIntel.map((news) => (
@@ -349,6 +341,8 @@ export default function DiscoverClient() {
                   key={news.id}
                   href={`/intel/${news.slug}`}
                   className="newsCapsule"
+                  draggable={false}
+                  onClick={(e) => { if (movedRef.current) { e.preventDefault(); } }}
                   style={{ display: "block", textDecoration: "none" }}
                 >
                   <div className="capsuleMeta">
@@ -368,6 +362,15 @@ export default function DiscoverClient() {
               <h2 className="sectionTitle">Regions</h2>
               <p className="sectionSubtitle">Switch the location feeding the News Feed</p>
             </div>
+            {regions.length > 6 && (
+              <input
+                type="text"
+                className="regionSearch"
+                placeholder="Search regions…"
+                value={regionQuery}
+                onChange={(e) => setRegionQuery(e.target.value)}
+              />
+            )}
             <div className="contextGrid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "24px" }}>
               <div
                 className={`contextCell ${activeRegion === null ? "regionActive" : ""}`}
@@ -380,7 +383,10 @@ export default function DiscoverClient() {
                 </div>
                 <span className="contextArrow">→</span>
               </div>
-              {regions.map((region, i) => (
+              {shownRegions.length === 0 && (
+                <div className="newsEmpty" style={{ gridColumn: "1 / -1" }}>No regions match “{regionQuery}”.</div>
+              )}
+              {shownRegions.map((region, i) => (
                 <div
                   key={region}
                   className={`contextCell ${activeRegion === region ? "regionActive" : ""}`}

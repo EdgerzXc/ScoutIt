@@ -8,6 +8,7 @@ import {
 import { getProperties } from "@/data/mockProperties";
 import { getArticles } from "@/data/mockArticles";
 import { getBrokers } from "@/data/mockBrokers";
+import { cityToRegion } from "@/lib/regions";
 
 // ── Mock fallback builders ───────────────────────────────────────
 function buildMockPayload() {
@@ -16,6 +17,7 @@ function buildMockPayload() {
     slug:      p.slug,
     title:     p.title,
     city:      p.city,
+    region:    p.region || cityToRegion(p.city || ""),
     location:  p.location,
     property_type: p.property_type,
     spaceCategory: p.spaceCategory || "",
@@ -37,7 +39,8 @@ function buildMockPayload() {
     id:        `intel${idx + 1}`,
     slug:      art.slug || `article-${idx + 1}`,
     title:     art.title,
-    city:      "",
+    city:      art.city || "",
+    region:    art.region || cityToRegion(art.city || ""),
     category:  art.category,
     intelType: "BRIEFING",
     excerpt:   art.excerpt,

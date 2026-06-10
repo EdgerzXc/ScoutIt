@@ -4,6 +4,8 @@
 // All field name mappings live here — update field names here only.
 // ═══════════════════════════════════════════════════════════════
 
+import { cityToRegion } from "./regions";
+
 const BASE_URL = "https://api.airtable.com/v0";
 
 // ── Tier label → number conversion ──────────────────────────────
@@ -102,6 +104,7 @@ export async function fetchProperties(apiKey, baseId) {
         title:           f.Title           || "Untitled Property",
         hook:            f.Hook            || "",
         city:            f.City            || "",
+        region:          f.Region          || cityToRegion(f.City || ""),
         location:        f.Location        || "",
         spaceCategory:   f.SpaceCategory   || "",
         property_type:   f.SpaceTypography || "",
@@ -190,6 +193,7 @@ export async function fetchIntel(apiKey, baseId) {
         intelType:    f.IntelType        || "BRIEFING",
         date:         f.Date             || "",
         city:         f.City             || "",
+        region:       f.Region           || cityToRegion(f.City || ""),
         image:        f.Image            || "",
         excerpt:      f.Excerpt          || "",
         lead:         f.Lead             || "",
