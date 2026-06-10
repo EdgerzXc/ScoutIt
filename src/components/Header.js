@@ -34,8 +34,8 @@ export default function Header() {
         ← Back
       </button>
       
-      <Link href="/" className="header-brand">
-        SCOUTIT
+      <Link href="/" className="header-brand" aria-label="ScoutIT — home">
+        <span className="brand-scout">Scout</span><span className="brand-it">IT</span>
       </Link>
 
       <nav className="header-nav" ref={menuRef}>
@@ -105,23 +105,20 @@ export default function Header() {
         }
 
         .header-brand {
-          font-family: var(--font-display);
-          font-size: 18px;
-          font-weight: bold;
-          letter-spacing: 0.18em;
-          color: var(--accent);
+          font-family: Georgia, 'Times New Roman', serif;
+          font-weight: 400;
+          font-size: 30px;
+          letter-spacing: 3px;
           position: absolute;
           left: 50%;
           transform: translateX(-50%);
           text-decoration: none;
-          transition: text-shadow 0.3s ease;
           white-space: nowrap;
+          line-height: 1;
         }
-
-        .header-brand:hover {
-          text-shadow: 0 0 10px rgba(200, 169, 110, 0.4);
-          color: var(--accent);
-        }
+        .header-brand .brand-scout { color: #f5f3ee; }
+        .header-brand .brand-it { color: var(--accent); transition: text-shadow 0.3s ease; }
+        .header-brand:hover .brand-it { text-shadow: 0 0 14px rgba(200, 169, 110, 0.55); }
 
         .header-nav {
           position: relative;
@@ -213,10 +210,10 @@ export default function Header() {
           }
           
           .header-brand {
-            font-size: 14px;
-            letter-spacing: 0.12em;
+            font-size: 24px;
+            letter-spacing: 2px;
           }
-          
+
           .header-back-btn {
             font-size: 10px;
             padding: 0 12px;
@@ -246,10 +243,10 @@ export default function Header() {
           }
           
           .header-brand {
-            font-size: 13px;
-            letter-spacing: 0.1em;
+            font-size: 22px;
+            letter-spacing: 2px;
           }
-          
+
           .header-back-btn {
             font-size: 9px;
             padding: 0 10px;
@@ -311,7 +308,7 @@ export default function Header() {
           }
           
           .header-brand {
-            font-size: 12px;
+            font-size: 20px;
             margin: 0 4px;
           }
           

@@ -456,9 +456,10 @@ export default function ShowcaseStage({ mode = "full" }) {
           <div className="sc-rank-badge" style={{ borderColor: `rgba(${tierMeta.rgb},0.6)`, color: tierMeta.color }}>
             #{active.rank} · {active.award_type} · {tierMeta.badge}
           </div>
-          <div className="sc-card" ref={cardRef} style={{ borderColor: `rgba(${tierMeta.rgb},0.65)` }}>
+          <div className="sc-card" ref={cardRef} style={{ borderColor: `rgba(${tierMeta.rgb},0.65)`, "--tg": `rgba(${tierMeta.rgb},0.5)` }}>
             <div className="sc-photo" style={active.photo ? { backgroundImage: `url(${active.photo})` } : undefined}>
               {!active.photo && <span className="sc-photo-txt">Property Photo</span>}
+              <span className="sc-card-cue" style={{ color: tierMeta.color, borderColor: `rgba(${tierMeta.rgb},0.6)` }}>Showcase It →</span>
             </div>
             <div className="sc-body">
               <div className="sc-cat" style={{ color: tierMeta.color }}>{active.category}</div>
@@ -501,13 +502,11 @@ export default function ShowcaseStage({ mode = "full" }) {
         {listOpen && restRanks.length > 0 && (
           <div className="sc-rest">
             <div className="sc-rest-label">The Contenders · Ranks 4–{ranked.length}</div>
-            <div className="sc-rest-row" ref={dragRef}
-              onMouseDown={onDragDown} onMouseMove={onDragMove} onMouseUp={onDragUp} onMouseLeave={onDragUp}
-              onTouchStart={onDragDown} onTouchMove={onDragMove} onTouchEnd={onDragUp}>
+            <div className="sc-rest-row">
               {restRanks.map((e) => {
                 const m = TIERS[e.tier];
                 return (
-                  <button key={e.rank} className={`sc-rest-card ${active && active.rank === e.rank ? "on" : ""}`} onClick={() => selectRank(e.rank)} style={{ "--tc": m.color, "--tg": `rgba(${m.rgb},0.5)` }}>
+                  <button key={e.rank} draggable={false} className={`sc-rest-card ${active && active.rank === e.rank ? "on" : ""}`} onClick={() => selectRank(e.rank)} style={{ "--tc": m.color, "--tg": `rgba(${m.rgb},0.5)` }}>
                     <div className="sc-rest-photo" style={e.photo ? { backgroundImage: `url(${e.photo})` } : undefined}>
                       <span className="sc-rest-rank">#{String(e.rank).padStart(2, "0")}</span>
                       <span className="sc-rest-showcase">Showcase →</span>
@@ -549,9 +548,10 @@ export default function ShowcaseStage({ mode = "full" }) {
 
         .sc-topbar { position: absolute; top: 0; left: 0; width: 100%; z-index: 7; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 16px 24px; background: linear-gradient(to bottom, rgba(0,0,0,0.72), rgba(0,0,0,0)); pointer-events: none; }
         .sc-topbar-cat { justify-self: start; font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; }
-        .sc-logo { justify-self: center; font-family: Georgia, serif; font-size: 22px; letter-spacing: 2px; text-decoration: none; pointer-events: auto; }
-        .sc-logo-scout { color: #f5f3ee; }
-        .sc-logo-it { color: #c8a96e; }
+        :global(.sc-logo) { justify-self: center; font-family: Georgia, serif; font-size: 30px; letter-spacing: 3px; line-height: 1; text-decoration: none; pointer-events: auto; }
+        :global(.sc-logo .sc-logo-scout) { color: #f5f3ee; }
+        :global(.sc-logo .sc-logo-it) { color: #c8a96e; transition: text-shadow 0.3s ease; }
+        :global(.sc-logo:hover .sc-logo-it) { text-shadow: 0 0 14px rgba(200,169,110,0.55); }
         .sc-menu { justify-self: end; position: relative; pointer-events: auto; }
         .sc-menu-btn { width: 42px; height: 42px; border-radius: 50%; border: 1px solid #2a2a2a; background: rgba(0,0,0,0.5); color: #c8a96e; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
         .sc-menu-btn svg { width: 17px; height: 17px; }
@@ -589,16 +589,20 @@ export default function ShowcaseStage({ mode = "full" }) {
         .sc-promo-embed { position: relative; width: 100%; aspect-ratio: 16/9; background: #000; }
         .sc-promo-embed :global(iframe) { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
         .sc-promo-soon { font-family: Georgia, serif; font-style: italic; font-size: 15px; color: #777; padding: 30px 4px; text-align: center; line-height: 1.6; }
-        .sc-promo-cta { font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #999; text-decoration: none; }
-        .sc-promo-cta:hover { color: #c8a96e; }
+        :global(.sc-promo-cta) { font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #999; text-decoration: none; }
+        :global(.sc-promo-cta:hover) { color: #c8a96e; }
 
         /* Spotlight card (enlarged) */
         .sc-overlay { position: absolute; inset: 0; z-index: 3; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding-bottom: 240px; pointer-events: none; }
         .sc-empty { font-family: Georgia, serif; font-style: italic; font-size: 22px; color: #666; }
         .sc-rank-badge { font-family: 'Courier New', monospace; font-size: 13px; letter-spacing: 0.28em; padding: 8px 22px; text-transform: uppercase; border: 1px solid; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); }
-        .sc-card { width: 330px; border: 1px solid; background: rgba(6,6,7,0.6); backdrop-filter: blur(16px); overflow: hidden; pointer-events: all; animation: scFloat 4.5s ease-in-out infinite; }
+        .sc-card { width: 330px; border: 1px solid; background: rgba(6,6,7,0.6); backdrop-filter: blur(16px); overflow: hidden; pointer-events: all; user-select: none; animation: scFloat 4.5s ease-in-out infinite; transition: box-shadow 0.3s ease; }
+        .sc-card:hover { animation-play-state: paused; box-shadow: 0 0 0 1px var(--tg), 0 24px 60px -22px var(--tg); }
         @keyframes scFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-        .sc-photo { width: 100%; height: 184px; background: rgba(10,10,10,0.6); background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center; }
+        .sc-photo { position: relative; width: 100%; height: 184px; background: rgba(10,10,10,0.6); background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center; overflow: hidden; transition: transform 0.55s ease; -webkit-user-drag: none; }
+        .sc-card:hover .sc-photo { transform: scale(1.05); }
+        .sc-card-cue { position: absolute; bottom: 12px; right: 12px; font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; padding: 6px 12px; border: 1px solid; background: rgba(0,0,0,0.62); backdrop-filter: blur(6px); opacity: 0; transform: translateY(6px); transition: opacity 0.28s ease, transform 0.28s ease; }
+        .sc-card:hover .sc-card-cue { opacity: 1; transform: translateY(0); }
         .sc-photo-txt { font-family: 'Courier New', monospace; font-size: 9px; letter-spacing: 2px; color: #2a2a2a; text-transform: uppercase; }
         .sc-body { padding: 22px; }
         .sc-cat { font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 8px; }
@@ -609,8 +613,8 @@ export default function ShowcaseStage({ mode = "full" }) {
         .sc-stat { display: flex; flex-direction: column; gap: 2px; }
         .sc-stat-num { font-family: Georgia, serif; font-size: 27px; }
         .sc-stat-lbl { font-family: 'Courier New', monospace; font-size: 9px; color: #555; letter-spacing: 0.18em; text-transform: uppercase; }
-        .sc-cta { font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 0.16em; color: #999; text-transform: uppercase; cursor: pointer; display: flex; justify-content: space-between; padding-top: 12px; border-top: 1px solid #1c1c1c; text-decoration: none; }
-        .sc-cta:hover { color: #c8a96e; }
+        :global(.sc-cta) { font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 0.16em; color: #999; text-transform: uppercase; cursor: pointer; display: flex; justify-content: space-between; padding-top: 12px; border-top: 1px solid #1c1c1c; text-decoration: none; }
+        :global(.sc-cta:hover) { color: #c8a96e; }
         .sc-platform { width: 330px; height: 13px; border-radius: 50%; border: 1px solid; background: transparent; margin-top: 6px; animation: scPlat 3s ease-in-out infinite; }
         @keyframes scPlat { 0%,100% { opacity: 0.6; } 50% { opacity: 1; } }
 
@@ -620,9 +624,9 @@ export default function ShowcaseStage({ mode = "full" }) {
         .sc-pill { font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; padding: 8px 18px; border: 1px solid; cursor: pointer; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); transition: all 0.3s; }
         .sc-rest { width: 100%; max-width: 1120px; pointer-events: all; }
         .sc-rest-label { font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 0.22em; color: #666; text-transform: uppercase; margin-bottom: 9px; text-align: center; }
-        .sc-rest-row { display: flex; gap: 12px; justify-content: flex-start; overflow-x: auto; cursor: grab; scrollbar-width: none; padding: 2px 4px 6px; }
+        .sc-rest-row { display: flex; gap: 12px; justify-content: flex-start; overflow-x: auto; scrollbar-width: none; padding: 2px 4px 6px; }
         .sc-rest-row::-webkit-scrollbar { display: none; }
-        .sc-rest-card { flex: 0 0 auto; width: 176px; text-align: left; background: rgba(10,10,12,0.85); backdrop-filter: blur(8px); border: 1px solid rgba(120,120,120,0.25); padding: 0; overflow: hidden; cursor: pointer; transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease; }
+        .sc-rest-card { flex: 0 0 auto; width: 176px; text-align: left; background: rgba(10,10,12,0.85); backdrop-filter: blur(8px); border: 1px solid rgba(120,120,120,0.25); padding: 0; overflow: hidden; cursor: pointer; user-select: none; -webkit-user-drag: none; transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease; }
         .sc-rest-card:hover { transform: translateY(-4px); border-color: var(--tg); box-shadow: 0 14px 32px -16px var(--tg); }
         .sc-rest-card.on { border-color: var(--tc); }
         .sc-rest-photo { position: relative; height: 84px; background: #161616; background-size: cover; background-position: center; overflow: hidden; transition: transform 0.45s ease; }
@@ -642,8 +646,8 @@ export default function ShowcaseStage({ mode = "full" }) {
         .sc-arrow:disabled { opacity: 0.3; cursor: default; }
         .sc-arrow-count { font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 0.1em; color: #777; }
 
-        .sc-seeall { position: absolute; top: 18px; right: 22px; z-index: 6; font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 3px; color: #c8a96e; text-transform: uppercase; text-decoration: none; border: 1px solid rgba(200,169,110,0.4); padding: 8px 16px; background: rgba(0,0,0,0.5); }
-        .sc-seeall:hover { background: rgba(200,169,110,0.12); }
+        :global(.sc-seeall) { position: absolute; top: 18px; right: 22px; z-index: 6; font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 3px; color: #c8a96e; text-transform: uppercase; text-decoration: none; border: 1px solid rgba(200,169,110,0.4); padding: 8px 16px; background: rgba(0,0,0,0.5); }
+        :global(.sc-seeall:hover) { background: rgba(200,169,110,0.12); }
 
         @media (max-width: 768px) {
           .sc-filter-panel, .sc-promo-panel { width: 86%; }

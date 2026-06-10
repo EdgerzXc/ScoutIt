@@ -118,12 +118,12 @@ export default function BoardPodium() {
         }
         .board-cat:hover { color: #f0ede8; }
         .board-cat.on { color: var(--accent); border-color: rgba(200,169,110,0.4); background: rgba(200,169,110,0.06); }
-        .board-seeall {
+        :global(.board-seeall) {
           font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase;
           color: var(--accent); text-decoration: none; border: 1px solid rgba(200,169,110,0.5);
           padding: 16px; text-align: center; transition: background 0.2s; margin-top: 28px;
         }
-        .board-seeall:hover { background: rgba(200,169,110,0.12); }
+        :global(.board-seeall:hover) { background: rgba(200,169,110,0.12); }
 
         .board-content { padding: clamp(36px, 6vh, 64px) clamp(28px, 4vw, 56px); display: flex; flex-direction: column; min-width: 0; }
         .board-content-head { margin-bottom: 28px; }
