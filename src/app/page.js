@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef, useCallback } from "react";
 import ReactionButtons from "@/components/ReactionButtons";
-import ShowcaseStage from "@/components/ShowcaseStage";
+import BoardPodium from "@/components/BoardPodium";
 
 import { SPACE_STARS, getDISCOVERY_FEED, getDISCOVER_HUBS, getCATEGORY_PREVIEWS } from "@/data/mockProperties";
 import { getArticles } from "@/data/mockArticles";
@@ -812,12 +812,9 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SECTION 2: Layer 01 — The Board (Showcase) */}
+      {/* SECTION 2: Layer 01 — The Board (ranked podium → /showcase) */}
       <section className="snap-section section-board" id="board-section" style={{ padding: 0, position: "relative", overflow: "hidden" }}>
-        <div style={{ position: "absolute", top: "16px", left: "22px", zIndex: 8, fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.18em", color: "var(--accent)", textTransform: "uppercase" }}>
-          Layer 01 // The Board
-        </div>
-        <ShowcaseStage mode="homepage" />
+        <BoardPodium />
       </section>
 
       {/* SECTION 3: Layer 02 */}
