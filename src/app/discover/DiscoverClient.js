@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import ReactionButtons from "@/components/ui/ReactionButtons";
 import { cityToRegion, regionOf } from "@/lib/regions";
+import Footer from "@/components/layout/Footer";
 import "./discover.css";
 
 const CATEGORIES = ["Residential", "Commercial", "STR", "Hospitality", "Restaurants", "Venues/Events"];
@@ -403,6 +404,7 @@ export default function DiscoverClient() {
             </div>
           </section>
         </div>
+        <Footer />
       </main>
     </div>
   );

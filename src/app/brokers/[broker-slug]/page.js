@@ -1,4 +1,5 @@
 import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import ConnectionPortal from "@/components/connection/ConnectionPortal";
@@ -126,6 +127,7 @@ export default async function BrokerDetailPage({ params }) {
         </section>
 
       </main>
+      <Footer />
 
       <style>{`
         .page-wrapper {

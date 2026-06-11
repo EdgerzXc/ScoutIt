@@ -54,12 +54,13 @@ export default function Header() {
           <div className="dropdown-brand">ScoutIt</div>
           <Link href="/">Home</Link>
           <Link href="/discover">Discover</Link>
-          <Link href="/intel">News</Link>
+          <Link href="/intel">Intel</Link>
           <Link href="/brokers">Brokers</Link>
           <Link href="/photographers">Photographers</Link>
           <Link href="/researchers">Researchers</Link>
           <Link href="/event-planners">Event Planners</Link>
           <Link href="/wishlist">Your Board</Link>
+          <Link href="/dashboard">Dashboard</Link>
           <Link href="/about">About</Link>
         </div>
       </nav>

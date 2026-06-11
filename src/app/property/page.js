@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
 import ReactionButtons from "@/components/ui/ReactionButtons";
 import { getProperties } from "@/data/mockProperties";
 import { getArticles } from "@/data/mockArticles";
@@ -435,6 +436,7 @@ function PropertyDirectoryContent() {
           </div>
         )}
       </main>
+      <Footer />
     </div>
   );
 }

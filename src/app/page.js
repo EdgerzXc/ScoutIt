@@ -6,6 +6,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import ReactionButtons from "@/components/ui/ReactionButtons";
 import BoardPodium from "@/components/board/BoardPodium";
 import CinematicJourney from "@/components/cinematic/CinematicJourney";
+import Footer from "@/components/layout/Footer";
 
 import { SPACE_STARS, getDISCOVERY_FEED, getDISCOVER_HUBS, getCATEGORY_PREVIEWS } from "@/data/mockProperties";
 import { getArticles } from "@/data/mockArticles";
@@ -3904,6 +3905,10 @@ export default function Home() {
           }
         }
       `}</style>
+
+      <section className="snap-section section-footer-wrapper" style={{ height: 'auto', minHeight: 'auto', scrollSnapAlign: 'end' }}>
+        <Footer />
+      </section>
 
       {/* Cinematic golden-light journey — overlay, activated by the UFO click */}
       <CinematicJourney />

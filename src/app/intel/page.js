@@ -1,7 +1,22 @@
 "use client";
 
 import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
 import Link from "next/link";
+
+function getArticleType(art) {
+  if (!art) return "Analysis";
+  const slug = (art.slug || "").toLowerCase();
+  const title = (art.title || "").toLowerCase();
+  const cat = (art.category || "").toLowerCase();
+  if (slug.includes("movement") || slug.includes("resurgence") || slug.includes("outlook") || slug.includes("insight") || title.includes("insight") || cat.includes("insight")) {
+    return "Insight";
+  }
+  if (slug.includes("demand") || slug.includes("boom") || slug.includes("surge") || slug.includes("entry") || slug.includes("report") || title.includes("report") || cat.includes("report")) {
+    return "Report";
+  }
+  return "Analysis";
+}
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getArticles } from "@/data/mockArticles";
@@ -147,10 +162,10 @@ export default function IntelPage() {
       <main className="intel-main">
         <header className="page-header">
           <span className="vector-label">Layer 02 // Editorial Briefings</span>
-          <h1 className="page-title">News &amp; Intelligence</h1>
-          <p className="page-subtitle">Tracing architectural shifts, spatial design, and development movements.</p>
+          <h1 className="page-title">Intel</h1>
+          <p className="page-subtitle">Tracing architectural shifts, spatial design, and development dispatches.</p>
           <Link href="/discover" className="mode-jump-box">
-            <span className="jump-here">News &amp; Intelligence</span>
+            <span className="jump-here">Intel</span>
             <span className="jump-arrow">→</span>
             <span className="jump-there">Discover</span>
           </Link>
@@ -167,7 +182,11 @@ export default function IntelPage() {
                 <div className="featured-overlay-new"></div>
               </div>
               <div className="featured-content-new">
-                <span className="featured-tag-new">{featuredArticle.category} &middot; Featured Briefing</span>
+                <div className="featured-badge-row" style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '12px' }}>
+                  <span className="featured-tag-new" style={{ margin: 0 }}>{featuredArticle.category}</span>
+                  <span className={`article-type-badge ${getArticleType(featuredArticle).toLowerCase()}`} style={{ fontSize: '9px', fontFamily: 'var(--font-mono)', padding: '2px 6px', borderRadius: '2px', textTransform: 'uppercase' }}>{getArticleType(featuredArticle)}</span>
+                  <span className="featured-read-time" style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>{Math.max(1, Math.round((featuredArticle.excerpt || "").split(/\s+/).length / 20))} min read</span>
+                </div>
                 <h2>{featuredArticle.title}</h2>
                 <p className="featured-excerpt-new">{featuredArticle.excerpt}</p>
                 <div className="featured-footer-new">
@@ -238,9 +257,10 @@ export default function IntelPage() {
                     <div className="image-overlay"></div>
                   </div>
                   <div className="article-content">
-                    <div className="article-header">
-                      <span className="article-category">{art.category}</span>
-                      <span className="article-date">{art.date}</span>
+                    <div className="article-header" style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '12px' }}>
+                      <span className="article-category" style={{ marginRight: 'auto' }}>{art.category}</span>
+                      <span className={`article-type-badge ${getArticleType(art).toLowerCase()}`} style={{ fontSize: '9px', fontFamily: 'var(--font-mono)', padding: '2px 6px', borderRadius: '2px', textTransform: 'uppercase' }}>{getArticleType(art)}</span>
+                      <span className="article-read-time" style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{Math.max(1, Math.round((art.excerpt || "").split(/\s+/).length / 20))} min read</span>
                     </div>
                     <h3 className="article-title">{art.title}</h3>
                     <p className="article-excerpt">{art.excerpt}</p>
@@ -281,6 +301,7 @@ export default function IntelPage() {
           </div>
         </section>
       </main>
+      <Footer />
 
       {/* Intel Side Panel */}
       {sidePanelArticle && (
@@ -291,7 +312,22 @@ export default function IntelPage() {
               <div className="side-panel-image" style={{ backgroundImage: `url(${sidePanelArticle.image})` }}></div>
             )}
             <div className="side-panel-body">
-              <span className="side-panel-cat">{sidePanelArticle.category} &middot; {sidePanelArticle.date}</span>
+              <div className="side-panel-badge-row" style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px' }}>
+                <span className="side-panel-cat">{sidePanelArticle.category}</span>
+                <span className={`article-type-badge ${getArticleType(sidePanelArticle).toLowerCase()}`} style={{ fontSize: '9px', fontFamily: 'var(--font-mono)', padding: '2px 6px', borderRadius: '2px', textTransform: 'uppercase' }}>{getArticleType(sidePanelArticle)}</span>
+                <span className="side-panel-read-time" style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{Math.max(1, Math.round((sidePanelArticle.excerpt || "").split(/\s+/).length / 20))} min read</span>
+              </div>
+              
+              <div className="scan-progress-wrapper" style={{ marginTop: '4px', marginBottom: '8px' }}>
+                <div className="scan-progress-label" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '9px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', marginBottom: '4px', textTransform: 'uppercase' }}>
+                  <span>Briefing Integrity Deep Scan</span>
+                  <span style={{ color: 'var(--accent)' }}>92% SECURE</span>
+                </div>
+                <div className="scan-progress-bar" style={{ height: '3px', background: 'rgba(255,255,255,0.05)', borderRadius: '2px', overflow: 'hidden' }}>
+                  <div className="scan-progress-fill" style={{ height: '100%', background: 'var(--accent)', width: '92%' }}></div>
+                </div>
+              </div>
+
               {["INSIGHT", "Insight"].includes(sidePanelArticle.category) && (
                 <div className="side-panel-insight-note">
                   <span>ScoutIt Insight</span>
@@ -301,7 +337,7 @@ export default function IntelPage() {
               <h2 className="side-panel-title">{sidePanelArticle.title}</h2>
               <p className="side-panel-excerpt">{sidePanelArticle.excerpt}</p>
               <Link href={`/intel/${sidePanelArticle.slug}`} className="side-panel-cta">
-                Read Full Briefing →
+                Open Full Article →
               </Link>
             </div>
           </div>
@@ -393,15 +429,16 @@ export default function IntelPage() {
         }
 
         .featured-card-new {
+          position: relative;
           display: flex;
           flex-direction: column;
-          background: var(--surface);
+          background: #000;
           border: 1px solid var(--border-solid);
           border-radius: var(--radius-md);
           overflow: hidden;
           transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
           text-decoration: none;
-          height: 480px;
+          height: 600px; /* Taller hero */
         }
 
         .featured-card-new:hover {
@@ -410,9 +447,11 @@ export default function IntelPage() {
         }
 
         .featured-image-wrapper {
-          height: 240px;
-          position: relative;
-          overflow: hidden;
+          position: absolute;
+          inset: 0;
+          height: 100%;
+          width: 100%;
+          z-index: 1;
         }
 
         .featured-image-new {
@@ -431,14 +470,41 @@ export default function IntelPage() {
         .featured-overlay-new {
           position: absolute;
           inset: 0;
-          background: linear-gradient(to top, var(--surface) 0%, transparent 100%);
+          background: linear-gradient(to top, rgba(9, 9, 9, 0.98) 0%, rgba(9, 9, 9, 0.6) 50%, rgba(9, 9, 9, 0.1) 80%, transparent 100%);
+          z-index: 2;
         }
 
         .featured-content-new {
-          padding: 24px;
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          z-index: 3;
+          padding: 40px;
           display: flex;
           flex-direction: column;
-          flex-grow: 1;
+          background: transparent;
+        }
+
+        /* Article Type Badge Styles */
+        .article-type-badge {
+          display: inline-block;
+          font-weight: 600;
+        }
+        .article-type-badge.insight {
+          background: rgba(0, 122, 255, 0.15);
+          color: #007aff;
+          border: 0.5px solid rgba(0, 122, 255, 0.3);
+        }
+        .article-type-badge.report {
+          background: rgba(200, 169, 110, 0.15);
+          color: #c8a96e;
+          border: 0.5px solid rgba(200, 169, 110, 0.3);
+        }
+        .article-type-badge.analysis {
+          background: rgba(255, 255, 255, 0.08);
+          color: #ffffff;
+          border: 0.5px solid rgba(255, 255, 255, 0.2);
         }
 
         .featured-tag-new {

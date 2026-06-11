@@ -1,6 +1,7 @@
 "use client";
 
 import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
 
 export default function AboutPage() {
   return (
@@ -50,6 +51,7 @@ export default function AboutPage() {
           </div>
         </section>
       </main>
+      <Footer />
 
       <style>{`
         .page-wrapper {

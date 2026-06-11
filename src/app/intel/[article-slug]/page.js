@@ -1,4 +1,5 @@
 import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getArticleBySlug, getArticles } from "@/data/mockArticles";
@@ -140,6 +141,7 @@ export default async function IntelArticlePage({ params }) {
           </div>
         </section>
       </main>
+      <Footer />
 
       <style>{`
         .page-wrapper {

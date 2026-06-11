@@ -1,6 +1,7 @@
 "use client";
 
 import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
 import { useState } from "react";
 import "../property/property.css";
 import { RestrictedAccessBanner, RestrictedCardWrapper } from "@/components/ui/EarlyAccessGate";
@@ -194,6 +195,7 @@ export default function EventPlannersPage() {
           </section>
         </div>
       </main>
+      <Footer />
 
       <style>{`
         .coming-soon-banner {

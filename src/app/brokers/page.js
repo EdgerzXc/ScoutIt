@@ -1,6 +1,7 @@
 "use client";
 
 import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { getBrokers } from "@/data/mockBrokers";
@@ -363,6 +364,7 @@ export default function BrokersPage() {
           </div>
         )}
       </main>
+      <Footer />
 
       <style>{`
         .brokers-main {

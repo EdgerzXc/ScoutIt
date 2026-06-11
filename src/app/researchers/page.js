@@ -1,6 +1,7 @@
 "use client";
 
 import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
 import { useState } from "react";
 import "../property/property.css";
 import { RestrictedAccessBanner, RestrictedCardWrapper } from "@/components/ui/EarlyAccessGate";
@@ -159,6 +160,7 @@ export default function ResearchersPage() {
           </section>
         </div>
       </main>
+      <Footer />
 
       <style>{`
         .coming-soon-banner { background: linear-gradient(135deg,rgba(200,169,110,.08) 0%,rgba(200,169,110,.03) 100%); border: .5px solid var(--accent-border); border-radius: 6px; padding: 16px 22px; margin-bottom: 32px; }

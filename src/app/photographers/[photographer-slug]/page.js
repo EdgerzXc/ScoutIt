@@ -1,4 +1,5 @@
 import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import ServiceConnectionPortal from "@/components/connection/ServiceConnectionPortal";
@@ -122,6 +123,7 @@ export default async function PhotographerDetailPage({ params }) {
         </section>
 
       </main>
+      <Footer />
 
       <style>{`
         .page-wrapper {

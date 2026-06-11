@@ -1,6 +1,7 @@
 "use client";
 
 import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { ReactionBadge } from "@/components/ui/ReactionButtons";
@@ -131,6 +132,7 @@ export default function WishlistPage() {
           </div>
         )}
       </main>
+      <Footer />
 
       <style jsx>{`
         .page-wrapper {
