@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef, useCallback } from "react";
 import ReactionButtons from "@/components/ui/ReactionButtons";
 import BoardPodium from "@/components/board/BoardPodium";
+import CinematicJourney from "@/components/cinematic/CinematicJourney";
 
 import { SPACE_STARS, getDISCOVERY_FEED, getDISCOVER_HUBS, getCATEGORY_PREVIEWS } from "@/data/mockProperties";
 import { getArticles } from "@/data/mockArticles";
@@ -43,6 +44,8 @@ export default function Home() {
     if (withPower) {
       setPowering(true);
       push(() => { setPowering(false); launch(); }, 500);           // power-up flash, then fire
+      // After the beam fires, enter the cinematic golden-light journey.
+      push(() => window.dispatchEvent(new CustomEvent("scoutit:cinematic")), 1600);
     } else {
       launch();
     }
@@ -3901,6 +3904,9 @@ export default function Home() {
           }
         }
       `}</style>
+
+      {/* Cinematic golden-light journey — overlay, activated by the UFO click */}
+      <CinematicJourney />
     </main>
   );
 }

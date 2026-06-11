@@ -3,7 +3,7 @@
 import Header from "@/components/layout/Header";
 import { useState } from "react";
 import "../property/property.css";
-import Link from "next/link";
+import { RestrictedAccessBanner, RestrictedCardWrapper } from "@/components/ui/EarlyAccessGate";
 import { getResearchers } from "@/data/mockResearchers";
 
 const DUMMY_RESEARCHERS = getResearchers();
@@ -38,15 +38,11 @@ export default function ResearchersPage() {
       <Header />
       <main className="brokers-main">
 
-        {/* Coming Soon Banner */}
-        <div className="coming-soon-banner">
-          <div className="coming-soon-inner">
-            <span className="coming-soon-badge">COMING SOON</span>
-            <p className="coming-soon-text">
-              ScoutIt Site Research is launching soon. Every researcher is independently vetted — field-verified, licensed where required, and tested against real property briefs before joining the roster.
-            </p>
-          </div>
-        </div>
+        {/* Restricted Access Banner */}
+        <RestrictedAccessBanner
+          rosterLabel="The ScoutIt Site Research Network"
+          openDate="Q4 2026"
+        />
 
         <header className="directory-header">
           <span className="vector-label">LAYER 03.3 // SITE INTELLIGENCE</span>
@@ -119,45 +115,44 @@ export default function ResearchersPage() {
                 const tierClass = r.tier === 1 ? "tier-1-card diamond-card" : r.tier === 2 ? "tier-2-card platinum-card" : "tier-3-card gold-card";
                 const tierLabel = r.tier === 1 ? "DIAMOND PARTNER" : r.tier === 2 ? "PLATINUM PARTNER" : "GOLD PARTNER";
                 return (
-                  <Link
-                    href={`/researchers/${r.id}`}
-                    key={r.id}
-                    className={`broker-card ${tierClass}`}
-                    style={{ textDecoration: "none", position: "relative" }}
-                  >
-                    <div className="general-tier-badge-label">{tierLabel}</div>
-                    <div className="coming-soon-card-overlay">PREVIEW CHANNEL</div>
-                    <div className="broker-image-container">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={r.image} alt={r.name} className="broker-image" />
-                      <div className="image-overlay" />
-                    </div>
-                    <div className="broker-content">
-                      <span className="broker-location">{r.location}</span>
-                      <h2 className="broker-name">{r.name}</h2>
-                      <p className="broker-title">{r.title}</p>
-                      <p className="broker-specialty">Focus: <span>{r.focus}</span></p>
-                      <p className="broker-specialty" style={{ marginBottom: "8px" }}>
-                        Markets: <span style={{ color: "var(--text-secondary)", fontSize: "12px" }}>{r.markets}</span>
-                      </p>
-                      <p className="broker-bio">{r.bio}</p>
-                      <div style={{ marginBottom: "16px" }}>
-                        <p style={{ fontSize: "11px", color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "8px" }}>Deliverables</p>
-                        {r.deliverables.map((d) => (
-                          <div key={d} style={{ display: "flex", alignItems: "center", gap: "7px", fontSize: "12px", color: "var(--text-secondary)", marginBottom: "4px" }}>
-                            <span style={{ color: "var(--accent)", fontSize: "9px" }}>—</span>{d}
-                          </div>
-                        ))}
+                  <RestrictedCardWrapper key={r.id} rosterType="Research Network">
+                    <div
+                      className={`broker-card ${tierClass}`}
+                      style={{ position: "relative" }}
+                    >
+                      <div className="general-tier-badge-label">{tierLabel}</div>
+                      <div className="broker-image-container">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={r.image} alt={r.name} className="broker-image" />
+                        <div className="image-overlay" />
                       </div>
-                      <div className="broker-footer">
-                        <div className="broker-stats">
-                          <span className="stat-value" style={{ fontSize: "12px" }}>{r.reports}</span>
-                          <span style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "2px" }}>Avg: {r.turnaround}</span>
+                      <div className="broker-content">
+                        <span className="broker-location">{r.location}</span>
+                        <h2 className="broker-name">{r.name}</h2>
+                        <p className="broker-title">{r.title}</p>
+                        <p className="broker-specialty">Focus: <span>{r.focus}</span></p>
+                        <p className="broker-specialty" style={{ marginBottom: "8px" }}>
+                          Markets: <span style={{ color: "var(--text-secondary)", fontSize: "12px" }}>{r.markets}</span>
+                        </p>
+                        <p className="broker-bio">{r.bio}</p>
+                        <div style={{ marginBottom: "16px" }}>
+                          <p style={{ fontSize: "11px", color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "8px" }}>Deliverables</p>
+                          {r.deliverables.map((d) => (
+                            <div key={d} style={{ display: "flex", alignItems: "center", gap: "7px", fontSize: "12px", color: "var(--text-secondary)", marginBottom: "4px" }}>
+                              <span style={{ color: "var(--accent)", fontSize: "9px" }}>—</span>{d}
+                            </div>
+                          ))}
                         </div>
-                        <span className="btn-contact">Focus →</span>
+                        <div className="broker-footer">
+                          <div className="broker-stats">
+                            <span className="stat-value" style={{ fontSize: "12px" }}>{r.reports}</span>
+                            <span style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "2px" }}>Avg: {r.turnaround}</span>
+                          </div>
+                          <span className="btn-contact">Focus →</span>
+                        </div>
                       </div>
                     </div>
-                  </Link>
+                  </RestrictedCardWrapper>
                 );
               })}
             </div>

@@ -3,7 +3,7 @@
 import Header from "@/components/layout/Header";
 import { useState } from "react";
 import "../property/property.css";
-import Link from "next/link";
+import { RestrictedAccessBanner, RestrictedCardWrapper } from "@/components/ui/EarlyAccessGate";
 import { getEventPlanners } from "@/data/mockEventPlanners";
 
 const DUMMY_PLANNERS = getEventPlanners();
@@ -55,16 +55,11 @@ export default function EventPlannersPage() {
       <Header />
       <main className="brokers-main">
 
-        {/* Coming Soon Banner */}
-        <div className="coming-soon-banner">
-          <div className="coming-soon-inner">
-            <span className="coming-soon-badge">COMING SOON</span>
-            <p className="coming-soon-text">
-              ScoutIt Event Design Network is launching soon. Certified planners and decorators will be verified, vetted, and bookable directly through this platform.
-              The profiles below are previews of how listing pages will display.
-            </p>
-          </div>
-        </div>
+        {/* Restricted Access Banner */}
+        <RestrictedAccessBanner
+          rosterLabel="The ScoutIt Event Design Network"
+          openDate="Q4 2026"
+        />
 
         <header className="directory-header">
           <span className="vector-label">LAYER 03.4 // EVENT DESIGN</span>
@@ -165,35 +160,34 @@ export default function EventPlannersPage() {
                     ? "PLATINUM PARTNER"
                     : "GOLD PARTNER";
                 return (
-                  <Link
-                    href={`/event-planners/${ep.id}`}
-                    key={ep.id}
-                    className={`broker-card ${tierClass}`}
-                    style={{ textDecoration: "none", position: "relative" }}
-                  >
-                    <div className="general-tier-badge-label">{tierLabel}</div>
-                    <div className="coming-soon-card-overlay">PREVIEW CHANNEL</div>
-                    <div className="broker-image-container">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={ep.image} alt={ep.name} className="broker-image" />
-                      <div className="image-overlay" />
-                    </div>
-                    <div className="broker-content">
-                      <span className="broker-location">{ep.location}</span>
-                      <h2 className="broker-name">{ep.name}</h2>
-                      <p className="broker-title">{ep.title}</p>
-                      <p className="broker-specialty">Event Type: <span>{ep.specialty}</span></p>
-                      <p className="broker-specialty">Aesthetic: <span style={{ color: "var(--text-secondary)", fontSize: "12px" }}>{ep.style}</span></p>
-                      <p className="broker-specialty" style={{ marginBottom: "8px" }}>Venues: <span style={{ color: "var(--text-muted)", fontSize: "12px" }}>{ep.venues}</span></p>
-                      <p className="broker-bio">{ep.bio}</p>
-                      <div className="broker-footer">
-                        <div className="broker-stats">
-                          <span className="stat-value" style={{ fontSize: "12px" }}>{ep.events}</span>
+                  <RestrictedCardWrapper key={ep.id} rosterType="Event Design Network">
+                    <div
+                      className={`broker-card ${tierClass}`}
+                      style={{ position: "relative" }}
+                    >
+                      <div className="general-tier-badge-label">{tierLabel}</div>
+                      <div className="broker-image-container">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={ep.image} alt={ep.name} className="broker-image" />
+                        <div className="image-overlay" />
+                      </div>
+                      <div className="broker-content">
+                        <span className="broker-location">{ep.location}</span>
+                        <h2 className="broker-name">{ep.name}</h2>
+                        <p className="broker-title">{ep.title}</p>
+                        <p className="broker-specialty">Event Type: <span>{ep.specialty}</span></p>
+                        <p className="broker-specialty">Aesthetic: <span style={{ color: "var(--text-secondary)", fontSize: "12px" }}>{ep.style}</span></p>
+                        <p className="broker-specialty" style={{ marginBottom: "8px" }}>Venues: <span style={{ color: "var(--text-muted)", fontSize: "12px" }}>{ep.venues}</span></p>
+                        <p className="broker-bio">{ep.bio}</p>
+                        <div className="broker-footer">
+                          <div className="broker-stats">
+                            <span className="stat-value" style={{ fontSize: "12px" }}>{ep.events}</span>
+                          </div>
+                          <span className="btn-contact">Focus →</span>
                         </div>
-                        <span className="btn-contact">Focus →</span>
                       </div>
                     </div>
-                  </Link>
+                  </RestrictedCardWrapper>
                 );
               })}
             </div>

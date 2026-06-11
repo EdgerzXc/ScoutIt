@@ -1,0 +1,73 @@
+/* ════════════════════════════════════════════════════════════════
+   SCOUTIT — CINEMATIC JOURNEY styles (Checkpoint 1)
+   All scoped under .cinematic-journey. Overlay only — never blocks
+   interaction with the real homepage (pointer-events: none).
+   ════════════════════════════════════════════════════════════════ */
+
+.cinematic-journey {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+}
+
+/* Cinematic veil: deep black + vignette. Content stays visible through
+   the lighter center; edges fall to near-black. (Full-black takeover at
+   each mission peak arrives in the next checkpoint.) */
+.cinematic-veil {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background:
+    radial-gradient(ellipse at center,
+      rgba(0, 0, 0, 0.30) 0%,
+      rgba(0, 0, 0, 0.62) 55%,
+      rgba(0, 0, 0, 0.96) 100%);
+  animation: cinematicVeilIn 1s ease forwards;
+}
+@keyframes cinematicVeilIn {
+  to { opacity: 1; }
+}
+
+/* The golden light channel — narrow strip down the left. */
+.cinematic-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  overflow: visible;
+  /* soft warm glow via GPU drop-shadow (cheap, one pass) */
+  filter: drop-shadow(0 0 6px rgba(255, 215, 0, 0.55))
+          drop-shadow(0 0 16px rgba(212, 175, 55, 0.35));
+}
+
+/* faint full route (where the light will go) */
+.cinematic-line-track {
+  fill: none;
+  stroke: rgba(200, 169, 110, 0.18);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+/* bright, scroll-drawn light */
+.cinematic-line-draw {
+  fill: none;
+  stroke: #ffd700;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+}
+
+/* the glowing head of light riding the current scroll tip */
+.cinematic-head {
+  opacity: 0;
+}
+.cinematic-head-glow {
+  fill: rgba(255, 215, 0, 0.5);
+}
+.cinematic-head-core {
+  fill: #fff6c0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cinematic-veil { animation: none; opacity: 1; }
+}

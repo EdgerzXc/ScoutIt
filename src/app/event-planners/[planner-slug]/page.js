@@ -2,6 +2,7 @@ import Header from "@/components/layout/Header";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import ServiceConnectionPortal from "@/components/connection/ServiceConnectionPortal";
+import { DetailPageAccessGate } from "@/components/ui/EarlyAccessGate";
 import { getEventPlanners } from "@/data/mockEventPlanners";
 
 const DUMMY_PLANNERS = getEventPlanners();
@@ -28,6 +29,12 @@ export default async function EventPlannerDetailPage({ params }) {
       <Header />
       
       <main className="broker-detail-main">
+        {/* Access Gate — restricted profile */}
+        <DetailPageAccessGate
+          rosterType="Event Design Network"
+          providerName={ep.name}
+        />
+
         {/* Profile Split layout */}
         <section className="profile-grid">
           

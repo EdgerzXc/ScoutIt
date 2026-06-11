@@ -1,9 +1,9 @@
 "use client";
 
 import Header from "@/components/layout/Header";
-import Link from "next/link";
 import { useState } from "react";
 import "../property/property.css";
+import { RestrictedAccessBanner, RestrictedCardWrapper } from "@/components/ui/EarlyAccessGate";
 
 import { getPhotographers } from "@/data/mockPhotographers";
 
@@ -44,16 +44,11 @@ export default function PhotographersPage() {
       <Header />
       <main className="brokers-main">
 
-        {/* Coming Soon Banner */}
-        <div className="coming-soon-banner">
-          <div className="coming-soon-inner">
-            <span className="coming-soon-badge">COMING SOON</span>
-            <p className="coming-soon-text">
-              ScoutIt Photography Network is launching soon. Partner photographers will be verified, vetted, and bookable directly through this platform.
-              The profiles below are previews of how your listing will appear.
-            </p>
-          </div>
-        </div>
+        {/* Restricted Access Banner */}
+        <RestrictedAccessBanner
+          rosterLabel="The ScoutIt Photography Network"
+          openDate="Q4 2026"
+        />
 
         <header className="directory-header">
           <span className="vector-label">LAYER 03.2 // SPACE PHOTOGRAPHY</span>
@@ -138,14 +133,12 @@ export default function PhotographersPage() {
                 const tierClass = ph.tier === 1 ? "tier-1-card diamond-card" : ph.tier === 2 ? "tier-2-card platinum-card" : "tier-3-card gold-card";
                 const tierLabel = ph.tier === 1 ? "DIAMOND PARTNER" : ph.tier === 2 ? "PLATINUM PARTNER" : "GOLD PARTNER";
                 return (
-                  <Link
-                    href={`/photographers/${ph.id}`}
-                    key={ph.id}
-                    className={`broker-card ${tierClass}`}
-                    style={{ textDecoration: "none", position: "relative" }}
-                  >
+                  <RestrictedCardWrapper key={ph.id} rosterType="Photography Network">
+                    <div
+                      className={`broker-card ${tierClass}`}
+                      style={{ position: "relative" }}
+                    >
                     <div className="general-tier-badge-label">{tierLabel}</div>
-                    <div className="coming-soon-card-overlay">PREVIEW CHANNEL</div>
                     <div className="broker-image-container">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={ph.image} alt={ph.name} className="broker-image" />
@@ -165,7 +158,8 @@ export default function PhotographersPage() {
                         <span className="btn-contact">Focus →</span>
                       </div>
                     </div>
-                  </Link>
+                    </div>
+                  </RestrictedCardWrapper>
                 );
               })}
             </div>
