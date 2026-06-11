@@ -1,10 +1,10 @@
 "use client";
 
-import Header from "@/components/Header";
+import Header from "@/components/layout/Header";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { getBrokers } from "@/data/mockBrokers";
-import ReactionButtons from "@/components/ReactionButtons";
+import ReactionButtons from "@/components/ui/ReactionButtons";
 import "../property/property.css";
 
 // ── Tier label → number map (mirrors airtable.js) ──────────────

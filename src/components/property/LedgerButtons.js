@@ -2,7 +2,7 @@
 
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import ReactionButtons from "@/components/ReactionButtons";
+import ReactionButtons from "@/components/ui/ReactionButtons";
 import { getPropertyBySlug } from "@/data/mockProperties";
 
 export default function LedgerButtons() {

@@ -1,5 +1,5 @@
 import DiscoverClient from "./DiscoverClient";
-import Header from "@/components/Header";
+import Header from "@/components/layout/Header";
 import { Suspense } from "react";
 
 export const dynamic = "force-dynamic";

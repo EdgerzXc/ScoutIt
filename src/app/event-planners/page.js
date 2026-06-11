@@ -1,6 +1,6 @@
 "use client";
 
-import Header from "@/components/Header";
+import Header from "@/components/layout/Header";
 import { useState } from "react";
 import "../property/property.css";
 import Link from "next/link";

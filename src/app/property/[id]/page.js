@@ -1,8 +1,8 @@
 // Case-sensitivity routing diagnostics trigger and async params fix
 import { notFound } from "next/navigation";
 import { getPropertyBySlug } from "@/data/mockProperties";
-import ResidentialScrollytelling from "@/components/property-layouts/ResidentialScrollytelling";
-import CommercialFlow from "@/components/property-layouts/CommercialFlow";
+import ResidentialScrollytelling from "@/components/property/ResidentialScrollytelling";
+import CommercialFlow from "@/components/property/CommercialFlow";
 
 // ----------------------------------------------------------------------
 // INCREMENTAL STATIC REGENERATION (ISR)

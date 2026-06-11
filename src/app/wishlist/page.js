@@ -1,9 +1,9 @@
 "use client";
 
-import Header from "@/components/Header";
+import Header from "@/components/layout/Header";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { ReactionBadge } from "@/components/ReactionButtons";
+import { ReactionBadge } from "@/components/ui/ReactionButtons";
 
 const REACTION_ORDER = ["Potential Fit", "Interested", "Inspired Me", "Save"];
 

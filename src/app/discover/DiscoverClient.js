@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import ReactionButtons from "@/components/ReactionButtons";
+import ReactionButtons from "@/components/ui/ReactionButtons";
 import { cityToRegion, regionOf } from "@/lib/regions";
 import "./discover.css";
 

@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import ReactionButtons from "@/components/ReactionButtons";
-import InteractiveMap from "@/components/InteractiveMap";
-import "@/app/property/[id]/property.css";
+import ReactionButtons from "@/components/ui/ReactionButtons";
+import InteractiveMap from "@/components/property/InteractiveMap";
+import "@/app/property/[id]/property-detail.css";
 import { getChapterConfig } from "./chapterConfig";
 
 // ═══════════════════════════════════════════════════

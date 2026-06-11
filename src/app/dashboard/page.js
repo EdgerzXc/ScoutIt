@@ -1,6 +1,6 @@
 "use client";
 
-import Header from "@/components/Header";
+import Header from "@/components/layout/Header";
 import { useState, useEffect } from "react";
 
 const INITIAL_PROFILE = {

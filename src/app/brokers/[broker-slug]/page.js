@@ -1,7 +1,7 @@
-import Header from "@/components/Header";
+import Header from "@/components/layout/Header";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import ConnectionPortal from "@/components/ConnectionPortal";
+import ConnectionPortal from "@/components/connection/ConnectionPortal";
 
 import { getBrokers } from "@/data/mockBrokers";
 

@@ -3,8 +3,8 @@
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import Header from "@/components/Header";
-import ReactionButtons from "@/components/ReactionButtons";
+import Header from "@/components/layout/Header";
+import ReactionButtons from "@/components/ui/ReactionButtons";
 import { getProperties } from "@/data/mockProperties";
 import { getArticles } from "@/data/mockArticles";
 import "./property.css";

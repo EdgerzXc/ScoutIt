@@ -1,4 +1,4 @@
-import ShowcaseStage from "@/components/ShowcaseStage";
+import ShowcaseStage from "@/components/board/ShowcaseStage";
 
 export const metadata = {
   title: "The Board · ScoutIT",

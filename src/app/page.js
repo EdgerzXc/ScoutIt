@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef, useCallback } from "react";
-import ReactionButtons from "@/components/ReactionButtons";
-import BoardPodium from "@/components/BoardPodium";
+import ReactionButtons from "@/components/ui/ReactionButtons";
+import BoardPodium from "@/components/board/BoardPodium";
 
 import { SPACE_STARS, getDISCOVERY_FEED, getDISCOVER_HUBS, getCATEGORY_PREVIEWS } from "@/data/mockProperties";
 import { getArticles } from "@/data/mockArticles";

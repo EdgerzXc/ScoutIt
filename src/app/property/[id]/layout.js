@@ -1,6 +1,6 @@
-import Header from "@/components/Header";
-import LedgerButtons from "@/components/shared/LedgerButtons";
-import EcosystemActionBar from "@/components/shared/EcosystemActionBar";
+import Header from "@/components/layout/Header";
+import LedgerButtons from "@/components/property/LedgerButtons";
+import EcosystemActionBar from "@/components/property/EcosystemActionBar";
 
 export default function PropertyUniversalFrame({ children }) {
   return (
