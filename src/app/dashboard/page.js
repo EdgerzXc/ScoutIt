@@ -11,7 +11,7 @@ import dynamic from "next/dynamic";
 const OwnerMode = dynamic(() => import("../../components/dashboard/OwnerMode"), { ssr: false });
 const BrokerMode = dynamic(() => import("../../components/dashboard/BrokerMode"), { ssr: false });
 const BuyerMode = dynamic(() => import("../../components/dashboard/BuyerMode"), { ssr: false });
-const ProviderMode = dynamic(() => Promise.resolve(({ type }) => <div className="placeholder-mode"><h2>{type || "Provider"} Dashboard</h2><p>Early Access state & Portfolio coming in Phase 6.</p></div>), { ssr: false });
+const ProviderMode = dynamic(() => import("../../components/dashboard/ProviderMode"), { ssr: false });
 
 const TAG_LABELS = {
   buyer: "Buyer / Scout",
