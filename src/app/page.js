@@ -3,10 +3,18 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef, useCallback } from "react";
+import dynamic from "next/dynamic";
 import ReactionButtons from "@/components/ui/ReactionButtons";
 import BoardPodium from "@/components/board/BoardPodium";
 import CinematicJourney from "@/components/cinematic/CinematicJourney";
 import Footer from "@/components/layout/Footer";
+
+// Scrollytelling manifesto — lazy-loaded so it costs the homepage nothing
+// until the UFO is clicked.
+const DescentSequence = dynamic(
+  () => import("@/components/scrollytelling/DescentSequence"),
+  { ssr: false }
+);
 
 import { SPACE_STARS, getDISCOVERY_FEED, getDISCOVER_HUBS, getCATEGORY_PREVIEWS } from "@/data/mockProperties";
 import { getArticles } from "@/data/mockArticles";
@@ -23,6 +31,7 @@ export default function Home() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [activeDiscoverType, setActiveDiscoverType] = useState("Residential");
   const [driftingRocks, setDriftingRocks] = useState([]);
+  const [descentActive, setDescentActive] = useState(false); // scrollytelling manifesto
   const containerRef = useRef(null);
   const eventHorizonRef = useRef(null);
 
@@ -708,7 +717,15 @@ export default function Home() {
   // Stars and glitters particle arrays removed for clean cinematic hero redesign
 
   return (
-    <main ref={containerRef} onScroll={handleScroll} className="cinematic-container">
+    <main
+      ref={containerRef}
+      onScroll={handleScroll}
+      className={`cinematic-container ${descentActive ? "descending" : ""}`}
+    >
+      {/* Scrollytelling manifesto overlay (Stage 1: descent only) */}
+      {descentActive && (
+        <DescentSequence onExit={() => setDescentActive(false)} />
+      )}
       {/* SECTION 1: SPACE HERO */}
       <section className="snap-section section-hook">
         <div className="grain"></div>
@@ -805,7 +822,12 @@ export default function Home() {
           <div className="title-ufo-zone">
             <span
               className={`title-ufo ${powering ? "powering" : ""}`}
-              onClick={() => fireBeam(true)}
+              onClick={() => {
+                fireBeam(true);
+                // The beam's power-up runs ~500ms; begin the descent just after
+                // so the darkening feels caused by the beam, not simultaneous.
+                setTimeout(() => setDescentActive(true), 650);
+              }}
               role="presentation"
             >
               <span className="title-ufo-underglow" />
@@ -1423,6 +1445,13 @@ export default function Home() {
         
         .cinematic-container::-webkit-scrollbar {
           display: none;
+        }
+
+        /* While the descent is active the hero holds in place — the sequence
+           happens "in place" over the homepage (scroll-driven reveal arrives
+           in Stage 2). */
+        .cinematic-container.descending {
+          overflow: hidden;
         }
 
         .snap-section {
