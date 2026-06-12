@@ -57,10 +57,10 @@ export default function SettingsPage() {
       </header>
 
       <main className={styles.content}>
-        <h1>Edit Profile Settings</h1>
+        <h1 className={styles.title}>Edit Profile Settings</h1>
         
         <div className={styles.formGroup}>
-          <label>Display Name</label>
+          <label className={styles.label}>Display Name</label>
           <input 
             type="text" 
             className={styles.input} 
@@ -70,7 +70,7 @@ export default function SettingsPage() {
         </div>
 
         <div className={styles.formGroup}>
-          <label style={{marginTop: 16}}>Your Intent Tags (Dashboards)</label>
+          <label className={styles.label} style={{marginTop: 16}}>Your Intent Tags (Dashboards)</label>
           <p style={{color: 'var(--text-secondary)', fontSize: 13, marginBottom: 16}}>
             Select all the roles you play on ScoutIt. Each tag unlocks a dedicated workspace in your Mode Switcher.
           </p>
