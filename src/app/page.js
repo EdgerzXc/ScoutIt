@@ -32,6 +32,7 @@ export default function Home() {
   const [wordLit, setWordLit] = useState(false);
   const [powering, setPowering] = useState(false);
   const beamTimers = useRef([]);
+  const beamInterval = useRef(null); // repeating auto-fire interval
 
   const fireBeam = useCallback((withPower) => {
     beamTimers.current.forEach(clearTimeout);
@@ -45,20 +46,28 @@ export default function Home() {
     if (withPower) {
       setPowering(true);
       push(() => { setPowering(false); launch(); }, 500);           // power-up flash, then fire
-      // After the beam fires, enter the cinematic golden-light journey.
-      push(() => window.dispatchEvent(new CustomEvent("scoutit:cinematic")), 1600);
+      // Cinematic journey disabled — beam sequence ends here.
     } else {
       launch();
     }
   }, []);
 
-  // Auto-fire once, 2s after load
+  // Auto-fire on load, then repeat every 6s so the beam stays visible on both mobile & desktop
   useEffect(() => {
-    const t = setTimeout(() => fireBeam(false), 2000);
-    return () => clearTimeout(t);
+    const t = setTimeout(() => {
+      fireBeam(false);
+      beamInterval.current = setInterval(() => fireBeam(false), 6000);
+    }, 2000);
+    return () => {
+      clearTimeout(t);
+      if (beamInterval.current) clearInterval(beamInterval.current);
+    };
   }, [fireBeam]);
   // Clear any pending beam timers on unmount
-  useEffect(() => () => beamTimers.current.forEach(clearTimeout), []);
+  useEffect(() => () => {
+    beamTimers.current.forEach(clearTimeout);
+    if (beamInterval.current) clearInterval(beamInterval.current);
+  }, []);
 
   // ── Event-horizon pull field (canvas) ──────────────────────────
   useEffect(() => {
@@ -806,14 +815,7 @@ export default function Home() {
           <div className="title-tagline-2">SPACE INTELLIGENCE · PHILIPPINE PROPERTY</div>
         </div>
 
-        {/* Scroll indicator */}
-        <div className="hook-scroll-indicator">
-          <span className="scroll-text">Scroll to explore</span>
-          <div className="scroll-chevrons">
-            <span className="scroll-chev scroll-chev-1">↓</span>
-            <span className="scroll-chev scroll-chev-2">↓</span>
-          </div>
-        </div>
+        {/* Scroll indicator removed — beam sequence begins the story */}
       </section>
 
       {/* SECTION 2: Layer 01 — The Board (ranked podium → /showcase) */}
@@ -1676,8 +1678,8 @@ export default function Home() {
           flex-direction: column;
           align-items: center;
           justify-content: flex-start;
-          height: 150px;
-          margin-bottom: 10px;
+          height: 160px;
+          margin-bottom: 8px;
         }
         .title-ufo {
           position: relative;
@@ -1732,15 +1734,36 @@ export default function Home() {
         .title-ufo.powering .porthole { animation: portPower 0.166s ease-in-out 3; }
         .title-ufo-svg .ufo-belly { fill: rgba(200, 169, 110, 0.6); }
 
-        /* ── Tractor beam: 4px gold, fades to transparent, extend → hold → fade ── */
+        /* ── Tractor beam: gold cone, fades to transparent, extend → hold → fade ── */
         .title-beam {
-          width: 4px;
-          height: 60px;
-          margin-top: 2px;
-          background: linear-gradient(to bottom, #c8a96e 0%, rgba(200, 169, 110, 0) 100%);
+          display: block;
+          width: 3px;
+          height: 80px;
+          margin-top: 0;
+          background: linear-gradient(
+            to bottom,
+            rgba(255, 235, 160, 1) 0%,
+            rgba(200, 169, 110, 0.85) 30%,
+            rgba(200, 169, 110, 0.3) 70%,
+            rgba(200, 169, 110, 0) 100%
+          );
+          box-shadow:
+            0 0 8px rgba(200, 169, 110, 0.6),
+            0 0 20px rgba(200, 169, 110, 0.25);
+          border-radius: 0 0 4px 4px;
           transform-origin: top center;
           opacity: 0;
-          animation: titleBeamSeq 1.3s ease-out forwards;
+          animation: titleBeamSeq 1.5s ease-out forwards;
+        }
+        /* Desktop: slightly wider beam for more visual impact */
+        @media (min-width: 769px) {
+          .title-beam {
+            width: 4px;
+            height: 100px;
+            box-shadow:
+              0 0 12px rgba(200, 169, 110, 0.7),
+              0 0 30px rgba(200, 169, 110, 0.3);
+          }
         }
 
         /* ── Discipline badge ── */
@@ -1808,15 +1831,15 @@ export default function Home() {
         }
         @keyframes titleBeamSeq {
           0%   { transform: scaleY(0); opacity: 0; }
-          8%   { opacity: 1; }
-          46%  { transform: scaleY(1); opacity: 1; }   /* extended (~0.6s) */
-          69%  { transform: scaleY(1); opacity: 1; }   /* hold (~0.3s) */
-          100% { transform: scaleY(1); opacity: 0; }   /* fade out (~0.4s) */
+          6%   { opacity: 1; }
+          40%  { transform: scaleY(1); opacity: 1; }   /* extended (~0.6s) */
+          65%  { transform: scaleY(1); opacity: 1; }   /* hold (~0.4s) */
+          100% { transform: scaleY(1); opacity: 0; }   /* fade out (~0.5s) */
         }
         @keyframes titleImpact {
           0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.3); }
-          40%  { opacity: 1; }
-          100% { opacity: 0; transform: translate(-50%, -50%) scale(1.15); }
+          35%  { opacity: 1; }
+          100% { opacity: 0; transform: translate(-50%, -50%) scale(1.4); }
         }
         /* ════════════ END TITLE SCREEN ════════════ */
 
