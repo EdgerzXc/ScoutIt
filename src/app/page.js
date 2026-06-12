@@ -4156,6 +4156,72 @@ export default function Home() {
             padding: 12px 28px;
           }
         }
+
+        /* =========================================
+           MOBILE OPTIMIZATION (MAX-WIDTH: 768px)
+           ========================================= */
+        @media (max-width: 768px) {
+          /* 1. Disable Scroll Snapping on Mobile */
+          .cinematic-container {
+            scroll-snap-type: none !important;
+          }
+          .snap-section {
+            scroll-snap-align: none !important;
+            height: auto !important;
+            min-height: 100vh !important;
+            padding: 40px 16px !important;
+          }
+
+          /* 2. Stack the Split Panes */
+          .property-split {
+            flex-direction: column !important;
+            height: auto !important;
+            min-height: 100vh !important;
+          }
+
+          .property-menu {
+            width: 100% !important;
+            min-width: 100% !important;
+            padding: 32px 20px !important;
+            border-right: none !important;
+            border-bottom: 1px solid var(--border-solid) !important;
+            height: auto !important;
+          }
+
+          .matrix-preview-pane {
+            width: 100% !important;
+            padding: 32px 16px !important;
+            height: auto !important;
+          }
+
+          /* 3. Adjust Flow Grid (Wishlist Layer) */
+          .flow-grid {
+            grid-template-columns: 1fr 1fr !important;
+            gap: 16px !important;
+          }
+          
+          /* 4. Fix Abstract Workspace Graphic */
+          .matrix-preview-pane > div {
+            padding: 24px 16px !important;
+          }
+          
+          /* Fix top hero section padding */
+          .section-hook {
+            padding-top: 100px !important;
+          }
+        }
+        
+        @media (max-width: 480px) {
+          /* Stack Flow Grid to 1 column on tiny screens */
+          .flow-grid {
+            grid-template-columns: 1fr !important;
+          }
+          
+          /* Slightly smaller padding on phones */
+          .property-menu {
+            padding: 24px 16px !important;
+          }
+        }
       `}</style>
 
       <section className="snap-section section-footer-wrapper" style={{ height: 'auto', minHeight: 'auto', scrollSnapAlign: 'end' }}>
