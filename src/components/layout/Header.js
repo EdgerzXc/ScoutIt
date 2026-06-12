@@ -72,7 +72,7 @@ export default function Header() {
           {user?.name ? (
             <span className="profile-initial">{user.name.charAt(0).toUpperCase()}</span>
           ) : (
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
               <circle cx="12" cy="7" r="4"/>
             </svg>
@@ -85,7 +85,7 @@ export default function Header() {
           onClick={() => setMenuOpen(v => !v)}
           aria-label="Menu"
         >
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
             <path d="M2 4h12M2 8h12M2 12h12"/>
           </svg>
         </button>
