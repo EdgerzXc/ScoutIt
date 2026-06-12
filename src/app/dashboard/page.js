@@ -10,7 +10,7 @@ import dynamic from "next/dynamic";
 // Using dummy components inline for now so it compiles, we'll extract them later.
 const OwnerMode = dynamic(() => import("../../components/dashboard/OwnerMode"), { ssr: false });
 const BrokerMode = dynamic(() => import("../../components/dashboard/BrokerMode"), { ssr: false });
-const BuyerMode = dynamic(() => Promise.resolve(() => <div className="placeholder-mode"><h2>Buyer / Scout Dashboard</h2><p>Search, Map, Saved listings coming in Phase 5.</p></div>), { ssr: false });
+const BuyerMode = dynamic(() => import("../../components/dashboard/BuyerMode"), { ssr: false });
 const ProviderMode = dynamic(() => Promise.resolve(({ type }) => <div className="placeholder-mode"><h2>{type || "Provider"} Dashboard</h2><p>Early Access state & Portfolio coming in Phase 6.</p></div>), { ssr: false });
 
 const TAG_LABELS = {
