@@ -7,6 +7,7 @@ import { useState, useEffect, useRef } from "react";
 export default function Header() {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [user, setUser] = useState(null);
   const menuRef = useRef(null);
 
   useEffect(() => {
@@ -18,6 +19,29 @@ export default function Header() {
     document.addEventListener("mousedown", onClickOutside);
     return () => document.removeEventListener("mousedown", onClickOutside);
   }, []);
+
+  useEffect(() => {
+    function readUser() {
+      try {
+        const raw = localStorage.getItem("scoutit_user");
+        setUser(raw ? JSON.parse(raw) : null);
+      } catch {
+        setUser(null);
+      }
+    }
+    readUser();
+    // Pick up sign-in/sign-out from other tabs or after onboarding
+    window.addEventListener("storage", readUser);
+    window.addEventListener("focus", readUser);
+    return () => {
+      window.removeEventListener("storage", readUser);
+      window.removeEventListener("focus", readUser);
+    };
+  }, []);
+
+  const profileHref = user?.name
+    ? `/profile/${encodeURIComponent(user.name)}`
+    : "/onboarding";
 
   return (
     <header className="global-header">
@@ -39,6 +63,21 @@ export default function Header() {
       </Link>
 
       <nav className="header-nav" ref={menuRef}>
+        <Link
+          href={profileHref}
+          className={`header-profile-btn ${user ? "signed-in" : ""}`}
+          aria-label={user?.name ? `Your profile — ${user.name}` : "Create an account"}
+          title={user?.name ? `Your profile — ${user.name}` : "Create an account"}
+        >
+          {user?.name ? (
+            <span className="profile-initial">{user.name.charAt(0).toUpperCase()}</span>
+          ) : (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+          )}
+        </Link>
         <button
           className="header-menu-btn"
           type="button"
@@ -52,6 +91,7 @@ export default function Header() {
         </button>
         <div className={`header-dropdown ${menuOpen ? "open" : ""}`}>
           <div className="dropdown-brand">ScoutIt</div>
+          <Link href={profileHref}>{user ? "My Profile" : "Create Account"}</Link>
           <Link href="/">Home</Link>
           <Link href="/discover">Discover</Link>
           <Link href="/intel">Intel</Link>
@@ -123,6 +163,59 @@ export default function Header() {
 
         .header-nav {
           position: relative;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .header-profile-btn {
+          width: 44px;
+          height: 44px;
+          border-radius: 50%;
+          border: 1px solid var(--accent-border);
+          background: var(--brand-overlay);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          text-decoration: none;
+          transition: all 0.25s ease;
+        }
+
+        .header-profile-btn svg {
+          width: 17px;
+          height: 17px;
+          stroke: var(--accent);
+        }
+
+        .header-profile-btn .profile-initial {
+          font-family: var(--font-display);
+          font-size: 17px;
+          line-height: 1;
+          color: var(--accent);
+        }
+
+        .header-profile-btn.signed-in {
+          background: var(--accent-dim);
+        }
+
+        .header-profile-btn:hover {
+          border-color: var(--accent-bright);
+          background: rgba(255, 184, 0, 0.16);
+          box-shadow: var(--shadow-glow-soft);
+          transform: translateY(-1px);
+        }
+
+        .header-profile-btn:hover svg {
+          stroke: var(--accent-bright);
+        }
+
+        .header-profile-btn:hover .profile-initial {
+          color: var(--accent-bright);
+        }
+
+        .header-profile-btn:focus-visible {
+          outline: 1.5px solid var(--accent-bright);
+          outline-offset: 2px;
         }
 
         .header-menu-btn {
@@ -225,7 +318,16 @@ export default function Header() {
             width: 38px;
             height: 38px;
           }
-          
+
+          .header-profile-btn {
+            width: 38px;
+            height: 38px;
+          }
+
+          .header-profile-btn .profile-initial {
+            font-size: 15px;
+          }
+
           .header-dropdown {
             min-width: 160px;
             padding: 6px;
@@ -259,7 +361,16 @@ export default function Header() {
             width: 36px;
             height: 36px;
           }
-          
+
+          .header-profile-btn {
+            width: 36px;
+            height: 36px;
+          }
+
+          .header-nav {
+            gap: 8px;
+          }
+
           .header-dropdown {
             position: fixed;
             top: auto;
@@ -317,10 +428,24 @@ export default function Header() {
             width: 36px;
             height: 36px;
           }
-          
+
           .header-menu-btn svg {
             width: 14px;
             height: 14px;
+          }
+
+          .header-profile-btn {
+            width: 36px;
+            height: 36px;
+          }
+
+          .header-profile-btn svg {
+            width: 15px;
+            height: 15px;
+          }
+
+          .header-profile-btn .profile-initial {
+            font-size: 14px;
           }
         }
         

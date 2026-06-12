@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef, useCallback } from "react";
 import dynamic from "next/dynamic";
 import ReactionButtons from "@/components/ui/ReactionButtons";
+import ProfileButton from "@/components/ui/ProfileButton";
 import BoardPodium from "@/components/board/BoardPodium";
 import CinematicJourney from "@/components/cinematic/CinematicJourney";
 import Footer from "@/components/layout/Footer";
@@ -726,6 +727,9 @@ export default function Home() {
       {descentActive && (
         <DescentSequence onExit={() => setDescentActive(false)} />
       )}
+      {/* Account / profile access — hidden during the descent so the
+          manifesto overlay stays immersive */}
+      {!descentActive && <ProfileButton floating />}
       {/* SECTION 1: SPACE HERO */}
       <section className="snap-section section-hook">
         <div className="grain"></div>
