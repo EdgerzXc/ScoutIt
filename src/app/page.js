@@ -4186,6 +4186,20 @@ export default function Home() {
             border-right: none !important;
             border-bottom: 1px solid var(--border-solid) !important;
             height: auto !important;
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            justify-content: center !important;
+            max-height: none !important;
+          }
+          
+          .property-menu .menu-footer {
+            width: 100% !important;
+            margin-top: 16px !important;
+          }
+
+          .property-menu .menu-footer .prominent-action-link {
+            width: 100% !important;
+            text-align: center !important;
           }
 
           .matrix-preview-pane {
