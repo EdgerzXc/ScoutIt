@@ -18,7 +18,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 
 const GOLD_SRC = "/scrollytelling/golden-liquid.jpeg";
 // How much wheel travel completes the whole descent (higher = slower/longer).
-const SCROLL_DISTANCE = 2600;
+const SCROLL_DISTANCE = 1500;
 
 export default function DescentSequence({ onExit }) {
   const [entered, setEntered] = useState(false);
@@ -35,20 +35,12 @@ export default function DescentSequence({ onExit }) {
     setTimeout(() => onExit?.(), 700);
   }, [onExit]);
 
-  const applyDelta = useCallback(
-    (deltaY) => {
-      const prev = progressRef.current;
-      const next = Math.min(1, Math.max(0, prev + deltaY / SCROLL_DISTANCE));
-      // Scrolling back up past the very start exits the sequence.
-      if (prev <= 0.0001 && deltaY < 0) {
-        beginExit();
-        return;
-      }
-      progressRef.current = next;
-      setProgress(next);
-    },
-    [beginExit]
-  );
+  const applyDelta = useCallback((deltaY) => {
+    const prev = progressRef.current;
+    const next = Math.min(1, Math.max(0, prev + deltaY / SCROLL_DISTANCE));
+    progressRef.current = next;
+    setProgress(next);
+  }, []);
 
   // Fade in on mount.
   useEffect(() => {
@@ -96,10 +88,11 @@ export default function DescentSequence({ onExit }) {
   const veilOpacity = Math.min(0.92, (progress / 0.12) * 0.92);
 
   // The reveal edge sweeps along the diagonal as progress grows. We soften it
-  // with a trailing band so the gold "flows" in rather than wipes in.
-  const edge = progress * 118 - 9; // -9 → 109 (%) so it fully clears at p=1
+  // with a trailing band so the gold "flows" in rather than wipes in. The
+  // teardrop end (bottom-left) lights up from the very first scroll.
+  const edge = progress * 100;
   const maskStop = `${edge.toFixed(1)}%`;
-  const maskStopSoft = `${(edge + 16).toFixed(1)}%`;
+  const maskStopSoft = `${(edge + 18).toFixed(1)}%`;
 
   // Travelling glow: rides the diagonal from teardrop (≈18%,72%) to tip
   // (≈84%,20%) of the stage.
@@ -143,12 +136,16 @@ export default function DescentSequence({ onExit }) {
         />
       </div>
 
-      {/* Quiet guidance — fades out once the descent is underway. */}
+      {/* Quiet guidance + a thin progress rail so scrolling always registers. */}
       <div className="descent-hint" data-gone={hintGone ? "true" : "false"}>
         <span className="descent-hint-line">SCROLL TO DESCEND</span>
         <button className="descent-exit" onClick={beginExit} type="button">
           ESC TO EXIT
         </button>
+      </div>
+
+      <div className="descent-rail" data-on={visible ? "true" : "false"}>
+        <div className="descent-rail-fill" style={{ width: `${Math.round(progress * 100)}%` }} />
       </div>
 
       <style>{`
@@ -275,6 +272,27 @@ export default function DescentSequence({ onExit }) {
           transition: color 0.3s ease;
         }
         .descent-exit:hover { color: rgba(240, 237, 232, 0.7); }
+
+        .descent-rail {
+          position: absolute;
+          left: 50%;
+          bottom: 3.4vh;
+          transform: translateX(-50%);
+          width: 180px;
+          height: 2px;
+          background: rgba(200, 169, 110, 0.14);
+          border-radius: 2px;
+          opacity: 0;
+          transition: opacity 0.6s ease;
+        }
+        .descent-rail[data-on="true"] { opacity: 1; }
+        .descent-rail-fill {
+          height: 100%;
+          background: rgba(200, 169, 110, 0.85);
+          border-radius: 2px;
+          box-shadow: 0 0 8px rgba(200, 169, 110, 0.6);
+          transition: width 0.12s linear;
+        }
 
         @keyframes descentPulse {
           0%, 100% { opacity: 0.55; }
