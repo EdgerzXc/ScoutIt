@@ -120,7 +120,11 @@ export default function DescentSequence({ onExit }) {
             maskImage: `linear-gradient(to top right, #000 ${maskStop}, transparent ${maskStopSoft})`,
           }}
         >
-          <img src={GOLD_SRC} alt="" draggable="false" />
+          <img className="descent-gold-base" src={GOLD_SRC} alt="" draggable="false" />
+          {/* Molten flow: a brightened copy of the gold with a diagonal highlight
+              band that sweeps continuously along the ribbon — makes the gold
+              read as flowing liquid light instead of a still photo. */}
+          <img className="descent-gold-flow" src={GOLD_SRC} alt="" draggable="false" aria-hidden="true" />
           {/* Cover the AI sparkle watermark in the bottom-right corner. */}
           <span className="descent-gold-watermark-mask" />
         </div>
@@ -193,14 +197,34 @@ export default function DescentSequence({ onExit }) {
           width: 92vw;
           max-width: 1200px;
         }
-        .descent-gold img {
+        .descent-gold-base {
           display: block;
           width: 100%;
           height: auto;
           /* The source is gold-on-black; screen blend drops its black bg so it
              sits seamlessly on the veil and only the gold glows through. */
           mix-blend-mode: screen;
-          filter: saturate(1.05) brightness(1.04);
+          filter: saturate(1.06) brightness(1.05);
+          /* Slow breathing glow so the gold is never fully static. */
+          animation: goldBreathe 5.5s ease-in-out infinite;
+        }
+        .descent-gold-flow {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: auto;
+          mix-blend-mode: screen;
+          /* Much brighter copy — but only a sweeping diagonal slice of it shows,
+             so a highlight appears to flow through the gold. */
+          filter: brightness(2.1) saturate(1.15) contrast(1.05);
+          -webkit-mask-image: linear-gradient(to top right, transparent 38%, #000 50%, transparent 62%);
+          mask-image: linear-gradient(to top right, transparent 38%, #000 50%, transparent 62%);
+          -webkit-mask-size: 280% 280%;
+          mask-size: 280% 280%;
+          -webkit-mask-repeat: no-repeat;
+          mask-repeat: no-repeat;
+          animation: goldFlow 4.2s linear infinite;
+          pointer-events: none;
         }
         .descent-gold-watermark-mask {
           position: absolute;
@@ -209,6 +233,16 @@ export default function DescentSequence({ onExit }) {
           width: 9%;
           height: 16%;
           background: radial-gradient(ellipse at bottom right, #000 55%, rgba(0,0,0,0) 100%);
+          z-index: 2;
+        }
+
+        @keyframes goldFlow {
+          0%   { -webkit-mask-position: 0% 100%;   mask-position: 0% 100%; }
+          100% { -webkit-mask-position: 100% 0%;   mask-position: 100% 0%; }
+        }
+        @keyframes goldBreathe {
+          0%, 100% { filter: saturate(1.06) brightness(1.0); }
+          50%      { filter: saturate(1.12) brightness(1.18); }
         }
 
         .descent-glow {
@@ -302,6 +336,8 @@ export default function DescentSequence({ onExit }) {
         @media (prefers-reduced-motion: reduce) {
           .descent-vignette, .descent-hint { transition-duration: 0.2s; }
           .descent-hint-line { animation: none; opacity: 0.85; }
+          .descent-gold-base { animation: none; }
+          .descent-gold-flow { animation: none; opacity: 0.5; }
         }
       `}</style>
     </div>
