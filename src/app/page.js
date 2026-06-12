@@ -33,6 +33,14 @@ export default function Home() {
   const [activeDiscoverType, setActiveDiscoverType] = useState("Residential");
   const [driftingRocks, setDriftingRocks] = useState([]);
   const [descentActive, setDescentActive] = useState(false); // scrollytelling manifesto
+  const [currentUser, setCurrentUser] = useState(null);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("scoutit_user");
+      if (raw) setCurrentUser(JSON.parse(raw));
+    } catch {}
+  }, []);
   const containerRef = useRef(null);
   const eventHorizonRef = useRef(null);
 
@@ -1413,31 +1421,82 @@ export default function Home() {
           <div className="property-menu">
             <div className="menu-header">
               <span className="vector-label">Layer 06 // The Workspace</span>
-              <h2 style={{ color: 'var(--accent)' }}>Take Command.</h2>
-              <p>Your private headquarters. Securely list assets, manage leads, and connect with high-intent clients.</p>
+              <h2 style={{ color: 'var(--accent)' }}>{currentUser ? "Welcome Back." : "Take Command."}</h2>
+              <p>{currentUser ? "Your private headquarters. Access your tools and track your activity below." : "Your private headquarters. Securely list assets, manage leads, and connect with high-intent clients."}</p>
             </div>
             
             <div className="ledger-tags-guide" style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '16px' }}>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '13px', lineHeight: '1.6' }}>
-                ScoutIt is a two-sided platform. While buyers browse, professionals command their market presence here:
-              </p>
-              
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <div style={{ padding: '16px', background: 'rgba(255, 184, 0, 0.05)', borderLeft: '2px solid var(--accent)', borderRadius: '0 4px 4px 0' }}>
-                  <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'var(--accent)', textTransform: 'uppercase', marginBottom: '8px' }}>For Property Owners</h4>
-                  <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>Use the Guided Wizard to easily list your space, highlight its architectural DNA, and receive direct pitches from vetted brokers.</p>
+              {!currentUser ? (
+                <>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '13px', lineHeight: '1.6' }}>
+                    ScoutIt is a two-sided platform. While buyers browse, professionals command their market presence here:
+                  </p>
+                  
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    <div style={{ padding: '16px', background: 'rgba(255, 184, 0, 0.05)', borderLeft: '2px solid var(--accent)', borderRadius: '0 4px 4px 0' }}>
+                      <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'var(--accent)', textTransform: 'uppercase', marginBottom: '8px' }}>For Property Owners</h4>
+                      <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>Use the Guided Wizard to easily list your space, highlight its architectural DNA, and receive direct pitches from vetted brokers.</p>
+                    </div>
+                    
+                    <div style={{ padding: '16px', background: 'rgba(255, 255, 255, 0.02)', borderLeft: '2px solid rgba(255, 255, 255, 0.2)', borderRadius: '0 4px 4px 0' }}>
+                      <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: '#fff', textTransform: 'uppercase', marginBottom: '8px' }}>For Licensed Brokers</h4>
+                      <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>Verify your PRC license to unlock Broker Mode. Manage your listings, track inbound leads, and build your digital portfolio.</p>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  {currentUser.tags?.includes('owner') && (
+                    <Link href="/dashboard" style={{ textDecoration: 'none', display: 'block' }}>
+                      <div className="hover:border-gold-accent transition-colors" style={{ padding: '16px', background: 'rgba(255, 184, 0, 0.05)', borderLeft: '2px solid var(--accent)', borderRadius: '0 4px 4px 0', border: '1px solid transparent' }}>
+                        <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'var(--accent)', textTransform: 'uppercase', marginBottom: '8px' }}>Owner Mode</h4>
+                        <div style={{ display: 'flex', gap: '12px' }}>
+                          <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Active Properties: <strong style={{ color: '#fff' }}>1</strong></span>
+                          <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>New Pitches: <strong style={{ color: '#fff' }}>3</strong></span>
+                        </div>
+                      </div>
+                    </Link>
+                  )}
+                  {currentUser.tags?.includes('broker') && (
+                    <Link href="/dashboard" style={{ textDecoration: 'none', display: 'block' }}>
+                      <div className="hover:border-gold-accent transition-colors" style={{ padding: '16px', background: 'rgba(255, 255, 255, 0.02)', borderLeft: '2px solid rgba(255, 255, 255, 0.2)', borderRadius: '0 4px 4px 0', border: '1px solid transparent' }}>
+                        <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: '#fff', textTransform: 'uppercase', marginBottom: '8px' }}>Broker Mode</h4>
+                        <div style={{ display: 'flex', gap: '12px' }}>
+                          <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Active Listings: <strong style={{ color: '#fff' }}>4</strong></span>
+                          <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Inbound Leads: <strong style={{ color: '#fff' }}>12</strong></span>
+                        </div>
+                      </div>
+                    </Link>
+                  )}
+                  {currentUser.tags?.includes('provider') && (
+                    <Link href="/dashboard" style={{ textDecoration: 'none', display: 'block' }}>
+                      <div className="hover:border-gold-accent transition-colors" style={{ padding: '16px', background: 'rgba(255, 255, 255, 0.02)', borderLeft: '2px solid rgba(255, 255, 255, 0.2)', borderRadius: '0 4px 4px 0', border: '1px solid transparent' }}>
+                        <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: '#fff', textTransform: 'uppercase', marginBottom: '8px' }}>Provider Mode ({currentUser.providerType || 'Service'})</h4>
+                        <div style={{ display: 'flex', gap: '12px' }}>
+                          <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Profile Views: <strong style={{ color: '#fff' }}>142</strong></span>
+                          <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Inquiries: <strong style={{ color: '#fff' }}>2</strong></span>
+                        </div>
+                      </div>
+                    </Link>
+                  )}
+                  {(!currentUser.tags?.includes('owner') && !currentUser.tags?.includes('broker') && !currentUser.tags?.includes('provider')) && (
+                    <Link href="/dashboard" style={{ textDecoration: 'none', display: 'block' }}>
+                      <div className="hover:border-gold-accent transition-colors" style={{ padding: '16px', background: 'rgba(255, 255, 255, 0.02)', borderLeft: '2px solid rgba(255, 255, 255, 0.2)', borderRadius: '0 4px 4px 0', border: '1px solid transparent' }}>
+                        <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: '#fff', textTransform: 'uppercase', marginBottom: '8px' }}>Buyer Mode</h4>
+                        <div style={{ display: 'flex', gap: '12px' }}>
+                          <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Saved Spaces: <strong style={{ color: '#fff' }}>7</strong></span>
+                          <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Curated Intel: <strong style={{ color: '#fff' }}>2</strong></span>
+                        </div>
+                      </div>
+                    </Link>
+                  )}
                 </div>
-                
-                <div style={{ padding: '16px', background: 'rgba(255, 255, 255, 0.02)', borderLeft: '2px solid rgba(255, 255, 255, 0.2)', borderRadius: '0 4px 4px 0' }}>
-                  <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: '#fff', textTransform: 'uppercase', marginBottom: '8px' }}>For Licensed Brokers</h4>
-                  <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>Verify your PRC license to unlock Broker Mode. Manage your listings, track inbound leads, and build your digital portfolio.</p>
-                </div>
-              </div>
+              )}
             </div>
 
             <div className="menu-footer" style={{ marginTop: '32px' }}>
-              <Link href="/onboarding" className="prominent-action-link" style={{ background: 'var(--accent)', color: 'var(--bg)', border: 'none', fontWeight: 'bold' }}>
-                Open Your Workspace →
+              <Link href={currentUser ? "/dashboard" : "/onboarding"} className="prominent-action-link" style={{ background: 'var(--accent)', color: 'var(--bg)', border: 'none', fontWeight: 'bold' }}>
+                {currentUser ? "Enter Dashboard →" : "Open Your Workspace →"}
               </Link>
             </div>
           </div>
@@ -1449,9 +1508,13 @@ export default function Home() {
               <div style={{ background: 'var(--surface)', border: '1px solid var(--surface-variant)', borderRadius: '8px', padding: '24px', boxShadow: '0 20px 40px rgba(0,0,0,0.5)', position: 'relative', zIndex: 2 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', borderBottom: '1px solid var(--surface-variant)', paddingBottom: '16px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--bg)', fontWeight: 'bold', fontFamily: 'var(--font-mono)' }}>OW</div>
+                    <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--bg)', fontWeight: 'bold', fontFamily: 'var(--font-mono)' }}>
+                      {currentUser?.primaryMode === 'broker' ? 'BR' : currentUser?.primaryMode === 'provider' ? 'PR' : currentUser?.primaryMode === 'buyer' ? 'BY' : 'OW'}
+                    </div>
                     <div>
-                      <div style={{ fontSize: '14px', fontWeight: 'bold', color: '#fff' }}>Owner Dashboard</div>
+                      <div style={{ fontSize: '14px', fontWeight: 'bold', color: '#fff' }}>
+                        {currentUser?.primaryMode === 'broker' ? 'Broker Dashboard' : currentUser?.primaryMode === 'provider' ? 'Provider Dashboard' : currentUser?.primaryMode === 'buyer' ? 'Buyer Dashboard' : 'Owner Dashboard'}
+                      </div>
                       <div style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--accent)' }}>VERIFIED ACCOUNT</div>
                     </div>
                   </div>
@@ -1459,17 +1522,25 @@ export default function Home() {
                 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
                   <div style={{ background: 'rgba(0,0,0,0.3)', padding: '16px', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                    <div style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>ACTIVE LISTINGS</div>
-                    <div style={{ fontSize: '24px', color: '#fff', fontFamily: 'var(--font-display)', marginTop: '8px' }}>03</div>
+                    <div style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>
+                      {currentUser?.primaryMode === 'provider' ? 'PROFILE VIEWS' : currentUser?.primaryMode === 'buyer' ? 'SAVED SPACES' : 'ACTIVE LISTINGS'}
+                    </div>
+                    <div style={{ fontSize: '24px', color: '#fff', fontFamily: 'var(--font-display)', marginTop: '8px' }}>
+                      {currentUser?.primaryMode === 'provider' ? '142' : currentUser?.primaryMode === 'buyer' ? '07' : '03'}
+                    </div>
                   </div>
                   <div style={{ background: 'rgba(255,184,0,0.05)', padding: '16px', borderRadius: '4px', border: '1px solid rgba(255,184,0,0.2)' }}>
-                    <div style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--accent)' }}>NEW LEADS</div>
-                    <div style={{ fontSize: '24px', color: 'var(--accent)', fontFamily: 'var(--font-display)', marginTop: '8px' }}>12</div>
+                    <div style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--accent)' }}>
+                      {currentUser?.primaryMode === 'buyer' ? 'CURATED INTEL' : 'NEW LEADS'}
+                    </div>
+                    <div style={{ fontSize: '24px', color: 'var(--accent)', fontFamily: 'var(--font-display)', marginTop: '8px' }}>
+                      {currentUser?.primaryMode === 'buyer' ? '02' : '12'}
+                    </div>
                   </div>
                 </div>
                 
                 <div style={{ height: '40px', background: 'var(--surface-variant)', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: '12px', border: '1px dashed rgba(255,255,255,0.1)' }}>
-                  + List New Property
+                  {currentUser?.primaryMode === 'provider' ? '+ Update Portfolio' : currentUser?.primaryMode === 'buyer' ? 'Explore Directory' : '+ List New Property'}
                 </div>
               </div>
               
