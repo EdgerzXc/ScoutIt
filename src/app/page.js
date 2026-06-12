@@ -326,12 +326,41 @@ export default function Home() {
       raf = requestAnimationFrame(loop);
     };
 
+    // Only animate while the hero canvas is actually on screen — once the user
+    // scrolls to lower sections, a 60fps canvas keeps competing with the
+    // scroll/snap animation for frame time.
+    let running = false;
+    let visible = true;
+    const start = () => {
+      if (running) return;
+      running = true;
+      last = performance.now();
+      raf = requestAnimationFrame(loop);
+    };
+    const stop = () => {
+      running = false;
+      cancelAnimationFrame(raf);
+    };
+    const syncRunning = () => {
+      if (visible && !document.hidden) start();
+      else stop();
+    };
+    const observer = new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+      syncRunning();
+    });
+    observer.observe(canvas);
+    const onVisibility = () => syncRunning();
+    document.addEventListener("visibilitychange", onVisibility);
+
     resize();
     draw(0);                 // paint one frame immediately (no blank flash before rAF)
-    raf = requestAnimationFrame(loop);
+    start();
     window.addEventListener("resize", resize);
     return () => {
-      cancelAnimationFrame(raf);
+      stop();
+      observer.disconnect();
+      document.removeEventListener("visibilitychange", onVisibility);
       window.removeEventListener("resize", resize);
     };
   }, []);
@@ -555,11 +584,20 @@ export default function Home() {
     }
   }, []);
 
+  // Save scroll position at most once per frame — writing sessionStorage on
+  // every scroll event adds main-thread work during the scroll itself.
+  const scrollSaveRaf = useRef(0);
   const handleScroll = (e) => {
-    if (e.currentTarget) {
-      sessionStorage.setItem("homepage_scroll", e.currentTarget.scrollTop.toString());
-    }
+    const target = e.currentTarget;
+    if (!target || scrollSaveRaf.current) return;
+    scrollSaveRaf.current = requestAnimationFrame(() => {
+      scrollSaveRaf.current = 0;
+      sessionStorage.setItem("homepage_scroll", target.scrollTop.toString());
+    });
   };
+  useEffect(() => () => {
+    if (scrollSaveRaf.current) cancelAnimationFrame(scrollSaveRaf.current);
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -1373,7 +1411,9 @@ export default function Home() {
           width: 100vw;
           overflow-y: scroll;
           scroll-snap-type: y mandatory;
-          scroll-behavior: smooth;
+          /* NOTE: no scroll-behavior:smooth here — combined with mandatory snap,
+             Chrome re-targets the smooth animation on every wheel tick and the
+             scroller can lock up / freeze rendering for 30s+. */
           background: var(--bg);
           color: var(--text-primary);
         }
