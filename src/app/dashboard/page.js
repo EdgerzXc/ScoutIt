@@ -8,7 +8,7 @@ import dynamic from "next/dynamic";
 
 // Lazy-loaded mode components (to be built in subsequent phases)
 // Using dummy components inline for now so it compiles, we'll extract them later.
-const OwnerMode = dynamic(() => Promise.resolve(() => <div className="placeholder-mode"><h2>Owner Dashboard</h2><p>Listing status, Pitches, Analytics coming in Phase 3.</p></div>), { ssr: false });
+const OwnerMode = dynamic(() => import("../../components/dashboard/OwnerMode"), { ssr: false });
 const BrokerMode = dynamic(() => Promise.resolve(() => <div className="placeholder-mode"><h2>Broker Workspace</h2><p>Pipeline, Feed, Action Bar coming in Phase 4.</p></div>), { ssr: false });
 const BuyerMode = dynamic(() => Promise.resolve(() => <div className="placeholder-mode"><h2>Buyer / Scout Dashboard</h2><p>Search, Map, Saved listings coming in Phase 5.</p></div>), { ssr: false });
 const ProviderMode = dynamic(() => Promise.resolve(({ type }) => <div className="placeholder-mode"><h2>{type || "Provider"} Dashboard</h2><p>Early Access state & Portfolio coming in Phase 6.</p></div>), { ssr: false });
