@@ -549,3 +549,45 @@ label {
     min-height: 90px;
   }
 }
+
+/* ══════════════════════════════════════════════════════════════
+   HIGH-CONTRAST ACCESSIBILITY MODE
+   ══════════════════════════════════════════════════════════════ */
+body.high-contrast {
+  /* Force maximum contrast for text */
+  --text-secondary: #ffffff !important;
+  --text-muted: #e6e6e6 !important;
+  
+  /* Thicken and highlight faint borders */
+  --border: var(--accent) !important;
+  --border-mid: var(--accent) !important;
+  --border-solid: var(--accent) !important;
+
+  /* Scale up typography for readability */
+  font-size: 18px !important;
+}
+
+body.high-contrast p {
+  font-size: 18px !important;
+  line-height: 1.8 !important;
+}
+
+body.high-contrast h1 { font-size: calc(1.15 * 3rem) !important; }
+body.high-contrast h2 { font-size: calc(1.15 * 2.5rem) !important; }
+body.high-contrast h3 { font-size: calc(1.15 * 2rem) !important; }
+body.high-contrast h4, 
+body.high-contrast h5, 
+body.high-contrast h6 { 
+  font-size: calc(1.15 * 1.25rem) !important; 
+}
+
+/* Ensure links and labels are hyper-visible */
+body.high-contrast a, 
+body.high-contrast label, 
+body.high-contrast span {
+  color: #ffffff;
+}
+body.high-contrast .text-accent {
+  color: var(--accent) !important;
+  text-shadow: 0 0 8px rgba(255, 184, 0, 0.4);
+}
