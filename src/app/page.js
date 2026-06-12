@@ -1405,11 +1405,87 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SECTION 6: THE ABOUT US LAYER */}
+      {/* SECTION 6: THE WORKSPACE LAYER */}
+      <section className="snap-section section-workspace" style={{ padding: 0 }}>
+        <div className="property-split">
+          
+          {/* Left Menu Panel */}
+          <div className="property-menu">
+            <div className="menu-header">
+              <span className="vector-label">Layer 06 // The Workspace</span>
+              <h2 style={{ color: 'var(--accent)' }}>Take Command.</h2>
+              <p>Your private headquarters. Securely list assets, manage leads, and connect with high-intent clients.</p>
+            </div>
+            
+            <div className="ledger-tags-guide" style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '16px' }}>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '13px', lineHeight: '1.6' }}>
+                ScoutIt is a two-sided platform. While buyers browse, professionals command their market presence here:
+              </p>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={{ padding: '16px', background: 'rgba(255, 184, 0, 0.05)', borderLeft: '2px solid var(--accent)', borderRadius: '0 4px 4px 0' }}>
+                  <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'var(--accent)', textTransform: 'uppercase', marginBottom: '8px' }}>For Property Owners</h4>
+                  <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>Use the Guided Wizard to easily list your space, highlight its architectural DNA, and receive direct pitches from vetted brokers.</p>
+                </div>
+                
+                <div style={{ padding: '16px', background: 'rgba(255, 255, 255, 0.02)', borderLeft: '2px solid rgba(255, 255, 255, 0.2)', borderRadius: '0 4px 4px 0' }}>
+                  <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: '#fff', textTransform: 'uppercase', marginBottom: '8px' }}>For Licensed Brokers</h4>
+                  <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>Verify your PRC license to unlock Broker Mode. Manage your listings, track inbound leads, and build your digital portfolio.</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="menu-footer" style={{ marginTop: '32px' }}>
+              <Link href="/onboarding" className="prominent-action-link" style={{ background: 'var(--accent)', color: 'var(--bg)', border: 'none', fontWeight: 'bold' }}>
+                Open Your Workspace →
+              </Link>
+            </div>
+          </div>
+
+          {/* Right Visual Canvas */}
+          <div className="matrix-preview-pane" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ position: 'relative', width: '100%', maxWidth: '400px', padding: '40px' }}>
+              {/* Abstract Dashboard UI Representation */}
+              <div style={{ background: 'var(--surface)', border: '1px solid var(--surface-variant)', borderRadius: '8px', padding: '24px', boxShadow: '0 20px 40px rgba(0,0,0,0.5)', position: 'relative', zIndex: 2 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', borderBottom: '1px solid var(--surface-variant)', paddingBottom: '16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--bg)', fontWeight: 'bold', fontFamily: 'var(--font-mono)' }}>OW</div>
+                    <div>
+                      <div style={{ fontSize: '14px', fontWeight: 'bold', color: '#fff' }}>Owner Dashboard</div>
+                      <div style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--accent)' }}>VERIFIED ACCOUNT</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
+                  <div style={{ background: 'rgba(0,0,0,0.3)', padding: '16px', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    <div style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>ACTIVE LISTINGS</div>
+                    <div style={{ fontSize: '24px', color: '#fff', fontFamily: 'var(--font-display)', marginTop: '8px' }}>03</div>
+                  </div>
+                  <div style={{ background: 'rgba(255,184,0,0.05)', padding: '16px', borderRadius: '4px', border: '1px solid rgba(255,184,0,0.2)' }}>
+                    <div style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--accent)' }}>NEW LEADS</div>
+                    <div style={{ fontSize: '24px', color: 'var(--accent)', fontFamily: 'var(--font-display)', marginTop: '8px' }}>12</div>
+                  </div>
+                </div>
+                
+                <div style={{ height: '40px', background: 'var(--surface-variant)', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: '12px', border: '1px dashed rgba(255,255,255,0.1)' }}>
+                  + List New Property
+                </div>
+              </div>
+              
+              {/* Decorative Glow */}
+              <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '150%', height: '150%', background: 'radial-gradient(circle, rgba(255,184,0,0.08) 0%, rgba(0,0,0,0) 60%)', zIndex: 1 }}></div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* SECTION 7: THE ABOUT US LAYER */}
       <section className="snap-section section-about">
         <div className="about-content">
           <header className="section-header-center">
-            <span className="vector-label">Layer 06 // About Us</span>
+            <span className="vector-label">Layer 07 // About Us</span>
             <h2>Why We Built ScoutIt</h2>
           </header>
           
