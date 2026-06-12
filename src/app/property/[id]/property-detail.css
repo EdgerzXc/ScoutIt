@@ -1132,3 +1132,38 @@ html.lightbox-open {
 }
 
 
+
+/* === PROPERTY FEATURES SCROLL (MOBILE OVERRIDE) === */
+.property-features-scroll {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 28px 20px;
+  margin: 0 0 36px;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .property-features-scroll {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    scrollbar-width: none;
+    gap: 28px;
+    margin: 0 0 36px;
+    width: 100vw;
+    margin-left: -20px;
+    padding: 0 20px;
+    padding-bottom: 8px;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+  .property-features-scroll::-webkit-scrollbar {
+    display: none;
+  }
+  .property-feature-item {
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+    min-width: 100px;
+    padding-right: 16px;
+  }
+}
