@@ -14,6 +14,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
+  // Pin all absolute URLs (OG tags, canonical, etc.) to the production domain.
+  // Without this, Next.js falls back to VERCEL_URL which is the per-commit
+  // preview URL (e.g. scoutit-nyjlszg3k-…vercel.app) — not publicly accessible.
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://scoutit.vercel.app"
+  ),
   title: {
     default: "ScoutIt — Space Intelligence",
     template: "%s · ScoutIt",
