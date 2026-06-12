@@ -256,8 +256,8 @@ export default function DescentSequence({ onExit }) {
           background: radial-gradient(
             circle,
             rgba(255, 232, 170, 0.55) 0%,
-            rgba(200, 169, 110, 0.28) 32%,
-            rgba(200, 169, 110, 0) 70%
+            rgba(255, 184, 0, 0.28) 32%,
+            rgba(255, 184, 0, 0) 70%
           );
           mix-blend-mode: screen;
         }
@@ -289,7 +289,7 @@ export default function DescentSequence({ onExit }) {
           font-family: var(--font-mono, monospace);
           font-size: 11px;
           letter-spacing: 0.42em;
-          color: rgba(200, 169, 110, 0.78);
+          color: rgba(255, 184, 0, 0.78);
           text-indent: 0.42em;
           animation: descentPulse 3.2s ease-in-out infinite;
         }
@@ -314,7 +314,7 @@ export default function DescentSequence({ onExit }) {
           transform: translateX(-50%);
           width: 180px;
           height: 2px;
-          background: rgba(200, 169, 110, 0.14);
+          background: rgba(255, 184, 0, 0.14);
           border-radius: 2px;
           opacity: 0;
           transition: opacity 0.6s ease;
@@ -322,9 +322,9 @@ export default function DescentSequence({ onExit }) {
         .descent-rail[data-on="true"] { opacity: 1; }
         .descent-rail-fill {
           height: 100%;
-          background: rgba(200, 169, 110, 0.85);
+          background: rgba(255, 184, 0, 0.85);
           border-radius: 2px;
-          box-shadow: 0 0 8px rgba(200, 169, 110, 0.6);
+          box-shadow: 0 0 8px rgba(255, 184, 0, 0.6);
           transition: width 0.12s linear;
         }
 

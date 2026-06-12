@@ -397,7 +397,7 @@ export default function IntelPage() {
         }
         .mode-jump-box:hover {
           border-color: var(--accent-border);
-          background: rgba(200, 169, 110, 0.06);
+          background: rgba(255, 184, 0, 0.06);
         }
         .mode-jump-box .jump-here {
           font-family: var(--font-mono);
@@ -497,9 +497,9 @@ export default function IntelPage() {
           border: 0.5px solid rgba(0, 122, 255, 0.3);
         }
         .article-type-badge.report {
-          background: rgba(200, 169, 110, 0.15);
-          color: #c8a96e;
-          border: 0.5px solid rgba(200, 169, 110, 0.3);
+          background: rgba(255, 184, 0, 0.15);
+          color: #ffb800;
+          border: 0.5px solid rgba(255, 184, 0, 0.3);
         }
         .article-type-badge.analysis {
           background: rgba(255, 255, 255, 0.08);
@@ -664,7 +664,7 @@ export default function IntelPage() {
         .filter-btn.active {
           color: var(--accent);
           border-color: var(--accent);
-          background: rgba(200, 169, 110, 0.08);
+          background: rgba(255, 184, 0, 0.08);
         }
 
         /* Grid */
@@ -863,9 +863,9 @@ export default function IntelPage() {
         }
 
         .side-panel-insight-note {
-          background: rgba(200,169,110,0.07);
-          border: 1px solid rgba(200,169,110,0.3);
-          border-left: 3px solid #c8a96e;
+          background: rgba(255,184,0,0.07);
+          border: 1px solid rgba(255,184,0,0.3);
+          border-left: 3px solid #ffb800;
           border-radius: 4px;
           padding: 12px 16px;
         }
@@ -873,7 +873,7 @@ export default function IntelPage() {
         .side-panel-insight-note span {
           font-family: var(--font-mono);
           font-size: 9px;
-          color: #c8a96e;
+          color: #ffb800;
           text-transform: uppercase;
           letter-spacing: 0.1em;
           font-weight: 700;
@@ -883,7 +883,7 @@ export default function IntelPage() {
 
         .side-panel-insight-note p {
           font-size: 12px;
-          color: #c8a96e;
+          color: #ffb800;
           margin: 0;
           opacity: 0.8;
         }

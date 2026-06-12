@@ -44,7 +44,7 @@
 /* faint full route (where the light will go) */
 .cinematic-line-track {
   fill: none;
-  stroke: rgba(200, 169, 110, 0.18);
+  stroke: rgba(255, 184, 0, 0.18);
   stroke-width: 2;
   stroke-linecap: round;
 }

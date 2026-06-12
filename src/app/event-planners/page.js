@@ -199,7 +199,7 @@ export default function EventPlannersPage() {
 
       <style>{`
         .coming-soon-banner {
-          background: linear-gradient(135deg, rgba(200,169,110,0.08) 0%, rgba(200,169,110,0.03) 100%);
+          background: linear-gradient(135deg, rgba(255,184,0,0.08) 0%, rgba(255,184,0,0.03) 100%);
           border: 0.5px solid var(--accent-border);
           border-radius: 6px;
           padding: 16px 22px;
@@ -383,9 +383,9 @@ export default function EventPlannersPage() {
         .tier-2-card { border-color: #a5c2d9 !important; }
         .tier-2-card .general-tier-badge-label { background: linear-gradient(135deg, #a5c2d9 0%, #eef3f7 100%); color: #0e0e0e; }
         .tier-2-card .broker-location { color: #a5c2d9; }
-        .tier-3-card { border-color: #c8a96e !important; }
-        .tier-3-card .general-tier-badge-label { background: linear-gradient(135deg, #c8a96e 0%, #f7ebd3 100%); color: #0e0e0e; }
-        .tier-3-card .broker-location { color: #c8a96e; }
+        .tier-3-card { border-color: #ffb800 !important; }
+        .tier-3-card .general-tier-badge-label { background: linear-gradient(135deg, #ffb800 0%, #f7ebd3 100%); color: #0e0e0e; }
+        .tier-3-card .broker-location { color: #ffb800; }
         @keyframes diamondGlow {
           0%   { background-position: 0% 50%; }
           50%  { background-position: 100% 50%; }

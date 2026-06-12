@@ -5,10 +5,10 @@ import Link from "next/link";
 import { rankBoard, BOARD_CATEGORIES } from "@/data/mockShowcase";
 
 const TIER = {
-  universe: { color: "#c8a96e", rgb: "200,169,110" },
+  universe: { color: "#ffb800", rgb: "255,184,0" },
   cluster: { color: "#C0C0C0", rgb: "192,192,192" },
   solar: { color: "#CD7F32", rgb: "205,127,50" },
-  starry: { color: "#8a8a8a", rgb: "138,138,138" },
+  starry: { color: "#c8c8c8", rgb: "138,138,138" },
 };
 
 function BoardCard({ e, variant }) {
@@ -99,7 +99,7 @@ export default function BoardPodium() {
           width: 100%; min-height: 100%;
           display: grid; grid-template-columns: 320px 1fr;
           background:
-            radial-gradient(ellipse at 80% 20%, rgba(200,169,110,0.05), transparent 55%),
+            radial-gradient(ellipse at 80% 20%, rgba(255,184,0,0.05), transparent 55%),
             #0b0b0d;
         }
         .board-menu {
@@ -109,21 +109,21 @@ export default function BoardPodium() {
         }
         .board-kicker { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.2em; color: var(--accent); text-transform: uppercase; }
         .board-title { font-family: var(--font-display); font-weight: 400; font-size: clamp(34px, 4vw, 48px); color: #f0ede8; margin: 12px 0 8px; }
-        .board-sub { font-family: Georgia, serif; font-style: italic; font-size: 14px; color: #8a8a8a; line-height: 1.6; margin-bottom: 28px; }
+        .board-sub { font-family: Georgia, serif; font-style: italic; font-size: 14px; color: #c8c8c8; line-height: 1.6; margin-bottom: 28px; }
         .board-nav { display: flex; flex-direction: column; gap: 2px; }
         .board-cat {
-          text-align: left; font-family: Georgia, serif; font-size: 17px; color: #8a8a8a;
+          text-align: left; font-family: Georgia, serif; font-size: 17px; color: #c8c8c8;
           background: none; border: 1px solid transparent; padding: 13px 16px; cursor: pointer;
           border-radius: 4px; transition: all 0.2s;
         }
         .board-cat:hover { color: #f0ede8; }
-        .board-cat.on { color: var(--accent); border-color: rgba(200,169,110,0.4); background: rgba(200,169,110,0.06); }
+        .board-cat.on { color: var(--accent); border-color: rgba(255,184,0,0.4); background: rgba(255,184,0,0.06); }
         :global(.board-seeall) {
           font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase;
-          color: var(--accent); text-decoration: none; border: 1px solid rgba(200,169,110,0.5);
+          color: var(--accent); text-decoration: none; border: 1px solid rgba(255,184,0,0.5);
           padding: 16px; text-align: center; transition: background 0.2s; margin-top: 28px;
         }
-        :global(.board-seeall:hover) { background: rgba(200,169,110,0.12); }
+        :global(.board-seeall:hover) { background: rgba(255,184,0,0.12); }
 
         .board-content { padding: clamp(36px, 6vh, 64px) clamp(28px, 4vw, 56px); display: flex; flex-direction: column; min-width: 0; }
         .board-content-head { margin-bottom: 28px; }

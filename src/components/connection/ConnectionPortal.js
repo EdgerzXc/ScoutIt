@@ -31,7 +31,7 @@ export default function ConnectionPortal({ brokerName }) {
 
         <style>{`
           .portal-success {
-            background: rgba(200, 169, 110, 0.04);
+            background: rgba(255, 184, 0, 0.04);
             border: 1px solid var(--accent-border);
             border-radius: var(--radius-md);
             padding: 40px;
@@ -274,7 +274,7 @@ export default function ConnectionPortal({ brokerName }) {
 
         .portal-submit-btn:hover {
           transform: translateY(-2px);
-          box-shadow: 0 4px 16px rgba(200,169,110,0.35);
+          box-shadow: 0 4px 16px rgba(255,184,0,0.35);
         }
 
         /* Safety Warning Disclaimer Styles */

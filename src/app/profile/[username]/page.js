@@ -77,7 +77,7 @@ export default function ProfilePage() {
           <div className="text-center p-8 max-w-lg w-full flex flex-col items-center animate-[slideUp_0.8s_ease-out]">
             <span className="text-gold-accent font-label-caps text-xs tracking-widest uppercase mb-4 block">Badge Unlocked</span>
             
-            <div className="text-8xl mb-6 drop-shadow-[0_0_40px_rgba(200,169,110,0.4)] animate-[bounce_2s_infinite]">
+            <div className="text-8xl mb-6 drop-shadow-[0_0_40px_rgba(255,184,0,0.4)] animate-[bounce_2s_infinite]">
               {ceremonyBadge.icon}
             </div>
             

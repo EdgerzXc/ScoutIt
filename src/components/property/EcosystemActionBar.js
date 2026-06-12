@@ -19,7 +19,7 @@ export default function EcosystemActionBar() {
       <span style={{
         fontFamily: 'var(--font-mono)',
         fontSize: '11px',
-        color: '#c8a96e',
+        color: '#ffb800',
         letterSpacing: '0.15em',
         textTransform: 'uppercase'
       }}>

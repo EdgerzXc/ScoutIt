@@ -298,7 +298,7 @@ export default function DiscoverClient() {
                             fontSize: "11px",
                             color: "var(--accent)",
                             textDecoration: "none",
-                            border: "1px solid rgba(200, 169, 110, 0.4)",
+                            border: "1px solid rgba(255, 184, 0, 0.4)",
                             padding: "6px 14px",
                             borderRadius: "2px",
                             transition: "all var(--transition-fast) ease",

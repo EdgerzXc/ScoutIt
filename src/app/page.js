@@ -105,7 +105,7 @@ export default function Home() {
       twSpeed: rand(0.6, 1.8),
     });
     const BODY_COLORS = [
-      () => `rgba(200,169,110,${rand(0.3, 0.6).toFixed(2)})`,   // gold
+      () => `rgba(255,184,0,${rand(0.3, 0.6).toFixed(2)})`,   // gold
       () => `rgba(240,237,232,${rand(0.2, 0.4).toFixed(2)})`,   // warm white
       () => `rgba(136,136,170,${rand(0.2, 0.4).toFixed(2)})`,   // cool blue
     ];
@@ -177,8 +177,8 @@ export default function Home() {
       const coreOp = 0.08 + 0.04 * Math.sin(t * 1.5);
       const coreR = Math.min(w, h) * 0.22;
       const coreGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, coreR);
-      coreGrad.addColorStop(0, `rgba(200,169,110,${coreOp.toFixed(3)})`);
-      coreGrad.addColorStop(1, "rgba(200,169,110,0)");
+      coreGrad.addColorStop(0, `rgba(255,184,0,${coreOp.toFixed(3)})`);
+      coreGrad.addColorStop(1, "rgba(255,184,0,0)");
       ctx.beginPath();
       ctx.arc(cx, cy, coreR, 0, Math.PI * 2);
       ctx.fillStyle = coreGrad;
@@ -211,7 +211,7 @@ export default function Home() {
         const r = 40 + (300 - 40) * eased;
         ctx.beginPath();
         ctx.arc(cx, cy, r, 0, Math.PI * 2);
-        ctx.strokeStyle = `rgba(200,169,110,${(0.12 * (1 - p)).toFixed(3)})`;
+        ctx.strokeStyle = `rgba(255,184,0,${(0.12 * (1 - p)).toFixed(3)})`;
         ctx.lineWidth = 2;
         ctx.stroke();
       }
@@ -229,14 +229,14 @@ export default function Home() {
         }
         ctx.beginPath();
         ctx.arc(cx, cy, ring.r, 0, Math.PI * 2);
-        ctx.strokeStyle = `rgba(200,169,110,${op.toFixed(3)})`;
+        ctx.strokeStyle = `rgba(255,184,0,${op.toFixed(3)})`;
         ctx.lineWidth = lw;
         ctx.stroke();
         if (ring.inner) {
           const a0 = (t * 0.25) % (Math.PI * 2);
           ctx.beginPath();
           ctx.arc(cx, cy, ring.r, a0, a0 + Math.PI * 0.6);
-          ctx.strokeStyle = `rgba(200,169,110,${(op * 2.4).toFixed(3)})`;
+          ctx.strokeStyle = `rgba(255,184,0,${(op * 2.4).toFixed(3)})`;
           ctx.lineWidth = 1.4;
           ctx.stroke();
         }
@@ -255,7 +255,7 @@ export default function Home() {
         ctx.moveTo(x, y); ctx.lineTo(x2, y2);
         ctx.strokeStyle = d.warm
           ? `rgba(240,237,232,${(d.opacity * fade).toFixed(3)})`
-          : `rgba(200,169,110,${(d.opacity * fade).toFixed(3)})`;
+          : `rgba(255,184,0,${(d.opacity * fade).toFixed(3)})`;
         ctx.lineWidth = 1;
         ctx.stroke();
       });
@@ -308,8 +308,8 @@ export default function Home() {
         const tx = cx + Math.cos(c.angle) * (c.radius + c.tail);
         const ty = cy + Math.sin(c.angle) * (c.radius + c.tail);
         const grad = ctx.createLinearGradient(hx, hy, tx, ty);
-        grad.addColorStop(0, "rgba(200,169,110,0.8)");
-        grad.addColorStop(1, "rgba(200,169,110,0)");
+        grad.addColorStop(0, "rgba(255,184,0,0.8)");
+        grad.addColorStop(1, "rgba(255,184,0,0)");
         ctx.beginPath();
         ctx.moveTo(hx, hy);
         ctx.lineTo(tx, ty);
@@ -320,7 +320,7 @@ export default function Home() {
         ctx.beginPath();
         ctx.arc(hx, hy, c.size, 0, Math.PI * 2);
         ctx.fillStyle = "rgba(255,250,235,0.95)";
-        ctx.shadowColor = "rgba(200,169,110,0.9)";
+        ctx.shadowColor = "rgba(255,184,0,0.9)";
         ctx.shadowBlur = 6;
         ctx.fill();
         ctx.shadowBlur = 0;
@@ -794,8 +794,8 @@ export default function Home() {
                       width: '100%',
                       height: '100%',
                       borderRadius: rock.borderRadius,
-                      background: 'rgba(200, 169, 110, 0.55)', // Gold-tinted to match theme
-                      boxShadow: '0 0 6px rgba(200, 169, 110, 0.25)',
+                      background: 'rgba(255, 184, 0, 0.55)', // Gold-tinted to match theme
+                      boxShadow: '0 0 6px rgba(255, 184, 0, 0.25)',
                       filter: 'blur(0.5px)'
                     }}
                   />
@@ -835,11 +835,11 @@ export default function Home() {
               <svg className="title-ufo-svg" viewBox="0 0 120 70" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <defs>
                   <filter id="ufoRimGlow" x="-30%" y="-30%" width="160%" height="160%">
-                    <feDropShadow dx="0" dy="0" stdDeviation="3" floodColor="#c8a96e" floodOpacity="0.55" />
+                    <feDropShadow dx="0" dy="0" stdDeviation="3" floodColor="#ffb800" floodOpacity="0.55" />
                   </filter>
                 </defs>
                 {/* saucer body — wide disc */}
-                <ellipse cx="60" cy="44" rx="55" ry="13" fill="#1a1a1a" stroke="#c8a96e" strokeWidth="2" filter="url(#ufoRimGlow)" />
+                <ellipse cx="60" cy="44" rx="55" ry="13" fill="#1a1a1a" stroke="#ffb800" strokeWidth="2" filter="url(#ufoRimGlow)" />
                 {/* belly — slightly lighter underside */}
                 <ellipse cx="60" cy="48" rx="40" ry="8" fill="#222222" />
                 {/* belly lights — 4 evenly spaced gold dots */}
@@ -848,7 +848,7 @@ export default function Home() {
                 <circle className="ufo-belly" cx="68" cy="51" r="2.2" />
                 <circle className="ufo-belly" cx="84" cy="49" r="2.2" />
                 {/* dome / cockpit — prominent, green-tinted */}
-                <path d="M37 38 Q60 4 83 38 Z" fill="#1e2a1e" stroke="#c8a96e" strokeWidth="1" />
+                <path d="M37 38 Q60 4 83 38 Z" fill="#1e2a1e" stroke="#ffb800" strokeWidth="1" />
                 {/* porthole windows — sequential 1-2-3 blink */}
                 <circle className="porthole porthole-1" cx="49" cy="28" r="4" />
                 <circle className="porthole porthole-2" cx="60" cy="24" r="4" />
@@ -1241,7 +1241,7 @@ export default function Home() {
                   { tag: "Save", desc: "Saved to your ledger" }
                 ].map((item, idx) => (
                   <li key={idx} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '12px' }}>
-                    <span style={{ color: 'var(--accent)', fontFamily: 'var(--font-mono)', border: '1px solid rgba(200, 169, 110, 0.3)', padding: '2px 8px', borderRadius: '2px', fontSize: '10px', textTransform: 'uppercase' }}>
+                    <span style={{ color: 'var(--accent)', fontFamily: 'var(--font-mono)', border: '1px solid rgba(255, 184, 0, 0.3)', padding: '2px 8px', borderRadius: '2px', fontSize: '10px', textTransform: 'uppercase' }}>
                       {item.tag}
                     </span>
                     <span style={{ color: 'var(--text-muted)' }}>{item.desc}</span>
@@ -1272,13 +1272,13 @@ export default function Home() {
                 {/* Step 1: Scan */}
                 <div className="flow-card">
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--accent)', border: '1px solid rgba(200,169,110,0.2)', padding: '2px 6px', borderRadius: '2px' }}>PHASE 01</span>
+                    <span style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--accent)', border: '1px solid rgba(255,184,0,0.2)', padding: '2px 6px', borderRadius: '2px' }}>PHASE 01</span>
                     <span style={{ fontSize: '24px', fontWeight: '800', fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.05)' }}>01</span>
                   </div>
                   
                   {/* Schematic Graphic: Mini Grid */}
                   <div style={{ height: '70px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px dashed #262626', background: 'rgba(0,0,0,0.3)', borderRadius: '2px' }}>
-                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="rgba(200, 169, 110, 0.4)" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="rgba(255, 184, 0, 0.4)" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
                       <rect x="3" y="3" width="7" height="9"></rect>
                       <rect x="14" y="3" width="7" height="5"></rect>
                       <rect x="14" y="12" width="7" height="9"></rect>
@@ -1295,7 +1295,7 @@ export default function Home() {
                 {/* Step 2: Tag */}
                 <div className="flow-card">
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--accent)', border: '1px solid rgba(200,169,110,0.2)', padding: '2px 6px', borderRadius: '2px' }}>PHASE 02</span>
+                    <span style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--accent)', border: '1px solid rgba(255,184,0,0.2)', padding: '2px 6px', borderRadius: '2px' }}>PHASE 02</span>
                     <span style={{ fontSize: '24px', fontWeight: '800', fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.05)' }}>02</span>
                   </div>
                   
@@ -1318,13 +1318,13 @@ export default function Home() {
                 {/* Step 3: Archive */}
                 <div className="flow-card">
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--accent)', border: '1px solid rgba(200,169,110,0.2)', padding: '2px 6px', borderRadius: '2px' }}>PHASE 03</span>
+                    <span style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--accent)', border: '1px solid rgba(255,184,0,0.2)', padding: '2px 6px', borderRadius: '2px' }}>PHASE 03</span>
                     <span style={{ fontSize: '24px', fontWeight: '800', fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.05)' }}>03</span>
                   </div>
                   
                   {/* Schematic Graphic: Vault lock */}
                   <div style={{ height: '70px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px dashed #262626', background: 'rgba(0,0,0,0.3)', borderRadius: '2px' }}>
-                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="rgba(200, 169, 110, 0.4)" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="rgba(255, 184, 0, 0.4)" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
                       <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                       <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                     </svg>
@@ -1339,13 +1339,13 @@ export default function Home() {
                 {/* Step 4: Route */}
                 <div className="flow-card">
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--accent)', border: '1px solid rgba(200,169,110,0.2)', padding: '2px 6px', borderRadius: '2px' }}>PHASE 04</span>
+                    <span style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--accent)', border: '1px solid rgba(255,184,0,0.2)', padding: '2px 6px', borderRadius: '2px' }}>PHASE 04</span>
                     <span style={{ fontSize: '24px', fontWeight: '800', fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.05)' }}>04</span>
                   </div>
                   
                   {/* Schematic Graphic: Handshake signal */}
                   <div style={{ height: '70px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px dashed #262626', background: 'rgba(0,0,0,0.3)', borderRadius: '2px' }}>
-                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="rgba(200, 169, 110, 0.4)" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="rgba(255, 184, 0, 0.4)" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
                       <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
                     </svg>
@@ -1480,10 +1480,16 @@ export default function Home() {
         }
 
         .prominent-action-link:hover {
-          background: var(--accent);
+          background: var(--accent-bright);
+          border-color: var(--accent-bright);
           color: #000;
-          box-shadow: 0 0 24px rgba(200, 169, 110, 0.2);
+          box-shadow: var(--shadow-glow);
           transform: translateY(-2px);
+        }
+
+        .prominent-action-link:focus-visible {
+          outline: 1.5px solid var(--accent-bright);
+          outline-offset: 3px;
         }
 
         .section-action-footer {
@@ -1520,12 +1526,12 @@ export default function Home() {
             circle,
             #000000 0%,
             #000000 35%,
-            rgba(200, 169, 110, 0.04) 45%,
-            rgba(200, 169, 110, 0.12) 55%,
+            rgba(255, 184, 0, 0.04) 45%,
+            rgba(255, 184, 0, 0.12) 55%,
             transparent 75%
           );
-          border: 1px solid rgba(200, 169, 110, 0.18);
-          box-shadow: 0 0 120px rgba(200, 169, 110, 0.14), inset 0 0 40px rgba(200, 169, 110, 0.08);
+          border: 1px solid rgba(255, 184, 0, 0.18);
+          box-shadow: 0 0 120px rgba(255, 184, 0, 0.14), inset 0 0 40px rgba(255, 184, 0, 0.08);
           pointer-events: none;
           z-index: 1;
           animation: slowOrbit 60s linear infinite;
@@ -1542,11 +1548,11 @@ export default function Home() {
           border-radius: 50%;
           background: conic-gradient(
             from 0deg,
-            rgba(200, 169, 110, 0.12) 0%,
+            rgba(255, 184, 0, 0.12) 0%,
             transparent 25%,
-            rgba(200, 169, 110, 0.18) 50%,
+            rgba(255, 184, 0, 0.18) 50%,
             transparent 75%,
-            rgba(200, 169, 110, 0.12) 100%
+            rgba(255, 184, 0, 0.12) 100%
           );
           filter: blur(35px);
           animation: slowSwirl 45s linear infinite;
@@ -1564,8 +1570,8 @@ export default function Home() {
           border-radius: 50% 50% 0 0;
           background: radial-gradient(
             ellipse at top,
-            rgba(200, 169, 110, 0.22) 0%,
-            rgba(200, 169, 110, 0.06) 40%,
+            rgba(255, 184, 0, 0.22) 0%,
+            rgba(255, 184, 0, 0.06) 40%,
             transparent 70%
           );
           filter: blur(40px);
@@ -1584,11 +1590,11 @@ export default function Home() {
           border-radius: 50%;
           background: conic-gradient(
             from 180deg,
-            rgba(200, 169, 110, 0.09) 0%,
+            rgba(255, 184, 0, 0.09) 0%,
             transparent 30%,
-            rgba(200, 169, 110, 0.15) 50%,
+            rgba(255, 184, 0, 0.15) 50%,
             transparent 80%,
-            rgba(200, 169, 110, 0.09) 100%
+            rgba(255, 184, 0, 0.09) 100%
           );
           filter: blur(50px);
           animation: slowSwirl 90s linear infinite reverse;
@@ -1634,7 +1640,7 @@ export default function Home() {
           height: 100%;
           background: #ffffff;
           border-radius: 50%;
-          box-shadow: 0 0 10px rgba(255, 255, 255, 0.9), 0 0 20px rgba(200, 169, 110, 0.4);
+          box-shadow: 0 0 10px rgba(255, 255, 255, 0.9), 0 0 20px rgba(255, 184, 0, 0.4);
           position: relative;
         }
         .comet-tail {
@@ -1644,7 +1650,7 @@ export default function Home() {
           transform: translateY(-50%);
           width: 90px; /* Longer, highly noticeable tail */
           height: 3px; /* Thicker head connection */
-          background: linear-gradient(to left, #ffffff 0%, rgba(200, 169, 110, 0.6) 30%, rgba(200, 169, 110, 0.15) 75%, transparent 100%);
+          background: linear-gradient(to left, #ffffff 0%, rgba(255, 184, 0, 0.6) 30%, rgba(255, 184, 0, 0.15) 75%, transparent 100%);
           clip-path: polygon(0 50%, 100% 0, 100% 100%); /* Elegant taper wedge shape */
           pointer-events: none;
         }
@@ -1657,7 +1663,7 @@ export default function Home() {
           border-radius: 50%;
           box-shadow: 
             0 0 12px rgba(224, 242, 254, 0.9), 
-            0 0 24px rgba(200, 169, 110, 0.6);
+            0 0 24px rgba(255, 184, 0, 0.6);
           animation: pulseNeutronDrifting 2.5s ease-in-out infinite alternate;
         }
         @keyframes pulseNeutronDrifting {
@@ -1665,13 +1671,13 @@ export default function Home() {
             transform: scale(0.85);
             box-shadow: 
               0 0 8px rgba(224, 242, 254, 0.7), 
-              0 0 16px rgba(200, 169, 110, 0.4);
+              0 0 16px rgba(255, 184, 0, 0.4);
           }
           100% {
             transform: scale(1.15);
             box-shadow: 
               0 0 16px rgba(224, 242, 254, 0.95), 
-              0 0 32px rgba(200, 169, 110, 0.75);
+              0 0 32px rgba(255, 184, 0, 0.75);
           }
         }
 
@@ -1715,16 +1721,16 @@ export default function Home() {
           transition: color 2s ease, text-shadow 2s ease;
         }
         .scoutit-wordmark .word-scout { color: #ffffff; }
-        .scoutit-wordmark .word-it    { color: #c8a96e; margin-right: -4px; }
+        .scoutit-wordmark .word-it    { color: #ffb800; margin-right: -4px; }
         /* beam-hit illumination snaps on fast, then fades back slowly via base transition */
         .scoutit-wordmark.lit .word-scout {
           color: #ffffff;
-          text-shadow: 0 0 60px rgba(200, 169, 110, 0.8), 0 0 120px rgba(200, 169, 110, 0.3);
+          text-shadow: 0 0 60px rgba(255, 184, 0, 0.8), 0 0 120px rgba(255, 184, 0, 0.3);
           transition: color 0.15s ease, text-shadow 0.15s ease;
         }
         .scoutit-wordmark.lit .word-it {
-          color: #c8a96e;
-          text-shadow: 0 0 60px rgba(200, 169, 110, 0.9), 0 0 120px rgba(200, 169, 110, 0.4);
+          color: #ffb800;
+          text-shadow: 0 0 60px rgba(255, 184, 0, 0.9), 0 0 120px rgba(255, 184, 0, 0.4);
           transition: color 0.15s ease, text-shadow 0.15s ease;
         }
 
@@ -1736,7 +1742,7 @@ export default function Home() {
           width: 220px;
           height: 220px;
           border-radius: 50%;
-          background: radial-gradient(circle, rgba(200, 169, 110, 0.6) 0%, rgba(200, 169, 110, 0) 60%);
+          background: radial-gradient(circle, rgba(255, 184, 0, 0.6) 0%, rgba(255, 184, 0, 0) 60%);
           transform: translate(-50%, -50%) scale(0.3);
           pointer-events: none;
           opacity: 0;
@@ -1772,7 +1778,7 @@ export default function Home() {
           transform: translateX(-50%);
           width: 180px;
           height: 90px;
-          background: radial-gradient(ellipse at top, rgba(200, 169, 110, 0.12), rgba(200, 169, 110, 0) 70%);
+          background: radial-gradient(ellipse at top, rgba(255, 184, 0, 0.12), rgba(255, 184, 0, 0) 70%);
           pointer-events: none;
           z-index: -1;
         }
@@ -1785,7 +1791,7 @@ export default function Home() {
           height: 60px;
           margin: -30px 0 0 -30px;
           border-radius: 50%;
-          border: 1px solid rgba(200, 169, 110, 0.5);
+          border: 1px solid rgba(255, 184, 0, 0.5);
           pointer-events: none;
           opacity: 0;
           z-index: -1;
@@ -1804,7 +1810,7 @@ export default function Home() {
         .title-ufo-svg .porthole-3 { animation: portSeq 1.4s linear infinite; animation-delay: 0.4s; }
         /* power-up: all three flash together, rapidly, 3x over ~0.5s */
         .title-ufo.powering .porthole { animation: portPower 0.166s ease-in-out 3; }
-        .title-ufo-svg .ufo-belly { fill: rgba(200, 169, 110, 0.6); }
+        .title-ufo-svg .ufo-belly { fill: rgba(255, 184, 0, 0.6); }
 
         /* ── Tractor beam: gold cone, fades to transparent, extend → hold → fade ── */
         .title-beam {
@@ -1815,13 +1821,13 @@ export default function Home() {
           background: linear-gradient(
             to bottom,
             rgba(255, 235, 160, 1) 0%,
-            rgba(200, 169, 110, 0.85) 30%,
-            rgba(200, 169, 110, 0.3) 70%,
-            rgba(200, 169, 110, 0) 100%
+            rgba(255, 184, 0, 0.85) 30%,
+            rgba(255, 184, 0, 0.3) 70%,
+            rgba(255, 184, 0, 0) 100%
           );
           box-shadow:
-            0 0 8px rgba(200, 169, 110, 0.6),
-            0 0 20px rgba(200, 169, 110, 0.25);
+            0 0 8px rgba(255, 184, 0, 0.6),
+            0 0 20px rgba(255, 184, 0, 0.25);
           border-radius: 0 0 4px 4px;
           transform-origin: top center;
           opacity: 0;
@@ -1833,8 +1839,8 @@ export default function Home() {
             width: 4px;
             height: 100px;
             box-shadow:
-              0 0 12px rgba(200, 169, 110, 0.7),
-              0 0 30px rgba(200, 169, 110, 0.3);
+              0 0 12px rgba(255, 184, 0, 0.7),
+              0 0 30px rgba(255, 184, 0, 0.3);
           }
         }
 
@@ -1852,7 +1858,7 @@ export default function Home() {
         .title-divider {
           width: 32px;
           height: 1px;
-          background: rgba(200, 169, 110, 0.35);
+          background: rgba(255, 184, 0, 0.35);
           margin: 0 auto 22px;
         }
 
@@ -1929,7 +1935,7 @@ export default function Home() {
         /* ── S: Comet Trail ───────────────────────────── */
         .letter-s {
           animation: cometDraw 0.7s cubic-bezier(0.4,0,0.2,1) forwards;
-          text-shadow: 0 0 12px rgba(200, 169, 110, 0.5);
+          text-shadow: 0 0 12px rgba(255, 184, 0, 0.5);
         }
 
         /* ── C: Eclipse Reveal ────────────────────────── */
@@ -1947,7 +1953,7 @@ export default function Home() {
           position: absolute;
           top: 50%; left: 50%;
           width: 120%; height: 35%;
-          border: 1px solid rgba(200,169,110,0.5);
+          border: 1px solid rgba(255,184,0,0.5);
           border-radius: 50%;
           transform: translate(-50%, -50%) rotateX(65deg);
           animation: orbitSweep 1.4s ease-out 1.0s forwards;
@@ -2074,7 +2080,7 @@ export default function Home() {
           min-width: 4px;
           flex: 1;
           min-height: 0.55em;
-          background: linear-gradient(to bottom, rgba(200,169,110,0.7) 0%, rgba(200,169,110,0.15) 100%);
+          background: linear-gradient(to bottom, rgba(255,184,0,0.7) 0%, rgba(255,184,0,0.15) 100%);
           clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%);
           animation: beamPulse 2s ease-in-out 3.4s infinite;
           opacity: 0;
@@ -2091,7 +2097,7 @@ export default function Home() {
           position: absolute;
           top: 50%; left: 50%;
           border-radius: 50%;
-          border: 1px solid rgba(200,169,110,0.5);
+          border: 1px solid rgba(255,184,0,0.5);
           transform: translate(-50%, -50%) scale(2);
           opacity: 0;
           pointer-events: none;
@@ -2147,7 +2153,7 @@ export default function Home() {
         }
         .scroll-chev {
           font-size: 13px;
-          color: #c8a96e;
+          color: #ffb800;
           opacity: 0;
         }
         .scroll-chev-1 { animation: chevSeq 1.5s ease-in-out infinite; }
@@ -2215,7 +2221,7 @@ export default function Home() {
         .hero-cta-btn:hover {
           background: var(--accent);
           color: #0e0e0e;
-          box-shadow: 0 0 35px rgba(200, 169, 110, 0.45);
+          box-shadow: 0 0 35px rgba(255, 184, 0, 0.45);
           transform: translateY(-2px);
         }
 
@@ -2283,8 +2289,8 @@ export default function Home() {
 
         /* UFO disc glow pulse */
         @keyframes discGlow {
-          0%, 100% { box-shadow: 0 0 12px rgba(200,169,110,0.4); }
-          50%       { box-shadow: 0 0 22px rgba(200,169,110,0.9), 0 0 40px rgba(200,169,110,0.2); }
+          0%, 100% { box-shadow: 0 0 12px rgba(255,184,0,0.4); }
+          50%       { box-shadow: 0 0 22px rgba(255,184,0,0.9), 0 0 40px rgba(255,184,0,0.2); }
         }
 
         /* UFO lights blink */
@@ -2411,8 +2417,8 @@ export default function Home() {
         .menu-btn:hover {
           color: var(--accent);
           transform: scale(1.03);
-          box-shadow: 0 0 20px rgba(200, 169, 110, 0.1);
-          border-color: rgba(200, 169, 110, 0.25);
+          box-shadow: 0 0 20px rgba(255, 184, 0, 0.1);
+          border-color: rgba(255, 184, 0, 0.25);
           padding-left: 28px;
         }
 
@@ -2420,7 +2426,7 @@ export default function Home() {
           color: var(--accent);
           background: var(--surface2);
           border-color: var(--accent);
-          box-shadow: 0 0 15px rgba(200, 169, 110, 0.05);
+          box-shadow: 0 0 15px rgba(255, 184, 0, 0.05);
           padding-left: 28px;
         }
 
@@ -2489,7 +2495,7 @@ export default function Home() {
 
         .vector-search-input:focus {
           border-color: var(--accent);
-          box-shadow: 0 0 8px rgba(200, 169, 110, 0.15);
+          box-shadow: 0 0 8px rgba(255, 184, 0, 0.15);
         }
 
         .search-suggestions-dropdown {
@@ -2655,9 +2661,9 @@ export default function Home() {
           transition: all var(--transition-fast);
         }
         .curated-collection-btn:hover {
-          border-color: var(--accent) !important;
+          border-color: var(--accent-bright) !important;
           transform: translateX(4px);
-          box-shadow: 0 0 12px rgba(200, 169, 110, 0.08);
+          box-shadow: var(--shadow-glow-soft);
         }
 
         .discover-news-item-link {
@@ -2670,8 +2676,8 @@ export default function Home() {
           text-decoration: none;
         }
         .discover-news-item-link:hover {
-          background: rgba(200, 169, 110, 0.03);
-          border-color: rgba(200, 169, 110, 0.15) !important;
+          background: rgba(255, 184, 0, 0.03);
+          border-color: rgba(255, 184, 0, 0.15) !important;
           transform: translateX(4px);
         }
         .news-item-title {
@@ -2888,7 +2894,7 @@ export default function Home() {
           width: 80px;
           height: 80px;
           border-radius: 50%;
-          background: rgba(200, 169, 110, 0.1);
+          background: rgba(255, 184, 0, 0.1);
           border: 1px dashed var(--accent-border);
         }
 
@@ -2991,9 +2997,9 @@ export default function Home() {
         }
 
         .soon-badge {
-          background: rgba(200, 169, 110, 0.1);
+          background: rgba(255, 184, 0, 0.1);
           color: var(--accent);
-          border: 0.5px solid rgba(200, 169, 110, 0.3);
+          border: 0.5px solid rgba(255, 184, 0, 0.3);
         }
 
         .service-title {
@@ -3018,8 +3024,8 @@ export default function Home() {
           font-size: 11px;
           font-weight: 600;
           text-transform: uppercase;
-          letter-spacing: 0.1em;
-          color: var(--text-muted);
+          letter-spacing: 0.14em;
+          color: var(--text-secondary);
           transition: color 0.2s ease;
           margin-top: auto;
         }
@@ -3036,7 +3042,7 @@ export default function Home() {
 
         .coming-soon-card:hover {
           border-color: var(--accent-border);
-          background: rgba(200, 169, 110, 0.02);
+          background: rgba(255, 184, 0, 0.02);
           transform: translateY(-4px);
         }
 
@@ -3096,8 +3102,8 @@ export default function Home() {
           content: "";
           height: 24px;
           width: 80px;
-          background: rgba(200, 169, 110, 0.05);
-          border: 1px solid rgba(200, 169, 110, 0.2);
+          background: rgba(255, 184, 0, 0.05);
+          border: 1px solid rgba(255, 184, 0, 0.2);
           border-radius: 12px;
           margin-left: auto;
         }
@@ -3396,7 +3402,7 @@ export default function Home() {
             display: none !important;
           }
           .service-cta {
-            font-size: 8px !important;
+            font-size: 10px !important;
           }
 
           /* 4. Layer 04: Horizontally draggable flow cards */

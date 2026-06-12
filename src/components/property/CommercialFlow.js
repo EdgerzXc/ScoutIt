@@ -54,10 +54,10 @@ function DeepIntelWidget({ open, onToggle, fields }) {
         onClick={onToggle}
         style={{width:"100%", background:"#161616", border:"0.5px solid #262626", padding:"14px 20px", cursor:"pointer", display:"flex", justifyContent:"space-between", alignItems:"center", borderRadius:"2px"}}
       >
-        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8a96e", letterSpacing:"0.18em", textTransform:"uppercase"}}>
+        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#ffb800", letterSpacing:"0.18em", textTransform:"uppercase"}}>
           DEEP INTELLIGENCE // VERIFIED SCOUT
         </span>
-        <svg viewBox="0 0 10 6" width="10" height="6" fill="none" stroke="#c8a96e" strokeWidth="1.5">
+        <svg viewBox="0 0 10 6" width="10" height="6" fill="none" stroke="#ffb800" strokeWidth="1.5">
           <path d={open ? "M1 5L5 1L9 5" : "M1 1L5 5L9 1"}/>
         </svg>
       </button>
@@ -66,14 +66,14 @@ function DeepIntelWidget({ open, onToggle, fields }) {
           <div style={{filter:"blur(4px)", pointerEvents:"none", userSelect:"none", display:"flex", flexDirection:"column"}}>
             {fields.map((field, i) => (
               <div key={i} style={{display:"flex", justifyContent:"space-between", alignItems:"center", padding:"11px 0", borderBottom: i < fields.length - 1 ? "1px solid #262626" : "none"}}>
-                <span style={{fontFamily:"Georgia,serif", fontSize:"13px", color:"#8a8a8a"}}>{field}</span>
+                <span style={{fontFamily:"Georgia,serif", fontSize:"13px", color:"#c8c8c8"}}>{field}</span>
                 <span style={{fontFamily:"'Courier New',monospace", fontSize:"12px", color:"#3a3a3a", letterSpacing:"0.1em"}}>████████</span>
               </div>
             ))}
           </div>
           <div style={{position:"absolute", inset:0, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:"14px", background:"rgba(22,22,22,0.88)", borderRadius:"0 0 2px 2px"}}>
-            <span style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#c8a96e", letterSpacing:"0.25em", textTransform:"uppercase"}}>VERIFIED SCOUT ONLY</span>
-            <button style={{fontFamily:"Georgia,serif", fontSize:"13px", color:"#0e0e0e", background:"#c8a96e", border:"none", padding:"10px 24px", borderRadius:"2px", cursor:"pointer", letterSpacing:"0.04em"}}>
+            <span style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#ffb800", letterSpacing:"0.25em", textTransform:"uppercase"}}>VERIFIED SCOUT ONLY</span>
+            <button style={{fontFamily:"Georgia,serif", fontSize:"13px", color:"#0e0e0e", background:"#ffb800", border:"none", padding:"10px 24px", borderRadius:"2px", cursor:"pointer", letterSpacing:"0.04em"}}>
               Unlock Full Intelligence →
             </button>
           </div>
@@ -101,10 +101,10 @@ function EngineRoomPanel({ property: d }) {
           marginBottom: open ? "0" : "0"
         }}
       >
-        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8a96e", letterSpacing:"0.18em", textTransform:"uppercase"}}>
+        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#ffb800", letterSpacing:"0.18em", textTransform:"uppercase"}}>
           For Operators — Technical Specs
         </span>
-        <svg viewBox="0 0 10 6" width="10" height="6" fill="none" stroke="#c8a96e" strokeWidth="1.5">
+        <svg viewBox="0 0 10 6" width="10" height="6" fill="none" stroke="#ffb800" strokeWidth="1.5">
           <path d={open ? "M1 5L5 1L9 5" : "M1 1L5 5L9 1"}/>
         </svg>
       </button>
@@ -114,31 +114,31 @@ function EngineRoomPanel({ property: d }) {
           <div style={{display:"flex", flexDirection:"column"}}>
             {d.structural_notes && (
               <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", gap:"20px"}}>
-                <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Ventilation / Exhaust</span>
+                <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Ventilation / Exhaust</span>
                 <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right"}}>{d.structural_notes}</span>
               </div>
             )}
             {d.expansion_potential && (
               <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", gap:"20px"}}>
-                <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Electrical Load</span>
+                <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Electrical Load</span>
                 <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right"}}>{d.expansion_potential}</span>
               </div>
             )}
             {d.zoning_type && (
               <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", gap:"20px"}}>
-                <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Zoning Classification</span>
+                <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Zoning Classification</span>
                 <span style={{fontFamily:"'Courier New',monospace", fontSize:"12px", color:"#f0ede8", textAlign:"right", letterSpacing:"0.04em"}}>{d.zoning_type}</span>
               </div>
             )}
             {d.ceiling_height_text && (
               <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", gap:"20px"}}>
-                <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Ceiling Clearance</span>
+                <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Ceiling Clearance</span>
                 <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right"}}>{d.ceiling_height_text}</span>
               </div>
             )}
             {d.developer_name && (
               <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", gap:"20px"}}>
-                <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Building Owner / Developer</span>
+                <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Building Owner / Developer</span>
                 <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right"}}>{d.developer_name}</span>
               </div>
             )}
@@ -168,10 +168,10 @@ function BackOfHousePanel({ property: d }) {
           justifyContent:"space-between", alignItems:"center", borderRadius:"2px"
         }}
       >
-        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8a96e", letterSpacing:"0.18em", textTransform:"uppercase"}}>
+        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#ffb800", letterSpacing:"0.18em", textTransform:"uppercase"}}>
           For Operators — Back of House
         </span>
-        <svg viewBox="0 0 10 6" width="10" height="6" fill="none" stroke="#c8a96e" strokeWidth="1.5">
+        <svg viewBox="0 0 10 6" width="10" height="6" fill="none" stroke="#ffb800" strokeWidth="1.5">
           <path d={open ? "M1 5L5 1L9 5" : "M1 1L5 5L9 1"}/>
         </svg>
       </button>
@@ -181,25 +181,25 @@ function BackOfHousePanel({ property: d }) {
           <div style={{display:"flex", flexDirection:"column"}}>
             {d.structural_notes && (
               <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", gap:"20px"}}>
-                <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Load-In / Load-Out</span>
+                <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Load-In / Load-Out</span>
                 <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right"}}>{d.structural_notes}</span>
               </div>
             )}
             {d.expansion_potential && (
               <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", gap:"20px"}}>
-                <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Rigging Notes</span>
+                <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Rigging Notes</span>
                 <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right"}}>{d.expansion_potential}</span>
               </div>
             )}
             {d.zoning_type && (
               <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", gap:"20px"}}>
-                <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Zoning Classification</span>
+                <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Zoning Classification</span>
                 <span style={{fontFamily:"'Courier New',monospace", fontSize:"12px", color:"#f0ede8", textAlign:"right", letterSpacing:"0.04em"}}>{d.zoning_type}</span>
               </div>
             )}
             {d.ceiling_height_text && (
               <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", gap:"20px"}}>
-                <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Ceiling Clearance</span>
+                <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Ceiling Clearance</span>
                 <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right"}}>{d.ceiling_height_text}</span>
               </div>
             )}
@@ -802,9 +802,9 @@ export default function CommercialFlow({ slug }) {
 
           <div className="photo-decor">
             <svg viewBox="0 0 1000 320" preserveAspectRatio="xMidYMid slice">
-              <rect x="680" y="30" width="200" height="150" fill="none" stroke="rgba(200,169,110,0.1)" strokeWidth="1"/>
-              <line x1="780" y1="30" x2="780" y2="180" stroke="rgba(200,169,110,0.07)" strokeWidth="0.5"/>
-              <line x1="680" y1="105" x2="880" y2="105" stroke="rgba(200,169,110,0.07)" strokeWidth="0.5"/>
+              <rect x="680" y="30" width="200" height="150" fill="none" stroke="rgba(255,184,0,0.1)" strokeWidth="1"/>
+              <line x1="780" y1="30" x2="780" y2="180" stroke="rgba(255,184,0,0.07)" strokeWidth="0.5"/>
+              <line x1="680" y1="105" x2="880" y2="105" stroke="rgba(255,184,0,0.07)" strokeWidth="0.5"/>
               <rect x="100" y="240" width="320" height="58" rx="3" fill="rgba(25,20,12,0.75)"/>
               <rect x="118" y="222" width="285" height="32" rx="3" fill="rgba(30,24,14,0.65)"/>
               <rect x="100" y="222" width="26"  height="76" rx="2" fill="rgba(28,22,13,0.7)"/>
@@ -1024,7 +1024,7 @@ export default function CommercialFlow({ slug }) {
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>01 — The Space</div>
+                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>01 — The Space</div>
                 <div style={{height:"1px", background:"#262626"}}/>
               </div>
 
@@ -1034,7 +1034,7 @@ export default function CommercialFlow({ slug }) {
                 <div style={{marginBottom:"36px"}}>
                   {d.aesthetic_tag && (
                     <div style={{marginBottom:"24px"}}>
-                      <span style={{fontFamily:"Georgia,serif", fontStyle:"italic", fontSize:"clamp(22px,3vw,30px)", fontWeight:400, color:"#c8a96e", letterSpacing:"0.01em", lineHeight:1.2}}>
+                      <span style={{fontFamily:"Georgia,serif", fontStyle:"italic", fontSize:"clamp(22px,3vw,30px)", fontWeight:400, color:"#ffb800", letterSpacing:"0.01em", lineHeight:1.2}}>
                         {d.aesthetic_tag || d.accordion_3_rating}
                       </span>
                     </div>
@@ -1051,7 +1051,7 @@ export default function CommercialFlow({ slug }) {
                           <span style={{fontSize:"24px", lineHeight:1, flexShrink:0}}>{stat.icon}</span>
                           <span style={{fontFamily:"var(--font-body)", fontSize:"clamp(20px,2.5vw,26px)", fontWeight:500, color:"#f0ede8", lineHeight:1.2}}>{stat.val}</span>
                         </div>
-                        <div style={{fontFamily:"var(--font-body)", fontSize:"10px", fontWeight:600, color:"#8a8a8a", letterSpacing:"0.08em", textTransform:"uppercase", marginTop:"6px"}}>{stat.label}</div>
+                        <div style={{fontFamily:"var(--font-body)", fontSize:"10px", fontWeight:600, color:"#c8c8c8", letterSpacing:"0.08em", textTransform:"uppercase", marginTop:"6px"}}>{stat.label}</div>
                       </div>
                     ))}
                   </div>
@@ -1059,19 +1059,19 @@ export default function CommercialFlow({ slug }) {
                   <div style={{display:"flex", flexDirection:"column"}}>
                     {d.seating_breakdown && (
                       <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626"}}>
-                        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Seating Breakdown</span>
+                        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase"}}>Seating Breakdown</span>
                         <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right", maxWidth:"55%"}}>{d.seating_breakdown}</span>
                       </div>
                     )}
                     {d.ceiling_height_text && (
                       <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626"}}>
-                        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Ceiling Clearance</span>
+                        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase"}}>Ceiling Clearance</span>
                         <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{d.ceiling_height_text}</span>
                       </div>
                     )}
                     {d.outdoor_description && d.outdoor_description !== "None" && (
                       <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626"}}>
-                        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Al Fresco / Outdoor</span>
+                        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase"}}>Al Fresco / Outdoor</span>
                         <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right", maxWidth:"55%"}}>{d.outdoor_description}</span>
                       </div>
                     )}
@@ -1087,7 +1087,7 @@ export default function CommercialFlow({ slug }) {
                 <div style={{marginBottom:"36px"}}>
                   {d.aesthetic_tag && (
                     <div style={{marginBottom:"24px"}}>
-                      <span style={{fontFamily:"Georgia,serif", fontStyle:"italic", fontSize:"clamp(22px,3vw,30px)", fontWeight:400, color:"#c8a96e", letterSpacing:"0.01em", lineHeight:1.2}}>
+                      <span style={{fontFamily:"Georgia,serif", fontStyle:"italic", fontSize:"clamp(22px,3vw,30px)", fontWeight:400, color:"#ffb800", letterSpacing:"0.01em", lineHeight:1.2}}>
                         {d.aesthetic_tag || d.accordion_3_rating}
                       </span>
                     </div>
@@ -1104,7 +1104,7 @@ export default function CommercialFlow({ slug }) {
                           <span style={{fontSize:"24px", lineHeight:1, flexShrink:0}}>{stat.icon}</span>
                           <span style={{fontFamily:"var(--font-body)", fontSize:"clamp(20px,2.5vw,26px)", fontWeight:500, color:"#f0ede8", lineHeight:1.2}}>{stat.val}</span>
                         </div>
-                        <div style={{fontFamily:"var(--font-body)", fontSize:"10px", fontWeight:600, color:"#8a8a8a", letterSpacing:"0.08em", textTransform:"uppercase", marginTop:"6px"}}>{stat.label}</div>
+                        <div style={{fontFamily:"var(--font-body)", fontSize:"10px", fontWeight:600, color:"#c8c8c8", letterSpacing:"0.08em", textTransform:"uppercase", marginTop:"6px"}}>{stat.label}</div>
                       </div>
                     ))}
                   </div>
@@ -1112,13 +1112,13 @@ export default function CommercialFlow({ slug }) {
                   <div style={{display:"flex", flexDirection:"column"}}>
                     {d.ceiling_height_text && (
                       <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626"}}>
-                        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Ceiling Clearance</span>
+                        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase"}}>Ceiling Clearance</span>
                         <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{d.ceiling_height_text}</span>
                       </div>
                     )}
                     {d.outdoor_description && d.outdoor_description !== "None" && (
                       <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626"}}>
-                        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Outdoor / Covered</span>
+                        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase"}}>Outdoor / Covered</span>
                         <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right", maxWidth:"55%"}}>{d.outdoor_description}</span>
                       </div>
                     )}
@@ -1134,7 +1134,7 @@ export default function CommercialFlow({ slug }) {
                 <>
                   {(d.aesthetic_tag || d.accordion_3_rating) && (
                     <div style={{marginBottom:"30px"}}>
-                      <span style={{fontFamily:"Georgia,serif", fontStyle:"italic", fontSize:"clamp(22px,3vw,30px)", fontWeight:400, color:"#c8a96e", letterSpacing:"0.01em", lineHeight:1.2}}>
+                      <span style={{fontFamily:"Georgia,serif", fontStyle:"italic", fontSize:"clamp(22px,3vw,30px)", fontWeight:400, color:"#ffb800", letterSpacing:"0.01em", lineHeight:1.2}}>
                         {d.aesthetic_tag || d.accordion_3_rating}
                       </span>
                     </div>
@@ -1152,7 +1152,7 @@ export default function CommercialFlow({ slug }) {
                           <span style={{fontSize:"24px", lineHeight:1, flexShrink:0}}>{stat.icon}</span>
                           <span style={{fontFamily:"var(--font-body)", fontSize:"clamp(20px,2.5vw,26px)", fontWeight:500, color:"#f0ede8", lineHeight:1.2}}>{stat.val}</span>
                         </div>
-                        <div style={{fontFamily:"var(--font-body)", fontSize:"10px", fontWeight:600, color:"#8a8a8a", letterSpacing:"0.08em", textTransform:"uppercase", marginTop:"6px"}}>{stat.label}</div>
+                        <div style={{fontFamily:"var(--font-body)", fontSize:"10px", fontWeight:600, color:"#c8c8c8", letterSpacing:"0.08em", textTransform:"uppercase", marginTop:"6px"}}>{stat.label}</div>
                       </div>
                     ))}
                   </div>
@@ -1160,19 +1160,19 @@ export default function CommercialFlow({ slug }) {
                   <div style={{display:"flex", flexDirection:"column"}}>
                     {d.ceiling_height_text && (
                       <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626"}}>
-                        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Ceiling Height</span>
+                        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase"}}>Ceiling Height</span>
                         <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{d.ceiling_height_text}</span>
                       </div>
                     )}
                     {d.furnishing && (
                       <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626"}}>
-                        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Furnishing</span>
+                        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase"}}>Furnishing</span>
                         <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{d.furnishing}</span>
                       </div>
                     )}
                     {d.outdoor_description && d.outdoor_description !== "None" && (
                       <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626"}}>
-                        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Outdoor Space</span>
+                        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase"}}>Outdoor Space</span>
                         <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right", maxWidth:"55%"}}>{d.outdoor_description}</span>
                       </div>
                     )}
@@ -1212,7 +1212,7 @@ export default function CommercialFlow({ slug }) {
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>02 — Location</div>
+                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>02 — Location</div>
                 <div style={{height:"1px", background:"#262626"}}/>
               </div>
 
@@ -1222,7 +1222,7 @@ export default function CommercialFlow({ slug }) {
                     {d.location || d.city}
                   </div>
                   {d.city && d.location && d.location !== d.city && (
-                    <div style={{fontFamily:"'Courier New',monospace", fontSize:"11px", color:"#8a8a8a", letterSpacing:"0.14em", marginTop:"10px", textTransform:"uppercase"}}>
+                    <div style={{fontFamily:"'Courier New',monospace", fontSize:"11px", color:"#c8c8c8", letterSpacing:"0.14em", marginTop:"10px", textTransform:"uppercase"}}>
                       {d.city} · NCR
                     </div>
                   )}
@@ -1233,31 +1233,31 @@ export default function CommercialFlow({ slug }) {
               <div style={{display:"flex", flexDirection:"column", marginBottom:"24px"}}>
                 {d.flood_zone_status && (
                   <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", gap:"20px"}}>
-                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Flood Zone</span>
+                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Flood Zone</span>
                     <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right"}}>{d.flood_zone_status}</span>
                   </div>
                 )}
                 {d.zoning_classification && (
                   <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", gap:"20px"}}>
-                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Zoning</span>
+                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Zoning</span>
                     <span style={{fontFamily:"'Courier New',monospace", fontSize:"12px", color:"#f0ede8", textAlign:"right", letterSpacing:"0.04em"}}>{d.zoning_classification}</span>
                   </div>
                 )}
                 {publicTransitObj && (
                   <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", gap:"20px"}}>
-                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Nearest Transit</span>
+                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Nearest Transit</span>
                     <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right"}}>{publicTransitObj.name} · {publicTransitObj.distance}</span>
                   </div>
                 )}
                 {d.nearest_highway && (
                   <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", gap:"20px"}}>
-                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Major Road</span>
+                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Major Road</span>
                     <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right"}}>{d.nearest_highway}</span>
                   </div>
                 )}
                 {d.street_type && (
                   <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", gap:"20px"}}>
-                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Street Type</span>
+                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Street Type</span>
                     <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right"}}>{d.street_type}</span>
                   </div>
                 )}
@@ -1266,11 +1266,11 @@ export default function CommercialFlow({ slug }) {
               {/* Commute context cards */}
               {commuteCards.length > 0 && (
                 <>
-                  <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#8a8a8a", letterSpacing:"0.2em", textTransform:"uppercase", marginBottom:"12px"}}>Commute Context</div>
+                  <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#c8c8c8", letterSpacing:"0.2em", textTransform:"uppercase", marginBottom:"12px"}}>Commute Context</div>
                   <div style={{display:"flex", flexWrap:"wrap", gap:"10px", marginBottom:"28px"}}>
                     {commuteCards.map(c => (
                       <div key={c.label} style={{flex:"1 1 120px", background:"#161616", border:"0.5px solid #262626", borderRadius:"4px", padding:"14px 16px"}}>
-                        <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#8a8a8a", letterSpacing:"0.16em", textTransform:"uppercase", marginBottom:"8px"}}>To {c.label}</div>
+                        <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#c8c8c8", letterSpacing:"0.16em", textTransform:"uppercase", marginBottom:"8px"}}>To {c.label}</div>
                         <div style={{fontFamily:"Georgia,serif", fontSize:"18px", color:"#f0ede8"}}>{c.value}</div>
                       </div>
                     ))}
@@ -1317,13 +1317,13 @@ export default function CommercialFlow({ slug }) {
                   {d.whereTo.map((item, idx) => (
                     <div key={idx} style={{display:"flex", justifyContent:"space-between", alignItems:"center", padding:"13px 0", borderBottom:"1px solid #262626"}}>
                       <div style={{display:"flex", alignItems:"center", gap:"12px"}}>
-                        <div style={{width:"5px", height:"5px", borderRadius:"50%", background:"#c8a96e", flexShrink:0}}/>
+                        <div style={{width:"5px", height:"5px", borderRadius:"50%", background:"#ffb800", flexShrink:0}}/>
                         <div>
                           <div style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{item.name}</div>
-                          {item.category && <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#8a8a8a", letterSpacing:"0.1em", textTransform:"uppercase", marginTop:"2px"}}>{item.category}</div>}
+                          {item.category && <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#c8c8c8", letterSpacing:"0.1em", textTransform:"uppercase", marginTop:"2px"}}>{item.category}</div>}
                         </div>
                       </div>
-                      <span style={{fontFamily:"'Courier New',monospace", fontSize:"11px", color:"#8a8a8a", letterSpacing:"0.1em", flexShrink:0}}>{item.distance}</span>
+                      <span style={{fontFamily:"'Courier New',monospace", fontSize:"11px", color:"#c8c8c8", letterSpacing:"0.1em", flexShrink:0}}>{item.distance}</span>
                     </div>
                   ))}
                 </div>
@@ -1353,7 +1353,7 @@ export default function CommercialFlow({ slug }) {
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>{ch['life']?.chapterNumber || '03'} — {ch['life']?.chapterLabel || 'Life Here'}</div>
+                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>{ch['life']?.chapterNumber || '03'} — {ch['life']?.chapterLabel || 'Life Here'}</div>
                 <div style={{height:"1px", background:"#262626"}}/>
               </div>
 
@@ -1365,12 +1365,12 @@ export default function CommercialFlow({ slug }) {
                 if (tags.length === 0) return null;
                 return (
                   <div style={{marginBottom:"28px"}}>
-                    <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#8a8a8a", letterSpacing:"0.2em", textTransform:"uppercase", marginBottom:"14px"}}>
+                    <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#c8c8c8", letterSpacing:"0.2em", textTransform:"uppercase", marginBottom:"14px"}}>
                       {isRestaurant ? "Best For" : isVenue ? "Ideal Events" : "Best Suited For"}
                     </div>
                     <div style={{display:"flex", flexWrap:"wrap", gap:"10px"}}>
                       {tags.map((t, i) => (
-                        <span key={i} style={{fontFamily:"Georgia,serif", fontSize:"15px", color:"#c8a96e", border:"0.5px solid rgba(200,169,110,0.4)", padding:"7px 18px", borderRadius:"4px", letterSpacing:"0.02em"}}>{t}</span>
+                        <span key={i} style={{fontFamily:"Georgia,serif", fontSize:"15px", color:"#ffb800", border:"0.5px solid rgba(255,184,0,0.4)", padding:"7px 18px", borderRadius:"4px", letterSpacing:"0.02em"}}>{t}</span>
                       ))}
                     </div>
                   </div>
@@ -1390,13 +1390,13 @@ export default function CommercialFlow({ slug }) {
                 <div style={{display:"flex", flexDirection:"column", marginBottom:"20px"}}>
                   {d.acoustic_profile && (
                     <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", gap:"20px"}}>
-                      <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Acoustic Profile</span>
+                      <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Acoustic Profile</span>
                       <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right"}}>{d.acoustic_profile}</span>
                     </div>
                   )}
                   {d.lighting_temperature && (
                     <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", gap:"20px"}}>
-                      <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Lighting</span>
+                      <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Lighting</span>
                       <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right"}}>{d.lighting_temperature}</span>
                     </div>
                   )}
@@ -1413,13 +1413,13 @@ export default function CommercialFlow({ slug }) {
                 <div style={{display:"flex", flexDirection:"column", marginBottom:"20px"}}>
                   {d.acoustic_profile && (
                     <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", gap:"20px"}}>
-                      <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Sound Isolation</span>
+                      <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Sound Isolation</span>
                       <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right"}}>{d.acoustic_profile}</span>
                     </div>
                   )}
                   {d.lighting_temperature && (
                     <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", gap:"20px"}}>
-                      <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Lighting Capability</span>
+                      <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Lighting Capability</span>
                       <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right"}}>{d.lighting_temperature}</span>
                     </div>
                   )}
@@ -1441,7 +1441,7 @@ export default function CommercialFlow({ slug }) {
                   )}
                   {d.safety_perception && (
                     <>
-                      <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#8a8a8a", letterSpacing:"0.2em", textTransform:"uppercase", margin:"4px 0 12px"}}>Safety Perception</div>
+                      <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#c8c8c8", letterSpacing:"0.2em", textTransform:"uppercase", margin:"4px 0 12px"}}>Safety Perception</div>
                       <p style={{fontFamily:"Georgia,serif", fontSize:"16px", color:"#f0ede8", lineHeight:1.9, margin:"0", maxWidth:"580px"}}>
                         {d.safety_perception}
                       </p>
@@ -1476,14 +1476,14 @@ export default function CommercialFlow({ slug }) {
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>{ch['whereto']?.chapterNumber || '04'} — {ch['whereto']?.chapterLabel || 'Where To?'}</div>
+                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>{ch['whereto']?.chapterNumber || '04'} — {ch['whereto']?.chapterLabel || 'Where To?'}</div>
                 <div style={{height:"1px", background:"#262626"}}/>
               </div>
 
               {/* Cell 9: Demand Anchors for restaurants and venues */}
               {(isRestaurant || isVenue) && d.demand_anchors && (
                 <div style={{marginBottom:"28px"}}>
-                  <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#8a8a8a", letterSpacing:"0.2em", textTransform:"uppercase", marginBottom:"14px"}}>
+                  <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#c8c8c8", letterSpacing:"0.2em", textTransform:"uppercase", marginBottom:"14px"}}>
                     {isRestaurant ? "Demand Anchors — What Drives Cover Count" : "Demand Anchors — Event Traffic Sources"}
                   </div>
                   <div style={{display:"flex", flexWrap:"wrap", gap:"8px", marginBottom:"20px"}}>
@@ -1529,20 +1529,20 @@ export default function CommercialFlow({ slug }) {
                   {d.whereTo.map((item, idx) => (
                     <div key={idx} style={{display:"flex", justifyContent:"space-between", alignItems:"center", padding:"13px 0", borderBottom:"1px solid #262626"}}>
                       <div style={{display:"flex", alignItems:"center", gap:"12px"}}>
-                        <div style={{width:"5px", height:"5px", borderRadius:"50%", background:"#c8a96e", flexShrink:0}}/>
+                        <div style={{width:"5px", height:"5px", borderRadius:"50%", background:"#ffb800", flexShrink:0}}/>
                         <div>
                           <div style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{item.name}</div>
-                          {item.category && <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#8a8a8a", letterSpacing:"0.1em", textTransform:"uppercase", marginTop:"2px"}}>{item.category}</div>}
+                          {item.category && <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#c8c8c8", letterSpacing:"0.1em", textTransform:"uppercase", marginTop:"2px"}}>{item.category}</div>}
                         </div>
                       </div>
-                      <span style={{fontFamily:"'Courier New',monospace", fontSize:"11px", color:"#8a8a8a", letterSpacing:"0.1em", flexShrink:0}}>{item.distance}</span>
+                      <span style={{fontFamily:"'Courier New',monospace", fontSize:"11px", color:"#c8c8c8", letterSpacing:"0.1em", flexShrink:0}}>{item.distance}</span>
                     </div>
                   ))}
                 </div>
               )}
 
               {whereToTab === "list" && (!d.whereTo || d.whereTo.length === 0) && (
-                <div style={{padding:"32px", background:"#161616", border:"0.5px dashed #262626", borderRadius:"2px", textAlign:"center", fontFamily:"'Courier New',monospace", fontSize:"11px", color:"#8a8a8a", letterSpacing:"0.12em", marginBottom:"24px"}}>
+                <div style={{padding:"32px", background:"#161616", border:"0.5px dashed #262626", borderRadius:"2px", textAlign:"center", fontFamily:"'Courier New',monospace", fontSize:"11px", color:"#c8c8c8", letterSpacing:"0.12em", marginBottom:"24px"}}>
                   [ LOCATION BRIEFING N/A — NO DATA IN CMS ]
                 </div>
               )}
@@ -1585,7 +1585,7 @@ export default function CommercialFlow({ slug }) {
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>{ch['buildplans']?.chapterNumber || '05'} — {ch['buildplans']?.chapterLabel || 'Build Plans'}</div>
+                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>{ch['buildplans']?.chapterNumber || '05'} — {ch['buildplans']?.chapterLabel || 'Build Plans'}</div>
                 <div style={{height:"1px", background:"#262626"}}/>
               </div>
 
@@ -1600,7 +1600,7 @@ export default function CommercialFlow({ slug }) {
                 <>
                   {d.expansion_potential && (
                     <>
-                      <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#8a8a8a", letterSpacing:"0.2em", textTransform:"uppercase", marginBottom:"12px"}}>Expansion Potential</div>
+                      <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#c8c8c8", letterSpacing:"0.2em", textTransform:"uppercase", marginBottom:"12px"}}>Expansion Potential</div>
                       <p style={{fontFamily:"Georgia,serif", fontSize:"17px", color:"#f0ede8", lineHeight:1.9, margin:"0 0 28px", maxWidth:"580px"}}>
                         {d.expansion_potential}
                       </p>
@@ -1608,13 +1608,13 @@ export default function CommercialFlow({ slug }) {
                   )}
                   {d.zoning_type && (
                     <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", marginBottom:"24px", gap:"20px"}}>
-                      <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.12em", textTransform:"uppercase"}}>Zoning Type</span>
+                      <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase"}}>Zoning Type</span>
                       <span style={{fontFamily:"'Courier New',monospace", fontSize:"12px", color:"#f0ede8", letterSpacing:"0.04em", textAlign:"right"}}>{d.zoning_type}</span>
                     </div>
                   )}
                   {d.developer_name && (
                     <div style={{background:"#161616", border:"0.5px solid #262626", borderRadius:"4px", padding:"18px 20px", marginBottom:"24px"}}>
-                      <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#8a8a8a", letterSpacing:"0.18em", textTransform:"uppercase", marginBottom:"8px"}}>Developer</div>
+                      <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#c8c8c8", letterSpacing:"0.18em", textTransform:"uppercase", marginBottom:"8px"}}>Developer</div>
                       <div style={{fontFamily:"Georgia,serif", fontSize:"18px", color:"#f0ede8", marginBottom: d.developer_notes ? "8px" : "0"}}>{d.developer_name}</div>
                       {d.developer_notes && (
                         <div style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#a0a0a0", lineHeight:1.7}}>{d.developer_notes}</div>
@@ -1623,7 +1623,7 @@ export default function CommercialFlow({ slug }) {
                   )}
                   {d.structural_notes && (
                     <>
-                      <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#8a8a8a", letterSpacing:"0.2em", textTransform:"uppercase", marginBottom:"12px"}}>Structural Notes</div>
+                      <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#c8c8c8", letterSpacing:"0.2em", textTransform:"uppercase", marginBottom:"12px"}}>Structural Notes</div>
                       <p style={{fontFamily:"Georgia,serif", fontSize:"15px", color:"#f0ede8", lineHeight:1.85, margin:"0", maxWidth:"580px"}}>
                         {d.structural_notes}
                       </p>
@@ -1666,7 +1666,7 @@ export default function CommercialFlow({ slug }) {
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>06 — Hidden Intel</div>
+                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>06 — Hidden Intel</div>
                 <div style={{height:"1px", background:"#262626"}}/>
               </div>
 
@@ -1679,7 +1679,7 @@ export default function CommercialFlow({ slug }) {
                 <div style={{filter:"blur(5px)", pointerEvents:"none", userSelect:"none", padding:"20px"}}>
                   {["Cap Rate (Area Benchmark)","Transaction History","Appreciation Projection","Price History","Competitive Density","Market Position Index"].map((label, i, arr) => (
                     <div key={label} style={{display:"flex", justifyContent:"space-between", alignItems:"center", padding:"13px 0", borderBottom: i < arr.length - 1 ? "1px solid #262626" : "none"}}>
-                      <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#8a8a8a"}}>{label}</span>
+                      <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#c8c8c8"}}>{label}</span>
                       <span style={{fontFamily:"'Courier New',monospace", fontSize:"12px", color:"#3a3a3a", letterSpacing:"0.1em"}}>████████</span>
                     </div>
                   ))}
@@ -1687,9 +1687,9 @@ export default function CommercialFlow({ slug }) {
                 <div style={{position:"absolute", inset:0, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:"16px", background:"rgba(22,22,22,0.9)"}}>
                   <div style={{display:"flex", alignItems:"center", gap:"8px"}}>
                     <span style={{fontSize:"15px"}}>🔒</span>
-                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#c8a96e", letterSpacing:"0.25em", textTransform:"uppercase"}}>Market Intelligence · Locked</span>
+                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#ffb800", letterSpacing:"0.25em", textTransform:"uppercase"}}>Market Intelligence · Locked</span>
                   </div>
-                  <button style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#0e0e0e", background:"#c8a96e", border:"none", padding:"11px 28px", borderRadius:"4px", cursor:"pointer", letterSpacing:"0.03em"}}>
+                  <button style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#0e0e0e", background:"#ffb800", border:"none", padding:"11px 28px", borderRadius:"4px", cursor:"pointer", letterSpacing:"0.03em"}}>
                     Unlock with Verified Scout →
                   </button>
                 </div>
@@ -1698,8 +1698,8 @@ export default function CommercialFlow({ slug }) {
             </div>
 
             <div className="panel-sidebar">
-              <div className="sidebar-block"><div className="sidebar-accent-line" style={{background:"#c8a96e"}}/><div className="sidebar-label">Cap rate est.</div><div className="sidebar-value" style={{color:"#8a8a8a"}}>🔒 Locked</div></div>
-              <div className="sidebar-block"><div className="sidebar-label">Price trend</div><div className="sidebar-value" style={{color:"#8a8a8a"}}>🔒 Locked</div></div>
+              <div className="sidebar-block"><div className="sidebar-accent-line" style={{background:"#ffb800"}}/><div className="sidebar-label">Cap rate est.</div><div className="sidebar-value" style={{color:"#c8c8c8"}}>🔒 Locked</div></div>
+              <div className="sidebar-block"><div className="sidebar-label">Price trend</div><div className="sidebar-value" style={{color:"#c8c8c8"}}>🔒 Locked</div></div>
               <div className="sidebar-block"><div className="sidebar-label">Intel source</div><div className="sidebar-value">ScoutIt Verified</div></div>
             </div>
           </div>
@@ -1709,7 +1709,7 @@ export default function CommercialFlow({ slug }) {
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>07 — Units &amp; Spaces</div>
+                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>07 — Units &amp; Spaces</div>
                 <div style={{height:"1px", background:"#262626"}}/>
               </div>
 
@@ -1733,7 +1733,7 @@ export default function CommercialFlow({ slug }) {
                       }}
                     >
                       <div>
-                        <div style={{fontFamily:"'Courier New',monospace", fontSize:"11px", color: activeUnit === u.name ? "#c8a96e" : "#8a8a8a", letterSpacing:"0.18em", textTransform:"uppercase", marginBottom:"8px"}}>
+                        <div style={{fontFamily:"'Courier New',monospace", fontSize:"11px", color: activeUnit === u.name ? "#ffb800" : "#c8c8c8", letterSpacing:"0.18em", textTransform:"uppercase", marginBottom:"8px"}}>
                           UNIT {String(ui + 1).padStart(2, "0")}
                         </div>
                         <div className="unit-z3-name">{u.name}</div>
@@ -1796,8 +1796,8 @@ export default function CommercialFlow({ slug }) {
                           }}
                           style={{display:"flex", alignItems:"baseline", gap:"10px", width:"100%", textAlign:"left", background:"none", border:"none", borderBottom:"1px solid #262626", padding:"9px 0", cursor:"pointer"}}
                         >
-                          <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color: activeUnit === u.name ? "#c8a96e" : "#6a6a6a", letterSpacing:"0.12em", flexShrink:0}}>{String(ui + 1).padStart(2, "0")}</span>
-                          <span style={{fontFamily:"Georgia,serif", fontSize:"13px", color: activeUnit === u.name ? "#f0ede8" : "#8a8a8a", lineHeight:1.3}}>{u.name}</span>
+                          <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color: activeUnit === u.name ? "#ffb800" : "#6a6a6a", letterSpacing:"0.12em", flexShrink:0}}>{String(ui + 1).padStart(2, "0")}</span>
+                          <span style={{fontFamily:"Georgia,serif", fontSize:"13px", color: activeUnit === u.name ? "#f0ede8" : "#c8c8c8", lineHeight:1.3}}>{u.name}</span>
                         </button>
                       );
                     })}
@@ -1812,13 +1812,13 @@ export default function CommercialFlow({ slug }) {
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>08 — Property Universe</div>
+                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>08 — Property Universe</div>
                 <div style={{height:"1px", background:"#262626"}}/>
               </div>
 
               {d.building_style && (
                 <div style={{marginBottom:"24px"}}>
-                  <span style={{fontFamily:"Georgia,serif", fontStyle:"italic", fontSize:"clamp(22px,3vw,30px)", fontWeight:400, color:"#c8a96e", letterSpacing:"0.01em"}}>
+                  <span style={{fontFamily:"Georgia,serif", fontStyle:"italic", fontSize:"clamp(22px,3vw,30px)", fontWeight:400, color:"#ffb800", letterSpacing:"0.01em"}}>
                     {d.building_style}
                   </span>
                 </div>
@@ -1826,7 +1826,7 @@ export default function CommercialFlow({ slug }) {
 
               {d.architect_designer && (
                 <div style={{background:"#161616", border:"0.5px solid #262626", borderRadius:"4px", padding:"16px 20px", marginBottom:"28px"}}>
-                  <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#8a8a8a", letterSpacing:"0.18em", textTransform:"uppercase", marginBottom:"8px"}}>Architect / Designer</div>
+                  <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#c8c8c8", letterSpacing:"0.18em", textTransform:"uppercase", marginBottom:"8px"}}>Architect / Designer</div>
                   <div style={{fontFamily:"Georgia,serif", fontSize:"18px", color:"#f0ede8"}}>{d.architect_designer}</div>
                 </div>
               )}
@@ -1864,9 +1864,9 @@ export default function CommercialFlow({ slug }) {
               {/* Verdict — the ScoutIt editorial stamp, premium & final */}
               {d.scoutit_verdict && (
                 <div className="sidebar-block" style={{paddingBottom:"22px", borderBottom:"1px solid #262626", marginBottom:"4px"}}>
-                  <div className="sidebar-accent-line" style={{background:"#c8a96e"}}/>
-                  <div style={{fontFamily:"'Courier New',monospace", fontSize:"11px", color:"#c8a96e", letterSpacing:"0.18em", textTransform:"uppercase", marginBottom:"10px"}}>ScoutIt Verdict</div>
-                  <div style={{fontFamily:"Georgia,serif", fontSize:"20px", color:"#c8a96e", lineHeight:1.35}}>{d.scoutit_verdict}</div>
+                  <div className="sidebar-accent-line" style={{background:"#ffb800"}}/>
+                  <div style={{fontFamily:"'Courier New',monospace", fontSize:"11px", color:"#ffb800", letterSpacing:"0.18em", textTransform:"uppercase", marginBottom:"10px"}}>ScoutIt Verdict</div>
+                  <div style={{fontFamily:"Georgia,serif", fontSize:"20px", color:"#ffb800", lineHeight:1.35}}>{d.scoutit_verdict}</div>
                 </div>
               )}
               {d.building_style && <div className="sidebar-block"><div className="sidebar-label">Building Style</div><div className="sidebar-value">{d.building_style}</div></div>}
@@ -1882,7 +1882,7 @@ export default function CommercialFlow({ slug }) {
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>09 — Services</div>
+                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>09 — Services</div>
                 <div style={{height:"1px", background:"#262626"}}/>
               </div>
 
@@ -1906,9 +1906,9 @@ export default function CommercialFlow({ slug }) {
                     <span style={{fontSize:"22px", flexShrink:0, lineHeight:1}}>{svc.icon}</span>
                     <span style={{flex:1, minWidth:0}}>
                       <span style={{display:"block", fontFamily:"Georgia,serif", fontSize:"17px", color:"#f0ede8", marginBottom:"3px"}}>{svc.title}</span>
-                      <span style={{display:"block", fontFamily:"system-ui,-apple-system,sans-serif", fontSize:"12.5px", color:"#8a8a8a", lineHeight:1.5}}>{svc.desc}</span>
+                      <span style={{display:"block", fontFamily:"system-ui,-apple-system,sans-serif", fontSize:"12.5px", color:"#c8c8c8", lineHeight:1.5}}>{svc.desc}</span>
                     </span>
-                    <span style={{fontFamily:"Georgia,serif", fontSize:"16px", color:"#c8a96e", flexShrink:0}}>→</span>
+                    <span style={{fontFamily:"Georgia,serif", fontSize:"16px", color:"#ffb800", flexShrink:0}}>→</span>
                   </Link>
                 ))}
               </div>
@@ -1916,7 +1916,7 @@ export default function CommercialFlow({ slug }) {
             </div>
 
             <div className="panel-sidebar">
-              <div className="sidebar-block"><div className="sidebar-accent-line" style={{background:"#c8a96e"}}/><div className="sidebar-label">Ecosystem</div><div className="sidebar-value">5 services live</div><div className="sidebar-sub">Vetted ScoutIt partners</div></div>
+              <div className="sidebar-block"><div className="sidebar-accent-line" style={{background:"#ffb800"}}/><div className="sidebar-label">Ecosystem</div><div className="sidebar-value">5 services live</div><div className="sidebar-sub">Vetted ScoutIt partners</div></div>
               <div className="sidebar-block"><div className="sidebar-label">Fulfilment</div><div className="sidebar-value">Partner-direct</div></div>
             </div>
           </div>
@@ -1926,7 +1926,7 @@ export default function CommercialFlow({ slug }) {
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>10 — Your Move</div>
+                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>10 — Your Move</div>
                 <div style={{height:"1px", background:"#262626"}}/>
               </div>
 
@@ -1935,7 +1935,7 @@ export default function CommercialFlow({ slug }) {
               </h2>
 
               <div className="reactions-container" style={{marginTop:"0", display:"flex", flexDirection:"column", gap:"10px"}}>
-                <p style={{fontFamily:"'Courier New',monospace", fontSize:"10px", textTransform:"uppercase", letterSpacing:"0.2em", color:"#8a8a8a", marginBottom:"16px"}}>HOW DOES THIS SPACE MAKE YOU FEEL?</p>
+                <p style={{fontFamily:"'Courier New',monospace", fontSize:"10px", textTransform:"uppercase", letterSpacing:"0.2em", color:"#c8c8c8", marginBottom:"16px"}}>HOW DOES THIS SPACE MAKE YOU FEEL?</p>
                 <ReactionButtons propertyId={slug || "batasan-hills"} propertyTitle={d.title} category={d.property_type} city={d.city}/>
               </div>
 
@@ -1949,19 +1949,19 @@ export default function CommercialFlow({ slug }) {
                       <div style={{padding:"22px 24px", background:"#161616", border:"0.5px solid #262626", borderRadius:"4px"}}>
                         <div style={{fontFamily:"Georgia,serif", fontSize:"clamp(30px,4.2vw,44px)", fontWeight:400, color:"#f0ede8", lineHeight:1.1}}>{d.listed_price}</div>
                         {d.price_source && (
-                          <div style={{fontFamily:"'Courier New',monospace", fontSize:"11px", letterSpacing:"0.1em", color:"#8a8a8a", marginTop:"10px"}}>
+                          <div style={{fontFamily:"'Courier New',monospace", fontSize:"11px", letterSpacing:"0.1em", color:"#c8c8c8", marginTop:"10px"}}>
                             Price indicated by {d.price_source}
                           </div>
                         )}
                         {d.price_notes && (
                           <div style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#a0a0a0", lineHeight:1.6, marginTop:"10px"}}>{d.price_notes}</div>
                         )}
-                        <p style={{fontFamily:"system-ui,-apple-system,sans-serif", fontSize:"11.5px", color:"#8a8a8a", lineHeight:1.7, marginTop:"16px"}}>
+                        <p style={{fontFamily:"system-ui,-apple-system,sans-serif", fontSize:"11.5px", color:"#c8c8c8", lineHeight:1.7, marginTop:"16px"}}>
                           Price estimates are provided solely by authorized sellers, owners, or licensed property managers. ScoutIt does not set, verify, or guarantee any stated price. For inquiries, speak directly with an authorized representative.
                         </p>
                       </div>
                     ) : (
-                      <Link href={`/property/${slug || "batasan-hills"}/brokers`} style={{display:"inline-block", fontFamily:"Georgia,serif", fontSize:"17px", color:"#c8a96e", textDecoration:"none", letterSpacing:"0.01em"}}>
+                      <Link href={`/property/${slug || "batasan-hills"}/brokers`} style={{display:"inline-block", fontFamily:"Georgia,serif", fontSize:"17px", color:"#ffb800", textDecoration:"none", letterSpacing:"0.01em"}}>
                         For pricing, connect with an authorized broker →
                       </Link>
                     )}
@@ -1972,7 +1972,7 @@ export default function CommercialFlow({ slug }) {
               <div style={{height:"1px", background:"#262626", margin:"28px 0 24px"}}/>
 
               <div style={{marginTop:"0"}}>
-                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#8a8a8a", letterSpacing:"0.15em", textTransform:"uppercase", marginBottom:"12px"}}>Assigned Representative</div>
+                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.15em", textTransform:"uppercase", marginBottom:"12px"}}>Assigned Representative</div>
                 <div className="broker-card">
                   <div className="broker-avatar">{brokerInitials}</div>
                   <div className="broker-info">
@@ -1993,7 +1993,7 @@ export default function CommercialFlow({ slug }) {
                 <span style={{fontFamily:"'Courier New',monospace", fontSize:"9.5px", color:"#4caf7d", letterSpacing:"0.14em", textTransform:"uppercase"}}>RA 9646 Compliant · Display-Only</span>
               </div>
 
-              <p style={{fontFamily:"Georgia,serif", fontSize:"13px", color:"#8a8a8a", lineHeight:1.7, marginTop:"16px", maxWidth:"600px"}}>
+              <p style={{fontFamily:"Georgia,serif", fontSize:"13px", color:"#c8c8c8", lineHeight:1.7, marginTop:"16px", maxWidth:"600px"}}>
                 ScoutIt is a spatial intelligence archive. In compliance with R.A. 9646, all site walks, direct inquiries, and purchase offers are facilitated exclusively by licensed, authorized real estate brokers.
               </p>
 

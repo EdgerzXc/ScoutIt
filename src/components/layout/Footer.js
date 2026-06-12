@@ -109,12 +109,12 @@ export default function Footer() {
         }
 
         .footer-brand .brand-scout { color: #f5f3ee; }
-        .footer-brand .brand-it { color: var(--accent, #c8a96e); }
+        .footer-brand .brand-it { color: var(--accent, #ffb800); }
 
         .footer-tagline {
           font-size: 14px;
           line-height: 1.6;
-          color: #888888;
+          color: var(--text-secondary, #c8c8c8);
           max-width: 320px;
         }
 
@@ -132,7 +132,7 @@ export default function Footer() {
           height: 36px;
           border-radius: 50%;
           border: 1px solid rgba(255, 255, 255, 0.1);
-          color: #a0a0a0;
+          color: var(--text-secondary, #c8c8c8);
           transition: all 0.25s ease;
         }
 
@@ -142,9 +142,9 @@ export default function Footer() {
         }
 
         .social-link:hover {
-          color: var(--accent, #c8a96e);
-          border-color: var(--accent, #c8a96e);
-          background: rgba(200, 169, 110, 0.08);
+          color: var(--accent, #ffb800);
+          border-color: var(--accent, #ffb800);
+          background: rgba(255, 184, 0, 0.08);
           transform: translateY(-2px);
         }
 
@@ -171,14 +171,14 @@ export default function Footer() {
 
         .nav-col a {
           font-size: 13px;
-          color: #888888;
+          color: var(--text-secondary, #c8c8c8);
           text-decoration: none;
           transition: all 0.2s ease;
           width: fit-content;
         }
 
         .nav-col a:hover {
-          color: var(--accent, #c8a96e);
+          color: var(--accent, #ffb800);
           padding-left: 4px;
         }
 
@@ -199,7 +199,7 @@ export default function Footer() {
 
         .footer-legal {
           font-size: 12px;
-          color: #666666;
+          color: var(--text-muted, #8f8c87);
           line-height: 1.5;
         }
 
@@ -211,13 +211,13 @@ export default function Footer() {
         }
 
         .footer-meta-links a {
-          color: #666666;
+          color: var(--text-muted, #8f8c87);
           text-decoration: none;
           transition: color 0.2s ease;
         }
 
         .footer-meta-links a:hover {
-          color: var(--accent, #c8a96e);
+          color: var(--accent, #ffb800);
         }
 
         .meta-separator {

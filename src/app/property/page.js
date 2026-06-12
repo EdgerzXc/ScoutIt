@@ -420,9 +420,9 @@ function PropertyDirectoryContent() {
                 <button 
                   onClick={() => setShowMap(!showMap)}
                   style={{
-                    background: showMap ? "#c8a96e" : "#0d0d0d",
-                    color: showMap ? "#000" : "#c8a96e",
-                    border: "1px solid #c8a96e",
+                    background: showMap ? "#ffb800" : "#0d0d0d",
+                    color: showMap ? "#000" : "#ffb800",
+                    border: "1px solid #ffb800",
                     padding: "0 24px",
                     height: "44px",
                     fontFamily: "var(--font-mono)",

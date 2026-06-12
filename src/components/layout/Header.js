@@ -102,7 +102,7 @@ export default function Header() {
         .header-back-btn:hover {
           border-color: var(--accent);
           color: var(--accent);
-          background: rgba(200, 169, 110, 0.1);
+          background: rgba(255, 184, 0, 0.1);
         }
 
         .header-brand {
@@ -119,7 +119,7 @@ export default function Header() {
         }
         .header-brand .brand-scout { color: #f5f3ee; }
         .header-brand .brand-it { color: var(--accent); transition: text-shadow 0.3s ease; }
-        .header-brand:hover .brand-it { text-shadow: 0 0 14px rgba(200, 169, 110, 0.55); }
+        .header-brand:hover .brand-it { text-shadow: 0 0 14px rgba(255, 184, 0, 0.55); }
 
         .header-nav {
           position: relative;
@@ -140,7 +140,7 @@ export default function Header() {
         }
 
         .header-menu-btn:hover {
-          background: rgba(200, 169, 110, 0.15);
+          background: rgba(255, 184, 0, 0.15);
           border-color: var(--accent-border);
         }
 
@@ -291,11 +291,11 @@ export default function Header() {
           }
           
           .header-dropdown a:active {
-            background: rgba(200, 169, 110, 0.15);
+            background: rgba(255, 184, 0, 0.15);
           }
           
           .header-dropdown .dropdown-brand {
-            font-size: 8px;
+            font-size: 9px;
             padding: 8px 12px 4px;
             margin-bottom: 8px;
           }
@@ -303,7 +303,7 @@ export default function Header() {
         
         @media (max-width: 480px) {
           .header-back-btn {
-            font-size: 8px;
+            font-size: 9px;
             padding: 0 8px;
             min-height: 36px;
           }
@@ -344,7 +344,7 @@ export default function Header() {
           
           .header-menu-btn,
           .header-back-btn {
-            -webkit-tap-highlight-color: rgba(200, 169, 110, 0.15);
+            -webkit-tap-highlight-color: rgba(255, 184, 0, 0.15);
           }
         }
       `}</style>

@@ -71,7 +71,7 @@
 }
 
 .filter-chevron {
-  color: var(--accent, #c8a96e);
+  color: var(--accent, #ffb800);
   font-size: 12px;
   transition: transform var(--transition-fast) ease;
 }
@@ -98,7 +98,7 @@
 }
 
 .filter-checkbox-label:hover {
-  color: var(--accent, #c8a96e);
+  color: var(--accent, #ffb800);
 }
 
 .filter-checkbox {
@@ -114,8 +114,8 @@
 }
 
 .filter-checkbox:checked {
-  background: var(--accent, #c8a96e);
-  border-color: var(--accent, #c8a96e);
+  background: var(--accent, #ffb800);
+  border-color: var(--accent, #ffb800);
 }
 
 .filter-checkbox:checked::after {
@@ -140,7 +140,7 @@
 .intel-widget-header {
   font-family: var(--font-mono), monospace;
   font-size: 10px;
-  color: var(--accent, #c8a96e);
+  color: var(--accent, #ffb800);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   margin-bottom: 16px;
@@ -203,8 +203,8 @@
 
 .global-search-input:focus {
   outline: none;
-  border-color: var(--accent, #c8a96e);
-  box-shadow: 0 0 12px rgba(200, 169, 110, 0.1);
+  border-color: var(--accent-bright, #ffc929);
+  box-shadow: var(--shadow-glow-soft, 0 0 24px rgba(255, 184, 0, 0.18));
 }
 
 /* Properties Grid */
@@ -228,8 +228,13 @@
 
 .property-preview-card:hover {
   transform: translateY(-4px);
-  border-color: rgba(200, 169, 110, 0.4);
-  box-shadow: var(--shadow-lg, 0 12px 24px rgba(0, 0, 0, 0.4));
+  border-color: rgba(255, 201, 41, 0.55);
+  box-shadow: var(--shadow-lg, 0 12px 24px rgba(0, 0, 0, 0.4)), var(--shadow-glow-soft, 0 0 24px rgba(255, 184, 0, 0.18));
+}
+
+.property-preview-card:focus-visible {
+  outline: 1.5px solid var(--accent-bright, #ffc929);
+  outline-offset: 3px;
 }
 
 .property-card-visual {
@@ -260,7 +265,7 @@
   padding: 4px 10px;
   border-radius: 2px;
   font-size: 10px;
-  color: var(--accent, #c8a96e);
+  color: var(--accent, #ffb800);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -317,7 +322,7 @@
 .property-action-btn {
   font-size: 11px;
   font-weight: 600;
-  color: var(--accent, #c8a96e);
+  color: var(--accent, #ffb800);
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }

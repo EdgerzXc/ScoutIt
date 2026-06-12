@@ -335,7 +335,7 @@ export default function BrokersPage() {
                           {broker.scoutRating != null && (
                             <div className="scout-rating-badge">
                               <span className="scout-rating-label">Scout Rating</span>
-                              <span className="scout-rating-value" style={{ color: broker.scoutRating >= 85 ? "#4caf7d" : "#c8a96e" }}>
+                              <span className="scout-rating-value" style={{ color: broker.scoutRating >= 85 ? "#4caf7d" : "#ffb800" }}>
                                 {broker.scoutRating}/100
                               </span>
                             </div>
@@ -425,8 +425,8 @@ export default function BrokersPage() {
         }
 
         .hotmap-row.active .hotmap-dot {
-          background: var(--accent, #c8a96e);
-          box-shadow: 0 0 8px var(--accent, #c8a96e);
+          background: var(--accent, #ffb800);
+          box-shadow: 0 0 8px var(--accent, #ffb800);
         }
 
         .hotmap-name {
@@ -447,7 +447,7 @@ export default function BrokersPage() {
         }
 
         .hotmap-row.active .hotmap-stat {
-          color: var(--accent, #c8a96e);
+          color: var(--accent, #ffb800);
         }
 
         .hotmap-bar-outer {
@@ -466,8 +466,8 @@ export default function BrokersPage() {
         }
 
         .hotmap-row.active .hotmap-bar-inner {
-          background: var(--accent, #c8a96e);
-          box-shadow: 0 0 4px rgba(200, 169, 110, 0.5);
+          background: var(--accent, #ffb800);
+          box-shadow: 0 0 4px rgba(255, 184, 0, 0.5);
         }
 
         .hotmap-row:hover .hotmap-bar-inner {
@@ -490,7 +490,7 @@ export default function BrokersPage() {
         }
 
         .filter-radio-label:hover {
-          color: var(--accent, #c8a96e);
+          color: var(--accent, #ffb800);
         }
 
         .filter-radio {
@@ -506,8 +506,8 @@ export default function BrokersPage() {
         }
 
         .filter-radio:checked {
-          background: var(--accent, #c8a96e);
-          border-color: var(--accent, #c8a96e);
+          background: var(--accent, #ffb800);
+          border-color: var(--accent, #ffb800);
         }
 
         .filter-radio:checked::after {
@@ -696,12 +696,12 @@ export default function BrokersPage() {
         .tier-2-card .general-tier-badge-label { background: linear-gradient(135deg, #a5c2d9 0%, #eef3f7 100%); color: #0e0e0e; }
         .tier-2-card .broker-location { color: #a5c2d9; }
 
-        .tier-3-card { border-color: #c8a96e !important; box-shadow: 0 4px 16px rgba(200,169,110,0.04); }
-        .tier-3-card .general-tier-badge-label { background: linear-gradient(135deg, #c8a96e 0%, #f7ebd3 100%); color: #0e0e0e; }
-        .tier-3-card .broker-location { color: #c8a96e; }
+        .tier-3-card { border-color: #ffb800 !important; box-shadow: 0 4px 16px rgba(255,184,0,0.04); }
+        .tier-3-card .general-tier-badge-label { background: linear-gradient(135deg, #ffb800 0%, #f7ebd3 100%); color: #0e0e0e; }
+        .tier-3-card .broker-location { color: #ffb800; }
 
-        .tier-4-card { border-color: #8a8a8a !important; }
-        .tier-4-card .general-tier-badge-label { background: linear-gradient(135deg, #8a8a8a 0%, #dcdcdc 100%); color: #0e0e0e; }
+        .tier-4-card { border-color: #c8c8c8 !important; }
+        .tier-4-card .general-tier-badge-label { background: linear-gradient(135deg, #c8c8c8 0%, #dcdcdc 100%); color: #0e0e0e; }
         .tier-4-card .broker-location { color: #dcdcdc; }
 
         .tier-5-card { border-color: #cd7f32 !important; }

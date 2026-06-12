@@ -18,7 +18,7 @@
 }
 
 .nav-back-link {
-  color: #c8a96e;
+  color: #ffb800;
   text-decoration: none;
   font-size: 13px;
   font-weight: 500;
@@ -37,7 +37,7 @@
 
 .nav-prop-info {
   font-size: 12px;
-  color: #8a8a8a;
+  color: #c8c8c8;
 }
 
 .brokers-main-content {
@@ -69,7 +69,7 @@
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 3px;
-  color: #c8a96e;
+  color: #ffb800;
   display: block;
   margin-bottom: 12px;
 }
@@ -85,7 +85,7 @@
   font-family: Georgia, serif;
   font-size: 16px;
   font-style: italic;
-  color: #8a8a8a;
+  color: #c8c8c8;
   margin: 0;
   line-height: 1.5;
 }
@@ -98,7 +98,7 @@
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 2px;
-  color: #c8a96e;
+  color: #ffb800;
   border-bottom: 1px solid #262626;
   padding-bottom: 10px;
   margin: 0 0 20px;
@@ -127,9 +127,9 @@
   position: absolute;
   top: 12px;
   right: 24px;
-  background: rgba(200, 169, 110, 0.15);
-  color: #c8a96e;
-  border: 0.5px solid rgba(200, 169, 110, 0.3);
+  background: rgba(255, 184, 0, 0.15);
+  color: #ffb800;
+  border: 0.5px solid rgba(255, 184, 0, 0.3);
   font-size: 9px;
   font-weight: 600;
   letter-spacing: 1.5px;
@@ -186,7 +186,7 @@
 
 .broker-license-txt {
   font-size: 12px;
-  color: #8a8a8a;
+  color: #c8c8c8;
   margin: 4px 0 2px;
 }
 
@@ -205,7 +205,7 @@
 .niche-pill-tag {
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid #262626;
-  color: #8a8a8a;
+  color: #c8c8c8;
   font-size: 11px;
   padding: 4px 10px;
   border-radius: 4px;
@@ -231,14 +231,14 @@
   font-family: Georgia, serif;
   font-size: 28px;
   font-weight: 400;
-  color: #c8a96e;
+  color: #ffb800;
   line-height: 1;
 }
 
 .rating-lbl {
   font-size: 8px;
   font-weight: 600;
-  color: #8a8a8a;
+  color: #c8c8c8;
   letter-spacing: 1px;
   margin-top: 4px;
   text-align: center;
@@ -255,7 +255,7 @@
 .action-profile-btn {
   background: transparent;
   border: 1px solid #262626;
-  color: #8a8a8a;
+  color: #c8c8c8;
   padding: 10px 20px;
   font-size: 12px;
   font-weight: 500;
@@ -268,11 +268,11 @@
 
 .action-profile-btn:hover {
   color: #f0ede8;
-  border-color: #8a8a8a;
+  border-color: #c8c8c8;
 }
 
 .action-retain-btn {
-  background: #c8a96e;
+  background: #ffb800;
   border: none;
   color: #0e0e0e;
   padding: 10px 20px;
@@ -322,7 +322,7 @@
   font-family: Georgia, serif;
   font-size: 15px;
   font-weight: 400;
-  color: #c8a96e;
+  color: #ffb800;
   margin: 0 0 4px;
 }
 
@@ -350,14 +350,14 @@
 
 .form-input-field:focus,
 .form-textarea-field:focus {
-  border-color: #c8a96e;
+  border-color: #ffb800;
 }
 
 .form-submit-btn {
   align-self: flex-start;
   background: transparent;
-  border: 1px solid #c8a96e;
-  color: #c8a96e;
+  border: 1px solid #ffb800;
+  color: #ffb800;
   padding: 10px 24px;
   font-size: 12px;
   font-weight: 600;
@@ -369,7 +369,7 @@
 }
 
 .form-submit-btn:hover {
-  background: #c8a96e;
+  background: #ffb800;
   color: #0e0e0e;
 }
 
@@ -381,7 +381,7 @@
 
 .brokers-compliance-footer p {
   font-size: 11px;
-  color: #8a8a8a;
+  color: #c8c8c8;
   line-height: 1.6;
   margin: 0;
 }
@@ -473,26 +473,26 @@
 
 /* Gold Card (Tier 3) */
 .gold-card {
-  border-color: #c8a96e !important;
-  box-shadow: 0 4px 20px rgba(200, 169, 110, 0.08);
+  border-color: #ffb800 !important;
+  box-shadow: 0 4px 20px rgba(255, 184, 0, 0.08);
 }
 
 .gold-card .tier-badge-label {
-  background: linear-gradient(135deg, #c8a96e 0%, #f7ebd3 100%);
+  background: linear-gradient(135deg, #ffb800 0%, #f7ebd3 100%);
   color: #0e0e0e;
 }
 
 .gold-card .rating-num {
-  color: #c8a96e;
+  color: #ffb800;
 }
 
 /* Silver Card (Tier 4) */
 .silver-card {
-  border-color: #8a8a8a !important;
+  border-color: #c8c8c8 !important;
 }
 
 .silver-card .tier-badge-label {
-  background: linear-gradient(135deg, #8a8a8a 0%, #dcdcdc 100%);
+  background: linear-gradient(135deg, #c8c8c8 0%, #dcdcdc 100%);
   color: #0e0e0e;
 }
 

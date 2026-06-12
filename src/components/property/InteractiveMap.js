@@ -80,7 +80,7 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
       // Add Main Property Marker
       window.L.marker(position, { icon: mainPropertyIcon })
         .addTo(map)
-        .bindPopup(`<strong style="color:#c8a96e">${propertyTitle || "ScoutIt Property"}</strong><br/><span style="color:#8a8a8a">Target Location</span>`, {
+        .bindPopup(`<strong style="color:#ffb800">${propertyTitle || "ScoutIt Property"}</strong><br/><span style="color:#c8c8c8">Target Location</span>`, {
           className: "custom-leaflet-popup"
         });
 
@@ -102,7 +102,7 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
           .addTo(map);
 
         // Bind custom popup & mouseover HUD trigger
-        marker.bindPopup(`<strong>${item.name}</strong><br/><span style="color:#8a8a8a">${item.category} &middot; ${item.distance}</span>`, {
+        marker.bindPopup(`<strong>${item.name}</strong><br/><span style="color:#c8c8c8">${item.category} &middot; ${item.distance}</span>`, {
           className: "custom-leaflet-popup"
         });
 
@@ -165,7 +165,7 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
 
             // 3. Draw the gold route polyline
             const routeLine = window.L.polyline(latlngs, {
-              color: "#c8a96e",
+              color: "#ffb800",
               weight: 3,
               opacity: 0.9,
               lineJoin: "round",
@@ -183,7 +183,7 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
             window.L.marker([destLat, destLng], { icon: originIcon })
               .addTo(map)
               .bindPopup(
-                `<strong style="color:#c8a96e">${destName}</strong><br/><span style="color:#8a8a8a">Transit hub · route start</span>`,
+                `<strong style="color:#ffb800">${destName}</strong><br/><span style="color:#c8c8c8">Transit hub · route start</span>`,
                 { className: "custom-leaflet-popup" }
               );
 
@@ -391,29 +391,29 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
 
         .leaflet-radar-ring {
           fill: none;
-          stroke: rgba(200, 169, 110, 0.12);
+          stroke: rgba(255, 184, 0, 0.12);
           stroke-width: 0.5;
         }
 
         .leaflet-radar-ring.outer {
-          stroke: rgba(200, 169, 110, 0.22);
+          stroke: rgba(255, 184, 0, 0.22);
           stroke-width: 0.6;
         }
 
         .leaflet-radar-sweep {
-          stroke: rgba(200, 169, 110, 0.25);
+          stroke: rgba(255, 184, 0, 0.25);
           stroke-width: 0.6;
         }
 
         .leaflet-radar-lock-line {
-          stroke: #c8a96e;
+          stroke: #ffb800;
           stroke-width: 0.75;
           stroke-dasharray: 2 2;
         }
 
         .leaflet-radar-lock-ring {
           fill: none;
-          stroke: #c8a96e;
+          stroke: #ffb800;
           stroke-width: 0.5;
           animation: leafletLockPulse 1.2s ease-out infinite;
           transform-origin: center;
@@ -460,7 +460,7 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
         .hud-card-cat {
           font-family: var(--font-mono);
           font-size: 7.5px;
-          color: #c8a96e;
+          color: #ffb800;
           letter-spacing: 0.08em;
           text-transform: uppercase;
         }
@@ -515,7 +515,7 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
           align-items: center;
           gap: 7px;
           background: rgba(14, 14, 14, 0.9);
-          border: 0.5px solid rgba(200, 169, 110, 0.4);
+          border: 0.5px solid rgba(255, 184, 0, 0.4);
           border-radius: 4px;
           padding: 7px 12px;
           backdrop-filter: blur(12px);
@@ -525,14 +525,14 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
           width: 7px;
           height: 7px;
           border-radius: 50%;
-          background: #c8a96e;
-          box-shadow: 0 0 6px #c8a96e;
+          background: #ffb800;
+          box-shadow: 0 0 6px #ffb800;
           flex-shrink: 0;
         }
         .map-route-label .route-time {
           font-family: var(--font-mono);
           font-size: 11px;
-          color: #c8a96e;
+          color: #ffb800;
           font-weight: 600;
           letter-spacing: 0.04em;
           white-space: nowrap;
@@ -548,7 +548,7 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
         .map-route-label .route-km {
           font-family: var(--font-mono);
           font-size: 10px;
-          color: #8a8a8a;
+          color: #c8c8c8;
           white-space: nowrap;
         }
 
@@ -568,7 +568,7 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
           width: 24px;
           height: 24px;
           border-radius: 50%;
-          border: 1px solid #c8a96e;
+          border: 1px solid #ffb800;
           animation: leafletPulse 2s ease-out infinite;
         }
 
@@ -576,8 +576,8 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
           width: 8px;
           height: 8px;
           border-radius: 50%;
-          background: #c8a96e;
-          box-shadow: 0 0 10px #c8a96e;
+          background: #ffb800;
+          box-shadow: 0 0 10px #ffb800;
         }
 
         @keyframes leafletPulse {
@@ -595,7 +595,7 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
           width: 6px;
           height: 6px;
           border-radius: 50%;
-          background: #8a8a8a;
+          background: #c8c8c8;
           border: 1px solid #1a1a1a;
           box-shadow: 0 0 4px rgba(255, 255, 255, 0.4);
           transition: all 0.2s ease;
@@ -607,14 +607,14 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
           height: 14px;
           border-radius: 50%;
           background: #0e0e0e;
-          border: 2px solid #c8a96e;
-          box-shadow: 0 0 8px rgba(200, 169, 110, 0.7);
+          border: 2px solid #ffb800;
+          box-shadow: 0 0 8px rgba(255, 184, 0, 0.7);
         }
 
         .custom-leaflet-marker.amenity:hover .amenity-dot {
-          background: #c8a96e;
+          background: #ffb800;
           transform: scale(1.5);
-          box-shadow: 0 0 8px #c8a96e;
+          box-shadow: 0 0 8px #ffb800;
         }
 
         /* Custom Popup Styles */
@@ -641,14 +641,14 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
 
         .leaflet-bar a {
           background-color: #121212 !important;
-          color: #8a8a8a !important;
+          color: #c8c8c8 !important;
           border-bottom: 0.5px solid #262626 !important;
           transition: all 0.2s ease;
         }
 
         .leaflet-bar a:hover {
           background-color: #1a1a1a !important;
-          color: #c8a96e !important;
+          color: #ffb800 !important;
         }
       `}</style>
     </div>

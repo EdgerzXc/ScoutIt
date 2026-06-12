@@ -130,17 +130,20 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
         {Object.entries(REACTION_SHAPES).map(([type, data]) => {
           const isActive = activeReaction === type;
           return (
-            <div
+            <button
               key={type}
+              type="button"
               className={`reaction-tile ${isActive ? "active" : ""}`}
               onClick={() => handleReactionClick(type)}
+              aria-pressed={isActive}
+              aria-label={data.label}
             >
               <div className="shape-wrapper">
                 {data.svg}
                 <span className="icon-overlay">{data.symbol}</span>
               </div>
               <span className="tile-label">{data.label}</span>
-            </div>
+            </button>
           );
         })}
       </div>
@@ -190,6 +193,15 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
           flex-direction: column;
           align-items: center;
           cursor: pointer;
+          background: transparent;
+          border: none;
+          padding: 0;
+          border-radius: 8px;
+        }
+
+        .reaction-tile:focus-visible {
+          outline: 1.5px solid var(--accent-bright, #ffc929);
+          outline-offset: 4px;
         }
 
         .shape-wrapper {
@@ -218,7 +230,7 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
           z-index: 2;
           font-size: 22px;
           opacity: 0.85;
-          color: #8a8a8a;
+          color: #c8c8c8;
           user-select: none;
           transition: all 0.25s ease;
         }
@@ -229,14 +241,15 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
         }
 
         .reaction-tile:hover .shape-wrapper :global(svg) {
-          stroke: #c8a96e;
+          stroke: var(--accent-bright, #ffc929);
           stroke-width: 3px;
+          filter: drop-shadow(0 0 6px rgba(255, 184, 0, 0.35));
         }
 
         /* Active states */
         .reaction-tile.active .shape-wrapper :global(svg) {
-          fill: #c8a96e;
-          stroke: #c8a96e;
+          fill: #ffb800;
+          stroke: #ffb800;
           stroke-width: 3px;
         }
 
@@ -247,24 +260,29 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
 
         /* Label styling */
         .tile-label {
-          font-family: system-ui, -apple-system, sans-serif;
-          font-size: 9px;
+          font-family: var(--font-mono, monospace);
+          font-size: 10px;
           text-transform: uppercase;
-          letter-spacing: 1px;
-          color: #6a6a6a;
+          letter-spacing: 0.12em;
+          color: var(--text-secondary, #c8c8c8);
           margin-top: 6px;
           transition: color 0.25s ease;
           text-align: center;
         }
 
+        .reaction-tile:hover .tile-label {
+          color: var(--accent-bright, #ffc929);
+        }
+
         .reaction-tile.active .tile-label {
-          color: #c8a96e;
+          color: #ffb800;
         }
 
         /* Confirmation text */
         .confirm-text {
-          font-family: system-ui, -apple-system, sans-serif;
-          color: #8a8a8a;
+          font-family: var(--font-mono, monospace);
+          color: var(--accent, #ffb800);
+          letter-spacing: 0.08em;
           font-size: 12px;
           margin-top: 12px;
           text-align: center;
@@ -323,8 +341,8 @@ export function ReactionBadge({ reactionType }) {
         .badge-svg-container :global(svg) {
           width: 100%;
           height: 100%;
-          fill: #c8a96e;
-          stroke: #c8a96e;
+          fill: #ffb800;
+          stroke: #ffb800;
           stroke-width: 1.5;
         }
 

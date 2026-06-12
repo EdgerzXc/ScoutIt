@@ -157,7 +157,7 @@ export default function WishlistPage() {
           font-size: 12px;
           text-transform: uppercase;
           letter-spacing: 3px;
-          color: #c8a96e;
+          color: #ffb800;
           margin-bottom: 16px;
         }
 
@@ -188,7 +188,7 @@ export default function WishlistPage() {
         .empty-subtitle {
           font-family: system-ui, sans-serif;
           font-size: 14px;
-          color: #8a8a8a;
+          color: #c8c8c8;
           margin-top: 8px;
         }
 
@@ -196,8 +196,8 @@ export default function WishlistPage() {
           display: inline-block;
           margin-top: 32px;
           background: transparent;
-          border: 1px solid #c8a96e;
-          color: #c8a96e;
+          border: 1px solid #ffb800;
+          color: #ffb800;
           padding: 12px 28px;
           font-size: 13px;
           text-transform: uppercase;
@@ -208,7 +208,7 @@ export default function WishlistPage() {
         }
 
         .empty-cta:hover {
-          background: #c8a96e;
+          background: #ffb800;
           color: #0e0e0e;
         }
 
@@ -216,7 +216,7 @@ export default function WishlistPage() {
         .loading-state {
           text-align: center;
           padding: 120px 0;
-          color: #8a8a8a;
+          color: #c8c8c8;
           font-size: 14px;
         }
 
@@ -238,7 +238,7 @@ export default function WishlistPage() {
           font-size: 11px;
           text-transform: uppercase;
           letter-spacing: 2px;
-          color: #c8a96e;
+          color: #ffb800;
           margin: 0 0 4px;
           padding-bottom: 8px;
           border-bottom: 1px solid #262626;
@@ -288,22 +288,22 @@ export default function WishlistPage() {
         }
 
         .card-title:hover {
-          color: #c8a96e;
+          color: #ffb800;
         }
 
         .card-meta {
           font-family: system-ui, sans-serif;
           font-size: 12px;
-          color: #8a8a8a;
+          color: #c8c8c8;
           display: flex;
           align-items: center;
           gap: 4px;
         }
 
         .advisor-badge {
-          background: rgba(200, 169, 110, 0.1);
-          border: 1px solid rgba(200, 169, 110, 0.3);
-          color: #c8a96e;
+          background: rgba(255, 184, 0, 0.1);
+          border: 1px solid rgba(255, 184, 0, 0.3);
+          color: #ffb800;
           font-size: 8px;
           font-weight: 700;
           letter-spacing: 1px;
@@ -329,8 +329,8 @@ export default function WishlistPage() {
           font-size: 10px;
           text-transform: uppercase;
           letter-spacing: 1px;
-          color: #c8a96e;
-          border: 1px solid rgba(200, 169, 110, 0.3);
+          color: #ffb800;
+          border: 1px solid rgba(255, 184, 0, 0.3);
           padding: 4px 10px;
           white-space: nowrap;
         }
@@ -338,7 +338,7 @@ export default function WishlistPage() {
         .remove-btn {
           background: none;
           border: 1px solid #262626;
-          color: #8a8a8a;
+          color: #c8c8c8;
           font-size: 12px;
           cursor: pointer;
           padding: 4px 8px;
@@ -354,7 +354,7 @@ export default function WishlistPage() {
         .board-footer {
           font-family: system-ui, sans-serif;
           font-size: 11px;
-          color: #8a8a8a;
+          color: #c8c8c8;
           text-align: center;
           padding-top: 24px;
           border-top: 1px solid #262626;

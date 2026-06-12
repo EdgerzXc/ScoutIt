@@ -57,12 +57,15 @@ slower. Glow is **localized**, never "glowing fog everywhere."
 | `--bg` | `#0e0e0e` | Page canvas (near-black) |
 | `--surface` / `--surface2` / `--surface3` | `#161616` / `#1e1e1e` / `#242424` | Raised panels, cards |
 | `--border` / `--border-mid` / `--border-solid` | `rgba(255,255,255,.07)` / `.13` / `#262626` | Hairline dividers |
-| `--text-primary` | `#f0ede8` (warm off-white) | Headlines, body |
-| `--text-secondary` | `rgba(240,237,232,.62)` | Subcopy |
-| `--text-muted` | `rgba(240,237,232,.38)` | Captions, hints |
-| `--accent` | `#c8a96e` (**champagne gold**) | The signature accent |
-| `--accent-rgb` | `200, 169, 110` | For inline `rgba()` |
-| `--accent-dim` / `--accent-border` | `rgba(200,169,110,.12)` / `.28` | Gold fills/borders |
+| `--text-primary` | `#f0ede8` (warm off-white) | Headlines |
+| `--text-secondary` | `#c8c8c8` | Body copy, subcopy |
+| `--text-muted` | `rgba(240,237,232,.45)` | Captions, hints |
+| `--accent` | `#ffb800` (**metallic gold**) | The signature accent (text gold, labels) |
+| `--accent-bright` | `#ffc929` (interactive gold) | Buttons, CTAs, hover & active states |
+| `--accent-muted` | `#7a5c00` (subdued gold) | Borders, dividers, secondary accents |
+| `--accent-rgb` | `255, 184, 0` | For inline `rgba()` |
+| `--accent-dim` / `--accent-border` | `rgba(255,184,0,.12)` / `.32` | Gold fills/borders |
+| `--shadow-glow` | `0 0 18px rgba(255,184,0,.45)` | Luminous glow for key CTAs |
 | `--green` `--yellow` `--red` | `#4caf7d` `#e8c84a` `#e8644a` | Semantic states (+ `-dim` variants) |
 | `--brand` / `--brand-overlay` | `#1a1814` / `rgba(12,11,9,.92)` | Deep brand surfaces/overlays |
 

@@ -29,18 +29,24 @@
 
   /* Typography Colors */
   --text-primary: #f0ede8;
-  --text-secondary: rgba(240, 237, 232, 0.62);
-  --text-muted: rgba(240, 237, 232, 0.38);
+  --text-secondary: #c8c8c8;
+  --text-muted: rgba(240, 237, 232, 0.45);
 
   /* Brand Identity */
   --brand: #1a1814;
   --brand-overlay: rgba(12, 11, 9, 0.92);
 
-  /* Accent — Champagne Gold */
-  --accent: #c8a96e;
-  --accent-rgb: 200, 169, 110;
-  --accent-dim: rgba(200, 169, 110, 0.12);
-  --accent-border: rgba(200, 169, 110, 0.28);
+  /* Accent — Metallic Gold System
+     --accent        baseline gold (text gold, headings, labels)
+     --accent-bright interactive gold (buttons, CTAs, hover, active nav)
+     --accent-muted  subdued gold (borders, dividers, secondary accents) */
+  --accent: #ffb800;
+  --accent-rgb: 255, 184, 0;
+  --accent-bright: #ffc929;
+  --accent-bright-rgb: 255, 201, 41;
+  --accent-muted: #7a5c00;
+  --accent-dim: rgba(255, 184, 0, 0.12);
+  --accent-border: rgba(255, 184, 0, 0.32);
 
   /* Semantic State Colors */
   --green: #4caf7d;
@@ -81,7 +87,8 @@
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.25);
   --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.35);
   --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.45);
-  --shadow-glow: 0 0 24px rgba(200, 169, 110, 0.08);
+  --shadow-glow: 0 0 18px rgba(255, 184, 0, 0.45);
+  --shadow-glow-soft: 0 0 24px rgba(255, 184, 0, 0.18);
 }
 
 /* ── BASE ELEMENTS ── */
@@ -157,7 +164,7 @@ a:hover {
 
 /* ── SELECTION ── */
 ::selection {
-  background: rgba(200, 169, 110, 0.25);
+  background: rgba(255, 184, 0, 0.25);
   color: var(--text-primary);
 }
 
@@ -444,7 +451,7 @@ a:hover {
 /* ── SWIPE-FRIENDLY TAP AREAS ── */
 @media (hover: none) and (pointer: coarse) {
   a, button {
-    -webkit-tap-highlight-color: rgba(200, 169, 110, 0.2);
+    -webkit-tap-highlight-color: rgba(255, 184, 0, 0.2);
   }
 }
 
@@ -467,7 +474,7 @@ input, textarea, select, [type="text"], [type="search"], [type="email"], [type="
 input:focus, textarea:focus, select:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 2px rgba(200, 169, 110, 0.1);
+  box-shadow: 0 0 0 2px rgba(255, 184, 0, 0.1);
   background: var(--surface2);
 }
 
@@ -500,7 +507,7 @@ input:focus, textarea:focus, select:focus {
   
   select {
     -webkit-appearance: none;
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(200,169,110,1)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(255,184,0,1)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
     background-repeat: no-repeat;
     background-position: right 14px center;
     background-size: 20px;

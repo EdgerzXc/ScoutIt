@@ -58,7 +58,7 @@ export default async function BrokerDetailPage({ params }) {
             {broker.scoutRating != null && (
               <div className="scout-rating-box">
                 <span className="scout-rating-box-label">Scout Rating</span>
-                <span className="scout-rating-box-score" style={{ color: broker.scoutRating >= 85 ? "#4caf7d" : "#c8a96e" }}>
+                <span className="scout-rating-box-score" style={{ color: broker.scoutRating >= 85 ? "#4caf7d" : "#ffb800" }}>
                   {broker.scoutRating}<span style={{ fontSize: "16px", color: "var(--text-muted)" }}>/100</span>
                 </span>
                 <div className="scout-rating-breakdown">

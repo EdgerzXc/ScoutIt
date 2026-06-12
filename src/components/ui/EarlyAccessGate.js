@@ -36,8 +36,8 @@ export function RestrictedAccessBanner({ rosterLabel = "This Roster", openDate =
       <style>{`
         .restricted-banner {
           background: linear-gradient(135deg, rgba(10,10,10,0.98) 0%, rgba(18,14,8,0.98) 100%);
-          border: 1px solid rgba(200,169,110,0.2);
-          border-left: 3px solid var(--accent, #c8a96e);
+          border: 1px solid rgba(255,184,0,0.2);
+          border-left: 3px solid var(--accent, #ffb800);
           border-radius: 4px;
           padding: 18px 24px;
           margin-bottom: 36px;
@@ -52,11 +52,11 @@ export function RestrictedAccessBanner({ rosterLabel = "This Roster", openDate =
           width: 36px;
           height: 36px;
           border-radius: 50%;
-          border: 1px solid rgba(200,169,110,0.3);
+          border: 1px solid rgba(255,184,0,0.3);
           display: flex;
           align-items: center;
           justify-content: center;
-          color: var(--accent, #c8a96e);
+          color: var(--accent, #ffb800);
         }
         .restricted-text-col { flex: 1; }
         .restricted-label {
@@ -64,7 +64,7 @@ export function RestrictedAccessBanner({ rosterLabel = "This Roster", openDate =
           font-family: var(--font-mono, monospace);
           font-size: 9px;
           letter-spacing: 0.18em;
-          color: var(--accent, #c8a96e);
+          color: var(--accent, #ffb800);
           font-weight: 700;
           margin-bottom: 6px;
           text-transform: uppercase;
@@ -86,10 +86,10 @@ export function RestrictedAccessBanner({ rosterLabel = "This Roster", openDate =
           width: 6px;
           height: 6px;
           border-radius: 50%;
-          background: rgba(200,169,110,0.2);
+          background: rgba(255,184,0,0.2);
         }
         .signal-dot.active {
-          background: var(--accent, #c8a96e);
+          background: var(--accent, #ffb800);
           animation: signalPulse 1.5s ease-in-out infinite;
         }
         .restricted-status {
@@ -146,7 +146,7 @@ export function RestrictedCardWrapper({ children, rosterType = "this roster" }) 
           cursor: pointer;
         }
         .restricted-card-wrap:focus {
-          outline: 1px solid var(--accent, #c8a96e);
+          outline: 1px solid var(--accent, #ffb800);
           outline-offset: 2px;
         }
         .restricted-card-tag {
@@ -157,9 +157,9 @@ export function RestrictedCardWrapper({ children, rosterType = "this roster" }) 
           font-weight: 700;
           letter-spacing: 0.12em;
           text-transform: uppercase;
-          color: var(--accent, #c8a96e);
+          color: var(--accent, #ffb800);
           background: rgba(14,14,14,0.92);
-          border: 1px solid rgba(200,169,110,0.35);
+          border: 1px solid rgba(255,184,0,0.35);
           padding: 4px 10px;
           border-radius: 2px;
           z-index: 10;
@@ -266,8 +266,8 @@ export function EarlyAccessModal({ rosterType = "this roster", onClose }) {
         }
         .gate-modal {
           background: #0e0e0e;
-          border: 1px solid rgba(200,169,110,0.25);
-          border-top: 3px solid var(--accent, #c8a96e);
+          border: 1px solid rgba(255,184,0,0.25);
+          border-top: 3px solid var(--accent, #ffb800);
           border-radius: 6px;
           padding: 48px 44px;
           max-width: 480px;
@@ -297,12 +297,12 @@ export function EarlyAccessModal({ rosterType = "this roster", onClose }) {
           width: 52px;
           height: 52px;
           border-radius: 50%;
-          border: 1px solid rgba(200,169,110,0.25);
-          background: rgba(200,169,110,0.05);
+          border: 1px solid rgba(255,184,0,0.25);
+          background: rgba(255,184,0,0.05);
           display: flex;
           align-items: center;
           justify-content: center;
-          color: var(--accent, #c8a96e);
+          color: var(--accent, #ffb800);
           margin: 0 auto 20px;
         }
         .gate-kicker {
@@ -310,7 +310,7 @@ export function EarlyAccessModal({ rosterType = "this roster", onClose }) {
           font-family: var(--font-mono, monospace);
           font-size: 9px;
           letter-spacing: 0.18em;
-          color: var(--accent, #c8a96e);
+          color: var(--accent, #ffb800);
           text-transform: uppercase;
           margin-bottom: 10px;
         }
@@ -337,7 +337,7 @@ export function EarlyAccessModal({ rosterType = "this roster", onClose }) {
           font-family: var(--font-mono, monospace);
           font-size: 9px;
           letter-spacing: 0.12em;
-          color: var(--accent, #c8a96e);
+          color: var(--accent, #ffb800);
           text-align: left;
           margin-bottom: 10px;
         }
@@ -357,9 +357,9 @@ export function EarlyAccessModal({ rosterType = "this roster", onClose }) {
           outline: none;
           transition: border-color 0.2s;
         }
-        .gate-input:focus { border-color: var(--accent, #c8a96e); }
+        .gate-input:focus { border-color: var(--accent, #ffb800); }
         .gate-submit-btn {
-          background: var(--accent, #c8a96e);
+          background: var(--accent, #ffb800);
           color: #0e0e0e;
           border: none;
           border-radius: 4px;
@@ -397,7 +397,7 @@ export function EarlyAccessModal({ rosterType = "this roster", onClose }) {
           color: var(--text-muted, #555);
         }
         .gate-footnote-link {
-          color: var(--accent, #c8a96e);
+          color: var(--accent, #ffb800);
           text-decoration: none;
           transition: opacity 0.2s;
         }
@@ -435,7 +435,7 @@ export function DetailPageAccessGate({ rosterType = "this profile", providerName
               <span className="detail-gate-kicker">ACCESS RESTRICTED — CLOSED BETA</span>
               <p className="detail-gate-msg">
                 Full profile access for{" "}
-                <strong style={{ color: "var(--accent, #c8a96e)" }}>{providerName}</strong>{" "}
+                <strong style={{ color: "var(--accent, #ffb800)" }}>{providerName}</strong>{" "}
                 requires referral clearance. You are viewing a preview profile.
               </p>
             </div>
@@ -456,8 +456,8 @@ export function DetailPageAccessGate({ rosterType = "this profile", providerName
       <style>{`
         .detail-gate-strip {
           background: linear-gradient(135deg, rgba(12,10,6,0.99) 0%, rgba(20,16,8,0.99) 100%);
-          border: 1px solid rgba(200,169,110,0.2);
-          border-left: 3px solid var(--accent, #c8a96e);
+          border: 1px solid rgba(255,184,0,0.2);
+          border-left: 3px solid var(--accent, #ffb800);
           border-radius: 4px;
           padding: 18px 28px;
           margin-bottom: 48px;
@@ -479,12 +479,12 @@ export function DetailPageAccessGate({ rosterType = "this profile", providerName
           width: 34px;
           height: 34px;
           border-radius: 50%;
-          border: 1px solid rgba(200,169,110,0.25);
-          background: rgba(200,169,110,0.05);
+          border: 1px solid rgba(255,184,0,0.25);
+          background: rgba(255,184,0,0.05);
           display: flex;
           align-items: center;
           justify-content: center;
-          color: var(--accent, #c8a96e);
+          color: var(--accent, #ffb800);
           flex-shrink: 0;
         }
         .detail-gate-kicker {
@@ -492,7 +492,7 @@ export function DetailPageAccessGate({ rosterType = "this profile", providerName
           font-family: var(--font-mono, monospace);
           font-size: 9px;
           letter-spacing: 0.14em;
-          color: var(--accent, #c8a96e);
+          color: var(--accent, #ffb800);
           text-transform: uppercase;
           margin-bottom: 5px;
           font-weight: 700;
@@ -505,8 +505,8 @@ export function DetailPageAccessGate({ rosterType = "this profile", providerName
         }
         .detail-gate-cta {
           background: transparent;
-          border: 1px solid var(--accent, #c8a96e);
-          color: var(--accent, #c8a96e);
+          border: 1px solid var(--accent, #ffb800);
+          color: var(--accent, #ffb800);
           padding: 12px 24px;
           font-family: var(--font-mono, monospace);
           font-size: 11px;
@@ -520,7 +520,7 @@ export function DetailPageAccessGate({ rosterType = "this profile", providerName
           flex-shrink: 0;
         }
         .detail-gate-cta:hover {
-          background: var(--accent, #c8a96e);
+          background: var(--accent, #ffb800);
           color: #0e0e0e;
         }
         @media (max-width: 640px) {
