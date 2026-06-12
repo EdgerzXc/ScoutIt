@@ -906,7 +906,7 @@ export default function ResidentialScrollytelling({ slug }) {
                 </div>
               )}
 
-              <div style={{display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(120px, 1fr))", gap:"28px 20px", margin:"0 0 36px", width:"100%"}}>
+              <div style={{display:"flex", flexDirection:"row", overflowX:"auto", scrollbarWidth:"none", gap:"28px", margin:"0 0 36px", width:"100vw", marginLeft:"-20px", padding:"0 20px", paddingBottom:"8px", scrollSnapType:"x mandatory", WebkitOverflowScrolling:"touch"}}>
                 {[
                   pill1Val && pill1Val !== 0 ? { icon: pill1Emoji, val: pill1Val, label: pill1Label } : null,
                   pill2Val && pill2Val !== 0 ? { icon: pill2Emoji, val: pill2Val, label: pill2Label } : null,
@@ -914,7 +914,7 @@ export default function ResidentialScrollytelling({ slug }) {
                   d.parking > 0 ? { icon: "🚗", val: d.parking, label: "Parking Slots" } : null,
                   d.lot_sqm > 0 ? { icon: "🌿", val: d.lot_sqm, label: "Lot sqm" } : null,
                 ].filter(Boolean).map((stat, i) => (
-                  <div key={i}>
+                  <div key={i} style={{ flex: "0 0 auto", scrollSnapAlign: "start", minWidth: "100px", paddingRight: "16px" }}>
                     <div style={{display:"flex", alignItems:"center", gap:"12px"}}>
                       <span style={{fontSize:"24px", lineHeight:1, flexShrink:0}}>{stat.icon}</span>
                       <span style={{fontFamily:"var(--font-body)", fontSize:"clamp(20px,2.5vw,26px)", fontWeight:500, color:"#f0ede8", lineHeight:1.2}}>{stat.val}</span>
