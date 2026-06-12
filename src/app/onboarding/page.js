@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 const TAGS = [
   { id: "buyer", icon: "🏠", title: "Looking to Buy or Rent", desc: "Browse, save, and get deep spatial intelligence." },
@@ -339,9 +340,21 @@ export default function OnboardingPage() {
       {/* Universal Grain Overlay */}
       <div className="fixed inset-0 pointer-events-none opacity-[0.03] z-50 mix-blend-overlay bg-[url('/grain.png')]"></div>
 
-      <header className="p-6 md:p-8 flex items-center justify-between sticky top-0 bg-background/90 backdrop-blur-md z-40 border-b border-surface-variant">
-        <div className="font-display-md text-2xl text-gold-accent tracking-tighter">Scout<span className="text-on-surface">IT</span></div>
-        <div className="flex items-center gap-2">
+      <header className="p-6 md:p-8 grid grid-cols-3 items-center sticky top-0 bg-background/90 backdrop-blur-md z-40 border-b border-surface-variant">
+        <div className="flex items-center justify-start">
+          <button 
+            onClick={() => router.back()} 
+            className="text-text-secondary hover:text-gold-accent transition-colors text-sm font-bold tracking-widest uppercase flex items-center gap-2"
+          >
+            ← Back
+          </button>
+        </div>
+        <div className="flex justify-center">
+          <Link href="/" className="font-display-md text-2xl text-gold-accent tracking-tighter hover:opacity-80 transition-opacity">
+            Scout<span className="text-on-surface">IT</span>
+          </Link>
+        </div>
+        <div className="flex items-center justify-end gap-2">
           {[1,2,3,4].map(s => (
             <div key={s} className={`h-1.5 rounded-full transition-all duration-300 ${step >= s ? 'w-6 bg-gold-accent' : 'w-2 bg-surface-variant'}`} />
           ))}
