@@ -3514,24 +3514,29 @@ export default function Home() {
             scroll-snap-align: center !important;
           }
 
-          /* 3. Layer 03: Horizontal row showing 2 cards side-by-side */
+          /* 3. Layer 03: Horizontal row showing cards */
           .services-grid {
             display: flex !important;
             flex-direction: row !important;
             overflow-x: auto !important;
             scrollbar-width: none !important;
             gap: 12px !important;
-            width: 100% !important;
+            width: 100vw !important;
+            margin-left: -20px !important;
+            padding-left: 20px !important;
+            padding-right: 20px !important;
             scroll-snap-type: x mandatory !important;
             padding-bottom: 8px !important;
+            -webkit-overflow-scrolling: touch !important;
           }
           .services-grid::-webkit-scrollbar {
             display: none !important;
           }
           .service-card {
-            flex: 0 0 145px !important;
-            width: 145px !important;
+            flex: 0 0 75vw !important;
+            width: 75vw !important;
             scroll-snap-align: start !important;
+            margin-right: 16px !important;
           }
           .service-card-inner {
             padding: 16px 12px !important;

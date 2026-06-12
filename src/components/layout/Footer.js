@@ -241,6 +241,7 @@ export default function Footer() {
           }
 
           .footer-nav-cols {
+            grid-template-columns: 1fr;
             gap: 24px;
           }
 
