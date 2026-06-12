@@ -101,8 +101,11 @@ export default function UnifiedDashboard() {
             <span>{user.connects_balance} CONNECTS</span>
           </div>
           <button className={styles.iconBtn}>🔔</button>
-          <div className={styles.avatar}>
-            {user.name.substring(0,2).toUpperCase()}
+          <div className={styles.profileMenu}>
+            <Link href={`/profile/${encodeURIComponent(user.name)}`} className={styles.avatar}>
+              {user.name ? user.name.substring(0,2).toUpperCase() : 'U'}
+            </Link>
+            <Link href="/settings" className={styles.settingsLink} title="Edit Profile & Tags">⚙️</Link>
           </div>
         </div>
       </header>

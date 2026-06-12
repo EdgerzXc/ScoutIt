@@ -3,13 +3,14 @@
 import { useState } from "react";
 import styles from "./OwnerMode.module.css";
 
-const TOTAL_STEPS = 7;
+const TOTAL_STEPS = 8;
 
 export default function GuidedWizard({ onPublish, onClose }) {
   const [isAdvanced, setIsAdvanced] = useState(false);
   const [step, setStep] = useState(1);
   
   const [formData, setFormData] = useState({
+    transaction: "",
     type: "",
     location: "",
     price: "",
@@ -126,6 +127,29 @@ export default function GuidedWizard({ onPublish, onClose }) {
       <div className={styles.wizardContent}>
         {step === 1 && (
           <>
+            <h2>How are you listing this property?</h2>
+            <div className={styles.typeGrid}>
+              {[
+                { id: 'sale', icon: '💰', label: 'For Sale' },
+                { id: 'rent', icon: '🔑', label: 'For Rent' },
+                { id: 'lease', icon: '📄', label: 'Long-term Lease' },
+              ].map(t => (
+                <div 
+                  key={t.id} 
+                  className={`${styles.typeCard} ${formData.transaction === t.id ? styles.selected : ''}`}
+                  onClick={() => setFormData({...formData, transaction: t.id})}
+                >
+                  <div className={styles.typeIcon}>{t.icon}</div>
+                  <div>{t.label}</div>
+                </div>
+              ))}
+            </div>
+            <button className={styles.buttonPrimary} style={{marginTop: 48}} disabled={!formData.transaction} onClick={nextStep}>Continue →</button>
+          </>
+        )}
+
+        {step === 2 && (
+          <>
             <h2>What are you listing?</h2>
             <div className={styles.typeGrid}>
               {[
@@ -148,7 +172,7 @@ export default function GuidedWizard({ onPublish, onClose }) {
           </>
         )}
 
-        {step === 2 && (
+        {step === 3 && (
           <>
             <h2>Where is it?</h2>
             <input 
@@ -163,7 +187,7 @@ export default function GuidedWizard({ onPublish, onClose }) {
           </>
         )}
 
-        {step === 3 && (
+        {step === 4 && (
           <>
             <h2>Price expectations?</h2>
             <p style={{color: 'var(--text-secondary)', marginBottom: 32}}>This is stored internally and NEVER displayed publicly.</p>
@@ -182,7 +206,7 @@ export default function GuidedWizard({ onPublish, onClose }) {
           </>
         )}
 
-        {step === 4 && (
+        {step === 5 && (
           <>
             <h2>Add media link</h2>
             <p style={{color: 'var(--text-secondary)', marginBottom: 16}}>Paste a Google Drive or Dropbox link to your photos/videos.</p>
@@ -212,7 +236,7 @@ export default function GuidedWizard({ onPublish, onClose }) {
           </>
         )}
 
-        {step === 5 && (
+        {step === 6 && (
           <>
             <h2>Describe it</h2>
             <p style={{color: 'var(--text-secondary)', marginBottom: 32}}>How many rooms? What's nearby? What's the vibe?</p>
@@ -230,7 +254,7 @@ export default function GuidedWizard({ onPublish, onClose }) {
           </>
         )}
 
-        {step === 6 && (
+        {step === 7 && (
           <>
             <h2>Verify ownership?</h2>
             <div className={styles.typeCard} style={{width: '100%', marginBottom: 32, padding: 64}} onClick={() => setFormData({...formData, verified: !formData.verified})}>
@@ -248,7 +272,7 @@ export default function GuidedWizard({ onPublish, onClose }) {
           </>
         )}
 
-        {step === 7 && (
+        {step === 8 && (
           <>
             <h2>Ready to publish</h2>
             <p style={{color: 'var(--text-secondary)', marginBottom: 32}}>Your listing completeness score will be {computeScore()}/100.</p>
