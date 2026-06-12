@@ -4,6 +4,9 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useDashboard } from "../../context/DashboardContext";
 
+import mapboxgl from 'mapbox-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
+
 const SAVED_LISTINGS = [
   { id: 'f1', type: 'House', title: 'Ayala Alabang Core', loc: 'Muntinlupa City', img: '🏠' },
   { id: 'f2', type: 'Condo', title: 'The Proscenium', loc: 'Rockwell Center', img: '🏢' },
@@ -13,10 +16,47 @@ const SAVED_LISTINGS = [
 export default function BuyerMode() {
   const [showMap, setShowMap] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const { listings } = useDashboard();
+  const [radius, setRadius] = useState("any");
+  const { listings, savedIds, toggleSave, addToast, searchByRadius, MAPBOX_TOKEN, DEFAULT_MAP_CENTER } = useDashboard();
   const searchRef = useRef(null);
+  const mapContainerRef = useRef(null);
+  const mapInstance = useRef(null);
 
-  // Mobile bottom-bar primary action (Scout) focuses the search bar
+  // Initialize Mapbox when showMap toggles
+  useEffect(() => {
+    if (showMap && mapContainerRef.current && !mapInstance.current && MAPBOX_TOKEN) {
+      mapboxgl.accessToken = MAPBOX_TOKEN;
+      mapInstance.current = new mapboxgl.Map({
+        container: mapContainerRef.current,
+        style: 'mapbox://styles/mapbox/dark-v11',
+        center: DEFAULT_MAP_CENTER, // Makati
+        zoom: 12,
+        pitch: 45
+      });
+
+      mapInstance.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
+
+      // Clean up on unmount or when toggling off
+      return () => {
+        mapInstance.current?.remove();
+        mapInstance.current = null;
+      };
+    }
+  }, [showMap, MAPBOX_TOKEN]);
+
+  // Handle Radius Change
+  const handleRadiusChange = (e) => {
+    const val = e.target.value;
+    setRadius(val);
+    searchByRadius(val);
+    if (val !== 'any') {
+      addToast(`Radar set to ${val}km`, "📡");
+    } else {
+      addToast(`Radar removed. Showing all.`, "🌍");
+    }
+  };
+
+  // Mobile bottom-bar primary action
   useEffect(() => {
     const onPrimary = (e) => {
       if (e.detail?.mode === "buyer" || e.detail?.mode === "exploring") {
@@ -28,7 +68,7 @@ export default function BuyerMode() {
     return () => window.removeEventListener("scoutit:primary-action", onPrimary);
   }, []);
 
-  // Live-filter the feed as the user types
+  // Live-filter the feed
   const q = searchQuery.trim().toLowerCase();
   const matches = (item) => !q || [item.title, item.type, item.loc, item.desc].some(v => v && v.toLowerCase().includes(q));
   const newFeedListings = listings.filter(matches).slice(0, 5);
@@ -45,12 +85,22 @@ export default function BuyerMode() {
           <div className="font-working-title text-on-surface truncate group-hover:underline">{item.title}</div>
           <div className="text-xs text-text-secondary truncate mt-0.5">{item.loc || 'Metro Manila'}</div>
         </div>
+        <button 
+          className="absolute top-4 right-4 text-2xl drop-shadow-md hover:scale-110 transition-transform"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleSave(item);
+          }}
+        >
+          {savedIds.includes(item.id) ? "🔖" : "📑"}
+        </button>
       </div>
     </Link>
   );
 
   const VerticalListingCard = ({ item }) => (
-    <Link href={`/property/${item.id}`} className="block shrink-0 w-[280px] snap-start">
+    <Link href={`/property/${item.id}`} className="block shrink-0 w-[280px] snap-start relative">
       <div className="bg-surface border border-surface-variant rounded-lg p-0 flex flex-col hover:border-text-secondary transition-colors cursor-pointer overflow-hidden group h-full">
         <div className="h-40 bg-surface-alt flex items-center justify-center text-6xl group-hover:scale-105 transition-transform duration-500">
           {item.img || '🏠'}
@@ -60,6 +110,16 @@ export default function BuyerMode() {
           <div className="font-working-title text-on-surface mb-1 truncate group-hover:underline">{item.title}</div>
           <div className="text-xs text-text-secondary truncate">{item.loc || 'Location hidden'}</div>
         </div>
+        <button 
+          className="absolute top-4 right-4 text-2xl drop-shadow-md hover:scale-110 transition-transform bg-background/20 rounded-full p-1"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleSave(item);
+          }}
+        >
+          {savedIds.includes(item.id) ? "🔖" : "📑"}
+        </button>
       </div>
     </Link>
   );
@@ -69,16 +129,31 @@ export default function BuyerMode() {
       
       {/* Search Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-surface-variant pb-6">
-        <div className="relative w-full md:max-w-md">
-          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary">🔍</span>
-          <input
-            type="text"
-            ref={searchRef}
-            className="w-full bg-surface border border-surface-variant rounded-full pl-11 pr-4 py-3 text-on-surface focus:outline-none focus:border-gold-accent transition-colors placeholder:text-text-muted"
-            placeholder="Search locations, asset types, or intel..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+        <div className="flex flex-col md:flex-row w-full md:w-auto gap-3 flex-1">
+          <div className="relative w-full md:max-w-md">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary">🔍</span>
+            <input
+              type="text"
+              ref={searchRef}
+              className="w-full bg-surface border border-surface-variant rounded-full pl-11 pr-4 py-3 text-on-surface focus:outline-none focus:border-gold-accent transition-colors placeholder:text-text-muted"
+              placeholder="Search locations, asset types, or intel..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          
+          {/* Proximity / Radius Filter */}
+          <select 
+            className="bg-surface border border-surface-variant rounded-full px-4 py-3 text-sm text-on-surface focus:outline-none focus:border-gold-accent transition-colors cursor-pointer w-full md:w-auto appearance-none"
+            value={radius}
+            onChange={handleRadiusChange}
+          >
+            <option value="any">🌍 Any Distance</option>
+            <option value="2">🎯 Within 2 km</option>
+            <option value="5">⭕ Within 5 km</option>
+            <option value="10">📍 Within 10 km</option>
+            <option value="25">🗺️ Within 25 km</option>
+          </select>
         </div>
         
         <div className="flex items-center gap-6 self-end md:self-auto">
@@ -97,19 +172,33 @@ export default function BuyerMode() {
       </div>
 
       {showMap ? (
-        <div className="w-full h-[600px] bg-surface border border-surface-variant rounded-lg flex flex-col items-center justify-center text-center p-6">
-          <span className="text-5xl mb-4">🗺️</span>
-          <p className="font-working-title text-on-surface text-lg mb-2">Mapbox integration goes here</p>
-          <span className="font-label-caps text-xs tracking-widest text-text-secondary uppercase">Showing 42 listings in view</span>
+        <div className="w-full h-[600px] bg-surface border border-surface-variant rounded-lg overflow-hidden relative shadow-[0_0_30px_rgba(212,175,55,0.05)]">
+          <div ref={mapContainerRef} className="absolute inset-0" />
+          
+          <div className="absolute bottom-6 left-6 right-6 flex justify-between items-end pointer-events-none">
+            <div className="bg-background/90 backdrop-blur border border-surface-variant p-4 rounded shadow-lg pointer-events-auto">
+              <span className="font-label-caps text-xs tracking-widest text-gold-accent uppercase block mb-1">Spatial Intelligence</span>
+              <div className="font-working-title text-on-surface">{listings.length} properties in radar</div>
+              {radius !== 'any' && <div className="text-xs text-text-secondary mt-1">{radius}km radius from Makati CBD</div>}
+            </div>
+            
+            <button 
+              className="pointer-events-auto bg-surface-container border border-surface-variant hover:border-gold-accent text-on-surface rounded-full w-12 h-12 flex items-center justify-center shadow-lg transition-colors"
+              onClick={() => setShowMap(false)}
+            >
+              ✕
+            </button>
+          </div>
         </div>
       ) : (
         <>
-          {/* Saved Listings Rail */}
+          {/* Intelligence Archive (Saved Items) */}
           <div className="flex flex-col gap-4">
-            <h2 className="font-headline-editorial text-2xl text-on-surface flex items-center justify-between">
-              Saved Listings
-              <button className="text-xs font-working-title text-gold-accent cursor-pointer hover:underline">View All</button>
+            <h2 className="font-headline-editorial text-2xl text-on-surface flex items-center justify-between border-b border-surface-variant pb-2">
+              Intelligence Archive
+              <button className="text-[10px] font-label-caps tracking-widest uppercase text-gold-accent hover:underline">Open Full Archive</button>
             </h2>
+            <p className="text-xs text-text-secondary mb-2">Tracked assets and saved market briefs.</p>
             <div className="flex gap-4 overflow-x-auto pb-4 snap-x hide-scrollbar">
               {savedFiltered.map(item => (
                 <div key={item.id} className="snap-start">
@@ -117,16 +206,32 @@ export default function BuyerMode() {
                 </div>
               ))}
               {savedFiltered.length === 0 && (
-                <div className="text-sm text-text-secondary py-6">No saved listings match "{searchQuery}".</div>
+                <div className="bg-[#121110] border border-dashed border-surface-variant rounded-lg p-8 w-full text-center">
+                  <span className="text-2xl mb-2 opacity-50 block">📂</span>
+                  <p className="text-sm text-text-secondary">Your archive is empty. Save listings or intel briefs to build your workspace.</p>
+                </div>
               )}
             </div>
           </div>
 
           {/* Feed Rail (New in Area) */}
-          <div className="flex flex-col gap-4 mt-4">
-            <h2 className="font-headline-editorial text-2xl text-on-surface flex items-center justify-between">
+          <div className="flex flex-col gap-4 mt-8">
+            <h2 className="font-headline-editorial text-2xl text-on-surface flex items-center justify-between border-b border-surface-variant pb-2">
               New in Metro Manila
-              <button className="text-xs font-working-title text-gold-accent cursor-pointer hover:underline">View Map</button>
+              <div className="flex items-center gap-4">
+                <button 
+                  className="font-label-caps tracking-widest uppercase text-[9px] text-background bg-gold-accent px-3 py-1.5 rounded shadow hover:opacity-90 transition-opacity flex items-center gap-1"
+                  onClick={() => addToast("Alert set for Metro Manila. We'll notify you when new listings drop.", "🔔")}
+                >
+                  🔔 Set Alert
+                </button>
+                <button 
+                  className="text-[10px] font-label-caps tracking-widest uppercase text-gold-accent hover:underline"
+                  onClick={() => setShowMap(true)}
+                >
+                  View Map
+                </button>
+              </div>
             </h2>
             <div className="flex gap-4 overflow-x-auto pb-6 snap-x hide-scrollbar">
               {newFeedListings.map(item => (

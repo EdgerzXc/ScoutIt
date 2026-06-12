@@ -6,6 +6,7 @@ import Link from "next/link";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import ReactionButtons from "@/components/ui/ReactionButtons";
+import InteractiveRadiusMap from "@/components/property/InteractiveRadiusMap";
 import { getProperties } from "@/data/mockProperties";
 import { getArticles } from "@/data/mockArticles";
 import "./property.css";
@@ -45,6 +46,12 @@ function PropertyDirectoryContent() {
   const [selectedLocations, setSelectedLocations] = useState([]);
   const [selectedAesthetics, setSelectedAesthetics] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  
+  // Proximity Radar State
+  const [showMap, setShowMap] = useState(false);
+  const [radius, setRadius] = useState("any");
+  const [centerLng, setCenterLng] = useState(121.0215);
+  const [centerLat, setCenterLat] = useState(14.5547);
 
   // Collapsible panels state
   const [openFilters, setOpenFilters] = useState({
@@ -66,55 +73,77 @@ function PropertyDirectoryContent() {
     }
   }, [initialType]);
 
-  // Load Airtable CMS data with mock fallback
+  // Load Airtable CMS data with mock fallback (now supports Supabase Radius)
   useEffect(() => {
     async function loadCMSData() {
       try {
-        const res = await fetch("/api/cms");
+        const res = await fetch(`/api/cms?radius=${radius}&lng=${centerLng}&lat=${centerLat}`);
         if (!res.ok) throw new Error();
         const data = await res.json();
 
         // 1. Group and format properties
         const airtableProperties = data.properties || [];
-        const baseProperties = getProperties().map(p => {
-          let cat = MOCK_CATEGORIES[p.slug] || p.spaceCategory || "Residential";
-          return {
-            id: p.slug,
-            slug: p.slug,
+        
+        let mergedProperties = [];
+        
+        if (data.source === "supabase_radius") {
+          // Strict Radius Search: Only show properties returned by the PostGIS query
+          mergedProperties = airtableProperties.map(p => ({
+            id: p.id,
+            slug: p.slug || p.id,
             title: p.title,
-            city: p.city,
-            location: p.location,
-            spaceCategory: cat,
+            city: p.city || "",
+            location: p.location || "",
+            spaceCategory: p.spaceCategory || "Residential",
             aestheticTag: p.aestheticTag || "Modernist",
             beds: p.beds,
             baths: p.baths,
             floor_sqm: p.floor_sqm,
-            image: p.photos?.[0] || p.image || "",
+            image: p.image || p.photos?.[0] || "",
             hook: p.hook || "Premium curated property briefing."
-          };
-        });
-
-        const mergedProperties = [...baseProperties];
-        airtableProperties.forEach(p => {
-          if (!p.title || !p.slug || !p.spaceCategory) return;
-          if (!mergedProperties.some(x => x.slug === p.slug || x.id === p.id)) {
-            let cat = p.spaceCategory || "Residential";
-            mergedProperties.unshift({
-              id: p.id,
-              slug: p.slug || p.id,
+          }));
+        } else {
+          // Standard Load: Merge Airtable with Local Mock Fallback
+          const baseProperties = getProperties().map(p => {
+            let cat = MOCK_CATEGORIES[p.slug] || p.spaceCategory || "Residential";
+            return {
+              id: p.slug,
+              slug: p.slug,
               title: p.title,
-              city: p.city || "",
-              location: p.location || "",
+              city: p.city,
+              location: p.location,
               spaceCategory: cat,
               aestheticTag: p.aestheticTag || "Modernist",
               beds: p.beds,
               baths: p.baths,
               floor_sqm: p.floor_sqm,
-              image: p.image || (p.photos?.[0]) || "",
-              hook: p.hook || "Vetted dynamic listing brief."
-            });
-          }
-        });
+              image: p.photos?.[0] || p.image || "",
+              hook: p.hook || "Premium curated property briefing."
+            };
+          });
+
+          mergedProperties = [...baseProperties];
+          airtableProperties.forEach(p => {
+            if (!p.title || !p.slug || !p.spaceCategory) return;
+            if (!mergedProperties.some(x => x.slug === p.slug || x.id === p.id)) {
+              let cat = p.spaceCategory || "Residential";
+              mergedProperties.unshift({
+                id: p.id,
+                slug: p.slug || p.id,
+                title: p.title,
+                city: p.city || "",
+                location: p.location || "",
+                spaceCategory: cat,
+                aestheticTag: p.aestheticTag || "Modernist",
+                beds: p.beds,
+                baths: p.baths,
+                floor_sqm: p.floor_sqm,
+                image: p.image || (p.photos?.[0]) || "",
+                hook: p.hook || "Vetted dynamic listing brief."
+              });
+            }
+          });
+        }
 
         setRawProperties(mergedProperties);
 
@@ -193,7 +222,7 @@ function PropertyDirectoryContent() {
     }
 
     loadCMSData();
-  }, []);
+  }, [radius, centerLng, centerLat]);
 
   const toggleFilterSection = (section) => {
     setOpenFilters(prev => ({ ...prev, [section]: !prev[section] }));
@@ -379,15 +408,48 @@ function PropertyDirectoryContent() {
 
             {/* Right Search Input & Properties Grid */}
             <section style={{ display: "flex", flexDirection: "column", flexGrow: 1 }}>
-              <div className="search-wrapper">
+              <div className="search-wrapper" style={{ display: "flex", gap: "12px", alignItems: "center", marginBottom: "16px" }}>
                 <input
                   type="text"
                   className="global-search-input"
                   placeholder="SEARCH DIRECTORY LEDGER BY KEYWORD, CITY, OR DESIGN TAG..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
+                  style={{ flexGrow: 1, margin: 0 }}
                 />
+                <button 
+                  onClick={() => setShowMap(!showMap)}
+                  style={{
+                    background: showMap ? "#c8a96e" : "#0d0d0d",
+                    color: showMap ? "#000" : "#c8a96e",
+                    border: "1px solid #c8a96e",
+                    padding: "0 24px",
+                    height: "44px",
+                    fontFamily: "var(--font-mono)",
+                    fontSize: "11px",
+                    letterSpacing: "0.1em",
+                    cursor: "pointer",
+                    textTransform: "uppercase",
+                    fontWeight: "bold",
+                    transition: "all 0.2s"
+                  }}
+                >
+                  {showMap ? "✕ CLOSE RADAR" : "🗺️ PROXIMITY RADAR"}
+                </button>
               </div>
+
+              {showMap && (
+                <InteractiveRadiusMap 
+                  initialLng={centerLng}
+                  initialLat={centerLat}
+                  onClose={() => setShowMap(false)}
+                  onSearch={(newRadiusKm, newLng, newLat) => {
+                    setRadius(newRadiusKm);
+                    setCenterLng(newLng);
+                    setCenterLat(newLat);
+                  }}
+                />
+              )}
 
               <div className="directory-grid">
                 {filteredProperties.length > 0 ? (

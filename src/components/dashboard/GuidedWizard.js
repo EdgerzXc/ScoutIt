@@ -4,17 +4,22 @@ import { useState } from "react";
 
 const TOTAL_STEPS = 7;
 
-export default function GuidedWizard({ onPublish, onClose }) {
-  const [isAdvanced, setIsAdvanced] = useState(false);
-  const [step, setStep] = useState(1);
+export default function GuidedWizard({ onPublish, onClose, initialData = null }) {
+  // Editing an existing listing skips the paced wizard and opens the full form
+  const isEditing = !!initialData;
   
+  // mode: 'selection' | 'very_basic' | 'basic' | 'advanced'
+  const [mode, setMode] = useState(isEditing ? 'advanced' : 'selection');
+  const [step, setStep] = useState(1);
+  const [showBriefing, setShowBriefing] = useState(false);
+
   const [formData, setFormData] = useState({
-    type: "",
-    location: "",
-    price: "",
-    mediaLink: "",
-    description: "",
-    verified: false
+    type: initialData?.type || "",
+    location: initialData?.location || "",
+    price: initialData?.price || "",
+    mediaLink: initialData?.mediaLink || "",
+    description: initialData?.description || initialData?.desc || "",
+    verified: initialData?.verified || false
   });
 
   const nextStep = () => setStep(s => Math.min(TOTAL_STEPS, s + 1));
@@ -34,22 +39,86 @@ export default function GuidedWizard({ onPublish, onClose }) {
     onPublish({ ...formData, completenessScore: computeScore() });
   };
 
-  if (isAdvanced) {
+  // --- MODE SELECTION SCREEN ---
+  if (mode === 'selection') {
     return (
       <div className="fixed inset-0 bg-background z-50 flex flex-col animate-[fadeIn_0.3s_ease-out] overflow-y-auto">
-        <div className="sticky top-0 bg-background/90 backdrop-blur-md border-b border-surface-variant p-4 flex justify-between items-center z-10">
-          <button className="text-text-secondary hover:text-on-surface font-working-title text-sm" onClick={onClose}>← Cancel</button>
-          <span className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase">Advanced Mode</span>
-          <button className="text-gold-accent hover:text-gold-accent/80 font-working-title text-sm" onClick={() => setIsAdvanced(false)}>Switch to Wizard</button>
+        <div className="sticky top-0 bg-background p-4 flex justify-between items-center z-10">
+          <button className="text-text-secondary hover:text-on-surface font-working-title text-sm" onClick={onClose}>← Exit Setup</button>
+          <span className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase">Workspace Initialization</span>
+          <span className="w-24"></span>
         </div>
         
-        <div className="flex-1 max-w-4xl mx-auto w-full p-6 md:p-12">
-          <h2 className="font-headline-editorial text-4xl mb-8 text-on-surface">Full Listing Configuration</h2>
+        <div className="flex-1 flex flex-col justify-center max-w-5xl mx-auto w-full p-6 py-12">
+          <div className="text-center mb-12">
+            <h2 className="font-headline-editorial text-4xl md:text-5xl mb-4 text-on-surface">How would you like to build your dossier?</h2>
+            <p className="text-text-secondary">Select the configuration mode that matches your available time and expertise.</p>
+          </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            {/* Very Basic Mode */}
+            <div 
+              className="bg-[#121110] border border-surface-variant hover:border-gold-accent rounded-lg p-8 flex flex-col items-center text-center cursor-pointer group transition-all"
+              onClick={() => setMode('very_basic')}
+            >
+              <div className="text-5xl mb-6 group-hover:scale-110 transition-transform">⚡</div>
+              <h3 className="font-working-title text-2xl text-on-surface mb-2">Concierge Fast-Track</h3>
+              <span className="font-label-caps text-[10px] tracking-widest text-text-secondary uppercase mb-4">Very Basic • &lt; 1 min</span>
+              <p className="text-sm text-text-secondary mb-8">Provide just the absolute minimum basics (Type & Location). We will instantly publish your asset as a Market Signal. Ideal for testing the waters quickly.</p>
+              <button className="mt-auto w-full border border-surface-variant group-hover:border-gold-accent group-hover:text-gold-accent text-on-surface font-working-title py-3 rounded transition-colors">Select Fast-Track</button>
+            </div>
+
+            {/* Basic Mode */}
+            <div 
+              className="bg-surface-container-low border border-gold-accent/50 shadow-[0_0_20px_rgba(212,175,55,0.1)] rounded-lg p-8 flex flex-col items-center text-center cursor-pointer group transition-all relative overflow-hidden"
+              onClick={() => setMode('basic')}
+            >
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 bg-gold-accent text-background font-label-caps text-[9px] px-3 py-1 rounded-b font-bold tracking-widest">RECOMMENDED</div>
+              <div className="text-5xl mb-6 mt-4 group-hover:scale-110 transition-transform">🧭</div>
+              <h3 className="font-working-title text-2xl text-on-surface mb-2">Guided Setup</h3>
+              <span className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase mb-4">Basic • 5 mins</span>
+              <p className="text-sm text-text-secondary mb-8">A step-by-step walkthrough pacing you through every single detail. Perfect for first-time owners who want to ensure a high completeness score.</p>
+              <button className="mt-auto w-full bg-gold-accent text-background font-working-title py-3 rounded font-bold hover:opacity-90 transition-opacity">Start Guided Setup</button>
+            </div>
+
+            {/* Advanced Mode */}
+            <div 
+              className="bg-[#121110] border border-surface-variant hover:border-gold-accent rounded-lg p-8 flex flex-col items-center text-center cursor-pointer group transition-all"
+              onClick={() => setMode('advanced')}
+            >
+              <div className="text-5xl mb-6 group-hover:scale-110 transition-transform">🎛️</div>
+              <h3 className="font-working-title text-2xl text-on-surface mb-2">Expert Configuration</h3>
+              <span className="font-label-caps text-[10px] tracking-widest text-text-secondary uppercase mb-4">Advanced • Dense Form</span>
+              <p className="text-sm text-text-secondary mb-8">A dense, single-page command interface for brokers and experienced owners. Complete control over all intelligence parameters and editorial guidelines.</p>
+              <button className="mt-auto w-full border border-surface-variant group-hover:border-gold-accent group-hover:text-gold-accent text-on-surface font-working-title py-3 rounded transition-colors">Open Expert Form</button>
+            </div>
+            
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // --- VERY BASIC (CONCIERGE FAST-TRACK) ---
+  if (mode === 'very_basic') {
+    return (
+      <div className="fixed inset-0 bg-background z-50 flex flex-col animate-[fadeIn_0.3s_ease-out] overflow-y-auto">
+        <div className="sticky top-0 bg-background p-4 flex justify-between items-center z-10">
+          <button className="text-text-secondary hover:text-on-surface font-working-title text-sm" onClick={() => setMode('selection')}>← Back to Modes</button>
+          <span className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase">Concierge Fast-Track</span>
+          <span className="w-24"></span>
+        </div>
+        
+        <div className="flex-1 flex flex-col justify-center items-center max-w-md mx-auto w-full p-6 text-center">
+          <div className="text-6xl mb-6">⚡</div>
+          <h2 className="font-headline-editorial text-4xl mb-2 text-on-surface">Let's get this live.</h2>
+          <p className="text-text-secondary mb-8">Just tell us what and where it is.</p>
+          
+          <div className="w-full flex flex-col gap-4 text-left mb-8">
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-bold text-on-surface">Asset Type</label>
-              <select className="bg-surface border border-surface-variant rounded px-4 py-3 text-on-surface focus:outline-none focus:border-gold-accent transition-colors" value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})}>
+              <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">Asset Type</label>
+              <select className="bg-surface border border-surface-variant rounded px-4 py-4 text-on-surface focus:outline-none focus:border-gold-accent transition-colors" value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})}>
                 <option value="">Select type...</option>
                 <option value="house">House</option>
                 <option value="lot">Lot</option>
@@ -58,58 +127,170 @@ export default function GuidedWizard({ onPublish, onClose }) {
                 <option value="other">Other</option>
               </select>
             </div>
-            <div className="flex flex-col gap-2">
-              <label className="text-sm font-bold text-on-surface">Location / Address</label>
-              <input className="bg-surface border border-surface-variant rounded px-4 py-3 text-on-surface focus:outline-none focus:border-gold-accent transition-colors" type="text" value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})} placeholder="e.g. BGC Core" />
+            
+            <div className="flex flex-col gap-2 mt-4">
+              <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">Location / Address</label>
+              <input 
+                className="w-full bg-surface border border-surface-variant rounded px-4 py-4 text-on-surface focus:outline-none focus:border-gold-accent transition-colors" 
+                type="text" 
+                placeholder="e.g. BGC Core" 
+                value={formData.location}
+                onChange={e => setFormData({...formData, location: e.target.value})}
+              />
             </div>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div className="flex flex-col gap-2">
-              <label className="text-sm font-bold text-on-surface">Pricing (Internal)</label>
-              <input className="bg-surface border border-surface-variant rounded px-4 py-3 text-on-surface focus:outline-none focus:border-gold-accent transition-colors" type="number" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} placeholder="₱" />
-              <span className="text-xs text-text-secondary">Never displayed publicly.</span>
-            </div>
-            <div className="flex flex-col gap-2">
-              <label className="text-sm font-bold text-on-surface">Verification Status</label>
-              <select className="bg-surface border border-surface-variant rounded px-4 py-3 text-on-surface focus:outline-none focus:border-gold-accent transition-colors" value={formData.verified} onChange={e => setFormData({...formData, verified: e.target.value === 'true'})}>
-                <option value="false">Unverified</option>
-                <option value="true">Owner Verified (Docs uploaded)</option>
-              </select>
-            </div>
+          
+          <div className="w-full p-4 bg-surface-alt border border-surface-variant rounded mb-8 text-sm text-text-secondary">
+            Note: This will publish as a "Market Signal" with a lower completeness score. You can edit the full dossier later.
           </div>
-
-          <div className="flex flex-col gap-2 mb-6">
-            <label className="text-sm font-bold text-on-surface">Editorial Description</label>
-            <textarea className="bg-surface border border-surface-variant rounded px-4 py-3 text-on-surface min-h-[120px] focus:outline-none focus:border-gold-accent transition-colors" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} placeholder="Describe the space..."></textarea>
-          </div>
-
-          <div className="flex flex-col gap-2 mb-8">
-            <label className="text-sm font-bold text-on-surface">Media Link (Google Drive / Dropbox)</label>
-            <div className="bg-gold-accent/10 border border-gold-accent/30 text-gold-accent p-3 rounded text-sm mb-2">
-              ⚠️ Ensure folder permissions are set to "Anyone with the link can view".
-            </div>
-            <input 
-              className="bg-surface border border-surface-variant rounded px-4 py-3 text-on-surface focus:outline-none focus:border-gold-accent transition-colors" 
-              type="url" 
-              value={formData.mediaLink} 
-              onChange={e => setFormData({...formData, mediaLink: e.target.value})} 
-              placeholder="https://drive.google.com/drive/folders/..." 
-            />
-          </div>
-
-          <button className="w-full bg-gold-accent text-background font-working-title text-base font-bold py-4 px-6 rounded hover:opacity-90 transition-all disabled:opacity-50" onClick={handlePublish}>Publish Configuration</button>
+          
+          <button 
+            className="w-full bg-gold-accent text-background font-working-title text-base font-bold py-4 px-6 rounded hover:opacity-90 transition-all disabled:opacity-50" 
+            disabled={!formData.type || !formData.location} 
+            onClick={handlePublish}
+          >
+            Publish Instantly
+          </button>
         </div>
       </div>
     );
   }
 
-  // GUIDED WIZARD
+  // --- ADVANCED (EXPERT FORM) ---
+  if (mode === 'advanced') {
+    return (
+      <div className="fixed inset-0 bg-background z-[60] flex flex-col animate-[fadeIn_0.3s_ease-out] overflow-y-auto">
+        <div className="sticky top-0 bg-background/90 backdrop-blur-md border-b border-surface-variant p-4 flex justify-between items-center z-10">
+          <button className="text-text-secondary hover:text-on-surface font-working-title text-sm" onClick={() => isEditing ? onClose() : setMode('selection')}>
+            {isEditing ? "← Cancel" : "← Back to Modes"}
+          </button>
+          <span className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase">{isEditing ? "Edit Dossier" : "Expert Configuration"}</span>
+          <div className="flex items-center gap-3">
+             <button 
+               className={`font-working-title text-sm px-3 py-1.5 rounded transition-colors ${showBriefing ? 'bg-gold-accent text-background' : 'border border-gold-accent text-gold-accent hover:bg-gold-accent/10'}`}
+               onClick={() => setShowBriefing(!showBriefing)}
+             >
+               {showBriefing ? "Hide Full Briefing" : "View Full Briefing"}
+             </button>
+          </div>
+        </div>
+        
+        <div className="flex-1 w-full flex flex-col lg:flex-row">
+          
+          {/* Main Form Area */}
+          <div className={`flex-1 p-6 md:p-12 transition-all ${showBriefing ? 'lg:w-2/3' : 'w-full max-w-4xl mx-auto'}`}>
+            <h2 className="font-headline-editorial text-4xl mb-8 text-on-surface">{isEditing ? `Edit: ${initialData.title || "Your Property"}` : "Full Configuration Workspace"}</h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-bold text-on-surface">Asset Type</label>
+                <select className="bg-surface border border-surface-variant rounded px-4 py-3 text-on-surface focus:outline-none focus:border-gold-accent transition-colors" value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})}>
+                  <option value="">Select type...</option>
+                  <option value="house">House</option>
+                  <option value="lot">Lot</option>
+                  <option value="condo">Condo</option>
+                  <option value="commercial">Commercial</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-bold text-on-surface">Location / Address</label>
+                <input className="bg-surface border border-surface-variant rounded px-4 py-3 text-on-surface focus:outline-none focus:border-gold-accent transition-colors" type="text" value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})} placeholder="e.g. BGC Core" />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-bold text-on-surface">Pricing Expectation (Internal)</label>
+                <input className="bg-surface border border-surface-variant rounded px-4 py-3 text-on-surface focus:outline-none focus:border-gold-accent transition-colors" type="number" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} placeholder="₱" />
+                <span className="text-xs text-text-secondary">Never displayed publicly. Used for broker matching algorithms.</span>
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-bold text-on-surface">Verification Status</label>
+                <select className="bg-surface border border-surface-variant rounded px-4 py-3 text-on-surface focus:outline-none focus:border-gold-accent transition-colors" value={formData.verified} onChange={e => setFormData({...formData, verified: e.target.value === 'true'})}>
+                  <option value="false">Unverified</option>
+                  <option value="true">Owner Verified (Docs uploaded)</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2 mb-6">
+              <label className="text-sm font-bold text-on-surface flex justify-between">
+                Editorial Description
+                <span className="text-text-muted font-normal text-xs">{formData.description.length} chars</span>
+              </label>
+              <textarea className="bg-surface border border-surface-variant rounded px-4 py-3 text-on-surface min-h-[160px] focus:outline-none focus:border-gold-accent transition-colors leading-relaxed" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} placeholder="Outline the property's unique value proposition, exact specifications, and surrounding infrastructure..."></textarea>
+            </div>
+
+            <div className="flex flex-col gap-2 mb-8">
+              <label className="text-sm font-bold text-on-surface">Media Link (Drive / Dropbox)</label>
+              <div className="bg-gold-accent/10 border border-gold-accent/30 text-gold-accent p-3 rounded text-sm mb-2">
+                ⚠️ Ensure folder permissions are set to "Anyone with the link can view" to allow brokers immediate access.
+              </div>
+              <input 
+                className="bg-surface border border-surface-variant rounded px-4 py-3 text-on-surface focus:outline-none focus:border-gold-accent transition-colors" 
+                type="url" 
+                value={formData.mediaLink} 
+                onChange={e => setFormData({...formData, mediaLink: e.target.value})} 
+                placeholder="https://drive.google.com/drive/folders/..." 
+              />
+            </div>
+
+            <button className="w-full bg-gold-accent text-background font-working-title text-lg font-bold py-4 px-6 rounded hover:opacity-90 transition-all shadow-[0_0_15px_rgba(212,175,55,0.2)] disabled:opacity-50" onClick={handlePublish}>
+              {isEditing ? "Update Dossier" : "Initialize Full Dossier"}
+            </button>
+          </div>
+
+          {/* Premium Briefing Panel (Collapsible) */}
+          {showBriefing && (
+            <div className="w-full lg:w-1/3 bg-[#0a0a0a] border-l border-surface-variant p-6 md:p-8 animate-[slideLeft_0.3s_ease-out]">
+              <div className="sticky top-24">
+                <span className="font-label-caps text-xs tracking-widest text-gold-accent uppercase mb-2 block">Intelligence Briefing</span>
+                <h3 className="font-headline-editorial text-2xl text-on-surface mb-6">Editorial & Rank Guidelines</h3>
+                
+                <div className="flex flex-col gap-6">
+                  <div className="p-4 bg-surface-alt border border-surface-variant rounded">
+                    <h4 className="font-working-title text-on-surface mb-2 flex items-center gap-2">
+                      <span className="text-gold-accent">1.</span> Achieving 100% Completeness
+                    </h4>
+                    <p className="text-sm text-text-secondary leading-relaxed">
+                      Listings above 80% completeness receive "Priority Status" in broker feeds. To hit 100%, you must provide a Media Link, an Editorial Description (&gt; 20 characters), and verify ownership.
+                    </p>
+                  </div>
+                  
+                  <div className="p-4 bg-surface-alt border border-surface-variant rounded">
+                    <h4 className="font-working-title text-on-surface mb-2 flex items-center gap-2">
+                      <span className="text-gold-accent">2.</span> Editorial Tone
+                    </h4>
+                    <p className="text-sm text-text-secondary leading-relaxed">
+                      Avoid ALL CAPS and excessive exclamation marks. Speak to spatial intelligence: highlight floor-to-ceiling heights, exact square meterage, specific facings (e.g., "Morning sun facing East"), and walking distance to key infrastructure.
+                    </p>
+                  </div>
+                  
+                  <div className="p-4 bg-surface-alt border border-surface-variant rounded">
+                    <h4 className="font-working-title text-on-surface mb-2 flex items-center gap-2">
+                      <span className="text-gold-accent">3.</span> Media Requirements
+                    </h4>
+                    <p className="text-sm text-text-secondary leading-relaxed">
+                      Upload at least one floorplan and 5 high-resolution interior shots. If using a Google Drive link, place all media in the root folder rather than nesting them in sub-directories.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+        </div>
+      </div>
+    );
+  }
+
+  // --- BASIC (GUIDED WIZARD) ---
   return (
     <div className="fixed inset-0 bg-background z-50 flex flex-col animate-[fadeIn_0.3s_ease-out]">
       <div className="sticky top-0 bg-background p-4 flex justify-between items-center">
-        <button className="text-text-secondary hover:text-on-surface font-working-title text-sm" onClick={step === 1 ? onClose : prevStep}>
-          {step === 1 ? "← Exit" : "← Back"}
+        <button className="text-text-secondary hover:text-on-surface font-working-title text-sm" onClick={step === 1 ? () => setMode('selection') : prevStep}>
+          {step === 1 ? "← Back to Modes" : "← Back"}
         </button>
         
         <div className="flex gap-2">
@@ -118,8 +299,8 @@ export default function GuidedWizard({ onPublish, onClose }) {
           ))}
         </div>
 
-        <button className="text-gold-accent hover:text-gold-accent/80 font-working-title text-sm" onClick={() => setIsAdvanced(true)}>
-          Advanced Mode
+        <button className="text-gold-accent hover:text-gold-accent/80 font-working-title text-sm" onClick={() => setMode('advanced')}>
+          Switch to Expert
         </button>
       </div>
 
@@ -137,7 +318,7 @@ export default function GuidedWizard({ onPublish, onClose }) {
               ].map(t => (
                 <div 
                   key={t.id} 
-                  className={`p-6 border rounded cursor-pointer transition-all flex flex-col items-center justify-center gap-3 ${formData.type === t.id ? 'bg-surface-container-low border-gold-accent' : 'bg-surface border-surface-variant hover:border-text-secondary'}`}
+                  className={`p-6 border rounded cursor-pointer transition-all flex flex-col items-center justify-center gap-3 ${formData.type === t.id ? 'bg-surface-container-low border-gold-accent shadow-[0_0_10px_rgba(212,175,55,0.1)]' : 'bg-surface border-surface-variant hover:border-text-secondary'}`}
                   onClick={() => setFormData({...formData, type: t.id})}
                 >
                   <div className="text-4xl">{t.icon}</div>
@@ -234,7 +415,7 @@ export default function GuidedWizard({ onPublish, onClose }) {
           <div className="w-full animate-[fadeIn_0.4s_ease-out]">
             <h2 className="font-headline-editorial text-4xl mb-8 text-on-surface">Verify ownership?</h2>
             <div 
-              className={`p-12 border rounded cursor-pointer transition-all flex flex-col items-center justify-center gap-4 mb-8 ${formData.verified ? 'bg-surface-container-low border-gold-accent' : 'bg-surface border-surface-variant'}`} 
+              className={`p-12 border rounded cursor-pointer transition-all flex flex-col items-center justify-center gap-4 mb-8 ${formData.verified ? 'bg-surface-container-low border-gold-accent shadow-[0_0_10px_rgba(212,175,55,0.1)]' : 'bg-surface border-surface-variant'}`} 
               onClick={() => setFormData({...formData, verified: !formData.verified})}
             >
               <div className="text-5xl">{formData.verified ? "✅" : "📑"}</div>
@@ -256,15 +437,16 @@ export default function GuidedWizard({ onPublish, onClose }) {
           <div className="w-full animate-[fadeIn_0.4s_ease-out]">
             <h2 className="font-headline-editorial text-4xl mb-4 text-on-surface">Ready to publish</h2>
             
-            <div className="bg-surface-alt border border-surface-variant p-8 rounded-lg mb-8">
-              <div className="text-6xl text-gold-accent mb-4 font-display-md">{computeScore()}</div>
+            <div className="bg-surface-alt border border-surface-variant p-8 rounded-lg mb-8 relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gold-accent"></div>
+              <div className="text-6xl text-gold-accent mb-4 font-display-md">{computeScore()}%</div>
               <div className="font-label-caps text-xs tracking-widest text-text-secondary uppercase mb-2">Completeness Score</div>
               <p className="text-sm text-text-secondary max-w-sm mx-auto">
                 Listings above 80% completeness rank higher in broker feeds.
               </p>
             </div>
             
-            <button className="w-full bg-gold-accent text-background font-working-title text-base font-bold py-4 px-6 rounded hover:opacity-90 transition-all" onClick={handlePublish}>Publish to Ledger</button>
+            <button className="w-full bg-gold-accent text-background font-working-title text-lg font-bold py-4 px-6 rounded hover:opacity-90 transition-all shadow-[0_0_15px_rgba(212,175,55,0.2)]" onClick={handlePublish}>Publish to Ledger</button>
           </div>
         )}
       </div>

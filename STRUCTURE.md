@@ -1,116 +1,81 @@
-# ScoutIt — Master Folder Structure
+# ScoutIt — Master Architecture & Structure Guide
 
-Plain-English guide to what every folder and file is for. This is the **one
-master folder** used by both AIs (Claude Code and Antigravity). When either
-AI opens the project, it opens **this folder** (`C:\Users\jerze\ScoutIt`).
+This is the **master architectural guide** for ScoutIt. It is explicitly designed to be read by AI agents (like Antigravity and Claude) to instantly understand the project's layout, data flow, tech stack, and recent feature integrations.
 
 ---
 
-## The two files that tell the AIs who they are
+## 1. Core Tech Stack & Integrations
 
-| File | Who reads it | What it's for |
-|---|---|---|
-| **`AGENTS.md`** | Both AIs (shared) | The shared brain — facts BOTH must know about this project (it's a modified Next.js; read the local docs before coding; etc.). |
-| **`CLAUDE.md`** | Claude only | Claude's own instructions. Right now it just imports `AGENTS.md`, so Claude reads the shared facts. Add Claude-specific rules here. |
-
-> Antigravity keeps *its* own rules inside Antigravity's settings, separate
-> from these. The shared truth both agents shoud agree on lives in `AGENTS.md`.
+- **Framework:** Next.js (App Router)
+- **Styling:** Vanilla CSS (`globals.css` and CSS Modules) & styled-jsx
+- **Primary Public CMS:** Airtable (Properties, Intel, Brokers)
+- **Secondary DB & Auth:** Supabase (User Auth, Owner Dashboard, Property submissions)
+- **Mapping & Geocoding:** Mapbox & Leaflet
 
 ---
 
-## Top-level files
+## 2. System Architecture & Data Flow
 
-| File | What it is |
-|---|---|
-| `package.json` | The project's ID card: its name, scripts (`npm run dev`, `build`, `start`), and list of dependencies. |
-| `package-lock.json` | Exact locked versions of every dependency. Don't edit by hand. |
-| `next.config.mjs` | Next.js configuration (currently minimal). |
-| `jsconfig.json` | Sets up the `@/` shortcut so imports like `@/components/...` point at `src/`. |
-| `eslint.config.mjs` | Code-style/linting rules. |
-| `vercel.json` | Settings for the Vercel deployment. |
-| `.gitignore` | Lists files git should NOT track (node_modules, build output, the `reference/` photos, secrets). |
-| `README.md` | Standard project readme. |
-| `STRUCTURE.md` | **This file.** |
-| `PROPERTY_ARCHITECTURE.md`, `SCOUTIT_AIRTABLE_SOP.md` | Existing project notes (property page design, Airtable how-to). |
-| `structure.txt` | An older auto-generated tree dump (informational). |
+ScoutIt uses a unique **Dual-CMS Architecture**:
 
-> 📖 **Start here for the big picture:** `docs/SCOUTIT_DESIGN_BRIEF.md` explains
-> what the whole site is *for* — purpose, audience, visual DNA (the 95% black /
-> 5% gold rule, exact color/font tokens), the UX "descent through Layers" model,
-> every route, and the in-progress scrollytelling manifesto. Read it before
-> touching design or UX.
+### A. The Public Directory (Airtable + Mapbox)
+All public-facing data (the `/property` directory, `/intel`, `/brokers`) is pulled from Airtable.
+- **API Proxy:** `src/app/api/cms/route.js` acts as the central switchboard. It fetches live Airtable data securely using `AIRTABLE_API_KEY` and `AIRTABLE_BASE_ID` from `.env.local`.
+- **Dynamic Geocoding:** To keep Airtable easy for human editors, owners only type a string location (e.g., "Zuellig Building, Makati"). `route.js` intercepts these properties, silently pings the **Mapbox Geocoding API** on the backend, and automatically assigns exact `lat` and `lng` coordinates to the payload.
+- **Proximity Radar (Haversine Filter):** The user can trigger a visual Radius Search (`InteractiveRadiusMap`). Because Airtable lacks built-in PostGIS, `route.js` uses a mathematical **Haversine Distance Formula** in Javascript to instantly filter the geocoded Airtable properties against the user's Mapbox slider radius.
+
+### B. The Private Dashboard (Supabase + Context)
+The `/dashboard` route is protected and splits into two distinct UX flows controlled by `DashboardContext.js`:
+- **Buyer Mode (`BuyerMode.js`):** A sleek, dark-mode CRM where users track shortlisted properties, saved searches, and intel briefs.
+- **Owner Mode (`GuidedWizard.js`):** A heavily interactive multi-phase wizard for property developers to submit new listings. The wizard includes:
+  - Step-by-step UI with progress saving.
+  - An interactive Mapbox pin-dropper to extract coordinates.
+  - Submissions are pushed directly to **Supabase** via `supabaseClient.js`.
 
 ---
 
-## The website code — `src/`
+## 3. Folder Structure — `src/`
 
-This is the actual site. Next.js App Router: **folders inside `src/app/`
-become URLs.**
+This project uses the Next.js App Router (`src/app/`).
 
-### `src/app/` — pages & routes
-- `layout.js` — the shell wrapped around every page (fonts, global CSS, the film-grain overlay).
-- `page.js` — the **homepage** (the cosmic event-horizon hero + sections). Large file; its styles are self-contained.
-- `globals.css` — site-wide design tokens: colors, fonts, spacing variables, resets. The shared style foundation.
-- `about/page.js` — the manifesto page.
-- `discover/`, `intel/`, `property/`, `showcase/`, `dashboard/`, `wishlist/` — the main sections. A folder named `[slug]` or `[id]` is a **detail page** (e.g. one property, one article).
-- `brokers/`, `photographers/`, `researchers/`, `event-planners/` — the people/services, each with a listing page and `[slug]` detail pages.
-- `api/` — backend endpoints (`cms`, `reactions`, `showcase`) the site calls for data.
+### `src/app/` (Pages & Routes)
+- `layout.js` — The global shell wrapper (fonts, global CSS, film-grain overlay).
+- `page.js` — The main homepage (cosmic event-horizon hero).
+- `globals.css` — Core design system tokens (95% black / 5% gold rule).
+- `property/page.js` — The primary Public Space Directory (grid of properties).
+- `property/[slug]/page.js` — The individual property detail page.
+- `dashboard/page.js` — The private authenticated portal (loads BuyerMode or OwnerMode).
+- `settings/page.js` — User profile and account configuration.
+- `api/` — Backend endpoints:
+  - `cms/route.js` — The master proxy for Airtable fetching and Mapbox geocoding.
+  - `reactions/route.js` — Endpoint for handling user likes/saves.
 
-### `src/components/` — reusable building blocks (organized by purpose)
-- `layout/` — `Header` (the top nav, used across the site).
-- `ui/` — small shared UI bits — `ReactionButtons`.
-- `board/` — `BoardPodium`, `ShowcaseStage` (the ranked-board feature).
-- `connection/` — `ConnectionPortal`, `ServiceConnectionPortal` (the "get in touch" panels on detail pages).
-- `property/` — everything for property detail pages: `InteractiveMap`, `LedgerButtons`, `EcosystemActionBar`, `CommercialFlow`, `ResidentialScrollytelling`, `chapterConfig`.
-- `cinematic/` — `CinematicJourney` (a hero cinematic, currently dormant in the beam flow).
-- `scrollytelling/` — **the manifesto build (in progress).** Holds `DescentSequence.js`: the UFO-triggered "descent" — darkening → molten-gold crack reveal → mission nodes → finale to `/about`. Lazy-loaded, driven by a single scroll `progress` value. See `docs/SCOUTIT_DESIGN_BRIEF.md` §6 and `docs/scrollytelling-mission-text.md`.
+### `src/components/` (Reusable UI Blocks)
+- `dashboard/` — Holds the heavy dashboard logic: `BuyerMode.js` and `GuidedWizard.js`.
+- `property/` — Everything for the property pages:
+  - `InteractiveRadiusMap.js` — The visual 3D radar map for radius searching on the directory.
+  - `InteractiveMap.js` — The Leaflet-based static map on individual property pages (shows vicinity/amenities).
+- `ui/` — Shared micro-components (e.g., `ReactionButtons`).
+- `layout/` — Site-wide wrappers (e.g., `Header`, `Footer`).
+- `scrollytelling/` — Complex narrative components driven by scroll progress.
 
-### `src/data/` — the content
-`mockProperties`, `mockArticles`, `mockBrokers`, `mockPhotographers`,
-`mockResearchers`, `mockEventPlanners`, `mockShowcase` — sample/fallback data
-the pages show when the live Airtable CMS isn't reachable.
+### `src/context/` (State Management)
+- `DashboardContext.js` — The global React Context that manages User Authentication (via Supabase) and UI state (switching between Buyer and Owner modes).
 
-### `src/lib/` — helpers (no visuals)
-- `airtable.js` — fetches live content from Airtable.
-- `regions.js` — maps cities to regions.
+### `src/data/` (Local Mock Data)
+Holds `mockProperties.js`, `mockBrokers.js`, etc. These files act as the ultimate fallback. If the `.env.local` Airtable keys are missing or the Airtable API goes down, `route.js` falls back to serving these mock files to ensure the site never crashes.
 
-### `src/hooks/` — reserved & empty
-Custom React hooks will live here later (e.g. a `useScrollProgress` for the
-scrollytelling build).
-
----
-
-## Your stuff — `docs/` and `reference/`
-
-| Folder | What goes in it |
-|---|---|
-| **`docs/`** | Plans, prompts, and reference docs. Key files: `SCOUTIT_DESIGN_BRIEF.md` (the read-first overview of the whole site), `scrollytelling-mission-text.md` (the six locked manifesto messages), plus other `SCOUTIT_*` notes. |
-| **`reference/`** | **Your guide photos** for how things should look. Git-ignored (stays on your machine, never deployed). Currently holds `golden liquid.jpeg` — the molten-gold centerpiece for the scrollytelling manifesto. See `reference/README.md`. |
-
-> The deployable copy of the gold image lives at
-> `public/scrollytelling/golden-liquid.jpeg` (the `reference/` original is never
-> served). Anything the website must actually load goes in `public/`.
+### `src/lib/` (Utilities)
+- `airtable.js` — The isolated logic for fetching and normalizing data from the Airtable API.
+- `supabaseClient.js` — The initialized Supabase client for authentication and Owner submissions.
+- `regions.js` — Helper functions for mapping cities to regions.
 
 ---
 
-## Folders you can ignore (the machinery)
+## 4. AI Collaboration Rules (`AGENTS.md`)
 
-| Folder | What it is |
-|---|---|
-| `node_modules/` | All third-party code the project depends on. Huge, auto-installed by `npm install`, never edited or committed. |
-| `.next/` | Build output the dev server generates. Disposable. |
-| `.git/` | The full version history + the safety backup (`git stash`). This is what connects to GitHub and Vercel. |
-| `public/` | Static files served as-is (images, icons). |
-| `.claude/` | Local tooling config for Claude Code (e.g. how to launch the dev server). |
+- **One agent at a time** finishes a chunk, then commits it to git to create a clean checkpoint.
+- If modifying the dashboard, always review `DashboardContext.js` to ensure state is maintained.
+- When creating UI, strictly adhere to the established "Premium ScoutIt Aesthetic" (vibrant accents, dark mode dominance, glassmorphism).
 
----
-
-## How the two AIs should share this without fighting
-
-1. **One agent at a time** finishes a chunk, then **commits it to git** (a clean checkpoint).
-2. The other agent starts from that clean, committed state — no guessing what's finished vs. abandoned.
-3. Optionally, each works on its own git **branch** and merges deliberately.
-4. `AGENTS.md` is the only shared memory between them — keep it current.
-
-> The mess that built up earlier came from *uncommitted* work being left
-> behind. Committing at clean points is the fix.
+> **AI Instruction Context:** Whenever an AI agent is asked to build a new feature or debug data flow, start by referencing `src/app/api/cms/route.js` for data origin, and `src/components/` for UI conventions.

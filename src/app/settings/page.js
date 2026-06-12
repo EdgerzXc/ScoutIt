@@ -199,6 +199,13 @@ export default function SettingsPage() {
         >
           Save Changes
         </button>
+
+        <button
+          className="w-full mt-4 border border-surface-variant text-text-secondary hover:text-error hover:border-error/50 font-working-title text-sm py-3 rounded transition-colors"
+          onClick={() => { localStorage.removeItem("scoutit_user"); router.push("/onboarding"); }}
+        >
+          🚪 Sign Out
+        </button>
       </main>
     </div>
   );

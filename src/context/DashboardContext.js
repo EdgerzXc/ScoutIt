@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect } from "react";
+import { supabase } from "../lib/supabaseClient";
 
 const DashboardContext = createContext();
 
@@ -8,107 +9,19 @@ export function useDashboard() {
   return useContext(DashboardContext);
 }
 
-const INITIAL_LISTINGS = [
-  {
-    id: 'f1',
-    type: 'Commercial Lot',
-    title: 'Alabang Commercial Lot',
-    desc: 'Prime corner lot available for joint venture or long-term lease. Owner highly motivated.',
-    hasMedia: true,
-    tag: 'HOT',
-    tagClass: 'bg-error/20 text-error',
-    time: 'Just now',
-    ownerId: 'sys_owner1', // Mock system owner
-    signals: {
-      ownerAge: '98% (< 1hr)',
-      ownerAgeClass: 'text-success',
-      accountAge: '2 yrs',
-      completeness: '85%'
-    }
-  },
-  {
-    id: 'f2',
-    type: 'Mixed-Use',
-    title: 'Poblacion Mixed-Use Building',
-    desc: '5-story building seeking property management and exclusive brokerage for upcoming vacancies.',
-    hasMedia: false,
-    tag: 'NEW',
-    tagClass: 'bg-surface-variant text-on-surface',
-    time: '2h ago',
-    ownerId: 'sys_owner1', // Mock system owner
-    signals: {
-      ownerAge: '75% (1-2 days)',
-      ownerAgeClass: 'text-gold-accent',
-      accountAge: '8 mos',
-      completeness: '92%'
-    }
-  }
-];
-
-const INITIAL_PITCHES = [
-  { 
-    id: 'p1',
-    listingId: 'f_dummy1',
-    title: 'The Sapphire Block',
-    loc: 'Makati CBD',
-    type: 'Office',
-    brokerName: "Miguel Santos", 
-    brokerFirm: "Santos Realty Group • Top 5% Broker", 
-    message: `"I have an international client flying in next week looking specifically for penthouses in this district. I believe your property fits their criteria perfectly. Can we arrange an exclusive viewing?"`,
-    status: 'pending',
-    timeRemaining: "2h ago",
-    isCurrentUserBroker: false, // so it shows in Owner Inbox
-    isCurrentUserOwner: true
-  },
-  { 
-    id: 'p2',
-    listingId: 'f_dummy2',
-    title: 'Luxe Residences Unit 15B',
-    loc: 'BGC',
-    type: 'Residential',
-    brokerName: "Elena Reyes", 
-    brokerFirm: "Independent • High Volume", 
-    message: `"My portfolio consists mainly of expatriate executives. Your listing matches the specs for a corporate lease I'm currently sourcing for a tech firm relocating a VP."`,
-    status: 'pending',
-    timeRemaining: "Yesterday",
-    isCurrentUserBroker: false,
-    isCurrentUserOwner: true
-  },
-  // Pitches sent by current user (Broker)
-  { 
-    id: 'p3', 
-    listingId: 'f_dummy3',
-    type: 'Commercial', 
-    title: 'Ortigas Tech Tower', 
-    loc: 'Ortigas Center', 
-    statusText: 'Meeting Set', 
-    badgeText: 'check_circle',
-    brokerName: 'Current User',
-    status: 'accepted',
-    isCurrentUserBroker: true,
-    isCurrentUserOwner: false
-  },
-  { 
-    id: 'p4', 
-    listingId: 'f_dummy4',
-    type: 'Industrial', 
-    title: 'QC Warehouses', 
-    loc: 'Quezon City', 
-    statusText: 'Owner Declined', 
-    badgeText: '',
-    brokerName: 'Current User',
-    status: 'declined',
-    isCurrentUserBroker: true,
-    isCurrentUserOwner: false
-  }
-];
-
 export function DashboardProvider({ children }) {
-  const [listings, setListings] = useState(INITIAL_LISTINGS);
-  const [pitches, setPitches] = useState(INITIAL_PITCHES);
+  const [listings, setListings] = useState([]);
+  const [pitches, setPitches] = useState([]);
   const [notifications, setNotifications] = useState([]);
-  const [connects, setConnects] = useState(5); // USERS_CMS default balance
+  const [connects, setConnects] = useState(5);
   const [currentUser, setCurrentUser] = useState(null);
+  const [toasts, setToasts] = useState([]);
+  const [savedIds, setSavedIds] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Default Center: Makati CBD
+  const DEFAULT_MAP_CENTER = [121.0215, 14.5547]; 
+  const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
 
   // Sync connects & user from local storage
   useEffect(() => {
@@ -122,10 +35,164 @@ export function DashboardProvider({ children }) {
     }
   }, []);
 
-  const addListing = (listing) => {
+  // Fetch from Supabase
+  useEffect(() => {
+    const fetchLiveIntelligence = async () => {
+      setIsLoading(true);
+      try {
+        // 1. Fetch Properties (Dossiers)
+        const { data: propertiesData, error: propError } = await supabase
+          .from('properties')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (!propError && propertiesData) {
+          setListings(mapSupabaseProperties(propertiesData));
+        }
+
+        // 2. Fetch Deals (Pitches)
+        const { data: dealsData, error: dealError } = await supabase
+          .from('deals')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (!dealError && dealsData) {
+          const mappedDeals = dealsData.map(d => ({
+            id: d.id,
+            listingId: d.property_id,
+            title: d.property_id, // We'll rely on the UI to map this to the property title
+            type: 'Deal',
+            brokerName: 'Broker User',
+            brokerFirm: 'Independent',
+            message: d.pitch_message,
+            status: d.status,
+            timeRemaining: new Date(d.created_at).toLocaleDateString(),
+            statusText: d.status.charAt(0).toUpperCase() + d.status.slice(1),
+            badgeText: d.status === 'accepted' ? 'check_circle' : '',
+            isCurrentUserBroker: true,
+            isCurrentUserOwner: true
+          }));
+          setPitches(mappedDeals);
+        }
+
+        // 3. Fetch Saved Intel
+        const { data: savedData, error: savedError } = await supabase
+          .from('saved_intel')
+          .select('*');
+          
+        if (!savedError && savedData) {
+          setSavedIds(savedData.map(s => s.property_id));
+        }
+
+      } catch (error) {
+        console.error("Error fetching intelligence from Ledger:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchLiveIntelligence();
+  }, []);
+
+  // ── Toasts ──
+  const addToast = (message, icon = "✓") => {
+    const id = "t_" + Date.now() + Math.random().toString(36).slice(2, 6);
+    setToasts(prev => [...prev, { id, message, icon }]);
+    setTimeout(() => {
+      setToasts(prev => prev.filter(t => t.id !== id));
+    }, 3500);
+  };
+
+  // ── Save / unsave (Supabase) ──
+  const toggleSave = async (item) => {
+    const isSaved = savedIds.includes(item.id);
+    if (isSaved) {
+      setSavedIds(prev => prev.filter(id => id !== item.id));
+      addToast("Removed from your Intelligence Archive", "🔖");
+      await supabase.from('saved_intel').delete().eq('property_id', item.id);
+    } else {
+      setSavedIds(prev => [...prev, item.id]);
+      addToast("Saved to Intelligence Archive", "🔖");
+      await supabase.from('saved_intel').insert([{ property_id: item.id }]);
+    }
+  };
+
+  // ── Owner listing management (Supabase) ──
+  const updateListing = async (listingId, data) => {
+    // Optimistic UI update
+    setListings(prev => prev.map(l => {
+      if (l.id !== listingId) return l;
+      return {
+        ...l,
+        ...data,
+        hasMedia: data.mediaLink ? true : l.hasMedia,
+        signals: { ...l.signals, completeness: data.completenessScore + "%" }
+      };
+    }));
+    addToast("Dossier updated", "✏️");
+
+    // Supabase update
+    await supabase.from('properties').update({
+      title: data.title || 'Updated Property',
+      type: data.type,
+      location: data.location,
+      price: data.price,
+      description: data.description,
+      media_link: data.mediaLink,
+      completeness_score: data.completenessScore,
+      verified: data.verified
+    }).eq('id', listingId);
+  };
+
+  const closeListing = async (listingId) => {
+    setListings(prev => prev.filter(l => l.id !== listingId));
+    addToast("Property File closed", "🏁");
+    await supabase.from('properties').delete().eq('id', listingId);
+  };
+
+  const addListing = async (listing) => {
+    addToast("Geocoding Location...", "⏳");
+    
+    // 1. Mapbox Geocoding
+    let coordinatesStr = null;
+    if (MAPBOX_TOKEN && listing.location) {
+      try {
+        const res = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(listing.location)}.json?country=ph&limit=1&access_token=${MAPBOX_TOKEN}`);
+        const geoData = await res.json();
+        if (geoData.features && geoData.features.length > 0) {
+          const [lng, lat] = geoData.features[0].center;
+          coordinatesStr = `POINT(${lng} ${lat})`;
+        }
+      } catch (err) {
+        console.error("Geocoding failed", err);
+      }
+    }
+
+    addToast("Initializing Dossier...", "⏳");
+    
+    // 2. Insert into Supabase
+    const { data, error } = await supabase.from('properties').insert([{
+      title: `${listing.type} in ${listing.location}`,
+      type: listing.type,
+      location: listing.location,
+      price: listing.price ? parseFloat(listing.price) : null,
+      description: listing.description,
+      media_link: listing.mediaLink,
+      completeness_score: listing.completenessScore,
+      verified: listing.verified,
+      coordinates: coordinatesStr
+    }]).select();
+
+    if (error || !data) {
+      addToast("Error initializing dossier.", "❌");
+      return;
+    }
+
+    const newDbListing = data[0];
+
     const newListing = {
       ...listing,
-      id: 'l_' + Date.now(),
+      id: newDbListing.id, // Use real Supabase UUID
       hasMedia: listing.mediaLink ? true : false,
       tag: 'NEW',
       tagClass: 'bg-gold-accent/20 text-gold-accent',
@@ -138,7 +205,9 @@ export function DashboardProvider({ children }) {
         completeness: listing.completenessScore + '%'
       }
     };
+    
     setListings(prev => [newListing, ...prev]);
+    addToast("Dossier live on the Intelligence Ledger", "✅");
     addNotification({
       title: "Listing Published",
       desc: `Your property at ${listing.location} is now live in the Broker feed.`,
@@ -146,10 +215,9 @@ export function DashboardProvider({ children }) {
     });
   };
 
-  const sendPitch = (listingId, message) => {
+  const sendPitch = async (listingId, message) => {
     if (connects < 1) return false;
     
-    // Deduct connect
     const newBalance = connects - 1;
     setConnects(newBalance);
     if (currentUser) {
@@ -158,13 +226,22 @@ export function DashboardProvider({ children }) {
       setCurrentUser(updatedUser);
     }
 
+    // Insert into Supabase Deals table
+    const { data, error } = await supabase.from('deals').insert([{
+      property_id: listingId,
+      pitch_message: message,
+      status: 'pending'
+    }]).select();
+
+    if (error) return false;
+
     const targetListing = listings.find(l => l.id === listingId);
 
     const newPitch = {
-      id: 'p_' + Date.now(),
+      id: data[0].id,
       listingId,
       title: targetListing ? targetListing.title : 'New Property',
-      loc: 'Location Masked',
+      loc: targetListing ? targetListing.loc : 'Location Masked',
       type: targetListing ? targetListing.type : 'Sourced',
       brokerName: currentUser?.name || 'ScoutIt Broker',
       brokerFirm: 'ScoutIt Pro Member',
@@ -174,29 +251,17 @@ export function DashboardProvider({ children }) {
       statusText: 'Sent Just now',
       badgeText: 'Waiting',
       isCurrentUserBroker: true,
-      isCurrentUserOwner: targetListing?.ownerId === 'current_user' // rare but possible
+      isCurrentUserOwner: true 
     };
 
-    // If the listing belongs to the current user (testing purpose), they are also the owner.
-    if (targetListing && targetListing.ownerId === 'current_user') {
-      newPitch.isCurrentUserOwner = true;
-    }
-
     setPitches(prev => [newPitch, ...prev]);
-    
-    // If it was the current user's own listing, notify them!
-    if (targetListing && targetListing.ownerId === 'current_user') {
-       addNotification({
-        title: "New Pitch Received!",
-        desc: `You received a new pitch for ${targetListing.title}.`,
-        icon: "📦"
-      });
-    }
+    addToast("Deal Initiated — 1 Connect spent", "⚡");
 
     return true;
   };
 
-  const updatePitchStatus = (pitchId, newStatus) => {
+  const updatePitchStatus = async (pitchId, newStatus) => {
+    // Optimistic UI
     setPitches(prev => prev.map(p => {
       if (p.id === pitchId) {
         return { 
@@ -209,23 +274,10 @@ export function DashboardProvider({ children }) {
       return p;
     }));
 
-    // Find the pitch to notify the broker (if we were the owner accepting/declining)
-    const pitch = pitches.find(p => p.id === pitchId);
-    if (pitch && pitch.isCurrentUserBroker) {
-      // Meaning we are simulating the other side too, or it's just self-testing
-      addNotification({
-        title: `Pitch ${newStatus === 'accepted' ? 'Accepted' : 'Declined'}`,
-        desc: `Your pitch for ${pitch.title} was ${newStatus}.`,
-        icon: newStatus === 'accepted' ? "🎉" : "❌"
-      });
-    } else {
-      // We are the owner who accepted/declined someone else's pitch
-      addNotification({
-        title: `Pitch ${newStatus === 'accepted' ? 'Accepted' : 'Declined'}`,
-        desc: `You have ${newStatus} the pitch from ${pitch?.brokerName}.`,
-        icon: newStatus === 'accepted' ? "🤝" : "📩"
-      });
-    }
+    addToast(`Deal status updated to ${newStatus}`, "🤝");
+
+    // Supabase update
+    await supabase.from('deals').update({ status: newStatus }).eq('id', pitchId);
   };
 
   const addNotification = (notif) => {
@@ -240,6 +292,62 @@ export function DashboardProvider({ children }) {
     setNotifications([]);
   };
 
+  // ── Proximity Radar (Radius Search) ──
+  const searchByRadius = async (radiusKm, centerLng = DEFAULT_MAP_CENTER[0], centerLat = DEFAULT_MAP_CENTER[1]) => {
+    setIsLoading(true);
+    try {
+      if (radiusKm === 'any') {
+        // Fetch all properties if no radius is selected
+        const { data, error } = await supabase.from('properties').select('*').order('created_at', { ascending: false });
+        if (!error && data) {
+          setListings(mapSupabaseProperties(data));
+        }
+      } else {
+        // Call the PostGIS RPC function
+        const { data, error } = await supabase.rpc('search_properties_in_radius', {
+          search_lng: centerLng,
+          search_lat: centerLat,
+          radius_km: parseFloat(radiusKm)
+        });
+        
+        if (!error && data) {
+          setListings(mapSupabaseProperties(data));
+        }
+      }
+    } catch (err) {
+      console.error("Radius search failed", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Helper to map DB row to UI model
+  const mapSupabaseProperties = (propertiesData) => {
+    return propertiesData.map(p => ({
+      id: p.id,
+      type: p.type,
+      title: p.title,
+      desc: p.description || '',
+      loc: p.location,
+      hasMedia: !!p.media_link,
+      mediaLink: p.media_link,
+      price: p.price,
+      tag: 'LIVE',
+      tagClass: 'bg-gold-accent/20 text-gold-accent',
+      time: new Date(p.created_at).toLocaleDateString(),
+      ownerId: p.owner_id || 'current_user',
+      completenessScore: p.completeness_score,
+      verified: p.verified,
+      coordinates: p.coordinates, // keep the geography string if needed
+      signals: {
+        ownerAge: 'Verified',
+        ownerAgeClass: 'text-success',
+        accountAge: 'Active',
+        completeness: p.completeness_score + '%'
+      }
+    }));
+  };
+
   return (
     <DashboardContext.Provider value={{
       listings,
@@ -247,11 +355,21 @@ export function DashboardProvider({ children }) {
       notifications,
       connects,
       currentUser,
+      toasts,
+      savedIds,
+      isLoading,
+      addToast,
+      toggleSave,
       addListing,
+      updateListing,
+      closeListing,
       sendPitch,
       updatePitchStatus,
       markNotificationsRead,
-      clearAllNotifications
+      clearAllNotifications,
+      searchByRadius,
+      MAPBOX_TOKEN,
+      DEFAULT_MAP_CENTER
     }}>
       {children}
     </DashboardContext.Provider>

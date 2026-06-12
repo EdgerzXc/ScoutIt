@@ -12,6 +12,7 @@ const BrokerMode = dynamic(() => import("../../components/dashboard/BrokerMode")
 const BuyerMode = dynamic(() => import("../../components/dashboard/BuyerMode"), { ssr: false });
 const ProviderMode = dynamic(() => import("../../components/dashboard/ProviderMode"), { ssr: false });
 import Nudge from "../../components/ui/Nudge";
+import Toasts from "../../components/ui/Toasts";
 
 const TAG_LABELS = {
   buyer: "Buyer / Scout",
@@ -269,6 +270,13 @@ function DashboardInner() {
             <Link href={`/profile/${encodeURIComponent(user.name)}`} title="View Public Profile" className="w-8 h-8 rounded-full bg-surface-variant border border-surface-variant flex items-center justify-center font-working-title text-sm font-bold text-on-surface hover:border-gold-accent transition-colors">
               {user.name ? user.name.substring(0,2).toUpperCase() : 'U'}
             </Link>
+            <button 
+              className="text-lg text-text-secondary hover:text-error transition-colors ml-2"
+              onClick={() => { localStorage.removeItem("scoutit_user"); router.push("/onboarding"); }}
+              title="Sign Out"
+            >
+              🚪
+            </button>
           </div>
           
           {/* Mobile Connects / Secondary Top indicator */}
@@ -284,6 +292,8 @@ function DashboardInner() {
         <Nudge mode={mode} />
         {renderActiveMode()}
       </main>
+
+      <Toasts />
 
       {/* Mobile Bottom Tab Bar */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-surface/95 backdrop-blur-md border-t border-surface-variant px-6 py-2 flex justify-between items-center z-40">
@@ -439,6 +449,12 @@ function DashboardInner() {
               <Link href="/settings" className="flex items-center gap-3 text-text-secondary hover:text-on-surface font-working-title text-sm py-2">
                 <span>⚙️</span> Account Settings
               </Link>
+              <button
+                className="flex items-center gap-3 text-text-secondary hover:text-error font-working-title text-sm py-2 w-full text-left"
+                onClick={() => { localStorage.removeItem("scoutit_user"); router.push("/onboarding"); }}
+              >
+                <span>🚪</span> Sign Out
+              </button>
             </div>
           </div>
         </div>
