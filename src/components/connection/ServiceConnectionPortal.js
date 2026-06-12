@@ -18,10 +18,10 @@ export default function ServiceConnectionPortal({ providerName, serviceType }) {
     return (
       <div className="portal-success">
         <span className="success-icon">🔑</span>
-        <h3>Handshake Initialized</h3>
+        <h3>Request Sent</h3>
         <p>
-          Secure communication portal requested with <strong>{providerName}</strong>. 
-          Your credentials have been routed. Verify your comm link at <strong>{email}</strong> for validation coordinates.
+          Your request is on its way to <strong>{providerName}</strong>.
+          Keep an eye on <strong>{email}</strong> — that&apos;s where they&apos;ll reach you.
         </p>
         <button className="reset-portal-btn" onClick={() => setSubmitted(false)}>
           Submit Another Request
@@ -142,9 +142,9 @@ export default function ServiceConnectionPortal({ providerName, serviceType }) {
           </div>
           
           <div className="form-group-item">
-            <label>Service Intent Brief</label>
-            <textarea 
-              placeholder={`Outline your target space/project details, aesthetic requirements, and key deliverables timeline...`}
+            <label>What do you need?</label>
+            <textarea
+              placeholder={`Describe your project — the space, the look you're going for, and when you need it done...`}
               rows="5" 
               value={intent}
               onChange={(e) => setIntent(e.target.value)}
@@ -153,7 +153,7 @@ export default function ServiceConnectionPortal({ providerName, serviceType }) {
           </div>
 
           <button type="submit" className="portal-submit-btn">
-            Initialize Channel Request
+            Send Request →
           </button>
         </form>
       </div>

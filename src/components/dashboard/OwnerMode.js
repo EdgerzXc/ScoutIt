@@ -82,9 +82,9 @@ export default function OwnerMode() {
         </div>
         <div className="bg-[#0a0a0a] rounded border border-surface-variant p-lg flex flex-col gap-md relative overflow-hidden items-center justify-center text-center py-32">
           <h3 className="font-display-md text-3xl mb-2 text-on-surface">Create your first Property File</h3>
-          <p className="text-text-secondary mb-8 max-w-md">Our wizard helps you build a high-trust, premium dossier for your asset in under 10 minutes.</p>
+          <p className="text-text-secondary mb-8 max-w-md">Our wizard walks you through building a polished, trustworthy listing in under 10 minutes.</p>
           <button className="bg-gold-accent text-background font-working-title px-8 py-4 rounded hover:bg-surface-tint transition-colors text-lg font-bold uppercase tracking-widest shadow-[0_0_20px_rgba(212,175,55,0.2)]" onClick={() => setShowWizard(true)}>
-            Initialize Workspace
+            Start My First Listing
           </button>
         </div>
       </div>

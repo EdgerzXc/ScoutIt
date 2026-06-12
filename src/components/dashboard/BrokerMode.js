@@ -349,7 +349,7 @@ export default function BrokerMode() {
                   className="mt-4 w-full border border-gold-accent text-gold-accent font-working-title text-sm py-3 rounded hover:bg-gold-accent hover:text-background transition-colors font-bold shadow-sm"
                   onClick={() => handleOpenPitchModal(item)}
                 >
-                  Initialize Deal File (1 Connect)
+                  Open Deal File (1 Connect)
                 </button>
               </div>
             ))}

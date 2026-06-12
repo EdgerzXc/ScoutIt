@@ -20,10 +20,10 @@ export default function ConnectionPortal({ brokerName }) {
     return (
       <div className="portal-success">
         <span className="success-icon">🔑</span>
-        <h3>Handshake Initialized</h3>
+        <h3>Request Sent</h3>
         <p>
-          Secure communication portal requested with <strong>{brokerName}</strong>. 
-          Your credentials have been routed. Verify your comm link at <strong>{email}</strong> for validation coordinates.
+          Your inquiry is on its way to <strong>{brokerName}</strong>.
+          Keep an eye on <strong>{email}</strong> — that&apos;s where they&apos;ll reach you.
         </p>
         <button className="reset-portal-btn" onClick={() => setSubmitted(false)}>
           Submit Another Request
@@ -147,7 +147,7 @@ export default function ConnectionPortal({ brokerName }) {
               <div className="form-group-item">
             <label>Acquisition Intent Brief</label>
             <textarea 
-              placeholder="Outline your acquisition criteria, spatial sectors, and target deployment timeline..."
+              placeholder="Tell them what you're looking for — property type, location, budget, timeline..."
               rows="5" 
               value={intent}
               onChange={(e) => setIntent(e.target.value)}
@@ -156,7 +156,7 @@ export default function ConnectionPortal({ brokerName }) {
           </div>
 
           <button type="submit" className="portal-submit-btn">
-            Initialize Roster Handshake
+            Send Inquiry →
           </button>
         </form>
       </div>

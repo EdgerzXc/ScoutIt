@@ -890,8 +890,8 @@ export default function Home() {
           <div className="property-menu">
             <div className="menu-header">
               <span className="vector-label">Layer 02 // Property Experiences</span>
-              <h2>Curated Sectors</h2>
-              <p>Select a category to begin your exploration.</p>
+              <h2>Explore by Category</h2>
+              <p>Pick a category and see what&apos;s inside — homes, offices, venues, and more.</p>
             </div>
             <nav className="menu-nav">
               {propertyTypes.map((type) => (
@@ -910,7 +910,7 @@ export default function Home() {
             </nav>
             <div className="menu-footer">
               <Link href={`/property?type=${activePropertyType.toLowerCase()}`} className="prominent-action-link">
-                Begin Exploring →
+                Browse {activePropertyType} →
               </Link>
             </div>
           </div>
@@ -918,8 +918,8 @@ export default function Home() {
           {/* Right Visual Canvas - Interactive Preview Panel */}
           <div className="matrix-preview-pane">
             <header className="pane-header">
-              <h3>{activePropertyType} Intelligence</h3>
-              <p>Live active preview stream</p>
+              <h3>{activePropertyType} Spaces</h3>
+              <p>A preview of what&apos;s in this category</p>
             </header>
             
             <div className="search-container">
@@ -1038,8 +1038,8 @@ export default function Home() {
           <div className="property-menu">
             <div className="menu-header">
               <span className="vector-label">Layer 03 // Discovery &amp; Intelligence</span>
-              <h2>Discovery Feed</h2>
-              <p>Explore real-time spatial reports, regional stories, and architectural curations.</p>
+              <h2>Stories &amp; Market Intel</h2>
+              <p>Neighborhood stories, market reports, and design features from around the Philippines.</p>
             </div>
             <nav className="menu-nav">
               {propertyTypes.map((type) => (
@@ -1054,7 +1054,7 @@ export default function Home() {
             </nav>
             <div className="menu-footer">
               <Link href="/intel" className="prominent-action-link">
-                Begin Exploring →
+                Read the Stories →
               </Link>
             </div>
           </div>
@@ -1062,8 +1062,8 @@ export default function Home() {
           {/* Right Visual Canvas */}
           <div className="matrix-preview-pane">
             <header className="pane-header">
-              <h3>{activeDiscoverType} Feed</h3>
-              <p>Live Property Intel &amp; Discoveries</p>
+              <h3>{activeDiscoverType} Stories</h3>
+              <p>Spotlights, articles &amp; collections</p>
             </header>
             
             <div className="discover-feed-preview" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
@@ -1169,8 +1169,8 @@ export default function Home() {
         <div className="services-content">
           <header className="section-header-center">
             <span className="vector-label">Layer 04 // Ecosystem Services</span>
-            <h2>Ecosystem Services</h2>
-            <p>Access our curated network of vetted professionals supporting every phase of space discovery, listings, and planning.</p>
+            <h2>The Professional Network</h2>
+            <p>Licensed advisors, photographers, researchers, and event planners — all vetted, all in one place.</p>
           </header>
 
           <div className="services-grid">
@@ -1179,7 +1179,7 @@ export default function Home() {
                 <div className="service-icon-wrapper">🏢</div>
                 <div className="service-status-badge live-badge">LIVE</div>
                 <h3 className="service-title">Verified Advisors</h3>
-                <p className="service-desc">Our network of licensed Space Intelligence advisors who guide you through acquisitions and curation.</p>
+                <p className="service-desc">Licensed real estate professionals who guide you through viewing, negotiating, and closing.</p>
                 <span className="service-cta">CONNECT WITH ADVISOR →</span>
               </div>
             </Link>
@@ -1189,7 +1189,7 @@ export default function Home() {
                 <div className="service-icon-wrapper">📸</div>
                 <div className="service-status-badge soon-badge">COMING SOON</div>
                 <h3 className="service-title">Space Photography</h3>
-                <p className="service-desc">Professional interior and architectural photographers vetted to capture listing spaces at elite quality.</p>
+                <p className="service-desc">Interior and architectural photographers who make every space look the way it deserves to.</p>
                 <span className="service-cta">EXPLORE ROSTER →</span>
               </div>
             </Link>
@@ -1199,7 +1199,7 @@ export default function Home() {
                 <div className="service-icon-wrapper">🔍</div>
                 <div className="service-status-badge soon-badge">COMING SOON</div>
                 <h3 className="service-title">Site Research</h3>
-                <p className="service-desc">On-ground due diligence, market analytics, and neighborhood profiling before you commit to a property.</p>
+                <p className="service-desc">On-the-ground research, market data, and neighborhood profiles before you commit.</p>
                 <span className="service-cta">EXPLORE ROSTER →</span>
               </div>
             </Link>
@@ -1209,7 +1209,7 @@ export default function Home() {
                 <div className="service-icon-wrapper">🎪</div>
                 <div className="service-status-badge soon-badge">COMING SOON</div>
                 <h3 className="service-title">Event Design</h3>
-                <p className="service-desc">Certified planners, stylists, and designers specializing in transforming and coordinating event spaces.</p>
+                <p className="service-desc">Planners, stylists, and designers who turn great spaces into great events.</p>
                 <span className="service-cta">EXPLORE ROSTER →</span>
               </div>
             </Link>
@@ -1226,19 +1226,19 @@ export default function Home() {
             <div className="menu-header">
               <span className="vector-label">Layer 05 // Your Board</span>
               <h2>Your Board</h2>
-              <p>Your inspiration archive. Collect design ideas, preferred cities, and target layouts.</p>
+              <p>Your private collection of spaces you love — no account needed, visible only to you.</p>
             </div>
             
             <div className="ledger-tags-guide" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <div style={{ color: 'var(--text-secondary)', fontSize: '13px', lineHeight: '1.6' }}>
-                Your board acts as a local cryptographic ledger. Mark properties with four distinct reaction tags:
+                Tag any property with one of four reactions. Everything stays on your device:
               </div>
               <ul style={{ listStyle: 'none', padding: 0, margin: '8px 0 0 0', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {[
-                  { tag: "Potential Fit", desc: "Properties matching parameters" },
-                  { tag: "Interested", desc: "Strong candidates for contact" },
-                  { tag: "Inspired Me", desc: "Design & styling inspiration" },
-                  { tag: "Save", desc: "Saved to your ledger" }
+                  { tag: "Potential Fit", desc: "Ticks your boxes" },
+                  { tag: "Interested", desc: "Ready to inquire about" },
+                  { tag: "Inspired Me", desc: "Design & styling ideas" },
+                  { tag: "Save", desc: "Keep for later" }
                 ].map((item, idx) => (
                   <li key={idx} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '12px' }}>
                     <span style={{ color: 'var(--accent)', fontFamily: 'var(--font-mono)', border: '1px solid rgba(255, 184, 0, 0.3)', padding: '2px 8px', borderRadius: '2px', fontSize: '10px', textTransform: 'uppercase' }}>
@@ -1252,7 +1252,7 @@ export default function Home() {
 
             <div className="menu-footer">
               <Link href="/wishlist" className="prominent-action-link">
-                Open Your Ledger →
+                Open Your Board →
               </Link>
             </div>
           </div>
@@ -1260,8 +1260,8 @@ export default function Home() {
           {/* Right Visual Canvas */}
           <div className="matrix-preview-pane">
             <header className="pane-header">
-              <h3>Personal Ledger System</h3>
-              <p>Cryptographic flow mechanics of your private spatial archive.</p>
+              <h3>How Your Board Works</h3>
+              <p>Four simple steps — all private to your device</p>
             </header>
 
             <div className="wishlist-infographics" style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
@@ -1287,8 +1287,8 @@ export default function Home() {
                   </div>
                   
                   <div>
-                    <h4 style={{ fontSize: '13px', textTransform: 'uppercase', color: '#fff', letterSpacing: '0.05em', margin: '0 0 6px 0', fontFamily: 'var(--font-display)' }}>Scan Architecture</h4>
-                    <p style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: '1.5', margin: 0 }}>Filter and search deep editorial briefings of premium local properties.</p>
+                    <h4 style={{ fontSize: '13px', textTransform: 'uppercase', color: '#fff', letterSpacing: '0.05em', margin: '0 0 6px 0', fontFamily: 'var(--font-display)' }}>Browse</h4>
+                    <p style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: '1.5', margin: 0 }}>Search and filter in-depth features on premium local properties.</p>
                   </div>
                 </div>
 
@@ -1310,8 +1310,8 @@ export default function Home() {
                   </div>
                   
                   <div>
-                    <h4 style={{ fontSize: '13px', textTransform: 'uppercase', color: '#fff', letterSpacing: '0.05em', margin: '0 0 6px 0', fontFamily: 'var(--font-display)' }}>Apply Reaction</h4>
-                    <p style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: '1.5', margin: 0 }}>Mark listings with custom tags reflecting your evaluation phase.</p>
+                    <h4 style={{ fontSize: '13px', textTransform: 'uppercase', color: '#fff', letterSpacing: '0.05em', margin: '0 0 6px 0', fontFamily: 'var(--font-display)' }}>Tag What Stands Out</h4>
+                    <p style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: '1.5', margin: 0 }}>Mark listings with the reaction that matches how you feel about them.</p>
                   </div>
                 </div>
 
@@ -1331,8 +1331,8 @@ export default function Home() {
                   </div>
                   
                   <div>
-                    <h4 style={{ fontSize: '13px', textTransform: 'uppercase', color: '#fff', letterSpacing: '0.05em', margin: '0 0 6px 0', fontFamily: 'var(--font-display)' }}>Secure Vault</h4>
-                    <p style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: '1.5', margin: 0 }}>Data is saved locally to your device's browser memory in complete isolation.</p>
+                    <h4 style={{ fontSize: '13px', textTransform: 'uppercase', color: '#fff', letterSpacing: '0.05em', margin: '0 0 6px 0', fontFamily: 'var(--font-display)' }}>Saved on Your Device</h4>
+                    <p style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: '1.5', margin: 0 }}>Your board is stored in your own browser — never on our servers.</p>
                   </div>
                 </div>
 
@@ -1352,8 +1352,8 @@ export default function Home() {
                   </div>
                   
                   <div>
-                    <h4 style={{ fontSize: '13px', textTransform: 'uppercase', color: '#fff', letterSpacing: '0.05em', margin: '0 0 6px 0', fontFamily: 'var(--font-display)' }}>Initialize Handshake</h4>
-                    <p style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: '1.5', margin: 0 }}>Connect with vetted space intelligence advisors to deploy your plans.</p>
+                    <h4 style={{ fontSize: '13px', textTransform: 'uppercase', color: '#fff', letterSpacing: '0.05em', margin: '0 0 6px 0', fontFamily: 'var(--font-display)' }}>Talk to an Advisor</h4>
+                    <p style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: '1.5', margin: 0 }}>When you&apos;re ready, connect with a licensed advisor to take the next step.</p>
                   </div>
                 </div>
 
@@ -1363,22 +1363,22 @@ export default function Home() {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', borderTop: '1px solid #262626', paddingTop: '24px' }}>
                 <div>
                   <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', textTransform: 'uppercase', color: 'var(--accent)', letterSpacing: '0.1em', marginBottom: '16px' }}>
-                    Anonymous Ledger Policy
+                    Privacy, by Design
                   </h4>
                   <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: '1.6', margin: 0 }}>
-                    ScoutIt operates on a zero-tracking architecture. We do not store your search habits, cookies, or personal metrics on any central cloud server. Your board remains entirely yours—securely encrypted on your device.
+                    We don&apos;t track your searches or save your activity on any server. Your board lives on your device and never leaves it.
                   </p>
                 </div>
                 
                 <div>
                   <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', textTransform: 'uppercase', color: 'var(--accent)', letterSpacing: '0.1em', marginBottom: '16px' }}>
-                    Memory Ledger Parameters
+                    The Fine Print
                   </h4>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     {[
-                      { metric: "Storage Technology", val: "LocalStorage API" },
-                      { metric: "Data Encryption", val: "Decentralized (On-Device)" },
-                      { metric: "Cloud Sinks", val: "None (Zero Server Sync)" }
+                      { metric: "Where it's saved", val: "On this device" },
+                      { metric: "Account required", val: "None" },
+                      { metric: "Server tracking", val: "None" }
                     ].map((st, idx) => (
                       <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed #222', paddingBottom: '6px' }}>
                         <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{st.metric}</span>
@@ -1406,7 +1406,7 @@ export default function Home() {
         <div className="about-content">
           <header className="section-header-center">
             <span className="vector-label">Layer 06 // About Us</span>
-            <h2>The ScoutIt Manifesto</h2>
+            <h2>Why We Built ScoutIt</h2>
           </header>
           
           <div className="about-manifesto-preview">
@@ -1872,11 +1872,11 @@ export default function Home() {
           margin: 0 0 10px;
         }
         .title-tagline-2 {
-          font-family: 'Courier New', monospace;
+          font-family: var(--font-mono), 'Courier New', monospace;
           font-size: 11px;
           letter-spacing: 4px;
           text-transform: uppercase;
-          color: #666666;
+          color: rgba(255, 184, 0, 0.55);
           text-align: center;
           margin: 0 0 34px;
         }
@@ -2371,8 +2371,8 @@ export default function Home() {
 
         .menu-header h2 {
           font-family: var(--font-display);
-          font-size: 28px;
-          margin: 8px 0;
+          font-size: 34px;
+          margin: 10px 0;
           color: var(--text-primary);
         }
 
@@ -2383,9 +2383,9 @@ export default function Home() {
 
         .vector-label {
           font-family: var(--font-mono);
-          font-size: 12px;
+          font-size: 11px;
           text-transform: uppercase;
-          letter-spacing: 0.15em;
+          letter-spacing: 0.3em;
           color: var(--accent);
         }
 

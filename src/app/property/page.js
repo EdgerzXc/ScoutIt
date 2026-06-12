@@ -304,13 +304,13 @@ function PropertyDirectoryContent() {
       <main className="directory-main">
         <header className="directory-header">
           <span className="vector-label">Layer 01 // Curated Showcases</span>
-          <h1>Space Intelligence Directory</h1>
-          <p className="page-subtitle">Refined architectural assets across prime Philippine corridors.</p>
+          <h1>The Space Directory</h1>
+          <p className="page-subtitle">Every home, office, and venue on ScoutIt — searchable in one place.</p>
         </header>
 
         {loading ? (
           <div style={{ display: "flex", justifyContent: "center", padding: "60px 0" }}>
-            <h3 style={{ fontFamily: "var(--font-mono)", color: "var(--accent)" }}>LOADING DIRECTORY LEDGER...</h3>
+            <h3 style={{ fontFamily: "var(--font-mono)", color: "var(--accent)" }}>LOADING THE DIRECTORY...</h3>
           </div>
         ) : (
           <div className="directory-container">

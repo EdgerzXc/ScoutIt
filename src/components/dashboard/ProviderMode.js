@@ -238,7 +238,7 @@ export default function ProviderMode({ type }) {
           </button>
           <button 
             className="bg-gold-accent text-background font-working-title font-bold px-6 py-2 rounded shadow-lg hover:opacity-90 transition-opacity"
-            onClick={() => addToast("New project dossier initialized.", "📝")}
+            onClick={() => addToast("New project created.", "📝")}
           >
             + New Project
           </button>

@@ -41,7 +41,7 @@ export default function OnboardingPage() {
     <div className="flex flex-col animate-[fadeIn_0.5s_ease-out]">
       <span className="text-gold-accent font-label-caps text-[12px] tracking-widest uppercase mb-4 block">Phase 01 // Identity</span>
       <h1 className="font-headline-editorial text-4xl md:text-5xl text-on-surface mb-2">Create your account</h1>
-      <p className="text-text-secondary font-body-md mb-8">A unified cryptographic memory for your real estate journey.</p>
+      <p className="text-text-secondary font-body-md mb-8">One place for your whole real estate journey.</p>
       
       <div className="flex flex-col gap-5 mb-8">
         <div className="flex flex-col gap-2">

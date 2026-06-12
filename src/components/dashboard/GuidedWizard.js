@@ -237,7 +237,7 @@ export default function GuidedWizard({ onPublish, onClose, initialData = null })
             </div>
 
             <button className="w-full bg-gold-accent text-background font-working-title text-lg font-bold py-4 px-6 rounded hover:opacity-90 transition-all shadow-[0_0_15px_rgba(212,175,55,0.2)] disabled:opacity-50" onClick={handlePublish}>
-              {isEditing ? "Update Dossier" : "Initialize Full Dossier"}
+              {isEditing ? "Update Listing" : "Publish Full Listing"}
             </button>
           </div>
 

@@ -203,7 +203,7 @@ export default function ProfilePage() {
         <section>
           <div className="flex flex-col items-center md:items-start mb-12 text-center md:text-left">
             <h2 className="font-headline-editorial text-4xl text-white mb-2">Trophy Wall</h2>
-            <p className="text-text-secondary italic">A cryptographic record of achievements and milestones.</p>
+            <p className="text-text-secondary italic">Your achievements and milestones, all in one place.</p>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
