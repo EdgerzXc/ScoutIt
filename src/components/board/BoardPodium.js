@@ -175,16 +175,21 @@ export default function BoardPodium() {
           
           /* Horizontal Carousel for Categories */
           .board-nav { 
+            display: flex;
             flex-direction: row; 
             flex-wrap: nowrap; 
             overflow-x: auto; 
             white-space: nowrap; 
             -webkit-overflow-scrolling: touch;
             padding-bottom: 12px;
+            width: 100vw;
+            margin-left: -20px;
+            padding: 0 20px;
+            scroll-snap-type: x mandatory;
           }
           .board-nav::-webkit-scrollbar { display: none; }
           .board-nav { scrollbar-width: none; }
-          .board-cat { font-size: 14px; padding: 10px 14px; flex-shrink: 0; }
+          .board-cat { font-size: 14px; padding: 10px 14px; flex-shrink: 0; scroll-snap-align: start; }
 
           /* Horizontal Carousel for Podium Cards */
           .board-podium { 
@@ -194,6 +199,10 @@ export default function BoardPodium() {
             scroll-snap-type: x mandatory; 
             padding-bottom: 24px;
             gap: 16px;
+            width: 100vw;
+            margin-left: -28px;
+            padding: 0 28px;
+            -webkit-overflow-scrolling: touch;
           }
           .board-podium::-webkit-scrollbar { display: none; }
           .board-podium { scrollbar-width: none; }
@@ -204,9 +213,10 @@ export default function BoardPodium() {
 
           /* Force cards to fit horizontal carousel */
           :global(.bp-hero), :global(.bp-mid), :global(.bp-mini) { 
-            min-width: 85vw; 
-            scroll-snap-align: center; 
+            min-width: 80vw; 
+            scroll-snap-align: start; 
             flex-shrink: 0;
+            margin-right: 16px;
           }
           
           .board-title { font-size: 32px; }
@@ -219,8 +229,8 @@ export default function BoardPodium() {
           :global(.bp-hero .bp-photo), :global(.bp-mid .bp-photo), :global(.bp-mini .bp-photo) { 
             width: 100%; height: 200px; 
           }
-          :global(.bp-hero .bp-name) { font-size: 22px; }
-          :global(.bp-mid .bp-name), :global(.bp-mini .bp-name) { font-size: 18px; }
+          :global(.bp-hero .bp-name) { font-size: 20px; }
+          :global(.bp-mid .bp-name), :global(.bp-mini .bp-name) { font-size: 16px; }
         }
       `}</style>
     </div>
