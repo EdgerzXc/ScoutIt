@@ -82,14 +82,14 @@ module.exports = {
         "gutter": "16px"
       },
       fontFamily: {
-        "body-lg": ["Inter", "sans-serif"],
-        "working-title": ["Inter", "sans-serif"],
-        "label-caps": ["Inter", "sans-serif"],
+        "body-lg": ["var(--font-geist-sans)", "Inter", "sans-serif"],
+        "working-title": ["var(--font-geist-sans)", "Inter", "sans-serif"],
+        "label-caps": ["var(--font-geist-sans)", "Inter", "sans-serif"],
         "headline-editorial": ["Georgia", "serif"],
         "display-md": ["Georgia", "serif"],
-        "body-md": ["Inter", "sans-serif"],
-        "data-tabular": ["Inter", "sans-serif"],
-        "body-sm": ["Inter", "sans-serif"],
+        "body-md": ["var(--font-geist-sans)", "Inter", "sans-serif"],
+        "data-tabular": ["var(--font-geist-sans)", "Inter", "sans-serif"],
+        "body-sm": ["var(--font-geist-sans)", "Inter", "sans-serif"],
         "display-lg": ["Georgia", "serif"]
       },
       fontSize: {
