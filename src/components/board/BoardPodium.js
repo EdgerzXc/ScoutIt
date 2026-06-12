@@ -171,13 +171,56 @@ export default function BoardPodium() {
         }
         @media (max-width: 820px) {
           .board-split { grid-template-columns: 1fr; }
-          .board-menu { border-right: none; border-bottom: 1px solid #1a1a1a; }
-          .board-nav { flex-direction: row; flex-wrap: wrap; }
-          .board-podium { grid-template-columns: 1fr; }
+          .board-menu { border-right: none; border-bottom: 1px solid #1a1a1a; padding: 32px 20px; }
+          
+          /* Horizontal Carousel for Categories */
+          .board-nav { 
+            flex-direction: row; 
+            flex-wrap: nowrap; 
+            overflow-x: auto; 
+            white-space: nowrap; 
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 12px;
+          }
+          .board-nav::-webkit-scrollbar { display: none; }
+          .board-nav { scrollbar-width: none; }
+          .board-cat { font-size: 14px; padding: 10px 14px; flex-shrink: 0; }
+
+          /* Horizontal Carousel for Podium Cards */
+          .board-podium { 
+            display: flex; 
+            flex-direction: row; 
+            overflow-x: auto; 
+            scroll-snap-type: x mandatory; 
+            padding-bottom: 24px;
+            gap: 16px;
+          }
+          .board-podium::-webkit-scrollbar { display: none; }
+          .board-podium { scrollbar-width: none; }
+          
+          .board-runners { 
+            display: contents; 
+          }
+
+          /* Force cards to fit horizontal carousel */
+          :global(.bp-hero), :global(.bp-mid), :global(.bp-mini) { 
+            min-width: 85vw; 
+            scroll-snap-align: center; 
+            flex-shrink: 0;
+          }
+          
+          .board-title { font-size: 32px; }
+          .board-content-title { font-size: 26px; }
         }
         @media (max-width: 560px) {
-          :global(.bp-mid), :global(.bp-mini) { flex-direction: column; }
-          :global(.bp-mid .bp-photo), :global(.bp-mini .bp-photo) { width: 100%; height: 120px; }
+          :global(.bp-hero), :global(.bp-mid), :global(.bp-mini) { 
+            flex-direction: column; 
+          }
+          :global(.bp-hero .bp-photo), :global(.bp-mid .bp-photo), :global(.bp-mini .bp-photo) { 
+            width: 100%; height: 200px; 
+          }
+          :global(.bp-hero .bp-name) { font-size: 22px; }
+          :global(.bp-mid .bp-name), :global(.bp-mini .bp-name) { font-size: 18px; }
         }
       `}</style>
     </div>

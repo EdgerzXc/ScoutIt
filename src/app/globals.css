@@ -294,7 +294,18 @@ a:hover {
 /* ── GRID RESPONSIVENESS ── */
 @media (max-width: 900px) {
   .discover-feed-preview > div > div[style*="grid"] {
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)) !important;
+    display: flex !important;
+    overflow-x: auto !important;
+    scroll-snap-type: x mandatory !important;
+    padding-bottom: 24px !important;
+  }
+  .discover-feed-preview > div > div[style*="grid"]::-webkit-scrollbar { display: none; }
+  .discover-feed-preview > div > div[style*="grid"] { scrollbar-width: none; }
+  
+  .discover-feed-preview > div > div[style*="grid"] > * {
+    min-width: 85vw !important;
+    scroll-snap-align: center !important;
+    flex-shrink: 0 !important;
   }
 }
 
@@ -311,13 +322,20 @@ a:hover {
 /* ── MENU BUTTON FIXES ── */
 @media (max-width: 768px) {
   .menu-nav {
-    flex-wrap: wrap !important;
-    gap: 8px !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    white-space: nowrap !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding-bottom: 12px !important;
+    gap: 12px !important;
   }
+  .menu-nav::-webkit-scrollbar { display: none; }
+  .menu-nav { scrollbar-width: none; }
   
   .menu-btn {
     font-size: 12px !important;
     padding: 10px 14px !important;
+    flex-shrink: 0 !important;
   }
 }
 
