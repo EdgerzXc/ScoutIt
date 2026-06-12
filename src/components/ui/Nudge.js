@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import styles from "./Nudge.module.css";
 
 // Hardcoded logic rules per Section 8
 const NUDGE_CONTENT = {
@@ -44,9 +43,17 @@ export default function Nudge({ mode }) {
       }
     }
 
-    // 2. Check "7 days since signup" rule (Mocked to true for demonstration)
-    const isAccountMature = true; 
-    
+    // 2. Hard rule: NO nudges during a user's first 7 days
+    let isAccountMature = false;
+    try {
+      const user = JSON.parse(localStorage.getItem("scoutit_user") || "null");
+      if (user?.created_at) {
+        const daysSinceSignup = (Date.now() - new Date(user.created_at).getTime()) / (1000 * 60 * 60 * 24);
+        isAccountMature = daysSinceSignup >= 7;
+      }
+    } catch (e) { /* no user, no nudge */ }
+
+
     // 3. Mock logic triggers (Assume all thresholds are met for the sake of UI demo)
     if (isAccountMature && NUDGE_CONTENT[mode]) {
       // Small delay to let the dashboard render first, making the slide-down animation pop
@@ -65,18 +72,33 @@ export default function Nudge({ mode }) {
   const content = NUDGE_CONTENT[mode];
 
   return (
-    <div className={styles.nudgeContainer}>
-      <div className={styles.glow}></div>
-      <div className={styles.nudgeContent}>
-        <div className={styles.nudgeIcon}>{content.icon}</div>
-        <div className={styles.nudgeText}>
-          <h4>{content.title}</h4>
-          <p>{content.desc}</p>
+    <div className="relative mb-6 rounded-lg overflow-hidden border border-gold-accent bg-surface animate-[slideDown_0.6s_ease-out_forwards]">
+      <div className="absolute inset-0 bg-gold-accent opacity-5"></div>
+      <div className="absolute -left-12 -top-12 w-32 h-32 bg-gold-accent opacity-20 blur-[40px] pointer-events-none"></div>
+      
+      <div className="relative p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="flex items-start md:items-center gap-4">
+          <div className="text-3xl bg-surface-alt p-3 rounded-md shrink-0">
+            {content.icon}
+          </div>
+          <div>
+            <h4 className="font-working-title text-gold-accent text-base mb-1">{content.title}</h4>
+            <p className="text-sm text-text-secondary">{content.desc}</p>
+          </div>
         </div>
-      </div>
-      <div className={styles.nudgeActions}>
-        <button className={styles.actionBtn}>{content.action}</button>
-        <button className={styles.dismissBtn} onClick={handleDismiss} title="Dismiss for 7 days">×</button>
+        
+        <div className="flex items-center gap-3 w-full md:w-auto mt-2 md:mt-0">
+          <button className="flex-1 md:flex-none bg-gold-accent text-background font-working-title text-sm font-bold py-2 px-6 rounded hover:opacity-90 transition-all whitespace-nowrap">
+            {content.action}
+          </button>
+          <button 
+            className="w-10 h-10 flex items-center justify-center rounded border border-surface-variant text-text-secondary hover:text-on-surface hover:bg-surface-container transition-colors" 
+            onClick={handleDismiss} 
+            title="Dismiss for 7 days"
+          >
+            ×
+          </button>
+        </div>
       </div>
     </div>
   );

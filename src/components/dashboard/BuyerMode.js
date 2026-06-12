@@ -1,112 +1,215 @@
 "use client";
 
-import { useState } from "react";
-import styles from "./BuyerMode.module.css";
+import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
+import { useDashboard } from "../../context/DashboardContext";
 
 const SAVED_LISTINGS = [
-  { id: 's1', type: 'House', title: 'Ayala Alabang Core', loc: 'Muntinlupa City', img: '🏠' },
-  { id: 's2', type: 'Condo', title: 'The Proscenium', loc: 'Rockwell Center', img: '🏢' },
-  { id: 's3', type: 'Lot', title: 'Elaro Corner Lot', loc: 'Nuvali, Laguna', img: '🌳' },
-];
-
-const NEW_LISTINGS = [
-  { id: 'n1', type: 'Commercial', title: 'Retail Space CBD', loc: 'Makati Ave', img: '🏬' },
-  { id: 'n2', type: 'House', title: 'Modern Zen 3BR', loc: 'Valle Verde, Pasig', img: '🏠' },
+  { id: 'f1', type: 'House', title: 'Ayala Alabang Core', loc: 'Muntinlupa City', img: '🏠' },
+  { id: 'f2', type: 'Condo', title: 'The Proscenium', loc: 'Rockwell Center', img: '🏢' },
+  { id: 'f_dummy1', type: 'Lot', title: 'Elaro Corner Lot', loc: 'Nuvali, Laguna', img: '🌳' },
 ];
 
 export default function BuyerMode() {
   const [showMap, setShowMap] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const { listings } = useDashboard();
+  const searchRef = useRef(null);
+
+  // Mobile bottom-bar primary action (Scout) focuses the search bar
+  useEffect(() => {
+    const onPrimary = (e) => {
+      if (e.detail?.mode === "buyer" || e.detail?.mode === "exploring") {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        searchRef.current?.focus();
+      }
+    };
+    window.addEventListener("scoutit:primary-action", onPrimary);
+    return () => window.removeEventListener("scoutit:primary-action", onPrimary);
+  }, []);
+
+  // Live-filter the feed as the user types
+  const q = searchQuery.trim().toLowerCase();
+  const matches = (item) => !q || [item.title, item.type, item.loc, item.desc].some(v => v && v.toLowerCase().includes(q));
+  const newFeedListings = listings.filter(matches).slice(0, 5);
+  const savedFiltered = SAVED_LISTINGS.filter(matches);
 
   const ListingCard = ({ item }) => (
-    <div className={styles.railCard}>
-      <div className={styles.cardImg}>{item.img}</div>
-      <div className={styles.cardContent}>
-        <div className={styles.cardType}>{item.type}</div>
-        <div className={styles.cardTitle}>{item.title}</div>
-        <div className={styles.cardLoc}>{item.loc}</div>
+    <Link href={`/property/${item.id}`} className="block shrink-0 min-w-[240px] md:min-w-[280px]">
+      <div className="bg-surface border border-surface-variant rounded-lg p-4 flex gap-4 items-center hover:border-gold-accent hover:bg-surface-container-low transition-colors cursor-pointer h-full group">
+        <div className="w-16 h-16 bg-surface-alt rounded flex items-center justify-center text-3xl shrink-0 group-hover:scale-105 transition-transform">
+          {item.img || '🏠'}
+        </div>
+        <div className="flex flex-col overflow-hidden">
+          <div className="text-gold-accent font-label-caps text-[10px] tracking-widest uppercase mb-1">{item.type}</div>
+          <div className="font-working-title text-on-surface truncate group-hover:underline">{item.title}</div>
+          <div className="text-xs text-text-secondary truncate mt-0.5">{item.loc || 'Metro Manila'}</div>
+        </div>
       </div>
-    </div>
+    </Link>
+  );
+
+  const VerticalListingCard = ({ item }) => (
+    <Link href={`/property/${item.id}`} className="block shrink-0 w-[280px] snap-start">
+      <div className="bg-surface border border-surface-variant rounded-lg p-0 flex flex-col hover:border-text-secondary transition-colors cursor-pointer overflow-hidden group h-full">
+        <div className="h-40 bg-surface-alt flex items-center justify-center text-6xl group-hover:scale-105 transition-transform duration-500">
+          {item.img || '🏠'}
+        </div>
+        <div className="p-4 flex flex-col">
+          <div className="text-gold-accent font-label-caps text-[10px] tracking-widest uppercase mb-1">{item.type}</div>
+          <div className="font-working-title text-on-surface mb-1 truncate group-hover:underline">{item.title}</div>
+          <div className="text-xs text-text-secondary truncate">{item.loc || 'Location hidden'}</div>
+        </div>
+      </div>
+    </Link>
   );
 
   return (
-    <div className={styles.dashboardContainer}>
+    <div className="w-full flex flex-col gap-8 pb-12 animate-[fadeIn_0.5s_ease-out]">
       
       {/* Search Header */}
-      <div className={styles.searchHeader}>
-        <div className={styles.searchBar}>
-          <input 
-            type="text" 
-            className={styles.searchInput} 
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-surface-variant pb-6">
+        <div className="relative w-full md:max-w-md">
+          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary">🔍</span>
+          <input
+            type="text"
+            ref={searchRef}
+            className="w-full bg-surface border border-surface-variant rounded-full pl-11 pr-4 py-3 text-on-surface focus:outline-none focus:border-gold-accent transition-colors placeholder:text-text-muted"
             placeholder="Search locations, asset types, or intel..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-          <button className={styles.searchBtn}>Search</button>
         </div>
         
-        <div className={styles.controls}>
-          <div className={styles.mapToggle}>
-            <span>List</span>
-            <label className={styles.switch}>
-              <input type="checkbox" checked={showMap} onChange={(e) => setShowMap(e.target.checked)} />
-              <span className={styles.slider}></span>
-            </label>
-            <span>Map</span>
+        <div className="flex items-center gap-6 self-end md:self-auto">
+          <div className="flex items-center gap-3">
+            <span className={`text-xs font-working-title ${!showMap ? 'text-gold-accent' : 'text-text-secondary'}`}>List</span>
+            <button 
+              className={`w-12 h-6 rounded-full p-1 transition-colors relative ${showMap ? 'bg-gold-accent' : 'bg-surface-variant'}`}
+              onClick={() => setShowMap(!showMap)}
+            >
+              <div className={`w-4 h-4 bg-on-surface rounded-full transition-transform absolute top-1 ${showMap ? 'translate-x-6' : 'translate-x-0'}`}></div>
+            </button>
+            <span className={`text-xs font-working-title ${showMap ? 'text-gold-accent' : 'text-text-secondary'}`}>Map</span>
           </div>
           
-          <div style={{fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--text-muted)'}}>
-            Filters +
-          </div>
         </div>
       </div>
 
       {showMap ? (
-        <div className={styles.mapPlaceholder}>
-          <span style={{fontSize: 48}}>🗺️</span>
-          <p>Mapbox integration goes here</p>
-          <span style={{fontSize: 12, fontFamily: 'var(--font-mono)'}}>Showing 42 listings in view</span>
+        <div className="w-full h-[600px] bg-surface border border-surface-variant rounded-lg flex flex-col items-center justify-center text-center p-6">
+          <span className="text-5xl mb-4">🗺️</span>
+          <p className="font-working-title text-on-surface text-lg mb-2">Mapbox integration goes here</p>
+          <span className="font-label-caps text-xs tracking-widest text-text-secondary uppercase">Showing 42 listings in view</span>
         </div>
       ) : (
         <>
           {/* Saved Listings Rail */}
-          <div>
-            <h2 className={styles.sectionTitle}>Saved Listings</h2>
-            <div className={styles.rail}>
-              {SAVED_LISTINGS.map(item => <ListingCard key={item.id} item={item} />)}
+          <div className="flex flex-col gap-4">
+            <h2 className="font-headline-editorial text-2xl text-on-surface flex items-center justify-between">
+              Saved Listings
+              <button className="text-xs font-working-title text-gold-accent cursor-pointer hover:underline">View All</button>
+            </h2>
+            <div className="flex gap-4 overflow-x-auto pb-4 snap-x hide-scrollbar">
+              {savedFiltered.map(item => (
+                <div key={item.id} className="snap-start">
+                  <ListingCard item={item} />
+                </div>
+              ))}
+              {savedFiltered.length === 0 && (
+                <div className="text-sm text-text-secondary py-6">No saved listings match "{searchQuery}".</div>
+              )}
             </div>
           </div>
 
-          {/* New in Area + Intel Feed */}
-          <div>
-            <h2 className={styles.sectionTitle}>New & Intel</h2>
-            <div className={styles.feedGrid}>
-              
-              <div className={styles.intelCard}>
-                <span className={styles.intelBadge}>Market Intel</span>
-                <div>
-                  <h3 className={styles.intelTitle}>Makati CBD Yields Drop</h3>
-                  <p className={styles.intelDesc}>Recent transactions show a 1.2% decrease in gross rental yields for premium studios in Legazpi Village over the last 30 days.</p>
-                </div>
-                <a href="#" className={styles.intelAction}>Read Full Brief →</a>
-              </div>
+          {/* Feed Rail (New in Area) */}
+          <div className="flex flex-col gap-4 mt-4">
+            <h2 className="font-headline-editorial text-2xl text-on-surface flex items-center justify-between">
+              New in Metro Manila
+              <button className="text-xs font-working-title text-gold-accent cursor-pointer hover:underline">View Map</button>
+            </h2>
+            <div className="flex gap-4 overflow-x-auto pb-6 snap-x hide-scrollbar">
+              {newFeedListings.map(item => (
+                <VerticalListingCard key={item.id} item={item} />
+              ))}
+              {newFeedListings.length === 0 && (
+                <div className="text-sm text-text-secondary py-6">Nothing matches "{searchQuery}" yet — try a broader search.</div>
+              )}
 
-              {NEW_LISTINGS.map(item => <ListingCard key={item.id} item={item} />)}
-              
-              <div className={styles.intelCard}>
-                <span className={styles.intelBadge}>Area Guide</span>
-                <div>
-                  <h3 className={styles.intelTitle}>Nuvali Expansion</h3>
-                  <p className={styles.intelDesc}>A deep dive into the upcoming commercial blocks and how they affect residential pricing in Elaro and Venare.</p>
-                </div>
-                <a href="#" className={styles.intelAction}>Explore Area →</a>
+              {/* See More Card */}
+              <div className="block shrink-0 w-[280px] snap-start flex items-center justify-center">
+                <button className="h-40 w-40 rounded-full border border-surface-variant bg-surface-alt text-on-surface hover:border-gold-accent hover:text-gold-accent transition-colors flex flex-col items-center justify-center gap-2">
+                  <span className="text-2xl">→</span>
+                  <span className="font-working-title text-sm">See all {listings.length}</span>
+                </button>
               </div>
+            </div>
+          </div>
+
+          {/* Intel Teaser Rail */}
+          <div className="flex flex-col gap-4 mt-8">
+            <h2 className="font-headline-editorial text-2xl text-on-surface flex items-center justify-between">
+              Market Intelligence
+              <button className="text-xs font-working-title text-gold-accent cursor-pointer hover:underline">View Archives</button>
+            </h2>
+            <div className="flex gap-6 overflow-x-auto pb-6 snap-x hide-scrollbar">
+              
+              {/* Intel Brief 1 */}
+              <Link href="/intel/makati-yields" className="block shrink-0 w-[320px] md:w-[400px] snap-start">
+                <div className="bg-[#121110] border border-gold-accent/20 rounded-lg p-6 flex flex-col justify-between hover:border-gold-accent transition-colors cursor-pointer group h-full">
+                  <div>
+                    <span className="inline-block bg-gold-accent/10 text-gold-accent font-label-caps text-[10px] tracking-widest uppercase px-2 py-1 rounded mb-4">Market Intel</span>
+                    <h3 className="font-headline-editorial text-xl text-on-surface mb-2">Makati CBD Yields Drop</h3>
+                    <p className="text-sm text-text-secondary leading-relaxed line-clamp-3">Recent transactions show a 1.2% decrease in gross rental yields for premium studios in Legazpi Village over the last 30 days. Capital appreciation remains steady but cash flow is tightening.</p>
+                  </div>
+                  <div className="mt-6 font-working-title text-sm text-gold-accent group-hover:underline flex items-center gap-2">
+                    Read Full Brief <span>→</span>
+                  </div>
+                </div>
+              </Link>
+
+              {/* Intel Brief 2 */}
+              <Link href="/intel/nuvali-expansion" className="block shrink-0 w-[320px] md:w-[400px] snap-start">
+                <div className="bg-[#121110] border border-gold-accent/20 rounded-lg p-6 flex flex-col justify-between hover:border-gold-accent transition-colors cursor-pointer group h-full">
+                  <div>
+                    <span className="inline-block bg-gold-accent/10 text-gold-accent font-label-caps text-[10px] tracking-widest uppercase px-2 py-1 rounded mb-4">Area Guide</span>
+                    <h3 className="font-headline-editorial text-xl text-on-surface mb-2">Nuvali Expansion Patterns</h3>
+                    <p className="text-sm text-text-secondary leading-relaxed line-clamp-3">A deep dive into the upcoming commercial blocks and how they affect residential pricing in Elaro and Venare. We map out the 5-year infrastructure pipeline and its impact on secondary market liquidity.</p>
+                  </div>
+                  <div className="mt-6 font-working-title text-sm text-gold-accent group-hover:underline flex items-center gap-2">
+                    Explore Area <span>→</span>
+                  </div>
+                </div>
+              </Link>
+              
+              {/* Intel Brief 3 */}
+              <Link href="/intel/pasig-zoning" className="block shrink-0 w-[320px] md:w-[400px] snap-start">
+                <div className="bg-[#121110] border border-gold-accent/20 rounded-lg p-6 flex flex-col justify-between hover:border-gold-accent transition-colors cursor-pointer group h-full">
+                  <div>
+                    <span className="inline-block bg-gold-accent/10 text-gold-accent font-label-caps text-[10px] tracking-widest uppercase px-2 py-1 rounded mb-4">Regulatory Alert</span>
+                    <h3 className="font-headline-editorial text-xl text-on-surface mb-2">Pasig Zoning Changes</h3>
+                    <p className="text-sm text-text-secondary leading-relaxed line-clamp-3">New LGU ordinances are shifting FAR (Floor Area Ratio) limitations near the upcoming subway stations. What this means for low-density residential asset owners looking to exit to mid-rise developers.</p>
+                  </div>
+                  <div className="mt-6 font-working-title text-sm text-gold-accent group-hover:underline flex items-center gap-2">
+                    View Impact Analysis <span>→</span>
+                  </div>
+                </div>
+              </Link>
 
             </div>
           </div>
         </>
       )}
 
+      <style jsx global>{`
+        .hide-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .hide-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
     </div>
   );
 }

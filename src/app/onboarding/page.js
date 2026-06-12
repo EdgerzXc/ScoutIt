@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import styles from "./page.module.css";
 
 const TAGS = [
   { id: "buyer", icon: "🏠", title: "Looking to Buy or Rent", desc: "Browse, save, and get deep spatial intelligence." },
@@ -39,58 +38,66 @@ export default function OnboardingPage() {
 
   // --- Step 1: Auth ---
   const renderStep1 = () => (
-    <div className={styles.stepWrapper}>
-      <span className={styles.eyebrow}>Phase 01 // Identity</span>
-      <h1 className={styles.heading}>Create your account</h1>
-      <p className={styles.subhead}>A unified cryptographic memory for your real estate journey.</p>
+    <div className="flex flex-col animate-[fadeIn_0.5s_ease-out]">
+      <span className="text-gold-accent font-label-caps text-[12px] tracking-widest uppercase mb-4 block">Phase 01 // Identity</span>
+      <h1 className="font-headline-editorial text-4xl md:text-5xl text-on-surface mb-2">Create your account</h1>
+      <p className="text-text-secondary font-body-md mb-8">A unified cryptographic memory for your real estate journey.</p>
       
-      <div className={styles.formGroup}>
-        <label className={styles.label}>Full Name</label>
-        <input 
-          className={styles.input} 
-          type="text" 
-          placeholder="Julian de Ayala"
-          value={formData.name}
-          onChange={e => setFormData({...formData, name: e.target.value})}
-        />
-      </div>
-      <div className={styles.formGroup}>
-        <label className={styles.label}>Email Address</label>
-        <input 
-          className={styles.input} 
-          type="email" 
-          placeholder="julian@example.com"
-          value={formData.email}
-          onChange={e => setFormData({...formData, email: e.target.value})}
-        />
-      </div>
-      <div className={styles.formGroup}>
-        <label className={styles.label}>Password</label>
-        <input 
-          className={styles.input} 
-          type="password" 
-          placeholder="••••••••"
-          value={formData.password}
-          onChange={e => setFormData({...formData, password: e.target.value})}
-        />
+      <div className="flex flex-col gap-5 mb-8">
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-bold text-on-surface">Full Name</label>
+          <input 
+            className="bg-surface border border-surface-variant rounded px-4 py-3 text-on-surface focus:outline-none focus:border-gold-accent transition-colors" 
+            type="text" 
+            placeholder="Julian de Ayala"
+            value={formData.name}
+            onChange={e => setFormData({...formData, name: e.target.value})}
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-bold text-on-surface">Email Address</label>
+          <input 
+            className="bg-surface border border-surface-variant rounded px-4 py-3 text-on-surface focus:outline-none focus:border-gold-accent transition-colors" 
+            type="email" 
+            placeholder="julian@example.com"
+            value={formData.email}
+            onChange={e => setFormData({...formData, email: e.target.value})}
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-bold text-on-surface">Password</label>
+          <input 
+            className="bg-surface border border-surface-variant rounded px-4 py-3 text-on-surface focus:outline-none focus:border-gold-accent transition-colors" 
+            type="password" 
+            placeholder="••••••••"
+            value={formData.password}
+            onChange={e => setFormData({...formData, password: e.target.value})}
+          />
+        </div>
       </div>
       
       <button 
-        className={styles.buttonPrimary} 
+        className="w-full bg-gold-accent text-background font-working-title text-base font-bold py-4 px-6 rounded hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed" 
         onClick={nextStep}
         disabled={!formData.name || !formData.email || !formData.password}
-        style={{ opacity: (!formData.name || !formData.email || !formData.password) ? 0.5 : 1 }}
       >
         Continue with Email →
       </button>
 
-      <div className={styles.divider}>Or</div>
+      <div className="flex items-center text-text-secondary text-sm my-6 gap-4">
+        <div className="flex-1 h-px bg-surface-variant"></div>
+        <span className="uppercase tracking-widest text-[10px]">Or</span>
+        <div className="flex-1 h-px bg-surface-variant"></div>
+      </div>
       
-      <button className={styles.buttonSecondary} onClick={() => {
-        // Mock Google Auth
-        setFormData({...formData, name: "Google User", email: "user@gmail.com", password: "oauth"});
-        nextStep();
-      }}>
+      <button 
+        className="w-full bg-surface border border-surface-variant text-on-surface font-working-title text-base font-bold py-4 px-6 rounded hover:bg-surface-container transition-colors" 
+        onClick={() => {
+          // Mock Google Auth
+          setFormData({...formData, name: "Google User", email: "user@gmail.com", password: "oauth"});
+          nextStep();
+        }}
+      >
         Continue with Google
       </button>
     </div>
@@ -108,47 +115,62 @@ export default function OnboardingPage() {
 
   const handleStep2Next = () => {
     if (formData.tags.length === 1) {
+      const onlyMode = formData.tags[0];
+      if (onlyMode === "exploring") {
+        // Exploring skips micro-setup entirely — straight to the feed
+        completeOnboarding({ primaryMode: onlyMode });
+        return;
+      }
       // Auto-set primary mode if only one is selected
-      setFormData({ ...formData, primaryMode: formData.tags[0] });
+      setFormData({ ...formData, primaryMode: onlyMode });
       setStep(4); // Skip to step 4
     } else {
       nextStep(); // Go to step 3
     }
   };
 
+  const handleStep3Next = () => {
+    if (formData.primaryMode === "exploring") {
+      completeOnboarding();
+    } else {
+      nextStep();
+    }
+  };
+
   const renderStep2 = () => (
-    <div className={styles.stepWrapper}>
-      <span className={styles.eyebrow}>Phase 02 // Intent Matrix</span>
-      <h1 className={styles.heading}>How will you use ScoutIt?</h1>
-      <p className={styles.subhead}>Select all that apply. This sets up your multi-role dashboard capabilities.</p>
+    <div className="flex flex-col animate-[fadeIn_0.5s_ease-out]">
+      <span className="text-gold-accent font-label-caps text-[12px] tracking-widest uppercase mb-4 block">Phase 02 // Intent Matrix</span>
+      <h1 className="font-headline-editorial text-4xl md:text-5xl text-on-surface mb-2">How will you use ScoutIt?</h1>
+      <p className="text-text-secondary font-body-md mb-8">Select all that apply. This sets up your multi-role dashboard capabilities.</p>
       
-      <div className={styles.tagGrid}>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
         {TAGS.map(tag => {
           const isSelected = formData.tags.includes(tag.id);
           return (
-            <div key={tag.id}>
+            <div key={tag.id} className="flex flex-col gap-2">
               <div 
-                className={`${styles.tagCard} ${isSelected ? styles.selected : ''}`}
+                className={`p-5 rounded border transition-all cursor-pointer flex items-start gap-4 ${isSelected ? 'bg-surface-container-low border-gold-accent' : 'bg-surface border-surface-variant hover:border-text-secondary'}`}
                 onClick={() => toggleTag(tag.id)}
               >
-                <div className={styles.tagIcon}>{tag.icon}</div>
-                <div className={styles.tagContent}>
-                  <h4>{tag.title}</h4>
-                  <p>{tag.desc}</p>
+                <div className="text-3xl mt-1">{tag.icon}</div>
+                <div className="flex-1">
+                  <h4 className="font-working-title text-lg text-on-surface mb-1">{tag.title}</h4>
+                  <p className="text-text-secondary text-sm leading-snug">{tag.desc}</p>
                 </div>
               </div>
               
               {tag.id === 'provider' && isSelected && (
-                <div className={styles.subSelect}>
+                <div className="pl-14 flex flex-col gap-3 mt-2 mb-2 animate-[fadeIn_0.3s_ease-out]">
                   {PROVIDER_SUBTAGS.map(sub => (
-                    <label key={sub.id} className={styles.subSelectLabel}>
+                    <label key={sub.id} className="flex items-center gap-3 text-on-surface cursor-pointer group">
                       <input 
                         type="radio" 
                         name="providerType"
+                        className="w-5 h-5 accent-gold-accent bg-surface border-surface-variant cursor-pointer"
                         checked={formData.providerType === sub.id}
                         onChange={() => setFormData({...formData, providerType: sub.id})}
                       />
-                      {sub.label}
+                      <span className="group-hover:text-gold-accent transition-colors">{sub.label}</span>
                     </label>
                   ))}
                 </div>
@@ -159,9 +181,8 @@ export default function OnboardingPage() {
       </div>
 
       <button 
-        className={styles.buttonPrimary} 
+        className="w-full bg-gold-accent text-background font-working-title text-base font-bold py-4 px-6 rounded hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed" 
         onClick={handleStep2Next}
-        style={{ marginTop: '32px', opacity: formData.tags.length === 0 ? 0.5 : 1 }}
         disabled={formData.tags.length === 0 || (formData.tags.includes('provider') && !formData.providerType)}
       >
         Set Capabilities →
@@ -171,24 +192,24 @@ export default function OnboardingPage() {
 
   // --- Step 3: Primary Mode ---
   const renderStep3 = () => (
-    <div className={styles.stepWrapper}>
-      <span className={styles.eyebrow}>Phase 03 // Workspace</span>
-      <h1 className={styles.heading}>What brings you here today?</h1>
-      <p className={styles.subhead}>You have multiple capabilities. Select your primary home base.<br/>(You can switch views anytime with one tap.)</p>
+    <div className="flex flex-col animate-[fadeIn_0.5s_ease-out]">
+      <span className="text-gold-accent font-label-caps text-[12px] tracking-widest uppercase mb-4 block">Phase 03 // Workspace</span>
+      <h1 className="font-headline-editorial text-4xl md:text-5xl text-on-surface mb-2">What brings you here today?</h1>
+      <p className="text-text-secondary font-body-md mb-8">You can switch anytime. This just sets your home base.</p>
       
-      <div className={styles.tagGrid}>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
         {formData.tags.map(tagId => {
           const tag = TAGS.find(t => t.id === tagId);
           const isSelected = formData.primaryMode === tagId;
           return (
             <div 
               key={tag.id}
-              className={`${styles.tagCard} ${isSelected ? styles.selected : ''}`}
+              className={`p-5 rounded border transition-all cursor-pointer flex items-center gap-4 ${isSelected ? 'bg-surface-container-low border-gold-accent' : 'bg-surface border-surface-variant hover:border-text-secondary'}`}
               onClick={() => setFormData({ ...formData, primaryMode: tag.id })}
             >
-              <div className={styles.tagIcon}>{tag.icon}</div>
-              <div className={styles.tagContent}>
-                <h4>{tag.title}</h4>
+              <div className="text-3xl">{tag.icon}</div>
+              <div className="flex-1">
+                <h4 className="font-working-title text-lg text-on-surface">{tag.title}</h4>
               </div>
             </div>
           );
@@ -196,9 +217,8 @@ export default function OnboardingPage() {
       </div>
 
       <button 
-        className={styles.buttonPrimary} 
-        onClick={nextStep}
-        style={{ marginTop: '32px', opacity: !formData.primaryMode ? 0.5 : 1 }}
+        className="w-full bg-gold-accent text-background font-working-title text-base font-bold py-4 px-6 rounded hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed" 
+        onClick={handleStep3Next}
         disabled={!formData.primaryMode}
       >
         Set Primary Mode →
@@ -207,14 +227,16 @@ export default function OnboardingPage() {
   );
 
   // --- Step 4: Micro Setup ---
-  const completeOnboarding = () => {
-    // 1. Construct final user payload
+  const completeOnboarding = (overrides = {}) => {
+    // 1. Construct final user payload matching USERS_CMS architecture
     const finalUser = {
       ...formData,
+      ...overrides,
       id: `usr-${Date.now()}`,
       created_at: new Date().toISOString(),
       subscription_tier: "free",
       connects_balance: 5,
+      profile_completeness: 20, // starts at 20%
     };
     
     // 2. Save to local storage (mock USERS_CMS/auth)
@@ -224,28 +246,27 @@ export default function OnboardingPage() {
     router.push("/dashboard");
   };
 
+  // PRC format check only (per spec — not validity): letters/dash prefix optional + 5+ digits
+  const prcFormatOk = /(\d{5,})/.test(formData.prcLicense);
+
   const renderStep4 = () => {
     const mode = formData.primaryMode;
-    
-    if (mode === "exploring") {
-      completeOnboarding(); // Skip micro-setup
-      return null;
-    }
+    if (mode === "exploring") return null; // handled before reaching step 4
 
     return (
-      <div className={styles.stepWrapper}>
-        <span className={styles.eyebrow}>Phase 04 // Calibration</span>
-        <h1 className={styles.heading}>One last thing</h1>
-        <p className={styles.subhead}>Let's calibrate your dashboard for Day 1.</p>
+      <div className="flex flex-col animate-[fadeIn_0.5s_ease-out]">
+        <span className="text-gold-accent font-label-caps text-[12px] tracking-widest uppercase mb-4 block">Phase 04 // Calibration</span>
+        <h1 className="font-headline-editorial text-4xl md:text-5xl text-on-surface mb-2">One last thing</h1>
+        <p className="text-text-secondary font-body-md mb-8">Let's calibrate your dashboard for Day 1.</p>
 
-        <div className={styles.setupCard}>
+        <div className="bg-surface-alt border border-surface-variant rounded-lg p-6 md:p-8 mb-8">
           {mode === "buyer" && (
             <>
-              <h3>What area are you scouting?</h3>
-              <p style={{color: 'var(--text-secondary)', fontSize: 14, marginBottom: 24}}>Optional. Helps us curate your feed.</p>
-              <div className={styles.formGroup}>
+              <h3 className="font-working-title text-xl text-on-surface mb-2">What area are you scouting?</h3>
+              <p className="text-text-secondary text-sm mb-6">Optional. Helps us curate your feed.</p>
+              <div className="flex flex-col gap-2">
                 <input 
-                  className={styles.input} 
+                  className="bg-surface border border-surface-variant rounded px-4 py-3 text-on-surface focus:outline-none focus:border-gold-accent transition-colors w-full" 
                   type="text" 
                   placeholder="e.g. BGC, Makati, Siargao"
                   value={formData.locationFocus}
@@ -257,22 +278,22 @@ export default function OnboardingPage() {
 
           {mode === "owner" && (
             <>
-              <h3>Ready to list your property?</h3>
-              <p style={{color: 'var(--text-secondary)', fontSize: 14, marginBottom: 24}}>You can set up your asset profile now, or explore the dashboard first.</p>
-              <div style={{display: 'flex', gap: 12, flexDirection: 'column'}}>
-                <button className={styles.buttonPrimary} onClick={completeOnboarding} style={{marginTop: 0}}>List Property Now</button>
-                <button className={styles.buttonSecondary} onClick={completeOnboarding} style={{marginTop: 0}}>I'll do it later</button>
+              <h3 className="font-working-title text-xl text-on-surface mb-2">Ready to list your property?</h3>
+              <p className="text-text-secondary text-sm mb-6">You can set up your asset profile now, or explore the dashboard first.</p>
+              <div className="flex flex-col gap-3">
+                <button className="w-full bg-gold-accent text-background font-working-title text-base font-bold py-3 px-6 rounded hover:opacity-90 transition-opacity" onClick={() => completeOnboarding()}>List Property Now</button>
+                <button className="w-full bg-surface border border-surface-variant text-on-surface font-working-title text-base font-bold py-3 px-6 rounded hover:bg-surface-container transition-colors" onClick={() => completeOnboarding()}>I'll do it later</button>
               </div>
             </>
           )}
 
           {mode === "broker" && (
             <>
-              <h3>Verify your License</h3>
-              <p style={{color: 'var(--text-secondary)', fontSize: 14, marginBottom: 24}}>To activate Broker Mode and receive inbound pitches, please provide your PRC Real Estate Broker license number.</p>
-              <div className={styles.formGroup}>
+              <h3 className="font-working-title text-xl text-on-surface mb-2">Verify your License</h3>
+              <p className="text-text-secondary text-sm mb-6">To activate Broker Mode and receive inbound pitches, please provide your PRC Real Estate Broker license number.</p>
+              <div className="flex flex-col gap-2">
                 <input 
-                  className={styles.input} 
+                  className="bg-surface border border-surface-variant rounded px-4 py-3 text-on-surface focus:outline-none focus:border-gold-accent transition-colors w-full uppercase" 
                   type="text" 
                   placeholder="PRC-REB-XXXXXXX"
                   value={formData.prcLicense}
@@ -284,44 +305,49 @@ export default function OnboardingPage() {
 
           {mode === "provider" && (
             <>
-              <h3>Set up your {PROVIDER_SUBTAGS.find(s=>s.id === formData.providerType)?.label} profile</h3>
-              <p style={{color: 'var(--text-secondary)', fontSize: 14, marginBottom: 24}}>Get your portfolio ready. Profiles that are 100% complete get first placement when gates open.</p>
-              <div style={{display: 'flex', gap: 12, flexDirection: 'column'}}>
-                <button className={styles.buttonPrimary} onClick={completeOnboarding} style={{marginTop: 0}}>Build Profile</button>
-                <button className={styles.buttonSecondary} onClick={completeOnboarding} style={{marginTop: 0}}>Skip for now</button>
+              <h3 className="font-working-title text-xl text-on-surface mb-2">Set up your {PROVIDER_SUBTAGS.find(s=>s.id === formData.providerType)?.label} profile</h3>
+              <p className="text-text-secondary text-sm mb-6">Get your portfolio ready. Profiles that are 100% complete get first placement when gates open.</p>
+              <div className="flex flex-col gap-3">
+                <button className="w-full bg-gold-accent text-background font-working-title text-base font-bold py-3 px-6 rounded hover:opacity-90 transition-opacity" onClick={() => completeOnboarding()}>Build Profile</button>
+                <button className="w-full bg-surface border border-surface-variant text-on-surface font-working-title text-base font-bold py-3 px-6 rounded hover:bg-surface-container transition-colors" onClick={() => completeOnboarding()}>Skip for now</button>
               </div>
             </>
           )}
         </div>
 
         {mode !== "owner" && mode !== "provider" && (
-          <button 
-            className={styles.buttonPrimary} 
-            onClick={completeOnboarding}
-            style={{ marginTop: '24px' }}
-          >
-            Enter ScoutIt →
-          </button>
+          <>
+            <button
+              className="w-full bg-gold-accent text-background font-working-title text-base font-bold py-4 px-6 rounded hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={() => completeOnboarding()}
+              disabled={mode === "broker" && !prcFormatOk}
+            >
+              Enter ScoutIt →
+            </button>
+            {mode === "broker" && !prcFormatOk && formData.prcLicense.length > 0 && (
+              <p className="text-error text-sm mt-3 text-center">That doesn't look like a PRC license number — it should contain at least 5 digits.</p>
+            )}
+          </>
         )}
       </div>
     );
   };
 
   return (
-    <div className={styles.container}>
+    <div className="min-h-screen bg-background text-text-primary flex flex-col">
       {/* Universal Grain Overlay */}
-      <div className="grain" aria-hidden="true"></div>
+      <div className="fixed inset-0 pointer-events-none opacity-[0.03] z-50 mix-blend-overlay bg-[url('/grain.png')]"></div>
 
-      <header className={styles.topNav}>
-        <div className={styles.logo}>Scout<span>IT</span></div>
-        <div className={styles.progress}>
+      <header className="p-6 md:p-8 flex items-center justify-between sticky top-0 bg-background/90 backdrop-blur-md z-40 border-b border-surface-variant">
+        <div className="font-display-md text-2xl text-gold-accent tracking-tighter">Scout<span className="text-on-surface">IT</span></div>
+        <div className="flex items-center gap-2">
           {[1,2,3,4].map(s => (
-            <div key={s} className={`${styles.dot} ${step >= s ? styles.active : ''}`} />
+            <div key={s} className={`h-1.5 rounded-full transition-all duration-300 ${step >= s ? 'w-6 bg-gold-accent' : 'w-2 bg-surface-variant'}`} />
           ))}
         </div>
       </header>
 
-      <main className={styles.main}>
+      <main className="flex-1 flex flex-col justify-center max-w-[600px] mx-auto w-full p-6 md:p-8 py-12">
         {step === 1 && renderStep1()}
         {step === 2 && renderStep2()}
         {step === 3 && renderStep3()}
