@@ -34,6 +34,12 @@ AI opens the project, it opens **this folder** (`C:\Users\jerze\ScoutIt`).
 | `PROPERTY_ARCHITECTURE.md`, `SCOUTIT_AIRTABLE_SOP.md` | Existing project notes (property page design, Airtable how-to). |
 | `structure.txt` | An older auto-generated tree dump (informational). |
 
+> 📖 **Start here for the big picture:** `docs/SCOUTIT_DESIGN_BRIEF.md` explains
+> what the whole site is *for* — purpose, audience, visual DNA (the 95% black /
+> 5% gold rule, exact color/font tokens), the UX "descent through Layers" model,
+> every route, and the in-progress scrollytelling manifesto. Read it before
+> touching design or UX.
+
 ---
 
 ## The website code — `src/`
@@ -56,7 +62,8 @@ become URLs.**
 - `board/` — `BoardPodium`, `ShowcaseStage` (the ranked-board feature).
 - `connection/` — `ConnectionPortal`, `ServiceConnectionPortal` (the "get in touch" panels on detail pages).
 - `property/` — everything for property detail pages: `InteractiveMap`, `LedgerButtons`, `EcosystemActionBar`, `CommercialFlow`, `ResidentialScrollytelling`, `chapterConfig`.
-- `scrollytelling/` — **reserved & empty.** The future scrollytelling build goes here. Kept empty so it can't collide with anything.
+- `cinematic/` — `CinematicJourney` (a hero cinematic, currently dormant in the beam flow).
+- `scrollytelling/` — **the manifesto build (in progress).** Holds `DescentSequence.js`: the UFO-triggered "descent" — darkening → molten-gold crack reveal → mission nodes → finale to `/about`. Lazy-loaded, driven by a single scroll `progress` value. See `docs/SCOUTIT_DESIGN_BRIEF.md` §6 and `docs/scrollytelling-mission-text.md`.
 
 ### `src/data/` — the content
 `mockProperties`, `mockArticles`, `mockBrokers`, `mockPhotographers`,
@@ -77,8 +84,12 @@ scrollytelling build).
 
 | Folder | What goes in it |
 |---|---|
-| **`docs/`** | Your plans and prompts (the `SCOUTIT_*_PROMPT.md` files, notes). The "what we intend to build" paperwork. |
-| **`reference/`** | **Your guide photos** for how things should look. Git-ignored (stays on your machine, never deployed). See `reference/README.md`. |
+| **`docs/`** | Plans, prompts, and reference docs. Key files: `SCOUTIT_DESIGN_BRIEF.md` (the read-first overview of the whole site), `scrollytelling-mission-text.md` (the six locked manifesto messages), plus other `SCOUTIT_*` notes. |
+| **`reference/`** | **Your guide photos** for how things should look. Git-ignored (stays on your machine, never deployed). Currently holds `golden liquid.jpeg` — the molten-gold centerpiece for the scrollytelling manifesto. See `reference/README.md`. |
+
+> The deployable copy of the gold image lives at
+> `public/scrollytelling/golden-liquid.jpeg` (the `reference/` original is never
+> served). Anything the website must actually load goes in `public/`.
 
 ---
 
