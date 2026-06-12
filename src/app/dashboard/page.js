@@ -21,6 +21,20 @@ const TAG_LABELS = {
   exploring: "Exploring"
 };
 
+// Roles a user can activate from the Mode menu without re-onboarding
+const ACTIVATABLE_MODES = [
+  { id: "buyer", icon: "🏠", cta: "Scout Properties", desc: "Browse, save listings, and get market intel." },
+  { id: "owner", icon: "📋", cta: "List as an Owner", desc: "List your property and receive broker pitches." },
+  { id: "broker", icon: "🤝", cta: "Become a Broker", desc: "Pitch owners and manage your pipeline. PRC license required." },
+  { id: "provider", icon: "📸", cta: "Join as a Service Provider", desc: "Photographer, researcher, or event designer." },
+];
+
+const PROVIDER_TYPES = [
+  { id: "photographer", label: "Photographer" },
+  { id: "researcher", label: "Site Researcher" },
+  { id: "designer", label: "Event Designer" },
+];
+
 function DashboardInner() {
   const router = useRouter();
   const { connects, currentUser, notifications, markNotificationsRead, clearAllNotifications } = useDashboard();
@@ -29,6 +43,9 @@ function DashboardInner() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showDesktopSwitcher, setShowDesktopSwitcher] = useState(false);
   const [showMobileProfileMenu, setShowMobileProfileMenu] = useState(false);
+  const [activating, setActivating] = useState(null); // mode id being activated (broker/provider need extra info)
+  const [activationLicense, setActivationLicense] = useState("");
+  const [activationProviderType, setActivationProviderType] = useState("");
 
   const switcherRef = useRef(null);
 
@@ -75,6 +92,36 @@ function DashboardInner() {
     setUser(updatedUser);
   };
 
+  // Roles the user doesn't have yet ("exploring" isn't an activatable role)
+  const addableModes = ACTIVATABLE_MODES.filter(m => !user.tags.includes(m.id));
+
+  const startActivation = (modeId) => {
+    setShowDesktopSwitcher(false);
+    setShowMobileProfileMenu(false);
+    if (modeId === "broker" || modeId === "provider") {
+      setActivationLicense("");
+      setActivationProviderType("");
+      setActivating(modeId); // needs extra info first
+    } else {
+      finishActivation(modeId);
+    }
+  };
+
+  const finishActivation = (modeId, extra = {}) => {
+    const updatedUser = {
+      ...user,
+      ...extra,
+      tags: [...user.tags.filter(t => t !== "exploring" || modeId === "exploring"), modeId],
+      primaryMode: modeId,
+    };
+    localStorage.setItem("scoutit_user", JSON.stringify(updatedUser));
+    setUser(updatedUser);
+    setMode(modeId);
+    setActivating(null);
+  };
+
+  const prcFormatOk = /(\d{5,})/.test(activationLicense);
+
   const renderActiveMode = () => {
     switch (mode) {
       case "owner": return <OwnerMode />;
@@ -118,8 +165,8 @@ function DashboardInner() {
         <div className="flex items-center gap-6">
           <Link href="/" className="font-display-md text-xl md:text-2xl text-gold-accent tracking-tighter">Scout<span className="text-on-surface">IT</span></Link>
           
-          {/* Custom Desktop Mode Switcher (only when the user has more than one capability) */}
-          <div className={`${user.tags.length > 1 ? 'hidden md:block' : 'hidden'} relative`} ref={switcherRef}>
+          {/* Custom Desktop Mode Switcher */}
+          <div className="hidden md:block relative" ref={switcherRef}>
             <button 
               className="flex items-center gap-2 bg-surface hover:bg-surface-alt border border-surface-variant text-on-surface text-sm font-working-title px-4 py-2 rounded-full uppercase tracking-wider transition-colors"
               onClick={() => setShowDesktopSwitcher(!showDesktopSwitcher)}
@@ -135,8 +182,8 @@ function DashboardInner() {
                 </div>
                 <div className="flex flex-col py-2">
                   {user.tags.map(tagId => (
-                    <button 
-                      key={tagId} 
+                    <button
+                      key={tagId}
                       className={`text-left px-4 py-3 font-working-title text-sm transition-colors hover:bg-surface-container ${mode === tagId ? 'text-gold-accent bg-surface-container-low border-l-2 border-gold-accent' : 'text-on-surface border-l-2 border-transparent'}`}
                       onClick={() => handleSwitchMode(tagId)}
                     >
@@ -144,6 +191,26 @@ function DashboardInner() {
                     </button>
                   ))}
                 </div>
+
+                {addableModes.length > 0 && (
+                  <>
+                    <div className="px-4 py-2 border-t border-surface-variant bg-surface-alt">
+                      <span className="font-label-caps text-[10px] tracking-widest uppercase text-text-secondary">Unlock More</span>
+                    </div>
+                    <div className="flex flex-col py-2">
+                      {addableModes.map(m => (
+                        <button
+                          key={m.id}
+                          className="text-left px-4 py-3 transition-colors hover:bg-surface-container group"
+                          onClick={() => startActivation(m.id)}
+                        >
+                          <span className="font-working-title text-sm text-gold-accent flex items-center gap-2">{m.icon} {m.cta}</span>
+                          <span className="block text-xs text-text-secondary mt-0.5">{m.desc}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
             )}
           </div>
@@ -251,6 +318,67 @@ function DashboardInner() {
         </button>
       </nav>
 
+      {/* Role Activation Modal (broker license / provider type) */}
+      {activating && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-background/90 backdrop-blur-md px-4">
+          <div className="w-full max-w-md bg-surface border border-surface-variant rounded-lg shadow-2xl p-6 animate-[slideUp_0.3s_ease-out]">
+            {activating === "broker" ? (
+              <>
+                <h3 className="font-headline-editorial text-2xl text-on-surface mb-2">Become a Broker</h3>
+                <p className="text-sm text-text-secondary mb-6">Enter your PRC Real Estate Broker license number to activate Broker Mode. We check the format only — verification happens later.</p>
+                <input
+                  className="w-full bg-surface-alt border border-surface-variant rounded px-4 py-3 text-on-surface focus:outline-none focus:border-gold-accent transition-colors uppercase mb-2"
+                  type="text"
+                  placeholder="PRC-REB-XXXXXXX"
+                  value={activationLicense}
+                  onChange={e => setActivationLicense(e.target.value)}
+                  autoFocus
+                />
+                {!prcFormatOk && activationLicense.length > 0 && (
+                  <p className="text-error text-xs mb-2">Should contain at least 5 digits.</p>
+                )}
+                <div className="flex gap-3 mt-4">
+                  <button className="flex-1 px-4 py-3 border border-surface-variant text-text-secondary rounded hover:text-on-surface hover:bg-surface-container transition-colors" onClick={() => setActivating(null)}>Cancel</button>
+                  <button
+                    className="flex-1 bg-gold-accent text-background font-working-title font-bold px-4 py-3 rounded hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={!prcFormatOk}
+                    onClick={() => finishActivation("broker", { prcLicense: activationLicense })}
+                  >
+                    Activate Broker Mode
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <h3 className="font-headline-editorial text-2xl text-on-surface mb-2">Join as a Service Provider</h3>
+                <p className="text-sm text-text-secondary mb-6">What kind of work do you do?</p>
+                <div className="flex flex-col gap-2 mb-4">
+                  {PROVIDER_TYPES.map(pt => (
+                    <button
+                      key={pt.id}
+                      className={`text-left p-4 rounded border font-working-title text-sm transition-colors ${activationProviderType === pt.id ? 'bg-surface-container-low border-gold-accent text-gold-accent' : 'bg-surface-alt border-surface-variant text-on-surface hover:border-text-secondary'}`}
+                      onClick={() => setActivationProviderType(pt.id)}
+                    >
+                      {pt.label} {activationProviderType === pt.id && "✓"}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex gap-3 mt-4">
+                  <button className="flex-1 px-4 py-3 border border-surface-variant text-text-secondary rounded hover:text-on-surface hover:bg-surface-container transition-colors" onClick={() => setActivating(null)}>Cancel</button>
+                  <button
+                    className="flex-1 bg-gold-accent text-background font-working-title font-bold px-4 py-3 rounded hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={!activationProviderType}
+                    onClick={() => finishActivation("provider", { providerType: activationProviderType })}
+                  >
+                    Activate Provider Mode
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Mobile Profile Menu Slide-out */}
       {showMobileProfileMenu && (
         <div className="md:hidden fixed inset-0 z-50 flex flex-col justify-end animate-[fadeIn_0.3s_ease-out]">
@@ -274,10 +402,10 @@ function DashboardInner() {
               <span className="font-label-caps text-[10px] tracking-widest uppercase text-text-secondary">Switch Capability</span>
             </div>
             )}
-            <div className="flex flex-col gap-2 mb-6">
+            <div className="flex flex-col gap-2 mb-4">
               {user.tags.length > 1 && user.tags.map(tagId => (
-                <button 
-                  key={tagId} 
+                <button
+                  key={tagId}
                   className={`flex items-center justify-between p-4 rounded-lg font-working-title text-sm border transition-colors ${mode === tagId ? 'bg-surface-container-low border-gold-accent text-gold-accent' : 'bg-surface border-surface-variant text-on-surface hover:border-text-secondary'}`}
                   onClick={() => handleSwitchMode(tagId)}
                 >
@@ -286,6 +414,26 @@ function DashboardInner() {
                 </button>
               ))}
             </div>
+
+            {addableModes.length > 0 && (
+              <>
+                <div className="mb-2">
+                  <span className="font-label-caps text-[10px] tracking-widest uppercase text-text-secondary">Unlock More</span>
+                </div>
+                <div className="flex flex-col gap-2 mb-6">
+                  {addableModes.map(m => (
+                    <button
+                      key={m.id}
+                      className="text-left p-4 rounded-lg border border-dashed border-gold-accent/40 bg-surface hover:border-gold-accent transition-colors"
+                      onClick={() => startActivation(m.id)}
+                    >
+                      <span className="font-working-title text-sm text-gold-accent flex items-center gap-2">{m.icon} {m.cta}</span>
+                      <span className="block text-xs text-text-secondary mt-0.5">{m.desc}</span>
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
 
             <div className="border-t border-surface-variant pt-4">
               <Link href="/settings" className="flex items-center gap-3 text-text-secondary hover:text-on-surface font-working-title text-sm py-2">

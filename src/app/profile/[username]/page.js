@@ -26,14 +26,18 @@ export default function ProfilePage() {
   const [showCeremony, setShowCeremony] = useState(false);
   const [ceremonyBadge, setCeremonyBadge] = useState(null);
   const [userTags, setUserTags] = useState(["owner", "broker"]); // Default fallback
+  const [publicProfile, setPublicProfile] = useState(null);
+  const [isOwnProfile, setIsOwnProfile] = useState(false);
 
   useEffect(() => {
-    // If the profile matches the logged in user, pull their tags.
+    // If the profile matches the logged in user, pull their tags + public card.
     const saved = localStorage.getItem("scoutit_user");
     if (saved) {
       const parsed = JSON.parse(saved);
       if (parsed.name === username || username === "User") {
         setUserTags(parsed.tags || ["exploring"]);
+        setPublicProfile(parsed.publicProfile || null);
+        setIsOwnProfile(true);
       }
     }
 
@@ -121,13 +125,30 @@ export default function ProfilePage() {
                   {TAG_LABELS[tag] || tag}
                 </span>
               ))}
-              <span className="font-label-caps text-[10px] tracking-widest text-text-secondary uppercase border border-surface-variant px-3 py-1 rounded-full">Metro Manila</span>
+              <span className="font-label-caps text-[10px] tracking-widest text-text-secondary uppercase border border-surface-variant px-3 py-1 rounded-full">📍 {publicProfile?.location || "Metro Manila"}</span>
               <span className="font-label-caps text-[10px] tracking-widest text-text-secondary uppercase border border-surface-variant px-3 py-1 rounded-full">Since Oct 2026</span>
             </div>
 
+            {publicProfile?.headline && (
+              <p className="font-working-title text-lg text-gold-accent mb-3">{publicProfile.headline}</p>
+            )}
+
             <p className="font-body-md text-text-secondary max-w-xl italic leading-relaxed">
-              An active participant in the ScoutIT ecosystem, leveraging market intelligence to make informed decisions.
+              {publicProfile?.bio || "An active participant in the ScoutIT ecosystem, leveraging market intelligence to make informed decisions."}
             </p>
+
+            {publicProfile?.firm && userTags.includes("broker") && (
+              <p className="font-label-caps text-[11px] tracking-widest text-text-secondary uppercase mt-3">{publicProfile.firm}</p>
+            )}
+            {publicProfile?.service && userTags.includes("provider") && (
+              <p className="text-sm text-text-secondary mt-3">{publicProfile.service}</p>
+            )}
+
+            {isOwnProfile && (
+              <Link href="/settings" className="mt-6 inline-block font-working-title text-sm text-gold-accent border border-gold-accent/40 px-5 py-2 rounded-full hover:bg-gold-accent/10 transition-colors">
+                ✏️ Edit Public Card
+              </Link>
+            )}
           </div>
         </section>
 
