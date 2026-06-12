@@ -12,6 +12,7 @@ const OwnerMode = dynamic(() => import("../../components/dashboard/OwnerMode"), 
 const BrokerMode = dynamic(() => import("../../components/dashboard/BrokerMode"), { ssr: false });
 const BuyerMode = dynamic(() => import("../../components/dashboard/BuyerMode"), { ssr: false });
 const ProviderMode = dynamic(() => import("../../components/dashboard/ProviderMode"), { ssr: false });
+import Nudge from "../../components/ui/Nudge";
 
 const TAG_LABELS = {
   buyer: "Buyer / Scout",
@@ -108,6 +109,7 @@ export default function UnifiedDashboard() {
 
       {/* Main Content Area (Mode determined) */}
       <main className={styles.mainContent}>
+        <Nudge mode={mode} />
         {renderActiveMode()}
       </main>
 
