@@ -1410,10 +1410,13 @@ export default function Home() {
           height: 100vh;
           width: 100vw;
           overflow-y: scroll;
-          scroll-snap-type: y mandatory;
-          /* NOTE: no scroll-behavior:smooth here — combined with mandatory snap,
-             Chrome re-targets the smooth animation on every wheel tick and the
-             scroller can lock up / freeze rendering for 30s+. */
+          /* NOTE: snap must stay "proximity" and there must be NO
+             scroll-behavior:smooth here. With "mandatory" snap (and worse,
+             mandatory + smooth), every wheel tick during the snap animation
+             forces Chrome to restart it; combined with the hero canvas this
+             locked up rendering for 30s+. Proximity still settles sections
+             gently but lets free scrolling breathe. */
+          scroll-snap-type: y proximity;
           background: var(--bg);
           color: var(--text-primary);
         }
