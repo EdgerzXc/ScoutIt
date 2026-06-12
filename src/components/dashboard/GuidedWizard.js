@@ -86,7 +86,7 @@ export default function GuidedWizard({ onPublish, onClose }) {
 
           <div className="flex flex-col gap-2 mb-8">
             <label className="text-sm font-bold text-on-surface">Media Link (Google Drive / Dropbox)</label>
-            <div className="bg-[#fff3cd] text-[#856404] p-3 rounded text-sm mb-2">
+            <div className="bg-gold-accent/10 border border-gold-accent/30 text-gold-accent p-3 rounded text-sm mb-2">
               ⚠️ Ensure folder permissions are set to "Anyone with the link can view".
             </div>
             <input 
@@ -181,6 +181,7 @@ export default function GuidedWizard({ onPublish, onClose }) {
               <button className="flex-1 bg-gold-accent text-background font-working-title text-base font-bold py-4 px-6 rounded hover:opacity-90 transition-all disabled:opacity-50" disabled={!formData.price} onClick={nextStep}>Continue →</button>
               <button className="flex-1 bg-surface border border-surface-variant text-on-surface font-working-title text-base font-bold py-4 px-6 rounded hover:bg-surface-container transition-colors" onClick={nextStep}>Skip</button>
             </div>
+            <p className="text-xs text-text-muted mt-4">Skipping is fine — but it lowers your completeness score, and brokers prioritize complete listings.</p>
           </div>
         )}
 
@@ -225,6 +226,7 @@ export default function GuidedWizard({ onPublish, onClose }) {
               <button className="flex-1 bg-gold-accent text-background font-working-title text-base font-bold py-4 px-6 rounded hover:opacity-90 transition-all disabled:opacity-50" disabled={formData.description.length < 10} onClick={nextStep}>Continue →</button>
               <button className="flex-1 bg-surface border border-surface-variant text-on-surface font-working-title text-base font-bold py-4 px-6 rounded hover:bg-surface-container transition-colors" onClick={nextStep}>Skip</button>
             </div>
+            <p className="text-xs text-text-muted mt-4">Without a description, your listing ranks lower in broker feeds.</p>
           </div>
         )}
 
@@ -237,8 +239,11 @@ export default function GuidedWizard({ onPublish, onClose }) {
             >
               <div className="text-5xl">{formData.verified ? "✅" : "📑"}</div>
               <div className={`font-working-title text-lg ${formData.verified ? 'text-gold-accent' : 'text-on-surface'}`}>
-                {formData.verified ? "Docs Attached" : "Tap to simulate title upload"}
+                {formData.verified ? "Documents attached" : "Tap to attach your title or tax declaration"}
               </div>
+              {!formData.verified && (
+                <p className="text-sm text-text-secondary">A clear photo is fine. Verified listings earn a ✔ badge and rank higher.</p>
+              )}
             </div>
             <div className="flex gap-4">
               <button className="flex-1 bg-gold-accent text-background font-working-title text-base font-bold py-4 px-6 rounded hover:opacity-90 transition-all disabled:opacity-50" disabled={!formData.verified} onClick={nextStep}>Continue →</button>

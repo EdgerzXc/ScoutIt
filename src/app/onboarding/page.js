@@ -73,13 +73,14 @@ export default function OnboardingPage() {
             value={formData.password}
             onChange={e => setFormData({...formData, password: e.target.value})}
           />
+          <span className="text-xs text-text-secondary">At least 8 characters.</span>
         </div>
       </div>
       
       <button 
         className="w-full bg-gold-accent text-background font-working-title text-base font-bold py-4 px-6 rounded hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed" 
         onClick={nextStep}
-        disabled={!formData.name || !formData.email || !formData.password}
+        disabled={!formData.name || !formData.email.includes("@") || formData.password.length < 8}
       >
         Continue with Email →
       </button>
@@ -281,7 +282,7 @@ export default function OnboardingPage() {
               <h3 className="font-working-title text-xl text-on-surface mb-2">Ready to list your property?</h3>
               <p className="text-text-secondary text-sm mb-6">You can set up your asset profile now, or explore the dashboard first.</p>
               <div className="flex flex-col gap-3">
-                <button className="w-full bg-gold-accent text-background font-working-title text-base font-bold py-3 px-6 rounded hover:opacity-90 transition-opacity" onClick={() => completeOnboarding()}>List Property Now</button>
+                <button className="w-full bg-gold-accent text-background font-working-title text-base font-bold py-3 px-6 rounded hover:opacity-90 transition-opacity" onClick={() => { localStorage.setItem("scoutit_open_wizard", "1"); completeOnboarding(); }}>List Property Now</button>
                 <button className="w-full bg-surface border border-surface-variant text-on-surface font-working-title text-base font-bold py-3 px-6 rounded hover:bg-surface-container transition-colors" onClick={() => completeOnboarding()}>I'll do it later</button>
               </div>
             </>

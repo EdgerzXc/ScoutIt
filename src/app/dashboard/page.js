@@ -198,7 +198,8 @@ function DashboardInner() {
 
           {/* Desktop User Menu (Hidden on mobile) */}
           <div className="hidden md:flex items-center gap-3">
-            <Link href={`/profile/${encodeURIComponent(user.name)}`} className="w-8 h-8 rounded-full bg-surface-variant border border-surface-variant flex items-center justify-center font-working-title text-sm font-bold text-on-surface hover:border-gold-accent transition-colors">
+            <Link href="/settings" title="Account Settings" className="text-lg text-text-secondary hover:text-on-surface transition-colors">⚙️</Link>
+            <Link href={`/profile/${encodeURIComponent(user.name)}`} title="View Public Profile" className="w-8 h-8 rounded-full bg-surface-variant border border-surface-variant flex items-center justify-center font-working-title text-sm font-bold text-on-surface hover:border-gold-accent transition-colors">
               {user.name ? user.name.substring(0,2).toUpperCase() : 'U'}
             </Link>
           </div>

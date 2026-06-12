@@ -6,7 +6,8 @@ import { useDashboard } from "../../context/DashboardContext";
 import Link from "next/link";
 
 export default function OwnerMode() {
-  const { listings, pitches, updatePitchStatus, addListing } = useDashboard();
+  const { listings, pitches, updatePitchStatus, addListing, currentUser } = useDashboard();
+  const firstName = currentUser?.name ? currentUser.name.split(" ")[0] : "";
   const [showWizard, setShowWizard] = useState(false);
   const [activeListingId, setActiveListingId] = useState(null);
 
@@ -32,6 +33,14 @@ export default function OwnerMode() {
     return () => window.removeEventListener("scoutit:primary-action", onPrimary);
   }, []);
 
+  // "List Property Now" from onboarding lands straight in the wizard
+  useEffect(() => {
+    if (localStorage.getItem("scoutit_open_wizard") === "1") {
+      localStorage.removeItem("scoutit_open_wizard");
+      setShowWizard(true);
+    }
+  }, []);
+
   // Filter pitches that are directed at the owner and specific to the active listing
   const incomingPitches = activeListing 
     ? pitches.filter(p => p.isCurrentUserOwner && p.status === 'pending' && p.listingId === activeListing.id)
@@ -51,7 +60,7 @@ export default function OwnerMode() {
       {/* Column 1: Status & Stats */}
       <div className="md:col-span-5 flex flex-col gap-gutter">
         <div className="mb-sm">
-          <h1 className="font-display-md text-display-md text-text-primary">Welcome Back</h1>
+          <h1 className="font-display-md text-display-md text-text-primary">{firstName ? `Welcome back, ${firstName}` : "Welcome back"}</h1>
           <p className="text-text-secondary font-body-md text-body-md">Manage your property portfolio.</p>
         </div>
         
@@ -121,11 +130,12 @@ export default function OwnerMode() {
                 <div className="grid grid-cols-2 gap-sm mt-4 border-t border-surface-variant pt-6">
                   <div>
                     <span className="block font-label-caps text-[10px] tracking-widest text-text-secondary mb-1 uppercase">Days on Market</span>
-                    <span className="font-data-tabular text-2xl text-text-primary font-bold">1</span>
+                    <span className="font-data-tabular text-2xl text-text-primary font-bold">&lt;1</span>
                   </div>
                   <div>
                     <span className="block font-label-caps text-[10px] tracking-widest text-text-secondary mb-1 uppercase">Profile Views</span>
-                    <span className="font-data-tabular text-2xl text-text-primary font-bold">12</span>
+                    <span className="font-data-tabular text-2xl text-text-primary font-bold">New</span>
+                    <span className="block text-[10px] text-text-secondary mt-0.5">First numbers within 24 hrs</span>
                   </div>
                 </div>
                 <Link href={`/property/${activeListing.id}`} className="mt-6 w-full border-2 border-gold-accent text-gold-accent bg-transparent hover:bg-gold-accent/10 font-working-title font-bold py-4 rounded transition-colors text-base text-center block">
@@ -140,17 +150,18 @@ export default function OwnerMode() {
                 <div className="flex flex-col gap-2">
                   <div className="flex justify-between items-center py-3 border-b border-surface-alt">
                     <span className="font-body-md text-text-primary">Saved to Favorites</span>
-                    <span className="font-data-tabular text-lg font-bold text-gold-accent">3</span>
+                    <span className="font-data-tabular text-lg font-bold text-gold-accent">—</span>
                   </div>
                   <div className="flex justify-between items-center py-3 border-b border-surface-alt">
-                    <span className="font-body-md text-text-primary">Inquiries Received</span>
+                    <span className="font-body-md text-text-primary">Pitches Received</span>
                     <span className="font-data-tabular text-lg font-bold text-gold-accent">{incomingPitches.length}</span>
                   </div>
                   <div className="flex justify-between items-center py-3">
-                    <span className="font-body-md text-text-primary">Average Time on Page</span>
-                    <span className="font-data-tabular text-lg font-bold text-gold-accent">1m 10s</span>
+                    <span className="font-body-md text-text-primary">Broker Interest</span>
+                    <span className="font-data-tabular text-lg font-bold text-gold-accent">{incomingPitches.length > 0 ? "Active" : "Building"}</span>
                   </div>
                 </div>
+                <p className="text-[11px] text-text-secondary mt-3">Stats update daily once your listing is live.</p>
               </div>
             )}
           </>
