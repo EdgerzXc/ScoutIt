@@ -2,6 +2,7 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Lock } from "lucide-react";
 import ServiceConnectionPortal from "@/components/connection/ServiceConnectionPortal";
 import { DetailPageAccessGate } from "@/components/ui/EarlyAccessGate";
 import { getPhotographers } from "@/data/mockPhotographers";
@@ -57,7 +58,7 @@ export default async function PhotographerDetailPage({ params }) {
             </div>
 
             <div className="detail-closures-box">
-              <span className="icon-badge">🔒 SECURE CREATOR LINK</span>
+              <span className="icon-badge"><Lock size={12} strokeWidth={1.5} style={{verticalAlign:"-2px", marginRight:"4px"}} />SECURE CREATOR LINK</span>
               <p>{ph.shoots}</p>
             </div>
           </div>

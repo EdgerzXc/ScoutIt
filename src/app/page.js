@@ -9,6 +9,7 @@ import ProfileButton from "@/components/ui/ProfileButton";
 import BoardPodium from "@/components/board/BoardPodium";
 import CinematicJourney from "@/components/cinematic/CinematicJourney";
 import Footer from "@/components/layout/Footer";
+import { Building2, Camera, Search, CalendarDays } from "lucide-react";
 
 // Scrollytelling manifesto — lazy-loaded so it costs the homepage nothing
 // until the UFO is clicked.
@@ -1188,7 +1189,7 @@ export default function Home() {
           <div className="services-grid">
             <Link href="/brokers" className="service-card live-card">
               <div className="service-card-inner">
-                <div className="service-icon-wrapper">🏢</div>
+                <div className="service-icon-wrapper"><Building2 strokeWidth={1.5} size="1em" /></div>
                 <div className="service-status-badge live-badge">LIVE</div>
                 <h3 className="service-title">Verified Advisors</h3>
                 <p className="service-desc">Licensed real estate professionals who guide you through viewing, negotiating, and closing.</p>
@@ -1198,7 +1199,7 @@ export default function Home() {
 
             <Link href="/photographers" className="service-card coming-soon-card">
               <div className="service-card-inner">
-                <div className="service-icon-wrapper">📸</div>
+                <div className="service-icon-wrapper"><Camera strokeWidth={1.5} size="1em" /></div>
                 <div className="service-status-badge soon-badge">COMING SOON</div>
                 <h3 className="service-title">Space Photography</h3>
                 <p className="service-desc">Interior and architectural photographers who make every space look the way it deserves to.</p>
@@ -1208,7 +1209,7 @@ export default function Home() {
 
             <Link href="/researchers" className="service-card coming-soon-card">
               <div className="service-card-inner">
-                <div className="service-icon-wrapper">🔍</div>
+                <div className="service-icon-wrapper"><Search strokeWidth={1.5} size="1em" /></div>
                 <div className="service-status-badge soon-badge">COMING SOON</div>
                 <h3 className="service-title">Site Research</h3>
                 <p className="service-desc">On-the-ground research, market data, and neighborhood profiles before you commit.</p>
@@ -1218,7 +1219,7 @@ export default function Home() {
 
             <Link href="/event-planners" className="service-card coming-soon-card">
               <div className="service-card-inner">
-                <div className="service-icon-wrapper">🎪</div>
+                <div className="service-icon-wrapper"><CalendarDays strokeWidth={1.5} size="1em" /></div>
                 <div className="service-status-badge soon-badge">COMING SOON</div>
                 <h3 className="service-title">Event Design</h3>
                 <p className="service-desc">Planners, stylists, and designers who turn great spaces into great events.</p>

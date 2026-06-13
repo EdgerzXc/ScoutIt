@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect } from "react";
 import { supabase } from "../lib/supabaseClient";
+import { Bookmark } from "lucide-react";
 
 const DashboardContext = createContext();
 
@@ -108,11 +109,11 @@ export function DashboardProvider({ children }) {
     const isSaved = savedIds.includes(item.id);
     if (isSaved) {
       setSavedIds(prev => prev.filter(id => id !== item.id));
-      addToast("Removed from your Intelligence Archive", "🔖");
+      addToast("Removed from your Intelligence Archive", <Bookmark strokeWidth={1.5} size="1em" />);
       await supabase.from('saved_intel').delete().eq('property_id', item.id);
     } else {
       setSavedIds(prev => [...prev, item.id]);
-      addToast("Saved to Intelligence Archive", "🔖");
+      addToast("Saved to Intelligence Archive", <Bookmark strokeWidth={1.5} size="1em" />);
       await supabase.from('saved_intel').insert([{ property_id: item.id }]);
     }
   };

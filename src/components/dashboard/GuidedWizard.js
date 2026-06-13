@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Building2 } from "lucide-react";
 
 const TOTAL_STEPS = 7;
 
@@ -312,7 +313,7 @@ export default function GuidedWizard({ onPublish, onClose, initialData = null })
               {[
                 { id: 'house', icon: '🏠', label: 'House' },
                 { id: 'lot', icon: '🌳', label: 'Lot / Land' },
-                { id: 'condo', icon: '🏢', label: 'Condo / Apt' },
+                { id: 'condo', icon: <Building2 strokeWidth={1.5} size="1em" />, label: 'Condo / Apt' },
                 { id: 'commercial', icon: '🏬', label: 'Commercial' },
                 { id: 'other', icon: '🧩', label: 'Other' },
               ].map(t => (

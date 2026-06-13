@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useDashboard } from "../../context/DashboardContext";
+import { Bookmark, Search } from "lucide-react";
 
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
@@ -93,7 +94,9 @@ export default function BuyerMode() {
             toggleSave(item);
           }}
         >
-          {savedIds.includes(item.id) ? "🔖" : "📑"}
+          {savedIds.includes(item.id)
+            ? <Bookmark strokeWidth={1.5} size="1em" className="text-gold-accent" />
+            : <Bookmark strokeWidth={1.5} size="1em" className="text-text-secondary" />}
         </button>
       </div>
     </Link>
@@ -118,7 +121,9 @@ export default function BuyerMode() {
             toggleSave(item);
           }}
         >
-          {savedIds.includes(item.id) ? "🔖" : "📑"}
+          {savedIds.includes(item.id)
+            ? <Bookmark strokeWidth={1.5} size="1em" className="text-gold-accent" />
+            : <Bookmark strokeWidth={1.5} size="1em" className="text-text-secondary" />}
         </button>
       </div>
     </Link>
@@ -131,7 +136,7 @@ export default function BuyerMode() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-surface-variant pb-6">
         <div className="flex flex-col md:flex-row w-full md:w-auto gap-3 flex-1">
           <div className="relative w-full md:max-w-md">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary">🔍</span>
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary"><Search strokeWidth={1.5} size="1em" /></span>
             <input
               type="text"
               ref={searchRef}

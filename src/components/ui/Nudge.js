@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { Camera } from "lucide-react";
 
 // Hardcoded logic rules per Section 8
 const NUDGE_CONTENT = {
@@ -23,7 +24,7 @@ const NUDGE_CONTENT = {
     action: "Get Intel"
   },
   provider: {
-    icon: "📸",
+    icon: <Camera strokeWidth={1.5} size="1em" />,
     title: "Expand Your Portfolio",
     desc: "You've hit the free portfolio limit. Upgrade to add unlimited media.",
     action: "Upgrade Plan"

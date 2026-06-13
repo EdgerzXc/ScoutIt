@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useDashboard } from "../../context/DashboardContext";
 import Link from "next/link";
+import { Lock } from "lucide-react";
 
 export default function BrokerMode() {
   const { connects, listings, pitches, sendPitch, updatePitchStatus } = useDashboard();
@@ -136,7 +137,7 @@ export default function BrokerMode() {
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center py-6 text-center">
-                  <span className="text-3xl mb-3 opacity-50">🔒</span>
+                  <span className="text-3xl mb-3 opacity-50"><Lock strokeWidth={1.5} size="1em" /></span>
                   <p className="text-sm text-text-secondary">Owner contact details are locked. They will be revealed immediately if the owner accepts your pitch.</p>
                   <div className="w-full mt-4 bg-surface-alt p-3 rounded text-left">
                      <span className="block text-[10px] text-text-secondary uppercase tracking-widest mb-1">Public Metrics</span>

@@ -13,6 +13,7 @@ const BuyerMode = dynamic(() => import("../../components/dashboard/BuyerMode"), 
 const ProviderMode = dynamic(() => import("../../components/dashboard/ProviderMode"), { ssr: false });
 import Nudge from "../../components/ui/Nudge";
 import Toasts from "../../components/ui/Toasts";
+import { Camera, Search, Bookmark } from "lucide-react";
 
 const TAG_LABELS = {
   buyer: "Buyer / Scout",
@@ -27,7 +28,7 @@ const ACTIVATABLE_MODES = [
   { id: "buyer", icon: "🏠", cta: "Scout Properties", desc: "Browse, save listings, and get market intel." },
   { id: "owner", icon: "📋", cta: "List as an Owner", desc: "List your property and receive broker pitches." },
   { id: "broker", icon: "🤝", cta: "Become a Broker", desc: "Pitch owners and manage your pipeline. PRC license required." },
-  { id: "provider", icon: "📸", cta: "Join as a Service Provider", desc: "Photographer, researcher, or event designer." },
+  { id: "provider", icon: <Camera strokeWidth={1.5} size="1em" />, cta: "Join as a Service Provider", desc: "Photographer, researcher, or event designer." },
 ];
 
 const PROVIDER_TYPES = [
@@ -137,8 +138,8 @@ function DashboardInner() {
   const PRIMARY_ACTIONS = {
     owner: { icon: "+", label: "List" },
     broker: { icon: "⚡", label: "Pitch" },
-    buyer: { icon: "🔍", label: "Scout" },
-    exploring: { icon: "🔍", label: "Scout" },
+    buyer: { icon: <Search strokeWidth={1.5} size="1em" />, label: "Scout" },
+    exploring: { icon: <Search strokeWidth={1.5} size="1em" />, label: "Scout" },
     provider: { icon: "🖼️", label: "Portfolio" },
   };
   const primaryAction = PRIMARY_ACTIONS[mode] || { icon: "●", label: "" };
@@ -302,7 +303,7 @@ function DashboardInner() {
           <span className="text-[10px] font-working-title font-bold">Home</span>
         </button>
         <Link href="/discover" className="flex flex-col items-center gap-1 text-text-secondary hover:text-on-surface transition-colors">
-          <span className="text-xl">🔍</span>
+          <span className="text-xl"><Search strokeWidth={1.5} size="1em" /></span>
           <span className="text-[10px] font-working-title">Search</span>
         </Link>
         <button
@@ -316,7 +317,7 @@ function DashboardInner() {
           <span className="text-[10px] font-working-title text-gold-accent font-bold mt-0.5">{primaryAction.label}</span>
         </button>
         <Link href="/wishlist" className="flex flex-col items-center gap-1 text-text-secondary hover:text-on-surface transition-colors">
-          <span className="text-xl">🔖</span>
+          <span className="text-xl"><Bookmark strokeWidth={1.5} size="1em" /></span>
           <span className="text-[10px] font-working-title">Saved</span>
         </Link>
         <button 

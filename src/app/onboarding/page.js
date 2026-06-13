@@ -3,13 +3,14 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Camera, Search } from "lucide-react";
 
 const TAGS = [
   { id: "buyer", icon: "🏠", title: "Looking to Buy or Rent", desc: "Browse, save, and get deep spatial intelligence." },
   { id: "owner", icon: "📋", title: "I Own Property", desc: "List spaces, manage assets, and receive broker pitches." },
   { id: "broker", icon: "🤝", title: "I'm a Licensed Broker / Agent", desc: "Pitch owners, manage listings, and curate leads." },
-  { id: "provider", icon: "📸", title: "I'm a Service Provider", desc: "Architectural photos, spatial research, or event design." },
-  { id: "exploring", icon: "🔍", title: "Just Exploring", desc: "I want to see what's out there." }
+  { id: "provider", icon: <Camera strokeWidth={1.5} size="1em" />, title: "I'm a Service Provider", desc: "Architectural photos, spatial research, or event design." },
+  { id: "exploring", icon: <Search strokeWidth={1.5} size="1em" />, title: "Just Exploring", desc: "I want to see what's out there." }
 ];
 
 const PROVIDER_SUBTAGS = [

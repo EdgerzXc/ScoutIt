@@ -6,6 +6,7 @@ import ReactionButtons from "@/components/ui/ReactionButtons";
 import InteractiveMap from "@/components/property/InteractiveMap";
 import "@/app/property/[id]/property-detail.css";
 import { getChapterConfig } from "./chapterConfig";
+import { Bed, Bath, Ruler, Car, Lock, Search, Camera, Building2 } from "lucide-react";
 
 // ═══════════════════════════════════════════════════
 // DATA — Airtable CMS first, mockDb fallback
@@ -282,8 +283,8 @@ export default function ResidentialScrollytelling({ slug }) {
   }
 
   // Emoji icons for the Chapter 1 editorial stat block
-  let pill1Emoji = "🛏";
-  let pill2Emoji = "🚿";
+  let pill1Emoji = <Bed size={24} strokeWidth={1.5} style={{color:"#f0ede8"}} />;
+  let pill2Emoji = <Bath size={24} strokeWidth={1.5} style={{color:"#f0ede8"}} />;
   if (isRestaurant)      { pill1Emoji = "🍽"; pill2Emoji = "🔪"; }
   else if (isHospitality){ pill1Emoji = "🛎"; pill2Emoji = "👥"; }
   else if (isVenue)      { pill1Emoji = "👥"; pill2Emoji = "🎚"; }
@@ -910,8 +911,8 @@ export default function ResidentialScrollytelling({ slug }) {
                 {[
                   pill1Val && pill1Val !== 0 ? { icon: pill1Emoji, val: pill1Val, label: pill1Label } : null,
                   pill2Val && pill2Val !== 0 ? { icon: pill2Emoji, val: pill2Val, label: pill2Label } : null,
-                  d.floor_sqm > 0 ? { icon: "📐", val: d.floor_sqm, label: "sqm floor" } : null,
-                  d.parking > 0 ? { icon: "🚗", val: d.parking, label: "Parking Slots" } : null,
+                  d.floor_sqm > 0 ? { icon: <Ruler size={24} strokeWidth={1.5} style={{color:"#f0ede8"}} />, val: d.floor_sqm, label: "sqm floor" } : null,
+                  d.parking > 0 ? { icon: <Car size={24} strokeWidth={1.5} style={{color:"#f0ede8"}} />, val: d.parking, label: "Parking Slots" } : null,
                   d.lot_sqm > 0 ? { icon: "🌿", val: d.lot_sqm, label: "Lot sqm" } : null,
                 ].filter(Boolean).map((stat, i) => (
                   <div key={i} className="property-feature-item">
@@ -1412,7 +1413,7 @@ export default function ResidentialScrollytelling({ slug }) {
                 </div>
                 <div style={{position:"absolute", inset:0, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:"16px", background:"rgba(22,22,22,0.9)"}}>
                   <div style={{display:"flex", alignItems:"center", gap:"8px"}}>
-                    <span style={{fontSize:"15px"}}>🔒</span>
+                    <Lock size={15} strokeWidth={1.5} style={{color:"#ffb800", flexShrink:0}} />
                     <span style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#ffb800", letterSpacing:"0.25em", textTransform:"uppercase"}}>Market Intelligence · Locked</span>
                   </div>
                   <button style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#0e0e0e", background:"#ffb800", border:"none", padding:"11px 28px", borderRadius:"4px", cursor:"pointer", letterSpacing:"0.03em"}}>
@@ -1424,8 +1425,8 @@ export default function ResidentialScrollytelling({ slug }) {
             </div>
 
             <div className="panel-sidebar">
-              <div className="sidebar-block"><div className="sidebar-accent-line" style={{background:"#ffb800"}}/><div className="sidebar-label">Cap rate est.</div><div className="sidebar-value" style={{color:"#c8c8c8"}}>🔒 Locked</div></div>
-              <div className="sidebar-block"><div className="sidebar-label">Price trend</div><div className="sidebar-value" style={{color:"#c8c8c8"}}>🔒 Locked</div></div>
+              <div className="sidebar-block"><div className="sidebar-accent-line" style={{background:"#ffb800"}}/><div className="sidebar-label">Cap rate est.</div><div className="sidebar-value" style={{color:"#c8c8c8"}}><Lock size={13} strokeWidth={1.5} style={{verticalAlign:"-2px", marginRight:"5px"}} />Locked</div></div>
+              <div className="sidebar-block"><div className="sidebar-label">Price trend</div><div className="sidebar-value" style={{color:"#c8c8c8"}}><Lock size={13} strokeWidth={1.5} style={{verticalAlign:"-2px", marginRight:"5px"}} />Locked</div></div>
               <div className="sidebar-block"><div className="sidebar-label">Intel source</div><div className="sidebar-value">ScoutIt Verified</div></div>
             </div>
           </div>
@@ -1620,9 +1621,9 @@ export default function ResidentialScrollytelling({ slug }) {
                 {[
                   { icon:"🗺️", title:"Curated 3D Map",     desc:"Get a spatial 3D rendering of this property.",            href:"/photographers" },
                   { icon:"🎨", title:"Pre-Design Concept",  desc:"See this space redesigned to your preferences.",          href:"/event-planners" },
-                  { icon:"🔍", title:"Site Research",       desc:"Commission a full due-diligence report on this property.", href:"/researchers" },
-                  { icon:"📸", title:"Space Photography",   desc:"Get professional architectural photos taken.",            href:"/photographers" },
-                  { icon:"🏢", title:"Verified Advisor",    desc:"Connect with an authorized space intelligence advisor.",  href:"/brokers" },
+                  { icon:<Search size={22} strokeWidth={1.5} style={{color:"#f0ede8"}} />, title:"Site Research",       desc:"Commission a full due-diligence report on this property.", href:"/researchers" },
+                  { icon:<Camera size={22} strokeWidth={1.5} style={{color:"#f0ede8"}} />, title:"Space Photography",   desc:"Get professional architectural photos taken.",            href:"/photographers" },
+                  { icon:<Building2 size={22} strokeWidth={1.5} style={{color:"#f0ede8"}} />, title:"Verified Advisor",    desc:"Connect with an authorized space intelligence advisor.",  href:"/brokers" },
                 ].map(svc => (
                   <Link
                     key={svc.title}

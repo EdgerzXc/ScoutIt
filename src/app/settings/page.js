@@ -4,12 +4,13 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import styles from "./page.module.css";
+import { Camera, Search } from "lucide-react";
 
 const INTENT_TAGS = [
-  { id: 'buyer', label: 'Looking to Buy/Rent', icon: '🔍' },
+  { id: 'buyer', label: 'Looking to Buy/Rent', icon: <Search strokeWidth={1.5} size="1em" /> },
   { id: 'owner', label: 'I Own Property', icon: '📋' },
   { id: 'broker', label: 'Licensed Broker', icon: '🤝' },
-  { id: 'provider', label: 'Service Provider', icon: '📸' }
+  { id: 'provider', label: 'Service Provider', icon: <Camera strokeWidth={1.5} size="1em" /> }
 ];
 
 export default function SettingsPage() {

@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { Bookmark, Sparkles, Target, Heart } from "lucide-react";
 
 const REACTION_SHAPES = {
   "Save": {
     label: "Save",
-    symbol: "🔖",
+    symbol: <Bookmark strokeWidth={1.5} size="1em" />,
     svg: (
       <svg viewBox="0 0 80 90" xmlns="http://www.w3.org/2000/svg">
         <path d="M10,0 L70,0 L70,90 L40,65 L10,90 Z" />
@@ -14,7 +15,7 @@ const REACTION_SHAPES = {
   },
   "Inspired Me": {
     label: "Inspired Me",
-    symbol: "✦",
+    symbol: <Sparkles strokeWidth={1.5} size="1em" />,
     svg: (
       <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
         <polygon points="50,5 61,35 95,35 68,57 79,91 50,70 21,91 32,57 5,35 39,35" />
@@ -23,7 +24,7 @@ const REACTION_SHAPES = {
   },
   "Potential Fit": {
     label: "Potential Fit",
-    symbol: "◎",
+    symbol: <Target strokeWidth={1.5} size="1em" />,
     svg: (
       <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
         <polygon points="50,5 93,27.5 93,72.5 50,95 7,72.5 7,27.5" />
@@ -32,7 +33,7 @@ const REACTION_SHAPES = {
   },
   "Interested": {
     label: "Interested",
-    symbol: "♡",
+    symbol: <Heart strokeWidth={1.5} size="1em" />,
     svg: (
       <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
         <path d="M50,85 C50,85 10,55 10,30 C10,15 22,5 35,5 C42,5 48,9 50,13 C52,9 58,5 65,5 C78,5 90,15 90,30 C90,55 50,85 50,85 Z" />
