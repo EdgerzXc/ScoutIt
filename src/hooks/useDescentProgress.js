@@ -1,54 +1,69 @@
-"use client";
+'use client'
+import { useEffect, useRef } from 'react'
 
-import { useEffect, useRef } from "react";
-
-function clamp(v, a, b) {
-  return v < a ? a : v > b ? b : v;
-}
-
-/**
- * useDescentProgress
- * 
- * Injects a local `--sp` CSS variable (0.0 to 1.0) onto the component's root node
- * representing its descent progress through the viewport.
- * 
- * --sp = 0 (Element is just entering the bottom of the viewport)
- * --sp = 1 (Element is fully scrolled past the top)
- */
 export default function useDescentProgress() {
-  const sectionRef = useRef(null);
+  const sectionRef = useRef(null)
 
   useEffect(() => {
-    const container = document.querySelector('.cinematic-container');
-    if (!container) return;
-    
-    const section = sectionRef.current;
-    if (!section) return;
+    if (!sectionRef.current) return
 
-    // Respect reduced motion
-    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (prefersReducedMotion) {
-      section.style.setProperty("--sp", 1);
-      return;
+    const section = sectionRef.current
+
+    const calculate = () => {
+      // Try cinematic-container first, fall back to window/document
+      const container = document.querySelector('.cinematic-container')
+      
+      let scrollTop, viewportHeight, totalScroll
+      
+      if (container && container.scrollHeight > container.clientHeight) {
+        // Container is the scroller
+        scrollTop = container.scrollTop
+        viewportHeight = container.clientHeight
+      } else {
+        // Body/window is the scroller
+        scrollTop = window.scrollY || document.documentElement.scrollTop
+        viewportHeight = window.innerHeight
+      }
+
+      const rect = section.getBoundingClientRect()
+      
+      // Progress from 0 (section just entered viewport top) 
+      // to 1 (section has fully scrolled through)
+      const progress = Math.max(0, Math.min(1,
+        1 - (rect.bottom / viewportHeight)
+      ))
+
+      section.style.setProperty('--sp', progress.toFixed(4))
     }
 
-    const handleScroll = () => {
-      const containerRect = container.getBoundingClientRect();
-      const sectionRect = section.getBoundingClientRect();
-      
-      // How far into the section we've scrolled (0 = just entered, 1 = leaving)
-      const progress = Math.max(0, Math.min(1,
-        1 - (sectionRect.bottom - containerRect.top) / containerRect.height
-      ));
-      
-      section.style.setProperty('--sp', progress.toFixed(4));
-    };
-
-    container.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll(); // run once on mount
+    // Attach to BOTH possible scroll targets
+    const container = document.querySelector('.cinematic-container')
     
-    return () => container.removeEventListener('scroll', handleScroll);
-  }, []);
+    window.addEventListener('scroll', calculate, { passive: true })
+    document.addEventListener('scroll', calculate, { passive: true })
+    if (container) {
+      container.addEventListener('scroll', calculate, { passive: true })
+    }
 
-  return sectionRef;
+    // Also use IntersectionObserver as a backup trigger
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(() => calculate())
+      },
+      { threshold: Array.from({length: 21}, (_, i) => i * 0.05) }
+    )
+    observer.observe(section)
+
+    // Run immediately
+    calculate()
+
+    return () => {
+      window.removeEventListener('scroll', calculate)
+      document.removeEventListener('scroll', calculate)
+      if (container) container.removeEventListener('scroll', calculate)
+      observer.disconnect()
+    }
+  }, [])
+
+  return sectionRef
 }
