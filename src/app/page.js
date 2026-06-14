@@ -2452,8 +2452,10 @@ export default function Home() {
         .property-menu {
           width: 22%;
           min-width: 280px;
-          background: var(--surface);
-          border-right: 1px solid var(--border-solid);
+          background: rgba(10, 10, 10, 0.65);
+          backdrop-filter: blur(15px);
+          -webkit-backdrop-filter: blur(15px);
+          border-right: 1px solid rgba(255, 255, 255, 0.05);
           display: flex;
           flex-direction: column;
           justify-content: space-between;
@@ -2531,7 +2533,9 @@ export default function Home() {
 
         .matrix-preview-pane {
           flex: 1;
-          background: #121212;
+          background: rgba(18, 18, 18, 0.4);
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
           padding: 120px 48px;
           display: flex;
           flex-direction: column;
