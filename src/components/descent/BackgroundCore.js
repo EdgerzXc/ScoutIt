@@ -6,32 +6,44 @@ import { useEffect, useState } from "react";
 export default function BackgroundCore() {
   return (
     <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none" style={{ zIndex: 0 }}>
+      {/* Base black */}
       <div className="absolute inset-0 bg-[#000000]" />
 
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes corePulse {
+          0% { opacity: 0.5; }
+          50% { opacity: 0.8; }
+          100% { opacity: 0.5; }
+        }
+      `}} />
+
       {/* The Core Radiant Gradient Background */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        {/* Molten Outer Core Glow */}
+      <div 
+        className="absolute inset-0 flex items-center justify-center"
+        style={{
+          transform: `scale(calc(1 + var(--sp) * 0.3))`
+        }}
+      >
+        {/* Center Glow (Pulsing Heat) */}
         <div 
-          className="absolute bg-[#FFB800] rounded-full blur-[120px]"
+          className="absolute inset-0"
           style={{
-            opacity: 0.5,
-            width: `calc(40vw + var(--sp) * 40vw)`,
-            height: `calc(40vw + var(--sp) * 40vw)`,
-            transform: `scale(calc(1 + sin(var(--sp) * 3.1415)))`
+            animation: 'corePulse 3s ease-in-out infinite',
+            background: 'radial-gradient(circle at center, rgba(255,140,0,0.6) 0%, rgba(255,80,0,0.2) 40%, transparent 70%)'
           }}
         />
-        {/* Inner Core Solid Shadow */}
+
+        {/* Second Ring (Mix Blend Screen) */}
         <div 
-          className="absolute bg-[#050505] rounded-full shadow-[inset_0_0_100px_#000]"
+          className="absolute inset-0 mix-blend-screen"
           style={{
-            width: `calc(20vw + var(--sp) * 20vw)`,
-            height: `calc(20vw + var(--sp) * 20vw)`,
-            opacity: `calc(var(--sp) * 0.8)`
+            background: 'radial-gradient(circle at center, rgba(255,184,0,0.3) 0%, transparent 50%)'
           }}
         />
       </div>
 
-      <div className="absolute top-0 inset-x-0 h-40 bg-gradient-to-b from-[#000000] to-transparent" />
+      <div className="absolute top-0 inset-x-0 h-40 bg-gradient-to-b from-[#000000] to-transparent z-10" />
+      <div className="absolute bottom-0 inset-x-0 h-40 bg-gradient-to-t from-[#000000] to-transparent z-10" />
     </div>
   );
 }

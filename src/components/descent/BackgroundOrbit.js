@@ -45,66 +45,77 @@ export default function BackgroundOrbit() {
       const cy = h / 2;
 
       ctx.save();
-      ctx.translate(cx, cy);
-      
-      ctx.rotate(sp * 0.2); // Slower, more majestic rotation
 
-      // As we descend, stars fly UP past the camera (Z decreases)
-      const speedOffset = sp * 2000; 
-
+      // --- 1. STARS ---
+      // 150 stars scattered in upper 70% of canvas
       stars.forEach(star => {
-        let z = star.z - speedOffset;
+        let z = star.z - (sp * 500); // slight forward movement
         while (z <= 0) z += 2000;
         
         const perspective = 800 / z;
-        const px = star.x * perspective;
-        const py = star.y * perspective;
+        const px = cx + star.x * perspective;
+        const py = (h * 0.35) + star.y * perspective; // bias towards upper canvas
         const pSize = star.size * perspective;
 
-        if (px > -cx && px < cx && py > -cy && py < cy) {
+        if (px > 0 && px < w && py > 0 && py < h * 0.7) { // limit to upper 70%
           ctx.beginPath();
           ctx.arc(px, py, Math.max(0.1, pSize), 0, Math.PI * 2);
-          if (Math.random() > 0.9) {
-            ctx.fillStyle = `rgba(255, 184, 0, ${star.opacity})`;
-          } else {
-            ctx.fillStyle = `rgba(255, 255, 255, ${star.opacity})`;
-          }
+          ctx.fillStyle = `rgba(255, 255, 255, ${star.opacity})`;
           ctx.fill();
         }
       });
 
-      // We are descending towards Earth.
-      // Earth starts far below the frame and moves UP into view, getting LARGER.
-      const scale = 1 + sp * 1.5; // Earth scales up by 250% as we get closer
-      const earthRadius = Math.min(w, h) * 0.9 * scale;
-      
-      // Start Earth low, move it UP (negative Y direction) as sp increases
-      const startY = h * 1.2; // Starts 1.2x screen height below center
-      const endY = h * 0.4;   // Ends taking up bottom half of screen
-      const earthY = startY - (sp * (startY - endY)); 
-      
-      const earthGradient = ctx.createRadialGradient(0, earthY, earthRadius * 0.7, 0, earthY, earthRadius);
-      earthGradient.addColorStop(0, "rgba(25, 25, 30, 1)"); 
-      earthGradient.addColorStop(1, "rgba(10, 10, 15, 1)"); 
+      // --- 2. EARTH SPHERE ---
+      const earthRadius = Math.min(w, h) * 0.7;
+      // Start at h*1.1, rise up by 5% of height as sp increases
+      const earthY = (h * 1.1) - (sp * h * 0.05);
+
+      // Atmosphere Glow
+      const atmosRadius = earthRadius * 1.15;
+      const atmosGradient = ctx.createRadialGradient(cx, earthY, earthRadius * 0.9, cx, earthY, atmosRadius);
+      atmosGradient.addColorStop(0, "rgba(80,140,255,0.3)");
+      atmosGradient.addColorStop(1, "transparent");
       
       ctx.beginPath();
-      ctx.arc(0, earthY, earthRadius, 0, Math.PI * 2);
+      ctx.arc(cx, earthY, atmosRadius, 0, Math.PI * 2);
+      ctx.fillStyle = atmosGradient;
+      ctx.fill();
+
+      // Earth Body
+      const earthGradient = ctx.createRadialGradient(cx, earthY, 0, cx, earthY, earthRadius);
+      earthGradient.addColorStop(0, "rgba(30,80,180,0.9)");
+      earthGradient.addColorStop(1, "rgba(10,30,80,0.4)");
+      
+      ctx.beginPath();
+      ctx.arc(cx, earthY, earthRadius, 0, Math.PI * 2);
       ctx.fillStyle = earthGradient;
       ctx.fill();
-      
-      ctx.lineWidth = 25 * scale;
-      ctx.strokeStyle = "rgba(100, 150, 255, 0.3)";
-      ctx.stroke();
 
-      ctx.lineWidth = 8 * scale;
-      ctx.strokeStyle = "rgba(100, 180, 255, 0.8)";
-      ctx.stroke();
-
+      // Terminator Line (Day/Night boundary suggestion)
       ctx.beginPath();
-      ctx.ellipse(0, earthY, earthRadius * 1.2, earthRadius * 0.3, Math.PI * 0.05, 0, Math.PI * 2);
-      ctx.lineWidth = 1.5 * scale;
-      ctx.strokeStyle = "rgba(255, 184, 0, 0.6)";
+      ctx.arc(cx, earthY, earthRadius, Math.PI * 1.1, Math.PI * 1.9); // Top arc
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = "rgba(255,200,100,0.4)";
       ctx.stroke();
+
+      // City Lights (40-60 dots scattered on the top half of the sphere)
+      // We'll generate pseudo-random points based on the radius
+      ctx.fillStyle = "rgba(255,220,100,0.7)";
+      for (let i = 0; i < 50; i++) {
+        // pseudo-random deterministic positions so they don't flicker
+        const angle = (i * 137.5) * Math.PI / 180; 
+        const r = earthRadius * ((i % 100) / 100) * 0.9; 
+        
+        const lx = cx + Math.cos(angle) * r;
+        const ly = earthY + Math.sin(angle) * r;
+
+        // Only draw if it's on the upper half of the globe
+        if (ly < earthY) {
+          ctx.beginPath();
+          ctx.arc(lx, ly, (i % 3) * 0.5 + 0.5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
 
       ctx.restore();
 

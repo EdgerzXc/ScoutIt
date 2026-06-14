@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 export default function BackgroundStratosphere() {
   return (
     <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none" style={{ zIndex: 0 }}>
-      <div className="absolute inset-0 bg-gradient-to-b from-[#05050a] via-[#0a1224] to-[#05050a]" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#05050a] via-[#081428] to-[#05050a]" />
 
       {/* Cloud layer 1: Slowest (Background) */}
       <div 
@@ -36,6 +36,38 @@ export default function BackgroundStratosphere() {
           opacity: 0.7,
           backgroundImage: 'radial-gradient(ellipse at 50% 80%, rgba(255,255,255,0.25) 0%, transparent 60%)',
           transform: `translateY(calc(var(--sp) * -60%))`, // Moves UP fastest
+        }}
+      />
+
+      {/* Cloud Streaks (Horizontal haze) */}
+      <div 
+        className="absolute inset-x-0 blur-md mix-blend-screen"
+        style={{
+          height: '60px',
+          top: '30%',
+          opacity: 0.15,
+          background: 'linear-gradient(to right, transparent, rgba(150,200,255,0.8), transparent)',
+          transform: `translateY(calc(var(--sp) * -30px))`,
+        }}
+      />
+      <div 
+        className="absolute inset-x-0 blur-lg mix-blend-screen"
+        style={{
+          height: '80px',
+          top: '55%',
+          opacity: 0.12,
+          background: 'linear-gradient(to right, transparent, rgba(200,220,255,0.6), transparent)',
+          transform: `translateY(calc(var(--sp) * -60px))`,
+        }}
+      />
+      <div 
+        className="absolute inset-x-0 blur-sm mix-blend-screen"
+        style={{
+          height: '40px',
+          top: '75%',
+          opacity: 0.2,
+          background: 'linear-gradient(to right, transparent, rgba(255,255,255,0.9), transparent)',
+          transform: `translateY(calc(var(--sp) * -90px))`,
         }}
       />
 

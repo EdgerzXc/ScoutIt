@@ -17,17 +17,23 @@ export default function BackgroundCrust() {
           transform: `translateY(calc(var(--sp) * -40%))`, // Negative translateY means it moves UP! This is correct for descending.
         }}
       >
-        {/* Strata Textures */}
-        <div className="absolute inset-x-0 top-0 h-[30%] bg-gradient-to-b from-[#151210] to-[#1a1614] border-b-[8px] border-[#2a2420]" />
-        <div className="absolute inset-x-0 top-[30%] h-[40%] bg-[#1a1614] border-b-[12px] border-[#110e0c]">
-          {/* Gold Veins */}
-          <svg className="absolute inset-0 w-full h-full" style={{ opacity: 0.4 }} preserveAspectRatio="none">
-            <path d="M0,50 Q200,100 400,20 T800,150 T1200,80" fill="none" stroke="#FFB800" strokeWidth="4" className="drop-shadow-[0_0_12px_#FFB800]" />
-            <path d="M0,150 Q300,50 600,120 T1200,180" fill="none" stroke="#FFB800" strokeWidth="3" className="drop-shadow-[0_0_8px_#FFB800]" />
-            <path d="M0,250 Q400,150 800,220 T1200,280" fill="none" stroke="#FFB800" strokeWidth="2" className="drop-shadow-[0_0_6px_#FFB800]" />
-          </svg>
+        {/* Strata Textures - 4 distinct bands */}
+        <div className="absolute inset-x-0 top-0 h-[25%] bg-[#111008] border-b-[8px] border-[#151210]" />
+        
+        <div className="absolute inset-x-0 top-[25%] h-[25%] bg-[#151210] border-b-[12px] border-[#1a1614]">
+          {/* Gold Veins - keeping existing path logic but wrapped inside the band or covering the whole thing */}
         </div>
-        <div className="absolute inset-x-0 top-[70%] h-[30%] bg-[#0f0c0a] border-b-[4px] border-[#3a2000]" />
+
+        <div className="absolute inset-x-0 top-[50%] h-[25%] bg-[#1a1614] border-b-[6px] border-[#111008]" />
+        
+        <div className="absolute inset-x-0 top-[75%] h-[25%] bg-[#111008]" />
+
+        {/* Gold Veins SVG covering the strata */}
+        <svg className="absolute inset-0 w-full h-full" style={{ opacity: 0.4 }} preserveAspectRatio="none">
+          <path d="M0,50 Q200,100 400,20 T800,150 T1200,80" fill="none" stroke="#FFB800" strokeWidth="4" className="drop-shadow-[0_0_12px_#FFB800]" />
+          <path d="M0,150 Q300,50 600,120 T1200,180" fill="none" stroke="#FFB800" strokeWidth="3" className="drop-shadow-[0_0_8px_#FFB800]" />
+          <path d="M0,250 Q400,150 800,220 T1200,280" fill="none" stroke="#FFB800" strokeWidth="2" className="drop-shadow-[0_0_6px_#FFB800]" />
+        </svg>
       </div>
 
       <div className="absolute top-0 inset-x-0 h-40 bg-gradient-to-b from-[#151210] to-transparent z-10" />
