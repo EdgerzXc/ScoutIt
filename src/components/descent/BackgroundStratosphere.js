@@ -4,10 +4,6 @@
 import { useEffect, useState } from "react";
 
 export default function BackgroundStratosphere() {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-  if (!mounted) return null;
-
   return (
     <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none" style={{ zIndex: 0 }}>
       <div className="absolute inset-0 bg-gradient-to-b from-[#05050a] via-[#0a1224] to-[#05050a]" />

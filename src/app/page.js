@@ -1120,80 +1120,77 @@ export default function Home() {
       {/* SECTION 5: Layer 04 (Ecosystem -> Crust) */}
       <DescentSection className="snap-section section-services">
         <BackgroundCrust />
-        <div className="services-content relative z-10">
-          <header className="section-header-center">
-            <span className="vector-label">Layer 04 // Ecosystem Services</span>
-            <h2>The Professional Network</h2>
-            <p>Licensed advisors, photographers, researchers, and event planners — all vetted, all in one place.</p>
-          </header>
-
-          <div className="services-grid">
-            <Link href="/brokers" className="service-card live-card">
-              <div className="service-card-inner">
-                <div className="service-icon-wrapper"><Building2 strokeWidth={1.5} size="1em" /></div>
-                <div className="service-status-badge live-badge">LIVE</div>
-                <h3 className="service-title">Verified Advisors</h3>
-                <p className="service-desc">Licensed real estate professionals who guide you through viewing, negotiating, and closing.</p>
-                <span className="service-cta">CONNECT WITH ADVISOR →</span>
-              </div>
-            </Link>
-
-            <Link href="/photographers" className="service-card coming-soon-card">
-              <div className="service-card-inner">
-                <div className="service-icon-wrapper"><Camera strokeWidth={1.5} size="1em" /></div>
-                <div className="service-status-badge soon-badge">COMING SOON</div>
-                <h3 className="service-title">Space Photography</h3>
-                <p className="service-desc">Interior and architectural photographers who make every space look the way it deserves to.</p>
-                <span className="service-cta">EXPLORE ROSTER →</span>
-              </div>
-            </Link>
-
-            <Link href="/researchers" className="service-card coming-soon-card">
-              <div className="service-card-inner">
-                <div className="service-icon-wrapper"><Search strokeWidth={1.5} size="1em" /></div>
-                <div className="service-status-badge soon-badge">COMING SOON</div>
-                <h3 className="service-title">Site Research</h3>
-                <p className="service-desc">On-the-ground research, market data, and neighborhood profiles before you commit.</p>
-                <span className="service-cta">EXPLORE ROSTER →</span>
-              </div>
-            </Link>
-
-            <Link href="/event-planners" className="service-card coming-soon-card">
-              <div className="service-card-inner">
-                <div className="service-icon-wrapper"><CalendarDays strokeWidth={1.5} size="1em" /></div>
-                <div className="service-status-badge soon-badge">COMING SOON</div>
-                <h3 className="service-title">Event Design</h3>
-                <p className="service-desc">Planners, stylists, and designers who turn great spaces into great events.</p>
-                <span className="service-cta">EXPLORE ROSTER →</span>
-              </div>
-            </Link>
-          </div>
-        </div>
-      </DescentSection>
-
-      {/* SECTION 8: THE ABOUT US LAYER (Layer 04 -> Crust) */}
-      <DescentSection className="snap-section section-about">
-        <BackgroundCrust />
-        <div className="about-content relative z-10">
-          <header className="section-header-center">
-            <span className="vector-label">Layer 04 // About Us</span>
-            <h2>Why We Built ScoutIt</h2>
-          </header>
+        <div className="services-content relative z-10" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '4rem' }}>
           
-          <div className="about-manifesto-preview">
-            <p className="manifesto-lead">
-              We believe a home is more than a list of specifications. It is a space where your life unfolds. ScoutIt is an editorial archive created for the Philippine property dreamer.
-            </p>
-            <p className="manifesto-secondary">
-              Instead of pressure-driven listings and corporate jargon, we curate architectural DNA, design history, and local narratives to help you discover spaces you'll truly love.
-            </p>
+          {/* Top Half: The Professional Network */}
+          <div>
+            <header className="section-header-center">
+              <span className="vector-label">Layer 04 // The Ecosystem</span>
+              <h2>The Professional Network</h2>
+              <p>Licensed advisors, photographers, researchers, and event planners — all vetted, all in one place.</p>
+            </header>
+
+            <div className="services-grid">
+              <Link href="/brokers" className="service-card live-card">
+                <div className="service-card-inner">
+                  <div className="service-icon-wrapper"><Building2 strokeWidth={1.5} size="1em" /></div>
+                  <div className="service-status-badge live-badge">LIVE</div>
+                  <h3 className="service-title">Verified Advisors</h3>
+                  <p className="service-desc">Licensed real estate professionals who guide you through viewing, negotiating, and closing.</p>
+                  <span className="service-cta">CONNECT WITH ADVISOR →</span>
+                </div>
+              </Link>
+
+              <Link href="/photographers" className="service-card coming-soon-card">
+                <div className="service-card-inner">
+                  <div className="service-icon-wrapper"><Camera strokeWidth={1.5} size="1em" /></div>
+                  <div className="service-status-badge soon-badge">COMING SOON</div>
+                  <h3 className="service-title">Space Photography</h3>
+                  <p className="service-desc">Interior and architectural photographers who make every space look the way it deserves to.</p>
+                  <span className="service-cta">EXPLORE ROSTER →</span>
+                </div>
+              </Link>
+
+              <Link href="/researchers" className="service-card coming-soon-card">
+                <div className="service-card-inner">
+                  <div className="service-icon-wrapper"><Search strokeWidth={1.5} size="1em" /></div>
+                  <div className="service-status-badge soon-badge">COMING SOON</div>
+                  <h3 className="service-title">Site Research</h3>
+                  <p className="service-desc">On-the-ground research, market data, and neighborhood profiles before you commit.</p>
+                  <span className="service-cta">EXPLORE ROSTER →</span>
+                </div>
+              </Link>
+
+              <Link href="/event-planners" className="service-card coming-soon-card">
+                <div className="service-card-inner">
+                  <div className="service-icon-wrapper"><CalendarDays strokeWidth={1.5} size="1em" /></div>
+                  <div className="service-status-badge soon-badge">COMING SOON</div>
+                  <h3 className="service-title">Event Design</h3>
+                  <p className="service-desc">Planners, stylists, and designers who turn great spaces into great events.</p>
+                  <span className="service-cta">EXPLORE ROSTER →</span>
+                </div>
+              </Link>
+            </div>
           </div>
 
-          <div className="section-action-footer">
-            <Link href="/about" className="prominent-action-link">
-              Read Our Full Story →
-            </Link>
+          {/* Bottom Half: About Us */}
+          <div style={{ borderTop: '1px solid #262626', paddingTop: '3rem' }}>
+            <div className="about-manifesto-preview">
+              <h2 style={{ fontSize: '24px', fontFamily: 'var(--font-display)', marginBottom: '16px' }}>Why We Built ScoutIt</h2>
+              <p className="manifesto-lead">
+                We believe a home is more than a list of specifications. It is a space where your life unfolds. ScoutIt is an editorial archive created for the Philippine property dreamer.
+              </p>
+              <p className="manifesto-secondary">
+                Instead of pressure-driven listings and corporate jargon, we curate architectural DNA, design history, and local narratives to help you discover spaces you'll truly love.
+              </p>
+            </div>
+            <div className="section-action-footer" style={{ marginTop: '24px', justifyContent: 'center' }}>
+              <Link href="/about" className="prominent-action-link">
+                Read Our Full Story →
+              </Link>
+            </div>
           </div>
+
         </div>
       </DescentSection>
 
@@ -1205,7 +1202,7 @@ export default function Home() {
           {/* Left Menu Panel */}
           <div className="property-menu">
             <div className="menu-header">
-              <span className="vector-label">Layer 05 // The Core (Inner)</span>
+              <span className="vector-label">Layer 05 // The Core Inner</span>
               <h2>Your Space — Private</h2>
               <p>Your private collection of spaces you love — no account needed, visible only to you.</p>
             </div>
@@ -1390,7 +1387,7 @@ export default function Home() {
           {/* Left Menu Panel */}
           <div className="property-menu">
             <div className="menu-header">
-              <span className="vector-label">Layer 05 // The Core (Outer)</span>
+              <span className="vector-label">Layer 05 // The Core Outer</span>
               <h2 style={{ color: 'var(--accent)' }}>About You — Public</h2>
               <p>{currentUser ? "Your private headquarters. Access your tools and track your activity below." : "Your private headquarters. Securely list assets, manage leads, and connect with high-intent clients."}</p>
             </div>
