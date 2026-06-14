@@ -21,7 +21,7 @@ export default function BackgroundCrust() {
         <div className="absolute inset-x-0 top-0 h-[30%] bg-gradient-to-b from-[#151210] to-[#1a1614] border-b-[8px] border-[#2a2420]" />
         <div className="absolute inset-x-0 top-[30%] h-[40%] bg-[#1a1614] border-b-[12px] border-[#110e0c]">
           {/* Gold Veins */}
-          <svg className="absolute inset-0 w-full h-full opacity-20" preserveAspectRatio="none">
+          <svg className="absolute inset-0 w-full h-full opacity-40" preserveAspectRatio="none">
             <path d="M0,50 Q200,100 400,20 T800,150 T1200,80" fill="none" stroke="#FFB800" strokeWidth="4" className="drop-shadow-[0_0_12px_#FFB800]" />
             <path d="M0,150 Q300,50 600,120 T1200,180" fill="none" stroke="#FFB800" strokeWidth="3" className="drop-shadow-[0_0_8px_#FFB800]" />
             <path d="M0,250 Q400,150 800,220 T1200,280" fill="none" stroke="#FFB800" strokeWidth="2" className="drop-shadow-[0_0_6px_#FFB800]" />

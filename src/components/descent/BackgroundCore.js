@@ -12,7 +12,7 @@ export default function BackgroundCore() {
       <div className="absolute inset-0 flex items-center justify-center">
         {/* Molten Outer Core Glow */}
         <div 
-          className="absolute bg-[#FFB800] rounded-full blur-[120px] opacity-20"
+          className="absolute bg-[#FFB800] rounded-full blur-[120px] opacity-50"
           style={{
             width: `calc(40vw + var(--sp) * 40vw)`,
             height: `calc(40vw + var(--sp) * 40vw)`,

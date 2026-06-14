@@ -20,8 +20,8 @@ export default function BackgroundMetropolis() {
           className="absolute inset-0 mix-blend-screen"
           style={{
             backgroundImage: `
-              linear-gradient(to right, rgba(255,184,0,0.15) 2px, transparent 2px),
-              linear-gradient(to bottom, rgba(255,184,0,0.15) 2px, transparent 2px)
+              linear-gradient(to right, rgba(255,184,0,0.35) 2px, transparent 2px),
+              linear-gradient(to bottom, rgba(255,184,0,0.35) 2px, transparent 2px)
             `,
             backgroundSize: '120px 120px',
             // Positive Y translates TOWARDS the camera when rotated 60deg X!
