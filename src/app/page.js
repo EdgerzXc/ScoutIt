@@ -839,7 +839,7 @@ export default function Home() {
         <BackgroundStratosphere />
         <div className="property-split relative z-10">
           {/* Left Menu Panel */}
-          <div className="property-menu">
+          <div className="property-menu" style={{ background: 'rgba(10, 10, 10, 0.65)', backdropFilter: 'blur(15px)', WebkitBackdropFilter: 'blur(15px)', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
             <div className="menu-header">
               <span className="vector-label">Layer 02 // Discovery &amp; Intelligence</span>
               <h2>Stories &amp; Market Intel</h2>
@@ -864,7 +864,7 @@ export default function Home() {
           </div>
 
           {/* Right Visual Canvas */}
-          <div className="matrix-preview-pane">
+          <div className="matrix-preview-pane" style={{ background: 'rgba(18, 18, 18, 0.4)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)' }}>
             <header className="pane-header">
               <h3>{activeDiscoverType} Stories</h3>
               <p>Spotlights, articles &amp; collections</p>
@@ -973,7 +973,7 @@ export default function Home() {
         <BackgroundMetropolis />
         <div className="property-split relative z-10">
           {/* Left Menu Panel */}
-          <div className="property-menu">
+          <div className="property-menu" style={{ background: 'rgba(10, 10, 10, 0.65)', backdropFilter: 'blur(15px)', WebkitBackdropFilter: 'blur(15px)', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
             <div className="menu-header">
               <span className="vector-label">Layer 03 // Property Experiences</span>
               <h2>Explore by Category</h2>
@@ -1002,7 +1002,7 @@ export default function Home() {
           </div>
           
           {/* Right Visual Canvas - Interactive Preview Panel */}
-          <div className="matrix-preview-pane">
+          <div className="matrix-preview-pane" style={{ background: 'rgba(18, 18, 18, 0.4)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)' }}>
             <header className="pane-header">
               <h3>{activePropertyType} Spaces</h3>
               <p>A preview of what&apos;s in this category</p>
@@ -1200,7 +1200,7 @@ export default function Home() {
         <div className="property-split relative z-10">
           
           {/* Left Menu Panel */}
-          <div className="property-menu">
+          <div className="property-menu" style={{ background: 'rgba(10, 10, 10, 0.65)', backdropFilter: 'blur(15px)', WebkitBackdropFilter: 'blur(15px)', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
             <div className="menu-header">
               <span className="vector-label">Layer 05 // The Core Inner</span>
               <h2>Your Space — Private</h2>
@@ -1236,7 +1236,7 @@ export default function Home() {
           </div>
 
           {/* Right Visual Canvas */}
-          <div className="matrix-preview-pane">
+          <div className="matrix-preview-pane" style={{ background: 'rgba(18, 18, 18, 0.4)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)' }}>
             <header className="pane-header">
               <h3>How Your Board Works</h3>
               <p>Four simple steps — all private to your device</p>
@@ -1385,7 +1385,7 @@ export default function Home() {
         <div className="property-split relative z-10">
           
           {/* Left Menu Panel */}
-          <div className="property-menu">
+          <div className="property-menu" style={{ background: 'rgba(10, 10, 10, 0.65)', backdropFilter: 'blur(15px)', WebkitBackdropFilter: 'blur(15px)', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
             <div className="menu-header">
               <span className="vector-label">Layer 05 // The Core Outer</span>
               <h2 style={{ color: 'var(--accent)' }}>About You — Public</h2>
@@ -1469,7 +1469,7 @@ export default function Home() {
           </div>
 
           {/* Right Visual Canvas */}
-          <div className="matrix-preview-pane" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="matrix-preview-pane" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(18, 18, 18, 0.4)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)' }}>
             <div style={{ position: 'relative', width: '100%', maxWidth: '400px', padding: '40px' }}>
               {/* Abstract Dashboard UI Representation */}
               <div style={{ background: 'var(--surface)', border: '1px solid var(--surface-variant)', borderRadius: '8px', padding: '24px', boxShadow: '0 20px 40px rgba(0,0,0,0.5)', position: 'relative', zIndex: 2 }}>
@@ -2452,10 +2452,6 @@ export default function Home() {
         .property-menu {
           width: 22%;
           min-width: 280px;
-          background: rgba(10, 10, 10, 0.65);
-          backdrop-filter: blur(15px);
-          -webkit-backdrop-filter: blur(15px);
-          border-right: 1px solid rgba(255, 255, 255, 0.05);
           display: flex;
           flex-direction: column;
           justify-content: space-between;
@@ -2533,9 +2529,6 @@ export default function Home() {
 
         .matrix-preview-pane {
           flex: 1;
-          background: rgba(18, 18, 18, 0.4);
-          backdrop-filter: blur(10px);
-          -webkit-backdrop-filter: blur(10px);
           padding: 120px 48px;
           display: flex;
           flex-direction: column;
