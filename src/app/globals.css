@@ -188,6 +188,15 @@ a:hover {
 .font-display { font-family: var(--font-display); }
 .font-body { font-family: var(--font-body); }
 
+/* ── HOMEPAGE DESCENT ARCHITECTURE ── */
+[data-descent-layer] {
+  /* Default progress to 0% if not set */
+  --sp: 0;
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
 /* ══════════════════════════════════════════════════════════════
    MOBILE-FIRST RESPONSIVE DESIGN SYSTEM
    ══════════════════════════════════════════════════════════════ */

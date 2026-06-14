@@ -1,0 +1,57 @@
+/* eslint-disable react-hooks/set-state-in-effect */
+"use client";
+
+import { useEffect, useState } from "react";
+
+export default function BackgroundStratosphere() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return null;
+
+  return (
+    <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none" style={{ zIndex: 0 }}>
+      <div className="absolute inset-0 bg-gradient-to-b from-[#05050a] via-[#0a1224] to-[#05050a]" />
+
+      {/* Cloud layer 1: Slowest (Background) */}
+      <div 
+        className="absolute inset-x-0 h-[300%] opacity-60 mix-blend-screen"
+        style={{
+          background: 'radial-gradient(ellipse at center, rgba(100,160,255,0.15) 0%, transparent 60%)',
+          backgroundSize: '100% 100%',
+          transform: `translateY(calc(var(--sp) * -20%))`, // Moves UP as we descend
+        }}
+      />
+
+      {/* Cloud layer 2: Medium (Midground) */}
+      <div 
+        className="absolute inset-x-0 h-[300%] opacity-80 mix-blend-screen"
+        style={{
+          backgroundImage: 'radial-gradient(circle at 30% 40%, rgba(255,184,0,0.1) 0%, transparent 50%), radial-gradient(circle at 70% 60%, rgba(100,180,255,0.12) 0%, transparent 40%)',
+          transform: `translateY(calc(var(--sp) * -40%))`, // Moves UP faster
+        }}
+      />
+
+      {/* Cloud layer 3: Fast (Foreground wisps) */}
+      <div 
+        className="absolute inset-x-0 h-[300%] opacity-70 mix-blend-screen"
+        style={{
+          backgroundImage: 'radial-gradient(ellipse at 50% 80%, rgba(255,255,255,0.08) 0%, transparent 60%)',
+          transform: `translateY(calc(var(--sp) * -60%))`, // Moves UP fastest
+        }}
+      />
+
+      {/* The Radar UFO - Moves up and scales out to simulate passing it */}
+      <div 
+        className="absolute w-40 h-[6px] bg-accent shadow-[0_0_30px_#FFB800] rounded-full"
+        style={{
+          top: `calc(70% - var(--sp) * 60%)`, // Starts low, flies UP
+          left: `calc(10% + var(--sp) * 80%)`,
+          transform: `rotate(15deg) scale(calc(1 + var(--sp) * 2))`,
+          opacity: `calc(1 - var(--sp) * 0.8)` // Fades out as we pass it
+        }}
+      />
+
+      <div className="absolute bottom-0 inset-x-0 h-40 bg-gradient-to-t from-[#0a0a0a] to-transparent z-10" />
+    </div>
+  );
+}

@@ -57,7 +57,7 @@ export default function BoardPodium() {
   const rest = ranked.slice(1);
 
   return (
-    <div className="board-split">
+    <div className="board-split relative z-10">
       {/* LEFT — menu */}
       <aside className="board-menu">
         <div>
@@ -98,9 +98,7 @@ export default function BoardPodium() {
         .board-split {
           width: 100%; min-height: 100%;
           display: grid; grid-template-columns: 320px 1fr;
-          background:
-            radial-gradient(ellipse at 80% 20%, rgba(255,184,0,0.05), transparent 55%),
-            #0b0b0d;
+          background: transparent;
         }
         .board-menu {
           display: flex; flex-direction: column; justify-content: space-between;

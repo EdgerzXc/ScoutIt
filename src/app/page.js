@@ -11,6 +11,14 @@ import CinematicJourney from "@/components/cinematic/CinematicJourney";
 import Footer from "@/components/layout/Footer";
 import { Building2, Camera, Search, CalendarDays } from "lucide-react";
 
+import DescentSection from "@/components/descent/DescentSection";
+import BackgroundOrbit from "@/components/descent/BackgroundOrbit";
+import BackgroundStratosphere from "@/components/descent/BackgroundStratosphere";
+import BackgroundMetropolis from "@/components/descent/BackgroundMetropolis";
+import BackgroundCrust from "@/components/descent/BackgroundCrust";
+import BackgroundCore from "@/components/descent/BackgroundCore";
+import EventHorizon from "@/components/cinematic/EventHorizon";
+
 // Scrollytelling manifesto — lazy-loaded so it costs the homepage nothing
 // until the UFO is clicked.
 const DescentSequence = dynamic(
@@ -740,92 +748,21 @@ export default function Home() {
           manifesto overlay stays immersive */}
       {!descentActive && <ProfileButton floating />}
       {/* SECTION 1: SPACE HERO */}
-      <section className="snap-section section-hook">
+      <DescentSection className="snap-section section-hook">
         <div className="grain"></div>
 
         {/* Cinematic Cosmic Space Background */}
         <div className="space-bg-container">
           {/* Event-horizon pull field (stars, heavenly bodies, dust, rings) */}
-          <canvas ref={eventHorizonRef} className="event-horizon-canvas" aria-hidden="true" />
-          {SPACE_STARS.map((star, idx) => (
-            <div
-              key={`space-star-${idx}`}
-              className="space-star"
-              style={{
-                position: 'absolute',
-                top: star.top,
-                left: star.left,
-                width: star.size,
-                height: star.size,
-                borderRadius: '50%',
-                backgroundColor: '#ffffff',
-                opacity: star.opacity,
-                boxShadow: star.opacity > 0.18 ? '0 0 8px rgba(255,255,255,0.6)' : 'none',
-                animation: 'twinkleSpace 6s ease-in-out infinite alternate',
-                animationDelay: `${idx * 0.4}s`
-              }}
-            />
-          ))}
+          <EventHorizon />
+
           {/* Subtle Gravitational accretion core */}
           <div className="black-hole-core"></div>
           <div className="accretion-disk-outer"></div>
+
           {/* Subtle Event Horizon curved glow at the bottom */}
           <div className="event-horizon"></div>
           <div className="event-horizon-swirl"></div>
-
-          {/* Faint Drifting Cosmic Elements (Occasional Rocks, Comets, Neutron Stars) */}
-          {driftingRocks.map((rock) => (
-            <div
-              key={rock.id}
-              className="drifting-container"
-              style={{
-                position: 'absolute',
-                top: rock.startY,
-                left: rock.startX,
-                width: rock.size,
-                height: rock.size,
-                animation: `driftToCenter ${rock.duration}s linear forwards`,
-                pointerEvents: 'none',
-                zIndex: 2
-              }}
-              onAnimationEnd={() => {
-                setDriftingRocks((prev) => prev.filter((r) => r.id !== rock.id));
-              }}
-            >
-              <div
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  transform: `rotate(${rock.angle}deg) scale(${rock.scale})`,
-                  transformOrigin: 'center center',
-                  pointerEvents: 'none'
-                }}
-              >
-                {rock.type === 'rock' && (
-                  <div
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      borderRadius: rock.borderRadius,
-                      background: 'rgba(255, 184, 0, 0.55)', // Gold-tinted to match theme
-                      boxShadow: '0 0 6px rgba(255, 184, 0, 0.25)',
-                      filter: 'blur(0.5px)'
-                    }}
-                  />
-                )}
-                {rock.type === 'comet' && (
-                  <div className="comet-head">
-                    <div className="comet-tail"></div>
-                  </div>
-                )}
-                {rock.type === 'neutron' && (
-                  <div className="neutron-star-drifting" />
-                )}
-              </div>
-            </div>
-          ))}
-
-          {/* Static pulsing star removed per user request */}
         </div>
 
         {/* Main hook content */}
@@ -889,20 +826,156 @@ export default function Home() {
         </div>
 
         {/* Scroll indicator removed — beam sequence begins the story */}
-      </section>
+      </DescentSection>
 
       {/* SECTION 2: Layer 01 — The Board (ranked podium → /showcase) */}
-      <section className="snap-section section-board" id="board-section" style={{ padding: 0, position: "relative", overflow: "hidden" }}>
+      <DescentSection className="snap-section section-board" id="board-section" style={{ padding: 0, position: "relative", overflow: "hidden" }}>
+        <BackgroundOrbit />
         <BoardPodium />
-      </section>
+      </DescentSection>
 
-      {/* SECTION 3: Layer 02 */}
-      <section className="snap-section section-property" id="property-section">
-        <div className="property-split">
+      {/* SECTION 3: Layer 02 (Discovery -> Stratosphere) */}
+      <DescentSection className="snap-section section-discover" id="discover-section" style={{ padding: 0 }}>
+        <BackgroundStratosphere />
+        <div className="property-split relative z-10">
           {/* Left Menu Panel */}
           <div className="property-menu">
             <div className="menu-header">
-              <span className="vector-label">Layer 02 // Property Experiences</span>
+              <span className="vector-label">Layer 02 // Discovery &amp; Intelligence</span>
+              <h2>Stories &amp; Market Intel</h2>
+              <p>Neighborhood stories, market reports, and design features from around the Philippines.</p>
+            </div>
+            <nav className="menu-nav">
+              {propertyTypes.map((type) => (
+                <button
+                  key={type}
+                  className={`menu-btn ${activeDiscoverType === type ? "active" : ""}`}
+                  onClick={() => setActiveDiscoverType(type)}
+                >
+                  {type}
+                </button>
+              ))}
+            </nav>
+            <div className="menu-footer">
+              <Link href="/intel" className="prominent-action-link">
+                Read the Stories →
+              </Link>
+            </div>
+          </div>
+
+          {/* Right Visual Canvas */}
+          <div className="matrix-preview-pane">
+            <header className="pane-header">
+              <h3>{activeDiscoverType} Stories</h3>
+              <p>Spotlights, articles &amp; collections</p>
+            </header>
+            
+            <div className="discover-feed-preview" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+              {/* Part 1: Property Spotlights */}
+              <div>
+                <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', textTransform: 'uppercase', color: 'var(--accent)', letterSpacing: '0.1em', marginBottom: '16px' }}>Property Spotlights</h4>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+                  {discoveryFeed[getDBCategory(activeDiscoverType)].spotlights.map((spot, idx) => (
+                    <div role="link" tabIndex={0} onClick={() => router.push(`/discover`)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); router.push(`/discover`); } }} key={idx} style={{ background: '#161616', border: '1px solid #262626', borderRadius: '4px', overflow: 'hidden', display: 'flex', flexDirection: 'column', textDecoration: 'none', color: 'inherit', cursor: 'pointer' }} className="discover-spotlight-card-link">
+                      <div style={{ height: '140px', overflow: 'hidden', position: 'relative' }}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={spot.image} alt={spot.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <span style={{ position: 'absolute', bottom: '12px', left: '12px', background: 'rgba(0,0,0,0.7)', color: 'var(--accent)', fontFamily: 'var(--font-mono)', fontSize: '10px', padding: '4px 8px', border: '1px solid var(--accent-border)', borderRadius: '2px' }}>{spot.style}</span>
+                      </div>
+                      <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
+                        <h5 style={{ fontSize: '16px', fontWeight: '500', color: '#fff', marginBottom: '4px', fontFamily: 'var(--font-display)' }}>{spot.title}</h5>
+                        <span style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block', marginBottom: '8px' }}>Location: {spot.location}</span>
+                        <p style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.5', marginBottom: '12px', flexGrow: 1 }}>{spot.desc}</p>
+                        
+                        {/* Asset-Intel Bridge News Segment */}
+                        {spot.newsTitle && (
+                          <div 
+                            style={{ 
+                              borderTop: "1px dashed rgba(255,255,255,0.08)", 
+                              paddingTop: "12px", 
+                              marginTop: "12px" 
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <span style={{ fontFamily: "var(--font-mono)", fontSize: "9px", color: "var(--accent)", textTransform: "uppercase", display: "block", marginBottom: "4px" }}>Linked Intelligence</span>
+                            <Link 
+                              href={`/intel/${spot.newsSlug}`}
+                              style={{ 
+                                // eslint-disable-next-line react/jsx-no-comment-textnodes
+                                fontSize: "12px", 
+                                color: "#fff", 
+                                fontWeight: "600",
+                                display: "block",
+                                lineHeight: "1.3",
+                                textDecoration: "underline",
+                                marginBottom: "4px"
+                              }}
+                            >
+                              {spot.newsTitle}
+                            </Link>
+                            <p style={{ fontSize: "11px", color: "var(--text-secondary)", lineHeight: "1.4", margin: 0, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+                              {spot.newsExcerpt}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Part 2: Split News & Collections */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', borderTop: '1px solid #262626', paddingTop: '24px' }}>
+                {/* News & Stories */}
+                <div>
+                  <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', textTransform: 'uppercase', color: 'var(--accent)', letterSpacing: '0.1em', marginBottom: '16px' }}>News &amp; Stories</h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    {discoveryFeed[getDBCategory(activeDiscoverType)].news.map((item, idx) => (
+                      <Link
+                        key={idx}
+                        href={`/intel/${item.slug}`}
+                        className="discover-news-item-link"
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                          <h5 className="news-item-title">{item.title}</h5>
+                          <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>{item.date}</span>
+                        </div>
+                        <p style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.5', margin: 0 }}>{item.excerpt}</p>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Curated Collections */}
+                <div>
+                  <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', textTransform: 'uppercase', color: 'var(--accent)', letterSpacing: '0.1em', marginBottom: '16px' }}>Curated Collections</h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {discoveryFeed[getDBCategory(activeDiscoverType)].collections.map((coll, idx) => (
+                      <div key={idx} className="curated-collection-btn" style={{ background: '#161616', border: '1px solid #262626', padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', transition: 'all 0.3s ease', borderRadius: '4px' }}>
+                        <span style={{ fontSize: '13px', color: '#fff' }}>{coll}</span>
+                        <span style={{ color: 'var(--accent)', fontSize: '12px' }}>Explore →</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="matrix-legend-caption" style={{ borderTop: '1px solid #262626', paddingTop: '24px', marginTop: '24px' }}>
+              Our editors trace design movements and regional narratives across the Philippine islands.
+            </div>
+          </div>
+        </div>
+      </DescentSection>
+
+      {/* SECTION 4: Layer 03 (Property Experiences -> Metropolis) */}
+      <DescentSection className="snap-section section-property" id="property-section">
+        <BackgroundMetropolis />
+        <div className="property-split relative z-10">
+          {/* Left Menu Panel */}
+          <div className="property-menu">
+            <div className="menu-header">
+              <span className="vector-label">Layer 03 // Property Experiences</span>
               <h2>Explore by Category</h2>
               <p>Pick a category and see what&apos;s inside — homes, offices, venues, and more.</p>
             </div>
@@ -1042,144 +1115,12 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </section>
+      </DescentSection>
 
-      {/* SECTION 3: Layer 02 */}
-      <section className="snap-section section-discover" id="discover-section" style={{ padding: 0 }}>
-        <div className="property-split">
-          {/* Left Menu Panel */}
-          <div className="property-menu">
-            <div className="menu-header">
-              <span className="vector-label">Layer 03 // Discovery &amp; Intelligence</span>
-              <h2>Stories &amp; Market Intel</h2>
-              <p>Neighborhood stories, market reports, and design features from around the Philippines.</p>
-            </div>
-            <nav className="menu-nav">
-              {propertyTypes.map((type) => (
-                <button
-                  key={type}
-                  className={`menu-btn ${activeDiscoverType === type ? "active" : ""}`}
-                  onClick={() => setActiveDiscoverType(type)}
-                >
-                  {type}
-                </button>
-              ))}
-            </nav>
-            <div className="menu-footer">
-              <Link href="/intel" className="prominent-action-link">
-                Read the Stories →
-              </Link>
-            </div>
-          </div>
-
-          {/* Right Visual Canvas */}
-          <div className="matrix-preview-pane">
-            <header className="pane-header">
-              <h3>{activeDiscoverType} Stories</h3>
-              <p>Spotlights, articles &amp; collections</p>
-            </header>
-            
-            <div className="discover-feed-preview" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-              {/* Part 1: Property Spotlights */}
-              <div>
-                <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', textTransform: 'uppercase', color: 'var(--accent)', letterSpacing: '0.1em', marginBottom: '16px' }}>Property Spotlights</h4>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
-                  {discoveryFeed[getDBCategory(activeDiscoverType)].spotlights.map((spot, idx) => (
-                    <div role="link" tabIndex={0} onClick={() => router.push(`/discover`)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); router.push(`/discover`); } }} key={idx} style={{ background: '#161616', border: '1px solid #262626', borderRadius: '4px', overflow: 'hidden', display: 'flex', flexDirection: 'column', textDecoration: 'none', color: 'inherit', cursor: 'pointer' }} className="discover-spotlight-card-link">
-                      <div style={{ height: '140px', overflow: 'hidden', position: 'relative' }}>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={spot.image} alt={spot.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        <span style={{ position: 'absolute', bottom: '12px', left: '12px', background: 'rgba(0,0,0,0.7)', color: 'var(--accent)', fontFamily: 'var(--font-mono)', fontSize: '10px', padding: '4px 8px', border: '1px solid var(--accent-border)', borderRadius: '2px' }}>{spot.style}</span>
-                      </div>
-                      <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
-                        <h5 style={{ fontSize: '16px', fontWeight: '500', color: '#fff', marginBottom: '4px', fontFamily: 'var(--font-display)' }}>{spot.title}</h5>
-                        <span style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block', marginBottom: '8px' }}>Location: {spot.location}</span>
-                        <p style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.5', marginBottom: '12px', flexGrow: 1 }}>{spot.desc}</p>
-                        
-                        {/* Asset-Intel Bridge News Segment */}
-                        {spot.newsTitle && (
-                          <div 
-                            style={{ 
-                              borderTop: "1px dashed rgba(255,255,255,0.08)", 
-                              paddingTop: "12px", 
-                              marginTop: "12px" 
-                            }}
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <span style={{ fontFamily: "var(--font-mono)", fontSize: "9px", color: "var(--accent)", textTransform: "uppercase", display: "block", marginBottom: "4px" }}>Linked Intelligence</span>
-                            <Link 
-                              href={`/intel/${spot.newsSlug}`}
-                              style={{ 
-                                // eslint-disable-next-line react/jsx-no-comment-textnodes
-                                fontSize: "12px", 
-                                color: "#fff", 
-                                fontWeight: "600",
-                                display: "block",
-                                lineHeight: "1.3",
-                                textDecoration: "underline",
-                                marginBottom: "4px"
-                              }}
-                            >
-                              {spot.newsTitle}
-                            </Link>
-                            <p style={{ fontSize: "11px", color: "var(--text-secondary)", lineHeight: "1.4", margin: 0, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
-                              {spot.newsExcerpt}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Part 2: Split News & Collections */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', borderTop: '1px solid #262626', paddingTop: '24px' }}>
-                {/* News & Stories */}
-                <div>
-                  <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', textTransform: 'uppercase', color: 'var(--accent)', letterSpacing: '0.1em', marginBottom: '16px' }}>News &amp; Stories</h4>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                    {discoveryFeed[getDBCategory(activeDiscoverType)].news.map((item, idx) => (
-                      <Link
-                        key={idx}
-                        href={`/intel/${item.slug}`}
-                        className="discover-news-item-link"
-                      >
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                          <h5 className="news-item-title">{item.title}</h5>
-                          <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>{item.date}</span>
-                        </div>
-                        <p style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.5', margin: 0 }}>{item.excerpt}</p>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Curated Collections */}
-                <div>
-                  <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', textTransform: 'uppercase', color: 'var(--accent)', letterSpacing: '0.1em', marginBottom: '16px' }}>Curated Collections</h4>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    {discoveryFeed[getDBCategory(activeDiscoverType)].collections.map((coll, idx) => (
-                      <div key={idx} className="curated-collection-btn" style={{ background: '#161616', border: '1px solid #262626', padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', transition: 'all 0.3s ease', borderRadius: '4px' }}>
-                        <span style={{ fontSize: '13px', color: '#fff' }}>{coll}</span>
-                        <span style={{ color: 'var(--accent)', fontSize: '12px' }}>Explore →</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="matrix-legend-caption" style={{ borderTop: '1px solid #262626', paddingTop: '24px', marginTop: '24px' }}>
-              Our editors trace design movements and regional narratives across the Philippine islands.
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* SECTION 4: Layer 03 */}
-      <section className="snap-section section-services">
-        <div className="services-content">
+      {/* SECTION 5: Layer 04 (Ecosystem -> Crust) */}
+      <DescentSection className="snap-section section-services">
+        <BackgroundCrust />
+        <div className="services-content relative z-10">
           <header className="section-header-center">
             <span className="vector-label">Layer 04 // Ecosystem Services</span>
             <h2>The Professional Network</h2>
@@ -1228,17 +1169,44 @@ export default function Home() {
             </Link>
           </div>
         </div>
-      </section>
+      </DescentSection>
 
-      {/* SECTION 5: THE WISHLIST LAYER */}
-      <section className="snap-section section-wishlist" style={{ padding: 0 }}>
-        <div className="property-split">
+      {/* SECTION 8: THE ABOUT US LAYER (Layer 04 -> Crust) */}
+      <DescentSection className="snap-section section-about">
+        <BackgroundCrust />
+        <div className="about-content relative z-10">
+          <header className="section-header-center">
+            <span className="vector-label">Layer 04 // About Us</span>
+            <h2>Why We Built ScoutIt</h2>
+          </header>
+          
+          <div className="about-manifesto-preview">
+            <p className="manifesto-lead">
+              We believe a home is more than a list of specifications. It is a space where your life unfolds. ScoutIt is an editorial archive created for the Philippine property dreamer.
+            </p>
+            <p className="manifesto-secondary">
+              Instead of pressure-driven listings and corporate jargon, we curate architectural DNA, design history, and local narratives to help you discover spaces you'll truly love.
+            </p>
+          </div>
+
+          <div className="section-action-footer">
+            <Link href="/about" className="prominent-action-link">
+              Read Our Full Story →
+            </Link>
+          </div>
+        </div>
+      </DescentSection>
+
+      {/* SECTION 6: THE WISHLIST LAYER (Layer 05 -> Core) */}
+      <DescentSection className="snap-section section-wishlist" style={{ padding: 0 }}>
+        <BackgroundCore />
+        <div className="property-split relative z-10">
           
           {/* Left Menu Panel */}
           <div className="property-menu">
             <div className="menu-header">
-              <span className="vector-label">Layer 05 // Your Board</span>
-              <h2>Your Board</h2>
+              <span className="vector-label">Layer 05 // The Core (Inner)</span>
+              <h2>Your Space — Private</h2>
               <p>Your private collection of spaces you love — no account needed, visible only to you.</p>
             </div>
             
@@ -1412,17 +1380,18 @@ export default function Home() {
           </div>
 
         </div>
-      </section>
+      </DescentSection>
 
-      {/* SECTION 6: THE WORKSPACE LAYER */}
-      <section className="snap-section section-workspace" style={{ padding: 0 }}>
-        <div className="property-split">
+      {/* SECTION 7: THE WORKSPACE LAYER (Layer 05 -> Core) */}
+      <DescentSection className="snap-section section-workspace" style={{ padding: 0 }}>
+        <BackgroundCore />
+        <div className="property-split relative z-10">
           
           {/* Left Menu Panel */}
           <div className="property-menu">
             <div className="menu-header">
-              <span className="vector-label">Layer 06 // The Workspace</span>
-              <h2 style={{ color: 'var(--accent)' }}>{currentUser ? "Welcome Back." : "Take Command."}</h2>
+              <span className="vector-label">Layer 05 // The Core (Outer)</span>
+              <h2 style={{ color: 'var(--accent)' }}>About You — Public</h2>
               <p>{currentUser ? "Your private headquarters. Access your tools and track your activity below." : "Your private headquarters. Securely list assets, manage leads, and connect with high-intent clients."}</p>
             </div>
             
@@ -1551,32 +1520,7 @@ export default function Home() {
           </div>
 
         </div>
-      </section>
-
-      {/* SECTION 7: THE ABOUT US LAYER */}
-      <section className="snap-section section-about">
-        <div className="about-content">
-          <header className="section-header-center">
-            <span className="vector-label">Layer 07 // About Us</span>
-            <h2>Why We Built ScoutIt</h2>
-          </header>
-          
-          <div className="about-manifesto-preview">
-            <p className="manifesto-lead">
-              We believe a home is more than a list of specifications. It is a space where your life unfolds. ScoutIt is an editorial archive created for the Philippine property dreamer.
-            </p>
-            <p className="manifesto-secondary">
-              Instead of pressure-driven listings and corporate jargon, we curate architectural DNA, design history, and local narratives to help you discover spaces you'll truly love.
-            </p>
-          </div>
-
-          <div className="section-action-footer">
-            <Link href="/about" className="prominent-action-link">
-              Read Our Full Story →
-            </Link>
-          </div>
-        </div>
-      </section>
+      </DescentSection>
 
       <style>{`
         /* Cinematic Snap Container */

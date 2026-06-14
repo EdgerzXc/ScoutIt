@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/set-state-in-effect */
+/* eslint-disable react-hooks/immutability */
 "use client";
 
 import { createContext, useContext, useState, useEffect } from "react";

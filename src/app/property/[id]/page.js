@@ -1,7 +1,7 @@
 // Case-sensitivity routing diagnostics trigger and async params fix
 import { notFound } from "next/navigation";
 import { getPropertyBySlug } from "@/data/mockProperties";
-import ResidentialScrollytelling from "@/components/property/ResidentialScrollytelling";
+import ResidentialFlow from "@/components/property/ResidentialFlow";
 import CommercialFlow from "@/components/property/CommercialFlow";
 
 // ----------------------------------------------------------------------
@@ -21,13 +21,13 @@ export async function generateMetadata({ params }) {
 // MAP, DON'T MATCH: Strict Configuration Object
 // ----------------------------------------------------------------------
 const CATEGORY_TO_LAYOUT_MAP = {
-  "residential": ResidentialScrollytelling,
+  "residential": ResidentialFlow,
   "commercial": CommercialFlow,
   "str": CommercialFlow,           // Hospitality acts like commercial flow for now
   "hospitality": CommercialFlow,
   "restaurants": CommercialFlow,
   "venues": CommercialFlow,
-  "default": ResidentialScrollytelling
+  "default": ResidentialFlow
 };
 
 export default async function PropertyRoute({ params }) {
