@@ -10,8 +10,9 @@ export default function BackgroundStratosphere() {
 
       {/* Cloud layer 1: Slowest (Background) */}
       <div 
-        className="absolute inset-x-0 h-[300%] opacity-60 mix-blend-screen"
+        className="absolute inset-x-0 h-[300%] mix-blend-screen"
         style={{
+          opacity: 0.6,
           background: 'radial-gradient(ellipse at center, rgba(100,160,255,0.35) 0%, transparent 60%)',
           backgroundSize: '100% 100%',
           transform: `translateY(calc(var(--sp) * -20%))`, // Moves UP as we descend
@@ -20,8 +21,9 @@ export default function BackgroundStratosphere() {
 
       {/* Cloud layer 2: Medium (Midground) */}
       <div 
-        className="absolute inset-x-0 h-[300%] opacity-80 mix-blend-screen"
+        className="absolute inset-x-0 h-[300%] mix-blend-screen"
         style={{
+          opacity: 0.8,
           backgroundImage: 'radial-gradient(circle at 30% 40%, rgba(255,184,0,0.35) 0%, transparent 50%), radial-gradient(circle at 70% 60%, rgba(100,180,255,0.35) 0%, transparent 40%)',
           transform: `translateY(calc(var(--sp) * -40%))`, // Moves UP faster
         }}
@@ -29,8 +31,9 @@ export default function BackgroundStratosphere() {
 
       {/* Cloud layer 3: Fast (Foreground wisps) */}
       <div 
-        className="absolute inset-x-0 h-[300%] opacity-70 mix-blend-screen"
+        className="absolute inset-x-0 h-[300%] mix-blend-screen"
         style={{
+          opacity: 0.7,
           backgroundImage: 'radial-gradient(ellipse at 50% 80%, rgba(255,255,255,0.25) 0%, transparent 60%)',
           transform: `translateY(calc(var(--sp) * -60%))`, // Moves UP fastest
         }}
