@@ -16,70 +16,39 @@ function clamp(v, a, b) {
  * --sp = 1 (Element is fully scrolled past the top)
  */
 export default function useDescentProgress() {
-  const ref = useRef(null);
+  const sectionRef = useRef(null);
 
   useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+    const container = document.querySelector('.cinematic-container');
+    if (!container) return;
+    
+    const section = sectionRef.current;
+    if (!section) return;
 
     // Respect reduced motion
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReducedMotion) {
-      el.style.setProperty("--sp", 1);
+      section.style.setProperty("--sp", 1);
       return;
     }
 
-    let rafId = 0;
-    let isIntersecting = false;
-
-    const compute = () => {
-      rafId = 0;
-      if (!isIntersecting) return;
-
-      const vh = window.innerHeight || 1;
-      const rect = el.getBoundingClientRect();
+    const handleScroll = () => {
+      const containerRect = container.getBoundingClientRect();
+      const sectionRect = section.getBoundingClientRect();
       
-      // Calculate progress:
-      // When rect.top == vh, progress is 0.
-      // When rect.top == -rect.height, progress is 1.
-      const rawProgress = (vh - rect.top) / (vh + rect.height);
-      const clampedProgress = clamp(rawProgress, 0, 1);
+      // How far into the section we've scrolled (0 = just entered, 1 = leaving)
+      const progress = Math.max(0, Math.min(1,
+        1 - (sectionRect.bottom - containerRect.top) / containerRect.height
+      ));
       
-      el.style.setProperty("--sp", clampedProgress.toFixed(4));
+      section.style.setProperty('--sp', progress.toFixed(4));
     };
 
-    const onScroll = () => {
-      if (!rafId && isIntersecting) {
-        rafId = requestAnimationFrame(compute);
-      }
-    };
-
-    const observer = new IntersectionObserver(([entry]) => {
-      isIntersecting = entry.isIntersecting;
-      if (isIntersecting) {
-        // Trigger an immediate compute when it becomes visible
-        compute();
-      }
-    }, {
-      // Observe slightly outside the viewport to ensure smooth handoffs
-      rootMargin: "10% 0px 10% 0px"
-    });
-
-    const container = el.closest('.cinematic-container') || window;
-    observer.observe(el);
-    container.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll, { passive: true });
-
-    // Initial compute
-    compute();
-
-    return () => {
-      observer.disconnect();
-      container.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-      if (rafId) cancelAnimationFrame(rafId);
-    };
+    container.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll(); // run once on mount
+    
+    return () => container.removeEventListener('scroll', handleScroll);
   }, []);
 
-  return ref;
+  return sectionRef;
 }
