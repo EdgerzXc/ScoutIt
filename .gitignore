@@ -45,3 +45,14 @@ next-env.d.ts
 
 # local Claude Code tooling
 .claude/
+
+# root-level fix/inject scripts (Claude Code artifacts)
+fix_*.js
+inject*.js
+add_*.js
+execute.js
+extract_*.js
+final_*.js
+perfect_fix.js
+recover_*.js
+strip_and_link.js
