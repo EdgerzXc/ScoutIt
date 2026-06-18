@@ -20,12 +20,26 @@ export const DISCOVERY_FEED = {
   Residential: {
     spotlights: [
       {
+        slug: "batasan-hills",
+        title: "Batasan Hills House & Lot",
+        location: "Batasan Hills, Quezon City",
+        style: "Modernist",
+        image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=400&q=80",
+        desc: "Modernist villa situated in the quiet hills of Quezon City.",
+        newsTitle: "BGC Spatial Movement",
+        newsSlug: "bgc-spatial-movement",
+        newsExcerpt: "A rise in demand for low-density residences drives modernist villa acquisitions across Bonifacio Global City core."
+      },
+      {
         slug: "aurelia-residences",
         title: "Aurelia Residences",
         location: "BGC Core",
         style: "Modern Tropical",
         image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=400&q=80",
-        desc: "Low density luxury high-rise featuring double-glazed glass wrap and custom bronze details."
+        desc: "Low density luxury high-rise featuring double-glazed glass wrap and custom bronze details.",
+        newsTitle: "BGC Spatial Movement",
+        newsSlug: "bgc-spatial-movement",
+        newsExcerpt: "A rise in demand for low-density residences drives modernist villa acquisitions across Bonifacio Global City core."
       },
       {
         slug: "the-estate-makati",
@@ -33,12 +47,17 @@ export const DISCOVERY_FEED = {
         location: "Makati Central",
         style: "Brutalist Luxury",
         image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=400&q=80",
-        desc: "Designed by Foster + Partners. Cruciform structure maximizing floor plate efficiency and natural daylight."
+        desc: "Designed by Foster + Partners. Cruciform structure maximizing floor plate efficiency and natural daylight.",
+        newsTitle: "BGC Spatial Movement",
+        newsSlug: "bgc-spatial-movement",
+        newsExcerpt: "A rise in demand for low-density residences drives modernist villa acquisitions across Bonifacio Global City core."
       }
     ],
     news: [
-      { slug: "bgc-spatial-movement", title: "BGC Spatial Movement", date: "June 2026", excerpt: "A rise in demand for low-density residences drives modernist villa acquisitions." },
-      { slug: "return-of-quiet-luxury", title: "The Return of Quiet Luxury", date: "May 2026", excerpt: "Local buyers favor hidden properties in Quezon City over flashy estates." }
+      { slug: "mastering-qc-market", title: "Mastering the QC Market", date: "Q3 2026", excerpt: "What to look for in QC subdivision residences." },
+      { slug: "makati-central-resurgence", title: "Makati Central Resurgence", date: "Q2 2026", excerpt: "Older luxury buildings undergoing massive renovations." },
+      { slug: "bgc-condo-yields-rise", title: "BGC Condo Yields Rise", date: "Q2 2026", excerpt: "Premium residential spaces see 4.2% YoY growth." },
+      { slug: "bgc-spatial-movement", title: "BGC Spatial Movement", date: "June 2026", excerpt: "A rise in demand for low-density residences drives modernist villa acquisitions." }
     ],
     collections: [
       "Modernist Penthouses",
@@ -1301,3 +1320,15 @@ export function getPropertyBySlug(slug) {
   };
 }
 
+export const locations = [
+  "Quezon City",
+  "Bonifacio Global City",
+  "Makati",
+  "Siargao",
+  "Boracay",
+  "El Nido",
+  "Coron",
+  "Panglao",
+  "Tagaytay Ridge",
+  "Parañaque"
+];

@@ -11,15 +11,7 @@ import CinematicJourney from "@/components/cinematic/CinematicJourney";
 import Footer from "@/components/layout/Footer";
 import { Building2, Camera, Search, CalendarDays } from "lucide-react";
 
-import DescentSection from "@/components/descent/DescentSection";
-import BackgroundOrbit from "@/components/descent/BackgroundOrbit";
-import BackgroundStratosphere from "@/components/descent/BackgroundStratosphere";
-import BackgroundMetropolis from "@/components/descent/BackgroundMetropolis";
-import BackgroundCrust from "@/components/descent/BackgroundCrust";
-import BackgroundCore from "@/components/descent/BackgroundCore";
-import EventHorizon from "@/components/cinematic/EventHorizon";
-
-// Scrollytelling manifesto — lazy-loaded so it costs the homepage nothing
+// Scrollytelling manifesto ΓÇö lazy-loaded so it costs the homepage nothing
 // until the UFO is clicked.
 const DescentSequence = dynamic(
   () => import("@/components/scrollytelling/DescentSequence"),
@@ -36,6 +28,9 @@ function getDBCategory(cat) {
 
 export default function Home() {
   const router = useRouter();
+
+    
+
   const [activePropertyType, setActivePropertyType] = useState("Residential");
   const [searchQuery, setSearchQuery] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
@@ -73,7 +68,7 @@ export default function Home() {
     if (withPower) {
       setPowering(true);
       push(() => { setPowering(false); launch(); }, 500);           // power-up flash, then fire
-      // Cinematic journey disabled — beam sequence ends here.
+      // Cinematic journey disabled ΓÇö beam sequence ends here.
     } else {
       launch();
     }
@@ -96,7 +91,7 @@ export default function Home() {
     if (beamInterval.current) clearInterval(beamInterval.current);
   }, []);
 
-  // ── Event-horizon pull field (canvas) ──────────────────────────
+  // ΓöÇΓöÇ Event-horizon pull field (canvas) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
   useEffect(() => {
     const canvas = eventHorizonRef.current;
     if (!canvas) return;
@@ -191,7 +186,7 @@ export default function Home() {
       t += dt;
       ctx.clearRect(0, 0, w, h);
 
-      // Inner core breath — central glow opacity oscillates (~4s cycle)
+      // Inner core breath ΓÇö central glow opacity oscillates (~4s cycle)
       const coreOp = 0.08 + 0.04 * Math.sin(t * 1.5);
       const coreR = Math.min(w, h) * 0.22;
       const coreGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, coreR);
@@ -202,7 +197,7 @@ export default function Home() {
       ctx.fillStyle = coreGrad;
       ctx.fill();
 
-      // Black-hole darkness pulse — expands to pull light in, contracts to release it.
+      // Black-hole darkness pulse ΓÇö expands to pull light in, contracts to release it.
       // 5s cycle, offset 2.5s from the outer ring so they alternate (dark center while
       // outer ring brightens, then center glows while outer ring dims).
       const darkF = 0.5 + 0.5 * Math.sin((t - 2.5) * (2 * Math.PI / 5));
@@ -215,7 +210,7 @@ export default function Home() {
       ctx.fillStyle = darkGrad;
       ctx.fill();
 
-      // Pulse shockwave rings — emanate every 3-4s, decelerating as they expand
+      // Pulse shockwave rings ΓÇö emanate every 3-4s, decelerating as they expand
       if (t >= nextPulseAt) {
         pulseRings.push({ age: 0 });
         nextPulseAt = t + rand(3, 4);
@@ -238,7 +233,7 @@ export default function Home() {
       rings.forEach((ring) => {
         let op, lw = 1;
         if (ring.outer) {
-          // Bold 4s breathe: opacity 0.05→0.35, stroke 1→2.5px
+          // Bold 4s breathe: opacity 0.05ΓåÆ0.35, stroke 1ΓåÆ2.5px
           const f = 0.5 + 0.5 * Math.sin(t * (2 * Math.PI / 4));
           op = 0.05 + 0.30 * f;
           lw = 1 + 1.5 * f;
@@ -260,7 +255,7 @@ export default function Home() {
         }
       });
 
-      // Dust trails — radial streaks, fading as they fall in
+      // Dust trails ΓÇö radial streaks, fading as they fall in
       dust.forEach((d) => {
         d.radius *= (1 - d.pull);
         if (d.radius < 30) Object.assign(d, initDust(), { radius: edgeRadius() });
@@ -278,7 +273,7 @@ export default function Home() {
         ctx.stroke();
       });
 
-      // Stars — slow straight pull toward center + gentle twinkle
+      // Stars ΓÇö slow straight pull toward center + gentle twinkle
       stars.forEach((s) => {
         s.radius *= (1 - s.pull);
         if (s.radius < 30) Object.assign(s, initStar(), { radius: edgeRadius() });
@@ -291,7 +286,7 @@ export default function Home() {
         ctx.fill();
       });
 
-      // Heavenly bodies — curved (spiral) infall with soft glow halo
+      // Heavenly bodies ΓÇö curved (spiral) infall with soft glow halo
       bodies.forEach((b) => {
         b.radius *= (1 - b.pull);
         b.angle += b.angVel;
@@ -312,7 +307,7 @@ export default function Home() {
         ctx.fill();
       });
 
-      // Comets — bright heads with gold tails, pulled straight toward center
+      // Comets ΓÇö bright heads with gold tails, pulled straight toward center
       comets.forEach((c) => {
         if (c.delay > 0) { c.delay -= dt; return; }
         c.radius -= c.speed * dt * 60;
@@ -353,7 +348,7 @@ export default function Home() {
       raf = requestAnimationFrame(loop);
     };
 
-    // Only animate while the hero canvas is actually on screen — once the user
+    // Only animate while the hero canvas is actually on screen ΓÇö once the user
     // scrolls to lower sections, a 60fps canvas keeps competing with the
     // scroll/snap animation for frame time.
     let running = false;
@@ -611,7 +606,7 @@ export default function Home() {
     }
   }, []);
 
-  // Save scroll position at most once per frame — writing sessionStorage on
+  // Save scroll position at most once per frame ΓÇö writing sessionStorage on
   // every scroll event adds main-thread work during the scroll itself.
   const scrollSaveRaf = useRef(0);
   const handleScroll = (e) => {
@@ -744,25 +739,96 @@ export default function Home() {
       {descentActive && (
         <DescentSequence onExit={() => setDescentActive(false)} />
       )}
-      {/* Account / profile access — hidden during the descent so the
+      {/* Account / profile access ΓÇö hidden during the descent so the
           manifesto overlay stays immersive */}
       {!descentActive && <ProfileButton floating />}
       {/* SECTION 1: SPACE HERO */}
-      <DescentSection className="snap-section section-hook">
+      <section className="snap-section section-hook">
         <div className="grain"></div>
 
         {/* Cinematic Cosmic Space Background */}
         <div className="space-bg-container">
           {/* Event-horizon pull field (stars, heavenly bodies, dust, rings) */}
-          <EventHorizon />
-
+          <canvas ref={eventHorizonRef} className="event-horizon-canvas" aria-hidden="true" />
+          {SPACE_STARS.map((star, idx) => (
+            <div
+              key={`space-star-${idx}`}
+              className="space-star"
+              style={{
+                position: 'absolute',
+                top: star.top,
+                left: star.left,
+                width: star.size,
+                height: star.size,
+                borderRadius: '50%',
+                backgroundColor: '#ffffff',
+                opacity: star.opacity,
+                boxShadow: star.opacity > 0.18 ? '0 0 8px rgba(255,255,255,0.6)' : 'none',
+                animation: 'twinkleSpace 6s ease-in-out infinite alternate',
+                animationDelay: `${idx * 0.4}s`
+              }}
+            />
+          ))}
           {/* Subtle Gravitational accretion core */}
           <div className="black-hole-core"></div>
           <div className="accretion-disk-outer"></div>
-
           {/* Subtle Event Horizon curved glow at the bottom */}
           <div className="event-horizon"></div>
           <div className="event-horizon-swirl"></div>
+
+          {/* Faint Drifting Cosmic Elements (Occasional Rocks, Comets, Neutron Stars) */}
+          {driftingRocks.map((rock) => (
+            <div
+              key={rock.id}
+              className="drifting-container"
+              style={{
+                position: 'absolute',
+                top: rock.startY,
+                left: rock.startX,
+                width: rock.size,
+                height: rock.size,
+                animation: `driftToCenter ${rock.duration}s linear forwards`,
+                pointerEvents: 'none',
+                zIndex: 2
+              }}
+              onAnimationEnd={() => {
+                setDriftingRocks((prev) => prev.filter((r) => r.id !== rock.id));
+              }}
+            >
+              <div
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  transform: `rotate(${rock.angle}deg) scale(${rock.scale})`,
+                  transformOrigin: 'center center',
+                  pointerEvents: 'none'
+                }}
+              >
+                {rock.type === 'rock' && (
+                  <div
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      borderRadius: rock.borderRadius,
+                      background: 'rgba(255, 184, 0, 0.55)', // Gold-tinted to match theme
+                      boxShadow: '0 0 6px rgba(255, 184, 0, 0.25)',
+                      filter: 'blur(0.5px)'
+                    }}
+                  />
+                )}
+                {rock.type === 'comet' && (
+                  <div className="comet-head">
+                    <div className="comet-tail"></div>
+                  </div>
+                )}
+                {rock.type === 'neutron' && (
+                  <div className="neutron-star-drifting" />
+                )}
+              </div>
+            </div>
+          ))}
+
+          {/* Static pulsing star removed per user request */}
         </div>
 
         {/* Main hook content */}
@@ -788,18 +854,18 @@ export default function Home() {
                     <feDropShadow dx="0" dy="0" stdDeviation="3" floodColor="#ffb800" floodOpacity="0.55" />
                   </filter>
                 </defs>
-                {/* saucer body — wide disc */}
+                {/* saucer body ΓÇö wide disc */}
                 <ellipse cx="60" cy="44" rx="55" ry="13" fill="#1a1a1a" stroke="#ffb800" strokeWidth="2" filter="url(#ufoRimGlow)" />
-                {/* belly — slightly lighter underside */}
+                {/* belly ΓÇö slightly lighter underside */}
                 <ellipse cx="60" cy="48" rx="40" ry="8" fill="#222222" />
-                {/* belly lights — 4 evenly spaced gold dots */}
+                {/* belly lights ΓÇö 4 evenly spaced gold dots */}
                 <circle className="ufo-belly" cx="36" cy="49" r="2.2" />
                 <circle className="ufo-belly" cx="52" cy="51" r="2.2" />
                 <circle className="ufo-belly" cx="68" cy="51" r="2.2" />
                 <circle className="ufo-belly" cx="84" cy="49" r="2.2" />
-                {/* dome / cockpit — prominent, green-tinted */}
+                {/* dome / cockpit ΓÇö prominent, green-tinted */}
                 <path d="M37 38 Q60 4 83 38 Z" fill="#1e2a1e" stroke="#ffb800" strokeWidth="1" />
-                {/* porthole windows — sequential 1-2-3 blink */}
+                {/* porthole windows ΓÇö sequential 1-2-3 blink */}
                 <circle className="porthole porthole-1" cx="49" cy="28" r="4" />
                 <circle className="porthole porthole-2" cx="60" cy="24" r="4" />
                 <circle className="porthole porthole-3" cx="71" cy="28" r="4" />
@@ -815,709 +881,70 @@ export default function Home() {
           </div>
 
           {/* Discipline badge */}
-          <div className="title-badge">SPACE · INTELLIGENCE · TECHNOLOGY</div>
+          <div className="title-badge">SPACE ┬╖ INTELLIGENCE ┬╖ TECHNOLOGY</div>
 
           {/* Divider */}
           <div className="title-divider"></div>
 
           {/* Taglines */}
           <p className="title-tagline-1">Get lost in spaces that actually inspire you.</p>
-          <div className="title-tagline-2">SPACE INTELLIGENCE · PHILIPPINE PROPERTY</div>
+          <div className="title-tagline-2">SPACE INTELLIGENCE ┬╖ PHILIPPINE PROPERTY</div>
         </div>
 
-        {/* Scroll indicator removed — beam sequence begins the story */}
-      </DescentSection>
+        {/* Scroll indicator removed ΓÇö beam sequence begins the story */}
+      </section>
 
-      {/* SECTION 2: Layer 01 — The Board (ranked podium → /showcase) */}
-      <DescentSection className="snap-section section-board" id="board-section" style={{ padding: 0, position: "relative", overflow: "hidden" }}>
-        <BackgroundOrbit />
-        <BoardPodium />
-      </DescentSection>
 
-      {/* SECTION 3: Layer 02 (Discovery -> Stratosphere) */}
-      <DescentSection className="snap-section section-discover" id="discover-section" style={{ padding: 0 }}>
-        <BackgroundStratosphere />
-        <div className="property-split relative z-10">
-          {/* Left Menu Panel */}
-          <div className="property-menu" style={{ background: 'rgba(10, 10, 10, 0.65)', backdropFilter: 'blur(15px)', WebkitBackdropFilter: 'blur(15px)', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
-            <div className="menu-header">
-              <span className="vector-label">Layer 02 // Discovery &amp; Intelligence</span>
-              <h2>Stories &amp; Market Intel</h2>
-              <p>Neighborhood stories, market reports, and design features from around the Philippines.</p>
-            </div>
-            <nav className="menu-nav">
-              {propertyTypes.map((type) => (
-                <button
-                  key={type}
-                  className={`menu-btn ${activeDiscoverType === type ? "active" : ""}`}
-                  onClick={() => setActiveDiscoverType(type)}
-                >
-                  {type}
-                </button>
-              ))}
-            </nav>
-            <div className="menu-footer">
-              <Link href="/intel" className="prominent-action-link">
-                Read the Stories →
-              </Link>
-            </div>
-          </div>
+      {/* =========================================
+          LAUNCHPAD (ELEVATOR MENU)
+          ========================================= */}
+      <section className="relative w-full max-w-6xl mx-auto px-6 py-24 z-20 flex flex-col items-center" style={{ backgroundColor: 'transparent' }}>
+        <h2 className="font-mono text-sm tracking-[0.3em] uppercase text-[#FFB800] mb-12 text-center opacity-80" style={{ textShadow: '0 0 10px rgba(255,184,0,0.3)' }}>
+          Select Your Descent Coordinate
+        </h2>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
+          {/* Card 01: Orbit (The Board) */}
+          <Link href="/layer/orbit" className="text-left group relative bg-[#111111]/80 backdrop-blur-md border border-white/5 rounded-xl p-8 overflow-hidden hover:border-[#FFB800]/50 transition-all duration-500 hover:-translate-y-1 block">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,184,0,0.1),transparent_50%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="font-mono text-[10px] text-[#FFB800] tracking-widest mb-4">LAYER 01 // ORBIT</div>
+            <h3 className="font-display text-2xl text-white mb-2">The Board</h3>
+            <p className="text-sm text-gray-400">Top 100 Most Inquired Properties</p>
+          </Link>
 
-          {/* Right Visual Canvas */}
-          <div className="matrix-preview-pane" style={{ background: 'rgba(18, 18, 18, 0.4)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)' }}>
-            <header className="pane-header">
-              <h3>{activeDiscoverType} Stories</h3>
-              <p>Spotlights, articles &amp; collections</p>
-            </header>
-            
-            <div className="discover-feed-preview" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-              {/* Part 1: Property Spotlights */}
-              <div>
-                <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', textTransform: 'uppercase', color: 'var(--accent)', letterSpacing: '0.1em', marginBottom: '16px' }}>Property Spotlights</h4>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
-                  {discoveryFeed[getDBCategory(activeDiscoverType)].spotlights.map((spot, idx) => (
-                    <div role="link" tabIndex={0} onClick={() => router.push(`/discover`)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); router.push(`/discover`); } }} key={idx} style={{ background: '#161616', border: '1px solid #262626', borderRadius: '4px', overflow: 'hidden', display: 'flex', flexDirection: 'column', textDecoration: 'none', color: 'inherit', cursor: 'pointer' }} className="discover-spotlight-card-link">
-                      <div style={{ height: '140px', overflow: 'hidden', position: 'relative' }}>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={spot.image} alt={spot.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        <span style={{ position: 'absolute', bottom: '12px', left: '12px', background: 'rgba(0,0,0,0.7)', color: 'var(--accent)', fontFamily: 'var(--font-mono)', fontSize: '10px', padding: '4px 8px', border: '1px solid var(--accent-border)', borderRadius: '2px' }}>{spot.style}</span>
-                      </div>
-                      <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
-                        <h5 style={{ fontSize: '16px', fontWeight: '500', color: '#fff', marginBottom: '4px', fontFamily: 'var(--font-display)' }}>{spot.title}</h5>
-                        <span style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block', marginBottom: '8px' }}>Location: {spot.location}</span>
-                        <p style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.5', marginBottom: '12px', flexGrow: 1 }}>{spot.desc}</p>
-                        
-                        {/* Asset-Intel Bridge News Segment */}
-                        {spot.newsTitle && (
-                          <div 
-                            style={{ 
-                              borderTop: "1px dashed rgba(255,255,255,0.08)", 
-                              paddingTop: "12px", 
-                              marginTop: "12px" 
-                            }}
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <span style={{ fontFamily: "var(--font-mono)", fontSize: "9px", color: "var(--accent)", textTransform: "uppercase", display: "block", marginBottom: "4px" }}>Linked Intelligence</span>
-                            <Link 
-                              href={`/intel/${spot.newsSlug}`}
-                              style={{ 
-                                // eslint-disable-next-line react/jsx-no-comment-textnodes
-                                fontSize: "12px", 
-                                color: "#fff", 
-                                fontWeight: "600",
-                                display: "block",
-                                lineHeight: "1.3",
-                                textDecoration: "underline",
-                                marginBottom: "4px"
-                              }}
-                            >
-                              {spot.newsTitle}
-                            </Link>
-                            <p style={{ fontSize: "11px", color: "var(--text-secondary)", lineHeight: "1.4", margin: 0, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
-                              {spot.newsExcerpt}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+          {/* Card 02: Stratosphere */}
+          <Link href="/layer/stratosphere" className="text-left group relative bg-[#111111]/80 backdrop-blur-md border border-white/5 rounded-xl p-8 overflow-hidden hover:border-[#FFB800]/50 transition-all duration-500 hover:-translate-y-1 block">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,184,0,0.1),transparent_50%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="font-mono text-[10px] text-[#FFB800] tracking-widest mb-4">LAYER 02 // STRATOSPHERE</div>
+            <h3 className="font-display text-2xl text-white mb-2">Stories & Intel</h3>
+            <p className="text-sm text-gray-400">Neighborhood stories & market features</p>
+          </Link>
 
-              {/* Part 2: Split News & Collections */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', borderTop: '1px solid #262626', paddingTop: '24px' }}>
-                {/* News & Stories */}
-                <div>
-                  <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', textTransform: 'uppercase', color: 'var(--accent)', letterSpacing: '0.1em', marginBottom: '16px' }}>News &amp; Stories</h4>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                    {discoveryFeed[getDBCategory(activeDiscoverType)].news.map((item, idx) => (
-                      <Link
-                        key={idx}
-                        href={`/intel/${item.slug}`}
-                        className="discover-news-item-link"
-                      >
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                          <h5 className="news-item-title">{item.title}</h5>
-                          <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>{item.date}</span>
-                        </div>
-                        <p style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.5', margin: 0 }}>{item.excerpt}</p>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
+          {/* Card 03: Metropolis */}
+          <Link href="/layer/metropolis" className="text-left group relative bg-[#111111]/80 backdrop-blur-md border border-white/5 rounded-xl p-8 overflow-hidden hover:border-[#FFB800]/50 transition-all duration-500 hover:-translate-y-1 lg:col-span-1 block">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(255,184,0,0.15),transparent_50%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="font-mono text-[10px] text-[#FFB800] tracking-widest mb-4">LAYER 03 // METROPOLIS</div>
+            <h3 className="font-display text-2xl text-white mb-2">Explore Spaces</h3>
+            <p className="text-sm text-gray-400">Search the complete property directory</p>
+          </Link>
 
-                {/* Curated Collections */}
-                <div>
-                  <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', textTransform: 'uppercase', color: 'var(--accent)', letterSpacing: '0.1em', marginBottom: '16px' }}>Curated Collections</h4>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    {discoveryFeed[getDBCategory(activeDiscoverType)].collections.map((coll, idx) => (
-                      <div key={idx} className="curated-collection-btn" style={{ background: '#161616', border: '1px solid #262626', padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', transition: 'all 0.3s ease', borderRadius: '4px' }}>
-                        <span style={{ fontSize: '13px', color: '#fff' }}>{coll}</span>
-                        <span style={{ color: 'var(--accent)', fontSize: '12px' }}>Explore →</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
+          {/* Card 04: The Crust */}
+          <Link href="/layer/crust" className="text-left group relative bg-[#111111]/80 backdrop-blur-md border border-white/5 rounded-xl p-8 overflow-hidden hover:border-[#FFB800]/50 transition-all duration-500 hover:-translate-y-1 md:col-span-1 lg:col-span-2 block">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,184,0,0.05),transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="font-mono text-[10px] text-[#FFB800] tracking-widest mb-4">LAYER 04 // THE CRUST</div>
+            <h3 className="font-display text-2xl text-white mb-2">The Ecosystem</h3>
+            <p className="text-sm text-gray-400">Verified Advisors & Professionals</p>
+          </Link>
 
-            <div className="matrix-legend-caption" style={{ borderTop: '1px solid #262626', paddingTop: '24px', marginTop: '24px' }}>
-              Our editors trace design movements and regional narratives across the Philippine islands.
-            </div>
-          </div>
+          {/* Card 05: The Core */}
+          <Link href="/layer/core" className="text-left group relative bg-[#111111]/80 backdrop-blur-md border border-white/5 rounded-xl p-8 overflow-hidden hover:border-[#FFB800]/50 transition-all duration-500 hover:-translate-y-1 md:col-span-1 lg:col-span-1 block">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,184,0,0.1),transparent_50%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="font-mono text-[10px] text-[#FFB800] tracking-widest mb-4">LAYER 05 // THE CORE</div>
+            <h3 className="font-display text-2xl text-white mb-2">Your Workspace</h3>
+            <p className="text-sm text-gray-400">Private Wishlist & Dashboard</p>
+          </Link>
         </div>
-      </DescentSection>
-
-      {/* SECTION 4: Layer 03 (Property Experiences -> Metropolis) */}
-      <DescentSection className="snap-section section-property" id="property-section">
-        <BackgroundMetropolis />
-        <div className="property-split relative z-10">
-          {/* Left Menu Panel */}
-          <div className="property-menu" style={{ background: 'rgba(10, 10, 10, 0.65)', backdropFilter: 'blur(15px)', WebkitBackdropFilter: 'blur(15px)', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
-            <div className="menu-header">
-              <span className="vector-label">Layer 03 // Property Experiences</span>
-              <h2>Explore by Category</h2>
-              <p>Pick a category and see what&apos;s inside — homes, offices, venues, and more.</p>
-            </div>
-            <nav className="menu-nav">
-              {propertyTypes.map((type) => (
-                <button
-                  key={type}
-                  className={`menu-btn ${activePropertyType === type ? "active" : ""}`}
-                  onClick={() => {
-                    setActivePropertyType(type);
-                    setSearchQuery("");
-                    setShowDropdown(false);
-                  }}
-                >
-                  {type}
-                </button>
-              ))}
-            </nav>
-            <div className="menu-footer">
-              <Link href={`/property?type=${activePropertyType.toLowerCase()}`} className="prominent-action-link">
-                Browse {activePropertyType} →
-              </Link>
-            </div>
-          </div>
-          
-          {/* Right Visual Canvas - Interactive Preview Panel */}
-          <div className="matrix-preview-pane" style={{ background: 'rgba(18, 18, 18, 0.4)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)' }}>
-            <header className="pane-header">
-              <h3>{activePropertyType} Spaces</h3>
-              <p>A preview of what&apos;s in this category</p>
-            </header>
-            
-            <div className="search-container">
-              <div className="search-input-wrapper">
-                <input 
-                  type="text" 
-                  className="vector-search-input"
-                  placeholder="Search spaces by name, city, or style..." 
-                  value={searchQuery}
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value);
-                    setShowDropdown(true);
-                  }}
-                  onFocus={() => setShowDropdown(true)}
-                  onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
-                />
-                {showDropdown && searchQuery.trim() !== "" && (
-                  (() => {
-                    const matchedLocations = locations.filter(loc => 
-                      loc.toLowerCase().includes(searchQuery.toLowerCase().trim())
-                    );
-                    
-                    if (matchedLocations.length === 0) return null;
-
-                    return (
-                      <div className="search-suggestions-dropdown">
-                        {matchedLocations.map(loc => (
-                          <div 
-                            key={loc} 
-                            className="dropdown-item"
-                            onClick={() => {
-                              setSearchQuery(loc);
-                              setShowDropdown(false);
-                            }}
-                          >
-                            {loc}
-                          </div>
-                        ))}
-                      </div>
-                    );
-                  })()
-                )}
-              </div>
-            </div>
-
-            <div className="mini-cards-grid" key={activePropertyType}>
-              {(() => {
-                const q = searchQuery.toLowerCase().trim();
-                const filtered = categoryPreviews[getDBCategory(activePropertyType)].filter(item => {
-                  if (!q) return true;
-                  const titleMatch = item.title.toLowerCase().includes(q);
-                  const locationTag = item.tags[2] ? item.tags[2].toLowerCase() : "";
-                  const locMatch = locationTag.includes(q);
-                  return titleMatch || locMatch;
-                }).slice(0, 4);
-
-                if (filtered.length === 0) {
-                  return (
-                    <div className="empty-state-msg">
-                      Zero matching assets found in active directory.
-                    </div>
-                  );
-                }
-
-                return filtered.map((item) => {
-                  const locationTag = item.tags[2] || "";
-                  const city = locationTag.replace("Location: ", "") || "Quezon City";
-                  return (
-                    <Link href={`/property/${item.slug || item.id}`} key={item.id} className="mini-preview-card" style={{ textDecoration: 'none', color: 'inherit' }}>
-                      <div className="mini-card-visual">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={item.image} alt={item.title} className="mini-card-image" />
-                      </div>
-                      
-                      <div className="home-card-reaction-overlay" onClick={(e) => e.stopPropagation()}>
-                        <ReactionButtons
-                          propertyId={item.id}
-                          propertyTitle={item.title}
-                          category={getDBCategory(activePropertyType)}
-                          city={city}
-                          small={true}
-                        />
-                      </div>
-
-                      <div className="mini-card-body">
-                      <h4>{item.title}</h4>
-                      <div className="mini-card-tags">
-                        {item.tags.map((tag, idx) => {
-                          const labels = ["The Space", "Daily Life Reality", "Location Story"];
-                          return (
-                            <div key={idx} className="mini-tag-wrapper">
-                              <span className="mini-tag-label">{labels[idx]}</span>
-                              <span className="mini-tag">{tag}</span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </Link>
-                );
-              });
-            })()}
-            </div>
-            
-            <div className="matrix-legend-caption">
-              Explore different spaces by clicking the categories. Tap any space to view its deep briefing page.
-            </div>
-          </div>
-        </div>
-      </DescentSection>
-
-      {/* SECTION 5: Layer 04 (Ecosystem -> Crust) */}
-      <DescentSection className="snap-section section-services">
-        <BackgroundCrust />
-        <div className="services-content relative z-10" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '4rem' }}>
-          
-          {/* Top Half: The Professional Network */}
-          <div>
-            <header className="section-header-center">
-              <span className="vector-label">Layer 04 // The Ecosystem</span>
-              <h2>The Professional Network</h2>
-              <p>Licensed advisors, photographers, researchers, and event planners — all vetted, all in one place.</p>
-            </header>
-
-            <div className="services-grid">
-              <Link href="/brokers" className="service-card live-card">
-                <div className="service-card-inner">
-                  <div className="service-icon-wrapper"><Building2 strokeWidth={1.5} size="1em" /></div>
-                  <div className="service-status-badge live-badge">LIVE</div>
-                  <h3 className="service-title">Verified Advisors</h3>
-                  <p className="service-desc">Licensed real estate professionals who guide you through viewing, negotiating, and closing.</p>
-                  <span className="service-cta">CONNECT WITH ADVISOR →</span>
-                </div>
-              </Link>
-
-              <Link href="/photographers" className="service-card coming-soon-card">
-                <div className="service-card-inner">
-                  <div className="service-icon-wrapper"><Camera strokeWidth={1.5} size="1em" /></div>
-                  <div className="service-status-badge soon-badge">COMING SOON</div>
-                  <h3 className="service-title">Space Photography</h3>
-                  <p className="service-desc">Interior and architectural photographers who make every space look the way it deserves to.</p>
-                  <span className="service-cta">EXPLORE ROSTER →</span>
-                </div>
-              </Link>
-
-              <Link href="/researchers" className="service-card coming-soon-card">
-                <div className="service-card-inner">
-                  <div className="service-icon-wrapper"><Search strokeWidth={1.5} size="1em" /></div>
-                  <div className="service-status-badge soon-badge">COMING SOON</div>
-                  <h3 className="service-title">Site Research</h3>
-                  <p className="service-desc">On-the-ground research, market data, and neighborhood profiles before you commit.</p>
-                  <span className="service-cta">EXPLORE ROSTER →</span>
-                </div>
-              </Link>
-
-              <Link href="/event-planners" className="service-card coming-soon-card">
-                <div className="service-card-inner">
-                  <div className="service-icon-wrapper"><CalendarDays strokeWidth={1.5} size="1em" /></div>
-                  <div className="service-status-badge soon-badge">COMING SOON</div>
-                  <h3 className="service-title">Event Design</h3>
-                  <p className="service-desc">Planners, stylists, and designers who turn great spaces into great events.</p>
-                  <span className="service-cta">EXPLORE ROSTER →</span>
-                </div>
-              </Link>
-            </div>
-          </div>
-
-          {/* Bottom Half: About Us */}
-          <div style={{ borderTop: '1px solid #262626', paddingTop: '3rem' }}>
-            <div className="about-manifesto-preview">
-              <h2 style={{ fontSize: '24px', fontFamily: 'var(--font-display)', marginBottom: '16px' }}>Why We Built ScoutIt</h2>
-              <p className="manifesto-lead">
-                We believe a home is more than a list of specifications. It is a space where your life unfolds. ScoutIt is an editorial archive created for the Philippine property dreamer.
-              </p>
-              <p className="manifesto-secondary">
-                Instead of pressure-driven listings and corporate jargon, we curate architectural DNA, design history, and local narratives to help you discover spaces you'll truly love.
-              </p>
-            </div>
-            <div className="section-action-footer" style={{ marginTop: '24px', justifyContent: 'center' }}>
-              <Link href="/about" className="prominent-action-link">
-                Read Our Full Story →
-              </Link>
-            </div>
-          </div>
-
-        </div>
-      </DescentSection>
-
-      {/* SECTION 6: THE WISHLIST LAYER (Layer 05 -> Core) */}
-      <DescentSection className="snap-section section-wishlist" style={{ padding: 0 }}>
-        <BackgroundCore />
-        <div className="property-split relative z-10">
-          
-          {/* Left Menu Panel */}
-          <div className="property-menu" style={{ background: 'rgba(10, 10, 10, 0.65)', backdropFilter: 'blur(15px)', WebkitBackdropFilter: 'blur(15px)', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
-            <div className="menu-header">
-              <span className="vector-label">Layer 05 // The Core Inner</span>
-              <h2>Your Space — Private</h2>
-              <p>Your private collection of spaces you love — no account needed, visible only to you.</p>
-            </div>
-            
-            <div className="ledger-tags-guide" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <div style={{ color: 'var(--text-secondary)', fontSize: '13px', lineHeight: '1.6' }}>
-                Tag any property with one of four reactions. Everything stays on your device:
-              </div>
-              <ul style={{ listStyle: 'none', padding: 0, margin: '8px 0 0 0', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {[
-                  { tag: "Potential Fit", desc: "Ticks your boxes" },
-                  { tag: "Interested", desc: "Ready to inquire about" },
-                  { tag: "Inspired Me", desc: "Design & styling ideas" },
-                  { tag: "Save", desc: "Keep for later" }
-                ].map((item, idx) => (
-                  <li key={idx} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '12px' }}>
-                    <span style={{ color: 'var(--accent)', fontFamily: 'var(--font-mono)', border: '1px solid rgba(255, 184, 0, 0.3)', padding: '2px 8px', borderRadius: '2px', fontSize: '10px', textTransform: 'uppercase' }}>
-                      {item.tag}
-                    </span>
-                    <span style={{ color: 'var(--text-muted)' }}>{item.desc}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="menu-footer">
-              <Link href="/wishlist" className="prominent-action-link">
-                Open Your Board →
-              </Link>
-            </div>
-          </div>
-
-          {/* Right Visual Canvas */}
-          <div className="matrix-preview-pane" style={{ background: 'rgba(18, 18, 18, 0.4)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)' }}>
-            <header className="pane-header">
-              <h3>How Your Board Works</h3>
-              <p>Four simple steps — all private to your device</p>
-            </header>
-
-            <div className="wishlist-infographics" style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
-              
-              {/* Connected Flow Steps */}
-              <div className="flow-grid">
-                
-                {/* Step 1: Scan */}
-                <div className="flow-card">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--accent)', border: '1px solid rgba(255,184,0,0.2)', padding: '2px 6px', borderRadius: '2px' }}>PHASE 01</span>
-                    <span style={{ fontSize: '24px', fontWeight: '800', fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.05)' }}>01</span>
-                  </div>
-                  
-                  {/* Schematic Graphic: Mini Grid */}
-                  <div style={{ height: '70px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px dashed #262626', background: 'rgba(0,0,0,0.3)', borderRadius: '2px' }}>
-                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="rgba(255, 184, 0, 0.4)" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-                      <rect x="3" y="3" width="7" height="9"></rect>
-                      <rect x="14" y="3" width="7" height="5"></rect>
-                      <rect x="14" y="12" width="7" height="9"></rect>
-                      <rect x="3" y="16" width="7" height="5"></rect>
-                    </svg>
-                  </div>
-                  
-                  <div>
-                    <h4 style={{ fontSize: '13px', textTransform: 'uppercase', color: '#fff', letterSpacing: '0.05em', margin: '0 0 6px 0', fontFamily: 'var(--font-display)' }}>Browse</h4>
-                    <p style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: '1.5', margin: 0 }}>Search and filter in-depth features on premium local properties.</p>
-                  </div>
-                </div>
-
-                {/* Step 2: Tag */}
-                <div className="flow-card">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--accent)', border: '1px solid rgba(255,184,0,0.2)', padding: '2px 6px', borderRadius: '2px' }}>PHASE 02</span>
-                    <span style={{ fontSize: '24px', fontWeight: '800', fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.05)' }}>02</span>
-                  </div>
-                  
-                  {/* Schematic Graphic: Floating Badges */}
-                  <div style={{ height: '70px', display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'center', justifyContent: 'center', border: '1px dashed #262626', background: 'rgba(0,0,0,0.3)', borderRadius: '2px', padding: '0 10px' }}>
-                    <div style={{ display: 'flex', gap: '4px' }}>
-                      <span style={{ fontSize: '8px', color: 'var(--accent)', border: '1px solid var(--accent)', padding: '2px 4px', borderRadius: '2px', opacity: 0.8 }}>FIT</span>
-                      <span style={{ fontSize: '8px', color: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.1)', padding: '2px 4px', borderRadius: '2px' }}>INT</span>
-                      <span style={{ fontSize: '8px', color: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.1)', padding: '2px 4px', borderRadius: '2px' }}>INS</span>
-                      <span style={{ fontSize: '8px', color: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.1)', padding: '2px 4px', borderRadius: '2px' }}>SAV</span>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <h4 style={{ fontSize: '13px', textTransform: 'uppercase', color: '#fff', letterSpacing: '0.05em', margin: '0 0 6px 0', fontFamily: 'var(--font-display)' }}>Tag What Stands Out</h4>
-                    <p style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: '1.5', margin: 0 }}>Mark listings with the reaction that matches how you feel about them.</p>
-                  </div>
-                </div>
-
-                {/* Step 3: Archive */}
-                <div className="flow-card">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--accent)', border: '1px solid rgba(255,184,0,0.2)', padding: '2px 6px', borderRadius: '2px' }}>PHASE 03</span>
-                    <span style={{ fontSize: '24px', fontWeight: '800', fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.05)' }}>03</span>
-                  </div>
-                  
-                  {/* Schematic Graphic: Vault lock */}
-                  <div style={{ height: '70px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px dashed #262626', background: 'rgba(0,0,0,0.3)', borderRadius: '2px' }}>
-                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="rgba(255, 184, 0, 0.4)" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                      <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                    </svg>
-                  </div>
-                  
-                  <div>
-                    <h4 style={{ fontSize: '13px', textTransform: 'uppercase', color: '#fff', letterSpacing: '0.05em', margin: '0 0 6px 0', fontFamily: 'var(--font-display)' }}>Saved on Your Device</h4>
-                    <p style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: '1.5', margin: 0 }}>Your board is stored in your own browser — never on our servers.</p>
-                  </div>
-                </div>
-
-                {/* Step 4: Route */}
-                <div className="flow-card">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--accent)', border: '1px solid rgba(255,184,0,0.2)', padding: '2px 6px', borderRadius: '2px' }}>PHASE 04</span>
-                    <span style={{ fontSize: '24px', fontWeight: '800', fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.05)' }}>04</span>
-                  </div>
-                  
-                  {/* Schematic Graphic: Handshake signal */}
-                  <div style={{ height: '70px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px dashed #262626', background: 'rgba(0,0,0,0.3)', borderRadius: '2px' }}>
-                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="rgba(255, 184, 0, 0.4)" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-                      <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-                    </svg>
-                  </div>
-                  
-                  <div>
-                    <h4 style={{ fontSize: '13px', textTransform: 'uppercase', color: '#fff', letterSpacing: '0.05em', margin: '0 0 6px 0', fontFamily: 'var(--font-display)' }}>Talk to an Advisor</h4>
-                    <p style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: '1.5', margin: 0 }}>When you&apos;re ready, connect with a licensed advisor to take the next step.</p>
-                  </div>
-                </div>
-
-              </div>
-
-              {/* Infographic Stats / Architecture Details */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', borderTop: '1px solid #262626', paddingTop: '24px' }}>
-                <div>
-                  <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', textTransform: 'uppercase', color: 'var(--accent)', letterSpacing: '0.1em', marginBottom: '16px' }}>
-                    Privacy, by Design
-                  </h4>
-                  <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: '1.6', margin: 0 }}>
-                    We don&apos;t track your searches or save your activity on any server. Your board lives on your device and never leaves it.
-                  </p>
-                </div>
-                
-                <div>
-                  <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', textTransform: 'uppercase', color: 'var(--accent)', letterSpacing: '0.1em', marginBottom: '16px' }}>
-                    The Fine Print
-                  </h4>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    {[
-                      { metric: "Where it's saved", val: "On this device" },
-                      { metric: "Account required", val: "None" },
-                      { metric: "Server tracking", val: "None" }
-                    ].map((st, idx) => (
-                      <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed #222', paddingBottom: '6px' }}>
-                        <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{st.metric}</span>
-                        <span style={{ fontSize: '12px', fontFamily: 'var(--font-mono)', color: '#fff' }}>{st.val}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-              </div>
-
-            </div>
-
-            <div className="matrix-legend-caption" style={{ borderTop: '1px solid #262626', paddingTop: '24px', marginTop: '24px' }}>
-              Your private collection of Philippine architectural inspirations. Keep them secure, revisit them anytime.
-            </div>
-
-          </div>
-
-        </div>
-      </DescentSection>
-
-      {/* SECTION 7: THE WORKSPACE LAYER (Layer 05 -> Core) */}
-      <DescentSection className="snap-section section-workspace" style={{ padding: 0 }}>
-        <BackgroundCore />
-        <div className="property-split relative z-10">
-          
-          {/* Left Menu Panel */}
-          <div className="property-menu" style={{ background: 'rgba(10, 10, 10, 0.65)', backdropFilter: 'blur(15px)', WebkitBackdropFilter: 'blur(15px)', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
-            <div className="menu-header">
-              <span className="vector-label">Layer 05 // The Core Outer</span>
-              <h2 style={{ color: 'var(--accent)' }}>About You — Public</h2>
-              <p>{currentUser ? "Your private headquarters. Access your tools and track your activity below." : "Your private headquarters. Securely list assets, manage leads, and connect with high-intent clients."}</p>
-            </div>
-            
-            <div className="ledger-tags-guide" style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '16px' }}>
-              {!currentUser ? (
-                <>
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '13px', lineHeight: '1.6' }}>
-                    ScoutIt is a two-sided platform. While buyers browse, professionals command their market presence here:
-                  </p>
-                  
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                    <div style={{ padding: '16px', background: 'rgba(255, 184, 0, 0.05)', borderLeft: '2px solid var(--accent)', borderRadius: '0 4px 4px 0' }}>
-                      <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'var(--accent)', textTransform: 'uppercase', marginBottom: '8px' }}>For Property Owners</h4>
-                      <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>Use the Guided Wizard to easily list your space, highlight its architectural DNA, and receive direct pitches from vetted brokers.</p>
-                    </div>
-                    
-                    <div style={{ padding: '16px', background: 'rgba(255, 255, 255, 0.02)', borderLeft: '2px solid rgba(255, 255, 255, 0.2)', borderRadius: '0 4px 4px 0' }}>
-                      <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: '#fff', textTransform: 'uppercase', marginBottom: '8px' }}>For Licensed Brokers</h4>
-                      <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>Verify your PRC license to unlock Broker Mode. Manage your listings, track inbound leads, and build your digital portfolio.</p>
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                  {currentUser.tags?.includes('owner') && (
-                    <Link href="/dashboard" style={{ textDecoration: 'none', display: 'block' }}>
-                      <div className="hover:border-gold-accent transition-colors" style={{ padding: '16px', background: 'rgba(255, 184, 0, 0.05)', borderLeft: '2px solid var(--accent)', borderRadius: '0 4px 4px 0', border: '1px solid transparent' }}>
-                        <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'var(--accent)', textTransform: 'uppercase', marginBottom: '8px' }}>Owner Mode</h4>
-                        <div style={{ display: 'flex', gap: '12px' }}>
-                          <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Active Properties: <strong style={{ color: '#fff' }}>1</strong></span>
-                          <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>New Pitches: <strong style={{ color: '#fff' }}>3</strong></span>
-                        </div>
-                      </div>
-                    </Link>
-                  )}
-                  {currentUser.tags?.includes('broker') && (
-                    <Link href="/dashboard" style={{ textDecoration: 'none', display: 'block' }}>
-                      <div className="hover:border-gold-accent transition-colors" style={{ padding: '16px', background: 'rgba(255, 255, 255, 0.02)', borderLeft: '2px solid rgba(255, 255, 255, 0.2)', borderRadius: '0 4px 4px 0', border: '1px solid transparent' }}>
-                        <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: '#fff', textTransform: 'uppercase', marginBottom: '8px' }}>Broker Mode</h4>
-                        <div style={{ display: 'flex', gap: '12px' }}>
-                          <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Active Listings: <strong style={{ color: '#fff' }}>4</strong></span>
-                          <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Inbound Leads: <strong style={{ color: '#fff' }}>12</strong></span>
-                        </div>
-                      </div>
-                    </Link>
-                  )}
-                  {currentUser.tags?.includes('provider') && (
-                    <Link href="/dashboard" style={{ textDecoration: 'none', display: 'block' }}>
-                      <div className="hover:border-gold-accent transition-colors" style={{ padding: '16px', background: 'rgba(255, 255, 255, 0.02)', borderLeft: '2px solid rgba(255, 255, 255, 0.2)', borderRadius: '0 4px 4px 0', border: '1px solid transparent' }}>
-                        <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: '#fff', textTransform: 'uppercase', marginBottom: '8px' }}>Provider Mode ({currentUser.providerType || 'Service'})</h4>
-                        <div style={{ display: 'flex', gap: '12px' }}>
-                          <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Profile Views: <strong style={{ color: '#fff' }}>142</strong></span>
-                          <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Inquiries: <strong style={{ color: '#fff' }}>2</strong></span>
-                        </div>
-                      </div>
-                    </Link>
-                  )}
-                  {(!currentUser.tags?.includes('owner') && !currentUser.tags?.includes('broker') && !currentUser.tags?.includes('provider')) && (
-                    <Link href="/dashboard" style={{ textDecoration: 'none', display: 'block' }}>
-                      <div className="hover:border-gold-accent transition-colors" style={{ padding: '16px', background: 'rgba(255, 255, 255, 0.02)', borderLeft: '2px solid rgba(255, 255, 255, 0.2)', borderRadius: '0 4px 4px 0', border: '1px solid transparent' }}>
-                        <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: '#fff', textTransform: 'uppercase', marginBottom: '8px' }}>Buyer Mode</h4>
-                        <div style={{ display: 'flex', gap: '12px' }}>
-                          <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Saved Spaces: <strong style={{ color: '#fff' }}>7</strong></span>
-                          <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Curated Intel: <strong style={{ color: '#fff' }}>2</strong></span>
-                        </div>
-                      </div>
-                    </Link>
-                  )}
-                </div>
-              )}
-            </div>
-
-            <div className="menu-footer" style={{ marginTop: '32px' }}>
-              <Link href={currentUser ? "/dashboard" : "/onboarding"} className="prominent-action-link" style={{ background: 'var(--accent)', color: 'var(--bg)', border: 'none', fontWeight: 'bold' }}>
-                {currentUser ? "Enter Dashboard →" : "Open Your Workspace →"}
-              </Link>
-            </div>
-          </div>
-
-          {/* Right Visual Canvas */}
-          <div className="matrix-preview-pane" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(18, 18, 18, 0.4)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)' }}>
-            <div style={{ position: 'relative', width: '100%', maxWidth: '400px', padding: '40px' }}>
-              {/* Abstract Dashboard UI Representation */}
-              <div style={{ background: 'var(--surface)', border: '1px solid var(--surface-variant)', borderRadius: '8px', padding: '24px', boxShadow: '0 20px 40px rgba(0,0,0,0.5)', position: 'relative', zIndex: 2 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', borderBottom: '1px solid var(--surface-variant)', paddingBottom: '16px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--bg)', fontWeight: 'bold', fontFamily: 'var(--font-mono)' }}>
-                      {currentUser?.primaryMode === 'broker' ? 'BR' : currentUser?.primaryMode === 'provider' ? 'PR' : currentUser?.primaryMode === 'buyer' ? 'BY' : 'OW'}
-                    </div>
-                    <div>
-                      <div style={{ fontSize: '14px', fontWeight: 'bold', color: '#fff' }}>
-                        {currentUser?.primaryMode === 'broker' ? 'Broker Dashboard' : currentUser?.primaryMode === 'provider' ? 'Provider Dashboard' : currentUser?.primaryMode === 'buyer' ? 'Buyer Dashboard' : 'Owner Dashboard'}
-                      </div>
-                      <div style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--accent)' }}>VERIFIED ACCOUNT</div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
-                  <div style={{ background: 'rgba(0,0,0,0.3)', padding: '16px', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                    <div style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>
-                      {currentUser?.primaryMode === 'provider' ? 'PROFILE VIEWS' : currentUser?.primaryMode === 'buyer' ? 'SAVED SPACES' : 'ACTIVE LISTINGS'}
-                    </div>
-                    <div style={{ fontSize: '24px', color: '#fff', fontFamily: 'var(--font-display)', marginTop: '8px' }}>
-                      {currentUser?.primaryMode === 'provider' ? '142' : currentUser?.primaryMode === 'buyer' ? '07' : '03'}
-                    </div>
-                  </div>
-                  <div style={{ background: 'rgba(255,184,0,0.05)', padding: '16px', borderRadius: '4px', border: '1px solid rgba(255,184,0,0.2)' }}>
-                    <div style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--accent)' }}>
-                      {currentUser?.primaryMode === 'buyer' ? 'CURATED INTEL' : 'NEW LEADS'}
-                    </div>
-                    <div style={{ fontSize: '24px', color: 'var(--accent)', fontFamily: 'var(--font-display)', marginTop: '8px' }}>
-                      {currentUser?.primaryMode === 'buyer' ? '02' : '12'}
-                    </div>
-                  </div>
-                </div>
-                
-                <div style={{ height: '40px', background: 'var(--surface-variant)', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: '12px', border: '1px dashed rgba(255,255,255,0.1)' }}>
-                  {currentUser?.primaryMode === 'provider' ? '+ Update Portfolio' : currentUser?.primaryMode === 'buyer' ? 'Explore Directory' : '+ List New Property'}
-                </div>
-              </div>
-              
-              {/* Decorative Glow */}
-              <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '150%', height: '150%', background: 'radial-gradient(circle, rgba(255,184,0,0.08) 0%, rgba(0,0,0,0) 60%)', zIndex: 1 }}></div>
-            </div>
-          </div>
-
-        </div>
-      </DescentSection>
+      </section>
 
       <style>{`
         /* Cinematic Snap Container */
@@ -1540,7 +967,7 @@ export default function Home() {
           display: none;
         }
 
-        /* While the descent is active the hero holds in place — the sequence
+        /* While the descent is active the hero holds in place ΓÇö the sequence
            happens "in place" over the homepage (scroll-driven reveal arrives
            in Stage 2). */
         .cinematic-container.descending {
@@ -1590,7 +1017,7 @@ export default function Home() {
           margin-top: 64px;
         }
 
-        /* ═══ SECTION 1: SPACE HERO ══════════════════════════════════ */
+        /* ΓòÉΓòÉΓòÉ SECTION 1: SPACE HERO ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */
         .section-hook {
           display: flex;
           align-items: center;
@@ -1706,7 +1133,7 @@ export default function Home() {
           to { transform: translate(-50%, -50%) rotate(360deg); }
         }
 
-        /* ── Faint drifting rock fragments / meteors (Occasional) ──── */
+        /* ΓöÇΓöÇ Faint drifting rock fragments / meteors (Occasional) ΓöÇΓöÇΓöÇΓöÇ */
         @keyframes driftToCenter {
           0% {
             transform: scale(1);
@@ -1727,7 +1154,7 @@ export default function Home() {
           }
         }
 
-        /* ── Comet Elements ── */
+        /* ΓöÇΓöÇ Comet Elements ΓöÇΓöÇ */
         .comet-head {
           width: 100%;
           height: 100%;
@@ -1748,7 +1175,7 @@ export default function Home() {
           pointer-events: none;
         }
 
-        /* ── Drifting Neutron Star ── */
+        /* ΓöÇΓöÇ Drifting Neutron Star ΓöÇΓöÇ */
         .neutron-star-drifting {
           width: 100%;
           height: 100%;
@@ -1776,14 +1203,14 @@ export default function Home() {
 
         /* Static pulsing star styling removed per user request */
 
-        /* ── Main wordmark container ─────────────────────────────── */
+        /* ΓöÇΓöÇ Main wordmark container ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
         .hook-content {
           text-align: center;
           z-index: 10;
           position: relative;
         }
 
-        /* Event-horizon canvas — full-cover, behind all hero content */
+        /* Event-horizon canvas ΓÇö full-cover, behind all hero content */
         .event-horizon-canvas {
           position: absolute;
           inset: 0;
@@ -1794,7 +1221,7 @@ export default function Home() {
           display: block;
         }
 
-        /* ════════════ TITLE SCREEN — WORDMARK REDESIGN ════════════ */
+        /* ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ TITLE SCREEN ΓÇö WORDMARK REDESIGN ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */
         .scoutit-wordmark {
           position: relative;
           display: flex;
@@ -1843,7 +1270,7 @@ export default function Home() {
           animation: titleImpact 0.3s ease-out forwards;
         }
 
-        /* ── UFO (clickable easter egg) hovering above the wordmark ── */
+        /* ΓöÇΓöÇ UFO (clickable easter egg) hovering above the wordmark ΓöÇΓöÇ */
         .title-ufo-zone {
           display: flex;
           flex-direction: column;
@@ -1863,7 +1290,7 @@ export default function Home() {
           animation: titleUfoFloat 3s ease-in-out infinite;
         }
         .title-ufo.powering { animation: none; }   /* stop floating during power-up */
-        /* Soft gold underglow — UFO emits faint warmth downward */
+        /* Soft gold underglow ΓÇö UFO emits faint warmth downward */
         .title-ufo-underglow {
           position: absolute;
           top: 60%;
@@ -1905,7 +1332,7 @@ export default function Home() {
         .title-ufo.powering .porthole { animation: portPower 0.166s ease-in-out 3; }
         .title-ufo-svg .ufo-belly { fill: rgba(255, 184, 0, 0.6); }
 
-        /* ── Tractor beam: gold cone, fades to transparent, extend → hold → fade ── */
+        /* ΓöÇΓöÇ Tractor beam: gold cone, fades to transparent, extend ΓåÆ hold ΓåÆ fade ΓöÇΓöÇ */
         .title-beam {
           display: block;
           width: 3px;
@@ -1937,7 +1364,7 @@ export default function Home() {
           }
         }
 
-        /* ── Discipline badge ── */
+        /* ΓöÇΓöÇ Discipline badge ΓöÇΓöÇ */
         .title-badge {
           font-family: 'Courier New', monospace;
           font-size: 13px;
@@ -1947,7 +1374,7 @@ export default function Home() {
           margin-bottom: 22px;
         }
 
-        /* ── Divider ── */
+        /* ΓöÇΓöÇ Divider ΓöÇΓöÇ */
         .title-divider {
           width: 32px;
           height: 1px;
@@ -1955,7 +1382,7 @@ export default function Home() {
           margin: 0 auto 22px;
         }
 
-        /* ── Taglines ── */
+        /* ΓöÇΓöÇ Taglines ΓöÇΓöÇ */
         .title-tagline-1 {
           font-family: Georgia, serif;
           font-style: italic;
@@ -2012,7 +1439,7 @@ export default function Home() {
           35%  { opacity: 1; }
           100% { opacity: 0; transform: translate(-50%, -50%) scale(1.4); }
         }
-        /* ════════════ END TITLE SCREEN ════════════ */
+        /* ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ END TITLE SCREEN ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */
 
         /* Base letter style */
         .letter {
@@ -2025,19 +1452,19 @@ export default function Home() {
           opacity: 0;
         }
 
-        /* ── S: Comet Trail ───────────────────────────── */
+        /* ΓöÇΓöÇ S: Comet Trail ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
         .letter-s {
           animation: cometDraw 0.7s cubic-bezier(0.4,0,0.2,1) forwards;
           text-shadow: 0 0 12px rgba(255, 184, 0, 0.5);
         }
 
-        /* ── C: Eclipse Reveal ────────────────────────── */
+        /* ΓöÇΓöÇ C: Eclipse Reveal ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
         .letter-c {
           animation: eclipseReveal 0.65s ease forwards;
           clip-path: inset(0 100% 0 0);
         }
 
-        /* ── O: Planet + Orbit Ring ───────────────────── */
+        /* ΓöÇΓöÇ O: Planet + Orbit Ring ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
         .letter-o {
           animation: planetPulse 0.6s ease forwards;
         }
@@ -2059,19 +1486,19 @@ export default function Home() {
           animation: signalFill 0.55s ease forwards;
         }
 
-        /* ── T1: Satellite Arms ───────────────────────── */
+        /* ΓöÇΓöÇ T1: Satellite Arms ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
         .letter-t1 {
           animation: satelliteArms 0.55s ease forwards;
           transform-origin: center center;
         }
 
-        /* I — normal letter, just needs position:relative for the UFO anchor */
+        /* I ΓÇö normal letter, just needs position:relative for the UFO anchor */
         .letter-i {
           animation: fadeIn 0.4s ease forwards;
           position: relative;
         }
 
-        /* UFO ANCHOR — static centering, never animated.
+        /* UFO ANCHOR ΓÇö static centering, never animated.
            ::after drops the green cognition beam down through the I */
         .ufo-anchor {
           position: absolute;
@@ -2098,7 +1525,7 @@ export default function Home() {
           border-radius: 0 0 2px 2px;
         }
 
-        /* UFO FLOAT — only translateY animated, horizontal centering untouched */
+        /* UFO FLOAT ΓÇö only translateY animated, horizontal centering untouched */
         .ufo-float {
           display: flex;
           flex-direction: column;
@@ -2180,7 +1607,7 @@ export default function Home() {
           animation-fill-mode: forwards;
         }
 
-        /* ── T2: Targeting Reticle ────────────────────── */
+        /* ΓöÇΓöÇ T2: Targeting Reticle ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
         .letter-t2 {
           animation: targetLock 0.6s ease forwards;
           position: relative;
@@ -2205,7 +1632,7 @@ export default function Home() {
           animation: reticleContract 0.5s ease 3.65s forwards;
         }
 
-        /* ── Subtitle ─────────────────────────────────── */
+        /* ΓöÇΓöÇ Subtitle ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
         .hook-subtitle {
           font-family: var(--font-mono);
           font-size: 13px;
@@ -2318,22 +1745,22 @@ export default function Home() {
           transform: translateY(-2px);
         }
 
-        /* KEYFRAMES ═══════════════════════════════════════════════════ */
+        /* KEYFRAMES ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */
 
-        /* S — comet: draws left-to-right with trailing glow */
+        /* S ΓÇö comet: draws left-to-right with trailing glow */
         @keyframes cometDraw {
           0%   { opacity: 0; clip-path: inset(0 100% 0 0); }
           30%  { opacity: 1; clip-path: inset(0 60% 0 0); }
           100% { opacity: 1; clip-path: inset(0 0% 0 0); }
         }
 
-        /* C — eclipse reveal */
+        /* C ΓÇö eclipse reveal */
         @keyframes eclipseReveal {
           0%   { opacity: 0; clip-path: inset(0 100% 0 0); }
           100% { opacity: 1; clip-path: inset(0 0% 0 0); }
         }
 
-        /* O — planet pulse */
+        /* O ΓÇö planet pulse */
         @keyframes planetPulse {
           0%   { opacity: 0; transform: scale(0.6); filter: blur(4px); }
           60%  { opacity: 1; transform: scale(1.08); filter: blur(0); }
@@ -2346,13 +1773,13 @@ export default function Home() {
           100% { opacity: 0;   transform: translate(-50%, -50%) rotateX(65deg) rotateZ(360deg); }
         }
 
-        /* U — signal fill from bottom */
+        /* U ΓÇö signal fill from bottom */
         @keyframes signalFill {
           0%   { opacity: 0; transform: translateY(10px); }
           100% { opacity: 1; transform: translateY(0); }
         }
 
-        /* T1 — satellite arms extend */
+        /* T1 ΓÇö satellite arms extend */
         @keyframes satelliteArms {
           0%   { opacity: 0; transform: scaleX(0.1); }
           50%  { opacity: 1; transform: scaleX(1.1); }
@@ -2399,44 +1826,44 @@ export default function Home() {
           100% { opacity: 0.5; }
         }
 
-        /* T2 — reticle contract */
+        /* T2 ΓÇö reticle contract */
         @keyframes reticleContract {
           0%   { opacity: 0.8; transform: translate(-50%, -50%) scale(2); }
           100% { opacity: 0;   transform: translate(-50%, -50%) scale(0.9); }
         }
 
-        /* T2 — target lock-in */
+        /* T2 ΓÇö target lock-in */
         @keyframes targetLock {
           0%   { opacity: 0; transform: scale(1.3); filter: blur(3px); }
           70%  { opacity: 1; transform: scale(0.95); }
           100% { opacity: 1; transform: scale(1); filter: blur(0); }
         }
 
-        /* UFO gentle float bob ─────────────────── */
+        /* UFO gentle float bob ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
         @keyframes float {
           0%, 100% { transform: translateY(-3px); }
           50%       { transform: translateY(3px); }
         }
 
-        /* Green cognition beam pulse ───────────── */
+        /* Green cognition beam pulse ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
         @keyframes beamGlow {
           0%, 100% { opacity: 0.4; }
           50%       { opacity: 0.8; }
         }
 
-        /* Star twinkle — fast (bright, quick blink) */
+        /* Star twinkle ΓÇö fast (bright, quick blink) */
         @keyframes twinkleFast {
           0%, 100% { opacity: 0;    transform: scale(0.8); }
           40%, 60% { opacity: 0.75; transform: scale(1.2); }
         }
 
-        /* Star twinkle — medium */
+        /* Star twinkle ΓÇö medium */
         @keyframes twinkleMed {
           0%, 100% { opacity: 0;   transform: scale(0.9); }
           45%, 55% { opacity: 0.5; transform: scale(1.1); }
         }
 
-        /* Star twinkle — slow (dim, deep-space) */
+        /* Star twinkle ΓÇö slow (dim, deep-space) */
         @keyframes twinkleSlow {
           0%, 100% { opacity: 0;    }
           40%, 60% { opacity: 0.35; }
@@ -2452,6 +1879,8 @@ export default function Home() {
         .property-menu {
           width: 22%;
           min-width: 280px;
+          background: var(--surface);
+          border-right: 1px solid var(--border-solid);
           display: flex;
           flex-direction: column;
           justify-content: space-between;
@@ -2529,6 +1958,7 @@ export default function Home() {
 
         .matrix-preview-pane {
           flex: 1;
+          background: #121212;
           padding: 120px 48px;
           display: flex;
           flex-direction: column;
@@ -3532,9 +2962,9 @@ export default function Home() {
           }
         }
 
-        /* ════════════════════════════════════════════════════════════
+        /* ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
            MOBILE-FIRST COMPREHENSIVE OPTIMIZATIONS
-           ════════════════════════════════════════════════════════════ */
+           ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */
 
         /* TABLET & MEDIUM MOBILE (768px - 900px) */
         @media (max-width: 900px) {
@@ -4044,7 +3474,7 @@ export default function Home() {
           }
         }
 
-        /* ── PERFORMANCE: Disable animations on reduced motion ── */
+        /* ΓöÇΓöÇ PERFORMANCE: Disable animations on reduced motion ΓöÇΓöÇ */
         @media (prefers-reduced-motion: reduce) {
           * {
             animation-duration: 0.01ms !important;
@@ -4068,7 +3498,7 @@ export default function Home() {
           }
         }
 
-        /* ── LANDSCAPE ORIENTATION ── */
+        /* ΓöÇΓöÇ LANDSCAPE ORIENTATION ΓöÇΓöÇ */
         @media (max-height: 600px) and (orientation: landscape) {
           .section-hook {
             min-height: 100vh;
@@ -4186,7 +3616,7 @@ export default function Home() {
         <Footer />
       </section>
 
-      {/* Cinematic golden-light journey — overlay, activated by the UFO click */}
+      {/* Cinematic golden-light journey ΓÇö overlay, activated by the UFO click */}
       <CinematicJourney />
     </main>
   );
