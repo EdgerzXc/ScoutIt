@@ -220,7 +220,7 @@ export default function DescentPage() {
         <div className="layer-content">
           <div className="dl-eyebrow">Layer 05 · the mantle</div>
           <h2 className="dl-title">We're the layer around you.</h2>
-          <p className="dl-sub">ScoutIT is the molten company wrapped around the thing at the center. Not a self-celebration — a promise: everything we build is to surround and protect you.</p>
+          <p className="dl-sub">ScoutIT is the massive, structured intelligence database wrapping around the thing at the center. We do the quiet, heavy lifting: everything we store is to protect and support you.</p>
           <Link href="/about" className="dl-cta">Read our story →</Link>
         </div>
       </section>

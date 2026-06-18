@@ -1496,7 +1496,9 @@
 
         /* SECTION: SERVICES LAYER */
         .section-services {
-          background: #070707;
+          background: transparent;
+          position: relative;
+          z-index: 10;
           display: flex;
           flex-direction: column;
           justify-content: center;
@@ -1731,6 +1733,12 @@
         @keyframes fadeIn {
           from { opacity: 0; }
           to { opacity: 1; }
+        }
+
+        /* Core "scroll down to breach" hint — gentle attention pulse */
+        @keyframes pulse {
+          0%, 100% { opacity: 0.55; }
+          50%      { opacity: 1; }
         }
 
         @keyframes pulseLine {

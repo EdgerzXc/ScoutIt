@@ -20,7 +20,7 @@ export default function CrustLayer() {
         <BackgroundCrust />
       </div>
 
-      <section className="snap-section section-services">
+      <section className="snap-section section-services relative z-10">
         <div className="services-content">
           <header className="section-header-center">
             <span className="vector-label">Layer 04 // Crust</span>

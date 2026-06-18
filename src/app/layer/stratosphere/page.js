@@ -19,10 +19,10 @@ export default function StratosphereLayer() {
     switch (displayType) {
       case "Residential": return "Residential";
       case "Commercial": return "Commercial";
-      case "STR": return "Short-Term Rental";
+      case "STR": return "STR";
       case "Hospitality": return "Hospitality";
-      case "Restaurants": return "Restaurant Space";
-      case "Venues/Events": return "Events / Venues";
+      case "Restaurants": return "Restaurants";
+      case "Venues/Events": return "Venues";
       default: return "Residential";
     }
   };
