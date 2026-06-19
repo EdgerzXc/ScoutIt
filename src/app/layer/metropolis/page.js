@@ -60,7 +60,7 @@ export default function MetropolisLayer() {
             </div>
           </div>
           <Link
-            href={`/discover?category=${category}`}
+            href={`/property?type=${category}`}
             className="prominent-action-link metro-browse"
           >
             Browse {browseLabel} →
