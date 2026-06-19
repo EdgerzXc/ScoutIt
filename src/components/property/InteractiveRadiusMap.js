@@ -157,7 +157,7 @@ export default function InteractiveRadiusMap({ onSearch, onClose, initialLng = 1
         </button>
       </div>
 
-      <style jsx>{`
+      <style dangerouslySetInnerHTML={{ __html: `
         .interactive-radius-wrapper {
           width: 100%;
           height: 400px;
@@ -168,19 +168,15 @@ export default function InteractiveRadiusMap({ onSearch, onClose, initialLng = 1
           margin-bottom: 24px;
           animation: slideDown 0.4s ease-out;
         }
-
         @keyframes slideDown {
           from { opacity: 0; transform: translateY(-10px); }
           to { opacity: 1; transform: translateY(0); }
         }
-
         .map-header-bar {
           position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
+          top: 0; left: 0; right: 0;
           height: 40px;
-          background: rgba(13, 13, 13, 0.85);
+          background: rgba(13,13,13,0.85);
           backdrop-filter: blur(8px);
           z-index: 10;
           display: flex;
@@ -194,7 +190,6 @@ export default function InteractiveRadiusMap({ onSearch, onClose, initialLng = 1
           text-transform: uppercase;
           letter-spacing: 0.1em;
         }
-
         .close-map-btn {
           background: none;
           border: none;
@@ -204,19 +199,17 @@ export default function InteractiveRadiusMap({ onSearch, onClose, initialLng = 1
           transition: color 0.2s;
         }
         .close-map-btn:hover { color: #f0ede8; }
-
         .mapbox-container {
           width: 100%;
           height: 100%;
           background: #000;
         }
-
         .map-control-panel {
           position: absolute;
           bottom: 16px;
           left: 16px;
           width: 280px;
-          background: rgba(18, 18, 18, 0.9);
+          background: rgba(18,18,18,0.9);
           backdrop-filter: blur(12px);
           border: 1px solid #2d2a24;
           border-radius: 6px;
@@ -224,13 +217,11 @@ export default function InteractiveRadiusMap({ onSearch, onClose, initialLng = 1
           z-index: 10;
           box-shadow: 0 8px 24px rgba(0,0,0,0.5);
         }
-
         .control-row {
           display: flex;
           justify-content: space-between;
           margin-bottom: 12px;
         }
-
         .control-label {
           font-family: var(--font-mono);
           font-size: 10px;
@@ -238,14 +229,12 @@ export default function InteractiveRadiusMap({ onSearch, onClose, initialLng = 1
           text-transform: uppercase;
           letter-spacing: 0.05em;
         }
-
         .control-value {
           font-family: var(--font-mono);
           font-size: 10px;
           color: #ffb800;
           font-weight: bold;
         }
-
         .radius-slider {
           width: 100%;
           appearance: none;
@@ -255,7 +244,6 @@ export default function InteractiveRadiusMap({ onSearch, onClose, initialLng = 1
           outline: none;
           margin-bottom: 12px;
         }
-
         .radius-slider::-webkit-slider-thumb {
           appearance: none;
           width: 16px;
@@ -265,7 +253,6 @@ export default function InteractiveRadiusMap({ onSearch, onClose, initialLng = 1
           cursor: pointer;
           border: 2px solid #1a1a1a;
         }
-
         .control-hint {
           font-size: 10px;
           color: #6a6a6a;
@@ -273,8 +260,7 @@ export default function InteractiveRadiusMap({ onSearch, onClose, initialLng = 1
           border-top: 1px dashed #262626;
           padding-top: 8px;
         }
-
-        :global(.custom-map-center-pin) {
+        .custom-map-center-pin {
           width: 24px;
           height: 24px;
           position: relative;
@@ -283,10 +269,8 @@ export default function InteractiveRadiusMap({ onSearch, onClose, initialLng = 1
           justify-content: center;
           cursor: grab;
         }
-        :global(.custom-map-center-pin:active) {
-          cursor: grabbing;
-        }
-        :global(.pin-dot) {
+        .custom-map-center-pin:active { cursor: grabbing; }
+        .pin-dot {
           width: 10px;
           height: 10px;
           background: #ffb800;
@@ -294,7 +278,7 @@ export default function InteractiveRadiusMap({ onSearch, onClose, initialLng = 1
           border: 2px solid #000;
           z-index: 2;
         }
-        :global(.pin-pulse) {
+        .pin-pulse {
           position: absolute;
           width: 100%;
           height: 100%;
@@ -307,7 +291,6 @@ export default function InteractiveRadiusMap({ onSearch, onClose, initialLng = 1
           0% { transform: scale(0.8); opacity: 0.5; }
           100% { transform: scale(2.5); opacity: 0; }
         }
-
         .confirm-radar-btn {
           width: 100%;
           margin-top: 16px;
@@ -324,10 +307,8 @@ export default function InteractiveRadiusMap({ onSearch, onClose, initialLng = 1
           cursor: pointer;
           transition: background 0.2s;
         }
-        .confirm-radar-btn:hover {
-          background: #d8ba7d;
-        }
-      `}</style>
+        .confirm-radar-btn:hover { background: #d8ba7d; }
+      `}} />
     </div>
   );
 }
