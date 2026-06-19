@@ -254,6 +254,30 @@ export default function BackgroundStratosphere() {
           .s2-speed-wrap, .s2-cloud-layer { opacity: 0; }
         }
 
+        /* ── MOBILE: stop the GPU-memory blowout that tears tiles to black ──
+           On phones the 8 huge blurred clouds (scaling to 5x), the 200vw
+           blend-screen horizon, and the masked blend-screen city bitmap all
+           get promoted to their own GPU layers via will-change and overrun
+           texture memory — the browser then drops tiles to black. We strip
+           the heaviest layers and hold the rest as static frames. */
+        @media (max-width: 768px) {
+          .s2-city, .s2-cloud-punch { will-change: auto !important; }
+
+          /* Drop the biggest hogs entirely. */
+          .s2-cloud-layer,
+          .s2-cloud-flash,
+          .s2-speed-wrap,
+          .s2-atmo { display: none !important; }
+
+          /* Hold the city as one static frame instead of rescaling a masked,
+             screen-blended bitmap every frame. */
+          .s2-city { animation: none !important; transform: scale(1.1) !important; opacity: 0.9 !important; }
+          .s2-city div { mix-blend-mode: normal !important; }
+
+          /* Shrink the last large blur. */
+          .s2-bloom { animation: none !important; filter: blur(16px) !important; opacity: 0.6 !important; }
+        }
+
       `}} />
     </div>
   );

@@ -58,6 +58,11 @@ export default function CoreLayer() {
             <Link href="/about-you" className="core-cta">About You →</Link>
             <span className="core-hint">Scroll to breach the inner core ↓</span>
           </div>
+
+          <div className="layer-mission">
+            <h3>Mission</h3>
+            <p>The Core serves as the Personal Layer. Every layer above led here. This is the molten center where the platform becomes yours alone — your profile, your board, your saved spaces. It was always about you.</p>
+          </div>
         </div>
       </section>
 

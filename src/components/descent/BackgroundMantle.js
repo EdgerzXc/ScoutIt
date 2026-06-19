@@ -39,12 +39,16 @@ export default function BackgroundMantle() {
 
       const W = mount.clientWidth  || window.innerWidth;
       const H = mount.clientHeight || window.innerHeight;
+      // Phones can't sustain thousands of lit draw calls — slash the geometry
+      // budget and the render cost when the viewport is small. This is what
+      // stops the frame collapse / WebGL context loss (the black glitching).
+      const isMobile = (W || window.innerWidth) < 768;
       const camera = new THREE.PerspectiveCamera(65, W / H, 0.5, 2000);
       camera.position.set(0, TUBE_H * 0.45, 0); // Looking straight down the silo
 
-      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer = new THREE.WebGLRenderer({ antialias: !isMobile, alpha: true, powerPreference: "high-performance" });
       renderer.setSize(W, H);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.25 : 2));
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
       renderer.toneMappingExposure = 1.1;
       mount.appendChild(renderer.domElement);
@@ -74,8 +78,8 @@ export default function BackgroundMantle() {
       scene.add(coreGlow); disposables.push(coreGlowGeo, coreGlowMat);
 
       /* ── THE DATA SILO WALLS (Endless Shelves) ── */
-      const RINGS_COUNT = 90;
-      const RING_SPACING = 20;
+      const RINGS_COUNT = isMobile ? 32 : 90;
+      const RING_SPACING = isMobile ? 24 : 20;
 
       // Group to hold all active lights so we can pulse them
       const activeDataNodes = [];
@@ -98,7 +102,7 @@ export default function BackgroundMantle() {
          disposables.push(shelfGeo, shelfMat);
          
          // Server Data Blocks on this shelf
-         const numBlocks = 16 + Math.floor(rnd(r) * 20);
+         const numBlocks = isMobile ? (7 + Math.floor(rnd(r) * 7)) : (16 + Math.floor(rnd(r) * 20));
          for(let b=0; b<numBlocks; b++) {
             const a = rnd(r*10 + b) * Math.PI * 2;
             const w = 3 + rnd(r+b)*10;
@@ -181,7 +185,8 @@ export default function BackgroundMantle() {
         emissive: 0x2a0500, // Faint red heat from the magma
         emissiveIntensity: 0.6
       });
-      for(let i=0; i<45; i++) {
+      const ROCK_COUNT = isMobile ? 16 : 45;
+      for(let i=0; i<ROCK_COUNT; i++) {
         const a = rnd(i*3.1) * Math.PI * 2;
         const rOff = TUBE_R * 0.85 + rnd(i*2.2) * 15;
         const h = 30 + rnd(i*1.5) * 90; // Jagged varying heights
@@ -200,7 +205,7 @@ export default function BackgroundMantle() {
       scene.add(rockGroup); disposables.push(rockMat);
 
       /* ── DATA PACKETS (Shooting up and down the beam) ── */
-      const PACKETS = 150;
+      const PACKETS = isMobile ? 50 : 150;
       const pGeo = new THREE.BoxGeometry(0.5, 12, 0.5);
       const pMat = new THREE.MeshBasicMaterial({ 
         color: 0xFFFFFF, 

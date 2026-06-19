@@ -158,11 +158,12 @@ export default function BackgroundCore({ isLoggedIn }) {
 
       const W = mount.clientWidth || window.innerWidth;
       const H = mount.clientHeight || window.innerHeight;
+      const isMobile = (W || window.innerWidth) < 768; // cheaper render on phones
       const camera = new THREE.PerspectiveCamera(60, W / H, 0.5, 2000);
 
-      renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+      renderer = new THREE.WebGLRenderer({ antialias: !isMobile, powerPreference: "high-performance" });
       renderer.setSize(W, H);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.25 : 2));
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
       renderer.toneMappingExposure = 1.3; // slightly brighter for climax
       mount.appendChild(renderer.domElement);

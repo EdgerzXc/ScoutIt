@@ -34,11 +34,12 @@ export default function BackgroundCrust() {
       const scene = new THREE.Scene();
       const W = mount.clientWidth || window.innerWidth;
       const H = mount.clientHeight || window.innerHeight;
+      const isMobile = (W || window.innerWidth) < 768; // cheaper render on phones
       const camera = new THREE.PerspectiveCamera(60, W / H, 0.1, 1000);
-      
-      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+
+      renderer = new THREE.WebGLRenderer({ antialias: !isMobile, alpha: true });
       renderer.setSize(W, H);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.25 : 2));
       mount.appendChild(renderer.domElement);
 
       const tickFunctions = [];

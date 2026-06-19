@@ -30,6 +30,10 @@ export default function MantleLayer() {
           <Link href="/about" className="mantle-cta">
             Read our story &rarr;
           </Link>
+          <div className="layer-mission">
+            <h3>Mission</h3>
+            <p>The Mantle serves as the Archive Layer. It is ScoutIt&rsquo;s thickest stratum: the massive, structured intelligence reservoir wrapping around the core. It does the quiet, heavy lifting — everything stored here exists to protect and support the person at the center.</p>
+          </div>
         </div>
       </section>
 

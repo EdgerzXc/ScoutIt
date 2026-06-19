@@ -964,6 +964,33 @@
           color: var(--accent);
         }
 
+        /* ── Shared "Mission" block — identical treatment on every layer,
+           mirrored from Layer 01's board-mission so all layers read the same. ── */
+        .layer-mission {
+          margin-top: 24px;
+          max-width: 320px;
+        }
+        .layer-mission h3 {
+          font-family: var(--font-mono);
+          font-size: 10px;
+          letter-spacing: 0.2em;
+          text-transform: uppercase;
+          color: var(--accent);
+          margin-bottom: 8px;
+        }
+        .layer-mission p {
+          font-family: Georgia, serif;
+          font-style: italic;
+          font-size: 13px;
+          line-height: 1.6;
+          color: var(--accent);
+          opacity: 0.85;
+          margin: 0;
+        }
+        /* Centered layers (Crust / Mantle / Core) center the mission too. */
+        .section-header-center .layer-mission,
+        .mantle-inner .layer-mission { margin-left: auto; margin-right: auto; }
+
         .menu-nav {
           display: flex;
           flex-direction: column;
@@ -1828,6 +1855,8 @@
             scrollbar-width: none;
             gap: 12px;
             width: 100%;
+            scroll-snap-type: x proximity;
+            -webkit-overflow-scrolling: touch;
           }
           .menu-nav::-webkit-scrollbar {
             display: none;
@@ -1837,6 +1866,7 @@
             padding: 10px 16px;
             white-space: nowrap;
             flex-shrink: 0;
+            scroll-snap-align: start;
           }
           .menu-btn:hover, .menu-btn.active {
             padding-left: 16px;
@@ -1916,9 +1946,10 @@
             display: none !important;
           }
           .mini-preview-card {
-            flex: 0 0 280px !important;
-            width: 280px !important;
-            scroll-snap-align: center !important;
+            flex: 0 0 80% !important;
+            max-width: 80% !important;
+            width: auto !important;
+            scroll-snap-align: start !important;
           }
           
           /* Shorten card box to fit in 1 scroll */
@@ -1955,9 +1986,10 @@
             display: none !important;
           }
           .discover-spotlight-card-link {
-            flex: 0 0 260px !important;
-            width: 260px !important;
-            scroll-snap-align: center !important;
+            flex: 0 0 80% !important;
+            max-width: 80% !important;
+            width: auto !important;
+            scroll-snap-align: start !important;
           }
           .discover-spotlight-card-link > div:first-child {
             height: 100px !important;
@@ -1981,9 +2013,10 @@
             display: none !important;
           }
           .discover-feed-preview > div:last-child > div {
-            flex: 0 0 260px !important;
-            width: 260px !important;
-            scroll-snap-align: center !important;
+            flex: 0 0 80% !important;
+            max-width: 80% !important;
+            width: auto !important;
+            scroll-snap-align: start !important;
           }
 
           /* 3. Layer 03: Horizontal row showing cards */
@@ -2005,10 +2038,11 @@
             display: none !important;
           }
           .service-card {
-            flex: 0 0 75vw !important;
-            width: 75vw !important;
+            flex: 0 0 80% !important;
+            max-width: 80% !important;
+            width: auto !important;
             scroll-snap-align: start !important;
-            margin-right: 16px !important;
+            margin-right: 0 !important;
           }
           .service-card-inner {
             padding: 16px 12px !important;
@@ -2048,9 +2082,10 @@
             display: none !important;
           }
           .flow-card {
-            flex: 0 0 220px !important;
-            width: 220px !important;
-            scroll-snap-align: center !important;
+            flex: 0 0 80% !important;
+            max-width: 80% !important;
+            width: auto !important;
+            scroll-snap-align: start !important;
             padding: 16px !important;
           }
           .flow-card h4 {
@@ -2202,8 +2237,8 @@
 
           .property-menu {
             padding: 32px 16px;
-            max-height: 250px;
-            gap: 12px;
+            max-height: none;
+            gap: 14px;
           }
 
           .matrix-preview-pane {

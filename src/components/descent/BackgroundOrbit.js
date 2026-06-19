@@ -289,12 +289,13 @@ export default function BackgroundOrbit() {
       const scene=new THREE.Scene();
       const W=mount.clientWidth||window.innerWidth;
       const H=mount.clientHeight||window.innerHeight;
+      const isMobile=(W||window.innerWidth)<768; // cheaper render on phones
       const camera=new THREE.PerspectiveCamera(55,W/H,0.5,2000);
       camera.position.set(0,15,560); camera.lookAt(0,0,0);
 
-      renderer=new THREE.WebGLRenderer({antialias:true});
+      renderer=new THREE.WebGLRenderer({antialias:!isMobile});
       renderer.setSize(W,H);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio,isMobile?1.25:2));
       renderer.toneMapping=THREE.ACESFilmicToneMapping;
       renderer.toneMappingExposure=1.1;
       mount.appendChild(renderer.domElement);

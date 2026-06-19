@@ -54,6 +54,10 @@ export default function MetropolisLayer() {
                 </button>
               ))}
             </nav>
+            <div className="layer-mission">
+              <h3>Mission</h3>
+              <p>The Metropolis serves as the Directory Layer. Every kind of space — home, office, venue, table — is the same product in disguise. This layer exists to let you walk the market building by building and find the exact square meters that fit you.</p>
+            </div>
           </div>
           <Link
             href={`/discover?category=${category}`}
@@ -308,6 +312,41 @@ export default function MetropolisLayer() {
           .metro-content { max-height: none; }
           .metro-cat:hover { background: transparent; color: rgba(255,255,255,0.55); }
           .metro-card:hover { transform: none; }
+
+          /* Category chips swipe sideways instead of stacking tall */
+          .metro-nav {
+            flex-direction: row;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            gap: 8px;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 4px;
+            scroll-snap-type: x proximity;
+          }
+          .metro-nav::-webkit-scrollbar { display: none; }
+          .metro-cat { flex: 0 0 auto; white-space: nowrap; scroll-snap-align: start; }
+
+          /* Property cards: swipe left/right — no long vertical drag.
+             Consistent rail spec shared across all layers. */
+          .metro-grid {
+            display: flex !important;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            gap: 14px;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            padding-bottom: 10px;
+          }
+          .metro-grid::-webkit-scrollbar { display: none; }
+          .metro-card {
+            flex: 0 0 80%;
+            max-width: 80%;
+            scroll-snap-align: start;
+          }
+          .metro-photo { height: 150px; }
         }
 
         @media (max-width: 640px) {
@@ -316,7 +355,8 @@ export default function MetropolisLayer() {
           .metro-search { font-size: 16px; }
           .metro-cat { min-height: 44px; padding: 10px 14px; }
           .metro-browse { min-height: 48px; display: flex; align-items: center; justify-content: center; }
-          .metro-grid { grid-template-columns: 1fr; gap: 12px; }
+          .metro-grid { gap: 14px; }
+          .metro-card { flex-basis: 82%; max-width: 82%; }
         }
 
         @media (max-width: 480px) {

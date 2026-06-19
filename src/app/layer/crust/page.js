@@ -29,6 +29,10 @@ export default function CrustLayer() {
               Verified advisors, photographers, site researchers, and event designers —
               the professionals who make every space decision count.
             </p>
+            <div className="layer-mission">
+              <h3>Mission</h3>
+              <p>The Crust serves as the Trust Layer. It is the solid ground the whole platform rests on — verified advisors, photographers, researchers, and planners — the people who make every space decision real, accountable, and worth committing to.</p>
+            </div>
           </header>
 
           <div className="services-grid">

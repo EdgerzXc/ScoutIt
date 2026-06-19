@@ -57,6 +57,10 @@ export default function StratosphereLayer() {
                 </button>
               ))}
             </nav>
+            <div className="layer-mission">
+              <h3>Mission</h3>
+              <p>The Stratosphere serves as the Intelligence Layer. This is where market signals travel before they ever touch the ground — neighborhood stories, regional data, and design narratives that let you read the market from above, long before you descend into it.</p>
+            </div>
             <div className="menu-footer">
               <Link href="/intel" className="prominent-action-link">
                 Read the Stories &rarr;
