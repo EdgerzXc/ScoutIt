@@ -604,42 +604,147 @@ label {
    HIGH-CONTRAST ACCESSIBILITY MODE
    ══════════════════════════════════════════════════════════════ */
 body.high-contrast {
-  /* Force maximum contrast for text */
-  --text-secondary: #ffffff !important;
-  --text-muted: #e6e6e6 !important;
-  
-  /* Thicken and highlight faint borders */
-  --border: var(--accent) !important;
-  --border-mid: var(--accent) !important;
-  --border-solid: var(--accent) !important;
+  /* Push all CSS design tokens to maximum contrast */
+  --bg:           #000000;
+  --surface:      #080808;
+  --surface2:     #0e0e0e;
+  --surface3:     #141414;
+  --surface-variant: #141414;
 
-  /* Scale up typography for readability */
+  --text-primary:   #ffffff;
+  --text-secondary: #ffffff;
+  --text-muted:     #e0e0e0;
+
+  --border:       rgba(255, 255, 255, 0.5);
+  --border-mid:   rgba(255, 255, 255, 0.6);
+  --border-solid: rgba(255, 255, 255, 0.4);
+
+  /* Lift the baseline font size */
+  font-size: 18px !important;
+  line-height: 1.85 !important;
+}
+
+/* Body and background surfaces */
+body.high-contrast,
+body.high-contrast main,
+body.high-contrast header,
+body.high-contrast footer,
+body.high-contrast section,
+body.high-contrast aside,
+body.high-contrast nav {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+/* All text nodes — cascade over inline-style colour values */
+body.high-contrast p,
+body.high-contrast li,
+body.high-contrast td,
+body.high-contrast th,
+body.high-contrast dd,
+body.high-contrast dt,
+body.high-contrast blockquote {
+  font-size: 18px !important;
+  line-height: 1.85 !important;
+  color: #ffffff !important;
+}
+
+body.high-contrast h1,
+body.high-contrast h2,
+body.high-contrast h3,
+body.high-contrast h4,
+body.high-contrast h5,
+body.high-contrast h6 {
+  color: #ffffff !important;
+  line-height: 1.3 !important;
+}
+
+body.high-contrast h1 { font-size: clamp(32px, 5vw, 56px) !important; }
+body.high-contrast h2 { font-size: clamp(26px, 4vw, 44px) !important; }
+body.high-contrast h3 { font-size: clamp(22px, 3vw, 36px) !important; }
+body.high-contrast h4,
+body.high-contrast h5,
+body.high-contrast h6 { font-size: clamp(18px, 2.5vw, 24px) !important; }
+
+/* Links — make them clearly gold + underlined */
+body.high-contrast a {
+  color: #ffb800 !important;
+  text-decoration: underline !important;
+  text-underline-offset: 3px;
+}
+body.high-contrast a:hover { color: #ffc929 !important; }
+
+/* Span, label, small — override inline colours */
+body.high-contrast span,
+body.high-contrast label,
+body.high-contrast small,
+body.high-contrast caption {
+  color: #ffffff !important;
+}
+
+/* Keep accent gold */
+body.high-contrast .text-accent,
+body.high-contrast [class*="accent"] {
+  color: #ffb800 !important;
+}
+
+/* Buttons — increase contrast and size */
+body.high-contrast button {
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  min-height: 44px;
+}
+
+/* Inputs — pure white text on dark bg */
+body.high-contrast input,
+body.high-contrast textarea,
+body.high-contrast select {
+  background: #000000 !important;
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
   font-size: 18px !important;
 }
-
-body.high-contrast p {
-  font-size: 18px !important;
-  line-height: 1.8 !important;
+body.high-contrast input::placeholder,
+body.high-contrast textarea::placeholder {
+  color: #c8c8c8 !important;
 }
 
-body.high-contrast h1 { font-size: calc(1.15 * 3rem) !important; }
-body.high-contrast h2 { font-size: calc(1.15 * 2.5rem) !important; }
-body.high-contrast h3 { font-size: calc(1.15 * 2rem) !important; }
-body.high-contrast h4, 
-body.high-contrast h5, 
-body.high-contrast h6 { 
-  font-size: calc(1.15 * 1.25rem) !important; 
+/* All borders — make them visible */
+body.high-contrast *[style*="border"] {
+  border-color: rgba(255, 255, 255, 0.35) !important;
 }
 
-/* Ensure links and labels are hyper-visible */
-body.high-contrast a, 
-body.high-contrast label, 
-body.high-contrast span {
-  color: #ffffff;
+/* Focus rings — thick gold ring */
+body.high-contrast :focus-visible {
+  outline: 3px solid #ffb800 !important;
+  outline-offset: 3px !important;
 }
-body.high-contrast .text-accent {
-  color: var(--accent) !important;
-  text-shadow: 0 0 8px rgba(255, 184, 0, 0.4);
+
+/* ══════════════════════════════════════════════════════════════
+   LIGHT MODE
+   Uses CSS filter invert + hue-rotate — the only reliable way to
+   flip a codebase with mixed inline + CSS-var colour sources.
+   Images, video, and canvas are counter-inverted to look normal.
+   The .toolbox-float widget is also counter-inverted so it keeps
+   its dark appearance regardless of the active mode.
+   ══════════════════════════════════════════════════════════════ */
+body.light-mode {
+  filter: invert(1) hue-rotate(180deg);
+  background: #f0ede8;
+}
+
+/* Restore natural appearance for media */
+body.light-mode img,
+body.light-mode video,
+body.light-mode iframe,
+body.light-mode canvas,
+body.light-mode .grain {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+/* Keep the toolbox looking correct (dark) in light mode */
+body.light-mode .toolbox-float {
+  filter: invert(1) hue-rotate(180deg);
 }
 
 /* ══════════════════════════════════════════════════════════════
