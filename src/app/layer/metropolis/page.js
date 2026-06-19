@@ -135,8 +135,8 @@ export default function MetropolisLayer() {
           justify-content: space-between;
           padding: clamp(28px,5vh,52px) 28px;
           border-right: 1px solid rgba(255,184,0,0.12);
-          background: rgba(10,10,10,0.6);
-          backdrop-filter: blur(8px);
+          background: transparent;   /* Layer 01 look — let the city background read through */
+          min-width: 0;              /* allow the category rail to scroll instead of blowing out the frame */
         }
         .metro-kicker {
           font-family: var(--font-mono);
@@ -153,14 +153,16 @@ export default function MetropolisLayer() {
           font-weight: 400;
           color: #f0ede8;
           margin-bottom: 10px;
+          text-shadow: 0 2px 20px rgba(0,0,0,0.7);
         }
         .metro-sub {
           font-family: var(--font-display);
           font-style: italic;
           font-size: 13px;
-          color: rgba(255,255,255,0.45);
+          color: rgba(255,255,255,0.62);
           line-height: 1.6;
           margin-bottom: 24px;
+          text-shadow: 0 1px 14px rgba(0,0,0,0.65);
         }
         .metro-nav {
           display: flex;
@@ -190,6 +192,10 @@ export default function MetropolisLayer() {
           padding: 11px 20px !important;
           margin-top: 20px;
           display: inline-block;
+          align-self: flex-start;
+          max-width: 100%;
+          box-sizing: border-box;
+          white-space: nowrap;
         }
 
         /* ── CONTENT ── */
@@ -197,6 +203,7 @@ export default function MetropolisLayer() {
           padding: clamp(24px,4vh,44px) clamp(20px,3vw,40px);
           overflow-y: auto;
           max-height: calc(100vh - 52px);
+          min-width: 0;   /* lets the card rail scroll rather than stretch the grid */
         }
         .metro-content-head { margin-bottom: 18px; }
         .metro-content-title {
@@ -313,7 +320,7 @@ export default function MetropolisLayer() {
           .metro-cat:hover { background: transparent; color: rgba(255,255,255,0.55); }
           .metro-card:hover { transform: none; }
 
-          /* Category chips swipe sideways instead of stacking tall */
+          /* Category chips: drag left/right (mirrors Layer 01's board-nav) */
           .metro-nav {
             flex-direction: row;
             flex-wrap: nowrap;
@@ -321,11 +328,21 @@ export default function MetropolisLayer() {
             gap: 8px;
             scrollbar-width: none;
             -webkit-overflow-scrolling: touch;
-            padding-bottom: 4px;
             scroll-snap-type: x proximity;
+            width: 100vw;
+            margin-left: -16px;
+            padding: 0 16px 6px;
           }
           .metro-nav::-webkit-scrollbar { display: none; }
-          .metro-cat { flex: 0 0 auto; white-space: nowrap; scroll-snap-align: start; }
+          .metro-cat {
+            flex: 0 0 auto;
+            white-space: nowrap;
+            scroll-snap-align: start;
+            font-size: 15px;
+            padding: 10px 16px;
+            border: 1px solid rgba(255,184,0,0.2);
+          }
+          .metro-cat.on { border-color: rgba(255,184,0,0.5); }
 
           /* Property cards: swipe left/right — no long vertical drag.
              Consistent rail spec shared across all layers. */

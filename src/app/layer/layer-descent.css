@@ -977,15 +977,17 @@
           text-transform: uppercase;
           color: var(--accent);
           margin-bottom: 8px;
+          text-shadow: 0 1px 10px rgba(0,0,0,0.7);
         }
         .layer-mission p {
-          font-family: Georgia, serif;
+          font-family: Georgia, "Times New Roman", serif;
           font-style: italic;
-          font-size: 13px;
-          line-height: 1.6;
-          color: var(--accent);
-          opacity: 0.85;
+          font-size: 13.5px;
+          line-height: 1.65;
+          color: #f3d27a;
+          opacity: 0.92;
           margin: 0;
+          text-shadow: 0 1px 12px rgba(0,0,0,0.75);
         }
         /* Centered layers (Crust / Mantle / Core) center the mission too. */
         .section-header-center .layer-mission,
