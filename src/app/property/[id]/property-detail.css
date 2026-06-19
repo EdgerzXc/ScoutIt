@@ -1167,3 +1167,79 @@ html.lightbox-open {
     padding-right: 16px;
   }
 }
+
+/* ══════════════════════════════════════
+   SMALL PHONES (≤ 480px)
+   ══════════════════════════════════════ */
+@media (max-width: 480px) {
+  .zone-photo {
+    min-height: 220px;
+    aspect-ratio: 4/3;
+  }
+
+  .mobile-hero-title {
+    font-size: 20px;
+  }
+
+  .mobile-hero-hook {
+    font-size: 13px;
+  }
+
+  .mobile-hero-intel {
+    padding: 16px 14px 10px;
+  }
+
+  /* Nav chapters — very compact */
+  .nav-chapter {
+    min-width: 48px;
+    padding: 0 4px;
+  }
+
+  .chapter-label {
+    font-size: 6px;
+  }
+
+  /* Panel content tighter padding */
+  .panel-content {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .display-heading,
+  .chapter-headline {
+    font-size: 22px;
+  }
+
+  /* Spec pills — smaller */
+  .spec-pill {
+    padding: 6px 10px;
+  }
+
+  .pill-val {
+    font-size: 13px;
+  }
+
+  /* Price */
+  .universe-price {
+    font-size: 28px;
+  }
+
+  /* Sidebar grid → single column */
+  .panel-sidebar {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Reaction buttons full-width */
+  .reaction-row {
+    max-width: 100%;
+  }
+
+  /* Touch targets */
+  .reaction-action-btn,
+  .whereto-tab-btn,
+  .move-cta {
+    min-height: 48px;
+    width: 100%;
+    justify-content: center;
+  }
+}

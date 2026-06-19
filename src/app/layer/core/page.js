@@ -367,12 +367,30 @@ export default function CoreLayer() {
         @media (max-width: 768px) {
           .core-guides {
             grid-template-columns: 1fr;
+            gap: 16px;
           }
           .core-inner {
             justify-content: center;
+            padding: 24px 16px;
           }
           .core-inner-inner {
             max-width: 520px;
+          }
+        }
+
+        @media (max-width: 640px) {
+          .core-inner {
+            padding: 20px 14px;
+          }
+          .portal-shortcut {
+            min-height: 48px;
+            padding: 12px 16px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .core-inner {
+            padding: 16px 12px;
           }
         }
       ` }} />

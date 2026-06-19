@@ -385,6 +385,38 @@ export default function WishlistPage() {
             right: -6px;
           }
         }
+
+        @media (max-width: 640px) {
+          .wishlist-main {
+            padding: 70px 14px 32px;
+          }
+          .page-title {
+            font-size: 26px;
+          }
+          .board-card {
+            padding: 14px;
+            gap: 10px;
+          }
+          /* Full-width action buttons on small phones */
+          .card-actions button,
+          .card-actions a {
+            flex: 1;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            touch-action: manipulation;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .page-title {
+            font-size: 22px;
+          }
+          .wishlist-main {
+            padding: 60px 12px 28px;
+          }
+        }
       `}</style>
     </div>
   );

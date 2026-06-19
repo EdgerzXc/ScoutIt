@@ -103,6 +103,8 @@ body {
   min-height: 100dvh;
   background: var(--bg);
   color: var(--text-primary);
+  /* Reserve space for the bottom nav on mobile */
+  padding-bottom: env(safe-area-inset-bottom);
   font-family: var(--font-body);
   font-size: 16px;
   font-weight: 450;
@@ -290,6 +292,11 @@ a:hover {
 
 /* ── MOBILE LAYOUT CONTAINERS ── */
 @media (max-width: 768px) {
+  /* Bottom nav clearance — prevents content from hiding behind the fixed nav */
+  body {
+    padding-bottom: calc(72px + env(safe-area-inset-bottom));
+  }
+
   .snap-section {
     padding: 40px 16px !important;
   }

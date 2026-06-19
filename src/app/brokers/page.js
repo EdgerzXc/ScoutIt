@@ -391,6 +391,23 @@ export default function BrokersPage() {
           .brokers-grid { grid-template-columns: 1fr; }
         }
 
+        @media (max-width: 768px) {
+          .brokers-grid { gap: 16px; }
+          .brokers-main, .brokers-layout { padding: 20px 16px; }
+          .broker-card:hover { transform: none; }
+          .broker-card:active { border-color: var(--accent-border); }
+        }
+
+        @media (max-width: 640px) {
+          .brokers-main, .brokers-layout { padding: 16px 14px; }
+          .brokers-grid { gap: 14px; }
+          .hotmap-row { min-height: 44px; display: flex; flex-direction: column; justify-content: center; }
+        }
+
+        @media (max-width: 480px) {
+          .brokers-grid { gap: 12px; }
+        }
+
         /* Location Hotmap Styles */
         .hotmap-container {
           display: flex;

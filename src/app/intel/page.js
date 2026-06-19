@@ -690,7 +690,23 @@ export default function IntelPage() {
         @media (max-width: 768px) {
           .articles-grid {
             grid-template-columns: 1fr;
+            gap: 20px;
           }
+          .article-card:hover { transform: none; }
+          .article-card:active { border-color: var(--accent-border); }
+          .article-image-container { height: 160px; }
+          .article-content { padding: 16px; }
+        }
+
+        @media (max-width: 640px) {
+          .articles-grid { gap: 14px; }
+          .article-image-container { height: 140px; }
+          .article-content { padding: 14px; }
+        }
+
+        @media (max-width: 480px) {
+          .article-image-container { height: 120px; }
+          .article-content { padding: 12px; }
         }
 
         .article-card {

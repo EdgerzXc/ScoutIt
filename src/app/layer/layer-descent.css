@@ -4,7 +4,7 @@
 
 /* Cinematic Snap Container */
         .cinematic-container {
-          height: 100vh;
+          height: 100dvh;
           width: 100vw;
           overflow-y: scroll;
           /* NOTE: snap must stay "proximity" and there must be NO
@@ -32,7 +32,7 @@
         .snap-section {
           scroll-snap-align: start;
           width: 100%;
-          height: 100vh;
+          height: 100dvh;
           position: relative;
           overflow: hidden;
         }
@@ -1527,9 +1527,49 @@
           }
         }
 
+        @media (max-width: 768px) {
+          .services-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+          }
+          .service-card-inner {
+            padding: 20px 16px;
+          }
+          .service-card:hover {
+            transform: none;
+          }
+          .service-card:active {
+            border-color: rgba(255, 184, 0, 0.4);
+            background: rgba(255, 255, 255, 0.04);
+          }
+          .services-content {
+            padding: 24px 16px;
+          }
+        }
+
         @media (max-width: 640px) {
           .services-grid {
             grid-template-columns: 1fr;
+            gap: 12px;
+          }
+          .service-card-inner {
+            padding: 18px 14px;
+          }
+          .service-icon-wrapper {
+            font-size: 24px;
+            margin-bottom: 16px;
+          }
+          .service-cta {
+            font-size: 10px;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .services-grid {
+            gap: 10px;
           }
         }
 

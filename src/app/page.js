@@ -949,7 +949,7 @@ export default function Home() {
       <style>{`
         /* Cinematic Snap Container */
         .cinematic-container {
-          height: 100vh;
+          height: 100dvh;
           width: 100vw;
           overflow-y: scroll;
           /* NOTE: snap must stay "proximity" and there must be NO
@@ -977,7 +977,7 @@ export default function Home() {
         .snap-section {
           scroll-snap-align: start;
           width: 100%;
-          height: 100vh;
+          height: 100dvh;
           position: relative;
           overflow: hidden;
         }
@@ -1288,6 +1288,10 @@ export default function Home() {
           cursor: pointer;
           z-index: 5;
           animation: titleUfoFloat 3s ease-in-out infinite;
+          touch-action: manipulation;
+          -webkit-tap-highlight-color: transparent;
+          user-select: none;
+          -webkit-user-select: none;
         }
         .title-ufo.powering { animation: none; }   /* stop floating during power-up */
         /* Soft gold underglow ΓÇö UFO emits faint warmth downward */
@@ -3538,19 +3542,29 @@ export default function Home() {
           /* 1. Disable Scroll Snapping on Mobile */
           .cinematic-container {
             scroll-snap-type: none !important;
+            height: auto !important;
+            min-height: 100dvh !important;
+            overflow-y: auto !important;
           }
           .snap-section {
             scroll-snap-align: none !important;
             height: auto !important;
-            min-height: 100vh !important;
+            min-height: 100dvh !important;
             padding: 40px 16px !important;
+          }
+
+          /* Hero section: account for sticky header + bottom nav */
+          .section-hook {
+            min-height: calc(100dvh - 72px) !important;
+            padding-top: 80px !important;
+            padding-bottom: 24px !important;
           }
 
           /* 2. Stack the Split Panes */
           .property-split {
             flex-direction: column !important;
             height: auto !important;
-            min-height: 100vh !important;
+            min-height: auto !important;
           }
 
           .property-menu {
@@ -3565,7 +3579,7 @@ export default function Home() {
             justify-content: center !important;
             max-height: none !important;
           }
-          
+
           .property-menu .menu-footer {
             width: 100% !important;
             margin-top: 16px !important;
@@ -3587,15 +3601,19 @@ export default function Home() {
             grid-template-columns: 1fr 1fr !important;
             gap: 16px !important;
           }
-          
+
           /* 4. Fix Abstract Workspace Graphic */
           .matrix-preview-pane > div {
             padding: 24px 16px !important;
           }
-          
-          /* Fix top hero section padding */
-          .section-hook {
-            padding-top: 100px !important;
+
+          /* 5. UFO zone — smaller on mobile */
+          .title-ufo-zone {
+            height: 120px !important;
+            margin-bottom: 4px !important;
+          }
+          .title-ufo-svg {
+            width: 80px !important;
           }
         }
         

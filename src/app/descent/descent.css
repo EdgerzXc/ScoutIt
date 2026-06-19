@@ -208,6 +208,71 @@
 @media (max-width: 768px) {
   .dl { padding: 80px 22px; }
   .dl-title { font-size: clamp(28px, 8vw, 40px); }
-  .layer-atmos .cloud.c3, .layer-mantle .magma.m2 { display: none; }
+  .dl-sub { font-size: clamp(14px, 4vw, 17px); margin-bottom: 24px; }
+
+  /* ============================================================
+     MOBILE PERFORMANCE — same look, far less GPU work.
+     Structure/markup unchanged; we only tame the costly paints.
+     ============================================================ */
+
+  /* 1. backdrop-filter is the #1 cause of scroll jank on phones.
+     Remove it across the descent and lean on slightly more opaque
+     panels so text stays just as readable. Catches both the inline
+     blur cards and the BoardPodium's glass cards. */
+  .descent-root [style*="backdrop"],
+  .descent-root .bp-card,
+  .descent-root .bp-rank,
+  .descent-root .bp-tier-tag {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  .descent-root [style*="backdrop"] { background-color: rgba(10, 11, 18, 0.82) !important; }
+  .descent-root .bp-card { background: rgba(12, 12, 16, 0.85) !important; }
+
+  /* 2. Animated filter:blur() layers re-rasterize every frame. Freeze
+     them into a static glow and shrink the blur radius — keeps the
+     mood, drops the per-frame cost to zero. */
+  .layer-atmos .cloud,
+  .layer-board .bnebula,
+  .layer-mantle .magma,
+  .layer-crust .strata,
+  .layer-crust .vein,
+  .layer-core .coreglow {
+    animation: none !important;
+  }
+  .layer-atmos .cloud { filter: blur(8px); opacity: 0.5; }
+  .layer-board .bnebula { filter: blur(26px); }
+  .layer-mantle .magma { filter: blur(24px); }
+  .layer-core .coreglow { transform: translate(-50%, -50%); }
+
+  /* 3. Tiny perpetual particles: lots of paint, little payoff on a
+     small screen. Drop them (and the redundant extra glows). */
+  .layer-atmos .mote,
+  .layer-mantle .bubble,
+  .layer-orbit .shoot,
+  .layer-atmos .cloud.c3,
+  .layer-mantle .magma.m2 { display: none; }
+
+  /* 4. Thin the skyline and hold the city on one calm dusk frame
+     instead of looping full-screen day/night gradients forever. */
   .layer-city .bld:nth-child(2n) { display: none; }
+  .layer-city .sky-day,
+  .layer-city .sky-night,
+  .layer-city .citystars,
+  .layer-city .sun,
+  .layer-city .moon { animation: none !important; opacity: 0; }
+  .layer-city .sky-dusk { animation: none !important; opacity: 1; }
+  .layer-city .win-layer { animation: none !important; opacity: 0.55; }
+
+  /* 5. Core: keep one calm pulse ring, drop the duplicates. */
+  .layer-core .ering.e2,
+  .layer-core .ering.e3 { display: none; }
+
+  /* ---- mobile visual polish: stack + breathe ---- */
+  .role-grid { grid-template-columns: 1fr; }
+  .core-wrap { gap: 22px; }
+  .dl-cta { padding: 14px 20px; }
+  .pioneer-strip { gap: 10px; }
+  .inner-core { padding: 18px; }
+  .ic-links { gap: 10px; }
 }

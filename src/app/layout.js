@@ -1,6 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import AccessibilityToggle from "@/components/ui/AccessibilityToggle";
+import BottomNav from "@/components/layout/BottomNav";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -57,6 +58,7 @@ export default function RootLayout({ children }) {
         {/* Cinematic film grain texture overlay */}
         <div className="grain" aria-hidden="true" />
         {children}
+        <BottomNav />
         <AccessibilityToggle />
       </body>
     </html>

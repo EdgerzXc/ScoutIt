@@ -306,6 +306,23 @@ export default function MetropolisLayer() {
           .metro-split { grid-template-columns: 1fr; }
           .metro-sidebar { border-right: none; border-bottom: 1px solid rgba(255,184,0,0.12); }
           .metro-content { max-height: none; }
+          .metro-cat:hover { background: transparent; color: rgba(255,255,255,0.55); }
+          .metro-card:hover { transform: none; }
+        }
+
+        @media (max-width: 640px) {
+          .metro-sidebar { padding: 24px 16px; }
+          .metro-content { padding: 20px 16px; }
+          .metro-search { font-size: 16px; }
+          .metro-cat { min-height: 44px; padding: 10px 14px; }
+          .metro-browse { min-height: 48px; display: flex; align-items: center; justify-content: center; }
+          .metro-grid { grid-template-columns: 1fr; gap: 12px; }
+        }
+
+        @media (max-width: 480px) {
+          .metro-sidebar { padding: 20px 12px; }
+          .metro-content { padding: 16px 12px; }
+          .metro-title { font-size: 22px; }
         }
       `}} />
     </main>

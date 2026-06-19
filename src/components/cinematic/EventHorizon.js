@@ -36,10 +36,13 @@ export default function EventHorizon({ className = "" }) {
     const initComet = (spread = true) => ({ angle: rand(0, Math.PI * 2), radius: spread ? rand(maxR * 0.45, maxR * 1.05) : edgeRadius(), speed: rand(0.8, 2), tail: rand(40, 100), size: rand(1.5, 2.5), angVel: Math.random() < 0.5 ? rand(-0.001, 0.001) : 0, delay: rand(0, 5) });
 
     const buildScene = () => {
-      stars = Array.from({ length: Math.round(rand(150, 180)) }, initStar);
-      bodies = Array.from({ length: Math.round(rand(8, 10)) }, initBody);
-      dust = Array.from({ length: Math.round(rand(4, 6)) }, initDust);
-      comets = Array.from({ length: Math.round(rand(4, 6)) }, () => initComet(true));
+      // Roughly halve the particle budget on phones — same look, far
+      // fewer per-frame arcs and gradients.
+      const m = (typeof window !== "undefined" && window.innerWidth < 768) ? 0.5 : 1;
+      stars = Array.from({ length: Math.round(rand(150, 180) * m) }, initStar);
+      bodies = Array.from({ length: Math.round(rand(8, 10) * m) }, initBody);
+      dust = Array.from({ length: Math.round(rand(4, 6) * m) }, initDust);
+      comets = Array.from({ length: Math.round(rand(4, 6) * m) }, () => initComet(true));
       pulseRings = [];
       nextPulseAt = t + rand(2, 3);
       const base = Math.min(w, h);
@@ -49,7 +52,9 @@ export default function EventHorizon({ className = "" }) {
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
       w = rect.width; h = rect.height;
-      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      // Phones pay per pixel and per particle — cap the pixel ratio lower
+      // on small screens so the canvas fills far fewer pixels each frame.
+      dpr = Math.min(window.devicePixelRatio || 1, window.innerWidth < 768 ? 1.5 : 2);
       canvas.width = Math.max(1, Math.round(w * dpr));
       canvas.height = Math.max(1, Math.round(h * dpr));
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
