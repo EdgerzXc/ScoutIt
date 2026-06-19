@@ -1,6 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import AccessibilityToggle from "@/components/ui/AccessibilityToggle";
+import FloatingToolbox from "@/components/ui/FloatingToolbox";
 import BottomNav from "@/components/layout/BottomNav";
 
 const geistSans = Geist({
@@ -59,7 +59,7 @@ export default function RootLayout({ children }) {
         <div className="grain" aria-hidden="true" />
         {children}
         <BottomNav />
-        <AccessibilityToggle />
+        <FloatingToolbox />
       </body>
     </html>
   );
