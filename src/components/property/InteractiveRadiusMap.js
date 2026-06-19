@@ -2,8 +2,8 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import maplibregl from 'maplibre-gl';
+import 'maplibre-gl/dist/maplibre-gl.css';
 
 // Math function to draw a geographical circle without Turf.js
 const createGeoJSONCircle = (center, radiusInKm, points = 64) => {
@@ -30,67 +30,51 @@ export default function InteractiveRadiusMap({ onSearch, onClose, initialLng = 1
   const [center, setCenter] = useState([initialLng, initialLat]);
   const [mapLoaded, setMapLoaded] = useState(false);
 
-  const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
-
-  // Initialize Mapbox
+  // Initialize MapLibre (no token needed — CARTO dark tiles are free)
   useEffect(() => {
-    if (!mapContainerRef.current || mapInstance.current || !MAPBOX_TOKEN) return;
+    if (!mapContainerRef.current || mapInstance.current) return;
 
-    mapboxgl.accessToken = MAPBOX_TOKEN;
-    const map = new mapboxgl.Map({
+    const map = new maplibregl.Map({
       container: mapContainerRef.current,
-      style: 'mapbox://styles/mapbox/dark-v11',
+      style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
       center: center,
       zoom: 11,
       pitch: 45
     });
 
     map.on('load', () => {
-      // Add Circle Source
       map.addSource('radius-circle', {
         type: 'geojson',
-        data: createGeoJSONCircle(center, radiusMiles * 1.60934) // Convert miles to km for math
+        data: createGeoJSONCircle(center, radiusMiles * 1.60934)
       });
 
-      // Add Circle Layer (Fill)
       map.addLayer({
         id: 'radius-circle-fill',
         type: 'fill',
         source: 'radius-circle',
-        paint: {
-          'fill-color': '#ffb800',
-          'fill-opacity': 0.15
-        }
+        paint: { 'fill-color': '#ffb800', 'fill-opacity': 0.15 }
       });
 
-      // Add Circle Layer (Outline)
       map.addLayer({
         id: 'radius-circle-outline',
         type: 'line',
         source: 'radius-circle',
-        paint: {
-          'line-color': '#ffb800',
-          'line-width': 2,
-          'line-dasharray': [2, 2]
-        }
+        paint: { 'line-color': '#ffb800', 'line-width': 2, 'line-dasharray': [2, 2] }
       });
 
-      // Create draggable center marker
       const el = document.createElement('div');
       el.className = 'custom-map-center-pin';
       el.innerHTML = '<div class="pin-dot"></div><div class="pin-pulse"></div>';
-      
-      const marker = new mapboxgl.Marker({ element: el, draggable: true })
+
+      const marker = new maplibregl.Marker({ element: el, draggable: true })
         .setLngLat(center)
         .addTo(map);
 
-      // Handle marker drag
       marker.on('dragend', () => {
         const lngLat = marker.getLngLat();
         setCenter([lngLat.lng, lngLat.lat]);
       });
 
-      // Handle map click to move marker
       map.on('click', (e) => {
         marker.setLngLat([e.lngLat.lng, e.lngLat.lat]);
         setCenter([e.lngLat.lng, e.lngLat.lat]);
@@ -106,7 +90,7 @@ export default function InteractiveRadiusMap({ onSearch, onClose, initialLng = 1
       map.remove();
       mapInstance.current = null;
     };
-  }, [MAPBOX_TOKEN]);
+  }, []);
 
   // Update circle visually when radius or center changes
   useEffect(() => {
