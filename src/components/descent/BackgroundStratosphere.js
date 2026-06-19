@@ -254,28 +254,43 @@ export default function BackgroundStratosphere() {
           .s2-speed-wrap, .s2-cloud-layer { opacity: 0; }
         }
 
-        /* ── MOBILE: stop the GPU-memory blowout that tears tiles to black ──
-           On phones the 8 huge blurred clouds (scaling to 5x), the 200vw
-           blend-screen horizon, and the masked blend-screen city bitmap all
-           get promoted to their own GPU layers via will-change and overrun
-           texture memory — the browser then drops tiles to black. We strip
-           the heaviest layers and hold the rest as static frames. */
+        /* ── MOBILE: keep the DESCENT animation, lose the glitch ──────────────
+           The black-tile glitch came from 8 huge clouds scaling to 5x while
+           promoted to their own GPU layers (will-change) plus a screen-blended
+           bitmap. We keep will-change OFF, normalise the city blend, thin the
+           clouds to 3, and CAP every scale so no single layer ever gets large
+           enough to overrun texture memory. The falling motion stays. */
         @media (max-width: 768px) {
           .s2-city, .s2-cloud-punch { will-change: auto !important; }
 
-          /* Drop the biggest hogs entirely. */
-          .s2-cloud-layer,
-          .s2-cloud-flash,
-          .s2-speed-wrap,
-          .s2-atmo { display: none !important; }
+          /* Speed lines — the strongest "falling" cue and nearly free. */
+          .s2-speed-wrap { display: block !important; }
 
-          /* Hold the city as one static frame instead of rescaling a masked,
-             screen-blended bitmap every frame. */
-          .s2-city { animation: none !important; transform: scale(1.1) !important; opacity: 0.9 !important; }
+          /* City approach: blend-normal + no will-change keeps the zoom cheap. */
           .s2-city div { mix-blend-mode: normal !important; }
 
-          /* Shrink the last large blur. */
-          .s2-bloom { animation: none !important; filter: blur(16px) !important; opacity: 0.6 !important; }
+          /* Keep only 3 clouds; the full-screen flash and 200vw horizon stay off. */
+          .s2-cloud-layer { display: block !important; }
+          .s2-cloud-punch:nth-child(n+4) { display: none !important; }
+          .s2-cloud-flash, .s2-atmo { display: none !important; }
+
+          /* Bloom keeps pulsing, just with a smaller blur radius. */
+          .s2-bloom { filter: blur(20px) !important; }
+
+          /* Cap the cloud scale so a blurred layer never balloons past ~2x. */
+          @keyframes s2-cloud-punch {
+            0%   { transform: scale(0.12) translateY(0);    opacity: 0; }
+            22%  { transform: scale(0.5)  translateY(-10vh); opacity: 0.7; }
+            62%  { transform: scale(1.2)  translateY(-32vh); opacity: 0.55; }
+            100% { transform: scale(2.0)  translateY(-62vh); opacity: 0; }
+          }
+          /* Gentler city zoom (1.7x instead of 2.2x) — lighter to rasterise. */
+          @keyframes s2-city {
+            0%   { transform: scale(0.78); opacity: 0; }
+            42%  { transform: scale(1.0);  opacity: 0.5; }
+            70%  { transform: scale(1.28); opacity: 0.9; }
+            100% { transform: scale(1.7);  opacity: 1; }
+          }
         }
 
       `}} />
