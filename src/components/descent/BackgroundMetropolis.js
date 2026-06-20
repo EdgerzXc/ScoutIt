@@ -240,7 +240,8 @@ export default function BackgroundMetropolis() {
         const l = new THREE.PointLight(c, i, d);
         l.position.set(x, y, z); scene.add(l);
       };
-      for (let lz = -120; lz < 160; lz += 28) {
+      const lampSpacing = isMobile ? 56 : 28;
+      for (let lz = -120; lz < 160; lz += lampSpacing) {
         mkP(-17, 9, lz, 0xFFE4A0, 1.8, 55);
         mkP( 17, 9, lz, 0xFFE4A0, 1.8, 55);
       }
@@ -265,7 +266,8 @@ export default function BackgroundMetropolis() {
         const m = new THREE.MeshStandardMaterial({ color: c, roughness: 0.96 });
         disposables.push(m); return m;
       });
-      MEDIAN_BUSHES.forEach((b, i) => {
+      const activeBushes = isMobile ? MEDIAN_BUSHES.filter((_, i) => i % 2 === 0) : MEDIAN_BUSHES;
+      activeBushes.forEach((b, i) => {
         const bg = new THREE.SphereGeometry(b.r, 6, 4);
         const bsh = new THREE.Mesh(bg, bushMats[i % bushMats.length]);
         bsh.scale.set(1, 0.55, 1);
@@ -287,7 +289,7 @@ export default function BackgroundMetropolis() {
       const lpMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.6 });
       const lbMat = new THREE.MeshBasicMaterial({ color: 0xFFB800 });
       disposables.push(lpMat, lbMat);
-      for (let lz = -120; lz < 160; lz += 28) {
+      for (let lz = -120; lz < 160; lz += lampSpacing) {
         [-17, 17].forEach((sx) => {
           const pg = new THREE.CylinderGeometry(0.1, 0.16, 10, 5);
           const p  = new THREE.Mesh(pg, lpMat);
@@ -336,7 +338,8 @@ export default function BackgroundMetropolis() {
         }
       };
 
-      STREET_TREES.forEach((t, i) => {
+      const activeTrees = isMobile ? STREET_TREES.filter((_, i) => i % 2 === 0) : STREET_TREES;
+      activeTrees.forEach((t, i) => {
         if (t.palm) {
           /* PALM — curved trunk + radiating frond spheres */
           const seg = 4;
@@ -506,16 +509,19 @@ export default function BackgroundMetropolis() {
         sign.rotation.y = rot + (faceX > 0 ? Math.PI / 2 : -Math.PI / 2);
         scene.add(sign); disposables.push(sg, sm);
         /* faint glow backing */
-        const glow = new THREE.Mesh(
-          new THREE.PlaneGeometry(sw * 1.6, sh * 1.6),
-          new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.18, blending: THREE.AdditiveBlending, depthWrite: false })
-        );
-        glow.position.copy(sign.position);
-        glow.rotation.copy(sign.rotation);
-        scene.add(glow); disposables.push(glow.geometry, glow.material);
+        if (!isMobile) {
+          const glow = new THREE.Mesh(
+            new THREE.PlaneGeometry(sw * 1.6, sh * 1.6),
+            new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.18, blending: THREE.AdditiveBlending, depthWrite: false })
+          );
+          glow.position.copy(sign.position);
+          glow.rotation.copy(sign.rotation);
+          scene.add(glow); disposables.push(glow.geometry, glow.material);
+        }
       };
 
-      SPECS.forEach((s) => {
+      const activeSpecs = isMobile ? SPECS.filter(s => Math.abs(s.x) < 120) : SPECS;
+      activeSpecs.forEach((s) => {
         const { x, z, w, d, h, type, style, rot, seed } = s;
 
         if (style === 1) {
