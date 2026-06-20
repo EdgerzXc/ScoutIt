@@ -881,14 +881,14 @@ export default function Home() {
           </div>
 
           {/* Discipline badge */}
-          <div className="title-badge">SPACE ┬╖ INTELLIGENCE ┬╖ TECHNOLOGY</div>
+          <div className="title-badge">SPACE &middot; INTELLIGENCE &middot; TECHNOLOGY</div>
 
           {/* Divider */}
           <div className="title-divider"></div>
 
           {/* Taglines */}
           <p className="title-tagline-1">Get lost in spaces that actually inspire you.</p>
-          <div className="title-tagline-2">SPACE INTELLIGENCE ┬╖ PHILIPPINE PROPERTY</div>
+          <div className="title-tagline-2">SPACE INTELLIGENCE &middot; PHILIPPINE PROPERTY</div>
         </div>
 
         {/* Scroll indicator removed ΓÇö beam sequence begins the story */}
