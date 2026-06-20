@@ -113,10 +113,11 @@ const MEDIAN_BUSHES = Array.from({ length: 55 }, (_, i) => ({
    to a warm golden band at the base where they catch the setting sun.
    Concrete towers get punched windows over a dark spandrel with a warm
    wash low down. Used as an emissiveMap with emissive=white. */
-function makeFacadeCanvas(fw, fh, density, seed, type) {
-  const cols = Math.max(3, Math.round(fw / 2.2));
-  const rows = Math.max(6, Math.round(fh / 1.9));
-  const CW = 6, CH = 6;                 // px per window cell
+function makeFacadeCanvas(fw, fh, density, seed, type, isMobile) {
+  const scale = isMobile ? 4.4 : 2.2;
+  const cols = Math.max(3, Math.round(fw / scale));
+  const rows = Math.max(6, Math.round(fh / (scale * 0.86)));
+  const CW = isMobile ? 12 : 6, CH = isMobile ? 12 : 6;                 // px per window cell
   const W = cols * CW, H = rows * CH;
   const cv = document.createElement("canvas");
   cv.width = W; cv.height = H;
@@ -195,18 +196,20 @@ export default function BackgroundMetropolis() {
       if (cancelled) return;
 
       const scene = new THREE.Scene();
-      scene.fog = new THREE.FogExp2(0x0a0a0a, 0.0035); // Dark grey/black fog
-
+      const scene = new THREE.Scene();
       const W = mount.clientWidth  || window.innerWidth;
       const H = mount.clientHeight || window.innerHeight;
       const isMobile = (W || window.innerWidth) < 768; // cheaper render on phones
+
+      scene.fog = isMobile ? new THREE.Fog(0x0a0a0a, 40, 260) : new THREE.FogExp2(0x0a0a0a, 0.0035); // Dark grey/black fog
+
       const camera = new THREE.PerspectiveCamera(60, W/H, 0.3, 900);
       camera.position.set(0, 200, 90);
       camera.lookAt(0, 0, 0);
 
       renderer = new THREE.WebGLRenderer({ antialias: !isMobile });
       renderer.setSize(W, H);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.25 : 2));
+      renderer.setPixelRatio(isMobile ? 1.0 : Math.min(window.devicePixelRatio, 2));
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
       renderer.toneMappingExposure = 1.08;
       mount.appendChild(renderer.domElement);
@@ -313,8 +316,8 @@ export default function BackgroundMetropolis() {
       disposables.push(trunkMat);
 
       const addFoliageCluster = (cx, cy, cz, radius, matBase, seed) => {
-        /* a clump = 4-6 small spheres jittered around a centre */
-        const blobs = 4 + Math.floor(rnd(seed) * 3);
+        /* a clump = 4-6 small spheres jittered around a centre, or just 1 on mobile */
+        const blobs = isMobile ? 1 : 4 + Math.floor(rnd(seed) * 3);
         for (let b = 0; b < blobs; b++) {
           const br = radius * (0.45 + rnd(seed + b * 17) * 0.5);
           const bg = new THREE.SphereGeometry(br, 6, 5);
@@ -346,8 +349,9 @@ export default function BackgroundMetropolis() {
             scene.add(tk); disposables.push(tg);
           }
           const topX = t.x + t.lean * t.trunkH * 0.4;
-          for (let f = 0; f < 7; f++) {
-            const angle = (f / 7) * Math.PI * 2;
+          const fronds = isMobile ? 4 : 7;
+          for (let f = 0; f < fronds; f++) {
+            const angle = (f / fronds) * Math.PI * 2;
             const fg = new THREE.SphereGeometry(t.canopyR * 0.7, 5, 4);
             const frond = new THREE.Mesh(fg, canopyMats[(i + f) % canopyMats.length]);
             frond.scale.set(0.5, 0.2, 1.6);
@@ -387,7 +391,7 @@ export default function BackgroundMetropolis() {
           /* broad crown: a ring of foliage clusters + a central cap,
              wider than tall → the classic acacia umbrella */
           const crownY = t.trunkH + t.canopyR * 0.35;
-          const ringN = 5 + Math.floor(rnd(t.seed + 3) * 3);
+          const ringN = isMobile ? 3 : 5 + Math.floor(rnd(t.seed + 3) * 3);
           for (let c = 0; c < ringN; c++) {
             const a = (c / ringN) * Math.PI * 2 + rnd(t.seed + c) * 0.5;
             const rr = t.canopyR * (0.75 + rnd(t.seed + c * 9) * 0.35);
@@ -413,7 +417,7 @@ export default function BackgroundMetropolis() {
       /* facade material for a given footprint slice */
       const makeFacade = (w, h, seed, type) => {
         const density = 0.22 + rnd(seed + 8) * 0.38 + (h > 60 ? 0.10 : 0);
-        const cv  = makeFacadeCanvas(w, h, density, seed, type);
+        const cv  = makeFacadeCanvas(w, h, density, seed, type, isMobile);
         const tex = new THREE.CanvasTexture(cv);
         tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
         disposables.push(tex);
@@ -454,6 +458,7 @@ export default function BackgroundMetropolis() {
       };
 
       const addAntenna = (x, topY, z, seed) => {
+        if (isMobile) return;
         const antH = 12 + rnd(seed + 100) * 14;
         const ag   = new THREE.CylinderGeometry(0.07, 0.14, antH, 4);
         const am   = new THREE.MeshBasicMaterial({ color: 0x888898 });
@@ -472,6 +477,7 @@ export default function BackgroundMetropolis() {
       const roofMat = new THREE.MeshStandardMaterial({ color: 0x050505, roughness: 0.9 });
       disposables.push(roofMat);
       const addRoofClutter = (x, topY, z, w, d, rot, seed) => {
+        if (isMobile) return;
         const n = 1 + Math.floor(rnd(seed + 1) * 3);
         for (let i = 0; i < n; i++) {
           const bw = 1.2 + rnd(seed + i * 7) * Math.min(4, w * 0.25);
