@@ -196,7 +196,6 @@ export default function BackgroundMetropolis() {
       if (cancelled) return;
 
       const scene = new THREE.Scene();
-      const scene = new THREE.Scene();
       const W = mount.clientWidth  || window.innerWidth;
       const H = mount.clientHeight || window.innerHeight;
       const isMobile = (W || window.innerWidth) < 768; // cheaper render on phones
