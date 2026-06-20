@@ -77,12 +77,6 @@ const SPECS = [
   /* second row — set back, a bit taller */
   ...genStrip('L', 700, 46, 25),
   ...genStrip('R', 920, 46, 25),
-  /* third row — deep back, tall skyline towers */
-  ...genStrip('L', 1500, 96, 55),
-  ...genStrip('R', 1760, 96, 55),
-  /* fourth row — far horizon megatowers */
-  ...genStrip('L', 2400, 150, 80),
-  ...genStrip('R', 2700, 150, 80),
 ];
 
 /* ── TREES ── denser canopies for a more realistic silhouette */
@@ -471,8 +465,7 @@ export default function BackgroundMetropolis() {
         const blm = new THREE.MeshBasicMaterial({ color: 0xFF3300 });
         const bl  = new THREE.Mesh(blg, blm);
         bl.position.set(x, topY + antH + 0.36, z);
-        bl.userData = { phase: rnd(seed + 88) * Math.PI * 2 };
-        scene.add(bl); blinkMeshes.push(bl); disposables.push(blg, blm);
+        scene.add(bl); disposables.push(blg, blm);
       };
 
       /* rooftop clutter — water tanks, AC plant boxes, vents on a flat roof */
@@ -520,7 +513,7 @@ export default function BackgroundMetropolis() {
         }
       };
 
-      const activeSpecs = isMobile ? SPECS.filter(s => Math.abs(s.x) < 120) : SPECS;
+      const activeSpecs = isMobile ? SPECS.filter(s => Math.abs(s.x) < 60) : SPECS;
       activeSpecs.forEach((s) => {
         const { x, z, w, d, h, type, style, rot, seed } = s;
 
@@ -675,11 +668,6 @@ export default function BackgroundMetropolis() {
         if (cycle > 1 - FADE)  fade = (cycle - (1 - FADE)) / FADE;
         else if (cycle < FADE) fade = 1 - cycle / FADE;
         if (fadeRef.current) fadeRef.current.style.opacity = fade.toFixed(3);
-
-        blinkMeshes.forEach((m) => {
-          const on = Math.sin(tick * 0.042 + m.userData.phase) > 0.68;
-          m.material.color.setHex(on ? 0xFF3300 : 0x180600);
-        });
 
         renderer.render(scene, camera);
       };
