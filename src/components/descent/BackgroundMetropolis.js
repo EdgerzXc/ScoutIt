@@ -245,7 +245,9 @@ export default function BackgroundMetropolis() {
 
       /* GROUND — glossy dark asphalt reflecting the gold */
       const gGeo = new THREE.PlaneGeometry(900, 900);
-      const gMat = new THREE.MeshStandardMaterial({ color: 0x050505, roughness: 0.2, metalness: 0.8 });
+      const gMat = isMobile 
+        ? new THREE.MeshBasicMaterial({ color: 0x050505 })
+        : new THREE.MeshStandardMaterial({ color: 0x050505, roughness: 0.2, metalness: 0.8 });
       const gnd  = new THREE.Mesh(gGeo, gMat);
       gnd.rotation.x = -Math.PI/2;
       scene.add(gnd);
@@ -253,14 +255,18 @@ export default function BackgroundMetropolis() {
 
       /* MEDIAN STRIP */
       const medGeo = new THREE.BoxGeometry(2.2, 0.28, 320);
-      const medMat = new THREE.MeshStandardMaterial({ color: 0x142008, roughness: 0.98 });
+      const medMat = isMobile
+        ? new THREE.MeshBasicMaterial({ color: 0x142008 })
+        : new THREE.MeshStandardMaterial({ color: 0x142008, roughness: 0.98 });
       const med    = new THREE.Mesh(medGeo, medMat);
       med.position.set(0, 0.14, 0); scene.add(med);
       disposables.push(medGeo, medMat);
 
       /* MEDIAN BUSHES */
       const bushMats = [0x050505, 0x080808, 0x030303].map((c) => {
-        const m = new THREE.MeshStandardMaterial({ color: c, roughness: 0.96 });
+        const m = isMobile
+          ? new THREE.MeshBasicMaterial({ color: c })
+          : new THREE.MeshStandardMaterial({ color: c, roughness: 0.96 });
         disposables.push(m); return m;
       });
       const activeBushes = isMobile ? MEDIAN_BUSHES.filter((_, i) => i % 2 === 0) : MEDIAN_BUSHES;
@@ -309,10 +315,14 @@ export default function BackgroundMetropolis() {
 
       /* ── TREES ── realistic dense canopies ──
          Deep black silhouettes against the gold sky. */
-      const trunkMat = new THREE.MeshStandardMaterial({ color: 0x020202, roughness: 1 });
+      const trunkMat = isMobile
+        ? new THREE.MeshBasicMaterial({ color: 0x020202 })
+        : new THREE.MeshStandardMaterial({ color: 0x020202, roughness: 1 });
       const canopyColors = [0x050505, 0x080808, 0x030303, 0x060606];
       const canopyMats = canopyColors.map((c) => {
-        const m = new THREE.MeshStandardMaterial({ color: c, roughness: 0.95, flatShading: true });
+        const m = isMobile
+          ? new THREE.MeshBasicMaterial({ color: c })
+          : new THREE.MeshStandardMaterial({ color: c, roughness: 0.95, flatShading: true });
         disposables.push(m); return m;
       });
       disposables.push(trunkMat);
@@ -412,7 +422,9 @@ export default function BackgroundMetropolis() {
       });
 
       /* BUILDINGS — style-driven silhouettes */
-      const topMat = new THREE.MeshStandardMaterial({ color: 0x020202, roughness: 0.9 });
+      const topMat = isMobile
+        ? new THREE.MeshBasicMaterial({ color: 0x020202 })
+        : new THREE.MeshStandardMaterial({ color: 0x020202, roughness: 0.9 });
       disposables.push(topMat);
       const blinkMeshes = [];
 
@@ -427,17 +439,19 @@ export default function BackgroundMetropolis() {
         disposables.push(tex);
         /* baked canvas drives emission;
            glossy black diffuse lets the gold directional sun add a premium sheen */
-        const mat = type === 1
-          ? new THREE.MeshStandardMaterial({
-              color: 0x0d0d0d, map: tex, emissiveMap: tex,
-              emissive: 0xffffff, emissiveIntensity: isMobile ? 0.4 : 1.0,
-              roughness: 0.05, metalness: 0.95, // Highly reflective black glass
-            })
-          : new THREE.MeshStandardMaterial({
-              color: 0x0d0d0d, map: tex, emissiveMap: tex,
-              emissive: 0xffffff, emissiveIntensity: isMobile ? 0.4 : 0.95,
-              roughness: 0.40, metalness: 0.50, // Dark matte metallic
-            });
+        const mat = isMobile
+          ? new THREE.MeshBasicMaterial({ map: tex }) // Bypass lighting completely on mobile
+          : (type === 1
+            ? new THREE.MeshStandardMaterial({
+                color: 0x0d0d0d, map: tex, emissiveMap: tex,
+                emissive: 0xffffff, emissiveIntensity: 1.0,
+                roughness: 0.05, metalness: 0.95, // Highly reflective black glass
+              })
+            : new THREE.MeshStandardMaterial({
+                color: 0x0d0d0d, map: tex, emissiveMap: tex,
+                emissive: 0xffffff, emissiveIntensity: 0.95,
+                roughness: 0.40, metalness: 0.50, // Dark matte metallic
+              }));
         disposables.push(mat);
         return mat;
       };
