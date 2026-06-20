@@ -273,9 +273,11 @@ export default function BackgroundMetropolis() {
       });
 
       /* ROAD MARKINGS */
-      for (let rz = -140; rz < 165; rz += 12) {
+      for (let rz = -140; rz < 165; rz += (isMobile ? 24 : 12)) {
         const dg = new THREE.PlaneGeometry(0.22, 7);
-        const dm = new THREE.MeshBasicMaterial({ color: 0xFFB800, transparent: true, opacity: 0.15 }); // Gold road lines
+        const dm = isMobile
+          ? new THREE.MeshBasicMaterial({ color: 0x221800 }) // Opaque dark gold, much cheaper
+          : new THREE.MeshBasicMaterial({ color: 0xFFB800, transparent: true, opacity: 0.15 }); // Glowing gold road lines
         const d  = new THREE.Mesh(dg, dm);
         d.rotation.x = -Math.PI/2;
         d.position.set(6.5, 0.06, rz); scene.add(d);
@@ -416,7 +418,9 @@ export default function BackgroundMetropolis() {
 
       /* facade material for a given footprint slice */
       const makeFacade = (w, h, seed, type) => {
-        const density = 0.22 + rnd(seed + 8) * 0.38 + (h > 60 ? 0.10 : 0);
+        let density = 0.22 + rnd(seed + 8) * 0.38 + (h > 60 ? 0.10 : 0);
+        if (isMobile) density *= 0.25; // 75% fewer lit windows on mobile to reduce texture high-values
+
         const cv  = makeFacadeCanvas(w, h, density, seed, type, isMobile);
         const tex = new THREE.CanvasTexture(cv);
         tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
@@ -426,12 +430,12 @@ export default function BackgroundMetropolis() {
         const mat = type === 1
           ? new THREE.MeshStandardMaterial({
               color: 0x0d0d0d, map: tex, emissiveMap: tex,
-              emissive: 0xffffff, emissiveIntensity: 1.0,
+              emissive: 0xffffff, emissiveIntensity: isMobile ? 0.4 : 1.0,
               roughness: 0.05, metalness: 0.95, // Highly reflective black glass
             })
           : new THREE.MeshStandardMaterial({
               color: 0x0d0d0d, map: tex, emissiveMap: tex,
-              emissive: 0xffffff, emissiveIntensity: 0.95,
+              emissive: 0xffffff, emissiveIntensity: isMobile ? 0.4 : 0.95,
               roughness: 0.40, metalness: 0.50, // Dark matte metallic
             });
         disposables.push(mat);
@@ -620,17 +624,19 @@ export default function BackgroundMetropolis() {
         scene.add(crown); disposables.push(crownGeo, crownMat);
         addAntenna(0, hy + 3.5, HERO_Z, hseed);
         /* dedicated beacon light + additive halo so it reads from far off */
-        const heroLight = new THREE.PointLight(0xFFC929, 3.4, 460, 1.1);
-        heroLight.position.set(0, hh * 0.7, HERO_Z + 36);
-        scene.add(heroLight);
-        const haloGeo = new THREE.PlaneGeometry(topW * 5.5, hh * 1.25);
-        const haloMat = new THREE.MeshBasicMaterial({
-          color: 0xFFB800, transparent: true, opacity: 0.1,
-          blending: THREE.AdditiveBlending, depthWrite: false, fog: false,
-        });
-        const halo = new THREE.Mesh(haloGeo, haloMat);
-        halo.position.set(0, hh * 0.5, HERO_Z - 8);
-        scene.add(halo); disposables.push(haloGeo, haloMat);
+        if (!isMobile) {
+          const heroLight = new THREE.PointLight(0xFFC929, 3.4, 460, 1.1);
+          heroLight.position.set(0, hh * 0.7, HERO_Z + 36);
+          scene.add(heroLight);
+          const haloGeo = new THREE.PlaneGeometry(topW * 5.5, hh * 1.25);
+          const haloMat = new THREE.MeshBasicMaterial({
+            color: 0xFFB800, transparent: true, opacity: 0.1,
+            blending: THREE.AdditiveBlending, depthWrite: false, fog: false,
+          });
+          const halo = new THREE.Mesh(haloGeo, haloMat);
+          halo.position.set(0, hh * 0.5, HERO_Z - 8);
+          scene.add(halo); disposables.push(haloGeo, haloMat);
+        }
       }
 
       /* ── ANIMATION (seamless looping fly-through) ──
