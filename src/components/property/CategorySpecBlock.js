@@ -49,8 +49,6 @@ const SPEC_CONFIG = {
   commercial: {
     label: "Commercial Specifications",
     major: [
-      { key: "rentFrom", label: "Rent From", fmt: "peso", suffix: "/mo", hero: true },
-      { key: "rentPerSqm", label: "Rent / sqm", fmt: "text", hero: true },
       { key: "totalGLA", label: "Total GLA", fmt: "num", suffix: "sqm", hero: true },
       { key: "floorPlate", label: "Floor Plate", fmt: "text", hero: true },
       { key: "buildingGrade", label: "Building Grade", fmt: "text" },
@@ -69,8 +67,6 @@ const SPEC_CONFIG = {
   residential: {
     label: "Residential Specifications",
     major: [
-      { key: "price", label: "Price", fmt: "peso", hero: true },
-      { key: "assocDues", label: "Assoc. Dues", fmt: "peso", suffix: "/mo", hero: true },
       { key: "floorLevel", label: "Floor Level", fmt: "text" },
       { key: "view", label: "View", fmt: "text" },
       { key: "turnoverDate", label: "Turnover", fmt: "text" },
@@ -82,8 +78,6 @@ const SPEC_CONFIG = {
   str: {
     label: "Short-Term Rental Specifications",
     major: [
-      { key: "nightlyRate", label: "Nightly Rate", fmt: "peso", suffix: "/night", hero: true },
-      { key: "cleaningFee", label: "Cleaning Fee", fmt: "peso", hero: true },
       { key: "maxGuests", label: "Max Guests", fmt: "num", suffix: "guests", hero: true },
       { key: "rating", label: "Avg. Rating", fmt: "num", hero: true },
       { key: "bedrooms", label: "Bedrooms", fmt: "num" },
@@ -97,8 +91,6 @@ const SPEC_CONFIG = {
   restaurant: {
     label: "Culinary Specifications",
     major: [
-      { key: "rent", label: "Rent", fmt: "peso", suffix: "/mo", hero: true },
-      { key: "dues", label: "Dues / CUSA", fmt: "peso", suffix: "/mo", hero: true },
       { key: "floorArea", label: "Floor Area", fmt: "num", suffix: "sqm", hero: true },
       { key: "seating", label: "Seating Capacity", fmt: "num", suffix: "seats", hero: true },
       { key: "kitchen", label: "Kitchen Condition", fmt: "text" },
@@ -130,7 +122,6 @@ const SPEC_CONFIG = {
       { key: "seated", label: "Seated Capacity", fmt: "num", suffix: "pax", hero: true },
       { key: "standing", label: "Standing Capacity", fmt: "num", suffix: "pax", hero: true },
       { key: "floorArea", label: "Floor Area", fmt: "num", suffix: "sqm", hero: true },
-      { key: "rentalRate", label: "Rental Rate", fmt: "peso", hero: true },
       { key: "rateBasis", label: "Rate Basis", fmt: "text" },
       { key: "minHours", label: "Min. Booking", fmt: "num", suffix: "hrs" },
       { key: "indoorOutdoor", label: "Indoor / Outdoor", fmt: "text" },
