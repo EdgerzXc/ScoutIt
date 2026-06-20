@@ -6,6 +6,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import ReactionButtons from "@/components/ui/ReactionButtons";
 import InteractiveMap from "@/components/property/InteractiveMap";
+import CategorySpecBlock from "@/components/property/CategorySpecBlock";
 import "@/app/property/[id]/property-detail.css";
 import { getChapterConfig } from "./chapterConfig";
 import { Bed, Bath, Ruler, Car, Lock, Search, Camera, Building2 } from "lucide-react";
@@ -1188,10 +1189,13 @@ export default function CommercialFlow({ slug }) {
                 </>
               )}
 
-              <DeepIntelWidget
-                open={widgets.space}
-                onToggle={() => setWidgets(w => ({...w, space: !w.space}))}
-                fields={isRestaurant
+              {/* ── CATEGORY SPEC BLOCK (per-category d.cat.* — SOP §2/§8) ──
+                  Editorial deep-intel labels are folded into its single locked
+                  teaser (replaces the separate DeepIntelWidget that used to sit
+                  here, so The Space chapter shows one premium box, not two). */}
+              <CategorySpecBlock
+                property={d}
+                extraLockedLabels={isRestaurant
                   ? ["Kitchen-to-Dining Ratio","Acoustic Baseline Score","Ambient Light Temperature","Ventilation Capacity"]
                   : isVenue
                   ? ["Rigging Load Ratings","Floor Load Limit","Acoustic Treatment Grade","Sound Isolation Rating"]
@@ -1942,31 +1946,48 @@ export default function CommercialFlow({ slug }) {
                 <ReactionButtons propertyId={slug || "batasan-hills"} propertyTitle={d.title} category={d.property_type} city={d.city}/>
               </div>
 
-              {/* Price — only when an authorized party has provided one ("N/A"/empty suppresses it) */}
+              {/* Price — SOP §9. A price is Published only when a human authority
+                  (Owner / Property Manager / Broker) confirmed it. Unverified or
+                  withheld → "Price on request"; never display an unverified price. */}
               {(() => {
                 const hasPrice = d.listed_price && d.listed_price.trim().toUpperCase() !== "N/A";
+                const isPublished = (d.price_status || "").toLowerCase().includes("publish");
+                const verifiedBy = (d.price_verified_by || "").trim();
+                const isVerified = verifiedBy && verifiedBy.toLowerCase() !== "unverified";
+                const showPrice = hasPrice && isPublished && isVerified;
                 return (
                   <>
                     <div style={{height:"1px", background:"#262626", margin:"28px 0 24px"}}/>
-                    {hasPrice ? (
+                    {showPrice ? (
                       <div style={{padding:"22px 24px", background:"#161616", border:"0.5px solid #262626", borderRadius:"4px"}}>
                         <div style={{fontFamily:"Georgia,serif", fontSize:"clamp(30px,4.2vw,44px)", fontWeight:400, color:"#f0ede8", lineHeight:1.1}}>{d.listed_price}</div>
+                        {/* Verified-by badge — the confirmation the buyer can trust */}
+                        <div style={{display:"inline-flex", alignItems:"center", gap:"7px", marginTop:"14px", padding:"6px 12px", border:"0.5px solid rgba(76,175,125,0.4)", borderRadius:"4px", background:"rgba(76,175,125,0.06)"}}>
+                          <svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="#4caf7d" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M2.5 7.5L6 11l5.5-7"/></svg>
+                          <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#4caf7d", letterSpacing:"0.12em", textTransform:"uppercase"}}>Verified by {verifiedBy}</span>
+                        </div>
                         {d.price_source && (
-                          <div style={{fontFamily:"'Courier New',monospace", fontSize:"11px", letterSpacing:"0.1em", color:"#c8c8c8", marginTop:"10px"}}>
-                            Price indicated by {d.price_source}
+                          <div style={{fontFamily:"'Courier New',monospace", fontSize:"11px", letterSpacing:"0.1em", color:"#c8c8c8", marginTop:"12px"}}>
+                            Source: {d.price_source}
                           </div>
                         )}
                         {d.price_notes && (
                           <div style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#a0a0a0", lineHeight:1.6, marginTop:"10px"}}>{d.price_notes}</div>
                         )}
                         <p style={{fontFamily:"system-ui,-apple-system,sans-serif", fontSize:"11.5px", color:"#c8c8c8", lineHeight:1.7, marginTop:"16px"}}>
-                          Price estimates are provided solely by authorized sellers, owners, or licensed property managers. ScoutIt does not set, verify, or guarantee any stated price. For inquiries, speak directly with an authorized representative.
+                          Price is provided and confirmed by the listing&apos;s authorized owner, property manager, or broker. ScoutIt displays it as confirmed by that party. For inquiries, speak directly with an authorized representative.
                         </p>
                       </div>
                     ) : (
-                      <Link href={`/property/${slug || "batasan-hills"}/brokers`} style={{display:"inline-block", fontFamily:"Georgia,serif", fontSize:"17px", color:"#ffb800", textDecoration:"none", letterSpacing:"0.01em"}}>
-                        For pricing, connect with an authorized broker →
-                      </Link>
+                      <div style={{padding:"22px 24px", background:"#161616", border:"0.5px solid #262626", borderRadius:"4px"}}>
+                        <div style={{fontFamily:"Georgia,serif", fontSize:"clamp(20px,2.6vw,26px)", fontWeight:400, color:"#f0ede8", lineHeight:1.2}}>Price on request</div>
+                        <p style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#a0a0a0", lineHeight:1.7, margin:"10px 0 16px", maxWidth:"480px"}}>
+                          No confirmed rate has been published for this space. Inquire with the owner, property manager, or broker for current pricing.
+                        </p>
+                        <Link href={`/property/${slug || "batasan-hills"}/brokers`} style={{display:"inline-block", fontFamily:"Georgia,serif", fontSize:"16px", color:"#ffb800", textDecoration:"none", letterSpacing:"0.01em"}}>
+                          Inquire with an authorized broker →
+                        </Link>
+                      </div>
                     )}
                   </>
                 );

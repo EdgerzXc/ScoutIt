@@ -1,6 +1,7 @@
 // Case-sensitivity routing diagnostics trigger and async params fix
 import { notFound } from "next/navigation";
 import { getPropertyBySlug } from "@/data/mockProperties";
+import { fetchProperties } from "@/lib/airtable";
 import ResidentialFlow from "@/components/property/ResidentialFlow";
 import CommercialFlow from "@/components/property/CommercialFlow";
 
@@ -30,17 +31,33 @@ const CATEGORY_TO_LAYOUT_MAP = {
   "default": ResidentialFlow
 };
 
+// Resolve the category that picks the layout flow. Approved Airtable records are
+// the source of truth (their slug won't exist in the mock detail store, so the
+// mock fallback can't tell us the real category). Fall back to mock for local-only
+// slugs and when the CMS is unavailable.
+async function resolveCategory(slug) {
+  const apiKey = process.env.AIRTABLE_API_KEY;
+  const baseId = process.env.AIRTABLE_BASE_ID;
+  if (apiKey && baseId) {
+    try {
+      const properties = await fetchProperties(apiKey, baseId);
+      const match = properties.find(
+        (p) => p.slug && p.slug.toLowerCase() === slug.toLowerCase()
+      );
+      if (match) return (match.spaceCategory || match.property_type || "").toLowerCase();
+    } catch {
+      /* CMS unavailable — fall through to mock-derived category */
+    }
+  }
+  const mock = getPropertyBySlug(slug);
+  return (mock?.spaceCategory || mock?.property_type || "default").toLowerCase();
+}
+
 export default async function PropertyRoute({ params }) {
   const resolvedParams = await params;
-  const propertyData = getPropertyBySlug(resolvedParams.id);
 
-  if (!propertyData) {
-    // If not in mockDb, might be from Airtable on client side, 
-    // but for ISR wrapper we fallback gracefully or just pass slug
-  }
-
-  // Determine Category string safely
-  const rawCat = (propertyData?.spaceCategory || propertyData?.property_type || "default").toLowerCase();
+  // Determine Category string safely (real CMS record wins over mock fallback)
+  const rawCat = await resolveCategory(resolvedParams.id);
   
   // Find mapped layout or fallback to default
   let layoutKey = "default";

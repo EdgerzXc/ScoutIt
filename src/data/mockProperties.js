@@ -460,6 +460,63 @@ export const DISCOVER_PROPERTIES = {
 };
 
 export const PROPERTIES_DETAILS = {
+  // ═══════════════════════════════════════════════════════════════
+  // TEMP DEV MOCK — remove in Stage 4 (mock-data cleanup).
+  // Exists only to render/verify the CategorySpecBlock (d.cat.*) +
+  // SOP §9 price logic locally without approving a real Airtable record.
+  // Route: /property/sm-ecom-test
+  // ═══════════════════════════════════════════════════════════════
+  "sm-ecom-test": {
+    title:             "SM E-Com Center — Office Tower",
+    location:          "Mall of Asia Complex, Pasay City",
+    lat:               14.5352,
+    lng:               120.9822,
+    hook:              "Grade-A leasing floors in the SM MOA business district.",
+    city:              "Pasay City",
+    property_type:     "Commercial",
+    spaceCategory:     "Commercial",
+    tenure:            "For Lease",
+    year_built:        "2017",
+    floor_sqm:         1850,
+    parking:           40,
+    ceiling_height_text: "2.9 meters",
+    aesthetic_tag:     "Grade-A Corporate",
+    scoutit_verdict:   "Recommended — Prime CBD Leasing Floor",
+    best_for:          "Multinationals · BPO · Corporate HQ",
+    accordion_3_text:  "Official SM leasing inventory — one of six E-Com tower floors offered for corporate lease.",
+    broker_name:       "SM Prime Leasing",
+    // ── SOP §9 price: Published + Property Manager-verified ──
+    listed_price:      "₱1,150 / sqm / month",
+    price_status:      "Published",
+    price_verified_by: "Property Manager",
+    price_source:      "SM Offices official leasing deck (June 2026)",
+    price_notes:       "Exclusive of CAMC and A/C charges. Minimum 3-year lease.",
+    // ── Per-category group consumed by CategorySpecBlock ──
+    cat: {
+      commercial: {
+        rentFrom:       1150,            // hero (currency)
+        rentPerSqm:     "₱1,150 / sqm",  // hero
+        totalGLA:       1850,            // hero (sqm)
+        floorPlate:     "1,850 sqm / floor", // hero
+        buildingGrade:  "Premium (Grade A)",
+        camc:           "₱155 / sqm",
+        handOver:       "Warm shell",
+        availability:   "Available Q3 2026",
+        certification:  "PEZA-registered IT zone",
+        peza:           true,
+        // acCharges + minLeaseTerm intentionally omitted → exercise the
+        // honest "Not listed yet" blank path (never an invented value).
+      },
+    },
+    photos: [
+      "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80",
+    ],
+    whereTo: [
+      { category: "Transit", name: "MOA Bus Terminal", distance: "6 min walk" },
+      { category: "Business", name: "SM Mall of Asia", distance: "3 min walk" },
+    ],
+    bestForTags: ["Grade A", "PEZA", "CBD"],
+  },
   "batasan-hills": {
     title:             "Batasan Hills House & Lot",
     location:          "Batasan Hills, Quezon City",

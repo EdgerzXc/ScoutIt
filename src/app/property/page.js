@@ -32,6 +32,96 @@ const MOCK_CATEGORIES = {
   "sky-pavilion-makati": "Venues"
 };
 
+// Carry the category-spec + price fields through the card mappers (the source
+// objects have them; the old mappers cherry-picked them away). Spread into each
+// card literal so cards can render category-aware specs + SOP §9 price.
+function cardExtras(p) {
+  return {
+    listed_price:      p.listed_price || "",
+    price_status:      p.price_status || "",
+    price_verified_by: p.price_verified_by || "",
+    cat:               p.cat || null,
+    seating_capacity:  p.seating_capacity || "",
+    standing_capacity: p.standing_capacity || "",
+    hosting_capacity:  p.hosting_capacity || "",
+    accommodations:    p.accommodations || "",
+    kitchen_grade:     p.kitchen_grade || "",
+    setup_grade:       p.setup_grade || "",
+  };
+}
+
+// Single card mapper (replaces 4 near-duplicate inline literals). cat is the
+// resolved SpaceCategory; fallbackHook keeps each call site's original copy.
+function toCard(p, cat, fallbackHook) {
+  return {
+    id:            p.id ?? p.slug,
+    slug:          p.slug || p.id,
+    title:         p.title,
+    city:          p.city || "",
+    location:      p.location || "",
+    spaceCategory: cat,
+    aestheticTag:  p.aestheticTag || "Modernist",
+    beds:          p.beds,
+    baths:         p.baths,
+    floor_sqm:     p.floor_sqm,
+    image:         p.image || p.photos?.[0] || "",
+    hook:          p.hook || fallbackHook,
+    ...cardExtras(p),
+  };
+}
+
+// SOP §9 gate for the card: only show a real price when an authority published +
+// verified it; otherwise "Price on request" (never an unverified price).
+function getCardPrice(p) {
+  const has = p.listed_price && p.listed_price.trim().toUpperCase() !== "N/A";
+  const published = (p.price_status || "").toLowerCase().includes("publish");
+  const verifiedBy = (p.price_verified_by || "").trim();
+  const verified = verifiedBy && verifiedBy.toLowerCase() !== "unverified";
+  if (has && published && verified) return { label: p.listed_price, verified: true };
+  return { label: "Price on request", verified: false };
+}
+
+// Category-appropriate card specs (offices show rent/grade, restaurants seating,
+// venues capacity, etc.) instead of residential beds/sqm for everything.
+function getCardSpecBadges(p) {
+  const cat = (p.spaceCategory || "").toLowerCase();
+  const out = [];
+  const sqm = p.floor_sqm > 0 ? `${p.floor_sqm} sqm` : null;
+  if (cat.includes("commercial") || cat.includes("office") || cat.includes("retail")) {
+    const c = p.cat?.commercial;
+    if (c?.rentPerSqm) out.push(c.rentPerSqm);
+    else if (c?.rentFrom) out.push(`₱${Number(c.rentFrom).toLocaleString("en-PH")}/sqm`);
+    if (c?.buildingGrade) out.push(c.buildingGrade);
+    if (sqm) out.push(sqm);
+  } else if (cat.includes("restaurant") || cat.includes("culinary")) {
+    if (p.seating_capacity) out.push(`${p.seating_capacity} seats`);
+    if (sqm) out.push(sqm);
+  } else if (cat.includes("venue") || cat.includes("event")) {
+    if (p.seating_capacity) out.push(String(p.seating_capacity));
+    else if (p.standing_capacity) out.push(`${p.standing_capacity} pax`);
+    if (sqm) out.push(sqm);
+  } else if (cat.includes("hospitality")) {
+    if (p.hosting_capacity) out.push(`${p.hosting_capacity} keys`);
+    if (p.accommodations) out.push(String(p.accommodations));
+  } else if (cat.includes("str")) {
+    if (p.beds > 0) out.push(`${p.beds} BR`);
+    if (p.accommodations) out.push(String(p.accommodations));
+    if (sqm) out.push(sqm);
+  } else {
+    if (p.beds > 0) out.push(`${p.beds} Beds`);
+    if (p.baths > 0) out.push(`${p.baths} Baths`);
+    if (sqm) out.push(sqm);
+  }
+  return out;
+}
+
+// First number group in a price string (handles "Php 850/sqm/mo", "₱18,500,000").
+function parsePrice(str) {
+  if (!str) return null;
+  const m = String(str).replace(/,/g, "").match(/\d+(\.\d+)?/);
+  return m ? Number(m[0]) : null;
+}
+
 function PropertyDirectoryContent() {
   const searchParams = useSearchParams();
   const initialType = searchParams.get("type");
@@ -53,9 +143,13 @@ function PropertyDirectoryContent() {
   const [centerLng, setCenterLng] = useState(121.0215);
   const [centerLat, setCenterLat] = useState(14.5547);
 
+  // Price Range State
+  const [selectedPriceRanges, setSelectedPriceRanges] = useState([]);
+
   // Collapsible panels state
   const [openFilters, setOpenFilters] = useState({
     sectors: true,
+    prices: true,
     locations: true,
     aesthetics: false,
   });
@@ -88,59 +182,22 @@ function PropertyDirectoryContent() {
         
         if (data.source === "supabase_radius") {
           // Strict Radius Search: Only show properties returned by the PostGIS query
-          mergedProperties = airtableProperties.map(p => ({
-            id: p.id,
-            slug: p.slug || p.id,
-            title: p.title,
-            city: p.city || "",
-            location: p.location || "",
-            spaceCategory: p.spaceCategory || "Residential",
-            aestheticTag: p.aestheticTag || "Modernist",
-            beds: p.beds,
-            baths: p.baths,
-            floor_sqm: p.floor_sqm,
-            image: p.image || p.photos?.[0] || "",
-            hook: p.hook || "Premium curated property briefing."
-          }));
+          mergedProperties = airtableProperties.map(p =>
+            toCard(p, p.spaceCategory || "Residential", "Premium curated property briefing.")
+          );
         } else {
           // Standard Load: Merge Airtable with Local Mock Fallback
-          const baseProperties = getProperties().map(p => {
-            let cat = MOCK_CATEGORIES[p.slug] || p.spaceCategory || "Residential";
-            return {
-              id: p.slug,
-              slug: p.slug,
-              title: p.title,
-              city: p.city,
-              location: p.location,
-              spaceCategory: cat,
-              aestheticTag: p.aestheticTag || "Modernist",
-              beds: p.beds,
-              baths: p.baths,
-              floor_sqm: p.floor_sqm,
-              image: p.photos?.[0] || p.image || "",
-              hook: p.hook || "Premium curated property briefing."
-            };
-          });
+          const baseProperties = getProperties().map(p =>
+            toCard(p, MOCK_CATEGORIES[p.slug] || p.spaceCategory || "Residential", "Premium curated property briefing.")
+          );
 
           mergedProperties = [...baseProperties];
           airtableProperties.forEach(p => {
             if (!p.title || !p.slug || !p.spaceCategory) return;
             if (!mergedProperties.some(x => x.slug === p.slug || x.id === p.id)) {
-              let cat = p.spaceCategory || "Residential";
-              mergedProperties.unshift({
-                id: p.id,
-                slug: p.slug || p.id,
-                title: p.title,
-                city: p.city || "",
-                location: p.location || "",
-                spaceCategory: cat,
-                aestheticTag: p.aestheticTag || "Modernist",
-                beds: p.beds,
-                baths: p.baths,
-                floor_sqm: p.floor_sqm,
-                image: p.image || (p.photos?.[0]) || "",
-                hook: p.hook || "Vetted dynamic listing brief."
-              });
+              mergedProperties.unshift(
+                toCard(p, p.spaceCategory || "Residential", "Vetted dynamic listing brief.")
+              );
             }
           });
         }
@@ -183,23 +240,9 @@ function PropertyDirectoryContent() {
         setRawIntel(mergedIntel);
       } catch (err) {
         // Fallback strictly to local mockDb
-        const baseProperties = getProperties().map(p => {
-          let cat = MOCK_CATEGORIES[p.slug] || p.spaceCategory || "Residential";
-          return {
-            id: p.slug,
-            slug: p.slug,
-            title: p.title,
-            city: p.city,
-            location: p.location,
-            spaceCategory: cat,
-            aestheticTag: p.aestheticTag || "Modernist",
-            beds: p.beds,
-            baths: p.baths,
-            floor_sqm: p.floor_sqm,
-            image: p.photos?.[0] || p.image || "",
-            hook: p.hook || "Premium curated property briefing."
-          };
-        });
+        const baseProperties = getProperties().map(p =>
+          toCard(p, MOCK_CATEGORIES[p.slug] || p.spaceCategory || "Residential", "Premium curated property briefing.")
+        );
         setRawProperties(baseProperties);
 
         const baseIntel = getArticles().map(art => {
@@ -228,10 +271,27 @@ function PropertyDirectoryContent() {
     setOpenFilters(prev => ({ ...prev, [section]: !prev[section] }));
   };
 
+  const normalizeCity = (city) => {
+    if (!city) return "";
+    let c = city.trim();
+    if (c.toLowerCase() === "pasay") return "Pasay City";
+    if (c.toLowerCase() === "taguig") return "Taguig City";
+    if (c.toLowerCase() === "makati") return "Makati City";
+    if (c.toLowerCase() === "quezon") return "Quezon City";
+    if (c.toLowerCase() === "paranaque" || c.toLowerCase() === "parañaque") return "Parañaque City";
+    return c;
+  };
+
   // Compile filter choices dynamically based on loaded property options
   const sectors = ["Residential", "Commercial", "STR", "Hospitality", "Restaurants", "Venues/Events"];
-  const locations = Array.from(new Set(rawProperties.map(p => p.city).filter(Boolean)));
+  const locations = Array.from(new Set(rawProperties.map(p => normalizeCity(p.city)).filter(Boolean)));
   const aesthetics = Array.from(new Set(rawProperties.map(p => p.aestheticTag).filter(Boolean)));
+  const priceRanges = [
+    { label: "Under ₱100k (Lease)", min: 0, max: 100000 },
+    { label: "₱100k - ₱500k", min: 100000, max: 500000 },
+    { label: "₱5M - ₱20M (Sale)", min: 5000000, max: 20000000 },
+    { label: "₱20M+ (Sale)", min: 20000000, max: Infinity }
+  ];
 
   const handleCheckboxChange = (val, state, setState) => {
     if (state.includes(val)) {
@@ -255,12 +315,22 @@ function PropertyDirectoryContent() {
       }
     }
     // Location filter
-    if (selectedLocations.length > 0 && !selectedLocations.includes(p.city)) {
+    if (selectedLocations.length > 0 && !selectedLocations.includes(normalizeCity(p.city))) {
       return false;
     }
     // Aesthetic filter
     if (selectedAesthetics.length > 0 && !selectedAesthetics.includes(p.aestheticTag)) {
       return false;
+    }
+    // Price Range filter
+    if (selectedPriceRanges.length > 0) {
+      const pPrice = parsePrice(p.listed_price);
+      if (pPrice === null) return false; // If no price, hide if price filter is active
+      const matchesPrice = selectedPriceRanges.some(rangeLabel => {
+        const range = priceRanges.find(r => r.label === rangeLabel);
+        return range && pPrice >= range.min && pPrice < range.max;
+      });
+      if (!matchesPrice) return false;
     }
     // Search query matches title, city, location, category, or aesthetic tag
     if (searchQuery.trim() !== "") {
@@ -303,7 +373,7 @@ function PropertyDirectoryContent() {
       <Header />
       <main className="directory-main">
         <header className="directory-header">
-          <span className="vector-label">Layer 01 // Curated Showcases</span>
+          <span className="vector-label">Layer 3.1 // Directory Ledger</span>
           <h1>The Space Directory</h1>
           <p className="page-subtitle">Every home, office, and venue on ScoutIt — searchable in one place.</p>
         </header>
@@ -334,6 +404,29 @@ function PropertyDirectoryContent() {
                           onChange={() => handleCheckboxChange(sec, selectedSectors, setSelectedSectors)}
                         />
                         {sec}
+                      </label>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Filter Section: Price Range */}
+              <div className="filter-card">
+                <button className="filter-trigger" onClick={() => toggleFilterSection("prices")}>
+                  Price Range
+                  <span className={`filter-chevron ${openFilters.prices ? "open" : ""}`}>▼</span>
+                </button>
+                {openFilters.prices && (
+                  <div className="filter-options">
+                    {priceRanges.map(pr => (
+                      <label key={pr.label} className="filter-checkbox-label">
+                        <input
+                          type="checkbox"
+                          className="filter-checkbox"
+                          checked={selectedPriceRanges.includes(pr.label)}
+                          onChange={() => handleCheckboxChange(pr.label, selectedPriceRanges, setSelectedPriceRanges)}
+                        />
+                        {pr.label}
                       </label>
                     ))}
                   </div>
@@ -453,23 +546,45 @@ function PropertyDirectoryContent() {
 
               <div className="directory-grid">
                 {filteredProperties.length > 0 ? (
-                  filteredProperties.map(p => (
+                  filteredProperties.map(p => {
+                    const cardPrice = getCardPrice(p);
+                    const specBadges = getCardSpecBadges(p);
+                    return (
                     <Link href={`/property/${p.slug}`} key={p.id} className="property-preview-card">
                       <div className="property-card-visual">
                         <span className="property-city-badge">{p.city}</span>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={p.image} alt={p.title} className="property-card-img" />
+                        {p.image ? (
+                          <img src={p.image} alt={p.title} className="property-card-img" />
+                        ) : (
+                          <div className="property-card-img" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#121212', width: '100%', height: '100%' }}>
+                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Image Pending</span>
+                          </div>
+                        )}
                       </div>
-                      
+
                       <div className="property-card-body">
                         <h3>{p.title}</h3>
                         <p className="hook">{p.hook}</p>
-                        
+
+                        {/* Price (SOP §9 gate) — verified published price or "on request" */}
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px", margin: "10px 0 4px" }}>
+                          {cardPrice.verified ? (
+                            <>
+                              <span style={{ fontFamily: "var(--font-body, Georgia, serif)", fontSize: "16px", color: "#f0ede8", fontWeight: 500 }}>{cardPrice.label}</span>
+                              <span style={{ display: "inline-flex", alignItems: "center", gap: "4px", fontFamily: "var(--font-mono, monospace)", fontSize: "9px", color: "#4caf7d", letterSpacing: "0.1em", textTransform: "uppercase" }}>✓ Verified</span>
+                            </>
+                          ) : (
+                            <span style={{ fontFamily: "var(--font-mono, monospace)", fontSize: "11px", color: "#8a8a8a", letterSpacing: "0.08em", textTransform: "uppercase" }}>Price on request</span>
+                          )}
+                        </div>
+
                         <div className="property-spec-badges">
                           <span className="property-spec-badge">{p.spaceCategory}</span>
-                          <span className="property-spec-badge">{p.aestheticTag}</span>
-                          {p.beds > 0 && <span className="property-spec-badge">{p.beds} Beds</span>}
-                          {p.floor_sqm > 0 && <span className="property-spec-badge">{p.floor_sqm} sqm</span>}
+                          {p.aestheticTag && <span className="property-spec-badge">{p.aestheticTag}</span>}
+                          {specBadges.map((b, i) => (
+                            <span key={i} className="property-spec-badge">{b}</span>
+                          ))}
                         </div>
 
                         <div className="property-card-footer">
@@ -486,7 +601,8 @@ function PropertyDirectoryContent() {
                         </div>
                       </div>
                     </Link>
-                  ))
+                    );
+                  })
                 ) : (
                   <div className="directory-empty">
                     <h3>No matching spaces found</h3>
