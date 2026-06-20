@@ -206,8 +206,8 @@ export default function BackgroundMetropolis() {
 
       renderer = new THREE.WebGLRenderer({ antialias: !isMobile });
       renderer.setSize(W, H);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.25 : 2));
-      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.setPixelRatio(isMobile ? 1.0 : Math.min(window.devicePixelRatio, 2));
+      renderer.toneMapping = isMobile ? THREE.LinearToneMapping : THREE.ACESFilmicToneMapping;
       renderer.toneMappingExposure = 1.08;
       mount.appendChild(renderer.domElement);
 
@@ -226,18 +226,21 @@ export default function BackgroundMetropolis() {
       const sun = new THREE.DirectionalLight(0xFFB800, 1.80); // Bright pure gold horizon
       sun.position.set(30, 40, -180); scene.add(sun);
       /* strong gold rim fill from down the avenue */
-      const sunFill = new THREE.DirectionalLight(0x7A5C00, 0.80);
-      sunFill.position.set(0, 15, -200); scene.add(sunFill);
+      if (!isMobile) {
+        const sunFill = new THREE.DirectionalLight(0x7A5C00, 0.80);
+        sunFill.position.set(0, 15, -200); scene.add(sunFill);
+      }
       scene.add(new THREE.AmbientLight(0x0d0d0d, 1.0)); // Pitch black ambient
 
-      const mkP = (x, y, z, c, i, d) => {
-        const l = new THREE.PointLight(c, i, d);
-        l.position.set(x, y, z); scene.add(l);
-      };
-      const lampSpacing = isMobile ? 56 : 28;
-      for (let lz = -120; lz < 160; lz += lampSpacing) {
-        mkP(-17, 9, lz, 0xFFE4A0, 1.8, 55);
-        mkP( 17, 9, lz, 0xFFE4A0, 1.8, 55);
+      if (!isMobile) {
+        const mkP = (x, y, z, c, i, d) => {
+          const l = new THREE.PointLight(c, i, d);
+          l.position.set(x, y, z); scene.add(l);
+        };
+        for (let lz = -120; lz < 160; lz += 28) {
+          mkP(-17, 9, lz, 0xFFE4A0, 1.8, 55);
+          mkP( 17, 9, lz, 0xFFE4A0, 1.8, 55);
+        }
       }
 
       /* GROUND — glossy dark asphalt reflecting the gold */
@@ -260,7 +263,7 @@ export default function BackgroundMetropolis() {
         const m = new THREE.MeshStandardMaterial({ color: c, roughness: 0.96 });
         disposables.push(m); return m;
       });
-      const activeBushes = isMobile ? MEDIAN_BUSHES.filter((_, i) => i % 2 === 0) : MEDIAN_BUSHES;
+      const activeBushes = isMobile ? [] : MEDIAN_BUSHES;
       activeBushes.forEach((b, i) => {
         const bg = new THREE.SphereGeometry(b.r, 6, 4);
         const bsh = new THREE.Mesh(bg, bushMats[i % bushMats.length]);
@@ -280,26 +283,28 @@ export default function BackgroundMetropolis() {
       }
 
       /* STREET LAMPS */
-      const lpMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.6 });
-      const lbMat = new THREE.MeshBasicMaterial({ color: 0xFFB800 });
-      disposables.push(lpMat, lbMat);
-      for (let lz = -120; lz < 160; lz += lampSpacing) {
-        [-17, 17].forEach((sx) => {
-          const pg = new THREE.CylinderGeometry(0.1, 0.16, 10, 5);
-          const p  = new THREE.Mesh(pg, lpMat);
-          p.position.set(sx, 5, lz); scene.add(p); disposables.push(pg);
+      if (!isMobile) {
+        const lpMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.6 });
+        const lbMat = new THREE.MeshBasicMaterial({ color: 0xFFB800 });
+        disposables.push(lpMat, lbMat);
+        for (let lz = -120; lz < 160; lz += 28) {
+          [-17, 17].forEach((sx) => {
+            const pg = new THREE.CylinderGeometry(0.1, 0.16, 10, 5);
+            const p  = new THREE.Mesh(pg, lpMat);
+            p.position.set(sx, 5, lz); scene.add(p); disposables.push(pg);
 
-          const ag = new THREE.CylinderGeometry(0.06, 0.06, 4, 4);
-          const arm = new THREE.Mesh(ag, lpMat);
-          arm.rotation.z = Math.PI/2;
-          arm.position.set(sx > 0 ? sx - 2 : sx + 2, 10, lz);
-          scene.add(arm); disposables.push(ag);
+            const ag = new THREE.CylinderGeometry(0.06, 0.06, 4, 4);
+            const arm = new THREE.Mesh(ag, lpMat);
+            arm.rotation.z = Math.PI/2;
+            arm.position.set(sx > 0 ? sx - 2 : sx + 2, 10, lz);
+            scene.add(arm); disposables.push(ag);
 
-          const bg = new THREE.SphereGeometry(0.35, 6, 5);
-          const bl = new THREE.Mesh(bg, lbMat);
-          bl.position.set(sx > 0 ? sx - 4 : sx + 4, 10, lz);
-          scene.add(bl); disposables.push(bg);
-        });
+            const bg = new THREE.SphereGeometry(0.35, 6, 5);
+            const bl = new THREE.Mesh(bg, lbMat);
+            bl.position.set(sx > 0 ? sx - 4 : sx + 4, 10, lz);
+            scene.add(bl); disposables.push(bg);
+          });
+        }
       }
 
       /* ── TREES ── realistic dense canopies ──
@@ -332,7 +337,7 @@ export default function BackgroundMetropolis() {
         }
       };
 
-      const activeTrees = isMobile ? STREET_TREES.filter((_, i) => i % 2 === 0) : STREET_TREES;
+      const activeTrees = isMobile ? [] : STREET_TREES;
       activeTrees.forEach((t, i) => {
         if (t.palm) {
           /* PALM — curved trunk + radiating frond spheres */
@@ -412,6 +417,15 @@ export default function BackgroundMetropolis() {
 
       /* facade material for a given footprint slice */
       const makeFacade = (w, h, seed, type) => {
+        if (isMobile) {
+          const mat = new THREE.MeshStandardMaterial({
+            color: 0x050505,
+            roughness: 0.6, metalness: 0.3, // Simple dark block catching the gold sun
+          });
+          disposables.push(mat);
+          return mat;
+        }
+
         const density = 0.22 + rnd(seed + 8) * 0.38 + (h > 60 ? 0.10 : 0);
         const cv  = makeFacadeCanvas(w, h, density, seed, type);
         const tex = new THREE.CanvasTexture(cv);
