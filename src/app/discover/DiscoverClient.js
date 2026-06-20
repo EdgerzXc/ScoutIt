@@ -151,8 +151,7 @@ export default function DiscoverClient() {
   // News feed filtered to the active region (graceful fallback to all)
   const filteredIntel = useMemo(() => {
     if (!activeRegion) return intel;
-    const matched = intel.filter(n => n.region === activeRegion);
-    return matched.length ? matched : intel;
+    return intel.filter(n => n.region === activeRegion);
   }, [intel, activeRegion]);
 
   // Selecting a spotlight drives the active region for the news feed
@@ -216,7 +215,7 @@ export default function DiscoverClient() {
           {/* Title + cross-link to News & Intelligence */}
           <div className="discoverTopBar">
             <div className="discoverTitleBlock">
-              <span className="discoverKicker">Discover</span>
+              <span className="discoverKicker">Layer 2.1 // Discovery</span>
               <h1 className="discoverTitle">{matchedCategory}</h1>
             </div>
             <Link href="/intel" className="modeJumpBox">

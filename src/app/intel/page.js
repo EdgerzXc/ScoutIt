@@ -161,7 +161,7 @@ export default function IntelPage() {
       <Header />
       <main className="intel-main">
         <header className="page-header">
-          <span className="vector-label">Layer 02 // Editorial Briefings</span>
+          <span className="vector-label">Layer 2.2 // Editorial Briefings</span>
           <h1 className="page-title">Intel</h1>
           <p className="page-subtitle">Tracing architectural shifts, spatial design, and development dispatches.</p>
           <Link href="/discover" className="mode-jump-box">

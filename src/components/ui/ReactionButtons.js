@@ -140,6 +140,7 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
               onClick={() => handleReactionClick(type)}
               aria-pressed={isActive}
               aria-label={data.label}
+              title={data.label}
             >
               <div className="shape-wrapper">
                 {data.svg}
