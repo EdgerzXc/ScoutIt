@@ -225,10 +225,10 @@ export default function BuyerMode() {
               New in Metro Manila
               <div className="flex items-center gap-4">
                 <button 
-                  className="font-label-caps tracking-widest uppercase text-[9px] text-background bg-gold-accent px-3 py-1.5 rounded shadow hover:opacity-90 transition-opacity flex items-center gap-1"
+                  className="font-label-caps tracking-widest uppercase text-[10px] text-background bg-gold-accent px-4 py-2 rounded shadow-[0_0_10px_rgba(212,175,55,0.3)] hover:opacity-90 hover:scale-105 transition-all flex items-center gap-1.5"
                   onClick={() => addToast("Alert set for Metro Manila. We'll notify you when new listings drop.", "🔔")}
                 >
-                  🔔 Set Alert
+                  + Set Alert
                 </button>
                 <button 
                   className="text-[10px] font-label-caps tracking-widest uppercase text-gold-accent hover:underline"
@@ -247,11 +247,16 @@ export default function BuyerMode() {
               )}
 
               {/* See More Card */}
-              <div className="block shrink-0 w-[280px] snap-start flex items-center justify-center">
-                <button className="h-40 w-40 rounded-full border border-surface-variant bg-surface-alt text-on-surface hover:border-gold-accent hover:text-gold-accent transition-colors flex flex-col items-center justify-center gap-2">
-                  <span className="text-2xl">→</span>
-                  <span className="font-working-title text-sm">See all {listings.length}</span>
-                </button>
+              <div className="block shrink-0 w-[280px] snap-start h-full">
+                <Link href="/property" className="h-full min-h-[250px] rounded-lg border border-surface-variant bg-surface-alt text-on-surface hover:border-gold-accent hover:bg-gold-accent/5 transition-all flex flex-col items-center justify-center gap-4 group">
+                  <div className="w-16 h-16 rounded-full border border-gold-accent/30 bg-[#121212] flex items-center justify-center text-gold-accent group-hover:scale-110 transition-transform">
+                    <Search strokeWidth={1.5} size="1.5em" />
+                  </div>
+                  <div className="text-center">
+                    <span className="font-working-title text-sm block mb-1">View Full Ledger</span>
+                    <span className="text-xs text-text-secondary">{listings.length} active spaces</span>
+                  </div>
+                </Link>
               </div>
             </div>
           </div>

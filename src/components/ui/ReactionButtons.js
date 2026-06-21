@@ -153,7 +153,7 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
       </div>
 
       <div className={`confirm-text ${showConfirm ? "visible" : ""}`}>
-        Noted. Your board has been updated.
+        Intel logged to secure Ledger.
       </div>
 
       <style jsx>{`
@@ -172,12 +172,12 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
         }
 
         .reaction-tiles-row.small .shape-wrapper {
-          width: 34px;
-          height: 34px;
+          width: 44px; /* Minimum mobile tap target */
+          height: 44px;
         }
 
         .reaction-tiles-row.small .icon-overlay {
-          font-size: 14px;
+          font-size: 16px;
         }
 
         .reaction-tiles-row.small .tile-label {
@@ -255,10 +255,11 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
           fill: #ffb800;
           stroke: #ffb800;
           stroke-width: 3px;
+          filter: drop-shadow(0 0 10px rgba(255, 184, 0, 0.4));
         }
 
         .reaction-tile.active .icon-overlay {
-          color: #0e0e0e;
+          color: #121212;
           opacity: 1;
         }
 
@@ -286,18 +287,22 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
         .confirm-text {
           font-family: var(--font-mono, monospace);
           color: var(--accent, #ffb800);
-          letter-spacing: 0.08em;
-          font-size: 12px;
-          margin-top: 12px;
+          letter-spacing: 0.1em;
+          font-size: 11px;
+          text-transform: uppercase;
+          margin-top: 16px;
           text-align: center;
           opacity: 0;
           visibility: hidden;
-          transition: opacity 0.25s ease, visibility 0.25s ease;
+          text-shadow: 0 0 8px rgba(255, 184, 0, 0.3);
+          transform: translateY(4px);
+          transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .confirm-text.visible {
           opacity: 1;
           visibility: visible;
+          transform: translateY(0);
         }
 
         @media (max-width: 640px) {
