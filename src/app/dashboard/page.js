@@ -296,38 +296,15 @@ function DashboardInner() {
 
       <Toasts />
 
-      {/* Mobile Bottom Tab Bar */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-surface/95 backdrop-blur-md border-t border-surface-variant px-6 py-2 flex justify-between items-center z-40">
-        <button className="flex flex-col items-center gap-1 text-gold-accent" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
-          <span className="text-xl">🏠</span>
-          <span className="text-[10px] font-working-title font-bold">Home</span>
-        </button>
-        <Link href="/discover" className="flex flex-col items-center gap-1 text-text-secondary hover:text-on-surface transition-colors">
-          <span className="text-xl"><Search strokeWidth={1.5} size="1em" /></span>
-          <span className="text-[10px] font-working-title">Search</span>
-        </Link>
-        <button
-          className="relative -top-4 flex flex-col items-center"
-          onClick={firePrimaryAction}
-          aria-label={primaryAction.label}
-        >
-          <span className="bg-gold-accent text-background w-14 h-14 rounded-full flex items-center justify-center text-2xl shadow-lg hover:opacity-90 transition-opacity border-4 border-background">
-            {primaryAction.icon}
-          </span>
-          <span className="text-[10px] font-working-title text-gold-accent font-bold mt-0.5">{primaryAction.label}</span>
-        </button>
-        <Link href="/wishlist" className="flex flex-col items-center gap-1 text-text-secondary hover:text-on-surface transition-colors">
-          <span className="text-xl"><Bookmark strokeWidth={1.5} size="1em" /></span>
-          <span className="text-[10px] font-working-title">Saved</span>
-        </Link>
-        <button 
-          className="flex flex-col items-center gap-1 text-text-secondary hover:text-on-surface transition-colors relative"
-          onClick={() => setShowMobileProfileMenu(true)}
-        >
-          <span className="text-xl">👤</span>
-          <span className="text-[10px] font-working-title">Profile</span>
-        </button>
-      </nav>
+      {/* Primary Action FAB (Floating above global BottomNav) */}
+      <button
+        className="md:hidden fixed bottom-24 right-4 z-40 bg-gold-accent text-background w-14 h-14 rounded-full flex flex-col items-center justify-center shadow-[0_8px_24px_rgba(255,184,0,0.4)] hover:opacity-90 transition-all border-2 border-surface-alt"
+        onClick={firePrimaryAction}
+        aria-label={primaryAction.label}
+      >
+        <span className="text-xl leading-none font-bold">{primaryAction.icon}</span>
+        {primaryAction.label && <span className="text-[9px] font-working-title font-bold mt-0.5 tracking-tighter uppercase leading-none">{primaryAction.label}</span>}
+      </button>
 
       {/* Role Activation Modal (broker license / provider type) */}
       {activating && (

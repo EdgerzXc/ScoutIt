@@ -152,15 +152,15 @@ export default function OwnerMode() {
   // --- VIEW: ZERO LISTINGS ---
   if (!hasListing) {
     return (
-      <div className="max-w-[1200px] mx-auto py-lg animate-[fadeIn_0.4s_ease]">
+      <div className="max-w-[1200px] mx-auto pt-16 md:pt-0 py-lg px-4 md:px-0 animate-[fadeIn_0.4s_ease]">
         <div className="mb-sm">
-          <h1 className="font-display-md text-display-md text-text-primary">{firstName ? `Welcome back, ${firstName}` : "Welcome back"}</h1>
-          <p className="text-text-secondary font-body-md text-body-md">Your workspace is empty.</p>
+          <h1 className="font-display-md text-3xl md:text-5xl text-text-primary mb-2">{firstName ? `Welcome back, ${firstName}` : "Welcome back"}</h1>
+          <p className="text-text-secondary font-body-md text-sm md:text-base">Your workspace is empty.</p>
         </div>
-        <div className="bg-[#0a0a0a] rounded border border-surface-variant p-lg flex flex-col gap-md relative overflow-hidden items-center justify-center text-center py-32">
-          <h3 className="font-display-md text-3xl mb-2 text-on-surface">Create your first Property File</h3>
-          <p className="text-text-secondary mb-8 max-w-md">Our wizard walks you through building a polished, trustworthy listing in under 10 minutes.</p>
-          <button className="bg-gold-accent text-background font-working-title px-8 py-4 rounded hover:bg-surface-tint transition-colors text-lg font-bold uppercase tracking-widest shadow-[0_0_20px_rgba(212,175,55,0.2)]" onClick={() => setShowWizard('select_mode')}>
+        <div className="bg-[#0a0a0a] rounded-lg border border-surface-variant p-8 md:p-lg flex flex-col gap-6 relative overflow-hidden items-center justify-center text-center py-20 md:py-32 mt-8">
+          <h3 className="font-display-md text-2xl md:text-3xl text-on-surface">Create your first Property File</h3>
+          <p className="text-text-secondary max-w-md text-sm md:text-base">Our wizard walks you through building a polished, trustworthy listing in under 10 minutes.</p>
+          <button className="bg-gold-accent text-background font-working-title px-6 py-3 md:px-8 md:py-4 rounded hover:bg-surface-tint transition-colors text-base md:text-lg font-bold uppercase tracking-widest shadow-[0_0_20px_rgba(212,175,55,0.2)] mt-2" onClick={() => setShowWizard('select_mode')}>
             Start My First Listing
           </button>
         </div>
