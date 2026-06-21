@@ -2,6 +2,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import FloatingToolbox from "@/components/ui/FloatingToolbox";
 import BottomNav from "@/components/layout/BottomNav";
+import ErrorBoundary from "@/components/ui/ErrorBoundary";
+import ReportButton from "@/components/ui/ReportButton";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -57,9 +59,12 @@ export default function RootLayout({ children }) {
       <body>
         {/* Cinematic film grain texture overlay */}
         <div className="grain" aria-hidden="true" />
-        {children}
+        <ErrorBoundary>
+          {children}
+        </ErrorBoundary>
         <BottomNav />
         <FloatingToolbox />
+        <ReportButton />
       </body>
     </html>
   );

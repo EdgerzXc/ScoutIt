@@ -70,27 +70,19 @@ function toCard(p, cat, fallbackHook) {
   };
 }
 
-// SOP §9 gate for the card: only show a real price when an authority published +
-// verified it; otherwise "Price on request" (never an unverified price).
-function getCardPrice(p) {
-  const has = p.listed_price && p.listed_price.trim().toUpperCase() !== "N/A";
-  const published = (p.price_status || "").toLowerCase().includes("publish");
-  const verifiedBy = (p.price_verified_by || "").trim();
-  const verified = verifiedBy && verifiedBy.toLowerCase() !== "unverified";
-  if (has && published && verified) return { label: p.listed_price, verified: true };
-  return { label: "Price on request", verified: false };
-}
+// COMPLIANCE: no price is shown on directory cards. All monetary values render
+// ONLY in the property page's "Your Move" section (real-estate-law compliance).
 
-// Category-appropriate card specs (offices show rent/grade, restaurants seating,
+// Category-appropriate card specs (offices show grade, restaurants seating,
 // venues capacity, etc.) instead of residential beds/sqm for everything.
+// NOTE: never push a monetary value here — money belongs only in "Your Move".
 function getCardSpecBadges(p) {
   const cat = (p.spaceCategory || "").toLowerCase();
   const out = [];
   const sqm = p.floor_sqm > 0 ? `${p.floor_sqm} sqm` : null;
   if (cat.includes("commercial") || cat.includes("office") || cat.includes("retail")) {
     const c = p.cat?.commercial;
-    if (c?.rentPerSqm) out.push(c.rentPerSqm);
-    else if (c?.rentFrom) out.push(`₱${Number(c.rentFrom).toLocaleString("en-PH")}/sqm`);
+    // No rent on cards — money is "Your Move" only.
     if (c?.buildingGrade) out.push(c.buildingGrade);
     if (sqm) out.push(sqm);
   } else if (cat.includes("restaurant") || cat.includes("culinary")) {
@@ -115,12 +107,23 @@ function getCardSpecBadges(p) {
   return out;
 }
 
-// First number group in a price string (handles "Php 850/sqm/mo", "₱18,500,000").
+// Internal-only: first number group in a price string ("Php 850/sqm/mo" → 850).
+// Used solely to bucket a listing into a qualitative band. NEVER rendered —
+// money is "Your Move" only (compliance).
 function parsePrice(str) {
   if (!str) return null;
   const m = String(str).replace(/,/g, "").match(/\d+(\.\d+)?/);
   return m ? Number(m[0]) : null;
 }
+
+// Qualitative price bands. Thresholds (PHP) are internal filter logic; only the
+// `label` is ever shown to users — no peso amounts appear in the UI (compliance).
+const PRICE_BANDS = [
+  { label: "Entry",   min: 0,        max: 1000000 },
+  { label: "Mid",     min: 1000000,  max: 10000000 },
+  { label: "Premium", min: 10000000, max: 50000000 },
+  { label: "Trophy",  min: 50000000, max: Infinity },
+];
 
 function PropertyDirectoryContent() {
   const searchParams = useSearchParams();
@@ -143,8 +146,9 @@ function PropertyDirectoryContent() {
   const [centerLng, setCenterLng] = useState(121.0215);
   const [centerLat, setCenterLat] = useState(14.5547);
 
-  // Price Range State
-  const [selectedPriceRanges, setSelectedPriceRanges] = useState([]);
+  // Price Band State — qualitative tiers only (Entry/Mid/Premium/Trophy).
+  // No monetary amounts are ever displayed; thresholds live in code for filtering.
+  const [selectedPriceBands, setSelectedPriceBands] = useState([]);
 
   // Collapsible panels state
   const [openFilters, setOpenFilters] = useState({
@@ -286,12 +290,6 @@ function PropertyDirectoryContent() {
   const sectors = ["Residential", "Commercial", "STR", "Hospitality", "Restaurants", "Venues/Events"];
   const locations = Array.from(new Set(rawProperties.map(p => normalizeCity(p.city)).filter(Boolean)));
   const aesthetics = Array.from(new Set(rawProperties.map(p => p.aestheticTag).filter(Boolean)));
-  const priceRanges = [
-    { label: "Under ₱100k (Lease)", min: 0, max: 100000 },
-    { label: "₱100k - ₱500k", min: 100000, max: 500000 },
-    { label: "₱5M - ₱20M (Sale)", min: 5000000, max: 20000000 },
-    { label: "₱20M+ (Sale)", min: 20000000, max: Infinity }
-  ];
 
   const handleCheckboxChange = (val, state, setState) => {
     if (state.includes(val)) {
@@ -322,15 +320,15 @@ function PropertyDirectoryContent() {
     if (selectedAesthetics.length > 0 && !selectedAesthetics.includes(p.aestheticTag)) {
       return false;
     }
-    // Price Range filter
-    if (selectedPriceRanges.length > 0) {
+    // Price Band filter — buckets by internal price magnitude; no amounts shown.
+    if (selectedPriceBands.length > 0) {
       const pPrice = parsePrice(p.listed_price);
-      if (pPrice === null) return false; // If no price, hide if price filter is active
-      const matchesPrice = selectedPriceRanges.some(rangeLabel => {
-        const range = priceRanges.find(r => r.label === rangeLabel);
-        return range && pPrice >= range.min && pPrice < range.max;
+      if (pPrice === null) return false; // no price on record → excluded when banding
+      const inBand = selectedPriceBands.some(label => {
+        const band = PRICE_BANDS.find(b => b.label === label);
+        return band && pPrice >= band.min && pPrice < band.max;
       });
-      if (!matchesPrice) return false;
+      if (!inBand) return false;
     }
     // Search query matches title, city, location, category, or aesthetic tag
     if (searchQuery.trim() !== "") {
@@ -410,23 +408,25 @@ function PropertyDirectoryContent() {
                 )}
               </div>
 
-              {/* Filter Section: Price Range */}
+              {/* Filter Section: Price Band — qualitative tiers only, NO peso amounts
+                  (compliance). Buckets by internal price magnitude; price itself is
+                  shown only in the property page's "Your Move" section. */}
               <div className="filter-card">
                 <button className="filter-trigger" onClick={() => toggleFilterSection("prices")}>
-                  Price Range
+                  Price Band
                   <span className={`filter-chevron ${openFilters.prices ? "open" : ""}`}>▼</span>
                 </button>
                 {openFilters.prices && (
                   <div className="filter-options">
-                    {priceRanges.map(pr => (
-                      <label key={pr.label} className="filter-checkbox-label">
+                    {PRICE_BANDS.map(band => (
+                      <label key={band.label} className="filter-checkbox-label">
                         <input
                           type="checkbox"
                           className="filter-checkbox"
-                          checked={selectedPriceRanges.includes(pr.label)}
-                          onChange={() => handleCheckboxChange(pr.label, selectedPriceRanges, setSelectedPriceRanges)}
+                          checked={selectedPriceBands.includes(band.label)}
+                          onChange={() => handleCheckboxChange(band.label, selectedPriceBands, setSelectedPriceBands)}
                         />
-                        {pr.label}
+                        {band.label}
                       </label>
                     ))}
                   </div>
@@ -547,7 +547,6 @@ function PropertyDirectoryContent() {
               <div className="directory-grid">
                 {filteredProperties.length > 0 ? (
                   filteredProperties.map(p => {
-                    const cardPrice = getCardPrice(p);
                     const specBadges = getCardSpecBadges(p);
                     return (
                     <Link href={`/property/${p.slug}`} key={p.id} className="property-preview-card">
@@ -567,17 +566,7 @@ function PropertyDirectoryContent() {
                         <h3>{p.title}</h3>
                         <p className="hook">{p.hook}</p>
 
-                        {/* Price (SOP §9 gate) — verified published price or "on request" */}
-                        <div style={{ display: "flex", alignItems: "center", gap: "8px", margin: "10px 0 4px" }}>
-                          {cardPrice.verified ? (
-                            <>
-                              <span style={{ fontFamily: "var(--font-body, Georgia, serif)", fontSize: "16px", color: "#f0ede8", fontWeight: 500 }}>{cardPrice.label}</span>
-                              <span style={{ display: "inline-flex", alignItems: "center", gap: "4px", fontFamily: "var(--font-mono, monospace)", fontSize: "9px", color: "#4caf7d", letterSpacing: "0.1em", textTransform: "uppercase" }}>✓ Verified</span>
-                            </>
-                          ) : (
-                            <span style={{ fontFamily: "var(--font-mono, monospace)", fontSize: "11px", color: "#8a8a8a", letterSpacing: "0.08em", textTransform: "uppercase" }}>Price on request</span>
-                          )}
-                        </div>
+                        {/* Price intentionally omitted on cards — shown only in "Your Move" (compliance). */}
 
                         <div className="property-spec-badges">
                           <span className="property-spec-badge">{p.spaceCategory}</span>

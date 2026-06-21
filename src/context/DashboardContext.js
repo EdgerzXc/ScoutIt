@@ -173,16 +173,23 @@ export function DashboardProvider({ children }) {
 
     addToast("Initializing Dossier...", "⏳");
     
-    // 2. Insert into Supabase
+    // 2. Insert into Supabase (owned by the current user; category data carried in details)
+    const slug = (listing.title || `${listing.type} in ${listing.location}`)
+      .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
     const { data, error } = await supabase.from('properties').insert([{
-      title: `${listing.type} in ${listing.location}`,
+      owner_id: currentUser?.id || null,
+      title: listing.title || `${listing.type} in ${listing.location}`,
       type: listing.type,
+      space_category: listing.category || listing.type,
+      slug,
       location: listing.location,
       price: listing.price ? parseFloat(listing.price) : null,
       description: listing.description,
       media_link: listing.mediaLink,
       completeness_score: listing.completenessScore,
       verified: listing.verified,
+      pipeline_status: 'pending',
+      details: listing.details || {},
       coordinates: coordinatesStr
     }]).select();
 
@@ -200,7 +207,7 @@ export function DashboardProvider({ children }) {
       tag: 'NEW',
       tagClass: 'bg-gold-accent/20 text-gold-accent',
       time: 'Just now',
-      ownerId: 'current_user',
+      ownerId: currentUser?.id || null,
       signals: {
         ownerAge: 'New — no data',
         ownerAgeClass: 'text-text-secondary',
@@ -260,6 +267,71 @@ export function DashboardProvider({ children }) {
     setPitches(prev => [newPitch, ...prev]);
     addToast("Deal Initiated — 1 Connect spent", "⚡");
 
+    return true;
+  };
+
+  // ── Owner → Broker handshake (spends 1 Connect, recorded in Supabase) ──
+  const inviteBroker = async (listingId, brokerName) => {
+    if (!brokerName) return false;
+    if (connects < 1) {
+      addToast("Not enough Connects to send the handshake", "◈");
+      return false;
+    }
+
+    // Debit locally (optimistic) + mirror to the user object
+    const newBalance = connects - 1;
+    setConnects(newBalance);
+    if (currentUser) {
+      const updatedUser = { ...currentUser, connects_balance: newBalance };
+      localStorage.setItem("scoutit_user", JSON.stringify(updatedUser));
+      setCurrentUser(updatedUser);
+    }
+
+    // Relationship row (owner-initiated invite, awaiting broker confirmation)
+    const { data, error } = await supabase.from('deals').insert([{
+      property_id: listingId,
+      broker_id: brokerName,
+      status: 'invited',
+      pitch_message: `Owner invited ${brokerName} to represent this property.`
+    }]).select();
+
+    // Connect ledger + balance (the real spend, per the Connects model)
+    if (currentUser?.id) {
+      await supabase.from('connect_transactions').insert([{
+        user_id: currentUser.id,
+        kind: 'spend',
+        bucket: 'granted',
+        amount: -1,
+        reason: 'Owner invited a broker (handshake)',
+        ref_type: 'handshake',
+        ref_id: listingId
+      }]);
+      await supabase.from('connect_balances')
+        .update({ granted_balance: newBalance, updated_at: new Date().toISOString() })
+        .eq('user_id', currentUser.id);
+    }
+
+    if (error) {
+      addToast("Couldn't send the invite — try again.", "❌");
+      return false;
+    }
+
+    const targetListing = listings.find(l => l.id === listingId);
+    setPitches(prev => [{
+      id: data[0].id,
+      listingId,
+      title: targetListing ? targetListing.title : 'Property',
+      type: 'Advisor',
+      brokerName,
+      brokerFirm: 'Invited advisor',
+      message: `Owner invited ${brokerName}.`,
+      status: 'invited',
+      statusText: 'Invited — awaiting broker',
+      badgeText: 'Waiting',
+      isCurrentUserBroker: false,
+      isCurrentUserOwner: true
+    }, ...prev]);
+    addToast(`Handshake sent to ${brokerName} — 1 Connect spent`, "🤝");
     return true;
   };
 
@@ -332,13 +404,17 @@ export function DashboardProvider({ children }) {
       title: p.title,
       desc: p.description || '',
       loc: p.location,
+      location: p.location,
       hasMedia: !!p.media_link,
       mediaLink: p.media_link,
       price: p.price,
       tag: 'LIVE',
       tagClass: 'bg-gold-accent/20 text-gold-accent',
       time: new Date(p.created_at).toLocaleDateString(),
-      ownerId: p.owner_id || 'current_user',
+      ownerId: p.owner_id || null,
+      spaceCategory: p.space_category || p.type,
+      details: p.details || {},
+      pipelineStatus: p.pipeline_status || 'approved',
       completenessScore: p.completeness_score,
       verified: p.verified,
       coordinates: p.coordinates, // keep the geography string if needed
@@ -367,6 +443,7 @@ export function DashboardProvider({ children }) {
       updateListing,
       closeListing,
       sendPitch,
+      inviteBroker,
       updatePitchStatus,
       markNotificationsRead,
       clearAllNotifications,

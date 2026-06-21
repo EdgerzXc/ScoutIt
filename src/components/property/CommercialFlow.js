@@ -220,13 +220,13 @@ function BackOfHousePanel({ property: d }) {
 // ═══════════════════════════════════════════════════
 // MAIN COMPONENT
 // ═══════════════════════════════════════════════════
-export default function CommercialFlow({ slug }) {
+export default function CommercialFlow({ slug, draftData, isDraftMode }) {
   // ── Interactive UI states ──────────────────────
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [photoMode,         setPhotoMode]         = useState("natural");
   const [activeTab,         setActiveTab]         = useState("space");
   const [menuOpen,   setMenuOpen]   = useState(false);
-  const [propertyData, setPropertyData] = useState(() => getPropertyBySlug(slug));
+  const [propertyData, setPropertyData] = useState(() => draftData || getPropertyBySlug(slug));
   const [dataLoading,  setDataLoading]  = useState(false);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [selectedUnit, setSelectedUnit] = useState(null);
@@ -249,8 +249,16 @@ export default function CommercialFlow({ slug }) {
   const menuRef      = useRef(null);
   const touchStartX  = useRef(0);
 
+  // ── Sync draftData when it changes ──
+  useEffect(() => {
+    if (draftData) {
+      setPropertyData(draftData);
+    }
+  }, [draftData]);
+
   // ── Fetch from Airtable in background; mock data already shown ──
   useEffect(() => {
+    if (isDraftMode) return;
     async function loadProperty() {
       try {
         const res  = await fetch("/api/cms");

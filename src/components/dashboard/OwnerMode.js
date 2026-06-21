@@ -1,21 +1,22 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import GuidedWizard from "./GuidedWizard";
+import LiveEditorWorkspace from "./LiveEditorWorkspace";
 import { useDashboard } from "../../context/DashboardContext";
 import Link from "next/link";
 
 export default function OwnerMode() {
-  const { listings, pitches, updatePitchStatus, addListing, updateListing, closeListing, currentUser } = useDashboard();
+  const { listings, pitches, updatePitchStatus, addListing, updateListing, closeListing, currentUser, inviteBroker, connects } = useDashboard();
   const firstName = currentUser?.name ? currentUser.name.split(" ")[0] : "";
   const [showWizard, setShowWizard] = useState(false); // false | true | 'edit'
   
-  // Check if current user has any listings
-  const myListings = listings.filter(l => l.ownerId === 'current_user');
+  // Check if current user has any listings (match the logged-in owner's id)
+  const myListings = listings.filter(l => currentUser && l.ownerId === currentUser.id);
   const hasListing = myListings.length > 0;
 
   // New Dossier State
   const [viewingDossierId, setViewingDossierId] = useState(null);
+  const [inviteName, setInviteName] = useState("");
 
   // If they only have 1 listing, jump straight to its dossier
   useEffect(() => {
@@ -31,7 +32,7 @@ export default function OwnerMode() {
     }
   }, [myListings, viewingDossierId]);
 
-  const activeListing = myListings.find(l => l.id === viewingDossierId);
+  const activeListing = myListings.find(l => l.id === viewingDossierId) || myListings[0];
 
   // Mobile bottom-bar primary action (+ List) opens the wizard
   useEffect(() => {
@@ -64,7 +65,7 @@ export default function OwnerMode() {
   };
 
   if (showWizard) {
-    return <GuidedWizard 
+    return <LiveEditorWorkspace 
       onPublish={handlePublish} 
       onClose={() => setShowWizard(false)} 
       isEditing={showWizard === 'edit'} 
@@ -237,6 +238,32 @@ export default function OwnerMode() {
 
         {/* Right Col: Active Inquiries (Pitches) */}
         <div className="md:col-span-8 flex flex-col">
+          {/* Invite an advisor — owner-initiated handshake, spends 1 Connect */}
+          <div className="bg-[#121110] border border-surface-variant rounded-lg p-5 mb-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-working-title text-base text-on-surface">Invite an advisor</h3>
+              <span className="font-label-caps text-[10px] tracking-widest text-gold-accent">◈ 1 CONNECT · {connects} LEFT</span>
+            </div>
+            <p className="text-xs text-text-secondary mb-3">You control who represents this property. Sending a handshake spends 1 Connect — whether or not they accept.</p>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <input
+                className="flex-1 bg-surface border border-surface-variant rounded px-4 py-3 text-on-surface text-sm focus:outline-none focus:border-gold-accent transition-colors"
+                type="text"
+                placeholder="Broker name or PRC #"
+                value={inviteName}
+                onChange={e => setInviteName(e.target.value)}
+              />
+              <button
+                type="button"
+                className="bg-gold-accent text-background font-working-title font-bold px-5 py-3 rounded hover:opacity-90 transition-opacity disabled:opacity-50 text-sm"
+                disabled={!inviteName.trim() || connects < 1}
+                onClick={async () => { const ok = await inviteBroker(activeListing.id, inviteName.trim()); if (ok) setInviteName(""); }}
+              >
+                Send Handshake
+              </button>
+            </div>
+          </div>
+
           <div className="flex justify-between items-center mb-4">
             <h2 className="font-working-title text-xl text-on-surface flex items-center gap-2">
               Active Inquiries
