@@ -54,6 +54,7 @@ different altitude. That is ScoutIT in the market. The UFO stays. Always.
 | 7 | **`07_FEATURES_AND_FLOWS/`** | User journeys, scrollytelling manifesto, comparison tool, onboarding |
 | 8 | **`08_OPERATIONS_AND_BACKLOG/`** | Build order, fix list, audits, cleanup playbook |
 | 9 | **`09_REFERENCE_RAW/`** | Original project README + reference-asset notes |
+| 11 | **`11_SCHEMATICS/`** | Visual system maps (one `.svg` per system) — start with Mission Control |
 
 ---
 
