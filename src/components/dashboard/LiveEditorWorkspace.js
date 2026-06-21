@@ -387,13 +387,13 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
 
       {/* ── RIGHT PANEL: LIVE PREVIEW (The Canvas) ── */}
       <div className={`flex-1 bg-background relative overflow-y-auto ${mobileView === 'preview' ? 'block' : 'hidden md:block'}`}>
-        {/* Draft Mode Banner */}
-        <div className="absolute top-0 left-0 w-full z-50 bg-gold-accent text-background text-center py-1.5 font-label-caps text-[10px] tracking-[0.3em] font-bold shadow-md">
+        {/* Draft Mode Banner — pointer-events-none so it doesn't block clicks on the Go Back button behind it */}
+        <div className="absolute top-0 left-0 w-full z-50 bg-gold-accent text-background text-center py-1.5 font-label-caps text-[10px] tracking-[0.3em] font-bold shadow-md pointer-events-none">
           LIVE PREVIEW / DRAFT MODE
         </div>
         
         {/* Render the Master Page Component inline */}
-        <div className="mt-8 md:pointer-events-none opacity-90 md:scale-[0.98] origin-top transition-all">
+        <div className="mt-10 md:pointer-events-none opacity-90 md:scale-[0.98] origin-top transition-all">
           <FlowLayout slug={null} draftData={draftData} isDraftMode={true} />
         </div>
       </div>
