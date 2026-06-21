@@ -17,7 +17,7 @@ const CATEGORY_FIELDS = {
   residential: [
     { key: "beds", label: "Bedrooms", type: "number" },
     { key: "baths", label: "Bathrooms", type: "number" },
-    { key: "floor_sqm", label: "Floor area (sqm)", type: "number" },
+    { key: "floor_sqm", label: "Floor area (sqm)", type: "number", proOnly: true },
     { key: "lot_sqm", label: "Lot area (sqm)", type: "number" },
     { key: "parking", label: "Parking slots", type: "number" },
     { key: "furnishing", label: "Furnishing", type: "select", options: ["Bare", "Semi-Furnished", "Fully Furnished"] },
@@ -25,14 +25,14 @@ const CATEGORY_FIELDS = {
     { key: "view", label: "View", type: "text" },
   ],
   commercial: [
-    { key: "rent_per_sqm", label: "Published rent (₱/sqm/mo)", type: "text" },
-    { key: "camc", label: "CAMC (₱/sqm/mo)", type: "text" },
-    { key: "ac_charges", label: "A/C charges", type: "text" },
-    { key: "building_grade", label: "Building grade", type: "select", options: ["Premium", "Grade A", "Grade B"] },
+    { key: "rent_per_sqm", label: "Published rent (₱/sqm/mo)", type: "text", proOnly: true },
+    { key: "camc", label: "CAMC (₱/sqm/mo)", type: "text", proOnly: true },
+    { key: "ac_charges", label: "A/C charges", type: "text", proOnly: true },
+    { key: "building_grade", label: "Building grade", type: "select", options: ["Premium", "Grade A", "Grade B"], proOnly: true },
     { key: "hand_over_condition", label: "Hand-over condition", type: "select", options: ["Bare Shell", "Semi-Fitted", "Fitted", "As-is-where-is"] },
     { key: "availability", label: "Availability", type: "text" },
-    { key: "total_gla", label: "Total GLA (sqm)", type: "number" },
-    { key: "peza", label: "PEZA certified", type: "checkbox" },
+    { key: "total_gla", label: "Total GLA (sqm)", type: "number", proOnly: true },
+    { key: "peza", label: "PEZA certified", type: "checkbox", proOnly: true },
   ],
   str: [
     { key: "max_guests", label: "Max guests", type: "number" },
@@ -42,7 +42,7 @@ const CATEGORY_FIELDS = {
     { key: "nightly_rate", label: "Nightly rate (₱)", type: "text" },
     { key: "min_stay_nights", label: "Minimum stay (nights)", type: "number" },
     { key: "self_check_in", label: "Self check-in available", type: "checkbox" },
-    { key: "permit_accreditation", label: "DOT / LGU permit (verify)", type: "text" },
+    { key: "permit_accreditation", label: "DOT / LGU permit (verify)", type: "text", proOnly: true },
   ],
   hospitality: [
     { key: "room_count", label: "Rooms / keys", type: "number" },
@@ -50,27 +50,27 @@ const CATEGORY_FIELDS = {
     { key: "room_types", label: "Room types", type: "text" },
     { key: "fb_outlets", label: "F&B outlets", type: "number" },
     { key: "function_rooms", label: "Function rooms", type: "number" },
-    { key: "operator_brand", label: "Operator / brand", type: "text" },
+    { key: "operator_brand", label: "Operator / brand", type: "text", proOnly: true },
   ],
   restaurants: [
     { key: "seating_capacity", label: "Seating capacity", type: "number" },
     { key: "kitchen_condition", label: "Kitchen condition", type: "select", options: ["With Kitchen", "Bare", "Needs Build-out"] },
-    { key: "hood_exhaust", label: "Hood / exhaust present", type: "checkbox" },
-    { key: "grease_trap", label: "Grease trap present", type: "checkbox" },
-    { key: "gas_line", label: "Gas line available", type: "checkbox" },
+    { key: "hood_exhaust", label: "Hood / exhaust present", type: "checkbox", proOnly: true },
+    { key: "grease_trap", label: "Grease trap present", type: "checkbox", proOnly: true },
+    { key: "gas_line", label: "Gas line available", type: "checkbox", proOnly: true },
     { key: "frontage", label: "Storefront frontage", type: "text" },
     { key: "foot_traffic", label: "Foot traffic", type: "select", options: ["Low", "Medium", "High"] },
-    { key: "liquor_license", label: "Liquor license eligible", type: "checkbox" },
+    { key: "liquor_license", label: "Liquor license eligible", type: "checkbox", proOnly: true },
   ],
   venues: [
     { key: "capacity_seated", label: "Seated capacity", type: "number" },
     { key: "capacity_standing", label: "Standing capacity", type: "number" },
     { key: "layout_configs", label: "Layout configurations", type: "text" },
-    { key: "av_equipment", label: "AV equipment included", type: "text" },
+    { key: "av_equipment", label: "AV equipment included", type: "text", proOnly: true },
     { key: "catering_policy", label: "Catering policy", type: "select", options: ["In-house only", "External allowed", "Both"] },
     { key: "air_conditioning", label: "Air-conditioned", type: "checkbox" },
     { key: "rental_rate", label: "Rental rate (₱)", type: "text" },
-    { key: "noise_curfew", label: "Noise curfew", type: "text" },
+    { key: "noise_curfew", label: "Noise curfew", type: "text", proOnly: true },
   ],
 };
 
@@ -85,6 +85,8 @@ const CATEGORY_TO_LAYOUT_MAP = {
 };
 
 export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, initialData }) {
+  const { raiseQuest } = require("../../context/DashboardContext").useDashboard();
+
   // State initialization
   const [formData, setFormData] = useState({
     title: initialData?.title || "",
@@ -100,6 +102,8 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
 
   const [activeSection, setActiveSection] = useState("basics");
   const [mobileView, setMobileView] = useState("editor"); // "editor" | "preview"
+  const [questingField, setQuestingField] = useState(null);
+  const [activeQuests, setActiveQuests] = useState(initialData?.quests || {});
 
   // Validate the 5 must-haves
   const mustHaves = {
@@ -273,14 +277,40 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
               
               {categoryFields.map(f => (
                 f.type === 'checkbox' ? (
-                  <label key={f.key} className="flex items-center gap-3 cursor-pointer text-on-surface bg-surface-alt border border-surface-variant rounded px-3 py-2.5 w-full">
-                    <input type="checkbox" className="w-4 h-4 accent-gold-accent" checked={!!formData.details[f.key]} onChange={e => setDetail(f.key, e.target.checked)} />
+                  <label key={f.key} className="flex items-center gap-3 cursor-pointer text-on-surface bg-surface-alt border border-surface-variant rounded px-3 py-2.5 w-full relative group">
+                    <input type="checkbox" className="w-4 h-4 accent-gold-accent" checked={!!formData.details[f.key]} onChange={e => setDetail(f.key, e.target.checked)} disabled={activeQuests[f.key]} />
                     <span className="text-sm font-working-title">{f.label}</span>
+                    {f.proOnly && !activeQuests[f.key] && (
+                      <button 
+                        className="absolute right-3 text-[10px] text-gold-accent font-working-title border border-gold-accent/30 rounded px-2 py-0.5 hover:bg-gold-accent/10 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
+                        onClick={(e) => { e.preventDefault(); setQuestingField({ key: f.key, label: f.label }); }}
+                      >
+                        ✨ Ask a Pro (1 ◈)
+                      </button>
+                    )}
+                    {activeQuests[f.key] && (
+                      <span className="absolute right-3 text-[9px] bg-gold-accent/10 text-gold-accent px-2 py-0.5 rounded uppercase font-bold">Quested</span>
+                    )}
                   </label>
                 ) : (
-                  <div key={f.key} className="flex flex-col gap-2">
-                    <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">{f.label}</label>
-                    {f.type === 'select' ? (
+                  <div key={f.key} className="flex flex-col gap-2 relative group">
+                    <div className="flex justify-between items-center h-5">
+                      <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">{f.label}</label>
+                      {f.proOnly && !activeQuests[f.key] && (
+                        <button 
+                          className="text-[10px] text-gold-accent font-working-title border border-gold-accent/30 rounded px-2 py-0.5 hover:bg-gold-accent/10 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
+                          onClick={() => setQuestingField({ key: f.key, label: f.label })}
+                        >
+                          ✨ Ask a Pro (1 ◈)
+                        </button>
+                      )}
+                    </div>
+                    {activeQuests[f.key] ? (
+                      <div className="bg-surface-container-low border border-dashed border-gold-accent/40 rounded px-3 py-2.5 text-text-secondary text-sm flex items-center justify-between">
+                        <span className="italic">Awaiting Pro Verification...</span>
+                        <span className="text-[9px] bg-gold-accent/10 text-gold-accent px-2 py-0.5 rounded uppercase font-bold">Quested</span>
+                      </div>
+                    ) : f.type === 'select' ? (
                       <select className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface focus:outline-none focus:border-gold-accent transition-colors text-sm" value={formData.details[f.key] || ''} onChange={e => setDetail(f.key, e.target.value)}>
                         <option value="">Select…</option>
                         {f.options.map(o => <option key={o} value={o}>{o}</option>)}
@@ -368,6 +398,38 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
       >
         {mobileView === 'editor' ? '👁️ View Live Preview' : '✏️ Back to Editor'}
       </button>
+
+      {/* Quest Modal */}
+      {questingField && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-background/90 backdrop-blur-md px-4">
+          <div className="w-full max-w-sm bg-surface border border-surface-variant rounded-lg shadow-2xl p-6 animate-[slideUp_0.3s_ease-out]">
+            <h3 className="font-headline-editorial text-2xl text-on-surface mb-2">Raise a Quest</h3>
+            <p className="text-sm text-text-secondary mb-6">
+              Don't know the exact <strong className="text-on-surface">{questingField.label}</strong>? Spend <strong className="text-gold-accent">1 Connect</strong> to delegate this to a verified Pro. They will research and fill this in for you.
+            </p>
+            <div className="flex gap-3 mt-4">
+              <button 
+                className="flex-1 px-4 py-3 border border-surface-variant text-text-secondary rounded hover:text-on-surface hover:bg-surface-container transition-colors" 
+                onClick={() => setQuestingField(null)}
+              >
+                Cancel
+              </button>
+              <button
+                className="flex-1 bg-gold-accent text-background font-working-title font-bold px-4 py-3 rounded hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+                onClick={async () => {
+                  const success = await raiseQuest(initialData?.id || "draft", questingField.key, questingField.label);
+                  if (success) {
+                    setActiveQuests(prev => ({ ...prev, [questingField.key]: true }));
+                    setQuestingField(null);
+                  }
+                }}
+              >
+                <span>Confirm & Spend 1</span> <span className="text-xs">◈</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

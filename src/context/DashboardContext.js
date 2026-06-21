@@ -163,6 +163,52 @@ export function DashboardProvider({ children }) {
     }
   };
 
+  // ── QuestIT (Raise a Quest) ──
+  const raiseQuest = async (propertyId, fieldKey, fieldLabel) => {
+    if (connects < 1) {
+      addToast("Not enough Connects to raise a Quest.", "◈");
+      return false;
+    }
+
+    // Debit locally (optimistic)
+    const newBalance = connects - 1;
+    setConnects(newBalance);
+    if (currentUser) {
+      const updatedUser = { ...currentUser, connects_balance: newBalance };
+      localStorage.setItem("scoutit_user", JSON.stringify(updatedUser));
+      setCurrentUser(updatedUser);
+    }
+
+    if (currentUser?.id) {
+      // Record spend transaction
+      await supabase.from('connect_transactions').insert([{
+        user_id: currentUser.id,
+        kind: 'spend',
+        bucket: 'granted',
+        amount: -1,
+        reason: `Raised Quest for ${fieldLabel}`,
+        ref_type: 'quest',
+        ref_id: propertyId || 'draft'
+      }]);
+      await supabase.from('connect_balances')
+        .update({ granted_balance: newBalance, updated_at: new Date().toISOString() })
+        .eq('user_id', currentUser.id);
+
+      // Create bounty claim for the Guild
+      // (Assuming bounty_claims accepts target_field and property_id)
+      await supabase.from('bounty_claims').insert([{
+        target_field: fieldKey,
+        property_id: propertyId,
+        initiator_id: currentUser.id,
+        status: 'open',
+        payout_connects: 1
+      }]);
+    }
+
+    addToast(`Quest raised for ${fieldLabel} — 1 Connect spent`, "✨");
+    return true;
+  };
+
   // ── Owner listing management (Supabase) ──
   const updateListing = async (listingId, data) => {
     // Optimistic UI update
@@ -547,6 +593,7 @@ export function DashboardProvider({ children }) {
       isLoading,
       addToast,
       toggleSave,
+      raiseQuest,
       addListing,
       addConciergeListing,
       updateListing,
