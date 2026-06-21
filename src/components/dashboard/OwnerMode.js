@@ -172,13 +172,13 @@ export default function OwnerMode() {
   if (!viewingDossierId && myListings.length > 1) {
     return (
       <div className="max-w-[1200px] mx-auto py-lg animate-[fadeIn_0.4s_ease]">
-        <div className="flex justify-between items-end mb-8 border-b border-surface-variant pb-6">
+        <div className="flex flex-col md:flex-row md:justify-between md:items-end mb-8 border-b border-surface-variant pb-6 gap-4">
           <div>
             <span className="font-label-caps text-gold-accent tracking-widest uppercase mb-2 block">Command Center</span>
-            <h1 className="font-display-md text-4xl text-text-primary">Active Property Files</h1>
+            <h1 className="font-display-md text-3xl md:text-4xl text-text-primary">Active Property Files</h1>
           </div>
           <button 
-            className="border border-gold-accent text-gold-accent hover:bg-gold-accent hover:text-background font-working-title font-bold px-6 py-3 rounded transition-all"
+            className="border border-gold-accent text-gold-accent hover:bg-gold-accent hover:text-background font-working-title font-bold px-6 py-3 rounded transition-all w-full md:w-auto"
             onClick={() => setShowWizard('select_mode')}
           >
             + New Property File
@@ -258,9 +258,9 @@ export default function OwnerMode() {
           <span className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase mb-1 block">Property Dossier</span>
           <h1 className="font-display-md text-3xl md:text-5xl text-on-surface">{activeListing.title || 'Untitled Property'}</h1>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
            <button 
-             className="border border-surface-variant text-text-secondary hover:text-on-surface hover:border-text-secondary font-working-title font-bold px-4 py-2 rounded transition-colors text-sm"
+             className="border border-surface-variant text-text-secondary hover:text-on-surface hover:border-text-secondary font-working-title font-bold px-4 py-2 rounded transition-colors text-sm flex-1 md:flex-none text-center justify-center"
              onClick={() => {
                if(window.confirm("Withdraw this property dossier from the market? Brokers will no longer see it.")) {
                  closeListing(activeListing.id);
@@ -270,14 +270,14 @@ export default function OwnerMode() {
              Withdraw
            </button>
            <button 
-             className="border border-gold-accent text-gold-accent hover:bg-gold-accent/10 font-working-title font-bold px-4 py-2 rounded transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+             className="border border-gold-accent text-gold-accent hover:bg-gold-accent/10 font-working-title font-bold px-4 py-2 rounded transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed flex-1 md:flex-none text-center justify-center"
              disabled={activeListing.pipelineStatus === 'ai_drafting'}
              onClick={() => setShowWizard('edit')}
            >
              Edit Workspace
            </button>
            {activeListing.pipelineStatus !== 'ai_drafting' && (
-             <Link href={`/property/${activeListing.id}`} className="bg-gold-accent text-background font-working-title font-bold px-4 py-2 rounded hover:opacity-90 transition-opacity text-sm">
+             <Link href={`/property/${activeListing.id}`} className="bg-gold-accent text-background font-working-title font-bold px-4 py-2 rounded hover:opacity-90 transition-opacity text-sm flex-1 md:flex-none text-center justify-center">
                View Public File
              </Link>
            )}
