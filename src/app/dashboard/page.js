@@ -70,6 +70,14 @@ function DashboardInner() {
     }
   }, [router]);
 
+  useEffect(() => {
+    const handleOpenMobileMenu = () => {
+      setShowMobileProfileMenu(true);
+    };
+    window.addEventListener("scoutit:open-mobile-menu", handleOpenMobileMenu);
+    return () => window.removeEventListener("scoutit:open-mobile-menu", handleOpenMobileMenu);
+  }, []);
+
   // Click outside to close desktop switcher
   useEffect(() => {
     function handleClickOutside(event) {
@@ -280,10 +288,19 @@ function DashboardInner() {
             </button>
           </div>
           
-          {/* Mobile Connects / Secondary Top indicator */}
-          <div className="md:hidden flex items-center gap-1 text-gold-accent font-label-caps text-[10px] tracking-widest">
-            <span>◈</span>
-            <span>{connects !== undefined ? connects : user.connects_balance}</span>
+          {/* Mobile Connects & Profile (Menu Trigger) */}
+          <div className="md:hidden flex items-center gap-3">
+            <div className="flex items-center gap-1 text-gold-accent font-label-caps text-[10px] tracking-widest">
+              <span>◈</span>
+              <span>{connects !== undefined ? connects : user.connects_balance}</span>
+            </div>
+            <button
+              className="w-8 h-8 rounded-full bg-surface-alt border border-surface-variant flex items-center justify-center font-working-title text-sm font-bold text-on-surface hover:border-gold-accent transition-colors"
+              onClick={() => setShowMobileProfileMenu(true)}
+              title="Open Mobile Menu"
+            >
+              {user.name ? user.name.substring(0,2).toUpperCase() : 'U'}
+            </button>
           </div>
         </div>
       </header>

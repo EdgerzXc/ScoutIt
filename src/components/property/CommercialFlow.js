@@ -843,10 +843,10 @@ export default function CommercialFlow({ slug, draftData, isDraftMode }) {
           <button
             onClick={(e) => {
               e.stopPropagation();
-              if (window.history.length > 1) {
+              if (window.history.length > 2) {
                 window.history.back();
               } else {
-                window.location.href = "/";
+                window.location.href = "/dashboard";
               }
             }}
             className="platform-back-btn"
@@ -869,6 +869,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode }) {
             </button>
             <div className={`platform-dropdown ${menuOpen ? "open" : ""}`}>
               <div className="dropdown-brand">ScoutIt</div>
+              <Link href="/dashboard">Dashboard</Link>
               <Link href="/">Home</Link>
               <Link href="/discover">Discover</Link>
               <Link href="/discover">News</Link>

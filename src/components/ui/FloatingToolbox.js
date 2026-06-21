@@ -126,7 +126,7 @@ export default function FloatingToolbox() {
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
-        className="toolbox-float"
+        className="toolbox-float hidden md:block"
         style={{ position: "fixed", left: pos.x, top: pos.y, zIndex: 99999, userSelect: "none", touchAction: "none" }}
       >
         <div

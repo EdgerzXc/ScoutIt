@@ -193,6 +193,9 @@ export default function DiscoverClient() {
       <aside className="catSidebar">
         <div className="brandLogo">SCOUTIT</div>
         <nav className="navLinks">
+          <Link href="/dashboard" className="navLink" style={{ color: "var(--accent)", borderBottom: "0.5px solid rgba(255,184,0,0.3)", paddingBottom: "16px", marginBottom: "8px" }}>
+            ← Dashboard
+          </Link>
           {CATEGORIES.map((cat) => {
             const isActive = matchedCategory.toLowerCase() === cat.toLowerCase();
             return (
