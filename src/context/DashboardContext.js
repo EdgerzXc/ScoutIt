@@ -225,6 +225,71 @@ export function DashboardProvider({ children }) {
     });
   };
 
+  const addConciergeListing = async (fileName) => {
+    addToast("Uploading document securely...", "⏳");
+    
+    // Simulate upload delay
+    await new Promise(r => setTimeout(r, 1500));
+    addToast("Document uploaded. Initializing AI Draft...", "🤖");
+    await new Promise(r => setTimeout(r, 800));
+
+    const title = `Drafting from PDF: ${fileName}`;
+    const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+
+    const { data, error } = await supabase.from('properties').insert([{
+      owner_id: currentUser?.id || null,
+      title: title,
+      type: 'Unknown',
+      space_category: 'Unknown',
+      slug,
+      location: 'Pending AI Extraction',
+      pipeline_status: 'ai_drafting',
+      details: { source_pdf: fileName }
+    }]).select();
+
+    if (error || !data) {
+      addToast("Error starting Concierge AI.", "❌");
+      return;
+    }
+
+    const newDbListing = data[0];
+
+    const newListing = {
+      id: newDbListing.id,
+      type: 'Unknown',
+      title: title,
+      desc: '',
+      loc: 'Pending AI Extraction',
+      location: 'Pending AI Extraction',
+      hasMedia: false,
+      mediaLink: null,
+      price: null,
+      tag: 'DRAFTING',
+      tagClass: 'bg-gold-accent/20 text-gold-accent',
+      time: 'Just now',
+      ownerId: currentUser?.id || null,
+      spaceCategory: 'Unknown',
+      details: { source_pdf: fileName },
+      pipelineStatus: 'ai_drafting',
+      completenessScore: 0,
+      verified: false,
+      signals: {
+        ownerAge: 'New — no data',
+        ownerAgeClass: 'text-text-secondary',
+        accountAge: 'New',
+        completeness: '0%'
+      }
+    };
+    
+    setListings(prev => [newListing, ...prev]);
+    addToast("Pitch deck sent to Council AI for drafting", "✅");
+    addNotification({
+      title: "AI Drafting Started",
+      desc: `Your document '${fileName}' is being parsed. We'll notify you when the draft is ready.`,
+      icon: "🤖"
+    });
+  };
+
   const sendPitch = async (listingId, message) => {
     if (connects < 1) return false;
     
@@ -440,6 +505,7 @@ export function DashboardProvider({ children }) {
       addToast,
       toggleSave,
       addListing,
+      addConciergeListing,
       updateListing,
       closeListing,
       sendPitch,
