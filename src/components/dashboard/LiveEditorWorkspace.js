@@ -393,7 +393,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
         </div>
         
         {/* Render the Master Page Component inline */}
-        <div className="mt-8 pointer-events-none opacity-90 scale-[0.98] origin-top transition-all">
+        <div className="mt-8 md:pointer-events-none opacity-90 md:scale-[0.98] origin-top transition-all">
           <FlowLayout slug={null} draftData={draftData} isDraftMode={true} />
         </div>
       </div>
