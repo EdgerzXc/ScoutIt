@@ -8,11 +8,7 @@ import { Bookmark, Search } from "lucide-react";
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
-const SAVED_LISTINGS = [
-  { id: 'f1', type: 'House', title: 'Ayala Alabang Core', loc: 'Muntinlupa City', img: '🏠' },
-  { id: 'f2', type: 'Condo', title: 'The Proscenium', loc: 'Rockwell Center', img: '🏢' },
-  { id: 'f_dummy1', type: 'Lot', title: 'Elaro Corner Lot', loc: 'Nuvali, Laguna', img: '🌳' },
-];
+const SAVED_LISTINGS = []; // Removed, now dynamically loaded from ledger
 
 export default function BuyerMode() {
   const [showMap, setShowMap] = useState(false);
@@ -73,7 +69,16 @@ export default function BuyerMode() {
   const q = searchQuery.trim().toLowerCase();
   const matches = (item) => !q || [item.title, item.type, item.loc, item.desc].some(v => v && v.toLowerCase().includes(q));
   const newFeedListings = listings.filter(matches).slice(0, 5);
-  const savedFiltered = SAVED_LISTINGS.filter(matches);
+  
+  // Map actual saved properties from the Intelligence Ledger
+  const actualSavedListings = listings.filter(l => savedIds.includes(l.id)).map(l => ({
+    id: l.id,
+    type: l.spaceCategory || l.type || 'Property',
+    title: l.title,
+    loc: l.location || l.loc || 'Location hidden',
+    img: l.hasMedia ? '📸' : '🏢', // Fallback icon
+  }));
+  const savedFiltered = actualSavedListings.filter(matches);
 
   const ListingCard = ({ item }) => (
     <Link href={`/property/${item.id}`} className="block shrink-0 min-w-[240px] md:min-w-[280px]">

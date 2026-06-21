@@ -83,9 +83,24 @@ export function DashboardProvider({ children }) {
           .from('saved_intel')
           .select('*');
           
+        let supabaseSavedIds = [];
         if (!savedError && savedData) {
-          setSavedIds(savedData.map(s => s.property_id));
+          supabaseSavedIds = savedData.map(s => s.property_id);
         }
+
+        // Also merge local storage reactions (Ledger stays on device)
+        let localSavedIds = [];
+        try {
+          const raw = localStorage.getItem("scoutit_reactions");
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed)) {
+              localSavedIds = parsed.map(p => p.property_id);
+            }
+          }
+        } catch(e) {}
+
+        setSavedIds([...new Set([...supabaseSavedIds, ...localSavedIds])]);
 
       } catch (error) {
         console.error("Error fetching intelligence from Ledger:", error);
@@ -106,17 +121,45 @@ export function DashboardProvider({ children }) {
     }, 3500);
   };
 
-  // ── Save / unsave (Supabase) ──
+  // ── Save / unsave (Supabase & Local Storage) ──
   const toggleSave = async (item) => {
     const isSaved = savedIds.includes(item.id);
     if (isSaved) {
       setSavedIds(prev => prev.filter(id => id !== item.id));
       addToast("Removed from your Intelligence Archive", <Bookmark strokeWidth={1.5} size="1em" />);
-      await supabase.from('saved_intel').delete().eq('property_id', item.id);
+      
+      // Sync Supabase
+      if (currentUser?.id) await supabase.from('saved_intel').delete().eq('property_id', item.id);
+      
+      // Sync Local Storage
+      try {
+        const raw = localStorage.getItem("scoutit_reactions");
+        if (raw) {
+          let parsed = JSON.parse(raw);
+          parsed = parsed.filter(p => p.property_id !== item.id);
+          localStorage.setItem("scoutit_reactions", JSON.stringify(parsed));
+        }
+      } catch(e) {}
     } else {
       setSavedIds(prev => [...prev, item.id]);
-      addToast("Saved to Intelligence Archive", <Bookmark strokeWidth={1.5} size="1em" />);
-      await supabase.from('saved_intel').insert([{ property_id: item.id }]);
+      addToast("Intel logged to secure Ledger", <Bookmark strokeWidth={1.5} size="1em" />);
+      
+      // Sync Supabase
+      if (currentUser?.id) await supabase.from('saved_intel').insert([{ property_id: item.id }]);
+      
+      // Sync Local Storage
+      try {
+        const raw = localStorage.getItem("scoutit_reactions") || "[]";
+        let parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) parsed = [];
+        parsed.push({
+          property_id: item.id,
+          property_title: item.title,
+          reaction_type: "Save",
+          timestamp: Date.now()
+        });
+        localStorage.setItem("scoutit_reactions", JSON.stringify(parsed));
+      } catch(e) {}
     }
   };
 
