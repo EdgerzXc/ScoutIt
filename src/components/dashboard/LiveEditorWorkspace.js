@@ -102,7 +102,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
 
   const [activeSection, setActiveSection] = useState("basics");
   const [mobileView, setMobileView] = useState("editor"); // "editor" | "preview"
-  const [questingField, setQuestingField] = useState(null);
+  const [showQuestModal, setShowQuestModal] = useState(false);
   const [activeQuests, setActiveQuests] = useState(initialData?.quests || {});
 
   // Lock body scroll when IDE is open
@@ -295,45 +295,21 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
               {categoryFields.map(f => (
                 f.type === 'checkbox' ? (
                   <label key={f.key} className="flex items-center gap-3 cursor-pointer text-on-surface bg-surface-alt border border-surface-variant rounded px-3 py-2.5 w-full relative group">
-                    <input type="checkbox" className="w-4 h-4 accent-gold-accent" checked={!!formData.details[f.key]} onChange={e => setDetail(f.key, e.target.checked)} disabled={activeQuests[f.key]} />
+                    <input type="checkbox" className="w-4 h-4 accent-gold-accent" checked={!!formData.details[f.key]} onChange={e => setDetail(f.key, e.target.checked)} disabled={activeQuests['full_dossier']} />
                     <span className="text-sm font-working-title">{f.label}</span>
-                    {f.proOnly && !activeQuests[f.key] && (
-                      <button 
-                        className="absolute right-3 text-[10px] text-gold-accent font-working-title border border-gold-accent/30 rounded px-2 py-0.5 hover:bg-gold-accent/10 transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100"
-                        onClick={(e) => { e.preventDefault(); setQuestingField({ key: f.key, label: f.label }); }}
-                      >
-                        ✨ Ask a Pro (1 ◈)
-                      </button>
-                    )}
-                    {activeQuests[f.key] && (
-                      <span className="absolute right-3 text-[9px] bg-gold-accent/10 text-gold-accent px-2 py-0.5 rounded uppercase font-bold">Quested</span>
-                    )}
                   </label>
                 ) : (
                   <div key={f.key} className="flex flex-col gap-2 relative group">
                     <div className="flex justify-between items-center h-5">
                       <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">{f.label}</label>
-                      {f.proOnly && !activeQuests[f.key] && (
-                        <button 
-                          className="text-[10px] text-gold-accent font-working-title border border-gold-accent/30 rounded px-2 py-0.5 hover:bg-gold-accent/10 transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100"
-                          onClick={() => setQuestingField({ key: f.key, label: f.label })}
-                        >
-                          ✨ Ask a Pro (1 ◈)
-                        </button>
-                      )}
                     </div>
-                    {activeQuests[f.key] ? (
-                      <div className="bg-surface-container-low border border-dashed border-gold-accent/40 rounded px-3 py-2.5 text-text-secondary text-sm flex items-center justify-between">
-                        <span className="italic">Awaiting Pro Verification...</span>
-                        <span className="text-[9px] bg-gold-accent/10 text-gold-accent px-2 py-0.5 rounded uppercase font-bold">Quested</span>
-                      </div>
-                    ) : f.type === 'select' ? (
-                      <select className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface focus:outline-none focus:border-gold-accent transition-colors text-sm" value={formData.details[f.key] || ''} onChange={e => setDetail(f.key, e.target.value)}>
+                    {f.type === 'select' ? (
+                      <select className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface focus:outline-none focus:border-gold-accent transition-colors text-sm" value={formData.details[f.key] || ''} onChange={e => setDetail(f.key, e.target.value)} disabled={activeQuests['full_dossier']}>
                         <option value="">Select…</option>
                         {f.options.map(o => <option key={o} value={o}>{o}</option>)}
                       </select>
                     ) : (
-                      <input className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface focus:outline-none focus:border-gold-accent transition-colors text-sm" type={f.type === 'number' ? 'number' : 'text'} value={formData.details[f.key] || ''} onChange={e => setDetail(f.key, e.target.value)} />
+                      <input className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface focus:outline-none focus:border-gold-accent transition-colors text-sm" type={f.type === 'number' ? 'number' : 'text'} value={formData.details[f.key] || ''} onChange={e => setDetail(f.key, e.target.value)} disabled={activeQuests['full_dossier']} />
                     )}
                   </div>
                 )
@@ -365,6 +341,20 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
                 <span className="text-xs text-text-secondary">I have title/docs ready for proof.</span>
               </div>
             </label>
+            
+            <div className="mt-6 p-4 rounded bg-surface-container-low border border-gold-accent/20">
+              <h4 className="font-working-title font-bold text-sm text-gold-accent mb-2">Need a fully comprehensive dossier?</h4>
+              <p className="text-xs text-text-secondary mb-4">
+                If you don't know all the specifications, you can raise a Data Quest to the QuestIT network. A verified Pro will research and complete your listing data for you.
+              </p>
+              <button 
+                className="w-full border border-gold-accent text-gold-accent hover:bg-gold-accent/10 font-working-title font-bold px-4 py-2.5 rounded transition-all text-sm flex items-center justify-center gap-2"
+                onClick={() => setShowQuestModal(true)}
+                disabled={activeQuests['full_dossier']}
+              >
+                {activeQuests['full_dossier'] ? "✨ Pro Completion Requested" : "✨ Request Pro Completion"}
+              </button>
+            </div>
           </section>
 
           <div className="pb-56"></div> {/* Extra padding to clear tall mobile footer (with missing fields list) */}
@@ -419,31 +409,33 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
       )}
 
       {/* Quest Modal */}
-      {questingField && (
+      {showQuestModal && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-background/90 backdrop-blur-md px-4">
           <div className="w-full max-w-sm bg-surface border border-surface-variant rounded-lg shadow-2xl p-6 animate-[slideUp_0.3s_ease-out]">
-            <h3 className="font-headline-editorial text-2xl text-on-surface mb-2">Raise a Quest</h3>
+            <h3 className="font-headline-editorial text-2xl text-on-surface mb-2">Raise a Data Quest</h3>
             <p className="text-sm text-text-secondary mb-6">
-              Don't know the exact <strong className="text-on-surface">{questingField.label}</strong>? Spend <strong className="text-gold-accent">1 Connect</strong> to delegate this to a verified Pro. They will research and fill this in for you.
+              Need comprehensive data or specific details researched? Submit this listing to the QuestIT network for Pros to review and complete.
+              <br /><br />
+              <strong className="text-gold-accent">This is completely free to post.</strong> You only spend Connects if you specifically match with a Pro later.
             </p>
             <div className="flex gap-3 mt-4">
               <button 
                 className="flex-1 px-4 py-3 border border-surface-variant text-text-secondary rounded hover:text-on-surface hover:bg-surface-container transition-colors" 
-                onClick={() => setQuestingField(null)}
+                onClick={() => setShowQuestModal(false)}
               >
                 Cancel
               </button>
               <button
                 className="flex-1 bg-gold-accent text-background font-working-title font-bold px-4 py-3 rounded hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
                 onClick={async () => {
-                  const success = await raiseQuest(initialData?.id || "draft", questingField.key, questingField.label);
+                  const success = await raiseQuest(initialData?.id || "draft", "full_dossier");
                   if (success) {
-                    setActiveQuests(prev => ({ ...prev, [questingField.key]: true }));
-                    setQuestingField(null);
+                    setActiveQuests(prev => ({ ...prev, 'full_dossier': true }));
+                    setShowQuestModal(false);
                   }
                 }}
               >
-                <span>Confirm & Spend 1</span> <span className="text-xs">◈</span>
+                <span>Confirm & Request Pro</span>
               </button>
             </div>
           </div>

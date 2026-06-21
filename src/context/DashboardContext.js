@@ -164,48 +164,19 @@ export function DashboardProvider({ children }) {
   };
 
   // ── QuestIT (Raise a Quest) ──
-  const raiseQuest = async (propertyId, fieldKey, fieldLabel) => {
-    if (connects < 1) {
-      addToast("Not enough Connects to raise a Quest.", "◈");
-      return false;
-    }
-
-    // Debit locally (optimistic)
-    const newBalance = connects - 1;
-    setConnects(newBalance);
-    if (currentUser) {
-      const updatedUser = { ...currentUser, connects_balance: newBalance };
-      localStorage.setItem("scoutit_user", JSON.stringify(updatedUser));
-      setCurrentUser(updatedUser);
-    }
-
+  const raiseQuest = async (propertyId, questScope) => {
     if (currentUser?.id) {
-      // Record spend transaction
-      await supabase.from('connect_transactions').insert([{
-        user_id: currentUser.id,
-        kind: 'spend',
-        bucket: 'granted',
-        amount: -1,
-        reason: `Raised Quest for ${fieldLabel}`,
-        ref_type: 'quest',
-        ref_id: propertyId || 'draft'
-      }]);
-      await supabase.from('connect_balances')
-        .update({ granted_balance: newBalance, updated_at: new Date().toISOString() })
-        .eq('user_id', currentUser.id);
-
-      // Create bounty claim for the Guild
-      // (Assuming bounty_claims accepts target_field and property_id)
+      // Create bounty claim for the Guild (Quest posting is now free)
       await supabase.from('bounty_claims').insert([{
-        target_field: fieldKey,
+        target_field: questScope,
         property_id: propertyId,
         initiator_id: currentUser.id,
         status: 'open',
-        payout_connects: 1
+        payout_connects: 0
       }]);
     }
 
-    addToast(`Quest raised for ${fieldLabel} — 1 Connect spent`, "✨");
+    addToast(`Data Quest raised for ${questScope} — Free to post`, "✨");
     return true;
   };
 
