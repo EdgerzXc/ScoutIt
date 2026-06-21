@@ -190,9 +190,18 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
           >
             ← {isEditing ? "Cancel" : "Exit"}
           </button>
-          <span className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase">
-            {isEditing ? "Edit Dossier" : "New Property Draft"}
-          </span>
+          
+          <div className="flex items-center gap-3">
+            <button 
+              className="md:hidden flex items-center gap-1 font-label-caps text-[10px] tracking-widest text-gold-accent uppercase border border-gold-accent/30 px-2 py-1 rounded hover:bg-gold-accent/10"
+              onClick={() => setMobileView('preview')}
+            >
+              👁️ Preview
+            </button>
+            <span className="hidden md:block font-label-caps text-[10px] tracking-widest text-gold-accent uppercase">
+              {isEditing ? "Edit Dossier" : "New Property Draft"}
+            </span>
+          </div>
         </div>
 
         {/* Editor Sections (Scrollable) */}
@@ -282,7 +291,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
                     <span className="text-sm font-working-title">{f.label}</span>
                     {f.proOnly && !activeQuests[f.key] && (
                       <button 
-                        className="absolute right-3 text-[10px] text-gold-accent font-working-title border border-gold-accent/30 rounded px-2 py-0.5 hover:bg-gold-accent/10 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
+                        className="absolute right-3 text-[10px] text-gold-accent font-working-title border border-gold-accent/30 rounded px-2 py-0.5 hover:bg-gold-accent/10 transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100"
                         onClick={(e) => { e.preventDefault(); setQuestingField({ key: f.key, label: f.label }); }}
                       >
                         ✨ Ask a Pro (1 ◈)
@@ -298,7 +307,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
                       <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">{f.label}</label>
                       {f.proOnly && !activeQuests[f.key] && (
                         <button 
-                          className="text-[10px] text-gold-accent font-working-title border border-gold-accent/30 rounded px-2 py-0.5 hover:bg-gold-accent/10 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
+                          className="text-[10px] text-gold-accent font-working-title border border-gold-accent/30 rounded px-2 py-0.5 hover:bg-gold-accent/10 transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100"
                           onClick={() => setQuestingField({ key: f.key, label: f.label })}
                         >
                           ✨ Ask a Pro (1 ◈)
@@ -391,13 +400,15 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
         </div>
       </div>
 
-      {/* ── MOBILE TOGGLE BUTTON ── */}
-      <button 
-        className="md:hidden fixed bottom-[88px] right-4 z-50 bg-gold-accent text-background font-working-title px-4 py-3 rounded shadow-[0_4px_12px_rgba(0,0,0,0.5)] border border-gold-accent/20 flex items-center gap-2 tracking-wide font-bold"
-        onClick={() => setMobileView(v => v === 'editor' ? 'preview' : 'editor')}
-      >
-        {mobileView === 'editor' ? '👁️ View Live Preview' : '✏️ Back to Editor'}
-      </button>
+      {/* ── MOBILE TOGGLE BUTTON (Only shows in Preview Mode) ── */}
+      {mobileView === 'preview' && (
+        <button 
+          className="md:hidden fixed bottom-6 right-6 z-[70] bg-gold-accent text-background font-working-title px-4 py-3 rounded-full shadow-[0_4px_12px_rgba(0,0,0,0.5)] border border-gold-accent/20 flex items-center gap-2 tracking-wide font-bold"
+          onClick={() => setMobileView('editor')}
+        >
+          ✏️ Editor
+        </button>
+      )}
 
       {/* Quest Modal */}
       {questingField && (
