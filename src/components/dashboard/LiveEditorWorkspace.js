@@ -99,6 +99,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
   });
 
   const [activeSection, setActiveSection] = useState("basics");
+  const [mobileView, setMobileView] = useState("editor"); // "editor" | "preview"
 
   // Validate the 5 must-haves
   const mustHaves = {
@@ -175,7 +176,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
   return (
     <div className="fixed inset-0 z-50 bg-background flex flex-col md:flex-row overflow-hidden animate-[fadeIn_0.3s_ease-out]">
       {/* ── LEFT PANEL: EDITOR (The Remote Control) ── */}
-      <div className="w-full md:w-[400px] lg:w-[450px] bg-surface border-r border-surface-variant flex flex-col h-full z-10 shrink-0">
+      <div className={`w-full md:w-[400px] lg:w-[450px] bg-surface border-r border-surface-variant flex flex-col h-full z-10 shrink-0 ${mobileView === 'editor' ? 'flex' : 'hidden md:flex'}`}>
         
         {/* Editor Header */}
         <div className="p-4 border-b border-surface-variant bg-background flex justify-between items-center sticky top-0 z-20">
@@ -243,11 +244,14 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
                 onChange={e => setField("price", e.target.value)} 
                 placeholder="e.g. 50000" 
               />
-              <span className="text-[10px] text-text-muted">Required for ranking, never publicly shown.</span>
+              <span className="text-[10px] text-text-muted">This is for internal ranking. It will only be shown publicly in 'Your Move' if you verify it.</span>
             </div>
 
             <div className="flex flex-col gap-2">
               <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">Photo URL / Media Link <span className="text-error">*</span></label>
+              <div className="bg-gold-accent/10 border border-gold-accent/30 text-gold-accent p-3 rounded text-xs mb-1">
+                ⚠️ Ensure folder permissions are set to "Anyone with the link can view" to allow brokers immediate access.
+              </div>
               <input 
                 className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface focus:outline-none focus:border-gold-accent transition-colors" 
                 type="text" 
@@ -345,7 +349,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
       </div>
 
       {/* ── RIGHT PANEL: LIVE PREVIEW (The Canvas) ── */}
-      <div className="flex-1 bg-background relative overflow-y-auto hidden md:block">
+      <div className={`flex-1 bg-background relative overflow-y-auto ${mobileView === 'preview' ? 'block' : 'hidden md:block'}`}>
         {/* Draft Mode Banner */}
         <div className="absolute top-0 left-0 w-full z-50 bg-gold-accent text-background text-center py-1.5 font-label-caps text-[10px] tracking-[0.3em] font-bold shadow-md">
           LIVE PREVIEW / DRAFT MODE
@@ -356,6 +360,15 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
           <FlowLayout slug={null} draftData={draftData} isDraftMode={true} />
         </div>
       </div>
+
+      {/* ── MOBILE TOGGLE BUTTON ── */}
+      <button 
+        className="md:hidden fixed bottom-[88px] right-4 z-50 bg-gold-accent text-background font-working-title px-4 py-3 rounded shadow-[0_4px_12px_rgba(0,0,0,0.5)] border border-gold-accent/20 flex items-center gap-2 tracking-wide font-bold"
+        onClick={() => setMobileView(v => v === 'editor' ? 'preview' : 'editor')}
+      >
+        {mobileView === 'editor' ? '👁️ View Live Preview' : '✏️ Back to Editor'}
+      </button>
+
     </div>
   );
 }
