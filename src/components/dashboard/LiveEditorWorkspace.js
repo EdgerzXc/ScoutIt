@@ -105,6 +105,14 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
   const [questingField, setQuestingField] = useState(null);
   const [activeQuests, setActiveQuests] = useState(initialData?.quests || {});
 
+  // Lock body scroll when IDE is open
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, []);
+
   // Validate the 5 must-haves
   const mustHaves = {
     title: !!formData.title.trim(),
@@ -193,7 +201,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
           
           <div className="flex items-center gap-3">
             <button 
-              className="md:hidden flex items-center gap-1 font-label-caps text-[10px] tracking-widest text-gold-accent uppercase border border-gold-accent/30 px-2 py-1 rounded hover:bg-gold-accent/10"
+              className="md:hidden flex items-center gap-1.5 font-label-caps text-[10px] md:text-xs tracking-widest text-gold-accent uppercase border border-gold-accent/30 px-3 py-2 rounded hover:bg-gold-accent/10"
               onClick={() => setMobileView('preview')}
             >
               👁️ Preview
@@ -224,14 +232,14 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
 
             <div className="flex flex-col gap-2">
               <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">Asset Category <span className="text-error">*</span></label>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-3">
                 {CATEGORIES.map(c => (
                   <button
                     key={c.id}
-                    className={`flex items-center gap-2 p-2 rounded border text-left text-sm transition-colors ${formData.category === c.id ? 'bg-surface-container-low border-gold-accent text-gold-accent' : 'bg-surface-alt border-surface-variant text-on-surface hover:border-text-secondary'}`}
+                    className={`flex items-center gap-2 px-3 py-4 rounded border text-left text-sm transition-colors ${formData.category === c.id ? 'bg-surface-container-low border-gold-accent text-gold-accent shadow-[0_0_15px_rgba(212,175,55,0.15)]' : 'bg-surface-alt border-surface-variant text-on-surface hover:border-text-secondary'}`}
                     onClick={() => setField("category", c.id)}
                   >
-                    <span>{c.icon}</span> {c.label}
+                    <span className="text-xl">{c.icon}</span> {c.label}
                   </button>
                 ))}
               </div>
@@ -359,7 +367,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
             </label>
           </section>
 
-          <div className="pb-24"></div> {/* Padding for sticky footer */}
+          <div className="pb-56"></div> {/* Extra padding to clear tall mobile footer (with missing fields list) */}
         </div>
 
         {/* Publish Gate Footer */}
