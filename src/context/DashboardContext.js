@@ -45,7 +45,7 @@ export function DashboardProvider({ children }) {
       try {
         // 1. Fetch Properties (Dossiers)
         const { data: propertiesData, error: propError } = await supabase
-          .from('properties')
+          .from('property_submissions')
           .select('*')
           .order('created_at', { ascending: false });
 
@@ -194,37 +194,41 @@ export function DashboardProvider({ children }) {
     }));
     addToast("Dossier updated", "✏️");
 
-    // Supabase update
-    await supabase.from('properties').update({
-      title: data.title || 'Updated Property',
-      type: data.type,
-      location: data.location,
-      price: data.price,
-      description: data.description,
-      media_link: data.mediaLink,
-      completeness_score: data.completenessScore,
-      verified: data.verified
-    }).eq('id', listingId);
+    // Server-side dual-database update (Supabase + Airtable if approved)
+    try {
+      const res = await fetch("/api/dashboard/update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ submissionId: listingId, data })
+      });
+      
+      if (!res.ok) {
+        throw new Error("Update failed");
+      }
+    } catch (err) {
+      console.error("Failed to sync listing update", err);
+      addToast("Failed to sync to database", "❌");
+    }
   };
 
   const closeListing = async (listingId) => {
     setListings(prev => prev.filter(l => l.id !== listingId));
     addToast("Property File closed", "🏁");
-    await supabase.from('properties').delete().eq('id', listingId);
+    await supabase.from('property_submissions').delete().eq('id', listingId);
   };
 
   const addListing = async (listing) => {
     addToast("Geocoding Location...", "⏳");
     
     // 1. Mapbox Geocoding
-    let coordinatesStr = null;
+    let lat = null;
+    let lng = null;
     if (MAPBOX_TOKEN && listing.location) {
       try {
         const res = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(listing.location)}.json?country=ph&limit=1&access_token=${MAPBOX_TOKEN}`);
         const geoData = await res.json();
         if (geoData.features && geoData.features.length > 0) {
-          const [lng, lat] = geoData.features[0].center;
-          coordinatesStr = `POINT(${lng} ${lat})`;
+          [lng, lat] = geoData.features[0].center;
         }
       } catch (err) {
         console.error("Geocoding failed", err);
@@ -234,23 +238,14 @@ export function DashboardProvider({ children }) {
     addToast("Initializing Dossier...", "⏳");
     
     // 2. Insert into Supabase (owned by the current user; category data carried in details)
-    const slug = (listing.title || `${listing.type} in ${listing.location}`)
-      .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-    const { data, error } = await supabase.from('properties').insert([{
+    const { data, error } = await supabase.from('property_submissions').insert([{
       owner_id: currentUser?.id || null,
-      title: listing.title || `${listing.type} in ${listing.location}`,
-      type: listing.type,
-      space_category: listing.category || listing.type,
-      slug,
-      location: listing.location,
-      price: listing.price ? parseFloat(listing.price) : null,
-      description: listing.description,
-      media_link: listing.mediaLink,
-      completeness_score: listing.completenessScore,
-      verified: listing.verified,
-      pipeline_status: 'pending',
-      details: listing.details || {},
-      coordinates: coordinatesStr
+      property_title: listing.title || `${listing.type} in ${listing.location}`,
+      property_type: listing.category || listing.type,
+      location_text: listing.location,
+      latitude: lat,
+      longitude: lng,
+      status: 'pending'
     }]).select();
 
     if (error || !data) {
@@ -296,15 +291,12 @@ export function DashboardProvider({ children }) {
     const title = `Drafting from PDF: ${fileName}`;
     const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
-    const { data, error } = await supabase.from('properties').insert([{
+    const { data, error } = await supabase.from('property_submissions').insert([{
       owner_id: currentUser?.id || null,
-      title: title,
-      type: 'Unknown',
-      space_category: 'Unknown',
-      slug,
-      location: 'Pending AI Extraction',
-      pipeline_status: 'ai_drafting',
-      details: { source_pdf: fileName }
+      property_title: title,
+      property_type: 'Unknown',
+      location_text: 'Pending AI Extraction',
+      status: 'pending'
     }]).select();
 
     if (error || !data) {
@@ -498,7 +490,7 @@ export function DashboardProvider({ children }) {
     try {
       if (radiusKm === 'any') {
         // Fetch all properties if no radius is selected
-        const { data, error } = await supabase.from('properties').select('*').order('created_at', { ascending: false });
+        const { data, error } = await supabase.from('property_submissions').select('*').order('created_at', { ascending: false });
         if (!error && data) {
           setListings(mapSupabaseProperties(data));
         }
@@ -525,29 +517,29 @@ export function DashboardProvider({ children }) {
   const mapSupabaseProperties = (propertiesData) => {
     return propertiesData.map(p => ({
       id: p.id,
-      type: p.type,
-      title: p.title,
-      desc: p.description || '',
-      loc: p.location,
-      location: p.location,
-      hasMedia: !!p.media_link,
-      mediaLink: p.media_link,
-      price: p.price,
+      type: p.property_type,
+      title: p.property_title,
+      desc: '',
+      loc: p.location_text,
+      location: p.location_text,
+      hasMedia: false,
+      mediaLink: null,
+      price: null,
       tag: 'LIVE',
       tagClass: 'bg-gold-accent/20 text-gold-accent',
-      time: new Date(p.created_at).toLocaleDateString(),
+      time: p.created_at ? new Date(p.created_at).toLocaleDateString() : 'Just now',
       ownerId: p.owner_id || null,
-      spaceCategory: p.space_category || p.type,
-      details: p.details || {},
-      pipelineStatus: p.pipeline_status || 'approved',
-      completenessScore: p.completeness_score,
-      verified: p.verified,
-      coordinates: p.coordinates, // keep the geography string if needed
+      spaceCategory: p.property_type,
+      details: {},
+      pipelineStatus: p.status || 'pending',
+      completenessScore: 50,
+      verified: false,
+      coordinates: p.latitude && p.longitude ? `POINT(${p.longitude} ${p.latitude})` : null,
       signals: {
         ownerAge: 'Verified',
         ownerAgeClass: 'text-success',
         accountAge: 'Active',
-        completeness: p.completeness_score + '%'
+        completeness: '50%'
       }
     }));
   };

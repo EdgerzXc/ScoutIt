@@ -4,7 +4,6 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { useState } from "react";
 import "../property/property.css";
-import { RestrictedAccessBanner, RestrictedCardWrapper } from "@/components/ui/EarlyAccessGate";
 import { getResearchers } from "@/data/mockResearchers";
 
 const DUMMY_RESEARCHERS = getResearchers();
@@ -38,12 +37,6 @@ export default function ResearchersPage() {
     <div className="directory-layout">
       <Header />
       <main className="brokers-main">
-
-        {/* Restricted Access Banner */}
-        <RestrictedAccessBanner
-          rosterLabel="The ScoutIt Site Research Network"
-          openDate="Q4 2026"
-        />
 
         <header className="directory-header">
           <span className="vector-label">LAYER 03.3 // SITE INTELLIGENCE</span>
@@ -116,8 +109,7 @@ export default function ResearchersPage() {
                 const tierClass = r.tier === 1 ? "tier-1-card diamond-card" : r.tier === 2 ? "tier-2-card platinum-card" : "tier-3-card gold-card";
                 const tierLabel = r.tier === 1 ? "DIAMOND PARTNER" : r.tier === 2 ? "PLATINUM PARTNER" : "GOLD PARTNER";
                 return (
-                  <RestrictedCardWrapper key={r.id} rosterType="Research Network">
-                    <div
+                  <div key={r.id}
                       className={`broker-card ${tierClass}`}
                       style={{ position: "relative" }}
                     >
@@ -153,7 +145,6 @@ export default function ResearchersPage() {
                         </div>
                       </div>
                     </div>
-                  </RestrictedCardWrapper>
                 );
               })}
             </div>

@@ -50,6 +50,7 @@ export default function Footer() {
             <Link href="/photographers">Photographers</Link>
             <Link href="/researchers">Researchers</Link>
             <Link href="/event-planners">Event Planners</Link>
+            <Link href="/pricing">Pricing & Tiers</Link>
           </div>
 
           <div className="nav-col">

@@ -4,7 +4,6 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { useState } from "react";
 import "../property/property.css";
-import { RestrictedAccessBanner, RestrictedCardWrapper } from "@/components/ui/EarlyAccessGate";
 
 import { getPhotographers } from "@/data/mockPhotographers";
 
@@ -44,12 +43,6 @@ export default function PhotographersPage() {
     <div className="directory-layout">
       <Header />
       <main className="brokers-main">
-
-        {/* Restricted Access Banner */}
-        <RestrictedAccessBanner
-          rosterLabel="The ScoutIt Photography Network"
-          openDate="Q4 2026"
-        />
 
         <header className="directory-header">
           <span className="vector-label">LAYER 03.2 // SPACE PHOTOGRAPHY</span>
@@ -134,8 +127,7 @@ export default function PhotographersPage() {
                 const tierClass = ph.tier === 1 ? "tier-1-card diamond-card" : ph.tier === 2 ? "tier-2-card platinum-card" : "tier-3-card gold-card";
                 const tierLabel = ph.tier === 1 ? "DIAMOND PARTNER" : ph.tier === 2 ? "PLATINUM PARTNER" : "GOLD PARTNER";
                 return (
-                  <RestrictedCardWrapper key={ph.id} rosterType="Photography Network">
-                    <div
+                  <div key={ph.id}
                       className={`broker-card ${tierClass}`}
                       style={{ position: "relative" }}
                     >
@@ -160,7 +152,6 @@ export default function PhotographersPage() {
                       </div>
                     </div>
                     </div>
-                  </RestrictedCardWrapper>
                 );
               })}
             </div>

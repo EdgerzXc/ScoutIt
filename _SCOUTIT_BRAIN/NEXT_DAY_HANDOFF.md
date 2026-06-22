@@ -6,7 +6,51 @@
 
 ---
 
-## 1. STATUS — what's live / built this session
+## 0. LIVE DEPLOYMENT STATUS (updated 2026-06-22)
+- **Deployed to production:** `scoutit.vercel.app` (Vercel project `prj_EERckLskNq8vLPLyavEXjYfen4kI`,
+  team `team_hWRb9j8WjUJshQqZuBkAOTFz`; repo `EdgerzXc/ScoutIt`, branch `main`).
+- **Antigravity IDE ("ScoutIt Builder") has been building in parallel and is AHEAD of the local
+  edits.** Already shipped & live: Owner Editor v1 (live workspace + Draft/Publish), QuestIT
+  raise-from-edit, contextual bottom navigation, mobile overhauls, buyer dashboard↔Ledger sync,
+  concierge UI. **Treat the deployed/committed code as source of truth — re-read it; local edits
+  may be superseded.**
+- **Public side works live:** real Airtable listings on `/property` + `/api/cms` (`source: airtable`).
+- **Env-var saga (RESOLVED):** the live owner dashboard was empty because the `NEXT_PUBLIC_SUPABASE_*`
+  vars were marked **"Sensitive"** in Vercel → Next.js doesn't inline sensitive vars into the client
+  bundle → `supabaseClient` fell back to its no-keys **stub** → **zero** Supabase calls. Proven via:
+  direct REST call returns 200 + data; `performance` shows 0 supabase requests; keys absent from
+  client chunks. **Fix applied:** re-added `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
+  `NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN` as **NON-sensitive, plain, Production** (via Vercel CLI) + pushed a
+  fresh commit to rebuild. (Airtable vars can stay sensitive — they're read server-side.)
+- **✅ VERIFIED LIVE (2026-06-22):** demo owner dashboard renders One/Two E-Com Center listings and
+  fires 3 Supabase requests (`/properties`, `/deals`, `/saved_intel`). The env-var fix holds.
+- **MOBILE UX COUNCIL LOOP — round 1 done (2026-06-22, LOCAL edits, NOT yet pushed).** Reviewed owner +
+  broker dashboards at 390px (via same-origin iframe — `resize_window` can't shrink a maximized window).
+  Note: committed code now uses **Tailwind utility classes** in the dashboards (the docs' "no Tailwind"
+  line is stale — running code wins). Five additive fixes made:
+  1. `OwnerMode.js` portfolio completeness ring → added inner `%` label (was an empty gold ring that
+     read as a perpetual loading spinner).
+  2. `OwnerMode.js` portfolio card height `h-64` → `h-auto min-h-[12rem] md:h-64` (killed the dead empty
+     mid-band on phones; desktop unchanged).
+  3. `OwnerMode.js` "+ New Property File" header button → `hidden md:inline-block` (the contextual
+     "+ List" FAB is the canonical add-listing control on mobile — one control per action).
+  4. `BrokerMode.js` added an `lg:hidden` mobile header (the desktop action bar is `hidden lg:flex`, so
+     phones had no title / pipeline context).
+  5. `BrokerMode.js` `dealTitle()` guard → never render a raw UUID as a deal title (owner-initiated
+     handshake deals carry no title; falls back to the connected property's title or "Unknown Property").
+- **NEXT:** owner/Antigravity pushes → re-verify the five fixes live at phone size, then continue the
+  council loop (FAB/last-card overlap, broker `lg:`-vs-owner `md:` breakpoint consistency, the UUID deal
+  data root-cause in `inviteBroker`).
+- **Connectors available:** Airtable MCP, Supabase MCP (project `yyixsuaimdzyiocswcgc` — auto-pauses,
+  restore if timing out), Vercel MCP (ids above), Claude-in-Chrome ("Browser 1") for live viewing.
+- **Hard-won gotchas:** the sandbox bash mount is STALE vs the real files (verify code via the Read
+  tool or the live site — never `git push` from the sandbox); Supabase auto-pauses; `NEXT_PUBLIC_`
+  vars must be non-sensitive to reach the browser; demo-owner login + dev-open RLS are scaffolding to
+  remove before launch.
+
+---
+
+## 1. STATUS — what's built (this session, local)
 
 ### Airtable — base `appWFRqR0wy6hSR6h` (live)
 - Persona-audit fields added: `SERVICE_PROVIDERS` (Bio, Service_Area, Rating, Reviews_Count);

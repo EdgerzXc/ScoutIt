@@ -52,7 +52,7 @@ export async function loadPublicProfile(displayName) {
     )
     .eq('display_name', displayName)
     .eq('is_profile_public', true)
-    .single();
+    .maybeSingle();
   return { data, error };
 }
 
@@ -162,11 +162,22 @@ export async function loadSeekerSavedCount(userId) {
 // Private only — reads from properties for own profile view.
 export async function loadOwnerListings(userId) {
   const { data, error } = await supabase
-    .from('properties')
-    .select('id, title, location, type, price, completeness_score, verified, created_at')
+    .from('property_submissions')
+    .select('id, property_title, location_text, property_type, status, created_at')
     .eq('owner_id', userId)
     .order('created_at', { ascending: false });
-  return { data: data || [], error };
+
+  // Map to the expected shape for OwnerPanel
+  const mappedData = (data || []).map(p => ({
+    id: p.id,
+    title: p.property_title,
+    location: p.location_text,
+    type: p.property_type,
+    verified: false,
+    completeness_score: 50
+  }));
+
+  return { data: mappedData, error };
 }
 
 // ── OWNER INQUIRY COUNT ───────────────────────────────────────────────────────

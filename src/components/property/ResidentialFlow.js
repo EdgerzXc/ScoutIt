@@ -9,6 +9,7 @@ import InteractiveMap from "@/components/property/InteractiveMap";
 import "@/app/property/[id]/property-detail.css";
 import { getChapterConfig } from "./chapterConfig";
 import { Bed, Bath, Ruler, Car, Lock, Search, Camera, Building2 } from "lucide-react";
+import InquiryModal from "@/components/property/InquiryModal";
 
 // ═══════════════════════════════════════════════════
 // DATA — Airtable CMS first, mockDb fallback
@@ -101,6 +102,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode }) {
   const [selectedUnit, setSelectedUnit] = useState(null);
   const [whereToTab,        setWhereToTab]        = useState("map");
   const [locTab,            setLocTab]            = useState("map");
+  const [isInquiryOpen,     setIsInquiryOpen]     = useState(false);
 
   // Per-panel accordion state (independent per section)
   const [accSpace,    setAccSpace]    = useState(null);
@@ -1721,9 +1723,9 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode }) {
                 </div>
               </div>
 
-              <Link href={`/property/${slug || "batasan-hills"}/brokers`} className="move-cta" style={{textDecoration:"none", marginTop:"16px"}}>
+              <button onClick={() => setIsInquiryOpen(true)} className="move-cta" style={{textDecoration:"none", marginTop:"16px", width:"100%"}}>
                 Connect with an Authorized Broker →
-              </Link>
+              </button>
 
               {/* RA 9646 compliance badge */}
               <div style={{display:"inline-flex", alignItems:"center", gap:"8px", marginTop:"20px", padding:"8px 14px", border:"0.5px solid rgba(76,175,125,0.4)", borderRadius:"4px", background:"rgba(76,175,125,0.06)"}}>
@@ -1747,6 +1749,13 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode }) {
 
 
        </div>{/* /page */}
+
+      <InquiryModal 
+        isOpen={isInquiryOpen} 
+        onClose={() => setIsInquiryOpen(false)} 
+        propertyTitle={d.title} 
+        brokerName={d.broker_name} 
+      />
 
       {/* Lightbox / Fullscreen Modal */}
       {isLightboxOpen && (

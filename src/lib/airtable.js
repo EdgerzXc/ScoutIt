@@ -320,3 +320,99 @@ export async function fetchHomepageConfig(apiKey, baseId) {
     featuredBrokers:     f.Featured_Brokers         || [], // linked record IDs
   };
 }
+
+// ═══════════════════════════════════════════════════════════════
+// INSERT HELPERS
+// ═══════════════════════════════════════════════════════════════
+export async function insertProperty(apiKey, baseId, data) {
+  const url = `${BASE_URL}/${baseId}/PROPERTIES_CMS`;
+  const slug = data.property_title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+
+  const payload = {
+    records: [
+      {
+        fields: {
+          Title: data.property_title,
+          Slug: slug,
+          Location: data.location_text || "",
+          Latitude: data.latitude ? Number(data.latitude) : null,
+          Longitude: data.longitude ? Number(data.longitude) : null,
+          SpaceTypography: data.property_type || "Unknown",
+          Approved_For_ScoutIt: true,
+        }
+      }
+    ]
+  };
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload)
+  });
+
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`Airtable insert failed: ${res.status} ${errText}`);
+  }
+
+  const result = await res.json();
+  return result.records[0];
+}
+
+export async function updateProperty(apiKey, baseId, slug, data) {
+  // 1. Find the Airtable Record ID using the slug
+  const params = `filterByFormula=${encodeURIComponent(`{Slug}='${slug}'`)}&maxRecords=1`;
+  const urlGet = `${BASE_URL}/${baseId}/PROPERTIES_CMS?${params}`;
+  
+  const resGet = await fetch(urlGet, {
+    headers: { Authorization: `Bearer ${apiKey}` },
+  });
+  
+  if (!resGet.ok) {
+    throw new Error(`Airtable fetch for update failed: ${resGet.status}`);
+  }
+  
+  const getResult = await resGet.json();
+  if (!getResult.records || getResult.records.length === 0) {
+    throw new Error(`Airtable record with slug '${slug}' not found.`);
+  }
+  
+  const recordId = getResult.records[0].id;
+
+  // 2. PATCH the record
+  const urlPatch = `${BASE_URL}/${baseId}/PROPERTIES_CMS/${recordId}`;
+  
+  // We only update what is provided. For ScoutIt, title/location/type updates.
+  const fieldsToUpdate = {};
+  if (data.property_title) fieldsToUpdate.Title = data.property_title;
+  if (data.location_text) fieldsToUpdate.Location = data.location_text;
+  if (data.property_type) fieldsToUpdate.SpaceTypography = data.property_type;
+  if (data.latitude) fieldsToUpdate.Latitude = Number(data.latitude);
+  if (data.longitude) fieldsToUpdate.Longitude = Number(data.longitude);
+  
+  const payload = {
+    fields: fieldsToUpdate
+  };
+
+  const resPatch = await fetch(urlPatch, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload)
+  });
+
+  if (!resPatch.ok) {
+    const errText = await resPatch.text();
+    throw new Error(`Airtable update failed: ${resPatch.status} ${errText}`);
+  }
+
+  return await resPatch.json();
+}

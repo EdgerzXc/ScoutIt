@@ -4,7 +4,6 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { useState } from "react";
 import "../property/property.css";
-import { RestrictedAccessBanner, RestrictedCardWrapper } from "@/components/ui/EarlyAccessGate";
 import { getEventPlanners } from "@/data/mockEventPlanners";
 
 const DUMMY_PLANNERS = getEventPlanners();
@@ -55,12 +54,6 @@ export default function EventPlannersPage() {
     <div className="directory-layout">
       <Header />
       <main className="brokers-main">
-
-        {/* Restricted Access Banner */}
-        <RestrictedAccessBanner
-          rosterLabel="The ScoutIt Event Design Network"
-          openDate="Q4 2026"
-        />
 
         <header className="directory-header">
           <span className="vector-label">LAYER 03.4 // EVENT DESIGN</span>
@@ -161,8 +154,7 @@ export default function EventPlannersPage() {
                     ? "PLATINUM PARTNER"
                     : "GOLD PARTNER";
                 return (
-                  <RestrictedCardWrapper key={ep.id} rosterType="Event Design Network">
-                    <div
+                  <div key={ep.id}
                       className={`broker-card ${tierClass}`}
                       style={{ position: "relative" }}
                     >
@@ -188,7 +180,6 @@ export default function EventPlannersPage() {
                         </div>
                       </div>
                     </div>
-                  </RestrictedCardWrapper>
                 );
               })}
             </div>

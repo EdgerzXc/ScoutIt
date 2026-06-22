@@ -27,6 +27,14 @@ export default function BrokerMode() {
   const pitchedListingIds = myPitches.map(p => p.listingId);
   const feed = listings.filter(l => !pitchedListingIds.includes(l.id));
 
+  // Some deals (e.g. owner-initiated handshakes) carry no title — never show a raw UUID.
+  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const dealTitle = (deal) => {
+    if (deal.title && !UUID_RE.test(deal.title)) return deal.title;
+    const prop = listings.find(l => l.id === deal.listingId) || deal.targetListing;
+    return prop?.title || 'Unknown Property';
+  };
+
   const handleOpenPitchModal = (listing) => {
     setPitchingListing(listing);
     setPitchError("");
@@ -234,6 +242,18 @@ export default function BrokerMode() {
         </div>
       )}
 
+      {/* Mobile / tablet header — the desktop action bar below is lg-only, so without this the phone view had no title or pipeline context */}
+      <header className="lg:hidden pt-2 pb-5 mb-6 border-b border-surface-variant flex items-end justify-between gap-4">
+        <div>
+          <span className="font-label-caps text-gold-accent tracking-widest uppercase text-[10px] mb-1 block">Command Center</span>
+          <h2 className="font-headline-editorial text-2xl text-on-surface">Broker Intelligence</h2>
+        </div>
+        <div className="text-right shrink-0">
+          <span className="block text-[9px] font-label-caps uppercase tracking-widest text-text-secondary">Deals Won</span>
+          <span className="text-on-surface font-data-tabular text-lg font-bold">{accepted.length}</span>
+        </div>
+      </header>
+
       {/* Action Bar */}
       <header className="py-md lg:py-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-background sticky top-0 lg:top-auto z-10 border-b border-surface-variant mb-8 hidden lg:flex">
         <div>
@@ -293,7 +313,7 @@ export default function BrokerMode() {
                   </div>
                   
                   <div className="mt-2 mb-auto pr-2">
-                    <h4 className="font-working-title text-base text-on-surface group-hover:underline line-clamp-1">{deal.title || 'Unknown Property'}</h4>
+                    <h4 className="font-working-title text-base text-on-surface group-hover:underline line-clamp-1">{dealTitle(deal)}</h4>
                     <p className="text-xs text-text-secondary mt-1">{deal.loc || 'Location details hidden'}</p>
                   </div>
                   

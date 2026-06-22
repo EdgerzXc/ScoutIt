@@ -10,6 +10,7 @@ import CategorySpecBlock from "@/components/property/CategorySpecBlock";
 import "@/app/property/[id]/property-detail.css";
 import { getChapterConfig } from "./chapterConfig";
 import { Bed, Bath, Ruler, Car, Lock, Search, Camera, Building2 } from "lucide-react";
+import InquiryModal from "@/components/property/InquiryModal";
 
 // ═══════════════════════════════════════════════════
 // DATA — Airtable CMS first, mockDb fallback
@@ -226,6 +227,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode }) {
   const [photoMode,         setPhotoMode]         = useState("natural");
   const [activeTab,         setActiveTab]         = useState("space");
   const [menuOpen,   setMenuOpen]   = useState(false);
+  const [isInquiryOpen, setIsInquiryOpen] = useState(false);
   const [propertyData, setPropertyData] = useState(() => draftData || getPropertyBySlug(slug));
   const [dataLoading,  setDataLoading]  = useState(false);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
@@ -2016,9 +2018,9 @@ export default function CommercialFlow({ slug, draftData, isDraftMode }) {
                 </div>
               </div>
 
-              <Link href={`/property/${slug || "batasan-hills"}/brokers`} className="move-cta" style={{textDecoration:"none", marginTop:"16px"}}>
+              <button onClick={() => setIsInquiryOpen(true)} className="move-cta" style={{textDecoration:"none", marginTop:"16px", width:"100%"}}>
                 Connect with an Authorized Broker →
-              </Link>
+              </button>
 
               {/* RA 9646 compliance badge */}
               <div style={{display:"inline-flex", alignItems:"center", gap:"8px", marginTop:"20px", padding:"8px 14px", border:"0.5px solid rgba(76,175,125,0.4)", borderRadius:"4px", background:"rgba(76,175,125,0.06)"}}>
@@ -2042,6 +2044,13 @@ export default function CommercialFlow({ slug, draftData, isDraftMode }) {
 
 
        </div>{/* /page */}
+
+      <InquiryModal 
+        isOpen={isInquiryOpen} 
+        onClose={() => setIsInquiryOpen(false)} 
+        propertyTitle={d.title} 
+        brokerName={d.broker_name} 
+      />
 
       {/* Lightbox / Fullscreen Modal */}
       {isLightboxOpen && (

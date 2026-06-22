@@ -177,8 +177,9 @@ export default function OwnerMode() {
             <span className="font-label-caps text-gold-accent tracking-widest uppercase mb-2 block">Command Center</span>
             <h1 className="font-display-md text-3xl md:text-4xl text-text-primary">Active Property Files</h1>
           </div>
-          <button 
-            className="border border-gold-accent text-gold-accent hover:bg-gold-accent hover:text-background font-working-title font-bold px-6 py-3 rounded transition-all w-full md:w-auto"
+          {/* Hidden on mobile — the contextual "+ List" FAB is the canonical add-listing control there (one control per action) */}
+          <button
+            className="hidden md:inline-block border border-gold-accent text-gold-accent hover:bg-gold-accent hover:text-background font-working-title font-bold px-6 py-3 rounded transition-all w-full md:w-auto"
             onClick={() => setShowWizard('select_mode')}
           >
             + New Property File
@@ -192,7 +193,7 @@ export default function OwnerMode() {
             return (
               <div 
                 key={listing.id}
-                className="bg-[#121110] border border-surface-variant hover:border-gold-accent rounded-lg p-6 flex flex-col cursor-pointer transition-all group relative overflow-hidden h-64"
+                className="bg-[#121110] border border-surface-variant hover:border-gold-accent rounded-lg p-6 flex flex-col cursor-pointer transition-all group relative overflow-hidden h-auto min-h-[12rem] md:h-64"
                 onClick={() => setViewingDossierId(listing.id)}
               >
                 <div className="absolute top-0 left-0 w-1 h-full bg-surface-variant group-hover:bg-gold-accent transition-colors"></div>
@@ -201,11 +202,15 @@ export default function OwnerMode() {
                     <h3 className="font-working-title text-xl text-on-surface mb-1 group-hover:underline">{listing.title || 'Untitled Property'}</h3>
                     <p className="text-xs text-text-secondary">{listing.location || 'Location missing'}</p>
                   </div>
-                  <div className="relative w-10 h-10 shrink-0">
+                  <div className="relative w-10 h-10 shrink-0" title={`${listing.signals?.completeness || '100%'} complete`}>
                     <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
                       <path className="text-surface-variant" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3"></path>
                       <path className="text-gold-accent" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeDasharray={`${listing.signals?.completeness?.replace('%','') || 100}, 100`} strokeWidth="3"></path>
                     </svg>
+                    {/* Inner % label so the ring reads as a completeness score, not a loading spinner */}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="font-data-tabular font-bold text-[8px] text-text-primary leading-none">{listing.signals?.completeness || '100%'}</span>
+                    </div>
                   </div>
                 </div>
                 
