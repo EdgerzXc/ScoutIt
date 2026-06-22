@@ -49,9 +49,51 @@ export function DashboardProvider({ children }) {
           .select('*')
           .order('created_at', { ascending: false });
 
+        let supabaseListings = [];
         if (!propError && propertiesData) {
-          setListings(mapSupabaseProperties(propertiesData));
+          supabaseListings = mapSupabaseProperties(propertiesData);
         }
+
+        let airtableListings = [];
+        try {
+          const cmsRes = await fetch('/api/cms');
+          if (cmsRes.ok) {
+            const cmsData = await cmsRes.json();
+            if (cmsData.properties) {
+              airtableListings = cmsData.properties.map(p => ({
+                id: p.id,
+                type: p.property_type || 'Property',
+                title: p.title,
+                desc: '',
+                loc: p.location || p.city,
+                location: p.location || p.city,
+                hasMedia: !!p.image,
+                mediaLink: p.image,
+                price: p.tenure,
+                tag: 'LIVE',
+                tagClass: 'bg-success/20 text-success',
+                time: 'Verified',
+                ownerId: 'scoutit-cms',
+                spaceCategory: p.spaceCategory || p.property_type,
+                details: {},
+                pipelineStatus: 'approved',
+                completenessScore: 100,
+                verified: true,
+                coordinates: p.lat && p.lng ? `POINT(${p.lng} ${p.lat})` : null,
+                signals: {
+                  ownerAge: 'Verified',
+                  ownerAgeClass: 'text-success',
+                  accountAge: 'ScoutIt Verified',
+                  completeness: '100%'
+                }
+              }));
+            }
+          }
+        } catch (e) {
+          console.error("Failed to fetch CMS properties:", e);
+        }
+
+        setListings([...airtableListings, ...supabaseListings]);
 
         // 2. Fetch Deals (Pitches)
         const { data: dealsData, error: dealError } = await supabase
@@ -488,33 +530,83 @@ export function DashboardProvider({ children }) {
   const searchByRadius = async (radiusKm, centerLng = DEFAULT_MAP_CENTER[0], centerLat = DEFAULT_MAP_CENTER[1]) => {
     setIsLoading(true);
     try {
-      // Always fetch all from Supabase, then filter locally via Haversine
-      const { data, error } = await supabase.from('property_submissions').select('*').order('created_at', { ascending: false });
+      // Always fetch all from Supabase
+      const { data: propertiesData, error: propError } = await supabase.from('property_submissions').select('*').order('created_at', { ascending: false });
       
-      if (!error && data) {
-        if (radiusKm === 'any') {
-          setListings(mapSupabaseProperties(data));
-        } else {
-          const radius = parseFloat(radiusKm);
-          // Haversine formula
-          const toRad = (value) => (value * Math.PI) / 180;
-          const filtered = data.filter(p => {
-            if (!p.latitude || !p.longitude) return false;
-            
-            const R = 6371; // Earth's radius in km
-            const dLat = toRad(p.latitude - centerLat);
-            const dLon = toRad(p.longitude - centerLng);
-            const a = 
-              Math.sin(dLat/2) * Math.sin(dLat/2) +
-              Math.cos(toRad(centerLat)) * Math.cos(toRad(p.latitude)) * 
-              Math.sin(dLon/2) * Math.sin(dLon/2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-            const distance = R * c;
-            
-            return distance <= radius;
-          });
-          setListings(mapSupabaseProperties(filtered));
+      let supabaseListings = [];
+      if (!propError && propertiesData) {
+        supabaseListings = mapSupabaseProperties(propertiesData);
+      }
+
+      // Always fetch from CMS
+      let airtableListings = [];
+      try {
+        const cmsRes = await fetch('/api/cms');
+        if (cmsRes.ok) {
+          const cmsData = await cmsRes.json();
+          if (cmsData.properties) {
+            airtableListings = cmsData.properties.map(p => ({
+              id: p.id,
+              type: p.property_type || 'Property',
+              title: p.title,
+              desc: '',
+              loc: p.location || p.city,
+              location: p.location || p.city,
+              hasMedia: !!p.image,
+              mediaLink: p.image,
+              price: p.tenure,
+              tag: 'LIVE',
+              tagClass: 'bg-success/20 text-success',
+              time: 'Verified',
+              ownerId: 'scoutit-cms',
+              spaceCategory: p.spaceCategory || p.property_type,
+              details: {},
+              pipelineStatus: 'approved',
+              completenessScore: 100,
+              verified: true,
+              coordinates: p.lat && p.lng ? `POINT(${p.lng} ${p.lat})` : null,
+              signals: {
+                ownerAge: 'Verified',
+                ownerAgeClass: 'text-success',
+                accountAge: 'ScoutIt Verified',
+                completeness: '100%'
+              }
+            }));
+          }
         }
+      } catch (e) {
+        console.error("Failed to fetch CMS properties:", e);
+      }
+
+      const allData = [...airtableListings, ...supabaseListings];
+
+      if (radiusKm === 'any') {
+        setListings(allData);
+      } else {
+        const radius = parseFloat(radiusKm);
+        const toRad = (value) => (value * Math.PI) / 180;
+        const filtered = allData.filter(p => {
+          if (!p.coordinates) return false;
+          
+          const match = p.coordinates.match(/POINT\(([^ ]+) ([^)]+)\)/);
+          if (!match) return false;
+          
+          const pLng = parseFloat(match[1]);
+          const pLat = parseFloat(match[2]);
+
+          const R = 6371; // Earth's radius in km
+          const dLat = toRad(pLat - centerLat);
+          const dLon = toRad(pLng - centerLng);
+          const a = 
+            Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(toRad(centerLat)) * Math.cos(toRad(pLat)) * 
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+          const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+          const distance = R * c;
+          
+          return distance <= radius;
+        });
+        setListings(filtered);
       }
     } catch (err) {
       console.error("Radius search failed", err);
