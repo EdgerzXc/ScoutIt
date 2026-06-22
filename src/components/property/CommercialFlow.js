@@ -834,7 +834,12 @@ export default function CommercialFlow({ slug, draftData, isDraftMode }) {
           <div className="photo-fade-bottom" />
 
           {/* Hero Intel */}
-          <div className="hero-intel">
+          <div 
+            className="hero-intel"
+            onClick={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
+            onTouchStart={(e) => e.stopPropagation()}
+          >
             <p className="hero-label">ScoutIt &middot; {briefLabel}</p>
             <h1 className="hero-title">{d.title}</h1>
             <p className="hero-location">{d.location}</p>
