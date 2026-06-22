@@ -169,6 +169,10 @@ export async function fetchProperties(apiKey, baseId) {
         whereTo: (() => {
           try { return JSON.parse(f.WhereTo || "[]"); } catch { return []; }
         })(),
+        // Units inventory stored as JSON string in Airtable (embedded units model)
+        units_inventory: (() => {
+          try { return JSON.parse(f.Units_JSON || "[]"); } catch { return []; }
+        })(),
         // Photos stored as comma-separated URLs
         photos: f.Photos
           ? f.Photos.split(",").map((u) => u.trim()).filter(Boolean)
@@ -326,21 +330,25 @@ export async function fetchHomepageConfig(apiKey, baseId) {
 // ═══════════════════════════════════════════════════════════════
 export async function insertProperty(apiKey, baseId, data) {
   const url = `${BASE_URL}/${baseId}/PROPERTIES_CMS`;
-  const slug = data.property_title
+  const slug = data.slug || (data.title || "")
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
+
+  // Units live embedded in the Supabase `details` jsonb; serialize them to a
+  // JSON string field in Airtable (same pattern as WhereTo) so the public
+  // read path can hydrate them back on fetchProperties.
+  const unitsJson = JSON.stringify(data.details?.units_inventory || []);
 
   const payload = {
     records: [
       {
         fields: {
-          Title: data.property_title,
+          Title: data.title,
           Slug: slug,
-          Location: data.location_text || "",
-          Latitude: data.latitude ? Number(data.latitude) : null,
-          Longitude: data.longitude ? Number(data.longitude) : null,
-          SpaceTypography: data.property_type || "Unknown",
+          Location: data.location || "",
+          SpaceTypography: data.type || "Unknown",
+          Units_JSON: unitsJson,
           Approved_For_ScoutIt: true,
         }
       }
@@ -390,11 +398,10 @@ export async function updateProperty(apiKey, baseId, slug, data) {
   
   // We only update what is provided. For ScoutIt, title/location/type updates.
   const fieldsToUpdate = {};
-  if (data.property_title) fieldsToUpdate.Title = data.property_title;
-  if (data.location_text) fieldsToUpdate.Location = data.location_text;
-  if (data.property_type) fieldsToUpdate.SpaceTypography = data.property_type;
-  if (data.latitude) fieldsToUpdate.Latitude = Number(data.latitude);
-  if (data.longitude) fieldsToUpdate.Longitude = Number(data.longitude);
+  if (data.title) fieldsToUpdate.Title = data.title;
+  if (data.location) fieldsToUpdate.Location = data.location;
+  if (data.type) fieldsToUpdate.SpaceTypography = data.type;
+  if (data.details?.units_inventory) fieldsToUpdate.Units_JSON = JSON.stringify(data.details.units_inventory);
   
   const payload = {
     fields: fieldsToUpdate

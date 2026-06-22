@@ -162,19 +162,19 @@ export async function loadSeekerSavedCount(userId) {
 // Private only — reads from properties for own profile view.
 export async function loadOwnerListings(userId) {
   const { data, error } = await supabase
-    .from('property_submissions')
-    .select('id, property_title, location_text, property_type, status, created_at')
+    .from('properties')
+    .select('id, title, location, type, pipeline_status, verified, completeness_score, created_at')
     .eq('owner_id', userId)
     .order('created_at', { ascending: false });
 
   // Map to the expected shape for OwnerPanel
   const mappedData = (data || []).map(p => ({
     id: p.id,
-    title: p.property_title,
-    location: p.location_text,
-    type: p.property_type,
-    verified: false,
-    completeness_score: 50
+    title: p.title,
+    location: p.location,
+    type: p.type,
+    verified: !!p.verified,
+    completeness_score: p.completeness_score ?? 50
   }));
 
   return { data: mappedData, error };

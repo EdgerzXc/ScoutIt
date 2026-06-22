@@ -45,7 +45,7 @@ export function DashboardProvider({ children }) {
       try {
         // 1. Fetch Properties (Dossiers)
         const { data: propertiesData, error: propError } = await supabase
-          .from('property_submissions')
+          .from('properties')
           .select('*')
           .order('created_at', { ascending: false });
 
@@ -256,7 +256,7 @@ export function DashboardProvider({ children }) {
   const closeListing = async (listingId) => {
     setListings(prev => prev.filter(l => l.id !== listingId));
     addToast("Property File closed", "🏁");
-    await supabase.from('property_submissions').delete().eq('id', listingId);
+    await supabase.from('properties').delete().eq('id', listingId);
   };
 
   const addListing = async (listing) => {
@@ -280,14 +280,24 @@ export function DashboardProvider({ children }) {
     addToast("Initializing Dossier...", "⏳");
     
     // 2. Insert into Supabase (owned by the current user; category data carried in details)
-    const { data, error } = await supabase.from('property_submissions').insert([{
+    const slug = (listing.title || `${listing.type} in ${listing.location}`)
+      .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+    const coordinates = (lat != null && lng != null) ? `POINT(${lng} ${lat})` : null;
+    const { data, error } = await supabase.from('properties').insert([{
       owner_id: currentUser?.id || null,
-      property_title: listing.title || `${listing.type} in ${listing.location}`,
-      property_type: listing.category || listing.type,
-      location_text: listing.location,
-      latitude: lat,
-      longitude: lng,
-      status: 'pending'
+      title: listing.title || `${listing.type} in ${listing.location}`,
+      type: listing.type,
+      space_category: listing.category || listing.type,
+      slug,
+      location: listing.location,
+      price: listing.price ? parseFloat(listing.price) : null,
+      description: listing.description,
+      media_link: listing.mediaLink,
+      completeness_score: listing.completenessScore,
+      verified: listing.verified,
+      pipeline_status: 'pending',
+      details: listing.details || {},
+      coordinates
     }]).select();
 
     if (error || !data) {
@@ -333,12 +343,15 @@ export function DashboardProvider({ children }) {
     const title = `Drafting from PDF: ${fileName}`;
     const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
-    const { data, error } = await supabase.from('property_submissions').insert([{
+    const { data, error } = await supabase.from('properties').insert([{
       owner_id: currentUser?.id || null,
-      property_title: title,
-      property_type: 'Unknown',
-      location_text: 'Pending AI Extraction',
-      status: 'pending'
+      title: title,
+      type: 'Unknown',
+      space_category: 'Unknown',
+      slug,
+      location: 'Pending AI Extraction',
+      pipeline_status: 'ai_drafting',
+      details: { source_pdf: fileName }
     }]).select();
 
     if (error || !data) {
@@ -531,7 +544,7 @@ export function DashboardProvider({ children }) {
     setIsLoading(true);
     try {
       // Always fetch all from Supabase
-      const { data: propertiesData, error: propError } = await supabase.from('property_submissions').select('*').order('created_at', { ascending: false });
+      const { data: propertiesData, error: propError } = await supabase.from('properties').select('*').order('created_at', { ascending: false });
       
       let supabaseListings = [];
       if (!propError && propertiesData) {
@@ -619,24 +632,24 @@ export function DashboardProvider({ children }) {
   const mapSupabaseProperties = (propertiesData) => {
     return propertiesData.map(p => ({
       id: p.id,
-      type: p.property_type,
-      title: p.property_title,
-      desc: '',
-      loc: p.location_text,
-      location: p.location_text,
-      hasMedia: false,
-      mediaLink: null,
-      price: null,
+      type: p.type,
+      title: p.title,
+      desc: p.description || '',
+      loc: p.location,
+      location: p.location,
+      hasMedia: !!p.media_link,
+      mediaLink: p.media_link || null,
+      price: p.price ?? null,
       tag: 'LIVE',
       tagClass: 'bg-gold-accent/20 text-gold-accent',
       time: p.created_at ? new Date(p.created_at).toLocaleDateString() : 'Just now',
       ownerId: p.owner_id || null,
-      spaceCategory: p.property_type,
-      details: {},
-      pipelineStatus: p.status || 'pending',
-      completenessScore: 50,
-      verified: false,
-      coordinates: p.latitude && p.longitude ? `POINT(${p.longitude} ${p.latitude})` : null,
+      spaceCategory: p.space_category || p.type,
+      details: p.details || {},
+      pipelineStatus: p.pipeline_status || 'pending',
+      completenessScore: p.completeness_score ?? 50,
+      verified: !!p.verified,
+      coordinates: p.coordinates || null,
       signals: {
         ownerAge: 'Verified',
         ownerAgeClass: 'text-success',

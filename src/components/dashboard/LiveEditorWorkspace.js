@@ -317,9 +317,67 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
             </section>
           )}
 
+          {/* Section: Inventory / Units */}
+          <section className="flex flex-col gap-4 animate-[fadeIn_0.3s_ease]">
+            <h3 className="font-headline-editorial text-2xl text-on-surface border-b border-surface-variant pb-2">3. Available Inventory</h3>
+            <p className="text-xs text-text-secondary mb-2">List specific spaces or units available within this property.</p>
+            
+            <div className="flex flex-col gap-3">
+              {(formData.details.units_inventory || []).map((unit, idx) => (
+                <div key={idx} className="bg-surface-alt border border-surface-variant rounded p-3 relative group">
+                  <button onClick={() => {
+                      const newUnits = [...(formData.details.units_inventory || [])];
+                      newUnits.splice(idx, 1);
+                      setDetail('units_inventory', newUnits);
+                    }} className="absolute top-2 right-2 text-text-muted hover:text-error" title="Remove unit">×</button>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div>
+                      <label className="text-[9px] font-label-caps tracking-widest text-text-secondary uppercase">Unit Name / Floor</label>
+                      <input className="bg-surface border border-surface-variant rounded px-2 py-1.5 focus:border-gold-accent w-full mt-1 text-on-surface" placeholder="e.g. Unit 14B" value={unit.name || ''} onChange={e => {
+                          const newUnits = [...(formData.details.units_inventory || [])];
+                          newUnits[idx] = { ...newUnits[idx], name: e.target.value };
+                          setDetail('units_inventory', newUnits);
+                      }} />
+                    </div>
+                    <div>
+                      <label className="text-[9px] font-label-caps tracking-widest text-text-secondary uppercase">Size (sqm)</label>
+                      <input className="bg-surface border border-surface-variant rounded px-2 py-1.5 focus:border-gold-accent w-full mt-1 text-on-surface" placeholder="e.g. 250" type="number" value={unit.size || ''} onChange={e => {
+                          const newUnits = [...(formData.details.units_inventory || [])];
+                          newUnits[idx] = { ...newUnits[idx], size: e.target.value };
+                          setDetail('units_inventory', newUnits);
+                      }} />
+                    </div>
+                    <div>
+                      <label className="text-[9px] font-label-caps tracking-widest text-text-secondary uppercase">Price / Rate</label>
+                      <input className="bg-surface border border-surface-variant rounded px-2 py-1.5 focus:border-gold-accent w-full mt-1 text-on-surface" placeholder="e.g. ₱1,200/sqm" value={unit.price || ''} onChange={e => {
+                          const newUnits = [...(formData.details.units_inventory || [])];
+                          newUnits[idx] = { ...newUnits[idx], price: e.target.value };
+                          setDetail('units_inventory', newUnits);
+                      }} />
+                    </div>
+                    <div>
+                      <label className="text-[9px] font-label-caps tracking-widest text-text-secondary uppercase">Photo URL</label>
+                      <input className="bg-surface border border-surface-variant rounded px-2 py-1.5 focus:border-gold-accent w-full mt-1 text-on-surface" placeholder="https://..." value={unit.photo || ''} onChange={e => {
+                          const newUnits = [...(formData.details.units_inventory || [])];
+                          newUnits[idx] = { ...newUnits[idx], photo: e.target.value };
+                          setDetail('units_inventory', newUnits);
+                      }} />
+                    </div>
+                  </div>
+                </div>
+              ))}
+              <button 
+                className="border border-dashed border-surface-variant text-text-secondary hover:text-gold-accent hover:border-gold-accent rounded py-3 text-sm font-working-title transition-all flex items-center justify-center gap-2"
+                onClick={() => setDetail('units_inventory', [...(formData.details.units_inventory || []), { name: '', size: '', price: '', photo: '' }])}
+              >
+                + Add Space / Unit
+              </button>
+            </div>
+          </section>
+
           {/* Section: Story & Validation */}
           <section className="flex flex-col gap-4">
-            <h3 className="font-headline-editorial text-2xl text-on-surface border-b border-surface-variant pb-2">3. Editorial</h3>
+            <h3 className="font-headline-editorial text-2xl text-on-surface border-b border-surface-variant pb-2">4. Editorial</h3>
             
             <div className="flex flex-col gap-2">
               <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase flex justify-between">

@@ -19,7 +19,7 @@ export async function POST(request) {
 
     // 1. Fetch the submission from Supabase
     const { data: submission, error: fetchError } = await supabase
-      .from('property_submissions')
+      .from('properties')
       .select('*')
       .eq('id', submissionId)
       .single();
@@ -35,8 +35,8 @@ export async function POST(request) {
 
     // 3. Update Supabase status to 'approved'
     const { error: updateError } = await supabase
-      .from('property_submissions')
-      .update({ status: 'approved' })
+      .from('properties')
+      .update({ pipeline_status: 'approved' })
       .eq('id', submissionId);
 
     if (updateError) {

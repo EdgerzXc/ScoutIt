@@ -433,7 +433,9 @@ export default function CommercialFlow({ slug, draftData, isDraftMode }) {
   else if (isVenue)      { pill1Emoji = "👥"; pill2Emoji = "🎚"; }
 
   // ── Build Dynamic Units List ───────────────────
-  const dynamicUnits = [];
+  // NOTE: `dynamicUnits` starts as spec-synthesized fallback units, then gets
+  // overridden below by the owner's real units_inventory when one exists.
+  let dynamicUnits = [];
   const isCommercial = 
     d.property_type?.toLowerCase().includes("commercial") || 
     d.property_type?.toLowerCase().includes("restaurant") || 
@@ -662,6 +664,29 @@ export default function CommercialFlow({ slug, draftData, isDraftMode }) {
   }
 
 
+
+  // ── Owner inventory override ───────────────────
+  // Real owner-entered units (units_inventory) take precedence over the
+  // spec-synthesized fallback. Each unit carries its own photo + specs.
+  const realUnits = Array.isArray(d.units_inventory)
+    ? d.units_inventory.filter(u => u && (u.name || u.size || u.price || u.photo))
+    : [];
+  if (realUnits.length > 0) {
+    dynamicUnits = realUnits.map((u, i) => ({
+      name: u.name || `Unit ${String(i + 1).padStart(2, "0")}`,
+      specs: [
+        u.size  ? `${u.size} sqm`     : null,
+        u.price ? String(u.price)     : null,
+        u.floor ? `Floor ${u.floor}`  : null,
+      ].filter(Boolean),
+      photo: u.photo || "",
+      isReal: true,
+    }));
+  }
+
+  // The currently selected unit object (drives the in-context detail sub-panel).
+  const activeUnitObj =
+    dynamicUnits.find(u => u.name === selectedUnit) || dynamicUnits[0] || null;
 
   // ── Photo navigation ──────────────────────────
   const goPrev = () => setCurrentImageIndex(i => (i === 0 ? photos.length - 1 : i - 1));
@@ -1734,6 +1759,36 @@ export default function CommercialFlow({ slug, draftData, isDraftMode }) {
                   );
                 })}
               </div>
+
+              {/* ── Selected-unit detail sub-panel (in-context, no new page) ── */}
+              {activeUnitObj && (
+                <div style={{marginTop:"28px", border:"0.5px solid #262626", borderRadius:"6px", overflow:"hidden", background:"#121212"}}>
+                  {activeUnitObj.photo ? (
+                    <div style={{width:"100%", aspectRatio:"16 / 9", backgroundImage:`url(${activeUnitObj.photo})`, backgroundSize:"cover", backgroundPosition:"center", transition:"background-image 240ms ease"}}/>
+                  ) : (
+                    <div style={{width:"100%", aspectRatio:"16 / 9", display:"flex", alignItems:"center", justifyContent:"center", background:"#0d0d0d", fontFamily:"'Courier New',monospace", fontSize:"10px", letterSpacing:"0.2em", color:"#6a6a6a", textTransform:"uppercase"}}>
+                      No unit photo provided
+                    </div>
+                  )}
+                  <div style={{padding:"20px 22px"}}>
+                    <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#ffb800", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"8px"}}>
+                      Selected Unit — Full Detail
+                    </div>
+                    <div style={{fontFamily:"Georgia,serif", fontSize:"22px", color:"#f0ede8", marginBottom:"14px"}}>
+                      {activeUnitObj.name}
+                    </div>
+                    <div style={{display:"flex", flexWrap:"wrap", gap:"8px"}}>
+                      {activeUnitObj.specs.length > 0 ? (
+                        activeUnitObj.specs.map(s => (
+                          <span key={s} style={{fontFamily:"'Courier New',monospace", fontSize:"11px", color:"#c8c8c8", letterSpacing:"0.08em", border:"0.5px solid #262626", borderRadius:"3px", padding:"6px 10px"}}>{s}</span>
+                        ))
+                      ) : (
+                        <span style={{fontFamily:"'Courier New',monospace", fontSize:"11px", color:"#6a6a6a"}}>No additional specs entered.</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <DeepIntelWidget
                 open={widgets.units}

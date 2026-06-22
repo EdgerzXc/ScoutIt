@@ -19,9 +19,9 @@ export default function AdminPage() {
   const fetchPending = async () => {
     setLoading(true);
     const { data, error } = await supabase
-      .from('property_submissions')
+      .from('properties')
       .select('*')
-      .eq('status', 'pending')
+      .eq('pipeline_status', 'pending')
       .order('created_at', { ascending: false });
 
     if (!error && data) {
@@ -96,15 +96,13 @@ export default function AdminPage() {
                     <div className="submission-info">
                       <div className="info-primary">
                         <Building2 size={16} color="#ffb800" />
-                        <h3>{prop.property_title}</h3>
+                        <h3>{prop.title}</h3>
                       </div>
                       <div className="info-secondary">
-                        <span className="info-tag">{prop.property_type}</span>
-                        <span className="info-tag">{prop.location_text}</span>
+                        <span className="info-tag">{prop.type}</span>
+                        <span className="info-tag">{prop.location}</span>
                         <span className="info-tag coords">
-                          {prop.latitude && prop.longitude 
-                            ? `Lat: ${prop.latitude.toFixed(4)}, Lng: ${prop.longitude.toFixed(4)}`
-                            : "No Coords"}
+                          {prop.coordinates ? "Geo-located" : "No Coords"}
                         </span>
                       </div>
                       <div className="info-meta">

@@ -12,7 +12,7 @@ export async function POST(request) {
 
     // 1. Fetch the current submission to check its status and get its slug
     const { data: currentSubmission, error: fetchError } = await supabase
-      .from('property_submissions')
+      .from('properties')
       .select('*')
       .eq('id', submissionId)
       .single();
@@ -24,14 +24,14 @@ export async function POST(request) {
 
     // Format the payload for Supabase
     const supabasePayload = {
-      property_title: data.title || currentSubmission.property_title,
-      property_type: data.type || currentSubmission.property_type,
-      location_text: data.location || currentSubmission.location_text
+      title: data.title || currentSubmission.title,
+      type: data.type || currentSubmission.type,
+      location: data.location || currentSubmission.location
     };
 
     // 2. Update Supabase
     const { error: updateError } = await supabase
-      .from('property_submissions')
+      .from('properties')
       .update(supabasePayload)
       .eq('id', submissionId);
 
@@ -41,13 +41,13 @@ export async function POST(request) {
     }
 
     // 3. If approved, update Airtable too!
-    if (currentSubmission.status === 'approved') {
+    if (currentSubmission.pipeline_status === 'approved') {
       const apiKey = process.env.AIRTABLE_API_KEY;
       const baseId = process.env.AIRTABLE_BASE_ID;
 
       if (apiKey && baseId) {
         // The slug is derived from the original title
-        const slug = currentSubmission.property_title
+        const slug = currentSubmission.slug || currentSubmission.title
           .toLowerCase()
           .replace(/[^a-z0-9]+/g, "-")
           .replace(/(^-|-$)/g, "");
