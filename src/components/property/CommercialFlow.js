@@ -797,7 +797,6 @@ export default function CommercialFlow({ slug, draftData, isDraftMode }) {
         <div 
           className="zone-photo" 
           id="photoZone" 
-          onClick={() => setIsLightboxOpen(true)}
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
         >
@@ -846,48 +845,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode }) {
             <p className="hero-hook">{d.hook}</p>
           </div>
 
-          {/* Go Back Button (Top Left) */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              if (window.history.length > 2) {
-                window.history.back();
-              } else {
-                window.location.href = "/dashboard";
-              }
-            }}
-            className="platform-back-btn"
-          >
-            ← Go Back
-          </button>
 
-          {/* Platform Nav (Top Right - Menu only) */}
-          <nav className="platform-nav" ref={menuRef} onClick={(e) => e.stopPropagation()}>
-            <button
-              className="platform-menu-btn"
-              type="button"
-              aria-expanded={menuOpen}
-              onClick={() => setMenuOpen(v => !v)}
-              aria-label="Menu"
-            >
-              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-                <path d="M2 4h12M2 8h12M2 12h12"/>
-              </svg>
-            </button>
-            <div className={`platform-dropdown ${menuOpen ? "open" : ""}`}>
-              <div className="dropdown-brand">ScoutIt</div>
-              <Link href="/dashboard">Dashboard</Link>
-              <Link href="/">Home</Link>
-              <Link href="/discover">Discover</Link>
-              <Link href="/discover">News</Link>
-              <Link href="/brokers">Brokers</Link>
-              <Link href="/photographers">Photographers</Link>
-              <Link href="/researchers">Researchers</Link>
-              <Link href="/event-planners">Event Planners</Link>
-              <Link href="/wishlist">Your Board</Link>
-              <Link href="/about">About</Link>
-            </div>
-          </nav>
 
           {/* Arrows */}
           <div className="photo-arrow left"  onClick={(e) => { e.stopPropagation(); goPrev(); }}>
@@ -910,6 +868,14 @@ export default function CommercialFlow({ slug, draftData, isDraftMode }) {
                   onClick={() => setPhotoMode("enhanced")}
                 >Enhanced</button>
               </div>
+              <button 
+                className="toggle-btn off" 
+                style={{ marginLeft: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}
+                onClick={() => setIsLightboxOpen(true)}
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+                Expand Photo
+              </button>
               <div className="photo-dots">
                 {photos.map((_, i) => (
                   <div
