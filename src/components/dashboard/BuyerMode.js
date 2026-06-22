@@ -19,27 +19,78 @@ export default function BuyerMode() {
   const mapContainerRef = useRef(null);
   const mapInstance = useRef(null);
 
-  // Initialize Mapbox when showMap toggles
-  useEffect(() => {
-    if (showMap && mapContainerRef.current && !mapInstance.current && MAPBOX_TOKEN) {
-      mapboxgl.accessToken = MAPBOX_TOKEN;
-      mapInstance.current = new mapboxgl.Map({
-        container: mapContainerRef.current,
-        style: 'mapbox://styles/mapbox/dark-v11',
-        center: DEFAULT_MAP_CENTER, // Makati
-        zoom: 12,
-        pitch: 45
-      });
+  // Store markers to clean them up when listings change
+  const markersRef = useRef([]);
 
-      mapInstance.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
+  // Initialize Mapbox and markers when showMap toggles or listings change
+  useEffect(() => {
+    if (showMap && mapContainerRef.current && MAPBOX_TOKEN) {
+      if (!mapInstance.current) {
+        mapboxgl.accessToken = MAPBOX_TOKEN;
+        mapInstance.current = new mapboxgl.Map({
+          container: mapContainerRef.current,
+          style: 'mapbox://styles/mapbox/dark-v11',
+          center: DEFAULT_MAP_CENTER, // Makati
+          zoom: 12,
+          pitch: 45
+        });
+
+        mapInstance.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
+      }
+
+      // Clear existing markers
+      markersRef.current.forEach(m => m.remove());
+      markersRef.current = [];
+
+      // Add markers for all listings
+      listings.forEach(listing => {
+        let coords = null;
+        if (listing.coordinates) {
+          const match = listing.coordinates.match(/POINT\(([^ ]+) ([^)]+)\)/);
+          if (match) {
+            coords = [parseFloat(match[1]), parseFloat(match[2])];
+          }
+        }
+
+        if (coords) {
+          // Marker element
+          const el = document.createElement('div');
+          el.className = 'w-8 h-8 rounded-full bg-gold-accent flex items-center justify-center text-sm shadow-[0_0_15px_rgba(212,175,55,0.6)] cursor-pointer hover:scale-110 transition-transform text-background font-bold border-2 border-[#121212] z-10';
+          el.innerHTML = listing.hasMedia ? '📸' : '🏢';
+
+          // Popup HTML
+          const popupHtml = `
+            <div class="bg-[#121110] border border-gold-accent/20 p-4 rounded-lg shadow-xl w-60">
+              <div class="text-[10px] text-gold-accent font-label-caps uppercase tracking-widest mb-1">${listing.type}</div>
+              <div class="text-sm font-working-title text-white truncate mb-1">${listing.title}</div>
+              <div class="text-xs text-gray-400 truncate mb-3">${listing.loc}</div>
+              <a href="/property/${listing.id}" class="block text-center w-full text-[10px] font-label-caps tracking-widest uppercase bg-gold-accent/10 hover:bg-gold-accent/20 text-gold-accent py-2 rounded transition-colors">
+                View Property
+              </a>
+            </div>
+          `;
+
+          const popup = new mapboxgl.Popup({ offset: 25, closeButton: false })
+            .setHTML(popupHtml);
+
+          const marker = new mapboxgl.Marker(el)
+            .setLngLat(coords)
+            .setPopup(popup)
+            .addTo(mapInstance.current);
+
+          markersRef.current.push(marker);
+        }
+      });
 
       // Clean up on unmount or when toggling off
       return () => {
-        mapInstance.current?.remove();
-        mapInstance.current = null;
+        // We only remove the map on unmount, not on every listings change
       };
+    } else if (!showMap && mapInstance.current) {
+      mapInstance.current.remove();
+      mapInstance.current = null;
     }
-  }, [showMap, MAPBOX_TOKEN]);
+  }, [showMap, MAPBOX_TOKEN, listings, DEFAULT_MAP_CENTER]);
 
   // Handle Radius Change
   const handleRadiusChange = (e) => {
