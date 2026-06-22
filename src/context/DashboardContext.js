@@ -484,26 +484,36 @@ export function DashboardProvider({ children }) {
     setNotifications([]);
   };
 
-  // ── Proximity Radar (Radius Search) ──
+  // ── Proximity Radar (Radius Search via Local Haversine) ──
   const searchByRadius = async (radiusKm, centerLng = DEFAULT_MAP_CENTER[0], centerLat = DEFAULT_MAP_CENTER[1]) => {
     setIsLoading(true);
     try {
-      if (radiusKm === 'any') {
-        // Fetch all properties if no radius is selected
-        const { data, error } = await supabase.from('property_submissions').select('*').order('created_at', { ascending: false });
-        if (!error && data) {
+      // Always fetch all from Supabase, then filter locally via Haversine
+      const { data, error } = await supabase.from('property_submissions').select('*').order('created_at', { ascending: false });
+      
+      if (!error && data) {
+        if (radiusKm === 'any') {
           setListings(mapSupabaseProperties(data));
-        }
-      } else {
-        // Call the PostGIS RPC function
-        const { data, error } = await supabase.rpc('search_properties_in_radius', {
-          search_lng: centerLng,
-          search_lat: centerLat,
-          radius_km: parseFloat(radiusKm)
-        });
-        
-        if (!error && data) {
-          setListings(mapSupabaseProperties(data));
+        } else {
+          const radius = parseFloat(radiusKm);
+          // Haversine formula
+          const toRad = (value) => (value * Math.PI) / 180;
+          const filtered = data.filter(p => {
+            if (!p.latitude || !p.longitude) return false;
+            
+            const R = 6371; // Earth's radius in km
+            const dLat = toRad(p.latitude - centerLat);
+            const dLon = toRad(p.longitude - centerLng);
+            const a = 
+              Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(toRad(centerLat)) * Math.cos(toRad(p.latitude)) * 
+              Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            const distance = R * c;
+            
+            return distance <= radius;
+          });
+          setListings(mapSupabaseProperties(filtered));
         }
       }
     } catch (err) {
