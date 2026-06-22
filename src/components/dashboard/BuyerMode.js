@@ -22,6 +22,13 @@ export default function BuyerMode() {
   // Store markers to clean them up when listings change
   const markersRef = useRef([]);
 
+  // Live-filter logic
+  const q = searchQuery.trim().toLowerCase();
+  const matches = (item) => !q || [item.title, item.type, item.loc, item.desc].some(v => v && v.toLowerCase().includes(q));
+  
+  // Apply filter to all listings
+  const filteredListings = listings.filter(matches);
+
   // Initialize Mapbox and markers when showMap toggles or listings change
   useEffect(() => {
     if (showMap && mapContainerRef.current && MAPBOX_TOKEN) {
@@ -42,8 +49,8 @@ export default function BuyerMode() {
       markersRef.current.forEach(m => m.remove());
       markersRef.current = [];
 
-      // Add markers for all listings
-      listings.forEach(listing => {
+      // Add markers for filtered listings
+      filteredListings.forEach(listing => {
         let coords = null;
         if (listing.coordinates) {
           const match = listing.coordinates.match(/POINT\(([^ ]+) ([^)]+)\)/);
@@ -90,7 +97,7 @@ export default function BuyerMode() {
       mapInstance.current.remove();
       mapInstance.current = null;
     }
-  }, [showMap, MAPBOX_TOKEN, listings, DEFAULT_MAP_CENTER]);
+  }, [showMap, MAPBOX_TOKEN, filteredListings, DEFAULT_MAP_CENTER]);
 
   // Handle Radius Change
   const handleRadiusChange = (e) => {
@@ -116,10 +123,7 @@ export default function BuyerMode() {
     return () => window.removeEventListener("scoutit:primary-action", onPrimary);
   }, []);
 
-  // Live-filter the feed
-  const q = searchQuery.trim().toLowerCase();
-  const matches = (item) => !q || [item.title, item.type, item.loc, item.desc].some(v => v && v.toLowerCase().includes(q));
-  const newFeedListings = listings.filter(matches).slice(0, 5);
+  const newFeedListings = filteredListings.slice(0, 5);
   
   // Map actual saved properties from the Intelligence Ledger
   const actualSavedListings = listings.filter(l => savedIds.includes(l.id)).map(l => ({
@@ -239,7 +243,7 @@ export default function BuyerMode() {
           <div className="absolute bottom-6 left-6 right-6 flex justify-between items-end pointer-events-none">
             <div className="bg-background/90 backdrop-blur border border-surface-variant p-4 rounded shadow-lg pointer-events-auto">
               <span className="font-label-caps text-xs tracking-widest text-gold-accent uppercase block mb-1">Spatial Intelligence</span>
-              <div className="font-working-title text-on-surface">{listings.length} properties in radar</div>
+              <div className="font-working-title text-on-surface">{filteredListings.length} properties in radar</div>
               {radius !== 'any' && <div className="text-xs text-text-secondary mt-1">{radius}km radius from Makati CBD</div>}
             </div>
             
