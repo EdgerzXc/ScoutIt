@@ -365,7 +365,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode }) {
 
   // ── Derived values ────────────────────────────
   const d           = propertyData;   // short alias
-  const photos      = d.photos && d.photos.length > 0 ? d.photos : (d.image ? [d.image] : [""]);
+  const photos      = d.photos && d.photos.length > 0 ? d.photos : (d.image ? [d.image] : ["https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2070&auto=format&fit=crop"]);
   const brokerInitials = (d.broker_name || "SA").split(" ").map(p => p[0]).join("").slice(0, 2).toUpperCase();
 
   // ── Category Detection & Custom Labels ──────────
@@ -866,7 +866,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode }) {
           >
             <p className="hero-label">ScoutIt &middot; {briefLabel}</p>
             <h1 className="hero-title">{d.title}</h1>
-            <p className="hero-location">{d.location}</p>
+            <p className="hero-location">{d.location || d.city || "Location on request"}</p>
             <p className="hero-hook">{d.hook}</p>
           </div>
 
@@ -920,7 +920,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode }) {
         <div className="mobile-hero-intel">
           <p className="mobile-hero-label">ScoutIt &middot; {briefLabel}</p>
           <h1 className="mobile-hero-title">{d.title}</h1>
-          <p className="mobile-hero-location">{d.location}</p>
+          <p className="mobile-hero-location">{d.location || d.city || "Location on request"}</p>
           <p className="mobile-hero-hook">{d.hook}</p>
         </div>
 

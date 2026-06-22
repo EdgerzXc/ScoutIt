@@ -886,6 +886,11 @@ export default function Home() {
           {/* Divider */}
           <div className="title-divider"></div>
 
+          {/* Plain-Language Value Proposition */}
+          <p className="title-tagline-intro">
+            A premium real estate platform for founders, creatives, and enterprises to find and lease prime commercial and residential spaces across the Philippines.
+          </p>
+
           {/* Taglines */}
           <p className="title-tagline-1">Get lost in spaces that actually inspire you.</p>
           <div className="title-tagline-2">SPACE INTELLIGENCE &middot; PHILIPPINE PROPERTY</div>
@@ -1387,6 +1392,16 @@ export default function Home() {
         }
 
         /* ΓöÇΓöÇ Taglines ΓöÇΓöÇ */
+        .title-tagline-intro {
+          font-family: var(--font-body, system-ui, sans-serif);
+          font-size: 14px;
+          line-height: 1.6;
+          color: #888888;
+          max-width: 520px;
+          margin: 0 auto 24px;
+          text-align: center;
+          font-weight: 400;
+        }
         .title-tagline-1 {
           font-family: Georgia, serif;
           font-style: italic;

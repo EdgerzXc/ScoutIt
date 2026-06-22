@@ -104,6 +104,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
   const [mobileView, setMobileView] = useState("editor"); // "editor" | "preview"
   const [showQuestModal, setShowQuestModal] = useState(false);
   const [activeQuests, setActiveQuests] = useState(initialData?.quests || {});
+  const [isBulkEdit, setIsBulkEdit] = useState(false);
 
   // Lock body scroll when IDE is open
   useEffect(() => {
@@ -319,10 +320,99 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
 
           {/* Section: Inventory / Units */}
           <section className="flex flex-col gap-4 animate-[fadeIn_0.3s_ease]">
-            <h3 className="font-headline-editorial text-2xl text-on-surface border-b border-surface-variant pb-2">3. Available Inventory</h3>
+            <h3 className="font-headline-editorial text-2xl text-on-surface border-b border-surface-variant pb-2 flex justify-between items-end">
+              <span>3. Available Inventory</span>
+              <button 
+                onClick={() => setIsBulkEdit(!isBulkEdit)}
+                className="text-[10px] font-label-caps tracking-widest text-gold-accent uppercase hover:bg-gold-accent/10 px-2 py-1 rounded border border-gold-accent/30"
+              >
+                {isBulkEdit ? "Form View" : "Grid View"}
+              </button>
+            </h3>
             <p className="text-xs text-text-secondary mb-2">List specific spaces or units available within this property.</p>
             
-            <div className="flex flex-col gap-3">
+            {isBulkEdit ? (
+              <div className="flex flex-col gap-2">
+                <div className="overflow-x-auto border border-surface-variant rounded bg-surface-alt">
+                  <table className="w-full text-left border-collapse min-w-[500px]">
+                    <thead>
+                      <tr className="border-b border-surface-variant bg-surface">
+                        <th className="p-2 text-[9px] font-label-caps tracking-widest text-text-secondary uppercase font-normal">Unit Name / Floor</th>
+                        <th className="p-2 text-[9px] font-label-caps tracking-widest text-text-secondary uppercase font-normal w-24">Size (sqm)</th>
+                        <th className="p-2 text-[9px] font-label-caps tracking-widest text-text-secondary uppercase font-normal w-32">Price / Rate</th>
+                        <th className="p-2 text-[9px] font-label-caps tracking-widest text-text-secondary uppercase font-normal">Photo URL</th>
+                        <th className="p-2 w-8"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(formData.details.units_inventory || []).map((unit, idx) => (
+                        <tr key={idx} className="border-b border-surface-variant/50 last:border-0 hover:bg-surface/50 transition-colors">
+                          <td className="p-0 border-r border-surface-variant/50">
+                            <input className="w-full bg-transparent px-2 py-2 text-xs text-on-surface focus:outline-none focus:bg-gold-accent/5 focus:ring-1 focus:ring-inset focus:ring-gold-accent" placeholder="Unit Name" value={unit.name || ''} onChange={e => {
+                              const newUnits = [...(formData.details.units_inventory || [])];
+                              newUnits[idx] = { ...newUnits[idx], name: e.target.value };
+                              setDetail('units_inventory', newUnits);
+                            }} />
+                          </td>
+                          <td className="p-0 border-r border-surface-variant/50">
+                            <input className="w-full bg-transparent px-2 py-2 text-xs text-on-surface focus:outline-none focus:bg-gold-accent/5 focus:ring-1 focus:ring-inset focus:ring-gold-accent" placeholder="Size" type="number" value={unit.size || ''} onChange={e => {
+                              const newUnits = [...(formData.details.units_inventory || [])];
+                              newUnits[idx] = { ...newUnits[idx], size: e.target.value };
+                              setDetail('units_inventory', newUnits);
+                            }} />
+                          </td>
+                          <td className="p-0 border-r border-surface-variant/50">
+                            <input className="w-full bg-transparent px-2 py-2 text-xs text-on-surface focus:outline-none focus:bg-gold-accent/5 focus:ring-1 focus:ring-inset focus:ring-gold-accent" placeholder="Price" value={unit.price || ''} onChange={e => {
+                              const newUnits = [...(formData.details.units_inventory || [])];
+                              newUnits[idx] = { ...newUnits[idx], price: e.target.value };
+                              setDetail('units_inventory', newUnits);
+                            }} />
+                          </td>
+                          <td className="p-0 border-r border-surface-variant/50">
+                            <input className="w-full bg-transparent px-2 py-2 text-xs text-on-surface focus:outline-none focus:bg-gold-accent/5 focus:ring-1 focus:ring-inset focus:ring-gold-accent" placeholder="https://..." value={unit.photo || ''} onChange={e => {
+                              const newUnits = [...(formData.details.units_inventory || [])];
+                              newUnits[idx] = { ...newUnits[idx], photo: e.target.value };
+                              setDetail('units_inventory', newUnits);
+                            }} />
+                          </td>
+                          <td className="p-0 text-center">
+                            <button tabIndex="-1" className="text-text-muted hover:text-error px-2 py-1 text-xs" onClick={() => {
+                              const newUnits = [...(formData.details.units_inventory || [])];
+                              newUnits.splice(idx, 1);
+                              setDetail('units_inventory', newUnits);
+                            }} title="Remove row">×</button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {(formData.details.units_inventory?.length === 0 || !formData.details.units_inventory) && (
+                    <div className="p-4 text-center text-xs text-text-muted font-mono italic">
+                      No units listed. Add a row below.
+                    </div>
+                  )}
+                </div>
+                <div className="flex gap-2 mt-1">
+                  <button 
+                    className="flex-1 bg-surface border border-surface-variant text-text-secondary hover:text-gold-accent hover:border-gold-accent rounded py-2 text-xs font-working-title transition-all flex items-center justify-center gap-1"
+                    onClick={() => setDetail('units_inventory', [...(formData.details.units_inventory || []), { name: '', size: '', price: '', photo: '' }])}
+                  >
+                    + Add Row
+                  </button>
+                  <button 
+                    className="flex-1 bg-surface border border-surface-variant text-text-secondary hover:text-gold-accent hover:border-gold-accent rounded py-2 text-xs font-working-title transition-all flex items-center justify-center gap-1"
+                    onClick={() => {
+                      const units = formData.details.units_inventory || [];
+                      const lastUnit = units.length > 0 ? units[units.length - 1] : { name: '', size: '', price: '', photo: '' };
+                      setDetail('units_inventory', [...units, { ...lastUnit }]);
+                    }}
+                  >
+                    ⎘ Duplicate Last Row
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3">
               {(formData.details.units_inventory || []).map((unit, idx) => (
                 <div key={idx} className="bg-surface-alt border border-surface-variant rounded p-3 relative group">
                   <button onClick={() => {
@@ -372,7 +462,8 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
               >
                 + Add Space / Unit
               </button>
-            </div>
+              </div>
+            )}
           </section>
 
           {/* Section: Story & Validation */}

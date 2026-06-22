@@ -234,7 +234,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode }) {
 
   // ── Derived values ────────────────────────────
   const d           = propertyData;   // short alias
-  const photos      = d.photos && d.photos.length > 0 ? d.photos : (d.image ? [d.image] : [""]);
+  const photos      = d.photos && d.photos.length > 0 ? d.photos : (d.image ? [d.image] : ["https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1920&q=80"]);
   const brokerInitials = (d.broker_name || "SA").split(" ").map(p => p[0]).join("").slice(0, 2).toUpperCase();
 
   // ── Category Detection & Custom Labels ──────────
@@ -301,8 +301,9 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode }) {
   else if (isHospitality){ pill1Emoji = "🛎"; pill2Emoji = "👥"; }
   else if (isVenue)      { pill1Emoji = "👥"; pill2Emoji = "🎚"; }
 
-  // ── Build Dynamic Units List ───────────────────
-  const dynamicUnits = [];
+  // ── 3. Dynamic Unit Generation (Mock specs) ──────
+  let dynamicUnits = [];
+
   const isCommercial = 
     d.property_type?.toLowerCase().includes("commercial") || 
     d.property_type?.toLowerCase().includes("restaurant") || 
@@ -532,6 +533,29 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode }) {
 
 
 
+  // ── Owner inventory override ───────────────────
+  // Real owner-entered units (units_inventory) take precedence over the
+  // spec-synthesized fallback. Each unit carries its own photo + specs.
+  const realUnits = Array.isArray(d.units_inventory)
+    ? d.units_inventory.filter(u => u && (u.name || u.size || u.price || u.photo))
+    : [];
+  if (realUnits.length > 0) {
+    dynamicUnits = realUnits.map((u, i) => ({
+      name: u.name || `Unit ${String(i + 1).padStart(2, "0")}`,
+      specs: [
+        u.size  ? `${u.size} sqm`     : null,
+        u.price ? String(u.price)     : null,
+        u.floor ? `Floor ${u.floor}`  : null,
+      ].filter(Boolean),
+      photo: u.photo || "",
+      isReal: true,
+    }));
+  }
+
+  // The currently selected unit object (drives the in-context detail sub-panel).
+  const activeUnitObj =
+    dynamicUnits.find(u => u.name === selectedUnit) || dynamicUnits[0] || null;
+
   // ── Photo navigation ──────────────────────────
   const goPrev = () => setCurrentImageIndex(i => (i === 0 ? photos.length - 1 : i - 1));
   const goNext = () => setCurrentImageIndex(i => (i + 1) % photos.length);
@@ -710,7 +734,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode }) {
           >
             <p className="hero-label">ScoutIt &middot; {briefLabel}</p>
             <h1 className="hero-title">{d.title}</h1>
-            <p className="hero-location">{d.location}</p>
+            <p className="hero-location">{d.location || d.city || "Location on request"}</p>
             <p className="hero-hook">{d.hook}</p>
           </div>
 
@@ -764,7 +788,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode }) {
         <div className="mobile-hero-intel">
           <p className="mobile-hero-label">ScoutIt &middot; {briefLabel}</p>
           <h1 className="mobile-hero-title">{d.title}</h1>
-          <p className="mobile-hero-location">{d.location}</p>
+          <p className="mobile-hero-location">{d.location || d.city || "Location on request"}</p>
           <p className="mobile-hero-hook">{d.hook}</p>
         </div>
 
@@ -1457,6 +1481,36 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode }) {
                 })}
               </div>
 
+              {/* ── Selected-unit detail sub-panel (in-context, no new page) ── */}
+              {activeUnitObj && (
+                <div style={{marginTop:"28px", border:"0.5px solid #262626", borderRadius:"6px", overflow:"hidden", background:"#121212"}}>
+                  {activeUnitObj.photo ? (
+                    <div style={{width:"100%", aspectRatio:"16 / 9", backgroundImage:`url(${activeUnitObj.photo})`, backgroundSize:"cover", backgroundPosition:"center", transition:"background-image 240ms ease"}}/>
+                  ) : (
+                    <div style={{width:"100%", aspectRatio:"16 / 9", display:"flex", alignItems:"center", justifyContent:"center", background:"#0d0d0d", fontFamily:"'Courier New',monospace", fontSize:"10px", letterSpacing:"0.2em", color:"#6a6a6a", textTransform:"uppercase"}}>
+                      No unit photo provided
+                    </div>
+                  )}
+                  <div style={{padding:"20px 22px"}}>
+                    <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#ffb800", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"8px"}}>
+                      Selected Unit — Full Detail
+                    </div>
+                    <div style={{fontFamily:"Georgia,serif", fontSize:"22px", color:"#f0ede8", marginBottom:"14px"}}>
+                      {activeUnitObj.name}
+                    </div>
+                    <div style={{display:"flex", flexWrap:"wrap", gap:"8px"}}>
+                      {activeUnitObj.specs.length > 0 ? (
+                        activeUnitObj.specs.map(s => (
+                          <span key={s} style={{fontFamily:"'Courier New',monospace", fontSize:"11px", color:"#c8c8c8", letterSpacing:"0.08em", border:"0.5px solid #262626", borderRadius:"3px", padding:"6px 10px"}}>{s}</span>
+                        ))
+                      ) : (
+                        <span style={{fontFamily:"'Courier New',monospace", fontSize:"11px", color:"#6a6a6a"}}>No additional specs entered.</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <DeepIntelWidget
                 open={widgets.units}
                 onToggle={() => setWidgets(w => ({...w, units: !w.units}))}
@@ -1672,9 +1726,15 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode }) {
                         </p>
                       </div>
                     ) : (
-                      <Link href={`/property/${slug || "batasan-hills"}/brokers`} style={{display:"inline-block", fontFamily:"Georgia,serif", fontSize:"17px", color:"#ffb800", textDecoration:"none", letterSpacing:"0.01em"}}>
-                        For pricing, connect with an authorized broker →
-                      </Link>
+                      <div style={{padding:"22px 24px", background:"#161616", border:"0.5px solid #262626", borderRadius:"4px"}}>
+                        <div style={{fontFamily:"Georgia,serif", fontSize:"clamp(20px,2.6vw,26px)", fontWeight:400, color:"#f0ede8", lineHeight:1.2}}>Price on request</div>
+                        <p style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#a0a0a0", lineHeight:1.7, margin:"10px 0 16px", maxWidth:"480px"}}>
+                          No confirmed rate has been published for this space. Inquire with the owner, property manager, or broker for current pricing.
+                        </p>
+                        <Link href={`/property/${slug || "batasan-hills"}/brokers`} style={{display:"inline-block", fontFamily:"Georgia,serif", fontSize:"16px", color:"#ffb800", textDecoration:"none", letterSpacing:"0.01em"}}>
+                          Inquire with an authorized broker →
+                        </Link>
+                      </div>
                     )}
                   </>
                 );

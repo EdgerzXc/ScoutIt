@@ -29,6 +29,14 @@ export async function POST(request) {
       location: data.location || currentSubmission.location
     };
 
+    // Merge details JSONB safely
+    if (data.details) {
+      supabasePayload.details = {
+        ...(currentSubmission.details || {}),
+        ...data.details
+      };
+    }
+
     // 2. Update Supabase
     const { error: updateError } = await supabase
       .from('properties')

@@ -345,7 +345,6 @@ export async function insertProperty(apiKey, baseId, data) {
       {
         fields: {
           Title: data.title,
-          Slug: slug,
           Location: data.location || "",
           SpaceTypography: data.type || "Unknown",
           Units_JSON: unitsJson,

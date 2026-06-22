@@ -104,28 +104,7 @@ export default function OnboardingPage() {
         Continue with Google
       </button>
 
-      {/* DEV/DEMO — preview the SM Offices owner experience (remove before launch) */}
-      <button
-        type="button"
-        className="w-full mt-4 border border-dashed border-gold-accent/40 text-gold-accent font-working-title text-sm py-3 px-6 rounded hover:border-gold-accent hover:bg-gold-accent/5 transition-colors"
-        onClick={() => {
-          localStorage.setItem("scoutit_user", JSON.stringify({
-            name: "SM Offices",
-            id: "usr-sm-offices",
-            email: "leasing@smoffices.ph",
-            tags: ["owner"],
-            primaryMode: "owner",
-            providerType: "",
-            subscription_tier: "cluster",
-            connects_balance: 18,
-            created_at: new Date().toISOString(),
-            profile_completeness: 85,
-          }));
-          router.push("/dashboard");
-        }}
-      >
-        ◈ View demo — SM Offices (Owner)
-      </button>
+
     </div>
   );
 
