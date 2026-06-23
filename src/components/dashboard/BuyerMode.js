@@ -4,6 +4,8 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useDashboard } from "../../context/DashboardContext";
 import { Bookmark, Search } from "lucide-react";
+import PostMoveEcosystem from "./PostMoveEcosystem";
+import VaultOfHonor from "./VaultOfHonor";
 
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
@@ -190,8 +192,11 @@ export default function BuyerMode() {
   );
 
   return (
-    <div className="w-full flex flex-col gap-8 pb-12 animate-[fadeIn_0.5s_ease-out]">
+    <div className="w-full max-w-7xl mx-auto px-4 md:px-8 flex flex-col gap-8 pb-24 animate-[fadeIn_0.5s_ease-out]">
       
+      {/* Vault of Honor */}
+      <VaultOfHonor />
+
       {/* Search Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-surface-variant pb-6">
         <div className="flex flex-col md:flex-row w-full md:w-auto gap-3 flex-1">
@@ -260,7 +265,7 @@ export default function BuyerMode() {
           {/* Intelligence Archive (Saved Items) */}
           <div className="flex flex-col gap-4">
             <h2 className="font-headline-editorial text-2xl text-on-surface flex items-center justify-between border-b border-surface-variant pb-2">
-              Intelligence Archive
+              Saved Properties
               <button className="text-[10px] font-label-caps tracking-widest uppercase text-gold-accent hover:underline">Open Full Archive</button>
             </h2>
             <p className="text-xs text-text-secondary mb-2">Tracked assets and saved market briefs.</p>
@@ -302,22 +307,32 @@ export default function BuyerMode() {
               {newFeedListings.map(item => (
                 <VerticalListingCard key={item.id} item={item} />
               ))}
-              {newFeedListings.length === 0 && (
-                <div className="text-sm text-text-secondary py-6">Nothing matches "{searchQuery}" yet — try a broader search.</div>
-              )}
-
-              {/* See More Card */}
-              <div className="block shrink-0 w-[280px] snap-start h-full">
-                <Link href="/property" className="h-full min-h-[250px] rounded-lg border border-surface-variant bg-surface-alt text-on-surface hover:border-gold-accent hover:bg-gold-accent/5 transition-all flex flex-col items-center justify-center gap-4 group">
-                  <div className="w-16 h-16 rounded-full border border-gold-accent/30 bg-[#121212] flex items-center justify-center text-gold-accent group-hover:scale-110 transition-transform">
+              {newFeedListings.length === 0 ? (
+                <div className="w-full flex flex-col items-center justify-center p-12 bg-[#121110]/50 border border-surface-variant/50 border-dashed rounded-xl">
+                  <div className="w-16 h-16 rounded-full border border-gold-accent/30 bg-[#121212] flex items-center justify-center text-gold-accent mb-4">
                     <Search strokeWidth={1.5} size="1.5em" />
                   </div>
-                  <div className="text-center">
-                    <span className="font-working-title text-sm block mb-1">View Full Ledger</span>
-                    <span className="text-xs text-text-secondary">{listings.length} active spaces</span>
-                  </div>
-                </Link>
-              </div>
+                  <h3 className="font-headline-editorial text-xl text-on-surface mb-2">The Ledger is Quiet</h3>
+                  <p className="text-sm text-text-secondary text-center mb-6 max-w-md">
+                    Nothing matches "{searchQuery}" right now. Broaden your search parameters or explore the full ledger to see what's active in the market.
+                  </p>
+                  <Link href="/property" className="font-label-caps tracking-widest uppercase text-[10px] text-gold-accent border border-gold-accent/30 bg-gold-accent/10 px-6 py-3 rounded hover:bg-gold-accent/20 transition-colors">
+                    Explore Full Ledger ({listings.length} active spaces)
+                  </Link>
+                </div>
+              ) : (
+                <div className="block shrink-0 w-[280px] snap-start h-full">
+                  <Link href="/property" className="h-full min-h-[250px] rounded-lg border border-surface-variant bg-surface-alt text-on-surface hover:border-gold-accent hover:bg-gold-accent/5 transition-all flex flex-col items-center justify-center gap-4 group">
+                    <div className="w-16 h-16 rounded-full border border-gold-accent/30 bg-[#121212] flex items-center justify-center text-gold-accent group-hover:scale-110 transition-transform">
+                      <Search strokeWidth={1.5} size="1.5em" />
+                    </div>
+                    <div className="text-center">
+                      <span className="font-working-title text-sm block mb-1">View Full Ledger</span>
+                      <span className="text-xs text-text-secondary">{listings.length} active spaces</span>
+                    </div>
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
 
@@ -373,6 +388,9 @@ export default function BuyerMode() {
 
             </div>
           </div>
+
+          {/* Post-Move Ecosystem */}
+          <PostMoveEcosystem />
         </>
       )}
 

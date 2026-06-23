@@ -2,14 +2,18 @@
 
 import { useState, useEffect } from "react";
 import LiveEditorWorkspace from "./LiveEditorWorkspace";
+import BulkImporterMode from "./BulkImporterMode";
 import { useDashboard } from "../../context/DashboardContext";
 import Link from "next/link";
+import { useRouter } from 'next/navigation';
+import Papa from 'papaparse';
 
 export default function OwnerMode() {
-  const { listings, pitches, updatePitchStatus, addListing, addConciergeListing, updateListing, closeListing, currentUser, inviteBroker, connects } = useDashboard();
+  const { listings, pitches, updatePitchStatus, addListing, addConciergeListing, bulkAddListings, addToast, updateListing, closeListing, currentUser, inviteBroker, connects } = useDashboard();
   const firstName = currentUser?.name ? currentUser.name.split(" ")[0] : "";
   const [showWizard, setShowWizard] = useState(false); // false | 'select_mode' | 'live_editor' | 'concierge' | 'edit'
   const [selectedFile, setSelectedFile] = useState(null);
+  const [isAssimilating, setIsAssimilating] = useState(false);
   
   // Check if current user has any listings (match the logged-in owner's id)
   const myListings = listings.filter(l => currentUser && l.ownerId === currentUser.id);
@@ -21,7 +25,16 @@ export default function OwnerMode() {
 
   // If they only have 1 listing, jump straight to its dossier
   useEffect(() => {
-    if (hasListing && myListings.length === 1 && !viewingDossierId) {
+    const searchParams = new URLSearchParams(window.location.search);
+    const editId = searchParams.get('edit');
+
+    if (editId && myListings.find(l => l.id === editId)) {
+      setViewingDossierId(editId);
+      setShowWizard('edit');
+      
+      // Clean up URL so refresh doesn't keep triggering edit
+      window.history.replaceState({}, '', '/dashboard');
+    } else if (hasListing && myListings.length === 1 && !viewingDossierId) {
       setViewingDossierId(myListings[0].id);
     }
   }, [hasListing, myListings, viewingDossierId]);
@@ -74,6 +87,10 @@ export default function OwnerMode() {
     />;
   }
 
+  if (showWizard === 'bulk') {
+    return <BulkImporterMode onClose={() => setShowWizard(false)} />;
+  }
+
   if (showWizard === 'select_mode') {
     return (
       <div className="max-w-[800px] mx-auto py-lg animate-[fadeIn_0.3s_ease]">
@@ -83,23 +100,161 @@ export default function OwnerMode() {
         
         <div className="grid md:grid-cols-2 gap-6">
           <div 
-            className="bg-[#121110] border border-surface-variant rounded-lg p-8 hover:border-gold-accent transition-colors cursor-pointer group relative overflow-hidden"
-            onClick={() => setShowWizard('concierge')}
+            className="bg-surface-alt/40 backdrop-blur-md border border-surface-variant/50 rounded-xl p-8 hover:border-gold-accent hover:bg-surface-alt/80 transition-all duration-300 cursor-pointer group relative overflow-hidden shadow-lg"
+            onClick={() => setShowWizard('bulk')}
           >
-             <div className="absolute top-0 left-0 w-1 h-full bg-surface-variant group-hover:bg-gold-accent transition-colors"></div>
-             <h3 className="font-working-title text-2xl text-on-surface mb-2">Concierge AI</h3>
-             <p className="text-sm text-text-secondary mb-4 leading-relaxed">Upload your existing pitch deck or PDF flyer. Our Council AI will extract the data and structure the dossier for your review.</p>
-             <span className="text-gold-accent font-label-caps text-[10px] tracking-widest border border-gold-accent/30 bg-gold-accent/10 px-2 py-1 rounded">RECOMMENDED FOR PORTFOLIOS</span>
+             <div className="absolute top-0 left-0 w-1.5 h-full bg-surface-variant group-hover:bg-gold-accent transition-colors"></div>
+             <h3 className="font-working-title text-2xl text-on-surface mb-3 group-hover:text-gold-accent transition-colors">Global Portfolio Importer</h3>
+             <p className="text-sm text-text-secondary mb-6 leading-relaxed">Upload a CSV to generate multiple separate Property Drafts at once. Perfect for migrating large asset portfolios.</p>
+             <span className="text-gold-accent font-label-caps text-[10px] tracking-widest border border-gold-accent/30 bg-gold-accent/10 px-3 py-1.5 rounded-full">RECOMMENDED FOR PROPERTY UPLOADS</span>
           </div>
 
           <div 
-            className="bg-[#121110] border border-surface-variant rounded-lg p-8 hover:border-text-primary transition-colors cursor-pointer group relative overflow-hidden"
+            className="bg-gradient-to-br from-[#1A1814] to-[#0A0908] backdrop-blur-xl border border-gold-accent/40 rounded-xl p-8 hover:border-gold-accent hover:shadow-[0_0_30px_rgba(255,184,0,0.15)] transition-all duration-500 cursor-pointer group relative overflow-hidden"
+            onClick={() => setShowWizard('vip_vault')}
+          >
+             <div className="absolute top-0 left-0 w-1.5 h-full bg-gold-accent/50 group-hover:bg-gold-accent transition-colors shadow-[0_0_15px_rgba(255,184,0,0.5)]"></div>
+             <div className="absolute -top-24 -right-24 w-48 h-48 bg-gold-accent/10 rounded-full blur-3xl group-hover:bg-gold-accent/20 transition-all duration-700"></div>
+             <h3 className="font-working-title text-2xl text-gold-accent mb-3 drop-shadow-md">The VIP Spatial Vault</h3>
+             <p className="text-sm text-text-secondary mb-6 leading-relaxed group-hover:text-on-surface transition-colors">Don't have time? Drop your raw property videos here. Our QuestIT Pros will convert them into immersive 3D Maps and 360° AR Tours.</p>
+             <span className="text-[#0A0908] font-label-caps font-bold text-[10px] tracking-widest bg-gold-accent px-3 py-1.5 rounded-full shadow-[0_0_10px_rgba(255,184,0,0.3)]">QUEST-IT ASSISTED</span>
+          </div>
+
+          <div 
+            className="bg-surface-alt/40 backdrop-blur-md border border-surface-variant/50 rounded-xl p-8 hover:border-text-primary hover:bg-surface-alt/80 transition-all duration-300 cursor-pointer group relative overflow-hidden shadow-lg"
+            onClick={() => setShowWizard('concierge')}
+          >
+             <div className="absolute top-0 left-0 w-1.5 h-full bg-surface-variant group-hover:bg-surface-alt transition-colors"></div>
+             <h3 className="font-working-title text-2xl text-on-surface mb-3 group-hover:text-white transition-colors">Concierge AI</h3>
+             <p className="text-sm text-text-secondary mb-6 leading-relaxed">Upload your existing pitch deck or PDF flyer. Our Council AI will extract the data and structure the dossier for your review.</p>
+          </div>
+
+          <div 
+            className="bg-surface-alt/40 backdrop-blur-md border border-surface-variant/50 rounded-xl p-8 hover:border-text-primary hover:bg-surface-alt/80 transition-all duration-300 cursor-pointer group relative overflow-hidden shadow-lg"
             onClick={() => setShowWizard('live_editor')}
           >
-             <div className="absolute top-0 left-0 w-1 h-full bg-surface-variant group-hover:bg-surface-alt transition-colors"></div>
-             <h3 className="font-working-title text-2xl text-on-surface mb-2">Live Editor Workspace</h3>
-             <p className="text-sm text-text-secondary mb-4 leading-relaxed">Build your listing manually using our step-by-step editor. Best if you don't have a deck and are starting from scratch.</p>
+             <div className="absolute top-0 left-0 w-1.5 h-full bg-surface-variant group-hover:bg-surface-alt transition-colors"></div>
+             <h3 className="font-working-title text-2xl text-on-surface mb-3 group-hover:text-white transition-colors">Live Editor Workspace</h3>
+             <p className="text-sm text-text-secondary mb-6 leading-relaxed">Build your listing manually using our step-by-step editor. Best if you don't have a deck and are starting from scratch.</p>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (showWizard === 'bulk') {
+    return (
+      <div className="max-w-[600px] mx-auto py-lg animate-[fadeIn_0.3s_ease]">
+        <button onClick={() => setShowWizard('select_mode')} className="text-text-secondary hover:text-gold-accent mb-8 font-working-title">← Back</button>
+        <h1 className="font-display-md text-4xl text-text-primary mb-2">Global Portfolio Importer</h1>
+        <p className="text-text-secondary mb-8">Drop your CSV or Excel file here. The Council AI will parse the structure and prepare your property drafts automatically.</p>
+        
+        <div className="bg-[#121110] border-2 border-dashed border-surface-variant rounded-lg p-12 text-center flex flex-col items-center relative transition-colors hover:border-gold-accent/50">
+          <span className="text-4xl mb-4">📊</span>
+          {selectedFile ? (
+            <div className="mb-6 w-full">
+              <div className="bg-surface-alt p-4 rounded border border-surface-variant flex items-center justify-between">
+                <span className="text-on-surface font-working-title text-sm truncate">{selectedFile.name}</span>
+                <button onClick={() => setSelectedFile(null)} className="text-xs font-bold text-error hover:underline">Remove</button>
+              </div>
+            </div>
+          ) : (
+            <div className="mb-6 w-full">
+              <p className="text-text-secondary mb-4">Drag and drop your spreadsheet (.csv)</p>
+              <input 
+                type="file" 
+                accept=".csv" 
+                className="hidden" 
+                id="csv-upload" 
+                onChange={(e) => setSelectedFile(e.target.files[0])} 
+              />
+              <label htmlFor="csv-upload" className="cursor-pointer border border-gold-accent text-gold-accent font-working-title px-6 py-2 rounded hover:bg-gold-accent/10 transition-colors inline-block">
+                Select CSV
+              </label>
+            </div>
+          )}
+
+          <button 
+            className="w-full bg-gold-accent text-background font-working-title font-bold px-6 py-3 rounded hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity mt-4 flex items-center justify-center gap-2"
+            disabled={!selectedFile || isAssimilating}
+            onClick={async () => {
+              if (selectedFile) {
+                setIsAssimilating(true);
+                addToast("Reading CSV headers...", "📊");
+                
+                Papa.parse(selectedFile, {
+                  header: true,
+                  skipEmptyLines: true,
+                  complete: async (results) => {
+                    const headers = results.meta.fields;
+                    const sampleData = results.data.slice(0, 3);
+                    
+                    try {
+                      addToast("Generating blueprint mapping via AI...", "🤖");
+                      const bpRes = await fetch('/api/ai/blueprint', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ headers, sampleData })
+                      });
+                      
+                      if (!bpRes.ok) throw new Error("AI Mapping failed");
+                      
+                      const blueprint = await bpRes.json();
+                      console.log("Blueprint generated:", blueprint);
+                      
+                      addToast(`Mapped ${Object.keys(blueprint).length} columns. Applying locally...`, "⚙️");
+                      
+                      // Map local rows using blueprint
+                      const cleanedProperties = results.data.map(row => {
+                        const prop = { details: {} };
+                        for (const rawKey in row) {
+                          const targetKey = blueprint[rawKey];
+                          if (targetKey && targetKey !== 'details') {
+                            prop[targetKey] = row[rawKey];
+                          } else {
+                            prop.details[rawKey] = row[rawKey];
+                          }
+                        }
+                        
+                        // Default properties needed for Supabase schema
+                        return {
+                          title: prop.title || 'Untitled',
+                          price: prop.price ? parseFloat(prop.price.toString().replace(/[^0-9.]/g, '')) : null,
+                          location: prop.location || 'Unknown Location',
+                          type: prop.type || 'Other',
+                          description: prop.description || null,
+                          media_link: prop.media_link || null,
+                          space_category: prop.space_category || prop.type || 'Other',
+                          owner_id: currentUser?.id || null,
+                          pipeline_status: 'pending',
+                          completeness_score: 50,
+                          details: prop.details
+                        };
+                      });
+                      
+                      const success = await bulkAddListings(cleanedProperties);
+                      
+                    } catch (err) {
+                      console.error("Blueprint error:", err);
+                      addToast("Failed to assimilate properties.", "❌");
+                    }
+                    
+                    setIsAssimilating(false);
+                    setSelectedFile(null);
+                    setShowWizard(false);
+                  }
+                });
+              }
+            }}
+          >
+            {isAssimilating ? (
+              <>
+                <span className="animate-spin">⚙️</span> Assimilating...
+              </>
+            ) : (
+              "Assimilate via Council AI"
+            )}
+          </button>
         </div>
       </div>
     );
@@ -143,6 +298,66 @@ export default function OwnerMode() {
             }}
           >
             Start AI Drafting
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (showWizard === 'vip_vault') {
+    return (
+      <div className="max-w-[700px] mx-auto py-lg animate-[fadeIn_0.5s_ease]">
+        <button onClick={() => setShowWizard('select_mode')} className="text-text-secondary hover:text-gold-accent mb-8 font-working-title transition-colors">← Back</button>
+        <h1 className="font-display-md text-5xl text-gold-accent mb-4 drop-shadow-md">The VIP Spatial Vault</h1>
+        
+        <div className="bg-gradient-to-r from-gold-accent/20 to-transparent border-l-4 border-gold-accent rounded-r-lg p-6 mb-10 shadow-[0_4px_20px_rgba(255,184,0,0.05)] backdrop-blur-sm">
+          <p className="text-base text-on-surface leading-relaxed">
+            <strong className="text-gold-accent font-working-title text-lg tracking-wide block mb-2">JUST DROP THE RAW VIDEOS. SCOUTIT HANDLES THE REST.</strong>
+            You don't need to know how to build complex 3D maps or AR tours. Simply walk through your property with your phone camera and drop the raw `.mp4` or `.mov` files below. Our QuestIT Pros will stitch them into immersive Spatial WebGL models, instantly maximizing your property's visibility to verified premium buyers.
+          </p>
+        </div>
+        
+        <div className="bg-gradient-to-br from-[#1A1814] to-[#0A0908] backdrop-blur-xl border border-gold-accent/30 rounded-2xl p-16 text-center flex flex-col items-center relative overflow-hidden transition-all duration-500 hover:border-gold-accent shadow-[0_0_40px_rgba(255,184,0,0.1)] group">
+          <div className="absolute inset-0 bg-gold-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
+          
+          <div className="w-20 h-20 bg-gold-accent/10 rounded-full flex items-center justify-center mb-6 shadow-[0_0_20px_rgba(255,184,0,0.2)] group-hover:scale-110 transition-transform duration-500">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#FFB800" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+          </div>
+
+          {selectedFile ? (
+            <div className="mb-8 w-full z-10">
+              <div className="bg-surface-alt/80 p-5 rounded-lg border border-gold-accent/40 flex items-center justify-between shadow-inner backdrop-blur-md">
+                <span className="text-gold-accent font-working-title text-sm truncate pr-4">{selectedFile.name}</span>
+                <button onClick={() => setSelectedFile(null)} className="text-xs font-bold text-error hover:text-red-400 hover:underline transition-colors uppercase tracking-widest">Remove</button>
+              </div>
+            </div>
+          ) : (
+            <div className="mb-10 w-full z-10">
+              <p className="text-text-secondary font-working-title text-sm uppercase tracking-widest mb-6">Drag and drop raw property videos</p>
+              <input type="file" accept="video/mp4,video/quicktime" className="hidden" id="video-upload" onChange={(e) => setSelectedFile(e.target.files[0])} />
+              <label htmlFor="video-upload" className="cursor-pointer bg-transparent border-2 border-gold-accent text-gold-accent font-working-title font-bold px-8 py-3 rounded hover:bg-gold-accent hover:text-[#0A0908] transition-all duration-300 inline-block uppercase tracking-wider shadow-[0_0_15px_rgba(255,184,0,0.15)] hover:shadow-[0_0_25px_rgba(255,184,0,0.4)]">
+                Select Video Files
+              </label>
+              <p className="text-[10px] text-text-secondary mt-4 tracking-widest uppercase">Supported: .mp4, .mov</p>
+            </div>
+          )}
+
+          <button 
+            className="w-full bg-gold-accent text-[#0A0908] font-working-title font-bold px-6 py-4 rounded hover:bg-[#FFC929] disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-300 mt-2 text-lg tracking-wide shadow-[0_0_20px_rgba(255,184,0,0.2)] hover:shadow-[0_0_30px_rgba(255,184,0,0.5)] z-10"
+            disabled={!selectedFile}
+            onClick={async () => {
+              if (selectedFile) {
+                await addConciergeListing(`[QuestIT Vault] ${selectedFile.name}`);
+                setSelectedFile(null);
+                setShowWizard(false);
+              }
+            }}
+          >
+            Submit to QuestIT Protocol
           </button>
         </div>
       </div>

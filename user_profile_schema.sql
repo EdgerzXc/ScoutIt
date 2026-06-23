@@ -31,6 +31,7 @@ create table if not exists public.user_profiles (
   connects_balance integer default 0,
   active_roles text[],                           -- buyer, owner, broker, provider, exploring
   is_profile_public boolean default false,
+  badges jsonb default '[]'::jsonb,              -- badge objects: [{ id, minted_at }]
   created_at timestamp with time zone default now(),
   updated_at timestamp with time zone default now()
 );

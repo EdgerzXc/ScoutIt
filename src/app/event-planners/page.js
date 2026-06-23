@@ -3,6 +3,7 @@
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { useState } from "react";
+import Link from "next/link";
 import "../property/property.css";
 import { getEventPlanners } from "@/data/mockEventPlanners";
 
@@ -139,49 +140,16 @@ export default function EventPlannersPage() {
               />
             </div>
 
-            <div className="brokers-grid">
-              {filtered.map((ep) => {
-                const tierClass =
-                  ep.tier === 1
-                    ? "tier-1-card diamond-card"
-                    : ep.tier === 2
-                    ? "tier-2-card platinum-card"
-                    : "tier-3-card gold-card";
-                const tierLabel =
-                  ep.tier === 1
-                    ? "DIAMOND PARTNER"
-                    : ep.tier === 2
-                    ? "PLATINUM PARTNER"
-                    : "GOLD PARTNER";
-                return (
-                  <div key={ep.id}
-                      className={`broker-card ${tierClass}`}
-                      style={{ position: "relative" }}
-                    >
-                      <div className="general-tier-badge-label">{tierLabel}</div>
-                      <div className="broker-image-container">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={ep.image} alt={ep.name} className="broker-image" />
-                        <div className="image-overlay" />
-                      </div>
-                      <div className="broker-content">
-                        <span className="broker-location">{ep.location}</span>
-                        <h2 className="broker-name">{ep.name}</h2>
-                        <p className="broker-title">{ep.title}</p>
-                        <p className="broker-specialty">Event Type: <span>{ep.specialty}</span></p>
-                        <p className="broker-specialty">Aesthetic: <span style={{ color: "var(--text-secondary)", fontSize: "12px" }}>{ep.style}</span></p>
-                        <p className="broker-specialty" style={{ marginBottom: "8px" }}>Venues: <span style={{ color: "var(--text-muted)", fontSize: "12px" }}>{ep.venues}</span></p>
-                        <p className="broker-bio">{ep.bio}</p>
-                        <div className="broker-footer">
-                          <div className="broker-stats">
-                            <span className="stat-value" style={{ fontSize: "12px" }}>{ep.events}</span>
-                          </div>
-                          <span className="btn-contact">Focus →</span>
-                        </div>
-                      </div>
-                    </div>
-                );
-              })}
+            <div className="waitlist-container" style={{ padding: "60px 40px", background: "var(--surface)", border: "1px solid var(--border-solid)", borderRadius: "var(--radius-md)", textAlign: "center", marginTop: "20px" }}>
+              <div style={{ fontSize: "48px", marginBottom: "24px" }}>📅</div>
+              <h2 style={{ fontFamily: "var(--font-display)", fontSize: "32px", color: "#fff", marginBottom: "16px" }}>The Roster is Being Curated</h2>
+              <p style={{ color: "var(--text-secondary)", marginBottom: "40px", maxWidth: "500px", margin: "0 auto 40px", lineHeight: "1.6" }}>
+                We are currently vetting the top event planners, interior stylists, and space designers in the ecosystem. Join the waitlist to secure early access when the layer goes live.
+              </p>
+              <div style={{ display: "flex", gap: "12px", justifyContent: "center", maxWidth: "450px", margin: "0 auto" }}>
+                <input type="email" placeholder="ENTER YOUR EMAIL..." className="global-search-input" style={{ flexGrow: 1, marginBottom: 0, padding: "16px", borderRadius: "4px" }} />
+                <Link href="/onboarding" style={{ display: "inline-flex", alignItems: "center", background: "var(--accent)", color: "#0e0e0e", fontWeight: "bold", padding: "0 32px", borderRadius: "4px", letterSpacing: "0.05em", textDecoration: "none" }}>JOIN</Link>
+              </div>
             </div>
           </section>
         </div>

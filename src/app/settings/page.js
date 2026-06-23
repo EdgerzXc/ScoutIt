@@ -13,10 +13,14 @@ const INTENT_TAGS = [
   { id: 'provider', label: 'Service Provider', icon: <Camera strokeWidth={1.5} size="1em" /> }
 ];
 
+import { ShieldCheck } from "lucide-react";
+import { BADGE_DEFINITIONS } from "@/lib/BadgeEngine";
+
 export default function SettingsPage() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [tags, setTags] = useState([]);
+  const [badges, setBadges] = useState([]);
   const [publicProfile, setPublicProfile] = useState({
     headline: "",
     bio: "",
@@ -32,6 +36,11 @@ export default function SettingsPage() {
       setName(user.name || "");
       setTags(user.tags || []);
       if (user.publicProfile) setPublicProfile(p => ({ ...p, ...user.publicProfile }));
+      // Temporary mock badges for the user, normally fetched from Supabase
+      if (!user.badges) {
+        user.badges = [{ id: "FOUNDING_SEEKER" }];
+      }
+      setBadges(user.badges);
     }
   }, []);
 
@@ -191,6 +200,37 @@ export default function SettingsPage() {
               {tags.includes('provider') && publicProfile.service && <p className="text-xs text-text-secondary mt-1">{publicProfile.service}</p>}
             </div>
           </div>
+        </div>
+
+        {/* ── Honors & Badges ── */}
+        <div className={styles.formGroup} style={{ marginTop: 24, padding: 24, border: '1px solid rgba(255,184,0,0.2)', borderRadius: 12, background: 'rgba(255,184,0,0.02)' }}>
+          <div className="flex items-center gap-3 mb-2">
+            <ShieldCheck className="text-gold-accent" size={20} />
+            <h3 className="font-display text-lg text-on-surface">Honors & Badges</h3>
+          </div>
+          <p style={{color: 'var(--text-secondary)', fontSize: 13, marginBottom: 16}}>
+            Your exclusive ScoutIt honors. Badges grant lifetime privileges and discounts.
+          </p>
+          
+          <div className="flex gap-3 flex-wrap mb-6">
+            {badges.map(b => {
+              const def = BADGE_DEFINITIONS[b.id];
+              if (!def) return null;
+              return (
+                <div key={b.id} className="flex items-center gap-2 px-3 py-2 rounded border" style={{ borderColor: `${def.color}30`, background: `${def.color}10` }}>
+                  <ShieldCheck size={14} color={def.color} />
+                  <span className="font-mono text-[10px] tracking-widest uppercase" style={{ color: def.color }}>{def.name}</span>
+                </div>
+              );
+            })}
+            {badges.length === 0 && (
+              <span className="text-text-muted text-sm italic">No honors yet.</span>
+            )}
+          </div>
+
+          <Link href="/badges" className="inline-block border border-gold-accent text-gold-accent font-working-title text-sm px-4 py-2 rounded hover:bg-gold-accent hover:text-background transition-colors">
+            View Milestones & Achievements →
+          </Link>
         </div>
 
         <button

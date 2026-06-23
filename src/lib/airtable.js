@@ -320,13 +320,130 @@ export async function fetchHomepageConfig(apiKey, baseId) {
     heroSubtext:         f.Hero_Subtext             || "",
     heroBackgroundVideo: f.Hero_Background_Video    || "",
     featuredProperties:  f.Featured_Properties      || [], // linked record IDs
-    featuredIntel:       f.Featured_Intel           || [], // linked record IDs
+featuredIntel:       f.Featured_Intel           || [], // linked record IDs
     featuredBrokers:     f.Featured_Brokers         || [], // linked record IDs
   };
 }
 
-// ═══════════════════════════════════════════════════════════════
-// INSERT HELPERS
+function reverseMapCategoryFields(details) {
+  const map = {};
+  if (!details) return map;
+
+  // Shared
+  if (details.beds !== undefined) map.Beds = Number(details.beds) || null;
+  if (details.baths !== undefined) map.Baths = Number(details.baths) || null;
+  if (details.floor_sqm !== undefined) map.FloorSqm = Number(details.floor_sqm) || null;
+  if (details.lot_sqm !== undefined) map.LotSqm = Number(details.lot_sqm) || null;
+  if (details.parking !== undefined) map.Parking = Number(details.parking) || null;
+  if (details.furnishing !== undefined) map.Furnishing = details.furnishing;
+
+  // Commercial
+  if (details.rentPerSqm !== undefined) map.CM_Rent_Per_Sqm = details.rentPerSqm;
+  if (details.totalGLA !== undefined) map.CM_Total_GLA = Number(details.totalGLA) || null;
+  if (details.floorPlate !== undefined) map.CM_Floor_Plate_Sqm = details.floorPlate;
+  if (details.buildingGrade !== undefined) map.CM_Building_Grade = details.buildingGrade;
+  if (details.handOver !== undefined) map.CM_Hand_Over_Condition = details.handOver;
+  if (details.availability !== undefined) map.CM_Availability_Status = details.availability;
+  if (details.minLeaseTerm !== undefined) map.CM_Min_Lease_Term = details.minLeaseTerm;
+  if (details.certification !== undefined) map.CM_Certification = details.certification;
+  if (details.peza !== undefined) map.CM_PEZA = !!details.peza;
+  if (details.camc !== undefined) map.CM_CAMC_Per_Sqm = details.camc;
+  if (details.acCharges !== undefined) map.CM_AC_Charges = details.acCharges;
+  if (details.acSystem !== undefined) map.CM_AC_System = details.acSystem;
+  if (details.reservedParking !== undefined) map.CM_Reserved_Parking = details.reservedParking;
+  if (details.escalation !== undefined) map.CM_Escalation_Rate = details.escalation;
+  if (details.fitOut !== undefined) map.CM_Fit_Out_Allowance = details.fitOut;
+  if (details.rentFree !== undefined) map.CM_Rent_Free_Period = details.rentFree;
+  if (details.parkingRatio !== undefined) map.CM_Parking_Ratio = details.parkingRatio;
+  if (details.backupPower !== undefined) map.CM_Backup_Power = details.backupPower;
+  if (details.floorLoading !== undefined) map.CM_Floor_Loading = details.floorLoading;
+  if (details.internet !== undefined) map.CM_Internet_Providers = details.internet;
+  if (details.availableUnits !== undefined) map.CM_Available_Units_Summary = details.availableUnits;
+  if (details.towersZones !== undefined) map.CM_Towers_Zones = details.towersZones;
+  if (details.capRate !== undefined) map.CM_Cap_Rate = Number(details.capRate) || null;
+  if (details.noi !== undefined) map.CM_NOI = Number(details.noi) || null;
+
+  // Residential
+  if (details.price !== undefined) map.RS_Price = Number(details.price) || null;
+  if (details.floorLevel !== undefined) map.RS_Floor_Level = details.floorLevel;
+  if (details.view !== undefined) map.RS_View = details.view;
+  if (details.assocDues !== undefined) map.RS_Assoc_Dues = Number(details.assocDues) || null;
+  if (details.turnoverDate !== undefined) map.RS_Turnover_Date = details.turnoverDate;
+  if (details.studio !== undefined) map.RS_Studio_Flag = !!details.studio;
+  if (details.petPolicy !== undefined) map.RS_Pet_Policy = details.petPolicy;
+  if (details.pricePerSqm !== undefined) map.RS_Price_Per_Sqm = Number(details.pricePerSqm) || null;
+  if (details.paymentTerms !== undefined) map.RS_Payment_Terms = details.paymentTerms;
+
+  // STR
+  if (details.nightlyRate !== undefined) map.STR_Nightly_Rate = Number(details.nightlyRate) || null;
+  if (details.maxGuests !== undefined) map.STR_Max_Guests = Number(details.maxGuests) || null;
+  if (details.rating !== undefined) map.STR_Avg_Rating = Number(details.rating) || null;
+  if (details.bedrooms !== undefined) map.Beds = Number(details.bedrooms) || null;
+  if (details.bathrooms !== undefined) map.Baths = Number(details.bathrooms) || null;
+  if (details.minStay !== undefined) map.STR_Min_Stay_Nights = Number(details.minStay) || null;
+  if (details.checkInOut !== undefined) map.STR_Check_In_Out = details.checkInOut;
+  if (details.weekendRate !== undefined) map.STR_Weekend_Rate = Number(details.weekendRate) || null;
+  if (details.bedConfig !== undefined) map.STR_Bed_Config = details.bedConfig;
+  if (details.selfCheckIn !== undefined) map.STR_Self_Check_In = !!details.selfCheckIn;
+  if (details.houseRules !== undefined) map.STR_House_Rules = details.houseRules;
+  if (details.cancellation !== undefined) map.STR_Cancellation_Policy = details.cancellation;
+  if (details.permit !== undefined) map.STR_Permit_Accreditation = details.permit;
+  if (details.wifiSpeed !== undefined) map.STR_WiFi_Speed = details.wifiSpeed;
+
+  // Restaurant
+  if (details.floorArea !== undefined) map.FloorSqm = Number(details.floorArea) || null;
+  if (details.seating !== undefined) map.RST_Seating_Capacity = Number(details.seating) || null;
+  if (details.kitchen !== undefined) map.RST_Kitchen_Condition = details.kitchen;
+  if (details.footTraffic !== undefined) map.RST_Foot_Traffic = details.footTraffic;
+  if (details.frontage !== undefined) map.RST_Frontage = details.frontage;
+  if (details.indoorOutdoor !== undefined) map.Indoor_Outdoor = details.indoorOutdoor;
+  if (details.previousUse !== undefined) map.RST_Previous_Use = details.previousUse;
+  if (details.hoodExhaust !== undefined) map.RST_Hood_Exhaust = !!details.hoodExhaust;
+  if (details.greaseTrap !== undefined) map.RST_Grease_Trap = !!details.greaseTrap;
+  if (details.gasLine !== undefined) map.RST_Gas_Line = !!details.gasLine;
+  if (details.power !== undefined) map.RST_Power_Capacity = details.power;
+  if (details.delivery !== undefined) map.RST_Delivery_Access = !!details.delivery;
+  if (details.liquor !== undefined) map.RST_Liquor_License = !!details.liquor;
+  if (details.zoning !== undefined) map.RST_FB_Zoning_Permit = details.zoning;
+  if (details.ceiling !== undefined) map.CeilingHeight = details.ceiling;
+  if (details.turnover !== undefined) map.RST_Turnover_Condition = details.turnover;
+  // parking already mapped above, but we can also set Guest_Parking
+  if (details.parking !== undefined) map.Guest_Parking = details.parking;
+
+  // Hospitality
+  if (details.rooms !== undefined) map.HOSP_Room_Count = Number(details.rooms) || null;
+  if (details.stars !== undefined) map.HOSP_Star_Rating = Number(details.stars) || null;
+  if (details.operator !== undefined) map.HOSP_Operator_Brand = details.operator;
+  if (details.roomTypes !== undefined) map.HOSP_Room_Types = details.roomTypes;
+  if (details.fbOutlets !== undefined) map.HOSP_FB_Outlets = Number(details.fbOutlets) || null;
+  if (details.functionRooms !== undefined) map.HOSP_Function_Rooms = Number(details.functionRooms) || null;
+  if (details.yearRenovated !== undefined) map.HOSP_Year_Built_Renovated = details.yearRenovated;
+  if (details.adr !== undefined) map.HOSP_ADR = Number(details.adr) || null;
+  if (details.occupancy !== undefined) map.HOSP_Occupancy_Rate = Number(details.occupancy) || null;
+  if (details.revpar !== undefined) map.HOSP_RevPAR = Number(details.revpar) || null;
+  if (details.capRate !== undefined) map.HOSP_Cap_Rate = Number(details.capRate) || null;
+  if (details.gfa !== undefined) map.HOSP_GFA = Number(details.gfa) || null;
+  if (details.landArea !== undefined) map.HOSP_Land_Area = Number(details.landArea) || null;
+
+  // Venue
+  if (details.seated !== undefined) map.VEN_Capacity_Seated = Number(details.seated) || null;
+  if (details.standing !== undefined) map.VEN_Capacity_Standing = Number(details.standing) || null;
+  if (details.floorArea !== undefined && !map.FloorSqm) map.FloorSqm = Number(details.floorArea) || null;
+  if (details.rentalRate !== undefined) map.VEN_Rental_Rate = Number(details.rentalRate) || null;
+  if (details.minHours !== undefined) map.VEN_Min_Booking_Hours = Number(details.minHours) || null;
+  if (details.aircon !== undefined) map.VEN_Air_Conditioning = !!details.aircon;
+  if (details.catering !== undefined) map.VEN_Catering_Policy = details.catering;
+  if (details.layouts !== undefined) map.VEN_Layout_Configs = details.layouts;
+  if (details.av !== undefined) map.VEN_AV_Equipment = details.av;
+  if (details.power !== undefined) map.VEN_Power_Capacity = details.power;
+  if (details.accessibility !== undefined) map.VEN_Accessibility = details.accessibility;
+  if (details.noiseCurfew !== undefined) map.VEN_Noise_Curfew = details.noiseCurfew;
+
+  return map;
+}
+
+// ═══════════════════════════════════════════════════
+// EXPORTED CMS METHODS
 // ═══════════════════════════════════════════════════════════════
 export async function insertProperty(apiKey, baseId, data) {
   const url = `${BASE_URL}/${baseId}/PROPERTIES_CMS`;
@@ -335,10 +452,8 @@ export async function insertProperty(apiKey, baseId, data) {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
 
-  // Units live embedded in the Supabase `details` jsonb; serialize them to a
-  // JSON string field in Airtable (same pattern as WhereTo) so the public
-  // read path can hydrate them back on fetchProperties.
   const unitsJson = JSON.stringify(data.details?.units_inventory || []);
+  const categoryFields = reverseMapCategoryFields(data.details);
 
   const payload = {
     records: [
@@ -347,8 +462,10 @@ export async function insertProperty(apiKey, baseId, data) {
           Title: data.title,
           Location: data.location || "",
           SpaceTypography: data.type || "Unknown",
+          SpaceCategory: data.space_category || data.category || data.type || "Unknown",
           Units_JSON: unitsJson,
           Approved_For_ScoutIt: true,
+          ...categoryFields
         }
       }
     ]
@@ -401,6 +518,9 @@ export async function updateProperty(apiKey, baseId, slug, data) {
   if (data.location) fieldsToUpdate.Location = data.location;
   if (data.type) fieldsToUpdate.SpaceTypography = data.type;
   if (data.details?.units_inventory) fieldsToUpdate.Units_JSON = JSON.stringify(data.details.units_inventory);
+  
+  const categoryFields = reverseMapCategoryFields(data.details);
+  Object.assign(fieldsToUpdate, categoryFields);
   
   const payload = {
     fields: fieldsToUpdate

@@ -26,7 +26,7 @@ export function DashboardProvider({ children }) {
   const DEFAULT_MAP_CENTER = [121.0215, 14.5547]; 
   const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
 
-  // Sync connects & user from local storage
+  // Sync connects & user from local storage, then fetch latest profile from Supabase
   useEffect(() => {
     const userStr = localStorage.getItem("scoutit_user");
     if (userStr) {
@@ -35,6 +35,25 @@ export function DashboardProvider({ children }) {
       if (user.connects_balance !== undefined) {
         setConnects(user.connects_balance);
       }
+      
+      // Fetch fresh profile data (like badges) from Supabase
+      const fetchProfile = async () => {
+        const { data } = await supabase
+          .from('user_profiles')
+          .select('badges')
+          .eq('id', user.id)
+          .single();
+          
+        if (data && data.badges) {
+          // Update current user with badges
+          setCurrentUser(prev => {
+            const updated = { ...prev, badges: data.badges };
+            localStorage.setItem("scoutit_user", JSON.stringify(updated));
+            return updated;
+          });
+        }
+      };
+      fetchProfile();
     }
   }, []);
 
@@ -168,7 +187,7 @@ export function DashboardProvider({ children }) {
     const isSaved = savedIds.includes(item.id);
     if (isSaved) {
       setSavedIds(prev => prev.filter(id => id !== item.id));
-      addToast("Removed from your Intelligence Archive", <Bookmark strokeWidth={1.5} size="1em" />);
+      addToast("Removed from your Saved Properties", <Bookmark strokeWidth={1.5} size="1em" />);
       
       // Sync Supabase
       if (currentUser?.id) await supabase.from('saved_intel').delete().eq('property_id', item.id);
@@ -330,6 +349,43 @@ export function DashboardProvider({ children }) {
       desc: `Your property at ${listing.location} is now live in the Broker feed.`,
       icon: "✅"
     });
+  };
+
+  const bulkAddListings = async (propertiesArray) => {
+    addToast("Bulk processing via AI Blueprint...", "🤖");
+    
+    // Attempt insertion
+    try {
+      const res = await fetch('/api/dashboard/bulk-insert', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ properties: propertiesArray })
+      });
+      const data = await res.json();
+      
+      if (data.success && data.inserted) {
+        addToast(`Successfully synced ${data.count} properties to Ledger.`, "✅");
+        
+        // Convert to UI models
+        const mappedNew = mapSupabaseProperties(data.inserted);
+        setListings(prev => [...mappedNew, ...prev]);
+        
+        addNotification({
+          title: "Bulk Import Complete",
+          desc: `${data.count} new properties are now live in the global feed.`,
+          icon: "🚀"
+        });
+        
+        return true;
+      } else {
+        addToast("Bulk insert failed.", "❌");
+        return false;
+      }
+    } catch (err) {
+      console.error(err);
+      addToast("Network error during bulk insert.", "❌");
+      return false;
+    }
   };
 
   const addConciergeListing = async (fileName) => {
@@ -673,6 +729,7 @@ export function DashboardProvider({ children }) {
       toggleSave,
       raiseQuest,
       addListing,
+      bulkAddListings,
       addConciergeListing,
       updateListing,
       closeListing,

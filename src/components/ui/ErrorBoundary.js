@@ -19,6 +19,7 @@ export default class ErrorBoundary extends Component {
   }
 
   componentDidCatch(error, info) {
+    this.setState({ errorMessage: error?.message || String(error), errorStack: error?.stack });
     reportError({
       kind: "crash",
       message: error?.message || String(error),
@@ -39,6 +40,10 @@ export default class ErrorBoundary extends Component {
           This screen hit a snag — and our team has automatically been notified. Try reloading;
           if it keeps happening, use “Report a problem.”
         </p>
+        <div className="bg-error/10 text-error p-4 text-left font-mono text-xs w-full max-w-4xl overflow-auto mb-6">
+          <p className="font-bold">{this.state.errorMessage}</p>
+          <pre>{this.state.errorStack}</pre>
+        </div>
         <div className="flex gap-3">
           <button
             type="button"

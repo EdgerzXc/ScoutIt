@@ -905,7 +905,7 @@ export default function Home() {
           ========================================= */}
       <section className="relative w-full max-w-6xl mx-auto px-6 py-24 z-20 flex flex-col items-center" style={{ backgroundColor: 'transparent' }}>
         <h2 className="font-mono text-sm tracking-[0.3em] uppercase text-[#FFB800] mb-12 text-center opacity-80" style={{ textShadow: '0 0 10px rgba(255,184,0,0.3)' }}>
-          Select Your Descent Coordinate
+          Browse Space Catalog
         </h2>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">

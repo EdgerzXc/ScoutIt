@@ -13,6 +13,7 @@ const BuyerMode = dynamic(() => import("../../components/dashboard/BuyerMode"), 
 const ProviderMode = dynamic(() => import("../../components/dashboard/ProviderMode"), { ssr: false });
 import Nudge from "../../components/ui/Nudge";
 import Toasts from "../../components/ui/Toasts";
+import ConciergeAI from "../../components/dashboard/ConciergeAI";
 import { Camera, Search, Bookmark } from "lucide-react";
 
 const TAG_LABELS = {
@@ -168,7 +169,7 @@ function DashboardInner() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-text-primary flex flex-col pb-[80px] md:pb-0">
+    <div className="min-h-screen bg-background text-text-primary flex flex-col pb-[100px] md:pb-24">
       
       {/* Top Nav (Persistent) */}
       <header className="sticky top-0 z-40 bg-background/90 backdrop-blur-md border-b border-surface-variant px-4 py-3 md:px-6 md:py-4 flex items-center justify-between">
@@ -227,7 +228,7 @@ function DashboardInner() {
         </div>
 
         <div className="flex items-center gap-4 md:gap-6">
-          <div className="hidden md:flex items-center gap-2 text-gold-accent font-label-caps text-[11px] tracking-widest bg-gold-accent/10 px-3 py-1.5 rounded-full transition-all">
+          <div className="hidden md:flex items-center gap-2 text-gold-accent font-label-caps text-[11px] tracking-widest bg-gold-accent/10 px-3 py-1.5 rounded-full transition-all" title="Platform Currency">
             <span className="icon">◈</span>
             <span>{connects !== undefined ? connects : user.connects_balance} CONNECTS</span>
           </div>
@@ -312,6 +313,7 @@ function DashboardInner() {
       </main>
 
       <Toasts />
+      <ConciergeAI />
 
       {/* Primary Action FAB (Floating above global BottomNav) */}
       <button

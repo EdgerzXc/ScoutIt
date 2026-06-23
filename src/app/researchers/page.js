@@ -3,6 +3,7 @@
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { useState } from "react";
+import Link from "next/link";
 import "../property/property.css";
 import { getResearchers } from "@/data/mockResearchers";
 
@@ -104,49 +105,16 @@ export default function ResearchersPage() {
                 value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
             </div>
 
-            <div className="brokers-grid">
-              {filtered.map((r) => {
-                const tierClass = r.tier === 1 ? "tier-1-card diamond-card" : r.tier === 2 ? "tier-2-card platinum-card" : "tier-3-card gold-card";
-                const tierLabel = r.tier === 1 ? "DIAMOND PARTNER" : r.tier === 2 ? "PLATINUM PARTNER" : "GOLD PARTNER";
-                return (
-                  <div key={r.id}
-                      className={`broker-card ${tierClass}`}
-                      style={{ position: "relative" }}
-                    >
-                      <div className="general-tier-badge-label">{tierLabel}</div>
-                      <div className="broker-image-container">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={r.image} alt={r.name} className="broker-image" />
-                        <div className="image-overlay" />
-                      </div>
-                      <div className="broker-content">
-                        <span className="broker-location">{r.location}</span>
-                        <h2 className="broker-name">{r.name}</h2>
-                        <p className="broker-title">{r.title}</p>
-                        <p className="broker-specialty">Focus: <span>{r.focus}</span></p>
-                        <p className="broker-specialty" style={{ marginBottom: "8px" }}>
-                          Markets: <span style={{ color: "var(--text-secondary)", fontSize: "12px" }}>{r.markets}</span>
-                        </p>
-                        <p className="broker-bio">{r.bio}</p>
-                        <div style={{ marginBottom: "16px" }}>
-                          <p style={{ fontSize: "11px", color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "8px" }}>Deliverables</p>
-                          {r.deliverables.map((d) => (
-                            <div key={d} style={{ display: "flex", alignItems: "center", gap: "7px", fontSize: "12px", color: "var(--text-secondary)", marginBottom: "4px" }}>
-                              <span style={{ color: "var(--accent)", fontSize: "9px" }}>—</span>{d}
-                            </div>
-                          ))}
-                        </div>
-                        <div className="broker-footer">
-                          <div className="broker-stats">
-                            <span className="stat-value" style={{ fontSize: "12px" }}>{r.reports}</span>
-                            <span style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "2px" }}>Avg: {r.turnaround}</span>
-                          </div>
-                          <span className="btn-contact">Focus →</span>
-                        </div>
-                      </div>
-                    </div>
-                );
-              })}
+            <div className="waitlist-container" style={{ padding: "60px 40px", background: "var(--surface)", border: "1px solid var(--border-solid)", borderRadius: "var(--radius-md)", textAlign: "center", marginTop: "20px" }}>
+              <div style={{ fontSize: "48px", marginBottom: "24px" }}>🔍</div>
+              <h2 style={{ fontFamily: "var(--font-display)", fontSize: "32px", color: "#fff", marginBottom: "16px" }}>The Roster is Being Curated</h2>
+              <p style={{ color: "var(--text-secondary)", marginBottom: "40px", maxWidth: "500px", margin: "0 auto 40px", lineHeight: "1.6" }}>
+                We are currently vetting the top site researchers and diligence specialists in the ecosystem. Join the waitlist to secure early access when the layer goes live.
+              </p>
+              <div style={{ display: "flex", gap: "12px", justifyContent: "center", maxWidth: "450px", margin: "0 auto" }}>
+                <input type="email" placeholder="ENTER YOUR EMAIL..." className="global-search-input" style={{ flexGrow: 1, marginBottom: 0, padding: "16px", borderRadius: "4px" }} />
+                <Link href="/onboarding" style={{ display: "inline-flex", alignItems: "center", background: "var(--accent)", color: "#0e0e0e", fontWeight: "bold", padding: "0 32px", borderRadius: "4px", letterSpacing: "0.05em", textDecoration: "none" }}>JOIN</Link>
+              </div>
             </div>
           </section>
         </div>

@@ -82,6 +82,7 @@
 - **Owner→broker handshake**: `inviteBroker` (spends 1 Connect → writes `deals` + `connect_transactions`
   + decrements `connect_balances`) + "Invite an advisor" panel in the dossier.
 - **Demo owner login**: "View demo — SM Offices (Owner)" button on onboarding (REMOVE before launch).
+- **QuestIT VIP Concierge (Claude 3.5)**: Backend (`api/questit/route.js`) and UI HUD (`ConciergeChat.js`) built and tested, but currently **shelved/unmounted from layout**. To activate for pre-launch: re-mount `<ConciergeChat />` in `layout.js` and add `ANTHROPIC_API_KEY` to `.env.local`.
 - **Error/report safety net**: global `ErrorBoundary`, `reportError` util, `ReportButton` (every page),
   `error_reports` table — wired in root layout.
 

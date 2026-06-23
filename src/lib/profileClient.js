@@ -18,6 +18,7 @@ export async function upsertProfile(localUser) {
     subscription_tier: localUser.tier || localUser.subscription_tier || 'starry',
     connects_balance: localUser.connects_balance ?? 0,
     active_roles: localUser.tags || [],
+    badges: localUser.badges || [],
     updated_at: new Date().toISOString(),
   };
 
@@ -48,7 +49,7 @@ export async function loadPublicProfile(displayName) {
     .select(
       'id, display_name, avatar_url, location, headline, bio, firm, service, ' +
       'member_since, subscription_tier, active_roles, provider_type, ' +
-      'provider_availability, is_profile_public'
+      'provider_availability, is_profile_public, badges'
     )
     .eq('display_name', displayName)
     .eq('is_profile_public', true)

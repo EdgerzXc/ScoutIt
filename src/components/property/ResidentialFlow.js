@@ -49,6 +49,71 @@ function resolveTransitHub(transitLabel, city) {
 // ═══════════════════════════════════════════════════
 // HELPER UTILITIES
 // ═══════════════════════════════════════════════════
+function SpatialVaultWidget({ lumaUrl, matterportUrl, heatmapUrl }) {
+  // Mock subscription state for the sake of the preview. In production, this would be tied to user context.
+  const hasSubscription = false; 
+
+  return (
+    <div style={{ marginTop: "32px", display: "flex", flexDirection: "column", gap: "24px" }}>
+      {lumaUrl && (
+        <div className="vault-item">
+          <h4 style={{ fontFamily: "'Courier New',monospace", fontSize: "10px", color: "#ffb800", letterSpacing: "0.18em", textTransform: "uppercase", marginBottom: "12px" }}>
+            3D Spatial Map
+          </h4>
+          <div style={{ position: "relative", width: "100%", height: "400px", borderRadius: "4px", overflow: "hidden", border: "1px solid #262626" }}>
+            <iframe src={hasSubscription ? lumaUrl : ""} style={{ width: "100%", height: "100%", border: "none", filter: hasSubscription ? "none" : "blur(8px) brightness(0.5)" }} title="3D Spatial Map" />
+            {!hasSubscription && (
+              <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "rgba(22,22,22,0.6)", backdropFilter: "blur(4px)" }}>
+                <span style={{ fontFamily: "Georgia,serif", fontSize: "16px", color: "#f0ede8", marginBottom: "8px" }}>Unlock The Spatial Vault</span>
+                <span style={{ fontFamily: "'Courier New',monospace", fontSize: "9px", color: "#ffb800", letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: "16px" }}>Premium Subscription Required</span>
+                <a href="/pricing/seeker" style={{ textDecoration: "none", fontFamily: "Georgia,serif", fontSize: "13px", color: "#0e0e0e", background: "#ffb800", border: "none", padding: "10px 24px", borderRadius: "2px", cursor: "pointer", display: "inline-block" }}>
+                  Upgrade to Cluster Tier →
+                </a>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+      {matterportUrl && (
+        <div className="vault-item">
+          <h4 style={{ fontFamily: "'Courier New',monospace", fontSize: "10px", color: "#ffb800", letterSpacing: "0.18em", textTransform: "uppercase", marginBottom: "12px" }}>
+            360° AR Room Tour
+          </h4>
+          <div style={{ position: "relative", width: "100%", height: "400px", borderRadius: "4px", overflow: "hidden", border: "1px solid #262626" }}>
+            <iframe src={hasSubscription ? matterportUrl : ""} style={{ width: "100%", height: "100%", border: "none", filter: hasSubscription ? "none" : "blur(8px) brightness(0.5)" }} title="360 Tour" />
+            {!hasSubscription && (
+              <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "rgba(22,22,22,0.6)", backdropFilter: "blur(4px)" }}>
+                <span style={{ fontFamily: "Georgia,serif", fontSize: "16px", color: "#f0ede8", marginBottom: "8px" }}>Unlock The Spatial Vault</span>
+                <a href="/pricing/seeker" style={{ textDecoration: "none", fontFamily: "Georgia,serif", fontSize: "13px", color: "#0e0e0e", background: "#ffb800", border: "none", padding: "10px 24px", borderRadius: "2px", cursor: "pointer", marginTop: "12px", display: "inline-block" }}>
+                  Upgrade to Cluster Tier →
+                </a>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+      {heatmapUrl && (
+        <div className="vault-item">
+          <h4 style={{ fontFamily: "'Courier New',monospace", fontSize: "10px", color: "#ffb800", letterSpacing: "0.18em", textTransform: "uppercase", marginBottom: "12px" }}>
+            Drone Heatmap Analysis
+          </h4>
+          <div style={{ position: "relative", width: "100%", height: "200px", borderRadius: "4px", overflow: "hidden", border: "1px solid #262626" }}>
+            <div style={{ width: "100%", height: "100%", background: "#111", filter: hasSubscription ? "none" : "blur(8px) brightness(0.5)" }} />
+            {!hasSubscription && (
+              <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "rgba(22,22,22,0.6)", backdropFilter: "blur(4px)" }}>
+                <span style={{ fontFamily: "Georgia,serif", fontSize: "16px", color: "#f0ede8", marginBottom: "8px" }}>Unlock The Spatial Vault</span>
+                <a href="/pricing/seeker" style={{ textDecoration: "none", fontFamily: "Georgia,serif", fontSize: "13px", color: "#0e0e0e", background: "#ffb800", border: "none", padding: "10px 24px", borderRadius: "2px", cursor: "pointer", marginTop: "12px", display: "inline-block" }}>
+                  Upgrade to Cluster Tier →
+                </a>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function DeepIntelWidget({ open, onToggle, fields }) {
   if (!fields || fields.length === 0) return null;
   return (
@@ -98,6 +163,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode }) {
   const [menuOpen,   setMenuOpen]   = useState(false);
   const [propertyData, setPropertyData] = useState(() => draftData || getPropertyBySlug(slug));
   const [dataLoading,  setDataLoading]  = useState(false);
+  const [isOwner, setIsOwner] = useState(false);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [selectedUnit, setSelectedUnit] = useState(null);
   const [whereToTab,        setWhereToTab]        = useState("map");
@@ -126,6 +192,19 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode }) {
       setPropertyData(draftData);
     }
   }, [draftData]);
+
+  // ── Check if current user is the owner ──
+  useEffect(() => {
+    const saved = localStorage.getItem("scoutit_user");
+    if (saved && propertyData) {
+      try {
+        const user = JSON.parse(saved);
+        if (user.id === propertyData.ownerId) {
+          setIsOwner(true);
+        }
+      } catch (e) {}
+    }
+  }, [propertyData]);
 
   // ── Fetch from Airtable in background; mock data already shown ──
   useEffect(() => {
@@ -248,15 +327,15 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode }) {
   const ch = Object.fromEntries(chapterConfig.map(c => [c.id, c]));
 
   // Determine brief label
-  let briefLabel = "Residential Briefing";
+  let briefLabel = "Residential Details";
   if (isRestaurant) {
-    briefLabel = "Culinary Briefing";
+    briefLabel = "Culinary Details";
   } else if (isHospitality) {
-    briefLabel = "Hospitality Briefing";
+    briefLabel = "Hospitality Details";
   } else if (isVenue) {
-    briefLabel = "Venue Briefing";
+    briefLabel = "Venue Details";
   } else if (d.property_type?.toLowerCase().includes("commercial") || d.property_type?.toLowerCase().includes("office") || d.property_type?.toLowerCase().includes("retail") || cat.includes("commercial")) {
-    briefLabel = "Commercial Briefing";
+    briefLabel = "Commercial Details";
   }
 
   // ── Spec Pills Dynamic Curators ────────────────
@@ -653,7 +732,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode }) {
           letterSpacing: "0.1em",
           gridColumn: "1 / -1"
         }}>
-          [ LOCATION BRIEFING N/A — NO DATA IN CMS ]
+          [ LOCATION DETAILS N/A — NO DATA IN CMS ]
         </div>
       );
     }
@@ -736,6 +815,13 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode }) {
             <h1 className="hero-title">{d.title}</h1>
             <p className="hero-location">{d.location || d.city || "Location on request"}</p>
             <p className="hero-hook">{d.hook}</p>
+            {isOwner && (
+              <div style={{ marginTop: '24px' }}>
+                <Link href={`/dashboard?edit=${d.id}`} className="font-working-title text-sm tracking-widest text-[#0e0e0e] bg-[#ffb800] px-6 py-3 rounded hover:bg-[#e6a600] transition-colors uppercase font-bold inline-block border border-[#ffb800] shadow-[0_0_15px_rgba(255,184,0,0.4)] cursor-pointer">
+                  Edit Property Dossier
+                </Link>
+              </div>
+            )}
           </div>
 
 
@@ -790,6 +876,13 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode }) {
           <h1 className="mobile-hero-title">{d.title}</h1>
           <p className="mobile-hero-location">{d.location || d.city || "Location on request"}</p>
           <p className="mobile-hero-hook">{d.hook}</p>
+          {isOwner && (
+            <div style={{ marginTop: '20px' }}>
+              <Link href={`/dashboard?edit=${d.id}`} className="font-working-title text-xs tracking-widest text-[#0e0e0e] bg-[#ffb800] px-5 py-3 rounded hover:bg-[#e6a600] transition-colors uppercase font-bold inline-block border border-[#ffb800] w-full text-center">
+                Edit Property Dossier
+              </Link>
+            </div>
+          )}
         </div>
 
         {/* ════ ZONE 2 – NAV (drag-to-scroll) ════ */}
@@ -810,6 +903,8 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode }) {
                 icon: <svg className="chapter-icon" viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="14" height="14" rx="1.5" stroke="currentColor" strokeWidth="1.3"/><path d="M6.5 9h7M6.5 12h4.5M6.5 6h7" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg> },
               { id: "location", label: "Location",
                 icon: <svg className="chapter-icon" viewBox="0 0 20 20" fill="none"><path d="M10 2C7.24 2 5 4.24 5 7c0 4.5 5 11 5 11s5-6.5 5-11c0-2.76-2.24-5-5-5z" stroke="currentColor" strokeWidth="1.3"/><circle cx="10" cy="7" r="2" stroke="currentColor" strokeWidth="1.3"/></svg> },
+              { id: "vault",    label: "The Vault",
+                icon: <svg className="chapter-icon" viewBox="0 0 20 20" fill="none"><path d="M10 2l6 4v8l-6 4-6-4V6l6-4z" stroke="currentColor" strokeWidth="1.3"/><path d="M10 2v8M4 6l6 4M16 6l-6 4" stroke="currentColor" strokeWidth="1.3"/></svg> },
               { id: "life",     label: "Life Here",
                 icon: <svg className="chapter-icon" viewBox="0 0 20 20" fill="none"><path d="M10 3C8 3 5 5 5 8c0 2 1 3.5 2.5 4.5L10 17l2.5-4.5C14 11.5 15 10 15 8c0-3-3-5-5-5z" stroke="currentColor" strokeWidth="1.3"/><circle cx="10" cy="8" r="1.5" fill="currentColor" stroke="none"/></svg> },
               { id: "whereto",  label: ch['whereto']?.navLabel || "Where To?",
@@ -948,6 +1043,30 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode }) {
                     <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{d.furnishing}</span>
                   </div>
                 )}
+                {d.view && (
+                  <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626"}}>
+                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase"}}>View</span>
+                    <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{d.view}</span>
+                  </div>
+                )}
+                {d.turnoverDate && (
+                  <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626"}}>
+                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase"}}>Turnover Date</span>
+                    <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{d.turnoverDate}</span>
+                  </div>
+                )}
+                {d.petPolicy && (
+                  <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626"}}>
+                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase"}}>Pet Policy</span>
+                    <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{d.petPolicy}</span>
+                  </div>
+                )}
+                {d.assocDues && (
+                  <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626"}}>
+                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase"}}>Assoc Dues</span>
+                    <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#ffb800"}}>₱{Number(d.assocDues).toLocaleString()} / mo <span style={{fontSize:"10px", color:"#7A5C00"}}>(Verified)</span></span>
+                  </div>
+                )}
                 {d.outdoor_description && d.outdoor_description !== "None" && (
                   <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626"}}>
                     <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase"}}>Outdoor Space</span>
@@ -965,7 +1084,16 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode }) {
               <DeepIntelWidget
                 open={widgets.space}
                 onToggle={() => setWidgets(w => ({...w, space: !w.space}))}
-                fields={["Ventilation Quality","Noise Level Score","Natural Light Score","Privacy Score","Acoustic Baseline"]}
+                fields={[
+                  d.floorLevel ? "Exact Floor Level" : null,
+                  d.pricePerSqm ? "Price Per SQM" : null,
+                  d.paymentTerms ? "Payment Terms" : null,
+                  "Ventilation Quality",
+                  "Noise Level Score",
+                  "Natural Light Score",
+                  "Privacy Score",
+                  "Acoustic Baseline"
+                ].filter(Boolean)}
               />
 
             </div>
@@ -976,6 +1104,33 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode }) {
               {d.tenure && <div className="sidebar-block"><div className="sidebar-label">Tenure</div><div className="sidebar-value">{d.tenure}</div></div>}
               {d.year_built && <div className="sidebar-block"><div className="sidebar-label">Year Built</div><div className="sidebar-value">{d.year_built}</div></div>}
               {d.title_status && <div className="sidebar-block"><div className="sidebar-label">Title</div><div className="sidebar-value">{d.title_status}</div></div>}
+            </div>
+          </div>
+
+          {/* ── THE VAULT (Ch. Premium) ── */}
+          <div className={`chapter-panel ${activeTab === "vault" ? "active" : ""}`} id="panel-vault">
+            <div className="panel-content" style={{ maxWidth: "100%" }}>
+              <div style={{marginBottom:"32px"}}>
+                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#ffb800", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>PREMIUM — THE SPATIAL VAULT</div>
+                <div style={{height:"1px", background:"#ffb800"}}/>
+              </div>
+
+              <div style={{marginBottom:"30px"}}>
+                <span style={{fontFamily:"Georgia,serif", fontStyle:"italic", fontSize:"clamp(22px,3vw,30px)", fontWeight:400, color:"#f0ede8", letterSpacing:"0.01em", lineHeight:1.2}}>
+                  3D Virtual Tours & Blueprints
+                </span>
+              </div>
+
+              <SpatialVaultWidget 
+                lumaUrl={d.luma3dMapUrl} 
+                matterportUrl={d.matterportTourUrl} 
+                heatmapUrl={d.droneHeatmapUrl} 
+              />
+            </div>
+            <div className="panel-sidebar">
+              <div className="sidebar-block"><div className="sidebar-accent-line" style={{background: "#ffb800"}}/><div className="sidebar-label" style={{color: "#ffb800"}}>Vault Status</div><div className="sidebar-value">Secured</div></div>
+              <div className="sidebar-block"><div className="sidebar-label">Verification</div><div className="sidebar-value">ScoutIT Pros</div></div>
+              <div className="sidebar-block"><div className="sidebar-label">Access</div><div className="sidebar-value">Orbit Tier Only</div></div>
             </div>
           </div>
 
@@ -1232,7 +1387,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode }) {
 
               {whereToTab === "list" && (!d.whereTo || d.whereTo.length === 0) && (
                 <div style={{padding:"32px", background:"#161616", border:"0.5px dashed #262626", borderRadius:"2px", textAlign:"center", fontFamily:"'Courier New',monospace", fontSize:"11px", color:"#c8c8c8", letterSpacing:"0.12em", marginBottom:"24px"}}>
-                  [ LOCATION BRIEFING N/A — NO DATA IN CMS ]
+                  [ LOCATION DETAILS N/A — NO DATA IN CMS ]
                 </div>
               )}
 

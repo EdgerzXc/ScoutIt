@@ -49,6 +49,7 @@ const SPEC_CONFIG = {
   commercial: {
     label: "Commercial Specifications",
     major: [
+      { key: "rentPerSqm", label: "Published Rent", fmt: "text", hero: true },
       { key: "totalGLA", label: "Total GLA", fmt: "num", suffix: "sqm", hero: true },
       { key: "floorPlate", label: "Floor Plate", fmt: "text", hero: true },
       { key: "buildingGrade", label: "Building Grade", fmt: "text" },
@@ -58,7 +59,7 @@ const SPEC_CONFIG = {
       { key: "certification", label: "Certification", fmt: "text" },
       { key: "peza", label: "PEZA Accredited", fmt: "bool" },
     ],
-    minor: ["AC System", "Reserved Parking", "Escalation Rate", "Fit-out Allowance",
+    minor: ["CAMC (CUSA)", "A/C Charges", "AC System", "Reserved Parking", "Escalation Rate", "Fit-out Allowance",
       "Rent-free Period", "Parking Ratio", "Backup Power", "Floor Loading",
       "Internet Providers", "Available Units", "Towers / Zones", "Cap Rate", "NOI"],
   },
@@ -186,7 +187,7 @@ export default function CategorySpecBlock({ property, extraLockedLabels = [] }) 
   const cat = d.spaceCategory || d.property_type || "";
   const key = resolveCategoryKey(cat);
   const config = key && SPEC_CONFIG[key];
-  const data = (d.cat && d.cat[key]) || null;
+  const data = (d.cat && d.cat[key]) || d || null;
 
   // No category match or no group wired → render nothing (page handles its
   // own sections); avoids a "Not listed yet" wall for unmapped records.

@@ -3,6 +3,7 @@
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { useState } from "react";
+import Link from "next/link";
 import "../property/property.css";
 
 import { getPhotographers } from "@/data/mockPhotographers";
@@ -122,38 +123,16 @@ export default function PhotographersPage() {
               />
             </div>
 
-            <div className="brokers-grid">
-              {filtered.map((ph) => {
-                const tierClass = ph.tier === 1 ? "tier-1-card diamond-card" : ph.tier === 2 ? "tier-2-card platinum-card" : "tier-3-card gold-card";
-                const tierLabel = ph.tier === 1 ? "DIAMOND PARTNER" : ph.tier === 2 ? "PLATINUM PARTNER" : "GOLD PARTNER";
-                return (
-                  <div key={ph.id}
-                      className={`broker-card ${tierClass}`}
-                      style={{ position: "relative" }}
-                    >
-                    <div className="general-tier-badge-label">{tierLabel}</div>
-                    <div className="broker-image-container">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={ph.image} alt={ph.name} className="broker-image" />
-                      <div className="image-overlay" />
-                    </div>
-                    <div className="broker-content">
-                      <span className="broker-location">{ph.location}</span>
-                      <h2 className="broker-name">{ph.name}</h2>
-                      <p className="broker-title">{ph.title}</p>
-                      <p className="broker-specialty">Specialty: <span>{ph.specialty}</span></p>
-                      <p className="broker-specialty" style={{ marginBottom: "8px" }}>Equipment: <span style={{ color: "var(--text-secondary)", fontSize: "12px" }}>{ph.equipment}</span></p>
-                      <p className="broker-bio">{ph.bio}</p>
-                      <div className="broker-footer">
-                        <div className="broker-stats">
-                          <span className="stat-value" style={{ fontSize: "12px" }}>{ph.sessions}</span>
-                        </div>
-                        <span className="btn-contact">Focus →</span>
-                      </div>
-                    </div>
-                    </div>
-                );
-              })}
+            <div className="waitlist-container" style={{ padding: "60px 40px", background: "var(--surface)", border: "1px solid var(--border-solid)", borderRadius: "var(--radius-md)", textAlign: "center", marginTop: "20px" }}>
+              <div style={{ fontSize: "48px", marginBottom: "24px" }}>📸</div>
+              <h2 style={{ fontFamily: "var(--font-display)", fontSize: "32px", color: "#fff", marginBottom: "16px" }}>The Roster is Being Curated</h2>
+              <p style={{ color: "var(--text-secondary)", marginBottom: "40px", maxWidth: "500px", margin: "0 auto 40px", lineHeight: "1.6" }}>
+                We are currently vetting the top architectural and interior photographers in the ecosystem. Join the waitlist to secure early access when the layer goes live.
+              </p>
+              <div style={{ display: "flex", gap: "12px", justifyContent: "center", maxWidth: "450px", margin: "0 auto" }}>
+                <input type="email" placeholder="ENTER YOUR EMAIL..." className="global-search-input" style={{ flexGrow: 1, marginBottom: 0, padding: "16px", borderRadius: "4px" }} />
+                <Link href="/onboarding" style={{ display: "inline-flex", alignItems: "center", background: "var(--accent)", color: "#0e0e0e", fontWeight: "bold", padding: "0 32px", borderRadius: "4px", letterSpacing: "0.05em", textDecoration: "none" }}>JOIN</Link>
+              </div>
             </div>
           </section>
         </div>

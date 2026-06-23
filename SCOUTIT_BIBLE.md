@@ -131,13 +131,25 @@ ScoutIt serves high-intent buyers, investors, and researchers who want intellige
 | **Discovery Feed** | Curated spotlights, news, collections — editorial curation, not algorithm slop |
 | **Double-Blind Privacy Shield** | Future feature: connect with brokers without revealing identity until ready |
 
-### Revenue Streams (Current + Planned)
+### The Dual-Monetization Architecture (Connects vs. Subscriptions)
 
-1. **Broker subscriptions** — recurring B2B revenue
-2. **Connects token economy** — micro-transactions (see Part 6)
-3. **Featured listings** — premium visibility for high-value properties
-4. **Bounty Hunt marketplace** — crowdsourced data tasks (see Part 6)
-5. **Luma AI 3D Tours** — premium unlock (future, see Part 6)
+ScoutIt strictly separates the **Communication Layer** from the **Deep Intelligence Layer** to maintain trust and UX integrity. We do not block inquiries behind subscriptions.
+
+1. **The Handshake (Connects)**
+   - **For Seekers:** Public facts (Price, GLA, Location, Condition) are free. If a seeker wants to inquire, they spend a **Connect** token to message the broker/owner. 
+   - **Psychology:** Pay-per-connect ensures high-intent leads without forcing buyers into subscriptions just to talk.
+
+2. **The Vault (Subscriptions for Seekers)**
+   - **For Seekers:** Access to "Deep Intelligence" (Luma AI 3D Spatial Maps, 360 AR Tours, Acoustic Heatmaps, Negotiation Buffers, exact Floor Levels). 
+   - **Psychology:** This is an "Ocular Replacement Upgrade." Busy executives or overseas investors pay a monthly subscription to skip physical site visits and do extreme due diligence from their desk.
+
+3. **The Deployment Queue (Subscriptions for Owners)**
+   - **For Owners:** We do *not* promise instant 3D generation. Subscribing to an upper tier (e.g., Orbit Layer) places the owner in a prioritized queue where ScoutIt deploys QuestIT Pros to scan their property. 
+   - **The Fast Lane:** If an owner is impatient, they can use the QuestIT marketplace to pay an expedited bounty, or upload their own videos for our Luma AI to process.
+
+4. **The Churned Owner Escrow (Data Ownership)**
+   - **The Dilemma:** What happens if an owner cancels their subscription, but ScoutIt already generated a highly valuable 3D Spatial Map for them?
+   - **The Hook:** ScoutIt owns the derivative 3D data. The 3D map stays active in The Vault for Premium Seekers. If a Premium Seeker views the 3D map of a churned owner and spends a Connect to inquire, the owner receives an automated email: *"A Premium Seeker wants this property based on the 3D tour. Resubscribe to accept the handshake."* This turns historical 3D maps into an eternal lead-generation trap that lures canceled owners back.
 
 ---
 
