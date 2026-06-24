@@ -46,6 +46,9 @@ next-env.d.ts
 # local Claude Code tooling
 .claude/
 
+# archived/superseded doc copies (kept locally for review, not tracked)
+_REVIEW_QUEUE/
+
 # root-level fix/inject scripts (Claude Code artifacts)
 fix_*.js
 inject*.js
