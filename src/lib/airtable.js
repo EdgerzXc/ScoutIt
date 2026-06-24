@@ -445,12 +445,45 @@ function reverseMapCategoryFields(details) {
 // ═══════════════════════════════════════════════════
 // EXPORTED CMS METHODS
 // ═══════════════════════════════════════════════════════════════
-export async function insertProperty(apiKey, baseId, data) {
-  const url = `${BASE_URL}/${baseId}/PROPERTIES_CMS`;
-  const slug = data.slug || (data.title || "")
+// Turn a title (or existing slug) into a clean URL slug: "One E-Com Center" → "one-ecom-center".
+function slugifyText(text) {
+  return (text || "")
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
+}
+
+// Guarantee the slug is unique in PROPERTIES_CMS so two listings never share a public URL.
+// Best-effort: if the lookup fails we still return a usable slug rather than block publishing.
+async function buildUniqueSlug(apiKey, baseId, baseSlug) {
+  const safe = baseSlug || "listing";
+  try {
+    const formula = `OR({Slug}='${safe}',LEFT({Slug},${safe.length + 1})='${safe}-')`;
+    const params = `filterByFormula=${encodeURIComponent(formula)}&fields%5B%5D=Slug&maxRecords=200`;
+    const res = await fetch(`${BASE_URL}/${baseId}/PROPERTIES_CMS?${params}`, {
+      headers: { Authorization: `Bearer ${apiKey}` },
+    });
+    if (!res.ok) return safe;
+    const data = await res.json();
+    const taken = new Set(
+      (data.records || []).map((r) => (r.fields.Slug || "").toLowerCase())
+    );
+    if (!taken.has(safe)) return safe;
+    for (let i = 2; i < 1000; i++) {
+      if (!taken.has(`${safe}-${i}`)) return `${safe}-${i}`;
+    }
+    return `${safe}-${Date.now().toString(36)}`;
+  } catch {
+    return safe;
+  }
+}
+
+// Insert a new property into Airtable. Returns the created record (its fields include
+// the final Slug so callers can persist/display the canonical public URL).
+export async function insertProperty(apiKey, baseId, data) {
+  const url = `${BASE_URL}/${baseId}/PROPERTIES_CMS`;
+  const baseSlug = slugifyText(data.slug || data.title);
+  const slug = await buildUniqueSlug(apiKey, baseId, baseSlug);
 
   const unitsJson = JSON.stringify(data.details?.units_inventory || []);
   const categoryFields = reverseMapCategoryFields(data.details);
@@ -460,6 +493,7 @@ export async function insertProperty(apiKey, baseId, data) {
       {
         fields: {
           Title: data.title,
+          Slug: slug,
           Location: data.location || "",
           SpaceTypography: data.type || "Unknown",
           SpaceCategory: data.space_category || data.category || data.type || "Unknown",

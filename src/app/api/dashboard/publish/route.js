@@ -57,7 +57,16 @@ export async function POST(request) {
           space_category: currentSubmission.space_category,
           details: currentSubmission.details || {}
         };
-        await insertProperty(apiKey, baseId, payload);
+        const created = await insertProperty(apiKey, baseId, payload);
+        // insertProperty generates/guarantees the slug — mirror it back to Supabase
+        // so the owner's editor shows and can share the real public URL.
+        const finalSlug = created?.fields?.Slug;
+        if (finalSlug && finalSlug !== currentSubmission.slug) {
+          await supabase
+            .from('properties')
+            .update({ slug: finalSlug })
+            .eq('id', submissionId);
+        }
       } catch (airtableErr) {
         console.error("[PUBLISH API] Airtable insert failed:", airtableErr);
         // It failed in Airtable, so we should maybe revert the status, but since we're using "sync engine",
