@@ -2,10 +2,13 @@
 const cspHeader = `
     default-src 'self';
     script-src 'self' 'unsafe-eval' 'unsafe-inline';
-    style-src 'self' 'unsafe-inline';
-    img-src 'self' blob: data: https://*.supabase.co;
-    font-src 'self';
-    connect-src 'self' https://*.supabase.co https://api.mapbox.com https://events.mapbox.com;
+    style-src 'self' 'unsafe-inline' https://unpkg.com;
+    img-src 'self' blob: data: https:;
+    font-src 'self' data:;
+    worker-src 'self' blob:;
+    child-src 'self' blob:;
+    frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com;
+    connect-src 'self' https://*.supabase.co https://*.mapbox.com https://events.mapbox.com https://unpkg.com;
     object-src 'none';
     base-uri 'self';
     form-action 'self';
