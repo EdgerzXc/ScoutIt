@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const cspHeader = `
     default-src 'self';
-    script-src 'self' 'unsafe-eval' 'unsafe-inline';
+    script-src 'self' 'unsafe-eval' 'unsafe-inline' https://unpkg.com;
     style-src 'self' 'unsafe-inline' https://unpkg.com;
     img-src 'self' blob: data: https:;
     font-src 'self' data:;
