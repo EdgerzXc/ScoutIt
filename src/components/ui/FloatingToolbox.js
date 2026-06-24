@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { reportError } from "@/lib/reportError";
 
 const WIZARD_STEPS = [
   {
@@ -33,11 +34,24 @@ export default function FloatingToolbox() {
   const [mounted, setMounted] = useState(false);
   const [pos, setPos] = useState({ x: 24, y: 0 });
 
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportText, setReportText] = useState("");
+  const [reportSent, setReportSent] = useState(false);
+  const [reportSending, setReportSending] = useState(false);
+
   const containerRef = useRef(null);
   const isDragging = useRef(false);
   const hasMoved = useRef(false);
   const anchor = useRef({ clientX: 0, clientY: 0, posX: 0, posY: 0 });
   const livePos = useRef({ x: 24, y: 0 });
+
+  // Apply theme classes to body
+  function applyTheme(m) {
+    if (typeof document === 'undefined') return;
+    document.body.classList.remove("high-contrast", "light-mode");
+    if (m === "high-contrast") document.body.classList.add("high-contrast");
+    if (m === "light") document.body.classList.add("light-mode");
+  }
 
   useEffect(() => {
     const fallbackY = window.innerHeight - 80;
@@ -52,20 +66,25 @@ export default function FloatingToolbox() {
     livePos.current = p;
     setPos(p);
     setMode(savedMode);
-    _apply(savedMode);
+    applyTheme(savedMode);
     setMounted(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const _apply = (m) => {
-    document.body.classList.remove("high-contrast", "light-mode");
-    if (m === "high-contrast") document.body.classList.add("high-contrast");
-    if (m === "light") document.body.classList.add("light-mode");
-  };
 
   const changeMode = (m) => {
     setMode(m);
-    _apply(m);
+    applyTheme(m);
     localStorage.setItem("scoutit_display_mode", m);
+  };
+
+  const submitReport = async () => {
+    if (!reportText.trim()) return;
+    setReportSending(true);
+    await reportError({ kind: "user_report", message: reportText.trim() });
+    setReportSending(false);
+    setReportSent(true);
+    setReportText("");
+    setTimeout(() => { setReportSent(false); setReportOpen(false); }, 2200);
   };
 
   // ── Drag ──────────────────────────────────────────────────────────────
@@ -229,7 +248,7 @@ export default function FloatingToolbox() {
           <div style={{ height: 1, background: "rgba(255,255,255,0.04)", margin: "0 9px" }} />
 
           {/* Wizard Guide */}
-          <div style={{ padding: "8px 9px 10px" }}>
+          <div style={{ padding: "8px 9px 4px" }}>
             <button
               onClick={() => { setWizardStep(0); setWizardOpen(true); setOpen(false); }}
               style={{
@@ -243,6 +262,25 @@ export default function FloatingToolbox() {
               <span style={{ fontSize: 13 }}>◈</span>
               <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase" }}>
                 Wizard Guide
+              </span>
+            </button>
+          </div>
+
+          {/* Report Issue */}
+          <div style={{ padding: "0 9px 10px" }}>
+            <button
+              onClick={() => { setReportOpen(true); setOpen(false); }}
+              style={{
+                width: "100%",
+                background: "rgba(255,255,255,0.02)",
+                border: "1px solid rgba(255,255,255,0.06)",
+                borderRadius: 5, padding: "9px 12px",
+                cursor: "pointer", display: "flex", alignItems: "center", gap: 8, color: "rgba(255,255,255,0.6)",
+              }}
+            >
+              <span style={{ fontSize: 13 }}>⚑</span>
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase" }}>
+                Report Issue
               </span>
             </button>
           </div>
@@ -316,6 +354,36 @@ export default function FloatingToolbox() {
                 {wizardStep < WIZARD_STEPS.length - 1 ? "Next →" : "Got it ✓"}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Report Problem overlay ── */}
+      {reportOpen && (
+        <div className="fixed inset-0 z-[100000] flex items-end sm:items-center justify-center bg-background/70 backdrop-blur-sm p-4" onClick={() => setReportOpen(false)}>
+          <div className="w-full max-w-md bg-[#111] border border-surface-variant rounded-lg p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
+            {reportSent ? (
+              <div className="text-center py-6">
+                <div className="text-3xl mb-3">✅</div>
+                <p className="font-working-title text-on-surface">Thank you — we got it.</p>
+              </div>
+            ) : (
+              <>
+                <h3 className="font-headline-editorial text-xl text-[#f0ede8] mb-1">Report a problem</h3>
+                <p className="text-xs text-[rgba(255,255,255,0.6)] mb-4">Tell us what went wrong or felt off. This goes straight to the team.</p>
+                <textarea
+                  className="w-full bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.1)] rounded px-4 py-3 text-[#f0ede8] text-sm min-h-[120px] focus:outline-none focus:border-gold-accent transition-colors"
+                  placeholder="What happened?"
+                  value={reportText}
+                  onChange={e => setReportText(e.target.value)}
+                  autoFocus
+                />
+                <div className="flex gap-3 mt-4">
+                  <button type="button" className="flex-1 border border-[rgba(255,255,255,0.1)] text-[rgba(255,255,255,0.6)] hover:text-white font-working-title text-sm py-3 rounded transition-colors" onClick={() => setReportOpen(false)}>Cancel</button>
+                  <button type="button" className="flex-1 bg-gold-accent text-black font-working-title font-bold text-sm py-3 rounded hover:opacity-90 transition-opacity disabled:opacity-50" disabled={!reportText.trim() || reportSending} onClick={submitReport}>{reportSending ? "Sending…" : "Send report"}</button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

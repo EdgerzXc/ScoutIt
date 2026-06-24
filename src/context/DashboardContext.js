@@ -278,6 +278,29 @@ export function DashboardProvider({ children }) {
     await supabase.from('properties').delete().eq('id', listingId);
   };
 
+  const publishListing = async (listingId) => {
+    if (!currentUser?.id) return false;
+    addToast("Syncing to live network...", "⏳");
+    try {
+      const res = await fetch("/api/dashboard/publish", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ submissionId: listingId, userId: currentUser.id })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || data.warning || "Failed to publish");
+      }
+      setListings(prev => prev.map(l => l.id === listingId ? { ...l, pipelineStatus: 'approved' } : l));
+      addToast("Property is now LIVE", "🌍");
+      return true;
+    } catch (err) {
+      console.error(err);
+      addToast(err.message || "Failed to publish", "❌");
+      return false;
+    }
+  };
+
   const addListing = async (listing) => {
     addToast("Geocoding Location...", "⏳");
     
@@ -349,6 +372,8 @@ export function DashboardProvider({ children }) {
       desc: `Your property at ${listing.location} is now live in the Broker feed.`,
       icon: "✅"
     });
+    
+    return newListing;
   };
 
   const bulkAddListings = async (propertiesArray) => {
@@ -498,7 +523,6 @@ export function DashboardProvider({ children }) {
     return true;
   };
 
-  // ── Owner → Broker handshake (spends 1 Connect, recorded in Supabase) ──
   const inviteBroker = async (listingId, brokerName) => {
     if (!brokerName) return false;
     if (connects < 1) {
@@ -506,81 +530,83 @@ export function DashboardProvider({ children }) {
       return false;
     }
 
-    // Debit locally (optimistic) + mirror to the user object
-    const newBalance = connects - 1;
-    setConnects(newBalance);
-    if (currentUser) {
-      const updatedUser = { ...currentUser, connects_balance: newBalance };
-      localStorage.setItem("scoutit_user", JSON.stringify(updatedUser));
-      setCurrentUser(updatedUser);
-    }
+    // Call the edge function for server-side Connect deduction and ledger record
+    try {
+      const res = await fetch("/api/dashboard/invite", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ listingId, brokerName, userId: currentUser?.id })
+      });
+      
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to process handshake");
+      }
+      
+      // Update local Connects balance optimistically
+      const newBalance = connects - 1;
+      setConnects(newBalance);
+      if (currentUser) {
+        const updatedUser = { ...currentUser, connects_balance: newBalance };
+        localStorage.setItem("scoutit_user", JSON.stringify(updatedUser));
+        setCurrentUser(updatedUser);
+      }
 
-    // Relationship row (owner-initiated invite, awaiting broker confirmation)
-    const { data, error } = await supabase.from('deals').insert([{
-      property_id: listingId,
-      broker_id: brokerName,
-      status: 'invited',
-      pitch_message: `Owner invited ${brokerName} to represent this property.`
-    }]).select();
-
-    // Connect ledger + balance (the real spend, per the Connects model)
-    if (currentUser?.id) {
-      await supabase.from('connect_transactions').insert([{
-        user_id: currentUser.id,
-        kind: 'spend',
-        bucket: 'granted',
-        amount: -1,
-        reason: 'Owner invited a broker (handshake)',
-        ref_type: 'handshake',
-        ref_id: listingId
-      }]);
-      await supabase.from('connect_balances')
-        .update({ granted_balance: newBalance, updated_at: new Date().toISOString() })
-        .eq('user_id', currentUser.id);
-    }
-
-    if (error) {
-      addToast("Couldn't send the invite — try again.", "❌");
+      const targetListing = listings.find(l => l.id === listingId);
+      setPitches(prev => [{
+        id: data.dealId,
+        listingId,
+        title: targetListing ? targetListing.title : 'Property',
+        type: 'Advisor',
+        brokerName,
+        brokerFirm: 'Invited advisor',
+        message: `Owner invited ${brokerName}.`,
+        status: 'invited',
+        statusText: 'Invited — awaiting broker',
+        badgeText: 'Waiting',
+        isCurrentUserBroker: false,
+        isCurrentUserOwner: true
+      }, ...prev]);
+      addToast(`Handshake sent to ${brokerName} — 1 Connect spent`, "🤝");
+      return true;
+    } catch (err) {
+      console.error(err);
+      addToast(err.message, "❌");
       return false;
     }
-
-    const targetListing = listings.find(l => l.id === listingId);
-    setPitches(prev => [{
-      id: data[0].id,
-      listingId,
-      title: targetListing ? targetListing.title : 'Property',
-      type: 'Advisor',
-      brokerName,
-      brokerFirm: 'Invited advisor',
-      message: `Owner invited ${brokerName}.`,
-      status: 'invited',
-      statusText: 'Invited — awaiting broker',
-      badgeText: 'Waiting',
-      isCurrentUserBroker: false,
-      isCurrentUserOwner: true
-    }, ...prev]);
-    addToast(`Handshake sent to ${brokerName} — 1 Connect spent`, "🤝");
-    return true;
   };
 
   const updatePitchStatus = async (pitchId, newStatus) => {
-    // Optimistic UI
-    setPitches(prev => prev.map(p => {
-      if (p.id === pitchId) {
-        return { 
-          ...p, 
-          status: newStatus,
-          statusText: newStatus === 'accepted' ? 'Meeting Set' : 'Owner Declined',
-          badgeText: newStatus === 'accepted' ? 'check_circle' : ''
-        };
-      }
-      return p;
-    }));
+    // Supabase update via Edge Function
+    try {
+      const res = await fetch("/api/dashboard/deals/update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ dealId: pitchId, newStatus, userId: currentUser?.id })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to update deal status");
 
-    addToast(`Deal status updated to ${newStatus}`, "🤝");
+      // Optimistic UI
+      setPitches(prev => prev.map(p => {
+        if (p.id === pitchId) {
+          return { 
+            ...p, 
+            status: newStatus,
+            statusText: newStatus === 'accepted' ? 'Meeting Set' : 'Owner Declined',
+            badgeText: newStatus === 'accepted' ? 'check_circle' : ''
+          };
+        }
+        return p;
+      }));
 
-    // Supabase update
-    await supabase.from('deals').update({ status: newStatus }).eq('id', pitchId);
+      addToast(`Deal status updated to ${newStatus}`, "🤝");
+      return true;
+    } catch (err) {
+      console.error(err);
+      addToast(err.message, "❌");
+      return false;
+    }
   };
 
   const addNotification = (notif) => {
@@ -732,6 +758,7 @@ export function DashboardProvider({ children }) {
       bulkAddListings,
       addConciergeListing,
       updateListing,
+      publishListing,
       closeListing,
       sendPitch,
       inviteBroker,

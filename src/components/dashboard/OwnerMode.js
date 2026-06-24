@@ -7,9 +7,10 @@ import { useDashboard } from "../../context/DashboardContext";
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
 import Papa from 'papaparse';
+import { sanitizeObject } from '../../lib/sanitize';
 
 export default function OwnerMode() {
-  const { listings, pitches, updatePitchStatus, addListing, addConciergeListing, bulkAddListings, addToast, updateListing, closeListing, currentUser, inviteBroker, connects } = useDashboard();
+  const { listings, pitches, updatePitchStatus, addListing, addConciergeListing, bulkAddListings, addToast, updateListing, publishListing, closeListing, currentUser, inviteBroker, connects } = useDashboard();
   const firstName = currentUser?.name ? currentUser.name.split(" ")[0] : "";
   const [showWizard, setShowWizard] = useState(false); // false | 'select_mode' | 'live_editor' | 'concierge' | 'edit'
   const [selectedFile, setSelectedFile] = useState(null);
@@ -69,12 +70,22 @@ export default function OwnerMode() {
     ? pitches.filter(p => p.isCurrentUserOwner && p.listingId === activeListing.id)
     : [];
 
-  const handlePublish = (listingData) => {
+  const handlePublish = async (listingData, isPublishing) => {
+    let finalId = viewingDossierId;
     if (showWizard === 'edit') {
-      updateListing(viewingDossierId, listingData);
+      await updateListing(viewingDossierId, listingData);
     } else {
-      addListing(listingData);
+      const inserted = await addListing(listingData);
+      if (inserted && inserted.id) {
+         finalId = inserted.id;
+      }
     }
+    
+    // If the user clicked "Publish to Live Feed", also hit the publish route
+    if (isPublishing && finalId) {
+       await publishListing(finalId);
+    }
+    
     setShowWizard(false);
   };
 
@@ -232,7 +243,7 @@ export default function OwnerMode() {
                         };
                       });
                       
-                      const success = await bulkAddListings(cleanedProperties);
+                      const success = await bulkAddListings(sanitizeObject(cleanedProperties));
                       
                     } catch (err) {
                       console.error("Blueprint error:", err);

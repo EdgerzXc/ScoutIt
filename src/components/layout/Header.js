@@ -99,7 +99,6 @@ export default function Header() {
           <Link href="/photographers">Photographers</Link>
           <Link href="/researchers">Researchers</Link>
           <Link href="/event-planners">Event Planners</Link>
-          <Link href="/movers">Movers (Post-Move)</Link>
           <Link href="/wishlist">Your Board</Link>
           <Link href="/dashboard">Dashboard</Link>
           <Link href="/about">About</Link>

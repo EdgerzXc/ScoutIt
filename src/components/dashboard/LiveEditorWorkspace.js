@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
-import CommercialFlow from "@/components/property/CommercialFlow";
-import ResidentialFlow from "@/components/property/ResidentialFlow";
+import CommercialFlow from "../property/CommercialFlow";
+import ResidentialFlow from "../property/ResidentialFlow";
+import { sanitizeObject } from "../../lib/sanitize";
 
 const CATEGORIES = [
   { id: "residential", icon: "🏠", label: "Residential" },
@@ -265,8 +266,27 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
       if (formData.mediaLink.trim() || formData.image.trim()) score += 20;
       if (formData.description.length > 20) score += 15;
       if (formData.verified) score += 20;
+      const payload = { ...formData, completenessScore: score };
+      onPublish(sanitizeObject(payload), true);
+    }
+  };
 
-      onPublish({ ...formData, completenessScore: score });
+  const handleSaveDraft = () => {
+    if (isPublishable) {
+      let score = 0;
+      if (formData.category && formData.location) score += 20;
+      if (categoryFields.length) {
+        const filled = categoryFields.filter(f => {
+          const v = formData.details?.[f.key];
+          return v !== undefined && v !== "" && v !== false;
+        }).length;
+        score += Math.round((filled / categoryFields.length) * 25);
+      }
+      if (formData.mediaLink.trim() || formData.image.trim()) score += 20;
+      if (formData.description.length > 20) score += 15;
+      if (formData.verified) score += 20;
+      const payload = { ...formData, completenessScore: score };
+      onPublish(sanitizeObject(payload), false);
     }
   };
 
@@ -637,15 +657,21 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
           </section>
         </div>
 
-        {/* Footer */}
-        <div className="p-4 border-t border-surface-variant bg-background shrink-0">
-          {!isPublishable && <p className="text-xs text-error mb-2 italic">Fill in all required fields marked with *</p>}
+        <div className="p-4 border-t border-surface-variant bg-background shrink-0 flex gap-2">
+          {!isPublishable && <p className="text-xs text-error mb-2 italic w-full text-center">Fill in all required fields marked with *</p>}
           <button 
-            className="w-full bg-gold-accent text-background font-bold py-3.5 rounded hover:opacity-90 disabled:opacity-50" 
+            className="flex-1 bg-surface-alt border border-surface-variant text-on-surface font-bold py-3.5 rounded hover:bg-surface-variant transition-colors disabled:opacity-50" 
+            disabled={!isPublishable} 
+            onClick={handleSaveDraft}
+          >
+            {isEditing ? "Save Changes" : "Save as Draft"}
+          </button>
+          <button 
+            className="flex-1 bg-gold-accent text-background font-bold py-3.5 rounded hover:opacity-90 disabled:opacity-50" 
             disabled={!isPublishable} 
             onClick={handlePublish}
           >
-            {isEditing ? "Update Property" : "Publish Draft"}
+            {isEditing ? "Publish Updates to Feed" : "Publish to Live Feed"}
           </button>
         </div>
       </div>

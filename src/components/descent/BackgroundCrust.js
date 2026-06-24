@@ -290,7 +290,7 @@ export default function BackgroundCrust() {
           const brightMat = new THREE.LineBasicMaterial({ 
             color: 0xFFB800, 
             transparent: true, 
-            opacity: 0.95,
+            opacity: 0.25,
             blending: THREE.AdditiveBlending 
           });
           
@@ -305,8 +305,8 @@ export default function BackgroundCrust() {
             maxPoints: numPoints, 
             currentPoints: 0, 
             state: 'waiting', 
-            waitTimer: rnd(i*7) * 300, 
-            speed: 0.5 + rnd(i*5)*1.5,
+            waitTimer: rnd(i*7) * 600, 
+            speed: 0.3 + rnd(i*5)*1.0,
             targetMat: objectPositions[i].mat // Store the property material
           });
         });
@@ -330,31 +330,31 @@ export default function BackgroundCrust() {
                if (root.mat.opacity > 0) root.mat.opacity -= 0.015;
                
                root.waitTimer -= 1;
-               if (root.waitTimer <= 0) {
-                 root.state = 'growing';
-                 root.mat.opacity = 0.95; // Snap back to full brightness for new growth
-                 root.currentPoints = 0;
-                 root.geo.setDrawRange(0, 0); // Reset position
-               }
-            } else if (root.state === 'growing') {
-               root.currentPoints += root.speed;
-               if (root.currentPoints >= root.maxPoints) {
-                 root.currentPoints = root.maxPoints;
-                 root.state = 'holding';
-                 root.waitTimer = 10 + Math.random()*30; 
-                 // The root reached the top! Property glows brilliantly
-                 root.targetMat.opacity = 0.95; 
-               }
-               root.geo.setDrawRange(0, Math.floor(root.currentPoints));
-            } else if (root.state === 'holding') {
+                if (root.waitTimer <= 0) {
+                  root.state = 'growing';
+                  root.mat.opacity = 0.25; // Snap back to lower brightness for new growth
+                  root.currentPoints = 0;
+                  root.geo.setDrawRange(0, 0); // Reset position
+                }
+             } else if (root.state === 'growing') {
+                root.currentPoints += root.speed;
+                if (root.currentPoints >= root.maxPoints) {
+                  root.currentPoints = root.maxPoints;
+                  root.state = 'holding';
+                  root.waitTimer = 10 + Math.random()*30; 
+                  // The root reached the top! Property glows brilliantly
+                  root.targetMat.opacity = 0.5; 
+                }
+                root.geo.setDrawRange(0, Math.floor(root.currentPoints));
+             } else if (root.state === 'holding') {
                // Hold the bright connection for a moment
                root.waitTimer -= 1;
                if (root.waitTimer <= 0) {
                  // Switch to waiting, which will slowly fade the line out naturally!
                  root.state = 'waiting';
-                 root.waitTimer = 100 + Math.random() * 400; 
+                 root.waitTimer = 300 + Math.random() * 600; 
                }
-            }
+             }
           });
 
           // Lock camera position to prevent motion sickness

@@ -83,20 +83,42 @@ export default function BrokerMode() {
             <div className={`px-3 py-1 rounded text-xs font-bold font-working-title tracking-wider uppercase border
               ${deal.status === 'accepted' ? 'bg-success/10 text-success border-success/30' : 
                 deal.status === 'declined' ? 'bg-error/10 text-error border-error/30' : 
+                deal.status === 'invited' ? 'bg-[#FFB800]/10 text-[#FFB800] border-[#FFB800]/30' :
                 'bg-gold-accent/10 text-gold-accent border-gold-accent/30'}`}
             >
-              Status: {deal.status}
+              Status: {deal.status === 'invited' ? 'Incoming Handshake' : deal.status}
             </div>
             {deal.status === 'pending' && (
               <button 
                 className="border border-surface-variant text-text-secondary hover:text-error hover:border-error font-working-title font-bold px-4 py-2 rounded transition-colors text-sm"
                 onClick={() => {
-                  updatePitchStatus(deal.id, 'declined'); // Brokers can rescind
+                  updatePitchStatus(deal.id, 'declined'); // Brokers can withdraw
                   setActiveDealId(null);
                 }}
               >
                 Withdraw Pitch
               </button>
+            )}
+            {deal.status === 'invited' && (
+              <div className="flex gap-2">
+                <button 
+                  className="border border-surface-variant text-text-secondary hover:text-error hover:border-error font-working-title font-bold px-4 py-2 rounded transition-colors text-sm"
+                  onClick={() => {
+                    updatePitchStatus(deal.id, 'declined');
+                    setActiveDealId(null);
+                  }}
+                >
+                  Decline
+                </button>
+                <button 
+                  className="bg-[#FFB800] text-background hover:opacity-90 font-working-title font-bold px-4 py-2 rounded transition-colors text-sm"
+                  onClick={() => {
+                    updatePitchStatus(deal.id, 'accepted');
+                  }}
+                >
+                  Accept
+                </button>
+              </div>
             )}
           </div>
         </div>
@@ -165,13 +187,20 @@ export default function BrokerMode() {
             {/* The Pitch Record */}
             <div className="bg-[#121110] border border-surface-variant rounded-lg overflow-hidden flex flex-col">
               <div className="bg-surface-alt border-b border-surface-variant p-4 flex justify-between items-center">
-                <h3 className="font-label-caps text-xs tracking-widest text-text-secondary uppercase">Initial Pitch Sent</h3>
+                <h3 className="font-label-caps text-xs tracking-widest text-text-secondary uppercase">
+                  {deal.status === 'invited' ? 'Message from Owner' : 'Initial Pitch Sent'}
+                </h3>
                 <span className="font-data-tabular text-xs text-text-muted">{deal.timeRemaining || 'Just now'}</span>
               </div>
               <div className="p-6">
                 <p className="font-body-md text-base text-on-surface leading-relaxed">
                   {deal.message}
                 </p>
+                {deal.status === 'invited' && (
+                   <p className="text-sm text-gold-accent mt-4 italic font-working-title">
+                     The owner has requested your representation. Accepting this handshake will unlock their contact information immediately.
+                   </p>
+                )}
               </div>
             </div>
 
@@ -306,8 +335,8 @@ export default function BrokerMode() {
                   <div className={`absolute top-0 left-0 w-1 h-full transition-colors ${isAccepted ? 'bg-success' : isDeclined ? 'bg-error' : 'bg-surface-variant group-hover:bg-gold-accent'}`}></div>
                   
                   <div className="flex justify-between items-start mb-2">
-                    <span className={`font-label-caps text-[9px] tracking-widest uppercase px-1.5 py-0.5 rounded ${isAccepted ? 'bg-success/10 text-success' : isDeclined ? 'bg-error/10 text-error' : 'bg-surface-alt text-text-secondary'}`}>
-                      {pStatus}
+                    <span className={`font-label-caps text-[9px] tracking-widest uppercase px-1.5 py-0.5 rounded ${isAccepted ? 'bg-success/10 text-success' : isDeclined ? 'bg-error/10 text-error' : pStatus === 'invited' ? 'bg-[#FFB800]/10 text-[#FFB800]' : 'bg-surface-alt text-text-secondary'}`}>
+                      {pStatus === 'invited' ? 'Incoming Handshake' : pStatus}
                     </span>
                     <span className="text-[10px] text-text-muted font-data-tabular">{deal.timeRemaining || 'Just now'}</span>
                   </div>
