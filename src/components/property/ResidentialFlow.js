@@ -215,8 +215,11 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode }) {
         if (!res.ok) return;
         const data = await res.json();
         if (data.properties && data.properties.length > 0) {
+          // Match by slug (public links) OR by record id (dashboard links pass id)
           const match = data.properties.find(
-            (p) => p.slug && p.slug.toLowerCase() === (slug || "").toLowerCase()
+            (p) =>
+              (p.slug && p.slug.toLowerCase() === (slug || "").toLowerCase()) ||
+              (p.id && p.id === slug)
           );
           if (match) {
             const mock = getPropertyBySlug(slug);

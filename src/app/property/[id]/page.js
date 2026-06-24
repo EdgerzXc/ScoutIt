@@ -41,8 +41,11 @@ async function resolveCategory(slug) {
   if (apiKey && baseId) {
     try {
       const properties = await fetchProperties(apiKey, baseId);
+      // Public links pass a slug; dashboard links pass a record id — match either.
       const match = properties.find(
-        (p) => p.slug && p.slug.toLowerCase() === slug.toLowerCase()
+        (p) =>
+          (p.slug && p.slug.toLowerCase() === slug.toLowerCase()) ||
+          (p.id && p.id === slug)
       );
       if (match) return (match.spaceCategory || match.property_type || "").toLowerCase();
     } catch {
