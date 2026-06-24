@@ -84,7 +84,7 @@ Four tiers, ascending from free to institutional. The naming maps to the brand: 
 
 ---
 
-#### Solar Seeker — ₱999/mo *(placeholder)*
+#### Solar Seeker — ₱149/mo
 *"Starting to get serious"*
 
 **Browse**
@@ -104,7 +104,7 @@ Four tiers, ascending from free to institutional. The naming maps to the brand: 
 
 ---
 
-#### Cluster Scout — ₱2,499/mo *(placeholder)*
+#### Cluster Scout — ₱499/mo
 *"Active acquisition mode"* — **Most Popular**
 
 **Browse**
@@ -112,8 +112,9 @@ Four tiers, ascending from free to institutional. The naming maps to the brand: 
 - Off-market intel briefings
 - Comparative space analysis (side-by-side view)
 
-**Intelligence**
-- Full deep intel suite
+**Intelligence & The Vault**
+- **The Vault Unlocked:** Full access to Luma AI 3D Spatial Maps and 360 AR Tours
+- Full deep intel suite (exact Floor Levels, acoustic heatmaps, negotiation buffers)
 - ScoutIT verdict labels (AAA Investment Grade, etc.)
 - Neighbourhood activity alerts
 
@@ -126,7 +127,7 @@ Four tiers, ascending from free to institutional. The naming maps to the brand: 
 
 ---
 
-#### Universe Principal — ₱5,999/mo *(placeholder)*
+#### Universe Principal — ₱2,499/mo
 *"White-glove intelligence"*
 
 **Browse**
@@ -134,7 +135,8 @@ Four tiers, ascending from free to institutional. The naming maps to the brand: 
 - Exclusive Universe-only listings
 - Pre-launch developer access
 
-**Intelligence**
+**Intelligence & The Vault**
+- Full access to The Vault (all 3D maps and spatial data)
 - Full off-market pipeline view
 - Custom briefing requests (ScoutIT prepares for you)
 - Historical transaction data access
@@ -175,7 +177,7 @@ Four tiers, ascending from free to institutional. The naming maps to the brand: 
 
 ---
 
-#### Solar Advisor — ₱1,999/mo *(placeholder)*
+#### Solar Advisor — ₱2,499/mo
 *"Building your book"*
 
 **Listings**
@@ -198,7 +200,7 @@ Four tiers, ascending from free to institutional. The naming maps to the brand: 
 
 ---
 
-#### Cluster Strategist — ₱4,999/mo *(placeholder)*
+#### Cluster Strategist — ₱6,499/mo
 *"Full platform power"* — **Most Popular**
 
 **Listings**
@@ -221,7 +223,7 @@ Four tiers, ascending from free to institutional. The naming maps to the brand: 
 
 ---
 
-#### Universe Elite — ₱9,999/mo *(placeholder)*
+#### Universe Elite — ₱18,000/mo
 *"Top of the roster"*
 
 **Listings**
@@ -248,6 +250,8 @@ Four tiers, ascending from free to institutional. The naming maps to the brand: 
 
 **Tier names:** Starry Holder · Solar Landlord · Cluster Developer · Universe Portfolio
 
+> **The Churned Escrow Rule:** If an owner churns (cancels their paid subscription), any Luma AI 3D maps or Deep Intelligence gathered by ScoutIT remains accessible in The Vault for Premium Seekers. If a Seeker uses a Connect to inquire based on that 3D tour, the lead is held in escrow until the owner reactivates their subscription.
+
 #### Starry Holder — Free
 *"Your first space on the map"*
 
@@ -259,17 +263,18 @@ Four tiers, ascending from free to institutional. The naming maps to the brand: 
 - Natural / Enhanced toggle locked
 - AI copy optimisation locked
 
-**Visibility**
+**Visibility & Intelligence**
 - Standard directory placement
 - Verified asset badge locked
 - No inquiry analytics
+- QuestIT Spatial Generation locked
 
 **Services**
 - Service provider hiring locked
 
 ---
 
-#### Solar Landlord — ₱1,499/mo *(placeholder)*
+#### Solar Landlord — ₱1,999/mo
 *"Serious about your asset"*
 
 **Listing**
@@ -280,10 +285,11 @@ Four tiers, ascending from free to institutional. The naming maps to the brand: 
 - Attach unlimited brokers
 - AI-assisted listing copy on 1 listing
 
-**Visibility**
+**Visibility & Intelligence**
 - Verified asset badge
 - Boosted directory placement
 - Basic inquiry analytics
+- **Spatial Generation Queue:** Priority Level 3 (Slow Deployment)
 
 **Services**
 - Hire photographers via Connects
@@ -292,7 +298,7 @@ Four tiers, ascending from free to institutional. The naming maps to the brand: 
 
 ---
 
-#### Cluster Developer — ₱3,999/mo *(placeholder)*
+#### Cluster Developer — ₱7,999/mo
 *"Multi-asset management"* — **Most Popular**
 
 **Listing**
@@ -301,11 +307,12 @@ Four tiers, ascending from free to institutional. The naming maps to the brand: 
 - AI copy optimisation on all listings
 - Crowdsourced data flag management (accept / reject bounty submissions on your properties)
 
-**Visibility**
+**Visibility & Intelligence**
 - Priority directory placement
 - Showcase board eligibility
 - Full inquiry analytics + lead funnel view
 - Market intelligence for your area
+- **Spatial Generation Queue:** Priority Level 2 (Accelerated Deployment of QuestIT for 3D/AR maps)
 
 **Services**
 - All service provider types hireable
@@ -314,7 +321,7 @@ Four tiers, ascending from free to institutional. The naming maps to the brand: 
 
 ---
 
-#### Universe Portfolio — ₱7,999/mo *(placeholder)*
+#### Universe Portfolio — ₱25,000/mo
 *"Institutional-grade presence"*
 
 **Listing**
@@ -363,7 +370,7 @@ Four tiers, ascending from free to institutional. The naming maps to the brand: 
 
 ---
 
-#### Solar Shooter — ₱799/mo *(placeholder)*
+#### Solar Shooter — ₱499/mo
 *"Building your client base"*
 
 **Portfolio**
@@ -385,7 +392,7 @@ Four tiers, ascending from free to institutional. The naming maps to the brand: 
 
 ---
 
-#### Cluster Architect — ₱1,999/mo *(placeholder)*
+#### Cluster Architect — ₱1,499/mo
 *"Serious visual professional"* — **Most Popular**
 
 **Portfolio**
@@ -408,7 +415,7 @@ Four tiers, ascending from free to institutional. The naming maps to the brand: 
 
 ---
 
-#### Universe Visual — ₱3,999/mo *(placeholder)*
+#### Universe Visual — ₱3,499/mo
 *"The eye of the platform"*
 
 **Portfolio**
@@ -460,7 +467,7 @@ Four tiers, ascending from free to institutional. The naming maps to the brand: 
 
 ---
 
-#### Solar Field Scout — ₱799/mo *(placeholder)*
+#### Solar Field Scout — ₱499/mo
 *"On-ground intelligence"*
 
 **Research Work**
@@ -482,7 +489,7 @@ Four tiers, ascending from free to institutional. The naming maps to the brand: 
 
 ---
 
-#### Cluster Intel Officer — ₱1,999/mo *(placeholder)*
+#### Cluster Intel Officer — ₱1,499/mo
 *"Verified intelligence authority"* — **Most Popular**
 
 **Research Work**
@@ -505,7 +512,7 @@ Four tiers, ascending from free to institutional. The naming maps to the brand: 
 
 ---
 
-#### Universe Data Principal — ₱3,999/mo *(placeholder)*
+#### Universe Data Principal — ₱3,499/mo
 *"The backbone of ScoutIT intel"*
 
 **Research Work**
@@ -586,10 +593,11 @@ A downloadable, ScoutIT-branded credential available to paid service providers a
 - Build a "Coming Soon" waitlist page using only the cosmic tier names — no prices, no feature lists
 
 ### Pricing validation approach:
-- Start with Solar tier only for early adopters (skip Cluster and Universe)
-- Offer 3-month free Solar access to first 10 brokers in exchange for feedback
-- Adjust prices based on conversion data before public launch
-- Never publish prices on the site until you have at least one paying user at that tier
+- **The B2C vs B2B Pivot:** Seekers are priced for massive volume (₱149/mo, ₱499/mo). Brokers/Owners are priced as high-value B2B SaaS.
+- **The Early Adopter (Founding Member) Strategy:** To overcome the cold-start problem (zero network effect), display the real B2B premium prices crossed out, and offer a massively discounted "Founding Member" price for the first 100 Supply-Side users.
+  - Broker Cluster Strategist: <del>₱6,499</del> → ₱1,999/mo
+  - Owner Cluster Developer: <del>₱7,999</del> → ₱2,499/mo
+- Never publish prices on the site without this psychological anchoring during the bootstrapping phase.
 
 ---
 

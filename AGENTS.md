@@ -27,6 +27,9 @@ ScoutIt uses two separate databases for two different jobs. **Do not mix them up
 
 ## 4. CRITICAL DOCUMENTATION
 Before writing complex code or modifying data structures, you must immediately read:
-- `STRUCTURE.md` for the folder and architecture map.
-- `docs/DATA_DICTIONARY.md` for exact Airtable/Supabase column schemas.
-- `docs/USER_FLOWS.md` for how the pages connect and user psychology.
+- `_SCOUTIT_BRAIN/02_ARCHITECTURE_AND_STRUCTURE/STRUCTURE.md` for the folder and architecture map.
+- `_SCOUTIT_BRAIN/04_DATA_AND_SCHEMA/DATA_DICTIONARY.md` for exact Airtable/Supabase column schemas.
+- `_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_FLOWS.md` for how the pages connect and user psychology.
+
+> All knowledge/strategy/handoff docs now live in ONE home: `_SCOUTIT_BRAIN/`. Start at
+> `_SCOUTIT_BRAIN/00_START_HERE.md`. (Consolidated 2026-06-24 — root/docs/automations no longer hold doc copies.)

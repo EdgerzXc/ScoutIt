@@ -4,6 +4,7 @@
 Community voice from actual residents — what's the building management really like, is it noisy, does the landlord fix things, real neighborhood experience. This should live inside ScoutIt as gated/premium content for registered members, not public-facing. Separate from the broker/researcher/photographer supply side — this is the demand side speaking.
 
 **Placement:** Intel section, hidden behind member login. Could surface as a "Resident Report" on each property or area page.
+**Constraint/Status:** On hold. Too early for phase 1. Implementing this now risks creating conflict with owners/landlords whose buy-in we need right now. Keep in backlog for later maturity phases.
 
 ---
 
@@ -25,64 +26,68 @@ Show users the real monthly cost of a property — not just rent but HOA, estima
 
 ---
 
-## 4. Enterprise Living Portfolios + Badge Economy (Developer Anchor Play)
-The big bet: let large developers (Ayala, SM, Megaworld, etc.) run a **living portfolio** inside
-ScoutIt — a Mission-Control-style edit surface scoped to their assets, kept always-current, so
-brokers and buyers come *to* them instead of everyone chasing each other. This is the move that
-turns ScoutIt from "a nicer marketplace" into the **system of record / intelligence layer** for
-Philippine space, and the way we retain an anchor developer (real switching costs once their daily
-workflow lives here). Not a near-term build — a deliberate "phase two with teeth." **Start after QA.**
-
-**Why it's the moat, not just a feature:** one credible anchor developer solves the marketplace
-cold-start from the supply side (premium PH inventory is concentrated in a few names), pulls brokers
-+ buyers, converts us to high-ACV recurring enterprise revenue, and their maintained structured data
-becomes the fuel for the intelligence layer (Bloomberg-for-space, not a board).
-
-**The membership primitive (design once, express three ways).** Enterprise "org with multiple
-listers," the QuestIT **Guild**, and a "team" are the SAME underlying concept: a *membership* — people
-with roles attached to a shared entity. Build one model (org/team/Guild) with roles
-(admin / lister / viewer / approver), not three half-versions. `owner_id` is already plain text, so
-the path is `owner_id → org-owned` and additive — make that naming/shape decision deliberately NOW so
-Antigravity doesn't build a wall we demolish later. This is the same road as the QuestIT plan, not a detour.
-
-**The badge / status economy (solves anchor-tenant dependency).** Badges are **limited, earned, never
-bought** — part of a developer's identity + visibility. They create a competitive environment where
-developers compete *for our recognition* (power stays with the platform, no single whale owns the
-roadmap). Earning a badge unlocks incentives, e.g. a 5% discount. Hard rules:
-- **Earned vs. bought wall:** visibility can be sold; status cannot. A buyable badge is worthless.
-  (Same principle as Scout Rating = closures only, never bought.)
-- **Discounts apply to OUR fees/subscription only — never to a property's price** (price discounting =
-  transacting = RESA violation; we never touch the transaction. That's the endgame red line.)
-- **Status is public; operating data is private to the developer's workspace.** Developers fear having
-  their numbers benchmarked next to rivals — compete over the badge, never over exposing their books.
-
-**Hard gates before any developer data goes live (non-negotiable):**
-- **Real authentication** (we're still on the mock/demo login — replace first).
-- **Bulletproof multi-tenant isolation / RLS.** This is the existential risk: once two companies share
-  the DB, a cross-tenant leak isn't a bug, it's the end of the company. RLS is currently dev-open. This
-  is the one area where "move fast with AI" is dangerous — code can look right, pass the demo, and still
-  leak. Treat tenant isolation as **move-slow-and-verify**, ideally a dedicated human/security-review
-  hardening pass before a second company's data is added.
-
-**On-ramp:** developers won't hand-key hundreds of properties — the **Listing Engine** (PDF/deck →
-draft) + QuestIT verification is the migration bridge that makes onboarding a portfolio feel like
-minutes, not months.
-
-**Known disadvantages to keep watching:** (1) compliance creep — the more it looks like developers +
-brokers transacting inside our walls, the closer we drift to brokering; keep "intelligence first,
-transactions never" airtight even as we make broker dealings easier. (2) Hollow-win risk — a living
-portfolio only retains a developer if brokers/buyers actually show up against it; don't let enterprise
-supply run ahead of demand-side liquidity. (3) Channel conflict — developers have their own sites +
-broker networks; the pitch must be the neutral broker marketplace + verification + market intelligence
-they can't build alone. (4) Operational load — enterprises expect humans/SLAs; a small team must be
-able to support an anchor account.
-
-**Status:** Captured for build **after current QA pass**. Sequence: finish single-owner loop → design
-membership primitive + badge economy on paper → real auth + tenant isolation gate → enterprise rollout.
-
----
-
 ## Notes
 - Cannot touch transaction/negotiation layer — RESA compliance (Real Estate Service Act of the Philippines)
 - Financial computation possible only with proper legal clearance and disclaimers
-- Enterprise/badge discounts apply to ScoutIt fees only, never to property prices (see Idea #4)
+
+---
+
+## 4. The AI Assimilation "Blueprint Rule" (Cost-Saving Architecture)
+When handling bulk CSV/Excel uploads via the Global Portfolio Importer, we cannot send thousands of rows to the AI directly (e.g. Gemini/OpenAI) as this will immediately burn through API token limits and budget.
+**The Proposed Solution:**
+- Use PapaParse to extract the raw JSON locally in the browser.
+- Slice off only the **Headers (Row 0)** and the **First 3 Rows of Data**.
+- Send *only* those 4 rows to the LLM (Council AI) to establish a "Mapping Blueprint" (e.g. `{"Sz (sqm)": "floor_sqm"}`).
+- Disconnect from the AI and use local, free Javascript to loop through the remaining thousands of rows using that blueprint.
+This ensures an upload of 10,000 properties costs the same exact amount of tokens as an upload of 3 properties.
+
+---
+
+## 5. Gamified Badge Ecosystem (Supabase Implementation)
+ScoutIt uses a "Pokémon-style" gamified badge system to drive obsessive completionist loops and FOMO. Badges grant massive discounts and unlock secret capabilities.
+
+**The Gamification Mechanics:**
+- **Visual Rarity:** Badges are styled with different visual tiers (e.g., Common Glass, Epic Glowing Persona Colors, Legendary Holographic Gold).
+- **The Pokedex (Locked Silhouettes):** In the Vault of Honors (`/badges`), active badges the user doesn't own render as dark, blurred silhouettes with padlock icons and hidden requirements to tease the user.
+- **The Graveyard:** Sold-out/limited cohort badges permanently turn to stone (grayscale with noise overlay) and display a red "YOU MISSED THIS" tag to drive extreme FOMO for the next drop.
+
+**Supabase Implementation Checklist (Handoff):**
+- [ ] Add a `badges` JSONB array to the Supabase `users` table.
+- [ ] Update `BadgeEngine.js` to fetch `claimed` amounts directly from a Supabase real-time count.
+- [ ] Create an API endpoint (`/api/badges/claim`) that securely mints a badge to a user in Supabase (checking `max_slots` to ensure cohorts don't over-mint).
+- [ ] Ensure Stripe Checkout reads the user's Supabase badges on the backend to apply discounts, so users cannot fake badges locally.
+
+---
+
+## 6. Multi-LLM Parsing Pipeline (Gemini → Claude)
+- **Concept:** Use a chained multi-AI approach for complex data extraction.
+- **Workflow:** 
+  1. Use **Gemini** for the initial fast, cheap extraction or visual OCR parsing of raw inputs (like PDFs, images, or massive CSV samples).
+  2. Take Gemini's structured output and pass it into a programmatic parsing step.
+  3. Send the refined payload to **Claude** (Anthropic) for high-reasoning tasks, such as generating the final compelling property description, synthesizing the "vibe" of the neighborhood, or making nuanced real estate assessments.
+- **Benefit:** Combines Gemini's speed/cost with Claude's superior linguistic and reasoning capabilities.
+
+---
+
+## 7. QuestIT Standalone Protocol (Bounty API Infrastructure)
+- **Concept:** QuestIT is decoupled from ScoutIt and acts as a standalone "Bounty-as-a-Service" API for the gig economy.
+- **Workflow:** Any business (not just ScoutIt) can hit the `api.questit.network/bounties/create` endpoint to summon local freelancers (photographers, inspectors, movers).
+- **Guilds on QuestIT:** Instead of a single company account, companies (like Re/Max or Lalamove) register as "Guilds" on QuestIT. Individual humans join these Guilds. When a bounty is posted, it routes to the appropriate Guild, and an accountable human claims it.
+- **ScoutIt Integration:** ScoutIt simply acts as the first client of the QuestIT API. Users log into ScoutIt using their QuestIT identity.
+
+---
+
+## 8. In-App Concierge: "The AI That Lives in the Database"
+- **Concept:** Provide an in-app AI conversational assistant (Concierge) that translates natural language (e.g., "Find me a bright 200 sqm office under 500k PHP with a modern vibe") directly into database queries and tool executions.
+- **Vector Search Magic:** Utilize Supabase `pgvector` to do semantic/similarity search. The AI won't just match hard numbers; it will understand "vibes", "aesthetics", and "moods" by mathematically comparing user intent against property descriptions and images.
+- **Monetization & Tier Gating:** 
+  - To protect against massive LLM token costs, the Concierge is strictly locked away from Free users.
+  - **Tiered Power:** Lower paid tiers might only get basic Chat/Search capabilities. Higher tiers (like Cosmic/Universe) unlock deep analytical vector search, larger token contexts, and the ability for the AI to auto-draft complex documents.
+  - Optionally, charge users "Connects" for heavy queries to align usage with revenue.
+
+---
+
+## 9. ScoutIt MCP Server Protocol (B2B / AI Ecosystem Integration)
+- **Concept:** Expose ScoutIt's database and business logic via the Model Context Protocol (MCP). Instead of an in-app chat, power users, developers, and enterprise brokerages can connect their own AI agents (Cursor, Claude Desktop, enterprise bots) directly to ScoutIt.
+- **Workflow:** An authorized user points their AI to a ScoutIt Server-Sent Event (SSE) endpoint. Their AI can then securely query the real estate catalog, manage deals, or verify data without needing to use the ScoutIt web UI.
+- **Status:** On hold. A highly powerful feature for the B2B ecosystem, but not necessary for the core MVP launch.

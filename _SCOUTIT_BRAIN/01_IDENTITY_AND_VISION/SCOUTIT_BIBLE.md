@@ -131,13 +131,25 @@ ScoutIt serves high-intent buyers, investors, and researchers who want intellige
 | **Discovery Feed** | Curated spotlights, news, collections — editorial curation, not algorithm slop |
 | **Double-Blind Privacy Shield** | Future feature: connect with brokers without revealing identity until ready |
 
-### Revenue Streams (Current + Planned)
+### The Dual-Monetization Architecture (Connects vs. Subscriptions)
 
-1. **Broker subscriptions** — recurring B2B revenue
-2. **Connects token economy** — micro-transactions (see Part 6)
-3. **Featured listings** — premium visibility for high-value properties
-4. **Bounty Hunt marketplace** — crowdsourced data tasks (see Part 6)
-5. **Luma AI 3D Tours** — premium unlock (future, see Part 6)
+ScoutIt strictly separates the **Communication Layer** from the **Deep Intelligence Layer** to maintain trust and UX integrity. We do not block inquiries behind subscriptions.
+
+1. **The Handshake (Connects)**
+   - **For Seekers:** Public facts (Price, GLA, Location, Condition) are free. If a seeker wants to inquire, they spend a **Connect** token to message the broker/owner. 
+   - **Psychology:** Pay-per-connect ensures high-intent leads without forcing buyers into subscriptions just to talk.
+
+2. **The Vault (Subscriptions for Seekers)**
+   - **For Seekers:** Access to "Deep Intelligence" (Luma AI 3D Spatial Maps, 360 AR Tours, Acoustic Heatmaps, Negotiation Buffers, exact Floor Levels). 
+   - **Psychology:** This is an "Ocular Replacement Upgrade." Busy executives or overseas investors pay a monthly subscription to skip physical site visits and do extreme due diligence from their desk.
+
+3. **The Deployment Queue (Subscriptions for Owners)**
+   - **For Owners:** We do *not* promise instant 3D generation. Subscribing to an upper tier (e.g., Orbit Layer) places the owner in a prioritized queue where ScoutIt deploys QuestIT Pros to scan their property. 
+   - **The Fast Lane:** If an owner is impatient, they can use the QuestIT marketplace to pay an expedited bounty, or upload their own videos for our Luma AI to process.
+
+4. **The Churned Owner Escrow (Data Ownership)**
+   - **The Dilemma:** What happens if an owner cancels their subscription, but ScoutIt already generated a highly valuable 3D Spatial Map for them?
+   - **The Hook:** ScoutIt owns the derivative 3D data. The 3D map stays active in The Vault for Premium Seekers. If a Premium Seeker views the 3D map of a churned owner and spends a Connect to inquire, the owner receives an automated email: *"A Premium Seeker wants this property based on the 3D tour. Resubscribe to accept the handshake."* This turns historical 3D maps into an eternal lead-generation trap that lures canceled owners back.
 
 ---
 
@@ -367,17 +379,26 @@ All Airtable data flows through one API proxy: `src/app/api/cms/route.js`. This 
 
 Authentication, user state, and owner submissions go here. The public never sees this directly.
 
-| Table | Purpose |
+> **⚠️ Reconciled 2026-06-24 — the live schema below replaces an earlier (stale) model.**
+> The old docs named tables `profiles`, `user_reactions`, `property_submissions`. Those are **gone**.
+> Per the 2026-06-22 units handoff: *"Do NOT reintroduce `property_submissions`. The table is `properties`."*
+> The running code is the source of truth.
+
+| Table (live) | Purpose |
 |---|---|
-| `profiles` | User role (buyer / owner), email, name |
-| `user_reactions` | What a user has shortlisted (cross-referenced with Airtable Slugs) |
-| `property_submissions` | Owner wizard submissions — held in "pending" until admin approves and ports to Airtable |
+| `properties` | Owner listings + drafts. Key fields: `owner_id`, `title`, `type`, `space_category`, `slug`, `location`, `price`, `pipeline_status`, `details` (jsonb — incl. `units_inventory`), `coordinates` (PostGIS). **This is the table — not `property_submissions`.** |
+| `user_profiles` | User identity/profile. `id` (text key, becomes the Auth UUID-as-text), `display_name`, `subscription_tier`, `connects_balance`, `active_roles`, `badges` (jsonb), etc. |
+| `saved_intel` | The buyer's saved/shortlisted properties (the server mirror of the on-device Ledger). `user_id`, `property_id`. |
+| `deals` | Broker/owner handshake pitches. `broker_id`, `property_id`, `status`, `pitch_message`. |
+| `privacy_settings`, `broker_profiles`, `researcher_profiles` | Per-role extensions of `user_profiles`. |
+| `connect_balances`, `connect_transactions` | Connects ledger — **writes only via Edge Functions (service role)**, never client-side. |
 
 **The golden rule:** Airtable = public display. Supabase = private user state. Never mix them.
+**Identity note:** real Supabase Auth is the next phase — see `04_DATA_AND_SCHEMA/SUPABASE_AUTH_INTEGRATION_PLAN.md`.
 
 ### The Admin Pipeline
 
-Owner submits via wizard → data lands in Supabase `property_submissions` (status: "pending") → admin reviews → if approved, manually copies to Airtable `PROPERTIES_CMS` → sets `Approved_For_ScoutIt = true` → property goes live.
+Owner submits via the Live Editor / wizard → data lands in Supabase **`properties`** (`pipeline_status = 'pending'`) → admin reviews (`/api/admin/approve`) → if approved, the record is copied to Airtable `PROPERTIES_CMS` (units ride along as `Units_JSON`) → `Approved_For_ScoutIt = true` → property goes live.
 
 ---
 
@@ -387,7 +408,7 @@ Owner submits via wizard → data lands in Supabase `property_submissions` (stat
 |---|---|---|
 | Framework | Next.js 16.2.7 (App Router, Turbopack) | Modified version — check `node_modules/next/dist/docs/` before writing framework code |
 | Language | React 19, plain JavaScript (no TypeScript) | |
-| Styling | Vanilla CSS + CSS Modules | No Tailwind anywhere in the main project |
+| Styling | Vanilla CSS + CSS Modules (public site) | **Public/marketing surfaces stay vanilla CSS.** Note (2026-06-24): the owner/broker **dashboards now use Tailwind utility classes** — running code wins over the old "no Tailwind anywhere" line. Keep the public site vanilla; dashboards may use Tailwind. |
 | CMS (public) | Airtable | Read-only, approval-gated |
 | CMS (private) | Supabase | Auth, reactions, submissions |
 | Maps | Mapbox (geocoding, radius search) + Leaflet (static property maps) | |
