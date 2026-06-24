@@ -6,6 +6,7 @@ import { useState } from "react";
 import Link from "next/link";
 import "../property/property.css";
 
+import FoundingProgramPanel from "@/components/ecosystem/FoundingProgramPanel";
 import { getPhotographers } from "@/data/mockPhotographers";
 
 const DUMMY_PHOTOGRAPHERS = getPhotographers();
@@ -123,17 +124,19 @@ export default function PhotographersPage() {
               />
             </div>
 
-            <div className="waitlist-container" style={{ padding: "60px 40px", background: "var(--surface)", border: "1px solid var(--border-solid)", borderRadius: "var(--radius-md)", textAlign: "center", marginTop: "20px" }}>
-              <div style={{ fontSize: "48px", marginBottom: "24px" }}>📸</div>
-              <h2 style={{ fontFamily: "var(--font-display)", fontSize: "32px", color: "#fff", marginBottom: "16px" }}>The Roster is Being Curated</h2>
-              <p style={{ color: "var(--text-secondary)", marginBottom: "40px", maxWidth: "500px", margin: "0 auto 40px", lineHeight: "1.6" }}>
-                We are currently vetting the top architectural and interior photographers in the ecosystem. Join the waitlist to secure early access when the layer goes live.
-              </p>
-              <div style={{ display: "flex", gap: "12px", justifyContent: "center", maxWidth: "450px", margin: "0 auto" }}>
-                <input type="email" placeholder="ENTER YOUR EMAIL..." className="global-search-input" style={{ flexGrow: 1, marginBottom: 0, padding: "16px", borderRadius: "4px" }} />
-                <Link href="/onboarding" style={{ display: "inline-flex", alignItems: "center", background: "var(--accent)", color: "#0e0e0e", fontWeight: "bold", padding: "0 32px", borderRadius: "4px", letterSpacing: "0.05em", textDecoration: "none" }}>JOIN</Link>
-              </div>
-            </div>
+            <FoundingProgramPanel
+              icon="📸"
+              serviceName="Space photography"
+              foundingTitle="Become a Founding Lens"
+              supplyBlurb="Space photography launches with the platform. Join now as a Founding Lens — set up your portfolio, get verified, and you'll be live and first in line the day we open."
+              perks={[
+                "Build your portfolio before the doors open",
+                "Claim your verified ScoutIt ID card",
+                "Lock in founding-member pricing",
+                "Go live first — featured the moment Photography launches",
+              ]}
+              ctaLabel="Claim Founding Lens"
+            />
           </section>
         </div>
       </main>

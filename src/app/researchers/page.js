@@ -5,6 +5,7 @@ import Footer from "@/components/layout/Footer";
 import { useState } from "react";
 import Link from "next/link";
 import "../property/property.css";
+import FoundingProgramPanel from "@/components/ecosystem/FoundingProgramPanel";
 import { getResearchers } from "@/data/mockResearchers";
 
 const DUMMY_RESEARCHERS = getResearchers();
@@ -105,17 +106,19 @@ export default function ResearchersPage() {
                 value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
             </div>
 
-            <div className="waitlist-container" style={{ padding: "60px 40px", background: "var(--surface)", border: "1px solid var(--border-solid)", borderRadius: "var(--radius-md)", textAlign: "center", marginTop: "20px" }}>
-              <div style={{ fontSize: "48px", marginBottom: "24px" }}>🔍</div>
-              <h2 style={{ fontFamily: "var(--font-display)", fontSize: "32px", color: "#fff", marginBottom: "16px" }}>The Roster is Being Curated</h2>
-              <p style={{ color: "var(--text-secondary)", marginBottom: "40px", maxWidth: "500px", margin: "0 auto 40px", lineHeight: "1.6" }}>
-                We are currently vetting the top site researchers and diligence specialists in the ecosystem. Join the waitlist to secure early access when the layer goes live.
-              </p>
-              <div style={{ display: "flex", gap: "12px", justifyContent: "center", maxWidth: "450px", margin: "0 auto" }}>
-                <input type="email" placeholder="ENTER YOUR EMAIL..." className="global-search-input" style={{ flexGrow: 1, marginBottom: 0, padding: "16px", borderRadius: "4px" }} />
-                <Link href="/onboarding" style={{ display: "inline-flex", alignItems: "center", background: "var(--accent)", color: "#0e0e0e", fontWeight: "bold", padding: "0 32px", borderRadius: "4px", letterSpacing: "0.05em", textDecoration: "none" }}>JOIN</Link>
-              </div>
-            </div>
+            <FoundingProgramPanel
+              icon="🔍"
+              serviceName="Site research"
+              foundingTitle="Become a Founding Analyst"
+              supplyBlurb="Site research launches with the platform. Join now as a Founding Analyst — start earning from bounties, build your credibility, and be first in line when commissions open."
+              perks={[
+                "Start earning Connects from bounties now",
+                "Claim your verified ScoutIt ID card",
+                "Lock in founding-member pricing",
+                "Become the area's data authority from day one",
+              ]}
+              ctaLabel="Claim Founding Analyst"
+            />
           </section>
         </div>
       </main>
