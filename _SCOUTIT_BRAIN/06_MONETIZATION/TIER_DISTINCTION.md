@@ -2,7 +2,8 @@
 
 > The single source of truth for **what each subscription tier actually unlocks** — the spec the
 > code's entitlement gate (`canSee(feature, tier)`) must enforce. Pairs with
-> `SCOUTIT_PRICING_STRATEGY.md` (pricing/positioning prose) and `CONNECTS_AND_BROKER_HANDSHAKE.md`.
+> `SCOUTIT_PRICING_STRATEGY.md` (pricing/positioning prose), `CONNECTS_AND_BROKER_HANDSHAKE.md`, and
+> `VAULT_LISTING_LIFECYCLE.md` (how the Vault is produced/kept + listing states + Quest IT).
 > Decided with the owner 2026-06-25. **Built? flags = current reality, verified, not aspiration.**
 
 ---
@@ -27,18 +28,52 @@ A live audit found the subscription system is a **storefront with no working bac
 
 ---
 
+## 0. Tier model — per-role subscriptions, shared ladder, bundles (decided 2026-06-25)
+
+**Tier is PER ROLE, not per account.** One login holds several *separate* memberships — a Seeker
+membership, an Owner membership, a Broker membership, etc. — each at its **own** level, each paid
+**separately**. Being Solar as a Seeker does **nothing** for your Broker hat; you subscribe again for
+each role. Default for any unsubscribed role = its **free Starry** rung.
+
+- **Which tier gates a feature = the feature's home world.** Seeker features (Vault, deep intel,
+  enhanced photos) are gated by the viewer's **Seeker** tier; Broker tools by the **Broker** tier; etc.
+  The "active hat" only chooses which world/dashboard you're in.
+- **Engine impact:** store a tier **per role** (e.g. `{ seeker:"solar", owner:"starry", broker:"cluster" }`)
+  instead of one account-wide `subscription_tier`. `canSee(feature, tier)` must receive the
+  feature's-world tier. (Today's code stores one tier — this is the foundation refactor before further gating.)
+
+**Shared ladder, role-specific names.** The rank is universal — `Starry < Solar < Cluster < Universe`
+(the *machinery*: rank is all the engine cares about). Each rung gets a themed **display nickname** per
+role (decoration only; already live on the pricing pages):
+
+| Rank | Seeker | Owner | Broker | Creator (provider) |
+|------|--------|-------|--------|--------------------|
+| Starry | Starry Wanderer | Starry Holder | Starry Closer | Starry Lens |
+| Solar | Solar Seeker | Solar Landlord | Solar Advisor | Solar Shooter |
+| Cluster | Cluster Scout | Cluster Developer | Cluster Strategist | Cluster Architect |
+| Universe | Universe Principal | Universe Portfolio | Universe Elite | Universe Visual |
+
+**Bundles (planned, payments-era).** A multi-hat user (e.g. Owner who also wants Seeker + Photographer)
+can buy a **bundle subscription** at a combined price. Because tier is stored **per role**, a bundle is
+just *one checkout that sets several role-tiers at once* — no special machinery. Build with payments.
+
+**Connects** depend on **both** tier **and** active role (e.g. Solar Seeker = 6/mo, Solar Broker = 8/mo;
+`CONNECTS_ALLOWANCE`). Per-role tiers imply **per-role Connects wallets** (separate pots per hat).
+
+---
+
 ## 1. Seekers / Buyers — *what they SEE*
 
 | Capability | Starry ₱0 | Solar ₱149 | Cluster ₱499 | Universe ₱2,499 | Built? |
 |---|---|---|---|---|---|
 | Browse all listings + editorial intel | 🔓 | 🔓 | 🔓 | 🔓 | ✅ |
 | Private board / saves — **unlimited, no account** | 🔓 | 🔓 | 🔓 | 🔓 | ✅ |
-| Deep intel (cap rate, yield, noise/quiet level, verdict) | 🔒 | 🔓 | 🔓 | 🔓 | ⚠️ data exists, gate missing |
-| Enhanced photos | 🔒 | 🔓 | 🔓 | 🔓 | ⚠️ field exists, gate missing |
+| Deep intel (cap rate, yield, noise/quiet level, verdict) | 🔒 | 🔓 | 🔓 | 🔓 | ⚠️ teaser blur-locked for all; real values intentionally NOT in DOM → reveal+gate = Phase B |
+| Enhanced photos | 🔒 | 🔓 | 🔓 | 🔓 | ✅ gate built 2026-06-25 (both flows; locked button → upgrade), pending push |
 | Guide Wizard (full) | teaser | 🔓 | 🔓 | 🔓 | ⚠️ |
 | **Contact a broker** (anonymous proxy, spends Connects) | 🔒 | 🔓 | 🔓 | 🔓 | ⚠️ |
 | Off-market briefings · side-by-side compare | 🔒 | 🔒 | 🔓 | 🔓 | ⏳ |
-| **The Vault** (Luma 3D, 360, drone heatmaps) | 🔒 | 🔒 | 🔓 | 🔓 | ⏳ |
+| **The Vault** (Luma 3D, 360, drone heatmaps) | 🔒 | 🔒 | 🔓 | 🔓 | ⚠️ gate ✅ both flows + demo (`the-paragon-tower`) 2026-06-25; production pipeline ⏳ (see `VAULT_LISTING_LIFECYCLE.md`) |
 | Identity-reveal control · priority matching · bounties | 🔒 | 🔒 | 🔓 | 🔓 | ⏳ |
 | Universe-only listings · custom briefings · curator · off-market pipeline | 🔒 | 🔒 | 🔒 | 🔓 | ⏳ |
 
