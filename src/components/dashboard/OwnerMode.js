@@ -8,6 +8,7 @@ import Link from "next/link";
 import { useRouter } from 'next/navigation';
 import Papa from 'papaparse';
 import { sanitizeObject } from '../../lib/sanitize';
+import { canSee, getCurrentTier } from '../../lib/entitlements';
 
 export default function OwnerMode() {
   const { listings, pitches, updatePitchStatus, addListing, addConciergeListing, bulkAddListings, addToast, updateListing, publishListing, closeListing, currentUser, inviteBroker, connects } = useDashboard();
@@ -15,6 +16,11 @@ export default function OwnerMode() {
   const [showWizard, setShowWizard] = useState(false); // false | 'select_mode' | 'live_editor' | 'concierge' | 'edit'
   const [selectedFile, setSelectedFile] = useState(null);
   const [isAssimilating, setIsAssimilating] = useState(false);
+  const [vaultTab, setVaultTab] = useState("url"); // "url" | "build"
+  const [vaultBuildOption, setVaultBuildOption] = useState(null); // null | "self" | "team"
+  const [vaultUrl, setVaultUrl] = useState("");
+  const [canUseVault, setCanUseVault] = useState(false);
+  useEffect(() => { setCanUseVault(canSee("vault", getCurrentTier())); }, []);
   
   // Check if current user has any listings (match the logged-in owner's id)
   const myListings = listings.filter(l => currentUser && l.ownerId === currentUser.id);
@@ -120,15 +126,35 @@ export default function OwnerMode() {
              <span className="text-gold-accent font-label-caps text-[10px] tracking-widest border border-gold-accent/30 bg-gold-accent/10 px-3 py-1.5 rounded-full">RECOMMENDED FOR PROPERTY UPLOADS</span>
           </div>
 
-          <div 
-            className="bg-gradient-to-br from-[#1A1814] to-[#0A0908] backdrop-blur-xl border border-gold-accent/40 rounded-xl p-8 hover:border-gold-accent hover:shadow-[0_0_30px_rgba(255,184,0,0.15)] transition-all duration-500 cursor-pointer group relative overflow-hidden"
-            onClick={() => setShowWizard('vip_vault')}
+          <div
+            className={`bg-gradient-to-br from-[#1A1814] to-[#0A0908] backdrop-blur-xl border rounded-xl p-8 transition-all duration-500 relative overflow-hidden group ${canUseVault ? "border-gold-accent/40 hover:border-gold-accent hover:shadow-[0_0_30px_rgba(255,184,0,0.15)] cursor-pointer" : "border-surface-variant cursor-not-allowed opacity-60"}`}
+            onClick={() => canUseVault && setShowWizard('vip_vault')}
           >
-             <div className="absolute top-0 left-0 w-1.5 h-full bg-gold-accent/50 group-hover:bg-gold-accent transition-colors shadow-[0_0_15px_rgba(255,184,0,0.5)]"></div>
-             <div className="absolute -top-24 -right-24 w-48 h-48 bg-gold-accent/10 rounded-full blur-3xl group-hover:bg-gold-accent/20 transition-all duration-700"></div>
-             <h3 className="font-working-title text-2xl text-gold-accent mb-3 drop-shadow-md">The VIP Spatial Vault</h3>
-             <p className="text-sm text-text-secondary mb-6 leading-relaxed group-hover:text-on-surface transition-colors">Don't have time? Drop your raw property videos here. Our QuestIT Pros will convert them into immersive 3D Maps and 360° AR Tours.</p>
-             <span className="text-[#0A0908] font-label-caps font-bold text-[10px] tracking-widest bg-gold-accent px-3 py-1.5 rounded-full shadow-[0_0_10px_rgba(255,184,0,0.3)]">QUEST-IT ASSISTED</span>
+            <div className={`absolute top-0 left-0 w-1.5 h-full transition-colors shadow-[0_0_15px_rgba(255,184,0,0.5)] ${canUseVault ? "bg-gold-accent/50 group-hover:bg-gold-accent" : "bg-surface-variant"}`}></div>
+            <div className="absolute -top-24 -right-24 w-48 h-48 bg-gold-accent/10 rounded-full blur-3xl group-hover:bg-gold-accent/20 transition-all duration-700"></div>
+
+            {/* Lock badge — visible when locked */}
+            {!canUseVault && (
+              <div className="absolute top-4 right-4 flex items-center gap-1.5 bg-surface-alt border border-surface-variant rounded-full px-3 py-1">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-text-secondary"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <span className="font-label-caps text-[9px] tracking-widest text-text-secondary uppercase">Cluster+</span>
+              </div>
+            )}
+
+            <h3 className={`font-working-title text-2xl mb-3 drop-shadow-md ${canUseVault ? "text-gold-accent" : "text-text-secondary"}`}>The Spatial Vault</h3>
+            <p className="text-sm text-text-secondary mb-6 leading-relaxed group-hover:text-on-surface transition-colors">
+              {canUseVault
+                ? "Link a Matterport or Luma URL, or drop raw videos for our QuestIT Pros to convert into immersive 3D tours."
+                : "Upgrade to Cluster or higher to unlock 360° tours, 3D maps, and drone heatmaps for your listing."}
+            </p>
+
+            {canUseVault ? (
+              <span className="text-[#0A0908] font-label-caps font-bold text-[10px] tracking-widest bg-gold-accent px-3 py-1.5 rounded-full shadow-[0_0_10px_rgba(255,184,0,0.3)]">QUEST-IT ASSISTED</span>
+            ) : (
+              <Link href="/pricing/owner" className="inline-block text-gold-accent font-label-caps text-[10px] tracking-widest border border-gold-accent/40 bg-gold-accent/10 px-3 py-1.5 rounded-full hover:bg-gold-accent/20 transition-colors" onClick={e => e.stopPropagation()}>
+                UPGRADE TO CLUSTER →
+              </Link>
+            )}
           </div>
 
           <div 
@@ -316,61 +342,248 @@ export default function OwnerMode() {
   }
 
   if (showWizard === 'vip_vault') {
+    if (!canUseVault) {
+      return (
+        <div className="max-w-[600px] mx-auto py-lg animate-[fadeIn_0.4s_ease] flex flex-col items-center text-center gap-6">
+          <div className="w-20 h-20 bg-surface-alt border border-surface-variant rounded-full flex items-center justify-center">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#7A5C00" strokeWidth="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <div>
+            <p className="font-label-caps text-[11px] tracking-widest text-gold-accent/60 uppercase mb-2">Cluster tier required</p>
+            <h2 className="font-display-md text-3xl text-on-surface mb-3">The Spatial Vault</h2>
+            <p className="text-text-secondary text-sm leading-relaxed max-w-sm">360° tours, 3D spatial maps, and drone heatmaps are a Cluster+ feature. Upgrade your Owner plan to unlock the full Vault experience for your listing.</p>
+          </div>
+          <div className="flex gap-3">
+            <button onClick={() => setShowWizard('select_mode')} className="border border-surface-variant text-text-secondary font-working-title px-6 py-3 rounded hover:border-gold-accent/40 hover:text-on-surface transition-colors text-sm">← Back</button>
+            <Link href="/pricing/owner" className="bg-gold-accent text-[#0A0908] font-working-title font-bold px-6 py-3 rounded hover:bg-[#FFC929] transition-colors text-sm tracking-wide">Upgrade to Cluster</Link>
+          </div>
+        </div>
+      );
+    }
+
+    const isUrlValid = vaultUrl.trim().startsWith("http");
+
+    const handleSaveUrl = async () => {
+      if (!isUrlValid) return;
+      if (activeListing) {
+        await updateListing(activeListing.id, { matterportTourUrl: vaultUrl.trim() });
+        addToast("Vault tour linked to your listing — it's live now.", "success");
+      }
+      setVaultUrl("");
+      setShowWizard(false);
+    };
+
+    const handleSubmitVideo = async () => {
+      if (!selectedFile) return;
+      await addConciergeListing(`[Vault — Self-recorded] ${selectedFile.name}`);
+      addToast("Video received — we'll process it and notify you when your tour is live.", "success");
+      setSelectedFile(null);
+      setVaultBuildOption(null);
+      setShowWizard(false);
+    };
+
+    const handleJoinQueue = async () => {
+      await addConciergeListing(`[Vault — ScoutIt Team] ${activeListing?.title || "Property"}`);
+      addToast("You're in the queue — our team will reach out to schedule your recording.", "success");
+      setVaultBuildOption(null);
+      setShowWizard(false);
+    };
+
+    const backLabel = vaultBuildOption ? "← Choose differently" : "← Back";
+    const handleBack = () => {
+      if (vaultBuildOption) { setVaultBuildOption(null); return; }
+      setShowWizard('select_mode');
+    };
+
     return (
       <div className="max-w-[700px] mx-auto py-lg animate-[fadeIn_0.5s_ease]">
-        <button onClick={() => setShowWizard('select_mode')} className="text-text-secondary hover:text-gold-accent mb-8 font-working-title transition-colors">← Back</button>
-        <h1 className="font-display-md text-5xl text-gold-accent mb-4 drop-shadow-md">The VIP Spatial Vault</h1>
-        
-        <div className="bg-gradient-to-r from-gold-accent/20 to-transparent border-l-4 border-gold-accent rounded-r-lg p-6 mb-10 shadow-[0_4px_20px_rgba(255,184,0,0.05)] backdrop-blur-sm">
-          <p className="text-base text-on-surface leading-relaxed">
-            <strong className="text-gold-accent font-working-title text-lg tracking-wide block mb-2">JUST DROP THE RAW VIDEOS. SCOUTIT HANDLES THE REST.</strong>
-            You don't need to know how to build complex 3D maps or AR tours. Simply walk through your property with your phone camera and drop the raw `.mp4` or `.mov` files below. Our QuestIT Pros will stitch them into immersive Spatial WebGL models, instantly maximizing your property's visibility to verified premium buyers.
-          </p>
-        </div>
-        
-        <div className="bg-gradient-to-br from-[#1A1814] to-[#0A0908] backdrop-blur-xl border border-gold-accent/30 rounded-2xl p-16 text-center flex flex-col items-center relative overflow-hidden transition-all duration-500 hover:border-gold-accent shadow-[0_0_40px_rgba(255,184,0,0.1)] group">
-          <div className="absolute inset-0 bg-gold-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
-          
-          <div className="w-20 h-20 bg-gold-accent/10 rounded-full flex items-center justify-center mb-6 shadow-[0_0_20px_rgba(255,184,0,0.2)] group-hover:scale-110 transition-transform duration-500">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#FFB800" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-              <polyline points="17 8 12 3 7 8"></polyline>
-              <line x1="12" y1="3" x2="12" y2="15"></line>
-            </svg>
-          </div>
+        <button onClick={handleBack} className="text-text-secondary hover:text-gold-accent mb-8 font-working-title transition-colors">{backLabel}</button>
+        <h1 className="font-display-md text-5xl text-gold-accent mb-3 drop-shadow-md">The Spatial Vault</h1>
+        <p className="text-text-secondary mb-10 font-working-title text-sm">Give buyers an immersive walk-through — 3D maps, 360° tours, AR experiences. No site visit wasted.</p>
 
-          {selectedFile ? (
-            <div className="mb-8 w-full z-10">
-              <div className="bg-surface-alt/80 p-5 rounded-lg border border-gold-accent/40 flex items-center justify-between shadow-inner backdrop-blur-md">
-                <span className="text-gold-accent font-working-title text-sm truncate pr-4">{selectedFile.name}</span>
-                <button onClick={() => setSelectedFile(null)} className="text-xs font-bold text-error hover:text-red-400 hover:underline transition-colors uppercase tracking-widest">Remove</button>
-              </div>
-            </div>
-          ) : (
-            <div className="mb-10 w-full z-10">
-              <p className="text-text-secondary font-working-title text-sm uppercase tracking-widest mb-6">Drag and drop raw property videos</p>
-              <input type="file" accept="video/mp4,video/quicktime" className="hidden" id="video-upload" onChange={(e) => setSelectedFile(e.target.files[0])} />
-              <label htmlFor="video-upload" className="cursor-pointer bg-transparent border-2 border-gold-accent text-gold-accent font-working-title font-bold px-8 py-3 rounded hover:bg-gold-accent hover:text-[#0A0908] transition-all duration-300 inline-block uppercase tracking-wider shadow-[0_0_15px_rgba(255,184,0,0.15)] hover:shadow-[0_0_25px_rgba(255,184,0,0.4)]">
-                Select Video Files
-              </label>
-              <p className="text-[10px] text-text-secondary mt-4 tracking-widest uppercase">Supported: .mp4, .mov</p>
-            </div>
-          )}
-
-          <button 
-            className="w-full bg-gold-accent text-[#0A0908] font-working-title font-bold px-6 py-4 rounded hover:bg-[#FFC929] disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-300 mt-2 text-lg tracking-wide shadow-[0_0_20px_rgba(255,184,0,0.2)] hover:shadow-[0_0_30px_rgba(255,184,0,0.5)] z-10"
-            disabled={!selectedFile}
-            onClick={async () => {
-              if (selectedFile) {
-                await addConciergeListing(`[QuestIT Vault] ${selectedFile.name}`);
-                setSelectedFile(null);
-                setShowWizard(false);
-              }
-            }}
+        {/* ── TOP TAB: I have a URL / Build one for me ── */}
+        <div className="flex gap-0 mb-8 rounded-lg overflow-hidden border border-surface-variant">
+          <button
+            onClick={() => { setVaultTab("url"); setVaultBuildOption(null); }}
+            className={`flex-1 py-3 font-label-caps text-[11px] tracking-widest uppercase transition-all duration-200 ${vaultTab === "url" ? "bg-gold-accent text-[#0A0908] font-bold" : "bg-surface-alt text-text-secondary hover:text-on-surface"}`}
           >
-            Submit to QuestIT Protocol
+            I already have a tour URL
+          </button>
+          <button
+            onClick={() => { setVaultTab("build"); setVaultBuildOption(null); }}
+            className={`flex-1 py-3 font-label-caps text-[11px] tracking-widest uppercase transition-all duration-200 ${vaultTab === "build" ? "bg-gold-accent text-[#0A0908] font-bold" : "bg-surface-alt text-text-secondary hover:text-on-surface"}`}
+          >
+            Build one for me
           </button>
         </div>
+
+        {/* ══ PATH A: Already have a URL ══ */}
+        {vaultTab === "url" && (
+          <div className="bg-gradient-to-br from-[#1A1814] to-[#0A0908] border border-gold-accent/30 rounded-2xl p-10 flex flex-col gap-6 animate-[fadeIn_0.3s_ease]">
+            <div>
+              <p className="text-xs font-label-caps tracking-widest text-gold-accent uppercase mb-1">Accepted sources</p>
+              <p className="text-sm text-text-secondary leading-relaxed">Matterport · Luma AI · Cupix · Zillow 3D · YouTube 360 · Any embeddable tour link</p>
+            </div>
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">Paste your tour URL</label>
+              <input
+                type="url"
+                className="bg-surface-alt border border-surface-variant rounded px-4 py-3 text-on-surface focus:outline-none focus:border-gold-accent transition-colors text-sm"
+                placeholder="https://my.matterport.com/show/?m=..."
+                value={vaultUrl}
+                onChange={e => setVaultUrl(e.target.value)}
+              />
+            </div>
+            <div className="bg-surface-alt/50 border border-surface-variant rounded-lg p-4 text-xs text-text-secondary leading-relaxed">
+              <strong className="text-on-surface font-working-title block mb-1">Goes live immediately</strong>
+              Saved to your listing right away. Cluster+ buyers see the full immersive tour. Everyone else sees a blurred teaser that nudges them to upgrade.
+            </div>
+            <button
+              onClick={handleSaveUrl}
+              disabled={!isUrlValid}
+              className="w-full bg-gold-accent text-[#0A0908] font-working-title font-bold px-6 py-4 rounded hover:bg-[#FFC929] disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-300 text-base tracking-wide shadow-[0_0_20px_rgba(255,184,0,0.2)] hover:shadow-[0_0_30px_rgba(255,184,0,0.4)]"
+            >
+              Link to My Listing
+            </button>
+          </div>
+        )}
+
+        {/* ══ PATH B: Build one for me ══ */}
+        {vaultTab === "build" && !vaultBuildOption && (
+          <div className="flex flex-col gap-4 animate-[fadeIn_0.3s_ease]">
+            <p className="text-sm text-text-secondary mb-2">How do you want to get the footage?</p>
+
+            {/* Option 1 — I'll record it myself */}
+            <div
+              onClick={() => setVaultBuildOption("self")}
+              className="bg-gradient-to-br from-[#1A1814] to-[#0A0908] border border-surface-variant hover:border-gold-accent/60 rounded-xl p-7 cursor-pointer group transition-all duration-300 hover:shadow-[0_0_20px_rgba(255,184,0,0.08)] relative overflow-hidden"
+            >
+              <div className="absolute top-0 left-0 w-1 h-full bg-surface-variant group-hover:bg-gold-accent/50 transition-colors" />
+              <div className="flex items-start gap-5">
+                <div className="w-12 h-12 rounded-full bg-gold-accent/10 flex items-center justify-center shrink-0 mt-0.5">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFB800" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M15 10l4.553-2.277A1 1 0 0 1 21 8.618v6.764a1 1 0 0 1-1.447.894L15 14"/><rect x="3" y="7" width="12" height="10" rx="2"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="font-working-title text-lg text-on-surface group-hover:text-gold-accent transition-colors mb-1">I'll record it myself</h3>
+                  <p className="text-sm text-text-secondary leading-relaxed">Walk through your property with your phone and upload the raw video. Our team processes it into a full 3D tour — you just need to hit record.</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Option 2 — ScoutIt Team records it */}
+            <div
+              onClick={() => setVaultBuildOption("team")}
+              className="bg-gradient-to-br from-[#1A1814] to-[#0A0908] border border-surface-variant hover:border-gold-accent/60 rounded-xl p-7 cursor-pointer group transition-all duration-300 hover:shadow-[0_0_20px_rgba(255,184,0,0.08)] relative overflow-hidden"
+            >
+              <div className="absolute top-0 left-0 w-1 h-full bg-surface-variant group-hover:bg-gold-accent/50 transition-colors" />
+              <div className="flex items-start gap-5">
+                <div className="w-12 h-12 rounded-full bg-gold-accent/10 flex items-center justify-center shrink-0 mt-0.5">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFB800" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="8" r="4"/><path d="M6 20v-2a6 6 0 0 1 12 0v2"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="font-working-title text-lg text-on-surface group-hover:text-gold-accent transition-colors mb-1">ScoutIt Team records it for me</h3>
+                  <p className="text-sm text-text-secondary leading-relaxed">No video needed. Join the queue and our team will come to your property, record everything, and build the full 3D tour from scratch.</p>
+                  <span className="inline-block mt-3 text-[10px] font-label-caps tracking-widest text-gold-accent/70 border border-gold-accent/30 bg-gold-accent/10 px-2.5 py-1 rounded-full">QUEUE — TYPICALLY 3–5 DAYS</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ══ PATH B1: Self-record — video upload ══ */}
+        {vaultTab === "build" && vaultBuildOption === "self" && (
+          <div className="bg-gradient-to-br from-[#1A1814] to-[#0A0908] border border-gold-accent/30 rounded-2xl p-10 flex flex-col items-center gap-6 animate-[fadeIn_0.3s_ease]">
+            <div className="bg-gradient-to-r from-gold-accent/20 to-transparent border-l-4 border-gold-accent rounded-r-lg p-5 w-full">
+              <strong className="text-gold-accent font-working-title text-sm tracking-wide block mb-1">JUST HIT RECORD</strong>
+              <p className="text-sm text-text-secondary leading-relaxed">Walk through every room slowly with your phone camera. Upload the raw .mp4 or .mov — we'll stitch it into an immersive 3D tour and notify you when it's live, typically within 48 hours.</p>
+            </div>
+
+            {selectedFile ? (
+              <div className="w-full bg-surface-alt/80 p-5 rounded-lg border border-gold-accent/40 flex items-center justify-between">
+                <div>
+                  <p className="text-gold-accent font-working-title text-sm truncate">{selectedFile.name}</p>
+                  <p className="text-[11px] text-text-secondary mt-0.5">{(selectedFile.size / (1024 * 1024)).toFixed(1)} MB</p>
+                </div>
+                <button onClick={() => setSelectedFile(null)} className="text-xs font-bold text-error hover:text-red-400 uppercase tracking-widest transition-colors">Remove</button>
+              </div>
+            ) : (
+              <div className="w-full flex flex-col items-center gap-4">
+                <div className="w-16 h-16 bg-gold-accent/10 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(255,184,0,0.15)]">
+                  <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#FFB800" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                  </svg>
+                </div>
+                <p className="text-text-secondary font-working-title text-sm uppercase tracking-widest">Drag and drop your video here</p>
+                <input type="file" accept="video/mp4,video/quicktime,video/*" className="hidden" id="video-upload" onChange={e => setSelectedFile(e.target.files[0])} />
+                <label htmlFor="video-upload" className="cursor-pointer border-2 border-gold-accent text-gold-accent font-working-title font-bold px-8 py-3 rounded hover:bg-gold-accent hover:text-[#0A0908] transition-all duration-300 uppercase tracking-wider">
+                  Select Video File
+                </label>
+                <p className="text-[10px] text-text-secondary tracking-widest uppercase">Supported: .mp4, .mov — any file size</p>
+              </div>
+            )}
+
+            <button
+              onClick={handleSubmitVideo}
+              disabled={!selectedFile}
+              className="w-full bg-gold-accent text-[#0A0908] font-working-title font-bold px-6 py-4 rounded hover:bg-[#FFC929] disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-300 text-base tracking-wide shadow-[0_0_20px_rgba(255,184,0,0.2)] hover:shadow-[0_0_30px_rgba(255,184,0,0.4)]"
+            >
+              Submit for Processing
+            </button>
+          </div>
+        )}
+
+        {/* ══ PATH B2: ScoutIt Team queue ══ */}
+        {vaultTab === "build" && vaultBuildOption === "team" && (
+          <div className="bg-gradient-to-br from-[#1A1814] to-[#0A0908] border border-gold-accent/30 rounded-2xl p-10 flex flex-col gap-6 animate-[fadeIn_0.3s_ease]">
+            <div className="bg-gradient-to-r from-gold-accent/20 to-transparent border-l-4 border-gold-accent rounded-r-lg p-5">
+              <strong className="text-gold-accent font-working-title text-sm tracking-wide block mb-1">WE HANDLE EVERYTHING</strong>
+              <p className="text-sm text-text-secondary leading-relaxed">Our team comes to your property, records the full walkthrough with professional equipment, and builds the 3D map and 360° tour. You just need to be available.</p>
+            </div>
+
+            <div className="flex flex-col gap-3 text-sm text-text-secondary">
+              <div className="flex items-center gap-3">
+                <div className="w-5 h-5 rounded-full bg-gold-accent/20 border border-gold-accent/40 flex items-center justify-center shrink-0">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#FFB800" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <span>Professional recording equipment</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-5 h-5 rounded-full bg-gold-accent/20 border border-gold-accent/40 flex items-center justify-center shrink-0">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#FFB800" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <span>Full 3D map + 360° tour built by our team</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-5 h-5 rounded-full bg-gold-accent/20 border border-gold-accent/40 flex items-center justify-center shrink-0">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#FFB800" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <span>We'll contact you within 24 hours to schedule</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-5 h-5 rounded-full bg-gold-accent/20 border border-gold-accent/40 flex items-center justify-center shrink-0">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#FFB800" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <span>Typical turnaround: 3–5 days from recording date</span>
+              </div>
+            </div>
+
+            <div className="bg-surface-alt/50 border border-surface-variant rounded-lg p-4 text-xs text-text-secondary">
+              <strong className="text-on-surface font-working-title block mb-1">Included with your Cluster subscription</strong>
+              Team recording is part of your Cluster+ plan. No extra charge — just join the queue.
+            </div>
+
+            <button
+              onClick={handleJoinQueue}
+              className="w-full bg-gold-accent text-[#0A0908] font-working-title font-bold px-6 py-4 rounded hover:bg-[#FFC929] transition-all duration-300 text-base tracking-wide shadow-[0_0_20px_rgba(255,184,0,0.2)] hover:shadow-[0_0_30px_rgba(255,184,0,0.4)]"
+            >
+              Join the Queue
+            </button>
+          </div>
+        )}
       </div>
     );
   }

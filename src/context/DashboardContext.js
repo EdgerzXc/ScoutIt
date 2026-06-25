@@ -5,6 +5,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { supabase } from "../lib/supabaseClient";
 import { Bookmark } from "lucide-react";
+import { getBalance, spendConnects, initWalletIfEmpty } from "../lib/connectsWallet";
 
 const DashboardContext = createContext();
 
@@ -32,9 +33,11 @@ export function DashboardProvider({ children }) {
     if (userStr) {
       const user = JSON.parse(userStr);
       setCurrentUser(user);
-      if (user.connects_balance !== undefined) {
-        setConnects(user.connects_balance);
-      }
+      // Seed wallet for active role if first visit, then read real 3-bucket balance
+      const role = (user.active_roles?.[0] || user.role || "seeker").toLowerCase();
+      const tier = (user.subscription_tier || user.tier || "starry").toLowerCase();
+      initWalletIfEmpty(role, tier);
+      setConnects(getBalance(role, tier));
       
       // Fetch fresh profile data (like badges) from Supabase
       const fetchProfile = async () => {
@@ -190,7 +193,7 @@ export function DashboardProvider({ children }) {
       addToast("Removed from your Saved Properties", <Bookmark strokeWidth={1.5} size="1em" />);
       
       // Sync Supabase
-      if (currentUser?.id) await supabase.from('saved_intel').delete().eq('property_id', item.id);
+      if (currentUser?.id) await supabase.from('saved_intel').delete().eq('user_id', currentUser.id).eq('property_id', item.id);
       
       // Sync Local Storage
       try {
@@ -206,7 +209,7 @@ export function DashboardProvider({ children }) {
       addToast("Intel logged to secure Ledger", <Bookmark strokeWidth={1.5} size="1em" />);
       
       // Sync Supabase
-      if (currentUser?.id) await supabase.from('saved_intel').insert([{ property_id: item.id }]);
+      if (currentUser?.id) await supabase.from('saved_intel').insert([{ user_id: currentUser.id, property_id: item.id }]);
       
       // Sync Local Storage
       try {
@@ -479,19 +482,19 @@ export function DashboardProvider({ children }) {
   };
 
   const sendPitch = async (listingId, message) => {
-    if (connects < 1) return false;
-    
-    const newBalance = connects - 1;
-    setConnects(newBalance);
-    if (currentUser) {
-      const updatedUser = { ...currentUser, connects_balance: newBalance };
-      localStorage.setItem("scoutit_user", JSON.stringify(updatedUser));
-      setCurrentUser(updatedUser);
+    const role = (currentUser?.active_roles?.[0] || currentUser?.role || "broker").toLowerCase();
+    const tier = (currentUser?.subscription_tier || currentUser?.tier || "starry").toLowerCase();
+    const result = spendConnects(role, tier, 1);
+    if (!result.success) {
+      addToast("Not enough Connects to send this pitch.", "◈");
+      return false;
     }
+    setConnects(result.remaining);
 
     // Insert into Supabase Deals table
     const { data, error } = await supabase.from('deals').insert([{
       property_id: listingId,
+      broker_id: currentUser?.id || null,
       pitch_message: message,
       status: 'pending'
     }]).select();
@@ -525,7 +528,10 @@ export function DashboardProvider({ children }) {
 
   const inviteBroker = async (listingId, brokerName) => {
     if (!brokerName) return false;
-    if (connects < 1) {
+    const role = (currentUser?.active_roles?.[0] || currentUser?.role || "owner").toLowerCase();
+    const tier = (currentUser?.subscription_tier || currentUser?.tier || "starry").toLowerCase();
+    const result = spendConnects(role, tier, 1);
+    if (!result.success) {
       addToast("Not enough Connects to send the handshake", "◈");
       return false;
     }
@@ -535,7 +541,7 @@ export function DashboardProvider({ children }) {
       const res = await fetch("/api/dashboard/invite", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ listingId, brokerName, userId: currentUser?.id })
+        body: JSON.stringify({ listingId, brokerName, userId: currentUser?.id, role })
       });
       
       const data = await res.json();
@@ -543,14 +549,7 @@ export function DashboardProvider({ children }) {
         throw new Error(data.error || "Failed to process handshake");
       }
       
-      // Update local Connects balance optimistically
-      const newBalance = connects - 1;
-      setConnects(newBalance);
-      if (currentUser) {
-        const updatedUser = { ...currentUser, connects_balance: newBalance };
-        localStorage.setItem("scoutit_user", JSON.stringify(updatedUser));
-        setCurrentUser(updatedUser);
-      }
+      setConnects(result.remaining);
 
       const targetListing = listings.find(l => l.id === listingId);
       setPitches(prev => [{

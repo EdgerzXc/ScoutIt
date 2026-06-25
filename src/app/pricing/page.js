@@ -3,7 +3,7 @@
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Link from "next/link";
-import { Search, Briefcase, Building, Camera } from "lucide-react";
+import { Search, Briefcase, Building, Camera, Layers } from "lucide-react";
 
 const PERSONAS = [
   {
@@ -44,6 +44,17 @@ const PERSONAS = [
   }
 ];
 
+const BUNDLE_CARD = {
+  id: "bundles",
+  title: "Multi-Role Bundles",
+  description: "Wear multiple hats? Bundle Seeker + Broker, Owner + Photographer, or go full Constellation — one plan, every role, up to 20% off.",
+  icon: Layers,
+  href: "/pricing/bundles",
+  accent: "text-gold-accent",
+  bgAccent: "bg-gradient-to-br from-gold-accent/10 to-blue-400/10",
+  isBundle: true,
+};
+
 export default function PricingHubPage() {
   return (
     <div className="pricing-layout">
@@ -72,12 +83,10 @@ export default function PricingHubPage() {
             return (
               <Link key={persona.id} href={persona.href} className="group relative block rounded-2xl p-[1px] overflow-hidden bg-surface-variant hover:bg-gradient-to-br hover:from-surface-variant hover:to-gold-accent/30 transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_10px_40px_rgba(255,184,0,0.1)]">
                 <div className="absolute inset-0 bg-surface-alt/80 backdrop-blur-xl group-hover:bg-[#0A0908]/90 transition-colors duration-500 z-0"></div>
-                
                 <div className="relative z-10 p-8 flex items-start gap-6 h-full">
                   <div className={`p-4 rounded-xl ${persona.bgAccent} transition-transform duration-500 group-hover:scale-110 flex-shrink-0`}>
                     <Icon className={`w-8 h-8 ${persona.accent}`} strokeWidth={1.5} />
                   </div>
-                  
                   <div className="flex flex-col h-full">
                     <h2 className="text-2xl font-working-title text-white mb-2 group-hover:text-gold-accent transition-colors duration-300">
                       {persona.title}
@@ -85,7 +94,6 @@ export default function PricingHubPage() {
                     <p className="text-sm text-text-secondary leading-relaxed mb-6 group-hover:text-white/80 transition-colors duration-300">
                       {persona.description}
                     </p>
-                    
                     <div className="mt-auto flex items-center gap-2 text-xs font-mono text-text-muted uppercase tracking-wider group-hover:text-gold-accent transition-colors duration-300">
                       <span>View Pricing</span>
                       <span className="transform transition-transform duration-300 group-hover:translate-x-1">→</span>
@@ -95,6 +103,33 @@ export default function PricingHubPage() {
               </Link>
             )
           })}
+
+          {/* Bundle card — spans full width */}
+          <Link href={BUNDLE_CARD.href} className="group relative block rounded-2xl p-[1px] overflow-hidden md:col-span-2 hover:-translate-y-1 transition-all duration-500 hover:shadow-[0_10px_40px_rgba(255,184,0,0.15)]" style={{background: 'linear-gradient(135deg, rgba(255,184,0,0.3), rgba(96,165,250,0.2), rgba(52,211,153,0.2))'}}>
+            <div className="absolute inset-0 bg-[#0A0908]/90 backdrop-blur-xl group-hover:bg-[#0A0908]/95 transition-colors duration-500 z-0 rounded-2xl"></div>
+            <div className="relative z-10 p-8 flex items-center gap-6">
+              <div className="p-4 rounded-xl bg-gradient-to-br from-gold-accent/15 to-blue-400/15 transition-transform duration-500 group-hover:scale-110 flex-shrink-0">
+                <Layers className="w-8 h-8 text-gold-accent" strokeWidth={1.5} />
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-2">
+                  <h2 className="text-2xl font-working-title text-white group-hover:text-gold-accent transition-colors duration-300">
+                    {BUNDLE_CARD.title}
+                  </h2>
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-widest px-2 py-0.5 rounded bg-gold-accent/20 text-gold-accent border border-gold-accent/30">
+                    Save up to 20%
+                  </span>
+                </div>
+                <p className="text-sm text-text-secondary leading-relaxed group-hover:text-white/80 transition-colors duration-300 max-w-2xl">
+                  {BUNDLE_CARD.description}
+                </p>
+              </div>
+              <div className="flex-shrink-0 flex items-center gap-2 text-xs font-mono text-text-muted uppercase tracking-wider group-hover:text-gold-accent transition-colors duration-300 pr-2">
+                <span>View Bundles</span>
+                <span className="transform transition-transform duration-300 group-hover:translate-x-1">→</span>
+              </div>
+            </div>
+          </Link>
         </div>
       </main>
       <Footer />

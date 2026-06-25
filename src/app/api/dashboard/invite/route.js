@@ -3,30 +3,38 @@ import { supabase } from "@/lib/supabaseClient";
 
 export async function POST(request) {
   try {
-    const { listingId, brokerName, userId } = await request.json();
+    const { listingId, brokerName, userId, role = 'owner' } = await request.json();
 
     if (!listingId || !brokerName || !userId) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    // 1. Fetch the user's connect balances
-    const { data: balanceData, error: balanceError } = await supabase
+    // 1. Fetch the user's connect balances (3-bucket: granted, purchased, earned)
+    // Query by (user_id, role) — one wallet row per role per user
+    const { data: balanceData } = await supabase
       .from('connect_balances')
-      .select('*')
+      .select('granted_balance, purchased_balance, earned_balance')
       .eq('user_id', userId)
+      .eq('role', role)
       .single();
 
-    // If no row exists, we assume they have 0 connects (or we can fallback to user_profiles)
-    let currentBalance = 0;
+    // Fall back to user_profiles cache if no wallet row exists yet
+    let granted = 0, purchased = 0, earned = 0;
     if (balanceData) {
-      currentBalance = balanceData.granted_balance || 0;
+      granted   = balanceData.granted_balance   || 0;
+      purchased = balanceData.purchased_balance || 0;
+      earned    = balanceData.earned_balance    || 0;
     } else {
-      // Try to get from user_profiles as fallback
-      const { data: profileData } = await supabase.from('user_profiles').select('connects_balance').eq('id', userId).single();
-      if (profileData) currentBalance = profileData.connects_balance || 0;
+      const { data: profileData } = await supabase
+        .from('user_profiles')
+        .select('connects_balance')
+        .eq('id', userId)
+        .single();
+      if (profileData) granted = profileData.connects_balance || 0;
     }
 
-    if (currentBalance < 1) {
+    const totalBalance = granted + purchased + earned;
+    if (totalBalance < 1) {
       return NextResponse.json({ error: "Insufficient Connects balance." }, { status: 403 });
     }
 
@@ -43,14 +51,29 @@ export async function POST(request) {
       return NextResponse.json({ error: "Failed to create handshake" }, { status: 500 });
     }
 
-    // 3. Atomically debit Connects via ledger transaction
-    const newBalance = currentBalance - 1;
-    
-    // Insert the transaction record
+    // 3. Debit 1 Connect — spend granted first, then purchased, then earned
+    let toDeduct = 1;
+    const updates = {};
+    let spentBucket = 'granted';
+
+    if (granted > 0) {
+      updates.granted_balance = granted - 1;
+      spentBucket = 'granted';
+    } else if (purchased > 0) {
+      updates.purchased_balance = purchased - 1;
+      spentBucket = 'purchased';
+    } else {
+      updates.earned_balance = earned - 1;
+      spentBucket = 'earned';
+    }
+    updates.updated_at = new Date().toISOString();
+
+    // Insert the immutable transaction record
     const { error: txError } = await supabase.from('connect_transactions').insert([{
       user_id: userId,
+      role,
       kind: 'spend',
-      bucket: 'granted',
+      bucket: spentBucket,
       amount: -1,
       reason: 'Owner invited a broker (handshake)',
       ref_type: 'handshake',
@@ -59,19 +82,21 @@ export async function POST(request) {
 
     if (txError) {
       console.error("[INVITE API] Failed to record transaction:", txError);
-      // Rollback deal if transaction failed (simple compensation)
       await supabase.from('deals').delete().eq('id', dealData[0].id);
       return NextResponse.json({ error: "Transaction failed. No Connects spent." }, { status: 500 });
     }
 
-    // Update the balances table
+    // Update the balances table (scoped to this role's wallet row)
     if (balanceData) {
       await supabase.from('connect_balances')
-        .update({ granted_balance: newBalance, updated_at: new Date().toISOString() })
-        .eq('user_id', userId);
+        .update(updates)
+        .eq('user_id', userId)
+        .eq('role', role);
     }
 
-    // Also update the simple cache in user_profiles
+    const newBalance = totalBalance - toDeduct;
+
+    // Keep user_profiles cache in sync
     await supabase.from('user_profiles')
       .update({ connects_balance: newBalance })
       .eq('id', userId);

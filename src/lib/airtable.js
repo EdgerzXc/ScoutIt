@@ -187,6 +187,10 @@ export async function fetchProperties(apiKey, baseId) {
           : [],
         video_url:        f.Video_URL        || "",
         virtual_tour_url: f.Virtual_Tour_URL || "",
+        // camelCase aliases consumed by SpatialVaultWidget in CommercialFlow / ResidentialFlow
+        matterportTourUrl: f.Virtual_Tour_URL || "",
+        luma3dMapUrl:      f.Luma_3D_Map_URL  || "",
+        droneHeatmapUrl:   f.Drone_Heatmap_URL || "",
 
         // ── Category bridge keys (feed the existing stat-pills) ───
         seating_capacity:  f.RST_Seating_Capacity || f.VEN_Capacity_Seated || "",
