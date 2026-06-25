@@ -461,6 +461,68 @@ export const DISCOVER_PROPERTIES = {
 
 export const PROPERTIES_DETAILS = {
   // ═══════════════════════════════════════════════════════════════
+  // DEMO SHOWCASE — subscription/tier preview (DEV ONLY, mock-only slug).
+  // Loaded with premium Vault (Matterport 3D tour) so the hidden ?dev=1 tier
+  // switcher visibly unlocks subscriber content. NOT a real Airtable listing;
+  // safe to fill with illustrative premium values. Route:
+  //   /property/the-paragon-tower?dev=1   (flip to Cluster to unlock the Vault)
+  // Remove with the rest of the dev mocks before launch.
+  // ═══════════════════════════════════════════════════════════════
+  "the-paragon-tower": {
+    title:             "The Paragon — Premier Office Tower",
+    location:          "9th Avenue, Bonifacio Global City",
+    lat:               14.5510,
+    lng:               121.0490,
+    hook:              "Trophy Grade-A office floors with full spatial intelligence.",
+    city:              "Bonifacio Global City",
+    property_type:     "Commercial",
+    spaceCategory:     "Commercial",
+    tenure:            "For Lease",
+    year_built:        "2025",
+    floor_sqm:         2200,
+    parking:           60,
+    ceiling_height_text: "3.2 meters",
+    aesthetic_tag:     "Trophy Grade-A Corporate",
+    scoutit_verdict:   "Highly Recommended — Trophy CBD Asset",
+    best_for:          "Multinationals · Regional HQ · Financial Institutions",
+    broker_name:       "ScoutIt Premier Leasing",
+    // ── Price (display-only) ──
+    listed_price:      "₱1,650 / sqm / month",
+    price_status:      "Published",
+    price_verified_by: "Property Manager",
+    price_source:      "ScoutIt demo data",
+    price_notes:       "Demo listing — figures are illustrative.",
+    // ── Premium Vault (unlocks at Cluster+) — real public Matterport sample ──
+    matterportTourUrl: "https://my.matterport.com/show/?m=SxQL3iGyoDo&play=1",
+    // ── Per-category spec block (CategorySpecBlock d.cat.commercial) ──
+    cat: {
+      commercial: {
+        rentFrom:       1650,
+        rentPerSqm:     "₱1,650 / sqm",
+        totalGLA:       2200,
+        floorPlate:     "2,200 sqm / floor",
+        buildingGrade:  "Trophy (Grade A)",
+        camc:           "₱185 / sqm",
+        handOver:       "Warm shell",
+        availability:   "Available Q4 2026",
+        certification:  "LEED Platinum · WELL Core",
+        peza:           true,
+        minLeaseTerm:   "3 years",
+      },
+    },
+    photos: [
+      "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=1200&q=80",
+    ],
+    whereTo: [
+      { category: "Transit",    name: "BGC Bus Terminal",             distance: "4 min walk" },
+      { category: "Business",   name: "Bonifacio High Street",        distance: "5 min walk" },
+      { category: "Healthcare", name: "St. Luke's Medical Center BGC", distance: "6 min drive" },
+    ],
+    bestForTags: ["Trophy Grade A", "LEED Platinum", "BGC Core"],
+  },
+  // ═══════════════════════════════════════════════════════════════
   // TEMP DEV MOCK — remove in Stage 4 (mock-data cleanup).
   // Exists only to render/verify the CategorySpecBlock (d.cat.*) +
   // SOP §9 price logic locally without approving a real Airtable record.

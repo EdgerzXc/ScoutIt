@@ -65,7 +65,7 @@ function SpatialVaultWidget({ lumaUrl, matterportUrl, heatmapUrl }) {
             3D Spatial Map
           </h4>
           <div style={{ position: "relative", width: "100%", height: "400px", borderRadius: "4px", overflow: "hidden", border: "1px solid #262626" }}>
-            <iframe src={hasSubscription ? lumaUrl : ""} style={{ width: "100%", height: "100%", border: "none", filter: hasSubscription ? "none" : "blur(8px) brightness(0.5)" }} title="3D Spatial Map" />
+            <iframe src={hasSubscription ? lumaUrl : undefined} style={{ width: "100%", height: "100%", border: "none", filter: hasSubscription ? "none" : "blur(8px) brightness(0.5)" }} title="3D Spatial Map" />
             {!hasSubscription && (
               <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "rgba(22,22,22,0.6)", backdropFilter: "blur(4px)" }}>
                 <span style={{ fontFamily: "Georgia,serif", fontSize: "16px", color: "#f0ede8", marginBottom: "8px" }}>Unlock The Spatial Vault</span>
@@ -84,7 +84,7 @@ function SpatialVaultWidget({ lumaUrl, matterportUrl, heatmapUrl }) {
             360° AR Room Tour
           </h4>
           <div style={{ position: "relative", width: "100%", height: "400px", borderRadius: "4px", overflow: "hidden", border: "1px solid #262626" }}>
-            <iframe src={hasSubscription ? matterportUrl : ""} style={{ width: "100%", height: "100%", border: "none", filter: hasSubscription ? "none" : "blur(8px) brightness(0.5)" }} title="360 Tour" />
+            <iframe src={hasSubscription ? matterportUrl : undefined} style={{ width: "100%", height: "100%", border: "none", filter: hasSubscription ? "none" : "blur(8px) brightness(0.5)" }} title="360 Tour" />
             {!hasSubscription && (
               <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "rgba(22,22,22,0.6)", backdropFilter: "blur(4px)" }}>
                 <span style={{ fontFamily: "Georgia,serif", fontSize: "16px", color: "#f0ede8", marginBottom: "8px" }}>Unlock The Spatial Vault</span>
@@ -293,6 +293,9 @@ export default function CommercialFlow({ slug, draftData, isDraftMode }) {
   // ── Interactive UI states ──────────────────────
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [photoMode,         setPhotoMode]         = useState("natural");
+  // Enhanced photos unlock at Solar+. SSR-safe — locked until the client reads the viewer's tier.
+  const [canEnhance,        setCanEnhance]        = useState(false);
+  useEffect(() => { setCanEnhance(canSee("enhancedPhotos", getCurrentTier())); }, []);
   const [activeTab,         setActiveTab]         = useState("space");
   const [menuOpen,   setMenuOpen]   = useState(false);
   const [isInquiryOpen, setIsInquiryOpen] = useState(false);
@@ -980,10 +983,21 @@ export default function CommercialFlow({ slug, draftData, isDraftMode }) {
                   className={`toggle-btn ${photoMode === "natural"  ? "active" : "off"}`}
                   onClick={() => setPhotoMode("natural")}
                 >Natural</button>
-                <button
-                  className={`toggle-btn ${photoMode === "enhanced" ? "active" : "off"}`}
-                  onClick={() => setPhotoMode("enhanced")}
-                >Enhanced</button>
+                {canEnhance ? (
+                  <button
+                    className={`toggle-btn ${photoMode === "enhanced" ? "active" : "off"}`}
+                    onClick={() => setPhotoMode("enhanced")}
+                  >Enhanced</button>
+                ) : (
+                  <a
+                    href="/pricing/seeker"
+                    className="toggle-btn off"
+                    title="Enhanced photos unlock at Solar tier — upgrade to view"
+                    style={{ display: "inline-flex", alignItems: "center", gap: "5px", textDecoration: "none" }}
+                  >
+                    <Lock size={9} strokeWidth={2} /> Enhanced
+                  </a>
+                )}
               </div>
               <button 
                 className="toggle-btn off" 
