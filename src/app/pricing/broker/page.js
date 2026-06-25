@@ -151,16 +151,17 @@ export default function BrokerPricingPage() {
               </ul>
 
               <div className="mt-auto">
-                <Link 
-                  href="/checkout" 
-                  className={`block w-full text-center py-3 rounded font-working-title text-xs uppercase tracking-widest font-bold transition-all duration-300 ${
+                <div
+                  aria-disabled="true"
+                  title="Subscriptions launch soon"
+                  className={`block w-full text-center py-3 rounded font-working-title text-xs uppercase tracking-widest font-bold cursor-not-allowed opacity-70 ${
                     tier.highlight
                       ? 'bg-blue-400 text-[#0A0908] hover:bg-blue-300 shadow-[0_0_20px_rgba(96,165,250,0.2)] hover:shadow-[0_0_30px_rgba(96,165,250,0.4)]'
                       : 'bg-transparent border border-surface-variant text-text-secondary hover:text-white hover:border-text-primary'
                   }`}
                 >
-                  {tier.buttonText}
-                </Link>
+                  Coming Soon
+                </div>
               </div>
             </div>
           ))}

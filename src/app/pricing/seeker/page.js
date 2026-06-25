@@ -13,9 +13,9 @@ const TIERS = [
     description: "Basic access to standard property data and public listings.",
     features: [
       "View public photos & descriptions",
-      "Basic neighborhood data",
-      "Direct Inquiry to Brokers",
-      "Save up to 5 properties"
+      "Full editorial property intel",
+      "Unlimited private saves — no account needed",
+      "Anonymous on-device board"
     ],
     highlight: false,
     buttonText: "Current Plan"
@@ -131,16 +131,17 @@ export default function SeekerPricingPage() {
               </ul>
 
               <div className="mt-auto">
-                <Link 
-                  href="/checkout" 
-                  className={`block w-full text-center py-4 rounded font-working-title text-sm uppercase tracking-widest font-bold transition-all duration-300 ${
+                <div
+                  aria-disabled="true"
+                  title="Subscriptions launch soon"
+                  className={`block w-full text-center py-4 rounded font-working-title text-sm uppercase tracking-widest font-bold cursor-not-allowed select-none ${
                     tier.highlight
-                      ? 'bg-gold-accent text-[#0A0908] hover:bg-[#FFC929] shadow-[0_0_20px_rgba(255,184,0,0.2)] hover:shadow-[0_0_30px_rgba(255,184,0,0.4)]'
-                      : 'bg-transparent border border-surface-variant text-text-secondary hover:text-white hover:border-text-primary'
+                      ? 'bg-gold-accent/30 text-[#0A0908]/70 border border-gold-accent/40'
+                      : 'bg-transparent border border-surface-variant/60 text-text-muted'
                   }`}
                 >
-                  {tier.buttonText}
-                </Link>
+                  Coming Soon
+                </div>
               </div>
             </div>
           ))}
