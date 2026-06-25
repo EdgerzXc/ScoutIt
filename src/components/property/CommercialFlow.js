@@ -7,6 +7,7 @@ import Link from "next/link";
 import ReactionButtons from "@/components/ui/ReactionButtons";
 import InteractiveMap from "@/components/property/InteractiveMap";
 import CategorySpecBlock from "@/components/property/CategorySpecBlock";
+import { canSee, getCurrentTier } from "@/lib/entitlements";
 import "@/app/property/[id]/property-detail.css";
 import { getChapterConfig } from "./chapterConfig";
 import { Bed, Bath, Ruler, Car, Lock, Search, Camera, Building2 } from "lucide-react";
@@ -51,8 +52,10 @@ function resolveTransitHub(transitLabel, city) {
 // HELPER UTILITIES
 // ═══════════════════════════════════════════════════
 function SpatialVaultWidget({ lumaUrl, matterportUrl, heatmapUrl }) {
-  // Mock subscription state for the sake of the preview. In production, this would be tied to user context.
-  const hasSubscription = false; 
+  // Tier-gated: the Vault unlocks at Cluster+. SSR-safe — locked until the client reads the viewer's tier.
+  // NOTE: client-trusted for now; server-authoritative enforcement is the later security pass.
+  const [hasSubscription, setHasSubscription] = useState(false);
+  useEffect(() => { setHasSubscription(canSee("vault", getCurrentTier())); }, []);
 
   return (
     <div style={{ marginTop: "32px", display: "flex", flexDirection: "column", gap: "24px" }}>
