@@ -36,6 +36,7 @@ export const FEATURE_MIN_TIER = {
   guideWizard: "solar",
   conciergeBasic: "solar",
   vault: "cluster",          // Luma 3D maps, 360 tours, drone heatmaps
+  marketIntel: "cluster",    // market/investment panel: txn history, cap-rate benchmark, appreciation modelling
   offMarket: "cluster",
   compare: "cluster",        // side-by-side comparison
   identityReveal: "cluster",

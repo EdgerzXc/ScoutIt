@@ -68,12 +68,13 @@ just *one checkout that sets several role-tiers at once* — no special machiner
 |---|---|---|---|---|---|
 | Browse all listings + editorial intel | 🔓 | 🔓 | 🔓 | 🔓 | ✅ |
 | Private board / saves — **unlimited, no account** | 🔓 | 🔓 | 🔓 | 🔓 | ✅ |
-| Deep intel (cap rate, yield, noise/quiet level, verdict) | 🔒 | 🔓 | 🔓 | 🔓 | ⚠️ teaser blur-locked for all; real values intentionally NOT in DOM → reveal+gate = Phase B |
+| Deep intel (cap rate, yield, noise/quiet level, verdict) | 🔒 | 🔓 | 🔓 | 🔓 | ✅ reveal+gate built 2026-06-25 (both flows + demo data); Starry shows no real values (no leak) — real values demo-only until server pass |
 | Enhanced photos | 🔒 | 🔓 | 🔓 | 🔓 | ✅ gate built 2026-06-25 (both flows; locked button → upgrade), pending push |
 | Guide Wizard (full) | teaser | 🔓 | 🔓 | 🔓 | ⚠️ |
 | **Contact a broker** (anonymous proxy, spends Connects) | 🔒 | 🔓 | 🔓 | 🔓 | ⚠️ |
 | Off-market briefings · side-by-side compare | 🔒 | 🔒 | 🔓 | 🔓 | ⏳ |
 | **The Vault** (Luma 3D, 360, drone heatmaps) | 🔒 | 🔒 | 🔓 | 🔓 | ⚠️ gate ✅ both flows + demo (`the-paragon-tower`) 2026-06-25; production pipeline ⏳ (see `VAULT_LISTING_LIFECYCLE.md`) |
+| **Hidden Intel** — market/investment panel (txn history, cap-rate benchmark, appreciation modelling) | 🔒 | 🔒 | 🔓 | 🔓 | ✅ gate+reveal built 2026-06-25 (`marketIntel`, both flows + demo data) |
 | Identity-reveal control · priority matching · bounties | 🔒 | 🔒 | 🔓 | 🔓 | ⏳ |
 | Universe-only listings · custom briefings · curator · off-market pipeline | 🔒 | 🔒 | 🔒 | 🔓 | ⏳ |
 

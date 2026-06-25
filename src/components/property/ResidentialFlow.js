@@ -117,8 +117,20 @@ function SpatialVaultWidget({ lumaUrl, matterportUrl, heatmapUrl }) {
   );
 }
 
-function DeepIntelWidget({ open, onToggle, fields }) {
+function DeepIntelWidget({ open, onToggle, fields, values }) {
+  // Deep intel unlocks at Solar+. SSR-safe — locked until the client reads the
+  // viewer's tier. Solar+ reveals real values from `values` (keyed by label);
+  // below Solar keeps the blur-locked teaser. Client-trusted for now (later
+  // security pass enforces server-side) — real values ship only on demo/seed data.
+  const [unlocked, setUnlocked] = useState(false);
+  useEffect(() => { setUnlocked(canSee("deepIntel", getCurrentTier())); }, []);
   if (!fields || fields.length === 0) return null;
+
+  const valueFor = (label) => {
+    const v = values ? values[label] : undefined;
+    return v != null && String(v).trim() !== "" ? v : null;
+  };
+
   return (
     <div style={{marginTop:"32px"}}>
       <div style={{height:"1px", background:"#262626", marginBottom:"16px"}}/>
@@ -127,13 +139,29 @@ function DeepIntelWidget({ open, onToggle, fields }) {
         style={{width:"100%", background:"#161616", border:"0.5px solid #262626", padding:"14px 20px", cursor:"pointer", display:"flex", justifyContent:"space-between", alignItems:"center", borderRadius:"2px"}}
       >
         <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#ffb800", letterSpacing:"0.18em", textTransform:"uppercase"}}>
-          DEEP INTELLIGENCE // VERIFIED SCOUT
+          DEEP INTELLIGENCE // {unlocked ? "UNLOCKED" : "VERIFIED SCOUT"}
         </span>
         <svg viewBox="0 0 10 6" width="10" height="6" fill="none" stroke="#ffb800" strokeWidth="1.5">
           <path d={open ? "M1 5L5 1L9 5" : "M1 1L5 5L9 1"}/>
         </svg>
       </button>
-      {open && (
+      {open && (unlocked ? (
+        <div style={{background:"#161616", border:"0.5px solid #262626", borderTop:"none", padding:"20px", borderRadius:"0 0 2px 2px", display:"flex", flexDirection:"column"}}>
+          {fields.map((field, i) => {
+            const value = valueFor(field);
+            return (
+              <div key={i} style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom: i < fields.length - 1 ? "1px solid #262626" : "none", gap:"20px"}}>
+                <span style={{fontFamily:"Georgia,serif", fontSize:"13px", color:"#c8c8c8"}}>{field}</span>
+                {value !== null ? (
+                  <span style={{fontFamily:"'Courier New',monospace", fontSize:"12px", color:"#ffb800", letterSpacing:"0.04em", textAlign:"right"}}>{value}</span>
+                ) : (
+                  <span style={{fontFamily:"'Courier New',monospace", fontSize:"11px", color:"#5a5a5a", letterSpacing:"0.08em", textAlign:"right"}}>Not recorded</span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      ) : (
         <div style={{background:"#161616", border:"0.5px solid #262626", borderTop:"none", padding:"20px", position:"relative", borderRadius:"0 0 2px 2px"}}>
           <div style={{filter:"blur(4px)", pointerEvents:"none", userSelect:"none", display:"flex", flexDirection:"column"}}>
             {fields.map((field, i) => (
@@ -144,13 +172,13 @@ function DeepIntelWidget({ open, onToggle, fields }) {
             ))}
           </div>
           <div style={{position:"absolute", inset:0, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:"14px", background:"rgba(22,22,22,0.88)", borderRadius:"0 0 2px 2px"}}>
-            <span style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#ffb800", letterSpacing:"0.25em", textTransform:"uppercase"}}>VERIFIED SCOUT ONLY</span>
-            <button style={{fontFamily:"Georgia,serif", fontSize:"13px", color:"#0e0e0e", background:"#ffb800", border:"none", padding:"10px 24px", borderRadius:"2px", cursor:"pointer", letterSpacing:"0.04em"}}>
+            <span style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#ffb800", letterSpacing:"0.25em", textTransform:"uppercase"}}>SOLAR TIER UNLOCKS THIS</span>
+            <a href="/pricing/seeker" style={{textDecoration:"none", fontFamily:"Georgia,serif", fontSize:"13px", color:"#0e0e0e", background:"#ffb800", border:"none", padding:"10px 24px", borderRadius:"2px", cursor:"pointer", letterSpacing:"0.04em"}}>
               Unlock Full Intelligence →
-            </button>
+            </a>
           </div>
         </div>
-      )}
+      ))}
     </div>
   );
 }
@@ -165,6 +193,9 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode }) {
   // Enhanced photos unlock at Solar+. SSR-safe — locked until the client reads the viewer's tier.
   const [canEnhance,        setCanEnhance]        = useState(false);
   useEffect(() => { setCanEnhance(canSee("enhancedPhotos", getCurrentTier())); }, []);
+  // Market/investment "Hidden Intel" panel unlocks at Cluster+ (same SSR-safe pattern).
+  const [canMarketIntel,    setCanMarketIntel]    = useState(false);
+  useEffect(() => { setCanMarketIntel(canSee("marketIntel", getCurrentTier())); }, []);
   const [activeTab,         setActiveTab]         = useState("space");
   const [menuOpen,   setMenuOpen]   = useState(false);
   const [propertyData, setPropertyData] = useState(() => draftData || getPropertyBySlug(slug));
@@ -1104,6 +1135,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode }) {
               <DeepIntelWidget
                 open={widgets.space}
                 onToggle={() => setWidgets(w => ({...w, space: !w.space}))}
+                values={d.deepIntel}
                 fields={[
                   d.floorLevel ? "Exact Floor Level" : null,
                   d.pricePerSqm ? "Price Per SQM" : null,
@@ -1279,6 +1311,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode }) {
               <DeepIntelWidget
                 open={widgets.location}
                 onToggle={() => setWidgets(w => ({...w, location: !w.location}))}
+                values={d.deepIntel}
                 fields={["Solar Orientation","Pedestrian Flow Metrics","Office Density Data","Development Pipeline"]}
               />
 
@@ -1346,6 +1379,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode }) {
               <DeepIntelWidget
                 open={widgets.life}
                 onToggle={() => setWidgets(w => ({...w, life: !w.life}))}
+                values={d.deepIntel}
                 fields={["Noise Decibel Readings","Lighting Color Temperature","Privacy Score Details","Peak Hour Crowd Data"]}
               />
 
@@ -1414,6 +1448,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode }) {
               <DeepIntelWidget
                 open={widgets.whereto}
                 onToggle={() => setWidgets(w => ({...w, whereto: !w.whereto}))}
+                values={d.deepIntel}
                 fields={["Walkability Score","Transit Frequency Analysis","Peak Hour Commute Data","Zoning Classification","Development Pipeline"]}
               />
 
@@ -1548,6 +1583,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode }) {
                   <DeepIntelWidget
                     open={widgets.buildplans}
                     onToggle={() => setWidgets(w => ({...w, buildplans: !w.buildplans}))}
+                    values={d.deepIntel}
                     fields={["MEP Specifications","Electrical Load Capacity","Kitchen-to-Dining Floor Ratio","Ventilation Routing","Structural Calculations"]}
                   />
                 </>
@@ -1584,26 +1620,46 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode }) {
                 Market and investment intelligence for this asset — transaction history, capitalization rates, and appreciation modelling — is reserved for Verified Scouts.
               </p>
 
-              {/* Tier 3 — fully paywalled market panel */}
-              <div style={{position:"relative", background:"#161616", border:"0.5px solid #262626", borderRadius:"4px", overflow:"hidden"}}>
-                <div style={{filter:"blur(5px)", pointerEvents:"none", userSelect:"none", padding:"20px"}}>
-                  {["Cap Rate (Area Benchmark)","Transaction History","Appreciation Projection","Price History","Competitive Density","Market Position Index"].map((label, i, arr) => (
-                    <div key={label} style={{display:"flex", justifyContent:"space-between", alignItems:"center", padding:"13px 0", borderBottom: i < arr.length - 1 ? "1px solid #262626" : "none"}}>
-                      <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#c8c8c8"}}>{label}</span>
-                      <span style={{fontFamily:"'Courier New',monospace", fontSize:"12px", color:"#3a3a3a", letterSpacing:"0.1em"}}>████████</span>
-                    </div>
-                  ))}
+              {/* Market panel — unlocks at Cluster+ (canMarketIntel). Reveals real
+                  values from d.deepIntel (keyed by label) when unlocked. */}
+              {canMarketIntel ? (
+                <div style={{background:"#161616", border:"0.5px solid #262626", borderRadius:"4px", overflow:"hidden", padding:"20px"}}>
+                  {["Cap Rate (Area Benchmark)","Transaction History","Appreciation Projection","Price History","Competitive Density","Market Position Index"].map((label, i, arr) => {
+                    const raw = d.deepIntel ? d.deepIntel[label] : undefined;
+                    const value = raw != null && String(raw).trim() !== "" ? raw : null;
+                    return (
+                      <div key={label} style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"13px 0", borderBottom: i < arr.length - 1 ? "1px solid #262626" : "none", gap:"20px"}}>
+                        <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#c8c8c8"}}>{label}</span>
+                        {value !== null ? (
+                          <span style={{fontFamily:"'Courier New',monospace", fontSize:"12px", color:"#ffb800", letterSpacing:"0.04em", textAlign:"right"}}>{value}</span>
+                        ) : (
+                          <span style={{fontFamily:"'Courier New',monospace", fontSize:"11px", color:"#5a5a5a", letterSpacing:"0.08em", textAlign:"right"}}>Not recorded</span>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
-                <div style={{position:"absolute", inset:0, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:"16px", background:"rgba(22,22,22,0.9)"}}>
-                  <div style={{display:"flex", alignItems:"center", gap:"8px"}}>
-                    <Lock size={15} strokeWidth={1.5} style={{color:"#ffb800", flexShrink:0}} />
-                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#ffb800", letterSpacing:"0.25em", textTransform:"uppercase"}}>Market Intelligence · Locked</span>
+              ) : (
+                <div style={{position:"relative", background:"#161616", border:"0.5px solid #262626", borderRadius:"4px", overflow:"hidden"}}>
+                  <div style={{filter:"blur(5px)", pointerEvents:"none", userSelect:"none", padding:"20px"}}>
+                    {["Cap Rate (Area Benchmark)","Transaction History","Appreciation Projection","Price History","Competitive Density","Market Position Index"].map((label, i, arr) => (
+                      <div key={label} style={{display:"flex", justifyContent:"space-between", alignItems:"center", padding:"13px 0", borderBottom: i < arr.length - 1 ? "1px solid #262626" : "none"}}>
+                        <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#c8c8c8"}}>{label}</span>
+                        <span style={{fontFamily:"'Courier New',monospace", fontSize:"12px", color:"#3a3a3a", letterSpacing:"0.1em"}}>████████</span>
+                      </div>
+                    ))}
                   </div>
-                  <button style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#0e0e0e", background:"#ffb800", border:"none", padding:"11px 28px", borderRadius:"4px", cursor:"pointer", letterSpacing:"0.03em"}}>
-                    Unlock with Verified Scout →
-                  </button>
+                  <div style={{position:"absolute", inset:0, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:"16px", background:"rgba(22,22,22,0.9)"}}>
+                    <div style={{display:"flex", alignItems:"center", gap:"8px"}}>
+                      <Lock size={15} strokeWidth={1.5} style={{color:"#ffb800", flexShrink:0}} />
+                      <span style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#ffb800", letterSpacing:"0.25em", textTransform:"uppercase"}}>Market Intelligence · Cluster Tier</span>
+                    </div>
+                    <a href="/pricing/seeker" style={{textDecoration:"none", fontFamily:"Georgia,serif", fontSize:"14px", color:"#0e0e0e", background:"#ffb800", border:"none", padding:"11px 28px", borderRadius:"4px", cursor:"pointer", letterSpacing:"0.03em"}}>
+                      Unlock with Cluster →
+                    </a>
+                  </div>
                 </div>
-              </div>
+              )}
 
             </div>
 
@@ -1689,6 +1745,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode }) {
               <DeepIntelWidget
                 open={widgets.units}
                 onToggle={() => setWidgets(w => ({...w, units: !w.units}))}
+                values={d.deepIntel}
                 fields={["Precise Room Dimensions","Technical Asset Manifest","Fixed Equipment Specs","Finish & Material Schedule","Utility Point Mapping"]}
               />
 
@@ -1795,6 +1852,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode }) {
               <DeepIntelWidget
                 open={widgets.universe}
                 onToggle={() => setWidgets(w => ({...w, universe: !w.universe}))}
+                values={d.deepIntel}
                 fields={["Detailed Historical Transaction Records","Architectural Heritage Notes","Original Permit & Blueprint Archive","Provenance & Ownership Lineage"]}
               />
 

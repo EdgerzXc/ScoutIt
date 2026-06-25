@@ -2,6 +2,13 @@
 
 import { useState, useEffect, useRef } from "react";
 import { reportError } from "@/lib/reportError";
+import { TIERS, TIER_LABELS } from "@/lib/entitlements";
+
+// Dev-only tier/role switcher lives inside this eye toolbox. It stays HIDDEN from
+// the public — revealed only by a secret gesture (tap the eye 5× quickly) or the
+// ?dev=1 URL. Toggling writes a mock user's tier/role to localStorage + reloads so
+// the entitlement gates re-read. ⚠️ remove before launch — scaffolding.
+const DEV_ROLES = ["seeker", "owner", "broker", "photographer", "researcher"];
 
 const WIZARD_STEPS = [
   {
@@ -39,6 +46,12 @@ export default function FloatingToolbox() {
   const [reportSent, setReportSent] = useState(false);
   const [reportSending, setReportSending] = useState(false);
 
+  // ── Dev tools (hidden) ──
+  const [devOn, setDevOn] = useState(false);
+  const [devTier, setDevTier] = useState("starry");
+  const [devRole, setDevRole] = useState("seeker");
+  const tapTimes = useRef([]);
+
   const containerRef = useRef(null);
   const isDragging = useRef(false);
   const hasMoved = useRef(false);
@@ -67,9 +80,43 @@ export default function FloatingToolbox() {
     setPos(p);
     setMode(savedMode);
     applyTheme(savedMode);
+
+    // Dev tools: ?dev=1 / ?dev=0 still work as a backup entry; otherwise read the
+    // stored flag. The 5-tap gesture toggles the same flag live (see onPointerUp).
+    const devParam = new URLSearchParams(window.location.search).get("dev");
+    if (devParam === "1") localStorage.setItem("scoutit_dev", "1");
+    if (devParam === "0") localStorage.removeItem("scoutit_dev");
+    setDevOn(localStorage.getItem("scoutit_dev") === "1");
+    try {
+      const u = JSON.parse(localStorage.getItem("scoutit_user") || "null");
+      if (u) {
+        setDevTier(String(u.subscription_tier || u.tier || "starry").toLowerCase());
+        const r = (u.active_roles || u.tags || [])[0];
+        if (r) setDevRole(String(r).toLowerCase());
+      }
+    } catch {}
+
     setMounted(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Apply a mock tier/role and reload so entitlement gates re-read.
+  const applyDev = (nextTier, nextRole) => {
+    try {
+      const u = JSON.parse(localStorage.getItem("scoutit_user") || "null") || { id: "dev-user" };
+      u.subscription_tier = nextTier;
+      u.tier = nextTier;
+      u.active_roles = [nextRole];
+      u.tags = [nextRole];
+      localStorage.setItem("scoutit_user", JSON.stringify(u));
+      window.location.reload();
+    } catch {}
+  };
+
+  const turnOffDev = () => {
+    localStorage.removeItem("scoutit_dev");
+    setDevOn(false);
+  };
 
   const changeMode = (m) => {
     setMode(m);
@@ -121,6 +168,19 @@ export default function FloatingToolbox() {
     if (!isDragging.current) return;
     isDragging.current = false;
     if (!hasMoved.current) {
+      // Secret gesture: 5 quick taps on the eye toggle the hidden Dev Tools.
+      const now = Date.now();
+      tapTimes.current = tapTimes.current.filter((t) => now - t < 1500);
+      tapTimes.current.push(now);
+      if (tapTimes.current.length >= 5) {
+        tapTimes.current = [];
+        const next = localStorage.getItem("scoutit_dev") !== "1";
+        if (next) localStorage.setItem("scoutit_dev", "1");
+        else localStorage.removeItem("scoutit_dev");
+        setDevOn(next);
+        setOpen(true); // reveal the panel so the Dev Tools section is visible
+        return;
+      }
       setOpen((o) => !o);
     } else {
       const p = { ...livePos.current };
@@ -284,6 +344,36 @@ export default function FloatingToolbox() {
               </span>
             </button>
           </div>
+
+          {/* ── Dev Tools (hidden) — revealed by 5-tap on the eye, or ?dev=1 ── */}
+          {devOn && (
+            <>
+              <div style={{ height: 1, background: "rgba(255,184,0,0.18)", margin: "0 9px" }} />
+              <div style={{ padding: "9px 11px 11px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 7 }}>
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "#ffb800", letterSpacing: "0.2em", textTransform: "uppercase" }}>Dev · Tier</span>
+                  <button onClick={turnOffDev} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.4)", cursor: "pointer", fontFamily: "var(--font-mono)", fontSize: 8.5, letterSpacing: "0.12em", textTransform: "uppercase" }}>Hide ✕</button>
+                </div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 9 }}>
+                  {TIERS.map((t) => {
+                    const on = t === devTier;
+                    return (
+                      <button key={t} onClick={() => applyDev(t, devRole)} style={{ fontFamily: "var(--font-mono)", fontSize: 9.5, padding: "4px 7px", borderRadius: 4, cursor: "pointer", textTransform: "capitalize", border: "1px solid " + (on ? "#ffb800" : "rgba(255,255,255,0.12)"), background: on ? "#ffb800" : "transparent", color: on ? "#0e0e0e" : "#c8c8c8" }}>{TIER_LABELS[t]}</button>
+                    );
+                  })}
+                </div>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "rgba(255,255,255,0.4)", letterSpacing: "0.2em", textTransform: "uppercase", display: "block", marginBottom: 6 }}>Role</span>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+                  {DEV_ROLES.map((r) => {
+                    const on = r === devRole;
+                    return (
+                      <button key={r} onClick={() => applyDev(devTier, r)} style={{ fontFamily: "var(--font-mono)", fontSize: 9.5, padding: "4px 7px", borderRadius: 4, cursor: "pointer", textTransform: "capitalize", border: "1px solid " + (on ? "#ffb800" : "rgba(255,255,255,0.12)"), background: on ? "#ffb800" : "transparent", color: on ? "#0e0e0e" : "#c8c8c8" }}>{r}</button>
+                    );
+                  })}
+                </div>
+              </div>
+            </>
+          )}
         </div>
       )}
 

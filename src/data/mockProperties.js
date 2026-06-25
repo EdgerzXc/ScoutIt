@@ -494,6 +494,71 @@ export const PROPERTIES_DETAILS = {
     price_notes:       "Demo listing — figures are illustrative.",
     // ── Premium Vault (unlocks at Cluster+) — real public Matterport sample ──
     matterportTourUrl: "https://my.matterport.com/show/?m=SxQL3iGyoDo&play=1",
+    // ── Deep intel (unlocks at Solar+) — keyed by the exact labels the commercial
+    //    page renders (CategorySpecBlock MINOR + extras + each DeepIntelWidget). ──
+    deepIntel: {
+      // CategorySpecBlock — commercial MINOR
+      "CAMC (CUSA)":          "₱185 / sqm / mo",
+      "A/C Charges":          "₱48 / sqm / mo",
+      "AC System":            "Centralized VRF · 7am–7pm + paid extension",
+      "Reserved Parking":     "1 slot / 100 sqm leased",
+      "Escalation Rate":      "5% per annum",
+      "Fit-out Allowance":    "₱8,000 / sqm (qualified tenants)",
+      "Rent-free Period":     "Up to 2 months on a 3-year term",
+      "Parking Ratio":        "1 : 95 sqm",
+      "Backup Power":         "100% · N+1 generator backup",
+      "Floor Loading":        "500 kg/sqm live load",
+      "Internet Providers":   "PLDT, Globe, Converge (redundant FTTH)",
+      "Available Units":      "Floors 14, 18 & 22 (full-floor)",
+      "Towers / Zones":       "Single tower · low/mid/high zones",
+      "Cap Rate":             "6.8%",
+      "NOI":                  "₱182.4M / yr (stabilized)",
+      // CategorySpecBlock — commercial extraLockedLabels
+      "Ventilation Quality":  "ASHRAE 62.1 · MERV-13 filtration",
+      "Noise Level Score":    "8.7 / 10 (low ambient)",
+      "Natural Light Score":  "9.1 / 10 (floor-to-ceiling glazing)",
+      "Privacy Score":        "8.4 / 10",
+      "Acoustic Baseline":    "NC-35 office baseline",
+      // DeepIntelWidget — location
+      "Solar Orientation":        "NE–SW long axis · low afternoon heat gain",
+      "Pedestrian Flow Metrics":  "12,400 avg daily (9th Ave frontage)",
+      "Office Density Data":      "Grade-A submarket vacancy 8.2%",
+      "Development Pipeline":     "2 towers delivering 2027 within 400m",
+      // DeepIntelWidget — life
+      "Noise Decibel Readings":   "42 dB daytime interior",
+      "Lighting Color Temperature":"4000K neutral · tunable lobby",
+      "Privacy Score Details":    "Tinted low-e glass · 0.28 SHGC",
+      "Peak Hour Crowd Data":     "Lobby peak 8:30–9:15am",
+      // DeepIntelWidget — whereto
+      "Walkability Score":        "92 / 100",
+      "Transit Frequency Analysis":"BGC Bus every 4–6 min at peak",
+      "Peak Hour Commute Data":   "BGC↔Makati 18 min off-peak",
+      "Zoning Classification":    "BGC Commercial · PEZA IT zone",
+      // DeepIntelWidget — buildplans
+      "MEP Specifications":       "VRF HVAC · 2 × 2,500 kVA transformers",
+      "Electrical Load Capacity": "120 VA / sqm tenant provision",
+      "Kitchen-to-Dining Floor Ratio":"N/A — office use",
+      "Ventilation Routing":      "Per-floor AHU · fresh-air economizer",
+      "Structural Calculations":  "Post-tensioned slab · 0.4g seismic design",
+      // DeepIntelWidget — units
+      "Precise Room Dimensions":  "Full-floor 2,200 sqm · 8.4m core-to-glass",
+      "Technical Asset Manifest": "150mm raised floor · 2 freight + 6 pax lifts",
+      "Fixed Equipment Specs":    "BMS · FDAS · NFPA-13 sprinklers",
+      "Finish & Material Schedule":"Warm shell · granite lobby · LVT-ready",
+      "Utility Point Mapping":    "Core riser · tenant meters per floor",
+      // DeepIntelWidget — universe
+      "Detailed Historical Transaction Records":"Developer-held · no prior resale",
+      "Architectural Heritage Notes":"Completed 2025 · LEED Platinum shell",
+      "Original Permit & Blueprint Archive":"On file · released to signed tenants",
+      "Provenance & Ownership Lineage":"Single-owner developer SPV",
+      // Hidden Intel — market/investment panel (unlocks at Cluster+)
+      "Cap Rate (Area Benchmark)":"6.4% – 7.1% (BGC Grade-A)",
+      "Transaction History":"No resale · developer-held since 2025",
+      "Appreciation Projection":"+5.8% p.a. (5-yr submarket avg)",
+      "Price History":"Launch ₱1,500 → ₱1,650 / sqm (2025→26)",
+      "Competitive Density":"6 Grade-A towers within 800m",
+      "Market Position Index":"Top-decile rents in BGC submarket",
+    },
     // ── Per-category spec block (CategorySpecBlock d.cat.commercial) ──
     cat: {
       commercial: {

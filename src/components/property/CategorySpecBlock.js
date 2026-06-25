@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { canSee, getCurrentTier } from "@/lib/entitlements";
 
 // ═══════════════════════════════════════════════════
 // CATEGORY SPEC BLOCK
@@ -143,10 +144,22 @@ function resolveCategoryKey(category) {
   return null;
 }
 
-// ── MINOR blur-lock teaser (mirrors DeepIntelWidget) ──
-function MinorLockSection({ labels }) {
+// ── MINOR deep-intel section (mirrors DeepIntelWidget) ──
+// Below Solar → blur-locked teaser. Solar+ → reveals real values (from
+// property.deepIntel, keyed by label). SSR-safe: locked until the client reads
+// the viewer's tier. NOTE: client-trusted for now (later security pass enforces
+// server-side) — that's why real values still only ship on demo/seed data.
+function MinorLockSection({ labels, values }) {
   const [open, setOpen] = useState(false);
+  const [unlocked, setUnlocked] = useState(false);
+  useEffect(() => { setUnlocked(canSee("deepIntel", getCurrentTier())); }, []);
   if (!labels || labels.length === 0) return null;
+
+  const valueFor = (label) => {
+    const v = values ? values[label] : undefined;
+    return v != null && String(v).trim() !== "" ? v : null;
+  };
+
   return (
     <div style={{ marginTop: "28px" }}>
       <button
@@ -154,13 +167,29 @@ function MinorLockSection({ labels }) {
         style={{ width: "100%", background: "#161616", border: "0.5px solid #262626", padding: "14px 20px", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", borderRadius: "2px" }}
       >
         <span style={{ fontFamily: "'Courier New',monospace", fontSize: "10px", color: "#ffb800", letterSpacing: "0.18em", textTransform: "uppercase" }}>
-          Deeper Intelligence // Verified Scout
+          Deeper Intelligence // {unlocked ? "Unlocked" : "Verified Scout"}
         </span>
         <svg viewBox="0 0 10 6" width="10" height="6" fill="none" stroke="#ffb800" strokeWidth="1.5">
           <path d={open ? "M1 5L5 1L9 5" : "M1 1L5 5L9 1"} />
         </svg>
       </button>
-      {open && (
+      {open && (unlocked ? (
+        <div style={{ background: "#161616", border: "0.5px solid #262626", borderTop: "none", padding: "20px", borderRadius: "0 0 2px 2px", display: "flex", flexDirection: "column" }}>
+          {labels.map((label, i) => {
+            const value = valueFor(label);
+            return (
+              <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", padding: "11px 0", borderBottom: i < labels.length - 1 ? "1px solid #262626" : "none", gap: "20px" }}>
+                <span style={{ fontFamily: "Georgia,serif", fontSize: "13px", color: "#c8c8c8" }}>{label}</span>
+                {value !== null ? (
+                  <span style={{ fontFamily: "'Courier New',monospace", fontSize: "12px", color: "#ffb800", letterSpacing: "0.04em", textAlign: "right" }}>{value}</span>
+                ) : (
+                  <span style={{ fontFamily: "'Courier New',monospace", fontSize: "11px", color: "#5a5a5a", letterSpacing: "0.08em", textAlign: "right" }}>Not recorded</span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      ) : (
         <div style={{ background: "#161616", border: "0.5px solid #262626", borderTop: "none", padding: "20px", position: "relative", borderRadius: "0 0 2px 2px" }}>
           <div style={{ filter: "blur(4px)", pointerEvents: "none", userSelect: "none", display: "flex", flexDirection: "column" }}>
             {labels.map((label, i) => (
@@ -171,13 +200,13 @@ function MinorLockSection({ labels }) {
             ))}
           </div>
           <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "14px", background: "rgba(22,22,22,0.88)", borderRadius: "0 0 2px 2px" }}>
-            <span style={{ fontFamily: "'Courier New',monospace", fontSize: "9px", color: "#ffb800", letterSpacing: "0.25em", textTransform: "uppercase" }}>Verified Scout Only</span>
-            <button style={{ fontFamily: "Georgia,serif", fontSize: "13px", color: "#0e0e0e", background: "#ffb800", border: "none", padding: "10px 24px", borderRadius: "2px", cursor: "pointer", letterSpacing: "0.04em" }}>
+            <span style={{ fontFamily: "'Courier New',monospace", fontSize: "9px", color: "#ffb800", letterSpacing: "0.25em", textTransform: "uppercase" }}>Solar Tier Unlocks This</span>
+            <a href="/pricing/seeker" style={{ textDecoration: "none", fontFamily: "Georgia,serif", fontSize: "13px", color: "#0e0e0e", background: "#ffb800", border: "none", padding: "10px 24px", borderRadius: "2px", cursor: "pointer", letterSpacing: "0.04em" }}>
               Unlock Full Intelligence →
-            </button>
+            </a>
           </div>
         </div>
-      )}
+      ))}
     </div>
   );
 }
@@ -244,7 +273,7 @@ export default function CategorySpecBlock({ property, extraLockedLabels = [] }) 
 
       {/* MINOR — blur-locked teaser (paywall placeholder). Editorial
           deep-intel labels are folded in so the page shows ONE locked box. */}
-      <MinorLockSection labels={[...config.minor, ...extraLockedLabels]} />
+      <MinorLockSection labels={[...config.minor, ...extraLockedLabels]} values={d.deepIntel} />
     </div>
   );
 }
