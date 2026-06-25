@@ -11,6 +11,7 @@ const TIERS = [
     price: "₱0",
     period: "forever",
     description: "Get listed on the intelligence roster and build your profile.",
+    connects: "1 Connect / month",
     features: [
       "3 Active premium listings",
       "Standard Directory Placement",
@@ -26,6 +27,7 @@ const TIERS = [
     originalPrice: "₱2,499",
     period: "monthly",
     description: "Boost your visibility and start pitching owners directly.",
+    connects: "8 Connects / month",
     features: [
       "Up to 15 active premium listings",
       "Boosted Search Placement",
@@ -41,6 +43,7 @@ const TIERS = [
     originalPrice: "₱6,499",
     period: "monthly",
     description: "Full platform power with priority lead routing.",
+    connects: "20 Connects / month",
     features: [
       "Up to 50 active premium listings",
       "Priority Lead Routing from Cluster Buyers",
@@ -57,6 +60,7 @@ const TIERS = [
     originalPrice: "₱18,000",
     period: "monthly",
     description: "Top-of-roster placement for massive brokerages.",
+    connects: "50 Connects / month",
     features: [
       "Unlimited premium listings",
       "White-Glove Listing Curation by ScoutIt",
@@ -139,6 +143,11 @@ export default function BrokerPricingPage() {
                 <p className="text-xs text-text-secondary leading-relaxed h-10">
                   {tier.description}
                 </p>
+              </div>
+
+              <div className={`flex items-center gap-2 mb-5 px-3 py-2 rounded-lg ${tier.highlight ? 'bg-blue-400/10 border border-blue-400/20' : 'bg-white/5 border border-white/10'}`}>
+                <span className="text-gold-accent font-mono font-bold text-sm">◈</span>
+                <span className={`text-xs font-mono font-semibold ${tier.highlight ? 'text-blue-400' : 'text-text-secondary'}`}>{tier.connects}</span>
               </div>
 
               <ul className="flex flex-col gap-3 flex-1 mb-8">

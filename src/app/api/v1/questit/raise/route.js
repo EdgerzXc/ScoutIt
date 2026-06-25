@@ -56,36 +56,69 @@ export async function POST(request) {
       return NextResponse.json({ error: policyResult.reason }, { status: 403 });
     }
 
-    // 5. Check Connects Ledger
+    // 5. Check Connects Ledger — 3-bucket: granted, purchased, earned
     const { data: balanceData } = await supabase
       .from('connect_balances')
-      .select('granted_balance')
+      .select('granted_balance, purchased_balance, earned_balance')
       .eq('user_id', companyId)
+      .eq('role', 'owner')
       .single();
 
-    const currentBalance = balanceData?.granted_balance || 0;
-    if (currentBalance < bountyConnects) {
+    const granted   = balanceData?.granted_balance   || 0;
+    const purchased = balanceData?.purchased_balance || 0;
+    const earned    = balanceData?.earned_balance    || 0;
+    const totalBalance = granted + purchased + earned;
+
+    if (totalBalance < bountyConnects) {
       return NextResponse.json({ error: "Insufficient Connects to fund this bounty." }, { status: 402 });
     }
 
-    // 6. Transact: Deduct Connects & Insert Quest
-    const newBalance = currentBalance - bountyConnects;
+    // 6. Transact: Deduct Connects (granted first → purchased → earned)
+    let remaining = bountyConnects;
+    const updates = {};
+    const bucketLog = [];
 
-    // Insert Transaction
-    await supabase.from('connect_transactions').insert([{
-      user_id: companyId,
-      kind: 'spend',
-      bucket: 'granted',
-      amount: -bountyConnects,
-      reason: `API Quest Raised for ${targetField}`,
-      ref_type: 'bounty',
-      ref_id: propertyId
-    }]);
+    if (granted > 0 && remaining > 0) {
+      const take = Math.min(granted, remaining);
+      updates.granted_balance = granted - take;
+      remaining -= take;
+      bucketLog.push({ bucket: 'granted', amount: -take });
+    }
+    if (purchased > 0 && remaining > 0) {
+      const take = Math.min(purchased, remaining);
+      updates.purchased_balance = purchased - take;
+      remaining -= take;
+      bucketLog.push({ bucket: 'purchased', amount: -take });
+    }
+    if (earned > 0 && remaining > 0) {
+      const take = Math.min(earned, remaining);
+      updates.earned_balance = earned - take;
+      remaining -= take;
+      bucketLog.push({ bucket: 'earned', amount: -take });
+    }
+    updates.updated_at = new Date().toISOString();
+
+    const newBalance = totalBalance - bountyConnects;
+
+    // Insert one transaction record per bucket touched
+    await supabase.from('connect_transactions').insert(
+      bucketLog.map(b => ({
+        user_id: companyId,
+        role: 'owner',
+        kind: 'spend',
+        bucket: b.bucket,
+        amount: b.amount,
+        reason: `API Quest Raised for ${targetField}`,
+        ref_type: 'bounty',
+        ref_id: propertyId
+      }))
+    );
 
     // Update Balance
     await supabase.from('connect_balances')
-      .update({ granted_balance: newBalance, updated_at: new Date().toISOString() })
-      .eq('user_id', companyId);
+      .update(updates)
+      .eq('user_id', companyId)
+      .eq('role', 'owner');
     
     await supabase.from('user_profiles')
       .update({ connects_balance: newBalance })
@@ -114,6 +147,7 @@ export async function POST(request) {
       message: "Quest successfully raised.",
       quest: questData,
       remaining_connects: newBalance
+
     });
 
   } catch (err) {

@@ -11,6 +11,7 @@ const TIERS = [
     price: "₱0",
     period: "forever",
     description: "Get your first space on the map.",
+    connects: "1 Connect / month",
     features: [
       "1 active listing",
       "Basic fields & Google Drive photos",
@@ -26,6 +27,7 @@ const TIERS = [
     originalPrice: "₱1,999",
     period: "monthly",
     description: "Serious about your asset visibility.",
+    connects: "6 Connects / month",
     features: [
       "Up to 5 active listings",
       "Full 10-chapter edit capacity",
@@ -41,6 +43,7 @@ const TIERS = [
     originalPrice: "₱7,999",
     period: "monthly",
     description: "Multi-asset management with deep intelligence.",
+    connects: "18 Connects / month",
     features: [
       "Up to 20 active listings",
       "Accelerated QuestIT Spatial Scanning",
@@ -57,6 +60,7 @@ const TIERS = [
     originalPrice: "₱25,000",
     period: "monthly",
     description: "Institutional-grade presence.",
+    connects: "40 Connects / month",
     features: [
       "Unlimited active listings",
       "Dedicated white-glove curation officer",
@@ -139,6 +143,11 @@ export default function OwnerPricingPage() {
                 <p className="text-xs text-text-secondary leading-relaxed h-10">
                   {tier.description}
                 </p>
+              </div>
+
+              <div className={`flex items-center gap-2 mb-5 px-3 py-2 rounded-lg ${tier.highlight ? 'bg-emerald-400/10 border border-emerald-400/20' : 'bg-white/5 border border-white/10'}`}>
+                <span className="text-gold-accent font-mono font-bold text-sm">◈</span>
+                <span className={`text-xs font-mono font-semibold ${tier.highlight ? 'text-emerald-400' : 'text-text-secondary'}`}>{tier.connects}</span>
               </div>
 
               <ul className="flex flex-col gap-3 flex-1 mb-8">

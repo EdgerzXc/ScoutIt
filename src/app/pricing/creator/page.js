@@ -11,6 +11,7 @@ const TIERS = [
     price: "₱0",
     period: "forever",
     description: "Start contributing and verifying platform intelligence.",
+    connects: "1 Connect / month + earn per submission",
     features: [
       "Up to 5 portfolio photos / 2 active jobs",
       "Access basic bounty tasks",
@@ -26,6 +27,7 @@ const TIERS = [
     originalPrice: "₱499",
     period: "monthly",
     description: "Build your client base with a verified identity.",
+    connects: "5 Connects / month + earn per submission",
     features: [
       "Up to 30 portfolio photos / 10 active jobs",
       "Priority Bounty Task Access",
@@ -41,6 +43,7 @@ const TIERS = [
     originalPrice: "₱1,499",
     period: "monthly",
     description: "For serious visual professionals & data officers.",
+    connects: "12 Connects / month + earn per submission",
     features: [
       "Up to 100 portfolio photos / 30 active jobs",
       "CDN-Hosted Portfolio Delivery",
@@ -57,6 +60,7 @@ const TIERS = [
     originalPrice: "₱3,499",
     period: "monthly",
     description: "The backbone of ScoutIt intelligence & visuals.",
+    connects: "25 Connects / month + earn per submission",
     features: [
       "Unlimited portfolio photos / active jobs",
       "Video & 360 Virtual Tour support",
@@ -139,6 +143,11 @@ export default function CreatorPricingPage() {
                 <p className="text-xs text-text-secondary leading-relaxed h-10">
                   {tier.description}
                 </p>
+              </div>
+
+              <div className={`flex items-center gap-2 mb-5 px-3 py-2 rounded-lg ${tier.highlight ? 'bg-purple-400/10 border border-purple-400/20' : 'bg-white/5 border border-white/10'}`}>
+                <span className="text-gold-accent font-mono font-bold text-sm">◈</span>
+                <span className={`text-xs font-mono font-semibold ${tier.highlight ? 'text-purple-400' : 'text-text-secondary'}`}>{tier.connects}</span>
               </div>
 
               <ul className="flex flex-col gap-3 flex-1 mb-8">

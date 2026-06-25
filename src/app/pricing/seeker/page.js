@@ -11,6 +11,7 @@ const TIERS = [
     price: "₱0",
     period: "forever",
     description: "Basic access to standard property data and public listings.",
+    connects: "1 Connect / month",
     features: [
       "View public photos & descriptions",
       "Full editorial property intel",
@@ -25,6 +26,7 @@ const TIERS = [
     price: "₱149",
     period: "monthly",
     description: "Unlock Deep Intelligence metrics and enhanced visuals.",
+    connects: "6 Connects / month",
     features: [
       "Deep Intel (Cap Rates, Noise Levels)",
       "Enhanced property photos unlocked",
@@ -39,6 +41,7 @@ const TIERS = [
     price: "₱499",
     period: "monthly",
     description: "Unlock the Spatial Vault and total Identity Reveal Control.",
+    connects: "15 Connects / month",
     features: [
       "The Vault Unlocked (Luma 3D Maps)",
       "Unlock Drone Heatmaps & Spatial intel",
@@ -54,6 +57,7 @@ const TIERS = [
     price: "₱2,499",
     period: "monthly",
     description: "White-glove intelligence for corporate scouts.",
+    connects: "40 Connects / month",
     features: [
       "Everything in Cluster Scout",
       "Exclusive Universe-only listings",
@@ -119,6 +123,11 @@ export default function SeekerPricingPage() {
                 <p className="text-sm text-text-secondary leading-relaxed h-12">
                   {tier.description}
                 </p>
+              </div>
+
+              <div className={`flex items-center gap-2 mb-6 px-3 py-2 rounded-lg ${tier.highlight ? 'bg-gold-accent/10 border border-gold-accent/20' : 'bg-white/5 border border-white/10'}`}>
+                <span className="text-gold-accent font-mono font-bold text-sm">◈</span>
+                <span className={`text-xs font-mono font-semibold ${tier.highlight ? 'text-gold-accent' : 'text-text-secondary'}`}>{tier.connects}</span>
               </div>
 
               <ul className="flex flex-col gap-4 flex-1 mb-8">
