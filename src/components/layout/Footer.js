@@ -11,7 +11,7 @@ export default function Footer() {
             <span className="brand-scout">Scout</span><span className="brand-it">IT</span>
           </Link>
           <p className="footer-tagline">
-            Next-generation space intelligence and verification platform for high-value Philippine properties.
+            The Philippines' first spatial commerce platform. Every kind of space — homes, offices, venues, tables — decoded into clear, verified intelligence.
           </p>
           <div className="footer-socials">
             <a href="#" aria-label="LinkedIn" className="social-link">

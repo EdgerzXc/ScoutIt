@@ -896,7 +896,7 @@ export default function Home() {
 
           {/* Plain-Language Value Proposition */}
           <p className="title-tagline-intro">
-            A premium real estate platform for founders, creatives, and enterprises to find and lease prime commercial and residential spaces across the Philippines.
+            The Philippines' first spatial commerce platform. We turn every kind of space — homes, offices, venues, restaurants — into clear, verified intelligence. No fake listings. No pressure. Just the signals that matter.
           </p>
 
           {/* Taglines */}

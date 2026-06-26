@@ -9,36 +9,36 @@ export default function AboutPage() {
       <Header />
       <main className="about-main">
         <header className="manifesto-header">
-          <span className="vector-label">Vector 05</span>
+          <span className="vector-label">Our Mission</span>
           <h1 className="manifesto-title">The ScoutIt Manifesto</h1>
         </header>
 
         <section className="manifesto-content">
           <div className="lead-paragraph">
             <p>
-              ScoutIt is not a marketplace. We are a space intelligence platform engineering the acquisition and transfer of prime real estate assets across the Philippine archipelago.
+              ScoutIt isn't a listing site. We're the Philippines' first spatial commerce platform — the intelligence layer that helps people read, understand, and choose space with confidence.
             </p>
           </div>
 
           <div className="editorial-grid">
             <div className="editorial-col">
-              <h3>01. The Matrix</h3>
+              <h3>01. The Intelligence</h3>
               <p>
-                In a fragmented market, information asymmetry dictates value. Our platform aggregates and synthesizes spatial data into a unified, high-fidelity matrix. We bypass traditional listings to provide institutional-grade intelligence on premium residential, commercial, and hospitality assets.
+                The market is noisy and full of half-truths. We gather the scattered facts about a space — the numbers, the neighborhood, the real demand — and turn them into one clear, verified briefing. No fake listings. No guesswork.
               </p>
             </div>
-            
+
             <div className="editorial-col">
-              <h3>02. The Advisors</h3>
+              <h3>02. The People</h3>
               <p>
-                Algorithms parse data, but human intuition navigates complexity. The ScoutIt roster comprises elite, vetted advisors specializing in niche sectors—from ultra-luxury bespoke residences in the Makati CBD to high-yield industrial corridors in the south.
+                Data only goes so far. Behind every space is a vetted network — brokers, photographers, researchers, planners — real professionals, rated only by verified results, never by who paid the most.
               </p>
             </div>
-            
+
             <div className="editorial-col">
-              <h3>03. The Architecture</h3>
+              <h3>03. The Experience</h3>
               <p>
-                Our structural framework—the v6 Design DNA—is built on absolute precision and minimalism. We remove the noise. No price tags, no intrusive banners. Just pure, verified asset data presented in a frictionless interface designed for serious capital deployment.
+                We stripped out everything that wastes your time. No pop-ups, no pressure, no inflated prices — just calm, verified information in a space as considered as the ones you're looking for.
               </p>
             </div>
           </div>
@@ -53,17 +53,17 @@ export default function AboutPage() {
                 
                 <div className="eco-node">
                   <h4>The Seekers</h4>
-                  <p>Institutional buyers, high-net-worth individuals, and spatial curators entering the matrix.</p>
-                </div>
-                
-                <div className="eco-node">
-                  <h4>Asset Holders</h4>
-                  <p>Prime property owners, developers, and off-market sellers deploying inventory.</p>
+                  <p>Buyers, renters, and the simply curious — anyone deciding on a space and wanting the real story behind it.</p>
                 </div>
 
                 <div className="eco-node">
-                  <h4>Service Elite</h4>
-                  <p>Verified photographers, researchers, and event planners joining the roster.</p>
+                  <h4>Space Owners</h4>
+                  <p>Owners, developers, and landlords who want the right eyes on their space — not just more clicks.</p>
+                </div>
+
+                <div className="eco-node">
+                  <h4>The Professionals</h4>
+                  <p>Verified brokers, photographers, researchers, and planners who make every space decision count.</p>
                 </div>
               </div>
 
@@ -73,14 +73,14 @@ export default function AboutPage() {
                 
                 <div className="eco-core-node">
                   <div className="core-pulse"></div>
-                  <h4>Data &amp; Intelligence</h4>
-                  <p>We aggregate raw spatial data, transforming it into high-fidelity intelligence (Layers 01-03).</p>
+                  <h4>The Intelligence</h4>
+                  <p>We turn scattered facts about every space into one clear, verified briefing you can trust.</p>
                 </div>
 
                 <div className="eco-core-node">
                   <div className="core-pulse"></div>
-                  <h4>The Service Hub</h4>
-                  <p>We maintain a strict, vetted roster of elite professionals ready for deployment (Layer 04).</p>
+                  <h4>The Network</h4>
+                  <p>We keep a vetted roster of professionals — rated by results — ready when you need them.</p>
                 </div>
               </div>
 
@@ -89,27 +89,27 @@ export default function AboutPage() {
                 <div className="eco-header">The Execution</div>
                 
                 <div className="eco-node outcome-node">
-                  <h4>Acquisition &amp; Curation</h4>
-                  <p>Seekers save assets to their private Boards, triggering strategic acquisitions guided by our intel.</p>
+                  <h4>Confident Decisions</h4>
+                  <p>Seekers save spaces to their private Board and decide with real signals, not sales pressure.</p>
                 </div>
 
                 <div className="eco-node outcome-node">
-                  <h4>Asset Liquidity</h4>
-                  <p>Owners successfully move high-value, off-market inventory to verified buyers.</p>
+                  <h4>The Right Match</h4>
+                  <p>Owners reach the people genuinely interested in their space — and the brokers who can close.</p>
                 </div>
 
                 <div className="eco-node outcome-node">
-                  <h4>Commissioned Deployment</h4>
-                  <p>Service elites are commissioned directly by users to capture, research, or design spaces.</p>
+                  <h4>Work That Counts</h4>
+                  <p>Professionals get hired directly to capture, research, or design the spaces people care about.</p>
                 </div>
               </div>
             </div>
           </div>
 
           <div className="vision-block">
-            <h2 className="vision-heading">Redefining Capital Placement in Emerging Asia.</h2>
+            <h2 className="vision-heading">Why this matters now.</h2>
             <p className="vision-text">
-              The Philippines stands at an economic inflection point. As global supply chains realign and domestic wealth generation accelerates, the demand for structured, reliable asset intelligence has never been higher. ScoutIt bridges the gap between vision and acquisition.
+              The Philippines is growing fast, and space — where people live, work, gather, and build — is at the center of it. Yet the way we find it still runs on fake listings, guesswork, and pressure. ScoutIt is the first to treat space as something you should understand before you commit. That's what a spatial commerce platform is, and we're the first to build one here.
             </p>
           </div>
         </section>
