@@ -2,6 +2,7 @@
 
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import ConnectsExplainer from "@/components/pricing/ConnectsExplainer";
 import Link from "next/link";
 import { Check } from "lucide-react";
 
@@ -155,6 +156,7 @@ export default function SeekerPricingPage() {
             </div>
           ))}
         </div>
+        <ConnectsExplainer />
       </main>
       <Footer />
 

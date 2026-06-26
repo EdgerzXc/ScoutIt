@@ -1053,3 +1053,52 @@ body.light-mode .toolbox-float {
     to { transform: translateY(0); }
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   LITE MODE — performance switch for low-end phones.
+   Class lives on <html> (toggled via the Display panel / Theme sheet).
+   Freezes all motion, drops expensive backdrop-blur + film grain, and
+   hides the cosmic decorative layers. The homepage 2D canvas, title beam,
+   and particles are also stopped in JS (see liteMode.js + page.js); the
+   layer-page WebGL canvases are hidden here, scoped to .layer-route so
+   property-page maps (Mapbox/Leaflet) are never affected.
+   ═══════════════════════════════════════════════════════════════ */
+html.lite-mode *,
+html.lite-mode *::before,
+html.lite-mode *::after {
+  animation-duration: 0s !important;
+  animation-delay: 0s !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0s !important;
+  transition-delay: 0s !important;
+}
+
+html.lite-mode {
+  scroll-behavior: auto !important;
+}
+
+/* backdrop-blur is one of the heaviest effects on weak mobile GPUs */
+html.lite-mode * {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Hide the homepage cosmic decoration (also stopped in JS) */
+html.lite-mode .grain,
+html.lite-mode .event-horizon-canvas,
+html.lite-mode .space-star,
+html.lite-mode .drifting-container,
+html.lite-mode .black-hole-core,
+html.lite-mode .accretion-disk-outer,
+html.lite-mode .event-horizon,
+html.lite-mode .event-horizon-swirl,
+html.lite-mode .title-beam,
+html.lite-mode .title-ufo-ping,
+html.lite-mode .title-ufo-underglow {
+  display: none !important;
+}
+
+/* Hide the layer-page WebGL backgrounds — scoped so maps are untouched */
+html.lite-mode .layer-route canvas {
+  display: none !important;
+}

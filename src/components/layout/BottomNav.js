@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { getStoredLiteMode, setLiteMode } from "@/lib/liteMode";
 
 // Common Icons Collection to avoid repeating SVGs
 const ICONS = {
@@ -86,14 +87,22 @@ export default function BottomNav() {
   const pathname = usePathname();
   const [themeSheetOpen, setThemeSheetOpen] = useState(false);
   const [currentMode, setCurrentMode] = useState("dark");
+  const [lite, setLite] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     const legacy = localStorage.getItem("scoutit_accessibility_mode") === "high-contrast" ? "high-contrast" : null;
     const savedMode = localStorage.getItem("scoutit_display_mode") || legacy || "dark";
     setCurrentMode(savedMode);
+    setLite(getStoredLiteMode());
     setMounted(true);
   }, []);
+
+  const toggleLite = () => {
+    const next = !lite;
+    setLite(next);
+    setLiteMode(next);
+  };
 
   const changeMode = (m) => {
     setCurrentMode(m);
@@ -193,9 +202,70 @@ export default function BottomNav() {
                 </button>
               ))}
             </div>
+
+            {/* Lite Mode — stops all animations so low-end phones don't lag */}
+            <button
+              className={`lite-toggle-row ${lite ? "active" : ""}`}
+              onClick={toggleLite}
+              aria-pressed={lite}
+            >
+              <div className="lite-toggle-text">
+                <div className="theme-label">Lite Mode {lite ? "· On" : "· Off"}</div>
+                <div className="theme-desc">Turn off animations for a faster, smoother experience on older phones.</div>
+              </div>
+              <span className={`lite-switch ${lite ? "on" : ""}`} aria-hidden="true">
+                <span className="lite-knob" />
+              </span>
+            </button>
           </div>
         </div>
       )}
+
+      <style jsx>{`
+        .lite-toggle-row {
+          width: 100%;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          text-align: left;
+          margin-top: 8px;
+          padding: 12px 14px;
+          border-radius: 8px;
+          background: rgba(255, 255, 255, 0.025);
+          border: 1px solid rgba(255, 255, 255, 0.07);
+          cursor: pointer;
+        }
+        .lite-toggle-row.active {
+          background: rgba(255, 184, 0, 0.08);
+          border-color: rgba(255, 184, 0, 0.3);
+        }
+        .lite-toggle-text { flex: 1; }
+        .lite-switch {
+          flex-shrink: 0;
+          width: 40px;
+          height: 22px;
+          border-radius: 999px;
+          background: rgba(255, 255, 255, 0.14);
+          border: 1px solid rgba(255, 255, 255, 0.18);
+          position: relative;
+          transition: background 0.2s ease, border-color 0.2s ease;
+        }
+        .lite-switch.on {
+          background: var(--accent-bright, #ffc929);
+          border-color: var(--accent-bright, #ffc929);
+        }
+        .lite-knob {
+          position: absolute;
+          top: 2px;
+          left: 2px;
+          width: 16px;
+          height: 16px;
+          border-radius: 50%;
+          background: #0e0e0e;
+          transition: transform 0.2s ease;
+        }
+        .lite-switch.on .lite-knob { transform: translateX(18px); }
+      `}</style>
     </>
   );
 }

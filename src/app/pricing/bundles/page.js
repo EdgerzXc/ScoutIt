@@ -2,6 +2,7 @@
 
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import ConnectsExplainer from "@/components/pricing/ConnectsExplainer";
 import Link from "next/link";
 import { Check, Layers } from "lucide-react";
 
@@ -11,7 +12,7 @@ const BUNDLES = [
     name: "Binary",
     tagline: "The Deal-Hunter",
     roles: ["Seeker", "Broker"],
-    roleColors: ["text-gold-accent", "text-blue-400"],
+    roleColors: ["text-gold-accent", "text-gold-accent"],
     price: "₱2,199",
     rawPrice: "₱2,498",
     savings: "₱299",
@@ -27,10 +28,10 @@ const BUNDLES = [
       "Anonymous browsing + proxy contact enabled",
       "Featured Broker placement on property pages"
     ],
-    accent: "from-blue-400 to-gold-accent",
-    glowColor: "rgba(96,165,250,0.15)",
-    glowHover: "rgba(96,165,250,0.25)",
-    borderColor: "border-blue-400/50",
+    accent: "from-gold-accent to-gold-accent",
+    glowColor: "rgba(255,184,0,0.15)",
+    glowHover: "rgba(255,184,0,0.25)",
+    borderColor: "border-gold-accent/50",
     highlight: false,
   },
   {
@@ -38,7 +39,7 @@ const BUNDLES = [
     name: "Eclipse",
     tagline: "The Asset Commander",
     roles: ["Seeker", "Owner"],
-    roleColors: ["text-gold-accent", "text-emerald-400"],
+    roleColors: ["text-gold-accent", "text-gold-accent"],
     price: "₱2,599",
     rawPrice: "₱2,998",
     savings: "₱399",
@@ -54,7 +55,7 @@ const BUNDLES = [
       "AI copy optimization on all your listings",
       "Identity Reveal Control + Anonymity Shield"
     ],
-    accent: "from-gold-accent to-emerald-400",
+    accent: "from-gold-accent to-gold-accent",
     glowColor: "rgba(255,184,0,0.15)",
     glowHover: "rgba(255,184,0,0.25)",
     borderColor: "border-gold-accent/50",
@@ -65,7 +66,7 @@ const BUNDLES = [
     name: "Orbit",
     tagline: "The Self-Producer",
     roles: ["Owner", "Photographer"],
-    roleColors: ["text-emerald-400", "text-purple-400"],
+    roleColors: ["text-gold-accent", "text-gold-accent"],
     price: "₱2,699",
     rawPrice: "₱3,098",
     savings: "₱399",
@@ -81,10 +82,10 @@ const BUNDLES = [
       "Full Job & Portfolio Analytics",
       "Read access to Deep Intel for research"
     ],
-    accent: "from-emerald-400 to-purple-400",
-    glowColor: "rgba(52,211,153,0.15)",
-    glowHover: "rgba(52,211,153,0.25)",
-    borderColor: "border-emerald-400/50",
+    accent: "from-gold-accent to-gold-accent",
+    glowColor: "rgba(255,184,0,0.15)",
+    glowHover: "rgba(255,184,0,0.25)",
+    borderColor: "border-gold-accent/50",
     highlight: false,
   },
   {
@@ -92,7 +93,7 @@ const BUNDLES = [
     name: "Constellation",
     tagline: "The Full Operator",
     roles: ["Seeker", "Owner", "Broker"],
-    roleColors: ["text-gold-accent", "text-emerald-400", "text-blue-400"],
+    roleColors: ["text-gold-accent", "text-gold-accent", "text-gold-accent"],
     price: "₱3,999",
     rawPrice: "₱4,997",
     savings: "₱998",
@@ -108,7 +109,7 @@ const BUNDLES = [
       "Market Intelligence + Full Analytics across all roles",
       "AI copy optimization + Priority Bounty Access"
     ],
-    accent: "from-gold-accent via-blue-400 to-purple-400",
+    accent: "from-gold-accent via-gold-accent to-gold-accent",
     glowColor: "rgba(255,184,0,0.12)",
     glowHover: "rgba(255,184,0,0.22)",
     borderColor: "border-gold-accent/60",
@@ -125,8 +126,8 @@ export default function BundlesPricingPage() {
 
         {/* Background glows */}
         <div className="absolute top-[-10%] left-[10%] w-[500px] h-[500px] bg-gold-accent/8 rounded-full blur-[140px] pointer-events-none" />
-        <div className="absolute bottom-[-10%] right-[10%] w-[600px] h-[600px] bg-blue-400/8 rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute top-[40%] left-[50%] w-[400px] h-[400px] bg-emerald-400/5 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute bottom-[-10%] right-[10%] w-[600px] h-[600px] bg-gold-accent/8 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute top-[40%] left-[50%] w-[400px] h-[400px] bg-gold-accent/5 rounded-full blur-[100px] pointer-events-none" />
 
         <header className="pricing-header z-10 relative">
           <Link href="/pricing" className="text-gold-accent font-mono text-xs uppercase tracking-widest hover:text-white transition-colors mb-8 inline-block">
@@ -207,8 +208,8 @@ export default function BundlesPricingPage() {
                   </div>
                   <div className="text-right">
                     <span className="text-xs font-mono text-text-muted uppercase block">You save</span>
-                    <span className="text-lg font-bold text-emerald-400">{bundle.savings}</span>
-                    <span className="text-xs text-emerald-400/70 font-mono block">({bundle.savingsPct} off)</span>
+                    <span className="text-lg font-bold text-gold-accent">{bundle.savings}</span>
+                    <span className="text-xs text-gold-accent/70 font-mono block">({bundle.savingsPct} off)</span>
                   </div>
                 </div>
 
@@ -254,6 +255,7 @@ export default function BundlesPricingPage() {
           </Link>
         </div>
 
+        <ConnectsExplainer />
       </main>
       <Footer />
 

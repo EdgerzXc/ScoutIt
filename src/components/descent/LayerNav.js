@@ -3,9 +3,22 @@
 import Link from "next/link";
 import { useState } from "react";
 
+// Plain-language companion for each cosmic layer name, so first-time visitors
+// know what "Stratosphere" or "Metropolis" actually is. Shown as "Cosmic · Plain"
+// on desktop; mobile collapses to the arrow only.
+const LAYER_PLAIN = {
+  Orbit: "The Board",
+  Stratosphere: "Intel",
+  Metropolis: "Explore",
+  Crust: "Network",
+  Mantle: "Discover",
+  Core: "Workspace",
+};
+
 function NavPill({ href, label, dir }) {
   const [hover, setHover] = useState(false);
   const arrow = dir === "prev" ? "←" : "→";
+  const plain = LAYER_PLAIN[label];
 
   return (
     <Link
@@ -39,7 +52,12 @@ function NavPill({ href, label, dir }) {
         <span style={{ color: hover ? "#0e0e0e" : "var(--accent)", fontSize: "13px", lineHeight: 1 }}>{arrow}</span>
       )}
       {/* On mobile hide label text, show only arrow */}
-      <span className="layer-nav-pill-label">{label}</span>
+      <span className="layer-nav-pill-label">
+        {label}
+        {plain && (
+          <span style={{ opacity: 0.55, fontWeight: 500 }}> · {plain}</span>
+        )}
+      </span>
       {dir === "next" && (
         <span style={{ color: hover ? "#0e0e0e" : "var(--accent)", fontSize: "13px", lineHeight: 1 }}>{arrow}</span>
       )}

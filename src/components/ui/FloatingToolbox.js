@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { reportError } from "@/lib/reportError";
 import { TIERS, TIER_LABELS } from "@/lib/entitlements";
+import { getStoredLiteMode, setLiteMode } from "@/lib/liteMode";
 
 // Dev-only tier/role switcher lives inside this eye toolbox. It stays HIDDEN from
 // the public — revealed only by a secret gesture (tap the eye 5× quickly) or the
@@ -36,6 +37,7 @@ const WIZARD_STEPS = [
 export default function FloatingToolbox() {
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState("dark");
+  const [lite, setLite] = useState(false);
   const [wizardOpen, setWizardOpen] = useState(false);
   const [wizardStep, setWizardStep] = useState(0);
   const [mounted, setMounted] = useState(false);
@@ -80,6 +82,7 @@ export default function FloatingToolbox() {
     setPos(p);
     setMode(savedMode);
     applyTheme(savedMode);
+    setLite(getStoredLiteMode());
 
     // Dev tools: ?dev=1 / ?dev=0 still work as a backup entry; otherwise read the
     // stored flag. The 5-tap gesture toggles the same flag live (see onPointerUp).
@@ -122,6 +125,12 @@ export default function FloatingToolbox() {
     setMode(m);
     applyTheme(m);
     localStorage.setItem("scoutit_display_mode", m);
+  };
+
+  const toggleLite = () => {
+    const next = !lite;
+    setLite(next);
+    setLiteMode(next);
   };
 
   const submitReport = async () => {
@@ -302,6 +311,42 @@ export default function FloatingToolbox() {
                 {mode === key && <span style={{ color: "#ffb800", fontSize: 11, marginLeft: "auto" }}>✓</span>}
               </button>
             ))}
+          </div>
+
+          {/* Lite Mode toggle — kills animations for low-end machines */}
+          <div style={{ padding: "0 9px 8px" }}>
+            <button
+              onClick={toggleLite}
+              aria-pressed={lite}
+              style={{
+                width: "100%",
+                background: lite ? "rgba(255,184,0,0.09)" : "rgba(255,255,255,0.025)",
+                border: `1px solid ${lite ? "rgba(255,184,0,0.3)" : "rgba(255,255,255,0.06)"}`,
+                borderRadius: 5, padding: "8px 10px",
+                cursor: "pointer", display: "flex", alignItems: "center", gap: 9, textAlign: "left",
+              }}
+            >
+              <div style={{ flex: 1 }}>
+                <div style={{ fontFamily: "var(--font-body)", fontSize: 12, color: lite ? "#ffb800" : "#e5e2e1", fontWeight: lite ? 600 : 400, lineHeight: 1.3 }}>
+                  Lite Mode {lite ? "· On" : "· Off"}
+                </div>
+                <div style={{ fontFamily: "var(--font-body)", fontSize: 10, color: "rgba(255,255,255,0.3)", lineHeight: 1.3, marginTop: 1 }}>
+                  Stops animations for older devices
+                </div>
+              </div>
+              <span style={{
+                flexShrink: 0, width: 34, height: 19, borderRadius: 999,
+                background: lite ? "#ffc929" : "rgba(255,255,255,0.14)",
+                border: `1px solid ${lite ? "#ffc929" : "rgba(255,255,255,0.18)"}`,
+                position: "relative", transition: "background 0.2s",
+              }}>
+                <span style={{
+                  position: "absolute", top: 1.5, left: 1.5, width: 14, height: 14, borderRadius: "50%",
+                  background: "#0e0e0e", transition: "transform 0.2s",
+                  transform: lite ? "translateX(15px)" : "translateX(0)",
+                }} />
+              </span>
+            </button>
           </div>
 
           {/* Divider */}

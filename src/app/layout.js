@@ -56,6 +56,15 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body>
+        {/* Lite Mode no-flash: apply the class before paint so low-end phones
+            never render the heavy cosmic layers. Defaults on for users who ask
+            for reduced motion; otherwise reads the stored preference. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "(function(){try{var v=localStorage.getItem('scoutit_lite_mode');var on=(v===null)?window.matchMedia('(prefers-reduced-motion: reduce)').matches:(v==='1');if(on)document.documentElement.classList.add('lite-mode');}catch(e){}})();",
+          }}
+        />
         {/* Cinematic film grain texture overlay */}
         <div className="grain" aria-hidden="true" />
         <ErrorBoundary>

@@ -46,7 +46,8 @@ altitude. That is ScoutIt in the market. **The UFO stays. Always.**
   - Canvas: `#0d0d0d` / `#121212`
 - **Typography:** Serif display headlines (Georgia), Geist Sans body, mono uppercase wide-tracked eyebrows (`var(--font-mono)`) for labels/buttons/metrics
 - **Feel:** Glassmorphism (`backdrop-filter: blur`), slow/intentional motion, localized glow
-- **Banned:** light mode, Tailwind, Three.js/WebGL in the main site, raw hex, glow-everywhere, Bootstrap-style components
+- **Banned:** light mode as the *default*, raw hex, glow-everywhere, Bootstrap-style components
+- **Allowed (reality check, 2026-06-26):** Tailwind utility classes are used throughout alongside vanilla CSS + CSS Modules. Three.js/WebGL and a 2D canvas power the homepage + layer-page backgrounds. These are permitted because **Lite Mode** (a global toggle in the Display panel / mobile Theme sheet) disables all animations, the canvas, and the WebGL backgrounds so low-end phones never lag. See `src/lib/liteMode.js`.
 
 ---
 
@@ -55,7 +56,7 @@ altitude. That is ScoutIt in the market. **The UFO stays. Always.**
 ### Stack
 - **Framework:** Next.js 16.2.7 (App Router, Turbopack) — **modified version with breaking changes**. Always read `node_modules/next/dist/docs/` before writing framework code.
 - **Language:** Plain JavaScript (no TypeScript). React 19.
-- **Styling:** Vanilla CSS + CSS Modules. **No Tailwind.**
+- **Styling:** Vanilla CSS + CSS Modules **and Tailwind** (utility classes are used across pages/components; Tailwind is configured in `tailwind.config.js`).
 - **Maps:** Mapbox (geocoding, tokens), Leaflet (static property maps)
 - **Deployment:** Vercel. Two projects deploy the same repo: `scoutit` and `scout-it`. Both auto-deploy on push to `main`.
 - **Repo:** `EdgerzXc/ScoutIt` on GitHub
@@ -106,12 +107,14 @@ src/app/pricing/                  ← all pricing pages
   5. Ecosystem Services
   6. Your Board → About
 
-- **5 dedicated layer route pages:**
-  - `/layer/orbit` — The Board
-  - `/stratosphere` — Intel
-  - `/metropolis` — Network (brokers, photographers, researchers)
-  - `/crust` — Your Board
-  - `/core` — Dashboard
+- **6 dedicated layer route pages (all under `/layer/*`):**
+  - `/layer/orbit` — The Board (top properties)
+  - `/layer/stratosphere` — Stories & Intel
+  - `/layer/metropolis` — Explore (property directory)
+  - `/layer/crust` — The Ecosystem (verified network)
+  - `/layer/mantle` — Discovery
+  - `/layer/core` — Your Workspace (wishlist + dashboard)
+  - Each layer nav pill shows a plain-language companion (e.g. "Stratosphere · Intel") so first-time users aren't lost.
 
 - **The Ledger** = private, device-only wishlist. 4 reaction tags: Potential Fit / Interested / Inspired Me / Save. **No account required. Never gated. Never server-required.**
 
@@ -337,8 +340,9 @@ useEffect(() => { setCanSeeFeature(canSee("vault", getCurrentTier())); }, []);
 | RLS hardening | Last step, per-table, after Auth is wired |
 | Branch strategy | All work goes to `main` directly unless owner says otherwise |
 | Scout Rating | Earned by verified closures only — never bought or tier-granted |
-| Tailwind | Banned. Vanilla CSS + CSS Modules only |
-| Light mode | Banned. Always dark |
+| Tailwind | Allowed — used alongside vanilla CSS + CSS Modules (doc corrected 2026-06-26) |
+| Three.js / canvas | Allowed for backgrounds — **must** be disabled by Lite Mode for low-end devices |
+| Light mode | Dark is the default; light/high-contrast modes exist in the Display panel |
 | Framework-level code | Always read `node_modules/next/dist/docs/` first |
 | The UFO | Stays. Always. |
 

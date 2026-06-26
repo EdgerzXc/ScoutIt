@@ -2,6 +2,7 @@
 
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import ConnectsExplainer from "@/components/pricing/ConnectsExplainer";
 import Link from "next/link";
 import { Check } from "lucide-react";
 
@@ -79,26 +80,26 @@ export default function CreatorPricingPage() {
       <Header />
       <main className="pricing-main relative overflow-hidden">
         
-        <div className="absolute top-[-10%] left-[20%] w-[500px] h-[500px] bg-purple-400/10 rounded-full blur-[120px] pointer-events-none"></div>
+        <div className="absolute top-[-10%] left-[20%] w-[500px] h-[500px] bg-gold-accent/10 rounded-full blur-[120px] pointer-events-none"></div>
         <div className="absolute bottom-[-10%] right-[10%] w-[600px] h-[600px] bg-surface-alt/20 rounded-full blur-[100px] pointer-events-none"></div>
 
         <header className="pricing-header z-10 relative">
-          <Link href="/pricing" className="text-purple-400 font-mono text-xs uppercase tracking-widest hover:text-white transition-colors mb-8 inline-block">
+          <Link href="/pricing" className="text-gold-accent font-mono text-xs uppercase tracking-widest hover:text-white transition-colors mb-8 inline-block">
             ← Back to Personas
           </Link>
-          <div className="mb-8 p-4 rounded-xl bg-gradient-to-r from-purple-900/40 to-fuchsia-900/40 border border-purple-400/30 inline-block">
-            <p className="text-purple-300 font-mono text-xs uppercase tracking-widest font-bold">
+          <div className="mb-8 p-4 rounded-xl bg-gradient-to-r from-[#1A1710]/80 to-[#101820]/80 border border-gold-accent/30 inline-block">
+            <p className="text-[#FFC929] font-mono text-xs uppercase tracking-widest font-bold">
               🚀 PIONEER COHORT
             </p>
             <p className="text-white text-sm mt-1">
-              Lock in <span className="text-purple-400 font-bold">Pioneer Member</span> rates forever. Only 20 slots per role.
+              Lock in <span className="text-gold-accent font-bold">Pioneer Member</span> rates forever. Only 20 slots per role.
             </p>
           </div>
-          <span className="vector-label text-purple-400 tracking-[0.3em] uppercase text-xs font-bold mb-4 block drop-shadow-md">
+          <span className="vector-label text-gold-accent tracking-[0.3em] uppercase text-xs font-bold mb-4 block drop-shadow-md">
             LAYER 08 // SERVICE TIERS
           </span>
           <h1 className="page-title text-5xl md:text-6xl font-display-md text-white mb-6 drop-shadow-lg">
-            Verify The <span className="text-purple-400">Intelligence</span>
+            Verify The <span className="text-gold-accent">Intelligence</span>
           </h1>
           <p className="page-subtitle text-lg text-text-secondary max-w-2xl mx-auto leading-relaxed">
             You are the data workforce of ScoutIt. Upgrade your tier to host your CDN portfolios, unlock priority job referrals, and build a verified institutional presence.
@@ -111,22 +112,22 @@ export default function CreatorPricingPage() {
               key={tier.name} 
               className={`flex flex-col rounded-2xl p-6 relative overflow-hidden transition-all duration-500 cursor-default ${
                 tier.highlight 
-                  ? 'bg-gradient-to-br from-[#1E1A24] to-[#0A0908] border border-purple-400/50 shadow-[0_0_40px_rgba(192,132,252,0.15)] hover:shadow-[0_0_60px_rgba(192,132,252,0.25)] hover:border-purple-400 transform hover:-translate-y-2' 
+                  ? 'bg-gradient-to-br from-[#1E1A24] to-[#0A0908] border border-gold-accent/50 shadow-[0_0_40px_rgba(255,184,0,0.15)] hover:shadow-[0_0_60px_rgba(255,184,0,0.25)] hover:border-gold-accent transform hover:-translate-y-2' 
                   : 'bg-surface-alt/40 backdrop-blur-md border border-surface-variant/50 hover:bg-surface-alt/60 hover:border-text-primary/30'
               }`}
             >
               {tier.highlight && (
                 <>
-                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-400 to-fuchsia-300 shadow-[0_0_15px_rgba(192,132,252,0.8)]"></div>
-                  <div className="absolute top-4 right-4 bg-purple-400 text-[#0A0908] text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-[0_0_10px_rgba(192,132,252,0.3)]">
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-gold-accent to-fuchsia-300 shadow-[0_0_15px_rgba(255,184,0,0.8)]"></div>
+                  <div className="absolute top-4 right-4 bg-gold-accent text-[#0A0908] text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-[0_0_10px_rgba(255,184,0,0.3)]">
                     Most Popular
                   </div>
-                  <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-purple-400/10 rounded-full blur-3xl"></div>
+                  <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-gold-accent/10 rounded-full blur-3xl"></div>
                 </>
               )}
 
               <div className="mb-6">
-                <h2 className={`text-2xl font-working-title mb-3 ${tier.highlight ? 'text-purple-400 drop-shadow-sm' : 'text-on-surface'}`}>
+                <h2 className={`text-2xl font-working-title mb-3 ${tier.highlight ? 'text-gold-accent drop-shadow-sm' : 'text-on-surface'}`}>
                   {tier.name}
                 </h2>
                 <div className="flex flex-col gap-1 mb-3">
@@ -145,15 +146,15 @@ export default function CreatorPricingPage() {
                 </p>
               </div>
 
-              <div className={`flex items-center gap-2 mb-5 px-3 py-2 rounded-lg ${tier.highlight ? 'bg-purple-400/10 border border-purple-400/20' : 'bg-white/5 border border-white/10'}`}>
+              <div className={`flex items-center gap-2 mb-5 px-3 py-2 rounded-lg ${tier.highlight ? 'bg-gold-accent/10 border border-gold-accent/20' : 'bg-white/5 border border-white/10'}`}>
                 <span className="text-gold-accent font-mono font-bold text-sm">◈</span>
-                <span className={`text-xs font-mono font-semibold ${tier.highlight ? 'text-purple-400' : 'text-text-secondary'}`}>{tier.connects}</span>
+                <span className={`text-xs font-mono font-semibold ${tier.highlight ? 'text-gold-accent' : 'text-text-secondary'}`}>{tier.connects}</span>
               </div>
 
               <ul className="flex flex-col gap-3 flex-1 mb-8">
                 {tier.features.map((feature, idx) => (
                   <li key={idx} className="flex items-start gap-2">
-                    <Check className={`mt-0.5 flex-shrink-0 ${tier.highlight ? 'text-purple-400' : 'text-text-secondary'}`} size={14} strokeWidth={3} />
+                    <Check className={`mt-0.5 flex-shrink-0 ${tier.highlight ? 'text-gold-accent' : 'text-text-secondary'}`} size={14} strokeWidth={3} />
                     <span className="text-xs text-on-surface leading-snug">{feature}</span>
                   </li>
                 ))}
@@ -165,7 +166,7 @@ export default function CreatorPricingPage() {
                   title="Subscriptions launch soon"
                   className={`block w-full text-center py-3 rounded font-working-title text-xs uppercase tracking-widest font-bold cursor-not-allowed opacity-70 ${
                     tier.highlight
-                      ? 'bg-purple-400 text-[#0A0908] hover:bg-purple-300 shadow-[0_0_20px_rgba(192,132,252,0.2)] hover:shadow-[0_0_30px_rgba(192,132,252,0.4)]'
+                      ? 'bg-gold-accent text-[#0A0908] hover:bg-[#FFC929] shadow-[0_0_20px_rgba(255,184,0,0.2)] hover:shadow-[0_0_30px_rgba(255,184,0,0.4)]'
                       : 'bg-transparent border border-surface-variant text-text-secondary hover:text-white hover:border-text-primary'
                   }`}
                 >
@@ -175,6 +176,7 @@ export default function CreatorPricingPage() {
             </div>
           ))}
         </div>
+        <ConnectsExplainer />
       </main>
       <Footer />
 

@@ -21,8 +21,8 @@ const PERSONAS = [
     description: "Maximize your listings, unlock priority lead routing, and dominate the intelligence roster.",
     icon: Briefcase,
     href: "/pricing/broker",
-    accent: "text-blue-400",
-    bgAccent: "bg-blue-400/10"
+    accent: "text-gold-accent",
+    bgAccent: "bg-gold-accent/10"
   },
   {
     id: "owner",
@@ -30,8 +30,8 @@ const PERSONAS = [
     description: "Accelerate 3D Spatial generation and manage your multi-asset portfolio with white-glove curation.",
     icon: Building,
     href: "/pricing/owner",
-    accent: "text-emerald-400",
-    bgAccent: "bg-emerald-400/10"
+    accent: "text-gold-accent",
+    bgAccent: "bg-gold-accent/10"
   },
   {
     id: "creator",
@@ -39,8 +39,8 @@ const PERSONAS = [
     description: "Host your CDN portfolios, access high-priority bounty routing, and connect with Universe Elite brokers.",
     icon: Camera,
     href: "/pricing/creator",
-    accent: "text-purple-400",
-    bgAccent: "bg-purple-400/10"
+    accent: "text-gold-accent",
+    bgAccent: "bg-gold-accent/10"
   }
 ];
 
@@ -51,7 +51,7 @@ const BUNDLE_CARD = {
   icon: Layers,
   href: "/pricing/bundles",
   accent: "text-gold-accent",
-  bgAccent: "bg-gradient-to-br from-gold-accent/10 to-blue-400/10",
+  bgAccent: "bg-gradient-to-br from-gold-accent/10 to-gold-accent/5",
   isBundle: true,
 };
 
@@ -105,10 +105,10 @@ export default function PricingHubPage() {
           })}
 
           {/* Bundle card — spans full width */}
-          <Link href={BUNDLE_CARD.href} className="group relative block rounded-2xl p-[1px] overflow-hidden md:col-span-2 hover:-translate-y-1 transition-all duration-500 hover:shadow-[0_10px_40px_rgba(255,184,0,0.15)]" style={{background: 'linear-gradient(135deg, rgba(255,184,0,0.3), rgba(96,165,250,0.2), rgba(52,211,153,0.2))'}}>
+          <Link href={BUNDLE_CARD.href} className="group relative block rounded-2xl p-[1px] overflow-hidden md:col-span-2 hover:-translate-y-1 transition-all duration-500 hover:shadow-[0_10px_40px_rgba(255,184,0,0.15)]" style={{background: 'linear-gradient(135deg, rgba(255,184,0,0.35), rgba(255,184,0,0.12), rgba(122,92,0,0.25))'}}>
             <div className="absolute inset-0 bg-[#0A0908]/90 backdrop-blur-xl group-hover:bg-[#0A0908]/95 transition-colors duration-500 z-0 rounded-2xl"></div>
             <div className="relative z-10 p-8 flex items-center gap-6">
-              <div className="p-4 rounded-xl bg-gradient-to-br from-gold-accent/15 to-blue-400/15 transition-transform duration-500 group-hover:scale-110 flex-shrink-0">
+              <div className="p-4 rounded-xl bg-gradient-to-br from-gold-accent/20 to-gold-accent/5 transition-transform duration-500 group-hover:scale-110 flex-shrink-0">
                 <Layers className="w-8 h-8 text-gold-accent" strokeWidth={1.5} />
               </div>
               <div className="flex-1">

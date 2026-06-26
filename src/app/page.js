@@ -10,6 +10,7 @@ import BoardPodium from "@/components/board/BoardPodium";
 import CinematicJourney from "@/components/cinematic/CinematicJourney";
 import Footer from "@/components/layout/Footer";
 import { Building2, Camera, Search, CalendarDays } from "lucide-react";
+import { isLiteMode } from "@/lib/liteMode";
 
 // Scrollytelling manifesto ΓÇö lazy-loaded so it costs the homepage nothing
 // until the UFO is clicked.
@@ -76,6 +77,7 @@ export default function Home() {
 
   // Auto-fire on load, then repeat every 6s so the beam stays visible on both mobile & desktop
   useEffect(() => {
+    if (isLiteMode()) return; // Lite Mode: no beam loop
     const t = setTimeout(() => {
       fireBeam(false);
       beamInterval.current = setInterval(() => fireBeam(false), 6000);
@@ -93,6 +95,7 @@ export default function Home() {
 
   // ΓöÇΓöÇ Event-horizon pull field (canvas) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
   useEffect(() => {
+    if (isLiteMode()) return; // Lite Mode: skip the cosmic canvas entirely
     const canvas = eventHorizonRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
@@ -629,8 +632,8 @@ export default function Home() {
     const prefersReducedMotion = typeof window !== 'undefined' && 
       window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     
-    // Disable animations if reduced motion is preferred or on very small mobile
-    if (prefersReducedMotion || (isMobile && window.innerWidth < 480)) {
+    // Disable animations in Lite Mode, with reduced motion, or on very small mobile
+    if (isLiteMode() || prefersReducedMotion || (isMobile && window.innerWidth < 480)) {
       setDriftingRocks([]);
       return;
     }
@@ -834,6 +837,11 @@ export default function Home() {
         {/* Main hook content */}
         <div className="hook-content">
 
+          {/* SEO / a11y heading — visually hidden; the styled wordmark below is decorative */}
+          <h1 className="visually-hidden-h1">
+            ScoutIt — Philippine Space Intelligence Platform
+          </h1>
+
           {/* UFO (clickable easter egg) hovering above the wordmark + tractor beam */}
           <div className="title-ufo-zone">
             <span
@@ -894,6 +902,12 @@ export default function Home() {
           {/* Taglines */}
           <p className="title-tagline-1">Get lost in spaces that actually inspire you.</p>
           <div className="title-tagline-2">SPACE INTELLIGENCE &middot; PHILIPPINE PROPERTY</div>
+
+          {/* Primary action path — gives first-time visitors a clear door in */}
+          <div className="hero-cta-row">
+            <Link href="/property" className="hero-cta-primary">Discover Spaces</Link>
+            <Link href="/layer/orbit" className="hero-cta-secondary">Browse The Board</Link>
+          </div>
         </div>
 
         {/* Scroll indicator removed ΓÇö beam sequence begins the story */}
@@ -1020,6 +1034,78 @@ export default function Home() {
         .section-action-footer {
           text-align: center;
           margin-top: 64px;
+        }
+
+        /* Visually-hidden SEO/a11y heading */
+        .visually-hidden-h1 {
+          position: absolute;
+          width: 1px;
+          height: 1px;
+          padding: 0;
+          margin: -1px;
+          overflow: hidden;
+          clip: rect(0, 0, 0, 0);
+          white-space: nowrap;
+          border: 0;
+        }
+
+        /* Hero primary action path */
+        .hero-cta-row {
+          display: flex;
+          gap: 16px;
+          justify-content: center;
+          align-items: center;
+          flex-wrap: wrap;
+          margin-top: 36px;
+        }
+
+        .hero-cta-primary {
+          font-family: var(--font-body);
+          font-size: 13px;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.18em;
+          color: #000;
+          background: var(--accent-bright);
+          border: 1px solid var(--accent-bright);
+          padding: 15px 34px;
+          border-radius: 4px;
+          text-decoration: none;
+          transition: transform var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+          box-shadow: 0 0 0 rgba(255, 184, 0, 0);
+        }
+        .hero-cta-primary:hover {
+          background: var(--accent);
+          box-shadow: 0 8px 30px rgba(255, 184, 0, 0.25);
+          transform: translateY(-2px);
+        }
+        .hero-cta-primary:focus-visible {
+          outline: 2px solid var(--accent-bright);
+          outline-offset: 3px;
+        }
+
+        .hero-cta-secondary {
+          font-family: var(--font-body);
+          font-size: 13px;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.18em;
+          color: var(--accent);
+          background: transparent;
+          border: 1px solid var(--accent-muted);
+          padding: 15px 30px;
+          border-radius: 4px;
+          text-decoration: none;
+          transition: transform var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+        }
+        .hero-cta-secondary:hover {
+          border-color: var(--accent);
+          color: var(--accent-bright);
+          transform: translateY(-2px);
+        }
+        .hero-cta-secondary:focus-visible {
+          outline: 2px solid var(--accent-bright);
+          outline-offset: 3px;
         }
 
         /* ΓòÉΓòÉΓòÉ SECTION 1: SPACE HERO ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */
