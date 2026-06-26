@@ -203,7 +203,7 @@ export default function SettingsPage() {
         </div>
 
         {/* ── Honors & Badges ── */}
-        <div className={styles.formGroup} style={{ marginTop: 24, padding: 24, border: '1px solid rgba(255,184,0,0.2)', borderRadius: 12, background: 'rgba(255,184,0,0.02)' }}>
+        <div className={styles.formGroup} style={{ marginTop: 24, padding: 24, border: '1px solid rgba(232, 174, 60,0.2)', borderRadius: 12, background: 'rgba(232, 174, 60,0.02)' }}>
           <div className="flex items-center gap-3 mb-2">
             <ShieldCheck className="text-gold-accent" size={20} />
             <h3 className="font-display text-lg text-on-surface">Honors & Badges</h3>

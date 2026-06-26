@@ -30,7 +30,7 @@ export default function CoreLayer() {
 
   return (
     <main
-      className="min-h-screen bg-[#0d0d0d] text-white selection:bg-[#FFB800] selection:text-black overflow-x-hidden font-sans"
+      className="min-h-screen bg-[#0d0d0d] text-white selection:bg-[#E8AE3C] selection:text-black overflow-x-hidden font-sans"
       style={{ paddingTop: "52px" }}
     >
       <LayerNav prev={{ href: "/layer/mantle", label: "Mantle" }} next={null} />
@@ -191,7 +191,7 @@ export default function CoreLayer() {
         .core-cta:hover {
           background: var(--accent-bright);
           border-color: var(--accent-bright);
-          box-shadow: 0 0 34px rgba(255, 184, 0, 0.45);
+          box-shadow: 0 0 34px rgba(232, 174, 60, 0.45);
           transform: translateY(-2px);
         }
         .core-cta:focus-visible {
@@ -247,7 +247,7 @@ export default function CoreLayer() {
         .portal-card:hover {
           border-color: var(--accent);
           transform: translateY(-4px);
-          box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), 0 0 40px rgba(255, 184, 0, 0.12);
+          box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), 0 0 40px rgba(232, 174, 60, 0.12);
         }
         .portal-glow {
           position: absolute;
@@ -255,7 +255,7 @@ export default function CoreLayer() {
           right: -30%;
           width: 70%;
           height: 160%;
-          background: radial-gradient(circle, rgba(255, 184, 0, 0.16) 0%, rgba(255, 184, 0, 0) 65%);
+          background: radial-gradient(circle, rgba(232, 174, 60, 0.16) 0%, rgba(232, 174, 60, 0) 65%);
           pointer-events: none;
         }
         .portal-head {
@@ -308,8 +308,8 @@ export default function CoreLayer() {
           padding: 14px;
         }
         .portal-stat.accent {
-          background: rgba(255, 184, 0, 0.06);
-          border-color: rgba(255, 184, 0, 0.2);
+          background: rgba(232, 174, 60, 0.06);
+          border-color: rgba(232, 174, 60, 0.2);
         }
         .portal-stat-k {
           display: block;

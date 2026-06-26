@@ -22,7 +22,7 @@ export default function MetropolisLayer() {
 
   return (
     <main
-      className="min-h-screen bg-[#0d0d0d] text-white selection:bg-[#FFB800] selection:text-black overflow-hidden font-sans"
+      className="min-h-screen bg-[#0d0d0d] text-white selection:bg-[#E8AE3C] selection:text-black overflow-hidden font-sans"
       style={{ paddingTop: "52px" }}
     >
       <LayerNav
@@ -134,7 +134,7 @@ export default function MetropolisLayer() {
           flex-direction: column;
           justify-content: space-between;
           padding: clamp(28px,5vh,52px) 28px;
-          border-right: 1px solid rgba(255,184,0,0.12);
+          border-right: 1px solid rgba(232, 174, 60,0.12);
           background: transparent;   /* Layer 01 look — let the city background read through */
           min-width: 0;              /* allow the category rail to scroll instead of blowing out the frame */
         }
@@ -184,8 +184,8 @@ export default function MetropolisLayer() {
         .metro-cat:hover { color: #f0ede8; }
         .metro-cat.on {
           color: var(--accent);
-          border-color: rgba(255,184,0,0.35);
-          background: rgba(255,184,0,0.06);
+          border-color: rgba(232, 174, 60,0.35);
+          background: rgba(232, 174, 60,0.06);
         }
         .metro-browse {
           font-size: 11px !important;
@@ -226,7 +226,7 @@ export default function MetropolisLayer() {
           width: 100%;
           max-width: 460px;
           background: rgba(255,255,255,0.04);
-          border: 1px solid rgba(255,184,0,0.18);
+          border: 1px solid rgba(232, 174, 60,0.18);
           color: #f0ede8;
           font-family: var(--font-body);
           font-size: 13px;
@@ -237,7 +237,7 @@ export default function MetropolisLayer() {
           transition: border-color 0.2s;
         }
         .metro-search::placeholder { color: rgba(255,255,255,0.28); }
-        .metro-search:focus { border-color: rgba(255,184,0,0.45); }
+        .metro-search:focus { border-color: rgba(232, 174, 60,0.45); }
 
         /* Property grid */
         .metro-grid {
@@ -248,7 +248,7 @@ export default function MetropolisLayer() {
         }
         .metro-card {
           background: rgba(18,18,18,0.85);
-          border: 1px solid rgba(255,184,0,0.12);
+          border: 1px solid rgba(232, 174, 60,0.12);
           border-radius: 6px;
           overflow: hidden;
           text-decoration: none;
@@ -256,7 +256,7 @@ export default function MetropolisLayer() {
           transition: border-color 0.2s, transform 0.2s;
         }
         .metro-card:hover {
-          border-color: rgba(255,184,0,0.38);
+          border-color: rgba(232, 174, 60,0.38);
           transform: translateY(-2px);
         }
         .metro-photo {
@@ -315,7 +315,7 @@ export default function MetropolisLayer() {
 
         @media (max-width: 768px) {
           .metro-split { grid-template-columns: 1fr; }
-          .metro-sidebar { border-right: none; border-bottom: 1px solid rgba(255,184,0,0.12); }
+          .metro-sidebar { border-right: none; border-bottom: 1px solid rgba(232, 174, 60,0.12); }
           .metro-content { max-height: none; }
           .metro-cat:hover { background: transparent; color: rgba(255,255,255,0.55); }
           .metro-card:hover { transform: none; }
@@ -340,9 +340,9 @@ export default function MetropolisLayer() {
             scroll-snap-align: start;
             font-size: 15px;
             padding: 10px 16px;
-            border: 1px solid rgba(255,184,0,0.2);
+            border: 1px solid rgba(232, 174, 60,0.2);
           }
-          .metro-cat.on { border-color: rgba(255,184,0,0.5); }
+          .metro-cat.on { border-color: rgba(232, 174, 60,0.5); }
 
           /* Property cards: swipe left/right — no long vertical drag.
              Consistent rail spec shared across all layers. */

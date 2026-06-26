@@ -71,7 +71,7 @@
 }
 
 .filter-chevron {
-  color: var(--accent, #ffb800);
+  color: var(--accent, #E8AE3C);
   font-size: 12px;
   transition: transform var(--transition-fast) ease;
 }
@@ -98,7 +98,7 @@
 }
 
 .filter-checkbox-label:hover {
-  color: var(--accent, #ffb800);
+  color: var(--accent, #E8AE3C);
 }
 
 .filter-checkbox {
@@ -114,8 +114,8 @@
 }
 
 .filter-checkbox:checked {
-  background: var(--accent, #ffb800);
-  border-color: var(--accent, #ffb800);
+  background: var(--accent, #E8AE3C);
+  border-color: var(--accent, #E8AE3C);
 }
 
 .filter-checkbox:checked::after {
@@ -140,7 +140,7 @@
 .intel-widget-header {
   font-family: var(--font-mono), monospace;
   font-size: 10px;
-  color: var(--accent, #ffb800);
+  color: var(--accent, #E8AE3C);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   margin-bottom: 16px;
@@ -203,8 +203,8 @@
 
 .global-search-input:focus {
   outline: none;
-  border-color: var(--accent-bright, #ffc929);
-  box-shadow: var(--shadow-glow-soft, 0 0 24px rgba(255, 184, 0, 0.18));
+  border-color: var(--accent-bright, #F7C64E);
+  box-shadow: var(--shadow-glow-soft, 0 0 24px rgba(232, 174, 60, 0.18));
 }
 
 /* Properties Grid */
@@ -228,12 +228,12 @@
 
 .property-preview-card:hover {
   transform: translateY(-4px);
-  border-color: rgba(255, 201, 41, 0.55);
-  box-shadow: var(--shadow-lg, 0 12px 24px rgba(0, 0, 0, 0.4)), var(--shadow-glow-soft, 0 0 24px rgba(255, 184, 0, 0.18));
+  border-color: rgba(247, 198, 78, 0.55);
+  box-shadow: var(--shadow-lg, 0 12px 24px rgba(0, 0, 0, 0.4)), var(--shadow-glow-soft, 0 0 24px rgba(232, 174, 60, 0.18));
 }
 
 .property-preview-card:focus-visible {
-  outline: 1.5px solid var(--accent-bright, #ffc929);
+  outline: 1.5px solid var(--accent-bright, #F7C64E);
   outline-offset: 3px;
 }
 
@@ -265,7 +265,7 @@
   padding: 4px 10px;
   border-radius: 2px;
   font-size: 10px;
-  color: var(--accent, #ffb800);
+  color: var(--accent, #E8AE3C);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -328,7 +328,7 @@
 .property-action-btn {
   font-size: 11px;
   font-weight: 600;
-  color: var(--accent, #ffb800);
+  color: var(--accent, #E8AE3C);
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
@@ -421,8 +421,8 @@
 
   /* Touch tap highlight */
   .property-preview-card:active {
-    border-color: rgba(255, 201, 41, 0.55);
-    box-shadow: 0 0 0 2px rgba(255, 184, 0, 0.15);
+    border-color: rgba(247, 198, 78, 0.55);
+    box-shadow: 0 0 0 2px rgba(232, 174, 60, 0.15);
   }
 }
 

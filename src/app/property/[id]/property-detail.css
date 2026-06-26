@@ -10,10 +10,10 @@
  --text-muted: rgba(240, 237, 232, 0.38);
  --brand: #1a1814;
  --brand-overlay: rgba(12, 11, 9, 0.92);
- --accent: #ffb800;
- --accent-rgb: 255, 184, 0;
- --accent-dim: rgba(255, 184, 0, 0.12);
- --accent-border: rgba(255, 184, 0, 0.28);
+ --accent: #E8AE3C;
+ --accent-rgb: 232, 174, 60;
+ --accent-dim: rgba(232, 174, 60, 0.12);
+ --accent-border: rgba(232, 174, 60, 0.28);
  --font-display: Georgia, 'Times New Roman', serif;
  --font-body: system-ui, -apple-system, 'Segoe UI', sans-serif;
  --transition: 0.38s cubic-bezier(0.4, 0, 0.2, 1);
@@ -633,7 +633,7 @@
 .reaction-action-btn:hover {
   border-color: var(--accent);
   color: var(--text-primary);
-  background: rgba(255, 184, 0, 0.05);
+  background: rgba(232, 174, 60, 0.05);
 }
 
 .reaction-action-btn.active {
@@ -911,7 +911,7 @@ html.lightbox-open {
 .whereto-tab-btn:hover {
   border-color: var(--accent);
   color: var(--text-primary);
-  background: rgba(255, 184, 0, 0.05);
+  background: rgba(232, 174, 60, 0.05);
 }
 
 .whereto-tab-btn.active {

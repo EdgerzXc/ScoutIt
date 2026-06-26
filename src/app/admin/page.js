@@ -95,7 +95,7 @@ export default function AdminPage() {
                   <div key={prop.id} className="submission-card">
                     <div className="submission-info">
                       <div className="info-primary">
-                        <Building2 size={16} color="#ffb800" />
+                        <Building2 size={16} color="#E8AE3C" />
                         <h3>{prop.title}</h3>
                       </div>
                       <div className="info-secondary">
@@ -299,7 +299,7 @@ export default function AdminPage() {
 
         .info-tag.coords {
           color: var(--accent);
-          background: rgba(255, 184, 0, 0.08);
+          background: rgba(232, 174, 60, 0.08);
         }
 
         .info-meta {
@@ -326,7 +326,7 @@ export default function AdminPage() {
         .btn-approve:hover:not(:disabled) {
           background: var(--accent-bright);
           transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(255, 184, 0, 0.2);
+          box-shadow: 0 4px 12px rgba(232, 174, 60, 0.2);
         }
 
         .btn-approve:disabled {

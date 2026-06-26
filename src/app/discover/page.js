@@ -14,7 +14,7 @@ export default function DiscoverPage() {
   return (
     <>
       <Header />
-      <Suspense fallback={<div style={{ padding: '60px', color: '#ffb800', background: '#0e0e0e', height: '100vh', fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Loading Discovery Engine Matrix...</div>}>
+      <Suspense fallback={<div style={{ padding: '60px', color: '#E8AE3C', background: '#0e0e0e', height: '100vh', fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Loading Discovery Engine Matrix...</div>}>
         <DiscoverClient />
       </Suspense>
     </>

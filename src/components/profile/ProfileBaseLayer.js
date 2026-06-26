@@ -4,7 +4,7 @@ import Link from "next/link";
 import { MapPin, Calendar, Edit2, MessageSquare } from "lucide-react";
 
 const TIER_CONFIG = {
-  universe: { label: "Universe", color: "#ffb800", border: "rgba(255,184,0,0.4)" },
+  universe: { label: "Universe", color: "#E8AE3C", border: "rgba(232, 174, 60,0.4)" },
   cluster:  { label: "Cluster",  color: "#C0C0C0", border: "rgba(192,192,192,0.4)" },
   solar:    { label: "Solar",    color: "#CD7F32", border: "rgba(205,127,50,0.4)" },
   starry:   { label: "Starry",   color: "#888888", border: "rgba(136,136,136,0.3)" },
@@ -148,7 +148,7 @@ export default function ProfileBaseLayer({
         {/* Connects — own view only, never on public */}
         {isOwnView && profile.connects_balance != null && (
           <div style={connectsBlock}>
-            <span style={{ color: "#ffb800", fontFamily: "var(--font-mono)", fontSize: 13 }}>
+            <span style={{ color: "#E8AE3C", fontFamily: "var(--font-mono)", fontSize: 13 }}>
               ◈ {profile.connects_balance}
             </span>
             <span style={{ fontFamily: "var(--font-body)", fontSize: 11, color: "var(--text-secondary)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
@@ -212,7 +212,7 @@ const avatarWrap = {
 const avatarInitials = {
   fontFamily: "Georgia, serif",
   fontSize: 32,
-  color: "#ffb800",
+  color: "#E8AE3C",
   lineHeight: 1,
 };
 
@@ -261,8 +261,8 @@ const roleTag = {
   fontWeight: 700,
   letterSpacing: "0.12em",
   textTransform: "uppercase",
-  color: "#ffb800",
-  border: "1px solid rgba(255,184,0,0.25)",
+  color: "#E8AE3C",
+  border: "1px solid rgba(232, 174, 60,0.25)",
   borderRadius: 20,
   padding: "3px 10px",
 };
@@ -298,8 +298,8 @@ const connectsBlock = {
   display: "flex",
   alignItems: "center",
   gap: 6,
-  background: "rgba(255,184,0,0.07)",
-  border: "1px solid rgba(255,184,0,0.15)",
+  background: "rgba(232, 174, 60,0.07)",
+  border: "1px solid rgba(232, 174, 60,0.15)",
   borderRadius: 20,
   padding: "6px 14px",
   marginBottom: 16,
@@ -318,8 +318,8 @@ const editBtn = {
   gap: 6,
   fontFamily: "var(--font-body)",
   fontSize: 12,
-  color: "#ffb800",
-  border: "1px solid rgba(255,184,0,0.3)",
+  color: "#E8AE3C",
+  border: "1px solid rgba(232, 174, 60,0.3)",
   borderRadius: 20,
   padding: "6px 14px",
   cursor: "pointer",
@@ -334,7 +334,7 @@ const contactBtn = {
   fontFamily: "var(--font-body)",
   fontSize: 12,
   color: "#0e0e0e",
-  background: "#ffb800",
+  background: "#E8AE3C",
   border: "none",
   borderRadius: 20,
   padding: "7px 16px",

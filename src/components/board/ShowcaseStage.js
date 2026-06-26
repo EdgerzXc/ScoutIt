@@ -9,7 +9,7 @@ import { rankBoard, BOARD_CATEGORIES, BOARD_AWARDS } from "@/data/mockShowcase";
 // ════════════════════════════════════════════════════════════════
 const TIER_ORDER = ["universe", "cluster", "solar", "starry"];
 const TIERS = {
-  universe: { label: "① Universe", color: "#ffb800", rgb: "255,184,0", flash: "rgba(255,184,0,0.85)", badge: "Universe" },
+  universe: { label: "① Universe", color: "#E8AE3C", rgb: "232, 174, 60", flash: "rgba(232, 174, 60,0.85)", badge: "Universe" },
   cluster:  { label: "② Cluster",  color: "#C0C0C0", rgb: "192,192,192", flash: "rgba(220,225,240,0.85)", badge: "Cluster" },
   solar:    { label: "③ Solar",    color: "#CD7F32", rgb: "205,127,50",  flash: "rgba(205,127,50,0.85)",  badge: "Solar" },
   starry:   { label: "④–⑩ Starry", color: "#888888", rgb: "136,136,136", flash: "rgba(15,30,80,0.85)",    badge: "Looking Up" },
@@ -184,7 +184,7 @@ function buildStarry(W, H) {
       // Sky
       let g = ctx.createLinearGradient(0, 0, 0, H * 0.62); g.addColorStop(0, "#000308"); g.addColorStop(0.3, "#000510"); g.addColorStop(0.7, "#010818"); g.addColorStop(1, "#020c22"); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H * 0.62);
       let mw = ctx.createLinearGradient(W * 0.1, 0, W * 0.7, H * 0.6); mw.addColorStop(0, "rgba(80,90,140,0)"); mw.addColorStop(0.2, "rgba(80,95,155,0.06)"); mw.addColorStop(0.45, "rgba(100,110,175,0.09)"); mw.addColorStop(0.65, "rgba(80,90,150,0.055)"); mw.addColorStop(1, "rgba(60,70,130,0)"); ctx.fillStyle = mw; ctx.fillRect(0, 0, W, H * 0.62);
-      [["rgba(255,184,0,", W * 0.22, H * 0.08, W * 0.18, 0.055, 0.022], ["rgba(192,200,230,", W * 0.52, H * 0.12, W * 0.14, 0.042, 0.018], ["rgba(205,127,50,", W * 0.8, H * 0.1, W * 0.12, 0.048, 0.018]].forEach(([c, x, y, r, a, b]) => { const gg = ctx.createRadialGradient(x, y, 0, x, y, r); gg.addColorStop(0, c + a + ")"); gg.addColorStop(0.5, c + b + ")"); gg.addColorStop(1, c + "0)"); ctx.fillStyle = gg; ctx.fillRect(0, 0, W, H * 0.62); });
+      [["rgba(232, 174, 60,", W * 0.22, H * 0.08, W * 0.18, 0.055, 0.022], ["rgba(192,200,230,", W * 0.52, H * 0.12, W * 0.14, 0.042, 0.018], ["rgba(205,127,50,", W * 0.8, H * 0.1, W * 0.12, 0.048, 0.018]].forEach(([c, x, y, r, a, b]) => { const gg = ctx.createRadialGradient(x, y, 0, x, y, r); gg.addColorStop(0, c + a + ")"); gg.addColorStop(0.5, c + b + ")"); gg.addColorStop(1, c + "0)"); ctx.fillStyle = gg; ctx.fillRect(0, 0, W, H * 0.62); });
       const moonX = W * 0.78, moonY = H * 0.14, moonR = Math.min(W, H) * 0.038;
       let mg = ctx.createRadialGradient(moonX - moonR * 0.2, moonY - moonR * 0.2, 0, moonX, moonY, moonR); mg.addColorStop(0, "rgba(240,238,220,0.82)"); mg.addColorStop(0.6, "rgba(210,208,185,0.55)"); mg.addColorStop(1, "rgba(180,175,150,0)"); ctx.beginPath(); ctx.arc(moonX, moonY, moonR, 0, Math.PI * 2); ctx.fillStyle = mg; ctx.fill();
       let mh = ctx.createRadialGradient(moonX, moonY, moonR * 0.7, moonX, moonY, moonR * 3.5); mh.addColorStop(0, "rgba(220,215,180,0.07)"); mh.addColorStop(1, "rgba(220,215,180,0)"); ctx.beginPath(); ctx.arc(moonX, moonY, moonR * 3.5, 0, Math.PI * 2); ctx.fillStyle = mh; ctx.fill();
@@ -572,15 +572,15 @@ export default function ShowcaseStage({ mode = "full" }) {
         .sc-topbar-cat { justify-self: start; font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; }
         :global(.sc-logo) { justify-self: center; font-family: Georgia, serif; font-size: 30px; letter-spacing: 3px; line-height: 1; text-decoration: none; pointer-events: auto; }
         :global(.sc-logo .sc-logo-scout) { color: #f5f3ee; }
-        :global(.sc-logo .sc-logo-it) { color: #ffb800; transition: text-shadow 0.3s ease; }
-        :global(.sc-logo:hover .sc-logo-it) { text-shadow: 0 0 14px rgba(255,184,0,0.55); }
+        :global(.sc-logo .sc-logo-it) { color: #E8AE3C; transition: text-shadow 0.3s ease; }
+        :global(.sc-logo:hover .sc-logo-it) { text-shadow: 0 0 14px rgba(232, 174, 60,0.55); }
         .sc-menu { justify-self: end; position: relative; pointer-events: auto; }
-        .sc-menu-btn { width: 42px; height: 42px; border-radius: 50%; border: 1px solid #2a2a2a; background: rgba(0,0,0,0.5); color: #ffb800; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
+        .sc-menu-btn { width: 42px; height: 42px; border-radius: 50%; border: 1px solid #2a2a2a; background: rgba(0,0,0,0.5); color: #E8AE3C; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
         .sc-menu-btn svg { width: 17px; height: 17px; }
-        .sc-menu-btn:hover { border-color: rgba(255,184,0,0.5); background: rgba(255,184,0,0.08); }
+        .sc-menu-btn:hover { border-color: rgba(232, 174, 60,0.5); background: rgba(232, 174, 60,0.08); }
         .sc-menu-drop { position: absolute; top: 50px; right: 0; min-width: 188px; background: rgba(8,8,9,0.96); backdrop-filter: blur(14px); border: 1px solid #1a1a1a; padding: 10px 0; display: flex; flex-direction: column; opacity: 0; visibility: hidden; transform: translateY(-6px); transition: opacity 0.2s, transform 0.2s, visibility 0.2s; }
         .sc-menu-drop.open { opacity: 1; visibility: visible; transform: translateY(0); }
-        .sc-menu-brand { font-family: Georgia, serif; font-size: 16px; color: #ffb800; padding: 6px 18px 10px; border-bottom: 1px solid #1a1a1a; margin-bottom: 6px; }
+        .sc-menu-brand { font-family: Georgia, serif; font-size: 16px; color: #E8AE3C; padding: 6px 18px 10px; border-bottom: 1px solid #1a1a1a; margin-bottom: 6px; }
         .sc-menu-drop :global(a) { font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #999; text-decoration: none; padding: 9px 18px; transition: color 0.15s, background 0.15s; }
         .sc-menu-drop :global(a):hover { color: #f0ede8; background: rgba(255,255,255,0.03); }
 
@@ -589,7 +589,7 @@ export default function ShowcaseStage({ mode = "full" }) {
         .sc-edge:hover { background: rgba(0,0,0,0.8); color: #f0ede8; }
         .sc-edge-left { left: 0; border-left: none; }
         .sc-edge-right { right: 0; border-right: none; }
-        .sc-edge.on { color: #ffb800; }
+        .sc-edge.on { color: #E8AE3C; }
 
         /* Filter panel (slides from left) */
         .sc-filter-panel { position: absolute; top: 0; left: 0; height: 100%; width: 300px; z-index: 8; background: rgba(8,8,9,0.95); backdrop-filter: blur(18px); border-right: 1px solid #1a1a1a; padding: 78px 26px 28px; transform: translateX(-100%); transition: transform 0.38s cubic-bezier(0.16,1,0.3,1); overflow-y: auto; }
@@ -598,11 +598,11 @@ export default function ShowcaseStage({ mode = "full" }) {
         .sc-fp-awards { display: flex; flex-wrap: wrap; gap: 8px; }
         .sc-fp-award { font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: #888; background: none; border: 1px solid #242424; padding: 9px 12px; cursor: pointer; transition: all 0.2s; }
         .sc-fp-award:hover { color: #f0ede8; }
-        .sc-fp-award.on { color: #ffb800; border-color: rgba(255,184,0,0.6); background: rgba(255,184,0,0.08); }
+        .sc-fp-award.on { color: #E8AE3C; border-color: rgba(232, 174, 60,0.6); background: rgba(232, 174, 60,0.08); }
         .sc-fp-cats { display: flex; flex-direction: column; gap: 2px; }
         .sc-fp-cat { text-align: left; font-family: Georgia, serif; font-size: 17px; color: #c8c8c8; background: none; border-left: 2px solid transparent; padding: 11px 14px; cursor: pointer; transition: all 0.2s; }
         .sc-fp-cat:hover { color: #f0ede8; }
-        .sc-fp-cat.on { color: #ffb800; border-left-color: #ffb800; background: rgba(255,184,0,0.06); }
+        .sc-fp-cat.on { color: #E8AE3C; border-left-color: #E8AE3C; background: rgba(232, 174, 60,0.06); }
 
         /* Promo panel (slides from right) */
         .sc-promo-panel { position: absolute; top: 0; right: 0; height: 100%; width: 360px; z-index: 8; background: rgba(8,8,9,0.95); backdrop-filter: blur(18px); border-left: 1px solid #1a1a1a; padding: 78px 26px 28px; transform: translateX(100%); transition: transform 0.38s cubic-bezier(0.16,1,0.3,1); display: flex; flex-direction: column; gap: 14px; }
@@ -612,7 +612,7 @@ export default function ShowcaseStage({ mode = "full" }) {
         .sc-promo-embed :global(iframe) { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
         .sc-promo-soon { font-family: Georgia, serif; font-style: italic; font-size: 15px; color: #777; padding: 30px 4px; text-align: center; line-height: 1.6; }
         :global(.sc-promo-cta) { font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #999; text-decoration: none; }
-        :global(.sc-promo-cta:hover) { color: #ffb800; }
+        :global(.sc-promo-cta:hover) { color: #E8AE3C; }
 
         /* Spotlight card (enlarged) */
         .sc-overlay { position: absolute; inset: 0; z-index: 3; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding-bottom: 240px; pointer-events: none; }
@@ -637,7 +637,7 @@ export default function ShowcaseStage({ mode = "full" }) {
         .sc-stat-num { font-family: Georgia, serif; font-size: 27px; }
         .sc-stat-lbl { font-family: 'Courier New', monospace; font-size: 9px; color: #555; letter-spacing: 0.18em; text-transform: uppercase; }
         :global(.sc-cta) { font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 0.16em; color: #999; text-transform: uppercase; cursor: pointer; display: flex; justify-content: space-between; padding-top: 12px; border-top: 1px solid #1c1c1c; text-decoration: none; }
-        :global(.sc-cta:hover) { color: #ffb800; }
+        :global(.sc-cta:hover) { color: #E8AE3C; }
         .sc-platform { width: 330px; height: 13px; border-radius: 50%; border: 1px solid; background: transparent; margin-top: 6px; animation: scPlat 3s ease-in-out infinite; }
         @keyframes scPlat { 0%,100% { opacity: 0.6; } 50% { opacity: 1; } }
 
@@ -664,13 +664,13 @@ export default function ShowcaseStage({ mode = "full" }) {
         .sc-controls { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; justify-content: center; pointer-events: all; }
         .sc-arrow { font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #999; background: none; border: 1px solid #2a2a2a; padding: 9px 18px; cursor: pointer; transition: all 0.2s; }
         .sc-list-toggle { font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: #888; background: rgba(0,0,0,0.4); border: 1px solid #2a2a2a; padding: 9px 16px; cursor: pointer; transition: all 0.2s; }
-        .sc-list-toggle:hover, .sc-list-toggle.on { color: #ffb800; border-color: rgba(255,184,0,0.5); }
-        .sc-arrow:hover:not(:disabled) { color: #ffb800; border-color: rgba(255,184,0,0.5); }
+        .sc-list-toggle:hover, .sc-list-toggle.on { color: #E8AE3C; border-color: rgba(232, 174, 60,0.5); }
+        .sc-arrow:hover:not(:disabled) { color: #E8AE3C; border-color: rgba(232, 174, 60,0.5); }
         .sc-arrow:disabled { opacity: 0.3; cursor: default; }
         .sc-arrow-count { font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 0.1em; color: #777; }
 
-        :global(.sc-seeall) { position: absolute; top: 18px; right: 22px; z-index: 6; font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 3px; color: #ffb800; text-transform: uppercase; text-decoration: none; border: 1px solid rgba(255,184,0,0.4); padding: 8px 16px; background: rgba(0,0,0,0.5); }
-        :global(.sc-seeall:hover) { background: rgba(255,184,0,0.12); }
+        :global(.sc-seeall) { position: absolute; top: 18px; right: 22px; z-index: 6; font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 3px; color: #E8AE3C; text-transform: uppercase; text-decoration: none; border: 1px solid rgba(232, 174, 60,0.4); padding: 8px 16px; background: rgba(0,0,0,0.5); }
+        :global(.sc-seeall:hover) { background: rgba(232, 174, 60,0.12); }
 
         @media (max-width: 768px) {
           .sc-filter-panel, .sc-promo-panel { width: 86%; }

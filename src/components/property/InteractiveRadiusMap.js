@@ -52,14 +52,14 @@ export default function InteractiveRadiusMap({ onSearch, onClose, initialLng = 1
         id: 'radius-circle-fill',
         type: 'fill',
         source: 'radius-circle',
-        paint: { 'fill-color': '#ffb800', 'fill-opacity': 0.15 }
+        paint: { 'fill-color': '#E8AE3C', 'fill-opacity': 0.15 }
       });
 
       map.addLayer({
         id: 'radius-circle-outline',
         type: 'line',
         source: 'radius-circle',
-        paint: { 'line-color': '#ffb800', 'line-width': 2, 'line-dasharray': [2, 2] }
+        paint: { 'line-color': '#E8AE3C', 'line-width': 2, 'line-dasharray': [2, 2] }
       });
 
       const el = document.createElement('div');
@@ -169,7 +169,7 @@ export default function InteractiveRadiusMap({ onSearch, onClose, initialLng = 1
           padding: 0 16px;
           font-family: var(--font-mono);
           font-size: 11px;
-          color: #ffb800;
+          color: #E8AE3C;
           border-bottom: 1px solid #262626;
           text-transform: uppercase;
           letter-spacing: 0.1em;
@@ -216,7 +216,7 @@ export default function InteractiveRadiusMap({ onSearch, onClose, initialLng = 1
         .control-value {
           font-family: var(--font-mono);
           font-size: 10px;
-          color: #ffb800;
+          color: #E8AE3C;
           font-weight: bold;
         }
         .radius-slider {
@@ -233,7 +233,7 @@ export default function InteractiveRadiusMap({ onSearch, onClose, initialLng = 1
           width: 16px;
           height: 16px;
           border-radius: 50%;
-          background: #ffb800;
+          background: #E8AE3C;
           cursor: pointer;
           border: 2px solid #1a1a1a;
         }
@@ -257,7 +257,7 @@ export default function InteractiveRadiusMap({ onSearch, onClose, initialLng = 1
         .pin-dot {
           width: 10px;
           height: 10px;
-          background: #ffb800;
+          background: #E8AE3C;
           border-radius: 50%;
           border: 2px solid #000;
           z-index: 2;
@@ -266,7 +266,7 @@ export default function InteractiveRadiusMap({ onSearch, onClose, initialLng = 1
           position: absolute;
           width: 100%;
           height: 100%;
-          background: #ffb800;
+          background: #E8AE3C;
           border-radius: 50%;
           opacity: 0.4;
           animation: mapPinPulse 1.5s infinite;
@@ -278,7 +278,7 @@ export default function InteractiveRadiusMap({ onSearch, onClose, initialLng = 1
         .confirm-radar-btn {
           width: 100%;
           margin-top: 16px;
-          background: #ffb800;
+          background: #E8AE3C;
           color: #000;
           border: none;
           padding: 12px 0;

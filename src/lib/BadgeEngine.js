@@ -52,7 +52,7 @@ export const BADGE_DEFINITIONS = {
     max_slots: 100,
     claimed: 100,
     status: "SOLD_OUT",
-    color: "#FFB800", // ScoutIt Gold
+    color: "#E8AE3C", // ScoutIt Gold
     perks: {
       free_access: true
     }

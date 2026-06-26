@@ -27,7 +27,7 @@ export default function EventHorizon({ className = "" }) {
     const edgeRadius = () => maxR * rand(0.75, 1.05);
     const initStar = () => ({ angle: rand(0, Math.PI * 2), radius: edgeRadius(), size: rand(0.4, 1.8), baseOpacity: rand(0.3, 0.9), pull: rand(0.0003, 0.0012), twPhase: rand(0, Math.PI * 2), twSpeed: rand(0.6, 1.8) });
     const BODY_COLORS = [
-      () => `rgba(255,184,0,${rand(0.3, 0.6).toFixed(2)})`,
+      () => `rgba(232, 174, 60,${rand(0.3, 0.6).toFixed(2)})`,
       () => `rgba(240,237,232,${rand(0.2, 0.4).toFixed(2)})`,
       () => `rgba(136,136,170,${rand(0.2, 0.4).toFixed(2)})`,
     ];
@@ -70,8 +70,8 @@ export default function EventHorizon({ className = "" }) {
       const coreOp = 0.08 + 0.04 * Math.sin(t * 1.5);
       const coreR = Math.min(w, h) * 0.22;
       const coreGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, coreR);
-      coreGrad.addColorStop(0, `rgba(255,184,0,${coreOp.toFixed(3)})`);
-      coreGrad.addColorStop(1, "rgba(255,184,0,0)");
+      coreGrad.addColorStop(0, `rgba(232, 174, 60,${coreOp.toFixed(3)})`);
+      coreGrad.addColorStop(1, "rgba(232, 174, 60,0)");
       ctx.beginPath(); ctx.arc(cx, cy, coreR, 0, Math.PI * 2); ctx.fillStyle = coreGrad; ctx.fill();
 
       const darkF = 0.5 + 0.5 * Math.sin((t - 2.5) * (2 * Math.PI / 5));
@@ -89,7 +89,7 @@ export default function EventHorizon({ className = "" }) {
         const eased = 1 - Math.pow(1 - p, 2);
         const r = 40 + (300 - 40) * eased;
         ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2);
-        ctx.strokeStyle = `rgba(255,184,0,${(0.12 * (1 - p)).toFixed(3)})`;
+        ctx.strokeStyle = `rgba(232, 174, 60,${(0.12 * (1 - p)).toFixed(3)})`;
         ctx.lineWidth = 2; ctx.stroke();
       }
 
@@ -102,11 +102,11 @@ export default function EventHorizon({ className = "" }) {
           op = ring.lo + (ring.hi - ring.lo) * (0.5 + 0.5 * Math.sin(t * ring.speed + ring.phase));
         }
         ctx.beginPath(); ctx.arc(cx, cy, ring.r, 0, Math.PI * 2);
-        ctx.strokeStyle = `rgba(255,184,0,${op.toFixed(3)})`; ctx.lineWidth = lw; ctx.stroke();
+        ctx.strokeStyle = `rgba(232, 174, 60,${op.toFixed(3)})`; ctx.lineWidth = lw; ctx.stroke();
         if (ring.inner) {
           const a0 = (t * 0.25) % (Math.PI * 2);
           ctx.beginPath(); ctx.arc(cx, cy, ring.r, a0, a0 + Math.PI * 0.6);
-          ctx.strokeStyle = `rgba(255,184,0,${(op * 2.4).toFixed(3)})`; ctx.lineWidth = 1.4; ctx.stroke();
+          ctx.strokeStyle = `rgba(232, 174, 60,${(op * 2.4).toFixed(3)})`; ctx.lineWidth = 1.4; ctx.stroke();
         }
       });
 
@@ -117,7 +117,7 @@ export default function EventHorizon({ className = "" }) {
         const x2 = cx + Math.cos(d.angle) * (d.radius + d.length), y2 = cy + Math.sin(d.angle) * (d.radius + d.length);
         const fade = Math.min(1, d.radius / (maxR * 0.6));
         ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x2, y2);
-        ctx.strokeStyle = d.warm ? `rgba(240,237,232,${(d.opacity * fade).toFixed(3)})` : `rgba(255,184,0,${(d.opacity * fade).toFixed(3)})`;
+        ctx.strokeStyle = d.warm ? `rgba(240,237,232,${(d.opacity * fade).toFixed(3)})` : `rgba(232, 174, 60,${(d.opacity * fade).toFixed(3)})`;
         ctx.lineWidth = 1; ctx.stroke();
       });
 
@@ -148,11 +148,11 @@ export default function EventHorizon({ className = "" }) {
         const hx = cx + Math.cos(c.angle) * c.radius, hy = cy + Math.sin(c.angle) * c.radius;
         const tx = cx + Math.cos(c.angle) * (c.radius + c.tail), ty = cy + Math.sin(c.angle) * (c.radius + c.tail);
         const grad = ctx.createLinearGradient(hx, hy, tx, ty);
-        grad.addColorStop(0, "rgba(255,184,0,0.8)"); grad.addColorStop(1, "rgba(255,184,0,0)");
+        grad.addColorStop(0, "rgba(232, 174, 60,0.8)"); grad.addColorStop(1, "rgba(232, 174, 60,0)");
         ctx.beginPath(); ctx.moveTo(hx, hy); ctx.lineTo(tx, ty);
         ctx.strokeStyle = grad; ctx.lineWidth = 1.4; ctx.lineCap = "round"; ctx.stroke();
         ctx.beginPath(); ctx.arc(hx, hy, c.size, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(255,250,235,0.95)"; ctx.shadowColor = "rgba(255,184,0,0.9)"; ctx.shadowBlur = 6; ctx.fill(); ctx.shadowBlur = 0;
+        ctx.fillStyle = "rgba(255,250,235,0.95)"; ctx.shadowColor = "rgba(232, 174, 60,0.9)"; ctx.shadowBlur = 6; ctx.fill(); ctx.shadowBlur = 0;
       });
     };
 

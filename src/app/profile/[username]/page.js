@@ -260,8 +260,8 @@ const notFoundDesc = {
 const notFoundCta = {
   fontFamily: "var(--font-body)",
   fontSize: 12,
-  color: "#ffb800",
-  border: "1px solid rgba(255,184,0,0.3)",
+  color: "#E8AE3C",
+  border: "1px solid rgba(232, 174, 60,0.3)",
   borderRadius: 20,
   padding: "8px 20px",
   textDecoration: "none",

@@ -37,10 +37,10 @@ function NavPill({ href, label, dir }) {
         textDecoration: "none",
         padding: "8px 14px",
         borderRadius: "999px",
-        border: `1px solid ${hover ? "var(--accent)" : "rgba(255,184,0,0.4)"}`,
-        background: hover ? "var(--accent)" : "rgba(255,184,0,0.07)",
+        border: `1px solid ${hover ? "var(--accent)" : "rgba(232, 174, 60,0.4)"}`,
+        background: hover ? "var(--accent)" : "rgba(232, 174, 60,0.07)",
         color: hover ? "#0e0e0e" : "#f0ede8",
-        boxShadow: hover ? "0 0 22px rgba(255,184,0,0.4)" : "none",
+        boxShadow: hover ? "0 0 22px rgba(232, 174, 60,0.4)" : "none",
         transition: "all 0.2s ease",
         whiteSpace: "nowrap",
         WebkitTapHighlightColor: "transparent",
@@ -85,7 +85,7 @@ export default function LayerNav({ prev = null, next = null }) {
           background: "rgba(10,10,10,0.80)",
           backdropFilter: "blur(14px)",
           WebkitBackdropFilter: "blur(14px)",
-          borderBottom: "1px solid rgba(255,184,0,0.12)",
+          borderBottom: "1px solid rgba(232, 174, 60,0.12)",
         }}
       >
         {/* BACK */}
@@ -114,7 +114,7 @@ export default function LayerNav({ prev = null, next = null }) {
           <span
             style={{
               color: "var(--accent)",
-              textShadow: logoHover ? "0 0 14px rgba(255,184,0,0.55)" : "none",
+              textShadow: logoHover ? "0 0 14px rgba(232, 174, 60,0.55)" : "none",
               transition: "text-shadow 0.3s ease",
             }}
           >

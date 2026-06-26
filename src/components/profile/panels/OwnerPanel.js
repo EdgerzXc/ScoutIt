@@ -13,7 +13,7 @@ export default function OwnerPanel({ listings = [], inquiryCount = 0 }) {
     <section style={panelStyle}>
       <div style={panelHeader}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <Building2 size={14} strokeWidth={1.5} color="#ffb800" />
+          <Building2 size={14} strokeWidth={1.5} color="#E8AE3C" />
           <span style={panelLabel}>Owner</span>
         </div>
         <span style={privateBadge}>Private</span>
@@ -21,17 +21,17 @@ export default function OwnerPanel({ listings = [], inquiryCount = 0 }) {
 
       <div style={statsRow}>
         <div style={statCard}>
-          <Building2 size={14} strokeWidth={1.5} color="#ffb800" style={{ marginBottom: 6 }} />
+          <Building2 size={14} strokeWidth={1.5} color="#E8AE3C" style={{ marginBottom: 6 }} />
           <span style={statValue}>{listings.length}</span>
           <span style={statLabel}>Listed Spaces</span>
         </div>
         <div style={statCard}>
-          <MessageSquare size={14} strokeWidth={1.5} color="#ffb800" style={{ marginBottom: 6 }} />
+          <MessageSquare size={14} strokeWidth={1.5} color="#E8AE3C" style={{ marginBottom: 6 }} />
           <span style={statValue}>{inquiryCount}</span>
           <span style={statLabel}>Total Inquiries</span>
         </div>
         <div style={statCard}>
-          <Users size={14} strokeWidth={1.5} color="rgba(255,184,0,0.4)" style={{ marginBottom: 6 }} />
+          <Users size={14} strokeWidth={1.5} color="rgba(232, 174, 60,0.4)" style={{ marginBottom: 6 }} />
           <span style={{ ...statValue, color: "var(--text-secondary)" }}>—</span>
           <span style={statLabel}>Broker Assoc.</span>
         </div>
@@ -73,7 +73,7 @@ export default function OwnerPanel({ listings = [], inquiryCount = 0 }) {
             </div>
           ))}
           {listings.length > 3 && (
-            <Link href="/dashboard" style={{ fontFamily: "var(--font-body)", fontSize: 11, color: "#ffb800", marginTop: 4 }}>
+            <Link href="/dashboard" style={{ fontFamily: "var(--font-body)", fontSize: 11, color: "#E8AE3C", marginTop: 4 }}>
               +{listings.length - 3} more listings
             </Link>
           )}
@@ -103,7 +103,7 @@ const panelLabel = {
   fontWeight: 700,
   letterSpacing: "0.14em",
   textTransform: "uppercase",
-  color: "#ffb800",
+  color: "#E8AE3C",
 };
 
 const privateBadge = {
@@ -177,7 +177,7 @@ const emptyText = {
 const emptyCta = {
   fontFamily: "var(--font-body)",
   fontSize: 12,
-  color: "#ffb800",
+  color: "#E8AE3C",
   letterSpacing: "0.06em",
   textDecoration: "underline",
   textUnderlineOffset: 3,

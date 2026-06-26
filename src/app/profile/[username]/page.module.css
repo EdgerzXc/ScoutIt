@@ -177,7 +177,7 @@
 .ceremonyIcon {
   font-size: 120px;
   margin-bottom: 32px;
-  filter: drop-shadow(0 0 40px rgba(255, 184, 0, 0.4));
+  filter: drop-shadow(0 0 40px rgba(232, 174, 60, 0.4));
   animation: float 3s ease-in-out infinite;
 }
 

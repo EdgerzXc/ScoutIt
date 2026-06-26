@@ -31,7 +31,7 @@ export default function StratosphereLayer() {
 
 
   return (
-    <main className="min-h-screen bg-[#0d0d0d] text-white selection:bg-[#FFB800] selection:text-black overflow-hidden font-sans" style={{ paddingTop: "52px" }}>
+    <main className="min-h-screen bg-[#0d0d0d] text-white selection:bg-[#E8AE3C] selection:text-black overflow-hidden font-sans" style={{ paddingTop: "52px" }}>
       <LayerNav prev={{ href: "/layer/orbit", label: "Orbit" }} next={{ href: "/layer/metropolis", label: "Metropolis" }} />
       <div className="fixed inset-0 pointer-events-none z-0">
         <BackgroundStratosphere />

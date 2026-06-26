@@ -94,7 +94,7 @@
 
 .tagCard.selected {
   border-color: var(--accent);
-  background: rgba(255, 184, 0, 0.05);
+  background: rgba(232, 174, 60, 0.05);
 }
 
 .tagIcon {

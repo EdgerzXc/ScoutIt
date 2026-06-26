@@ -3,6 +3,7 @@ import "./globals.css";
 import FloatingToolbox from "@/components/ui/FloatingToolbox";
 import BottomNav from "@/components/layout/BottomNav";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
+import WaitlistModal from "@/components/waitlist/WaitlistModal";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -72,6 +73,7 @@ export default function RootLayout({ children }) {
         </ErrorBoundary>
         <BottomNav />
         <FloatingToolbox />
+        <WaitlistModal />
       </body>
     </html>
   );

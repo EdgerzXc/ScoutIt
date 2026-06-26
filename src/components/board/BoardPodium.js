@@ -5,7 +5,7 @@ import Link from "next/link";
 import { rankBoard, BOARD_CATEGORIES } from "@/data/mockShowcase";
 
 const TIER = {
-  universe: { color: "#ffb800", rgb: "255,184,0" },
+  universe: { color: "#E8AE3C", rgb: "232, 174, 60" },
   cluster: { color: "#C0C0C0", rgb: "192,192,192" },
   solar: { color: "#CD7F32", rgb: "205,127,50" },
   starry: { color: "#c8c8c8", rgb: "138,138,138" },
@@ -123,7 +123,7 @@ export default function BoardPodium() {
           border-radius: 4px; transition: all 0.2s;
         }
         .board-cat:hover { color: #f0ede8; }
-        .board-cat.on { color: var(--accent); border-color: rgba(255,184,0,0.4); background: rgba(255,184,0,0.06); }
+        .board-cat.on { color: var(--accent); border-color: rgba(232, 174, 60,0.4); background: rgba(232, 174, 60,0.06); }
         
         .board-mission { margin-top: 24px; max-width: 260px; }
         .board-mission h3 { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.2em; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; }
@@ -131,10 +131,10 @@ export default function BoardPodium() {
 
         :global(.board-seeall) {
           font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase;
-          color: var(--accent); text-decoration: none; border: 1px solid rgba(255,184,0,0.5);
+          color: var(--accent); text-decoration: none; border: 1px solid rgba(232, 174, 60,0.5);
           padding: 16px; text-align: center; transition: background 0.2s; margin-top: 28px;
         }
-        :global(.board-seeall:hover) { background: rgba(255,184,0,0.12); }
+        :global(.board-seeall:hover) { background: rgba(232, 174, 60,0.12); }
 
         .board-content { padding: clamp(24px, 4vh, 48px) clamp(28px, 4vw, 56px); display: flex; flex-direction: column; min-width: 0; overflow-y: auto; }
         .board-content::-webkit-scrollbar { display: none; }

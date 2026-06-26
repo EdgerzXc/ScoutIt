@@ -127,10 +127,10 @@ export default function OwnerMode() {
           </div>
 
           <div
-            className={`bg-gradient-to-br from-[#1A1814] to-[#0A0908] backdrop-blur-xl border rounded-xl p-8 transition-all duration-500 relative overflow-hidden group ${canUseVault ? "border-gold-accent/40 hover:border-gold-accent hover:shadow-[0_0_30px_rgba(255,184,0,0.15)] cursor-pointer" : "border-surface-variant cursor-not-allowed opacity-60"}`}
+            className={`bg-gradient-to-br from-[#1A1814] to-[#0A0908] backdrop-blur-xl border rounded-xl p-8 transition-all duration-500 relative overflow-hidden group ${canUseVault ? "border-gold-accent/40 hover:border-gold-accent hover:shadow-[0_0_30px_rgba(232, 174, 60,0.15)] cursor-pointer" : "border-surface-variant cursor-not-allowed opacity-60"}`}
             onClick={() => canUseVault && setShowWizard('vip_vault')}
           >
-            <div className={`absolute top-0 left-0 w-1.5 h-full transition-colors shadow-[0_0_15px_rgba(255,184,0,0.5)] ${canUseVault ? "bg-gold-accent/50 group-hover:bg-gold-accent" : "bg-surface-variant"}`}></div>
+            <div className={`absolute top-0 left-0 w-1.5 h-full transition-colors shadow-[0_0_15px_rgba(232, 174, 60,0.5)] ${canUseVault ? "bg-gold-accent/50 group-hover:bg-gold-accent" : "bg-surface-variant"}`}></div>
             <div className="absolute -top-24 -right-24 w-48 h-48 bg-gold-accent/10 rounded-full blur-3xl group-hover:bg-gold-accent/20 transition-all duration-700"></div>
 
             {/* Lock badge — visible when locked */}
@@ -149,7 +149,7 @@ export default function OwnerMode() {
             </p>
 
             {canUseVault ? (
-              <span className="text-[#0A0908] font-label-caps font-bold text-[10px] tracking-widest bg-gold-accent px-3 py-1.5 rounded-full shadow-[0_0_10px_rgba(255,184,0,0.3)]">QUEST-IT ASSISTED</span>
+              <span className="text-[#0A0908] font-label-caps font-bold text-[10px] tracking-widest bg-gold-accent px-3 py-1.5 rounded-full shadow-[0_0_10px_rgba(232, 174, 60,0.3)]">QUEST-IT ASSISTED</span>
             ) : (
               <Link href="/pricing/owner" className="inline-block text-gold-accent font-label-caps text-[10px] tracking-widest border border-gold-accent/40 bg-gold-accent/10 px-3 py-1.5 rounded-full hover:bg-gold-accent/20 transition-colors" onClick={e => e.stopPropagation()}>
                 UPGRADE TO CLUSTER →
@@ -346,7 +346,7 @@ export default function OwnerMode() {
       return (
         <div className="max-w-[600px] mx-auto py-lg animate-[fadeIn_0.4s_ease] flex flex-col items-center text-center gap-6">
           <div className="w-20 h-20 bg-surface-alt border border-surface-variant rounded-full flex items-center justify-center">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#7A5C00" strokeWidth="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#6E531A" strokeWidth="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
           </div>
           <div>
             <p className="font-label-caps text-[11px] tracking-widest text-gold-accent/60 uppercase mb-2">Cluster tier required</p>
@@ -355,7 +355,7 @@ export default function OwnerMode() {
           </div>
           <div className="flex gap-3">
             <button onClick={() => setShowWizard('select_mode')} className="border border-surface-variant text-text-secondary font-working-title px-6 py-3 rounded hover:border-gold-accent/40 hover:text-on-surface transition-colors text-sm">← Back</button>
-            <Link href="/pricing/owner" className="bg-gold-accent text-[#0A0908] font-working-title font-bold px-6 py-3 rounded hover:bg-[#FFC929] transition-colors text-sm tracking-wide">Upgrade to Cluster</Link>
+            <Link href="/pricing/owner" className="bg-gold-accent text-[#0A0908] font-working-title font-bold px-6 py-3 rounded hover:bg-[#F7C64E] transition-colors text-sm tracking-wide">Upgrade to Cluster</Link>
           </div>
         </div>
       );
@@ -441,7 +441,7 @@ export default function OwnerMode() {
             <button
               onClick={handleSaveUrl}
               disabled={!isUrlValid}
-              className="w-full bg-gold-accent text-[#0A0908] font-working-title font-bold px-6 py-4 rounded hover:bg-[#FFC929] disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-300 text-base tracking-wide shadow-[0_0_20px_rgba(255,184,0,0.2)] hover:shadow-[0_0_30px_rgba(255,184,0,0.4)]"
+              className="w-full bg-gold-accent text-[#0A0908] font-working-title font-bold px-6 py-4 rounded hover:bg-[#F7C64E] disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-300 text-base tracking-wide shadow-[0_0_20px_rgba(232, 174, 60,0.2)] hover:shadow-[0_0_30px_rgba(232, 174, 60,0.4)]"
             >
               Link to My Listing
             </button>
@@ -456,12 +456,12 @@ export default function OwnerMode() {
             {/* Option 1 — I'll record it myself */}
             <div
               onClick={() => setVaultBuildOption("self")}
-              className="bg-gradient-to-br from-[#1A1814] to-[#0A0908] border border-surface-variant hover:border-gold-accent/60 rounded-xl p-7 cursor-pointer group transition-all duration-300 hover:shadow-[0_0_20px_rgba(255,184,0,0.08)] relative overflow-hidden"
+              className="bg-gradient-to-br from-[#1A1814] to-[#0A0908] border border-surface-variant hover:border-gold-accent/60 rounded-xl p-7 cursor-pointer group transition-all duration-300 hover:shadow-[0_0_20px_rgba(232, 174, 60,0.08)] relative overflow-hidden"
             >
               <div className="absolute top-0 left-0 w-1 h-full bg-surface-variant group-hover:bg-gold-accent/50 transition-colors" />
               <div className="flex items-start gap-5">
                 <div className="w-12 h-12 rounded-full bg-gold-accent/10 flex items-center justify-center shrink-0 mt-0.5">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFB800" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#E8AE3C" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M15 10l4.553-2.277A1 1 0 0 1 21 8.618v6.764a1 1 0 0 1-1.447.894L15 14"/><rect x="3" y="7" width="12" height="10" rx="2"/>
                   </svg>
                 </div>
@@ -475,12 +475,12 @@ export default function OwnerMode() {
             {/* Option 2 — ScoutIt Team records it */}
             <div
               onClick={() => setVaultBuildOption("team")}
-              className="bg-gradient-to-br from-[#1A1814] to-[#0A0908] border border-surface-variant hover:border-gold-accent/60 rounded-xl p-7 cursor-pointer group transition-all duration-300 hover:shadow-[0_0_20px_rgba(255,184,0,0.08)] relative overflow-hidden"
+              className="bg-gradient-to-br from-[#1A1814] to-[#0A0908] border border-surface-variant hover:border-gold-accent/60 rounded-xl p-7 cursor-pointer group transition-all duration-300 hover:shadow-[0_0_20px_rgba(232, 174, 60,0.08)] relative overflow-hidden"
             >
               <div className="absolute top-0 left-0 w-1 h-full bg-surface-variant group-hover:bg-gold-accent/50 transition-colors" />
               <div className="flex items-start gap-5">
                 <div className="w-12 h-12 rounded-full bg-gold-accent/10 flex items-center justify-center shrink-0 mt-0.5">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFB800" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#E8AE3C" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="12" cy="8" r="4"/><path d="M6 20v-2a6 6 0 0 1 12 0v2"/>
                   </svg>
                 </div>
@@ -512,8 +512,8 @@ export default function OwnerMode() {
               </div>
             ) : (
               <div className="w-full flex flex-col items-center gap-4">
-                <div className="w-16 h-16 bg-gold-accent/10 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(255,184,0,0.15)]">
-                  <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#FFB800" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <div className="w-16 h-16 bg-gold-accent/10 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(232, 174, 60,0.15)]">
+                  <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#E8AE3C" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
                   </svg>
                 </div>
@@ -529,7 +529,7 @@ export default function OwnerMode() {
             <button
               onClick={handleSubmitVideo}
               disabled={!selectedFile}
-              className="w-full bg-gold-accent text-[#0A0908] font-working-title font-bold px-6 py-4 rounded hover:bg-[#FFC929] disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-300 text-base tracking-wide shadow-[0_0_20px_rgba(255,184,0,0.2)] hover:shadow-[0_0_30px_rgba(255,184,0,0.4)]"
+              className="w-full bg-gold-accent text-[#0A0908] font-working-title font-bold px-6 py-4 rounded hover:bg-[#F7C64E] disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-300 text-base tracking-wide shadow-[0_0_20px_rgba(232, 174, 60,0.2)] hover:shadow-[0_0_30px_rgba(232, 174, 60,0.4)]"
             >
               Submit for Processing
             </button>
@@ -547,25 +547,25 @@ export default function OwnerMode() {
             <div className="flex flex-col gap-3 text-sm text-text-secondary">
               <div className="flex items-center gap-3">
                 <div className="w-5 h-5 rounded-full bg-gold-accent/20 border border-gold-accent/40 flex items-center justify-center shrink-0">
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#FFB800" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#E8AE3C" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                 </div>
                 <span>Professional recording equipment</span>
               </div>
               <div className="flex items-center gap-3">
                 <div className="w-5 h-5 rounded-full bg-gold-accent/20 border border-gold-accent/40 flex items-center justify-center shrink-0">
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#FFB800" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#E8AE3C" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                 </div>
                 <span>Full 3D map + 360° tour built by our team</span>
               </div>
               <div className="flex items-center gap-3">
                 <div className="w-5 h-5 rounded-full bg-gold-accent/20 border border-gold-accent/40 flex items-center justify-center shrink-0">
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#FFB800" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#E8AE3C" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                 </div>
                 <span>We'll contact you within 24 hours to schedule</span>
               </div>
               <div className="flex items-center gap-3">
                 <div className="w-5 h-5 rounded-full bg-gold-accent/20 border border-gold-accent/40 flex items-center justify-center shrink-0">
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#FFB800" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#E8AE3C" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                 </div>
                 <span>Typical turnaround: 3–5 days from recording date</span>
               </div>
@@ -578,7 +578,7 @@ export default function OwnerMode() {
 
             <button
               onClick={handleJoinQueue}
-              className="w-full bg-gold-accent text-[#0A0908] font-working-title font-bold px-6 py-4 rounded hover:bg-[#FFC929] transition-all duration-300 text-base tracking-wide shadow-[0_0_20px_rgba(255,184,0,0.2)] hover:shadow-[0_0_30px_rgba(255,184,0,0.4)]"
+              className="w-full bg-gold-accent text-[#0A0908] font-working-title font-bold px-6 py-4 rounded hover:bg-[#F7C64E] transition-all duration-300 text-base tracking-wide shadow-[0_0_20px_rgba(232, 174, 60,0.2)] hover:shadow-[0_0_30px_rgba(232, 174, 60,0.4)]"
             >
               Join the Queue
             </button>

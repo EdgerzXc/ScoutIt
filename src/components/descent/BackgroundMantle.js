@@ -56,7 +56,7 @@ export default function BackgroundMantle() {
       /* ── CENTRAL DATA TRUNK (The Core Beam) ── */
       const beamGeo = new THREE.CylinderGeometry(4, 4, TUBE_H, 24);
       const beamMat = new THREE.MeshBasicMaterial({
-        color: 0xFFB800,
+        color: 0xE8AE3C,
         transparent: true,
         opacity: 0.15,
         blending: THREE.AdditiveBlending,
@@ -113,8 +113,8 @@ export default function BackgroundMantle() {
             
             const blockGeo = new THREE.BoxGeometry(w, h, d);
             const blockMat = new THREE.MeshStandardMaterial({ 
-              color: isActive ? 0xFFC929 : 0x0D0D0D,
-              emissive: isActive ? 0xFFB800 : 0x000000,
+              color: isActive ? 0xF7C64E : 0x0D0D0D,
+              emissive: isActive ? 0xE8AE3C : 0x000000,
               emissiveIntensity: isActive ? 0.8 : 0,
               roughness: 0.5,
               metalness: 0.8
@@ -138,12 +138,12 @@ export default function BackgroundMantle() {
       /* ── LIGHTING ── */
       scene.add(new THREE.AmbientLight(0xFFFFFF, 0.05)); // Extremely dark, only highlights geometry
 
-      const cameraLight = new THREE.PointLight(0xFFB800, 2.5, 250); // Illuminates the shaft as we fall
+      const cameraLight = new THREE.PointLight(0xE8AE3C, 2.5, 250); // Illuminates the shaft as we fall
       scene.add(cameraLight);
 
       // Core light pouring up from the bottom
       const yBot = -TUBE_H / 2;
-      const coreLight = new THREE.PointLight(0xFFC929, 5.0, 600);
+      const coreLight = new THREE.PointLight(0xF7C64E, 5.0, 600);
       coreLight.position.set(0, yBot + 100, 0);
       scene.add(coreLight);
 

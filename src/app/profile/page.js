@@ -243,7 +243,7 @@ const backLink = {
 const navTitle = {
   fontFamily: "var(--font-mono)",
   fontSize: 10,
-  color: "#ffb800",
+  color: "#E8AE3C",
   letterSpacing: "0.3em",
   textTransform: "uppercase",
 };
@@ -251,7 +251,7 @@ const navTitle = {
 const publicLink = {
   fontFamily: "var(--font-body)",
   fontSize: 11,
-  color: "#ffb800",
+  color: "#E8AE3C",
   textDecoration: "none",
   letterSpacing: "0.06em",
 };

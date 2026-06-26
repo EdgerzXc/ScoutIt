@@ -241,7 +241,7 @@ export default async function IntelArticlePage({ params }) {
 
         /* Advisory Box */
         .advisory-box {
-          background: rgba(255, 184, 0, 0.05);
+          background: rgba(232, 174, 60, 0.05);
           border: 1px solid var(--accent-border);
           border-radius: var(--radius-md);
           padding: 32px;
@@ -279,9 +279,9 @@ export default async function IntelArticlePage({ params }) {
 
         /* Insight Disclaimer */
         .insight-disclaimer-banner {
-          background: rgba(255, 184, 0, 0.07);
-          border: 1px solid rgba(255, 184, 0, 0.35);
-          border-left: 3px solid #ffb800;
+          background: rgba(232, 174, 60, 0.07);
+          border: 1px solid rgba(232, 174, 60, 0.35);
+          border-left: 3px solid #E8AE3C;
           border-radius: 4px;
           padding: 20px 24px;
           margin-bottom: 36px;
@@ -290,7 +290,7 @@ export default async function IntelArticlePage({ params }) {
         .insight-disclaimer-label {
           font-family: var(--font-mono);
           font-size: 10px;
-          color: #ffb800;
+          color: #E8AE3C;
           letter-spacing: 0.12em;
           text-transform: uppercase;
           font-weight: 700;
@@ -300,7 +300,7 @@ export default async function IntelArticlePage({ params }) {
 
         .insight-disclaimer-text {
           font-size: 13px;
-          color: #ffb800;
+          color: #E8AE3C;
           margin: 0;
           opacity: 0.85;
           line-height: 1.5;

@@ -58,7 +58,7 @@
 .inquiry-tag {
   font-family: 'Courier New', Courier, monospace;
   font-size: 10px;
-  color: #ffb800;
+  color: #E8AE3C;
   letter-spacing: 0.15em;
   text-transform: uppercase;
   display: block;
@@ -127,8 +127,8 @@
 .form-group input:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #ffb800;
-  box-shadow: 0 0 0 1px rgba(255, 184, 0, 0.2);
+  border-color: #E8AE3C;
+  box-shadow: 0 0 0 1px rgba(232, 174, 60, 0.2);
 }
 
 .form-group input::placeholder,
@@ -145,7 +145,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .inquiry-submit {
   margin-top: 8px;
-  background: #ffb800;
+  background: #E8AE3C;
   color: #0e0e0e;
   border: none;
   border-radius: 4px;

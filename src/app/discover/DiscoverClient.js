@@ -193,7 +193,7 @@ export default function DiscoverClient() {
       <aside className="catSidebar">
         <div className="brandLogo">SCOUTIT</div>
         <nav className="navLinks">
-          <Link href="/dashboard" className="navLink" style={{ color: "var(--accent)", borderBottom: "0.5px solid rgba(255,184,0,0.3)", paddingBottom: "16px", marginBottom: "8px" }}>
+          <Link href="/dashboard" className="navLink" style={{ color: "var(--accent)", borderBottom: "0.5px solid rgba(232, 174, 60,0.3)", paddingBottom: "16px", marginBottom: "8px" }}>
             ← Dashboard
           </Link>
           {CATEGORIES.map((cat) => {
@@ -300,7 +300,7 @@ export default function DiscoverClient() {
                             fontSize: "11px",
                             color: "var(--accent)",
                             textDecoration: "none",
-                            border: "1px solid rgba(255, 184, 0, 0.4)",
+                            border: "1px solid rgba(232, 174, 60, 0.4)",
                             padding: "6px 14px",
                             borderRadius: "2px",
                             transition: "all var(--transition-fast) ease",

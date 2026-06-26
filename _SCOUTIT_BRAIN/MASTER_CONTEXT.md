@@ -40,9 +40,10 @@ altitude. That is ScoutIt in the market. **The UFO stays. Always.**
 
 - **Always dark mode.** 95% deep black, 5% gold. Gold is a signature, not wallpaper.
 - **CSS variables only — never raw hex:**
-  - `--accent: #FFB800` (primary gold)
-  - `--accent-bright: #FFC929` (buttons, CTAs, hover)
-  - `--accent-muted: #7A5C00` (borders, dividers)
+  - `--accent: #E8AE3C` (primary amber gold — refined 2026-06-26, warmer/less yellow than the old #FFB800)
+  - `--accent-bright: #F7C64E` (buttons, CTAs, hover)
+  - `--accent-muted: #6E531A` (borders, dividers)
+  - rgb tuples for glows: primary `232, 174, 60`, bright `247, 198, 78` (used in `rgba(...)` shadows + the WebGL backgrounds)
   - Canvas: `#0d0d0d` / `#121212`
 - **Typography:** Serif display headlines (Georgia), Geist Sans body, mono uppercase wide-tracked eyebrows (`var(--font-mono)`) for labels/buttons/metrics
 - **Feel:** Glassmorphism (`backdrop-filter: blur`), slow/intentional motion, localized glow

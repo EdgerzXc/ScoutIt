@@ -34,7 +34,7 @@ export default function StickyNavigator({ scrollYProgress }) {
         const color = useTransform(
           scrollYProgress,
           [Math.max(0, start - 0.1), start, end, Math.min(1, end + 0.1)],
-          ["rgba(255,255,255,0.4)", "#FFB800", "#FFB800", "rgba(255,255,255,0.4)"]
+          ["rgba(255,255,255,0.4)", "#E8AE3C", "#E8AE3C", "rgba(255,255,255,0.4)"]
         );
 
         return (
@@ -42,7 +42,7 @@ export default function StickyNavigator({ scrollYProgress }) {
             <motion.button
               onClick={() => handleScroll(num)}
               style={{ opacity, scale, color }}
-              className="font-mono text-[10px] font-bold cursor-pointer hover:text-[#FFB800] transition-colors focus:outline-none"
+              className="font-mono text-[10px] font-bold cursor-pointer hover:text-[#E8AE3C] transition-colors focus:outline-none"
               whileHover={{ scale: 1.3 }}
             >
               0{num}

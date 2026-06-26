@@ -44,7 +44,7 @@ export default function AccessibilityToggle() {
         height: "48px",
         borderRadius: "50%",
         background: isHighContrast ? "var(--accent)" : "rgba(0, 0, 0, 0.6)",
-        border: `1px solid ${isHighContrast ? "#000" : "rgba(255, 184, 0, 0.3)"}`,
+        border: `1px solid ${isHighContrast ? "#000" : "rgba(232, 174, 60, 0.3)"}`,
         color: isHighContrast ? "#000" : "var(--accent)",
         display: "flex",
         alignItems: "center",
@@ -52,7 +52,7 @@ export default function AccessibilityToggle() {
         cursor: "pointer",
         zIndex: 99999,
         backdropFilter: "blur(4px)",
-        boxShadow: isHighContrast ? "0 0 20px rgba(255, 184, 0, 0.5)" : "0 4px 12px rgba(0,0,0,0.5)",
+        boxShadow: isHighContrast ? "0 0 20px rgba(232, 174, 60, 0.5)" : "0 4px 12px rgba(0,0,0,0.5)",
         transition: "all 0.3s ease"
       }}
     >

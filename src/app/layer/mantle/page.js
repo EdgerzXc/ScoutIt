@@ -7,7 +7,7 @@ import BackgroundMantle from "@/components/descent/BackgroundMantle";
 export default function MantleLayer() {
   return (
     <main
-      className="min-h-screen bg-[#0d0d0d] text-white selection:bg-[#FFB800] selection:text-black overflow-hidden font-sans"
+      className="min-h-screen bg-[#0d0d0d] text-white selection:bg-[#E8AE3C] selection:text-black overflow-hidden font-sans"
       style={{ paddingTop: "52px" }}
     >
       <LayerNav
@@ -84,7 +84,7 @@ export default function MantleLayer() {
           letter-spacing: 0.18em;
           text-transform: uppercase;
           color: var(--accent);
-          border: 1px solid rgba(255,184,0,0.4);
+          border: 1px solid rgba(232, 174, 60,0.4);
           padding: 13px 26px;
           border-radius: 4px;
           text-decoration: none;

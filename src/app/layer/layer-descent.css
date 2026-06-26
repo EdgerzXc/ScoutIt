@@ -102,12 +102,12 @@
             circle,
             #000000 0%,
             #000000 35%,
-            rgba(255, 184, 0, 0.04) 45%,
-            rgba(255, 184, 0, 0.12) 55%,
+            rgba(232, 174, 60, 0.04) 45%,
+            rgba(232, 174, 60, 0.12) 55%,
             transparent 75%
           );
-          border: 1px solid rgba(255, 184, 0, 0.18);
-          box-shadow: 0 0 120px rgba(255, 184, 0, 0.14), inset 0 0 40px rgba(255, 184, 0, 0.08);
+          border: 1px solid rgba(232, 174, 60, 0.18);
+          box-shadow: 0 0 120px rgba(232, 174, 60, 0.14), inset 0 0 40px rgba(232, 174, 60, 0.08);
           pointer-events: none;
           z-index: 1;
           animation: slowOrbit 60s linear infinite;
@@ -124,11 +124,11 @@
           border-radius: 50%;
           background: conic-gradient(
             from 0deg,
-            rgba(255, 184, 0, 0.12) 0%,
+            rgba(232, 174, 60, 0.12) 0%,
             transparent 25%,
-            rgba(255, 184, 0, 0.18) 50%,
+            rgba(232, 174, 60, 0.18) 50%,
             transparent 75%,
-            rgba(255, 184, 0, 0.12) 100%
+            rgba(232, 174, 60, 0.12) 100%
           );
           filter: blur(35px);
           animation: slowSwirl 45s linear infinite;
@@ -146,8 +146,8 @@
           border-radius: 50% 50% 0 0;
           background: radial-gradient(
             ellipse at top,
-            rgba(255, 184, 0, 0.22) 0%,
-            rgba(255, 184, 0, 0.06) 40%,
+            rgba(232, 174, 60, 0.22) 0%,
+            rgba(232, 174, 60, 0.06) 40%,
             transparent 70%
           );
           filter: blur(40px);
@@ -166,11 +166,11 @@
           border-radius: 50%;
           background: conic-gradient(
             from 180deg,
-            rgba(255, 184, 0, 0.09) 0%,
+            rgba(232, 174, 60, 0.09) 0%,
             transparent 30%,
-            rgba(255, 184, 0, 0.15) 50%,
+            rgba(232, 174, 60, 0.15) 50%,
             transparent 80%,
-            rgba(255, 184, 0, 0.09) 100%
+            rgba(232, 174, 60, 0.09) 100%
           );
           filter: blur(50px);
           animation: slowSwirl 90s linear infinite reverse;
@@ -216,7 +216,7 @@
           height: 100%;
           background: #ffffff;
           border-radius: 50%;
-          box-shadow: 0 0 10px rgba(255, 255, 255, 0.9), 0 0 20px rgba(255, 184, 0, 0.4);
+          box-shadow: 0 0 10px rgba(255, 255, 255, 0.9), 0 0 20px rgba(232, 174, 60, 0.4);
           position: relative;
         }
         .comet-tail {
@@ -226,7 +226,7 @@
           transform: translateY(-50%);
           width: 90px; /* Longer, highly noticeable tail */
           height: 3px; /* Thicker head connection */
-          background: linear-gradient(to left, #ffffff 0%, rgba(255, 184, 0, 0.6) 30%, rgba(255, 184, 0, 0.15) 75%, transparent 100%);
+          background: linear-gradient(to left, #ffffff 0%, rgba(232, 174, 60, 0.6) 30%, rgba(232, 174, 60, 0.15) 75%, transparent 100%);
           clip-path: polygon(0 50%, 100% 0, 100% 100%); /* Elegant taper wedge shape */
           pointer-events: none;
         }
@@ -239,7 +239,7 @@
           border-radius: 50%;
           box-shadow: 
             0 0 12px rgba(224, 242, 254, 0.9), 
-            0 0 24px rgba(255, 184, 0, 0.6);
+            0 0 24px rgba(232, 174, 60, 0.6);
           animation: pulseNeutronDrifting 2.5s ease-in-out infinite alternate;
         }
         @keyframes pulseNeutronDrifting {
@@ -247,13 +247,13 @@
             transform: scale(0.85);
             box-shadow: 
               0 0 8px rgba(224, 242, 254, 0.7), 
-              0 0 16px rgba(255, 184, 0, 0.4);
+              0 0 16px rgba(232, 174, 60, 0.4);
           }
           100% {
             transform: scale(1.15);
             box-shadow: 
               0 0 16px rgba(224, 242, 254, 0.95), 
-              0 0 32px rgba(255, 184, 0, 0.75);
+              0 0 32px rgba(232, 174, 60, 0.75);
           }
         }
 
@@ -297,16 +297,16 @@
           transition: color 2s ease, text-shadow 2s ease;
         }
         .scoutit-wordmark .word-scout { color: #ffffff; }
-        .scoutit-wordmark .word-it    { color: #ffb800; margin-right: -4px; }
+        .scoutit-wordmark .word-it    { color: #E8AE3C; margin-right: -4px; }
         /* beam-hit illumination snaps on fast, then fades back slowly via base transition */
         .scoutit-wordmark.lit .word-scout {
           color: #ffffff;
-          text-shadow: 0 0 60px rgba(255, 184, 0, 0.8), 0 0 120px rgba(255, 184, 0, 0.3);
+          text-shadow: 0 0 60px rgba(232, 174, 60, 0.8), 0 0 120px rgba(232, 174, 60, 0.3);
           transition: color 0.15s ease, text-shadow 0.15s ease;
         }
         .scoutit-wordmark.lit .word-it {
-          color: #ffb800;
-          text-shadow: 0 0 60px rgba(255, 184, 0, 0.9), 0 0 120px rgba(255, 184, 0, 0.4);
+          color: #E8AE3C;
+          text-shadow: 0 0 60px rgba(232, 174, 60, 0.9), 0 0 120px rgba(232, 174, 60, 0.4);
           transition: color 0.15s ease, text-shadow 0.15s ease;
         }
 
@@ -318,7 +318,7 @@
           width: 220px;
           height: 220px;
           border-radius: 50%;
-          background: radial-gradient(circle, rgba(255, 184, 0, 0.6) 0%, rgba(255, 184, 0, 0) 60%);
+          background: radial-gradient(circle, rgba(232, 174, 60, 0.6) 0%, rgba(232, 174, 60, 0) 60%);
           transform: translate(-50%, -50%) scale(0.3);
           pointer-events: none;
           opacity: 0;
@@ -354,7 +354,7 @@
           transform: translateX(-50%);
           width: 180px;
           height: 90px;
-          background: radial-gradient(ellipse at top, rgba(255, 184, 0, 0.12), rgba(255, 184, 0, 0) 70%);
+          background: radial-gradient(ellipse at top, rgba(232, 174, 60, 0.12), rgba(232, 174, 60, 0) 70%);
           pointer-events: none;
           z-index: -1;
         }
@@ -367,7 +367,7 @@
           height: 60px;
           margin: -30px 0 0 -30px;
           border-radius: 50%;
-          border: 1px solid rgba(255, 184, 0, 0.5);
+          border: 1px solid rgba(232, 174, 60, 0.5);
           pointer-events: none;
           opacity: 0;
           z-index: -1;
@@ -386,7 +386,7 @@
         .title-ufo-svg .porthole-3 { animation: portSeq 1.4s linear infinite; animation-delay: 0.4s; }
         /* power-up: all three flash together, rapidly, 3x over ~0.5s */
         .title-ufo.powering .porthole { animation: portPower 0.166s ease-in-out 3; }
-        .title-ufo-svg .ufo-belly { fill: rgba(255, 184, 0, 0.6); }
+        .title-ufo-svg .ufo-belly { fill: rgba(232, 174, 60, 0.6); }
 
         /* ── Tractor beam: gold cone, fades to transparent, extend &rarr; hold &rarr; fade ── */
         .title-beam {
@@ -397,13 +397,13 @@
           background: linear-gradient(
             to bottom,
             rgba(255, 235, 160, 1) 0%,
-            rgba(255, 184, 0, 0.85) 30%,
-            rgba(255, 184, 0, 0.3) 70%,
-            rgba(255, 184, 0, 0) 100%
+            rgba(232, 174, 60, 0.85) 30%,
+            rgba(232, 174, 60, 0.3) 70%,
+            rgba(232, 174, 60, 0) 100%
           );
           box-shadow:
-            0 0 8px rgba(255, 184, 0, 0.6),
-            0 0 20px rgba(255, 184, 0, 0.25);
+            0 0 8px rgba(232, 174, 60, 0.6),
+            0 0 20px rgba(232, 174, 60, 0.25);
           border-radius: 0 0 4px 4px;
           transform-origin: top center;
           opacity: 0;
@@ -415,8 +415,8 @@
             width: 4px;
             height: 100px;
             box-shadow:
-              0 0 12px rgba(255, 184, 0, 0.7),
-              0 0 30px rgba(255, 184, 0, 0.3);
+              0 0 12px rgba(232, 174, 60, 0.7),
+              0 0 30px rgba(232, 174, 60, 0.3);
           }
         }
 
@@ -434,7 +434,7 @@
         .title-divider {
           width: 32px;
           height: 1px;
-          background: rgba(255, 184, 0, 0.35);
+          background: rgba(232, 174, 60, 0.35);
           margin: 0 auto 22px;
         }
 
@@ -452,7 +452,7 @@
           font-size: 11px;
           letter-spacing: 4px;
           text-transform: uppercase;
-          color: rgba(255, 184, 0, 0.55);
+          color: rgba(232, 174, 60, 0.55);
           text-align: center;
           margin: 0 0 34px;
         }
@@ -511,7 +511,7 @@
         /* ── S: Comet Trail ───────────────────────────── */
         .letter-s {
           animation: cometDraw 0.7s cubic-bezier(0.4,0,0.2,1) forwards;
-          text-shadow: 0 0 12px rgba(255, 184, 0, 0.5);
+          text-shadow: 0 0 12px rgba(232, 174, 60, 0.5);
         }
 
         /* ── C: Eclipse Reveal ────────────────────────── */
@@ -529,7 +529,7 @@
           position: absolute;
           top: 50%; left: 50%;
           width: 120%; height: 35%;
-          border: 1px solid rgba(255,184,0,0.5);
+          border: 1px solid rgba(232, 174, 60,0.5);
           border-radius: 50%;
           transform: translate(-50%, -50%) rotateX(65deg);
           animation: orbitSweep 1.4s ease-out 1.0s forwards;
@@ -656,7 +656,7 @@
           min-width: 4px;
           flex: 1;
           min-height: 0.55em;
-          background: linear-gradient(to bottom, rgba(255,184,0,0.7) 0%, rgba(255,184,0,0.15) 100%);
+          background: linear-gradient(to bottom, rgba(232, 174, 60,0.7) 0%, rgba(232, 174, 60,0.15) 100%);
           clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%);
           animation: beamPulse 2s ease-in-out 3.4s infinite;
           opacity: 0;
@@ -673,7 +673,7 @@
           position: absolute;
           top: 50%; left: 50%;
           border-radius: 50%;
-          border: 1px solid rgba(255,184,0,0.5);
+          border: 1px solid rgba(232, 174, 60,0.5);
           transform: translate(-50%, -50%) scale(2);
           opacity: 0;
           pointer-events: none;
@@ -729,7 +729,7 @@
         }
         .scroll-chev {
           font-size: 13px;
-          color: #ffb800;
+          color: #E8AE3C;
           opacity: 0;
         }
         .scroll-chev-1 { animation: chevSeq 1.5s ease-in-out infinite; }
@@ -797,7 +797,7 @@
         .hero-cta-btn:hover {
           background: var(--accent);
           color: #0e0e0e;
-          box-shadow: 0 0 35px rgba(255, 184, 0, 0.45);
+          box-shadow: 0 0 35px rgba(232, 174, 60, 0.45);
           transform: translateY(-2px);
         }
 
@@ -865,8 +865,8 @@
 
         /* UFO disc glow pulse */
         @keyframes discGlow {
-          0%, 100% { box-shadow: 0 0 12px rgba(255,184,0,0.4); }
-          50%       { box-shadow: 0 0 22px rgba(255,184,0,0.9), 0 0 40px rgba(255,184,0,0.2); }
+          0%, 100% { box-shadow: 0 0 12px rgba(232, 174, 60,0.4); }
+          50%       { box-shadow: 0 0 22px rgba(232, 174, 60,0.9), 0 0 40px rgba(232, 174, 60,0.2); }
         }
 
         /* UFO lights blink */
@@ -1021,8 +1021,8 @@
         .menu-btn:hover {
           color: var(--accent);
           transform: scale(1.03);
-          box-shadow: 0 0 20px rgba(255, 184, 0, 0.1);
-          border-color: rgba(255, 184, 0, 0.25);
+          box-shadow: 0 0 20px rgba(232, 174, 60, 0.1);
+          border-color: rgba(232, 174, 60, 0.25);
           padding-left: 28px;
         }
 
@@ -1030,7 +1030,7 @@
           color: var(--accent);
           background: var(--surface2);
           border-color: var(--accent);
-          box-shadow: 0 0 15px rgba(255, 184, 0, 0.05);
+          box-shadow: 0 0 15px rgba(232, 174, 60, 0.05);
           padding-left: 28px;
         }
 
@@ -1099,7 +1099,7 @@
 
         .vector-search-input:focus {
           border-color: var(--accent);
-          box-shadow: 0 0 8px rgba(255, 184, 0, 0.15);
+          box-shadow: 0 0 8px rgba(232, 174, 60, 0.15);
         }
 
         .search-suggestions-dropdown {
@@ -1280,8 +1280,8 @@
           text-decoration: none;
         }
         .discover-news-item-link:hover {
-          background: rgba(255, 184, 0, 0.03);
-          border-color: rgba(255, 184, 0, 0.15) !important;
+          background: rgba(232, 174, 60, 0.03);
+          border-color: rgba(232, 174, 60, 0.15) !important;
           transform: translateX(4px);
         }
         .news-item-title {
@@ -1498,7 +1498,7 @@
           width: 80px;
           height: 80px;
           border-radius: 50%;
-          background: rgba(255, 184, 0, 0.1);
+          background: rgba(232, 174, 60, 0.1);
           border: 1px dashed var(--accent-border);
         }
 
@@ -1568,7 +1568,7 @@
             transform: none;
           }
           .service-card:active {
-            border-color: rgba(255, 184, 0, 0.4);
+            border-color: rgba(232, 174, 60, 0.4);
             background: rgba(255, 255, 255, 0.04);
           }
           .services-content {
@@ -1645,9 +1645,9 @@
         }
 
         .soon-badge {
-          background: rgba(255, 184, 0, 0.1);
+          background: rgba(232, 174, 60, 0.1);
           color: var(--accent);
-          border: 0.5px solid rgba(255, 184, 0, 0.3);
+          border: 0.5px solid rgba(232, 174, 60, 0.3);
         }
 
         .service-title {
@@ -1690,7 +1690,7 @@
 
         .coming-soon-card:hover {
           border-color: var(--accent-border);
-          background: rgba(255, 184, 0, 0.02);
+          background: rgba(232, 174, 60, 0.02);
           transform: translateY(-4px);
         }
 
@@ -1750,8 +1750,8 @@
           content: "";
           height: 24px;
           width: 80px;
-          background: rgba(255, 184, 0, 0.05);
-          border: 1px solid rgba(255, 184, 0, 0.2);
+          background: rgba(232, 174, 60, 0.05);
+          border: 1px solid rgba(232, 174, 60, 0.2);
           border-radius: 12px;
           margin-left: auto;
         }
@@ -2765,7 +2765,7 @@
    moving stratosphere reads through while text stays legible. */
 .section-discover .property-menu {
   background: linear-gradient(160deg, rgba(12, 9, 4, 0.58), rgba(6, 6, 6, 0.50));
-  border-right: 1px solid rgba(255, 184, 0, 0.18);
+  border-right: 1px solid rgba(232, 174, 60, 0.18);
 }
 .section-discover .matrix-preview-pane {
   background: linear-gradient(180deg, rgba(6, 6, 6, 0.68) 0%, rgba(6, 6, 6, 0.34) 22%, rgba(6, 6, 6, 0.28) 100%);

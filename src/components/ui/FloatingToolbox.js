@@ -226,14 +226,14 @@ export default function FloatingToolbox() {
           style={{
             width: 48, height: 48, borderRadius: "50%",
             background: eyeActive
-              ? (mode === "high-contrast" ? "#ffb800" : "rgba(255,184,0,0.14)")
+              ? (mode === "high-contrast" ? "#E8AE3C" : "rgba(232, 174, 60,0.14)")
               : "rgba(10,10,10,0.85)",
-            border: `1.5px solid ${eyeActive ? "rgba(255,184,0,0.55)" : "rgba(255,184,0,0.22)"}`,
-            color: mode === "high-contrast" ? "#000" : "#ffb800",
+            border: `1.5px solid ${eyeActive ? "rgba(232, 174, 60,0.55)" : "rgba(232, 174, 60,0.22)"}`,
+            color: mode === "high-contrast" ? "#000" : "#E8AE3C",
             display: "flex", alignItems: "center", justifyContent: "center",
             cursor: "grab", position: "relative",
             boxShadow: eyeActive
-              ? "0 0 18px rgba(255,184,0,0.3), 0 4px 16px rgba(0,0,0,0.5)"
+              ? "0 0 18px rgba(232, 174, 60,0.3), 0 4px 16px rgba(0,0,0,0.5)"
               : "0 4px 16px rgba(0,0,0,0.55)",
             transition: "background 0.25s, box-shadow 0.25s, border-color 0.25s",
           }}
@@ -249,7 +249,7 @@ export default function FloatingToolbox() {
             <span style={{
               position: "absolute", top: 0, right: 0,
               width: 10, height: 10, borderRadius: "50%",
-              background: "#ffb800", border: "1.5px solid #0e0e0e",
+              background: "#E8AE3C", border: "1.5px solid #0e0e0e",
             }} />
           )}
         </div>
@@ -263,7 +263,7 @@ export default function FloatingToolbox() {
             position: "fixed", left: panelX, top: panelY,
             zIndex: 99998, width: 218,
             background: "#111111",
-            border: "1px solid rgba(255,184,0,0.2)",
+            border: "1px solid rgba(232, 174, 60,0.2)",
             borderRadius: 8,
             boxShadow: "0 12px 48px rgba(0,0,0,0.75)",
             overflow: "hidden",
@@ -275,7 +275,7 @@ export default function FloatingToolbox() {
             borderBottom: "1px solid rgba(255,255,255,0.05)",
             display: "flex", alignItems: "center", justifyContent: "space-between",
           }}>
-            <span style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "#ffb800", letterSpacing: "0.22em", textTransform: "uppercase" }}>
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "#E8AE3C", letterSpacing: "0.22em", textTransform: "uppercase" }}>
               Display
             </span>
             <button onClick={() => setOpen(false)} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.28)", cursor: "pointer", fontSize: 14, lineHeight: 1, padding: "1px 2px" }}>✕</button>
@@ -286,29 +286,29 @@ export default function FloatingToolbox() {
             {[
               { key: "dark",          label: "Dark Mode",     desc: "Cosmic default",        dot: "#1e1e1e", dotBorder: "rgba(255,255,255,0.18)" },
               { key: "light",         label: "Light Mode",    desc: "Bright, open reading",  dot: "#f0ede8", dotBorder: "rgba(0,0,0,0.18)" },
-              { key: "high-contrast", label: "High Contrast", desc: "Maximum readability",   dot: "#ffb800", dotBorder: "rgba(255,184,0,0.4)" },
+              { key: "high-contrast", label: "High Contrast", desc: "Maximum readability",   dot: "#E8AE3C", dotBorder: "rgba(232, 174, 60,0.4)" },
             ].map(({ key, label, desc, dot, dotBorder }) => (
               <button
                 key={key}
                 onClick={() => changeMode(key)}
                 style={{
                   width: "100%",
-                  background: mode === key ? "rgba(255,184,0,0.09)" : "rgba(255,255,255,0.025)",
-                  border: `1px solid ${mode === key ? "rgba(255,184,0,0.3)" : "rgba(255,255,255,0.06)"}`,
+                  background: mode === key ? "rgba(232, 174, 60,0.09)" : "rgba(255,255,255,0.025)",
+                  border: `1px solid ${mode === key ? "rgba(232, 174, 60,0.3)" : "rgba(255,255,255,0.06)"}`,
                   borderRadius: 5, padding: "8px 10px",
                   cursor: "pointer", display: "flex", alignItems: "center", gap: 9, textAlign: "left",
                 }}
               >
                 <div style={{ width: 10, height: 10, borderRadius: "50%", background: dot, border: `1.5px solid ${dotBorder}`, flexShrink: 0 }} />
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontFamily: "var(--font-body)", fontSize: 12, color: mode === key ? "#ffb800" : "#e5e2e1", fontWeight: mode === key ? 600 : 400, lineHeight: 1.3 }}>
+                  <div style={{ fontFamily: "var(--font-body)", fontSize: 12, color: mode === key ? "#E8AE3C" : "#e5e2e1", fontWeight: mode === key ? 600 : 400, lineHeight: 1.3 }}>
                     {label}
                   </div>
                   <div style={{ fontFamily: "var(--font-body)", fontSize: 10, color: "rgba(255,255,255,0.3)", lineHeight: 1.3, marginTop: 1 }}>
                     {desc}
                   </div>
                 </div>
-                {mode === key && <span style={{ color: "#ffb800", fontSize: 11, marginLeft: "auto" }}>✓</span>}
+                {mode === key && <span style={{ color: "#E8AE3C", fontSize: 11, marginLeft: "auto" }}>✓</span>}
               </button>
             ))}
           </div>
@@ -320,14 +320,14 @@ export default function FloatingToolbox() {
               aria-pressed={lite}
               style={{
                 width: "100%",
-                background: lite ? "rgba(255,184,0,0.09)" : "rgba(255,255,255,0.025)",
-                border: `1px solid ${lite ? "rgba(255,184,0,0.3)" : "rgba(255,255,255,0.06)"}`,
+                background: lite ? "rgba(232, 174, 60,0.09)" : "rgba(255,255,255,0.025)",
+                border: `1px solid ${lite ? "rgba(232, 174, 60,0.3)" : "rgba(255,255,255,0.06)"}`,
                 borderRadius: 5, padding: "8px 10px",
                 cursor: "pointer", display: "flex", alignItems: "center", gap: 9, textAlign: "left",
               }}
             >
               <div style={{ flex: 1 }}>
-                <div style={{ fontFamily: "var(--font-body)", fontSize: 12, color: lite ? "#ffb800" : "#e5e2e1", fontWeight: lite ? 600 : 400, lineHeight: 1.3 }}>
+                <div style={{ fontFamily: "var(--font-body)", fontSize: 12, color: lite ? "#E8AE3C" : "#e5e2e1", fontWeight: lite ? 600 : 400, lineHeight: 1.3 }}>
                   Lite Mode {lite ? "· On" : "· Off"}
                 </div>
                 <div style={{ fontFamily: "var(--font-body)", fontSize: 10, color: "rgba(255,255,255,0.3)", lineHeight: 1.3, marginTop: 1 }}>
@@ -336,8 +336,8 @@ export default function FloatingToolbox() {
               </div>
               <span style={{
                 flexShrink: 0, width: 34, height: 19, borderRadius: 999,
-                background: lite ? "#ffc929" : "rgba(255,255,255,0.14)",
-                border: `1px solid ${lite ? "#ffc929" : "rgba(255,255,255,0.18)"}`,
+                background: lite ? "#F7C64E" : "rgba(255,255,255,0.14)",
+                border: `1px solid ${lite ? "#F7C64E" : "rgba(255,255,255,0.18)"}`,
                 position: "relative", transition: "background 0.2s",
               }}>
                 <span style={{
@@ -358,10 +358,10 @@ export default function FloatingToolbox() {
               onClick={() => { setWizardStep(0); setWizardOpen(true); setOpen(false); }}
               style={{
                 width: "100%",
-                background: "rgba(255,184,0,0.05)",
-                border: "1px solid rgba(255,184,0,0.18)",
+                background: "rgba(232, 174, 60,0.05)",
+                border: "1px solid rgba(232, 174, 60,0.18)",
                 borderRadius: 5, padding: "9px 12px",
-                cursor: "pointer", display: "flex", alignItems: "center", gap: 8, color: "#ffb800",
+                cursor: "pointer", display: "flex", alignItems: "center", gap: 8, color: "#E8AE3C",
               }}
             >
               <span style={{ fontSize: 13 }}>◈</span>
@@ -393,17 +393,17 @@ export default function FloatingToolbox() {
           {/* ── Dev Tools (hidden) — revealed by 5-tap on the eye, or ?dev=1 ── */}
           {devOn && (
             <>
-              <div style={{ height: 1, background: "rgba(255,184,0,0.18)", margin: "0 9px" }} />
+              <div style={{ height: 1, background: "rgba(232, 174, 60,0.18)", margin: "0 9px" }} />
               <div style={{ padding: "9px 11px 11px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 7 }}>
-                  <span style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "#ffb800", letterSpacing: "0.2em", textTransform: "uppercase" }}>Dev · Tier</span>
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "#E8AE3C", letterSpacing: "0.2em", textTransform: "uppercase" }}>Dev · Tier</span>
                   <button onClick={turnOffDev} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.4)", cursor: "pointer", fontFamily: "var(--font-mono)", fontSize: 8.5, letterSpacing: "0.12em", textTransform: "uppercase" }}>Hide ✕</button>
                 </div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 9 }}>
                   {TIERS.map((t) => {
                     const on = t === devTier;
                     return (
-                      <button key={t} onClick={() => applyDev(t, devRole)} style={{ fontFamily: "var(--font-mono)", fontSize: 9.5, padding: "4px 7px", borderRadius: 4, cursor: "pointer", textTransform: "capitalize", border: "1px solid " + (on ? "#ffb800" : "rgba(255,255,255,0.12)"), background: on ? "#ffb800" : "transparent", color: on ? "#0e0e0e" : "#c8c8c8" }}>{TIER_LABELS[t]}</button>
+                      <button key={t} onClick={() => applyDev(t, devRole)} style={{ fontFamily: "var(--font-mono)", fontSize: 9.5, padding: "4px 7px", borderRadius: 4, cursor: "pointer", textTransform: "capitalize", border: "1px solid " + (on ? "#E8AE3C" : "rgba(255,255,255,0.12)"), background: on ? "#E8AE3C" : "transparent", color: on ? "#0e0e0e" : "#c8c8c8" }}>{TIER_LABELS[t]}</button>
                     );
                   })}
                 </div>
@@ -412,7 +412,7 @@ export default function FloatingToolbox() {
                   {DEV_ROLES.map((r) => {
                     const on = r === devRole;
                     return (
-                      <button key={r} onClick={() => applyDev(devTier, r)} style={{ fontFamily: "var(--font-mono)", fontSize: 9.5, padding: "4px 7px", borderRadius: 4, cursor: "pointer", textTransform: "capitalize", border: "1px solid " + (on ? "#ffb800" : "rgba(255,255,255,0.12)"), background: on ? "#ffb800" : "transparent", color: on ? "#0e0e0e" : "#c8c8c8" }}>{r}</button>
+                      <button key={r} onClick={() => applyDev(devTier, r)} style={{ fontFamily: "var(--font-mono)", fontSize: 9.5, padding: "4px 7px", borderRadius: 4, cursor: "pointer", textTransform: "capitalize", border: "1px solid " + (on ? "#E8AE3C" : "rgba(255,255,255,0.12)"), background: on ? "#E8AE3C" : "transparent", color: on ? "#0e0e0e" : "#c8c8c8" }}>{r}</button>
                     );
                   })}
                 </div>
@@ -433,11 +433,11 @@ export default function FloatingToolbox() {
           }}
           onClick={(e) => e.target === e.currentTarget && setWizardOpen(false)}
         >
-          <div style={{ width: "100%", maxWidth: 460, background: "#111111", border: "1px solid rgba(255,184,0,0.2)", borderRadius: 12, overflow: "hidden" }}>
+          <div style={{ width: "100%", maxWidth: 460, background: "#111111", border: "1px solid rgba(232, 174, 60,0.2)", borderRadius: 12, overflow: "hidden" }}>
             {/* Wizard header */}
             <div style={{ padding: "20px 24px 14px", borderBottom: "1px solid rgba(255,255,255,0.05)", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
               <div>
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "#ffb800", letterSpacing: "0.22em", textTransform: "uppercase", display: "block", marginBottom: 6 }}>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "#E8AE3C", letterSpacing: "0.22em", textTransform: "uppercase", display: "block", marginBottom: 6 }}>
                   Guide // {wizardStep + 1} of {WIZARD_STEPS.length}
                 </span>
                 <h2 style={{ fontFamily: "Georgia, serif", fontSize: 24, color: "#f0ede8", fontWeight: 400, lineHeight: 1.2 }}>
@@ -449,7 +449,7 @@ export default function FloatingToolbox() {
 
             {/* Wizard body */}
             <div style={{ padding: "32px 24px 20px", textAlign: "center" }}>
-              <div style={{ fontFamily: "var(--font-mono)", fontSize: 40, color: "#ffb800", marginBottom: 20, lineHeight: 1 }}>
+              <div style={{ fontFamily: "var(--font-mono)", fontSize: 40, color: "#E8AE3C", marginBottom: 20, lineHeight: 1 }}>
                 {WIZARD_STEPS[wizardStep].glyph}
               </div>
               <p style={{ fontFamily: "Georgia, serif", fontStyle: "italic", fontSize: 15, color: "rgba(240,237,232,0.82)", lineHeight: 1.8, maxWidth: 380, margin: "0 auto" }}>
@@ -467,7 +467,7 @@ export default function FloatingToolbox() {
                   onClick={() => setWizardStep(i)}
                   style={{
                     width: i === wizardStep ? 22 : 6, height: 6, borderRadius: 3,
-                    background: i === wizardStep ? "#ffb800" : "rgba(255,255,255,0.12)",
+                    background: i === wizardStep ? "#E8AE3C" : "rgba(255,255,255,0.12)",
                     cursor: "pointer", transition: "width 0.25s, background 0.2s",
                   }}
                 />
@@ -484,7 +484,7 @@ export default function FloatingToolbox() {
               )}
               <button
                 onClick={() => wizardStep < WIZARD_STEPS.length - 1 ? setWizardStep((s) => s + 1) : setWizardOpen(false)}
-                style={{ flex: 1, padding: "11px 0", background: "#ffb800", border: "none", borderRadius: 6, color: "#000", fontFamily: "var(--font-body)", fontSize: 13, fontWeight: 600, cursor: "pointer" }}
+                style={{ flex: 1, padding: "11px 0", background: "#E8AE3C", border: "none", borderRadius: 6, color: "#000", fontFamily: "var(--font-body)", fontSize: 13, fontWeight: 600, cursor: "pointer" }}
               >
                 {wizardStep < WIZARD_STEPS.length - 1 ? "Next →" : "Got it ✓"}
               </button>

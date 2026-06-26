@@ -243,7 +243,7 @@ export default function AboutPage() {
           left: 10%;
           right: 10%;
           height: 1px;
-          background: linear-gradient(90deg, transparent, rgba(255,184,0,0.3), transparent);
+          background: linear-gradient(90deg, transparent, rgba(232, 174, 60,0.3), transparent);
           z-index: 0;
         }
 
@@ -268,7 +268,7 @@ export default function AboutPage() {
 
         .center-header {
           color: var(--accent);
-          border-bottom: 1px solid rgba(255,184,0,0.3);
+          border-bottom: 1px solid rgba(232, 174, 60,0.3);
         }
 
         .eco-node {
@@ -290,7 +290,7 @@ export default function AboutPage() {
 
         .eco-core-node {
           background: #161616;
-          border: 1px solid rgba(255,184,0,0.2);
+          border: 1px solid rgba(232, 174, 60,0.2);
           padding: 32px 24px;
           border-radius: 4px;
           text-align: center;

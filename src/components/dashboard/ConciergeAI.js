@@ -83,7 +83,7 @@ export default function ConciergeAI() {
           className="relative group w-14 h-14 bg-[#121110] border border-gold-accent/50 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(212,175,55,0.2)] hover:shadow-[0_0_30px_rgba(212,175,55,0.4)] transition-all hover:scale-105"
         >
           {/* Rotating glow */}
-          <div className="absolute inset-0 rounded-full bg-[conic-gradient(from_0deg,transparent,rgba(255,184,0,0.5),transparent)] animate-[spin_4s_linear_infinite] opacity-50"></div>
+          <div className="absolute inset-0 rounded-full bg-[conic-gradient(from_0deg,transparent,rgba(232, 174, 60,0.5),transparent)] animate-[spin_4s_linear_infinite] opacity-50"></div>
           <div className="absolute inset-1 rounded-full bg-[#121110] flex items-center justify-center z-10">
             <Sparkles className="text-gold-accent group-hover:animate-pulse" size="1.5em" strokeWidth={1.5} />
           </div>

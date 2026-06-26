@@ -110,7 +110,7 @@ export default function Footer() {
         }
 
         .footer-brand .brand-scout { color: #f5f3ee; }
-        .footer-brand .brand-it { color: var(--accent, #ffb800); }
+        .footer-brand .brand-it { color: var(--accent, #E8AE3C); }
 
         .footer-tagline {
           font-size: 14px;
@@ -143,9 +143,9 @@ export default function Footer() {
         }
 
         .social-link:hover {
-          color: var(--accent, #ffb800);
-          border-color: var(--accent, #ffb800);
-          background: rgba(255, 184, 0, 0.08);
+          color: var(--accent, #E8AE3C);
+          border-color: var(--accent, #E8AE3C);
+          background: rgba(232, 174, 60, 0.08);
           transform: translateY(-2px);
         }
 
@@ -179,7 +179,7 @@ export default function Footer() {
         }
 
         .nav-col a:hover {
-          color: var(--accent, #ffb800);
+          color: var(--accent, #E8AE3C);
           padding-left: 4px;
         }
 
@@ -218,7 +218,7 @@ export default function Footer() {
         }
 
         .footer-meta-links a:hover {
-          color: var(--accent, #ffb800);
+          color: var(--accent, #E8AE3C);
         }
 
         .meta-separator {

@@ -43,7 +43,7 @@ export default function FoundingProgramPanel({
       <style>{`
         .founding-panel {
           padding: 56px 40px;
-          background: linear-gradient(135deg, rgba(255,184,0,0.06) 0%, var(--surface) 60%);
+          background: linear-gradient(135deg, rgba(232, 174, 60,0.06) 0%, var(--surface) 60%);
           border: 1px solid var(--accent-muted);
           border-radius: var(--radius-md);
           text-align: center;

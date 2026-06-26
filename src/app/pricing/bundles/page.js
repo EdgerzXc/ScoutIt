@@ -29,8 +29,8 @@ const BUNDLES = [
       "Featured Broker placement on property pages"
     ],
     accent: "from-gold-accent to-gold-accent",
-    glowColor: "rgba(255,184,0,0.15)",
-    glowHover: "rgba(255,184,0,0.25)",
+    glowColor: "rgba(232, 174, 60,0.15)",
+    glowHover: "rgba(232, 174, 60,0.25)",
     borderColor: "border-gold-accent/50",
     highlight: false,
   },
@@ -56,8 +56,8 @@ const BUNDLES = [
       "Identity Reveal Control + Anonymity Shield"
     ],
     accent: "from-gold-accent to-gold-accent",
-    glowColor: "rgba(255,184,0,0.15)",
-    glowHover: "rgba(255,184,0,0.25)",
+    glowColor: "rgba(232, 174, 60,0.15)",
+    glowHover: "rgba(232, 174, 60,0.25)",
     borderColor: "border-gold-accent/50",
     highlight: true,
   },
@@ -83,8 +83,8 @@ const BUNDLES = [
       "Read access to Deep Intel for research"
     ],
     accent: "from-gold-accent to-gold-accent",
-    glowColor: "rgba(255,184,0,0.15)",
-    glowHover: "rgba(255,184,0,0.25)",
+    glowColor: "rgba(232, 174, 60,0.15)",
+    glowHover: "rgba(232, 174, 60,0.25)",
     borderColor: "border-gold-accent/50",
     highlight: false,
   },
@@ -110,8 +110,8 @@ const BUNDLES = [
       "AI copy optimization + Priority Bounty Access"
     ],
     accent: "from-gold-accent via-gold-accent to-gold-accent",
-    glowColor: "rgba(255,184,0,0.12)",
-    glowHover: "rgba(255,184,0,0.22)",
+    glowColor: "rgba(232, 174, 60,0.12)",
+    glowHover: "rgba(232, 174, 60,0.22)",
     borderColor: "border-gold-accent/60",
     highlight: false,
     flagship: true,
@@ -168,7 +168,7 @@ export default function BundlesPricingPage() {
               <div className={`absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r ${bundle.accent} opacity-80`} />
 
               {bundle.flagship && (
-                <div className="absolute top-4 right-4 bg-gradient-to-r from-gold-accent to-[#FFC929] text-[#0A0908] text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">
+                <div className="absolute top-4 right-4 bg-gradient-to-r from-gold-accent to-[#F7C64E] text-[#0A0908] text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">
                   Best Value
                 </div>
               )}
@@ -234,13 +234,13 @@ export default function BundlesPricingPage() {
               </ul>
 
               {/* CTA */}
-              <div
-                aria-disabled="true"
-                title="Subscriptions launch soon"
-                className="block w-full text-center py-3 rounded font-working-title text-xs uppercase tracking-widest font-bold cursor-not-allowed opacity-60 bg-transparent border border-surface-variant text-text-secondary"
+              <button
+                type="button"
+                onClick={() => window.dispatchEvent(new CustomEvent("scoutit:open-waitlist", { detail: { role: null, tier: bundle.name, source: "pricing-bundles" } }))}
+                className="block w-full text-center py-3 rounded font-working-title text-xs uppercase tracking-widest font-bold cursor-pointer transition-all bg-transparent border border-gold-accent/40 text-gold-accent hover:bg-gold-accent/10"
               >
-                Coming Soon
-              </div>
+                Join the Waitlist
+              </button>
             </div>
           ))}
         </div>

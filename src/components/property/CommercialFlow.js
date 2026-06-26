@@ -61,7 +61,7 @@ function SpatialVaultWidget({ lumaUrl, matterportUrl, heatmapUrl }) {
     <div style={{ marginTop: "32px", display: "flex", flexDirection: "column", gap: "24px" }}>
       {lumaUrl && (
         <div className="vault-item">
-          <h4 style={{ fontFamily: "'Courier New',monospace", fontSize: "10px", color: "#ffb800", letterSpacing: "0.18em", textTransform: "uppercase", marginBottom: "12px" }}>
+          <h4 style={{ fontFamily: "'Courier New',monospace", fontSize: "10px", color: "#E8AE3C", letterSpacing: "0.18em", textTransform: "uppercase", marginBottom: "12px" }}>
             3D Spatial Map
           </h4>
           <div style={{ position: "relative", width: "100%", height: "400px", borderRadius: "4px", overflow: "hidden", border: "1px solid #262626" }}>
@@ -69,8 +69,8 @@ function SpatialVaultWidget({ lumaUrl, matterportUrl, heatmapUrl }) {
             {!hasSubscription && (
               <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "rgba(22,22,22,0.6)", backdropFilter: "blur(4px)" }}>
                 <span style={{ fontFamily: "Georgia,serif", fontSize: "16px", color: "#f0ede8", marginBottom: "8px" }}>Unlock The Spatial Vault</span>
-                <span style={{ fontFamily: "'Courier New',monospace", fontSize: "9px", color: "#ffb800", letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: "16px" }}>Premium Subscription Required</span>
-                <a href="/pricing/seeker" style={{ textDecoration: "none", fontFamily: "Georgia,serif", fontSize: "13px", color: "#0e0e0e", background: "#ffb800", border: "none", padding: "10px 24px", borderRadius: "2px", cursor: "pointer", display: "inline-block" }}>
+                <span style={{ fontFamily: "'Courier New',monospace", fontSize: "9px", color: "#E8AE3C", letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: "16px" }}>Premium Subscription Required</span>
+                <a href="/pricing/seeker" style={{ textDecoration: "none", fontFamily: "Georgia,serif", fontSize: "13px", color: "#0e0e0e", background: "#E8AE3C", border: "none", padding: "10px 24px", borderRadius: "2px", cursor: "pointer", display: "inline-block" }}>
                   Upgrade to Cluster Tier →
                 </a>
               </div>
@@ -80,7 +80,7 @@ function SpatialVaultWidget({ lumaUrl, matterportUrl, heatmapUrl }) {
       )}
       {matterportUrl && (
         <div className="vault-item">
-          <h4 style={{ fontFamily: "'Courier New',monospace", fontSize: "10px", color: "#ffb800", letterSpacing: "0.18em", textTransform: "uppercase", marginBottom: "12px" }}>
+          <h4 style={{ fontFamily: "'Courier New',monospace", fontSize: "10px", color: "#E8AE3C", letterSpacing: "0.18em", textTransform: "uppercase", marginBottom: "12px" }}>
             360° AR Room Tour
           </h4>
           <div style={{ position: "relative", width: "100%", height: "400px", borderRadius: "4px", overflow: "hidden", border: "1px solid #262626" }}>
@@ -88,7 +88,7 @@ function SpatialVaultWidget({ lumaUrl, matterportUrl, heatmapUrl }) {
             {!hasSubscription && (
               <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "rgba(22,22,22,0.6)", backdropFilter: "blur(4px)" }}>
                 <span style={{ fontFamily: "Georgia,serif", fontSize: "16px", color: "#f0ede8", marginBottom: "8px" }}>Unlock The Spatial Vault</span>
-                <a href="/pricing/seeker" style={{ textDecoration: "none", fontFamily: "Georgia,serif", fontSize: "13px", color: "#0e0e0e", background: "#ffb800", border: "none", padding: "10px 24px", borderRadius: "2px", cursor: "pointer", marginTop: "12px", display: "inline-block" }}>
+                <a href="/pricing/seeker" style={{ textDecoration: "none", fontFamily: "Georgia,serif", fontSize: "13px", color: "#0e0e0e", background: "#E8AE3C", border: "none", padding: "10px 24px", borderRadius: "2px", cursor: "pointer", marginTop: "12px", display: "inline-block" }}>
                   Upgrade to Cluster Tier →
                 </a>
               </div>
@@ -98,7 +98,7 @@ function SpatialVaultWidget({ lumaUrl, matterportUrl, heatmapUrl }) {
       )}
       {heatmapUrl && (
         <div className="vault-item">
-          <h4 style={{ fontFamily: "'Courier New',monospace", fontSize: "10px", color: "#ffb800", letterSpacing: "0.18em", textTransform: "uppercase", marginBottom: "12px" }}>
+          <h4 style={{ fontFamily: "'Courier New',monospace", fontSize: "10px", color: "#E8AE3C", letterSpacing: "0.18em", textTransform: "uppercase", marginBottom: "12px" }}>
             Drone Heatmap Analysis
           </h4>
           <div style={{ position: "relative", width: "100%", height: "200px", borderRadius: "4px", overflow: "hidden", border: "1px solid #262626" }}>
@@ -106,7 +106,7 @@ function SpatialVaultWidget({ lumaUrl, matterportUrl, heatmapUrl }) {
             {!hasSubscription && (
               <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "rgba(22,22,22,0.6)", backdropFilter: "blur(4px)" }}>
                 <span style={{ fontFamily: "Georgia,serif", fontSize: "16px", color: "#f0ede8", marginBottom: "8px" }}>Unlock The Spatial Vault</span>
-                <a href="/pricing/seeker" style={{ textDecoration: "none", fontFamily: "Georgia,serif", fontSize: "13px", color: "#0e0e0e", background: "#ffb800", border: "none", padding: "10px 24px", borderRadius: "2px", cursor: "pointer", marginTop: "12px", display: "inline-block" }}>
+                <a href="/pricing/seeker" style={{ textDecoration: "none", fontFamily: "Georgia,serif", fontSize: "13px", color: "#0e0e0e", background: "#E8AE3C", border: "none", padding: "10px 24px", borderRadius: "2px", cursor: "pointer", marginTop: "12px", display: "inline-block" }}>
                   Upgrade to Cluster Tier →
                 </a>
               </div>
@@ -139,10 +139,10 @@ function DeepIntelWidget({ open, onToggle, fields, values }) {
         onClick={onToggle}
         style={{width:"100%", background:"#161616", border:"0.5px solid #262626", padding:"14px 20px", cursor:"pointer", display:"flex", justifyContent:"space-between", alignItems:"center", borderRadius:"2px"}}
       >
-        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#ffb800", letterSpacing:"0.18em", textTransform:"uppercase"}}>
+        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#E8AE3C", letterSpacing:"0.18em", textTransform:"uppercase"}}>
           DEEP INTELLIGENCE // {unlocked ? "UNLOCKED" : "VERIFIED SCOUT"}
         </span>
-        <svg viewBox="0 0 10 6" width="10" height="6" fill="none" stroke="#ffb800" strokeWidth="1.5">
+        <svg viewBox="0 0 10 6" width="10" height="6" fill="none" stroke="#E8AE3C" strokeWidth="1.5">
           <path d={open ? "M1 5L5 1L9 5" : "M1 1L5 5L9 1"}/>
         </svg>
       </button>
@@ -154,7 +154,7 @@ function DeepIntelWidget({ open, onToggle, fields, values }) {
               <div key={i} style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom: i < fields.length - 1 ? "1px solid #262626" : "none", gap:"20px"}}>
                 <span style={{fontFamily:"Georgia,serif", fontSize:"13px", color:"#c8c8c8"}}>{field}</span>
                 {value !== null ? (
-                  <span style={{fontFamily:"'Courier New',monospace", fontSize:"12px", color:"#ffb800", letterSpacing:"0.04em", textAlign:"right"}}>{value}</span>
+                  <span style={{fontFamily:"'Courier New',monospace", fontSize:"12px", color:"#E8AE3C", letterSpacing:"0.04em", textAlign:"right"}}>{value}</span>
                 ) : (
                   <span style={{fontFamily:"'Courier New',monospace", fontSize:"11px", color:"#5a5a5a", letterSpacing:"0.08em", textAlign:"right"}}>Not recorded</span>
                 )}
@@ -173,8 +173,8 @@ function DeepIntelWidget({ open, onToggle, fields, values }) {
             ))}
           </div>
           <div style={{position:"absolute", inset:0, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:"14px", background:"rgba(22,22,22,0.88)", borderRadius:"0 0 2px 2px"}}>
-            <span style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#ffb800", letterSpacing:"0.25em", textTransform:"uppercase"}}>SOLAR TIER UNLOCKS THIS</span>
-            <a href="/pricing/seeker" style={{textDecoration:"none", fontFamily:"Georgia,serif", fontSize:"13px", color:"#0e0e0e", background:"#ffb800", border:"none", padding:"10px 24px", borderRadius:"2px", cursor:"pointer", letterSpacing:"0.04em"}}>
+            <span style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#E8AE3C", letterSpacing:"0.25em", textTransform:"uppercase"}}>SOLAR TIER UNLOCKS THIS</span>
+            <a href="/pricing/seeker" style={{textDecoration:"none", fontFamily:"Georgia,serif", fontSize:"13px", color:"#0e0e0e", background:"#E8AE3C", border:"none", padding:"10px 24px", borderRadius:"2px", cursor:"pointer", letterSpacing:"0.04em"}}>
               Unlock Full Intelligence →
             </a>
           </div>
@@ -202,10 +202,10 @@ function EngineRoomPanel({ property: d }) {
           marginBottom: open ? "0" : "0"
         }}
       >
-        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#ffb800", letterSpacing:"0.18em", textTransform:"uppercase"}}>
+        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#E8AE3C", letterSpacing:"0.18em", textTransform:"uppercase"}}>
           For Operators — Technical Specs
         </span>
-        <svg viewBox="0 0 10 6" width="10" height="6" fill="none" stroke="#ffb800" strokeWidth="1.5">
+        <svg viewBox="0 0 10 6" width="10" height="6" fill="none" stroke="#E8AE3C" strokeWidth="1.5">
           <path d={open ? "M1 5L5 1L9 5" : "M1 1L5 5L9 1"}/>
         </svg>
       </button>
@@ -269,10 +269,10 @@ function BackOfHousePanel({ property: d }) {
           justifyContent:"space-between", alignItems:"center", borderRadius:"2px"
         }}
       >
-        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#ffb800", letterSpacing:"0.18em", textTransform:"uppercase"}}>
+        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#E8AE3C", letterSpacing:"0.18em", textTransform:"uppercase"}}>
           For Operators — Back of House
         </span>
-        <svg viewBox="0 0 10 6" width="10" height="6" fill="none" stroke="#ffb800" strokeWidth="1.5">
+        <svg viewBox="0 0 10 6" width="10" height="6" fill="none" stroke="#E8AE3C" strokeWidth="1.5">
           <path d={open ? "M1 5L5 1L9 5" : "M1 1L5 5L9 1"}/>
         </svg>
       </button>
@@ -959,9 +959,9 @@ export default function CommercialFlow({ slug, draftData, isDraftMode }) {
 
           <div className="photo-decor">
             <svg viewBox="0 0 1000 320" preserveAspectRatio="xMidYMid slice">
-              <rect x="680" y="30" width="200" height="150" fill="none" stroke="rgba(255,184,0,0.1)" strokeWidth="1"/>
-              <line x1="780" y1="30" x2="780" y2="180" stroke="rgba(255,184,0,0.07)" strokeWidth="0.5"/>
-              <line x1="680" y1="105" x2="880" y2="105" stroke="rgba(255,184,0,0.07)" strokeWidth="0.5"/>
+              <rect x="680" y="30" width="200" height="150" fill="none" stroke="rgba(232, 174, 60,0.1)" strokeWidth="1"/>
+              <line x1="780" y1="30" x2="780" y2="180" stroke="rgba(232, 174, 60,0.07)" strokeWidth="0.5"/>
+              <line x1="680" y1="105" x2="880" y2="105" stroke="rgba(232, 174, 60,0.07)" strokeWidth="0.5"/>
               <rect x="100" y="240" width="320" height="58" rx="3" fill="rgba(25,20,12,0.75)"/>
               <rect x="118" y="222" width="285" height="32" rx="3" fill="rgba(30,24,14,0.65)"/>
               <rect x="100" y="222" width="26"  height="76" rx="2" fill="rgba(28,22,13,0.7)"/>
@@ -989,7 +989,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode }) {
             <p className="hero-hook">{d.hook}</p>
             {isOwner && (
               <div style={{ marginTop: '24px' }}>
-                <Link href={`/dashboard?edit=${d.id}`} className="font-working-title text-sm tracking-widest text-[#0e0e0e] bg-[#ffb800] px-6 py-3 rounded hover:bg-[#e6a600] transition-colors uppercase font-bold inline-block border border-[#ffb800] shadow-[0_0_15px_rgba(255,184,0,0.4)] cursor-pointer">
+                <Link href={`/dashboard?edit=${d.id}`} className="font-working-title text-sm tracking-widest text-[#0e0e0e] bg-[#E8AE3C] px-6 py-3 rounded hover:bg-[#e6a600] transition-colors uppercase font-bold inline-block border border-[#E8AE3C] shadow-[0_0_15px_rgba(232, 174, 60,0.4)] cursor-pointer">
                   Edit Property Dossier
                 </Link>
               </div>
@@ -1061,7 +1061,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode }) {
           <p className="mobile-hero-hook">{d.hook}</p>
           {isOwner && (
             <div style={{ marginTop: '20px' }}>
-              <Link href={`/dashboard?edit=${d.id}`} className="font-working-title text-xs tracking-widest text-[#0e0e0e] bg-[#ffb800] px-5 py-3 rounded hover:bg-[#e6a600] transition-colors uppercase font-bold inline-block border border-[#ffb800] w-full text-center">
+              <Link href={`/dashboard?edit=${d.id}`} className="font-working-title text-xs tracking-widest text-[#0e0e0e] bg-[#E8AE3C] px-5 py-3 rounded hover:bg-[#e6a600] transition-colors uppercase font-bold inline-block border border-[#E8AE3C] w-full text-center">
                 Edit Property Dossier
               </Link>
             </div>
@@ -1191,7 +1191,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode }) {
                 <div style={{marginBottom:"36px"}}>
                   {d.aesthetic_tag && (
                     <div style={{marginBottom:"24px"}}>
-                      <span style={{fontFamily:"Georgia,serif", fontStyle:"italic", fontSize:"clamp(22px,3vw,30px)", fontWeight:400, color:"#ffb800", letterSpacing:"0.01em", lineHeight:1.2}}>
+                      <span style={{fontFamily:"Georgia,serif", fontStyle:"italic", fontSize:"clamp(22px,3vw,30px)", fontWeight:400, color:"#E8AE3C", letterSpacing:"0.01em", lineHeight:1.2}}>
                         {d.aesthetic_tag || d.accordion_3_rating}
                       </span>
                     </div>
@@ -1244,7 +1244,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode }) {
                 <div style={{marginBottom:"36px"}}>
                   {d.aesthetic_tag && (
                     <div style={{marginBottom:"24px"}}>
-                      <span style={{fontFamily:"Georgia,serif", fontStyle:"italic", fontSize:"clamp(22px,3vw,30px)", fontWeight:400, color:"#ffb800", letterSpacing:"0.01em", lineHeight:1.2}}>
+                      <span style={{fontFamily:"Georgia,serif", fontStyle:"italic", fontSize:"clamp(22px,3vw,30px)", fontWeight:400, color:"#E8AE3C", letterSpacing:"0.01em", lineHeight:1.2}}>
                         {d.aesthetic_tag || d.accordion_3_rating}
                       </span>
                     </div>
@@ -1291,7 +1291,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode }) {
                 <>
                   {(d.aesthetic_tag || d.accordion_3_rating) && (
                     <div style={{marginBottom:"30px"}}>
-                      <span style={{fontFamily:"Georgia,serif", fontStyle:"italic", fontSize:"clamp(22px,3vw,30px)", fontWeight:400, color:"#ffb800", letterSpacing:"0.01em", lineHeight:1.2}}>
+                      <span style={{fontFamily:"Georgia,serif", fontStyle:"italic", fontSize:"clamp(22px,3vw,30px)", fontWeight:400, color:"#E8AE3C", letterSpacing:"0.01em", lineHeight:1.2}}>
                         {d.aesthetic_tag || d.accordion_3_rating}
                       </span>
                     </div>
@@ -1371,8 +1371,8 @@ export default function CommercialFlow({ slug, draftData, isDraftMode }) {
           <div className={`chapter-panel ${activeTab === "vault" ? "active" : ""}`} id="panel-vault">
             <div className="panel-content" style={{ maxWidth: "100%" }}>
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#ffb800", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>PREMIUM — THE SPATIAL VAULT</div>
-                <div style={{height:"1px", background:"#ffb800"}}/>
+                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#E8AE3C", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>PREMIUM — THE SPATIAL VAULT</div>
+                <div style={{height:"1px", background:"#E8AE3C"}}/>
               </div>
 
               <div style={{marginBottom:"30px"}}>
@@ -1388,7 +1388,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode }) {
               />
             </div>
             <div className="panel-sidebar">
-              <div className="sidebar-block"><div className="sidebar-accent-line" style={{background: "#ffb800"}}/><div className="sidebar-label" style={{color: "#ffb800"}}>Vault Status</div><div className="sidebar-value">Secured</div></div>
+              <div className="sidebar-block"><div className="sidebar-accent-line" style={{background: "#E8AE3C"}}/><div className="sidebar-label" style={{color: "#E8AE3C"}}>Vault Status</div><div className="sidebar-value">Secured</div></div>
               <div className="sidebar-block"><div className="sidebar-label">Verification</div><div className="sidebar-value">ScoutIT Pros</div></div>
               <div className="sidebar-block"><div className="sidebar-label">Access</div><div className="sidebar-value">Orbit Tier Only</div></div>
             </div>
@@ -1504,7 +1504,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode }) {
                   {d.whereTo.map((item, idx) => (
                     <div key={idx} style={{display:"flex", justifyContent:"space-between", alignItems:"center", padding:"13px 0", borderBottom:"1px solid #262626"}}>
                       <div style={{display:"flex", alignItems:"center", gap:"12px"}}>
-                        <div style={{width:"5px", height:"5px", borderRadius:"50%", background:"#ffb800", flexShrink:0}}/>
+                        <div style={{width:"5px", height:"5px", borderRadius:"50%", background:"#E8AE3C", flexShrink:0}}/>
                         <div>
                           <div style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{item.name}</div>
                           {item.category && <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#c8c8c8", letterSpacing:"0.1em", textTransform:"uppercase", marginTop:"2px"}}>{item.category}</div>}
@@ -1558,7 +1558,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode }) {
                     </div>
                     <div style={{display:"flex", flexWrap:"wrap", gap:"10px"}}>
                       {tags.map((t, i) => (
-                        <span key={i} style={{fontFamily:"Georgia,serif", fontSize:"15px", color:"#ffb800", border:"0.5px solid rgba(255,184,0,0.4)", padding:"7px 18px", borderRadius:"4px", letterSpacing:"0.02em"}}>{t}</span>
+                        <span key={i} style={{fontFamily:"Georgia,serif", fontSize:"15px", color:"#E8AE3C", border:"0.5px solid rgba(232, 174, 60,0.4)", padding:"7px 18px", borderRadius:"4px", letterSpacing:"0.02em"}}>{t}</span>
                       ))}
                     </div>
                   </div>
@@ -1718,7 +1718,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode }) {
                   {d.whereTo.map((item, idx) => (
                     <div key={idx} style={{display:"flex", justifyContent:"space-between", alignItems:"center", padding:"13px 0", borderBottom:"1px solid #262626"}}>
                       <div style={{display:"flex", alignItems:"center", gap:"12px"}}>
-                        <div style={{width:"5px", height:"5px", borderRadius:"50%", background:"#ffb800", flexShrink:0}}/>
+                        <div style={{width:"5px", height:"5px", borderRadius:"50%", background:"#E8AE3C", flexShrink:0}}/>
                         <div>
                           <div style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{item.name}</div>
                           {item.category && <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#c8c8c8", letterSpacing:"0.1em", textTransform:"uppercase", marginTop:"2px"}}>{item.category}</div>}
@@ -1876,7 +1876,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode }) {
                       <div key={label} style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"13px 0", borderBottom: i < arr.length - 1 ? "1px solid #262626" : "none", gap:"20px"}}>
                         <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#c8c8c8"}}>{label}</span>
                         {value !== null ? (
-                          <span style={{fontFamily:"'Courier New',monospace", fontSize:"12px", color:"#ffb800", letterSpacing:"0.04em", textAlign:"right"}}>{value}</span>
+                          <span style={{fontFamily:"'Courier New',monospace", fontSize:"12px", color:"#E8AE3C", letterSpacing:"0.04em", textAlign:"right"}}>{value}</span>
                         ) : (
                           <span style={{fontFamily:"'Courier New',monospace", fontSize:"11px", color:"#5a5a5a", letterSpacing:"0.08em", textAlign:"right"}}>Not recorded</span>
                         )}
@@ -1896,10 +1896,10 @@ export default function CommercialFlow({ slug, draftData, isDraftMode }) {
                   </div>
                   <div style={{position:"absolute", inset:0, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:"16px", background:"rgba(22,22,22,0.9)"}}>
                     <div style={{display:"flex", alignItems:"center", gap:"8px"}}>
-                      <Lock size={15} strokeWidth={1.5} style={{color:"#ffb800", flexShrink:0}} />
-                      <span style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#ffb800", letterSpacing:"0.25em", textTransform:"uppercase"}}>Market Intelligence · Cluster Tier</span>
+                      <Lock size={15} strokeWidth={1.5} style={{color:"#E8AE3C", flexShrink:0}} />
+                      <span style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#E8AE3C", letterSpacing:"0.25em", textTransform:"uppercase"}}>Market Intelligence · Cluster Tier</span>
                     </div>
-                    <a href="/pricing/seeker" style={{textDecoration:"none", fontFamily:"Georgia,serif", fontSize:"14px", color:"#0e0e0e", background:"#ffb800", border:"none", padding:"11px 28px", borderRadius:"4px", cursor:"pointer", letterSpacing:"0.03em"}}>
+                    <a href="/pricing/seeker" style={{textDecoration:"none", fontFamily:"Georgia,serif", fontSize:"14px", color:"#0e0e0e", background:"#E8AE3C", border:"none", padding:"11px 28px", borderRadius:"4px", cursor:"pointer", letterSpacing:"0.03em"}}>
                       Unlock with Cluster →
                     </a>
                   </div>
@@ -1909,7 +1909,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode }) {
             </div>
 
             <div className="panel-sidebar">
-              <div className="sidebar-block"><div className="sidebar-accent-line" style={{background:"#ffb800"}}/><div className="sidebar-label">Cap rate est.</div><div className="sidebar-value" style={{color:"#c8c8c8"}}><Lock size={13} strokeWidth={1.5} style={{verticalAlign:"-2px", marginRight:"5px"}} />Locked</div></div>
+              <div className="sidebar-block"><div className="sidebar-accent-line" style={{background:"#E8AE3C"}}/><div className="sidebar-label">Cap rate est.</div><div className="sidebar-value" style={{color:"#c8c8c8"}}><Lock size={13} strokeWidth={1.5} style={{verticalAlign:"-2px", marginRight:"5px"}} />Locked</div></div>
               <div className="sidebar-block"><div className="sidebar-label">Price trend</div><div className="sidebar-value" style={{color:"#c8c8c8"}}><Lock size={13} strokeWidth={1.5} style={{verticalAlign:"-2px", marginRight:"5px"}} />Locked</div></div>
               <div className="sidebar-block"><div className="sidebar-label">Intel source</div><div className="sidebar-value">ScoutIt Verified</div></div>
             </div>
@@ -1944,7 +1944,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode }) {
                       }}
                     >
                       <div>
-                        <div style={{fontFamily:"'Courier New',monospace", fontSize:"11px", color: activeUnit === u.name ? "#ffb800" : "#c8c8c8", letterSpacing:"0.18em", textTransform:"uppercase", marginBottom:"8px"}}>
+                        <div style={{fontFamily:"'Courier New',monospace", fontSize:"11px", color: activeUnit === u.name ? "#E8AE3C" : "#c8c8c8", letterSpacing:"0.18em", textTransform:"uppercase", marginBottom:"8px"}}>
                           UNIT {String(ui + 1).padStart(2, "0")}
                         </div>
                         <div className="unit-z3-name">{u.name}</div>
@@ -1968,7 +1968,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode }) {
                     </div>
                   )}
                   <div style={{padding:"20px 22px"}}>
-                    <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#ffb800", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"8px"}}>
+                    <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#E8AE3C", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"8px"}}>
                       Selected Unit — Full Detail
                     </div>
                     <div style={{fontFamily:"Georgia,serif", fontSize:"22px", color:"#f0ede8", marginBottom:"14px"}}>
@@ -2038,7 +2038,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode }) {
                           }}
                           style={{display:"flex", alignItems:"baseline", gap:"10px", width:"100%", textAlign:"left", background:"none", border:"none", borderBottom:"1px solid #262626", padding:"9px 0", cursor:"pointer"}}
                         >
-                          <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color: activeUnit === u.name ? "#ffb800" : "#6a6a6a", letterSpacing:"0.12em", flexShrink:0}}>{String(ui + 1).padStart(2, "0")}</span>
+                          <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color: activeUnit === u.name ? "#E8AE3C" : "#6a6a6a", letterSpacing:"0.12em", flexShrink:0}}>{String(ui + 1).padStart(2, "0")}</span>
                           <span style={{fontFamily:"Georgia,serif", fontSize:"13px", color: activeUnit === u.name ? "#f0ede8" : "#c8c8c8", lineHeight:1.3}}>{u.name}</span>
                         </button>
                       );
@@ -2060,7 +2060,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode }) {
 
               {d.building_style && (
                 <div style={{marginBottom:"24px"}}>
-                  <span style={{fontFamily:"Georgia,serif", fontStyle:"italic", fontSize:"clamp(22px,3vw,30px)", fontWeight:400, color:"#ffb800", letterSpacing:"0.01em"}}>
+                  <span style={{fontFamily:"Georgia,serif", fontStyle:"italic", fontSize:"clamp(22px,3vw,30px)", fontWeight:400, color:"#E8AE3C", letterSpacing:"0.01em"}}>
                     {d.building_style}
                   </span>
                 </div>
@@ -2107,9 +2107,9 @@ export default function CommercialFlow({ slug, draftData, isDraftMode }) {
               {/* Verdict — the ScoutIt editorial stamp, premium & final */}
               {d.scoutit_verdict && (
                 <div className="sidebar-block" style={{paddingBottom:"22px", borderBottom:"1px solid #262626", marginBottom:"4px"}}>
-                  <div className="sidebar-accent-line" style={{background:"#ffb800"}}/>
-                  <div style={{fontFamily:"'Courier New',monospace", fontSize:"11px", color:"#ffb800", letterSpacing:"0.18em", textTransform:"uppercase", marginBottom:"10px"}}>ScoutIt Verdict</div>
-                  <div style={{fontFamily:"Georgia,serif", fontSize:"20px", color:"#ffb800", lineHeight:1.35}}>{d.scoutit_verdict}</div>
+                  <div className="sidebar-accent-line" style={{background:"#E8AE3C"}}/>
+                  <div style={{fontFamily:"'Courier New',monospace", fontSize:"11px", color:"#E8AE3C", letterSpacing:"0.18em", textTransform:"uppercase", marginBottom:"10px"}}>ScoutIt Verdict</div>
+                  <div style={{fontFamily:"Georgia,serif", fontSize:"20px", color:"#E8AE3C", lineHeight:1.35}}>{d.scoutit_verdict}</div>
                 </div>
               )}
               {d.building_style && <div className="sidebar-block"><div className="sidebar-label">Building Style</div><div className="sidebar-value">{d.building_style}</div></div>}
@@ -2151,7 +2151,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode }) {
                       <span style={{display:"block", fontFamily:"Georgia,serif", fontSize:"17px", color:"#f0ede8", marginBottom:"3px"}}>{svc.title}</span>
                       <span style={{display:"block", fontFamily:"system-ui,-apple-system,sans-serif", fontSize:"12.5px", color:"#c8c8c8", lineHeight:1.5}}>{svc.desc}</span>
                     </span>
-                    <span style={{fontFamily:"Georgia,serif", fontSize:"16px", color:"#ffb800", flexShrink:0}}>→</span>
+                    <span style={{fontFamily:"Georgia,serif", fontSize:"16px", color:"#E8AE3C", flexShrink:0}}>→</span>
                   </Link>
                 ))}
               </div>
@@ -2159,7 +2159,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode }) {
             </div>
 
             <div className="panel-sidebar">
-              <div className="sidebar-block"><div className="sidebar-accent-line" style={{background:"#ffb800"}}/><div className="sidebar-label">Ecosystem</div><div className="sidebar-value">5 services live</div><div className="sidebar-sub">Vetted ScoutIt partners</div></div>
+              <div className="sidebar-block"><div className="sidebar-accent-line" style={{background:"#E8AE3C"}}/><div className="sidebar-label">Ecosystem</div><div className="sidebar-value">5 services live</div><div className="sidebar-sub">Vetted ScoutIt partners</div></div>
               <div className="sidebar-block"><div className="sidebar-label">Fulfilment</div><div className="sidebar-value">Partner-direct</div></div>
             </div>
           </div>
@@ -2220,7 +2220,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode }) {
                         <p style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#a0a0a0", lineHeight:1.7, margin:"10px 0 16px", maxWidth:"480px"}}>
                           No confirmed rate has been published for this space. Inquire with the owner, property manager, or broker for current pricing.
                         </p>
-                        <Link href={`/property/${slug || "batasan-hills"}/brokers`} style={{display:"inline-block", fontFamily:"Georgia,serif", fontSize:"16px", color:"#ffb800", textDecoration:"none", letterSpacing:"0.01em"}}>
+                        <Link href={`/property/${slug || "batasan-hills"}/brokers`} style={{display:"inline-block", fontFamily:"Georgia,serif", fontSize:"16px", color:"#E8AE3C", textDecoration:"none", letterSpacing:"0.01em"}}>
                           Inquire with an authorized broker →
                         </Link>
                       </div>
@@ -2278,7 +2278,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode }) {
             bottom: '24px',
             right: '24px',
             zIndex: 9999,
-            background: '#FFB800',
+            background: '#E8AE3C',
             color: '#0A0908',
             border: 'none',
             padding: '14px 24px',
@@ -2289,7 +2289,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode }) {
             textTransform: 'uppercase',
             fontWeight: 'bold',
             cursor: 'pointer',
-            boxShadow: '0 8px 24px rgba(255,184,0,0.3)',
+            boxShadow: '0 8px 24px rgba(232, 174, 60,0.3)',
             display: 'flex',
             alignItems: 'center',
             gap: '8px'

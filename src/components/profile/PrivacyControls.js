@@ -74,7 +74,7 @@ export default function PrivacyControls({
   return (
     <section style={sectionStyle}>
       <div style={sectionHeader}>
-        <Shield size={14} strokeWidth={1.5} color="#ffb800" />
+        <Shield size={14} strokeWidth={1.5} color="#E8AE3C" />
         <span style={sectionTitle}>Privacy</span>
         {saving && (
           <span style={{ fontFamily: "var(--font-body)", fontSize: 10, color: "var(--text-secondary)", marginLeft: "auto" }}>
@@ -89,7 +89,7 @@ export default function PrivacyControls({
           onKeyDown={(e) => e.key === "Enter" && togglePublicProfile()}>
           <div style={controlInfo}>
             <span style={controlLabel}>
-              {publicProfile ? <Globe size={12} strokeWidth={1.5} color="#ffb800" /> : <Lock size={12} strokeWidth={1.5} color="var(--text-secondary)" />}
+              {publicProfile ? <Globe size={12} strokeWidth={1.5} color="#E8AE3C" /> : <Lock size={12} strokeWidth={1.5} color="var(--text-secondary)" />}
               Public Profile
             </span>
             <span style={controlDesc}>
@@ -145,7 +145,7 @@ export default function PrivacyControls({
                 <div style={controlInfo}>
                   <span style={controlLabel}>
                     {settings.anonymous_browsing
-                      ? <EyeOff size={12} strokeWidth={1.5} color="#ffb800" />
+                      ? <EyeOff size={12} strokeWidth={1.5} color="#E8AE3C" />
                       : <Eye size={12} strokeWidth={1.5} color="var(--text-secondary)" />}
                     Anonymous Browsing
                   </span>
@@ -166,7 +166,7 @@ export default function PrivacyControls({
                 <div style={controlInfo}>
                   <span style={controlLabel}>
                     {settings.anonymous_byline
-                      ? <EyeOff size={12} strokeWidth={1.5} color="#ffb800" />
+                      ? <EyeOff size={12} strokeWidth={1.5} color="#E8AE3C" />
                       : <Eye size={12} strokeWidth={1.5} color="var(--text-secondary)" />}
                     Anonymous Byline
                   </span>
@@ -197,8 +197,8 @@ function Toggle({ on, small = false }) {
         width: w,
         height: h,
         borderRadius: h,
-        background: on ? "rgba(255,184,0,0.25)" : "rgba(255,255,255,0.06)",
-        border: `1px solid ${on ? "rgba(255,184,0,0.5)" : "rgba(255,255,255,0.1)"}`,
+        background: on ? "rgba(232, 174, 60,0.25)" : "rgba(255,255,255,0.06)",
+        border: `1px solid ${on ? "rgba(232, 174, 60,0.5)" : "rgba(255,255,255,0.1)"}`,
         position: "relative",
         flexShrink: 0,
         transition: "background 0.2s, border-color 0.2s",
@@ -213,7 +213,7 @@ function Toggle({ on, small = false }) {
           width: dot,
           height: dot,
           borderRadius: "50%",
-          background: on ? "#ffb800" : "rgba(255,255,255,0.25)",
+          background: on ? "#E8AE3C" : "rgba(255,255,255,0.25)",
           transition: "left 0.2s cubic-bezier(0.4,0,0.2,1), background 0.2s",
         }}
       />
@@ -241,7 +241,7 @@ const sectionTitle = {
   fontWeight: 700,
   letterSpacing: "0.14em",
   textTransform: "uppercase",
-  color: "#ffb800",
+  color: "#E8AE3C",
 };
 
 const controlBlock = {

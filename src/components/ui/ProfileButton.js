@@ -92,7 +92,7 @@ export default function ProfileButton({ floating = false }) {
 
         .profile-btn:hover {
           border-color: var(--accent-bright);
-          background: rgba(255, 184, 0, 0.16);
+          background: rgba(232, 174, 60, 0.16);
           box-shadow: var(--shadow-glow-soft);
           transform: translateY(-1px);
         }

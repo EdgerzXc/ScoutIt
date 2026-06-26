@@ -43,13 +43,13 @@
      --accent        baseline gold (text gold, headings, labels)
      --accent-bright interactive gold (buttons, CTAs, hover, active nav)
      --accent-muted  subdued gold (borders, dividers, secondary accents) */
-  --accent: #ffb800;
-  --accent-rgb: 255, 184, 0;
-  --accent-bright: #ffc929;
-  --accent-bright-rgb: 255, 201, 41;
-  --accent-muted: #7a5c00;
-  --accent-dim: rgba(255, 184, 0, 0.12);
-  --accent-border: rgba(255, 184, 0, 0.32);
+  --accent: #E8AE3C;
+  --accent-rgb: 232, 174, 60;
+  --accent-bright: #F7C64E;
+  --accent-bright-rgb: 247, 198, 78;
+  --accent-muted: #6E531A;
+  --accent-dim: rgba(232, 174, 60, 0.12);
+  --accent-border: rgba(232, 174, 60, 0.32);
 
   /* Semantic State Colors */
   --green: #4caf7d;
@@ -90,8 +90,8 @@
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.25);
   --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.35);
   --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.45);
-  --shadow-glow: 0 0 18px rgba(255, 184, 0, 0.45);
-  --shadow-glow-soft: 0 0 24px rgba(255, 184, 0, 0.18);
+  --shadow-glow: 0 0 18px rgba(232, 174, 60, 0.45);
+  --shadow-glow-soft: 0 0 24px rgba(232, 174, 60, 0.18);
 }
 
 /* ── BASE ELEMENTS ── */
@@ -169,7 +169,7 @@ a:hover {
 
 /* ── SELECTION ── */
 ::selection {
-  background: rgba(255, 184, 0, 0.25);
+  background: rgba(232, 174, 60, 0.25);
   color: var(--text-primary);
 }
 
@@ -503,7 +503,7 @@ a:hover {
 /* ── SWIPE-FRIENDLY TAP AREAS ── */
 @media (hover: none) and (pointer: coarse) {
   a, button {
-    -webkit-tap-highlight-color: rgba(255, 184, 0, 0.2);
+    -webkit-tap-highlight-color: rgba(232, 174, 60, 0.2);
   }
 }
 
@@ -526,7 +526,7 @@ input, textarea, select, [type="text"], [type="search"], [type="email"], [type="
 input:focus, textarea:focus, select:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 2px rgba(255, 184, 0, 0.1);
+  box-shadow: 0 0 0 2px rgba(232, 174, 60, 0.1);
   background: var(--surface2);
 }
 
@@ -559,7 +559,7 @@ input:focus, textarea:focus, select:focus {
   
   select {
     -webkit-appearance: none;
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(255,184,0,1)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(232, 174, 60,1)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
     background-repeat: no-repeat;
     background-position: right 14px center;
     background-size: 20px;
@@ -670,11 +670,11 @@ body.high-contrast h6 { font-size: clamp(18px, 2.5vw, 24px) !important; }
 
 /* Links — make them clearly gold + underlined */
 body.high-contrast a {
-  color: #ffb800 !important;
+  color: #E8AE3C !important;
   text-decoration: underline !important;
   text-underline-offset: 3px;
 }
-body.high-contrast a:hover { color: #ffc929 !important; }
+body.high-contrast a:hover { color: #F7C64E !important; }
 
 /* Span, label, small — override inline colours */
 body.high-contrast span,
@@ -687,7 +687,7 @@ body.high-contrast caption {
 /* Keep accent gold */
 body.high-contrast .text-accent,
 body.high-contrast [class*="accent"] {
-  color: #ffb800 !important;
+  color: #E8AE3C !important;
 }
 
 /* Buttons — increase contrast and size */
@@ -718,7 +718,7 @@ body.high-contrast *[style*="border"] {
 
 /* Focus rings — thick gold ring */
 body.high-contrast :focus-visible {
-  outline: 3px solid #ffb800 !important;
+  outline: 3px solid #E8AE3C !important;
   outline-offset: 3px !important;
 }
 
@@ -808,7 +808,7 @@ body.light-mode .toolbox-float {
   height: var(--size, 100px);
   border-radius: 50%;
   background: radial-gradient(circle at 30% 30%, #333 0%, #0a0a0a 80%);
-  box-shadow: inset -10px -10px 20px rgba(0,0,0,0.9), 0 0 15px rgba(255,184,0,0.1);
+  box-shadow: inset -10px -10px 20px rgba(0,0,0,0.9), 0 0 15px rgba(232, 174, 60,0.1);
   animation: float-past var(--duration, 20s) linear infinite;
   animation-delay: var(--delay, 0s);
   z-index: 0;
@@ -824,8 +824,8 @@ body.light-mode .toolbox-float {
   max-width: 2500px;
   max-height: 2500px;
   border-radius: 50%;
-  background: radial-gradient(ellipse at top, rgba(255,184,0,0.15) 0%, rgba(255,184,0,0.05) 15%, rgba(10,10,10,0.95) 45%, transparent 70%);
-  box-shadow: 0 -30px 120px rgba(255,184,0,0.25);
+  background: radial-gradient(ellipse at top, rgba(232, 174, 60,0.15) 0%, rgba(232, 174, 60,0.05) 15%, rgba(10,10,10,0.95) 45%, transparent 70%);
+  box-shadow: 0 -30px 120px rgba(232, 174, 60,0.25);
   animation: earth-approach 25s ease-in-out infinite alternate;
   pointer-events: none;
   z-index: 1;
@@ -912,7 +912,7 @@ body.light-mode .toolbox-float {
 
   .bottom-nav-item.active .bottom-nav-icon svg {
     stroke: var(--accent);
-    filter: drop-shadow(0 0 6px rgba(255, 184, 0, 0.4));
+    filter: drop-shadow(0 0 6px rgba(232, 174, 60, 0.4));
   }
 
   .bottom-nav-label {
@@ -937,7 +937,7 @@ body.light-mode .toolbox-float {
     height: 3px;
     border-radius: 50%;
     background: var(--accent);
-    box-shadow: 0 0 6px rgba(255, 184, 0, 0.6);
+    box-shadow: 0 0 6px rgba(232, 174, 60, 0.6);
   }
 
   .theme-sheet-overlay {
@@ -1004,8 +1004,8 @@ body.light-mode .toolbox-float {
   }
 
   .theme-option.active {
-    background: rgba(255, 184, 0, 0.09);
-    border-color: rgba(255, 184, 0, 0.3);
+    background: rgba(232, 174, 60, 0.09);
+    border-color: rgba(232, 174, 60, 0.3);
   }
 
   .theme-dot {

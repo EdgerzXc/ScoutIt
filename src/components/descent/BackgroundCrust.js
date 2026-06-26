@@ -89,7 +89,7 @@ export default function BackgroundCrust() {
         }
         pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
         const pMat = new THREE.PointsMaterial({
-          color: 0xFFB800, size: 2.0, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending
+          color: 0xE8AE3C, size: 2.0, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending
         });
         const packets = new THREE.Points(pGeo, pMat);
         scene.add(packets);
@@ -147,7 +147,7 @@ export default function BackgroundCrust() {
         
         // A dazzling gold moon in the sky!
         const moonGeo = new THREE.SphereGeometry(3.5, 32, 32);
-        const moonMat = new THREE.MeshBasicMaterial({ color: 0xFFC929 });
+        const moonMat = new THREE.MeshBasicMaterial({ color: 0xF7C64E });
         const moon = new THREE.Mesh(moonGeo, moonMat);
         moon.position.set(-35, 25, -20); // Moon in the background sky
         scene.add(moon);
@@ -156,7 +156,7 @@ export default function BackgroundCrust() {
         // Soft golden lighting
         const ambientLight = new THREE.AmbientLight(0xFFFFFF, 0.15); // Slight base visibility
         // Position the light IN FRONT of the city (z: 20) so it illuminates the faces we see!
-        const moonLight = new THREE.PointLight(0xFFC929, 3.0, 200); 
+        const moonLight = new THREE.PointLight(0xF7C64E, 3.0, 200); 
         moonLight.position.set(-20, 30, 20); 
         scene.add(ambientLight, moonLight);
 
@@ -174,7 +174,7 @@ export default function BackgroundCrust() {
            group.position.set(x, surfaceY, 0);
            
            // Unique material for the glowing windows
-           const reactMat = new THREE.MeshBasicMaterial({ color: 0xFFB800, transparent: true, opacity: 0.05 });
+           const reactMat = new THREE.MeshBasicMaterial({ color: 0xE8AE3C, transparent: true, opacity: 0.05 });
            disposables.push(reactMat);
 
            if (type < 0.4) {
@@ -275,7 +275,7 @@ export default function BackgroundCrust() {
         });
         rootLinesGeo.setAttribute('position', new THREE.Float32BufferAttribute(rootLinesPos, 3));
         const rootLinesMat = new THREE.LineBasicMaterial({ 
-          color: 0x7A5C00, transparent: true, opacity: 0.3, blending: THREE.AdditiveBlending 
+          color: 0x6E531A, transparent: true, opacity: 0.3, blending: THREE.AdditiveBlending 
         });
         scene.add(new THREE.LineSegments(rootLinesGeo, rootLinesMat));
         disposables.push(rootLinesGeo, rootLinesMat);
@@ -288,7 +288,7 @@ export default function BackgroundCrust() {
           const lineGeo = new THREE.BufferGeometry().setFromPoints(pts);
           
           const brightMat = new THREE.LineBasicMaterial({ 
-            color: 0xFFB800, 
+            color: 0xE8AE3C, 
             transparent: true, 
             opacity: 0.25,
             blending: THREE.AdditiveBlending 

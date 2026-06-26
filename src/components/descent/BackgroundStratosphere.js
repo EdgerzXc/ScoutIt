@@ -68,7 +68,7 @@ export default function BackgroundStratosphere() {
       <div className="absolute inset-0 s2-stars">
         {STARS.map((s, i) => (
           <div key={i} className="absolute rounded-full"
-            style={{ left: s.left, top: s.top, width: s.size, height: s.size, opacity: s.o, background: "#FFB800" }} />
+            style={{ left: s.left, top: s.top, width: s.size, height: s.size, opacity: s.o, background: "#E8AE3C" }} />
         ))}
       </div>
 
@@ -78,7 +78,7 @@ export default function BackgroundStratosphere() {
           top: "44%", left: "50%",
           width: "200vw", height: "12vh",
           transform: "translateX(-50%)",
-          background: "linear-gradient(to top, rgba(255,184,0,0.85) 0%, rgba(255,184,0,0.15) 55%, transparent 100%)",
+          background: "linear-gradient(to top, rgba(232, 174, 60,0.85) 0%, rgba(232, 174, 60,0.15) 55%, transparent 100%)",
           borderRadius: "50%",
           filter: "blur(12px)",
           mixBlendMode: "screen",
@@ -94,8 +94,8 @@ export default function BackgroundStratosphere() {
               style={{
                 width: "100%", height: "100%",
                 background: ln.warm
-                  ? `linear-gradient(to right, transparent 0%, rgba(255,184,0,${ln.opacity}) 35%, transparent 100%)`
-                  : `linear-gradient(to right, transparent 0%, rgba(255,201,41,${ln.opacity}) 35%, transparent 100%)`,
+                  ? `linear-gradient(to right, transparent 0%, rgba(232, 174, 60,${ln.opacity}) 35%, transparent 100%)`
+                  : `linear-gradient(to right, transparent 0%, rgba(247, 198, 78,${ln.opacity}) 35%, transparent 100%)`,
                 animationDuration: `${ln.dur}s`,
                 animationDelay: `${ln.delay}s`,
               }}
@@ -116,7 +116,7 @@ export default function BackgroundStratosphere() {
               width: c.width,
               height: c.height,
               filter: `blur(${Math.round(c.blur * 0.6)}px)`,
-              background: "radial-gradient(ellipse 70% 55% at 50% 50%, rgba(15,10,0,0.95) 0%, rgba(255,184,0,0.20) 45%, transparent 72%)",
+              background: "radial-gradient(ellipse 70% 55% at 50% 50%, rgba(15,10,0,0.95) 0%, rgba(232, 174, 60,0.20) 45%, transparent 72%)",
               animationDuration: `${c.dur}s`,
               animationDelay: `${c.delay}s`,
               transformOrigin: "50% 50%",
@@ -125,7 +125,7 @@ export default function BackgroundStratosphere() {
         ))}
         {/* Full-screen gold flash at peak punch-through */}
         <div className="absolute inset-0 s2-cloud-flash"
-          style={{ background: "rgba(255,184,0,0.55)", pointerEvents: "none" }} />
+          style={{ background: "rgba(232, 174, 60,0.55)", pointerEvents: "none" }} />
       </div>
 
       {/* ── CITY / LAND ───────────────────────────────────────── */}
@@ -157,7 +157,7 @@ export default function BackgroundStratosphere() {
         style={{
           width: "120vw", height: "55vh",
           transform: "translateX(-50%)",
-          background: "radial-gradient(ellipse 95% 75% at 50% 100%, rgba(255,184,0,0.35) 0%, rgba(255,130,0,0.15) 50%, transparent 75%)",
+          background: "radial-gradient(ellipse 95% 75% at 50% 100%, rgba(232, 174, 60,0.35) 0%, rgba(255,130,0,0.15) 50%, transparent 75%)",
           filter: "blur(32px)",
         }}
       />

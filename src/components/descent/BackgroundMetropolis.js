@@ -129,7 +129,7 @@ function makeFacadeCanvas(fw, fh, density, seed, type, isMobile) {
     g.addColorStop(0.00, "#030303");    // deep black zenith
     g.addColorStop(0.60, "#080808");    // dark grey
     g.addColorStop(0.85, "#332400");    // dark gold band
-    g.addColorStop(1.00, "#FFB800");    // glowing gold horizon catch
+    g.addColorStop(1.00, "#E8AE3C");    // glowing gold horizon catch
     ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
 
     /* faint vertical sheen variation across panels */
@@ -149,7 +149,7 @@ function makeFacadeCanvas(fw, fh, density, seed, type, isMobile) {
       const s = seed + r * 131 + c * 17;
       if (rnd(s) < density * 0.45) {
         const br = (0.50 + rnd(s * 7) * 0.5).toFixed(2);
-        ctx.fillStyle = `rgba(255,184,0,${br})`; // True ScoutIt Gold
+        ctx.fillStyle = `rgba(232, 174, 60,${br})`; // True ScoutIt Gold
         ctx.fillRect(c * CW + 1, r * CH + 1, CW - 2, CH - 2);
       }
     }
@@ -159,18 +159,18 @@ function makeFacadeCanvas(fw, fh, density, seed, type, isMobile) {
     ctx.fillRect(0, 0, W, H);
     /* subtle gold wash on lower third */
     const wg = ctx.createLinearGradient(0, H * 0.65, 0, H);
-    wg.addColorStop(0, "rgba(255,184,0,0)");
-    wg.addColorStop(1, "rgba(255,184,0,0.15)");
+    wg.addColorStop(0, "rgba(232, 174, 60,0)");
+    wg.addColorStop(1, "rgba(232, 174, 60,0.15)");
     ctx.fillStyle = wg; ctx.fillRect(0, 0, W, H);
     /* floor slab lines */
-    ctx.fillStyle = "rgba(255,184,0,0.06)";
+    ctx.fillStyle = "rgba(232, 174, 60,0.06)";
     for (let r = 0; r <= rows; r++) ctx.fillRect(0, r * CH, W, 1);
     /* punched windows, lit warm */
     for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
       const s = seed + r * 211 + c * 29;
       if (rnd(s) < density) {
         const br = (0.6 + rnd(s * 7) * 0.4).toFixed(2);
-        ctx.fillStyle = `rgba(255,184,0,${br})`; // True ScoutIt Gold
+        ctx.fillStyle = `rgba(232, 174, 60,${br})`; // True ScoutIt Gold
       } else {
         ctx.fillStyle = "rgba(5,5,5,0.95)";
       }
@@ -225,10 +225,10 @@ export default function BackgroundMetropolis() {
 
       /* LIGHTS — pure gold and pitch black */
       scene.add(new THREE.HemisphereLight(0x111111, 0x1a1500, 1.5)); // Dark grey/gold hemisphere
-      const sun = new THREE.DirectionalLight(0xFFB800, 1.80); // Bright pure gold horizon
+      const sun = new THREE.DirectionalLight(0xE8AE3C, 1.80); // Bright pure gold horizon
       sun.position.set(30, 40, -180); scene.add(sun);
       /* strong gold rim fill from down the avenue */
-      const sunFill = new THREE.DirectionalLight(0x7A5C00, 0.80);
+      const sunFill = new THREE.DirectionalLight(0x6E531A, 0.80);
       sunFill.position.set(0, 15, -200); scene.add(sunFill);
       scene.add(new THREE.AmbientLight(0x0d0d0d, 1.0)); // Pitch black ambient
 
@@ -282,7 +282,7 @@ export default function BackgroundMetropolis() {
         const dg = new THREE.PlaneGeometry(0.22, 7);
         const dm = isMobile
           ? new THREE.MeshBasicMaterial({ color: 0x221800 }) // Opaque dark gold, much cheaper
-          : new THREE.MeshBasicMaterial({ color: 0xFFB800, transparent: true, opacity: 0.15 }); // Glowing gold road lines
+          : new THREE.MeshBasicMaterial({ color: 0xE8AE3C, transparent: true, opacity: 0.15 }); // Glowing gold road lines
         const d  = new THREE.Mesh(dg, dm);
         d.rotation.x = -Math.PI/2;
         d.position.set(6.5, 0.06, rz); scene.add(d);
@@ -291,7 +291,7 @@ export default function BackgroundMetropolis() {
 
       /* STREET LAMPS */
       const lpMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.6 });
-      const lbMat = new THREE.MeshBasicMaterial({ color: 0xFFB800 });
+      const lbMat = new THREE.MeshBasicMaterial({ color: 0xE8AE3C });
       disposables.push(lpMat, lbMat);
       for (let lz = -120; lz < 160; lz += lampSpacing) {
         [-17, 17].forEach((sx) => {
@@ -468,7 +468,7 @@ export default function BackgroundMetropolis() {
 
       const goldTrim = (x, y, z, w, d, rot) => {
         const tg = new THREE.BoxGeometry(w + 0.4, 0.5, d + 0.4);
-        const tm = new THREE.MeshBasicMaterial({ color: 0xFFB800 });
+        const tm = new THREE.MeshBasicMaterial({ color: 0xE8AE3C });
         const tr = new THREE.Mesh(tg, tm);
         tr.position.set(x, y + 0.25, z); tr.rotation.y = rot;
         scene.add(tr); disposables.push(tg, tm);
@@ -565,7 +565,7 @@ export default function BackgroundMetropolis() {
           scene.add(mesh); disposables.push(geo);
           /* glowing crown ring */
           const cg = new THREE.CylinderGeometry(rB * 0.62, rB * 0.62, 0.8, 12);
-          const cm = new THREE.MeshBasicMaterial({ color: 0xFFB800 });
+          const cm = new THREE.MeshBasicMaterial({ color: 0xE8AE3C });
           const cr = new THREE.Mesh(cg, cm);
           cr.position.set(x, h + 0.4, z);
           scene.add(cr); disposables.push(cg, cm);
@@ -631,19 +631,19 @@ export default function BackgroundMetropolis() {
         goldTrim(0, hy, HERO_Z, topW, topW, 0);
         /* glowing gold crown ring */
         const crownGeo = new THREE.CylinderGeometry(topW * 0.5, topW * 0.5, 3.5, 18);
-        const crownMat = new THREE.MeshBasicMaterial({ color: 0xFFB800 });
+        const crownMat = new THREE.MeshBasicMaterial({ color: 0xE8AE3C });
         const crown = new THREE.Mesh(crownGeo, crownMat);
         crown.position.set(0, hy + 1.75, HERO_Z);
         scene.add(crown); disposables.push(crownGeo, crownMat);
         addAntenna(0, hy + 3.5, HERO_Z, hseed);
         /* dedicated beacon light + additive halo so it reads from far off */
         if (!isMobile) {
-          const heroLight = new THREE.PointLight(0xFFC929, 3.4, 460, 1.1);
+          const heroLight = new THREE.PointLight(0xF7C64E, 3.4, 460, 1.1);
           heroLight.position.set(0, hh * 0.7, HERO_Z + 36);
           scene.add(heroLight);
           const haloGeo = new THREE.PlaneGeometry(topW * 5.5, hh * 1.25);
           const haloMat = new THREE.MeshBasicMaterial({
-            color: 0xFFB800, transparent: true, opacity: 0.1,
+            color: 0xE8AE3C, transparent: true, opacity: 0.1,
             blending: THREE.AdditiveBlending, depthWrite: false, fog: false,
           });
           const halo = new THREE.Mesh(haloGeo, haloMat);

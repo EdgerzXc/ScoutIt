@@ -65,11 +65,11 @@ void main(){
   
   /* Tight threshold ensures most of the sky remains black */
   float cloud1 = smoothstep(0.35, 0.70, n1); 
-  c += vec3(0.48, 0.36, 0.0) * cloud1 * 1.5; // Muted gold (#7A5C00)
+  c += vec3(0.48, 0.36, 0.0) * cloud1 * 1.5; // Muted gold (#6E531A)
   
   /* Inner glowing gold filaments */
   float core = smoothstep(0.55, 0.85, n1);
-  c += vec3(1.0, 0.72, 0.0) * core * 2.5; // Primary gold (#FFB800)
+  c += vec3(1.0, 0.72, 0.0) * core * 2.5; // Primary gold (#E8AE3C)
 
   gl_FragColor=vec4(c,1.);
 }`;

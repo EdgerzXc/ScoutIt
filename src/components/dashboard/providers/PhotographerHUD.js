@@ -280,12 +280,12 @@ export default function PhotographerHUD({ projects, activeProjectId, setActivePr
               {/* Certifications Row */}
               <div className="flex flex-wrap gap-2 mb-6">
                 {certCaaDrone && (
-                  <span className="bg-[#1a1814] text-gold-accent border border-gold-accent/40 font-label-caps text-[9px] uppercase tracking-widest px-2 py-1 rounded flex items-center gap-1 shadow-[0_0_8px_rgba(255,184,0,0.1)]">
+                  <span className="bg-[#1a1814] text-gold-accent border border-gold-accent/40 font-label-caps text-[9px] uppercase tracking-widest px-2 py-1 rounded flex items-center gap-1 shadow-[0_0_8px_rgba(232, 174, 60,0.1)]">
                     <span className="text-[10px]">🚁</span> CAA Certified
                   </span>
                 )}
                 {certInsurance && (
-                  <span className="bg-[#1a1814] text-gold-accent border border-gold-accent/40 font-label-caps text-[9px] uppercase tracking-widest px-2 py-1 rounded flex items-center gap-1 shadow-[0_0_8px_rgba(255,184,0,0.1)]">
+                  <span className="bg-[#1a1814] text-gold-accent border border-gold-accent/40 font-label-caps text-[9px] uppercase tracking-widest px-2 py-1 rounded flex items-center gap-1 shadow-[0_0_8px_rgba(232, 174, 60,0.1)]">
                     <span className="text-[10px]">🛡️</span> Insured
                   </span>
                 )}

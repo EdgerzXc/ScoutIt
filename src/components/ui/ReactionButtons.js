@@ -204,7 +204,7 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
         }
 
         .reaction-tile:focus-visible {
-          outline: 1.5px solid var(--accent-bright, #ffc929);
+          outline: 1.5px solid var(--accent-bright, #F7C64E);
           outline-offset: 4px;
         }
 
@@ -245,17 +245,17 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
         }
 
         .reaction-tile:hover .shape-wrapper :global(svg) {
-          stroke: var(--accent-bright, #ffc929);
+          stroke: var(--accent-bright, #F7C64E);
           stroke-width: 3px;
-          filter: drop-shadow(0 0 6px rgba(255, 184, 0, 0.35));
+          filter: drop-shadow(0 0 6px rgba(232, 174, 60, 0.35));
         }
 
         /* Active states */
         .reaction-tile.active .shape-wrapper :global(svg) {
-          fill: #ffb800;
-          stroke: #ffb800;
+          fill: #E8AE3C;
+          stroke: #E8AE3C;
           stroke-width: 3px;
-          filter: drop-shadow(0 0 10px rgba(255, 184, 0, 0.4));
+          filter: drop-shadow(0 0 10px rgba(232, 174, 60, 0.4));
         }
 
         .reaction-tile.active .icon-overlay {
@@ -276,17 +276,17 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
         }
 
         .reaction-tile:hover .tile-label {
-          color: var(--accent-bright, #ffc929);
+          color: var(--accent-bright, #F7C64E);
         }
 
         .reaction-tile.active .tile-label {
-          color: #ffb800;
+          color: #E8AE3C;
         }
 
         /* Confirmation text */
         .confirm-text {
           font-family: var(--font-mono, monospace);
-          color: var(--accent, #ffb800);
+          color: var(--accent, #E8AE3C);
           letter-spacing: 0.1em;
           font-size: 11px;
           text-transform: uppercase;
@@ -294,7 +294,7 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
           text-align: center;
           opacity: 0;
           visibility: hidden;
-          text-shadow: 0 0 8px rgba(255, 184, 0, 0.3);
+          text-shadow: 0 0 8px rgba(232, 174, 60, 0.3);
           transform: translateY(4px);
           transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
@@ -350,8 +350,8 @@ export function ReactionBadge({ reactionType }) {
         .badge-svg-container :global(svg) {
           width: 100%;
           height: 100%;
-          fill: #ffb800;
-          stroke: #ffb800;
+          fill: #E8AE3C;
+          stroke: #E8AE3C;
           stroke-width: 1.5;
         }
 

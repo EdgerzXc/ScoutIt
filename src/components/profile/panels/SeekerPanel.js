@@ -11,7 +11,7 @@ export default function SeekerPanel({ savedCount = 0, isAnonymous = false }) {
     <section style={panelStyle}>
       <div style={panelHeader}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <Bookmark size={14} strokeWidth={1.5} color="#ffb800" />
+          <Bookmark size={14} strokeWidth={1.5} color="#E8AE3C" />
           <span style={panelLabel}>Seeker</span>
         </div>
         <span style={privateBadge}>Private</span>
@@ -19,12 +19,12 @@ export default function SeekerPanel({ savedCount = 0, isAnonymous = false }) {
 
       <div style={statsRow}>
         <div style={statCard}>
-          <Bookmark size={14} strokeWidth={1.5} color="#ffb800" style={{ marginBottom: 6 }} />
+          <Bookmark size={14} strokeWidth={1.5} color="#E8AE3C" style={{ marginBottom: 6 }} />
           <span style={statValue}>{savedCount}</span>
           <span style={statLabel}>Saved Properties</span>
         </div>
         <div style={statCard}>
-          <Search size={14} strokeWidth={1.5} color="rgba(255,184,0,0.4)" style={{ marginBottom: 6 }} />
+          <Search size={14} strokeWidth={1.5} color="rgba(232, 174, 60,0.4)" style={{ marginBottom: 6 }} />
           <span style={{ ...statValue, color: "var(--text-secondary)" }}>—</span>
           <span style={statLabel}>Active Searches</span>
         </div>
@@ -42,8 +42,8 @@ export default function SeekerPanel({ savedCount = 0, isAnonymous = false }) {
           style={{
             fontFamily: "var(--font-body)",
             fontSize: 11,
-            color: "rgba(255,184,0,0.35)",
-            border: "1px solid rgba(255,184,0,0.15)",
+            color: "rgba(232, 174, 60,0.35)",
+            border: "1px solid rgba(232, 174, 60,0.15)",
             borderRadius: 20,
             padding: "4px 12px",
             cursor: "not-allowed",
@@ -86,7 +86,7 @@ const panelLabel = {
   fontWeight: 700,
   letterSpacing: "0.14em",
   textTransform: "uppercase",
-  color: "#ffb800",
+  color: "#E8AE3C",
 };
 
 const privateBadge = {
@@ -144,7 +144,7 @@ const wishlistRow = {
 const anonNotice = {
   marginTop: 12,
   padding: "8px 12px",
-  background: "rgba(255,184,0,0.04)",
-  border: "1px solid rgba(255,184,0,0.1)",
+  background: "rgba(232, 174, 60,0.04)",
+  border: "1px solid rgba(232, 174, 60,0.1)",
   borderRadius: 4,
 };

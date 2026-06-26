@@ -99,14 +99,14 @@ export default function SeekerPricingPage() {
               key={tier.name} 
               className={`flex flex-col rounded-2xl p-8 relative overflow-hidden transition-all duration-500 cursor-default ${
                 tier.highlight 
-                  ? 'bg-gradient-to-br from-[#1A1814] to-[#0A0908] border border-gold-accent/50 shadow-[0_0_40px_rgba(255,184,0,0.15)] hover:shadow-[0_0_60px_rgba(255,184,0,0.25)] hover:border-gold-accent transform hover:-translate-y-2' 
+                  ? 'bg-gradient-to-br from-[#1A1814] to-[#0A0908] border border-gold-accent/50 shadow-[0_0_40px_rgba(232, 174, 60,0.15)] hover:shadow-[0_0_60px_rgba(232, 174, 60,0.25)] hover:border-gold-accent transform hover:-translate-y-2' 
                   : 'bg-surface-alt/40 backdrop-blur-md border border-surface-variant/50 hover:bg-surface-alt/60 hover:border-text-primary/30'
               }`}
             >
               {tier.highlight && (
                 <>
-                  <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-gold-accent to-[#FFC929] shadow-[0_0_15px_rgba(255,184,0,0.8)]"></div>
-                  <div className="absolute top-4 right-4 bg-gold-accent text-[#0A0908] text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-[0_0_10px_rgba(255,184,0,0.3)]">
+                  <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-gold-accent to-[#F7C64E] shadow-[0_0_15px_rgba(232, 174, 60,0.8)]"></div>
+                  <div className="absolute top-4 right-4 bg-gold-accent text-[#0A0908] text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-[0_0_10px_rgba(232, 174, 60,0.3)]">
                     Most Popular
                   </div>
                   <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-gold-accent/10 rounded-full blur-3xl"></div>
@@ -141,17 +141,17 @@ export default function SeekerPricingPage() {
               </ul>
 
               <div className="mt-auto">
-                <div
-                  aria-disabled="true"
-                  title="Subscriptions launch soon"
-                  className={`block w-full text-center py-4 rounded font-working-title text-sm uppercase tracking-widest font-bold cursor-not-allowed select-none ${
+                <button
+                  type="button"
+                  onClick={() => window.dispatchEvent(new CustomEvent("scoutit:open-waitlist", { detail: { role: "seeker", tier: tier.name, source: "pricing-seeker" } }))}
+                  className={`block w-full text-center py-4 rounded font-working-title text-sm uppercase tracking-widest font-bold cursor-pointer transition-all ${
                     tier.highlight
-                      ? 'bg-gold-accent/30 text-[#0A0908]/70 border border-gold-accent/40'
-                      : 'bg-transparent border border-surface-variant/60 text-text-muted'
+                      ? 'bg-gold-accent text-[#0A0908] hover:bg-[#F7C64E]'
+                      : 'bg-transparent border border-gold-accent/40 text-gold-accent hover:bg-gold-accent/10'
                   }`}
                 >
-                  Coming Soon
-                </div>
+                  Join the Waitlist
+                </button>
               </div>
             </div>
           ))}

@@ -27,7 +27,7 @@
   font-size: 22px;
   font-weight: 500;
   letter-spacing: 0.08em;
-  color: #ffb800; /* --accent */
+  color: #E8AE3C; /* --accent */
   text-transform: uppercase;
   margin-bottom: 48px;
   padding-left: 8px;
@@ -53,13 +53,13 @@
 }
 
 .navLink:hover {
-  color: #ffb800;
-  background: rgba(255, 184, 0, 0.05);
+  color: #E8AE3C;
+  background: rgba(232, 174, 60, 0.05);
 }
 
 .navLink.active {
   color: #0e0e0e;
-  background: #ffb800;
+  background: #E8AE3C;
   font-weight: 600;
 }
 
@@ -117,7 +117,7 @@
 }
 
 .spotlightMatrix::-webkit-scrollbar-thumb {
-  background: rgba(255, 184, 0, 0.2);
+  background: rgba(232, 174, 60, 0.2);
 }
 
 .spotlightCard {
@@ -135,14 +135,14 @@
 }
 
 .spotlightCard:hover {
-  border-color: rgba(255, 184, 0, 0.3);
+  border-color: rgba(232, 174, 60, 0.3);
 }
 
 .spotlightCard.spotlight {
   width: 580px;
   flex: 0 0 580px;
-  border-color: #ffb800;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 24px rgba(255, 184, 0, 0.08);
+  border-color: #E8AE3C;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 24px rgba(232, 174, 60, 0.08);
 }
 
 /* Inside Card Layout split */
@@ -189,7 +189,7 @@
   padding: 4px 10px;
   border-radius: var(--radius-sm);
   font-size: 10px;
-  color: #ffb800;
+  color: #E8AE3C;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -250,7 +250,7 @@
 
 .intelTitle {
   font-size: 10px;
-  color: #ffb800;
+  color: #E8AE3C;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   font-weight: 600;
@@ -304,9 +304,9 @@
 }
 
 .spotlightIntentBtn.active {
-  background: rgba(255, 184, 0, 0.12);
-  color: #ffb800;
-  border-color: rgba(255, 184, 0, 0.28);
+  background: rgba(232, 174, 60, 0.12);
+  color: #E8AE3C;
+  border-color: rgba(232, 174, 60, 0.28);
 }
 
 .chronologicalNewsRow {
@@ -350,7 +350,7 @@
   font-size: 9px;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: #ffb800;
+  color: #E8AE3C;
   margin-bottom: 10px;
 }
 
@@ -409,7 +409,7 @@
 
 .contextCell:hover {
   background: #1e1e1e;
-  border-color: rgba(255, 184, 0, 0.3);
+  border-color: rgba(232, 174, 60, 0.3);
 }
 
 .contextLabelBlock {
@@ -431,7 +431,7 @@
 }
 
 .contextArrow {
-  color: #ffb800;
+  color: #E8AE3C;
   font-size: 14px;
   font-weight: bold;
 }
@@ -505,7 +505,7 @@
 .drawerCloseBtnText {
   background: transparent;
   border: none;
-  color: #ffb800;
+  color: #E8AE3C;
   font-family: var(--font-body);
   font-size: 12px;
   font-weight: 600;
@@ -545,7 +545,7 @@
 
 .briefProfileNum {
   font-size: 11px;
-  color: #ffb800;
+  color: #E8AE3C;
   font-family: var(--font-mono);
 }
 
@@ -667,8 +667,8 @@
 }
 
 .discover-briefing-btn:hover {
-  background: rgba(255, 184, 0, 0.08) !important;
-  border-color: #ffb800 !important;
+  background: rgba(232, 174, 60, 0.08) !important;
+  border-color: #E8AE3C !important;
 }
 
 /* ── Top bar: title + jump box ── */
@@ -714,8 +714,8 @@
   transition: all var(--transition);
 }
 .modeJumpBox:hover {
-  border-color: rgba(255, 184, 0, 0.5);
-  background: rgba(255, 184, 0, 0.06);
+  border-color: rgba(232, 174, 60, 0.5);
+  background: rgba(232, 174, 60, 0.06);
 }
 .modeJumpBox .jumpHere {
   font-family: var(--font-mono);
@@ -740,8 +740,8 @@
 
 /* Active region cell + empty news state */
 .contextCell.regionActive {
-  border-color: rgba(255, 184, 0, 0.6);
-  background: rgba(255, 184, 0, 0.08);
+  border-color: rgba(232, 174, 60, 0.6);
+  background: rgba(232, 174, 60, 0.08);
 }
 .contextCell.regionActive .contextName { color: var(--accent); }
 .newsEmpty {
@@ -767,7 +767,7 @@
   transition: border-color var(--transition);
 }
 .regionSearch::placeholder { color: rgba(240, 237, 232, 0.35); }
-.regionSearch:focus { outline: none; border-color: rgba(255, 184, 0, 0.5); }
+.regionSearch:focus { outline: none; border-color: rgba(232, 174, 60, 0.5); }
 
 
 /* ══════════════════════════════════════

@@ -12,7 +12,7 @@ export default function ResearcherPanel({ data, isAnonymous = false }) {
     <section style={panelStyle}>
       <div style={panelHeader}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <BookOpen size={14} strokeWidth={1.5} color="#ffb800" />
+          <BookOpen size={14} strokeWidth={1.5} color="#E8AE3C" />
           <span style={panelLabel}>Researcher</span>
         </div>
         {isAnonymous && (
@@ -30,22 +30,22 @@ export default function ResearcherPanel({ data, isAnonymous = false }) {
       ) : (
         <div style={statsRow}>
           <div style={statCard}>
-            <BookOpen size={14} strokeWidth={1.5} color="#ffb800" style={{ marginBottom: 6 }} />
+            <BookOpen size={14} strokeWidth={1.5} color="#E8AE3C" style={{ marginBottom: 6 }} />
             <span style={statValue}>{data.intel_submissions ?? 0}</span>
             <span style={statLabel}>Submissions</span>
           </div>
           <div style={statCard}>
-            <CheckCircle size={14} strokeWidth={1.5} color="#ffb800" style={{ marginBottom: 6 }} />
+            <CheckCircle size={14} strokeWidth={1.5} color="#E8AE3C" style={{ marginBottom: 6 }} />
             <span style={statValue}>{data.accepted_submissions ?? 0}</span>
             <span style={statLabel}>Accepted</span>
           </div>
           <div style={statCard}>
-            <Award size={14} strokeWidth={1.5} color="#ffb800" style={{ marginBottom: 6 }} />
+            <Award size={14} strokeWidth={1.5} color="#E8AE3C" style={{ marginBottom: 6 }} />
             <span style={statValue}>{Number(data.credibility_score ?? 0).toFixed(1)}</span>
             <span style={statLabel}>Credibility</span>
           </div>
           <div style={statCard}>
-            <Zap size={14} strokeWidth={1.5} color="#ffb800" style={{ marginBottom: 6 }} />
+            <Zap size={14} strokeWidth={1.5} color="#E8AE3C" style={{ marginBottom: 6 }} />
             <span style={statValue}>{data.connects_earned_from_research ?? 0}</span>
             <span style={statLabel}>Connects Earned</span>
           </div>
@@ -75,7 +75,7 @@ const panelLabel = {
   fontWeight: 700,
   letterSpacing: "0.14em",
   textTransform: "uppercase",
-  color: "#ffb800",
+  color: "#E8AE3C",
 };
 
 const anonBadge = {
@@ -139,7 +139,7 @@ const emptyText = {
 const emptyCta = {
   fontFamily: "var(--font-body)",
   fontSize: 12,
-  color: "#ffb800",
+  color: "#E8AE3C",
   letterSpacing: "0.06em",
   textDecoration: "underline",
   textUnderlineOffset: 3,

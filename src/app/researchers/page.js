@@ -125,7 +125,7 @@ export default function ResearchersPage() {
       <Footer />
 
       <style>{`
-        .coming-soon-banner { background: linear-gradient(135deg,rgba(255,184,0,.08) 0%,rgba(255,184,0,.03) 100%); border: .5px solid var(--accent-border); border-radius: 6px; padding: 16px 22px; margin-bottom: 32px; }
+        .coming-soon-banner { background: linear-gradient(135deg,rgba(232, 174, 60,.08) 0%,rgba(232, 174, 60,.03) 100%); border: .5px solid var(--accent-border); border-radius: 6px; padding: 16px 22px; margin-bottom: 32px; }
         .coming-soon-inner { display: flex; align-items: flex-start; gap: 14px; }
         .coming-soon-badge { background: var(--accent); color: #0e0e0e; font-size: 9px; font-weight: 700; letter-spacing: .12em; padding: 4px 10px; border-radius: 3px; white-space: nowrap; flex-shrink: 0; margin-top: 2px; }
         .coming-soon-text { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
@@ -160,9 +160,9 @@ export default function ResearchersPage() {
         .tier-2-card { border-color: #a5c2d9 !important; }
         .tier-2-card .general-tier-badge-label { background: linear-gradient(135deg,#a5c2d9 0%,#eef3f7 100%); color: #0e0e0e; }
         .tier-2-card .broker-location { color: #a5c2d9; }
-        .tier-3-card { border-color: #ffb800 !important; }
-        .tier-3-card .general-tier-badge-label { background: linear-gradient(135deg,#ffb800 0%,#f7ebd3 100%); color: #0e0e0e; }
-        .tier-3-card .broker-location { color: #ffb800; }
+        .tier-3-card { border-color: #E8AE3C !important; }
+        .tier-3-card .general-tier-badge-label { background: linear-gradient(135deg,#E8AE3C 0%,#f7ebd3 100%); color: #0e0e0e; }
+        .tier-3-card .broker-location { color: #E8AE3C; }
         @keyframes diamondGlow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
       `}</style>
     </div>

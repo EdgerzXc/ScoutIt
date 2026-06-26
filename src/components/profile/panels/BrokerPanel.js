@@ -11,7 +11,7 @@ function RatingBar({ label, value, max = 100 }) {
         <span style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "var(--text-secondary)", letterSpacing: "0.04em" }}>
           {label}
         </span>
-        <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#ffb800" }}>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#E8AE3C" }}>
           {pct.toFixed(0)}%
         </span>
       </div>
@@ -20,7 +20,7 @@ function RatingBar({ label, value, max = 100 }) {
           style={{
             height: "100%",
             width: `${pct}%`,
-            background: "linear-gradient(90deg, #7a5c00, #ffb800)",
+            background: "linear-gradient(90deg, #6E531A, #E8AE3C)",
             borderRadius: 2,
             transition: "width 0.6s cubic-bezier(0.4,0,0.2,1)",
           }}
@@ -41,7 +41,7 @@ export default function BrokerPanel({ data, isPublic = false }) {
     <section style={panelStyle}>
       <div style={panelHeader}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <Briefcase size={14} strokeWidth={1.5} color="#ffb800" />
+          <Briefcase size={14} strokeWidth={1.5} color="#E8AE3C" />
           <span style={panelLabel}>Broker</span>
         </div>
         {!isPublic && data?.profile_views_this_month != null && (
@@ -67,7 +67,7 @@ export default function BrokerPanel({ data, isPublic = false }) {
           {/* Scout Rating */}
           <div style={metricBlock}>
             <div style={{ display: "flex", alignItems: "flex-end", gap: 10, marginBottom: 16 }}>
-              <span style={{ fontFamily: "Georgia, serif", fontSize: 48, color: "#ffb800", lineHeight: 1 }}>
+              <span style={{ fontFamily: "Georgia, serif", fontSize: 48, color: "#E8AE3C", lineHeight: 1 }}>
                 {Number(data.scout_rating ?? 0).toFixed(1)}
               </span>
               <div style={{ display: "flex", flexDirection: "column", paddingBottom: 8 }}>
@@ -80,8 +80,8 @@ export default function BrokerPanel({ data, isPublic = false }) {
                       key={i}
                       size={10}
                       strokeWidth={1.5}
-                      fill={i <= Math.round(data.scout_rating ?? 0) ? "#ffb800" : "transparent"}
-                      color="#ffb800"
+                      fill={i <= Math.round(data.scout_rating ?? 0) ? "#E8AE3C" : "transparent"}
+                      color="#E8AE3C"
                     />
                   ))}
                 </div>
@@ -102,7 +102,7 @@ export default function BrokerPanel({ data, isPublic = false }) {
                 style={{
                   fontFamily: "var(--font-body)",
                   fontSize: 11,
-                  color: "#ffb800",
+                  color: "#E8AE3C",
                   cursor: "pointer",
                   letterSpacing: "0.04em",
                   userSelect: "none",
@@ -119,18 +119,18 @@ export default function BrokerPanel({ data, isPublic = false }) {
           {/* Stats Row */}
           <div style={statsRow}>
             <div style={statCard}>
-              <CheckCircle size={14} strokeWidth={1.5} color="#ffb800" style={{ marginBottom: 6 }} />
+              <CheckCircle size={14} strokeWidth={1.5} color="#E8AE3C" style={{ marginBottom: 6 }} />
               <span style={statValue}>{data.verified_closures ?? 0}</span>
               <span style={statLabel}>Verified Closures</span>
             </div>
             <div style={statCard}>
-              <BarChart2 size={14} strokeWidth={1.5} color="#ffb800" style={{ marginBottom: 6 }} />
+              <BarChart2 size={14} strokeWidth={1.5} color="#E8AE3C" style={{ marginBottom: 6 }} />
               <span style={statValue}>{data.active_listings_count ?? 0}</span>
               <span style={statLabel}>Active Listings</span>
             </div>
             {!isPublic && (
               <div style={statCard}>
-                <Eye size={14} strokeWidth={1.5} color="#ffb800" style={{ marginBottom: 6 }} />
+                <Eye size={14} strokeWidth={1.5} color="#E8AE3C" style={{ marginBottom: 6 }} />
                 <span style={statValue}>{data.profile_views_this_month ?? 0}</span>
                 <span style={statLabel}>Profile Views</span>
               </div>
@@ -162,12 +162,12 @@ const panelLabel = {
   fontWeight: 700,
   letterSpacing: "0.14em",
   textTransform: "uppercase",
-  color: "#ffb800",
+  color: "#E8AE3C",
 };
 
 const metricBlock = {
-  background: "rgba(255,184,0,0.03)",
-  border: "1px solid rgba(255,184,0,0.08)",
+  background: "rgba(232, 174, 60,0.03)",
+  border: "1px solid rgba(232, 174, 60,0.08)",
   borderRadius: 4,
   padding: 16,
 };
@@ -223,7 +223,7 @@ const emptyText = {
 const emptyCta = {
   fontFamily: "var(--font-body)",
   fontSize: 12,
-  color: "#ffb800",
+  color: "#E8AE3C",
   letterSpacing: "0.06em",
   textDecoration: "underline",
   textUnderlineOffset: 3,

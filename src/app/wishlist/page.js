@@ -157,7 +157,7 @@ export default function WishlistPage() {
           font-size: 12px;
           text-transform: uppercase;
           letter-spacing: 3px;
-          color: #ffb800;
+          color: #E8AE3C;
           margin-bottom: 16px;
         }
 
@@ -196,8 +196,8 @@ export default function WishlistPage() {
           display: inline-block;
           margin-top: 32px;
           background: transparent;
-          border: 1px solid #ffb800;
-          color: #ffb800;
+          border: 1px solid #E8AE3C;
+          color: #E8AE3C;
           padding: 12px 28px;
           font-size: 13px;
           text-transform: uppercase;
@@ -208,7 +208,7 @@ export default function WishlistPage() {
         }
 
         .empty-cta:hover {
-          background: #ffb800;
+          background: #E8AE3C;
           color: #0e0e0e;
         }
 
@@ -238,7 +238,7 @@ export default function WishlistPage() {
           font-size: 11px;
           text-transform: uppercase;
           letter-spacing: 2px;
-          color: #ffb800;
+          color: #E8AE3C;
           margin: 0 0 4px;
           padding-bottom: 8px;
           border-bottom: 1px solid #262626;
@@ -288,7 +288,7 @@ export default function WishlistPage() {
         }
 
         .card-title:hover {
-          color: #ffb800;
+          color: #E8AE3C;
         }
 
         .card-meta {
@@ -301,9 +301,9 @@ export default function WishlistPage() {
         }
 
         .advisor-badge {
-          background: rgba(255, 184, 0, 0.1);
-          border: 1px solid rgba(255, 184, 0, 0.3);
-          color: #ffb800;
+          background: rgba(232, 174, 60, 0.1);
+          border: 1px solid rgba(232, 174, 60, 0.3);
+          color: #E8AE3C;
           font-size: 8px;
           font-weight: 700;
           letter-spacing: 1px;
@@ -329,8 +329,8 @@ export default function WishlistPage() {
           font-size: 10px;
           text-transform: uppercase;
           letter-spacing: 1px;
-          color: #ffb800;
-          border: 1px solid rgba(255, 184, 0, 0.3);
+          color: #E8AE3C;
+          border: 1px solid rgba(232, 174, 60, 0.3);
           padding: 4px 10px;
           white-space: nowrap;
         }

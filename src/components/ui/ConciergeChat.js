@@ -116,21 +116,21 @@ export default function ConciergeChat() {
           height: 56px;
           border-radius: 50%;
           background: var(--brand-overlay, rgba(12, 11, 9, 0.92));
-          border: 1px solid var(--accent, #ffb800);
-          color: var(--accent, #ffb800);
+          border: 1px solid var(--accent, #E8AE3C);
+          color: var(--accent, #E8AE3C);
           display: flex;
           align-items: center;
           justify-content: center;
           cursor: pointer;
           z-index: 9999;
-          box-shadow: 0 4px 20px rgba(0,0,0,0.4), 0 0 12px rgba(255,184,0,0.2);
+          box-shadow: 0 4px 20px rgba(0,0,0,0.4), 0 0 12px rgba(232, 174, 60,0.2);
           backdrop-filter: blur(8px);
           transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .concierge-fab:hover {
           transform: translateY(-4px) scale(1.05);
-          background: rgba(255, 184, 0, 0.1);
-          box-shadow: 0 8px 24px rgba(0,0,0,0.6), 0 0 16px rgba(255,184,0,0.3);
+          background: rgba(232, 174, 60, 0.1);
+          box-shadow: 0 8px 24px rgba(0,0,0,0.6), 0 0 16px rgba(232, 174, 60,0.3);
         }
         .concierge-fab.open {
           transform: scale(0.8) translateY(10px);
@@ -185,8 +185,8 @@ export default function ConciergeChat() {
           width: 6px;
           height: 6px;
           border-radius: 50%;
-          background: var(--accent, #ffb800);
-          box-shadow: 0 0 8px var(--accent, #ffb800);
+          background: var(--accent, #E8AE3C);
+          box-shadow: 0 0 8px var(--accent, #E8AE3C);
           animation: pulse-glow 2s infinite alternate;
         }
         .concierge-close {
@@ -230,7 +230,7 @@ export default function ConciergeChat() {
           line-height: 1.5;
         }
         .chat-bubble.user .bubble-text {
-          background: var(--accent, #ffb800);
+          background: var(--accent, #E8AE3C);
           color: #0e0e0e;
           border-bottom-right-radius: 2px;
           font-weight: 500;
@@ -247,7 +247,7 @@ export default function ConciergeChat() {
           width: 4px;
           height: 4px;
           margin: 0 2px;
-          background: var(--accent, #ffb800);
+          background: var(--accent, #E8AE3C);
           border-radius: 50%;
           animation: chat-bounce 1.4s infinite ease-in-out both;
         }
@@ -273,13 +273,13 @@ export default function ConciergeChat() {
         }
         .concierge-input:focus {
           outline: none;
-          border-color: var(--accent, #ffb800);
+          border-color: var(--accent, #E8AE3C);
         }
         .concierge-send {
           width: 44px;
           height: 44px;
           border-radius: 6px;
-          background: var(--accent, #ffb800);
+          background: var(--accent, #E8AE3C);
           color: #0e0e0e;
           border: none;
           display: flex;
@@ -297,8 +297,8 @@ export default function ConciergeChat() {
         }
 
         @keyframes pulse-glow {
-          0% { opacity: 0.6; box-shadow: 0 0 8px rgba(255,184,0,0.5); }
-          100% { opacity: 1; box-shadow: 0 0 16px rgba(255,184,0,1); }
+          0% { opacity: 0.6; box-shadow: 0 0 8px rgba(232, 174, 60,0.5); }
+          100% { opacity: 1; box-shadow: 0 0 16px rgba(232, 174, 60,1); }
         }
         @keyframes chat-bounce {
           0%, 80%, 100% { transform: scale(0); }

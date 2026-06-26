@@ -96,8 +96,8 @@ export default function AboutYouPage() {
                 <defs>
                   <radialGradient id="ayCore" cx="50%" cy="50%" r="50%">
                     <stop offset="0%" stopColor="#FFE9A8" />
-                    <stop offset="55%" stopColor="#FFB800" />
-                    <stop offset="100%" stopColor="#7A5C00" />
+                    <stop offset="55%" stopColor="#E8AE3C" />
+                    <stop offset="100%" stopColor="#6E531A" />
                   </radialGradient>
                 </defs>
 
@@ -243,7 +243,7 @@ export default function AboutYouPage() {
           letter-spacing: 0.32em;
           text-transform: uppercase;
           color: var(--accent);
-          text-shadow: 0 0 24px rgba(255, 184, 0, 0.5);
+          text-shadow: 0 0 24px rgba(232, 174, 60, 0.5);
         }
         .ay-title {
           font-family: var(--font-display);
@@ -283,7 +283,7 @@ export default function AboutYouPage() {
           letter-spacing: 0.28em;
           text-transform: uppercase;
           color: var(--accent);
-          text-shadow: 0 0 20px rgba(255, 184, 0, 0.45);
+          text-shadow: 0 0 20px rgba(232, 174, 60, 0.45);
         }
         .ay-section-title {
           font-family: var(--font-display);
@@ -307,18 +307,18 @@ export default function AboutYouPage() {
           display: flex;
           justify-content: center;
           padding: clamp(24px, 4vw, 48px);
-          border: 1px solid rgba(255, 184, 0, 0.16);
+          border: 1px solid rgba(232, 174, 60, 0.16);
           border-radius: 20px;
           background: radial-gradient(ellipse at center, rgba(20, 12, 4, 0.55) 0%, rgba(8, 5, 2, 0.4) 70%);
           backdrop-filter: blur(6px);
           -webkit-backdrop-filter: blur(6px);
-          box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5), inset 0 0 80px rgba(255, 184, 0, 0.04);
+          box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5), inset 0 0 80px rgba(232, 174, 60, 0.04);
         }
         .ay-schematic { width: 100%; display: flex; justify-content: center; }
         .ay-schematic svg { width: 100%; max-width: 500px; height: auto; }
-        .ay-ring { fill: none; stroke: rgba(255, 184, 0, 0.28); stroke-width: 1; }
-        .ay-ring-faint { stroke: rgba(255, 184, 0, 0.12); stroke-dasharray: 3 6; }
-        .ay-spoke { stroke: rgba(255, 184, 0, 0.22); stroke-width: 1; }
+        .ay-ring { fill: none; stroke: rgba(232, 174, 60, 0.28); stroke-width: 1; }
+        .ay-ring-faint { stroke: rgba(232, 174, 60, 0.12); stroke-dasharray: 3 6; }
+        .ay-spoke { stroke: rgba(232, 174, 60, 0.22); stroke-width: 1; }
         .ay-node { fill: #0b0805; stroke: var(--accent); stroke-width: 1.5; }
         .ay-node-label {
           fill: rgba(248, 238, 220, 0.82);
@@ -326,7 +326,7 @@ export default function AboutYouPage() {
           font-size: 12px;
           letter-spacing: 0.06em;
         }
-        .ay-you-glow { filter: drop-shadow(0 0 26px rgba(255, 184, 0, 0.7)); }
+        .ay-you-glow { filter: drop-shadow(0 0 26px rgba(232, 174, 60, 0.7)); }
         .ay-you-text {
           fill: #1a0f02;
           font-family: var(--font-display);
@@ -342,11 +342,11 @@ export default function AboutYouPage() {
           gap: 24px;
           align-items: flex-start;
           padding: 24px 4px;
-          border-bottom: 1px solid rgba(255, 184, 0, 0.1);
+          border-bottom: 1px solid rgba(232, 174, 60, 0.1);
           transition: border-color 0.25s ease, transform 0.25s ease;
         }
         .ay-layer:last-child { border-bottom: none; }
-        .ay-layer:hover { border-color: rgba(255, 184, 0, 0.3); transform: translateX(4px); }
+        .ay-layer:hover { border-color: rgba(232, 174, 60, 0.3); transform: translateX(4px); }
         .ay-layer-k {
           font-family: var(--font-mono);
           font-size: 14px;
@@ -354,7 +354,7 @@ export default function AboutYouPage() {
           color: var(--accent);
           padding-top: 4px;
           min-width: 32px;
-          text-shadow: 0 0 18px rgba(255, 184, 0, 0.5);
+          text-shadow: 0 0 18px rgba(232, 174, 60, 0.5);
         }
         .ay-layer-name {
           font-family: var(--font-display);
@@ -378,7 +378,7 @@ export default function AboutYouPage() {
         }
         .ay-role-card {
           background: rgba(16, 11, 4, 0.55);
-          border: 1px solid rgba(255, 184, 0, 0.16);
+          border: 1px solid rgba(232, 174, 60, 0.16);
           border-radius: 14px;
           padding: 28px 26px;
           backdrop-filter: blur(8px);
@@ -389,7 +389,7 @@ export default function AboutYouPage() {
         .ay-role-card:hover {
           border-color: var(--accent);
           transform: translateY(-4px);
-          box-shadow: 0 26px 60px rgba(0, 0, 0, 0.5), 0 0 36px rgba(255, 184, 0, 0.1);
+          box-shadow: 0 26px 60px rgba(0, 0, 0, 0.5), 0 0 36px rgba(232, 174, 60, 0.1);
         }
         .ay-role-title {
           font-family: var(--font-display);
@@ -411,7 +411,7 @@ export default function AboutYouPage() {
         .ay-cta-band {
           text-align: center;
           padding: clamp(72px, 10vw, 130px) clamp(24px, 6vw, 48px);
-          background: radial-gradient(ellipse 70% 100% at 50% 100%, rgba(255, 184, 0, 0.12), transparent 70%);
+          background: radial-gradient(ellipse 70% 100% at 50% 100%, rgba(232, 174, 60, 0.12), transparent 70%);
         }
         .ay-cta-title {
           font-family: var(--font-display);
@@ -438,7 +438,7 @@ export default function AboutYouPage() {
         .ay-cta-primary:hover {
           background: var(--accent-bright);
           border-color: var(--accent-bright);
-          box-shadow: 0 0 34px rgba(255, 184, 0, 0.45);
+          box-shadow: 0 0 34px rgba(232, 174, 60, 0.45);
           transform: translateY(-2px);
         }
         .ay-cta-secondary {
@@ -448,7 +448,7 @@ export default function AboutYouPage() {
           text-transform: uppercase;
           color: rgba(248, 238, 220, 0.75);
           padding: 17px 28px;
-          border: 1px solid rgba(255, 184, 0, 0.25);
+          border: 1px solid rgba(232, 174, 60, 0.25);
           border-radius: 4px;
           text-decoration: none;
           transition: all 0.2s ease;

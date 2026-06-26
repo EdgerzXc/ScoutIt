@@ -186,7 +186,7 @@ export default function BottomNav() {
               {[
                 { key: "dark", label: "Dark Mode", desc: "Cosmic default", dot: "#1e1e1e", dotBorder: "rgba(255,255,255,0.18)" },
                 { key: "light", label: "Light Mode", desc: "Bright, open reading", dot: "#f0ede8", dotBorder: "rgba(0,0,0,0.18)" },
-                { key: "high-contrast", label: "High Contrast", desc: "Maximum readability", dot: "#ffb800", dotBorder: "rgba(255,184,0,0.4)" },
+                { key: "high-contrast", label: "High Contrast", desc: "Maximum readability", dot: "#E8AE3C", dotBorder: "rgba(232, 174, 60,0.4)" },
               ].map(({ key, label, desc, dot, dotBorder }) => (
                 <button
                   key={key}
@@ -236,8 +236,8 @@ export default function BottomNav() {
           cursor: pointer;
         }
         .lite-toggle-row.active {
-          background: rgba(255, 184, 0, 0.08);
-          border-color: rgba(255, 184, 0, 0.3);
+          background: rgba(232, 174, 60, 0.08);
+          border-color: rgba(232, 174, 60, 0.3);
         }
         .lite-toggle-text { flex: 1; }
         .lite-switch {
@@ -251,8 +251,8 @@ export default function BottomNav() {
           transition: background 0.2s ease, border-color 0.2s ease;
         }
         .lite-switch.on {
-          background: var(--accent-bright, #ffc929);
-          border-color: var(--accent-bright, #ffc929);
+          background: var(--accent-bright, #F7C64E);
+          border-color: var(--accent-bright, #F7C64E);
         }
         .lite-knob {
           position: absolute;

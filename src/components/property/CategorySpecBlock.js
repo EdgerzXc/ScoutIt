@@ -166,10 +166,10 @@ function MinorLockSection({ labels, values }) {
         onClick={() => setOpen((v) => !v)}
         style={{ width: "100%", background: "#161616", border: "0.5px solid #262626", padding: "14px 20px", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", borderRadius: "2px" }}
       >
-        <span style={{ fontFamily: "'Courier New',monospace", fontSize: "10px", color: "#ffb800", letterSpacing: "0.18em", textTransform: "uppercase" }}>
+        <span style={{ fontFamily: "'Courier New',monospace", fontSize: "10px", color: "#E8AE3C", letterSpacing: "0.18em", textTransform: "uppercase" }}>
           Deeper Intelligence // {unlocked ? "Unlocked" : "Verified Scout"}
         </span>
-        <svg viewBox="0 0 10 6" width="10" height="6" fill="none" stroke="#ffb800" strokeWidth="1.5">
+        <svg viewBox="0 0 10 6" width="10" height="6" fill="none" stroke="#E8AE3C" strokeWidth="1.5">
           <path d={open ? "M1 5L5 1L9 5" : "M1 1L5 5L9 1"} />
         </svg>
       </button>
@@ -181,7 +181,7 @@ function MinorLockSection({ labels, values }) {
               <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", padding: "11px 0", borderBottom: i < labels.length - 1 ? "1px solid #262626" : "none", gap: "20px" }}>
                 <span style={{ fontFamily: "Georgia,serif", fontSize: "13px", color: "#c8c8c8" }}>{label}</span>
                 {value !== null ? (
-                  <span style={{ fontFamily: "'Courier New',monospace", fontSize: "12px", color: "#ffb800", letterSpacing: "0.04em", textAlign: "right" }}>{value}</span>
+                  <span style={{ fontFamily: "'Courier New',monospace", fontSize: "12px", color: "#E8AE3C", letterSpacing: "0.04em", textAlign: "right" }}>{value}</span>
                 ) : (
                   <span style={{ fontFamily: "'Courier New',monospace", fontSize: "11px", color: "#5a5a5a", letterSpacing: "0.08em", textAlign: "right" }}>Not recorded</span>
                 )}
@@ -200,8 +200,8 @@ function MinorLockSection({ labels, values }) {
             ))}
           </div>
           <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "14px", background: "rgba(22,22,22,0.88)", borderRadius: "0 0 2px 2px" }}>
-            <span style={{ fontFamily: "'Courier New',monospace", fontSize: "9px", color: "#ffb800", letterSpacing: "0.25em", textTransform: "uppercase" }}>Solar Tier Unlocks This</span>
-            <a href="/pricing/seeker" style={{ textDecoration: "none", fontFamily: "Georgia,serif", fontSize: "13px", color: "#0e0e0e", background: "#ffb800", border: "none", padding: "10px 24px", borderRadius: "2px", cursor: "pointer", letterSpacing: "0.04em" }}>
+            <span style={{ fontFamily: "'Courier New',monospace", fontSize: "9px", color: "#E8AE3C", letterSpacing: "0.25em", textTransform: "uppercase" }}>Solar Tier Unlocks This</span>
+            <a href="/pricing/seeker" style={{ textDecoration: "none", fontFamily: "Georgia,serif", fontSize: "13px", color: "#0e0e0e", background: "#E8AE3C", border: "none", padding: "10px 24px", borderRadius: "2px", cursor: "pointer", letterSpacing: "0.04em" }}>
               Unlock Full Intelligence →
             </a>
           </div>
@@ -236,7 +236,7 @@ export default function CategorySpecBlock({ property, extraLockedLabels = [] }) 
     <div style={{ marginBottom: "36px" }}>
       {/* Section header */}
       <div style={{ marginBottom: "20px" }}>
-        <div style={{ fontFamily: "'Courier New',monospace", fontSize: "10px", color: "#ffb800", letterSpacing: "0.22em", textTransform: "uppercase", marginBottom: "10px" }}>
+        <div style={{ fontFamily: "'Courier New',monospace", fontSize: "10px", color: "#E8AE3C", letterSpacing: "0.22em", textTransform: "uppercase", marginBottom: "10px" }}>
           {config.label}
         </div>
         <div style={{ height: "1px", background: "#262626" }} />

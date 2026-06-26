@@ -497,6 +497,34 @@ alter table property_leads enable row level security;
 create policy "dev open" on property_leads for all using (true);
 ```
 
+### `waitlist` — pre-launch founding-cohort signups
+
+> Captured by the live UI (hero "Founding access" link + every pricing
+> "Join the Waitlist" button) via `POST /api/waitlist`. The route currently
+> STUBS storage — it validates + logs but does not persist, because we don't
+> want PII in a dev-open DB during the security reset. After the reset:
+> 1. Run this SQL.
+> 2. In `src/app/api/waitlist/route.js`, uncomment the `supabase.from("waitlist").insert(...)` block and the `supabaseClient` import.
+> No frontend change is needed — `src/lib/waitlist.js` already sends `{ email, role, tier, source }` matching these columns.
+
+```sql
+create table waitlist (
+  id          uuid primary key default gen_random_uuid(),
+  email       text not null,
+  role        text,                                  -- seeker|owner|broker|photographer|researcher|null (bundles)
+  tier        text,                                  -- tier/bundle name the user clicked from
+  source      text,                                  -- hero | pricing-seeker | pricing-bundles | ...
+  created_at  timestamptz default now(),
+  unique (email)                                     -- one signup per email; route treats 23505 as success
+);
+
+alter table waitlist enable row level security;
+-- Intake is write-only from the server (service role). No public read of PII.
+create policy "dev open" on waitlist for all using (true);
+-- HARDEN AT LAUNCH: drop the dev-open policy; allow INSERT only via service role,
+-- and never expose SELECT to the anon key (emails are private).
+```
+
 ---
 
 ## After running all blocks — verification checklist
