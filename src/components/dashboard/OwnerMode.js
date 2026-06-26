@@ -332,16 +332,22 @@ export default function OwnerMode() {
               addToast("Reading your PDF...", "📄");
 
               try {
-                // Read PDF as text via FileReader
-                const text = await new Promise((resolve, reject) => {
-                  const reader = new FileReader();
-                  reader.onload = e => resolve(e.target.result);
-                  reader.onerror = reject;
-                  reader.readAsText(selectedFile);
+                // 1. Extract the real text layer from the PDF (server-side via unpdf).
+                //    FileReader.readAsText on a binary PDF returns garbage, so we
+                //    send the file to /api/ai/read-pdf which does proper extraction.
+                const pdfForm = new FormData();
+                pdfForm.append('file', selectedFile);
+                const pdfRes = await fetch('/api/ai/read-pdf', {
+                  method: 'POST',
+                  body: pdfForm
                 });
+                const pdfData = await pdfRes.json();
+                if (!pdfRes.ok) throw new Error(pdfData.error || 'Could not read PDF');
+                const text = pdfData.text;
 
                 addToast("AI is extracting property details...", "🧠");
 
+                // 2. Hand the extracted text to the schema-mapping AI.
                 const res = await fetch('/api/ai/assimilate', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },

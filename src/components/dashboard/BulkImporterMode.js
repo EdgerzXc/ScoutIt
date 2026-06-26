@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Papa from "papaparse";
 import { useDashboard } from "../../context/DashboardContext";
 
 export default function BulkImporterMode({ onClose }) {
@@ -9,39 +10,36 @@ export default function BulkImporterMode({ onClose }) {
   const [columns, setColumns] = useState([]);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // Simplified CSV Parser
+  // Robust CSV parsing via Papa.parse — correctly handles quoted fields,
+  // commas inside values (e.g. "Makati, Metro Manila"), and newlines in cells.
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     addToast(`Parsing ${file.name}...`, "⏳");
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const text = event.target.result;
-      const lines = text.split("\n").filter(line => line.trim() !== "");
-      if (lines.length < 2) {
-        addToast("CSV must contain headers and at least one row.", "❌");
-        return;
-      }
-      
-      const headers = lines[0].split(",").map(h => h.trim().replace(/"/g, ''));
-      setColumns(headers);
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: (results) => {
+        const headers = (results.meta.fields || []).filter(Boolean);
+        const rows = results.data
+          .filter((row) => Object.values(row).some((v) => v && v.trim() !== ""))
+          .map((row, i) => ({ ...row, _id: `row-${i}-${Date.now()}` }));
 
-      const rows = [];
-      for (let i = 1; i < lines.length; i++) {
-        const values = lines[i].split(",").map(v => v.trim().replace(/"/g, ''));
-        const rowData = {};
-        headers.forEach((header, index) => {
-          rowData[header] = values[index] || "";
-        });
-        // We ensure every row has a unique frontend ID
-        rowData._id = `row-${i}-${Date.now()}`;
-        rows.push(rowData);
-      }
-      setCsvData(rows);
-      addToast(`Successfully parsed ${rows.length} records.`, "✅");
-    };
-    reader.readAsText(file);
+        if (headers.length === 0 || rows.length === 0) {
+          addToast("CSV must contain headers and at least one row.", "❌");
+          return;
+        }
+
+        setColumns(headers);
+        setCsvData(rows);
+        addToast(`Successfully parsed ${rows.length} records.`, "✅");
+      },
+      error: (err) => {
+        console.error("[BulkImporter] CSV parse error:", err);
+        addToast(`Could not parse CSV: ${err.message}`, "❌");
+      },
+    });
   };
 
   const handleCellChange = (rowId, column, value) => {

@@ -67,9 +67,9 @@ export default function Footer() {
             © {new Date().getFullYear()} ScoutIt. Space Intelligence Platform. Philippine operations governed by RA 9646. All rights reserved.
           </p>
           <div className="footer-meta-links">
-            <a href="#">Terms of Service</a>
+            <Link href="/terms">Terms of Service</Link>
             <span className="meta-separator">•</span>
-            <a href="#">Privacy Policy</a>
+            <Link href="/privacy">Privacy Policy</Link>
           </div>
         </div>
       </div>

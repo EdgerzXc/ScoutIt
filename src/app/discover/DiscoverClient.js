@@ -250,7 +250,13 @@ export default function DiscoverClient() {
                     <div className="cardVisual">
                       <div
                         className="visualBg"
-                        style={{ background: `linear-gradient(to top, rgba(0,0,0,0.9), transparent), url('${property.image}')`, backgroundSize: "cover", backgroundPosition: "center" }}
+                        style={{
+                          background: property.image
+                            ? `linear-gradient(to top, rgba(0,0,0,0.9), transparent), url('${property.image}')`
+                            : "linear-gradient(135deg, #211c12, #0e0e0e)",
+                          backgroundSize: "cover",
+                          backgroundPosition: "center",
+                        }}
                       />
                       <div className="visualContent">
                         <div className="cardHeader">
@@ -276,15 +282,11 @@ export default function DiscoverClient() {
                             <span className="affinityValue">{property.location}</span>
                           </div>
                           <div className="affinityRow">
-                            <span className="affinityLabel">Zoning Profile</span>
-                            <span className="affinityValue">AAA Tier</span>
+                            <span className="affinityLabel">Category</span>
+                            <span className="affinityValue">{matchedCategory}</span>
                           </div>
                           <div className="affinityRow">
-                            <span className="affinityLabel">Affinity Rating</span>
-                            <span className="affinityValue">98.4%</span>
-                          </div>
-                          <div className="affinityRow">
-                            <span className="affinityLabel">Density Profile</span>
+                            <span className="affinityLabel">Layout</span>
                             <span className="affinityValue">{property.density}</span>
                           </div>
                         </div>
