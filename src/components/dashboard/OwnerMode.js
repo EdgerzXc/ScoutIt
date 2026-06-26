@@ -323,18 +323,63 @@ export default function OwnerMode() {
             </div>
           )}
 
-          <button 
-            className="w-full bg-gold-accent text-background font-working-title font-bold px-6 py-3 rounded hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity mt-4"
-            disabled={!selectedFile}
+          <button
+            className="w-full bg-gold-accent text-background font-working-title font-bold px-6 py-3 rounded hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity mt-4 flex items-center justify-center gap-2"
+            disabled={!selectedFile || isAssimilating}
             onClick={async () => {
-              if (selectedFile) {
-                await addConciergeListing(selectedFile.name);
+              if (!selectedFile) return;
+              setIsAssimilating(true);
+              addToast("Reading your PDF...", "📄");
+
+              try {
+                // Read PDF as text via FileReader
+                const text = await new Promise((resolve, reject) => {
+                  const reader = new FileReader();
+                  reader.onload = e => resolve(e.target.result);
+                  reader.onerror = reject;
+                  reader.readAsText(selectedFile);
+                });
+
+                addToast("AI is extracting property details...", "🧠");
+
+                const res = await fetch('/api/ai/assimilate', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    source: 'pdf_concierge',
+                    payload: [{ raw_text: text, filename: selectedFile.name }]
+                  })
+                });
+
+                const result = await res.json();
+                if (!res.ok) throw new Error(result.error || 'Assimilation failed');
+
+                const draft = result.drafts?.[0];
+                if (draft) {
+                  await addListing({
+                    title: draft.title || selectedFile.name,
+                    location: draft.location || '',
+                    space_category: draft.space_category || 'commercial',
+                    type: draft.space_category || 'commercial',
+                    price: draft.price || null,
+                    description: draft.description || '',
+                    media_link: draft.media_link || '',
+                    pipeline_status: 'pending',
+                    details: { ...draft.details, ai_confidence: draft.confidence, ai_gaps: draft.gaps }
+                  });
+                  addToast(`Draft created with ${Math.round((draft.confidence || 0) * 100)}% confidence. Review and complete missing fields.`, "✅");
+                }
+              } catch (err) {
+                console.error('[Concierge]', err);
+                addToast(`AI extraction failed: ${err.message}`, "❌");
+              } finally {
+                setIsAssimilating(false);
                 setSelectedFile(null);
                 setShowWizard(false);
               }
             }}
           >
-            Start AI Drafting
+            {isAssimilating ? <><span className="animate-spin">⚙️</span> Extracting...</> : "Start AI Drafting"}
           </button>
         </div>
       </div>
@@ -375,8 +420,26 @@ export default function OwnerMode() {
 
     const handleSubmitVideo = async () => {
       if (!selectedFile) return;
-      await addConciergeListing(`[Vault — Self-recorded] ${selectedFile.name}`);
-      addToast("Video received — we'll process it and notify you when your tour is live.", "success");
+      addToast("Uploading your video...", "🎬");
+
+      try {
+        const form = new FormData();
+        form.append('file', selectedFile);
+        form.append('owner_id', currentUser?.id || 'unknown');
+        form.append('property_id', activeListing?.id || '');
+
+        const res = await fetch('/api/storage/upload', { method: 'POST', body: form });
+        const result = await res.json();
+
+        if (!res.ok) throw new Error(result.error || 'Upload failed');
+
+        addToast("Video uploaded — your Spatial Tour will be ready in 3–5 days.", "✅");
+      } catch (err) {
+        console.error('[Vault upload]', err);
+        addToast(`Upload failed: ${err.message}`, "❌");
+        return;
+      }
+
       setSelectedFile(null);
       setVaultBuildOption(null);
       setShowWizard(false);

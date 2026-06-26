@@ -39,12 +39,29 @@ Pull these in only when the task touches their domain. The Founder always sits a
 | **Compliance / Legal (RA 9646 · RESA)** | Philippine real-estate law | Price renders only in "Your Move", only owner-verified; broker verification & authority; **STR legality (re-verify quarterly)**; the Financial Affordability layer needs legal clearance first; `[UNVERIFIED]` flags | Pricing display, broker authority, STR, money/affordability features, any legally-adjacent field |
 | **Monetization Economist** | The platform economy | Connects rules (granted resets monthly, no roll-over; earned+bought never expire; handshake spent-on-send, no refund); subscription tiers & packs (₱49/199/499/1,199); churned-owner escrow trap; **Scout Rating = closures only, never bought by tier** | Pricing, Connects spend, tier gating, bounty payouts, any revenue mechanic |
 | **AI / Cost Architect** | Smart AI without burning budget | The **Blueprint Rule** (send only headers + 3 rows to map, loop the rest in free JS); multi-LLM pipeline (Gemini cheap extract → Claude high-reasoning); Concierge/vector search gated to paid tiers; token-cost discipline | Bulk import, any LLM feature, Concierge, vector search, MCP server, draft generation |
-| **Brand / Visual Guardian** | The luxury look | ~95% dark / ~5% gold (count the gold), CSS tokens never raw hex, slow/intentional motion, localized glow (no "glowing fog"), the UFO stays, **no Tailwind on the public site** (dashboards may) | New components' visual design, animations, hero/centerpiece work, anything that could dilute the brand ratio |
-| **Performance / Mobile Engineer** | Speed on a phone | Mobile-first default; scroll-snap `y proximity` only (never `mandatory` + smooth); compositor-only animation (transform/opacity); CWV budgets; bundle/image weight; no WebGL in main site | Animations, heavy media, scroll behavior, perceived-perf, layout at 390px, bundle regressions |
+| **Brand / Visual Guardian** | The luxury look | ~95% dark / ~5% gold (count the gold; amber `#E8AE3C`), CSS tokens never raw hex, slow/intentional motion, localized glow (no "glowing fog"), the UFO stays. **Tailwind IS allowed** (used across the app); Three.js/WebGL backgrounds allowed — gated by Lite Mode | New components' visual design, animations, hero/centerpiece work, anything that could dilute the brand ratio |
+| **Performance / Mobile Engineer** | Speed on a phone | Mobile-first default; scroll-snap `y proximity` only (never `mandatory` + smooth); compositor-only animation (transform/opacity); CWV budgets; bundle/image weight; **WebGL/Three.js allowed but MUST degrade via Lite Mode** (`src/lib/liteMode.js`) — static fallback on low-end phones | Animations, heavy media, scroll behavior, perceived-perf, layout at 390px, bundle regressions |
 | **Ecosystem / Pro-Supply Advocate** | The B2B professionals | Brokers/photographers/researchers/event designers experience; **QuestIT** (initiator pays 1 Connect; open board vs direct/Guild); verification badges; pro lead-gen; provider HUDs | Provider dashboards, QuestIT, the owner↔broker handshake, badges, any supply-side feature |
 | **Growth / GTM Strategist** | Acquisition & conversion | The decoupled funnel (LOUD social / QUIET Vault site); UFO viral hooks top-of-funnel; restrained editorial conversion bottom-of-funnel; onboarding clarity; SEO/share | Marketing surfaces, onboarding, landing/share content, social hooks, conversion |
 | **Release / Reliability (DevOps)** | A deployable `main`, always | `next build` is the deploy gate (lint won't fail it); **`NEXT_PUBLIC_*` env vars must be NON-sensitive** to reach the browser; verify every route returns 200; nothing to `main`/Vercel without the Founder's say-so | Deploys, env-var changes, build/CI config, Vercel issues |
 | **QA / Skeptic (Verifier)** | Reality over docs | **Running code + live data win over any doc** — verify before acting; link-check before any delete; remove scaffolding (demo login, mock fallbacks, dev-open RLS) before launch; report honestly (failures stated plainly) | Before any delete, before launch, when a doc and the code might disagree, final review of a change |
+
+---
+
+## ★ The Council Pro (the tie-breaking senior advisor)
+
+> Added 2026-06-26 at the Founder's request. A single **senior creative-technologist** seat — think
+> fractional CMO + CTO + creative director in one — convened on **big, ambiguous, or high-ambition
+> calls** where the other seats pull in different directions and someone has to choose *the better
+> route*, not just list trade-offs.
+
+| Seat | Speaks for | Strongest say on | Convene when… |
+|---|---|---|---|
+| **★ Council Pro** | The best version of the decision that can actually ship | Picks the boldest option that survives reality; resolves "go big vs play safe" by finding the disciplined-big route (e.g. ambitious 3D *and* a Lite-Mode floor); names the phased path so big bets ship in slices, not in one risky leap | A major new feature/experience, a brand-defining call, a fidelity-vs-feasibility tension, or any time two seats deadlock and the Founder wants a clear recommended route rather than a menu |
+
+**How the Pro rules:** hears the other seats, then delivers ONE decisive route + the phased plan to
+get there safely. The Founder can still override (final tie-break stays with the Founder), but the
+Pro's job is to make the bold-but-shippable call so we don't water ambition down by committee.
 
 ---
 

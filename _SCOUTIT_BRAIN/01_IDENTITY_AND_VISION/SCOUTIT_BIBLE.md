@@ -100,8 +100,56 @@ ScoutIt responds with:
 > The signals are real. The spaces are real.
 > The platform is yours.
 
-### RA 9646
-ScoutIt operates in compliance with the **Philippine Real Estate Service Act (RA 9646)**. This governs how the platform facilitates property introductions, broker verification, and owner submissions. Compliance is non-negotiable and is noted in the site footer.
+---
+
+### The Real Vision — The Operating System for PH Real Estate (locked 2026-06-26)
+
+ScoutIt is not competing with brokerages. **ScoutIt is building the infrastructure they will all have to run on.**
+
+Right now brokers operate in their own echo chambers — their own Facebook pages, their own websites, their own network. There is no real competition between them because buyers cannot compare. The broker's sales team does the heavy lifting while the broker collects.
+
+**ScoutIt puts all brokers in the same arena for the first time.**
+
+Once on the platform, buyers can see:
+- Which broker has more verified listings
+- Which broker's properties have deeper intel
+- Which broker's Scout Rating reflects real closures
+- Which broker shows up, and which one coasts
+
+Brokers now have to compete on quality — not just on who you know. This is not a threat to brokerages. It is an upgrade to the entire ecosystem. The best brokers will thrive. The ones who relied on information asymmetry will have to evolve.
+
+**The dangerous line:** brokers may feel threatened early — before the platform has enough users to make it clearly valuable to them. This is why the **200 listings before monetization** rule exists. Build the arena before you invite the gladiators. Let brokers feel the gift before they feel the mirror.
+
+**The end state:**
+- Brokers don't need their own website — they compete on ScoutIt's ecosystem
+- Developers don't need a large sales team — ScoutIt surfaces their properties with deep intel
+- Buyers get one honest source of truth instead of scattered, pressure-filled information
+- ScoutIt becomes the layer that makes the entire PH real estate market more trustworthy, more legible, and more intelligent
+
+**ScoutIt is not a listings site. It is the operating system for Philippine real estate.**
+
+---
+
+### The Founder's Edge (non-replicable, June 2026)
+
+The founder (Jerzel) ranked a CRE brokerage from invisible to top 1-5 Google — from zero — by building SEO through property listings and name authority. He knows how to photograph, edit, and list a property so it ranks. He knows how to make a rough, difficult space look aspirational while staying honest and true to the natural condition of the property.
+
+This is not a skill you can hire easily. It is years of trial and error built into one person. In the early days, this personal edge — not the tech, not the design — is the real moat.
+
+---
+
+### RA 9646 — Legal Compliance (clarified 2026-06-26)
+
+ScoutIt operates in compliance with the **Philippine Real Estate Service Act (RA 9646)**. Compliance is non-negotiable and is noted in the site footer.
+
+**Key clarification:** Connects is NOT brokerage activity. It is an authorization and anti-spam layer:
+- Connects gates WHO can be listed on a property — not the transaction itself
+- The handshake = "this broker has the owner's blessing to appear on this listing"
+- ScoutIt never facilitates, negotiates, or takes a cut of any transaction
+- ScoutIt resolves platform disputes only — never transaction disputes
+- This has been reviewed and confirmed: the model is clean under RA 9646
+
+**The ephemeral chat:** messages between broker and owner are deleted immediately when the chat closes. ScoutIt does not retain chat contents. This must appear in the Terms of Service and as a disclaimer inside every chat window.
 
 ---
 
@@ -418,26 +466,45 @@ Owner submits via the Live Editor / wizard → data lands in Supabase **`propert
 
 ---
 
-## PART 10 — THE GO-TO-MARKET (DECOUPLED FUNNEL)
+## PART 10 — THE GO-TO-MARKET (CONFIRMED STRATEGY, June 2026)
 
-ScoutIt's acquisition strategy is deliberately split into two completely different voices:
+### The North Star Metric Before Monetization
+**200 real, approved property listings before subscriptions go live.**
+- No tier gates, no Connects charges until this number is hit
+- Build the arena before you monetize it
+- Trust first, revenue second
 
-### Top of Funnel — Social Media (LOUD)
-- Platform: TikTok, Reels, YouTube Shorts
-- Tone: UFO energy, gamified, space-themed, viral hooks
-- Content: "we found a hidden space in BGC" / "rate this ₱50M condo" / Bounty Hunt challenges
-- Goal: awareness, follows, curiosity
-- Character: strange, bold, disruptive
+### Phase 1 — Seed (now → 200 listings)
+- **Content:** Dark editorial luxury — not "this property is good" but WHY it's good. What's nearby. Foot traffic. Business potential. Neighborhood pulse. Deep intel that no PH listing site has ever tried.
+- **Listings source:** Founder's CRE brokerage network (commercial + residential connections). One residential brokerage confirmed as seed partner. Web research + Listing Engine fills the rest.
+- **Category focus:** Residential first, one city. Prove the model. Then expand categories.
+- **SEO:** Primary long-term channel. Founder has proven track record — ranked a CRE brokerage from invisible to top 1-5 Google. Same playbook applies here. Build name + property-level authority from day one.
+- **Social:** Dark editorial aesthetic. Luxury feel. Not "look at this property" — "look at what we know about this property." Launch social accounts the week of first content drop with sneak peek content to build audience before full launch.
 
-### Bottom of Funnel — The Website (QUIET)
-- The website is **The Vault** — a clinical intelligence terminal
-- Tone: editorial, data-dense, restrained
-- Goal: conversion, trust, depth
-- Character: premium, mysterious, confident
+### Phase 2 — Grow (200 listings → monetization on)
+- Invite brokers into the ecosystem once inventory justifies it
+- Open subscriptions and Connects economy
+- Expand to second city and additional categories
+- Waitlist converts: photographers, researchers, event planners, other services open
 
-The two channels intentionally sound like different brands. That's the point. The social media gets them curious. The website makes them stay.
+### Phase 3 — Show Fangs
+- The moment developers call ScoutIt instead of the other way around
+- The moment brokerages realize they need a ScoutIt presence to stay competitive
+- The moment the platform has enough listings and traffic that it becomes the reference point for PH real estate search
+- This is not a launch event. It is a tipping point that happens organically.
 
-**The insight:** people who find you through a viral UFO video and then land on a dark, disciplined intelligence platform feel like they've discovered something exclusive. The contrast *is* the product.
+### Content Philosophy (locked)
+Every property must be inspirational — even a rough, dirty, difficult space. The founder's editorial skill: enhance photography to show best-case presentation while staying true to the natural condition of the property. Never mislead. Always inspire. Show people what a space *could be* — backed by real data.
+
+> "We don't tell people this is good. We show them: this property is close to this, high foot traffic, good for starting a business. The data speaks."
+
+### The Two-Voice Strategy
+- **Social (loud):** Dark editorial, luxury aesthetic, scroll-stopping content in PH's social media battleground
+- **Website (quiet):** The intelligence terminal. Premium. Restrained. The contrast between the two is intentional — social gets them curious, website makes them stay and trust.
+
+### RA 9646 Positioning
+Public-facing always: *"Intelligence First. Transactions Never."*
+ScoutIt is the decision layer — not a brokerage, not a listings site. The platform above both.
 
 ---
 

@@ -85,8 +85,10 @@ different altitude. That is ScoutIT in the market. The UFO stays. Always.
 ### The product surface
 - **Homepage = a descent** through 6 numbered layers (Hero → The Board → Property Experiences
   → Discovery & Intelligence → Ecosystem Services → Your Board → About).
-- **5 dedicated "layer" route pages:** `/layer/orbit` (Board) · `/stratosphere` (Intel) ·
-  `/metropolis` (Network) · `/crust` (Your Board) · `/core` (Dashboard).
+- **6 dedicated "layer" route pages (all under `/layer/*`):** `/layer/orbit` (The Board) ·
+  `/layer/stratosphere` (Intel) · `/layer/metropolis` (Explore) · `/layer/crust` (Network) ·
+  `/layer/mantle` (Archive) · `/layer/core` (Your Workspace). Nav pills show plain labels
+  (e.g. "Stratosphere · Intel").
 - **The Ledger** = private, device-only wishlist (4 tags: Potential Fit / Interested /
   Inspired Me / Save). No account required.
 - **Property pages** use a **chapter-registry system** — 10 chapters, reframed per category
@@ -94,11 +96,14 @@ different altitude. That is ScoutIT in the market. The UFO stays. Always.
 
 ### Design DNA
 - **~95% darkness, ~5% gold.** Gold is a signature, not wallpaper.
-- **Use CSS variables, never raw hex.** `--accent` `#FFB800`, `--accent-bright` `#FFC929`,
-  `--accent-muted` `#7A5C00`, canvas `--bg` `#0e0e0e`.
+- **Use CSS variables, never raw hex.** `--accent` `#E8AE3C` (refined amber, 2026-06-26 — warmer
+  than the old `#FFB800`), `--accent-bright` `#F7C64E`, `--accent-muted` `#6E531A`, canvas `--bg` `#0e0e0e`.
 - Serif display headlines (Georgia), Geist Sans body, **mono uppercase wide-tracked eyebrows**.
-- Glassmorphism, slow/intentional motion, localized glow. **Banned:** light mode, Tailwind,
-  Three.js/WebGL in the main site, raw hex, glow-everywhere.
+- Glassmorphism, slow/intentional motion, localized glow.
+- **Allowed (corrected 2026-06-26):** **Tailwind** (used across the app alongside vanilla CSS) and
+  **Three.js/WebGL** backgrounds — both gated by **Lite Mode** (`src/lib/liteMode.js`), a global toggle
+  that disables animations/3D for low-end phones. **Banned:** raw hex, glow-everywhere. Dark is the
+  default; light/high-contrast modes live in the Display panel.
 
 ### Monetization (the Cosmic tiers)
 - Four ascending tiers for every user type: **Starry (free) → Solar → Cluster → Universe.**

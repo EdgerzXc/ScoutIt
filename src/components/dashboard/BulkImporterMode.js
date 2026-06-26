@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useDashboard } from "../../context/DashboardContext";
 
 export default function BulkImporterMode({ onClose }) {
-  const { addToast } = useDashboard();
+  const { addToast, currentUser } = useDashboard();
   const [csvData, setCsvData] = useState([]);
   const [columns, setColumns] = useState([]);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -53,14 +53,74 @@ export default function BulkImporterMode({ onClose }) {
   const handleSubmit = async () => {
     if (csvData.length === 0) return;
     setIsProcessing(true);
-    addToast("Initializing bulk sequence to Supabase...", "🚀");
-    
-    // Simulating batch insert for the walkthrough
-    setTimeout(() => {
-      addToast(`${csvData.length} properties queued for Admin Approval!`, "✅");
+    addToast("Mapping your columns to ScoutIt schema...", "🧠");
+
+    try {
+      // Step 1: Get AI blueprint mapping for the CSV headers
+      const blueprintRes = await fetch('/api/ai/blueprint', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          headers: columns,
+          sampleData: csvData.slice(0, 3).map(r => {
+            const clean = { ...r };
+            delete clean._id;
+            return clean;
+          })
+        })
+      });
+
+      if (!blueprintRes.ok) throw new Error('Blueprint mapping failed');
+      const mapping = await blueprintRes.json();
+
+      addToast("Schema mapped. Sending to Supabase...", "🚀");
+
+      // Step 2: Transform rows using the mapping
+      const properties = csvData.map(row => {
+        const mapped = { details: {} };
+        columns.forEach(col => {
+          const target = mapping[col] || 'details';
+          const val = row[col];
+          if (!val) return;
+          if (target === 'details') {
+            mapped.details[col] = val;
+          } else {
+            mapped[target] = val;
+          }
+        });
+
+        return {
+          owner_id: currentUser?.id || 'bulk-import',
+          title: mapped.title || 'Untitled Property',
+          location: mapped.location || '',
+          type: mapped.type || 'commercial',
+          space_category: mapped.type || 'commercial',
+          price: mapped.price || null,
+          description: mapped.description || '',
+          media_link: mapped.media_link || '',
+          pipeline_status: 'pending',
+          details: mapped.details || {}
+        };
+      });
+
+      // Step 3: Bulk insert into Supabase
+      const insertRes = await fetch('/api/dashboard/bulk-insert', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ properties })
+      });
+
+      const result = await insertRes.json();
+      if (!insertRes.ok) throw new Error(result.error || 'Insert failed');
+
+      addToast(`${result.count} properties queued for Admin Approval!`, "✅");
+      onClose();
+    } catch (err) {
+      console.error('[BulkImporter]', err);
+      addToast(`Import failed: ${err.message}`, "❌");
+    } finally {
       setIsProcessing(false);
-      onClose(); // go back to dashboard
-    }, 2000);
+    }
   };
 
   return (

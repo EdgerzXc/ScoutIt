@@ -6,6 +6,39 @@
 
 ---
 
+## LEGAL & PRIVACY DECISIONS (locked 2026-06-26, owner confirmed)
+
+### Connects is NOT brokerage — it is an authorization + anti-spam layer
+- Connects gates WHO can be listed on a property, not the transaction itself
+- The handshake = "this broker has the owner's blessing to appear on this listing"
+- ScoutIt never touches the actual sale, rental, or any financial transaction
+- RA 9646 concern: **resolved** — no commission, no negotiation, no representation by ScoutIt
+- Connects is closer to a verified badge system than a referral fee
+
+### Chat messages are ephemeral — deleted on close
+- Messages are NEVER stored permanently
+- Chat closes on: mutual handshake OR either party walks away
+- After close, all messages are deleted from the database immediately
+- ScoutIt does NOT retain chat contents — this must be stated in Terms of Service
+- If they want to chat again, they spend another Connect (accepted tradeoff)
+
+### ScoutIt resolves platform disputes only
+- ScoutIt will NOT mediate transaction disputes (price, commission, terms)
+- ScoutIt ONLY resolves issues about the platform itself (unauthorized listings, impersonation, abuse)
+- This line must be explicit in Terms of Service
+
+### Required UI disclaimer inside every chat window
+> *"This conversation is temporary and will be deleted when closed. ScoutIt is not a party to any agreement made here."*
+- This single line is the legal shield — do not ship chat without it
+
+### Contact info tradeoff (accepted)
+- Once chat opens, parties may choose to share private contact info
+- If they share it, ScoutIt cannot un-share it — this is accepted
+- The Connect is the price of access, not a guarantee of privacy after exchange
+- This is documented and accepted by the owner (Jerzel, June 2026)
+
+---
+
 ## 1. What it is (plain language)
 
 After an owner and a broker **connect** (the handshake already costs 1 Connect today), a **chatbox opens** between them. They talk. If both are happy, **each sends the handshake gesture** — a two-handed confirm. A gold animation fires, and the relationship becomes **linked**:
