@@ -1,12 +1,6 @@
 import { NextResponse } from 'next/server';
 import { extractText, getDocumentProxy } from 'unpdf';
 import { createClient } from '@supabase/supabase-js';
-import { rateLimit } from '@/lib/rateLimit';
-
-const limiter = rateLimit({
-  interval: 5 * 60 * 1000, // 5 minutes
-  uniqueTokenPerInterval: 200,
-});
 
 // Extracts the real text layer from an uploaded PDF.
 // The concierge flow used to call FileReader.readAsText() on the raw binary,
@@ -19,12 +13,6 @@ const limiter = rateLimit({
 const MAX_BYTES = 20 * 1024 * 1024; // 20MB — pitch decks/flyers are well under this
 
 export async function POST(request) {
-  try {
-    const ip = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
-    await limiter.check(5, ip); // 5 PDFs per 5 minutes
-  } catch (error) {
-    return NextResponse.json({ error: "Rate limit exceeded. Try again later." }, { status: 429 });
-  }
 
   try {
     // Authenticate user via JWT to prevent unauthenticated DoS on PDF parsing

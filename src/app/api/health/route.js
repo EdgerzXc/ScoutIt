@@ -1,19 +1,11 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { rateLimit } from '@/lib/rateLimit';
-
-// Throttled to 12 requests per minute (e.g. 1 check every 5 seconds) to prevent probing DoS
-const limiter = rateLimit({
-  interval: 60 * 1000, 
-  uniqueTokenPerInterval: 100,
-});
 
 export async function GET(request) {
   try {
     const ip = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
-    await limiter.check(12, ip);
   } catch (error) {
-    return NextResponse.json({ status: "error", message: "Too many health check requests" }, { status: 429 });
+    return NextResponse.json({ status: "error", message: "Error" }, { status: 500 });
   }
 
   const results = {

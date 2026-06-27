@@ -23,9 +23,19 @@ export async function POST(request) {
       return NextResponse.json({ error: "Unauthorized: Invalid session" }, { status: 401 });
     }
 
-    // Optional: Check if user is an admin
-    // For now, we at least guarantee they are a registered user.
     const userId = user.id;
+
+    // SECURITY FIX: Verify the user is an admin
+    const { data: userProfile, error: profileError } = await supabaseAdmin
+      .from('user_profiles')
+      .select('role')
+      .eq('id', userId)
+      .single();
+
+    if (profileError || !userProfile || userProfile.role !== 'admin') {
+      console.warn(`[ADMIN API] Unauthorized access attempt by user ${userId}`);
+      return NextResponse.json({ error: "Unauthorized: Admin privileges required" }, { status: 403 });
+    }
 
     const { submissionId } = await request.json();
 

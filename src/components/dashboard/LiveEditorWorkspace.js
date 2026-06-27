@@ -152,6 +152,8 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
     details: initialData?.details || {},
   });
 
+  const [lastSaved, setLastSaved] = useState(null);
+  const [draftLoaded, setDraftLoaded] = useState(false);
   const [activeSection, setActiveSection] = useState("basics");
   const [mobileView, setMobileView] = useState("editor"); // "editor" | "preview"
   const [showQuestModal, setShowQuestModal] = useState(false);
@@ -171,6 +173,54 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
       document.body.style.overflow = "";
     };
   }, []);
+
+  // Load Draft on Mount
+  useEffect(() => {
+    if (!isEditing) {
+      const savedDraft = localStorage.getItem("scoutit_listing_draft");
+      if (savedDraft) {
+        try {
+          const parsed = JSON.parse(savedDraft);
+          setFormData(parsed);
+          setLastSaved(new Date());
+        } catch (e) {
+          console.error("Failed to parse draft", e);
+        }
+      }
+    }
+    setDraftLoaded(true);
+  }, [isEditing]);
+
+  // Auto-Save Draft
+  useEffect(() => {
+    if (draftLoaded && !isEditing) {
+      // Only save if it has at least a title or location to avoid saving completely empty drafts
+      if (formData.title.trim() || formData.location.trim()) {
+        localStorage.setItem("scoutit_listing_draft", JSON.stringify(formData));
+        setLastSaved(new Date());
+      } else {
+        localStorage.removeItem("scoutit_listing_draft");
+      }
+    }
+  }, [formData, draftLoaded, isEditing]);
+
+  const clearDraft = () => {
+    if (window.confirm("Are you sure you want to clear your draft and start over?")) {
+      localStorage.removeItem("scoutit_listing_draft");
+      setFormData({
+        title: "",
+        category: "",
+        location: "",
+        price: "",
+        mediaLink: "",
+        image: "",
+        description: "",
+        verified: false,
+        details: {},
+      });
+      setLastSaved(null);
+    }
+  };
 
   // Resize Logic
   const startResizing = useCallback((e) => {
@@ -270,6 +320,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
       if (formData.description.length > 20) score += 15;
       if (formData.verified) score += 20;
       const payload = { ...formData, completenessScore: score };
+      if (!isEditing) localStorage.removeItem("scoutit_listing_draft");
       onPublish(sanitizeObject(payload), true);
     }
   };
@@ -289,6 +340,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
       if (formData.description.length > 20) score += 15;
       if (formData.verified) score += 20;
       const payload = { ...formData, completenessScore: score };
+      if (!isEditing) localStorage.removeItem("scoutit_listing_draft");
       onPublish(sanitizeObject(payload), false);
     }
   };
@@ -327,9 +379,17 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
           >
             ← {isEditing ? "Cancel" : "Exit"}
           </button>
-          <span className="hidden md:block font-label-caps text-[10px] tracking-widest text-gold-accent uppercase">
-            {isEditing ? "Edit Dossier" : "New Property Draft"}
-          </span>
+          
+          <div className="flex items-center gap-4">
+            {!isEditing && lastSaved && (
+              <button onClick={clearDraft} className="text-error/80 hover:text-error text-[10px] uppercase font-label-caps tracking-wider transition-colors">
+                Clear Draft
+              </button>
+            )}
+            <span className="hidden md:block font-label-caps text-[10px] tracking-widest text-gold-accent uppercase">
+              {isEditing ? "Edit Dossier" : "New Property Draft"}
+            </span>
+          </div>
         </div>
 
         {/* Editor Sections */}
@@ -662,6 +722,11 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
 
         <div className="px-4 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] border-t border-surface-variant bg-background shrink-0">
           {!isPublishable && <p className="text-xs text-text-secondary mb-2 italic w-full text-center">{canSaveDraft ? "Fill in all required fields (*) to publish — or save a draft for now." : "Add a title to save a draft; fill all required fields (*) to publish."}</p>}
+          {lastSaved && !isEditing && (
+            <p className="text-[10px] text-gold-accent mb-2 text-center font-working-title">
+              ✓ Draft auto-saved at {lastSaved.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+            </p>
+          )}
           <div className="flex gap-2">
             <button
               className="flex-1 bg-surface-alt border border-surface-variant text-on-surface font-bold py-3.5 rounded hover:bg-surface-variant transition-colors disabled:opacity-50"

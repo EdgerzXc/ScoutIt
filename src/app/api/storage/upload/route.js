@@ -1,11 +1,5 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { rateLimit } from '@/lib/rateLimit';
-
-const limiter = rateLimit({
-  interval: 10 * 60 * 1000, // 10 minutes
-  uniqueTokenPerInterval: 200,
-});
 
 const TEMP_BUCKET = 'property-videos-temp';
 const MAX_FILE_SIZE = 500 * 1024 * 1024; // 500MB
@@ -18,12 +12,6 @@ function getServiceClient() {
 }
 
 export async function POST(request) {
-  try {
-    const ip = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
-    await limiter.check(3, ip); // 3 uploads per 10 minutes
-  } catch (error) {
-    return NextResponse.json({ error: "Rate limit exceeded. Try again later." }, { status: 429 });
-  }
 
   try {
     // Authenticate user via JWT to prevent identity spoofing

@@ -72,8 +72,9 @@ CREATE POLICY "Users can read their own profile" ON user_profiles
   FOR SELECT USING (id = (SELECT auth.uid())::text);
 
 DROP POLICY IF EXISTS "Users can update their own profile" ON user_profiles;
-CREATE POLICY "Users can update their own profile" ON user_profiles
-  FOR UPDATE USING (id = (SELECT auth.uid())::text);
+-- We intentionally drop the UPDATE policy to prevent clients from directly editing
+-- their connects_balance or role via the browser console.
+-- Profile updates MUST be handled server-side via secure API routes.
 
 CREATE INDEX IF NOT EXISTS idx_user_profiles_id ON user_profiles(id);
 

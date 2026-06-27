@@ -54,6 +54,7 @@ different altitude. That is ScoutIT in the market. The UFO stays. Always.
 | 7 | **`07_FEATURES_AND_FLOWS/`** | User journeys, scrollytelling manifesto, comparison tool, onboarding |
 | 8 | **`08_OPERATIONS_AND_BACKLOG/`** | Build order, fix list, audits, cleanup playbook |
 | 9 | **`09_REFERENCE_RAW/`** | Original project README + reference-asset notes |
+| 10 | **`10_CYBER_SECURITY/`** | Security hardening reports, Upstash Redis rate limiting, API security, and Supabase RLS policies |
 | 11 | **`11_SCHEMATICS/`** | Visual system maps (one `.svg` per system) — start with Mission Control |
 
 ---
@@ -187,6 +188,9 @@ different altitude. That is ScoutIT in the market. The UFO stays. Always.
 **09 · Reference (raw)**
 - `PROJECT_README.md` — original Next.js project README
 - `REFERENCE_README.md` — notes on the owner's reference assets
+
+**10 · Cyber Security**
+- `SECURITY_HARDENING_REPORT.md` — record of Upstash rate limits, API payload checks, Playwright Council E2E tests, and Supabase RLS lockdown
 
 ---
 

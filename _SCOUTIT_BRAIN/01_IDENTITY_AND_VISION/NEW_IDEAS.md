@@ -91,3 +91,9 @@ ScoutIt uses a "Pokémon-style" gamified badge system to drive obsessive complet
 - **Concept:** Expose ScoutIt's database and business logic via the Model Context Protocol (MCP). Instead of an in-app chat, power users, developers, and enterprise brokerages can connect their own AI agents (Cursor, Claude Desktop, enterprise bots) directly to ScoutIt.
 - **Workflow:** An authorized user points their AI to a ScoutIt Server-Sent Event (SSE) endpoint. Their AI can then securely query the real estate catalog, manage deals, or verify data without needing to use the ScoutIt web UI.
 - **Status:** On hold. A highly powerful feature for the B2B ecosystem, but not necessary for the core MVP launch.
+
+---
+
+## 10. Google OAuth Implementation
+- **Concept:** Allow users to sign in to ScoutIt using their Google accounts.
+- **Status:** Deferred due to Google Cloud Platform requiring a billing account/credit card to create the initial project credentials. The code is ready in `authClient.js` but the UI button is commented out until the owner is ready to set up GCP.

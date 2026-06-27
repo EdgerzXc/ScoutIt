@@ -13,6 +13,8 @@
     "@google/genai": "^2.9.0",
     "@marsidev/react-turnstile": "^1.5.3",
     "@supabase/supabase-js": "^2.108.1",
+    "@upstash/ratelimit": "^2.0.8",
+    "@upstash/redis": "^1.38.0",
     "framer-motion": "^12.40.0",
     "isomorphic-dompurify": "^3.18.0",
     "lru-cache": "^11.5.1",

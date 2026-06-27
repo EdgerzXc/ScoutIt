@@ -1,0 +1,726 @@
+[
+  {
+    "route": "/",
+    "label": "desktop",
+    "status": 200,
+    "consoleErrors": [],
+    "title": "ScoutIt — Space Intelligence",
+    "metaDesc": "ScoutIt transforms Philippine real estate into intelligent property briefings. Scout smarter, move faster.",
+    "h1": [],
+    "h2": [
+      "Browse Space Catalog"
+    ],
+    "ctas": [
+      "ScoutIT",
+      "Discover Spaces",
+      "Intel briefings",
+      "Your Board",
+      "Brokers",
+      "Photographers",
+      "Researchers",
+      "Event Planners",
+      "Pricing & Tiers",
+      "About Us",
+      "Dashboard",
+      "Terms of Service",
+      "Privacy Policy",
+      "Home",
+      "Spaces",
+      "Theme",
+      "Discover",
+      "Dash"
+    ],
+    "bodyLen": 1077,
+    "imgs": 0,
+    "imgNoAlt": 0,
+    "propLinks": [
+      "/property"
+    ]
+  },
+  {
+    "route": "/",
+    "label": "mobile",
+    "status": 200,
+    "consoleErrors": [],
+    "title": "ScoutIt — Space Intelligence",
+    "metaDesc": "ScoutIt transforms Philippine real estate into intelligent property briefings. Scout smarter, move faster.",
+    "h1": [],
+    "h2": [
+      "Browse Space Catalog"
+    ],
+    "ctas": [
+      "ScoutIT",
+      "Discover Spaces",
+      "Intel briefings",
+      "Your Board",
+      "Brokers",
+      "Photographers",
+      "Researchers",
+      "Event Planners",
+      "Pricing & Tiers",
+      "About Us",
+      "Dashboard",
+      "Terms of Service",
+      "Privacy Policy",
+      "Home",
+      "Spaces",
+      "Theme",
+      "Discover",
+      "Dash"
+    ],
+    "bodyLen": 1109,
+    "imgs": 0,
+    "imgNoAlt": 0,
+    "propLinks": [
+      "/property"
+    ]
+  },
+  {
+    "route": "/pricing",
+    "label": "desktop",
+    "status": 200,
+    "consoleErrors": [],
+    "title": "ScoutIt — Space Intelligence",
+    "metaDesc": "ScoutIt transforms Philippine real estate into intelligent property briefings. Scout smarter, move faster.",
+    "h1": [
+      "Choose Your Role in the Ecosystem"
+    ],
+    "h2": [
+      "Seekers & Buyers",
+      "Brokers & Advisors",
+      "Property Owners",
+      "Photographers & Intel",
+      "Multi-Role Bundles"
+    ],
+    "ctas": [
+      "← Back",
+      "ScoutIT",
+      "Create Account",
+      "Home",
+      "Discover",
+      "Intel",
+      "Brokers",
+      "Photographers",
+      "Researchers",
+      "Event Planners",
+      "Your Board",
+      "Dashboard",
+      "About",
+      "ScoutIT",
+      "Discover Spaces",
+      "Intel briefings",
+      "Your Board",
+      "Brokers",
+      "Photographers",
+      "Researchers",
+      "Event Planners",
+      "Pricing & Tiers",
+      "About Us",
+      "Dashboard",
+      "Terms of Service",
+      "Privacy Policy",
+      "Home",
+      "Spaces",
+      "Theme",
+      "Discover",
+      "Dash"
+    ],
+    "bodyLen": 1363,
+    "imgs": 0,
+    "imgNoAlt": 0,
+    "propLinks": [
+      "/property"
+    ]
+  },
+  {
+    "route": "/pricing",
+    "label": "mobile",
+    "status": 200,
+    "consoleErrors": [],
+    "title": "ScoutIt — Space Intelligence",
+    "metaDesc": "ScoutIt transforms Philippine real estate into intelligent property briefings. Scout smarter, move faster.",
+    "h1": [
+      "Choose Your Role in the Ecosystem"
+    ],
+    "h2": [
+      "Seekers & Buyers",
+      "Brokers & Advisors",
+      "Property Owners",
+      "Photographers & Intel",
+      "Multi-Role Bundles"
+    ],
+    "ctas": [
+      "← Back",
+      "ScoutIT",
+      "Create Account",
+      "Home",
+      "Discover",
+      "Intel",
+      "Brokers",
+      "Photographers",
+      "Researchers",
+      "Event Planners",
+      "Your Board",
+      "Dashboard",
+      "About",
+      "ScoutIT",
+      "Discover Spaces",
+      "Intel briefings",
+      "Your Board",
+      "Brokers",
+      "Photographers",
+      "Researchers",
+      "Event Planners",
+      "Pricing & Tiers",
+      "About Us",
+      "Dashboard",
+      "Terms of Service",
+      "Privacy Policy",
+      "Home",
+      "Spaces",
+      "Theme",
+      "Discover",
+      "Dash"
+    ],
+    "bodyLen": 1395,
+    "imgs": 0,
+    "imgNoAlt": 0,
+    "propLinks": [
+      "/property"
+    ]
+  },
+  {
+    "route": "/pricing/bundles",
+    "label": "desktop",
+    "status": 200,
+    "consoleErrors": [],
+    "title": "ScoutIt — Space Intelligence",
+    "metaDesc": "ScoutIt transforms Philippine real estate into intelligent property briefings. Scout smarter, move faster.",
+    "h1": [
+      "Every Role. One Plan."
+    ],
+    "h2": [
+      "Binary",
+      "Eclipse",
+      "Orbit",
+      "Constellation"
+    ],
+    "ctas": [
+      "← Back",
+      "ScoutIT",
+      "Create Account",
+      "Home",
+      "Discover",
+      "Intel",
+      "Brokers",
+      "Photographers",
+      "Researchers",
+      "Event Planners",
+      "Your Board",
+      "Dashboard",
+      "About",
+      "← Back to Personas",
+      "← View single-role pricing",
+      "ScoutIT",
+      "Discover Spaces",
+      "Intel briefings",
+      "Your Board",
+      "Brokers",
+      "Photographers",
+      "Researchers",
+      "Event Planners",
+      "Pricing & Tiers",
+      "About Us",
+      "Dashboard",
+      "Terms of Service",
+      "Privacy Policy",
+      "Home",
+      "Spaces",
+      "Theme",
+      "Discover",
+      "Dash"
+    ],
+    "bodyLen": 3149,
+    "imgs": 0,
+    "imgNoAlt": 0,
+    "propLinks": [
+      "/property"
+    ]
+  },
+  {
+    "route": "/pricing/bundles",
+    "label": "mobile",
+    "status": 200,
+    "consoleErrors": [],
+    "title": "ScoutIt — Space Intelligence",
+    "metaDesc": "ScoutIt transforms Philippine real estate into intelligent property briefings. Scout smarter, move faster.",
+    "h1": [
+      "Every Role. One Plan."
+    ],
+    "h2": [
+      "Binary",
+      "Eclipse",
+      "Orbit",
+      "Constellation"
+    ],
+    "ctas": [
+      "← Back",
+      "ScoutIT",
+      "Create Account",
+      "Home",
+      "Discover",
+      "Intel",
+      "Brokers",
+      "Photographers",
+      "Researchers",
+      "Event Planners",
+      "Your Board",
+      "Dashboard",
+      "About",
+      "← Back to Personas",
+      "← View single-role pricing",
+      "ScoutIT",
+      "Discover Spaces",
+      "Intel briefings",
+      "Your Board",
+      "Brokers",
+      "Photographers",
+      "Researchers",
+      "Event Planners",
+      "Pricing & Tiers",
+      "About Us",
+      "Dashboard",
+      "Terms of Service",
+      "Privacy Policy",
+      "Home",
+      "Spaces",
+      "Theme",
+      "Discover",
+      "Dash"
+    ],
+    "bodyLen": 3181,
+    "imgs": 0,
+    "imgNoAlt": 0,
+    "propLinks": [
+      "/property"
+    ]
+  },
+  {
+    "route": "/pricing/owner",
+    "label": "desktop",
+    "status": 200,
+    "consoleErrors": [],
+    "title": "ScoutIt — Space Intelligence",
+    "metaDesc": "ScoutIt transforms Philippine real estate into intelligent property briefings. Scout smarter, move faster.",
+    "h1": [
+      "Command Your Assets"
+    ],
+    "h2": [
+      "Starry Holder",
+      "Solar Landlord",
+      "Cluster Developer",
+      "Universe Portfolio"
+    ],
+    "ctas": [
+      "← Back",
+      "ScoutIT",
+      "Create Account",
+      "Home",
+      "Discover",
+      "Intel",
+      "Brokers",
+      "Photographers",
+      "Researchers",
+      "Event Planners",
+      "Your Board",
+      "Dashboard",
+      "About",
+      "← Back to Personas",
+      "ScoutIT",
+      "Discover Spaces",
+      "Intel briefings",
+      "Your Board",
+      "Brokers",
+      "Photographers",
+      "Researchers",
+      "Event Planners",
+      "Pricing & Tiers",
+      "About Us",
+      "Dashboard",
+      "Terms of Service",
+      "Privacy Policy",
+      "Home",
+      "Spaces",
+      "Theme",
+      "Discover",
+      "Dash"
+    ],
+    "bodyLen": 1726,
+    "imgs": 0,
+    "imgNoAlt": 0,
+    "propLinks": [
+      "/property"
+    ]
+  },
+  {
+    "route": "/pricing/owner",
+    "label": "mobile",
+    "status": 200,
+    "consoleErrors": [],
+    "title": "ScoutIt — Space Intelligence",
+    "metaDesc": "ScoutIt transforms Philippine real estate into intelligent property briefings. Scout smarter, move faster.",
+    "h1": [
+      "Command Your Assets"
+    ],
+    "h2": [
+      "Starry Holder",
+      "Solar Landlord",
+      "Cluster Developer",
+      "Universe Portfolio"
+    ],
+    "ctas": [
+      "← Back",
+      "ScoutIT",
+      "Create Account",
+      "Home",
+      "Discover",
+      "Intel",
+      "Brokers",
+      "Photographers",
+      "Researchers",
+      "Event Planners",
+      "Your Board",
+      "Dashboard",
+      "About",
+      "← Back to Personas",
+      "ScoutIT",
+      "Discover Spaces",
+      "Intel briefings",
+      "Your Board",
+      "Brokers",
+      "Photographers",
+      "Researchers",
+      "Event Planners",
+      "Pricing & Tiers",
+      "About Us",
+      "Dashboard",
+      "Terms of Service",
+      "Privacy Policy",
+      "Home",
+      "Spaces",
+      "Theme",
+      "Discover",
+      "Dash"
+    ],
+    "bodyLen": 1758,
+    "imgs": 0,
+    "imgNoAlt": 0,
+    "propLinks": [
+      "/property"
+    ]
+  },
+  {
+    "route": "/layer/orbit",
+    "label": "desktop",
+    "status": 200,
+    "consoleErrors": [],
+    "title": "ScoutIt — Space Intelligence",
+    "metaDesc": "ScoutIt transforms Philippine real estate into intelligent property briefings. Scout smarter, move faster.",
+    "h1": [],
+    "h2": [
+      "The Board"
+    ],
+    "ctas": [
+      "←Home",
+      "ScoutIT",
+      "Stratosphere→",
+      "All Properties",
+      "Residential",
+      "Commercial",
+      "STR",
+      "Hospitality",
+      "Restaurants",
+      "Venues/Events",
+      "See The Showcase →",
+      "Home",
+      "Spaces",
+      "Theme",
+      "Discover",
+      "Dash"
+    ],
+    "bodyLen": 919,
+    "imgs": 0,
+    "imgNoAlt": 0,
+    "propLinks": [
+      "/property"
+    ]
+  },
+  {
+    "route": "/layer/orbit",
+    "label": "mobile",
+    "status": 200,
+    "consoleErrors": [],
+    "title": "ScoutIt — Space Intelligence",
+    "metaDesc": "ScoutIt transforms Philippine real estate into intelligent property briefings. Scout smarter, move faster.",
+    "h1": [],
+    "h2": [
+      "The Board"
+    ],
+    "ctas": [
+      "←Home",
+      "ScoutIT",
+      "Stratosphere→",
+      "All Properties",
+      "Residential",
+      "Commercial",
+      "STR",
+      "Hospitality",
+      "Restaurants",
+      "Venues/Events",
+      "See The Showcase →",
+      "Home",
+      "Spaces",
+      "Theme",
+      "Discover",
+      "Dash"
+    ],
+    "bodyLen": 933,
+    "imgs": 0,
+    "imgNoAlt": 0,
+    "propLinks": [
+      "/property"
+    ]
+  },
+  {
+    "route": "/stratosphere",
+    "label": "desktop",
+    "status": 404,
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 404 ()"
+    ],
+    "title": "ScoutIt — Space Intelligence",
+    "metaDesc": "ScoutIt transforms Philippine real estate into intelligent property briefings. Scout smarter, move faster.",
+    "h1": [
+      "404"
+    ],
+    "h2": [
+      "This page could not be found."
+    ],
+    "ctas": [
+      "Home",
+      "Spaces",
+      "Theme",
+      "Discover",
+      "Dash"
+    ],
+    "bodyLen": 33,
+    "imgs": 0,
+    "imgNoAlt": 0,
+    "propLinks": [
+      "/property"
+    ]
+  },
+  {
+    "route": "/stratosphere",
+    "label": "mobile",
+    "status": 404,
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 404 ()"
+    ],
+    "title": "ScoutIt — Space Intelligence",
+    "metaDesc": "ScoutIt transforms Philippine real estate into intelligent property briefings. Scout smarter, move faster.",
+    "h1": [
+      "404"
+    ],
+    "h2": [
+      "This page could not be found."
+    ],
+    "ctas": [
+      "Home",
+      "Spaces",
+      "Theme",
+      "Discover",
+      "Dash"
+    ],
+    "bodyLen": 65,
+    "imgs": 0,
+    "imgNoAlt": 0,
+    "propLinks": [
+      "/property"
+    ]
+  },
+  {
+    "route": "/metropolis",
+    "label": "desktop",
+    "status": 404,
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 404 ()"
+    ],
+    "title": "ScoutIt — Space Intelligence",
+    "metaDesc": "ScoutIt transforms Philippine real estate into intelligent property briefings. Scout smarter, move faster.",
+    "h1": [
+      "404"
+    ],
+    "h2": [
+      "This page could not be found."
+    ],
+    "ctas": [
+      "Home",
+      "Spaces",
+      "Theme",
+      "Discover",
+      "Dash"
+    ],
+    "bodyLen": 33,
+    "imgs": 0,
+    "imgNoAlt": 0,
+    "propLinks": [
+      "/property"
+    ]
+  },
+  {
+    "route": "/metropolis",
+    "label": "mobile",
+    "status": 404,
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 404 ()"
+    ],
+    "title": "ScoutIt — Space Intelligence",
+    "metaDesc": "ScoutIt transforms Philippine real estate into intelligent property briefings. Scout smarter, move faster.",
+    "h1": [
+      "404"
+    ],
+    "h2": [
+      "This page could not be found."
+    ],
+    "ctas": [
+      "Home",
+      "Spaces",
+      "Theme",
+      "Discover",
+      "Dash"
+    ],
+    "bodyLen": 65,
+    "imgs": 0,
+    "imgNoAlt": 0,
+    "propLinks": [
+      "/property"
+    ]
+  },
+  {
+    "route": "/crust",
+    "label": "desktop",
+    "status": 404,
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 404 ()"
+    ],
+    "title": "ScoutIt — Space Intelligence",
+    "metaDesc": "ScoutIt transforms Philippine real estate into intelligent property briefings. Scout smarter, move faster.",
+    "h1": [
+      "404"
+    ],
+    "h2": [
+      "This page could not be found."
+    ],
+    "ctas": [
+      "Home",
+      "Spaces",
+      "Theme",
+      "Discover",
+      "Dash"
+    ],
+    "bodyLen": 33,
+    "imgs": 0,
+    "imgNoAlt": 0,
+    "propLinks": [
+      "/property"
+    ]
+  },
+  {
+    "route": "/crust",
+    "label": "mobile",
+    "status": 404,
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 404 ()"
+    ],
+    "title": "ScoutIt — Space Intelligence",
+    "metaDesc": "ScoutIt transforms Philippine real estate into intelligent property briefings. Scout smarter, move faster.",
+    "h1": [
+      "404"
+    ],
+    "h2": [
+      "This page could not be found."
+    ],
+    "ctas": [
+      "Home",
+      "Spaces",
+      "Theme",
+      "Discover",
+      "Dash"
+    ],
+    "bodyLen": 65,
+    "imgs": 0,
+    "imgNoAlt": 0,
+    "propLinks": [
+      "/property"
+    ]
+  },
+  {
+    "route": "/core",
+    "label": "desktop",
+    "status": 404,
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 404 ()"
+    ],
+    "title": "ScoutIt — Space Intelligence",
+    "metaDesc": "ScoutIt transforms Philippine real estate into intelligent property briefings. Scout smarter, move faster.",
+    "h1": [
+      "404"
+    ],
+    "h2": [
+      "This page could not be found."
+    ],
+    "ctas": [
+      "Home",
+      "Spaces",
+      "Theme",
+      "Discover",
+      "Dash"
+    ],
+    "bodyLen": 33,
+    "imgs": 0,
+    "imgNoAlt": 0,
+    "propLinks": [
+      "/property"
+    ]
+  },
+  {
+    "route": "/core",
+    "label": "mobile",
+    "status": 404,
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 404 ()"
+    ],
+    "title": "ScoutIt — Space Intelligence",
+    "metaDesc": "ScoutIt transforms Philippine real estate into intelligent property briefings. Scout smarter, move faster.",
+    "h1": [
+      "404"
+    ],
+    "h2": [
+      "This page could not be found."
+    ],
+    "ctas": [
+      "Home",
+      "Spaces",
+      "Theme",
+      "Discover",
+      "Dash"
+    ],
+    "bodyLen": 65,
+    "imgs": 0,
+    "imgNoAlt": 0,
+    "propLinks": [
+      "/property"
+    ]
+  }
+]

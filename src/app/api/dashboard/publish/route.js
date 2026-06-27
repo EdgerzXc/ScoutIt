@@ -2,20 +2,8 @@ import { NextResponse } from "next/server";
 import { insertProperty, updateProperty } from "@/lib/airtable";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { rateLimit } from "@/lib/rateLimit";
-
-const limiter = rateLimit({
-  interval: 5 * 60 * 1000, // 5 minutes
-  uniqueTokenPerInterval: 500,
-});
 
 export async function POST(request) {
-  try {
-    const ip = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
-    await limiter.check(10, ip); // 10 requests per 5 minutes
-  } catch (error) {
-    return NextResponse.json({ error: "Rate limit exceeded. Try again later." }, { status: 429 });
-  }
 
   try {
     // 1. Extract token from Authorization header to prevent identity spoofing

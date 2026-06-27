@@ -28,3 +28,25 @@ export const getSession = async () => {
 export const onAuthStateChange = (callback) => {
   return supabase.auth.onAuthStateChange(callback);
 };
+
+export const signInWithOAuth = async (provider, options = {}) => {
+  return await supabase.auth.signInWithOAuth({
+    provider,
+    options,
+  });
+};
+
+export const signInWithOtp = async (email, options = {}) => {
+  return await supabase.auth.signInWithOtp({
+    email,
+    options,
+  });
+};
+
+export const verifyOtp = async (email, token, type = 'email') => {
+  return await supabase.auth.verifyOtp({
+    email,
+    token,
+    type,
+  });
+};

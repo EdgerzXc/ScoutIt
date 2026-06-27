@@ -2,12 +2,6 @@ import { NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { getProperties } from '@/data/mockProperties';
 import { createClient } from '@supabase/supabase-js';
-import { rateLimit } from '@/lib/rateLimit';
-
-const limiter = rateLimit({
-  interval: 60 * 1000, // 1 minute
-  uniqueTokenPerInterval: 200,
-});
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY || "missing_key", // Fallback handles gracefully
@@ -53,12 +47,6 @@ const tools = [
 ];
 
 export async function POST(request) {
-  try {
-    const ip = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
-    await limiter.check(10, ip); // 10 messages per minute
-  } catch (error) {
-    return NextResponse.json({ error: "Rate limit exceeded. Try again later." }, { status: 429 });
-  }
 
   try {
     const authHeader = request.headers.get("Authorization");

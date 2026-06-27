@@ -10,12 +10,6 @@
 // import { supabase } from "@/lib/supabaseClient";
 import { z } from "zod";
 import DOMPurify from "isomorphic-dompurify";
-import { rateLimit } from "@/lib/rateLimit";
-
-const limiter = rateLimit({
-  interval: 10 * 60 * 1000, // 10 minutes
-  uniqueTokenPerInterval: 500,
-});
 
 const waitlistSchema = z.object({
   email: z.string().email("Invalid email format").max(255),
@@ -26,12 +20,6 @@ const waitlistSchema = z.object({
 });
 
 export async function POST(req) {
-  try {
-    const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
-    await limiter.check(5, ip); // 5 requests per 10 minutes
-  } catch (error) {
-    return Response.json({ ok: false, error: "Rate limit exceeded. Try again later." }, { status: 429 });
-  }
 
   let body;
   try {

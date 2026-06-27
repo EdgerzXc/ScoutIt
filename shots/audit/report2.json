@@ -1,0 +1,630 @@
+[
+  {
+    "route": "/",
+    "label": "desktop",
+    "status": 200,
+    "consoleErrors": [],
+    "title": "ScoutIt — Space Intelligence",
+    "h1": [],
+    "h2": [
+      "Browse Space Catalog"
+    ],
+    "h3": [
+      "The Board",
+      "Stories & Intel",
+      "Explore Spaces",
+      "The Ecosystem",
+      "Your Workspace",
+      "Platform",
+      "Services",
+      "Company"
+    ],
+    "imgTags": 0,
+    "bgImgCount": 2,
+    "canvas": 1,
+    "bodyBg": "rgb(14, 14, 14)",
+    "bodyLen": 1077,
+    "realPropLinks": [],
+    "firstText": "Scout IT SPACE · INTELLIGENCE · TECHNOLOGY A premium real estate platform for founders, creatives, and enterprises to find and lease prime commercial and residential spaces across the Philippines. Get lost in spaces that actually inspire you. SPACE INTELLIGENCE · PHILIPPINE PROPERTY BROWSE SPACE CATALOG LAYER 01 // ORBIT The Board Top 100 Most Inquired Properties LAYER 02 // STRATOSPHERE Stories & Intel Neighborhood stories & market features LAYER 03 // METROPOLIS Explore Spaces Search the compl"
+  },
+  {
+    "route": "/",
+    "label": "mobile",
+    "status": 200,
+    "consoleErrors": [],
+    "title": "ScoutIt — Space Intelligence",
+    "h1": [],
+    "h2": [
+      "Browse Space Catalog"
+    ],
+    "h3": [
+      "The Board",
+      "Stories & Intel",
+      "Explore Spaces",
+      "The Ecosystem",
+      "Your Workspace",
+      "Platform",
+      "Services",
+      "Company"
+    ],
+    "imgTags": 0,
+    "bgImgCount": 2,
+    "canvas": 1,
+    "bodyBg": "rgb(14, 14, 14)",
+    "bodyLen": 1109,
+    "realPropLinks": [],
+    "firstText": "Scout IT SPACE · INTELLIGENCE · TECHNOLOGY A premium real estate platform for founders, creatives, and enterprises to find and lease prime commercial and residential spaces across the Philippines. Get lost in spaces that actually inspire you. SPACE INTELLIGENCE · PHILIPPINE PROPERTY BROWSE SPACE CATALOG LAYER 01 // ORBIT The Board Top 100 Most Inquired Properties LAYER 02 // STRATOSPHERE Stories & Intel Neighborhood stories & market features LAYER 03 // METROPOLIS Explore Spaces Search the compl"
+  },
+  {
+    "route": "/discover",
+    "label": "desktop",
+    "status": 200,
+    "consoleErrors": [],
+    "title": "Discover · ScoutIt",
+    "h1": [
+      "Residential"
+    ],
+    "h2": [
+      "Spotlights",
+      "News Feed",
+      "Regions"
+    ],
+    "h3": [
+      "The Estate Makati Suite",
+      "Batasan Hills House & Lot",
+      "Aurelia Residences",
+      "Mastering the QC Market",
+      "QC Residential Summary",
+      "Platform",
+      "Services",
+      "Company"
+    ],
+    "imgTags": 0,
+    "bgImgCount": 4,
+    "canvas": 0,
+    "bodyBg": "rgb(14, 14, 14)",
+    "bodyLen": 1659,
+    "realPropLinks": [
+      "/property/the-estate-makati",
+      "/property/batasan-hills",
+      "/property/aurelia-residences"
+    ],
+    "firstText": "← BACK ScoutIT SCOUTIT ← DASHBOARD RESIDENTIAL COMMERCIAL STR HOSPITALITY RESTAURANTS VENUES/EVENTS LAYER 2.1 // DISCOVERY RESIDENTIAL DISCOVER → NEWS & INTELLIGENCE Spotlights DRAG LEFT & RIGHT · TAP A SPACE TO LOAD ITS LOCAL NEWS MAKATI CENTRAL The Estate Makati Suite 3 Bedrooms · 220 sqm ASSET SPECIFICATIONS Location Ayala Avenue, Makati Central Zoning Profile AAA Tier Affinity Rating 98.4% Density Profile 3 Bedrooms · 220 sqm VIEW FULL BRIEFING → QUEZON CITY Batasan Hills House & Lot 3 Bedro"
+  },
+  {
+    "route": "/discover",
+    "label": "mobile",
+    "status": 200,
+    "consoleErrors": [],
+    "title": "Discover · ScoutIt",
+    "h1": [
+      "Residential"
+    ],
+    "h2": [
+      "Spotlights",
+      "News Feed",
+      "Regions"
+    ],
+    "h3": [
+      "The Estate Makati Suite",
+      "Batasan Hills House & Lot",
+      "Aurelia Residences",
+      "Mastering the QC Market",
+      "QC Residential Summary",
+      "Platform",
+      "Services",
+      "Company"
+    ],
+    "imgTags": 0,
+    "bgImgCount": 4,
+    "canvas": 0,
+    "bodyBg": "rgb(14, 14, 14)",
+    "bodyLen": 1227,
+    "realPropLinks": [
+      "/property/the-estate-makati",
+      "/property/batasan-hills",
+      "/property/aurelia-residences"
+    ],
+    "firstText": "← BACK ScoutIT SCOUTIT ← DASHBOARD RESIDENTIAL COMMERCIAL STR HOSPITALITY RESTAURANTS VENUES/EVENTS LAYER 2.1 // DISCOVERY RESIDENTIAL DISCOVER → NEWS & INTELLIGENCE Spotlights DRAG LEFT & RIGHT · TAP A SPACE TO LOAD ITS LOCAL NEWS MAKATI CENTRAL The Estate Makati Suite 3 Bedrooms · 220 sqm QUEZON CITY Batasan Hills House & Lot 3 Bedrooms · 180 sqm BONIFACIO GLOBAL CITY Aurelia Residences 4 Bedrooms · 240 sqm News Feed LATEST IN QUEZON CITY · NEWEST FIRST BLOG QUEZON CITY Mastering the QC Market"
+  },
+  {
+    "route": "/property",
+    "label": "desktop",
+    "status": 200,
+    "consoleErrors": [],
+    "title": "ScoutIt — Space Intelligence",
+    "h1": [
+      "The Space Directory"
+    ],
+    "h2": [],
+    "h3": [
+      "The Paragon — Premier Office Tower",
+      "SM E-Com Center — Office Tower",
+      "Batasan Hills House & Lot",
+      "Aurelia Residences Penthouse",
+      "The Estate Makati Suite",
+      "Siargao Tropical Beachfront Villa",
+      "Palawan Eco-Retreat Lodge",
+      "Gallery by Chele Space",
+      "Antonio's Tagaytay Heritage Estate",
+      "The Glasshouse BGC Event Space"
+    ],
+    "imgTags": 15,
+    "bgImgCount": 1,
+    "canvas": 0,
+    "bodyBg": "rgb(14, 14, 14)",
+    "bodyLen": 3669,
+    "realPropLinks": [
+      "/property/the-paragon-tower",
+      "/property/sm-ecom-test",
+      "/property/batasan-hills",
+      "/property/aurelia-residences",
+      "/property/the-estate-makati",
+      "/property/siargao-tropical-villa"
+    ],
+    "firstText": "← BACK ScoutIT Layer 3.1 // Directory Ledger The Space Directory Every home, office, and venue on ScoutIt — searchable in one place. SECTORS ▼ Residential Commercial STR Hospitality Restaurants Venues/Events PRICE BAND ▼ Entry Mid Premium Trophy LOCATIONS ▼ Bonifacio Global City Pasay City Quezon City Makati Central Siargao El Nido Tagaytay Ridge Boracay Coron Panglao Parañaque City Makati City AESTHETICS ▼ NEIGHBORHOOD INTEL BGC Spatial Movement Residential · June 2026 The Return of Quiet Luxur"
+  },
+  {
+    "route": "/property",
+    "label": "mobile",
+    "status": 200,
+    "consoleErrors": [],
+    "title": "ScoutIt — Space Intelligence",
+    "h1": [
+      "The Space Directory"
+    ],
+    "h2": [],
+    "h3": [
+      "The Paragon — Premier Office Tower",
+      "SM E-Com Center — Office Tower",
+      "Batasan Hills House & Lot",
+      "Aurelia Residences Penthouse",
+      "The Estate Makati Suite",
+      "Siargao Tropical Beachfront Villa",
+      "Palawan Eco-Retreat Lodge",
+      "Gallery by Chele Space",
+      "Antonio's Tagaytay Heritage Estate",
+      "The Glasshouse BGC Event Space"
+    ],
+    "imgTags": 15,
+    "bgImgCount": 1,
+    "canvas": 0,
+    "bodyBg": "rgb(14, 14, 14)",
+    "bodyLen": 3545,
+    "realPropLinks": [
+      "/property/the-paragon-tower",
+      "/property/sm-ecom-test",
+      "/property/batasan-hills",
+      "/property/aurelia-residences",
+      "/property/the-estate-makati",
+      "/property/siargao-tropical-villa"
+    ],
+    "firstText": "← BACK ScoutIT Layer 3.1 // Directory Ledger The Space Directory Every home, office, and venue on ScoutIt — searchable in one place. SECTORS ▼ Residential Commercial STR Hospitality Restaurants Venues/Events PRICE BAND ▼ Entry Mid Premium Trophy LOCATIONS ▼ Bonifacio Global City Pasay City Quezon City Makati Central Siargao El Nido Tagaytay Ridge Boracay Coron Panglao Parañaque City Makati City AESTHETICS ▼ 🗺️ PROXIMITY RADAR BONIFACIO GLOBAL CITY The Paragon — Premier Office Tower Trophy Grade"
+  },
+  {
+    "route": "/intel",
+    "label": "desktop",
+    "status": 200,
+    "consoleErrors": [],
+    "title": "ScoutIt — Space Intelligence",
+    "h1": [
+      "Intel"
+    ],
+    "h2": [
+      "BGC Spatial Movement"
+    ],
+    "h3": [
+      "The Return of Quiet Luxury",
+      "Green Office Demand",
+      "BGC Commercial Corridors",
+      "The Return of Quiet Luxury",
+      "Green Office Demand",
+      "BGC Commercial Corridors",
+      "Surf-Front Land Rush",
+      "Off-Grid Island Living",
+      "Manila Venue Trends",
+      "Poblacion Food Architecture"
+    ],
+    "imgTags": 23,
+    "bgImgCount": 1,
+    "canvas": 0,
+    "bodyBg": "rgb(14, 14, 14)",
+    "bodyLen": 5355,
+    "realPropLinks": [],
+    "firstText": "← BACK ScoutIT LAYER 2.2 // EDITORIAL BRIEFINGS Intel Tracing architectural shifts, spatial design, and development dispatches. INTEL → DISCOVER RESIDENTIAL INSIGHT 1 min read BGC Spatial Movement A rise in demand for low-density residences drives modernist villa acquisitions across Bonifacio Global City core. June 2026 Read Deep Analysis → TRENDING BRIEFINGS 01 · RESIDENTIAL · MAY 2026 The Return of Quiet Luxury Local high-net-worth buyers increasingly favor hidden properties in Quezon City ove"
+  },
+  {
+    "route": "/intel",
+    "label": "mobile",
+    "status": 200,
+    "consoleErrors": [],
+    "title": "ScoutIt — Space Intelligence",
+    "h1": [
+      "Intel"
+    ],
+    "h2": [
+      "BGC Spatial Movement"
+    ],
+    "h3": [
+      "The Return of Quiet Luxury",
+      "Green Office Demand",
+      "BGC Commercial Corridors",
+      "The Return of Quiet Luxury",
+      "Green Office Demand",
+      "BGC Commercial Corridors",
+      "Surf-Front Land Rush",
+      "Off-Grid Island Living",
+      "Manila Venue Trends",
+      "Poblacion Food Architecture"
+    ],
+    "imgTags": 23,
+    "bgImgCount": 1,
+    "canvas": 0,
+    "bodyBg": "rgb(14, 14, 14)",
+    "bodyLen": 5385,
+    "realPropLinks": [],
+    "firstText": "← BACK ScoutIT LAYER 2.2 // EDITORIAL BRIEFINGS Intel Tracing architectural shifts, spatial design, and development dispatches. INTEL → DISCOVER RESIDENTIAL INSIGHT 1 min read BGC Spatial Movement A rise in demand for low-density residences drives modernist villa acquisitions across Bonifacio Global City core. June 2026 Read Deep Analysis → TRENDING BRIEFINGS 01 · RESIDENTIAL · MAY 2026 The Return of Quiet Luxury Local high-net-worth buyers increasingly favor hidden properties in Quezon City ove"
+  },
+  {
+    "route": "/brokers",
+    "label": "desktop",
+    "status": 200,
+    "consoleErrors": [],
+    "title": "ScoutIt — Space Intelligence",
+    "h1": [
+      "Intelligence Roster"
+    ],
+    "h2": [
+      "Miguel Torres, REB",
+      "Elena Santos, REB",
+      "Marco Reyes, REB",
+      "Julian Sy",
+      "Camille Laurel",
+      "Sofia Araneta"
+    ],
+    "h3": [
+      "Platform",
+      "Services",
+      "Company"
+    ],
+    "imgTags": 6,
+    "bgImgCount": 1,
+    "canvas": 0,
+    "bodyBg": "rgb(14, 14, 14)",
+    "bodyLen": 2751,
+    "realPropLinks": [],
+    "firstText": "← BACK ScoutIT LAYER 03.1 // VERIFIED ADVISORS Intelligence Roster Directory of elite Space Intelligence advisors across prime corridors. PARTNERSHIP TIERS ▼ Diamond Partner Platinum Partner Gold Partner Silver Partner Bronze Partner CLOSURES ACTIVITY ▼ Show All 1+ Closures 2+ Closures 3+ Closures LOCATIONS FOCUS ▼ BGC Focus Hospitality Sector Laguna Focus Makati Core Quezon City Focus Tagaytay Focus LOCATION HOTMAP BGC Focus 1 AGENT (17%) Hospitality Sector 1 AGENT (17%) Laguna Focus 1 AGENT (1"
+  },
+  {
+    "route": "/brokers",
+    "label": "mobile",
+    "status": 200,
+    "consoleErrors": [],
+    "title": "ScoutIt — Space Intelligence",
+    "h1": [
+      "Intelligence Roster"
+    ],
+    "h2": [
+      "Miguel Torres, REB",
+      "Elena Santos, REB",
+      "Marco Reyes, REB",
+      "Julian Sy",
+      "Camille Laurel",
+      "Sofia Araneta"
+    ],
+    "h3": [
+      "Platform",
+      "Services",
+      "Company"
+    ],
+    "imgTags": 6,
+    "bgImgCount": 1,
+    "canvas": 0,
+    "bodyBg": "rgb(14, 14, 14)",
+    "bodyLen": 2596,
+    "realPropLinks": [],
+    "firstText": "← BACK ScoutIT LAYER 03.1 // VERIFIED ADVISORS Intelligence Roster Directory of elite Space Intelligence advisors across prime corridors. PARTNERSHIP TIERS ▼ Diamond Partner Platinum Partner Gold Partner Silver Partner Bronze Partner CLOSURES ACTIVITY ▼ Show All 1+ Closures 2+ Closures 3+ Closures LOCATIONS FOCUS ▼ BGC Focus Hospitality Sector Laguna Focus Makati Core Quezon City Focus Tagaytay Focus SILVER PARTNER BGC FOCUS Miguel Torres, REB PRINCIPAL STRATEGIST Specialty: Ultra-Luxury Residen"
+  },
+  {
+    "route": "/about",
+    "label": "desktop",
+    "status": 200,
+    "consoleErrors": [],
+    "title": "ScoutIt — Space Intelligence",
+    "h1": [
+      "The ScoutIt Manifesto"
+    ],
+    "h2": [
+      "The ScoutIt Ecosystem",
+      "Redefining Capital Placement in Emerging Asia."
+    ],
+    "h3": [
+      "01. The Matrix",
+      "02. The Advisors",
+      "03. The Architecture",
+      "Platform",
+      "Services",
+      "Company"
+    ],
+    "imgTags": 0,
+    "bgImgCount": 1,
+    "canvas": 0,
+    "bodyBg": "rgb(14, 14, 14)",
+    "bodyLen": 2719,
+    "realPropLinks": [],
+    "firstText": "← BACK ScoutIT VECTOR 05 The ScoutIt Manifesto ScoutIt is not a marketplace. We are a space intelligence platform engineering the acquisition and transfer of prime real estate assets across the Philippine archipelago. 01. The Matrix In a fragmented market, information asymmetry dictates value. Our platform aggregates and synthesizes spatial data into a unified, high-fidelity matrix. We bypass traditional listings to provide institutional-grade intelligence on premium residential, commercial, and"
+  },
+  {
+    "route": "/about",
+    "label": "mobile",
+    "status": 200,
+    "consoleErrors": [],
+    "title": "ScoutIt — Space Intelligence",
+    "h1": [
+      "The ScoutIt Manifesto"
+    ],
+    "h2": [
+      "The ScoutIt Ecosystem",
+      "Redefining Capital Placement in Emerging Asia."
+    ],
+    "h3": [
+      "01. The Matrix",
+      "02. The Advisors",
+      "03. The Architecture",
+      "Platform",
+      "Services",
+      "Company"
+    ],
+    "imgTags": 0,
+    "bgImgCount": 1,
+    "canvas": 0,
+    "bodyBg": "rgb(14, 14, 14)",
+    "bodyLen": 2751,
+    "realPropLinks": [],
+    "firstText": "← BACK ScoutIT VECTOR 05 The ScoutIt Manifesto ScoutIt is not a marketplace. We are a space intelligence platform engineering the acquisition and transfer of prime real estate assets across the Philippine archipelago. 01. The Matrix In a fragmented market, information asymmetry dictates value. Our platform aggregates and synthesizes spatial data into a unified, high-fidelity matrix. We bypass traditional listings to provide institutional-grade intelligence on premium residential, commercial, and"
+  },
+  {
+    "route": "/layer/stratosphere",
+    "label": "desktop",
+    "status": 200,
+    "consoleErrors": [],
+    "title": "ScoutIt — Space Intelligence",
+    "h1": [],
+    "h2": [
+      "Stories & Market Intel"
+    ],
+    "h3": [
+      "Mission",
+      "Residential Stories"
+    ],
+    "imgTags": 3,
+    "bgImgCount": 2,
+    "canvas": 0,
+    "bodyBg": "rgb(14, 14, 14)",
+    "bodyLen": 2107,
+    "realPropLinks": [],
+    "firstText": "← ORBIT ScoutIT METROPOLIS → LAYER 02 // STRATOSPHERE Stories & Market Intel Neighborhood stories, market reports, and design features from around the Philippines. Residential Commercial STR Hospitality Restaurants Venues/Events MISSION The Stratosphere serves as the Intelligence Layer. This is where market signals travel before they ever touch the ground — neighborhood stories, regional data, and design narratives that let you read the market from above, long before you descend into it. READ TH"
+  },
+  {
+    "route": "/layer/stratosphere",
+    "label": "mobile",
+    "status": 200,
+    "consoleErrors": [],
+    "title": "ScoutIt — Space Intelligence",
+    "h1": [],
+    "h2": [
+      "Stories & Market Intel"
+    ],
+    "h3": [
+      "Mission",
+      "Residential Stories"
+    ],
+    "imgTags": 3,
+    "bgImgCount": 2,
+    "canvas": 0,
+    "bodyBg": "rgb(14, 14, 14)",
+    "bodyLen": 1507,
+    "realPropLinks": [],
+    "firstText": "← ScoutIT → LAYER 02 // STRATOSPHERE Stories & Market Intel Neighborhood stories, market reports, and design features from around the Philippines. Residential Commercial STR Hospitality Restaurants Venues/Events MISSION The Stratosphere serves as the Intelligence Layer. This is where market signals travel before they ever touch the ground — neighborhood stories, regional data, and design narratives that let you read the market from above, long before you descend into it. READ THE STORIES → Resid"
+  },
+  {
+    "route": "/layer/metropolis",
+    "label": "desktop",
+    "status": 200,
+    "consoleErrors": [],
+    "title": "ScoutIt — Space Intelligence",
+    "h1": [],
+    "h2": [
+      "Explore by Category"
+    ],
+    "h3": [
+      "Mission",
+      "Residential Spaces"
+    ],
+    "imgTags": 0,
+    "bgImgCount": 4,
+    "canvas": 1,
+    "bodyBg": "rgb(14, 14, 14)",
+    "bodyLen": 913,
+    "realPropLinks": [
+      "/property/aurelia-residences",
+      "/property/the-estate-makati",
+      "/property/park-central-towers"
+    ],
+    "firstText": "← STRATOSPHERE ScoutIT CRUST → LAYER 03 // METROPOLIS Explore by Category Pick a category and see what's inside — homes, offices, venues, and more. Residential Commercial STR Hospitality Restaurants Venues/Events MISSION The Metropolis serves as the Directory Layer. Every kind of space — home, office, venue, table — is the same product in disguise. This layer exists to let you walk the market building by building and find the exact square meters that fit you. BROWSE RESIDENTIAL → Residential Spa"
+  },
+  {
+    "route": "/layer/metropolis",
+    "label": "mobile",
+    "status": 200,
+    "consoleErrors": [],
+    "title": "ScoutIt — Space Intelligence",
+    "h1": [],
+    "h2": [
+      "Explore by Category"
+    ],
+    "h3": [
+      "Mission",
+      "Residential Spaces"
+    ],
+    "imgTags": 0,
+    "bgImgCount": 4,
+    "canvas": 1,
+    "bodyBg": "rgb(14, 14, 14)",
+    "bodyLen": 927,
+    "realPropLinks": [
+      "/property/aurelia-residences",
+      "/property/the-estate-makati",
+      "/property/park-central-towers"
+    ],
+    "firstText": "← ScoutIT → LAYER 03 // METROPOLIS Explore by Category Pick a category and see what's inside — homes, offices, venues, and more. Residential Commercial STR Hospitality Restaurants Venues/Events MISSION The Metropolis serves as the Directory Layer. Every kind of space — home, office, venue, table — is the same product in disguise. This layer exists to let you walk the market building by building and find the exact square meters that fit you. BROWSE RESIDENTIAL → Residential Spaces A PREVIEW OF WH"
+  },
+  {
+    "route": "/layer/crust",
+    "label": "desktop",
+    "status": 200,
+    "consoleErrors": [],
+    "title": "ScoutIt — Space Intelligence",
+    "h1": [],
+    "h2": [
+      "The Service Ecosystem"
+    ],
+    "h3": [
+      "Mission",
+      "Verified Advisors",
+      "Space Photography",
+      "Site Research",
+      "Event Design"
+    ],
+    "imgTags": 0,
+    "bgImgCount": 1,
+    "canvas": 1,
+    "bodyBg": "rgb(14, 14, 14)",
+    "bodyLen": 977,
+    "realPropLinks": [],
+    "firstText": "← METROPOLIS ScoutIT MANTLE → VERIFIED PROVIDERS The Service Ecosystem Verified advisors, photographers, site researchers, and event designers — the professionals who make every space decision count. MISSION The Crust serves as the Trust Layer. It is the solid ground the whole platform rests on — verified advisors, photographers, researchers, and planners — the people who make every space decision real, accountable, and worth committing to. LIVE Verified Advisors Licensed real estate professiona"
+  },
+  {
+    "route": "/layer/crust",
+    "label": "mobile",
+    "status": 200,
+    "consoleErrors": [],
+    "title": "ScoutIt — Space Intelligence",
+    "h1": [],
+    "h2": [
+      "The Service Ecosystem"
+    ],
+    "h3": [
+      "Mission",
+      "Verified Advisors",
+      "Space Photography",
+      "Site Research",
+      "Event Design"
+    ],
+    "imgTags": 0,
+    "bgImgCount": 1,
+    "canvas": 1,
+    "bodyBg": "rgb(14, 14, 14)",
+    "bodyLen": 643,
+    "realPropLinks": [],
+    "firstText": "← ScoutIT → VERIFIED PROVIDERS The Service Ecosystem Verified advisors, photographers, site researchers, and event designers — the professionals who make every space decision count. MISSION The Crust serves as the Trust Layer. It is the solid ground the whole platform rests on — verified advisors, photographers, researchers, and planners — the people who make every space decision real, accountable, and worth committing to. LIVE Verified Advisors CONNECT WITH ADVISOR → PRE-REGISTER Space Photogra"
+  },
+  {
+    "route": "/layer/mantle",
+    "label": "desktop",
+    "status": 200,
+    "consoleErrors": [],
+    "title": "ScoutIt — Space Intelligence",
+    "h1": [],
+    "h2": [
+      "We’re the deep archive holding you up."
+    ],
+    "h3": [
+      "Mission"
+    ],
+    "imgTags": 0,
+    "bgImgCount": 1,
+    "canvas": 1,
+    "bodyBg": "rgb(14, 14, 14)",
+    "bodyLen": 554,
+    "realPropLinks": [],
+    "firstText": "← CRUST ScoutIT CORE → LAYER 05 // THE MANTLE We’re the deep archive holding you up. ScoutIt is the massive, structured intelligence database wrapping around the thing at the center. We do the quiet, heavy lifting: everything we store is to protect and support you. READ OUR STORY → MISSION The Mantle serves as the Archive Layer. It is ScoutIt’s thickest stratum: the massive, structured intelligence reservoir wrapping around the core. It does the quiet, heavy lifting — everything stored here exis"
+  },
+  {
+    "route": "/layer/mantle",
+    "label": "mobile",
+    "status": 200,
+    "consoleErrors": [],
+    "title": "ScoutIt — Space Intelligence",
+    "h1": [],
+    "h2": [
+      "We’re the deep archive holding you up."
+    ],
+    "h3": [
+      "Mission"
+    ],
+    "imgTags": 0,
+    "bgImgCount": 1,
+    "canvas": 1,
+    "bodyBg": "rgb(14, 14, 14)",
+    "bodyLen": 576,
+    "realPropLinks": [],
+    "firstText": "← ScoutIT → LAYER 05 // THE MANTLE We’re the deep archive holding you up. ScoutIt is the massive, structured intelligence database wrapping around the thing at the center. We do the quiet, heavy lifting: everything we store is to protect and support you. READ OUR STORY → MISSION The Mantle serves as the Archive Layer. It is ScoutIt’s thickest stratum: the massive, structured intelligence reservoir wrapping around the core. It does the quiet, heavy lifting — everything stored here exists to prote"
+  },
+  {
+    "route": "/property/the-estate-makati",
+    "label": "desktop",
+    "status": 200,
+    "consoleErrors": [],
+    "title": "Property Intel — the-estate-makati — ScoutIt · ScoutIt",
+    "h1": [
+      "The Estate Makati Suite",
+      "The Estate Makati Suite"
+    ],
+    "h2": [
+      "When you're ready, we'll make the introduction."
+    ],
+    "h3": [
+      "Platform",
+      "Services",
+      "Company"
+    ],
+    "imgTags": 36,
+    "bgImgCount": 5,
+    "canvas": 0,
+    "bodyBg": "rgb(14, 14, 14)",
+    "bodyLen": 5682,
+    "realPropLinks": [
+      "/property/the-estate-makati/brokers"
+    ],
+    "firstText": "← BACK ScoutIT SCOUTIT · RESIDENTIAL DETAILS The Estate Makati Suite Ayala Avenue, Makati Central Cruciform structure designed by Foster + Partners to maximize natural daylight. Natural Enhanced Expand Photo 1 / 2 The Space Location The Vault Life Here Where To? Build Plans The Fine Print Units Universe Services Your Move 01 — THE SPACE Special 3 BEDROOMS 3 BATHROOMS 220 SQM FLOOR 2 PARKING SLOTS CEILING HEIGHT 3.4 meters FURNISHING Bare OUTDOOR SPACE Private double-foyer lobby entrance Built us"
+  },
+  {
+    "route": "/property/the-estate-makati",
+    "label": "mobile",
+    "status": 200,
+    "consoleErrors": [],
+    "title": "Property Intel — the-estate-makati — ScoutIt · ScoutIt",
+    "h1": [
+      "The Estate Makati Suite",
+      "The Estate Makati Suite"
+    ],
+    "h2": [
+      "When you're ready, we'll make the introduction."
+    ],
+    "h3": [
+      "Platform",
+      "Services",
+      "Company"
+    ],
+    "imgTags": 2,
+    "bgImgCount": 5,
+    "canvas": 0,
+    "bodyBg": "rgb(14, 14, 14)",
+    "bodyLen": 1311,
+    "realPropLinks": [
+      "/property/the-estate-makati/brokers"
+    ],
+    "firstText": "← BACK ScoutIT Natural Enhanced Expand Photo 1 / 2 SCOUTIT · RESIDENTIAL DETAILS The Estate Makati Suite Ayala Avenue, Makati Central Cruciform structure designed by Foster + Partners to maximize natural daylight. The Space Location The Vault Life Here Where To? Build Plans The Fine Print Units Universe Services Your Move 01 — THE SPACE Special 3 BEDROOMS 3 BATHROOMS 220 SQM FLOOR 2 PARKING SLOTS CEILING HEIGHT 3.4 meters FURNISHING Bare OUTDOOR SPACE Private double-foyer lobby entrance Built us"
+  }
+]
