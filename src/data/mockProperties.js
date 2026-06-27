@@ -80,7 +80,7 @@ export const DISCOVERY_FEED = {
         title: "Arthaland Century Pacific",
         location: "BGC North",
         style: "Eco-Corporate",
-        image: "https://images.unsplash.com/photo-1582653291997-079a1c04e5d1?w=400&q=80",
+        image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&q=80",
         desc: "A boutique commercial landmark combining zero-waste technology and premium workspace layouts."
       }
     ],
@@ -222,7 +222,7 @@ export const CATEGORY_PREVIEWS = {
     {
       id: "arthaland-century-pacific",
       title: "Arthaland Century Pacific",
-      image: "https://images.unsplash.com/photo-1582653291997-079a1c04e5d1?w=800&q=80",
+      image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80",
       tags: ["Aesthetic: Eco-Corporate", "Zoning: Mixed-Use", "Location: BGC North"],
     }
   ],

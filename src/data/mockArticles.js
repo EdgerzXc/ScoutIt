@@ -63,7 +63,7 @@ export const ARTICLES = [
     category: "Commercial",
     date: "April 2026",
     excerpt: "Retail podiums and commercial corridors evolve to incorporate open-air sky parks and wellness zones.",
-    image: "https://images.unsplash.com/photo-1582653291997-079a1c04e5d1?w=800&q=80"
+    image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80"
   },
   {
     slug: "surf-front-land-rush",
@@ -143,7 +143,7 @@ export const ARTICLES = [
     category: "Commercial",
     date: "Q3 2026",
     excerpt: "Retail spaces are fully occupied for the next 24 months.",
-    image: "https://images.unsplash.com/photo-1582653291997-079a1c04e5d1?w=800&q=80"
+    image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80"
   },
   {
     slug: "bgc-commercial-outlook",
@@ -263,7 +263,7 @@ export const ARTICLE_DB = {
     title: "BGC Commercial Corridors",
     category: "Commercial",
     date: "April 2026",
-    image: "https://images.unsplash.com/photo-1582653291997-079a1c04e5d1?w=1200&q=80",
+    image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1200&q=80",
     lead: "High-density retail environments are giving way to open-air sky parks. The evolution of BGC's commercial plazas points toward integrated, design-first urban gardens.",
     body: [
       "Traditional commercial layouts are being remodeled to meet a consumer demand for wellness and space. Plazas and high-density shopping structures are integrating massive, glass-domed green zones, open-air pedestrian avenues, and micro-climate gardens that actively cool the surroundings.",

@@ -59,7 +59,7 @@ export default function Header() {
       </button>
       
       <Link href="/" className="header-brand" aria-label="ScoutIT — home">
-        <span className="brand-scout">Scout</span><span className="brand-it">IT</span>
+        <span className="brand-s">S</span><span className="brand-scout">cout</span><span className="brand-it">IT</span>
       </Link>
 
       <nav className="header-nav" ref={menuRef}>
@@ -158,7 +158,9 @@ export default function Header() {
           line-height: 1;
         }
         .header-brand .brand-scout { color: #f5f3ee; }
+        .header-brand .brand-s,
         .header-brand .brand-it { color: var(--accent); transition: text-shadow 0.3s ease; }
+        .header-brand:hover .brand-s,
         .header-brand:hover .brand-it { text-shadow: 0 0 14px rgba(232, 174, 60, 0.55); }
 
         .header-nav {

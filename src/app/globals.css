@@ -900,8 +900,11 @@ body.light-mode .toolbox-float {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 26px;
-    height: 26px;
+    width: 46px;
+    height: 28px;
+    border-radius: 14px;
+    border: 1px solid transparent;
+    transition: background 0.22s ease, border-color 0.22s ease;
   }
 
   .bottom-nav-icon svg {
@@ -910,16 +913,23 @@ body.light-mode .toolbox-float {
     transition: stroke 0.2s ease;
   }
 
+  /* Active state — a soft gold "pill" behind the icon, on-brand glow,
+     and a gold accent bar riding the top edge. Reads instantly as "you are here". */
+  .bottom-nav-item.active .bottom-nav-icon {
+    background: rgba(232, 174, 60, 0.12);
+    border-color: rgba(232, 174, 60, 0.28);
+  }
+
   .bottom-nav-item.active .bottom-nav-icon svg {
     stroke: var(--accent);
-    filter: drop-shadow(0 0 6px rgba(232, 174, 60, 0.4));
+    filter: drop-shadow(0 0 6px rgba(232, 174, 60, 0.45));
   }
 
   .bottom-nav-label {
     font-family: var(--font-mono);
-    font-size: 8px;
+    font-size: 9px;
     font-weight: 600;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.07em;
     text-transform: uppercase;
     line-height: 1;
     white-space: nowrap;
@@ -930,14 +940,59 @@ body.light-mode .toolbox-float {
 
   .bottom-nav-dot {
     position: absolute;
-    top: 2px;
+    top: 0;
     left: 50%;
     transform: translateX(-50%);
-    width: 3px;
+    width: 22px;
     height: 3px;
-    border-radius: 50%;
+    border-radius: 0 0 3px 3px;
     background: var(--accent);
-    box-shadow: 0 0 6px rgba(232, 174, 60, 0.6);
+    box-shadow: 0 0 8px rgba(232, 174, 60, 0.7);
+  }
+
+  /* ── Property action bar: the primary CTA (Inquire) reads as one clear,
+        raised gold action so there's a single obvious next step on mobile. ── */
+  .bottom-nav.property-actions .bottom-nav-item.primary .bottom-nav-icon {
+    background: var(--accent-bright, #F7C64E);
+    border-color: var(--accent-bright, #F7C64E);
+    width: 54px;
+    height: 34px;
+    border-radius: 17px;
+    margin-top: -10px;
+    box-shadow: 0 4px 16px rgba(247, 198, 78, 0.4), 0 0 0 4px rgba(12, 11, 9, 0.96);
+  }
+
+  .bottom-nav.property-actions .bottom-nav-item.primary .bottom-nav-icon svg {
+    stroke: #0e0e0e;
+  }
+
+  .bottom-nav.property-actions .bottom-nav-item.primary .bottom-nav-label {
+    color: var(--accent-bright, #F7C64E);
+  }
+
+  .bottom-nav.property-actions .bottom-nav-item.primary:active .bottom-nav-icon {
+    transform: scale(0.94);
+  }
+
+  /* Transient "Link copied" confirmation for the Share fallback. */
+  .bottom-nav-toast {
+    position: fixed;
+    bottom: 84px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 901;
+    background: rgba(20, 18, 14, 0.96);
+    color: var(--accent);
+    border: 1px solid rgba(232, 174, 60, 0.32);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 9px 18px;
+    border-radius: 999px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5);
   }
 
   .theme-sheet-overlay {

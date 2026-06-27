@@ -206,6 +206,13 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode }) {
   const [whereToTab,        setWhereToTab]        = useState("map");
   const [locTab,            setLocTab]            = useState("map");
   const [isInquiryOpen,     setIsInquiryOpen]     = useState(false);
+  // The mobile bottom bar's "Inquire" action opens this modal via a global event,
+  // so the primary CTA is always reachable from the thumb zone on a long page.
+  useEffect(() => {
+    const open = () => setIsInquiryOpen(true);
+    window.addEventListener("scoutit:property-inquire", open);
+    return () => window.removeEventListener("scoutit:property-inquire", open);
+  }, []);
 
   // Per-panel accordion state (independent per section)
   const [accSpace,    setAccSpace]    = useState(null);

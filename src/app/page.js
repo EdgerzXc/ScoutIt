@@ -884,7 +884,7 @@ export default function Home() {
 
           {/* ScoutIT wordmark */}
           <div className={`scoutit-wordmark ${wordLit ? "lit" : ""}`} aria-label="ScoutIT">
-            <span className="word-scout">Scout</span><span className="word-it">IT</span>
+            <span className="word-s">S</span><span className="word-scout">cout</span><span className="word-it">IT</span>
             {flashId > 0 && <span key={`flash-${flashId}`} className="title-impact" />}
           </div>
 
@@ -1358,6 +1358,7 @@ export default function Home() {
           margin: 0 0 20px;
           line-height: 1;
         }
+        .scoutit-wordmark .word-s,
         .scoutit-wordmark .word-scout,
         .scoutit-wordmark .word-it {
           font-family: Georgia, 'Times New Roman', serif;
@@ -1369,6 +1370,7 @@ export default function Home() {
           transition: color 2s ease, text-shadow 2s ease;
         }
         .scoutit-wordmark .word-scout { color: #ffffff; }
+        .scoutit-wordmark .word-s     { color: #E8AE3C; }
         .scoutit-wordmark .word-it    { color: #E8AE3C; margin-right: -4px; }
         /* beam-hit illumination snaps on fast, then fades back slowly via base transition */
         .scoutit-wordmark.lit .word-scout {
@@ -1376,6 +1378,7 @@ export default function Home() {
           text-shadow: 0 0 60px rgba(232, 174, 60, 0.8), 0 0 120px rgba(232, 174, 60, 0.3);
           transition: color 0.15s ease, text-shadow 0.15s ease;
         }
+        .scoutit-wordmark.lit .word-s,
         .scoutit-wordmark.lit .word-it {
           color: #E8AE3C;
           text-shadow: 0 0 60px rgba(232, 174, 60, 0.9), 0 0 120px rgba(232, 174, 60, 0.4);

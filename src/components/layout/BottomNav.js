@@ -57,6 +57,31 @@ const ICONS = {
       <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
       <circle cx="12" cy="12" r="3" />
     </svg>
+  ),
+  back: (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="19" y1="12" x2="5" y2="12" />
+      <polyline points="12 19 5 12 12 5" />
+    </svg>
+  ),
+  save: (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+    </svg>
+  ),
+  inquire: (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8z" />
+    </svg>
+  ),
+  share: (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="18" cy="5" r="3" />
+      <circle cx="6" cy="12" r="3" />
+      <circle cx="18" cy="19" r="3" />
+      <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+      <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+    </svg>
   )
 };
 
@@ -72,14 +97,20 @@ const ITEMS = {
   theme:     { id: "theme",     action: "open-theme-sheet",         label: "Theme", icon: ICONS.theme }
 };
 
-// Contextual Layout Configurations
+// Contextual Layout Configurations.
+// IA rules (mobile bottom nav, ≤5 items):
+//   • Slot 1 (left) anchors the section you're in — "you are here".
+//   • Home stays reachable from every context.
+//   • Slots 2–4 are the most useful onward destinations for that page.
+//   • Theme/display is a utility, so it always sits in the last slot —
+//     never in the prime, thumb-reachable centre.
 const CONTEXTS = {
-  default:   [ITEMS.home,      ITEMS.spaces,    ITEMS.theme, ITEMS.discover, ITEMS.dashboard],
-  dashboard: [ITEMS.dashboard, ITEMS.role,      ITEMS.theme, ITEMS.discover, ITEMS.board],
-  board:     [ITEMS.board,     ITEMS.spaces,    ITEMS.theme, ITEMS.intel,    ITEMS.dashboard],
-  discover:  [ITEMS.discover,  ITEMS.board,     ITEMS.theme, ITEMS.spaces,   ITEMS.dashboard],
-  spaces:    [ITEMS.spaces,    ITEMS.intel,     ITEMS.theme, ITEMS.discover, ITEMS.dashboard],
-  intel:     [ITEMS.intel,     ITEMS.spaces,    ITEMS.theme, ITEMS.board,    ITEMS.dashboard]
+  default:   [ITEMS.home,      ITEMS.spaces,    ITEMS.discover, ITEMS.intel,  ITEMS.theme],
+  dashboard: [ITEMS.dashboard, ITEMS.home,      ITEMS.discover, ITEMS.role,   ITEMS.theme],
+  board:     [ITEMS.board,     ITEMS.home,      ITEMS.spaces,   ITEMS.discover, ITEMS.theme],
+  discover:  [ITEMS.discover,  ITEMS.home,      ITEMS.spaces,   ITEMS.board,  ITEMS.theme],
+  spaces:    [ITEMS.spaces,    ITEMS.home,      ITEMS.discover, ITEMS.board,  ITEMS.theme],
+  intel:     [ITEMS.intel,     ITEMS.home,      ITEMS.spaces,   ITEMS.board,  ITEMS.theme]
 };
 
 
@@ -89,6 +120,13 @@ export default function BottomNav() {
   const [currentMode, setCurrentMode] = useState("dark");
   const [lite, setLite] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+  const [shareToast, setShareToast] = useState("");
+
+  // On a single property page (/property/<slug>) the bar becomes an ACTION bar
+  // — the page's real jobs (save, inquire, share) under the thumb, not nav links.
+  const propertyMatch = pathname.match(/^\/property\/([^/]+)\/?$/);
+  const propSlug = propertyMatch ? propertyMatch[1] : null;
 
   useEffect(() => {
     const legacy = localStorage.getItem("scoutit_accessibility_mode") === "high-contrast" ? "high-contrast" : null;
@@ -97,6 +135,91 @@ export default function BottomNav() {
     setLite(getStoredLiteMode());
     setMounted(true);
   }, []);
+
+  // Reflect whether this property is already saved to the Ledger. Saves are stored
+  // in `scoutit_reactions` as a reaction of type "Save" — same format ReactionButtons
+  // uses, so the bar and the on-page save buttons stay in sync via shared storage.
+  useEffect(() => {
+    if (!propSlug) return;
+    try {
+      const arr = JSON.parse(localStorage.getItem("scoutit_reactions") || "[]");
+      const match = Array.isArray(arr) ? arr.find((i) => i.property_id === propSlug) : null;
+      setIsSaved(!!match && match.reaction_type === "Save");
+    } catch {
+      setIsSaved(false);
+    }
+  }, [propSlug]);
+
+  const toggleSave = () => {
+    if (!propSlug) return;
+    try {
+      let arr = JSON.parse(localStorage.getItem("scoutit_reactions") || "[]");
+      if (!Array.isArray(arr)) arr = [];
+      const idx = arr.findIndex((i) => i.property_id === propSlug);
+      const alreadySaved = idx > -1 && arr[idx].reaction_type === "Save";
+      if (alreadySaved) {
+        arr.splice(idx, 1);
+        setIsSaved(false);
+      } else {
+        const title = document.querySelector("h1")?.textContent?.trim() || propSlug;
+        const item = { property_id: propSlug, property_title: title, category: "", city: "", reaction_type: "Save", is_broker: false, timestamp: Date.now() };
+        if (idx > -1) arr[idx] = item; else arr.push(item);
+        setIsSaved(true);
+        fetch("/api/reactions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ property_id: propSlug, reaction_type: "Save" }) }).catch(() => {});
+      }
+      localStorage.setItem("scoutit_reactions", JSON.stringify(arr));
+    } catch {
+      /* localStorage unavailable — leave state unchanged */
+    }
+  };
+
+  // Copy text with the modern API, falling back to a legacy textarea+execCommand
+  // for browsers/contexts where the Clipboard API is blocked. Returns success.
+  const copyLink = async (text) => {
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        return true;
+      }
+    } catch {
+      /* fall through to legacy path */
+    }
+    try {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      const ok = document.execCommand("copy");
+      document.body.removeChild(ta);
+      return ok;
+    } catch {
+      return false;
+    }
+  };
+
+  const handleShare = async () => {
+    const url = typeof window !== "undefined" ? window.location.href : "";
+    const title = document.querySelector("h1")?.textContent?.trim() || "ScoutIT";
+    // Native share sheet is the primary path on mobile; the rest is desktop fallback.
+    if (navigator.share) {
+      try {
+        await navigator.share({ title, text: `${title} · ScoutIT`, url });
+      } catch {
+        /* user dismissed the share sheet — no-op */
+      }
+      return;
+    }
+    const ok = await copyLink(url);
+    setShareToast(ok ? "Link copied" : "Couldn't copy — long-press the address bar");
+    setTimeout(() => setShareToast(""), 2400);
+  };
+
+  const openInquiry = () => {
+    window.dispatchEvent(new CustomEvent("scoutit:property-inquire"));
+  };
 
   const toggleLite = () => {
     const next = !lite;
@@ -128,6 +251,42 @@ export default function BottomNav() {
   else if (pathname.startsWith("/intel")) itemsToRender = CONTEXTS.intel;
 
   if (!mounted) return null;
+
+  // ── Property action bar (single property page) ──
+  if (propSlug) {
+    return (
+      <>
+        <nav className="bottom-nav property-actions" aria-label="Property actions">
+          <Link href="/property" className="bottom-nav-item" aria-label="Back to all spaces">
+            <span className="bottom-nav-icon">{ICONS.back}</span>
+            <span className="bottom-nav-label">Spaces</span>
+          </Link>
+          <button
+            className={`bottom-nav-item${isSaved ? " active" : ""}`}
+            onClick={toggleSave}
+            aria-pressed={isSaved}
+            aria-label={isSaved ? "Saved to your board" : "Save to your board"}
+          >
+            <span className="bottom-nav-icon">{ICONS.save}</span>
+            <span className="bottom-nav-label">{isSaved ? "Saved" : "Save"}</span>
+          </button>
+          <button className="bottom-nav-item primary" onClick={openInquiry} aria-label="Inquire about this space">
+            <span className="bottom-nav-icon">{ICONS.inquire}</span>
+            <span className="bottom-nav-label">Inquire</span>
+          </button>
+          <button className="bottom-nav-item" onClick={handleShare} aria-label="Share this space">
+            <span className="bottom-nav-icon">{ICONS.share}</span>
+            <span className="bottom-nav-label">Share</span>
+          </button>
+          <Link href="/" className="bottom-nav-item" aria-label="Home">
+            <span className="bottom-nav-icon">{ICONS.home}</span>
+            <span className="bottom-nav-label">Home</span>
+          </Link>
+        </nav>
+        {shareToast && <div className="bottom-nav-toast" role="status" aria-live="polite">{shareToast}</div>}
+      </>
+    );
+  }
 
   return (
     <>

@@ -330,6 +330,13 @@ export default function CommercialFlow({ slug, draftData, isDraftMode }) {
   const [activeTab,         setActiveTab]         = useState("space");
   const [menuOpen,   setMenuOpen]   = useState(false);
   const [isInquiryOpen, setIsInquiryOpen] = useState(false);
+  // The mobile bottom bar's "Inquire" action opens this modal via a global event,
+  // so the primary CTA is always reachable from the thumb zone on a long page.
+  useEffect(() => {
+    const open = () => setIsInquiryOpen(true);
+    window.addEventListener("scoutit:property-inquire", open);
+    return () => window.removeEventListener("scoutit:property-inquire", open);
+  }, []);
   const [propertyData, setPropertyData] = useState(() => draftData || getPropertyBySlug(slug));
   const [dataLoading,  setDataLoading]  = useState(false);
   const [isOwner, setIsOwner] = useState(false);

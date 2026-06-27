@@ -44,7 +44,7 @@ export const DUMMY_BROKERS = [
     ],
     managedProperties: [
       { slug: "zuellig-building", title: "Zuellig Commercial Tower", category: "Commercial", image: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=400&q=80" },
-      { slug: "arthaland-century-pacific", title: "Arthaland Century Plaza", category: "Commercial", image: "https://images.unsplash.com/photo-1582653291997-079a1c04e5d1?auto=format&fit=crop&w=400&q=80" }
+      { slug: "arthaland-century-pacific", title: "Arthaland Century Plaza", category: "Commercial", image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=400&q=80" }
     ]
   },
   {
@@ -92,7 +92,7 @@ export const DUMMY_BROKERS = [
     ],
     managedProperties: [
       { slug: "zuellig-building", title: "Zuellig Commercial Tower", category: "Commercial", image: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=400&q=80" },
-      { slug: "arthaland-century-pacific", title: "Arthaland Century Plaza", category: "Commercial", image: "https://images.unsplash.com/photo-1582653291997-079a1c04e5d1?auto=format&fit=crop&w=400&q=80" }
+      { slug: "arthaland-century-pacific", title: "Arthaland Century Plaza", category: "Commercial", image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=400&q=80" }
     ]
   },
   {

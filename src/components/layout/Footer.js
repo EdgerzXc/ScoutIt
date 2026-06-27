@@ -8,7 +8,7 @@ export default function Footer() {
       <div className="footer-container">
         <div className="footer-branding">
           <Link href="/" className="footer-brand">
-            <span className="brand-scout">Scout</span><span className="brand-it">IT</span>
+            <span className="brand-s">S</span><span className="brand-scout">cout</span><span className="brand-it">IT</span>
           </Link>
           <p className="footer-tagline">
             The Philippines' first spatial commerce platform. Every kind of space — homes, offices, venues, tables — decoded into clear, verified intelligence.
@@ -110,6 +110,7 @@ export default function Footer() {
         }
 
         .footer-brand .brand-scout { color: #f5f3ee; }
+        .footer-brand .brand-s,
         .footer-brand .brand-it { color: var(--accent, #E8AE3C); }
 
         .footer-tagline {

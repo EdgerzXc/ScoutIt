@@ -354,7 +354,7 @@ export default function OnboardingPage() {
         </div>
         <div className="flex justify-center">
           <Link href="/" className="font-display-md text-2xl text-gold-accent tracking-tighter hover:opacity-80 transition-opacity">
-            Scout<span className="text-on-surface">IT</span>
+            S<span className="text-on-surface">cout</span>IT
           </Link>
         </div>
         <div className="flex items-center justify-end gap-2">
