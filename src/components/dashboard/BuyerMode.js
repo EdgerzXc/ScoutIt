@@ -194,9 +194,6 @@ export default function BuyerMode() {
   return (
     <div className="w-full max-w-7xl mx-auto px-4 md:px-8 flex flex-col gap-8 pb-24 animate-[fadeIn_0.5s_ease-out]">
       
-      {/* Vault of Honor */}
-      <VaultOfHonor />
-
       {/* Search Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-surface-variant pb-6">
         <div className="flex flex-col md:flex-row w-full md:w-auto gap-3 flex-1">
@@ -266,7 +263,7 @@ export default function BuyerMode() {
           <div className="flex flex-col gap-4">
             <h2 className="font-headline-editorial text-2xl text-on-surface flex items-center justify-between border-b border-surface-variant pb-2">
               Saved Properties
-              <button className="text-[10px] font-label-caps tracking-widest uppercase text-gold-accent hover:underline">Open Full Archive</button>
+              <button className="text-[10px] font-label-caps tracking-widest uppercase text-gold-accent hover:underline py-2.5 px-1 -my-1">Open Full Archive</button>
             </h2>
             <p className="text-xs text-text-secondary mb-2">Tracked assets and saved market briefs.</p>
             <div className="flex gap-4 overflow-x-auto pb-4 snap-x hide-scrollbar">
@@ -295,8 +292,8 @@ export default function BuyerMode() {
                 >
                   + Set Alert
                 </button>
-                <button 
-                  className="text-[10px] font-label-caps tracking-widest uppercase text-gold-accent hover:underline"
+                <button
+                  className="text-[10px] font-label-caps tracking-widest uppercase text-gold-accent hover:underline py-2.5 px-1 -my-1"
                   onClick={() => setShowMap(true)}
                 >
                   View Map
@@ -340,7 +337,7 @@ export default function BuyerMode() {
           <div className="flex flex-col gap-4 mt-8">
             <h2 className="font-headline-editorial text-2xl text-on-surface flex items-center justify-between">
               Market Intelligence
-              <button className="text-xs font-working-title text-gold-accent cursor-pointer hover:underline">View Archives</button>
+              <button className="text-xs font-working-title text-gold-accent cursor-pointer hover:underline py-2.5 px-1 -my-1">View Archives</button>
             </h2>
             <div className="flex gap-6 overflow-x-auto pb-6 snap-x hide-scrollbar">
               
@@ -393,6 +390,9 @@ export default function BuyerMode() {
           <PostMoveEcosystem />
         </>
       )}
+
+      {/* Vault of Honor — badges/achievements sit below the core content (search + saved + intel) */}
+      <VaultOfHonor />
 
       <style jsx global>{`
         .hide-scrollbar::-webkit-scrollbar {

@@ -174,7 +174,7 @@ function DashboardInner() {
       {/* Top Nav (Persistent) */}
       <header className="sticky top-0 z-40 bg-background/90 backdrop-blur-md border-b border-surface-variant px-4 py-3 md:px-6 md:py-4 flex items-center justify-between">
         <div className="flex items-center gap-6">
-          <Link href="/" className="font-display-md text-xl md:text-2xl text-gold-accent tracking-tighter">Scout<span className="text-on-surface">IT</span></Link>
+          <Link href="/" className="font-display-md text-xl md:text-2xl text-gold-accent tracking-tighter">S<span className="text-on-surface">cout</span>IT</Link>
           
           {/* Custom Desktop Mode Switcher */}
           <div className="hidden md:block relative" ref={switcherRef}>
@@ -234,9 +234,10 @@ function DashboardInner() {
           </div>
           
           <div className="relative">
-            <button 
-              className="text-xl hover:opacity-80 transition-opacity relative mt-1"
+            <button
+              className="text-xl hover:opacity-80 transition-opacity relative w-11 h-11 flex items-center justify-center"
               onClick={toggleNotifications}
+              aria-label="Notifications"
             >
               🔔
               {unreadCount > 0 && (
@@ -296,9 +297,10 @@ function DashboardInner() {
               <span>{connects !== undefined ? connects : user.connects_balance}</span>
             </div>
             <button
-              className="w-8 h-8 rounded-full bg-surface-alt border border-surface-variant flex items-center justify-center font-working-title text-sm font-bold text-on-surface hover:border-gold-accent transition-colors"
+              className="w-10 h-10 rounded-full bg-surface-alt border border-surface-variant flex items-center justify-center font-working-title text-sm font-bold text-on-surface hover:border-gold-accent transition-colors"
               onClick={() => setShowMobileProfileMenu(true)}
               title="Open Mobile Menu"
+              aria-label="Open menu"
             >
               {user.name ? user.name.substring(0,2).toUpperCase() : 'U'}
             </button>

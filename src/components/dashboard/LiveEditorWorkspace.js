@@ -211,6 +211,9 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
     media: !!formData.mediaLink.trim() || !!formData.image.trim()
   };
   const isPublishable = Object.values(mustHaves).every(Boolean);
+  // A draft only needs a title — the whole point is to save unfinished work
+  // without losing it. Publishing still requires all must-haves above.
+  const canSaveDraft = mustHaves.title;
 
   const setField = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -272,7 +275,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
   };
 
   const handleSaveDraft = () => {
-    if (isPublishable) {
+    if (canSaveDraft) {
       let score = 0;
       if (formData.category && formData.location) score += 20;
       if (categoryFields.length) {
@@ -301,7 +304,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
   const FlowLayout = CATEGORY_TO_LAYOUT_MAP[layoutKey];
 
   return (
-    <div className="fixed inset-0 z-50 bg-background flex flex-col md:flex-row overflow-hidden animate-[fadeIn_0.3s_ease-out]">
+    <div className="fixed inset-0 z-[1000] bg-background flex flex-col md:flex-row overflow-hidden animate-[fadeIn_0.3s_ease-out]">
       
       {/* ── LEFT PANEL: EDITOR ── */}
       <div 
@@ -333,7 +336,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
         <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-8 custom-scrollbar">
           
           <section className="flex flex-col gap-4">
-            <h3 className="font-headline-editorial text-2xl text-on-surface border-b border-surface-variant pb-2">1. Must Haves</h3>
+            <h3 className="font-headline-editorial text-2xl text-on-surface border-b border-surface-variant pb-2">Must Haves</h3>
             
             <div className="flex flex-col gap-2">
               <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">Property Title <span className="text-error">*</span></label>
@@ -401,7 +404,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
           {/* Section: Category Specs */}
           {categoryFields.length > 0 && (
             <section className="flex flex-col gap-4 animate-[fadeIn_0.3s_ease]">
-              <h3 className="font-headline-editorial text-2xl text-on-surface border-b border-surface-variant pb-2">2. Space Details</h3>
+              <h3 className="font-headline-editorial text-2xl text-on-surface border-b border-surface-variant pb-2">Space Details</h3>
               {categoryFields.map(f => (
                 f.type === 'checkbox' ? (
                   <label key={f.key} className="flex items-center gap-3 cursor-pointer text-on-surface bg-surface-alt border border-surface-variant rounded px-3 py-2.5 w-full">
@@ -428,7 +431,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
           {/* Section: Inventory */}
           <section className="flex flex-col gap-4">
             <h3 className="font-headline-editorial text-2xl text-on-surface border-b border-surface-variant pb-2 flex justify-between items-end">
-              <span>3. Available Inventory</span>
+              <span>Available Inventory</span>
               <div className="flex gap-2">
                 <button 
                   onClick={() => setIsUploadingCsv(!isUploadingCsv)}
@@ -588,7 +591,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
 
           {/* Section: Deep Intelligence (Optional) */}
           <section className="flex flex-col gap-4">
-            <h3 className="font-headline-editorial text-2xl text-on-surface border-b border-surface-variant pb-2">4. Deep Intelligence <span className="text-sm text-text-secondary font-working-title font-normal tracking-normal ml-2">(Optional)</span></h3>
+            <h3 className="font-headline-editorial text-2xl text-on-surface border-b border-surface-variant pb-2">Deep Intelligence <span className="text-sm text-text-secondary font-working-title font-normal tracking-normal ml-2">(Optional)</span></h3>
             
             <div className="bg-surface-alt border border-gold-accent/30 rounded p-4 flex flex-col gap-2 relative overflow-hidden">
               <div className="absolute top-0 left-0 w-1 h-full bg-gold-accent" />
@@ -647,7 +650,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
 
           {/* Section: Editorial */}
           <section className="flex flex-col gap-4 pb-32">
-            <h3 className="font-headline-editorial text-2xl text-on-surface border-b border-surface-variant pb-2">5. Editorial</h3>
+            <h3 className="font-headline-editorial text-2xl text-on-surface border-b border-surface-variant pb-2">Editorial</h3>
             <textarea className="bg-surface-alt border border-surface-variant rounded px-3 py-3 text-on-surface min-h-[120px] text-sm" value={formData.description} onChange={e => setField("description", e.target.value)} placeholder="Property description..." />
             
             <label className="flex items-center gap-3 cursor-pointer text-on-surface bg-surface-alt border border-surface-variant rounded px-3 py-3">
@@ -657,22 +660,24 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
           </section>
         </div>
 
-        <div className="p-4 border-t border-surface-variant bg-background shrink-0 flex gap-2">
-          {!isPublishable && <p className="text-xs text-error mb-2 italic w-full text-center">Fill in all required fields marked with *</p>}
-          <button 
-            className="flex-1 bg-surface-alt border border-surface-variant text-on-surface font-bold py-3.5 rounded hover:bg-surface-variant transition-colors disabled:opacity-50" 
-            disabled={!isPublishable} 
-            onClick={handleSaveDraft}
-          >
-            {isEditing ? "Save Changes" : "Save as Draft"}
-          </button>
-          <button 
-            className="flex-1 bg-gold-accent text-background font-bold py-3.5 rounded hover:opacity-90 disabled:opacity-50" 
-            disabled={!isPublishable} 
-            onClick={handlePublish}
-          >
-            {isEditing ? "Publish Updates to Feed" : "Publish to Live Feed"}
-          </button>
+        <div className="px-4 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] border-t border-surface-variant bg-background shrink-0">
+          {!isPublishable && <p className="text-xs text-text-secondary mb-2 italic w-full text-center">{canSaveDraft ? "Fill in all required fields (*) to publish — or save a draft for now." : "Add a title to save a draft; fill all required fields (*) to publish."}</p>}
+          <div className="flex gap-2">
+            <button
+              className="flex-1 bg-surface-alt border border-surface-variant text-on-surface font-bold py-3.5 rounded hover:bg-surface-variant transition-colors disabled:opacity-50"
+              disabled={!canSaveDraft}
+              onClick={handleSaveDraft}
+            >
+              {isEditing ? "Save Changes" : "Save as Draft"}
+            </button>
+            <button
+              className="flex-1 bg-gold-accent text-background font-bold py-3.5 rounded hover:opacity-90 disabled:opacity-50"
+              disabled={!isPublishable}
+              onClick={handlePublish}
+            >
+              {isEditing ? "Publish Updates to Feed" : "Publish to Live Feed"}
+            </button>
+          </div>
         </div>
       </div>
 
