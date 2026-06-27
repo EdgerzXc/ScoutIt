@@ -905,8 +905,8 @@ export default function Home() {
 
           {/* Primary action path — gives first-time visitors a clear door in */}
           <div className="hero-cta-row">
-            <Link href="/property" className="hero-cta-primary" onClick={() => window.dispatchEvent(new CustomEvent("scoutit:start-ambient"))}>Discover Spaces</Link>
-            <Link href="/layer/orbit" className="hero-cta-secondary" onClick={() => window.dispatchEvent(new CustomEvent("scoutit:start-ambient"))}>Browse The Board</Link>
+            <Link href="/property" className="hero-cta-primary">Discover Spaces</Link>
+            <Link href="/layer/orbit" className="hero-cta-secondary">Browse The Board</Link>
           </div>
 
           {/* Pre-launch founding-cohort capture */}
