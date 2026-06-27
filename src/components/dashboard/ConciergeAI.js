@@ -77,7 +77,7 @@ export default function ConciergeAI() {
   return (
     <>
       {/* Floating Action Button */}
-      <div className={`fixed bottom-6 right-6 z-[100] transition-transform duration-500 ${isOpen ? 'scale-0 opacity-0 pointer-events-none' : 'scale-100 opacity-100'}`}>
+      <div className={`fixed z-[1000] bottom-[88px] left-5 right-auto md:bottom-6 md:left-auto md:right-6 transition-transform duration-500 ${isOpen ? 'scale-0 opacity-0 pointer-events-none' : 'scale-100 opacity-100'}`}>
         <button
           onClick={() => setIsOpen(true)}
           className="relative group w-14 h-14 bg-[#121110] border border-gold-accent/50 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(212,175,55,0.2)] hover:shadow-[0_0_30px_rgba(212,175,55,0.4)] transition-all hover:scale-105"
@@ -91,7 +91,7 @@ export default function ConciergeAI() {
       </div>
 
       {/* Chat Modal / Sidebar */}
-      <div className={`fixed inset-y-0 right-0 z-[100] w-full sm:w-[400px] bg-[#0d0d0d]/95 backdrop-blur-xl border-l border-surface-variant shadow-2xl transform transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] flex flex-col ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+      <div className={`fixed inset-y-0 right-0 z-[1000] w-full sm:w-[400px] bg-[#0d0d0d]/95 backdrop-blur-xl border-l border-surface-variant shadow-2xl transform transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] flex flex-col ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
         
         {/* Header */}
         <div className="h-16 border-b border-surface-variant px-6 flex items-center justify-between shrink-0 bg-gradient-to-b from-[#1a1814] to-transparent">

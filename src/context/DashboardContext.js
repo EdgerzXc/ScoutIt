@@ -4,6 +4,7 @@
 
 import { createContext, useContext, useState, useEffect } from "react";
 import { supabase } from "../lib/supabaseClient";
+import { onAuthStateChange, getSession } from "../lib/authClient";
 import { Bookmark } from "lucide-react";
 import { getBalance, spendConnects, initWalletIfEmpty } from "../lib/connectsWallet";
 
@@ -27,38 +28,70 @@ export function DashboardProvider({ children }) {
   const DEFAULT_MAP_CENTER = [121.0215, 14.5547]; 
   const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
 
-  // Sync connects & user from local storage, then fetch latest profile from Supabase
+  // Sync user from Supabase Auth
   useEffect(() => {
-    const userStr = localStorage.getItem("scoutit_user");
-    if (userStr) {
-      const user = JSON.parse(userStr);
-      setCurrentUser(user);
-      // Seed wallet for active role if first visit, then read real 3-bucket balance
-      const role = (user.active_roles?.[0] || user.role || "seeker").toLowerCase();
-      const tier = (user.subscription_tier || user.tier || "starry").toLowerCase();
-      initWalletIfEmpty(role, tier);
-      setConnects(getBalance(role, tier));
-      
-      // Fetch fresh profile data (like badges) from Supabase
-      const fetchProfile = async () => {
-        const { data } = await supabase
-          .from('user_profiles')
-          .select('badges')
-          .eq('id', user.id)
-          .single();
-          
-        if (data && data.badges) {
-          // Update current user with badges
-          setCurrentUser(prev => {
-            const updated = { ...prev, badges: data.badges };
-            localStorage.setItem("scoutit_user", JSON.stringify(updated));
-            return updated;
-          });
-        }
-      };
-      fetchProfile();
-    }
+    const fetchSession = async () => {
+      const { data: { session } } = await getSession();
+      if (session?.user) {
+        await handleUserLogin(session.user);
+      } else {
+        // Clear old mock data if no real session exists
+        localStorage.removeItem("scoutit_user");
+        setCurrentUser(null);
+        setIsLoading(false);
+      }
+    };
+    fetchSession();
+
+    const { data: { subscription } } = onAuthStateChange(async (_event, session) => {
+      if (session?.user) {
+        await handleUserLogin(session.user);
+      } else {
+        setCurrentUser(null);
+      }
+    });
+
+    return () => subscription?.unsubscribe();
   }, []);
+
+  const handleUserLogin = async (authUser) => {
+    // Fetch fresh profile data
+    const { data: profile } = await supabase
+      .from('user_profiles')
+      .select('*')
+      .eq('id', authUser.id)
+      .single();
+
+    const mergedUser = {
+      ...authUser,
+      ...profile,
+      id: authUser.id,
+    };
+    setCurrentUser(mergedUser);
+
+    const role = (profile?.role || "seeker").toLowerCase();
+    const tier = (profile?.subscription_tier || "starry").toLowerCase();
+    initWalletIfEmpty(role, tier);
+    setConnects(getBalance(role, tier));
+
+    await syncLocalReactionsToSupabase(authUser.id);
+  };
+
+  const syncLocalReactionsToSupabase = async (userId) => {
+    try {
+      const raw = localStorage.getItem("scoutit_reactions");
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        for (const reaction of parsed) {
+          await supabase.from('saved_intel').insert([{
+            user_id: userId,
+            property_id: reaction.property_id
+          }]); // Simple insert, fails gracefully if RLS/unique prevents duplicate
+        }
+      }
+    } catch(e) {}
+  };
 
   // Fetch from Supabase
   useEffect(() => {
@@ -260,9 +293,15 @@ export function DashboardProvider({ children }) {
 
     // Server-side dual-database update (Supabase + Airtable if approved)
     try {
+      const { data: { session } } = await getSession();
+      const token = session?.access_token;
+
       const res = await fetch("/api/dashboard/update", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": token ? `Bearer ${token}` : ""
+        },
         body: JSON.stringify({ submissionId: listingId, data })
       });
       
@@ -384,9 +423,15 @@ export function DashboardProvider({ children }) {
     
     // Attempt insertion
     try {
+      const { data: { session } } = await getSession();
+      const token = session?.access_token;
+
       const res = await fetch('/api/dashboard/bulk-insert', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          "Authorization": token ? `Bearer ${token}` : ""
+        },
         body: JSON.stringify({ properties: propertiesArray })
       });
       const data = await res.json();
@@ -578,9 +623,15 @@ export function DashboardProvider({ children }) {
   const updatePitchStatus = async (pitchId, newStatus) => {
     // Supabase update via Edge Function
     try {
+      const { data: { session } } = await getSession();
+      const token = session?.access_token;
+
       const res = await fetch("/api/dashboard/deals/update", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": token ? `Bearer ${token}` : ""
+        },
         body: JSON.stringify({ dealId: pitchId, newStatus, userId: currentUser?.id })
       });
       const data = await res.json();

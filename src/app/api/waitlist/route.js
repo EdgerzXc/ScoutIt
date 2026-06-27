@@ -8,11 +8,31 @@
 // needed.
 
 // import { supabase } from "@/lib/supabaseClient";
+import { z } from "zod";
+import DOMPurify from "isomorphic-dompurify";
+import { rateLimit } from "@/lib/rateLimit";
 
-const VALID_ROLES = ["seeker", "owner", "broker", "photographer", "researcher", null];
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const limiter = rateLimit({
+  interval: 10 * 60 * 1000, // 10 minutes
+  uniqueTokenPerInterval: 500,
+});
+
+const waitlistSchema = z.object({
+  email: z.string().email("Invalid email format").max(255),
+  role: z.enum(["seeker", "owner", "broker", "photographer", "researcher"]).nullable().optional(),
+  tier: z.string().nullable().optional(),
+  source: z.string().max(60).optional(),
+  turnstileToken: z.string().min(1, "Captcha token is required")
+});
 
 export async function POST(req) {
+  try {
+    const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
+    await limiter.check(5, ip); // 5 requests per 10 minutes
+  } catch (error) {
+    return Response.json({ ok: false, error: "Rate limit exceeded. Try again later." }, { status: 429 });
+  }
+
   let body;
   try {
     body = await req.json();
@@ -20,16 +40,32 @@ export async function POST(req) {
     return Response.json({ ok: false, error: "Invalid request body." }, { status: 400 });
   }
 
-  const email = String(body?.email || "").trim().toLowerCase();
-  const role = body?.role ?? null;
-  const tier = body?.tier ?? null;
-  const source = String(body?.source || "site").slice(0, 60);
-
-  if (!EMAIL_RE.test(email)) {
-    return Response.json({ ok: false, error: "Invalid email." }, { status: 400 });
+  const result = waitlistSchema.safeParse(body);
+  if (!result.success) {
+    return Response.json({ ok: false, error: "Invalid input data." }, { status: 400 });
   }
-  if (!VALID_ROLES.includes(role)) {
-    return Response.json({ ok: false, error: "Invalid role." }, { status: 400 });
+
+  const { email, role, tier, source: rawSource, turnstileToken } = result.data;
+  const source = DOMPurify.sanitize(rawSource || "site");
+
+  // Verify Turnstile Token
+  const TURNSTILE_SECRET_KEY = process.env.TURNSTILE_SECRET_KEY || "1x0000000000000000000000000000000AA";
+  try {
+    const cfFormData = new FormData();
+    cfFormData.append('secret', TURNSTILE_SECRET_KEY);
+    cfFormData.append('response', turnstileToken);
+
+    const cfRes = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      body: cfFormData
+    });
+    
+    const cfData = await cfRes.json();
+    if (!cfData.success) {
+      return Response.json({ ok: false, error: "Captcha verification failed. Are you a bot?" }, { status: 403 });
+    }
+  } catch (error) {
+    return Response.json({ ok: false, error: "Could not reach captcha service." }, { status: 500 });
   }
 
   // ── POST-RESET: persist to Supabase ───────────────────────────────────────

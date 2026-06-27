@@ -43,7 +43,7 @@ function rememberLocal(email) {
 }
 
 // Submit a signup. Returns { ok, already, error }.
-export async function joinWaitlist({ email, role = null, tier = null, source = "site" }) {
+export async function joinWaitlist({ email, role = null, tier = null, source = "site", turnstileToken = null }) {
   const clean = String(email || "").trim().toLowerCase();
   if (!isValidEmail(clean)) {
     return { ok: false, error: "Please enter a valid email address." };
@@ -56,7 +56,7 @@ export async function joinWaitlist({ email, role = null, tier = null, source = "
     const res = await fetch("/api/waitlist", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: clean, role, tier, source }),
+      body: JSON.stringify({ email: clean, role, tier, source, turnstileToken }),
     });
     // The stub route always 200s today; once Supabase is wired it may report
     // duplicates or validation errors. Treat a non-OK as a soft failure.

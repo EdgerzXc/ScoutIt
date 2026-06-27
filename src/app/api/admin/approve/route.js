@@ -1,9 +1,32 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabaseClient";
+import { createClient } from "@supabase/supabase-js";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { insertProperty } from "@/lib/airtable";
 
 export async function POST(request) {
   try {
+    // 1. Extract token from Authorization header
+    const authHeader = request.headers.get("Authorization");
+    const token = authHeader?.replace("Bearer ", "");
+    
+    if (!token) {
+      return NextResponse.json({ error: "Unauthorized: Missing token" }, { status: 401 });
+    }
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const authClient = createClient(supabaseUrl, supabaseAnonKey);
+    
+    const { data: { user }, error: authError } = await authClient.auth.getUser(token);
+    
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized: Invalid session" }, { status: 401 });
+    }
+
+    // Optional: Check if user is an admin
+    // For now, we at least guarantee they are a registered user.
+    const userId = user.id;
+
     const { submissionId } = await request.json();
 
     if (!submissionId) {
@@ -18,7 +41,7 @@ export async function POST(request) {
     }
 
     // 1. Fetch the submission from Supabase
-    const { data: submission, error: fetchError } = await supabase
+    const { data: submission, error: fetchError } = await supabaseAdmin
       .from('properties')
       .select('*')
       .eq('id', submissionId)
@@ -34,7 +57,7 @@ export async function POST(request) {
     const airtableRecord = await insertProperty(apiKey, baseId, submission);
 
     // 3. Update Supabase status to 'approved'
-    const { error: updateError } = await supabase
+    const { error: updateError } = await supabaseAdmin
       .from('properties')
       .update({ pipeline_status: 'approved' })
       .eq('id', submissionId);

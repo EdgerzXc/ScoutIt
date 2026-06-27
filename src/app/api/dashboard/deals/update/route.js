@@ -1,16 +1,37 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabaseClient";
+import { createClient } from "@supabase/supabase-js";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 export async function POST(request) {
   try {
-    const { dealId, newStatus, userId } = await request.json();
+    // 1. Extract token from Authorization header
+    const authHeader = request.headers.get("Authorization");
+    const token = authHeader?.replace("Bearer ", "");
+    
+    if (!token) {
+      return NextResponse.json({ error: "Unauthorized: Missing token" }, { status: 401 });
+    }
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const authClient = createClient(supabaseUrl, supabaseAnonKey);
+    
+    const { data: { user }, error: authError } = await authClient.auth.getUser(token);
+    
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized: Invalid session" }, { status: 401 });
+    }
+
+    const userId = user.id;
+
+    const { dealId, newStatus } = await request.json();
 
     if (!dealId || !newStatus || !userId) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
     // 1. Fetch the deal to verify authorization
-    const { data: deal, error: fetchError } = await supabase
+    const { data: deal, error: fetchError } = await supabaseAdmin
       .from('deals')
       .select('*, properties(owner_id)')
       .eq('id', dealId)
@@ -35,7 +56,7 @@ export async function POST(request) {
     }
 
     // 2. Update the deal
-    const { error: updateError } = await supabase
+    const { error: updateError } = await supabaseAdmin
       .from('deals')
       .update({ status: newStatus })
       .eq('id', dealId);

@@ -1,17 +1,56 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabaseClient";
-import { insertProperty } from "@/lib/airtable";
+import { insertProperty, updateProperty } from "@/lib/airtable";
+import { createClient } from "@supabase/supabase-js";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { rateLimit } from "@/lib/rateLimit";
+
+const limiter = rateLimit({
+  interval: 5 * 60 * 1000, // 5 minutes
+  uniqueTokenPerInterval: 500,
+});
 
 export async function POST(request) {
   try {
-    const { submissionId, userId } = await request.json();
+    const ip = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
+    await limiter.check(10, ip); // 10 requests per 5 minutes
+  } catch (error) {
+    return NextResponse.json({ error: "Rate limit exceeded. Try again later." }, { status: 429 });
+  }
 
-    if (!submissionId || !userId) {
-      return NextResponse.json({ error: "Missing submissionId or userId" }, { status: 400 });
+  try {
+    // 1. Extract token from Authorization header to prevent identity spoofing
+    const authHeader = request.headers.get("Authorization");
+    const token = authHeader?.replace("Bearer ", "");
+    
+    if (!token) {
+      return NextResponse.json({ error: "Unauthorized: Missing token" }, { status: 401 });
     }
 
-    // 1. Fetch the submission and verify ownership
-    const { data: currentSubmission, error: fetchError } = await supabase
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const authClient = createClient(supabaseUrl, supabaseAnonKey);
+    
+    // Validate session server-side
+    const { data: { user }, error: authError } = await authClient.auth.getUser(token);
+    
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized: Invalid session" }, { status: 401 });
+    }
+
+    const userId = user.id;
+
+    const { submissionId } = await request.json();
+
+    if (!submissionId) {
+      return NextResponse.json({ error: "Missing submissionId" }, { status: 400 });
+    }
+
+    if (!supabaseAdmin) {
+      return NextResponse.json({ error: "Server error: missing service role configuration" }, { status: 500 });
+    }
+
+    // 2. Fetch the submission using Admin client and verify ownership
+    const { data: currentSubmission, error: fetchError } = await supabaseAdmin
       .from('properties')
       .select('*')
       .eq('id', submissionId)
@@ -26,29 +65,13 @@ export async function POST(request) {
       return NextResponse.json({ error: "Unauthorized: You do not own this property" }, { status: 403 });
     }
 
-    if (currentSubmission.pipeline_status === 'approved') {
-      return NextResponse.json({ error: "Property is already published" }, { status: 400 });
-    }
-
-    // 2. Update Supabase pipeline_status
-    const { error: updateError } = await supabase
-      .from('properties')
-      .update({ pipeline_status: 'approved' })
-      .eq('id', submissionId);
-
-    if (updateError) {
-      console.error("[PUBLISH API] Failed to approve in Supabase:", updateError);
-      return NextResponse.json({ error: "Failed to update database" }, { status: 500 });
-    }
-
-    // 3. Sync to Airtable (Insert as a new active property)
+    // 3. Sync to Airtable (Idempotent Upsert)
     const apiKey = process.env.AIRTABLE_API_KEY;
     const baseId = process.env.AIRTABLE_BASE_ID;
 
     if (apiKey && baseId) {
       try {
-        console.log(`[PUBLISH API] Publishing slug ${currentSubmission.slug} to Airtable...`);
-        // Format payload for insertProperty
+        console.log(`[PUBLISH API] Syncing slug ${currentSubmission.slug} to Airtable...`);
         const payload = {
           title: currentSubmission.title,
           slug: currentSubmission.slug,
@@ -57,27 +80,37 @@ export async function POST(request) {
           space_category: currentSubmission.space_category,
           details: currentSubmission.details || {}
         };
-        const created = await insertProperty(apiKey, baseId, payload);
-        // insertProperty generates/guarantees the slug — mirror it back to Supabase
-        // so the owner's editor shows and can share the real public URL.
-        const finalSlug = created?.fields?.Slug;
-        if (finalSlug && finalSlug !== currentSubmission.slug) {
-          await supabase
-            .from('properties')
-            .update({ slug: finalSlug })
-            .eq('id', submissionId);
+        
+        let finalSlug = currentSubmission.slug;
+        
+        // Attempt update first, fallback to insert
+        try {
+          // If update succeeds, the record existed
+          await updateProperty(apiKey, baseId, currentSubmission.slug, payload);
+        } catch (updateErr) {
+          // Record doesn't exist, insert instead
+          const created = await insertProperty(apiKey, baseId, payload);
+          finalSlug = created?.fields?.Slug || currentSubmission.slug;
         }
+
+        // 4. Update Supabase only AFTER Airtable success
+        const { error: updateError } = await supabaseAdmin
+          .from('properties')
+          .update({ pipeline_status: 'approved', slug: finalSlug })
+          .eq('id', submissionId);
+
+        if (updateError) {
+          console.error("[PUBLISH API] Failed to approve in Supabase:", updateError);
+          return NextResponse.json({ error: "Failed to update database status" }, { status: 500 });
+        }
+
       } catch (airtableErr) {
-        console.error("[PUBLISH API] Airtable insert failed:", airtableErr);
-        // It failed in Airtable, so we should maybe revert the status, but since we're using "sync engine",
-        // we'll return a warning. In a robust system, this would be queued or transactional.
-        return NextResponse.json({ 
-          success: true, 
-          warning: "Published in Supabase, but Airtable sync failed: " + airtableErr.message 
-        });
+        console.error("[PUBLISH API] Airtable sync failed:", airtableErr);
+        return NextResponse.json({ error: "Airtable sync failed: " + airtableErr.message }, { status: 500 });
       }
     } else {
-      console.warn("[PUBLISH API] Airtable credentials missing, skipping sync.");
+      console.warn("[PUBLISH API] Airtable credentials missing, approving locally only.");
+      await supabaseAdmin.from('properties').update({ pipeline_status: 'approved' }).eq('id', submissionId);
     }
 
     return NextResponse.json({ success: true });

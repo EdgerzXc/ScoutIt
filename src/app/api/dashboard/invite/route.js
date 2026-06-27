@@ -1,17 +1,42 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabaseClient";
+import { createClient } from "@supabase/supabase-js";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 export async function POST(request) {
   try {
-    const { listingId, brokerName, userId, role = 'owner' } = await request.json();
+    // 1. Extract token from Authorization header to prevent identity spoofing
+    const authHeader = request.headers.get("Authorization");
+    const token = authHeader?.replace("Bearer ", "");
+    
+    if (!token) {
+      return NextResponse.json({ error: "Unauthorized: Missing token" }, { status: 401 });
+    }
 
-    if (!listingId || !brokerName || !userId) {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const authClient = createClient(supabaseUrl, supabaseAnonKey);
+    
+    const { data: { user }, error: authError } = await authClient.auth.getUser(token);
+    
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized: Invalid session" }, { status: 401 });
+    }
+
+    const userId = user.id;
+
+    // Remove userId from the body destructuring, trust the token
+    const { listingId, brokerName, role = 'owner' } = await request.json();
+
+    if (!listingId || !brokerName) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    // 1. Fetch the user's connect balances (3-bucket: granted, purchased, earned)
-    // Query by (user_id, role) — one wallet row per role per user
-    const { data: balanceData } = await supabase
+    if (!supabaseAdmin) {
+      return NextResponse.json({ error: "Server error: missing service role configuration" }, { status: 500 });
+    }
+
+    // 1. Fetch the user's connect balances using the Admin client
+    const { data: balanceData } = await supabaseAdmin
       .from('connect_balances')
       .select('granted_balance, purchased_balance, earned_balance')
       .eq('user_id', userId)
@@ -25,7 +50,7 @@ export async function POST(request) {
       purchased = balanceData.purchased_balance || 0;
       earned    = balanceData.earned_balance    || 0;
     } else {
-      const { data: profileData } = await supabase
+      const { data: profileData } = await supabaseAdmin
         .from('user_profiles')
         .select('connects_balance')
         .eq('id', userId)
@@ -39,7 +64,7 @@ export async function POST(request) {
     }
 
     // 2. Insert into deals (handshake)
-    const { data: dealData, error: dealError } = await supabase.from('deals').insert([{
+    const { data: dealData, error: dealError } = await supabaseAdmin.from('deals').insert([{
       property_id: listingId,
       broker_id: brokerName,
       status: 'invited',
@@ -69,7 +94,7 @@ export async function POST(request) {
     updates.updated_at = new Date().toISOString();
 
     // Insert the immutable transaction record
-    const { error: txError } = await supabase.from('connect_transactions').insert([{
+    const { error: txError } = await supabaseAdmin.from('connect_transactions').insert([{
       user_id: userId,
       role,
       kind: 'spend',
@@ -82,13 +107,13 @@ export async function POST(request) {
 
     if (txError) {
       console.error("[INVITE API] Failed to record transaction:", txError);
-      await supabase.from('deals').delete().eq('id', dealData[0].id);
+      await supabaseAdmin.from('deals').delete().eq('id', dealData[0].id);
       return NextResponse.json({ error: "Transaction failed. No Connects spent." }, { status: 500 });
     }
 
-    // Update the balances table (scoped to this role's wallet row)
+    // Update the balances table
     if (balanceData) {
-      await supabase.from('connect_balances')
+      await supabaseAdmin.from('connect_balances')
         .update(updates)
         .eq('user_id', userId)
         .eq('role', role);
@@ -97,7 +122,7 @@ export async function POST(request) {
     const newBalance = totalBalance - toDeduct;
 
     // Keep user_profiles cache in sync
-    await supabase.from('user_profiles')
+    await supabaseAdmin.from('user_profiles')
       .update({ connects_balance: newBalance })
       .eq('id', userId);
 

@@ -1,17 +1,54 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabaseClient";
+import { createClient } from "@supabase/supabase-js";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { updateProperty } from "@/lib/airtable";
+import { z } from "zod";
+import DOMPurify from "isomorphic-dompurify";
+
+const updateSchema = z.object({
+  title: z.string().max(255).optional(),
+  type: z.string().max(100).optional(),
+  location: z.string().max(255).optional(),
+  details: z.record(z.any()).optional()
+});
 
 export async function POST(request) {
   try {
+    // 1. Extract token from Authorization header
+    const authHeader = request.headers.get("Authorization");
+    const token = authHeader?.replace("Bearer ", "");
+    
+    if (!token) {
+      return NextResponse.json({ error: "Unauthorized: Missing token" }, { status: 401 });
+    }
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const authClient = createClient(supabaseUrl, supabaseAnonKey);
+    
+    const { data: { user }, error: authError } = await authClient.auth.getUser(token);
+    
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized: Invalid session" }, { status: 401 });
+    }
+
+    const userId = user.id;
+
     const { submissionId, data } = await request.json();
 
     if (!submissionId || !data) {
       return NextResponse.json({ error: "Missing submissionId or data" }, { status: 400 });
     }
 
+    const validationResult = updateSchema.safeParse(data);
+    if (!validationResult.success) {
+      return NextResponse.json({ error: "Invalid data format" }, { status: 400 });
+    }
+
+    const validatedData = validationResult.data;
+
     // 1. Fetch the current submission to check its status and get its slug
-    const { data: currentSubmission, error: fetchError } = await supabase
+    const { data: currentSubmission, error: fetchError } = await supabaseAdmin
       .from('properties')
       .select('*')
       .eq('id', submissionId)
@@ -22,23 +59,34 @@ export async function POST(request) {
       return NextResponse.json({ error: "Submission not found or error fetching" }, { status: 404 });
     }
 
-    // Format the payload for Supabase
+    if (currentSubmission.owner_id !== userId) {
+      return NextResponse.json({ error: "Unauthorized: You do not own this property" }, { status: 403 });
+    }
+
+    // Format the payload for Supabase, sanitizing string inputs
     const supabasePayload = {
-      title: data.title || currentSubmission.title,
-      type: data.type || currentSubmission.type,
-      location: data.location || currentSubmission.location
+      title: validatedData.title ? DOMPurify.sanitize(validatedData.title) : currentSubmission.title,
+      type: validatedData.type ? DOMPurify.sanitize(validatedData.type) : currentSubmission.type,
+      location: validatedData.location ? DOMPurify.sanitize(validatedData.location) : currentSubmission.location
     };
 
     // Merge details JSONB safely
-    if (data.details) {
+    if (validatedData.details) {
+      // In a real strict environment, we'd recursively sanitize or strictly validate `details`. 
+      // Assuming details is a flat object of strings for now.
+      const sanitizedDetails = {};
+      for (const [key, val] of Object.entries(validatedData.details)) {
+        sanitizedDetails[DOMPurify.sanitize(key)] = typeof val === 'string' ? DOMPurify.sanitize(val) : val;
+      }
+
       supabasePayload.details = {
         ...(currentSubmission.details || {}),
-        ...data.details
+        ...sanitizedDetails
       };
     }
 
     // 2. Update Supabase
-    const { error: updateError } = await supabase
+    const { error: updateError } = await supabaseAdmin
       .from('properties')
       .update(supabasePayload)
       .eq('id', submissionId);

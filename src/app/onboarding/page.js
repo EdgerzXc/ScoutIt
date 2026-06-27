@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Camera, Search } from "lucide-react";
+import { signUp, signInWithPassword } from "@/lib/authClient";
+import { supabase } from "@/lib/supabaseClient";
 
 const TAGS = [
   { id: "buyer", icon: "🏠", title: "Looking to Buy or Rent", desc: "Browse, save, and get deep spatial intelligence." },
@@ -37,6 +39,37 @@ export default function OnboardingPage() {
 
   const nextStep = () => setStep(s => s + 1);
   const prevStep = () => setStep(s => Math.max(1, s - 1));
+
+  const handleAuth = async () => {
+    try {
+      // Try to sign in first
+      const { data: signInData, error: signInError } = await signInWithPassword(formData.email, formData.password);
+      if (!signInError && signInData?.user) {
+        // Successful login, check if they have a profile
+        const { data: profile } = await supabase.from('user_profiles').select('*').eq('id', signInData.user.id).single();
+        if (profile && profile.role) {
+          // Profile exists, skip onboarding
+          router.push("/dashboard");
+          return;
+        } else {
+          // No profile, proceed to step 2
+          nextStep();
+          return;
+        }
+      }
+
+      // If sign in fails, try sign up
+      const { data: signUpData, error: signUpError } = await signUp(formData.email, formData.password, { full_name: formData.name });
+      if (signUpError) {
+        alert(signUpError.message);
+        return;
+      }
+      
+      nextStep();
+    } catch (e) {
+      alert("Authentication failed.");
+    }
+  };
 
   // --- Step 1: Auth ---
   const renderStep1 = () => (
@@ -81,7 +114,7 @@ export default function OnboardingPage() {
       
       <button 
         className="w-full bg-gold-accent text-background font-working-title text-base font-bold py-4 px-6 rounded hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed" 
-        onClick={nextStep}
+        onClick={handleAuth}
         disabled={!formData.name || !formData.email.includes("@") || formData.password.length < 8}
       >
         Continue with Email →
@@ -232,22 +265,35 @@ export default function OnboardingPage() {
   );
 
   // --- Step 4: Micro Setup ---
-  const completeOnboarding = (overrides = {}) => {
-    // 1. Construct final user payload matching USERS_CMS architecture
+  const completeOnboarding = async (overrides = {}) => {
+    // 1. Get current session
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) {
+      alert("Session lost. Please try logging in again.");
+      return;
+    }
+
+    // 2. Construct final user payload matching USERS_CMS architecture
     const finalUser = {
-      ...formData,
-      ...overrides,
-      id: `usr-${Date.now()}`,
-      created_at: new Date().toISOString(),
+      id: session.user.id,
+      email: session.user.email,
+      full_name: formData.name,
+      role: overrides.primaryMode || formData.primaryMode,
       subscription_tier: "free",
       connects_balance: 5,
       profile_completeness: 20, // starts at 20%
     };
     
-    // 2. Save to local storage (mock USERS_CMS/auth)
-    localStorage.setItem("scoutit_user", JSON.stringify(finalUser));
+    // 3. Save to Supabase (real USERS_CMS/auth)
+    const { error } = await supabase.from('user_profiles').upsert(finalUser);
     
-    // 3. Redirect to unified dashboard
+    if (error) {
+      console.error("Profile save error:", error);
+      alert("Failed to save profile.");
+      return;
+    }
+    
+    // 4. Redirect to unified dashboard
     router.push("/dashboard");
   };
 

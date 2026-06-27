@@ -75,3 +75,13 @@ create policy "Allow public update on projects" on public.projects for update us
 create policy "Allow public read access on saved_intel" on public.saved_intel for select using (true);
 create policy "Allow public insert on saved_intel" on public.saved_intel for insert with check (true);
 create policy "Allow public delete on saved_intel" on public.saved_intel for delete using (true);
+
+-- 5. WAITLIST (Pre-launch signups)
+create table public.waitlist (
+  id uuid default gen_random_uuid() primary key,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  email text not null unique,
+  role text,
+  tier text,
+  source text
+);

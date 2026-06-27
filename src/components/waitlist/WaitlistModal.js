@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { joinWaitlist } from "@/lib/waitlist";
+import { Turnstile } from '@marsidev/react-turnstile';
 
 // Single global waitlist modal. Mounted once in the root layout; opened from
 // anywhere by dispatching:
@@ -23,6 +24,7 @@ export default function WaitlistModal() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState("idle"); // idle | sending | done | already | error
   const [error, setError] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState("");
 
   const reset = useCallback(() => {
     setEmail("");
@@ -59,7 +61,7 @@ export default function WaitlistModal() {
     e.preventDefault();
     setStatus("sending");
     setError("");
-    const res = await joinWaitlist({ email, role: ctx.role, tier: ctx.tier, source: ctx.source });
+    const res = await joinWaitlist({ email, role: ctx.role, tier: ctx.tier, source: ctx.source, turnstileToken });
     if (!res.ok) {
       setStatus("error");
       setError(res.error || "Something went wrong.");
@@ -115,7 +117,13 @@ export default function WaitlistModal() {
                 autoFocus
                 required
               />
-              <button type="submit" className="wl-btn" disabled={status === "sending"}>
+              <Turnstile 
+                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "1x00000000000000000000AA"} 
+                onSuccess={(token) => setTurnstileToken(token)}
+                onError={() => setError("Captcha verification failed. Please try again.")}
+                options={{ theme: 'dark' }}
+              />
+              <button type="submit" className="wl-btn" disabled={status === "sending" || !turnstileToken}>
                 {status === "sending" ? "Joining…" : "Join the Waitlist"}
               </button>
             </form>

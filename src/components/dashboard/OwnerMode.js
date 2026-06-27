@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation';
 import Papa from 'papaparse';
 import { sanitizeObject } from '../../lib/sanitize';
 import { canSee, getCurrentTier } from '../../lib/entitlements';
+import { supabase } from '../../lib/supabaseClient';
 
 export default function OwnerMode() {
   const { listings, pitches, updatePitchStatus, addListing, addConciergeListing, bulkAddListings, addToast, updateListing, publishListing, closeListing, currentUser, inviteBroker, connects } = useDashboard();
@@ -337,8 +338,11 @@ export default function OwnerMode() {
                 //    send the file to /api/ai/read-pdf which does proper extraction.
                 const pdfForm = new FormData();
                 pdfForm.append('file', selectedFile);
+                const { data: { session } } = await supabase.auth.getSession();
+                const token = session?.access_token;
                 const pdfRes = await fetch('/api/ai/read-pdf', {
                   method: 'POST',
+                  headers: { 'Authorization': token ? `Bearer ${token}` : "" },
                   body: pdfForm
                 });
                 const pdfData = await pdfRes.json();
@@ -434,7 +438,13 @@ export default function OwnerMode() {
         form.append('owner_id', currentUser?.id || 'unknown');
         form.append('property_id', activeListing?.id || '');
 
-        const res = await fetch('/api/storage/upload', { method: 'POST', body: form });
+        const { data: { session } } = await supabase.auth.getSession();
+        const token = session?.access_token;
+        const res = await fetch('/api/storage/upload', { 
+          method: 'POST', 
+          headers: { 'Authorization': token ? `Bearer ${token}` : "" },
+          body: form 
+        });
         const result = await res.json();
 
         if (!res.ok) throw new Error(result.error || 'Upload failed');

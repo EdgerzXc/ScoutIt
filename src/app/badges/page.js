@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { BADGE_DEFINITIONS, getAllBadges, hasBadge } from "@/lib/BadgeEngine";
+import { supabase } from "@/lib/supabaseClient";
 import Link from "next/link";
 import { Shield, ShieldAlert, ShieldCheck, Lock } from "lucide-react";
 
@@ -35,9 +36,15 @@ export default function BadgeRegistryPage() {
     
     setClaimingId(badgeId);
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+
       const res = await fetch('/api/badges/claim', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : ""
+        },
         body: JSON.stringify({ badgeId, userId: user.id })
       });
       const data = await res.json();

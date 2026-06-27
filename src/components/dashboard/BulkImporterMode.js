@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Papa from "papaparse";
 import { useDashboard } from "../../context/DashboardContext";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function BulkImporterMode({ onClose }) {
   const { addToast, currentUser } = useDashboard();
@@ -102,9 +103,15 @@ export default function BulkImporterMode({ onClose }) {
       });
 
       // Step 3: Bulk insert into Supabase
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+
       const insertRes = await fetch('/api/dashboard/bulk-insert', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : ""
+        },
         body: JSON.stringify({ properties })
       });
 
