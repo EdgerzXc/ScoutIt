@@ -1,6 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import FloatingToolbox from "@/components/ui/FloatingToolbox";
+import AmbientSound from "@/components/ui/AmbientSound";
 import BottomNav from "@/components/layout/BottomNav";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import WaitlistModal from "@/components/waitlist/WaitlistModal";
@@ -72,6 +73,7 @@ export default function RootLayout({ children }) {
           {children}
         </ErrorBoundary>
         <BottomNav />
+        <AmbientSound />
         <FloatingToolbox />
         <WaitlistModal />
       </body>
