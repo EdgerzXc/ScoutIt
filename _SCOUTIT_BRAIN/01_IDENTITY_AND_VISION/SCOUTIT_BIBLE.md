@@ -356,11 +356,11 @@ Always use CSS variables. Never raw hex values.
 | `--text-primary` | `#f0ede8` | Headlines (warm off-white) |
 | `--text-secondary` | `#c8c8c8` | Body copy |
 | `--text-muted` | `rgba(240,237,232,.45)` | Captions, hints |
-| `--accent` | `#ffb800` | The gold. Signature accent. |
-| `--accent-bright` | `#ffc929` | Interactive gold (buttons, CTAs, hover) |
-| `--accent-muted` | `#7a5c00` | Subdued gold (borders, dividers) |
+| `--accent` | `#E8AE3C` | The gold. Signature accent. (refined 2026-06-26 — warmer amber, less yellow than the old `#ffb800`) |
+| `--accent-bright` | `#F7C64E` | Interactive gold (buttons, CTAs, hover) |
+| `--accent-muted` | `#6E531A` | Subdued gold (borders, dividers) |
 | `--border` | `rgba(255,255,255,.07)` | Hairline dividers |
-| `--shadow-glow` | `0 0 18px rgba(255,184,0,.45)` | Gold halo for key CTAs |
+| `--shadow-glow` | `0 0 18px rgba(232,174,60,.45)` | Gold halo for key CTAs (rgb tuple `232, 174, 60`) |
 | `--green` `--yellow` `--red` | `#4caf7d` `#e8c84a` `#e8644a` | Semantic states |
 | `--brand` | `#1a1814` | Deep brand surfaces |
 
@@ -394,12 +394,17 @@ Always use CSS variables. Never raw hex values.
 ### What Is Banned
 
 - Raw hex colors anywhere in component code (use tokens)
-- Tailwind CSS (vanilla CSS + CSS Modules only)
-- Three.js / WebGL in the main site (too heavy; failure mode = "glowing fog")
-- Light mode (the brand is dark-only)
 - `scroll-snap-type: y mandatory` + `scroll-behavior: smooth` together (causes 30s+ rendering freeze — use `y proximity`)
 - Glow "everywhere" — localized bloom only
 - Inventing centerpiece visuals — all signature imagery comes from the owner's reference photos in `reference/`
+
+> **Allowed (corrected 2026-06-26 — running code wins over the old "banned" line):**
+> - **Tailwind** is used across the app (dashboards especially) alongside vanilla CSS + CSS Modules.
+>   Public/marketing surfaces stay vanilla CSS; dashboards may use Tailwind.
+> - **Three.js / WebGL** (and a 2D canvas) power the homepage + layer-page backgrounds — permitted
+>   because **Lite Mode** (`src/lib/liteMode.js`) disables animations/canvas/WebGL on low-end phones.
+> - **Light mode** is not the default but exists: dark is default; light/high-contrast modes live in
+>   the Display panel. (Dark stays the brand's signature.)
 
 ---
 
@@ -523,8 +528,8 @@ ScoutIt is the decision layer — not a brokerage, not a listings site. The plat
 2. Navigates to `/dashboard` → role detected as "owner"
 3. Clicks "List a Property" → enters the `GuidedWizard.js` multi-phase form
 4. Phase 1: Basic details · Phase 2: Location (Mapbox pin drop generates coordinates) · Phase 3+: Photos, specs
-5. Submits → data lands in Supabase `property_submissions` with status "pending"
-6. Admin approves → property ports to Airtable → goes live on the platform
+5. Submits → data lands in Supabase **`properties`** with `pipeline_status='pending'` (NOT a `property_submissions` table — that table is gone; see PART 8)
+6. Admin approves → property ports to Airtable `PROPERTIES_CMS` → goes live on the platform
 
 ---
 
