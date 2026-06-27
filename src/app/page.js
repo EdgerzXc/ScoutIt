@@ -1078,17 +1078,18 @@ export default function Home() {
           font-weight: 600;
           text-transform: uppercase;
           letter-spacing: 0.18em;
-          color: #000;
-          background: var(--accent-bright);
-          border: 1px solid var(--accent-bright);
+          color: #0a0a0a;
+          background: var(--accent);
+          border: 1px solid var(--accent);
           padding: 15px 34px;
           border-radius: 4px;
           text-decoration: none;
-          transition: transform var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+          transition: transform var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast), border-color var(--transition-fast);
           box-shadow: 0 0 0 rgba(232, 174, 60, 0);
         }
         .hero-cta-primary:hover {
-          background: var(--accent);
+          background: var(--accent-bright);
+          border-color: var(--accent-bright);
           box-shadow: 0 8px 30px rgba(232, 174, 60, 0.25);
           transform: translateY(-2px);
         }

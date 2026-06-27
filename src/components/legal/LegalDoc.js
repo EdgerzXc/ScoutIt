@@ -25,6 +25,17 @@ export default function LegalDoc({ eyebrow, title, meta, intro, sections, relate
         </div>
 
         <div className="legal-body">
+          <div className="legal-disclaimer" role="note">
+            <span className="legal-disclaimer-label">⚠ Draft — not yet legally reviewed</span>
+            <p>
+              This is a working draft, written in plain language to be transparent about how
+              ScoutIt intends to operate during our pre-launch period. It has{" "}
+              <strong>not yet been reviewed or approved by a licensed attorney</strong>, it is not
+              final, and it may change before ScoutIt opens to the public. Nothing here is legal
+              advice. If anything is unclear, please reach out before relying on it.
+            </p>
+          </div>
+
           <div className="legal-intro">
             <p>{intro}</p>
           </div>
@@ -107,6 +118,36 @@ export default function LegalDoc({ eyebrow, title, meta, intro, sections, relate
         .legal-body {
           display: flex;
           flex-direction: column;
+        }
+
+        .legal-disclaimer {
+          border: 1px solid var(--accent-border, rgba(232, 174, 60, 0.32));
+          background: rgba(232, 174, 60, 0.06);
+          border-radius: 6px;
+          padding: 20px 22px;
+          margin-bottom: 44px;
+        }
+
+        .legal-disclaimer-label {
+          display: block;
+          font-family: var(--font-geist-mono, monospace);
+          font-size: 10px;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+          color: var(--accent, #E8AE3C);
+          margin-bottom: 10px;
+        }
+
+        .legal-disclaimer p {
+          font-size: 13.5px;
+          line-height: 1.7;
+          color: rgba(245, 243, 238, 0.78);
+          margin: 0;
+        }
+
+        .legal-disclaimer strong {
+          color: #f5f3ee;
+          font-weight: 600;
         }
 
         .legal-intro p {
