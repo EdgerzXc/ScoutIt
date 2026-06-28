@@ -1,45 +1,33 @@
 # ScoutIt Handoff - End of Session
 
 ### What We Accomplished
-1. **Security Hardening (API & Database)**
-   - Locked down Supabase with strict RLS (Row Level Security).
-   - Removed all `FOR ALL USING (true)` dev-mode policies.
-   - Fixed the search-path injection vulnerability in the stored functions.
-   - Secured Next.js API routes with real Supabase Auth token verification.
+1. **Unit Builder UI (`UnitBuilder.js`)**
+   - Built a dynamic units/spaces inventory builder inside the listing intake flow.
+   - Tied it directly as Step 3 in `LiveEditorWorkspace.js` before publishing.
 
-2. **Real Supabase Authentication**
-   - Ripped out the mocked login and fully wired up Supabase Auth.
-   - Added support for Google OAuth and Email OTP / Magic Links.
+2. **Freemium Gating on Units**
+   - Configured uploader limits so Free tier users (Starry) can only upload **1 photo** per unit.
+   - Pro tier users (Solar, Cluster, Universe) can upload up to **5 photos** per unit.
 
-3. **Owner Dashboard "Auto-Save Draft" Flow**
-   - Connected the "Live Editor Workspace" so progress automatically saves without the user clicking "Save".
-   - Set up the UI to transition seamlessly between "Draft" and "Published" states.
+3. **Resolved Vercel Build Blocker**
+   - Fixed a double declaration of `currentPhotos` in `PhotoUploader.js`.
+   - Escaped double quotes inside `UnitBuilder.js` to clear strict ESLint rules that were causing Vercel compilation to exit with code 1. The build is now fully green and active!
 
-4. **Resend SMTP Integration**
-   - Wired up Supabase to send its confirmation emails through our custom Resend domain instead of the default limits.
-
-5. **AI PDF Extractor (Phase 1 AI Listing Engine)**
-   - Built a drag-and-drop cinematic overlay in the Live Editor to accept property brochures.
-   - Wired up `/api/ai/read-pdf` (via unpdf) and `/api/ai/assimilate` (Gemini Flash) to securely read PDFs.
-   - Prompt engineering strictly enforces literal fact extraction with zero hallucination.
-
-6. **Launch-Ready Security & Monitoring**
-   - Integrated **Sentry** (`@sentry/nextjs`) across Client, Server, and Edge layers for real-time error tracking.
-   - Built the **User Security Settings** UI in the dashboard to allow safe password resets directly via Supabase Auth.
+4. **Updated Architecture Docs**
+   - Deeply expanded `WEBSITE_ARCHITECTURE.md` to cover all Dual-CMS strategies, Connects, monetization rules, and design details.
 
 ## Current State of the Codebase:
-- Supabase is completely live and secure.
-- The `onboarding` flow works with real OTPs and Google OAuth.
-- The `LiveEditorWorkspace` automatically saves to `localStorage` under `scoutit_listing_draft` and clears upon successful publish.
+- The owner dashboard wizard now has a fully functioning 3-step listing flow with unit details.
+- Next.js compiles and builds locally and on Vercel with zero linting or syntax errors.
 
 ## What's Next:
-The user has two massive feature paths remaining before the core platform is fundamentally complete:
-1. **The AI PDF Extractor** (Phase 1 of the AI Listing Engine) - Drag & drop PDF -> auto-fill the listing form.
-2. **The Buyer Leads System** - Routing inquiries from the public view directly into the correct Owner's dashboard inbox.
+1. **Airtable Sync verification**: Confirm that `units_inventory` array properly stringifies and synchronizes with the `Units_JSON` column in Airtable when published, and that it displays correctly in property templates.
+2. **Buyer Leads System**: Map out routing seeker inquiries directly into the Owner's dashboard inbox.
+3. **VIP Spatial Vault Lockouts**: Gate premium 3D maps and Matterport virtual tours for paying users.
 
 ## Prompt for Next Session
 ```text
-Hey! We are continuing work on ScoutIt. Please read `_SCOUTIT_BRAIN/NEXT_DAY_HANDOFF.md` to catch up on what we accomplished in our last session (Security hardening, Real Supabase Auth, Resend SMTP, and Owner Auto-Save Drafts). 
+Hey! We are continuing work on ScoutIt. Please read `_SCOUTIT_BRAIN/NEXT_DAY_HANDOFF.md` and `_SCOUTIT_BRAIN/08_OPERATIONS_AND_BACKLOG/SESSION_HANDOFF_2026-06-28.md` to catch up. 
 
-Today, I want to start by building the AI PDF Extractor (Phase 1 of the AI Listing Engine) so owners can drag and drop property brochures and the AI auto-fills the listing form. Please review the codebase and create an implementation plan for this feature!
+Let's begin by testing the new Unit Builder flow. We need to verify that when an owner adds a unit with photos and publishes, the units_inventory array gets correctly pushed to Airtable's Units_JSON column and loads on the public property page. Let's create an integration test plan for this sync flow!
 ```
