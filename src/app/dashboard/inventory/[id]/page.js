@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { DashboardProvider, useDashboard } from "../../../../context/DashboardContext";
@@ -9,7 +9,7 @@ import { getCurrentTier } from "../../../../lib/entitlements";
 
 function InventoryInner({ params }) {
   const router = useRouter();
-  const { id } = params;
+  const { id } = use(params);
   const { listings, updateListing, currentUser } = useDashboard();
   useEffect(() => {
     if (listings.length > 0 && !listings.find(l => String(l.id) === String(id))) {
