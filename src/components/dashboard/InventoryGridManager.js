@@ -22,13 +22,10 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
     }
   };
 
-  const updateUnit = (id, field, value) => {
+  const updateUnit = (id, field, value, shouldSave = false) => {
     const newUnits = units.map(u => u.id === id ? { ...u, [field]: value } : u);
     onChange(newUnits);
-  };
-
-  const handleBlur = () => {
-    onAutoSave(units);
+    if (shouldSave) onAutoSave(newUnits);
   };
 
   const handleFeatureAdd = (id, e) => {
@@ -81,12 +78,12 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
             ) : (
               units.map(unit => (
                 <tr key={unit.id} className="border-b border-surface-variant hover:bg-surface-variant/30 transition-colors group">
-                  <td className="p-3 align-top">
+                  <td className="p-3 align-top border-r border-surface-variant/30">
                     <input 
                       type="text" 
                       value={unit.name || ""} 
                       onChange={(e) => updateUnit(unit.id, "name", e.target.value)} 
-                      onBlur={handleBlur}
+                      onBlur={(e) => updateUnit(unit.id, "name", e.target.value, true)}
                       placeholder="e.g. Master Suite" 
                       className="w-full bg-transparent border border-transparent hover:border-surface-variant focus:border-gold-accent rounded px-2 py-1 text-sm text-text-primary focus:outline-none transition-colors"
                     />
@@ -96,7 +93,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                       type="text" 
                       value={unit.size || ""} 
                       onChange={(e) => updateUnit(unit.id, "size", e.target.value)} 
-                      onBlur={handleBlur}
+                      onBlur={(e) => updateUnit(unit.id, "size", e.target.value, true)}
                       placeholder="e.g. 30" 
                       className="w-full bg-transparent border border-transparent hover:border-surface-variant focus:border-gold-accent rounded px-2 py-1 text-sm text-text-primary focus:outline-none transition-colors"
                     />
