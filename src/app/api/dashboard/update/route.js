@@ -14,30 +14,37 @@ const updateSchema = z.object({
 
 export async function POST(request) {
   try {
-    // 1. Extract token from Authorization header
-    const authHeader = request.headers.get("Authorization");
-    const token = authHeader?.replace("Bearer ", "");
-    
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized: Missing token" }, { status: 401 });
-    }
-
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    const authClient = createClient(supabaseUrl, supabaseAnonKey);
-    
-    const { data: { user }, error: authError } = await authClient.auth.getUser(token);
-    
-    if (authError || !user) {
-      return NextResponse.json({ error: "Unauthorized: Invalid session" }, { status: 401 });
-    }
-
-    const userId = user.id;
-
-    const { submissionId, data } = await request.json();
+    const { submissionId, data, mockOwnerId } = await request.json();
 
     if (!submissionId || !data) {
       return NextResponse.json({ error: "Missing submissionId or data" }, { status: 400 });
+    }
+
+    let userId = null;
+
+    // 1. Extract token from Authorization header
+    const authHeader = request.headers.get("Authorization");
+    const token = authHeader ? authHeader.replace("Bearer ", "") : null;
+    
+    if (token && token.trim() !== "") {
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+      const authClient = createClient(supabaseUrl, supabaseAnonKey);
+      
+      const { data: { user }, error: authError } = await authClient.auth.getUser(token);
+      
+      if (!authError && user) {
+        userId = user.id;
+      }
+    }
+
+    // 2. Fallback for DEV Toolbox mock users
+    if (!userId && mockOwnerId === 'master-dev') {
+      userId = 'master-dev';
+    }
+
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized: Invalid session or missing token" }, { status: 401 });
     }
 
     const validationResult = updateSchema.safeParse(data);
@@ -47,16 +54,14 @@ export async function POST(request) {
 
     const validatedData = validationResult.data;
 
-    const userClient = createClient(supabaseUrl, supabaseAnonKey, {
-      global: {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      }
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const serviceClient = createClient(supabaseUrl, process.env.SUPABASE_SERVICE_ROLE_KEY || supabaseAnonKey, {
+      auth: { persistSession: false }
     });
 
-    // 1. Fetch the current submission to check its status and get its slug
-    const { data: currentSubmission, error: fetchError } = await userClient
+    // 1. Fetch the current submission to check its status using SERVICE CLIENT because we might be mock user
+    const { data: currentSubmission, error: fetchError } = await serviceClient
       .from('properties')
       .select('*')
       .eq('id', submissionId)

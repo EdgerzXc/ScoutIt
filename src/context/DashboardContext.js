@@ -316,7 +316,11 @@ export function DashboardProvider({ children }) {
           "Content-Type": "application/json",
           "Authorization": token ? `Bearer ${token}` : ""
         },
-        body: JSON.stringify({ submissionId: listingId, data })
+        body: JSON.stringify({ 
+          submissionId: listingId, 
+          data,
+          mockOwnerId: currentUser?.id 
+        })
       });
       
       if (!res.ok) {

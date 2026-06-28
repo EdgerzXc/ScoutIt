@@ -8,6 +8,7 @@ import { uploadPropertyPhoto } from "../../lib/storage";
 export default function InventoryGridManager({ units = [], onChange, isPro, onAutoSave }) {
   const [activePhotoUnit, setActivePhotoUnit] = useState(null);
   const [uploadingUnitId, setUploadingUnitId] = useState(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const addUnit = () => {
     const newUnit = { id: Date.now().toString(), name: "", size: "", features: [], photos: [] };
@@ -60,15 +61,31 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
     const file = e.dataTransfer?.files?.[0];
     if (file && file.type.startsWith('image/')) {
       setUploadingUnitId(id);
+      setUploadProgress(0);
+      
+      const progressInterval = setInterval(() => {
+        setUploadProgress(prev => {
+          const next = prev + Math.floor(Math.random() * 10) + 5;
+          return next >= 90 ? 90 : next;
+        });
+      }, 300);
+
       try {
         const url = await uploadPropertyPhoto(file);
-        const unit = units.find(u => u.id === id);
-        const newPhotos = [...(unit.photos || []), url];
-        updateUnit(id, "photos", newPhotos, true);
+        clearInterval(progressInterval);
+        setUploadProgress(100);
+        
+        setTimeout(() => {
+          const unit = units.find(u => u.id === id);
+          const newPhotos = [...(unit.photos || []), url];
+          updateUnit(id, "photos", newPhotos, true);
+          setUploadingUnitId(null);
+        }, 500);
       } catch (err) {
+        clearInterval(progressInterval);
         console.error("Direct upload failed:", err);
+        setUploadingUnitId(null);
       }
-      setUploadingUnitId(null);
     }
   };
 
@@ -167,8 +184,17 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                       </div>
                     )}
                     {uploadingUnitId === unit.id && (
-                      <div className="text-[10px] text-gold-accent mt-1 animate-pulse">
-                        Uploading...
+                      <div className="mt-2 w-full max-w-[80px] mx-auto">
+                        <div className="text-[10px] text-gold-accent mb-1 animate-pulse flex justify-between">
+                          <span>Uploading...</span>
+                          <span>{uploadProgress}%</span>
+                        </div>
+                        <div className="w-full h-1 bg-surface-variant rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-gold-accent transition-all duration-300 ease-out"
+                            style={{ width: `${uploadProgress}%` }}
+                          />
+                        </div>
                       </div>
                     )}
                   </td>
