@@ -1,14 +1,14 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Camera, Trash2, X, Plus } from "lucide-react";
+import { Upload, Trash2, X, Plus } from "lucide-react";
 import PhotoUploader from "./PhotoUploader";
 
 export default function InventoryGridManager({ units = [], onChange, isPro, onAutoSave }) {
   const [activePhotoUnit, setActivePhotoUnit] = useState(null);
 
   const addUnit = () => {
-    const newUnit = { id: Date.now().toString(), name: "", size: "", price: "", features: [], photos: [] };
+    const newUnit = { id: Date.now().toString(), name: "", size: "", features: [], photos: [] };
     const newUnits = [...units, newUnit];
     onChange(newUnits);
     onAutoSave(newUnits);
@@ -64,10 +64,9 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
         <table className="w-full text-left border-collapse min-w-[800px]">
           <thead>
             <tr className="bg-surface-alt border-b border-surface-variant">
-              <th className="p-4 font-label-caps text-[10px] tracking-widest text-gold-accent uppercase w-[20%]">Unit Identifier</th>
-              <th className="p-4 font-label-caps text-[10px] tracking-widest text-gold-accent uppercase w-[15%]">Size (sqm)</th>
-              <th className="p-4 font-label-caps text-[10px] tracking-widest text-gold-accent uppercase w-[15%]">Price / Rent</th>
-              <th className="p-4 font-label-caps text-[10px] tracking-widest text-gold-accent uppercase w-[35%]">Tags & Features</th>
+              <th className="p-4 font-label-caps text-[10px] tracking-widest text-gold-accent uppercase w-[25%]">Unit Identifier</th>
+              <th className="p-4 font-label-caps text-[10px] tracking-widest text-gold-accent uppercase w-[20%]">Size (sqm)</th>
+              <th className="p-4 font-label-caps text-[10px] tracking-widest text-gold-accent uppercase w-[40%]">Tags & Features</th>
               <th className="p-4 font-label-caps text-[10px] tracking-widest text-gold-accent uppercase text-center w-[10%]">Media</th>
               <th className="p-4 font-label-caps text-[10px] tracking-widest text-gold-accent uppercase text-center w-[5%]"></th>
             </tr>
@@ -103,16 +102,6 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                     />
                   </td>
                   <td className="p-3 align-top">
-                    <input 
-                      type="text" 
-                      value={unit.price || ""} 
-                      onChange={(e) => updateUnit(unit.id, "price", e.target.value)} 
-                      onBlur={handleBlur}
-                      placeholder="e.g. ₱50k/mo" 
-                      className="w-full bg-transparent border border-transparent hover:border-surface-variant focus:border-gold-accent rounded px-2 py-1 text-sm text-text-primary focus:outline-none transition-colors"
-                    />
-                  </td>
-                  <td className="p-3 align-top">
                     <div className="flex flex-wrap gap-2 mb-2">
                       {(unit.features || []).map((feature, idx) => (
                         <span key={idx} className="inline-flex items-center gap-1 px-2 py-1 bg-surface-variant border border-gold-accent/20 text-[11px] text-text-primary rounded uppercase tracking-wide font-working-title">
@@ -123,19 +112,34 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                         </span>
                       ))}
                     </div>
-                    <input 
-                      type="text" 
-                      onKeyDown={(e) => handleFeatureAdd(unit.id, e)} 
-                      placeholder="Type a feature & press Enter..." 
-                      className="w-full bg-surface/50 border border-surface-variant focus:border-gold-accent rounded px-2 py-1.5 text-xs text-text-primary focus:outline-none transition-colors placeholder:text-text-muted"
-                    />
+                    <div className="flex items-center gap-2">
+                      <input 
+                        type="text" 
+                        id={`feature-input-${unit.id}`}
+                        onKeyDown={(e) => handleFeatureAdd(unit.id, e)} 
+                        placeholder="Type a feature & press Enter..." 
+                        className="w-full bg-surface/50 border border-surface-variant focus:border-gold-accent rounded px-2 py-1.5 text-xs text-text-primary focus:outline-none transition-colors placeholder:text-text-muted"
+                      />
+                      <button 
+                        onClick={() => {
+                          const input = document.getElementById(`feature-input-${unit.id}`);
+                          if (input && input.value.trim() !== '') {
+                            handleFeatureAdd(unit.id, { key: 'Enter', target: input, preventDefault: () => {} });
+                          }
+                        }}
+                        className="px-2 py-1.5 bg-surface-variant hover:bg-gold-accent hover:text-background text-text-secondary rounded transition-colors text-xs font-label-caps uppercase tracking-widest flex items-center justify-center shrink-0"
+                        title="Add Feature"
+                      >
+                        <Plus size={14} />
+                      </button>
+                    </div>
                   </td>
                   <td className="p-3 align-top text-center">
                     <button 
                       onClick={() => setActivePhotoUnit(unit.id)}
                       className="inline-flex items-center justify-center p-2 rounded hover:bg-gold-accent/10 text-text-secondary hover:text-gold-accent transition-colors relative"
                     >
-                      <Camera size={18} />
+                      <Upload size={18} />
                       {(unit.photos?.length > 0 || unit.image) && (
                         <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-gold-accent rounded-full border border-background"></span>
                       )}
