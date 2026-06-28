@@ -3,9 +3,11 @@
 import { useState, useRef } from "react";
 import { Upload, Trash2, X, Plus } from "lucide-react";
 import PhotoUploader from "./PhotoUploader";
+import { uploadPropertyPhoto } from "../../lib/storage";
 
 export default function InventoryGridManager({ units = [], onChange, isPro, onAutoSave }) {
   const [activePhotoUnit, setActivePhotoUnit] = useState(null);
+  const [uploadingUnitId, setUploadingUnitId] = useState(null);
 
   const addUnit = () => {
     const newUnit = { id: Date.now().toString(), name: "", size: "", features: [], photos: [] };
@@ -50,6 +52,23 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
       const newUnits = units.map(u => u.id === id ? { ...u, features: newFeatures } : u);
       onChange(newUnits);
       onAutoSave(newUnits);
+    }
+  };
+
+  const handleDirectDrop = async (e, id) => {
+    e.preventDefault();
+    const file = e.dataTransfer?.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      setUploadingUnitId(id);
+      try {
+        const url = await uploadPropertyPhoto(file);
+        const unit = units.find(u => u.id === id);
+        const newPhotos = [...(unit.photos || []), url];
+        updateUnit(id, "photos", newPhotos, true);
+      } catch (err) {
+        console.error("Direct upload failed:", err);
+      }
+      setUploadingUnitId(null);
     }
   };
 
@@ -109,38 +128,49 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                         </span>
                       ))}
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex gap-2">
                       <input 
                         type="text" 
-                        id={`feature-input-${unit.id}`}
                         onKeyDown={(e) => handleFeatureAdd(unit.id, e)} 
                         placeholder="Type a feature & press Enter..." 
-                        className="w-full bg-surface/50 border border-surface-variant focus:border-gold-accent rounded px-2 py-1.5 text-xs text-text-primary focus:outline-none transition-colors placeholder:text-text-muted"
+                        className="bg-transparent text-sm text-text-secondary focus:outline-none placeholder-text-muted/50 border-b border-surface-variant focus:border-gold-accent transition-colors flex-1"
                       />
                       <button 
-                        onClick={() => {
-                          const input = document.getElementById(`feature-input-${unit.id}`);
+                        onClick={(e) => {
+                          const input = e.currentTarget.previousElementSibling;
                           if (input && input.value.trim() !== '') {
-                            handleFeatureAdd(unit.id, { key: 'Enter', target: input, preventDefault: () => {} });
+                            handleFeatureAdd(unit.id, { key: 'Enter', preventDefault: () => {}, target: input });
                           }
                         }}
-                        className="px-2 py-1.5 bg-surface-variant hover:bg-gold-accent hover:text-background text-text-secondary rounded transition-colors text-xs font-label-caps uppercase tracking-widest flex items-center justify-center shrink-0"
-                        title="Add Feature"
+                        className="text-text-muted hover:text-gold-accent transition-colors"
+                        title="Add feature"
                       >
-                        <Plus size={14} />
+                        <Plus size={16} />
                       </button>
                     </div>
                   </td>
-                  <td className="p-3 align-top text-center">
+                  <td 
+                    className={`p-3 align-top text-center transition-colors ${uploadingUnitId === unit.id ? 'opacity-50' : ''}`}
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={(e) => handleDirectDrop(e, unit.id)}
+                  >
                     <button 
                       onClick={() => setActivePhotoUnit(unit.id)}
-                      className="inline-flex items-center justify-center p-2 rounded hover:bg-gold-accent/10 text-text-secondary hover:text-gold-accent transition-colors relative"
+                      className={`h-10 w-10 flex items-center justify-center rounded border ${unit.photos?.some(p => p) ? 'bg-gold-accent/20 border-gold-accent text-gold-accent' : 'bg-surface-alt border-surface-variant text-text-muted hover:border-gold-accent hover:text-gold-accent'} transition-colors mx-auto`}
+                      title="Upload photos"
                     >
                       <Upload size={18} />
-                      {(unit.photos?.length > 0 || unit.image) && (
-                        <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-gold-accent rounded-full border border-background"></span>
-                      )}
                     </button>
+                    {unit.photos?.filter(p => p).length > 0 && (
+                      <div className="text-[10px] text-text-secondary mt-1">
+                        {unit.photos.filter(p => p).length} photos
+                      </div>
+                    )}
+                    {uploadingUnitId === unit.id && (
+                      <div className="text-[10px] text-gold-accent mt-1 animate-pulse">
+                        Uploading...
+                      </div>
+                    )}
                   </td>
                   <td className="p-3 align-top text-center">
                     <button 

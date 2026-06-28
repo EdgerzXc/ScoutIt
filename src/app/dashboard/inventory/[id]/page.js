@@ -64,10 +64,10 @@ function InventoryInner({ params }) {
         <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-surface-variant pb-6 mb-8 gap-4">
           <div>
             <Link 
-              href={`/dashboard?edit=${listing.id}`}
+              href="/dashboard"
               className="text-text-secondary hover:text-gold-accent text-sm font-working-title flex items-center gap-2 mb-4 transition-colors"
             >
-              ← Back to Property Dossier
+              ← Back to Dashboard
             </Link>
             <span className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase mb-1 block">
               Inventory Manager

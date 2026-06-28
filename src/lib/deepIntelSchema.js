@@ -7,7 +7,9 @@ export const DEEP_INTEL_SCHEMA = {
       { key: "DI_AC_Charges", label: "A/C Charges", placeholder: "e.g. ₱48 / sqm / mo" },
       { key: "DI_Escalation", label: "Escalation Rate", placeholder: "e.g. 5% per annum" },
       { key: "DI_Fit_Out", label: "Fit-out Allowance", placeholder: "e.g. ₱8,000 / sqm" },
-      { key: "DI_Rent_Free", label: "Rent-free Period", placeholder: "e.g. Up to 2 months" }
+      { key: "DI_Rent_Free", label: "Rent-free Period", placeholder: "e.g. Up to 2 months" },
+      { key: "DI_Cap_Rate", label: "Cap Rate", placeholder: "e.g. 6.8%" },
+      { key: "DI_NOI", label: "NOI", placeholder: "e.g. ₱182.4M / yr (stabilized)" }
     ],
     2: [
       { key: "DI_Towers", label: "Towers / Zones", placeholder: "e.g. Single tower, high zone" },
@@ -38,8 +40,6 @@ export const DEEP_INTEL_SCHEMA = {
       { key: "DI_Structural", label: "Structural Calculations", placeholder: "e.g. PT 0.4g seismic" }
     ],
     6: [
-      { key: "DI_Cap_Rate", label: "Cap Rate", placeholder: "e.g. 6.8%" },
-      { key: "DI_NOI", label: "NOI", placeholder: "e.g. ₱182.4M / yr (stabilized)" },
       { key: "DI_Available", label: "Available Units", placeholder: "e.g. Floors 14, 18 & 22" },
       { key: "DI_Density", label: "Office Density Data", placeholder: "e.g. Grade-A vacancy 8.2%" },
       { key: "DI_Pipeline", label: "Development Pipeline", placeholder: "e.g. 2 towers in 2027" },
