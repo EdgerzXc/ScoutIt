@@ -47,8 +47,16 @@ export async function POST(request) {
 
     const validatedData = validationResult.data;
 
+    const userClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    });
+
     // 1. Fetch the current submission to check its status and get its slug
-    const { data: currentSubmission, error: fetchError } = await supabaseAdmin
+    const { data: currentSubmission, error: fetchError } = await userClient
       .from('properties')
       .select('*')
       .eq('id', submissionId)
@@ -86,7 +94,7 @@ export async function POST(request) {
     }
 
     // 2. Update Supabase
-    const { error: updateError } = await supabaseAdmin
+    const { error: updateError } = await userClient
       .from('properties')
       .update(supabasePayload)
       .eq('id', submissionId);

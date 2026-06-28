@@ -187,9 +187,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
               while (photosArray.length < maxPhotos) photosArray.push("");
               if (photosArray.length > maxPhotos) photosArray.length = maxPhotos;
 
-              const handlePhotoChange = (idx, url) => {
-                const newPhotos = [...photosArray];
-                newPhotos[idx] = url;
+              const handlePhotoChange = (newPhotos) => {
                 const newUnits = units.map(un => un.id === activePhotoUnit ? { ...un, photos: newPhotos, image: newPhotos[0] } : un);
                 onChange(newUnits);
                 onAutoSave(newUnits);
@@ -197,16 +195,13 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
 
               return (
                 <div>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
-                    {photosArray.map((photoUrl, idx) => (
-                      <div key={idx} className="aspect-square relative">
-                        <PhotoUploader 
-                          url={photoUrl} 
-                          onUpload={(url) => handlePhotoChange(idx, url)} 
-                          onRemove={() => handlePhotoChange(idx, "")} 
-                        />
-                      </div>
-                    ))}
+                  <div className="mb-4">
+                    <PhotoUploader 
+                      photos={photosArray} 
+                      onChange={handlePhotoChange}
+                      isPro={isPro}
+                      maxFreePhotos={isPro ? 5 : 1}
+                    />
                   </div>
                   {!isPro && (
                     <div className="mt-4 p-4 border border-gold-accent/20 bg-gold-accent/5 rounded-lg text-sm text-text-secondary">
