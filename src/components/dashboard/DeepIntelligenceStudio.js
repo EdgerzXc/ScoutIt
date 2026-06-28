@@ -351,6 +351,21 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
       spaceCategory: formData.category,
       category: formData.category,
       photos: formData.photos && formData.photos.some(p => p.trim()) ? formData.photos.filter(p => p.trim()) : (formData.image ? [formData.image] : []),
+      
+      // Map basic space specs to root so the Preview (Flows) can read them
+      beds: formData.details?.Beds || formData.details?.Bedrooms || 0,
+      baths: formData.details?.Baths || formData.details?.Bathrooms || 0,
+      floor_sqm: formData.details?.Floor_Area_Sqm || formData.details?.Indoor_Sqm || 0,
+      lot_sqm: formData.details?.Lot_Area_Sqm || formData.details?.Alfresco_Sqm || 0,
+      parking: formData.details?.Parking_Slots || 0,
+      guest_capacity: formData.details?.Guest_Capacity || 0,
+      cleaning_time: formData.details?.Cleaning_Time || 0,
+      accommodations: formData.details?.Accommodations || "",
+      event_capacity: formData.details?.Event_Capacity || formData.details?.Seating_Capacity || 0,
+      rooms: formData.details?.Rooms || 0,
+      ceiling_height_text: formData.details?.Ceiling_Height || "",
+      turnoverDate: formData.details?.Turnover_Date || "",
+      
       details: formData.details
     };
   }, [formData]);
@@ -492,6 +507,24 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
                   >
                     + Add Another Photo
                   </button>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-3 mt-4">
+                <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">Space Specs <span className="text-error">*</span></label>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2 mb-6 border-b border-surface-variant pb-6">
+                  {categoryFields.map(field => (
+                    <div key={field.key} className="flex flex-col gap-2">
+                      <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">{field.label}</label>
+                      <input 
+                        className="bg-surface-alt border border-surface-variant rounded px-3 py-2 text-on-surface text-sm focus:outline-none focus:border-gold-accent transition-colors" 
+                        type={field.type} 
+                        value={formData.details[field.key] || ''} 
+                        onChange={e => setDetail(field.key, e.target.value)} 
+                        placeholder={field.type === "number" ? "0" : ""}
+                      />
+                    </div>
+                  ))}
                 </div>
               </div>
 
