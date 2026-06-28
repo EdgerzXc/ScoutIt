@@ -369,7 +369,13 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
   const handlePublish = () => {
     if (isPublishable) {
       if (!isEditing) localStorage.removeItem("scoutit_listing_draft");
-      const payload = sanitizeObject(formData);
+      const payload = {
+        ...sanitizeObject(formData),
+        type: formData.category,
+        mediaLink: formData.photos?.[0] || formData.image || "",
+        completenessScore: completionPercentage,
+        verified: false
+      };
       onPublish(payload, true);
     }
   };
@@ -377,7 +383,13 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
   const handleSaveDraft = () => {
     if (mustHaves.title) {
       if (!isEditing) localStorage.removeItem("scoutit_listing_draft");
-      const payload = sanitizeObject(formData);
+      const payload = {
+        ...sanitizeObject(formData),
+        type: formData.category,
+        mediaLink: formData.photos?.[0] || formData.image || "",
+        completenessScore: completionPercentage,
+        verified: false
+      };
       onPublish(payload, false);
     }
   };
