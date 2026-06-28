@@ -166,7 +166,11 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
 
       {/* Photo Uploader Modal */}
       {activePhotoUnit && (
-        <div className="fixed inset-0 z-[3000] bg-background/90 backdrop-blur-md flex items-center justify-center p-4 animate-[fadeIn_0.2s_ease]">
+        <div 
+          className="fixed inset-0 z-[3000] bg-background/90 backdrop-blur-md flex items-center justify-center p-4 animate-[fadeIn_0.2s_ease]"
+          onDragOver={e => e.preventDefault()}
+          onDrop={e => e.preventDefault()}
+        >
           <div className="bg-[#121110] border border-gold-accent/30 rounded-lg p-6 max-w-2xl w-full shadow-2xl">
             <div className="flex justify-between items-center mb-6">
               <h3 className="font-display-md text-2xl text-gold-accent">Unit Media</h3>

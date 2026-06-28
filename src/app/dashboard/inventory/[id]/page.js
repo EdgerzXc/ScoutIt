@@ -52,6 +52,7 @@ function InventoryInner({ params }) {
       await updateListing(listing.id, { details: updatedDetails });
     } catch (e) {
       console.error("Failed to auto-save inventory", e);
+      addToast(e.message || "Failed to save units to database", "❌");
     }
   };
 
