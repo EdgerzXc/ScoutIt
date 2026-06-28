@@ -371,14 +371,26 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
   const handlePublish = () => {
     if (isPublishable) {
       if (!isEditing) localStorage.removeItem("scoutit_listing_draft");
-      onPublish(sanitizeObject(formData), true);
+      const payload = sanitizeObject(formData);
+      if (payload.units_inventory) {
+        payload.details = payload.details || {};
+        payload.details.units_inventory = payload.units_inventory;
+        delete payload.units_inventory;
+      }
+      onPublish(payload, true);
     }
   };
 
   const handleSaveDraft = () => {
     if (mustHaves.title) {
       if (!isEditing) localStorage.removeItem("scoutit_listing_draft");
-      onPublish(sanitizeObject(formData), false);
+      const payload = sanitizeObject(formData);
+      if (payload.units_inventory) {
+        payload.details = payload.details || {};
+        payload.details.units_inventory = payload.units_inventory;
+        delete payload.units_inventory;
+      }
+      onPublish(payload, false);
     }
   };
 

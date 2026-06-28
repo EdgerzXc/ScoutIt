@@ -13,21 +13,33 @@
    - Fixed a double declaration of `currentPhotos` in `PhotoUploader.js`.
    - Escaped double quotes inside `UnitBuilder.js` to clear strict ESLint rules that were causing Vercel compilation to exit with code 1. The build is now fully green and active!
 
-4. **Updated Architecture Docs**
+4. **Fixed Supabase Photo Upload Error (Invalid Compact JWS)**
+   - Identified that the `NEXT_PUBLIC_SUPABASE_ANON_KEY` was using the new non-JWT publishable key format, which caused the Supabase Storage API to crash when expecting a JWT. 
+   - Replaced it with the legacy JWT anon key in `.env.local`.
+
+5. **Updated Architecture Docs**
    - Deeply expanded `WEBSITE_ARCHITECTURE.md` to cover all Dual-CMS strategies, Connects, monetization rules, and design details.
 
 ## Current State of the Codebase:
 - The owner dashboard wizard now has a fully functioning 3-step listing flow with unit details.
+- Photo uploads work locally using the legacy JWT anon key.
 - Next.js compiles and builds locally and on Vercel with zero linting or syntax errors.
 
-## What's Next:
-1. **Airtable Sync verification**: Confirm that `units_inventory` array properly stringifies and synchronizes with the `Units_JSON` column in Airtable when published, and that it displays correctly in property templates.
-2. **Buyer Leads System**: Map out routing seeker inquiries directly into the Owner's dashboard inbox.
-3. **VIP Spatial Vault Lockouts**: Gate premium 3D maps and Matterport virtual tours for paying users.
+## What's Next (Deployment & Vercel Sync):
+1. **GitHub Commit**: Push the latest changes to your repository. Note: `.env.local` is ignored by Git, which is correct and safe!
+2. **Vercel Environment Variables**: You **MUST** go to your Vercel Dashboard -> Settings -> Environment Variables, and change the `NEXT_PUBLIC_SUPABASE_ANON_KEY` to the legacy JWT key. If you leave the `sb_publishable_` key in Vercel, photo uploads will still break in production!
+3. **Airtable Sync verification**: Confirm that `units_inventory` array properly stringifies and synchronizes with the `Units_JSON` column in Airtable when published, and that it displays correctly in property templates.
 
 ## Prompt for Next Session
 ```text
-Hey! We are continuing work on ScoutIt. Please read `_SCOUTIT_BRAIN/NEXT_DAY_HANDOFF.md` and `_SCOUTIT_BRAIN/08_OPERATIONS_AND_BACKLOG/SESSION_HANDOFF_2026-06-28.md` to catch up. 
+Hey! We are continuing work on ScoutIt, a premium commercial and residential real estate directory. 
 
-Let's begin by testing the new Unit Builder flow. We need to verify that when an owner adds a unit with photos and publishes, the units_inventory array gets correctly pushed to Airtable's Units_JSON column and loads on the public property page. Let's create an integration test plan for this sync flow!
+CRITICAL FIRST STEP: Before doing *anything* else, you must familiarize yourself with this project so you aren't flying blind. 
+1. Read `_SCOUTIT_BRAIN/00_START_HERE.md` to get the master overview.
+2. Read `_SCOUTIT_BRAIN/NEXT_DAY_HANDOFF.md` and `_SCOUTIT_BRAIN/08_OPERATIONS_AND_BACKLOG/SESSION_HANDOFF_2026-06-28.md` to see exactly where we left off.
+3. Briefly scan the other architecture and schema docs in `_SCOUTIT_BRAIN/` to understand the Dual-CMS (Airtable + Supabase) architecture and design system.
+
+I have committed the code to GitHub and updated the Vercel environment variables with the legacy JWT anon key to fix the photo upload JWS error. 
+
+Let's begin by testing the new Unit Builder flow in production/local. We need to verify that when an owner adds a unit with photos and publishes, the units_inventory array gets correctly pushed to Airtable's Units_JSON column and loads on the public property page. Let's create an integration test plan for this sync flow!
 ```
