@@ -94,10 +94,21 @@ export async function POST(request) {
     }
 
     // 2. Update Supabase
-    const { error: updateError } = await userClient
+    // We verified ownership above. RLS might silently drop updates, so we use the service role key.
+    const serviceClient = createClient(supabaseUrl, process.env.SUPABASE_SERVICE_ROLE_KEY || supabaseAnonKey, {
+      auth: { persistSession: false }
+    });
+
+    const { error: updateError, data: updateData } = await serviceClient
       .from('properties')
       .update(supabasePayload)
-      .eq('id', submissionId);
+      .eq('id', submissionId)
+      .select();
+
+    if (!updateData || updateData.length === 0) {
+      console.warn("[UPDATE API] Zero rows updated. Supabase RLS or missing ID issue.");
+      return NextResponse.json({ error: "Failed to update database (0 rows affected)" }, { status: 500 });
+    }
 
     if (updateError) {
       console.error("[UPDATE API] Failed to update Supabase:", updateError);

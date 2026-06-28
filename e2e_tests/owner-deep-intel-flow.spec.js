@@ -112,10 +112,20 @@ test.describe('Owner Deep Intelligence Studio Flow', () => {
       await page.getByPlaceholder('e.g. BGC Core').fill(`E2E ${category.label} Location`);
       await page.getByPlaceholder('e.g. 50000').fill('150000');
       
+      // Mock Supabase storage
+      await page.route('**/storage/v1/object/property_photos/*', async route => {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ Key: 'property_photos/dummy.png' })
+        });
+      });
+
       // Fill out required photos
-      const photoInputs = await page.getByPlaceholder(/Photo URL/).all();
-      for (const input of photoInputs) {
-        await input.fill('https://images.unsplash.com/photo-1497366216548-37526070297c');
+      const fileInputs = await page.locator('input[type="file"]').all();
+      for (let i = 0; i < Math.min(5, fileInputs.length); i++) {
+        await fileInputs[i].setInputFiles('e2e_tests/dummy.png');
+        await page.waitForTimeout(600); // Wait for the mocked upload to complete
       }
 
       // Next
