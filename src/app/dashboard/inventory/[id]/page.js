@@ -21,6 +21,7 @@ function InventoryInner({ params }) {
 
   // State must be above early return
   const [localUnits, setLocalUnits] = useState([]);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Keep localUnits in sync when data loads or updates remotely
   useEffect(() => {
@@ -48,12 +49,17 @@ function InventoryInner({ params }) {
     const updatedDetails = { ...listing.details, units_inventory: newUnits };
     
     // Auto-save silently
+    setIsSaving(true);
     try {
       await updateListing(listing.id, { details: updatedDetails });
     } catch (e) {
       console.error("Failed to auto-save inventory", e);
-      addToast(e.message || "Failed to save units to database", "❌");
     }
+    setIsSaving(false);
+  };
+
+  const manualSave = () => {
+    handleAutoSave(localUnits);
   };
 
   return (
@@ -76,8 +82,21 @@ function InventoryInner({ params }) {
               {listing.title || 'Untitled Property'}
             </h1>
           </div>
-          <div className="text-sm text-text-secondary font-working-title bg-surface-alt px-4 py-2 rounded-full border border-surface-variant">
-            Changes auto-save automatically
+          <div className="flex flex-col items-end gap-2">
+            <button 
+              onClick={manualSave}
+              disabled={isSaving}
+              className={`text-sm font-working-title font-bold px-6 py-2 rounded-full border transition-colors ${
+                isSaving 
+                  ? 'bg-surface-variant text-text-muted border-surface-variant cursor-not-allowed'
+                  : 'bg-gold-accent text-background border-gold-accent hover:bg-gold-accent-hover'
+              }`}
+            >
+              {isSaving ? 'Saving...' : 'Save Changes'}
+            </button>
+            <span className="text-[10px] text-text-secondary font-working-title uppercase tracking-wider">
+              Also auto-saves on edits
+            </span>
           </div>
         </div>
 
