@@ -41,7 +41,7 @@ export default function UnitBuilder({ units = [], onChange, isPro = false }) {
 
       {units.length === 0 ? (
         <div className="text-center py-12 border border-dashed border-surface-variant rounded bg-surface-alt">
-          <p className="text-text-secondary text-sm">No units added yet. Click "Add Unit" to start building your inventory.</p>
+          <p className="text-text-secondary text-sm">No units added yet. Click &quot;Add Unit&quot; to start building your inventory.</p>
         </div>
       ) : (
         <div className="flex flex-col gap-8">
