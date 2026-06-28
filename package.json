@@ -20,7 +20,7 @@
     "isomorphic-dompurify": "^3.18.0",
     "lru-cache": "^11.5.1",
     "lucide-react": "^1.18.0",
-    "mapbox-gl": "^3.24.0",
+    "mapbox-gl": "^3.25.0",
     "maplibre-gl": "^5.24.0",
     "next": "16.2.7",
     "papaparse": "^5.5.4",
