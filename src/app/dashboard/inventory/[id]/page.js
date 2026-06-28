@@ -19,6 +19,18 @@ function InventoryInner({ params }) {
 
   const listing = listings.find(l => String(l.id) === String(id));
 
+  // State must be above early return
+  const [localUnits, setLocalUnits] = useState([]);
+
+  // Keep localUnits in sync when data loads or updates remotely
+  useEffect(() => {
+    if (listing) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setLocalUnits(listing.details?.units_inventory || listing.units_inventory || []);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [listing?.details?.units_inventory, listing?.units_inventory]);
+
   if (!listing) {
     return (
       <div className="min-h-screen bg-background flex justify-center items-center font-working-title text-text-secondary">
@@ -29,10 +41,9 @@ function InventoryInner({ params }) {
 
   const isPro = getCurrentTier() !== "starry";
 
-  // Get units from details or main object, default to empty array
-  const units = listing.details?.units_inventory || listing.units_inventory || [];
-
   const handleAutoSave = async (newUnits) => {
+    setLocalUnits(newUnits);
+    
     // Create a deep copy of the listing details to update
     const updatedDetails = { ...listing.details, units_inventory: newUnits };
     
@@ -71,8 +82,8 @@ function InventoryInner({ params }) {
 
         {/* Grid Manager */}
         <InventoryGridManager 
-          units={units} 
-          onChange={() => {}} // Local state is handled inside the manager for fast typing, we use onAutoSave for db sync
+          units={localUnits} 
+          onChange={(newUnits) => setLocalUnits(newUnits)}
           onAutoSave={handleAutoSave}
           isPro={isPro}
         />
