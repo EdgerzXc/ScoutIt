@@ -1,7 +1,0 @@
-version: 2
-updates:
-  # Instructs Dependabot where to look and what language you are using
-  - package-ecosystem: "npm" # Change to "pip" for Python, "composer" for PHP, etc.
-    directory: "/" # Where your dependency file is located
-    schedule:
-      interval: "weekly" # Options: "daily", "weekly", or "monthly"
