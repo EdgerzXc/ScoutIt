@@ -720,9 +720,9 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
         </div>
         <div className="mt-10 opacity-90 md:scale-[0.98] origin-top transition-all pointer-events-auto">
           {['commercial', 'restaurants', 'venues'].includes(formData.category) ? (
-            <CommercialFlow slug={null} draftData={draftData} isDraftMode={true} externalActiveTab={'space'} />
+            <CommercialFlow slug={null} draftData={draftData} isDraftMode={true} externalActiveTab={step === 3 ? 'units' : 'space'} />
           ) : (
-            <ResidentialFlow slug={null} draftData={draftData} isDraftMode={true} externalActiveTab={'space'} />
+            <ResidentialFlow slug={null} draftData={draftData} isDraftMode={true} externalActiveTab={step === 3 ? 'units' : 'space'} />
           )}
         </div>
       </div>
