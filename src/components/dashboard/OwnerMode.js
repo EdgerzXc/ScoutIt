@@ -827,6 +827,12 @@ export default function OwnerMode() {
            >
              Edit Workspace
            </button>
+           <Link 
+             href={`/dashboard/inventory/${activeListing.id}`}
+             className="border border-gold-accent text-gold-accent hover:bg-gold-accent/10 font-working-title font-bold px-4 py-2 rounded transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed flex-1 md:flex-none text-center justify-center"
+           >
+             Manage Inventory
+           </Link>
            <button 
              className="bg-gold-accent/10 border border-gold-accent text-gold-accent hover:bg-gold-accent/20 font-working-title font-bold px-4 py-2 rounded transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed flex-1 md:flex-none text-center justify-center shadow-[0_0_10px_rgba(232,174,60,0.1)]"
              disabled={activeListing.pipelineStatus === 'ai_drafting'}

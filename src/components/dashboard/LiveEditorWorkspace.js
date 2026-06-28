@@ -6,7 +6,6 @@ import ResidentialFlow from "../property/ResidentialFlow";
 import { sanitizeObject } from "../../lib/sanitize";
 import { supabase } from "../../lib/supabaseClient";
 import PhotoUploader from "./PhotoUploader";
-import UnitBuilder from "./UnitBuilder";
 import { getCurrentTier } from "../../lib/entitlements";
 
 const CATEGORIES = [
@@ -153,7 +152,6 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
     description: initialData?.description || initialData?.desc || "",
     verified: initialData?.verified || false,
     details: initialData?.details || {},
-    units_inventory: initialData?.units_inventory || [],
   });
 
   const isPro = getCurrentTier() !== "starry";
@@ -372,11 +370,6 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
     if (isPublishable) {
       if (!isEditing) localStorage.removeItem("scoutit_listing_draft");
       const payload = sanitizeObject(formData);
-      if (payload.units_inventory) {
-        payload.details = payload.details || {};
-        payload.details.units_inventory = payload.units_inventory;
-        delete payload.units_inventory;
-      }
       onPublish(payload, true);
     }
   };
@@ -385,11 +378,6 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
     if (mustHaves.title) {
       if (!isEditing) localStorage.removeItem("scoutit_listing_draft");
       const payload = sanitizeObject(formData);
-      if (payload.units_inventory) {
-        payload.details = payload.details || {};
-        payload.details.units_inventory = payload.units_inventory;
-        delete payload.units_inventory;
-      }
       onPublish(payload, false);
     }
   };
@@ -439,14 +427,6 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
         </div>
       )}
 
-      {/* Draft Data mapped to include units_inventory */}
-      {(() => {
-        if (!draftData.units_inventory) {
-          draftData.units_inventory = formData.units_inventory;
-        }
-        return null;
-      })()}
-
       {/* Header */}
       <div className="p-4 border-b border-surface-variant bg-background flex justify-between items-center z-20">
         <button className="text-text-secondary hover:text-on-surface font-working-title text-sm" onClick={onClose}>
@@ -474,7 +454,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
 
       {/* Progress Bar */}
       <div className="w-full bg-surface-variant h-1 relative overflow-hidden">
-        <div className={`absolute top-0 left-0 h-1 transition-all duration-300 ${step === 1 ? 'w-1/3 bg-gold-accent' : step === 2 ? 'w-2/3 bg-gold-accent' : `w-full ${getProgressColor()}`}`}></div>
+        <div className={`absolute top-0 left-0 h-1 transition-all duration-300 ${step === 1 ? 'w-1/2 bg-gold-accent' : 'w-full bg-gold-accent'}`}></div>
       </div>
 
       <div className="flex-1 overflow-y-auto p-6 md:p-12 custom-scrollbar bg-surface flex flex-col items-center">
@@ -547,35 +527,6 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
                   onSetImage={(url) => setField("image", url)}
                 />
               </div>
-
-              <div className="flex flex-col gap-2 mt-4 relative group">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-label-caps tracking-widest text-gold-accent flex items-center gap-2 uppercase">
-                    External Media Folder (Google Drive)
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                      <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                    </svg>
-                  </label>
-                  <span className="text-[9px] uppercase tracking-widest font-mono text-gold-accent border border-gold-accent/30 px-1.5 py-0.5 rounded">Premium</span>
-                </div>
-                <div className="relative">
-                  <input 
-                    className="w-full bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface opacity-50 cursor-not-allowed focus:outline-none transition-colors" 
-                    type="url" 
-                    value={formData.mediaLink || ""} 
-                    onChange={e => setField("mediaLink", e.target.value)} 
-                    placeholder="e.g. drive.google.com/drive/folders/..." 
-                    disabled
-                  />
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-background/50 backdrop-blur-[1px] rounded">
-                    <button className="text-[10px] uppercase tracking-widest font-mono font-bold text-background bg-gold-accent px-3 py-1.5 rounded shadow-lg hover:scale-105 transition-transform">
-                      Upgrade to Unlock
-                    </button>
-                  </div>
-                </div>
-                <span className="text-[10px] text-text-secondary">Have more than 5 photos, floor plans, or drone videos? Link a public folder. <span className="text-error">⚠️ Important: Set folder to "Viewer" only.</span></span>
-              </div>
             </section>
           )}
 
@@ -641,17 +592,6 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
             </section>
           )}
 
-          {/* Step 3: Units Inventory */}
-          {step === 3 && (
-            <section className="flex flex-col gap-6 animate-[fadeIn_0.3s_ease]">
-              <UnitBuilder 
-                units={formData.units_inventory} 
-                onChange={(newUnits) => setField("units_inventory", newUnits)} 
-                isPro={isPro} 
-              />
-            </section>
-          )}
-
           {/* Navigation Buttons */}
           <div className="flex justify-between items-center mt-12 pt-6 border-t border-surface-variant">
             {step > 1 ? (
@@ -674,10 +614,10 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
                 Save Draft
               </button>
               
-              {step < 3 ? (
+              {step === 1 ? (
                 <button 
-                  onClick={() => setStep(step + 1)}
-                  disabled={step === 1 ? !Object.values(mustHaves).every(Boolean) : false}
+                  onClick={() => setStep(2)}
+                  disabled={!Object.values(mustHaves).every(Boolean)}
                   className="px-6 py-2 rounded bg-surface-variant text-on-surface text-sm font-label-caps tracking-widest uppercase hover:bg-gold-accent hover:text-background disabled:opacity-50 transition-colors"
                 >
                   Next Step →

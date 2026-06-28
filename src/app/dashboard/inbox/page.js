@@ -42,6 +42,20 @@ export default function InboxPage() {
     }
   };
 
+  const handleOfferHandshake = (dealId) => {
+    setDeals(deals.map(d => d.id === dealId ? { ...d, handshakeState: 'offered' } : d));
+    if (selectedDeal?.id === dealId) {
+      setSelectedDeal({ ...selectedDeal, handshakeState: 'offered' });
+    }
+  };
+
+  const handleAcceptHandshake = (dealId) => {
+    setDeals(deals.map(d => d.id === dealId ? { ...d, handshakeState: 'linked', status: 'closed' } : d));
+    if (selectedDeal?.id === dealId) {
+      setSelectedDeal({ ...selectedDeal, handshakeState: 'linked', status: 'closed' });
+    }
+  };
+
   return (
     <DashboardLayout>
       <div className="flex h-[calc(100vh-64px)] bg-background">
@@ -90,7 +104,12 @@ export default function InboxPage() {
         {/* Right Content - ChatBox */}
         <div className="w-2/3 flex flex-col bg-background relative">
           {selectedDeal ? (
-            <ChatBox deal={selectedDeal} onCloseDeal={handleCloseDeal} />
+            <ChatBox 
+              deal={selectedDeal} 
+              onCloseDeal={handleCloseDeal} 
+              onOfferHandshake={() => handleOfferHandshake(selectedDeal.id)}
+              onAcceptHandshake={() => handleAcceptHandshake(selectedDeal.id)}
+            />
           ) : (
             <div className="flex-1 flex flex-col items-center justify-center text-center p-8 opacity-50">
               <div className="w-16 h-16 rounded-full bg-surface-variant flex items-center justify-center mb-4">

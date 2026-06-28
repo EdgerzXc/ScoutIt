@@ -34,7 +34,7 @@ const renderTextWithLinks = (text) => {
   });
 };
 
-export default function ChatBox({ deal, onCloseDeal }) {
+export default function ChatBox({ deal, onCloseDeal, onOfferHandshake, onAcceptHandshake }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -42,6 +42,7 @@ export default function ChatBox({ deal, onCloseDeal }) {
   const [isDragging, setIsDragging] = useState(false);
   const [showConfirmClose, setShowConfirmClose] = useState(false);
   const [showBookingModal, setShowBookingModal] = useState(false);
+  const [showConfirmHandshake, setShowConfirmHandshake] = useState(false);
   const [uploadError, setUploadError] = useState(null);
   
   const messagesEndRef = useRef(null);
@@ -190,6 +191,48 @@ export default function ChatBox({ deal, onCloseDeal }) {
         </div>
       )}
 
+      {/* Handshake Animation Overlay */}
+      {deal.handshakeState === 'linked' && (
+        <div className="absolute inset-0 z-50 bg-black/90 backdrop-blur-md flex flex-col items-center justify-center animate-[fadeIn_0.5s_ease]">
+          <div className="text-6xl mb-6 animate-bounce">🤝</div>
+          <h2 className="text-3xl font-headline-editorial text-gold-accent mb-2">Deal Linked</h2>
+          <p className="text-text-secondary max-w-md text-center">
+            You are now officially connected. This temporary chat will close permanently.
+          </p>
+        </div>
+      )}
+
+      {/* Handshake Confirmation Modal */}
+      {showConfirmHandshake && (
+        <div className="absolute inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center">
+          <div className="bg-surface-alt border border-gold-accent/50 p-6 rounded-lg max-w-sm text-center shadow-[0_0_30px_rgba(232,174,60,0.15)]">
+            <div className="text-4xl mb-4">⚠️</div>
+            <h3 className="text-xl font-headline-editorial text-gold-accent mb-2">Exchange Contact Info?</h3>
+            <p className="text-sm text-text-secondary mb-6">
+              Before you shake hands, make sure you have exchanged private contact info. 
+              <strong> Once linked, this chat will be deleted forever.</strong>
+            </p>
+            <div className="flex gap-3 justify-center">
+              <button 
+                onClick={() => setShowConfirmHandshake(false)}
+                className="px-4 py-2 border border-surface-variant text-text-secondary rounded hover:text-white"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={() => {
+                  setShowConfirmHandshake(false);
+                  onOfferHandshake();
+                }}
+                className="px-4 py-2 bg-gold-accent text-black font-bold rounded hover:bg-[#F7C64E]"
+              >
+                Offer Handshake
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Chat Header */}
       <div className="p-4 border-b border-surface-variant flex justify-between items-center bg-[#121212]/80 backdrop-blur-md sticky top-0 z-10">
         <div>
@@ -201,7 +244,23 @@ export default function ChatBox({ deal, onCloseDeal }) {
           </p>
         </div>
         {deal.status !== 'closed' && (
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
+            {deal.handshakeState === 'offered' ? (
+              <button 
+                onClick={onAcceptHandshake}
+                className="bg-success text-white px-3 py-1.5 rounded text-xs font-mono uppercase tracking-widest hover:bg-success/80 transition-colors animate-pulse"
+              >
+                Accept Handshake
+              </button>
+            ) : (
+              <button 
+                onClick={() => setShowConfirmHandshake(true)}
+                className="border border-gold-accent text-gold-accent px-3 py-1.5 rounded text-xs font-mono uppercase tracking-widest hover:bg-gold-accent/10 transition-colors"
+              >
+                Offer Handshake 🤝
+              </button>
+            )}
+            
             <button 
               onClick={() => setShowBookingModal(true)}
               className="bg-gold-accent text-background px-3 py-1.5 rounded text-xs font-mono uppercase tracking-widest hover:bg-[#F7C64E] transition-colors shadow-[0_0_10px_rgba(232,174,60,0.2)]"
