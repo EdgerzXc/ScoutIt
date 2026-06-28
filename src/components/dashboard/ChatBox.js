@@ -10,10 +10,18 @@ const renderTextWithLinks = (text) => {
 
   return parts.map((part, index) => {
     if (part.match(urlRegex)) {
+      let safeUrl = "#";
+      try {
+        const parsed = new URL(part);
+        if (["http:", "https:"].includes(parsed.protocol)) {
+          safeUrl = parsed.href;
+        }
+      } catch (e) {}
+
       return (
         <a 
           key={index} 
-          href={part} 
+          href={safeUrl} 
           target="_blank" 
           rel="noopener noreferrer" 
           className="text-gold-accent underline hover:text-[#F7C64E] break-all"

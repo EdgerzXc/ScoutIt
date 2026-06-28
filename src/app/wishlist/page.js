@@ -92,11 +92,11 @@ export default function WishlistPage() {
                       </div>
                       <div className="card-body">
                         {item.is_broker ? (
-                          <Link href={`/brokers/${item.property_id}`} style={{ textDecoration: "none" }}>
+                          <Link href={`/brokers/${encodeURIComponent(item.property_id)}`} style={{ textDecoration: "none" }}>
                             <h3 className="card-title">{item.property_title}</h3>
                           </Link>
                         ) : (
-                          <Link href={`/property/${item.property_id}`} style={{ textDecoration: "none" }}>
+                          <Link href={`/property/${encodeURIComponent(item.property_id)}`} style={{ textDecoration: "none" }}>
                             <h3 className="card-title">{item.property_title}</h3>
                           </Link>
                         )}

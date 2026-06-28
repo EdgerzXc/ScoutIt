@@ -319,7 +319,7 @@ export default function PhotographerHUD({ projects, activeProjectId, setActivePr
                   </div>
                   <div className="flex-1 overflow-hidden">
                     <span className="text-[10px] text-text-secondary uppercase tracking-widest font-label-caps block mb-1">Portfolio</span>
-                    <a href={portfolio} target="_blank" rel="noopener noreferrer" className="text-sm text-on-surface underline hover:text-gold-accent block truncate">{portfolio}</a>
+                    <a href={(() => { try { const u = new URL(portfolio); return ["http:", "https:"].includes(u.protocol) ? u.href : "#"; } catch { return "#"; } })()} target="_blank" rel="noopener noreferrer" className="text-sm text-on-surface underline hover:text-gold-accent block truncate">{portfolio}</a>
                   </div>
                 </div>
               </div>
