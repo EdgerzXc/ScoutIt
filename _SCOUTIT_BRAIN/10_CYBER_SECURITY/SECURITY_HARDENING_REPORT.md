@@ -54,6 +54,22 @@ The database was moved from "dev-open" (`FOR ALL USING (true)`) to a production-
 
 ---
 
-## 5. Next Steps
+## 6. Application Monitoring (Sentry)
+To ensure we have launch-ready observability, **Sentry** has been integrated into the Next.js stack.
+- **Scope:** Client-side UI crashes, Server-side API errors, and Edge function failures.
+- **Why:** Replaces manual bug reporting with automated, stack-trace-level alerts directly to the engineering team. Ensures we catch unhandled promise rejections and React render errors instantly.
+- **Action Required:** Provide the `NEXT_PUBLIC_SENTRY_DSN` environment variable in Vercel to activate telemetry.
+
+---
+
+## 7. User-Managed Security (Settings)
+We expanded the dashboard settings to give users direct control over their account security via Supabase Auth.
+- **Password Resets:** Users can securely update their passwords from the dashboard settings.
+- **Two-Factor Authentication (2FA):** UI placeholder implemented for Authenticator App enrollment (to be fully wired up in a future update).
+
+---
+
+## 8. Next Steps
 - Move onto building the **QuestIT** framework (Data Bounty layer).
 - Secure the upcoming Webhooks (e.g., PayMongo/payment processors) once implemented.
+- Wire up the full 2FA QR-code flow using Supabase MFA.

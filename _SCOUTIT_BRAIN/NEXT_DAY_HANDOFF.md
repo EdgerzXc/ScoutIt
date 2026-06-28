@@ -1,10 +1,31 @@
 # ScoutIt Handoff - End of Session
 
-## What We Accomplished Today:
-1. **Cyber Security Hardening:** Addressed all critical RLS (Row Level Security) and database advisor warnings. Created `supabase_advisor_fixes.sql` and organized security logs into `_SCOUTIT_BRAIN/10_CYBER_SECURITY/`.
-2. **Production-Ready Auth:** Ripped out the mocked login and fully wired up Supabase Auth. Added support for **Google OAuth** and **Email OTP / Magic Links**.
-3. **Email Infrastructure:** Bypassed Supabase's strict free-tier email limits by configuring a custom SMTP server using **Resend**.
-4. **Owner Listing Friction Reduction:** Added a robust **Auto-Save Draft System** to the `LiveEditorWorkspace.js` so Owners never lose their progress if they close the tab or crash. This paves the way for hitting the 200-property milestone.
+### What We Accomplished
+1. **Security Hardening (API & Database)**
+   - Locked down Supabase with strict RLS (Row Level Security).
+   - Removed all `FOR ALL USING (true)` dev-mode policies.
+   - Fixed the search-path injection vulnerability in the stored functions.
+   - Secured Next.js API routes with real Supabase Auth token verification.
+
+2. **Real Supabase Authentication**
+   - Ripped out the mocked login and fully wired up Supabase Auth.
+   - Added support for Google OAuth and Email OTP / Magic Links.
+
+3. **Owner Dashboard "Auto-Save Draft" Flow**
+   - Connected the "Live Editor Workspace" so progress automatically saves without the user clicking "Save".
+   - Set up the UI to transition seamlessly between "Draft" and "Published" states.
+
+4. **Resend SMTP Integration**
+   - Wired up Supabase to send its confirmation emails through our custom Resend domain instead of the default limits.
+
+5. **AI PDF Extractor (Phase 1 AI Listing Engine)**
+   - Built a drag-and-drop cinematic overlay in the Live Editor to accept property brochures.
+   - Wired up `/api/ai/read-pdf` (via unpdf) and `/api/ai/assimilate` (Gemini Flash) to securely read PDFs.
+   - Prompt engineering strictly enforces literal fact extraction with zero hallucination.
+
+6. **Launch-Ready Security & Monitoring**
+   - Integrated **Sentry** (`@sentry/nextjs`) across Client, Server, and Edge layers for real-time error tracking.
+   - Built the **User Security Settings** UI in the dashboard to allow safe password resets directly via Supabase Auth.
 
 ## Current State of the Codebase:
 - Supabase is completely live and secure.

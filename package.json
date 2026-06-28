@@ -12,6 +12,7 @@
     "@anthropic-ai/sdk": "^0.105.0",
     "@google/genai": "^2.9.0",
     "@marsidev/react-turnstile": "^1.5.3",
+    "@sentry/nextjs": "^10.62.0",
     "@supabase/supabase-js": "^2.108.1",
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.38.0",

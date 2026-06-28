@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import CommercialFlow from "../property/CommercialFlow";
 import ResidentialFlow from "../property/ResidentialFlow";
 import { sanitizeObject } from "../../lib/sanitize";
+import { supabase } from "../../lib/supabaseClient";
 
 const CATEGORIES = [
   { id: "residential", icon: "🏠", label: "Residential" },
@@ -165,6 +166,10 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
   const [showMobilePreview, setShowMobilePreview] = useState(false);
   const [expandedUnitIdx, setExpandedUnitIdx] = useState(null);
   const isResizing = useRef(false);
+  const fileInputRef = useRef(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isExtracting, setIsExtracting] = useState(false);
+  const [extractionError, setExtractionError] = useState(null);
 
   // Lock body scroll when IDE is open
   useEffect(() => {
@@ -219,6 +224,103 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
         details: {},
       });
       setLastSaved(null);
+    }
+  };
+
+  // --- AI PDF Extractor (Phase 1) ---
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = async (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      await processPdfFile(e.dataTransfer.files[0]);
+    }
+  };
+
+  const handleFileUpload = async (e) => {
+    if (e.target.files && e.target.files.length > 0) {
+      await processPdfFile(e.target.files[0]);
+    }
+  };
+
+  const processPdfFile = async (file) => {
+    if (file.type !== "application/pdf") {
+      setExtractionError("Please upload a PDF file.");
+      return;
+    }
+    setIsExtracting(true);
+    setExtractionError(null);
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+      
+      const form = new FormData();
+      form.append("file", file);
+
+      // 1. Extract Text
+      const readRes = await fetch("/api/ai/read-pdf", {
+        method: "POST",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: form,
+      });
+
+      if (!readRes.ok) {
+        const errorData = await readRes.json();
+        throw new Error(errorData.error || "Failed to read PDF");
+      }
+      const { text } = await readRes.json();
+
+      // 2. Assimilate (Phase 1 AI Extraction)
+      const assimilateRes = await fetch("/api/ai/assimilate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ payload: [{ source: file.name, text }] }),
+      });
+
+      if (!assimilateRes.ok) throw new Error("Assimilation failed");
+      
+      const { drafts } = await assimilateRes.json();
+      if (drafts && drafts.length > 0) {
+        const draft = drafts[0];
+        
+        // Merge into formData
+        setFormData(prev => ({
+          ...prev,
+          title: draft.title || prev.title,
+          location: draft.location || prev.location,
+          category: draft.space_category || prev.category,
+          price: draft.price || prev.price,
+          description: draft.description || prev.description,
+          details: {
+            ...prev.details,
+            ...draft.details,
+            floor_sqm: draft.floor_sqm || prev.details?.floor_sqm,
+            lot_sqm: draft.lot_sqm || prev.details?.lot_sqm,
+            beds: draft.beds || prev.details?.beds,
+            baths: draft.baths || prev.details?.baths,
+            parking: draft.parking || prev.details?.parking,
+            furnishing: draft.furnishing || prev.details?.furnishing,
+            tenure: draft.tenure || prev.details?.tenure,
+            year_built: draft.year_built || prev.details?.year_built,
+            title_status: draft.title_status || prev.details?.title_status,
+          }
+        }));
+      }
+    } catch (err) {
+      console.error(err);
+      setExtractionError(err.message);
+    } finally {
+      setIsExtracting(false);
     }
   };
 
@@ -356,8 +458,37 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
   const FlowLayout = CATEGORY_TO_LAYOUT_MAP[layoutKey];
 
   return (
-    <div className="fixed inset-0 z-[1000] bg-background flex flex-col md:flex-row overflow-hidden animate-[fadeIn_0.3s_ease-out]">
+    <div 
+      className="fixed inset-0 z-[1000] bg-background flex flex-col md:flex-row overflow-hidden animate-[fadeIn_0.3s_ease-out]"
+      onDragOver={handleDragOver}
+      onDragEnter={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
       
+      {/* AI Extraction Overlay */}
+      {(isDragging || isExtracting) && (
+        <div className="absolute inset-0 z-[2000] bg-background/80 backdrop-blur-md flex flex-col items-center justify-center border-4 border-dashed border-gold-accent transition-all">
+          {isExtracting ? (
+            <div className="flex flex-col items-center gap-4 animate-pulse">
+              <div className="text-gold-accent">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+              </div>
+              <h2 className="text-2xl font-headline-editorial text-gold-accent">The AI Council is analyzing your document...</h2>
+              <p className="text-sm text-text-secondary">Extracting structured data from PDF</p>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-4">
+              <div className="text-gold-accent">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              </div>
+              <h2 className="text-2xl font-headline-editorial text-gold-accent">Drop PDF Brochure to Auto-fill</h2>
+              <p className="text-sm text-text-secondary">Phase 1 Ingest Extractor</p>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* ── LEFT PANEL: EDITOR ── */}
       <div 
         style={{ width: leftPaneWidth }} 
@@ -381,6 +512,19 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
           </button>
           
           <div className="flex items-center gap-4">
+            <input 
+              type="file" 
+              accept="application/pdf" 
+              className="hidden" 
+              ref={fileInputRef} 
+              onChange={handleFileUpload} 
+            />
+            <button 
+              onClick={() => fileInputRef.current?.click()} 
+              className="text-gold-accent hover:text-gold-accent/80 text-[10px] uppercase font-label-caps tracking-wider transition-colors border border-gold-accent/30 rounded px-2 py-1"
+            >
+              Upload PDF (Auto-fill)
+            </button>
             {!isEditing && lastSaved && (
               <button onClick={clearDraft} className="text-error/80 hover:text-error text-[10px] uppercase font-label-caps tracking-wider transition-colors">
                 Clear Draft
@@ -394,6 +538,12 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
 
         {/* Editor Sections */}
         <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-8 custom-scrollbar">
+          
+          {extractionError && (
+            <div className="bg-error/10 border border-error/30 text-error p-3 rounded text-sm mb-[-1rem]">
+              <strong>AI Extraction Error:</strong> {extractionError}
+            </div>
+          )}
           
           <section className="flex flex-col gap-4">
             <h3 className="font-headline-editorial text-2xl text-on-surface border-b border-surface-variant pb-2">Must Haves</h3>

@@ -48,4 +48,19 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+import { withSentryConfig } from '@sentry/nextjs';
+
+export default withSentryConfig(nextConfig, {
+  // For all available options, see:
+  // https://github.com/getsentry/sentry-webpack-plugin#options
+  silent: true,
+  org: "scoutit",
+  project: "scoutit-web",
+}, {
+  // For all available options, see:
+  // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
+  widenClientFileUpload: true,
+  transpileClientSDK: false,
+  hideSourceMaps: true,
+  disableLogger: true,
+});

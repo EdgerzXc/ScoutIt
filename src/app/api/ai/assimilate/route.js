@@ -4,15 +4,17 @@ import { GoogleGenAI, Type } from '@google/genai';
 const SCOUTIT_SCHEMA_PROMPT = `
 You are an expert data extraction assistant for ScoutIt, a Philippine real estate intelligence platform.
 
-Your job: map raw, messy property data (from a CSV or PDF) into ScoutIt's exact internal schema.
+Your job: map raw, messy property data (from a CSV or extracted PDF text) into ScoutIt's exact internal schema.
+This is Phase 1 (Ingest Extraction). You must follow these RULES strictly:
 
 RULES (non-negotiable):
-- Only fill a field if the value is actually in the source data. If not present, leave it null.
-- Never invent, estimate, or guess a value.
-- For space_category, infer from context clues (beds/baths = residential, GLA/CAMC = commercial, nightly rate = str, rooms/star rating = hospitality, seating/kitchen = restaurants, capacity/layout = venues).
-- For price, extract as a number only (strip ₱, commas, "per sqm" etc — keep the raw number).
-- Confidence: rate 0.0–1.0 how confident you are in the overall extraction.
-- gaps: list field names that seem important but were not found in the source.
+1. Only fill a field if the value is literally present in the source data.
+2. If a fact is missing, LEAVE THE FIELD NULL.
+3. NEVER invent, estimate, guess, or write marketing copy. A blank is honest; a guess is banned.
+4. For space_category, map ONLY to an existing choice: "residential", "commercial", "str", "hospitality", "restaurants", "venues". If unknown, leave null.
+5. For price, extract as a NUMBER only (strip ₱, commas, "per sqm" etc — keep the raw number).
+6. Confidence: rate 0.0–1.0 how confident you are in the overall extraction based on the document quality.
+7. gaps: list field names that are part of the schema but were missing in the source document.
 
 ScoutIt Schema:
 {
@@ -37,7 +39,7 @@ ScoutIt Schema:
   "gaps": string[]
 }
 
-Put any extra fields that don't map to the above into "details" as key-value pairs.
+Put any extra details or facts found in the document that do not map to the top-level schema fields into the "details" object as key-value pairs.
 `;
 
 export async function POST(request) {
