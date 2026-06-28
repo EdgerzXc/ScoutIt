@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import LiveEditorWorkspace from "./LiveEditorWorkspace";
+import DeepIntelligenceStudio from "./DeepIntelligenceStudio";
 import BulkImporterMode from "./BulkImporterMode";
 import { useDashboard } from "../../context/DashboardContext";
 import Link from "next/link";
@@ -26,6 +27,14 @@ export default function OwnerMode() {
   // Check if current user has any listings (match the logged-in owner's id)
   const myListings = listings.filter(l => currentUser && l.ownerId === currentUser.id);
   const hasListing = myListings.length > 0;
+  console.log('OWNER_MODE_RENDER', { 
+    totalListings: listings.length, 
+    myListingsLength: myListings.length, 
+    currentUserId: currentUser?.id,
+    myListingsIds: myListings.map(l => l.id),
+    firstListingOwnerId: listings.length > 0 ? listings[0].ownerId : null,
+    localStorageUser: typeof window !== 'undefined' ? localStorage.getItem('scoutit_user') : 'ssr'
+  });
 
   // New Dossier State
   const [viewingDossierId, setViewingDossierId] = useState(null);
@@ -79,7 +88,7 @@ export default function OwnerMode() {
 
   const handlePublish = async (listingData, isPublishing) => {
     let finalId = viewingDossierId;
-    if (showWizard === 'edit') {
+    if (showWizard === 'edit' || showWizard === 'deep_intel_edit') {
       await updateListing(viewingDossierId, listingData);
     } else {
       const inserted = await addListing(listingData);
@@ -102,6 +111,15 @@ export default function OwnerMode() {
       onClose={() => setShowWizard(false)} 
       isEditing={showWizard === 'edit'} 
       initialData={showWizard === 'edit' ? activeListing : null} 
+    />;
+  }
+
+  if (showWizard === 'deep_intel' || showWizard === 'deep_intel_edit') {
+    return <DeepIntelligenceStudio 
+      onPublish={handlePublish} 
+      onClose={() => setShowWizard(false)} 
+      isEditing={showWizard === 'deep_intel_edit'} 
+      initialData={showWizard === 'deep_intel_edit' ? activeListing : null} 
     />;
   }
 
@@ -174,6 +192,16 @@ export default function OwnerMode() {
              <div className="absolute top-0 left-0 w-1.5 h-full bg-surface-variant group-hover:bg-surface-alt transition-colors"></div>
              <h3 className="font-working-title text-2xl text-on-surface mb-3 group-hover:text-white transition-colors">Live Editor Workspace</h3>
              <p className="text-sm text-text-secondary mb-6 leading-relaxed">Build your listing manually using our step-by-step editor. Best if you don't have a deck and are starting from scratch.</p>
+          </div>
+
+          <div 
+            className="bg-surface-alt/40 backdrop-blur-md border border-surface-variant/50 rounded-xl p-8 hover:border-gold-accent hover:bg-surface-alt/80 transition-all duration-300 cursor-pointer group relative overflow-hidden shadow-[0_0_20px_rgba(232,174,60,0.05)] hover:shadow-[0_0_30px_rgba(232,174,60,0.15)]"
+            onClick={() => setShowWizard('deep_intel')}
+          >
+             <div className="absolute top-0 left-0 w-1.5 h-full bg-gold-accent/40 group-hover:bg-gold-accent transition-colors"></div>
+             <h3 className="font-working-title text-2xl text-gold-accent mb-3 group-hover:text-[#F7C64E] transition-colors">Deep Intelligence Vault</h3>
+             <p className="text-sm text-text-secondary mb-6 leading-relaxed">Unlock the hidden matrix. Manually override structural specs, input financial intelligence, and map advanced logistics.</p>
+             <span className="text-gold-accent font-label-caps text-[10px] tracking-widest border border-gold-accent/30 bg-gold-accent/10 px-3 py-1.5 rounded-full shadow-[0_0_10px_rgba(232,174,60,0.2)]">PRO MODE</span>
           </div>
         </div>
       </div>
@@ -798,6 +826,13 @@ export default function OwnerMode() {
              onClick={() => setShowWizard('edit')}
            >
              Edit Workspace
+           </button>
+           <button 
+             className="bg-gold-accent/10 border border-gold-accent text-gold-accent hover:bg-gold-accent/20 font-working-title font-bold px-4 py-2 rounded transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed flex-1 md:flex-none text-center justify-center shadow-[0_0_10px_rgba(232,174,60,0.1)]"
+             disabled={activeListing.pipelineStatus === 'ai_drafting'}
+             onClick={() => setShowWizard('deep_intel_edit')}
+           >
+             Add Deep Intel
            </button>
            {activeListing.pipelineStatus !== 'ai_drafting' && (
              <Link href={`/property/${activeListing.id}`} className="bg-gold-accent text-background font-working-title font-bold px-4 py-2 rounded hover:opacity-90 transition-opacity text-sm flex-1 md:flex-none text-center justify-center">

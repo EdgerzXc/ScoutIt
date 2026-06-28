@@ -35,7 +35,18 @@ export function DashboardProvider({ children }) {
       if (session?.user) {
         await handleUserLogin(session.user);
       } else {
-        // Clear old mock data if no real session exists
+        // If they are using the DEV Toolbox mock user, preserve it
+        const mockStr = localStorage.getItem("scoutit_user");
+        if (mockStr && mockStr.includes("master-dev")) {
+          try {
+            const parsed = JSON.parse(mockStr);
+            setCurrentUser(parsed);
+            setIsLoading(false);
+            return;
+          } catch(e) {}
+        }
+        
+        // Otherwise, clear old mock data if no real session exists
         localStorage.removeItem("scoutit_user");
         setCurrentUser(null);
         setIsLoading(false);
@@ -47,7 +58,10 @@ export function DashboardProvider({ children }) {
       if (session?.user) {
         await handleUserLogin(session.user);
       } else {
-        setCurrentUser(null);
+        const mockStr = localStorage.getItem("scoutit_user");
+        if (!(mockStr && mockStr.includes("master-dev"))) {
+          setCurrentUser(null);
+        }
       }
     });
 

@@ -59,3 +59,7 @@ final_*.js
 perfect_fix.js
 recover_*.js
 strip_and_link.js
+debug-*.html
+test-results/
+playwright-report/
+

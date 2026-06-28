@@ -7,7 +7,8 @@ import Link from "next/link";
 import ReactionButtons from "@/components/ui/ReactionButtons";
 import InteractiveMap from "@/components/property/InteractiveMap";
 import CategorySpecBlock from "@/components/property/CategorySpecBlock";
-import { canSee, getCurrentTier } from "@/lib/entitlements";
+import { canSee, getCurrentTier } from "../../lib/entitlements";
+import { DEEP_INTEL_SCHEMA } from "../../lib/deepIntelSchema";
 import "@/app/property/[id]/property-detail.css";
 import { getChapterConfig } from "./chapterConfig";
 import { Bed, Bath, Ruler, Car, Lock, Search, Camera, Building2 } from "lucide-react";
@@ -16,7 +17,6 @@ import InquiryModal from "@/components/property/InquiryModal";
 // ═══════════════════════════════════════════════════
 // DATA — Airtable CMS first, mockDb fallback
 // ═══════════════════════════════════════════════════
-import { getPropertyBySlug } from "@/data/mockProperties";
 
 // ═══════════════════════════════════════════════════
 // TRANSIT HUBS — module-scope so coordinate references stay
@@ -127,8 +127,8 @@ function DeepIntelWidget({ open, onToggle, fields, values }) {
   useEffect(() => { setUnlocked(canSee("deepIntel", getCurrentTier())); }, []);
   if (!fields || fields.length === 0) return null;
 
-  const valueFor = (label) => {
-    const v = values ? values[label] : undefined;
+  const valueFor = (fieldKey) => {
+    const v = values ? values[fieldKey] : undefined;
     return v != null && String(v).trim() !== "" ? v : null;
   };
 
@@ -149,10 +149,10 @@ function DeepIntelWidget({ open, onToggle, fields, values }) {
       {open && (unlocked ? (
         <div style={{background:"#161616", border:"0.5px solid #262626", borderTop:"none", padding:"20px", borderRadius:"0 0 2px 2px", display:"flex", flexDirection:"column"}}>
           {fields.map((field, i) => {
-            const value = valueFor(field);
+            const value = valueFor(field.key);
             return (
-              <div key={i} style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom: i < fields.length - 1 ? "1px solid #262626" : "none", gap:"20px"}}>
-                <span style={{fontFamily:"Georgia,serif", fontSize:"13px", color:"#c8c8c8"}}>{field}</span>
+              <div key={field.key || i} style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom: i < fields.length - 1 ? "1px solid #262626" : "none", gap:"20px"}}>
+                <span style={{fontFamily:"Georgia,serif", fontSize:"13px", color:"#c8c8c8"}}>{field.label || field}</span>
                 {value !== null ? (
                   <span style={{fontFamily:"'Courier New',monospace", fontSize:"12px", color:"#E8AE3C", letterSpacing:"0.04em", textAlign:"right"}}>{value}</span>
                 ) : (
@@ -166,8 +166,8 @@ function DeepIntelWidget({ open, onToggle, fields, values }) {
         <div style={{background:"#161616", border:"0.5px solid #262626", borderTop:"none", padding:"20px", position:"relative", borderRadius:"0 0 2px 2px"}}>
           <div style={{filter:"blur(4px)", pointerEvents:"none", userSelect:"none", display:"flex", flexDirection:"column"}}>
             {fields.map((field, i) => (
-              <div key={i} style={{display:"flex", justifyContent:"space-between", alignItems:"center", padding:"11px 0", borderBottom: i < fields.length - 1 ? "1px solid #262626" : "none"}}>
-                <span style={{fontFamily:"Georgia,serif", fontSize:"13px", color:"#c8c8c8"}}>{field}</span>
+              <div key={field.key || i} style={{display:"flex", justifyContent:"space-between", alignItems:"center", padding:"11px 0", borderBottom: i < fields.length - 1 ? "1px solid #262626" : "none"}}>
+                <span style={{fontFamily:"Georgia,serif", fontSize:"13px", color:"#c8c8c8"}}>{field.label || field}</span>
                 <span style={{fontFamily:"'Courier New',monospace", fontSize:"12px", color:"#3a3a3a", letterSpacing:"0.1em"}}>████████</span>
               </div>
             ))}
@@ -317,7 +317,7 @@ function BackOfHousePanel({ property: d }) {
 // ═══════════════════════════════════════════════════
 // MAIN COMPONENT
 // ═══════════════════════════════════════════════════
-export default function CommercialFlow({ slug, draftData, isDraftMode }) {
+export default function CommercialFlow({ slug, draftData, isDraftMode, externalActiveTab }) {
   // ── Interactive UI states ──────────────────────
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [photoMode,         setPhotoMode]         = useState("natural");
@@ -327,7 +327,15 @@ export default function CommercialFlow({ slug, draftData, isDraftMode }) {
   // Market/investment "Hidden Intel" panel unlocks at Cluster+ (same SSR-safe pattern).
   const [canMarketIntel,    setCanMarketIntel]    = useState(false);
   useEffect(() => { setCanMarketIntel(canSee("marketIntel", getCurrentTier())); }, []);
-  const [activeTab,         setActiveTab]         = useState("space");
+  const [activeTab,         setActiveTab]         = useState(externalActiveTab || "space");
+
+  useEffect(() => {
+    if (externalActiveTab && externalActiveTab !== activeTab) {
+      setActiveTab(externalActiveTab);
+      const scrollEl = document.querySelector('.zone-story');
+      if (scrollEl) scrollEl.scrollTop = 0;
+    }
+  }, [externalActiveTab]);
   const [menuOpen,   setMenuOpen]   = useState(false);
   const [isInquiryOpen, setIsInquiryOpen] = useState(false);
   // The mobile bottom bar's "Inquire" action opens this modal via a global event,
@@ -1101,8 +1109,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode }) {
                 icon: <svg className="chapter-icon" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="currentColor" strokeWidth="1.3"/><path d="M10 6v4l3 2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg> },
               { id: "buildplans", label: "Build Plans",
                 icon: <svg className="chapter-icon" viewBox="0 0 20 20" fill="none"><rect x="3" y="2" width="14" height="16" rx="1" stroke="currentColor" strokeWidth="1.3"/><path d="M6 6h8M6 9h8M6 12h5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/><path d="M13 14l2 2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/><rect x="12" y="12" width="4" height="4" rx="0.5" stroke="currentColor" strokeWidth="1.1"/></svg> },
-              { id: "hiddenintel", label: "Hidden Intel",
-                icon: <svg className="chapter-icon" viewBox="0 0 20 20" fill="none"><path d="M10 4C5.5 4 2 10 2 10s3.5 6 8 6 8-6 8-6-3.5-6-8-6z" stroke="currentColor" strokeWidth="1.3"/><circle cx="10" cy="10" r="2.5" stroke="currentColor" strokeWidth="1.3"/><path d="M3 3l14 14" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" opacity="0.4"/></svg> },
+
             ].map((tab, idx, arr) => (
               <span key={tab.id} style={{display:"contents"}}>
                 <div
@@ -1346,6 +1353,12 @@ export default function CommercialFlow({ slug, draftData, isDraftMode }) {
                       {d.accordion_3_text}
                     </p>
                   )}
+                  <DeepIntelWidget
+                    open={widgets.space}
+                    onToggle={() => setWidgets(w => ({...w, space: !w.space}))}
+                    values={d.details || d.deepIntel}
+                    fields={DEEP_INTEL_SCHEMA[d.category || "commercial"]?.[1] || []}
+                  />
                 </>
               )}
 
@@ -1526,8 +1539,8 @@ export default function CommercialFlow({ slug, draftData, isDraftMode }) {
               <DeepIntelWidget
                 open={widgets.location}
                 onToggle={() => setWidgets(w => ({...w, location: !w.location}))}
-                values={d.deepIntel}
-                fields={["Solar Orientation","Pedestrian Flow Metrics","Office Density Data","Development Pipeline"]}
+                values={d.details || d.deepIntel}
+                fields={DEEP_INTEL_SCHEMA[d.category || "commercial"]?.[2] || []}
               />
 
             </div>
@@ -1648,13 +1661,8 @@ export default function CommercialFlow({ slug, draftData, isDraftMode }) {
               <DeepIntelWidget
                 open={widgets.life}
                 onToggle={() => setWidgets(w => ({...w, life: !w.life}))}
-                values={d.deepIntel}
-                fields={isRestaurant
-                  ? ["Noise Decibel Baseline","Lighting Color Temperature Score","Table Intimacy Rating","Peak Dining Hour Data"]
-                  : isVenue
-                  ? ["Acoustic Treatment Grade","Blackout Capability","Sound Spillage Rating","Lighting Rig Load"]
-                  : ["Noise Decibel Readings","Lighting Color Temperature","Privacy Score Details","Peak Hour Crowd Data"]
-                }
+                values={d.details || d.deepIntel}
+                fields={DEEP_INTEL_SCHEMA[d.category || "commercial"]?.[3] || []}
               />
 
             </div>
@@ -1746,13 +1754,8 @@ export default function CommercialFlow({ slug, draftData, isDraftMode }) {
               <DeepIntelWidget
                 open={widgets.whereto}
                 onToggle={() => setWidgets(w => ({...w, whereto: !w.whereto}))}
-                values={d.deepIntel}
-                fields={isRestaurant
-                  ? ["Peak Dining Hour Traffic","Foot Traffic Score","Pre/Post-Dinner Venue Flow","Delivery Zone Coverage"]
-                  : isVenue
-                  ? ["Event Traffic Flow Analysis","Hotel Proximity Score","Transport Node Coverage","Airport Transfer Index"]
-                  : ["Walkability Score","Transit Frequency Analysis","Peak Hour Commute Data","Zoning Classification","Development Pipeline"]
-                }
+                values={d.details || d.deepIntel}
+                fields={DEEP_INTEL_SCHEMA[d.category || "commercial"]?.[4] || []}
               />
 
             </div>
@@ -1829,8 +1832,8 @@ export default function CommercialFlow({ slug, draftData, isDraftMode }) {
                   <DeepIntelWidget
                     open={widgets.buildplans}
                     onToggle={() => setWidgets(w => ({...w, buildplans: !w.buildplans}))}
-                    values={d.deepIntel}
-                    fields={["MEP Specifications","Electrical Load Capacity","Kitchen-to-Dining Floor Ratio","Ventilation Routing","Structural Calculations"]}
+                    values={d.details || d.deepIntel}
+                    fields={DEEP_INTEL_SCHEMA[d.category || "commercial"]?.[5] || []}
                   />
                 </>
               )}
@@ -1859,68 +1862,6 @@ export default function CommercialFlow({ slug, draftData, isDraftMode }) {
             </div>
           </div>
 
-          {/* ── HIDDEN INTEL (Ch. 6) ── */}
-          <div className={`chapter-panel ${activeTab === "hiddenintel" ? "active" : ""}`} id="panel-hiddenintel">
-            <div className="panel-content">
-
-              <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>06 — Hidden Intel</div>
-                <div style={{height:"1px", background:"#262626"}}/>
-              </div>
-
-              <p style={{fontFamily:"Georgia,serif", fontSize:"16px", color:"#f0ede8", lineHeight:1.85, margin:"0 0 28px", maxWidth:"540px"}}>
-                Market and investment intelligence for this asset — transaction history, capitalization rates, and appreciation modelling — is reserved for Verified Scouts.
-              </p>
-
-              {/* Market panel — unlocks at Cluster+ (canMarketIntel). Reveals real
-                  values from d.deepIntel (keyed by label) when unlocked. */}
-              {canMarketIntel ? (
-                <div style={{background:"#161616", border:"0.5px solid #262626", borderRadius:"4px", overflow:"hidden", padding:"20px"}}>
-                  {["Cap Rate (Area Benchmark)","Transaction History","Appreciation Projection","Price History","Competitive Density","Market Position Index"].map((label, i, arr) => {
-                    const raw = d.deepIntel ? d.deepIntel[label] : undefined;
-                    const value = raw != null && String(raw).trim() !== "" ? raw : null;
-                    return (
-                      <div key={label} style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"13px 0", borderBottom: i < arr.length - 1 ? "1px solid #262626" : "none", gap:"20px"}}>
-                        <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#c8c8c8"}}>{label}</span>
-                        {value !== null ? (
-                          <span style={{fontFamily:"'Courier New',monospace", fontSize:"12px", color:"#E8AE3C", letterSpacing:"0.04em", textAlign:"right"}}>{value}</span>
-                        ) : (
-                          <span style={{fontFamily:"'Courier New',monospace", fontSize:"11px", color:"#5a5a5a", letterSpacing:"0.08em", textAlign:"right"}}>Not recorded</span>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div style={{position:"relative", background:"#161616", border:"0.5px solid #262626", borderRadius:"4px", overflow:"hidden"}}>
-                  <div style={{filter:"blur(5px)", pointerEvents:"none", userSelect:"none", padding:"20px"}}>
-                    {["Cap Rate (Area Benchmark)","Transaction History","Appreciation Projection","Price History","Competitive Density","Market Position Index"].map((label, i, arr) => (
-                      <div key={label} style={{display:"flex", justifyContent:"space-between", alignItems:"center", padding:"13px 0", borderBottom: i < arr.length - 1 ? "1px solid #262626" : "none"}}>
-                        <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#c8c8c8"}}>{label}</span>
-                        <span style={{fontFamily:"'Courier New',monospace", fontSize:"12px", color:"#3a3a3a", letterSpacing:"0.1em"}}>████████</span>
-                      </div>
-                    ))}
-                  </div>
-                  <div style={{position:"absolute", inset:0, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:"16px", background:"rgba(22,22,22,0.9)"}}>
-                    <div style={{display:"flex", alignItems:"center", gap:"8px"}}>
-                      <Lock size={15} strokeWidth={1.5} style={{color:"#E8AE3C", flexShrink:0}} />
-                      <span style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#E8AE3C", letterSpacing:"0.25em", textTransform:"uppercase"}}>Market Intelligence · Cluster Tier</span>
-                    </div>
-                    <a href="/pricing/seeker" style={{textDecoration:"none", fontFamily:"Georgia,serif", fontSize:"14px", color:"#0e0e0e", background:"#E8AE3C", border:"none", padding:"11px 28px", borderRadius:"4px", cursor:"pointer", letterSpacing:"0.03em"}}>
-                      Unlock with Cluster →
-                    </a>
-                  </div>
-                </div>
-              )}
-
-            </div>
-
-            <div className="panel-sidebar">
-              <div className="sidebar-block"><div className="sidebar-accent-line" style={{background:"#E8AE3C"}}/><div className="sidebar-label">Cap rate est.</div><div className="sidebar-value" style={{color:"#c8c8c8"}}><Lock size={13} strokeWidth={1.5} style={{verticalAlign:"-2px", marginRight:"5px"}} />Locked</div></div>
-              <div className="sidebar-block"><div className="sidebar-label">Price trend</div><div className="sidebar-value" style={{color:"#c8c8c8"}}><Lock size={13} strokeWidth={1.5} style={{verticalAlign:"-2px", marginRight:"5px"}} />Locked</div></div>
-              <div className="sidebar-block"><div className="sidebar-label">Intel source</div><div className="sidebar-value">ScoutIt Verified</div></div>
-            </div>
-          </div>
 
           {/* ── UNITS (Ch. 7) ── */}
           <div className={`chapter-panel ${activeTab === "units" ? "active" : ""}`} id="panel-units">
@@ -1997,8 +1938,8 @@ export default function CommercialFlow({ slug, draftData, isDraftMode }) {
               <DeepIntelWidget
                 open={widgets.units}
                 onToggle={() => setWidgets(w => ({...w, units: !w.units}))}
-                values={d.deepIntel}
-                fields={["Precise Room Dimensions","Technical Asset Manifest","Fixed Equipment Specs","Finish & Material Schedule","Utility Point Mapping"]}
+                values={d.details || d.deepIntel}
+                fields={DEEP_INTEL_SCHEMA[d.category || "commercial"]?.[6] || []}
               />
 
             </div>

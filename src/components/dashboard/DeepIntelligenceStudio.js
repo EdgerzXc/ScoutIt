@@ -5,6 +5,7 @@ import CommercialFlow from "../property/CommercialFlow";
 import ResidentialFlow from "../property/ResidentialFlow";
 import { sanitizeObject } from "../../lib/sanitize";
 import { supabase } from "../../lib/supabaseClient";
+import { DEEP_INTEL_SCHEMA } from "../../lib/deepIntelSchema";
 
 const CATEGORIES = [
   { id: "residential", icon: "🏠", label: "Residential" },
@@ -136,7 +137,7 @@ const CATEGORY_FIELDS = {
   ],
 };
 
-export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, initialData }) {
+export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, initialData }) {
   // State initialization
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
@@ -145,6 +146,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
     location: initialData?.location || "",
     price: initialData?.price || "", // Internal price
     mediaLink: initialData?.mediaLink || "",
+    photos: initialData?.photos || ["", "", "", "", ""],
     image: initialData?.image || (initialData?.photos && initialData?.photos[0]) || "", 
     description: initialData?.description || initialData?.desc || "",
     verified: initialData?.verified || false,
@@ -309,13 +311,13 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
     }
   };
 
-  const mustHaves = {
+  const mustHaves = useMemo(() => ({
     title: !!formData.title.trim(),
     category: !!formData.category,
     location: !!formData.location.trim(),
     price: !!String(formData.price).trim(),
     media: formData.photos ? formData.photos.filter(p => p.trim()).length >= 5 : false
-  };
+  }), [formData.title, formData.category, formData.location, formData.price, formData.photos]);
   const isPublishable = Object.values(mustHaves).every(Boolean);
 
   const setField = (field, value) => setFormData((prev) => ({ ...prev, [field]: value }));
@@ -364,26 +366,6 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
     >
       {/* Editor Pane (Left on Desktop) */}
       <div className="md:col-start-1 md:row-start-1 md:row-span-2 flex flex-col overflow-hidden relative pointer-events-auto">
-      {/* AI Extraction Overlay */}
-      {(isDragging || isExtracting) && (
-        <div className="absolute inset-0 z-[2000] bg-background/80 backdrop-blur-md flex flex-col items-center justify-center border-4 border-dashed border-gold-accent transition-all">
-          {isExtracting ? (
-            <div className="flex flex-col items-center gap-4 animate-pulse">
-              <div className="text-gold-accent">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
-              </div>
-              <h2 className="text-2xl font-headline-editorial text-gold-accent">The AI Council is analyzing your document...</h2>
-            </div>
-          ) : (
-            <div className="flex flex-col items-center gap-4">
-              <div className="text-gold-accent">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-              </div>
-              <h2 className="text-2xl font-headline-editorial text-gold-accent">Drop PDF Brochure to Auto-fill</h2>
-            </div>
-          )}
-        </div>
-      )}
 
       {/* Header */}
       <div className="p-4 border-b border-surface-variant bg-background flex justify-between items-center z-20">
@@ -392,27 +374,19 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
         </button>
         
         <div className="flex items-center gap-4">
-          <input type="file" accept="application/pdf" className="hidden" ref={fileInputRef} onChange={handleFileUpload} />
-          <button 
-            onClick={() => fileInputRef.current?.click()} 
-            className="text-gold-accent hover:text-gold-accent/80 text-[10px] uppercase font-label-caps tracking-wider transition-colors border border-gold-accent/30 rounded px-2 py-1"
-          >
-            Upload PDF (Auto-fill)
-          </button>
           {!isEditing && lastSaved && (
             <button onClick={clearDraft} className="text-error/80 hover:text-error text-[10px] uppercase font-label-caps tracking-wider transition-colors">
               Clear Draft
             </button>
           )}
           <span className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase">
-            {isEditing ? "Edit Dossier" : "New Property Draft"}
+            {isEditing ? "Edit Deep Intel" : "New Deep Intel Dossier"}
           </span>
         </div>
       </div>
 
-      {/* Progress Bar */}
       <div className="w-full bg-surface-variant h-1">
-        <div className="bg-gold-accent h-1 transition-all duration-300" style={{ width: `${(step / 4) * 100}%` }}></div>
+        <div className="bg-gold-accent h-1 transition-all duration-300" style={{ width: `${(step / 6) * 100}%` }}></div>
       </div>
 
       <div className="flex-1 overflow-y-auto p-6 md:p-12 custom-scrollbar bg-surface flex flex-col items-center">
@@ -423,11 +397,11 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
             </div>
           )}
 
-          {/* STEP 1: Core Identity */}
+          {/* STEP 1: The Space */}
           {step === 1 && (
             <section className="flex flex-col gap-6 animate-[fadeIn_0.3s_ease]">
-              <h3 className="font-headline-editorial text-3xl text-gold-accent border-b border-surface-variant pb-2">Step 1: Core Identity</h3>
-              <p className="text-sm text-text-secondary">Let's start with the absolute must-haves.</p>
+              <h3 className="font-headline-editorial text-3xl text-gold-accent border-b border-surface-variant pb-2">Step 1: The Space</h3>
+              <p className="text-sm text-text-secondary">Let's start with the absolute must-haves and core spatial financials.</p>
               
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">Asset Category <span className="text-error">*</span></label>
@@ -520,149 +494,56 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
                   </button>
                 </div>
               </div>
-            </section>
-          )}
 
-          {/* STEP 2: Category Specs */}
-          {step === 2 && (
-            <section className="flex flex-col gap-6 animate-[fadeIn_0.3s_ease]">
-              <h3 className="font-headline-editorial text-3xl text-gold-accent border-b border-surface-variant pb-2">
-                Step 2: {CATEGORIES.find(c => c.id === formData.category)?.label} Specs
-              </h3>
-              <p className="text-sm text-text-secondary">Specific details for {CATEGORIES.find(c => c.id === formData.category)?.label} properties.</p>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {categoryFields.map(f => (
-                  f.type === 'checkbox' ? (
-                    <label key={f.key} className="flex items-center gap-3 cursor-pointer text-on-surface bg-surface-alt border border-surface-variant rounded px-3 py-2.5 w-full relative overflow-hidden">
-                      {f.proOnly && <div className="absolute right-0 top-0 bottom-0 bg-gold-accent/20 px-2 flex items-center border-l border-gold-accent/30"><span className="text-[8px] font-label-caps text-gold-accent">SOLAR+</span></div>}
-                      <input type="checkbox" className="w-4 h-4 accent-gold-accent" checked={!!formData.details[f.key]} onChange={e => setDetail(f.key, e.target.checked)} />
-                      <span className="text-sm font-working-title">{f.label}</span>
-                    </label>
-                  ) : (
-                    <div key={f.key} className="flex flex-col gap-2 relative">
-                      <div className="flex justify-between items-center">
-                        <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">{f.label}</label>
-                        {f.proOnly && <span className="text-[8px] font-label-caps bg-gold-accent/10 text-gold-accent border border-gold-accent/30 px-1 py-0.5 rounded">SOLAR+ Gated</span>}
-                      </div>
-                      {f.type === 'select' ? (
-                        <select className={`bg-surface-alt border rounded px-3 py-2.5 text-on-surface text-sm focus:outline-none focus:border-gold-accent transition-colors ${f.proOnly ? 'border-gold-accent/30' : 'border-surface-variant'}`} value={formData.details[f.key] || ''} onChange={e => setDetail(f.key, e.target.value)}>
-                          <option value="">Select…</option>
-                          {f.options.map(o => <option key={o} value={o}>{o}</option>)}
-                        </select>
-                      ) : (
-                        <input className={`bg-surface-alt border rounded px-3 py-2.5 text-on-surface text-sm focus:outline-none focus:border-gold-accent transition-colors ${f.proOnly ? 'border-gold-accent/30' : 'border-surface-variant'}`} type={f.type === 'number' ? 'number' : 'text'} value={formData.details[f.key] || ''} onChange={e => setDetail(f.key, e.target.value)} />
-                      )}
-                    </div>
-                  )
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                {(DEEP_INTEL_SCHEMA[formData.category || "commercial"]?.[1] || []).map((field) => (
+                  <div key={field.key} className="flex flex-col gap-2">
+                    <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">{field.label}</label>
+                    <input 
+                      className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface text-sm focus:outline-none focus:border-gold-accent transition-colors" 
+                      type="text" 
+                      value={formData.details[field.key] || ''} 
+                      onChange={e => setDetail(field.key, e.target.value)} 
+                      placeholder={field.placeholder} 
+                    />
+                  </div>
                 ))}
               </div>
             </section>
           )}
 
-          {/* STEP 3: Advanced Intelligence */}
-          {step === 3 && (
-            <section className="flex flex-col gap-6 animate-[fadeIn_0.3s_ease]">
-              <h3 className="font-headline-editorial text-3xl text-gold-accent border-b border-surface-variant pb-2">
-                Step 3: Advanced Intelligence <span className="text-sm font-working-title text-text-secondary tracking-normal">(Optional)</span>
-              </h3>
-              <p className="text-sm text-text-secondary">ScoutIt's AI usually fills these in, but you can pre-populate deep data if you have it.</p>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex flex-col gap-2">
-                  <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">Target Audience / Ideal Use</label>
-                  <input className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface text-sm focus:outline-none focus:border-gold-accent transition-colors" type="text" value={formData.details.target_audience || ''} onChange={e => setDetail('target_audience', e.target.value)} placeholder="e.g. High-end retail, Tech startups" />
+          {/* DYNAMIC STEPS 2-6 */}
+          {[2, 3, 4, 5, 6].map(s => (
+            step === s && (
+              <section key={s} className="flex flex-col gap-6 animate-[fadeIn_0.3s_ease]">
+                <h3 className="font-headline-editorial text-3xl text-gold-accent border-b border-surface-variant pb-2">
+                  {s === 2 ? "Step 2: Location" : s === 3 ? "Step 3: Life Here" : s === 4 ? "Step 4: Where To?" : s === 5 ? "Step 5: Build Plans" : "Step 6: Units & Universe"}
+                </h3>
+                <p className="text-sm text-text-secondary">
+                  {s === 2 ? "Site specifics, zoning, and orientation details." : 
+                   s === 3 ? "Environmental and spatial comfort details for occupants." : 
+                   s === 4 ? "Connectivity, mobility, and local neighborhood reach." : 
+                   s === 5 ? "Engineering specifications, MEP constraints, and structural details." : 
+                   "Availability, ownership lineage, and macro market conditions."}
+                </p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {(DEEP_INTEL_SCHEMA[formData.category || "commercial"]?.[s] || []).map((field) => (
+                    <div key={field.key} className="flex flex-col gap-2 md:col-span-1">
+                      <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">{field.label}</label>
+                      <input 
+                        className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface text-sm focus:outline-none focus:border-gold-accent transition-colors" 
+                        type={field.key === "DI_Hist_Tx" ? "textarea" : "text"} 
+                        value={formData.details[field.key] || ''} 
+                        onChange={e => setDetail(field.key, e.target.value)} 
+                        placeholder={field.placeholder} 
+                      />
+                    </div>
+                  ))}
                 </div>
-                <div className="flex flex-col gap-2">
-                  <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">Demographics</label>
-                  <input className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface text-sm focus:outline-none focus:border-gold-accent transition-colors" type="text" value={formData.details.demographics || ''} onChange={e => setDetail('demographics', e.target.value)} placeholder="e.g. High income, Young professionals" />
-                </div>
-                <div className="flex flex-col gap-2">
-                  <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">Foot Traffic / Surrounding Area</label>
-                  <input className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface text-sm focus:outline-none focus:border-gold-accent transition-colors" type="text" value={formData.details.surrounding_area || ''} onChange={e => setDetail('surrounding_area', e.target.value)} placeholder="e.g. 5,000+ daily pedestrians, near Mall" />
-                </div>
-                <div className="flex flex-col gap-2">
-                  <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">Logistics / Structural Notes</label>
-                  <input className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface text-sm focus:outline-none focus:border-gold-accent transition-colors" type="text" value={formData.details.structural_notes || ''} onChange={e => setDetail('structural_notes', e.target.value)} placeholder="e.g. 3 loading bays, 6.5m ceiling clearance" />
-                </div>
-                <div className="flex flex-col gap-2 md:col-span-2">
-                  <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">Developer / Building Owner</label>
-                  <input className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface text-sm focus:outline-none focus:border-gold-accent transition-colors" type="text" value={formData.details.developer_name || ''} onChange={e => setDetail('developer_name', e.target.value)} placeholder="e.g. Ayala Land, SM Prime" />
-                </div>
-              </div>
-            </section>
-          )}
-
-          {/* STEP 4: Inventory & Review */}
-          {step === 4 && (
-            <section className="flex flex-col gap-6 animate-[fadeIn_0.3s_ease]">
-              <h3 className="font-headline-editorial text-3xl text-gold-accent border-b border-surface-variant pb-2">
-                Step 4: Available Inventory
-              </h3>
-              <p className="text-sm text-text-secondary">Optionally manage individual units within this property.</p>
-
-              <div className="flex gap-2">
-                <button onClick={() => setIsUploadingCsv(!isUploadingCsv)} className="text-[10px] font-label-caps tracking-widest text-gold-accent uppercase hover:bg-gold-accent/10 px-4 py-2 rounded border border-gold-accent/30 transition-colors">
-                  {isUploadingCsv ? "Close CSV" : "Upload Unit Inventory (CSV)"}
-                </button>
-              </div>
-
-              {isUploadingCsv && (
-                <div className="border-2 border-dashed border-gold-accent/30 bg-surface-alt rounded p-8 flex flex-col items-center justify-center text-center gap-4">
-                  <div className="text-gold-accent mb-2">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                  </div>
-                  <div>
-                    <p className="text-sm font-working-title text-on-surface mb-1">Upload CSV or Excel</p>
-                    <p className="text-xs text-text-secondary">Drag and drop your developer inventory file here.</p>
-                  </div>
-                </div>
-              )}
-
-              <div className="overflow-x-auto border border-surface-variant rounded bg-surface-alt">
-                <table className="w-full text-left border-collapse min-w-[600px]">
-                  <thead>
-                    <tr className="border-b border-surface-variant bg-surface">
-                      <th className="p-2 text-[9px] font-label-caps text-text-secondary uppercase font-normal">Unit Name</th>
-                      <th className="p-2 text-[9px] font-label-caps text-text-secondary uppercase font-normal">Size (sqm)</th>
-                      <th className="p-2 text-[9px] font-label-caps text-text-secondary uppercase font-normal">Price / Rate</th>
-                      <th className="p-2 w-16 text-center">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {(formData.details.units_inventory || []).map((unit, idx) => (
-                      <tr key={idx} className="border-b border-surface-variant/50">
-                        <td className="p-1"><input className="w-full bg-transparent p-1 text-xs text-on-surface focus:outline-none border border-transparent hover:border-surface-variant focus:border-gold-accent rounded" value={unit.name || ''} onChange={e => {
-                          const list = [...(formData.details.units_inventory || [])];
-                          list[idx] = { ...list[idx], name: e.target.value };
-                          setDetail('units_inventory', list);
-                        }} placeholder="Unit 101" /></td>
-                        <td className="p-1"><input className="w-full bg-transparent p-1 text-xs text-on-surface focus:outline-none border border-transparent hover:border-surface-variant focus:border-gold-accent rounded" value={unit.size || ''} onChange={e => {
-                          const list = [...(formData.details.units_inventory || [])];
-                          list[idx] = { ...list[idx], size: e.target.value };
-                          setDetail('units_inventory', list);
-                        }} placeholder="150" /></td>
-                        <td className="p-1"><input className="w-full bg-transparent p-1 text-xs text-on-surface focus:outline-none border border-transparent hover:border-surface-variant focus:border-gold-accent rounded" value={unit.price || ''} onChange={e => {
-                          const list = [...(formData.details.units_inventory || [])];
-                          list[idx] = { ...list[idx], price: e.target.value };
-                          setDetail('units_inventory', list);
-                        }} placeholder="50000" /></td>
-                        <td className="p-1 text-center text-[10px] flex items-center justify-center gap-2 h-full pt-2">
-                          <button onClick={() => {
-                            const list = [...(formData.details.units_inventory || [])];
-                            list.splice(idx, 1);
-                            setDetail('units_inventory', list);
-                          }} className="text-error hover:text-error/80 transition-colors" title="Delete Row">×</button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                <button className="w-full p-2 text-xs text-gold-accent hover:bg-gold-accent/10 border-t border-surface-variant transition-colors" onClick={() => setDetail('units_inventory', [...(formData.details.units_inventory || []), {name: '', size: '', price: ''}])}>+ Add Row</button>
-              </div>
-
-            </section>
-          )}
+              </section>
+            )
+          ))}
 
           {/* Navigation Buttons */}
           <div className="flex justify-between mt-12 pt-6 border-t border-surface-variant">
@@ -684,7 +565,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
                 Save Draft
               </button>
               
-              {step < 4 ? (
+              {step < 6 ? (
                 <button 
                   onClick={() => setStep(step + 1)}
                   disabled={step === 1 && !formData.category} // Must select category to proceed
@@ -723,9 +604,9 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
         </div>
         <div className="mt-10 opacity-90 md:scale-[0.98] origin-top transition-all pointer-events-auto">
           {['commercial', 'restaurants', 'venues'].includes(formData.category) ? (
-            <CommercialFlow slug={null} draftData={draftData} isDraftMode={true} externalActiveTab={['space', 'space', 'location', 'units'][step - 1] || 'space'} />
+            <CommercialFlow slug={null} draftData={draftData} isDraftMode={true} externalActiveTab={['space', 'location', 'life', 'whereto', 'buildplans', 'units'][step - 1]} />
           ) : (
-            <ResidentialFlow slug={null} draftData={draftData} isDraftMode={true} externalActiveTab={['space', 'space', 'location', 'units'][step - 1] || 'space'} />
+            <ResidentialFlow slug={null} draftData={draftData} isDraftMode={true} externalActiveTab={['space', 'location', 'life', 'whereto', 'buildplans', 'units'][step - 1]} />
           )}
         </div>
       </div>

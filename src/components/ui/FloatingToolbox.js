@@ -106,13 +106,26 @@ export default function FloatingToolbox() {
   // Apply a mock tier/role and reload so entitlement gates re-read.
   const applyDev = (nextTier, nextRole) => {
     try {
-      const u = JSON.parse(localStorage.getItem("scoutit_user") || "null") || { id: "dev-user" };
+      let u = JSON.parse(localStorage.getItem("scoutit_user") || "null");
+      if (!u) {
+        u = {
+          id: "master-dev",
+          full_name: "Master Developer",
+          email: "dev@scoutit.com",
+          connects_balance: 9999
+        };
+      }
       u.subscription_tier = nextTier;
       u.tier = nextTier;
-      u.active_roles = [nextRole];
-      u.tags = [nextRole];
+      u.active_roles = ["buyer", "owner", "broker"]; // User wanted a master account with everything
+      u.tags = ["buyer", "owner", "broker"];
       localStorage.setItem("scoutit_user", JSON.stringify(u));
-      window.location.reload();
+      
+      if (window.location.pathname.includes("/onboarding")) {
+        window.location.href = "/dashboard";
+      } else {
+        window.location.reload();
+      }
     } catch {}
   };
 

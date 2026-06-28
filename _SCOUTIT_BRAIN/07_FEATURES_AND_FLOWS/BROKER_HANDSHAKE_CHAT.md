@@ -183,3 +183,25 @@ Until then: spec is frozen here; no half-built chat on a dev-open database.
 - Broker edit rights on a linked listing? (proposed: owner-only for v1)
 - Unlink flow — can either party end representation, and does the listing drop off the broker profile? (proposed: yes, either party; status → ended)
 - Multiple brokers display on the property page — list all "Represented by", or owner picks a primary? (proposed: list all)
+
+---
+
+## 12. Buyer Routing & The Hierarchy Roster Window (Added 2026-06-28)
+
+When a Buyer attempts to contact a representative for a property that has multiple brokers attached (an Open Listing), the system **must** use **Option B: The Roster Window**. 
+
+### The Roster Window UI
+Instead of a simple dropdown, clicking "Contact Representative" opens a full-screen sliding panel or modal that ranks the verified brokers into a strict hierarchy:
+1. 🏆 **ScoutIt Recommended:** Brokers on high-tier Cosmic subscriptions (Universe/Cosmic) are artificially boosted here to drive monetization.
+2. ⭐ **Top Rated:** Ranked purely by user reviews and verified closures.
+3. 🏢 **Direct Listing:** The broker who actually uploaded the property or the owner themselves.
+
+This exact same UI component is reused on the standalone "Verified Advisors" page when a user searches by property name.
+
+### Strict Viewing Rule: Schedule Before Handshake
+Buyers **cannot** immediately request a live viewing from the public page. The flow is strictly:
+1. **Connect:** Buyer spends 1 Connect to open the Temporary Chatbox with their chosen broker from the Roster.
+2. **Chat & Schedule:** Inside the chatbox, there is a "Request Live Viewing" button. The buyer can use this to propose a date/time.
+3. **Dashboard Sync:** This schedule request automatically appears on the Broker's (or Owner's) Calendar/Dashboard.
+4. **The Handshake:** After the viewing, if both parties agree to proceed with a formal transaction, they perform the **Handshake Gesture**. 
+5. **Chat Closes:** The Handshake is the culmination of the temporary phase. It permanently links them for the transaction and **closes the temporary chatbox** (triggering the 7-day archive cycle).

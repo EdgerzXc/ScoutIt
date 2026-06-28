@@ -11,6 +11,7 @@ import { getChapterConfig } from "./chapterConfig";
 import { Bed, Bath, Ruler, Car, Lock, Search, Camera, Building2 } from "lucide-react";
 import InquiryModal from "@/components/property/InquiryModal";
 import { canSee, getCurrentTier } from "@/lib/entitlements";
+import { DEEP_INTEL_SCHEMA } from "@/lib/deepIntelSchema";
 
 // ═══════════════════════════════════════════════════
 // DATA — Airtable CMS first, mockDb fallback
@@ -186,7 +187,7 @@ function DeepIntelWidget({ open, onToggle, fields, values }) {
 // ═══════════════════════════════════════════════════
 // MAIN COMPONENT
 // ═══════════════════════════════════════════════════
-export default function ResidentialFlow({ slug, draftData, isDraftMode }) {
+export default function ResidentialFlow({ slug, draftData, isDraftMode, externalActiveTab }) {
   // ── Interactive UI states ──────────────────────
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [photoMode,         setPhotoMode]         = useState("natural");
@@ -196,7 +197,15 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode }) {
   // Market/investment "Hidden Intel" panel unlocks at Cluster+ (same SSR-safe pattern).
   const [canMarketIntel,    setCanMarketIntel]    = useState(false);
   useEffect(() => { setCanMarketIntel(canSee("marketIntel", getCurrentTier())); }, []);
-  const [activeTab,         setActiveTab]         = useState("space");
+  const [activeTab,         setActiveTab]         = useState(externalActiveTab || "space");
+
+  useEffect(() => {
+    if (externalActiveTab && externalActiveTab !== activeTab) {
+      setActiveTab(externalActiveTab);
+      const scrollEl = document.querySelector('.zone-story');
+      if (scrollEl) scrollEl.scrollTop = 0;
+    }
+  }, [externalActiveTab]);
   const [menuOpen,   setMenuOpen]   = useState(false);
   const [propertyData, setPropertyData] = useState(() => draftData || getPropertyBySlug(slug));
   const [dataLoading,  setDataLoading]  = useState(false);
@@ -1318,8 +1327,8 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode }) {
               <DeepIntelWidget
                 open={widgets.location}
                 onToggle={() => setWidgets(w => ({...w, location: !w.location}))}
-                values={d.deepIntel}
-                fields={["Solar Orientation","Pedestrian Flow Metrics","Office Density Data","Development Pipeline"]}
+                values={d.details || d.deepIntel}
+                fields={DEEP_INTEL_SCHEMA[d.category || "residential"]?.[2] || []}
               />
 
             </div>
@@ -1386,8 +1395,8 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode }) {
               <DeepIntelWidget
                 open={widgets.life}
                 onToggle={() => setWidgets(w => ({...w, life: !w.life}))}
-                values={d.deepIntel}
-                fields={["Noise Decibel Readings","Lighting Color Temperature","Privacy Score Details","Peak Hour Crowd Data"]}
+                values={d.details || d.deepIntel}
+                fields={DEEP_INTEL_SCHEMA[d.category || "residential"]?.[3] || []}
               />
 
             </div>
@@ -1455,8 +1464,8 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode }) {
               <DeepIntelWidget
                 open={widgets.whereto}
                 onToggle={() => setWidgets(w => ({...w, whereto: !w.whereto}))}
-                values={d.deepIntel}
-                fields={["Walkability Score","Transit Frequency Analysis","Peak Hour Commute Data","Zoning Classification","Development Pipeline"]}
+                values={d.details || d.deepIntel}
+                fields={DEEP_INTEL_SCHEMA[d.category || "residential"]?.[4] || []}
               />
 
             </div>
@@ -1590,8 +1599,8 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode }) {
                   <DeepIntelWidget
                     open={widgets.buildplans}
                     onToggle={() => setWidgets(w => ({...w, buildplans: !w.buildplans}))}
-                    values={d.deepIntel}
-                    fields={["MEP Specifications","Electrical Load Capacity","Kitchen-to-Dining Floor Ratio","Ventilation Routing","Structural Calculations"]}
+                    values={d.details || d.deepIntel}
+                    fields={DEEP_INTEL_SCHEMA[d.category || "residential"]?.[5] || []}
                   />
                 </>
               )}
@@ -1749,12 +1758,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode }) {
                 </div>
               )}
 
-              <DeepIntelWidget
-                open={widgets.units}
-                onToggle={() => setWidgets(w => ({...w, units: !w.units}))}
-                values={d.deepIntel}
-                fields={["Precise Room Dimensions","Technical Asset Manifest","Fixed Equipment Specs","Finish & Material Schedule","Utility Point Mapping"]}
-              />
+              {/* Units deep intel merged into Universe */}
 
             </div>
 
@@ -1859,8 +1863,8 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode }) {
               <DeepIntelWidget
                 open={widgets.universe}
                 onToggle={() => setWidgets(w => ({...w, universe: !w.universe}))}
-                values={d.deepIntel}
-                fields={["Detailed Historical Transaction Records","Architectural Heritage Notes","Original Permit & Blueprint Archive","Provenance & Ownership Lineage"]}
+                values={d.details || d.deepIntel}
+                fields={DEEP_INTEL_SCHEMA[d.category || "residential"]?.[6] || []}
               />
 
             </div>

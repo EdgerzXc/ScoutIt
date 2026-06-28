@@ -205,12 +205,17 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
 
       // Update HUD Overlay positioning dynamically on Map Movement
       const updatePositions = () => {
-        const pPoint = map.latLngToContainerPoint(position);
-        setPropertyPixel({ x: pPoint.x, y: pPoint.y });
+        if (!mapInstance.current) return;
+        try {
+          const pPoint = map.latLngToContainerPoint(position);
+          setPropertyPixel({ x: pPoint.x, y: pPoint.y });
 
-        if (hoveredRef.current) {
-          const tPoint = map.latLngToContainerPoint(hoveredRef.current.latlng);
-          setHoveredPixel({ x: tPoint.x, y: tPoint.y });
+          if (hoveredRef.current) {
+            const tPoint = map.latLngToContainerPoint(hoveredRef.current.latlng);
+            setHoveredPixel({ x: tPoint.x, y: tPoint.y });
+          }
+        } catch (e) {
+          // Ignore Leaflet not being fully initialized (e.g. _leaflet_pos undefined)
         }
       };
 
@@ -218,13 +223,17 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
       // so the property stays centered (fixes maps that mount while hidden).
       const recenter = () => {
         if (!mapInstance.current) return;
-        mapInstance.current.invalidateSize();
-        if (routeLayerRef.current) {
-          mapInstance.current.fitBounds(routeLayerRef.current.getBounds(), { padding: [55, 55], maxZoom: 15 });
-        } else {
-          mapInstance.current.setView(position, mapInstance.current.getZoom() || 15);
+        try {
+          mapInstance.current.invalidateSize();
+          if (routeLayerRef.current) {
+            mapInstance.current.fitBounds(routeLayerRef.current.getBounds(), { padding: [55, 55], maxZoom: 15 });
+          } else {
+            mapInstance.current.setView(position, mapInstance.current.getZoom() || 15);
+          }
+          updatePositions();
+        } catch (e) {
+          // Prevent Leaflet errors during ResizeObserver events from creating infinite loops
         }
-        updatePositions();
       };
 
       // Set initial positions

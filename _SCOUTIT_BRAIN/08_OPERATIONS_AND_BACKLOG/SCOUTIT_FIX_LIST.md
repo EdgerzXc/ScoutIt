@@ -44,7 +44,7 @@ functionality first; strip mock data + honest-blanks + dev backdoors in the fina
 4. **Delete dead file** `src/app/page.original.js` `[Website]`.
 
 ## P1 — The listing pipeline (the missing link) + master page
-5. 🔴 **Rebuild the submission wizard to be category-aware** `[Website]` — pick category →
+5. ✅ **Rebuild the submission wizard to be category-aware** `[Website]` — pick category →
    ask that category's curated fields (SOP §2). Today it captures only 6 generic fields.
 6. 🔴 **Add the wizard "Upload a Doc" mode** `[Website]+[Make]` — PDF/DOCX → Listing Engine
    extracts → owner reviews a **pre-filled** category form. (Guide in the audit doc;
