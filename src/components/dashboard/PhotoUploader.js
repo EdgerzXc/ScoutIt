@@ -1,16 +1,15 @@
 import { useState, useRef } from 'react';
 import { uploadPropertyPhoto } from '../../lib/storage';
 
-export default function PhotoUploader({ photos, onChange, onSetImage, isPro = false }) {
+export default function PhotoUploader({ photos, onChange, onSetImage, isPro = false, maxFreePhotos = 7 }) {
   const [uploadingIndex, setUploadingIndex] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [dragOverIndex, setDragOverIndex] = useState(null);
   const [error, setError] = useState(null);
   const fileInputRefs = useRef([]);
 
-  const MAX_FREE_PHOTOS = 7;
   const currentPhotos = photos || ["", "", "", "", ""];
-  const maxReached = !isPro && currentPhotos.length >= MAX_FREE_PHOTOS;
+  const maxReached = !isPro && currentPhotos.length >= maxFreePhotos;
 
   const handleUpload = async (index, file) => {
     if (!file) return;

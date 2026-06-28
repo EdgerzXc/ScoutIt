@@ -6,6 +6,8 @@ import ResidentialFlow from "../property/ResidentialFlow";
 import { sanitizeObject } from "../../lib/sanitize";
 import { supabase } from "../../lib/supabaseClient";
 import PhotoUploader from "./PhotoUploader";
+import UnitBuilder from "./UnitBuilder";
+import { getCurrentTier } from "../../lib/entitlements";
 
 const CATEGORIES = [
   { id: "residential", icon: "🏠", label: "Residential" },
@@ -151,7 +153,10 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
     description: initialData?.description || initialData?.desc || "",
     verified: initialData?.verified || false,
     details: initialData?.details || {},
+    units_inventory: initialData?.units_inventory || [],
   });
+
+  const isPro = getCurrentTier() !== "starry";
 
   const [lastSaved, setLastSaved] = useState(null);
   const [draftLoaded, setDraftLoaded] = useState(false);
@@ -422,6 +427,14 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
         </div>
       )}
 
+      {/* Draft Data mapped to include units_inventory */}
+      {(() => {
+        if (!draftData.units_inventory) {
+          draftData.units_inventory = formData.units_inventory;
+        }
+        return null;
+      })()}
+
       {/* Header */}
       <div className="p-4 border-b border-surface-variant bg-background flex justify-between items-center z-20">
         <button className="text-text-secondary hover:text-on-surface font-working-title text-sm" onClick={onClose}>
@@ -449,7 +462,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
 
       {/* Progress Bar */}
       <div className="w-full bg-surface-variant h-1 relative overflow-hidden">
-        <div className={`absolute top-0 left-0 h-1 transition-all duration-300 ${step === 1 ? 'w-1/2 bg-gold-accent' : `w-full ${getProgressColor()}`}`}></div>
+        <div className={`absolute top-0 left-0 h-1 transition-all duration-300 ${step === 1 ? 'w-1/3 bg-gold-accent' : step === 2 ? 'w-2/3 bg-gold-accent' : `w-full ${getProgressColor()}`}`}></div>
       </div>
 
       <div className="flex-1 overflow-y-auto p-6 md:p-12 custom-scrollbar bg-surface flex flex-col items-center">
@@ -616,6 +629,17 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
             </section>
           )}
 
+          {/* Step 3: Units Inventory */}
+          {step === 3 && (
+            <section className="flex flex-col gap-6 animate-[fadeIn_0.3s_ease]">
+              <UnitBuilder 
+                units={formData.units_inventory} 
+                onChange={(newUnits) => setField("units_inventory", newUnits)} 
+                isPro={isPro} 
+              />
+            </section>
+          )}
+
           {/* Navigation Buttons */}
           <div className="flex justify-between items-center mt-12 pt-6 border-t border-surface-variant">
             {step > 1 ? (
@@ -638,10 +662,10 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
                 Save Draft
               </button>
               
-              {step === 1 ? (
+              {step < 3 ? (
                 <button 
-                  onClick={() => setStep(2)}
-                  disabled={!Object.values(mustHaves).every(Boolean)}
+                  onClick={() => setStep(step + 1)}
+                  disabled={step === 1 ? !Object.values(mustHaves).every(Boolean) : false}
                   className="px-6 py-2 rounded bg-surface-variant text-on-surface text-sm font-label-caps tracking-widest uppercase hover:bg-gold-accent hover:text-background disabled:opacity-50 transition-colors"
                 >
                   Next Step →
