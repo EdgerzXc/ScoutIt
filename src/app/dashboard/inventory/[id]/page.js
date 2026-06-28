@@ -12,12 +12,12 @@ function InventoryInner({ params }) {
   const { id } = params;
   const { listings, updateListing, currentUser } = useDashboard();
   useEffect(() => {
-    if (listings.length > 0 && !listings.find(l => l.id === id)) {
+    if (listings.length > 0 && !listings.find(l => String(l.id) === String(id))) {
       router.push("/dashboard");
     }
   }, [listings, id, router]);
 
-  const listing = listings.find(l => l.id === id);
+  const listing = listings.find(l => String(l.id) === String(id));
 
   if (!listing) {
     return (
