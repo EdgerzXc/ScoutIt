@@ -6,6 +6,7 @@ import ResidentialFlow from "../property/ResidentialFlow";
 import { sanitizeObject } from "../../lib/sanitize";
 import { supabase } from "../../lib/supabaseClient";
 import { DEEP_INTEL_SCHEMA } from "../../lib/deepIntelSchema";
+import PhotoUploader from "./PhotoUploader";
 
 const CATEGORIES = [
   { id: "residential", icon: "🏠", label: "Residential" },
@@ -237,12 +238,24 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
     }
   };
 
-  const handleDragOver = (e) => { e.preventDefault(); setIsDragging(true); };
+  const handleDragOver = (e) => { 
+    e.preventDefault(); 
+    if (e.dataTransfer.items) {
+      for (let i = 0; i < e.dataTransfer.items.length; i++) {
+        if (e.dataTransfer.items[i].type.startsWith('image/')) {
+          return;
+        }
+      }
+    }
+    setIsDragging(true); 
+  };
   const handleDragLeave = (e) => { e.preventDefault(); setIsDragging(false); };
   const handleDrop = async (e) => {
     e.preventDefault();
     setIsDragging(false);
+    
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      if (e.dataTransfer.files[0].type.startsWith('image/')) return;
       await processPdfFile(e.dataTransfer.files[0]);
     }
   };
@@ -327,6 +340,67 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
   }));
 
   const categoryFields = CATEGORY_FIELDS[formData.category] || [];
+  const deepIntelFields = DEEP_INTEL_SCHEMA[formData.category || "commercial"] || {};
+
+  const completionStats = useMemo(() => {
+    let total = categoryFields.length;
+    let filled = 0;
+
+    categoryFields.forEach(f => {
+      const val = formData.details[f.key];
+      if (val !== undefined && val !== null && String(val).trim() !== "") filled++;
+    });
+
+    Object.values(deepIntelFields).forEach(stepFields => {
+      stepFields.forEach(f => {
+        total++;
+        const val = formData.details[f.key];
+        if (val !== undefined && val !== null && String(val).trim() !== "") filled++;
+      });
+    });
+
+    // Add mustHaves
+    total += 4; // title, location, price, media
+    if (formData.title.trim()) filled++;
+    if (formData.location.trim()) filled++;
+    if (String(formData.price).trim()) filled++;
+    if (formData.photos && formData.photos.filter(p => p.trim()).length >= 5) filled++;
+
+    return { total, filled, percentage: total === 0 ? 100 : Math.round((filled / total) * 100) };
+  }, [formData, categoryFields, deepIntelFields]);
+
+  const jumpToEmptyField = () => {
+    const scrollOpts = { behavior: 'smooth', block: 'center' };
+    
+    // 1. Basic fields (Step 1)
+    if (!formData.title.trim()) { if (step !== 1) setStep(1); setTimeout(() => document.getElementById('field-title')?.scrollIntoView(scrollOpts), 100); return; }
+    if (!formData.location.trim()) { if (step !== 1) setStep(1); setTimeout(() => document.getElementById('field-location')?.scrollIntoView(scrollOpts), 100); return; }
+    if (!String(formData.price).trim()) { if (step !== 1) setStep(1); setTimeout(() => document.getElementById('field-price')?.scrollIntoView(scrollOpts), 100); return; }
+    if (!formData.photos || formData.photos.filter(p => p.trim()).length < 5) { if (step !== 1) setStep(1); setTimeout(() => document.getElementById('field-photos')?.scrollIntoView(scrollOpts), 100); return; }
+
+    // 2. Category fields (Step 1)
+    for (const f of categoryFields) {
+      const val = formData.details[f.key];
+      if (val === undefined || val === null || String(val).trim() === "") {
+        if (step !== 1) setStep(1);
+        setTimeout(() => document.getElementById(`field-${f.key}`)?.scrollIntoView(scrollOpts), 100);
+        return;
+      }
+    }
+
+    // 3. Deep Intel fields (Steps 2-6)
+    for (let s = 2; s <= 6; s++) {
+      const fields = deepIntelFields[s] || [];
+      for (const f of fields) {
+        const val = formData.details[f.key];
+        if (val === undefined || val === null || String(val).trim() === "") {
+          if (step !== s) setStep(s);
+          setTimeout(() => document.getElementById(`field-${f.key}`)?.scrollIntoView(scrollOpts), 100);
+          return;
+        }
+      }
+    }
+  };
 
   const handlePublish = () => {
     if (isPublishable) {
@@ -400,8 +474,22 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
         </div>
       </div>
 
-      <div className="w-full bg-surface-variant h-1">
-        <div className="bg-gold-accent h-1 transition-all duration-300" style={{ width: `${(step / 6) * 100}%` }}></div>
+      <div 
+        className="w-full bg-surface-variant h-3 cursor-pointer relative group flex overflow-hidden"
+        onClick={jumpToEmptyField}
+        title="Click to jump to next empty field"
+      >
+        <div className="bg-gold-accent/40 h-3 transition-all duration-300 absolute top-0 left-0" style={{ width: `${(step / 6) * 100}%` }}></div>
+        <div className="bg-success h-3 transition-all duration-300 relative z-10" style={{ width: `${completionStats.percentage}%` }}></div>
+        <div className="absolute inset-0 bg-white/0 hover:bg-white/10 transition-colors z-20 flex items-center justify-center opacity-0 group-hover:opacity-100">
+          <span className="text-[10px] font-mono text-white bg-black/50 px-2 rounded backdrop-blur">JUMP TO NEXT EMPTY FIELD</span>
+        </div>
+      </div>
+      
+      <div className="w-full bg-surface text-center py-1 border-b border-surface-variant">
+        <span className="text-[10px] font-mono text-text-secondary">
+          VAULT COMPLETION: <span className={completionStats.percentage >= 100 ? "text-success" : "text-gold-accent"}>{completionStats.percentage}%</span>
+        </span>
       </div>
 
       <div className="flex-1 overflow-y-auto p-6 md:p-12 custom-scrollbar bg-surface flex flex-col items-center">
@@ -416,7 +504,7 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
           {step === 1 && (
             <section className="flex flex-col gap-6 animate-[fadeIn_0.3s_ease]">
               <h3 className="font-headline-editorial text-3xl text-gold-accent border-b border-surface-variant pb-2">Step 1: The Space</h3>
-              <p className="text-sm text-text-secondary">Let's start with the absolute must-haves and core spatial financials.</p>
+              <p className="text-sm text-text-secondary">Let&apos;s start with the absolute must-haves and core spatial financials.</p>
               
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">Asset Category <span className="text-error">*</span></label>
@@ -436,6 +524,7 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">Property Title <span className="text-error">*</span></label>
                 <input 
+                  id="field-title"
                   className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface focus:outline-none focus:border-gold-accent transition-colors" 
                   type="text" 
                   value={formData.title} 
@@ -447,6 +536,7 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">Location / Address <span className="text-error">*</span></label>
                 <input 
+                  id="field-location"
                   className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface focus:outline-none focus:border-gold-accent transition-colors" 
                   type="text" 
                   value={formData.location} 
@@ -458,6 +548,7 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">Listed Price (₱) <span className="text-error">*</span></label>
                 <input 
+                  id="field-price"
                   className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface focus:outline-none focus:border-gold-accent transition-colors" 
                   type="number" 
                   value={formData.price} 
@@ -468,46 +559,11 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
 
               <div className="flex flex-col gap-3">
                 <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">Property Photos (Min. 5 required) <span className="text-error">*</span></label>
-                <div className="flex flex-col gap-2">
-                  {(formData.photos || ["", "", "", "", ""]).map((photoUrl, index) => (
-                    <div key={index} className="flex gap-2">
-                      <input 
-                        className="bg-surface-alt border border-surface-variant rounded px-3 py-2 text-sm text-on-surface focus:outline-none focus:border-gold-accent transition-colors flex-1" 
-                        type="text" 
-                        value={photoUrl || ''} 
-                        onChange={e => {
-                          const newPhotos = [...(formData.photos || ["", "", "", "", ""])];
-                          newPhotos[index] = e.target.value;
-                          setField("photos", newPhotos);
-                          if (index === 0) {
-                             setField("image", e.target.value); // Keep backwards compatibility
-                          }
-                        }} 
-                        placeholder={`Photo URL ${index + 1}${index === 0 ? ' (Primary)' : ''}`} 
-                      />
-                      {(formData.photos || []).length > 5 && (
-                        <button 
-                          className="px-3 border border-error/50 text-error hover:bg-error/10 rounded transition-colors"
-                          onClick={() => {
-                            const newPhotos = (formData.photos || ["", "", "", "", ""]).filter((_, i) => i !== index);
-                            setField("photos", newPhotos);
-                            if (index === 0) setField("image", newPhotos[0] || "");
-                          }}
-                        >
-                          ✕
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                  <button 
-                    className="mt-2 py-2 border border-dashed border-gold-accent/50 text-gold-accent hover:bg-gold-accent/10 rounded text-sm font-label-caps tracking-widest uppercase transition-colors"
-                    onClick={() => {
-                      setField("photos", [...(formData.photos || ["", "", "", "", ""]), ""]);
-                    }}
-                  >
-                    + Add Another Photo
-                  </button>
-                </div>
+                <PhotoUploader 
+                  photos={formData.photos} 
+                  onChange={(newPhotos) => setField("photos", newPhotos)}
+                  onSetImage={(url) => setField("image", url)}
+                />
               </div>
 
               <div className="flex flex-col gap-3 mt-4">
@@ -517,6 +573,7 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
                     <div key={field.key} className="flex flex-col gap-2">
                       <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">{field.label}</label>
                       <input 
+                        id={`field-${field.key}`}
                         className="bg-surface-alt border border-surface-variant rounded px-3 py-2 text-on-surface text-sm focus:outline-none focus:border-gold-accent transition-colors" 
                         type={field.type} 
                         value={formData.details[field.key] || ''} 
@@ -533,6 +590,7 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
                   <div key={field.key} className="flex flex-col gap-2">
                     <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">{field.label}</label>
                     <input 
+                      id={`field-${field.key}`}
                       className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface text-sm focus:outline-none focus:border-gold-accent transition-colors" 
                       type="text" 
                       value={formData.details[field.key] || ''} 
@@ -565,6 +623,7 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
                     <div key={field.key} className="flex flex-col gap-2 md:col-span-1">
                       <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">{field.label}</label>
                       <input 
+                        id={`field-${field.key}`}
                         className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface text-sm focus:outline-none focus:border-gold-accent transition-colors" 
                         type={field.key === "DI_Hist_Tx" ? "textarea" : "text"} 
                         value={formData.details[field.key] || ''} 

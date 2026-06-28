@@ -5,6 +5,7 @@ import CommercialFlow from "../property/CommercialFlow";
 import ResidentialFlow from "../property/ResidentialFlow";
 import { sanitizeObject } from "../../lib/sanitize";
 import { supabase } from "../../lib/supabaseClient";
+import PhotoUploader from "./PhotoUploader";
 
 const CATEGORIES = [
   { id: "residential", icon: "🏠", label: "Residential" },
@@ -14,6 +15,127 @@ const CATEGORIES = [
   { id: "restaurants", icon: "🍽️", label: "Restaurant" },
   { id: "venues", icon: "🎤", label: "Venue" },
 ];
+
+const CATEGORY_FIELDS = {
+  residential: [
+    { key: "Beds", label: "Bedrooms", type: "number", proOnly: false },
+    { key: "Baths", label: "Bathrooms", type: "number", proOnly: false },
+    { key: "Floor_Area_Sqm", label: "Floor area (sqm)", type: "number", proOnly: false },
+    { key: "Lot_Area_Sqm", label: "Lot area (sqm)", type: "number", proOnly: false },
+    { key: "Parking_Slots", label: "Parking slots", type: "number", proOnly: false },
+    { key: "Furnishing", label: "Furnishing", type: "select", options: ["Bare", "Semi-Furnished", "Fully Furnished"], proOnly: false },
+    { key: "RS_Floor_Level", label: "Floor Level", type: "text", proOnly: false },
+    { key: "RS_View", label: "View", type: "text", proOnly: false },
+    { key: "RS_Turnover_Date", label: "Turnover Date", type: "text", proOnly: false },
+    { key: "RS_Pet_Policy", label: "Pet Policy", type: "text", proOnly: false },
+    { key: "RS_Assoc_Dues", label: "Assoc Dues (₱/mo)", type: "number", proOnly: false },
+    { key: "RS_Studio_Flag", label: "Studio Unit", type: "checkbox", proOnly: false },
+    { key: "Amenities", label: "Amenities", type: "text", proOnly: false },
+    { key: "TitleStatus", label: "Title Status", type: "text", proOnly: false },
+    { key: "RS_Price", label: "Residential Price", type: "number", proOnly: false },
+    { key: "RS_Price_Per_Sqm", label: "Price / sqm", type: "number", proOnly: true },
+    { key: "RS_Payment_Terms", label: "Payment Terms", type: "text", proOnly: true },
+  ],
+  commercial: [
+    { key: "CM_Rent_Per_Sqm", label: "Published rent (₱/sqm/mo)", type: "number", proOnly: false },
+    { key: "CM_Total_GLA", label: "Total GLA (sqm)", type: "number", proOnly: false },
+    { key: "CM_Floor_Plate_Sqm", label: "Floor Plate (sqm)", type: "number", proOnly: false },
+    { key: "CM_Building_Grade", label: "Building grade", type: "select", options: ["Premium", "Grade A", "Grade B", "Grade C"], proOnly: false },
+    { key: "CM_Hand_Over_Condition", label: "Hand-over condition", type: "select", options: ["Bare Shell", "Warm Shell", "Fitted", "As-is-where-is"], proOnly: false },
+    { key: "CM_Availability_Status", label: "Availability", type: "text", proOnly: false },
+    { key: "CM_Min_Lease_Term", label: "Min. Lease Term", type: "text", proOnly: false },
+    { key: "CM_Certification", label: "Certification", type: "text", proOnly: false },
+    { key: "PEZA", label: "PEZA Accredited", type: "checkbox", proOnly: false },
+    { key: "CM_CAMC_Per_Sqm", label: "CAMC (₱/sqm/mo)", type: "number", proOnly: false },
+    { key: "CM_AC_Charges", label: "A/C charges", type: "number", proOnly: false },
+    { key: "CM_AC_System", label: "AC System", type: "text", proOnly: true },
+    { key: "CM_Reserved_Parking", label: "Reserved Parking", type: "text", proOnly: true },
+    { key: "CM_Escalation_Rate", label: "Escalation Rate", type: "text", proOnly: true },
+    { key: "CM_Fit_Out_Allowance", label: "Fit-out Allowance", type: "text", proOnly: true },
+    { key: "CM_Rent_Free_Period", label: "Rent-free Period", type: "text", proOnly: true },
+    { key: "CM_Parking_Ratio", label: "Parking Ratio", type: "text", proOnly: true },
+    { key: "CM_Backup_Power", label: "Backup Power", type: "text", proOnly: true },
+    { key: "CM_Floor_Loading", label: "Floor Loading", type: "text", proOnly: true },
+    { key: "CM_Internet_Providers", label: "Internet Providers", type: "text", proOnly: true },
+    { key: "CM_Available_Units_Summary", label: "Available Units", type: "text", proOnly: true },
+    { key: "CM_Towers_Zones", label: "Towers / Zones", type: "text", proOnly: true },
+    { key: "CM_Cap_Rate", label: "Cap Rate (%)", type: "number", proOnly: true },
+    { key: "CM_NOI", label: "NOI", type: "number", proOnly: true },
+  ],
+  str: [
+    { key: "STR_Nightly_Rate", label: "Nightly rate (₱)", type: "number", proOnly: false },
+    { key: "STR_Cleaning_Fee", label: "Cleaning Fee (₱)", type: "number", proOnly: false },
+    { key: "STR_Max_Guests", label: "Max guests", type: "number", proOnly: false },
+    { key: "STR_Avg_Rating", label: "Avg. Rating", type: "number", proOnly: false },
+    { key: "STR_Bedrooms", label: "Bedrooms", type: "number", proOnly: false },
+    { key: "STR_Bathrooms", label: "Bathrooms", type: "number", proOnly: false },
+    { key: "STR_Min_Stay_Nights", label: "Minimum stay (nights)", type: "number", proOnly: false },
+    { key: "STR_Check_In_Out", label: "Check-in / out", type: "text", proOnly: false },
+    { key: "Amenities", label: "Amenities", type: "text", proOnly: false },
+    { key: "STR_Weekend_Rate", label: "Weekend Rate (₱)", type: "number", proOnly: true },
+    { key: "STR_Bed_Config", label: "Bed configuration", type: "text", proOnly: true },
+    { key: "STR_Self_Check_In", label: "Self check-in available", type: "checkbox", proOnly: true },
+    { key: "STR_House_Rules", label: "House Rules", type: "text", proOnly: true },
+    { key: "STR_Cancellation_Policy", label: "Cancellation Policy", type: "text", proOnly: true },
+    { key: "STR_Permit_Accreditation", label: "DOT / LGU permit", type: "text", proOnly: true },
+    { key: "STR_WiFi_Speed", label: "WiFi Speed", type: "text", proOnly: true },
+  ],
+  hospitality: [
+    { key: "HOSP_Room_Count", label: "Room Count", type: "number", proOnly: false },
+    { key: "HOSP_Star_Rating", label: "Star Rating", type: "number", proOnly: false },
+    { key: "HOSP_FB_Outlets", label: "F&B Outlets", type: "number", proOnly: false },
+    { key: "HOSP_Function_Rooms", label: "Function Rooms", type: "number", proOnly: false },
+    { key: "HOSP_Operator_Brand", label: "Operator / Brand", type: "text", proOnly: false },
+    { key: "HOSP_Room_Types", label: "Room Types", type: "text", proOnly: false },
+    { key: "HOSP_Year_Built_Renovated", label: "Built / Renovated", type: "text", proOnly: false },
+    { key: "Listed_Price", label: "Listed Price", type: "number", proOnly: false },
+    { key: "HOSP_ADR", label: "ADR (₱)", type: "number", proOnly: true },
+    { key: "HOSP_Occupancy_Rate", label: "Occupancy Rate (%)", type: "number", proOnly: true },
+    { key: "HOSP_RevPAR", label: "RevPAR (₱)", type: "number", proOnly: true },
+    { key: "HOSP_Cap_Rate", label: "Cap Rate (%)", type: "number", proOnly: true },
+    { key: "HOSP_GFA", label: "GFA (sqm)", type: "number", proOnly: true },
+    { key: "HOSP_Land_Area", label: "Land Area (sqm)", type: "number", proOnly: true },
+  ],
+  restaurants: [
+    { key: "RST_Floor_Area_Sqm", label: "Floor Area (sqm)", type: "number", proOnly: false },
+    { key: "RST_Seating_Capacity", label: "Seating capacity", type: "number", proOnly: false },
+    { key: "RST_Kitchen_Condition", label: "Kitchen condition", type: "select", options: ["With Kitchen", "Bare", "Needs Build-out"], proOnly: false },
+    { key: "RST_Foot_Traffic", label: "Foot traffic", type: "select", options: ["Low", "Medium", "High"], proOnly: false },
+    { key: "RST_Frontage", label: "Storefront frontage", type: "text", proOnly: false },
+    { key: "RST_Indoor_Outdoor", label: "Indoor / Outdoor", type: "text", proOnly: false },
+    { key: "RST_Previous_Use", label: "Previous Use", type: "text", proOnly: false },
+    { key: "RST_Rent", label: "Rent (₱/mo)", type: "number", proOnly: false },
+    { key: "RST_Dues_CUSA", label: "Dues / CUSA (₱/mo)", type: "number", proOnly: false },
+    { key: "RST_Hood_Exhaust", label: "Hood / exhaust present", type: "checkbox", proOnly: true },
+    { key: "RST_Grease_Trap", label: "Grease trap present", type: "checkbox", proOnly: true },
+    { key: "RST_Gas_Line", label: "Gas line available", type: "checkbox", proOnly: true },
+    { key: "RST_Power_Capacity", label: "Power Capacity", type: "number", proOnly: true },
+    { key: "RST_Delivery_Access", label: "Delivery Access", type: "text", proOnly: true },
+    { key: "RST_Liquor_License", label: "Liquor license eligible", type: "text", proOnly: true },
+    { key: "RST_FB_Zoning_Permit", label: "F&B Zoning Permit", type: "text", proOnly: true },
+    { key: "RST_Ceiling_Height", label: "Ceiling Height", type: "text", proOnly: true },
+    { key: "RST_Turnover_Condition", label: "Turnover Condition", type: "text", proOnly: true },
+    { key: "RST_Parking", label: "Parking", type: "text", proOnly: true },
+  ],
+  venues: [
+    { key: "VEN_Capacity_Seated", label: "Seated capacity", type: "number", proOnly: false },
+    { key: "VEN_Capacity_Standing", label: "Standing capacity", type: "number", proOnly: false },
+    { key: "VEN_Floor_Area_Sqm", label: "Floor Area (sqm)", type: "number", proOnly: false },
+    { key: "VEN_Min_Booking_Hours", label: "Min Booking (hrs)", type: "number", proOnly: false },
+    { key: "VEN_Indoor_Outdoor", label: "Indoor / Outdoor", type: "text", proOnly: false },
+    { key: "VEN_Air_Conditioning", label: "Air-conditioned", type: "text", proOnly: false },
+    { key: "VEN_Catering_Policy", label: "Catering policy", type: "select", options: ["In-house only", "External allowed", "Both"], proOnly: false },
+    { key: "VEN_Rental_Rate", label: "Rental Rate (₱)", type: "number", proOnly: false },
+    { key: "VEN_Rate_Basis", label: "Rate Basis", type: "text", proOnly: false },
+    { key: "VEN_Layout_Configs", label: "Layout configurations", type: "text", proOnly: true },
+    { key: "VEN_Ceiling_Height", label: "Ceiling Height", type: "text", proOnly: true },
+    { key: "VEN_AV_Equipment", label: "AV equipment included", type: "text", proOnly: true },
+    { key: "VEN_Power_Capacity", label: "Power Capacity", type: "text", proOnly: true },
+    { key: "VEN_Parking", label: "Parking", type: "text", proOnly: true },
+    { key: "VEN_Accessibility", label: "Accessibility", type: "text", proOnly: true },
+    { key: "VEN_Noise_Curfew", label: "Noise curfew", type: "text", proOnly: true },
+  ],
+};
 
 
 export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, initialData }) {
@@ -112,12 +234,26 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
     }
   };
 
-  const handleDragOver = (e) => { e.preventDefault(); setIsDragging(true); };
+  const handleDragOver = (e) => { 
+    e.preventDefault(); 
+    // Ignore if dragging an image (let PhotoUploader handle it)
+    if (e.dataTransfer.items) {
+      for (let i = 0; i < e.dataTransfer.items.length; i++) {
+        if (e.dataTransfer.items[i].type.startsWith('image/')) {
+          return;
+        }
+      }
+    }
+    setIsDragging(true); 
+  };
   const handleDragLeave = (e) => { e.preventDefault(); setIsDragging(false); };
   const handleDrop = async (e) => {
     e.preventDefault();
     setIsDragging(false);
+    
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      // Ignore if it's an image
+      if (e.dataTransfer.files[0].type.startsWith('image/')) return;
       await processPdfFile(e.dataTransfer.files[0]);
     }
   };
@@ -193,7 +329,6 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
     price: !!String(formData.price).trim(),
     media: formData.photos ? formData.photos.filter(p => p.trim()).length >= 5 : false
   };
-  const isPublishable = Object.values(mustHaves).every(Boolean);
 
   const setField = (field, value) => setFormData((prev) => ({ ...prev, [field]: value }));
   const setDetail = (key, value) => setFormData((prev) => ({
@@ -201,7 +336,32 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
     details: { ...prev.details, [key]: value },
   }));
 
+  const categoryFields = formData.category ? CATEGORY_FIELDS[formData.category] || [] : [];
+  const publicFields = categoryFields.filter(f => !f.proOnly);
 
+  // Completion calculation
+  const totalPublicFieldsCount = publicFields.length;
+  let filledPublicFieldsCount = 0;
+  
+  publicFields.forEach(f => {
+    // Check if field has value in details or main form data
+    const val = formData.details[f.key] || formData[f.key];
+    if (val !== undefined && val !== null && String(val).trim() !== "") {
+      filledPublicFieldsCount++;
+    }
+  });
+
+  const completionPercentage = totalPublicFieldsCount === 0 
+    ? 100 
+    : Math.round((filledPublicFieldsCount / totalPublicFieldsCount) * 100);
+
+  const isPublishable = Object.values(mustHaves).every(Boolean) && completionPercentage >= 70;
+
+  const getProgressColor = () => {
+    if (completionPercentage >= 70) return "bg-success";
+    if (completionPercentage >= 40) return "bg-gold-accent";
+    return "bg-error";
+  };
 
   const handlePublish = () => {
     if (isPublishable) {
@@ -288,8 +448,8 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
       </div>
 
       {/* Progress Bar */}
-      <div className="w-full bg-surface-variant h-1">
-        <div className="bg-gold-accent h-1 transition-all duration-300" style={{ width: `100%` }}></div>
+      <div className="w-full bg-surface-variant h-1 relative overflow-hidden">
+        <div className={`absolute top-0 left-0 h-1 transition-all duration-300 ${step === 1 ? 'w-1/2 bg-gold-accent' : `w-full ${getProgressColor()}`}`}></div>
       </div>
 
       <div className="flex-1 overflow-y-auto p-6 md:p-12 custom-scrollbar bg-surface flex flex-col items-center">
@@ -300,109 +460,176 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
             </div>
           )}
 
-          {/* Core Identity */}
-          <section className="flex flex-col gap-6 animate-[fadeIn_0.3s_ease]">
-            <h3 className="font-headline-editorial text-3xl text-gold-accent border-b border-surface-variant pb-2">Basic Property Information</h3>
-            <p className="text-sm text-text-secondary">Input the bare minimum details here. You can enhance this listing later using the Deep Intelligence Studio.</p>
-            
-            <div className="flex flex-col gap-2">
-              <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">Asset Category <span className="text-error">*</span></label>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                {CATEGORIES.map(c => (
-                  <button
-                    key={c.id}
-                    className={`flex flex-col items-center justify-center gap-2 px-3 py-6 rounded border text-sm transition-colors ${formData.category === c.id ? 'bg-surface-container-low border-gold-accent text-gold-accent shadow-[0_0_15px_rgba(232,174,60,0.15)]' : 'bg-surface-alt border-surface-variant text-on-surface hover:border-gold-accent/50'}`}
-                    onClick={() => setField("category", c.id)}
-                  >
-                    <span className="text-2xl">{c.icon}</span> {c.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">Property Title <span className="text-error">*</span></label>
-              <input 
-                className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface focus:outline-none focus:border-gold-accent transition-colors" 
-                type="text" 
-                value={formData.title} 
-                onChange={e => setField("title", e.target.value)} 
-                placeholder="e.g. Premium High-Rise Office in BGC Core" 
-              />
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">Location / Address <span className="text-error">*</span></label>
-              <input 
-                className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface focus:outline-none focus:border-gold-accent transition-colors" 
-                type="text" 
-                value={formData.location} 
-                onChange={e => setField("location", e.target.value)} 
-                placeholder="e.g. BGC Core" 
-              />
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">Listed Price (₱) <span className="text-error">*</span></label>
-              <input 
-                className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface focus:outline-none focus:border-gold-accent transition-colors" 
-                type="number" 
-                value={formData.price} 
-                onChange={e => setField("price", e.target.value)} 
-                placeholder="e.g. 50000" 
-              />
-            </div>
-
-            <div className="flex flex-col gap-3">
-              <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">Property Photos (Min. 5 required) <span className="text-error">*</span></label>
+          {/* Step 1: Core Identity */}
+          {step === 1 && (
+            <section className="flex flex-col gap-6 animate-[fadeIn_0.3s_ease]">
+              <h3 className="font-headline-editorial text-3xl text-gold-accent border-b border-surface-variant pb-2">Basic Property Information</h3>
+              <p className="text-on-surface-muted text-sm max-w-xl">Fill out the bare minimum details to list your property. Don&apos;t worry if you don&apos;t know everything—our Deep Intelligence Vault will securely collect the rest later.</p>
+              
               <div className="flex flex-col gap-2">
-                {(formData.photos || ["", "", "", "", ""]).map((photoUrl, index) => (
-                  <div key={index} className="flex gap-2">
-                    <input 
-                      className="bg-surface-alt border border-surface-variant rounded px-3 py-2 text-sm text-on-surface focus:outline-none focus:border-gold-accent transition-colors flex-1" 
-                      type="text" 
-                      value={photoUrl || ''} 
-                      onChange={e => {
-                        const newPhotos = [...(formData.photos || ["", "", "", "", ""])];
-                        newPhotos[index] = e.target.value;
-                        setField("photos", newPhotos);
-                        if (index === 0) {
-                           setField("image", e.target.value); // Keep backwards compatibility
-                        }
-                      }} 
-                      placeholder={`Photo URL ${index + 1}${index === 0 ? ' (Primary)' : ''}`} 
-                    />
-                    {(formData.photos || []).length > 5 && (
-                      <button 
-                        className="px-3 border border-error/50 text-error hover:bg-error/10 rounded transition-colors"
-                        onClick={() => {
-                          const newPhotos = (formData.photos || ["", "", "", "", ""]).filter((_, i) => i !== index);
-                          setField("photos", newPhotos);
-                          if (index === 0) setField("image", newPhotos[0] || "");
-                        }}
-                      >
-                        ✕
-                      </button>
-                    )}
-                  </div>
-                ))}
-                <button 
-                  className="mt-2 py-2 border border-dashed border-gold-accent/50 text-gold-accent hover:bg-gold-accent/10 rounded text-sm font-label-caps tracking-widest uppercase transition-colors"
-                  onClick={() => {
-                    setField("photos", [...(formData.photos || ["", "", "", "", ""]), ""]);
-                  }}
-                >
-                  + Add Another Photo
-                </button>
+                <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">Asset Category <span className="text-error">*</span></label>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  {CATEGORIES.map(c => (
+                    <button
+                      key={c.id}
+                      className={`flex flex-col items-center justify-center gap-2 px-3 py-6 rounded border text-sm transition-colors ${formData.category === c.id ? 'bg-surface-container-low border-gold-accent text-gold-accent shadow-[0_0_15px_rgba(232,174,60,0.15)]' : 'bg-surface-alt border-surface-variant text-on-surface hover:border-gold-accent/50'}`}
+                      onClick={() => setField("category", c.id)}
+                    >
+                      <span className="text-2xl">{c.icon}</span> {c.label}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
-          </section>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">Property Title <span className="text-error">*</span></label>
+                <input 
+                  className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface focus:outline-none focus:border-gold-accent transition-colors" 
+                  type="text" 
+                  value={formData.title} 
+                  onChange={e => setField("title", e.target.value)} 
+                  placeholder="e.g. Premium High-Rise Office in BGC Core" 
+                />
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">Location / Address <span className="text-error">*</span></label>
+                <input 
+                  className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface focus:outline-none focus:border-gold-accent transition-colors" 
+                  type="text" 
+                  value={formData.location} 
+                  onChange={e => setField("location", e.target.value)} 
+                  placeholder="e.g. BGC Core" 
+                />
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">Listed Price (₱) <span className="text-error">*</span></label>
+                <input 
+                  className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface focus:outline-none focus:border-gold-accent transition-colors" 
+                  type="number" 
+                  value={formData.price} 
+                  onChange={e => setField("price", e.target.value)} 
+                  placeholder="e.g. 50000" 
+                />
+              </div>
+
+              <div className="flex flex-col gap-3">
+                <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">Property Photos (Min. 5 required) <span className="text-error">*</span></label>
+                <PhotoUploader 
+                  photos={formData.photos} 
+                  onChange={(newPhotos) => setField("photos", newPhotos)}
+                  onSetImage={(url) => setField("image", url)}
+                />
+              </div>
+
+              <div className="flex flex-col gap-2 mt-4 relative group">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-label-caps tracking-widest text-gold-accent flex items-center gap-2 uppercase">
+                    External Media Folder (Google Drive)
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                  </label>
+                  <span className="text-[9px] uppercase tracking-widest font-mono text-gold-accent border border-gold-accent/30 px-1.5 py-0.5 rounded">Premium</span>
+                </div>
+                <div className="relative">
+                  <input 
+                    className="w-full bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface opacity-50 cursor-not-allowed focus:outline-none transition-colors" 
+                    type="url" 
+                    value={formData.mediaLink || ""} 
+                    onChange={e => setField("mediaLink", e.target.value)} 
+                    placeholder="e.g. drive.google.com/drive/folders/..." 
+                    disabled
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-background/50 backdrop-blur-[1px] rounded">
+                    <button className="text-[10px] uppercase tracking-widest font-mono font-bold text-background bg-gold-accent px-3 py-1.5 rounded shadow-lg hover:scale-105 transition-transform">
+                      Upgrade to Unlock
+                    </button>
+                  </div>
+                </div>
+                <span className="text-[10px] text-text-secondary">Have more than 5 photos, floor plans, or drone videos? Link a public folder. <span className="text-error">⚠️ Important: Set folder to "Viewer" only.</span></span>
+              </div>
+            </section>
+          )}
+
+          {/* Step 2: Public Intel */}
+          {step === 2 && (
+            <section className="flex flex-col gap-6 animate-[fadeIn_0.3s_ease]">
+              <div className="border-b border-surface-variant pb-4 mb-2 flex justify-between items-end">
+                <div>
+                  <h3 className="font-headline-editorial text-3xl text-gold-accent">Public Listing Intel</h3>
+                  <p className="text-sm text-text-secondary mt-1">Complete at least 70% of these details to publish your listing to the directory.</p>
+                </div>
+                <div className="flex flex-col items-end">
+                  <span className={`text-xl font-headline-editorial ${completionPercentage >= 70 ? 'text-success' : 'text-gold-accent'}`}>{completionPercentage}%</span>
+                  <span className="text-[10px] font-label-caps text-text-secondary tracking-widest uppercase">Completeness</span>
+                </div>
+              </div>
+
+              {publicFields.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+                  {publicFields.map((f) => (
+                    <div key={f.key} className="flex flex-col gap-1.5">
+                      <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">
+                        {f.label}
+                      </label>
+                      {f.type === "select" ? (
+                        <select
+                          className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-sm text-on-surface focus:outline-none focus:border-gold-accent transition-colors appearance-none"
+                          value={formData.details[f.key] || formData[f.key] || ""}
+                          onChange={(e) => setDetail(f.key, e.target.value)}
+                        >
+                          <option value="" disabled>Select {f.label}</option>
+                          {f.options.map((opt) => (
+                            <option key={opt} value={opt}>{opt}</option>
+                          ))}
+                        </select>
+                      ) : f.type === "checkbox" ? (
+                        <label className="flex items-center gap-3 bg-surface-alt border border-surface-variant rounded px-3 py-2.5 cursor-pointer hover:border-gold-accent transition-colors">
+                          <input
+                            type="checkbox"
+                            className="accent-gold-accent w-4 h-4"
+                            checked={formData.details[f.key] || false}
+                            onChange={(e) => setDetail(f.key, e.target.checked)}
+                          />
+                          <span className="text-sm text-on-surface">{f.label}</span>
+                        </label>
+                      ) : (
+                        <input
+                          className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-sm text-on-surface focus:outline-none focus:border-gold-accent transition-colors"
+                          type={f.type}
+                          placeholder={`Enter ${f.label.toLowerCase()}`}
+                          value={formData.details[f.key] || formData[f.key] || ""}
+                          onChange={(e) => setDetail(f.key, e.target.value)}
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-text-secondary text-sm italic">
+                  Please select a property category in Step 1 to load specific fields.
+                </div>
+              )}
+            </section>
+          )}
 
           {/* Navigation Buttons */}
-          <div className="flex justify-between mt-12 pt-6 border-t border-surface-variant">
-            <div></div>
+          <div className="flex justify-between items-center mt-12 pt-6 border-t border-surface-variant">
+            {step > 1 ? (
+              <button 
+                onClick={() => setStep(step - 1)}
+                className="text-text-secondary hover:text-on-surface text-sm font-label-caps tracking-widest uppercase transition-colors"
+              >
+                ← Back
+              </button>
+            ) : (
+              <div></div>
+            )}
 
-            <div className="flex gap-4">
+            <div className="flex gap-4 items-center">
               <button 
                 onClick={handleSaveDraft}
                 disabled={!mustHaves.title}
@@ -411,13 +638,30 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
                 Save Draft
               </button>
               
-              <button 
-                onClick={handlePublish}
-                disabled={!isPublishable}
-                className="px-6 py-2 rounded bg-gold-accent text-background text-sm font-label-caps tracking-widest uppercase hover:bg-[#F7C64E] disabled:opacity-50 transition-colors shadow-[0_0_15px_rgba(232,174,60,0.3)]"
-              >
-                Submit Basic Info
-              </button>
+              {step === 1 ? (
+                <button 
+                  onClick={() => setStep(2)}
+                  disabled={!Object.values(mustHaves).every(Boolean)}
+                  className="px-6 py-2 rounded bg-surface-variant text-on-surface text-sm font-label-caps tracking-widest uppercase hover:bg-gold-accent hover:text-background disabled:opacity-50 transition-colors"
+                >
+                  Next Step →
+                </button>
+              ) : (
+                <div className="flex flex-col items-end gap-1">
+                  <button 
+                    onClick={handlePublish}
+                    disabled={!isPublishable}
+                    className="px-6 py-2 rounded bg-gold-accent text-background text-sm font-label-caps tracking-widest uppercase hover:bg-[#F7C64E] disabled:opacity-50 transition-all shadow-[0_0_15px_rgba(232,174,60,0.3)] disabled:shadow-none"
+                  >
+                    Publish to Directory
+                  </button>
+                  {completionPercentage >= 70 ? (
+                    <span className="text-[10px] text-success font-medium">Ready to publish! Fill more to boost visibility.</span>
+                  ) : (
+                    <span className="text-[10px] text-error font-medium">Reach 70% to publish ({completionPercentage}%)</span>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 

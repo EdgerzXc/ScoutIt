@@ -56,3 +56,38 @@ export const uploadAttachment = async (dealId, file) => {
     size: file.size
   };
 };
+
+export const uploadPropertyPhoto = async (file) => {
+  // Client-side Validation
+  if (!MAX_SIZES[file.type]) {
+    throw new Error("Invalid file type. Only JPG, PNG, PDF, and MP4 are allowed.");
+  }
+  const maxSize = MAX_SIZES[file.type];
+  if (file.size > maxSize) {
+    throw new Error(`File is too large. Maximum size is ${maxSize / (1024 * 1024)}MB for this file type.`);
+  }
+
+  // Unique filename
+  const safeName = file.name.replace(/[^a-zA-Z0-9.\-]/g, '_');
+  const uniqueFilename = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}_${safeName}`;
+  const filePath = `${uniqueFilename}`;
+
+  // Upload to Supabase Storage
+  const { data, error } = await supabase.storage
+    .from('property_photos')
+    .upload(filePath, file, {
+      cacheControl: '3600',
+      upsert: false
+    });
+
+  if (error) {
+    throw new Error(error.message || "Failed to upload file to property_photos bucket.");
+  }
+
+  // Get public URL (bucket must be public)
+  const { data: urlData } = supabase.storage
+    .from('property_photos')
+    .getPublicUrl(filePath);
+
+  return urlData.publicUrl;
+};
