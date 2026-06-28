@@ -76,7 +76,6 @@ export default function PhotoUploader({ photos, onChange, onSetImage, isPro = fa
     }
   };
 
-  const currentPhotos = photos || ["", "", "", "", ""];
 
   return (
     <div id="field-photos" className="flex flex-col gap-3 w-full">
