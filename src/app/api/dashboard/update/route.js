@@ -100,9 +100,6 @@ export async function POST(request) {
 
     // 2. Update Supabase
     // We verified ownership above. RLS might silently drop updates, so we use the service role key.
-    const serviceClient = createClient(supabaseUrl, process.env.SUPABASE_SERVICE_ROLE_KEY || supabaseAnonKey, {
-      auth: { persistSession: false }
-    });
 
     const { error: updateError, data: updateData } = await serviceClient
       .from('properties')
