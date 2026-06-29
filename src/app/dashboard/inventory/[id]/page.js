@@ -24,6 +24,7 @@ function InventoryInner({ params }) {
   // State must be above early return
   const [localUnits, setLocalUnits] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
+  const autoSaveTimeout = useRef(null);
 
   // Keep localUnits in sync when data loads or updates remotely
   useEffect(() => {
@@ -39,8 +40,6 @@ function InventoryInner({ params }) {
       </div>
     );
   }
-
-  const autoSaveTimeout = useRef(null);
 
   const handleAutoSave = (newUnits) => {
     setLocalUnits(newUnits);
