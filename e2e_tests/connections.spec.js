@@ -17,8 +17,14 @@ test.describe('Full Flow Mockups: Discovery to Handshake', () => {
     await connectBtn.evaluate(b => b.click());
 
     // 6. Inquiry Modal (Spending 1 Connect)
-    const modalTitle = page.locator('text=Contact Owner').or(page.locator('text=Contact Representative'));
+    const modalTitle = page.locator('text=Select Representative');
     await expect(modalTitle).toBeVisible();
+
+    // Select the first broker
+    await page.locator('button:has-text("Elena Rostova")').click();
+
+    // Now it should show the composing screen
+    await expect(page.locator('text=Contact Elena Rostova')).toBeVisible();
     
     const textArea = page.locator('textarea[name="message"]');
     await textArea.fill('Hi, I am interested in this property. Is there an available schedule?');
@@ -34,6 +40,10 @@ test.describe('Full Flow Mockups: Discovery to Handshake', () => {
     // 8. Go to Dashboard Inbox
     await page.goto('http://localhost:3000/dashboard/inbox');
     await expect(page.locator('text=ScoutIT').first()).toBeVisible();
+    
+    // Select the deal to open the ChatBox
+    await page.locator('h3:has-text("The Zuellig Building")').click();
+    await page.waitForTimeout(500);
 
     // 9. Buyer requests a live viewing inside the Chatbox
     const requestViewingBtn = page.locator('button:has-text("Request Live Viewing")');

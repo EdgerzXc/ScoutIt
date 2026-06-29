@@ -6,7 +6,11 @@ import Link from "next/link";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import ReactionButtons from "@/components/ui/ReactionButtons";
-import InteractiveRadiusMap from "@/components/property/InteractiveRadiusMap";
+import dynamic from "next/dynamic";
+const InteractiveRadiusMap = dynamic(() => import("@/components/property/InteractiveRadiusMap"), { 
+  ssr: false, 
+  loading: () => <div style={{ height: 400, background: "#121212", display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontFamily: "var(--font-mono)", color: "var(--accent)" }}>LOADING RADAR...</span></div>
+});
 import { getProperties } from "@/data/mockProperties";
 import { getArticles } from "@/data/mockArticles";
 import "./property.css";

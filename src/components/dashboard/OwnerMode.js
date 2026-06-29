@@ -27,18 +27,12 @@ export default function OwnerMode() {
   // Check if current user has any listings (match the logged-in owner's id)
   const myListings = listings.filter(l => currentUser && l.ownerId === currentUser.id);
   const hasListing = myListings.length > 0;
-  console.log('OWNER_MODE_RENDER', { 
-    totalListings: listings.length, 
-    myListingsLength: myListings.length, 
-    currentUserId: currentUser?.id,
-    myListingsIds: myListings.map(l => l.id),
-    firstListingOwnerId: listings.length > 0 ? listings[0].ownerId : null,
-    localStorageUser: typeof window !== 'undefined' ? localStorage.getItem('scoutit_user') : 'ssr'
-  });
 
   // New Dossier State
   const [viewingDossierId, setViewingDossierId] = useState(null);
   const [inviteName, setInviteName] = useState("");
+
+  const myListingsIds = myListings.map(l => l.id).join(',');
 
   // If they only have 1 listing, jump straight to its dossier
   useEffect(() => {
@@ -54,14 +48,14 @@ export default function OwnerMode() {
     } else if (hasListing && myListings.length === 1 && !viewingDossierId) {
       setViewingDossierId(myListings[0].id);
     }
-  }, [hasListing, myListings, viewingDossierId]);
+  }, [hasListing, myListings.length, myListingsIds, viewingDossierId]);
 
   // Handle cleanup if the active dossier is deleted
   useEffect(() => {
     if (viewingDossierId && !myListings.find(l => l.id === viewingDossierId)) {
       setViewingDossierId(null);
     }
-  }, [myListings, viewingDossierId]);
+  }, [myListings.length, myListingsIds, viewingDossierId]);
 
   const activeListing = myListings.find(l => l.id === viewingDossierId) || myListings[0];
 

@@ -1,5 +1,24 @@
 # ScoutIt Handoff - End of Session
 
+> ### 🆕 2026-06-29 — Units editor rebuild + save-crash fix (most recent work)
+> - **Fixed a silent prod crash:** `/api/dashboard/update` was 500-ing on every save because
+>   `isomorphic-dompurify` (→ jsdom) throws `ERR_REQUIRE_ESM` under Next 16 serverless. Edits looked
+>   saved then reverted on refresh. `src/lib/sanitize.js` is now dependency-free; `update`,
+>   `bulk-insert`, `waitlist` routes use it. **Never import a DOM sanitizer in an API route.**
+> - **Unit editor rebuilt** → `src/components/dashboard/InventoryGridManager.js` (`/dashboard/inventory/[id]`):
+>   Floor field, floor-grouping, search, bulk-add, duplicate, live counts, tier-gated photos (free 1 / pro 5).
+> - **Save UX:** animated Save button (idle → Saving… → Saved ✓ → idle); `updateListing()` returns a real boolean.
+> - **Public render wired:** `ResidentialFlow.js` + `CommercialFlow.js` now render owner **features** + **floor**
+>   and resolve unit photos from `photos[]`/`image`.
+> - Details in: `02_ARCHITECTURE_AND_STRUCTURE/WEBSITE_ARCHITECTURE.md §7`,
+>   `04_DATA_AND_SCHEMA/DATA_DICTIONARY.md §3`, `UNITS_HANDOFF_2026-06-22.md` (top).
+> - **Open:** confirm publish/approve copies `units_inventory` → Airtable `Units_JSON` so units show on the
+>   public page (pending Supabase-only properties still show synthesized fallback units).
+>
+> _The notes below are from the prior (2026-06-28) UnitBuilder session and remain valid history._
+
+---
+
 ### What We Accomplished
 1. **Unit Builder UI (`UnitBuilder.js`)**
    - Built a dynamic units/spaces inventory builder inside the listing intake flow.

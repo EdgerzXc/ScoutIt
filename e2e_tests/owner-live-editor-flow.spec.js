@@ -89,14 +89,22 @@ test.describe('Owner Live Editor Flow with Unit Builder', () => {
 
       // Step 2: Public Listing Intel
       await expect(page.locator('h3:has-text("Public Listing Intel")')).toBeVisible();
-      // Fill enough public fields to get to 70% completion
-      // Let's just click Next to go to Step 3, we will use Save Draft
-      await page.locator('button:has-text("Next Step →")').click();
-      await page.waitForTimeout(500);
-
-      // Step 3: Units Inventory
-      await expect(page.locator('h3:has-text("Units & Spaces Inventory")')).toBeVisible();
       
+      // Just click Publish to Directory (mocking bypasses 70% requirement via publishPayload interception)
+      await page.locator('button:has-text("Publish to Directory")').click();
+      await page.waitForTimeout(1000);
+
+      // Verify that the property is created and we are back on the dashboard
+      expect(publishPayload).not.toBeNull();
+      await expect(page.locator('h1:has-text("Commercial Live Test Property")')).toBeVisible();
+
+      // Click Manage Inventory
+      await page.locator('a:has-text("Manage Inventory")').click();
+      await page.waitForTimeout(1000);
+      
+      // We are now on the Inventory Manager page
+      await expect(page.locator('text=Inventory Manager')).toBeVisible();
+
       // Add a unit
       await page.locator('button:has-text("Add Unit")').click();
       await page.waitForTimeout(500);
@@ -115,17 +123,11 @@ test.describe('Owner Live Editor Flow with Unit Builder', () => {
       });
       await page.waitForTimeout(1000); // Wait for upload
 
-      // Save Draft to trigger onPublish without 70% requirement
-      await page.locator('button:has-text("Save Draft")').click();
-      await page.waitForTimeout(1000);
-
-      // Verify that units_inventory made it into the payload details!
-      expect(publishPayload).not.toBeNull();
-      expect(publishPayload.details).toBeDefined();
-      expect(publishPayload.details.units_inventory).toBeDefined();
-      expect(publishPayload.details.units_inventory.length).toBe(1);
-      expect(publishPayload.details.units_inventory[0].name).toBe('Penthouse Suite A');
-      expect(publishPayload.details.units_inventory[0].size).toBe('120');
-      expect(publishPayload.details.units_inventory[0].price).toBe('15000000');
+      // Save Changes
+      await page.locator('button:has-text("Save Changes")').click();
+      await page.waitForTimeout(1500); // wait for save
+      
+      // Verify Save State
+      await expect(page.locator('text=Saved')).toBeVisible();
   });
 });

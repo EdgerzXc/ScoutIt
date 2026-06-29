@@ -58,7 +58,7 @@ test.describe('Deep E2E Council Verification - Interactive Workflows', () => {
     });
 
     // Wait for the inquiry modal to open and animate in
-    await page.waitForSelector('h2:has-text("Schedule a Viewing")');
+    await page.waitForSelector('h2:has-text("Select Representative")');
     await page.waitForTimeout(1000);
     
     await page.screenshot({ path: 'e2e_tests/screenshots/deep_buyer_inquiry.png', ...screenshotOptions });

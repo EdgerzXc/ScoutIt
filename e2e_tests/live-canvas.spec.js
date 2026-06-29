@@ -40,13 +40,13 @@ test.describe('Owner Live Canvas (Editor v1)', () => {
     await page.waitForTimeout(1000);
 
     // Live Editor should now be visible — check for the Must Haves section
-    await expect(page.locator('h3').filter({ hasText: '1. Must Haves' })).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('h3').filter({ hasText: 'Basic Property Information' })).toBeVisible({ timeout: 10000 });
 
     // The right pane shows the live preview banner
     await expect(page.getByText('LIVE PREVIEW / DRAFT MODE').first()).toBeVisible();
 
     // Test real-time reactivity: change the property title
-    const titleInput = page.locator('input[placeholder="e.g. Modern Villa in BGC"]');
+    const titleInput = page.locator('input[placeholder="e.g. Premium High-Rise Office in BGC Core"]');
     const newTitle = `Canvas Edit ${Date.now()}`;
     await titleInput.fill(newTitle);
 

@@ -60,3 +60,38 @@ When an Owner uses `GuidedWizard.js`, the data goes here to await admin approval
 - **`latitude`** & **`longitude`** (Numeric) - Dropped by the Mapbox pin picker
 - **`property_type`** (String)
 - **`status`** (String) - "pending" or "approved"
+
+> ⚠️ **Correction (2026-06-29):** The sections above are legacy. The LIVE owner-data table is
+> **`properties`** (NOT `property_submissions`), profiles live in **`user_profiles`**, and saved
+> items live in **`saved_intel`**. Do not reintroduce `property_submissions`. See
+> `04_DATA_AND_SCHEMA/SUPABASE_LIVE_SCHEMA.md` for the authoritative live schema.
+
+---
+
+## 3. UNITS INVENTORY (Embedded — `properties.details.units_inventory`)
+
+Units/spaces inside a building are **not a separate table**. They live as a JSON array on the
+property row: `properties.details.units_inventory`. This array also rides the publish chain to
+Airtable's `Units_JSON` column and is parsed back on fetch (mirrors the `WhereTo` JSON pattern).
+
+### Per-unit object shape
+- **`id`** (String) — client-generated row id (stable within the editor session)
+- **`name`** (String) — unit identifier, e.g. "Unit 12-A", "Master Suite"
+- **`size`** (String/Number) — area in sqm; rendered publicly as "X sqm"
+- **`floor`** (String) — floor label, e.g. "3", "Ground"; rendered publicly as "Floor X"; also drives
+  the editor's floor-grouping. *(Added 2026-06-29.)*
+- **`features`** (String[]) — tag chips, e.g. ["Aircon ready", "Corner unit"]; rendered as chips on
+  the public page. *(Now wired to display — 2026-06-29.)*
+- **`photos`** (String[]) — Supabase Storage URLs (`property_photos` bucket). **Tier-gated:** free
+  (Starry) = 1 photo/unit, PRO (Solar/Cluster/Universe) = 5/unit.
+- **`image`** (String) — convenience mirror of `photos[0]` for legacy readers.
+- **`price`** (String, optional) — legacy per-unit price; still rendered if present, not collected by
+  the current editor.
+
+### Who reads/writes it
+- **Editor (write):** `src/components/dashboard/InventoryGridManager.js` at
+  `/dashboard/inventory/[id]` (the dedicated bulk manager). Also `LiveEditorWorkspace.js` wizard.
+- **Public (read):** `src/components/property/ResidentialFlow.js` + `CommercialFlow.js` map
+  `units_inventory` → unit cards. Real owner units override the synthesized fallback units.
+- **Photo resolution on public page:** `photo || image || photos.find(Boolean)` (so any of the
+  fields populated by the editor will display).

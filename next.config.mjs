@@ -17,6 +17,7 @@ const cspHeader = `
 `;
 
 const nextConfig = {
+  productionBrowserSourceMaps: true,
   async headers() {
     return [
       {

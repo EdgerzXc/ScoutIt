@@ -3,6 +3,34 @@
 Self-contained handoff for the next session (Antigravity, resuming ~Wed 2026-06-24).
 Pick up from here — assume no chat memory.
 
+---
+## 🆕 2026-06-29 UPDATE — units editor rebuilt, save crash fixed, public render wired
+This supersedes parts of the backlog below. What changed today:
+
+1. **ROOT-CAUSE: unit saves silently failed in prod.** `/api/dashboard/update` was 500-crashing on
+   every call because `isomorphic-dompurify` → `jsdom` throws `ERR_REQUIRE_ESM` at module load under
+   Next 16 / Turbopack serverless. Optimistic UI showed "saved", then refresh reverted (looked like a
+   React bug; was 100% server-side). **Fix:** `src/lib/sanitize.js` is now dependency-free; routes
+   `update`, `bulk-insert`, `waitlist` use `stripAllTags`. (Same crash had silently broken bulk import
+   + waitlist too.)
+2. **Save UX:** auto-save + manual **Save Changes** button now share one debounced `persist()` path;
+   button is an animated state machine (idle → Saving… → Saved ✓ → idle, red Retry on fail).
+   `updateListing()` returns a real boolean now.
+3. **DONE — Step C "owner spreadsheet-grid view":** shipped as the dedicated
+   `src/components/dashboard/InventoryGridManager.js` at `/dashboard/inventory/[id]`. Adds Floor field,
+   floor-grouping (collapsible), search, bulk-add N units, duplicate unit, live unit/floor counts,
+   tier-gated photos (free 1 / pro 5).
+4. **DONE — ResidentialFlow units:** `ResidentialFlow.js` now renders real units (same mapping as
+   `CommercialFlow.js`). BOTH flows now also render owner **features** (were ignored) + **floor**, and
+   resolve unit photos as `photo || image || photos.find(Boolean)`.
+5. **Schema:** per-unit object now `{ id, name, size, floor, features[], photos[], image, price? }`.
+   See `04_DATA_AND_SCHEMA/DATA_DICTIONARY.md → §3`.
+
+**Still open:** confirm the publish/approve step copies `units_inventory` → Airtable `Units_JSON` so
+owner units appear on the PUBLIC page (a pending Supabase-only property still shows synthesized
+fallback units, since the public page reads the `/api/cms` Airtable feed).
+---
+
 ## TL;DR status
 - **All of today's work is committed + pushed**: commit `cfca1f0` on `main`, deployed to Vercel prod.
 - **Production is healthy**: `scoutit.vercel.app` → 200; `GET /api/cms` → `"source":"airtable"` (live data, not mock).
@@ -54,13 +82,13 @@ A building's units live as `properties.details.units_inventory` = array of
 4. Open the public property page → confirm the real units render, photo-swaps on click, detail panel shows.
 
 ## REMAINING BACKLOG
-- **Step C — owner spreadsheet-grid view**: optional dense bulk-entry toggle (Form ⇄ Grid) over the
-  same `details.units_inventory` (add row, duplicate-last-row, tab between cells). Default stays the
-  current card form.
-- **ResidentialFlow units**: apply the same real-units rendering + click→photo-swap + detail panel
-  that `CommercialFlow.js` now has. (Condos/house-and-lot.)
+- ✅ **DONE (2026-06-29) — Step C owner grid view**: shipped as `InventoryGridManager.js`
+  (`/dashboard/inventory/[id]`) with floor-grouping, search, bulk-add, duplicate, counts.
+- ✅ **DONE (2026-06-29) — ResidentialFlow units**: real-units rendering applied (now also renders
+  features + floor in both flows).
 - **Update-after-approval units sync**: `/api/dashboard/update` currently syncs title/type/location
   (+ Units_JSON via updateProperty if details passed). Confirm edited units re-sync to Airtable.
+  (Note the update route's `details` merge now persists `units_inventory` correctly post-crash-fix.)
 - **Pre-launch security**: remove the demo-owner login button + dev-open access before public launch.
 
 ## KEY FACTS / GOTCHAS

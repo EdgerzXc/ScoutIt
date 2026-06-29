@@ -1,4 +1,4 @@
-@import "mapbox-gl/dist/mapbox-gl.css";
+
 
 @tailwind base;
 @tailwind components;
@@ -33,7 +33,7 @@
   /* Typography Colors */
   --text-primary: #f0ede8;
   --text-secondary: #c8c8c8;
-  --text-muted: rgba(240, 237, 232, 0.45);
+  --text-muted: rgba(240, 237, 232, 0.65);
 
   /* Brand Identity */
   --brand: #1a1814;

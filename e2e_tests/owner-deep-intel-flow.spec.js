@@ -21,12 +21,21 @@ test.describe('Owner Deep Intelligence Studio Flow', () => {
 
   test.beforeEach(async ({ page }) => {
     page.on('console', msg => {
-      if (msg.type() === 'error' || msg.text().includes('error') || msg.text().includes('fail') || msg.text().includes('OWNER_MODE_RENDER')) {
-        console.log('PAGE LOG ERROR:', msg.text());
-        if (msg.location()) {
-          console.log('LOCATION:', msg.location().url, msg.location().lineNumber);
+      if (msg.type() === 'error' || msg.text().includes('Maximum update depth exceeded')) {
+        console.log(`PAGE LOG ERROR: ${msg.text()}`);
+        console.log(`LOCATION: ${msg.location().url} ${msg.location().lineNumber}`);
+        if (msg.args().length > 0) {
+          msg.args()[0].jsonValue().then(arg => {
+            console.log(`ARG: ${arg}`);
+          }).catch(() => {});
         }
+        page.screenshot({ path: 'error-overlay-console.png' }).catch(() => {});
       }
+    });
+
+    page.on('pageerror', error => {
+      console.log(`PAGE ERROR TRACE: ${error.message}\n${error.stack}`);
+      page.screenshot({ path: 'error-overlay-pageerror.png' }).catch(() => {});
     });
 
     page.on('pageerror', error => {

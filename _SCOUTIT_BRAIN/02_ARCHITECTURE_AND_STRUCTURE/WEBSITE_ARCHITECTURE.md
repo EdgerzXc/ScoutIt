@@ -61,3 +61,43 @@ Entitlements are handled via a robust gating system defined in `src/lib/entitlem
 * **Visual Identity:** 95% deep black (`#0d0d0d` / `#121212`) and 5% gold.
 * **Variables:** CSS variables are strictly used over raw hex values: `--accent` (`#E8AE3C`), `--accent-bright` (`#F7C64E`), `--accent-muted` (`#6E531A`).
 * **Animations:** Glassmorphism and localized glows are paired with performance considerations (`Lite Mode` disables WebGL/animations for low-end devices).
+
+---
+
+## 7. Units / Inventory Manager (updated 2026-06-29)
+A building's individual units/spaces live as an **embedded JSON array** on the property row:
+`properties.details.units_inventory` (no separate units table). They ride the publish chain to
+Airtable's `Units_JSON` column and parse back on fetch. Full per-unit schema lives in
+`04_DATA_AND_SCHEMA/DATA_DICTIONARY.md → §3 Units Inventory`.
+
+### A. Owner editor — `InventoryGridManager.js` (`/dashboard/inventory/[id]`)
+Purpose-built for **high-volume buildings** (e.g. a commercial floor with 25 units). Features:
+* **Floor field + auto floor-grouping** — units collapse into per-floor sections with live counts and
+  an "Add here" button per floor.
+* **Bulk add** — create N blank units at once, optionally pre-assigned to a floor.
+* **Search** — filter by unit name, floor, or feature.
+* **Duplicate unit** — clone name/size/floor/features (photos don't carry over) for repetitive spaces.
+* **Live summary** — "X units · Y floors" header.
+* **Tier-gated photos** — free (Starry) = 1 photo/unit, PRO = 5/unit (`maxPhotos = isPro ? 5 : 1`).
+
+### B. Save model (page: `dashboard/inventory/[id]/page.js`)
+* **Auto-save** on edit (debounced ~1s) **and** a manual **Save Changes** button share one `persist()`
+  path. Typing only updates local state (never saves mid-keystroke); blur / structural changes commit.
+* The **Save button is a state machine**: idle → *Saving…* (spinner) → *Saved* ✓ (green) → idle, with a
+  red *Retry Save* on failure. `updateListing()` now returns a real `true/false` so the button reflects
+  the actual server result (no more false "saved").
+
+### C. Public render — `ResidentialFlow.js` + `CommercialFlow.js`
+Real `units_inventory` overrides the synthesized fallback units. Each flow renders per unit:
+name, **size**, **floor**, **features** (chips), price (legacy), and a photo resolved as
+`photo || image || photos.find(Boolean)`. *(Features + floor + the photos[]/image resolution were
+wired on 2026-06-29 — previously the public page silently ignored owner-entered features and read a
+`u.photo` field the editor never wrote.)*
+
+### D. ⚠️ Server gotcha — no DOM sanitizers in API routes
+`isomorphic-dompurify` must **never** be imported in a server API route. It loads `jsdom`, which under
+Next 16 + Turbopack serverless throws `ERR_REQUIRE_ESM` at module load and **500s the whole route**.
+This silently broke unit saves (`/api/dashboard/update`) — edits looked saved (optimistic UI) then
+reverted on refresh. Fixed 2026-06-29: `src/lib/sanitize.js` is now dependency-free (regex
+HTML-stripping, exports `stripAllTags` / `sanitizeObject`); routes `update`, `bulk-insert`, and
+`waitlist` use it. Diagnose "saves don't persist" by checking the route's real HTTP status, not the UI.

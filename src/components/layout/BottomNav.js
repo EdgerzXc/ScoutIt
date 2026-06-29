@@ -309,6 +309,7 @@ export default function BottomNav() {
                 href={item.href}
                 className={`bottom-nav-item${active ? " active" : ""}`}
                 aria-current={active ? "page" : undefined}
+                aria-label={`Bottom Nav: ${item.label}`}
               >
                 {content}
               </Link>
@@ -319,6 +320,7 @@ export default function BottomNav() {
             <button
               key={item.id}
               className="bottom-nav-item"
+              aria-label={`Bottom Nav: ${item.label}`}
               onClick={() => {
                 if (item.action === "scoutit:open-mobile-menu") {
                   window.dispatchEvent(new CustomEvent("scoutit:open-mobile-menu"));

@@ -1,9 +1,9 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import FloatingToolbox from "@/components/ui/FloatingToolbox";
+import dynamic from "next/dynamic";
 import BottomNav from "@/components/layout/BottomNav";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
-import WaitlistModal from "@/components/waitlist/WaitlistModal";
+import DynamicOverlays from "@/components/layout/DynamicOverlays";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -48,8 +48,7 @@ export const metadata = {
 export const viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  maximumScale: 5,
   themeColor: "#0e0e0e",
 };
 
@@ -72,8 +71,7 @@ export default function RootLayout({ children }) {
           {children}
         </ErrorBoundary>
         <BottomNav />
-        <FloatingToolbox />
-        <WaitlistModal />
+        <DynamicOverlays />
       </body>
     </html>
   );
