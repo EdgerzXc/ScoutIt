@@ -9,7 +9,7 @@
 
 // import { supabase } from "@/lib/supabaseClient";
 import { z } from "zod";
-import DOMPurify from "isomorphic-dompurify";
+import { stripAllTags } from "@/lib/sanitize";
 
 const waitlistSchema = z.object({
   email: z.string().email("Invalid email format").max(255),
@@ -34,7 +34,7 @@ export async function POST(req) {
   }
 
   const { email, role, tier, source: rawSource, turnstileToken } = result.data;
-  const source = DOMPurify.sanitize(rawSource || "site");
+  const source = stripAllTags(rawSource || "site");
 
   // Verify Turnstile Token
   const TURNSTILE_SECRET_KEY = process.env.TURNSTILE_SECRET_KEY || "1x0000000000000000000000000000000AA";

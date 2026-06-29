@@ -3,7 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { updateProperty } from "@/lib/airtable";
 import { z } from "zod";
-import DOMPurify from "isomorphic-dompurify";
+import { stripAllTags } from "@/lib/sanitize";
 
 const updateSchema = z.object({
   title: z.string().max(255).optional(),
@@ -78,9 +78,9 @@ export async function POST(request) {
 
     // Format the payload for Supabase, sanitizing string inputs
     const supabasePayload = {
-      title: validatedData.title ? DOMPurify.sanitize(validatedData.title) : currentSubmission.title,
-      type: validatedData.type ? DOMPurify.sanitize(validatedData.type) : currentSubmission.type,
-      location: validatedData.location ? DOMPurify.sanitize(validatedData.location) : currentSubmission.location
+      title: validatedData.title ? stripAllTags(validatedData.title) : currentSubmission.title,
+      type: validatedData.type ? stripAllTags(validatedData.type) : currentSubmission.type,
+      location: validatedData.location ? stripAllTags(validatedData.location) : currentSubmission.location
     };
 
     // Merge details JSONB safely
@@ -89,7 +89,7 @@ export async function POST(request) {
       // Assuming details is a flat object of strings for now.
       const sanitizedDetails = {};
       for (const [key, val] of Object.entries(validatedData.details)) {
-        sanitizedDetails[DOMPurify.sanitize(key)] = typeof val === 'string' ? DOMPurify.sanitize(val) : val;
+        sanitizedDetails[stripAllTags(key)] = typeof val === 'string' ? stripAllTags(val) : val;
       }
 
       supabasePayload.details = {

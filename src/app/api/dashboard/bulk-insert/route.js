@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { z } from "zod";
-import DOMPurify from "isomorphic-dompurify";
+import { stripAllTags } from "@/lib/sanitize";
 
 const propertySchema = z.object({
   title: z.string().max(255).optional(),
@@ -52,9 +52,9 @@ export async function POST(request) {
       const sanitized = {};
       for (const [key, val] of Object.entries(p)) {
         if (typeof val === 'string') {
-          sanitized[DOMPurify.sanitize(key)] = DOMPurify.sanitize(val);
+          sanitized[stripAllTags(key)] = stripAllTags(val);
         } else {
-          sanitized[DOMPurify.sanitize(key)] = val;
+          sanitized[stripAllTags(key)] = val;
         }
       }
       return {
