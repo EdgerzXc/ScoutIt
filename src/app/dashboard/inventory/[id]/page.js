@@ -10,7 +10,8 @@ import { getCurrentTier } from "../../../../lib/entitlements";
 function InventoryInner({ params }) {
   const router = useRouter();
   const { id } = use(params);
-  const { listings, updateListing, currentUser } = useDashboard();
+  const { listings, updateListing, currentUser, addToast, getCurrentTier } = useDashboard();
+  
   useEffect(() => {
     if (listings.length > 0 && !listings.find(l => String(l.id) === String(id))) {
       router.push("/dashboard");
@@ -18,6 +19,7 @@ function InventoryInner({ params }) {
   }, [listings, id, router]);
 
   const listing = listings.find(l => String(l.id) === String(id));
+  const isPro = getCurrentTier ? getCurrentTier() !== "starry" : true;
 
   // State must be above early return
   const [localUnits, setLocalUnits] = useState([]);
@@ -25,22 +27,18 @@ function InventoryInner({ params }) {
 
   // Keep localUnits in sync when data loads or updates remotely
   useEffect(() => {
-    if (listing) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setLocalUnits(listing.details?.units_inventory || listing.units_inventory || []);
+    if (listing?.details?.units_inventory) {
+      setLocalUnits(listing.details.units_inventory);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [listing?.details?.units_inventory, listing?.units_inventory]);
+  }, [listing?.details?.units_inventory]);
 
   if (!listing) {
     return (
-      <div className="min-h-screen bg-background flex justify-center items-center font-working-title text-text-secondary">
-        Loading inventory manager...
+      <div className="min-h-screen bg-background pt-24 pb-12 flex items-center justify-center">
+        <span className="text-text-muted font-working-title animate-pulse">Loading Inventory...</span>
       </div>
     );
   }
-
-  const isPro = getCurrentTier() !== "starry";
 
   const handleAutoSave = async (newUnits) => {
     setLocalUnits(newUnits);
@@ -51,15 +49,29 @@ function InventoryInner({ params }) {
     // Auto-save silently
     setIsSaving(true);
     try {
-      await updateListing(listing.id, { details: updatedDetails });
+      const success = await updateListing(listing.id, { details: updatedDetails });
+      if (success === false) {
+        console.error("Auto-save returned false");
+      }
     } catch (e) {
       console.error("Failed to auto-save inventory", e);
     }
     setIsSaving(false);
   };
 
-  const manualSave = () => {
-    handleAutoSave(localUnits);
+  const manualSave = async () => {
+    setIsSaving(true);
+    try {
+      const updatedDetails = { ...listing.details, units_inventory: localUnits };
+      const success = await updateListing(listing.id, { details: updatedDetails });
+      if (success !== false) {
+         addToast("Changes saved successfully.", "✅");
+      }
+    } catch (e) {
+      console.error("Failed manual save", e);
+      addToast("Failed to save changes", "❌");
+    }
+    setIsSaving(false);
   };
 
   return (
