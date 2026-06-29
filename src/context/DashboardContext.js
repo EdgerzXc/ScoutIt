@@ -292,7 +292,12 @@ export function DashboardProvider({ children }) {
   };
 
   // ── Owner listing management (Supabase) ──
-  const updateListing = async (listingId, data) => {
+  // Returns true if the change was persisted to the server, false otherwise.
+  // Pass { silent: true } when the caller renders its own save feedback
+  // (e.g. the Inventory page's Save button) to avoid duplicate toasts.
+  const updateListing = async (listingId, data, options = {}) => {
+    const { silent = false } = options;
+
     // Optimistic UI update
     setListings(prev => prev.map(l => {
       if (l.id !== listingId) return l;
@@ -303,7 +308,7 @@ export function DashboardProvider({ children }) {
         signals: { ...l.signals, completeness: data.completenessScore + "%" }
       };
     }));
-    addToast("Dossier updated", "✏️");
+    if (!silent) addToast("Dossier updated", "✏️");
 
     // Server-side dual-database update (Supabase + Airtable if approved)
     try {
@@ -312,23 +317,25 @@ export function DashboardProvider({ children }) {
 
       const res = await fetch("/api/dashboard/update", {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
           "Authorization": token ? `Bearer ${token}` : ""
         },
-        body: JSON.stringify({ 
-          submissionId: listingId, 
+        body: JSON.stringify({
+          submissionId: listingId,
           data,
-          mockOwnerId: currentUser?.id 
+          mockOwnerId: currentUser?.id
         })
       });
-      
+
       if (!res.ok) {
         throw new Error("Update failed");
       }
+      return true;
     } catch (err) {
       console.error("Failed to sync listing update", err);
-      addToast("Failed to sync to database", "❌");
+      if (!silent) addToast("Failed to sync to database", "❌");
+      return false;
     }
   };
 

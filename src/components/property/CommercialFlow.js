@@ -811,10 +811,11 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
       name: u.name || `Unit ${String(i + 1).padStart(2, "0")}`,
       specs: [
         u.size  ? `${u.size} sqm`     : null,
-        u.price ? String(u.price)     : null,
         u.floor ? `Floor ${u.floor}`  : null,
+        u.price ? String(u.price)     : null,
+        ...(Array.isArray(u.features) ? u.features : []),
       ].filter(Boolean),
-      photo: u.photo || "",
+      photo: u.photo || u.image || (Array.isArray(u.photos) ? u.photos.find(Boolean) : "") || "",
       isReal: true,
     }));
   }

@@ -3,6 +3,7 @@
 import { useEffect, useState, use, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Loader2, Check, AlertTriangle } from "lucide-react";
 import { DashboardProvider, useDashboard } from "../../../../context/DashboardContext";
 import InventoryGridManager from "../../../../components/dashboard/InventoryGridManager";
 import { getCurrentTier } from "../../../../lib/entitlements";
@@ -23,8 +24,10 @@ function InventoryInner({ params }) {
 
   // State must be above early return
   const [localUnits, setLocalUnits] = useState([]);
-  const [isSaving, setIsSaving] = useState(false);
+  // Save lifecycle for the button animation: idle → saving → saved → idle (or error)
+  const [saveState, setSaveState] = useState("idle");
   const autoSaveTimeout = useRef(null);
+  const savedResetTimeout = useRef(null);
 
   // Track which listing ID we've already seeded localUnits for.
   // Using the ID (not a boolean) means navigating to a different listing
@@ -45,6 +48,14 @@ function InventoryInner({ params }) {
     }
   }, [listing, id]);
 
+  // Clear pending timers on unmount so we never set state on a dead component.
+  useEffect(() => {
+    return () => {
+      if (autoSaveTimeout.current) clearTimeout(autoSaveTimeout.current);
+      if (savedResetTimeout.current) clearTimeout(savedResetTimeout.current);
+    };
+  }, []);
+
   if (!listing) {
     return (
       <div className="min-h-screen bg-background pt-24 pb-12 flex items-center justify-center">
@@ -53,48 +64,51 @@ function InventoryInner({ params }) {
     );
   }
 
-  const handleAutoSave = (newUnits) => {
-    setLocalUnits(newUnits);
-    
-    if (autoSaveTimeout.current) {
-      clearTimeout(autoSaveTimeout.current);
+  // Single persistence path for both auto-save and manual save.
+  // Drives the button animation and returns once the server confirms.
+  const persist = async (units) => {
+    if (savedResetTimeout.current) {
+      clearTimeout(savedResetTimeout.current);
+    }
+    setSaveState("saving");
+
+    // Read listing from ref so we always use the latest details, not a stale closure.
+    const updatedDetails = { ...listingRef.current.details, units_inventory: units };
+
+    let ok = false;
+    try {
+      // silent: the button + status line provide the feedback, so suppress context toasts.
+      ok = await updateListing(listingRef.current.id, { details: updatedDetails }, { silent: true });
+    } catch (e) {
+      console.error("Failed to save inventory", e);
+      ok = false;
     }
 
-    autoSaveTimeout.current = setTimeout(async () => {
-      // Read listing from ref so we always get the current details, not a stale closure.
-      const updatedDetails = { ...listingRef.current.details, units_inventory: newUnits };
-      
-      // Auto-save silently
-      setIsSaving(true);
-      try {
-        const success = await updateListing(listing.id, { details: updatedDetails });
-        if (success === false) {
-          console.error("Auto-save returned false");
-        }
-      } catch (e) {
-        console.error("Failed to auto-save inventory", e);
-      }
-      setIsSaving(false);
-    }, 1000);
+    setSaveState(ok ? "saved" : "error");
+    if (!ok) {
+      addToast("Couldn't save your changes — check your connection.", "❌");
+    }
+
+    // Settle the button back to idle after the confirmation has been seen.
+    savedResetTimeout.current = setTimeout(() => setSaveState("idle"), ok ? 1800 : 2800);
+    return ok;
   };
 
-  const manualSave = async () => {
+  const handleAutoSave = (newUnits) => {
+    setLocalUnits(newUnits);
+
     if (autoSaveTimeout.current) {
       clearTimeout(autoSaveTimeout.current);
     }
-    
-    setIsSaving(true);
-    try {
-      const updatedDetails = { ...listing.details, units_inventory: localUnits };
-      const success = await updateListing(listing.id, { details: updatedDetails });
-      if (success !== false) {
-         addToast("Changes saved successfully.", "✅");
-      }
-    } catch (e) {
-      console.error("Failed manual save", e);
-      addToast("Failed to save changes", "❌");
+    autoSaveTimeout.current = setTimeout(() => persist(newUnits), 1000);
+  };
+
+  const manualSave = () => {
+    if (saveState === "saving") return;
+    if (autoSaveTimeout.current) {
+      clearTimeout(autoSaveTimeout.current);
     }
-    setIsSaving(false);
+    persist(localUnits);
   };
 
   return (
@@ -118,19 +132,39 @@ function InventoryInner({ params }) {
             </h1>
           </div>
           <div className="flex flex-col items-end gap-2">
-            <button 
+            <button
               onClick={manualSave}
-              disabled={isSaving}
-              className={`text-sm font-working-title font-bold px-6 py-2 rounded-full border transition-colors ${
-                isSaving 
-                  ? 'bg-surface-variant text-text-muted border-surface-variant cursor-not-allowed'
+              disabled={saveState === 'saving'}
+              className={`min-w-[150px] text-sm font-working-title font-bold px-6 py-2 rounded-full border transition-all duration-300 flex items-center justify-center gap-2 ${
+                saveState === 'saving'
+                  ? 'bg-surface-variant text-text-muted border-surface-variant cursor-wait'
+                  : saveState === 'saved'
+                  ? 'bg-success/15 text-success border-success'
+                  : saveState === 'error'
+                  ? 'bg-error/15 text-error border-error hover:bg-error/25'
                   : 'bg-gold-accent text-background border-gold-accent hover:bg-gold-accent-hover'
               }`}
             >
-              {isSaving ? 'Saving...' : 'Save Changes'}
+              {saveState === 'saving' && (
+                <><Loader2 size={15} className="animate-spin" /> Saving…</>
+              )}
+              {saveState === 'saved' && (
+                <span className="flex items-center gap-2 animate-[fadeIn_0.25s_ease]">
+                  <Check size={15} strokeWidth={3} /> Saved
+                </span>
+              )}
+              {saveState === 'error' && (
+                <><AlertTriangle size={15} /> Retry Save</>
+              )}
+              {saveState === 'idle' && 'Save Changes'}
             </button>
-            <span className="text-[10px] text-text-secondary font-working-title uppercase tracking-wider">
-              Also auto-saves on edits
+            <span className={`text-[10px] font-working-title uppercase tracking-wider transition-colors ${
+              saveState === 'saved' ? 'text-success' : saveState === 'error' ? 'text-error' : 'text-text-secondary'
+            }`}>
+              {saveState === 'saving' && 'Saving your changes…'}
+              {saveState === 'saved' && 'All changes saved'}
+              {saveState === 'error' && "Couldn't save — tap Retry"}
+              {saveState === 'idle' && 'Auto-saves as you edit'}
             </span>
           </div>
         </div>
