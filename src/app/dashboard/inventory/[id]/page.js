@@ -27,9 +27,17 @@ function InventoryInner({ params }) {
   const autoSaveTimeout = useRef(null);
 
   // Keep localUnits in sync when data loads or updates remotely
+  const hasLoadedInitial = useRef(false);
+  
+  // Reset initial load tracking if the user navigates to a different property ID
   useEffect(() => {
-    if (listing?.details?.units_inventory) {
-      setLocalUnits(listing.details.units_inventory);
+    hasLoadedInitial.current = false;
+  }, [id]);
+
+  useEffect(() => {
+    if (!hasLoadedInitial.current) {
+      setLocalUnits(listing?.details?.units_inventory || []);
+      hasLoadedInitial.current = true;
     }
   }, [listing?.details?.units_inventory]);
 
