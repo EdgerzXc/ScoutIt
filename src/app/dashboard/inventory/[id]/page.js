@@ -26,20 +26,24 @@ function InventoryInner({ params }) {
   const [isSaving, setIsSaving] = useState(false);
   const autoSaveTimeout = useRef(null);
 
-  // Keep localUnits in sync when data loads or updates remotely
-  const hasLoadedInitial = useRef(false);
-  
-  // Reset initial load tracking if the user navigates to a different property ID
-  useEffect(() => {
-    hasLoadedInitial.current = false;
-  }, [id]);
+  // Track which listing ID we've already seeded localUnits for.
+  // Using the ID (not a boolean) means navigating to a different listing
+  // re-seeds correctly without an extra reset effect.
+  const initializedForId = useRef(null);
 
+  // Keep a live ref to listing so the auto-save timeout never reads a stale closure.
+  const listingRef = useRef(listing);
   useEffect(() => {
-    if (!hasLoadedInitial.current) {
-      setLocalUnits(listing?.details?.units_inventory || []);
-      hasLoadedInitial.current = true;
+    listingRef.current = listing;
+  });
+
+  // Seed localUnits exactly once per listing ID, and only when listing data is present.
+  useEffect(() => {
+    if (listing && initializedForId.current !== id) {
+      setLocalUnits(listing.details?.units_inventory || []);
+      initializedForId.current = id;
     }
-  }, [listing?.details?.units_inventory]);
+  }, [listing, id]);
 
   if (!listing) {
     return (
@@ -57,8 +61,8 @@ function InventoryInner({ params }) {
     }
 
     autoSaveTimeout.current = setTimeout(async () => {
-      // Create a deep copy of the listing details to update
-      const updatedDetails = { ...listing.details, units_inventory: newUnits };
+      // Read listing from ref so we always get the current details, not a stale closure.
+      const updatedDetails = { ...listingRef.current.details, units_inventory: newUnits };
       
       // Auto-save silently
       setIsSaving(true);
