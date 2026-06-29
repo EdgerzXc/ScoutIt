@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
+import { useEffect, useState, use, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { DashboardProvider, useDashboard } from "../../../../context/DashboardContext";
@@ -40,26 +40,38 @@ function InventoryInner({ params }) {
     );
   }
 
-  const handleAutoSave = async (newUnits) => {
+  const autoSaveTimeout = useRef(null);
+
+  const handleAutoSave = (newUnits) => {
     setLocalUnits(newUnits);
     
-    // Create a deep copy of the listing details to update
-    const updatedDetails = { ...listing.details, units_inventory: newUnits };
-    
-    // Auto-save silently
-    setIsSaving(true);
-    try {
-      const success = await updateListing(listing.id, { details: updatedDetails });
-      if (success === false) {
-        console.error("Auto-save returned false");
-      }
-    } catch (e) {
-      console.error("Failed to auto-save inventory", e);
+    if (autoSaveTimeout.current) {
+      clearTimeout(autoSaveTimeout.current);
     }
-    setIsSaving(false);
+
+    autoSaveTimeout.current = setTimeout(async () => {
+      // Create a deep copy of the listing details to update
+      const updatedDetails = { ...listing.details, units_inventory: newUnits };
+      
+      // Auto-save silently
+      setIsSaving(true);
+      try {
+        const success = await updateListing(listing.id, { details: updatedDetails });
+        if (success === false) {
+          console.error("Auto-save returned false");
+        }
+      } catch (e) {
+        console.error("Failed to auto-save inventory", e);
+      }
+      setIsSaving(false);
+    }, 1000);
   };
 
   const manualSave = async () => {
+    if (autoSaveTimeout.current) {
+      clearTimeout(autoSaveTimeout.current);
+    }
+    
     setIsSaving(true);
     try {
       const updatedDetails = { ...listing.details, units_inventory: localUnits };
