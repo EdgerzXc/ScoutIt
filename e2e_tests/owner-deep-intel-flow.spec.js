@@ -130,11 +130,19 @@ test.describe('Owner Deep Intelligence Studio Flow', () => {
         });
       });
 
-      // Fill out required photos
+      // Fill out required photos.
+      // A fixed sleep here was flaky under real async upload timing (PhotoUploader.js
+      // shows "Uploading..." while a slot is in flight) -- some categories intermittently
+      // landed on 4/5 photos instead of 5, which silently keeps mustHaves.media false and
+      // "Submit for Approval" disabled forever. Wait for the actual completion signal
+      // instead of guessing a duration.
       const fileInputs = await page.locator('input[type="file"]').all();
       for (let i = 0; i < Math.min(5, fileInputs.length); i++) {
         await fileInputs[i].setInputFiles('e2e_tests/dummy.png');
-        await page.waitForTimeout(600); // Wait for the mocked upload to complete
+        // The "Uploading..." label may or may not appear before this check runs;
+        // either way, wait until no slot is still showing it.
+        await page.getByText('Uploading...').waitFor({ state: 'visible', timeout: 800 }).catch(() => {});
+        await page.getByText('Uploading...').waitFor({ state: 'hidden', timeout: 5000 }).catch(() => {});
       }
 
       // Next

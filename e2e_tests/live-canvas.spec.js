@@ -55,9 +55,10 @@ test.describe('Owner Live Canvas (Editor v1)', () => {
     const canvasTitle = page.locator('.hero-title').first();
     await expect(canvasTitle).toHaveText(newTitle, { timeout: 8000 });
 
-    // LiveEditorWorkspace.js line 667: "Save Changes" (editing) or "Save as Draft" (new)
-    // Since this is a fresh listing, the button text will be "Save as Draft"
-    const saveBtn = page.locator('button').filter({ hasText: /Save (as Draft|Changes)/i }).first();
+    // LiveEditorWorkspace.js line 626: "Save Draft" — this used to read "Save as Draft" /
+    // "Save Changes" depending on new-vs-editing state; the button text was since
+    // simplified to a single "Save Draft" label regardless of state.
+    const saveBtn = page.locator('button').filter({ hasText: /Save Draft/i }).first();
     
     // The button exists even when disabled (only enabled once all 5 must-haves are filled)
     await expect(saveBtn).toBeVisible({ timeout: 5000 });

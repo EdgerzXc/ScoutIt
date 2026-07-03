@@ -50,16 +50,25 @@ test.describe('Owner Live Editor Flow with Unit Builder', () => {
       });
 
       let publishPayload = null;
-      // Mock Supabase property inserts/updates
+      // Mock Supabase property inserts/updates/reads.
+      // /dashboard and /dashboard/inventory/[id] each mount their own independent
+      // DashboardProvider (no shared provider at a layout level) -- navigating between
+      // them remounts the context and re-fetches `listings` from scratch via a GET on
+      // this same endpoint. Without mocking that GET too, the freshly-mounted provider
+      // never sees the property this test just "created" (it was never really inserted,
+      // only the POST was intercepted), so the inventory page's
+      // "listing not found -> redirect to /dashboard" guard fires before the page renders.
       await page.route('**/rest/v1/properties*', async route => {
         if (route.request().method() === 'POST') {
           const postData = JSON.parse(route.request().postData() || '[{}]');
-          publishPayload = postData[0];
-          await route.fulfill({ status: 201, contentType: 'application/json', body: JSON.stringify([{ ...publishPayload, id: `mock-id-live` }]) });
+          publishPayload = { ...postData[0], id: 'mock-id-live' };
+          await route.fulfill({ status: 201, contentType: 'application/json', body: JSON.stringify([publishPayload]) });
         } else if (route.request().method() === 'PATCH') {
           const postData = JSON.parse(route.request().postData() || '{}');
-          publishPayload = postData;
-          await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([{}]) });
+          publishPayload = { ...publishPayload, ...postData };
+          await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([publishPayload]) });
+        } else if (route.request().method() === 'GET') {
+          await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(publishPayload ? [publishPayload] : []) });
         } else {
           await route.continue();
         }
@@ -98,36 +107,51 @@ test.describe('Owner Live Editor Flow with Unit Builder', () => {
       expect(publishPayload).not.toBeNull();
       await expect(page.locator('h1:has-text("Commercial Live Test Property")')).toBeVisible();
 
+      // The Inventory Manager reads/writes real property_units rows via
+      // /api/dashboard/units (see SCOUTIT_MASTER_BUILD_SPEC.md §9) -- it no longer
+      // reads the legacy details.units_inventory blob this test used to seed.
+      // GET: no existing units yet. POST: echo back whatever was sent, assigning a
+      // real-looking id to any client temp id so the save completes successfully.
+      let savedUnits = [];
+      await page.route('**/api/dashboard/units*', async route => {
+        if (route.request().method() === 'GET') {
+          await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ units: savedUnits }) });
+        } else if (route.request().method() === 'POST') {
+          const body = JSON.parse(route.request().postData() || '{}');
+          savedUnits = (body.units || []).map((u, i) => ({ ...u, id: u.id || `mock-unit-${i}` }));
+          await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ success: true, units: savedUnits, insertedIdByTempId: {} }) });
+        } else {
+          await route.continue();
+        }
+      });
+
       // Click Manage Inventory
       await page.locator('a:has-text("Manage Inventory")').click();
       await page.waitForTimeout(1000);
-      
+
       // We are now on the Inventory Manager page
       await expect(page.locator('text=Inventory Manager')).toBeVisible();
 
-      // Add a unit
-      await page.locator('button:has-text("Add Unit")').click();
+      // Add a unit. The empty state's CTA reads "Add your first unit"; once units
+      // exist, the toolbar's own "+ Add Unit" button takes over -- match either.
+      await page.locator('button').filter({ hasText: /Add (your first unit|Unit)/i }).first().click();
       await page.waitForTimeout(500);
 
-      // Fill unit details
-      await page.getByPlaceholder('e.g. Studio Unit A, Floor 12').fill('Penthouse Suite A');
-      await page.getByPlaceholder('e.g. 45').fill('120');
-      await page.getByPlaceholder('e.g. 5000000').fill('15000000');
-
-      // Add a unit photo
-      const unitFileInputs = await page.locator('input[type="file"]').all();
-      await unitFileInputs[0].setInputFiles({
-        name: `unit0.png`,
-        mimeType: 'image/png',
-        buffer: Buffer.from('mock image data')
-      });
-      await page.waitForTimeout(1000); // Wait for upload
+      // Fill unit details -- current InventoryGridManager.js placeholders
+      // ("e.g. Unit 12-A" for name, "30" for size sqm, "e.g. 3" for floor).
+      // The per-unit Price field was removed (commit 738f2e9); photo upload now
+      // opens a modal / accepts drag-and-drop rather than an inline <input type="file">,
+      // so it's exercised separately and not required for a unit to save.
+      await page.getByPlaceholder('e.g. Unit 12-A').first().fill('Penthouse Suite A');
+      await page.getByPlaceholder('30').first().fill('120');
 
       // Save Changes
       await page.locator('button:has-text("Save Changes")').click();
       await page.waitForTimeout(1500); // wait for save
-      
+
       // Verify Save State
-      await expect(page.locator('text=Saved')).toBeVisible();
+      // Exact match: the "All changes saved" status text also contains the
+      // substring "saved", so a loose text= locator resolves to two elements.
+      await expect(page.getByText('Saved', { exact: true })).toBeVisible();
   });
 });

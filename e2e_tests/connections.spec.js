@@ -51,7 +51,10 @@ test.describe('Full Flow Mockups: Discovery to Handshake', () => {
     await requestViewingBtn.click();
 
     // 10. Verify the Booking Modal opens
-    const bookingTitle = page.locator('text=Live Viewing');
+    // Exact match: "Request Live Viewing" (the button, still on screen behind the
+    // modal) also contains the substring "Live Viewing", so a loose text= locator
+    // resolves to two elements. The modal's own badge has the exact text "Live Viewing".
+    const bookingTitle = page.getByText('Live Viewing', { exact: true });
     await expect(bookingTitle).toBeVisible();
 
     // 11. Select Date
