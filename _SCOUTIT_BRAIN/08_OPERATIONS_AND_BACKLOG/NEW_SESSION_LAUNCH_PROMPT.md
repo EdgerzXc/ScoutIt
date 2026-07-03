@@ -1,9 +1,9 @@
-# New-Session Kickoff Prompt — Launch Readiness
+# New-Session Kickoff Prompt — Full Context Load, No Shortcuts
 
-> Paste the block below into a fresh ScoutIt session to get the agent fully up to speed on the
-> whole project and pointed at **launch readiness**. It tells the agent what to read, what's
-> already done, what's off-limits (security is parked), and to come back with a prioritized plan
-> before building. Saved 2026-06-27.
+> Paste the block below into a fresh ScoutIt session. Updated 2026-07-03 after the owner said
+> directly: "it is getting annoying when there is failure on coding because it keeps shortcutting
+> things and not knowing everything first." This version makes full context-loading the explicit
+> first step, not an assumption — see the saved memory `working-style-and-deploys.md` for why.
 
 ---
 
@@ -12,81 +12,91 @@
 You are resuming work on **ScoutIt** — the Philippines' first spatial commerce platform. This is a
 **modified Next.js 16.2.7** app (App Router, Turbopack) — APIs may differ from your training data.
 
-## Step 1 — Read everything before doing anything
+## Step 0 — Load full context. Do not skip or skim any part of this. No shortcuts.
 
-Read these, in order, and treat the **running code + live data as the source of truth over any
-doc** (verify, don't assume):
+This is not optional and not a formality. Recent coding mistakes (inventing a "50-year" flood
+dataset that doesn't exist; briefly misdiagnosing a real, already-designed QuestIT schema as
+"unbuilt" because a search wasn't thorough enough) came directly from acting on partial or
+remembered context instead of actually checking the current state first. Do the following in
+order, completely, before writing a single line of code:
 
-1. `_SCOUTIT_BRAIN/00_START_HERE.md` — the map
-2. `_SCOUTIT_BRAIN/00_SOP.md` — how we work each turn (the operating contract)
-3. `_SCOUTIT_BRAIN/00_COUNCIL.md` — the decision panel for product/UX calls
-4. `_SCOUTIT_BRAIN/MASTER_CONTEXT.md` — the single-file complete project bible
-5. `_SCOUTIT_BRAIN/01_IDENTITY_AND_VISION/SCOUTIT_BIBLE.md` — what ScoutIt *is*
-6. `_SCOUTIT_BRAIN/08_OPERATIONS_AND_BACKLOG/SESSION_HANDOFF_2026-06-27.md` — the latest resume point
-7. `_SCOUTIT_BRAIN/08_OPERATIONS_AND_BACKLOG/PRE_LAUNCH_BUILD_LIST.md` — the confirmed build queue
-8. Key code: `src/lib/entitlements.js` (gating source of truth), `src/context/DashboardContext.js`
-   (dashboard state), `src/app/api/cms/route.js` (Airtable proxy), `src/components/dashboard/OwnerMode.js`
-   (owner dashboard + Concierge + Vault wizard), `src/app/globals.css` (design tokens).
+1. **Use the `obsidian-second-brain` skill on the real vault at `C:\Users\jerze\my-vault` — read
+   it for real, don't skim it.** If the vault's ScoutIt notes look stale against what you find in
+   the repo, refresh them (`/obsidian-architect` or equivalent) before relying on them, so the
+   next session doesn't inherit the same staleness.
+2. `_SCOUTIT_BRAIN/00_START_HERE.md` — the map.
+3. `_SCOUTIT_BRAIN/NEXT_DAY_HANDOFF.md` — the resume pointer.
+4. `_SCOUTIT_BRAIN/08_OPERATIONS_AND_BACKLOG/SESSION_HANDOFF_2026-07-03.md` — **read the whole
+   file, not just the top "RESUME HERE" block.** Part 5 specifically lists work that was built
+   but never verified in a browser because of a tool outage — treat every claim in it as unproven
+   until you've checked it yourself.
+5. `_SCOUTIT_BRAIN/SCOUTIT_MASTER_BUILD_SPEC.md` — §3 (Mission Control) and §9 (Unit Delegation,
+   built) at minimum; skim the rest for anything relevant to what you're about to touch.
+6. `_SCOUTIT_BRAIN/08_OPERATIONS_AND_BACKLOG/PLAN_STAFF_ENTERPRISE_ANALYTICS_NOTIFICATIONS.md` —
+   the approved plan for Mission Control / Enterprise / analytics / notifications / Google Sign-In.
+7. Before touching any *specific* feature area (a component, a table, an API route), grep and
+   read the actual current source for that area. Don't assume a doc is still accurate without
+   checking the running code against it — this repo's own rule is code + `_SCOUTIT_BRAIN` win over
+   anything else, always.
+8. Cross-check anything schema-related against the live Airtable base (`appWFRqR0wy6hSR6h`) and
+   live Supabase project (`yyixsuaimdzyiocswcgc`) directly — don't trust a doc's field list without
+   confirming it.
 
-Then confirm in plain language that you're up to speed.
+Only after all of that: confirm in plain language that you're up to speed, and say what you found
+that was stale or different from what the docs claimed, if anything.
 
-## Step 2 — Current state (verify, then trust)
+## Step 1 — Current state (verify each claim, then trust it)
 
-- Latest pushed commit is `c676ec7` (hero CTA refined to amber + a "not yet legally reviewed" draft
-  banner on the legal pages). Confirm you have it (`git log --oneline -3`). Both Vercel projects
-  (`scoutit` and `scout-it`) auto-deploy `main`.
-- **Legal pages (`/terms`, `/privacy`) are DRAFTS** currently being reviewed by a PH AI lawyer. When
-  the revised text comes back, drop it into `src/app/{terms,privacy}/page.js` (the pages are
-  data-driven via `src/components/legal/LegalDoc.js`) and update the effective date + draft banner.
-- **`GEMINI_API_KEY` is unset** (owner's small to-do) — the listing tools work mechanically but fall
-  back to dumb keyword mapping without it.
+- **Solid, verified, live on both `scoutit.vercel.app` and `scout-it.vercel.app`:** everything
+  through commit `c9c17dd`. This includes Unit Delegation & Co-Working Operators (§9, fully
+  built + E2E-verified), Track 1 Notifications (persisted bell, stale-listing cron,
+  broker-on-change alerts), the QuestIT documentation correction (it's a real future platform,
+  explicitly parked, don't touch — see `_SCOUTIT_BRAIN/QUESTIT_FUTURE/README.md`), and 5 fixed
+  E2E test failures (all pre-existing test/config drift, none were real app bugs).
+- **Unverified — built but never checked in a browser, because of a tool outage mid-session (Part
+  5 of the session handoff):**
+  1. Footer audit fixes (`src/components/layout/Footer.js`) + new `src/app/enterprise/page.js`.
+  2. A Mission Control dev-preview (`src/components/dashboard/MissionControlMode.js`) with a
+     staff lens (near-global property access) and an enterprise lens (scoped to own portfolio),
+     reachable only via a new section in the dev toolbox (`src/components/ui/FloatingToolbox.js`)
+     — **explicitly not production-safe**, real Enterprise isolation still needs the RLS reset.
+  3. NOAH historical flood-risk range tabs (`src/components/property/FloodHeatmapMap.js`) — 5-yr/
+     25-yr/100-yr, matching NOAH's real published return periods (there is no 50-year dataset).
+     **Unconfirmed whether the 5yr/25yr PMTiles files actually exist** at the same Hugging Face
+     path as the working 100yr one — check this before trusting the new tabs work.
+  4. Six fully-populated master mock properties (one per category) — **not started at all**, fully
+     scripted and ready to run: `_tmp-master-properties.js` + `_tmp-deepintel-schema.json` at the
+     repo root (throwaway, delete after running).
+- Verify all four Part-5 items for real before building anything further on top of them, and
+  before committing or asking to push.
 
-## Step 3 — The mission: LAUNCH READINESS (non-security)
+## Step 2 — Non-negotiable rules (break these and you break the product)
 
-North star: **200 real, approved listings before monetization.** Build the arena before the
-gladiators. Your lane is **everything EXCEPT security** — the security overhaul (Supabase reset,
-real Auth, RLS, token rotation, Connects Edge Functions, input validation) is **PARKED on purpose**
-as one deliberate final pass. **Do not start it. Keep any data-layer touch additive and reversible.**
+- **Design DNA:** ~95% dark / ~5% gold, **CSS variables only, never raw hex** (`--accent #E8AE3C`,
+  `--accent-bright #F7C64E`, `--accent-muted #6E531A`). Count the gold before adding more.
+- **Dual-CMS:** Airtable = public read-only via the one proxy `src/app/api/cms/route.js`. Supabase
+  = private user state. Never mix, never call Airtable from the client.
+- **Never invent data** — no source → blank field, never a plausible-sounding guess. This applies
+  to flood-risk numbers, financial figures, and now confirmed to apply to external API filenames
+  too (verify a resource exists before hardcoding a URL to it).
+- **Never push to `main`/Vercel without the owner's explicit say-so**, every time, even if a prior
+  push was approved — approval doesn't carry forward automatically. The owner is non-technical —
+  explain in plain language.
+- **RLS is still effectively disabled on 15+ Supabase tables — deliberately parked.** Don't build
+  Enterprise-accounts data isolation, and don't "fix" this as a drive-by; it's its own future reset.
+- **QuestIT is explicitly off-limits** unless the owner says otherwise — see
+  `_SCOUTIT_BRAIN/QUESTIT_FUTURE/README.md` before touching anything with "questit" in the name.
+- Mission Control and real Enterprise accounts (beyond the existing dev-preview) each still need
+  their own dedicated session — don't casually expand either mid-task.
 
-Likely launch-readiness work (confirm/re-prioritize with the owner — don't assume):
-- **Public-site polish / "nothing looks broken or fake":** extend the discover image-fallback
-  pattern site-wide; fix the guest-visible dashboard demo state (a logged-out visitor lands on a
-  seeded "15 Connects" dashboard — gate it or make it read as a preview); sweep for any other
-  fake/placeholder-looking surfaces.
-- **Claude editorial descriptions (the SEO/brand moat):** after extraction, pass the structured
-  payload to Claude to write the honest, compelling property write-up. Needs `ANTHROPIC_API_KEY`.
-  Most on-strategy feature.
-- **Owner editor / publish flow:** verify upload → draft → review → Publish → Airtable mirror is
-  smooth end-to-end.
-- **Getting toward 200 listings:** reduce friction in the listing/intake flow (PDF concierge + CSV
-  importer are proven; make them effortless).
-- **Founding-cohort badges**, **Mapbox geocode write-back** (before listing count passes ~50), and
-  the manual Airtable `Active_Listings_Count` rollup.
-- Deferred unless the owner asks: payments (after 200 listings), email, the in-app buyer Concierge /
-  vector search, QuestIT standalone.
+## Step 3 — Then, before building anything new
 
-## Step 4 — The non-negotiable rules (break these and you break the product)
-
-- **Design DNA:** ~95% dark / ~5% gold, **CSS variables only, never raw hex** (`--accent #E8AE3C`
-  amber, `--accent-bright #F7C64E`, `--accent-muted #6E531A`). Count the gold before adding more.
-- **Dual-CMS:** Airtable = public read-only via the one proxy `src/app/api/cms/route.js`. Supabase =
-  private user state. **Never mix**, never call Airtable from the client.
-- **Never invent property data** — no source → blank field (a blank is honest; a fake value is not).
-- **Never push to `main`/Vercel without the owner's explicit say-so.** The owner is non-technical —
-  explain in plain language. `main` must always be deployable (`next build` is the gate).
-- **Connects writes go through API routes only** (service role), never client-side. **Scout Rating =
-  verified closures only.** Tailwind allowed in dashboards; public site stays vanilla CSS.
-  Three.js/WebGL backgrounds allowed but must degrade via Lite Mode. The UFO stays.
-
-## Step 5 — Then, before building
-
-Convene the relevant Council seats, produce **one prioritized launch-readiness punch list** (smallest
-additive changes first, public-trust items before deep features), show it to the owner, and ask which
-to start. Verify (build + a quick check) before proposing any push, and tell the owner plainly what
-changed and what's next.
+Report back what you verified from Step 1's unverified list (what worked, what didn't), fix
+anything broken, run the master-properties script, and only then ask the owner what's next —
+don't assume the plan below is still the priority without checking.
 
 # ═══════ END — STOP COPYING HERE ═══════
 
 ---
 
-*If you want a tighter or broader scope for the next session, edit Step 3 before pasting.*
+*If you want a tighter or broader scope for the next session, edit Step 1/Step 3 before pasting.*

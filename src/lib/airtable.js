@@ -237,8 +237,8 @@ export async function fetchProperties(apiKey, baseId) {
         standing_capacity: f.VEN_Capacity_Standing || "",
         cover_count:       f.RST_Seating_Capacity || "",
         kitchen_grade:     f.RST_Kitchen_Condition || "",
-        accommodations:    f.HOSP_Room_Types || (f.HOSP_Room_Count ? `${f.HOSP_Room_Count} rooms` : ""),
-        hosting_capacity:  f.HOSP_Room_Count || "",
+        accommodations:    f.HOSP_Room_Types || (f.HOSP_Room_Count ? `${f.HOSP_Room_Count} rooms` : "") || f.STR_Bed_Config || "",
+        hosting_capacity:  f.HOSP_Room_Count || (f.STR_Max_Guests ? `${f.STR_Max_Guests} Guests` : "") || "",
         setup_grade:       f.VEN_AV_Equipment || "",
 
         // ── Per-category field groups (SOP §2). `cat.<type>` powers

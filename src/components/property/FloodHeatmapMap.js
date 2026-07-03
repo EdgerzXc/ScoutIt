@@ -6,11 +6,23 @@ import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { Protocol } from 'pmtiles';
 
-// Free, open-licensed UP NOAH flood hazard data (100-year return period), self-served as
-// cloud-optimized vector tiles via HTTP range requests - no full-file download needed.
+// Free, open-licensed UP NOAH flood hazard data, self-served as cloud-optimized vector
+// tiles via HTTP range requests - no full-file download needed.
 // Source: huggingface.co/datasets/bettergovph/project-noah-hazard-maps
-const FLOOD_PMTILES_URL = 'pmtiles://https://huggingface.co/datasets/bettergovph/project-noah-hazard-maps/resolve/main/PMTiles/layers/flood_100yr.pmtiles';
-const FLOOD_SOURCE_LAYER = 'flood_100yr';
+//
+// NOAH publishes exactly three rainfall return periods (HEATMAP_NOAH_INTEGRATION_PLAN.md
+// §1) - there is no "50-year" dataset. "5yr" is the closest fit for "recent/current
+// conditions", "25yr" for a mid-range planning horizon, "100yr" for worst-case/long-term.
+const FLOOD_PERIODS = [
+  { id: "5yr", label: "Recent (5-yr)", file: "flood_5yr.pmtiles", layer: "flood_5yr" },
+  { id: "25yr", label: "25-yr", file: "flood_25yr.pmtiles", layer: "flood_25yr" },
+  { id: "100yr", label: "100-yr", file: "flood_100yr.pmtiles", layer: "flood_100yr" },
+];
+const NOAH_BASE_URL = "https://huggingface.co/datasets/bettergovph/project-noah-hazard-maps/resolve/main/PMTiles/layers/";
+
+function pmtilesUrlFor(period) {
+  return `pmtiles://${NOAH_BASE_URL}${period.file}`;
+}
 
 // NOAH's own Low/Medium/High hazard classification (Var: 1/2/3).
 const HAZARD_LEVELS = [
@@ -27,11 +39,41 @@ function ensurePmtilesProtocol() {
   protocolRegistered = true;
 }
 
+function addHazardLayer(map, period) {
+  if (map.getLayer('flood-hazard-fill')) map.removeLayer('flood-hazard-fill');
+  if (map.getSource('flood-hazard')) map.removeSource('flood-hazard');
+
+  map.addSource('flood-hazard', {
+    type: 'vector',
+    url: pmtilesUrlFor(period),
+  });
+
+  map.addLayer({
+    id: 'flood-hazard-fill',
+    type: 'fill',
+    source: 'flood-hazard',
+    'source-layer': period.layer,
+    paint: {
+      'fill-color': [
+        'match', ['get', 'Var'],
+        1, HAZARD_LEVELS[0].color,
+        2, HAZARD_LEVELS[1].color,
+        3, HAZARD_LEVELS[2].color,
+        '#666666',
+      ],
+      'fill-opacity': 0.5,
+    },
+  });
+}
+
 export default function FloodHeatmapMap({ lat, lng, propertyTitle }) {
   const mapContainerRef = useRef(null);
   const mapInstance = useRef(null);
   const [loadState, setLoadState] = useState('loading'); // loading | ready | error
+  const [periodId, setPeriodId] = useState('100yr');
+  const activePeriod = FLOOD_PERIODS.find((p) => p.id === periodId) || FLOOD_PERIODS[2];
 
+  // Initial map + first hazard layer load.
   useEffect(() => {
     if (!mapContainerRef.current || mapInstance.current || lat == null || lng == null) return;
 
@@ -48,27 +90,7 @@ export default function FloodHeatmapMap({ lat, lng, propertyTitle }) {
 
     map.on('load', () => {
       try {
-        map.addSource('flood-hazard', {
-          type: 'vector',
-          url: FLOOD_PMTILES_URL,
-        });
-
-        map.addLayer({
-          id: 'flood-hazard-fill',
-          type: 'fill',
-          source: 'flood-hazard',
-          'source-layer': FLOOD_SOURCE_LAYER,
-          paint: {
-            'fill-color': [
-              'match', ['get', 'Var'],
-              1, HAZARD_LEVELS[0].color,
-              2, HAZARD_LEVELS[1].color,
-              3, HAZARD_LEVELS[2].color,
-              '#666666',
-            ],
-            'fill-opacity': 0.5,
-          },
-        });
+        addHazardLayer(map, activePeriod);
 
         new maplibregl.Marker({ color: '#E8AE3C' })
           .setLngLat([lng, lat])
@@ -91,13 +113,44 @@ export default function FloodHeatmapMap({ lat, lng, propertyTitle }) {
       map.remove();
       mapInstance.current = null;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lat, lng]);
+
+  // Swap the hazard layer in place when the user picks a different return period,
+  // without tearing down/recreating the whole map.
+  useEffect(() => {
+    const map = mapInstance.current;
+    if (!map || loadState === 'loading') return;
+    if (!map.isStyleLoaded()) return;
+    try {
+      setLoadState('loading');
+      addHazardLayer(map, activePeriod);
+      setLoadState('ready');
+    } catch (err) {
+      console.error('[FloodHeatmapMap] Failed to swap hazard layer:', err);
+      setLoadState('error');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [periodId]);
 
   if (lat == null || lng == null) return null;
 
   return (
     <div className="flood-heatmap-wrapper">
       <div ref={mapContainerRef} className="flood-heatmap-container" />
+
+      <div className="flood-heatmap-period-tabs">
+        {FLOOD_PERIODS.map((p) => (
+          <button
+            key={p.id}
+            className={`flood-heatmap-period-tab ${p.id === periodId ? 'active' : ''}`}
+            onClick={() => setPeriodId(p.id)}
+            type="button"
+          >
+            {p.label}
+          </button>
+        ))}
+      </div>
 
       {loadState === 'loading' && (
         <div className="flood-heatmap-status">Loading hazard data…</div>
@@ -109,7 +162,7 @@ export default function FloodHeatmapMap({ lat, lng, propertyTitle }) {
       )}
 
       <div className="flood-heatmap-legend">
-        <div className="flood-heatmap-legend-title">100-Year Flood Hazard</div>
+        <div className="flood-heatmap-legend-title">{activePeriod.label} Flood Hazard</div>
         {HAZARD_LEVELS.map((level) => (
           <div className="flood-heatmap-legend-row" key={level.value}>
             <span className="flood-heatmap-legend-swatch" style={{ background: level.color }} />
@@ -119,8 +172,7 @@ export default function FloodHeatmapMap({ lat, lng, propertyTitle }) {
       </div>
 
       <div className="flood-heatmap-disclaimer">
-        Source: UP NOAH (open data). Historical hazard modeling, periodically refreshed — not a
-        real-time flood forecast.
+        Source: UP NOAH Archives (open data). {activePeriod.label === '100-yr' ? 'A 100-year rainfall' : activePeriod.label === '25-yr' ? 'A 25-year rainfall' : 'A 5-year (recent-conditions) rainfall'} return-period model — historical hazard modeling, periodically refreshed, not a real-time flood forecast.
       </div>
 
       <style dangerouslySetInnerHTML={{ __html: `
@@ -138,6 +190,38 @@ export default function FloodHeatmapMap({ lat, lng, propertyTitle }) {
           width: 100%;
           height: clamp(360px, 48vh, 440px);
           background: #000;
+        }
+        .flood-heatmap-period-tabs {
+          position: absolute;
+          top: 12px;
+          right: 56px;
+          display: flex;
+          gap: 4px;
+          z-index: 5;
+        }
+        .flood-heatmap-period-tab {
+          font-family: var(--font-mono);
+          font-size: 9.5px;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+          padding: 6px 10px;
+          border-radius: 4px;
+          border: 0.5px solid #262626;
+          background: rgba(13,13,13,0.85);
+          backdrop-filter: blur(8px);
+          color: #c8c8c8;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+        .flood-heatmap-period-tab:hover {
+          border-color: #E8AE3C;
+          color: #E8AE3C;
+        }
+        .flood-heatmap-period-tab.active {
+          background: #E8AE3C;
+          border-color: #E8AE3C;
+          color: #0e0e0e;
+          font-weight: 700;
         }
         .flood-heatmap-status {
           position: absolute;

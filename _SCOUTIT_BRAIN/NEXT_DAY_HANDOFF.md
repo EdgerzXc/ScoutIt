@@ -1,20 +1,26 @@
 # ScoutIt Handoff - End of Session
 
-> ## ▶️ RESUME HERE (latest) — 2026-07-03, Part 2
-> **Read `08_OPERATIONS_AND_BACKLOG/SESSION_HANDOFF_2026-07-03.md` (Part 2 section at the top)
-> first, then `08_OPERATIONS_AND_BACKLOG/PLAN_STAFF_ENTERPRISE_ANALYTICS_NOTIFICATIONS.md`.**
-> Owner reviewed Unit Delegation live in the browser (a real demo property now exists in both
-> Supabase + Airtable — `ScoutIt Demo Tower — Unit Delegation Showcase`, kept, not a throwaway),
-> approved it, and it's **committed locally to `main`** (commit `56df83d`). **Track 1 —
-> Notifications — is also now built, live-verified, and committed** (commit `8c88011`): persisted
-> bell dropdown, a daily stale-listing cron with dedupe, and broker-on-change alerts on
-> price/units/delegation changes. **Still NOT pushed to GitHub/Vercel** — owner's explicit choice
-> to stop before that step. Next up per the approved plan's sequencing: Track 2's prerequisite
-> (real analytics instrumentation — wire the `/api/inquiries` stub, add page-view tracking)
-> before the analytics panel itself. Mission Control and Enterprise accounts still need their own
-> dedicated sessions — don't start either casually.
+> ## ▶️ RESUME HERE (latest) — 2026-07-03, Part 5 — READ THE FULL PROMPT, NO SHORTCUTS
+> **Owner's explicit instruction this session, read literally:** load full context — the real
+> `obsidian-second-brain` vault (not skimmed), this whole file, `00_START_HERE.md`, and
+> `08_OPERATIONS_AND_BACKLOG/SESSION_HANDOFF_2026-07-03.md` **in full** — before writing any code.
+> Coding mistakes this session (an invented "50-year" flood dataset, a QuestIT gap briefly
+> misdiagnosed as unbuilt when a real schema already existed) came directly from acting on partial
+> context instead of checking the real current state first. This is now a standing rule, saved to
+> memory (`working-style-and-deploys.md`).
 >
-> ## Previous — 2026-07-03, Part 1
+> **Read `08_OPERATIONS_AND_BACKLOG/SESSION_HANDOFF_2026-07-03.md`'s Part 5 section (at the top)
+> in full before touching anything** — it lists four pieces of work (footer/enterprise page,
+> Mission Control dev-preview, NOAH historical flood ranges, 6 master mock properties) that were
+> either built-but-never-verified-in-a-browser or entirely blocked, because of a tool outage that
+> hit mid-session. None of it is safe to assume works. Verify each one for real before building
+> anything further on top of it, and definitely before committing/pushing.
+>
+> Everything through commit `c9c17dd` (Unit Delegation, Track 1 Notifications, the QuestIT
+> correction, and 5 E2E test fixes) **is real, verified, and already pushed live** to both
+> `scoutit.vercel.app` and `scout-it.vercel.app` — that part is solid ground to build from.
+>
+> ## Previous — 2026-07-03, Part 2
 > Unit Delegation (§9) was **built and E2E-verified end-to-end**, not just planned — schema, real CRUD
 > replacing the old JSON blob, the delegation handshake, the Operator dashboard, and the Unit
 > Master Page. Found + fixed 2 real pre-existing bugs along the way (a silently-broken

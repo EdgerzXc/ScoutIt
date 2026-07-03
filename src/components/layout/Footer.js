@@ -42,8 +42,9 @@ export default function Footer() {
             <Link href="/discover">Discover Spaces</Link>
             <Link href="/intel">Intel briefings</Link>
             <Link href="/wishlist">Your Board</Link>
+            <Link href="/badges">Badges</Link>
           </div>
-          
+
           <div className="nav-col">
             <h3>Services</h3>
             <Link href="/brokers">Brokers</Link>
@@ -56,7 +57,9 @@ export default function Footer() {
           <div className="nav-col">
             <h3>Company</h3>
             <Link href="/about">About Us</Link>
+            <Link href="/enterprise">Enterprise</Link>
             <Link href="/dashboard">Dashboard</Link>
+            <a href="mailto:hello@scout-it.vercel.app">Contact</a>
           </div>
         </div>
       </div>
@@ -70,6 +73,8 @@ export default function Footer() {
             <Link href="/terms">Terms of Service</Link>
             <span className="meta-separator">•</span>
             <Link href="/privacy">Privacy Policy</Link>
+            <span className="meta-separator">•</span>
+            <a href="mailto:hello@scout-it.vercel.app">Contact</a>
           </div>
         </div>
       </div>

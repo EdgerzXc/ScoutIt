@@ -1172,11 +1172,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                   d.floorLevel ? "Exact Floor Level" : null,
                   d.pricePerSqm ? "Price Per SQM" : null,
                   d.paymentTerms ? "Payment Terms" : null,
-                  "Ventilation Quality",
-                  "Noise Level Score",
-                  "Natural Light Score",
-                  "Privacy Score",
-                  "Acoustic Baseline"
+                  ...(DEEP_INTEL_SCHEMA[d.category || "residential"]?.[1] || []),
                 ].filter(Boolean)}
               />
 

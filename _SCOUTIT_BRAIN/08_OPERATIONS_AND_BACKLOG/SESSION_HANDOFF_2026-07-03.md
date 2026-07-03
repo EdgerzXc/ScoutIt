@@ -1,6 +1,83 @@
 # Session Handoff — 2026-07-03
 
-> ## ▶️ RESUME HERE (latest) — 2026-07-03, Part 2
+> ## ▶️ RESUME HERE (latest) — 2026-07-03, Part 5 — READ THE NEXT-SESSION PROMPT FIRST
+> **Before touching any code, run the full context-load sequence** (see
+> `NEXT_DAY_HANDOFF.md`'s pinned prompt, or just: `obsidian-second-brain` skill on the real vault,
+> not a skim → `00_START_HERE.md` → `NEXT_DAY_HANDOFF.md` → this file, all of it, not excerpted →
+> then read actual current source for whatever you're about to touch, don't work from memory of
+> what a prior session built). This isn't optional this time — the owner said directly that
+> shortcut-y context-loading has caused real coding mistakes (see the memory note added this
+> session: `working-style-and-deploys.md`, "Load full context before writing any code").
+>
+> **What's real and pushed as of Part 4:** all of Part 2 + Part 3's work is live on both
+> `scoutit.vercel.app` and `scout-it.vercel.app` (commits through `c9c17dd`). Nothing from Part 5
+> below has been pushed — most of it hasn't even been verified in a browser yet, see why below.
+>
+> **Part 5 work — built but UNVERIFIED, do not trust it blindly, check it for real first:**
+> A mid-session tool outage (the safety classifier gating Bash/network/MCP-write calls went down
+> for an extended stretch) blocked all live verification, database writes, and the dev-server
+> preview for the rest of the session. Everything below was written correctly to the best of
+> available static analysis, but **none of it has been run in a browser or confirmed against a
+> live database** — treat it as a first draft to verify, not finished work:
+> 1. **Footer audit + fixes** (`src/components/layout/Footer.js`) — added Enterprise, Badges,
+>    Contact links; new `src/app/enterprise/page.js` marketing/waitlist page (mailto CTA to the
+>    same `hello@scout-it.vercel.app` address already used in `EarlyAccessGate.js`).
+> 2. **Mission Control dev-preview** (`src/components/dashboard/MissionControlMode.js`, wired
+>    into `src/app/dashboard/page.js` + a new "Mission Control (preview only)" section in
+>    `src/components/ui/FloatingToolbox.js`'s dev panel). **Owner correction this session:**
+>    Mission Control is ONE dashboard with two lenses, not two separate systems — "staff" (owner +
+>    team) gets near-global property access/edit; "enterprise" (external client companies) gets
+>    scoped-to-own-portfolio access. Both lenses currently reuse `useDashboard()`'s already-global
+>    `listings` (real data, since RLS is still permissively open) — **explicitly NOT
+>    production-safe**, real Enterprise isolation still needs the parked RLS reset + a real
+>    `organizations` table (Track 4, `PLAN_STAFF_ENTERPRISE_ANALYTICS_NOTIFICATIONS.md`). Gated
+>    entirely behind the dev toolbox (`scoutit_dev` flag) — never added to `ACTIVATABLE_MODES`, so
+>    no real user can self-activate it.
+> 3. **NOAH historical flood risk ranges** (`src/components/property/FloodHeatmapMap.js`) — added
+>    a 3-tab selector for NOAH's real return periods (5-yr "Recent", 25-yr, 100-yr). **Correction
+>    to the owner's original ask:** NOAH does not publish a "50-year" dataset
+>    (`HEATMAP_NOAH_INTEGRATION_PLAN.md` §1 confirms only 5/25/100-yr exist) — used 25-yr instead
+>    of inventing one. **Unverified: whether `flood_5yr.pmtiles` and `flood_25yr.pmtiles` actually
+>    exist at the same Hugging Face path as the already-working `flood_100yr.pmtiles`** — inferred
+>    from the established naming convention + NOAH's confirmed data coverage, not confirmed live
+>    (the outage blocked the check). **Check this first** — if either file 404s, the component's
+>    existing error state will show "unavailable" gracefully, but it needs a real check before
+>    trusting the 5yr/25yr tabs work at all.
+> 4. **6 master mock properties (task not started — blocked entirely by the outage).** A complete
+>    generation script is ready to run: `_tmp-master-properties.js` + `_tmp-deepintel-schema.json`
+>    (repo root, throwaway, delete after running) — one fully-populated demo property per category
+>    (residential/commercial/str/hospitality/restaurants/venues), every category spec field, every
+>    Deep Intelligence field across all 6 chapters (values mechanically derived from
+>    `deepIntelSchema.js`'s own "e.g. ..." placeholders — not invented), 2-3 units each. Run with
+>    `node --env-file=.env.local _tmp-master-properties.js` from the repo root once Supabase/
+>    Airtable MCP access is confirmed working again, following the exact same pattern as the
+>    `ScoutIt Demo Tower` real demo property from earlier in this session.
+>
+> **Immediate next steps, in order:** (1) run the context-load sequence above, for real. (2)
+> Verify Part 5's four items actually work — start the dev server, click through the footer/
+> enterprise page/Mission Control preview/NOAH tabs, fix anything broken. (3) Run the master-
+> properties script, verify each of the 6 properties renders correctly on its public page, clean
+> up the two `_tmp-*` files after. (4) Only then commit + ask before pushing.
+>
+> ## Part 4 (same day) — pushed to main + both Vercel deployments
+> Fixed all 5 pre-existing Playwright E2E failures (`E2E_TEST_FIX_LIST.md`-adjacent, unrelated to
+> this session's actual feature work — all were test/config drift against the current UI:
+> `connections.spec.js`/`owner-live-editor-flow.spec.js` had ambiguous loose-text locators,
+> `live-canvas.spec.js` had a stale button-text assertion, `owner-deep-intel-flow.spec.js` had a
+> racy fixed-sleep photo-upload wait that intermittently landed on 4/5 photos, and
+> `owner-live-editor-flow.spec.js` predated the `property_units` rebuild entirely). Full suite:
+> 20/20 passing with the plain `npx playwright test` default command. Also capped
+> `playwright.config.js`'s local workers at 2 — unlimited parallel workers were running multiple
+> heavy photo-upload flows simultaneously, causing real resource-contention flakiness unrelated to
+> any app bug. **Pushed to `main` and both Vercel projects redeployed successfully**
+> (`scoutit.vercel.app` + `scout-it.vercel.app`, commit `c9c17dd`) — owner explicitly asked for
+> this after confirming no reproducible bug on the "hidden details" report he'd flagged (tested
+> exhaustively across `DeepIntelWidget`, `MinorLockSection`/`CategorySpecBlock`, and the full
+> "Hidden Intel"/"The Fine Print" chapter including `FloodRiskBadge` — found nothing broken; the
+> report may need a screenshot next time to pin down, or was already fixed by this session's
+> earlier work).
+>
+> ## Part 2 — 2026-07-03
 > Owner did a live browser walkthrough of Unit Delegation (real demo property created across
 > Supabase + Airtable — `ScoutIt Demo Tower — Unit Delegation Showcase`, kept as a real working
 > example, not deleted). Approved, then **committed locally to `main`**: commit `56df83d` (Unit

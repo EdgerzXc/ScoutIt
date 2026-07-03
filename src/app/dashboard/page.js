@@ -12,6 +12,7 @@ const BrokerMode = dynamic(() => import("../../components/dashboard/BrokerMode")
 const BuyerMode = dynamic(() => import("../../components/dashboard/BuyerMode"), { ssr: false });
 const ProviderMode = dynamic(() => import("../../components/dashboard/ProviderMode"), { ssr: false });
 const OperatorMode = dynamic(() => import("../../components/dashboard/OperatorMode"), { ssr: false });
+const MissionControlMode = dynamic(() => import("../../components/dashboard/MissionControlMode"), { ssr: false });
 import Nudge from "../../components/ui/Nudge";
 import Toasts from "../../components/ui/Toasts";
 import ConciergeAI from "../../components/dashboard/ConciergeAI";
@@ -24,7 +25,11 @@ const TAG_LABELS = {
   broker: "Broker",
   provider: "Service Provider",
   operator: "Operator",
-  exploring: "Exploring"
+  exploring: "Exploring",
+  // Dev-toolbox-only modes -- never added to ACTIVATABLE_MODES, so a real user can
+  // never self-activate these from the normal "Unlock More" switcher.
+  mc_staff: "Mission Control · Staff",
+  mc_enterprise: "Mission Control · Enterprise",
 };
 
 // Roles a user can activate from the Mode menu without re-onboarding
@@ -146,6 +151,8 @@ function DashboardInner() {
       case "exploring": return <BuyerMode />;
       case "provider": return <ProviderMode type={user.providerType} />;
       case "operator": return <OperatorMode />;
+      case "mc_staff": return <MissionControlMode variant="staff" />;
+      case "mc_enterprise": return <MissionControlMode variant="enterprise" />;
       default: return <div>Unknown Mode</div>;
     }
   };
