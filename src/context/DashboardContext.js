@@ -42,10 +42,11 @@ export function DashboardProvider({ children }) {
             const parsed = JSON.parse(mockStr);
             setCurrentUser(parsed);
             setIsLoading(false);
+            fetchNotifications(parsed.id);
             return;
           } catch(e) {}
         }
-        
+
         // Otherwise, clear old mock data if no real session exists
         localStorage.removeItem("scoutit_user");
         setCurrentUser(null);
@@ -89,6 +90,39 @@ export function DashboardProvider({ children }) {
     setConnects(getBalance(role, tier));
 
     await syncLocalReactionsToSupabase(authUser.id);
+    fetchNotifications(authUser.id);
+  };
+
+  // ── Notifications (persisted — Track 1, PLAN_STAFF_ENTERPRISE_ANALYTICS_NOTIFICATIONS.md) ──
+  const authedFetch = async (url, options = {}) => {
+    const { data: { session } } = await getSession();
+    const token = session?.access_token;
+    return fetch(url, {
+      ...options,
+      headers: {
+        ...(options.headers || {}),
+        "Authorization": token ? `Bearer ${token}` : "",
+      },
+    });
+  };
+
+  const fetchNotifications = async (userId) => {
+    if (!userId) return;
+    try {
+      const mockParam = userId === "master-dev" ? "?mockOwnerId=master-dev" : "";
+      const res = await authedFetch(`/api/notifications${mockParam}`);
+      if (!res.ok) return;
+      const data = await res.json();
+      setNotifications((data.notifications || []).map(n => ({
+        id: n.id,
+        title: n.title,
+        desc: n.desc,
+        icon: n.icon,
+        read: n.read,
+      })));
+    } catch (e) {
+      console.error("Failed to fetch notifications", e);
+    }
   };
 
   const syncLocalReactionsToSupabase = async (userId) => {
@@ -692,14 +726,44 @@ export function DashboardProvider({ children }) {
 
   const addNotification = (notif) => {
     setNotifications(prev => [{ ...notif, id: 'n_' + Date.now(), read: false }, ...prev]);
+
+    // Persist client-triggered notifications through the same table as the
+    // server-triggered ones (stale-listing, broker-on-change).
+    if (currentUser?.id) {
+      const mockParam = currentUser.id === "master-dev" ? "?mockOwnerId=master-dev" : "";
+      authedFetch(`/api/notifications${mockParam}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          mockOwnerId: currentUser.id === "master-dev" ? "master-dev" : undefined,
+          title: notif.title,
+          desc: notif.desc,
+          icon: typeof notif.icon === "string" ? notif.icon : "🔔",
+          notificationType: notif.notificationType || "client_event",
+        }),
+      }).catch(e => console.error("Failed to persist notification", e));
+    }
   };
 
   const markNotificationsRead = () => {
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    if (currentUser?.id) {
+      const mockParam = currentUser.id === "master-dev" ? "?mockOwnerId=master-dev" : "";
+      authedFetch(`/api/notifications${mockParam}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mockOwnerId: currentUser.id === "master-dev" ? "master-dev" : undefined }),
+      }).catch(e => console.error("Failed to mark notifications read", e));
+    }
   };
 
   const clearAllNotifications = () => {
     setNotifications([]);
+    if (currentUser?.id) {
+      const mockParam = currentUser.id === "master-dev" ? "?mockOwnerId=master-dev" : "";
+      authedFetch(`/api/notifications${mockParam}`, { method: "DELETE" })
+        .catch(e => console.error("Failed to clear notifications", e));
+    }
   };
 
   // ── Proximity Radar (Radius Search via Local Haversine) ──

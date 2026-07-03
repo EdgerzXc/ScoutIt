@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { syncPropertyUnitsToAirtable } from "@/lib/unitsSync";
+import { notifyAttachedBrokers } from "@/lib/notifications";
 
 // Owner accepts an operator's handshake request and picks which specific
 // units to hand over. Per SCOUTIT_MASTER_BUILD_SPEC.md §9.2/locked decision
@@ -218,6 +219,17 @@ export async function POST(request) {
     } catch (airtableErr) {
       console.error("[DELEGATE API] Airtable sync failed:", airtableErr);
       warning = "Units delegated, but Airtable sync failed: " + airtableErr.message;
+    }
+
+    if (property.pipeline_status === 'approved') {
+      await notifyAttachedBrokers(supabaseAdmin, {
+        propertyId: property.id,
+        title: "Units delegated to an operator",
+        desc: `${unitIds.length} unit(s) in "${property.title}" are now operated by a co-working operator.`,
+        icon: "🏢",
+        notificationType: "property_changed",
+        excludeUserId: userId,
+      });
     }
 
     return NextResponse.json({ success: true, status: "accepted", delegatedUnitIds: unitIds, ...(warning ? { warning } : {}) });

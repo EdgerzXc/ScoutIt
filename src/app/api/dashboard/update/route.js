@@ -4,6 +4,15 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { updateProperty } from "@/lib/airtable";
 import { z } from "zod";
 import { stripAllTags } from "@/lib/sanitize";
+import { notifyAttachedBrokers } from "@/lib/notifications";
+
+// Price/status-ish keys across every category's details shape (Track 1,
+// PLAN_STAFF_ENTERPRISE_ANALYTICS_NOTIFICATIONS.md — "Price + status + units"
+// triggers a broker-on-change alert, not every autosave keystroke).
+const BROKER_ALERT_WATCH_KEYS = [
+  "price", "rentPerSqm", "camc", "acCharges", "nightlyRate", "rent", "rentalRate",
+  "listedPrice", "Listed_Price", "priceStatus", "Price_Status", "availability",
+];
 
 const updateSchema = z.object({
   title: z.string().max(255).optional(),
@@ -115,6 +124,28 @@ export async function POST(request) {
     if (updateError) {
       console.error("[UPDATE API] Failed to update Supabase:", updateError);
       return NextResponse.json({ error: "Failed to update database" }, { status: 500 });
+    }
+
+    // 2b. Broker-on-change alert — only for a watched price/status field
+    // actually changing value, and only on already-approved (public)
+    // properties, since that's the only state where an attached broker exists.
+    if (currentSubmission.pipeline_status === 'approved' && validatedData.details) {
+      const oldDetails = currentSubmission.details || {};
+      const newDetails = supabasePayload.details || {};
+      const touchedKeys = Object.keys(validatedData.details);
+      const changedKey = BROKER_ALERT_WATCH_KEYS.find(
+        (key) => touchedKeys.includes(key) && oldDetails[key] !== newDetails[key]
+      );
+      if (changedKey) {
+        await notifyAttachedBrokers(serviceClient, {
+          propertyId: submissionId,
+          title: "Listing updated",
+          desc: `"${currentSubmission.title}" was updated — check the latest details.`,
+          icon: "📋",
+          notificationType: "property_changed",
+          excludeUserId: userId,
+        });
+      }
     }
 
     // 3. If approved, update Airtable too!

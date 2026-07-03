@@ -317,6 +317,29 @@ export async function fetchProperties(apiKey, baseId) {
 }
 
 // ═══════════════════════════════════════════════════════════════
+// PROPERTIES_CMS → verification lifecycle only (Slug + Last_Verified_Date)
+// Lightweight sibling of fetchProperties, used by the stale-listing cron
+// (Track 1, PLAN_STAFF_ENTERPRISE_ANALYTICS_NOTIFICATIONS.md) so that route
+// doesn't have to pull every field of every approved property just to check
+// one date.
+// ═══════════════════════════════════════════════════════════════
+export async function fetchPropertyVerificationDates(apiKey, baseId) {
+  const records = await fetchTable(
+    "PROPERTIES_CMS",
+    apiKey,
+    baseId,
+    "fields%5B%5D=Slug&fields%5B%5D=Title&fields%5B%5D=Last_Verified_Date&fields%5B%5D=Approved_For_ScoutIt"
+  );
+  return records
+    .filter((r) => r.fields.Approved_For_ScoutIt && r.fields.Slug)
+    .map((r) => ({
+      slug: r.fields.Slug,
+      title: r.fields.Title || "Untitled Property",
+      lastVerifiedDate: r.fields.Last_Verified_Date || null,
+    }));
+}
+
+// ═══════════════════════════════════════════════════════════════
 // INTEL_CMS → normalized article objects
 // ═══════════════════════════════════════════════════════════════
 export async function fetchIntel(apiKey, baseId) {

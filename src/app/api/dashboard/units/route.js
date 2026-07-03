@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { sanitizeObject } from "@/lib/sanitize";
 import { syncPropertyUnitsToAirtable } from "@/lib/unitsSync";
+import { notifyAttachedBrokers } from "@/lib/notifications";
 
 // Matches a real Postgres uuid (property_units.id). Client-side temp ids from
 // InventoryGridManager's newId() (Date.now().toString(36) + random) never match
@@ -267,6 +268,20 @@ export async function POST(request) {
     } catch (airtableErr) {
       console.error("[UNITS API] Airtable sync failed:", airtableErr);
       warning = "Units saved, but Airtable sync failed: " + airtableErr.message;
+    }
+
+    // Broker-on-change alert — only for structural inventory changes (units
+    // added/removed), not every field edit on an existing unit (Track 1,
+    // PLAN_STAFF_ENTERPRISE_ANALYTICS_NOTIFICATIONS.md).
+    if (property.pipeline_status === 'approved' && (toInsert.length > 0 || toDelete.length > 0)) {
+      await notifyAttachedBrokers(serviceClient, {
+        propertyId: propertyId,
+        title: "Unit inventory changed",
+        desc: `"${property.title}" had units added or removed.`,
+        icon: "🏢",
+        notificationType: "property_changed",
+        excludeUserId: userId,
+      });
     }
 
     // Map any client temp ids back so the caller can reconcile local state.
