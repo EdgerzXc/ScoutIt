@@ -760,15 +760,33 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
   };
 
   // ── Drag-to-scroll handlers ───────────────────
+  // Pointer Events + setPointerCapture so the drag keeps tracking even when
+  // the cursor leaves the (narrow) nav strip mid-drag -- the old mouse-event
+  // version cancelled on mouseleave, which made fast drags feel like they
+  // kept getting interrupted. Touch is left alone (native scroll handles it).
   const onDragStart = (e) => {
+    if (e.pointerType === "touch") return;
     isDragging.current  = true;
     startX.current      = e.pageX;
     scrollStart.current = scrollRef.current.scrollLeft;
     scrollRef.current.style.cursor = "grabbing";
+    // CSS gives .nav-inner scroll-behavior:smooth for nice keyboard-focus
+    // scrolling, but that animates every scrollLeft write -- during a live
+    // drag that means dozens of overlapping animations fighting each other,
+    // which is what made dragging feel laggy/late. Go instant while dragging.
+    scrollRef.current.style.scrollBehavior = "auto";
+    scrollRef.current.setPointerCapture(e.pointerId);
   };
-  const onDragEnd = () => {
+  const onDragEnd = (e) => {
+    if (!isDragging.current) return;
     isDragging.current = false;
-    if (scrollRef.current) scrollRef.current.style.cursor = "grab";
+    if (scrollRef.current) {
+      scrollRef.current.style.cursor = "grab";
+      scrollRef.current.style.scrollBehavior = "";
+      if (e?.pointerId != null) {
+        try { scrollRef.current.releasePointerCapture(e.pointerId); } catch {}
+      }
+    }
   };
   const onDragMove = (e) => {
     if (!isDragging.current) return;
@@ -1015,10 +1033,10 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
             aria-label="Property chapters"
             ref={scrollRef}
             style={{ scrollbarWidth: "none", msOverflowStyle: "none", cursor: "grab" }}
-            onMouseDown={onDragStart}
-            onMouseLeave={onDragEnd}
-            onMouseUp={onDragEnd}
-            onMouseMove={onDragMove}
+            onPointerDown={onDragStart}
+            onPointerUp={onDragEnd}
+            onPointerCancel={onDragEnd}
+            onPointerMove={onDragMove}
           >
 
             {/* ── Core tabs ── */}
