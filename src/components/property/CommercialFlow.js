@@ -326,6 +326,18 @@ function BackOfHousePanel({ property: d }) {
 // ═══════════════════════════════════════════════════
 // MAIN COMPONENT
 // ═══════════════════════════════════════════════════
+// Chapter state deep-links via ?chapter= (P2 from /impeccable critique: no way to
+// share a link to a specific chapter, and refresh always reset to "The Space").
+// Uses history.replaceState rather than Next.js router push so a chapter click
+// never triggers a navigation/refetch — this is a URL bookmark, not a route change.
+const VALID_CHAPTERS = new Set(["space","location","vault","life","whereto","buildplans","units","universe","services","yourmove"]);
+
+function initialChapterFromUrl(fallback) {
+  if (typeof window === "undefined") return fallback;
+  const urlChapter = new URLSearchParams(window.location.search).get("chapter");
+  return urlChapter && VALID_CHAPTERS.has(urlChapter) ? urlChapter : fallback;
+}
+
 export default function CommercialFlow({ slug, draftData, isDraftMode, externalActiveTab }) {
   // ── Interactive UI states ──────────────────────
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -337,6 +349,22 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
   const [canMarketIntel,    setCanMarketIntel]    = useState(false);
   useEffect(() => { setCanMarketIntel(canSee("marketIntel", getCurrentTier())); }, []);
   const [activeTab,         setActiveTab]         = useState(externalActiveTab || "space");
+  // SSR-safe: useState's initializer can't read window (hydration mismatch —
+  // React reuses the server-rendered value on mount instead of re-running the
+  // initializer). Read the real ?chapter= param client-side, after mount, one
+  // rAF past the initial commit — setting state synchronously in the mount
+  // effect lands inside React StrictMode's dev-only double-hydration check
+  // and logs a false-positive mismatch warning even though the end state is
+  // correct either way; deferring one frame keeps the console clean.
+  useEffect(() => {
+    if (externalActiveTab) return;
+    const raf = requestAnimationFrame(() => {
+      const urlChapter = initialChapterFromUrl(null);
+      if (urlChapter) setActiveTab(urlChapter);
+    });
+    return () => cancelAnimationFrame(raf);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (externalActiveTab && externalActiveTab !== activeTab) {
@@ -880,6 +908,11 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
   // Smooth scroll page to chapter content on mobile tab selection
   const handleTabClick = (tabId) => {
     setActiveTab(tabId);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.set("chapter", tabId);
+      window.history.replaceState(null, "", url);
+    }
     if (window.innerWidth <= 768) {
       setTimeout(() => {
         document.querySelector('.zone-story')
@@ -1469,37 +1502,48 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                 </div>
               )}
 
-              {/* Free location facts */}
+              {/* Free location facts — grouped (Risk & Zoning / Access) per
+                  /impeccable critique's chunking guideline (≤4 items/group) */}
               <div style={{display:"flex", flexDirection:"column", marginBottom:"24px"}}>
-                {d.flood_zone_status && (
-                  <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", gap:"20px"}}>
-                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Flood Zone</span>
-                    <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right"}}>{d.flood_zone_status}</span>
-                  </div>
+                {(d.flood_zone_status || d.zoning_classification) && (
+                  <>
+                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#5a5a5a", letterSpacing:"0.18em", textTransform:"uppercase", marginBottom:"2px"}}>Risk &amp; Zoning</span>
+                    {d.flood_zone_status && (
+                      <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", gap:"20px"}}>
+                        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Flood Zone</span>
+                        <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right"}}>{d.flood_zone_status}</span>
+                      </div>
+                    )}
+                    {d.zoning_classification && (
+                      <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", gap:"20px"}}>
+                        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Zoning</span>
+                        <span style={{fontFamily:"'Courier New',monospace", fontSize:"12px", color:"#f0ede8", textAlign:"right", letterSpacing:"0.04em"}}>{d.zoning_classification}</span>
+                      </div>
+                    )}
+                  </>
                 )}
-                {d.zoning_classification && (
-                  <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", gap:"20px"}}>
-                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Zoning</span>
-                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"12px", color:"#f0ede8", textAlign:"right", letterSpacing:"0.04em"}}>{d.zoning_classification}</span>
-                  </div>
-                )}
-                {publicTransitObj && (
-                  <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", gap:"20px"}}>
-                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Nearest Transit</span>
-                    <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right"}}>{publicTransitObj.name} · {publicTransitObj.distance}</span>
-                  </div>
-                )}
-                {d.nearest_highway && (
-                  <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", gap:"20px"}}>
-                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Major Road</span>
-                    <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right"}}>{d.nearest_highway}</span>
-                  </div>
-                )}
-                {d.street_type && (
-                  <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", gap:"20px"}}>
-                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Street Type</span>
-                    <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right"}}>{d.street_type}</span>
-                  </div>
+                {(publicTransitObj || d.nearest_highway || d.street_type) && (
+                  <>
+                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#5a5a5a", letterSpacing:"0.18em", textTransform:"uppercase", marginTop:"16px", marginBottom:"2px"}}>Access</span>
+                    {publicTransitObj && (
+                      <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", gap:"20px"}}>
+                        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Nearest Transit</span>
+                        <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right"}}>{publicTransitObj.name} · {publicTransitObj.distance}</span>
+                      </div>
+                    )}
+                    {d.nearest_highway && (
+                      <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", gap:"20px"}}>
+                        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Major Road</span>
+                        <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right"}}>{d.nearest_highway}</span>
+                      </div>
+                    )}
+                    {d.street_type && (
+                      <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", gap:"20px"}}>
+                        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Street Type</span>
+                        <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right"}}>{d.street_type}</span>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
 
