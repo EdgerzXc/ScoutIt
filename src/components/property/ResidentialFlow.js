@@ -1233,7 +1233,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
             <div className="panel-sidebar">
               <div className="sidebar-block"><div className="sidebar-accent-line" style={{background: "#E8AE3C"}}/><div className="sidebar-label" style={{color: "#E8AE3C"}}>Vault Status</div><div className="sidebar-value">Secured</div></div>
               <div className="sidebar-block"><div className="sidebar-label">Verification</div><div className="sidebar-value">ScoutIT Pros</div></div>
-              <div className="sidebar-block"><div className="sidebar-label">Access</div><div className="sidebar-value">Orbit Tier Only</div></div>
+              <div className="sidebar-block"><div className="sidebar-label">Access</div><div className="sidebar-value">Cluster Tier Only</div></div>
             </div>
           </div>
 

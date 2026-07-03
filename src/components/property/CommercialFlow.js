@@ -64,9 +64,12 @@ function SpatialVaultWidget({ lumaUrl, matterportUrl, heatmapUrl }) {
     <div style={{ marginTop: "32px", display: "flex", flexDirection: "column", gap: "24px" }}>
       {lumaUrl && (
         <div className="vault-item">
-          <h4 style={{ fontFamily: "'Courier New',monospace", fontSize: "10px", color: "#E8AE3C", letterSpacing: "0.18em", textTransform: "uppercase", marginBottom: "12px" }}>
+          <h4 style={{ fontFamily: "'Courier New',monospace", fontSize: "10px", color: "#E8AE3C", letterSpacing: "0.18em", textTransform: "uppercase", marginBottom: "4px" }}>
             3D Spatial Map
           </h4>
+          <p style={{ fontFamily: "Georgia,serif", fontStyle: "italic", fontSize: "11px", color: "var(--text-muted, #c8c8c8)", marginBottom: "12px" }}>
+            Illustrative capture — this property's own 3D scan is in progress
+          </p>
           <div style={{ position: "relative", width: "100%", height: "400px", borderRadius: "4px", overflow: "hidden", border: "1px solid #262626" }}>
             <iframe src={hasSubscription ? lumaUrl : undefined} style={{ width: "100%", height: "100%", border: "none", filter: hasSubscription ? "none" : "blur(8px) brightness(0.5)" }} title="3D Spatial Map" />
             {!hasSubscription && (
@@ -83,9 +86,12 @@ function SpatialVaultWidget({ lumaUrl, matterportUrl, heatmapUrl }) {
       )}
       {matterportUrl && (
         <div className="vault-item">
-          <h4 style={{ fontFamily: "'Courier New',monospace", fontSize: "10px", color: "#E8AE3C", letterSpacing: "0.18em", textTransform: "uppercase", marginBottom: "12px" }}>
+          <h4 style={{ fontFamily: "'Courier New',monospace", fontSize: "10px", color: "#E8AE3C", letterSpacing: "0.18em", textTransform: "uppercase", marginBottom: "4px" }}>
             360° AR Room Tour
           </h4>
+          <p style={{ fontFamily: "Georgia,serif", fontStyle: "italic", fontSize: "11px", color: "var(--text-muted, #c8c8c8)", marginBottom: "12px" }}>
+            Illustrative tour — this property's own 360° capture is in progress
+          </p>
           <div style={{ position: "relative", width: "100%", height: "400px", borderRadius: "4px", overflow: "hidden", border: "1px solid #262626" }}>
             <iframe src={hasSubscription ? matterportUrl : undefined} style={{ width: "100%", height: "100%", border: "none", filter: hasSubscription ? "none" : "blur(8px) brightness(0.5)" }} title="360 Tour" />
             {!hasSubscription && (
@@ -1097,6 +1103,8 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
         <div className={`zone-nav ${canScrollLeft ? "can-scroll-left" : ""} ${canScrollRight ? "can-scroll-right" : ""}`}>
           <div
             className="nav-inner"
+            role="tablist"
+            aria-label="Property chapters"
             ref={scrollRef}
             style={{ scrollbarWidth: "none", msOverflowStyle: "none", cursor: "grab" }}
             onMouseDown={onDragStart}
@@ -1122,13 +1130,16 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
 
             ].map((tab, idx, arr) => (
               <span key={tab.id} style={{display:"contents"}}>
-                <div
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={activeTab === tab.id}
                   className={`nav-chapter ${activeTab === tab.id ? "active" : ""}`}
                   onClick={() => handleTabClick(tab.id)}
                 >
                   {tab.icon}
                   <span className="chapter-label">{tab.label}</span>
-                </div>
+                </button>
                 {idx < arr.length - 1 && <div className="nav-divider" />}
               </span>
             ))}
@@ -1138,7 +1149,10 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
             {/* Units */}
             {dynamicUnits.length > 0 && (
               <>
-                <div
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={activeTab === "units"}
                   className={`nav-chapter ${activeTab === "units" ? "active" : ""}`}
                   onClick={() => handleTabClick("units")}
                 >
@@ -1149,13 +1163,16 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                     <rect x="11" y="11" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.3"/>
                   </svg>
                   <span className="chapter-label">Units</span>
-                </div>
+                </button>
                 <div className="nav-divider" />
               </>
             )}
 
             {/* Universe */}
-            <div
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === "universe"}
               className={`nav-chapter ${activeTab === "universe" ? "active" : ""}`}
               onClick={() => handleTabClick("universe")}
             >
@@ -1165,12 +1182,15 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                 <circle cx="10" cy="11.5" r="1.5" stroke="currentColor" strokeWidth="1.3"/>
               </svg>
               <span className="chapter-label">Universe</span>
-            </div>
+            </button>
 
             <div className="nav-divider" />
 
             {/* Services */}
-            <div
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === "services"}
               className={`nav-chapter ${activeTab === "services" ? "active" : ""}`}
               onClick={() => handleTabClick("services")}
             >
@@ -1178,12 +1198,15 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                 <path d="M10 2.5l1.9 3.9 4.3.6-3.1 3 .7 4.3L10 16.3 6.3 17.3l.7-4.3-3.1-3 4.3-.6z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/>
               </svg>
               <span className="chapter-label">Services</span>
-            </div>
+            </button>
 
             <div className="nav-divider" />
 
             {/* Your Move — CTA */}
-            <div
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === "yourmove"}
               className={`nav-chapter nav-chapter--cta ${activeTab === "yourmove" ? "active" : ""}`}
               onClick={() => handleTabClick("yourmove")}
             >
@@ -1191,7 +1214,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                 <path d="M4 10h10M11 7l3 3-3 3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
               <span className="chapter-label">Your Move</span>
-            </div>
+            </button>
 
           </div>{/* /nav-inner */}
 
@@ -1420,7 +1443,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
             <div className="panel-sidebar">
               <div className="sidebar-block"><div className="sidebar-accent-line" style={{background: "#E8AE3C"}}/><div className="sidebar-label" style={{color: "#E8AE3C"}}>Vault Status</div><div className="sidebar-value">Secured</div></div>
               <div className="sidebar-block"><div className="sidebar-label">Verification</div><div className="sidebar-value">ScoutIT Pros</div></div>
-              <div className="sidebar-block"><div className="sidebar-label">Access</div><div className="sidebar-value">Orbit Tier Only</div></div>
+              <div className="sidebar-block"><div className="sidebar-label">Access</div><div className="sidebar-value">Cluster Tier Only</div></div>
             </div>
           </div>
 

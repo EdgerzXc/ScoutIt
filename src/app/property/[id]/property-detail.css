@@ -1251,3 +1251,34 @@ html.lightbox-open {
     justify-content: center;
   }
 }
+
+/* ── Motion — DESIGN.md's Breathing Signal Rule + reduced-motion fallback ──
+   Flagged by /impeccable critique: this file had 3 infinite/entrance
+   animations (.map-pulse, .lightbox-overlay's fadeIn, .btn-pulse/
+   radar-btn-pulse) with zero prefers-reduced-motion handling anywhere in
+   the file. */
+.move-cta:not(.move-cta-secondary) {
+  animation: glow-pulse-vault 3.2s ease-in-out infinite;
+}
+.move-cta:not(.move-cta-secondary):hover {
+  animation: none;
+}
+@keyframes glow-pulse-vault {
+  0%, 100% { box-shadow: 0 0 6px rgba(232, 174, 60, 0.15); }
+  50%      { box-shadow: 0 0 26px rgba(232, 174, 60, 0.55); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .map-pulse,
+  .btn-pulse,
+  .lightbox-overlay,
+  .move-cta:not(.move-cta-secondary) {
+    animation: none !important;
+  }
+  .lightbox-overlay {
+    opacity: 1 !important;
+  }
+  .move-cta:not(.move-cta-secondary) {
+    box-shadow: var(--shadow-glow-soft) !important;
+  }
+}
