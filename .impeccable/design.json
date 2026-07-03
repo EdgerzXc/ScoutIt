@@ -1,0 +1,153 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-03T00:00:00.000Z",
+  "title": "Design System: ScoutIt",
+  "extensions": {
+    "colorMeta": {
+      "spatial-gold": {
+        "role": "primary",
+        "displayName": "Spatial Gold",
+        "canonical": "oklch(76% 0.13 75)",
+        "tonalRamp": ["#241a08", "#3e2c0e", "#5c4014", "#846019", "#ab7d24", "#c9962e", "#E8AE3C", "#f5cf7e"]
+      },
+      "spatial-gold-bright": {
+        "role": "primary",
+        "displayName": "Spatial Gold Bright",
+        "canonical": "oklch(83% 0.14 80)",
+        "tonalRamp": ["#2c2109", "#4a3810", "#6c5217", "#95721f", "#bd9128", "#dcae37", "#F7C64E", "#fbdc94"]
+      },
+      "spatial-gold-muted": {
+        "role": "primary",
+        "displayName": "Spatial Gold Muted",
+        "canonical": "oklch(42% 0.07 70)",
+        "tonalRamp": ["#120d04", "#1f1608", "#2e200b", "#452f10", "#5a3d16", "#6E531A", "#8a6a22", "#a9852f"]
+      },
+      "void-black": {
+        "role": "neutral",
+        "displayName": "Void Black",
+        "canonical": "oklch(16% 0.003 60)",
+        "tonalRamp": ["#000000", "#0e0e0e", "#161616", "#1e1e1e", "#242424", "#3a3a3a", "#5a5a5a", "#8a8a8a"]
+      },
+      "paper-white": {
+        "role": "neutral",
+        "displayName": "Paper White",
+        "canonical": "oklch(94% 0.006 75)",
+        "tonalRamp": ["#3a3835", "#6a6763", "#918e88", "#b8b4ad", "#d5d1c9", "#e8e4dc", "#f0ede8", "#faf8f4"]
+      },
+      "soft-grey": {
+        "role": "neutral",
+        "displayName": "Soft Grey",
+        "canonical": "oklch(82% 0 0)",
+        "tonalRamp": ["#2a2a2a", "#454545", "#606060", "#7c7c7c", "#989898", "#b4b4b4", "#c8c8c8", "#e0e0e0"]
+      },
+      "signal-green": { "role": "success", "displayName": "Signal Green", "canonical": "oklch(65% 0.11 155)", "tonalRamp": ["#0d1f16", "#173a29", "#245a3f", "#337c58", "#4caf7d", "#6ec49a", "#95d8b8", "#c2ecd8"] },
+      "signal-amber": { "role": "warning", "displayName": "Signal Amber", "canonical": "oklch(83% 0.13 90)", "tonalRamp": ["#2b2308", "#463a0e", "#6b5a16", "#96811f", "#c2a92a", "#e8c84a", "#f2da85", "#f9ecc0"] },
+      "signal-red": { "role": "danger", "displayName": "Signal Red", "canonical": "oklch(64% 0.15 30)", "tonalRamp": ["#2a0e08", "#471810", "#6b2418", "#973121", "#c73f2b", "#e8644a", "#f08e7a", "#f7bcae"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Hero headlines, property titles, section headers. Georgia serif, never sans." },
+      "body": { "displayName": "Body", "purpose": "All prose copy. Geist Sans, capped ~65-75ch line length." },
+      "label": { "displayName": "Instrument Label", "purpose": "Chapter eyebrows, badges, system metadata, status labels. Mono, uppercase, 0.18em tracking -- the system's core signature." }
+    },
+    "shadows": [
+      { "name": "sm", "value": "0 2px 8px rgba(0,0,0,0.25)", "purpose": "Subtle lift for list items, small raised chips." },
+      { "name": "md", "value": "0 4px 16px rgba(0,0,0,0.35)", "purpose": "Cards, panels, dropdowns." },
+      { "name": "lg", "value": "0 12px 40px rgba(0,0,0,0.45)", "purpose": "Modals, floating toolbox, top-of-stack chrome." },
+      { "name": "glow", "value": "0 0 18px rgba(232,174,60,0.45)", "purpose": "Gold-tinted -- active/focused accent elements only, a signal not decoration." },
+      { "name": "glow-soft", "value": "0 0 24px rgba(232,174,60,0.18)", "purpose": "Softer gold glow for ambient accent emphasis." }
+    ],
+    "motion": [
+      { "name": "transition", "value": "0.38s cubic-bezier(0.4, 0, 0.2, 1)", "purpose": "Default state-change easing." },
+      { "name": "transition-fast", "value": "0.25s cubic-bezier(0.4, 0, 0.2, 1)", "purpose": "Hover/focus micro-interactions." },
+      { "name": "transition-slow", "value": "0.6s cubic-bezier(0.4, 0, 0.2, 1)", "purpose": "Larger layout/reveal transitions." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "480px" },
+      { "name": "md", "value": "768px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The system's one loud interactive element -- Spatial Gold Bright fill, void-black text.",
+      "html": "<button class=\"ds-btn-primary\">DISCOVER SPACES</button>",
+      "css": ".ds-btn-primary { background: #F7C64E; color: #0e0e0e; font-family: var(--font-geist-sans), sans-serif; font-weight: 600; padding: 10px 24px; border: none; border-radius: 4px; letter-spacing: 0.02em; cursor: pointer; transition: background 0.25s cubic-bezier(0.4,0,0.2,1), transform 0.25s cubic-bezier(0.4,0,0.2,1); } .ds-btn-primary:hover { background: #E8AE3C; transform: translateY(-1px); } .ds-btn-primary:focus-visible { outline: 1.5px solid #E8AE3C; outline-offset: 2px; }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Secondary action inside a panel where a primary CTA would be too loud.",
+      "html": "<button class=\"ds-btn-ghost\">Cancel</button>",
+      "css": ".ds-btn-ghost { background: transparent; color: #c8c8c8; border: 1px solid #6E531A; padding: 10px 24px; border-radius: 4px; cursor: pointer; transition: color 0.25s, border-color 0.25s; } .ds-btn-ghost:hover { color: #E8AE3C; border-color: #E8AE3C; }"
+    },
+    {
+      "name": "Chapter Eyebrow",
+      "kind": "custom",
+      "refersTo": "chapter-eyebrow",
+      "description": "Signature numbered chapter marker opening every property-page section (e.g. 01 -- THE SPACE), followed by a hairline divider.",
+      "html": "<div class=\"ds-chapter-eyebrow\"><span>01 &mdash; THE SPACE</span><div class=\"ds-chapter-rule\"></div></div>",
+      "css": ".ds-chapter-eyebrow span { font-family: var(--font-geist-mono), monospace; font-size: 10px; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: #E8AE3C; display: block; margin-bottom: 10px; } .ds-chapter-rule { height: 1px; background: #262626; }"
+    },
+    {
+      "name": "Panel / Card",
+      "kind": "card",
+      "refersTo": "card-surface",
+      "description": "Tonal-layered surface, hairline border, no drop shadow at rest.",
+      "html": "<div class=\"ds-panel\">Panel content</div>",
+      "css": ".ds-panel { background: #161616; border: 0.5px solid #262626; border-radius: 4px; padding: 20px; color: #f0ede8; }"
+    },
+    {
+      "name": "Floating Glass Panel",
+      "kind": "custom",
+      "refersTo": "glass-panel",
+      "description": "Scoped glassmorphism for genuinely floating chrome (toolbox, modals) -- never static content cards.",
+      "html": "<div class=\"ds-glass-panel\">Floating chrome</div>",
+      "css": ".ds-glass-panel { background: rgba(17,17,17,0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(232,174,60,0.2); border-radius: 8px; box-shadow: 0 12px 48px rgba(0,0,0,0.75); }"
+    },
+    {
+      "name": "Nav Pill (active)",
+      "kind": "nav",
+      "refersTo": "nav-pill-active",
+      "description": "Active navigation state -- gold + soft glow, mono uppercase label.",
+      "html": "<a class=\"ds-nav-pill ds-nav-pill-active\">STRATOSPHERE &middot; INTEL</a>",
+      "css": ".ds-nav-pill { font-family: var(--font-geist-mono), monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #c8c8c8; text-decoration: none; padding: 6px 14px; border-radius: 20px; transition: color 0.25s, background 0.25s; } .ds-nav-pill-active { color: #F7C64E; background: rgba(232,174,60,0.08); box-shadow: 0 0 18px rgba(232,174,60,0.18); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Spatial Commerce",
+    "overview": "ScoutIt isn't a real estate listings board wearing a dark theme -- it's an intelligence terminal for Philippine space, built for people deciding whether to trust it enough to act. The system runs on restraint: 95% void-black canvas, 5% Spatial Gold, and every use of that gold has to earn its place. Chrome stays quiet so the actual signal -- flood risk, verification badges, market data, category intelligence -- can carry the visual weight instead of decoration doing it. The name is deliberate: this treats real estate, short-term rentals, hospitality, restaurants, and event venues as one category -- \"spatial commerce\" -- not six separate templates bolted together.",
+    "keyCharacteristics": [
+      "Void-black canvas with tonal surface layering, not pure flat black",
+      "Gold is a signal, not wallpaper -- deployed with intent, never decoratively",
+      "Mono-spaced, wide-tracked, uppercase labels for system chrome",
+      "Georgia serif for display headlines -- editorial weight, not tech-startup sans-everywhere",
+      "Numbered chapter registry on property pages is real information architecture, not decoration",
+      "Scoped, purposeful glassmorphism -- never default"
+    ],
+    "rules": [
+      { "name": "The One Signal Rule", "body": "Gold renders on <=5% of any given screen. If a section reads gold-heavy, it's decorating, not signaling.", "section": "colors" },
+      { "name": "The No-Pure-Black Rule", "body": "Never #000000 as a surface color; void-black (#0e0e0e) always carries the intended warmth.", "section": "colors" },
+      { "name": "The Instrument-Label Rule", "body": "Any UI chrome that isn't a headline or body copy is mono, uppercase, and wide-tracked. The system's most recognizable signature.", "section": "typography" },
+      { "name": "The Glow-Is-a-Signal Rule", "body": "Gold glow means interactive and currently relevant, not decorative flourish.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do keep gold to <=5% of any screen -- it's a signal, not a theme color.",
+      "Do use the mono/uppercase/wide-tracked treatment for every piece of system chrome.",
+      "Do use tonal surface-stepping plus subtle neutral shadows for depth; reserve gold glow for genuinely interactive/focused elements only.",
+      "Do treat the numbered chapter registry as real information architecture.",
+      "Do scope glassmorphism to genuinely floating chrome -- never static content."
+    ],
+    "donts": [
+      "Don't read as a generic PH listings directory (Lamudi/Zillow-style board).",
+      "Don't reach for common luxury real estate cliches -- gold-and-marble old-money framing, ornate serif-everywhere, stock-photo-mansion imagery.",
+      "Don't use pure #000000 as a surface.",
+      "Don't apply gold decoratively -- every gold use should be a deliberate signal.",
+      "Don't use border-left/border-right as a colored accent stripe.",
+      "Don't use gradient text.",
+      "Don't apply the numbered-chapter/eyebrow pattern reflexively outside the property-page chapter system."
+    ]
+  }
+}
