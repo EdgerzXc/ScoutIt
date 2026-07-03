@@ -198,6 +198,11 @@ different altitude. That is ScoutIT in the market. The UFO stays. Always.
 **10 · Cyber Security**
 - `SECURITY_HARDENING_REPORT.md` — record of Upstash rate limits, API payload checks, Playwright Council E2E tests, and Supabase RLS lockdown
 
+**QuestIT (future — do not touch)**
+- `QUESTIT_FUTURE/README.md` — ⚠️ **read before touching anything QuestIT-related.** QuestIT is
+  a separate standalone future platform (not a ScoutIt module) — explicitly parked by the owner.
+- `QUESTIT_FUTURE/questit_api_schema.sql` — the draft DB schema for the ScoutIt↔QuestIT bridge, written but never applied
+
 ---
 
 ## 6. Decisions log + remaining open items

@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin as supabase } from "@/lib/supabaseAdmin";
 import { canRaiseQuest } from "@/lib/questitPolicyEngine";
 
+// This route currently 401s on every call — the questit_api_keys/questit_policies/
+// company_quests tables it queries were never migrated into the live DB. That's
+// intentional, not a bug: see _SCOUTIT_BRAIN/QUESTIT_FUTURE/README.md before
+// "fixing" this.
 export async function POST(request) {
   try {
     // 1. Authenticate API Key

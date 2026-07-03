@@ -218,6 +218,9 @@ Monetizes: **access · intelligence · visibility · connection** — never the 
 - When an owner joins the Vault queue → ScoutIT internally posts a QuestIT quest
 - If no community member claims it → ScoutIT sends their own team
 - **Invisible to the property owner** — they just see "ScoutIT team records it"
+- ⚠️ **Explicitly parked — see `QUESTIT_FUTURE/README.md` before touching any `questit_*` table
+  or route.** The bridge routes (`api/v1/questit/raise`, `api/v1/questit/quests`) and their draft
+  schema already exist but are intentionally not wired up yet.
 
 ### The Vault Listing Lifecycle
 1. Owner joins Vault queue (Cluster+)

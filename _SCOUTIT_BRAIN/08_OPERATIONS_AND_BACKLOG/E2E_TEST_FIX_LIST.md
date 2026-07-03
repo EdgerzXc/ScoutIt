@@ -67,22 +67,23 @@ rolled back (confirmed 0 orphaned rows). Funded (5 granted) → 200, real `deals
 'Owner invited a broker (handshake)'`), balance correctly decremented 5→4. All test artifacts
 (user, wallet, deal, ledger rows) deleted after.
 
-## 🔴 New finding (2026-07-03): structurally broken, not just unverified
+## 🔮 Not a bug — QuestIT is intentionally parked, see QUESTIT_FUTURE/
 
-### 3. `/api/v1/questit/raise` — references three tables that don't exist anywhere
-**Found while attempting to E2E-verify the same Connects-spend rewiring as #2.** The route reads
-from `questit_api_keys`, `questit_policies`, and writes to `company_quests` — **none of these
-three tables exist in the live Supabase database, and none appear in any `.sql` file in this
-repo.** This isn't a config gap (missing env var, unset flag) — the schema was simply never
-created. Every call to this route has almost certainly always failed, immediately, at the very
-first query (`questit_api_keys` lookup) — and because that query's error is caught generically,
-the route returns a misleading `401 "Invalid or inactive API Key"` instead of any indication the
-backing tables don't exist. `src/lib/questitPolicyEngine.js` (the policy evaluator this route
-calls) is fine on its own — it's pure logic with no DB dependency, just never gets a
-`policy_rules` row to evaluate against in practice.
-**Not fixed — deliberately.** Building these three tables means real schema decisions (API key
-hashing scheme, `policy_rules` JSON shape, `company_quests` columns) that shouldn't be guessed
-as a tangent. Flagged here per this file's own rule, not silently expanded into a build task.
+### 3. `/api/v1/questit/raise` and `/api/v1/questit/quests` — correctly parked, do not fix
+**Found while attempting to E2E-verify the same Connects-spend rewiring as #2**, then corrected
+after owner context: QuestIT is a **separate, standalone future platform** (a hybrid
+quest-app/website meant for many companies, not just ScoutIt — ScoutIt is only its first
+client), not a ScoutIt module. Both routes read/write `questit_api_keys`, `questit_policies`,
+and `company_quests` — none of which have ever been migrated into the live Supabase database.
+**This was initially misdiagnosed as "needs undesigned schema" — wrong.** A real schema already
+exists (`_SCOUTIT_BRAIN/QUESTIT_FUTURE/questit_api_schema.sql`, moved there from the repo root
+2026-07-03), it was simply never run. The generic error handling on both routes turns the missing
+tables into a misleading `401 "Invalid or inactive API Key"` instead of a clear "not configured"
+message — which is exactly why this keeps getting mistaken for an active bug worth fixing.
+**Owner instruction (2026-07-03): leave it alone.** Full context, the two existing (slightly
+inconsistent) schema drafts, and the explicit "don't touch" rule live in
+`_SCOUTIT_BRAIN/QUESTIT_FUTURE/README.md` — read that before ever touching anything
+QuestIT-related again, in a review, an E2E pass, or otherwise.
 
 ### 4. Deep Intelligence panel plumbing (`DeepIntel_JSON` → `property.deepIntel`)
 **Built:** 2026-07-02, earlier in the same session — `src/lib/airtable.js` now parses a new
