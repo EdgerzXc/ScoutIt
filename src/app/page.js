@@ -1085,13 +1085,14 @@ export default function Home() {
           border-radius: 4px;
           text-decoration: none;
           transition: transform var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast), border-color var(--transition-fast);
-          box-shadow: 0 0 0 rgba(232, 174, 60, 0);
+          animation: glowPulse 3.2s ease-in-out infinite;
         }
         .hero-cta-primary:hover {
           background: var(--accent-bright);
           border-color: var(--accent-bright);
           box-shadow: 0 8px 30px rgba(232, 174, 60, 0.25);
           transform: translateY(-2px);
+          animation: none;
         }
         .hero-cta-primary:focus-visible {
           outline: 2px solid var(--accent-bright);
@@ -1891,6 +1892,13 @@ export default function Home() {
         }
 
         /* KEYFRAMES ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */
+
+        /* Primary CTA — breathing gold glow (dim -> bright -> dim), signals
+           "this is the one clickable thing" without a second accent color */
+        @keyframes glowPulse {
+          0%, 100% { box-shadow: 0 0 6px rgba(232, 174, 60, 0.15); }
+          50%      { box-shadow: 0 0 26px rgba(232, 174, 60, 0.55); }
+        }
 
         /* S ΓÇö comet: draws left-to-right with trailing glow */
         @keyframes cometDraw {
@@ -3634,6 +3642,11 @@ export default function Home() {
           .hook-scroll-indicator {
             animation: none !important;
             opacity: 1 !important;
+          }
+
+          .hero-cta-primary {
+            animation: none !important;
+            box-shadow: var(--shadow-glow-soft) !important;
           }
 
           .black-hole-core,

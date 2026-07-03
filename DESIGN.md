@@ -89,14 +89,16 @@ behind them).
 - Numbered chapter registry on property pages (`01 — THE SPACE`) is a real information
   architecture (ten real chapters per space category), not a decorative section marker
 - Scoped, purposeful glassmorphism (4px/12px/20px blur depending on context) — never default
+- Primary CTAs breathe with a slow gold glow pulse rather than introducing a second accent
+  color — motion carries the "click me" signal, gold stays the only hue
 
 ## 2. Colors
 
 The palette is a strict two-role system by design: void-black carries everything, Spatial Gold
-punctuates. **Open direction, not yet resolved:** the owner wants a genuine secondary "this is
-clickable" accent color distinct from gold, for specific interactive moments — not a replacement
-for the black/gold standard, an addition to it. Run `/impeccable colorize` to work through real
-candidates; don't invent one here.
+punctuates. **Resolved 2026-07-03:** rather than adding a second "clickable" accent color, the
+"this is clickable" signal is carried by motion instead — primary CTAs breathe with a slow gold
+glow pulse (see §4 Elevation, "The Breathing Signal Rule"). This keeps the palette to one hue
+while still giving interactive elements a distinct, unmistakable affordance.
 
 ### Primary
 - **Spatial Gold** (`#E8AE3C`): baseline gold — headline accents, labels, verified badges, the
@@ -170,15 +172,26 @@ currently focused, functioning as a signal rather than a depth cue.
 **The Glow-Is-a-Signal Rule.** Gold glow means "interactive and currently relevant," not
 "decorative flourish." If glow shows up on something static, it's misused.
 
+**The Breathing Signal Rule.** The single primary CTA on a given view breathes with a slow
+(`3.2s ease-in-out infinite`) gold glow pulse — `box-shadow` cycling between `glow-soft` and a
+brighter peak (`0 0 26px rgba(232,174,60,0.55)`) — instead of the system reaching for a second
+accent color to mean "click here." The pulse pauses (`animation: none`) on hover, handing off to
+the normal hover glow/lift. Reserve this for the one dominant action per view — if multiple
+elements pulse at once, none of them read as primary anymore. Always paired with a
+`prefers-reduced-motion` fallback that lands on a static `glow-soft` shadow, never zero glow.
+
 ## 5. Components
 
 ### Buttons
 - **Shape:** `border-radius: 4px` (`--radius-md`) — sharp enough to feel precise, not
   pill-shaped-friendly-app-default.
 - **Primary:** Spatial Gold Bright background, void-black text, `10px 24px` padding — the
-  system's one loud interactive element.
-- **Hover/Focus:** background shifts toward baseline Spatial Gold; `:focus-visible` gets a
-  1.5px gold outline with 2px offset, system-wide (`--accent` outline, not browser default blue).
+  system's one loud interactive element. The dominant primary CTA on a view (hero, key form
+  submit) breathes with the glow pulse (§4, The Breathing Signal Rule); secondary primaries on
+  the same view stay static so only one thing pulses at a time.
+- **Hover/Focus:** background shifts toward baseline Spatial Gold; glow pulse pauses and hands off
+  to a lift + brighter static glow; `:focus-visible` gets a 1.5px gold outline with 2px offset,
+  system-wide (`--accent` outline, not browser default blue).
 - **Ghost/Secondary:** transparent background, gold-muted border — used where a primary CTA
   would be too loud for the context (secondary actions inside a panel).
 
