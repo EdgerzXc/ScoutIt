@@ -58,3 +58,20 @@ polished version of an existing real-estate template.
 WCAG AA baseline. No specialized accessibility requirements beyond that, but per the owner:
 accessibility should serve the "new category standard" ambition — a genuinely usable site, not a
 decoratively-premium one that happens to also check a box.
+
+## Roadmap Notes (captured, not yet built)
+
+Two initiatives approved-in-direction as of 2026-07-03, not yet implemented — full detail lives
+in `_SCOUTIT_BRAIN`, not duplicated here:
+
+- **Dashboard atmosphere overhaul** — the dashboard (product register, principle #4 above) is
+  getting its own structural + atmospheric framework: mandatory Identity → Status → **Scout
+  Insight** (AI-driven recommendations — the platform's core differentiator, without it ScoutIt
+  reads as a CMS not an intelligence platform) → Workspace → per-role ambient atmosphere, still
+  within the locked 95/5 black/gold system. Spec: `_SCOUTIT_BRAIN/03_DESIGN/
+  DASHBOARD_ATMOSPHERE_FRAMEWORK.md`.
+- **In-house CRM** — framed as "relationship intelligence, not contact management": lead stages,
+  deal pipeline, notes, reminders, interaction history, follow-up recommendations, evaluated
+  through a "Workflow Gravity" lens (does it drive Entry/Dependency/Workflow-Centralization/
+  Network-Lock-in/Intelligence-Quality). Not a CRM-feature-parity play. Spec:
+  `_SCOUTIT_BRAIN/08_OPERATIONS_AND_BACKLOG/CRM_INITIATIVE.md`.

@@ -1,6 +1,29 @@
 # ScoutIt Handoff - End of Session
 
-> ## ▶️ RESUME HERE (latest) — 2026-07-03, Part 6 — Part 5 verified + fixed + LIVE
+> ## ▶️ RESUME HERE (latest) — 2026-07-03, Part 7 — impeccable pass shipped; 2 new initiatives captured
+> **Property page design pass via `/impeccable` is done and live** — 2 P0s (accessible chapter
+> tabs, Vault tier-name bug + illustrative-content labeling), 2 P1s (CSP `frame-src` gap, the new
+> "breathing gold glow" primary-CTA rule), a P2 (URL-synced chapter deep-linking), and a P3
+> (Location fact-list chunking). Applied to both `ResidentialFlow.js` and `CommercialFlow.js`.
+> Commits `893dfd0` → `0e52c05`, all pushed. Full detail: `08_OPERATIONS_AND_BACKLOG/
+> SESSION_HANDOFF_2026-07-03.md` Part 7 (top of file).
+>
+> **Owner then shared two new initiatives (source: `2 Core Ideas.docx`) — captured as docs only,
+> nothing built yet:**
+> - `03_DESIGN/DASHBOARD_ATMOSPHERE_FRAMEWORK.md` — mandatory dashboard structure (Identity →
+>   Status → **Scout Insight** → Workspace → Role Atmosphere) + per-role ambient differentiation.
+>   Owner's own read: the dashboard "looks plain" — this is the framework for fixing that, not a
+>   generic polish pass.
+> - `08_OPERATIONS_AND_BACKLOG/CRM_INITIATIVE.md` — "relationship intelligence, not contact
+>   management," framed through the owner's Workflow Gravity strategic lens. Real
+>   proto-infrastructure already exists (`deals` table, `BrokerMode.js` Deal File Workspace,
+>   `/api/deals/*`) — one concrete gap flagged (deal notes aren't persisted to Supabase yet).
+>
+> **Next real step for either:** a dedicated scoping/planning conversation with the owner — both
+> docs end with open decision questions, not a build plan. They likely interlock for Broker mode
+> specifically (Scout Insight ≈ CRM follow-ups) — recommend one combined planning pass.
+>
+> ## Previous — 2026-07-03, Part 6 — Part 5 verified + fixed + LIVE
 > **Part 5's four unverified items are now all verified, fixed where needed, and pushed live**
 > (commit `9aab743`, both `scoutit.vercel.app` and `scout-it.vercel.app` — confirmed `READY` on
 > both Vercel projects, spot-checked `200` on the live domains). Full detail in

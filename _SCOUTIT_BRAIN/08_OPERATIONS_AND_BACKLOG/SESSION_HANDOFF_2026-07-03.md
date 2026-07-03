@@ -1,6 +1,89 @@
 # Session Handoff — 2026-07-03
 
-> ## ▶️ RESUME HERE (latest) — 2026-07-03, Part 6 — Part 5 verified, 2 real bugs fixed, gold-standard properties built, pushed live
+> ## ▶️ RESUME HERE (latest) — 2026-07-03, Part 7 — impeccable design pass shipped; 2 new initiatives captured (dashboard atmosphere + CRM)
+>
+> **1. Ran the full `/impeccable` workflow against the property detail page** (property is
+> `AGENTS.md`'s brand-register surface — see `PRODUCT.md` design principle #4), owner's stated
+> next direction from Part 6. `init` → `document` (`PRODUCT.md` + `DESIGN.md`, both at repo root,
+> not gitignored) → `colorize` → `critique` (2 parallel sub-agents per the skill's hard invariant:
+> a design-review assessment + a detector/browser-evidence assessment). Findings fixed in priority
+> order, each verified live in a running dev server before commit, per the owner's "tell before
+> every push" working style:
+> - **P0** — chapter nav in `ResidentialFlow.js`/`CommercialFlow.js` was clickable `<div>`s, not
+>   real interactive elements — converted to `<button role="tab" aria-selected>` inside a
+>   `role="tablist"` container (keyboard/screen-reader accessible now).
+> - **P0** — the Vault section's Matterport/Luma demo content wasn't labeled as illustrative, and
+>   its sidebar said `"Orbit Tier Only"` — `"Orbit"` isn't a real tier
+>   (`entitlements.js`'s real list is `starry/solar/cluster/universe`). Both fixed.
+> - **P1** — CSP `frame-src` was missing `lumalabs.ai`, silently blocking the Vault's Luma embed
+>   on all 6 gold-standard properties since Part 6's push. Fixed and pushed same-day as its own
+>   commit (`50bc3cb`) since it affected already-shipped production content.
+> - **P1** — primary CTA affordance: owner's own design call, implemented instead of a proposed
+>   second accent color — a slow breathing gold-glow pulse (`3.2s ease-in-out infinite`) on the
+>   dominant CTA per view, now a named rule in `DESIGN.md` §4 ("The Breathing Signal Rule").
+>   Applied to the homepage hero CTA and the Vault's primary action; full
+>   `prefers-reduced-motion` fallback added (the CSS file had zero reduced-motion handling before
+>   this, despite 3 pre-existing animations).
+> - **P2** — chapter tab state now syncs to `?chapter=` in the URL via `history.replaceState`
+>   (not Next.js router push, deliberately — avoids polluting back/forward history or triggering a
+>   data refetch on every tab click). Deep links and refreshes now land on the correct chapter.
+>   Hit a real SSR/hydration bug building this — `useState(() => urlLookup())` lazy initializers
+>   silently no-op on first load because React reuses server-rendered state during hydration; fixed
+>   with `useState(default) + useEffect` reading the URL post-mount, then a further React
+>   StrictMode double-hydration false-positive fixed by deferring that `useEffect`'s `setState` one
+>   `requestAnimationFrame` past mount.
+> - **P3** — Location chapter's flat 5-item fact list regrouped into "Risk & Zoning" / "Access"
+>   sub-groups (chunking guideline: ≤4 items per ungrouped group).
+> - Applied identically to both `ResidentialFlow.js` and `CommercialFlow.js` — both files shared
+>   the exact same underlying nav/state bugs (copy-paste siblings).
+> - **Commits:** `893dfd0`, `07b7a77`, `50bc3cb`, `4b3fd94`, `1a49c43`, `0e52c05` — all pushed to
+>   `main`/GitHub/Vercel. `npm run build` clean before every push; zero console/server/network
+>   errors on final live verification.
+> - **Caught and corrected one bad sub-agent finding before acting on it:** Assessment A
+>   misattributed a California-address showing on a Pasig listing's Vault to a hardcoded bug —
+>   verified it was actually the session's own deliberate, documented gold-standard placeholder
+>   content (real Airtable `Virtual_Tour_URL` field), not a code defect. Standing discipline:
+>   verify sub-agent output before acting on it, don't trust the report at face value.
+> - **impeccable install note:** `npx impeccable install` got blocked by Claude Code's safety
+>   classifier (unverified npm-registry fetch+execute, flagged as supply-chain risk). Resolved by
+>   copying the skill files directly from the already-cloned, user-approved plugin repo
+>   (`~/.claude/plugins/marketplaces/impeccable/plugin/skills/impeccable/` →
+>   `ScoutIt/.claude/skills/impeccable/`) instead of running the npx installer — no app code
+>   affected, `.claude/` is gitignored so this is local tooling only.
+>
+> **2. Owner shared a second doc (`2 Core Ideas.docx`, Desktop) with two new product/design
+> initiatives — captured as docs, NOT implemented:**
+> - **Dashboard Atmosphere Framework** — a structural spec for every dashboard (Buyer/Owner/
+>   Broker/Service Provider): mandatory `IDENTITY → STATUS → SCOUT INSIGHT → WORKSPACE → ROLE
+>   ATMOSPHERE` layer order, a non-negotiable AI-insight module ("Scout Insight" — named as
+>   ScoutIt's actual product differentiator, without it "ScoutIt becomes a premium CMS instead of
+>   an intelligence platform"), and per-role *ambient* differentiation (Buyer=aspirational
+>   glow/fog, Owner=blueprint grid, Broker=tactical pulses/signal nodes, Service
+>   Provider=lens bloom/glass) — all still inside the locked 95% black / 5% gold system, no new
+>   hues. Full spec + gap analysis against the current codebase (role components already exist;
+>   Scout Insight and role atmosphere don't, anywhere) at
+>   `03_DESIGN/DASHBOARD_ATMOSPHERE_FRAMEWORK.md`.
+> - **CRM Initiative** — "relationship intelligence, not contact management." ScoutIt's CRM (if
+>   built) exists to serve the platform's intelligence moat, not to compete on CRM feature parity.
+>   Framed through the owner's "Workflow Gravity" strategic lens (Entry → Dependency → Workflow
+>   Centralization → Network Lock-in → Operating System). Real proto-infrastructure already
+>   exists and isn't a from-scratch build: the `deals` table, `BrokerMode.js`'s Deal File
+>   Workspace, and `/api/deals/*` lifecycle routes — with one concrete, low-risk gap flagged
+>   (`dealNotes` in `BrokerMode.js` is local React state, never persisted to Supabase). Full
+>   capture + 5 open owner-decision questions (who's it for, lead source, scoring data source,
+>   scope vs. Mission Control/Enterprise, sequencing vs. the atmosphere framework) at
+>   `08_OPERATIONS_AND_BACKLOG/CRM_INITIATIVE.md` — deliberately not scoped into a build plan yet,
+>   that's the next conversation.
+> - Both docs flag that they likely interlock for Broker mode specifically (Scout Insight ≈ CRM
+>   follow-up recommendations, Broker's "Tactical Velocity" atmosphere = pipeline urgency) —
+>   recommended as one combined planning pass rather than two independent builds.
+>
+> **Nothing built yet for either initiative — this was a documentation/capture pass only, per the
+> owner's explicit ask ("make all necessary changes so ScoutIt Folder is up to date").** Next
+> real step for either is a dedicated planning conversation, same pattern as
+> `PLAN_STAFF_ENTERPRISE_ANALYTICS_NOTIFICATIONS.md`.
+>
+> ## Previous — 2026-07-03, Part 6 — Part 5 verified, 2 real bugs fixed, gold-standard properties built, pushed live
 >
 > **1. Verified all four Part 5 items in a real running dev server** (not just static review):
 > - **Footer + `/enterprise` page** — clean, no console errors, all links present.

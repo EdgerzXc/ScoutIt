@@ -157,6 +157,9 @@ different altitude. That is ScoutIT in the market. The UFO stays. Always.
 **03 · Design**
 - `SCOUTIT_DESIGN_BRIEF.md` — brand brief & visual system
 - `DESIGN_AUDIT_2026-06.md` — design audit findings
+- `DASHBOARD_ATMOSPHERE_FRAMEWORK.md` — 🆕 approved-direction, not-yet-built spec for dashboard
+  structure (Identity → Status → Scout Insight → Workspace → Role Atmosphere) + per-role ambient
+  differentiation — read before any dashboard design/UI work
 
 **04 · Data & Schema**
 - `MASTER_PROPERTIES_GOLD_STANDARD.md` — ⭐ the 6 reference properties (one per category, fully
@@ -187,12 +190,15 @@ different altitude. That is ScoutIT in the market. The UFO stays. Always.
 - `FABLE_ONBOARDING_PROMPT.md` — onboarding prompt
 
 **08 · Operations & Backlog**
-- `SESSION_HANDOFF_2026-07-02.md` — ⭐ latest complete session record (start here per `NEXT_DAY_HANDOFF.md`)
+- `SESSION_HANDOFF_2026-07-03.md` — ⭐ latest complete session record (start here per `NEXT_DAY_HANDOFF.md`)
 - `E2E_TEST_FIX_LIST.md` — every bug/unverified flow flagged during codebase work, batched for one E2E pass
 - `HEATMAP_NOAH_INTEGRATION_PLAN.md` — NOAH/HazardHunterPH research + the ready-to-execute plan for the flood-risk map layer
 - `SCOUTIT_FIX_LIST.md` — the single prioritized build/fix list + launch build order
 - `WEBSITE_COUNCIL_AUDIT.md` — website audit
 - `SCOUTIT_CLEANUP_PROMPT.md` — pre-launch cleanup playbook
+- `CRM_INITIATIVE.md` — 🆕 captured-not-scoped: "relationship intelligence, not contact
+  management" CRM philosophy + Workflow Gravity strategic lens + open decision questions —
+  read before scoping any lead/pipeline/deal-notes work
 
 **09 · Reference (raw)**
 - `PROJECT_README.md` — original Next.js project README
