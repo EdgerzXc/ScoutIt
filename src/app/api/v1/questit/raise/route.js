@@ -56,73 +56,30 @@ export async function POST(request) {
       return NextResponse.json({ error: policyResult.reason }, { status: 403 });
     }
 
-    // 5. Check Connects Ledger — 3-bucket: granted, purchased, earned
-    const { data: balanceData } = await supabase
-      .from('connect_balances')
-      .select('granted_balance, purchased_balance, earned_balance')
-      .eq('user_id', companyId)
-      .eq('role', 'owner')
-      .single();
+    // 5. Atomic Connect spend — balance check + 3-bucket deduction (granted → purchased →
+    // earned) + ledger insert, all in one indivisible Postgres transaction (spend_connects RPC).
+    // NOTE: connect_balances/connect_transactions have no `role` column in the live schema
+    // (per-role wallets are a documented but unbuilt design) — the wallet is per user_id only.
+    const { data: spendData, error: spendError } = await supabase.rpc('spend_connects', {
+      p_user_id: companyId,
+      p_amount: bountyConnects,
+      p_reason: `API Quest Raised for ${targetField}`,
+      p_ref_type: 'bounty',
+      p_ref_id: propertyId,
+    });
 
-    const granted   = balanceData?.granted_balance   || 0;
-    const purchased = balanceData?.purchased_balance || 0;
-    const earned    = balanceData?.earned_balance    || 0;
-    const totalBalance = granted + purchased + earned;
-
-    if (totalBalance < bountyConnects) {
-      return NextResponse.json({ error: "Insufficient Connects to fund this bounty." }, { status: 402 });
+    if (spendError) {
+      const insufficient = spendError.message?.includes('insufficient balance') || spendError.message?.includes('no wallet found');
+      return NextResponse.json(
+        { error: insufficient ? "Insufficient Connects to fund this bounty." : "Connect spend failed." },
+        { status: insufficient ? 402 : 500 }
+      );
     }
 
-    // 6. Transact: Deduct Connects (granted first → purchased → earned)
-    let remaining = bountyConnects;
-    const updates = {};
-    const bucketLog = [];
-
-    if (granted > 0 && remaining > 0) {
-      const take = Math.min(granted, remaining);
-      updates.granted_balance = granted - take;
-      remaining -= take;
-      bucketLog.push({ bucket: 'granted', amount: -take });
+    const newBalance = spendData?.[0]?.total_balance ?? null;
+    if (newBalance !== null) {
+      await supabase.from('user_profiles').update({ connects_balance: newBalance }).eq('id', companyId);
     }
-    if (purchased > 0 && remaining > 0) {
-      const take = Math.min(purchased, remaining);
-      updates.purchased_balance = purchased - take;
-      remaining -= take;
-      bucketLog.push({ bucket: 'purchased', amount: -take });
-    }
-    if (earned > 0 && remaining > 0) {
-      const take = Math.min(earned, remaining);
-      updates.earned_balance = earned - take;
-      remaining -= take;
-      bucketLog.push({ bucket: 'earned', amount: -take });
-    }
-    updates.updated_at = new Date().toISOString();
-
-    const newBalance = totalBalance - bountyConnects;
-
-    // Insert one transaction record per bucket touched
-    await supabase.from('connect_transactions').insert(
-      bucketLog.map(b => ({
-        user_id: companyId,
-        role: 'owner',
-        kind: 'spend',
-        bucket: b.bucket,
-        amount: b.amount,
-        reason: `API Quest Raised for ${targetField}`,
-        ref_type: 'bounty',
-        ref_id: propertyId
-      }))
-    );
-
-    // Update Balance
-    await supabase.from('connect_balances')
-      .update(updates)
-      .eq('user_id', companyId)
-      .eq('role', 'owner');
-    
-    await supabase.from('user_profiles')
-      .update({ connects_balance: newBalance })
-      .eq('id', companyId);
 
     // Insert Quest
     const { data: questData, error: questError } = await supabase.from('company_quests').insert([{
@@ -136,6 +93,9 @@ export async function POST(request) {
 
     if (questError) {
       console.error("[QuestIT API] Failed to create quest:", questError);
+      // NOTE: Connects were already spent by this point (the RPC succeeded, same order as
+      // before this fix). Refunding on quest-insert failure is a known rare edge case, not
+      // auto-handled — flagged rather than silently accepted.
       return NextResponse.json({ error: "Failed to post bounty to the Quest Board" }, { status: 500 });
     }
 

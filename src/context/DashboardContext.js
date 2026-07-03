@@ -608,9 +608,15 @@ export function DashboardProvider({ children }) {
 
     // Call the edge function for server-side Connect deduction and ledger record
     try {
+      const { data: { session } } = await getSession();
+      const token = session?.access_token;
+
       const res = await fetch("/api/dashboard/invite", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": token ? `Bearer ${token}` : ""
+        },
         body: JSON.stringify({ listingId, brokerName, userId: currentUser?.id, role })
       });
       

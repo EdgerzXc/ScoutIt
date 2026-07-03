@@ -1,5 +1,10 @@
 # ScoutIt — Property-by-Category SOP (Council Output)
 
+> ⚠️ **VISIBILITY RULINGS MOVED (2026-07-02):** for what is PUBLIC vs HIDDEN INTEL, this doc's §8 is
+> superseded by **`FIELD_VISIBILITY_MAP.md`** + the per-category **`VISIBILITY_MAP__*.md`** files
+> (signed off by the owner). Where §8 and the code design (`src/lib/deepIntelSchema.js`) differ
+> (e.g. CAMC / A/C charges), the code design wins. §8 remains as historical council record only.
+
 > The standard operating procedure for **what data the CMS holds per property type**
 > and **how the master page presents it.** Produced by the Council (Design Expert,
 > Owner Advocate, Buyer Advocate, + the rotating Category Master).

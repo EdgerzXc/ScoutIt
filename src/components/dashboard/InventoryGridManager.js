@@ -13,7 +13,15 @@ const MAX_BULK = 50;
 // Stable-ish unique id for a new unit row.
 const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 
-export default function InventoryGridManager({ units = [], onChange, isPro, onAutoSave }) {
+// mode: "owner" (default, full CRUD) or "operator" — the restricted view
+// used by OperatorMode.js for delegated units (SCOUTIT_MASTER_BUILD_SPEC.md
+// §9.2): operators can rename, re-photo, and set availability on their own
+// delegated units, but never touch size/floor/features, and can't add,
+// duplicate, or delete units — those stay owner-only. Kept as one shared
+// component with a mode prop rather than a fork, per the locked plan
+// decision, to avoid the two grids drifting apart.
+export default function InventoryGridManager({ units = [], onChange, isPro, onAutoSave, mode = "owner" }) {
+  const isOperatorMode = mode === "operator";
   const [activePhotoUnit, setActivePhotoUnit] = useState(null);
   const [uploadingUnitId, setUploadingUnitId] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -212,47 +220,53 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
           )}
         </div>
 
-        {/* Bulk add */}
-        <div className="flex items-center gap-2 shrink-0">
-          <span className="font-label-caps text-[9px] tracking-widest text-text-secondary uppercase hidden sm:block">Bulk add</span>
-          <input
-            type="number"
-            min={1}
-            max={MAX_BULK}
-            value={bulkQty}
-            onChange={(e) => setBulkQty(e.target.value)}
-            className="w-14 bg-surface-alt border border-surface-variant rounded px-2 py-1.5 text-sm text-text-primary text-center focus:outline-none focus:border-gold-accent transition-colors"
-            title="How many units"
-          />
-          <input
-            type="text"
-            value={bulkFloor}
-            onChange={(e) => setBulkFloor(e.target.value)}
-            placeholder="Floor"
-            className="w-20 bg-surface-alt border border-surface-variant rounded px-2 py-1.5 text-sm text-text-primary focus:outline-none focus:border-gold-accent transition-colors"
-            title="Optional floor for the batch"
-          />
-          <button
-            onClick={bulkAdd}
-            className="bg-gold-accent text-background font-working-title font-bold px-3 py-1.5 rounded text-sm hover:bg-gold-accent-hover transition-colors whitespace-nowrap"
-          >
-            Add
-          </button>
-        </div>
+        {/* Bulk add — owner only, operators can't add units */}
+        {!isOperatorMode && (
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="font-label-caps text-[9px] tracking-widest text-text-secondary uppercase hidden sm:block">Bulk add</span>
+            <input
+              type="number"
+              min={1}
+              max={MAX_BULK}
+              value={bulkQty}
+              onChange={(e) => setBulkQty(e.target.value)}
+              className="w-14 bg-surface-alt border border-surface-variant rounded px-2 py-1.5 text-sm text-text-primary text-center focus:outline-none focus:border-gold-accent transition-colors"
+              title="How many units"
+            />
+            <input
+              type="text"
+              value={bulkFloor}
+              onChange={(e) => setBulkFloor(e.target.value)}
+              placeholder="Floor"
+              className="w-20 bg-surface-alt border border-surface-variant rounded px-2 py-1.5 text-sm text-text-primary focus:outline-none focus:border-gold-accent transition-colors"
+              title="Optional floor for the batch"
+            />
+            <button
+              onClick={bulkAdd}
+              className="bg-gold-accent text-background font-working-title font-bold px-3 py-1.5 rounded text-sm hover:bg-gold-accent-hover transition-colors whitespace-nowrap"
+            >
+              Add
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Empty state */}
       {units.length === 0 ? (
         <div className="bg-[#121110] border border-surface-variant rounded-lg p-10 text-center">
           <p className="text-text-secondary text-sm italic mb-4">
-            No units yet. Add them one at a time, or use <span className="text-gold-accent">Bulk add</span> for buildings with many similar spaces.
+            {isOperatorMode
+              ? "No units have been delegated to you yet."
+              : (<>No units yet. Add them one at a time, or use <span className="text-gold-accent">Bulk add</span> for buildings with many similar spaces.</>)}
           </p>
-          <button
-            onClick={() => addUnit()}
-            className="inline-flex items-center gap-2 border border-gold-accent text-gold-accent hover:bg-gold-accent/10 px-4 py-2 rounded text-sm font-working-title transition-colors"
-          >
-            <Plus size={16} /> Add your first unit
-          </button>
+          {!isOperatorMode && (
+            <button
+              onClick={() => addUnit()}
+              className="inline-flex items-center gap-2 border border-gold-accent text-gold-accent hover:bg-gold-accent/10 px-4 py-2 rounded text-sm font-working-title transition-colors"
+            >
+              <Plus size={16} /> Add your first unit
+            </button>
+          )}
         </div>
       ) : filtered.length === 0 ? (
         <div className="bg-[#121110] border border-surface-variant rounded-lg p-8 text-center text-text-secondary text-sm italic">
@@ -275,7 +289,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                     · {floorUnits.length} {floorUnits.length === 1 ? "unit" : "units"}
                   </span>
                 </button>
-                {!search && (
+                {!search && !isOperatorMode && (
                   <button
                     onClick={() => addUnit(floorKey === UNASSIGNED ? "" : floorKey)}
                     className="flex items-center gap-1 text-text-muted hover:text-gold-accent transition-colors text-xs font-working-title"
@@ -296,6 +310,9 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                         <th className="p-3 font-label-caps text-[10px] tracking-widest text-text-secondary uppercase w-[12%]">Floor</th>
                         <th className="p-3 font-label-caps text-[10px] tracking-widest text-text-secondary uppercase w-[34%]">Tags &amp; Features</th>
                         <th className="p-3 font-label-caps text-[10px] tracking-widest text-text-secondary uppercase text-center w-[10%]">Media</th>
+                        {isOperatorMode && (
+                          <th className="p-3 font-label-caps text-[10px] tracking-widest text-text-secondary uppercase w-[14%]">Availability</th>
+                        )}
                         <th className="p-3 w-[8%]" />
                       </tr>
                     </thead>
@@ -303,40 +320,68 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                       {floorUnits.map((unit) => {
                         const photoCount = (unit.photos || []).filter(Boolean).length;
                         const atPhotoLimit = photoCount >= maxPhotos;
+                        // Delegated units (§9.2) are pinned in the owner's grid — the
+                        // owner's route silently ignores edits/deletes to these, so
+                        // the grid must show that plainly rather than let the owner
+                        // type into a field that quietly never saves. In operator
+                        // mode every row IS the operator's own delegated unit, so we
+                        // don't apply the "someone else's unit" lock treatment — but
+                        // structural fields (size/floor/features) stay read-only
+                        // there regardless, per spec §9.2.
+                        const isDelegated = Boolean(unit.operatorId);
+                        const lockedForOwner = isDelegated && !isOperatorMode;
+                        const structuralReadOnly = isOperatorMode || lockedForOwner;
                         return (
-                          <tr key={unit.id} className="border-b border-surface-variant/40 hover:bg-surface-variant/20 transition-colors group">
+                          <tr key={unit.id} className={`border-b border-surface-variant/40 transition-colors group ${lockedForOwner ? "bg-gold-accent/5" : "hover:bg-surface-variant/20"}`}>
                             {/* Name */}
                             <td className="p-2.5 align-top">
-                              <input
-                                type="text"
-                                value={unit.name || ""}
-                                onChange={(e) => updateUnit(unit.id, "name", e.target.value)}
-                                onBlur={(e) => updateUnit(unit.id, "name", e.target.value, true)}
-                                placeholder="e.g. Unit 12-A"
-                                className="w-full bg-transparent border border-transparent hover:border-surface-variant focus:border-gold-accent rounded px-2 py-1 text-sm text-text-primary focus:outline-none transition-colors"
-                              />
+                              {lockedForOwner ? (
+                                <div className="px-2 py-1">
+                                  <div className="text-sm text-text-primary">{unit.name || "Unnamed unit"}</div>
+                                  <div className="flex items-center gap-1 text-[10px] text-gold-accent font-label-caps tracking-wide uppercase mt-0.5">
+                                    <Lock size={9} /> Operated by {unit.operatorDisplayName || "another party"}
+                                  </div>
+                                </div>
+                              ) : (
+                                <input
+                                  type="text"
+                                  value={unit.name || ""}
+                                  onChange={(e) => updateUnit(unit.id, "name", e.target.value)}
+                                  onBlur={(e) => updateUnit(unit.id, "name", e.target.value, true)}
+                                  placeholder="e.g. Unit 12-A"
+                                  className="w-full bg-transparent border border-transparent hover:border-surface-variant focus:border-gold-accent rounded px-2 py-1 text-sm text-text-primary focus:outline-none transition-colors"
+                                />
+                              )}
                             </td>
                             {/* Size */}
                             <td className="p-2.5 align-top">
-                              <input
-                                type="text"
-                                value={unit.size || ""}
-                                onChange={(e) => updateUnit(unit.id, "size", e.target.value)}
-                                onBlur={(e) => updateUnit(unit.id, "size", e.target.value, true)}
-                                placeholder="30"
-                                className="w-full bg-transparent border border-transparent hover:border-surface-variant focus:border-gold-accent rounded px-2 py-1 text-sm text-text-primary focus:outline-none transition-colors"
-                              />
+                              {structuralReadOnly ? (
+                                <span className="px-2 py-1 text-sm text-text-secondary block">{unit.size || "—"}</span>
+                              ) : (
+                                <input
+                                  type="text"
+                                  value={unit.size || ""}
+                                  onChange={(e) => updateUnit(unit.id, "size", e.target.value)}
+                                  onBlur={(e) => updateUnit(unit.id, "size", e.target.value, true)}
+                                  placeholder="30"
+                                  className="w-full bg-transparent border border-transparent hover:border-surface-variant focus:border-gold-accent rounded px-2 py-1 text-sm text-text-primary focus:outline-none transition-colors"
+                                />
+                              )}
                             </td>
                             {/* Floor */}
                             <td className="p-2.5 align-top">
-                              <input
-                                type="text"
-                                value={unit.floor || ""}
-                                onChange={(e) => updateUnit(unit.id, "floor", e.target.value)}
-                                onBlur={(e) => updateUnit(unit.id, "floor", e.target.value, true)}
-                                placeholder="e.g. 3"
-                                className="w-full bg-transparent border border-transparent hover:border-surface-variant focus:border-gold-accent rounded px-2 py-1 text-sm text-text-primary focus:outline-none transition-colors"
-                              />
+                              {structuralReadOnly ? (
+                                <span className="px-2 py-1 text-sm text-text-secondary block">{unit.floor || "—"}</span>
+                              ) : (
+                                <input
+                                  type="text"
+                                  value={unit.floor || ""}
+                                  onChange={(e) => updateUnit(unit.id, "floor", e.target.value)}
+                                  onBlur={(e) => updateUnit(unit.id, "floor", e.target.value, true)}
+                                  placeholder="e.g. 3"
+                                  className="w-full bg-transparent border border-transparent hover:border-surface-variant focus:border-gold-accent rounded px-2 py-1 text-sm text-text-primary focus:outline-none transition-colors"
+                                />
+                              )}
                             </td>
                             {/* Features */}
                             <td className="p-2.5 align-top">
@@ -345,51 +390,56 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                                   {(unit.features || []).map((feature, idx) => (
                                     <span key={idx} className="inline-flex items-center gap-1 px-2 py-1 bg-surface-variant border border-gold-accent/20 text-[11px] text-text-primary rounded uppercase tracking-wide font-working-title">
                                       {feature}
-                                      <button onClick={() => removeFeature(unit.id, feature)} className="text-text-muted hover:text-error transition-colors">
-                                        <X size={10} />
-                                      </button>
+                                      {!structuralReadOnly && (
+                                        <button onClick={() => removeFeature(unit.id, feature)} className="text-text-muted hover:text-error transition-colors">
+                                          <X size={10} />
+                                        </button>
+                                      )}
                                     </span>
                                   ))}
                                 </div>
                               )}
-                              <div className="flex gap-2 items-center">
-                                <input
-                                  type="text"
-                                  onKeyDown={(e) => {
-                                    if (e.key === "Enter") {
-                                      e.preventDefault();
-                                      handleFeatureAdd(unit.id, e.target.value);
-                                      e.target.value = "";
-                                    }
-                                  }}
-                                  placeholder="Type a feature & press Enter…"
-                                  className="bg-transparent text-sm text-text-secondary focus:outline-none placeholder-text-muted/50 border-b border-surface-variant focus:border-gold-accent transition-colors flex-1"
-                                />
-                                <button
-                                  onClick={(e) => {
-                                    const input = e.currentTarget.previousElementSibling;
-                                    if (input && input.value.trim() !== "") {
-                                      handleFeatureAdd(unit.id, input.value);
-                                      input.value = "";
-                                    }
-                                  }}
-                                  className="text-text-muted hover:text-gold-accent transition-colors"
-                                  title="Add feature"
-                                >
-                                  <Plus size={16} />
-                                </button>
-                              </div>
+                              {!structuralReadOnly && (
+                                <div className="flex gap-2 items-center">
+                                  <input
+                                    type="text"
+                                    onKeyDown={(e) => {
+                                      if (e.key === "Enter") {
+                                        e.preventDefault();
+                                        handleFeatureAdd(unit.id, e.target.value);
+                                        e.target.value = "";
+                                      }
+                                    }}
+                                    placeholder="Type a feature & press Enter…"
+                                    className="bg-transparent text-sm text-text-secondary focus:outline-none placeholder-text-muted/50 border-b border-surface-variant focus:border-gold-accent transition-colors flex-1"
+                                  />
+                                  <button
+                                    onClick={(e) => {
+                                      const input = e.currentTarget.previousElementSibling;
+                                      if (input && input.value.trim() !== "") {
+                                        handleFeatureAdd(unit.id, input.value);
+                                        input.value = "";
+                                      }
+                                    }}
+                                    className="text-text-muted hover:text-gold-accent transition-colors"
+                                    title="Add feature"
+                                  >
+                                    <Plus size={16} />
+                                  </button>
+                                </div>
+                              )}
                             </td>
                             {/* Media */}
                             <td
                               className={`p-2.5 align-top text-center transition-colors ${uploadingUnitId === unit.id ? "opacity-50" : ""}`}
-                              onDragOver={(e) => e.preventDefault()}
-                              onDrop={(e) => handleDirectDrop(e, unit.id)}
+                              onDragOver={(e) => !lockedForOwner && e.preventDefault()}
+                              onDrop={(e) => !lockedForOwner && handleDirectDrop(e, unit.id)}
                             >
                               <button
-                                onClick={() => setActivePhotoUnit(unit.id)}
-                                className={`relative h-10 w-10 flex items-center justify-center rounded border ${photoCount > 0 ? "bg-gold-accent/20 border-gold-accent text-gold-accent" : "bg-surface-alt border-surface-variant text-text-muted hover:border-gold-accent hover:text-gold-accent"} transition-colors mx-auto`}
-                                title={isPro ? "Upload photos" : "Free tier: 1 photo per unit"}
+                                onClick={() => !lockedForOwner && setActivePhotoUnit(unit.id)}
+                                disabled={lockedForOwner}
+                                className={`relative h-10 w-10 flex items-center justify-center rounded border ${photoCount > 0 ? "bg-gold-accent/20 border-gold-accent text-gold-accent" : "bg-surface-alt border-surface-variant text-text-muted hover:border-gold-accent hover:text-gold-accent"} transition-colors mx-auto disabled:opacity-40 disabled:cursor-not-allowed`}
+                                title={lockedForOwner ? "Managed by the operator" : isPro ? "Upload photos" : "Free tier: 1 photo per unit"}
                               >
                                 <Upload size={18} />
                               </button>
@@ -405,24 +455,40 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                                 </div>
                               )}
                             </td>
-                            {/* Row actions */}
+                            {/* Availability — operator mode only */}
+                            {isOperatorMode && (
+                              <td className="p-2.5 align-top">
+                                <select
+                                  value={unit.availabilityStatus || "available"}
+                                  onChange={(e) => updateUnit(unit.id, "availabilityStatus", e.target.value, true)}
+                                  className="w-full bg-surface-alt border border-surface-variant rounded px-2 py-1.5 text-sm text-text-primary focus:outline-none focus:border-gold-accent transition-colors"
+                                >
+                                  <option value="available">Available</option>
+                                  <option value="occupied">Occupied</option>
+                                  <option value="coming_soon">Coming Soon</option>
+                                </select>
+                              </td>
+                            )}
+                            {/* Row actions — never available in operator mode or for delegated rows */}
                             <td className="p-2.5 align-top text-center whitespace-nowrap">
-                              <div className="inline-flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button
-                                  onClick={() => duplicateUnit(unit.id)}
-                                  className="p-2 rounded hover:bg-gold-accent/10 text-text-muted hover:text-gold-accent transition-colors"
-                                  title="Duplicate unit"
-                                >
-                                  <Copy size={15} />
-                                </button>
-                                <button
-                                  onClick={() => removeUnit(unit.id)}
-                                  className="p-2 rounded hover:bg-error/10 text-text-muted hover:text-error transition-colors"
-                                  title="Delete unit"
-                                >
-                                  <Trash2 size={15} />
-                                </button>
-                              </div>
+                              {!isOperatorMode && !lockedForOwner && (
+                                <div className="inline-flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <button
+                                    onClick={() => duplicateUnit(unit.id)}
+                                    className="p-2 rounded hover:bg-gold-accent/10 text-text-muted hover:text-gold-accent transition-colors"
+                                    title="Duplicate unit"
+                                  >
+                                    <Copy size={15} />
+                                  </button>
+                                  <button
+                                    onClick={() => removeUnit(unit.id)}
+                                    className="p-2 rounded hover:bg-error/10 text-text-muted hover:text-error transition-colors"
+                                    title="Delete unit"
+                                  >
+                                    <Trash2 size={15} />
+                                  </button>
+                                </div>
+                              )}
                             </td>
                           </tr>
                         );
@@ -436,8 +502,8 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
         })
       )}
 
-      {/* Add single unit */}
-      {units.length > 0 && (
+      {/* Add single unit — owner only */}
+      {units.length > 0 && !isOperatorMode && (
         <button
           onClick={() => addUnit()}
           className="self-start border border-gold-accent text-gold-accent hover:bg-gold-accent/10 px-4 py-2 flex items-center gap-2 rounded text-sm font-working-title transition-colors"

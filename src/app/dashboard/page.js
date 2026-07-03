@@ -11,9 +11,11 @@ const OwnerMode = dynamic(() => import("../../components/dashboard/OwnerMode"), 
 const BrokerMode = dynamic(() => import("../../components/dashboard/BrokerMode"), { ssr: false });
 const BuyerMode = dynamic(() => import("../../components/dashboard/BuyerMode"), { ssr: false });
 const ProviderMode = dynamic(() => import("../../components/dashboard/ProviderMode"), { ssr: false });
+const OperatorMode = dynamic(() => import("../../components/dashboard/OperatorMode"), { ssr: false });
 import Nudge from "../../components/ui/Nudge";
 import Toasts from "../../components/ui/Toasts";
 import ConciergeAI from "../../components/dashboard/ConciergeAI";
+import ConnectsBreakdown from "../../components/dashboard/ConnectsBreakdown";
 import { Camera, Search, Bookmark } from "lucide-react";
 
 const TAG_LABELS = {
@@ -21,6 +23,7 @@ const TAG_LABELS = {
   owner: "Owner",
   broker: "Broker",
   provider: "Service Provider",
+  operator: "Operator",
   exploring: "Exploring"
 };
 
@@ -30,6 +33,7 @@ const ACTIVATABLE_MODES = [
   { id: "owner", icon: "📋", cta: "List as an Owner", desc: "List your property and receive broker pitches." },
   { id: "broker", icon: "🤝", cta: "Become a Broker", desc: "Pitch owners and manage your pipeline. PRC license required." },
   { id: "provider", icon: <Camera strokeWidth={1.5} size="1em" />, cta: "Join as a Service Provider", desc: "Photographer, researcher, or event designer." },
+  { id: "operator", icon: "🏢", cta: "Operate Spaces", desc: "Manage units delegated to you inside buildings you don't own." },
 ];
 
 const PROVIDER_TYPES = [
@@ -44,6 +48,7 @@ function DashboardInner() {
   const [user, setUser] = useState(null);
   const [mode, setMode] = useState("");
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showConnectsBreakdown, setShowConnectsBreakdown] = useState(false);
   const [showDesktopSwitcher, setShowDesktopSwitcher] = useState(false);
   const [showMobileProfileMenu, setShowMobileProfileMenu] = useState(false);
   const [activating, setActivating] = useState(null); // mode id being activated (broker/provider need extra info)
@@ -140,6 +145,7 @@ function DashboardInner() {
       case "buyer":
       case "exploring": return <BuyerMode />;
       case "provider": return <ProviderMode type={user.providerType} />;
+      case "operator": return <OperatorMode />;
       default: return <div>Unknown Mode</div>;
     }
   };
@@ -228,11 +234,24 @@ function DashboardInner() {
         </div>
 
         <div className="flex items-center gap-4 md:gap-6">
-          <div className="hidden md:flex items-center gap-2 text-gold-accent font-label-caps text-[11px] tracking-widest bg-gold-accent/10 px-3 py-1.5 rounded-full transition-all" title="Platform Currency">
-            <span className="icon">◈</span>
-            <span>{connects !== undefined ? connects : user.connects_balance} CONNECTS</span>
+          <div className="hidden md:block relative">
+            <button
+              className="flex items-center gap-2 text-gold-accent font-label-caps text-[11px] tracking-widest bg-gold-accent/10 px-3 py-1.5 rounded-full transition-all hover:bg-gold-accent/20"
+              title="View your Connects breakdown"
+              onClick={() => setShowConnectsBreakdown((v) => !v)}
+            >
+              <span className="icon">◈</span>
+              <span>{connects !== undefined ? connects : user.connects_balance} CONNECTS</span>
+            </button>
+            <ConnectsBreakdown
+              open={showConnectsBreakdown}
+              onClose={() => setShowConnectsBreakdown(false)}
+              mode={mode}
+              providerType={user.providerType}
+              tier={user.subscription_tier || user.tier}
+            />
           </div>
-          
+
           <div className="relative">
             <button
               className="text-xl hover:opacity-80 transition-opacity relative w-11 h-11 flex items-center justify-center"
@@ -292,9 +311,22 @@ function DashboardInner() {
           
           {/* Mobile Connects & Profile (Menu Trigger) */}
           <div className="md:hidden flex items-center gap-3">
-            <div className="flex items-center gap-1 text-gold-accent font-label-caps text-[10px] tracking-widest">
-              <span>◈</span>
-              <span>{connects !== undefined ? connects : user.connects_balance}</span>
+            <div className="relative">
+              <button
+                className="flex items-center gap-1 text-gold-accent font-label-caps text-[10px] tracking-widest"
+                title="View your Connects breakdown"
+                onClick={() => setShowConnectsBreakdown((v) => !v)}
+              >
+                <span>◈</span>
+                <span>{connects !== undefined ? connects : user.connects_balance}</span>
+              </button>
+              <ConnectsBreakdown
+                open={showConnectsBreakdown}
+                onClose={() => setShowConnectsBreakdown(false)}
+                mode={mode}
+                providerType={user.providerType}
+                tier={user.subscription_tier || user.tier}
+              />
             </div>
             <button
               className="w-10 h-10 rounded-full bg-surface-alt border border-surface-variant flex items-center justify-center font-working-title text-sm font-bold text-on-surface hover:border-gold-accent transition-colors"

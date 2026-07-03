@@ -1,5 +1,10 @@
 # ScoutIT — Per-Category Field SOP (current, wizard-ready)
 
+> ⚠️ **VISIBILITY RULINGS MOVED (2026-07-02):** this doc's "needed = free / extra = paid" split is
+> superseded by **`FIELD_VISIBILITY_MAP.md`** + the per-category **`VISIBILITY_MAP__*.md`** files
+> (signed off by the owner — per SECTION × per CATEGORY). Keep using this doc for the wizard field
+> lists / data-entry rules; check the visibility maps for what renders public vs hidden.
+
 > The single, current source for **what data each property category needs**, mapped to the
 > **live** `PROPERTIES_CMS` field names (base `appWFRqR0wy6hSR6h`). The owner wizard, directory
 > cards, and property page all branch from this. Supersedes drift in the older

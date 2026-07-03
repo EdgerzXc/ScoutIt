@@ -25,7 +25,7 @@ export async function POST(request) {
     const userId = user.id;
 
     // Remove userId from the body destructuring, trust the token
-    const { listingId, brokerName, role = 'owner' } = await request.json();
+    const { listingId, brokerName } = await request.json();
 
     if (!listingId || !brokerName) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -35,35 +35,7 @@ export async function POST(request) {
       return NextResponse.json({ error: "Server error: missing service role configuration" }, { status: 500 });
     }
 
-    // 1. Fetch the user's connect balances using the Admin client
-    const { data: balanceData } = await supabaseAdmin
-      .from('connect_balances')
-      .select('granted_balance, purchased_balance, earned_balance')
-      .eq('user_id', userId)
-      .eq('role', role)
-      .single();
-
-    // Fall back to user_profiles cache if no wallet row exists yet
-    let granted = 0, purchased = 0, earned = 0;
-    if (balanceData) {
-      granted   = balanceData.granted_balance   || 0;
-      purchased = balanceData.purchased_balance || 0;
-      earned    = balanceData.earned_balance    || 0;
-    } else {
-      const { data: profileData } = await supabaseAdmin
-        .from('user_profiles')
-        .select('connects_balance')
-        .eq('id', userId)
-        .single();
-      if (profileData) granted = profileData.connects_balance || 0;
-    }
-
-    const totalBalance = granted + purchased + earned;
-    if (totalBalance < 1) {
-      return NextResponse.json({ error: "Insufficient Connects balance." }, { status: 403 });
-    }
-
-    // 2. Insert into deals (handshake)
+    // 1. Insert the handshake deal first — rolled back below if the Connect spend fails
     const { data: dealData, error: dealError } = await supabaseAdmin.from('deals').insert([{
       property_id: listingId,
       broker_id: brokerName,
@@ -76,55 +48,34 @@ export async function POST(request) {
       return NextResponse.json({ error: "Failed to create handshake" }, { status: 500 });
     }
 
-    // 3. Debit 1 Connect — spend granted first, then purchased, then earned
-    let toDeduct = 1;
-    const updates = {};
-    let spentBucket = 'granted';
+    // 2. Atomic Connect spend — balance check + 3-bucket deduction (granted → purchased →
+    // earned) + ledger insert, all in one indivisible Postgres transaction (spend_connects RPC).
+    // NOTE: connect_balances/connect_transactions have no `role` column in the live schema
+    // (per-role wallets are a documented but unbuilt design) — the wallet is per user_id only.
+    const { data: spendData, error: spendError } = await supabaseAdmin.rpc('spend_connects', {
+      p_user_id: userId,
+      p_amount: 1,
+      p_reason: 'Owner invited a broker (handshake)',
+      p_ref_type: 'handshake',
+      p_ref_id: listingId,
+    });
 
-    if (granted > 0) {
-      updates.granted_balance = granted - 1;
-      spentBucket = 'granted';
-    } else if (purchased > 0) {
-      updates.purchased_balance = purchased - 1;
-      spentBucket = 'purchased';
-    } else {
-      updates.earned_balance = earned - 1;
-      spentBucket = 'earned';
-    }
-    updates.updated_at = new Date().toISOString();
-
-    // Insert the immutable transaction record
-    const { error: txError } = await supabaseAdmin.from('connect_transactions').insert([{
-      user_id: userId,
-      role,
-      kind: 'spend',
-      bucket: spentBucket,
-      amount: -1,
-      reason: 'Owner invited a broker (handshake)',
-      ref_type: 'handshake',
-      ref_id: listingId
-    }]);
-
-    if (txError) {
-      console.error("[INVITE API] Failed to record transaction:", txError);
+    if (spendError) {
+      console.error("[INVITE API] Connect spend failed:", spendError);
       await supabaseAdmin.from('deals').delete().eq('id', dealData[0].id);
-      return NextResponse.json({ error: "Transaction failed. No Connects spent." }, { status: 500 });
+      const insufficient = spendError.message?.includes('insufficient balance') || spendError.message?.includes('no wallet found');
+      return NextResponse.json(
+        { error: insufficient ? "Insufficient Connects balance." : "Transaction failed. No Connects spent." },
+        { status: insufficient ? 403 : 500 }
+      );
     }
 
-    // Update the balances table
-    if (balanceData) {
-      await supabaseAdmin.from('connect_balances')
-        .update(updates)
-        .eq('user_id', userId)
-        .eq('role', role);
+    const newBalance = spendData?.[0]?.total_balance ?? null;
+
+    // Keep the user_profiles cache in sync (best-effort display cache; not the source of truth)
+    if (newBalance !== null) {
+      await supabaseAdmin.from('user_profiles').update({ connects_balance: newBalance }).eq('id', userId);
     }
-
-    const newBalance = totalBalance - toDeduct;
-
-    // Keep user_profiles cache in sync
-    await supabaseAdmin.from('user_profiles')
-      .update({ connects_balance: newBalance })
-      .eq('id', userId);
 
     return NextResponse.json({ success: true, dealId: dealData[0].id, newBalance });
 

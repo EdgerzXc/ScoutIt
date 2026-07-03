@@ -3,57 +3,74 @@
 import { useEffect, useState } from "react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import { BADGE_DEFINITIONS, getAllBadges, hasBadge } from "@/lib/BadgeEngine";
+import { hasBadge } from "@/lib/BadgeEngine";
 import { supabase } from "@/lib/supabaseClient";
 import Link from "next/link";
 import { Shield, ShieldAlert, ShieldCheck, Lock } from "lucide-react";
 
 export default function BadgeRegistryPage() {
   const [userBadges, setUserBadges] = useState([]);
+  const [badgeDefs, setBadgeDefs] = useState([]);
 
   useEffect(() => {
-    const userStr = localStorage.getItem("scoutit_user");
-    if (userStr) {
-      const user = JSON.parse(userStr);
-      setUserBadges(user.badges || [{ id: "FOUNDING_SEEKER" }]);
-    } else {
-      setUserBadges([{ id: "FOUNDING_SEEKER" }]);
-    }
+    // Real counts (claimed/status) always come from the server, regardless of who's logged in.
+    fetch("/api/badges")
+      .then((res) => res.json())
+      .then((data) => setBadgeDefs(data.definitions || []))
+      .catch((err) => console.error("Failed to load badge registry:", err));
+
+    const loadUserBadges = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        const { data: rows } = await supabase
+          .from("user_badges")
+          .select("badge_id, earned_at")
+          .eq("user_id", session.user.id);
+        setUserBadges((rows || []).map((r) => ({ id: r.badge_id, minted_at: r.earned_at })));
+        return;
+      }
+      // No real session — fall back to the dev-toolbox mock user, if any.
+      const userStr = localStorage.getItem("scoutit_user");
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        setUserBadges(user.badges || []);
+      }
+    };
+    loadUserBadges();
   }, []);
 
-  const activeBadges = getAllBadges("ACTIVE");
-  const soldOutBadges = getAllBadges("SOLD_OUT");
+  const activeBadges = badgeDefs.filter((b) => b.status === "ACTIVE");
+  const soldOutBadges = badgeDefs.filter((b) => b.status === "SOLD_OUT");
 
   const [claimingId, setClaimingId] = useState(null);
 
   const handleClaimBadge = async (badgeId) => {
-    const userStr = localStorage.getItem("scoutit_user");
-    if (!userStr) {
+    const { data: { session } } = await supabase.auth.getSession();
+    const token = session?.access_token;
+
+    if (!token) {
       alert("Please log in to claim a badge.");
       return;
     }
-    const user = JSON.parse(userStr);
-    
+
     setClaimingId(badgeId);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const token = session?.access_token;
-
       const res = await fetch('/api/badges/claim', {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
-          'Authorization': token ? `Bearer ${token}` : ""
+          'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ badgeId, userId: user.id })
+        body: JSON.stringify({ badgeId })
       });
       const data = await res.json();
       if (data.success) {
-        const updatedBadges = data.badges;
-        setUserBadges(updatedBadges);
-        // update local storage
-        user.badges = updatedBadges;
-        localStorage.setItem("scoutit_user", JSON.stringify(user));
+        setUserBadges((data.badges || []).map((b) => ({ id: b.badge_id, minted_at: b.earned_at })));
+        // Refresh real counts so the progress bar reflects the new claim immediately.
+        fetch("/api/badges")
+          .then((r) => r.json())
+          .then((d) => setBadgeDefs(d.definitions || []))
+          .catch(() => {});
         alert("Badge claimed successfully!");
       } else {
         alert(data.error || "Failed to claim badge");

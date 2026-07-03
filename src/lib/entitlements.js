@@ -91,3 +91,12 @@ export function getCurrentRole() {
   const roles = u && (u.active_roles || u.tags);
   return (Array.isArray(roles) && roles[0]) || "seeker";
 }
+
+// Unlike getCurrentRole() (the primary/first hat), a user can hold several
+// hats at once — e.g. the Operator hat (SCOUTIT_MASTER_BUILD_SPEC.md §9.4)
+// alongside Owner/Broker. Use this when checking for one specific hat.
+export function hasActiveRole(role) {
+  const u = readUser();
+  const roles = (u && (u.active_roles || u.tags)) || [];
+  return Array.isArray(roles) && roles.includes(role);
+}

@@ -1157,3 +1157,51 @@ html.lite-mode .title-ufo-underglow {
 html.lite-mode .layer-route canvas {
   display: none !important;
 }
+
+/* ==========================================================================
+   LIQUID GLASS (CINEMATIC) UTILITIES
+   ========================================================================== */
+.liquid-glass {
+  background: rgba(255, 255, 255, 0.01);
+  background-blend-mode: luminosity;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  box-shadow: inset 0 1px 1px rgba(232, 174, 60, 0.1);
+  position: relative;
+  /* overflow: hidden; */ /* Keep off so tooltips/dropdowns inside can overflow if needed */
+}
+
+.liquid-glass::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.4px;
+  background: linear-gradient(180deg, rgba(232, 174, 60, 0.45) 0%, rgba(232, 174, 60, 0.15) 20%, rgba(232, 174, 60, 0) 40%, rgba(232, 174, 60, 0) 60%, rgba(232, 174, 60, 0.15) 80%, rgba(232, 174, 60, 0.45) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.liquid-glass-strong {
+  background: rgba(255, 255, 255, 0.02);
+  background-blend-mode: luminosity;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(232, 174, 60, 0.2);
+  position: relative;
+}
+
+.liquid-glass-strong::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.4px;
+  background: linear-gradient(180deg, rgba(232, 174, 60, 0.6) 0%, rgba(232, 174, 60, 0.25) 20%, rgba(232, 174, 60, 0) 40%, rgba(232, 174, 60, 0) 60%, rgba(232, 174, 60, 0.25) 80%, rgba(232, 174, 60, 0.6) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}

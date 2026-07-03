@@ -12,6 +12,10 @@ export default function BrokerMode() {
   const [pitchMessage, setPitchMessage] = useState("");
   const [pitchError, setPitchError] = useState("");
   
+  // Notification and ID Card State
+  const [showNotification, setShowNotification] = useState(true);
+  const [showIdCard, setShowIdCard] = useState(false);
+  
   // New Deal File Workspace State
   const [activeDealId, setActiveDealId] = useState(null);
   
@@ -232,6 +236,109 @@ export default function BrokerMode() {
   return (
     <div className="flex-1 flex flex-col w-full max-w-[1200px] mx-auto animate-[fadeIn_0.4s_ease] relative">
       
+      {/* Notification Banner */}
+      {showNotification && !activeDealId && !showIdCard && (
+        <div className="bg-gold-accent/10 border border-gold-accent/30 rounded-lg p-4 mb-6 flex items-start sm:items-center justify-between gap-4 animate-[slideDown_0.4s_ease]">
+          <div className="flex gap-4 items-start sm:items-center">
+            <div className="w-8 h-8 rounded-full bg-gold-accent flex items-center justify-center text-background text-lg shrink-0">✨</div>
+            <div>
+              <h4 className="font-working-title text-on-surface text-sm font-bold">New Feature: Official Verified ID Card</h4>
+              <p className="text-text-secondary text-xs mt-1">You can now generate and download your official ScoutIt Verified Broker ID card for marketing use.</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 shrink-0">
+            <button 
+              onClick={() => { setShowIdCard(true); setShowNotification(false); }}
+              className="text-xs font-bold text-background bg-gold-accent px-4 py-2 rounded hover:opacity-90 transition-opacity"
+            >
+              Generate ID
+            </button>
+            <button onClick={() => setShowNotification(false)} className="text-text-muted hover:text-on-surface p-2">✕</button>
+          </div>
+        </div>
+      )}
+
+      {/* ID Card Generation Overlay */}
+      {showIdCard && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-background/95 backdrop-blur-md px-4 overflow-y-auto pt-20 pb-10">
+          <div className="w-full max-w-2xl bg-[#0d0d0d] border border-surface-variant rounded-xl shadow-[0_0_50px_rgba(232,174,60,0.1)] flex flex-col relative animate-[scaleUp_0.4s_ease-out]">
+            <button 
+              onClick={() => setShowIdCard(false)}
+              className="absolute top-4 right-4 text-text-muted hover:text-on-surface text-xl z-20"
+            >
+              ✕
+            </button>
+            
+            <div className="p-8 pb-0 text-center">
+              <h2 className="font-headline-editorial text-3xl text-on-surface">Verified Identity</h2>
+              <p className="text-text-secondary text-sm mt-2 mb-8">Download or screenshot this card to verify your status with clients.</p>
+            </div>
+
+            {/* The Actual ID Card Design */}
+            <div className="mx-auto w-full max-w-[400px] mb-8 bg-[#121110] rounded-2xl border border-[rgba(232,174,60,0.4)] relative overflow-hidden shadow-[0_20px_40px_rgba(0,0,0,0.8)]">
+              {/* Glass Glare */}
+              <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/5 to-transparent z-10 pointer-events-none"></div>
+              
+              {/* Header */}
+              <div className="bg-[#E8AE3C] p-4 flex justify-between items-center relative z-20">
+                <span className="font-display-md text-background text-xl font-bold tracking-tighter">S<span className="font-normal">cout</span>IT</span>
+                <span className="font-mono text-[10px] text-background/80 tracking-widest font-bold">VERIFIED ADVISOR</span>
+              </div>
+              
+              {/* Body */}
+              <div className="p-6 relative z-20">
+                <div className="flex gap-6 items-center mb-6">
+                  <div className="w-20 h-20 rounded-full border-2 border-[#E8AE3C] bg-surface-alt overflow-hidden flex items-center justify-center relative">
+                    <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&q=80')] bg-cover bg-center"></div>
+                  </div>
+                  <div>
+                    <h3 className="font-headline-editorial text-2xl text-on-surface mb-1">Miguel Torres</h3>
+                    <p className="font-working-title text-text-secondary text-xs tracking-wider uppercase">Solar Partner</p>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <div className="bg-surface-alt p-3 rounded border border-surface-variant">
+                    <span className="block text-[8px] text-text-muted font-mono uppercase tracking-widest mb-1">Scout Rating</span>
+                    <span className="text-on-surface font-mono font-bold text-lg">94/100</span>
+                  </div>
+                  <div className="bg-surface-alt p-3 rounded border border-surface-variant">
+                    <span className="block text-[8px] text-text-muted font-mono uppercase tracking-widest mb-1">PRC License</span>
+                    <span className="text-on-surface font-mono font-bold text-sm">#0019284</span>
+                  </div>
+                </div>
+
+                <div className="border-t border-surface-variant pt-4 flex justify-between items-end">
+                  <div>
+                    <span className="block text-[8px] text-text-muted font-mono uppercase tracking-widest mb-1">Valid Until</span>
+                    <span className="text-text-secondary font-mono text-xs">DEC 2026</span>
+                  </div>
+                  {/* Mock QR Code Pattern */}
+                  <div className="w-12 h-12 bg-white rounded p-1 opacity-90">
+                    <div className="w-full h-full bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PHBhdGggZD0iTTAgMGg0MHY0MEgweiIgZmlsbD0ibm9uZSIvPjxwYXRoIGQ9Ik00IDRoMTB2MTBINGV6bTEyIDB2MmgtdjJoLXYyaDJoMnYyaDJ2Mmgydi0yaDJ2LThoMnd6IiBmaWxsPSIjMDAwIi8+PC9zdmc+')] bg-cover bg-no-repeat"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6 border-t border-surface-variant bg-surface-alt flex justify-center rounded-b-xl gap-4">
+              <button 
+                onClick={() => setShowIdCard(false)}
+                className="px-6 py-3 border border-surface-variant rounded text-text-secondary font-working-title text-sm hover:text-on-surface transition-colors"
+              >
+                Close
+              </button>
+              <button 
+                onClick={() => window.print()}
+                className="px-6 py-3 bg-[#E8AE3C] text-background rounded font-working-title text-sm font-bold hover:opacity-90 transition-opacity flex items-center gap-2"
+              >
+                <span>🖨️</span> Print / Save to PDF
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Draft Pitch Modal Overlay */}
       {pitchingListing && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-background/90 backdrop-blur-md px-4">

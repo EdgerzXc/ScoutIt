@@ -1,17 +1,19 @@
 "use client";
 
-import { useEffect, useState, use, useRef } from "react";
+import { useEffect, useState, use, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Loader2, Check, AlertTriangle } from "lucide-react";
 import { DashboardProvider, useDashboard } from "../../../../context/DashboardContext";
 import InventoryGridManager from "../../../../components/dashboard/InventoryGridManager";
+import DelegationRequests from "../../../../components/dashboard/DelegationRequests";
 import { getCurrentTier } from "../../../../lib/entitlements";
+import { getSession } from "../../../../lib/authClient";
 
 function InventoryInner({ params }) {
   const router = useRouter();
   const { id } = use(params);
-  const { listings, updateListing, currentUser, addToast, getCurrentTier } = useDashboard();
+  const { listings, currentUser, addToast, getCurrentTier } = useDashboard();
   
   useEffect(() => {
     if (listings.length > 0 && !listings.find(l => String(l.id) === String(id))) {
@@ -24,14 +26,15 @@ function InventoryInner({ params }) {
 
   // State must be above early return
   const [localUnits, setLocalUnits] = useState([]);
+  const [unitsLoaded, setUnitsLoaded] = useState(false);
   // Save lifecycle for the button animation: idle → saving → saved → idle (or error)
   const [saveState, setSaveState] = useState("idle");
   const autoSaveTimeout = useRef(null);
   const savedResetTimeout = useRef(null);
 
-  // Track which listing ID we've already seeded localUnits for.
+  // Track which listing ID we've already loaded units for.
   // Using the ID (not a boolean) means navigating to a different listing
-  // re-seeds correctly without an extra reset effect.
+  // re-loads correctly without an extra reset effect.
   const initializedForId = useRef(null);
 
   // Keep a live ref to listing so the auto-save timeout never reads a stale closure.
@@ -40,13 +43,52 @@ function InventoryInner({ params }) {
     listingRef.current = listing;
   });
 
-  // Seed localUnits exactly once per listing ID, and only when listing data is present.
+  // Live ref to the latest localUnits + in-flight guard. Newly-added units get
+  // client-side temp ids until the server assigns real ones; if a second save
+  // fires while one is still in flight, we must NOT resend the old temp ids
+  // after reconciliation (that would insert the same unit twice). Instead we
+  // queue a flag and, once the in-flight save settles, re-run persist against
+  // whatever localUnits looks like *then* (via the ref, never a stale closure).
+  const localUnitsRef = useRef(localUnits);
   useEffect(() => {
-    if (listing && initializedForId.current !== id) {
-      setLocalUnits(listing.details?.units_inventory || []);
-      initializedForId.current = id;
+    localUnitsRef.current = localUnits;
+  }, [localUnits]);
+  const isSavingRef = useRef(false);
+  const pendingSaveRef = useRef(false);
+
+  // Load real property_units rows (not details.units_inventory). Exposed as a
+  // stable function so DelegationRequests can trigger a reload after an
+  // accept stamps operator_id on units this page is currently showing.
+  const fetchUnits = useCallback(async ({ silent = false } = {}) => {
+    if (!listingRef.current) return;
+    try {
+      const { data: { session } } = await getSession();
+      const token = session?.access_token;
+      const params = new URLSearchParams({ propertyId: listingRef.current.id });
+      if (currentUser?.id) params.set("mockOwnerId", currentUser.id);
+
+      const res = await fetch(`/api/dashboard/units?${params.toString()}`, {
+        headers: { Authorization: token ? `Bearer ${token}` : "" },
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setLocalUnits(data.units || []);
+      } else if (!silent) {
+        console.error("Failed to load units", data.error);
+        addToast("Couldn't load units — check your connection.", "❌");
+      }
+    } catch (e) {
+      if (!silent) console.error("Failed to load units", e);
+    } finally {
+      setUnitsLoaded(true);
     }
-  }, [listing, id]);
+  }, [currentUser, addToast]);
+
+  useEffect(() => {
+    if (!listing || initializedForId.current === id) return;
+    initializedForId.current = id;
+    fetchUnits();
+  }, [listing, id, fetchUnits]);
 
   // Clear pending timers on unmount so we never set state on a dead component.
   useEffect(() => {
@@ -56,7 +98,7 @@ function InventoryInner({ params }) {
     };
   }, []);
 
-  if (!listing) {
+  if (!listing || !unitsLoaded) {
     return (
       <div className="min-h-screen bg-background pt-24 pb-12 flex items-center justify-center">
         <span className="text-text-muted font-working-title animate-pulse">Loading Inventory...</span>
@@ -66,19 +108,48 @@ function InventoryInner({ params }) {
 
   // Single persistence path for both auto-save and manual save.
   // Drives the button animation and returns once the server confirms.
+  // Writes to the real property_units table via /api/dashboard/units, not the
+  // legacy details.units_inventory blob — see SCOUTIT_MASTER_BUILD_SPEC.md §9.
   const persist = async (units) => {
+    // A save is already in flight: don't fire a concurrent request (it could
+    // resend not-yet-reconciled temp ids and insert duplicate rows). Record
+    // that another save is wanted; the in-flight one will pick up the latest
+    // state via localUnitsRef once it settles.
+    if (isSavingRef.current) {
+      pendingSaveRef.current = true;
+      return true;
+    }
+    isSavingRef.current = true;
+
     if (savedResetTimeout.current) {
       clearTimeout(savedResetTimeout.current);
     }
     setSaveState("saving");
 
-    // Read listing from ref so we always use the latest details, not a stale closure.
-    const updatedDetails = { ...listingRef.current.details, units_inventory: units };
-
     let ok = false;
     try {
-      // silent: the button + status line provide the feedback, so suppress context toasts.
-      ok = await updateListing(listingRef.current.id, { details: updatedDetails }, { silent: true });
+      const { data: { session } } = await getSession();
+      const token = session?.access_token;
+      const res = await fetch("/api/dashboard/units", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: token ? `Bearer ${token}` : "",
+        },
+        body: JSON.stringify({
+          propertyId: listingRef.current.id,
+          units,
+          mockOwnerId: currentUser?.id,
+        }),
+      });
+      const data = await res.json();
+      ok = res.ok && data.success;
+      if (ok) {
+        // Reconcile: server-assigned real ids replace client temp ids so the
+        // next save updates rather than re-inserting these rows.
+        setLocalUnits(data.units || units);
+        if (data.warning) addToast(data.warning, "⚠️");
+      }
     } catch (e) {
       console.error("Failed to save inventory", e);
       ok = false;
@@ -91,6 +162,14 @@ function InventoryInner({ params }) {
 
     // Settle the button back to idle after the confirmation has been seen.
     savedResetTimeout.current = setTimeout(() => setSaveState("idle"), ok ? 1800 : 2800);
+
+    isSavingRef.current = false;
+    if (pendingSaveRef.current) {
+      pendingSaveRef.current = false;
+      // Re-run against the freshest state, not the (possibly stale) `units`
+      // this call closed over.
+      persist(localUnitsRef.current);
+    }
     return ok;
   };
 
@@ -169,9 +248,16 @@ function InventoryInner({ params }) {
           </div>
         </div>
 
+        {/* Pending operator delegation requests (§9.2) — review above the grid */}
+        <DelegationRequests
+          propertyId={listing.id}
+          units={localUnits}
+          onDelegated={() => fetchUnits({ silent: true })}
+        />
+
         {/* Grid Manager */}
-        <InventoryGridManager 
-          units={localUnits} 
+        <InventoryGridManager
+          units={localUnits}
           onChange={(newUnits) => setLocalUnits(newUnits)}
           onAutoSave={handleAutoSave}
           isPro={isPro}

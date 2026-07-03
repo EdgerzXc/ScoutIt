@@ -5,8 +5,43 @@
 // ═══════════════════════════════════════════════════════════════
 
 import { cityToRegion } from "./regions";
+import { DEEP_INTEL_SCHEMA } from "./deepIntelSchema";
 
 const BASE_URL = "https://api.airtable.com/v0";
+
+// ── Deep Intelligence values (Airtable `DeepIntel_JSON` column) ─
+// Stored as a JSON object keyed by the DI_* keys in deepIntelSchema.js
+// (label-keyed extras allowed). The per-chapter DeepIntelWidget looks
+// values up by DI_ key while CategorySpecBlock's locked section looks
+// up by label — so we expand each DI_ key into a label alias too.
+// Mirrors the Units_JSON / WhereTo JSON-column pattern.
+function expandDeepIntel(jsonStr) {
+  let raw;
+  try { raw = JSON.parse(jsonStr || "{}") || {}; } catch { raw = {}; }
+  const out = { ...raw };
+  for (const category of Object.values(DEEP_INTEL_SCHEMA)) {
+    for (const fields of Object.values(category)) {
+      for (const field of fields) {
+        if (raw[field.key] !== undefined && out[field.label] === undefined) {
+          out[field.label] = raw[field.key];
+        }
+      }
+    }
+  }
+  return out;
+}
+
+// SpaceCategory (Airtable select) → DEEP_INTEL_SCHEMA key
+function deepIntelCategoryFor(spaceCategory) {
+  const c = (spaceCategory || "").toLowerCase();
+  if (c.includes("commercial")) return "commercial";
+  if (c.includes("str") || c.includes("short")) return "str";
+  if (c.includes("hospitality")) return "hospitality";
+  if (c.includes("restaurant") || c.includes("culinary")) return "restaurants";
+  if (c.includes("venue") || c.includes("event")) return "venues";
+  if (c.includes("residential")) return "residential";
+  return "";
+}
 
 // ── Tier label → number conversion ──────────────────────────────
 // Airtable stores SubscriptionLabel as text (Gold, Silver, etc.)
@@ -173,6 +208,11 @@ export async function fetchProperties(apiKey, baseId) {
         units_inventory: (() => {
           try { return JSON.parse(f.Units_JSON || "[]"); } catch { return []; }
         })(),
+        // Deep Intelligence panel values (HIDDEN INTEL, Solar+) — JSON column,
+        // expanded so both DI_-key and label lookups resolve (see helper above)
+        deepIntel: expandDeepIntel(f.DeepIntel_JSON),
+        // Schema key for DEEP_INTEL_SCHEMA[...] lookups in the flows
+        category: deepIntelCategoryFor(f.SpaceCategory),
         // Photos stored as comma-separated URLs
         photos: f.Photos
           ? f.Photos.split(",").map((u) => u.trim()).filter(Boolean)
@@ -449,47 +489,25 @@ function reverseMapCategoryFields(details) {
 // ═══════════════════════════════════════════════════
 // EXPORTED CMS METHODS
 // ═══════════════════════════════════════════════════════════════
-// Turn a title (or existing slug) into a clean URL slug: "One E-Com Center" → "one-ecom-center".
-function slugifyText(text) {
-  return (text || "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-}
 
-// Guarantee the slug is unique in PROPERTIES_CMS so two listings never share a public URL.
-// Best-effort: if the lookup fails we still return a usable slug rather than block publishing.
-async function buildUniqueSlug(apiKey, baseId, baseSlug) {
-  const safe = baseSlug || "listing";
-  try {
-    const formula = `OR({Slug}='${safe}',LEFT({Slug},${safe.length + 1})='${safe}-')`;
-    const params = `filterByFormula=${encodeURIComponent(formula)}&fields%5B%5D=Slug&maxRecords=200`;
-    const res = await fetch(`${BASE_URL}/${baseId}/PROPERTIES_CMS?${params}`, {
-      headers: { Authorization: `Bearer ${apiKey}` },
-    });
-    if (!res.ok) return safe;
-    const data = await res.json();
-    const taken = new Set(
-      (data.records || []).map((r) => (r.fields.Slug || "").toLowerCase())
-    );
-    if (!taken.has(safe)) return safe;
-    for (let i = 2; i < 1000; i++) {
-      if (!taken.has(`${safe}-${i}`)) return `${safe}-${i}`;
-    }
-    return `${safe}-${Date.now().toString(36)}`;
-  } catch {
-    return safe;
-  }
-}
-
-// Insert a new property into Airtable. Returns the created record (its fields include
-// the final Slug so callers can persist/display the canonical public URL).
-export async function insertProperty(apiKey, baseId, data) {
+// Insert a new property into Airtable. Returns the created record — its fields
+// include the Slug Airtable computed, so callers persist/display that as the
+// canonical public URL.
+//
+// Slug used to be writable and was generated + de-duplicated here
+// (slugifyText + buildUniqueSlug against existing PROPERTIES_CMS records).
+// It's now a computed/formula field in the live base — writing to it fails
+// with a 422 ("Field \"Slug\" cannot accept a value because the field is
+// computed"), which was silently breaking every first-time property insert
+// (found while verifying the units_inventory→property_units migration).
+// Removed the write; the slug Airtable computes comes back on `fields.Slug`.
+export async function insertProperty(apiKey, baseId, data, unitsOverride = null) {
   const url = `${BASE_URL}/${baseId}/PROPERTIES_CMS`;
-  const baseSlug = slugifyText(data.slug || data.title);
-  const slug = await buildUniqueSlug(apiKey, baseId, baseSlug);
 
-  const unitsJson = JSON.stringify(data.details?.units_inventory || []);
+  // unitsOverride (real property_units rows, including id/operator_id) takes
+  // precedence over the legacy details.units_inventory blob when provided —
+  // see src/app/api/dashboard/units/route.js.
+  const unitsJson = JSON.stringify(unitsOverride || data.details?.units_inventory || []);
   const categoryFields = reverseMapCategoryFields(data.details);
 
   const payload = {
@@ -497,7 +515,6 @@ export async function insertProperty(apiKey, baseId, data) {
       {
         fields: {
           Title: data.title,
-          Slug: slug,
           Location: data.location || "",
           SpaceTypography: data.type || "Unknown",
           SpaceCategory: data.space_category || data.category || data.type || "Unknown",
@@ -527,7 +544,7 @@ export async function insertProperty(apiKey, baseId, data) {
   return result.records[0];
 }
 
-export async function updateProperty(apiKey, baseId, slug, data) {
+export async function updateProperty(apiKey, baseId, slug, data, unitsOverride = null) {
   // 1. Find the Airtable Record ID using the slug
   const params = `filterByFormula=${encodeURIComponent(`{Slug}='${slug}'`)}&maxRecords=1`;
   const urlGet = `${BASE_URL}/${baseId}/PROPERTIES_CMS?${params}`;
@@ -555,7 +572,11 @@ export async function updateProperty(apiKey, baseId, slug, data) {
   if (data.title) fieldsToUpdate.Title = data.title;
   if (data.location) fieldsToUpdate.Location = data.location;
   if (data.type) fieldsToUpdate.SpaceTypography = data.type;
-  if (data.details?.units_inventory) fieldsToUpdate.Units_JSON = JSON.stringify(data.details.units_inventory);
+  if (unitsOverride) {
+    fieldsToUpdate.Units_JSON = JSON.stringify(unitsOverride);
+  } else if (data.details?.units_inventory) {
+    fieldsToUpdate.Units_JSON = JSON.stringify(data.details.units_inventory);
+  }
   
   const categoryFields = reverseMapCategoryFields(data.details);
   Object.assign(fieldsToUpdate, categoryFields);

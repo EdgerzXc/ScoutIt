@@ -1,5 +1,13 @@
 # ScoutIT — Property Page Architecture Refactor + Category Content System
 
+> ✅ **STATUS: BUILT.** This refactor is live — `src/components/property/chapterConfig.js` (the
+> registry), `CategorySpecBlock.js`, `ResidentialFlow.js` + `CommercialFlow.js` (rendering both
+> flows for all 6 categories per `CATEGORY_TO_LAYOUT_MAP`), and `src/lib/deepIntelSchema.js` (the
+> per-category × per-chapter hidden-intel field lists) all exist and match this spec. Read this
+> file for the *design intent* behind the chapter order/naming per category; for what's public vs
+> paid in each chapter, see `04_DATA_AND_SCHEMA/VISIBILITY_MAP__*.md` (one per category) — those
+> are the current operational reference, not this file.
+
 Read `CLAUDE.md` and `SCOUTIT_BRAND.md` before starting. This is a major architectural refactor — read everything carefully before touching any code.
 
 ---

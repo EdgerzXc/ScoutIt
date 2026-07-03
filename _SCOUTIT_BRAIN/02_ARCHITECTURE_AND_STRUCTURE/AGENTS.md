@@ -7,11 +7,16 @@ This version has breaking changes — APIs, conventions, and file structure may 
 ---
 
 # 🤖 MASTER AI SYSTEM PROMPT
+
+> ⚠️ **This is a brain-folder COPY** of the live `AGENTS.md` at the project root (loaded every
+> session via `CLAUDE.md`). Keep it synced when the root changes — per `00_SOP.md` rule 8
+> ("sync the docs in the same turn"). Synced 2026-07-02.
+
 **ATTENTION ALL AI AGENTS:** If you are reading this, you are working on the **ScoutIt Space Intelligence Platform**. You must adhere to the following strict architectural and design rules at all times.
 
 ## 1. PROJECT IDENTITY & DESIGN DNA
 - **What this is:** ScoutIt is a premium, ultra-luxury commercial and residential real estate directory. Do not treat it as a generic property app.
-- **The Design Rule:** You must ALWAYS use Dark Mode. The visual aesthetic is 95% deep black (`#0d0d0d`, `#121212`) and 5% glowing gold accents. Gold system (June 2026): primary gold `#FFB800` (`--accent`), interactive gold `#FFC929` (`--accent-bright`, for buttons/CTAs/hover), muted gold `#7A5C00` (`--accent-muted`, for borders/dividers). Always use the CSS variables, never raw hex.
+- **The Design Rule:** You must ALWAYS use Dark Mode. The visual aesthetic is 95% deep black (`#0d0d0d`, `#121212`) and 5% glowing gold accents. Gold system (refined June 26 2026 — warmer amber, less yellow): primary gold `#E8AE3C` (`--accent`), interactive gold `#F7C64E` (`--accent-bright`, for buttons/CTAs/hover), muted gold `#6E531A` (`--accent-muted`, for borders/dividers). Glow rgb tuples: `232, 174, 60` / `247, 198, 78`. Always use the CSS variables, never raw hex.
 - **Typography:** Always use uppercase, spaced-out, mono-spaced fonts (`var(--font-mono)`) for small labels, buttons, and system metrics. 
 - **Feel:** Use glassmorphism (`backdrop-filter: blur`), subtle micro-animations, and high-end cinematic visuals. **Never output generic white/blue Bootstrap-style components.**
 

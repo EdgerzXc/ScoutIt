@@ -45,6 +45,7 @@ different altitude. That is ScoutIT in the market. The UFO stays. Always.
 | ★ | **`00_SOP.md`** | **Read every turn** — operating rules + invariants that keep work aligned & non-breaking |
 | ★ | **`00_COUNCIL.md`** | The 5-seat decision panel for product/UX calls |
 | ▶ | **`NEXT_DAY_HANDOFF.md`** | **Resume here** — current build status, locked decisions, ordered next steps |
+| ▶ | **`SCOUTIT_MASTER_BUILD_SPEC.md`** | The active build queue for Mission Control, Security Core, Badge Engine, Heatmap, Affordability Calculator — read before touching any of those. Has its own open-questions list; don't guess on those, ask the owner. |
 | 1 | **`01_IDENTITY_AND_VISION/`** | What ScoutIT *is*, why it exists, the wordplay, the manifesto, future ideas |
 | 2 | **`02_ARCHITECTURE_AND_STRUCTURE/`** | The tech stack, folder map, dual-CMS data flow, AI working rules |
 | 3 | **`03_DESIGN/`** | The visual DNA: 95% black / 5% gold, tokens, typography, motion |
@@ -158,6 +159,8 @@ different altitude. That is ScoutIT in the market. The UFO stays. Always.
 - `DESIGN_AUDIT_2026-06.md` — design audit findings
 
 **04 · Data & Schema**
+- `FIELD_VISIBILITY_MAP.md` — ⭐ SIGNED OFF (2026-07-02): what's PUBLIC vs HIDDEN INTEL vs INTERNAL, per page section × category
+- `VISIBILITY_MAP__{RESIDENTIAL,COMMERCIAL,STR,HOSPITALITY,RESTAURANTS,VENUES}.md` — one per category, the operational references
 - `DATA_DICTIONARY.md` — Airtable + Supabase column schemas
 - `AIRTABLE_IMPLEMENTATION_PLAN.md` — the data model build plan
 - `SCOUTIT_AIRTABLE_SOP.md` — per-category data-entry SOP (golden rule: no data → blank)
@@ -181,6 +184,9 @@ different altitude. That is ScoutIT in the market. The UFO stays. Always.
 - `FABLE_ONBOARDING_PROMPT.md` — onboarding prompt
 
 **08 · Operations & Backlog**
+- `SESSION_HANDOFF_2026-07-02.md` — ⭐ latest complete session record (start here per `NEXT_DAY_HANDOFF.md`)
+- `E2E_TEST_FIX_LIST.md` — every bug/unverified flow flagged during codebase work, batched for one E2E pass
+- `HEATMAP_NOAH_INTEGRATION_PLAN.md` — NOAH/HazardHunterPH research + the ready-to-execute plan for the flood-risk map layer
 - `SCOUTIT_FIX_LIST.md` — the single prioritized build/fix list + launch build order
 - `WEBSITE_COUNCIL_AUDIT.md` — website audit
 - `SCOUTIT_CLEANUP_PROMPT.md` — pre-launch cleanup playbook

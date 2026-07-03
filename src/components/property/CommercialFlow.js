@@ -6,13 +6,15 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import ReactionButtons from "@/components/ui/ReactionButtons";
 import InteractiveMap from "@/components/property/InteractiveMap";
+import FloodHeatmapMap from "@/components/property/FloodHeatmapMap";
 import CategorySpecBlock from "@/components/property/CategorySpecBlock";
-import { canSee, getCurrentTier } from "../../lib/entitlements";
+import { canSee, getCurrentTier, hasActiveRole } from "../../lib/entitlements";
 import { DEEP_INTEL_SCHEMA } from "../../lib/deepIntelSchema";
 import "@/app/property/[id]/property-detail.css";
 import { getChapterConfig } from "./chapterConfig";
 import { Bed, Bath, Ruler, Car, Lock, Search, Camera, Building2 } from "lucide-react";
 import InquiryModal from "@/components/property/InquiryModal";
+import OperatorRequestModal from "@/components/property/OperatorRequestModal";
 import { getPropertyBySlug } from "@/data/mockProperties";
 
 // ═══════════════════════════════════════════════════
@@ -339,6 +341,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
   }, [externalActiveTab]);
   const [menuOpen,   setMenuOpen]   = useState(false);
   const [isInquiryOpen, setIsInquiryOpen] = useState(false);
+  const [isOperatorRequestOpen, setIsOperatorRequestOpen] = useState(false);
   // The mobile bottom bar's "Inquire" action opens this modal via a global event,
   // so the primary CTA is always reachable from the thumb zone on a long page.
   useEffect(() => {
@@ -808,6 +811,11 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
     : [];
   if (realUnits.length > 0) {
     dynamicUnits = realUnits.map((u, i) => ({
+      // id is the real property_units UUID, serialized into Units_JSON since
+      // the /api/dashboard/units rewrite (SCOUTIT_MASTER_BUILD_SPEC.md §9) —
+      // absent for any older/mock unit data, in which case no Unit Master
+      // Page link renders (see the "View Unit Master Page" guard below).
+      id: u.id || null,
       name: u.name || `Unit ${String(i + 1).padStart(2, "0")}`,
       specs: [
         u.size  ? `${u.size} sqm`     : null,
@@ -1504,7 +1512,18 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                 <button className={`whereto-tab-btn ${locTab === "list" ? "active" : ""}`} onClick={() => setLocTab("list")}>
                   Directory List
                 </button>
+                <button className={`whereto-tab-btn ${locTab === "flood" ? "active" : ""}`} onClick={() => setLocTab("flood")}>
+                  Flood Risk Map
+                </button>
               </div>
+
+              {locTab === "flood" && (
+                <FloodHeatmapMap
+                  lat={d.lat || d.latitude}
+                  lng={d.lng || d.longitude}
+                  propertyTitle={d.title}
+                />
+              )}
 
               {locTab === "map" && (
                 <div style={{height:"clamp(420px, 52vh, 480px)", minHeight:"420px", flexShrink:0, borderRadius:"4px", overflow:"hidden", border:"0.5px solid #262626", marginBottom:"8px"}}>
@@ -1933,6 +1952,16 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                         <span style={{fontFamily:"'Courier New',monospace", fontSize:"11px", color:"#6a6a6a"}}>No additional specs entered.</span>
                       )}
                     </div>
+                    {/* Real units carry a stable id (property_units.id); synthesized
+                        fallback units don't and have no master page to link to. */}
+                    {activeUnitObj.id && (
+                      <Link
+                        href={`/property/${d.slug}/unit/${activeUnitObj.id}`}
+                        style={{display:"inline-block", marginTop:"16px", fontFamily:"'Courier New',monospace", fontSize:"11px", color:"#E8AE3C", letterSpacing:"0.1em", textTransform:"uppercase", textDecoration:"none"}}
+                      >
+                        View Unit Master Page →
+                      </Link>
+                    )}
                   </div>
                 </div>
               )}
@@ -2197,6 +2226,22 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                 Connect with an Authorized Broker →
               </button>
 
+              {/* Co-working operators only (Operator hat) — §9.2 delegation handshake */}
+              {hasActiveRole("operator") && (
+                <button
+                  onClick={() => setIsOperatorRequestOpen(true)}
+                  style={{
+                    marginTop: "10px", width: "100%", background: "transparent",
+                    border: "0.5px solid rgba(232,174,60,0.4)", color: "#E8AE3C",
+                    fontFamily: "'Courier New',monospace", fontSize: "11px",
+                    letterSpacing: "0.12em", textTransform: "uppercase",
+                    padding: "12px 16px", borderRadius: "4px", cursor: "pointer",
+                  }}
+                >
+                  Request to Operate This Building →
+                </button>
+              )}
+
               {/* RA 9646 compliance badge */}
               <div style={{display:"inline-flex", alignItems:"center", gap:"8px", marginTop:"20px", padding:"8px 14px", border:"0.5px solid rgba(76,175,125,0.4)", borderRadius:"4px", background:"rgba(76,175,125,0.06)"}}>
                 <span style={{width:"7px", height:"7px", borderRadius:"50%", background:"#4caf7d", flexShrink:0}}/>
@@ -2253,11 +2298,18 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
         </button>
       )}
 
-      <InquiryModal 
-        isOpen={isInquiryOpen} 
-        onClose={() => setIsInquiryOpen(false)} 
-        propertyTitle={d.title} 
-        brokerName={d.broker_name} 
+      <InquiryModal
+        isOpen={isInquiryOpen}
+        onClose={() => setIsInquiryOpen(false)}
+        propertyTitle={d.title}
+        brokerName={d.broker_name}
+      />
+
+      <OperatorRequestModal
+        isOpen={isOperatorRequestOpen}
+        onClose={() => setIsOperatorRequestOpen(false)}
+        propertyTitle={d.title}
+        propertySlug={d.slug}
       />
 
       {/* Lightbox / Fullscreen Modal */}

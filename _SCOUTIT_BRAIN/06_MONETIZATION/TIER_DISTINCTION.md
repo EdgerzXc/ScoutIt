@@ -60,6 +60,13 @@ just *one checkout that sets several role-tiers at once* — no special machiner
 **Connects** depend on **both** tier **and** active role (e.g. Solar Seeker = 6/mo, Solar Broker = 8/mo;
 `CONNECTS_ALLOWANCE`). Per-role tiers imply **per-role Connects wallets** (separate pots per hat).
 
+> **Live-DB check (2026-07-02):** confirmed the per-role foundation refactor has not started —
+> `user_profiles.subscription_tier` is still one value per account, and Supabase's
+> `connect_balances`/`connect_transactions` have no `role` column (one wallet per `user_id`).
+> See `08_OPERATIONS_AND_BACKLOG/E2E_TEST_FIX_LIST.md` #6. Don't add a `role` column to just the
+> Connects tables in isolation — it's downstream of the tier-storage refactor above, not a
+> standalone fix.
+
 ---
 
 ## 1. Seekers / Buyers — *what they SEE*

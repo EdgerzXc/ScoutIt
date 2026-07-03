@@ -9,14 +9,13 @@ import ReactionButtons from "@/components/ui/ReactionButtons";
 import "../property/property.css";
 
 // ── Tier label → number map (mirrors airtable.js) ──────────────
-const TIER_MAP = { Diamond: 1, Platinum: 2, Gold: 3, Silver: 4, Bronze: 5 };
+const TIER_MAP = { Universe: 1, Cluster: 2, Solar: 3, Starry: 4, Bronze: 5 };
 
 const TIERS = [
-  { value: 1, label: "Diamond Partner" },
-  { value: 2, label: "Platinum Partner" },
-  { value: 3, label: "Gold Partner" },
-  { value: 4, label: "Silver Partner" },
-  { value: 5, label: "Bronze Partner" },
+  { value: 1, label: "Universe Partner" },
+  { value: 2, label: "Cluster Partner" },
+  { value: 3, label: "Solar Partner" },
+  { value: 4, label: "Starry Partner" },
 ];
 
 function normalizeTier(broker) {
@@ -134,7 +133,7 @@ export default function BrokersPage() {
       <Header />
       <main className="brokers-main">
         <header className="directory-header">
-          <span className="vector-label">LAYER 03.1 // VERIFIED ADVISORS</span>
+          <span className="vector-label">LAYER 04.1 // VERIFIED ADVISORS</span>
           <h1 className="page-title">Intelligence Roster</h1>
           <p className="page-subtitle">Directory of elite Space Intelligence advisors across prime corridors.</p>
         </header>
@@ -289,11 +288,11 @@ export default function BrokersPage() {
                   let tierClass = "";
                   let tierBadgeText = "";
                   switch (tier) {
-                    case 1: tierClass = "tier-1-card diamond-card";  tierBadgeText = "DIAMOND PARTNER";  break;
-                    case 2: tierClass = "tier-2-card platinum-card"; tierBadgeText = "PLATINUM PARTNER"; break;
-                    case 3: tierClass = "tier-3-card gold-card";     tierBadgeText = "GOLD PARTNER";     break;
-                    case 4: tierClass = "tier-4-card silver-card";   tierBadgeText = "SILVER PARTNER";   break;
-                    case 5: tierClass = "tier-5-card bronze-card";   tierBadgeText = "BRONZE PARTNER";   break;
+                    case 1: tierClass = "tier-1-card universe-card";  tierBadgeText = "UNIVERSE PARTNER";  break;
+                    case 2: tierClass = "tier-2-card cluster-card"; tierBadgeText = "CLUSTER PARTNER"; break;
+                    case 3: tierClass = "tier-3-card solar-card";     tierBadgeText = "SOLAR PARTNER";     break;
+                    case 4: tierClass = "tier-4-card starry-card";   tierBadgeText = "STARRY PARTNER";   break;
+                    case 5: tierClass = "tier-4-card starry-card";   tierBadgeText = "STARRY PARTNER";   break; // Fallback
                     default: break;
                   }
 
@@ -317,6 +316,15 @@ export default function BrokersPage() {
                         <h2 className="broker-name">{broker.name}</h2>
                         <p className="broker-title">{broker.title}</p>
                         <p className="broker-specialty">Specialty: <span>{broker.specialty}</span></p>
+                        
+                        {broker.niche && broker.niche.length > 0 && (
+                          <div className="broker-skills-wrap">
+                            {broker.niche.map((skill, i) => (
+                              <span key={i} className="broker-skill-pill">{skill}</span>
+                            ))}
+                          </div>
+                        )}
+                        
                         <p className="broker-bio">{broker.bio}</p>
                         <div className="broker-reactions-wrap" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
                           <ReactionButtons
@@ -621,11 +629,30 @@ export default function BrokersPage() {
         .broker-specialty span { color: var(--text-primary); }
 
         .broker-bio {
-          font-size: 14px;
+          font-size: 13px;
           line-height: 1.6;
           color: var(--text-secondary);
           margin-bottom: 16px;
           flex: 1;
+        }
+
+        .broker-skills-wrap {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
+          margin-bottom: 16px;
+        }
+
+        .broker-skill-pill {
+          background: rgba(232, 174, 60, 0.08);
+          border: 1px solid rgba(232, 174, 60, 0.2);
+          color: var(--accent);
+          font-size: 10px;
+          padding: 3px 8px;
+          border-radius: 4px;
+          font-family: var(--font-mono), monospace;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
         }
 
         .broker-reactions-wrap {
@@ -698,32 +725,34 @@ export default function BrokersPage() {
           font-size: 8px;
           font-weight: 700;
           letter-spacing: 1px;
-          padding: 3px 8px;
-          border-radius: 2px;
+          padding: 4px 10px;
+          border-radius: 4px;
           font-family: var(--font-mono), monospace;
           z-index: 10;
+          text-transform: uppercase;
         }
 
-        .tier-1-card { border-color: transparent !important; box-shadow: 0 8px 32px rgba(0,242,254,0.08); position: relative; }
-        .tier-1-card::before { content: ""; position: absolute; inset: -1px; z-index: -1; border-radius: 6px; background: linear-gradient(90deg, #00f2fe, #4facfe, #b19ffb, #00f2fe); background-size: 300% 300%; animation: diamondGlow 6s linear infinite; }
-        .tier-1-card .general-tier-badge-label { background: linear-gradient(135deg, #00f2fe 0%, #b19ffb 100%); color: #0e0e0e; box-shadow: 0 0 8px rgba(0,242,254,0.3); }
-        .tier-1-card .broker-location { color: #00f2fe; }
+        /* Universe Partner (Tier 1) - Cosmic/Galaxy Aesthetic */
+        .tier-1-card { border-color: transparent !important; box-shadow: 0 8px 32px rgba(177, 159, 251, 0.1); position: relative; }
+        .tier-1-card::before { content: ""; position: absolute; inset: -1px; z-index: -1; border-radius: 6px; background: linear-gradient(90deg, #b19ffb, #7d5fff, #00f2fe, #b19ffb); background-size: 300% 300%; animation: diamondGlow 6s linear infinite; }
+        .tier-1-card .general-tier-badge-label { background: linear-gradient(135deg, #7d5fff 0%, #b19ffb 100%); color: #fff; box-shadow: 0 0 12px rgba(177,159,251,0.4); border: 1px solid rgba(255,255,255,0.2); }
+        .tier-1-card .broker-location { color: #b19ffb; }
+        .tier-1-card .broker-name { text-shadow: 0 0 10px rgba(177,159,251,0.2); }
 
-        .tier-2-card { border-color: #a5c2d9 !important; box-shadow: 0 4px 16px rgba(165,194,217,0.04); }
-        .tier-2-card .general-tier-badge-label { background: linear-gradient(135deg, #a5c2d9 0%, #eef3f7 100%); color: #0e0e0e; }
+        /* Cluster Partner (Tier 2) - Frost/Starlight Aesthetic */
+        .tier-2-card { border-color: rgba(165,194,217, 0.4) !important; box-shadow: 0 4px 16px rgba(165,194,217,0.04); }
+        .tier-2-card .general-tier-badge-label { background: linear-gradient(135deg, rgba(165,194,217,0.1) 0%, rgba(238,243,247,0.2) 100%); color: #eef3f7; border: 1px solid rgba(165,194,217,0.5); backdrop-filter: blur(4px); }
         .tier-2-card .broker-location { color: #a5c2d9; }
 
-        .tier-3-card { border-color: #E8AE3C !important; box-shadow: 0 4px 16px rgba(232, 174, 60,0.04); }
-        .tier-3-card .general-tier-badge-label { background: linear-gradient(135deg, #E8AE3C 0%, #f7ebd3 100%); color: #0e0e0e; }
+        /* Solar Partner (Tier 3) - Gold/Sun Aesthetic */
+        .tier-3-card { border-color: rgba(232, 174, 60, 0.4) !important; box-shadow: 0 4px 16px rgba(232, 174, 60,0.04); }
+        .tier-3-card .general-tier-badge-label { background: linear-gradient(135deg, rgba(232,174,60,0.15) 0%, rgba(232,174,60,0.05) 100%); color: #E8AE3C; border: 1px solid rgba(232, 174, 60, 0.5); backdrop-filter: blur(4px); }
         .tier-3-card .broker-location { color: #E8AE3C; }
 
-        .tier-4-card { border-color: #c8c8c8 !important; }
-        .tier-4-card .general-tier-badge-label { background: linear-gradient(135deg, #c8c8c8 0%, #dcdcdc 100%); color: #0e0e0e; }
-        .tier-4-card .broker-location { color: #dcdcdc; }
-
-        .tier-5-card { border-color: #cd7f32 !important; }
-        .tier-5-card .general-tier-badge-label { background: linear-gradient(135deg, #a05a2c 0%, #cd7f32 100%); color: #ffffff; }
-        .tier-5-card .broker-location { color: #cd7f32; }
+        /* Starry Partner (Tier 4) - Subdued Constellation Aesthetic */
+        .tier-4-card { border-color: rgba(200,200,200, 0.2) !important; }
+        .tier-4-card .general-tier-badge-label { background: rgba(255,255,255,0.05); color: #c8c8c8; border: 1px solid rgba(200,200,200,0.3); }
+        .tier-4-card .broker-location { color: #a0a0a0; }
 
         @keyframes diamondGlow {
           0%   { background-position: 0% 50%; }

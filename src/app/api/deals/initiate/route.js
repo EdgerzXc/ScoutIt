@@ -24,9 +24,17 @@ export async function POST(request) {
 
     const userId = user.id;
 
-    const { listingId, message, role = 'buyer' } = await request.json();
+    // role is a display/reason-text hint only, never persisted to a column —
+    // connect_balances/connect_transactions have no `role` column in the live
+    // schema (per-role wallets are a documented but unbuilt design; the
+    // wallet is per user_id only). unitId is optional: set when this initiate
+    // is scoped to one delegated unit (Unit Master Page "Your Move") or when
+    // an operator (role: 'operator') is opening the initial ask to a building
+    // owner about delegating units (SCOUTIT_MASTER_BUILD_SPEC.md §9.2) — left
+    // null until the owner picks specific units to hand over.
+    const { listingId, propertySlug, message, role = 'buyer', unitId } = await request.json();
 
-    if (!listingId) {
+    if (!listingId && !propertySlug) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
@@ -34,45 +42,57 @@ export async function POST(request) {
       return NextResponse.json({ error: "Server error: missing service role configuration" }, { status: 500 });
     }
 
-    // 1. Fetch the user's connect balances using the Admin client
-    const { data: balanceData } = await supabaseAdmin
-      .from('connect_balances')
-      .select('granted_balance, purchased_balance, earned_balance')
-      .eq('user_id', userId)
-      .eq('role', role)
-      .single();
-
-    // Fall back to user_profiles cache if no wallet row exists yet
-    let granted = 0, purchased = 0, earned = 0;
-    if (balanceData) {
-      granted   = balanceData.granted_balance   || 0;
-      purchased = balanceData.purchased_balance || 0;
-      earned    = balanceData.earned_balance    || 0;
-    } else {
-      const { data: profileData } = await supabaseAdmin
-        .from('user_profiles')
-        .select('connects_balance')
-        .eq('id', userId)
+    // Public property pages are sourced from Airtable and only ever carry an
+    // Airtable record id, never the Supabase properties.id UUID that
+    // deals.property_id actually foreign-keys to (Airtable has no such field
+    // synced back yet — a separate, pre-existing gap, not something to patch
+    // via an Airtable schema change while that work is paused). Callers that
+    // only know the public slug pass propertySlug instead, and we resolve the
+    // real UUID here — slug is already identical on both sides today.
+    let resolvedListingId = listingId;
+    if (!resolvedListingId && propertySlug) {
+      const { data: propBySlug, error: slugErr } = await supabaseAdmin
+        .from('properties')
+        .select('id')
+        .eq('slug', propertySlug)
         .single();
-      if (profileData) granted = profileData.connects_balance || 0;
+      if (slugErr || !propBySlug) {
+        return NextResponse.json({ error: "Property not found" }, { status: 404 });
+      }
+      resolvedListingId = propBySlug.id;
     }
 
-    const totalBalance = granted + purchased + earned;
-    if (totalBalance < 1) {
-      return NextResponse.json({ error: "Insufficient Connects balance." }, { status: 403 });
+    // If this is a per-unit contact (Unit Master Page "Your Move"), look up
+    // whether the unit has a delegated operator so the ledger reason text is
+    // accurate about who's actually being contacted.
+    let unitOperatorId = null;
+    if (unitId) {
+      const { data: unitRow } = await supabaseAdmin
+        .from('property_units')
+        .select('operator_id')
+        .eq('id', unitId)
+        .single();
+      unitOperatorId = unitRow?.operator_id || null;
     }
 
-    // 2. Insert into deals
-    // Expire 14 days from now
+    // 1. Insert the deal first — rolled back below if the Connect spend fails.
+    // Expire 14 days from now.
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 14);
 
+    const defaultMessage = role === 'operator'
+      ? 'Operator requested to discuss operating units in this property.'
+      : unitOperatorId
+      ? 'Buyer contacted the unit operator.'
+      : 'Buyer initiated contact.';
+
     const { data: dealData, error: dealError } = await supabaseAdmin.from('deals').insert([{
-      property_id: listingId,
+      property_id: resolvedListingId,
       buyer_id: userId,
+      unit_id: unitId || null,
       status: 'connected',
       expires_at: expiresAt.toISOString(),
-      pitch_message: message || `Buyer initiated contact.`
+      pitch_message: message || defaultMessage
     }]).select();
 
     if (dealError || !dealData) {
@@ -80,55 +100,37 @@ export async function POST(request) {
       return NextResponse.json({ error: "Failed to initiate chat." }, { status: 500 });
     }
 
-    // 3. Debit 1 Connect
-    let toDeduct = 1;
-    const updates = {};
-    let spentBucket = 'granted';
+    // 2. Atomic Connect spend — balance check + 3-bucket deduction (granted → purchased →
+    // earned) + ledger insert, all in one indivisible Postgres transaction (spend_connects RPC).
+    // Matches the pattern already proven correct in /api/dashboard/invite/route.js.
+    const { data: spendData, error: spendError } = await supabaseAdmin.rpc('spend_connects', {
+      p_user_id: userId,
+      p_amount: 1,
+      p_reason: role === 'operator'
+        ? 'Operator contacted building owner'
+        : unitOperatorId
+        ? 'Buyer contacted unit operator'
+        : 'Buyer contacted owner',
+      p_ref_type: 'initiate_chat',
+      p_ref_id: resolvedListingId,
+    });
 
-    if (granted > 0) {
-      updates.granted_balance = granted - 1;
-      spentBucket = 'granted';
-    } else if (purchased > 0) {
-      updates.purchased_balance = purchased - 1;
-      spentBucket = 'purchased';
-    } else {
-      updates.earned_balance = earned - 1;
-      spentBucket = 'earned';
-    }
-    updates.updated_at = new Date().toISOString();
-
-    // Insert the immutable transaction record
-    const { error: txError } = await supabaseAdmin.from('connect_transactions').insert([{
-      user_id: userId,
-      role,
-      kind: 'spend',
-      bucket: spentBucket,
-      amount: -1,
-      reason: 'Buyer contacted owner',
-      ref_type: 'initiate_chat',
-      ref_id: listingId
-    }]);
-
-    if (txError) {
-      console.error("[INITIATE API] Failed to record transaction:", txError);
+    if (spendError) {
+      console.error("[INITIATE API] Connect spend failed:", spendError);
       await supabaseAdmin.from('deals').delete().eq('id', dealData[0].id);
-      return NextResponse.json({ error: "Transaction failed. No Connects spent." }, { status: 500 });
+      const insufficient = spendError.message?.includes('insufficient balance') || spendError.message?.includes('no wallet found');
+      return NextResponse.json(
+        { error: insufficient ? "Insufficient Connects balance." : "Transaction failed. No Connects spent." },
+        { status: insufficient ? 403 : 500 }
+      );
     }
 
-    // Update the balances table
-    if (balanceData) {
-      await supabaseAdmin.from('connect_balances')
-        .update(updates)
-        .eq('user_id', userId)
-        .eq('role', role);
+    const newBalance = spendData?.[0]?.total_balance ?? null;
+
+    // Keep the user_profiles cache in sync (best-effort display cache; not the source of truth)
+    if (newBalance !== null) {
+      await supabaseAdmin.from('user_profiles').update({ connects_balance: newBalance }).eq('id', userId);
     }
-
-    const newBalance = totalBalance - toDeduct;
-
-    // Keep user_profiles cache in sync
-    await supabaseAdmin.from('user_profiles')
-      .update({ connects_balance: newBalance })
-      .eq('id', userId);
 
     return NextResponse.json({ success: true, dealId: dealData[0].id, newBalance });
 
