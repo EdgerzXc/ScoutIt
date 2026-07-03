@@ -7,7 +7,7 @@ const cspHeader = `
     font-src 'self' data:;
     worker-src 'self' blob:;
     child-src 'self' blob:;
-    frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://my.matterport.com https://*.matterport.com;
+    frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://my.matterport.com https://*.matterport.com https://lumalabs.ai;
     connect-src 'self' https://*.supabase.co https://*.mapbox.com https://events.mapbox.com https://unpkg.com https://*.cartocdn.com https://huggingface.co https://*.hf.co;
     object-src 'none';
     base-uri 'self';
