@@ -199,6 +199,14 @@
   display: none;
 }
 .nav-chapter {
+  /* Real <button> now (was a div) for keyboard/screen-reader access — reset UA button chrome */
+  appearance: none;
+  border: none;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  text-align: inherit;
+
   flex: 0 0 22vw !important;
   min-width: 145px !important;
   display: flex;
