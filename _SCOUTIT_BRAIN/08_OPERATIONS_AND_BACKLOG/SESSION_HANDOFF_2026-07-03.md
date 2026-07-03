@@ -1,6 +1,59 @@
 # Session Handoff — 2026-07-03
 
-> ## ▶️ RESUME HERE (latest) — 2026-07-03, Part 5 — READ THE NEXT-SESSION PROMPT FIRST
+> ## ▶️ RESUME HERE (latest) — 2026-07-03, Part 6 — Part 5 verified, 2 real bugs fixed, gold-standard properties built, pushed live
+>
+> **1. Verified all four Part 5 items in a real running dev server** (not just static review):
+> - **Footer + `/enterprise` page** — clean, no console errors, all links present.
+> - **Mission Control dev-preview** — both Staff (global, 16 properties) and Enterprise (scoped to
+>   owner, 6 properties) lenses render real Supabase/Airtable data correctly. An initial "0
+>   properties" screenshot was just a load-timing race in the test, not a bug — confirmed on retry.
+> - **NOAH flood-risk 5-yr/25-yr/100-yr tabs** — `curl`-confirmed both new `.pmtiles` files are
+>   live on Hugging Face (previously unverified), then confirmed in a real browser that each tab
+>   triggers a genuine 206 range-request fetch against the correct file, not just a UI swap. Detail
+>   in `HEATMAP_NOAH_INTEGRATION_PLAN.md §7`.
+> - **`_tmp-master-properties.js` (6 master mock properties)** — ran it. It was broken: wrote
+>   Airtable singleSelect values that don't exist in the live schema (`"Warm Shell"`,
+>   `"Short-Term Rental"`, etc.) and a non-date string into `RS_Turnover_Date`, so **every one of
+>   the 6 Airtable inserts failed** on the first attempt (the Supabase side had already inserted,
+>   leaving 6 orphaned rows — cleaned up via `execute_sql` before retrying). Fixed by checking the
+>   real Airtable schema (`get_table_schema`) and mapping to real choices, or omitting fields where
+>   nothing genuinely fit. All 6 succeeded on retry.
+>
+> **2. Found and fixed a real pre-existing bug during Part 5 verification:** every STR-category
+> listing showed hardcoded fake placeholder text (`"2 Beach Suites"`, `"15 Guests"`) instead of
+> real data — `src/lib/airtable.js` only ever mapped Hospitality's fields into the shared
+> `accommodations`/`hosting_capacity` keys, never STR's own. Fixed.
+>
+> **3. Owner then asked to fully populate those 6 master properties** (public + hidden-intel +
+> vault fields, per `FIELD_VISIBILITY_MAP.md`) as a permanent "gold standard" reference set, and
+> explicitly said **not** to delete any other existing listings. Full writeup, including 3 more
+> real bugs found while doing this (2 of them platform-wide, not scoped to just these 6 records):
+> **`04_DATA_AND_SCHEMA/MASTER_PROPERTIES_GOLD_STANDARD.md`**. Short version:
+> - Created 2 missing Airtable columns (`Luma_3D_Map_URL`, `Drone_Heatmap_URL`) that code and docs
+>   had referenced for a long time but never actually existed — the Vault's Luma/drone sections
+>   have been silently non-functional on every property, platform-wide, until now.
+> - Fixed `ResidentialFlow.js`'s "The Space" chapter, which was hardcoded to Commercial's field
+>   labels instead of using the same dynamic schema lookup every sibling chapter uses — affected
+>   every residential listing, not just the new ones.
+> - Populated real, HTTP-verified Matterport + Luma embeds, real Mapbox-geocoded coordinates (2 of
+>   6 initially resolved to the same generic city-center point on a first pass — re-geocoded with
+>   more specific location strings), real NOAH flood risk score/zone, real distinct photos, unit
+>   photos synced through to Airtable's `Units_JSON`, and the full `DEEP_INTEL_SCHEMA` hidden-intel
+>   set per category.
+>
+> **4. Pushed to `main` and both Vercel projects, per explicit owner instruction** — commit
+> `9aab743`. Ran `npm run build` locally first (clean, no errors) before pushing. Confirmed both
+> `scoutit` and `scout-it` Vercel deployments reached `READY`, then spot-checked `200` on
+> `scoutit.vercel.app`/`scout-it.vercel.app` for both a new property page and `/enterprise`.
+> Excluded `skills-lock.json` and the untracked `.agents/skills/*`/`council-of-high-intelligence/`
+> dirs from the commit, matching established practice (unrelated tooling, not app code).
+>
+> **Owner's stated next direction:** a design-polish pass on property pages using `impeccable`
+> (github.com/pbakaus/impeccable), already installed as a Claude Code plugin
+> (`~/.claude/plugins/marketplaces/impeccable`). Not started — no design work done against it yet
+> in this session.
+>
+> ## Previous — 2026-07-03, Part 5 — READ THE NEXT-SESSION PROMPT FIRST
 > **Before touching any code, run the full context-load sequence** (see
 > `NEXT_DAY_HANDOFF.md`'s pinned prompt, or just: `obsidian-second-brain` skill on the real vault,
 > not a skim → `00_START_HERE.md` → `NEXT_DAY_HANDOFF.md` → this file, all of it, not excerpted →

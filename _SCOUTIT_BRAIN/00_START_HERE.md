@@ -159,6 +159,9 @@ different altitude. That is ScoutIT in the market. The UFO stays. Always.
 - `DESIGN_AUDIT_2026-06.md` — design audit findings
 
 **04 · Data & Schema**
+- `MASTER_PROPERTIES_GOLD_STANDARD.md` — ⭐ the 6 reference properties (one per category, fully
+  populated public/hidden/vault data) — the "done" standard to check any property-page feature
+  against; do not delete these records
 - `FIELD_VISIBILITY_MAP.md` — ⭐ SIGNED OFF (2026-07-02): what's PUBLIC vs HIDDEN INTEL vs INTERNAL, per page section × category
 - `VISIBILITY_MAP__{RESIDENTIAL,COMMERCIAL,STR,HOSPITALITY,RESTAURANTS,VENUES}.md` — one per category, the operational references
 - `DATA_DICTIONARY.md` — Airtable + Supabase column schemas

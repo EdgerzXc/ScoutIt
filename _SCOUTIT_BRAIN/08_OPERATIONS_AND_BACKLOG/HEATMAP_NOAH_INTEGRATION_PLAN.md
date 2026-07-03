@@ -162,3 +162,19 @@ visible viewport, which is normal (most of any country isn't in a flood zone).
 **Not yet done:** HazardHunterPH per-property scoring (§4 above), the rest of the Heatmap schema
 fields (landslide/storm-surge/traffic/air-quality layers) — this session only shipped the flood
 layer, per the locked spec from conversation.
+
+## 7. BUILT + VERIFIED LIVE 2026-07-03 — 5-yr / 25-yr / 100-yr return-period tabs
+
+`FloodHeatmapMap.js` gained a 3-tab selector for NOAH's other two published return periods (this
+doc's §1 already confirmed NOAH publishes exactly 5/25/100-yr — no "50-year" dataset exists, so
+the owner's original 50-yr ask was corrected to 25-yr instead of invented).
+
+**Verified for real, not assumed:**
+- `curl`-confirmed both `flood_5yr.pmtiles` (510MB) and `flood_25yr.pmtiles` (590MB) return HTTP
+  200 at the same Hugging Face path as the already-working `flood_100yr.pmtiles`.
+- Live browser check: clicked all 3 tabs on a real property page, confirmed via network logs that
+  each tab actually triggers a real 206 Partial Content range-request fetch against the correct
+  `.pmtiles` file (not just a UI label swap) and the legend/marker update correctly, no console
+  errors.
+
+Pushed live to `scoutit.vercel.app` + `scout-it.vercel.app`, commit `9aab743`.

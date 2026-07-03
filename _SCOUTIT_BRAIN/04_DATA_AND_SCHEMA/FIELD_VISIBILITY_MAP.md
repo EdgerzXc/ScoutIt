@@ -149,7 +149,13 @@ feel scores (ComfortLevel/NaturalLight/Privacy/SpaceFeel) · ConvenienceScore + 
 Commute*/SafetyPerception/CommunityFeel/Zoning*/StructuralNotes/ExpansionPotential/UniverseSummary/
 ArchitectDesigner/BuildingStyle/DeveloperNotes/Price_Notes (§8 universal MINOR) · Enhanced_Photos (Solar+)
 
-**VAULT (Cluster+):** Virtual_Tour_URL · Video_URL · Floor_Plans · Luma/drone media
+**VAULT (Cluster+):** Virtual_Tour_URL · Video_URL · Floor_Plans · Luma_3D_Map_URL · Drone_Heatmap_URL
+(the latter two were referenced in `src/lib/airtable.js` and this doc for a long time but the
+Airtable columns themselves never existed — created 2026-07-03 while building the gold-standard
+master properties; see `MASTER_PROPERTIES_GOLD_STANDARD.md`. `Drone_Heatmap_URL` is stored and
+gates the Vault's "Drone Heatmap Analysis" section into view, but `SpatialVaultWidget` doesn't yet
+render the URL's content there — pre-existing gap, not fixed, flagged for whoever builds real drone
+imagery support)
 
 **INTERNAL (never served):** PriceRange_Internal · Vision_Uploads · AI_* fields · AI_Draft_Notes ·
 Broker_Input_Notes · Pipeline_Status · Verification_Status (derive a public "Verified ✓" badge only) ·

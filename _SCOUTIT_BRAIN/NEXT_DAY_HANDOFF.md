@@ -1,6 +1,23 @@
 # ScoutIt Handoff - End of Session
 
-> ## ▶️ RESUME HERE (latest) — 2026-07-03, Part 5 — READ THE FULL PROMPT, NO SHORTCUTS
+> ## ▶️ RESUME HERE (latest) — 2026-07-03, Part 6 — Part 5 verified + fixed + LIVE
+> **Part 5's four unverified items are now all verified, fixed where needed, and pushed live**
+> (commit `9aab743`, both `scoutit.vercel.app` and `scout-it.vercel.app` — confirmed `READY` on
+> both Vercel projects, spot-checked `200` on the live domains). Full detail in
+> `08_OPERATIONS_AND_BACKLOG/SESSION_HANDOFF_2026-07-03.md`'s Part 6 section (top of file).
+>
+> Also built this session: **one fully-populated "gold standard" master property per category**
+> (public + hidden-intel + vault data, real Mapbox geocoding, real Matterport/Luma embeds, real
+> NOAH flood risk) — see `04_DATA_AND_SCHEMA/MASTER_PROPERTIES_GOLD_STANDARD.md`. **Do not delete
+> those 6 records.** Found and fixed 5 real pre-existing bugs along the way (2 platform-wide,
+> affecting every listing of that type, not just the new ones) — full list in that doc's §3.
+>
+> **Next up (owner's stated direction):** a design pass using the `impeccable` tool
+> (github.com/pbakaus/impeccable, installed as a Claude Code plugin at
+> `~/.claude/plugins/marketplaces/impeccable`) to raise the visual polish of the property pages.
+> Not started yet — no design work has been done against it.
+>
+> ## Previous — 2026-07-03, Part 5 — READ THE FULL PROMPT, NO SHORTCUTS
 > **Owner's explicit instruction this session, read literally:** load full context — the real
 > `obsidian-second-brain` vault (not skimmed), this whole file, `00_START_HERE.md`, and
 > `08_OPERATIONS_AND_BACKLOG/SESSION_HANDOFF_2026-07-03.md` **in full** — before writing any code.
