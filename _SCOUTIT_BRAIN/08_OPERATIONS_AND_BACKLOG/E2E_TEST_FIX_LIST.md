@@ -1,5 +1,14 @@
 # E2E Test & Fix List — things to verify/repair in the full end-to-end pass
 
+> **2026-07-03 update:** items #2 and #5 below are now fully E2E-verified (see their sections).
+> Item #3 turned out to be structurally broken, not just unverified — see its section, a new
+> finding, not a fix. Verification method for #2: a real throwaway Supabase Auth user created via
+> the Admin API, a funded/zeroed test wallet, and real HTTP calls to the running dev server against
+> `/api/dashboard/invite` with a real Bearer token — no-token → 401, zero-balance → 403 with
+> confirmed zero orphaned `deals` rows (rollback works), funded → 200 with a correct `deals` row,
+> a correct `connect_transactions` ledger row (bucket/amount/reason/ref all right), and correct
+> balance decrement. All test data cleaned up after (user, wallet, deal, ledger rows all deleted).
+
 > **Function of this file:** every bug or unverified flow flagged during codebase work that
 > needs a real, authenticated, click-through test before it can be trusted — as opposed to the
 > unit-level SQL/API checks already done inline. Owner instruction (2026-07-02): park these,
@@ -45,24 +54,35 @@ recreated the test user, confirmed the trigger fires and the row appears immedia
 
 ---
 
-## 🟡 Rewired but only unit/API-tested — needs a full authenticated click-through
+## ✅ Fully E2E-verified (2026-07-03)
 
-### 2. `/api/dashboard/invite` — the atomic Connects spend
+### 2. `/api/dashboard/invite` — the atomic Connects spend — VERIFIED, no bugs found
 **Rewired:** 2026-07-02 to call the new `spend_connects` Postgres RPC instead of racy manual
 balance math (see `NEXT_DAY_HANDOFF.md` §7-10).
-**Tested so far:** RPC math verified directly in SQL with a throwaway wallet (bucket order,
-ledger rows, insufficient-balance failure all correct). Route confirmed to compile and 401
-correctly with no token.
-**Still needed:** a real owner session inviting a real broker on a real (or sandboxed) listing —
-confirm the deal is created, the Connect is actually deducted from the right bucket, and the
-UI reflects the new balance. Blocked on fixing #1 above first (no Authorization header = will
-never get past the auth check).
+**E2E verified 2026-07-03:** real throwaway Supabase Auth user (Admin API), real funded wallet,
+real HTTP calls with a real Bearer session token against the running dev server. No-token → 401.
+Zero-balance → 403 `"Insufficient Connects balance."` with the handshake `deals` row correctly
+rolled back (confirmed 0 orphaned rows). Funded (5 granted) → 200, real `deals` row (`status:
+'invited'`), real `connect_transactions` ledger row (`bucket: 'granted', amount: -1, reason:
+'Owner invited a broker (handshake)'`), balance correctly decremented 5→4. All test artifacts
+(user, wallet, deal, ledger rows) deleted after.
 
-### 3. `/api/v1/questit/raise` — same atomic Connects spend
-**Rewired:** same session, same RPC. Verified to compile and 401 on invalid API key.
-**Still needed:** a real QuestIT API key + a real company/policy row, raise a bounty, confirm
-the quest is posted AND the Connects were actually deducted (single atomic operation now,
-previously 3 separate un-locked writes).
+## 🔴 New finding (2026-07-03): structurally broken, not just unverified
+
+### 3. `/api/v1/questit/raise` — references three tables that don't exist anywhere
+**Found while attempting to E2E-verify the same Connects-spend rewiring as #2.** The route reads
+from `questit_api_keys`, `questit_policies`, and writes to `company_quests` — **none of these
+three tables exist in the live Supabase database, and none appear in any `.sql` file in this
+repo.** This isn't a config gap (missing env var, unset flag) — the schema was simply never
+created. Every call to this route has almost certainly always failed, immediately, at the very
+first query (`questit_api_keys` lookup) — and because that query's error is caught generically,
+the route returns a misleading `401 "Invalid or inactive API Key"` instead of any indication the
+backing tables don't exist. `src/lib/questitPolicyEngine.js` (the policy evaluator this route
+calls) is fine on its own — it's pure logic with no DB dependency, just never gets a
+`policy_rules` row to evaluate against in practice.
+**Not fixed — deliberately.** Building these three tables means real schema decisions (API key
+hashing scheme, `policy_rules` JSON shape, `company_quests` columns) that shouldn't be guessed
+as a tangent. Flagged here per this file's own rule, not silently expanded into a build task.
 
 ### 4. Deep Intelligence panel plumbing (`DeepIntel_JSON` → `property.deepIntel`)
 **Built:** 2026-07-02, earlier in the same session — `src/lib/airtable.js` now parses a new
@@ -79,19 +99,19 @@ real values instead of "Not recorded", confirm Residential's panel still works t
 
 ## 🟢 New pure-codebase pieces this session — no bug suspected, just unverified end-to-end
 
-### 5. Connects breakdown popover
+### 5. Connects breakdown popover — VERIFIED across roles, 2026-07-03
 **Built:** 2026-07-02 — `src/components/dashboard/ConnectsBreakdown.js`, wired into
 `src/app/dashboard/page.js` (both desktop and mobile Connects pills).
-**Tested so far:** clicked in a real running dev server with a seeded mock user, confirmed
-correct bucket math (real numbers from `connectsWallet.js`, not placeholders), confirmed
-click-outside-to-close. Verified for the Owner role only.
-**Still needed:** click through as Broker / Seeker(buyer) / each Provider subtype
-(photographer/researcher/designer) to confirm `walletRoleForMode()`'s mapping holds for all of
-them, and confirm the header pill number and the popover total agree once a user goes through
-the *real* login/init path (`handleUserLogin` → `initWalletIfEmpty` → `setConnects`) instead of
-a synthetic test seed (today's test bypassed that path, which is why the header briefly showed
-a stale number while the popover showed the correct one — not a bug, just an artifact of the
-quick test).
+**E2E verified 2026-07-03 across roles:** switched the dev-mock account's mode live in the
+browser and opened the popover for each — Broker → Monthly Allowance 50, Buyer (maps to
+`seeker`) → 40, Provider/photographer → 25. Three distinct, role-correct numbers, zero console
+errors on any switch — confirms `walletRoleForMode()`'s mapping is correct for all three.
+**Confirmed, not a bug:** the header pill (hardcoded `useState(5)` default) and the popover total
+disagree under the dev-mock path specifically, because `setConnects` only ever gets called from
+`handleUserLogin`'s real-Supabase-session branch — the mock/master-dev path never runs it. This
+is the same artifact already noted in the previous pass, now re-confirmed rather than newly
+found. Only a real login exercises the header pill; not scoped to fix here since it's a dev-tool
+artifact, not a production path.
 
 ---
 

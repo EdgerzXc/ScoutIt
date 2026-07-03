@@ -1,21 +1,31 @@
 # ScoutIt Handoff - End of Session
 
-> ## ▶️ RESUME HERE (latest) — 2026-07-03
-> **Read `08_OPERATIONS_AND_BACKLOG/SESSION_HANDOFF_2026-07-03.md` first, then
-> `08_OPERATIONS_AND_BACKLOG/PLAN_STAFF_ENTERPRISE_ANALYTICS_NOTIFICATIONS.md`.** Unit Delegation
-> (§9) is now **built and E2E-verified end-to-end**, not just planned — schema, real CRUD
+> ## ▶️ RESUME HERE (latest) — 2026-07-03, Part 2
+> **Read `08_OPERATIONS_AND_BACKLOG/SESSION_HANDOFF_2026-07-03.md` (Part 2 section at the top)
+> first, then `08_OPERATIONS_AND_BACKLOG/PLAN_STAFF_ENTERPRISE_ANALYTICS_NOTIFICATIONS.md`.**
+> Owner reviewed Unit Delegation live in the browser (a real demo property now exists in both
+> Supabase + Airtable — `ScoutIt Demo Tower — Unit Delegation Showcase`, kept, not a throwaway),
+> approved it, and it's **committed locally to `main`** (commit `56df83d`). **Track 1 —
+> Notifications — is also now built, live-verified, and committed** (commit `8c88011`): persisted
+> bell dropdown, a daily stale-listing cron with dedupe, and broker-on-change alerts on
+> price/units/delegation changes. **Still NOT pushed to GitHub/Vercel** — owner's explicit choice
+> to stop before that step. Next up per the approved plan's sequencing: Track 2's prerequisite
+> (real analytics instrumentation — wire the `/api/inquiries` stub, add page-view tracking)
+> before the analytics panel itself. Mission Control and Enterprise accounts still need their own
+> dedicated sessions — don't start either casually.
+>
+> ## Previous — 2026-07-03, Part 1
+> Unit Delegation (§9) was **built and E2E-verified end-to-end**, not just planned — schema, real CRUD
 > replacing the old JSON blob, the delegation handshake, the Operator dashboard, and the Unit
 > Master Page. Found + fixed 2 real pre-existing bugs along the way (a silently-broken
 > buyer→broker Connect spend; an Airtable Slug field that became computed and was breaking every
 > new-property insert) + a 3rd found-but-not-fixed one (`/api/admin/approve`'s role check is
 > broken — documented, not patched). Data docs (`DATA_DICTIONARY.md`, `FIELD_VISIBILITY_MAP.md`,
-> `SCOUTIT_MASTER_BUILD_SPEC.md §9.4`) updated to match. **Nothing pushed to `main`/Vercel — fully
-> uncommitted.** A follow-up conversation produced a full **approved plan** (not yet built) for:
-> Mission Control (staff, separate deployment) + Enterprise accounts (external client companies,
-> main site, explicitly parked on the RLS reset) + self-serve analytics (on hold pending real
-> instrumentation) + notifications (incl. broker-on-change alerts) + Google Sign-In (blocked on
-> needing a debit card for Google Cloud billing). **Immediate next step, owner's explicit request:
-> walk through the Unit Delegation work live in the browser before committing anything.**
+> `SCOUTIT_MASTER_BUILD_SPEC.md §9.4`) updated to match. A follow-up conversation produced a full
+> **approved plan** for: Mission Control (staff, separate deployment) + Enterprise accounts
+> (external client companies, main site, explicitly parked on the RLS reset) + self-serve
+> analytics (on hold pending real instrumentation) + notifications (incl. broker-on-change
+> alerts) + Google Sign-In (blocked on needing a debit card for Google Cloud billing).
 >
 > ## Previous — 2026-07-02, Part 3
 > **Read `08_OPERATIONS_AND_BACKLOG/SESSION_HANDOFF_2026-07-02_PART3.md`**, then Part 2, then

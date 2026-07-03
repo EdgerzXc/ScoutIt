@@ -1,5 +1,47 @@
 # Session Handoff — 2026-07-03
 
+> ## ▶️ RESUME HERE (latest) — 2026-07-03, Part 2
+> Owner did a live browser walkthrough of Unit Delegation (real demo property created across
+> Supabase + Airtable — `ScoutIt Demo Tower — Unit Delegation Showcase`, kept as a real working
+> example, not deleted). Approved, then **committed locally to `main`**: commit `56df83d` (Unit
+> Delegation + the 2 bug fixes + docs) and commit `8c88011` (Track 1 — Notifications, built and
+> live-verified this same session: `user_notifications` table, persisted bell dropdown via
+> `/api/notifications`, daily stale-listing Vercel Cron at `/api/cron/check-stale-listings` with
+> dedupe, and broker-on-change alerts wired into `/api/dashboard/update` +
+> `/api/dashboard/units` + `/api/dashboard/units/delegate` — scoped to price/rate + units +
+> delegation changes only, not every autosave keystroke, per owner's explicit call). Both
+> commits verified live with real Supabase/Airtable writes and reads, not just code review; all
+> test artifacts (throwaway test broker, test notifications) cleaned up after.
+> **Still NOT pushed to GitHub/Vercel** — owner explicitly chose to stop before that step this
+> session. Two unrelated things were deliberately left uncommitted both times: `skills-lock.json`
+> (an unrelated skill-install diff) and the untracked `.agents/skills/*` /
+> `council-of-high-intelligence/` directories (unrelated tooling, not app code) — leave these
+> alone unless asked.
+> **Next up, per the approved plan's sequencing** (`PLAN_STAFF_ENTERPRISE_ANALYTICS_NOTIFICATIONS.md`):
+> Track 2's prerequisite — real analytics instrumentation (wire `/api/inquiries/route.js`, which
+> is still a literal stub; add a `property_pageviews` table + view counter) — before the actual
+> analytics panel gets built. Mission Control and Enterprise accounts still each need their own
+> dedicated session; don't slide them into a general continuation.
+>
+> ## Part 3 (same day) — backlog cleanup, no new features
+> Closed out three items from `E2E_TEST_FIX_LIST.md` (a pre-existing backlog file, unrelated to
+> Unit Delegation/Notifications): (1) added a `CRON_SECRET` to lock down the new stale-listing
+> cron route — was accepting unauthenticated requests; local `.env.local` updated, **owner still
+> needs to add the same value to Vercel's env vars before/at push time**, value shared in-chat,
+> not repeated here. (2) `/api/dashboard/invite`'s Connects-spend rewiring is now fully E2E-verified
+> with a real throwaway Supabase Auth user (no-token/zero-balance/funded-success all correct,
+> rollback confirmed) — see the fix list for detail. (3) Found `/api/v1/questit/raise` is
+> **structurally broken, not just unverified** — it references three Supabase tables
+> (`questit_api_keys`, `questit_policies`, `company_quests`) that don't exist anywhere in the repo
+> or the live DB. Not fixed — building that schema is a real design decision (API key hashing,
+> policy shape), flagged instead of guessed. (4) Connects breakdown popover now verified across
+> Broker/Buyer/Provider roles, not just Owner — role-mapping is correct, the header-pill-vs-popover
+> mismatch already known from the prior session is a dev-mock-account artifact, not a bug. No app
+> code changed in this round except the notification-alert wiring already covered in Part 2's
+> commit `8c88011` — this round was pure verification + one doc update.
+>
+> ## Original 2026-07-03 session (Part 1)
+
 > **Read this first** — most recent session. Built and E2E-verified `SCOUTIT_MASTER_BUILD_SPEC.md
 > §9` (Unit Delegation & Co-Working Operators) end-to-end, found and fixed two real pre-existing
 > production bugs along the way, and started scoping a new Team Access / Mission Control
