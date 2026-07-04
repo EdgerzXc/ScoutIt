@@ -7,8 +7,18 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import ReactionButtons from "@/components/ui/ReactionButtons";
 import { useTrueClosestTransit } from "@/hooks/useTrueClosestTransit";
-import InteractiveMap from "@/components/property/InteractiveMap";
 import "@/app/property/[id]/property-detail.css";
+
+// Leaflet is huge. We dynamically import the InteractiveMap so the initial page load
+// doesn't block on parsing the React Leaflet wrapper.
+const InteractiveMap = dynamic(() => import("@/components/property/InteractiveMap"), {
+  ssr: false,
+  loading: () => (
+    <div style={{ height: "100%", width: "100%", background: "#0d0d0d", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", letterSpacing: "0.1em", textTransform: "uppercase", color: "#c8c8c8" }}>Loading tactical map…</span>
+    </div>
+  ),
+});
 import { getChapterConfig } from "./chapterConfig";
 import { Bed, Bath, Ruler, Car, Lock, Search, Camera, Building2 } from "lucide-react";
 import InquiryModal from "@/components/property/InquiryModal";
