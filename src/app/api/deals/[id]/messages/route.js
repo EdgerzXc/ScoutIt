@@ -2,24 +2,32 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
-export async function GET(request, { params }) {
-  try {
-    const { id: dealId } = await params;
-    
-    // Auth check
-    const authHeader = request.headers.get("Authorization");
-    const token = authHeader?.replace("Bearer ", "");
-    
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+// Same dev-mock convention as /api/notifications and /api/dashboard/units --
+// ?mockOwnerId=master-dev only takes effect when no real Bearer token was
+// sent, so real user sessions are unaffected.
+async function resolveUserId(request, mockOwnerId) {
+  const authHeader = request.headers.get("Authorization");
+  const token = authHeader ? authHeader.replace("Bearer ", "") : null;
 
+  if (token && token.trim() !== "") {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     const authClient = createClient(supabaseUrl, supabaseAnonKey);
-    
-    const { data: { user }, error: authError } = await authClient.auth.getUser(token);
-    if (authError || !user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const { data: { user }, error } = await authClient.auth.getUser(token);
+    if (!error && user) return user.id;
+  }
+  if (mockOwnerId === "master-dev") return "master-dev";
+  return null;
+}
+
+export async function GET(request, { params }) {
+  try {
+    const { id: dealId } = await params;
+    const { searchParams } = new URL(request.url);
+    const userId = await resolveUserId(request, searchParams.get("mockOwnerId"));
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     // Validate access (buyer, broker, or owner)
     const { data: deal, error: dealError } = await supabaseAdmin
@@ -32,10 +40,10 @@ export async function GET(request, { params }) {
       return NextResponse.json({ error: "Deal not found" }, { status: 404 });
     }
 
-    const isParty = 
-      deal.buyer_id === user.id || 
-      deal.broker_id === user.id || 
-      deal.properties?.owner_id === user.id;
+    const isParty =
+      deal.buyer_id === userId ||
+      deal.broker_id === userId ||
+      deal.properties?.owner_id === userId;
 
     if (!isParty) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -61,21 +69,9 @@ export async function GET(request, { params }) {
 export async function POST(request, { params }) {
   try {
     const { id: dealId } = await params;
-    
-    // Auth check
-    const authHeader = request.headers.get("Authorization");
-    const token = authHeader?.replace("Bearer ", "");
-    
-    if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    const authClient = createClient(supabaseUrl, supabaseAnonKey);
-    
-    const { data: { user }, error: authError } = await authClient.auth.getUser(token);
-    if (authError || !user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-    const { body, role } = await request.json();
+    const { body, role, mockOwnerId } = await request.json();
+    const userId = await resolveUserId(request, mockOwnerId);
+    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     if (!body || !role) {
       return NextResponse.json({ error: "Missing body or role" }, { status: 400 });
@@ -94,10 +90,10 @@ export async function POST(request, { params }) {
       return NextResponse.json({ error: "This conversation has been closed and is read-only." }, { status: 403 });
     }
 
-    const isParty = 
-      deal.buyer_id === user.id || 
-      deal.broker_id === user.id || 
-      deal.properties?.owner_id === user.id;
+    const isParty =
+      deal.buyer_id === userId ||
+      deal.broker_id === userId ||
+      deal.properties?.owner_id === userId;
 
     if (!isParty) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
@@ -106,7 +102,7 @@ export async function POST(request, { params }) {
       .from('deal_messages')
       .insert([{
         deal_id: dealId,
-        sender_id: user.id,
+        sender_id: userId,
         sender_role: role,
         body
       }])
@@ -115,13 +111,52 @@ export async function POST(request, { params }) {
 
     if (insertError) return NextResponse.json({ error: "Failed to send message" }, { status: 500 });
 
-    // Reset 72-hour inactivity timer (updated_at)
-    await supabaseAdmin
-      .from('deals')
-      .update({ updated_at: new Date().toISOString() })
-      .eq('id', dealId);
+    // Note: there's no updated_at column on deals to bump for an inactivity
+    // timer -- GET /api/deals derives "most recent conversation" from
+    // deal_messages.created_at directly instead, so no write-back is needed
+    // here (a previous version of this route silently failed trying to
+    // update a column that doesn't exist).
 
     return NextResponse.json({ message });
+  } catch (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+// Marks every message NOT sent by the current user as read -- called when the
+// Inbox opens a conversation, so unread badges (GET /api/deals) clear.
+export async function PATCH(request, { params }) {
+  try {
+    const { id: dealId } = await params;
+    const { searchParams } = new URL(request.url);
+    const userId = await resolveUserId(request, searchParams.get("mockOwnerId"));
+    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const { data: deal, error: dealError } = await supabaseAdmin
+      .from('deals')
+      .select('buyer_id, broker_id, properties(owner_id)')
+      .eq('id', dealId)
+      .single();
+
+    if (dealError || !deal) return NextResponse.json({ error: "Deal not found" }, { status: 404 });
+
+    const isParty =
+      deal.buyer_id === userId ||
+      deal.broker_id === userId ||
+      deal.properties?.owner_id === userId;
+
+    if (!isParty) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
+    const { error: updateError } = await supabaseAdmin
+      .from('deal_messages')
+      .update({ read_at: new Date().toISOString() })
+      .eq('deal_id', dealId)
+      .neq('sender_id', userId)
+      .is('read_at', null);
+
+    if (updateError) return NextResponse.json({ error: "Failed to mark messages read" }, { status: 500 });
+
+    return NextResponse.json({ success: true });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

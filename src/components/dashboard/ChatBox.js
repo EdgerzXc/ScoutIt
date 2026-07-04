@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import BookingModal from "./BookingModal";
 import { uploadAttachment } from "../../lib/storage";
+import { getSession } from "../../lib/authClient";
 
 // Safe Link Parser to prevent XSS
 const renderTextWithLinks = (text) => {
@@ -19,11 +20,11 @@ const renderTextWithLinks = (text) => {
       } catch (e) {}
 
       return (
-        <a 
-          key={index} 
-          href={safeUrl} 
-          target="_blank" 
-          rel="noopener noreferrer" 
+        <a
+          key={index}
+          href={safeUrl}
+          target="_blank"
+          rel="noopener noreferrer"
           className="text-gold-accent underline hover:text-[#F7C64E] break-all"
         >
           {part}
@@ -34,8 +35,47 @@ const renderTextWithLinks = (text) => {
   });
 };
 
+// Attachment messages are sent through the same plain-text deal_messages.body
+// column as regular text (no separate attachments table/column) -- encoded
+// as a small JSON envelope with a recognizable prefix so it round-trips
+// through the real API instead of only living in local state.
+const ATTACHMENT_PREFIX = "__scoutit_attachment__:";
+const encodeAttachment = (att) => `${ATTACHMENT_PREFIX}${JSON.stringify(att)}`;
+const decodeAttachment = (body) => {
+  if (!body || !body.startsWith(ATTACHMENT_PREFIX)) return null;
+  try {
+    return JSON.parse(body.slice(ATTACHMENT_PREFIX.length));
+  } catch {
+    return null;
+  }
+};
+
+// Resolves { token, mockOwnerId, userId } for API calls -- real Supabase
+// session first, falling back to the dev toolbox's "master-dev" localStorage
+// convention (see FloatingToolbox.js) when there's no real session, matching
+// the same pattern InquiryModal/UnitInquiryModal/OperatorRequestModal use.
+async function resolveAuth() {
+  const { data: { session } } = await getSession();
+  if (session?.access_token) {
+    return { token: session.access_token, mockOwnerId: null, userId: session.user.id };
+  }
+  try {
+    const raw = localStorage.getItem("scoutit_user");
+    const u = raw ? JSON.parse(raw) : null;
+    if (u?.id === "master-dev") return { token: null, mockOwnerId: "master-dev", userId: "master-dev" };
+  } catch {}
+  return { token: null, mockOwnerId: null, userId: null };
+}
+
+function authHeaders(token) {
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
 export default function ChatBox({ deal, onCloseDeal, onOfferHandshake, onAcceptHandshake }) {
   const [messages, setMessages] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
+  const [myUserId, setMyUserId] = useState(null);
   const [input, setInput] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -44,43 +84,92 @@ export default function ChatBox({ deal, onCloseDeal, onOfferHandshake, onAcceptH
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [showConfirmHandshake, setShowConfirmHandshake] = useState(false);
   const [uploadError, setUploadError] = useState(null);
-  
+
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
 
+  const mapMessage = useCallback((m, currentUserId) => {
+    const attachment = decodeAttachment(m.body);
+    return {
+      id: m.id,
+      sender: m.sender_id === currentUserId ? "me" : m.sender_role,
+      body: attachment ? "" : m.body,
+      timestamp: m.created_at,
+      attachments: attachment ? [attachment] : [],
+    };
+  }, []);
+
+  const loadMessages = useCallback(async () => {
+    setLoading(true);
+    setLoadError(null);
+    try {
+      const { token, mockOwnerId, userId } = await resolveAuth();
+      if (!userId) {
+        setLoadError("Please log in to view this conversation.");
+        setLoading(false);
+        return;
+      }
+      setMyUserId(userId);
+      const qs = mockOwnerId ? `?mockOwnerId=${mockOwnerId}` : "";
+      const res = await fetch(`/api/deals/${deal.id}/messages${qs}`, { headers: authHeaders(token) });
+      const data = await res.json();
+      if (!res.ok) {
+        setLoadError(data.error || "Couldn't load this conversation.");
+        setLoading(false);
+        return;
+      }
+      setMessages((data.messages || []).map((m) => mapMessage(m, userId)));
+
+      // Mark incoming messages read now that the conversation is open.
+      fetch(`/api/deals/${deal.id}/messages${qs}`, {
+        method: "PATCH",
+        headers: authHeaders(token),
+      }).catch(() => {});
+    } catch (err) {
+      console.error("Failed to load messages", err);
+      setLoadError("Couldn't load this conversation — check your connection.");
+    } finally {
+      setLoading(false);
+    }
+  }, [deal.id, mapMessage]);
+
   useEffect(() => {
-    // In a real app, fetch from /api/deals/[deal.id]/messages
-    setMessages([
-      { 
-        id: 1, 
-        sender: 'buyer', 
-        body: 'Hi, I am interested in viewing this property. Are there any available schedules this week?', 
-        timestamp: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
-        attachments: []
-      },
-    ]);
+    loadMessages();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deal.id]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isUploading]);
 
+  const sendMessageBody = async (body) => {
+    const { token, mockOwnerId, userId } = await resolveAuth();
+    if (!userId) throw new Error("Please log in to send a message.");
+    const res = await fetch(`/api/deals/${deal.id}/messages`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...authHeaders(token) },
+      body: JSON.stringify({ body, role: deal.myRole || "buyer", mockOwnerId }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Couldn't send your message.");
+    setMessages((prev) => [...prev, mapMessage(data.message, userId)]);
+  };
+
   const handleSend = async (e) => {
     if (e) e.preventDefault();
     if (!input.trim() || deal.status === 'closed') return;
 
     setIsSubmitting(true);
-    
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    setMessages([
-      ...messages,
-      { id: Date.now(), sender: 'me', body: input, timestamp: new Date().toISOString(), attachments: [] }
-    ]);
-    
-    setInput("");
-    setIsSubmitting(false);
+    setUploadError(null);
+    try {
+      await sendMessageBody(input.trim());
+      setInput("");
+    } catch (err) {
+      setUploadError(err.message);
+      setTimeout(() => setUploadError(null), 5000);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleFileUpload = async (file) => {
@@ -90,21 +179,9 @@ export default function ChatBox({ deal, onCloseDeal, onOfferHandshake, onAcceptH
 
     try {
       const attachment = await uploadAttachment(deal.id, file);
-      
-      // Immediately add the attachment to messages
-      setMessages(prev => [
-        ...prev,
-        { 
-          id: Date.now(), 
-          sender: 'me', 
-          body: `Attached: ${file.name}`, 
-          timestamp: new Date().toISOString(),
-          attachments: [attachment]
-        }
-      ]);
+      await sendMessageBody(encodeAttachment(attachment));
     } catch (err) {
       setUploadError(err.message);
-      // Auto-hide error after 5s
       setTimeout(() => setUploadError(null), 5000);
     } finally {
       setIsUploading(false);
@@ -138,6 +215,16 @@ export default function ChatBox({ deal, onCloseDeal, onOfferHandshake, onAcceptH
   };
 
   const handleEndConversation = async () => {
+    try {
+      const { token, mockOwnerId } = await resolveAuth();
+      await fetch(`/api/deals/${deal.id}/close`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...authHeaders(token) },
+        body: JSON.stringify({ mockOwnerId }),
+      });
+    } catch (err) {
+      console.error("Failed to close deal", err);
+    }
     onCloseDeal(deal.id);
     setShowConfirmClose(false);
   };
@@ -172,14 +259,14 @@ export default function ChatBox({ deal, onCloseDeal, onOfferHandshake, onAcceptH
   };
 
   return (
-    <div 
+    <div
       className="flex flex-col h-full relative"
       onDragOver={onDragOver}
       onDragEnter={onDragOver}
       onDragLeave={onDragLeave}
       onDrop={onDrop}
     >
-      
+
       {/* Drag overlay */}
       {isDragging && (
         <div className="absolute inset-0 z-50 bg-background/80 backdrop-blur-sm border-2 border-dashed border-gold-accent flex items-center justify-center pointer-events-none">
@@ -191,7 +278,10 @@ export default function ChatBox({ deal, onCloseDeal, onOfferHandshake, onAcceptH
         </div>
       )}
 
-      {/* Handshake Animation Overlay */}
+      {/* Handshake Animation Overlay -- cosmetic only for now: there is no
+          handshake_state column on deals, so this doesn't persist across a
+          reload. Wiring a real handshake flow (contact-info exchange +
+          permanent chat deletion) is its own feature, not part of this pass. */}
       {deal.handshakeState === 'linked' && (
         <div className="absolute inset-0 z-50 bg-black/90 backdrop-blur-md flex flex-col items-center justify-center animate-[fadeIn_0.5s_ease]">
           <div className="text-6xl mb-6 animate-bounce">🤝</div>
@@ -209,17 +299,17 @@ export default function ChatBox({ deal, onCloseDeal, onOfferHandshake, onAcceptH
             <div className="text-4xl mb-4">⚠️</div>
             <h3 className="text-xl font-headline-editorial text-gold-accent mb-2">Exchange Contact Info?</h3>
             <p className="text-sm text-text-secondary mb-6">
-              Before you shake hands, make sure you have exchanged private contact info. 
+              Before you shake hands, make sure you have exchanged private contact info.
               <strong> Once linked, this chat will be deleted forever.</strong>
             </p>
             <div className="flex gap-3 justify-center">
-              <button 
+              <button
                 onClick={() => setShowConfirmHandshake(false)}
                 className="px-4 py-2 border border-surface-variant text-text-secondary rounded hover:text-white"
               >
                 Cancel
               </button>
-              <button 
+              <button
                 onClick={() => {
                   setShowConfirmHandshake(false);
                   onOfferHandshake();
@@ -246,28 +336,28 @@ export default function ChatBox({ deal, onCloseDeal, onOfferHandshake, onAcceptH
         {deal.status !== 'closed' && (
           <div className="flex gap-2 items-center">
             {deal.handshakeState === 'offered' ? (
-              <button 
+              <button
                 onClick={onAcceptHandshake}
                 className="bg-success text-white px-3 py-1.5 rounded text-xs font-mono uppercase tracking-widest hover:bg-success/80 transition-colors animate-pulse"
               >
                 Accept Handshake
               </button>
             ) : (
-              <button 
+              <button
                 onClick={() => setShowConfirmHandshake(true)}
                 className="border border-gold-accent text-gold-accent px-3 py-1.5 rounded text-xs font-mono uppercase tracking-widest hover:bg-gold-accent/10 transition-colors"
               >
                 Offer Handshake 🤝
               </button>
             )}
-            
-            <button 
+
+            <button
               onClick={() => setShowBookingModal(true)}
               className="bg-gold-accent text-background px-3 py-1.5 rounded text-xs font-mono uppercase tracking-widest hover:bg-[#F7C64E] transition-colors shadow-[0_0_10px_rgba(232,174,60,0.2)]"
             >
               Request Live Viewing
             </button>
-            <button 
+            <button
               onClick={() => setShowConfirmClose(true)}
               className="border border-error/50 text-error px-3 py-1.5 rounded text-xs font-mono uppercase tracking-widest hover:bg-error/10 transition-colors"
             >
@@ -296,7 +386,7 @@ export default function ChatBox({ deal, onCloseDeal, onOfferHandshake, onAcceptH
         </div>
       )}
 
-      {/* Upload Error Banner */}
+      {/* Upload/Send Error Banner */}
       {uploadError && (
         <div className="bg-error/20 border-l-4 border-error p-3 text-xs text-error animate-[fadeIn_0.3s_ease]">
           <strong>Error:</strong> {uploadError}
@@ -305,19 +395,25 @@ export default function ChatBox({ deal, onCloseDeal, onOfferHandshake, onAcceptH
 
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar bg-gradient-to-b from-[#0d0d0d] to-[#121212]">
-        {messages.map((msg) => {
+        {loading && (
+          <p className="text-center text-xs text-text-secondary font-mono uppercase tracking-widest">Loading conversation…</p>
+        )}
+        {loadError && (
+          <p className="text-center text-xs text-error font-mono">{loadError}</p>
+        )}
+        {!loading && !loadError && messages.map((msg) => {
           const isMe = msg.sender === 'me';
           return (
             <div key={msg.id} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} animate-[fadeIn_0.3s_ease]`}>
-              <div 
+              <div
                 className={`max-w-[85%] p-3.5 rounded-xl text-sm shadow-sm ${
-                  isMe 
-                    ? 'bg-gold-accent/90 text-background rounded-tr-sm' 
+                  isMe
+                    ? 'bg-gold-accent/90 text-background rounded-tr-sm'
                     : 'bg-surface-variant/80 backdrop-blur-md text-on-surface rounded-tl-sm border border-white/5'
                 }`}
               >
                 {renderTextWithLinks(msg.body)}
-                
+
                 {/* Render Attachments */}
                 {msg.attachments && msg.attachments.length > 0 && (
                   <div className="mt-2 flex flex-col gap-2">
@@ -346,15 +442,15 @@ export default function ChatBox({ deal, onCloseDeal, onOfferHandshake, onAcceptH
       {/* Composer Area */}
       <div className="p-4 border-t border-surface-variant bg-[#121212]/90 backdrop-blur-md relative">
         <form onSubmit={handleSend} className="flex gap-2 items-center">
-          
-          <input 
-            type="file" 
-            ref={fileInputRef} 
-            onChange={onFileChange} 
-            className="hidden" 
-            accept="image/jpeg,image/png,application/pdf,video/mp4" 
+
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={onFileChange}
+            className="hidden"
+            accept="image/jpeg,image/png,application/pdf,video/mp4"
           />
-          
+
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
@@ -393,13 +489,13 @@ export default function ChatBox({ deal, onCloseDeal, onOfferHandshake, onAcceptH
               Are you sure you want to close this chat? You will not be able to message this person again unless a new Connect is spent.
             </p>
             <div className="flex gap-3 justify-end">
-              <button 
+              <button
                 onClick={() => setShowConfirmClose(false)}
                 className="px-4 py-2 rounded border border-surface-variant text-sm text-text-secondary hover:text-on-surface transition-colors"
               >
                 Cancel
               </button>
-              <button 
+              <button
                 onClick={handleEndConversation}
                 className="px-4 py-2 rounded bg-error/20 text-error border border-error/50 text-sm font-working-title hover:bg-error/30 transition-colors"
               >
@@ -410,18 +506,17 @@ export default function ChatBox({ deal, onCloseDeal, onOfferHandshake, onAcceptH
         </div>
       )}
 
-      {/* Booking Modal */}
-      <BookingModal 
+      {/* Booking Modal -- still local-only (viewing_appointments table exists
+          but this modal was never wired to it; out of scope for this pass) */}
+      <BookingModal
         isOpen={showBookingModal}
         onClose={() => setShowBookingModal(false)}
         brokerName={deal.other_party}
         onSchedule={(scheduledAt) => {
-          setMessages([...messages, { 
-            id: Date.now(), 
-            sender: 'me', 
-            body: `[SYSTEM] I have requested a live viewing for: ${new Date(scheduledAt).toLocaleString()}`, 
-            timestamp: new Date().toISOString() 
-          }]);
+          sendMessageBody(`[SYSTEM] I have requested a live viewing for: ${new Date(scheduledAt).toLocaleString()}`).catch((err) => {
+            setUploadError(err.message);
+            setTimeout(() => setUploadError(null), 5000);
+          });
           setShowBookingModal(false);
         }}
       />

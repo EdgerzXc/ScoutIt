@@ -2393,7 +2393,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
         isOpen={isInquiryOpen}
         onClose={() => setIsInquiryOpen(false)}
         propertyTitle={d.title}
-        brokerName={d.broker_name}
+        propertySlug={d.slug}
       />
 
       <OperatorRequestModal

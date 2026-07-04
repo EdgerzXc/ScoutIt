@@ -213,6 +213,7 @@ export function DashboardProvider({ children }) {
             brokerName: 'Broker User',
             brokerFirm: 'Independent',
             message: d.pitch_message,
+            privateNotes: d.private_notes || '',
             status: d.status,
             timeRemaining: new Date(d.created_at).toLocaleDateString(),
             statusText: d.status.charAt(0).toUpperCase() + d.status.slice(1),

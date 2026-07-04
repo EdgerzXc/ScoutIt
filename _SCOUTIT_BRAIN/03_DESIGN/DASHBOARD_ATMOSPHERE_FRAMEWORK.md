@@ -133,9 +133,12 @@ What's **missing** against this framework, per role, as of this doc:
    overlays for Owner, no signal pulses for Broker, no lens bloom for Service Provider, no
    contour-line/signal-node motifs anywhere.
 4. **`BrokerMode.js` has a proto-pipeline already** — `activeDealId`, a Deal File workspace, and
-   `dealNotes` scratchpad notes — but `dealNotes` is local React state, **not persisted to
-   Supabase.** This is the natural seam where Layer 4 (Workspace) meets the CRM initiative — see
-   `08_OPERATIONS_AND_BACKLOG/CRM_INITIATIVE.md`.
+   `dealNotes` scratchpad notes. **Fixed 2026-07-04:** `dealNotes` now persists to
+   `deals.private_notes` via `PATCH /api/deals/[id]/notes` (debounced), and `OwnerMode.js` gained
+   the same notes field on incoming pitches — see
+   `08_OPERATIONS_AND_BACKLOG/SESSION_HANDOFF_2026-07-04.md`. This is still just the persistence
+   layer, not the fuller CRM vision (lead scoring, follow-up recommendations) —
+   `08_OPERATIONS_AND_BACKLOG/CRM_INITIATIVE.md` still applies for that.
 
 ## 7. Open questions before implementation starts
 

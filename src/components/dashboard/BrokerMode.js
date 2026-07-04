@@ -1,26 +1,29 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useDashboard } from "../../context/DashboardContext";
 import Link from "next/link";
 import { Lock } from "lucide-react";
+import { getSession } from "../../lib/authClient";
 
 export default function BrokerMode() {
-  const { connects, listings, pitches, sendPitch, updatePitchStatus } = useDashboard();
-  
+  const { connects, listings, pitches, sendPitch, updatePitchStatus, currentUser } = useDashboard();
+
   const [pitchingListing, setPitchingListing] = useState(null);
   const [pitchMessage, setPitchMessage] = useState("");
   const [pitchError, setPitchError] = useState("");
-  
+
   // Notification and ID Card State
   const [showNotification, setShowNotification] = useState(true);
   const [showIdCard, setShowIdCard] = useState(false);
-  
+
   // New Deal File Workspace State
   const [activeDealId, setActiveDealId] = useState(null);
-  
-  // For the scratchpad notes in the deal file
+
+  // For the scratchpad notes in the deal file -- persisted to deals.private_notes
+  // (debounced so we're not firing a PATCH on every keystroke).
   const [dealNotes, setDealNotes] = useState({});
+  const noteSaveTimers = useRef({});
 
   // Filter pipeline data
   const myPitches = pitches.filter(p => p.isCurrentUserBroker);
@@ -57,6 +60,23 @@ export default function BrokerMode() {
 
   const handleSaveNote = (dealId, note) => {
     setDealNotes(prev => ({ ...prev, [dealId]: note }));
+
+    // Debounce the actual persist so typing doesn't fire a request per keystroke.
+    clearTimeout(noteSaveTimers.current[dealId]);
+    noteSaveTimers.current[dealId] = setTimeout(async () => {
+      try {
+        const { data: { session } } = await getSession();
+        const token = session?.access_token;
+        const mockOwnerId = !token && currentUser?.id === 'master-dev' ? 'master-dev' : undefined;
+        await fetch(`/api/deals/${dealId}/notes`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+          body: JSON.stringify({ note, mockOwnerId }),
+        });
+      } catch (err) {
+        console.error('Failed to save deal notes', err);
+      }
+    }, 800);
   };
 
   // --- VIEW: LAYER 2 - DEAL FILE WORKSPACE ---
@@ -67,7 +87,10 @@ export default function BrokerMode() {
       return null;
     }
     const property = listings.find(l => l.id === deal.listingId) || deal.targetListing;
-    const notes = dealNotes[deal.id] || "Client requires Vastu compliance. Confirm facing direction with owner before site visit.";
+    // dealNotes[deal.id] wins once the user has typed this session (avoids
+    // losing keystrokes to a stale prop while the debounced save is in
+    // flight); deal.privateNotes is the persisted value from a prior session.
+    const notes = dealNotes[deal.id] !== undefined ? dealNotes[deal.id] : (deal.privateNotes || "");
 
     return (
       <div className="max-w-[1200px] mx-auto py-4 animate-[fadeIn_0.3s_ease]">

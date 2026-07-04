@@ -2,22 +2,35 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
-export async function POST(request, { params }) {
-  try {
-    const { id: dealId } = await params;
-    
-    // Auth check
-    const authHeader = request.headers.get("Authorization");
-    const token = authHeader?.replace("Bearer ", "");
-    
-    if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+// Same dev-mock convention as /api/notifications and /api/dashboard/units --
+// ?mockOwnerId=master-dev only takes effect when no real Bearer token was
+// sent, so real user sessions are unaffected.
+async function resolveUserId(request, mockOwnerId) {
+  const authHeader = request.headers.get("Authorization");
+  const token = authHeader ? authHeader.replace("Bearer ", "") : null;
 
+  if (token && token.trim() !== "") {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     const authClient = createClient(supabaseUrl, supabaseAnonKey);
-    
-    const { data: { user }, error: authError } = await authClient.auth.getUser(token);
-    if (authError || !user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const { data: { user }, error } = await authClient.auth.getUser(token);
+    if (!error && user) return user.id;
+  }
+  if (mockOwnerId === "master-dev") return "master-dev";
+  return null;
+}
+
+export async function POST(request, { params }) {
+  try {
+    const { id: dealId } = await params;
+    let mockOwnerId = null;
+    try {
+      const body = await request.json();
+      mockOwnerId = body?.mockOwnerId || null;
+    } catch { /* no body sent -- fine, real sessions don't need one */ }
+
+    const userId = await resolveUserId(request, mockOwnerId);
+    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     // Validate access
     const { data: deal, error: dealError } = await supabaseAdmin
@@ -28,10 +41,10 @@ export async function POST(request, { params }) {
 
     if (dealError || !deal) return NextResponse.json({ error: "Deal not found" }, { status: 404 });
 
-    const isParty = 
-      deal.buyer_id === user.id || 
-      deal.broker_id === user.id || 
-      deal.properties?.owner_id === user.id;
+    const isParty =
+      deal.buyer_id === userId ||
+      deal.broker_id === userId ||
+      deal.properties?.owner_id === userId;
 
     if (!isParty) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
@@ -42,7 +55,7 @@ export async function POST(request, { params }) {
     // Set to closed and start the 7-day archive timer
     const { error: updateError } = await supabaseAdmin
       .from('deals')
-      .update({ 
+      .update({
         status: 'closed',
         closed_at: new Date().toISOString()
       })

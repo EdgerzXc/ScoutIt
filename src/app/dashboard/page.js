@@ -18,7 +18,8 @@ import Toasts from "../../components/ui/Toasts";
 import ConciergeAI from "../../components/dashboard/ConciergeAI";
 import ConnectsBreakdown from "../../components/dashboard/ConnectsBreakdown";
 import AtmosphereBackground from "../../components/ui/AtmosphereBackground";
-import { Camera, Search, Bookmark } from "lucide-react";
+import { getSession } from "../../lib/authClient";
+import { Camera, Search, Bookmark, MessageCircle } from "lucide-react";
 
 const TAG_LABELS = {
   buyer: "Buyer / Scout",
@@ -60,6 +61,7 @@ function DashboardInner() {
   const [activating, setActivating] = useState(null); // mode id being activated (broker/provider need extra info)
   const [activationLicense, setActivationLicense] = useState("");
   const [activationProviderType, setActivationProviderType] = useState("");
+  const [unreadInboxCount, setUnreadInboxCount] = useState(0);
 
   const switcherRef = useRef(null);
 
@@ -81,6 +83,32 @@ function DashboardInner() {
       router.push("/onboarding");
     }
   }, [router]);
+
+  // Unread-message badge on the Inbox nav entry -- separate from the
+  // notification bell (that's for the "new inquiry" ping; this is for
+  // "you have an unread reply waiting").
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data: { session } } = await getSession();
+        const mockOwnerId = !session?.access_token && user.id === "master-dev" ? "master-dev" : null;
+        if (!session?.access_token && !mockOwnerId) return;
+        const qs = mockOwnerId ? `?mockOwnerId=${mockOwnerId}` : "";
+        const res = await fetch(`/api/deals${qs}`, {
+          headers: session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {},
+        });
+        if (!res.ok || cancelled) return;
+        const data = await res.json();
+        const total = (data.deals || []).reduce((sum, d) => sum + (d.unreadCount || 0), 0);
+        if (!cancelled) setUnreadInboxCount(total);
+      } catch {
+        // Inbox badge is a nice-to-have -- fail quietly, the bell still covers signaling.
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [user]);
 
   useEffect(() => {
     const handleOpenMobileMenu = () => {
@@ -260,6 +288,20 @@ function DashboardInner() {
               tier={user.subscription_tier || user.tier}
             />
           </div>
+
+          <Link
+            href="/dashboard/inbox"
+            className="relative w-11 h-11 flex items-center justify-center text-text-secondary hover:text-gold-accent transition-colors"
+            aria-label="Inbox"
+            title="Inbox"
+          >
+            <MessageCircle strokeWidth={1.5} size={20} />
+            {unreadInboxCount > 0 && (
+              <span className="absolute top-1.5 right-1.5 w-3.5 h-3.5 bg-gold-accent rounded-full border-2 border-background flex items-center justify-center text-[8px] font-bold text-background">
+                {unreadInboxCount}
+              </span>
+            )}
+          </Link>
 
           <div className="relative">
             <button

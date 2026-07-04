@@ -1,29 +1,29 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { notifyUser } from "@/lib/notifications";
 
-export async function POST(request) {
-  try {
-    // 1. Extract token from Authorization header to prevent identity spoofing
-    const authHeader = request.headers.get("Authorization");
-    const token = authHeader?.replace("Bearer ", "");
-    
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized: Missing token" }, { status: 401 });
-    }
+// Same dev-mock convention as /api/notifications and /api/dashboard/units --
+// ?mockOwnerId=master-dev (here: a body field, since this is a POST) only
+// takes effect when no real Bearer token was sent, so real sessions are
+// unaffected.
+async function resolveUserId(request, mockOwnerId) {
+  const authHeader = request.headers.get("Authorization");
+  const token = authHeader ? authHeader.replace("Bearer ", "") : null;
 
+  if (token && token.trim() !== "") {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     const authClient = createClient(supabaseUrl, supabaseAnonKey);
-    
-    const { data: { user }, error: authError } = await authClient.auth.getUser(token);
-    
-    if (authError || !user) {
-      return NextResponse.json({ error: "Unauthorized: Invalid session" }, { status: 401 });
-    }
+    const { data: { user }, error } = await authClient.auth.getUser(token);
+    if (!error && user) return user.id;
+  }
+  if (mockOwnerId === "master-dev") return "master-dev";
+  return null;
+}
 
-    const userId = user.id;
-
+export async function POST(request) {
+  try {
     // role is a display/reason-text hint only, never persisted to a column —
     // connect_balances/connect_transactions have no `role` column in the live
     // schema (per-role wallets are a documented but unbuilt design; the
@@ -32,7 +32,12 @@ export async function POST(request) {
     // an operator (role: 'operator') is opening the initial ask to a building
     // owner about delegating units (SCOUTIT_MASTER_BUILD_SPEC.md §9.2) — left
     // null until the owner picks specific units to hand over.
-    const { listingId, propertySlug, message, role = 'buyer', unitId } = await request.json();
+    const { listingId, propertySlug, message, role = 'buyer', unitId, mockOwnerId } = await request.json();
+
+    const userId = await resolveUserId(request, mockOwnerId);
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized: Invalid session" }, { status: 401 });
+    }
 
     if (!listingId && !propertySlug) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -61,6 +66,14 @@ export async function POST(request) {
       }
       resolvedListingId = propBySlug.id;
     }
+
+    // Needed for the owner notification below regardless of which lookup path
+    // resolved the property (listingId vs propertySlug).
+    const { data: propertyRow } = await supabaseAdmin
+      .from('properties')
+      .select('title, owner_id')
+      .eq('id', resolvedListingId)
+      .single();
 
     // If this is a per-unit contact (Unit Master Page "Your Move"), look up
     // whether the unit has a delegated operator so the ledger reason text is
@@ -130,6 +143,35 @@ export async function POST(request) {
     // Keep the user_profiles cache in sync (best-effort display cache; not the source of truth)
     if (newBalance !== null) {
       await supabaseAdmin.from('user_profiles').update({ connects_balance: newBalance }).eq('id', userId);
+    }
+
+    // Signal the recipient(s) through the real notification bell -- this was
+    // the actual gap: a buyer/operator contact created a deal row but nobody
+    // on the other end ever found out. Owner always gets notified (it's their
+    // listing); the unit operator also gets notified when the contact is
+    // scoped to a unit they operate, since they're the one who acts on it.
+    const propertyTitle = propertyRow?.title || 'your property';
+    if (propertyRow?.owner_id && propertyRow.owner_id !== userId) {
+      await notifyUser(supabaseAdmin, {
+        userId: propertyRow.owner_id,
+        title: role === 'operator' ? 'New operator request' : 'New inquiry',
+        desc: role === 'operator'
+          ? `Someone wants to operate units in "${propertyTitle}".`
+          : `Someone is asking about "${propertyTitle}".`,
+        icon: role === 'operator' ? '🏢' : '💬',
+        propertyId: resolvedListingId,
+        notificationType: role === 'operator' ? 'operator_request' : 'new_inquiry',
+      });
+    }
+    if (unitOperatorId && unitOperatorId !== userId) {
+      await notifyUser(supabaseAdmin, {
+        userId: unitOperatorId,
+        title: 'New inquiry on your unit',
+        desc: `Someone is asking about a unit you operate in "${propertyTitle}".`,
+        icon: '💬',
+        propertyId: resolvedListingId,
+        notificationType: 'new_inquiry',
+      });
     }
 
     return NextResponse.json({ success: true, dealId: dealData[0].id, newBalance });

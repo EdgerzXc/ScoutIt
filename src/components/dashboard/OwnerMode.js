@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import LiveEditorWorkspace from "./LiveEditorWorkspace";
 import DeepIntelligenceStudio from "./DeepIntelligenceStudio";
 import BulkImporterMode from "./BulkImporterMode";
@@ -24,9 +24,45 @@ export default function OwnerMode() {
   const [canUseVault, setCanUseVault] = useState(false);
   useEffect(() => { setCanUseVault(canSee("vault", getCurrentTier())); }, []);
   
-  // Check if current user has any listings (match the logged-in owner's id)
-  const myListings = listings.filter(l => currentUser && l.ownerId === currentUser.id);
+  // Bulk select for mass-archive on the Active Property Files grid.
+  const [selectMode, setSelectMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [isArchiving, setIsArchiving] = useState(false);
+  // DashboardContext's `listings` isn't refetched after an archive call, so
+  // freshly-archived ids are hidden locally until the next real refresh.
+  const [justArchivedIds, setJustArchivedIds] = useState([]);
+  const toggleSelected = (id) => {
+    setSelectedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  };
+
+  // Check if current user has any listings (match the logged-in owner's id).
+  // Archived (mass-deleted) listings are filtered out here rather than never
+  // fetched, since the archive is a soft-delete via pipeline_status.
+  const myListings = listings.filter(l => currentUser && l.ownerId === currentUser.id && l.pipelineStatus !== 'archived' && !justArchivedIds.includes(l.id));
   const hasListing = myListings.length > 0;
+
+  // Private notes on an incoming pitch/deal -- same deals.private_notes
+  // column BrokerMode.js's Deal File Workspace uses, debounced-saved here too.
+  const [dealNotes, setDealNotes] = useState({});
+  const noteSaveTimers = useRef({});
+  const handleSaveDealNote = (dealId, note) => {
+    setDealNotes(prev => ({ ...prev, [dealId]: note }));
+    clearTimeout(noteSaveTimers.current[dealId]);
+    noteSaveTimers.current[dealId] = setTimeout(async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const token = session?.access_token;
+        const mockOwnerId = !token && currentUser?.id === 'master-dev' ? 'master-dev' : undefined;
+        await fetch(`/api/deals/${dealId}/notes`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+          body: JSON.stringify({ note, mockOwnerId }),
+        });
+      } catch (err) {
+        console.error('Failed to save deal notes', err);
+      }
+    }, 800);
+  };
 
   // New Dossier State
   const [viewingDossierId, setViewingDossierId] = useState(null);
@@ -718,43 +754,94 @@ export default function OwnerMode() {
             <h1 className="font-display-md text-3xl md:text-4xl text-text-primary">Active Property Files</h1>
           </div>
           {/* Hidden on mobile — the contextual "+ List" FAB is the canonical add-listing control there (one control per action) */}
-          <button
-            className="hidden md:inline-block border border-gold-accent text-gold-accent hover:bg-gold-accent hover:text-background font-working-title font-bold px-6 py-3 rounded transition-all w-full md:w-auto"
-            onClick={() => setShowWizard('select_mode')}
-          >
-            + New Property File
-          </button>
+          <div className="flex gap-3 w-full md:w-auto">
+            {selectMode && selectedIds.length > 0 && (
+              <button
+                className="border border-error text-error hover:bg-error hover:text-white font-working-title font-bold px-5 py-3 rounded transition-all disabled:opacity-50"
+                disabled={isArchiving}
+                onClick={async () => {
+                  setIsArchiving(true);
+                  try {
+                    const { data: { session } } = await supabase.auth.getSession();
+                    const token = session?.access_token;
+                    const mockOwnerId = !token && currentUser?.id === 'master-dev' ? 'master-dev' : undefined;
+                    const res = await fetch('/api/dashboard/archive', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+                      body: JSON.stringify({ propertyIds: selectedIds, mockOwnerId }),
+                    });
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.error || 'Failed to archive');
+                    setJustArchivedIds(prev => [...prev, ...selectedIds]);
+                    addToast(`Archived ${data.archivedCount} propert${data.archivedCount === 1 ? 'y' : 'ies'}.`, '🗑️');
+                    setSelectedIds([]);
+                    setSelectMode(false);
+                  } catch (err) {
+                    addToast(err.message || 'Failed to archive listings', '⚠️');
+                  } finally {
+                    setIsArchiving(false);
+                  }
+                }}
+              >
+                {isArchiving ? 'Archiving…' : `Archive Selected (${selectedIds.length})`}
+              </button>
+            )}
+            <button
+              className="border border-surface-variant text-text-secondary hover:text-on-surface hover:border-text-secondary font-working-title font-bold px-5 py-3 rounded transition-all"
+              onClick={() => { setSelectMode(s => !s); setSelectedIds([]); }}
+            >
+              {selectMode ? 'Cancel' : 'Select'}
+            </button>
+            <button
+              className="hidden md:inline-block border border-gold-accent text-gold-accent hover:bg-gold-accent hover:text-background font-working-title font-bold px-6 py-3 rounded transition-all w-full md:w-auto"
+              onClick={() => setShowWizard('select_mode')}
+            >
+              + New Property File
+            </button>
+          </div>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {myListings.map(listing => {
             const listPitches = pitches.filter(p => p.isCurrentUserOwner && p.listingId === listing.id);
             const pendingPitches = listPitches.filter(p => p.status === 'pending');
+            const isSelected = selectedIds.includes(listing.id);
             return (
-              <div 
+              <div
                 key={listing.id}
-                className="card-atmosphere hov-card rounded-lg p-6 flex flex-col cursor-pointer transition-all group relative overflow-hidden h-auto min-h-[12rem] md:h-64"
-                onClick={() => setViewingDossierId(listing.id)}
+                className={`card-atmosphere hov-card rounded-lg p-6 flex flex-col cursor-pointer transition-all group relative overflow-hidden h-auto min-h-[12rem] md:h-64 ${pendingPitches.length > 0 ? 'cta-pulse' : ''} ${isSelected ? 'border-gold-accent' : ''}`}
+                onClick={() => selectMode ? toggleSelected(listing.id) : setViewingDossierId(listing.id)}
               >
                 <div className="absolute top-0 left-0 w-1 h-full bg-surface-variant group-hover:bg-gold-accent transition-colors"></div>
+                {selectMode && (
+                  <input
+                    type="checkbox"
+                    checked={isSelected}
+                    onChange={() => toggleSelected(listing.id)}
+                    onClick={(e) => e.stopPropagation()}
+                    className="absolute top-4 right-4 w-5 h-5 accent-gold-accent cursor-pointer z-10"
+                  />
+                )}
                 <div className="flex justify-between items-start mb-auto">
                   <div className="pr-4">
                     <h3 className="font-working-title text-xl text-on-surface mb-1 group-hover:underline">{listing.title || 'Untitled Property'}</h3>
                     <p className="text-xs text-text-secondary">{listing.location || 'Location missing'}</p>
                   </div>
-                  <div className="relative w-10 h-10 shrink-0" title={`${listing.signals?.completeness || '100%'} complete`}>
-                    <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-                      <path className="text-surface-variant" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3"></path>
-                      <path className="text-gold-accent" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeDasharray={`${listing.signals?.completeness?.replace('%','') || 100}, 100`} strokeWidth="3"></path>
-                    </svg>
-                    {/* Inner % label so the ring reads as a completeness score, not a loading spinner */}
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="font-data-tabular font-bold text-[8px] text-text-primary leading-none">{listing.signals?.completeness || '100%'}</span>
+                  {!selectMode && (
+                    <div className="relative w-10 h-10 shrink-0" title={`${listing.signals?.completeness || '100%'} complete`}>
+                      <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                        <path className="text-surface-variant" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3"></path>
+                        <path className="text-gold-accent" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeDasharray={`${listing.signals?.completeness?.replace('%','') || 100}, 100`} strokeWidth="3"></path>
+                      </svg>
+                      {/* Inner % label so the ring reads as a completeness score, not a loading spinner */}
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className="font-data-tabular font-bold text-[8px] text-text-primary leading-none">{listing.signals?.completeness || '100%'}</span>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
-                
-                
+
+
                 {listing.pipelineStatus === 'ai_drafting' ? (
                   <div className="border-t border-surface-variant pt-4 mt-4 h-full flex flex-col justify-center">
                     <div className="bg-surface-alt/50 p-2.5 rounded border border-surface-variant flex items-center justify-center gap-2 relative overflow-hidden">
@@ -994,7 +1081,20 @@ export default function OwnerMode() {
                       {pitch.message}
                     </p>
                   </div>
-                  
+
+                  {/* Private scratchpad -- only you see this, shared with your
+                      own view of this deal across sessions (deals.private_notes) */}
+                  <div className="mb-4">
+                    <span className="block font-label-caps text-[9px] tracking-widest text-text-muted uppercase mb-1">Private Notes</span>
+                    <textarea
+                      className="w-full bg-[#0a0a0a] border border-surface-alt rounded p-3 text-xs text-text-secondary focus:outline-none focus:border-gold-accent/50 transition-colors resize-y min-h-[60px]"
+                      placeholder="Jot down anything about this inquiry — only visible to you..."
+                      value={dealNotes[pitch.id] !== undefined ? dealNotes[pitch.id] : (pitch.privateNotes || "")}
+                      onChange={(e) => handleSaveDealNote(pitch.id, e.target.value)}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  </div>
+
                   {pitch.status === 'pending' && (
                     <div className="flex gap-3">
                       <button 

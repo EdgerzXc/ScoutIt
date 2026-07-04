@@ -1,6 +1,23 @@
 # ScoutIt Handoff - End of Session
 
-> ## ▶️ RESUME HERE (latest) — 2026-07-03, Part 7 — impeccable pass shipped; 2 new initiatives captured
+> ## ▶️ RESUME HERE (latest) — 2026-07-04 — atmosphere upgrade + drag fix + real inquiry pipeline/messenger/Owner CRM notes/mass-delete
+> Two parts, full detail in `08_OPERATIONS_AND_BACKLOG/SESSION_HANDOFF_2026-07-04.md`:
+> - **Part 1:** site-wide dark/gold atmosphere visual upgrade (~31 files) + fixed the property
+>   page's chapter-nav drag (missing `preventDefault()` on `pointerdown` let the browser start a
+>   native selection-drag instead). Commits `7774a26`, `51cbf2b`.
+> - **Part 2:** owner asked for mass-delete + inquiry signaling + a real messenger + a mini-CRM on
+>   the Owner dashboard. Turned out several pieces already existed as UI-only mocks never wired to
+>   already-working real backend: `InquiryModal.js` was silently discarding every buyer inquiry
+>   while showing a fake success message; `ChatBox.js`/the Inbox page were 100% mock data even
+>   though `/api/deals/[id]/messages` and `/api/deals/[id]/close` already worked for real. Fixed
+>   the inquiry pipeline, wired real messaging end-to-end, added owner mass-archive +
+>   already-pulsing inquiry badges, and persisted deal notes (closing the exact gap
+>   `CRM_INITIATIVE.md` flagged below, for both Broker and Owner). One schema migration attempt was
+>   auto-blocked as unauthorized (worked around in app code, no schema changed). One real mistake
+>   during testing (briefly archived 2 real listings) was caught and reverted the same session —
+>   see the handoff doc for full disclosure.
+>
+> ## Previous — 2026-07-03, Part 7 — impeccable pass shipped; 2 new initiatives captured
 > **Property page design pass via `/impeccable` is done and live** — 2 P0s (accessible chapter
 > tabs, Vault tier-name bug + illustrative-content labeling), 2 P1s (CSP `frame-src` gap, the new
 > "breathing gold glow" primary-CTA rule), a P2 (URL-synced chapter deep-linking), and a P3

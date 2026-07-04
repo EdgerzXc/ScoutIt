@@ -2210,7 +2210,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
         isOpen={isInquiryOpen}
         onClose={() => setIsInquiryOpen(false)}
         propertyTitle={d.title}
-        brokerName={d.broker_name}
+        propertySlug={d.slug}
       />
 
       <OperatorRequestModal

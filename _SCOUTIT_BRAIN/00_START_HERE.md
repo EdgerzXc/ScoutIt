@@ -190,15 +190,18 @@ different altitude. That is ScoutIT in the market. The UFO stays. Always.
 - `FABLE_ONBOARDING_PROMPT.md` — onboarding prompt
 
 **08 · Operations & Backlog**
-- `SESSION_HANDOFF_2026-07-03.md` — ⭐ latest complete session record (start here per `NEXT_DAY_HANDOFF.md`)
+- `SESSION_HANDOFF_2026-07-04.md` — ⭐ latest complete session record (start here per `NEXT_DAY_HANDOFF.md`)
+- `SESSION_HANDOFF_2026-07-03.md` — previous session record
 - `E2E_TEST_FIX_LIST.md` — every bug/unverified flow flagged during codebase work, batched for one E2E pass
 - `HEATMAP_NOAH_INTEGRATION_PLAN.md` — NOAH/HazardHunterPH research + the ready-to-execute plan for the flood-risk map layer
 - `SCOUTIT_FIX_LIST.md` — the single prioritized build/fix list + launch build order
 - `WEBSITE_COUNCIL_AUDIT.md` — website audit
 - `SCOUTIT_CLEANUP_PROMPT.md` — pre-launch cleanup playbook
-- `CRM_INITIATIVE.md` — 🆕 captured-not-scoped: "relationship intelligence, not contact
-  management" CRM philosophy + Workflow Gravity strategic lens + open decision questions —
-  read before scoping any lead/pipeline/deal-notes work
+- `CRM_INITIATIVE.md` — "relationship intelligence, not contact management" CRM philosophy +
+  Workflow Gravity strategic lens + open decision questions — read before scoping any
+  lead/pipeline work. 2026-07-04: the deal-notes persistence gap it flagged is now built (real
+  messenger too) — see `SESSION_HANDOFF_2026-07-04.md`; the fuller lead-scoring/follow-up vision
+  is still open
 
 **09 · Reference (raw)**
 - `PROJECT_README.md` — original Next.js project README
