@@ -8,6 +8,9 @@ export default function VaultOfHonor() {
   // Mock unlocked badges for demonstration
   // In production, this would come from Supabase user data
   const [unlockedBadges] = useState(["pioneer", "spatial_analyst"]);
+  // The badge grid runs a permanent spin/glow/blur animation per unlocked card, which
+  // was the source of mobile lag — gate it behind a tap instead of mounting on load.
+  const [isLoaded, setIsLoaded] = useState(false);
 
   return (
     <div className="w-full mb-12 animate-[fadeIn_0.5s_ease-out]">
@@ -23,6 +26,18 @@ export default function VaultOfHonor() {
         </div>
       </div>
 
+      {!isLoaded ? (
+        <button
+          type="button"
+          onClick={() => setIsLoaded(true)}
+          className="w-full rounded-xl border border-surface-variant hover:border-gold-accent/50 bg-[#0a0a0a] py-10 flex flex-col items-center justify-center gap-2 transition-colors group"
+        >
+          <span className="font-label-caps tracking-widest text-[10px] text-gold-accent group-hover:text-gold-accent-bright">
+            Tap to Load
+          </span>
+          <span className="text-sm text-text-secondary">View your milestones & achievements</span>
+        </button>
+      ) : (
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         {BADGE_REGISTRY.map((badge) => {
           const isUnlocked = unlockedBadges.includes(badge.id);
@@ -95,6 +110,7 @@ export default function VaultOfHonor() {
           );
         })}
       </div>
+      )}
     </div>
   );
 }

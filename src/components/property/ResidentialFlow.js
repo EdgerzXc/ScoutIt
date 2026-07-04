@@ -4,6 +4,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import ReactionButtons from "@/components/ui/ReactionButtons";
 import InteractiveMap from "@/components/property/InteractiveMap";
 import "@/app/property/[id]/property-detail.css";
@@ -13,8 +14,19 @@ import InquiryModal from "@/components/property/InquiryModal";
 import OperatorRequestModal from "@/components/property/OperatorRequestModal";
 import AffordabilityCalculator from "@/components/property/AffordabilityCalculator";
 import FloodRiskBadge from "@/components/property/FloodRiskBadge";
-import FloodHeatmapMap from "@/components/property/FloodHeatmapMap";
 import { canSee, getCurrentTier, hasActiveRole } from "@/lib/entitlements";
+
+// Code-split maplibre-gl + pmtiles out of the main property-page bundle — they're
+// only needed if the visitor taps the Flood Risk Map tab, which was the real cause
+// of the slow mobile-data load (not the tab-gated render, the eager static import).
+const FloodHeatmapMap = dynamic(() => import("@/components/property/FloodHeatmapMap"), {
+  ssr: false,
+  loading: () => (
+    <div style={{ height: "clamp(360px, 48vh, 440px)", background: "#0d0d0d", border: "0.5px solid #262626", borderRadius: "4px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", letterSpacing: "0.1em", textTransform: "uppercase", color: "#c8c8c8" }}>Loading flood hazard data…</span>
+    </div>
+  ),
+});
 import { DEEP_INTEL_SCHEMA } from "@/lib/deepIntelSchema";
 
 // ═══════════════════════════════════════════════════

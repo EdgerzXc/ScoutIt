@@ -4,11 +4,22 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import ReactionButtons from "@/components/ui/ReactionButtons";
 import InteractiveMap from "@/components/property/InteractiveMap";
-import FloodHeatmapMap from "@/components/property/FloodHeatmapMap";
 import CategorySpecBlock from "@/components/property/CategorySpecBlock";
 import { canSee, getCurrentTier, hasActiveRole } from "../../lib/entitlements";
+
+// Code-split maplibre-gl + pmtiles out of the main property-page bundle — they're
+// only needed if the visitor taps the Flood Risk Map tab.
+const FloodHeatmapMap = dynamic(() => import("@/components/property/FloodHeatmapMap"), {
+  ssr: false,
+  loading: () => (
+    <div style={{ height: "clamp(360px, 48vh, 440px)", background: "#0d0d0d", border: "0.5px solid #262626", borderRadius: "4px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", letterSpacing: "0.1em", textTransform: "uppercase", color: "#c8c8c8" }}>Loading flood hazard data…</span>
+    </div>
+  ),
+});
 import { DEEP_INTEL_SCHEMA } from "../../lib/deepIntelSchema";
 import "@/app/property/[id]/property-detail.css";
 import { getChapterConfig } from "./chapterConfig";
