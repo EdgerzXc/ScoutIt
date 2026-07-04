@@ -13,6 +13,8 @@ const InteractiveRadiusMap = dynamic(() => import("@/components/property/Interac
 });
 
 import AtmosphereBackground from "@/components/ui/AtmosphereBackground";
+import ComparisonMatrix from "@/components/property/ComparisonMatrix";
+import { motion, AnimatePresence } from "framer-motion";
 import "./property.css";
 
 // Dictionary mapping local mockDb slugs to correct UI SpaceCategories
@@ -129,6 +131,18 @@ const PRICE_BANDS = [
   { label: "Trophy",  min: 50000000, max: Infinity },
 ];
 
+const gridVariants = {
+  hidden: {},
+  visible: {
+    transition: { staggerChildren: 0.08 }
+  }
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 15 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] } }
+};
+
 function PropertyDirectoryContent() {
   const searchParams = useSearchParams();
   const initialType = searchParams.get("type");
@@ -161,6 +175,21 @@ function PropertyDirectoryContent() {
     locations: true,
     aesthetics: false,
   });
+
+  // Comparison Matrix State
+  const [compareList, setCompareList] = useState([]);
+  const [showMatrix, setShowMatrix] = useState(false);
+
+  const toggleCompare = (p, e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCompareList(prev => {
+      const exists = prev.find(item => item.id === p.id);
+      if (exists) return prev.filter(item => item.id !== p.id);
+      if (prev.length >= 3) return prev;
+      return [...prev, p];
+    });
+  };
 
   // Pre-filter on URL category parameters
   useEffect(() => {
@@ -521,12 +550,13 @@ function PropertyDirectoryContent() {
                 />
               )}
 
-              <div className="directory-grid">
+              <motion.div className="directory-grid" variants={gridVariants} initial="hidden" animate="visible">
                 {filteredProperties.length > 0 ? (
                   filteredProperties.map(p => {
                     const specBadges = getCardSpecBadges(p);
                     return (
-                    <Link href={`/property/${p.slug}`} key={p.id} className="property-preview-card">
+                    <motion.div key={p.id} variants={cardVariants}>
+                      <Link href={`/property/${p.slug}`} className="property-preview-card">
                       <div className="property-card-visual">
                         <span className="property-city-badge">{p.city}</span>
                         { }
@@ -555,7 +585,13 @@ function PropertyDirectoryContent() {
                         </div>
 
                         <div className="property-card-footer">
-                          <div onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+                          <div onClick={(e) => { e.preventDefault(); e.stopPropagation(); }} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                            <button 
+                              className={`compare-toggle-btn ${compareList.find(item => item.id === p.id) ? 'active' : ''}`}
+                              onClick={(e) => toggleCompare(p, e)}
+                            >
+                              {compareList.find(item => item.id === p.id) ? "✓ Added" : "+ Compare"}
+                            </button>
                             <ReactionButtons
                               propertyId={p.id}
                               propertyTitle={p.title}
@@ -568,6 +604,7 @@ function PropertyDirectoryContent() {
                         </div>
                       </div>
                     </Link>
+                    </motion.div>
                     );
                   })
                 ) : (
@@ -576,10 +613,31 @@ function PropertyDirectoryContent() {
                     <p>Try clearing some filters or refining your search parameters.</p>
                   </div>
                 )}
-              </div>
+              </motion.div>
             </section>
           </div>
         )}
+
+        {compareList.length > 0 && (
+          <div className="compare-action-bar">
+            <div className="compare-count">
+              COMPARING {compareList.length}/3 ASSETS
+            </div>
+            <div className="compare-actions">
+              <button className="compare-clear" onClick={() => setCompareList([])}>Clear</button>
+              <button className="compare-view" onClick={() => setShowMatrix(true)}>View Matrix</button>
+            </div>
+          </div>
+        )}
+
+        <AnimatePresence mode="wait">
+          {showMatrix && (
+            <ComparisonMatrix 
+              properties={compareList} 
+              onClose={() => setShowMatrix(false)} 
+            />
+          )}
+        </AnimatePresence>
       </main>
       <Footer />
     </div>

@@ -6,6 +6,7 @@ import ResidentialFlow from "../property/ResidentialFlow";
 import { sanitizeObject } from "../../lib/sanitize";
 import { supabase } from "../../lib/supabaseClient";
 import PhotoUploader from "./PhotoUploader";
+import GeoPricingGauge from "./GeoPricingGauge";
 import { getCurrentTier } from "../../lib/entitlements";
 
 const CATEGORIES = [
@@ -528,6 +529,11 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
                   value={formData.price} 
                   onChange={e => setField("price", e.target.value)} 
                   placeholder="e.g. 50000" 
+                />
+                <GeoPricingGauge 
+                  location={formData.location} 
+                  category={formData.category} 
+                  price={formData.price} 
                 />
               </div>
 

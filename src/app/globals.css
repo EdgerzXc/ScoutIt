@@ -187,6 +187,8 @@ a:hover {
 .text-yellow { color: var(--yellow); }
 .text-red { color: var(--red); }
 
+.tabular-nums { font-variant-numeric: tabular-nums; }
+
 .bg-surface { background: var(--surface); }
 .bg-surface2 { background: var(--surface2); }
 
