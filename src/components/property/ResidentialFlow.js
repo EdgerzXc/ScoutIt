@@ -292,6 +292,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
   const isDragging   = useRef(false);
   const startX       = useRef(0);
   const scrollStart  = useRef(0);
+  const pointerDownX = useRef(null);
   const menuRef      = useRef(null);
   const touchStartX  = useRef(0);
 
@@ -776,26 +777,18 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
   // the cursor leaves the (narrow) nav strip mid-drag -- the old mouse-event
   // version cancelled on mouseleave, which made fast drags feel like they
   // kept getting interrupted. Touch is left alone (native scroll handles it).
+  // A press only becomes a drag once it moves past this many pixels -- below
+  // that, we never preventDefault/capture, so a plain click on a nav-chapter
+  // button underneath reaches it untouched (previously *every* pointerdown
+  // claimed the pointer immediately, which silently ate all tab clicks).
+  const DRAG_THRESHOLD = 6;
   const onDragStart = (e) => {
     if (e.pointerType === "touch") return;
-    // Without this, the browser can start its own native text/content
-    // selection drag right on pointerdown (before any move even fires) --
-    // that fight is what made the strip look draggable (grab cursor) but
-    // not actually respond: our scrollLeft writes were competing with the
-    // browser's native selection-drag instead of driving it outright.
-    e.preventDefault();
-    isDragging.current  = true;
-    startX.current      = e.pageX;
-    scrollStart.current = scrollRef.current.scrollLeft;
-    scrollRef.current.style.cursor = "grabbing";
-    // CSS gives .nav-inner scroll-behavior:smooth for nice keyboard-focus
-    // scrolling, but that animates every scrollLeft write -- during a live
-    // drag that means dozens of overlapping animations fighting each other,
-    // which is what made dragging feel laggy/late. Go instant while dragging.
-    scrollRef.current.style.scrollBehavior = "auto";
-    try { scrollRef.current.setPointerCapture(e.pointerId); } catch {}
+    pointerDownX.current = e.pageX;
+    scrollStart.current  = scrollRef.current.scrollLeft;
   };
   const onDragEnd = (e) => {
+    pointerDownX.current = null;
     if (!isDragging.current) return;
     isDragging.current = false;
     if (scrollRef.current) {
@@ -807,7 +800,22 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
     }
   };
   const onDragMove = (e) => {
-    if (!isDragging.current) return;
+    if (pointerDownX.current == null) return;
+    if (!isDragging.current) {
+      if (Math.abs(e.pageX - pointerDownX.current) < DRAG_THRESHOLD) return;
+      // Movement just confirmed this is a drag, not a click -- claim the
+      // pointer now (not on pointerdown) so the browser's native text/content
+      // selection drag doesn't fight our scroll from here on.
+      isDragging.current = true;
+      startX.current = pointerDownX.current;
+      scrollRef.current.style.cursor = "grabbing";
+      // CSS gives .nav-inner scroll-behavior:smooth for nice keyboard-focus
+      // scrolling, but that animates every scrollLeft write -- during a live
+      // drag that means dozens of overlapping animations fighting each other,
+      // which is what made dragging feel laggy/late. Go instant while dragging.
+      scrollRef.current.style.scrollBehavior = "auto";
+      try { scrollRef.current.setPointerCapture(e.pointerId); } catch {}
+    }
     e.preventDefault();
     const delta = (e.pageX - startX.current) * 1.5;
     scrollRef.current.scrollLeft = scrollStart.current - delta;
