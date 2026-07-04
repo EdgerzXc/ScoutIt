@@ -19,7 +19,7 @@ import ConciergeAI from "../../components/dashboard/ConciergeAI";
 import ConnectsBreakdown from "../../components/dashboard/ConnectsBreakdown";
 import AtmosphereBackground from "../../components/ui/AtmosphereBackground";
 import { getSession } from "../../lib/authClient";
-import { Camera, Search, Bookmark, MessageCircle } from "lucide-react";
+import { Camera, Search, Bookmark, MessageCircle, Briefcase } from "lucide-react";
 
 const TAG_LABELS = {
   buyer: "Buyer / Scout",
@@ -288,6 +288,18 @@ function DashboardInner() {
               tier={user.subscription_tier || user.tier}
             />
           </div>
+
+          {/* CRM Nav (Owner/Broker only) */}
+          {(mode === "owner" || mode === "broker") && (
+            <Link
+              href="/dashboard/crm"
+              className="relative w-11 h-11 flex items-center justify-center text-text-secondary hover:text-gold-accent transition-colors"
+              aria-label="Master CRM"
+              title="Master CRM"
+            >
+              <Briefcase strokeWidth={1.5} size={20} />
+            </Link>
+          )}
 
           <Link
             href="/dashboard/inbox"

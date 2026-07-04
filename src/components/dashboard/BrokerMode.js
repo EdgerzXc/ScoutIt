@@ -29,6 +29,8 @@ export default function BrokerMode() {
   const myPitches = pitches.filter(p => p.isCurrentUserBroker);
   const pending = myPitches.filter(p => p.status === 'pending');
   const accepted = myPitches.filter(p => p.status === 'accepted');
+  const activePitches = myPitches.filter(p => p.status !== 'accepted' && p.status !== 'closed');
+
 
   // Feed = listings that we haven't pitched to yet
   const pitchedListingIds = myPitches.map(p => p.listingId);
@@ -444,17 +446,16 @@ export default function BrokerMode() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {myPitches.length === 0 && (
+            {activePitches.length === 0 && (
               <div className="col-span-full py-16 text-center border border-dashed border-surface-variant rounded-lg flex flex-col items-center">
                 <span className="text-3xl mb-4 opacity-50">📂</span>
-                <p className="text-on-surface font-working-title mb-2">Your CRM is empty.</p>
+                <p className="text-on-surface font-working-title mb-2">No active deal files.</p>
                 <p className="text-text-secondary text-sm">Find properties in the intelligence feed to initiate a deal file.</p>
               </div>
             )}
             
-            {myPitches.map((deal) => {
+            {activePitches.map((deal) => {
               const pStatus = deal.status;
-              const isAccepted = pStatus === 'accepted';
               const isDeclined = pStatus === 'declined';
               return (
                 <div 
@@ -462,10 +463,10 @@ export default function BrokerMode() {
                   className={`card-atmosphere hov-glow rounded-lg p-5 flex flex-col cursor-pointer transition-all group relative overflow-hidden h-48 ${isDeclined ? 'opacity-60 grayscale' : ''}`}
                   onClick={() => setActiveDealId(deal.id)}
                 >
-                  <div className={`absolute top-0 left-0 w-1 h-full transition-colors ${isAccepted ? 'bg-success' : isDeclined ? 'bg-error' : 'bg-surface-variant group-hover:bg-gold-accent'}`}></div>
+                  <div className={`absolute top-0 left-0 w-1 h-full transition-colors ${isDeclined ? 'bg-error' : 'bg-surface-variant group-hover:bg-gold-accent'}`}></div>
                   
                   <div className="flex justify-between items-start mb-2">
-                    <span className={`font-label-caps text-[9px] tracking-widest uppercase px-1.5 py-0.5 rounded ${isAccepted ? 'bg-success/10 text-success' : isDeclined ? 'bg-error/10 text-error' : pStatus === 'invited' ? 'bg-[#E8AE3C]/10 text-[#E8AE3C]' : 'bg-surface-alt text-text-secondary'}`}>
+                    <span className={`font-label-caps text-[9px] tracking-widest uppercase px-1.5 py-0.5 rounded ${isDeclined ? 'bg-error/10 text-error' : pStatus === 'invited' ? 'bg-[#E8AE3C]/10 text-[#E8AE3C]' : 'bg-surface-alt text-text-secondary'}`}>
                       {pStatus === 'invited' ? 'Incoming Handshake' : pStatus}
                     </span>
                     <span className="text-[10px] text-text-muted font-data-tabular">{deal.timeRemaining || 'Just now'}</span>
@@ -479,6 +480,53 @@ export default function BrokerMode() {
                   <div className="border-t border-surface-variant pt-3 mt-4 flex justify-between items-center text-xs">
                     <span className="text-gold-accent flex items-center gap-1 group-hover:gap-2 transition-all font-working-title">
                       Open Workspace <span>→</span>
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="flex justify-between items-end border-b border-surface-variant pb-2 mt-8">
+            <h3 className="font-working-title text-xl text-on-surface flex items-center gap-2">
+              <span className="text-gold-accent">✦</span> Verified Advisory Portfolio
+            </h3>
+            <span className="text-text-secondary font-label-caps text-[10px] tracking-widest uppercase">{accepted.length} Properties</span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {accepted.length === 0 && (
+              <div className="col-span-full py-12 text-center border border-dashed border-surface-variant rounded-lg flex flex-col items-center">
+                <span className="text-3xl mb-4 opacity-50">🛡️</span>
+                <p className="text-on-surface font-working-title mb-2">No Verified Properties.</p>
+                <p className="text-text-secondary text-sm">Accept a handshake from an owner to become a Verified Advisor.</p>
+              </div>
+            )}
+            
+            {accepted.map((deal) => {
+              return (
+                <div 
+                  key={deal.id} 
+                  className="card-atmosphere hov-glow rounded-lg p-5 flex flex-col cursor-pointer transition-all group relative overflow-hidden h-48 border border-gold-accent/20"
+                  onClick={() => setActiveDealId(deal.id)}
+                >
+                  <div className="absolute top-0 left-0 w-1 h-full transition-colors bg-success"></div>
+                  
+                  <div className="flex justify-between items-start mb-2">
+                    <span className="font-label-caps text-[9px] tracking-widest uppercase px-1.5 py-0.5 rounded bg-success/10 text-success flex items-center gap-1">
+                      <span>🛡️</span> Verified Advisor
+                    </span>
+                    <span className="text-[10px] text-text-muted font-data-tabular">Active</span>
+                  </div>
+                  
+                  <div className="mt-2 mb-auto pr-2">
+                    <h4 className="font-working-title text-base text-on-surface group-hover:underline line-clamp-1">{dealTitle(deal)}</h4>
+                    <p className="text-xs text-text-secondary mt-1">{deal.loc || 'Location details hidden'}</p>
+                  </div>
+                  
+                  <div className="border-t border-surface-variant pt-3 mt-4 flex justify-between items-center text-xs">
+                    <span className="text-gold-accent flex items-center gap-1 group-hover:gap-2 transition-all font-working-title">
+                      Manage Portfolio <span>→</span>
                     </span>
                   </div>
                 </div>

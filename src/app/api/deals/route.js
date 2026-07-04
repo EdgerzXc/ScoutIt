@@ -127,6 +127,7 @@ export async function GET(request) {
           lastActivityAt: lastActivityByDeal[d.id] || d.created_at,
           closedAt: d.closed_at,
           expiresAt: d.expires_at,
+          private_notes: d.private_notes,
         };
       })
       .sort((a, b) => new Date(b.lastActivityAt) - new Date(a.lastActivityAt));
@@ -134,6 +135,74 @@ export async function GET(request) {
     return NextResponse.json({ deals: result });
   } catch (err) {
     console.error("[DEALS API] GET error:", err);
+    return NextResponse.json({ error: err.message || "Internal server error" }, { status: 500 });
+  }
+}
+
+import { z } from "zod";
+
+const postSchema = z.object({
+  propertyId: z.string(),
+  otherPartyEmail: z.string(), // We use this as ID for simplicity
+  status: z.string(),
+  initialMessage: z.string().optional(),
+  mockOwnerId: z.string().optional()
+});
+
+export async function POST(request) {
+  try {
+    const parsed = postSchema.safeParse(await request.json());
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Invalid data format" }, { status: 400 });
+    }
+    const { propertyId, otherPartyEmail, status, initialMessage, mockOwnerId } = parsed.data;
+    const userId = await resolveUserId(request, mockOwnerId);
+    
+    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const isMock = userId === "master-dev";
+
+    // Insert into Supabase deals table
+    // Assuming user is owner, other party is buyer for this simple manual creation
+    const { data: inserted, error } = await supabaseAdmin
+      .from("deals")
+      .insert({
+        status: status || "connected",
+        pitch_message: initialMessage || "",
+        buyer_id: isMock ? otherPartyEmail : userId,
+        broker_id: null,
+        // if user is creating it manually, they might be the owner. In real app, we'd find the property and set owner_id appropriately.
+        property_id: propertyId,
+      })
+      .select("*, properties(id, title, slug, owner_id)")
+      .single();
+
+    if (error) {
+      console.error("[DEALS API] POST error:", error);
+      return NextResponse.json({ error: "Failed to create deal" }, { status: 500 });
+    }
+
+    // Format like the GET endpoint
+    const deal = {
+      id: inserted.id,
+      status: inserted.status,
+      propertyId: inserted.properties?.id || propertyId,
+      propertyTitle: inserted.properties?.title || "Unknown Property",
+      propertySlug: inserted.properties?.slug || null,
+      myRole: "owner", // Assumed for manual creation
+      otherParty: otherPartyEmail || "Buyer",
+      lastMessage: inserted.pitch_message || "",
+      unreadCount: 0,
+      createdAt: inserted.created_at,
+      lastActivityAt: inserted.created_at,
+      closedAt: inserted.closed_at,
+      expiresAt: inserted.expires_at,
+      private_notes: inserted.private_notes,
+    };
+
+    return NextResponse.json({ success: true, deal });
+  } catch (err) {
+    console.error("[DEALS API] POST error:", err);
     return NextResponse.json({ error: err.message || "Internal server error" }, { status: 500 });
   }
 }

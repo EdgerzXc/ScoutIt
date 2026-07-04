@@ -94,10 +94,36 @@ export default function InboxPage() {
     setDeals((prev) => prev.map((d) => (d.id === dealId ? { ...d, handshakeState: 'offered' } : d)));
   };
 
-  const handleAcceptHandshake = (dealId) => {
-    setDeals((prev) => prev.map((d) => (d.id === dealId ? { ...d, handshakeState: 'linked', status: 'closed' } : d)));
-  };
+  const handleAcceptHandshake = async (dealId) => {
+    try {
+      const { data: { session } } = await getSession();
+      const token = session?.access_token;
+      // In DEV, if no real token but master-dev is logged in, pass a flag
+      const mockStr = localStorage.getItem("scoutit_user");
+      let mockOwnerId;
+      if (!token && mockStr && mockStr.includes("master-dev")) {
+        mockOwnerId = "master-dev";
+      }
 
+      const res = await fetch(`/api/deals/${dealId}`, {
+        method: "PATCH",
+        headers: { 
+          "Content-Type": "application/json",
+          ...(token ? { "Authorization": `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({ status: "accepted", mockOwnerId })
+      });
+
+      if (!res.ok) {
+        console.error("Failed to accept handshake");
+        return;
+      }
+      
+      setDeals((prev) => prev.map((d) => (d.id === dealId ? { ...d, handshakeState: 'linked', status: 'accepted' } : d)));
+    } catch (err) {
+      console.error("Error accepting handshake", err);
+    }
+  };
   return (
     <DashboardLayout>
       <div className="flex h-[calc(100vh-64px)] bg-background">

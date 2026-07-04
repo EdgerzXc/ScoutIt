@@ -81,8 +81,10 @@ export default function ChatBox({ deal, onCloseDeal, onOfferHandshake, onAcceptH
   const [isUploading, setIsUploading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [showConfirmClose, setShowConfirmClose] = useState(false);
+  const [showConfirmReport, setShowConfirmReport] = useState(false);
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [showConfirmHandshake, setShowConfirmHandshake] = useState(false);
+  const [isPitchExpanded, setIsPitchExpanded] = useState(false);
   const [uploadError, setUploadError] = useState(null);
 
   const messagesEndRef = useRef(null);
@@ -229,6 +231,21 @@ export default function ChatBox({ deal, onCloseDeal, onOfferHandshake, onAcceptH
     setShowConfirmClose(false);
   };
 
+  const handleReportConversation = async () => {
+    try {
+      const { token, mockOwnerId } = await resolveAuth();
+      await fetch(`/api/deals/${deal.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", ...authHeaders(token) },
+        body: JSON.stringify({ status: "reported", mockOwnerId }),
+      });
+    } catch (err) {
+      console.error("Failed to report deal", err);
+    }
+    onCloseDeal(deal.id);
+    setShowConfirmReport(false);
+  };
+
   const daysLeft = deal.expires_at ? Math.ceil((new Date(deal.expires_at) - new Date()) / (1000 * 60 * 60 * 24)) : 14;
 
   const renderAttachment = (att) => {
@@ -278,16 +295,13 @@ export default function ChatBox({ deal, onCloseDeal, onOfferHandshake, onAcceptH
         </div>
       )}
 
-      {/* Handshake Animation Overlay -- cosmetic only for now: there is no
-          handshake_state column on deals, so this doesn't persist across a
-          reload. Wiring a real handshake flow (contact-info exchange +
-          permanent chat deletion) is its own feature, not part of this pass. */}
+      {/* Handshake Animation Overlay -- Verified Advisor Flow */}
       {deal.handshakeState === 'linked' && (
         <div className="absolute inset-0 z-50 bg-black/90 backdrop-blur-md flex flex-col items-center justify-center animate-[fadeIn_0.5s_ease]">
-          <div className="text-6xl mb-6 animate-bounce">🤝</div>
-          <h2 className="text-3xl font-headline-editorial text-gold-accent mb-2">Deal Linked</h2>
+          <div className="text-6xl mb-6 animate-bounce">🛡️</div>
+          <h2 className="text-3xl font-headline-editorial text-gold-accent mb-2">Verified Advisor Linked</h2>
           <p className="text-text-secondary max-w-md text-center">
-            You are now officially connected. This temporary chat will close permanently.
+            The property is now active in the Verified Advisory Portfolio. This temporary chat will close permanently.
           </p>
         </div>
       )}
@@ -333,7 +347,7 @@ export default function ChatBox({ deal, onCloseDeal, onOfferHandshake, onAcceptH
             Inquiry for <strong>{deal.property_title}</strong>
           </p>
         </div>
-        {deal.status !== 'closed' && (
+        {deal.status !== 'closed' && deal.status !== 'accepted' && (
           <div className="flex gap-2 items-center">
             {deal.handshakeState === 'offered' ? (
               <button
@@ -363,9 +377,36 @@ export default function ChatBox({ deal, onCloseDeal, onOfferHandshake, onAcceptH
             >
               End Conversation
             </button>
+            <button
+              onClick={() => setShowConfirmReport(true)}
+              className="text-error/70 hover:text-error px-2 py-1.5 rounded text-xs transition-colors"
+              title="Report / Unmatch"
+            >
+              🚩
+            </button>
           </div>
         )}
       </div>
+
+      {/* Pitch Drawer */}
+      {deal.pitch_message && (
+        <div className="bg-[#1a1a1a] border-b border-surface-variant flex flex-col z-0">
+          <button 
+            className="w-full flex justify-between items-center px-4 py-2 text-xs font-mono tracking-widest uppercase text-text-secondary hover:text-on-surface hover:bg-white/5 transition-colors"
+            onClick={() => setIsPitchExpanded(!isPitchExpanded)}
+          >
+            <span className="flex items-center gap-2">
+              <span className="text-gold-accent">📄</span> Original Pitch Terms
+            </span>
+            <span>{isPitchExpanded ? '▲' : '▼'}</span>
+          </button>
+          {isPitchExpanded && (
+            <div className="px-6 py-4 border-t border-white/5 text-sm text-text-muted bg-[#121212] animate-[fadeIn_0.2s_ease]">
+              <p className="whitespace-pre-wrap font-serif italic border-l-2 border-gold-accent/30 pl-4">{deal.pitch_message}</p>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Required Legal Disclaimer */}
       <div className="bg-surface-variant/30 border-b border-surface-variant p-3 text-center">
@@ -376,9 +417,38 @@ export default function ChatBox({ deal, onCloseDeal, onOfferHandshake, onAcceptH
       </div>
 
       {/* Warnings & Banners */}
-      {deal.status === 'closed' ? (
+      {deal.status === 'accepted' ? (
+        <div className="bg-[#121212] border-b border-surface-variant p-6 flex flex-col items-center">
+          <div className="max-w-md w-full bg-gradient-to-br from-[#1a1a1a] to-[#0d0d0d] border border-gold-accent/30 rounded-xl p-6 shadow-[0_10px_40px_rgba(232,174,60,0.05)] flex flex-col items-center animate-[fadeIn_0.5s_ease]">
+            <span className="text-3xl mb-3">🛡️</span>
+            <span className="font-label-caps text-[10px] tracking-widest uppercase text-success bg-success/10 px-2 py-1 rounded mb-4">Verified Advisor Active</span>
+            
+            <h3 className="text-2xl font-headline-editorial text-on-surface mb-1">{deal.other_party_contact?.name || deal.other_party}</h3>
+            <p className="text-sm text-text-secondary font-mono mb-4">{deal.other_party_contact?.email || 'verified@advisory.network'}</p>
+            <p className="text-sm text-gold-accent font-data-tabular">{deal.other_party_contact?.phone || '+63 917 000 0000'}</p>
+            
+            <div className="w-full h-px bg-surface-variant my-5"></div>
+            
+            <div className="flex flex-wrap gap-2 justify-center w-full">
+              <a href={`https://wa.me/${(deal.other_party_contact?.phone || '').replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer" className="flex-1 min-w-[120px] bg-[#25D366]/20 text-[#25D366] border border-[#25D366]/30 px-3 py-2 rounded text-center text-xs font-working-title hover:bg-[#25D366]/30 transition-colors">
+                WhatsApp
+              </a>
+              <button onClick={() => setShowBookingModal(true)} className="flex-1 min-w-[120px] bg-gold-accent/20 text-gold-accent border border-gold-accent/30 px-3 py-2 rounded text-xs font-working-title hover:bg-gold-accent/30 transition-colors">
+                Schedule Call
+              </button>
+              <button className="flex-1 min-w-[120px] bg-surface-variant text-text-secondary border border-white/10 px-3 py-2 rounded text-xs font-working-title hover:text-white transition-colors" onClick={() => alert("Vault access coming soon.")}>
+                📂 Open Vault
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : deal.status === 'closed' ? (
         <div className="bg-error/10 text-error p-3 text-center text-xs font-mono tracking-widest uppercase border-b border-error/20">
           This conversation is closed and archived for 7 days.
+        </div>
+      ) : deal.status === 'reported' ? (
+        <div className="bg-error/20 text-error p-4 text-center text-sm font-working-title border-b border-error/30">
+          <span className="mr-2">🚩</span> This conversation was reported and permanently closed. Our Trust & Safety team is reviewing the interaction.
         </div>
       ) : (
         <div className="bg-surface-container-low p-2 text-center text-[10px] uppercase font-mono tracking-widest text-text-secondary border-b border-surface-variant">
@@ -454,7 +524,7 @@ export default function ChatBox({ deal, onCloseDeal, onOfferHandshake, onAcceptH
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            disabled={deal.status === 'closed' || isUploading}
+            disabled={['closed', 'accepted', 'reported'].includes(deal.status) || isUploading}
             className="p-2.5 rounded-full text-text-secondary hover:text-gold-accent hover:bg-gold-accent/10 transition-colors disabled:opacity-50 flex items-center justify-center"
             title="Attach file (Max 10MB Doc/Img, 50MB Video)"
           >
@@ -464,15 +534,15 @@ export default function ChatBox({ deal, onCloseDeal, onOfferHandshake, onAcceptH
           <input
             type="text"
             className="flex-1 bg-surface border border-surface-variant rounded-full px-5 py-2.5 text-sm text-on-surface focus:outline-none focus:border-gold-accent/50 disabled:opacity-50 transition-colors"
-            placeholder={deal.status === 'closed' ? "This chat is closed." : "Type your message or drag a file here..."}
+            placeholder={['closed', 'accepted', 'reported'].includes(deal.status) ? "This chat is closed." : "Type your message or drag a file here..."}
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            disabled={deal.status === 'closed' || isSubmitting}
+            disabled={['closed', 'accepted', 'reported'].includes(deal.status) || isSubmitting}
           />
 
           <button
             type="submit"
-            disabled={deal.status === 'closed' || isSubmitting || (!input.trim() && !isUploading)}
+            disabled={['closed', 'accepted', 'reported'].includes(deal.status) || isSubmitting || (!input.trim() && !isUploading)}
             className="bg-gold-accent text-background px-6 py-2.5 rounded-full text-sm font-working-title disabled:opacity-50 hover:bg-[#F7C64E] transition-colors shadow-[0_4px_10px_rgba(232,174,60,0.1)]"
           >
             {isSubmitting ? "..." : "Send"}
@@ -506,12 +576,41 @@ export default function ChatBox({ deal, onCloseDeal, onOfferHandshake, onAcceptH
         </div>
       )}
 
+      {/* Report Modal */}
+      {showConfirmReport && (
+        <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-[100] flex items-center justify-center p-6 animate-[fadeIn_0.2s_ease]">
+          <div className="bg-[#121212] border border-error/50 rounded-lg p-6 max-w-sm w-full shadow-[0_0_40px_rgba(255,0,0,0.1)]">
+            <h3 className="font-working-title text-lg text-error mb-2 flex items-center gap-2">
+              <span>🚩</span> Report & Unmatch
+            </h3>
+            <p className="text-sm text-text-secondary mb-6">
+              This will permanently close the chat and flag the user. Connects will be reviewed by our Trust & Safety team. Are you sure?
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setShowConfirmReport(false)}
+                className="px-4 py-2 rounded border border-surface-variant text-sm text-text-secondary hover:text-on-surface transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleReportConversation}
+                className="px-4 py-2 rounded bg-error text-white text-sm font-working-title hover:bg-error/80 transition-colors"
+              >
+                Report User
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Booking Modal -- still local-only (viewing_appointments table exists
           but this modal was never wired to it; out of scope for this pass) */}
       <BookingModal
         isOpen={showBookingModal}
         onClose={() => setShowBookingModal(false)}
         brokerName={deal.other_party}
+        dealId={deal.id}
         onSchedule={(scheduledAt) => {
           sendMessageBody(`[SYSTEM] I have requested a live viewing for: ${new Date(scheduledAt).toLocaleString()}`).catch((err) => {
             setUploadError(err.message);

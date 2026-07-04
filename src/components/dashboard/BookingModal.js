@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export default function BookingModal({ isOpen, onClose, brokerName, onSchedule }) {
+export default function BookingModal({ isOpen, onClose, brokerName, dealId, onSchedule }) {
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -15,14 +15,32 @@ export default function BookingModal({ isOpen, onClose, brokerName, onSchedule }
     if (!selectedDate || !selectedTime) return;
 
     setIsSubmitting(true);
-    // Simulate API call to /api/deals/[id]/schedule
-    await new Promise(res => setTimeout(res, 1000));
     
     // Combine date and time for backend
     const scheduledAt = new Date(`${selectedDate} ${selectedTime}`).toISOString();
     
-    onSchedule(scheduledAt);
-    setIsSubmitting(false);
+    try {
+      const res = await fetch("/api/viewing-appointments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          dealId,
+          scheduledAt,
+          mockOwnerId: "master-dev" // or read from context if available
+        })
+      });
+      
+      if (!res.ok) {
+        throw new Error("Failed to schedule appointment");
+      }
+      
+      onSchedule(scheduledAt);
+    } catch (e) {
+      console.error(e);
+      alert("Failed to schedule appointment. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

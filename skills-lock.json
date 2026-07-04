@@ -67,6 +67,12 @@
       "skillPath": "canvas-design/SKILL.md",
       "computedHash": "21e7c68d336893e4f2aa8d269854fd5e253c89cfc6dd0e74fa487fe7e96abdeb"
     },
+    "caveman": {
+      "source": "juliusbrussee/caveman",
+      "sourceType": "github",
+      "skillPath": "skills/caveman/SKILL.md",
+      "computedHash": "b0e7741886c0c32270cedc1a2fc21c2879d90964d3ce00f24952de7064613404"
+    },
     "changelog-generator": {
       "source": "ComposioHQ/awesome-claude-skills",
       "sourceType": "github",
