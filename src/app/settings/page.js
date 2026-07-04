@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import styles from "./page.module.css";
+import AtmosphereBackground from "@/components/ui/AtmosphereBackground";
 import { Camera, Search, ShieldCheck, Lock } from "lucide-react";
 import { BADGE_DEFINITIONS } from "@/lib/BadgeEngine";
 import { supabase } from "@/lib/supabaseClient";
@@ -185,6 +186,7 @@ export default function SettingsPage() {
 
   return (
     <div className={styles.settingsContainer}>
+      <AtmosphereBackground variant="default" />
       <header className={styles.topNav}>
         <Link href="/dashboard" className={styles.backBtn}>← Back to Dashboard</Link>
       </header>

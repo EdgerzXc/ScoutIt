@@ -84,8 +84,8 @@ export default function OwnerPanel({ listings = [], inquiryCount = 0 }) {
 }
 
 const panelStyle = {
-  background: "#161616",
-  border: "1px solid rgba(255,255,255,0.05)",
+  background: "linear-gradient(165deg, #1a1917, #111110)",
+  border: "1px solid rgba(255,255,255,0.08)",
   borderRadius: 6,
   padding: 24,
 };
@@ -125,8 +125,8 @@ const statsRow = {
 };
 
 const statCard = {
-  background: "#1a1a1a",
-  border: "1px solid rgba(255,255,255,0.05)",
+  background: "linear-gradient(165deg, #1a1917, #111110)",
+  border: "1px solid rgba(255,255,255,0.08)",
   borderRadius: 4,
   padding: "12px 8px",
   display: "flex",

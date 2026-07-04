@@ -36,7 +36,7 @@ export default function PostMoveEcosystem() {
         
         {/* Left Column: Move-In Checklist */}
         <div className="lg:col-span-5 flex flex-col gap-4">
-          <div className="bg-[#121110] border border-surface-variant rounded-lg p-6 hover:border-gold-accent/50 transition-colors h-full">
+          <div className="card-atmosphere hov-card rounded-lg p-6 transition-colors h-full">
             <div className="flex justify-between items-end mb-6">
               <div>
                 <span className="font-label-caps text-[10px] tracking-widest uppercase text-gold-accent block mb-1">Logistics</span>

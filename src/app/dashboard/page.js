@@ -17,6 +17,7 @@ import Nudge from "../../components/ui/Nudge";
 import Toasts from "../../components/ui/Toasts";
 import ConciergeAI from "../../components/dashboard/ConciergeAI";
 import ConnectsBreakdown from "../../components/dashboard/ConnectsBreakdown";
+import AtmosphereBackground from "../../components/ui/AtmosphereBackground";
 import { Camera, Search, Bookmark } from "lucide-react";
 
 const TAG_LABELS = {
@@ -182,12 +183,13 @@ function DashboardInner() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-text-primary flex flex-col pb-[100px] md:pb-24">
-      
+    <div className="relative min-h-screen bg-background text-text-primary flex flex-col pb-[100px] md:pb-24">
+      <AtmosphereBackground variant="dashboard" />
+
       {/* Top Nav (Persistent) */}
-      <header className="sticky top-0 z-40 bg-background/90 backdrop-blur-md border-b border-surface-variant px-4 py-3 md:px-6 md:py-4 flex items-center justify-between">
+      <header className="relative z-40 sticky top-0 bg-background/90 backdrop-blur-md border-b border-surface-variant px-4 py-3 md:px-6 md:py-4 flex items-center justify-between">
         <div className="flex items-center gap-6">
-          <Link href="/" className="font-display-md text-xl md:text-2xl text-gold-accent tracking-tighter">S<span className="text-on-surface">cout</span>IT</Link>
+          <Link href="/" className="font-display-md text-xl md:text-2xl text-gold-accent tracking-tighter text-glow">S<span className="text-on-surface">cout</span>IT</Link>
           
           {/* Custom Desktop Mode Switcher */}
           <div className="hidden md:block relative" ref={switcherRef}>
@@ -348,7 +350,7 @@ function DashboardInner() {
       </header>
 
       {/* Main Content Area (Mode determined) */}
-      <main className="flex-1 w-full max-w-7xl mx-auto md:p-6 p-0 relative">
+      <main className="relative z-10 flex-1 w-full max-w-7xl mx-auto md:p-6 p-0">
         <Nudge mode={mode} />
         {renderActiveMode()}
       </main>

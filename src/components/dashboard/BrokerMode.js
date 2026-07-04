@@ -131,7 +131,7 @@ export default function BrokerMode() {
           {/* Left Col: Connected Listing & Owner Profile */}
           <div className="md:col-span-4 flex flex-col gap-6">
             {/* Connected Listing */}
-            <div className="bg-[#121110] border border-surface-variant rounded-lg p-6">
+            <div className="card-atmosphere rounded-lg p-6">
               <h3 className="font-label-caps text-xs tracking-widest text-text-secondary mb-4 uppercase border-b border-surface-variant pb-2">Connected Asset</h3>
               <div className="flex flex-col gap-2">
                 <span className="text-gold-accent font-label-caps text-[10px] tracking-widest uppercase">{property?.type || 'Property'}</span>
@@ -148,7 +148,7 @@ export default function BrokerMode() {
             </div>
 
             {/* Owner Intelligence */}
-            <div className="bg-[#121110] border border-surface-variant rounded-lg p-6">
+            <div className="card-atmosphere rounded-lg p-6">
               <h3 className="font-label-caps text-xs tracking-widest text-text-secondary mb-4 uppercase border-b border-surface-variant pb-2">Owner Intelligence</h3>
               
               {deal.status === 'accepted' ? (
@@ -189,7 +189,7 @@ export default function BrokerMode() {
           <div className="md:col-span-8 flex flex-col gap-6">
             
             {/* The Pitch Record */}
-            <div className="bg-[#121110] border border-surface-variant rounded-lg overflow-hidden flex flex-col">
+            <div className="card-atmosphere rounded-lg overflow-hidden flex flex-col">
               <div className="bg-surface-alt border-b border-surface-variant p-4 flex justify-between items-center">
                 <h3 className="font-label-caps text-xs tracking-widest text-text-secondary uppercase">
                   {deal.status === 'invited' ? 'Message from Owner' : 'Initial Pitch Sent'}
@@ -209,7 +209,7 @@ export default function BrokerMode() {
             </div>
 
             {/* Private Intelligence Scratchpad */}
-            <div className="bg-surface border border-gold-accent/30 rounded-lg overflow-hidden flex flex-col shadow-lg">
+            <div className="card-atmosphere-gold rounded-lg overflow-hidden flex flex-col shadow-lg">
               <div className="bg-gold-accent/5 border-b border-gold-accent/20 p-4 flex justify-between items-center">
                 <h3 className="font-label-caps text-xs tracking-widest text-gold-accent uppercase flex items-center gap-2">
                   <span>📝</span> Private Deal Notes
@@ -342,7 +342,7 @@ export default function BrokerMode() {
       {/* Draft Pitch Modal Overlay */}
       {pitchingListing && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-background/90 backdrop-blur-md px-4">
-          <div className="w-full max-w-lg bg-surface border border-surface-variant rounded-lg shadow-2xl p-6 animate-[slideUp_0.4s_ease-out]">
+          <div className="w-full max-w-lg card-atmosphere rounded-lg shadow-2xl p-6 animate-[slideUp_0.4s_ease-out]">
             <h3 className="font-headline-editorial text-2xl text-on-surface mb-2">Draft Pitch</h3>
             <p className="text-sm text-text-secondary mb-6">Pitching <span className="font-bold text-gold-accent">{pitchingListing.title}</span></p>
             
@@ -436,7 +436,7 @@ export default function BrokerMode() {
               return (
                 <div 
                   key={deal.id} 
-                  className={`bg-[#121110] border border-surface-variant rounded-lg p-5 flex flex-col cursor-pointer transition-all group relative overflow-hidden h-48 hover:border-gold-accent hover:shadow-[0_0_15px_rgba(212,175,55,0.1)] ${isDeclined ? 'opacity-60 grayscale' : ''}`}
+                  className={`card-atmosphere hov-glow rounded-lg p-5 flex flex-col cursor-pointer transition-all group relative overflow-hidden h-48 ${isDeclined ? 'opacity-60 grayscale' : ''}`}
                   onClick={() => setActiveDealId(deal.id)}
                 >
                   <div className={`absolute top-0 left-0 w-1 h-full transition-colors ${isAccepted ? 'bg-success' : isDeclined ? 'bg-error' : 'bg-surface-variant group-hover:bg-gold-accent'}`}></div>
@@ -478,7 +478,7 @@ export default function BrokerMode() {
               </div>
             )}
             {feed.map((item) => (
-              <div key={item.id} className="bg-surface border border-surface-variant p-5 rounded-lg hover:border-gold-accent/50 transition-colors group relative">
+              <div key={item.id} className="card-atmosphere hov-card p-5 rounded-lg transition-colors group relative">
                 <div className="flex justify-between items-start mb-2">
                   <span className="text-gold-accent font-label-caps text-[10px] tracking-widest uppercase">{item.type || 'Property'}</span>
                   <span className="text-text-secondary text-[10px] font-data-tabular bg-surface-alt px-1.5 py-0.5 rounded">{item.time || 'New'}</span>

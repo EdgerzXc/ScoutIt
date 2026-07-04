@@ -5,6 +5,7 @@ import Footer from "@/components/layout/Footer";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { ReactionBadge } from "@/components/ui/ReactionButtons";
+import AtmosphereBackground from "@/components/ui/AtmosphereBackground";
 
 const REACTION_ORDER = ["Potential Fit", "Interested", "Inspired Me", "Save"];
 
@@ -53,6 +54,7 @@ export default function WishlistPage() {
 
   return (
     <div className="page-wrapper">
+      <AtmosphereBackground variant="default" />
       <Header />
       <main className="wishlist-main">
         <header className="page-header">
@@ -139,12 +141,15 @@ export default function WishlistPage() {
           min-height: 100vh;
           background: #0e0e0e;
           color: #f0ede8;
+          position: relative;
         }
 
         .wishlist-main {
           max-width: 900px;
           margin: 0 auto;
           padding: 120px 24px 80px;
+          position: relative;
+          z-index: 1;
         }
 
         .page-header {
@@ -254,11 +259,17 @@ export default function WishlistPage() {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          background: #161616;
-          border: 1px solid #262626;
+          background: linear-gradient(165deg, #1a1917, #111110);
+          border: 1px solid rgba(255, 255, 255, 0.08);
           padding: 16px 20px;
-          transition: opacity 0.3s ease, transform 0.3s ease;
+          transition: opacity 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
           position: relative;
+        }
+
+        .board-card:hover {
+          transform: translateY(-3px);
+          border-color: rgba(232, 174, 60, 0.3);
+          box-shadow: 0 14px 32px rgba(0, 0, 0, 0.45), 0 0 24px rgba(232, 174, 60, 0.18);
         }
 
         .badge-corner {

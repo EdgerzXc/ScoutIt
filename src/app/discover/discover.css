@@ -66,6 +66,8 @@
 /* 2. Main Content Frame */
 .engineContainer {
   padding-left: 160px; /* Accommodate Left Sidebar */
+  position: relative;
+  z-index: 1;
 }
 
 .engineFrame {
@@ -124,11 +126,11 @@
   flex: 0 0 320px;
   width: 320px;
   height: 420px;
-  background: #161616;
-  border: 1px solid #262626;
+  background: linear-gradient(165deg, #1a1917, #111110);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--radius-md);
   overflow: hidden;
-  transition: width 0.48s cubic-bezier(0.4, 0, 0.2, 1), border-color var(--transition), box-shadow var(--transition);
+  transition: width 0.48s cubic-bezier(0.4, 0, 0.2, 1), border-color var(--transition), box-shadow var(--transition), transform var(--transition-fast);
   cursor: pointer;
   position: relative;
   display: flex;
@@ -136,6 +138,8 @@
 
 .spotlightCard:hover {
   border-color: rgba(232, 174, 60, 0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.45), var(--shadow-glow-soft);
 }
 
 .spotlightCard.spotlight {
@@ -332,16 +336,17 @@
 
 .newsCapsule {
   flex: 0 0 340px;
-  background: #161616;
-  border: 1px solid #262626;
+  background: linear-gradient(165deg, #1a1917, #111110);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--radius-sm);
   padding: 20px;
-  transition: border-color var(--transition), background var(--transition);
+  transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition-fast);
 }
 
 .newsCapsule:hover {
-  border-color: rgba(255, 255, 255, 0.1);
-  background: #1e1e1e;
+  border-color: rgba(232, 174, 60, 0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.45), var(--shadow-glow-soft);
 }
 
 .capsuleMeta {
@@ -396,8 +401,8 @@
 .contextCell {
   flex: 0 0 300px;
   width: 300px;
-  background: #161616;
-  border: 1px solid #262626;
+  background: linear-gradient(165deg, #1a1917, #111110);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--radius-sm);
   padding: 24px;
   display: flex;
@@ -408,8 +413,9 @@
 }
 
 .contextCell:hover {
-  background: #1e1e1e;
   border-color: rgba(232, 174, 60, 0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.45), var(--shadow-glow-soft);
 }
 
 .contextLabelBlock {
@@ -525,8 +531,8 @@
 }
 
 .briefProfileCard {
-  background: #161616;
-  border: 1px solid #262626;
+  background: linear-gradient(165deg, #1a1917, #111110);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--radius-md);
   padding: 20px;
   display: flex;

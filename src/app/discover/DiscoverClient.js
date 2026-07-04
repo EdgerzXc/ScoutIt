@@ -6,6 +6,7 @@ import Link from "next/link";
 import ReactionButtons from "@/components/ui/ReactionButtons";
 import { cityToRegion, regionOf } from "@/lib/regions";
 import Footer from "@/components/layout/Footer";
+import AtmosphereBackground from "@/components/ui/AtmosphereBackground";
 import "./discover.css";
 
 const CATEGORIES = ["Residential", "Commercial", "STR", "Hospitality", "Restaurants", "Venues/Events"];
@@ -189,6 +190,7 @@ export default function DiscoverClient() {
 
   return (
     <div className="discoverLayout">
+      <AtmosphereBackground variant="default" />
       {/* 1. Left Sidebar Navigation Strip */}
       <aside className="catSidebar">
         <div className="brandLogo">SCOUTIT</div>

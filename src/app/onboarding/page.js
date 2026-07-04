@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Camera, Search } from "lucide-react";
 import { signUp, signInWithPassword, signInWithOAuth, signInWithOtp, verifyOtp, getSession } from "@/lib/authClient";
 import { supabase } from "@/lib/supabaseClient";
+import AtmosphereBackground from "@/components/ui/AtmosphereBackground";
 
 const TAGS = [
   { id: "buyer", icon: "🏠", title: "Looking to Buy or Rent", desc: "Browse, save, and get deep spatial intelligence." },
@@ -477,11 +478,12 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-text-primary flex flex-col">
+    <div className="relative min-h-screen bg-background text-text-primary flex flex-col">
+      <AtmosphereBackground variant="hero" />
       {/* Universal Grain Overlay */}
       <div className="fixed inset-0 pointer-events-none opacity-[0.03] z-50 mix-blend-overlay bg-[url('/grain.png')]"></div>
 
-      <header className="p-6 md:p-8 grid grid-cols-3 items-center sticky top-0 bg-background/90 backdrop-blur-md z-40 border-b border-surface-variant">
+      <header className="relative z-40 p-6 md:p-8 grid grid-cols-3 items-center sticky top-0 bg-background/90 backdrop-blur-md border-b border-surface-variant">
         <div className="flex items-center justify-start">
           <button 
             onClick={() => router.back()} 
@@ -502,7 +504,7 @@ export default function OnboardingPage() {
         </div>
       </header>
 
-      <main className="flex-1 flex flex-col justify-center max-w-[600px] mx-auto w-full p-6 md:p-8 py-12">
+      <main className="relative z-10 flex-1 flex flex-col justify-center max-w-[600px] mx-auto w-full p-6 md:p-8 py-12">
         {step === 1 && renderStep1()}
         {step === 2 && renderStep2()}
         {step === 3 && renderStep3()}

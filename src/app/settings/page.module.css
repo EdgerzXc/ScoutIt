@@ -4,6 +4,7 @@
   color: var(--text-primary);
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
 .topNav {
@@ -36,6 +37,8 @@
   margin: 48px auto;
   width: 100%;
   padding: 0 24px;
+  position: relative;
+  z-index: 1;
 }
 
 .title {
@@ -81,8 +84,8 @@
 }
 
 .tagCard {
-  background: var(--surface);
-  border: 1px solid var(--border-solid);
+  background: linear-gradient(165deg, #1a1917, #111110);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   padding: 16px;
   border-radius: 6px;
   cursor: pointer;
@@ -90,6 +93,12 @@
   align-items: center;
   gap: 12px;
   transition: all var(--transition-fast);
+}
+
+.tagCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.45), var(--shadow-glow-soft);
+  border-color: rgba(232, 174, 60, 0.3);
 }
 
 .tagCard.selected {

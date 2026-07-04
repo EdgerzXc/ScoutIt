@@ -54,7 +54,7 @@ export default function ResearcherHUD({ quests, activeQuestId, setActiveQuestId 
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 flex flex-col gap-6">
-            <div className="bg-[#121110] border border-surface-variant rounded-lg p-6">
+            <div className="card-atmosphere rounded-lg p-6">
               <h3 className="font-label-caps text-xs tracking-widest text-text-secondary uppercase mb-4">Target Field Verification</h3>
               <p className="text-sm text-text-secondary mb-4">The owner has raised a bounty to verify the following fields.</p>
               
@@ -82,7 +82,7 @@ export default function ResearcherHUD({ quests, activeQuestId, setActiveQuestId 
               </div>
             </div>
             
-            <div className="bg-[#121110] border border-surface-variant rounded-lg p-6">
+            <div className="card-atmosphere rounded-lg p-6">
               <h3 className="font-label-caps text-xs tracking-widest text-text-secondary uppercase mb-4">Audit Notes</h3>
               <textarea 
                 className="w-full bg-surface border border-surface-variant rounded p-3 text-sm focus:outline-none focus:border-[#00f2fe] text-on-surface min-h-[100px]"
@@ -143,7 +143,7 @@ export default function ResearcherHUD({ quests, activeQuestId, setActiveQuestId 
           {quests.map(quest => (
             <div 
               key={quest.id} 
-              className="bg-surface border border-surface-variant rounded-lg p-4 grid grid-cols-1 md:grid-cols-12 gap-4 items-center cursor-pointer hover:border-[#00f2fe] transition-colors group"
+              className="card-atmosphere hov-card rounded-lg p-4 grid grid-cols-1 md:grid-cols-12 gap-4 items-center cursor-pointer hover:border-[#00f2fe] transition-colors group"
               onClick={() => setActiveQuestId(quest.id)}
             >
               <div className="md:col-span-5">
@@ -178,8 +178,8 @@ export default function ResearcherHUD({ quests, activeQuestId, setActiveQuestId 
           
           {/* Form (Left Column) */}
           <div className="xl:col-span-7 flex flex-col gap-6">
-            <div className="bg-[#121110] border border-surface-variant rounded-lg p-6 flex flex-col gap-6">
-              
+            <div className="card-atmosphere rounded-lg p-6 flex flex-col gap-6">
+
               <div>
                 <h3 className="font-label-caps text-[10px] tracking-widest text-[#00f2fe] uppercase mb-4 border-b border-surface-variant/50 pb-2">Operational Status</h3>
                 
@@ -266,7 +266,7 @@ export default function ResearcherHUD({ quests, activeQuestId, setActiveQuestId 
               Investigator Dossier <span className="flex h-2 w-2 relative"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00f2fe] opacity-75"></span><span className="relative inline-flex rounded-full h-2 w-2 bg-[#00f2fe]"></span></span>
             </h3>
             
-            <div className="bg-[#0a0a0a] border border-surface-variant rounded-lg p-6 relative overflow-hidden shadow-2xl sticky top-24 font-mono">
+            <div className="card-atmosphere rounded-lg p-6 relative overflow-hidden shadow-2xl sticky top-24 font-mono">
               <div className="absolute top-0 right-0 w-48 h-48 bg-[#00f2fe] opacity-[0.03] blur-[50px] rounded-full pointer-events-none"></div>
               
               <div className="flex items-start justify-between mb-6 relative z-10">

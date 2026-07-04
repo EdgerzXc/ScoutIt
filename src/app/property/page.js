@@ -13,6 +13,7 @@ const InteractiveRadiusMap = dynamic(() => import("@/components/property/Interac
 });
 import { getProperties } from "@/data/mockProperties";
 import { getArticles } from "@/data/mockArticles";
+import AtmosphereBackground from "@/components/ui/AtmosphereBackground";
 import "./property.css";
 
 // Dictionary mapping local mockDb slugs to correct UI SpaceCategories
@@ -372,6 +373,7 @@ function PropertyDirectoryContent() {
 
   return (
     <div className="directory-layout">
+      <AtmosphereBackground variant="default" />
       <Header />
       <main className="directory-main">
         <header className="directory-header">

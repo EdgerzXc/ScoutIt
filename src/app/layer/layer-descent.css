@@ -1168,16 +1168,17 @@
         }
 
         .mini-preview-card {
-          background: var(--surface);
-          border: 1px solid var(--border-solid);
+          background: linear-gradient(165deg, #1a1917, #111110);
+          border: 1px solid rgba(255, 255, 255, 0.08);
           border-radius: var(--radius-md);
           overflow: hidden;
-          transition: transform var(--transition-fast), border-color var(--transition-fast);
+          transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
         }
 
         .mini-preview-card:hover {
           transform: translateY(-4px);
           border-color: var(--accent);
+          box-shadow: 0 14px 32px rgba(0, 0, 0, 0.45), var(--shadow-glow-soft);
         }
 
         .mini-card-visual {
@@ -1716,8 +1717,8 @@
         }
 
         .ledger-ghost {
-          background: var(--surface);
-          border: 1px solid var(--border-solid);
+          background: linear-gradient(165deg, #1a1917, #111110);
+          border: 1px solid rgba(255, 255, 255, 0.08);
           border-radius: var(--radius-md);
           overflow: hidden;
         }

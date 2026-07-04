@@ -105,7 +105,7 @@ export default function OperatorMode() {
         </div>
       ) : (
         buildings.map((b) => (
-          <div key={b.propertyId} className="bg-[#121110] border border-surface-variant rounded-lg p-5">
+          <div key={b.propertyId} className="card-atmosphere hov-card rounded-lg p-5">
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-working-title text-lg text-on-surface">{b.propertyTitle || "Untitled Building"}</h2>
               {b.propertySlug && (

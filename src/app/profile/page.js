@@ -8,6 +8,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import ProfileBaseLayer from "@/components/profile/ProfileBaseLayer";
+import AtmosphereBackground from "@/components/ui/AtmosphereBackground";
 import PrivacyControls from "@/components/profile/PrivacyControls";
 import BrokerPanel from "@/components/profile/panels/BrokerPanel";
 import PhotographerPanel from "@/components/profile/panels/PhotographerPanel";
@@ -147,6 +148,7 @@ export default function OwnProfilePage() {
 
   return (
     <div style={pageWrap}>
+      <AtmosphereBackground variant="default" />
       {/* Nav */}
       <header style={navBar}>
         <Link href="/dashboard" style={backLink}>
@@ -216,6 +218,7 @@ const pageWrap = {
   background: "#0e0e0e",
   color: "#f0ede8",
   paddingBottom: 80,
+  position: "relative",
 };
 
 const navBar = {
@@ -263,6 +266,8 @@ const mainContent = {
   display: "flex",
   flexDirection: "column",
   gap: 24,
+  position: "relative",
+  zIndex: 1,
 };
 
 const panelsGrid = {

@@ -139,7 +139,7 @@ export default function BuyerMode() {
 
   const ListingCard = ({ item }) => (
     <Link href={`/property/${item.id}`} className="block shrink-0 min-w-[240px] md:min-w-[280px]">
-      <div className="bg-surface border border-surface-variant rounded-lg p-4 flex gap-4 items-center hover:border-gold-accent hover:bg-surface-container-low transition-colors cursor-pointer h-full group">
+      <div className="card-atmosphere hov-card rounded-lg p-4 flex gap-4 items-center hover:border-gold-accent transition-colors cursor-pointer h-full group">
         <div className="w-16 h-16 bg-surface-alt rounded flex items-center justify-center text-3xl shrink-0 group-hover:scale-105 transition-transform">
           {item.img || '🏠'}
         </div>
@@ -166,7 +166,7 @@ export default function BuyerMode() {
 
   const VerticalListingCard = ({ item }) => (
     <Link href={`/property/${item.id}`} className="block shrink-0 w-[280px] snap-start relative">
-      <div className="bg-surface border border-surface-variant rounded-lg p-0 flex flex-col hover:border-text-secondary transition-colors cursor-pointer overflow-hidden group h-full">
+      <div className="card-atmosphere hov-card rounded-lg p-0 flex flex-col hover:border-text-secondary transition-colors cursor-pointer overflow-hidden group h-full">
         <div className="h-40 bg-surface-alt flex items-center justify-center text-6xl group-hover:scale-105 transition-transform duration-500">
           {item.img || '🏠'}
         </div>
@@ -343,7 +343,7 @@ export default function BuyerMode() {
               
               {/* Intel Brief 1 */}
               <Link href="/intel/makati-yields" className="block shrink-0 w-[320px] md:w-[400px] snap-start">
-                <div className="bg-[#121110] border border-gold-accent/20 rounded-lg p-6 flex flex-col justify-between hover:border-gold-accent transition-colors cursor-pointer group h-full">
+                <div className="card-atmosphere-gold hov-glow rounded-lg p-6 flex flex-col justify-between transition-colors cursor-pointer group h-full">
                   <div>
                     <span className="inline-block bg-gold-accent/10 text-gold-accent font-label-caps text-[10px] tracking-widest uppercase px-2 py-1 rounded mb-4">Market Intel</span>
                     <h3 className="font-headline-editorial text-xl text-on-surface mb-2">Makati CBD Yields Drop</h3>
@@ -357,7 +357,7 @@ export default function BuyerMode() {
 
               {/* Intel Brief 2 */}
               <Link href="/intel/nuvali-expansion" className="block shrink-0 w-[320px] md:w-[400px] snap-start">
-                <div className="bg-[#121110] border border-gold-accent/20 rounded-lg p-6 flex flex-col justify-between hover:border-gold-accent transition-colors cursor-pointer group h-full">
+                <div className="card-atmosphere-gold hov-glow rounded-lg p-6 flex flex-col justify-between transition-colors cursor-pointer group h-full">
                   <div>
                     <span className="inline-block bg-gold-accent/10 text-gold-accent font-label-caps text-[10px] tracking-widest uppercase px-2 py-1 rounded mb-4">Area Guide</span>
                     <h3 className="font-headline-editorial text-xl text-on-surface mb-2">Nuvali Expansion Patterns</h3>
@@ -371,7 +371,7 @@ export default function BuyerMode() {
               
               {/* Intel Brief 3 */}
               <Link href="/intel/pasig-zoning" className="block shrink-0 w-[320px] md:w-[400px] snap-start">
-                <div className="bg-[#121110] border border-gold-accent/20 rounded-lg p-6 flex flex-col justify-between hover:border-gold-accent transition-colors cursor-pointer group h-full">
+                <div className="card-atmosphere-gold hov-glow rounded-lg p-6 flex flex-col justify-between transition-colors cursor-pointer group h-full">
                   <div>
                     <span className="inline-block bg-gold-accent/10 text-gold-accent font-label-caps text-[10px] tracking-widest uppercase px-2 py-1 rounded mb-4">Regulatory Alert</span>
                     <h3 className="font-headline-editorial text-xl text-on-surface mb-2">Pasig Zoning Changes</h3>

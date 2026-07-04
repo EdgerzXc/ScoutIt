@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { getBrokers } from "@/data/mockBrokers";
 import ReactionButtons from "@/components/ui/ReactionButtons";
+import AtmosphereBackground from "@/components/ui/AtmosphereBackground";
 import "../property/property.css";
 
 // ── Tier label → number map (mirrors airtable.js) ──────────────
@@ -130,6 +131,7 @@ export default function BrokersPage() {
 
   return (
     <div className="directory-layout">
+      <AtmosphereBackground variant="default" />
       <Header />
       <main className="brokers-main">
         <header className="directory-header">
@@ -379,6 +381,8 @@ export default function BrokersPage() {
           padding: 40px 45px;
           max-width: 1400px;
           margin: 0 auto;
+          position: relative;
+          z-index: 1;
         }
 
         .page-title {
@@ -548,8 +552,8 @@ export default function BrokersPage() {
         }
 
         .broker-card {
-          background: var(--surface);
-          border: 1px solid var(--border-solid);
+          background: linear-gradient(165deg, #1a1917, #111110);
+          border: 1px solid rgba(255, 255, 255, 0.08);
           border-radius: var(--radius-md);
           overflow: hidden;
           display: flex;

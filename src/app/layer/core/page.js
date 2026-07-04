@@ -236,8 +236,8 @@ export default function CoreLayer() {
           position: relative;
           display: block;
           text-decoration: none;
-          background: var(--surface);
-          border: 1px solid var(--surface-variant);
+          background: linear-gradient(155deg, #1d1a16, #131110);
+          border: 1px solid rgba(232, 174, 60, 0.28);
           border-radius: 12px;
           padding: 26px;
           box-shadow: 0 24px 50px rgba(0, 0, 0, 0.55);

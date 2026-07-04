@@ -57,7 +57,7 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-[#121110] border border-surface-variant rounded-lg p-6">
+          <div className="card-atmosphere rounded-lg p-6">
             <h3 className="font-label-caps text-xs tracking-widest text-text-secondary uppercase mb-4">Design Brief</h3>
             <p className="font-body-md text-sm text-on-surface mb-6 leading-relaxed">{project.scope || "Develop a modern, high-yield retail staging concept for this 120sqm bare shell unit."}</p>
             
@@ -75,7 +75,7 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
             </div>
           </div>
 
-          <div className="bg-surface border border-surface-variant rounded-lg overflow-hidden flex flex-col">
+          <div className="card-atmosphere rounded-lg overflow-hidden flex flex-col">
             <div className="bg-surface-alt border-b border-surface-variant p-4 flex justify-between items-center">
               <h3 className="font-label-caps text-xs tracking-widest text-text-secondary uppercase">Asset Drop</h3>
             </div>
@@ -117,7 +117,7 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
           {projects.map(project => (
             <div 
               key={project.id} 
-              className="bg-surface border border-surface-variant rounded-lg overflow-hidden cursor-pointer group hover:border-[#ff75c3] transition-all"
+              className="card-atmosphere hov-card rounded-lg overflow-hidden cursor-pointer group hover:border-[#ff75c3] transition-all"
               onClick={() => setActiveProjectId(project.id)}
             >
               <div className="aspect-video bg-surface-alt flex items-center justify-center text-5xl relative">
@@ -153,8 +153,8 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
           
           {/* Studio Form (Left Column) */}
           <div className="xl:col-span-7 flex flex-col gap-6">
-            <div className="bg-[#121110] border border-surface-variant rounded-lg p-6 flex flex-col gap-6">
-              
+            <div className="card-atmosphere rounded-lg p-6 flex flex-col gap-6">
+
               <div>
                 <h3 className="font-label-caps text-[10px] tracking-widest text-[#ff75c3] uppercase mb-4 border-b border-surface-variant/50 pb-2">Studio Identity</h3>
                 
@@ -229,7 +229,7 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
               Studio Preview <span className="flex h-2 w-2 relative"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#ff75c3] opacity-75"></span><span className="relative inline-flex rounded-full h-2 w-2 bg-[#ff75c3]"></span></span>
             </h3>
             
-            <div className="bg-surface border border-surface-variant rounded-lg p-6 relative overflow-hidden shadow-2xl sticky top-24">
+            <div className="card-atmosphere rounded-lg p-6 relative overflow-hidden shadow-2xl sticky top-24">
               <div className="absolute top-0 right-0 w-64 h-64 bg-[#ff75c3] opacity-[0.04] blur-[60px] rounded-full pointer-events-none"></div>
               
               <div className="flex items-start justify-between mb-6 relative z-10">

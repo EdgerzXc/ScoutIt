@@ -5,12 +5,15 @@
   background: var(--bg, #0e0e0e);
   color: var(--text-primary, #f0ede8);
   font-family: var(--font-body), sans-serif;
+  position: relative;
 }
 
 .directory-main {
   max-width: 1400px;
   margin: 0 auto;
   padding: 40px 45px;
+  position: relative;
+  z-index: 1;
 }
 
 .directory-header {
@@ -42,8 +45,8 @@
 }
 
 .filter-card {
-  background: var(--surface, #161616);
-  border: 1px solid var(--border-solid, #262626);
+  background: linear-gradient(165deg, #1a1917, #111110);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--radius-md, 6px);
   overflow: hidden;
 }
@@ -215,8 +218,8 @@
 }
 
 .property-preview-card {
-  background: var(--surface, #161616);
-  border: 1px solid var(--border-solid, #262626);
+  background: linear-gradient(165deg, #1a1917, #111110);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--radius-md, 6px);
   overflow: hidden;
   text-decoration: none;

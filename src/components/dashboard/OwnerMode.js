@@ -733,7 +733,7 @@ export default function OwnerMode() {
             return (
               <div 
                 key={listing.id}
-                className="bg-[#121110] border border-surface-variant hover:border-gold-accent rounded-lg p-6 flex flex-col cursor-pointer transition-all group relative overflow-hidden h-auto min-h-[12rem] md:h-64"
+                className="card-atmosphere hov-card rounded-lg p-6 flex flex-col cursor-pointer transition-all group relative overflow-hidden h-auto min-h-[12rem] md:h-64"
                 onClick={() => setViewingDossierId(listing.id)}
               >
                 <div className="absolute top-0 left-0 w-1 h-full bg-surface-variant group-hover:bg-gold-accent transition-colors"></div>
@@ -843,7 +843,7 @@ export default function OwnerMode() {
       </div>
 
       {activeListing.pipelineStatus === 'ai_drafting' && (
-        <div className="bg-[#1a1814] border border-gold-accent/30 rounded-lg p-5 mb-8 flex items-start gap-4">
+        <div className="card-atmosphere-gold rounded-lg p-5 mb-8 flex items-start gap-4">
            <span className="text-2xl mt-1">🤖</span>
            <div>
              <h4 className="font-working-title text-gold-accent text-lg mb-1">AI Drafting in Progress</h4>
@@ -858,7 +858,7 @@ export default function OwnerMode() {
         
         {/* Left Col: Workspace Intelligence */}
         <div className="md:col-span-4 flex flex-col gap-6">
-          <div className="bg-[#121110] border border-surface-variant rounded-lg p-6">
+          <div className="card-atmosphere rounded-lg p-6">
             <h3 className="font-label-caps text-xs tracking-widest text-text-secondary mb-4 uppercase border-b border-surface-variant pb-2">Listing Health</h3>
             {activeListing.pipelineStatus === 'ai_drafting' ? (
                <div className="flex flex-col items-center justify-center py-4 opacity-50">
@@ -883,7 +883,7 @@ export default function OwnerMode() {
             )}
           </div>
 
-          <div className="bg-[#121110] border border-surface-variant rounded-lg p-6">
+          <div className="card-atmosphere rounded-lg p-6">
             <h3 className="font-label-caps text-xs tracking-widest text-text-secondary mb-4 uppercase border-b border-surface-variant pb-2">Engagement Analytics</h3>
             {activeListing.pipelineStatus === 'ai_drafting' ? (
                <div className="flex flex-col items-center justify-center py-4 opacity-50">
@@ -914,7 +914,7 @@ export default function OwnerMode() {
         {/* Right Col: Active Inquiries (Pitches) */}
         <div className="md:col-span-8 flex flex-col">
           {/* Invite an advisor — owner-initiated handshake, spends 1 Connect */}
-          <div className="bg-[#121110] border border-surface-variant rounded-lg p-5 mb-4">
+          <div className="card-atmosphere rounded-lg p-5 mb-4">
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-working-title text-base text-on-surface">Invite an advisor</h3>
               <span className="font-label-caps text-[10px] tracking-widest text-gold-accent">◈ 1 CONNECT · {connects} LEFT</span>
@@ -966,7 +966,7 @@ export default function OwnerMode() {
           ) : (
             <div className="flex flex-col gap-4">
               {incomingPitches.map(pitch => (
-                <div key={pitch.id} className="bg-[#121110] border border-surface-variant rounded-lg p-6 shadow-xl relative">
+                <div key={pitch.id} className="card-atmosphere rounded-lg p-6 shadow-xl relative">
                   {/* Status Indicator Line */}
                   <div className={`absolute left-0 top-0 bottom-0 w-1 rounded-l-lg ${pitch.status === 'accepted' ? 'bg-success' : pitch.status === 'declined' ? 'bg-error' : 'bg-gold-accent'}`}></div>
                   

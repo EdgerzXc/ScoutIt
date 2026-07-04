@@ -2237,16 +2237,17 @@ export default function Home() {
         }
 
         .mini-preview-card {
-          background: var(--surface);
-          border: 1px solid var(--border-solid);
+          background: linear-gradient(165deg, #1a1917, #111110);
+          border: 1px solid rgba(255, 255, 255, 0.08);
           border-radius: var(--radius-md);
           overflow: hidden;
-          transition: transform var(--transition-fast), border-color var(--transition-fast);
+          transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
         }
 
         .mini-preview-card:hover {
           transform: translateY(-4px);
           border-color: var(--accent);
+          box-shadow: 0 14px 32px rgba(0, 0, 0, 0.45), var(--shadow-glow-soft);
         }
 
         .mini-card-visual {
@@ -2507,8 +2508,8 @@ export default function Home() {
         }
 
         .broker-preview-card {
-          background: rgba(255,255,255,0.02);
-          border: 1px solid var(--border-solid);
+          background: linear-gradient(165deg, #1a1917, #111110);
+          border: 1px solid rgba(255, 255, 255, 0.08);
           border-radius: 8px;
           padding: 32px 24px;
           display: flex;
@@ -2522,6 +2523,7 @@ export default function Home() {
         .broker-preview-card:hover {
           border-color: var(--accent);
           transform: translateY(-4px);
+          box-shadow: 0 14px 32px rgba(0, 0, 0, 0.45), var(--shadow-glow-soft);
         }
 
         .broker-metrics-block {
@@ -2630,14 +2632,20 @@ export default function Home() {
         }
 
         .service-card {
-          background: rgba(255, 255, 255, 0.02);
-          border: 1px solid var(--border-solid);
+          background: linear-gradient(165deg, #1a1917, #111110);
+          border: 1px solid rgba(255, 255, 255, 0.08);
           border-radius: 8px;
           text-decoration: none;
           display: block;
           transition: all 0.3s ease;
           position: relative;
           overflow: hidden;
+        }
+
+        .service-card:hover {
+          transform: translateY(-4px);
+          border-color: rgba(232, 174, 60, 0.3);
+          box-shadow: 0 14px 32px rgba(0, 0, 0, 0.45), var(--shadow-glow-soft);
         }
 
         .service-card-inner {
@@ -2741,8 +2749,8 @@ export default function Home() {
         }
 
         .ledger-ghost {
-          background: var(--surface);
-          border: 1px solid var(--border-solid);
+          background: linear-gradient(165deg, #1a1917, #111110);
+          border: 1px solid rgba(255, 255, 255, 0.08);
           border-radius: var(--radius-md);
           overflow: hidden;
         }

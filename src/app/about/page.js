@@ -2,10 +2,12 @@
 
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import AtmosphereBackground from "@/components/ui/AtmosphereBackground";
 
 export default function AboutPage() {
   return (
     <div className="page-wrapper">
+      <AtmosphereBackground variant="default" />
       <Header />
       <main className="about-main">
         <header className="manifesto-header">
@@ -121,9 +123,12 @@ export default function AboutPage() {
           background: var(--bg);
           color: var(--text-primary);
           min-height: 100vh;
+          position: relative;
         }
 
         .about-main {
+          position: relative;
+          z-index: 1;
           padding: 80px 40px;
           max-width: 1000px;
           margin: 0 auto;
@@ -272,16 +277,17 @@ export default function AboutPage() {
         }
 
         .eco-node {
-          background: #121212;
-          border: 1px solid #1f1f1f;
+          background: linear-gradient(165deg, #1a1917, #111110);
+          border: 1px solid rgba(255, 255, 255, 0.08);
           padding: 24px;
           border-radius: 4px;
           transition: all 0.3s ease;
         }
 
         .eco-node:hover {
-          border-color: rgba(255,255,255,0.2);
-          transform: translateY(-2px);
+          border-color: rgba(232, 174, 60, 0.3);
+          transform: translateY(-4px);
+          box-shadow: 0 14px 32px rgba(0, 0, 0, 0.45), var(--shadow-glow-soft);
         }
 
         .outcome-node {
@@ -289,13 +295,13 @@ export default function AboutPage() {
         }
 
         .eco-core-node {
-          background: #161616;
-          border: 1px solid rgba(232, 174, 60,0.2);
+          background: linear-gradient(155deg, #1d1a16, #131110);
+          border: 1px solid rgba(232, 174, 60, 0.28);
           padding: 32px 24px;
           border-radius: 4px;
           text-align: center;
           position: relative;
-          box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+          box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 40px rgba(232, 174, 60, 0.06);
           display: flex;
           flex-direction: column;
           justify-content: center;

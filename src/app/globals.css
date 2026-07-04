@@ -162,7 +162,7 @@ a:hover {
   inset: 0;
   pointer-events: none;
   z-index: 9999;
-  opacity: 0.03;
+  opacity: 0.05;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size: 128px;
 }
@@ -1156,6 +1156,100 @@ html.lite-mode .title-ufo-underglow {
 /* Hide the layer-page WebGL backgrounds — scoped so maps are untouched */
 html.lite-mode .layer-route canvas {
   display: none !important;
+}
+
+/* ==========================================================================
+   ATMOSPHERE SYSTEM (dark/gold depth upgrade)
+   Layered background + gradient card surfaces + lift/glow hover motion.
+   Presentation-only — reuses --accent-rgb / --accent-bright-rgb / --shadow-glow-soft
+   already defined in :root above. Reposition the glow per-screen with the
+   --glow-x / --glow-y custom properties (default: top-right).
+   ========================================================================== */
+
+/* Layer 1 (base tone) + Layer 2 (ambient gold light source) + Layer 4 (vignette).
+   Layer 3 (grain) already exists site-wide via the .grain element in layout.js. */
+.atmosphere-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  --glow-x: 88%;
+  --glow-y: -8%;
+}
+
+.atmosphere-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(160deg, #131110 0%, #0c0b0a 45%, #080706 100%);
+}
+
+.atmosphere-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 900px 560px at var(--glow-x) var(--glow-y), rgba(var(--accent-rgb), 0.14), transparent 60%),
+    radial-gradient(ellipse 700px 500px at 6% 18%, rgba(var(--accent-rgb), 0.045), transparent 62%),
+    radial-gradient(ellipse 900px 700px at 30% 115%, rgba(198, 190, 175, 0.05), transparent 60%),
+    radial-gradient(ellipse 1400px 900px at 50% 40%, transparent 55%, rgba(0, 0, 0, 0.5) 100%);
+}
+
+/* Ambient glow is decorative weight on top of the base tone — drop it under
+   Lite Mode same as .grain and the other cosmic decoration layers. */
+html.lite-mode .atmosphere-bg::after {
+  display: none !important;
+}
+
+/* Card surfaces — replace flat fills with subtle depth gradients */
+.card-atmosphere {
+  background: linear-gradient(165deg, #1a1917, #111110);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.card-atmosphere-gold {
+  background: linear-gradient(155deg, #1d1a16, #131110);
+  border: 1px solid rgba(var(--accent-rgb), 0.28);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), 0 0 40px rgba(var(--accent-rgb), 0.06);
+}
+
+/* Hover lift — apply to every clickable card/tile for consistency.
+   Transitions are already neutralized site-wide under Lite Mode via the
+   `html.lite-mode *` rule above, so no extra override is needed here. */
+.hov-card {
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+}
+
+.hov-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.45), var(--shadow-glow-soft);
+  border-color: rgba(var(--accent-rgb), 0.3);
+}
+
+.hov-glow {
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+}
+
+.hov-glow:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5), 0 0 48px rgba(var(--accent-rgb), 0.12);
+  border-color: rgba(var(--accent-rgb), 0.45);
+}
+
+/* Gold text glow — wordmark/headlines/kickers only, applied sparingly */
+.text-glow {
+  text-shadow: 0 0 18px rgba(var(--accent-bright-rgb), 0.35);
+}
+
+/* CTA pulse — primary gold buttons only, not every gold element */
+@keyframes ctaPulse {
+  0%, 100% { box-shadow: 0 0 24px rgba(var(--accent-rgb), 0.18), 0 4px 16px rgba(0, 0, 0, 0.35); }
+  50% { box-shadow: 0 0 32px rgba(var(--accent-rgb), 0.5), 0 4px 16px rgba(0, 0, 0, 0.35); }
+}
+
+.cta-pulse {
+  animation: ctaPulse 2.6s ease-in-out infinite;
 }
 
 /* ==========================================================================

@@ -1,12 +1,15 @@
 import Link from "next/link";
+import AtmosphereBackground from "@/components/ui/AtmosphereBackground";
 
 export default function DashboardLayout({ children }) {
   return (
-    <div className="min-h-screen bg-background text-text-primary flex flex-col pb-[100px] md:pb-24">
+    <div className="relative min-h-screen bg-background text-text-primary flex flex-col pb-[100px] md:pb-24">
+      <AtmosphereBackground variant="dashboard" />
+
       {/* Top Nav (Persistent) */}
-      <header className="sticky top-0 z-40 bg-background/90 backdrop-blur-md border-b border-surface-variant px-4 py-3 md:px-6 md:py-4 flex items-center justify-between">
+      <header className="relative z-40 sticky top-0 bg-background/90 backdrop-blur-md border-b border-surface-variant px-4 py-3 md:px-6 md:py-4 flex items-center justify-between">
         <div className="flex items-center gap-6">
-          <Link href="/dashboard" className="font-display-md text-xl md:text-2xl text-gold-accent tracking-tighter">S<span className="text-on-surface">cout</span>IT</Link>
+          <Link href="/dashboard" className="font-display-md text-xl md:text-2xl text-gold-accent tracking-tighter text-glow">S<span className="text-on-surface">cout</span>IT</Link>
         </div>
         <div className="flex gap-4">
             <Link href="/dashboard" className="text-sm text-text-secondary hover:text-gold-accent">Dashboard</Link>
@@ -16,7 +19,7 @@ export default function DashboardLayout({ children }) {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col relative z-0">
+      <main className="relative z-10 flex-1 flex flex-col">
         {children}
       </main>
     </div>
