@@ -20,7 +20,24 @@ const FloodHeatmapMap = dynamic(() => import("@/components/property/FloodHeatmap
     </div>
   ),
 });
+// mapbox-gl + @turf/turf are only needed for the Rail Network tab, and that
+// tab itself only renders for properties actually near the LRT/MRT network.
+const ManilaTransitMap = dynamic(() => import("@/components/transit/ManilaTransitMap"), {
+  ssr: false,
+  loading: () => (
+    <div style={{ height: "clamp(420px, 52vh, 480px)", background: "#000", border: "0.5px solid #262626", borderRadius: "4px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", letterSpacing: "0.1em", textTransform: "uppercase", color: "#c8c8c8" }}>Loading rail network…</span>
+    </div>
+  ),
+});
 import { DEEP_INTEL_SCHEMA } from "../../lib/deepIntelSchema";
+
+// Loose bounding box around Metro Manila + the LRT/MRT lines' exurb extensions
+// (Cavite, Antipolo) -- properties outside this simply aren't served by rail,
+// so the tab only shows where it's actually a useful signal.
+function isNearManilaRail(lat, lng) {
+  return lat != null && lng != null && lat >= 14.2 && lat <= 14.9 && lng >= 120.7 && lng <= 121.3;
+}
 import "@/app/property/[id]/property-detail.css";
 import { getChapterConfig } from "./chapterConfig";
 import { Bed, Bath, Ruler, Car, Lock, Search, Camera, Building2 } from "lucide-react";
@@ -1625,12 +1642,25 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                 <button className={`whereto-tab-btn ${locTab === "flood" ? "active" : ""}`} onClick={() => setLocTab("flood")}>
                   Flood Risk Map
                 </button>
+                {isNearManilaRail(d.lat || d.latitude, d.lng || d.longitude) && (
+                  <button className={`whereto-tab-btn ${locTab === "transit" ? "active" : ""}`} onClick={() => setLocTab("transit")}>
+                    Rail Network
+                  </button>
+                )}
               </div>
 
               {locTab === "flood" && (
                 <FloodHeatmapMap
                   lat={d.lat || d.latitude}
                   lng={d.lng || d.longitude}
+                  propertyTitle={d.title}
+                />
+              )}
+
+              {locTab === "transit" && (
+                <ManilaTransitMap
+                  propertyLat={d.lat || d.latitude}
+                  propertyLng={d.lng || d.longitude}
                   propertyTitle={d.title}
                 />
               )}
