@@ -3,6 +3,18 @@
 import { useState } from "react";
 import { useDashboard } from "../../../context/DashboardContext";
 
+const ToggleSwitch = ({ label, checked, onChange, primary = false }) => (
+  <div className="flex items-center justify-between py-2 border-b border-surface-variant/50 last:border-0">
+    <span className="font-working-title text-sm text-on-surface">{label}</span>
+    <div 
+      className={`w-10 h-6 rounded-full flex items-center p-1 transition-colors cursor-pointer ${checked ? (primary ? 'bg-[#ff75c3]' : 'bg-on-surface') : 'bg-surface-variant'}`}
+      onClick={() => onChange(!checked)}
+    >
+      <div className={`w-4 h-4 bg-background rounded-full transition-transform ${checked ? 'translate-x-4' : 'translate-x-0'}`}></div>
+    </div>
+  </div>
+);
+
 export default function DesignerHUD({ projects, activeProjectId, setActiveProjectId }) {
   const { addToast } = useDashboard();
   const [activeTab, setActiveTab] = useState("projects"); // 'projects' | 'studio'
@@ -23,17 +35,6 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
   const [softRevit, setSoftRevit] = useState(false);
 
   // Reusable custom toggle component (Creative/Pink accent for Designer vibe)
-  const ToggleSwitch = ({ label, checked, onChange, primary = false }) => (
-    <div className="flex items-center justify-between py-2 border-b border-surface-variant/50 last:border-0">
-      <span className="font-working-title text-sm text-on-surface">{label}</span>
-      <div 
-        className={`w-10 h-6 rounded-full flex items-center p-1 transition-colors cursor-pointer ${checked ? (primary ? 'bg-[#ff75c3]' : 'bg-on-surface') : 'bg-surface-variant'}`}
-        onClick={() => onChange(!checked)}
-      >
-        <div className={`w-4 h-4 bg-background rounded-full transition-transform ${checked ? 'translate-x-4' : 'translate-x-0'}`}></div>
-      </div>
-    </div>
-  );
 
   if (activeProjectId) {
     const project = projects.find(p => p.id === activeProjectId);

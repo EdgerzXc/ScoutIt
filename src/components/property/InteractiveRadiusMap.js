@@ -39,7 +39,8 @@ export default function InteractiveRadiusMap({ onSearch, onClose, initialLng = 1
       style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
       center: center,
       zoom: 11,
-      pitch: 45
+      pitch: 45,
+      scrollZoom: false
     });
 
     map.on('load', () => {

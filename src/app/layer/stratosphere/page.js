@@ -5,7 +5,7 @@ import LayerNav from "@/components/descent/LayerNav";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { getDISCOVERY_FEED } from "@/data/mockProperties";
+
 import BackgroundStratosphere from "@/components/descent/BackgroundStratosphere";
 
 
@@ -27,7 +27,14 @@ export default function StratosphereLayer() {
     }
   };
 
-  const discoveryFeed = getDISCOVERY_FEED();
+  const discoveryFeed = {
+    Residential: { spotlights: [], news: [], collections: [] },
+    Commercial: { spotlights: [], news: [], collections: [] },
+    STR: { spotlights: [], news: [], collections: [] },
+    Hospitality: { spotlights: [], news: [], collections: [] },
+    Restaurants: { spotlights: [], news: [], collections: [] },
+    Venues: { spotlights: [], news: [], collections: [] }
+  };
 
 
   return (
@@ -106,7 +113,7 @@ export default function StratosphereLayer() {
                             <Link 
                               href={`/intel/${spot.newsSlug}`}
                               style={{ 
-                                // eslint-disable-next-line react/jsx-no-comment-textnodes
+                                 
                                 fontSize: "12px", 
                                 color: "#fff", 
                                 fontWeight: "600",

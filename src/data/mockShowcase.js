@@ -5,7 +5,7 @@
 // per (award × category) so the board can be filtered both ways.
 // Replace getShowcaseEntries() with the SHOWCASE_CMS fetch later.
 // ═══════════════════════════════════════════════════════════════
-import { getProperties } from "./mockProperties";
+
 
 // Airtable column names for the future SHOWCASE_CMS table → app keys.
 export const SHOWCASE_CMS_FIELDS = {
@@ -47,7 +47,7 @@ const SEED = {
 };
 
 export function getShowcaseEntries() {
-  const props = getProperties();
+  const props = [];
   return props.map((p, i) => {
     const inquiry = SEED[p.slug] ?? Math.max(4, 40 - i * 3);
     return {

@@ -79,9 +79,12 @@ export default function FloatingToolbox() {
     })();
     const p = savedPos ?? { x: 24, y: fallbackY };
     livePos.current = p;
+
     setPos(p);
+
     setMode(savedMode);
     applyTheme(savedMode);
+
     setLite(getStoredLiteMode());
 
     // Dev tools: ?dev=1 / ?dev=0 still work as a backup entry; otherwise read the
@@ -89,18 +92,24 @@ export default function FloatingToolbox() {
     const devParam = new URLSearchParams(window.location.search).get("dev");
     if (devParam === "1") localStorage.setItem("scoutit_dev", "1");
     if (devParam === "0") localStorage.removeItem("scoutit_dev");
+
     setDevOn(localStorage.getItem("scoutit_dev") === "1");
     try {
       const u = JSON.parse(localStorage.getItem("scoutit_user") || "null");
       if (u) {
+
         setDevTier(String(u.subscription_tier || u.tier || "starry").toLowerCase());
         const r = (u.active_roles || u.tags || [])[0];
-        if (r) setDevRole(String(r).toLowerCase());
+        if (r) {
+
+          setDevRole(String(r).toLowerCase());
+        }
       }
     } catch {}
 
+
     setMounted(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []);
 
   // Apply a mock tier/role and reload so entitlement gates re-read.
@@ -122,7 +131,7 @@ export default function FloatingToolbox() {
       localStorage.setItem("scoutit_user", JSON.stringify(u));
       
       if (window.location.pathname.includes("/onboarding")) {
-        window.location.href = "/dashboard";
+        window.location.assign("/dashboard");
       } else {
         window.location.reload();
       }
@@ -146,7 +155,7 @@ export default function FloatingToolbox() {
       u.active_roles = [...new Set([...(u.active_roles || []), modeId])];
       u.primaryMode = modeId;
       localStorage.setItem("scoutit_user", JSON.stringify(u));
-      window.location.href = "/dashboard";
+      window.location.assign("/dashboard");
     } catch {}
   };
 

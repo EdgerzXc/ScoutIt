@@ -14,6 +14,7 @@ export default function ConciergeAI() {
       id: "1",
       role: "ai",
       content: "Welcome to Scout AI. I have synchronized with your Spatial Vault. How can I assist your real estate strategy today?",
+
       timestamp: new Date().toISOString()
     }
   ]);
@@ -40,6 +41,7 @@ export default function ConciergeAI() {
 
     // Add user message
     const newMsg = {
+      // eslint-disable-next-line react-hooks/purity
       id: Date.now().toString(),
       role: "user",
       content: userMsg,

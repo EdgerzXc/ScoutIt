@@ -18,7 +18,7 @@ export default function AboutPage() {
         <section className="manifesto-content">
           <div className="lead-paragraph">
             <p>
-              ScoutIt isn't a listing site. We're the Philippines' first spatial commerce platform — the intelligence layer that helps people read, understand, and choose space with confidence.
+              ScoutIt isn&apos;t a listing site. We&apos;re the Philippines&apos; first spatial commerce platform — the intelligence layer that helps people read, understand, and choose space with confidence.
             </p>
           </div>
 
@@ -40,7 +40,7 @@ export default function AboutPage() {
             <div className="editorial-col">
               <h3>03. The Experience</h3>
               <p>
-                We stripped out everything that wastes your time. No pop-ups, no pressure, no inflated prices — just calm, verified information in a space as considered as the ones you're looking for.
+                We stripped out everything that wastes your time. No pop-ups, no pressure, no inflated prices — just calm, verified information in a space as considered as the ones you&apos;re looking for.
               </p>
             </div>
           </div>
@@ -111,7 +111,7 @@ export default function AboutPage() {
           <div className="vision-block">
             <h2 className="vision-heading">Why this matters now.</h2>
             <p className="vision-text">
-              The Philippines is growing fast, and space — where people live, work, gather, and build — is at the center of it. Yet the way we find it still runs on fake listings, guesswork, and pressure. ScoutIt is the first to treat space as something you should understand before you commit. That's what a spatial commerce platform is, and we're the first to build one here.
+              The Philippines is growing fast, and space — where people live, work, gather, and build — is at the center of it. Yet the way we find it still runs on fake listings, guesswork, and pressure. ScoutIt is the first to treat space as something you should understand before you commit. That&apos;s what a spatial commerce platform is, and we&apos;re the first to build one here.
             </p>
           </div>
         </section>

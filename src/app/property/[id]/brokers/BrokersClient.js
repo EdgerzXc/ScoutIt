@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { getBrokers } from "@/data/mockBrokers";
 import "./brokers.css";
 
 const TIER_MAP = { Diamond: 1, Platinum: 2, Gold: 3, Silver: 4, Bronze: 5 };
@@ -27,10 +26,10 @@ export default function BrokersClient({ slug }) {
         if (data.brokers && data.brokers.length > 0) {
           setBrokers(data.brokers);
         } else {
-          setBrokers(getBrokers());
+          setBrokers([]);
         }
       } catch {
-        setBrokers(getBrokers());
+        setBrokers([]);
       } finally {
         setLoading(false);
       }

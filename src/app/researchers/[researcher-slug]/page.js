@@ -5,9 +5,9 @@ import { notFound } from "next/navigation";
 import { Lock } from "lucide-react";
 import ServiceConnectionPortal from "@/components/connection/ServiceConnectionPortal";
 import { DetailPageAccessGate } from "@/components/ui/EarlyAccessGate";
-import { getResearchers } from "@/data/mockResearchers";
 
-const DUMMY_RESEARCHERS = getResearchers();
+
+const DUMMY_RESEARCHERS = [];
 
 export async function generateMetadata({ params }) {
   const { "researcher-slug": slug } = await params;
@@ -68,7 +68,7 @@ export default async function ResearcherDetailPage({ params }) {
             <header className="profile-header">
               <span className="vector-label">Research Profile &middot; {r.clearanceTier}</span>
               <h1 className="profile-name">{r.name}</h1>
-              <p className="profile-title">{r.title} // {r.location}</p>
+              <p className="profile-title">{r.title} {"//"} {r.location}</p>
             </header>
 
             <div className="profile-body-content">

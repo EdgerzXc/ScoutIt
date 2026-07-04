@@ -19,8 +19,8 @@ const DescentSequence = dynamic(
   { ssr: false }
 );
 
-import { SPACE_STARS, getDISCOVERY_FEED, getDISCOVER_HUBS, getCATEGORY_PREVIEWS } from "@/data/mockProperties";
-import { getArticles } from "@/data/mockArticles";
+
+
 
 function getDBCategory(cat) {
   if (cat === "Venues/Events") return "Venues";
@@ -390,8 +390,8 @@ export default function Home() {
     };
   }, []);
 
-  const [discoveryFeed, setDiscoveryFeed] = useState(getDISCOVERY_FEED());
-  const [categoryPreviews, setCategoryPreviews] = useState(getCATEGORY_PREVIEWS());
+  const [discoveryFeed, setDiscoveryFeed] = useState([]);
+  const [categoryPreviews, setCategoryPreviews] = useState({});
   const [locations, setLocations] = useState([
     "BGC Core", "Makati Central", "Roxas Triangle", "Quezon City", 
     "Quezon Province", "Alabang", "Siargao"
@@ -407,7 +407,7 @@ export default function Home() {
         
         // 1. Group/format Properties for categoryPreviews
         const airtableProperties = data.properties || [];
-        const basePreviews = getCATEGORY_PREVIEWS();
+        const basePreviews = {};
         
         const updatedPreviews = {
           Residential: [...basePreviews.Residential],
@@ -454,7 +454,7 @@ export default function Home() {
         setLocations(newLocations);
         
         // 2. Group/format Properties & Intel for discoveryFeed
-        const baseFeed = getDISCOVERY_FEED();
+        const baseFeed = [];
         const updatedFeed = {
           Residential: { ...baseFeed.Residential, spotlights: [...baseFeed.Residential.spotlights], news: [...baseFeed.Residential.news], collections: [...baseFeed.Residential.collections] },
           Commercial: { ...baseFeed.Commercial, spotlights: [...baseFeed.Commercial.spotlights], news: [...baseFeed.Commercial.news], collections: [...baseFeed.Commercial.collections] },
@@ -551,7 +551,7 @@ export default function Home() {
       } catch (err) {
         console.error("Failed to load CMS data on homepage:", err);
         // Fallback matching for base feed
-        const baseFeed = getDISCOVERY_FEED();
+        const baseFeed = [];
         const updatedFeed = {
           Residential: { ...baseFeed.Residential, spotlights: [...baseFeed.Residential.spotlights], news: [...baseFeed.Residential.news], collections: [...baseFeed.Residential.collections] },
           Commercial: { ...baseFeed.Commercial, spotlights: [...baseFeed.Commercial.spotlights], news: [...baseFeed.Commercial.news], collections: [...baseFeed.Commercial.collections] },
@@ -728,7 +728,7 @@ export default function Home() {
   
   const propertyTypes = ["Residential", "Commercial", "STR", "Hospitality", "Restaurants", "Venues/Events"];
 
-  const discoverHubs = getDISCOVER_HUBS();
+  const discoverHubs = [];
 
   // Stars and glitters particle arrays removed for clean cinematic hero redesign
 
@@ -753,7 +753,7 @@ export default function Home() {
         <div className="space-bg-container">
           {/* Event-horizon pull field (stars, heavenly bodies, dust, rings) */}
           <canvas ref={eventHorizonRef} className="event-horizon-canvas" aria-hidden="true" />
-          {SPACE_STARS.map((star, idx) => (
+          {[].map((star, idx) => (
             <div
               key={`space-star-${idx}`}
               className="space-star"
@@ -896,7 +896,7 @@ export default function Home() {
 
           {/* Plain-Language Value Proposition */}
           <p className="title-tagline-intro">
-            The Philippines' first spatial commerce platform. We turn every kind of space — homes, offices, venues, restaurants — into clear, verified intelligence. No fake listings. No pressure. Just the signals that matter.
+            The Philippines&apos; first spatial commerce platform. We turn every kind of space — homes, offices, venues, restaurants — into clear, verified intelligence. No fake listings. No pressure. Just the signals that matter.
           </p>
 
           {/* Taglines */}

@@ -12,11 +12,7 @@ export default function AdminPage() {
   const [processingId, setProcessingId] = useState(null);
   const [message, setMessage] = useState(null); // { type: 'success' | 'error', text: '' }
 
-  useEffect(() => {
-    fetchPending();
-  }, []);
-
-  const fetchPending = async () => {
+  async function fetchPending() {
     setLoading(true);
     const { data, error } = await supabase
       .from('properties')
@@ -29,6 +25,11 @@ export default function AdminPage() {
     }
     setLoading(false);
   };
+
+  useEffect(() => {
+    fetchPending();
+  }, []);
+
 
   const handleApprove = async (submissionId) => {
     setProcessingId(submissionId);

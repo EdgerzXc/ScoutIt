@@ -113,7 +113,7 @@ export default function FloodHeatmapMap({ lat, lng, propertyTitle }) {
       map.remove();
       mapInstance.current = null;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [lat, lng]);
 
   // Swap the hazard layer in place when the user picks a different return period,
@@ -130,7 +130,7 @@ export default function FloodHeatmapMap({ lat, lng, propertyTitle }) {
       console.error('[FloodHeatmapMap] Failed to swap hazard layer:', err);
       setLoadState('error');
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [periodId]);
 
   if (lat == null || lng == null) return null;

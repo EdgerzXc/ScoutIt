@@ -24,7 +24,7 @@ export default function NotFound() {
         <span className="nf-layer-label">LAYER ∞ // UNCHARTED SPACE</span>
         <h1 className="nf-title">Signal Lost</h1>
         <p className="nf-sub">
-          The coordinates you entered don't exist in our database.
+          The coordinates you entered don&apos;t exist in our database.
           <br />
           The space may have moved — or it was never mapped.
         </p>

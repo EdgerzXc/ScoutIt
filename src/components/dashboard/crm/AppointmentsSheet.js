@@ -90,7 +90,7 @@ export default function AppointmentsSheet({ appointments, onStatusUpdate }) {
                       
                       {appt.notes && (
                         <div className="mt-3 text-xs text-text-muted italic border-l-2 border-surface-variant pl-2">
-                          "{appt.notes}"
+                          &quot;{appt.notes}&quot;
                         </div>
                       )}
                     </div>

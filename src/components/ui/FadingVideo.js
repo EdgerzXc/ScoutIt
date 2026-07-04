@@ -8,10 +8,7 @@ export default function FadingVideo({ videos, className = "" }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const videoRef = useRef(null);
 
-  useEffect(() => {
-    // Reset play state when video changes
-    setIsPlaying(false);
-  }, [currentIndex]);
+
 
   const handleLoadedData = () => {
     setIsPlaying(true);

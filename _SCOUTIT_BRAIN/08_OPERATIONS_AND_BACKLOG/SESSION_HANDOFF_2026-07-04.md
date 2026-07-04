@@ -133,3 +133,18 @@ with `preventDefault()` on start + `user-select:none` hardening on `.nav-inner` 
 
 **Commits:** `7774a26` (atmosphere), `51cbf2b` (drag fix). Both pushed to `main`; Vercel deploys
 confirmed `READY` on both `scout-it` (main production) and `scoutit` (secondary) projects.
+
+---
+
+## Part 3 — 2026-07-04, Master CRM completion, Appointments Wiring, and Environment Tools
+
+**Context:** Continued the CRM initiative from Part 2. The user wanted to complete the pipeline logic for deals and wire up the appointments/scheduling system so it wasn't just a UI mock. After that, we installed new environment tools (Ponytail, Aider) for codebase cleanup.
+
+**What was actually built this session:**
+1. **Master CRM Kanban Pipeline:** Clarified and verified that the Kanban board automatically moves deals through stages. Specifically, when a pitch is accepted in the chat, the deal automatically transitions to `accepted` status and reflects immediately in the broker/owner Kanban board.
+2. **Appointments Wiring (`ChatBox.js` to `viewing-appointments`):** Modified the `BookingModal` within `ChatBox.js` to pass the real `dealId`. The "Request Live Viewing" button now correctly posts to `/api/viewing-appointments`, securely writing the appointment to the database instead of just sending a local system text message. These requests now dynamically populate the **Appointments Tab** in the Master CRM.
+3. **Pushed to Production:** Committed the CRM integration and Kanban completion (`c84d159`) and pushed everything to the live GitHub repository, triggering Vercel deployments.
+
+**Environment Tooling Added:**
+1. **Ponytail Plugin:** Installed the `ponytail` "lazy senior dev" plugin globally (`C:\Users\jerze\.gemini\config\plugins\ponytail`). Discussed its function (cutting code output by enforcing native/HTML standards) and warned that it might fight against ScoutIt's highly-customized "Atmosphere" Dark/Gold aesthetic if left on during UI tasks.
+2. **Aider CLI:** Installed the Aider AI pair programmer via `pip`. Navigated a Python 3.13 dependency conflict with `numpy` during installation, but successfully installed the bleeding-edge version directly from Aider's GitHub repo. Established a safety protocol for the user (always run inside a clean git state, use `/add` to scope context, and feed it `STRUCTURE.md` so it understands the Dual-CMS Airtable/Supabase logic).

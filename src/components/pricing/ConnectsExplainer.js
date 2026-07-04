@@ -2,7 +2,7 @@ import { Handshake, Sparkles, RefreshCw } from "lucide-react";
 
 // Plain-language explainer for the Connects economy. Dropped into every pricing
 // page (where the "◈ X Connects / month" badges appear) so visitors understand
-// what they're actually paying for before they subscribe.
+// what they&apos;re actually paying for before they subscribe.
 const POINTS = [
   {
     icon: Handshake,
@@ -20,7 +20,7 @@ const POINTS = [
     icon: RefreshCw,
     title: "Monthly reset",
     body:
-      "Your tier allowance refreshes on the 1st of each month — it doesn't roll over. Connects you bought or earned stay in your wallet until you use them.",
+      "Your tier allowance refreshes on the 1st of each month — it doesn&apos;t roll over. Connects you bought or earned stay in your wallet until you use them.",
   },
 ];
 
@@ -39,7 +39,7 @@ export default function ConnectsExplainer() {
         </h2>
         <p className="text-sm text-text-secondary leading-relaxed max-w-2xl mb-8">
           ScoutIt monetizes connection, not discovery. You never pay to look —
-          Connects are only spent when you reach out. Here's how they work.
+          Connects are only spent when you reach out. Here&apos;s how they work.
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

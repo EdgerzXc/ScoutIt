@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-// Pre-launch recruitment panel for ecosystem services that aren't open to buyers yet.
+// Pre-launch recruitment panel for ecosystem services that aren&apos;t open to buyers yet.
 // Turns "coming soon" into an on-ramp: recruit the supply side now (portfolio + ID card +
 // founding pricing), while telling buyers the service is on its way.
 export default function FoundingProgramPanel({
@@ -37,7 +37,7 @@ export default function FoundingProgramPanel({
 
       <div className="founding-divider" />
       <p className="founding-buyer">
-        Looking to hire? {serviceName} goes live with the platform launch — and you'll be the first to know.
+        Looking to hire? {serviceName} goes live with the platform launch — and you&apos;ll be the first to know.
       </p>
 
       <style>{`

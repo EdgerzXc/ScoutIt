@@ -4,9 +4,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import ConnectionPortal from "@/components/connection/ConnectionPortal";
 
-import { getBrokers } from "@/data/mockBrokers";
 
-const DUMMY_BROKERS = getBrokers();
+const DUMMY_BROKERS = [];
 
 export async function generateMetadata({ params }) {
   const { "broker-slug": slug } = await params;
@@ -73,7 +72,7 @@ export default async function BrokerDetailPage({ params }) {
             <header className="profile-header">
               <span className="vector-label">Advisory Profile &middot; {broker.clearanceTier}</span>
               <h1 className="profile-name">{broker.name}</h1>
-              <p className="profile-title">{broker.title} // {broker.location}</p>
+              <p className="profile-title">{broker.title} {"//"} {broker.location}</p>
             </header>
 
             <div className="profile-body-content">

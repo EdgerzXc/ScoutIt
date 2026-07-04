@@ -35,6 +35,7 @@ export default function BuyerMode() {
   useEffect(() => {
     if (showMap && mapContainerRef.current && MAPBOX_TOKEN) {
       if (!mapInstance.current) {
+        // eslint-disable-next-line react-hooks/immutability
         mapboxgl.accessToken = MAPBOX_TOKEN;
         mapInstance.current = new mapboxgl.Map({
           container: mapContainerRef.current,
@@ -311,7 +312,7 @@ export default function BuyerMode() {
                   </div>
                   <h3 className="font-headline-editorial text-xl text-on-surface mb-2">The Ledger is Quiet</h3>
                   <p className="text-sm text-text-secondary text-center mb-6 max-w-md">
-                    Nothing matches "{searchQuery}" right now. Broaden your search parameters or explore the full ledger to see what's active in the market.
+                    Nothing matches &quot;{searchQuery}&quot; right now. Broaden your search parameters or explore the full ledger to see what&apos;s active in the market.
                   </p>
                   <Link href="/property" className="font-label-caps tracking-widest uppercase text-[10px] text-gold-accent border border-gold-accent/30 bg-gold-accent/10 px-6 py-3 rounded hover:bg-gold-accent/20 transition-colors">
                     Explore Full Ledger ({listings.length} active spaces)

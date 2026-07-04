@@ -12,19 +12,8 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
   const [propertyPixel, setPropertyPixel] = useState({ x: 0, y: 0 });
   const [hoveredAmenity, setHoveredAmenity] = useState(null);
   const [hoveredPixel, setHoveredPixel] = useState(null);
-  const [sweepAngle, setSweepAngle] = useState(0);
   const [routeInfo, setRouteInfo] = useState(null);
 
-  // Smooth radar sweep animation loop
-  useEffect(() => {
-    let frame;
-    const animate = () => {
-      setSweepAngle((a) => (a + 1.2) % 360);
-      frame = requestAnimationFrame(animate);
-    };
-    frame = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(frame);
-  }, []);
 
   useEffect(() => {
     // 1. Dynamically append Leaflet CSS
@@ -55,7 +44,9 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
         center: position,
         zoom: 15,
         zoomControl: false,
-        attributionControl: false
+        attributionControl: false,
+        scrollWheelZoom: false,
+        dragging: !window.L.Browser.mobile // prevents swiping from moving map on mobile
       });
 
       // Add CartoDB Dark Matter tile layer
@@ -286,13 +277,11 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
         mapInstance.current = null;
       }
     };
-  }, [lat, lng, propertyTitle, vicinityData, routeDestination, routeDestCoords, routeLabel, mapboxToken]);
+    // We use JSON.stringify for arrays/objects to prevent reference-equality React loops 
+    // that destroy and recreate the Leaflet map unnecessarily.
+  }, [lat, lng, propertyTitle, JSON.stringify(vicinityData), routeDestination, JSON.stringify(routeDestCoords), routeLabel, mapboxToken]);
 
-  // Compute sweep line coordinates based on animation angle
-  const sweepRad = (sweepAngle * Math.PI) / 180;
   const sweepLength = 150; // Sweeps up to outer ring radius
-  const sweepX2 = propertyPixel.x + sweepLength * Math.cos(sweepRad);
-  const sweepY2 = propertyPixel.y + sweepLength * Math.sin(sweepRad);
 
   return (
     <div className="map-view-wrapper">
@@ -311,9 +300,10 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
           <line 
             x1={propertyPixel.x} 
             y1={propertyPixel.y} 
-            x2={sweepX2} 
-            y2={sweepY2} 
-            className="leaflet-radar-sweep" 
+            x2={propertyPixel.x} 
+            y2={propertyPixel.y - sweepLength} 
+            className="leaflet-radar-sweep animated" 
+            style={{ transformOrigin: `${propertyPixel.x}px ${propertyPixel.y}px` }}
           />
 
           {/* Target lock dashed vector line to hovered target pin */}
@@ -412,6 +402,15 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
         .leaflet-radar-sweep {
           stroke: rgba(232, 174, 60, 0.25);
           stroke-width: 0.6;
+        }
+
+        .leaflet-radar-sweep.animated {
+          animation: radarSweep 3s linear infinite;
+        }
+
+        @keyframes radarSweep {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
         }
 
         .leaflet-radar-lock-line {

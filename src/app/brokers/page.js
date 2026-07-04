@@ -4,7 +4,6 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { getBrokers } from "@/data/mockBrokers";
 import ReactionButtons from "@/components/ui/ReactionButtons";
 import AtmosphereBackground from "@/components/ui/AtmosphereBackground";
 import "../property/property.css";
@@ -34,7 +33,7 @@ function getClosureCount(closuresStr) {
 }
 
 export default function BrokersPage() {
-  const [brokers, setBrokers]     = useState(() => getBrokers());
+  const [brokers, setBrokers]     = useState([]);
   const [loading, setLoading]     = useState(false);
   const [source, setSource]       = useState("mock_local");
   const [searchTerm, setSearchTerm] = useState("");

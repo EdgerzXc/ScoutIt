@@ -9,8 +9,10 @@ import ReactionButtons from "@/components/ui/ReactionButtons";
 import InteractiveMap from "@/components/property/InteractiveMap";
 import CategorySpecBlock from "@/components/property/CategorySpecBlock";
 import { canSee, getCurrentTier, hasActiveRole } from "../../lib/entitlements";
+import { useTrueClosestTransit } from "@/hooks/useTrueClosestTransit";
+import { resolveTransitHub } from "@/lib/transit";
 
-// Code-split maplibre-gl + pmtiles out of the main property-page bundle — they're
+// Code-split maplibre-gl + pmtiles out of the main property-page bundle — they&apos;re
 // only needed if the visitor taps the Flood Risk Map tab.
 const FloodHeatmapMap = dynamic(() => import("@/components/property/FloodHeatmapMap"), {
   ssr: false,
@@ -33,8 +35,8 @@ const ManilaTransitMap = dynamic(() => import("@/components/transit/ManilaTransi
 import { DEEP_INTEL_SCHEMA } from "../../lib/deepIntelSchema";
 
 // Loose bounding box around Metro Manila + the LRT/MRT lines' exurb extensions
-// (Cavite, Antipolo) -- properties outside this simply aren't served by rail,
-// so the tab only shows where it's actually a useful signal.
+// (Cavite, Antipolo) -- properties outside this simply aren&apos;t served by rail,
+// so the tab only shows where it&apos;s actually a useful signal.
 function isNearManilaRail(lat, lng) {
   return lat != null && lng != null && lat >= 14.2 && lat <= 14.9 && lng >= 120.7 && lng <= 121.3;
 }
@@ -43,7 +45,6 @@ import { getChapterConfig } from "./chapterConfig";
 import { Bed, Bath, Ruler, Car, Lock, Search, Camera, Building2 } from "lucide-react";
 import InquiryModal from "@/components/property/InquiryModal";
 import OperatorRequestModal from "@/components/property/OperatorRequestModal";
-import { getPropertyBySlug } from "@/data/mockProperties";
 
 // ═══════════════════════════════════════════════════
 // DATA — Airtable CMS first, mockDb fallback
@@ -53,31 +54,7 @@ import { getPropertyBySlug } from "@/data/mockProperties";
 // TRANSIT HUBS — module-scope so coordinate references stay
 // referentially stable across renders (avoids effect-dep loops).
 // ═══════════════════════════════════════════════════
-const TRANSIT_HUBS = [
-  { keys: ["north ave", "mrt-7", "mrt 7"], coords: [14.6527, 121.0324] }, // North Avenue (MRT-3/MRT-7)
-  { keys: ["quezon ave"],                  coords: [14.6427, 121.0388] }, // Quezon Avenue (MRT-3)
-  { keys: ["cubao", "araneta"],            coords: [14.6190, 121.0530] }, // Cubao (MRT-3/LRT-2)
-  { keys: ["ortigas"],                     coords: [14.5876, 121.0563] }, // Ortigas (MRT-3)
-  { keys: ["shaw"],                        coords: [14.5810, 121.0537] }, // Shaw Blvd (MRT-3)
-  { keys: ["ayala"],                       coords: [14.5494, 121.0280] }, // Ayala (MRT-3)
-  { keys: ["taft", "edsa"],                coords: [14.5378, 120.9947] }, // Taft/EDSA (MRT-3/LRT-1)
-  { keys: ["recto"],                       coords: [14.6038, 120.9822] }, // Recto (LRT-2)
-  { keys: ["katipunan"],                   coords: [14.6306, 121.0730] }, // Katipunan (LRT-2)
-];
-const CITY_HUB = {
-  "quezon city": [14.6527, 121.0324],           // North Avenue
-  "bonifacio global city": [14.5494, 121.0280], // Ayala (nearest rail to BGC)
-  "makati": [14.5494, 121.0280],                // Ayala
-  "pasig": [14.5876, 121.0563],                 // Ortigas
-  "mandaluyong": [14.5810, 121.0537],           // Shaw
-  "manila": [14.6038, 120.9822],                // Recto
-};
-function resolveTransitHub(transitLabel, city) {
-  const name = (transitLabel || "").toLowerCase();
-  const byName = TRANSIT_HUBS.find(h => h.keys.some(k => name.includes(k)));
-  if (byName) return byName.coords;
-  return CITY_HUB[(city || "").toLowerCase()] || null;
-}
+
 
 // ═══════════════════════════════════════════════════
 // HELPER UTILITIES
@@ -96,7 +73,7 @@ function SpatialVaultWidget({ lumaUrl, matterportUrl, heatmapUrl }) {
             3D Spatial Map
           </h4>
           <p style={{ fontFamily: "Georgia,serif", fontStyle: "italic", fontSize: "11px", color: "var(--text-muted, #c8c8c8)", marginBottom: "12px" }}>
-            Illustrative capture — this property's own 3D scan is in progress
+            Illustrative capture — this property&apos;s own 3D scan is in progress
           </p>
           <div style={{ position: "relative", width: "100%", height: "400px", borderRadius: "4px", overflow: "hidden", border: "1px solid #262626" }}>
             <iframe src={hasSubscription ? lumaUrl : undefined} style={{ width: "100%", height: "100%", border: "none", filter: hasSubscription ? "none" : "blur(8px) brightness(0.5)" }} title="3D Spatial Map" />
@@ -118,7 +95,7 @@ function SpatialVaultWidget({ lumaUrl, matterportUrl, heatmapUrl }) {
             360° AR Room Tour
           </h4>
           <p style={{ fontFamily: "Georgia,serif", fontStyle: "italic", fontSize: "11px", color: "var(--text-muted, #c8c8c8)", marginBottom: "12px" }}>
-            Illustrative tour — this property's own 360° capture is in progress
+            Illustrative tour — this property&apos;s own 360° capture is in progress
           </p>
           <div style={{ position: "relative", width: "100%", height: "400px", borderRadius: "4px", overflow: "hidden", border: "1px solid #262626" }}>
             <iframe src={hasSubscription ? matterportUrl : undefined} style={{ width: "100%", height: "100%", border: "none", filter: hasSubscription ? "none" : "blur(8px) brightness(0.5)" }} title="360 Tour" />
@@ -377,7 +354,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
   const [canMarketIntel,    setCanMarketIntel]    = useState(false);
   useEffect(() => { setCanMarketIntel(canSee("marketIntel", getCurrentTier())); }, []);
   const [activeTab,         setActiveTab]         = useState(externalActiveTab || "space");
-  // SSR-safe: useState's initializer can't read window (hydration mismatch —
+  // SSR-safe: useState's initializer can&apos;t read window (hydration mismatch —
   // React reuses the server-rendered value on mount instead of re-running the
   // initializer). Read the real ?chapter= param client-side, after mount, one
   // rAF past the initial commit — setting state synchronously in the mount
@@ -391,7 +368,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
       if (urlChapter) setActiveTab(urlChapter);
     });
     return () => cancelAnimationFrame(raf);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []);
 
   useEffect(() => {
@@ -411,7 +388,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
     window.addEventListener("scoutit:property-inquire", open);
     return () => window.removeEventListener("scoutit:property-inquire", open);
   }, []);
-  const [propertyData, setPropertyData] = useState(() => draftData || getPropertyBySlug(slug));
+  const [propertyData, setPropertyData] = useState(() => draftData || null);
   const [dataLoading,  setDataLoading]  = useState(false);
   const [isOwner, setIsOwner] = useState(false);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
@@ -472,8 +449,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
               (p.id && p.id === slug)
           );
           if (match) {
-            const mock = getPropertyBySlug(slug);
-            setPropertyData({ ...mock, ...match });
+            setPropertyData({ ...match });
           }
         }
       } catch { /* stay on mock data */ }
@@ -544,6 +520,16 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isLightboxOpen, propertyData]);
+
+  // ── Hook calls that must run before early returns ──
+  const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || "";
+  const publicTransitObj = useTrueClosestTransit(
+    propertyData?.whereTo, 
+    propertyData?.lat || propertyData?.latitude, 
+    propertyData?.lng || propertyData?.longitude, 
+    propertyData?.city, 
+    mapboxToken
+  );
 
   // ── Loading guard ─────────────────────────────
   if (dataLoading || !propertyData) {
@@ -635,7 +621,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
 
   // ── Build Dynamic Units List ───────────────────
   // NOTE: `dynamicUnits` starts as spec-synthesized fallback units, then gets
-  // overridden below by the owner's real units_inventory when one exists.
+  // overridden below by the owner&apos;s real units_inventory when one exists.
   let dynamicUnits = [];
   const isCommercial = 
     d.property_type?.toLowerCase().includes("commercial") || 
@@ -946,7 +932,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
       if (Math.abs(e.pageX - pointerDownX.current) < DRAG_THRESHOLD) return;
       // Movement just confirmed this is a drag, not a click -- claim the
       // pointer now (not on pointerdown) so the browser's native text/content
-      // selection drag doesn't fight our scroll from here on.
+      // selection drag doesn&apos;t fight our scroll from here on.
       isDragging.current = true;
       startX.current = pointerDownX.current;
       scrollRef.current.style.cursor = "grabbing";
@@ -988,13 +974,8 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
   // Extract sidebar location values dynamically from whereTo array
   const nearestMallObj = d.whereTo?.find(p => p.category?.toLowerCase() === "essentials" || p.category?.toLowerCase() === "business" || p.name?.toLowerCase().includes("mall") || p.name?.toLowerCase().includes("shop"));
   const nearestHospitalObj = d.whereTo?.find(p => p.category?.toLowerCase() === "healthcare" || p.name?.toLowerCase().includes("hospital") || p.name?.toLowerCase().includes("medical"));
-  const publicTransitObj = d.whereTo?.find(p => p.category?.toLowerCase() === "transit" || p.name?.toLowerCase().includes("mrt") || p.name?.toLowerCase().includes("lrt") || p.name?.toLowerCase().includes("bus") || p.name?.toLowerCase().includes("station"));
   
   const hasWalk = d.whereTo?.some(p => p.distance?.toLowerCase().includes("walk"));
-  const walkabilitySub = hasWalk ? "Essentials within walking distance" : "Vehicle recommended for errands";
-
-  // ── Chapter 2 — Mapbox route to nearest transit ──
-  const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || "";
   const transitLabel = publicTransitObj?.name || "";
   // Clean the name for geocoding: drop parentheticals, "stops", normalize "Ave"
   const transitDestination = transitLabel
@@ -1004,7 +985,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
         .replace(/\bAve\b/gi, "Avenue")
         .trim()}, ${d.city || "Metro Manila"}, Philippines`
     : "";
-  const transitDestCoords = resolveTransitHub(transitLabel, d.city);
+  const transitDestCoords = publicTransitObj?.trueCoords || null;
 
   const commuteCards = [
     { label: "BGC",     value: d.commute_bgc },
@@ -1662,11 +1643,12 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                   propertyLat={d.lat || d.latitude}
                   propertyLng={d.lng || d.longitude}
                   propertyTitle={d.title}
+                  trueTransitCoords={transitDestCoords}
                 />
               )}
 
               {locTab === "map" && (
-                <div style={{height:"clamp(420px, 52vh, 480px)", minHeight:"420px", flexShrink:0, borderRadius:"4px", overflow:"hidden", border:"0.5px solid #262626", marginBottom:"8px"}}>
+                <div style={{height:"clamp(600px, 80vh, 850px)", minHeight:"600px", flexShrink:0, borderRadius:"4px", overflow:"hidden", border:"0.5px solid #262626", marginBottom:"80px"}}>
                   <InteractiveMap
                     lat={d.lat || d.latitude || 14.5547}
                     lng={d.lng || d.longitude || 121.0244}
@@ -1878,7 +1860,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
               </div>
 
               {whereToTab === "map" && (
-                <div style={{height:"clamp(460px, 64vh, 600px)", minHeight:"460px", flexShrink:0, borderRadius:"4px", overflow:"hidden", border:"0.5px solid #262626", marginBottom:"24px"}}>
+                <div style={{height:"clamp(600px, 80vh, 850px)", minHeight:"600px", flexShrink:0, borderRadius:"4px", overflow:"hidden", border:"0.5px solid #262626", marginBottom:"120px"}}>
                   <InteractiveMap
                     lat={d.lat || d.latitude || 14.5547}
                     lng={d.lng || d.longitude || 121.0244}
@@ -2093,7 +2075,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                       )}
                     </div>
                     {/* Real units carry a stable id (property_units.id); synthesized
-                        fallback units don't and have no master page to link to. */}
+                        fallback units don&apos;t and have no master page to link to. */}
                     {activeUnitObj.id && (
                       <Link
                         href={`/property/${d.slug}/unit/${activeUnitObj.id}`}

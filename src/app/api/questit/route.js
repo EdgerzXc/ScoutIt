@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
-import { getProperties } from '@/data/mockProperties';
 import { createClient } from '@supabase/supabase-js';
 
 const anthropic = new Anthropic({

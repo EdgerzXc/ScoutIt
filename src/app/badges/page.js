@@ -98,7 +98,7 @@ export default function BadgeRegistryPage() {
             ScoutIt Badge Registry
           </h1>
           <p className="font-body text-text-secondary text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
-            A public ledger of the platform's most exclusive honors. Badges grant lifetime privileges, massive discounts, and elevated status. Once a cohort is full, it is permanently locked.
+            A public ledger of the platform&apos;s most exclusive honors. Badges grant lifetime privileges, massive discounts, and elevated status. Once a cohort is full, it is permanently locked.
           </p>
         </div>
 

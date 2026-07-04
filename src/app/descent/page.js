@@ -140,7 +140,7 @@ export default function DescentPage() {
         <div className="layer-content">
           <div className="dl-eyebrow">Layer 02 · the atmosphere</div>
           <h2 className="dl-title">News travels in the air.</h2>
-          <p className="dl-sub">Before your feet touch the ground — what's moving, what's shifting, what's worth knowing. The market, read from above.</p>
+          <p className="dl-sub">Before your feet touch the ground — what&apos;s moving, what&apos;s shifting, what&apos;s worth knowing. The market, read from above.</p>
           <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 30 }}>
             {[{ t: "Makati CBD yields drop", k: "Market intel", href: "/intel/makati-yields" }, { t: "Nuvali expansion patterns", k: "Area guide", href: "/intel/nuvali-expansion" }, { t: "Pasig zoning changes", k: "Regulatory", href: "/intel/pasig-zoning" }].map((a) => (
               <Link key={a.href} href={a.href} style={{ flex: "1 1 240px", textDecoration: "none", background: "rgba(10,12,24,0.6)", border: "0.5px solid rgba(232, 174, 60,0.2)", borderRadius: 10, padding: "18px 20px", backdropFilter: "blur(4px)" }}>
@@ -219,7 +219,7 @@ export default function DescentPage() {
         </div>
         <div className="layer-content">
           <div className="dl-eyebrow">Layer 05 · the mantle</div>
-          <h2 className="dl-title">We're the layer around you.</h2>
+          <h2 className="dl-title">We&apos;re the layer around you.</h2>
           <p className="dl-sub">ScoutIT is the massive, structured intelligence database wrapping around the thing at the center. We do the quiet, heavy lifting: everything we store is to protect and support you.</p>
           <Link href="/about" className="dl-cta">Read our story →</Link>
         </div>
@@ -263,7 +263,7 @@ export default function DescentPage() {
               <div className="membrane">Inner core · private</div>
               {signedIn ? (
                 <div className="inner-core">
-                  <div className="ic-head"><LayoutGrid strokeWidth={1.5} size={22} style={{ color: "#E8AE3C" }} /> Welcome back — here's your world.</div>
+                  <div className="ic-head"><LayoutGrid strokeWidth={1.5} size={22} style={{ color: "#E8AE3C" }} /> Welcome back — here&apos;s your world.</div>
                   <div className="ic-sub">Your board, your saved spaces, your profile. The center is yours.</div>
                   <div className="ic-links">
                     <Link href="/dashboard" className="dl-cta solid">Enter your space →</Link>

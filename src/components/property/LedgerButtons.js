@@ -1,10 +1,10 @@
-/* eslint-disable react-hooks/set-state-in-effect */
+
 "use client";
 
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import ReactionButtons from "@/components/ui/ReactionButtons";
-import { getPropertyBySlug } from "@/data/mockProperties";
+
 
 export default function LedgerButtons() {
   const params = useParams();
@@ -13,16 +13,12 @@ export default function LedgerButtons() {
 
   useEffect(() => {
     // In a real scenario, this could fetch the property info based on the ID.
-    // For now, we fetch from mock properties if available.
     if (id) {
-      const data = getPropertyBySlug(id);
-      if (data) {
-        setPropertyInfo({
-          title: data.title || id,
-          category: data.spaceCategory || data.property_type || "",
-          city: data.city || data.location || ""
-        });
-      }
+      setPropertyInfo({
+        title: id,
+        category: "",
+        city: ""
+      });
     }
   }, [id]);
 

@@ -6,9 +6,8 @@ import { useState } from "react";
 import Link from "next/link";
 import "../property/property.css";
 import FoundingProgramPanel from "@/components/ecosystem/FoundingProgramPanel";
-import { getResearchers } from "@/data/mockResearchers";
 
-const DUMMY_RESEARCHERS = getResearchers();
+const DUMMY_RESEARCHERS = [];
 
 const FOCUS_AREAS = ["Residential Due Diligence", "Commercial Investment Analysis", "Short-Term Rental & Hospitality", "Land Acquisition", "Industrial & Logistics"];
 const MARKETS = ["Metro Manila", "Cebu & Visayas", "Davao & Mindanao", "Clark & Central Luzon", "Iloilo & Western Visayas"];

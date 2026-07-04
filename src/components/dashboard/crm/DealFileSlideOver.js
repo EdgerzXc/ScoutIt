@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Building2, UserCircle2, Calendar, FileText, CheckCircle2 } from "lucide-react";
+import { X, Building2, UserCircle2, Calendar, FileText, CheckCircle2, MapPin, Clock } from "lucide-react";
 
 export default function DealFileSlideOver({ isOpen, onClose, deal, onDealUpdate }) {
   const [notes, setNotes] = useState("");

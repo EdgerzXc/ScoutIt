@@ -1,6 +1,7 @@
 "use client";
 
 import { Component } from "react";
+import Link from "next/link";
 import { reportError } from "@/lib/reportError";
 
 /**
@@ -52,12 +53,12 @@ export default class ErrorBoundary extends Component {
           >
             Reload
           </button>
-          <a
+          <Link
             href="/"
             className="border border-surface-variant text-on-surface font-working-title font-bold px-6 py-3 rounded hover:border-gold-accent transition-colors"
           >
             Back to Home
-          </a>
+          </Link>
         </div>
       </div>
     );

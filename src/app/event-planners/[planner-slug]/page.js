@@ -5,9 +5,9 @@ import { notFound } from "next/navigation";
 import { Lock } from "lucide-react";
 import ServiceConnectionPortal from "@/components/connection/ServiceConnectionPortal";
 import { DetailPageAccessGate } from "@/components/ui/EarlyAccessGate";
-import { getEventPlanners } from "@/data/mockEventPlanners";
 
-const DUMMY_PLANNERS = getEventPlanners();
+
+const DUMMY_PLANNERS = [];
 
 export async function generateMetadata({ params }) {
   const { "planner-slug": slug } = await params;
@@ -68,7 +68,7 @@ export default async function EventPlannerDetailPage({ params }) {
             <header className="profile-header">
               <span className="vector-label">Design Profile &middot; {ep.clearanceTier}</span>
               <h1 className="profile-name">{ep.name}</h1>
-              <p className="profile-title">{ep.title} // {ep.location}</p>
+              <p className="profile-title">{ep.title} {"//"} {ep.location}</p>
             </header>
 
             <div className="profile-body-content">

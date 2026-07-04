@@ -23,11 +23,7 @@ function CRMPageInner() {
   const [showToast, setShowToast] = useState("");
   const [isNewDealModalOpen, setIsNewDealModalOpen] = useState(false);
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
+  async function fetchData() {
     try {
       const [dealsRes, apptsRes] = await Promise.all([
         fetch("/api/deals?mockOwnerId=master-dev"),
@@ -43,6 +39,11 @@ function CRMPageInner() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
 
   const handleStatusChange = async (dealId, newStatus) => {
     setIsUpdatingStatus(true);

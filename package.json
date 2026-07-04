@@ -18,8 +18,6 @@
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.38.0",
     "framer-motion": "^12.40.0",
-    "isomorphic-dompurify": "^3.18.0",
-    "lru-cache": "^11.5.1",
     "lucide-react": "^1.18.0",
     "mapbox-gl": "^3.24.0",
     "maplibre-gl": "^5.24.0",

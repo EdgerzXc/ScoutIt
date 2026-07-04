@@ -462,6 +462,7 @@ export default function BackgroundCore({ isLoggedIn }) {
         if (mount.contains(renderer.domElement)) mount.removeChild(renderer.domElement);
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

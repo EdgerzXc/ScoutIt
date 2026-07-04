@@ -149,7 +149,7 @@ export default function BulkImporterMode({ onClose }) {
           <h2 className="font-display-md text-2xl text-on-surface mb-2">Upload CSV Portfolio</h2>
           <p className="text-sm text-text-secondary mb-6 text-center max-w-xl leading-relaxed">
             Ensure your CSV contains columns matching our schema (e.g., <strong>Title, Location, Category, Price, Condition, Layout, Size (sqm)</strong>). 
-            <br /><em>Note: For Residential spaces, use "Bedrooms" and "Furnishing" instead of Condition and Layout.</em>
+            <br /><em>Note: For Residential spaces, use &quot;Bedrooms&quot; and &quot;Furnishing&quot; instead of Condition and Layout.</em>
           </p>
           <input 
             type="file" 

@@ -6,9 +6,9 @@ import { useState } from "react";
 import Link from "next/link";
 import "../property/property.css";
 import FoundingProgramPanel from "@/components/ecosystem/FoundingProgramPanel";
-import { getEventPlanners } from "@/data/mockEventPlanners";
 
-const DUMMY_PLANNERS = getEventPlanners();
+
+const DUMMY_PLANNERS = [];
 
 const SPECIALTIES = [
   "Wedding & Luxury Events",

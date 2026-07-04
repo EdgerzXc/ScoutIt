@@ -103,7 +103,7 @@ export default function KanbanBoard({ deals, viewingAs, onStatusChange, onDealCl
                     </div>
                     {deal.lastMessage && (
                       <div className="text-xs text-text-muted truncate italic border-t border-surface-variant pt-2 mt-2">
-                        "{deal.lastMessage}"
+                        &quot;{deal.lastMessage}&quot;
                       </div>
                     )}
                   </div>

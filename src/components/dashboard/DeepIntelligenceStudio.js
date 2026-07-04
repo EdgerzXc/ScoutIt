@@ -339,7 +339,9 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
     details: { ...prev.details, [key]: value },
   }));
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const categoryFields = CATEGORY_FIELDS[formData.category] || [];
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const deepIntelFields = DEEP_INTEL_SCHEMA[formData.category || "commercial"] || {};
 
   const completionStats = useMemo(() => {

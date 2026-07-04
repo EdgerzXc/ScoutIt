@@ -1,5 +1,7 @@
 "use client";
 
+/* eslint-disable jsx-a11y/alt-text, @next/next/no-img-element */
+
 import Link from "next/link";
 import { Camera, Image, ToggleLeft, ToggleRight } from "lucide-react";
 import { useState } from "react";

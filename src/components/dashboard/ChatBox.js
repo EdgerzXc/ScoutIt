@@ -252,6 +252,7 @@ export default function ChatBox({ deal, onCloseDeal, onOfferHandshake, onAcceptH
     if (att.type.startsWith('image/')) {
       return (
         <a href={att.url} target="_blank" rel="noopener noreferrer" className="block mt-2">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={att.url} alt={att.name} className="max-w-[200px] max-h-[200px] rounded object-cover border border-white/10 hover:opacity-90 transition-opacity" />
         </a>
       );

@@ -84,18 +84,22 @@ function layerIdsForLine(line) {
   return ids;
 }
 
-export default function ManilaTransitMap({ propertyLat, propertyLng, propertyTitle } = {}) {
+export default function ManilaTransitMap({ propertyLat, propertyLng, propertyTitle, trueTransitCoords } = {}) {
   const mapContainerRef = useRef(null);
   const mapInstance = useRef(null);
   const propertyMarkerRef = useRef(null);
   const rafRef = useRef(null);
   const lineDataRef = useRef({}); // id -> { track, totalKm }
-  const [loadState, setLoadState] = useState("loading"); // loading | ready | error
+  const [loadState, setLoadState] = useState(() => {
+    return process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN ? "loading" : "error";
+  }); // loading | ready | error
   const [visibleLines, setVisibleLines] = useState(
     () => Object.fromEntries(LINE_META.map((l) => [l.id, true]))
   );
   const visibleLinesRef = useRef(visibleLines);
-  visibleLinesRef.current = visibleLines;
+  useEffect(() => {
+    visibleLinesRef.current = visibleLines;
+  }, [visibleLines]);
 
   const hasProperty = typeof propertyLat === "number" && typeof propertyLng === "number";
   const [nearestStation, setNearestStation] = useState(null);
@@ -105,7 +109,6 @@ export default function ManilaTransitMap({ propertyLat, propertyLng, propertyTit
 
     const token = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || "";
     if (!token) {
-      setLoadState("error");
       return;
     }
     mapboxgl.accessToken = token;
@@ -283,7 +286,22 @@ export default function ManilaTransitMap({ propertyLat, propertyLng, propertyTit
 
         // ── Pinpoint the actual property + its closest real station ──
         if (hasProperty) {
-          const nearest = nearestStationTo(propertyLat, propertyLng);
+          let nearest = null;
+          if (trueTransitCoords) {
+            // Find the station nearest to the true route destination
+            const tempNearest = nearestStationTo(trueTransitCoords[0], trueTransitCoords[1]);
+            if (tempNearest) {
+              // But calculate the distance from the actual property for coverage check
+              const dist = turfDistance(
+                turfPoint([propertyLng, propertyLat]), 
+                turfPoint([tempNearest.lon, tempNearest.lat]), 
+                { units: "kilometers" }
+              );
+              nearest = { ...tempNearest, distanceKm: dist };
+            }
+          } else {
+            nearest = nearestStationTo(propertyLat, propertyLng);
+          }
           setNearestStation(nearest);
 
           const el = document.createElement("div");
@@ -318,6 +336,26 @@ export default function ManilaTransitMap({ propertyLat, propertyLng, propertyTit
               },
             });
 
+            const token = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
+            if (token) {
+              const dirUrl = `https://api.mapbox.com/directions/v5/mapbox/driving/${propertyLng},${propertyLat};${nearest.lon},${nearest.lat}?geometries=geojson&overview=full&access_token=${token}`;
+              fetch(dirUrl)
+                .then(r => r.json())
+                .then(data => {
+                  if (data.routes && data.routes[0]) {
+                    const source = map.getSource(PROPERTY_CONNECTOR_SOURCE);
+                    if (source) {
+                      source.setData({
+                        type: "Feature",
+                        properties: {},
+                        geometry: data.routes[0].geometry,
+                      });
+                    }
+                  }
+                })
+                .catch(err => console.error("Error fetching true route:", err));
+            }
+
             map.fitBounds(
               [[propertyLng, propertyLat], [nearest.lon, nearest.lat]],
               { padding: 90, maxZoom: 15, pitch: 60, duration: 0 }
@@ -331,7 +369,13 @@ export default function ManilaTransitMap({ propertyLat, propertyLng, propertyTit
 
         // ── Telemetry loop: every train travels back-and-forth along the
         // real track curve, each on its own phase offset and per-line speed ──
+        let lastTime = 0;
         const animate = (t) => {
+          rafRef.current = requestAnimationFrame(animate);
+          // Throttle to ~30 FPS to prevent heavy Turf.js math from lagging the main thread
+          if (t - lastTime < 33) return;
+          lastTime = t;
+
           LINE_META.forEach((line) => {
             if (!visibleLinesRef.current[line.id]) return;
             const { track, totalKm } = lineDataRef.current[line.id];
@@ -353,7 +397,6 @@ export default function ManilaTransitMap({ propertyLat, propertyLng, propertyTit
               if (trailSrc) trailSrc.setData(trailFeature(track, totalKm, distanceKm, direction));
             }
           });
-          rafRef.current = requestAnimationFrame(animate);
         };
         rafRef.current = requestAnimationFrame(animate);
       } catch (err) {

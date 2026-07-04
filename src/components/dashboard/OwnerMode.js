@@ -84,6 +84,7 @@ export default function OwnerMode() {
     } else if (hasListing && myListings.length === 1 && !viewingDossierId) {
       setViewingDossierId(myListings[0].id);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasListing, myListings.length, myListingsIds, viewingDossierId]);
 
   // Handle cleanup if the active dossier is deleted
@@ -91,6 +92,7 @@ export default function OwnerMode() {
     if (viewingDossierId && !myListings.find(l => l.id === viewingDossierId)) {
       setViewingDossierId(null);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [myListings.length, myListingsIds, viewingDossierId]);
 
   const activeListing = myListings.find(l => l.id === viewingDossierId) || myListings[0];
@@ -221,7 +223,7 @@ export default function OwnerMode() {
           >
              <div className="absolute top-0 left-0 w-1.5 h-full bg-surface-variant group-hover:bg-surface-alt transition-colors"></div>
              <h3 className="font-working-title text-2xl text-on-surface mb-3 group-hover:text-white transition-colors">Live Editor Workspace</h3>
-             <p className="text-sm text-text-secondary mb-6 leading-relaxed">Build your listing manually using our step-by-step editor. Best if you don't have a deck and are starting from scratch.</p>
+             <p className="text-sm text-text-secondary mb-6 leading-relaxed">Build your listing manually using our step-by-step editor. Best if you don&apos;t have a deck and are starting from scratch.</p>
           </div>
 
           <div 
@@ -603,7 +605,7 @@ export default function OwnerMode() {
                   </svg>
                 </div>
                 <div>
-                  <h3 className="font-working-title text-lg text-on-surface group-hover:text-gold-accent transition-colors mb-1">I'll record it myself</h3>
+                  <h3 className="font-working-title text-lg text-on-surface group-hover:text-gold-accent transition-colors mb-1">I&apos;ll record it myself</h3>
                   <p className="text-sm text-text-secondary leading-relaxed">Walk through your property with your phone and upload the raw video. Our team processes it into a full 3D tour — you just need to hit record.</p>
                 </div>
               </div>
@@ -636,7 +638,7 @@ export default function OwnerMode() {
           <div className="bg-gradient-to-br from-[#1A1814] to-[#0A0908] border border-gold-accent/30 rounded-2xl p-10 flex flex-col items-center gap-6 animate-[fadeIn_0.3s_ease]">
             <div className="bg-gradient-to-r from-gold-accent/20 to-transparent border-l-4 border-gold-accent rounded-r-lg p-5 w-full">
               <strong className="text-gold-accent font-working-title text-sm tracking-wide block mb-1">JUST HIT RECORD</strong>
-              <p className="text-sm text-text-secondary leading-relaxed">Walk through every room slowly with your phone camera. Upload the raw .mp4 or .mov — we'll stitch it into an immersive 3D tour and notify you when it's live, typically within 48 hours.</p>
+              <p className="text-sm text-text-secondary leading-relaxed">Walk through every room slowly with your phone camera. Upload the raw .mp4 or .mov — we&apos;ll stitch it into an immersive 3D tour and notify you when it&apos;s live, typically within 48 hours.</p>
             </div>
 
             {selectedFile ? (
@@ -698,7 +700,7 @@ export default function OwnerMode() {
                 <div className="w-5 h-5 rounded-full bg-gold-accent/20 border border-gold-accent/40 flex items-center justify-center shrink-0">
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#E8AE3C" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                 </div>
-                <span>We'll contact you within 24 hours to schedule</span>
+                <span>We&apos;ll contact you within 24 hours to schedule</span>
               </div>
               <div className="flex items-center gap-3">
                 <div className="w-5 h-5 rounded-full bg-gold-accent/20 border border-gold-accent/40 flex items-center justify-center shrink-0">
@@ -935,7 +937,7 @@ export default function OwnerMode() {
            <div>
              <h4 className="font-working-title text-gold-accent text-lg mb-1">AI Drafting in Progress</h4>
              <p className="text-sm text-text-secondary leading-relaxed">
-               Your pitch deck <strong className="text-on-surface">{activeListing.details?.source_pdf}</strong> is currently being analyzed. The Council AI is extracting facts and structuring the dossier. This process usually takes 2-5 minutes. We will notify you when it's ready for your final review.
+               Your pitch deck <strong className="text-on-surface">{activeListing.details?.source_pdf}</strong> is currently being analyzed. The Council AI is extracting facts and structuring the dossier. This process usually takes 2-5 minutes. We will notify you when it&apos;s ready for your final review.
              </p>
            </div>
         </div>

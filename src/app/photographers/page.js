@@ -7,9 +7,9 @@ import Link from "next/link";
 import "../property/property.css";
 
 import FoundingProgramPanel from "@/components/ecosystem/FoundingProgramPanel";
-import { getPhotographers } from "@/data/mockPhotographers";
 
-const DUMMY_PHOTOGRAPHERS = getPhotographers();
+
+const DUMMY_PHOTOGRAPHERS = [];
 
 const SPECIALTIES = ["Interior Architecture", "Drone Aerial + Lifestyle", "Commercial & F&B", "Minimalist Residential", "Luxury & High-End"];
 const LOCATIONS = ["BGC, Taguig", "Makati, Metro Manila", "Cebu City", "Quezon City", "Alabang"];

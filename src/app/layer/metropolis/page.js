@@ -3,9 +3,9 @@
 import LayerNav from "@/components/descent/LayerNav";
 import Link from "next/link";
 import { useState } from "react";
-import { CATEGORY_PREVIEWS } from "@/data/mockProperties";
 import BackgroundMetropolis from "@/components/descent/BackgroundMetropolis";
 
+const CATEGORY_PREVIEWS = {};
 const CATEGORIES = ["Residential", "Commercial", "STR", "Hospitality", "Restaurants", "Venues"];
 
 export default function MetropolisLayer() {
@@ -41,7 +41,7 @@ export default function MetropolisLayer() {
             <span className="metro-kicker">Layer 03 // Metropolis</span>
             <h2 className="metro-title">Explore by Category</h2>
             <p className="metro-sub">
-              Pick a category and see what's inside — homes, offices, venues, and more.
+              Pick a category and see what&apos;s inside — homes, offices, venues, and more.
             </p>
             <nav className="metro-nav">
               {CATEGORIES.map(c => (

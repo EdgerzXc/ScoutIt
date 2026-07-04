@@ -1,6 +1,6 @@
 // Case-sensitivity routing diagnostics trigger and async params fix
 import { notFound } from "next/navigation";
-import { getPropertyBySlug } from "@/data/mockProperties";
+
 import { fetchProperties } from "@/lib/airtable";
 import ResidentialFlow from "@/components/property/ResidentialFlow";
 import CommercialFlow from "@/components/property/CommercialFlow";
@@ -52,7 +52,7 @@ async function resolveCategory(slug) {
       /* CMS unavailable — fall through to mock-derived category */
     }
   }
-  const mock = getPropertyBySlug(slug);
+  const mock = null;
   return (mock?.spaceCategory || mock?.property_type || "default").toLowerCase();
 }
 

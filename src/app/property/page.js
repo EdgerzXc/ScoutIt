@@ -11,8 +11,7 @@ const InteractiveRadiusMap = dynamic(() => import("@/components/property/Interac
   ssr: false, 
   loading: () => <div style={{ height: 400, background: "#121212", display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontFamily: "var(--font-mono)", color: "var(--accent)" }}>LOADING RADAR...</span></div>
 });
-import { getProperties } from "@/data/mockProperties";
-import { getArticles } from "@/data/mockArticles";
+
 import AtmosphereBackground from "@/components/ui/AtmosphereBackground";
 import "./property.css";
 
@@ -196,9 +195,7 @@ function PropertyDirectoryContent() {
           );
         } else {
           // Standard Load: Merge Airtable with Local Mock Fallback
-          const baseProperties = getProperties().map(p =>
-            toCard(p, MOCK_CATEGORIES[p.slug] || p.spaceCategory || "Residential", "Premium curated property briefing.")
-          );
+          const baseProperties = [];
 
           mergedProperties = [...baseProperties];
           airtableProperties.forEach(p => {
@@ -215,19 +212,7 @@ function PropertyDirectoryContent() {
 
         // 2. Load intel reports
         const airtableIntel = data.intel || [];
-        const baseIntel = getArticles().map(art => {
-          let category = art.category || "Residential";
-          if (category.toLowerCase() === "hospitality") category = "Hospitality";
-          if (category.toLowerCase() === "str") category = "STR";
-          if (category.toLowerCase() === "culinary" || category.toLowerCase() === "restaurants") category = "Restaurants";
-          if (category.toLowerCase() === "venues" || category.toLowerCase() === "events") category = "Venues";
-          return {
-            slug: art.slug,
-            title: art.title,
-            category,
-            date: art.date
-          };
-        });
+        const baseIntel = [];
 
         const mergedIntel = [...baseIntel];
         airtableIntel.forEach(item => {
@@ -249,24 +234,10 @@ function PropertyDirectoryContent() {
         setRawIntel(mergedIntel);
       } catch (err) {
         // Fallback strictly to local mockDb
-        const baseProperties = getProperties().map(p =>
-          toCard(p, MOCK_CATEGORIES[p.slug] || p.spaceCategory || "Residential", "Premium curated property briefing.")
-        );
+        const baseProperties = [];
         setRawProperties(baseProperties);
 
-        const baseIntel = getArticles().map(art => {
-          let category = art.category || "Residential";
-          if (category.toLowerCase() === "hospitality") category = "Hospitality";
-          if (category.toLowerCase() === "str") category = "STR";
-          if (category.toLowerCase() === "culinary" || category.toLowerCase() === "restaurants") category = "Restaurants";
-          if (category.toLowerCase() === "venues" || category.toLowerCase() === "events") category = "Venues";
-          return {
-            slug: art.slug,
-            title: art.title,
-            category,
-            date: art.date
-          };
-        });
+        const baseIntel = [];
         setRawIntel(baseIntel);
       } finally {
         setLoading(false);
@@ -558,9 +529,10 @@ function PropertyDirectoryContent() {
                     <Link href={`/property/${p.slug}`} key={p.id} className="property-preview-card">
                       <div className="property-card-visual">
                         <span className="property-city-badge">{p.city}</span>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        { }
                         {p.image ? (
-                          <img src={p.image} alt={p.title} className="property-card-img" />
+                          /* eslint-disable-next-line @next/next/no-img-element */
+          <img src={p.image} alt={p.title} className="property-card-img" />
                         ) : (
                           <div className="property-card-img" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#121212', width: '100%', height: '100%' }}>
                             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Image Pending</span>

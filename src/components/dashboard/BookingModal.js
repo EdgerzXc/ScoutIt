@@ -54,7 +54,7 @@ export default function BookingModal({ isOpen, onClose, brokerName, dealId, onSc
           <span className="text-xs text-gold-accent font-mono uppercase tracking-widest bg-gold-accent/10 px-2 py-1 rounded">Live Viewing</span>
           <h2 className="font-working-title text-xl text-on-surface mt-3">Schedule with {brokerName}</h2>
           <p className="text-sm text-text-secondary mt-1">
-            Pick a date and time. This will send a request to the broker's calendar.
+            Pick a date and time. This will send a request to the broker&apos;s calendar.
           </p>
         </div>
 

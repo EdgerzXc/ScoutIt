@@ -5,9 +5,9 @@ import { notFound } from "next/navigation";
 import { Lock } from "lucide-react";
 import ServiceConnectionPortal from "@/components/connection/ServiceConnectionPortal";
 import { DetailPageAccessGate } from "@/components/ui/EarlyAccessGate";
-import { getPhotographers } from "@/data/mockPhotographers";
 
-const DUMMY_PHOTOGRAPHERS = getPhotographers();
+
+const DUMMY_PHOTOGRAPHERS = [];
 
 export async function generateMetadata({ params }) {
   const { "photographer-slug": slug } = await params;
@@ -68,7 +68,7 @@ export default async function PhotographerDetailPage({ params }) {
             <header className="profile-header">
               <span className="vector-label">Creative Profile &middot; {ph.clearanceTier}</span>
               <h1 className="profile-name">{ph.name}</h1>
-              <p className="profile-title">{ph.title} // {ph.location}</p>
+              <p className="profile-title">{ph.title} {"//"} {ph.location}</p>
             </header>
 
             <div className="profile-body-content">

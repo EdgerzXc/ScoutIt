@@ -87,10 +87,10 @@ export default function WaitlistModal() {
           <div className="wl-done">
             <div className="wl-check">✓</div>
             <h2 className="wl-title">
-              {status === "already" ? "You're already on the list." : "You're on the list."}
+              {status === "already" ? "You&apos;re already on the list." : "You&apos;re on the list."}
             </h2>
             <p className="wl-sub">
-              We'll reach out the moment {roleLabel ? `${roleLabel} ` : ""}access opens — with your
+              We&apos;ll reach out the moment {roleLabel ? `${roleLabel} ` : ""}access opens — with your
               founding rate locked in. No spam. No pressure.
             </p>
             <button className="wl-btn" onClick={() => setOpen(false)}>Done</button>
@@ -102,7 +102,7 @@ export default function WaitlistModal() {
             </h2>
             <p className="wl-sub">
               ScoutIt opens in cohorts. Founding members keep their rate forever — only the first
-              20 slots per role. Drop your email and we'll bring you in first.
+              20 slots per role. Drop your email and we&apos;ll bring you in first.
             </p>
 
             <form onSubmit={submit} className="wl-form">

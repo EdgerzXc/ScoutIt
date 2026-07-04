@@ -19,8 +19,6 @@ function getArticleType(art) {
 }
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { getArticles } from "@/data/mockArticles";
-import { getProperties } from "@/data/mockProperties";
 
 const MOCK_CATEGORIES = {
   "batasan-hills": "Residential",
@@ -46,7 +44,7 @@ export default function IntelPage() {
   const router = useRouter();
   const [filter, setFilter] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
-  const [articles, setArticles] = useState(getArticles());
+  const [articles, setArticles] = useState([]);
   const [propertiesList, setPropertiesList] = useState([]);
   const [sidePanelArticle, setSidePanelArticle] = useState(null);
 
@@ -59,7 +57,7 @@ export default function IntelPage() {
 
         // 1. Setup properties for asset back-linking
         const airtableProperties = data.properties || [];
-        const baseProperties = getProperties().map(p => {
+        const baseProperties = [].map(p => {
           let cat = MOCK_CATEGORIES[p.slug] || p.spaceCategory || "Residential";
           return {
             slug: p.slug,
@@ -84,7 +82,7 @@ export default function IntelPage() {
 
         // 2. Setup intel reports
         const airtableIntel = data.intel || [];
-        const baseArticles = [...getArticles()];
+        const baseArticles = [...[]];
         airtableIntel.forEach(item => {
           if (!baseArticles.some(x => x.slug === item.slug)) {
             let category = item.category || "Residential";
@@ -267,7 +265,7 @@ export default function IntelPage() {
 
                     {/* Featured Asset Back-link Tag */}
                     {(() => {
-                      const linkedProp = getLinkedProperty(art);
+                      const linkedProp = null;
                       if (!linkedProp) return null;
                       return (
                         <div style={{ marginTop: "12px", borderTop: "1px dashed rgba(255,255,255,0.08)", paddingTop: "12px" }}>

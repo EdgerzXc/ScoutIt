@@ -5,74 +5,7 @@ import {
   fetchIntel,
   fetchHomepageConfig,
 } from "@/lib/airtable";
-import { getProperties } from "@/data/mockProperties";
-import { getArticles } from "@/data/mockArticles";
-import { getBrokers } from "@/data/mockBrokers";
 import { cityToRegion } from "@/lib/regions";
-
-// ── Mock fallback builders ───────────────────────────────────────
-function buildMockPayload() {
-  const mockProperties = getProperties().map((p) => ({
-    id:        p.slug,
-    slug:      p.slug,
-    title:     p.title,
-    city:      p.city,
-    region:    p.region || cityToRegion(p.city || ""),
-    location:  p.location,
-    property_type: p.property_type,
-    spaceCategory: p.spaceCategory || "",
-    seating_capacity: p.seating_capacity || "",
-    kitchen_grade: p.kitchen_grade || "",
-    accommodations: p.accommodations || "",
-    hosting_capacity: p.hosting_capacity || "",
-    setup_grade: p.setup_grade || "",
-    tenure:    p.tenure,
-    beds:      p.beds,
-    baths:     p.baths,
-    floor_sqm: p.floor_sqm,
-    furnishing: p.furnishing,
-    gradient:  "linear-gradient(135deg, #1f1c18 0%, #100f0d 100%)",
-    image:     p.photos?.[0] || "",
-    lat:       p.lat,
-    lng:       p.lng,
-  }));
-
-  const mockIntel = getArticles().map((art, idx) => ({
-    id:        `intel${idx + 1}`,
-    slug:      art.slug || `article-${idx + 1}`,
-    title:     art.title,
-    city:      art.city || "",
-    region:    art.region || cityToRegion(art.city || ""),
-    category:  art.category,
-    intelType: "BRIEFING",
-    excerpt:   art.excerpt,
-    date:      art.date,
-    image:     art.image || "",
-  }));
-
-  const mockBrokers = getBrokers().map((b) => ({
-    id:               b.id,
-    name:             b.name,
-    title:            b.title,
-    specialty:        b.specialty,
-    location:         b.location,
-    bio:              b.bio,
-    image:            b.image,
-    license:          b.license,
-    closures:         b.closures,
-    rating:           b.rating,
-    subscriptionTier: b.subscriptionTier,
-    subscriptionLabel: ["Diamond","Platinum","Gold","Silver","Bronze"][b.subscriptionTier - 1] || "Bronze",
-    niche:            b.niche || [],
-    clearanceTier:    b.clearanceTier || "",
-    rosterRank:       b.metrics?.[0]?.value || "",
-    rosterStatus:     b.metrics?.[2]?.value || "Active",
-    managedProperties: [],
-    metrics:          b.metrics || [],
-  }));
-
-  return { properties: mockProperties, intel: mockIntel, brokers: mockBrokers, homepage: null };
-}
 
 // ── Main handler ─────────────────────────────────────────────────
 export async function GET(request) {
@@ -96,12 +29,7 @@ export async function GET(request) {
 
   // ── 1. Fetch Data (Live Airtable or Mock Fallback) ────────────
   if (!apiKey || !baseId) {
-    console.warn("[CMS] Env vars missing — serving local mock data.");
-    const fallback = buildMockPayload();
-    properties = fallback.properties;
-    intel = fallback.intel;
-    brokers = fallback.brokers;
-    homepage = fallback.homepage;
+    console.warn("[CMS] Env vars missing — serving empty fallback.");
     source = "mock_fallback";
   } else {
     try {
@@ -115,11 +43,6 @@ export async function GET(request) {
       source = "airtable";
     } catch (error) {
       console.error("[CMS] Airtable fetch failed:", error.message);
-      const fallback = buildMockPayload();
-      properties = fallback.properties;
-      intel = fallback.intel;
-      brokers = fallback.brokers;
-      homepage = fallback.homepage;
       source = "mock_fallback_on_error";
     }
   }

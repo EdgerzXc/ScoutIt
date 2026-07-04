@@ -401,7 +401,7 @@ export default function OnboardingPage() {
       <div className="flex flex-col animate-[fadeIn_0.5s_ease-out]">
         <span className="text-gold-accent font-label-caps text-[12px] tracking-widest uppercase mb-4 block">Phase 04 // Calibration</span>
         <h1 className="font-headline-editorial text-4xl md:text-5xl text-on-surface mb-2">One last thing</h1>
-        <p className="text-text-secondary font-body-md mb-8">Let's calibrate your dashboard for Day 1.</p>
+        <p className="text-text-secondary font-body-md mb-8">Let&apos;s calibrate your dashboard for Day 1.</p>
 
         <div className="bg-surface-alt border border-surface-variant rounded-lg p-6 md:p-8 mb-8">
           {mode === "buyer" && (
@@ -426,7 +426,7 @@ export default function OnboardingPage() {
               <p className="text-text-secondary text-sm mb-6">You can set up your asset profile now, or explore the dashboard first.</p>
               <div className="flex flex-col gap-3">
                 <button className="w-full bg-gold-accent text-background font-working-title text-base font-bold py-3 px-6 rounded hover:opacity-90 transition-opacity" onClick={() => { localStorage.setItem("scoutit_open_wizard", "1"); completeOnboarding(); }}>List Property Now</button>
-                <button className="w-full bg-surface border border-surface-variant text-on-surface font-working-title text-base font-bold py-3 px-6 rounded hover:bg-surface-container transition-colors" onClick={() => completeOnboarding()}>I'll do it later</button>
+                <button className="w-full bg-surface border border-surface-variant text-on-surface font-working-title text-base font-bold py-3 px-6 rounded hover:bg-surface-container transition-colors" onClick={() => completeOnboarding()}>I&apos;ll do it later</button>
               </div>
             </>
           )}
@@ -469,7 +469,7 @@ export default function OnboardingPage() {
               Enter ScoutIt →
             </button>
             {mode === "broker" && !prcFormatOk && formData.prcLicense.length > 0 && (
-              <p className="text-error text-sm mt-3 text-center">That doesn't look like a PRC license number — it should contain at least 5 digits.</p>
+              <p className="text-error text-sm mt-3 text-center">That doesn&apos;t look like a PRC license number — it should contain at least 5 digits.</p>
             )}
           </>
         )}

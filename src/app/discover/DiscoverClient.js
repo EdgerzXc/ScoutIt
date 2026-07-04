@@ -16,16 +16,13 @@ function getDBCategory(cat) {
   return cat;
 }
 
-import { DISCOVER_PROPERTIES } from "@/data/mockProperties";
-import { DISCOVER_INTEL } from "@/data/mockArticles";
-
 export default function DiscoverClient() {
   const searchParams = useSearchParams();
   const typeParam = searchParams.get("type") || "residential";
   const matchedCategory = CATEGORIES.find(c => c.toLowerCase() === typeParam.toLowerCase()) || "Residential";
 
-  const [allProperties, setAllProperties] = useState(DISCOVER_PROPERTIES);
-  const [allIntel, setAllIntel] = useState(DISCOVER_INTEL);
+  const [allProperties, setAllProperties] = useState([]);
+  const [allIntel, setAllIntel] = useState([]);
 
   const [properties, setProperties] = useState([]);
   const [intel, setIntel] = useState([]);
@@ -116,6 +113,9 @@ export default function DiscoverClient() {
     fetchCMS();
   }, []);
 
+  // Region search (only surfaced when the list grows)
+  const [regionQuery, setRegionQuery] = useState("");
+
   // Update filtered selection on category change or live data load
   useEffect(() => {
     const dbCategory = getDBCategory(matchedCategory);
@@ -141,8 +141,7 @@ export default function DiscoverClient() {
     return seen;
   }, [properties]);
 
-  // Region search (only surfaced when the list grows)
-  const [regionQuery, setRegionQuery] = useState("");
+
   const shownRegions = useMemo(() => {
     const q = regionQuery.trim().toLowerCase();
     if (!q) return regions;
