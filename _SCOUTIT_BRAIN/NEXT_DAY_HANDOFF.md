@@ -1,6 +1,17 @@
 # ScoutIt Handoff - End of Session
 
-> ## ▶️ RESUME HERE (latest) — 2026-07-04 — atmosphere upgrade + drag fix + real inquiry pipeline/messenger/Owner CRM notes/mass-delete
+> ## ▶️ RESUME HERE (latest) — 2026-07-05 — Cinematic Polish, Geo-Pricing, Mapbox Routing & Pending Security Pass
+> Full detail in `08_OPERATIONS_AND_BACKLOG/SESSION_HANDOFF_2026-07-05.md`:
+> - **Built and Shipped:** 
+>   - **Transit Routing:** Replaced Haversine straight-line math with the Mapbox Matrix API for true driving distances to train stations.
+>   - **Codebase Optimization:** Replaced static map loads with Next.js `dynamic()` imports (`ssr: false`) to unblock the main thread, and removed dead scratch files via `knip`. Set up Next.js Image component remote patterns.
+>   - **Features:** Built the `ComparisonMatrix.js` modal and a Dynamic Geo-Pricing Engine (`GeoPricingGauge.js`) for the Owner Dashboard.
+>   - **Cinematic Visual Polish:** Executed a massive design engineering pass using `motion-ui` and `make-interfaces-feel-better` skills. Applied `framer-motion` stagger to property grids, `AnimatePresence` focus pulls, `tabular-nums` to stop jumping digits, `text-wrap: balance` for premium typography, and active film grain to secure the luxury aesthetic.
+> - **PLANNED / ON HOLD (Next Steps):**
+>   - **Security Hardening:** Owner explicitly requested to pause the Infrastructure Blueprint (Airtable cache, Mapbox cache-back, native webhooks) in order to prioritize Supabase RLS tightening, Input Validations, and overall security audits. **DO NOT build new infrastructure features until security is complete.**
+>   - **SEO Automations:** Owner requested an automated system to generate SEO best practices for the property listings.
+>
+> ## Previous — 2026-07-04 — atmosphere upgrade + drag fix + real inquiry pipeline/messenger/Owner CRM notes/mass-delete
 > Two parts, full detail in `08_OPERATIONS_AND_BACKLOG/SESSION_HANDOFF_2026-07-04.md`:
 > - **Part 1:** site-wide dark/gold atmosphere visual upgrade (~31 files) + fixed the property
 >   page's chapter-nav drag (missing `preventDefault()` on `pointerdown` let the browser start a
