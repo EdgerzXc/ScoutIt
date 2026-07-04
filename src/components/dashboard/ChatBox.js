@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { motion } from "framer-motion";
 import BookingModal from "./BookingModal";
 import { uploadAttachment } from "../../lib/storage";
 import { getSession } from "../../lib/authClient";
@@ -338,6 +339,18 @@ export default function ChatBox({ deal, onCloseDeal, onOfferHandshake, onAcceptH
         </div>
       )}
 
+      {/* Secure Connection SVG Line */}
+      <div className="w-full h-1 overflow-hidden relative bg-black">
+        <motion.div 
+          className="absolute inset-0 bg-gradient-to-r from-transparent via-gold-accent to-transparent opacity-50"
+          animate={{ x: ["-100%", "100%"] }}
+          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+        />
+        <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none">
+          <line x1="0" y1="2" x2="100%" y2="2" stroke="rgba(232, 174, 60, 0.2)" strokeWidth="1" strokeDasharray="4 4" />
+        </svg>
+      </div>
+
       {/* Chat Header */}
       <div className="p-4 border-b border-surface-variant flex justify-between items-center bg-[#121212]/80 backdrop-blur-md sticky top-0 z-10">
         <div>
@@ -472,10 +485,16 @@ export default function ChatBox({ deal, onCloseDeal, onOfferHandshake, onAcceptH
         {loadError && (
           <p className="text-center text-xs text-error font-mono">{loadError}</p>
         )}
-        {!loading && !loadError && messages.map((msg) => {
+        {!loading && !loadError && messages.map((msg, index) => {
           const isMe = msg.sender === 'me';
           return (
-            <div key={msg.id} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} animate-[fadeIn_0.3s_ease]`}>
+            <motion.div 
+              key={msg.id} 
+              className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+            >
               <div
                 className={`max-w-[85%] p-3.5 rounded-xl text-sm shadow-sm ${
                   isMe
@@ -495,7 +514,7 @@ export default function ChatBox({ deal, onCloseDeal, onOfferHandshake, onAcceptH
               <span className="text-[10px] text-text-muted mt-1 px-1 font-mono uppercase">
                 {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </span>
-            </div>
+            </motion.div>
           );
         })}
 

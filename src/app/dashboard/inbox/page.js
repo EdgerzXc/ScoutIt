@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { motion } from "framer-motion";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import ChatBox from "@/components/dashboard/ChatBox";
 import { getSession } from "@/lib/authClient";
@@ -143,9 +144,12 @@ export default function InboxPage() {
             ) : deals.length === 0 ? (
               <div className="p-6 text-text-secondary">No active leads.</div>
             ) : (
-              deals.map(deal => (
-                <div
+              deals.map((deal, index) => (
+                <motion.div
                   key={deal.id}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.2, delay: index * 0.05 }}
                   onClick={() => handleSelectDeal(deal)}
                   className={`p-4 border-b border-surface-variant cursor-pointer transition-colors ${selectedDealId === deal.id ? 'bg-surface-variant' : 'hover:bg-surface-variant/50'}`}
                 >
@@ -155,9 +159,13 @@ export default function InboxPage() {
                     </h3>
                     <div className="flex items-center gap-1.5 shrink-0">
                       {deal.unreadCount > 0 && (
-                        <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-gold-accent text-background text-[10px] font-bold font-mono flex items-center justify-center">
+                        <motion.span 
+                          className="min-w-[18px] h-[18px] px-1 rounded-full bg-gold-accent text-background text-[10px] font-bold font-mono flex items-center justify-center"
+                          animate={{ boxShadow: ["0px 0px 0px rgba(232,174,60,0)", "0px 0px 10px rgba(232,174,60,0.8)", "0px 0px 0px rgba(232,174,60,0)"] }}
+                          transition={{ repeat: Infinity, duration: 2 }}
+                        >
                           {deal.unreadCount}
-                        </span>
+                        </motion.span>
                       )}
                       {deal.status === 'closed' ? (
                         <span className="px-2 py-0.5 rounded bg-surface-variant text-text-secondary text-[10px] font-mono uppercase tracking-wider whitespace-nowrap">
@@ -172,7 +180,7 @@ export default function InboxPage() {
                   </div>
                   <p className="text-xs text-text-primary mb-1">{deal.other_party}</p>
                   <p className="text-xs text-text-secondary truncate">{deal.last_message}</p>
-                </div>
+                </motion.div>
               ))
             )}
           </div>
