@@ -891,6 +891,12 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
   // kept getting interrupted. Touch is left alone (native scroll handles it).
   const onDragStart = (e) => {
     if (e.pointerType === "touch") return;
+    // Without this, the browser can start its own native text/content
+    // selection drag right on pointerdown (before any move even fires) --
+    // that fight is what made the strip look draggable (grab cursor) but
+    // not actually respond: our scrollLeft writes were competing with the
+    // browser's native selection-drag instead of driving it outright.
+    e.preventDefault();
     isDragging.current  = true;
     startX.current      = e.pageX;
     scrollStart.current = scrollRef.current.scrollLeft;
@@ -900,7 +906,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
     // drag that means dozens of overlapping animations fighting each other,
     // which is what made dragging feel laggy/late. Go instant while dragging.
     scrollRef.current.style.scrollBehavior = "auto";
-    scrollRef.current.setPointerCapture(e.pointerId);
+    try { scrollRef.current.setPointerCapture(e.pointerId); } catch {}
   };
   const onDragEnd = (e) => {
     if (!isDragging.current) return;
