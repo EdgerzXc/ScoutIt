@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Header from "@/components/layout/Header";
@@ -305,71 +305,67 @@ function PropertyDirectoryContent() {
   };
 
   // Filter properties dynamically
-  const filteredProperties = rawProperties.filter(p => {
-    // Sector filter
-    if (selectedSectors.length > 0) {
-      const mappedSectors = selectedSectors.map(s => {
-        if (s === "Venues/Events") return "Venues";
-        return s;
-      });
-      let cat = p.spaceCategory;
-      if (!mappedSectors.includes(cat)) {
+  const filteredProperties = useMemo(() => {
+    const mappedSectors = selectedSectors.length > 0
+      ? selectedSectors.map(s => (s === "Venues/Events" ? "Venues" : s))
+      : [];
+
+    return rawProperties.filter(p => {
+      // Sector filter
+      if (mappedSectors.length > 0) {
+        let cat = p.spaceCategory;
+        if (!mappedSectors.includes(cat)) {
+          return false;
+        }
+      }
+      // Location filter
+      if (selectedLocations.length > 0 && !selectedLocations.includes(normalizeCity(p.city))) {
         return false;
       }
-    }
-    // Location filter
-    if (selectedLocations.length > 0 && !selectedLocations.includes(normalizeCity(p.city))) {
-      return false;
-    }
-    // Aesthetic filter
-    if (selectedAesthetics.length > 0 && !selectedAesthetics.includes(p.aestheticTag)) {
-      return false;
-    }
-    // Price Band filter — buckets by internal price magnitude; no amounts shown.
-    if (selectedPriceBands.length > 0) {
-      const pPrice = parsePrice(p.listed_price);
-      if (pPrice === null) return false; // no price on record → excluded when banding
-      const inBand = selectedPriceBands.some(label => {
-        const band = PRICE_BANDS.find(b => b.label === label);
-        return band && pPrice >= band.min && pPrice < band.max;
-      });
-      if (!inBand) return false;
-    }
-    // Search query matches title, city, location, category, or aesthetic tag
-    if (searchQuery.trim() !== "") {
-      const q = searchQuery.toLowerCase();
-      const matchTitle = p.title.toLowerCase().includes(q);
-      const matchCity = p.city.toLowerCase().includes(q);
-      const matchLocation = p.location.toLowerCase().includes(q);
-      const matchCategory = p.spaceCategory.toLowerCase().includes(q);
-      const matchAesthetic = p.aestheticTag.toLowerCase().includes(q);
-      return matchTitle || matchCity || matchLocation || matchCategory || matchAesthetic;
-    }
-    return true;
-  });
+      // Aesthetic filter
+      if (selectedAesthetics.length > 0 && !selectedAesthetics.includes(p.aestheticTag)) {
+        return false;
+      }
+      // Price Band filter — buckets by internal price magnitude; no amounts shown.
+      if (selectedPriceBands.length > 0) {
+        const pPrice = parsePrice(p.listed_price);
+        if (pPrice === null) return false; // no price on record → excluded when banding
+        const inBand = selectedPriceBands.some(label => {
+          const band = PRICE_BANDS.find(b => b.label === label);
+          return band && pPrice >= band.min && pPrice < band.max;
+        });
+        if (!inBand) return false;
+      }
+      // Search query matches title, city, location, category, or aesthetic tag
+      if (searchQuery.trim() !== "") {
+        const q = searchQuery.toLowerCase();
+        const matchTitle = p.title.toLowerCase().includes(q);
+        const matchCity = p.city.toLowerCase().includes(q);
+        const matchLocation = p.location.toLowerCase().includes(q);
+        const matchCategory = p.spaceCategory.toLowerCase().includes(q);
+        const matchAesthetic = p.aestheticTag.toLowerCase().includes(q);
+        return matchTitle || matchCity || matchLocation || matchCategory || matchAesthetic;
+      }
+      return true;
+    });
+  }, [rawProperties, selectedSectors, selectedLocations, selectedAesthetics, selectedPriceBands, searchQuery]);
 
   // Compile Dynamic "Neighborhood Intel" Sidebar Widget
-  const getWidgetArticles = () => {
+  const widgetArticles = useMemo(() => {
+    let filtered = [];
     if (selectedLocations.length > 0) {
       // Find articles matching selected locations
-      return rawIntel.filter(art => selectedLocations.some(loc => art.title.toLowerCase().includes(loc.toLowerCase()) || art.slug.toLowerCase().includes(loc.toLowerCase().replace(/\s+/g, '-'))));
-    }
-    if (selectedSectors.length > 0) {
+      filtered = rawIntel.filter(art => selectedLocations.some(loc => art.title.toLowerCase().includes(loc.toLowerCase()) || art.slug.toLowerCase().includes(loc.toLowerCase().replace(/\s+/g, '-'))));
+    } else if (selectedSectors.length > 0) {
       // Find articles matching selected sectors
-      const mappedSectors = selectedSectors.map(s => {
-        if (s === "Venues/Events") return "Venues";
-        return s;
-      });
-      return rawIntel.filter(art => {
-        let cat = art.category;
-        return mappedSectors.includes(cat);
-      });
+      const mappedSectors = selectedSectors.map(s => s === "Venues/Events" ? "Venues" : s);
+      filtered = rawIntel.filter(art => mappedSectors.includes(art.category));
+    } else {
+      // Return newest general articles
+      filtered = rawIntel;
     }
-    // Return newest general articles
-    return rawIntel.slice(0, 3);
-  };
-
-  const widgetArticles = getWidgetArticles().slice(0, 3);
+    return filtered.slice(0, 3);
+  }, [rawIntel, selectedLocations, selectedSectors]);
 
   return (
     <div className="directory-layout">
