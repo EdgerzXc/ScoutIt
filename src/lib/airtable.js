@@ -15,7 +15,7 @@ const BASE_URL = "https://api.airtable.com/v0";
 // values up by DI_ key while CategorySpecBlock's locked section looks
 // up by label — so we expand each DI_ key into a label alias too.
 // Mirrors the Units_JSON / WhereTo JSON-column pattern.
-function expandDeepIntel(jsonStr) {
+export function expandDeepIntel(jsonStr) {
   let raw;
   try { raw = JSON.parse(jsonStr || "{}") || {}; } catch { raw = {}; }
   const out = { ...raw };

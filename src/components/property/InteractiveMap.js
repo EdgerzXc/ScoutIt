@@ -68,10 +68,21 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
         iconAnchor: [12, 12]
       });
 
+      const mainPopup = document.createElement('div');
+      const mainTitle = document.createElement('strong');
+      mainTitle.style.color = '#E8AE3C';
+      mainTitle.textContent = propertyTitle || "ScoutIt Property";
+      const mainSub = document.createElement('span');
+      mainSub.style.color = '#c8c8c8';
+      mainSub.textContent = 'Target Location';
+      mainPopup.appendChild(mainTitle);
+      mainPopup.appendChild(document.createElement('br'));
+      mainPopup.appendChild(mainSub);
+
       // Add Main Property Marker
       window.L.marker(position, { icon: mainPropertyIcon })
         .addTo(map)
-        .bindPopup(`<strong style="color:#E8AE3C">${propertyTitle || "ScoutIt Property"}</strong><br/><span style="color:#c8c8c8">Target Location</span>`, {
+        .bindPopup(mainPopup, {
           className: "custom-leaflet-popup"
         });
 
@@ -92,8 +103,18 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
         const marker = window.L.marker(itemPosition, { icon: amenityIcon })
           .addTo(map);
 
+        const amenityPopup = document.createElement('div');
+        const amenityTitle = document.createElement('strong');
+        amenityTitle.textContent = item.name;
+        const amenitySub = document.createElement('span');
+        amenitySub.style.color = '#c8c8c8';
+        amenitySub.innerHTML = `${item.category.replace(/</g, '&lt;')} &middot; ${item.distance.replace(/</g, '&lt;')}`;
+        amenityPopup.appendChild(amenityTitle);
+        amenityPopup.appendChild(document.createElement('br'));
+        amenityPopup.appendChild(amenitySub);
+
         // Bind custom popup & mouseover HUD trigger
-        marker.bindPopup(`<strong>${item.name}</strong><br/><span style="color:#c8c8c8">${item.category} &middot; ${item.distance}</span>`, {
+        marker.bindPopup(amenityPopup, {
           className: "custom-leaflet-popup"
         });
 
@@ -171,12 +192,20 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
               iconSize: [16, 16],
               iconAnchor: [8, 8],
             });
+            const routePopup = document.createElement('div');
+            const routeTitle = document.createElement('strong');
+            routeTitle.style.color = '#E8AE3C';
+            routeTitle.textContent = destName;
+            const routeSub = document.createElement('span');
+            routeSub.style.color = '#c8c8c8';
+            routeSub.textContent = 'Transit hub · route start';
+            routePopup.appendChild(routeTitle);
+            routePopup.appendChild(document.createElement('br'));
+            routePopup.appendChild(routeSub);
+
             window.L.marker([destLat, destLng], { icon: originIcon })
               .addTo(map)
-              .bindPopup(
-                `<strong style="color:#E8AE3C">${destName}</strong><br/><span style="color:#c8c8c8">Transit hub · route start</span>`,
-                { className: "custom-leaflet-popup" }
-              );
+              .bindPopup(routePopup, { className: "custom-leaflet-popup" });
 
             // 5. Frame both endpoints
             map.fitBounds(routeLine.getBounds(), { padding: [55, 55], maxZoom: 15 });
