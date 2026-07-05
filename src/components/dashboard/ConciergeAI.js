@@ -108,6 +108,7 @@ export default function ConciergeAI() {
           </div>
           <button 
             onClick={() => setIsOpen(false)}
+            aria-label="Close"
             className="w-8 h-8 flex items-center justify-center text-text-secondary hover:text-error transition-colors rounded-full hover:bg-surface-variant"
           >
             <X size="1.2em" />

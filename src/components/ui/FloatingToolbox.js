@@ -316,7 +316,7 @@ export default function FloatingToolbox() {
             <span style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "#E8AE3C", letterSpacing: "0.22em", textTransform: "uppercase" }}>
               Display
             </span>
-            <button onClick={() => setOpen(false)} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.28)", cursor: "pointer", fontSize: 14, lineHeight: 1, padding: "1px 2px" }}>✕</button>
+            <button onClick={() => setOpen(false)} aria-label="Close" style={{ background: "none", border: "none", color: "rgba(255,255,255,0.28)", cursor: "pointer", fontSize: 14, lineHeight: 1, padding: "1px 2px" }}>✕</button>
           </div>
 
           {/* Mode options */}
@@ -435,7 +435,7 @@ export default function FloatingToolbox() {
               <div style={{ padding: "9px 11px 11px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 7 }}>
                   <span style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "#E8AE3C", letterSpacing: "0.2em", textTransform: "uppercase" }}>Dev · Tier</span>
-                  <button onClick={turnOffDev} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.4)", cursor: "pointer", fontFamily: "var(--font-mono)", fontSize: 8.5, letterSpacing: "0.12em", textTransform: "uppercase" }}>Hide ✕</button>
+                  <button onClick={turnOffDev} aria-label="Hide Developer Options" style={{ background: "none", border: "none", color: "rgba(255,255,255,0.4)", cursor: "pointer", fontFamily: "var(--font-mono)", fontSize: 8.5, letterSpacing: "0.12em", textTransform: "uppercase" }}>Hide ✕</button>
                 </div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 9 }}>
                   {TIERS.map((t) => {
@@ -492,7 +492,7 @@ export default function FloatingToolbox() {
                   {WIZARD_STEPS[wizardStep].title}
                 </h2>
               </div>
-              <button onClick={() => setWizardOpen(false)} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.28)", cursor: "pointer", fontSize: 18, lineHeight: 1, padding: "2px 4px", flexShrink: 0 }}>✕</button>
+              <button onClick={() => setWizardOpen(false)} aria-label="Close" style={{ background: "none", border: "none", color: "rgba(255,255,255,0.28)", cursor: "pointer", fontSize: 18, lineHeight: 1, padding: "2px 4px", flexShrink: 0 }}>✕</button>
             </div>
 
             {/* Wizard body */}

@@ -65,7 +65,7 @@ export default function UnitInquiryModal({ isOpen, onClose, propertyTitle, prope
   return (
     <div className="inquiry-overlay">
       <div className="inquiry-modal">
-        <button className="inquiry-close" onClick={onClose}>✕</button>
+        <button className="inquiry-close" onClick={onClose} aria-label="Close">✕</button>
 
         {status === "success" ? (
           <div className="inquiry-success">

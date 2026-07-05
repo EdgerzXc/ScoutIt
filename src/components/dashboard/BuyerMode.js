@@ -253,6 +253,7 @@ export default function BuyerMode() {
             <button 
               className="pointer-events-auto bg-surface-container border border-surface-variant hover:border-gold-accent text-on-surface rounded-full w-12 h-12 flex items-center justify-center shadow-lg transition-colors"
               onClick={() => setShowMap(false)}
+              aria-label="Close"
             >
               ✕
             </button>

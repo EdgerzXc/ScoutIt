@@ -214,7 +214,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
             className="w-full bg-transparent text-sm text-text-primary focus:outline-none placeholder-text-muted/60"
           />
           {search && (
-            <button onClick={() => setSearch("")} className="text-text-muted hover:text-gold-accent" title="Clear">
+            <button onClick={() => setSearch("")} aria-label="Clear Search" className="text-text-muted hover:text-gold-accent" title="Clear">
               <X size={14} />
             </button>
           )}
@@ -391,7 +391,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                                     <span key={idx} className="inline-flex items-center gap-1 px-2 py-1 bg-surface-variant border border-gold-accent/20 text-[11px] text-text-primary rounded uppercase tracking-wide font-working-title">
                                       {feature}
                                       {!structuralReadOnly && (
-                                        <button onClick={() => removeFeature(unit.id, feature)} className="text-text-muted hover:text-error transition-colors">
+                                        <button onClick={() => removeFeature(unit.id, feature)} aria-label={`Remove ${feature}`} className="text-text-muted hover:text-error transition-colors">
                                           <X size={10} />
                                         </button>
                                       )}
@@ -524,6 +524,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
               <h3 className="font-display-md text-2xl text-gold-accent">Unit Media</h3>
               <button
                 onClick={() => setActivePhotoUnit(null)}
+                aria-label="Close"
                 className="p-2 text-text-secondary hover:text-on-surface bg-surface-variant hover:bg-surface rounded transition-colors"
               >
                 <X size={20} />
