@@ -404,7 +404,7 @@ function DashboardInner() {
       </header>
 
       {/* Main Content Area (Mode determined) */}
-      <main className="relative z-10 flex-1 w-full max-w-7xl mx-auto md:p-6 p-0">
+      <main className="relative z-10 flex-1 w-full max-w-7xl mx-auto px-4 py-6 md:p-6">
         <Nudge mode={mode} />
         {renderActiveMode()}
       </main>
