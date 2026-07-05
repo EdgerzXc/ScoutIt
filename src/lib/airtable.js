@@ -640,3 +640,46 @@ export async function updateProperty(apiKey, baseId, slug, data, unitsOverride =
 
   return await resPatch.json();
 }
+
+export async function deletePropertyById(apiKey, baseId, recordId) {
+  const url = `${BASE_URL}/${baseId}/PROPERTIES_CMS/${recordId}`;
+  
+  const res = await fetch(url, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${apiKey}`
+    }
+  });
+
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`Airtable delete by ID failed: ${res.status} ${errText}`);
+  }
+
+  return await res.json();
+}
+
+export async function deleteProperty(apiKey, baseId, slug) {
+  // 1. Find the Airtable Record ID using the slug
+  const params = `filterByFormula=${encodeURIComponent(`{Slug}='${slug}'`)}&maxRecords=1`;
+  const urlGet = `${BASE_URL}/${baseId}/PROPERTIES_CMS?${params}`;
+  
+  const resGet = await fetch(urlGet, {
+    headers: { Authorization: `Bearer ${apiKey}` },
+  });
+  
+  if (!resGet.ok) {
+    throw new Error(`Airtable fetch for delete failed: ${resGet.status}`);
+  }
+  
+  const getResult = await resGet.json();
+  if (!getResult.records || getResult.records.length === 0) {
+    // Record not found, might have been already deleted
+    return { deleted: true, id: null };
+  }
+  
+  const recordId = getResult.records[0].id;
+
+  // 2. DELETE the record
+  return await deletePropertyById(apiKey, baseId, recordId);
+}

@@ -385,9 +385,30 @@ export function DashboardProvider({ children }) {
   };
 
   const closeListing = async (listingId) => {
+    // Optimistic UI update
     setListings(prev => prev.filter(l => l.id !== listingId));
     addToast("Property File closed", "🏁");
-    await supabase.from('properties').delete().eq('id', listingId);
+    
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token || (currentUser?.id === 'master-dev' ? 'mock-e2e-token' : '');
+      
+      const res = await fetch("/api/dashboard/delete", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ submissionId: listingId, userId: currentUser?.id })
+      });
+      
+      if (!res.ok) {
+        throw new Error("Delete failed on server");
+      }
+    } catch (err) {
+      console.error("Failed to delete property", err);
+      addToast("Error deleting from database", "❌");
+    }
   };
 
   const publishListing = async (listingId) => {
