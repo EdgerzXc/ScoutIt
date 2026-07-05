@@ -26,7 +26,7 @@ export default function ComparisonMatrix({ properties, onClose }) {
       >
         <div className="matrix-header">
           <h2 className="matrix-title">Asset Comparison</h2>
-          <button className="matrix-close" onClick={onClose}>✕</button>
+          <button className="matrix-close" onClick={onClose} aria-label="Close">✕</button>
         </div>
 
         <div className="matrix-scroll-container">

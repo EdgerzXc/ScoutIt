@@ -305,7 +305,7 @@ export default function IntelPage() {
       {sidePanelArticle && (
         <div className="side-panel-overlay" onClick={() => setSidePanelArticle(null)}>
           <div className="side-panel" onClick={(e) => e.stopPropagation()}>
-            <button className="side-panel-close" onClick={() => setSidePanelArticle(null)}>✕</button>
+            <button className="side-panel-close" aria-label="Close" onClick={() => setSidePanelArticle(null)}>✕</button>
             {sidePanelArticle.image && (
               <div className="side-panel-image" style={{ backgroundImage: `url(${sidePanelArticle.image})` }}></div>
             )}

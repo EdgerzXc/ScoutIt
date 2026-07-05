@@ -151,6 +151,7 @@ export default function PhotoUploader({ photos, onChange, onSetImage, isPro = fa
                   <button 
                     className="absolute top-2 right-2 bg-error text-white rounded-full w-5 h-5 flex items-center justify-center shadow hover:scale-110 transition-transform z-10 text-xs"
                     onClick={(e) => { e.stopPropagation(); handleRemove(index); }}
+                    aria-label="Remove photo"
                     title="Remove Photo Slot"
                   >
                     ✕
