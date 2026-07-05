@@ -202,6 +202,36 @@ test.describe('Comprehensive E2E Flow', () => {
 
     await expect(seekerPage.locator('text=Hello! Yes, we can schedule a viewing tomorrow.').first()).toBeVisible({ timeout: 10000 });
 
+    // Phase 4: Broker (Owner) Offers Handshake, Seeker Accepts
+    await ownerPage.locator('button:has-text("Offer Handshake 🤝")').click();
+    
+    // Use the exact text to click the modal confirmation button
+    const offerPromise = ownerPage.waitForResponse(response => response.url().includes('/api/deals/') && response.request().method() === 'PATCH');
+    await ownerPage.locator('button:has-text("Offer Handshake")').filter({ hasText: /^Offer Handshake$/ }).click();
+    await offerPromise;
+    
+    // Seeker sees "Accept Handshake"
+    // Since the deal state needs to be refetched by the seeker in the absence of a real-time deals subscription:
+    await seekerPage.reload();
+    
+    const acceptBtn = seekerPage.locator('button:has-text("Accept Handshake")');
+    await expect(acceptBtn).toBeVisible({ timeout: 15000 });
+    await acceptBtn.click();
+
+    // Verify contact info is shown ("Verified Advisor Active")
+    await expect(seekerPage.locator('text=Verified Advisor Active').first()).toBeVisible({ timeout: 15000 });
+    
+    // Phase 5: Schedule Live Viewing
+    await seekerPage.locator('button:has-text("Schedule Call")').first().click(); // Open BookingModal
+    
+    // Fill the BookingModal (We just click the Confirm Booking button since it defaults to something)
+    const confirmBookingBtn = seekerPage.locator('button:has-text("Confirm Booking")');
+    await expect(confirmBookingBtn).toBeVisible({ timeout: 10000 });
+    await confirmBookingBtn.click();
+    
+    // Verify SYSTEM message appeared in chat
+    await expect(seekerPage.locator('text=[SYSTEM] I have requested a live viewing for:').first()).toBeVisible({ timeout: 10000 });
+
     await ownerContext.close();
     await seekerContext.close();
   });
