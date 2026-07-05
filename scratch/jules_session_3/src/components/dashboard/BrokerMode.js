@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useMemo } from "react";
+import { useState, useRef } from "react";
 import { useDashboard } from "../../context/DashboardContext";
 import Link from "next/link";
 import { Lock } from "lucide-react";
@@ -25,31 +25,16 @@ export default function BrokerMode() {
   const [dealNotes, setDealNotes] = useState({});
   const noteSaveTimers = useRef({});
 
-  // ⚡ Bolt Optimization: Memoize derived pipelines
-  const { myPitches, pending, accepted, activePitches, feed } = useMemo(() => {
-    const _myPitches = pitches.filter(p => p.isCurrentUserBroker);
-    const _pending = [];
-    const _accepted = [];
-    const _activePitches = [];
-    const pitchedListingIds = new Set();
-    
-    _myPitches.forEach(p => {
-      pitchedListingIds.add(p.listingId);
-      if (p.status === 'pending') _pending.push(p);
-      if (p.status === 'accepted') _accepted.push(p);
-      if (p.status !== 'accepted' && p.status !== 'closed') _activePitches.push(p);
-    });
+  // Filter pipeline data
+  const myPitches = pitches.filter(p => p.isCurrentUserBroker);
+  const pending = myPitches.filter(p => p.status === 'pending');
+  const accepted = myPitches.filter(p => p.status === 'accepted');
+  const activePitches = myPitches.filter(p => p.status !== 'accepted' && p.status !== 'closed');
 
-    const _feed = listings.filter(l => !pitchedListingIds.has(l.id));
 
-    return {
-      myPitches: _myPitches,
-      pending: _pending,
-      accepted: _accepted,
-      activePitches: _activePitches,
-      feed: _feed
-    };
-  }, [pitches, listings]);
+  // Feed = listings that we haven't pitched to yet
+  const pitchedListingIds = myPitches.map(p => p.listingId);
+  const feed = listings.filter(l => !pitchedListingIds.includes(l.id));
 
   // Some deals (e.g. owner-initiated handshakes) carry no title — never show a raw UUID.
   const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -84,7 +69,7 @@ export default function BrokerMode() {
       try {
         const { data: { session } } = await getSession();
         const token = session?.access_token;
-        const mockOwnerId = !token && currentUser?.id ? currentUser.id : undefined;
+        const mockOwnerId = !token && currentUser?.id === 'master-dev' ? 'master-dev' : undefined;
         await fetch(`/api/deals/${dealId}/notes`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
@@ -612,4 +597,3 @@ export default function BrokerMode() {
     </div>
   );
 }
-

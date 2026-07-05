@@ -84,7 +84,7 @@ export default function BrokerMode() {
       try {
         const { data: { session } } = await getSession();
         const token = session?.access_token;
-        const mockOwnerId = !token && currentUser?.id ? currentUser.id : undefined;
+        const mockOwnerId = !token && currentUser?.id === 'master-dev' ? 'master-dev' : undefined;
         await fetch(`/api/deals/${dealId}/notes`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
@@ -293,7 +293,7 @@ export default function BrokerMode() {
             >
               Generate ID
             </button>
-            <button onClick={() => setShowNotification(false)} aria-label="Close" className="text-text-muted hover:text-on-surface p-2">✕</button>
+            <button onClick={() => setShowNotification(false)} className="text-text-muted hover:text-on-surface p-2">✕</button>
           </div>
         </div>
       )}
@@ -304,7 +304,6 @@ export default function BrokerMode() {
           <div className="w-full max-w-2xl bg-[#0d0d0d] border border-surface-variant rounded-xl shadow-[0_0_50px_rgba(232,174,60,0.1)] flex flex-col relative animate-[scaleUp_0.4s_ease-out]">
             <button 
               onClick={() => setShowIdCard(false)}
-              aria-label="Close"
               className="absolute top-4 right-4 text-text-muted hover:text-on-surface text-xl z-20"
             >
               ✕
@@ -612,4 +611,3 @@ export default function BrokerMode() {
     </div>
   );
 }
-

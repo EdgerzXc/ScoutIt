@@ -26,7 +26,7 @@ export default function ComparisonMatrix({ properties, onClose }) {
       >
         <div className="matrix-header">
           <h2 className="matrix-title">Asset Comparison</h2>
-          <button className="matrix-close" onClick={onClose} aria-label="Close">✕</button>
+          <button className="matrix-close" onClick={onClose}>✕</button>
         </div>
 
         <div className="matrix-scroll-container">
@@ -87,7 +87,7 @@ export default function ComparisonMatrix({ properties, onClose }) {
             <div className="matrix-cell row-header sticky-col">ScoutIt Verdict</div>
             {properties.map((p) => (
               <div key={p.id} className="matrix-cell data-cell italic-hook">
-                "{p.hook || "Premium curated property briefing."}"
+                &quot;{p.hook || "Premium curated property briefing."}&quot;
               </div>
             ))}
 

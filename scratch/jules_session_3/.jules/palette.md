@@ -1,0 +1,3 @@
+## 2024-07-05 - Missing ARIA Labels on Icon-Only Buttons
+**Learning:** Found a widespread pattern of missing `aria-label` attributes on icon-only buttons (using `lucide-react`'s `<X />` icon or the `✕` character). This issue existed across CRM component modals, property inquiry modals, UI slide-overs, and various dashboard components. Without these labels, screen readers announce these purely visual close/hide/remove actions as generic "buttons", creating significant accessibility barriers.
+**Action:** Always strictly verify that icon-only buttons (`<button><Icon/></button>` or `<button>✕</button>`), especially for structural actions like closing, hiding, or removing, contain descriptive `aria-label`s.
