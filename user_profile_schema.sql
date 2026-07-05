@@ -54,7 +54,7 @@ create table if not exists public.broker_profiles (
   stewardship_velocity numeric(5,2) default 0,
   verified_closures integer default 0,
   active_listings_count integer default 0,
-  profile_views_this_month integer default 0,   -- TODO FLAG 3: auto-increment via edge function
+  profile_views_this_month integer default 0,
   specializations text[]
 );
 
