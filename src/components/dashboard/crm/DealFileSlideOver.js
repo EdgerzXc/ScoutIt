@@ -77,6 +77,7 @@ export default function DealFileSlideOver({ isOpen, onClose, deal, onDealUpdate 
               </h2>
               <button 
                 onClick={onClose}
+                aria-label="Close"
                 className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-alt text-text-secondary transition-colors"
               >
                 <X size={20} />

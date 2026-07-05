@@ -108,7 +108,7 @@ export default function InteractiveRadiusMap({ onSearch, onClose, initialLng = 1
     <div className="interactive-radius-wrapper">
       <div className="map-header-bar">
         <span>📍 Interactive Proximity Radar</span>
-        <button onClick={onClose} className="close-map-btn">✕</button>
+        <button onClick={onClose} aria-label="Close" className="close-map-btn">✕</button>
       </div>
 
       <div ref={mapContainerRef} className="mapbox-container" />

@@ -46,7 +46,7 @@ export default function BookingModal({ isOpen, onClose, brokerName, dealId, onSc
   return (
     <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-20 flex items-center justify-center p-6">
       <div className="bg-[#121212] border border-surface-variant rounded-lg p-6 max-w-md w-full shadow-2xl relative">
-        <button onClick={onClose} className="absolute top-4 right-4 text-text-muted hover:text-on-surface">
+        <button onClick={onClose} aria-label="Close" className="absolute top-4 right-4 text-text-muted hover:text-on-surface">
           ✕
         </button>
 

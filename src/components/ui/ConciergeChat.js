@@ -76,7 +76,7 @@ export default function ConciergeChat() {
               <span className="brand-dot"></span>
               QuestIT Concierge
             </div>
-            <button className="concierge-close" onClick={() => setIsOpen(false)}>✕</button>
+            <button className="concierge-close" onClick={() => setIsOpen(false)} aria-label="Close">✕</button>
           </div>
           
           <div className="concierge-body">

@@ -93,7 +93,7 @@ export default function InquiryModal({ isOpen, onClose, propertyTitle, propertyS
             exit={{ y: 20, scale: 0.95, opacity: 0 }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
           >
-            <button className="inquiry-close" onClick={onClose}>
+            <button className="inquiry-close" onClick={onClose} aria-label="Close">
               ✕
             </button>
 

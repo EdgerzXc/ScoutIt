@@ -503,7 +503,7 @@ function DashboardInner() {
                   <Link href={`/profile/${encodeURIComponent(user.name)}`} className="text-xs text-gold-accent hover:underline">View Public Profile</Link>
                 </div>
               </div>
-              <button className="text-text-secondary" onClick={() => setShowMobileProfileMenu(false)}>✕</button>
+              <button className="text-text-secondary" aria-label="Close" onClick={() => setShowMobileProfileMenu(false)}>✕</button>
             </div>
             
             {user.tags.length > 1 && (
