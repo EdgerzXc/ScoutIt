@@ -64,16 +64,24 @@ export async function GET(request) {
     let notified = 0;
     let skippedDupe = 0;
 
-    for (const property of staleProperties) {
-      const { data: existing } = await supabaseAdmin
+    // Fetch existing notifications for all stale properties at once to avoid N+1 queries
+    const existingNotificationsSet = new Set();
+    if (staleProperties.length > 0) {
+      const propertyIds = staleProperties.map((p) => p.id);
+      const { data: existingBatch } = await supabaseAdmin
         .from("user_notifications")
-        .select("id")
-        .eq("property_id", property.id)
+        .select("property_id")
+        .in("property_id", propertyIds)
         .eq("notification_type", "stale_listing")
-        .gte("created_at", new Date(now - staleCutoffMs).toISOString())
-        .limit(1);
+        .gte("created_at", new Date(now - staleCutoffMs).toISOString());
 
-      if (existing && existing.length > 0) {
+      if (existingBatch) {
+        existingBatch.forEach((row) => existingNotificationsSet.add(row.property_id));
+      }
+    }
+
+    for (const property of staleProperties) {
+      if (existingNotificationsSet.has(property.id)) {
         skippedDupe++;
         continue;
       }
