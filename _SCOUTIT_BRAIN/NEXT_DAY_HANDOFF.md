@@ -1,6 +1,12 @@
 # ScoutIt Handoff - End of Session
 
-> ## ▶️ RESUME HERE (latest) — 2026-07-05 (Part 2) — Cinematic Polish & Interactive 3-POV E2E Tests
+> ## ▶️ RESUME HERE (latest) — 2026-07-05 (Part 3) — Jules Sessions, CRM Notes, & Mobile Dashboard
+> - **Jules Sessions Integrated:** Successfully mapped the new `BrokerPanel.js`, `profileClient.js`, and `increment_profile_views` edge function from the external archives. This brings native CRM metrics ("Scout Rating", "Stewardship Velocity") to public broker profiles.
+> - **Operator Security Hardening:** Installed the strict `/api/dashboard/operator/units` API route to enforce role-based access for unit modifications, patching a major vulnerability hole for multi-tenant properties.
+> - **Mobile Dashboard UI:** Fixed the "failed deployment" horizontal overflow bug by adding missing `px-4` padding to the `dashboard/page.js` mobile viewport, allowing components with negative margins to bleed correctly without expanding `100vw`. Verified this fix with a Playwright E2E script on an iPhone 13 viewport.
+> - **CRM Persistence Verified:** Audited `BrokerMode.js` and confirmed that the Deal Notes are properly debouncing and patching to `/api/deals/[id]/notes` directly to Supabase.
+>
+> ## Previous — 2026-07-05 (Part 2) — Cinematic Polish & Interactive 3-POV E2E Tests
 > Full detail in `08_OPERATIONS_AND_BACKLOG/SESSION_HANDOFF_2026-07-05_PART2.md` (to be created if needed):
 > - **Interactive 3-POV E2E Tests (Playwright):** Created `e2e_tests/interactive-pov.spec.js` which simulates the complete interaction between a Buyer, Broker, and Owner. Leveraged Playwright's `page.route` to create a shared, in-memory mock API state across 3 independent browser contexts.
 > - **Cinematic & Atmospheric Visual Enhancements:** Applied ScoutIt's ultra-luxury aesthetic to communication components using `framer-motion`:
