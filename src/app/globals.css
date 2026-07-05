@@ -1,22 +1,22 @@
-
+﻿
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ═══════════════════════════════════════════════════════════════
-   SCOUTIT — GLOBAL DESIGN TOKENS & BASE STYLES
-   Visual DNA v6 · Space Intelligence Platform
-   ═══════════════════════════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   SCOUTIT â€” GLOBAL DESIGN TOKENS & BASE STYLES
+   Visual DNA v6 Â· Space Intelligence Platform
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
-/* ── RESET ── */
+/* â”€â”€ RESET â”€â”€ */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-/* ── ROOT DESIGN TOKENS ── */
+/* â”€â”€ ROOT DESIGN TOKENS â”€â”€ */
 :root {
   /* Canvas & Surfaces */
   --bg: #0e0e0e;
@@ -39,7 +39,7 @@
   --brand: #1a1814;
   --brand-overlay: rgba(12, 11, 9, 0.92);
 
-  /* Accent — Metallic Gold System
+  /* Accent â€” Metallic Gold System
      --accent        baseline gold (text gold, headings, labels)
      --accent-bright interactive gold (buttons, CTAs, hover, active nav)
      --accent-muted  subdued gold (borders, dividers, secondary accents) */
@@ -94,7 +94,7 @@
   --shadow-glow-soft: 0 0 24px rgba(232, 174, 60, 0.18);
 }
 
-/* ── BASE ELEMENTS ── */
+/* â”€â”€ BASE ELEMENTS â”€â”€ */
 html {
   height: 100%;
   color-scheme: dark;
@@ -121,7 +121,7 @@ p {
   line-height: 1.65;
 }
 
-/* ── LINKS ── */
+/* â”€â”€ LINKS â”€â”€ */
 a {
   color: inherit;
   text-decoration: none;
@@ -132,7 +132,7 @@ a:hover {
   color: var(--accent);
 }
 
-/* ── SCROLLBAR THEMING ── */
+/* â”€â”€ SCROLLBAR THEMING â”€â”€ */
 ::-webkit-scrollbar {
   width: 3px;
 }
@@ -156,7 +156,7 @@ a:hover {
   scrollbar-color: var(--border-mid) transparent;
 }
 
-/* ── FILM GRAIN TEXTURE ── */
+/* â”€â”€ FILM GRAIN TEXTURE â”€â”€ */
 .grain {
   position: fixed;
   inset: 0;
@@ -167,19 +167,19 @@ a:hover {
   background-size: 128px;
 }
 
-/* ── SELECTION ── */
+/* â”€â”€ SELECTION â”€â”€ */
 ::selection {
   background: rgba(232, 174, 60, 0.25);
   color: var(--text-primary);
 }
 
-/* ── FOCUS STATES ── */
+/* â”€â”€ FOCUS STATES â”€â”€ */
 :focus-visible {
   outline: 1.5px solid var(--accent);
   outline-offset: 2px;
 }
 
-/* ── UTILITY CLASSES ── */
+/* â”€â”€ UTILITY CLASSES â”€â”€ */
 .text-accent { color: var(--accent); }
 .text-secondary { color: var(--text-secondary); }
 .text-muted { color: var(--text-muted); }
@@ -194,52 +194,6 @@ a:hover {
 
 .font-display { font-family: var(--font-display); }
 .font-body { font-family: var(--font-body); }
-
-/* ── THE ATMOSPHERE SYSTEM ── */
-.atmosphere-bg {
-  /* Layer 1 — base tone, always full opacity */
-  background: linear-gradient(160deg, #131110 0%, #0c0b0a 45%, #080706 100%);
-  position: relative;
-  overflow: hidden;
-}
-
-.atmosphere-bg > * {
-  position: relative;
-  z-index: 2; /* Content stays above the atmosphere layers */
-}
-
-.atmosphere-glow {
-  position: absolute;
-  inset: 0;
-  /* Layer 2 — ambient gold "light source" */
-  background:
-    radial-gradient(ellipse 900px 560px at 88% -8%, rgba(232,174,60,0.14), transparent 60%),
-    radial-gradient(ellipse 700px 500px at 6% 18%, rgba(232,174,60,0.045), transparent 62%),
-    radial-gradient(ellipse 900px 700px at 30% 115%, rgba(198,190,175,0.05), transparent 60%);
-  z-index: 0;
-  pointer-events: none;
-}
-
-.atmosphere-grain {
-  position: absolute;
-  inset: 0;
-  /* Layer 3 — grain */
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size: 128px;
-  opacity: 0.05;
-  mix-blend-mode: overlay;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.atmosphere-vignette {
-  position: absolute;
-  inset: 0;
-  /* Layer 4 — vignette */
-  background: radial-gradient(ellipse 1400px 900px at 50% 40%, transparent 55%, rgba(0,0,0,0.5) 100%);
-  pointer-events: none;
-  z-index: 1;
-}
 
 .hov-card {
   background: linear-gradient(165deg, #1a1917, #111110);
@@ -279,7 +233,7 @@ a:hover {
   50%      { box-shadow: 0 0 32px rgba(232,174,60,0.5),  0 4px 16px rgba(0,0,0,0.35); }
 }
 
-/* ── HOMEPAGE DESCENT ARCHITECTURE ── */
+/* â”€â”€ HOMEPAGE DESCENT ARCHITECTURE â”€â”€ */
 [data-descent-layer] {
   /* Default progress to 0% if not set */
   --sp: 0;
@@ -288,11 +242,11 @@ a:hover {
   overflow: hidden;
 }
 
-/* ══════════════════════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    MOBILE-FIRST RESPONSIVE DESIGN SYSTEM
-   ══════════════════════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
-/* ── MOBILE TYPOGRAPHY SCALING ── */
+/* â”€â”€ MOBILE TYPOGRAPHY SCALING â”€â”€ */
 @media (max-width: 768px) {
   body {
     font-size: 15px;
@@ -331,7 +285,7 @@ a:hover {
   h6 { font-size: 13px !important; line-height: 1.4 !important; }
 }
 
-/* ── MOBILE SPACING ADJUSTMENTS ── */
+/* â”€â”€ MOBILE SPACING ADJUSTMENTS â”€â”€ */
 @media (max-width: 768px) {
   :root {
     --space-lg: 20px;
@@ -350,7 +304,7 @@ a:hover {
   }
 }
 
-/* ── TOUCH TARGET OPTIMIZATION ── */
+/* â”€â”€ TOUCH TARGET OPTIMIZATION â”€â”€ */
 @media (hover: none) and (pointer: coarse) {
   button, a, [role="button"] {
     min-height: 48px;
@@ -365,7 +319,7 @@ a:hover {
   }
 }
 
-/* ── REDUCE MOTION FOR ACCESSIBILITY ── */
+/* â”€â”€ REDUCE MOTION FOR ACCESSIBILITY â”€â”€ */
 @media (prefers-reduced-motion: reduce) {
   * {
     animation-duration: 0.01ms !important;
@@ -378,9 +332,9 @@ a:hover {
   }
 }
 
-/* ── MOBILE LAYOUT CONTAINERS ── */
+/* â”€â”€ MOBILE LAYOUT CONTAINERS â”€â”€ */
 @media (max-width: 768px) {
-  /* Bottom nav clearance — prevents content from hiding behind the fixed nav */
+  /* Bottom nav clearance â€” prevents content from hiding behind the fixed nav */
   body {
     padding-bottom: calc(72px + env(safe-area-inset-bottom));
   }
@@ -396,7 +350,7 @@ a:hover {
   }
 }
 
-/* ── GRID RESPONSIVENESS ── */
+/* â”€â”€ GRID RESPONSIVENESS â”€â”€ */
 @media (max-width: 900px) {
   .discover-feed-preview > div > div[style*="grid"] {
     display: flex !important;
@@ -431,7 +385,7 @@ a:hover {
   }
 }
 
-/* ── MENU BUTTON FIXES ── */
+/* â”€â”€ MENU BUTTON FIXES â”€â”€ */
 @media (max-width: 768px) {
   .menu-nav {
     display: flex !important;
@@ -459,7 +413,7 @@ a:hover {
   }
 }
 
-/* ── DROPDOWN POSITIONING FIX ── */
+/* â”€â”€ DROPDOWN POSITIONING FIX â”€â”€ */
 @media (max-width: 480px) {
   .header-dropdown {
     position: fixed !important;
@@ -478,7 +432,7 @@ a:hover {
   }
 }
 
-/* ── SEARCH INPUT OPTIMIZATION ── */
+/* â”€â”€ SEARCH INPUT OPTIMIZATION â”€â”€ */
 @media (max-width: 768px) {
   .vector-search-input {
     font-size: 16px !important;
@@ -490,7 +444,7 @@ a:hover {
   }
 }
 
-/* ── IMAGE OPTIMIZATION ── */
+/* â”€â”€ IMAGE OPTIMIZATION â”€â”€ */
 @media (max-width: 640px) {
   img {
     max-width: 100%;
@@ -502,7 +456,7 @@ a:hover {
   }
 }
 
-/* ── HERO SECTION MOBILE ── */
+/* â”€â”€ HERO SECTION MOBILE â”€â”€ */
 @media (max-width: 900px) {
   .section-hook {
     min-height: 60vh !important;
@@ -519,7 +473,7 @@ a:hover {
   }
 }
 
-/* ── TEXT OVERFLOW HANDLING ── */
+/* â”€â”€ TEXT OVERFLOW HANDLING â”€â”€ */
 @media (max-width: 480px) {
   .matrix-legend-caption,
   .ledger-tags-guide {
@@ -533,7 +487,7 @@ a:hover {
   }
 }
 
-/* ── PERFORMANCE: DISABLE ANIMATIONS ON LOW-END MOBILE ── */
+/* â”€â”€ PERFORMANCE: DISABLE ANIMATIONS ON LOW-END MOBILE â”€â”€ */
 @media (max-width: 480px) and (prefers-reduced-motion: no-preference) {
   /* Reduce animation complexity on small screens */
   .drifting-container {
@@ -541,7 +495,7 @@ a:hover {
   }
 }
 
-/* ── SCROLLBAR HIDE ON MOBILE ── */
+/* â”€â”€ SCROLLBAR HIDE ON MOBILE â”€â”€ */
 @media (max-width: 768px) {
   ::-webkit-scrollbar {
     display: none;
@@ -552,7 +506,7 @@ a:hover {
   }
 }
 
-/* ── BUTTON GROUP RESPONSIVE ── */
+/* â”€â”€ BUTTON GROUP RESPONSIVE â”€â”€ */
 @media (max-width: 640px) {
   .menu-footer {
     padding: 0 !important;
@@ -565,7 +519,7 @@ a:hover {
   }
 }
 
-/* ── FLEXBOX STACKING ── */
+/* â”€â”€ FLEXBOX STACKING â”€â”€ */
 @media (max-width: 768px) {
   [style*="display: 'flex'"][style*="justifyContent: 'space-between'"] {
     flex-direction: column !important;
@@ -573,7 +527,7 @@ a:hover {
   }
 }
 
-/* ── CARD STYLING FOR MOBILE ── */
+/* â”€â”€ CARD STYLING FOR MOBILE â”€â”€ */
 @media (max-width: 640px) {
   .discover-spotlight-card-link,
   .mini-preview-card,
@@ -586,16 +540,16 @@ a:hover {
   }
 }
 
-/* ── SWIPE-FRIENDLY TAP AREAS ── */
+/* â”€â”€ SWIPE-FRIENDLY TAP AREAS â”€â”€ */
 @media (hover: none) and (pointer: coarse) {
   a, button {
     -webkit-tap-highlight-color: rgba(232, 174, 60, 0.2);
   }
 }
 
-/* ══════════════════════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    FORM INPUT OPTIMIZATION FOR MOBILE
-   ══════════════════════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 /* Base form input styles */
 input, textarea, select, [type="text"], [type="search"], [type="email"], [type="tel"], [type="number"] {
@@ -688,9 +642,9 @@ label {
   }
 }
 
-/* ══════════════════════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    HIGH-CONTRAST ACCESSIBILITY MODE
-   ══════════════════════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 body.high-contrast {
   /* Push all CSS design tokens to maximum contrast */
   --bg:           #000000;
@@ -724,7 +678,7 @@ body.high-contrast nav {
   color: #ffffff !important;
 }
 
-/* All text nodes — cascade over inline-style colour values */
+/* All text nodes â€” cascade over inline-style colour values */
 body.high-contrast p,
 body.high-contrast li,
 body.high-contrast td,
@@ -754,7 +708,7 @@ body.high-contrast h4,
 body.high-contrast h5,
 body.high-contrast h6 { font-size: clamp(18px, 2.5vw, 24px) !important; }
 
-/* Links — make them clearly gold + underlined */
+/* Links â€” make them clearly gold + underlined */
 body.high-contrast a {
   color: #E8AE3C !important;
   text-decoration: underline !important;
@@ -762,7 +716,7 @@ body.high-contrast a {
 }
 body.high-contrast a:hover { color: #F7C64E !important; }
 
-/* Span, label, small — override inline colours */
+/* Span, label, small â€” override inline colours */
 body.high-contrast span,
 body.high-contrast label,
 body.high-contrast small,
@@ -776,14 +730,14 @@ body.high-contrast [class*="accent"] {
   color: #E8AE3C !important;
 }
 
-/* Buttons — increase contrast and size */
+/* Buttons â€” increase contrast and size */
 body.high-contrast button {
   font-size: 15px !important;
   font-weight: 600 !important;
   min-height: 44px;
 }
 
-/* Inputs — pure white text on dark bg */
+/* Inputs â€” pure white text on dark bg */
 body.high-contrast input,
 body.high-contrast textarea,
 body.high-contrast select {
@@ -797,25 +751,25 @@ body.high-contrast textarea::placeholder {
   color: #c8c8c8 !important;
 }
 
-/* All borders — make them visible */
+/* All borders â€” make them visible */
 body.high-contrast *[style*="border"] {
   border-color: rgba(255, 255, 255, 0.35) !important;
 }
 
-/* Focus rings — thick gold ring */
+/* Focus rings â€” thick gold ring */
 body.high-contrast :focus-visible {
   outline: 3px solid #E8AE3C !important;
   outline-offset: 3px !important;
 }
 
-/* ══════════════════════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    LIGHT MODE
-   Uses CSS filter invert + hue-rotate — the only reliable way to
+   Uses CSS filter invert + hue-rotate â€” the only reliable way to
    flip a codebase with mixed inline + CSS-var colour sources.
    Images, video, and canvas are counter-inverted to look normal.
    The .toolbox-float widget is also counter-inverted so it keeps
    its dark appearance regardless of the active mode.
-   ══════════════════════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 body.light-mode {
   filter: invert(1) hue-rotate(180deg);
   background: #f0ede8;
@@ -835,9 +789,9 @@ body.light-mode .toolbox-float {
   filter: invert(1) hue-rotate(180deg);
 }
 
-/* ══════════════════════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    LAYER 01: STRATOSPHERE ENTRY ANIMATIONS
-   ══════════════════════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .perspective-container {
   perspective: 800px;
   perspective-origin: center center;
@@ -930,9 +884,9 @@ body.light-mode .toolbox-float {
   mix-blend-mode: screen;
 }
 
-/* ══════════════════════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    BOTTOM NAV / THEME SHEET (Moved from inline to prevent FOUC)
-   ══════════════════════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .bottom-nav {
   display: none;
 }
@@ -999,7 +953,7 @@ body.light-mode .toolbox-float {
     transition: stroke 0.2s ease;
   }
 
-  /* Active state — a soft gold "pill" behind the icon, on-brand glow,
+  /* Active state â€” a soft gold "pill" behind the icon, on-brand glow,
      and a gold accent bar riding the top edge. Reads instantly as "you are here". */
   .bottom-nav-item.active .bottom-nav-icon {
     background: rgba(232, 174, 60, 0.12);
@@ -1036,8 +990,8 @@ body.light-mode .toolbox-float {
     box-shadow: 0 0 8px rgba(232, 174, 60, 0.7);
   }
 
-  /* ── Property action bar: the primary CTA (Inquire) reads as one clear,
-        raised gold action so there's a single obvious next step on mobile. ── */
+  /* â”€â”€ Property action bar: the primary CTA (Inquire) reads as one clear,
+        raised gold action so there's a single obvious next step on mobile. â”€â”€ */
   .bottom-nav.property-actions .bottom-nav-item.primary .bottom-nav-icon {
     background: var(--accent-bright, #F7C64E);
     border-color: var(--accent-bright, #F7C64E);
@@ -1195,15 +1149,15 @@ body.light-mode .toolbox-float {
   }
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   LITE MODE — performance switch for low-end phones.
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   LITE MODE â€” performance switch for low-end phones.
    Class lives on <html> (toggled via the Display panel / Theme sheet).
    Freezes all motion, drops expensive backdrop-blur + film grain, and
    hides the cosmic decorative layers. The homepage 2D canvas, title beam,
    and particles are also stopped in JS (see liteMode.js + page.js); the
    layer-page WebGL canvases are hidden here, scoped to .layer-route so
    property-page maps (Mapbox/Leaflet) are never affected.
-   ═══════════════════════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 html.lite-mode *,
 html.lite-mode *::before,
 html.lite-mode *::after {
@@ -1239,7 +1193,7 @@ html.lite-mode .title-ufo-underglow {
   display: none !important;
 }
 
-/* Hide the layer-page WebGL backgrounds — scoped so maps are untouched */
+/* Hide the layer-page WebGL backgrounds â€” scoped so maps are untouched */
 html.lite-mode .layer-route canvas {
   display: none !important;
 }
@@ -1247,7 +1201,7 @@ html.lite-mode .layer-route canvas {
 /* ==========================================================================
    ATMOSPHERE SYSTEM (dark/gold depth upgrade)
    Layered background + gradient card surfaces + lift/glow hover motion.
-   Presentation-only — reuses --accent-rgb / --accent-bright-rgb / --shadow-glow-soft
+   Presentation-only â€” reuses --accent-rgb / --accent-bright-rgb / --shadow-glow-soft
    already defined in :root above. Reposition the glow per-screen with the
    --glow-x / --glow-y custom properties (default: top-right).
    ========================================================================== */
@@ -1282,13 +1236,13 @@ html.lite-mode .layer-route canvas {
     radial-gradient(ellipse 1400px 900px at 50% 40%, transparent 55%, rgba(0, 0, 0, 0.5) 100%);
 }
 
-/* Ambient glow is decorative weight on top of the base tone — drop it under
+/* Ambient glow is decorative weight on top of the base tone â€” drop it under
    Lite Mode same as .grain and the other cosmic decoration layers. */
 html.lite-mode .atmosphere-bg::after {
   display: none !important;
 }
 
-/* Card surfaces — replace flat fills with subtle depth gradients */
+/* Card surfaces â€” replace flat fills with subtle depth gradients */
 .card-atmosphere {
   background: linear-gradient(165deg, #1a1917, #111110);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -1300,7 +1254,7 @@ html.lite-mode .atmosphere-bg::after {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), 0 0 40px rgba(var(--accent-rgb), 0.06);
 }
 
-/* Hover lift — apply to every clickable card/tile for consistency.
+/* Hover lift â€” apply to every clickable card/tile for consistency.
    Transitions are already neutralized site-wide under Lite Mode via the
    `html.lite-mode *` rule above, so no extra override is needed here. */
 .hov-card {
@@ -1323,12 +1277,12 @@ html.lite-mode .atmosphere-bg::after {
   border-color: rgba(var(--accent-rgb), 0.45);
 }
 
-/* Gold text glow — wordmark/headlines/kickers only, applied sparingly */
+/* Gold text glow â€” wordmark/headlines/kickers only, applied sparingly */
 .text-glow {
   text-shadow: 0 0 18px rgba(var(--accent-bright-rgb), 0.35);
 }
 
-/* CTA pulse — primary gold buttons only, not every gold element */
+/* CTA pulse â€” primary gold buttons only, not every gold element */
 @keyframes ctaPulse {
   0%, 100% { box-shadow: 0 0 24px rgba(var(--accent-rgb), 0.18), 0 4px 16px rgba(0, 0, 0, 0.35); }
   50% { box-shadow: 0 0 32px rgba(var(--accent-rgb), 0.5), 0 4px 16px rgba(0, 0, 0, 0.35); }

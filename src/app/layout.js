@@ -65,16 +65,13 @@ export default function RootLayout({ children }) {
               "(function(){try{var v=localStorage.getItem('scoutit_lite_mode');var on=(v===null)?window.matchMedia('(prefers-reduced-motion: reduce)').matches:(v==='1');if(on)document.documentElement.classList.add('lite-mode');}catch(e){}})();",
           }}
         />
-        <div className="atmosphere-bg">
-          <div className="atmosphere-glow" aria-hidden="true" />
-          <div className="atmosphere-grain" aria-hidden="true" />
-          <div className="atmosphere-vignette" aria-hidden="true" />
-          <ErrorBoundary>
-            {children}
-          </ErrorBoundary>
-          <BottomNav />
-          <DynamicOverlays />
-        </div>
+        {/* Cinematic film grain texture overlay */}
+        <div className="grain" aria-hidden="true" />
+        <ErrorBoundary>
+          {children}
+        </ErrorBoundary>
+        <BottomNav />
+        <DynamicOverlays />
       </body>
     </html>
   );
