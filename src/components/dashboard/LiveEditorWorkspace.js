@@ -138,7 +138,7 @@ const CATEGORY_FIELDS = {
 
 
 export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, initialData }) {
-  const { currentUser } = useDashboard();
+  const { currentUser, addToast } = useDashboard();
   
   // State initialization
   const [step, setStep] = useState(1);
@@ -163,6 +163,36 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
   const [isDragging, setIsDragging] = useState(false);
   const [isExtracting, setIsExtracting] = useState(false);
   const [extractionError, setExtractionError] = useState(null);
+  const [isOptimizing, setIsOptimizing] = useState(false);
+
+  const handleSeoOptimize = async () => {
+    if (!formData.description) {
+      addToast("Please write a short description first.", "warning");
+      return;
+    }
+    setIsOptimizing(true);
+    addToast("SEO Council AI is rewriting your description...", "🤖");
+    try {
+      const res = await fetch('/api/ai/rewrite', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          text: formData.description,
+          location: formData.location,
+          category: formData.category
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "SEO Optimization failed");
+      setFormData(prev => ({ ...prev, description: data.text }));
+      addToast("Description optimized for search engines!", "success");
+    } catch (err) {
+      console.error(err);
+      addToast(err.message, "error");
+    } finally {
+      setIsOptimizing(false);
+    }
+  };
 
   // Resizer state
   const [leftWidth, setLeftWidth] = useState(45);
@@ -561,6 +591,25 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
                   location={formData.location} 
                   category={formData.category} 
                   price={formData.price} 
+                />
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <div className="flex justify-between items-end">
+                  <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">Property Description</label>
+                  <button 
+                    onClick={handleSeoOptimize}
+                    disabled={isOptimizing || !formData.description}
+                    className="text-[10px] font-label-caps tracking-widest text-gold-accent uppercase hover:text-[#F7C64E] transition-colors disabled:opacity-50 flex items-center gap-1 bg-gold-accent/10 border border-gold-accent/30 px-2 py-1 rounded"
+                  >
+                    {isOptimizing ? "Optimizing..." : "✨ SEO Optimize Description"}
+                  </button>
+                </div>
+                <textarea 
+                  className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface focus:outline-none focus:border-gold-accent transition-colors min-h-[120px] resize-y text-sm leading-relaxed" 
+                  value={formData.description} 
+                  onChange={e => setField("description", e.target.value)} 
+                  placeholder="Describe your property. Click the 'SEO Optimize' button to have our AI restructure it for maximum search engine visibility." 
                 />
               </div>
 

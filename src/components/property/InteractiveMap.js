@@ -308,6 +308,7 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
     };
     // We use JSON.stringify for arrays/objects to prevent reference-equality React loops 
     // that destroy and recreate the Leaflet map unnecessarily.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lat, lng, propertyTitle, JSON.stringify(vicinityData), routeDestination, JSON.stringify(routeDestCoords), routeLabel, mapboxToken]);
 
   const sweepLength = 150; // Sweeps up to outer ring radius

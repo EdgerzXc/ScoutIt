@@ -1018,7 +1018,7 @@ export default function OwnerMode() {
             <p className="text-xs text-text-secondary mb-3">You control who represents this property. Sending a handshake spends 1 Connect — whether or not they accept.</p>
             <div className="flex flex-col sm:flex-row gap-2">
               <input
-                className="flex-1 bg-surface border border-surface-variant rounded px-4 py-3 text-on-surface text-sm focus:outline-none focus:border-gold-accent transition-colors"
+                className="flex-1 hov-card border border-surface-variant rounded px-4 py-3 text-on-surface text-sm focus:outline-none focus:border-gold-accent transition-colors"
                 type="text"
                 placeholder="Broker name or PRC #"
                 value={inviteName}
@@ -1107,7 +1107,7 @@ export default function OwnerMode() {
                   {pitch.status === 'pending' && (
                     <div className="flex gap-3">
                       <button 
-                        className="flex-1 bg-surface border border-surface-variant hover:border-error hover:text-error text-text-primary font-working-title text-sm font-bold py-3 rounded transition-colors" 
+                        className="flex-1 hov-card border border-surface-variant hover:border-error hover:text-error text-text-primary font-working-title text-sm font-bold py-3 rounded transition-colors" 
                         onClick={() => updatePitchStatus(pitch.id, 'declined')}
                       >
                         Decline
@@ -1151,3 +1151,4 @@ export default function OwnerMode() {
     </div>
   );
 }
+

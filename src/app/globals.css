@@ -195,6 +195,90 @@ a:hover {
 .font-display { font-family: var(--font-display); }
 .font-body { font-family: var(--font-body); }
 
+/* ── THE ATMOSPHERE SYSTEM ── */
+.atmosphere-bg {
+  /* Layer 1 — base tone, always full opacity */
+  background: linear-gradient(160deg, #131110 0%, #0c0b0a 45%, #080706 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.atmosphere-bg > * {
+  position: relative;
+  z-index: 2; /* Content stays above the atmosphere layers */
+}
+
+.atmosphere-glow {
+  position: absolute;
+  inset: 0;
+  /* Layer 2 — ambient gold "light source" */
+  background:
+    radial-gradient(ellipse 900px 560px at 88% -8%, rgba(232,174,60,0.14), transparent 60%),
+    radial-gradient(ellipse 700px 500px at 6% 18%, rgba(232,174,60,0.045), transparent 62%),
+    radial-gradient(ellipse 900px 700px at 30% 115%, rgba(198,190,175,0.05), transparent 60%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.atmosphere-grain {
+  position: absolute;
+  inset: 0;
+  /* Layer 3 — grain */
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 128px;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.atmosphere-vignette {
+  position: absolute;
+  inset: 0;
+  /* Layer 4 — vignette */
+  background: radial-gradient(ellipse 1400px 900px at 50% 40%, transparent 55%, rgba(0,0,0,0.5) 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.hov-card {
+  background: linear-gradient(165deg, #1a1917, #111110);
+  border: 1px solid rgba(255,255,255,0.08);
+  transition: transform 0.38s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.38s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.38s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hov-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4), 0 0 40px rgba(232,174,60,0.05);
+  border-color: rgba(232,174,60,0.25);
+}
+
+.hov-glow {
+  background: linear-gradient(155deg, #1d1a16, #131110);
+  border: 1px solid rgba(232,174,60,0.25);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4), 0 0 40px rgba(232,174,60,0.06);
+  transition: transform 0.38s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.38s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.38s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hov-glow:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 40px rgba(232,174,60,0.12);
+  border-color: rgba(232,174,60,0.4);
+}
+
+.text-gold-glow {
+  text-shadow: 0 0 18px rgba(247,198,78,0.35);
+}
+
+.cta-pulse {
+  animation: ctaPulse 3s infinite ease-in-out;
+}
+
+@keyframes ctaPulse {
+  0%, 100% { box-shadow: 0 0 24px rgba(232,174,60,0.18), 0 4px 16px rgba(0,0,0,0.35); }
+  50%      { box-shadow: 0 0 32px rgba(232,174,60,0.5),  0 4px 16px rgba(0,0,0,0.35); }
+}
+
 /* ── HOMEPAGE DESCENT ARCHITECTURE ── */
 [data-descent-layer] {
   /* Default progress to 0% if not set */

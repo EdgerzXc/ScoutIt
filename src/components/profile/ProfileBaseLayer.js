@@ -1,6 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
+import ProfileContactModal from "./ProfileContactModal";
 import { MapPin, Calendar, Edit2, MessageSquare } from "lucide-react";
 
 const TIER_CONFIG = {
@@ -23,6 +25,8 @@ export default function ProfileBaseLayer({
   isOwnView = false,
   publicRoles = [],
 }) {
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+
   if (!profile) return null;
 
   const tier = TIER_CONFIG[profile.subscription_tier] ?? TIER_CONFIG.starry;
@@ -39,7 +43,8 @@ export default function ProfileBaseLayer({
     : "?";
 
   return (
-    <section style={baseSection}>
+    <>
+      <section style={baseSection}>
       {/* Avatar */}
       <div style={avatarWrap}>
         {profile.avatar_url ? (
@@ -168,9 +173,7 @@ export default function ProfileBaseLayer({
           ) : (
             <button
               style={contactBtn}
-              onClick={() => {
-                // TODO: wire to Connection Portal
-              }}
+              onClick={() => setIsContactModalOpen(true)}
             >
               <MessageSquare size={12} strokeWidth={1.5} />
               Contact
@@ -184,6 +187,13 @@ export default function ProfileBaseLayer({
         </div>
       </div>
     </section>
+
+      <ProfileContactModal
+        isOpen={isContactModalOpen}
+        onClose={() => setIsContactModalOpen(false)}
+        profile={profile}
+      />
+    </>
   );
 }
 

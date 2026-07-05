@@ -12,9 +12,29 @@ export const revalidate = 3600;
 
 export async function generateMetadata({ params }) {
   const resolvedParams = await params;
+  const apiKey = process.env.AIRTABLE_API_KEY;
+  const baseId = process.env.AIRTABLE_BASE_ID;
+  let seoTitle = `Property Intel — ${resolvedParams.id} — ScoutIt`;
+  let seoDescription = "Property Intelligence Vector";
+
+  if (apiKey && baseId) {
+    try {
+      const properties = await fetchProperties(apiKey, baseId);
+      const match = properties.find(
+        (p) =>
+          (p.slug && p.slug.toLowerCase() === resolvedParams.id.toLowerCase()) ||
+          (p.id && p.id === resolvedParams.id)
+      );
+      if (match) {
+        if (match.seo_title) seoTitle = match.seo_title;
+        if (match.seo_description) seoDescription = match.seo_description;
+      }
+    } catch {}
+  }
+
   return {
-    title: `Property Intel — ${resolvedParams.id} — ScoutIt`,
-    description: "Property Intelligence Vector"
+    title: seoTitle,
+    description: seoDescription
   };
 }
 
@@ -59,9 +79,22 @@ async function resolveCategory(slug) {
 export default async function PropertyRoute({ params }) {
   const resolvedParams = await params;
 
-  // Determine Category string safely (real CMS record wins over mock fallback)
-  const rawCat = await resolveCategory(resolvedParams.id);
-  
+  const apiKey = process.env.AIRTABLE_API_KEY;
+  const baseId = process.env.AIRTABLE_BASE_ID;
+  let match = null;
+
+  if (apiKey && baseId) {
+    try {
+      const properties = await fetchProperties(apiKey, baseId);
+      match = properties.find(
+        (p) =>
+          (p.slug && p.slug.toLowerCase() === resolvedParams.id.toLowerCase()) ||
+          (p.id && p.id === resolvedParams.id)
+      );
+    } catch {}
+  }
+
+  const rawCat = match ? (match.spaceCategory || match.property_type || "default").toLowerCase() : "default";
   // Find mapped layout or fallback to default
   let layoutKey = "default";
   for (const key of Object.keys(CATEGORY_TO_LAYOUT_MAP)) {
@@ -75,9 +108,17 @@ export default async function PropertyRoute({ params }) {
   const InjectedLayout = CATEGORY_TO_LAYOUT_MAP[layoutKey] || CATEGORY_TO_LAYOUT_MAP["default"];
 
   return (
-    <article className="chameleon-content-wrapper">
-      {/* We pass the slug so the client component can fetch dynamic data via API if needed */}
-      <InjectedLayout slug={resolvedParams.id} />
-    </article>
+    <>
+      {match?.seo_json_ld && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: match.seo_json_ld }}
+        />
+      )}
+      <article className="chameleon-content-wrapper">
+        {/* We pass the slug so the client component can fetch dynamic data via API if needed */}
+        <InjectedLayout slug={resolvedParams.id} />
+      </article>
+    </>
   );
 }

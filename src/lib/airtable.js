@@ -208,6 +208,9 @@ export async function fetchProperties(apiKey, baseId) {
         gradient:             f.Gradient     || "linear-gradient(135deg, #1f1c18 0%, #100f0d 100%)",
         latitude:             f.Latitude ? Number(f.Latitude) : null,
         longitude:            f.Longitude ? Number(f.Longitude) : null,
+        seo_title:            f.SEO_Title    || "",
+        seo_description:      f.SEO_Description || "",
+        seo_json_ld:          f.SEO_JSON_LD  || "",
         // WhereTo stored as JSON string in Airtable
         whereTo: (() => {
           try { return JSON.parse(f.WhereTo || "[]"); } catch { return []; }
@@ -605,6 +608,9 @@ export async function updateProperty(apiKey, baseId, slug, data, unitsOverride =
   if (data.title) fieldsToUpdate.Title = data.title;
   if (data.location) fieldsToUpdate.Location = data.location;
   if (data.type) fieldsToUpdate.SpaceTypography = data.type.charAt(0).toUpperCase() + data.type.slice(1);
+  if (data.seo_title) fieldsToUpdate.SEO_Title = data.seo_title;
+  if (data.seo_description) fieldsToUpdate.SEO_Description = data.seo_description;
+  if (data.seo_json_ld) fieldsToUpdate.SEO_JSON_LD = data.seo_json_ld;
   if (unitsOverride) {
     fieldsToUpdate.Units_JSON = JSON.stringify(unitsOverride);
   } else if (data.details?.units_inventory) {

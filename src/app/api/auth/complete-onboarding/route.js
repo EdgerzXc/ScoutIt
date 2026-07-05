@@ -28,7 +28,7 @@ export async function POST(request) {
       return NextResponse.json({ error: "Missing required profile fields" }, { status: 400 });
     }
 
-    // SECURITY FIX: Prevent Privilege Escalation by validating allowed roles
+    // Validate allowed roles to prevent privilege escalation
     const allowedRoles = ['owner', 'broker', 'investor', 'tenant'];
     const safeRole = allowedRoles.includes(role) ? role : 'owner';
 

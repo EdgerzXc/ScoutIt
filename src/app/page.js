@@ -931,49 +931,49 @@ export default function Home() {
           LAUNCHPAD (ELEVATOR MENU)
           ========================================= */}
       <section className="relative w-full max-w-6xl mx-auto px-6 py-24 z-20 flex flex-col items-center" style={{ backgroundColor: 'transparent' }}>
-        <h2 className="font-mono text-sm tracking-[0.3em] uppercase text-[#E8AE3C] mb-12 text-center opacity-80" style={{ textShadow: '0 0 10px rgba(232, 174, 60,0.3)' }}>
+        <h2 className="font-mono text-sm tracking-[0.3em] uppercase text-gold-accent mb-12 text-center opacity-80" style={{ textShadow: '0 0 10px rgba(232, 174, 60,0.3)' }}>
           Browse Space Catalog
         </h2>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
           {/* Card 01: Orbit (The Board) */}
-          <Link href="/layer/orbit" className="text-left group relative bg-[#111111]/80 backdrop-blur-md border border-white/5 rounded-xl p-8 overflow-hidden hover:border-[#E8AE3C]/50 transition-all duration-500 hover:-translate-y-1 block">
+          <Link href="/layer/orbit" className="text-left group relative bg-[#111111]/80 backdrop-blur-md border border-white/5 rounded-xl p-8 overflow-hidden hover:border-gold-accent/50 transition-all duration-500 hover:-translate-y-1 block">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(232, 174, 60,0.1),transparent_50%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            <div className="font-mono text-[10px] text-[#E8AE3C] tracking-widest mb-4">LAYER 01 // ORBIT</div>
+            <div className="font-mono text-[10px] text-gold-accent tracking-widest mb-4">LAYER 01 // ORBIT</div>
             <h3 className="font-display text-2xl text-white mb-2">The Board</h3>
-            <p className="text-sm text-gray-400">Top 100 Most Inquired Properties</p>
+            <p className="text-sm text-text-secondary">Top 100 Most Inquired Properties</p>
           </Link>
 
           {/* Card 02: Stratosphere */}
-          <Link href="/layer/stratosphere" className="text-left group relative bg-[#111111]/80 backdrop-blur-md border border-white/5 rounded-xl p-8 overflow-hidden hover:border-[#E8AE3C]/50 transition-all duration-500 hover:-translate-y-1 block">
+          <Link href="/layer/stratosphere" className="text-left group relative bg-[#111111]/80 backdrop-blur-md border border-white/5 rounded-xl p-8 overflow-hidden hover:border-gold-accent/50 transition-all duration-500 hover:-translate-y-1 block">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(232, 174, 60,0.1),transparent_50%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            <div className="font-mono text-[10px] text-[#E8AE3C] tracking-widest mb-4">LAYER 02 // STRATOSPHERE</div>
+            <div className="font-mono text-[10px] text-gold-accent tracking-widest mb-4">LAYER 02 // STRATOSPHERE</div>
             <h3 className="font-display text-2xl text-white mb-2">Stories & Intel</h3>
-            <p className="text-sm text-gray-400">Neighborhood stories & market features</p>
+            <p className="text-sm text-text-secondary">Neighborhood stories & market features</p>
           </Link>
 
           {/* Card 03: Metropolis */}
-          <Link href="/layer/metropolis" className="text-left group relative bg-[#111111]/80 backdrop-blur-md border border-white/5 rounded-xl p-8 overflow-hidden hover:border-[#E8AE3C]/50 transition-all duration-500 hover:-translate-y-1 lg:col-span-1 block">
+          <Link href="/layer/metropolis" className="text-left group relative bg-[#111111]/80 backdrop-blur-md border border-white/5 rounded-xl p-8 overflow-hidden hover:border-gold-accent/50 transition-all duration-500 hover:-translate-y-1 lg:col-span-1 block">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(232, 174, 60,0.15),transparent_50%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            <div className="font-mono text-[10px] text-[#E8AE3C] tracking-widest mb-4">LAYER 03 // METROPOLIS</div>
+            <div className="font-mono text-[10px] text-gold-accent tracking-widest mb-4">LAYER 03 // METROPOLIS</div>
             <h3 className="font-display text-2xl text-white mb-2">Explore Spaces</h3>
-            <p className="text-sm text-gray-400">Search the complete property directory</p>
+            <p className="text-sm text-text-secondary">Search the complete property directory</p>
           </Link>
 
           {/* Card 04: The Crust */}
-          <Link href="/layer/crust" className="text-left group relative bg-[#111111]/80 backdrop-blur-md border border-white/5 rounded-xl p-8 overflow-hidden hover:border-[#E8AE3C]/50 transition-all duration-500 hover:-translate-y-1 md:col-span-1 lg:col-span-2 block">
+          <Link href="/layer/crust" className="text-left group relative bg-[#111111]/80 backdrop-blur-md border border-white/5 rounded-xl p-8 overflow-hidden hover:border-gold-accent/50 transition-all duration-500 hover:-translate-y-1 md:col-span-1 lg:col-span-2 block">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(232, 174, 60,0.05),transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            <div className="font-mono text-[10px] text-[#E8AE3C] tracking-widest mb-4">LAYER 04 // THE CRUST</div>
+            <div className="font-mono text-[10px] text-gold-accent tracking-widest mb-4">LAYER 04 // THE CRUST</div>
             <h3 className="font-display text-2xl text-white mb-2">The Ecosystem</h3>
-            <p className="text-sm text-gray-400">Verified Advisors & Professionals</p>
+            <p className="text-sm text-text-secondary">Verified Advisors & Professionals</p>
           </Link>
 
           {/* Card 05: The Core */}
-          <Link href="/layer/core" className="text-left group relative bg-[#111111]/80 backdrop-blur-md border border-white/5 rounded-xl p-8 overflow-hidden hover:border-[#E8AE3C]/50 transition-all duration-500 hover:-translate-y-1 md:col-span-1 lg:col-span-1 block">
+          <Link href="/layer/core" className="text-left group relative bg-[#111111]/80 backdrop-blur-md border border-white/5 rounded-xl p-8 overflow-hidden hover:border-gold-accent/50 transition-all duration-500 hover:-translate-y-1 md:col-span-1 lg:col-span-1 block">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(232, 174, 60,0.1),transparent_50%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            <div className="font-mono text-[10px] text-[#E8AE3C] tracking-widest mb-4">LAYER 05 // THE CORE</div>
+            <div className="font-mono text-[10px] text-gold-accent tracking-widest mb-4">LAYER 05 // THE CORE</div>
             <h3 className="font-display text-2xl text-white mb-2">Your Workspace</h3>
-            <p className="text-sm text-gray-400">Private Wishlist & Dashboard</p>
+            <p className="text-sm text-text-secondary">Private Wishlist & Dashboard</p>
           </Link>
         </div>
       </section>

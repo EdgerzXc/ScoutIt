@@ -5,8 +5,48 @@
 
 import Link from "next/link";
 import { Bookmark, Search, Share2 } from "lucide-react";
+import { useState } from "react";
 
 export default function SeekerPanel({ savedCount = 0, isAnonymous = false }) {
+  const [shareLink, setShareLink] = useState(null);
+  const [generating, setGenerating] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const handleGenerateLink = async () => {
+    setGenerating(true);
+    try {
+      const mockStr = localStorage.getItem("scoutit_user");
+      let mockOwnerId = "master-dev"; // Default fallback
+      if (mockStr) {
+        try {
+          const userObj = JSON.parse(mockStr);
+          if (userObj.id) mockOwnerId = userObj.id;
+        } catch (e) {}
+      }
+
+      const res = await fetch("/api/wishlist/share", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mockOwnerId })
+      });
+      const data = await res.json();
+      if (data.shareToken) {
+        setShareLink(`${window.location.origin}/wishlist/shared/${data.shareToken}`);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  const copyToClipboard = () => {
+    if (shareLink) {
+      navigator.clipboard.writeText(shareLink);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
   return (
     <section style={panelStyle}>
       <div style={panelHeader}>
@@ -37,22 +77,42 @@ export default function SeekerPanel({ savedCount = 0, isAnonymous = false }) {
             Wishlist Share
           </span>
         </div>
-        <button
-          disabled
-          style={{
-            fontFamily: "var(--font-body)",
-            fontSize: 11,
-            color: "rgba(232, 174, 60,0.35)",
-            border: "1px solid rgba(232, 174, 60,0.15)",
-            borderRadius: 20,
-            padding: "4px 12px",
-            cursor: "not-allowed",
-            background: "none",
-          }}
-        >
-          {/* TODO FLAG 2: Wishlist token share — generates token link with no name attached */}
-          Generate Token Link — Coming Soon
-        </button>
+        {shareLink ? (
+          <button
+            onClick={copyToClipboard}
+            style={{
+              fontFamily: "var(--font-body)",
+              fontSize: 11,
+              color: copied ? "#22c55e" : "#E8AE3C",
+              border: `1px solid ${copied ? "rgba(34, 197, 94, 0.4)" : "rgba(232, 174, 60,0.3)"}`,
+              borderRadius: 20,
+              padding: "4px 12px",
+              cursor: "pointer",
+              background: copied ? "rgba(34, 197, 94, 0.1)" : "rgba(232, 174, 60, 0.05)",
+              transition: "all 0.2s ease"
+            }}
+          >
+            {copied ? "Copied to Clipboard!" : "Copy Share Link"}
+          </button>
+        ) : (
+          <button
+            onClick={handleGenerateLink}
+            disabled={generating}
+            style={{
+              fontFamily: "var(--font-body)",
+              fontSize: 11,
+              color: generating ? "rgba(232, 174, 60,0.5)" : "#E8AE3C",
+              border: "1px solid rgba(232, 174, 60,0.3)",
+              borderRadius: 20,
+              padding: "4px 12px",
+              cursor: generating ? "not-allowed" : "pointer",
+              background: "rgba(232, 174, 60,0.05)",
+              transition: "all 0.2s ease"
+            }}
+          >
+            {generating ? "Generating..." : "Generate Token Link"}
+          </button>
+        )}
       </div>
 
       {isAnonymous && (

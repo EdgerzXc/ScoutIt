@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useDashboard } from "../../context/DashboardContext";
 
@@ -27,7 +28,29 @@ function statusStyle(status) {
 }
 
 export default function MissionControlMode({ variant = "staff" }) {
-  const { listings, currentUser } = useDashboard();
+  const { listings, currentUser, addToast } = useDashboard();
+  const [generatingSeoFor, setGeneratingSeoFor] = useState(null);
+
+  const handleGenerateSeo = async (id) => {
+    try {
+      setGeneratingSeoFor(id);
+      // We pass the session token manually if available, 
+      // but the API also accepts requests without a token if mockOwnerId is provided (for dev)
+      const res = await fetch("/api/admin/generate-seo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, mockOwnerId: "master-dev" }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to generate SEO");
+      addToast(`SEO metadata generated for property!`, "success");
+    } catch (err) {
+      console.error(err);
+      addToast(err.message, "error");
+    } finally {
+      setGeneratingSeoFor(null);
+    }
+  };
 
   const scoped =
     variant === "enterprise"
@@ -130,8 +153,16 @@ export default function MissionControlMode({ variant = "staff" }) {
                           href={`/dashboard/inventory/${l.id}`}
                           className="text-gold-accent hover:underline text-xs"
                         >
-                          Manage →
+                          Manage
                         </Link>
+                        <span className="text-surface-variant mx-2">|</span>
+                        <button
+                          onClick={() => handleGenerateSeo(l.id)}
+                          disabled={generatingSeoFor === l.id}
+                          className="text-gold-accent hover:text-gold-accent-bright text-xs disabled:opacity-50"
+                        >
+                          {generatingSeoFor === l.id ? "Generating..." : "✨ Generate SEO"}
+                        </button>
                       </td>
                     </tr>
                   );

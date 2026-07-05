@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-export default function ConnectionPortal({ brokerName }) {
+export default function ConnectionPortal({ brokerName, isModal = false }) {
   const [alias, setAlias] = useState("");
   const [email, setEmail] = useState("");
   const [intent, setIntent] = useState("");
@@ -85,7 +85,7 @@ export default function ConnectionPortal({ brokerName }) {
   }
 
   return (
-    <div className="connection-portal-container">
+    <div className={`connection-portal-container ${isModal ? "is-modal" : ""}`}>
       {/* Safety Notice Box FIRST */}
       <div className="safety-disclaimer-box">
         <div className="disclaimer-header">
@@ -162,6 +162,22 @@ export default function ConnectionPortal({ brokerName }) {
       </div>
 
       <style>{`
+        
+        .connection-portal-container.is-modal {
+          gap: 32px;
+        }
+
+        .connection-portal-container.is-modal .connection-portal-card {
+          background: transparent;
+          border: none;
+          padding: 0;
+          box-shadow: none;
+        }
+
+        .connection-portal-container.is-modal .safety-disclaimer-box {
+          padding: 32px;
+        }
+
         .connection-portal-container {
           display: flex;
           flex-direction: column;

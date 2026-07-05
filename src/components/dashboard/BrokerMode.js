@@ -127,7 +127,7 @@ export default function BrokerMode() {
             <div className={`px-3 py-1 rounded text-xs font-bold font-working-title tracking-wider uppercase border
               ${deal.status === 'accepted' ? 'bg-success/10 text-success border-success/30' : 
                 deal.status === 'declined' ? 'bg-error/10 text-error border-error/30' : 
-                deal.status === 'invited' ? 'bg-[#E8AE3C]/10 text-[#E8AE3C] border-[#E8AE3C]/30' :
+                deal.status === 'invited' ? 'bg-[#E8AE3C]/10 text-accent border-[#E8AE3C]/30' :
                 'bg-gold-accent/10 text-gold-accent border-gold-accent/30'}`}
             >
               Status: {deal.status === 'invited' ? 'Incoming Handshake' : deal.status}
@@ -482,7 +482,7 @@ export default function BrokerMode() {
                   <div className={`absolute top-0 left-0 w-1 h-full transition-colors ${isDeclined ? 'bg-error' : 'bg-surface-variant group-hover:bg-gold-accent'}`}></div>
                   
                   <div className="flex justify-between items-start mb-2">
-                    <span className={`font-label-caps text-[9px] tracking-widest uppercase px-1.5 py-0.5 rounded ${isDeclined ? 'bg-error/10 text-error' : pStatus === 'invited' ? 'bg-[#E8AE3C]/10 text-[#E8AE3C]' : 'bg-surface-alt text-text-secondary'}`}>
+                    <span className={`font-label-caps text-[9px] tracking-widest uppercase px-1.5 py-0.5 rounded ${isDeclined ? 'bg-error/10 text-error' : pStatus === 'invited' ? 'bg-[#E8AE3C]/10 text-accent' : 'bg-surface-alt text-text-secondary'}`}>
                       {pStatus === 'invited' ? 'Incoming Handshake' : pStatus}
                     </span>
                     <span className="text-[10px] text-text-muted font-data-tabular">{deal.timeRemaining || 'Just now'}</span>
@@ -612,4 +612,5 @@ export default function BrokerMode() {
     </div>
   );
 }
+
 
