@@ -1,7 +1,10 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { MapPin, Calendar, Edit2, MessageSquare } from "lucide-react";
+import { MapPin, Calendar, Edit2, MessageSquare, X } from "lucide-react";
+import ConnectionPortal from "@/components/connection/ConnectionPortal";
+import ServiceConnectionPortal from "@/components/connection/ServiceConnectionPortal";
 
 const TIER_CONFIG = {
   universe: { label: "Universe", color: "#E8AE3C", border: "rgba(232, 174, 60,0.4)" },
@@ -23,6 +26,18 @@ export default function ProfileBaseLayer({
   isOwnView = false,
   publicRoles = [],
 }) {
+  const [showPortal, setShowPortal] = useState(false);
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (showPortal) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+    return () => { document.body.style.overflow = "auto"; };
+  }, [showPortal]);
+
   if (!profile) return null;
 
   const tier = TIER_CONFIG[profile.subscription_tier] ?? TIER_CONFIG.starry;
@@ -37,6 +52,10 @@ export default function ProfileBaseLayer({
   const initials = profile.display_name
     ? profile.display_name.slice(0, 2).toUpperCase()
     : "?";
+
+  const isBroker = displayRoles.includes("broker");
+  const isProvider = displayRoles.includes("provider");
+  const serviceType = profile.provider_type ? profile.provider_type.charAt(0).toUpperCase() + profile.provider_type.slice(1) : "Service Provider";
 
   return (
     <section style={baseSection}>
@@ -168,9 +187,7 @@ export default function ProfileBaseLayer({
           ) : (
             <button
               style={contactBtn}
-              onClick={() => {
-                // TODO: wire to Connection Portal
-              }}
+              onClick={() => setShowPortal(true)}
             >
               <MessageSquare size={12} strokeWidth={1.5} />
               Contact
@@ -182,10 +199,60 @@ export default function ProfileBaseLayer({
             </Link>
           )}
         </div>
+
+        {showPortal && (
+          <div style={modalOverlay} onClick={(e) => { if (e.target === e.currentTarget) setShowPortal(false); }}>
+            <div style={modalContent}>
+              <button style={modalClose} onClick={() => setShowPortal(false)} aria-label="Close">
+                <X size={20} color="#fff" />
+              </button>
+              <div style={{ padding: 24, paddingTop: 48, maxHeight: "85vh", overflowY: "auto" }}>
+                {isBroker ? (
+                  <ConnectionPortal brokerName={profile.display_name || "this user"} />
+                ) : isProvider ? (
+                  <ServiceConnectionPortal providerName={profile.display_name || "this user"} serviceType={serviceType} />
+                ) : (
+                  <ConnectionPortal brokerName={profile.display_name || "this user"} />
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );
 }
+
+const modalOverlay = {
+  position: "fixed",
+  inset: 0,
+  zIndex: 100000,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  padding: 24,
+  background: "rgba(0, 0, 0, 0.72)",
+  backdropFilter: "blur(8px)",
+};
+
+const modalContent = {
+  position: "relative",
+  width: "100%",
+  maxWidth: 800,
+  background: "#0e0e0e",
+  border: "1px solid rgba(255,255,255,0.1)",
+  borderRadius: 8,
+};
+
+const modalClose = {
+  position: "absolute",
+  top: 16,
+  right: 16,
+  background: "none",
+  border: "none",
+  cursor: "pointer",
+  zIndex: 10,
+};
 
 const baseSection = {
   display: "flex",
