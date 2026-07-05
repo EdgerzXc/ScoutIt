@@ -71,20 +71,33 @@ export default function BuyerMode() {
           el.className = 'w-8 h-8 rounded-full bg-gold-accent flex items-center justify-center text-sm shadow-[0_0_15px_rgba(212,175,55,0.6)] cursor-pointer hover:scale-110 transition-transform text-background font-bold border-2 border-[#121212] z-10';
           el.innerHTML = listing.hasMedia ? '📸' : '🏢';
 
-          // Popup HTML
-          const popupHtml = `
-            <div class="bg-[#121110] border border-gold-accent/20 p-4 rounded-lg shadow-xl w-60">
-              <div class="text-[10px] text-gold-accent font-label-caps uppercase tracking-widest mb-1">${listing.type}</div>
-              <div class="text-sm font-working-title text-white truncate mb-1">${listing.title}</div>
-              <div class="text-xs text-gray-400 truncate mb-3">${listing.loc}</div>
-              <a href="/property/${listing.id}" class="block text-center w-full text-[10px] font-label-caps tracking-widest uppercase bg-gold-accent/10 hover:bg-gold-accent/20 text-gold-accent py-2 rounded transition-colors">
-                View Property
-              </a>
-            </div>
-          `;
+          // Popup DOM elements (Secure against XSS)
+          const popupContainer = document.createElement('div');
+          popupContainer.className = 'bg-[#121110] border border-gold-accent/20 p-4 rounded-lg shadow-xl w-60';
+
+          const typeDiv = document.createElement('div');
+          typeDiv.className = 'text-[10px] text-gold-accent font-label-caps uppercase tracking-widest mb-1';
+          typeDiv.textContent = listing.type;
+          popupContainer.appendChild(typeDiv);
+
+          const titleDiv = document.createElement('div');
+          titleDiv.className = 'text-sm font-working-title text-white truncate mb-1';
+          titleDiv.textContent = listing.title;
+          popupContainer.appendChild(titleDiv);
+
+          const locDiv = document.createElement('div');
+          locDiv.className = 'text-xs text-gray-400 truncate mb-3';
+          locDiv.textContent = listing.loc;
+          popupContainer.appendChild(locDiv);
+
+          const linkAnchor = document.createElement('a');
+          linkAnchor.href = `/property/${listing.id}`;
+          linkAnchor.className = 'block text-center w-full text-[10px] font-label-caps tracking-widest uppercase bg-gold-accent/10 hover:bg-gold-accent/20 text-gold-accent py-2 rounded transition-colors';
+          linkAnchor.textContent = 'View Property';
+          popupContainer.appendChild(linkAnchor);
 
           const popup = new mapboxgl.Popup({ offset: 25, closeButton: false })
-            .setHTML(popupHtml);
+            .setDOMContent(popupContainer);
 
           const marker = new mapboxgl.Marker(el)
             .setLngLat(coords)
