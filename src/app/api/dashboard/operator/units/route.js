@@ -132,17 +132,28 @@ export async function POST(request) {
 
     const toUpdate = incoming.filter((u) => ownedIds.has(u.id));
     const errors = [];
-    for (const u of toUpdate) {
-      const patch = {
-        name: u.name || "",
-        photos: u.photos || [],
-        image: u.image || (u.photos || []).find(Boolean) || "",
-        updated_at: new Date().toISOString(),
-      };
-      if (u.availabilityStatus) patch.availability_status = u.availabilityStatus;
-      const { error } = await supabaseAdmin.from("property_units").update(patch).eq("id", u.id);
-      if (error) errors.push(error);
+    
+    if (toUpdate.length > 0) {
+      // Execute all updates concurrently to avoid N+1 waterfall latency
+      // This prevents the PostgREST heterogeneous key bulk upsert bug while
+      // still dramatically improving performance over sequential await.
+      const updatePromises = toUpdate.map(u => {
+        const patch = {
+          name: u.name || "",
+          photos: u.photos || [],
+          image: u.image || (u.photos || []).find(Boolean) || "",
+          updated_at: new Date().toISOString(),
+        };
+        if (u.availabilityStatus) patch.availability_status = u.availabilityStatus;
+        return supabaseAdmin.from("property_units").update(patch).eq("id", u.id);
+      });
+
+      const results = await Promise.all(updatePromises);
+      for (const res of results) {
+        if (res.error) errors.push(res.error);
+      }
     }
+    
     if (errors.length > 0) {
       console.error("[OPERATOR UNITS API] Write errors:", errors);
       return NextResponse.json({ error: "Failed to save one or more units" }, { status: 500 });

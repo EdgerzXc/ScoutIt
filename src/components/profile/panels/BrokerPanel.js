@@ -49,7 +49,6 @@ export default function BrokerPanel({ data, isPublic = false }) {
             <Eye size={12} strokeWidth={1.5} color="var(--text-secondary)" />
             <span style={{ fontFamily: "var(--font-body)", fontSize: 11, color: "var(--text-secondary)" }}>
               {data.profile_views_this_month} profile views this month
-              {/* TODO FLAG 3: profile_views_this_month auto-increments via Supabase edge function */}
             </span>
           </div>
         )}
