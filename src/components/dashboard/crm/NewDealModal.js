@@ -65,7 +65,7 @@ export default function NewDealModal({ isOpen, onClose, onDealCreated }) {
             <h2 className="font-headline-editorial text-2xl text-on-surface flex items-center gap-2">
               Create New Deal
             </h2>
-            <button onClick={onClose} className="text-text-muted hover:text-on-surface transition-colors">
+            <button onClick={onClose} aria-label="Close" className="text-text-muted hover:text-on-surface transition-colors">
               <X size={20} />
             </button>
           </div>
