@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Search } from "lucide-react";
 
 const COLUMNS = [
@@ -15,14 +15,32 @@ export default function KanbanBoard({ deals, viewingAs, onStatusChange, onDealCl
   const [search, setSearch] = useState("");
   const [draggingId, setDraggingId] = useState(null);
 
-  const filteredDeals = deals.filter(deal => {
-    if (!search) return true;
+  // ⚡ Bolt Optimization: Memoize filtering and bucket deals by status in a single pass
+  // to avoid O(N) filter and O(5*N) column filters on every render, especially when typing in search.
+  const dealsByColumn = useMemo(() => {
+    const buckets = COLUMNS.reduce((acc, col) => {
+      acc[col.id] = [];
+      return acc;
+    }, {});
+
     const q = search.toLowerCase();
-    return (
-      (deal.propertyTitle && deal.propertyTitle.toLowerCase().includes(q)) ||
-      (deal.otherParty && deal.otherParty.toLowerCase().includes(q))
-    );
-  });
+
+    deals.forEach(deal => {
+      // 1. Filter
+      if (search) {
+        const matches = (deal.propertyTitle && deal.propertyTitle.toLowerCase().includes(q)) ||
+                        (deal.otherParty && deal.otherParty.toLowerCase().includes(q));
+        if (!matches) return;
+      }
+
+      // 2. Bucket
+      if (buckets[deal.status]) {
+        buckets[deal.status].push(deal);
+      }
+    });
+
+    return buckets;
+  }, [deals, search]);
 
   const getStatusColor = (status) => {
     if (status === "accepted" || status === "closed") return "bg-success/5 border-success/20";
@@ -66,7 +84,7 @@ export default function KanbanBoard({ deals, viewingAs, onStatusChange, onDealCl
       
       <div className="flex-1 flex gap-4 overflow-x-auto pb-4 snap-x">
         {COLUMNS.map(col => {
-          const colDeals = filteredDeals.filter(d => d.status === col.id);
+          const colDeals = dealsByColumn[col.id] || [];
           
           return (
             <div 
