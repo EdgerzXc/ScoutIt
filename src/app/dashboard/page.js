@@ -338,21 +338,30 @@ function DashboardInner() {
                     <span className="text-xs text-gold-accent cursor-pointer hover:underline" onClick={clearAllNotifications}>Clear All</span>
                   )}
                 </div>
-                <div className="max-h-[300px] overflow-y-auto">
-                  {notifications.length === 0 ? (
-                    <div className="p-6 text-center text-sm text-text-secondary italic">All caught up.</div>
-                  ) : (
-                    notifications.map(notif => (
-                      <div key={notif.id} className={`p-4 border-b border-surface-variant/50 flex gap-3 ${!notif.read ? 'bg-surface-container-low' : ''}`}>
-                        <div className="text-2xl shrink-0">{notif.icon}</div>
-                        <div>
-                          <div className="font-working-title text-sm text-on-surface mb-1">{notif.title}</div>
-                          <div className="text-xs text-text-secondary">{notif.desc}</div>
+                  <div className="max-h-[300px] overflow-y-auto">
+                    {notifications.length === 0 ? (
+                      <div className="p-6 text-center text-sm text-text-secondary italic">All caught up.</div>
+                    ) : (
+                      notifications.map(notif => (
+                        <div 
+                          key={notif.id} 
+                          onClick={() => {
+                            if (notif.notificationType === 'inquiry') {
+                              router.push('/dashboard/inbox');
+                              setShowNotifications(false);
+                            }
+                          }}
+                          className={`p-4 border-b border-surface-variant/50 flex gap-3 transition-colors ${!notif.read ? 'bg-surface-container-low' : ''} ${notif.notificationType === 'inquiry' ? 'cursor-pointer hover:bg-surface-variant' : ''}`}
+                        >
+                          <div className="text-2xl shrink-0">{notif.icon}</div>
+                          <div>
+                            <div className="font-working-title text-sm text-on-surface mb-1">{notif.title}</div>
+                            <div className="text-xs text-text-secondary">{notif.desc}</div>
+                          </div>
                         </div>
-                      </div>
-                    ))
-                  )}
-                </div>
+                      ))
+                    )}
+                  </div>
               </div>
             )}
           </div>

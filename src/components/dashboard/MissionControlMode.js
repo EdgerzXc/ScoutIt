@@ -28,8 +28,10 @@ function statusStyle(status) {
 }
 
 export default function MissionControlMode({ variant = "staff" }) {
-  const { listings, currentUser, addToast } = useDashboard();
+  const { listings, currentUser, addToast, closeListing } = useDashboard();
   const [generatingSeoFor, setGeneratingSeoFor] = useState(null);
+  const [selectedIds, setSelectedIds] = useState(new Set());
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleGenerateSeo = async (id) => {
     try {
@@ -62,6 +64,41 @@ export default function MissionControlMode({ variant = "staff" }) {
     approved: scoped.filter((l) => l.pipelineStatus === "approved").length,
     pending: scoped.filter((l) => l.pipelineStatus === "pending" || l.pipelineStatus === "draft").length,
     owners: new Set(scoped.map((l) => l.ownerId).filter(Boolean)).size,
+  };
+
+  const handleSelectAll = (e) => {
+    if (e.target.checked) {
+      setSelectedIds(new Set(scoped.map(l => l.id)));
+    } else {
+      setSelectedIds(new Set());
+    }
+  };
+
+  const handleSelectOne = (id) => {
+    const next = new Set(selectedIds);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    setSelectedIds(next);
+  };
+
+  const handleMassDelete = async () => {
+    if (!window.confirm(`Are you sure you want to delete ${selectedIds.size} properties?`)) return;
+    setIsDeleting(true);
+    let successCount = 0;
+    
+    // Convert to array and clear selection immediately for UI optimism
+    const idsToDelete = Array.from(selectedIds);
+    setSelectedIds(new Set());
+
+    try {
+      // Execute deletions (closeListing handles its own UI optimism + toast)
+      await Promise.all(idsToDelete.map(id => closeListing(id)));
+      addToast(`Successfully deleted ${idsToDelete.length} properties.`, "✅");
+    } catch (e) {
+      addToast("Error deleting some properties.", "❌");
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   return (
@@ -104,15 +141,39 @@ export default function MissionControlMode({ variant = "staff" }) {
       {/* Property table */}
       <div className="bg-surface border border-surface-variant rounded-lg overflow-hidden">
         <div className="px-4 py-3 border-b border-surface-variant bg-surface-alt flex justify-between items-center">
-          <span className="font-label-caps text-[10px] tracking-widest uppercase text-text-secondary">
-            {variant === "enterprise" ? "Your Properties" : "All Properties"}
-          </span>
+          <div className="flex items-center gap-4">
+            <span className="font-label-caps text-[10px] tracking-widest uppercase text-text-secondary">
+              {variant === "enterprise" ? "Your Properties" : "All Properties"}
+            </span>
+            {selectedIds.size > 0 && (
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-gold-accent bg-gold-accent/10 px-2 py-0.5 rounded">
+                  {selectedIds.size} selected
+                </span>
+                <button
+                  onClick={handleMassDelete}
+                  disabled={isDeleting}
+                  className="text-xs bg-red-900/40 text-red-400 hover:bg-red-900/60 hover:text-red-300 px-3 py-1 rounded transition-colors disabled:opacity-50"
+                >
+                  {isDeleting ? "Deleting..." : "Delete Selected"}
+                </button>
+              </div>
+            )}
+          </div>
           <span className="text-xs text-text-secondary">{scoped.length} {scoped.length === 1 ? "listing" : "listings"}</span>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="text-left text-[10px] uppercase tracking-wider text-text-secondary border-b border-surface-variant">
+                <th className="px-4 py-2 font-normal w-10">
+                  <input
+                    type="checkbox"
+                    className="rounded border-surface-variant bg-transparent text-gold-accent focus:ring-gold-accent focus:ring-offset-surface"
+                    checked={scoped.length > 0 && selectedIds.size === scoped.length}
+                    onChange={handleSelectAll}
+                  />
+                </th>
                 <th className="px-4 py-2 font-normal">Title</th>
                 <th className="px-4 py-2 font-normal">Category</th>
                 {variant === "staff" && <th className="px-4 py-2 font-normal">Owner</th>}
@@ -131,8 +192,17 @@ export default function MissionControlMode({ variant = "staff" }) {
               ) : (
                 scoped.map((l) => {
                   const status = statusStyle(l.pipelineStatus);
+                  const isSelected = selectedIds.has(l.id);
                   return (
-                    <tr key={l.id} className="border-b border-surface-variant/50 hover:bg-surface-container-low transition-colors">
+                    <tr key={l.id} className={`border-b border-surface-variant/50 hover:bg-surface-container-low transition-colors ${isSelected ? "bg-gold-accent/5" : ""}`}>
+                      <td className="px-4 py-2.5">
+                        <input
+                          type="checkbox"
+                          className="rounded border-surface-variant bg-transparent text-gold-accent focus:ring-gold-accent focus:ring-offset-surface"
+                          checked={isSelected}
+                          onChange={() => handleSelectOne(l.id)}
+                        />
+                      </td>
                       <td className="px-4 py-2.5 text-on-surface">{l.title}</td>
                       <td className="px-4 py-2.5 text-text-secondary">{l.spaceCategory || "—"}</td>
                       {variant === "staff" && (
@@ -155,6 +225,17 @@ export default function MissionControlMode({ variant = "staff" }) {
                         >
                           Manage
                         </Link>
+                        <span className="text-surface-variant mx-2">|</span>
+                        <button
+                          onClick={() => {
+                            if(window.confirm("Are you sure you want to delete this property?")) {
+                              closeListing(l.id);
+                            }
+                          }}
+                          className="text-red-400 hover:text-red-300 text-xs"
+                        >
+                          Delete
+                        </button>
                         <span className="text-surface-variant mx-2">|</span>
                         <button
                           onClick={() => handleGenerateSeo(l.id)}

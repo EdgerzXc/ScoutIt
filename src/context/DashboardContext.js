@@ -127,6 +127,8 @@ export function DashboardProvider({ children }) {
         desc: n.desc,
         icon: n.icon,
         read: n.read,
+        propertyId: n.propertyId,
+        notificationType: n.notificationType,
       })));
     } catch (e) {
       console.error("Failed to fetch notifications", e);
