@@ -54,6 +54,11 @@ function DashboardInner() {
   const { connects, currentUser, notifications, markNotificationsRead, clearAllNotifications } = useDashboard();
   const [user, setUser] = useState(null);
   const [mode, setMode] = useState("");
+  
+  useEffect(() => {
+    console.log("DashboardInner rendering! mode:", mode, "user:", user);
+  }, [mode, user]);
+
   const [showNotifications, setShowNotifications] = useState(false);
   const [showConnectsBreakdown, setShowConnectsBreakdown] = useState(false);
   const [showDesktopSwitcher, setShowDesktopSwitcher] = useState(false);
@@ -93,7 +98,7 @@ function DashboardInner() {
     (async () => {
       try {
         const { data: { session } } = await getSession();
-        const mockOwnerId = !session?.access_token && user.id === "master-dev" ? "master-dev" : null;
+        const mockOwnerId = !session?.access_token && user?.id ? user.id : null;
         if (!session?.access_token && !mockOwnerId) return;
         const qs = mockOwnerId ? `?mockOwnerId=${mockOwnerId}` : "";
         const res = await fetch(`/api/deals${qs}`, {

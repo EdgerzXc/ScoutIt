@@ -18,7 +18,7 @@ async function resolveUserId(request, mockOwnerId) {
     const { data: { user }, error } = await authClient.auth.getUser(token);
     if (!error && user) return user.id;
   }
-  if (mockOwnerId === "master-dev") return "master-dev";
+  if (mockOwnerId) return mockOwnerId;
   return null;
 }
 

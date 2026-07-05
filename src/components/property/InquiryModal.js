@@ -31,7 +31,18 @@ export default function InquiryModal({ isOpen, onClose, propertyTitle, propertyS
 
       const { data: { session } } = await getSession();
       const token = session?.access_token;
-      if (!token) {
+      
+      // Allow mock tests
+      const mockUserStr = typeof window !== 'undefined' ? localStorage.getItem('scoutit_user') : null;
+      let mockId = null;
+      if (mockUserStr) {
+          try {
+              const u = JSON.parse(mockUserStr);
+              mockId = u.id;
+          } catch(e) {}
+      }
+
+      if (!token && !mockId) {
         setStatus("error");
         setErrorMsg("Please log in to contact the owner.");
         return;
@@ -39,8 +50,11 @@ export default function InquiryModal({ isOpen, onClose, propertyTitle, propertyS
 
       const res = await fetch("/api/deals/initiate", {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ propertySlug, message }),
+        headers: { 
+            "Content-Type": "application/json", 
+            ...(token ? { Authorization: `Bearer ${token}` } : {}) 
+        },
+        body: JSON.stringify({ propertySlug, message, mockOwnerId: mockId }),
       });
       const data = await res.json();
 

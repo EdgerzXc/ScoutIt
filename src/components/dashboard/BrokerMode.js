@@ -69,7 +69,7 @@ export default function BrokerMode() {
       try {
         const { data: { session } } = await getSession();
         const token = session?.access_token;
-        const mockOwnerId = !token && currentUser?.id === 'master-dev' ? 'master-dev' : undefined;
+        const mockOwnerId = !token && currentUser?.id ? currentUser.id : undefined;
         await fetch(`/api/deals/${dealId}/notes`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },

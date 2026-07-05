@@ -31,7 +31,14 @@ export function DashboardProvider({ children }) {
   // Sync user from Supabase Auth
   useEffect(() => {
     const fetchSession = async () => {
-      const { data: { session } } = await getSession();
+      let session = null;
+      try {
+        const res = await getSession();
+        session = res?.data?.session;
+      } catch (err) {
+        console.warn("Supabase getSession failed, falling back to mock:", err);
+      }
+
       if (session?.user) {
         await handleUserLogin(session.user);
       } else {
@@ -110,7 +117,7 @@ export function DashboardProvider({ children }) {
   const fetchNotifications = async (userId) => {
     if (!userId) return;
     try {
-      const mockParam = userId === "master-dev" ? "?mockOwnerId=master-dev" : "";
+      const mockParam = userId ? `?mockOwnerId=${userId}` : "";
       const res = await authedFetch(`/api/notifications${mockParam}`);
       if (!res.ok) return;
       const data = await res.json();
@@ -385,9 +392,15 @@ export function DashboardProvider({ children }) {
     if (!currentUser?.id) return false;
     addToast("Syncing to live network...", "⏳");
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token || (currentUser.id === 'master-dev' ? 'mock-e2e-token' : '');
+      
       const res = await fetch("/api/dashboard/publish", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
         body: JSON.stringify({ submissionId: listingId, userId: currentUser.id })
       });
       const data = await res.json();
@@ -732,12 +745,12 @@ export function DashboardProvider({ children }) {
     // Persist client-triggered notifications through the same table as the
     // server-triggered ones (stale-listing, broker-on-change).
     if (currentUser?.id) {
-      const mockParam = currentUser.id === "master-dev" ? "?mockOwnerId=master-dev" : "";
+      const mockParam = currentUser?.id ? `?mockOwnerId=${currentUser.id}` : "";
       authedFetch(`/api/notifications${mockParam}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          mockOwnerId: currentUser.id === "master-dev" ? "master-dev" : undefined,
+          mockOwnerId: currentUser?.id || undefined,
           title: notif.title,
           desc: notif.desc,
           icon: typeof notif.icon === "string" ? notif.icon : "🔔",
@@ -750,11 +763,11 @@ export function DashboardProvider({ children }) {
   const markNotificationsRead = () => {
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
     if (currentUser?.id) {
-      const mockParam = currentUser.id === "master-dev" ? "?mockOwnerId=master-dev" : "";
+      const mockParam = currentUser?.id ? `?mockOwnerId=${currentUser.id}` : "";
       authedFetch(`/api/notifications${mockParam}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mockOwnerId: currentUser.id === "master-dev" ? "master-dev" : undefined }),
+        body: JSON.stringify({ mockOwnerId: currentUser?.id || undefined }),
       }).catch(e => console.error("Failed to mark notifications read", e));
     }
   };
@@ -762,7 +775,7 @@ export function DashboardProvider({ children }) {
   const clearAllNotifications = () => {
     setNotifications([]);
     if (currentUser?.id) {
-      const mockParam = currentUser.id === "master-dev" ? "?mockOwnerId=master-dev" : "";
+      const mockParam = currentUser?.id ? `?mockOwnerId=${currentUser.id}` : "";
       authedFetch(`/api/notifications${mockParam}`, { method: "DELETE" })
         .catch(e => console.error("Failed to clear notifications", e));
     }

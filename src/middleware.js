@@ -5,6 +5,7 @@ import { Redis } from '@upstash/redis';
 // Define limiters globally so they can be reused across requests
 let standardLimiter;
 let strictLimiter;
+let aiLimiter;
 
 function initLimiters() {
   if (!standardLimiter || !strictLimiter) {
@@ -21,6 +22,12 @@ function initLimiters() {
       strictLimiter = new Ratelimit({
         redis: redis,
         limiter: Ratelimit.slidingWindow(5, '10 s'),
+        analytics: true,
+      });
+
+      aiLimiter = new Ratelimit({
+        redis: redis,
+        limiter: Ratelimit.slidingWindow(15, '10 s'),
         analytics: true,
       });
     }
@@ -42,8 +49,10 @@ export async function middleware(request) {
   let limiterToUse = standardLimiter;
   
   // Apply stricter limits to auth and ai routes
-  if (path.startsWith('/api/auth/') || path.startsWith('/api/ai/')) {
+  if (path.startsWith('/api/auth/')) {
     limiterToUse = strictLimiter;
+  } else if (path.startsWith('/api/ai/')) {
+    limiterToUse = aiLimiter || standardLimiter;
   }
 
   try {

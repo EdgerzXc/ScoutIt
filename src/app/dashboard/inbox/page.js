@@ -14,7 +14,7 @@ async function resolveAuth() {
   try {
     const raw = localStorage.getItem("scoutit_user");
     const u = raw ? JSON.parse(raw) : null;
-    if (u?.id === "master-dev") return { token: null, mockOwnerId: "master-dev" };
+    if (u?.id) return { token: null, mockOwnerId: u.id };
   } catch {}
   return { token: null, mockOwnerId: null };
 }
@@ -30,6 +30,7 @@ function toChatBoxDeal(d) {
     status: d.status,
     other_party: d.otherParty,
     last_message: d.lastMessage,
+    pitch_message: d.pitch_message,
     myRole: d.myRole,
     unreadCount: d.unreadCount,
     expires_at: d.expiresAt,
@@ -103,7 +104,7 @@ export default function InboxPage() {
       const mockStr = localStorage.getItem("scoutit_user");
       let mockOwnerId;
       if (!token && mockStr && mockStr.includes("master-dev")) {
-        mockOwnerId = "master-dev";
+        mockOwnerId = u?.id;
       }
 
       const res = await fetch(`/api/deals/${dealId}`, {

@@ -63,7 +63,7 @@ async function resolveAuth() {
   try {
     const raw = localStorage.getItem("scoutit_user");
     const u = raw ? JSON.parse(raw) : null;
-    if (u?.id === "master-dev") return { token: null, mockOwnerId: "master-dev", userId: "master-dev" };
+    if (u?.id) return { token: null, mockOwnerId: u.id, userId: u.id };
   } catch {}
   return { token: null, mockOwnerId: null, userId: null };
 }
@@ -73,6 +73,7 @@ function authHeaders(token) {
 }
 
 export default function ChatBox({ deal, onCloseDeal, onOfferHandshake, onAcceptHandshake }) {
+  console.log("ChatBox rendering deal:", deal);
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);

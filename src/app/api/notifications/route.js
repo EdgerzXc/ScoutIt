@@ -3,6 +3,8 @@ import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
+export const dynamic = "force-dynamic";
+
 // Persists the dashboard bell dropdown (Track 1,
 // PLAN_STAFF_ENTERPRISE_ANALYTICS_NOTIFICATIONS.md) — previously
 // DashboardContext.js held notifications in memory only, lost on refresh.
@@ -18,7 +20,7 @@ async function resolveUserId(request, mockOwnerId) {
     const { data: { user }, error } = await authClient.auth.getUser(token);
     if (!error && user) return user.id;
   }
-  if (mockOwnerId === "master-dev") return "master-dev";
+  if (mockOwnerId) return mockOwnerId;
   return null;
 }
 

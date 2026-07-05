@@ -57,10 +57,18 @@ const TIER_LABEL_TO_NUM = {
 // ── Base fetch with auth and ISR cache ──────────────────────────
 async function fetchTable(tableId, apiKey, baseId, params = "") {
   const url = `${BASE_URL}/${baseId}/${encodeURIComponent(tableId)}${params ? `?${params}` : ""}`;
-  const res = await fetch(url, {
+  
+  const fetchOptions = {
     headers: { Authorization: `Bearer ${apiKey}` },
-    next: { revalidate: 60 }, // ISR: revalidate every 60 seconds
-  });
+  };
+  
+  if (process.env.NODE_ENV !== 'production') {
+    fetchOptions.cache = 'no-store';
+  } else {
+    fetchOptions.next = { revalidate: 60 };
+  }
+
+  const res = await fetch(url, fetchOptions);
 
   if (!res.ok) {
     throw new Error(`Airtable fetch failed for table "${tableId}": ${res.status} ${res.statusText}`);
@@ -539,8 +547,10 @@ export async function insertProperty(apiKey, baseId, data, unitsOverride = null)
         fields: {
           Title: data.title,
           Location: data.location || "",
-          SpaceTypography: data.type || "Unknown",
-          SpaceCategory: data.space_category || data.category || data.type || "Unknown",
+          SpaceTypography: data.type ? (data.type.charAt(0).toUpperCase() + data.type.slice(1)) : "Unknown",
+          SpaceCategory: (data.space_category || data.category || data.type) ? 
+            ((data.space_category || data.category || data.type).charAt(0).toUpperCase() + (data.space_category || data.category || data.type).slice(1)) : 
+            "Unknown",
           Units_JSON: unitsJson,
           Approved_For_ScoutIt: true,
           ...categoryFields
@@ -594,7 +604,7 @@ export async function updateProperty(apiKey, baseId, slug, data, unitsOverride =
   const fieldsToUpdate = {};
   if (data.title) fieldsToUpdate.Title = data.title;
   if (data.location) fieldsToUpdate.Location = data.location;
-  if (data.type) fieldsToUpdate.SpaceTypography = data.type;
+  if (data.type) fieldsToUpdate.SpaceTypography = data.type.charAt(0).toUpperCase() + data.type.slice(1);
   if (unitsOverride) {
     fieldsToUpdate.Units_JSON = JSON.stringify(unitsOverride);
   } else if (data.details?.units_inventory) {

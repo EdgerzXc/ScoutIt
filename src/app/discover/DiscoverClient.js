@@ -7,9 +7,19 @@ import ReactionButtons from "@/components/ui/ReactionButtons";
 import { cityToRegion, regionOf } from "@/lib/regions";
 import Footer from "@/components/layout/Footer";
 import AtmosphereBackground from "@/components/ui/AtmosphereBackground";
+import { DISCOVER_INTEL } from "@/data/mockArticles";
 import "./discover.css";
 
 const CATEGORIES = ["Residential", "Commercial", "STR", "Hospitality", "Restaurants", "Venues/Events"];
+
+const DISCOVER_PROPERTIES = {
+  Residential: [],
+  Commercial: [],
+  STR: [],
+  Hospitality: [],
+  Restaurants: [],
+  Venues: []
+};
 
 function getDBCategory(cat) {
   if (cat === "Venues/Events") return "Venues";
@@ -267,6 +277,11 @@ export default function DiscoverClient() {
                           <h3 className="cardTitleText">{property.title}</h3>
                           <div className="cardSpecTags">
                             <span className="specBadge">{property.density}</span>
+                          </div>
+                          <div className="mobile-briefing-cta" onClick={(e) => e.stopPropagation()}>
+                            <Link href={`/property/${property.slug || property.id}`}>
+                              VIEW FULL BRIEFING →
+                            </Link>
                           </div>
                         </div>
                       </div>

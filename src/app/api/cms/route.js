@@ -7,6 +7,8 @@ import {
 } from "@/lib/airtable";
 import { cityToRegion } from "@/lib/regions";
 
+export const dynamic = 'force-dynamic';
+
 // ── Main handler ─────────────────────────────────────────────────
 export async function GET(request) {
   const { searchParams } = new URL(request.url);

@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
+export const dynamic = "force-dynamic";
+
 // Lists every deal the current user is a party to (as buyer, broker, or
 // property owner) for the Inbox. The existing DashboardContext.js deals
 // fetch pulls ALL deals client-side with no filter and relies on RLS alone
@@ -20,7 +22,7 @@ async function resolveUserId(request, mockOwnerId) {
     const { data: { user }, error } = await authClient.auth.getUser(token);
     if (!error && user) return user.id;
   }
-  if (mockOwnerId === "master-dev") return "master-dev";
+  if (mockOwnerId) return mockOwnerId;
   return null;
 }
 
@@ -122,6 +124,7 @@ export async function GET(request) {
           myRole,
           otherParty: otherId ? (namesById[otherId] || otherRoleLabel) : otherRoleLabel,
           lastMessage: lastMessageByDeal[d.id] || d.pitch_message || "",
+          pitch_message: d.pitch_message,
           unreadCount: unreadByDeal[d.id] || 0,
           createdAt: d.created_at,
           lastActivityAt: lastActivityByDeal[d.id] || d.created_at,

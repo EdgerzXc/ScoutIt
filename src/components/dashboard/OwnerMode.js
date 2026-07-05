@@ -13,6 +13,7 @@ import { canSee, getCurrentTier } from '../../lib/entitlements';
 import { supabase } from '../../lib/supabaseClient';
 
 export default function OwnerMode() {
+  console.log("OwnerMode rendering!");
   const { listings, pitches, updatePitchStatus, addListing, addConciergeListing, bulkAddListings, addToast, updateListing, publishListing, closeListing, currentUser, inviteBroker, connects } = useDashboard();
   const firstName = currentUser?.name ? currentUser.name.split(" ")[0] : "";
   const [showWizard, setShowWizard] = useState(false); // false | 'select_mode' | 'live_editor' | 'concierge' | 'edit'
@@ -52,7 +53,7 @@ export default function OwnerMode() {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         const token = session?.access_token;
-        const mockOwnerId = !token && currentUser?.id === 'master-dev' ? 'master-dev' : undefined;
+        const mockOwnerId = !token && currentUser?.id ? currentUser.id : undefined;
         await fetch(`/api/deals/${dealId}/notes`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
@@ -735,9 +736,9 @@ export default function OwnerMode() {
           <h1 className="font-display-md text-3xl md:text-5xl text-text-primary mb-2">{firstName ? `Welcome back, ${firstName}` : "Welcome back"}</h1>
           <p className="text-text-secondary font-body-md text-sm md:text-base">Your workspace is empty.</p>
         </div>
-        <div className="bg-[#0a0a0a] rounded-lg border border-surface-variant p-8 md:p-lg flex flex-col gap-6 relative overflow-hidden items-center justify-center text-center py-20 md:py-32 mt-8">
-          <h3 className="font-display-md text-2xl md:text-3xl text-on-surface">Create your first Property File</h3>
-          <p className="text-text-secondary max-w-md text-sm md:text-base">Our wizard walks you through building a polished, trustworthy listing in under 10 minutes.</p>
+        <div className="bg-[#0a0a0a] rounded-lg border border-surface-variant px-4 py-16 md:p-lg flex flex-col gap-6 relative overflow-hidden items-center justify-center text-center md:py-32 mt-8 mx-4 md:mx-0">
+          <h3 className="font-display-md text-2xl md:text-3xl text-on-surface px-2">Create your first Property File</h3>
+          <p className="text-text-secondary max-w-md text-sm md:text-base px-2">Our wizard walks you through building a polished, trustworthy listing in under 10 minutes.</p>
           <button className="bg-gold-accent text-background font-working-title px-6 py-3 md:px-8 md:py-4 rounded hover:bg-surface-tint transition-colors text-base md:text-lg font-bold uppercase tracking-widest shadow-[0_0_20px_rgba(212,175,55,0.2)] mt-2" onClick={() => setShowWizard('select_mode')}>
             Start My First Listing
           </button>
@@ -766,7 +767,7 @@ export default function OwnerMode() {
                   try {
                     const { data: { session } } = await supabase.auth.getSession();
                     const token = session?.access_token;
-                    const mockOwnerId = !token && currentUser?.id === 'master-dev' ? 'master-dev' : undefined;
+                    const mockOwnerId = !token && currentUser?.id ? currentUser.id : undefined;
                     const res = await fetch('/api/dashboard/archive', {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
@@ -803,7 +804,7 @@ export default function OwnerMode() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="flex overflow-x-auto snap-x md:grid md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 pb-4 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide">
           {myListings.map(listing => {
             const listPitches = pitches.filter(p => p.isCurrentUserOwner && p.listingId === listing.id);
             const pendingPitches = listPitches.filter(p => p.status === 'pending');
@@ -811,7 +812,7 @@ export default function OwnerMode() {
             return (
               <div
                 key={listing.id}
-                className={`card-atmosphere hov-card rounded-lg p-6 flex flex-col cursor-pointer transition-all group relative overflow-hidden h-auto min-h-[12rem] md:h-64 ${pendingPitches.length > 0 ? 'cta-pulse' : ''} ${isSelected ? 'border-gold-accent' : ''}`}
+                className={`card-atmosphere hov-card rounded-lg p-5 md:p-6 flex flex-col cursor-pointer transition-all group relative overflow-hidden h-auto min-h-[12rem] md:h-64 shrink-0 w-[85vw] snap-center md:w-auto md:shrink ${pendingPitches.length > 0 ? 'cta-pulse' : ''} ${isSelected ? 'border-gold-accent' : ''}`}
                 onClick={() => selectMode ? toggleSelected(listing.id) : setViewingDossierId(listing.id)}
               >
                 <div className="absolute top-0 left-0 w-1 h-full bg-surface-variant group-hover:bg-gold-accent transition-colors"></div>
@@ -916,6 +917,12 @@ export default function OwnerMode() {
            >
              Manage Inventory
            </Link>
+           <button
+             className="hidden md:inline-block border border-gold-accent text-gold-accent hover:bg-gold-accent hover:text-background font-working-title font-bold px-4 py-2 rounded transition-all text-sm flex-1 md:flex-none text-center justify-center"
+             onClick={() => setShowWizard('select_mode')}
+           >
+             + New Property
+           </button>
            <button 
              className="bg-gold-accent/10 border border-gold-accent text-gold-accent hover:bg-gold-accent/20 font-working-title font-bold px-4 py-2 rounded transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed flex-1 md:flex-none text-center justify-center shadow-[0_0_10px_rgba(232,174,60,0.1)]"
              disabled={activeListing.pipelineStatus === 'ai_drafting'}

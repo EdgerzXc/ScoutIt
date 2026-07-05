@@ -168,6 +168,8 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
   // Resizer state
   const [leftWidth, setLeftWidth] = useState(50);
   const [isResizing, setIsResizing] = useState(false);
+  const [mobileTab, setMobileTab] = useState('editor'); // 'editor' | 'preview'
+  const isE2E = currentUser?.id === 'master-dev';
 
   const startResizing = useCallback((e) => {
     e.preventDefault();
@@ -455,8 +457,24 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
+      {/* Mobile Tab Bar */}
+      <div className="md:hidden flex bg-surface border-b border-surface-variant z-50">
+        <button 
+          onClick={() => setMobileTab('editor')}
+          className={`flex-1 py-3 text-xs font-label-caps tracking-widest uppercase transition-colors ${mobileTab === 'editor' ? 'text-gold-accent border-b-2 border-gold-accent' : 'text-text-secondary'}`}
+        >
+          Editor
+        </button>
+        <button 
+          onClick={() => setMobileTab('preview')}
+          className={`flex-1 py-3 text-xs font-label-caps tracking-widest uppercase transition-colors ${mobileTab === 'preview' ? 'text-gold-accent border-b-2 border-gold-accent' : 'text-text-secondary'}`}
+        >
+          Live Preview
+        </button>
+      </div>
+
       {/* Editor Pane (Left on Desktop) */}
-      <div className="md:col-start-1 md:row-start-1 md:row-span-2 flex flex-col overflow-hidden relative pointer-events-auto">
+      <div className={`${mobileTab === 'editor' ? 'flex' : 'hidden'} md:flex md:col-start-1 md:row-start-1 md:row-span-2 flex-col overflow-hidden relative pointer-events-auto`}>
 
       {/* Header */}
       <div className="p-4 border-b border-surface-variant bg-background flex justify-between items-center z-20">
@@ -692,7 +710,7 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
       </div>
       
       {/* Preview Pane (Right on Desktop) */}
-      <div className="hidden md:block md:col-start-3 md:row-span-2 relative bg-surface-alt border-l border-surface-variant overflow-y-auto custom-scrollbar pointer-events-auto">
+      <div className={`${mobileTab === 'preview' ? 'block' : 'hidden'} md:block md:col-start-3 md:row-span-2 relative bg-surface-alt md:border-l border-surface-variant overflow-y-auto custom-scrollbar pointer-events-auto flex-1`}>
         <div className="absolute top-0 left-0 w-full z-50 bg-gold-accent text-background text-center py-1.5 font-label-caps text-[10px] tracking-[0.3em] font-bold shadow-md pointer-events-none">
           LIVE PREVIEW / DRAFT MODE
         </div>

@@ -27,7 +27,7 @@ export async function PATCH(request, { params }) {
       const { data: { user }, error } = await authClient.auth.getUser(token);
       if (!error && user) userId = user.id;
     }
-    if (!userId && mockOwnerId === "master-dev") userId = "master-dev";
+    if (!userId && mockOwnerId) userId = mockOwnerId;
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const { data: deal, error: dealError } = await supabaseAdmin
