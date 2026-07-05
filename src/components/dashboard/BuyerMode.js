@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
 import { useDashboard } from "../../context/DashboardContext";
 import { Bookmark, Search } from "lucide-react";
@@ -24,12 +24,15 @@ export default function BuyerMode() {
   // Store markers to clean them up when listings change
   const markersRef = useRef([]);
 
-  // Live-filter logic
-  const q = searchQuery.trim().toLowerCase();
-  const matches = (item) => !q || [item.title, item.type, item.loc, item.desc].some(v => v && v.toLowerCase().includes(q));
-  
-  // Apply filter to all listings
-  const filteredListings = listings.filter(matches);
+  // ⚡ Bolt Optimization: Memoize filtered listings to avoid O(N*C) calculations on every keystroke
+  const filteredListings = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return listings;
+
+    return listings.filter(item =>
+      [item.title, item.type, item.loc, item.desc].some(v => v && v.toLowerCase().includes(q))
+    );
+  }, [listings, searchQuery]);
 
   // Initialize Mapbox and markers when showMap toggles or listings change
   useEffect(() => {
@@ -127,16 +130,26 @@ export default function BuyerMode() {
   }, []);
 
   const newFeedListings = filteredListings.slice(0, 5);
-  
-  // Map actual saved properties from the Intelligence Ledger
-  const actualSavedListings = listings.filter(l => savedIds.includes(l.id)).map(l => ({
-    id: l.id,
-    type: l.spaceCategory || l.type || 'Property',
-    title: l.title,
-    loc: l.location || l.loc || 'Location hidden',
-    img: l.hasMedia ? '📸' : '🏢', // Fallback icon
-  }));
-  const savedFiltered = actualSavedListings.filter(matches);
+
+  // ⚡ Bolt Optimization: Memoize saved listings mapping and filtering
+  const savedFiltered = useMemo(() => {
+    const _actualSavedListings = listings
+      .filter(l => savedIds.includes(l.id))
+      .map(l => ({
+        id: l.id,
+        type: l.spaceCategory || l.type || "Property",
+        title: l.title,
+        loc: l.location || l.loc || "Location hidden",
+        img: l.hasMedia ? "📸" : "🏢",
+      }));
+
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return _actualSavedListings;
+
+    return _actualSavedListings.filter(item =>
+      [item.title, item.type, item.loc, item.desc].some(v => v && v.toLowerCase().includes(q))
+    );
+  }, [listings, savedIds, searchQuery]);
 
   const ListingCard = ({ item }) => (
     <Link href={`/property/${item.id}`} className="block shrink-0 min-w-[240px] md:min-w-[280px]">
