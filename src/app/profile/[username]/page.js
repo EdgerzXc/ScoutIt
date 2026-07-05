@@ -21,6 +21,7 @@ import {
   loadResearcherProfile,
   loadPhotographerProjects,
 } from "@/lib/profileClient";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function PublicProfilePage() {
   const { username } = useParams();
@@ -77,6 +78,15 @@ export default function PublicProfilePage() {
       setResearcherData(researcherResult.data);
       setPhotographerProjects(photoResult.data ?? []);
       setLoading(false);
+
+      // Trigger profile view increment for brokers
+      if (showBroker && pub.id) {
+        supabase.functions.invoke("increment-broker-profile-views", {
+          body: { user_id: pub.id }
+        }).catch(err => {
+          console.error("Failed to increment broker profile views:", err);
+        });
+      }
     };
 
     init();
