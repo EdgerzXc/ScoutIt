@@ -418,10 +418,14 @@ export default function SettingsPage() {
                 <p className="text-sm text-on-surface mb-4">
                   1. Scan this QR code with your Authenticator App (Google Authenticator, Authy, etc).
                 </p>
-                <div 
-                  className="bg-white p-2 rounded w-48 h-48 mx-auto mb-4 flex items-center justify-center overflow-hidden"
-                  dangerouslySetInnerHTML={{ __html: qrCode }} 
-                />
+                <div className="bg-white p-2 rounded w-48 h-48 mx-auto mb-4 flex items-center justify-center overflow-hidden">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={`data:image/svg+xml;utf8,${encodeURIComponent(qrCode)}`}
+                    alt="2FA QR Code"
+                    className="w-full h-full object-contain"
+                  />
+                </div>
                 <p className="text-sm text-on-surface mb-2">
                   2. Enter the 6-digit code from the app to verify.
                 </p>
