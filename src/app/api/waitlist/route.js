@@ -37,7 +37,16 @@ export async function POST(req) {
   const source = stripAllTags(rawSource || "site");
 
   // Verify Turnstile Token
-  const TURNSTILE_SECRET_KEY = process.env.TURNSTILE_SECRET_KEY || "1x0000000000000000000000000000000AA";
+  let TURNSTILE_SECRET_KEY = process.env.TURNSTILE_SECRET_KEY;
+  if (!TURNSTILE_SECRET_KEY) {
+    if (process.env.NODE_ENV === 'development') {
+      TURNSTILE_SECRET_KEY = "1x0000000000000000000000000000000AA";
+    } else {
+      console.error("[waitlist] Missing TURNSTILE_SECRET_KEY in production.");
+      return Response.json({ ok: false, error: "Server configuration error." }, { status: 500 });
+    }
+  }
+
   try {
     const cfFormData = new FormData();
     cfFormData.append('secret', TURNSTILE_SECRET_KEY);
