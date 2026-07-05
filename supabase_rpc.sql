@@ -21,3 +21,18 @@ $$;
 grant execute on function search_properties_in_radius to public;
 grant execute on function search_properties_in_radius to anon;
 grant execute on function search_properties_in_radius to authenticated;
+
+-- 3. Increment profile views for a broker
+create or replace function increment_broker_profile_views(target_user_id text)
+returns void
+language sql
+as $$
+  update public.broker_profiles
+  set profile_views_this_month = coalesce(profile_views_this_month, 0) + 1
+  where user_id = target_user_id;
+$$;
+
+-- Allow public access to the increment RPC function
+grant execute on function increment_broker_profile_views to public;
+grant execute on function increment_broker_profile_views to anon;
+grant execute on function increment_broker_profile_views to authenticated;

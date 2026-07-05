@@ -20,6 +20,7 @@ import {
   loadBrokerProfile,
   loadResearcherProfile,
   loadPhotographerProjects,
+  incrementBrokerProfileViews,
 } from "@/lib/profileClient";
 
 export default function PublicProfilePage() {
@@ -77,6 +78,27 @@ export default function PublicProfilePage() {
       setResearcherData(researcherResult.data);
       setPhotographerProjects(photoResult.data ?? []);
       setLoading(false);
+
+      // Increment broker profile views if viewing a public broker profile
+      if (showBroker) {
+        // Prevent incrementing own view count
+        const rawLocalUser = localStorage.getItem("scoutit_user");
+        let isOwnProfile = false;
+        if (rawLocalUser) {
+          try {
+            const localUser = JSON.parse(rawLocalUser);
+            isOwnProfile = localUser.id === pub.id;
+          } catch (e) {
+            // Ignore parse errors
+          }
+        }
+
+        if (!isOwnProfile) {
+          incrementBrokerProfileViews(pub.id).catch((err) => {
+            console.error("Failed to increment broker profile views:", err);
+          });
+        }
+      }
     };
 
     init();

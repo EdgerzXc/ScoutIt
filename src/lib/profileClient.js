@@ -200,3 +200,11 @@ export async function loadOwnerInquiryCount(propertyIds) {
     .in('property_id', propertyIds);
   return { count: count ?? 0, error };
 }
+
+// ── INCREMENT PROFILE VIEWS ───────────────────────────────────────────────────
+export async function incrementBrokerProfileViews(userId) {
+  const { data, error } = await supabase.functions.invoke('increment_profile_views', {
+    body: { user_id: userId },
+  });
+  return { data, error };
+}
