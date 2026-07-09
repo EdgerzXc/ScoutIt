@@ -74,39 +74,68 @@ export default function ProfileBaseLayer({
       <div style={identityBlock}>
         <h1 style={nameStyle}>{profile.display_name || "Anonymous"}</h1>
 
-        {/* Tier badge */}
-        <div
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 6,
-            border: `1px solid ${tier.border}`,
-            borderRadius: 20,
-            padding: "3px 10px",
-            marginBottom: 12,
-            marginTop: 6,
-          }}
-        >
-          <span
+        {/* Tier badge + Example flag — the example badge carries the same
+            visual weight as the tier/verification pill, never a tooltip */}
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center", marginBottom: 12, marginTop: 6 }}>
+          <div
             style={{
-              width: 6,
-              height: 6,
-              borderRadius: "50%",
-              background: tier.color,
-              display: "inline-block",
-            }}
-          />
-          <span
-            style={{
-              fontFamily: "var(--font-body)",
-              fontSize: 10,
-              letterSpacing: "0.1em",
-              textTransform: "uppercase",
-              color: tier.color,
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              border: `1px solid ${tier.border}`,
+              borderRadius: 20,
+              padding: "3px 10px",
             }}
           >
-            {tier.label}
-          </span>
+            <span
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: "50%",
+                background: tier.color,
+                display: "inline-block",
+              }}
+            />
+            <span
+              style={{
+                fontFamily: "var(--font-body)",
+                fontSize: 10,
+                letterSpacing: "0.1em",
+                textTransform: "uppercase",
+                color: tier.color,
+              }}
+            >
+              {tier.label}
+            </span>
+          </div>
+
+          {profile.is_example_account && (
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                border: "1px dashed rgba(240, 237, 232, 0.45)",
+                borderRadius: 20,
+                padding: "3px 10px",
+                background: "rgba(240, 237, 232, 0.06)",
+              }}
+              title="This is a seeded demonstration profile, not a real person"
+            >
+              <span
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 10,
+                  fontWeight: 700,
+                  letterSpacing: "0.12em",
+                  textTransform: "uppercase",
+                  color: "var(--text-secondary)",
+                }}
+              >
+                ⚠ Example Profile
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Meta row */}

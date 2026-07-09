@@ -307,6 +307,9 @@ export default function BrokersPage() {
                       {tierBadgeText && (
                         <div className="general-tier-badge-label">{tierBadgeText}</div>
                       )}
+                      {broker.isExample && (
+                        <div className="example-badge-overlay">⚠ EXAMPLE PROFILE</div>
+                      )}
                       <div className="broker-image-container">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={broker.image} alt={broker.name} className="broker-image" />
@@ -548,6 +551,22 @@ export default function BrokersPage() {
           top: 50%;
           left: 50%;
           transform: translate(-50%, -50%);
+        }
+
+        .example-badge-overlay {
+          position: absolute;
+          top: 12px;
+          left: 12px;
+          font-size: 9px;
+          font-weight: 700;
+          letter-spacing: 0.12em;
+          color: var(--text-primary);
+          background: rgba(14, 14, 14, 0.9);
+          border: 1px dashed rgba(240, 237, 232, 0.5);
+          padding: 4px 10px;
+          border-radius: 3px;
+          z-index: 10;
+          font-family: var(--font-mono), monospace;
         }
 
         .broker-card {

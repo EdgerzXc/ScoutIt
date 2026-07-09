@@ -48,7 +48,7 @@ export async function loadPublicProfile(displayName) {
     .select(
       'id, display_name, avatar_url, location, headline, bio, firm, service, ' +
       'member_since, subscription_tier, active_roles, provider_type, ' +
-      'provider_availability, is_profile_public'
+      'provider_availability, is_profile_public, is_example_account'
     )
     .eq('display_name', displayName)
     .eq('is_profile_public', true)
@@ -64,6 +64,42 @@ export async function loadPublicProfile(displayName) {
     data: { ...data, badges: (badgeRows || []).map((b) => ({ id: b.badge_id, minted_at: b.earned_at })) },
     error: null,
   };
+}
+
+// ── PUBLIC PROVIDER DIRECTORY ─────────────────────────────────────────────────
+// Powers /researchers and /photographers. RLS only exposes rows with
+// is_profile_public = true to the anon client, so this is public data by
+// definition. Same field discipline as loadPublicProfile — never
+// connects_balance.
+export async function loadPublicProviders(providerType) {
+  const { data, error } = await supabase
+    .from('user_profiles')
+    .select(
+      'id, display_name, avatar_url, location, headline, bio, service, ' +
+      'subscription_tier, provider_availability, is_example_account'
+    )
+    .eq('provider_type', providerType)
+    .eq('is_profile_public', true)
+    .eq('is_shadowbanned', false)
+    .order('display_name', { ascending: true });
+  return { data: data || [], error };
+}
+
+// ── PUBLIC ROLES (for viewing someone else's profile) ─────────────────────────
+// privacy_settings is own-rows-only under RLS (correctly, since the 2026-07-09
+// reset), so a visitor can't read the target's public_roles directly — the
+// server route returns just that one display-control field, and only for
+// public profiles.
+export async function loadPublicRoles(userId) {
+  try {
+    const res = await fetch(`/api/profile/public-roles?userId=${encodeURIComponent(userId)}`);
+    if (!res.ok) return { publicRoles: [], error: null };
+    const data = await res.json();
+    return { publicRoles: data.publicRoles || [], error: null };
+  } catch (error) {
+    console.error("Failed to load public roles", error);
+    return { publicRoles: [], error };
+  }
 }
 
 // ── PRIVACY SETTINGS ──────────────────────────────────────────────────────────

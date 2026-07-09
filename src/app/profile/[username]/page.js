@@ -16,7 +16,7 @@ import PhotographerPanel from "@/components/profile/panels/PhotographerPanel";
 import ResearcherPanel from "@/components/profile/panels/ResearcherPanel";
 import {
   loadPublicProfile,
-  loadPrivacySettings,
+  loadPublicRoles,
   loadBrokerProfile,
   loadResearcherProfile,
   loadPhotographerProjects,
@@ -53,11 +53,13 @@ export default function PublicProfilePage() {
 
       setProfile(pub);
 
-      // Load privacy settings to know which roles are public
-      const { data: privData } = await loadPrivacySettings(pub.id);
-      setPrivacy(privData);
+      // Which roles the person chose to display publicly. Fetched via a
+      // server route — privacy_settings is own-rows-only under RLS, so the
+      // anon client can't (and shouldn't) read the raw row of someone else.
+      const { publicRoles: fetchedRoles } = await loadPublicRoles(pub.id);
+      setPrivacy({ public_roles: fetchedRoles });
 
-      const publicRoles = privData?.public_roles ?? [];
+      const publicRoles = fetchedRoles;
       const roles = pub.active_roles ?? [];
       const provType = pub.provider_type;
 

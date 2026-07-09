@@ -2,28 +2,55 @@
 
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import "../property/property.css";
 import FoundingProgramPanel from "@/components/ecosystem/FoundingProgramPanel";
-
-const DUMMY_RESEARCHERS = [];
+import { loadPublicProviders } from "@/lib/profileClient";
 
 const FOCUS_AREAS = ["Residential Due Diligence", "Commercial Investment Analysis", "Short-Term Rental & Hospitality", "Land Acquisition", "Industrial & Logistics"];
 const MARKETS = ["Metro Manila", "Cebu & Visayas", "Davao & Mindanao", "Clark & Central Luzon", "Iloilo & Western Visayas"];
 
 export default function ResearchersPage() {
+  // Real roster: public researcher profiles from Supabase (RLS only exposes
+  // is_profile_public rows to the anon client). This page previously
+  // hardcoded an empty array and never fetched anything.
+  const [researchers, setResearchers] = useState(null); // null = loading
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedFocus, setSelectedFocus] = useState([]);
   const [selectedMarkets, setSelectedMarkets] = useState([]);
   const [openFilters, setOpenFilters] = useState({ focus: true, markets: true });
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await loadPublicProviders("researcher");
+      if (cancelled) return;
+      if (error) {
+        console.error("Failed to load researchers", error);
+        setResearchers([]);
+        return;
+      }
+      setResearchers(data.map((p) => ({
+        name: p.display_name || "Unnamed Analyst",
+        location: p.location || "",
+        focus: p.service || "",
+        headline: p.headline || "",
+        bio: p.bio || "",
+        image: p.avatar_url || "",
+        isExample: !!p.is_example_account,
+        available: p.provider_availability !== false,
+      })));
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   const toggleFilter = (section) => setOpenFilters((p) => ({ ...p, [section]: !p[section] }));
   const toggle = (val, state, setState) => {
     setState(state.includes(val) ? state.filter((x) => x !== val) : [...state, val]);
   };
 
-  const filtered = DUMMY_RESEARCHERS.filter((r) => {
+  const filtered = (researchers || []).filter((r) => {
     if (searchTerm.trim()) {
       const q = searchTerm.toLowerCase();
       if (!r.name.toLowerCase().includes(q) && !r.location.toLowerCase().includes(q) &&
@@ -105,6 +132,50 @@ export default function ResearchersPage() {
                 value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
             </div>
 
+            {researchers === null && (
+              <p style={{ color: "var(--text-secondary)", fontSize: 13, padding: "24px 0" }}>Loading the roster…</p>
+            )}
+            {researchers !== null && filtered.length === 0 && (
+              <p style={{ color: "var(--text-secondary)", fontSize: 13, padding: "24px 0" }}>
+                {researchers.length === 0
+                  ? "No researchers have public profiles yet."
+                  : "No researchers match your filters."}
+              </p>
+            )}
+            {filtered.length > 0 && (
+              <div className="brokers-grid" style={{ marginBottom: 32 }}>
+                {filtered.map((r) => (
+                  <Link key={r.name} href={`/profile/${encodeURIComponent(r.name)}`} className="broker-card" style={{ textDecoration: "none" }}>
+                    {r.isExample && <div className="example-badge-overlay">⚠ EXAMPLE PROFILE</div>}
+                    <div className="broker-image-container">
+                      {r.image ? (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img src={r.image} alt={r.name} className="broker-image" />
+                      ) : (
+                        <div className="broker-image" style={{ display: "flex", alignItems: "center", justifyContent: "center", background: "var(--surface2)", fontSize: 40, color: "var(--accent)" }}>🔍</div>
+                      )}
+                      <div className="image-overlay"></div>
+                    </div>
+                    <div className="broker-content">
+                      <div className="broker-location">{r.location}</div>
+                      <h2 className="broker-name">{r.name}</h2>
+                      <p className="broker-title">{r.headline || "Site Researcher"}</p>
+                      {r.focus && <p className="broker-specialty">Focus: <span>{r.focus}</span></p>}
+                      {r.bio && <p className="broker-bio">{r.bio}</p>}
+                      <div className="broker-footer">
+                        <div className="broker-stats">
+                          <span style={{ fontSize: 11, color: r.available ? "var(--green)" : "var(--text-muted)" }}>
+                            {r.available ? "● Available for briefs" : "○ Currently unavailable"}
+                          </span>
+                        </div>
+                        <span className="btn-contact">View Profile</span>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+
             <FoundingProgramPanel
               icon="🔍"
               serviceName="Site research"
@@ -124,6 +195,7 @@ export default function ResearchersPage() {
       <Footer />
 
       <style>{`
+        .example-badge-overlay { position: absolute; top: 12px; left: 12px; font-size: 9px; font-weight: 700; letter-spacing: .12em; color: var(--text-primary); background: rgba(14,14,14,.9); border: 1px dashed rgba(240,237,232,.5); padding: 4px 10px; border-radius: 3px; z-index: 10; font-family: var(--font-mono),monospace; }
         .coming-soon-banner { background: linear-gradient(135deg,rgba(232, 174, 60,.08) 0%,rgba(232, 174, 60,.03) 100%); border: .5px solid var(--accent-border); border-radius: 6px; padding: 16px 22px; margin-bottom: 32px; }
         .coming-soon-inner { display: flex; align-items: flex-start; gap: 14px; }
         .coming-soon-badge { background: var(--accent); color: #0e0e0e; font-size: 9px; font-weight: 700; letter-spacing: .12em; padding: 4px 10px; border-radius: 3px; white-space: nowrap; flex-shrink: 0; margin-top: 2px; }

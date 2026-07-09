@@ -2,23 +2,49 @@
 
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import "../property/property.css";
 
 import FoundingProgramPanel from "@/components/ecosystem/FoundingProgramPanel";
-
-
-const DUMMY_PHOTOGRAPHERS = [];
+import { loadPublicProviders } from "@/lib/profileClient";
 
 const SPECIALTIES = ["Interior Architecture", "Drone Aerial + Lifestyle", "Commercial & F&B", "Minimalist Residential", "Luxury & High-End"];
 const LOCATIONS = ["BGC, Taguig", "Makati, Metro Manila", "Cebu City", "Quezon City", "Alabang"];
 
 export default function PhotographersPage() {
+  // Real roster: public photographer profiles from Supabase (RLS only exposes
+  // is_profile_public rows to the anon client). This page previously
+  // hardcoded an empty array and never fetched anything.
+  const [photographers, setPhotographers] = useState(null); // null = loading
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSpecialties, setSelectedSpecialties] = useState([]);
   const [selectedLocations, setSelectedLocations] = useState([]);
   const [openFilters, setOpenFilters] = useState({ specialties: true, locations: true });
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await loadPublicProviders("photographer");
+      if (cancelled) return;
+      if (error) {
+        console.error("Failed to load photographers", error);
+        setPhotographers([]);
+        return;
+      }
+      setPhotographers(data.map((p) => ({
+        name: p.display_name || "Unnamed Photographer",
+        location: p.location || "",
+        specialty: p.service || "",
+        headline: p.headline || "",
+        bio: p.bio || "",
+        image: p.avatar_url || "",
+        isExample: !!p.is_example_account,
+        available: p.provider_availability !== false,
+      })));
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   const toggleFilter = (section) => setOpenFilters((p) => ({ ...p, [section]: !p[section] }));
 
@@ -26,7 +52,7 @@ export default function PhotographersPage() {
     setState(state.includes(val) ? state.filter((x) => x !== val) : [...state, val]);
   };
 
-  const filtered = DUMMY_PHOTOGRAPHERS.filter((p) => {
+  const filtered = (photographers || []).filter((p) => {
     if (searchTerm.trim()) {
       const q = searchTerm.toLowerCase();
       if (
@@ -124,6 +150,50 @@ export default function PhotographersPage() {
               />
             </div>
 
+            {photographers === null && (
+              <p style={{ color: "var(--text-secondary)", fontSize: 13, padding: "24px 0" }}>Loading the roster…</p>
+            )}
+            {photographers !== null && filtered.length === 0 && (
+              <p style={{ color: "var(--text-secondary)", fontSize: 13, padding: "24px 0" }}>
+                {photographers.length === 0
+                  ? "No photographers have public profiles yet."
+                  : "No photographers match your filters."}
+              </p>
+            )}
+            {filtered.length > 0 && (
+              <div className="brokers-grid" style={{ marginBottom: 32 }}>
+                {filtered.map((p) => (
+                  <Link key={p.name} href={`/profile/${encodeURIComponent(p.name)}`} className="broker-card" style={{ textDecoration: "none" }}>
+                    {p.isExample && <div className="example-badge-overlay">⚠ EXAMPLE PROFILE</div>}
+                    <div className="broker-image-container">
+                      {p.image ? (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img src={p.image} alt={p.name} className="broker-image" />
+                      ) : (
+                        <div className="broker-image" style={{ display: "flex", alignItems: "center", justifyContent: "center", background: "var(--surface2)", fontSize: 40, color: "var(--accent)" }}>📸</div>
+                      )}
+                      <div className="image-overlay"></div>
+                    </div>
+                    <div className="broker-content">
+                      <div className="broker-location">{p.location}</div>
+                      <h2 className="broker-name">{p.name}</h2>
+                      <p className="broker-title">{p.headline || "Space Photographer"}</p>
+                      {p.specialty && <p className="broker-specialty">Specialty: <span>{p.specialty}</span></p>}
+                      {p.bio && <p className="broker-bio">{p.bio}</p>}
+                      <div className="broker-footer">
+                        <div className="broker-stats">
+                          <span style={{ fontSize: 11, color: p.available ? "var(--green)" : "var(--text-muted)" }}>
+                            {p.available ? "● Available for shoots" : "○ Currently unavailable"}
+                          </span>
+                        </div>
+                        <span className="btn-contact">View Portfolio</span>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+
             <FoundingProgramPanel
               icon="📸"
               serviceName="Space photography"
@@ -143,6 +213,7 @@ export default function PhotographersPage() {
       <Footer />
 
       <style>{`
+        .example-badge-overlay { position: absolute; top: 12px; left: 12px; font-size: 9px; font-weight: 700; letter-spacing: .12em; color: var(--text-primary); background: rgba(14,14,14,.9); border: 1px dashed rgba(240,237,232,.5); padding: 4px 10px; border-radius: 3px; z-index: 10; font-family: var(--font-mono),monospace; }
         .coming-soon-banner {
           background: linear-gradient(135deg, rgba(232, 174, 60,0.08) 0%, rgba(232, 174, 60,0.03) 100%);
           border: 0.5px solid var(--accent-border);

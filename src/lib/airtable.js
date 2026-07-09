@@ -98,6 +98,10 @@ export async function fetchBrokers(apiKey, baseId) {
 
       return {
         id:               f.BrokerID        || r.id,
+        // Seed/demo rows must never pass as real advisors. Primary signal is
+        // the Is_Example checkbox; the Title regex is the fallback for when
+        // the Airtable token can't create that field (data-only scope).
+        isExample:        !!f.Is_Example || /\bexample\b/i.test(f.Title || ""),
         name:             f.Name            || "Unnamed Advisor",
         title:            f.Title           || "",
         specialty:        f.Specialty       || "",
