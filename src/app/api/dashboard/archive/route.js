@@ -38,7 +38,8 @@ export async function POST(request) {
       const { data: { user }, error } = await authClient.auth.getUser(token);
       if (!error && user) userId = user.id;
     }
-    if (!userId && mockOwnerId) userId = mockOwnerId;
+    // Dev-only fallback -- rejected in production (same gate as /api/dashboard/publish).
+    if (!userId && process.env.NODE_ENV !== "production" && mockOwnerId) userId = mockOwnerId;
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized: Invalid session or missing token" }, { status: 401 });
     }

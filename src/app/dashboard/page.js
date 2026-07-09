@@ -180,8 +180,7 @@ function DashboardInner() {
       case "exploring": return <BuyerMode />;
       case "provider": return <ProviderMode type={user.providerType} />;
       case "operator": return <OperatorMode />;
-      case "mc_staff": return <MissionControlMode variant="staff" />;
-      case "mc_enterprise": return <MissionControlMode variant="enterprise" />;
+      case "mc_enterprise": return <MissionControlMode />;
       default: return <div>Unknown Mode</div>;
     }
   };
@@ -212,7 +211,9 @@ function DashboardInner() {
 
   return (
     <div className="relative min-h-screen bg-background text-text-primary flex flex-col pb-[100px] md:pb-24">
-      <AtmosphereBackground variant="dashboard" />
+      {/* Broker gets the "Tactical Velocity" ambient layer (signal pulses +
+          light streaks); every other role keeps the base dashboard glow. */}
+      <AtmosphereBackground variant={mode === "broker" ? "broker" : "dashboard"} />
 
       {/* Top Nav (Persistent) */}
       <header className="relative z-40 sticky top-0 bg-background/90 backdrop-blur-md border-b border-surface-variant px-4 py-3 md:px-6 md:py-4 flex items-center justify-between">
@@ -349,9 +350,12 @@ function DashboardInner() {
                             if (notif.notificationType === 'inquiry') {
                               router.push('/dashboard/inbox');
                               setShowNotifications(false);
+                            } else if (notif.propertyId) {
+                              router.push(`/dashboard/inventory/${notif.propertyId}`);
+                              setShowNotifications(false);
                             }
                           }}
-                          className={`p-4 border-b border-surface-variant/50 flex gap-3 transition-colors ${!notif.read ? 'bg-surface-container-low' : ''} ${notif.notificationType === 'inquiry' ? 'cursor-pointer hover:bg-surface-variant' : ''}`}
+                          className={`p-4 border-b border-surface-variant/50 flex gap-3 transition-colors ${!notif.read ? 'bg-surface-container-low' : ''} ${(notif.notificationType === 'inquiry' || notif.propertyId) ? 'cursor-pointer hover:bg-surface-variant' : ''}`}
                         >
                           <div className="text-2xl shrink-0">{notif.icon}</div>
                           <div>

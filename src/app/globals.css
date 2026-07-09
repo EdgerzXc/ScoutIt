@@ -1242,6 +1242,73 @@ html.lite-mode .atmosphere-bg::after {
   display: none !important;
 }
 
+/* ROLE ATMOSPHERE: BROKER "TACTICAL VELOCITY"
+   Ambient-only differentiation per DASHBOARD_ATMOSPHERE_FRAMEWORK.md Layer 5:
+   same 95/5 black/gold system, no new colors. Two layers: directional light
+   streaks (pursuit) + pulsing signal nodes (live network). Both animate
+   opacity only (compositor-friendly). */
+.atmosphere-broker {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.atmosphere-broker::before {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  background: repeating-linear-gradient(
+    115deg,
+    transparent 0px,
+    transparent 180px,
+    rgba(var(--accent-rgb), 0.035) 181px,
+    rgba(var(--accent-rgb), 0.035) 183px,
+    transparent 184px,
+    transparent 420px
+  );
+  mask-image: radial-gradient(ellipse 80% 70% at 70% 20%, black 0%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 70% 20%, black 0%, transparent 75%);
+  animation: brokerStreaks 9s ease-in-out infinite;
+}
+
+.atmosphere-broker::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle 3px at 82% 22%, rgba(247, 198, 78, 0.5), transparent 100%),
+    radial-gradient(circle 2px at 68% 48%, rgba(var(--accent-rgb), 0.4), transparent 100%),
+    radial-gradient(circle 2px at 90% 62%, rgba(var(--accent-rgb), 0.35), transparent 100%),
+    radial-gradient(circle 3px at 12% 78%, rgba(var(--accent-rgb), 0.3), transparent 100%),
+    radial-gradient(circle 2px at 28% 30%, rgba(var(--accent-rgb), 0.3), transparent 100%);
+  animation: brokerSignals 4.5s ease-in-out infinite;
+}
+
+@keyframes brokerStreaks {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 1; }
+}
+
+@keyframes brokerSignals {
+  0%, 100% { opacity: 0.35; }
+  50%      { opacity: 0.9; }
+}
+
+html.lite-mode .atmosphere-broker,
+html.lite-mode .atmosphere-broker::before,
+html.lite-mode .atmosphere-broker::after {
+  display: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .atmosphere-broker::before,
+  .atmosphere-broker::after {
+    animation: none;
+  }
+}
+
 /* Card surfaces â€” replace flat fills with subtle depth gradients */
 .card-atmosphere {
   background: linear-gradient(165deg, #1a1917, #111110);

@@ -21,7 +21,10 @@ export async function POST(request) {
     // Read body exactly once
     const body = await request.json().catch(() => ({}));
     
-    if (!userId && body.mockOwnerId !== 'master-dev') {
+    // The master-dev bypass is dev-only -- in production a verified session
+    // token is required, full stop (same gate as /api/dashboard/publish).
+    const isDevMock = process.env.NODE_ENV !== 'production' && body.mockOwnerId === 'master-dev';
+    if (!userId && !isDevMock) {
        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

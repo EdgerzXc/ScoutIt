@@ -4,6 +4,7 @@ import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { syncPropertyUnitsToAirtable } from "@/lib/unitsSync";
 import { notifyAttachedBrokers } from "@/lib/notifications";
+import { logActivity } from "@/lib/crmActivity";
 
 // Owner accepts an operator's handshake request and picks which specific
 // units to hand over. Per SCOUTIT_MASTER_BUILD_SPEC.md §9.2/locked decision
@@ -149,6 +150,13 @@ export async function POST(request) {
 
     if (action === "decline") {
       await supabaseAdmin.from("deals").update({ status: "declined" }).eq("id", dealId);
+      await logActivity(supabaseAdmin, {
+        dealId,
+        propertyId: property.id,
+        activityType: "delegation_declined",
+        actorId: userId,
+        metadata: { operatorId: deal.buyer_id },
+      });
       return NextResponse.json({ success: true, status: "declined" });
     }
 
@@ -231,6 +239,14 @@ export async function POST(request) {
         excludeUserId: userId,
       });
     }
+
+    await logActivity(supabaseAdmin, {
+      dealId,
+      propertyId: property.id,
+      activityType: "delegation_accepted",
+      actorId: userId,
+      metadata: { operatorId: deal.buyer_id, unitCount: unitIds.length },
+    });
 
     return NextResponse.json({ success: true, status: "accepted", delegatedUnitIds: unitIds, ...(warning ? { warning } : {}) });
   } catch (err) {

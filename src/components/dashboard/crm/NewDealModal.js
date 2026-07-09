@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { X, Building2, UserCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { crmFetch } from "../../../lib/crmClient";
 
-export default function NewDealModal({ isOpen, onClose, onDealCreated }) {
+export default function NewDealModal({ isOpen, onClose, onDealCreated, mockUserId }) {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [formData, setFormData] = useState({
     propertyId: "",
     otherPartyEmail: "",
@@ -19,26 +21,18 @@ export default function NewDealModal({ isOpen, onClose, onDealCreated }) {
     e.preventDefault();
     setLoading(true);
     
+    setError("");
     try {
-      const res = await fetch("/api/deals", {
+      const data = await crmFetch("/api/deals", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...formData,
-          mockOwnerId: "master-dev"
-        })
+        mockUserId,
+        body: formData,
       });
-      
-      const data = await res.json();
-      if (res.ok) {
-        if (onDealCreated) onDealCreated(data.deal);
-        onClose();
-      } else {
-        alert(data.error || "Failed to create deal");
-      }
+      if (onDealCreated) onDealCreated(data.deal);
+      onClose();
     } catch (err) {
       console.error(err);
-      alert("Something went wrong");
+      setError(err.message || "Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -128,6 +122,10 @@ export default function NewDealModal({ isOpen, onClose, onDealCreated }) {
                 onChange={e => setFormData({ ...formData, initialMessage: e.target.value })}
               />
             </div>
+
+            {error && (
+              <div className="text-error text-sm bg-error/10 border border-error/30 rounded px-3 py-2">{error}</div>
+            )}
 
             <div className="pt-4 flex justify-end gap-3">
               <button 

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { z } from "zod";
+import { logActivity } from "@/lib/crmActivity";
 
 const schema = z.object({
   status: z.enum(["connected", "pending", "accepted", "closed", "declined", "reported"]),
@@ -27,12 +28,13 @@ export async function PATCH(request, { params }) {
       const { data: { user }, error } = await authClient.auth.getUser(token);
       if (!error && user) userId = user.id;
     }
-    if (!userId && mockOwnerId) userId = mockOwnerId;
+    // Dev-only fallback -- rejected in production (same gate as /api/dashboard/publish).
+    if (!userId && process.env.NODE_ENV !== "production" && mockOwnerId) userId = mockOwnerId;
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const { data: deal, error: dealError } = await supabaseAdmin
       .from("deals")
-      .select("buyer_id, broker_id, properties(owner_id)")
+      .select("status, property_id, buyer_id, broker_id, properties(owner_id)")
       .eq("id", dealId)
       .single();
 
@@ -61,6 +63,14 @@ export async function PATCH(request, { params }) {
       console.error("[DEALS API] Failed to update status:", updateError);
       return NextResponse.json({ error: "Failed to update status" }, { status: 500 });
     }
+
+    await logActivity(supabaseAdmin, {
+      dealId,
+      propertyId: deal.property_id,
+      activityType: "status_change",
+      actorId: userId,
+      metadata: { from: deal.status, to: status },
+    });
 
     return NextResponse.json({ success: true, status: updateData.status });
   } catch (err) {

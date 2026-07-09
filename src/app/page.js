@@ -11,6 +11,7 @@ import CinematicJourney from "@/components/cinematic/CinematicJourney";
 import Footer from "@/components/layout/Footer";
 import { Building2, Camera, Search, CalendarDays } from "lucide-react";
 import { isLiteMode } from "@/lib/liteMode";
+import { getArticles } from "@/data/mockArticles";
 
 // Scrollytelling manifesto ΓÇö lazy-loaded so it costs the homepage nothing
 // until the UFO is clicked.
@@ -410,12 +411,12 @@ export default function Home() {
         const basePreviews = {};
         
         const updatedPreviews = {
-          Residential: [...basePreviews.Residential],
-          Commercial: [...basePreviews.Commercial],
-          STR: [...basePreviews.STR],
-          Hospitality: [...basePreviews.Hospitality],
-          Restaurants: [...basePreviews.Restaurants],
-          Venues: [...basePreviews.Venues],
+          Residential: [...(basePreviews.Residential || [])],
+          Commercial: [...(basePreviews.Commercial || [])],
+          STR: [...(basePreviews.STR || [])],
+          Hospitality: [...(basePreviews.Hospitality || [])],
+          Restaurants: [...(basePreviews.Restaurants || [])],
+          Venues: [...(basePreviews.Venues || [])],
         };
         
         const newLocations = [
@@ -454,14 +455,38 @@ export default function Home() {
         setLocations(newLocations);
         
         // 2. Group/format Properties & Intel for discoveryFeed
-        const baseFeed = [];
+        const baseFeed = {};
         const updatedFeed = {
-          Residential: { ...baseFeed.Residential, spotlights: [...baseFeed.Residential.spotlights], news: [...baseFeed.Residential.news], collections: [...baseFeed.Residential.collections] },
-          Commercial: { ...baseFeed.Commercial, spotlights: [...baseFeed.Commercial.spotlights], news: [...baseFeed.Commercial.news], collections: [...baseFeed.Commercial.collections] },
-          STR: { ...baseFeed.STR, spotlights: [...baseFeed.STR.spotlights], news: [...baseFeed.STR.news], collections: [...baseFeed.STR.collections] },
-          Hospitality: { ...baseFeed.Hospitality, spotlights: [...baseFeed.Hospitality.spotlights], news: [...baseFeed.Hospitality.news], collections: [...baseFeed.Hospitality.collections] },
-          Restaurants: { ...baseFeed.Restaurants, spotlights: [...baseFeed.Restaurants.spotlights], news: [...baseFeed.Restaurants.news], collections: [...baseFeed.Restaurants.collections] },
-          Venues: { ...baseFeed.Venues, spotlights: [...baseFeed.Venues.spotlights], news: [...baseFeed.Venues.news], collections: [...baseFeed.Venues.collections] },
+          Residential: {
+            spotlights: [...(baseFeed.Residential?.spotlights || [])],
+            news: [...(baseFeed.Residential?.news || [])],
+            collections: [...(baseFeed.Residential?.collections || [])],
+          },
+          Commercial: {
+            spotlights: [...(baseFeed.Commercial?.spotlights || [])],
+            news: [...(baseFeed.Commercial?.news || [])],
+            collections: [...(baseFeed.Commercial?.collections || [])],
+          },
+          STR: {
+            spotlights: [...(baseFeed.STR?.spotlights || [])],
+            news: [...(baseFeed.STR?.news || [])],
+            collections: [...(baseFeed.STR?.collections || [])],
+          },
+          Hospitality: {
+            spotlights: [...(baseFeed.Hospitality?.spotlights || [])],
+            news: [...(baseFeed.Hospitality?.news || [])],
+            collections: [...(baseFeed.Hospitality?.collections || [])],
+          },
+          Restaurants: {
+            spotlights: [...(baseFeed.Restaurants?.spotlights || [])],
+            news: [...(baseFeed.Restaurants?.news || [])],
+            collections: [...(baseFeed.Restaurants?.collections || [])],
+          },
+          Venues: {
+            spotlights: [...(baseFeed.Venues?.spotlights || [])],
+            news: [...(baseFeed.Venues?.news || [])],
+            collections: [...(baseFeed.Venues?.collections || [])],
+          }
         };
         
         airtableProperties.forEach((p) => {

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { logActivity } from "@/lib/crmActivity";
 
 export async function POST(request) {
   try {
@@ -65,6 +66,14 @@ export async function POST(request) {
       console.error("[DEAL UPDATE API] Failed to update deal:", updateError);
       return NextResponse.json({ error: "Failed to update deal status" }, { status: 500 });
     }
+
+    await logActivity(supabaseAdmin, {
+      dealId,
+      propertyId: deal.property_id,
+      activityType: "status_change",
+      actorId: userId,
+      metadata: { from: deal.status, to: newStatus },
+    });
 
     return NextResponse.json({ success: true, dealId, newStatus });
 

@@ -47,8 +47,9 @@ export async function POST(request) {
       }
     }
 
-    // 2. Fallback for DEV Toolbox mock users
-    if (!userId && mockOwnerId === 'master-dev') {
+    // 2. Fallback for DEV Toolbox mock users -- dev-only, rejected in
+    // production (same gate as /api/dashboard/publish).
+    if (!userId && process.env.NODE_ENV !== 'production' && mockOwnerId === 'master-dev') {
       userId = 'master-dev';
     }
 

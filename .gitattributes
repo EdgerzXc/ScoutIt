@@ -1,0 +1,27 @@
+# Line-ending policy: the repo stores LF (2,038 of 2,060 tracked text files
+# already do). This overrides any developer's local core.autocrlf so editor
+# or OS differences can't silently reintroduce CRLF churn into diffs.
+#
+# Known exception: ~19 files were historically committed with CRLF (e.g.
+# package.json, src/app/layout.js, src/context/DashboardContext.js). They
+# stay untouched until a deliberate one-time normalization commit
+# (`git add --renormalize .`) — until then they may show a whole-file
+# line-ending diff the first time they're edited. That's expected, not data
+# loss.
+* text=auto eol=lf
+
+# Binaries — never normalize.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.pdf binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.mp4 binary
+*.mov binary
+*.zip binary

@@ -22,7 +22,10 @@ export async function POST(request) {
     const authHeader = request.headers.get("Authorization");
     const token = authHeader?.replace("Bearer ", "");
     
-    if (mockOwnerId !== 'master-dev') {
+    // The master-dev bypass is dev-only -- in production a verified session
+    // token is required, full stop (same gate as /api/dashboard/publish).
+    const isDevMock = process.env.NODE_ENV !== 'production' && mockOwnerId === 'master-dev';
+    if (!isDevMock) {
       if (!token) {
         return NextResponse.json({ error: "Unauthorized: Missing token" }, { status: 401 });
       }

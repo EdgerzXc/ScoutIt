@@ -1,10 +1,13 @@
 "use client";
 
-import { useState, useRef, useMemo } from "react";
+import { useState, useRef, useMemo, useCallback } from "react";
 import { useDashboard } from "../../context/DashboardContext";
 import Link from "next/link";
 import { Lock } from "lucide-react";
 import { getSession } from "../../lib/authClient";
+import TaskRail from "./crm/TaskRail";
+import DealTimeline from "./crm/DealTimeline";
+import { computeListingStrength } from "../../lib/listingStrength";
 
 export default function BrokerMode() {
   const { connects, listings, pitches, sendPitch, updatePitchStatus, currentUser } = useDashboard();
@@ -24,6 +27,11 @@ export default function BrokerMode() {
   // (debounced so we're not firing a PATCH on every keystroke).
   const [dealNotes, setDealNotes] = useState({});
   const noteSaveTimers = useRef({});
+
+  // Open/overdue counts reported up by TaskRail so Scout Insight can surface
+  // them without a second fetch.
+  const [taskSummary, setTaskSummary] = useState(null);
+  const handleTaskSummary = useCallback((summary) => setTaskSummary(summary), []);
 
   // ⚡ Bolt Optimization: Memoize derived pipelines
   const { myPitches, pending, accepted, activePitches, feed } = useMemo(() => {
@@ -50,6 +58,48 @@ export default function BrokerMode() {
       feed: _feed
     };
   }, [pitches, listings]);
+
+  // Scout Insight (Layer 3, DASHBOARD_ATMOSPHERE_FRAMEWORK.md): rule-based
+  // only, per the Honest Blank Rule — every line below is a fact the broker
+  // can verify themselves (counts and field-completeness checks), never a
+  // fabricated probability. When there's nothing to say, it says so.
+  const insights = useMemo(() => {
+    const list = [];
+    const incoming = pitches.filter(p => p.isCurrentUserBroker && p.status === 'invited');
+    if (incoming.length > 0) {
+      list.push({
+        icon: "🤝",
+        text: `${incoming.length} incoming handshake${incoming.length === 1 ? '' : 's'} awaiting your response — accepting unlocks owner contact details.`,
+        rule: "Deals with status 'invited'",
+      });
+    }
+    if (taskSummary?.overdue > 0) {
+      list.push({
+        icon: "⏰",
+        text: `${taskSummary.overdue} task${taskSummary.overdue === 1 ? ' is' : 's are'} overdue — check your task list below.`,
+        rule: "Open tasks past their due date",
+      });
+    }
+    // Weakest listing in the verified portfolio, with what's missing.
+    const acceptedDeals = pitches.filter(p => p.isCurrentUserBroker && p.status === 'accepted');
+    let weakest = null;
+    for (const deal of acceptedDeals) {
+      const prop = listings.find(l => l.id === deal.listingId);
+      if (!prop) continue;
+      const strength = computeListingStrength(prop);
+      if (strength.score < 100 && (!weakest || strength.score < weakest.strength.score)) {
+        weakest = { prop, strength };
+      }
+    }
+    if (weakest) {
+      list.push({
+        icon: "📋",
+        text: `"${weakest.prop.title}" is ${weakest.strength.score}% complete — missing ${weakest.strength.missing.slice(0, 2).join(" and ").toLowerCase()}.`,
+        rule: "Field-completeness check on your verified portfolio",
+      });
+    }
+    return list;
+  }, [pitches, listings, taskSummary]);
 
   // Some deals (e.g. owner-initiated handshakes) carry no title — never show a raw UUID.
   const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -223,6 +273,41 @@ export default function BrokerMode() {
                 </div>
               )}
             </div>
+
+            {/* Listing Strength — rule-based field completeness, no AI */}
+            {property && (() => {
+              const strength = computeListingStrength(property);
+              return (
+                <div className="card-atmosphere rounded-lg p-6">
+                  <h3 className="font-label-caps text-xs tracking-widest text-text-secondary mb-4 uppercase border-b border-surface-variant pb-2">Listing Strength</h3>
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="relative w-14 h-14 shrink-0">
+                      <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                        <path className="text-surface-variant" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="4"></path>
+                        <path className="text-gold-accent" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeDasharray={`${strength.score}, 100`} strokeWidth="4"></path>
+                      </svg>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className="font-data-tabular font-bold text-xs text-text-primary">{strength.score}%</span>
+                      </div>
+                    </div>
+                    <p className="text-xs text-text-secondary leading-relaxed">
+                      {strength.passed} of {strength.total} key fields complete on this listing.
+                    </p>
+                  </div>
+                  {strength.missing.length > 0 ? (
+                    <ul className="flex flex-col gap-1.5">
+                      {strength.missing.map(item => (
+                        <li key={item} className="text-xs text-text-secondary flex items-center gap-2">
+                          <span className="w-1.5 h-1.5 rounded-full bg-gold-accent/60 shrink-0"></span> Missing: {item}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-xs text-success">All key fields are complete.</p>
+                  )}
+                </div>
+              );
+            })()}
           </div>
 
           {/* Right Col: Thread & Intelligence Notes */}
@@ -264,6 +349,12 @@ export default function BrokerMode() {
                   onChange={(e) => handleSaveNote(deal.id, e.target.value)}
                 />
               </div>
+            </div>
+
+            {/* Deal Timeline — every inquiry, status change, note, and viewing on this deal */}
+            <div className="card-atmosphere rounded-lg p-6">
+              <h3 className="font-label-caps text-xs tracking-widest text-text-secondary mb-4 uppercase border-b border-surface-variant pb-2">Deal Timeline</h3>
+              <DealTimeline dealId={deal.id} mockUserId={currentUser?.id} />
             </div>
 
           </div>
@@ -442,7 +533,7 @@ export default function BrokerMode() {
             <span className="block text-[10px] font-label-caps uppercase tracking-widest text-text-secondary">Pipeline Health</span>
             <span className="text-on-surface font-working-title text-sm">{accepted.length} Deals Won</span>
           </div>
-          <button 
+          <button
             className="border border-gold-accent text-gold-accent font-working-title px-6 py-3 rounded text-sm font-bold hover:bg-gold-accent hover:text-background transition-all shadow-[0_0_15px_rgba(212,175,55,0.15)]"
             onClick={() => document.getElementById('broker-feed')?.scrollIntoView({ behavior: 'smooth' })}
           >
@@ -450,6 +541,34 @@ export default function BrokerMode() {
           </button>
         </div>
       </header>
+
+      {/* SCOUT INSIGHT — Layer 3 of the dashboard framework. Rule-based facts
+          only; shows an honest empty state when there's nothing to surface. */}
+      <div className="card-atmosphere-gold rounded-lg p-5 mb-8">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-gold-accent animate-pulse"></span> Scout Insight
+          </h3>
+          <span className="font-label-caps text-[9px] tracking-widest text-text-muted uppercase hidden sm:block">Rule-based · computed from your live pipeline</span>
+        </div>
+        {insights.length > 0 ? (
+          <div className="flex flex-col gap-2.5">
+            {insights.map((insight, i) => (
+              <div key={i} className="flex items-start gap-3">
+                <span className="text-base shrink-0 mt-[-1px]" aria-hidden="true">{insight.icon}</span>
+                <div>
+                  <p className="text-sm text-on-surface leading-snug">{insight.text}</p>
+                  <p className="text-[10px] text-text-muted mt-0.5">Rule: {insight.rule}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-text-secondary">
+            Not enough data yet — insights appear here as your pipeline, tasks, and portfolio grow.
+          </p>
+        )}
+      </div>
 
       {/* High-Density Layout */}
       <div className="flex-1 flex flex-col lg:flex-row gap-12">
@@ -551,8 +670,11 @@ export default function BrokerMode() {
           </div>
         </div>
 
-        {/* Right Column: Feed */}
+        {/* Right Column: Tasks + Feed */}
         <div id="broker-feed" className="lg:w-1/3 flex flex-col gap-6 mt-8 lg:mt-0 scroll-mt-20">
+          {/* The "don't forget" engine — crm_tasks, incl. auto follow-ups after completed viewings */}
+          <TaskRail mockUserId={currentUser?.id} onSummary={handleTaskSummary} />
+
           <div className="flex justify-between items-end border-b border-surface-variant pb-2">
             <h3 className="font-working-title text-xl text-on-surface">Market Intelligence Feed</h3>
             <span className="text-text-secondary font-label-caps text-[10px] tracking-widest uppercase">{feed.length} Targets</span>

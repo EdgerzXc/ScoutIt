@@ -18,7 +18,9 @@ async function resolveUserId(request, mockOwnerId) {
     const { data: { user }, error } = await authClient.auth.getUser(token);
     if (!error && user) return user.id;
   }
-  if (mockOwnerId) return mockOwnerId;
+  // Dev-only fallback -- rejected in production, where identity must come
+  // from a verified session token (same gate as /api/dashboard/publish).
+  if (process.env.NODE_ENV !== "production" && mockOwnerId) return mockOwnerId;
   return null;
 }
 

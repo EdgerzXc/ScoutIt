@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { z } from "zod";
+import { logNoteActivityDeduped } from "@/lib/crmActivity";
 
 // Persists the "private scratchpad" per deal -- BrokerMode.js's Deal File
 // Workspace already had this UI (dealNotes local state), it just never wrote
@@ -35,12 +36,13 @@ export async function PATCH(request, { params }) {
       const { data: { user }, error } = await authClient.auth.getUser(token);
       if (!error && user) userId = user.id;
     }
-    if (!userId && mockOwnerId) userId = mockOwnerId;
+    // Dev-only fallback -- rejected in production (same gate as /api/dashboard/publish).
+    if (!userId && process.env.NODE_ENV !== "production" && mockOwnerId) userId = mockOwnerId;
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const { data: deal, error: dealError } = await supabaseAdmin
       .from("deals")
-      .select("buyer_id, broker_id, properties(owner_id)")
+      .select("property_id, buyer_id, broker_id, properties(owner_id)")
       .eq("id", dealId)
       .single();
 
@@ -61,6 +63,16 @@ export async function PATCH(request, { params }) {
     if (updateError) {
       console.error("[DEAL NOTES API] Failed to save:", updateError);
       return NextResponse.json({ error: "Failed to save notes" }, { status: 500 });
+    }
+
+    // Timeline: one note_added row per actor per half hour, not one per
+    // debounced keystroke pause. Empty notes (clearing) don't log.
+    if (note.trim().length > 0) {
+      await logNoteActivityDeduped(supabaseAdmin, {
+        dealId,
+        propertyId: deal.property_id,
+        actorId: userId,
+      });
     }
 
     return NextResponse.json({ success: true });

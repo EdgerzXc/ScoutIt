@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { notifyUser } from "@/lib/notifications";
+import { logActivity } from "@/lib/crmActivity";
 
 // Same dev-mock convention as /api/notifications and /api/dashboard/units --
 // ?mockOwnerId=master-dev (here: a body field, since this is a POST) only
@@ -18,8 +19,9 @@ async function resolveUserId(request, mockOwnerId) {
     const { data: { user }, error } = await authClient.auth.getUser(token);
     if (!error && user) return user.id;
   }
-  // Allow any dev-mock user ID in test environment
-  if (mockOwnerId) return mockOwnerId;
+  // Dev-only fallback -- rejected in production, where identity must come
+  // from a verified session token (same gate as /api/dashboard/publish).
+  if (process.env.NODE_ENV !== "production" && mockOwnerId) return mockOwnerId;
   return null;
 }
 
@@ -184,6 +186,16 @@ export async function POST(request) {
         notificationType: 'new_inquiry',
       });
     }
+
+    // CRM Timeline: an initiated contact IS the inquiry event -- log it so it
+    // shows up on the deal's and property's Timeline immediately.
+    await logActivity(supabaseAdmin, {
+      dealId: dealData[0].id,
+      propertyId: resolvedListingId,
+      activityType: role === 'operator' ? 'operator_request' : 'inquiry',
+      actorId: userId,
+      metadata: { unitId: unitId || null },
+    });
 
     return NextResponse.json({ success: true, dealId: dealData[0].id, newBalance });
 

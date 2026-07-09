@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { z } from "zod";
+import { logActivity } from "@/lib/crmActivity";
 
 async function resolveUserId(request, mockOwnerId) {
   const authHeader = request.headers.get("Authorization");
@@ -13,7 +14,9 @@ async function resolveUserId(request, mockOwnerId) {
     const { data: { user }, error } = await authClient.auth.getUser(token);
     if (!error && user) return user.id;
   }
-  if (mockOwnerId) return mockOwnerId;
+  // Dev-only fallback -- rejected in production, where identity must come
+  // from a verified session token (same gate as /api/dashboard/publish).
+  if (process.env.NODE_ENV !== "production" && mockOwnerId) return mockOwnerId;
   return null;
 }
 
@@ -22,8 +25,16 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url);
     const mockOwnerId = searchParams.get("mockOwnerId");
     const userId = await resolveUserId(request, mockOwnerId);
-    
+
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    // host_id/guest_id are uuid columns — a non-uuid dev-mock id (e.g.
+    // master-dev) can never be a party, and passing it into the .or() filter
+    // is a Postgres type error that 500s the whole request.
+    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!UUID_RE.test(userId)) {
+      return NextResponse.json({ appointments: [] });
+    }
 
     // Fetch where user is host or guest
     const { data: appointments, error } = await supabaseAdmin
@@ -169,6 +180,14 @@ export async function POST(request) {
       console.error("[APPOINTMENTS API] Insert error:", insertError);
       return NextResponse.json({ error: "Failed to create appointment" }, { status: 500 });
     }
+
+    await logActivity(supabaseAdmin, {
+      dealId,
+      propertyId: deal.properties?.id || null,
+      activityType: "viewing_scheduled",
+      actorId: userId,
+      metadata: { scheduledAt, appointmentId: inserted.id },
+    });
 
     return NextResponse.json({ success: true, appointment: inserted });
   } catch (err) {

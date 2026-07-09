@@ -3,8 +3,10 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Building2, UserCircle2, Calendar, FileText, CheckCircle2, MapPin, Clock } from "lucide-react";
+import { crmFetch } from "../../../lib/crmClient";
+import DealTimeline from "./DealTimeline";
 
-export default function DealFileSlideOver({ isOpen, onClose, deal, onDealUpdate }) {
+export default function DealFileSlideOver({ isOpen, onClose, deal, onDealUpdate, mockUserId }) {
   const [notes, setNotes] = useState("");
   const [savingState, setSavingState] = useState("idle"); // idle, saving, saved
   const saveTimeout = useRef(null);
@@ -26,18 +28,14 @@ export default function DealFileSlideOver({ isOpen, onClose, deal, onDealUpdate 
 
     saveTimeout.current = setTimeout(async () => {
       try {
-        const res = await fetch(`/api/deals/${deal.id}/notes`, {
+        await crmFetch(`/api/deals/${deal.id}/notes`, {
           method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ note: newNotes, mockOwnerId: "master-dev" }) // Remove mockOwnerId in prod
+          mockUserId,
+          body: { note: newNotes },
         });
-        if (res.ok) {
-          setSavingState("saved");
-          setTimeout(() => setSavingState("idle"), 2000);
-          if (onDealUpdate) onDealUpdate(deal.id, { private_notes: newNotes });
-        } else {
-          setSavingState("idle");
-        }
+        setSavingState("saved");
+        setTimeout(() => setSavingState("idle"), 2000);
+        if (onDealUpdate) onDealUpdate(deal.id, { private_notes: newNotes });
       } catch (e) {
         console.error(e);
         setSavingState("idle");
@@ -147,27 +145,12 @@ export default function DealFileSlideOver({ isOpen, onClose, deal, onDealUpdate 
                 />
               </div>
 
-              {/* Activity */}
+              {/* Activity — real crm_activity_log rows, newest first */}
               <div>
                 <h3 className="font-working-title text-sm text-on-surface flex items-center gap-2 mb-4">
                   <Clock size={16} className="text-gold-accent" /> Activity Timeline
                 </h3>
-                <div className="border-l border-surface-variant ml-2 pl-4 flex flex-col gap-4">
-                  <div className="relative">
-                    <div className="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-gold-accent border-2 border-surface"></div>
-                    <p className="text-xs text-text-secondary mb-1">
-                      {new Date(deal.lastActivityAt).toLocaleDateString()}
-                    </p>
-                    <p className="text-sm text-on-surface">Deal activity recorded.</p>
-                  </div>
-                  <div className="relative">
-                    <div className="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-surface-variant border-2 border-surface"></div>
-                    <p className="text-xs text-text-secondary mb-1">
-                      {new Date(deal.createdAt).toLocaleDateString()}
-                    </p>
-                    <p className="text-sm text-on-surface">Deal initiated.</p>
-                  </div>
-                </div>
+                <DealTimeline dealId={deal.id} mockUserId={mockUserId} />
               </div>
 
             </div>

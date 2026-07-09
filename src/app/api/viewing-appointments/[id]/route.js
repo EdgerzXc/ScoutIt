@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { z } from "zod";
+import { logActivity, createTask } from "@/lib/crmActivity";
 
 const schema = z.object({
   status: z.enum(["confirmed", "cancelled", "completed"]),
@@ -18,7 +19,9 @@ async function resolveUserId(request, mockOwnerId) {
     const { data: { user }, error } = await authClient.auth.getUser(token);
     if (!error && user) return user.id;
   }
-  if (mockOwnerId) return mockOwnerId;
+  // Dev-only fallback -- rejected in production, where identity must come
+  // from a verified session token (same gate as /api/dashboard/publish).
+  if (process.env.NODE_ENV !== "production" && mockOwnerId) return mockOwnerId;
   return null;
 }
 
@@ -36,7 +39,7 @@ export async function PATCH(request, { params }) {
 
     const { data: appt, error: fetchError } = await supabaseAdmin
       .from("viewing_appointments")
-      .select("host_id, guest_id")
+      .select("host_id, guest_id, deal_id, deals(property_id, properties(title))")
       .eq("id", id)
       .single();
 
@@ -61,6 +64,28 @@ export async function PATCH(request, { params }) {
     if (updateError) {
       console.error("[APPOINTMENTS API] Update error:", updateError);
       return NextResponse.json({ error: "Failed to update appointment" }, { status: 500 });
+    }
+
+    // CRM Timeline entry for the state change (viewing_confirmed /
+    // viewing_cancelled / viewing_completed).
+    await logActivity(supabaseAdmin, {
+      dealId: appt.deal_id,
+      propertyId: appt.deals?.property_id || null,
+      activityType: `viewing_${status}`,
+      actorId: userId,
+      metadata: { appointmentId: id },
+    });
+
+    // The one auto-created task type: when the host marks a viewing
+    // completed, drop a "Follow up" task on their list due in 24 hours.
+    if (status === "completed") {
+      const propertyTitle = appt.deals?.properties?.title;
+      await createTask(supabaseAdmin, {
+        ownerUserId: appt.host_id,
+        title: propertyTitle ? `Follow up after viewing — ${propertyTitle}` : "Follow up after viewing",
+        dueAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        dealId: appt.deal_id,
+      });
     }
 
     return NextResponse.json({ success: true, status });

@@ -11,6 +11,8 @@ import Papa from 'papaparse';
 import { sanitizeObject } from '../../lib/sanitize';
 import { canSee, getCurrentTier } from '../../lib/entitlements';
 import { supabase } from '../../lib/supabaseClient';
+import DealTimeline from './crm/DealTimeline';
+import { computeListingStrength } from '../../lib/listingStrength';
 
 export default function OwnerMode() {
   console.log("OwnerMode rendering!");
@@ -977,6 +979,23 @@ export default function OwnerMode() {
                  </p>
                </div>
             )}
+            {/* Rule-based checklist of what's actually missing (same engine
+                as the Broker's Listing Strength card, no AI) */}
+            {activeListing.pipelineStatus !== 'ai_drafting' && (() => {
+              const strength = computeListingStrength(activeListing);
+              if (strength.missing.length === 0) {
+                return <p className="text-xs text-success">All key fields are complete.</p>;
+              }
+              return (
+                <ul className="flex flex-col gap-1.5 border-t border-surface-variant pt-4">
+                  {strength.missing.map(item => (
+                    <li key={item} className="text-xs text-text-secondary flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-gold-accent/60 shrink-0"></span> Missing: {item}
+                    </li>
+                  ))}
+                </ul>
+              );
+            })()}
           </div>
 
           <div className="card-atmosphere rounded-lg p-6">
@@ -990,20 +1009,27 @@ export default function OwnerMode() {
                  <div className="flex flex-col gap-4">
                    <div className="flex justify-between items-center">
                      <span className="font-body-md text-text-primary">Profile Views</span>
-                     <span className="font-data-tabular text-lg font-bold text-on-surface">New</span>
+                     <span className="font-data-tabular text-sm text-text-muted">Not yet tracked</span>
                    </div>
                    <div className="flex justify-between items-center">
                      <span className="font-body-md text-text-primary">Saved to Archives</span>
-                     <span className="font-data-tabular text-lg font-bold text-on-surface">—</span>
+                     <span className="font-data-tabular text-sm text-text-muted">Not yet tracked</span>
                    </div>
                    <div className="flex justify-between items-center">
                      <span className="font-body-md text-text-primary">Total Inquiries</span>
                      <span className="font-data-tabular text-lg font-bold text-gold-accent">{incomingPitches.length}</span>
                    </div>
                  </div>
-                 <p className="text-[10px] text-text-muted mt-4 text-center">Analytics update every 12 hours.</p>
+                 <p className="text-[10px] text-text-muted mt-4 text-center">View tracking arrives once page instrumentation ships — no invented numbers until then.</p>
                </>
             )}
+          </div>
+
+          {/* Property Timeline — inquiries, deal changes, notes, viewings on
+              this property, straight from crm_activity_log */}
+          <div className="card-atmosphere rounded-lg p-6">
+            <h3 className="font-label-caps text-xs tracking-widest text-text-secondary mb-4 uppercase border-b border-surface-variant pb-2">Property Timeline</h3>
+            <DealTimeline propertyId={activeListing.id} mockUserId={currentUser?.id} />
           </div>
         </div>
 

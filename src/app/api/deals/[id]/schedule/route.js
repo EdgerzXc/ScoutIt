@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { logActivity } from "@/lib/crmActivity";
 
 export async function POST(request, { params }) {
   try {
@@ -76,6 +77,14 @@ export async function POST(request, { params }) {
 
     // Reset chat inactivity timer
     await supabaseAdmin.from('deals').update({ updated_at: new Date().toISOString() }).eq('id', dealId);
+
+    await logActivity(supabaseAdmin, {
+      dealId,
+      propertyId: deal.property_id,
+      activityType: "viewing_scheduled",
+      actorId: user.id,
+      metadata: { scheduledAt: scheduled_at, appointmentId: appointment.id },
+    });
 
     return NextResponse.json({ success: true, appointment });
   } catch (error) {

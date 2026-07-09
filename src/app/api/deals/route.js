@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { logActivity } from "@/lib/crmActivity";
 
 export const dynamic = "force-dynamic";
 
@@ -22,13 +23,15 @@ async function resolveUserId(request, mockOwnerId) {
     const { data: { user }, error } = await authClient.auth.getUser(token);
     if (!error && user) return user.id;
   }
-  if (mockOwnerId) return mockOwnerId;
+  // Dev-only fallback -- rejected in production, where identity must come
+  // from a verified session token (same gate as /api/dashboard/publish).
+  if (process.env.NODE_ENV !== "production" && mockOwnerId) return mockOwnerId;
   return null;
 }
 
 // No updated_at column on deals (yet) -- sort order is derived from
 // created_at + latest message timestamp instead, computed below.
-const DEAL_FIELDS = "id, status, pitch_message, private_notes, buyer_id, broker_id, unit_id, created_at, closed_at, expires_at, properties(id, title, slug, owner_id)";
+const DEAL_FIELDS = "id, status, pitch_message, private_notes, buyer_id, broker_id, unit_id, created_at, closed_at, expires_at, properties(id, title, slug, owner_id, price)";
 
 export async function GET(request) {
   try {
@@ -121,6 +124,7 @@ export async function GET(request) {
           propertyId: d.properties?.id || null,
           propertyTitle: d.properties?.title || "Untitled Property",
           propertySlug: d.properties?.slug || null,
+          propertyPrice: d.properties?.price ?? null,
           myRole,
           otherParty: otherId ? (namesById[otherId] || otherRoleLabel) : otherRoleLabel,
           lastMessage: lastMessageByDeal[d.id] || d.pitch_message || "",
@@ -160,22 +164,32 @@ export async function POST(request) {
     }
     const { propertyId, otherPartyEmail, status, initialMessage, mockOwnerId } = parsed.data;
     const userId = await resolveUserId(request, mockOwnerId);
-    
+
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const isMock = userId === "master-dev";
+    // The property decides the creator's role: if they own it, the other
+    // party is the buyer; otherwise the creator is tracking this deal as the
+    // broker and the other party is their buyer. (Previously this inserted
+    // the creator as buyer_id of their own property — a self-deal that
+    // pointed at nobody.)
+    const { data: property, error: propError } = await supabaseAdmin
+      .from("properties")
+      .select("id, title, slug, owner_id")
+      .eq("id", propertyId)
+      .single();
+    if (propError || !property) {
+      return NextResponse.json({ error: "Property not found — use the Supabase property ID" }, { status: 404 });
+    }
 
-    // Insert into Supabase deals table
-    // Assuming user is owner, other party is buyer for this simple manual creation
+    const isOwner = property.owner_id === userId;
     const { data: inserted, error } = await supabaseAdmin
       .from("deals")
       .insert({
         status: status || "connected",
         pitch_message: initialMessage || "",
-        buyer_id: isMock ? otherPartyEmail : userId,
-        broker_id: null,
-        // if user is creating it manually, they might be the owner. In real app, we'd find the property and set owner_id appropriately.
-        property_id: propertyId,
+        buyer_id: otherPartyEmail,
+        broker_id: isOwner ? null : userId,
+        property_id: property.id,
       })
       .select("*, properties(id, title, slug, owner_id)")
       .single();
@@ -185,6 +199,14 @@ export async function POST(request) {
       return NextResponse.json({ error: "Failed to create deal" }, { status: 500 });
     }
 
+    await logActivity(supabaseAdmin, {
+      dealId: inserted.id,
+      propertyId: property.id,
+      activityType: "deal_created",
+      actorId: userId,
+      metadata: { source: "manual", status: inserted.status },
+    });
+
     // Format like the GET endpoint
     const deal = {
       id: inserted.id,
@@ -192,7 +214,7 @@ export async function POST(request) {
       propertyId: inserted.properties?.id || propertyId,
       propertyTitle: inserted.properties?.title || "Unknown Property",
       propertySlug: inserted.properties?.slug || null,
-      myRole: "owner", // Assumed for manual creation
+      myRole: isOwner ? "owner" : "broker",
       otherParty: otherPartyEmail || "Buyer",
       lastMessage: inserted.pitch_message || "",
       unreadCount: 0,

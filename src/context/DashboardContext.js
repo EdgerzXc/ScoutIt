@@ -509,7 +509,9 @@ export function DashboardProvider({ children }) {
     addNotification({
       title: "Listing Published",
       desc: `Your property at ${listing.location} is now live in the Broker feed.`,
-      icon: "✅"
+      icon: "✅",
+      propertyId: newListing.id,
+      notificationType: "property_published"
     });
     
     return newListing;
@@ -619,7 +621,9 @@ export function DashboardProvider({ children }) {
     addNotification({
       title: "AI Drafting Started",
       desc: `Your document '${fileName}' is being parsed. We'll notify you when the draft is ready.`,
-      icon: "🤖"
+      icon: "🤖",
+      propertyId: newListing.id,
+      notificationType: "property_drafting"
     });
   };
 
@@ -778,6 +782,7 @@ export function DashboardProvider({ children }) {
           desc: notif.desc,
           icon: typeof notif.icon === "string" ? notif.icon : "🔔",
           notificationType: notif.notificationType || "client_event",
+          propertyId: notif.propertyId || undefined,
         }),
       }).catch(e => console.error("Failed to persist notification", e));
     }
