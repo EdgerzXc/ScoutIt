@@ -308,7 +308,7 @@ export default function BrokersPage() {
                         <div className="general-tier-badge-label">{tierBadgeText}</div>
                       )}
                       {broker.isExample && (
-                        <div className="example-badge-overlay">⚠ EXAMPLE PROFILE</div>
+                        <div className="example-badge-overlay">Example Profile</div>
                       )}
                       <div className="broker-image-container">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -557,14 +557,17 @@ export default function BrokersPage() {
           position: absolute;
           top: 12px;
           left: 12px;
-          font-size: 9px;
-          font-weight: 700;
-          letter-spacing: 0.12em;
+          font-size: 10px;
+          font-weight: 500;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
           color: var(--text-primary);
-          background: rgba(14, 14, 14, 0.9);
-          border: 1px dashed rgba(240, 237, 232, 0.5);
-          padding: 4px 10px;
-          border-radius: 3px;
+          background: rgba(14, 14, 14, 0.82);
+          backdrop-filter: blur(4px);
+          -webkit-backdrop-filter: blur(4px);
+          border: 1px dashed rgba(240, 237, 232, 0.45);
+          padding: 5px 11px;
+          border-radius: var(--radius-sm);
           z-index: 10;
           font-family: var(--font-mono), monospace;
         }

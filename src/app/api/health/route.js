@@ -30,11 +30,14 @@ export async function GET(request) {
       results.services.supabase = "unconfigured";
     }
 
-    // Check Airtable connection
+    // Check Airtable connection — probe the real CMS table. This previously
+    // hit a nonexistent "Properties" table, so health reported Airtable as
+    // unhealthy (and the endpoint 503'd) even while /api/cms was serving
+    // Airtable data fine.
     const airtableBaseId = process.env.AIRTABLE_BASE_ID;
     const airtableKey = process.env.AIRTABLE_API_KEY;
     if (airtableBaseId && airtableKey) {
-      const atRes = await fetch(`https://api.airtable.com/v0/${airtableBaseId}/Properties?maxRecords=1`, {
+      const atRes = await fetch(`https://api.airtable.com/v0/${airtableBaseId}/PROPERTIES_CMS?maxRecords=1`, {
         headers: { Authorization: `Bearer ${airtableKey}` }
       });
       results.services.airtable = atRes.ok ? "healthy" : "unhealthy";

@@ -126,13 +126,13 @@ export default function ProfileBaseLayer({
                 style={{
                   fontFamily: "var(--font-mono)",
                   fontSize: 10,
-                  fontWeight: 700,
-                  letterSpacing: "0.12em",
+                  fontWeight: 500,
+                  letterSpacing: "0.18em",
                   textTransform: "uppercase",
                   color: "var(--text-secondary)",
                 }}
               >
-                ⚠ Example Profile
+                Example Profile
               </span>
             </div>
           )}

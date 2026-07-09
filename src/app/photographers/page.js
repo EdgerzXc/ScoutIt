@@ -151,26 +151,35 @@ export default function PhotographersPage() {
             </div>
 
             {photographers === null && (
-              <p style={{ color: "var(--text-secondary)", fontSize: 13, padding: "24px 0" }}>Loading the roster…</p>
+              <div className="roster-state" role="status" aria-live="polite">
+                <span className="roster-state-label">Scanning the roster…</span>
+              </div>
             )}
             {photographers !== null && filtered.length === 0 && (
-              <p style={{ color: "var(--text-secondary)", fontSize: 13, padding: "24px 0" }}>
-                {photographers.length === 0
-                  ? "No photographers have public profiles yet."
-                  : "No photographers match your filters."}
-              </p>
+              <div className="roster-state">
+                <span className="roster-state-label">
+                  {photographers.length === 0
+                    ? "No photographers on the public roster yet"
+                    : "No photographers match your filters"}
+                </span>
+                <span className="roster-state-sub">
+                  {photographers.length === 0
+                    ? "Founding Lens slots are open below."
+                    : "Clear a filter or broaden your search."}
+                </span>
+              </div>
             )}
             {filtered.length > 0 && (
               <div className="brokers-grid" style={{ marginBottom: 32 }}>
                 {filtered.map((p) => (
                   <Link key={p.name} href={`/profile/${encodeURIComponent(p.name)}`} className="broker-card" style={{ textDecoration: "none" }}>
-                    {p.isExample && <div className="example-badge-overlay">⚠ EXAMPLE PROFILE</div>}
+                    {p.isExample && <div className="example-badge-overlay">Example Profile</div>}
                     <div className="broker-image-container">
                       {p.image ? (
                         /* eslint-disable-next-line @next/next/no-img-element */
-                        <img src={p.image} alt={p.name} className="broker-image" />
+                        <img src={p.image} alt={p.name} className="broker-image" loading="lazy" />
                       ) : (
-                        <div className="broker-image" style={{ display: "flex", alignItems: "center", justifyContent: "center", background: "var(--surface2)", fontSize: 40, color: "var(--accent)" }}>📸</div>
+                        <div className="broker-image broker-image-fallback" aria-hidden="true">📸</div>
                       )}
                       <div className="image-overlay"></div>
                     </div>
@@ -181,11 +190,10 @@ export default function PhotographersPage() {
                       {p.specialty && <p className="broker-specialty">Specialty: <span>{p.specialty}</span></p>}
                       {p.bio && <p className="broker-bio">{p.bio}</p>}
                       <div className="broker-footer">
-                        <div className="broker-stats">
-                          <span style={{ fontSize: 11, color: p.available ? "var(--green)" : "var(--text-muted)" }}>
-                            {p.available ? "● Available for shoots" : "○ Currently unavailable"}
-                          </span>
-                        </div>
+                        <span className={`availability-chip ${p.available ? "is-available" : ""}`}>
+                          <span className="availability-dot" aria-hidden="true"></span>
+                          {p.available ? "Available for shoots" : "Currently unavailable"}
+                        </span>
                         <span className="btn-contact">View Portfolio</span>
                       </div>
                     </div>
@@ -213,7 +221,20 @@ export default function PhotographersPage() {
       <Footer />
 
       <style>{`
-        .example-badge-overlay { position: absolute; top: 12px; left: 12px; font-size: 9px; font-weight: 700; letter-spacing: .12em; color: var(--text-primary); background: rgba(14,14,14,.9); border: 1px dashed rgba(240,237,232,.5); padding: 4px 10px; border-radius: 3px; z-index: 10; font-family: var(--font-mono),monospace; }
+        /* Roster chrome — mono label spec from DESIGN.md (10px / .18em / uppercase) */
+        .example-badge-overlay { position: absolute; top: 12px; left: 12px; font-size: 10px; font-weight: 500; letter-spacing: .18em; text-transform: uppercase; color: var(--text-primary); background: rgba(14,14,14,.82); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); border: 1px dashed rgba(240,237,232,.45); padding: 5px 11px; border-radius: var(--radius-sm); z-index: 10; font-family: var(--font-mono),monospace; }
+        .availability-chip { display: inline-flex; align-items: center; gap: 7px; font-family: var(--font-mono),monospace; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--text-muted); }
+        .availability-chip .availability-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border-mid); flex-shrink: 0; }
+        .availability-chip.is-available { color: var(--green); }
+        .availability-chip.is-available .availability-dot { background: var(--green); box-shadow: 0 0 8px rgba(76,175,125,.55); }
+        .roster-state { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 48px 24px; margin-bottom: 32px; border: 1px dashed var(--border-mid); border-radius: var(--radius-lg); background: linear-gradient(165deg, #161616, #111110); text-align: center; }
+        .roster-state-label { font-family: var(--font-mono),monospace; font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--text-secondary); }
+        .roster-state-sub { font-size: 13px; color: var(--text-muted); }
+        .broker-image-fallback { display: flex; align-items: center; justify-content: center; background: var(--surface2); font-size: 40px; color: var(--accent); }
+        .broker-card:focus-visible { outline: 1.5px solid var(--accent); outline-offset: 3px; }
+        @media (prefers-reduced-motion: reduce) {
+          .broker-card, .broker-card:hover, .broker-image, .broker-card:hover .broker-image { transition: none; transform: none; }
+        }
         .coming-soon-banner {
           background: linear-gradient(135deg, rgba(232, 174, 60,0.08) 0%, rgba(232, 174, 60,0.03) 100%);
           border: 0.5px solid var(--accent-border);
@@ -275,23 +296,23 @@ export default function PhotographersPage() {
           .brokers-grid { grid-template-columns: 1fr; }
         }
         .broker-card {
-          background: var(--surface);
-          border: 1px solid var(--border-solid);
+          background: linear-gradient(165deg, #1a1917, #111110);
+          border: 1px solid var(--border);
           border-radius: var(--radius-md);
           overflow: hidden;
           display: flex;
           flex-direction: column;
-          transition: transform 0.38s ease, box-shadow 0.38s ease, border-color 0.38s ease;
+          transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
           position: relative;
         }
         .broker-card:hover {
           border-color: var(--accent-border);
-          box-shadow: var(--shadow-lg);
+          box-shadow: 0 14px 32px rgba(0,0,0,.45), 0 0 40px rgba(232,174,60,.06);
           transform: translateY(-4px);
         }
         .broker-image-container {
           position: relative;
-          height: 280px;
+          height: 240px;
           overflow: hidden;
         }
         .broker-image {
