@@ -3,26 +3,22 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef, useCallback } from "react";
-import dynamic from "next/dynamic";
 import ReactionButtons from "@/components/ui/ReactionButtons";
 import ProfileButton from "@/components/ui/ProfileButton";
 import BoardPodium from "@/components/board/BoardPodium";
 import CinematicJourney from "@/components/cinematic/CinematicJourney";
 import BlackHoleCanvas from "@/components/descent/BlackHoleCanvas";
+import GoldenHorizonCanvas, { GOLDEN_DEFAULT_PARAMS } from "@/components/descent/GoldenHorizonCanvas";
+import InteractivePanel from "@/components/descent/InteractivePanel";
 import Footer from "@/components/layout/Footer";
 import { Building2, Camera, Search, CalendarDays } from "lucide-react";
-import { isLiteMode } from "@/lib/liteMode";
+import {
+  isLiteMode,
+  isInteractiveMode,
+  setInteractiveMode,
+  INTERACTIVE_MODE_EVENT,
+} from "@/lib/liteMode";
 import { getArticles } from "@/data/mockArticles";
-
-// Scrollytelling manifesto ΓÇö lazy-loaded so it costs the homepage nothing
-// until the UFO is clicked.
-const DescentSequence = dynamic(
-  () => import("@/components/scrollytelling/DescentSequence"),
-  { ssr: false }
-);
-
-
-
 
 function getDBCategory(cat) {
   if (cat === "Venues/Events") return "Venues";
@@ -39,7 +35,6 @@ export default function Home() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [activeDiscoverType, setActiveDiscoverType] = useState("Residential");
   const [driftingRocks, setDriftingRocks] = useState([]);
-  const [descentActive, setDescentActive] = useState(false); // scrollytelling manifesto
   const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
@@ -57,6 +52,20 @@ export default function Home() {
   const [powering, setPowering] = useState(false);
   const beamTimers = useRef([]);
   const beamInterval = useRef(null); // repeating auto-fire interval
+
+  // Interactive Mode — hidden easter egg (5 clicks on the UFO within ~2s).
+  // Not a security boundary, just a discovery gate; the beam/descent effects
+  // below still fire on every single click same as before.
+  const [interactiveMode, setInteractiveModeState] = useState(false);
+  const [blackHoleParams, setBlackHoleParams] = useState(GOLDEN_DEFAULT_PARAMS);
+  const ufoTapTimes = useRef([]);
+
+  useEffect(() => {
+    setInteractiveModeState(isInteractiveMode());
+    const onToggle = (e) => setInteractiveModeState(!!e.detail?.on);
+    window.addEventListener(INTERACTIVE_MODE_EVENT, onToggle);
+    return () => window.removeEventListener(INTERACTIVE_MODE_EVENT, onToggle);
+  }, []);
 
   const fireBeam = useCallback((withPower) => {
     beamTimers.current.forEach(clearTimeout);
@@ -465,25 +474,33 @@ export default function Home() {
     <main
       ref={containerRef}
       onScroll={handleScroll}
-      className={`cinematic-container ${descentActive ? "descending" : ""}`}
+      className="cinematic-container"
     >
-      {/* Scrollytelling manifesto overlay (Stage 1: descent only) */}
-      {descentActive && (
-        <DescentSequence onExit={() => setDescentActive(false)} />
-      )}
-      {/* Account / profile access ΓÇö hidden during the descent so the
-          manifesto overlay stays immersive */}
-      {!descentActive && <ProfileButton floating />}
+      <ProfileButton floating />
       {/* SECTION 1: SPACE HERO */}
-      <section className="snap-section section-hook">
+      <section className={`snap-section section-hook ${interactiveMode ? "interactive-hero" : ""}`}>
         <div className="grain"></div>
 
         {/* Cinematic Cosmic Space Background */}
         <div className="space-bg-container">
-          {/* Raymarched golden black hole — gravitational lensing + accretion
-              disk (owner's "Golden Horizon" spec). Replaces the old 2D
-              star-pull canvas. */}
-          <BlackHoleCanvas />
+          {/* Balance mode (default, everyone): the raymarched golden black
+              hole framing the wordmark. Interactive mode (unlocked via 5
+              clicks on the UFO): the full Golden Horizon simulator — drag to
+              orbit, click shockwaves, hover lensing — plus its control
+              panel. Lite Mode wins over both — each component no-ops
+              internally when it's on. */}
+          {interactiveMode ? (
+            <>
+              <GoldenHorizonCanvas params={blackHoleParams} />
+              <InteractivePanel
+                params={blackHoleParams}
+                onChange={setBlackHoleParams}
+                onClose={() => setInteractiveMode(false)}
+              />
+            </>
+          ) : (
+            <BlackHoleCanvas />
+          )}
           {[].map((star, idx) => (
             <div
               key={`space-star-${idx}`}
@@ -578,9 +595,15 @@ export default function Home() {
               className={`title-ufo ${powering ? "powering" : ""}`}
               onClick={() => {
                 fireBeam(true);
-                // The beam's power-up runs ~500ms; begin the descent just after
-                // so the darkening feels caused by the beam, not simultaneous.
-                setTimeout(() => setDescentActive(true), 650);
+
+                // Secret gesture: 5 quick taps on the UFO toggle Interactive Mode.
+                const now = Date.now();
+                ufoTapTimes.current = ufoTapTimes.current.filter((tm) => now - tm < 2000);
+                ufoTapTimes.current.push(now);
+                if (ufoTapTimes.current.length >= 5) {
+                  ufoTapTimes.current = [];
+                  setInteractiveMode(!interactiveMode);
+                }
               }}
               role="presentation"
             >
@@ -727,13 +750,6 @@ export default function Home() {
         
         .cinematic-container::-webkit-scrollbar {
           display: none;
-        }
-
-        /* While the descent is active the hero holds in place ΓÇö the sequence
-           happens "in place" over the homepage (scroll-driven reveal arrives
-           in Stage 2). */
-        .cinematic-container.descending {
-          overflow: hidden;
         }
 
         .snap-section {
@@ -1078,6 +1094,18 @@ export default function Home() {
           z-index: 1;
           pointer-events: none;
           display: block;
+        }
+
+        /* Interactive Mode: let drags/clicks fall through the hero text
+           block onto the Golden Horizon canvas, while every real control
+           (links, buttons, the UFO) stays clickable. */
+        .interactive-hero .hook-content {
+          pointer-events: none;
+        }
+        .interactive-hero .hook-content a,
+        .interactive-hero .hook-content button,
+        .interactive-hero .hook-content .title-ufo {
+          pointer-events: auto;
         }
 
         /* Readability scrim over the shader's bright disk band — a soft dark

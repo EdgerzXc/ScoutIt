@@ -1181,6 +1181,7 @@ html.lite-mode * {
 /* Hide the homepage cosmic decoration (also stopped in JS) */
 html.lite-mode .grain,
 html.lite-mode .event-horizon-canvas,
+html.lite-mode .golden-horizon-wrap,
 html.lite-mode .space-star,
 html.lite-mode .drifting-container,
 html.lite-mode .black-hole-core,
