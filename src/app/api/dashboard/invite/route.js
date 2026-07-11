@@ -35,12 +35,35 @@ export async function POST(request) {
       return NextResponse.json({ error: "Server error: missing service role configuration" }, { status: 500 });
     }
 
+    // Resolve the typed name to a real broker's user id — `deals.broker_id`
+    // must be a UUID for GET /api/deals's `.eq("broker_id", userId)` to ever
+    // find this deal. Storing the raw typed string here (the previous
+    // behavior) permanently orphaned the invite: no broker account could
+    // ever see it in their Inbox, since their real user id never matched.
+    const { data: brokerMatches, error: brokerLookupError } = await supabaseAdmin
+      .from('user_profiles')
+      .select('id, display_name')
+      .ilike('display_name', brokerName.trim())
+      .contains('active_roles', ['broker']);
+
+    if (brokerLookupError) {
+      console.error("[INVITE API] Broker lookup failed:", brokerLookupError);
+      return NextResponse.json({ error: "Failed to look up broker" }, { status: 500 });
+    }
+    if (!brokerMatches || brokerMatches.length === 0) {
+      return NextResponse.json({ error: `No broker named "${brokerName}" found. Check the spelling or PRC number.` }, { status: 404 });
+    }
+    if (brokerMatches.length > 1) {
+      return NextResponse.json({ error: `Multiple brokers named "${brokerName}" found — ask them for their PRC number to disambiguate.` }, { status: 409 });
+    }
+    const resolvedBrokerId = brokerMatches[0].id;
+
     // 1. Insert the handshake deal first — rolled back below if the Connect spend fails
     const { data: dealData, error: dealError } = await supabaseAdmin.from('deals').insert([{
       property_id: listingId,
-      broker_id: brokerName,
+      broker_id: resolvedBrokerId,
       status: 'invited',
-      pitch_message: `Owner invited ${brokerName} to represent this property.`
+      pitch_message: `Owner invited ${brokerMatches[0].display_name} to represent this property.`
     }]).select();
 
     if (dealError || !dealData) {

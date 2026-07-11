@@ -208,30 +208,57 @@ export function DashboardProvider({ children }) {
 
         setListings([...airtableListings, ...supabaseListings]);
 
-        // 2. Fetch Deals (Pitches)
-        const { data: dealsData, error: dealError } = await supabase
-          .from('deals')
-          .select('*')
-          .order('created_at', { ascending: false });
-
-        if (!dealError && dealsData) {
-          const mappedDeals = dealsData.map(d => ({
-            id: d.id,
-            listingId: d.property_id,
-            title: d.property_id, // We'll rely on the UI to map this to the property title
-            type: 'Deal',
-            brokerName: 'Broker User',
-            brokerFirm: 'Independent',
-            message: d.pitch_message,
-            privateNotes: d.private_notes || '',
-            status: d.status,
-            timeRemaining: new Date(d.created_at).toLocaleDateString(),
-            statusText: d.status.charAt(0).toUpperCase() + d.status.slice(1),
-            badgeText: d.status === 'accepted' ? 'check_circle' : '',
-            isCurrentUserBroker: true,
-            isCurrentUserOwner: true
-          }));
-          setPitches(mappedDeals);
+        // 2. Fetch Deals (Pitches) — via the real /api/deals server route, NOT
+        // a direct client select(). The direct query this replaced had no
+        // per-row role resolution at all: every single deal in the result
+        // set (RLS still scoped that set correctly to the signed-in user's
+        // own deals) got isCurrentUserBroker/isCurrentUserOwner hardcoded to
+        // true simultaneously, brokerName hardcoded to the literal string
+        // "Broker User", and title set to the raw property UUID. That meant
+        // OwnerMode's "Active Inquiries" and BrokerMode's "Active Deal
+        // Files"/"Verified Advisory Portfolio" — which both filter this same
+        // `pitches` array by those flags — could never reliably tell an
+        // owner's incoming pitch apart from a broker's own sent pitch, and
+        // never showed a real name. /api/deals already resolves myRole and
+        // the other party's real display name server-side; just remap that
+        // into the field names BrokerMode/OwnerMode already read.
+        try {
+          const { data: { session } } = await getSession();
+          const token = session?.access_token;
+          const mockOwnerId = !token && currentUser?.id ? currentUser.id : undefined;
+          const qs = mockOwnerId ? `?mockOwnerId=${mockOwnerId}` : "";
+          const dealsRes = await fetch(`/api/deals${qs}`, {
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          });
+          if (dealsRes.ok) {
+            const { deals: dealsData } = await dealsRes.json();
+            const mappedDeals = (dealsData || []).map(d => ({
+              id: d.id,
+              listingId: d.propertyId,
+              propertySlug: d.propertySlug,
+              title: d.propertyTitle,
+              type: 'Deal',
+              loc: undefined,
+              brokerName: d.myRole === 'owner' ? d.otherParty : (currentUser?.name || 'You'),
+              brokerFirm: d.myRole === 'owner' ? 'Independent' : 'ScoutIt Pro Member',
+              // Which template a card should render — an owner's incoming
+              // deals can be either a broker's pitch OR a buyer's direct
+              // inquiry, and they were previously shown with the same
+              // hardcoded "PRC VERIFIED" badge regardless of which.
+              otherPartyRole: d.otherPartyRole,
+              message: d.pitch_message,
+              privateNotes: d.private_notes || '',
+              status: d.status,
+              timeRemaining: new Date(d.createdAt).toLocaleDateString(),
+              statusText: d.status.charAt(0).toUpperCase() + d.status.slice(1),
+              badgeText: d.status === 'accepted' ? 'check_circle' : '',
+              isCurrentUserBroker: d.myRole === 'broker',
+              isCurrentUserOwner: d.myRole === 'owner',
+            }));
+            setPitches(mappedDeals);
+          }
+        } catch (dealFetchErr) {
+          console.error("Failed to fetch deals:", dealFetchErr);
         }
 
         // 3. Fetch Saved Intel
@@ -266,6 +293,7 @@ export function DashboardProvider({ children }) {
     };
 
     fetchLiveIntelligence();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ── Toasts ──
@@ -488,14 +516,19 @@ export function DashboardProvider({ children }) {
 
     const newDbListing = data[0];
 
+    // Map through the same DB-row -> UI-model function every other listing
+    // uses (mapSupabaseProperties) rather than spreading the wizard's raw
+    // field names (listing.description/listing.category) over the result —
+    // those don't match the UI model's desc/spaceCategory keys and dropped
+    // `coordinates` entirely, so a freshly-published listing's Listing
+    // Health / Listing Strength checks always reported description, map
+    // location, and category as missing until the next full refetch
+    // silently replaced this object with a correctly-shaped one.
     const newListing = {
-      ...listing,
-      id: newDbListing.id, // Use real Supabase UUID
-      hasMedia: listing.mediaLink ? true : false,
+      ...mapSupabaseProperties([newDbListing])[0],
       tag: 'NEW',
       tagClass: 'bg-gold-accent/20 text-gold-accent',
       time: 'Just now',
-      ownerId: currentUser?.id || null,
       signals: {
         ownerAge: 'New — no data',
         ownerAgeClass: 'text-text-secondary',
@@ -503,7 +536,7 @@ export function DashboardProvider({ children }) {
         completeness: listing.completenessScore + '%'
       }
     };
-    
+
     setListings(prev => [newListing, ...prev]);
     addToast("Dossier live on the Intelligence Ledger", "✅");
     addNotification({
@@ -630,54 +663,81 @@ export function DashboardProvider({ children }) {
   const sendPitch = async (listingId, message) => {
     const role = (currentUser?.active_roles?.[0] || currentUser?.role || "broker").toLowerCase();
     const tier = (currentUser?.subscription_tier || currentUser?.tier || "starry").toLowerCase();
-    const result = spendConnects(role, tier, 1);
-    if (!result.success) {
+    // Local balance is a pre-check only — the authoritative spend is the
+    // server's spend_connects RPC. The local sim wallet is deducted AFTER the
+    // server confirms (below), so a failed call can never eat the displayed
+    // balance. (The old order spent first with no rollback: every server
+    // failure permanently drained the local wallet — double jeopardy.)
+    if (getBalance(role, tier) < 1) {
       addToast("Not enough Connects to send this pitch.", "◈");
       return false;
     }
-    setConnects(result.remaining);
 
-    // Insert into Supabase Deals table
-    const { data, error } = await supabase.from('deals').insert([{
-      property_id: listingId,
-      broker_id: currentUser?.id || null,
-      pitch_message: message,
-      status: 'pending'
-    }]).select();
+    // Server-side route (supabaseAdmin + spend_connects), NOT a direct client
+    // insert — `deals` has an explicit RLS policy blocking all direct client
+    // inserts ("Users cannot insert deals directly", with_check: false).
+    // The old code inserted straight from the client here, which always
+    // failed silently: this local wallet spend still happened, the caller
+    // (BrokerMode's handleSendPitch) never awaited this function so it always
+    // treated the pitch as successful, and no deal was ever actually created.
+    try {
+      const { data: { session } } = await getSession();
+      const token = session?.access_token;
+      const mockOwnerId = !token && currentUser?.id === 'master-dev' ? 'master-dev' : undefined;
+      const res = await fetch('/api/deals/pitch', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ listingId, message, mockOwnerId }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        addToast(data.error || "Failed to send pitch.", "❌");
+        return false;
+      }
 
-    if (error) return false;
+      // Server confirmed — now mirror the spend locally. Prefer the server's
+      // authoritative newBalance (real sessions) over the local sim total.
+      const localSpend = spendConnects(role, tier, 1);
+      setConnects(typeof data.newBalance === 'number' ? data.newBalance : localSpend.remaining);
 
-    const targetListing = listings.find(l => l.id === listingId);
+      const targetListing = listings.find(l => l.id === listingId);
+      const newPitch = {
+        id: data.dealId,
+        listingId,
+        title: targetListing ? targetListing.title : (data.propertyTitle || 'New Property'),
+        loc: targetListing ? targetListing.loc : 'Location Masked',
+        type: targetListing ? targetListing.type : 'Sourced',
+        brokerName: currentUser?.name || 'ScoutIt Broker',
+        brokerFirm: 'ScoutIt Pro Member',
+        message,
+        status: 'pending',
+        timeRemaining: 'Just now',
+        statusText: 'Sent Just now',
+        badgeText: 'Waiting',
+        isCurrentUserBroker: true,
+        isCurrentUserOwner: true
+      };
 
-    const newPitch = {
-      id: data[0].id,
-      listingId,
-      title: targetListing ? targetListing.title : 'New Property',
-      loc: targetListing ? targetListing.loc : 'Location Masked',
-      type: targetListing ? targetListing.type : 'Sourced',
-      brokerName: currentUser?.name || 'ScoutIt Broker',
-      brokerFirm: 'ScoutIt Pro Member',
-      message,
-      status: 'pending',
-      timeRemaining: 'Just now',
-      statusText: 'Sent Just now',
-      badgeText: 'Waiting',
-      isCurrentUserBroker: true,
-      isCurrentUserOwner: true 
-    };
-
-    setPitches(prev => [newPitch, ...prev]);
-    addToast("Deal Initiated — 1 Connect spent", "⚡");
-
-    return true;
+      setPitches(prev => [newPitch, ...prev]);
+      addToast("Deal Initiated — 1 Connect spent", "⚡");
+      return true;
+    } catch (err) {
+      console.error("Failed to send pitch", err);
+      addToast("Failed to send pitch — check your connection.", "❌");
+      return false;
+    }
   };
 
   const inviteBroker = async (listingId, brokerName) => {
     if (!brokerName) return false;
     const role = (currentUser?.active_roles?.[0] || currentUser?.role || "owner").toLowerCase();
     const tier = (currentUser?.subscription_tier || currentUser?.tier || "starry").toLowerCase();
-    const result = spendConnects(role, tier, 1);
-    if (!result.success) {
+    // Pre-check only — local sim wallet is deducted after the server confirms
+    // (same no-double-jeopardy ordering as sendPitch).
+    if (getBalance(role, tier) < 1) {
       addToast("Not enough Connects to send the handshake", "◈");
       return false;
     }
@@ -700,8 +760,10 @@ export function DashboardProvider({ children }) {
       if (!res.ok) {
         throw new Error(data.error || "Failed to process handshake");
       }
-      
-      setConnects(result.remaining);
+
+      // Server confirmed — mirror the spend locally, prefer server truth.
+      const localSpend = spendConnects(role, tier, 1);
+      setConnects(typeof data.newBalance === 'number' ? data.newBalance : localSpend.remaining);
 
       const targetListing = listings.find(l => l.id === listingId);
       setPitches(prev => [{
@@ -902,6 +964,12 @@ export function DashboardProvider({ children }) {
   const mapSupabaseProperties = (propertiesData) => {
     return propertiesData.map(p => ({
       id: p.id,
+      // Published listings sync to Airtable keyed by slug, and the public
+      // /property/[id] page ONLY ever resolves against the Airtable feed —
+      // it never queries Supabase at all. Every link built from `.id` (the
+      // Supabase UUID) instead of `.slug` was a link to a page that loads
+      // forever, including the owner's own "View Public File" button.
+      slug: p.slug || null,
       type: p.type,
       title: p.title,
       desc: p.description || '',

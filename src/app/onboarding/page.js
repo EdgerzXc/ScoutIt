@@ -44,6 +44,25 @@ export default function OnboardingPage() {
   const nextStep = () => setStep(s => s + 1);
   const prevStep = () => setStep(s => Math.max(1, s - 1));
 
+  // dashboard/page.js decides which mode to render (and bounces to /onboarding
+  // if the key is missing) purely from localStorage("scoutit_user") — nothing
+  // in the real Supabase auth path ever wrote it, so a RETURNING real user who
+  // already has a profile hit an infinite onboarding loop the same way a
+  // freshly-onboarded one did. Reconstruct the same shape from their saved
+  // profile before sending them to /dashboard.
+  const persistLocalSession = (userId, profile) => {
+    localStorage.setItem("scoutit_user", JSON.stringify({
+      id: userId,
+      name: profile.display_name || profile.full_name || "ScoutIt User",
+      tags: Array.isArray(profile.active_roles) && profile.active_roles.length > 0
+        ? profile.active_roles
+        : [profile.role || "buyer"],
+      primaryMode: profile.role || "buyer",
+      providerType: profile.provider_type || undefined,
+      prcLicense: profile.prc_license || undefined,
+    }));
+  };
+
   // Handle Google Auth Return
   useEffect(() => {
     const checkSession = async () => {
@@ -53,6 +72,7 @@ export default function OnboardingPage() {
         setFormData(prev => ({ ...prev, name: session.user.user_metadata?.full_name || "Google User", email: session.user.email }));
         const { data: profile } = await supabase.from('user_profiles').select('*').eq('id', session.user.id).single();
         if (profile && profile.role) {
+          persistLocalSession(session.user.id, profile);
           router.push("/dashboard");
         } else {
           setStep(2);
@@ -84,6 +104,7 @@ export default function OnboardingPage() {
           // Same profile check
           const { data: profile } = await supabase.from('user_profiles').select('*').eq('id', verifyData.user.id).single();
           if (profile && profile.role) {
+            persistLocalSession(verifyData.user.id, profile);
             router.push("/dashboard");
             return;
           } else {
@@ -100,6 +121,7 @@ export default function OnboardingPage() {
         const { data: profile } = await supabase.from('user_profiles').select('*').eq('id', signInData.user.id).single();
         if (profile && profile.role) {
           // Profile exists, skip onboarding
+          persistLocalSession(signInData.user.id, profile);
           router.push("/dashboard");
           return;
         } else {
@@ -363,6 +385,9 @@ export default function OnboardingPage() {
       return;
     }
 
+    const primaryMode = overrides.primaryMode || formData.primaryMode;
+    const tags = formData.tags.length > 0 ? formData.tags : [primaryMode];
+
     // 2. Call secure server-side endpoint
     try {
       const response = await fetch('/api/auth/complete-onboarding', {
@@ -373,15 +398,32 @@ export default function OnboardingPage() {
         },
         body: JSON.stringify({
           name: formData.name,
-          role: overrides.primaryMode || formData.primaryMode
+          role: primaryMode,
+          tags,
+          providerType: formData.providerType || null,
+          prcLicense: formData.prcLicense || null,
         })
       });
 
       if (!response.ok) {
         throw new Error("Failed to save profile");
       }
-      
-      // 3. Redirect to unified dashboard
+
+      // 3. dashboard/page.js reads localStorage("scoutit_user") to pick which
+      // mode to render and redirects to /onboarding if it's missing — nothing
+      // in the real Supabase auth path ever wrote this key, so every real
+      // signup landed back here in an infinite loop right after finishing
+      // onboarding. Mirror the same shape the dev-mock/mode-switcher writes.
+      localStorage.setItem("scoutit_user", JSON.stringify({
+        id: session.user.id,
+        name: formData.name,
+        tags,
+        primaryMode,
+        providerType: formData.providerType || undefined,
+        prcLicense: formData.prcLicense || undefined,
+      }));
+
+      // 4. Redirect to unified dashboard
       router.push("/dashboard");
     } catch (error) {
       console.error("Profile save error:", error);

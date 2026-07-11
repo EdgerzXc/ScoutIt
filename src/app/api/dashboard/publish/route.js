@@ -76,11 +76,17 @@ export async function POST(request) {
         };
         
         let finalSlug = currentSubmission.slug;
-        
-        // Attempt update first, fallback to insert
+
+        // Attempt update first, fallback to insert. Airtable's Slug is a
+        // FORMULA field (computed from Title) — the app-side slug can drift
+        // from it (e.g. "E-Com" slugifies differently on each side, the exact
+        // cause of the one-ecom-center Contact-flow break). Both paths read
+        // Airtable's computed Slug back and persist it to Supabase below, so
+        // Airtable stays the single source of slug truth on every publish.
         try {
           // If update succeeds, the record existed
-          await updateProperty(apiKey, baseId, currentSubmission.slug, payload);
+          const updated = await updateProperty(apiKey, baseId, currentSubmission.slug, payload);
+          finalSlug = updated?.fields?.Slug || currentSubmission.slug;
         } catch (updateErr) {
           // Record doesn't exist, insert instead
           const created = await insertProperty(apiKey, baseId, payload);

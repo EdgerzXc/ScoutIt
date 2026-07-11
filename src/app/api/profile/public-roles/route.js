@@ -33,7 +33,20 @@ export async function GET(request) {
       .eq("user_id", userId)
       .maybeSingle();
 
-    return NextResponse.json({ publicRoles: privacy?.public_roles || [] });
+    // user_badges is own-rows-only under RLS (same 2026-07-09 reset), so the
+    // anon client returns [] for every visitor — public profiles showed zero
+    // earned badges. Badges are public-display data by definition (they're
+    // rendered on the public profile page), so serve them here the same way
+    // as public_roles: service-role, public profiles only.
+    const { data: badgeRows } = await supabaseAdmin
+      .from("user_badges")
+      .select("badge_id, earned_at")
+      .eq("user_id", userId);
+
+    return NextResponse.json({
+      publicRoles: privacy?.public_roles || [],
+      badges: badgeRows || [],
+    });
   } catch (err) {
     console.error("[PUBLIC ROLES API] Error:", err);
     return NextResponse.json({ error: err.message || "Internal server error" }, { status: 500 });

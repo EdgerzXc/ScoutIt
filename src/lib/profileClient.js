@@ -55,13 +55,24 @@ export async function loadPublicProfile(displayName) {
     .maybeSingle();
   if (error || !data) return { data, error };
 
-  const { data: badgeRows } = await supabase
-    .from('user_badges')
-    .select('badge_id, earned_at')
-    .eq('user_id', data.id);
+  // user_badges is own-rows-only under RLS, so an anon-client read returns []
+  // for every visitor. Badges on a PUBLIC profile are public-display data —
+  // fetch them via the service-role public-profile route instead (which only
+  // serves is_profile_public profiles). Best-effort: a failed badge fetch
+  // never blocks the profile itself.
+  let badgeRows = [];
+  try {
+    const res = await fetch(`/api/profile/public-roles?userId=${encodeURIComponent(data.id)}`);
+    if (res.ok) {
+      const payload = await res.json();
+      badgeRows = payload.badges || [];
+    }
+  } catch (badgeErr) {
+    console.error('Failed to load public badges', badgeErr);
+  }
 
   return {
-    data: { ...data, badges: (badgeRows || []).map((b) => ({ id: b.badge_id, minted_at: b.earned_at })) },
+    data: { ...data, badges: badgeRows.map((b) => ({ id: b.badge_id, minted_at: b.earned_at })) },
     error: null,
   };
 }

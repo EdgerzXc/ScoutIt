@@ -692,12 +692,13 @@ export default function OwnerMode() {
             const listPitches = pitches.filter(p => p.isCurrentUserOwner && p.listingId === listing.id);
             const pendingPitches = listPitches.filter(p => p.status === 'pending');
             const isSelected = selectedIds.includes(listing.id);
-            // Real completeness, never a flattering default: use the pipeline's
-            // signal when present, otherwise the same field-completeness engine
-            // the dossier's Listing Health card runs.
-            const completeness = listing.signals?.completeness
-              ? parseInt(listing.signals.completeness, 10)
-              : computeListingStrength(listing).score;
+            // listing.signals.completeness is a hardcoded placeholder wherever
+            // it's set (0/50/100 literals in DashboardContext, never computed
+            // from real fields) — computeListingStrength is the only value
+            // that's actually derived from this listing's real data, and the
+            // same one the dossier's "Missing:" checklist below uses, so the
+            // ring and the checklist can never disagree.
+            const completeness = computeListingStrength(listing).score;
             return (
               <div
                 key={listing.id}
@@ -822,7 +823,7 @@ export default function OwnerMode() {
              Add Deep Intel
            </button>
            {activeListing.pipelineStatus !== 'ai_drafting' && (
-             <Link href={`/property/${activeListing.id}`} className="bg-gold-accent text-background font-working-title font-bold px-4 py-2 rounded hover:opacity-90 transition-opacity text-sm flex-1 md:flex-none text-center justify-center">
+             <Link href={`/property/${activeListing.slug || activeListing.id}`} className="bg-gold-accent text-background font-working-title font-bold px-4 py-2 rounded hover:opacity-90 transition-opacity text-sm flex-1 md:flex-none text-center justify-center">
                View Public File
              </Link>
            )}
@@ -855,9 +856,10 @@ export default function OwnerMode() {
             ) : (
                <div className="flex items-center gap-4 mb-6">
                  {(() => {
-                   const healthScore = activeListing.signals?.completeness
-                     ? parseInt(activeListing.signals.completeness, 10)
-                     : computeListingStrength(activeListing).score;
+                   // Same source as the grid ring above and the "Missing:"
+                   // checklist below — see that comment for why
+                   // signals.completeness is never used here.
+                   const healthScore = computeListingStrength(activeListing).score;
                    return (
                  <div className="relative w-16 h-16 shrink-0">
                    <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
@@ -996,9 +998,17 @@ export default function OwnerMode() {
                       <div>
                         <h4 className="font-working-title text-lg text-on-surface flex items-center gap-2">
                           {pitch.brokerName}
-                          <span className="bg-gold-accent/10 text-gold-accent text-[9px] font-label-caps px-1.5 py-0.5 rounded tracking-widest">PRC VERIFIED</span>
+                          {/* An owner's incoming deals are either a broker's
+                              pitch or a buyer's direct inquiry — "PRC
+                              VERIFIED" (a broker-only credential) was
+                              previously shown unconditionally on both. */}
+                          {pitch.otherPartyRole === 'Broker' ? (
+                            <span className="bg-gold-accent/10 text-gold-accent text-[9px] font-label-caps px-1.5 py-0.5 rounded tracking-widest">PRC VERIFIED</span>
+                          ) : (
+                            <span className="bg-surface-variant text-text-secondary text-[9px] font-label-caps px-1.5 py-0.5 rounded tracking-widest">PROSPECTIVE BUYER</span>
+                          )}
                         </h4>
-                        <span className="text-xs text-text-secondary">{pitch.brokerFirm}</span>
+                        <span className="text-xs text-text-secondary">{pitch.otherPartyRole === 'Broker' ? pitch.brokerFirm : 'Direct inquiry'}</span>
                       </div>
                     </div>
                     <div className="text-right">

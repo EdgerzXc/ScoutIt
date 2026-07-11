@@ -98,14 +98,7 @@ export default function InboxPage() {
 
   const handleAcceptHandshake = async (dealId) => {
     try {
-      const { data: { session } } = await getSession();
-      const token = session?.access_token;
-      // In DEV, if no real token but master-dev is logged in, pass a flag
-      const mockStr = localStorage.getItem("scoutit_user");
-      let mockOwnerId;
-      if (!token && mockStr && mockStr.includes("master-dev")) {
-        mockOwnerId = u?.id;
-      }
+      const { token, mockOwnerId } = await resolveAuth();
 
       const res = await fetch(`/api/deals/${dealId}`, {
         method: "PATCH",

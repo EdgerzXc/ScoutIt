@@ -438,16 +438,30 @@ export default function ChatBox({ deal, onCloseDeal, onOfferHandshake, onAcceptH
             <span className="text-3xl mb-3">🛡️</span>
             <span className="font-label-caps text-[10px] tracking-widest uppercase text-success bg-success/10 px-2 py-1 rounded mb-4">Verified Advisor Active</span>
             
-            <h3 className="text-2xl font-headline-editorial text-on-surface mb-1">{deal.other_party_contact?.name || deal.other_party}</h3>
-            <p className="text-sm text-text-secondary font-mono mb-4">{deal.other_party_contact?.email || 'verified@advisory.network'}</p>
-            <p className="text-sm text-gold-accent font-data-tabular">{deal.other_party_contact?.phone || '+63 917 000 0000'}</p>
-            
+            <h3 className="text-2xl font-headline-editorial text-on-surface mb-1">{deal.other_party}</h3>
+            {/* deal.other_party_contact has never existed on any deals row or
+                API response — the fallback text used to be a fake email/phone
+                a user could plausibly try to dial. Honest blank instead: real
+                contact details aren't collected yet, so point back at chat. */}
+            {deal.other_party_contact?.email || deal.other_party_contact?.phone ? (
+              <>
+                <p className="text-sm text-text-secondary font-mono mb-4">{deal.other_party_contact?.email}</p>
+                {deal.other_party_contact?.phone && (
+                  <p className="text-sm text-gold-accent font-data-tabular">{deal.other_party_contact.phone}</p>
+                )}
+              </>
+            ) : (
+              <p className="text-sm text-text-secondary">Contact details aren&apos;t shared automatically — coordinate below in chat.</p>
+            )}
+
             <div className="w-full h-px bg-surface-variant my-5"></div>
-            
+
             <div className="flex flex-wrap gap-2 justify-center w-full">
-              <a href={`https://wa.me/${(deal.other_party_contact?.phone || '').replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer" className="flex-1 min-w-[120px] bg-[#25D366]/20 text-[#25D366] border border-[#25D366]/30 px-3 py-2 rounded text-center text-xs font-working-title hover:bg-[#25D366]/30 transition-colors">
-                WhatsApp
-              </a>
+              {deal.other_party_contact?.phone && (
+                <a href={`https://wa.me/${deal.other_party_contact.phone.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer" className="flex-1 min-w-[120px] bg-[#25D366]/20 text-[#25D366] border border-[#25D366]/30 px-3 py-2 rounded text-center text-xs font-working-title hover:bg-[#25D366]/30 transition-colors">
+                  WhatsApp
+                </a>
+              )}
               <button onClick={() => setShowBookingModal(true)} className="flex-1 min-w-[120px] bg-gold-accent/20 text-gold-accent border border-gold-accent/30 px-3 py-2 rounded text-xs font-working-title hover:bg-gold-accent/30 transition-colors">
                 Schedule Call
               </button>

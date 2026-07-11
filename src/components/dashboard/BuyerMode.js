@@ -88,7 +88,7 @@ export default function BuyerMode() {
           locEl.textContent = listing.loc;
           
           const linkEl = document.createElement('a');
-          linkEl.href = `/property/${listing.id}`;
+          linkEl.href = `/property/${listing.slug || listing.id}`;
           linkEl.className = 'block text-center w-full text-[10px] font-label-caps tracking-widest uppercase bg-gold-accent/10 hover:bg-gold-accent/20 text-gold-accent py-2 rounded transition-colors';
           linkEl.textContent = 'View Property';
           
@@ -187,7 +187,7 @@ export default function BuyerMode() {
   }, [listings, savedIds, searchQuery]);
 
   const ListingCard = ({ item }) => (
-    <Link href={`/property/${item.id}`} className="block shrink-0 min-w-[240px] md:min-w-[280px]">
+    <Link href={`/property/${item.slug || item.id}`} className="block shrink-0 min-w-[240px] md:min-w-[280px]">
       <div className="card-atmosphere hov-card rounded-lg p-4 flex gap-4 items-center hover:border-gold-accent transition-colors cursor-pointer h-full group">
         <div className="w-16 h-16 bg-surface-alt rounded flex items-center justify-center text-3xl shrink-0 group-hover:scale-105 transition-transform">
           {item.img || '🏠'}
@@ -214,7 +214,7 @@ export default function BuyerMode() {
   );
 
   const VerticalListingCard = ({ item }) => (
-    <Link href={`/property/${item.id}`} className="block shrink-0 w-[280px] snap-start relative">
+    <Link href={`/property/${item.slug || item.id}`} className="block shrink-0 w-[280px] snap-start relative">
       <div className="card-atmosphere hov-card rounded-lg p-0 flex flex-col hover:border-text-secondary transition-colors cursor-pointer overflow-hidden group h-full">
         <div className="h-40 bg-surface-alt flex items-center justify-center text-6xl group-hover:scale-105 transition-transform duration-500">
           {item.img || '🏠'}

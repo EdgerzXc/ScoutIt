@@ -15,6 +15,7 @@ export default function BrokerMode() {
   const [pitchingListing, setPitchingListing] = useState(null);
   const [pitchMessage, setPitchMessage] = useState("");
   const [pitchError, setPitchError] = useState("");
+  const [isSendingPitch, setIsSendingPitch] = useState(false);
 
   // Notification and ID Card State. The "new feature" banner dismissal is
   // persisted — a banner that resurrects on every visit stops being news.
@@ -125,13 +126,24 @@ export default function BrokerMode() {
     setPitchMessage("Hi, I have a client looking for this exact profile. I'd love to arrange an exclusive viewing.");
   };
 
-  const handleSendPitch = () => {
-    if (!pitchingListing) return;
-    const success = sendPitch(pitchingListing.id, pitchMessage);
-    if (success) {
-      setPitchingListing(null);
-    } else {
-      setPitchError("Not enough Connects. You need 1 Connect to send this pitch.");
+  const handleSendPitch = async () => {
+    if (!pitchingListing || isSendingPitch) return;
+    // sendPitch is async and does a real server round-trip (deals has an RLS
+    // policy blocking direct client inserts, so this must go through
+    // /api/deals/pitch) — this call was previously never awaited, so the
+    // modal closed as "sent" immediately regardless of whether the pitch
+    // actually succeeded, and a real failure was never shown to the broker.
+    setIsSendingPitch(true);
+    setPitchError("");
+    try {
+      const success = await sendPitch(pitchingListing.id, pitchMessage);
+      if (success) {
+        setPitchingListing(null);
+      } else {
+        setPitchError("Couldn't send this pitch — see the notification for details.");
+      }
+    } finally {
+      setIsSendingPitch(false);
     }
   };
 
@@ -235,13 +247,13 @@ export default function BrokerMode() {
               <h3 className="font-label-caps text-xs tracking-widest text-text-secondary mb-4 uppercase border-b border-surface-variant pb-2">Connected Asset</h3>
               <div className="flex flex-col gap-2">
                 <span className="text-gold-accent font-label-caps text-[10px] tracking-widest uppercase">{property?.type || 'Property'}</span>
-                <Link href={`/property/${deal.listingId}`} className="font-working-title text-xl text-on-surface hover:text-gold-accent hover:underline transition-colors">
+                <Link href={`/property/${property?.slug || deal.propertySlug || deal.listingId}`} className="font-working-title text-xl text-on-surface hover:text-gold-accent hover:underline transition-colors">
                   {property?.title || 'View Listing'}
                 </Link>
                 <span className="text-sm text-text-secondary">{property?.loc || property?.location || 'Location details restricted'}</span>
               </div>
               <div className="mt-6 pt-4 border-t border-surface-variant">
-                <Link href={`/property/${deal.listingId}`} className="text-sm font-working-title text-gold-accent flex items-center gap-2 hover:underline">
+                <Link href={`/property/${property?.slug || deal.propertySlug || deal.listingId}`} className="text-sm font-working-title text-gold-accent flex items-center gap-2 hover:underline">
                   Open Property Dossier <span>→</span>
                 </Link>
               </div>
@@ -508,11 +520,12 @@ export default function BrokerMode() {
                 >
                   Cancel
                 </button>
-                <button 
-                  className="bg-gold-accent text-background font-working-title px-6 py-2 rounded font-bold hover:opacity-90 transition-opacity"
+                <button
+                  className="bg-gold-accent text-background font-working-title px-6 py-2 rounded font-bold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
                   onClick={handleSendPitch}
+                  disabled={isSendingPitch}
                 >
-                  Send Pitch
+                  {isSendingPitch ? "Sending…" : "Send Pitch"}
                 </button>
               </div>
             </div>
@@ -713,7 +726,7 @@ export default function BrokerMode() {
                 </div>
                 
                 <h4 className="font-working-title text-on-surface text-lg mb-1 line-clamp-1">
-                  <Link href={`/property/${item.id}`} className="hover:text-gold-accent hover:underline transition-colors block">
+                  <Link href={`/property/${item.slug || item.id}`} className="hover:text-gold-accent hover:underline transition-colors block">
                     {item.title}
                   </Link>
                 </h4>
@@ -726,7 +739,12 @@ export default function BrokerMode() {
                   </div>
                   <div>
                     <div className="text-[9px] text-text-secondary uppercase tracking-wider mb-1 font-label-caps">Completeness</div>
-                    <div className="text-on-surface font-data-tabular text-xs">{item.signals?.completeness || '100%'}</div>
+                    {/* item.signals.completeness is a hardcoded placeholder
+                        (never derived from real fields) everywhere it's set
+                        in DashboardContext — computeListingStrength is the
+                        only real source, same as the Listing Strength card
+                        below once a deal file is opened on this property. */}
+                    <div className="text-on-surface font-data-tabular text-xs">{computeListingStrength(item).score}%</div>
                   </div>
                 </div>
                 

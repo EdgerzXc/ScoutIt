@@ -127,6 +127,7 @@ export async function GET(request) {
           propertyPrice: d.properties?.price ?? null,
           myRole,
           otherParty: otherId ? (namesById[otherId] || otherRoleLabel) : otherRoleLabel,
+          otherPartyRole: otherRoleLabel, // "Broker" | "Buyer" | "Owner" — which template a UI card should use
           lastMessage: lastMessageByDeal[d.id] || d.pitch_message || "",
           pitch_message: d.pitch_message,
           unreadCount: unreadByDeal[d.id] || 0,
