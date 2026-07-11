@@ -208,7 +208,10 @@ export async function fetchProperties(apiKey, baseId) {
         price_verified_by:      f.Price_Verified_By    || "",
         price_source:           f.Price_Source         || "",
         price_notes:            f.Price_Notes          || "",
-        image:                f.Image        || "",
+        // Card surfaces read `image`; fall back to the first Photos entry so a
+        // property with a populated gallery but no dedicated Image column still
+        // shows a real photo instead of the gradient placeholder.
+        image:                f.Image || (f.Photos ? f.Photos.split(",")[0].trim() : "") || "",
         gradient:             f.Gradient     || "linear-gradient(135deg, #1f1c18 0%, #100f0d 100%)",
         latitude:             f.Latitude ? Number(f.Latitude) : null,
         longitude:            f.Longitude ? Number(f.Longitude) : null,

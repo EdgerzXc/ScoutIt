@@ -217,7 +217,7 @@ export default function BulkImporterMode({ onClose }) {
           <button 
             onClick={handleSubmit}
             disabled={csvData.length === 0 || isProcessing}
-            className="bg-gold-accent text-background font-working-title font-bold px-8 py-4 rounded hover:opacity-90 disabled:opacity-50 transition-all uppercase tracking-widest text-sm shadow-[0_0_15px_rgba(212,175,55,0.2)]"
+            className="bg-gold-accent text-background font-working-title font-bold px-8 py-4 rounded hover:opacity-90 disabled:opacity-50 transition-all uppercase tracking-widest text-sm shadow-[0_0_15px_rgba(232,174,60,0.2)]"
           >
             {isProcessing ? "Processing..." : "Process & Import Portfolio"}
           </button>

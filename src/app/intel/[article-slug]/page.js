@@ -2,6 +2,7 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getArticleBySlug, getArticles } from "@/data/mockArticles";
 import { fetchIntel } from "@/lib/airtable";
 
 async function getLiveArticle(slug) {
@@ -25,14 +26,16 @@ async function getLiveArticle(slug) {
       console.error("Failed to load article from Airtable:", e);
     }
   }
-  return null;
+  // Fall back to the editorial mock set — the same articles the homepage and
+  // intel hub link to, so those links always resolve instead of 404ing.
+  return getArticleBySlug(slug);
 }
 
 async function getLiveRelated(slug) {
   const apiKey = process.env.AIRTABLE_API_KEY;
   const baseId = process.env.AIRTABLE_BASE_ID;
   
-  const baseArticles = [...[]];
+  const baseArticles = [...getArticles()];
   
   if (apiKey && baseId) {
     try {

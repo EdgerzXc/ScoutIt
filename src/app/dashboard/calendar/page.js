@@ -64,7 +64,7 @@ export default function CalendarPage() {
                       {appt.status === 'pending' ? (
                         <>
                           <button className="text-xs text-error border border-error/30 px-3 py-1.5 rounded hover:bg-error/10 uppercase tracking-wider font-mono">Decline</button>
-                          <button className="text-xs text-background bg-gold-accent px-3 py-1.5 rounded hover:bg-[#F7C64E] uppercase tracking-wider font-mono">Accept</button>
+                          <button className="text-xs text-background bg-gold-accent px-3 py-1.5 rounded hover:bg-gold-bright uppercase tracking-wider font-mono">Accept</button>
                         </>
                       ) : (
                         <span className="text-xs text-gold-accent bg-gold-accent/10 px-3 py-1.5 rounded uppercase tracking-wider font-mono border border-gold-accent/20">

@@ -13,11 +13,15 @@ export default function BadgeRegistryPage() {
   const [badgeDefs, setBadgeDefs] = useState([]);
 
   useEffect(() => {
+    let alive = true;
     // Real counts (claimed/status) always come from the server, regardless of who's logged in.
     fetch("/api/badges")
       .then((res) => res.json())
-      .then((data) => setBadgeDefs(data.definitions || []))
-      .catch((err) => console.error("Failed to load badge registry:", err));
+      .then((data) => { if (alive) setBadgeDefs(data.definitions || []); })
+      .catch((err) => {
+        // Navigating away aborts the fetch — only report while still mounted.
+        if (alive) console.error("Failed to load badge registry:", err);
+      });
 
     const loadUserBadges = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -37,6 +41,7 @@ export default function BadgeRegistryPage() {
       }
     };
     loadUserBadges();
+    return () => { alive = false; };
   }, []);
 
   const activeBadges = badgeDefs.filter((b) => b.status === "ACTIVE");

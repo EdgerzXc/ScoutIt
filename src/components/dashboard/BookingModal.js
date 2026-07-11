@@ -97,7 +97,7 @@ export default function BookingModal({ isOpen, onClose, brokerName, dealId, onSc
             <button 
               type="submit"
               disabled={!selectedDate || !selectedTime || isSubmitting}
-              className="w-full bg-gold-accent text-background py-3 rounded font-working-title disabled:opacity-50 hover:bg-[#F7C64E] transition-colors"
+              className="w-full bg-gold-accent text-background py-3 rounded font-working-title disabled:opacity-50 hover:bg-gold-bright transition-colors"
             >
               {isSubmitting ? "Requesting..." : "Send Request"}
             </button>

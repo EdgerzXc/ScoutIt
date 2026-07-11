@@ -15,7 +15,6 @@ import DealTimeline from './crm/DealTimeline';
 import { computeListingStrength } from '../../lib/listingStrength';
 
 export default function OwnerMode() {
-  console.log("OwnerMode rendering!");
   const { listings, pitches, updatePitchStatus, addListing, addConciergeListing, bulkAddListings, addToast, updateListing, publishListing, closeListing, currentUser, inviteBroker, connects } = useDashboard();
   const firstName = currentUser?.name ? currentUser.name.split(" ")[0] : "";
   const [showWizard, setShowWizard] = useState(false); // false | 'select_mode' | 'live_editor' | 'concierge' | 'edit'
@@ -181,10 +180,10 @@ export default function OwnerMode() {
           </div>
 
           <div
-            className={`bg-gradient-to-br from-[#1A1814] to-[#0A0908] backdrop-blur-xl border rounded-xl p-8 transition-all duration-500 relative overflow-hidden group ${canUseVault ? "border-gold-accent/40 hover:border-gold-accent hover:shadow-[0_0_30px_rgba(232, 174, 60,0.15)] cursor-pointer" : "border-surface-variant cursor-not-allowed opacity-60"}`}
+            className={`bg-gradient-to-br from-[#1A1814] to-[#0A0908] backdrop-blur-xl border rounded-xl p-8 transition-all duration-500 relative overflow-hidden group ${canUseVault ? "border-gold-accent/40 hover:border-gold-accent hover:shadow-[0_0_30px_rgba(232,174,60,0.15)] cursor-pointer" : "border-surface-variant cursor-not-allowed opacity-60"}`}
             onClick={() => canUseVault && setShowWizard('vip_vault')}
           >
-            <div className={`absolute top-0 left-0 w-1.5 h-full transition-colors shadow-[0_0_15px_rgba(232, 174, 60,0.5)] ${canUseVault ? "bg-gold-accent/50 group-hover:bg-gold-accent" : "bg-surface-variant"}`}></div>
+            <div className={`absolute top-0 left-0 w-1.5 h-full transition-colors shadow-[0_0_15px_rgba(232,174,60,0.5)] ${canUseVault ? "bg-gold-accent/50 group-hover:bg-gold-accent" : "bg-surface-variant"}`}></div>
             <div className="absolute -top-24 -right-24 w-48 h-48 bg-gold-accent/10 rounded-full blur-3xl group-hover:bg-gold-accent/20 transition-all duration-700"></div>
 
             {/* Lock badge — visible when locked */}
@@ -203,7 +202,7 @@ export default function OwnerMode() {
             </p>
 
             {canUseVault ? (
-              <span className="text-[#0A0908] font-label-caps font-bold text-[10px] tracking-widest bg-gold-accent px-3 py-1.5 rounded-full shadow-[0_0_10px_rgba(232, 174, 60,0.3)]">QUEST-IT ASSISTED</span>
+              <span className="text-background font-label-caps font-bold text-[10px] tracking-widest bg-gold-accent px-3 py-1.5 rounded-full shadow-[0_0_10px_rgba(232,174,60,0.3)]">QUEST-IT ASSISTED</span>
             ) : (
               <Link href="/pricing/owner" className="inline-block text-gold-accent font-label-caps text-[10px] tracking-widest border border-gold-accent/40 bg-gold-accent/10 px-3 py-1.5 rounded-full hover:bg-gold-accent/20 transition-colors" onClick={e => e.stopPropagation()}>
                 UPGRADE TO CLUSTER →
@@ -234,128 +233,10 @@ export default function OwnerMode() {
             onClick={() => setShowWizard('deep_intel')}
           >
              <div className="absolute top-0 left-0 w-1.5 h-full bg-gold-accent/40 group-hover:bg-gold-accent transition-colors"></div>
-             <h3 className="font-working-title text-2xl text-gold-accent mb-3 group-hover:text-[#F7C64E] transition-colors">Deep Intelligence Vault</h3>
+             <h3 className="font-working-title text-2xl text-gold-accent mb-3 group-hover:text-gold-bright transition-colors">Deep Intelligence Vault</h3>
              <p className="text-sm text-text-secondary mb-6 leading-relaxed">Unlock the hidden matrix. Manually override structural specs, input financial intelligence, and map advanced logistics.</p>
              <span className="text-gold-accent font-label-caps text-[10px] tracking-widest border border-gold-accent/30 bg-gold-accent/10 px-3 py-1.5 rounded-full shadow-[0_0_10px_rgba(232,174,60,0.2)]">PRO MODE</span>
           </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (showWizard === 'bulk') {
-    return (
-      <div className="max-w-[600px] mx-auto py-lg animate-[fadeIn_0.3s_ease]">
-        <button onClick={() => setShowWizard('select_mode')} className="text-text-secondary hover:text-gold-accent mb-8 font-working-title">← Back</button>
-        <h1 className="font-display-md text-4xl text-text-primary mb-2">Global Portfolio Importer</h1>
-        <p className="text-text-secondary mb-8">Drop your CSV or Excel file here. The Council AI will parse the structure and prepare your property drafts automatically.</p>
-        
-        <div className="bg-[#121110] border-2 border-dashed border-surface-variant rounded-lg p-12 text-center flex flex-col items-center relative transition-colors hover:border-gold-accent/50">
-          <span className="text-4xl mb-4">📊</span>
-          {selectedFile ? (
-            <div className="mb-6 w-full">
-              <div className="bg-surface-alt p-4 rounded border border-surface-variant flex items-center justify-between">
-                <span className="text-on-surface font-working-title text-sm truncate">{selectedFile.name}</span>
-                <button onClick={() => setSelectedFile(null)} className="text-xs font-bold text-error hover:underline">Remove</button>
-              </div>
-            </div>
-          ) : (
-            <div className="mb-6 w-full">
-              <p className="text-text-secondary mb-4">Drag and drop your spreadsheet (.csv)</p>
-              <input 
-                type="file" 
-                accept=".csv" 
-                className="hidden" 
-                id="csv-upload" 
-                onChange={(e) => setSelectedFile(e.target.files[0])} 
-              />
-              <label htmlFor="csv-upload" className="cursor-pointer border border-gold-accent text-gold-accent font-working-title px-6 py-2 rounded hover:bg-gold-accent/10 transition-colors inline-block">
-                Select CSV
-              </label>
-            </div>
-          )}
-
-          <button 
-            className="w-full bg-gold-accent text-background font-working-title font-bold px-6 py-3 rounded hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity mt-4 flex items-center justify-center gap-2"
-            disabled={!selectedFile || isAssimilating}
-            onClick={async () => {
-              if (selectedFile) {
-                setIsAssimilating(true);
-                addToast("Reading CSV headers...", "📊");
-                
-                Papa.parse(selectedFile, {
-                  header: true,
-                  skipEmptyLines: true,
-                  complete: async (results) => {
-                    const headers = results.meta.fields;
-                    const sampleData = results.data.slice(0, 3);
-                    
-                    try {
-                      addToast("Generating blueprint mapping via AI...", "🤖");
-                      const bpRes = await fetch('/api/ai/blueprint', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ headers, sampleData })
-                      });
-                      
-                      if (!bpRes.ok) throw new Error("AI Mapping failed");
-                      
-                      const blueprint = await bpRes.json();
-                      console.log("Blueprint generated:", blueprint);
-                      
-                      addToast(`Mapped ${Object.keys(blueprint).length} columns. Applying locally...`, "⚙️");
-                      
-                      // Map local rows using blueprint
-                      const cleanedProperties = results.data.map(row => {
-                        const prop = { details: {} };
-                        for (const rawKey in row) {
-                          const targetKey = blueprint[rawKey];
-                          if (targetKey && targetKey !== 'details') {
-                            prop[targetKey] = row[rawKey];
-                          } else {
-                            prop.details[rawKey] = row[rawKey];
-                          }
-                        }
-                        
-                        // Default properties needed for Supabase schema
-                        return {
-                          title: prop.title || 'Untitled',
-                          price: prop.price ? parseFloat(prop.price.toString().replace(/[^0-9.]/g, '')) : null,
-                          location: prop.location || 'Unknown Location',
-                          type: prop.type || 'Other',
-                          description: prop.description || null,
-                          media_link: prop.media_link || null,
-                          space_category: prop.space_category || prop.type || 'Other',
-                          owner_id: currentUser?.id || null,
-                          pipeline_status: 'pending',
-                          completeness_score: 50,
-                          details: prop.details
-                        };
-                      });
-                      
-                      const success = await bulkAddListings(sanitizeObject(cleanedProperties));
-                      
-                    } catch (err) {
-                      console.error("Blueprint error:", err);
-                      addToast("Failed to assimilate properties.", "❌");
-                    }
-                    
-                    setIsAssimilating(false);
-                    setSelectedFile(null);
-                    setShowWizard(false);
-                  }
-                });
-              }
-            }}
-          >
-            {isAssimilating ? (
-              <>
-                <span className="animate-spin">⚙️</span> Assimilating...
-              </>
-            ) : (
-              "Assimilate via Council AI"
-            )}
-          </button>
         </div>
       </div>
     );
@@ -464,7 +345,7 @@ export default function OwnerMode() {
       return (
         <div className="max-w-[600px] mx-auto py-lg animate-[fadeIn_0.4s_ease] flex flex-col items-center text-center gap-6">
           <div className="w-20 h-20 bg-surface-alt border border-surface-variant rounded-full flex items-center justify-center">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#6E531A" strokeWidth="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--accent-muted)" strokeWidth="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
           </div>
           <div>
             <p className="font-label-caps text-[11px] tracking-widest text-gold-accent/60 uppercase mb-2">Cluster tier required</p>
@@ -473,7 +354,7 @@ export default function OwnerMode() {
           </div>
           <div className="flex gap-3">
             <button onClick={() => setShowWizard('select_mode')} className="border border-surface-variant text-text-secondary font-working-title px-6 py-3 rounded hover:border-gold-accent/40 hover:text-on-surface transition-colors text-sm">← Back</button>
-            <Link href="/pricing/owner" className="bg-gold-accent text-[#0A0908] font-working-title font-bold px-6 py-3 rounded hover:bg-[#F7C64E] transition-colors text-sm tracking-wide">Upgrade to Cluster</Link>
+            <Link href="/pricing/owner" className="bg-gold-accent text-background font-working-title font-bold px-6 py-3 rounded hover:bg-gold-bright transition-colors text-sm tracking-wide">Upgrade to Cluster</Link>
           </div>
         </div>
       );
@@ -547,13 +428,13 @@ export default function OwnerMode() {
         <div className="flex gap-0 mb-8 rounded-lg overflow-hidden border border-surface-variant">
           <button
             onClick={() => { setVaultTab("url"); setVaultBuildOption(null); }}
-            className={`flex-1 py-3 font-label-caps text-[11px] tracking-widest uppercase transition-all duration-200 ${vaultTab === "url" ? "bg-gold-accent text-[#0A0908] font-bold" : "bg-surface-alt text-text-secondary hover:text-on-surface"}`}
+            className={`flex-1 py-3 font-label-caps text-[11px] tracking-widest uppercase transition-all duration-200 ${vaultTab === "url" ? "bg-gold-accent text-background font-bold" : "bg-surface-alt text-text-secondary hover:text-on-surface"}`}
           >
             I already have a tour URL
           </button>
           <button
             onClick={() => { setVaultTab("build"); setVaultBuildOption(null); }}
-            className={`flex-1 py-3 font-label-caps text-[11px] tracking-widest uppercase transition-all duration-200 ${vaultTab === "build" ? "bg-gold-accent text-[#0A0908] font-bold" : "bg-surface-alt text-text-secondary hover:text-on-surface"}`}
+            className={`flex-1 py-3 font-label-caps text-[11px] tracking-widest uppercase transition-all duration-200 ${vaultTab === "build" ? "bg-gold-accent text-background font-bold" : "bg-surface-alt text-text-secondary hover:text-on-surface"}`}
           >
             Build one for me
           </button>
@@ -583,7 +464,7 @@ export default function OwnerMode() {
             <button
               onClick={handleSaveUrl}
               disabled={!isUrlValid}
-              className="w-full bg-gold-accent text-[#0A0908] font-working-title font-bold px-6 py-4 rounded hover:bg-[#F7C64E] disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-300 text-base tracking-wide shadow-[0_0_20px_rgba(232, 174, 60,0.2)] hover:shadow-[0_0_30px_rgba(232, 174, 60,0.4)]"
+              className="w-full bg-gold-accent text-background font-working-title font-bold px-6 py-4 rounded hover:bg-gold-bright disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-300 text-base tracking-wide shadow-[0_0_20px_rgba(232,174,60,0.2)] hover:shadow-[0_0_30px_rgba(232,174,60,0.4)]"
             >
               Link to My Listing
             </button>
@@ -598,12 +479,12 @@ export default function OwnerMode() {
             {/* Option 1 — I'll record it myself */}
             <div
               onClick={() => setVaultBuildOption("self")}
-              className="bg-gradient-to-br from-[#1A1814] to-[#0A0908] border border-surface-variant hover:border-gold-accent/60 rounded-xl p-7 cursor-pointer group transition-all duration-300 hover:shadow-[0_0_20px_rgba(232, 174, 60,0.08)] relative overflow-hidden"
+              className="bg-gradient-to-br from-[#1A1814] to-[#0A0908] border border-surface-variant hover:border-gold-accent/60 rounded-xl p-7 cursor-pointer group transition-all duration-300 hover:shadow-[0_0_20px_rgba(232,174,60,0.08)] relative overflow-hidden"
             >
               <div className="absolute top-0 left-0 w-1 h-full bg-surface-variant group-hover:bg-gold-accent/50 transition-colors" />
               <div className="flex items-start gap-5">
                 <div className="w-12 h-12 rounded-full bg-gold-accent/10 flex items-center justify-center shrink-0 mt-0.5">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#E8AE3C" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M15 10l4.553-2.277A1 1 0 0 1 21 8.618v6.764a1 1 0 0 1-1.447.894L15 14"/><rect x="3" y="7" width="12" height="10" rx="2"/>
                   </svg>
                 </div>
@@ -617,12 +498,12 @@ export default function OwnerMode() {
             {/* Option 2 — ScoutIt Team records it */}
             <div
               onClick={() => setVaultBuildOption("team")}
-              className="bg-gradient-to-br from-[#1A1814] to-[#0A0908] border border-surface-variant hover:border-gold-accent/60 rounded-xl p-7 cursor-pointer group transition-all duration-300 hover:shadow-[0_0_20px_rgba(232, 174, 60,0.08)] relative overflow-hidden"
+              className="bg-gradient-to-br from-[#1A1814] to-[#0A0908] border border-surface-variant hover:border-gold-accent/60 rounded-xl p-7 cursor-pointer group transition-all duration-300 hover:shadow-[0_0_20px_rgba(232,174,60,0.08)] relative overflow-hidden"
             >
               <div className="absolute top-0 left-0 w-1 h-full bg-surface-variant group-hover:bg-gold-accent/50 transition-colors" />
               <div className="flex items-start gap-5">
                 <div className="w-12 h-12 rounded-full bg-gold-accent/10 flex items-center justify-center shrink-0 mt-0.5">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#E8AE3C" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="12" cy="8" r="4"/><path d="M6 20v-2a6 6 0 0 1 12 0v2"/>
                   </svg>
                 </div>
@@ -654,14 +535,14 @@ export default function OwnerMode() {
               </div>
             ) : (
               <div className="w-full flex flex-col items-center gap-4">
-                <div className="w-16 h-16 bg-gold-accent/10 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(232, 174, 60,0.15)]">
-                  <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#E8AE3C" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <div className="w-16 h-16 bg-gold-accent/10 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(232,174,60,0.15)]">
+                  <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
                   </svg>
                 </div>
                 <p className="text-text-secondary font-working-title text-sm uppercase tracking-widest">Drag and drop your video here</p>
                 <input type="file" accept="video/mp4,video/quicktime,video/*" className="hidden" id="video-upload" onChange={e => setSelectedFile(e.target.files[0])} />
-                <label htmlFor="video-upload" className="cursor-pointer border-2 border-gold-accent text-gold-accent font-working-title font-bold px-8 py-3 rounded hover:bg-gold-accent hover:text-[#0A0908] transition-all duration-300 uppercase tracking-wider">
+                <label htmlFor="video-upload" className="cursor-pointer border-2 border-gold-accent text-gold-accent font-working-title font-bold px-8 py-3 rounded hover:bg-gold-accent hover:text-background transition-all duration-300 uppercase tracking-wider">
                   Select Video File
                 </label>
                 <p className="text-[10px] text-text-secondary tracking-widest uppercase">Supported: .mp4, .mov — any file size</p>
@@ -671,7 +552,7 @@ export default function OwnerMode() {
             <button
               onClick={handleSubmitVideo}
               disabled={!selectedFile}
-              className="w-full bg-gold-accent text-[#0A0908] font-working-title font-bold px-6 py-4 rounded hover:bg-[#F7C64E] disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-300 text-base tracking-wide shadow-[0_0_20px_rgba(232, 174, 60,0.2)] hover:shadow-[0_0_30px_rgba(232, 174, 60,0.4)]"
+              className="w-full bg-gold-accent text-background font-working-title font-bold px-6 py-4 rounded hover:bg-gold-bright disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-300 text-base tracking-wide shadow-[0_0_20px_rgba(232,174,60,0.2)] hover:shadow-[0_0_30px_rgba(232,174,60,0.4)]"
             >
               Submit for Processing
             </button>
@@ -689,25 +570,25 @@ export default function OwnerMode() {
             <div className="flex flex-col gap-3 text-sm text-text-secondary">
               <div className="flex items-center gap-3">
                 <div className="w-5 h-5 rounded-full bg-gold-accent/20 border border-gold-accent/40 flex items-center justify-center shrink-0">
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#E8AE3C" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                 </div>
                 <span>Professional recording equipment</span>
               </div>
               <div className="flex items-center gap-3">
                 <div className="w-5 h-5 rounded-full bg-gold-accent/20 border border-gold-accent/40 flex items-center justify-center shrink-0">
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#E8AE3C" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                 </div>
                 <span>Full 3D map + 360° tour built by our team</span>
               </div>
               <div className="flex items-center gap-3">
                 <div className="w-5 h-5 rounded-full bg-gold-accent/20 border border-gold-accent/40 flex items-center justify-center shrink-0">
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#E8AE3C" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                 </div>
                 <span>We&apos;ll contact you within 24 hours to schedule</span>
               </div>
               <div className="flex items-center gap-3">
                 <div className="w-5 h-5 rounded-full bg-gold-accent/20 border border-gold-accent/40 flex items-center justify-center shrink-0">
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#E8AE3C" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                 </div>
                 <span>Typical turnaround: 3–5 days from recording date</span>
               </div>
@@ -720,7 +601,7 @@ export default function OwnerMode() {
 
             <button
               onClick={handleJoinQueue}
-              className="w-full bg-gold-accent text-[#0A0908] font-working-title font-bold px-6 py-4 rounded hover:bg-[#F7C64E] transition-all duration-300 text-base tracking-wide shadow-[0_0_20px_rgba(232, 174, 60,0.2)] hover:shadow-[0_0_30px_rgba(232, 174, 60,0.4)]"
+              className="w-full bg-gold-accent text-background font-working-title font-bold px-6 py-4 rounded hover:bg-gold-bright transition-all duration-300 text-base tracking-wide shadow-[0_0_20px_rgba(232,174,60,0.2)] hover:shadow-[0_0_30px_rgba(232,174,60,0.4)]"
             >
               Join the Queue
             </button>
@@ -741,7 +622,7 @@ export default function OwnerMode() {
         <div className="bg-[#0a0a0a] rounded-lg border border-surface-variant px-4 py-16 md:p-lg flex flex-col gap-6 relative overflow-hidden items-center justify-center text-center md:py-32 mt-8 mx-4 md:mx-0">
           <h3 className="font-display-md text-2xl md:text-3xl text-on-surface px-2">Create your first Property File</h3>
           <p className="text-text-secondary max-w-md text-sm md:text-base px-2">Our wizard walks you through building a polished, trustworthy listing in under 10 minutes.</p>
-          <button className="bg-gold-accent text-background font-working-title px-6 py-3 md:px-8 md:py-4 rounded hover:bg-surface-tint transition-colors text-base md:text-lg font-bold uppercase tracking-widest shadow-[0_0_20px_rgba(212,175,55,0.2)] mt-2" onClick={() => setShowWizard('select_mode')}>
+          <button className="bg-gold-accent text-background font-working-title px-6 py-3 md:px-8 md:py-4 rounded hover:bg-surface-tint transition-colors text-base md:text-lg font-bold uppercase tracking-widest shadow-[0_0_20px_rgba(232,174,60,0.2)] mt-2" onClick={() => setShowWizard('select_mode')}>
             Start My First Listing
           </button>
         </div>
@@ -811,6 +692,12 @@ export default function OwnerMode() {
             const listPitches = pitches.filter(p => p.isCurrentUserOwner && p.listingId === listing.id);
             const pendingPitches = listPitches.filter(p => p.status === 'pending');
             const isSelected = selectedIds.includes(listing.id);
+            // Real completeness, never a flattering default: use the pipeline's
+            // signal when present, otherwise the same field-completeness engine
+            // the dossier's Listing Health card runs.
+            const completeness = listing.signals?.completeness
+              ? parseInt(listing.signals.completeness, 10)
+              : computeListingStrength(listing).score;
             return (
               <div
                 key={listing.id}
@@ -833,14 +720,14 @@ export default function OwnerMode() {
                     <p className="text-xs text-text-secondary">{listing.location || 'Location missing'}</p>
                   </div>
                   {!selectMode && (
-                    <div className="relative w-10 h-10 shrink-0" title={`${listing.signals?.completeness || '100%'} complete`}>
+                    <div className="relative w-10 h-10 shrink-0" title={`${completeness}% complete`}>
                       <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
                         <path className="text-surface-variant" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3"></path>
-                        <path className="text-gold-accent" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeDasharray={`${listing.signals?.completeness?.replace('%','') || 100}, 100`} strokeWidth="3"></path>
+                        <path className="text-gold-accent" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeDasharray={`${completeness}, 100`} strokeWidth="3"></path>
                       </svg>
                       {/* Inner % label so the ring reads as a completeness score, not a loading spinner */}
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="font-data-tabular font-bold text-[8px] text-text-primary leading-none">{listing.signals?.completeness || '100%'}</span>
+                        <span className="font-data-tabular font-bold text-[8px] text-text-primary leading-none">{completeness}%</span>
                       </div>
                     </div>
                   )}
@@ -865,7 +752,9 @@ export default function OwnerMode() {
                     </div>
                     <div>
                       <span className="block font-label-caps text-[9px] tracking-widest text-text-muted uppercase mb-1">Profile Views</span>
-                      <span className="font-data-tabular text-lg text-text-primary">New</span>
+                      {/* Honest blank — view tracking isn't instrumented yet,
+                          same policy as the dossier's Engagement Analytics */}
+                      <span className="font-data-tabular text-lg text-text-muted" title="View tracking arrives once page instrumentation ships">—</span>
                     </div>
                   </div>
                 )}
@@ -965,15 +854,22 @@ export default function OwnerMode() {
                </div>
             ) : (
                <div className="flex items-center gap-4 mb-6">
+                 {(() => {
+                   const healthScore = activeListing.signals?.completeness
+                     ? parseInt(activeListing.signals.completeness, 10)
+                     : computeListingStrength(activeListing).score;
+                   return (
                  <div className="relative w-16 h-16 shrink-0">
                    <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
                      <path className="text-surface-variant" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="4"></path>
-                     <path className="text-gold-accent" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeDasharray={`${activeListing.signals?.completeness?.replace('%','') || 100}, 100`} strokeWidth="4"></path>
+                     <path className="text-gold-accent" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeDasharray={`${healthScore}, 100`} strokeWidth="4"></path>
                    </svg>
                    <div className="absolute inset-0 flex items-center justify-center">
-                     <span className="font-data-tabular font-bold text-sm text-text-primary">{activeListing.signals?.completeness || '100%'}</span>
+                     <span className="font-data-tabular font-bold text-sm text-text-primary">{healthScore}%</span>
                    </div>
                  </div>
+                   );
+                 })()}
                  <p className="text-xs text-text-secondary leading-relaxed">
                    A completeness score of 85%+ guarantees Priority Ranking in Broker feeds.
                  </p>

@@ -26,7 +26,7 @@ const renderTextWithLinks = (text) => {
           href={safeUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-gold-accent underline hover:text-[#F7C64E] break-all"
+          className="text-gold-accent underline hover:text-gold-bright break-all"
         >
           {part}
         </a>
@@ -331,7 +331,7 @@ export default function ChatBox({ deal, onCloseDeal, onOfferHandshake, onAcceptH
                   setShowConfirmHandshake(false);
                   onOfferHandshake();
                 }}
-                className="px-4 py-2 bg-gold-accent text-black font-bold rounded hover:bg-[#F7C64E]"
+                className="px-4 py-2 bg-gold-accent text-black font-bold rounded hover:bg-gold-bright"
               >
                 Offer Handshake
               </button>
@@ -382,7 +382,7 @@ export default function ChatBox({ deal, onCloseDeal, onOfferHandshake, onAcceptH
 
             <button
               onClick={() => setShowBookingModal(true)}
-              className="bg-gold-accent text-background px-3 py-1.5 rounded text-xs font-mono uppercase tracking-widest hover:bg-[#F7C64E] transition-colors shadow-[0_0_10px_rgba(232,174,60,0.2)]"
+              className="bg-gold-accent text-background px-3 py-1.5 rounded text-xs font-mono uppercase tracking-widest hover:bg-gold-bright transition-colors shadow-[0_0_10px_rgba(232,174,60,0.2)]"
             >
               Request Live Viewing
             </button>
@@ -564,7 +564,7 @@ export default function ChatBox({ deal, onCloseDeal, onOfferHandshake, onAcceptH
           <button
             type="submit"
             disabled={['closed', 'accepted', 'reported'].includes(deal.status) || isSubmitting || (!input.trim() && !isUploading)}
-            className="bg-gold-accent text-background px-6 py-2.5 rounded-full text-sm font-working-title disabled:opacity-50 hover:bg-[#F7C64E] transition-colors shadow-[0_4px_10px_rgba(232,174,60,0.1)]"
+            className="bg-gold-accent text-background px-6 py-2.5 rounded-full text-sm font-working-title disabled:opacity-50 hover:bg-gold-bright transition-colors shadow-[0_4px_10px_rgba(232,174,60,0.1)]"
           >
             {isSubmitting ? "..." : "Send"}
           </button>

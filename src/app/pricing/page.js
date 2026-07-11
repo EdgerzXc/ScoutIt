@@ -81,7 +81,7 @@ export default function PricingHubPage() {
           {PERSONAS.map((persona) => {
             const Icon = persona.icon;
             return (
-              <Link key={persona.id} href={persona.href} className="group relative block rounded-2xl p-[1px] overflow-hidden bg-surface-variant hover:bg-gradient-to-br hover:from-surface-variant hover:to-gold-accent/30 transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_10px_40px_rgba(232, 174, 60,0.1)]">
+              <Link key={persona.id} href={persona.href} className="group relative block rounded-2xl p-[1px] overflow-hidden bg-surface-variant hover:bg-gradient-to-br hover:from-surface-variant hover:to-gold-accent/30 transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_10px_40px_rgba(232,174,60,0.1)]">
                 <div className="absolute inset-0 bg-surface-alt/80 backdrop-blur-xl group-hover:bg-[#0A0908]/90 transition-colors duration-500 z-0"></div>
                 <div className="relative z-10 p-8 flex items-start gap-6 h-full">
                   <div className={`p-4 rounded-xl ${persona.bgAccent} transition-transform duration-500 group-hover:scale-110 flex-shrink-0`}>
@@ -105,7 +105,7 @@ export default function PricingHubPage() {
           })}
 
           {/* Bundle card — spans full width */}
-          <Link href={BUNDLE_CARD.href} className="group relative block rounded-2xl p-[1px] overflow-hidden md:col-span-2 hover:-translate-y-1 transition-all duration-500 hover:shadow-[0_10px_40px_rgba(232, 174, 60,0.15)]" style={{background: 'linear-gradient(135deg, rgba(232, 174, 60,0.35), rgba(232, 174, 60,0.12), rgba(122,92,0,0.25))'}}>
+          <Link href={BUNDLE_CARD.href} className="group relative block rounded-2xl p-[1px] overflow-hidden md:col-span-2 hover:-translate-y-1 transition-all duration-500 hover:shadow-[0_10px_40px_rgba(232,174,60,0.15)]" style={{background: 'linear-gradient(135deg, rgba(232, 174, 60,0.35), rgba(232, 174, 60,0.12), rgba(122,92,0,0.25))'}}>
             <div className="absolute inset-0 bg-[#0A0908]/90 backdrop-blur-xl group-hover:bg-[#0A0908]/95 transition-colors duration-500 z-0 rounded-2xl"></div>
             <div className="relative z-10 p-8 flex items-center gap-6">
               <div className="p-4 rounded-xl bg-gradient-to-br from-gold-accent/20 to-gold-accent/5 transition-transform duration-500 group-hover:scale-110 flex-shrink-0">

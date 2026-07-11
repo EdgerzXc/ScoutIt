@@ -979,7 +979,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
             <p className="hero-hook">{d.hook}</p>
             {isOwner && (
               <div style={{ marginTop: '24px' }}>
-                <Link href={`/dashboard?edit=${d.id}`} className="font-working-title text-sm tracking-widest text-[#0e0e0e] bg-[#E8AE3C] px-6 py-3 rounded hover:bg-[#e6a600] transition-colors uppercase font-bold inline-block border border-[#E8AE3C] shadow-[0_0_15px_rgba(232, 174, 60,0.4)] cursor-pointer">
+                <Link href={`/dashboard?edit=${d.id}`} className="font-working-title text-sm tracking-widest text-[#0e0e0e] bg-gold-accent px-6 py-3 rounded hover:bg-[#e6a600] transition-colors uppercase font-bold inline-block border border-gold-accent shadow-[0_0_15px_rgba(232,174,60,0.4)] cursor-pointer">
                   Edit Property Dossier
                 </Link>
               </div>
@@ -1051,7 +1051,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
           <p className="mobile-hero-hook">{d.hook}</p>
           {isOwner && (
             <div style={{ marginTop: '20px' }}>
-              <Link href={`/dashboard?edit=${d.id}`} className="font-working-title text-xs tracking-widest text-[#0e0e0e] bg-[#E8AE3C] px-5 py-3 rounded hover:bg-[#e6a600] transition-colors uppercase font-bold inline-block border border-[#E8AE3C] w-full text-center">
+              <Link href={`/dashboard?edit=${d.id}`} className="font-working-title text-xs tracking-widest text-[#0e0e0e] bg-gold-accent px-5 py-3 rounded hover:bg-[#e6a600] transition-colors uppercase font-bold inline-block border border-gold-accent w-full text-center">
                 Edit Property Dossier
               </Link>
             </div>

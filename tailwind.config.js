@@ -33,6 +33,7 @@ module.exports = {
         "on-tertiary-container": "#334063",
         "tertiary-fixed": "#dae2ff",
         "gold-accent": "#E8AE3C",
+        "gold-bright": "#F7C64E",
         "inverse-primary": "#6E531A",
         "surface-container-lowest": "#0e0e0e",
         "inverse-on-surface": "#313030",

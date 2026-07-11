@@ -38,7 +38,7 @@
   overflow: visible;
   /* soft warm glow via GPU drop-shadow (cheap, one pass) */
   filter: drop-shadow(0 0 6px rgba(255, 215, 0, 0.55))
-          drop-shadow(0 0 16px rgba(212, 175, 55, 0.35));
+          drop-shadow(0 0 16px rgba(232,174,60, 0.35));
 }
 
 /* faint full route (where the light will go) */

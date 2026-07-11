@@ -10,12 +10,13 @@ import VaultOfHonor from "./VaultOfHonor";
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
-const SAVED_LISTINGS = []; // Removed, now dynamically loaded from ledger
-
 export default function BuyerMode() {
   const [showMap, setShowMap] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [radius, setRadius] = useState("any");
+  // Area watch — device-local (same pattern as the Ledger), so the toggle is
+  // real state instead of a fire-and-forget toast that pretends to subscribe.
+  const [areaWatch, setAreaWatch] = useState(false);
   const { listings, savedIds, toggleSave, addToast, searchByRadius, MAPBOX_TOKEN, DEFAULT_MAP_CENTER } = useDashboard();
   const searchRef = useRef(null);
   const mapContainerRef = useRef(null);
@@ -67,7 +68,7 @@ export default function BuyerMode() {
         if (coords) {
           // Marker element
           const el = document.createElement('div');
-          el.className = 'w-8 h-8 rounded-full bg-gold-accent flex items-center justify-center text-sm shadow-[0_0_15px_rgba(212,175,55,0.6)] cursor-pointer hover:scale-110 transition-transform text-background font-bold border-2 border-[#121212] z-10';
+          el.className = 'w-8 h-8 rounded-full bg-gold-accent flex items-center justify-center text-sm shadow-[0_0_15px_rgba(232,174,60,0.6)] cursor-pointer hover:scale-110 transition-transform text-background font-bold border-2 border-[#121212] z-10';
           el.innerHTML = listing.hasMedia ? '📸' : '🏢';
 
           // Secure Popup DOM Construction to prevent XSS
@@ -128,6 +129,27 @@ export default function BuyerMode() {
     } else {
       addToast(`Radar removed. Showing all.`, "🌍");
     }
+  };
+
+  useEffect(() => {
+    try {
+      setAreaWatch(localStorage.getItem("scoutit_area_watch") === "metro-manila");
+    } catch { /* localStorage unavailable */ }
+  }, []);
+
+  const toggleAreaWatch = () => {
+    const next = !areaWatch;
+    setAreaWatch(next);
+    try {
+      if (next) localStorage.setItem("scoutit_area_watch", "metro-manila");
+      else localStorage.removeItem("scoutit_area_watch");
+    } catch { /* localStorage unavailable */ }
+    addToast(
+      next
+        ? "Watching Metro Manila — new drops surface at the top of your feed."
+        : "Stopped watching Metro Manila.",
+      next ? "📡" : "🌍"
+    );
   };
 
   // Mobile bottom-bar primary action
@@ -266,7 +288,7 @@ export default function BuyerMode() {
       </div>
 
       {showMap ? (
-        <div className="w-full h-[600px] bg-surface border border-surface-variant rounded-lg overflow-hidden relative shadow-[0_0_30px_rgba(212,175,55,0.05)]">
+        <div className="w-full h-[600px] bg-surface border border-surface-variant rounded-lg overflow-hidden relative shadow-[0_0_30px_rgba(232,174,60,0.05)]">
           <div ref={mapContainerRef} className="absolute inset-0" />
           
           <div className="absolute bottom-6 left-6 right-6 flex justify-between items-end pointer-events-none">
@@ -290,7 +312,7 @@ export default function BuyerMode() {
           <div className="flex flex-col gap-4">
             <h2 className="font-headline-editorial text-2xl text-on-surface flex items-center justify-between border-b border-surface-variant pb-2">
               Saved Properties
-              <button className="text-[10px] font-label-caps tracking-widest uppercase text-gold-accent hover:underline py-2.5 px-1 -my-1">Open Full Archive</button>
+              <Link href="/wishlist" className="text-[10px] font-label-caps tracking-widest uppercase text-gold-accent hover:underline py-2.5 px-1 -my-1">Open Full Archive</Link>
             </h2>
             <p className="text-xs text-text-secondary mb-2">Tracked assets and saved market briefs.</p>
             <div className="flex gap-4 overflow-x-auto pb-4 snap-x hide-scrollbar">
@@ -313,11 +335,12 @@ export default function BuyerMode() {
             <h2 className="font-headline-editorial text-2xl text-on-surface flex items-center justify-between border-b border-surface-variant pb-2">
               New in Metro Manila
               <div className="flex items-center gap-4">
-                <button 
-                  className="font-label-caps tracking-widest uppercase text-[10px] text-background bg-gold-accent px-4 py-2 rounded shadow-[0_0_10px_rgba(212,175,55,0.3)] hover:opacity-90 hover:scale-105 transition-all flex items-center gap-1.5"
-                  onClick={() => addToast("Alert set for Metro Manila. We'll notify you when new listings drop.", "🔔")}
+                <button
+                  className={`font-label-caps tracking-widest uppercase text-[10px] px-4 py-2 rounded transition-all flex items-center gap-1.5 ${areaWatch ? 'text-gold-accent bg-gold-accent/10 border border-gold-accent/40' : 'text-background bg-gold-accent shadow-[0_0_10px_rgba(232,174,60,0.3)] hover:opacity-90 hover:scale-105'}`}
+                  onClick={toggleAreaWatch}
+                  aria-pressed={areaWatch}
                 >
-                  + Set Alert
+                  {areaWatch ? '✓ Watching Area' : '+ Watch Area'}
                 </button>
                 <button
                   className="text-[10px] font-label-caps tracking-widest uppercase text-gold-accent hover:underline py-2.5 px-1 -my-1"
@@ -364,17 +387,19 @@ export default function BuyerMode() {
           <div className="flex flex-col gap-4 mt-8">
             <h2 className="font-headline-editorial text-2xl text-on-surface flex items-center justify-between">
               Market Intelligence
-              <button className="text-xs font-working-title text-gold-accent cursor-pointer hover:underline py-2.5 px-1 -my-1">View Archives</button>
+              <Link href="/intel" className="text-xs font-working-title text-gold-accent hover:underline py-2.5 px-1 -my-1">View Archives</Link>
             </h2>
             <div className="flex gap-6 overflow-x-auto pb-6 snap-x hide-scrollbar">
               
-              {/* Intel Brief 1 */}
-              <Link href="/intel/makati-yields" className="block shrink-0 w-[320px] md:w-[400px] snap-start">
+              {/* Intel Brief 1 — links must point at REAL briefings (the old
+                  makati-yields / nuvali-expansion / pasig-zoning slugs never
+                  existed and 404'd from the dashboard) */}
+              <Link href="/intel/bgc-condo-yields-rise" className="block shrink-0 w-[320px] md:w-[400px] snap-start">
                 <div className="card-atmosphere-gold hov-glow rounded-lg p-6 flex flex-col justify-between transition-colors cursor-pointer group h-full">
                   <div>
                     <span className="inline-block bg-gold-accent/10 text-gold-accent font-label-caps text-[10px] tracking-widest uppercase px-2 py-1 rounded mb-4">Market Intel</span>
-                    <h3 className="font-headline-editorial text-xl text-on-surface mb-2">Makati CBD Yields Drop</h3>
-                    <p className="text-sm text-text-secondary leading-relaxed line-clamp-3">Recent transactions show a 1.2% decrease in gross rental yields for premium studios in Legazpi Village over the last 30 days. Capital appreciation remains steady but cash flow is tightening.</p>
+                    <h3 className="font-headline-editorial text-xl text-on-surface mb-2">BGC Condo Yields Rise</h3>
+                    <p className="text-sm text-text-secondary leading-relaxed line-clamp-3">Premium residential spaces post 4.2% year-on-year growth. What the transaction data says about where BGC rental demand is heading — and which unit profiles are capturing it.</p>
                   </div>
                   <div className="mt-6 font-working-title text-sm text-gold-accent group-hover:underline flex items-center gap-2">
                     Read Full Brief <span>→</span>
@@ -383,26 +408,26 @@ export default function BuyerMode() {
               </Link>
 
               {/* Intel Brief 2 */}
-              <Link href="/intel/nuvali-expansion" className="block shrink-0 w-[320px] md:w-[400px] snap-start">
+              <Link href="/intel/makati-central-resurgence" className="block shrink-0 w-[320px] md:w-[400px] snap-start">
                 <div className="card-atmosphere-gold hov-glow rounded-lg p-6 flex flex-col justify-between transition-colors cursor-pointer group h-full">
                   <div>
                     <span className="inline-block bg-gold-accent/10 text-gold-accent font-label-caps text-[10px] tracking-widest uppercase px-2 py-1 rounded mb-4">Area Guide</span>
-                    <h3 className="font-headline-editorial text-xl text-on-surface mb-2">Nuvali Expansion Patterns</h3>
-                    <p className="text-sm text-text-secondary leading-relaxed line-clamp-3">A deep dive into the upcoming commercial blocks and how they affect residential pricing in Elaro and Venare. We map out the 5-year infrastructure pipeline and its impact on secondary market liquidity.</p>
+                    <h3 className="font-headline-editorial text-xl text-on-surface mb-2">Makati Central Resurgence</h3>
+                    <p className="text-sm text-text-secondary leading-relaxed line-clamp-3">Older luxury buildings across the Makati core are undergoing massive renovations. How the retrofit wave is repricing the district — and what it means if you&apos;re scouting for value.</p>
                   </div>
                   <div className="mt-6 font-working-title text-sm text-gold-accent group-hover:underline flex items-center gap-2">
                     Explore Area <span>→</span>
                   </div>
                 </div>
               </Link>
-              
+
               {/* Intel Brief 3 */}
-              <Link href="/intel/pasig-zoning" className="block shrink-0 w-[320px] md:w-[400px] snap-start">
+              <Link href="/intel/high-street-expansion" className="block shrink-0 w-[320px] md:w-[400px] snap-start">
                 <div className="card-atmosphere-gold hov-glow rounded-lg p-6 flex flex-col justify-between transition-colors cursor-pointer group h-full">
                   <div>
-                    <span className="inline-block bg-gold-accent/10 text-gold-accent font-label-caps text-[10px] tracking-widest uppercase px-2 py-1 rounded mb-4">Regulatory Alert</span>
-                    <h3 className="font-headline-editorial text-xl text-on-surface mb-2">Pasig Zoning Changes</h3>
-                    <p className="text-sm text-text-secondary leading-relaxed line-clamp-3">New LGU ordinances are shifting FAR (Floor Area Ratio) limitations near the upcoming subway stations. What this means for low-density residential asset owners looking to exit to mid-rise developers.</p>
+                    <span className="inline-block bg-gold-accent/10 text-gold-accent font-label-caps text-[10px] tracking-widest uppercase px-2 py-1 rounded mb-4">Commercial Signal</span>
+                    <h3 className="font-headline-editorial text-xl text-on-surface mb-2">High Street Expansion</h3>
+                    <p className="text-sm text-text-secondary leading-relaxed line-clamp-3">Retail spaces along the High Street corridor are fully occupied for the next 24 months. What the occupancy squeeze signals for surrounding residential and mixed-use assets.</p>
                   </div>
                   <div className="mt-6 font-working-title text-sm text-gold-accent group-hover:underline flex items-center gap-2">
                     View Impact Analysis <span>→</span>

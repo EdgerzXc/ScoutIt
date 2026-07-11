@@ -4,14 +4,100 @@
 import LayerNav from "@/components/descent/LayerNav";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getArticles } from "@/data/mockArticles";
 
 import BackgroundStratosphere from "@/components/descent/BackgroundStratosphere";
 
+const EMPTY_FEED = {
+  Residential: { spotlights: [], news: [], collections: [] },
+  Commercial: { spotlights: [], news: [], collections: [] },
+  STR: { spotlights: [], news: [], collections: [] },
+  Hospitality: { spotlights: [], news: [], collections: [] },
+  Restaurants: { spotlights: [], news: [], collections: [] },
+  Venues: { spotlights: [], news: [], collections: [] },
+};
+
+const normalizeCategory = (raw) => {
+  const c = (raw || "Residential").toLowerCase();
+  if (c === "hospitality") return "Hospitality";
+  if (c === "str") return "STR";
+  if (c === "culinary" || c === "restaurants") return "Restaurants";
+  if (c === "venues" || c === "events") return "Venues";
+  if (c === "commercial") return "Commercial";
+  return "Residential";
+};
 
 export default function StratosphereLayer() {
   const router = useRouter();
   const [activeDiscoverType, setActiveDiscoverType] = useState("Residential");
+  // The intelligence feed mirrors the homepage's: live CMS properties become
+  // spotlights, editorial articles (mock base + Airtable intel in front, same
+  // policy as /intel) become the news column. This was a hardcoded empty
+  // object after the 2026-07-05 cleanup, which left the whole layer blank.
+  const [discoveryFeed, setDiscoveryFeed] = useState(EMPTY_FEED);
+
+  useEffect(() => {
+    let alive = true;
+    async function loadFeed() {
+      try {
+        const res = await fetch("/api/cms");
+        if (!alive || !res.ok) return;
+        const data = await res.json();
+        if (!alive) return;
+
+        const feed = structuredClone(EMPTY_FEED);
+
+        const articles = [...getArticles()].map((a) => ({
+          slug: a.slug,
+          title: a.title,
+          category: normalizeCategory(a.category),
+          date: a.date || "",
+          excerpt: a.excerpt || "",
+        }));
+        (data.intel || []).forEach((item) => {
+          if (!articles.some((x) => x.slug === item.slug)) {
+            articles.unshift({
+              slug: item.slug || item.id,
+              title: item.title,
+              category: normalizeCategory(item.category),
+              date: item.date || "Just Now",
+              excerpt: item.excerpt || "",
+            });
+          }
+        });
+        articles.forEach((a) => {
+          if (feed[a.category]) feed[a.category].news.push(a);
+        });
+
+        (data.properties || []).forEach((p) => {
+          if (!p.title || !p.slug || !p.spaceCategory) return;
+          const category = normalizeCategory(p.spaceCategory);
+          if (!feed[category] || feed[category].spotlights.some((x) => x.slug === p.slug)) return;
+          const news =
+            articles.find((a) => a.category === category) || null;
+          feed[category].spotlights.push({
+            id: p.id,
+            slug: p.slug || p.id,
+            title: p.title,
+            location: p.location || p.city,
+            style: p.aestheticTag || "Modernist",
+            image: p.image || (p.photos?.[0]) || "",
+            desc: p.hook || "",
+            newsTitle: news ? news.title : null,
+            newsSlug: news ? news.slug : null,
+            newsExcerpt: news ? news.excerpt : null,
+          });
+        });
+
+        setDiscoveryFeed(feed);
+      } catch (err) {
+        if (alive) console.error("Stratosphere feed load error:", err);
+      }
+    }
+    loadFeed();
+    return () => { alive = false; };
+  }, []);
 
   const propertyTypes = ["Residential", "Commercial", "STR", "Hospitality", "Restaurants", "Venues/Events"];
 
@@ -27,18 +113,9 @@ export default function StratosphereLayer() {
     }
   };
 
-  const discoveryFeed = {
-    Residential: { spotlights: [], news: [], collections: [] },
-    Commercial: { spotlights: [], news: [], collections: [] },
-    STR: { spotlights: [], news: [], collections: [] },
-    Hospitality: { spotlights: [], news: [], collections: [] },
-    Restaurants: { spotlights: [], news: [], collections: [] },
-    Venues: { spotlights: [], news: [], collections: [] }
-  };
-
 
   return (
-    <main className="min-h-screen bg-[#0d0d0d] text-white selection:bg-[#E8AE3C] selection:text-black overflow-hidden font-sans" style={{ paddingTop: "52px" }}>
+    <main className="min-h-screen bg-[#0d0d0d] text-white selection:bg-gold-accent selection:text-black overflow-hidden font-sans" style={{ paddingTop: "52px" }}>
       <LayerNav prev={{ href: "/layer/orbit", label: "Orbit" }} next={{ href: "/layer/metropolis", label: "Metropolis" }} />
       <div className="fixed inset-0 pointer-events-none z-0">
         <BackgroundStratosphere />

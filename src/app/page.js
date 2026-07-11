@@ -287,47 +287,12 @@ export default function Home() {
         setDiscoveryFeed(updatedFeed);
         
       } catch (err) {
+        // The old fallback here rebuilt the feed from a mock base feed that the
+        // 2026-07-05 cleanup deleted — the leftover code dereferenced an empty
+        // array and crashed inside this very catch. The CMS proxy now has its
+        // own stale-on-error cache, so if we still land here, keeping the
+        // current feed state is the correct quiet failure.
         console.error("Failed to load CMS data on homepage:", err);
-        // Fallback matching for base feed
-        const baseFeed = [];
-        const updatedFeed = {
-          Residential: { ...baseFeed.Residential, spotlights: [...baseFeed.Residential.spotlights], news: [...baseFeed.Residential.news], collections: [...baseFeed.Residential.collections] },
-          Commercial: { ...baseFeed.Commercial, spotlights: [...baseFeed.Commercial.spotlights], news: [...baseFeed.Commercial.news], collections: [...baseFeed.Commercial.collections] },
-          STR: { ...baseFeed.STR, spotlights: [...baseFeed.STR.spotlights], news: [...baseFeed.STR.news], collections: [...baseFeed.STR.collections] },
-          Hospitality: { ...baseFeed.Hospitality, spotlights: [...baseFeed.Hospitality.spotlights], news: [...baseFeed.Hospitality.news], collections: [...baseFeed.Hospitality.collections] },
-          Restaurants: { ...baseFeed.Restaurants, spotlights: [...baseFeed.Restaurants.spotlights], news: [...baseFeed.Restaurants.news], collections: [...baseFeed.Restaurants.collections] },
-          Venues: { ...baseFeed.Venues, spotlights: [...baseFeed.Venues.spotlights], news: [...baseFeed.Venues.news], collections: [...baseFeed.Venues.collections] },
-        };
-        const allArticles = getArticles().map(art => {
-          let category = art.category || "Residential";
-          if (category.toLowerCase() === "hospitality") category = "Hospitality";
-          if (category.toLowerCase() === "str") category = "STR";
-          if (category.toLowerCase() === "culinary" || category.toLowerCase() === "restaurants") category = "Restaurants";
-          if (category.toLowerCase() === "venues" || category.toLowerCase() === "events") category = "Venues";
-          return { slug: art.slug, title: art.title, category, excerpt: art.excerpt };
-        });
-        const findNewsForSpotlight = (spot, category) => {
-          const matchCity = allArticles.find(art => {
-            const spotLoc = spot.location || "";
-            const artCity = art.city || "";
-            return spotLoc && artCity && (spotLoc.toLowerCase().includes(artCity.toLowerCase()) || artCity.toLowerCase().includes(spotLoc.toLowerCase()));
-          });
-          if (matchCity) return matchCity;
-          const matchCategory = allArticles.find(art => art.category === category);
-          return matchCategory || null;
-        };
-        for (const cat in updatedFeed) {
-          updatedFeed[cat].spotlights = updatedFeed[cat].spotlights.map(spot => {
-            const news = findNewsForSpotlight(spot, cat);
-            return {
-              ...spot,
-              newsTitle: news ? news.title : null,
-              newsSlug: news ? news.slug : null,
-              newsExcerpt: news ? (news.excerpt || "") : null
-            };
-          });
-        }
-        setDiscoveryFeed(updatedFeed);
       }
     }
     
@@ -691,7 +656,7 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
           {/* Card 01: Orbit (The Board) */}
           <Link href="/layer/orbit" className="text-left group relative bg-[#111111]/80 backdrop-blur-md border border-white/5 rounded-xl p-8 overflow-hidden hover:border-gold-accent/50 transition-all duration-500 hover:-translate-y-1 block">
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(232, 174, 60,0.1),transparent_50%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(232,174,60,0.1),transparent_50%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="font-mono text-[10px] text-gold-accent tracking-widest mb-4">LAYER 01 // ORBIT</div>
             <h3 className="font-display text-2xl text-white mb-2">The Board</h3>
             <p className="text-sm text-text-secondary">Top 100 Most Inquired Properties</p>
@@ -699,7 +664,7 @@ export default function Home() {
 
           {/* Card 02: Stratosphere */}
           <Link href="/layer/stratosphere" className="text-left group relative bg-[#111111]/80 backdrop-blur-md border border-white/5 rounded-xl p-8 overflow-hidden hover:border-gold-accent/50 transition-all duration-500 hover:-translate-y-1 block">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(232, 174, 60,0.1),transparent_50%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(232,174,60,0.1),transparent_50%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="font-mono text-[10px] text-gold-accent tracking-widest mb-4">LAYER 02 // STRATOSPHERE</div>
             <h3 className="font-display text-2xl text-white mb-2">Stories & Intel</h3>
             <p className="text-sm text-text-secondary">Neighborhood stories & market features</p>
@@ -707,7 +672,7 @@ export default function Home() {
 
           {/* Card 03: Metropolis */}
           <Link href="/layer/metropolis" className="text-left group relative bg-[#111111]/80 backdrop-blur-md border border-white/5 rounded-xl p-8 overflow-hidden hover:border-gold-accent/50 transition-all duration-500 hover:-translate-y-1 lg:col-span-1 block">
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(232, 174, 60,0.15),transparent_50%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(232,174,60,0.15),transparent_50%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="font-mono text-[10px] text-gold-accent tracking-widest mb-4">LAYER 03 // METROPOLIS</div>
             <h3 className="font-display text-2xl text-white mb-2">Explore Spaces</h3>
             <p className="text-sm text-text-secondary">Search the complete property directory</p>
@@ -715,7 +680,7 @@ export default function Home() {
 
           {/* Card 04: The Crust */}
           <Link href="/layer/crust" className="text-left group relative bg-[#111111]/80 backdrop-blur-md border border-white/5 rounded-xl p-8 overflow-hidden hover:border-gold-accent/50 transition-all duration-500 hover:-translate-y-1 md:col-span-1 lg:col-span-2 block">
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(232, 174, 60,0.05),transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(232,174,60,0.05),transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="font-mono text-[10px] text-gold-accent tracking-widest mb-4">LAYER 04 // THE CRUST</div>
             <h3 className="font-display text-2xl text-white mb-2">The Ecosystem</h3>
             <p className="text-sm text-text-secondary">Verified Advisors & Professionals</p>
@@ -723,7 +688,7 @@ export default function Home() {
 
           {/* Card 05: The Core */}
           <Link href="/layer/core" className="text-left group relative bg-[#111111]/80 backdrop-blur-md border border-white/5 rounded-xl p-8 overflow-hidden hover:border-gold-accent/50 transition-all duration-500 hover:-translate-y-1 md:col-span-1 lg:col-span-1 block">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(232, 174, 60,0.1),transparent_50%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(232,174,60,0.1),transparent_50%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="font-mono text-[10px] text-gold-accent tracking-widest mb-4">LAYER 05 // THE CORE</div>
             <h3 className="font-display text-2xl text-white mb-2">Your Workspace</h3>
             <p className="text-sm text-text-secondary">Private Wishlist & Dashboard</p>

@@ -19,6 +19,7 @@ function getArticleType(art) {
 }
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { getArticles } from "@/data/mockArticles";
 
 const MOCK_CATEGORIES = {
   "batasan-hills": "Residential",
@@ -44,16 +45,23 @@ export default function IntelPage() {
   const router = useRouter();
   const [filter, setFilter] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
-  const [articles, setArticles] = useState([]);
+  // Editorial mock briefings are the base layer (same set the homepage links
+  // to); live Airtable intel is merged in front once it loads. The 2026-07-05
+  // dead-code cleanup emptied this to [] which left the hub blank — and every
+  // homepage news teaser 404ing — whenever Airtable INTEL had no records.
+  const [articles, setArticles] = useState(getArticles());
   const [propertiesList, setPropertiesList] = useState([]);
   const [sidePanelArticle, setSidePanelArticle] = useState(null);
 
   useEffect(() => {
+    let alive = true;
     async function loadCMSData() {
       try {
         const res = await fetch("/api/cms");
+        if (!alive) return;
         if (!res.ok) throw new Error();
         const data = await res.json();
+        if (!alive) return;
 
         // 1. Setup properties for asset back-linking
         const airtableProperties = data.properties || [];
@@ -82,7 +90,7 @@ export default function IntelPage() {
 
         // 2. Setup intel reports
         const airtableIntel = data.intel || [];
-        const baseArticles = [...[]];
+        const baseArticles = [...getArticles()];
         airtableIntel.forEach(item => {
           if (!baseArticles.some(x => x.slug === item.slug)) {
             let category = item.category || "Residential";
@@ -103,10 +111,12 @@ export default function IntelPage() {
         });
         setArticles(baseArticles);
       } catch (err) {
-        console.error("Intel page CMS load error:", err);
+        // Navigating away aborts the fetch — only report while still mounted.
+        if (alive) console.error("Intel page CMS load error:", err);
       }
     }
     loadCMSData();
+    return () => { alive = false; };
   }, []);
 
   const categories = ["All", "Residential", "Commercial", "STR", "Hospitality", "Culinary", "Venues", "Summary"];

@@ -375,7 +375,7 @@ export default function SettingsPage() {
           />
 
           {securityMessage.text && (
-            <div className={`mt-3 p-3 rounded text-sm ${securityMessage.type === 'error' ? 'bg-error/10 border border-error/50 text-error' : 'bg-[#121212] border border-[#E8AE3C] text-[#E8AE3C]'}`}>
+            <div className={`mt-3 p-3 rounded text-sm ${securityMessage.type === 'error' ? 'bg-error/10 border border-error/50 text-error' : 'bg-[#121212] border border-gold-accent text-[#E8AE3C]'}`}>
               {securityMessage.text}
             </div>
           )}
@@ -395,7 +395,7 @@ export default function SettingsPage() {
             <h4 className="font-working-title text-md text-on-surface mb-2">Two-Factor Authentication (2FA)</h4>
             
             {mfaMessage.text && (
-              <div className={`mb-4 p-3 rounded text-sm ${mfaMessage.type === 'error' ? 'bg-error/10 border border-error/50 text-error' : 'bg-[#121212] border border-[#E8AE3C] text-[#E8AE3C]'}`}>
+              <div className={`mb-4 p-3 rounded text-sm ${mfaMessage.type === 'error' ? 'bg-error/10 border border-error/50 text-error' : 'bg-[#121212] border border-gold-accent text-[#E8AE3C]'}`}>
                 {mfaMessage.text}
               </div>
             )}

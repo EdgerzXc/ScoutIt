@@ -2,13 +2,11 @@
 
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import "../property/property.css";
 import FoundingProgramPanel from "@/components/ecosystem/FoundingProgramPanel";
-
-
-const DUMMY_PLANNERS = [];
+import { loadPublicProviders } from "@/lib/profileClient";
 
 const SPECIALTIES = [
   "Wedding & Luxury Events",
@@ -27,17 +25,45 @@ const LOCATIONS = [
 ];
 
 export default function EventPlannersPage() {
+  // Real roster: public event-planner profiles from Supabase (same pattern as
+  // /photographers and /researchers — RLS only exposes is_profile_public rows).
+  // This page previously hardcoded an empty array and never fetched anything.
+  const [planners, setPlanners] = useState(null); // null = loading
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSpecialties, setSelectedSpecialties] = useState([]);
   const [selectedLocations, setSelectedLocations] = useState([]);
   const [openFilters, setOpenFilters] = useState({ specialties: true, locations: true });
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await loadPublicProviders("event_planner");
+      if (cancelled) return;
+      if (error) {
+        console.error("Failed to load event planners", error);
+        setPlanners([]);
+        return;
+      }
+      setPlanners(data.map((p) => ({
+        name: p.display_name || "Unnamed Planner",
+        location: p.location || "",
+        specialty: p.service || "",
+        headline: p.headline || "",
+        bio: p.bio || "",
+        image: p.avatar_url || "",
+        isExample: !!p.is_example_account,
+        available: p.provider_availability !== false,
+      })));
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   const toggleFilter = (section) => setOpenFilters((p) => ({ ...p, [section]: !p[section] }));
   const toggle = (val, state, setState) => {
     setState(state.includes(val) ? state.filter((x) => x !== val) : [...state, val]);
   };
 
-  const filtered = DUMMY_PLANNERS.filter((ep) => {
+  const filtered = (planners || []).filter((ep) => {
     if (searchTerm.trim()) {
       const q = searchTerm.toLowerCase();
       if (
@@ -140,6 +166,58 @@ export default function EventPlannersPage() {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
+
+            {planners === null && (
+              <div className="roster-state" role="status" aria-live="polite">
+                <span className="roster-state-label">Scanning the roster…</span>
+              </div>
+            )}
+            {planners !== null && filtered.length === 0 && (
+              <div className="roster-state">
+                <span className="roster-state-label">
+                  {planners.length === 0
+                    ? "No event designers on the public roster yet"
+                    : "No event designers match your filters"}
+                </span>
+                <span className="roster-state-sub">
+                  {planners.length === 0
+                    ? "Founding Designer slots are open below."
+                    : "Clear a filter or broaden your search."}
+                </span>
+              </div>
+            )}
+            {filtered.length > 0 && (
+              <div className="brokers-grid" style={{ marginBottom: 32 }}>
+                {filtered.map((ep) => (
+                  <Link key={ep.name} href={`/profile/${encodeURIComponent(ep.name)}`} className="broker-card" style={{ textDecoration: "none" }}>
+                    {ep.isExample && <div className="example-badge-overlay">Example Profile</div>}
+                    <div className="broker-image-container">
+                      {ep.image ? (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img src={ep.image} alt={ep.name} className="broker-image" loading="lazy" />
+                      ) : (
+                        <div className="broker-image broker-image-fallback" aria-hidden="true">📐</div>
+                      )}
+                      <div className="image-overlay"></div>
+                    </div>
+                    <div className="broker-content">
+                      <div className="broker-location">{ep.location}</div>
+                      <h2 className="broker-name">{ep.name}</h2>
+                      <p className="broker-title">{ep.headline || "Event & Space Designer"}</p>
+                      {ep.specialty && <p className="broker-specialty">Specialty: <span>{ep.specialty}</span></p>}
+                      {ep.bio && <p className="broker-bio">{ep.bio}</p>}
+                      <div className="broker-footer">
+                        <span className={`availability-chip ${ep.available ? "is-available" : ""}`}>
+                          <span className="availability-dot" aria-hidden="true"></span>
+                          {ep.available ? "Available for events" : "Currently unavailable"}
+                        </span>
+                        <span className="btn-contact">View Profile</span>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
 
             <FoundingProgramPanel
               icon="📐"

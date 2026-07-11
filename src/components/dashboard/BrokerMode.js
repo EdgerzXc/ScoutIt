@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useMemo, useCallback } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useDashboard } from "../../context/DashboardContext";
 import Link from "next/link";
 import { Lock } from "lucide-react";
@@ -16,9 +16,19 @@ export default function BrokerMode() {
   const [pitchMessage, setPitchMessage] = useState("");
   const [pitchError, setPitchError] = useState("");
 
-  // Notification and ID Card State
-  const [showNotification, setShowNotification] = useState(true);
+  // Notification and ID Card State. The "new feature" banner dismissal is
+  // persisted — a banner that resurrects on every visit stops being news.
+  const [showNotification, setShowNotification] = useState(false);
   const [showIdCard, setShowIdCard] = useState(false);
+  useEffect(() => {
+    try {
+      setShowNotification(localStorage.getItem("scoutit_idcard_banner_seen") !== "1");
+    } catch { /* localStorage unavailable */ }
+  }, []);
+  const dismissIdCardBanner = () => {
+    setShowNotification(false);
+    try { localStorage.setItem("scoutit_idcard_banner_seen", "1"); } catch { /* ignore */ }
+  };
 
   // New Deal File Workspace State
   const [activeDealId, setActiveDealId] = useState(null);
@@ -177,7 +187,7 @@ export default function BrokerMode() {
             <div className={`px-3 py-1 rounded text-xs font-bold font-working-title tracking-wider uppercase border
               ${deal.status === 'accepted' ? 'bg-success/10 text-success border-success/30' : 
                 deal.status === 'declined' ? 'bg-error/10 text-error border-error/30' : 
-                deal.status === 'invited' ? 'bg-[#E8AE3C]/10 text-accent border-[#E8AE3C]/30' :
+                deal.status === 'invited' ? 'bg-gold-accent/10 text-gold-accent border-gold-accent/30' :
                 'bg-gold-accent/10 text-gold-accent border-gold-accent/30'}`}
             >
               Status: {deal.status === 'invited' ? 'Incoming Handshake' : deal.status}
@@ -205,7 +215,7 @@ export default function BrokerMode() {
                   Decline
                 </button>
                 <button 
-                  className="bg-[#E8AE3C] text-background hover:opacity-90 font-working-title font-bold px-4 py-2 rounded transition-colors text-sm"
+                  className="bg-gold-accent text-background hover:opacity-90 font-working-title font-bold px-4 py-2 rounded transition-colors text-sm"
                   onClick={() => {
                     updatePitchStatus(deal.id, 'accepted');
                   }}
@@ -243,33 +253,27 @@ export default function BrokerMode() {
               
               {deal.status === 'accepted' ? (
                 <div className="flex flex-col gap-4">
+                  {/* Honest blanks only — a placeholder phone number here is a
+                      number a broker would actually dial. */}
                   <div className="p-3 bg-success/5 border border-success/20 rounded">
                     <span className="block text-[10px] tracking-widest text-success uppercase mb-2 font-label-caps">Unlocked Contact Info</span>
                     <div className="mb-2">
                       <span className="text-xs text-text-secondary block">Phone</span>
-                      <span className="font-working-title text-on-surface">{deal.ownerContact?.phone || "+63 917 555 1234"}</span>
+                      <span className={`font-working-title ${deal.ownerContact?.phone ? 'text-on-surface' : 'text-text-muted'}`}>{deal.ownerContact?.phone || "Not provided — message them in your Inbox"}</span>
                     </div>
                     <div>
                       <span className="text-xs text-text-secondary block">Email</span>
-                      <span className="font-working-title text-on-surface">{deal.ownerContact?.email || "owner@example.com"}</span>
+                      <span className={`font-working-title ${deal.ownerContact?.email ? 'text-on-surface' : 'text-text-muted'}`}>{deal.ownerContact?.email || "Not provided — message them in your Inbox"}</span>
                     </div>
                   </div>
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-text-secondary">Response Speed</span>
-                    <span className="text-on-surface font-data-tabular">Fast (&lt; 2 hrs)</span>
-                  </div>
+                  <Link href="/dashboard/inbox" className="text-sm font-working-title text-gold-accent flex items-center gap-2 hover:underline">
+                    Open conversation <span>→</span>
+                  </Link>
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center py-6 text-center">
                   <span className="text-3xl mb-3 opacity-50"><Lock strokeWidth={1.5} size="1em" /></span>
                   <p className="text-sm text-text-secondary">Owner contact details are locked. They will be revealed immediately if the owner accepts your pitch.</p>
-                  <div className="w-full mt-4 bg-surface-alt p-3 rounded text-left">
-                     <span className="block text-[10px] text-text-secondary uppercase tracking-widest mb-1">Public Metrics</span>
-                     <div className="flex justify-between text-sm">
-                       <span className="text-text-primary">Platform Tenure</span>
-                       <span className="font-data-tabular">New Owner</span>
-                     </div>
-                  </div>
                 </div>
               )}
             </div>
@@ -378,13 +382,13 @@ export default function BrokerMode() {
             </div>
           </div>
           <div className="flex items-center gap-3 shrink-0">
-            <button 
-              onClick={() => { setShowIdCard(true); setShowNotification(false); }}
+            <button
+              onClick={() => { setShowIdCard(true); dismissIdCardBanner(); }}
               className="text-xs font-bold text-background bg-gold-accent px-4 py-2 rounded hover:opacity-90 transition-opacity"
             >
               Generate ID
             </button>
-            <button onClick={() => setShowNotification(false)} aria-label="Close" className="text-text-muted hover:text-on-surface p-2">✕</button>
+            <button onClick={dismissIdCardBanner} aria-label="Close" className="text-text-muted hover:text-on-surface p-2">✕</button>
           </div>
         </div>
       )}
@@ -412,38 +416,44 @@ export default function BrokerMode() {
               <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/5 to-transparent z-10 pointer-events-none"></div>
               
               {/* Header */}
-              <div className="bg-[#E8AE3C] p-4 flex justify-between items-center relative z-20">
+              <div className="bg-gold-accent p-4 flex justify-between items-center relative z-20">
                 <span className="font-display-md text-background text-xl font-bold tracking-tighter">S<span className="font-normal">cout</span>IT</span>
                 <span className="font-mono text-[10px] text-background/80 tracking-widest font-bold">VERIFIED ADVISOR</span>
               </div>
               
-              {/* Body */}
+              {/* Body — always the signed-in broker's own data, never a sample
+                  persona. Scout Rating is earned by closures only, so until a
+                  real rating exists the card says so instead of inventing one. */}
               <div className="p-6 relative z-20">
                 <div className="flex gap-6 items-center mb-6">
-                  <div className="w-20 h-20 rounded-full border-2 border-[#E8AE3C] bg-surface-alt overflow-hidden flex items-center justify-center relative">
-                    <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&q=80')] bg-cover bg-center"></div>
+                  <div className="w-20 h-20 rounded-full border-2 border-gold-accent bg-surface-alt overflow-hidden flex items-center justify-center relative">
+                    <span className="font-headline-editorial text-3xl text-gold-accent">
+                      {(currentUser?.name || "?").split(" ").map(w => w.charAt(0)).slice(0, 2).join("").toUpperCase()}
+                    </span>
                   </div>
                   <div>
-                    <h3 className="font-headline-editorial text-2xl text-on-surface mb-1">Miguel Torres</h3>
-                    <p className="font-working-title text-text-secondary text-xs tracking-wider uppercase">Solar Partner</p>
+                    <h3 className="font-headline-editorial text-2xl text-on-surface mb-1">{currentUser?.name || "Unnamed Broker"}</h3>
+                    <p className="font-working-title text-text-secondary text-xs tracking-wider uppercase">
+                      {(currentUser?.subscription_tier || currentUser?.tier) ? `${(currentUser.subscription_tier || currentUser.tier)} Partner` : "ScoutIt Broker"}
+                    </p>
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   <div className="bg-surface-alt p-3 rounded border border-surface-variant">
                     <span className="block text-[8px] text-text-muted font-mono uppercase tracking-widest mb-1">Scout Rating</span>
-                    <span className="text-on-surface font-mono font-bold text-lg">94/100</span>
+                    <span className="text-text-muted font-mono font-bold text-sm" title="Earned through verified closures only">Earned by closures</span>
                   </div>
                   <div className="bg-surface-alt p-3 rounded border border-surface-variant">
                     <span className="block text-[8px] text-text-muted font-mono uppercase tracking-widest mb-1">PRC License</span>
-                    <span className="text-on-surface font-mono font-bold text-sm">#0019284</span>
+                    <span className="text-on-surface font-mono font-bold text-sm">{currentUser?.prcLicense || currentUser?.prc_license || "On file"}</span>
                   </div>
                 </div>
 
                 <div className="border-t border-surface-variant pt-4 flex justify-between items-end">
                   <div>
                     <span className="block text-[8px] text-text-muted font-mono uppercase tracking-widest mb-1">Valid Until</span>
-                    <span className="text-text-secondary font-mono text-xs">DEC 2026</span>
+                    <span className="text-text-secondary font-mono text-xs">DEC {new Date().getFullYear()}</span>
                   </div>
                   {/* Mock QR Code Pattern */}
                   <div className="w-12 h-12 bg-white rounded p-1 opacity-90">
@@ -462,7 +472,7 @@ export default function BrokerMode() {
               </button>
               <button 
                 onClick={() => window.print()}
-                className="px-6 py-3 bg-[#E8AE3C] text-background rounded font-working-title text-sm font-bold hover:opacity-90 transition-opacity flex items-center gap-2"
+                className="px-6 py-3 bg-gold-accent text-background rounded font-working-title text-sm font-bold hover:opacity-90 transition-opacity flex items-center gap-2"
               >
                 <span>🖨️</span> Print / Save to PDF
               </button>
@@ -533,8 +543,17 @@ export default function BrokerMode() {
             <span className="block text-[10px] font-label-caps uppercase tracking-widest text-text-secondary">Pipeline Health</span>
             <span className="text-on-surface font-working-title text-sm">{accepted.length} Deals Won</span>
           </div>
+          {/* Permanent entry point — the dismissible "new feature" banner must
+              not be the only way to reach the ID card */}
           <button
-            className="border border-gold-accent text-gold-accent font-working-title px-6 py-3 rounded text-sm font-bold hover:bg-gold-accent hover:text-background transition-all shadow-[0_0_15px_rgba(212,175,55,0.15)]"
+            className="border border-surface-variant text-text-secondary font-working-title px-4 py-3 rounded text-sm hover:text-gold-accent hover:border-gold-accent/40 transition-all"
+            onClick={() => setShowIdCard(true)}
+            title="Generate your Verified Broker ID card"
+          >
+            🪪 ID Card
+          </button>
+          <button
+            className="border border-gold-accent text-gold-accent font-working-title px-6 py-3 rounded text-sm font-bold hover:bg-gold-accent hover:text-background transition-all shadow-[0_0_15px_rgba(232,174,60,0.15)]"
             onClick={() => document.getElementById('broker-feed')?.scrollIntoView({ behavior: 'smooth' })}
           >
             + Find Opportunities
@@ -601,7 +620,7 @@ export default function BrokerMode() {
                   <div className={`absolute top-0 left-0 w-1 h-full transition-colors ${isDeclined ? 'bg-error' : 'bg-surface-variant group-hover:bg-gold-accent'}`}></div>
                   
                   <div className="flex justify-between items-start mb-2">
-                    <span className={`font-label-caps text-[9px] tracking-widest uppercase px-1.5 py-0.5 rounded ${isDeclined ? 'bg-error/10 text-error' : pStatus === 'invited' ? 'bg-[#E8AE3C]/10 text-accent' : 'bg-surface-alt text-text-secondary'}`}>
+                    <span className={`font-label-caps text-[9px] tracking-widest uppercase px-1.5 py-0.5 rounded ${isDeclined ? 'bg-error/10 text-error' : pStatus === 'invited' ? 'bg-gold-accent/10 text-gold-accent' : 'bg-surface-alt text-text-secondary'}`}>
                       {pStatus === 'invited' ? 'Incoming Handshake' : pStatus}
                     </span>
                     <span className="text-[10px] text-text-muted font-data-tabular">{deal.timeRemaining || 'Just now'}</span>

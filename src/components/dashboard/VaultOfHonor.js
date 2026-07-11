@@ -48,7 +48,7 @@ export default function VaultOfHonor() {
               key={badge.id}
               className={`relative group rounded-xl border p-6 flex flex-col items-center text-center transition-all duration-500 overflow-hidden min-h-[200px] justify-center ${
                 isUnlocked 
-                  ? 'bg-gradient-to-b from-[#1a1814] to-[#0d0d0d] border-gold-accent/40 hover:border-gold-accent shadow-[0_0_15px_rgba(232, 174, 60,0.05)] hover:shadow-[0_0_25px_rgba(232, 174, 60,0.15)]' 
+                  ? 'bg-gradient-to-b from-[#1a1814] to-[#0d0d0d] border-gold-accent/40 hover:border-gold-accent shadow-[0_0_15px_rgba(232,174,60,0.05)] hover:shadow-[0_0_25px_rgba(232,174,60,0.15)]' 
                   : 'bg-[#0a0a0a] border-surface-variant hover:border-surface-variant/80'
               }`}
             >
@@ -69,7 +69,7 @@ export default function VaultOfHonor() {
                     size="1.5em" 
                     className={`transition-all duration-500 ${
                       isUnlocked 
-                        ? 'text-gold-accent drop-shadow-[0_0_8px_rgba(232, 174, 60,0.6)]' 
+                        ? 'text-gold-accent drop-shadow-[0_0_8px_rgba(232,174,60,0.6)]' 
                         : 'text-surface-alt' // Very dark icon to create silhouette effect
                     }`} 
                   />

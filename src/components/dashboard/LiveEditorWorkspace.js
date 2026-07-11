@@ -600,7 +600,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
                   <button 
                     onClick={handleSeoOptimize}
                     disabled={isOptimizing || !formData.description}
-                    className="text-[10px] font-label-caps tracking-widest text-gold-accent uppercase hover:text-[#F7C64E] transition-colors disabled:opacity-50 flex items-center gap-1 bg-gold-accent/10 border border-gold-accent/30 px-2 py-1 rounded"
+                    className="text-[10px] font-label-caps tracking-widest text-gold-accent uppercase hover:text-gold-bright transition-colors disabled:opacity-50 flex items-center gap-1 bg-gold-accent/10 border border-gold-accent/30 px-2 py-1 rounded"
                   >
                     {isOptimizing ? "Optimizing..." : "✨ SEO Optimize Description"}
                   </button>
@@ -721,7 +721,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
                   <button 
                     onClick={handlePublish}
                     disabled={!isPublishable}
-                    className="px-6 py-2 rounded bg-gold-accent text-background text-sm font-label-caps tracking-widest uppercase hover:bg-[#F7C64E] disabled:opacity-50 transition-all shadow-[0_0_15px_rgba(232,174,60,0.3)] disabled:shadow-none"
+                    className="px-6 py-2 rounded bg-gold-accent text-background text-sm font-label-caps tracking-widest uppercase hover:bg-gold-bright disabled:opacity-50 transition-all shadow-[0_0_15px_rgba(232,174,60,0.3)] disabled:shadow-none"
                   >
                     Publish to Directory
                   </button>

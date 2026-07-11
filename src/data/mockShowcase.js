@@ -46,8 +46,11 @@ const SEED = {
   "sky-pavilion-makati": 11, "bohol-treehouse-lodge": 9,
 };
 
-export function getShowcaseEntries() {
-  const props = [];
+// Derives Board entries from a property list (the live CMS feed). The 2026-07-05
+// dead-code cleanup deleted mockProperties.js, which silently emptied the Board;
+// live properties are now the source, keeping the seeded engagement numbers
+// until the real SHOWCASE_CMS table exists.
+export function getShowcaseEntries(props = []) {
   return props.map((p, i) => {
     const inquiry = SEED[p.slug] ?? Math.max(4, 40 - i * 3);
     return {

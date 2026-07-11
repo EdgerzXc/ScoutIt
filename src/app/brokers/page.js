@@ -35,7 +35,10 @@ function getClosureCount(closuresStr) {
 export default function BrokersPage() {
   const [brokers, setBrokers]     = useState([]);
   const [loading, setLoading]     = useState(false);
-  const [source, setSource]       = useState("mock_local");
+  // "loading" until the CMS answers — the old "mock_local" default was a
+  // leftover from a deleted local mock roster and made empty states look
+  // like a data-source bug instead of an empty live network.
+  const [source, setSource]       = useState("loading");
   const [searchTerm, setSearchTerm] = useState("");
 
   // Filters State
@@ -54,11 +57,11 @@ export default function BrokersPage() {
         const res  = await fetch("/api/cms");
         if (!res.ok) return;
         const data = await res.json();
-        if (data.brokers && data.brokers.length > 0) {
-          setBrokers(data.brokers);
-          setSource(data.source);
-        }
-      } catch { /* stay on mock data */ }
+        setBrokers(data.brokers || []);
+        setSource(data.source || "unknown");
+      } catch {
+        setSource("network_error");
+      }
     }
     load();
   }, []);

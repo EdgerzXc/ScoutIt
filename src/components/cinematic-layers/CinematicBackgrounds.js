@@ -43,22 +43,22 @@ export default function CinematicBackgrounds({ scrollYProgress }) {
           }}
           className="absolute bottom-[-40%] w-[150vw] h-[150vw] max-w-[1200px] max-h-[1200px] rounded-full"
         >
-          <div className="absolute inset-0 rounded-full bg-gradient-to-t from-transparent via-[rgba(232, 174, 60,0.05)] to-[rgba(232, 174, 60,0.15)] blur-2xl" />
-          <div className="absolute inset-0 rounded-full border-t border-[rgba(232, 174, 60,0.3)] blur-[2px]" />
+          <div className="absolute inset-0 rounded-full bg-gradient-to-t from-transparent via-[rgba(232,174,60,0.05)] to-[rgba(232,174,60,0.15)] blur-2xl" />
+          <div className="absolute inset-0 rounded-full border-t border-[rgba(232,174,60,0.3)] blur-[2px]" />
         </motion.div>
       </motion.div>
 
       {/* LAYER 02: STRATOSPHERE */}
       <motion.div style={{ opacity: stratoOpacity, y: prefersReducedMotion ? 0 : stratoY }} className="absolute inset-0">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[rgba(232, 174, 60,0.08)] to-[#0a0a0a]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[rgba(232,174,60,0.08)] to-[#0a0a0a]" />
         {/* Soft floating particles / light rays */}
-        <div className="absolute top-[20%] left-[20%] w-[40%] h-[60%] bg-[rgba(232, 174, 60,0.05)] blur-[100px] rounded-full" />
-        <div className="absolute top-[40%] right-[20%] w-[30%] h-[50%] bg-[rgba(232, 174, 60,0.03)] blur-[80px] rounded-full" />
+        <div className="absolute top-[20%] left-[20%] w-[40%] h-[60%] bg-[rgba(232,174,60,0.05)] blur-[100px] rounded-full" />
+        <div className="absolute top-[40%] right-[20%] w-[30%] h-[50%] bg-[rgba(232,174,60,0.03)] blur-[80px] rounded-full" />
       </motion.div>
 
       {/* LAYER 03: METROPOLIS */}
       <motion.div style={{ opacity: metroOpacity }} className="absolute inset-0 flex flex-col justify-end">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_50%,rgba(232, 174, 60,0.08)_0%,transparent_60%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_50%,rgba(232,174,60,0.08)_0%,transparent_60%)]" />
         {/* Glowing Golden Grid */}
         <motion.div 
           style={{ scale: prefersReducedMotion ? 1 : gridScale }}
@@ -91,14 +91,14 @@ export default function CinematicBackgrounds({ scrollYProgress }) {
 
       {/* LAYER 05: CORE */}
       <motion.div style={{ opacity: coreOpacity }} className="absolute inset-0 flex items-center justify-center">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(232, 174, 60,0.12)_0%,transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(232,174,60,0.12)_0%,transparent_50%)]" />
         {/* Rotating geometric matrix */}
         <motion.div 
           style={{ rotate: prefersReducedMotion ? 0 : coreRotate }}
-          className="w-[40vw] h-[40vw] max-w-[500px] max-h-[500px] border border-[rgba(232, 174, 60,0.2)] rounded-lg flex items-center justify-center"
+          className="w-[40vw] h-[40vw] max-w-[500px] max-h-[500px] border border-[rgba(232,174,60,0.2)] rounded-lg flex items-center justify-center"
         >
-          <div className="w-[70%] h-[70%] border border-[rgba(232, 174, 60,0.4)] rounded-full flex items-center justify-center">
-            <div className="w-[40%] h-[40%] bg-[rgba(232, 174, 60,0.1)] blur-md rounded-full" />
+          <div className="w-[70%] h-[70%] border border-[rgba(232,174,60,0.4)] rounded-full flex items-center justify-center">
+            <div className="w-[40%] h-[40%] bg-[rgba(232,174,60,0.1)] blur-md rounded-full" />
           </div>
         </motion.div>
       </motion.div>

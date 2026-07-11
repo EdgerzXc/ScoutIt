@@ -133,7 +133,7 @@ export default function DelegationRequests({ propertyId, units, onDelegated }) {
                     >
                       <input
                         type="checkbox"
-                        className="accent-[#E8AE3C]"
+                        className="accent-gold-accent"
                         checked={selectedUnitIds.has(u.id)}
                         onChange={() => toggleUnit(u.id)}
                       />

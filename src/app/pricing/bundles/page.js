@@ -168,12 +168,12 @@ export default function BundlesPricingPage() {
               <div className={`absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r ${bundle.accent} opacity-80`} />
 
               {bundle.flagship && (
-                <div className="absolute top-4 right-4 bg-gradient-to-r from-gold-accent to-[#F7C64E] text-[#0A0908] text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">
+                <div className="absolute top-4 right-4 bg-gradient-to-r from-gold-accent to-gold-bright text-background text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">
                   Best Value
                 </div>
               )}
               {bundle.highlight && !bundle.flagship && (
-                <div className="absolute top-4 right-4 bg-gold-accent text-[#0A0908] text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">
+                <div className="absolute top-4 right-4 bg-gold-accent text-background text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">
                   Most Popular
                 </div>
               )}

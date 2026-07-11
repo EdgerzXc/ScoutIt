@@ -30,7 +30,7 @@ export default function CoreLayer() {
 
   return (
     <main
-      className="min-h-screen bg-[#0d0d0d] text-white selection:bg-[#E8AE3C] selection:text-black overflow-x-hidden font-sans"
+      className="min-h-screen bg-[#0d0d0d] text-white selection:bg-gold-accent selection:text-black overflow-x-hidden font-sans"
       style={{ paddingTop: "52px" }}
     >
       <LayerNav prev={{ href: "/layer/mantle", label: "Mantle" }} next={null} />

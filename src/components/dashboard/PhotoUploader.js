@@ -183,7 +183,7 @@ export default function PhotoUploader({ photos, onChange, onSetImage, isPro = fa
       
       {maxReached ? (
         <button 
-          className="mt-2 py-3 bg-gradient-to-r from-gold-accent to-[#F7C64E] text-background hover:scale-[1.01] rounded text-xs font-bold tracking-widest uppercase transition-transform shadow-lg"
+          className="mt-2 py-3 bg-gradient-to-r from-gold-accent to-gold-bright text-background hover:scale-[1.01] rounded text-xs font-bold tracking-widest uppercase transition-transform shadow-lg"
           onClick={() => alert("Upgrade to PRO to unlock more photo slots!")}
         >
           🔒 UPGRADE TO PRO FOR MORE PHOTOS

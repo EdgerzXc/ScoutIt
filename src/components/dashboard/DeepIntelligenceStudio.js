@@ -681,7 +681,7 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
                 <button 
                   onClick={() => setStep(step + 1)}
                   disabled={step === 1 && !formData.category} // Must select category to proceed
-                  className="px-6 py-2 rounded bg-gold-accent text-background text-sm font-label-caps tracking-widest uppercase hover:bg-[#F7C64E] disabled:opacity-50 transition-colors shadow-[0_0_15px_rgba(232,174,60,0.2)]"
+                  className="px-6 py-2 rounded bg-gold-accent text-background text-sm font-label-caps tracking-widest uppercase hover:bg-gold-bright disabled:opacity-50 transition-colors shadow-[0_0_15px_rgba(232,174,60,0.2)]"
                 >
                   Next Step →
                 </button>
@@ -689,7 +689,7 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
                 <button 
                   onClick={handlePublish}
                   disabled={!isPublishable}
-                  className="px-6 py-2 rounded bg-gold-accent text-background text-sm font-label-caps tracking-widest uppercase hover:bg-[#F7C64E] disabled:opacity-50 transition-colors shadow-[0_0_15px_rgba(232,174,60,0.3)]"
+                  className="px-6 py-2 rounded bg-gold-accent text-background text-sm font-label-caps tracking-widest uppercase hover:bg-gold-bright disabled:opacity-50 transition-colors shadow-[0_0_15px_rgba(232,174,60,0.3)]"
                 >
                   Submit for Approval
                 </button>

@@ -11,7 +11,7 @@ import { useDashboard } from "../../context/DashboardContext";
 
 const STATUS_STYLES = {
   approved: { label: "Approved", color: "#4caf7d" },
-  pending: { label: "Pending", color: "#E8AE3C" },
+  pending: { label: "Pending", color: "var(--accent)" },
   draft: { label: "Draft", color: "#8f8c87" },
   ai_drafting: { label: "AI Drafting", color: "#5a8ce8" },
 };
@@ -72,7 +72,7 @@ export default function MissionControlMode() {
         <span className="text-lg">⚠️</span>
         <div className="text-xs text-text-secondary leading-relaxed">
           <span className="text-gold-accent font-bold uppercase tracking-wider">Dev preview only.</span>{" "}
-          Real Enterprise account isolation isn't built yet — this filters by "properties you own" as a stand-in for a real company scope, which doesn't exist as a concept yet. Not safe to expose to real users until the RLS security reset happens.
+          Real Enterprise account isolation isn&apos;t built yet — this filters by &quot;properties you own&quot; as a stand-in for a real company scope, which doesn&apos;t exist as a concept yet. Not safe to expose to real users until the RLS security reset happens.
         </div>
       </div>
 
@@ -81,7 +81,7 @@ export default function MissionControlMode() {
           Mission Control · Enterprise
         </span>
         <h1 className="font-display-md text-2xl md:text-3xl text-on-surface mt-1">
-          Your Company's Portfolio
+          Your Company&apos;s Portfolio
         </h1>
       </div>
 
