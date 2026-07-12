@@ -55,16 +55,33 @@ const OwnerListingCard = memo(({
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-4 border-t border-surface-variant pt-4 mt-4">
+        <div className="grid grid-cols-3 gap-2 border-t border-surface-variant pt-4 mt-4">
           <div>
-            <span className="block font-label-caps text-[9px] tracking-widest text-text-muted uppercase mb-1">Active Inquiries</span>
+            <span className="block font-label-caps text-[9px] tracking-widest text-text-muted uppercase mb-1">Inquiries</span>
             <span className={`font-data-tabular text-lg ${pendingPitchesCount > 0 ? 'text-gold-accent font-bold' : 'text-text-secondary'}`}>
               {pendingPitchesCount}
             </span>
           </div>
           <div>
-            <span className="block font-label-caps text-[9px] tracking-widest text-text-muted uppercase mb-1">Profile Views</span>
+            <span className="block font-label-caps text-[9px] tracking-widest text-text-muted uppercase mb-1">Views</span>
             <span className="font-data-tabular text-lg text-text-muted" title="View tracking arrives once page instrumentation ships">—</span>
+          </div>
+          <div className="flex items-end justify-end">
+            <button 
+              className="text-gold-accent border border-gold-accent/30 rounded px-3 py-1.5 text-[10px] uppercase font-label-caps tracking-widest hover:bg-gold-accent hover:text-background transition-colors"
+              onClick={(e) => {
+                e.stopPropagation();
+                const url = `${window.location.origin}/property/${listing.slug || listing.id}`;
+                if (navigator.share) {
+                  navigator.share({ title: listing.title, url }).catch(() => {});
+                } else {
+                  navigator.clipboard.writeText(url);
+                  alert('Link copied to clipboard!');
+                }
+              }}
+            >
+              Share
+            </button>
           </div>
         </div>
       )}

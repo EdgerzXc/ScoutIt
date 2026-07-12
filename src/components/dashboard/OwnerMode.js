@@ -33,8 +33,8 @@ export default function OwnerMode() {
   const [selectedIds, setSelectedIds] = useState([]);
   const [isArchiving, setIsArchiving] = useState(false);
   // DashboardContext's `listings` isn't refetched after an archive call, so
-  // freshly-archived ids are hidden locally until the next real refresh.
   const [justArchivedIds, setJustArchivedIds] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const toggleSelected = (id) => {
     setSelectedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
   };
@@ -640,6 +640,19 @@ export default function OwnerMode() {
 
   // --- VIEW: LAYER 1 - ACTIVE PROPERTY FILES (PORTFOLIO VIEW) ---
   if (!viewingDossierId && myListings.length > 1) {
+    const filteredListings = myListings.filter(l => 
+      !searchQuery || 
+      l.title?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      l.location?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    const groupedListings = filteredListings.reduce((acc, listing) => {
+      const loc = listing.location || 'Unspecified Location';
+      if (!acc[loc]) acc[loc] = [];
+      acc[loc].push(listing);
+      return acc;
+    }, {});
+
     return (
       <div className="max-w-[1200px] mx-auto py-lg animate-slide-up-fade">
         <div className="flex flex-col md:flex-row md:justify-between md:items-end mb-8 border-b border-surface-variant pb-6 gap-4">
@@ -695,49 +708,50 @@ export default function OwnerMode() {
           </div>
         </div>
 
-        <div className="flex overflow-x-auto snap-x md:grid md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 pb-4 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide">
-          {myListings.length === 0 ? (
-            <div className="col-span-full flex flex-col items-center justify-center p-12 bg-surface/50 border border-surface-variant/50 border-dashed rounded-xl">
-              <div className="w-16 h-16 rounded-full border border-gold-accent/30 bg-surface flex items-center justify-center text-gold-accent mb-4">
-                <span className="text-3xl">+</span>
-              </div>
-              <h3 className="font-headline-editorial text-xl text-on-surface mb-2">No Property Files</h3>
-              <p className="text-sm text-text-secondary text-center mb-6 max-w-md">
-                You haven&apos;t added any properties to your workspace yet. Click &quot;New Property File&quot; to start uploading.
-              </p>
-              <button 
-                onClick={() => setShowWizard('select_mode')}
-                className="font-label-caps tracking-widest uppercase text-[10px] text-gold-accent border border-gold-accent/30 bg-gold-accent/10 px-6 py-3 rounded hover:bg-gold-accent/20 transition-colors"
-              >
-                Create New Property File
-              </button>
-            </div>
-          ) : myListings.map((listing, index) => {
-            const listPitches = pitches.filter(p => p.isCurrentUserOwner && p.listingId === listing.id);
-            const pendingPitches = listPitches.filter(p => p.status === 'pending');
-            const isSelected = selectedIds.includes(listing.id);
-            // listing.signals.completeness is a hardcoded placeholder wherever
-            // it's set (0/50/100 literals in DashboardContext, never computed
-            // from real fields) — computeListingStrength is the only value
-            // that's actually derived from this listing's real data, and the
-            // same one the dossier's "Missing:" checklist below uses, so the
-            // ring and the checklist can never disagree.
-            const completeness = computeListingStrength(listing).score;
-            return (
-              <OwnerListingCard 
-                key={listing.id}
-                listing={listing}
-                pendingPitchesCount={pendingPitches.length}
-                isSelected={isSelected}
-                completeness={completeness}
-                selectMode={selectMode}
-                toggleSelected={toggleSelected}
-                setViewingDossierId={setViewingDossierId}
-                index={index}
-              />
-            );
-          })}
+        <div className="mb-6">
+          <input
+            type="text"
+            placeholder="Search your properties..."
+            className="w-full md:w-96 bg-surface border border-surface-variant rounded px-4 py-3 text-sm text-on-surface focus:outline-none focus:border-gold-accent transition-colors"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
         </div>
+
+        {filteredListings.length === 0 ? (
+          <div className="text-text-secondary py-8 text-center bg-surface-alt border border-surface-variant rounded-lg">
+            No properties match your search.
+          </div>
+        ) : (
+          <div className="flex flex-col gap-12 pb-4">
+            {Object.keys(groupedListings).sort().map(location => (
+              <div key={location}>
+                <h2 className="font-label-caps text-xs tracking-widest text-text-secondary uppercase mb-4 border-b border-surface-variant pb-2">{location}</h2>
+                <div className="flex overflow-x-auto snap-x md:grid md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide">
+                  {groupedListings[location].map((listing, index) => {
+                    const listPitches = pitches.filter(p => p.isCurrentUserOwner && p.listingId === listing.id);
+                    const pendingPitches = listPitches.filter(p => p.status === 'pending');
+                    const isSelected = selectedIds.includes(listing.id);
+                    const completeness = computeListingStrength(listing).score;
+                    return (
+                      <OwnerListingCard 
+                        key={listing.id}
+                        listing={listing}
+                        pendingPitchesCount={pendingPitches.length}
+                        isSelected={isSelected}
+                        completeness={completeness}
+                        selectMode={selectMode}
+                        toggleSelected={toggleSelected}
+                        setViewingDossierId={setViewingDossierId}
+                        index={index}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     );
   }
