@@ -26,6 +26,7 @@ import OperatorRequestModal from "@/components/property/OperatorRequestModal";
 import AffordabilityCalculator from "@/components/property/AffordabilityCalculator";
 import FloodRiskBadge from "@/components/property/FloodRiskBadge";
 import SpatialVaultWidget from "@/components/property/SpatialVaultWidget";
+import { hasInteractiveUnitPage, hasSpatial3D } from "@/lib/unitMasterPage";
 import { canSee, getCurrentTier, hasActiveRole } from "@/lib/entitlements";
 
 // Code-split maplibre-gl + pmtiles out of the main property-page bundle — they&apos;re
@@ -686,8 +687,12 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
         ...(Array.isArray(u.features) ? u.features : []),
       ].filter(Boolean),
       photo: u.photo || u.image || (Array.isArray(u.photos) ? u.photos.find(Boolean) : "") || "",
-      floor_plan_3d_data: u.floor_plan_3d_data || null,
       operator_id: u.operator_id || null,
+      // Carry the Unit Master Page signals so the teaser below can tell a real
+      // micro-listing (operator / scenarios / floor plan / authored detail)
+      // from a bare inventory row.
+      details: u.details || {},
+      subdivision_scenarios: u.subdivision_scenarios || [],
       isReal: true,
     }));
   }
@@ -1782,15 +1787,16 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
 
               <div className="units-z3-list">
                 {dynamicUnits.map((u, ui) => {
-                  const hasDeepIntel = u.id && (u.floor_plan_3d_data || u.operator_id);
-                  const CardWrapper = hasDeepIntel ? Link : "div";
-                  const wrapperProps = hasDeepIntel 
+                  const hasUnitPage = u.id && hasInteractiveUnitPage(u);
+                  const teaserLabel = hasSpatial3D(u) ? "EXPLORE 3D SPACE ✦" : "VIEW SUITE →";
+                  const CardWrapper = hasUnitPage ? Link : "div";
+                  const wrapperProps = hasUnitPage 
                     ? { href: `/property/${d.slug}/unit/${u.id}`, style: { textDecoration: "none" } }
                     : {};
                   
                   return (
                     <CardWrapper
-                      className={`unit-z3-row ${!hasDeepIntel ? "static-unit" : ""}`}
+                      className={`unit-z3-row ${!hasUnitPage ? "static-unit" : ""}`}
                       key={u.name}
                       id={`unit-row-${ui}`}
                       {...wrapperProps}
@@ -1802,9 +1808,9 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                           </div>
                           <div className="unit-z3-name">{u.name}</div>
                         </div>
-                        {hasDeepIntel && (
+                        {hasUnitPage && (
                           <div style={{fontFamily:"var(--font-mono)", fontSize:"10px", color:"var(--accent)", letterSpacing:"0.3em", textTransform:"uppercase", whiteSpace:"nowrap"}}>
-                            EXPLORE 3D SPACE ✦
+                            {teaserLabel}
                           </div>
                         )}
                       </div>
