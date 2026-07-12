@@ -410,17 +410,95 @@ featuredIntel:       f.Featured_Intel           || [], // linked record IDs
   };
 }
 
+// The owner editor (LiveEditorWorkspace.js) stores category-spec values in
+// details under Airtable-style keys (its CATEGORY_FIELDS `f.key` values, e.g.
+// "CM_Rent_Per_Sqm", "Beds", "RS_Price"). This mapper, however, reads
+// camelCase keys ("rentPerSqm", "beds", "price"). The two conventions have
+// zero overlap, so before this table every spec field a real owner typed in
+// the wizard was silently dropped on publish -> the public master page showed
+// "Not listed yet" for rent, GLA, grade, beds, etc. even though the owner
+// filled them in. This aliases the editor's keys onto the camelCase keys the
+// mapper below already handles (reusing its correct per-field type coercion).
+const EDITOR_DETAIL_ALIASES = {
+  // Shared
+  Beds: "beds", Baths: "baths", Floor_Area_Sqm: "floor_sqm", Lot_Area_Sqm: "lot_sqm",
+  Parking_Slots: "parking", Furnishing: "furnishing", Amenities: "amenities", TitleStatus: "titleStatus",
+  // Commercial
+  CM_Rent_Per_Sqm: "rentPerSqm", CM_Total_GLA: "totalGLA", CM_Floor_Plate_Sqm: "floorPlate",
+  CM_Building_Grade: "buildingGrade", CM_Hand_Over_Condition: "handOver", CM_Availability_Status: "availability",
+  CM_Min_Lease_Term: "minLeaseTerm", CM_Certification: "certification", PEZA: "peza", Listed_Price: "listedPrice",
+  CM_CAMC_Per_Sqm: "camc", CM_AC_Charges: "acCharges", CM_AC_System: "acSystem",
+  CM_Reserved_Parking: "reservedParking", CM_Escalation_Rate: "escalation", CM_Fit_Out_Allowance: "fitOut",
+  CM_Rent_Free_Period: "rentFree", CM_Parking_Ratio: "parkingRatio", CM_Backup_Power: "backupPower",
+  CM_Floor_Loading: "floorLoading", CM_Internet_Providers: "internet", CM_Available_Units_Summary: "availableUnits",
+  CM_Towers_Zones: "towersZones", CM_Cap_Rate: "capRate", CM_NOI: "noi",
+  // Residential
+  RS_Floor_Level: "floorLevel", RS_View: "view", RS_Turnover_Date: "turnoverDate", RS_Pet_Policy: "petPolicy",
+  RS_Assoc_Dues: "assocDues", RS_Studio_Flag: "studio", RS_Price: "price", RS_Price_Per_Sqm: "pricePerSqm",
+  RS_Payment_Terms: "paymentTerms",
+  // STR
+  STR_Nightly_Rate: "nightlyRate", STR_Max_Guests: "maxGuests", STR_Avg_Rating: "rating",
+  STR_Bedrooms: "bedrooms", STR_Bathrooms: "bathrooms", STR_Min_Stay_Nights: "minStay",
+  STR_Check_In_Out: "checkInOut", STR_Weekend_Rate: "weekendRate", STR_Bed_Config: "bedConfig",
+  STR_Self_Check_In: "selfCheckIn", STR_House_Rules: "houseRules", STR_Cancellation_Policy: "cancellation",
+  STR_Permit_Accreditation: "permit", STR_WiFi_Speed: "wifiSpeed", STR_Cleaning_Fee: "cleaningFee",
+  // Hospitality
+  HOSP_Room_Count: "rooms", HOSP_Star_Rating: "stars", HOSP_FB_Outlets: "fbOutlets",
+  HOSP_Function_Rooms: "functionRooms", HOSP_Operator_Brand: "operator", HOSP_Room_Types: "roomTypes",
+  HOSP_Year_Built_Renovated: "yearRenovated", HOSP_ADR: "adr", HOSP_Occupancy_Rate: "occupancy",
+  HOSP_RevPAR: "revpar", HOSP_Cap_Rate: "capRate", HOSP_GFA: "gfa", HOSP_Land_Area: "landArea",
+  // Restaurants
+  RST_Seating_Capacity: "seating", RST_Floor_Area_Sqm: "floorArea", RST_Frontage_M: "frontage",
+  RST_Hood_Exhaust: "hoodExhaust", RST_Grease_Trap: "greaseTrap", RST_Gas_Line: "gasLine",
+  RST_Power_Capacity: "power", RST_Delivery_Access: "delivery", RST_Liquor_License: "liquor",
+  RST_FB_Zoning_Permit: "zoning", RST_Ceiling_Height: "ceiling", RST_Turnover_Condition: "turnover",
+  RST_Parking: "parking", RST_Rent_Per_Month: "rstRent", RST_Dues_CUSA: "rstDues",
+  // Venues
+  VEN_Capacity_Seated: "seated", VEN_Capacity_Standing: "standing", VEN_Floor_Area_Sqm: "floorArea",
+  VEN_Min_Booking_Hours: "minHours", VEN_Indoor_Outdoor: "indoorOutdoor", VEN_Air_Conditioning: "aircon",
+  VEN_Catering_Policy: "catering", VEN_Rental_Rate: "rentalRate", VEN_Layout_Configs: "layouts",
+  VEN_Ceiling_Height: "ceiling", VEN_AV_Equipment: "av", VEN_Power_Capacity: "power",
+  VEN_Parking: "parking", VEN_Accessibility: "accessibility", VEN_Noise_Curfew: "noiseCurfew",
+  VEN_Rate_Basis: "venRateBasis",
+};
+
 function reverseMapCategoryFields(details) {
   const map = {};
   if (!details) return map;
 
+  // Normalize editor-sourced keys onto the camelCase keys read below. Only
+  // fills a camelCase key when it isn't already present, so any existing
+  // camelCase writer keeps precedence and nothing regresses.
+  const aliased = { ...details };
+  for (const editorKey in EDITOR_DETAIL_ALIASES) {
+    const camelKey = EDITOR_DETAIL_ALIASES[editorKey];
+    if (aliased[editorKey] !== undefined && aliased[camelKey] === undefined) {
+      aliased[camelKey] = aliased[editorKey];
+    }
+  }
+  details = aliased;
+
+  // Comma-safe numeric coercion — an owner typing "25,000" must not become null.
+  const toNum = (v) => {
+    const n = Number(String(v).replace(/[,\s]/g, ""));
+    return Number.isFinite(n) && String(v).trim() !== "" ? n : null;
+  };
+
   // Shared
-  if (details.beds !== undefined) map.Beds = Number(details.beds) || null;
-  if (details.baths !== undefined) map.Baths = Number(details.baths) || null;
-  if (details.floor_sqm !== undefined) map.FloorSqm = Number(details.floor_sqm) || null;
-  if (details.lot_sqm !== undefined) map.LotSqm = Number(details.lot_sqm) || null;
-  if (details.parking !== undefined) map.Parking = Number(details.parking) || null;
+  if (details.beds !== undefined) map.Beds = toNum(details.beds);
+  if (details.baths !== undefined) map.Baths = toNum(details.baths);
+  if (details.floor_sqm !== undefined) map.FloorSqm = toNum(details.floor_sqm);
+  if (details.lot_sqm !== undefined) map.LotSqm = toNum(details.lot_sqm);
+  if (details.parking !== undefined) map.Parking = toNum(details.parking);
   if (details.furnishing !== undefined) map.Furnishing = details.furnishing;
+  if (details.titleStatus !== undefined) map.TitleStatus = details.titleStatus;
+  if (details.amenities !== undefined) {
+    // Airtable Amenities is multipleSelects -> needs an array; typecast:true on
+    // the write auto-creates any option the owner typed that doesn't exist yet.
+    map.Amenities = Array.isArray(details.amenities)
+      ? details.amenities
+      : String(details.amenities).split(",").map((s) => s.trim()).filter(Boolean);
+  }
 
   // Commercial
   if (details.rentPerSqm !== undefined) map.CM_Rent_Per_Sqm = details.rentPerSqm;
@@ -445,8 +523,9 @@ function reverseMapCategoryFields(details) {
   if (details.internet !== undefined) map.CM_Internet_Providers = details.internet;
   if (details.availableUnits !== undefined) map.CM_Available_Units_Summary = details.availableUnits;
   if (details.towersZones !== undefined) map.CM_Towers_Zones = details.towersZones;
-  if (details.capRate !== undefined) map.CM_Cap_Rate = Number(details.capRate) || null;
-  if (details.noi !== undefined) map.CM_NOI = Number(details.noi) || null;
+  if (details.capRate !== undefined) map.CM_Cap_Rate = toNum(details.capRate);
+  if (details.noi !== undefined) map.CM_NOI = toNum(details.noi);
+  if (details.listedPrice !== undefined) map.Listed_Price = details.listedPrice;
 
   // Residential
   if (details.price !== undefined) map.RS_Price = Number(details.price) || null;
@@ -474,6 +553,7 @@ function reverseMapCategoryFields(details) {
   if (details.cancellation !== undefined) map.STR_Cancellation_Policy = details.cancellation;
   if (details.permit !== undefined) map.STR_Permit_Accreditation = details.permit;
   if (details.wifiSpeed !== undefined) map.STR_WiFi_Speed = details.wifiSpeed;
+  if (details.cleaningFee !== undefined) map.STR_Cleaning_Fee = toNum(details.cleaningFee);
 
   // Restaurant
   if (details.floorArea !== undefined) map.FloorSqm = Number(details.floorArea) || null;
@@ -494,6 +574,8 @@ function reverseMapCategoryFields(details) {
   if (details.turnover !== undefined) map.RST_Turnover_Condition = details.turnover;
   // parking already mapped above, but we can also set Guest_Parking
   if (details.parking !== undefined) map.Guest_Parking = details.parking;
+  if (details.rstRent !== undefined) map.RST_Rent = toNum(details.rstRent);
+  if (details.rstDues !== undefined) map.RST_Dues_CUSA = toNum(details.rstDues);
 
   // Hospitality
   if (details.rooms !== undefined) map.HOSP_Room_Count = Number(details.rooms) || null;
@@ -523,8 +605,22 @@ function reverseMapCategoryFields(details) {
   if (details.power !== undefined) map.VEN_Power_Capacity = details.power;
   if (details.accessibility !== undefined) map.VEN_Accessibility = details.accessibility;
   if (details.noiseCurfew !== undefined) map.VEN_Noise_Curfew = details.noiseCurfew;
+  if (details.venRateBasis !== undefined) map.VEN_Rate_Basis = details.venRateBasis;
 
   return map;
+}
+
+// Photos are stored in Supabase Storage; their URLs travel in details.photos
+// (the owner editor's photo array). Mirror them into Airtable's Photos/Image
+// columns so the public page — which reads photos from Airtable — displays the
+// Supabase-hosted images. Falls back to media_link when no array is present.
+function photoFields(data) {
+  const fromDetails = Array.isArray(data?.details?.photos)
+    ? data.details.photos.filter(Boolean)
+    : [];
+  const list = fromDetails.length ? fromDetails : (data?.media_link ? [data.media_link] : []);
+  if (!list.length) return {};
+  return { Photos: list.join(","), Image: list[0] };
 }
 
 // ═══════════════════════════════════════════════════
@@ -563,10 +659,15 @@ export async function insertProperty(apiKey, baseId, data, unitsOverride = null)
             "Unknown",
           Units_JSON: unitsJson,
           Approved_For_ScoutIt: true,
+          ...photoFields(data),
           ...categoryFields
         }
       }
-    ]
+    ],
+    // Auto-create singleSelect options (Building Grade, Hand-over, Furnishing,
+    // etc.) instead of rejecting the whole record when an owner picks a value
+    // that isn't already an Airtable choice.
+    typecast: true
   };
 
   const res = await fetch(url, {
@@ -627,8 +728,12 @@ export async function updateProperty(apiKey, baseId, slug, data, unitsOverride =
   const categoryFields = reverseMapCategoryFields(data.details);
   Object.assign(fieldsToUpdate, categoryFields);
   
+  Object.assign(fieldsToUpdate, photoFields(data));
+
   const payload = {
-    fields: fieldsToUpdate
+    fields: fieldsToUpdate,
+    // Same rationale as insertProperty — let singleSelect choices auto-create.
+    typecast: true
   };
 
   const resPatch = await fetch(urlPatch, {

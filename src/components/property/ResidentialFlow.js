@@ -25,6 +25,7 @@ import InquiryModal from "@/components/property/InquiryModal";
 import OperatorRequestModal from "@/components/property/OperatorRequestModal";
 import AffordabilityCalculator from "@/components/property/AffordabilityCalculator";
 import FloodRiskBadge from "@/components/property/FloodRiskBadge";
+import SpatialVaultWidget from "@/components/property/SpatialVaultWidget";
 import { canSee, getCurrentTier, hasActiveRole } from "@/lib/entitlements";
 
 // Code-split maplibre-gl + pmtiles out of the main property-page bundle — they&apos;re
@@ -70,79 +71,6 @@ import { resolveTransitHub } from "@/lib/transit";
 // ═══════════════════════════════════════════════════
 // HELPER UTILITIES
 // ═══════════════════════════════════════════════════
-function SpatialVaultWidget({ lumaUrl, matterportUrl, heatmapUrl }) {
-  // Tier-gated: the Vault unlocks at Cluster+. SSR-safe — locked until the client reads the viewer's tier.
-  // NOTE: client-trusted for now; server-authoritative enforcement is the later security pass.
-  const [hasSubscription, setHasSubscription] = useState(false);
-  useEffect(() => { setHasSubscription(canSee("vault", getCurrentTier())); }, []);
-
-  return (
-    <div style={{ marginTop: "32px", display: "flex", flexDirection: "column", gap: "24px" }}>
-      {lumaUrl && (
-        <div className="vault-item">
-          <h4 style={{ fontFamily: "'Courier New',monospace", fontSize: "10px", color: "#E8AE3C", letterSpacing: "0.18em", textTransform: "uppercase", marginBottom: "4px" }}>
-            3D Spatial Map
-          </h4>
-          <p style={{ fontFamily: "Georgia,serif", fontStyle: "italic", fontSize: "11px", color: "var(--text-muted, #c8c8c8)", marginBottom: "12px" }}>
-            Illustrative capture — this property&apos;s own 3D scan is in progress
-          </p>
-          <div style={{ position: "relative", width: "100%", height: "400px", borderRadius: "4px", overflow: "hidden", border: "1px solid #262626" }}>
-            <iframe src={hasSubscription ? lumaUrl : undefined} style={{ width: "100%", height: "100%", border: "none", filter: hasSubscription ? "none" : "blur(8px) brightness(0.5)" }} title="3D Spatial Map" />
-            {!hasSubscription && (
-              <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "rgba(22,22,22,0.6)", backdropFilter: "blur(4px)" }}>
-                <span style={{ fontFamily: "Georgia,serif", fontSize: "16px", color: "#f0ede8", marginBottom: "8px" }}>Unlock The Spatial Vault</span>
-                <span style={{ fontFamily: "'Courier New',monospace", fontSize: "9px", color: "#E8AE3C", letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: "16px" }}>Premium Subscription Required</span>
-                <a href="/pricing/seeker" style={{ textDecoration: "none", fontFamily: "Georgia,serif", fontSize: "13px", color: "#0e0e0e", background: "#E8AE3C", border: "none", padding: "10px 24px", borderRadius: "2px", cursor: "pointer", display: "inline-block" }}>
-                  Upgrade to Cluster Tier →
-                </a>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-      {matterportUrl && (
-        <div className="vault-item">
-          <h4 style={{ fontFamily: "'Courier New',monospace", fontSize: "10px", color: "#E8AE3C", letterSpacing: "0.18em", textTransform: "uppercase", marginBottom: "4px" }}>
-            360° AR Room Tour
-          </h4>
-          <p style={{ fontFamily: "Georgia,serif", fontStyle: "italic", fontSize: "11px", color: "var(--text-muted, #c8c8c8)", marginBottom: "12px" }}>
-            Illustrative tour — this property&apos;s own 360° capture is in progress
-          </p>
-          <div style={{ position: "relative", width: "100%", height: "400px", borderRadius: "4px", overflow: "hidden", border: "1px solid #262626" }}>
-            <iframe src={hasSubscription ? matterportUrl : undefined} style={{ width: "100%", height: "100%", border: "none", filter: hasSubscription ? "none" : "blur(8px) brightness(0.5)" }} title="360 Tour" />
-            {!hasSubscription && (
-              <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "rgba(22,22,22,0.6)", backdropFilter: "blur(4px)" }}>
-                <span style={{ fontFamily: "Georgia,serif", fontSize: "16px", color: "#f0ede8", marginBottom: "8px" }}>Unlock The Spatial Vault</span>
-                <a href="/pricing/seeker" style={{ textDecoration: "none", fontFamily: "Georgia,serif", fontSize: "13px", color: "#0e0e0e", background: "#E8AE3C", border: "none", padding: "10px 24px", borderRadius: "2px", cursor: "pointer", marginTop: "12px", display: "inline-block" }}>
-                  Upgrade to Cluster Tier →
-                </a>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-      {heatmapUrl && (
-        <div className="vault-item">
-          <h4 style={{ fontFamily: "'Courier New',monospace", fontSize: "10px", color: "#E8AE3C", letterSpacing: "0.18em", textTransform: "uppercase", marginBottom: "12px" }}>
-            Drone Heatmap Analysis
-          </h4>
-          <div style={{ position: "relative", width: "100%", height: "200px", borderRadius: "4px", overflow: "hidden", border: "1px solid #262626" }}>
-            <div style={{ width: "100%", height: "100%", background: "#111", filter: hasSubscription ? "none" : "blur(8px) brightness(0.5)" }} />
-            {!hasSubscription && (
-              <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "rgba(22,22,22,0.6)", backdropFilter: "blur(4px)" }}>
-                <span style={{ fontFamily: "Georgia,serif", fontSize: "16px", color: "#f0ede8", marginBottom: "8px" }}>Unlock The Spatial Vault</span>
-                <a href="/pricing/seeker" style={{ textDecoration: "none", fontFamily: "Georgia,serif", fontSize: "13px", color: "#0e0e0e", background: "#E8AE3C", border: "none", padding: "10px 24px", borderRadius: "2px", cursor: "pointer", marginTop: "12px", display: "inline-block" }}>
-                  Upgrade to Cluster Tier →
-                </a>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
 function DeepIntelWidget({ open, onToggle, fields, values }) {
   // Deep intel unlocks at Solar+. SSR-safe — locked until the client reads the
   // viewer's tier. Solar+ reveals real values from `values` (keyed by label);
@@ -758,13 +686,13 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
         ...(Array.isArray(u.features) ? u.features : []),
       ].filter(Boolean),
       photo: u.photo || u.image || (Array.isArray(u.photos) ? u.photos.find(Boolean) : "") || "",
+      floor_plan_3d_data: u.floor_plan_3d_data || null,
+      operator_id: u.operator_id || null,
       isReal: true,
     }));
   }
 
-  // The currently selected unit object (drives the in-context detail sub-panel).
-  const activeUnitObj =
-    dynamicUnits.find(u => u.name === selectedUnit) || dynamicUnits[0] || null;
+
 
   // ── Photo navigation ──────────────────────────
   const goPrev = () => setCurrentImageIndex(i => (i === 0 ? photos.length - 1 : i - 1));
@@ -1854,76 +1782,39 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
 
               <div className="units-z3-list">
                 {dynamicUnits.map((u, ui) => {
-                  const activeUnit = selectedUnit || (dynamicUnits.length > 0 ? dynamicUnits[0].name : "");
+                  const hasDeepIntel = u.id && (u.floor_plan_3d_data || u.operator_id);
+                  const CardWrapper = hasDeepIntel ? Link : "div";
+                  const wrapperProps = hasDeepIntel 
+                    ? { href: `/property/${d.slug}/unit/${u.id}`, style: { textDecoration: "none" } }
+                    : {};
+                  
                   return (
-                    <div
-                      className={`unit-z3-row ${activeUnit === u.name ? "selected" : ""}`}
+                    <CardWrapper
+                      className={`unit-z3-row ${!hasDeepIntel ? "static-unit" : ""}`}
                       key={u.name}
                       id={`unit-row-${ui}`}
-                      onClick={() => {
-                        setSelectedUnit(u.name);
-                        let targetIndex = 0;
-                        if (u.name.toLowerCase().includes("suite") || u.name.toLowerCase().includes("master")) { targetIndex = 1 % photos.length; }
-                        else if (u.name.toLowerCase().includes("room")) { const num = parseInt(u.name.replace(/\D/g, ""), 10); targetIndex = (isNaN(num) ? 1 : num) % photos.length; }
-                        else if (u.name.toLowerCase().includes("bath") || u.name.toLowerCase().includes("washroom")) { targetIndex = (photos.length - 1) % photos.length; }
-                        else if (u.name.toLowerCase().includes("kitchen") || u.name.toLowerCase().includes("utility")) { targetIndex = 1 % photos.length; }
-                        else { targetIndex = 2 % photos.length; }
-                        if (photos && photos.length > 0) setCurrentImageIndex(targetIndex);
-                      }}
+                      {...wrapperProps}
                     >
-                      <div>
-                        <div style={{fontFamily:"'Courier New',monospace", fontSize:"11px", color: activeUnit === u.name ? "#E8AE3C" : "#c8c8c8", letterSpacing:"0.18em", textTransform:"uppercase", marginBottom:"8px"}}>
-                          UNIT {String(ui + 1).padStart(2, "0")}
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", width: "100%" }}>
+                        <div>
+                          <div style={{fontFamily:"'Courier New',monospace", fontSize:"11px", color: "#c8c8c8", letterSpacing:"0.18em", textTransform:"uppercase", marginBottom:"8px"}}>
+                            UNIT {String(ui + 1).padStart(2, "0")}
+                          </div>
+                          <div className="unit-z3-name">{u.name}</div>
                         </div>
-                        <div className="unit-z3-name">{u.name}</div>
+                        {hasDeepIntel && (
+                          <div style={{fontFamily:"var(--font-mono)", fontSize:"10px", color:"var(--accent)", letterSpacing:"0.3em", textTransform:"uppercase", whiteSpace:"nowrap"}}>
+                            EXPLORE 3D SPACE ✦
+                          </div>
+                        )}
                       </div>
                       <div className="unit-z3-specs">
                         {u.specs.map(s => <span key={s} className="unit-z3-spec">{s}</span>)}
                       </div>
-                    </div>
+                    </CardWrapper>
                   );
                 })}
               </div>
-
-              {/* ── Selected-unit detail sub-panel (in-context, no new page) ── */}
-              {activeUnitObj && (
-                <div style={{marginTop:"28px", border:"0.5px solid #262626", borderRadius:"6px", overflow:"hidden", background:"#121212"}}>
-                  {activeUnitObj.photo ? (
-                    <div style={{width:"100%", aspectRatio:"16 / 9", backgroundImage:`url(${activeUnitObj.photo})`, backgroundSize:"cover", backgroundPosition:"center", transition:"background-image 240ms ease"}}/>
-                  ) : (
-                    <div style={{width:"100%", aspectRatio:"16 / 9", display:"flex", alignItems:"center", justifyContent:"center", background:"#0d0d0d", fontFamily:"'Courier New',monospace", fontSize:"10px", letterSpacing:"0.2em", color:"#6a6a6a", textTransform:"uppercase"}}>
-                      No unit photo provided
-                    </div>
-                  )}
-                  <div style={{padding:"20px 22px"}}>
-                    <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#E8AE3C", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"8px"}}>
-                      Selected Unit — Full Detail
-                    </div>
-                    <div style={{fontFamily:"Georgia,serif", fontSize:"22px", color:"#f0ede8", marginBottom:"14px"}}>
-                      {activeUnitObj.name}
-                    </div>
-                    <div style={{display:"flex", flexWrap:"wrap", gap:"8px"}}>
-                      {activeUnitObj.specs.length > 0 ? (
-                        activeUnitObj.specs.map(s => (
-                          <span key={s} style={{fontFamily:"'Courier New',monospace", fontSize:"11px", color:"#c8c8c8", letterSpacing:"0.08em", border:"0.5px solid #262626", borderRadius:"3px", padding:"6px 10px"}}>{s}</span>
-                        ))
-                      ) : (
-                        <span style={{fontFamily:"'Courier New',monospace", fontSize:"11px", color:"#6a6a6a"}}>No additional specs entered.</span>
-                      )}
-                    </div>
-                    {/* Real units carry a stable id (property_units.id); synthesized
-                        fallback units don&apos;t and have no master page to link to. */}
-                    {activeUnitObj.id && (
-                      <Link
-                        href={`/property/${d.slug}/unit/${activeUnitObj.id}`}
-                        style={{display:"inline-block", marginTop:"16px", fontFamily:"'Courier New',monospace", fontSize:"11px", color:"#E8AE3C", letterSpacing:"0.1em", textTransform:"uppercase", textDecoration:"none"}}
-                      >
-                        View Unit Master Page →
-                      </Link>
-                    )}
-                  </div>
-                </div>
-              )}
 
               {/* Units deep intel merged into Universe */}
 
@@ -1960,19 +1851,17 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                   <div className="sidebar-label" style={{marginBottom:"10px"}}>Unit Index</div>
                   <div style={{display:"flex", flexDirection:"column", gap:"2px"}}>
                     {dynamicUnits.map((u, ui) => {
-                      const activeUnit = selectedUnit || dynamicUnits[0].name;
                       return (
                         <button
                           key={u.name}
                           onClick={() => {
-                            setSelectedUnit(u.name);
                             const el = document.getElementById(`unit-row-${ui}`);
                             if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
                           }}
                           style={{display:"flex", alignItems:"baseline", gap:"10px", width:"100%", textAlign:"left", background:"none", border:"none", borderBottom:"1px solid #262626", padding:"9px 0", cursor:"pointer"}}
                         >
-                          <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color: activeUnit === u.name ? "#E8AE3C" : "#6a6a6a", letterSpacing:"0.12em", flexShrink:0}}>{String(ui + 1).padStart(2, "0")}</span>
-                          <span style={{fontFamily:"Georgia,serif", fontSize:"13px", color: activeUnit === u.name ? "#f0ede8" : "#c8c8c8", lineHeight:1.3}}>{u.name}</span>
+                          <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color: "#6a6a6a", letterSpacing:"0.12em", flexShrink:0}}>{String(ui + 1).padStart(2, "0")}</span>
+                          <span style={{fontFamily:"Georgia,serif", fontSize:"13px", color: "#c8c8c8", lineHeight:1.3}}>{u.name}</span>
                         </button>
                       );
                     })}

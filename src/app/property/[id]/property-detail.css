@@ -392,7 +392,9 @@
 .zone-story::after { content: ''; position: absolute; bottom: -80px; left: 15%; width: 45%; height: 160px; background: radial-gradient(ellipse, rgba(var(--accent-rgb), 0.04) 0%, transparent 70%); pointer-events: none; }
 .units-z3-list { display: flex; flex-direction: column; gap: 8px; }
 .unit-z3-row { display: grid; grid-template-columns: 1fr 2.4fr; gap: 20px; align-items: start; padding: 20px 22px; border-radius: 5px; background: linear-gradient(165deg, #1a1917, #111110); border: 0.5px solid var(--border); cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s; scroll-margin-top: 120px; }
+.unit-z3-row.static-unit { cursor: default; }
 .unit-z3-row:hover { border-color: var(--border-mid); transform: translateY(-2px); box-shadow: var(--shadow-glow-soft, 0 0 24px rgba(232, 174, 60, 0.18)); }
+.unit-z3-row.static-unit:hover { transform: none; border-color: var(--border); box-shadow: none; }
 .unit-z3-row.selected { background: var(--accent-dim); border-color: var(--accent); border-left: 3px solid var(--accent); }
 .unit-z3-name { font-family: Georgia, serif; font-size: 22px; font-weight: 500; color: #f0ede8; padding-top: 2px; letter-spacing: 0.01em; }
 .unit-z3-specs { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 4px; }

@@ -505,7 +505,15 @@ export function DashboardProvider({ children }) {
       completeness_score: listing.completenessScore,
       verified: listing.verified,
       pipeline_status: 'pending',
-      details: listing.details || {},
+      // Persist the uploaded photo URLs (Supabase Storage) inside details so
+      // the publish route — which re-reads the row from Supabase — can mirror
+      // them into Airtable's Photos/Image columns for the public page.
+      details: {
+        ...(listing.details || {}),
+        ...(Array.isArray(listing.photos) && listing.photos.filter(Boolean).length
+          ? { photos: listing.photos.filter(Boolean) }
+          : {}),
+      },
       coordinates
     }]).select();
 

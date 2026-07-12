@@ -12,7 +12,7 @@ import "./InquiryModal.css";
 // broker roster, a token key nothing else in the app writes to, and it
 // swallows all fetch errors) — extending a non-functional mock would ship a
 // unit contact flow that looks like it works but doesn't.
-export default function UnitInquiryModal({ isOpen, onClose, propertyTitle, propertySlug, unitId, unitName, operatorDisplayName }) {
+export default function UnitInquiryModal({ isOpen, onClose, propertyTitle, propertySlug, unitId, unitName, operatorDisplayName, prefillMessage = "" }) {
   const [status, setStatus] = useState("composing"); // composing, submitting, success, error
   const [errorMsg, setErrorMsg] = useState("");
 
@@ -95,6 +95,7 @@ export default function UnitInquiryModal({ isOpen, onClose, propertyTitle, prope
                   name="message"
                   rows="4"
                   required
+                  defaultValue={prefillMessage}
                   placeholder={`Hi, I'm interested in ${unitName}. Is it currently available?`}
                 ></textarea>
               </div>

@@ -19,6 +19,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 ScoutIt uses two separate databases for two different jobs. **Do not mix them up.**
 1. **AIRTABLE = Public Read-Only Content.** All public properties, articles, and brokers displayed on the website are fetched from Airtable via the central proxy `src/app/api/cms/route.js`.
 2. **SUPABASE = Private User Data & Submissions.** Supabase handles User Authentication and stores private dashboard state (saved properties). When an Owner submits a new property via the Dashboard, it goes to Supabase, NOT Airtable.
+3. **The bridge (publish):** when an owner PUBLISHES, `/api/dashboard/publish` syncs the Supabase row to Airtable automatically. Airtable's `Slug` is a **formula field** (computed from Title, not writable) — the publish route reads the computed slug back and saves it to Supabase, so **Airtable is the single source of slug truth**. Never write `Slug` in an Airtable payload, and never invent an app-side slug for a published property (this exact drift broke the Contact button on 3 live properties; fixed 2026-07-11).
 
 ## 3. MAPBOX & GEOCODING
 - Owners do not manually type Coordinates into Airtable.

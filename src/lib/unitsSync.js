@@ -39,6 +39,10 @@ export async function syncPropertyUnitsToAirtable(serviceClient, property) {
     price: u.price || "",
     operator_id: u.operator_id || null,
     operator_display_name: u.operator_id ? displayNames[u.operator_id] || null : null,
+    // Unit Master Page rich fields — pass straight through into Units_JSON so
+    // the public page (airtable.js parses Units_JSON verbatim) can render them.
+    details: u.details || {},
+    subdivision_scenarios: u.subdivision_scenarios || [],
   }));
 
   if (property.slug) {

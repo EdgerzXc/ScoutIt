@@ -2,9 +2,10 @@
 
 import { useState, useMemo } from "react";
 import {
-  Upload, Trash2, X, Plus, Copy, ChevronDown, ChevronRight, Search, Layers, Lock,
+  Upload, Trash2, X, Plus, Copy, ChevronDown, ChevronRight, Search, Layers, Lock, Split, SlidersHorizontal,
 } from "lucide-react";
 import PhotoUploader from "./PhotoUploader";
+import UnitDetailsDrawer from "./UnitDetailsDrawer";
 import { uploadPropertyPhoto } from "../../lib/storage";
 
 const UNASSIGNED = "__unassigned__";
@@ -25,6 +26,13 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
   const [activePhotoUnit, setActivePhotoUnit] = useState(null);
   const [uploadingUnitId, setUploadingUnitId] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
+
+  const [subdivideUnitId, setSubdivideUnitId] = useState(null);
+  const [subdivideQty, setSubdivideQty] = useState(2);
+  const [subdivideSqm, setSubdivideSqm] = useState("");
+
+  // The unit whose rich Unit Master Page editor (drawer) is open.
+  const [detailsUnitId, setDetailsUnitId] = useState(null);
 
   const [search, setSearch] = useState("");
   const [collapsedFloors, setCollapsedFloors] = useState(() => new Set());
@@ -77,8 +85,36 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
       name: src.name ? `${src.name} (copy)` : "",
       features: [...(src.features || [])],
       photos: [], // photos don't carry over to a fresh unit
+      // Deep-clone the rich fields so the duplicate carries the Master Page
+      // details + subdivision scenarios (incl. any generated 3D data) without
+      // sharing references — matches the spec's "Duplicate clones the 3D data".
+      details: JSON.parse(JSON.stringify(src.details || {})),
+      subdivisionScenarios: JSON.parse(JSON.stringify(src.subdivisionScenarios || [])),
     };
     commit([...units.slice(0, idx + 1), copy, ...units.slice(idx + 1)]);
+  };
+
+  const executeSubdivide = () => {
+    if (!subdivideUnitId) return;
+    const qty = Math.max(2, parseInt(subdivideQty, 10) || 2);
+    const sqm = subdivideSqm.trim() || "";
+    
+    const idx = units.findIndex((u) => u.id === subdivideUnitId);
+    if (idx === -1) return;
+    
+    const src = units[idx];
+    const newUnits = Array.from({ length: qty }, (_, i) => ({
+      ...src,
+      id: newId(),
+      name: `${src.name || "Unit"} (Subdivided ${i + 1})`,
+      size: sqm,
+      features: [...(src.features || [])],
+      photos: [],
+      availabilityStatus: "available"
+    }));
+    
+    commit([...units.slice(0, idx + 1), ...newUnits, ...units.slice(idx + 1)]);
+    setSubdivideUnitId(null);
   };
 
   const removeUnit = (id) => {
@@ -472,7 +508,16 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                             {/* Row actions — never available in operator mode or for delegated rows */}
                             <td className="p-2.5 align-top text-center whitespace-nowrap">
                               {!isOperatorMode && !lockedForOwner && (
-                                <div className="inline-flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div className="inline-flex items-center gap-1">
+                                  {/* Always visible — the drill-in Unit Master Page editor */}
+                                  <button
+                                    onClick={() => setDetailsUnitId(unit.id)}
+                                    className="p-2 rounded border border-surface-variant text-text-secondary hover:bg-gold-accent/10 hover:text-gold-accent hover:border-gold-accent transition-colors"
+                                    title="Edit Unit Master Page (details & subdivision options)"
+                                  >
+                                    <SlidersHorizontal size={15} />
+                                  </button>
+                                  <span className="inline-flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                   <button
                                     onClick={() => duplicateUnit(unit.id)}
                                     className="p-2 rounded hover:bg-gold-accent/10 text-text-muted hover:text-gold-accent transition-colors"
@@ -481,12 +526,20 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                                     <Copy size={15} />
                                   </button>
                                   <button
+                                    onClick={() => setSubdivideUnitId(unit.id)}
+                                    className="p-2 rounded hover:bg-gold-accent/10 text-text-muted hover:text-gold-accent transition-colors"
+                                    title="Subdivide unit"
+                                  >
+                                    <Split size={15} />
+                                  </button>
+                                  <button
                                     onClick={() => removeUnit(unit.id)}
                                     className="p-2 rounded hover:bg-error/10 text-text-muted hover:text-error transition-colors"
                                     title="Delete unit"
                                   >
                                     <Trash2 size={15} />
                                   </button>
+                                  </span>
                                 </div>
                               )}
                             </td>
@@ -576,6 +629,67 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                 </div>
               );
             })()}
+          </div>
+        </div>
+      )}
+
+      {/* Unit Master Page drill-in editor */}
+      {detailsUnitId && (() => {
+        const du = units.find((u) => u.id === detailsUnitId);
+        if (!du) return null;
+        return (
+          <UnitDetailsDrawer
+            unit={du}
+            isPro={isPro}
+            onClose={() => setDetailsUnitId(null)}
+            onDetail={(key, value) => {
+              const cur = units.find((u) => u.id === detailsUnitId);
+              updateUnit(detailsUnitId, "details", { ...(cur?.details || {}), [key]: value }, true);
+            }}
+            onScenarios={(arr) => updateUnit(detailsUnitId, "subdivisionScenarios", arr, true)}
+          />
+        );
+      })()}
+
+      {/* Subdivide Modal */}
+      {subdivideUnitId && (
+        <div className="fixed inset-0 z-[3000] bg-background/90 backdrop-blur-md flex items-center justify-center p-4 animate-[fadeIn_0.2s_ease]">
+          <div className="bg-[#121110] border border-gold-accent/30 rounded-lg p-6 max-w-sm w-full shadow-2xl">
+            <h3 className="font-display-md text-xl text-gold-accent mb-4">Subdivide Space</h3>
+            <div className="mb-4">
+              <label className="block text-[11px] text-text-secondary uppercase tracking-widest font-label-caps mb-1">How many spaces are you dividing this into?</label>
+              <input
+                type="number"
+                min={2}
+                value={subdivideQty}
+                onChange={(e) => setSubdivideQty(e.target.value)}
+                className="w-full bg-surface-alt border border-surface-variant rounded px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-gold-accent transition-colors"
+              />
+            </div>
+            <div className="mb-6">
+              <label className="block text-[11px] text-text-secondary uppercase tracking-widest font-label-caps mb-1">Average Sqm per space?</label>
+              <input
+                type="text"
+                placeholder="e.g. 50"
+                value={subdivideSqm}
+                onChange={(e) => setSubdivideSqm(e.target.value)}
+                className="w-full bg-surface-alt border border-surface-variant rounded px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-gold-accent transition-colors"
+              />
+            </div>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setSubdivideUnitId(null)}
+                className="px-4 py-2 text-sm text-text-muted hover:text-text-primary transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={executeSubdivide}
+                className="bg-gold-accent text-background font-working-title font-bold px-4 py-2 rounded text-sm hover:bg-gold-accent-hover transition-colors"
+              >
+                Subdivide
+              </button>
+            </div>
           </div>
         </div>
       )}
