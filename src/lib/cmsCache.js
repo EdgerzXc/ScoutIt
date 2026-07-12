@@ -15,6 +15,19 @@ import {
   fetchIntel,
   fetchHomepageConfig,
 } from "@/lib/airtable";
+import { Redis } from '@upstash/redis';
+
+let redis = null;
+if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+  try {
+    redis = new Redis({
+      url: process.env.UPSTASH_REDIS_REST_URL,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN,
+    });
+  } catch (err) {
+    console.error("[CMS] Failed to initialize Redis:", err.message);
+  }
+}
 
 const FRESH_TTL_MS = 60 * 1000; // serve from memory for 60s
 const EMPTY_BUNDLE = {
@@ -97,12 +110,32 @@ export async function getCmsBundle() {
   if (cache.bundle && now - cache.fetchedAt < FRESH_TTL_MS) {
     return cache.bundle;
   }
+  
+  if (redis) {
+    try {
+      const cachedBundle = await redis.get('cms_bundle');
+      if (cachedBundle) {
+        cache = { bundle: cachedBundle, fetchedAt: now };
+        return { ...cachedBundle, source: 'upstash_redis' };
+      }
+    } catch (err) {
+      console.error("[CMS] Redis fetch failed:", err.message);
+    }
+  }
+
   if (inflight) return inflight;
 
   inflight = buildBundle()
-    .then((bundle) => {
+    .then(async (bundle) => {
       cache = { bundle, fetchedAt: Date.now() };
       inflight = null;
+      if (redis && bundle.source === 'airtable') {
+        try {
+          await redis.set('cms_bundle', bundle, { ex: 600 }); // Cache for 10 minutes
+        } catch (err) {
+          console.error("[CMS] Redis set failed:", err.message);
+        }
+      }
       return bundle;
     })
     .catch((error) => {

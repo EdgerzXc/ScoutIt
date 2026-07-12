@@ -854,6 +854,41 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
     ));
   };
 
+  // ── PDF Tear-Sheet Generation ─────────────────
+  const handleDownloadPdf = async () => {
+    const element = document.querySelector('.page');
+    if (!element) return;
+    
+    try {
+      const html2pdf = (await import('html2pdf.js')).default;
+      const opt = {
+        margin:       [0.5, 0.5, 0.5, 0.5],
+        filename:     `ScoutIt_${d.title.replace(/\s+/g, '_')}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true, logging: false },
+        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+      };
+      
+      // Temporarily hide elements that shouldn't be in the PDF
+      const nav = element.querySelector('.zone-nav');
+      const mobileHero = element.querySelector('.mobile-hero-intel');
+      const inquiryBar = document.querySelector('.inquiry-bar');
+      
+      if (nav) nav.style.display = 'none';
+      if (mobileHero) mobileHero.style.display = 'none';
+      if (inquiryBar) inquiryBar.style.display = 'none';
+      
+      await html2pdf().set(opt).from(element).save();
+      
+      // Restore elements
+      if (nav) nav.style.display = '';
+      if (mobileHero) mobileHero.style.display = '';
+      if (inquiryBar) inquiryBar.style.display = '';
+    } catch (err) {
+      console.error("[PDF] Generation failed:", err);
+    }
+  };
+
   // ══════════════════════════════════════════════
   // RENDER
   // ══════════════════════════════════════════════
@@ -913,13 +948,19 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
             <h1 className="hero-title">{d.title}</h1>
             <p className="hero-location">{d.location || d.city || null}</p>
             <p className="hero-hook">{d.hook}</p>
-            {isOwner && (
-              <div style={{ marginTop: '24px' }}>
-                <Link href={`/dashboard?edit=${d.id}`} className="font-working-title text-sm tracking-widest text-[#0e0e0e] bg-gold-accent px-6 py-3 rounded hover:bg-[#e6a600] transition-colors uppercase font-bold inline-block border border-gold-accent shadow-[0_0_15px_rgba(232,174,60,0.4)] cursor-pointer">
-                  Edit Property Dossier
+            <div style={{ marginTop: '24px', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+              <button 
+                onClick={(e) => { e.stopPropagation(); handleDownloadPdf(); }}
+                className="font-working-title text-sm tracking-widest text-background bg-gold-accent px-6 py-3 rounded hover:opacity-90 transition-opacity uppercase font-bold inline-flex items-center gap-2 border border-gold-accent shadow-[0_0_15px_rgba(232,174,60,0.4)] cursor-pointer"
+              >
+                <span>🖨️</span> Download Tear-Sheet
+              </button>
+              {isOwner && (
+                <Link href={`/dashboard?edit=${d.id}`} className="font-working-title text-sm tracking-widest text-text-secondary bg-surface-alt px-6 py-3 rounded hover:text-on-surface transition-colors uppercase font-bold inline-block border border-surface-variant cursor-pointer">
+                  Edit Dossier
                 </Link>
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
 

@@ -9,9 +9,7 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
   const routeLayerRef = useRef(null);
 
   const [mapLoaded, setMapLoaded] = useState(false);
-  const [propertyPixel, setPropertyPixel] = useState({ x: 0, y: 0 });
   const [hoveredAmenity, setHoveredAmenity] = useState(null);
-  const [hoveredPixel, setHoveredPixel] = useState(null);
   const [routeInfo, setRouteInfo] = useState(null);
 
 
@@ -119,7 +117,6 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
         });
 
         marker.on("mouseover", () => {
-          const itemPoint = map.latLngToContainerPoint(itemPosition);
           const data = {
             id: index,
             name: item.name,
@@ -129,13 +126,13 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
           };
           hoveredRef.current = data;
           setHoveredAmenity(data);
-          setHoveredPixel({ x: itemPoint.x, y: itemPoint.y });
+          updatePositions();
         });
 
         marker.on("mouseout", () => {
           hoveredRef.current = null;
           setHoveredAmenity(null);
-          setHoveredPixel(null);
+          updatePositions();
         });
       });
 
@@ -228,11 +225,34 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
         if (!mapInstance.current) return;
         try {
           const pPoint = map.latLngToContainerPoint(position);
-          setPropertyPixel({ x: pPoint.x, y: pPoint.y });
-
+          
+          const r1 = document.getElementById("radar-ring-1");
+          const r2 = document.getElementById("radar-ring-2");
+          const r3 = document.getElementById("radar-ring-3");
+          const r4 = document.getElementById("radar-ring-4");
+          const sw = document.getElementById("radar-sweep");
+          const ll = document.getElementById("radar-lock-line");
+          const lr = document.getElementById("radar-lock-ring");
+          
+          if (r1) { r1.setAttribute('cx', pPoint.x); r1.setAttribute('cy', pPoint.y); }
+          if (r2) { r2.setAttribute('cx', pPoint.x); r2.setAttribute('cy', pPoint.y); }
+          if (r3) { r3.setAttribute('cx', pPoint.x); r3.setAttribute('cy', pPoint.y); }
+          if (r4) { r4.setAttribute('cx', pPoint.x); r4.setAttribute('cy', pPoint.y); }
+          if (sw) { 
+            sw.setAttribute('x1', pPoint.x); sw.setAttribute('y1', pPoint.y); 
+            sw.setAttribute('x2', pPoint.x); sw.setAttribute('y2', pPoint.y - 150); 
+            sw.style.transformOrigin = `${pPoint.x}px ${pPoint.y}px`;
+          }
+          
           if (hoveredRef.current) {
             const tPoint = map.latLngToContainerPoint(hoveredRef.current.latlng);
-            setHoveredPixel({ x: tPoint.x, y: tPoint.y });
+            if (ll) {
+              ll.setAttribute('x1', pPoint.x); ll.setAttribute('y1', pPoint.y);
+              ll.setAttribute('x2', tPoint.x); ll.setAttribute('y2', tPoint.y);
+            }
+            if (lr) {
+              lr.setAttribute('cx', tPoint.x); lr.setAttribute('cy', tPoint.y);
+            }
           }
         } catch (e) {
           // Ignore Leaflet not being fully initialized (e.g. _leaflet_pos undefined)
@@ -321,34 +341,36 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
       {mapLoaded && (
         <svg className="hud-radar-svg-overlay">
           {/* Concentric rings centered on property pin */}
-          <circle cx={propertyPixel.x} cy={propertyPixel.y} r="50" className="leaflet-radar-ring" />
-          <circle cx={propertyPixel.x} cy={propertyPixel.y} r="100" className="leaflet-radar-ring" />
-          <circle cx={propertyPixel.x} cy={propertyPixel.y} r="150" className="leaflet-radar-ring" />
-          <circle cx={propertyPixel.x} cy={propertyPixel.y} r="150" className="leaflet-radar-ring outer" strokeDasharray="1 3" />
+          <circle id="radar-ring-1" cx="0" cy="0" r="50" className="leaflet-radar-ring" />
+          <circle id="radar-ring-2" cx="0" cy="0" r="100" className="leaflet-radar-ring" />
+          <circle id="radar-ring-3" cx="0" cy="0" r="150" className="leaflet-radar-ring" />
+          <circle id="radar-ring-4" cx="0" cy="0" r="150" className="leaflet-radar-ring outer" strokeDasharray="1 3" />
 
           {/* Sweeper sweep line */}
           <line 
-            x1={propertyPixel.x} 
-            y1={propertyPixel.y} 
-            x2={propertyPixel.x} 
-            y2={propertyPixel.y - sweepLength} 
+            id="radar-sweep"
+            x1="0" 
+            y1="0" 
+            x2="0" 
+            y2="-150" 
             className="leaflet-radar-sweep animated" 
-            style={{ transformOrigin: `${propertyPixel.x}px ${propertyPixel.y}px` }}
           />
 
           {/* Target lock dashed vector line to hovered target pin */}
-          {hoveredAmenity && hoveredPixel && (
+          {hoveredAmenity && (
             <>
               <line
-                x1={propertyPixel.x}
-                y1={propertyPixel.y}
-                x2={hoveredPixel.x}
-                y2={hoveredPixel.y}
+                id="radar-lock-line"
+                x1="0"
+                y1="0"
+                x2="0"
+                y2="0"
                 className="leaflet-radar-lock-line"
               />
               <circle
-                cx={hoveredPixel.x}
-                cy={hoveredPixel.y}
+                id="radar-lock-ring"
+                cx="0"
+                cy="0"
                 r="10"
                 className="leaflet-radar-lock-ring"
               />
