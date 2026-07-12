@@ -9,11 +9,13 @@ import VaultOfHonor from "./VaultOfHonor";
 
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import circle from '@turf/circle';
 
 export default function BuyerMode() {
   const [showMap, setShowMap] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [radius, setRadius] = useState("any");
+  const [radius, setRadius] = useState("5");
+  const [radarCenter, setRadarCenter] = useState(null);
   // Area watch — device-local (same pattern as the Ledger), so the toggle is
   // real state instead of a fire-and-forget toast that pretends to subscribe.
   const [areaWatch, setAreaWatch] = useState(false);
@@ -38,6 +40,14 @@ export default function BuyerMode() {
   }, [listings, searchQuery]);
 
   const [mapError, setMapError] = useState(null);
+  const [mapLoaded, setMapLoaded] = useState(false);
+
+  // Initialize searchByRadius to 5km on mount so the list matches the map overlay
+  useEffect(() => {
+    setRadarCenter(DEFAULT_MAP_CENTER);
+    searchByRadius("5", DEFAULT_MAP_CENTER[0], DEFAULT_MAP_CENTER[1]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // 1. Initialize Mapbox (now MapLibre)
   useEffect(() => {
@@ -65,7 +75,53 @@ export default function BuyerMode() {
         // Ensure the map resizes correctly if the container layout changes
         map.on('load', () => {
           map.resize();
+
+          // Add radar source and layers
+          if (!map.getSource('radar-source')) {
+            map.addSource('radar-source', {
+              type: 'geojson',
+              data: { type: 'FeatureCollection', features: [] }
+            });
+            map.addLayer({
+              id: 'radar-fill',
+              type: 'fill',
+              source: 'radar-source',
+              paint: {
+                'fill-color': '#E8AE3C',
+                'fill-opacity': 0.1
+              }
+            });
+            map.addLayer({
+              id: 'radar-stroke',
+              type: 'line',
+              source: 'radar-source',
+              paint: {
+                'line-color': '#E8AE3C',
+                'line-width': 2,
+                'line-opacity': 0.8,
+                'line-dasharray': [2, 2]
+              }
+            });
+          }
+          setMapLoaded(true);
+
+          // Add draggable radar center pin
+          const radarMarkerEl = document.createElement('div');
+          radarMarkerEl.className = 'w-6 h-6 rounded-full border-2 border-gold-accent bg-gold-accent/20 cursor-move flex items-center justify-center backdrop-blur-sm shadow-[0_0_15px_rgba(232,174,60,0.5)]';
+          const innerDot = document.createElement('div');
+          innerDot.className = 'w-2 h-2 rounded-full bg-gold-accent';
+          radarMarkerEl.appendChild(innerDot);
+
+          const radarMarker = new maplibregl.Marker({ element: radarMarkerEl, draggable: true })
+            .setLngLat(DEFAULT_MAP_CENTER)
+            .addTo(map);
+
+          radarMarker.on('dragend', () => {
+            const lngLat = radarMarker.getLngLat();
+            setRadarCenter([lngLat.lng, lngLat.lat]);
+          });
         });
+
         setTimeout(() => {
           if (mapInstance.current) mapInstance.current.resize();
         }, 500);
@@ -144,11 +200,39 @@ export default function BuyerMode() {
     });
   }, [showMap, filteredListings]);
 
-  // Handle Radius Change
+  // 3. Sync Radar Overlay
+  useEffect(() => {
+    if (!mapInstance.current || !mapLoaded || !showMap || !radarCenter) return;
+    const map = mapInstance.current;
+    if (!map.getSource('radar-source')) return;
+
+    if (radius === 'any') {
+      map.getSource('radar-source').setData({ type: 'FeatureCollection', features: [] });
+    } else {
+      const radiusKm = parseFloat(radius);
+      if (!isNaN(radiusKm)) {
+        try {
+          const radarCircle = circle(radarCenter, radiusKm, { steps: 64, units: 'kilometers' });
+          map.getSource('radar-source').setData(radarCircle);
+        } catch (err) {
+          console.error("Error drawing radar circle:", err);
+        }
+      }
+    }
+  }, [mapLoaded, radius, radarCenter, showMap]);
+
+  // Update search list when radarCenter changes
+  useEffect(() => {
+    if (radarCenter) {
+      searchByRadius(radius, radarCenter[0], radarCenter[1]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [radarCenter]);
+
   const handleRadiusChange = (e) => {
     const val = e.target.value;
     setRadius(val);
-    searchByRadius(val);
+    searchByRadius(val, radarCenter ? radarCenter[0] : DEFAULT_MAP_CENTER[0], radarCenter ? radarCenter[1] : DEFAULT_MAP_CENTER[1]);
     if (val !== 'any') {
       addToast(`Radar set to ${val}km`, "📡");
     } else {
@@ -285,7 +369,7 @@ export default function BuyerMode() {
           
           {/* Proximity / Radius Filter */}
           <select 
-            className="bg-surface border border-surface-variant rounded-full px-4 py-3 text-sm text-on-surface focus:outline-none focus:border-gold-accent transition-colors cursor-pointer w-full md:w-auto appearance-none"
+            className="bg-surface border border-surface-variant rounded-full px-4 py-3 text-sm text-on-surface focus:outline-none focus:border-gold-accent transition-colors cursor-pointer w-full md:w-auto"
             value={radius}
             onChange={handleRadiusChange}
           >
@@ -324,7 +408,7 @@ export default function BuyerMode() {
           )}
           <div ref={mapContainerRef} style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }} />
           
-          <div className="absolute bottom-6 left-6 z-10">
+          <div className="absolute bottom-6 left-6 z-10 flex flex-col gap-2">
             <div className="bg-background/90 backdrop-blur border border-surface-variant p-4 rounded shadow-lg">
               <div className="text-[10px] font-label-caps tracking-widest text-gold-accent mb-1 uppercase">
                 Spatial Intelligence
@@ -332,6 +416,17 @@ export default function BuyerMode() {
               <div className="font-working-title text-on-surface">{filteredListings.filter(l => l.coordinates).length} properties in radar</div>
               {radius !== 'any' && <div className="text-xs text-text-secondary mt-1">{radius}km radius from Makati CBD</div>}
             </div>
+            
+            <select
+              className="bg-background/90 backdrop-blur border border-surface-variant text-on-surface text-sm rounded px-3 py-2 w-full focus:outline-none focus:border-gold-accent transition-colors cursor-pointer"
+              value={radius}
+              onChange={handleRadiusChange}
+            >
+              <option value="any">Search: Metro Manila Wide</option>
+              <option value="3">Within 3km (Makati/BGC Core)</option>
+              <option value="5">Within 5km</option>
+              <option value="10">Within 10km</option>
+            </select>
           </div>
             
             <button 

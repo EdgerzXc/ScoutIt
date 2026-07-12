@@ -11,8 +11,12 @@ import TaskRail from "./crm/TaskRail";
 import DealTimeline from "./crm/DealTimeline";
 import { computeListingStrength } from "../../lib/listingStrength";
 
+import maplibregl from 'maplibre-gl';
+import 'maplibre-gl/dist/maplibre-gl.css';
+import circle from '@turf/circle';
+
 export default function BrokerMode() {
-  const { connects, listings, pitches, sendPitch, updatePitchStatus, currentUser, addToast } = useDashboard();
+  const { connects, listings, pitches, sendPitch, updatePitchStatus, currentUser, addToast, searchByRadius, MAPBOX_TOKEN, DEFAULT_MAP_CENTER } = useDashboard();
 
   const [pitchingListing, setPitchingListing] = useState(null);
   const [pitchMessage, setPitchMessage] = useState("");
@@ -46,6 +50,36 @@ export default function BrokerMode() {
   const [taskSummary, setTaskSummary] = useState(null);
   const handleTaskSummary = useCallback((summary) => setTaskSummary(summary), []);
 
+  // Map State & Refs
+  const [showMap, setShowMap] = useState(false);
+  const [radius, setRadius] = useState("5");
+  const [radarCenter, setRadarCenter] = useState(null);
+  const [mapError, setMapError] = useState(null);
+  const [mapLoaded, setMapLoaded] = useState(false);
+
+  // Initialize searchByRadius to 5km on mount so the list matches the map overlay
+  useEffect(() => {
+    setRadarCenter(DEFAULT_MAP_CENTER);
+    searchByRadius("5", DEFAULT_MAP_CENTER[0], DEFAULT_MAP_CENTER[1]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const mapContainerRef = useRef(null);
+  const mapInstance = useRef(null);
+  const markersRef = useRef([]);
+
+
+
+  const handleRadiusChange = (e) => {
+    const val = e.target.value;
+    setRadius(val);
+    searchByRadius(val, radarCenter ? radarCenter[0] : DEFAULT_MAP_CENTER[0], radarCenter ? radarCenter[1] : DEFAULT_MAP_CENTER[1]);
+    if (val !== 'any') {
+      if (addToast) addToast(`Radar set to ${val}km`, "📡");
+    } else {
+      if (addToast) addToast(`Radar removed. Showing all.`, "🌍");
+    }
+  };
+
   // ⚡ Bolt Optimization: Memoize derived pipelines
   const { myPitches, pending, accepted, activePitches, feed } = useMemo(() => {
     const _myPitches = pitches.filter(p => p.isCurrentUserBroker);
@@ -71,6 +105,177 @@ export default function BrokerMode() {
       feed: _feed
     };
   }, [pitches, listings]);
+
+  // 1. Initialize Mapbox
+  useEffect(() => {
+    if (showMap && mapContainerRef.current) {
+      try {
+        setMapError(null);
+        const map = new maplibregl.Map({
+          container: mapContainerRef.current,
+          style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+          center: DEFAULT_MAP_CENTER || [121.0215, 14.5547],
+          zoom: 12,
+          pitch: 45
+        });
+
+        map.on('error', (e) => {
+          if (e && e.error) setMapError(e.error.message || 'Unknown Mapbox Error');
+        });
+
+        map.addControl(new maplibregl.NavigationControl(), 'top-right');
+        mapInstance.current = map;
+
+        map.on('load', () => {
+          map.resize();
+
+          // Add radar source and layers
+          if (!map.getSource('radar-source')) {
+            map.addSource('radar-source', {
+              type: 'geojson',
+              data: { type: 'FeatureCollection', features: [] }
+            });
+            map.addLayer({
+              id: 'radar-fill',
+              type: 'fill',
+              source: 'radar-source',
+              paint: {
+                'fill-color': '#E8AE3C',
+                'fill-opacity': 0.1
+              }
+            });
+            map.addLayer({
+              id: 'radar-stroke',
+              type: 'line',
+              source: 'radar-source',
+              paint: {
+                'line-color': '#E8AE3C',
+                'line-width': 2,
+                'line-opacity': 0.8,
+                'line-dasharray': [2, 2]
+              }
+            });
+          }
+          setMapLoaded(true);
+
+          // Add draggable radar center pin
+          const radarMarkerEl = document.createElement('div');
+          radarMarkerEl.className = 'w-6 h-6 rounded-full border-2 border-gold-accent bg-gold-accent/20 cursor-move flex items-center justify-center backdrop-blur-sm shadow-[0_0_15px_rgba(232,174,60,0.5)]';
+          const innerDot = document.createElement('div');
+          innerDot.className = 'w-2 h-2 rounded-full bg-gold-accent';
+          radarMarkerEl.appendChild(innerDot);
+
+          const radarMarker = new maplibregl.Marker({ element: radarMarkerEl, draggable: true })
+            .setLngLat(DEFAULT_MAP_CENTER)
+            .addTo(map);
+
+          radarMarker.on('dragend', () => {
+            const lngLat = radarMarker.getLngLat();
+            setRadarCenter([lngLat.lng, lngLat.lat]);
+          });
+        });
+
+        setTimeout(() => { if (mapInstance.current) mapInstance.current.resize(); }, 500);
+
+        return () => {
+          map.remove();
+          mapInstance.current = null;
+        };
+      } catch (err) {
+        setMapError(err.message || String(err));
+      }
+    }
+  }, [showMap, DEFAULT_MAP_CENTER]);
+
+  // 2. Sync Markers with Feed
+  useEffect(() => {
+    if (!mapInstance.current || !showMap) return;
+
+    markersRef.current.forEach(m => m.remove());
+    markersRef.current = [];
+
+    feed.forEach(listing => {
+      let coords = null;
+      if (listing.coordinates) {
+        const match = listing.coordinates.match(/POINT\(([^ ]+) ([^)]+)\)/);
+        if (match) {
+          coords = [parseFloat(match[1]), parseFloat(match[2])];
+        }
+      } else if (listing.lng && listing.lat) {
+        coords = [listing.lng, listing.lat];
+      }
+
+      if (coords) {
+        const el = document.createElement('div');
+        el.className = 'w-8 h-8 rounded-full bg-gold-accent flex items-center justify-center text-sm shadow-[0_0_15px_rgba(232,174,60,0.6)] cursor-pointer hover:scale-110 transition-transform text-background font-bold border-2 border-[#121212] z-10';
+        el.innerHTML = listing.hasMedia ? '📸' : '🏢';
+
+        const popupContent = document.createElement('div');
+        popupContent.className = 'bg-[#121110] border border-gold-accent/20 p-4 rounded-lg shadow-xl w-60';
+        
+        const typeEl = document.createElement('div');
+        typeEl.className = 'text-[10px] text-gold-accent font-label-caps uppercase tracking-widest mb-1';
+        typeEl.textContent = listing.type || listing.spaceCategory || 'Property';
+        
+        const titleEl = document.createElement('div');
+        titleEl.className = 'text-sm font-working-title text-white truncate mb-1';
+        titleEl.textContent = listing.title;
+        
+        const locEl = document.createElement('div');
+        locEl.className = 'text-xs text-text-secondary truncate mb-3';
+        locEl.textContent = listing.loc || listing.location;
+        
+        const linkEl = document.createElement('a');
+        linkEl.href = `/property/${listing.slug || listing.id}`;
+        linkEl.className = 'block text-center w-full text-[10px] font-label-caps tracking-widest uppercase bg-gold-accent/10 hover:bg-gold-accent/20 text-gold-accent py-2 rounded transition-colors';
+        linkEl.textContent = 'View Property';
+        
+        popupContent.appendChild(typeEl);
+        popupContent.appendChild(titleEl);
+        popupContent.appendChild(locEl);
+        popupContent.appendChild(linkEl);
+
+        const popup = new maplibregl.Popup({ offset: 25, closeButton: false })
+          .setDOMContent(popupContent);
+
+        const marker = new maplibregl.Marker(el)
+          .setLngLat(coords)
+          .setPopup(popup)
+          .addTo(mapInstance.current);
+
+        markersRef.current.push(marker);
+      }
+    });
+  }, [showMap, feed]);
+
+  // 3. Sync Radar Overlay
+  useEffect(() => {
+    if (!mapInstance.current || !mapLoaded || !showMap || !radarCenter) return;
+    const map = mapInstance.current;
+    if (!map.getSource('radar-source')) return;
+
+    if (radius === 'any') {
+      map.getSource('radar-source').setData({ type: 'FeatureCollection', features: [] });
+    } else {
+      const radiusKm = parseFloat(radius);
+      if (!isNaN(radiusKm)) {
+        try {
+          const radarCircle = circle(radarCenter, radiusKm, { steps: 64, units: 'kilometers' });
+          map.getSource('radar-source').setData(radarCircle);
+        } catch (err) {
+          console.error("Error drawing radar circle:", err);
+        }
+      }
+    }
+  }, [mapLoaded, radius, radarCenter, showMap]);
+
+  // Update search list when radarCenter changes
+  useEffect(() => {
+    if (radarCenter) {
+      searchByRadius(radius, radarCenter[0], radarCenter[1]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [radarCenter]);
 
   // Some deals (e.g. owner-initiated handshakes) carry no title — never show a raw UUID.
   const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -154,7 +359,7 @@ export default function BrokerMode() {
               ← Back to Opportunity Files
             </button>
             <span className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase mb-1 block">Opportunity File</span>
-            <h1 className="font-display-md text-3xl md:text-5xl text-on-surface">Deal: {property?.title || 'Unknown Property'}</h1>
+            <h1 className="font-display-md text-3xl md:text-5xl text-on-surface break-words">Deal: {property?.title || 'Unknown Property'}</h1>
           </div>
           <div className="flex items-center gap-4">
             <div className={`px-3 py-1 rounded text-xs font-bold font-working-title tracking-wider uppercase border
@@ -208,10 +413,10 @@ export default function BrokerMode() {
               <h3 className="font-label-caps text-xs tracking-widest text-text-secondary mb-4 uppercase border-b border-surface-variant pb-2">Connected Asset</h3>
               <div className="flex flex-col gap-2">
                 <span className="text-gold-accent font-label-caps text-[10px] tracking-widest uppercase">{property?.type || 'Property'}</span>
-                <Link href={`/property/${property?.slug || deal.propertySlug || deal.listingId}`} className="font-working-title text-xl text-on-surface hover:text-gold-accent hover:underline transition-colors">
+                <Link href={`/property/${property?.slug || deal.propertySlug || deal.listingId}`} className="font-working-title text-xl text-on-surface hover:text-gold-accent hover:underline transition-colors break-words">
                   {property?.title || 'View Listing'}
                 </Link>
-                <span className="text-sm text-text-secondary">{property?.loc || property?.location || 'Location details restricted'}</span>
+                <span className="text-sm text-text-secondary break-words">{property?.loc || property?.location || 'Location details restricted'}</span>
               </div>
               <div className="mt-6 pt-4 border-t border-surface-variant">
                 <Link href={`/property/${property?.slug || deal.propertySlug || deal.listingId}`} className="text-sm font-working-title text-gold-accent flex items-center gap-2 hover:underline">
@@ -400,14 +605,14 @@ export default function BrokerMode() {
                   real rating exists the card says so instead of inventing one. */}
               <div className="p-6 relative z-20">
                 <div className="flex gap-6 items-center mb-6">
-                  <div className="w-20 h-20 rounded-full border-2 border-gold-accent bg-surface-alt overflow-hidden flex items-center justify-center relative">
+                  <div className="w-20 h-20 rounded-full border-2 border-gold-accent bg-surface-alt overflow-hidden flex items-center justify-center relative shrink-0">
                     <span className="font-headline-editorial text-3xl text-gold-accent">
                       {(currentUser?.name || "?").split(" ").map(w => w.charAt(0)).slice(0, 2).join("").toUpperCase()}
                     </span>
                   </div>
-                  <div>
-                    <h3 className="font-headline-editorial text-2xl text-on-surface mb-1">{currentUser?.name || "Unnamed Broker"}</h3>
-                    <p className="font-working-title text-text-secondary text-xs tracking-wider uppercase">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-headline-editorial text-2xl text-on-surface mb-1 truncate">{currentUser?.name || "Unnamed Broker"}</h3>
+                    <p className="font-working-title text-text-secondary text-xs tracking-wider uppercase truncate">
                       {(currentUser?.subscription_tier || currentUser?.tier) ? `${(currentUser.subscription_tier || currentUser.tier)} Partner` : "ScoutIt Broker"}
                     </p>
                   </div>
@@ -529,14 +734,62 @@ export default function BrokerMode() {
           </button>
           <button
             className="border border-gold-accent text-gold-accent font-working-title px-6 py-3 rounded text-sm font-bold hover:bg-gold-accent hover:text-background transition-all shadow-[0_0_15px_rgba(232,174,60,0.15)] active:scale-[0.98] bg-[rgba(247,198,78,0.05)]"
-            onClick={() => document.getElementById('broker-feed')?.scrollIntoView({ behavior: 'smooth' })}
+            onClick={() => {
+              setShowMap(prev => !prev);
+              if (!showMap) {
+                setTimeout(() => document.getElementById('broker-map-section')?.scrollIntoView({ behavior: 'smooth' }), 100);
+              }
+            }}
           >
-            + Find Opportunities
+            {showMap ? 'Hide Map' : '+ Find Opportunities (Map)'}
           </button>
         </div>
       </MeshHero>
 
       <ScoutInsightPanel pitches={pitches} listings={listings} taskSummary={taskSummary} />
+
+      {/* Embedded Radar Map */}
+      {showMap && (
+        <div id="broker-map-section" className="w-full h-[600px] bg-surface border border-surface-variant rounded-lg overflow-hidden relative shadow-[0_0_30px_rgba(232,174,60,0.05)] mb-8 scroll-mt-24">
+          <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
+          
+          {mapError && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-surface/80 text-error z-20 p-8 text-center">
+              <span className="font-bold mb-2">Map Error</span>
+              <span className="text-sm">{mapError}</span>
+            </div>
+          )}
+          <div ref={mapContainerRef} style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }} />
+          
+          <div className="absolute bottom-6 left-6 z-10 flex flex-col gap-2">
+            <div className="bg-background/90 backdrop-blur border border-surface-variant p-4 rounded shadow-lg">
+              <div className="text-[10px] font-label-caps tracking-widest text-gold-accent mb-1 uppercase">
+                Spatial Intelligence
+              </div>
+              <div className="font-working-title text-on-surface">{feed.filter(l => l.coordinates || (l.lng && l.lat)).length} targets in radar</div>
+              {radius !== 'any' && <div className="text-xs text-text-secondary mt-1">{radius}km radius from Makati CBD</div>}
+            </div>
+            
+            <select
+              className="bg-background/90 backdrop-blur border border-surface-variant text-on-surface text-sm rounded px-3 py-2 w-full focus:outline-none focus:border-gold-accent transition-colors"
+              value={radius}
+              onChange={handleRadiusChange}
+            >
+              <option value="any">Search: Metro Manila Wide</option>
+              <option value="3">Within 3km (Makati/BGC Core)</option>
+              <option value="5">Within 5km</option>
+              <option value="10">Within 10km</option>
+            </select>
+          </div>
+            
+          <button 
+            className="absolute bottom-6 right-6 pointer-events-auto bg-surface-container border border-surface-variant hover:border-gold-accent text-on-surface rounded-full w-12 h-12 flex items-center justify-center shadow-lg transition-colors"
+            onClick={() => setShowMap(false)} aria-label="Close Map"
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {/* High-Density Layout */}
       <div className="flex-1 flex flex-col lg:flex-row gap-12">
@@ -575,7 +828,7 @@ export default function BrokerMode() {
                   </div>
                   
                   <div className="mt-2 mb-auto pr-2">
-                    <h4 className="font-working-title text-base text-on-surface group-hover:underline line-clamp-1">{dealTitle(deal)}</h4>
+                    <h4 className="font-working-title text-base text-on-surface group-hover:underline truncate">{dealTitle(deal)}</h4>
                     <p className="text-xs text-text-secondary mt-1 line-clamp-2 break-words">{deal.loc || 'Location details hidden'}</p>
                   </div>
                   
@@ -621,7 +874,7 @@ export default function BrokerMode() {
                   </div>
                   
                   <div className="mt-2 mb-auto pr-2">
-                    <h4 className="font-working-title text-base text-on-surface group-hover:underline line-clamp-1">{dealTitle(deal)}</h4>
+                    <h4 className="font-working-title text-base text-on-surface group-hover:underline truncate">{dealTitle(deal)}</h4>
                     <p className="text-xs text-text-secondary mt-1 line-clamp-2 break-words">{deal.loc || 'Location details hidden'}</p>
                   </div>
                   
@@ -637,7 +890,7 @@ export default function BrokerMode() {
         </div>
 
         {/* Right Column: Tasks + Feed */}
-        <div id="broker-feed" className="lg:w-1/3 flex flex-col gap-6 mt-8 lg:mt-0 scroll-mt-20">
+        <div id="broker-feed" className="lg:w-1/3 flex flex-col gap-6 mt-8 lg:mt-0 scroll-mt-20 lg:sticky lg:top-8 lg:h-[calc(100vh-4rem)]">
           {/* The "don't forget" engine — crm_tasks, incl. auto follow-ups after completed viewings */}
           <TaskRail mockUserId={currentUser?.id} onSummary={handleTaskSummary} />
 
@@ -660,12 +913,12 @@ export default function BrokerMode() {
                   <span className="text-text-secondary text-[10px] font-data-tabular bg-surface-alt px-1.5 py-0.5 rounded">{item.time || 'New'}</span>
                 </div>
                 
-                <h4 className="font-working-title text-on-surface text-lg mb-1 line-clamp-1">
-                  <Link href={`/property/${item.slug || item.id}`} className="hover:text-gold-accent hover:underline transition-colors block">
+                <h4 className="font-working-title text-on-surface text-lg mb-1 truncate">
+                  <Link href={`/property/${item.slug || item.id}`} className="hover:text-gold-accent hover:underline transition-colors block truncate">
                     {item.title}
                   </Link>
                 </h4>
-                <div className="text-text-secondary text-xs line-clamp-2 leading-relaxed">{item.desc}</div>
+                <div className="text-text-secondary text-xs line-clamp-2 leading-relaxed break-words">{item.hook || item.universe_summary || item.description || 'Details restricted.'}</div>
                 
                 <div className="grid grid-cols-2 gap-2 mt-4 p-3 bg-[#0a0a0a] rounded border border-surface-variant text-center">
                   <div>

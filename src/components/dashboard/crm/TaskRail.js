@@ -112,20 +112,20 @@ export default function TaskRail({ mockUserId, dealId = null, onSummary }) {
         </span>
       </div>
 
-      <form onSubmit={addTask} className="flex flex-col sm:flex-row gap-2">
+      <form onSubmit={addTask} className="flex flex-col gap-3">
         <input
           type="text"
-          className="flex-1 bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-sm text-on-surface focus:outline-none focus:border-gold-accent transition-colors"
+          className="w-full bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-sm text-on-surface focus:outline-none focus:border-gold-accent transition-colors"
           placeholder={dealId ? "Add a task for this deal…" : "Add a task…"}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           maxLength={300}
         />
-        <div className="flex gap-2">
+        <div className="flex gap-2 w-full">
           <input
             type="date"
             aria-label="Due date"
-            className="bg-surface-alt border border-surface-variant rounded px-2 py-2.5 text-xs text-text-secondary focus:outline-none focus:border-gold-accent transition-colors"
+            className="flex-1 min-w-0 bg-surface-alt border border-surface-variant rounded px-2 py-2.5 text-xs text-text-secondary focus:outline-none focus:border-gold-accent transition-colors"
             value={dueDate}
             onChange={(e) => setDueDate(e.target.value)}
           />
@@ -133,7 +133,7 @@ export default function TaskRail({ mockUserId, dealId = null, onSummary }) {
             type="submit"
             disabled={!title.trim() || busy}
             aria-label="Add task"
-            className="bg-gold-accent text-background font-working-title font-bold px-3 py-2.5 rounded hover:opacity-90 transition-opacity disabled:opacity-40 flex items-center gap-1 text-sm"
+            className="shrink-0 bg-gold-accent text-background font-working-title font-bold px-4 py-2.5 rounded hover:opacity-90 transition-opacity disabled:opacity-40 flex items-center justify-center gap-1 text-sm"
           >
             <Plus size={16} /> Add
           </button>
