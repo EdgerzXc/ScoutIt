@@ -4,12 +4,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import ConnectionPortal from "@/components/connection/ConnectionPortal";
 
-
-const DUMMY_BROKERS = [];
+import { getCmsBundle } from "@/lib/cmsCache";
 
 export async function generateMetadata({ params }) {
   const { "broker-slug": slug } = await params;
-  const broker = DUMMY_BROKERS.find(b => b.id === slug);
+  const bundle = await getCmsBundle();
+  const broker = bundle.brokers.find(b => b.id === slug);
   return {
     title: broker ? `${broker.name} · Advisor Profile` : "Advisor Profile",
     description: broker ? broker.bio : "Vetted space intelligence advisor."
@@ -18,7 +18,8 @@ export async function generateMetadata({ params }) {
 
 export default async function BrokerDetailPage({ params }) {
   const { "broker-slug": slug } = await params;
-  const broker = DUMMY_BROKERS.find(b => b.id === slug);
+  const bundle = await getCmsBundle();
+  const broker = bundle.brokers.find(b => b.id === slug);
 
   if (!broker) {
     notFound();

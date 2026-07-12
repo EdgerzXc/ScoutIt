@@ -5,12 +5,14 @@ import { useDashboard } from "../../context/DashboardContext";
 import Link from "next/link";
 import { Lock } from "lucide-react";
 import { getSession } from "../../lib/authClient";
+import ScoutInsightPanel from './panels/ScoutInsightPanel';
+import MeshHero from '../ui/MeshHero';
 import TaskRail from "./crm/TaskRail";
 import DealTimeline from "./crm/DealTimeline";
 import { computeListingStrength } from "../../lib/listingStrength";
 
 export default function BrokerMode() {
-  const { connects, listings, pitches, sendPitch, updatePitchStatus, currentUser } = useDashboard();
+  const { connects, listings, pitches, sendPitch, updatePitchStatus, currentUser, addToast } = useDashboard();
 
   const [pitchingListing, setPitchingListing] = useState(null);
   const [pitchMessage, setPitchMessage] = useState("");
@@ -70,48 +72,6 @@ export default function BrokerMode() {
     };
   }, [pitches, listings]);
 
-  // Scout Insight (Layer 3, DASHBOARD_ATMOSPHERE_FRAMEWORK.md): rule-based
-  // only, per the Honest Blank Rule — every line below is a fact the broker
-  // can verify themselves (counts and field-completeness checks), never a
-  // fabricated probability. When there's nothing to say, it says so.
-  const insights = useMemo(() => {
-    const list = [];
-    const incoming = pitches.filter(p => p.isCurrentUserBroker && p.status === 'invited');
-    if (incoming.length > 0) {
-      list.push({
-        icon: "🤝",
-        text: `${incoming.length} incoming handshake${incoming.length === 1 ? '' : 's'} awaiting your response — accepting unlocks owner contact details.`,
-        rule: "Deals with status 'invited'",
-      });
-    }
-    if (taskSummary?.overdue > 0) {
-      list.push({
-        icon: "⏰",
-        text: `${taskSummary.overdue} task${taskSummary.overdue === 1 ? ' is' : 's are'} overdue — check your task list below.`,
-        rule: "Open tasks past their due date",
-      });
-    }
-    // Weakest listing in the verified portfolio, with what's missing.
-    const acceptedDeals = pitches.filter(p => p.isCurrentUserBroker && p.status === 'accepted');
-    let weakest = null;
-    for (const deal of acceptedDeals) {
-      const prop = listings.find(l => l.id === deal.listingId);
-      if (!prop) continue;
-      const strength = computeListingStrength(prop);
-      if (strength.score < 100 && (!weakest || strength.score < weakest.strength.score)) {
-        weakest = { prop, strength };
-      }
-    }
-    if (weakest) {
-      list.push({
-        icon: "📋",
-        text: `"${weakest.prop.title}" is ${weakest.strength.score}% complete — missing ${weakest.strength.missing.slice(0, 2).join(" and ").toLowerCase()}.`,
-        rule: "Field-completeness check on your verified portfolio",
-      });
-    }
-    return list;
-  }, [pitches, listings, taskSummary]);
-
   // Some deals (e.g. owner-initiated handshakes) carry no title — never show a raw UUID.
   const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   const dealTitle = (deal) => {
@@ -164,6 +124,7 @@ export default function BrokerMode() {
         });
       } catch (err) {
         console.error('Failed to save deal notes', err);
+        if (addToast) addToast("Failed to save private note. Check your connection.", "❌");
       }
     }, 800);
   };
@@ -361,6 +322,7 @@ export default function BrokerMode() {
                 <textarea 
                   className="w-full bg-transparent p-5 text-on-surface min-h-[200px] focus:outline-none placeholder:text-surface-variant font-body-md leading-relaxed resize-y"
                   placeholder="Capture client requirements, internal tracking IDs, or next action steps here..."
+                  maxLength={4000}
                   value={dealNotes[deal.id] !== undefined ? dealNotes[deal.id] : notes}
                   onChange={(e) => handleSaveNote(deal.id, e.target.value)}
                 />
@@ -502,6 +464,7 @@ export default function BrokerMode() {
             
             <textarea 
               className="w-full bg-surface-alt border border-surface-variant rounded p-4 text-on-surface min-h-[160px] focus:outline-none focus:border-gold-accent transition-colors"
+              maxLength={1000}
               value={pitchMessage}
               onChange={(e) => setPitchMessage(e.target.value)}
             />
@@ -533,11 +496,10 @@ export default function BrokerMode() {
         </div>
       )}
 
-      {/* Mobile / tablet header — the desktop action bar below is lg-only, so without this the phone view had no title or pipeline context */}
-      <header className="lg:hidden pt-2 pb-5 mb-6 border-b border-surface-variant flex items-end justify-between gap-4">
+      <header className="lg:hidden pt-4 pb-6 mb-6 border-b border-surface-variant flex items-end justify-between gap-4 mesh-bg-hero px-4 rounded-xl shadow-lg">
         <div>
           <span className="font-label-caps text-gold-accent tracking-widest uppercase text-[10px] mb-1 block">Command Center</span>
-          <h2 className="font-headline-editorial text-2xl text-on-surface">Broker Intelligence</h2>
+          <h2 className="font-headline-editorial text-3xl text-gradient-sapphire">Broker Intelligence</h2>
         </div>
         <div className="text-right shrink-0">
           <span className="block text-[9px] font-label-caps uppercase tracking-widest text-text-secondary">Deals Won</span>
@@ -546,10 +508,10 @@ export default function BrokerMode() {
       </header>
 
       {/* Action Bar */}
-      <header className="py-md lg:py-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-background sticky top-0 lg:top-auto z-10 border-b border-surface-variant mb-8 hidden lg:flex">
+      <MeshHero className="py-6 lg:py-10 px-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sticky top-0 lg:top-auto z-10 border-b border-surface-variant mb-8 hidden lg:flex rounded-2xl shadow-xl border border-[rgba(255,255,255,0.05)]">
         <div>
           <span className="font-label-caps text-gold-accent tracking-widest uppercase mb-2 block">Command Center</span>
-          <h2 className="font-headline-editorial text-headline-editorial text-on-surface text-4xl">Broker Intelligence</h2>
+          <h2 className="font-headline-editorial text-gradient-sapphire text-4xl lg:text-5xl drop-shadow-md">Broker Intelligence</h2>
         </div>
         <div className="flex items-center gap-6">
           <div className="text-right">
@@ -559,57 +521,31 @@ export default function BrokerMode() {
           {/* Permanent entry point — the dismissible "new feature" banner must
               not be the only way to reach the ID card */}
           <button
-            className="border border-surface-variant text-text-secondary font-working-title px-4 py-3 rounded text-sm hover:text-gold-accent hover:border-gold-accent/40 transition-all"
+            className="border border-surface-variant text-text-secondary font-working-title px-4 py-3 rounded text-sm hover:text-gold-accent hover:border-gold-accent/40 transition-all active:scale-[0.98] bg-[rgba(26,16,37,0.5)]"
             onClick={() => setShowIdCard(true)}
             title="Generate your Verified Broker ID card"
           >
             🪪 ID Card
           </button>
           <button
-            className="border border-gold-accent text-gold-accent font-working-title px-6 py-3 rounded text-sm font-bold hover:bg-gold-accent hover:text-background transition-all shadow-[0_0_15px_rgba(232,174,60,0.15)]"
+            className="border border-gold-accent text-gold-accent font-working-title px-6 py-3 rounded text-sm font-bold hover:bg-gold-accent hover:text-background transition-all shadow-[0_0_15px_rgba(232,174,60,0.15)] active:scale-[0.98] bg-[rgba(247,198,78,0.05)]"
             onClick={() => document.getElementById('broker-feed')?.scrollIntoView({ behavior: 'smooth' })}
           >
             + Find Opportunities
           </button>
         </div>
-      </header>
+      </MeshHero>
 
-      {/* SCOUT INSIGHT — Layer 3 of the dashboard framework. Rule-based facts
-          only; shows an honest empty state when there's nothing to surface. */}
-      <div className="card-atmosphere-gold rounded-lg p-5 mb-8">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-gold-accent animate-pulse"></span> Scout Insight
-          </h3>
-          <span className="font-label-caps text-[9px] tracking-widest text-text-muted uppercase hidden sm:block">Rule-based · computed from your live pipeline</span>
-        </div>
-        {insights.length > 0 ? (
-          <div className="flex flex-col gap-2.5">
-            {insights.map((insight, i) => (
-              <div key={i} className="flex items-start gap-3">
-                <span className="text-base shrink-0 mt-[-1px]" aria-hidden="true">{insight.icon}</span>
-                <div>
-                  <p className="text-sm text-on-surface leading-snug">{insight.text}</p>
-                  <p className="text-[10px] text-text-muted mt-0.5">Rule: {insight.rule}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-sm text-text-secondary">
-            Not enough data yet — insights appear here as your pipeline, tasks, and portfolio grow.
-          </p>
-        )}
-      </div>
+      <ScoutInsightPanel pitches={pitches} listings={listings} taskSummary={taskSummary} />
 
       {/* High-Density Layout */}
       <div className="flex-1 flex flex-col lg:flex-row gap-12">
         
         {/* Left Column: Active Opportunities */}
         <div className="lg:w-2/3 flex flex-col gap-6">
-          <div className="flex justify-between items-end border-b border-surface-variant pb-2">
-            <h3 className="font-working-title text-xl text-on-surface">Active Deal Files</h3>
-            <span className="text-text-secondary font-label-caps text-[10px] tracking-widest uppercase">{myPitches.length} Total tracked</span>
+          <div className="flex justify-between items-end border-b border-surface-variant pb-3">
+            <h3 className="font-working-title text-2xl text-on-surface">Active Deal Files</h3>
+            <span className="text-text-secondary font-label-caps text-[10px] tracking-widest uppercase bg-surface-alt px-2 py-1 rounded-md">{myPitches.length} Total tracked</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -627,10 +563,9 @@ export default function BrokerMode() {
               return (
                 <div 
                   key={deal.id} 
-                  className={`card-atmosphere hov-glow rounded-lg p-5 flex flex-col cursor-pointer transition-all group relative overflow-hidden h-48 ${isDeclined ? 'opacity-60 grayscale' : ''}`}
+                  className={`rounded-xl p-6 flex flex-col cursor-pointer transition-all group relative overflow-hidden h-52 ${isDeclined ? 'opacity-60 grayscale border border-surface-variant bg-surface-alt' : 'hov-glow'}`}
                   onClick={() => setActiveDealId(deal.id)}
                 >
-                  <div className={`absolute top-0 left-0 w-1 h-full transition-colors ${isDeclined ? 'bg-error' : 'bg-surface-variant group-hover:bg-gold-accent'}`}></div>
                   
                   <div className="flex justify-between items-start mb-2">
                     <span className={`font-label-caps text-[9px] tracking-widest uppercase px-1.5 py-0.5 rounded ${isDeclined ? 'bg-error/10 text-error' : pStatus === 'invited' ? 'bg-gold-accent/10 text-gold-accent' : 'bg-surface-alt text-text-secondary'}`}>
@@ -641,7 +576,7 @@ export default function BrokerMode() {
                   
                   <div className="mt-2 mb-auto pr-2">
                     <h4 className="font-working-title text-base text-on-surface group-hover:underline line-clamp-1">{dealTitle(deal)}</h4>
-                    <p className="text-xs text-text-secondary mt-1">{deal.loc || 'Location details hidden'}</p>
+                    <p className="text-xs text-text-secondary mt-1 line-clamp-2 break-words">{deal.loc || 'Location details hidden'}</p>
                   </div>
                   
                   <div className="border-t border-surface-variant pt-3 mt-4 flex justify-between items-center text-xs">
@@ -674,10 +609,9 @@ export default function BrokerMode() {
               return (
                 <div 
                   key={deal.id} 
-                  className="card-atmosphere hov-glow rounded-lg p-5 flex flex-col cursor-pointer transition-all group relative overflow-hidden h-48 border border-gold-accent/20"
+                  className="rounded-xl p-6 flex flex-col cursor-pointer transition-all group relative overflow-hidden h-52 border border-success/30 bg-success/5 hover:border-success/50 hover:bg-success/10 hover:-translate-y-2 shadow-[0_4px_20px_rgba(16,185,129,0.05)] hover:shadow-[0_12px_40px_rgba(0,0,0,0.5),0_0_50px_rgba(16,185,129,0.15)] backdrop-blur-md"
                   onClick={() => setActiveDealId(deal.id)}
                 >
-                  <div className="absolute top-0 left-0 w-1 h-full transition-colors bg-success"></div>
                   
                   <div className="flex justify-between items-start mb-2">
                     <span className="font-label-caps text-[9px] tracking-widest uppercase px-1.5 py-0.5 rounded bg-success/10 text-success flex items-center gap-1">
@@ -688,7 +622,7 @@ export default function BrokerMode() {
                   
                   <div className="mt-2 mb-auto pr-2">
                     <h4 className="font-working-title text-base text-on-surface group-hover:underline line-clamp-1">{dealTitle(deal)}</h4>
-                    <p className="text-xs text-text-secondary mt-1">{deal.loc || 'Location details hidden'}</p>
+                    <p className="text-xs text-text-secondary mt-1 line-clamp-2 break-words">{deal.loc || 'Location details hidden'}</p>
                   </div>
                   
                   <div className="border-t border-surface-variant pt-3 mt-4 flex justify-between items-center text-xs">
@@ -718,9 +652,10 @@ export default function BrokerMode() {
                 You have pitched all available properties in the market.
               </div>
             )}
-            {feed.map((item) => (
-              <div key={item.id} className="card-atmosphere hov-card p-5 rounded-lg transition-colors group relative">
-                <div className="flex justify-between items-start mb-2">
+            {feed.map((item, index) => (
+              <div key={item.id} className="hov-card p-6 rounded-xl transition-all group relative stagger-enter" style={{ '--i': index }}>
+                <div className="absolute inset-0 bg-gradient-to-br from-[rgba(255,255,255,0.02)] to-transparent pointer-events-none rounded-xl"></div>
+                <div className="flex justify-between items-start mb-3 relative z-10">
                   <span className="text-gold-accent font-label-caps text-[10px] tracking-widest uppercase">{item.type || 'Property'}</span>
                   <span className="text-text-secondary text-[10px] font-data-tabular bg-surface-alt px-1.5 py-0.5 rounded">{item.time || 'New'}</span>
                 </div>
@@ -749,7 +684,7 @@ export default function BrokerMode() {
                 </div>
                 
                 <button 
-                  className="mt-4 w-full border border-gold-accent text-gold-accent font-working-title text-sm py-3 rounded hover:bg-gold-accent hover:text-background transition-colors font-bold shadow-sm"
+                  className="mt-5 w-full border border-gold-accent text-gold-accent font-working-title text-sm py-3 rounded-lg hover:bg-gold-accent hover:text-background transition-all font-bold shadow-[0_0_15px_rgba(247,198,78,0.1)] active:scale-[0.98]"
                   onClick={() => handleOpenPitchModal(item)}
                 >
                   Open Deal File (1 Connect)

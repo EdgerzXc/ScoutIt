@@ -38,7 +38,6 @@ export default function BuyerMode() {
   useEffect(() => {
     if (showMap && mapContainerRef.current && MAPBOX_TOKEN) {
       if (!mapInstance.current) {
-        // eslint-disable-next-line react-hooks/immutability
         mapboxgl.accessToken = MAPBOX_TOKEN;
         mapInstance.current = new mapboxgl.Map({
           container: mapContainerRef.current,

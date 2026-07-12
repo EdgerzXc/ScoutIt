@@ -6,10 +6,10 @@ import ProfileContactModal from "./ProfileContactModal";
 import { MapPin, Calendar, Edit2, MessageSquare } from "lucide-react";
 
 const TIER_CONFIG = {
-  universe: { label: "Universe", color: "#E8AE3C", border: "rgba(232, 174, 60,0.4)" },
+  universe: { label: "Universe", color: "var(--accent)", border: "var(--accent-muted)" },
   cluster:  { label: "Cluster",  color: "#C0C0C0", border: "rgba(192,192,192,0.4)" },
   solar:    { label: "Solar",    color: "#CD7F32", border: "rgba(205,127,50,0.4)" },
-  starry:   { label: "Starry",   color: "#888888", border: "rgba(136,136,136,0.3)" },
+  starry:   { label: "Starry",   color: "var(--text-secondary)", border: "rgba(136,136,136,0.3)" },
 };
 
 const ROLE_LABELS = {
@@ -183,10 +183,10 @@ export default function ProfileBaseLayer({
         {/* Connects — own view only, never on public */}
         {isOwnView && profile.connects_balance != null && (
           <div style={connectsBlock}>
-            <span style={{ color: "#E8AE3C", fontFamily: "var(--font-mono)", fontSize: 13 }}>
+            <span className="text-gold-accent font-mono text-[13px]">
               ◈ {profile.connects_balance}
             </span>
-            <span style={{ fontFamily: "var(--font-body)", fontSize: 11, color: "var(--text-secondary)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+            <span className="font-body text-[11px] text-text-secondary tracking-widest uppercase">
               Connects
             </span>
           </div>
@@ -240,7 +240,7 @@ const avatarWrap = {
   width: 96,
   height: 96,
   borderRadius: "50%",
-  background: "#1e1e1e",
+  background: "var(--surface)",
   border: "1px solid rgba(255,255,255,0.08)",
   display: "flex",
   alignItems: "center",
@@ -252,7 +252,7 @@ const avatarWrap = {
 const avatarInitials = {
   fontFamily: "Georgia, serif",
   fontSize: 32,
-  color: "#E8AE3C",
+  color: "var(--accent)",
   lineHeight: 1,
 };
 
@@ -267,7 +267,7 @@ const identityBlock = {
 const nameStyle = {
   fontFamily: "Georgia, serif",
   fontSize: 36,
-  color: "#f0ede8",
+  color: "var(--on-surface)",
   lineHeight: 1.1,
   letterSpacing: "-0.01em",
 };
@@ -301,8 +301,8 @@ const roleTag = {
   fontWeight: 700,
   letterSpacing: "0.12em",
   textTransform: "uppercase",
-  color: "#E8AE3C",
-  border: "1px solid rgba(232, 174, 60,0.25)",
+  color: "var(--accent)",
+  border: "1px solid var(--accent-muted)",
   borderRadius: 20,
   padding: "3px 10px",
 };
@@ -310,7 +310,7 @@ const roleTag = {
 const headline = {
   fontFamily: "var(--font-body)",
   fontSize: 15,
-  color: "#e5e2e1",
+  color: "var(--on-surface)",
   marginBottom: 8,
   lineHeight: 1.5,
 };
@@ -339,7 +339,7 @@ const connectsBlock = {
   alignItems: "center",
   gap: 6,
   background: "rgba(232, 174, 60,0.07)",
-  border: "1px solid rgba(232, 174, 60,0.15)",
+  border: "1px solid var(--accent-muted)",
   borderRadius: 20,
   padding: "6px 14px",
   marginBottom: 16,
@@ -358,8 +358,8 @@ const editBtn = {
   gap: 6,
   fontFamily: "var(--font-body)",
   fontSize: 12,
-  color: "#E8AE3C",
-  border: "1px solid rgba(232, 174, 60,0.3)",
+  color: "var(--accent)",
+  border: "1px solid var(--accent-muted)",
   borderRadius: 20,
   padding: "6px 14px",
   cursor: "pointer",
@@ -373,8 +373,8 @@ const contactBtn = {
   gap: 6,
   fontFamily: "var(--font-body)",
   fontSize: 12,
-  color: "#0e0e0e",
-  background: "#E8AE3C",
+  color: "var(--background)",
+  background: "var(--accent)",
   border: "none",
   borderRadius: 20,
   padding: "7px 16px",

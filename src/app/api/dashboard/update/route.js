@@ -23,7 +23,7 @@ const updateSchema = z.object({
 
 export async function POST(request) {
   try {
-    const { submissionId, data, mockOwnerId } = await request.json();
+    const { submissionId, data  } = await request.json();
 
     if (!submissionId || !data) {
       return NextResponse.json({ error: "Missing submissionId or data" }, { status: 400 });
@@ -47,11 +47,7 @@ export async function POST(request) {
       }
     }
 
-    // 2. Fallback for DEV Toolbox mock users -- dev-only, rejected in
-    // production (same gate as /api/dashboard/publish).
-    if (!userId && process.env.NODE_ENV !== 'production' && mockOwnerId === 'master-dev') {
-      userId = 'master-dev';
-    }
+
 
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized: Invalid session or missing token" }, { status: 401 });

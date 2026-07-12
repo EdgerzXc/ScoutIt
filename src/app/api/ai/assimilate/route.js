@@ -49,8 +49,12 @@ export async function POST(request) {
 
     console.log(`[Assimilate] source=${source} items=${payload?.length ?? 0}`);
 
-    if (!payload || payload.length === 0) {
-      return NextResponse.json({ error: 'Empty payload' }, { status: 400 });
+    if (!payload || !Array.isArray(payload) || payload.length === 0) {
+      return NextResponse.json({ error: 'Empty or invalid payload' }, { status: 400 });
+    }
+
+    if (payload.length > 20) {
+      return NextResponse.json({ error: 'Payload too large (max 20 items)' }, { status: 413 });
     }
 
     if (!process.env.GEMINI_API_KEY) {

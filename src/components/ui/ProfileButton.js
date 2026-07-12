@@ -14,20 +14,44 @@ export default function ProfileButton({ floating = false }) {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    function readUser() {
+    let mounted = true;
+
+    async function loadUser() {
       try {
-        const raw = localStorage.getItem("scoutit_user");
-        setUser(raw ? JSON.parse(raw) : null);
-      } catch {
-        setUser(null);
+        const { getSession } = await import("@/lib/authClient");
+        const { getProfileByUserId } = await import("@/lib/profileClient");
+
+        const { data: { session } } = await getSession();
+        if (session?.user) {
+          const profile = await getProfileByUserId(session.user.id);
+          if (mounted) {
+            setUser({
+              id: session.user.id,
+              name: profile?.display_name || session.user.user_metadata?.full_name || session.user.email,
+            });
+          }
+        } else {
+          if (mounted) setUser(null);
+        }
+      } catch (e) {
+        if (mounted) setUser(null);
       }
     }
-    readUser();
-    window.addEventListener("storage", readUser);
-    window.addEventListener("focus", readUser);
+    
+    loadUser();
+
+    // Optionally handle auth state changes
+    import("@/lib/authClient").then(({ onAuthStateChange }) => {
+      const { data: { subscription } } = onAuthStateChange((event, session) => {
+        if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
+          loadUser();
+        }
+      });
+      return () => subscription?.unsubscribe();
+    });
+
     return () => {
-      window.removeEventListener("storage", readUser);
-      window.removeEventListener("focus", readUser);
+      mounted = false;
     };
   }, []);
 

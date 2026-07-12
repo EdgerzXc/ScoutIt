@@ -27,7 +27,7 @@
   font-family: var(--font-display), Georgia, serif;
   font-size: 38px;
   letter-spacing: 0.02em;
-  color: #fff;
+  color: var(--on-surface);
   margin: 8px 0;
   text-wrap: balance;
 }
@@ -61,7 +61,7 @@
   justify-content: space-between;
   align-items: center;
   cursor: pointer;
-  color: #fff;
+  color: var(--on-surface);
   font-family: var(--font-display), sans-serif;
   font-size: 13px;
   font-weight: 600;
@@ -171,7 +171,7 @@
 .intel-widget-item h4 {
   font-size: 13px;
   font-weight: 500;
-  color: #fff;
+  color: var(--on-surface);
   line-height: 1.3;
   margin-bottom: 4px;
 }
@@ -200,7 +200,7 @@
   border-radius: var(--radius-md, 6px);
   padding: 14px 20px;
   font-size: 13px;
-  color: #fff;
+  color: var(--on-surface);
   font-family: var(--font-mono), monospace;
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
@@ -288,7 +288,7 @@
 .property-card-body h3 {
   font-family: var(--font-display), Georgia, serif;
   font-size: 20px;
-  color: #fff;
+  color: var(--on-surface);
   margin-bottom: 6px;
   line-height: 1.3;
   word-wrap: break-word;
@@ -338,6 +338,12 @@
   color: var(--accent, #E8AE3C);
   letter-spacing: 0.05em;
   text-transform: uppercase;
+  transition: color 0.2s ease, text-shadow 0.2s ease;
+}
+
+.property-action-btn:hover {
+  color: var(--accent-bright, #F7C64E);
+  text-shadow: 0 0 8px rgba(232, 174, 60, 0.4);
 }
 
 .directory-empty {
@@ -352,7 +358,7 @@
 .directory-empty h3 {
   font-family: var(--font-display), Georgia, serif;
   font-size: 20px;
-  color: #fff;
+  color: var(--on-surface);
   margin-bottom: 8px;
 }
 
@@ -600,7 +606,7 @@
 }
 
 .compare-clear:hover {
-  color: #fff;
+  color: var(--on-surface);
   border-color: rgba(255, 255, 255, 0.4);
 }
 

@@ -7,8 +7,8 @@ import { Bookmark, Search } from "lucide-react";
 import PostMoveEcosystem from "./PostMoveEcosystem";
 import VaultOfHonor from "./VaultOfHonor";
 
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import maplibregl from 'maplibre-gl';
+import 'maplibre-gl/dist/maplibre-gl.css';
 
 export default function BuyerMode() {
   const [showMap, setShowMap] = useState(false);
@@ -28,96 +28,121 @@ export default function BuyerMode() {
   // ⚡ Bolt Optimization: Memoize filtered listings to avoid O(N*C) calculations on every keystroke
   const filteredListings = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
-    if (!q) return listings;
+    const publicListings = listings.filter(l => l.ownerId === 'scoutit-cms' && !l.isDuplicateOfAirtable);
     
-    return listings.filter(item => 
+    if (!q) return publicListings;
+    
+    return publicListings.filter(item => 
       [item.title, item.type, item.loc, item.desc].some(v => v && v.toLowerCase().includes(q))
     );
   }, [listings, searchQuery]);
 
-  // Initialize Mapbox and markers when showMap toggles or listings change
+  const [mapError, setMapError] = useState(null);
+
+  // 1. Initialize Mapbox (now MapLibre)
   useEffect(() => {
-    if (showMap && mapContainerRef.current && MAPBOX_TOKEN) {
-      if (!mapInstance.current) {
-        mapboxgl.accessToken = MAPBOX_TOKEN;
-        mapInstance.current = new mapboxgl.Map({
+    if (showMap && mapContainerRef.current) {
+      try {
+        setMapError(null);
+        const map = new maplibregl.Map({
           container: mapContainerRef.current,
-          style: 'mapbox://styles/mapbox/dark-v11',
+          style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
           center: DEFAULT_MAP_CENTER, // Makati
           zoom: 12,
           pitch: 45
         });
 
-        mapInstance.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
+        map.on('error', (e) => {
+          console.error("MapLibre Error Event:", e);
+          if (e && e.error) {
+             setMapError(e.error.message || 'Unknown Mapbox Error');
+          }
+        });
+
+        map.addControl(new maplibregl.NavigationControl(), 'top-right');
+        mapInstance.current = map;
+
+        // Ensure the map resizes correctly if the container layout changes
+        map.on('load', () => {
+          map.resize();
+        });
+        setTimeout(() => {
+          if (mapInstance.current) mapInstance.current.resize();
+        }, 500);
+
+        return () => {
+          map.remove();
+          mapInstance.current = null;
+        };
+      } catch (err) {
+        console.error("MapLibre Initialization Error:", err);
+        setMapError(err.message || String(err));
+      }
+    }
+  }, [showMap, DEFAULT_MAP_CENTER]);
+
+  // 2. Sync Markers
+  useEffect(() => {
+    if (!mapInstance.current || !showMap) return;
+
+    // Clear existing markers
+    markersRef.current.forEach(m => m.remove());
+    markersRef.current = [];
+
+    // Add markers for filtered listings
+    filteredListings.forEach(listing => {
+      let coords = null;
+      if (listing.coordinates) {
+        const match = listing.coordinates.match(/POINT\(([^ ]+) ([^)]+)\)/);
+        if (match) {
+          coords = [parseFloat(match[1]), parseFloat(match[2])];
+        }
       }
 
-      // Clear existing markers
-      markersRef.current.forEach(m => m.remove());
-      markersRef.current = [];
+      if (coords) {
+        // Marker element
+        const el = document.createElement('div');
+        el.className = 'w-8 h-8 rounded-full bg-gold-accent flex items-center justify-center text-sm shadow-[0_0_15px_rgba(232,174,60,0.6)] cursor-pointer hover:scale-110 transition-transform text-background font-bold border-2 border-[#121212] z-10';
+        el.innerHTML = listing.hasMedia ? '📸' : '🏢';
 
-      // Add markers for filtered listings
-      filteredListings.forEach(listing => {
-        let coords = null;
-        if (listing.coordinates) {
-          const match = listing.coordinates.match(/POINT\(([^ ]+) ([^)]+)\)/);
-          if (match) {
-            coords = [parseFloat(match[1]), parseFloat(match[2])];
-          }
-        }
+        // Secure Popup DOM Construction to prevent XSS
+        const popupContent = document.createElement('div');
+        popupContent.className = 'bg-[#121110] border border-gold-accent/20 p-4 rounded-lg shadow-xl w-60';
+        
+        const typeEl = document.createElement('div');
+        typeEl.className = 'text-[10px] text-gold-accent font-label-caps uppercase tracking-widest mb-1';
+        typeEl.textContent = listing.type;
+        
+        const titleEl = document.createElement('div');
+        titleEl.className = 'text-sm font-working-title text-white truncate mb-1';
+        titleEl.textContent = listing.title;
+        
+        const locEl = document.createElement('div');
+        locEl.className = 'text-xs text-text-secondary truncate mb-3';
+        locEl.textContent = listing.loc;
+        
+        const linkEl = document.createElement('a');
+        linkEl.href = `/property/${listing.slug || listing.id}`;
+        linkEl.className = 'block text-center w-full text-[10px] font-label-caps tracking-widest uppercase bg-gold-accent/10 hover:bg-gold-accent/20 text-gold-accent py-2 rounded transition-colors';
+        linkEl.textContent = 'View Property';
+        
+        popupContent.appendChild(typeEl);
+        popupContent.appendChild(titleEl);
+        popupContent.appendChild(locEl);
+        popupContent.appendChild(linkEl);
 
-        if (coords) {
-          // Marker element
-          const el = document.createElement('div');
-          el.className = 'w-8 h-8 rounded-full bg-gold-accent flex items-center justify-center text-sm shadow-[0_0_15px_rgba(232,174,60,0.6)] cursor-pointer hover:scale-110 transition-transform text-background font-bold border-2 border-[#121212] z-10';
-          el.innerHTML = listing.hasMedia ? '📸' : '🏢';
+        const popup = new maplibregl.Popup({ offset: 25, closeButton: false })
+          .setDOMContent(popupContent);
 
-          // Secure Popup DOM Construction to prevent XSS
-          const popupContent = document.createElement('div');
-          popupContent.className = 'bg-[#121110] border border-gold-accent/20 p-4 rounded-lg shadow-xl w-60';
-          
-          const typeEl = document.createElement('div');
-          typeEl.className = 'text-[10px] text-gold-accent font-label-caps uppercase tracking-widest mb-1';
-          typeEl.textContent = listing.type;
-          
-          const titleEl = document.createElement('div');
-          titleEl.className = 'text-sm font-working-title text-white truncate mb-1';
-          titleEl.textContent = listing.title;
-          
-          const locEl = document.createElement('div');
-          locEl.className = 'text-xs text-text-secondary truncate mb-3';
-          locEl.textContent = listing.loc;
-          
-          const linkEl = document.createElement('a');
-          linkEl.href = `/property/${listing.slug || listing.id}`;
-          linkEl.className = 'block text-center w-full text-[10px] font-label-caps tracking-widest uppercase bg-gold-accent/10 hover:bg-gold-accent/20 text-gold-accent py-2 rounded transition-colors';
-          linkEl.textContent = 'View Property';
-          
-          popupContent.appendChild(typeEl);
-          popupContent.appendChild(titleEl);
-          popupContent.appendChild(locEl);
-          popupContent.appendChild(linkEl);
+        const marker = new maplibregl.Marker(el)
+          .setLngLat(coords)
+          .setPopup(popup)
+          .addTo(mapInstance.current);
 
-          const popup = new mapboxgl.Popup({ offset: 25, closeButton: false })
-            .setDOMContent(popupContent);
-
-          const marker = new mapboxgl.Marker(el)
-            .setLngLat(coords)
-            .setPopup(popup)
-            .addTo(mapInstance.current);
-
-          markersRef.current.push(marker);
-        }
-      });
-
-      // Clean up on unmount or when toggling off
-      return () => {
-        // We only remove the map on unmount, not on every listings change
-      };
-    } else if (!showMap && mapInstance.current) {
-      mapInstance.current.remove();
-      mapInstance.current = null;
-    }
-  }, [showMap, MAPBOX_TOKEN, filteredListings, DEFAULT_MAP_CENTER]);
+        markersRef.current.push(marker);
+      }
+    });
+  }, [showMap, filteredListings]);
 
   // Handle Radius Change
   const handleRadiusChange = (e) => {
@@ -169,7 +194,7 @@ export default function BuyerMode() {
   // ⚡ Bolt Optimization: Memoize saved listings mapping and filtering
   const savedFiltered = useMemo(() => {
     const _actualSavedListings = listings
-      .filter(l => savedIds.includes(l.id))
+      .filter(l => savedIds.includes(l.id) && l.ownerId === 'scoutit-cms' && !l.isDuplicateOfAirtable)
       .map(l => ({
         id: l.id,
         type: l.spaceCategory || l.type || 'Property',
@@ -289,22 +314,32 @@ export default function BuyerMode() {
 
       {showMap ? (
         <div className="w-full h-[600px] bg-surface border border-surface-variant rounded-lg overflow-hidden relative shadow-[0_0_30px_rgba(232,174,60,0.05)]">
-          <div ref={mapContainerRef} className="absolute inset-0" />
+          <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
           
-          <div className="absolute bottom-6 left-6 right-6 flex justify-between items-end pointer-events-none">
-            <div className="bg-background/90 backdrop-blur border border-surface-variant p-4 rounded shadow-lg pointer-events-auto">
-              <span className="font-label-caps text-xs tracking-widest text-gold-accent uppercase block mb-1">Spatial Intelligence</span>
-              <div className="font-working-title text-on-surface">{filteredListings.length} properties in radar</div>
+          {mapError && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-surface/80 text-error z-20 p-8 text-center">
+              <span className="font-bold mb-2">Map Error</span>
+              <span className="text-sm">{mapError}</span>
+            </div>
+          )}
+          <div ref={mapContainerRef} style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }} />
+          
+          <div className="absolute bottom-6 left-6 z-10">
+            <div className="bg-background/90 backdrop-blur border border-surface-variant p-4 rounded shadow-lg">
+              <div className="text-[10px] font-label-caps tracking-widest text-gold-accent mb-1 uppercase">
+                Spatial Intelligence
+              </div>
+              <div className="font-working-title text-on-surface">{filteredListings.filter(l => l.coordinates).length} properties in radar</div>
               {radius !== 'any' && <div className="text-xs text-text-secondary mt-1">{radius}km radius from Makati CBD</div>}
             </div>
+          </div>
             
             <button 
-              className="pointer-events-auto bg-surface-container border border-surface-variant hover:border-gold-accent text-on-surface rounded-full w-12 h-12 flex items-center justify-center shadow-lg transition-colors"
+              className="absolute bottom-6 right-6 pointer-events-auto bg-surface-container border border-surface-variant hover:border-gold-accent text-on-surface rounded-full w-12 h-12 flex items-center justify-center shadow-lg transition-colors"
               onClick={() => setShowMap(false)} aria-label="Close"
             >
               ✕
             </button>
-          </div>
         </div>
       ) : (
         <>
@@ -355,8 +390,8 @@ export default function BuyerMode() {
                 <VerticalListingCard key={item.id} item={item} />
               ))}
               {newFeedListings.length === 0 ? (
-                <div className="w-full flex flex-col items-center justify-center p-12 bg-[#121110]/50 border border-surface-variant/50 border-dashed rounded-xl">
-                  <div className="w-16 h-16 rounded-full border border-gold-accent/30 bg-[#121212] flex items-center justify-center text-gold-accent mb-4">
+                <div className="w-full flex flex-col items-center justify-center p-12 bg-surface/50 border border-surface-variant/50 border-dashed rounded-xl">
+                  <div className="w-16 h-16 rounded-full border border-gold-accent/30 bg-surface flex items-center justify-center text-gold-accent mb-4">
                     <Search strokeWidth={1.5} size="1.5em" />
                   </div>
                   <h3 className="font-headline-editorial text-xl text-on-surface mb-2">The Ledger is Quiet</h3>
@@ -370,7 +405,7 @@ export default function BuyerMode() {
               ) : (
                 <div className="block shrink-0 w-[280px] snap-start h-full">
                   <Link href="/property" className="h-full min-h-[250px] rounded-lg border border-surface-variant bg-surface-alt text-on-surface hover:border-gold-accent hover:bg-gold-accent/5 transition-all flex flex-col items-center justify-center gap-4 group">
-                    <div className="w-16 h-16 rounded-full border border-gold-accent/30 bg-[#121212] flex items-center justify-center text-gold-accent group-hover:scale-110 transition-transform">
+                    <div className="w-16 h-16 rounded-full border border-gold-accent/30 bg-surface flex items-center justify-center text-gold-accent group-hover:scale-110 transition-transform">
                       <Search strokeWidth={1.5} size="1.5em" />
                     </div>
                     <div className="text-center">

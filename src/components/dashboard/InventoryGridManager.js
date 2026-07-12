@@ -96,8 +96,8 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
 
   const executeSubdivide = () => {
     if (!subdivideUnitId) return;
-    const qty = Math.max(2, parseInt(subdivideQty, 10) || 2);
-    const sqm = subdivideSqm.trim() || "";
+    const qty = Math.max(2, Math.min(20, parseInt(subdivideQty, 10) || 2));
+    const sqm = subdivideSqm.trim().slice(0, 50) || "";
     
     const idx = units.findIndex((u) => u.id === subdivideUnitId);
     if (idx === -1) return;
@@ -130,10 +130,14 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
   };
 
   const handleFeatureAdd = (id, rawValue) => {
-    const val = (rawValue || "").trim();
+    const val = (rawValue || "").trim().slice(0, 50);
     if (!val) return;
     const unit = units.find((u) => u.id === id);
     if (unit && !(unit.features || []).includes(val)) {
+      if ((unit.features || []).length >= 20) {
+        alert("Maximum 20 features allowed per unit.");
+        return;
+      }
       commit(
         units.map((u) =>
           u.id === id ? { ...u, features: [...(u.features || []), val] } : u
@@ -187,6 +191,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
     } catch (err) {
       clearInterval(progressInterval);
       console.error("Direct upload failed:", err);
+      alert("Failed to upload photo. Please check your connection and try again.");
       setUploadingUnitId(null);
     }
   };
@@ -271,6 +276,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
             />
             <input
               type="text"
+              maxLength={50}
               value={bulkFloor}
               onChange={(e) => setBulkFloor(e.target.value)}
               placeholder="Floor"
@@ -370,7 +376,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                         return (
                           <tr key={unit.id} className={`border-b border-surface-variant/40 transition-colors group ${lockedForOwner ? "bg-gold-accent/5" : "hover:bg-surface-variant/20"}`}>
                             {/* Name */}
-                            <td className="p-2.5 align-top">
+                            <td className="p-2.5 align-top max-w-[200px] break-words">
                               {lockedForOwner ? (
                                 <div className="px-2 py-1">
                                   <div className="text-sm text-text-primary">{unit.name || "Unnamed unit"}</div>
@@ -381,6 +387,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                               ) : (
                                 <input
                                   type="text"
+                                  maxLength={100}
                                   value={unit.name || ""}
                                   onChange={(e) => updateUnit(unit.id, "name", e.target.value)}
                                   onBlur={(e) => updateUnit(unit.id, "name", e.target.value, true)}
@@ -390,12 +397,13 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                               )}
                             </td>
                             {/* Size */}
-                            <td className="p-2.5 align-top">
+                            <td className="p-2.5 align-top max-w-[100px] break-words">
                               {structuralReadOnly ? (
                                 <span className="px-2 py-1 text-sm text-text-secondary block">{unit.size || "—"}</span>
                               ) : (
                                 <input
                                   type="text"
+                                  maxLength={50}
                                   value={unit.size || ""}
                                   onChange={(e) => updateUnit(unit.id, "size", e.target.value)}
                                   onBlur={(e) => updateUnit(unit.id, "size", e.target.value, true)}
@@ -405,12 +413,13 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                               )}
                             </td>
                             {/* Floor */}
-                            <td className="p-2.5 align-top">
+                            <td className="p-2.5 align-top max-w-[120px] break-words">
                               {structuralReadOnly ? (
                                 <span className="px-2 py-1 text-sm text-text-secondary block">{unit.floor || "—"}</span>
                               ) : (
                                 <input
                                   type="text"
+                                  maxLength={50}
                                   value={unit.floor || ""}
                                   onChange={(e) => updateUnit(unit.id, "floor", e.target.value)}
                                   onBlur={(e) => updateUnit(unit.id, "floor", e.target.value, true)}
@@ -420,7 +429,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                               )}
                             </td>
                             {/* Features */}
-                            <td className="p-2.5 align-top">
+                            <td className="p-2.5 align-top max-w-[250px] break-words">
                               {(unit.features || []).length > 0 && (
                                 <div className="flex flex-wrap gap-1.5 mb-2">
                                   {(unit.features || []).map((feature, idx) => (
@@ -439,6 +448,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                                 <div className="flex gap-2 items-center">
                                   <input
                                     type="text"
+                                    maxLength={50}
                                     onKeyDown={(e) => {
                                       if (e.key === "Enter") {
                                         e.preventDefault();
@@ -505,11 +515,11 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                                 </select>
                               </td>
                             )}
-                            {/* Row actions — never available in operator mode or for delegated rows */}
+                            {/* Row actions */}
                             <td className="p-2.5 align-top text-center whitespace-nowrap">
-                              {!isOperatorMode && !lockedForOwner && (
+                              {(isOperatorMode || !lockedForOwner) && (
                                 <div className="inline-flex items-center gap-1">
-                                  {/* Always visible — the drill-in Unit Master Page editor */}
+                                  {/* Always visible to the active party — the drill-in Unit Master Page editor */}
                                   <button
                                     onClick={() => setDetailsUnitId(unit.id)}
                                     className="p-2 rounded border border-surface-variant text-text-secondary hover:bg-gold-accent/10 hover:text-gold-accent hover:border-gold-accent transition-colors"
@@ -517,29 +527,32 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                                   >
                                     <SlidersHorizontal size={15} />
                                   </button>
-                                  <span className="inline-flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                  <button
-                                    onClick={() => duplicateUnit(unit.id)}
-                                    className="p-2 rounded hover:bg-gold-accent/10 text-text-muted hover:text-gold-accent transition-colors"
-                                    title="Duplicate unit"
-                                  >
-                                    <Copy size={15} />
-                                  </button>
-                                  <button
-                                    onClick={() => setSubdivideUnitId(unit.id)}
-                                    className="p-2 rounded hover:bg-gold-accent/10 text-text-muted hover:text-gold-accent transition-colors"
-                                    title="Subdivide unit"
-                                  >
-                                    <Split size={15} />
-                                  </button>
-                                  <button
-                                    onClick={() => removeUnit(unit.id)}
-                                    className="p-2 rounded hover:bg-error/10 text-text-muted hover:text-error transition-colors"
-                                    title="Delete unit"
-                                  >
-                                    <Trash2 size={15} />
-                                  </button>
-                                  </span>
+                                  
+                                  {!isOperatorMode && !lockedForOwner && (
+                                    <span className="inline-flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                      <button
+                                        onClick={() => duplicateUnit(unit.id)}
+                                        className="p-2 rounded hover:bg-gold-accent/10 text-text-muted hover:text-gold-accent transition-colors"
+                                        title="Duplicate unit"
+                                      >
+                                        <Copy size={15} />
+                                      </button>
+                                      <button
+                                        onClick={() => setSubdivideUnitId(unit.id)}
+                                        className="p-2 rounded hover:bg-gold-accent/10 text-text-muted hover:text-gold-accent transition-colors"
+                                        title="Subdivide unit"
+                                      >
+                                        <Split size={15} />
+                                      </button>
+                                      <button
+                                        onClick={() => removeUnit(unit.id)}
+                                        className="p-2 rounded hover:bg-error/10 text-text-muted hover:text-error transition-colors"
+                                        title="Delete unit"
+                                      >
+                                        <Trash2 size={15} />
+                                      </button>
+                                    </span>
+                                  )}
                                 </div>
                               )}
                             </td>
@@ -661,6 +674,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
               <input
                 type="number"
                 min={2}
+                max={20}
                 value={subdivideQty}
                 onChange={(e) => setSubdivideQty(e.target.value)}
                 className="w-full bg-surface-alt border border-surface-variant rounded px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-gold-accent transition-colors"
@@ -670,6 +684,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
               <label className="block text-[11px] text-text-secondary uppercase tracking-widest font-label-caps mb-1">Average Sqm per space?</label>
               <input
                 type="text"
+                maxLength={50}
                 placeholder="e.g. 50"
                 value={subdivideSqm}
                 onChange={(e) => setSubdivideSqm(e.target.value)}

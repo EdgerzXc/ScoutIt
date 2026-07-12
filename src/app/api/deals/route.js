@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { logActivity } from "@/lib/crmActivity";
 
@@ -12,22 +11,7 @@ export const dynamic = "force-dynamic";
 // auth pattern as /api/deals/[id]/messages), so it's additive/parallel, not
 // a replacement for that existing (separately flagged) mechanism.
 
-async function resolveUserId(request, mockOwnerId) {
-  const authHeader = request.headers.get("Authorization");
-  const token = authHeader ? authHeader.replace("Bearer ", "") : null;
 
-  if (token && token.trim() !== "") {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    const authClient = createClient(supabaseUrl, supabaseAnonKey);
-    const { data: { user }, error } = await authClient.auth.getUser(token);
-    if (!error && user) return user.id;
-  }
-  // Dev-only fallback -- rejected in production, where identity must come
-  // from a verified session token (same gate as /api/dashboard/publish).
-  if (process.env.NODE_ENV !== "production" && mockOwnerId) return mockOwnerId;
-  return null;
-}
 
 // No updated_at column on deals (yet) -- sort order is derived from
 // created_at + latest message timestamp instead, computed below.
@@ -36,8 +20,7 @@ const DEAL_FIELDS = "id, status, pitch_message, private_notes, buyer_id, broker_
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
-    const mockOwnerId = searchParams.get("mockOwnerId");
-    const userId = await resolveUserId(request, mockOwnerId);
+    const userId = await resolveUserId(request);
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized: Invalid session or missing token" }, { status: 401 });
     }
@@ -148,14 +131,14 @@ export async function GET(request) {
 }
 
 import { z } from "zod";
+import { resolveUserId } from "@/lib/serverAuth";
 
 const postSchema = z.object({
   propertyId: z.string(),
   otherPartyEmail: z.string(), // We use this as ID for simplicity
   status: z.string(),
   initialMessage: z.string().optional(),
-  mockOwnerId: z.string().optional()
-});
+  });
 
 export async function POST(request) {
   try {
@@ -163,8 +146,8 @@ export async function POST(request) {
     if (!parsed.success) {
       return NextResponse.json({ error: "Invalid data format" }, { status: 400 });
     }
-    const { propertyId, otherPartyEmail, status, initialMessage, mockOwnerId } = parsed.data;
-    const userId = await resolveUserId(request, mockOwnerId);
+    const { propertyId, otherPartyEmail, status, initialMessage  } = parsed.data;
+    const userId = await resolveUserId(request);
 
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 

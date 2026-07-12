@@ -16,6 +16,8 @@ export async function generateMetadata({ params }) {
   const baseId = process.env.AIRTABLE_BASE_ID;
   let seoTitle = `Property Intel — ${resolvedParams.id} — ScoutIt`;
   let seoDescription = "Property Intelligence Vector";
+  let imageUrl = "https://scoutit.com/og-default.jpg";
+  let url = `https://scoutit.com/property/${resolvedParams.id}`;
 
   if (apiKey && baseId) {
     try {
@@ -27,14 +29,45 @@ export async function generateMetadata({ params }) {
       );
       if (match) {
         if (match.seo_title) seoTitle = match.seo_title;
+        else seoTitle = `ScoutIt: ${match.title} · ${match.location || "Premium Space"}`;
+        
         if (match.seo_description) seoDescription = match.seo_description;
+        else seoDescription = `Premium ${match.spaceCategory || "commercial"} space. Explore the full intelligence dossier, layout flexibilities, and rich metrics on ScoutIt.`;
+
+        // Find the highest resolution photo (usually the first one)
+        const photo = Array.isArray(match.photos) ? match.photos.find(Boolean) : (match.photo || match.image);
+        if (photo) imageUrl = photo;
+        
+        if (match.slug) url = `https://scoutit.com/property/${match.slug}`;
       }
     } catch {}
   }
 
   return {
     title: seoTitle,
-    description: seoDescription
+    description: seoDescription,
+    openGraph: {
+      title: seoTitle,
+      description: seoDescription,
+      url: url,
+      siteName: 'ScoutIt',
+      images: [
+        {
+          url: imageUrl,
+          width: 1200,
+          height: 630,
+          alt: seoTitle,
+        },
+      ],
+      locale: 'en_US',
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: seoTitle,
+      description: seoDescription,
+      images: [imageUrl],
+    },
   };
 }
 

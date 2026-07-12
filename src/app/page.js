@@ -148,8 +148,8 @@ export default function Home() {
                 title: p.title,
                 image: p.image || (p.photos?.[0]) || "",
                 tags: [
-                  `Aesthetic: ${p.aestheticTag || "Modernist"}`,
-                  `Spatial Density: ${p.spatialDensity || "Low"}`,
+                  `Aesthetic: ${p.aestheticTag || null}`,
+                  `Spatial Density: ${p.spatialDensity || null}`,
                   `Location: ${p.location || p.city}`
                 ]
               });
@@ -212,7 +212,7 @@ export default function Home() {
                 slug: p.slug || p.id,
                 title: p.title,
                 location: p.location || p.city,
-                style: p.aestheticTag || "Modernist",
+                style: p.aestheticTag || null,
                 image: p.image || (p.photos?.[0]) || "",
                 desc: p.hook || ""
               });
@@ -222,7 +222,7 @@ export default function Home() {
         
         const airtableIntel = data.intel || [];
         airtableIntel.forEach((item) => {
-          let category = item.category || "Residential";
+          let category = item.category || null;
           if (category.toLowerCase() === "hospitality") category = "Hospitality";
           if (category.toLowerCase() === "str") category = "STR";
           if (category.toLowerCase() === "culinary" || category.toLowerCase() === "restaurants") category = "Restaurants";
@@ -233,7 +233,7 @@ export default function Home() {
               updatedFeed[category].news.unshift({
                 slug: item.slug || item.id,
                 title: item.title,
-                date: item.date || "Just Now",
+                date: item.date || null,
                 excerpt: item.excerpt || ""
               });
             }
@@ -243,7 +243,7 @@ export default function Home() {
         // Dynamic Spotlight Match Logic
         const allArticles = [
           ...airtableIntel.map(item => {
-            let category = item.category || "Residential";
+            let category = item.category || null;
             if (category.toLowerCase() === "hospitality") category = "Hospitality";
             if (category.toLowerCase() === "str") category = "STR";
             if (category.toLowerCase() === "culinary" || category.toLowerCase() === "restaurants") category = "Restaurants";
@@ -251,7 +251,7 @@ export default function Home() {
             return { ...item, category };
           }),
           ...getArticles().map(art => {
-            let category = art.category || "Residential";
+            let category = art.category || null;
             if (category.toLowerCase() === "hospitality") category = "Hospitality";
             if (category.toLowerCase() === "str") category = "STR";
             if (category.toLowerCase() === "culinary" || category.toLowerCase() === "restaurants") category = "Restaurants";

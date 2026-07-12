@@ -21,6 +21,10 @@ export async function POST(request) {
       return NextResponse.json({ error: "Unauthorized: Invalid session" }, { status: 401 });
     }
 
+    if (!user || !user.id || typeof user.id !== 'string') {
+      return NextResponse.json({ error: "Unauthorized: Invalid user data" }, { status: 401 });
+    }
+
     const shareToken = encryptUserId(user.id);
 
     return NextResponse.json({ success: true, shareToken });

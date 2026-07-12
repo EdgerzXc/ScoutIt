@@ -204,7 +204,7 @@ export default function OnboardingPage() {
               <span className="text-xs text-text-secondary">Enter the 6-digit code sent to your email.</span>
             </>
           ) : (
-            <p className="text-sm text-text-secondary">We will send a magic link and 6-digit code to your email.</p>
+            <p className="text-sm text-text-secondary">We&apos;ll email you a secure link and a 6-digit code.</p>
           )}
         </div>
       </div>
@@ -219,7 +219,7 @@ export default function OnboardingPage() {
           (useOtp && otpSent && otpCode.length < 6)
         }
       >
-        {useOtp && !otpSent ? "Send Verification Code →" : useOtp && otpSent ? "Verify & Continue →" : "Continue with Email →"}
+        {useOtp && !otpSent ? "Send Verification Code →" : useOtp && otpSent ? "Verify & Continue →" : "Sign in with email →"}
       </button>
 
       {!otpSent && (
@@ -230,7 +230,7 @@ export default function OnboardingPage() {
             setOtpSent(false);
           }}
         >
-          {useOtp ? "Use a Password instead" : "Use a One-Time Code instead"}
+          {useOtp ? "Sign in with a password" : "Sign in with a code"}
         </button>
       )}
 
@@ -291,7 +291,7 @@ export default function OnboardingPage() {
     <div className="flex flex-col animate-[fadeIn_0.5s_ease-out]">
       <span className="text-gold-accent font-label-caps text-[12px] tracking-widest uppercase mb-4 block">Phase 02 // Intent Matrix</span>
       <h1 className="font-headline-editorial text-4xl md:text-5xl text-on-surface mb-2">How will you use ScoutIt?</h1>
-      <p className="text-text-secondary font-body-md mb-8">Select all that apply. This sets up your multi-role dashboard capabilities.</p>
+      <p className="text-text-secondary font-body-md mb-8">Select your roles to customize your dashboard.</p>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
         {TAGS.map(tag => {
@@ -335,7 +335,7 @@ export default function OnboardingPage() {
         onClick={handleStep2Next}
         disabled={formData.tags.length === 0 || (formData.tags.includes('provider') && !formData.providerType)}
       >
-        Set Capabilities →
+        Save preferences →
       </button>
     </div>
   );
@@ -344,8 +344,8 @@ export default function OnboardingPage() {
   const renderStep3 = () => (
     <div className="flex flex-col animate-[fadeIn_0.5s_ease-out]">
       <span className="text-gold-accent font-label-caps text-[12px] tracking-widest uppercase mb-4 block">Phase 03 // Workspace</span>
-      <h1 className="font-headline-editorial text-4xl md:text-5xl text-on-surface mb-2">What brings you here today?</h1>
-      <p className="text-text-secondary font-body-md mb-8">You can switch anytime. This just sets your home base.</p>
+      <h1 className="font-headline-editorial text-4xl md:text-5xl text-on-surface mb-2">Which view do you want to start in?</h1>
+      <p className="text-text-secondary font-body-md mb-8">You can switch between roles later in your dashboard.</p>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
         {formData.tags.map(tagId => {
@@ -371,7 +371,7 @@ export default function OnboardingPage() {
         onClick={handleStep3Next}
         disabled={!formData.primaryMode}
       >
-        Set Primary Mode →
+        Go to Dashboard →
       </button>
     </div>
   );
@@ -443,7 +443,7 @@ export default function OnboardingPage() {
       <div className="flex flex-col animate-[fadeIn_0.5s_ease-out]">
         <span className="text-gold-accent font-label-caps text-[12px] tracking-widest uppercase mb-4 block">Phase 04 // Calibration</span>
         <h1 className="font-headline-editorial text-4xl md:text-5xl text-on-surface mb-2">One last thing</h1>
-        <p className="text-text-secondary font-body-md mb-8">Let&apos;s calibrate your dashboard for Day 1.</p>
+        <p className="text-text-secondary font-body-md mb-8">Customize your workspace.</p>
 
         <div className="bg-surface-alt border border-surface-variant rounded-lg p-6 md:p-8 mb-8">
           {mode === "buyer" && (
@@ -467,8 +467,8 @@ export default function OnboardingPage() {
               <h3 className="font-working-title text-xl text-on-surface mb-2">Ready to list your property?</h3>
               <p className="text-text-secondary text-sm mb-6">You can set up your asset profile now, or explore the dashboard first.</p>
               <div className="flex flex-col gap-3">
-                <button className="w-full bg-gold-accent text-background font-working-title text-base font-bold py-3 px-6 rounded hover:opacity-90 transition-opacity" onClick={() => { localStorage.setItem("scoutit_open_wizard", "1"); completeOnboarding(); }}>List Property Now</button>
-                <button className="w-full bg-surface border border-surface-variant text-on-surface font-working-title text-base font-bold py-3 px-6 rounded hover:bg-surface-container transition-colors" onClick={() => completeOnboarding()}>I&apos;ll do it later</button>
+                <button className="w-full bg-gold-accent text-background font-label-caps uppercase tracking-widest text-base font-bold py-3 px-6 rounded hover:opacity-90 transition-opacity" onClick={() => { localStorage.setItem("scoutit_open_wizard", "1"); completeOnboarding(); }}>Create your first listing</button>
+                <button className="w-full bg-surface border border-surface-variant text-on-surface font-label-caps uppercase tracking-widest text-base font-bold py-3 px-6 rounded hover:bg-surface-container transition-colors" onClick={() => completeOnboarding()}>Skip this step</button>
               </div>
             </>
           )}
@@ -494,8 +494,8 @@ export default function OnboardingPage() {
               <h3 className="font-working-title text-xl text-on-surface mb-2">Set up your {PROVIDER_SUBTAGS.find(s=>s.id === formData.providerType)?.label} profile</h3>
               <p className="text-text-secondary text-sm mb-6">Get your portfolio ready. Profiles that are 100% complete get first placement when gates open.</p>
               <div className="flex flex-col gap-3">
-                <button className="w-full bg-gold-accent text-background font-working-title text-base font-bold py-3 px-6 rounded hover:opacity-90 transition-opacity" onClick={() => completeOnboarding()}>Build Profile</button>
-                <button className="w-full bg-surface border border-surface-variant text-on-surface font-working-title text-base font-bold py-3 px-6 rounded hover:bg-surface-container transition-colors" onClick={() => completeOnboarding()}>Skip for now</button>
+                <button className="w-full bg-gold-accent text-background font-label-caps uppercase tracking-widest text-base font-bold py-3 px-6 rounded hover:opacity-90 transition-opacity" onClick={() => completeOnboarding()}>Build Profile</button>
+                <button className="w-full bg-surface border border-surface-variant text-on-surface font-label-caps uppercase tracking-widest text-base font-bold py-3 px-6 rounded hover:bg-surface-container transition-colors" onClick={() => completeOnboarding()}>Skip for now</button>
               </div>
             </>
           )}
@@ -508,10 +508,10 @@ export default function OnboardingPage() {
               onClick={() => completeOnboarding()}
               disabled={mode === "broker" && !prcFormatOk}
             >
-              Enter ScoutIt →
+              Go to Dashboard →
             </button>
             {mode === "broker" && !prcFormatOk && formData.prcLicense.length > 0 && (
-              <p className="text-error text-sm mt-3 text-center">That doesn&apos;t look like a PRC license number — it should contain at least 5 digits.</p>
+              <p className="text-error text-sm mt-3 text-center">Please enter a valid PRC license number with at least 5 digits.</p>
             )}
           </>
         )}

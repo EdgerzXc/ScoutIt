@@ -48,7 +48,7 @@ export default function ServiceConnectionPortal({ providerName, serviceType, isM
           .portal-success h3 {
             font-family: var(--font-display);
             font-size: 22px;
-            color: #fff;
+            color: var(--on-surface);
             margin: 0 0 12px 0;
           }
 
@@ -75,7 +75,7 @@ export default function ServiceConnectionPortal({ providerName, serviceType, isM
 
           .reset-portal-btn:hover {
             background: var(--accent);
-            color: #0e0e0e;
+            color: var(--background);
           }
         `}</style>
       </div>
@@ -200,7 +200,7 @@ export default function ServiceConnectionPortal({ providerName, serviceType, isM
         .portal-header h4 {
           font-family: var(--font-display);
           font-size: 34px;
-          color: #fff;
+          color: var(--on-surface);
           margin: 0 0 12px 0;
           letter-spacing: 0.01em;
         }
@@ -252,10 +252,10 @@ export default function ServiceConnectionPortal({ providerName, serviceType, isM
         .form-group-item input,
         .form-group-item textarea {
           background: rgba(0,0,0,0.3);
-          border: 1px solid #333;
+          border: 1px solid var(--border-solid);
           border-radius: 6px;
           padding: 18px 24px;
-          color: #fff;
+          color: var(--on-surface);
           font-family: var(--font-body);
           font-size: 18px;
           outline: none;
@@ -270,7 +270,7 @@ export default function ServiceConnectionPortal({ providerName, serviceType, isM
 
         .portal-submit-btn {
           background: var(--accent);
-          color: #0e0e0e;
+          color: var(--background);
           border: none;
           padding: 18px 44px;
           border-radius: 4px;
@@ -352,7 +352,7 @@ export default function ServiceConnectionPortal({ providerName, serviceType, isM
         }
 
         .disclaimer-paragraph strong {
-          color: #fff;
+          color: var(--on-surface);
           font-weight: 600;
         }
 

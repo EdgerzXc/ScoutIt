@@ -3,6 +3,8 @@
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Link from "next/link";
+import MeshHero from "@/components/ui/MeshHero";
+import HoverCard from "@/components/ui/HoverCard";
 
 function getArticleType(art) {
   if (!art) return "Analysis";
@@ -168,16 +170,17 @@ export default function IntelPage() {
     <div className="page-wrapper">
       <Header />
       <main className="intel-main">
-        <header className="page-header">
-          <span className="vector-label">Layer 2.2 // Editorial Briefings</span>
-          <h1 className="page-title">Intel</h1>
-          <p className="page-subtitle">Tracing architectural shifts, spatial design, and development dispatches.</p>
-          <Link href="/discover" className="mode-jump-box">
-            <span className="jump-here">Intel</span>
-            <span className="jump-arrow">→</span>
-            <span className="jump-there">Discover</span>
+        <MeshHero
+          tag="Layer 2.2 // Editorial Briefings"
+          title="Intel"
+          subtitle="Tracing architectural shifts, spatial design, and development dispatches."
+        >
+          <Link href="/discover" className="mt-6 inline-flex items-center gap-3 no-underline border border-surface-variant px-5 py-3 rounded-sm font-mono text-xs uppercase tracking-[0.1em] text-text-secondary hover:text-gold-accent hover:border-gold-accent transition-colors active:scale-[0.98]">
+            <span className="text-text-muted">Intel</span>
+            <span className="text-gold-accent">→</span>
+            <span className="text-gold-accent">Discover</span>
           </Link>
-        </header>
+        </MeshHero>
 
         {/* Featured Split Hero (Only shown when filter is All and search is empty) */}
         {filter === "All" && searchQuery.trim() === "" && featuredArticle && (
@@ -240,7 +243,7 @@ export default function IntelPage() {
               <button
                 key={cat}
                 onClick={() => setFilter(cat)}
-                className={`filter-btn ${filter === cat ? "active" : ""}`}
+                className={`filter-btn font-mono text-xs tracking-[0.1em] uppercase px-4 py-2 border rounded-sm transition-colors active:scale-[0.98] ${filter === cat ? "bg-gold-accent text-background border-gold-accent shadow-[0_0_15px_rgba(232,174,60,0.3)]" : "bg-transparent text-text-secondary border-surface-variant hover:border-gold-accent hover:text-gold-accent"}`}
               >
                 {cat}
               </button>
@@ -253,9 +256,9 @@ export default function IntelPage() {
           <div className="articles-grid">
             {remainingArticles.length > 0 ? (
               remainingArticles.map((art) => (
-                <div
+                <HoverCard
                   key={art.slug}
-                  className="article-card"
+                  className="article-card flex flex-col h-full bg-surface-alt border border-surface-variant rounded-md overflow-hidden"
                   onClick={() => setSidePanelArticle(art)}
                   style={{ cursor: "pointer" }}
                 >
@@ -296,9 +299,9 @@ export default function IntelPage() {
                       );
                     })()}
 
-                    <span className="read-more-btn" style={{ marginTop: "16px", display: "inline-block" }}>Read Briefing →</span>
+                    <span className="read-more-btn" style={{ marginTop: "16px", display: "inline-block", color: "var(--accent)" }}>Read Briefing →</span>
                   </div>
-                </div>
+                </HoverCard>
               ))
             ) : (
               <div className="articles-empty-state" style={{ gridColumn: "1 / -1", textAlign: "center", padding: "60px 20px" }}>

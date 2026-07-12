@@ -7,7 +7,7 @@ const ToggleSwitch = ({ label, checked, onChange, gold = false }) => (
   <div className="flex items-center justify-between py-2 border-b border-surface-variant/50 last:border-0">
     <span className="font-working-title text-sm text-on-surface">{label}</span>
     <div 
-      className={`w-10 h-6 rounded-full flex items-center p-1 transition-colors cursor-pointer ${checked ? (gold ? 'bg-gold-accent' : 'bg-on-surface') : 'bg-surface-variant'}`}
+      className={`w-10 h-6 rounded-full flex items-center p-1 active:scale-95 transition-all cursor-pointer ${checked ? (gold ? 'bg-gold-accent' : 'bg-on-surface') : 'bg-surface-variant'}`}
       onClick={() => onChange(!checked)}
     >
       <div className={`w-4 h-4 bg-background rounded-full transition-transform ${checked ? 'translate-x-4' : 'translate-x-0'}`}></div>
@@ -47,14 +47,14 @@ export default function PhotographerHUD({ projects, activeProjectId, setActivePr
       return null;
     }
     return (
-      <div className="flex flex-col gap-6 animate-[fadeIn_0.3s_ease]">
+      <div className="flex flex-col gap-6 animate-slide-up-fade">
         <div className="flex justify-between items-end border-b border-surface-variant pb-4">
           <div>
             <button className="text-text-secondary hover:text-gold-accent text-sm mb-2" onClick={() => setActiveProjectId(null)}>← Back to Gallery</button>
             <h2 className="font-display-md text-3xl text-on-surface">{project.title}</h2>
           </div>
           <button 
-            className="bg-gold-accent text-background font-working-title font-bold px-4 py-2 rounded text-sm hover:opacity-90 transition-all"
+            className="bg-gold-accent text-background active:scale-95 font-working-title font-bold px-4 py-2 rounded text-sm hover:opacity-90 transition-all"
             onClick={() => addToast("Final Gallery Submitted.", "📸")}
           >
             Submit Final Gallery
@@ -89,7 +89,7 @@ export default function PhotographerHUD({ projects, activeProjectId, setActivePr
   }
 
   return (
-    <div className="flex flex-col gap-6 animate-[fadeIn_0.4s_ease]">
+    <div className="flex flex-col gap-6 animate-slide-up-fade">
       
       {/* Tab Navigation */}
       <div className="flex border-b border-surface-variant overflow-x-auto">
@@ -109,10 +109,11 @@ export default function PhotographerHUD({ projects, activeProjectId, setActivePr
 
       {activeTab === 'bounties' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-[fadeIn_0.2s_ease]">
-          {projects.map(project => (
+          {projects.map((project, index) => (
             <div 
               key={project.id} 
-              className="card-atmosphere hov-card rounded-lg overflow-hidden cursor-pointer group transition-all"
+              className="card-atmosphere hov-card stagger-enter rounded-lg overflow-hidden cursor-pointer group transition-all"
+              style={{ '--i': index }}
               onClick={() => setActiveProjectId(project.id)}
             >
               <div className="aspect-video bg-surface-alt flex items-center justify-center text-5xl relative">
@@ -160,7 +161,7 @@ export default function PhotographerHUD({ projects, activeProjectId, setActivePr
                     <p className="text-xs text-text-secondary mt-1">Toggle off to create artificial scarcity if fully booked.</p>
                   </div>
                   <div 
-                    className={`w-12 h-6 rounded-full flex items-center p-1 transition-colors cursor-pointer ${acceptingProjects ? 'bg-gold-accent' : 'bg-surface-variant'}`}
+                    className={`w-12 h-6 rounded-full flex items-center p-1 active:scale-95 transition-all cursor-pointer ${acceptingProjects ? 'bg-gold-accent' : 'bg-surface-variant'}`}
                     onClick={() => setAcceptingProjects(!acceptingProjects)}
                   >
                     <div className={`w-4 h-4 bg-background rounded-full transition-transform ${acceptingProjects ? 'translate-x-6' : 'translate-x-0'}`}></div>
@@ -242,7 +243,7 @@ export default function PhotographerHUD({ projects, activeProjectId, setActivePr
               </div>
               
               <button 
-                className="w-full mt-4 bg-surface border border-gold-accent/50 text-gold-accent font-working-title font-bold px-4 py-4 rounded hover:bg-gold-accent/10 transition-all uppercase tracking-wider text-sm"
+                className="w-full mt-4 bg-surface border border-gold-accent/50 text-gold-accent active:scale-95 font-working-title font-bold px-4 py-4 rounded hover:bg-gold-accent/10 transition-all uppercase tracking-wider text-sm"
                 onClick={() => addToast("Elite Roster Profile Updated.", "✨")}
               >
                 Save Showcase Profile

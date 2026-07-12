@@ -84,10 +84,11 @@ export default function WishlistPage() {
               <section key={group.type} className="reaction-group">
                 <h2 className="group-label">{group.type}</h2>
                 <div className="cards-grid">
-                  {group.items.map((item) => (
+                  {group.items.map((item, index) => (
                     <div
                       key={item.timestamp}
-                      className={`board-card ${fadingOut.has(item.timestamp) ? "fading" : ""}`}
+                      className={`board-card stagger-enter ${fadingOut.has(item.timestamp) ? "fading" : ""}`}
+                      style={{ '--i': index }}
                     >
                       <div className="badge-corner">
                         <ReactionBadge reactionType={item.reaction_type} />
@@ -158,7 +159,7 @@ export default function WishlistPage() {
 
         .layer-label {
           display: block;
-          font-family: system-ui, sans-serif;
+          font-family: var(--font-mono), monospace;
           font-size: 12px;
           text-transform: uppercase;
           letter-spacing: 3px;
@@ -191,7 +192,7 @@ export default function WishlistPage() {
         }
 
         .empty-subtitle {
-          font-family: system-ui, sans-serif;
+          font-family: var(--font-mono), monospace;
           font-size: 14px;
           color: #c8c8c8;
           margin-top: 8px;
@@ -208,13 +209,17 @@ export default function WishlistPage() {
           text-transform: uppercase;
           letter-spacing: 1px;
           text-decoration: none;
-          font-family: system-ui, sans-serif;
+          font-family: var(--font-mono), monospace;
           transition: background 0.2s, color 0.2s;
         }
 
         .empty-cta:hover {
           background: #E8AE3C;
           color: #0e0e0e;
+        }
+
+        .empty-cta:active {
+          transform: scale(0.95);
         }
 
         /* Loading */
@@ -239,7 +244,7 @@ export default function WishlistPage() {
         }
 
         .group-label {
-          font-family: system-ui, sans-serif;
+          font-family: var(--font-mono), monospace;
           font-size: 11px;
           text-transform: uppercase;
           letter-spacing: 2px;
@@ -303,7 +308,7 @@ export default function WishlistPage() {
         }
 
         .card-meta {
-          font-family: system-ui, sans-serif;
+          font-family: var(--font-mono), monospace;
           font-size: 12px;
           color: #c8c8c8;
           display: flex;
@@ -336,7 +341,7 @@ export default function WishlistPage() {
         }
 
         .reaction-badge {
-          font-family: system-ui, sans-serif;
+          font-family: var(--font-mono), monospace;
           font-size: 10px;
           text-transform: uppercase;
           letter-spacing: 1px;
@@ -354,7 +359,7 @@ export default function WishlistPage() {
           cursor: pointer;
           padding: 4px 8px;
           transition: color 0.2s, border-color 0.2s;
-          font-family: system-ui, sans-serif;
+          font-family: var(--font-mono), monospace;
         }
 
         .remove-btn:hover {
@@ -362,8 +367,12 @@ export default function WishlistPage() {
           border-color: #f0ede8;
         }
 
+        .remove-btn:active {
+          transform: scale(0.95);
+        }
+
         .board-footer {
-          font-family: system-ui, sans-serif;
+          font-family: var(--font-mono), monospace;
           font-size: 11px;
           color: #c8c8c8;
           text-align: center;

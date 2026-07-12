@@ -502,7 +502,7 @@ export default function BlackHoleCanvas({ params: paramsProp, onSnapshotReady } 
       gl.deleteShader(fs);
       gl.deleteBuffer(buffer);
     };
-  }, []);
+  }, [onSnapshotReady]);
 
   return (
     <canvas

@@ -345,16 +345,16 @@ export default function BottomNav() {
             </div>
             <div className="theme-sheet-options">
               {[
-                { key: "dark", label: "Dark Mode", desc: "Cosmic default", dot: "#1e1e1e", dotBorder: "rgba(255,255,255,0.18)" },
-                { key: "light", label: "Light Mode", desc: "Bright, open reading", dot: "#f0ede8", dotBorder: "rgba(0,0,0,0.18)" },
-                { key: "high-contrast", label: "High Contrast", desc: "Maximum readability", dot: "#E8AE3C", dotBorder: "rgba(232, 174, 60,0.4)" },
-              ].map(({ key, label, desc, dot, dotBorder }) => (
+                { key: "dark", label: "Dark Mode", desc: "Cosmic default", dotClass: "bg-surface border-on-surface/20" },
+                { key: "light", label: "Light Mode", desc: "Bright, open reading", dotClass: "bg-on-surface border-background/20" },
+                { key: "high-contrast", label: "High Contrast", desc: "Maximum readability", dotClass: "bg-gold-accent border-gold-accent/40" },
+              ].map(({ key, label, desc, dotClass }) => (
                 <button
                   key={key}
                   className={`theme-option ${currentMode === key ? "active" : ""}`}
                   onClick={() => changeMode(key)}
                 >
-                  <div className="theme-dot" style={{ background: dot, border: `1.5px solid ${dotBorder}` }} />
+                  <div className={`w-5 h-5 rounded-full border-[1.5px] ${dotClass}`} />
                   <div className="theme-text">
                     <div className="theme-label">{label}</div>
                     <div className="theme-desc">{desc}</div>
@@ -366,67 +366,21 @@ export default function BottomNav() {
 
             {/* Lite Mode — stops all animations so low-end phones don't lag */}
             <button
-              className={`lite-toggle-row ${lite ? "active" : ""}`}
+              className={`w-full flex items-center gap-3 text-left mt-2 p-3 rounded-lg border cursor-pointer transition-colors ${lite ? "bg-gold-accent/10 border-gold-accent/30" : "bg-on-surface/[0.025] border-on-surface/10"}`}
               onClick={toggleLite}
               aria-pressed={lite}
             >
-              <div className="lite-toggle-text">
+              <div className="flex-1">
                 <div className="theme-label">Lite Mode {lite ? "· On" : "· Off"}</div>
                 <div className="theme-desc">Turn off animations for a faster, smoother experience on older phones.</div>
               </div>
-              <span className={`lite-switch ${lite ? "on" : ""}`} aria-hidden="true">
-                <span className="lite-knob" />
+              <span className={`shrink-0 w-10 h-[22px] rounded-full border relative transition-colors ${lite ? "bg-gold-accent border-gold-accent" : "bg-on-surface/10 border-on-surface/20"}`} aria-hidden="true">
+                <span className={`absolute top-[2px] left-[2px] w-4 h-4 rounded-full bg-background transition-transform duration-200 ease-out ${lite ? "translate-x-[18px]" : ""}`} />
               </span>
             </button>
           </div>
         </div>
       )}
-
-      <style jsx>{`
-        .lite-toggle-row {
-          width: 100%;
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          text-align: left;
-          margin-top: 8px;
-          padding: 12px 14px;
-          border-radius: 8px;
-          background: rgba(255, 255, 255, 0.025);
-          border: 1px solid rgba(255, 255, 255, 0.07);
-          cursor: pointer;
-        }
-        .lite-toggle-row.active {
-          background: rgba(232, 174, 60, 0.08);
-          border-color: rgba(232, 174, 60, 0.3);
-        }
-        .lite-toggle-text { flex: 1; }
-        .lite-switch {
-          flex-shrink: 0;
-          width: 40px;
-          height: 22px;
-          border-radius: 999px;
-          background: rgba(255, 255, 255, 0.14);
-          border: 1px solid rgba(255, 255, 255, 0.18);
-          position: relative;
-          transition: background 0.2s ease, border-color 0.2s ease;
-        }
-        .lite-switch.on {
-          background: var(--accent-bright, #F7C64E);
-          border-color: var(--accent-bright, #F7C64E);
-        }
-        .lite-knob {
-          position: absolute;
-          top: 2px;
-          left: 2px;
-          width: 16px;
-          height: 16px;
-          border-radius: 50%;
-          background: #0e0e0e;
-          transition: transform 0.2s ease;
-        }
-        .lite-switch.on .lite-knob { transform: translateX(18px); }
-      `}</style>
     </>
   );
 }

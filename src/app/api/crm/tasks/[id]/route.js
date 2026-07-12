@@ -1,23 +1,9 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { z } from "zod";
+import { resolveUserId } from "@/lib/serverAuth";
 
-async function resolveUserId(request, mockOwnerId) {
-  const authHeader = request.headers.get("Authorization");
-  const token = authHeader ? authHeader.replace("Bearer ", "") : null;
-  if (token && token.trim() !== "") {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    const authClient = createClient(supabaseUrl, supabaseAnonKey);
-    const { data: { user }, error } = await authClient.auth.getUser(token);
-    if (!error && user) return user.id;
-  }
-  // Dev-only fallback -- rejected in production, where identity must come
-  // from a verified session token (same gate as /api/dashboard/publish).
-  if (process.env.NODE_ENV !== "production" && mockOwnerId) return mockOwnerId;
-  return null;
-}
+
 
 async function loadOwnedTask(taskId, userId) {
   const { data: task, error } = await supabaseAdmin
@@ -34,8 +20,7 @@ const patchSchema = z.object({
   completed: z.boolean().optional(),
   title: z.string().min(1).max(300).optional(),
   dueAt: z.string().datetime({ offset: true }).optional().nullable(),
-  mockOwnerId: z.string().optional(),
-});
+  });
 
 export async function PATCH(request, { params }) {
   try {
@@ -44,8 +29,8 @@ export async function PATCH(request, { params }) {
     if (!parsed.success) {
       return NextResponse.json({ error: "Invalid data format" }, { status: 400 });
     }
-    const { completed, title, dueAt, mockOwnerId } = parsed.data;
-    const userId = await resolveUserId(request, mockOwnerId);
+    const { completed, title, dueAt  } = parsed.data;
+    const userId = await resolveUserId(request);
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     if (!supabaseAdmin) return NextResponse.json({ error: "Server error: missing service role configuration" }, { status: 500 });
 
@@ -93,7 +78,7 @@ export async function DELETE(request, { params }) {
   try {
     const { id: taskId } = await params;
     const { searchParams } = new URL(request.url);
-    const userId = await resolveUserId(request, searchParams.get("mockOwnerId"));
+    const userId = await resolveUserId(request);
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     if (!supabaseAdmin) return NextResponse.json({ error: "Server error: missing service role configuration" }, { status: 500 });
 

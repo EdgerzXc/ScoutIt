@@ -4,6 +4,7 @@ import { z } from "zod";
 import { sanitizeObject } from "@/lib/sanitize";
 import { syncPropertyUnitsToAirtable } from "@/lib/unitsSync";
 import { notifyAttachedBrokers } from "@/lib/notifications";
+import { resolveUserId } from "@/lib/serverAuth";
 
 // Matches a real Postgres uuid (property_units.id). Client-side temp ids from
 // InventoryGridManager's newId() (Date.now().toString(36) + random) never match
@@ -29,8 +30,7 @@ const unitSchema = z.object({
 const bodySchema = z.object({
   propertyId: z.string(),
   units: z.array(unitSchema).max(500),
-  mockOwnerId: z.string().optional(),
-});
+  });
 
 function authClientFor() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -49,19 +49,7 @@ function serviceClientFor() {
   });
 }
 
-async function resolveUserId(request, mockOwnerId) {
-  const authHeader = request.headers.get("Authorization");
-  const token = authHeader ? authHeader.replace("Bearer ", "") : null;
 
-  if (token && token.trim() !== "") {
-    const { data: { user }, error } = await authClientFor().auth.getUser(token);
-    if (!error && user) return user.id;
-  }
-  // Dev-only fallback -- rejected in production, where identity must come
-  // from a verified session token (same gate as /api/dashboard/publish).
-  if (process.env.NODE_ENV !== "production" && mockOwnerId) return mockOwnerId;
-  return null;
-}
 
 // Shape a DB row the way the dashboard client (InventoryGridManager) expects.
 function toClientUnit(row) {
@@ -86,12 +74,11 @@ export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const propertyId = searchParams.get("propertyId");
-    const mockOwnerId = searchParams.get("mockOwnerId");
     if (!propertyId) {
       return NextResponse.json({ error: "Missing propertyId" }, { status: 400 });
     }
 
-    const userId = await resolveUserId(request, mockOwnerId);
+    const userId = await resolveUserId(request);
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized: Invalid session or missing token" }, { status: 401 });
     }
@@ -150,10 +137,10 @@ export async function POST(request) {
     if (!parsed.success) {
       return NextResponse.json({ error: "Invalid data format" }, { status: 400 });
     }
-    const { propertyId, units: incomingRaw, mockOwnerId } = parsed.data;
+    const { propertyId, units: incomingRaw  } = parsed.data;
     const incoming = sanitizeObject(incomingRaw);
 
-    const userId = await resolveUserId(request, mockOwnerId);
+    const userId = await resolveUserId(request);
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized: Invalid session or missing token" }, { status: 401 });
     }

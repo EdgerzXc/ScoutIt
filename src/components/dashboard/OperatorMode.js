@@ -12,18 +12,14 @@ import { useDashboard } from "../../context/DashboardContext";
 // InventoryGridManager in its restricted "operator" mode rather than forking
 // a second grid component.
 export default function OperatorMode() {
-  const { addToast } = useDashboard();
+  const { addToast, authedFetch } = useDashboard();
   const [buildings, setBuildings] = useState(null); // null = loading
   const buildingsRef = useRef(buildings);
   useEffect(() => { buildingsRef.current = buildings; }, [buildings]);
 
   const load = useCallback(async () => {
     try {
-      const { data: { session } } = await getSession();
-      const token = session?.access_token;
-      const res = await fetch("/api/dashboard/operator/units", {
-        headers: { Authorization: token ? `Bearer ${token}` : "" },
-      });
+      const res = await authedFetch("/api/dashboard/operator/units");
       const data = await res.json();
       if (res.ok) {
         setBuildings(data.buildings || []);
@@ -41,11 +37,9 @@ export default function OperatorMode() {
 
   const saveBuildingUnits = async (propertyId, units) => {
     try {
-      const { data: { session } } = await getSession();
-      const token = session?.access_token;
-      const res = await fetch("/api/dashboard/operator/units", {
+      const res = await authedFetch("/api/dashboard/operator/units", {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: token ? `Bearer ${token}` : "" },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ propertyId, units }),
       });
       const data = await res.json();

@@ -6,8 +6,7 @@ import { logActivity } from "@/lib/crmActivity";
 
 const schema = z.object({
   status: z.enum(["connected", "pending", "accepted", "closed", "declined", "reported"]),
-  mockOwnerId: z.string().optional(),
-});
+  });
 
 export async function PATCH(request, { params }) {
   try {
@@ -16,7 +15,7 @@ export async function PATCH(request, { params }) {
     if (!parsed.success) {
       return NextResponse.json({ error: "Invalid data format" }, { status: 400 });
     }
-    const { status, mockOwnerId } = parsed.data;
+    const { status  } = parsed.data;
 
     const authHeader = request.headers.get("Authorization");
     const token = authHeader ? authHeader.replace("Bearer ", "") : null;
@@ -29,7 +28,6 @@ export async function PATCH(request, { params }) {
       if (!error && user) userId = user.id;
     }
     // Dev-only fallback -- rejected in production (same gate as /api/dashboard/publish).
-    if (!userId && process.env.NODE_ENV !== "production" && mockOwnerId) userId = mockOwnerId;
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const { data: deal, error: dealError } = await supabaseAdmin

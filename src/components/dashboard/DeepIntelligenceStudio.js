@@ -485,7 +485,7 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
         <div className="flex items-center gap-4">
           {!isEditing && lastSaved && (
             <button onClick={clearDraft} className="text-error/80 hover:text-error text-[10px] uppercase font-label-caps tracking-wider transition-colors">
-              Clear Draft
+              Delete draft
             </button>
           )}
           <span className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase">
@@ -664,7 +664,7 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
                 onClick={() => setStep(step - 1)}
                 className="px-6 py-2 rounded border border-surface-variant text-text-secondary text-sm font-label-caps tracking-widest uppercase hover:text-on-surface hover:border-text-secondary transition-colors"
               >
-                ← Back
+                ← Previous step
               </button>
             ) : <div></div>}
 
@@ -691,7 +691,7 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
                   disabled={!isPublishable}
                   className="px-6 py-2 rounded bg-gold-accent text-background text-sm font-label-caps tracking-widest uppercase hover:bg-gold-bright disabled:opacity-50 transition-colors shadow-[0_0_15px_rgba(232,174,60,0.3)]"
                 >
-                  Submit for Approval
+                  Publish listing
                 </button>
               )}
             </div>

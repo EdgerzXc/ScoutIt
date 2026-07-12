@@ -1,29 +1,14 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { notifyUser } from "@/lib/notifications";
 import { logActivity } from "@/lib/crmActivity";
+import { resolveUserId } from "@/lib/serverAuth";
 
 // Same dev-mock convention as /api/notifications and /api/dashboard/units --
 // ?mockOwnerId=master-dev (here: a body field, since this is a POST) only
 // takes effect when no real Bearer token was sent, so real sessions are
 // unaffected.
-async function resolveUserId(request, mockOwnerId) {
-  const authHeader = request.headers.get("Authorization");
-  const token = authHeader ? authHeader.replace("Bearer ", "") : null;
 
-  if (token && token.trim() !== "") {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    const authClient = createClient(supabaseUrl, supabaseAnonKey);
-    const { data: { user }, error } = await authClient.auth.getUser(token);
-    if (!error && user) return user.id;
-  }
-  // Dev-only fallback -- rejected in production, where identity must come
-  // from a verified session token (same gate as /api/dashboard/publish).
-  if (process.env.NODE_ENV !== "production" && mockOwnerId) return mockOwnerId;
-  return null;
-}
 
 export async function POST(request) {
   try {
@@ -35,9 +20,9 @@ export async function POST(request) {
     // an operator (role: 'operator') is opening the initial ask to a building
     // owner about delegating units (SCOUTIT_MASTER_BUILD_SPEC.md §9.2) — left
     // null until the owner picks specific units to hand over.
-    const { listingId, propertySlug, message, role = 'buyer', unitId, mockOwnerId } = await request.json();
+    const { listingId, propertySlug, message, role = 'buyer', unitId  } = await request.json();
 
-    const userId = await resolveUserId(request, mockOwnerId);
+    const userId = await resolveUserId(request);
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized: Invalid session" }, { status: 401 });
     }

@@ -23,6 +23,9 @@ import { getChapterConfig } from "./chapterConfig";
 import { Bed, Bath, Ruler, Car, Lock, Search, Camera, Building2 } from "lucide-react";
 import InquiryModal from "@/components/property/InquiryModal";
 import OperatorRequestModal from "@/components/property/OperatorRequestModal";
+import GlassPanel from "@/components/ui/GlassPanel";
+import HoverCard from "@/components/ui/HoverCard";
+import MeshHero from "@/components/ui/MeshHero";
 import AffordabilityCalculator from "@/components/property/AffordabilityCalculator";
 import FloodRiskBadge from "@/components/property/FloodRiskBadge";
 import SpatialVaultWidget from "@/components/property/SpatialVaultWidget";
@@ -92,52 +95,52 @@ function DeepIntelWidget({ open, onToggle, fields, values }) {
   };
 
   return (
-    <div style={{marginTop:"32px"}}>
-      <div style={{height:"1px", background:"#262626", marginBottom:"16px"}}/>
+    <div className="mt-8">
+      <div className="h-px bg-surface-variant mb-4" />
       <button
         onClick={onToggle}
-        style={{width:"100%", background:"#161616", border:"0.5px solid #262626", padding:"14px 20px", cursor:"pointer", display:"flex", justifyContent:"space-between", alignItems:"center", borderRadius:"2px"}}
+        className="w-full bg-surface-alt border border-surface-variant p-4 cursor-pointer flex justify-between items-center rounded-sm hover:bg-surface-variant transition-colors active:scale-[0.99]"
       >
-        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#E8AE3C", letterSpacing:"0.18em", textTransform:"uppercase"}}>
+        <span className="font-mono text-[10px] text-gold-accent tracking-[0.18em] uppercase">
           DEEP INTELLIGENCE // {unlocked ? "UNLOCKED" : "VERIFIED SCOUT"}
         </span>
-        <svg viewBox="0 0 10 6" width="10" height="6" fill="none" stroke="#E8AE3C" strokeWidth="1.5">
-          <path d={open ? "M1 5L5 1L9 5" : "M1 1L5 5L9 1"}/>
+        <svg viewBox="0 0 10 6" width="10" height="6" fill="none" stroke="#E8AE3C" strokeWidth="1.5" className="transition-transform duration-300" style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }}>
+          <path d="M1 1L5 5L9 1" />
         </svg>
       </button>
       {open && (unlocked ? (
-        <div style={{background:"#161616", border:"0.5px solid #262626", borderTop:"none", padding:"20px", borderRadius:"0 0 2px 2px", display:"flex", flexDirection:"column"}}>
+        <GlassPanel className="p-5 flex flex-col rounded-b-sm border-t-0">
           {fields.map((field, i) => {
             const value = valueFor(field);
             return (
-              <div key={(field && field.key) || i} style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom: i < fields.length - 1 ? "1px solid #262626" : "none", gap:"20px"}}>
-                <span style={{fontFamily:"Georgia,serif", fontSize:"13px", color:"#c8c8c8"}}>{(field && field.label) || field}</span>
+              <div key={(field && field.key) || i} className={`flex justify-between items-baseline py-3 gap-5 ${i < fields.length - 1 ? 'border-b border-surface-variant' : ''}`}>
+                <span className="font-serif text-[13px] text-text-secondary">{(field && field.label) || field}</span>
                 {value !== null ? (
-                  <span style={{fontFamily:"'Courier New',monospace", fontSize:"12px", color:"#E8AE3C", letterSpacing:"0.04em", textAlign:"right"}}>{value}</span>
+                  <span className="font-mono text-xs text-gold-accent tracking-[0.04em] text-right">{value}</span>
                 ) : (
-                  <span style={{fontFamily:"'Courier New',monospace", fontSize:"11px", color:"#5a5a5a", letterSpacing:"0.08em", textAlign:"right"}}>Not recorded</span>
+                  <span className="font-mono text-[11px] text-text-muted tracking-[0.08em] text-right">Not recorded</span>
                 )}
               </div>
             );
           })}
-        </div>
+        </GlassPanel>
       ) : (
-        <div style={{background:"#161616", border:"0.5px solid #262626", borderTop:"none", padding:"20px", position:"relative", borderRadius:"0 0 2px 2px"}}>
-          <div style={{filter:"blur(4px)", pointerEvents:"none", userSelect:"none", display:"flex", flexDirection:"column"}}>
+        <GlassPanel className="p-5 relative rounded-b-sm border-t-0">
+          <div className="blur-sm pointer-events-none select-none flex flex-col">
             {fields.map((field, i) => (
-              <div key={(field && field.key) || i} style={{display:"flex", justifyContent:"space-between", alignItems:"center", padding:"11px 0", borderBottom: i < fields.length - 1 ? "1px solid #262626" : "none"}}>
-                <span style={{fontFamily:"Georgia,serif", fontSize:"13px", color:"#c8c8c8"}}>{(field && field.label) || field}</span>
-                <span style={{fontFamily:"'Courier New',monospace", fontSize:"12px", color:"#3a3a3a", letterSpacing:"0.1em"}}>████████</span>
+              <div key={(field && field.key) || i} className={`flex justify-between items-center py-3 ${i < fields.length - 1 ? 'border-b border-surface-variant' : ''}`}>
+                <span className="font-serif text-[13px] text-text-secondary">{(field && field.label) || field}</span>
+                <span className="font-mono text-xs text-text-muted tracking-[0.1em]">████████</span>
               </div>
             ))}
           </div>
-          <div style={{position:"absolute", inset:0, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:"14px", background:"rgba(22,22,22,0.88)", borderRadius:"0 0 2px 2px"}}>
-            <span style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#E8AE3C", letterSpacing:"0.25em", textTransform:"uppercase"}}>SOLAR TIER UNLOCKS THIS</span>
-            <a href="/pricing/seeker" style={{textDecoration:"none", fontFamily:"Georgia,serif", fontSize:"13px", color:"#0e0e0e", background:"#E8AE3C", border:"none", padding:"10px 24px", borderRadius:"2px", cursor:"pointer", letterSpacing:"0.04em"}}>
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-surface-alt/90 rounded-b-sm backdrop-blur-md">
+            <span className="font-mono text-[9px] text-gold-accent tracking-[0.25em] uppercase drop-shadow-md">SOLAR TIER UNLOCKS THIS</span>
+            <a href="/pricing/seeker" className="no-underline font-serif text-[13px] text-background bg-gold-accent hover:bg-gold-accent-bright border-none px-6 py-2.5 rounded-sm cursor-pointer tracking-[0.04em] transition-all hover:-translate-y-0.5 hover:shadow-[0_0_15px_rgba(232,174,60,0.4)] active:scale-[0.98]">
               Unlock Full Intelligence →
             </a>
           </div>
-        </div>
+        </GlassPanel>
       ))}
     </div>
   );
@@ -368,7 +371,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
   // ── Derived values ────────────────────────────
   const d           = propertyData;   // short alias
   const photos      = d.photos && d.photos.length > 0 ? d.photos : (d.image ? [d.image] : ["https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1920&q=80"]);
-  const brokerInitials = (d.broker_name || "SA").split(" ").map(p => p[0]).join("").slice(0, 2).toUpperCase();
+  const brokerInitials = (d.broker_name || " ").split(" ").map(p => p[0]).join("").slice(0, 2).toUpperCase();
 
   // ── Category Detection & Custom Labels ──────────
   const cat = (d.spaceCategory || "").toLowerCase() || (d.property_type || "").toLowerCase();
@@ -402,27 +405,27 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
   let pill2Icon = <><path d="M2 8h10M2 8V5a2 2 0 012-2v0a1 1 0 011 1v4" strokeLinecap="round"/><path d="M12 8v3" strokeLinecap="round"/></>;
 
   if (isRestaurant) {
-    pill1Val = d.seating_capacity || "80 Seats";
+    pill1Val = d.seating_capacity || null;
     pill1Label = "Seating Capacity";
     pill1Icon = <><path d="M3 2h8v5H3V2zm0 5h8v4.5C11 12.3 10.3 13 9.5 13H4.5C3.7 13 3 12.3 3 11.5V7zM1 13h12" strokeLinecap="round"/></>;
 
-    pill2Val = d.kitchen_grade || "Commercial AAA";
+    pill2Val = d.kitchen_grade || null;
     pill2Label = "Kitchen Grade";
     pill2Icon = <><circle cx="6" cy="6" r="4"/><path d="M10 6h3" strokeLinecap="round"/><path d="M6 10v3" strokeLinecap="round"/></>;
   } else if (isHospitality) {
-    pill1Val = d.accommodations || "2 Beach Suites";
+    pill1Val = d.accommodations || null;
     pill1Label = "Accommodations";
     pill1Icon = <><rect x="2" y="2" width="10" height="10" rx="1.5"/><circle cx="7" cy="7" r="1.5"/><path d="M3 5h4" strokeLinecap="round"/></>;
 
-    pill2Val = d.hosting_capacity || "15 Guests";
+    pill2Val = d.hosting_capacity || null;
     pill2Label = "Hosting Capacity";
     pill2Icon = <><circle cx="5" cy="4" r="2"/><circle cx="9" cy="4" r="2"/><path d="M2 11c0-2 2-3 3-3s3 1 3 3M7 11c0-2 2-3 3-3s3 1 3 3"/></>;
   } else if (isVenue) {
-    pill1Val = d.seating_capacity || "350 Capacity";
+    pill1Val = d.seating_capacity || null;
     pill1Label = "Guest Capacity";
     pill1Icon = <><path d="M2 12a4 4 0 018 0" strokeLinecap="round"/><circle cx="6" cy="5" r="3"/><circle cx="12" cy="7" r="1.5"/><path d="M10 12a2 2 0 013-1" strokeLinecap="round"/></>;
 
-    pill2Val = d.setup_grade || "Premium A/V";
+    pill2Val = d.setup_grade || null;
     pill2Label = "Setup Grade";
     pill2Icon = <><circle cx="7" cy="7" r="5"/><path d="M7 2v2M7 10v2M2 7h2M10 7h2" strokeLinecap="round"/></>;
   }
@@ -451,7 +454,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
       specs: [
         `${d.floor_sqm ? Math.round(d.floor_sqm * 0.6) : 150} sqm dining layout`,
         "Curated ambient lighting & interior acoustics",
-        `Capacity: ${d.seating_capacity || "80 seats"}`,
+        d.seating_capacity ? `Capacity: ${d.seating_capacity}` : null,
         "Fitted furniture & custom seating plan"
       ]
     });
@@ -462,7 +465,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
         "High electrical load capacity ready",
         "Dedicated HVAC & exhaust air integration",
         "Fresh water supply & commercial drainage lines",
-        `Grade: ${d.kitchen_grade || "Commercial AAA"}`
+        d.kitchen_grade ? `Grade: ${d.kitchen_grade}` : null
       ]
     });
     // 3. Specialties / Menus
@@ -502,7 +505,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
     dynamicUnits.push({
       name: "Guest Suites",
       specs: [
-        `Accommodations: ${d.accommodations || "2 Luxury Suites"}`,
+        d.accommodations ? `Accommodations: ${d.accommodations}` : null,
         "Premium ocean breeze ventilation",
         "En-suite bathroom & standing shower",
         "Private veranda access ready"
@@ -536,7 +539,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
       name: "Grand Ballroom / Glasshouse",
       specs: [
         `${d.floor_sqm ? Math.round(d.floor_sqm * 0.7) : 400} sqm event floor`,
-        `Ceiling clearance: ${d.ceiling_height_text || "6.5 meters"}`,
+        d.ceiling_height_text ? `Ceiling clearance: ${d.ceiling_height_text}` : null,
         "Reinforced overhead rigging points",
         "Smart acoustic ceiling clouds"
       ]
@@ -908,7 +911,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
           >
             <p className="hero-label">ScoutIt &middot; {briefLabel}</p>
             <h1 className="hero-title">{d.title}</h1>
-            <p className="hero-location">{d.location || d.city || "Location on request"}</p>
+            <p className="hero-location">{d.location || d.city || null}</p>
             <p className="hero-hook">{d.hook}</p>
             {isOwner && (
               <div style={{ marginTop: '24px' }}>
@@ -980,7 +983,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
         <div className="mobile-hero-intel">
           <p className="mobile-hero-label">ScoutIt &middot; {briefLabel}</p>
           <h1 className="mobile-hero-title">{d.title}</h1>
-          <p className="mobile-hero-location">{d.location || d.city || "Location on request"}</p>
+          <p className="mobile-hero-location">{d.location || d.city || null}</p>
           <p className="mobile-hero-hook">{d.hook}</p>
           {isOwner && (
             <div style={{ marginTop: '20px' }}>
@@ -2017,7 +2020,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                   <>
                     <div style={{height:"1px", background:"#262626", margin:"28px 0 24px"}}/>
                     {hasPrice ? (
-                      <div style={{padding:"22px 24px", background:"#161616", border:"0.5px solid #262626", borderRadius:"4px"}}>
+                      <GlassPanel className="p-6 rounded-md">
                         <div style={{fontFamily:"Georgia,serif", fontSize:"clamp(30px,4.2vw,44px)", fontWeight:400, color:"#f0ede8", lineHeight:1.1}}>{d.listed_price}</div>
                         {d.price_source && (
                           <div style={{fontFamily:"'Courier New',monospace", fontSize:"11px", letterSpacing:"0.1em", color:"#c8c8c8", marginTop:"10px"}}>
@@ -2030,9 +2033,9 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                         <p style={{fontFamily:"system-ui,-apple-system,sans-serif", fontSize:"11.5px", color:"#c8c8c8", lineHeight:1.7, marginTop:"16px"}}>
                           Price estimates are provided solely by authorized sellers, owners, or licensed property managers. ScoutIt does not set, verify, or guarantee any stated price. For inquiries, speak directly with an authorized representative.
                         </p>
-                      </div>
+                      </GlassPanel>
                     ) : (
-                      <div style={{padding:"22px 24px", background:"#161616", border:"0.5px solid #262626", borderRadius:"4px"}}>
+                      <GlassPanel className="p-6 rounded-md">
                         <div style={{fontFamily:"Georgia,serif", fontSize:"clamp(20px,2.6vw,26px)", fontWeight:400, color:"#f0ede8", lineHeight:1.2}}>Price on request</div>
                         <p style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#a0a0a0", lineHeight:1.7, margin:"10px 0 16px", maxWidth:"480px"}}>
                           No confirmed rate has been published for this space. Inquire with the owner, property manager, or broker for current pricing.
@@ -2040,7 +2043,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                         <Link href={`/property/${slug || "batasan-hills"}/brokers`} style={{display:"inline-block", fontFamily:"Georgia,serif", fontSize:"16px", color:"#E8AE3C", textDecoration:"none", letterSpacing:"0.01em"}}>
                           Inquire with an authorized broker →
                         </Link>
-                      </div>
+                      </GlassPanel>
                     )}
                   </>
                 );
@@ -2066,21 +2069,29 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                 </div>
               </div>
 
-              <button onClick={() => setIsInquiryOpen(true)} className="move-cta" style={{textDecoration:"none", marginTop:"16px", width:"100%"}}>
+              <button onClick={() => setIsInquiryOpen(true)} className="move-cta hover-glow active:scale-[0.98] transition-all" style={{textDecoration:"none", marginTop:"16px", width:"100%", background: "#E8AE3C", color: "#000", border: "none", padding: "16px", fontFamily: "Georgia, serif", fontSize: "16px", cursor: "pointer", borderRadius: "4px"}}>
                 Connect with an Authorized Broker →
               </button>
 
-              {/* Co-working operators only (Operator hat) — §9.2 delegation handshake */}
+              <div style={{ marginTop: "10px", width: "100%" }}>
+                <button
+                  onClick={() => {
+                    if (typeof window !== 'undefined') {
+                      const cleanUrl = window.location.origin + window.location.pathname;
+                      const shareText = `✦ ${d.title || 'Space Intelligence'}\n${d.hook ? d.hook + '\n\n' : ''}🔗 ${cleanUrl}`;
+                      navigator.clipboard.writeText(shareText);
+                      alert("Link and description copied to clipboard!");
+                    }
+                  }}
+                  className="w-full bg-transparent border border-surface-variant text-text-secondary font-mono text-xs tracking-[0.12em] uppercase font-bold py-3 px-4 rounded hover:bg-surface-alt transition-colors active:scale-[0.98] flex items-center justify-center gap-2"
+                >
+                  Share
+                </button>
+              </div>
               {hasActiveRole("operator") && (
                 <button
                   onClick={() => setIsOperatorRequestOpen(true)}
-                  style={{
-                    marginTop: "10px", width: "100%", background: "transparent",
-                    border: "0.5px solid rgba(232,174,60,0.4)", color: "#E8AE3C",
-                    fontFamily: "'Courier New',monospace", fontSize: "11px",
-                    letterSpacing: "0.12em", textTransform: "uppercase",
-                    padding: "12px 16px", borderRadius: "4px", cursor: "pointer",
-                  }}
+                  className="mt-3 w-full bg-transparent border border-gold-accent/40 text-gold-accent font-mono text-[11px] tracking-[0.12em] uppercase py-3 px-4 rounded cursor-pointer hover:bg-gold-accent/10 active:scale-[0.98] transition-all"
                 >
                   Request to Operate This Building →
                 </button>

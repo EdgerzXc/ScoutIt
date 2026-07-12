@@ -12,6 +12,7 @@ import { useTrueClosestTransit } from "@/hooks/useTrueClosestTransit";
 import { resolveTransitHub } from "@/lib/transit";
 import { hasInteractiveUnitPage, hasSpatial3D } from "@/lib/unitMasterPage";
 import SpatialVaultWidget from "@/components/property/SpatialVaultWidget";
+import PromoteModal from "./PromoteModal";
 
 // Leaflet is huge. We dynamically import the InteractiveMap so the initial page load
 // doesn't block on parsing the React Leaflet wrapper.
@@ -57,6 +58,9 @@ import { getChapterConfig } from "./chapterConfig";
 import { Bed, Bath, Ruler, Car, Lock, Search, Camera, Building2 } from "lucide-react";
 import InquiryModal from "@/components/property/InquiryModal";
 import OperatorRequestModal from "@/components/property/OperatorRequestModal";
+import GlassPanel from "@/components/ui/GlassPanel";
+import HoverCard from "@/components/ui/HoverCard";
+import MeshHero from "@/components/ui/MeshHero";
 
 // ═══════════════════════════════════════════════════
 // DATA — Airtable CMS first, mockDb fallback
@@ -87,52 +91,52 @@ function DeepIntelWidget({ open, onToggle, fields, values }) {
   };
 
   return (
-    <div style={{marginTop:"32px"}}>
-      <div style={{height:"1px", background:"#262626", marginBottom:"16px"}}/>
+    <div className="mt-8">
+      <div className="h-px bg-surface-variant mb-4" />
       <button
         onClick={onToggle}
-        style={{width:"100%", background:"#161616", border:"0.5px solid #262626", padding:"14px 20px", cursor:"pointer", display:"flex", justifyContent:"space-between", alignItems:"center", borderRadius:"2px"}}
+        className="w-full bg-surface-alt border border-surface-variant p-4 cursor-pointer flex justify-between items-center rounded-sm hover:bg-surface-variant transition-colors active:scale-[0.99]"
       >
-        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#E8AE3C", letterSpacing:"0.18em", textTransform:"uppercase"}}>
+        <span className="font-mono text-[10px] text-gold-accent tracking-[0.18em] uppercase">
           DEEP INTELLIGENCE // {unlocked ? "UNLOCKED" : "VERIFIED SCOUT"}
         </span>
-        <svg viewBox="0 0 10 6" width="10" height="6" fill="none" stroke="#E8AE3C" strokeWidth="1.5">
-          <path d={open ? "M1 5L5 1L9 5" : "M1 1L5 5L9 1"}/>
+        <svg viewBox="0 0 10 6" width="10" height="6" fill="none" stroke="#E8AE3C" strokeWidth="1.5" className="transition-transform duration-300" style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }}>
+          <path d="M1 1L5 5L9 1" />
         </svg>
       </button>
       {open && (unlocked ? (
-        <div style={{background:"#161616", border:"0.5px solid #262626", borderTop:"none", padding:"20px", borderRadius:"0 0 2px 2px", display:"flex", flexDirection:"column"}}>
+        <GlassPanel className="p-5 flex flex-col rounded-b-sm border-t-0">
           {fields.map((field, i) => {
             const value = valueFor(field.key);
             return (
-              <div key={field.key || i} style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom: i < fields.length - 1 ? "1px solid #262626" : "none", gap:"20px"}}>
-                <span style={{fontFamily:"Georgia,serif", fontSize:"13px", color:"#c8c8c8"}}>{field.label || field}</span>
+              <div key={field.key || i} className={`flex justify-between items-baseline py-3 gap-5 ${i < fields.length - 1 ? 'border-b border-surface-variant' : ''}`}>
+                <span className="font-serif text-[13px] text-text-secondary">{field.label || field}</span>
                 {value !== null ? (
-                  <span style={{fontFamily:"'Courier New',monospace", fontSize:"12px", color:"#E8AE3C", letterSpacing:"0.04em", textAlign:"right"}}>{value}</span>
+                  <span className="font-mono text-xs text-gold-accent tracking-[0.04em] text-right">{value}</span>
                 ) : (
-                  <span style={{fontFamily:"'Courier New',monospace", fontSize:"11px", color:"#5a5a5a", letterSpacing:"0.08em", textAlign:"right"}}>Not recorded</span>
+                  <span className="font-mono text-[11px] text-text-muted tracking-[0.08em] text-right">Not recorded</span>
                 )}
               </div>
             );
           })}
-        </div>
+        </GlassPanel>
       ) : (
-        <div style={{background:"#161616", border:"0.5px solid #262626", borderTop:"none", padding:"20px", position:"relative", borderRadius:"0 0 2px 2px"}}>
-          <div style={{filter:"blur(4px)", pointerEvents:"none", userSelect:"none", display:"flex", flexDirection:"column"}}>
+        <GlassPanel className="p-5 relative rounded-b-sm border-t-0">
+          <div className="blur-sm pointer-events-none select-none flex flex-col">
             {fields.map((field, i) => (
-              <div key={field.key || i} style={{display:"flex", justifyContent:"space-between", alignItems:"center", padding:"11px 0", borderBottom: i < fields.length - 1 ? "1px solid #262626" : "none"}}>
-                <span style={{fontFamily:"Georgia,serif", fontSize:"13px", color:"#c8c8c8"}}>{field.label || field}</span>
-                <span style={{fontFamily:"'Courier New',monospace", fontSize:"12px", color:"#3a3a3a", letterSpacing:"0.1em"}}>████████</span>
+              <div key={field.key || i} className={`flex justify-between items-center py-3 ${i < fields.length - 1 ? 'border-b border-surface-variant' : ''}`}>
+                <span className="font-serif text-[13px] text-text-secondary">{field.label || field}</span>
+                <span className="font-mono text-xs text-text-muted tracking-[0.1em]">████████</span>
               </div>
             ))}
           </div>
-          <div style={{position:"absolute", inset:0, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:"14px", background:"rgba(22,22,22,0.88)", borderRadius:"0 0 2px 2px"}}>
-            <span style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#E8AE3C", letterSpacing:"0.25em", textTransform:"uppercase"}}>SOLAR TIER UNLOCKS THIS</span>
-            <a href="/pricing/seeker" style={{textDecoration:"none", fontFamily:"Georgia,serif", fontSize:"13px", color:"#0e0e0e", background:"#E8AE3C", border:"none", padding:"10px 24px", borderRadius:"2px", cursor:"pointer", letterSpacing:"0.04em"}}>
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-surface-alt/90 rounded-b-sm backdrop-blur-md">
+            <span className="font-mono text-[9px] text-gold-accent tracking-[0.25em] uppercase drop-shadow-md">SOLAR TIER UNLOCKS THIS</span>
+            <a href="/pricing/seeker" className="no-underline font-serif text-[13px] text-background bg-gold-accent hover:bg-gold-accent-bright border-none px-6 py-2.5 rounded-sm cursor-pointer tracking-[0.04em] transition-all hover:-translate-y-0.5 hover:shadow-[0_0_15px_rgba(232,174,60,0.4)] active:scale-[0.98]">
               Unlock Full Intelligence →
             </a>
           </div>
-        </div>
+        </GlassPanel>
       ))}
     </div>
   );
@@ -321,6 +325,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
   const [menuOpen,   setMenuOpen]   = useState(false);
   const [isInquiryOpen, setIsInquiryOpen] = useState(false);
   const [isOperatorRequestOpen, setIsOperatorRequestOpen] = useState(false);
+  const [isPromoteOpen, setIsPromoteOpen] = useState(false);
   // The mobile bottom bar's "Inquire" action opens this modal via a global event,
   // so the primary CTA is always reachable from the thumb zone on a long page.
   useEffect(() => {
@@ -492,7 +497,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
   // ── Derived values ────────────────────────────
   const d           = propertyData;   // short alias
   const photos      = d.photos && d.photos.length > 0 ? d.photos : (d.image ? [d.image] : ["https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2070&auto=format&fit=crop"]);
-  const brokerInitials = (d.broker_name || "SA").split(" ").map(p => p[0]).join("").slice(0, 2).toUpperCase();
+  const brokerInitials = (d.broker_name || " ").split(" ").map(p => p[0]).join("").slice(0, 2).toUpperCase();
 
   // ── Category Detection & Custom Labels ──────────
   const cat = (d.spaceCategory || "").toLowerCase() || (d.property_type || "").toLowerCase();
@@ -526,27 +531,27 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
   let pill2Icon = <><path d="M2 8h10M2 8V5a2 2 0 012-2v0a1 1 0 011 1v4" strokeLinecap="round"/><path d="M12 8v3" strokeLinecap="round"/></>;
 
   if (isRestaurant) {
-    pill1Val = d.seating_capacity || "80 Seats";
+    pill1Val = d.seating_capacity || null;
     pill1Label = "Seating Capacity";
     pill1Icon = <><path d="M3 2h8v5H3V2zm0 5h8v4.5C11 12.3 10.3 13 9.5 13H4.5C3.7 13 3 12.3 3 11.5V7zM1 13h12" strokeLinecap="round"/></>;
 
-    pill2Val = d.kitchen_grade || "Commercial AAA";
+    pill2Val = d.kitchen_grade || null;
     pill2Label = "Kitchen Grade";
     pill2Icon = <><circle cx="6" cy="6" r="4"/><path d="M10 6h3" strokeLinecap="round"/><path d="M6 10v3" strokeLinecap="round"/></>;
   } else if (isHospitality) {
-    pill1Val = d.accommodations || "2 Beach Suites";
+    pill1Val = d.accommodations || null;
     pill1Label = "Accommodations";
     pill1Icon = <><rect x="2" y="2" width="10" height="10" rx="1.5"/><circle cx="7" cy="7" r="1.5"/><path d="M3 5h4" strokeLinecap="round"/></>;
 
-    pill2Val = d.hosting_capacity || "15 Guests";
+    pill2Val = d.hosting_capacity || null;
     pill2Label = "Hosting Capacity";
     pill2Icon = <><circle cx="5" cy="4" r="2"/><circle cx="9" cy="4" r="2"/><path d="M2 11c0-2 2-3 3-3s3 1 3 3M7 11c0-2 2-3 3-3s3 1 3 3"/></>;
   } else if (isVenue) {
-    pill1Val = d.seating_capacity || "350 Capacity";
+    pill1Val = d.seating_capacity || null;
     pill1Label = "Guest Capacity";
     pill1Icon = <><path d="M2 12a4 4 0 018 0" strokeLinecap="round"/><circle cx="6" cy="5" r="3"/><circle cx="12" cy="7" r="1.5"/><path d="M10 12a2 2 0 013-1" strokeLinecap="round"/></>;
 
-    pill2Val = d.setup_grade || "Premium A/V";
+    pill2Val = d.setup_grade || null;
     pill2Label = "Setup Grade";
     pill2Icon = <><circle cx="7" cy="7" r="5"/><path d="M7 2v2M7 10v2M2 7h2M10 7h2" strokeLinecap="round"/></>;
   }
@@ -576,7 +581,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
       specs: [
         `${d.floor_sqm ? Math.round(d.floor_sqm * 0.6) : 150} sqm dining layout`,
         "Curated ambient lighting & interior acoustics",
-        `Capacity: ${d.seating_capacity || "80 seats"}`,
+        d.seating_capacity ? `Capacity: ${d.seating_capacity}` : null,
         "Fitted furniture & custom seating plan"
       ]
     });
@@ -587,7 +592,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
         "High electrical load capacity ready",
         "Dedicated HVAC & exhaust air integration",
         "Fresh water supply & commercial drainage lines",
-        `Grade: ${d.kitchen_grade || "Commercial AAA"}`
+        d.kitchen_grade ? `Grade: ${d.kitchen_grade}` : null
       ]
     });
     // 3. Specialties / Menus
@@ -627,7 +632,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
     dynamicUnits.push({
       name: "Guest Suites",
       specs: [
-        `Accommodations: ${d.accommodations || "2 Luxury Suites"}`,
+        d.accommodations ? `Accommodations: ${d.accommodations}` : null,
         "Premium ocean breeze ventilation",
         "En-suite bathroom & standing shower",
         "Private veranda access ready"
@@ -661,7 +666,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
       name: "Grand Ballroom / Glasshouse",
       specs: [
         `${d.floor_sqm ? Math.round(d.floor_sqm * 0.7) : 400} sqm event floor`,
-        `Ceiling clearance: ${d.ceiling_height_text || "6.5 meters"}`,
+        d.ceiling_height_text ? `Ceiling clearance: ${d.ceiling_height_text}` : null,
         "Reinforced overhead rigging points",
         "Smart acoustic ceiling clouds"
       ]
@@ -1032,7 +1037,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
           >
             <p className="hero-label">ScoutIt &middot; {briefLabel}</p>
             <h1 className="hero-title">{d.title}</h1>
-            <p className="hero-location">{d.location || d.city || "Location on request"}</p>
+            <p className="hero-location">{d.location || d.city || null}</p>
             <p className="hero-hook">{d.hook}</p>
             {isOwner && (
               <div style={{ marginTop: '24px' }}>
@@ -1104,7 +1109,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
         <div className="mobile-hero-intel">
           <p className="mobile-hero-label">ScoutIt &middot; {briefLabel}</p>
           <h1 className="mobile-hero-title">{d.title}</h1>
-          <p className="mobile-hero-location">{d.location || d.city || "Location on request"}</p>
+          <p className="mobile-hero-location">{d.location || d.city || null}</p>
           <p className="mobile-hero-hook">{d.hook}</p>
           {isOwner && (
             <div style={{ marginTop: '20px' }}>
@@ -2200,7 +2205,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                   <>
                     <div style={{height:"1px", background:"#262626", margin:"28px 0 24px"}}/>
                     {showPrice ? (
-                      <div style={{padding:"22px 24px", background:"#161616", border:"0.5px solid #262626", borderRadius:"4px"}}>
+                      <GlassPanel className="p-6 rounded-md">
                         <div style={{fontFamily:"Georgia,serif", fontSize:"clamp(30px,4.2vw,44px)", fontWeight:400, color:"#f0ede8", lineHeight:1.1}}>{d.listed_price}</div>
                         {/* Verified-by badge — the confirmation the buyer can trust */}
                         <div style={{display:"inline-flex", alignItems:"center", gap:"7px", marginTop:"14px", padding:"6px 12px", border:"0.5px solid rgba(76,175,125,0.4)", borderRadius:"4px", background:"rgba(76,175,125,0.06)"}}>
@@ -2218,9 +2223,9 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                         <p style={{fontFamily:"system-ui,-apple-system,sans-serif", fontSize:"11.5px", color:"#c8c8c8", lineHeight:1.7, marginTop:"16px"}}>
                           Price is provided and confirmed by the listing&apos;s authorized owner, property manager, or broker. ScoutIt displays it as confirmed by that party. For inquiries, speak directly with an authorized representative.
                         </p>
-                      </div>
+                      </GlassPanel>
                     ) : (
-                      <div style={{padding:"22px 24px", background:"#161616", border:"0.5px solid #262626", borderRadius:"4px"}}>
+                      <GlassPanel className="p-6 rounded-md">
                         <div style={{fontFamily:"Georgia,serif", fontSize:"clamp(20px,2.6vw,26px)", fontWeight:400, color:"#f0ede8", lineHeight:1.2}}>Price on request</div>
                         <p style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#a0a0a0", lineHeight:1.7, margin:"10px 0 16px", maxWidth:"480px"}}>
                           No confirmed rate has been published for this space. Inquire with the owner, property manager, or broker for current pricing.
@@ -2228,7 +2233,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                         <Link href={`/property/${slug || "batasan-hills"}/brokers`} style={{display:"inline-block", fontFamily:"Georgia,serif", fontSize:"16px", color:"#E8AE3C", textDecoration:"none", letterSpacing:"0.01em"}}>
                           Inquire with an authorized broker →
                         </Link>
-                      </div>
+                      </GlassPanel>
                     )}
                   </>
                 );
@@ -2248,21 +2253,37 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                 </div>
               </div>
 
-              <button onClick={() => setIsInquiryOpen(true)} className="move-cta" style={{textDecoration:"none", marginTop:"16px", width:"100%"}}>
+              <button onClick={() => setIsInquiryOpen(true)} className="move-cta hover-glow active:scale-[0.98] transition-all" style={{textDecoration:"none", marginTop:"16px", width:"100%", background: "#E8AE3C", color: "#000", border: "none", padding: "16px", fontFamily: "Georgia, serif", fontSize: "16px", cursor: "pointer", borderRadius: "4px"}}>
                 Connect with an Authorized Broker →
               </button>
+
+              <div style={{ display: "flex", gap: "10px", marginTop: "10px", width: "100%" }}>
+                <button
+                  onClick={() => {
+                    if (typeof window !== 'undefined') {
+                      const cleanUrl = window.location.origin + window.location.pathname;
+                      const shareText = `✦ ${d.title || 'Space Intelligence'}\n${d.hook ? d.hook + '\n\n' : ''}🔗 ${cleanUrl}`;
+                      navigator.clipboard.writeText(shareText);
+                      alert("Link and description copied to clipboard!");
+                    }
+                  }}
+                  className="flex-1 bg-transparent border border-surface-variant text-text-secondary font-mono text-xs tracking-[0.12em] uppercase font-bold py-3 px-4 rounded hover:bg-surface-alt transition-colors active:scale-[0.98] flex items-center justify-center gap-2"
+                >
+                  Share
+                </button>
+                <button
+                  onClick={() => setIsPromoteOpen(true)}
+                  className="flex-1 bg-transparent border border-gold-accent/60 text-gold-accent font-mono text-xs tracking-[0.12em] uppercase font-bold py-3 px-4 rounded hover:bg-gold-accent hover:text-background transition-colors active:scale-[0.98] flex items-center justify-center gap-2 shadow-[0_0_10px_rgba(232,174,60,0.15)]"
+                >
+                  AI Promote ✦
+                </button>
+              </div>
 
               {/* Co-working operators only (Operator hat) — §9.2 delegation handshake */}
               {hasActiveRole("operator") && (
                 <button
                   onClick={() => setIsOperatorRequestOpen(true)}
-                  style={{
-                    marginTop: "10px", width: "100%", background: "transparent",
-                    border: "0.5px solid rgba(232,174,60,0.4)", color: "#E8AE3C",
-                    fontFamily: "'Courier New',monospace", fontSize: "11px",
-                    letterSpacing: "0.12em", textTransform: "uppercase",
-                    padding: "12px 16px", borderRadius: "4px", cursor: "pointer",
-                  }}
+                  className="mt-3 w-full bg-transparent border border-gold-accent/40 text-gold-accent font-mono text-[11px] tracking-[0.12em] uppercase py-3 px-4 rounded cursor-pointer hover:bg-gold-accent/10 active:scale-[0.98] transition-all"
                 >
                   Request to Operate This Building →
                 </button>
@@ -2336,6 +2357,13 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
         onClose={() => setIsOperatorRequestOpen(false)}
         propertyTitle={d.title}
         propertySlug={d.slug}
+      />
+
+      <PromoteModal
+        isOpen={isPromoteOpen}
+        onClose={() => setIsPromoteOpen(false)}
+        propertyData={d}
+        link={typeof window !== 'undefined' ? window.location.href : `https://scoutit.com/property/${d.slug}`}
       />
 
       {/* Lightbox / Fullscreen Modal */}

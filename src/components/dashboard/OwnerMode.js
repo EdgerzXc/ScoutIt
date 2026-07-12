@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, memo } from "react";
 import LiveEditorWorkspace from "./LiveEditorWorkspace";
 import DeepIntelligenceStudio from "./DeepIntelligenceStudio";
 import BulkImporterMode from "./BulkImporterMode";
@@ -13,6 +13,8 @@ import { canSee, getCurrentTier } from '../../lib/entitlements';
 import { supabase } from '../../lib/supabaseClient';
 import DealTimeline from './crm/DealTimeline';
 import { computeListingStrength } from '../../lib/listingStrength';
+
+import OwnerListingCard from './cards/OwnerListingCard';
 
 export default function OwnerMode() {
   const { listings, pitches, updatePitchStatus, addListing, addConciergeListing, bulkAddListings, addToast, updateListing, publishListing, closeListing, currentUser, inviteBroker, connects } = useDashboard();
@@ -164,27 +166,25 @@ export default function OwnerMode() {
   if (showWizard === 'select_mode') {
     return (
       <div className="max-w-[800px] mx-auto py-lg animate-[fadeIn_0.3s_ease]">
-        <button onClick={() => setShowWizard(false)} className="text-text-secondary hover:text-gold-accent mb-8 font-working-title">← Back to Dashboard</button>
-        <h1 className="font-display-md text-4xl text-text-primary mb-2">How would you like to create this listing?</h1>
-        <p className="text-text-secondary mb-8">Choose your preferred workflow.</p>
+        <button onClick={() => setShowWizard(false)} className="text-text-secondary hover:text-gold-accent mb-8 font-working-title active:scale-95 transition-all inline-block">← Back to Dashboard</button>
+        <h1 className="font-display-md text-4xl text-text-primary mb-2">How do you want to create your listing?</h1>
+        <p className="text-text-secondary mb-8">Choose an option to get started.</p>
         
         <div className="grid md:grid-cols-2 gap-6">
           <div 
             className="bg-surface-alt/40 backdrop-blur-md border border-surface-variant/50 rounded-xl p-8 hover:border-gold-accent hover:bg-surface-alt/80 transition-all duration-300 cursor-pointer group relative overflow-hidden shadow-lg"
             onClick={() => setShowWizard('bulk')}
           >
-             <div className="absolute top-0 left-0 w-1.5 h-full bg-surface-variant group-hover:bg-gold-accent transition-colors"></div>
-             <h3 className="font-working-title text-2xl text-on-surface mb-3 group-hover:text-gold-accent transition-colors">Global Portfolio Importer</h3>
+             <h3 className="font-working-title text-2xl text-on-surface mb-3 group-hover:text-gold-accent transition-colors">Upload Portfolio (CSV)</h3>
              <p className="text-sm text-text-secondary mb-6 leading-relaxed">Upload a CSV to generate multiple separate Property Drafts at once. Perfect for migrating large asset portfolios.</p>
              <span className="text-gold-accent font-label-caps text-[10px] tracking-widest border border-gold-accent/30 bg-gold-accent/10 px-3 py-1.5 rounded-full">RECOMMENDED FOR PROPERTY UPLOADS</span>
           </div>
 
           <div
-            className={`bg-gradient-to-br from-[#1A1814] to-[#0A0908] backdrop-blur-xl border rounded-xl p-8 transition-all duration-500 relative overflow-hidden group ${canUseVault ? "border-gold-accent/40 hover:border-gold-accent hover:shadow-[0_0_30px_rgba(232,174,60,0.15)] cursor-pointer" : "border-surface-variant cursor-not-allowed opacity-60"}`}
+            className={`bg-[#0d0d0d] backdrop-blur-xl border rounded-xl p-8 transition-all duration-500 relative overflow-hidden group ${canUseVault ? "border-gold-accent/20 hover:border-gold-accent/60 cursor-pointer" : "border-surface-variant cursor-not-allowed opacity-60"}`}
             onClick={() => canUseVault && setShowWizard('vip_vault')}
           >
-            <div className={`absolute top-0 left-0 w-1.5 h-full transition-colors shadow-[0_0_15px_rgba(232,174,60,0.5)] ${canUseVault ? "bg-gold-accent/50 group-hover:bg-gold-accent" : "bg-surface-variant"}`}></div>
-            <div className="absolute -top-24 -right-24 w-48 h-48 bg-gold-accent/10 rounded-full blur-3xl group-hover:bg-gold-accent/20 transition-all duration-700"></div>
+            <div className="absolute -top-24 -right-24 w-48 h-48 bg-gold-accent/5 rounded-full blur-3xl group-hover:bg-gold-accent/10 transition-all duration-700"></div>
 
             {/* Lock badge — visible when locked */}
             {!canUseVault && (
@@ -204,7 +204,7 @@ export default function OwnerMode() {
             {canUseVault ? (
               <span className="text-background font-label-caps font-bold text-[10px] tracking-widest bg-gold-accent px-3 py-1.5 rounded-full shadow-[0_0_10px_rgba(232,174,60,0.3)]">QUEST-IT ASSISTED</span>
             ) : (
-              <Link href="/pricing/owner" className="inline-block text-gold-accent font-label-caps text-[10px] tracking-widest border border-gold-accent/40 bg-gold-accent/10 px-3 py-1.5 rounded-full hover:bg-gold-accent/20 transition-colors" onClick={e => e.stopPropagation()}>
+              <Link href="/pricing/owner" className="inline-block text-gold-accent font-label-caps text-[10px] tracking-widest border border-gold-accent/40 bg-gold-accent/10 px-3 py-1.5 rounded-full hover:bg-gold-accent/20 active:scale-95 transition-all" onClick={e => e.stopPropagation()}>
                 UPGRADE TO CLUSTER →
               </Link>
             )}
@@ -214,8 +214,7 @@ export default function OwnerMode() {
             className="bg-surface-alt/40 backdrop-blur-md border border-surface-variant/50 rounded-xl p-8 hover:border-text-primary hover:bg-surface-alt/80 transition-all duration-300 cursor-pointer group relative overflow-hidden shadow-lg"
             onClick={() => setShowWizard('concierge')}
           >
-             <div className="absolute top-0 left-0 w-1.5 h-full bg-surface-variant group-hover:bg-surface-alt transition-colors"></div>
-             <h3 className="font-working-title text-2xl text-on-surface mb-3 group-hover:text-white transition-colors">Concierge AI</h3>
+             <h3 className="font-working-title text-2xl text-on-surface mb-3 group-hover:text-white transition-colors">Upload Pitch Deck (PDF)</h3>
              <p className="text-sm text-text-secondary mb-6 leading-relaxed">Upload your existing pitch deck or PDF flyer. Our Council AI will extract the data and structure the dossier for your review.</p>
           </div>
 
@@ -223,20 +222,29 @@ export default function OwnerMode() {
             className="bg-surface-alt/40 backdrop-blur-md border border-surface-variant/50 rounded-xl p-8 hover:border-text-primary hover:bg-surface-alt/80 transition-all duration-300 cursor-pointer group relative overflow-hidden shadow-lg"
             onClick={() => setShowWizard('live_editor')}
           >
-             <div className="absolute top-0 left-0 w-1.5 h-full bg-surface-variant group-hover:bg-surface-alt transition-colors"></div>
-             <h3 className="font-working-title text-2xl text-on-surface mb-3 group-hover:text-white transition-colors">Live Editor Workspace</h3>
+             <h3 className="font-working-title text-2xl text-on-surface mb-3 group-hover:text-white transition-colors">Build from Scratch</h3>
              <p className="text-sm text-text-secondary mb-6 leading-relaxed">Build your listing manually using our step-by-step editor. Best if you don&apos;t have a deck and are starting from scratch.</p>
           </div>
 
           <div 
-            className="bg-surface-alt/40 backdrop-blur-md border border-surface-variant/50 rounded-xl p-8 hover:border-gold-accent hover:bg-surface-alt/80 transition-all duration-300 cursor-pointer group relative overflow-hidden shadow-[0_0_20px_rgba(232,174,60,0.05)] hover:shadow-[0_0_30px_rgba(232,174,60,0.15)]"
+            className="bg-[#0d0d0d] backdrop-blur-md border border-gold-accent/20 rounded-xl p-8 hover:border-gold-accent/60 transition-all duration-300 cursor-pointer group relative overflow-hidden"
             onClick={() => setShowWizard('deep_intel')}
           >
-             <div className="absolute top-0 left-0 w-1.5 h-full bg-gold-accent/40 group-hover:bg-gold-accent transition-colors"></div>
-             <h3 className="font-working-title text-2xl text-gold-accent mb-3 group-hover:text-gold-bright transition-colors">Deep Intelligence Vault</h3>
+             <h3 className="font-working-title text-2xl text-gold-accent mb-3 group-hover:text-gold-bright transition-colors">Advanced Editor</h3>
              <p className="text-sm text-text-secondary mb-6 leading-relaxed">Unlock the hidden matrix. Manually override structural specs, input financial intelligence, and map advanced logistics.</p>
              <span className="text-gold-accent font-label-caps text-[10px] tracking-widest border border-gold-accent/30 bg-gold-accent/10 px-3 py-1.5 rounded-full shadow-[0_0_10px_rgba(232,174,60,0.2)]">PRO MODE</span>
           </div>
+        </div>
+
+        {/* Power User Bypass */}
+        <div className="mt-8 text-center animate-[fadeIn_0.5s_ease_0.2s]">
+          <p className="text-text-secondary text-sm mb-2">Already know what you&apos;re doing?</p>
+          <button 
+            onClick={() => setShowWizard('live_editor')} 
+            className="text-text-secondary hover:text-gold-accent border-b border-transparent hover:border-gold-accent/30 pb-0.5 font-working-title text-sm active:scale-95 inline-block transition-all"
+          >
+            Skip to Editor (Quick Add)
+          </button>
         </div>
       </div>
     );
@@ -246,8 +254,8 @@ export default function OwnerMode() {
     return (
       <div className="max-w-[600px] mx-auto py-lg animate-[fadeIn_0.3s_ease]">
         <button onClick={() => setShowWizard('select_mode')} className="text-text-secondary hover:text-gold-accent mb-8 font-working-title">← Back</button>
-        <h1 className="font-display-md text-4xl text-text-primary mb-2">Upload Pitch Deck</h1>
-        <p className="text-text-secondary mb-8">Drop your PDF here. The Council AI will parse the details and prepare a draft.</p>
+        <h1 className="font-display-md text-4xl text-text-primary mb-2">Upload Pitch Deck or PDF</h1>
+        <p className="text-text-secondary mb-8">Upload your PDF. Our AI will automatically extract property details to create a draft.</p>
         
         <div className="bg-[#121110] border-2 border-dashed border-surface-variant rounded-lg p-12 text-center flex flex-col items-center relative transition-colors hover:border-gold-accent/50">
           <span className="text-4xl mb-4">📄</span>
@@ -263,13 +271,13 @@ export default function OwnerMode() {
               <p className="text-text-secondary mb-4">Drag and drop your PDF, or click to browse.</p>
               <input type="file" accept=".pdf" className="hidden" id="pdf-upload" onChange={(e) => setSelectedFile(e.target.files[0])} />
               <label htmlFor="pdf-upload" className="cursor-pointer border border-gold-accent text-gold-accent font-working-title px-6 py-2 rounded hover:bg-gold-accent/10 transition-colors inline-block">
-                Select File
+                Choose a PDF file
               </label>
             </div>
           )}
 
           <button
-            className="w-full bg-gold-accent text-background font-working-title font-bold px-6 py-3 rounded hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity mt-4 flex items-center justify-center gap-2"
+            className="w-full bg-gold-accent text-background font-working-title font-bold px-6 py-3 rounded hover:opacity-90 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 transition-all mt-4 flex items-center justify-center gap-2"
             disabled={!selectedFile || isAssimilating}
             onClick={async () => {
               if (!selectedFile) return;
@@ -333,7 +341,7 @@ export default function OwnerMode() {
               }
             }}
           >
-            {isAssimilating ? <><span className="animate-spin">⚙️</span> Extracting...</> : "Start AI Drafting"}
+            {isAssimilating ? <><span className="animate-spin">⚙️</span> Extracting...</> : "Create draft from PDF"}
           </button>
         </div>
       </div>
@@ -353,8 +361,8 @@ export default function OwnerMode() {
             <p className="text-text-secondary text-sm leading-relaxed max-w-sm">360° tours, 3D spatial maps, and drone heatmaps are a Cluster+ feature. Upgrade your Owner plan to unlock the full Vault experience for your listing.</p>
           </div>
           <div className="flex gap-3">
-            <button onClick={() => setShowWizard('select_mode')} className="border border-surface-variant text-text-secondary font-working-title px-6 py-3 rounded hover:border-gold-accent/40 hover:text-on-surface transition-colors text-sm">← Back</button>
-            <Link href="/pricing/owner" className="bg-gold-accent text-background font-working-title font-bold px-6 py-3 rounded hover:bg-gold-bright transition-colors text-sm tracking-wide">Upgrade to Cluster</Link>
+            <button onClick={() => setShowWizard('select_mode')} className="border border-surface-variant text-text-secondary font-working-title px-6 py-3 rounded hover:border-gold-accent/40 hover:text-on-surface active:scale-95 transition-all text-sm">← Back</button>
+            <Link href="/pricing/owner" className="bg-gold-accent text-background font-working-title font-bold px-6 py-3 rounded hover:bg-gold-bright active:scale-95 transition-all text-sm tracking-wide">Upgrade to Cluster</Link>
           </div>
         </div>
       );
@@ -412,7 +420,7 @@ export default function OwnerMode() {
       setShowWizard(false);
     };
 
-    const backLabel = vaultBuildOption ? "← Choose differently" : "← Back";
+    const backLabel = vaultBuildOption ? "← Choose another option" : "← Back";
     const handleBack = () => {
       if (vaultBuildOption) { setVaultBuildOption(null); return; }
       setShowWizard('select_mode');
@@ -420,7 +428,7 @@ export default function OwnerMode() {
 
     return (
       <div className="max-w-[700px] mx-auto py-lg animate-[fadeIn_0.5s_ease]">
-        <button onClick={handleBack} className="text-text-secondary hover:text-gold-accent mb-8 font-working-title transition-colors">{backLabel}</button>
+        <button onClick={handleBack} className="text-text-secondary hover:text-gold-accent mb-8 font-label-caps uppercase tracking-widest transition-colors">{backLabel}</button>
         <h1 className="font-display-md text-5xl text-gold-accent mb-3 drop-shadow-md">The Spatial Vault</h1>
         <p className="text-text-secondary mb-10 font-working-title text-sm">Give buyers an immersive walk-through — 3D maps, 360° tours, AR experiences. No site visit wasted.</p>
 
@@ -464,7 +472,7 @@ export default function OwnerMode() {
             <button
               onClick={handleSaveUrl}
               disabled={!isUrlValid}
-              className="w-full bg-gold-accent text-background font-working-title font-bold px-6 py-4 rounded hover:bg-gold-bright disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-300 text-base tracking-wide shadow-[0_0_20px_rgba(232,174,60,0.2)] hover:shadow-[0_0_30px_rgba(232,174,60,0.4)]"
+              className="w-full bg-gold-accent text-background font-label-caps uppercase tracking-widest font-bold px-6 py-4 rounded hover:bg-gold-bright active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed disabled:active:scale-100 transition-all duration-300 text-base tracking-wide shadow-[0_0_20px_rgba(232,174,60,0.2)] hover:shadow-[0_0_30px_rgba(232,174,60,0.4)]"
             >
               Link to My Listing
             </button>
@@ -519,9 +527,9 @@ export default function OwnerMode() {
 
         {/* ══ PATH B1: Self-record — video upload ══ */}
         {vaultTab === "build" && vaultBuildOption === "self" && (
-          <div className="bg-gradient-to-br from-[#1A1814] to-[#0A0908] border border-gold-accent/30 rounded-2xl p-10 flex flex-col items-center gap-6 animate-[fadeIn_0.3s_ease]">
-            <div className="bg-gradient-to-r from-gold-accent/20 to-transparent border-l-4 border-gold-accent rounded-r-lg p-5 w-full">
-              <strong className="text-gold-accent font-working-title text-sm tracking-wide block mb-1">JUST HIT RECORD</strong>
+          <div className="bg-[#0d0d0d] border border-gold-accent/20 rounded-2xl p-10 flex flex-col items-center gap-6 animate-[fadeIn_0.3s_ease]">
+            <div className="bg-surface-alt/50 border border-gold-accent/20 rounded-lg p-5 w-full">
+              <strong className="text-gold-accent font-label-caps uppercase tracking-widest text-sm block mb-1">JUST HIT RECORD</strong>
               <p className="text-sm text-text-secondary leading-relaxed">Walk through every room slowly with your phone camera. Upload the raw .mp4 or .mov — we&apos;ll stitch it into an immersive 3D tour and notify you when it&apos;s live, typically within 48 hours.</p>
             </div>
 
@@ -540,9 +548,9 @@ export default function OwnerMode() {
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
                   </svg>
                 </div>
-                <p className="text-text-secondary font-working-title text-sm uppercase tracking-widest">Drag and drop your video here</p>
+                <p className="text-text-secondary font-label-caps text-sm uppercase tracking-widest">Drag and drop your video here</p>
                 <input type="file" accept="video/mp4,video/quicktime,video/*" className="hidden" id="video-upload" onChange={e => setSelectedFile(e.target.files[0])} />
-                <label htmlFor="video-upload" className="cursor-pointer border-2 border-gold-accent text-gold-accent font-working-title font-bold px-8 py-3 rounded hover:bg-gold-accent hover:text-background transition-all duration-300 uppercase tracking-wider">
+                <label htmlFor="video-upload" className="cursor-pointer border-2 border-gold-accent text-gold-accent font-label-caps uppercase tracking-widest font-bold px-8 py-3 rounded hover:bg-gold-accent hover:text-background transition-all duration-300">
                   Select Video File
                 </label>
                 <p className="text-[10px] text-text-secondary tracking-widest uppercase">Supported: .mp4, .mov — any file size</p>
@@ -552,7 +560,7 @@ export default function OwnerMode() {
             <button
               onClick={handleSubmitVideo}
               disabled={!selectedFile}
-              className="w-full bg-gold-accent text-background font-working-title font-bold px-6 py-4 rounded hover:bg-gold-bright disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-300 text-base tracking-wide shadow-[0_0_20px_rgba(232,174,60,0.2)] hover:shadow-[0_0_30px_rgba(232,174,60,0.4)]"
+              className="w-full bg-gold-accent text-background font-label-caps uppercase tracking-widest font-bold px-6 py-4 rounded hover:bg-gold-bright active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed disabled:active:scale-100 transition-all duration-300 text-base shadow-[0_0_20px_rgba(232,174,60,0.2)] hover:shadow-[0_0_30px_rgba(232,174,60,0.4)]"
             >
               Submit for Processing
             </button>
@@ -561,9 +569,9 @@ export default function OwnerMode() {
 
         {/* ══ PATH B2: ScoutIt Team queue ══ */}
         {vaultTab === "build" && vaultBuildOption === "team" && (
-          <div className="bg-gradient-to-br from-[#1A1814] to-[#0A0908] border border-gold-accent/30 rounded-2xl p-10 flex flex-col gap-6 animate-[fadeIn_0.3s_ease]">
-            <div className="bg-gradient-to-r from-gold-accent/20 to-transparent border-l-4 border-gold-accent rounded-r-lg p-5">
-              <strong className="text-gold-accent font-working-title text-sm tracking-wide block mb-1">WE HANDLE EVERYTHING</strong>
+          <div className="bg-[#0d0d0d] border border-gold-accent/20 rounded-2xl p-10 flex flex-col gap-6 animate-[fadeIn_0.3s_ease]">
+            <div className="bg-surface-alt/50 border border-gold-accent/20 rounded-lg p-5">
+              <strong className="text-gold-accent font-label-caps uppercase tracking-widest text-sm block mb-1">WE HANDLE EVERYTHING</strong>
               <p className="text-sm text-text-secondary leading-relaxed">Our team comes to your property, records the full walkthrough with professional equipment, and builds the 3D map and 360° tour. You just need to be available.</p>
             </div>
 
@@ -595,13 +603,13 @@ export default function OwnerMode() {
             </div>
 
             <div className="bg-surface-alt/50 border border-surface-variant rounded-lg p-4 text-xs text-text-secondary">
-              <strong className="text-on-surface font-working-title block mb-1">Included with your Cluster subscription</strong>
+              <strong className="text-on-surface font-label-caps uppercase tracking-widest block mb-1">Included with your Cluster subscription</strong>
               Team recording is part of your Cluster+ plan. No extra charge — just join the queue.
             </div>
 
             <button
               onClick={handleJoinQueue}
-              className="w-full bg-gold-accent text-background font-working-title font-bold px-6 py-4 rounded hover:bg-gold-bright transition-all duration-300 text-base tracking-wide shadow-[0_0_20px_rgba(232,174,60,0.2)] hover:shadow-[0_0_30px_rgba(232,174,60,0.4)]"
+              className="w-full bg-gold-accent text-background font-label-caps uppercase tracking-widest font-bold px-6 py-4 rounded hover:bg-gold-bright active:scale-95 transition-all duration-300 text-base shadow-[0_0_20px_rgba(232,174,60,0.2)] hover:shadow-[0_0_30px_rgba(232,174,60,0.4)]"
             >
               Join the Queue
             </button>
@@ -620,10 +628,10 @@ export default function OwnerMode() {
           <p className="text-text-secondary font-body-md text-sm md:text-base">Your workspace is empty.</p>
         </div>
         <div className="bg-[#0a0a0a] rounded-lg border border-surface-variant px-4 py-16 md:p-lg flex flex-col gap-6 relative overflow-hidden items-center justify-center text-center md:py-32 mt-8 mx-4 md:mx-0">
-          <h3 className="font-display-md text-2xl md:text-3xl text-on-surface px-2">Create your first Property File</h3>
-          <p className="text-text-secondary max-w-md text-sm md:text-base px-2">Our wizard walks you through building a polished, trustworthy listing in under 10 minutes.</p>
-          <button className="bg-gold-accent text-background font-working-title px-6 py-3 md:px-8 md:py-4 rounded hover:bg-surface-tint transition-colors text-base md:text-lg font-bold uppercase tracking-widest shadow-[0_0_20px_rgba(232,174,60,0.2)] mt-2" onClick={() => setShowWizard('select_mode')}>
-            Start My First Listing
+          <h3 className="font-display-md text-2xl md:text-3xl text-on-surface px-2">Create your first listing</h3>
+          <p className="text-text-secondary max-w-md text-sm md:text-base px-2">Build a complete property listing in under 10 minutes.</p>
+          <button className="bg-gold-accent text-background font-label-caps uppercase tracking-widest px-6 py-3 md:px-8 md:py-4 rounded hover:bg-surface-tint active:scale-95 transition-all text-base md:text-lg font-bold shadow-[0_0_20px_rgba(232,174,60,0.2)] mt-2" onClick={() => setShowWizard('select_mode')}>
+            Create your first listing
           </button>
         </div>
       </div>
@@ -633,17 +641,17 @@ export default function OwnerMode() {
   // --- VIEW: LAYER 1 - ACTIVE PROPERTY FILES (PORTFOLIO VIEW) ---
   if (!viewingDossierId && myListings.length > 1) {
     return (
-      <div className="max-w-[1200px] mx-auto py-lg animate-[fadeIn_0.4s_ease]">
+      <div className="max-w-[1200px] mx-auto py-lg animate-slide-up-fade">
         <div className="flex flex-col md:flex-row md:justify-between md:items-end mb-8 border-b border-surface-variant pb-6 gap-4">
           <div>
             <span className="font-label-caps text-gold-accent tracking-widest uppercase mb-2 block">Command Center</span>
-            <h1 className="font-display-md text-3xl md:text-4xl text-text-primary">Active Property Files</h1>
+            <h1 className="font-display-md text-3xl md:text-4xl text-text-primary">Active Listings</h1>
           </div>
           {/* Hidden on mobile — the contextual "+ List" FAB is the canonical add-listing control there (one control per action) */}
           <div className="flex gap-3 w-full md:w-auto">
             {selectMode && selectedIds.length > 0 && (
               <button
-                className="border border-error text-error hover:bg-error hover:text-white font-working-title font-bold px-5 py-3 rounded transition-all disabled:opacity-50"
+                className="border border-error text-error hover:bg-error hover:text-white font-label-caps uppercase tracking-widest font-bold px-5 py-3 rounded active:scale-95 transition-all disabled:opacity-50 disabled:active:scale-100"
                 disabled={isArchiving}
                 onClick={async () => {
                   setIsArchiving(true);
@@ -669,17 +677,17 @@ export default function OwnerMode() {
                   }
                 }}
               >
-                {isArchiving ? 'Archiving…' : `Archive Selected (${selectedIds.length})`}
+                {isArchiving ? 'Archiving…' : `Archive selected listings (${selectedIds.length})`}
               </button>
             )}
             <button
-              className="border border-surface-variant text-text-secondary hover:text-on-surface hover:border-text-secondary font-working-title font-bold px-5 py-3 rounded transition-all"
+              className="border border-surface-variant text-text-secondary hover:text-on-surface hover:border-text-secondary font-label-caps uppercase tracking-widest font-bold px-5 py-3 rounded transition-all"
               onClick={() => { setSelectMode(s => !s); setSelectedIds([]); }}
             >
               {selectMode ? 'Cancel' : 'Select'}
             </button>
             <button
-              className="hidden md:inline-block border border-gold-accent text-gold-accent hover:bg-gold-accent hover:text-background font-working-title font-bold px-6 py-3 rounded transition-all w-full md:w-auto"
+              className="hidden md:inline-block border border-gold-accent text-gold-accent hover:bg-gold-accent hover:text-background active:scale-95 font-label-caps uppercase tracking-widest font-bold px-6 py-3 rounded transition-all w-full md:w-auto"
               onClick={() => setShowWizard('select_mode')}
             >
               + New Property File
@@ -688,7 +696,23 @@ export default function OwnerMode() {
         </div>
 
         <div className="flex overflow-x-auto snap-x md:grid md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 pb-4 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide">
-          {myListings.map(listing => {
+          {myListings.length === 0 ? (
+            <div className="col-span-full flex flex-col items-center justify-center p-12 bg-surface/50 border border-surface-variant/50 border-dashed rounded-xl">
+              <div className="w-16 h-16 rounded-full border border-gold-accent/30 bg-surface flex items-center justify-center text-gold-accent mb-4">
+                <span className="text-3xl">+</span>
+              </div>
+              <h3 className="font-headline-editorial text-xl text-on-surface mb-2">No Property Files</h3>
+              <p className="text-sm text-text-secondary text-center mb-6 max-w-md">
+                You haven&apos;t added any properties to your workspace yet. Click &quot;New Property File&quot; to start uploading.
+              </p>
+              <button 
+                onClick={() => setShowWizard('select_mode')}
+                className="font-label-caps tracking-widest uppercase text-[10px] text-gold-accent border border-gold-accent/30 bg-gold-accent/10 px-6 py-3 rounded hover:bg-gold-accent/20 transition-colors"
+              >
+                Create New Property File
+              </button>
+            </div>
+          ) : myListings.map((listing, index) => {
             const listPitches = pitches.filter(p => p.isCurrentUserOwner && p.listingId === listing.id);
             const pendingPitches = listPitches.filter(p => p.status === 'pending');
             const isSelected = selectedIds.includes(listing.id);
@@ -700,66 +724,17 @@ export default function OwnerMode() {
             // ring and the checklist can never disagree.
             const completeness = computeListingStrength(listing).score;
             return (
-              <div
+              <OwnerListingCard 
                 key={listing.id}
-                className={`card-atmosphere hov-card rounded-lg p-5 md:p-6 flex flex-col cursor-pointer transition-all group relative overflow-hidden h-auto min-h-[12rem] md:h-64 shrink-0 w-[85vw] snap-center md:w-auto md:shrink ${pendingPitches.length > 0 ? 'cta-pulse' : ''} ${isSelected ? 'border-gold-accent' : ''}`}
-                onClick={() => selectMode ? toggleSelected(listing.id) : setViewingDossierId(listing.id)}
-              >
-                <div className="absolute top-0 left-0 w-1 h-full bg-surface-variant group-hover:bg-gold-accent transition-colors"></div>
-                {selectMode && (
-                  <input
-                    type="checkbox"
-                    checked={isSelected}
-                    onChange={() => toggleSelected(listing.id)}
-                    onClick={(e) => e.stopPropagation()}
-                    className="absolute top-4 right-4 w-5 h-5 accent-gold-accent cursor-pointer z-10"
-                  />
-                )}
-                <div className="flex justify-between items-start mb-auto">
-                  <div className="pr-4">
-                    <h3 className="font-working-title text-xl text-on-surface mb-1 group-hover:underline">{listing.title || 'Untitled Property'}</h3>
-                    <p className="text-xs text-text-secondary">{listing.location || 'Location missing'}</p>
-                  </div>
-                  {!selectMode && (
-                    <div className="relative w-10 h-10 shrink-0" title={`${completeness}% complete`}>
-                      <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-                        <path className="text-surface-variant" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3"></path>
-                        <path className="text-gold-accent" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeDasharray={`${completeness}, 100`} strokeWidth="3"></path>
-                      </svg>
-                      {/* Inner % label so the ring reads as a completeness score, not a loading spinner */}
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="font-data-tabular font-bold text-[8px] text-text-primary leading-none">{completeness}%</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-
-                {listing.pipelineStatus === 'ai_drafting' ? (
-                  <div className="border-t border-surface-variant pt-4 mt-4 h-full flex flex-col justify-center">
-                    <div className="bg-surface-alt/50 p-2.5 rounded border border-surface-variant flex items-center justify-center gap-2 relative overflow-hidden">
-                      <div className="absolute inset-0 bg-gold-accent/5 opacity-50 animate-pulse"></div>
-                      <span className="animate-spin text-gold-accent text-xs">⚙️</span>
-                      <span className="text-[10px] text-text-secondary font-working-title uppercase tracking-widest z-10">COUNCIL AI IS DRAFTING...</span>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-2 gap-4 border-t border-surface-variant pt-4 mt-4">
-                    <div>
-                      <span className="block font-label-caps text-[9px] tracking-widest text-text-muted uppercase mb-1">Active Inquiries</span>
-                      <span className={`font-data-tabular text-lg ${pendingPitches.length > 0 ? 'text-gold-accent font-bold' : 'text-text-secondary'}`}>
-                        {pendingPitches.length}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="block font-label-caps text-[9px] tracking-widest text-text-muted uppercase mb-1">Profile Views</span>
-                      {/* Honest blank — view tracking isn't instrumented yet,
-                          same policy as the dossier's Engagement Analytics */}
-                      <span className="font-data-tabular text-lg text-text-muted" title="View tracking arrives once page instrumentation ships">—</span>
-                    </div>
-                  </div>
-                )}
-              </div>
+                listing={listing}
+                pendingPitchesCount={pendingPitches.length}
+                isSelected={isSelected}
+                completeness={completeness}
+                selectMode={selectMode}
+                toggleSelected={toggleSelected}
+                setViewingDossierId={setViewingDossierId}
+                index={index}
+              />
             );
           })}
         </div>
@@ -769,14 +744,14 @@ export default function OwnerMode() {
 
   // --- VIEW: LAYER 2 - PROPERTY DOSSIER WORKSPACE ---
   return (
-    <div className="max-w-[1200px] mx-auto py-4 animate-[fadeIn_0.3s_ease]">
+    <div className="max-w-[1200px] mx-auto py-4 animate-slide-up-fade">
       
       {/* Dossier Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-surface-variant pb-6 mb-8 gap-4">
         <div>
           {myListings.length > 1 && (
             <button 
-              className="text-text-secondary hover:text-gold-accent text-sm font-working-title flex items-center gap-2 mb-4 transition-colors"
+              className="text-text-secondary hover:text-gold-accent text-sm font-label-caps uppercase tracking-widest flex items-center gap-2 mb-4 transition-colors"
               onClick={() => setViewingDossierId(null)}
             >
               ← Back to Active Files
@@ -787,7 +762,7 @@ export default function OwnerMode() {
         </div>
         <div className="flex flex-wrap gap-3">
            <button 
-             className="border border-surface-variant text-text-secondary hover:text-on-surface hover:border-text-secondary font-working-title font-bold px-4 py-2 rounded transition-colors text-sm flex-1 md:flex-none text-center justify-center"
+             className="border border-surface-variant text-text-secondary hover:text-on-surface hover:border-text-secondary font-label-caps uppercase tracking-widest font-bold px-4 py-2 rounded transition-colors text-sm flex-1 md:flex-none text-center justify-center"
              onClick={() => {
                if(window.confirm("Withdraw this property dossier from the market? Brokers will no longer see it.")) {
                  closeListing(activeListing.id);
@@ -797,7 +772,7 @@ export default function OwnerMode() {
              Withdraw
            </button>
            <button 
-             className="border border-gold-accent text-gold-accent hover:bg-gold-accent/10 font-working-title font-bold px-4 py-2 rounded transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed flex-1 md:flex-none text-center justify-center"
+             className="border border-gold-accent text-gold-accent hover:bg-gold-accent/10 active:scale-95 font-label-caps uppercase tracking-widest font-bold px-4 py-2 rounded transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed flex-1 md:flex-none text-center justify-center"
              disabled={activeListing.pipelineStatus === 'ai_drafting'}
              onClick={() => setShowWizard('edit')}
            >
@@ -805,25 +780,25 @@ export default function OwnerMode() {
            </button>
            <Link 
              href={`/dashboard/inventory/${activeListing.id}`}
-             className="border border-gold-accent text-gold-accent hover:bg-gold-accent/10 font-working-title font-bold px-4 py-2 rounded transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed flex-1 md:flex-none text-center justify-center"
+             className="border border-gold-accent text-gold-accent hover:bg-gold-accent/10 font-label-caps uppercase tracking-widest font-bold px-4 py-2 rounded transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed flex-1 md:flex-none text-center justify-center"
            >
              Manage Inventory
            </Link>
            <button
-             className="hidden md:inline-block border border-gold-accent text-gold-accent hover:bg-gold-accent hover:text-background font-working-title font-bold px-4 py-2 rounded transition-all text-sm flex-1 md:flex-none text-center justify-center"
+             className="hidden md:inline-block border border-gold-accent text-gold-accent hover:bg-gold-accent hover:text-background active:scale-95 font-label-caps uppercase tracking-widest font-bold px-4 py-2 rounded transition-all text-sm flex-1 md:flex-none text-center justify-center"
              onClick={() => setShowWizard('select_mode')}
            >
              + New Property
            </button>
            <button 
-             className="bg-gold-accent/10 border border-gold-accent text-gold-accent hover:bg-gold-accent/20 font-working-title font-bold px-4 py-2 rounded transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed flex-1 md:flex-none text-center justify-center shadow-[0_0_10px_rgba(232,174,60,0.1)]"
+             className="bg-gold-accent/10 border border-gold-accent text-gold-accent hover:bg-gold-accent/20 active:scale-95 font-label-caps uppercase tracking-widest font-bold px-4 py-2 rounded transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed flex-1 md:flex-none text-center justify-center shadow-[0_0_10px_rgba(232,174,60,0.1)]"
              disabled={activeListing.pipelineStatus === 'ai_drafting'}
              onClick={() => setShowWizard('deep_intel_edit')}
            >
              Add Deep Intel
            </button>
            {activeListing.pipelineStatus !== 'ai_drafting' && (
-             <Link href={`/property/${activeListing.slug || activeListing.id}`} className="bg-gold-accent text-background font-working-title font-bold px-4 py-2 rounded hover:opacity-90 transition-opacity text-sm flex-1 md:flex-none text-center justify-center">
+             <Link href={`/property/${activeListing.slug || activeListing.id}`} className="bg-gold-accent text-background font-label-caps uppercase tracking-widest font-bold px-4 py-2 rounded hover:opacity-90 transition-opacity text-sm flex-1 md:flex-none text-center justify-center">
                View Public File
              </Link>
            )}
@@ -851,7 +826,7 @@ export default function OwnerMode() {
             {activeListing.pipelineStatus === 'ai_drafting' ? (
                <div className="flex flex-col items-center justify-center py-4 opacity-50">
                  <span className="text-3xl mb-2 animate-pulse">⏳</span>
-                 <p className="text-xs text-center font-working-title tracking-widest text-text-muted">AWAITING AI ANALYSIS</p>
+                 <p className="text-xs text-center font-label-caps uppercase tracking-widest text-text-muted">AWAITING AI ANALYSIS</p>
                </div>
             ) : (
                <div className="flex items-center gap-4 mb-6">
@@ -950,7 +925,7 @@ export default function OwnerMode() {
               />
               <button
                 type="button"
-                className="bg-gold-accent text-background font-working-title font-bold px-5 py-3 rounded hover:opacity-90 transition-opacity disabled:opacity-50 text-sm"
+                className="bg-gold-accent text-background active:scale-95 font-label-caps uppercase tracking-widest font-bold px-5 py-3 rounded hover:opacity-90 transition-opacity disabled:opacity-50 text-sm"
                 disabled={!inviteName.trim() || connects < 1}
                 onClick={async () => { const ok = await inviteBroker(activeListing.id, inviteName.trim()); if (ok) setInviteName(""); }}
               >
@@ -978,7 +953,7 @@ export default function OwnerMode() {
                  Brokers are reviewing your dossier. Listings with extensive media galleries receive inquiries 4× faster.
                </p>
                {!activeListing?.hasMedia && (
-                 <button className="mt-6 border border-gold-accent text-gold-accent font-working-title px-6 py-2 rounded hover:bg-gold-accent/10 transition-colors" onClick={() => setShowWizard('edit')}>
+                 <button className="mt-6 border border-gold-accent text-gold-accent font-label-caps uppercase tracking-widest px-6 py-2 rounded hover:bg-gold-accent/10 transition-colors" onClick={() => setShowWizard('edit')}>
                    Add Media Gallery
                  </button>
                )}
@@ -1045,7 +1020,7 @@ export default function OwnerMode() {
                         Decline
                       </button>
                       <button 
-                        className="flex-1 bg-gold-accent text-background font-working-title text-sm font-bold py-3 rounded hover:opacity-90 transition-opacity shadow-lg" 
+                        className="flex-1 bg-gold-accent text-background active:scale-95 font-working-title text-sm font-bold py-3 rounded hover:opacity-90 transition-opacity shadow-lg" 
                         onClick={() => updatePitchStatus(pitch.id, 'accepted')}
                       >
                         Accept Inquiry

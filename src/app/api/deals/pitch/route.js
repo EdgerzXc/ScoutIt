@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { notifyUser } from "@/lib/notifications";
 import { logActivity } from "@/lib/crmActivity";
+import { resolveUserId } from "@/lib/serverAuth";
 
 // Broker-initiated pitch (Market Intelligence Feed -> "Open Deal File").
 // `deals` has an explicit RLS policy blocking ALL direct client inserts
@@ -15,26 +15,13 @@ import { logActivity } from "@/lib/crmActivity";
 // and no deal was ever created. This route follows the same
 // verified-token + supabaseAdmin + spend_connects pattern already proven in
 // /api/dashboard/invite and /api/deals/initiate.
-async function resolveUserId(request, mockOwnerId) {
-  const authHeader = request.headers.get("Authorization");
-  const token = authHeader ? authHeader.replace("Bearer ", "") : null;
 
-  if (token && token.trim() !== "") {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    const authClient = createClient(supabaseUrl, supabaseAnonKey);
-    const { data: { user }, error } = await authClient.auth.getUser(token);
-    if (!error && user) return user.id;
-  }
-  if (process.env.NODE_ENV !== "production" && mockOwnerId) return mockOwnerId;
-  return null;
-}
 
 export async function POST(request) {
   try {
-    const { listingId, message, mockOwnerId } = await request.json();
+    const { listingId, message  } = await request.json();
 
-    const brokerId = await resolveUserId(request, mockOwnerId);
+    const brokerId = await resolveUserId(request);
     if (!brokerId) {
       return NextResponse.json({ error: "Unauthorized: Invalid session" }, { status: 401 });
     }

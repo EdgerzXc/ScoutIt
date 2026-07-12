@@ -442,6 +442,15 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
     };
   }, [formData]);
 
+  const [debouncedDraftData, setDebouncedDraftData] = useState(draftData);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedDraftData(draftData);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [draftData]);
+
   return (
     <div 
       className={`fixed inset-0 z-[1000] bg-background flex flex-col md:grid md:grid-rows-[auto_1fr] overflow-hidden animate-[fadeIn_0.3s_ease-out] ${isResizing ? 'select-none pointer-events-none' : ''}`}
@@ -753,9 +762,9 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
         </div>
         <div className="mt-10 opacity-90 md:scale-[0.98] origin-top transition-all pointer-events-auto">
           {['commercial', 'restaurants', 'venues'].includes(formData.category) ? (
-            <CommercialFlow slug={null} draftData={draftData} isDraftMode={true} externalActiveTab={step === 3 ? 'units' : 'space'} />
+            <CommercialFlow slug={null} draftData={debouncedDraftData} isDraftMode={true} externalActiveTab={step === 3 ? 'units' : 'space'} />
           ) : (
-            <ResidentialFlow slug={null} draftData={draftData} isDraftMode={true} externalActiveTab={step === 3 ? 'units' : 'space'} />
+            <ResidentialFlow slug={null} draftData={debouncedDraftData} isDraftMode={true} externalActiveTab={step === 3 ? 'units' : 'space'} />
           )}
         </div>
       </div>

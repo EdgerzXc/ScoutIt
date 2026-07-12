@@ -85,11 +85,11 @@ module.exports = {
       fontFamily: {
         "body-lg": ["var(--font-geist-sans)", "Inter", "sans-serif"],
         "working-title": ["var(--font-geist-sans)", "Inter", "sans-serif"],
-        "label-caps": ["var(--font-geist-sans)", "Inter", "sans-serif"],
+        "label-caps": ["var(--font-geist-mono)", "ui-monospace", "monospace"],
         "headline-editorial": ["Georgia", "serif"],
         "display-md": ["Georgia", "serif"],
         "body-md": ["var(--font-geist-sans)", "Inter", "sans-serif"],
-        "data-tabular": ["var(--font-geist-sans)", "Inter", "sans-serif"],
+        "data-tabular": ["var(--font-geist-mono)", "ui-monospace", "monospace"],
         "body-sm": ["var(--font-geist-sans)", "Inter", "sans-serif"],
         "display-lg": ["Georgia", "serif"]
       },

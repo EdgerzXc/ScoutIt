@@ -52,6 +52,7 @@ export default function DealTimeline({ dealId = null, propertyId = null, mockUse
       if (dealId) params.set("dealId", dealId);
       else if (propertyId) params.set("propertyId", propertyId);
       const qs = params.toString();
+      if (!mockUserId && process.env.NODE_ENV === "development") return;
       const data = await crmFetch(`/api/crm/activity${qs ? `?${qs}` : ""}`, { mockUserId });
       setItems((data.activity || []).slice(0, limit));
     } catch (e) {

@@ -10,6 +10,10 @@ import { getBalance, spendConnects, initWalletIfEmpty } from "../lib/connectsWal
 
 const DashboardContext = createContext();
 
+// Default Center: Makati CBD
+const DEFAULT_MAP_CENTER = [121.0215, 14.5547]; 
+const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
+
 export function useDashboard() {
   return useContext(DashboardContext);
 }
@@ -23,10 +27,6 @@ export function DashboardProvider({ children }) {
   const [toasts, setToasts] = useState([]);
   const [savedIds, setSavedIds] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-
-  // Default Center: Makati CBD
-  const DEFAULT_MAP_CENTER = [121.0215, 14.5547]; 
-  const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
 
   // Sync user from Supabase Auth
   useEffect(() => {
@@ -43,7 +43,7 @@ export function DashboardProvider({ children }) {
         await handleUserLogin(session.user);
       } else {
         // If they are using the DEV Toolbox mock user, preserve it
-        const mockStr = localStorage.getItem("scoutit_user");
+        const mockStr = typeof window !== 'undefined' ? localStorage.getItem("scoutit_user") : null;
         if (mockStr && mockStr.includes("master-dev")) {
           try {
             const parsed = JSON.parse(mockStr);
@@ -55,7 +55,7 @@ export function DashboardProvider({ children }) {
         }
 
         // Otherwise, clear old mock data if no real session exists
-        localStorage.removeItem("scoutit_user");
+        if (typeof window !== 'undefined') localStorage.removeItem("scoutit_user");
         setCurrentUser(null);
         setIsLoading(false);
       }
@@ -66,7 +66,7 @@ export function DashboardProvider({ children }) {
       if (session?.user) {
         await handleUserLogin(session.user);
       } else {
-        const mockStr = localStorage.getItem("scoutit_user");
+        const mockStr = typeof window !== 'undefined' ? localStorage.getItem("scoutit_user") : null;
         if (!(mockStr && mockStr.includes("master-dev"))) {
           setCurrentUser(null);
         }
@@ -105,11 +105,21 @@ export function DashboardProvider({ children }) {
   const authedFetch = async (url, options = {}) => {
     const { data: { session } } = await getSession();
     const token = session?.access_token;
+    let mockUserId = "";
+    if (!token && typeof window !== 'undefined') {
+      try {
+        const mockStr = localStorage.getItem("scoutit_user");
+        if (mockStr && mockStr.includes("master-dev")) {
+          mockUserId = JSON.parse(mockStr).id;
+        }
+      } catch (e) {}
+    }
     return fetch(url, {
       ...options,
       headers: {
         ...(options.headers || {}),
         "Authorization": token ? `Bearer ${token}` : "",
+        ...(mockUserId ? { "x-mock-user-id": mockUserId } : {})
       },
     });
   };
@@ -117,8 +127,7 @@ export function DashboardProvider({ children }) {
   const fetchNotifications = async (userId) => {
     if (!userId) return;
     try {
-      const mockParam = userId ? `?mockOwnerId=${userId}` : "";
-      const res = await authedFetch(`/api/notifications${mockParam}`);
+      const res = await authedFetch(`/api/notifications`);
       if (!res.ok) return;
       const data = await res.json();
       setNotifications((data.notifications || []).map(n => ({
@@ -175,6 +184,7 @@ export function DashboardProvider({ children }) {
             if (cmsData.properties) {
               airtableListings = cmsData.properties.map(p => ({
                 id: p.id,
+                slug: p.slug,
                 type: p.property_type || 'Property',
                 title: p.title,
                 desc: '',
@@ -206,7 +216,13 @@ export function DashboardProvider({ children }) {
           console.error("Failed to fetch CMS properties:", e);
         }
 
-        setListings([...airtableListings, ...supabaseListings]);
+        const existingTitles = new Set(airtableListings.map(p => (p.title || '').toLowerCase()));
+        const enrichedSupabaseListings = supabaseListings.map(p => ({
+          ...p,
+          isDuplicateOfAirtable: existingTitles.has((p.title || '').toLowerCase())
+        }));
+
+        setListings([...airtableListings, ...enrichedSupabaseListings]);
 
         // 2. Fetch Deals (Pitches) — via the real /api/deals server route, NOT
         // a direct client select(). The direct query this replaced had no
@@ -225,9 +241,7 @@ export function DashboardProvider({ children }) {
         try {
           const { data: { session } } = await getSession();
           const token = session?.access_token;
-          const mockOwnerId = !token && currentUser?.id ? currentUser.id : undefined;
-          const qs = mockOwnerId ? `?mockOwnerId=${mockOwnerId}` : "";
-          const dealsRes = await fetch(`/api/deals${qs}`, {
+          const dealsRes = await fetch(`/api/deals`, {
             headers: token ? { Authorization: `Bearer ${token}` } : {},
           });
           if (dealsRes.ok) {
@@ -396,8 +410,7 @@ export function DashboardProvider({ children }) {
         },
         body: JSON.stringify({
           submissionId: listingId,
-          data,
-          mockOwnerId: currentUser?.id
+          data
         })
       });
 
@@ -691,14 +704,13 @@ export function DashboardProvider({ children }) {
     try {
       const { data: { session } } = await getSession();
       const token = session?.access_token;
-      const mockOwnerId = !token && currentUser?.id === 'master-dev' ? 'master-dev' : undefined;
       const res = await fetch('/api/deals/pitch', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify({ listingId, message, mockOwnerId }),
+        body: JSON.stringify({ listingId, message }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -842,12 +854,10 @@ export function DashboardProvider({ children }) {
     // Persist client-triggered notifications through the same table as the
     // server-triggered ones (stale-listing, broker-on-change).
     if (currentUser?.id) {
-      const mockParam = currentUser?.id ? `?mockOwnerId=${currentUser.id}` : "";
-      authedFetch(`/api/notifications${mockParam}`, {
+      authedFetch(`/api/notifications`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          mockOwnerId: currentUser?.id || undefined,
           title: notif.title,
           desc: notif.desc,
           icon: typeof notif.icon === "string" ? notif.icon : "🔔",
@@ -861,11 +871,10 @@ export function DashboardProvider({ children }) {
   const markNotificationsRead = () => {
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
     if (currentUser?.id) {
-      const mockParam = currentUser?.id ? `?mockOwnerId=${currentUser.id}` : "";
-      authedFetch(`/api/notifications${mockParam}`, {
+      authedFetch(`/api/notifications`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mockOwnerId: currentUser?.id || undefined }),
+        body: JSON.stringify({}),
       }).catch(e => console.error("Failed to mark notifications read", e));
     }
   };
@@ -873,8 +882,7 @@ export function DashboardProvider({ children }) {
   const clearAllNotifications = () => {
     setNotifications([]);
     if (currentUser?.id) {
-      const mockParam = currentUser?.id ? `?mockOwnerId=${currentUser.id}` : "";
-      authedFetch(`/api/notifications${mockParam}`, { method: "DELETE" })
+      authedFetch(`/api/notifications`, { method: "DELETE" })
         .catch(e => console.error("Failed to clear notifications", e));
     }
   };
@@ -931,7 +939,13 @@ export function DashboardProvider({ children }) {
         console.error("Failed to fetch CMS properties:", e);
       }
 
-      const allData = [...airtableListings, ...supabaseListings];
+      const existingTitles = new Set(airtableListings.map(p => (p.title || '').toLowerCase()));
+      const enrichedSupabaseListings = supabaseListings.map(p => ({
+        ...p,
+        isDuplicateOfAirtable: existingTitles.has((p.title || '').toLowerCase())
+      }));
+
+      const allData = [...airtableListings, ...enrichedSupabaseListings];
 
       if (radiusKm === 'any') {
         setListings(allData);
@@ -1031,7 +1045,8 @@ export function DashboardProvider({ children }) {
       clearAllNotifications,
       searchByRadius,
       MAPBOX_TOKEN,
-      DEFAULT_MAP_CENTER
+      DEFAULT_MAP_CENTER,
+      authedFetch
     }}>
       {children}
     </DashboardContext.Provider>

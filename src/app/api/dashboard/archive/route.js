@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { resolveUserId } from "@/lib/serverAuth";
 import { z } from "zod";
 
 // Soft-delete for the Owner dashboard's "Active Property Files" grid --
@@ -17,8 +18,7 @@ import { z } from "zod";
 
 const schema = z.object({
   propertyIds: z.array(z.string()).min(1).max(100),
-  mockOwnerId: z.string().optional(),
-});
+  });
 
 export async function POST(request) {
   try {
@@ -26,20 +26,11 @@ export async function POST(request) {
     if (!parsed.success) {
       return NextResponse.json({ error: "Invalid data format" }, { status: 400 });
     }
-    const { propertyIds, mockOwnerId } = parsed.data;
+    const { propertyIds  } = parsed.data;
 
-    const authHeader = request.headers.get("Authorization");
-    const token = authHeader ? authHeader.replace("Bearer ", "") : null;
-    let userId = null;
-    if (token && token.trim() !== "") {
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-      const authClient = createClient(supabaseUrl, supabaseAnonKey);
-      const { data: { user }, error } = await authClient.auth.getUser(token);
-      if (!error && user) userId = user.id;
-    }
+    const userId = await resolveUserId(request);
+    
     // Dev-only fallback -- rejected in production (same gate as /api/dashboard/publish).
-    if (!userId && process.env.NODE_ENV !== "production" && mockOwnerId) userId = mockOwnerId;
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized: Invalid session or missing token" }, { status: 401 });
     }

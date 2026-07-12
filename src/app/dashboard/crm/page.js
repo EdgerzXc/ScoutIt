@@ -56,7 +56,7 @@ function CRMPageInner() {
       setTimeout(() => setShowToast(""), 4000);
     }
     setLoading(false);
-  }, [currentUser?.id]);
+  }, [currentUser]);
 
   useEffect(() => {
     if (userLoading) return;

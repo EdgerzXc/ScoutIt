@@ -74,7 +74,7 @@ export default function PrivacyControls({
   return (
     <section style={sectionStyle}>
       <div style={sectionHeader}>
-        <Shield size={14} strokeWidth={1.5} color="#E8AE3C" />
+        <Shield size={14} strokeWidth={1.5} className="text-gold-accent" />
         <span style={sectionTitle}>Privacy</span>
         {saving && (
           <span style={{ fontFamily: "var(--font-body)", fontSize: 10, color: "var(--text-secondary)", marginLeft: "auto" }}>
@@ -89,7 +89,7 @@ export default function PrivacyControls({
           onKeyDown={(e) => e.key === "Enter" && togglePublicProfile()}>
           <div style={controlInfo}>
             <span style={controlLabel}>
-              {publicProfile ? <Globe size={12} strokeWidth={1.5} color="#E8AE3C" /> : <Lock size={12} strokeWidth={1.5} color="var(--text-secondary)" />}
+              {publicProfile ? <Globe size={12} strokeWidth={1.5} className="text-gold-accent" /> : <Lock size={12} strokeWidth={1.5} className="text-text-secondary" />}
               Public Profile
             </span>
             <span style={controlDesc}>
@@ -145,8 +145,8 @@ export default function PrivacyControls({
                 <div style={controlInfo}>
                   <span style={controlLabel}>
                     {settings.anonymous_browsing
-                      ? <EyeOff size={12} strokeWidth={1.5} color="#E8AE3C" />
-                      : <Eye size={12} strokeWidth={1.5} color="var(--text-secondary)" />}
+                      ? <EyeOff size={12} strokeWidth={1.5} className="text-gold-accent" />
+                      : <Eye size={12} strokeWidth={1.5} className="text-text-secondary" />}
                     Anonymous Browsing
                   </span>
                   <span style={controlDesc}>Property views are not logged to your name.</span>
@@ -166,8 +166,8 @@ export default function PrivacyControls({
                 <div style={controlInfo}>
                   <span style={controlLabel}>
                     {settings.anonymous_byline
-                      ? <EyeOff size={12} strokeWidth={1.5} color="#E8AE3C" />
-                      : <Eye size={12} strokeWidth={1.5} color="var(--text-secondary)" />}
+                      ? <EyeOff size={12} strokeWidth={1.5} className="text-gold-accent" />
+                      : <Eye size={12} strokeWidth={1.5} className="text-text-secondary" />}
                     Anonymous Byline
                   </span>
                   <span style={controlDesc}>Intel articles display as &ldquo;Verified Researcher&rdquo;.</span>
@@ -213,7 +213,7 @@ function Toggle({ on, small = false }) {
           width: dot,
           height: dot,
           borderRadius: "50%",
-          background: on ? "#E8AE3C" : "rgba(255,255,255,0.25)",
+          background: on ? "var(--accent)" : "rgba(255,255,255,0.25)",
           transition: "left 0.2s cubic-bezier(0.4,0,0.2,1), background 0.2s",
         }}
       />
@@ -222,7 +222,7 @@ function Toggle({ on, small = false }) {
 }
 
 const sectionStyle = {
-  background: "#161616",
+  background: "var(--surface)",
   border: "1px solid rgba(255,255,255,0.05)",
   borderRadius: 6,
   padding: 24,
@@ -241,7 +241,7 @@ const sectionTitle = {
   fontWeight: 700,
   letterSpacing: "0.14em",
   textTransform: "uppercase",
-  color: "#E8AE3C",
+  color: "var(--accent)",
 };
 
 const controlBlock = {

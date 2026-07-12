@@ -1,18 +1,9 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
 import Anthropic from "@anthropic-ai/sdk";
 import { fetchProperties, updateProperty } from "@/lib/airtable";
+import { resolveUserId } from "@/lib/serverAuth";
 
-async function resolveUserId(request) {
-  const authHeader = request.headers.get("Authorization");
-  const token = authHeader?.replace("Bearer ", "");
-  if (!token) return null;
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  const authClient = createClient(supabaseUrl, supabaseAnonKey);
-  const { data: { user }, error } = await authClient.auth.getUser(token);
-  return !error && user ? user.id : null;
-}
+
 
 export async function POST(request) {
   try {

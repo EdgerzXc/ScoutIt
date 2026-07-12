@@ -1,29 +1,14 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { z } from "zod";
 import { logActivity, createTask } from "@/lib/crmActivity";
+import { resolveUserId } from "@/lib/serverAuth";
 
 const schema = z.object({
   status: z.enum(["confirmed", "cancelled", "completed"]),
-  mockOwnerId: z.string().optional(),
-});
+  });
 
-async function resolveUserId(request, mockOwnerId) {
-  const authHeader = request.headers.get("Authorization");
-  const token = authHeader ? authHeader.replace("Bearer ", "") : null;
-  if (token && token.trim() !== "") {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    const authClient = createClient(supabaseUrl, supabaseAnonKey);
-    const { data: { user }, error } = await authClient.auth.getUser(token);
-    if (!error && user) return user.id;
-  }
-  // Dev-only fallback -- rejected in production, where identity must come
-  // from a verified session token (same gate as /api/dashboard/publish).
-  if (process.env.NODE_ENV !== "production" && mockOwnerId) return mockOwnerId;
-  return null;
-}
+
 
 export async function PATCH(request, { params }) {
   try {
@@ -32,8 +17,8 @@ export async function PATCH(request, { params }) {
     if (!parsed.success) {
       return NextResponse.json({ error: "Invalid data format" }, { status: 400 });
     }
-    const { status, mockOwnerId } = parsed.data;
-    const userId = await resolveUserId(request, mockOwnerId);
+    const { status  } = parsed.data;
+    const userId = await resolveUserId(request);
     
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 

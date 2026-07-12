@@ -2,15 +2,15 @@
 name: ScoutIt
 description: The Philippines' first spatial commerce platform — space intelligence, not a listings board.
 colors:
-  spatial-gold: "#E8AE3C"
-  spatial-gold-bright: "#F7C64E"
-  spatial-gold-muted: "#6E531A"
-  void-black: "#0e0e0e"
-  ink-surface: "#161616"
-  ink-surface-2: "#1e1e1e"
-  ink-surface-3: "#242424"
-  paper-white: "#f0ede8"
-  soft-grey: "#c8c8c8"
+  primary: "#E8AE3C"
+  primary-bright: "#F7C64E"
+  primary-muted: "#6E531A"
+  neutral-bg: "#0e0e0e"
+  neutral-surface: "#161616"
+  neutral-surface-2: "#1e1e1e"
+  neutral-surface-3: "#242424"
+  neutral-text: "#f0ede8"
+  neutral-text-secondary: "#c8c8c8"
   signal-green: "#4caf7d"
   signal-amber: "#e8c84a"
   signal-red: "#e8644a"
@@ -50,14 +50,14 @@ spacing:
   3xl: "64px"
 components:
   button-primary:
-    backgroundColor: "{colors.spatial-gold-bright}"
-    textColor: "{colors.void-black}"
+    backgroundColor: "{colors.primary-bright}"
+    textColor: "{colors.neutral-bg}"
     rounded: "{rounded.md}"
     padding: "10px 24px"
   button-primary-hover:
-    backgroundColor: "{colors.spatial-gold}"
+    backgroundColor: "{colors.primary}"
   chapter-eyebrow:
-    textColor: "{colors.spatial-gold}"
+    textColor: "{colors.primary}"
     typography: "{typography.label}"
 ---
 
@@ -67,66 +67,43 @@ components:
 
 **Creative North Star: "The Spatial Commerce"**
 
-ScoutIt isn't a real estate listings board wearing a dark theme — it's an intelligence terminal for
-Philippine space, built for people deciding whether to trust it enough to act. The system runs on
-restraint: 95% void-black canvas, 5% Spatial Gold, and every use of that gold has to earn its
-place. Chrome stays quiet so the actual signal — flood risk, verification badges, market data,
-category intelligence — can carry the visual weight instead of decoration doing it. The name is
-deliberate: this treats real estate, short-term rentals, hospitality, restaurants, and event
-venues as one category — "spatial commerce" — not six separate templates bolted together.
+ScoutIt isn't a real estate listings board wearing a dark theme — it's an intelligence terminal for Philippine space, built for people deciding whether to trust it enough to act. With the introduction of the **Impeccable Phase**, the system has evolved from its strict 95% void-black / 5% gold origins into a rich, dynamic, and premium platform. We now embrace deep mesh gradients, advanced glassmorphism, and secondary jewel tones (Sapphire, Emerald) to create a breathtaking SaaS experience while maintaining our intelligence-first DNA.
 
-This system explicitly rejects: generic PH listing-directory aesthetics (Lamudi/Zillow-style
-boards), "common luxury real estate" cliché (gold-and-marble old-money tropes, ornate
-serif-everywhere, stock-photo-mansion imagery), and generic AI-template SaaS defaults (gradient
-hero, cream/sand backgrounds, identical card grids, reflexive uppercase eyebrows with no system
-behind them).
+This system explicitly rejects: generic PH listing-directory aesthetics (Lamudi/Zillow-style boards) and the "common luxury real estate" cliché (gold-and-marble old-money tropes, ornate serif-everywhere, stock-photo-mansion imagery). We lean into high-end modern SaaS aesthetics.
 
 **Key Characteristics:**
-- Void-black canvas with tonal surface layering, not pure flat black
-- Gold is a signal, not wallpaper — deployed with intent, never decoratively
+- Rich deep-void canvas enhanced by subtle radial mesh gradients to provide atmospheric depth.
+- Gold is our primary signature, augmented by Sapphire and Emerald to denote specific intelligence domains.
 - Mono-spaced, wide-tracked, uppercase labels for system chrome (eyebrows, badges, metadata)
-- Georgia serif for display headlines — editorial weight, not tech-startup sans-everywhere
-- Numbered chapter registry on property pages (`01 — THE SPACE`) is a real information
-  architecture (ten real chapters per space category), not a decorative section marker
-- Scoped, purposeful glassmorphism (4px/12px/20px blur depending on context) — never default
-- Primary CTAs breathe with a slow gold glow pulse rather than introducing a second accent
-  color — motion carries the "click me" signal, gold stays the only hue
+- Georgia serif for display headlines — editorial weight, occasionally featuring premium gradient clips for hero moments.
+- Scoped, purposeful glassmorphism — heavy backdrop blurs, multi-layered shadows, and translucent borders.
+- Hover physics (scale down, tilt, multi-layered glowing shadows) make the interface feel highly tactile and alive.
 
 ## 2. Colors
 
-The palette is a strict two-role system by design: void-black carries everything, Spatial Gold
-punctuates. **Resolved 2026-07-03:** rather than adding a second "clickable" accent color, the
-"this is clickable" signal is carried by motion instead — primary CTAs breathe with a slow gold
-glow pulse (see §4 Elevation, "The Breathing Signal Rule"). This keeps the palette to one hue
-while still giving interactive elements a distinct, unmistakable affordance.
+The palette is a strict two-role system by design: void-black carries everything, Spatial Gold punctuates.
 
 ### Primary
-- **Spatial Gold** (`#E8AE3C`): baseline gold — headline accents, labels, verified badges, the
-  color that says "this is ScoutIt," never applied broadly.
-- **Spatial Gold Bright** (`#F7C64E`): interactive gold — buttons, CTAs, hover/active nav states.
-  The version of gold that means "you can act on this."
-- **Spatial Gold Muted** (`#6E531A`): subdued gold — borders, dividers, secondary accents where
-  full gold would be too loud.
+- **Spatial Gold** (`#E8AE3C`): baseline gold — headline accents, labels, verified badges, the color that says "this is ScoutIt," never applied broadly.
+- **Spatial Gold Bright** (`#F7C64E`): interactive gold — buttons, CTAs, hover/active nav states. The version of gold that means "you can act on this."
+- **Spatial Gold Muted** (`#6E531A`): subdued gold — borders, dividers, secondary accents where full gold would be too loud.
 
 ### Neutral
-- **Void Black** (`#0e0e0e`): the base canvas. Not pure `#000` — carries a hair of warmth so it
-  reads as considered, not default-dark-mode.
-- **Ink Surface** (`#161616` → `#1e1e1e` → `#242424`): three-step tonal layering for cards, panels,
-  and raised chrome. Depth comes from these steps plus glow, not drop shadows.
+- **Void Black** (`#0e0e0e`): the base canvas. Not pure `#000` — carries a hair of warmth so it reads as considered, not default-dark-mode.
+- **Ink Surface** (`#161616`): primary raised surface layer. Depth comes from these steps plus glow, not drop shadows.
 - **Paper White** (`#f0ede8`): primary text. Warm off-white, not pure white — never `#fff` directly.
 - **Soft Grey** (`#c8c8c8`): secondary text — labels, metadata, supporting copy.
 
-### Semantic
-- **Signal Green** (`#4caf7d`) / **Signal Amber** (`#e8c84a`) / **Signal Red** (`#e8644a`): status
-  states (verified, pending, error) — kept desaturated enough to sit quietly next to gold without
-  competing with it.
+### Semantic / Impeccable Accents
+- **Signal Green & Emerald** (`#10b981`): Success, verified states.
+- **Signal Amber** (`#f59e0b`): Pending, caution.
+- **Signal Red** (`#ef4444`): Error, critical alerts.
+- **Tech Sapphire** (`#3b82f6`): High-tech intelligence, AI insights, command center data.
 
 ### Named Rules
-**The One Signal Rule.** Gold renders on ≤5% of any given screen. If a section reads gold-heavy,
-it's decorating, not signaling — pull it back.
+**The Dynamic Canvas Rule.** Pure `#000000` is forbidden. The base canvas must utilize our deep purple/blue void tones (`#0a0510`) and incorporate subtle radial mesh gradients for high-impact areas (like headers and hero sections).
 
-**The No-Pure-Black Rule.** Never `#000000` as a surface color; void-black (`#0e0e0e`) always
-carries the intended warmth. Pure black reads as an unstyled default, not a deliberate choice.
+**The Tactile Interface Rule.** All primary interactive surfaces (cards, buttons) must respond physically. Use `active:scale-[0.98]` and multi-layered glow shadows on hover to ensure the app feels alive and premium.
 
 ## 3. Typography
 
@@ -134,112 +111,73 @@ carries the intended warmth. Pure black reads as an unstyled default, not a deli
 **Body Font:** Geist Sans (via `next/font`), system-ui fallback
 **Label/Mono Font:** Geist Mono, 'Courier New' fallback
 
-**Character:** Serif display against a sans body is the system's core typographic contrast —
-editorial authority up top, clean readability underneath. The mono label layer is where the
-"intelligence terminal" feeling actually lives: every eyebrow, badge, and system-chrome label runs
-uppercase and wide-tracked in mono, deliberately looking like instrument-panel text.
+**Character:** Serif display against a sans body is the system's core typographic contrast — editorial authority up top, clean readability underneath. The mono label layer is where the "intelligence terminal" feeling actually lives: every eyebrow, badge, and system-chrome label runs uppercase and wide-tracked in mono, deliberately looking like instrument-panel text.
 
 ### Hierarchy
-- **Display** (400 weight, `clamp(1.75rem, 4vw, 3rem)`, 1.2 line-height): hero headlines, property
-  titles, section headers. Georgia serif — never sans for these.
-- **Body** (450 weight, 16px / 15px mobile / 14px small-mobile, 1.65 line-height): all prose copy.
-- **Label** (500 weight, 10px, 0.18em letter-spacing, uppercase): chapter eyebrows
-  (`01 — THE SPACE`), badges, system metadata. Mono only — never body or display fonts here.
+- **Display** (400 weight, `clamp(1.75rem, 4vw, 3rem)`, 1.2 line-height): hero headlines, property titles, section headers. Georgia serif — never sans for these.
+- **Headline** (400 weight, 24px, 1.4 line-height): sub-headlines and editorial text.
+- **Title** (600 weight, 20px, 1.2 line-height): working titles, section headings.
+- **Body** (450 weight, 16px, 1.65 line-height): all prose copy.
+- **Label** (500 weight, 10px, 0.18em letter-spacing, uppercase): chapter eyebrows (`01 — THE SPACE`), badges, system metadata. Mono only — never body or display fonts here.
 
 ### Named Rules
-**The Instrument-Label Rule.** Any UI chrome that isn't a headline or body copy — eyebrows,
-badges, metadata, status labels — is mono, uppercase, and wide-tracked. This is the system's most
-recognizable signature; don't substitute a sans label "for variety."
+**The Instrument-Label Rule.** Any UI chrome that isn't a headline or body copy — eyebrows, badges, metadata, status labels — is mono, uppercase, and wide-tracked. This is the system's most recognizable signature; don't substitute a sans label "for variety."
 
 ## 4. Elevation
 
-Flat by default, tonal layering for depth. Surfaces step through `void-black` →
-`ink-surface` → `ink-surface-2` → `ink-surface-3` rather than relying on drop shadows to imply
-stacking order. Shadows exist but stay subtle (25–45% opacity, neutral black) — they mark real
-state changes (raised panels, active cards), not ambient decoration. The one exception is
-**glow**: a gold-tinted shadow reserved for accent elements that are actively interactive or
-currently focused, functioning as a signal rather than a depth cue.
+Flat by default, tonal layering for depth. Surfaces step through `void-black` → `ink-surface` → `ink-surface-2` → `ink-surface-3` rather than relying on drop shadows to imply stacking order. Shadows exist but stay subtle (25–45% opacity, neutral black) — they mark real state changes (raised panels, active cards), not ambient decoration. The one exception is **glow**: a gold-tinted shadow reserved for accent elements that are actively interactive or currently focused, functioning as a signal rather than a depth cue.
 
-### Shadow Vocabulary
-- **sm** (`0 2px 8px rgba(0,0,0,0.25)`): subtle lift, list items, small raised chips.
-- **md** (`0 4px 16px rgba(0,0,0,0.35)`): cards, panels, dropdowns.
-- **lg** (`0 12px 40px rgba(0,0,0,0.45)`): modals, the toolbox panel, anything meant to feel
-  above everything else.
-- **glow** (`0 0 18px rgba(232,174,60,0.45)`) / **glow-soft** (`0 0 24px rgba(232,174,60,0.18)`):
-  gold-tinted — active/focused accent elements only, never applied to neutral surfaces.
+### Shadow & Glass Vocabulary
+- **sm** (`0 2px 8px rgba(0,0,0,0.25)`): subtle lift, list items.
+- **md** (`0 4px 16px rgba(0,0,0,0.35)`): standard dropdowns.
+- **glass-panel**: `rgba(26,16,37,0.65)` background, `16px` blur, 1px translucent border, large shadow. Used for high-impact dashboard cards.
+- **glow** (`0 0 24px rgba(247,198,78,0.55)`): active/focused accent elements, vibrant hover states.
+- **sapphire-glow** (`0 0 32px rgba(59,130,246,0.35)`): Used for AI or deep-insight elements.
 
 ### Named Rules
-**The Glow-Is-a-Signal Rule.** Gold glow means "interactive and currently relevant," not
-"decorative flourish." If glow shows up on something static, it's misused.
-
-**The Breathing Signal Rule.** The single primary CTA on a given view breathes with a slow
-(`3.2s ease-in-out infinite`) gold glow pulse — `box-shadow` cycling between `glow-soft` and a
-brighter peak (`0 0 26px rgba(232,174,60,0.55)`) — instead of the system reaching for a second
-accent color to mean "click here." The pulse pauses (`animation: none`) on hover, handing off to
-the normal hover glow/lift. Reserve this for the one dominant action per view — if multiple
-elements pulse at once, none of them read as primary anymore. Always paired with a
-`prefers-reduced-motion` fallback that lands on a static `glow-soft` shadow, never zero glow.
+**The Premium Glass Rule.** Standard opaque surfaces are for secondary UI. Primary data cards, KPI strips, and hero containers must utilize the `glass-panel` or `hov-glow` patterns to maximize the feeling of spatial depth.
 
 ## 5. Components
 
 ### Buttons
-- **Shape:** `border-radius: 4px` (`--radius-md`) — sharp enough to feel precise, not
-  pill-shaped-friendly-app-default.
-- **Primary:** Spatial Gold Bright background, void-black text, `10px 24px` padding — the
-  system's one loud interactive element. The dominant primary CTA on a view (hero, key form
-  submit) breathes with the glow pulse (§4, The Breathing Signal Rule); secondary primaries on
-  the same view stay static so only one thing pulses at a time.
-- **Hover/Focus:** background shifts toward baseline Spatial Gold; glow pulse pauses and hands off
-  to a lift + brighter static glow; `:focus-visible` gets a 1.5px gold outline with 2px offset,
-  system-wide (`--accent` outline, not browser default blue).
-- **Ghost/Secondary:** transparent background, gold-muted border — used where a primary CTA
-  would be too loud for the context (secondary actions inside a panel).
+- **Shape:** `border-radius: 4px` (`--radius-md`) — sharp enough to feel precise, not pill-shaped-friendly-app-default.
+- **Primary:** Spatial Gold Bright background (`#F7C64E`), void-black text, `10px 24px` padding — the system's one loud interactive element.
+- **Hover / Focus:** background shifts toward baseline Spatial Gold; glow pulse pauses and hands off to a lift + brighter static glow; `:focus-visible` gets a 1.5px gold outline with 2px offset.
+- **Secondary / Ghost / Tertiary (if applicable):** transparent background, gold-muted border — used where a primary CTA would be too loud for the context.
 
-### Cards / Panels
-- **Corner style:** `4px`–`6px` radius, never fully rounded/pill except pills themselves
-  (`--radius-pill: 20px`) and true circular elements (`--radius-full`).
-- **Background:** `ink-surface` steps, occasionally with `backdrop-filter: blur(4–20px)` for true
-  overlay/floating chrome (the dev toolbox panel, modals) — glassmorphism is scoped to genuinely
-  floating UI, never applied to static content cards.
-- **Border:** hairline (`rgba(255,255,255,0.07–0.13)`), not a visible stroke — depth comes from
-  the surface-step + shadow combination, the border is a whisper.
+### Chips
+- **Style:** Background void-black, text paper white, border hairline solid.
+- **State:** Selected state gets gold text.
 
-### Chapter Eyebrow (signature component)
-The numbered chapter marker (`01 — THE SPACE`, `02 — LOCATION`, ...) that opens every section of a
-property page. Mono, uppercase, wide-tracked, Spatial Gold or soft-grey depending on active state,
-followed by a full-width hairline divider. This is a real navigational/informational system (ten
-real chapters, reframed per space category) — not a decorative section marker, and should not be
-flattened into a generic pattern.
+### Cards / Containers
+- **Corner Style:** `4px`–`6px` radius.
+- **Background:** `ink-surface` steps (`#161616` to `#242424`).
+- **Shadow Strategy:** Subtle neutral lift (`sm` or `md`), hover triggers gold glow for interactive cards (`hov-card`, `hov-glow`).
+- **Border:** hairline (`rgba(255,255,255,0.07–0.13)`), not a visible stroke.
+- **Internal Padding:** `16px` to `24px`.
+
+### Inputs / Fields
+- **Style:** 1px border solid, `void-black` background, `4px` radius.
+- **Focus:** 1.5px gold outline, offset 2px.
+- **Error / Disabled:** red tint for error, muted grey for disabled.
 
 ### Navigation
-- **Style:** mono uppercase labels for nav pills, Georgia serif for the wordmark ("ScoutIT," gold
-  "S" and "IT" bracketing a white "cout").
-- **States:** active nav item gets Spatial Gold Bright + subtle glow; inactive stays soft-grey.
+- **Style:** mono uppercase labels for nav pills, Georgia serif for the wordmark.
+- **Hover/Active:** Active nav item gets Spatial Gold Bright + subtle glow; inactive stays soft-grey.
+
+### Chapter Eyebrow
+The numbered chapter marker (`01 — THE SPACE`, `02 — LOCATION`, ...) that opens every section of a property page. Mono, uppercase, wide-tracked, Spatial Gold or soft-grey depending on active state, followed by a full-width hairline divider. 
 
 ## 6. Do's and Don'ts
 
 ### Do:
-- **Do** keep gold to ≤5% of any screen — it's a signal, not a theme color.
-- **Do** use the mono/uppercase/wide-tracked treatment for every piece of system chrome
-  (eyebrows, badges, labels) — this is the system's core signature.
-- **Do** use tonal surface-stepping (`ink-surface` → `ink-surface-3`) plus subtle neutral shadows
-  for depth; reserve gold glow for genuinely interactive/focused elements only.
-- **Do** treat the numbered chapter registry as real information architecture — it's earned by
-  actually having ten sequential chapters, not applied as decoration.
-- **Do** scope glassmorphism to genuinely floating chrome (toolbox, modals) — never static content.
+- **Do** utilize our rich gradient texts (`text-gradient-gold`, `text-gradient-sapphire`) for major page titles to establish a premium presence.
+- **Do** use the mono/uppercase/wide-tracked treatment for every piece of system chrome (eyebrows, badges, labels).
+- **Do** wrap primary intelligence data in `glass-panel` to provide depth.
+- **Do** ensure physical, tactile feedback on all interactive elements via `active:scale-[0.98]` and expansive hover glows.
 
 ### Don't:
-- **Don't** read as a generic PH listings directory (Lamudi/Zillow-style board) — ScoutIt sells
-  intelligence, not inventory count.
-- **Don't** reach for "common luxury real estate" clichés — gold-and-marble old-money framing,
-  ornate serif-everywhere, stock-photo-mansion imagery. The brand wants to feel new and
-  category-defining, not like a polished version of an existing luxury template.
-- **Don't** use pure `#000000` as a surface — void-black (`#0e0e0e`) always carries its intended
-  warmth.
-- **Don't** apply gold decoratively (backgrounds, large fills, borders-for-the-sake-of-borders) —
-  every gold use should be a deliberate signal.
-- **Don't** use `border-left`/`border-right` as a colored accent stripe on cards or list items.
-- **Don't** use gradient text (`background-clip: text` + gradient).
-- **Don't** apply the numbered-chapter/eyebrow pattern reflexively outside the property-page
-  chapter system — it's a locked, specific signature there, not a general-purpose section marker
-  for every new surface built.
+- **Don't** build generic PH listing sites (Lamudi/Zillow-style directory boards).
+- **Don't** use the "common luxury real estate" cliché (gold-and-marble old-money tropes).
+- **Don't** use pure `#000000` or `#FFFFFF` for any backgrounds.
+- **Don't** make flat interfaces; if a primary card has no hover physics, it's a bug.

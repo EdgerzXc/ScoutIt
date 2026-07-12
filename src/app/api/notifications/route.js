@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { resolveUserId } from "@/lib/serverAuth";
 
 export const dynamic = "force-dynamic";
 
@@ -9,28 +9,12 @@ export const dynamic = "force-dynamic";
 // PLAN_STAFF_ENTERPRISE_ANALYTICS_NOTIFICATIONS.md) — previously
 // DashboardContext.js held notifications in memory only, lost on refresh.
 
-async function resolveUserId(request, mockOwnerId) {
-  const authHeader = request.headers.get("Authorization");
-  const token = authHeader ? authHeader.replace("Bearer ", "") : null;
 
-  if (token && token.trim() !== "") {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    const authClient = createClient(supabaseUrl, supabaseAnonKey);
-    const { data: { user }, error } = await authClient.auth.getUser(token);
-    if (!error && user) return user.id;
-  }
-  // Dev-only fallback -- rejected in production, where identity must come
-  // from a verified session token (same gate as /api/dashboard/publish).
-  if (process.env.NODE_ENV !== "production" && mockOwnerId) return mockOwnerId;
-  return null;
-}
 
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
-    const mockOwnerId = searchParams.get("mockOwnerId");
-    const userId = await resolveUserId(request, mockOwnerId);
+    const userId = await resolveUserId(request);
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized: Invalid session or missing token" }, { status: 401 });
     }
@@ -69,7 +53,6 @@ export async function GET(request) {
 }
 
 const patchSchema = z.object({
-  mockOwnerId: z.string().optional(),
   ids: z.array(z.string()).max(200).optional(), // omit to mark ALL read
 });
 
@@ -79,8 +62,8 @@ export async function PATCH(request) {
     if (!parsed.success) {
       return NextResponse.json({ error: "Invalid data format" }, { status: 400 });
     }
-    const { mockOwnerId, ids } = parsed.data;
-    const userId = await resolveUserId(request, mockOwnerId);
+    const { ids  } = parsed.data;
+    const userId = await resolveUserId(request);
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized: Invalid session or missing token" }, { status: 401 });
     }
@@ -106,8 +89,7 @@ export async function PATCH(request) {
 export async function DELETE(request) {
   try {
     const { searchParams } = new URL(request.url);
-    const mockOwnerId = searchParams.get("mockOwnerId");
-    const userId = await resolveUserId(request, mockOwnerId);
+    const userId = await resolveUserId(request);
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized: Invalid session or missing token" }, { status: 401 });
     }
@@ -128,7 +110,6 @@ export async function DELETE(request) {
 }
 
 const postSchema = z.object({
-  mockOwnerId: z.string().optional(),
   title: z.string().max(200),
   desc: z.string().max(1000),
   icon: z.string().max(20).optional(),
@@ -145,8 +126,8 @@ export async function POST(request) {
     if (!parsed.success) {
       return NextResponse.json({ error: "Invalid data format" }, { status: 400 });
     }
-    const { mockOwnerId, title, desc, icon, propertyId, notificationType } = parsed.data;
-    const userId = await resolveUserId(request, mockOwnerId);
+    const { title, desc, icon, propertyId, notificationType  } = parsed.data;
+    const userId = await resolveUserId(request);
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized: Invalid session or missing token" }, { status: 401 });
     }

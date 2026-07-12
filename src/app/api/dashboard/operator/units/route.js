@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { sanitizeObject } from "@/lib/sanitize";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { syncPropertyUnitsToAirtable } from "@/lib/unitsSync";
+import { resolveUserId } from "@/lib/serverAuth";
 
 // Operator's restricted view/edit surface (SCOUTIT_MASTER_BUILD_SPEC.md §9.2):
 // operators can rename, re-photo, and set availability on units delegated to
@@ -12,16 +12,7 @@ import { syncPropertyUnitsToAirtable } from "@/lib/unitsSync";
 // operators can't add/remove units, only edit fields on ones already
 // delegated to them.
 
-async function resolveUserId(request) {
-  const authHeader = request.headers.get("Authorization");
-  const token = authHeader?.replace("Bearer ", "");
-  if (!token) return null;
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  const authClient = createClient(supabaseUrl, supabaseAnonKey);
-  const { data: { user }, error } = await authClient.auth.getUser(token);
-  return !error && user ? user.id : null;
-}
+
 
 function toClientUnit(row) {
   return {

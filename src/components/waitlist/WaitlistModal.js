@@ -72,40 +72,40 @@ export default function WaitlistModal() {
 
   return (
     <div
-      className="wl-overlay"
+      className="fixed inset-0 z-[100001] flex items-center justify-center p-5 bg-background/70 backdrop-blur-md"
       onClick={(e) => e.target === e.currentTarget && setOpen(false)}
       role="dialog"
       aria-modal="true"
       aria-label="Join the founding waitlist"
     >
-      <div className="wl-card">
-        <button className="wl-close" onClick={() => setOpen(false)} aria-label="Close">✕</button>
+      <div className="relative w-full max-w-[440px] bg-surface border border-gold-accent/30 rounded-2xl px-7 pt-8 pb-7 shadow-[0_24px_80px_rgba(0,0,0,0.7),0_0_60px_rgba(232,174,60,0.06)]">
+        <button className="absolute top-3.5 right-4 bg-transparent border-none text-on-surface/30 text-base cursor-pointer leading-none p-1 hover:text-on-surface/70" onClick={() => setOpen(false)} aria-label="Close">✕</button>
 
-        <span className="wl-eyebrow">◈ Founding Access</span>
+        <span className="block font-label-caps text-[11px] tracking-widest uppercase text-gold-accent mb-3.5">◈ Founding Access</span>
 
         {done ? (
-          <div className="wl-done">
-            <div className="wl-check">✓</div>
-            <h2 className="wl-title">
-              {status === "already" ? "You&apos;re already on the list." : "You&apos;re on the list."}
+          <div className="text-center py-1.5">
+            <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-gold-accent/10 border border-gold-accent/40 text-gold-accent text-2xl flex items-center justify-center">✓</div>
+            <h2 className="font-headline-editorial text-[26px] leading-tight text-on-surface font-normal mb-2.5">
+              {status === "already" ? "You're already on the list." : "You're on the list."}
             </h2>
-            <p className="wl-sub">
-              We&apos;ll reach out the moment {roleLabel ? `${roleLabel} ` : ""}access opens — with your
+            <p className="text-[13.5px] leading-relaxed text-text-secondary mb-5.5">
+              We'll reach out the moment {roleLabel ? `${roleLabel} ` : ""}access opens — with your
               founding rate locked in. No spam. No pressure.
             </p>
-            <button className="wl-btn" onClick={() => setOpen(false)}>Done</button>
+            <button className="w-full bg-gold-accent text-background border-none rounded-lg p-3.5 font-label-caps text-[13px] font-bold tracking-wide uppercase cursor-pointer transition-all hover:-translate-y-px hover:shadow-[0_8px_26px_rgba(232,174,60,0.25)]" onClick={() => setOpen(false)}>Done</button>
           </div>
         ) : (
           <>
-            <h2 className="wl-title">
-              Lock your founding rate{roleLabel ? <> as a <span className="wl-gold">{roleLabel}</span></> : null}.
+            <h2 className="font-headline-editorial text-[26px] leading-tight text-on-surface font-normal mb-3">
+              Lock your founding rate{roleLabel ? <> as a <span className="text-gold-accent">{roleLabel}</span></> : null}.
             </h2>
-            <p className="wl-sub">
+            <p className="text-[13.5px] leading-relaxed text-text-secondary mb-5">
               ScoutIt opens in cohorts. Founding members keep their rate forever — only the first
-              20 slots per role. Drop your email and we&apos;ll bring you in first.
+              20 slots per role. Drop your email and we'll bring you in first.
             </p>
 
-            <form onSubmit={submit} className="wl-form">
+            <form onSubmit={submit} className="flex flex-col gap-2.5">
               <input
                 type="email"
                 inputMode="email"
@@ -113,7 +113,7 @@ export default function WaitlistModal() {
                 placeholder="you@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="wl-input"
+                className="w-full bg-on-surface/5 border border-on-surface/10 rounded-lg p-3.5 text-on-surface text-[15px] outline-none transition-colors focus:border-gold-accent"
                 autoFocus
                 required
               />
@@ -123,134 +123,15 @@ export default function WaitlistModal() {
                 onError={() => setError("Captcha verification failed. Please try again.")}
                 options={{ theme: 'dark' }}
               />
-              <button type="submit" className="wl-btn" disabled={status === "sending" || !turnstileToken}>
+              <button type="submit" className="w-full bg-gold-accent-bright text-background border-none rounded-lg p-3.5 font-label-caps text-[13px] font-bold tracking-wide uppercase cursor-pointer transition-all hover:-translate-y-px hover:bg-gold-accent hover:shadow-[0_8px_26px_rgba(232,174,60,0.25)] disabled:opacity-60 disabled:cursor-default" disabled={status === "sending" || !turnstileToken}>
                 {status === "sending" ? "Joining…" : "Join the Waitlist"}
               </button>
             </form>
-            {status === "error" && <p className="wl-error">{error}</p>}
-            <p className="wl-fine">Intelligence first. We never sell or share your email.</p>
+            {status === "error" && <p className="text-[#ff8f6b] text-[12.5px] mt-2.5">{error}</p>}
+            <p className="text-[11px] text-on-surface/30 mt-3.5 text-center">Intelligence first. We never sell or share your email.</p>
           </>
         )}
       </div>
-
-      <style jsx>{`
-        .wl-overlay {
-          position: fixed;
-          inset: 0;
-          z-index: 100001;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 20px;
-          background: rgba(0, 0, 0, 0.72);
-          backdrop-filter: blur(8px);
-          -webkit-backdrop-filter: blur(8px);
-        }
-        .wl-card {
-          position: relative;
-          width: 100%;
-          max-width: 440px;
-          background: linear-gradient(160deg, #14110b 0%, #0a0908 60%);
-          border: 1px solid rgba(232, 174, 60, 0.28);
-          border-radius: 16px;
-          padding: 34px 30px 28px;
-          box-shadow: 0 24px 80px rgba(0, 0, 0, 0.7), 0 0 60px rgba(232, 174, 60, 0.06);
-        }
-        .wl-close {
-          position: absolute;
-          top: 14px;
-          right: 16px;
-          background: none;
-          border: none;
-          color: rgba(255, 255, 255, 0.32);
-          font-size: 16px;
-          cursor: pointer;
-          line-height: 1;
-          padding: 4px;
-        }
-        .wl-close:hover { color: rgba(255, 255, 255, 0.7); }
-        .wl-eyebrow {
-          font-family: var(--font-mono, monospace);
-          font-size: 11px;
-          letter-spacing: 0.28em;
-          text-transform: uppercase;
-          color: var(--accent, #E8AE3C);
-          display: block;
-          margin-bottom: 14px;
-        }
-        .wl-title {
-          font-family: Georgia, "Times New Roman", serif;
-          font-size: 26px;
-          line-height: 1.25;
-          color: #f5f3ee;
-          font-weight: 400;
-          margin-bottom: 12px;
-        }
-        .wl-gold { color: var(--accent, #E8AE3C); }
-        .wl-sub {
-          font-size: 13.5px;
-          line-height: 1.6;
-          color: rgba(240, 237, 232, 0.62);
-          margin-bottom: 22px;
-        }
-        .wl-form { display: flex; flex-direction: column; gap: 10px; }
-        .wl-input {
-          width: 100%;
-          background: rgba(255, 255, 255, 0.04);
-          border: 1px solid rgba(255, 255, 255, 0.14);
-          border-radius: 8px;
-          padding: 14px 16px;
-          color: #f5f3ee;
-          font-size: 15px;
-          outline: none;
-          transition: border-color 0.2s;
-        }
-        .wl-input:focus { border-color: var(--accent, #E8AE3C); }
-        .wl-btn {
-          width: 100%;
-          background: var(--accent-bright, #F7C64E);
-          color: #0a0908;
-          border: none;
-          border-radius: 8px;
-          padding: 14px 16px;
-          font-family: var(--font-body, sans-serif);
-          font-size: 13px;
-          font-weight: 700;
-          letter-spacing: 0.06em;
-          text-transform: uppercase;
-          cursor: pointer;
-          transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
-        }
-        .wl-btn:hover:not(:disabled) {
-          background: var(--accent, #E8AE3C);
-          transform: translateY(-1px);
-          box-shadow: 0 8px 26px rgba(232, 174, 60, 0.25);
-        }
-        .wl-btn:disabled { opacity: 0.6; cursor: default; }
-        .wl-error { color: #ff8f6b; font-size: 12.5px; margin-top: 10px; }
-        .wl-fine {
-          font-size: 11px;
-          color: rgba(255, 255, 255, 0.3);
-          margin-top: 14px;
-          text-align: center;
-        }
-        .wl-done { text-align: center; padding: 6px 0; }
-        .wl-check {
-          width: 52px;
-          height: 52px;
-          margin: 0 auto 16px;
-          border-radius: 50%;
-          background: rgba(232, 174, 60, 0.12);
-          border: 1px solid rgba(232, 174, 60, 0.4);
-          color: var(--accent, #E8AE3C);
-          font-size: 24px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-        .wl-done .wl-title { margin-bottom: 10px; }
-        .wl-done .wl-sub { margin-bottom: 22px; }
-      `}</style>
     </div>
   );
 }

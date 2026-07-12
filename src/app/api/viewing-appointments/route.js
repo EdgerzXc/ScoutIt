@@ -1,30 +1,15 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { z } from "zod";
 import { logActivity } from "@/lib/crmActivity";
+import { resolveUserId } from "@/lib/serverAuth";
 
-async function resolveUserId(request, mockOwnerId) {
-  const authHeader = request.headers.get("Authorization");
-  const token = authHeader ? authHeader.replace("Bearer ", "") : null;
-  if (token && token.trim() !== "") {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    const authClient = createClient(supabaseUrl, supabaseAnonKey);
-    const { data: { user }, error } = await authClient.auth.getUser(token);
-    if (!error && user) return user.id;
-  }
-  // Dev-only fallback -- rejected in production, where identity must come
-  // from a verified session token (same gate as /api/dashboard/publish).
-  if (process.env.NODE_ENV !== "production" && mockOwnerId) return mockOwnerId;
-  return null;
-}
+
 
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
-    const mockOwnerId = searchParams.get("mockOwnerId");
-    const userId = await resolveUserId(request, mockOwnerId);
+    const userId = await resolveUserId(request);
 
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -120,8 +105,7 @@ const postSchema = z.object({
   dealId: z.string(),
   scheduledAt: z.string(),
   notes: z.string().optional(),
-  mockOwnerId: z.string().optional(),
-});
+  });
 
 export async function POST(request) {
   try {
@@ -129,8 +113,8 @@ export async function POST(request) {
     if (!parsed.success) {
       return NextResponse.json({ error: "Invalid data format" }, { status: 400 });
     }
-    const { dealId, scheduledAt, notes, mockOwnerId } = parsed.data;
-    const userId = await resolveUserId(request, mockOwnerId);
+    const { dealId, scheduledAt, notes  } = parsed.data;
+    const userId = await resolveUserId(request);
     
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 

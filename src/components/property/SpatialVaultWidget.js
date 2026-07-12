@@ -13,19 +13,19 @@ export default function SpatialVaultWidget({ lumaUrl, matterportUrl, heatmapUrl 
     <div style={{ marginTop: "32px", display: "flex", flexDirection: "column", gap: "24px" }}>
       {lumaUrl && (
         <div className="vault-item">
-          <h4 style={{ fontFamily: "'Courier New',monospace", fontSize: "10px", color: "#E8AE3C", letterSpacing: "0.18em", textTransform: "uppercase", marginBottom: "4px" }}>
+          <h4 className="font-label-caps text-[10px] text-gold-accent tracking-widest uppercase mb-1">
             3D Spatial Map
           </h4>
-          <p style={{ fontFamily: "Georgia,serif", fontStyle: "italic", fontSize: "11px", color: "var(--text-muted, #c8c8c8)", marginBottom: "12px" }}>
+          <p className="font-headline-editorial italic text-[11px] text-text-secondary mb-3">
             Illustrative capture — this property&apos;s own 3D scan is in progress
           </p>
-          <div style={{ position: "relative", width: "100%", height: "400px", borderRadius: "4px", overflow: "hidden", border: "1px solid #262626" }}>
-            <iframe src={hasSubscription ? lumaUrl : undefined} style={{ width: "100%", height: "100%", border: "none", filter: hasSubscription ? "none" : "blur(8px) brightness(0.5)" }} title="3D Spatial Map" />
+          <div className="relative w-full h-[400px] rounded overflow-hidden border border-surface-variant">
+            <iframe src={hasSubscription ? lumaUrl : undefined} className={`w-full h-full border-none ${hasSubscription ? '' : 'blur-sm brightness-50'}`} title="3D Spatial Map" />
             {!hasSubscription && (
-              <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "rgba(22,22,22,0.6)", backdropFilter: "blur(4px)" }}>
-                <span style={{ fontFamily: "Georgia,serif", fontSize: "16px", color: "#f0ede8", marginBottom: "8px" }}>Unlock The Spatial Vault</span>
-                <span style={{ fontFamily: "'Courier New',monospace", fontSize: "9px", color: "#E8AE3C", letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: "16px" }}>Premium Subscription Required</span>
-                <a href="/pricing/seeker" style={{ textDecoration: "none", fontFamily: "Georgia,serif", fontSize: "13px", color: "#0e0e0e", background: "#E8AE3C", border: "none", padding: "10px 24px", borderRadius: "2px", cursor: "pointer", display: "inline-block" }}>
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/60 backdrop-blur-sm">
+                <span className="font-headline-editorial text-base text-on-surface mb-2">Unlock The Spatial Vault</span>
+                <span className="font-label-caps text-[9px] text-gold-accent tracking-widest uppercase mb-4">Premium Subscription Required</span>
+                <a href="/pricing/seeker" className="font-label-caps uppercase tracking-widest text-[11px] font-bold text-background bg-gold-accent hover:opacity-90 px-6 py-3 rounded transition-opacity">
                   Upgrade to Cluster Tier →
                 </a>
               </div>
@@ -35,18 +35,18 @@ export default function SpatialVaultWidget({ lumaUrl, matterportUrl, heatmapUrl 
       )}
       {matterportUrl && (
         <div className="vault-item">
-          <h4 style={{ fontFamily: "'Courier New',monospace", fontSize: "10px", color: "#E8AE3C", letterSpacing: "0.18em", textTransform: "uppercase", marginBottom: "4px" }}>
+          <h4 className="font-label-caps text-[10px] text-gold-accent tracking-widest uppercase mb-1">
             360° AR Room Tour
           </h4>
-          <p style={{ fontFamily: "Georgia,serif", fontStyle: "italic", fontSize: "11px", color: "var(--text-muted, #c8c8c8)", marginBottom: "12px" }}>
+          <p className="font-headline-editorial italic text-[11px] text-text-secondary mb-3">
             Illustrative tour — this property&apos;s own 360° capture is in progress
           </p>
-          <div style={{ position: "relative", width: "100%", height: "400px", borderRadius: "4px", overflow: "hidden", border: "1px solid #262626" }}>
-            <iframe src={hasSubscription ? matterportUrl : undefined} style={{ width: "100%", height: "100%", border: "none", filter: hasSubscription ? "none" : "blur(8px) brightness(0.5)" }} title="360 Tour" />
+          <div className="relative w-full h-[400px] rounded overflow-hidden border border-surface-variant">
+            <iframe src={hasSubscription ? matterportUrl : undefined} className={`w-full h-full border-none ${hasSubscription ? '' : 'blur-sm brightness-50'}`} title="360 Tour" />
             {!hasSubscription && (
-              <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "rgba(22,22,22,0.6)", backdropFilter: "blur(4px)" }}>
-                <span style={{ fontFamily: "Georgia,serif", fontSize: "16px", color: "#f0ede8", marginBottom: "8px" }}>Unlock The Spatial Vault</span>
-                <a href="/pricing/seeker" style={{ textDecoration: "none", fontFamily: "Georgia,serif", fontSize: "13px", color: "#0e0e0e", background: "#E8AE3C", border: "none", padding: "10px 24px", borderRadius: "2px", cursor: "pointer", marginTop: "12px", display: "inline-block" }}>
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/60 backdrop-blur-sm">
+                <span className="font-headline-editorial text-base text-on-surface mb-2">Unlock The Spatial Vault</span>
+                <a href="/pricing/seeker" className="font-label-caps uppercase tracking-widest text-[11px] font-bold text-background bg-gold-accent hover:opacity-90 px-6 py-3 rounded transition-opacity mt-3">
                   Upgrade to Cluster Tier →
                 </a>
               </div>
@@ -56,15 +56,15 @@ export default function SpatialVaultWidget({ lumaUrl, matterportUrl, heatmapUrl 
       )}
       {heatmapUrl && (
         <div className="vault-item">
-          <h4 style={{ fontFamily: "'Courier New',monospace", fontSize: "10px", color: "#E8AE3C", letterSpacing: "0.18em", textTransform: "uppercase", marginBottom: "12px" }}>
+          <h4 className="font-label-caps text-[10px] text-gold-accent tracking-widest uppercase mb-3">
             Drone Heatmap Analysis
           </h4>
-          <div style={{ position: "relative", width: "100%", height: "200px", borderRadius: "4px", overflow: "hidden", border: "1px solid #262626" }}>
-            <div style={{ width: "100%", height: "100%", background: "#111", filter: hasSubscription ? "none" : "blur(8px) brightness(0.5)" }} />
+          <div className="relative w-full h-[200px] rounded overflow-hidden border border-surface-variant">
+            <div className={`w-full h-full bg-[#111] ${hasSubscription ? '' : 'blur-sm brightness-50'}`} />
             {!hasSubscription && (
-              <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "rgba(22,22,22,0.6)", backdropFilter: "blur(4px)" }}>
-                <span style={{ fontFamily: "Georgia,serif", fontSize: "16px", color: "#f0ede8", marginBottom: "8px" }}>Unlock The Spatial Vault</span>
-                <a href="/pricing/seeker" style={{ textDecoration: "none", fontFamily: "Georgia,serif", fontSize: "13px", color: "#0e0e0e", background: "#E8AE3C", border: "none", padding: "10px 24px", borderRadius: "2px", cursor: "pointer", marginTop: "12px", display: "inline-block" }}>
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/60 backdrop-blur-sm">
+                <span className="font-headline-editorial text-base text-on-surface mb-2">Unlock The Spatial Vault</span>
+                <a href="/pricing/seeker" className="font-label-caps uppercase tracking-widest text-[11px] font-bold text-background bg-gold-accent hover:opacity-90 px-6 py-3 rounded transition-opacity mt-3">
                   Upgrade to Cluster Tier →
                 </a>
               </div>

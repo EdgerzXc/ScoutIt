@@ -75,6 +75,9 @@ export default function UnitDetailsDrawer({ unit, isPro, onDetail, onScenarios, 
           {/* Overview */}
           <section className="flex flex-col gap-4">
             <div className="text-[11px] font-label-caps tracking-widest uppercase text-text-secondary">The Space</div>
+            <Field label="Base listed rate">
+              <input className={inputCls} value={d.price || ""} onChange={(e) => onDetail("price", e.target.value)} placeholder="e.g. ₱200,000 / mo or ₱1,500/sqm" />
+            </Field>
             <Field label="Unit type">
               <select className={inputCls} value={d.unit_type || ""} onChange={(e) => onDetail("unit_type", e.target.value)}>
                 <option value="">Select type…</option>
@@ -119,11 +122,17 @@ export default function UnitDetailsDrawer({ unit, isPro, onDetail, onScenarios, 
             </Field>
           </section>
 
-          {/* Floor plan */}
+          {/* Floor plan & Vault */}
           <section className="flex flex-col gap-4 pt-2 border-t border-surface-variant">
             <div className="text-[11px] font-label-caps tracking-widest uppercase text-text-secondary">The Unit Vault</div>
-            <Field label="2D floor plan URL" hint="Uploaded blueprint. The 3D interactive plan is generated from this (Cluster+ tenants see it in the Vault).">
+            <Field label="2D floor plan URL" hint="Uploaded blueprint. Used as the base for 3D generation.">
               <input className={inputCls} value={d.floor_plan_2d_url || ""} onChange={(e) => onDetail("floor_plan_2d_url", e.target.value)} placeholder="https://…/floor-12.png" />
+            </Field>
+            <Field label="3D Spatial Data (Luma/Spline URL)" hint="The generated or custom 3D model link (Cluster+ only).">
+              <input className={inputCls} value={d.floor_plan_3d_data || d.luma_url || ""} onChange={(e) => onDetail("floor_plan_3d_data", e.target.value)} placeholder="https://my.spline.design/..." />
+            </Field>
+            <Field label="Matterport URL" hint="A commissioned professional 3D scan link.">
+              <input className={inputCls} value={d.matterport_url || ""} onChange={(e) => onDetail("matterport_url", e.target.value)} placeholder="https://my.matterport.com/show/?m=..." />
             </Field>
             <p className="text-[11px] text-text-muted -mt-1">
               3D conversion is generated on our side and shown gated behind Cluster+ — no Connect cost. A commissioned pro model is a separate paid ecosystem service.

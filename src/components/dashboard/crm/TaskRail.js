@@ -16,6 +16,7 @@ export default function TaskRail({ mockUserId, dealId = null, onSummary }) {
   const [showDone, setShowDone] = useState(false);
 
   const load = useCallback(async () => {
+    if (!mockUserId && process.env.NODE_ENV === "development") return;
     try {
       const data = await crmFetch("/api/crm/tasks", { mockUserId });
       setTasks(data.tasks || []);

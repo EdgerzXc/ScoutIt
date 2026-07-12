@@ -562,8 +562,8 @@ export default function FloatingToolbox() {
                   autoFocus
                 />
                 <div className="flex gap-3 mt-4">
-                  <button type="button" className="flex-1 border border-[rgba(255,255,255,0.1)] text-[rgba(255,255,255,0.6)] hover:text-white font-working-title text-sm py-3 rounded transition-colors" onClick={() => setReportOpen(false)}>Cancel</button>
-                  <button type="button" className="flex-1 bg-gold-accent text-black font-working-title font-bold text-sm py-3 rounded hover:opacity-90 transition-opacity disabled:opacity-50" disabled={!reportText.trim() || reportSending} onClick={submitReport}>{reportSending ? "Sending…" : "Send report"}</button>
+                  <button type="button" className="flex-1 border border-[rgba(255,255,255,0.1)] text-[rgba(255,255,255,0.6)] hover:text-white font-label-caps uppercase tracking-widest text-sm py-3 rounded transition-colors" onClick={() => setReportOpen(false)}>Cancel</button>
+                  <button type="button" className="flex-1 bg-gold-accent text-black font-label-caps uppercase tracking-widest font-bold text-sm py-3 rounded hover:opacity-90 transition-opacity disabled:opacity-50" disabled={!reportText.trim() || reportSending} onClick={submitReport}>{reportSending ? "Sending…" : "Send report"}</button>
                 </div>
               </>
             )}

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useDashboard } from "../../context/DashboardContext";
+import GlassPanel from "../ui/GlassPanel";
 
 // Enterprise Mission Control 
 // ⚠️ DEV-TOOLBOX PREVIEW ONLY. Real Enterprise account isolation
@@ -10,14 +11,14 @@ import { useDashboard } from "../../context/DashboardContext";
 // component fakes "your company's portfolio" as "properties you happen to own".
 
 const STATUS_STYLES = {
-  approved: { label: "Approved", color: "#4caf7d" },
-  pending: { label: "Pending", color: "var(--accent)" },
-  draft: { label: "Draft", color: "#8f8c87" },
-  ai_drafting: { label: "AI Drafting", color: "#5a8ce8" },
+  approved: { label: "Approved", textClass: "text-success", bgClass: "bg-success" },
+  pending: { label: "Pending", textClass: "text-gold-accent", bgClass: "bg-gold-accent" },
+  draft: { label: "Draft", textClass: "text-text-secondary", bgClass: "bg-surface-variant" },
+  ai_drafting: { label: "AI Drafting", textClass: "text-tertiary", bgClass: "bg-tertiary" },
 };
 
 function statusStyle(status) {
-  return STATUS_STYLES[status] || { label: status || "Unknown", color: "#5a5a5a" };
+  return STATUS_STYLES[status] || { label: status || "Unknown", textClass: "text-text-muted", bgClass: "bg-surface-variant" };
 }
 
 export default function MissionControlMode() {
@@ -77,31 +78,31 @@ export default function MissionControlMode() {
       </div>
 
       <div>
-        <span className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase">
+        <span className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase drop-shadow-[0_0_10px_rgba(247,198,78,0.5)]">
           Mission Control · Enterprise
         </span>
-        <h1 className="font-display-md text-2xl md:text-3xl text-on-surface mt-1">
+        <h1 className="font-display-md text-3xl md:text-4xl mt-1 text-gradient-sapphire">
           Your Company&apos;s Portfolio
         </h1>
       </div>
 
       {/* KPI strip */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: "Total Properties", value: kpis.total },
-          { label: "Approved", value: kpis.approved },
-          { label: "Pending / Draft", value: kpis.pending },
-          { label: "Team Members", value: "—" },
+          { label: "Total Properties", value: kpis.total, glow: "rgba(59,130,246,0.15)" },
+          { label: "Approved", value: kpis.approved, glow: "rgba(16,185,129,0.15)" },
+          { label: "Pending / Draft", value: kpis.pending, glow: "rgba(247,198,78,0.15)" },
+          { label: "Team Members", value: "—", glow: "rgba(255,255,255,0.05)" },
         ].map((kpi) => (
-          <div key={kpi.label} className="bg-surface border border-surface-variant rounded-lg p-4">
-            <div className="font-mono text-2xl text-gold-accent">{kpi.value}</div>
-            <div className="text-[10px] text-text-secondary uppercase tracking-wider mt-1">{kpi.label}</div>
-          </div>
+          <GlassPanel key={kpi.label} className="rounded-xl p-5 hover:-translate-y-1 transition-transform duration-300" glowColor={kpi.glow}>
+            <div className="font-mono text-3xl text-white font-bold">{kpi.value}</div>
+            <div className="text-[10px] text-text-secondary uppercase tracking-wider mt-2">{kpi.label}</div>
+          </GlassPanel>
         ))}
       </div>
 
       {/* Property table */}
-      <div className="bg-surface border border-surface-variant rounded-lg overflow-hidden">
+      <GlassPanel className="rounded-xl overflow-hidden shadow-2xl border border-[rgba(255,255,255,0.1)]">
         <div className="px-4 py-3 border-b border-surface-variant bg-surface-alt flex justify-between items-center">
           <div className="flex items-center gap-4">
             <span className="font-label-caps text-[10px] tracking-widest uppercase text-text-secondary">
@@ -115,7 +116,7 @@ export default function MissionControlMode() {
                 <button
                   onClick={handleMassDelete}
                   disabled={isDeleting}
-                  className="text-xs bg-red-900/40 text-red-400 hover:bg-red-900/60 hover:text-red-300 px-3 py-1 rounded transition-colors disabled:opacity-50"
+                  className="text-xs bg-red-900/40 text-red-400 hover:bg-red-900/60 hover:text-red-300 px-3 py-1 rounded transition-colors disabled:opacity-50 active:scale-[0.98]"
                 >
                   {isDeleting ? "Deleting..." : "Delete Selected"}
                 </button>
@@ -127,7 +128,7 @@ export default function MissionControlMode() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-[10px] uppercase tracking-wider text-text-secondary border-b border-surface-variant">
+              <tr className="text-left text-[10px] uppercase tracking-wider text-text-secondary border-b border-[rgba(255,255,255,0.1)] bg-[rgba(0,0,0,0.2)]">
                 <th className="px-4 py-2 font-normal w-10">
                   <input
                     type="checkbox"
@@ -155,7 +156,7 @@ export default function MissionControlMode() {
                   const status = statusStyle(l.pipelineStatus);
                   const isSelected = selectedIds.has(l.id);
                   return (
-                    <tr key={l.id} className={`border-b border-surface-variant/50 hover:bg-surface-container-low transition-colors ${isSelected ? "bg-gold-accent/5" : ""}`}>
+                    <tr key={l.id} className={`border-b border-[rgba(255,255,255,0.05)] hover:bg-[rgba(255,255,255,0.02)] transition-colors ${isSelected ? "bg-[rgba(247,198,78,0.05)]" : ""}`}>
                       <td className="px-4 py-2.5">
                         <input
                           type="checkbox"
@@ -164,14 +165,13 @@ export default function MissionControlMode() {
                           onChange={() => handleSelectOne(l.id)}
                         />
                       </td>
-                      <td className="px-4 py-2.5 text-on-surface">{l.title}</td>
-                      <td className="px-4 py-2.5 text-text-secondary">{l.spaceCategory || "—"}</td>
+                      <td className="px-4 py-2.5 text-on-surface max-w-[200px] truncate" title={l.title}>{l.title}</td>
+                      <td className="px-4 py-2.5 text-text-secondary max-w-[150px] truncate" title={l.spaceCategory || ""}>{l.spaceCategory || "—"}</td>
                       <td className="px-4 py-2.5">
                         <span
-                          className="inline-flex items-center gap-1.5 text-xs font-medium"
-                          style={{ color: status.color }}
+                          className={`inline-flex items-center gap-1.5 text-xs font-medium ${status.textClass}`}
                         >
-                          <span className="w-1.5 h-1.5 rounded-full" style={{ background: status.color }} />
+                          <span className={`w-1.5 h-1.5 rounded-full ${status.bgClass}`} />
                           {status.label}
                         </span>
                       </td>
@@ -202,7 +202,7 @@ export default function MissionControlMode() {
             </tbody>
           </table>
         </div>
-      </div>
+      </GlassPanel>
     </div>
   );
 }

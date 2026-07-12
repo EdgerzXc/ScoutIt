@@ -66,7 +66,7 @@ function toCard(p, cat, fallbackHook) {
     city:          p.city || "",
     location:      p.location || "",
     spaceCategory: cat,
-    aestheticTag:  p.aestheticTag || "Modernist",
+    aestheticTag:  p.aestheticTag || null,
     beds:          p.beds,
     baths:         p.baths,
     floor_sqm:     p.floor_sqm,
@@ -220,7 +220,7 @@ function PropertyDirectoryContent() {
         if (data.source === "supabase_radius") {
           // Strict Radius Search: Only show properties returned by the PostGIS query
           mergedProperties = airtableProperties.map(p =>
-            toCard(p, p.spaceCategory || "Residential", "Premium curated property briefing.")
+            toCard(p, p.spaceCategory || null, "Premium curated property briefing.")
           );
         } else {
           // Standard Load: Merge Airtable with Local Mock Fallback
@@ -231,7 +231,7 @@ function PropertyDirectoryContent() {
             if (!p.title || !p.slug || !p.spaceCategory) return;
             if (!mergedProperties.some(x => x.slug === p.slug || x.id === p.id)) {
               mergedProperties.unshift(
-                toCard(p, p.spaceCategory || "Residential", "Vetted dynamic listing brief.")
+                toCard(p, p.spaceCategory || null, "Vetted dynamic listing brief.")
               );
             }
           });
@@ -246,7 +246,7 @@ function PropertyDirectoryContent() {
         const mergedIntel = [...baseIntel];
         airtableIntel.forEach(item => {
           if (!mergedIntel.some(x => x.slug === item.slug)) {
-            let category = item.category || "Residential";
+            let category = item.category || null;
             if (category.toLowerCase() === "hospitality") category = "Hospitality";
             if (category.toLowerCase() === "str") category = "STR";
             if (category.toLowerCase() === "culinary" || category.toLowerCase() === "restaurants") category = "Restaurants";
@@ -255,7 +255,7 @@ function PropertyDirectoryContent() {
               slug: item.slug || item.id,
               title: item.title,
               category,
-              date: item.date || "Just Now"
+              date: item.date || null
             });
           }
         });
@@ -562,7 +562,7 @@ function PropertyDirectoryContent() {
                         { }
                         {p.image ? (
                           /* eslint-disable-next-line @next/next/no-img-element */
-          <img src={p.image} alt={p.title} className="property-card-img" />
+          <img src={p.image} alt={p.title} className="property-card-img" loading="lazy" />
                         ) : (
                           <div className="property-card-img" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#121212', width: '100%', height: '100%' }}>
                             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Image Pending</span>

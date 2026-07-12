@@ -161,47 +161,47 @@ function MinorLockSection({ labels, values }) {
   };
 
   return (
-    <div style={{ marginTop: "28px" }}>
+    <div className="mt-7">
       <button
         onClick={() => setOpen((v) => !v)}
-        style={{ width: "100%", background: "#161616", border: "0.5px solid #262626", padding: "14px 20px", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", borderRadius: "2px" }}
+        className="w-full bg-surface border border-surface-variant px-5 py-3.5 cursor-pointer flex justify-between items-center rounded-sm hover:border-gold-accent/50 transition-colors"
       >
-        <span style={{ fontFamily: "'Courier New',monospace", fontSize: "10px", color: "#E8AE3C", letterSpacing: "0.18em", textTransform: "uppercase" }}>
+        <span className="font-label-caps text-[10px] text-gold-accent tracking-widest uppercase">
           Deeper Intelligence // {unlocked ? "Unlocked" : "Verified Scout"}
         </span>
-        <svg viewBox="0 0 10 6" width="10" height="6" fill="none" stroke="#E8AE3C" strokeWidth="1.5">
+        <svg viewBox="0 0 10 6" width="10" height="6" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-gold-accent">
           <path d={open ? "M1 5L5 1L9 5" : "M1 1L5 5L9 1"} />
         </svg>
       </button>
       {open && (unlocked ? (
-        <div style={{ background: "#161616", border: "0.5px solid #262626", borderTop: "none", padding: "20px", borderRadius: "0 0 2px 2px", display: "flex", flexDirection: "column" }}>
+        <div className="bg-surface border border-surface-variant border-t-0 p-5 rounded-b-sm flex flex-col">
           {labels.map((label, i) => {
             const value = valueFor(label);
             return (
-              <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", padding: "11px 0", borderBottom: i < labels.length - 1 ? "1px solid #262626" : "none", gap: "20px" }}>
-                <span style={{ fontFamily: "Georgia,serif", fontSize: "13px", color: "#c8c8c8" }}>{label}</span>
+              <div key={i} className={`flex justify-between items-baseline py-2.5 gap-5 ${i < labels.length - 1 ? 'border-b border-surface-variant' : ''}`}>
+                <span className="font-headline-editorial text-[13px] text-text-secondary">{label}</span>
                 {value !== null ? (
-                  <span style={{ fontFamily: "'Courier New',monospace", fontSize: "12px", color: "#E8AE3C", letterSpacing: "0.04em", textAlign: "right" }}>{value}</span>
+                  <span className="font-label-caps text-[12px] text-gold-accent tracking-widest text-right">{value}</span>
                 ) : (
-                  <span style={{ fontFamily: "'Courier New',monospace", fontSize: "11px", color: "#5a5a5a", letterSpacing: "0.08em", textAlign: "right" }}>Not recorded</span>
+                  <span className="font-label-caps text-[11px] text-[#5a5a5a] tracking-widest text-right">Not recorded</span>
                 )}
               </div>
             );
           })}
         </div>
       ) : (
-        <div style={{ background: "#161616", border: "0.5px solid #262626", borderTop: "none", padding: "20px", position: "relative", borderRadius: "0 0 2px 2px" }}>
-          <div style={{ filter: "blur(4px)", pointerEvents: "none", userSelect: "none", display: "flex", flexDirection: "column" }}>
+        <div className="bg-surface border border-surface-variant border-t-0 p-5 relative rounded-b-sm">
+          <div className="blur-sm pointer-events-none select-none flex flex-col">
             {labels.map((label, i) => (
-              <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "11px 0", borderBottom: i < labels.length - 1 ? "1px solid #262626" : "none" }}>
-                <span style={{ fontFamily: "Georgia,serif", fontSize: "13px", color: "#c8c8c8" }}>{label}</span>
-                <span style={{ fontFamily: "'Courier New',monospace", fontSize: "12px", color: "#3a3a3a", letterSpacing: "0.1em" }}>████████</span>
+              <div key={i} className={`flex justify-between items-center py-2.5 ${i < labels.length - 1 ? 'border-b border-surface-variant' : ''}`}>
+                <span className="font-headline-editorial text-[13px] text-text-secondary">{label}</span>
+                <span className="font-label-caps text-[12px] text-[#3a3a3a] tracking-widest">████████</span>
               </div>
             ))}
           </div>
-          <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "14px", background: "rgba(22,22,22,0.88)", borderRadius: "0 0 2px 2px" }}>
-            <span style={{ fontFamily: "'Courier New',monospace", fontSize: "9px", color: "#E8AE3C", letterSpacing: "0.25em", textTransform: "uppercase" }}>Solar Tier Unlocks This</span>
-            <a href="/pricing/seeker" style={{ textDecoration: "none", fontFamily: "Georgia,serif", fontSize: "13px", color: "#0e0e0e", background: "#E8AE3C", border: "none", padding: "10px 24px", borderRadius: "2px", cursor: "pointer", letterSpacing: "0.04em" }}>
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3.5 bg-background/90 rounded-b-sm backdrop-blur-sm">
+            <span className="font-label-caps text-[9px] text-gold-accent tracking-widest uppercase">Solar Tier Unlocks This</span>
+            <a href="/pricing/seeker" className="font-label-caps uppercase tracking-widest text-[11px] font-bold text-background bg-gold-accent hover:opacity-90 px-6 py-2.5 rounded-sm transition-opacity">
               Unlock Full Intelligence →
             </a>
           </div>
@@ -233,38 +233,38 @@ export default function CategorySpecBlock({ property, extraLockedLabels = [] }) 
   const rows = config.major.filter((field) => !field.hero);
 
   return (
-    <div style={{ marginBottom: "36px" }}>
+    <div className="mb-9">
       {/* Section header */}
-      <div style={{ marginBottom: "20px" }}>
-        <div style={{ fontFamily: "'Courier New',monospace", fontSize: "10px", color: "#E8AE3C", letterSpacing: "0.22em", textTransform: "uppercase", marginBottom: "10px" }}>
+      <div className="mb-5">
+        <div className="font-label-caps text-[10px] text-gold-accent tracking-widest uppercase mb-2.5">
           {config.label}
         </div>
-        <div style={{ height: "1px", background: "#262626" }} />
+        <div className="h-[1px] bg-surface-variant" />
       </div>
 
       {/* Hero facts (present MAJOR numeric/currency) */}
       {heroFacts.length > 0 && (
-        <div className="property-features-scroll" style={{ marginBottom: "24px" }}>
+        <div className="property-features-scroll mb-6">
           {heroFacts.map(({ field, value }, i) => (
             <div key={i} className="property-feature-item">
-              <span style={{ fontFamily: "var(--font-body)", fontSize: "clamp(20px,2.5vw,26px)", fontWeight: 500, color: "#f0ede8", lineHeight: 1.2 }}>{value}</span>
-              <div style={{ fontFamily: "var(--font-body)", fontSize: "10px", fontWeight: 600, color: "#c8c8c8", letterSpacing: "0.08em", textTransform: "uppercase", marginTop: "6px" }}>{field.label}</div>
+              <span className="font-body text-[clamp(20px,2.5vw,26px)] font-medium text-on-surface leading-[1.2]">{value}</span>
+              <div className="font-body text-[10px] font-semibold text-text-secondary tracking-widest uppercase mt-1.5">{field.label}</div>
             </div>
           ))}
         </div>
       )}
 
       {/* MAJOR detail rows — honest "Not listed yet" for blanks */}
-      <div style={{ display: "flex", flexDirection: "column" }}>
+      <div className="flex flex-col">
         {rows.map((field, i) => {
           const value = formatValue(field, data[field.key]);
           return (
-            <div key={field.key} style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", padding: "11px 0", borderBottom: i < rows.length - 1 ? "1px solid #262626" : "none", gap: "20px" }}>
-              <span style={{ fontFamily: "'Courier New',monospace", fontSize: "10px", color: "#c8c8c8", letterSpacing: "0.12em", textTransform: "uppercase", flexShrink: 0 }}>{field.label}</span>
+            <div key={field.key} className={`flex justify-between items-baseline py-2.5 gap-5 ${i < rows.length - 1 ? 'border-b border-surface-variant' : ''}`}>
+              <span className="font-label-caps text-[10px] text-text-secondary tracking-widest uppercase shrink-0">{field.label}</span>
               {value !== null ? (
-                <span style={{ fontFamily: "Georgia,serif", fontSize: "14px", color: "#f0ede8", textAlign: "right" }}>{value}</span>
+                <span className="font-headline-editorial text-[14px] text-on-surface text-right">{value}</span>
               ) : (
-                <span style={{ fontFamily: "'Courier New',monospace", fontSize: "11px", color: "#5a5a5a", letterSpacing: "0.08em", textAlign: "right" }}>Not listed yet</span>
+                <span className="font-label-caps text-[11px] text-[#5a5a5a] tracking-widest text-right">Not listed yet</span>
               )}
             </div>
           );

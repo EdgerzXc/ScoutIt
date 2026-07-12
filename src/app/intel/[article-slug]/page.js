@@ -4,6 +4,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getArticleBySlug, getArticles } from "@/data/mockArticles";
 import { fetchIntel } from "@/lib/airtable";
+import GlassPanel from "@/components/ui/GlassPanel";
+import HoverCard from "@/components/ui/HoverCard";
 
 async function getLiveArticle(slug) {
   const apiKey = process.env.AIRTABLE_API_KEY;
@@ -105,10 +107,10 @@ export default async function IntelArticlePage({ params }) {
           <div className="article-content-wrapper">
             {/* Insight disclaimer banner */}
             {["INSIGHT", "Insight"].includes(article.category) || ["INSIGHT", "Insight"].includes(article.intelType) || ["INSIGHT", "Insight"].includes(article.type) ? (
-              <div className="insight-disclaimer-banner">
-                <span className="insight-disclaimer-label">ScoutIt Insight</span>
-                <p className="insight-disclaimer-text">This is a ScoutIt Insight — a projection based on available data, not a verified fact.</p>
-              </div>
+              <GlassPanel className="p-4 mb-8 border-l-2 border-l-gold-accent bg-gold-accent/5">
+                <span className="font-mono text-[10px] text-gold-accent tracking-[0.15em] uppercase block mb-1">ScoutIt Insight</span>
+                <p className="font-serif text-sm text-text-secondary m-0">This is a ScoutIt Insight — a projection based on available data, not a verified fact.</p>
+              </GlassPanel>
             ) : null}
             <p className="article-lead-text">{article.lead}</p>
             
@@ -119,10 +121,10 @@ export default async function IntelArticlePage({ params }) {
             </div>
 
             {/* Advisory Note */}
-            <div className="advisory-box">
-              <span className="advisory-label">SCOUTIT BRIEFING RECOMMENDATION</span>
-              <p className="advisory-text">{article.recommendation}</p>
-            </div>
+            <GlassPanel className="p-6 mt-12 bg-surface-alt border-surface-variant">
+              <span className="font-mono text-[10px] text-gold-accent tracking-[0.15em] uppercase block mb-3">SCOUTIT BRIEFING RECOMMENDATION</span>
+              <p className="font-serif text-sm text-text-primary leading-relaxed m-0">{article.recommendation}</p>
+            </GlassPanel>
           </div>
         </section>
 
@@ -131,13 +133,15 @@ export default async function IntelArticlePage({ params }) {
           <h3 className="related-title">Related Briefings</h3>
           <div className="related-grid">
             {related.map((rel) => (
-              <Link href={`/intel/${rel.slug}`} key={rel.slug} className="related-card">
-                <div className="related-img-wrap" style={{ backgroundImage: `url(${rel.image})` }}></div>
-                <div className="related-card-body">
-                  <span className="related-cat">{rel.category}</span>
-                  <h4>{rel.title}</h4>
-                  <span className="related-link">Read Analysis →</span>
-                </div>
+              <Link href={`/intel/${rel.slug}`} key={rel.slug} style={{textDecoration: 'none'}}>
+                <HoverCard className="related-card flex flex-col h-full bg-surface-alt border border-surface-variant overflow-hidden">
+                  <div className="related-img-wrap" style={{ backgroundImage: `url(${rel.image})` }}></div>
+                  <div className="related-card-body">
+                    <span className="related-cat">{rel.category}</span>
+                    <h4>{rel.title}</h4>
+                    <span className="related-link text-gold-accent mt-4 inline-block font-serif">Read Analysis →</span>
+                  </div>
+                </HoverCard>
               </Link>
             ))}
           </div>

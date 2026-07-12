@@ -507,7 +507,7 @@
 
 .bronze-card .tier-badge-label {
   background: linear-gradient(135deg, #a05a2c 0%, #cd7f32 100%);
-  color: #ffffff;
+  color: var(--on-surface);
 }
 
 .bronze-card .rating-num {
