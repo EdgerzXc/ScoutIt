@@ -28,6 +28,12 @@ export default function OnboardingPage() {
   const [useOtp, setUseOtp] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [otpCode, setOtpCode] = useState("");
+  const [toast, setToast] = useState(null);
+
+  const showToast = (message, type = "error") => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
   
   // Data state
   const [formData, setFormData] = useState({
@@ -89,7 +95,7 @@ export default function OnboardingPage() {
           // Send OTP
           const { error } = await signInWithOtp(formData.email);
           if (error) {
-            alert(error.message);
+            showToast(error.message);
             return;
           }
           setOtpSent(true);
@@ -98,7 +104,7 @@ export default function OnboardingPage() {
           // Verify OTP
           const { data: verifyData, error: verifyError } = await verifyOtp(formData.email, otpCode);
           if (verifyError || !verifyData?.user) {
-            alert(verifyError?.message || "Invalid code");
+            showToast(verifyError?.message || "Invalid code");
             return;
           }
           // Same profile check
@@ -134,13 +140,13 @@ export default function OnboardingPage() {
       // If sign in fails, try sign up
       const { data: signUpData, error: signUpError } = await signUp(formData.email, formData.password, { full_name: formData.name });
       if (signUpError) {
-        alert(signUpError.message);
+        showToast(signUpError.message);
         return;
       }
       
       nextStep();
     } catch (e) {
-      alert("Authentication failed.");
+      showToast("Authentication failed.");
     }
   };
 
@@ -381,7 +387,7 @@ export default function OnboardingPage() {
     // 1. Get current session
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.user) {
-      alert("Session lost. Please try logging in again.");
+      showToast("Session lost. Please try logging in again.");
       return;
     }
 
@@ -427,7 +433,7 @@ export default function OnboardingPage() {
       router.push("/dashboard");
     } catch (error) {
       console.error("Profile save error:", error);
-      alert("Failed to save profile.");
+      showToast("Failed to save profile.");
       return;
     }
   };
@@ -522,6 +528,15 @@ export default function OnboardingPage() {
   return (
     <div className="relative min-h-screen bg-background text-text-primary flex flex-col">
       <AtmosphereBackground variant="hero" />
+      
+      {/* Toast Notification */}
+      {toast && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] bg-[#0a0a0a] border border-[#E8AE3C]/50 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 animate-[slideDown_0.3s_ease-out]">
+          <span className="text-[#E8AE3C]">{toast.type === "error" ? "⚠️" : "✅"}</span>
+          <span className="text-sm font-working-title">{toast.message}</span>
+        </div>
+      )}
+
       {/* Universal Grain Overlay */}
       <div className="fixed inset-0 pointer-events-none opacity-[0.03] z-50 mix-blend-overlay bg-[url('/grain.png')]"></div>
 

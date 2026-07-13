@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { useDashboard } from "../../context/DashboardContext";
 
 export default function BookingModal({ isOpen, onClose, brokerName, dealId, onSchedule }) {
+  const { addToast } = useDashboard();
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -37,7 +39,7 @@ export default function BookingModal({ isOpen, onClose, brokerName, dealId, onSc
       onSchedule(scheduledAt);
     } catch (e) {
       console.error(e);
-      alert("Failed to schedule appointment. Please try again.");
+      if(addToast) addToast("Failed to schedule appointment. Please try again.", "❌");
     } finally {
       setIsSubmitting(false);
     }

@@ -28,15 +28,27 @@ export async function generateMetadata({ params }) {
           (p.id && p.id === resolvedParams.id)
       );
       if (match) {
+        const title = match.title || "Premium Space";
+        const cat = match.spaceCategory || match.category || "Commercial Space";
+        const details = typeof match.details === 'string' ? JSON.parse(match.details || '{}') : (match.details || {});
+        const sqm = details.Floor_Area_Sqm || details.CM_Total_GLA || details.RST_Floor_Area_Sqm || details.VEN_Floor_Area_Sqm || details.HOSP_GFA || "";
+
         if (match.seo_title) seoTitle = match.seo_title;
-        else seoTitle = `ScoutIt: ${match.title} · ${match.location || "Premium Space"}`;
+        else seoTitle = `${title} | ${sqm ? sqm + ' sqm ' : ''}${cat}`;
         
         if (match.seo_description) seoDescription = match.seo_description;
-        else seoDescription = `Premium ${match.spaceCategory || "commercial"} space. Explore the full intelligence dossier, layout flexibilities, and rich metrics on ScoutIt.`;
+        else seoDescription = `A premium architectural asset in ${match.location || "the Philippines"}. Explore the full market briefing and operational context on ScoutIt.`;
 
         // Find the highest resolution photo (usually the first one)
         const photo = Array.isArray(match.photos) ? match.photos.find(Boolean) : (match.photo || match.image);
-        if (photo) imageUrl = photo;
+        
+        const ogParams = new URLSearchParams();
+        ogParams.set('title', title);
+        ogParams.set('category', cat);
+        if (sqm) ogParams.set('sqm', sqm);
+        if (photo) ogParams.set('image', photo);
+
+        imageUrl = `https://scoutit.com/api/og?${ogParams.toString()}`;
         
         if (match.slug) url = `https://scoutit.com/property/${match.slug}`;
       }

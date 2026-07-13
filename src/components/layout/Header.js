@@ -59,7 +59,7 @@ export default function Header() {
       </button>
       
       <Link href="/" className="header-brand" aria-label="ScoutIT — home">
-        <span className="brand-s">S</span><span className="brand-scout">cout</span><span className="brand-it">IT</span>
+        <span className="brand-s" style={{ color: "var(--accent)" }}>S</span><span className="brand-scout">cout</span><span className="brand-it">IT</span>
       </Link>
 
       <nav className="header-nav" ref={menuRef}>
@@ -94,7 +94,6 @@ export default function Header() {
           <Link href={profileHref}>{user ? "My Profile" : "Create Account"}</Link>
           <Link href="/">Home</Link>
           <Link href="/discover">Discover</Link>
-          <Link href="/intel">Intel</Link>
           <Link href="/brokers">Brokers</Link>
           <Link href="/photographers">Photographers</Link>
           <Link href="/researchers">Researchers</Link>

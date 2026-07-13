@@ -4,6 +4,7 @@ import LayerNav from "@/components/descent/LayerNav";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import BackgroundCore from "@/components/descent/BackgroundCore";
+import LayerHeader from "@/components/descent/LayerHeader";
 
 export default function CoreLayer() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -34,35 +35,31 @@ export default function CoreLayer() {
       style={{ paddingTop: "52px" }}
     >
       <LayerNav prev={{ href: "/layer/mantle", label: "Mantle" }} next={null} />
-
       <div className="fixed inset-0 pointer-events-none z-0">
         <BackgroundCore isLoggedIn={!!currentUser} />
       </div>
 
-      {/* ════ OUTER CORE — "About You" (the sign-up request) ════ */}
-      <section id="outer-core" className="core-section core-outer">
+      <div className="layer-pane relative z-10">
+        <LayerHeader 
+          layerNum="06" 
+          layerName="Core" 
+          title={currentUser ? `Welcome back, ${currentUser.name}.` : "About You."} 
+          description={currentUser ? "You've breached the center. Your private command layer is one crack below — your profile, your tools, your activity, all in one place." : "You've descended through every layer of ScoutIt. This is where it becomes yours. Here's how the platform works for you — and why people make it their command center for space."} 
+          missionText="The Core serves as the Personal Layer. Every layer above led here. This is the molten center where the platform becomes yours alone — your profile, your board, your saved spaces. It was always about you." 
+          ctaText={currentUser ? "Open Your Dashboard →" : "Create Your Account →"}
+          ctaHref={currentUser ? "/dashboard" : "/onboarding"}
+        />
+
+        {/* ════ OUTER CORE — "About You" (the sign-up request) ════ */}
+        <section id="outer-core" className="core-section core-outer">
         <div className="core-outer-inner">
-          <span className="vector-label">Layer 06 // The Core</span>
 
-          <h1 className="core-title">
-            {currentUser ? `Welcome back, ${currentUser.name}.` : "About You."}
-          </h1>
-
-          <p className="core-lead">
-            {currentUser
-              ? "You've breached the center. Your private command layer is one crack below — your profile, your tools, your activity, all in one place."
-              : "You've descended through every layer of ScoutIt. This is where it becomes yours. Here's how the platform works for you — and why people make it their command center for space."}
-          </p>
 
           <div className="core-actions">
             <Link href="/about-you" className="core-cta">About You →</Link>
             <span className="core-hint">Scroll to breach the inner core ↓</span>
           </div>
 
-          <div className="layer-mission">
-            <h3>Mission</h3>
-            <p>The Core serves as the Personal Layer. Every layer above led here. This is the molten center where the platform becomes yours alone — your profile, your board, your saved spaces. It was always about you.</p>
-          </div>
         </div>
       </section>
 
@@ -132,16 +129,17 @@ export default function CoreLayer() {
             </div>
           )}
         </div>
-      </section>
+        </section>
+      </div>
 
       <style dangerouslySetInnerHTML={{ __html: `
         .core-section {
           position: relative;
           z-index: 10;
-          min-height: calc(100vh - 52px);
+          min-height: calc(100vh - 200px);
           display: flex;
           align-items: center;
-          padding: 80px clamp(24px, 6vw, 96px);
+          padding: 40px clamp(24px, 6vw, 96px);
         }
 
         /* ── Outer Core ───────────────────────────── */

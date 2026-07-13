@@ -164,6 +164,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
   const [isExtracting, setIsExtracting] = useState(false);
   const [extractionError, setExtractionError] = useState(null);
   const [isOptimizing, setIsOptimizing] = useState(false);
+  const [isVerified, setIsVerified] = useState(false);
 
   const handleSeoOptimize = async () => {
     if (!formData.description) {
@@ -727,10 +728,21 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
                 </button>
               ) : (
                 <div className="flex flex-col items-end gap-1">
+                  <label className="flex items-center gap-2 mb-2 cursor-pointer bg-surface-alt/50 border border-surface-variant p-2 rounded w-full">
+                    <input 
+                      type="checkbox" 
+                      checked={isVerified} 
+                      onChange={(e) => setIsVerified(e.target.checked)} 
+                      className="accent-gold-accent shrink-0" 
+                    />
+                    <span className="text-[10px] text-text-secondary leading-tight">
+                      I legally assert I am the direct owner or an authorized licensed broker (RA 9646) for this property.
+                    </span>
+                  </label>
                   <button 
                     onClick={handlePublish}
-                    disabled={!isPublishable}
-                    className="px-6 py-2 rounded bg-gold-accent text-background text-sm font-label-caps tracking-widest uppercase hover:bg-gold-bright disabled:opacity-50 transition-all shadow-[0_0_15px_rgba(232,174,60,0.3)] disabled:shadow-none"
+                    disabled={!isPublishable || !isVerified}
+                    className="px-6 py-2 rounded bg-gold-accent text-background text-sm font-label-caps tracking-widest uppercase hover:bg-gold-bright disabled:opacity-50 transition-all shadow-[0_0_15px_rgba(232,174,60,0.3)] disabled:shadow-none w-full"
                   >
                     Publish to Directory
                   </button>

@@ -4,6 +4,8 @@ import LayerNav from "@/components/descent/LayerNav";
 import Link from "next/link";
 import { useState } from "react";
 import BackgroundMetropolis from "@/components/descent/BackgroundMetropolis";
+import LayerHeader from "@/components/descent/LayerHeader";
+import LayerTransition from "@/components/descent/LayerTransition";
 
 const CATEGORY_PREVIEWS = {};
 const CATEGORIES = ["Residential", "Commercial", "STR", "Hospitality", "Restaurants", "Venues"];
@@ -29,38 +31,41 @@ export default function MetropolisLayer() {
         prev={{ href: "/layer/stratosphere", label: "Stratosphere" }}
         next={{ href: "/layer/crust", label: "Crust" }}
       />
-
       <div className="fixed inset-0 pointer-events-none z-0">
         <BackgroundMetropolis />
       </div>
 
-      <div className="metro-split">
+      <div className="layer-pane relative z-10">
+        <LayerHeader 
+          layerNum="03" 
+          layerName="Metropolis" 
+          title="Explore by Category" 
+          description="Pick a category and see what's inside — homes, offices, venues, and more." 
+          missionText="The Metropolis serves as the Directory Layer. Every kind of space — home, office, venue, table — is the same product in disguise. This layer exists to let you walk the market building by building and find the exact square meters that fit you." 
+          ctaText="Browse All Properties →"
+          ctaHref="/property?_cb=1"
+        />
+
+        <div className="descent-split">
         {/* ── LEFT SIDEBAR ── */}
-        <aside className="metro-sidebar">
+        <aside className="descent-sidebar" style={{ justifyContent: "space-between" }}>
           <div>
-            <span className="metro-kicker">Layer 03 // Metropolis</span>
-            <h2 className="metro-title">Explore by Category</h2>
-            <p className="metro-sub">
-              Pick a category and see what&apos;s inside — homes, offices, venues, and more.
-            </p>
-            <nav className="metro-nav">
+
+            <nav className="descent-nav">
               {CATEGORIES.map(c => (
                 <button
                   key={c}
-                  className={`metro-cat${category === c ? " on" : ""}`}
+                  className={`descent-cat${category === c ? " on" : ""}`}
                   onClick={() => { setCategory(c); setSearch(""); }}
                 >
                   {c === "Venues" ? "Venues/Events" : c}
                 </button>
               ))}
             </nav>
-            <div className="layer-mission">
-              <h3>Mission</h3>
-              <p>The Metropolis serves as the Directory Layer. Every kind of space — home, office, venue, table — is the same product in disguise. This layer exists to let you walk the market building by building and find the exact square meters that fit you.</p>
-            </div>
+
           </div>
           <Link
-            href={`/property?type=${category}`}
+            href={`/property?type=${category}&_cb=1`}
             className="prominent-action-link metro-browse"
           >
             Browse {browseLabel} →
@@ -68,7 +73,7 @@ export default function MetropolisLayer() {
         </aside>
 
         {/* ── RIGHT CONTENT ── */}
-        <div className="metro-content">
+        <div className="descent-content">
           <div className="metro-content-head">
             <h3 className="metro-content-title">
               {browseLabel} Spaces
@@ -116,77 +121,18 @@ export default function MetropolisLayer() {
           <p className="metro-hint">
             Explore different spaces by clicking the categories. Tap any space to view its deep briefing page.
           </p>
+          </div>
         </div>
+        <LayerTransition 
+          nextNum="04" 
+          nextName="Crust" 
+          nextHref="/layer/crust" 
+          teaser="Go street-level. Meet the professionals who move spaces." 
+        />
       </div>
 
       <style dangerouslySetInnerHTML={{ __html: `
-        .metro-split {
-          position: relative;
-          z-index: 10;
-          display: grid;
-          grid-template-columns: 280px 1fr;
-          min-height: calc(100vh - 52px);
-        }
-
-        /* ── SIDEBAR ── */
-        .metro-sidebar {
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-          padding: clamp(28px,5vh,52px) 28px;
-          border-right: 1px solid rgba(232, 174, 60,0.12);
-          background: transparent;   /* Layer 01 look — let the city background read through */
-          min-width: 0;              /* allow the category rail to scroll instead of blowing out the frame */
-        }
-        .metro-kicker {
-          font-family: var(--font-mono);
-          font-size: 10px;
-          letter-spacing: 0.22em;
-          color: var(--accent);
-          text-transform: uppercase;
-          display: block;
-          margin-bottom: 10px;
-        }
-        .metro-title {
-          font-family: var(--font-display);
-          font-size: clamp(26px,3vw,36px);
-          font-weight: 400;
-          color: #f0ede8;
-          margin-bottom: 10px;
-          text-shadow: 0 2px 20px rgba(0,0,0,0.7);
-        }
-        .metro-sub {
-          font-family: var(--font-display);
-          font-style: italic;
-          font-size: 13px;
-          color: rgba(255,255,255,0.62);
-          line-height: 1.6;
-          margin-bottom: 24px;
-          text-shadow: 0 1px 14px rgba(0,0,0,0.65);
-        }
-        .metro-nav {
-          display: flex;
-          flex-direction: column;
-          gap: 2px;
-        }
-        .metro-cat {
-          text-align: left;
-          font-family: var(--font-display);
-          font-size: 16px;
-          color: rgba(255,255,255,0.55);
-          background: none;
-          border: 1px solid transparent;
-          padding: 11px 14px;
-          cursor: pointer;
-          border-radius: 4px;
-          transition: all 0.2s;
-        }
-        .metro-cat:hover { color: #f0ede8; }
-        .metro-cat.on {
-          color: var(--accent);
-          border-color: rgba(232, 174, 60,0.35);
-          background: rgba(232, 174, 60,0.06);
-        }
+        /* ── SIDEBAR EXTRAS ── */
         .metro-browse {
           font-size: 11px !important;
           padding: 11px 20px !important;
@@ -198,13 +144,7 @@ export default function MetropolisLayer() {
           white-space: nowrap;
         }
 
-        /* ── CONTENT ── */
-        .metro-content {
-          padding: clamp(24px,4vh,44px) clamp(20px,3vw,40px);
-          overflow-y: auto;
-          max-height: calc(100vh - 52px);
-          min-width: 0;   /* lets the card rail scroll rather than stretch the grid */
-        }
+        /* ── CONTENT EXTRAS ── */
         .metro-content-head { margin-bottom: 18px; }
         .metro-content-title {
           font-family: var(--font-display);

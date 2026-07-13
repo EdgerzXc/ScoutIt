@@ -61,6 +61,7 @@ export default function CinematicJourney() {
   const [path, setPath] = useState(null); // { d, contentH, W }
 
   const groupRef = useRef(null); // translated by -scrollTop (anchors line to page)
+  const textGroupRef = useRef(null); // anchors text to page
   const drawRef = useRef(null); // bright, scroll-drawn path
   const headRef = useRef(null); // glowing head of light
   const lenRef = useRef(0);
@@ -112,6 +113,9 @@ export default function CinematicJourney() {
       // anchor the whole line to the page content
       if (groupRef.current) {
         groupRef.current.style.transform = `translateY(${-scrollTop}px)`;
+      }
+      if (textGroupRef.current) {
+        textGroupRef.current.style.transform = `translateY(${-scrollTop}px)`;
       }
 
       // progressive draw: light reaches a little ahead of the viewport center
@@ -166,6 +170,42 @@ export default function CinematicJourney() {
           </g>
         </svg>
       )}
+
+      {/* Render the mission text in pure Gold for each layer */}
+      <div ref={textGroupRef} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
+        {path && CINEMATIC_LAYERS.map((layer, i) => {
+          const loop = path.loops[i];
+          if (!loop) return null;
+          
+          // Position the text to the right of the loop
+          return (
+            <div 
+              key={i} 
+              className="cinematic-mission-text" 
+              style={{ 
+                position: "absolute", 
+                top: `${loop.y - 10}px`, 
+                left: `${loop.x + 80}px`,
+                maxWidth: "280px",
+                fontFamily: "var(--font-mono)",
+                fontSize: "11px",
+                color: "var(--accent)", // Gold
+                letterSpacing: "0.08em",
+                lineHeight: "1.6",
+                textTransform: "uppercase",
+                textShadow: "0 2px 12px rgba(0,0,0,0.8)"
+              }}
+            >
+              <div style={{ fontWeight: "bold", marginBottom: "6px", color: "var(--accent-bright)" }}>
+                {layer.label}
+              </div>
+              <div style={{ opacity: 0.9 }}>
+                {layer.mission}
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

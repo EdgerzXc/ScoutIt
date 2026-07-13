@@ -103,11 +103,11 @@ test.describe('Owner Deep Intelligence Studio Flow', () => {
       await page.goto('http://localhost:3000/dashboard');
       await page.waitForTimeout(2000);
 
-      // We should be on the "How would you like to create this listing?" screen
-      await expect(page.locator('h1:has-text("How would you like to create this listing?")')).toBeVisible({ timeout: 10000 });
+      // We should be on the "How do you want to create your listing?" screen
+      await expect(page.locator('h1:has-text("How do you want to create your listing?")')).toBeVisible({ timeout: 10000 });
 
-      // Click "Deep Intelligence Vault"
-      await page.locator('h3:has-text("Deep Intelligence Vault")').click();
+      // Click "Advanced Editor"
+      await page.locator('h3:has-text("Advanced Editor")').click();
       await page.waitForTimeout(1000);
 
       // Step 1: The Space

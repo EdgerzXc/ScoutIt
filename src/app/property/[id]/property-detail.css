@@ -39,9 +39,11 @@
  cursor: zoom-in; }
 .photo-slide { position: absolute; inset: 0;
  opacity: 0;
- transition: opacity 0.6s ease, background-image 0s;
+ transition: opacity 0.6s ease;
  background-size: cover;
- background-position: center; }
+ background-position: center;
+ object-fit: cover;
+ object-position: center; }
 .photo-slide.active { opacity: 1; }
 .photo-slide.natural  { filter: saturate(1.0) brightness(1.05); }
 .photo-slide.enhanced { filter: saturate(1.2) brightness(1.1) contrast(1.05) sepia(0.06); }

@@ -57,31 +57,22 @@ export default function BoardPodium() {
   const rest = ranked.slice(1);
 
   return (
-    <div className="board-split relative z-10">
+    <div className="descent-split relative z-10">
       {/* LEFT — menu */}
-      <aside className="board-menu">
-        <div>
-          <span className="board-kicker">Layer 01 // The Board</span>
-          <h2 className="board-title">The Board</h2>
-          <p className="board-sub">The properties Manila is watching — ranked by real inquiry demand.</p>
-          <nav className="board-nav">
-            {BOARD_CATEGORIES.map((c) => (
-              <button key={c} className={`board-cat ${category === c ? "on" : ""}`} onClick={() => setCategory(c)}>
-                {c === "All" ? "All Properties" : c}
-              </button>
-            ))}
-          </nav>
-          
-          <div className="board-mission">
-            <h3>Mission</h3>
-            <p>The Orbit serves as the Showcase Layer. This specific layer exists to grant the highest-ranked properties the ultimate visibility they deserve, elevating them to the apex of the platform.</p>
-          </div>
-        </div>
+      <aside className="descent-sidebar" style={{ justifyContent: "space-between" }}>
+        <nav className="descent-nav">
+          {BOARD_CATEGORIES.map((c) => (
+            <button key={c} className={`descent-cat ${category === c ? "on" : ""}`} onClick={() => setCategory(c)}>
+              {c === "All" ? "All Properties" : c}
+            </button>
+          ))}
+        </nav>
+
         <Link href="/showcase" className="board-seeall">See The Showcase →</Link>
       </aside>
 
       {/* RIGHT — leaderboard preview */}
-      <div className="board-content">
+      <div className="descent-content">
         <div className="board-content-head">
           <h3 className="board-content-title">{category === "All" ? "Overall" : category} · Most Inquired</h3>
           <div className="board-content-sub">Live Leaderboard — Updated Monthly</div>
@@ -100,30 +91,9 @@ export default function BoardPodium() {
       </div>
 
       <style jsx>{`
-        .board-split {
-          width: 100%; min-height: 100%;
-          display: grid; grid-template-columns: 320px 1fr;
-          background: transparent;
-        }
-        .board-menu {
-          display: flex; flex-direction: column; justify-content: space-between;
-          padding: clamp(24px, 4vh, 48px) 36px 90px 36px;
-          border-right: 1px solid #1a1a1a;
-          overflow-y: auto;
-        }
-        .board-menu::-webkit-scrollbar { display: none; }
-        .board-menu { scrollbar-width: none; }
         .board-kicker { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.2em; color: var(--accent); text-transform: uppercase; }
         .board-title { font-family: var(--font-display); font-weight: 400; font-size: clamp(34px, 4vw, 48px); color: #f0ede8; margin: 12px 0 8px; }
         .board-sub { font-family: Georgia, serif; font-style: italic; font-size: 14px; color: #c8c8c8; line-height: 1.6; margin-bottom: 28px; }
-        .board-nav { display: flex; flex-direction: column; gap: 2px; }
-        .board-cat {
-          text-align: left; font-family: Georgia, serif; font-size: 17px; color: #c8c8c8;
-          background: none; border: 1px solid transparent; padding: 13px 16px; cursor: pointer;
-          border-radius: 4px; transition: all 0.2s;
-        }
-        .board-cat:hover { color: #f0ede8; }
-        .board-cat.on { color: var(--accent); border-color: rgba(232, 174, 60,0.4); background: rgba(232, 174, 60,0.06); }
         
         .board-mission { margin-top: 24px; max-width: 260px; }
         .board-mission h3 { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.2em; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; }

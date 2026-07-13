@@ -16,19 +16,19 @@
   padding: 0;
 }
 
-/* â”€â”€ ROOT DESIGN TOKENS â”€â”€ */
+/* ── ROOT DESIGN TOKENS ── */
 :root {
   /* Canvas & Surfaces - richer deep tones */
-  --bg: #0a0510;
-  --surface: #120b1b;
-  --surface2: #1a1025;
-  --surface3: #221530;
-  --surface-variant: #1a1025;
+  --bg: #0d0d0d;
+  --surface: #121212;
+  --surface2: #1a1a1a;
+  --surface3: #222222;
+  --surface-variant: #1a1a1a;
 
   /* Borders */
   --border: rgba(255, 255, 255, 0.08);
   --border-mid: rgba(255, 255, 255, 0.15);
-  --border-solid: #2d1b4e;
+  --border-solid: #2d2d2d;
 
   /* Typography Colors */
   --text-primary: #ffffff;
@@ -36,15 +36,15 @@
   --text-muted: rgba(255, 255, 255, 0.45);
 
   /* Brand Identity */
-  --brand: #05020a;
-  --brand-overlay: rgba(5, 2, 10, 0.92);
+  --brand: #0d0d0d;
+  --brand-overlay: rgba(13, 13, 13, 0.92);
 
   /* Accent — Expanded Gold System + Secondary Accents */
-  --accent: #F7C64E;
-  --accent-rgb: 247, 198, 78;
-  --accent-bright: #FFDE82;
-  --accent-bright-rgb: 255, 222, 130;
-  --accent-muted: #8A6D26;
+  --accent: #E8AE3C;
+  --accent-rgb: 232, 174, 60;
+  --accent-bright: #F7C64E;
+  --accent-bright-rgb: 247, 198, 78;
+  --accent-muted: #6E531A;
   --accent-dim: rgba(247, 198, 78, 0.12);
   --accent-border: rgba(247, 198, 78, 0.32);
 
@@ -241,20 +241,12 @@ a:hover {
   color: transparent;
 }
 
-.text-gradient-sapphire {
-  background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 50%, #1d4ed8 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  color: transparent;
-}
-
 .mesh-bg-hero {
   background-color: var(--bg);
   background-image: 
-    radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.15), transparent 50%),
-    radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.15), transparent 50%),
-    radial-gradient(circle at 50% 80%, rgba(247, 198, 78, 0.1), transparent 50%);
+    radial-gradient(circle at 15% 50%, rgba(255, 255, 255, 0.03), transparent 50%),
+    radial-gradient(circle at 85% 30%, rgba(255, 255, 255, 0.02), transparent 50%),
+    radial-gradient(circle at 50% 80%, rgba(247, 198, 78, 0.08), transparent 50%);
 }
 
 .glass-panel {
@@ -405,8 +397,24 @@ a:hover {
   }
   
   .grain {
-    display: none;
+    display: none !important;
   }
+}
+
+html.lite-mode * {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+html.lite-mode .grain,
+html.lite-mode .nf-radar,
+html.lite-mode .nf-pulse,
+html.lite-mode .nf-ring,
+html.lite-mode .drifting-container,
+html.lite-mode .cinematic-container {
+  display: none !important;
+  animation: none !important;
 }
 
 /* â”€â”€ MOBILE LAYOUT CONTAINERS â”€â”€ */

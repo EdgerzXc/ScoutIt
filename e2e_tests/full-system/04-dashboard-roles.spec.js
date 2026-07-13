@@ -85,7 +85,7 @@ test.describe('master-dev (READ-ONLY — real data)', () => {
     await expect(
       page
         .locator('h1')
-        .filter({ hasText: /Active Property Files|Welcome back/i })
+        .filter({ hasText: /Active Listings|Welcome back/i })
         .first()
     ).toBeVisible({ timeout: 30000 });
 

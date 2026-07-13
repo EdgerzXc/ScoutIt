@@ -11,6 +11,12 @@ import { Shield, ShieldAlert, ShieldCheck, Lock } from "lucide-react";
 export default function BadgeRegistryPage() {
   const [userBadges, setUserBadges] = useState([]);
   const [badgeDefs, setBadgeDefs] = useState([]);
+  const [toast, setToast] = useState(null);
+
+  const showToast = (message, type = "error") => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
 
   useEffect(() => {
     let alive = true;
@@ -54,7 +60,7 @@ export default function BadgeRegistryPage() {
     const token = session?.access_token;
 
     if (!token) {
-      alert("Please log in to claim a badge.");
+      showToast("Please log in to claim a badge.");
       return;
     }
 
@@ -76,13 +82,13 @@ export default function BadgeRegistryPage() {
           .then((r) => r.json())
           .then((d) => setBadgeDefs(d.definitions || []))
           .catch(() => {});
-        alert("Badge claimed successfully!");
+        showToast("Badge claimed successfully!", "success");
       } else {
-        alert(data.error || "Failed to claim badge");
+        showToast(data.error || "Failed to claim badge");
       }
     } catch (err) {
       console.error(err);
-      alert("Error claiming badge");
+      showToast("Error claiming badge");
     } finally {
       setClaimingId(null);
     }
@@ -92,6 +98,14 @@ export default function BadgeRegistryPage() {
     <main className="min-h-screen flex flex-col bg-bg">
       <Header />
       
+      {/* Toast Notification */}
+      {toast && (
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[9999] bg-[#0a0a0a] border border-[#E8AE3C]/50 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 animate-[slideDown_0.3s_ease-out]">
+          <span className="text-[#E8AE3C]">{toast.type === "error" ? "⚠️" : "✅"}</span>
+          <span className="text-sm font-working-title">{toast.message}</span>
+        </div>
+      )}
+
       <div className="flex-grow max-w-4xl w-full mx-auto px-6 py-24 sm:py-32">
         
         {/* Header Section */}

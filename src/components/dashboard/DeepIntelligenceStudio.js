@@ -7,6 +7,7 @@ import { sanitizeObject } from "../../lib/sanitize";
 import { supabase } from "../../lib/supabaseClient";
 import { DEEP_INTEL_SCHEMA } from "../../lib/deepIntelSchema";
 import PhotoUploader from "./PhotoUploader";
+import { useDashboard } from "../../context/DashboardContext";
 
 const CATEGORIES = [
   { id: "residential", icon: "🏠", label: "Residential" },
@@ -169,6 +170,8 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
   const [leftWidth, setLeftWidth] = useState(50);
   const [isResizing, setIsResizing] = useState(false);
   const [mobileTab, setMobileTab] = useState('editor'); // 'editor' | 'preview'
+  
+  const { currentUser } = useDashboard() || {};
   const isE2E = currentUser?.id === 'master-dev';
 
   const startResizing = useCallback((e) => {

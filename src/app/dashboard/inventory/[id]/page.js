@@ -261,6 +261,8 @@ function InventoryInner({ params }) {
           onChange={(newUnits) => setLocalUnits(newUnits)}
           onAutoSave={handleAutoSave}
           isPro={isPro}
+          propertyId={listing.slug || listing.id}
+          property={listing}
         />
 
       </div>

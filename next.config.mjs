@@ -36,8 +36,21 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'picsum.photos',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
       }
     ],
+  },
+  async redirects() {
+    return [
+      {
+        source: '/the-board',
+        destination: '/wishlist',
+        permanent: true,
+      },
+    ];
   },
   async headers() {
     return [

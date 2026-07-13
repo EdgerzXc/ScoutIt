@@ -82,11 +82,11 @@ test.describe('Owner Live Editor Flow with Unit Builder', () => {
       await page.goto('http://localhost:3000/dashboard');
       await page.waitForTimeout(2000);
 
-      // We should be on the "How would you like to create this listing?" screen
-      await expect(page.locator('h1:has-text("How would you like to create this listing?")')).toBeVisible({ timeout: 10000 });
+      // We should be on the "How do you want to create your listing?" screen
+      await expect(page.locator('h1:has-text("How do you want to create your listing?")')).toBeVisible({ timeout: 10000 });
 
-      // Click "Live Editor Workspace"
-      await page.locator('h3:has-text("Live Editor Workspace")').click();
+      // Click "Build from Scratch"
+      await page.locator('h3:has-text("Build from Scratch")').click();
       await page.waitForTimeout(1000);
 
       // Step 1: Basic Property Information

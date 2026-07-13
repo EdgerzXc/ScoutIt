@@ -23,6 +23,9 @@ export default function FadingVideo({ videos, className = "" }) {
 
   return (
     <div className={`relative w-full h-full ${className}`}>
+      {videos.length > 1 && (
+        <link rel="preload" as="video" href={videos[(currentIndex + 1) % videos.length]} />
+      )}
       <AnimatePresence mode="wait">
         <motion.video
           key={currentIndex}
@@ -31,6 +34,7 @@ export default function FadingVideo({ videos, className = "" }) {
           autoPlay
           muted
           playsInline
+          preload="auto"
           loop={videos.length === 1} // if only 1 video, just let it loop natively
           onLoadedData={handleLoadedData}
           onEnded={videos.length > 1 ? handleEnded : undefined}
@@ -41,7 +45,7 @@ export default function FadingVideo({ videos, className = "" }) {
           className="absolute inset-0 w-full h-full object-cover"
         />
       </AnimatePresence>
-      <div className="absolute inset-0 bg-black/60 z-0"></div>
+      <div className="absolute inset-0 bg-black/60 z-0 pointer-events-none"></div>
     </div>
   );
 }

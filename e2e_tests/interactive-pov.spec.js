@@ -24,14 +24,14 @@ const setupMockApi = async (page, role, userId, userName) => {
       const newDeal = {
         id: `deal_${Date.now()}`,
         property_slug: body.propertySlug,
-        property_title: 'Aurelia Residences',
+        property_title: 'The Ridgeline',
         buyer_id: role === 'buyer' ? userId : null,
         owner_id: 'owner-123',
         broker_id: 'broker-123',
         status: 'open',
         handshakeState: 'none',
         last_message: body.message,
-        other_party: 'Aurelia Owner',
+        other_party: 'The Ridgeline Owner',
         unreadCount: 0
       };
       dealsState.push(newDeal);
@@ -116,10 +116,10 @@ test('3-POV Interactive Handshake Flow', async ({ browser }) => {
   });
 
   // --- POV 1: BUYER INITIATES INQUIRY ---
-  await buyerPage.goto('/property/aurelia-residences-bgc-preselling-406sqm-penthouse');
+  await buyerPage.goto('/property/the-ridgeline-at-capitol-commons');
   
   // Wait for page load
-  await buyerPage.waitForSelector('text=Aurelia Residences', { timeout: 10000 });
+  await buyerPage.waitForSelector('text=The Ridgeline', { timeout: 10000 });
 
   // Try to find a connect button
   const connectButtons = [
@@ -142,7 +142,7 @@ test('3-POV Interactive Handshake Flow', async ({ browser }) => {
   // but let's assume one is found for the actual flow
   if (clicked) {
     // Fill modal
-    await buyerPage.fill('textarea[name="message"]', 'Hi, I am interested in Aurelia.');
+    await buyerPage.fill('textarea[name="message"]', 'Hi, I am interested in The Ridgeline.');
     await buyerPage.click('button:has-text("Spend 1 Connect")');
     
     // Wait for success
@@ -152,7 +152,7 @@ test('3-POV Interactive Handshake Flow', async ({ browser }) => {
     await buyerPage.evaluate(async () => {
       await fetch('/api/deals/initiate', {
         method: 'POST',
-        body: JSON.stringify({ propertySlug: 'aurelia-residences-bgc-preselling-406sqm-penthouse', message: 'Hi, I am interested in Aurelia.' })
+        body: JSON.stringify({ propertySlug: 'the-ridgeline-at-capitol-commons', message: 'Hi, I am interested in The Ridgeline.' })
       });
     });
   }
@@ -161,13 +161,13 @@ test('3-POV Interactive Handshake Flow', async ({ browser }) => {
   await brokerPage.goto('/dashboard/inbox');
   
   // Select the deal
-  await brokerPage.click('text=Aurelia Residences');
+  await brokerPage.click('text=The Ridgeline');
   
   // Wait for the buyer's message
-  await brokerPage.waitForSelector('text=Hi, I am interested in Aurelia.');
+  await brokerPage.waitForSelector('text=Hi, I am interested in The Ridgeline.');
 
   // Broker replies
-  await brokerPage.fill('input[placeholder="Type your message or drag a file here..."]', 'Hello John, I can help you with Aurelia. Shall we shake hands?');
+  await brokerPage.fill('input[placeholder="Type your message or drag a file here..."]', 'Hello John, I can help you with The Ridgeline. Shall we shake hands?');
   await brokerPage.click('button:has-text("Send")');
 
   // Broker offers handshake
@@ -176,10 +176,10 @@ test('3-POV Interactive Handshake Flow', async ({ browser }) => {
 
   // --- POV 1: BUYER ACCEPTS HANDSHAKE ---
   await buyerPage.goto('/dashboard/inbox');
-  await buyerPage.click('text=Aurelia Residences');
+  await buyerPage.click('text=The Ridgeline');
   
   // See broker's message
-  await buyerPage.waitForSelector('text=Hello John, I can help you with Aurelia.');
+  await buyerPage.waitForSelector('text=Hello John, I can help you with The Ridgeline.');
 
   // Accept handshake
   await buyerPage.click('button:has-text("Accept Handshake")');

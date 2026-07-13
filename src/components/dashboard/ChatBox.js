@@ -72,6 +72,14 @@ function authHeaders(token) {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
+const messageVariants = {
+  initial: { opacity: 0, y: 15 },
+  animate: { opacity: 1, y: 0 }
+};
+
+const messageTransition = { duration: 0.3 };
+const loadingLineTransition = { duration: 2, repeat: Infinity, ease: "linear" };
+
 export default function ChatBox({ deal, onCloseDeal, onOfferHandshake, onAcceptHandshake }) {
   console.log("ChatBox rendering deal:", deal);
   const [messages, setMessages] = useState([]);
@@ -345,7 +353,7 @@ export default function ChatBox({ deal, onCloseDeal, onOfferHandshake, onAcceptH
         <motion.div 
           className="absolute inset-0 bg-gradient-to-r from-transparent via-gold-accent to-transparent opacity-50"
           animate={{ x: ["-100%", "100%"] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+          transition={loadingLineTransition}
         />
         <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none">
           <line x1="0" y1="2" x2="100%" y2="2" stroke="rgba(232, 174, 60, 0.2)" strokeWidth="1" strokeDasharray="4 4" />
@@ -506,9 +514,10 @@ export default function ChatBox({ deal, onCloseDeal, onOfferHandshake, onAcceptH
             <motion.div 
               key={msg.id} 
               className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
+              initial="initial"
+              animate="animate"
+              variants={messageVariants}
+              transition={messageTransition}
             >
               <div
                 className={`max-w-[85%] p-3.5 rounded-xl text-sm shadow-sm ${

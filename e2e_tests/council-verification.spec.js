@@ -19,21 +19,21 @@ test.describe('Deep E2E Council Verification - Interactive Workflows', () => {
     });
 
     await page.goto('/dashboard');
-    await page.waitForTimeout(2000);
+    
+    // Wait for either button to appear in the DOM
+    await expect(page.locator('text="Create your first listing"').or(page.locator('text="+ New Property File"')).first()).toBeVisible({ timeout: 15000 });
 
-    // If "Start My First Listing" exists (zero listings view)
-    const startFirstBtn = page.getByText('Start My First Listing');
-    // If "+ New Property File" exists (has listings view)
-    const newPropertyBtn = page.getByText('+ New Property File', { exact: true });
+    const startFirstBtn = page.getByRole('button', { name: 'Create your first listing', exact: true });
+    const newPropertyBtn = page.getByRole('button', { name: '+ New Property File', exact: true });
 
     if (await startFirstBtn.isVisible()) {
-      await startFirstBtn.click();
+      await startFirstBtn.click({ force: true });
     } else if (await newPropertyBtn.isVisible()) {
-      await newPropertyBtn.click();
+      await newPropertyBtn.click({ force: true });
     }
 
     // Wait for the modal/wizard to appear
-    await page.waitForSelector('h1:has-text("How would you like to create this listing?")');
+    await expect(page.locator('h1:has-text("How do you want to create your listing?")')).toBeVisible({ timeout: 15000 });
     await page.waitForTimeout(1000);
     await page.screenshot({ path: 'e2e_tests/screenshots/deep_owner_wizard.png', ...screenshotOptions });
   });
@@ -49,8 +49,10 @@ test.describe('Deep E2E Council Verification - Interactive Workflows', () => {
       }));
     });
 
-    await page.goto('/property/aurelia-residences');
-    await page.waitForTimeout(3000);
+    await page.goto('/property/the-ridgeline-at-capitol-commons');
+    
+    // Wait until loading is gone and the property is displayed (h2 is rendered in the layer header)
+    await expect(page.locator('text="LOADING SPACE INTELLIGENCE..."')).toBeHidden({ timeout: 20000 });
     
     // Simulate clicking the floating "Inquire" button which dispatches the global event
     await page.evaluate(() => {
@@ -58,7 +60,7 @@ test.describe('Deep E2E Council Verification - Interactive Workflows', () => {
     });
 
     // Wait for the inquiry modal to open and animate in
-    await page.waitForSelector('h2:has-text("Select Representative")');
+    await expect(page.locator('h2:has-text("Contact the Owner")')).toBeVisible({ timeout: 15000 });
     await page.waitForTimeout(1000);
     
     await page.screenshot({ path: 'e2e_tests/screenshots/deep_buyer_inquiry.png', ...screenshotOptions });
@@ -76,20 +78,19 @@ test.describe('Deep E2E Council Verification - Interactive Workflows', () => {
     });
 
     await page.goto('/dashboard');
-    await page.waitForTimeout(2000);
     
-    // Broker Mode should load Active Deal Files or at least Market Intelligence
-    // Try to click an active deal if one exists
+    // Wait for either the deal file to load or the open deal button
+    await expect(page.locator('text="Open Workspace"').or(page.locator('button:has-text("Open Deal File")')).first()).toBeVisible({ timeout: 15000 }).catch(() => {});
+    
     const activeDealCount = await page.locator('text="Open Workspace"').count();
     if (activeDealCount > 0) {
-      await page.locator('text="Open Workspace"').first().click();
-      await page.waitForSelector('text="Opportunity File"');
+      await page.locator('text="Open Workspace"').first().click({ force: true });
+      await expect(page.locator('text="Opportunity File"').first()).toBeVisible({ timeout: 15000 });
     } else {
-      // If no deals, click to open a pitch modal
       const openDealCount = await page.locator('button:has-text("Open Deal File")').count();
       if (openDealCount > 0) {
-        await page.locator('button:has-text("Open Deal File")').first().click();
-        await page.waitForSelector('text="Draft Pitch"');
+        await page.locator('button:has-text("Open Deal File")').first().click({ force: true });
+        await expect(page.locator('text="Draft Pitch"').first()).toBeVisible({ timeout: 15000 });
       }
     }
 

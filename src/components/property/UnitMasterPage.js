@@ -25,7 +25,7 @@ const SpecCard = ({ label, value }) => {
   );
 };
 
-export default function UnitMasterPage({ slug, unitId }) {
+export default function UnitMasterPage({ slug, unitId, previewProperty, previewUnit }) {
   const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isInquiryOpen, setIsInquiryOpen] = useState(false);
@@ -54,6 +54,12 @@ export default function UnitMasterPage({ slug, unitId }) {
   }, []);
 
   useEffect(() => {
+    if (previewProperty) {
+      setProperty(previewProperty);
+      setLoading(false);
+      return;
+    }
+
     let cancelled = false;
     (async () => {
       try {
@@ -75,7 +81,7 @@ export default function UnitMasterPage({ slug, unitId }) {
     return () => {
       cancelled = true;
     };
-  }, [slug]);
+  }, [slug, previewProperty]);
 
   // Manage nav scroll indicators
   useEffect(() => {
@@ -104,7 +110,7 @@ export default function UnitMasterPage({ slug, unitId }) {
     );
   }
 
-  const unit = property?.units_inventory?.find((u) => u.id === unitId);
+  const unit = previewUnit || property?.units_inventory?.find((u) => u.id === unitId);
 
   if (!property || !unit) {
     return (

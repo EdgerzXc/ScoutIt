@@ -105,7 +105,7 @@ const ITEMS = {
 //   • Theme/display is a utility, so it always sits in the last slot —
 //     never in the prime, thumb-reachable centre.
 const CONTEXTS = {
-  default:   [ITEMS.home,      ITEMS.spaces,    ITEMS.discover, ITEMS.intel,  ITEMS.theme],
+  default:   [ITEMS.home,      ITEMS.spaces,    ITEMS.discover, ITEMS.board,  ITEMS.theme],
   dashboard: [ITEMS.dashboard, ITEMS.home,      ITEMS.discover, ITEMS.role,   ITEMS.theme],
   board:     [ITEMS.board,     ITEMS.home,      ITEMS.spaces,   ITEMS.discover, ITEMS.theme],
   discover:  [ITEMS.discover,  ITEMS.home,      ITEMS.spaces,   ITEMS.board,  ITEMS.theme],

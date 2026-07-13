@@ -7,6 +7,7 @@ import {
 import PhotoUploader from "./PhotoUploader";
 import UnitDetailsDrawer from "./UnitDetailsDrawer";
 import { uploadPropertyPhoto } from "../../lib/storage";
+import { useDashboard } from "../../context/DashboardContext";
 
 const UNASSIGNED = "__unassigned__";
 const MAX_BULK = 50;
@@ -21,7 +22,8 @@ const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2
 // duplicate, or delete units — those stay owner-only. Kept as one shared
 // component with a mode prop rather than a fork, per the locked plan
 // decision, to avoid the two grids drifting apart.
-export default function InventoryGridManager({ units = [], onChange, isPro, onAutoSave, mode = "owner" }) {
+export default function InventoryGridManager({ units = [], onChange, isPro, onAutoSave, mode = "owner", propertyId, property }) {
+  const { addToast } = useDashboard();
   const isOperatorMode = mode === "operator";
   const [activePhotoUnit, setActivePhotoUnit] = useState(null);
   const [uploadingUnitId, setUploadingUnitId] = useState(null);
@@ -135,7 +137,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
     const unit = units.find((u) => u.id === id);
     if (unit && !(unit.features || []).includes(val)) {
       if ((unit.features || []).length >= 20) {
-        alert("Maximum 20 features allowed per unit.");
+        if (addToast) addToast("Maximum 20 features allowed per unit.", "⚠️");
         return;
       }
       commit(
@@ -191,7 +193,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
     } catch (err) {
       clearInterval(progressInterval);
       console.error("Direct upload failed:", err);
-      alert("Failed to upload photo. Please check your connection and try again.");
+      if (addToast) addToast("Failed to upload photo. Please check your connection and try again.", "❌");
       setUploadingUnitId(null);
     }
   };
@@ -347,14 +349,13 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                   <table className="w-full text-left border-collapse min-w-[820px]">
                     <thead>
                       <tr className="border-b border-surface-variant/60">
-                        <th className="p-3 font-label-caps text-[10px] tracking-widest text-text-secondary uppercase w-[24%]">Unit Identifier</th>
-                        <th className="p-3 font-label-caps text-[10px] tracking-widest text-text-secondary uppercase w-[12%]">Size (sqm)</th>
-                        <th className="p-3 font-label-caps text-[10px] tracking-widest text-text-secondary uppercase w-[12%]">Floor</th>
-                        <th className="p-3 font-label-caps text-[10px] tracking-widest text-text-secondary uppercase w-[34%]">Tags &amp; Features</th>
-                        <th className="p-3 font-label-caps text-[10px] tracking-widest text-text-secondary uppercase text-center w-[10%]">Media</th>
-                        {isOperatorMode && (
-                          <th className="p-3 font-label-caps text-[10px] tracking-widest text-text-secondary uppercase w-[14%]">Availability</th>
-                        )}
+                        <th className="p-3 font-label-caps text-[10px] tracking-widest text-text-secondary uppercase w-[20%]">Unit Identifier</th>
+                        <th className="p-3 font-label-caps text-[10px] tracking-widest text-text-secondary uppercase w-[10%]">Size (sqm)</th>
+                        <th className="p-3 font-label-caps text-[10px] tracking-widest text-text-secondary uppercase w-[10%]">Floor</th>
+                        <th className="p-3 font-label-caps text-[10px] tracking-widest text-text-secondary uppercase w-[24%]">Tags &amp; Features</th>
+                        <th className="p-3 font-label-caps text-[10px] tracking-widest text-text-secondary uppercase text-center w-[8%]">Media</th>
+                        <th className="p-3 font-label-caps text-[10px] tracking-widest text-text-secondary uppercase w-[10%]">Availability</th>
+                        <th className="p-3 font-label-caps text-[10px] tracking-widest text-text-secondary uppercase w-[10%]">Operator</th>
                         <th className="p-3 w-[8%]" />
                       </tr>
                     </thead>
@@ -501,20 +502,43 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                                 </div>
                               )}
                             </td>
-                            {/* Availability — operator mode only */}
-                            {isOperatorMode && (
-                              <td className="p-2.5 align-top">
-                                <select
-                                  value={unit.availabilityStatus || "available"}
-                                  onChange={(e) => updateUnit(unit.id, "availabilityStatus", e.target.value, true)}
-                                  className="w-full bg-surface-alt border border-surface-variant rounded px-2 py-1.5 text-sm text-text-primary focus:outline-none focus:border-gold-accent transition-colors"
-                                >
-                                  <option value="available">Available</option>
-                                  <option value="occupied">Occupied</option>
-                                  <option value="coming_soon">Coming Soon</option>
-                                </select>
-                              </td>
-                            )}
+                            {/* Availability - unlocked for both owners and operators */}
+                            <td className="p-2.5 align-top">
+                              <select
+                                value={unit.availabilityStatus || "available"}
+                                onChange={(e) => updateUnit(unit.id, "availabilityStatus", e.target.value, true)}
+                                className="w-full bg-surface-alt border border-surface-variant rounded px-2 py-1.5 text-sm text-text-primary focus:outline-none focus:border-gold-accent transition-colors"
+                              >
+                                <option value="available">Available</option>
+                                <option value="occupied">Occupied</option>
+                                <option value="coming_soon">Coming Soon</option>
+                              </select>
+                            </td>
+                            {/* Operator Delegation */}
+                            <td className="p-2.5 align-top">
+                              <select
+                                value={unit.operatorId || ""}
+                                onChange={(e) => {
+                                  const opId = e.target.value || null;
+                                  const nameMap = {
+                                    "op_1": "Jules (Operator)",
+                                    "op_2": "Jerzel (Operator)"
+                                  };
+                                  const next = units.map((u) => 
+                                    u.id === unit.id 
+                                      ? { ...u, operatorId: opId, operatorDisplayName: nameMap[opId] || null } 
+                                      : u
+                                  );
+                                  commit(next);
+                                }}
+                                disabled={isOperatorMode}
+                                className="w-full bg-surface-alt border border-surface-variant rounded px-2 py-1.5 text-sm text-text-primary focus:outline-none focus:border-gold-accent transition-colors disabled:opacity-50"
+                              >
+                                <option value="">None (Owner)</option>
+                                <option value="op_1">Jules (Operator)</option>
+                                <option value="op_2">Jerzel (Operator)</option>
+                              </select>
+                            </td>
                             {/* Row actions */}
                             <td className="p-2.5 align-top text-center whitespace-nowrap">
                               {(isOperatorMode || !lockedForOwner) && (
@@ -654,6 +678,8 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
           <UnitDetailsDrawer
             unit={du}
             isPro={isPro}
+            propertyId={propertyId}
+            property={property}
             onClose={() => setDetailsUnitId(null)}
             onDetail={(key, value) => {
               const cur = units.find((u) => u.id === detailsUnitId);

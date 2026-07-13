@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from "react";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
+import { DashboardProvider, useDashboard } from "@/context/DashboardContext";
 
-export default function CalendarPage() {
+function CalendarInner() {
+  const { addToast } = useDashboard();
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -31,7 +33,7 @@ export default function CalendarPage() {
 
   const handleSaveSettings = async () => {
     // In a real app: POST to /api/availability
-    alert("Availability saved!");
+    if (addToast) addToast("Availability saved!", "✅");
   };
 
   return (
@@ -132,5 +134,13 @@ export default function CalendarPage() {
         </div>
       </div>
     </DashboardLayout>
+  );
+}
+
+export default function CalendarPage() {
+  return (
+    <DashboardProvider>
+      <CalendarInner />
+    </DashboardProvider>
   );
 }

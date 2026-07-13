@@ -56,7 +56,10 @@ export default function InboxPage() {
       }
       const qs = mockOwnerId ? `?mockOwnerId=${mockOwnerId}` : "";
       const res = await fetch(`/api/deals${qs}`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          ...(mockOwnerId ? { "x-mock-user-id": mockOwnerId } : {})
+        },
       });
       const data = await res.json();
       if (!res.ok) {

@@ -174,7 +174,12 @@ function PropertyDirectoryContent() {
     prices: true,
     locations: true,
     aesthetics: false,
+    buildingGrades: true,
   });
+
+  // Polymorphic Filter States
+  const [selectedBuildingGrades, setSelectedBuildingGrades] = useState([]);
+  const [selectedBeds, setSelectedBeds] = useState([]);
 
   // Comparison Matrix State
   const [compareList, setCompareList] = useState([]);
@@ -295,6 +300,8 @@ function PropertyDirectoryContent() {
   const sectors = ["Residential", "Commercial", "STR", "Hospitality", "Restaurants", "Venues/Events"];
   const locations = Array.from(new Set(rawProperties.map(p => normalizeCity(p.city)).filter(Boolean)));
   const aesthetics = Array.from(new Set(rawProperties.map(p => p.aestheticTag).filter(Boolean)));
+  const buildingGrades = Array.from(new Set(rawProperties.filter(p => p.spaceCategory === "Commercial").map(p => p.cat?.commercial?.buildingGrade).filter(Boolean)));
+  const bedOptions = ["1", "2", "3", "4+"];
 
   const handleCheckboxChange = (val, state, setState) => {
     if (state.includes(val)) {
@@ -334,6 +341,20 @@ function PropertyDirectoryContent() {
         return band && pPrice >= band.min && pPrice < band.max;
       });
       if (!inBand) return false;
+    }
+    // Polymorphic filter: Building Grade (Commercial)
+    if (selectedSectors.includes("Commercial") && selectedBuildingGrades.length > 0) {
+      const bg = p.cat?.commercial?.buildingGrade;
+      if (!bg || !selectedBuildingGrades.includes(bg)) return false;
+    }
+    // Polymorphic filter: Bedrooms (Residential)
+    if (selectedSectors.includes("Residential") && selectedBeds.length > 0) {
+      if (!p.beds) return false;
+      const bedMatch = selectedBeds.some(bedLabel => {
+        if (bedLabel === "4+") return p.beds >= 4;
+        return p.beds === parseInt(bedLabel);
+      });
+      if (!bedMatch) return false;
     }
     // Search query matches title, city, location, category, or aesthetic tag
     if (searchQuery.trim() !== "") {
@@ -413,6 +434,51 @@ function PropertyDirectoryContent() {
                   </div>
                 )}
               </div>
+
+              {/* Polymorphic Filter: Building Grades (Only shown if Commercial is selected) */}
+              {selectedSectors.includes("Commercial") && buildingGrades.length > 0 && (
+                <div className="filter-card animate-[fadeIn_0.3s_ease-out]">
+                  <button className="filter-trigger" onClick={() => toggleFilterSection("buildingGrades")}>
+                    Building Grade
+                    <span className={`filter-chevron ${openFilters.buildingGrades ? "open" : ""}`}>▼</span>
+                  </button>
+                  {openFilters.buildingGrades && (
+                    <div className="filter-options">
+                      {buildingGrades.map(grade => (
+                        <label key={grade} className="filter-checkbox-label">
+                          <input
+                            type="checkbox"
+                            className="filter-checkbox"
+                            checked={selectedBuildingGrades.includes(grade)}
+                            onChange={() => handleCheckboxChange(grade, selectedBuildingGrades, setSelectedBuildingGrades)}
+                          />
+                          {grade}
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Polymorphic Filter: Bedrooms (Only shown if Residential is selected) */}
+              {selectedSectors.includes("Residential") && (
+                <div className="filter-card animate-[fadeIn_0.3s_ease-out]">
+                  <div className="filter-options mt-2">
+                    <span className="text-[10px] text-text-secondary uppercase tracking-widest mb-2 block">Bedrooms</span>
+                    <div className="flex gap-2 flex-wrap">
+                      {bedOptions.map(bed => (
+                        <button
+                          key={bed}
+                          className={`px-3 py-1 text-xs border rounded-full transition-colors ${selectedBeds.includes(bed) ? 'border-gold-accent bg-gold-accent/20 text-gold-accent' : 'border-surface-variant bg-surface text-text-secondary hover:border-text-secondary'}`}
+                          onClick={() => handleCheckboxChange(bed, selectedBeds, setSelectedBeds)}
+                        >
+                          {bed} {bed !== "4+" && "BR"}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Filter Section: Price Band — qualitative tiers only, NO peso amounts
                   (compliance). Buckets by internal price magnitude; price itself is

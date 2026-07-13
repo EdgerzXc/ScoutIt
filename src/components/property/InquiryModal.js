@@ -8,6 +8,32 @@ import GlassPanel from "../ui/GlassPanel";
 import { ImpeccableTextArea } from "../ui/ImpeccableInput";
 import { ImpeccableButton } from "../ui/ImpeccableButton";
 
+const backdropVariants = {
+  hidden: { opacity: 0, backdropFilter: "blur(0px)" },
+  visible: { opacity: 1, backdropFilter: "blur(8px)" }
+};
+
+const modalVariants = {
+  hidden: { y: 30, scale: 0.95, opacity: 0 },
+  visible: { y: 0, scale: 1, opacity: 1 },
+  exit: { y: 20, scale: 0.95, opacity: 0 }
+};
+
+const modalTransition = { type: "spring", stiffness: 300, damping: 30 };
+const backdropTransition = { duration: 0.4 };
+
+const successVariants = {
+  hidden: { opacity: 0, scale: 0.9 },
+  visible: { opacity: 1, scale: 1 },
+  exit: { opacity: 0, scale: 0.9 }
+};
+
+const formVariants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -10 }
+};
+
 export default function InquiryModal({ isOpen, onClose, propertyTitle, propertySlug }) {
   const [status, setStatus] = useState("composing"); // composing, submitting, success, error
   const [errorMsg, setErrorMsg] = useState("");
@@ -71,17 +97,19 @@ export default function InquiryModal({ isOpen, onClose, propertyTitle, propertyS
       {isOpen && (
         <motion.div 
           className="fixed inset-0 z-[9999] bg-[#0a0908]/85 flex items-center justify-center p-5"
-          initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
-          animate={{ opacity: 1, backdropFilter: "blur(8px)" }}
-          exit={{ opacity: 0, backdropFilter: "blur(0px)" }}
-          transition={{ duration: 0.4 }}
+          variants={backdropVariants}
+          initial="hidden"
+          animate="visible"
+          exit="hidden"
+          transition={backdropTransition}
         >
           <motion.div 
             className="w-full max-w-[500px]"
-            initial={{ y: 30, scale: 0.95, opacity: 0 }}
-            animate={{ y: 0, scale: 1, opacity: 1 }}
-            exit={{ y: 20, scale: 0.95, opacity: 0 }}
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            variants={modalVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            transition={modalTransition}
           >
             <GlassPanel className="relative p-8 rounded-xl shadow-[0_24px_60px_rgba(0,0,0,0.6)]">
               <button 
@@ -97,9 +125,10 @@ export default function InquiryModal({ isOpen, onClose, propertyTitle, propertyS
                   <motion.div 
                     key="success"
                     className="text-center py-10 flex flex-col items-center gap-4"
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
+                    variants={successVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit="exit"
                   >
                     <div className="w-16 h-16 rounded-full bg-success/10 border border-success/30 text-success flex items-center justify-center mb-2">
                       <motion.div
@@ -119,9 +148,10 @@ export default function InquiryModal({ isOpen, onClose, propertyTitle, propertyS
                 ) : (
                   <motion.div 
                     key="form"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
+                    variants={formVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit="exit"
                   >
                     <div className="mb-6">
                       <span className="font-mono text-[10px] text-gold-accent tracking-[0.15em] uppercase block mb-2">

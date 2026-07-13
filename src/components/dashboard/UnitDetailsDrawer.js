@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { X, Plus, Trash2, Star } from "lucide-react";
 import { UNIT_TYPES, estimateCapacity } from "../../lib/unitMasterPage";
+import UnitMasterPage from "../property/UnitMasterPage";
 
 // Drill-in editor for one unit's Unit Master Page — the rich co-working fields
 // (details) and the subdivision scenarios that power the "This space flexes"
@@ -30,19 +31,11 @@ function Field({ label, hint, children }) {
   );
 }
 
-export default function UnitDetailsDrawer({ unit, isPro, onDetail, onScenarios, onClose }) {
+export default function UnitDetailsDrawer({ unit, isPro, propertyId, property, onDetail, onScenarios, onClose }) {
   const d = unit.details || {};
   const scenarios = Array.isArray(unit.subdivisionScenarios) ? unit.subdivisionScenarios : [];
-  const [inclusionsText, setInclusionsText] = useState(
-    Array.isArray(d.lease_inclusions) ? d.lease_inclusions.join(", ") : ""
-  );
 
   const capEstimate = estimateCapacity(unit.size);
-
-  const commitInclusions = (text) => {
-    const arr = text.split(",").map((s) => s.trim()).filter(Boolean);
-    onDetail("lease_inclusions", arr);
-  };
 
   const addScenario = () => {
     onScenarios([
@@ -58,17 +51,29 @@ export default function UnitDetailsDrawer({ unit, isPro, onDetail, onScenarios, 
   };
 
   return (
-    <div className="fixed inset-0 z-[1100] flex justify-end">
-      <div className="absolute inset-0 bg-black/60" onClick={onClose} />
-      <div className="relative w-full max-w-[560px] h-full overflow-y-auto bg-background border-l border-surface-variant shadow-2xl animate-[slideInRight_0.25s_ease-out]">
+    <div className="fixed inset-0 z-[1100] bg-background flex flex-col md:grid md:grid-cols-[450px_1fr] overflow-hidden animate-[fadeIn_0.2s_ease-out]">
+      {/* Left side: Editor Form */}
+      <div className="relative w-full h-full overflow-y-auto bg-background border-r border-surface-variant flex flex-col">
         <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 bg-background/95 backdrop-blur border-b border-surface-variant">
           <div>
             <div className="text-[10px] font-label-caps tracking-widest uppercase text-gold-accent">Unit Master Page</div>
             <h2 className="font-display-md text-lg text-on-surface">{unit.name || "Untitled Unit"}</h2>
           </div>
-          <button onClick={onClose} className="p-2 rounded hover:bg-surface-alt text-text-muted hover:text-on-surface transition-colors" aria-label="Close">
-            <X size={18} />
-          </button>
+          <div className="flex items-center gap-3">
+            {propertyId && unit.id && (
+              <a 
+                href={`/property/${propertyId}/unit/${unit.id}`} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="px-3 py-1.5 rounded border border-surface-variant text-text-secondary hover:text-gold-accent hover:border-gold-accent text-[11px] font-label-caps uppercase tracking-widest transition-colors"
+              >
+                Preview
+              </a>
+            )}
+            <button onClick={onClose} className="p-2 rounded hover:bg-surface-alt text-text-muted hover:text-on-surface transition-colors" aria-label="Close">
+              <X size={18} />
+            </button>
+          </div>
         </div>
 
         <div className="px-6 py-5 flex flex-col gap-6">
@@ -98,29 +103,16 @@ export default function UnitDetailsDrawer({ unit, isPro, onDetail, onScenarios, 
             <Field label="Fit-out status">
               <input className={inputCls} value={d.fit_out_status || ""} onChange={(e) => onDetail("fit_out_status", e.target.value)} placeholder="Warm shell / Fully fitted / Plug-and-play" />
             </Field>
+            <Field label="Availability">
+              <select className={inputCls} value={d.availabilityStatus || "available"} onChange={(e) => onDetail("availabilityStatus", e.target.value)}>
+                <option value="available">Available</option>
+                <option value="occupied">Occupied</option>
+                <option value="coming_soon">Coming Soon</option>
+              </select>
+            </Field>
           </section>
 
-          {/* Terms & Fit-Out */}
-          <section className="flex flex-col gap-4 pt-2 border-t border-surface-variant">
-            <div className="text-[11px] font-label-caps tracking-widest uppercase text-text-secondary">Terms & Fit-Out</div>
-            <div className="grid grid-cols-2 gap-4">
-              <Field label="Operating hours">
-                <input className={inputCls} value={d.operating_hours || ""} onChange={(e) => onDetail("operating_hours", e.target.value)} placeholder="24/7 / 8am–9pm" />
-              </Field>
-              <Field label="Minimum term">
-                <input className={inputCls} value={d.min_term || ""} onChange={(e) => onDetail("min_term", e.target.value)} placeholder="6 months" />
-              </Field>
-              <Field label="Deposit">
-                <input className={inputCls} value={d.deposit || ""} onChange={(e) => onDetail("deposit", e.target.value)} placeholder="2 months" />
-              </Field>
-            </div>
-            <Field label="What's included" hint="Comma-separated — Internet, Utilities, Furniture, Meeting-room credits…">
-              <input className={inputCls} value={inclusionsText} onChange={(e) => { setInclusionsText(e.target.value); commitInclusions(e.target.value); }} placeholder="Internet, Utilities, Furniture, 10 meeting-room hrs/mo" />
-            </Field>
-            <Field label="House rules / fit-out rules">
-              <textarea rows={2} className={inputCls} value={d.house_rules || ""} onChange={(e) => onDetail("house_rules", e.target.value)} placeholder="No structural changes; landlord approval for signage." />
-            </Field>
-          </section>
+
 
           {/* Floor plan & Vault */}
           <section className="flex flex-col gap-4 pt-2 border-t border-surface-variant">
@@ -187,6 +179,16 @@ export default function UnitDetailsDrawer({ unit, isPro, onDetail, onScenarios, 
             </button>
           </section>
         </div>
+      </div>
+
+      {/* Right side: Live Preview */}
+      <div className="hidden md:block relative w-full h-full overflow-y-auto bg-surface-alt custom-scrollbar">
+        <UnitMasterPage 
+          slug={propertyId} 
+          unitId={unit.id} 
+          previewProperty={property} 
+          previewUnit={unit} 
+        />
       </div>
     </div>
   );

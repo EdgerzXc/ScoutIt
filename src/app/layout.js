@@ -43,6 +43,11 @@ export const metadata = {
     locale: "en_PH",
     siteName: "ScoutIt",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "ScoutIt — Space Intelligence",
+    description: "ScoutIt transforms Philippine real estate into intelligent property briefings. Scout smarter, move faster.",
+  },
 };
 
 export const viewport = {

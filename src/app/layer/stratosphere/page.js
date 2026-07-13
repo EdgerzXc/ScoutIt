@@ -8,6 +8,8 @@ import { useState, useEffect } from "react";
 import { getArticles } from "@/data/mockArticles";
 
 import BackgroundStratosphere from "@/components/descent/BackgroundStratosphere";
+import LayerHeader from "@/components/descent/LayerHeader";
+import LayerTransition from "@/components/descent/LayerTransition";
 
 const EMPTY_FEED = {
   Residential: { spotlights: [], news: [], collections: [] },
@@ -120,32 +122,34 @@ export default function StratosphereLayer() {
       <div className="fixed inset-0 pointer-events-none z-0">
         <BackgroundStratosphere />
       </div>
-{/* SECTION 3: Layer 02 */}
-      <section className="snap-section section-discover" id="discover-section" style={{ padding: 0 }}>
-        <div className="property-split">
+      <div className="layer-pane relative z-10">
+        <LayerHeader 
+          layerNum="02" 
+          layerName="Stratosphere" 
+          title="Stories & Market Intel" 
+          description="Neighborhood stories, market reports, and design features from around the Philippines." 
+          missionText="The Stratosphere serves as the Intelligence Layer. This is where market signals travel before they ever touch the ground — neighborhood stories, regional data, and design narratives that let you read the market from above, long before you descend into it." 
+          ctaText="Discover Stories →"
+          ctaHref="/intel"
+        />
+        {/* SECTION 3: Layer 02 */}
+        <section className="snap-section section-discover" id="discover-section" style={{ padding: 0 }}>
+        <div className="descent-split">
           {/* Left Menu Panel */}
-          <div className="property-menu">
-            <div className="menu-header">
-              <span className="vector-label">Layer 02 // Stratosphere</span>
-              <h2>Stories &amp; Market Intel</h2>
-              <p>Neighborhood stories, market reports, and design features from around the Philippines.</p>
-            </div>
-            <nav className="menu-nav">
+          <div className="descent-sidebar" style={{ justifyContent: "space-between" }}>
+            <nav className="descent-nav">
               {propertyTypes.map((type) => (
                 <button
                   key={type}
-                  className={`menu-btn ${activeDiscoverType === type ? "active" : ""}`}
+                  className={`descent-cat ${activeDiscoverType === type ? "on" : ""}`}
                   onClick={() => setActiveDiscoverType(type)}
                 >
                   {type}
                 </button>
               ))}
             </nav>
-            <div className="layer-mission">
-              <h3>Mission</h3>
-              <p>The Stratosphere serves as the Intelligence Layer. This is where market signals travel before they ever touch the ground — neighborhood stories, regional data, and design narratives that let you read the market from above, long before you descend into it.</p>
-            </div>
-            <div className="menu-footer">
+
+            <div className="menu-footer" style={{ marginTop: "32px" }}>
               <Link href="/intel" className="prominent-action-link">
                 Read the Stories &rarr;
               </Link>
@@ -153,7 +157,7 @@ export default function StratosphereLayer() {
           </div>
 
           {/* Right Visual Canvas */}
-          <div className="matrix-preview-pane">
+          <div className="descent-content matrix-preview-pane">
             <header className="pane-header">
               <h3>{activeDiscoverType} Stories</h3>
               <p>Spotlights, articles &amp; collections</p>
@@ -255,8 +259,15 @@ export default function StratosphereLayer() {
             </div>
           </div>
         </div>
-      </section>
-</main>
+        </section>
+        <LayerTransition 
+          nextNum="03" 
+          nextName="Metropolis" 
+          nextHref="/layer/metropolis" 
+          teaser="Drop below the clouds. The city directory opens up." 
+        />
+      </div>
+    </main>
         
   );
 }

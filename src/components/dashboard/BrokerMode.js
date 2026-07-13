@@ -5,6 +5,7 @@ import { useDashboard } from "../../context/DashboardContext";
 import Link from "next/link";
 import { Lock } from "lucide-react";
 import { getSession } from "../../lib/authClient";
+import { supabase } from "../../lib/supabaseClient";
 import ScoutInsightPanel from './panels/ScoutInsightPanel';
 import MeshHero from '../ui/MeshHero';
 import TaskRail from "./crm/TaskRail";
@@ -22,6 +23,33 @@ export default function BrokerMode() {
   const [pitchMessage, setPitchMessage] = useState("");
   const [pitchError, setPitchError] = useState("");
   const [isSendingPitch, setIsSendingPitch] = useState(false);
+
+  // License State
+  const [prcInput, setPrcInput] = useState("");
+  const [dhsudInput, setDhsudInput] = useState("");
+
+  useEffect(() => {
+    if (currentUser) {
+      setPrcInput(currentUser.prcLicense || currentUser.prc_license || "");
+      setDhsudInput(currentUser.dhsudNumber || currentUser.dhsud_number || "");
+    }
+  }, [currentUser]);
+
+  const handleUpdateLicense = async (field, value) => {
+    if (!currentUser) return;
+    try {
+      const { error } = await supabase
+        .from('user_profiles')
+        .update({ [field]: value })
+        .eq('id', currentUser.id);
+      
+      if (error) throw error;
+      if (addToast) addToast("License updated successfully", "✅");
+    } catch (err) {
+      console.error("Failed to update license:", err);
+      if (addToast) addToast("Failed to update license", "❌");
+    }
+  };
 
   // Notification and ID Card State. The "new feature" banner dismissal is
   // persisted — a banner that resurrects on every visit stops being news.
@@ -618,14 +646,32 @@ export default function BrokerMode() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                  <div className="bg-surface-alt p-3 rounded border border-surface-variant">
+                <div className="grid grid-cols-3 gap-4 mb-6">
+                  <div className="bg-surface-alt p-3 rounded border border-surface-variant flex flex-col justify-center">
                     <span className="block text-[8px] text-text-muted font-mono uppercase tracking-widest mb-1">Scout Rating</span>
                     <span className="text-text-muted font-mono font-bold text-sm" title="Earned through verified closures only">Earned by closures</span>
                   </div>
-                  <div className="bg-surface-alt p-3 rounded border border-surface-variant">
+                  <div className="bg-surface-alt p-3 rounded border border-surface-variant flex flex-col justify-center">
                     <span className="block text-[8px] text-text-muted font-mono uppercase tracking-widest mb-1">PRC License</span>
-                    <span className="text-on-surface font-mono font-bold text-sm">{currentUser?.prcLicense || currentUser?.prc_license || "On file"}</span>
+                    <input 
+                      type="text" 
+                      className="bg-transparent border-none text-on-surface font-mono font-bold text-sm p-0 focus:ring-0 w-full"
+                      placeholder="Enter PRC No."
+                      value={prcInput}
+                      onChange={(e) => setPrcInput(e.target.value)}
+                      onBlur={(e) => handleUpdateLicense('prc_license', e.target.value)}
+                    />
+                  </div>
+                  <div className="bg-surface-alt p-3 rounded border border-surface-variant flex flex-col justify-center">
+                    <span className="block text-[8px] text-text-muted font-mono uppercase tracking-widest mb-1">DHSUD No.</span>
+                    <input 
+                      type="text" 
+                      className="bg-transparent border-none text-on-surface font-mono font-bold text-sm p-0 focus:ring-0 w-full"
+                      placeholder="Enter DHSUD No."
+                      value={dhsudInput}
+                      onChange={(e) => setDhsudInput(e.target.value)}
+                      onBlur={(e) => handleUpdateLicense('dhsud_number', e.target.value)}
+                    />
                   </div>
                 </div>
 
@@ -704,7 +750,7 @@ export default function BrokerMode() {
       <header className="lg:hidden pt-4 pb-6 mb-6 border-b border-surface-variant flex items-end justify-between gap-4 mesh-bg-hero px-4 rounded-xl shadow-lg">
         <div>
           <span className="font-label-caps text-gold-accent tracking-widest uppercase text-[10px] mb-1 block">Command Center</span>
-          <h2 className="font-headline-editorial text-3xl text-gradient-sapphire">Broker Intelligence</h2>
+          <h2 className="font-headline-editorial text-3xl text-gradient-gold">Broker Intelligence</h2>
         </div>
         <div className="text-right shrink-0">
           <span className="block text-[9px] font-label-caps uppercase tracking-widest text-text-secondary">Deals Won</span>
@@ -716,7 +762,7 @@ export default function BrokerMode() {
       <MeshHero className="py-6 lg:py-10 px-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sticky top-0 lg:top-auto z-10 border-b border-surface-variant mb-8 hidden lg:flex rounded-2xl shadow-xl border border-[rgba(255,255,255,0.05)]">
         <div>
           <span className="font-label-caps text-gold-accent tracking-widest uppercase mb-2 block">Command Center</span>
-          <h2 className="font-headline-editorial text-gradient-sapphire text-4xl lg:text-5xl drop-shadow-md">Broker Intelligence</h2>
+          <h2 className="font-headline-editorial text-gradient-gold text-4xl lg:text-5xl drop-shadow-md">Broker Intelligence</h2>
         </div>
         <div className="flex items-center gap-6">
           <div className="text-right">

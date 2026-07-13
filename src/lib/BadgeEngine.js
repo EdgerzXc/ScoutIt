@@ -39,7 +39,7 @@ export const BADGE_DEFINITIONS = {
     max_slots: 20,
     claimed: 19,
     status: "ACTIVE",
-    color: "#C084FC", // Amethyst Purple
+    color: "#0d0d0d", // Obsidian Black
     perks: {
       discount: true,
       priority_support: true

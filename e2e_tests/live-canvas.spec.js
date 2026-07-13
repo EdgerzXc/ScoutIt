@@ -32,11 +32,11 @@ test.describe('Owner Live Canvas (Editor v1)', () => {
     await page.locator('button:has-text("Start My First Listing")').click();
     await page.waitForTimeout(500);
 
-    // Mode selector screen — look for the "Live Editor Workspace" option
-    await expect(page.locator('h3:has-text("Live Editor Workspace")').first()).toBeVisible({ timeout: 10000 });
+    // Mode selector screen — look for the "Build from Scratch" option
+    await expect(page.locator('h3:has-text("Build from Scratch")').first()).toBeVisible({ timeout: 10000 });
 
-    // Click the Live Editor Workspace card
-    await page.locator('h3:has-text("Live Editor Workspace")').click();
+    // Click the Build from Scratch card
+    await page.locator('h3:has-text("Build from Scratch")').click();
     await page.waitForTimeout(1000);
 
     // Live Editor should now be visible — check for the Must Haves section

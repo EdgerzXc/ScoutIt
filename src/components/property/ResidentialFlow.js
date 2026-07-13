@@ -20,7 +20,9 @@ const InteractiveMap = dynamic(() => import("@/components/property/InteractiveMa
   ),
 });
 import { getChapterConfig } from "./chapterConfig";
-import { Bed, Bath, Ruler, Car, Lock, Search, Camera, Building2 } from "lucide-react";
+import { Lock, Unlock, Zap, ChevronRight, Share2, MapPin, Eye, Search, Layers, X, Home, Users, ArrowUpRight, Copy, Check, Bed, Bath, Ruler, Car, Building2, Camera } from "lucide-react";
+import Image from "next/image";
+import ShareModal from "./ShareModal";
 import InquiryModal from "@/components/property/InquiryModal";
 import OperatorRequestModal from "@/components/property/OperatorRequestModal";
 import GlassPanel from "@/components/ui/GlassPanel";
@@ -205,6 +207,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
   const [whereToTab,        setWhereToTab]        = useState("map");
   const [locTab,            setLocTab]            = useState("map");
   const [isInquiryOpen,     setIsInquiryOpen]     = useState(false);
+  const [shareTextOpen,     setShareTextOpen]     = useState(null);
   const [isOperatorRequestOpen, setIsOperatorRequestOpen] = useState(false);
   // The mobile bottom bar's "Inquire" action opens this modal via a global event,
   // so the primary CTA is always reachable from the thumb zone on a long page.
@@ -907,12 +910,14 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
         >
 
           {photos.map((url, i) => (
-            <div
+            <Image
               key={i}
+              src={url}
+              alt={`${d.title} preview ${i+1}`}
+              fill
+              priority={i === 0}
+              quality={85}
               className={`photo-slide ${photoMode} ${currentImageIndex === i ? "active" : ""}`}
-              style={{ 
-                backgroundImage: `url(${url})`
-              }}
             />
           ))}
 
@@ -2119,9 +2124,25 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                   onClick={() => {
                     if (typeof window !== 'undefined') {
                       const cleanUrl = window.location.origin + window.location.pathname;
-                      const shareText = `✦ ${d.title || 'Space Intelligence'}\n${d.hook ? d.hook + '\n\n' : ''}🔗 ${cleanUrl}`;
-                      navigator.clipboard.writeText(shareText);
-                      alert("Link and description copied to clipboard!");
+                      const title = d.title || "Premium Space";
+                      const cat = d.spaceCategory || d.category || "Residential Space";
+                      const sqm = d.sqm || d.Floor_Area_Sqm || d.CM_Total_GLA || "";
+                      const shareText = `${title} — Market Intelligence Briefing\n${cat} | ${sqm ? sqm + ' sqm | ' : ''}${d.location || 'Location upon inquiry'}\nDiscover the complete architectural and operational signals for this space on ScoutIt, the Philippines' first spatial commerce platform.\nAccess the full briefing: ${cleanUrl}`;
+                      
+                      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                      
+                      if (isMobile && navigator.share) {
+                        navigator.share({
+                          title: `${title} - ScoutIt`,
+                          text: shareText
+                        }).catch(err => {
+                          if (err.name !== 'AbortError') {
+                            setShareTextOpen(shareText);
+                          }
+                        });
+                      } else {
+                        setShareTextOpen(shareText);
+                      }
                     }
                   }}
                   className="w-full bg-transparent border border-surface-variant text-text-secondary font-mono text-xs tracking-[0.12em] uppercase font-bold py-3 px-4 rounded hover:bg-surface-alt transition-colors active:scale-[0.98] flex items-center justify-center gap-2"
@@ -2235,6 +2256,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
               src={photos[currentImageIndex]} 
               alt={`${d.title} fullscreen view`} 
               className={`lightbox-image ${photoMode}`} 
+              loading="lazy"
             />
           </div>
 
@@ -2251,6 +2273,13 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
           </div>
         </div>
       )}
+
+      <ShareModal 
+        isOpen={!!shareTextOpen}
+        onClose={() => setShareTextOpen(null)}
+        shareText={shareTextOpen}
+        propertyUrl={typeof window !== 'undefined' ? window.location.href : ''}
+      />
     </>
   );
 }

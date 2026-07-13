@@ -46,10 +46,10 @@ test.describe('Comprehensive E2E Flow', () => {
     await loadingText.waitFor({ state: 'hidden', timeout: 15000 }).catch(() => {});
 
     // Navigate to wizard
-    const liveEditorButton = ownerPage.locator('div.group:has-text("Live Editor Workspace"), h3:has-text("Live Editor Workspace")').first();
+    const liveEditorButton = ownerPage.locator('div.group:has-text("Build from Scratch"), h3:has-text("Build from Scratch")').first();
     if (!(await liveEditorButton.isVisible())) {
       // Wait for OwnerMode to actually mount (otherwise clicking the page.js FAB fires an event into the void)
-      const ownerModeIdentifier = ownerPage.locator('h1:has-text("Active Property Files"), h1:has-text("Welcome back")').first();
+      const ownerModeIdentifier = ownerPage.locator('h1:has-text("Active Listings"), h1:has-text("Welcome back")').first();
       await ownerModeIdentifier.waitFor({ state: 'visible', timeout: 45000 }).catch(() => console.log("OwnerMode identifier not found, but continuing"));
 
       // Look for the mobile FAB or the desktop button
@@ -78,8 +78,8 @@ test.describe('Comprehensive E2E Flow', () => {
       await expect(liveEditorButton).toBeVisible({ timeout: 10000 });
     }
     
-    // Now click Live Editor Workspace
-    await liveEditorButton.click();
+    // Now click Build from Scratch
+    await ownerPage.locator('div.group:has-text("Build from Scratch"), h3:has-text("Build from Scratch")').first().click();
 
     // Wait for the Live Editor Workspace header to appear
     await expect(ownerPage.locator('text="Property Blueprint"')).toBeVisible({ timeout: 10000 }).catch(() => {});

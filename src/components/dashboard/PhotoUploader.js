@@ -1,7 +1,9 @@
 import { useState, useRef } from 'react';
 import { uploadPropertyPhoto } from '../../lib/storage';
+import { useDashboard } from '../../context/DashboardContext';
 
 export default function PhotoUploader({ photos, onChange, onSetImage, isPro = false, maxFreePhotos = 7 }) {
+  const { addToast } = useDashboard();
   const [uploadingIndex, setUploadingIndex] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [dragOverIndex, setDragOverIndex] = useState(null);
@@ -184,7 +186,7 @@ export default function PhotoUploader({ photos, onChange, onSetImage, isPro = fa
       {maxReached ? (
         <button 
           className="mt-2 py-3 bg-gradient-to-r from-gold-accent to-gold-bright text-background hover:scale-[1.01] rounded text-xs font-bold tracking-widest uppercase transition-transform shadow-lg"
-          onClick={() => alert("Upgrade to PRO to unlock more photo slots!")}
+          onClick={() => { if(addToast) addToast("Upgrade to PRO to unlock more photo slots!", "🔒"); }}
         >
           🔒 UPGRADE TO PRO FOR MORE PHOTOS
         </button>

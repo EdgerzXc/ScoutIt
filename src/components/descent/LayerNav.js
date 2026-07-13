@@ -55,7 +55,7 @@ function NavPill({ href, label, dir }) {
       <span className="layer-nav-pill-label">
         {label}
         {plain && (
-          <span style={{ opacity: 0.55, fontWeight: 500 }}> · {plain}</span>
+          <span style={{ opacity: 1, fontWeight: 500 }}> · {plain}</span>
         )}
       </span>
       {dir === "next" && (
@@ -108,9 +108,13 @@ export default function LayerNav({ prev = null, next = null }) {
             textDecoration: "none",
             whiteSpace: "nowrap",
             flexShrink: 0,
+            position: "absolute",
+            left: "50%",
+            transform: "translateX(-50%)",
           }}
         >
-          <span style={{ color: "#f5f3ee" }}>Scout</span>
+          <span style={{ color: "var(--accent)" }}>S</span>
+          <span style={{ color: "#f5f3ee" }}>cout</span>
           <span
             style={{
               color: "var(--accent)",

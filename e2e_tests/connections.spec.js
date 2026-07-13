@@ -9,22 +9,16 @@ test.describe('Full Flow Mockups: Discovery to Handshake', () => {
     });
 
     // 1. Property Details Page Discovery
-    await page.goto('http://localhost:3000/property/aurelia-residences');
-    await expect(page.locator('text=Aurelia Residences').first()).toBeVisible();
+    await page.goto('http://localhost:3000/property/the-ridgeline-at-capitol-commons');
+    await expect(page.locator('text=The Ridgeline').first()).toBeVisible({ timeout: 15000 });
     // Look for the "Connect with an Authorized Broker" button
     const connectBtn = page.locator('button:has-text("Connect with an Authorized Broker")');
     await expect(connectBtn).toBeVisible();
     await connectBtn.evaluate(b => b.click());
 
     // 6. Inquiry Modal (Spending 1 Connect)
-    const modalTitle = page.locator('text=Select Representative');
+    const modalTitle = page.locator('text=Contact the Owner');
     await expect(modalTitle).toBeVisible();
-
-    // Select the first broker
-    await page.locator('button:has-text("Elena Rostova")').click();
-
-    // Now it should show the composing screen
-    await expect(page.locator('text=Contact Elena Rostova')).toBeVisible();
     
     const textArea = page.locator('textarea[name="message"]');
     await textArea.fill('Hi, I am interested in this property. Is there an available schedule?');

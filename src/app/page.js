@@ -7,8 +7,15 @@ import ReactionButtons from "@/components/ui/ReactionButtons";
 import ProfileButton from "@/components/ui/ProfileButton";
 import BoardPodium from "@/components/board/BoardPodium";
 import CinematicJourney from "@/components/cinematic/CinematicJourney";
-import BlackHoleCanvas from "@/components/descent/BlackHoleCanvas";
-import GoldenHorizonCanvas, { GOLDEN_DEFAULT_PARAMS } from "@/components/descent/GoldenHorizonCanvas";
+import dynamic from "next/dynamic";
+const BlackHoleCanvas = dynamic(() => import("@/components/descent/BlackHoleCanvas"), { ssr: false });
+const GoldenHorizonCanvas = dynamic(() => import("@/components/descent/GoldenHorizonCanvas"), { ssr: false });
+
+const GOLDEN_DEFAULT_PARAMS = {
+  horizonRadius: 0.16, diskInner: 0.22, diskOuter: 0.7, lensingStrength: 0.28,
+  spinSpeed: 0.8, beamingStrength: 0.45, brightness: 1.1, bloomIntensity: 1.3,
+  colorShift: 0, noiseFreq: 1.0, pitch: 0.12, yaw: 0.0, starfieldDensity: 0.6,
+};
 import InteractivePanel from "@/components/descent/InteractivePanel";
 import Footer from "@/components/layout/Footer";
 import { Building2, Camera, Search, CalendarDays } from "lucide-react";
@@ -654,44 +661,44 @@ export default function Home() {
         </h2>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
-          {/* Card 01: Orbit (The Board) */}
+          {/* Card 01: Orbit */}
           <Link href="/layer/orbit" className="text-left group relative bg-[#111111]/80 backdrop-blur-md border border-white/5 rounded-xl p-8 overflow-hidden hover:border-gold-accent/50 transition-all duration-500 hover:-translate-y-1 block">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(232,174,60,0.1),transparent_50%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="font-mono text-[10px] text-gold-accent tracking-widest mb-4">LAYER 01 // ORBIT</div>
-            <h3 className="font-display text-2xl text-white mb-2">The Board</h3>
-            <p className="text-sm text-text-secondary">Top 100 Most Inquired Properties</p>
+            <h3 className="font-display text-2xl text-white mb-2">Most Inquired Properties</h3>
+            <p className="text-sm text-text-secondary">Top 100 properties ranked by real demand</p>
           </Link>
 
           {/* Card 02: Stratosphere */}
           <Link href="/layer/stratosphere" className="text-left group relative bg-[#111111]/80 backdrop-blur-md border border-white/5 rounded-xl p-8 overflow-hidden hover:border-gold-accent/50 transition-all duration-500 hover:-translate-y-1 block">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(232,174,60,0.1),transparent_50%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="font-mono text-[10px] text-gold-accent tracking-widest mb-4">LAYER 02 // STRATOSPHERE</div>
-            <h3 className="font-display text-2xl text-white mb-2">Stories & Intel</h3>
-            <p className="text-sm text-text-secondary">Neighborhood stories & market features</p>
+            <h3 className="font-display text-2xl text-white mb-2">Market Intelligence</h3>
+            <p className="text-sm text-text-secondary">Deep-dive stories, trends, and neighborhood intel</p>
           </Link>
 
           {/* Card 03: Metropolis */}
           <Link href="/layer/metropolis" className="text-left group relative bg-[#111111]/80 backdrop-blur-md border border-white/5 rounded-xl p-8 overflow-hidden hover:border-gold-accent/50 transition-all duration-500 hover:-translate-y-1 lg:col-span-1 block">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(232,174,60,0.15),transparent_50%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="font-mono text-[10px] text-gold-accent tracking-widest mb-4">LAYER 03 // METROPOLIS</div>
-            <h3 className="font-display text-2xl text-white mb-2">Explore Spaces</h3>
-            <p className="text-sm text-text-secondary">Search the complete property directory</p>
+            <h3 className="font-display text-2xl text-white mb-2">Property Directory</h3>
+            <p className="text-sm text-text-secondary">Search all commercial and residential spaces</p>
           </Link>
 
           {/* Card 04: The Crust */}
           <Link href="/layer/crust" className="text-left group relative bg-[#111111]/80 backdrop-blur-md border border-white/5 rounded-xl p-8 overflow-hidden hover:border-gold-accent/50 transition-all duration-500 hover:-translate-y-1 md:col-span-1 lg:col-span-2 block">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(232,174,60,0.05),transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="font-mono text-[10px] text-gold-accent tracking-widest mb-4">LAYER 04 // THE CRUST</div>
-            <h3 className="font-display text-2xl text-white mb-2">The Ecosystem</h3>
-            <p className="text-sm text-text-secondary">Verified Advisors & Professionals</p>
+            <h3 className="font-display text-2xl text-white mb-2">Verified Professionals</h3>
+            <p className="text-sm text-text-secondary">Connect with trusted advisors, brokers, and partners</p>
           </Link>
 
           {/* Card 05: The Core */}
           <Link href="/layer/core" className="text-left group relative bg-[#111111]/80 backdrop-blur-md border border-white/5 rounded-xl p-8 overflow-hidden hover:border-gold-accent/50 transition-all duration-500 hover:-translate-y-1 md:col-span-1 lg:col-span-1 block">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(232,174,60,0.1),transparent_50%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="font-mono text-[10px] text-gold-accent tracking-widest mb-4">LAYER 05 // THE CORE</div>
-            <h3 className="font-display text-2xl text-white mb-2">Your Workspace</h3>
-            <p className="text-sm text-text-secondary">Private Wishlist & Dashboard</p>
+            <h3 className="font-display text-2xl text-white mb-2">Private Dashboard</h3>
+            <p className="text-sm text-text-secondary">Manage your wishlist, properties, and direct deals</p>
           </Link>
         </div>
       </section>

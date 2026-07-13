@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Calendar, Clock, MapPin, CheckCircle, XCircle } from "lucide-react";
+import { Calendar, Clock, MapPin, CheckCircle, XCircle, Edit2, Link as LinkIcon, Plus } from "lucide-react";
 
 export default function AppointmentsSheet({ appointments, onStatusUpdate }) {
   const [updatingId, setUpdatingId] = useState(null);
@@ -52,7 +52,49 @@ export default function AppointmentsSheet({ appointments, onStatusUpdate }) {
   });
 
   return (
-    <div className="flex flex-col gap-8 h-full overflow-y-auto pb-10">
+    <div className="flex flex-col gap-8 h-full overflow-y-auto pb-10 custom-scrollbar pr-2">
+      
+      {/* Calendar Integrations Section */}
+      <div className="bg-[#121212] border border-[#E8AE3C]/20 rounded-lg p-5">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h3 className="font-serif text-[#E8AE3C] text-lg">Calendar Sync</h3>
+            <p className="text-xs text-white/50 mt-1">Connect your tools to automate availability and bookings.</p>
+          </div>
+          <button className="flex items-center gap-2 px-3 py-1.5 bg-[#E8AE3C]/10 hover:bg-[#E8AE3C]/20 text-[#E8AE3C] border border-[#E8AE3C]/30 rounded text-xs uppercase tracking-wider font-bold transition-colors">
+            <Plus size={14} /> Add New
+          </button>
+        </div>
+        
+        <div className="flex flex-col md:flex-row gap-3">
+          <div className="flex-1 bg-black/40 border border-white/5 rounded p-3 flex items-center justify-between group hover:border-white/10 transition-colors">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded bg-white text-black flex items-center justify-center font-bold text-xs">G</div>
+              <div>
+                <div className="text-sm text-white/90 font-medium">Google Calendar</div>
+                <div className="text-[10px] text-green-400">Connected as team@scoutit.com</div>
+              </div>
+            </div>
+            <button className="text-white/40 hover:text-white transition-colors" title="Manage Integration">
+              <Edit2 size={14} />
+            </button>
+          </div>
+          
+          <div className="flex-1 bg-black/40 border border-white/5 rounded p-3 flex items-center justify-between group hover:border-[#E8AE3C]/30 transition-colors">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded bg-blue-600 text-white flex items-center justify-center font-bold text-[10px]">Cal</div>
+              <div>
+                <div className="text-sm text-white/90 font-medium">Calendly</div>
+                <div className="text-[10px] text-[#E8AE3C]">Not Connected</div>
+              </div>
+            </div>
+            <button className="text-[#E8AE3C] hover:text-[#F7C64E] transition-colors" title="Link Calendly">
+              <LinkIcon size={14} />
+            </button>
+          </div>
+        </div>
+      </div>
+
       {Object.entries(groups).map(([label, appts]) => {
         if (appts.length === 0) return null;
         return (
@@ -95,24 +137,30 @@ export default function AppointmentsSheet({ appointments, onStatusUpdate }) {
                       )}
                     </div>
 
-                    {appt.status === "pending" && appt.isHost && (
-                      <div className="flex gap-2">
-                        <button 
-                          onClick={() => handleUpdate(appt.id, "cancelled")}
-                          disabled={updatingId === appt.id}
-                          className="px-3 py-1.5 rounded border border-error/30 text-error hover:bg-error/10 transition-colors text-xs font-working-title flex items-center gap-1 disabled:opacity-50"
-                        >
-                          <XCircle size={14} /> Decline
-                        </button>
-                        <button 
-                          onClick={() => handleUpdate(appt.id, "confirmed")}
-                          disabled={updatingId === appt.id}
-                          className="px-3 py-1.5 rounded border border-success/30 text-success hover:bg-success/10 transition-colors text-xs font-working-title flex items-center gap-1 disabled:opacity-50"
-                        >
-                          <CheckCircle size={14} /> Confirm
-                        </button>
-                      </div>
-                    )}
+                    <div className="flex flex-col md:flex-row gap-2 mt-4 md:mt-0">
+                      {appt.status === "pending" && appt.isHost && (
+                        <div className="flex gap-2">
+                          <button 
+                            onClick={() => handleUpdate(appt.id, "cancelled")}
+                            disabled={updatingId === appt.id}
+                            className="px-3 py-1.5 rounded border border-error/30 text-error hover:bg-error/10 transition-colors text-xs font-working-title flex items-center gap-1 disabled:opacity-50"
+                          >
+                            <XCircle size={14} /> Decline
+                          </button>
+                          <button 
+                            onClick={() => handleUpdate(appt.id, "confirmed")}
+                            disabled={updatingId === appt.id}
+                            className="px-3 py-1.5 rounded border border-success/30 text-success hover:bg-success/10 transition-colors text-xs font-working-title flex items-center gap-1 disabled:opacity-50"
+                          >
+                            <CheckCircle size={14} /> Confirm
+                          </button>
+                        </div>
+                      )}
+                      
+                      <button className="px-3 py-1.5 rounded border border-white/10 text-white/70 hover:bg-white/5 transition-colors text-xs font-working-title flex items-center justify-center gap-1">
+                        <Edit2 size={12} /> Manage
+                      </button>
+                    </div>
                   </div>
                 );
               })}
