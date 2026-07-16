@@ -143,7 +143,14 @@ export default function PublicProfilePage() {
         {/* Role Panels — only public roles */}
         {hasAnyPanel && (
           <div style={panelsGrid}>
-            {showBroker && <BrokerPanel data={brokerData} isPublic />}
+            {showBroker && (
+              <BrokerPanel
+                data={brokerData}
+                isPublic
+                prcVerified={!!profile?.prc_verified}
+                prcLicense={profile?.prc_verified ? profile?.prc_license : ""}
+              />
+            )}
             {showPhotographer && (
               <PhotographerPanel
                 projects={photographerProjects}

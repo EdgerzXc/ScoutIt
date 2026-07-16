@@ -6,6 +6,27 @@ import { useDashboard } from "../../../context/DashboardContext";
 
 const ROLES = ["Admin", "Head of Finances", "Location Manager", "Agent", "Viewer"];
 
+// Gold-ring initials disc when a member has no real avatar photo — we never
+// show a stock stranger's face for a real account (Honest Blank Rule).
+function MemberAvatar({ member, size = "w-10 h-10", textSize = "text-sm" }) {
+  if (member.avatar) {
+    /* eslint-disable-next-line @next/next/no-img-element */
+    return <img src={member.avatar} alt={member.name} className={`${size} rounded-full object-cover`} />;
+  }
+  const initials = (member.name || "?")
+    .split(" ")
+    .map((w) => w[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+  return (
+    <div className={`${size} rounded-full bg-[#E8AE3C]/10 border border-[#E8AE3C]/30 flex items-center justify-center shrink-0`}>
+      <span className={`${textSize} font-mono text-[#E8AE3C] tracking-wider`}>{initials}</span>
+    </div>
+  );
+}
+
 export default function TeamManagementPanel({ currentUser = null, properties = [] }) {
   const { addToast } = useDashboard();
   const [teamList, setTeamList] = useState([]);
@@ -31,77 +52,27 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
       { id: "bypass_ai_queue", label: "Priority AI Processing", description: "Bypass the standard drafting queue for instant AI insights." },
     ];
 
-    // Inject the real user
+    // The real signed-in super-admin is the only member until invites go out.
+    // Honest Blank Rule: no seeded teammates, no invented activity or tasks.
     if (currentUser) {
       list.push({
         id: "current_user",
         name: currentUser.user_metadata?.full_name || currentUser.email || "You",
-        email: currentUser.email || "user@scoutit.com",
+        email: currentUser.email || "",
         role: "Admin",
-        avatar: currentUser.user_metadata?.avatar_url || "https://picsum.photos/seed/admin/100/100",
+        avatar: currentUser.user_metadata?.avatar_url || null,
         lastActive: "Just now",
-        activities: [
-          { id: 1, action: "Approved Listing", target: properties.length > 0 ? properties[0].title : "One Roxas Triangle", time: "10 mins ago" },
-          { id: 2, action: "Invited Member", target: "sarah@scoutit.com", time: "2 hrs ago" },
-        ],
-        tasks: [
-          { id: 1, title: "Review Q3 Expansion Strategy", status: "To Do", priority: "High", due: "Today" },
-          { id: 2, title: "Approve Enterprise Contracts", status: "In Progress", priority: "Medium", due: "Tomorrow" },
-          { id: 3, title: "Weekly Sync with Finances", status: "Done", priority: "Low", due: "Yesterday" }
-        ],
+        activities: [],
+        tasks: [],
         permissions: defaultPermissions.map(p => ({ ...p, granted: true }))
       });
     }
-
-    // Add logical dummy data
-    list.push({
-      id: "user_2",
-      name: "Sarah Chen",
-      email: "sarah@scoutit.com",
-      role: "Head of Finances",
-      avatar: "https://picsum.photos/seed/sarah/100/100",
-      lastActive: "2 hours ago",
-      activities: [
-        { id: 1, action: "Exported Report", target: "Q3 Revenue Projections", time: "2 hrs ago" },
-        { id: 2, action: "Updated Billing", target: "Corporate Card ending in 4421", time: "3 hrs ago" },
-      ],
-      tasks: [
-        { id: 1, title: "Export Weekly Revenue Report", status: "Done", priority: "High", due: "Yesterday" },
-        { id: 2, title: "Audit Commission Payouts", status: "In Progress", priority: "High", due: "Today" },
-        { id: 3, title: "Prepare Q4 Budget Forecast", status: "To Do", priority: "Medium", due: "Next Week" }
-      ],
-      permissions: defaultPermissions.map(p => ({ 
-        ...p, 
-        granted: ["view_financials", "manage_finance", "export_data"].includes(p.id) 
-      }))
-    });
-
-    list.push({
-      id: "user_3",
-      name: "David Park",
-      email: "david@scoutit.com",
-      role: "Location Manager",
-      avatar: "https://picsum.photos/seed/david/100/100",
-      lastActive: "1 day ago",
-      activities: [
-        { id: 1, action: "Connected with", target: "John Doe (Broker)", time: "1 day ago" },
-        { id: 2, action: "Updated Details", target: properties.length > 1 ? properties[1].title : "BGC Corporate Center", time: "2 days ago" },
-      ],
-      tasks: [
-        { id: 1, title: "Onboard new BGC building", status: "To Do", priority: "High", due: "Tomorrow" },
-        { id: 2, title: "Update Floor Plans for Tower A", status: "To Do", priority: "Medium", due: "Next Week" }
-      ],
-      permissions: defaultPermissions.map(p => ({ 
-        ...p, 
-        granted: ["manage_listings", "delegate_units", "publish_airtable", "manage_projects"].includes(p.id) 
-      }))
-    });
 
     // Set state
     setTeamList(list);
   }, [currentUser, properties]);
 
-  const [activeMemberId, setActiveMemberId] = useState("user_2");
+  const [activeMemberId, setActiveMemberId] = useState("current_user");
   const [editingRoleId, setEditingRoleId] = useState(null);
   const [activeTab, setActiveTab] = useState("permissions"); // "activity" | "tasks" | "permissions"
   
@@ -183,8 +154,8 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
       name: inviteEmail.split("@")[0],
       email: inviteEmail,
       role: inviteRole,
-      avatar: `https://picsum.photos/seed/${inviteEmail}/100/100`,
-      lastActive: "Just joined",
+      avatar: null,
+      lastActive: "Invited — not yet joined",
       activities: [],
       tasks: [],
       permissions: teamList[0]?.permissions.map(p => ({ ...p, granted: false })) || []
@@ -271,7 +242,7 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
                       : 'bg-transparent border-transparent hover:bg-white/5'
                   }`}
                 >
-                  <img src={member.avatar} alt={member.name} className="w-10 h-10 rounded-full object-cover" />
+                  <MemberAvatar member={member} />
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-center mb-0.5">
                       <div className="text-sm text-white font-medium truncate">{member.name}</div>
@@ -294,7 +265,7 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
             {activeMember ? (
               <>
                 <div className="p-6 border-b border-white/5 flex flex-col items-center text-center relative">
-                  <img src={activeMember.avatar} alt={activeMember.name} className="w-20 h-20 rounded-full object-cover border-2 border-white/10 shadow-lg mb-4" />
+                  <div className="mb-4"><MemberAvatar member={activeMember} size="w-20 h-20" textSize="text-xl" /></div>
                   <h3 className="text-lg text-white font-medium">{activeMember.name}</h3>
                   <div className="flex items-center gap-1 text-xs text-white/50 mt-1 mb-4">
                     <Mail size={12} /> {activeMember.email}
@@ -370,8 +341,7 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
                       
                       <div className="space-y-3 flex-1">
                         {activeMember.permissions?.map(perm => {
-                          const overrideKey = `${activeMember.id}_${perm.id}`;
-                          const isGranted = permissionOverrides[overrideKey] !== undefined ? permissionOverrides[overrideKey] : perm.granted;
+                          const isGranted = perm.granted;
                           
                           return (
                             <div 

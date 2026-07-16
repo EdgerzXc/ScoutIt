@@ -1,16 +1,17 @@
 import UnitMasterPage from "@/components/property/UnitMasterPage";
 
 import { fetchProperties } from "@/lib/airtable";
+import { siteUrl } from "@/lib/siteUrl";
 
 export async function generateMetadata({ params }) {
   const resolvedParams = await params;
   const apiKey = process.env.AIRTABLE_API_KEY;
   const baseId = process.env.AIRTABLE_BASE_ID;
-  
+
   let seoTitle = `Unit Intel — ${resolvedParams.id} — ScoutIt`;
   let seoDescription = "Unit-level Space Intelligence Vector";
-  let imageUrl = "https://scoutit.com/og-default.jpg";
-  let url = `https://scoutit.com/property/${resolvedParams.id}/unit/${resolvedParams.unitId}`;
+  let imageUrl = siteUrl("/og-default.jpg");
+  let url = siteUrl(`/property/${resolvedParams.id}/unit/${resolvedParams.unitId}`);
 
   if (apiKey && baseId) {
     try {
@@ -38,7 +39,7 @@ export async function generateMetadata({ params }) {
             if (propPhoto) imageUrl = propPhoto;
           }
         }
-        if (match.slug) url = `https://scoutit.com/property/${match.slug}/unit/${resolvedParams.unitId}`;
+        if (match.slug) url = siteUrl(`/property/${match.slug}/unit/${resolvedParams.unitId}`);
       }
     } catch {}
   }

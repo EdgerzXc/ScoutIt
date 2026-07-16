@@ -70,6 +70,7 @@ export default function PromoteModal({ isOpen, onClose, propertyData, link }) {
   
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState(null);
+  const [source, setSource] = useState(null);
   const [error, setError] = useState(null);
 
   const generateCopy = async (regenerate = false) => {
@@ -87,10 +88,11 @@ export default function PromoteModal({ isOpen, onClose, propertyData, link }) {
         }),
       });
       const result = await res.json();
-      
+
       if (!res.ok) throw new Error(result.error || "Failed to generate");
-      
+
       setData(result.data);
+      setSource(result.source || null);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -144,9 +146,11 @@ export default function PromoteModal({ isOpen, onClose, propertyData, link }) {
 
           {data && (
             <div className="animate-[fadeIn_0.3s_ease]">
-              <p className="text-sm text-text-secondary mb-6">
-                Your space intelligence has been distilled into three strategic formats. 
-                Optimized for engagement and ready to share.
+              <p className="text-sm text-text-secondary mb-2">
+                Promotional copy built strictly from this listing&apos;s recorded specs — nothing invented, ready to share.
+              </p>
+              <p className="text-[10px] font-label-caps tracking-widest uppercase text-text-secondary/70 mb-6">
+                {source === "ai" ? "AI-drafted · grounded in verified listing data" : "Composed from verified listing data"}
               </p>
 
               <CopyBox label="Short Summary (X / WhatsApp)" text={data.fastPitch} />

@@ -170,7 +170,14 @@ export default function OwnProfilePage() {
 
         {/* Role Panels */}
         <div style={panelsGrid}>
-          {isBroker && <BrokerPanel data={brokerData} isPublic={false} />}
+          {isBroker && (
+            <BrokerPanel
+              data={brokerData}
+              isPublic={false}
+              prcVerified={!!profile?.prc_verified}
+              prcLicense={profile?.prc_verified ? profile?.prc_license : ""}
+            />
+          )}
           {isPhotographer && (
             <PhotographerPanel
               projects={photographerProjects}

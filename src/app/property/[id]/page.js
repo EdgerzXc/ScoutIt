@@ -2,8 +2,37 @@
 import { notFound } from "next/navigation";
 
 import { fetchProperties } from "@/lib/airtable";
+import { siteUrl } from "@/lib/siteUrl";
+import { extractFacts } from "@/lib/shareBriefing";
 import ResidentialFlow from "@/components/property/ResidentialFlow";
 import CommercialFlow from "@/components/property/CommercialFlow";
+
+// Fallback structured data for listings without a hand-written seo_json_ld.
+// Factual fields only, no monetary values (money renders only in "Your Move").
+function buildListingJsonLd(match, slugOrId) {
+  const facts = extractFacts(match);
+  const photo = Array.isArray(match.photos) ? match.photos.find(Boolean) : (match.photo || match.image);
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "RealEstateListing",
+    name: facts.title,
+    url: siteUrl(`/property/${match.slug || slugOrId}`),
+  };
+  if (match.seo_description) jsonLd.description = match.seo_description;
+  if (photo) jsonLd.image = photo;
+  if (facts.location || facts.city) {
+    jsonLd.address = {
+      "@type": "PostalAddress",
+      ...(facts.city ? { addressLocality: facts.city } : {}),
+      ...(facts.location ? { streetAddress: facts.location } : {}),
+      addressCountry: "PH",
+    };
+  }
+  if (facts.sqm) {
+    jsonLd.floorSize = { "@type": "QuantitativeValue", value: Number(facts.sqm) || facts.sqm, unitCode: "MTK" };
+  }
+  return JSON.stringify(jsonLd);
+}
 
 // ----------------------------------------------------------------------
 // INCREMENTAL STATIC REGENERATION (ISR)
@@ -16,8 +45,8 @@ export async function generateMetadata({ params }) {
   const baseId = process.env.AIRTABLE_BASE_ID;
   let seoTitle = `Property Intel — ${resolvedParams.id} — ScoutIt`;
   let seoDescription = "Property Intelligence Vector";
-  let imageUrl = "https://scoutit.com/og-default.jpg";
-  let url = `https://scoutit.com/property/${resolvedParams.id}`;
+  let imageUrl = siteUrl("/og-default.jpg");
+  let url = siteUrl(`/property/${resolvedParams.id}`);
 
   if (apiKey && baseId) {
     try {
@@ -28,10 +57,10 @@ export async function generateMetadata({ params }) {
           (p.id && p.id === resolvedParams.id)
       );
       if (match) {
-        const title = match.title || "Premium Space";
-        const cat = match.spaceCategory || match.category || "Commercial Space";
-        const details = typeof match.details === 'string' ? JSON.parse(match.details || '{}') : (match.details || {});
-        const sqm = details.Floor_Area_Sqm || details.CM_Total_GLA || details.RST_Floor_Area_Sqm || details.VEN_Floor_Area_Sqm || details.HOSP_GFA || "";
+        const facts = extractFacts(match);
+        const title = facts.title;
+        const cat = facts.category;
+        const sqm = facts.sqm;
 
         if (match.seo_title) seoTitle = match.seo_title;
         else seoTitle = `${title} | ${sqm ? sqm + ' sqm ' : ''}${cat}`;
@@ -48,9 +77,9 @@ export async function generateMetadata({ params }) {
         if (sqm) ogParams.set('sqm', sqm);
         if (photo) ogParams.set('image', photo);
 
-        imageUrl = `https://scoutit.com/api/og?${ogParams.toString()}`;
-        
-        if (match.slug) url = `https://scoutit.com/property/${match.slug}`;
+        imageUrl = siteUrl(`/api/og?${ogParams.toString()}`);
+
+        if (match.slug) url = siteUrl(`/property/${match.slug}`);
       }
     } catch {}
   }
@@ -152,12 +181,14 @@ export default async function PropertyRoute({ params }) {
   // The Chameleon Injection
   const InjectedLayout = CATEGORY_TO_LAYOUT_MAP[layoutKey] || CATEGORY_TO_LAYOUT_MAP["default"];
 
+  const jsonLd = match ? (match.seo_json_ld || buildListingJsonLd(match, resolvedParams.id)) : null;
+
   return (
     <>
-      {match?.seo_json_ld && (
+      {jsonLd && (
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: match.seo_json_ld }}
+          dangerouslySetInnerHTML={{ __html: jsonLd }}
         />
       )}
       <article className="chameleon-content-wrapper">

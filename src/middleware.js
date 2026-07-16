@@ -35,6 +35,13 @@ function initLimiters() {
 }
 
 export async function middleware(request) {
+  // Local dev / E2E runs fire hundreds of same-IP requests and were tripping
+  // the limiter (429s mid-test-suite). Rate limiting is a production shield —
+  // skip it entirely outside production builds.
+  if (process.env.NODE_ENV !== 'production') {
+    return NextResponse.next();
+  }
+
   // Initialize limiters if possible
   initLimiters();
 

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { GEMINI_MODEL } from '@/lib/geminiModel';
 import { GoogleGenAI, Type } from '@google/genai';
 
 export async function POST(request) {
@@ -41,7 +42,7 @@ export async function POST(request) {
     `;
 
     const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: GEMINI_MODEL,
         contents: prompt,
         config: {
             responseMimeType: 'application/json',

@@ -9,9 +9,9 @@ import {
   CalendarDays, HardHat, Warehouse, BellRing
 } from "lucide-react";
 import { useDashboard } from "../../context/DashboardContext";
+import { computeListingStrength } from "../../lib/listingStrength";
 import GlassPanel from "../ui/GlassPanel";
 import TeamManagementPanel from "./panels/TeamManagementPanel";
-import EnterpriseCMSPanel from "./panels/EnterpriseCMSPanel";
 import ProjectManagementPanel from "./panels/ProjectManagementPanel";
 import InventoryGridManager from "./InventoryGridManager";
 import DelegationRequests from "./DelegationRequests";
@@ -54,22 +54,23 @@ export default function MissionControlMode() {
   }, [currentUser]);
 
 
+  // Real unit inventory stats feed the Dashboard hero, Inventory tab, and
+  // Analytics intel line — fetch once when the sandbox unlocks.
   useEffect(() => {
-    if (activeTab === "inventory") {
-      const fetchStats = async () => {
-        try {
-          const res = await fetch('/api/dashboard/inventory');
-          if (res.ok) {
-            const data = await res.json();
-            if (data.stats) setInventoryStats(data.stats);
-          }
-        } catch (e) {
-          console.error("Failed to fetch inventory stats", e);
+    if (!isEnterprise) return;
+    const fetchStats = async () => {
+      try {
+        const res = await fetch('/api/dashboard/inventory');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.stats) setInventoryStats(data.stats);
         }
-      };
-      fetchStats();
-    }
-  }, [activeTab]);
+      } catch (e) {
+        console.error("Failed to fetch inventory stats", e);
+      }
+    };
+    fetchStats();
+  }, [isEnterprise]);
 
   // Hard-scoped to only the Enterprise's own properties
   const scoped = listings.filter((l) => l.ownerId === currentUser?.id);
@@ -87,7 +88,48 @@ export default function MissionControlMode() {
     approved: scoped.filter((l) => l.pipelineStatus === "approved").length,
     pending: scoped.filter((l) => l.pipelineStatus === "pending" || l.pipelineStatus === "draft").length,
     newLeads: scopedPitches.filter((p) => p.status === "pending").length || scopedPitches.length,
+    drafting: scoped.filter((l) => l.pipelineStatus === "draft" || l.pipelineStatus === "ai_drafting").length,
   };
+
+  // ── Honest, derived signals (no invented numbers — Honest Blank Rule) ──
+
+  // Same strength engine OwnerMode uses (live field checklist, not the stale
+  // DB completeness_score column), so scores match across dashboards.
+  const strengthOf = (l) => computeListingStrength(l).score;
+
+  // Portfolio health = average listing completeness across the company scope.
+  const healthScore = scoped.length > 0
+    ? Math.round(scoped.reduce((sum, l) => sum + strengthOf(l), 0) / scoped.length)
+    : null;
+
+  // Listings whose dossier is thin enough to hurt conversion.
+  const weakListings = scoped.filter((l) => strengthOf(l) < 50);
+
+  // Real alert feed: incomplete dossiers + unanswered broker pitches.
+  const alerts = [
+    ...weakListings.slice(0, 2).map((l) => ({
+      tone: "warn",
+      label: "Incomplete dossier",
+      detail: l.title,
+    })),
+    ...(kpis.newLeads > 0
+      ? [{ tone: "info", label: "Awaiting reply", detail: `${kpis.newLeads} broker ${kpis.newLeads === 1 ? "pitch" : "pitches"}` }]
+      : []),
+  ];
+
+  // Plain-language portfolio digest built from live counts only.
+  const portfolioSignal = scoped.length === 0
+    ? "No properties in your company scope yet. Add or import your first asset from the Portfolio module."
+    : [
+        `Your portfolio holds ${kpis.total} ${kpis.total === 1 ? "listing" : "listings"} — ${kpis.approved} live, ${kpis.pending} in the pipeline.`,
+        inventoryStats.total > 0
+          ? `${inventoryStats.total} units tracked: ${inventoryStats.occupied} occupied, ${inventoryStats.vacant} vacant${inventoryStats.maintenance ? `, ${inventoryStats.maintenance} in maintenance` : ""}.`
+          : null,
+        weakListings.length > 0
+          ? `${weakListings.length} ${weakListings.length === 1 ? "dossier needs" : "dossiers need"} more detail to hit full strength.`
+          : null,
+        kpis.newLeads > 0 ? `${kpis.newLeads} broker ${kpis.newLeads === 1 ? "pitch is" : "pitches are"} waiting on your review.` : null,
+      ].filter(Boolean).join(" ");
 
   const handleSelectAll = (e) => {
     if (e.target.checked) {
@@ -239,6 +281,9 @@ export default function MissionControlMode() {
               <h1 className="font-display-md text-3xl md:text-4xl mt-1 text-gradient-sapphire">
                 Enterprise Dashboard
               </h1>
+              <p className="text-sm text-text-secondary mt-2 max-w-xl">
+                One view of your whole operation — every number below is read live from your portfolio.
+              </p>
             </div>
 
             {/* Bento Grid Dashboard */}
@@ -251,8 +296,8 @@ export default function MissionControlMode() {
                 
                 <div className="flex items-start justify-between relative z-10 mb-auto">
                   <div>
-                    <h3 className="text-white font-display-md text-2xl tracking-wide mb-1">Company Health</h3>
-                    <p className="text-text-secondary text-sm font-mono uppercase tracking-widest">System Status: Optimal</p>
+                    <h3 className="text-white font-display-md text-2xl tracking-wide mb-1">Portfolio Strength</h3>
+                    <p className="text-text-secondary text-sm font-mono uppercase tracking-widest">Average dossier completeness</p>
                   </div>
                   <div className="w-12 h-12 rounded-2xl bg-surface-alt border border-white/10 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-500">
                     <Activity className="text-gold-accent" size={24} />
@@ -260,13 +305,20 @@ export default function MissionControlMode() {
                 </div>
 
                 <div className="relative z-10 mt-12">
-                  <div className="flex items-baseline gap-3">
-                    <span className="font-display-md text-7xl text-white tracking-tighter drop-shadow-md">98</span>
-                    <span className="text-gold-accent font-mono text-sm uppercase tracking-widest">Score</span>
-                  </div>
+                  {healthScore !== null ? (
+                    <div className="flex items-baseline gap-3">
+                      <span className="font-display-md text-7xl text-white tracking-tighter drop-shadow-md">{healthScore}</span>
+                      <span className="text-gold-accent font-mono text-sm uppercase tracking-widest">/ 100</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-baseline gap-3">
+                      <span className="font-display-md text-7xl text-white/30 tracking-tighter">—</span>
+                      <span className="text-text-secondary font-mono text-sm uppercase tracking-widest">No assets yet</span>
+                    </div>
+                  )}
                   <div className="mt-6 flex items-center gap-4 text-xs text-text-secondary">
-                    <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span> 3 items need review</span>
-                    <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]"></span> 12 active users</span>
+                    <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span> {kpis.approved} live {kpis.approved === 1 ? "listing" : "listings"}</span>
+                    <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-gold-accent shadow-[0_0_8px_rgba(232,174,60,0.5)]"></span> {weakListings.length} need{weakListings.length === 1 ? "s" : ""} attention</span>
                   </div>
                 </div>
               </GlassPanel>
@@ -274,9 +326,9 @@ export default function MissionControlMode() {
               {/* Standard KPI Cards (1x1) */}
               {[
                 { label: "Active Portfolio", value: kpis.total, glow: "rgba(59,130,246,0.1)", onClick: () => setActiveTab("portfolio"), icon: Building2 },
-                { label: "New Leads", value: kpis.newLeads.toString(), glow: "rgba(16,185,129,0.1)", onClick: () => setActiveTab("crm"), icon: Users },
-                { label: "Pending Tasks", value: kpis.pending, glow: "rgba(247,198,78,0.1)", onClick: () => setActiveTab("projects"), icon: ClipboardList },
-                { label: "Team Online", value: "3", glow: "rgba(255,255,255,0.05)", onClick: () => setActiveTab("team"), actionText: "Manage", icon: UsersRound },
+                { label: "Broker Pitches", value: kpis.newLeads.toString(), glow: "rgba(16,185,129,0.1)", onClick: () => setActiveTab("crm"), icon: Users },
+                { label: "In Pipeline", value: kpis.pending, glow: "rgba(247,198,78,0.1)", onClick: () => setActiveTab("projects"), icon: ClipboardList },
+                { label: "Team Seats", value: "—", glow: "rgba(255,255,255,0.05)", onClick: () => setActiveTab("team"), actionText: "Set up", icon: UsersRound },
               ].map((kpi) => (
                 <GlassPanel 
                   key={kpi.label} 
@@ -306,15 +358,15 @@ export default function MissionControlMode() {
               <GlassPanel className="md:col-span-2 md:row-span-1 rounded-2xl p-6 relative overflow-hidden group border-white/5 hover:border-white/10 transition-colors duration-300 flex flex-col justify-center bg-gradient-to-r from-transparent to-blue-900/5">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-8 h-8 rounded-full bg-gold-accent/10 border border-gold-accent/20 flex items-center justify-center">
-                    <Bot className="text-gold-accent" size={14} />
+                    <Activity className="text-gold-accent" size={14} />
                   </div>
                   <div>
-                    <h4 className="text-white font-medium text-sm">AI Executive Summary</h4>
-                    <p className="text-text-secondary text-[11px] font-mono tracking-widest uppercase">Generated 2h ago</p>
+                    <h4 className="text-white font-medium text-sm">Portfolio Signal</h4>
+                    <p className="text-text-secondary text-[11px] font-mono tracking-widest uppercase">Live · read from your data</p>
                   </div>
                 </div>
                 <p className="text-sm text-text-secondary leading-relaxed pl-11">
-                  Portfolio occupancy remains stable at 94%. 3 leases are expiring within 60 days. The AI agent drafted 2 new renewal proposals pending your approval in Projects.
+                  {portfolioSignal}
                 </p>
               </GlassPanel>
 
@@ -324,22 +376,17 @@ export default function MissionControlMode() {
                   <CalendarDays className="text-gold-accent opacity-80" size={18} />
                   <h4 className="text-white font-medium text-sm">Today&apos;s Schedule</h4>
                 </div>
-                <div className="space-y-4">
-                  <div className="relative pl-4 border-l-2 border-gold-accent/50">
-                    <div className="absolute w-2 h-2 rounded-full bg-gold-accent -left-[5px] top-1.5 shadow-[0_0_8px_rgba(232,174,60,0.8)]" />
-                    <p className="text-white text-sm font-medium">Site Visit: The Aurelia</p>
-                    <p className="text-text-secondary text-xs mt-0.5 font-mono">10:00 AM • Taguig</p>
+                <div className="flex flex-col items-center justify-center text-center py-10 gap-3">
+                  <div className="w-12 h-12 rounded-full border border-white/10 bg-white/[0.02] flex items-center justify-center">
+                    <CalendarDays className="text-text-secondary" size={20} />
                   </div>
-                  <div className="relative pl-4 border-l-2 border-white/10">
-                    <div className="absolute w-2 h-2 rounded-full bg-white/20 -left-[5px] top-1.5" />
-                    <p className="text-text-secondary text-sm font-medium group-hover:text-white transition-colors">Client Meeting: Shang</p>
-                    <p className="text-text-secondary text-xs mt-0.5 font-mono">2:30 PM • Zoom</p>
-                  </div>
-                  <div className="relative pl-4 border-l-2 border-white/10">
-                    <div className="absolute w-2 h-2 rounded-full bg-white/20 -left-[5px] top-1.5" />
-                    <p className="text-text-secondary text-sm font-medium group-hover:text-white transition-colors">Q3 Financial Review</p>
-                    <p className="text-text-secondary text-xs mt-0.5 font-mono">4:00 PM • Boardroom</p>
-                  </div>
+                  <p className="text-text-secondary text-sm">Nothing booked today.</p>
+                  <p className="text-text-secondary/60 text-xs leading-relaxed max-w-[180px]">
+                    Site visits and client meetings will line up here once your calendar connects.
+                  </p>
+                  <Link href="/dashboard/calendar" className="text-gold-accent text-[10px] font-mono uppercase tracking-widest hover:underline mt-1">
+                    Open Calendar →
+                  </Link>
                 </div>
               </GlassPanel>
 
@@ -350,15 +397,26 @@ export default function MissionControlMode() {
               >
                 <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/5 rounded-full blur-2xl group-hover:bg-red-500/10 transition-colors duration-500 -translate-y-1/2 translate-x-1/2" />
                 <div className="flex items-center justify-between mb-4 relative z-10">
-                  <BellRing className="text-red-400 group-hover:text-red-300 transition-colors duration-300" size={18} />
-                  <span className="w-5 h-5 rounded-full bg-red-500/20 text-red-400 text-[10px] font-bold flex items-center justify-center">2</span>
+                  <BellRing className={`${alerts.length > 0 ? "text-red-400 group-hover:text-red-300" : "text-emerald-400"} transition-colors duration-300`} size={18} />
+                  {alerts.length > 0 && (
+                    <span className="w-5 h-5 rounded-full bg-red-500/20 text-red-400 text-[10px] font-bold flex items-center justify-center">{alerts.length}</span>
+                  )}
                 </div>
                 <div className="relative z-10">
-                  <h4 className="text-white font-medium text-sm mb-1">System Alerts</h4>
-                  <p className="text-xs text-text-secondary line-clamp-2 leading-relaxed">
-                    <span className="text-red-400 font-medium">Missing Docs:</span> BGC Penthouse<br/>
-                    <span className="text-gold-accent font-medium mt-1 inline-block">Expiring:</span> Lease #4092 (12 days)
-                  </p>
+                  <h4 className="text-white font-medium text-sm mb-1">Needs Attention</h4>
+                  {alerts.length > 0 ? (
+                    <p className="text-xs text-text-secondary line-clamp-3 leading-relaxed">
+                      {alerts.slice(0, 2).map((a, i) => (
+                        <span key={i} className="block">
+                          <span className={`${a.tone === "warn" ? "text-gold-accent" : "text-blue-400"} font-medium`}>{a.label}:</span> {a.detail}
+                        </span>
+                      ))}
+                    </p>
+                  ) : (
+                    <p className="text-xs text-text-secondary leading-relaxed">
+                      <span className="text-emerald-400 font-medium">All clear.</span> Every dossier is in shape and no pitches are waiting.
+                    </p>
+                  )}
                 </div>
               </GlassPanel>
 
@@ -369,12 +427,14 @@ export default function MissionControlMode() {
               >
                 <div className="flex items-center justify-between mb-4">
                   <Warehouse className="text-text-secondary group-hover:text-gold-accent transition-colors duration-300" size={18} />
-                  <span className="text-emerald-400 text-[10px] font-mono font-bold">+4% M/M</span>
+                  {inventoryStats.total > 0 && (
+                    <span className="text-emerald-400 text-[10px] font-mono font-bold">{inventoryStats.vacant} vacant</span>
+                  )}
                 </div>
                 <div>
-                  <div className="font-display-md text-3xl text-white tracking-tight mb-1 group-hover:scale-[1.02] origin-left transition-transform duration-300">8.2M</div>
+                  <div className="font-display-md text-3xl text-white tracking-tight mb-1 group-hover:scale-[1.02] origin-left transition-transform duration-300">{inventoryStats.total}</div>
                   <div className="text-[10px] font-mono text-text-secondary uppercase tracking-widest">
-                    Est. Inventory Val
+                    Units Tracked
                   </div>
                 </div>
               </GlassPanel>
@@ -388,9 +448,9 @@ export default function MissionControlMode() {
                   <HardHat className="text-text-secondary group-hover:text-gold-accent transition-colors duration-300" size={18} />
                 </div>
                 <div>
-                  <div className="font-display-md text-3xl text-white tracking-tight mb-1 group-hover:scale-[1.02] origin-left transition-transform duration-300">5</div>
+                  <div className="font-display-md text-3xl text-white tracking-tight mb-1 group-hover:scale-[1.02] origin-left transition-transform duration-300">{kpis.drafting}</div>
                   <div className="text-[10px] font-mono text-text-secondary uppercase tracking-widest">
-                    Active Projects
+                    Drafts in Progress
                   </div>
                 </div>
               </GlassPanel>
@@ -400,11 +460,14 @@ export default function MissionControlMode() {
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both">
             <div>
               <span className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase drop-shadow-[0_0_10px_rgba(247,198,78,0.5)]">
-                Mission Control • Portfolio (Center of the Universe)
+                Mission Control • Portfolio
               </span>
               <h1 className="font-display-md text-3xl md:text-4xl mt-1 text-gradient-sapphire">
                 Manage Assets
               </h1>
+              <p className="text-sm text-text-secondary mt-2 max-w-xl">
+                Every property your company controls — edit, publish, or retire them from one table.
+              </p>
             </div>
 
             {/* Bulk Actions */}
@@ -491,7 +554,7 @@ export default function MissionControlMode() {
                           {status.label}
                         </span>
                       </td>
-                      <td className="px-4 py-2.5 text-text-secondary">{l.completenessScore ?? 0}%</td>
+                      <td className="px-4 py-2.5 text-text-secondary">{strengthOf(l)}%</td>
                       <td className="px-4 py-2.5 text-right">
                         <Link
                           href={`/dashboard/inventory/${l.id}`}
@@ -529,6 +592,9 @@ export default function MissionControlMode() {
             <div>
               <span className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase drop-shadow-[0_0_10px_rgba(247,198,78,0.5)]">Mission Control • CRM</span>
               <h1 className="font-display-md text-3xl md:text-4xl mt-1 text-white">Relationship Management</h1>
+              <p className="text-sm text-text-secondary mt-2 max-w-xl">
+                The people around your portfolio — broker pitches, leads, and every conversation in play.
+              </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 flex-1">
               <GlassPanel className="col-span-2 rounded-2xl border-white/5 overflow-hidden flex flex-col items-center justify-center p-12 text-center group">
@@ -577,13 +643,16 @@ export default function MissionControlMode() {
             <div>
               <span className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase drop-shadow-[0_0_10px_rgba(247,198,78,0.5)]">Mission Control • Inventory</span>
               <h1 className="font-display-md text-3xl md:text-4xl mt-1 text-white">Asset Inventory</h1>
+              <p className="text-sm text-text-secondary mt-2 max-w-xl">
+                Unit-by-unit control of each estate — occupancy, delegation handshakes, and the floor grid.
+              </p>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {[
                 { label: "Total Properties", val: scoped.length },
-                { label: "Est. Units", val: scoped.length * 142 },
-                { label: "Active Leases", val: Math.floor(scoped.length * 142 * 0.8) },
-                { label: "Maintenance", val: Math.floor(scoped.length * 142 * 0.05) }
+                { label: "Units Tracked", val: inventoryStats.total },
+                { label: "Occupied", val: inventoryStats.occupied },
+                { label: "Maintenance", val: inventoryStats.maintenance }
               ].map(stat => (
                 <GlassPanel key={stat.label} className="p-6 rounded-2xl border-white/5">
                   <div className="text-3xl text-white font-display-md">{stat.val}</div>
@@ -618,7 +687,7 @@ export default function MissionControlMode() {
                         isOperatorMode={false} 
                         units={enterpriseUnits}
                         onChange={setEnterpriseUnits}
-                        onAutoSave={(u) => { console.log('Saved units', u); }}
+                        onAutoSave={() => {}}
                       />
                     </div>
                   </>
@@ -633,6 +702,9 @@ export default function MissionControlMode() {
             <div>
               <span className="font-label-caps text-[10px] tracking-widest text-emerald-400 uppercase drop-shadow-[0_0_10px_rgba(52,211,153,0.5)]">Mission Control • Finance</span>
               <h1 className="font-display-md text-3xl md:text-4xl mt-1 text-white">Financial Hub</h1>
+              <p className="text-sm text-text-secondary mt-2 max-w-xl">
+                Your Connects balance and money movement — live once billing is switched on.
+              </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <GlassPanel className="col-span-1 rounded-2xl border-white/5 p-6 flex flex-col relative overflow-hidden">
@@ -643,29 +715,20 @@ export default function MissionControlMode() {
               </GlassPanel>
               <GlassPanel className="col-span-1 rounded-2xl border-white/5 p-6 flex flex-col relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-gold-accent/10 to-transparent" />
-                <h4 className="text-white font-medium text-sm mb-6 relative z-10">Est. MRR (Mock)</h4>
-                <div className="text-4xl text-gold-accent font-display-md tracking-tighter mt-auto mb-2 relative z-10">₱{(scoped.length * 150000).toLocaleString()}</div>
-                <div className="text-text-secondary text-xs font-mono font-medium relative z-10">Monthly Recurring Rev.</div>
+                <h4 className="text-white font-medium text-sm mb-6 relative z-10">Units Ready to Earn</h4>
+                <div className="text-4xl text-gold-accent font-display-md tracking-tighter mt-auto mb-2 relative z-10">{inventoryStats.vacant}</div>
+                <div className="text-text-secondary text-xs font-mono font-medium relative z-10">Vacant units available for lease</div>
               </GlassPanel>
               <GlassPanel className="col-span-2 rounded-2xl border-white/5 p-6 flex flex-col">
                 <h4 className="text-white font-medium text-sm mb-4">Transaction Ledger</h4>
-                <div className="flex-1 overflow-y-auto pr-2 space-y-3 custom-scrollbar">
-                  {[
-                    { id: 'tx1', desc: 'Connects Top-Up (100x)', amount: '-₱5,000.00', date: 'Today', type: 'debit' },
-                    { id: 'tx2', desc: 'Listing Featured Promotion', amount: '-₱1,200.00', date: 'Yesterday', type: 'debit' },
-                    { id: 'tx3', desc: 'Lead Generation Referral', amount: '+₱15,000.00', date: '3 Days Ago', type: 'credit' },
-                    { id: 'tx4', desc: 'Monthly SaaS Subscription', amount: '-₱4,500.00', date: '1 Week Ago', type: 'debit' }
-                  ].map(tx => (
-                    <div key={tx.id} className="flex justify-between items-center py-2 border-b border-white/5 last:border-0">
-                      <div>
-                        <div className="text-sm text-white font-medium">{tx.desc}</div>
-                        <div className="text-[10px] text-text-secondary uppercase tracking-widest mt-0.5">{tx.date}</div>
-                      </div>
-                      <div className={`font-mono text-sm ${tx.type === 'credit' ? 'text-emerald-400' : 'text-white'}`}>
-                        {tx.amount}
-                      </div>
-                    </div>
-                  ))}
+                <div className="flex-1 flex flex-col items-center justify-center text-center py-8 gap-3">
+                  <div className="w-12 h-12 rounded-full border border-white/10 bg-white/[0.02] flex items-center justify-center">
+                    <BadgeDollarSign className="text-text-secondary" size={20} />
+                  </div>
+                  <p className="text-text-secondary text-sm">No transactions recorded yet.</p>
+                  <p className="text-text-secondary/60 text-xs max-w-xs leading-relaxed">
+                    Connects top-ups and subscription charges will appear here once billing goes live.
+                  </p>
                 </div>
               </GlassPanel>
             </div>
@@ -675,6 +738,9 @@ export default function MissionControlMode() {
             <div>
               <span className="font-label-caps text-[10px] tracking-widest text-blue-400 uppercase drop-shadow-[0_0_10px_rgba(59,130,246,0.5)]">Mission Control • Analytics</span>
               <h1 className="font-display-md text-3xl md:text-4xl mt-1 text-white">Market Intelligence</h1>
+              <p className="text-sm text-text-secondary mt-2 max-w-xl">
+                How the market moves around your assets. Charts below are sample previews until live data connects.
+              </p>
             </div>
             
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -683,8 +749,11 @@ export default function MissionControlMode() {
                 <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/5 via-black to-transparent opacity-50" />
                 <div className="relative z-10 flex justify-between items-center mb-6">
                   <div>
-                    <h3 className="text-white font-medium text-sm">Historical Property Yield</h3>
-                    <p className="text-[10px] text-text-secondary font-mono tracking-widest uppercase mt-1">Makati CBD vs BGC (5 Years)</p>
+                    <h3 className="text-white font-medium text-sm flex items-center gap-2">
+                      Historical Property Yield
+                      <span className="text-[9px] font-mono uppercase tracking-widest text-gold-accent border border-gold-accent/30 bg-gold-accent/10 rounded px-1.5 py-0.5">Sample preview</span>
+                    </h3>
+                    <p className="text-[10px] text-text-secondary font-mono tracking-widest uppercase mt-1">Makati CBD vs BGC · illustrative — live data connects at launch</p>
                   </div>
                   <select className="bg-black/50 border border-white/10 text-xs text-white rounded px-2 py-1 outline-none focus:border-blue-400 transition-colors">
                     <option>Yield (%)</option>
@@ -724,8 +793,11 @@ export default function MissionControlMode() {
               
               {/* Space Demand Trends */}
               <GlassPanel className="col-span-1 rounded-2xl border-white/5 p-6 flex flex-col">
-                <h3 className="text-white font-medium text-sm mb-1">Space Demand Trends</h3>
-                <p className="text-[10px] text-text-secondary font-mono tracking-widest uppercase mb-6">Upcoming Hotspots</p>
+                <h3 className="text-white font-medium text-sm mb-1 flex items-center gap-2">
+                  Space Demand Trends
+                  <span className="text-[9px] font-mono uppercase tracking-widest text-gold-accent border border-gold-accent/30 bg-gold-accent/10 rounded px-1.5 py-0.5">Sample preview</span>
+                </h3>
+                <p className="text-[10px] text-text-secondary font-mono tracking-widest uppercase mb-6">Illustrative — live data connects at launch</p>
                 
                 <div className="space-y-4 flex-1">
                   {[
@@ -758,12 +830,15 @@ export default function MissionControlMode() {
                    </div>
                    <div>
                      <h3 className="text-white font-medium text-sm">Intel Synergy</h3>
-                     <p className="text-xs text-text-secondary mt-2 leading-relaxed">
-                       Based on your {inventoryStats.saved_intel_count || 12} saved intel from Master Property Pages, the market heavily favors <strong className="text-white">Class-A Office re-developments</strong> in your designated scope. 
-                     </p>
-                     <button className="mt-4 text-[10px] font-mono uppercase tracking-widest text-emerald-400 flex items-center gap-1 group-hover:gap-2 transition-all">
-                       Generate Strategy <ArrowRight size={12} />
-                     </button>
+                     {inventoryStats.saved_intel_count > 0 ? (
+                       <p className="text-xs text-text-secondary mt-2 leading-relaxed">
+                         {inventoryStats.saved_intel_count} intel {inventoryStats.saved_intel_count === 1 ? "report is" : "reports are"} saved against your properties. Cross-referencing them against market movement arrives with live analytics.
+                       </p>
+                     ) : (
+                       <p className="text-xs text-text-secondary mt-2 leading-relaxed">
+                         No intel saved yet. Save market intel from your Master Property Pages and this panel will surface patterns across your scope.
+                       </p>
+                     )}
                    </div>
                 </div>
               </GlassPanel>
@@ -784,6 +859,9 @@ export default function MissionControlMode() {
             <div>
               <span className="font-label-caps text-[10px] tracking-widest text-blue-400 uppercase drop-shadow-[0_0_10px_rgba(59,130,246,0.5)]">Mission Control • AI</span>
               <h1 className="font-display-md text-3xl md:text-4xl mt-1 text-white">Intelligence Center</h1>
+              <p className="text-sm text-text-secondary mt-2 max-w-xl">
+                Where AI works for your portfolio — drafting dossiers now, portfolio Q&amp;A next.
+              </p>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 flex-1">
@@ -795,7 +873,7 @@ export default function MissionControlMode() {
                   </div>
                   <div>
                     <h3 className="text-xl text-white font-medium">ScoutIt Concierge</h3>
-                    <p className="text-xs text-text-secondary font-mono mt-1">Status: Active & Monitoring</p>
+                    <p className="text-xs text-text-secondary font-mono mt-1">Status: Coming online</p>
                   </div>
                 </div>
                 <div className="relative z-10 bg-black/40 rounded-xl border border-white/5 p-4 flex-1 flex flex-col">
@@ -803,12 +881,14 @@ export default function MissionControlMode() {
                     <div className="flex gap-3">
                       <Bot className="text-blue-400 shrink-0 mt-1" size={16} />
                       <div className="bg-surface-variant/50 rounded-lg p-3 text-sm text-text-secondary border border-white/5">
-                        I've analyzed your {scoped.length} active listings. I noticed that 2 properties are missing HD floor plans, which historically drops conversion by 14%. Would you like me to flag them for your photography team?
+                        {scoped.length > 0
+                          ? `I can see ${scoped.length} ${scoped.length === 1 ? "listing" : "listings"} in your scope${weakListings.length > 0 ? `, and ${weakListings.length} ${weakListings.length === 1 ? "dossier" : "dossiers"} could use more detail` : ""}. Conversational portfolio analysis unlocks when the Concierge goes live.`
+                          : "Once your portfolio has assets, I'll analyze dossiers, spot gaps, and answer questions about your scope — conversational analysis unlocks when the Concierge goes live."}
                       </div>
                     </div>
                   </div>
                   <div className="relative">
-                    <input type="text" placeholder="Ask ScoutIt AI to analyze your portfolio..." className="w-full bg-surface border border-white/10 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500/50 transition-colors" disabled />
+                    <input type="text" placeholder="Portfolio Q&A unlocks when the Concierge goes live..." className="w-full bg-surface border border-white/10 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500/50 transition-colors" disabled />
                     <button className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-text-secondary hover:text-white" disabled>
                       <ArrowRight size={16} />
                     </button>
@@ -819,32 +899,35 @@ export default function MissionControlMode() {
               <div className="col-span-1 flex flex-col gap-6">
                 <GlassPanel className="rounded-2xl border-white/5 p-6 hover:border-blue-500/20 transition-colors">
                   <h4 className="text-white font-medium text-sm mb-4">Automated Drafting Queue</h4>
-                  <div className="space-y-4">
-                    {[
-                      { title: "BGC Penthouse Suite", status: "Generating copy...", progress: 60 },
-                      { title: "Makati Office Space", status: "Analyzing floorplan...", progress: 30 }
-                    ].map((item, i) => (
-                      <div key={i}>
-                        <div className="flex justify-between text-xs mb-1.5">
-                          <span className="text-white">{item.title}</span>
-                          <span className="text-blue-400 font-mono">{item.progress}%</span>
+                  {scoped.filter((l) => l.pipelineStatus === "ai_drafting").length > 0 ? (
+                    <div className="space-y-4">
+                      {scoped.filter((l) => l.pipelineStatus === "ai_drafting").slice(0, 4).map((l) => (
+                        <div key={l.id}>
+                          <div className="flex justify-between text-xs mb-1.5">
+                            <span className="text-white truncate pr-2">{l.title}</span>
+                            <span className="text-blue-400 font-mono shrink-0">Drafting</span>
+                          </div>
+                          <div className="w-full bg-black/50 h-1.5 rounded-full overflow-hidden">
+                            <div className="bg-blue-500 h-full rounded-full w-1/2 animate-pulse" />
+                          </div>
+                          <div className="text-[10px] text-text-secondary mt-1">Council AI is composing this dossier</div>
                         </div>
-                        <div className="w-full bg-black/50 h-1.5 rounded-full overflow-hidden">
-                          <div className="bg-blue-500 h-full rounded-full transition-all duration-1000" style={{ width: `${item.progress}%` }} />
-                        </div>
-                        <div className="text-[10px] text-text-secondary mt-1">{item.status}</div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-text-secondary leading-relaxed py-4">
+                      Queue is empty. When a listing enters AI drafting, its progress shows here.
+                    </p>
+                  )}
                 </GlassPanel>
 
-                <GlassPanel className="flex-1 rounded-2xl border-white/5 p-6 flex flex-col justify-between group hover:border-gold-accent/20 transition-colors cursor-pointer">
+                <GlassPanel className="flex-1 rounded-2xl border-white/5 p-6 flex flex-col justify-between group hover:border-gold-accent/20 transition-colors">
                   <div>
-                    <h4 className="text-white font-medium text-sm mb-2">Market Intelligence</h4>
-                    <p className="text-xs text-text-secondary">AI-generated comp analysis based on recent closings in your specific zones.</p>
+                    <h4 className="text-white font-medium text-sm mb-2">Market Reports</h4>
+                    <p className="text-xs text-text-secondary">AI comp analysis from real closings in your zones — switches on once enough market data accumulates.</p>
                   </div>
-                  <div className="text-gold-accent text-xs font-medium flex items-center gap-1 group-hover:gap-2 transition-all">
-                    View Market Report <ArrowRight size={14} />
+                  <div className="text-text-secondary text-[10px] font-mono uppercase tracking-widest">
+                    Coming online
                   </div>
                 </GlassPanel>
               </div>
@@ -933,7 +1016,7 @@ export default function MissionControlMode() {
                         <ArrowRight size={14} className="text-text-secondary" />
                       </h4>
                       <p className="text-xs text-text-secondary mb-4">Manage webhooks and external API access tokens.</p>
-                      <div className="text-xs font-mono text-text-secondary bg-black/50 px-2 py-1 rounded inline-block">2 Active Tokens</div>
+                      <div className="text-xs font-mono text-text-secondary bg-black/50 px-2 py-1 rounded inline-block">No tokens issued yet</div>
                     </GlassPanel>
                   </div>
                 )}

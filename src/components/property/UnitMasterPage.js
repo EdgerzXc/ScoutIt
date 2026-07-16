@@ -133,8 +133,10 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
     ? unit.photos.filter(Boolean)
     : (unit.image || unit.photo ? [unit.image || unit.photo] : []);
   
-  // If no photos, inject a fallback so layout doesn't break
-  const displayPhotos = photos.length > 0 ? photos : ["/placeholder-unit.jpg"];
+  // No photos → keep the layout but show an honest "pending" hero instead of
+  // pointing at an image file that doesn't exist (silent 404 + blank zone).
+  const hasPhotos = photos.length > 0;
+  const displayPhotos = hasPhotos ? photos : [null];
 
   const activeScenario = scenarios.find((s) => s.id === activeScenarioId) || scenarios[0] || null;
 
@@ -225,8 +227,16 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
             <div
               key={i}
               className={`photo-slide ${photoMode} ${currentImageIndex === i ? "active" : ""}`}
-              style={{ backgroundImage: `url(${url})`, backgroundPosition: "center", backgroundSize: "cover" }}
-            />
+              style={url
+                ? { backgroundImage: `url(${url})`, backgroundPosition: "center", backgroundSize: "cover" }
+                : { background: "linear-gradient(160deg, #141414, #0d0d0d)", display: "flex", alignItems: "center", justifyContent: "center" }}
+            >
+              {!url && (
+                <span style={{ fontFamily: "'Courier New',monospace", fontSize: "11px", color: "#5a5a5a", letterSpacing: "0.15em", textTransform: "uppercase" }}>
+                  Unit imagery pending
+                </span>
+              )}
+            </div>
           ))}
 
           <div className="light-shaft" />
@@ -557,8 +567,18 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
       <PromoteModal
         isOpen={isPromoteOpen}
         onClose={() => setIsPromoteOpen(false)}
-        propertyData={unit}
-        link={typeof window !== 'undefined' ? window.location.href : `https://scoutit.com/property/${property.slug}/unit/${unit.id}`}
+        propertyData={{
+          // Merge building context into the unit so promo copy carries real
+          // facts (location, category, size) instead of a bare unit row.
+          ...unit,
+          title: `${unit.name} · ${property.title}`,
+          location: property.location || property.city || "",
+          city: property.city || "",
+          spaceCategory: property.spaceCategory || property.category || "",
+          sqm: unit.size || null,
+          seating_capacity: cap?.value || null,
+        }}
+        link={typeof window !== 'undefined' ? window.location.href : `/property/${property.slug}/unit/${unit.id}`}
       />
     </>
   );

@@ -74,6 +74,13 @@ export default async function BrokerDetailPage({ params }) {
               <span className="vector-label">Advisory Profile &middot; {broker.clearanceTier}</span>
               <h1 className="profile-name">{broker.name}</h1>
               <p className="profile-title">{broker.title} {"//"} {broker.location}</p>
+              {/* RA 9646: badge renders only when staff ticked License_Verified
+                  in Airtable after checking the PRC registry. */}
+              {broker.licenseVerified && (
+                <span className="prc-verified-badge">
+                  ✓ PRC VERIFIED{broker.license ? ` · ${broker.license}` : ""}
+                </span>
+              )}
             </header>
 
             <div className="profile-body-content">
@@ -313,6 +320,22 @@ export default async function BrokerDetailPage({ params }) {
           font-weight: 500;
           color: #fff;
           margin: 0 0 8px 0;
+        }
+
+        .prc-verified-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          margin-top: 10px;
+          font-family: var(--font-mono), monospace;
+          font-size: 10px;
+          font-weight: 700;
+          letter-spacing: 0.12em;
+          color: #4caf7d;
+          background: rgba(76, 175, 125, 0.1);
+          border: 1px solid rgba(76, 175, 125, 0.3);
+          border-radius: 3px;
+          padding: 4px 10px;
         }
 
         .profile-title {

@@ -40,10 +40,15 @@ export default function EnterprisePage() {
         </div>
 
         <div className="enterprise-cta">
-          <p>Currently in early development. Tell us about your portfolio and we&apos;ll reach out.</p>
-          <a href="mailto:hello@scout-it.vercel.app?subject=Enterprise%20Account%20Inquiry" className="enterprise-cta-btn">
-            Get in touch →
-          </a>
+          <p>Currently in early development. Preview the Mission Control workspace from your dashboard, or tell us about your portfolio and we&apos;ll reach out.</p>
+          <div className="enterprise-cta-row">
+            <a href="/dashboard" className="enterprise-cta-btn">
+              Preview Mission Control →
+            </a>
+            <a href="mailto:hello@scout-it.vercel.app?subject=Enterprise%20Account%20Inquiry" className="enterprise-cta-secondary">
+              Get in touch
+            </a>
+          </div>
         </div>
       </main>
       <Footer />
@@ -125,6 +130,29 @@ export default function EnterprisePage() {
         .enterprise-cta-btn:hover {
           transform: translateY(-2px);
           box-shadow: var(--shadow-glow);
+        }
+        .enterprise-cta-row {
+          display: flex;
+          gap: 14px;
+          justify-content: center;
+          flex-wrap: wrap;
+          align-items: center;
+        }
+        .enterprise-cta-secondary {
+          display: inline-flex;
+          align-items: center;
+          color: var(--accent);
+          border: 1px solid var(--accent-muted);
+          padding: 13px 26px;
+          border-radius: 4px;
+          letter-spacing: 0.04em;
+          text-decoration: none;
+          font-size: 14px;
+          transition: border-color 0.25s ease, background 0.25s ease;
+        }
+        .enterprise-cta-secondary:hover {
+          border-color: var(--accent);
+          background: rgba(232, 174, 60, 0.06);
         }
         @media (max-width: 768px) {
           .enterprise-grid { grid-template-columns: 1fr; }

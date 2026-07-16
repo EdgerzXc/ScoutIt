@@ -48,7 +48,10 @@ export async function loadPublicProfile(displayName) {
     .select(
       'id, display_name, avatar_url, location, headline, bio, firm, service, ' +
       'member_since, subscription_tier, active_roles, provider_type, ' +
-      'provider_availability, is_profile_public, is_example_account'
+      'provider_availability, is_profile_public, is_example_account, ' +
+      // RA 9646 trust badge: public by design — but the badge renders ONLY
+      // when prc_verified is true (staff-checked), never from the raw number.
+      'prc_license, prc_verified'
     )
     .eq('display_name', displayName)
     .eq('is_profile_public', true)

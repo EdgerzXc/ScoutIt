@@ -39,7 +39,8 @@ export default function Footer() {
         <div className="footer-nav-cols">
           <div className="nav-col">
             <h3>Platform</h3>
-            <Link href="/discover">Discover Spaces</Link>
+            <Link href="/discover">Discover</Link>
+            <Link href="/property">Space Directory</Link>
             <Link href="/intel">Intel briefings</Link>
             <Link href="/wishlist">Your Board</Link>
             <Link href="/badges">Badges</Link>

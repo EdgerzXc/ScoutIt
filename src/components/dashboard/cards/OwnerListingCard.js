@@ -1,6 +1,7 @@
 import React, { memo } from 'react';
 import HoverCard from '../../ui/HoverCard';
 import ShareModal from "@/components/property/ShareModal";
+import { buildShareText } from "@/lib/shareBriefing";
 
 const OwnerListingCard = memo(({ 
   listing, 
@@ -16,21 +17,14 @@ const OwnerListingCard = memo(({
 
   const handleShare = (e) => {
     e.stopPropagation();
-    const title = listing.title || "Premium Space";
-    const cat = listing.spaceCategory || listing.category || "Commercial Space";
-    const sqm = listing.sqm || listing.Floor_Area_Sqm || listing.CM_Total_GLA || "";
-    const cleanLoc = (listing.location || 'Location upon inquiry');
-    const cleanCat = cat.replace(/\s+/g, '');
-    const locTag = cleanLoc !== 'Location upon inquiry' ? '#' + cleanLoc.split(',')[0].replace(/[^a-zA-Z0-9]/g, '') : '';
     const cleanUrl = `${window.location.origin}/property/${listing.slug || listing.id}`;
-    
-    const shareText = `■ MARKET INTELLIGENCE BRIEFING\n${title}\n\n▸ Category: ${cat}\n▸ Location: ${cleanLoc}${sqm ? '\n▸ Size: ' + sqm + ' sqm' : ''}\n\nDiscover the complete architectural and operational signals for this space on ScoutIt, the Philippines' first spatial commerce platform.\n\nAccess the full dossier here:\n${cleanUrl}\n\n#ScoutIt #${cleanCat} ${locTag} #RealEstatePH`;
-    
+    const shareText = buildShareText(listing, cleanUrl);
+
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    
+
     if (isMobile && navigator.share) {
       navigator.share({
-        title: `${title} - ScoutIt`,
+        title: `${listing.title || "Premium Space"} - ScoutIt`,
         text: shareText
       }).catch(err => {
         if (err.name !== 'AbortError') {

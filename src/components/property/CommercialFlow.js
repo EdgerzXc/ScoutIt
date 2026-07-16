@@ -13,6 +13,7 @@ import { resolveTransitHub } from "@/lib/transit";
 import { hasInteractiveUnitPage, hasSpatial3D } from "@/lib/unitMasterPage";
 import SpatialVaultWidget from "@/components/property/SpatialVaultWidget";
 import PromoteModal from "./PromoteModal";
+import MonthlyCostCalculator from "@/components/property/MonthlyCostCalculator";
 
 // Leaflet is huge. We dynamically import the InteractiveMap so the initial page load
 // doesn't block on parsing the React Leaflet wrapper.
@@ -57,6 +58,7 @@ import "@/app/property/[id]/property-detail.css";
 import { getChapterConfig } from "./chapterConfig";
 import { Bed, Bath, Ruler, Car, Lock, Search, Camera, Building2 } from "lucide-react";
 import ShareModal from "./ShareModal";
+import { buildShareText } from "@/lib/shareBriefing";
 import InquiryModal from "@/components/property/InquiryModal";
 import OperatorRequestModal from "@/components/property/OperatorRequestModal";
 import GlassPanel from "@/components/ui/GlassPanel";
@@ -2285,6 +2287,8 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                 );
               })()}
 
+              <MonthlyCostCalculator d={d} />
+
               <div style={{height:"1px", background:"#262626", margin:"28px 0 24px"}}/>
 
               <div style={{marginTop:"0"}}>
@@ -2294,7 +2298,13 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                   <div className="broker-info">
                     <div className="broker-name-el">{d.broker_name}</div>
                     <div className="broker-meta">Direct Listing</div>
-                    <div className="broker-rating" style={{color:"#4caf7d"}}>Verified broker</div>
+                    {/* "PRC Verified" is a staff-checked credential claim — never
+                        assert it unconditionally (RA 9646). */}
+                    {d.brokerLicenseVerified ? (
+                      <div className="broker-rating" style={{color:"#4caf7d"}}>PRC Verified broker</div>
+                    ) : (
+                      <div className="broker-rating" style={{color:"var(--text-secondary)"}}>ScoutIt roster</div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -2308,16 +2318,13 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                   onClick={() => {
                     if (typeof window !== 'undefined') {
                       const cleanUrl = window.location.origin + window.location.pathname;
-                      const title = d.title || "Premium Space";
-                      const cat = d.spaceCategory || d.category || "Commercial Space";
-                      const sqm = d.sqm || d.Floor_Area_Sqm || d.CM_Total_GLA || "";
-                      const shareText = `${title} — Market Intelligence Briefing\n${cat} | ${sqm ? sqm + ' sqm | ' : ''}${d.location || 'Location upon inquiry'}\nDiscover the complete architectural and operational signals for this space on ScoutIt, the Philippines' first spatial commerce platform.\nAccess the full briefing: ${cleanUrl}`;
-                      
+                      const shareText = buildShareText(d, cleanUrl);
+
                       const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-                      
+
                       if (isMobile && navigator.share) {
                         navigator.share({
-                          title: `${title} - ScoutIt`,
+                          title: `${d.title || "Premium Space"} - ScoutIt`,
                           text: shareText
                         }).catch(err => {
                           if (err.name !== 'AbortError') {
@@ -2432,7 +2439,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
         isOpen={isPromoteOpen}
         onClose={() => setIsPromoteOpen(false)}
         propertyData={d}
-        link={typeof window !== 'undefined' ? window.location.href : `https://scoutit.com/property/${d.slug}`}
+        link={typeof window !== 'undefined' ? window.location.href : `/property/${d.slug}`}
       />
 
       {/* Lightbox / Fullscreen Modal */}
@@ -2480,40 +2487,6 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
         </div>
       )}
 
-      {/* Custom Share Modal */}
-      {shareTextOpen && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="bg-[#0a0a0a] border border-[#E8AE3C]/30 rounded-xl p-6 w-full max-w-lg shadow-[0_0_30px_rgba(232,174,60,0.1)]">
-            <h3 className="text-xl font-serif text-[#E8AE3C] mb-2">Share Briefing</h3>
-            <p className="text-sm text-gray-400 mb-4">Copy the text below to share this property on Facebook, LinkedIn, or Email.</p>
-            
-            <textarea 
-              readOnly 
-              className="w-full h-48 bg-[#111111] border border-gray-800 rounded-lg p-4 text-sm text-white font-mono resize-none focus:outline-none focus:border-[#E8AE3C]"
-              value={shareTextOpen}
-            />
-            
-            <div className="flex justify-end gap-3 mt-6">
-              <button 
-                onClick={() => setShareTextOpen(null)}
-                className="px-4 py-2 text-sm text-gray-400 hover:text-white transition-colors"
-              >
-                Close
-              </button>
-              <button 
-                onClick={() => {
-                  navigator.clipboard.writeText(shareTextOpen);
-                  alert("Briefing copied to clipboard!");
-                  setShareTextOpen(null);
-                }}
-                className="px-6 py-2 bg-[#E8AE3C] text-black font-bold text-sm rounded hover:bg-[#F7C64E] transition-colors active:scale-[0.98]"
-              >
-                Copy to Clipboard
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 }

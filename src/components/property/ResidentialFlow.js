@@ -23,12 +23,14 @@ import { getChapterConfig } from "./chapterConfig";
 import { Lock, Unlock, Zap, ChevronRight, Share2, MapPin, Eye, Search, Layers, X, Home, Users, ArrowUpRight, Copy, Check, Bed, Bath, Ruler, Car, Building2, Camera } from "lucide-react";
 import Image from "next/image";
 import ShareModal from "./ShareModal";
+import { buildShareText } from "@/lib/shareBriefing";
 import InquiryModal from "@/components/property/InquiryModal";
 import OperatorRequestModal from "@/components/property/OperatorRequestModal";
 import GlassPanel from "@/components/ui/GlassPanel";
 import HoverCard from "@/components/ui/HoverCard";
 import MeshHero from "@/components/ui/MeshHero";
 import AffordabilityCalculator from "@/components/property/AffordabilityCalculator";
+import MonthlyCostCalculator from "@/components/property/MonthlyCostCalculator";
 import FloodRiskBadge from "@/components/property/FloodRiskBadge";
 import SpatialVaultWidget from "@/components/property/SpatialVaultWidget";
 import { hasInteractiveUnitPage, hasSpatial3D } from "@/lib/unitMasterPage";
@@ -2101,6 +2103,8 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                 tenure={d.tenure}
               />
 
+              <MonthlyCostCalculator d={d} />
+
               <div style={{height:"1px", background:"#262626", margin:"28px 0 24px"}}/>
 
               <div style={{marginTop:"0"}}>
@@ -2110,7 +2114,13 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                   <div className="broker-info">
                     <div className="broker-name-el">{d.broker_name}</div>
                     <div className="broker-meta">Direct Listing</div>
-                    <div className="broker-rating" style={{color:"#4caf7d"}}>Verified broker</div>
+                    {/* "PRC Verified" is a staff-checked credential claim — never
+                        assert it unconditionally (RA 9646). */}
+                    {d.brokerLicenseVerified ? (
+                      <div className="broker-rating" style={{color:"#4caf7d"}}>PRC Verified broker</div>
+                    ) : (
+                      <div className="broker-rating" style={{color:"var(--text-secondary)"}}>ScoutIt roster</div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -2124,16 +2134,13 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                   onClick={() => {
                     if (typeof window !== 'undefined') {
                       const cleanUrl = window.location.origin + window.location.pathname;
-                      const title = d.title || "Premium Space";
-                      const cat = d.spaceCategory || d.category || "Residential Space";
-                      const sqm = d.sqm || d.Floor_Area_Sqm || d.CM_Total_GLA || "";
-                      const shareText = `${title} — Market Intelligence Briefing\n${cat} | ${sqm ? sqm + ' sqm | ' : ''}${d.location || 'Location upon inquiry'}\nDiscover the complete architectural and operational signals for this space on ScoutIt, the Philippines' first spatial commerce platform.\nAccess the full briefing: ${cleanUrl}`;
-                      
+                      const shareText = buildShareText(d, cleanUrl);
+
                       const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-                      
+
                       if (isMobile && navigator.share) {
                         navigator.share({
-                          title: `${title} - ScoutIt`,
+                          title: `${d.title || "Premium Space"} - ScoutIt`,
                           text: shareText
                         }).catch(err => {
                           if (err.name !== 'AbortError') {

@@ -109,6 +109,9 @@ export async function fetchBrokers(apiKey, baseId) {
         bio:              f.Bio             || "",
         image:            f.Image           || "",
         license:          f.License         || "",
+        // RA 9646 trust badge — true only when staff ticked License_Verified
+        // in Airtable after checking the PRC registry. Never assume.
+        licenseVerified:  !!f.License_Verified,
         closures:         f.Closures        || "",
         rating:           Number(f.Rating)  || 0,
         subscriptionTier: subscriptionTier,

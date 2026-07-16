@@ -27,24 +27,36 @@ export default function BrokerMode() {
   // License State
   const [prcInput, setPrcInput] = useState("");
   const [dhsudInput, setDhsudInput] = useState("");
+  const [prcExpiryInput, setPrcExpiryInput] = useState("");
+  const [prcVerified, setPrcVerified] = useState(false);
 
   useEffect(() => {
     if (currentUser) {
       setPrcInput(currentUser.prcLicense || currentUser.prc_license || "");
       setDhsudInput(currentUser.dhsudNumber || currentUser.dhsud_number || "");
+      setPrcExpiryInput(currentUser.prcExpiry || currentUser.prc_expiry || "");
+      setPrcVerified(!!(currentUser.prcVerified ?? currentUser.prc_verified));
     }
   }, [currentUser]);
 
   const handleUpdateLicense = async (field, value) => {
     if (!currentUser) return;
     try {
+      // Changing any credential invalidates a previously issued badge —
+      // staff must re-check the new number against the PRC registry.
+      const patch = { [field]: value || null };
+      if (["prc_license", "prc_expiry", "dhsud_number"].includes(field)) {
+        patch.prc_verified = false;
+        patch.prc_verified_at = null;
+      }
       const { error } = await supabase
         .from('user_profiles')
-        .update({ [field]: value })
+        .update(patch)
         .eq('id', currentUser.id);
-      
+
       if (error) throw error;
-      if (addToast) addToast("License updated successfully", "✅");
+      setPrcVerified(false);
+      if (addToast) addToast("License updated — pending re-verification", "✅");
     } catch (err) {
       console.error("Failed to update license:", err);
       if (addToast) addToast("Failed to update license", "❌");
@@ -676,9 +688,27 @@ export default function BrokerMode() {
                 </div>
 
                 <div className="border-t border-surface-variant pt-4 flex justify-between items-end">
-                  <div>
-                    <span className="block text-[8px] text-text-muted font-mono uppercase tracking-widest mb-1">Valid Until</span>
-                    <span className="text-text-secondary font-mono text-xs">DEC {new Date().getFullYear()}</span>
+                  <div className="flex items-end gap-6">
+                    <div>
+                      <span className="block text-[8px] text-text-muted font-mono uppercase tracking-widest mb-1">License Valid Until</span>
+                      <input
+                        type="date"
+                        className="bg-transparent border-none text-text-secondary font-mono text-xs p-0 focus:ring-0 [color-scheme:dark]"
+                        value={prcExpiryInput}
+                        onChange={(e) => setPrcExpiryInput(e.target.value)}
+                        onBlur={(e) => handleUpdateLicense('prc_expiry', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <span className="block text-[8px] text-text-muted font-mono uppercase tracking-widest mb-1">Verification</span>
+                      {prcVerified ? (
+                        <span className="text-[#4caf7d] font-mono text-xs font-bold">PRC VERIFIED</span>
+                      ) : prcInput ? (
+                        <span className="text-gold-accent font-mono text-xs" title="ScoutIt staff checks your number against the PRC registry">Pending review</span>
+                      ) : (
+                        <span className="text-text-muted font-mono text-xs">Not submitted</span>
+                      )}
+                    </div>
                   </div>
                   {/* Mock QR Code Pattern */}
                   <div className="w-12 h-12 bg-white rounded p-1 opacity-90">

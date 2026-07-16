@@ -4,13 +4,57 @@ import { useState, useEffect } from "react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { supabase } from "@/lib/supabaseClient";
-import { Building2, Check, AlertCircle } from "lucide-react";
+import { Building2, Check, AlertCircle, ShieldCheck, ShieldOff } from "lucide-react";
 
 export default function AdminPage() {
   const [pendingProperties, setPendingProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState(null);
   const [message, setMessage] = useState(null); // { type: 'success' | 'error', text: '' }
+
+  // RA 9646: PRC credential verification queue
+  const [prcQueue, setPrcQueue] = useState([]);
+  const [prcLoading, setPrcLoading] = useState(true);
+  const [prcProcessingId, setPrcProcessingId] = useState(null);
+
+  async function authHeaders() {
+    const { data: { session } } = await supabase.auth.getSession();
+    const token = session?.access_token;
+    return { "Content-Type": "application/json", "Authorization": token ? `Bearer ${token}` : "" };
+  }
+
+  async function fetchPrcQueue() {
+    setPrcLoading(true);
+    try {
+      const res = await fetch("/api/admin/prc", { headers: await authHeaders() });
+      const result = await res.json();
+      if (res.ok) setPrcQueue(result.data || []);
+    } catch (err) {
+      console.error("Failed to load PRC queue", err);
+    } finally {
+      setPrcLoading(false);
+    }
+  }
+
+  const handlePrcToggle = async (userId, verified) => {
+    setPrcProcessingId(userId);
+    setMessage(null);
+    try {
+      const res = await fetch("/api/admin/prc", {
+        method: "POST",
+        headers: await authHeaders(),
+        body: JSON.stringify({ userId, verified }),
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || "Failed to update verification.");
+      setPrcQueue((prev) => prev.map((p) => (p.id === userId ? { ...p, prc_verified: verified } : p)));
+      setMessage({ type: "success", text: verified ? "Credential marked PRC Verified." : "Verification revoked." });
+    } catch (err) {
+      setMessage({ type: "error", text: err.message });
+    } finally {
+      setPrcProcessingId(null);
+    }
+  };
 
   async function fetchPending() {
     setLoading(true);
@@ -28,6 +72,8 @@ export default function AdminPage() {
 
   useEffect(() => {
     fetchPending();
+    fetchPrcQueue();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
 
@@ -124,6 +170,61 @@ export default function AdminPage() {
                         onClick={() => handleApprove(prop.id)}
                       >
                         {processingId === prop.id ? "SYNCING..." : "APPROVE TO AIRTABLE"}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* RA 9646 — PRC credential verification queue */}
+          <div className="admin-panel" style={{ marginTop: 32 }}>
+            <div className="panel-header">
+              <h2>PRC Verification</h2>
+              <span className="count-badge">{prcQueue.filter((p) => !p.prc_verified).length}</span>
+            </div>
+
+            {prcLoading ? (
+              <div className="loading-state">Loading credential submissions...</div>
+            ) : prcQueue.length === 0 ? (
+              <div className="empty-state">
+                <p>No PRC credentials submitted yet. Brokers add theirs from their dashboard ID card.</p>
+              </div>
+            ) : (
+              <div className="submission-list">
+                {prcQueue.map((p) => (
+                  <div key={p.id} className="submission-card">
+                    <div className="submission-info">
+                      <div className="info-primary">
+                        {p.prc_verified
+                          ? <ShieldCheck size={16} color="#4caf7d" />
+                          : <ShieldOff size={16} color="#E8AE3C" />}
+                        <h3>{p.display_name || p.id}</h3>
+                      </div>
+                      <div className="info-secondary">
+                        <span className="info-tag coords">PRC {p.prc_license}</span>
+                        {p.dhsud_number && <span className="info-tag">DHSUD {p.dhsud_number}</span>}
+                        {p.prc_expiry && <span className="info-tag">Expires {p.prc_expiry}</span>}
+                        {p.firm && <span className="info-tag">{p.firm}</span>}
+                      </div>
+                      <div className="info-meta">
+                        {p.prc_verified
+                          ? `Verified ${p.prc_verified_at ? new Date(p.prc_verified_at).toLocaleDateString() : ""} — badge live on public profile`
+                          : "Unverified — check against the PRC public registry before approving"}
+                      </div>
+                    </div>
+
+                    <div className="submission-actions">
+                      <button
+                        className="btn-approve"
+                        disabled={prcProcessingId === p.id}
+                        onClick={() => handlePrcToggle(p.id, !p.prc_verified)}
+                        style={p.prc_verified ? { background: "transparent", border: "1px solid rgba(255,255,255,0.2)", color: "var(--text-secondary)" } : undefined}
+                      >
+                        {prcProcessingId === p.id
+                          ? "SAVING..."
+                          : p.prc_verified ? "REVOKE BADGE" : "MARK PRC VERIFIED"}
                       </button>
                     </div>
                   </div>

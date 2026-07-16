@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { GEMINI_MODEL } from '@/lib/geminiModel';
 import { GoogleGenAI, Type } from '@google/genai';
 
 const SCOUTIT_SCHEMA_PROMPT = `
@@ -74,7 +75,7 @@ ${JSON.stringify(item, null, 2)}
 Return a single JSON object following the ScoutIt Schema exactly.`;
 
         const response = await ai.models.generateContent({
-          model: 'gemini-2.5-flash',
+          model: GEMINI_MODEL,
           contents: prompt,
           config: {
             responseMimeType: 'application/json',

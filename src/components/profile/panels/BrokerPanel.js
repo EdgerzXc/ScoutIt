@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Briefcase, Star, TrendingUp, Eye, CheckCircle, BarChart2 } from "lucide-react";
+import { Briefcase, Star, TrendingUp, Eye, CheckCircle, BarChart2, ShieldCheck } from "lucide-react";
 
 function RatingBar({ label, value, max = 100 }) {
   const pct = Math.min(100, Math.max(0, value));
@@ -30,7 +30,7 @@ function RatingBar({ label, value, max = 100 }) {
   );
 }
 
-export default function BrokerPanel({ data, isPublic = false }) {
+export default function BrokerPanel({ data, isPublic = false, prcVerified = false, prcLicense = "" }) {
   const isEmpty =
     !data ||
     (data.verified_closures === 0 &&
@@ -43,6 +43,14 @@ export default function BrokerPanel({ data, isPublic = false }) {
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <Briefcase size={14} strokeWidth={1.5} color="#E8AE3C" />
           <span style={panelLabel}>Broker</span>
+          {/* RA 9646 badge — renders ONLY when staff verified the credential
+              against the PRC registry, never from the mere number. */}
+          {prcVerified && (
+            <span style={prcBadge} title={prcLicense ? `PRC License ${prcLicense} — verified by ScoutIt` : "Verified by ScoutIt"}>
+              <ShieldCheck size={11} strokeWidth={2} />
+              PRC VERIFIED{prcLicense ? ` · ${prcLicense}` : ""}
+            </span>
+          )}
         </div>
         {!isPublic && data?.profile_views_this_month != null && (
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
@@ -162,6 +170,21 @@ const panelLabel = {
   letterSpacing: "0.14em",
   textTransform: "uppercase",
   color: "#E8AE3C",
+};
+
+const prcBadge = {
+  display: "inline-flex",
+  alignItems: "center",
+  gap: 4,
+  fontFamily: "var(--font-mono)",
+  fontSize: 9,
+  fontWeight: 700,
+  letterSpacing: "0.1em",
+  color: "#4caf7d",
+  background: "rgba(76, 175, 125, 0.1)",
+  border: "1px solid rgba(76, 175, 125, 0.3)",
+  borderRadius: 3,
+  padding: "2px 7px",
 };
 
 const metricBlock = {

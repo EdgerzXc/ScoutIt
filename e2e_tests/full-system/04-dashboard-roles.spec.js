@@ -38,9 +38,10 @@ test.describe('Owner with zero listings (safe mock)', () => {
     await gotoAndSettle(page, '/dashboard');
     await expectRealContent(page);
 
-    // Zero-listings owner state → the first-listing CTA.
+    // Zero-listings owner state → the first-listing CTA. (Button copy was
+    // renamed from "Start My First Listing" to "Create your first listing".)
     const startBtn = page
-      .getByText('Start My First Listing')
+      .getByRole('button', { name: /Create your first listing/i })
       .or(page.getByText('+ New Property File', { exact: true }))
       .first();
     await expect(startBtn).toBeVisible({ timeout: 25000 });
@@ -49,7 +50,7 @@ test.describe('Owner with zero listings (safe mock)', () => {
     // The creation-mode chooser must appear. We open it and STOP — no draft
     // is created, nothing is submitted.
     await expect(
-      page.getByText(/How would you like to create this listing\?/i)
+      page.getByText(/How do you want to create your listing\?/i)
     ).toBeVisible({ timeout: 15000 });
 
     expect(errors, errors.join('\n')).toEqual([]);

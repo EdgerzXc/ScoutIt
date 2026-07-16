@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { GEMINI_MODEL } from '@/lib/geminiModel';
 import { GoogleGenAI } from '@google/genai';
 
 const SEO_OPTIMIZE_PROMPT = `
@@ -47,7 +48,7 @@ ${text}
 `;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: GEMINI_MODEL,
       contents: `${SEO_OPTIMIZE_PROMPT}\n${contextPrompt}`,
     });
 
