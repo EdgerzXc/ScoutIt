@@ -43,19 +43,13 @@ test.describe('Enterprise Mission Control Flow', () => {
     // Click Alignment tab for the active member
     await page.click('button:has-text("Alignment")');
 
-    // Click Assign Task
+    // Click Assign Task — tasks now persist to the real crm_tasks table, so
+    // this test only verifies the form opens and STOPS (read-only safety:
+    // submitting would write a production row for master-dev).
     await page.click('button:has-text("Assign Task")');
-
-    // Fill form
-    await page.fill('input[placeholder="e.g., Audit building Q3 compliance..."]', 'Conduct Fire Safety Audit');
-    await page.selectOption('select', 'Urgent');
-    await page.fill('input[placeholder="e.g., Next Friday"]', 'Tomorrow 10AM');
-    
-    // Click Submit (Delegate to [Name])
-    await page.click('button[type="submit"]');
-
-    // Verify task is added
-    await expect(page.getByText('Conduct Fire Safety Audit')).toBeVisible();
+    await expect(page.locator('input[placeholder="e.g., Audit building Q3 compliance..."]')).toBeVisible();
+    await expect(page.locator('input[type="date"]').first()).toBeVisible();
+    await page.click('button:has-text("Cancel")');
 
     // 4. Delegate a Unit
     // Click Inventory tab

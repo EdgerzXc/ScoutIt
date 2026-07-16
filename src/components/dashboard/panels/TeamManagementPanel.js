@@ -1,10 +1,22 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Users, Shield, Clock, X, ChevronDown, Check, Activity, Mail, CheckSquare, Plus, AlertCircle, Key, CheckCircle } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { Users, Shield, Clock, X, ChevronDown, Check, Activity, Mail, CheckSquare, Plus, AlertCircle, Key, CheckCircle, Link2, History } from "lucide-react";
 import { useDashboard } from "../../../context/DashboardContext";
+import { crmFetch } from "../../../lib/crmClient";
 
-const ROLES = ["Admin", "Head of Finances", "Location Manager", "Agent", "Viewer"];
+// Seats a real estate enterprise actually staffs — brokers, developer project
+// managers, strata/property managers, co-working operators, finance.
+const ROLES = ["Admin", "Broker", "Developer PM", "Strata Manager", "Operator", "Head of Finances", "Agent", "Viewer"];
+
+// Plain-language labels for crm_activity_log activity types.
+const ACTIVITY_LABELS = {
+  deal_initiated: "Opened a connection",
+  status_change: "Moved a deal",
+  note_added: "Added a private note",
+  viewing_scheduled: "Scheduled a viewing",
+  task_completed: "Completed a task",
+};
 
 // Gold-ring initials disc when a member has no real avatar photo — we never
 // show a stock stranger's face for a real account (Honest Blank Rule).
@@ -27,9 +39,33 @@ function MemberAvatar({ member, size = "w-10 h-10", textSize = "text-sm" }) {
   );
 }
 
-export default function TeamManagementPanel({ currentUser = null, properties = [] }) {
+export default function TeamManagementPanel({ currentUser = null, properties = [], pitches = [] }) {
   const { addToast } = useDashboard();
   const [teamList, setTeamList] = useState([]);
+
+  // Real crm_tasks rows for the signed-in member (persisted; survives refresh,
+  // completed rows become the task history). Invited sandbox members have no
+  // account yet, so they honestly show nothing.
+  const [memberTasks, setMemberTasks] = useState(null); // null = loading
+  const [memberActivity, setMemberActivity] = useState(null);
+
+  const loadMemberData = useCallback(async () => {
+    if (!currentUser?.id) return;
+    try {
+      const data = await crmFetch("/api/crm/tasks", { mockUserId: currentUser.id });
+      setMemberTasks(data.tasks || []);
+    } catch {
+      setMemberTasks([]);
+    }
+    try {
+      const data = await crmFetch("/api/crm/activity", { mockUserId: currentUser.id });
+      setMemberActivity(data.activities || data.activity || []);
+    } catch {
+      setMemberActivity([]);
+    }
+  }, [currentUser?.id]);
+
+  useEffect(() => { loadMemberData(); }, [loadMemberData]);
   
   // Modals / Overlays
   const [isInvitingMember, setIsInvitingMember] = useState(false);
@@ -79,59 +115,53 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
   // Task assignment state
   const [isAssigningTask, setIsAssigningTask] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState("");
-  const [newTaskPriority, setNewTaskPriority] = useState("Medium");
   const [newTaskDue, setNewTaskDue] = useState("");
+  const [isSavingTask, setIsSavingTask] = useState(false);
+  const [showTaskHistory, setShowTaskHistory] = useState(false);
 
   const activeMember = teamList.find(m => m.id === activeMemberId) || teamList[0];
 
-  const handleAssignTask = (e) => {
+  // Persisted through the same crm_tasks engine brokers use — refresh-proof,
+  // and completed rows automatically become the member's task history.
+  const handleAssignTask = async (e) => {
     e.preventDefault();
-    if (!newTaskTitle.trim()) return;
-
-    const newTask = {
-      id: Date.now(),
-      title: newTaskTitle,
-      status: "To Do",
-      priority: newTaskPriority,
-      due: newTaskDue || "No Date"
-    };
-
-    setTeamList(prev => prev.map(m => 
-      m.id === activeMemberId ? { ...m, tasks: [newTask, ...(m.tasks || [])] } : m
-    ));
-
-    addToast(`Delegated "${newTaskTitle}" to ${activeMember.name.split(" ")[0]}`, "✅");
-
-    setIsAssigningTask(false);
-    setNewTaskTitle("");
-    setNewTaskPriority("Medium");
-    setNewTaskDue("");
-  };
-
-  const handleMarkTaskDone = (taskId) => {
-    setTeamList(prev => prev.map(m => 
-      m.id === activeMemberId 
-        ? { ...m, tasks: m.tasks.map(t => t.id === taskId ? { ...t, status: "Done" } : t) }
-        : m
-    ));
-    addToast("Task marked as Done", "✅");
-  };
-
-  const getPriorityColor = (priority) => {
-    switch(priority) {
-      case "High": return "text-red-400 border-red-400/30 bg-red-400/10";
-      case "Medium": return "text-yellow-400 border-yellow-400/30 bg-yellow-400/10";
-      case "Low": return "text-green-400 border-green-400/30 bg-green-400/10";
-      default: return "text-white/50 border-white/10 bg-white/5";
+    if (!newTaskTitle.trim() || isSavingTask) return;
+    if (activeMemberId !== "current_user") {
+      addToast("That seat isn't activated yet — tasks can be delegated once they join", "ℹ️");
+      return;
+    }
+    setIsSavingTask(true);
+    try {
+      const body = {
+        title: newTaskTitle.trim(),
+        dueAt: newTaskDue ? new Date(`${newTaskDue}T09:00:00`).toISOString() : null,
+      };
+      const data = await crmFetch("/api/crm/tasks", { method: "POST", mockUserId: currentUser?.id, body });
+      setMemberTasks((prev) => [data.task, ...(prev || [])]);
+      addToast(`Delegated "${newTaskTitle.trim()}"`, "✅");
+      setIsAssigningTask(false);
+      setNewTaskTitle("");
+      setNewTaskDue("");
+    } catch (err) {
+      console.error("Failed to delegate task:", err);
+      addToast("Couldn't save the task — try again", "❌");
+    } finally {
+      setIsSavingTask(false);
     }
   };
 
-  const getStatusColor = (status) => {
-    switch(status) {
-      case "Done": return "text-[#E8AE3C] opacity-50 line-through";
-      case "In Progress": return "text-white";
-      case "To Do": return "text-white";
-      default: return "text-white/50";
+  const handleMarkTaskDone = async (taskId) => {
+    try {
+      const data = await crmFetch(`/api/crm/tasks/${taskId}`, {
+        method: "PATCH",
+        mockUserId: currentUser?.id,
+        body: { completed: true },
+      });
+      setMemberTasks((prev) => (prev || []).map((t) => (t.id === taskId ? data.task : t)));
+      addToast("Task marked as Done", "✅");
+    } catch (err) {
+      console.error("Failed to complete task:", err);
+      addToast("Couldn't update the task", "❌");
     }
   };
 
@@ -246,10 +276,20 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-center mb-0.5">
                       <div className="text-sm text-white font-medium truncate">{member.name}</div>
-                      {/* Task Load Indicator */}
-                      {member.tasks?.filter(t => t.status !== "Done").length > 0 && (
-                        <div className="text-[9px] font-mono bg-[#E8AE3C]/20 text-[#E8AE3C] px-1.5 py-0.5 rounded">
-                          {member.tasks.filter(t => t.status !== "Done").length} Tasks
+                      {/* Live load indicators — open tasks + active chatboxes */}
+                      {member.id === 'current_user' && (
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          {(memberTasks || []).filter((t) => !t.completedAt).length > 0 && (
+                            <div className="text-[9px] font-mono bg-[#E8AE3C]/20 text-[#E8AE3C] px-1.5 py-0.5 rounded">
+                              {(memberTasks || []).filter((t) => !t.completedAt).length} Tasks
+                            </div>
+                          )}
+                          {pitches.filter((p) => p.status === 'pending' || p.status === 'accepted').length > 0 && (
+                            <div className="text-[9px] font-mono bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded flex items-center gap-1">
+                              <Link2 size={9} />
+                              {pitches.filter((p) => p.status === 'pending' || p.status === 'accepted').length}
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
@@ -320,13 +360,21 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
                   >
                     <CheckSquare size={14} /> Alignment
                   </button>
-                  <button 
+                  <button
                     onClick={() => setActiveTab('activity')}
                     className={`flex-1 py-3 text-[11px] font-medium tracking-wide uppercase transition-colors flex items-center justify-center gap-1.5 ${
                       activeTab === 'activity' ? 'text-[#E8AE3C] border-b-2 border-[#E8AE3C]' : 'text-white/40 hover:text-white/80 border-b-2 border-transparent'
                     }`}
                   >
                     <Activity size={14} /> Activity Log
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('connections')}
+                    className={`flex-1 py-3 text-[11px] font-medium tracking-wide uppercase transition-colors flex items-center justify-center gap-1.5 ${
+                      activeTab === 'connections' ? 'text-[#E8AE3C] border-b-2 border-[#E8AE3C]' : 'text-white/40 hover:text-white/80 border-b-2 border-transparent'
+                    }`}
+                  >
+                    <Link2 size={14} /> Connections
                   </button>
                 </div>
                 
@@ -375,19 +423,73 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
 
                   {activeTab === 'activity' && (
                     <div className="space-y-4 animate-in fade-in duration-300">
-                      {activeMember.activities.map(act => (
-                        <div key={act.id} className="relative pl-4 border-l border-white/10 pb-4 last:pb-0">
-                          <div className="absolute w-2 h-2 rounded-full bg-[#E8AE3C] -left-[4.5px] top-1.5 ring-4 ring-[#121212]"></div>
-                          <div className="text-xs text-white/80">
-                            <span className="font-medium text-white">{act.action}</span> {act.target}
-                          </div>
-                          <div className="flex items-center gap-1 text-[10px] text-white/40 mt-1 uppercase tracking-widest">
-                            <Clock size={10} /> {act.time}
-                          </div>
+                      {activeMemberId !== 'current_user' ? (
+                        <div className="text-xs text-white/40 italic text-center py-8">
+                          This seat hasn&apos;t been activated yet — activity appears once they join and start working.
                         </div>
-                      ))}
-                      {activeMember.activities.length === 0 && (
-                        <div className="text-xs text-white/40 italic">No recent activity.</div>
+                      ) : memberActivity === null ? (
+                        <div className="text-xs text-white/40 italic text-center py-8">Loading activity…</div>
+                      ) : memberActivity.length === 0 ? (
+                        <div className="text-xs text-white/40 italic text-center py-8">
+                          No recorded activity yet. Deal moves, notes, and viewings will build this timeline automatically.
+                        </div>
+                      ) : (
+                        memberActivity.slice(0, 30).map((act) => (
+                          <div key={act.id} className="relative pl-4 border-l border-white/10 pb-4 last:pb-0">
+                            <div className="absolute w-2 h-2 rounded-full bg-[#E8AE3C] -left-[4.5px] top-1.5 ring-4 ring-[#121212]"></div>
+                            <div className="text-xs text-white/80">
+                              <span className="font-medium text-white">{ACTIVITY_LABELS[act.activityType] || act.activityType}</span>
+                              {act.propertyTitle ? ` — ${act.propertyTitle}` : ""}
+                            </div>
+                            <div className="flex items-center gap-1 text-[10px] text-white/40 mt-1 uppercase tracking-widest">
+                              <Clock size={10} /> {act.createdAt ? new Date(act.createdAt).toLocaleString() : ""}
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  )}
+
+                  {activeTab === 'connections' && (
+                    <div className="space-y-3 animate-in fade-in duration-300">
+                      <div className="text-xs text-white/40 uppercase tracking-widest mb-1">Connection History</div>
+                      <p className="text-[11px] text-white/40 leading-relaxed mb-3">
+                        Everyone this member is talking to through ScoutIt Connects. Names stay sealed until both sides reveal themselves inside the chatbox.
+                      </p>
+                      {activeMemberId !== 'current_user' ? (
+                        <div className="text-xs text-white/40 italic text-center py-8">
+                          This seat hasn&apos;t been activated yet — connections appear once they join.
+                        </div>
+                      ) : pitches.length === 0 ? (
+                        <div className="text-xs text-white/40 italic text-center py-8">
+                          No connections on record yet. When a buyer or broker spends a Connect on your portfolio, it shows here.
+                        </div>
+                      ) : (
+                        pitches.map((p) => {
+                          const revealed = p.status === 'accepted';
+                          return (
+                            <div key={p.id} className="p-3 bg-white/5 border border-white/10 rounded-lg flex items-start justify-between gap-3">
+                              <div className="min-w-0">
+                                <div className="text-sm text-white font-medium truncate">
+                                  {revealed ? p.brokerName : 'Sealed connection'}
+                                </div>
+                                <div className="text-[11px] text-white/50 truncate mt-0.5">{p.title}</div>
+                                {!revealed && p.status === 'pending' && (
+                                  <div className="text-[10px] font-mono uppercase tracking-widest text-[#E8AE3C] mt-1.5 flex items-center gap-1.5">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-[#E8AE3C] animate-pulse" />
+                                    Active temporary chatbox
+                                  </div>
+                                )}
+                              </div>
+                              <div className="text-right shrink-0">
+                                <span className={`text-[10px] font-mono uppercase tracking-widest ${p.status === 'accepted' ? 'text-green-400' : p.status === 'rejected' ? 'text-red-400' : 'text-[#E8AE3C]'}`}>
+                                  {p.statusText}
+                                </span>
+                                <div className="text-[10px] text-white/40 mt-1">{p.timeRemaining}</div>
+                              </div>
+                            </div>
+                          );
+                        })
                       )}
                     </div>
                   )}
@@ -418,74 +520,90 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
                               className="w-full bg-surface border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-[#E8AE3C] transition-colors"
                             />
                           </div>
-                          <div className="flex gap-3">
-                            <div className="flex-1">
-                              <label className="text-[10px] text-white/60 uppercase tracking-widest mb-1 block">Priority</label>
-                              <select 
-                                value={newTaskPriority}
-                                onChange={(e) => setNewTaskPriority(e.target.value)}
-                                className="w-full bg-surface border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-[#E8AE3C] transition-colors"
-                              >
-                                <option value="Low">Low</option>
-                                <option value="Medium">Medium</option>
-                                <option value="High">High</option>
-                                <option value="Urgent">Urgent</option>
-                              </select>
-                            </div>
-                            <div className="flex-1">
-                              <label className="text-[10px] text-white/60 uppercase tracking-widest mb-1 block">Due Date</label>
-                              <input 
-                                type="text" 
-                                value={newTaskDue}
-                                onChange={(e) => setNewTaskDue(e.target.value)}
-                                placeholder="e.g., Next Friday" 
-                                className="w-full bg-surface border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-[#E8AE3C] transition-colors"
-                              />
-                            </div>
+                          <div>
+                            <label className="text-[10px] text-white/60 uppercase tracking-widest mb-1 block">Due Date</label>
+                            <input
+                              type="date"
+                              value={newTaskDue}
+                              onChange={(e) => setNewTaskDue(e.target.value)}
+                              className="w-full bg-surface border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-[#E8AE3C] transition-colors [color-scheme:dark]"
+                            />
                           </div>
-                          <button type="submit" className="w-full mt-2 bg-[#E8AE3C] hover:bg-[#F7C64E] text-black font-medium py-2 rounded-lg text-sm transition-colors">
-                            Delegate to {activeMember.name.split(' ')[0]}
+                          <button type="submit" disabled={isSavingTask} className="w-full mt-2 bg-[#E8AE3C] hover:bg-[#F7C64E] disabled:opacity-50 text-black font-medium py-2 rounded-lg text-sm transition-colors">
+                            {isSavingTask ? "Saving…" : `Delegate to ${activeMember.name.split(' ')[0]}`}
                           </button>
                         </form>
                       )}
 
-                      <div className="space-y-2 flex-1">
-                        {activeMember.tasks?.map(task => (
-                          <div key={task.id} className="group p-3 bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 hover:border-white/20 transition-all flex flex-col gap-2 relative overflow-hidden">
-                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#E8AE3C]/5 to-transparent -translate-x-[100%] group-hover:animate-shimmer" />
-                            <div className="flex justify-between items-start gap-4 relative z-10">
-                              <div className={`text-sm font-medium ${getStatusColor(task.status)}`}>
-                                {task.title}
-                              </div>
-                              <div className="flex items-center gap-2 shrink-0">
-                                {task.status !== "Done" && (
-                                  <button 
-                                    onClick={() => handleMarkTaskDone(task.id)}
-                                    className="text-white/30 hover:text-green-400 transition-colors"
-                                    title="Mark as Done"
-                                  >
-                                    <CheckCircle size={14} />
-                                  </button>
-                                )}
-                                <span className={`text-[9px] uppercase tracking-wider font-mono px-1.5 py-0.5 rounded border ${getPriorityColor(task.priority)}`}>
-                                  {task.priority}
-                                </span>
-                              </div>
-                            </div>
-                            <div className="flex justify-between items-center relative z-10">
-                              <div className="flex items-center gap-1 text-[10px] text-white/40 uppercase tracking-widest">
-                                <AlertCircle size={10} /> Due: {task.due}
-                              </div>
-                              <div className="text-[10px] font-mono text-white/30 border border-white/10 px-1 rounded">
-                                {task.status}
-                              </div>
-                            </div>
+                      {activeMemberId !== 'current_user' ? (
+                        <div className="text-xs text-white/40 italic text-center py-8">
+                          This seat hasn&apos;t been activated yet — delegate tasks once they join.
+                        </div>
+                      ) : memberTasks === null ? (
+                        <div className="text-xs text-white/40 italic text-center py-8">Loading tasks…</div>
+                      ) : (
+                        <>
+                          {/* Open tasks — persisted crm_tasks rows */}
+                          <div className="space-y-2">
+                            {memberTasks.filter((t) => !t.completedAt).map((task) => {
+                              const overdue = task.dueAt && new Date(task.dueAt) < new Date();
+                              return (
+                                <div key={task.id} className="group p-3 bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 hover:border-white/20 transition-all flex flex-col gap-2 relative overflow-hidden">
+                                  <div className="flex justify-between items-start gap-4">
+                                    <div className="text-sm font-medium text-white">
+                                      {task.title}
+                                      {task.dealTitle && <span className="text-white/40 text-xs font-normal ml-2">· {task.dealTitle}</span>}
+                                    </div>
+                                    <button
+                                      onClick={() => handleMarkTaskDone(task.id)}
+                                      className="text-white/30 hover:text-green-400 transition-colors shrink-0"
+                                      title="Mark as Done"
+                                    >
+                                      <CheckCircle size={14} />
+                                    </button>
+                                  </div>
+                                  <div className={`flex items-center gap-1 text-[10px] uppercase tracking-widest ${overdue ? 'text-red-400' : 'text-white/40'}`}>
+                                    <AlertCircle size={10} />
+                                    {task.dueAt ? `Due ${new Date(task.dueAt).toLocaleDateString()}${overdue ? ' — overdue' : ''}` : 'No due date'}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                            {memberTasks.filter((t) => !t.completedAt).length === 0 && (
+                              <div className="text-xs text-white/40 italic text-center py-6">No open tasks. Everything&apos;s done.</div>
+                            )}
                           </div>
-                        ))}
-                        {(!activeMember.tasks || activeMember.tasks.length === 0) && (
-                          <div className="text-xs text-white/40 italic text-center py-8">No tasks delegated yet.</div>
-                        )}
-                      </div>
+
+                          {/* Task history — completed crm_tasks rows */}
+                          {memberTasks.filter((t) => t.completedAt).length > 0 && (
+                            <div className="mt-6">
+                              <button
+                                onClick={() => setShowTaskHistory((s) => !s)}
+                                className="flex items-center gap-2 text-[10px] uppercase font-bold tracking-wider text-white/50 hover:text-white transition-colors"
+                              >
+                                <History size={12} />
+                                Task History ({memberTasks.filter((t) => t.completedAt).length})
+                                <ChevronDown size={12} className={`transition-transform ${showTaskHistory ? 'rotate-180' : ''}`} />
+                              </button>
+                              {showTaskHistory && (
+                                <div className="space-y-1.5 mt-3 animate-in fade-in">
+                                  {memberTasks
+                                    .filter((t) => t.completedAt)
+                                    .sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt))
+                                    .map((task) => (
+                                      <div key={task.id} className="p-2.5 bg-black/30 border border-white/5 rounded-lg flex items-center justify-between gap-3">
+                                        <div className="text-xs text-white/50 line-through truncate">{task.title}</div>
+                                        <div className="text-[10px] text-white/30 font-mono shrink-0">
+                                          ✓ {new Date(task.completedAt).toLocaleDateString()}
+                                        </div>
+                                      </div>
+                                    ))}
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </>
+                      )}
                     </div>
                   )}
                 </div>

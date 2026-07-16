@@ -13,6 +13,7 @@ import { computeListingStrength } from "../../lib/listingStrength";
 import GlassPanel from "../ui/GlassPanel";
 import TeamManagementPanel from "./panels/TeamManagementPanel";
 import ProjectManagementPanel from "./panels/ProjectManagementPanel";
+import TaskRail from "./crm/TaskRail";
 import InventoryGridManager from "./InventoryGridManager";
 import DelegationRequests from "./DelegationRequests";
 
@@ -193,7 +194,7 @@ export default function MissionControlMode() {
   );
 
   return (
-    <div className="flex h-full w-full max-w-[1400px] mx-auto animate-slide-up-fade relative">
+    <div className="flex h-full w-full animate-slide-up-fade relative">
       {!isEnterprise ? (
         <div className="flex-1 w-full min-h-[calc(100vh-100px)] z-50 flex flex-col items-center justify-center p-6 bg-[#0d0d0d] overflow-y-auto">
           <div className="max-w-4xl w-full flex flex-col items-center text-center space-y-8 animate-in slide-in-from-bottom-8 duration-700">
@@ -440,7 +441,7 @@ export default function MissionControlMode() {
               </GlassPanel>
 
               {/* Active Projects (1x1) */}
-              <GlassPanel 
+              <GlassPanel
                 onClick={() => setActiveTab("projects")}
                 className="md:col-span-1 md:row-span-1 rounded-2xl p-6 relative overflow-hidden group border-white/5 hover:border-white/20 transition-all duration-300 shadow-lg cursor-pointer"
               >
@@ -451,6 +452,52 @@ export default function MissionControlMode() {
                   <div className="font-display-md text-3xl text-white tracking-tight mb-1 group-hover:scale-[1.02] origin-left transition-transform duration-300">{kpis.drafting}</div>
                   <div className="text-[10px] font-mono text-text-secondary uppercase tracking-widest">
                     Drafts in Progress
+                  </div>
+                </div>
+              </GlassPanel>
+
+              {/* Occupancy (1x1) — live unit data */}
+              <GlassPanel
+                onClick={() => setActiveTab("inventory")}
+                className="md:col-span-1 md:row-span-1 rounded-2xl p-6 relative overflow-hidden group border-white/5 hover:border-white/20 transition-all duration-300 shadow-lg cursor-pointer"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <Activity className="text-text-secondary group-hover:text-emerald-400 transition-colors duration-300" size={18} />
+                </div>
+                <div>
+                  <div className="font-display-md text-3xl text-white tracking-tight mb-2 group-hover:scale-[1.02] origin-left transition-transform duration-300">
+                    {inventoryStats.total > 0 ? `${Math.round((inventoryStats.occupied / inventoryStats.total) * 100)}%` : "—"}
+                  </div>
+                  {inventoryStats.total > 0 && (
+                    <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden mb-2">
+                      <div className="h-full bg-emerald-500/60 rounded-full transition-all duration-700" style={{ width: `${Math.round((inventoryStats.occupied / inventoryStats.total) * 100)}%` }} />
+                    </div>
+                  )}
+                  <div className="text-[10px] font-mono text-text-secondary uppercase tracking-widest">
+                    Occupancy Rate
+                  </div>
+                </div>
+              </GlassPanel>
+
+              {/* Connections (1x1) — live deal chatboxes */}
+              <GlassPanel
+                onClick={() => setActiveTab("crm")}
+                className="md:col-span-1 md:row-span-1 rounded-2xl p-6 relative overflow-hidden group border-white/5 hover:border-white/20 transition-all duration-300 shadow-lg cursor-pointer"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <Users className="text-text-secondary group-hover:text-blue-400 transition-colors duration-300" size={18} />
+                  {(pitches || []).filter((p) => p.status === "pending").length > 0 && (
+                    <span className="text-gold-accent text-[10px] font-mono font-bold">
+                      {(pitches || []).filter((p) => p.status === "pending").length} sealed
+                    </span>
+                  )}
+                </div>
+                <div>
+                  <div className="font-display-md text-3xl text-white tracking-tight mb-1 group-hover:scale-[1.02] origin-left transition-transform duration-300">
+                    {(pitches || []).filter((p) => p.status === "accepted" || p.status === "pending").length}
+                  </div>
+                  <div className="text-[10px] font-mono text-text-secondary uppercase tracking-widest">
+                    Active Chatboxes
                   </div>
                 </div>
               </GlassPanel>
@@ -596,47 +643,79 @@ export default function MissionControlMode() {
                 The people around your portfolio — broker pitches, leads, and every conversation in play.
               </p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 flex-1">
-              <GlassPanel className="col-span-2 rounded-2xl border-white/5 overflow-hidden flex flex-col items-center justify-center p-12 text-center group">
-                <div className="w-16 h-16 rounded-full bg-gold-accent/10 border border-gold-accent/20 flex items-center justify-center mb-6">
-                  <Users className="text-gold-accent" size={28} />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1">
+              {/* Live pipeline — every deal chatbox, double-blind respected */}
+              <GlassPanel className="lg:col-span-2 rounded-2xl border-white/5 overflow-hidden flex flex-col">
+                <div className="px-6 py-4 border-b border-white/5 flex items-center justify-between">
+                  <h3 className="text-white font-medium text-sm">Connection Pipeline</h3>
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-text-secondary">
+                    {(pitches || []).length} {(pitches || []).length === 1 ? "conversation" : "conversations"} on record
+                  </span>
                 </div>
-                <h3 className="text-xl text-white font-medium mb-2">Pipeline Empty</h3>
-                <p className="text-text-secondary text-sm max-w-sm">You haven't synced any contacts or leads yet. Connect your email or upload a CSV to get started.</p>
-                <button className="mt-6 px-6 py-2.5 bg-gold-accent text-black rounded-lg font-medium text-sm hover:bg-gold-accent-bright transition-colors">Import Contacts</button>
-              </GlassPanel>
-              <div className="col-span-1 flex flex-col gap-6">
-                <GlassPanel className="flex-1 rounded-2xl border-white/5 p-6">
-                  <h4 className="text-white font-medium text-sm mb-4">Recent Interactions</h4>
-                  {scopedPitches.length === 0 ? (
-                    <div className="text-center text-text-secondary text-xs mt-12 italic">No recent activity</div>
-                  ) : (
-                    <div className="flex flex-col gap-4 overflow-y-auto max-h-[300px] custom-scrollbar">
-                      {scopedPitches.slice(0, 5).map((p) => (
-                        <div key={p.id} className="relative pl-4 border-l-2 border-gold-accent/30">
-                          <div className="absolute w-1.5 h-1.5 rounded-full bg-gold-accent/50 -left-[4px] top-1.5" />
-                          <p className="text-sm text-white font-medium flex items-center gap-2">
-                            {p.brokerName} <span className="text-text-secondary text-[10px] font-normal uppercase tracking-widest">({p.brokerFirm})</span>
-                          </p>
-                          <p className="text-xs text-text-secondary mt-0.5 line-clamp-1">{p.title}</p>
-                          <p className={`text-[10px] font-mono uppercase tracking-widest mt-1 ${p.status === 'accepted' ? 'text-success' : p.status === 'rejected' ? 'text-error' : 'text-gold-accent'}`}>
-                            {p.statusText}
-                          </p>
-                        </div>
-                      ))}
+                {(pitches || []).length === 0 ? (
+                  <div className="flex-1 flex flex-col items-center justify-center p-12 text-center">
+                    <div className="w-16 h-16 rounded-full bg-gold-accent/10 border border-gold-accent/20 flex items-center justify-center mb-6">
+                      <Users className="text-gold-accent" size={28} />
                     </div>
-                  )}
-                </GlassPanel>
-                <GlassPanel className="h-48 rounded-2xl border-white/5 p-6">
-                  <h4 className="text-white font-medium text-sm mb-4">Lead Sources</h4>
-                  <div className="text-center text-text-secondary text-xs mt-8 italic">Insufficient data</div>
+                    <h3 className="text-xl text-white font-medium mb-2">No connections yet</h3>
+                    <p className="text-text-secondary text-sm max-w-sm">
+                      When buyers or brokers spend a Connect on your properties, every conversation lands here as a live pipeline entry.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="flex-1 overflow-y-auto custom-scrollbar divide-y divide-white/5">
+                    {(pitches || []).map((p) => {
+                      const revealed = p.status === "accepted";
+                      return (
+                        <div key={p.id} className="px-6 py-4 hover:bg-white/[0.02] transition-colors flex items-start justify-between gap-4">
+                          <div className="min-w-0">
+                            <p className="text-sm text-white font-medium truncate">
+                              {revealed ? p.brokerName : "Sealed connection"}
+                              <span className="text-text-secondary text-[10px] font-normal uppercase tracking-widest ml-2">
+                                {revealed ? (p.otherPartyRole || "connected party") : "identity held until both sides connect"}
+                              </span>
+                            </p>
+                            <p className="text-xs text-text-secondary mt-1 truncate">{p.title}</p>
+                            {!revealed && p.status === "pending" && (
+                              <p className="text-[10px] font-mono uppercase tracking-widest text-gold-accent mt-1.5 flex items-center gap-1.5">
+                                <span className="w-1.5 h-1.5 rounded-full bg-gold-accent animate-pulse" />
+                                Active temporary chatbox
+                              </p>
+                            )}
+                          </div>
+                          <div className="text-right shrink-0">
+                            <span className={`text-[10px] font-mono uppercase tracking-widest ${p.status === "accepted" ? "text-success" : p.status === "rejected" ? "text-error" : "text-gold-accent"}`}>
+                              {p.statusText}
+                            </span>
+                            <p className="text-[10px] text-text-secondary mt-1">{p.timeRemaining}</p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </GlassPanel>
+
+              {/* Editable schedule & tasks — the same crm_tasks engine brokers use */}
+              <div className="lg:col-span-1 flex flex-col gap-6">
+                <GlassPanel className="flex-1 rounded-2xl border-white/5 p-6 overflow-y-auto custom-scrollbar">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="text-white font-medium text-sm">Schedule & Tasks</h4>
+                    <Link href="/dashboard/calendar" className="text-[10px] font-mono uppercase tracking-widest text-gold-accent hover:underline">
+                      Calendar →
+                    </Link>
+                  </div>
+                  <p className="text-[11px] text-text-secondary mb-4 leading-relaxed">
+                    Site visits, follow-ups, document deadlines — add anything with a due date and tick it off when done.
+                  </p>
+                  <TaskRail mockUserId={currentUser?.id} />
                 </GlassPanel>
               </div>
             </div>
           </div>
         ) : activeTab === "team" ? (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both h-full">
-            <TeamManagementPanel currentUser={currentUser} properties={scoped} />
+            <TeamManagementPanel currentUser={currentUser} properties={scoped} pitches={pitches || []} />
           </div>
         ) : activeTab === "inventory" ? (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both h-full flex flex-col gap-6">
