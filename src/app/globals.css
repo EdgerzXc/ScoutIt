@@ -380,8 +380,20 @@ a:hover {
     min-width: 48px;
     padding: 12px 16px;
   }
-  
-  input, textarea, select {
+
+  /* Map library controls draw their own compact chrome — the blanket 48px
+     button rule was blowing up MapLibre/Leaflet zoom buttons into huge
+     white panels on phones. Restore their native sizing. */
+  .maplibregl-ctrl button,
+  .mapboxgl-ctrl button,
+  .leaflet-bar a,
+  .leaflet-control-zoom a {
+    min-height: 0;
+    min-width: 0;
+    padding: 0;
+  }
+
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), textarea, select {
     min-height: 48px;
     font-size: 16px; /* Prevents iOS zoom on focus */
     padding: 12px 14px;
@@ -636,8 +648,9 @@ html.lite-mode .cinematic-container {
    FORM INPUT OPTIMIZATION FOR MOBILE
    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
-/* Base form input styles */
-input, textarea, select, [type="text"], [type="search"], [type="email"], [type="tel"], [type="number"] {
+/* Base form input styles — checkboxes/radios/ranges excluded so they keep
+   their compact native rendering instead of becoming padded text boxes */
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), textarea, select, [type="text"], [type="search"], [type="email"], [type="tel"], [type="number"] {
   font-family: var(--font-body);
   color: var(--text-primary);
   background: var(--surface);
@@ -655,9 +668,12 @@ input:focus, textarea:focus, select:focus {
   background: var(--surface2);
 }
 
-/* Mobile form input enhancements */
+/* Mobile form input enhancements.
+   Checkboxes/radios/ranges are excluded — the blanket 48px min-height +
+   padding was inflating every checkbox into a giant white square (seen on
+   the transit-map line toggles and directory filters). */
 @media (max-width: 768px) {
-  input, textarea, select, [type="text"], [type="search"], [type="email"], [type="tel"], [type="number"] {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), textarea, select, [type="text"], [type="search"], [type="email"], [type="tel"], [type="number"] {
     font-size: 16px; /* Prevent iOS auto-zoom */
     padding: 14px 16px;
     min-height: 48px;
@@ -717,11 +733,11 @@ label {
     font-size: 13px;
   }
   
-  input, textarea, select {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), textarea, select {
     font-size: 16px;
     min-height: 44px;
   }
-  
+
   textarea {
     min-height: 90px;
   }

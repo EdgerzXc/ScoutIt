@@ -84,3 +84,39 @@ export function hasSpatial3D(unit) {
       (Array.isArray(scenarios) && scenarios.some((s) => s?.floor_plan_3d_data))
   );
 }
+
+// What's actually waiting on this unit's Master Page — short chips shown as
+// the FIRST thing on the unit card so buyers know why to tap through.
+// Chapter 07 (both flows) renders these; keep labels short (mobile chips).
+export function unitMasterPageOverview(unit) {
+  if (!unit) return [];
+  const d = unit.details || {};
+  const scenarios = unit.subdivision_scenarios || unit.subdivisionScenarios || [];
+  const items = [];
+
+  if (hasSpatial3D(unit)) items.push("3D walkthrough");
+  if (d.floor_plan_2d_url) items.push("Floor plan");
+  if (Array.isArray(scenarios) && scenarios.length > 0) {
+    items.push(`${scenarios.length} space ${scenarios.length === 1 ? "scenario" : "scenarios"}`);
+  }
+  const cap = unitCapacity(unit);
+  if (cap) items.push(`Fits ${cap.estimated ? "~" : ""}${cap.value}`);
+  const typeLabel = unitTypeLabel(d.unit_type);
+  if (typeLabel) items.push(typeLabel);
+  if (unit.operator_display_name) items.push(`Run by ${unit.operator_display_name}`);
+  else if (unit.operator_id) items.push("Operator on board");
+  if (d.differentiator) items.push("Owner's notes");
+
+  return items;
+}
+
+// Display formatting for owner-entered unit prices, which arrive as raw
+// strings/numbers ("150000000") and used to render unformatted. Numbers get
+// peso-grouped; anything already formatted ("₱85k/mo") passes through.
+export function formatUnitPrice(price) {
+  if (price == null || String(price).trim() === "") return "";
+  const raw = String(price).trim();
+  const n = Number(raw.replace(/[,\s]/g, ""));
+  if (!Number.isFinite(n) || n <= 0 || /[^\d.,\s]/.test(raw)) return raw;
+  return `₱${n.toLocaleString("en-PH")}`;
+}

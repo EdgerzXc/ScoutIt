@@ -641,6 +641,81 @@ export default function ManilaTransitMap({ propertyLat, propertyLng, propertyTit
           0% { transform: scale(0.5); opacity: 1; }
           100% { transform: scale(2.2); opacity: 0; }
         }
+
+        /* ── Mobile: the two overlay panels were covering most of the map ── */
+        @media (max-width: 640px) {
+          .transit-map-wrapper,
+          .transit-map-container {
+            min-height: 440px;
+          }
+          /* Line toggles become one slim chip row across the top */
+          .transit-map-panel {
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            flex-direction: row;
+            align-items: center;
+            gap: 6px;
+            min-width: 0;
+            padding: 8px 10px;
+            overflow-x: auto;
+            scrollbar-width: none;
+          }
+          .transit-map-panel::-webkit-scrollbar { display: none; }
+          .transit-map-panel-title {
+            display: none;
+          }
+          .transit-map-toggle {
+            flex: 0 0 auto;
+            gap: 6px;
+            padding: 6px 10px;
+            border: 0.5px solid #262626;
+            border-radius: 999px;
+            background: rgba(0, 0, 0, 0.4);
+            min-height: 36px;
+          }
+          .transit-map-toggle input {
+            width: 13px;
+            height: 13px;
+          }
+          .transit-map-toggle-label {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            white-space: nowrap;
+          }
+          /* Nearest station shrinks to a slim bottom strip */
+          .transit-map-nearest {
+            bottom: 10px;
+            left: 10px;
+            right: 10px;
+            max-width: none;
+            min-width: 0;
+            padding: 10px 12px;
+          }
+          .transit-map-nearest .transit-map-panel-title {
+            display: block;
+            font-size: 10px;
+            margin-bottom: 4px;
+          }
+          .transit-map-nearest-name { font-size: 14px; }
+          .transit-map-nearest-distance {
+            font-size: 14px;
+            margin-top: 4px;
+            display: inline-block;
+            margin-right: 8px;
+          }
+          .transit-map-nearest-hint {
+            display: inline-block;
+            margin-top: 0;
+          }
+          .transit-map-status {
+            right: 10px;
+            top: auto;
+            bottom: 10px;
+          }
+        }
       `}</style>
     </div>
   );

@@ -263,7 +263,7 @@
 .zone-story { flex: 1; display: flex; position: relative; overflow: hidden; background: var(--bg); min-height: 0; }
 .chapter-panel { position: absolute; inset: 0; display: flex; opacity: 0; pointer-events: none; transition: opacity var(--transition); width: 100%; max-width: none; }
 .chapter-panel.active { opacity: 1; pointer-events: all; }
-.panel-content { flex: 1; padding: 26px 32px; display: flex; flex-direction: column; gap: 18px; overflow-y: auto; min-height: 0; width: 100%; max-width: none; }
+.panel-content { flex: 1; padding: 26px 32px; display: flex; flex-direction: column; gap: 18px; overflow-y: auto; min-height: 0; width: 100%; max-width: none; overflow-wrap: break-word; }
 .panel-content::-webkit-scrollbar { width: 3px; }
 .panel-content::-webkit-scrollbar-track { background: transparent; }
 .panel-content::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 2px; }
@@ -393,14 +393,83 @@
 .move-cta-secondary:hover { background: var(--accent-dim); transform: none; }
 .zone-story::after { content: ''; position: absolute; bottom: -80px; left: 15%; width: 45%; height: 160px; background: radial-gradient(ellipse, rgba(var(--accent-rgb), 0.04) 0%, transparent 70%); pointer-events: none; }
 .units-z3-list { display: flex; flex-direction: column; gap: 8px; }
-.unit-z3-row { display: grid; grid-template-columns: 1fr 2.4fr; gap: 20px; align-items: start; padding: 20px 22px; border-radius: 5px; background: linear-gradient(165deg, #1a1917, #111110); border: 0.5px solid var(--border); cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s; scroll-margin-top: 120px; }
+.unit-z3-row { display: flex; flex-direction: column; gap: 14px; align-items: stretch; padding: 20px 22px; border-radius: 5px; background: linear-gradient(165deg, #1a1917, #111110); border: 0.5px solid var(--border); cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s; scroll-margin-top: 120px; }
 .unit-z3-row.static-unit { cursor: default; }
 .unit-z3-row:hover { border-color: var(--border-mid); transform: translateY(-2px); box-shadow: var(--shadow-glow-soft, 0 0 24px rgba(232, 174, 60, 0.18)); }
 .unit-z3-row.static-unit:hover { transform: none; border-color: var(--border); box-shadow: none; }
 .unit-z3-row.selected { background: var(--accent-dim); border-color: var(--accent); border-left: 3px solid var(--accent); }
-.unit-z3-name { font-family: Georgia, serif; font-size: 22px; font-weight: 500; color: #f0ede8; padding-top: 2px; letter-spacing: 0.01em; }
-.unit-z3-specs { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 4px; }
-.unit-z3-spec { font-size: 14px; color: var(--text-secondary); background: var(--surface3); padding: 8px 15px; border-radius: 4px; border: 0.5px solid var(--border); line-height: 1.3; }
+.unit-z3-row.has-master-page { border-color: rgba(74, 222, 128, 0.25); }
+.unit-z3-row.has-master-page:hover { border-color: rgba(74, 222, 128, 0.55); box-shadow: 0 0 24px rgba(74, 222, 128, 0.12); }
+.unit-z3-name { font-family: Georgia, serif; font-size: 22px; font-weight: 500; color: #f0ede8; padding-top: 2px; letter-spacing: 0.01em; overflow-wrap: anywhere; }
+.unit-z3-specs { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 0; }
+.unit-z3-spec { font-size: 14px; color: var(--text-secondary); background: var(--surface3); padding: 8px 15px; border-radius: 4px; border: 0.5px solid var(--border); line-height: 1.3; overflow-wrap: anywhere; }
+
+/* ── Unit Master Page signal — the blinking-green "this unit has its own
+   page" marker + the first-thing-you-see overview of what's inside it ── */
+.unit-ump-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #4ade80;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.unit-ump-live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4ade80;
+  box-shadow: 0 0 8px rgba(74, 222, 128, 0.8);
+  animation: ump-live-blink 1.6s ease-in-out infinite;
+}
+@keyframes ump-live-blink {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(0.8); }
+}
+.unit-ump-overview {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 0.5px solid rgba(74, 222, 128, 0.25);
+  border-radius: 4px;
+  background: rgba(74, 222, 128, 0.04);
+}
+.unit-ump-overview-chip {
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #f0ede8;
+  background: rgba(0, 0, 0, 0.35);
+  border: 0.5px solid var(--border);
+  border-radius: 999px;
+  padding: 5px 10px;
+  line-height: 1.3;
+}
+.unit-ump-open {
+  margin-left: auto;
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  white-space: nowrap;
+}
+@media (prefers-reduced-motion: reduce) {
+  .unit-ump-live-dot { animation: none; }
+}
+@media (max-width: 640px) {
+  .unit-z3-row { padding: 16px; gap: 12px; }
+  .unit-z3-name { font-size: 18px; }
+  .unit-z3-spec { font-size: 12px; padding: 6px 10px; }
+  .unit-ump-open { margin-left: 0; width: 100%; }
+}
 .unit-z3-row.selected .unit-z3-spec { background: rgba(var(--accent-rgb), 0.08); border-color: var(--accent-border); color: var(--text-primary); }
 .units-panel { position: absolute; top: 72px; left: 0; right: 0; background: var(--surface); border-bottom: 0.5px solid var(--border-mid); border-top: 0.5px solid var(--accent-border); z-index: 50; max-height: 0; overflow: hidden; transition: max-height 0.3s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease; opacity: 0; pointer-events: none; }
 .units-panel.open { max-height: 200px; opacity: 1; pointer-events: all; }
@@ -1253,11 +1322,26 @@ html.lightbox-open {
 
   /* Touch targets */
   .reaction-action-btn,
-  .whereto-tab-btn,
   .move-cta {
     min-height: 48px;
     width: 100%;
     justify-content: center;
+  }
+
+  /* Map-view options: compact 2-up grid instead of four stacked
+     full-width bars that ate a whole phone screen */
+  .whereto-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+  .whereto-tab-btn {
+    min-height: 44px;
+    width: 100%;
+    justify-content: center;
+    padding: 8px 10px;
+    font-size: 10px;
+    letter-spacing: 0.04em;
   }
 }
 

@@ -33,7 +33,7 @@ import AffordabilityCalculator from "@/components/property/AffordabilityCalculat
 import MonthlyCostCalculator from "@/components/property/MonthlyCostCalculator";
 import FloodRiskBadge from "@/components/property/FloodRiskBadge";
 import SpatialVaultWidget from "@/components/property/SpatialVaultWidget";
-import { hasInteractiveUnitPage, hasSpatial3D } from "@/lib/unitMasterPage";
+import { hasInteractiveUnitPage, hasSpatial3D, unitMasterPageOverview, formatUnitPrice } from "@/lib/unitMasterPage";
 import { canSee, getCurrentTier, hasActiveRole } from "@/lib/entitlements";
 
 // Code-split maplibre-gl + pmtiles out of the main property-page bundle — they&apos;re
@@ -689,9 +689,9 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
       id: u.id || null,
       name: u.name || `Unit ${String(i + 1).padStart(2, "0")}`,
       specs: [
-        u.size  ? `${u.size} sqm`     : null,
-        u.floor ? `Floor ${u.floor}`  : null,
-        u.price ? String(u.price)     : null,
+        u.size  ? `${u.size} sqm`       : null,
+        u.floor ? `Floor ${u.floor}`    : null,
+        u.price ? formatUnitPrice(u.price) : null,
         ...(Array.isArray(u.features) ? u.features : []),
       ].filter(Boolean),
       photo: u.photo || u.image || (Array.isArray(u.photos) ? u.photos.find(Boolean) : "") || "",
@@ -1432,7 +1432,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
               )}
 
               {locTab === "map" && (
-                <div style={{height:"clamp(600px, 80vh, 850px)", minHeight:"600px", flexShrink:0, borderRadius:"4px", overflow:"hidden", border:"0.5px solid #262626", marginBottom:"80px"}}>
+                <div style={{height:"clamp(420px, 70vh, 850px)", minHeight:"420px", flexShrink:0, borderRadius:"4px", overflow:"hidden", border:"0.5px solid #262626", marginBottom:"clamp(28px, 8vw, 80px)"}}>
                   <InteractiveMap
                     lat={d.lat || d.latitude || 14.5547}
                     lng={d.lng || d.longitude || 121.0244}
@@ -1566,7 +1566,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
               </div>
 
               {whereToTab === "map" && (
-                <div style={{height:"clamp(600px, 80vh, 850px)", minHeight:"600px", flexShrink:0, borderRadius:"4px", overflow:"hidden", border:"0.5px solid #262626", marginBottom:"120px"}}>
+                <div style={{height:"clamp(420px, 70vh, 850px)", minHeight:"420px", flexShrink:0, borderRadius:"4px", overflow:"hidden", border:"0.5px solid #262626", marginBottom:"clamp(32px, 9vw, 120px)"}}>
                   <InteractiveMap
                     lat={d.lat || d.latitude || 14.5547}
                     lng={d.lng || d.longitude || 121.0244}
@@ -1839,32 +1839,46 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
               <div className="units-z3-list">
                 {dynamicUnits.map((u, ui) => {
                   const hasUnitPage = u.id && hasInteractiveUnitPage(u);
-                  const teaserLabel = hasSpatial3D(u) ? "EXPLORE 3D SPACE ✦" : "VIEW SUITE →";
+                  const teaserLabel = hasSpatial3D(u) ? "Explore 3D Space ✦" : "Open Master Page →";
+                  const overview = hasUnitPage ? unitMasterPageOverview(u) : [];
                   const CardWrapper = hasUnitPage ? Link : "div";
-                  const wrapperProps = hasUnitPage 
+                  const wrapperProps = hasUnitPage
                     ? { href: `/property/${d.slug}/unit/${u.id}`, style: { textDecoration: "none" } }
                     : {};
-                  
+
                   return (
                     <CardWrapper
-                      className={`unit-z3-row ${!hasUnitPage ? "static-unit" : ""}`}
+                      className={`unit-z3-row ${!hasUnitPage ? "static-unit" : "has-master-page"}`}
                       key={u.name}
                       id={`unit-row-${ui}`}
                       {...wrapperProps}
                     >
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", width: "100%" }}>
-                        <div>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", width: "100%", gap: "12px", flexWrap: "wrap" }}>
+                        <div style={{ minWidth: 0 }}>
                           <div style={{fontFamily:"'Courier New',monospace", fontSize:"11px", color: "#c8c8c8", letterSpacing:"0.18em", textTransform:"uppercase", marginBottom:"8px"}}>
                             UNIT {String(ui + 1).padStart(2, "0")}
                           </div>
                           <div className="unit-z3-name">{u.name}</div>
                         </div>
                         {hasUnitPage && (
-                          <div style={{fontFamily:"var(--font-mono)", fontSize:"10px", color:"var(--accent)", letterSpacing:"0.3em", textTransform:"uppercase", whiteSpace:"nowrap"}}>
-                            {teaserLabel}
+                          <div className="unit-ump-live">
+                            <span className="unit-ump-live-dot" />
+                            Master Page Live
                           </div>
                         )}
                       </div>
+
+                      {/* What's inside the Unit Master Page — shown FIRST so
+                          buyers know why to tap through */}
+                      {hasUnitPage && (
+                        <div className="unit-ump-overview">
+                          {overview.map((item) => (
+                            <span key={item} className="unit-ump-overview-chip">{item}</span>
+                          ))}
+                          <span className="unit-ump-open">{teaserLabel}</span>
+                        </div>
+                      )}
+
                       <div className="unit-z3-specs">
                         {u.specs.map(s => <span key={s} className="unit-z3-spec">{s}</span>)}
                       </div>
