@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { isLiteMode } from "@/lib/liteMode";
 
 /**
  * Layer 06 — The Core ("The Climax")
@@ -129,6 +130,9 @@ export default function BackgroundCore({ isLoggedIn }) {
   useEffect(() => {
     const mount = mountRef.current;
     if (!mount) return;
+    // Lite Mode: never start the WebGL scene on low-power devices — the CSS
+    // layer background stays, only the animated canvas is skipped.
+    if (isLiteMode()) return;
 
     let cancelled = false, frameId, renderer, resizeObs;
     const disposables = [];

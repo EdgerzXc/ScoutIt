@@ -200,7 +200,7 @@ function MinorLockSection({ labels, values }) {
             ))}
           </div>
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3.5 bg-background/90 rounded-b-sm backdrop-blur-sm">
-            <span className="font-label-caps text-[9px] text-gold-accent tracking-widest uppercase">Solar Tier Unlocks This</span>
+            <span className="font-label-caps text-[10px] text-gold-accent tracking-widest uppercase">Solar Tier Unlocks This</span>
             <a href="/pricing/seeker" className="font-label-caps uppercase tracking-widest text-[11px] font-bold text-background bg-gold-accent hover:opacity-90 px-6 py-2.5 rounded-sm transition-opacity">
               Unlock Full Intelligence →
             </a>

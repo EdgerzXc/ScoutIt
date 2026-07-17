@@ -4,6 +4,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getArticleBySlug, getArticles } from "@/data/mockArticles";
 import { fetchIntel } from "@/lib/airtable";
+import { parseArticleBlocks, blocksFromLegacy } from "@/lib/articleSchema";
+import ArticleBlocks from "@/components/intel/ArticleBlocks";
 import GlassPanel from "@/components/ui/GlassPanel";
 import HoverCard from "@/components/ui/HoverCard";
 
@@ -112,19 +114,21 @@ export default async function IntelArticlePage({ params }) {
                 <p className="font-serif text-sm text-text-secondary m-0">This is a ScoutIt Insight — a projection based on available data, not a verified fact.</p>
               </GlassPanel>
             ) : null}
-            <p className="article-lead-text">{article.lead}</p>
-            
+            {article.lead ? <p className="article-lead-text">{article.lead}</p> : null}
+
+            {/* Universal block body — every article (legacy or uploaded) renders
+                through the same ArticleBlocks reader. */}
             <div className="article-paragraphs">
-              {article.body.map((para, idx) => (
-                <p key={idx} className="article-paragraph">{para}</p>
-              ))}
+              <ArticleBlocks blocks={parseArticleBlocks(article.bodyJson) || blocksFromLegacy(article)} />
             </div>
 
             {/* Advisory Note */}
-            <GlassPanel className="p-6 mt-12 bg-surface-alt border-surface-variant">
-              <span className="font-mono text-[10px] text-gold-accent tracking-[0.15em] uppercase block mb-3">SCOUTIT BRIEFING RECOMMENDATION</span>
-              <p className="font-serif text-sm text-text-primary leading-relaxed m-0">{article.recommendation}</p>
-            </GlassPanel>
+            {article.recommendation ? (
+              <GlassPanel className="p-6 mt-12 bg-surface-alt border-surface-variant">
+                <span className="font-mono text-[10px] text-gold-accent tracking-[0.15em] uppercase block mb-3">SCOUTIT BRIEFING RECOMMENDATION</span>
+                <p className="font-serif text-sm text-text-primary leading-relaxed m-0">{article.recommendation}</p>
+              </GlassPanel>
+            ) : null}
           </div>
         </section>
 
@@ -374,7 +378,7 @@ export default async function IntelArticlePage({ params }) {
 
         .related-cat {
           font-family: var(--font-mono);
-          font-size: 9px;
+          font-size: 10px;
           color: var(--accent);
           text-transform: uppercase;
           letter-spacing: 0.05em;

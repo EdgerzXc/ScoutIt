@@ -158,6 +158,9 @@ function PropertyDirectoryContent() {
   const [selectedAesthetics, setSelectedAesthetics] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   
+  // Mobile filter drawer (≤900px) — listings show first, filters on demand
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
+
   // Proximity Radar State
   const [showMap, setShowMap] = useState(false);
   const [radius, setRadius] = useState("any");
@@ -409,8 +412,18 @@ function PropertyDirectoryContent() {
           </div>
         ) : (
           <div className="directory-container">
+            {/* Mobile: filters collapse behind one toggle so listings appear immediately */}
+            <button
+              className="mobile-filters-toggle"
+              onClick={() => setShowMobileFilters((v) => !v)}
+              aria-expanded={showMobileFilters}
+            >
+              Filters {(selectedSectors.length + selectedLocations.length + selectedAesthetics.length) > 0 ? `(${selectedSectors.length + selectedLocations.length + selectedAesthetics.length})` : ""}
+              <span className={`filter-chevron ${showMobileFilters ? "open" : ""}`}>▼</span>
+            </button>
+
             {/* Sidebar Filters */}
-            <aside className="filters-sidebar">
+            <aside className={`filters-sidebar ${showMobileFilters ? "mobile-open" : ""}`}>
               
               {/* Filter Section: Sectors */}
               <div className="filter-card">

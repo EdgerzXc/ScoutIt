@@ -139,7 +139,7 @@ function DeepIntelWidget({ open, onToggle, fields, values }) {
             ))}
           </div>
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-surface-alt/90 rounded-b-sm backdrop-blur-md">
-            <span className="font-mono text-[9px] text-gold-accent tracking-[0.25em] uppercase drop-shadow-md">SOLAR TIER UNLOCKS THIS</span>
+            <span className="font-mono text-[10px] text-gold-accent tracking-[0.25em] uppercase drop-shadow-md">SOLAR TIER UNLOCKS THIS</span>
             <a href="/pricing/seeker" className="no-underline font-serif text-[13px] text-background bg-gold-accent hover:bg-gold-accent-bright border-none px-6 py-2.5 rounded-sm cursor-pointer tracking-[0.04em] transition-all hover:-translate-y-0.5 hover:shadow-[0_0_15px_rgba(232,174,60,0.4)] active:scale-[0.98]">
               Unlock Full Intelligence →
             </a>

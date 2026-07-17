@@ -163,7 +163,7 @@
 .pioneer { display: flex; align-items: center; gap: 10px; border: 0.5px solid rgba(255, 255, 255, 0.14); border-radius: 999px; padding: 6px 14px 6px 6px; background: rgba(0, 0, 0, 0.3); }
 .pioneer .pi-av { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: Georgia, serif; font-size: 14px; color: #2a1405; background: radial-gradient(circle at 35% 30%, #ffe8a8, #E8AE3C); }
 .pioneer .pi-name { font-size: 13px; color: #f0ede8; }
-.pioneer .pi-tag { font-family: var(--font-mono, monospace); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); }
+.pioneer .pi-tag { font-family: var(--font-mono, monospace); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); }
 .membrane { display: flex; align-items: center; gap: 14px; font-family: var(--font-mono, monospace); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(232, 174, 60, 0.8); margin: 4px 0; }
 .membrane::before, .membrane::after { content: ""; flex: 1; height: 1px; background: rgba(232, 174, 60, 0.25); }
 .inner-core { border: 0.5px solid rgba(255, 255, 255, 0.14); background: rgba(0, 0, 0, 0.35); border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 14px; }

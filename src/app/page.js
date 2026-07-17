@@ -2046,7 +2046,7 @@ export default function Home() {
 
         .mini-tag-label {
           color: var(--accent);
-          font-size: 9px;
+          font-size: 10px;
           letter-spacing: 0.1em;
           opacity: 0.75;
           margin-bottom: 2px;
@@ -2402,7 +2402,7 @@ export default function Home() {
 
         .service-status-badge {
           font-family: var(--font-mono);
-          font-size: 9px;
+          font-size: 10px;
           font-weight: 700;
           letter-spacing: 0.1em;
           padding: 4px 8px;
@@ -2731,7 +2731,7 @@ export default function Home() {
             margin-bottom: 8px !important;
           }
           .mini-tag-label {
-            font-size: 8px !important;
+            font-size: 10px !important;
           }
           .mini-tag {
             font-size: 10px !important;
@@ -3115,7 +3115,7 @@ export default function Home() {
           }
 
           .scroll-text {
-            font-size: 9px;
+            font-size: 10px;
           }
 
           .scroll-line {
@@ -3312,11 +3312,11 @@ export default function Home() {
           }
 
           .pane-header p {
-            font-size: 9px;
+            font-size: 10px;
           }
 
           .vector-label {
-            font-size: 9px;
+            font-size: 10px;
           }
 
           .search-container {

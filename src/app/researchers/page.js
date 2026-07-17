@@ -219,13 +219,14 @@ export default function ResearchersPage() {
         }
         .coming-soon-banner { background: linear-gradient(135deg,rgba(232, 174, 60,.08) 0%,rgba(232, 174, 60,.03) 100%); border: .5px solid var(--accent-border); border-radius: 6px; padding: 16px 22px; margin-bottom: 32px; }
         .coming-soon-inner { display: flex; align-items: flex-start; gap: 14px; }
-        .coming-soon-badge { background: var(--accent); color: #0e0e0e; font-size: 9px; font-weight: 700; letter-spacing: .12em; padding: 4px 10px; border-radius: 3px; white-space: nowrap; flex-shrink: 0; margin-top: 2px; }
+        .coming-soon-badge { background: var(--accent); color: #0e0e0e; font-size: 10px; font-weight: 700; letter-spacing: .12em; padding: 4px 10px; border-radius: 3px; white-space: nowrap; flex-shrink: 0; margin-top: 2px; }
         .coming-soon-text { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
-        .coming-soon-card-overlay { position: absolute; top: 12px; left: 12px; font-size: 8px; font-weight: 700; letter-spacing: .1em; color: var(--text-muted); background: rgba(14,14,14,.8); border: .5px solid var(--border-mid); padding: 3px 8px; border-radius: 2px; z-index: 10; font-family: var(--font-mono),monospace; }
+        .coming-soon-card-overlay { position: absolute; top: 12px; left: 12px; font-size: 10px; font-weight: 700; letter-spacing: .1em; color: var(--text-muted); background: rgba(14,14,14,.8); border: .5px solid var(--border-mid); padding: 3px 8px; border-radius: 2px; z-index: 10; font-family: var(--font-mono),monospace; }
         .brokers-main { padding: 40px 45px; max-width: 1400px; margin: 0 auto; }
         .page-title { font-family: var(--font-display); font-size: 38px; letter-spacing: .02em; color: #fff; margin: 8px 0; }
         .brokers-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 24px; }
         @media (max-width:1024px) { .brokers-grid { grid-template-columns: 1fr; } }
+        
         .broker-card { background: linear-gradient(165deg, #1a1917, #111110); border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; display: flex; flex-direction: column; transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition); position: relative; }
         .broker-card:hover { border-color: var(--accent-border); box-shadow: 0 14px 32px rgba(0,0,0,.45), 0 0 40px rgba(232,174,60,.06); transform: translateY(-4px); }
         .broker-image-container { position: relative; height: 240px; overflow: hidden; }
@@ -244,7 +245,7 @@ export default function ResearchersPage() {
         .stat-value { font-family: var(--font-display); font-size: 24px; color: var(--text-primary); }
         .btn-contact { background: transparent; border: 1px solid var(--accent); padding: 8px 16px; border-radius: 4px; color: var(--accent); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; cursor: pointer; transition: all .2s; }
         .btn-contact:hover { background: var(--accent); color: #000; }
-        .general-tier-badge-label { position: absolute; top: 12px; right: 12px; font-size: 8px; font-weight: 700; letter-spacing: 1px; padding: 3px 8px; border-radius: 2px; font-family: var(--font-mono),monospace; z-index: 10; }
+        .general-tier-badge-label { position: absolute; top: 12px; right: 12px; font-size: 10px; font-weight: 700; letter-spacing: 1px; padding: 3px 8px; border-radius: 2px; font-family: var(--font-mono),monospace; z-index: 10; }
         .tier-1-card { border-color: transparent !important; box-shadow: 0 8px 32px rgba(0,242,254,.08); }
         .tier-1-card::before { content: ""; position: absolute; inset: -1px; z-index: -1; border-radius: 6px; background: linear-gradient(90deg,#00f2fe,#4facfe,#b19ffb,#00f2fe); background-size: 300% 300%; animation: diamondGlow 6s linear infinite; }
         .tier-1-card .general-tier-badge-label { background: linear-gradient(135deg,#00f2fe 0%,#b19ffb 100%); color: #0e0e0e; box-shadow: 0 0 8px rgba(0,242,254,.3); }
@@ -256,6 +257,21 @@ export default function ResearchersPage() {
         .tier-3-card .general-tier-badge-label { background: linear-gradient(135deg,#E8AE3C 0%,#f7ebd3 100%); color: #0e0e0e; }
         .tier-3-card .broker-location { color: #E8AE3C; }
         @keyframes diamondGlow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+      
+        @media (max-width: 640px) {
+          /* Compact directory card on phones — no more one-card-per-screen */
+          .broker-image-container { height: 150px; }
+          .broker-content { padding: 16px; }
+          .broker-name { font-size: 18px; }
+          .broker-bio {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-bottom: 12px;
+          }
+          .brokers-grid { gap: 14px; }
+        }
       `}</style>
     </div>
   );

@@ -45,6 +45,11 @@
   gap: 24px;
 }
 
+/* Mobile filters toggle — hidden on desktop, where the sidebar is always visible */
+.mobile-filters-toggle {
+  display: none;
+}
+
 .filter-card {
   background: linear-gradient(165deg, #1a1917, #111110);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -373,7 +378,7 @@
 @media (max-width: 900px) {
   .directory-container {
     grid-template-columns: 1fr;
-    gap: 24px;
+    gap: 16px;
   }
   /* 2-col property grid still works on tablet */
   .directory-grid {
@@ -384,7 +389,35 @@
     padding: 30px 20px;
   }
 
-  /* Removed horizontal pill collapse for sidebar. We rely on the default vertical stacking. */
+  /* Listings come first on mobile — the whole filter stack collapses
+     behind one toggle instead of pushing content half a screen down. */
+  .mobile-filters-toggle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    min-height: 48px;
+    padding: 14px 20px;
+    background: linear-gradient(165deg, #1a1917, #111110);
+    border: 1px solid rgba(232, 174, 60, 0.25);
+    border-radius: var(--radius-md, 6px);
+    color: var(--on-surface);
+    font-family: var(--font-display), sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+
+  .filters-sidebar {
+    display: none;
+  }
+
+  .filters-sidebar.mobile-open {
+    display: flex;
+  }
 
   /* Hide secondary sidebar widget — save vertical space */
   .intel-widget {
@@ -532,7 +565,7 @@
   }
 
   .property-spec-badge {
-    font-size: 9px;
+    font-size: 10px;
     padding: 2px 6px;
   }
 }
@@ -543,7 +576,7 @@
   border: 1px solid rgba(232, 174, 60, 0.4);
   color: var(--accent, #E8AE3C);
   font-family: var(--font-mono), monospace;
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   padding: 6px 10px;

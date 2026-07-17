@@ -246,7 +246,7 @@ export default function PhotographersPage() {
         .coming-soon-badge {
           background: var(--accent);
           color: #0e0e0e;
-          font-size: 9px;
+          font-size: 10px;
           font-weight: 700;
           letter-spacing: 0.12em;
           padding: 4px 10px;
@@ -264,7 +264,7 @@ export default function PhotographersPage() {
           position: absolute;
           top: 12px;
           left: 12px;
-          font-size: 8px;
+          font-size: 10px;
           font-weight: 700;
           letter-spacing: 0.1em;
           color: var(--text-muted);
@@ -295,6 +295,7 @@ export default function PhotographersPage() {
         @media (max-width: 1024px) {
           .brokers-grid { grid-template-columns: 1fr; }
         }
+        
         .broker-card {
           background: linear-gradient(165deg, #1a1917, #111110);
           border: 1px solid var(--border);
@@ -405,7 +406,7 @@ export default function PhotographersPage() {
           position: absolute;
           top: 12px;
           right: 12px;
-          font-size: 8px;
+          font-size: 10px;
           font-weight: 700;
           letter-spacing: 1px;
           padding: 3px 8px;
@@ -427,6 +428,21 @@ export default function PhotographersPage() {
           0%   { background-position: 0% 50%; }
           50%  { background-position: 100% 50%; }
           100% { background-position: 0% 50%; }
+        }
+      
+        @media (max-width: 640px) {
+          /* Compact directory card on phones — no more one-card-per-screen */
+          .broker-image-container { height: 150px; }
+          .broker-content { padding: 16px; }
+          .broker-name { font-size: 18px; }
+          .broker-bio {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-bottom: 12px;
+          }
+          .brokers-grid { gap: 14px; }
         }
       `}</style>
     </div>

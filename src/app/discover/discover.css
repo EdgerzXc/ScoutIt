@@ -369,7 +369,7 @@
 .capsuleMeta {
   display: flex;
   justify-content: space-between;
-  font-size: 9px;
+  font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: #E8AE3C;

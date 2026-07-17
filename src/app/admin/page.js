@@ -5,6 +5,7 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { supabase } from "@/lib/supabaseClient";
 import { Building2, Check, AlertCircle, ShieldCheck, ShieldOff } from "lucide-react";
+import IntelStudioPanel from "@/components/intel/IntelStudioPanel";
 
 export default function AdminPage() {
   const [pendingProperties, setPendingProperties] = useState([]);
@@ -232,6 +233,19 @@ export default function AdminPage() {
               </div>
             )}
           </div>
+
+          {/* Intel Studio — upload any document, publish a readable article */}
+          <div className="admin-panel" style={{ marginTop: 32 }}>
+            <div className="panel-header">
+              <h2>Intel Studio</h2>
+            </div>
+            <p className="panel-hint">
+              Turn any document into an Intel article. Upload a PDF market report, a CSV data
+              sheet, or plain text — it gets structured into the universal article format,
+              previewed here, and saved to the INTEL_CMS.
+            </p>
+            <IntelStudioPanel />
+          </div>
         </div>
       </main>
       <Footer />
@@ -325,6 +339,17 @@ export default function AdminPage() {
           font-size: 20px;
           color: #fff;
           margin: 0;
+        }
+
+        .panel-hint {
+          padding: 16px 24px 0;
+          font-size: 14px;
+          line-height: 1.6;
+          color: var(--text-secondary);
+        }
+
+        .admin-panel :global(.intel-studio) {
+          padding: 24px;
         }
 
         .count-badge {

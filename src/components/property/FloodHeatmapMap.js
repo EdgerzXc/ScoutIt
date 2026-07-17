@@ -252,7 +252,7 @@ export default function FloodHeatmapMap({ lat, lng, propertyTitle }) {
         }
         .flood-heatmap-legend-title {
           font-family: var(--font-mono);
-          font-size: 9px;
+          font-size: 10px;
           letter-spacing: 0.1em;
           text-transform: uppercase;
           color: #c8c8c8;
@@ -276,7 +276,7 @@ export default function FloodHeatmapMap({ lat, lng, propertyTitle }) {
         }
         .flood-heatmap-disclaimer {
           font-family: var(--font-mono);
-          font-size: 9px;
+          font-size: 10px;
           letter-spacing: 0.04em;
           color: #6a6a6a;
           line-height: 1.5;

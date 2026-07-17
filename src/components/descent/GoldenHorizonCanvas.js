@@ -901,7 +901,7 @@ export default function GoldenHorizonCanvas({ params: paramsProp }) {
         .gh-label {
           position: absolute;
           font-family: var(--font-mono), 'Courier New', monospace;
-          font-size: 8px;
+          font-size: 10px;
           letter-spacing: 0.12em;
           color: rgba(232, 174, 60, 0.4);
         }
@@ -941,7 +941,7 @@ export default function GoldenHorizonCanvas({ params: paramsProp }) {
           top: 16px;
           right: 16px;
           padding: 10px 12px;
-          font-size: 9px;
+          font-size: 10px;
           flex-direction: column;
           align-items: stretch;
           gap: 5px;

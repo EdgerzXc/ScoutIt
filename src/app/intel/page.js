@@ -188,14 +188,16 @@ export default function IntelPage() {
             {/* Left Featured Card */}
             <Link href={`/intel/${featuredArticle.slug}`} className="featured-card-new">
               <div className="featured-image-wrapper">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={featuredArticle.image} alt={featuredArticle.title} className="featured-image-new" />
+                {featuredArticle.image ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img src={featuredArticle.image} alt={featuredArticle.title} className="featured-image-new" />
+                ) : null}
                 <div className="featured-overlay-new"></div>
               </div>
               <div className="featured-content-new">
                 <div className="featured-badge-row" style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '12px' }}>
                   <span className="featured-tag-new" style={{ margin: 0 }}>{featuredArticle.category}</span>
-                  <span className={`article-type-badge ${getArticleType(featuredArticle).toLowerCase()}`} style={{ fontSize: '9px', fontFamily: 'var(--font-mono)', padding: '2px 6px', borderRadius: '2px', textTransform: 'uppercase' }}>{getArticleType(featuredArticle)}</span>
+                  <span className={`article-type-badge ${getArticleType(featuredArticle).toLowerCase()}`} style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', padding: '2px 6px', borderRadius: '2px', textTransform: 'uppercase' }}>{getArticleType(featuredArticle)}</span>
                   <span className="featured-read-time" style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>{Math.max(1, Math.round((featuredArticle.excerpt || "").split(/\s+/).length / 20))} min read</span>
                 </div>
                 <h2>{featuredArticle.title}</h2>
@@ -263,14 +265,16 @@ export default function IntelPage() {
                   style={{ cursor: "pointer" }}
                 >
                   <div className="article-image-container">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={art.image} alt={art.title} className="article-image" />
+                    {art.image ? (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img src={art.image} alt={art.title} className="article-image" />
+                    ) : null}
                     <div className="image-overlay"></div>
                   </div>
                   <div className="article-content">
                     <div className="article-header" style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '12px' }}>
                       <span className="article-category" style={{ marginRight: 'auto' }}>{art.category}</span>
-                      <span className={`article-type-badge ${getArticleType(art).toLowerCase()}`} style={{ fontSize: '9px', fontFamily: 'var(--font-mono)', padding: '2px 6px', borderRadius: '2px', textTransform: 'uppercase' }}>{getArticleType(art)}</span>
+                      <span className={`article-type-badge ${getArticleType(art).toLowerCase()}`} style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', padding: '2px 6px', borderRadius: '2px', textTransform: 'uppercase' }}>{getArticleType(art)}</span>
                       <span className="article-read-time" style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{Math.max(1, Math.round((art.excerpt || "").split(/\s+/).length / 20))} min read</span>
                     </div>
                     <h3 className="article-title">{art.title}</h3>
@@ -325,12 +329,12 @@ export default function IntelPage() {
             <div className="side-panel-body">
               <div className="side-panel-badge-row" style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px' }}>
                 <span className="side-panel-cat">{sidePanelArticle.category}</span>
-                <span className={`article-type-badge ${getArticleType(sidePanelArticle).toLowerCase()}`} style={{ fontSize: '9px', fontFamily: 'var(--font-mono)', padding: '2px 6px', borderRadius: '2px', textTransform: 'uppercase' }}>{getArticleType(sidePanelArticle)}</span>
+                <span className={`article-type-badge ${getArticleType(sidePanelArticle).toLowerCase()}`} style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', padding: '2px 6px', borderRadius: '2px', textTransform: 'uppercase' }}>{getArticleType(sidePanelArticle)}</span>
                 <span className="side-panel-read-time" style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{Math.max(1, Math.round((sidePanelArticle.excerpt || "").split(/\s+/).length / 20))} min read</span>
               </div>
               
               <div className="scan-progress-wrapper" style={{ marginTop: '4px', marginBottom: '8px' }}>
-                <div className="scan-progress-label" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '9px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', marginBottom: '4px', textTransform: 'uppercase' }}>
+                <div className="scan-progress-label" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', marginBottom: '4px', textTransform: 'uppercase' }}>
                   <span>Briefing Integrity Deep Scan</span>
                   <span style={{ color: 'var(--accent)' }}>92% SECURE</span>
                 </div>
@@ -589,7 +593,7 @@ export default function IntelPage() {
 
         .trending-meta {
           font-family: var(--font-mono);
-          font-size: 9px;
+          font-size: 10px;
           color: var(--accent);
           text-transform: uppercase;
           letter-spacing: 0.05em;
@@ -777,7 +781,7 @@ export default function IntelPage() {
 
         .article-category {
           font-family: var(--font-mono);
-          font-size: 9px;
+          font-size: 10px;
           color: var(--accent);
           text-transform: uppercase;
           letter-spacing: 0.05em;
@@ -899,7 +903,7 @@ export default function IntelPage() {
 
         .side-panel-insight-note span {
           font-family: var(--font-mono);
-          font-size: 9px;
+          font-size: 10px;
           color: #E8AE3C;
           text-transform: uppercase;
           letter-spacing: 0.1em;

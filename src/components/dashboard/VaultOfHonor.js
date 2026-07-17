@@ -91,7 +91,7 @@ export default function VaultOfHonor() {
                 
                 {/* Rarity Label (Unlocked only) */}
                 {isUnlocked && (
-                  <span className="font-label-caps text-[9px] tracking-widest uppercase text-gold-accent/80 block mb-2">
+                  <span className="font-label-caps text-[10px] tracking-widest uppercase text-gold-accent/80 block mb-2">
                     {badge.rarity}
                   </span>
                 )}

@@ -67,7 +67,7 @@ export default function RootLayout({ children }) {
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "(function(){try{var v=localStorage.getItem('scoutit_lite_mode');var on=(v===null)?window.matchMedia('(prefers-reduced-motion: reduce)').matches:(v==='1');if(on)document.documentElement.classList.add('lite-mode');}catch(e){}})();",
+              "(function(){try{var v=localStorage.getItem('scoutit_lite_mode');var on;if(v===null){var reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;var mem=navigator.deviceMemory||8;var cores=navigator.hardwareConcurrency||8;var conn=(navigator.connection||{}).effectiveType||'4g';var weakPhone=window.matchMedia('(pointer: coarse)').matches&&(mem<=4||cores<=4||conn==='2g'||conn==='slow-2g'||conn==='3g');on=reduced||weakPhone;}else{on=(v==='1');}if(on)document.documentElement.classList.add('lite-mode');}catch(e){}})();",
           }}
         />
         {/* Cinematic film grain texture overlay */}

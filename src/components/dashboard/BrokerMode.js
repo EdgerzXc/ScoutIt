@@ -561,7 +561,7 @@ export default function BrokerMode() {
                 <h3 className="font-label-caps text-xs tracking-widest text-gold-accent uppercase flex items-center gap-2">
                   <span>📝</span> Private Deal Notes
                 </h3>
-                <span className="font-label-caps text-[9px] text-text-muted uppercase">Only visible to you</span>
+                <span className="font-label-caps text-[10px] text-text-muted uppercase">Only visible to you</span>
               </div>
               <div className="p-1">
                 <textarea 
@@ -658,13 +658,13 @@ export default function BrokerMode() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4 mb-6">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6">
                   <div className="bg-surface-alt p-3 rounded border border-surface-variant flex flex-col justify-center">
-                    <span className="block text-[8px] text-text-muted font-mono uppercase tracking-widest mb-1">Scout Rating</span>
+                    <span className="block text-[10px] text-text-muted font-mono uppercase tracking-widest mb-1">Scout Rating</span>
                     <span className="text-text-muted font-mono font-bold text-sm" title="Earned through verified closures only">Earned by closures</span>
                   </div>
                   <div className="bg-surface-alt p-3 rounded border border-surface-variant flex flex-col justify-center">
-                    <span className="block text-[8px] text-text-muted font-mono uppercase tracking-widest mb-1">PRC License</span>
+                    <span className="block text-[10px] text-text-muted font-mono uppercase tracking-widest mb-1">PRC License</span>
                     <input 
                       type="text" 
                       className="bg-transparent border-none text-on-surface font-mono font-bold text-sm p-0 focus:ring-0 w-full"
@@ -675,7 +675,7 @@ export default function BrokerMode() {
                     />
                   </div>
                   <div className="bg-surface-alt p-3 rounded border border-surface-variant flex flex-col justify-center">
-                    <span className="block text-[8px] text-text-muted font-mono uppercase tracking-widest mb-1">DHSUD No.</span>
+                    <span className="block text-[10px] text-text-muted font-mono uppercase tracking-widest mb-1">DHSUD No.</span>
                     <input 
                       type="text" 
                       className="bg-transparent border-none text-on-surface font-mono font-bold text-sm p-0 focus:ring-0 w-full"
@@ -690,7 +690,7 @@ export default function BrokerMode() {
                 <div className="border-t border-surface-variant pt-4 flex justify-between items-end">
                   <div className="flex items-end gap-6">
                     <div>
-                      <span className="block text-[8px] text-text-muted font-mono uppercase tracking-widest mb-1">License Valid Until</span>
+                      <span className="block text-[10px] text-text-muted font-mono uppercase tracking-widest mb-1">License Valid Until</span>
                       <input
                         type="date"
                         className="bg-transparent border-none text-text-secondary font-mono text-xs p-0 focus:ring-0 [color-scheme:dark]"
@@ -700,7 +700,7 @@ export default function BrokerMode() {
                       />
                     </div>
                     <div>
-                      <span className="block text-[8px] text-text-muted font-mono uppercase tracking-widest mb-1">Verification</span>
+                      <span className="block text-[10px] text-text-muted font-mono uppercase tracking-widest mb-1">Verification</span>
                       {prcVerified ? (
                         <span className="text-[#4caf7d] font-mono text-xs font-bold">PRC VERIFIED</span>
                       ) : prcInput ? (
@@ -783,7 +783,7 @@ export default function BrokerMode() {
           <h2 className="font-headline-editorial text-3xl text-gradient-gold">Broker Intelligence</h2>
         </div>
         <div className="text-right shrink-0">
-          <span className="block text-[9px] font-label-caps uppercase tracking-widest text-text-secondary">Deals Won</span>
+          <span className="block text-[10px] font-label-caps uppercase tracking-widest text-text-secondary">Deals Won</span>
           <span className="text-on-surface font-data-tabular text-lg font-bold">{accepted.length}</span>
         </div>
       </header>
@@ -897,7 +897,7 @@ export default function BrokerMode() {
                 >
                   
                   <div className="flex justify-between items-start mb-2">
-                    <span className={`font-label-caps text-[9px] tracking-widest uppercase px-1.5 py-0.5 rounded ${isDeclined ? 'bg-error/10 text-error' : pStatus === 'invited' ? 'bg-gold-accent/10 text-gold-accent' : 'bg-surface-alt text-text-secondary'}`}>
+                    <span className={`font-label-caps text-[10px] tracking-widest uppercase px-1.5 py-0.5 rounded ${isDeclined ? 'bg-error/10 text-error' : pStatus === 'invited' ? 'bg-gold-accent/10 text-gold-accent' : 'bg-surface-alt text-text-secondary'}`}>
                       {pStatus === 'invited' ? 'Incoming Handshake' : pStatus}
                     </span>
                     <span className="text-[10px] text-text-muted font-data-tabular">{deal.timeRemaining || 'Just now'}</span>
@@ -943,7 +943,7 @@ export default function BrokerMode() {
                 >
                   
                   <div className="flex justify-between items-start mb-2">
-                    <span className="font-label-caps text-[9px] tracking-widest uppercase px-1.5 py-0.5 rounded bg-success/10 text-success flex items-center gap-1">
+                    <span className="font-label-caps text-[10px] tracking-widest uppercase px-1.5 py-0.5 rounded bg-success/10 text-success flex items-center gap-1">
                       <span>🛡️</span> Verified Advisor
                     </span>
                     <span className="text-[10px] text-text-muted font-data-tabular">Active</span>
@@ -998,11 +998,11 @@ export default function BrokerMode() {
                 
                 <div className="grid grid-cols-2 gap-2 mt-4 p-3 bg-[#0a0a0a] rounded border border-surface-variant text-center">
                   <div>
-                    <div className="text-[9px] text-text-secondary uppercase tracking-wider mb-1 font-label-caps">Owner Tenure</div>
+                    <div className="text-[10px] text-text-secondary uppercase tracking-wider mb-1 font-label-caps">Owner Tenure</div>
                     <div className="text-on-surface font-data-tabular text-xs">{item.signals?.accountAge || 'New'}</div>
                   </div>
                   <div>
-                    <div className="text-[9px] text-text-secondary uppercase tracking-wider mb-1 font-label-caps">Completeness</div>
+                    <div className="text-[10px] text-text-secondary uppercase tracking-wider mb-1 font-label-caps">Completeness</div>
                     {/* item.signals.completeness is a hardcoded placeholder
                         (never derived from real fields) everywhere it's set
                         in DashboardContext — computeListingStrength is the

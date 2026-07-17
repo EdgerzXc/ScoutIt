@@ -626,7 +626,7 @@ export default function ShowcaseStage({ mode = "full" }) {
         .sc-card:hover .sc-photo { transform: scale(1.05); }
         .sc-card-cue { position: absolute; bottom: 12px; right: 12px; font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; padding: 6px 12px; border: 1px solid; background: rgba(0,0,0,0.62); backdrop-filter: blur(6px); opacity: 0; transform: translateY(6px); transition: opacity 0.28s ease, transform 0.28s ease; }
         .sc-card:hover .sc-card-cue { opacity: 1; transform: translateY(0); }
-        .sc-photo-txt { font-family: 'Courier New', monospace; font-size: 9px; letter-spacing: 2px; color: #2a2a2a; text-transform: uppercase; }
+        .sc-photo-txt { font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 2px; color: #2a2a2a; text-transform: uppercase; }
         .sc-body { padding: 22px; }
         .sc-cat { font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 8px; }
         .sc-name { font-family: Georgia, serif; font-size: 25px; color: #f0ede8; margin-bottom: 4px; line-height: 1.25; }
@@ -635,7 +635,7 @@ export default function ShowcaseStage({ mode = "full" }) {
         .sc-stats { display: flex; gap: 26px; margin-bottom: 16px; }
         .sc-stat { display: flex; flex-direction: column; gap: 2px; }
         .sc-stat-num { font-family: Georgia, serif; font-size: 27px; }
-        .sc-stat-lbl { font-family: 'Courier New', monospace; font-size: 9px; color: #555; letter-spacing: 0.18em; text-transform: uppercase; }
+        .sc-stat-lbl { font-family: 'Courier New', monospace; font-size: 10px; color: #555; letter-spacing: 0.18em; text-transform: uppercase; }
         :global(.sc-cta) { font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 0.16em; color: #999; text-transform: uppercase; cursor: pointer; display: flex; justify-content: space-between; padding-top: 12px; border-top: 1px solid #1c1c1c; text-decoration: none; }
         :global(.sc-cta:hover) { color: #E8AE3C; }
         .sc-platform { width: 330px; height: 13px; border-radius: 50%; border: 1px solid; background: transparent; margin-top: 6px; animation: scPlat 3s ease-in-out infinite; }
@@ -655,12 +655,12 @@ export default function ShowcaseStage({ mode = "full" }) {
         .sc-rest-photo { position: relative; height: 84px; background: #161616; background-size: cover; background-position: center; overflow: hidden; transition: transform 0.45s ease; }
         .sc-rest-card:hover .sc-rest-photo { transform: scale(1.07); }
         .sc-rest-rank { position: absolute; top: 8px; left: 8px; font-family: 'Courier New', monospace; font-size: 12px; color: var(--tc); background: rgba(0,0,0,0.62); padding: 2px 8px; }
-        .sc-rest-showcase { position: absolute; bottom: 7px; right: 7px; font-family: 'Courier New', monospace; font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase; color: #fff; background: rgba(0,0,0,0.6); padding: 3px 7px; opacity: 0; transition: opacity 0.25s; }
+        .sc-rest-showcase { position: absolute; bottom: 7px; right: 7px; font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: #fff; background: rgba(0,0,0,0.6); padding: 3px 7px; opacity: 0; transition: opacity 0.25s; }
         .sc-rest-card:hover .sc-rest-showcase { opacity: 1; }
         .sc-rest-info { padding: 11px 12px 13px; }
-        .sc-rest-cat { font-family: 'Courier New', monospace; font-size: 8px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--tc); margin-bottom: 5px; }
+        .sc-rest-cat { font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--tc); margin-bottom: 5px; }
         .sc-rest-name { font-family: Georgia, serif; font-size: 15px; color: #e8e6e2; line-height: 1.25; }
-        .sc-rest-stat { font-family: 'Courier New', monospace; font-size: 9px; color: #666; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 6px; }
+        .sc-rest-stat { font-family: 'Courier New', monospace; font-size: 10px; color: #666; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 6px; }
         .sc-controls { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; justify-content: center; pointer-events: all; }
         .sc-arrow { font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #999; background: none; border: 1px solid #2a2a2a; padding: 9px 18px; cursor: pointer; transition: all 0.2s; }
         .sc-list-toggle { font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: #888; background: rgba(0,0,0,0.4); border: 1px solid #2a2a2a; padding: 9px 16px; cursor: pointer; transition: all 0.2s; }
@@ -676,6 +676,18 @@ export default function ShowcaseStage({ mode = "full" }) {
           .sc-filter-panel, .sc-promo-panel { width: 86%; }
           .sc-card { width: 290px; }
           .sc-rest-row { justify-content: flex-start; }
+          /* Tier pills were wider than the phone screen and got clipped —
+             let them scroll sideways within their own row instead. */
+          .sc-tier-nav {
+            max-width: 100%;
+            overflow-x: auto;
+            gap: 8px;
+            padding: 0 12px 4px;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+          }
+          .sc-tier-nav::-webkit-scrollbar { display: none; }
+          .sc-pill { flex: 0 0 auto; padding: 8px 12px; min-height: 40px; }
         }
       `}</style>
     </div>

@@ -130,22 +130,22 @@ export default function BoardPodium() {
         :global(.bp-mid .bp-photo), :global(.bp-mini .bp-photo) { width: 38%; min-width: 100px; height: auto; }
         :global(.bp-card:hover .bp-photo) { transform: scale(1.05); }
         :global(.bp-rank) { position: absolute; top: 10px; left: 10px; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; padding: 3px 9px; border: 1px solid; background: rgba(0,0,0,0.62); backdrop-filter: blur(6px); }
-        :global(.bp-tier-tag) { position: absolute; top: 10px; right: 10px; font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.18em; text-transform: uppercase; padding: 3px 8px; border: 1px solid; background: rgba(0,0,0,0.55); backdrop-filter: blur(6px); }
-        :global(.bp-showcase) { position: absolute; bottom: 10px; right: 10px; font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: #fff; background: rgba(0,0,0,0.6); padding: 4px 9px; opacity: 0; transform: translateY(6px); transition: all 0.28s ease; }
+        :global(.bp-tier-tag) { position: absolute; top: 10px; right: 10px; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; padding: 3px 8px; border: 1px solid; background: rgba(0,0,0,0.55); backdrop-filter: blur(6px); }
+        :global(.bp-showcase) { position: absolute; bottom: 10px; right: 10px; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: #fff; background: rgba(0,0,0,0.6); padding: 4px 9px; opacity: 0; transform: translateY(6px); transition: all 0.28s ease; }
         :global(.bp-card:hover .bp-showcase) { opacity: 1; transform: translateY(0); }
         :global(.bp-body) { padding: 14px; display: flex; flex-direction: column; flex: 1; min-width: 0; }
-        :global(.bp-cat) { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 5px; }
+        :global(.bp-cat) { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 5px; }
         :global(.bp-name) { font-family: Georgia, serif; color: #f0ede8; line-height: 1.25; }
         :global(.bp-hero .bp-name) { font-size: 22px; }
         :global(.bp-mid .bp-name) { font-size: 16px; }
         :global(.bp-mini .bp-name) { font-size: 14px; }
-        :global(.bp-loc) { font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; color: #666; margin-top: 4px; }
+        :global(.bp-loc) { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #666; margin-top: 4px; }
         :global(.bp-divider) { height: 1px; background: rgba(255,255,255,0.08); margin: 12px 0; }
         :global(.bp-stats) { display: flex; gap: 16px; }
         :global(.bp-stat) { display: flex; flex-direction: column; }
         :global(.bp-num) { font-family: Georgia, serif; font-size: 18px; }
-        :global(.bp-lbl) { font-family: var(--font-mono); font-size: 7px; letter-spacing: 0.16em; text-transform: uppercase; color: #777; margin-top: 2px; }
-        :global(.bp-mini-stat) { font-family: var(--font-mono); font-size: 9px; color: #777; letter-spacing: 0.1em; text-transform: uppercase; margin-top: auto; }
+        :global(.bp-lbl) { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: #777; margin-top: 2px; }
+        :global(.bp-mini-stat) { font-family: var(--font-mono); font-size: 10px; color: #777; letter-spacing: 0.1em; text-transform: uppercase; margin-top: auto; }
         :global(.bp-mini-stat span) { font-family: Georgia, serif; font-size: 14px; }
 
         @media (max-width: 1024px) {

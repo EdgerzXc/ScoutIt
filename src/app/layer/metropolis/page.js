@@ -224,7 +224,7 @@ export default function MetropolisLayer() {
         .metro-tag-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
         .metro-tag-label {
           font-family: var(--font-mono);
-          font-size: 9px;
+          font-size: 10px;
           letter-spacing: 0.16em;
           text-transform: uppercase;
           color: var(--accent);

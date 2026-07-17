@@ -315,7 +315,7 @@ export default function BrokersPage() {
                       )}
                       <div className="broker-image-container">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={broker.image} alt={broker.name} className="broker-image" />
+                        <img src={broker.image} alt={broker.name} className="broker-image" loading="lazy" />
                         <div className="image-overlay" />
                       </div>
                       <div className="broker-content">
@@ -476,7 +476,7 @@ export default function BrokersPage() {
 
         .hotmap-stat {
           color: var(--text-muted, rgba(240, 237, 232, 0.38));
-          font-size: 9px;
+          font-size: 10px;
           letter-spacing: 0.05em;
         }
 
@@ -706,7 +706,7 @@ export default function BrokersPage() {
 
         .scout-rating-label {
           font-family: var(--font-mono);
-          font-size: 8px;
+          font-size: 10px;
           text-transform: uppercase;
           letter-spacing: 0.08em;
           color: var(--text-muted);
@@ -750,7 +750,7 @@ export default function BrokersPage() {
           position: absolute;
           top: 12px;
           right: 12px;
-          font-size: 8px;
+          font-size: 10px;
           font-weight: 700;
           letter-spacing: 1px;
           padding: 4px 10px;
@@ -786,6 +786,23 @@ export default function BrokersPage() {
           0%   { background-position: 0% 50%; }
           50%  { background-position: 100% 50%; }
           100% { background-position: 0% 50%; }
+        }
+      
+        @media (max-width: 640px) {
+          /* Compact card: shorter portrait, clamped bio — roughly 2 cards
+             per scroll screen instead of one card filling the display */
+          .broker-image-container { height: 150px; }
+          .broker-content { padding: 16px; }
+          .broker-name { font-size: 18px; }
+          .broker-title { margin-bottom: 10px; }
+          .broker-specialty { margin-bottom: 10px; }
+          .broker-bio {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-bottom: 12px;
+          }
         }
       `}</style>
     </div>

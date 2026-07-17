@@ -67,6 +67,10 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
 
   useEffect(() => { loadMemberData(); }, [loadMemberData]);
   
+  // Mobile master–detail: below md the list and detail share one screen,
+  // so tapping a member slides to the detail pane and a back button returns.
+  const [showMobileDetail, setShowMobileDetail] = useState(false);
+
   // Modals / Overlays
   const [isInvitingMember, setIsInvitingMember] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
@@ -253,7 +257,7 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
         <div className="flex-1 flex overflow-hidden relative z-10">
           
           {/* Members List (Left Side) */}
-          <div className="w-1/2 border-r border-white/5 flex flex-col">
+          <div className={`w-full md:w-1/3 border-r border-white/5 flex-col ${showMobileDetail ? "hidden md:flex" : "flex"}`}>
             <div className="p-4 border-b border-white/5">
               <button 
                 onClick={() => setIsInvitingMember(true)}
@@ -265,7 +269,7 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
               {teamList.map(member => (
                 <div 
                   key={member.id}
-                  onClick={() => { setActiveMemberId(member.id); setEditingRoleId(null); }}
+                  onClick={() => { setActiveMemberId(member.id); setEditingRoleId(null); setShowMobileDetail(true); }}
                   className={`p-3 rounded-lg cursor-pointer transition-all flex items-center gap-3 border ${
                     activeMemberId === member.id 
                       ? 'bg-white/10 border-white/20' 
@@ -280,12 +284,12 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
                       {member.id === 'current_user' && (
                         <div className="flex items-center gap-1.5 shrink-0">
                           {(memberTasks || []).filter((t) => !t.completedAt).length > 0 && (
-                            <div className="text-[9px] font-mono bg-[#E8AE3C]/20 text-[#E8AE3C] px-1.5 py-0.5 rounded">
+                            <div className="text-[10px] font-mono bg-[#E8AE3C]/20 text-[#E8AE3C] px-1.5 py-0.5 rounded">
                               {(memberTasks || []).filter((t) => !t.completedAt).length} Tasks
                             </div>
                           )}
                           {pitches.filter((p) => p.status === 'pending' || p.status === 'accepted').length > 0 && (
-                            <div className="text-[9px] font-mono bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded flex items-center gap-1">
+                            <div className="text-[10px] font-mono bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded flex items-center gap-1">
                               <Link2 size={9} />
                               {pitches.filter((p) => p.status === 'pending' || p.status === 'accepted').length}
                             </div>
@@ -301,10 +305,16 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
           </div>
 
           {/* Member Details & Tabs (Right Side) */}
-          <div className="w-1/2 md:w-2/3 flex flex-col bg-surface/50 border-l border-white/5">
+          <div className={`w-full md:w-2/3 flex-col bg-surface/50 border-l border-white/5 ${showMobileDetail ? "flex" : "hidden md:flex"}`}>
             {activeMember ? (
               <>
                 <div className="p-6 border-b border-white/5 flex flex-col items-center text-center relative">
+                  <button
+                    onClick={() => setShowMobileDetail(false)}
+                    className="md:hidden absolute left-4 top-4 flex items-center gap-1 text-[11px] font-mono uppercase tracking-widest text-[#E8AE3C] min-h-[40px]"
+                  >
+                    ← Team
+                  </button>
                   <div className="mb-4"><MemberAvatar member={activeMember} size="w-20 h-20" textSize="text-xl" /></div>
                   <h3 className="text-lg text-white font-medium">{activeMember.name}</h3>
                   <div className="flex items-center gap-1 text-xs text-white/50 mt-1 mb-4">

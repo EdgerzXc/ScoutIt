@@ -241,11 +241,11 @@ export default function BadgeRegistryPage() {
                     <ShieldAlert size={20} color="#666" strokeWidth={1.5} />
                   )}
                   {userHasIt ? (
-                    <span className="font-mono text-[9px] uppercase tracking-widest text-gold-accent border border-gold-accent/30 px-1.5 rounded">
+                    <span className="font-mono text-[10px] uppercase tracking-widest text-gold-accent border border-gold-accent/30 px-1.5 rounded">
                       OWNED
                     </span>
                   ) : (
-                    <span className="font-mono text-[9px] uppercase tracking-widest text-red-500 bg-red-500/10 border border-red-500/20 px-1.5 rounded">
+                    <span className="font-mono text-[10px] uppercase tracking-widest text-red-500 bg-red-500/10 border border-red-500/20 px-1.5 rounded">
                       YOU MISSED THIS
                     </span>
                   )}

@@ -320,7 +320,7 @@ export default function WishlistPage() {
           background: rgba(232, 174, 60, 0.1);
           border: 1px solid rgba(232, 174, 60, 0.3);
           color: #E8AE3C;
-          font-size: 8px;
+          font-size: 10px;
           font-weight: 700;
           letter-spacing: 1px;
           padding: 2px 6px;

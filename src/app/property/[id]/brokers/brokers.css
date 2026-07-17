@@ -130,7 +130,7 @@
   background: rgba(232, 174, 60, 0.15);
   color: #E8AE3C;
   border: 0.5px solid rgba(232, 174, 60, 0.3);
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 600;
   letter-spacing: 1.5px;
   padding: 4px 10px;
@@ -176,7 +176,7 @@
 .leris-badge {
   background: rgba(76, 175, 125, 0.12);
   color: #4caf7d;
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 600;
   letter-spacing: 1px;
   padding: 2px 8px;
@@ -236,7 +236,7 @@
 }
 
 .rating-lbl {
-  font-size: 8px;
+  font-size: 10px;
   font-weight: 600;
   color: #c8c8c8;
   letter-spacing: 1px;
@@ -413,7 +413,7 @@
   position: absolute;
   top: 12px;
   right: 24px;
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: 1.5px;
   padding: 4px 10px;

@@ -148,7 +148,7 @@ export default function CrustLayer() {
         .service-status-badge {
           display: inline-block;
           font-family: var(--font-mono);
-          font-size: 9px;
+          font-size: 10px;
           letter-spacing: 0.2em;
           text-transform: uppercase;
           padding: 4px 10px;

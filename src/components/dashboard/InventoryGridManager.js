@@ -266,7 +266,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
         {/* Bulk add — owner only, operators can't add units */}
         {!isOperatorMode && (
           <div className="flex items-center gap-2 shrink-0">
-            <span className="font-label-caps text-[9px] tracking-widest text-text-secondary uppercase hidden sm:block">Bulk add</span>
+            <span className="font-label-caps text-[10px] tracking-widest text-text-secondary uppercase hidden sm:block">Bulk add</span>
             <input
               type="number"
               min={1}

@@ -78,7 +78,7 @@ export default function ProjectManagementPanel({ properties = [] }) {
         <div className="flex items-center justify-between mb-6 border-b border-white/10 pb-4">
           <h3 className="text-lg font-medium text-white flex items-center gap-2">
             Development Milestones
-            <span className="text-[9px] font-mono uppercase tracking-widest text-gold-accent border border-gold-accent/30 bg-gold-accent/10 rounded px-1.5 py-0.5">Sample preview</span>
+            <span className="text-[10px] font-mono uppercase tracking-widest text-gold-accent border border-gold-accent/30 bg-gold-accent/10 rounded px-1.5 py-0.5">Sample preview</span>
           </h3>
           <span className="text-xs text-text-secondary font-mono">Milestone tracking connects to your project data at launch</span>
         </div>

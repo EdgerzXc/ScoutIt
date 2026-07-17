@@ -103,7 +103,7 @@ export default function ConciergeAI() {
             </div>
             <div>
               <h3 className="font-headline-editorial text-lg text-on-surface leading-none">Scout AI</h3>
-              <span className="font-label-caps text-[9px] tracking-widest text-gold-accent uppercase">VIP Concierge Active</span>
+              <span className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase">VIP Concierge Active</span>
             </div>
           </div>
           <button 
@@ -119,7 +119,7 @@ export default function ConciergeAI() {
         <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6 custom-scrollbar">
           {messages.map((msg) => (
             <div key={msg.id} className={`flex flex-col max-w-[85%] ${msg.role === 'user' ? 'self-end items-end' : 'self-start items-start'}`}>
-              <span className="font-label-caps text-[9px] tracking-widest text-text-muted uppercase mb-1">
+              <span className="font-label-caps text-[10px] tracking-widest text-text-muted uppercase mb-1">
                 {msg.role === 'user' ? 'You' : 'Scout AI'}
               </span>
               <div className={`p-4 rounded-2xl text-sm leading-relaxed font-body ${
@@ -135,7 +135,7 @@ export default function ConciergeAI() {
 
           {isTyping && (
             <div className="self-start max-w-[85%] flex flex-col items-start">
-              <span className="font-label-caps text-[9px] tracking-widest text-gold-accent uppercase mb-1 animate-pulse">
+              <span className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase mb-1 animate-pulse">
                 Processing Logic
               </span>
               <div className="p-4 rounded-2xl bg-[#121110] border border-gold-accent/20 rounded-bl-sm flex items-center gap-2">

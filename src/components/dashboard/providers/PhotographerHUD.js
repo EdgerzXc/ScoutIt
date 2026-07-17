@@ -271,7 +271,7 @@ export default function PhotographerHUD({ projects, activeProjectId, setActivePr
                   <div>
                     <div className="flex items-center gap-2">
                       <h4 className="font-working-title text-xl text-on-surface">ScoutIt Pro</h4>
-                      <span className="bg-gold-accent/10 text-gold-accent font-label-caps text-[8px] uppercase tracking-widest px-2 py-0.5 rounded border border-gold-accent/20">Verified</span>
+                      <span className="bg-gold-accent/10 text-gold-accent font-label-caps text-[10px] uppercase tracking-widest px-2 py-0.5 rounded border border-gold-accent/20">Verified</span>
                     </div>
                     <p className="text-sm text-gold-accent mt-0.5">{specialty}</p>
                     <p className="text-[10px] text-text-muted mt-1 uppercase tracking-widest font-label-caps">{turnaroundTime}</p>
@@ -282,12 +282,12 @@ export default function PhotographerHUD({ projects, activeProjectId, setActivePr
               {/* Certifications Row */}
               <div className="flex flex-wrap gap-2 mb-6">
                 {certCaaDrone && (
-                  <span className="bg-[#1a1814] text-gold-accent border border-gold-accent/40 font-label-caps text-[9px] uppercase tracking-widest px-2 py-1 rounded flex items-center gap-1 shadow-[0_0_8px_rgba(232,174,60,0.1)]">
+                  <span className="bg-[#1a1814] text-gold-accent border border-gold-accent/40 font-label-caps text-[10px] uppercase tracking-widest px-2 py-1 rounded flex items-center gap-1 shadow-[0_0_8px_rgba(232,174,60,0.1)]">
                     <span className="text-[10px]">🚁</span> CAA Certified
                   </span>
                 )}
                 {certInsurance && (
-                  <span className="bg-[#1a1814] text-gold-accent border border-gold-accent/40 font-label-caps text-[9px] uppercase tracking-widest px-2 py-1 rounded flex items-center gap-1 shadow-[0_0_8px_rgba(232,174,60,0.1)]">
+                  <span className="bg-[#1a1814] text-gold-accent border border-gold-accent/40 font-label-caps text-[10px] uppercase tracking-widest px-2 py-1 rounded flex items-center gap-1 shadow-[0_0_8px_rgba(232,174,60,0.1)]">
                     <span className="text-[10px]">🛡️</span> Insured
                   </span>
                 )}

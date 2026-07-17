@@ -123,12 +123,12 @@ export default function PhotoUploader({ photos, onChange, onSetImage, isPro = fa
                   <svg className="animate-spin absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  <span className="absolute text-[9px] font-mono font-bold">{uploadProgress}%</span>
+                  <span className="absolute text-[10px] font-mono font-bold">{uploadProgress}%</span>
                 </div>
                 <div className="w-2/3 bg-surface-variant rounded-full h-1 mb-2 overflow-hidden">
                   <div className="bg-gold-accent h-1 rounded-full transition-all duration-300 ease-out" style={{ width: `${uploadProgress}%` }}></div>
                 </div>
-                <span className="text-[9px] uppercase tracking-widest font-mono animate-pulse">Uploading...</span>
+                <span className="text-[10px] uppercase tracking-widest font-mono animate-pulse">Uploading...</span>
               </div>
             ) : photoUrl && typeof photoUrl === 'string' && photoUrl.trim() !== "" ? (
               <>

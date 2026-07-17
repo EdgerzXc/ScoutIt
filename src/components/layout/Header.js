@@ -287,7 +287,7 @@ export default function Header() {
         }
 
         .header-dropdown .dropdown-brand {
-          font-size: 9px;
+          font-size: 10px;
           font-weight: 600;
           letter-spacing: 0.15em;
           text-transform: uppercase;
@@ -352,7 +352,7 @@ export default function Header() {
           }
 
           .header-back-btn {
-            font-size: 9px;
+            font-size: 10px;
             padding: 0 10px;
             min-height: 36px;
             white-space: nowrap;
@@ -407,7 +407,7 @@ export default function Header() {
           }
           
           .header-dropdown .dropdown-brand {
-            font-size: 9px;
+            font-size: 10px;
             padding: 8px 12px 4px;
             margin-bottom: 8px;
           }
@@ -415,7 +415,7 @@ export default function Header() {
         
         @media (max-width: 480px) {
           .header-back-btn {
-            font-size: 9px;
+            font-size: 10px;
             padding: 0 8px;
             min-height: 36px;
           }

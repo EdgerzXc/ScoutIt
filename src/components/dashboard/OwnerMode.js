@@ -190,7 +190,7 @@ export default function OwnerMode() {
             {!canUseVault && (
               <div className="absolute top-4 right-4 flex items-center gap-1.5 bg-surface-alt border border-surface-variant rounded-full px-3 py-1">
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-text-secondary"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                <span className="font-label-caps text-[9px] tracking-widest text-text-secondary uppercase">Cluster+</span>
+                <span className="font-label-caps text-[10px] tracking-widest text-text-secondary uppercase">Cluster+</span>
               </div>
             )}
 
@@ -992,9 +992,9 @@ export default function OwnerMode() {
                               VERIFIED" (a broker-only credential) was
                               previously shown unconditionally on both. */}
                           {pitch.otherPartyRole === 'Broker' ? (
-                            <span className="bg-gold-accent/10 text-gold-accent text-[9px] font-label-caps px-1.5 py-0.5 rounded tracking-widest">PRC VERIFIED</span>
+                            <span className="bg-gold-accent/10 text-gold-accent text-[10px] font-label-caps px-1.5 py-0.5 rounded tracking-widest">PRC VERIFIED</span>
                           ) : (
-                            <span className="bg-surface-variant text-text-secondary text-[9px] font-label-caps px-1.5 py-0.5 rounded tracking-widest">PROSPECTIVE BUYER</span>
+                            <span className="bg-surface-variant text-text-secondary text-[10px] font-label-caps px-1.5 py-0.5 rounded tracking-widest">PROSPECTIVE BUYER</span>
                           )}
                         </h4>
                         <span className="text-xs text-text-secondary">{pitch.otherPartyRole === 'Broker' ? pitch.brokerFirm : 'Direct inquiry'}</span>
@@ -1002,7 +1002,7 @@ export default function OwnerMode() {
                     </div>
                     <div className="text-right">
                       <span className="font-label-caps text-[10px] tracking-widest text-text-muted uppercase block">{pitch.timeRemaining}</span>
-                      {pitch.status === 'pending' && <span className="text-[9px] text-gold-accent">AWAITING RESPONSE</span>}
+                      {pitch.status === 'pending' && <span className="text-[10px] text-gold-accent">AWAITING RESPONSE</span>}
                     </div>
                   </div>
                   
@@ -1015,7 +1015,7 @@ export default function OwnerMode() {
                   {/* Private scratchpad -- only you see this, shared with your
                       own view of this deal across sessions (deals.private_notes) */}
                   <div className="mb-4">
-                    <span className="block font-label-caps text-[9px] tracking-widest text-text-muted uppercase mb-1">Private Notes</span>
+                    <span className="block font-label-caps text-[10px] tracking-widest text-text-muted uppercase mb-1">Private Notes</span>
                     <textarea
                       className="w-full bg-[#0a0a0a] border border-surface-alt rounded p-3 text-xs text-text-secondary focus:outline-none focus:border-gold-accent/50 transition-colors resize-y min-h-[60px]"
                       placeholder="Jot down anything about this inquiry — only visible to you..."

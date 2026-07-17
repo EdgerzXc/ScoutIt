@@ -244,7 +244,7 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
                   <div>
                     <div className="flex items-center gap-2">
                       <h4 className="font-working-title text-xl text-on-surface">ScoutIt Studio</h4>
-                      <span className="bg-[#ff75c3]/10 text-[#ff75c3] font-label-caps text-[8px] uppercase tracking-widest px-2 py-0.5 rounded border border-[#ff75c3]/20">Verified</span>
+                      <span className="bg-[#ff75c3]/10 text-[#ff75c3] font-label-caps text-[10px] uppercase tracking-widest px-2 py-0.5 rounded border border-[#ff75c3]/20">Verified</span>
                     </div>
                     <p className="text-sm text-text-secondary mt-0.5">{aesthetic}</p>
                   </div>
@@ -273,10 +273,10 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
                 <div>
                   <span className="text-[10px] text-text-secondary uppercase tracking-widest font-label-caps mb-2 block">Software Stack</span>
                   <div className="flex flex-wrap gap-2">
-                    {softAutoCAD && <span className="bg-[#121110] text-text-secondary border border-surface-variant font-label-caps text-[9px] uppercase tracking-widest px-2 py-1 rounded">AutoCAD</span>}
-                    {softSketchUp && <span className="bg-[#121110] text-text-secondary border border-surface-variant font-label-caps text-[9px] uppercase tracking-widest px-2 py-1 rounded">SketchUp</span>}
-                    {softBlender && <span className="bg-[#121110] text-text-secondary border border-surface-variant font-label-caps text-[9px] uppercase tracking-widest px-2 py-1 rounded">Blender</span>}
-                    {softRevit && <span className="bg-[#121110] text-text-secondary border border-surface-variant font-label-caps text-[9px] uppercase tracking-widest px-2 py-1 rounded">Revit</span>}
+                    {softAutoCAD && <span className="bg-[#121110] text-text-secondary border border-surface-variant font-label-caps text-[10px] uppercase tracking-widest px-2 py-1 rounded">AutoCAD</span>}
+                    {softSketchUp && <span className="bg-[#121110] text-text-secondary border border-surface-variant font-label-caps text-[10px] uppercase tracking-widest px-2 py-1 rounded">SketchUp</span>}
+                    {softBlender && <span className="bg-[#121110] text-text-secondary border border-surface-variant font-label-caps text-[10px] uppercase tracking-widest px-2 py-1 rounded">Blender</span>}
+                    {softRevit && <span className="bg-[#121110] text-text-secondary border border-surface-variant font-label-caps text-[10px] uppercase tracking-widest px-2 py-1 rounded">Revit</span>}
                     {!softAutoCAD && !softSketchUp && !softBlender && !softRevit && (
                       <span className="text-xs text-text-muted italic">No specific software stack listed.</span>
                     )}

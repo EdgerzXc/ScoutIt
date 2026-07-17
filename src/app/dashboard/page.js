@@ -310,7 +310,7 @@ function DashboardInner() {
           >
             <MessageCircle strokeWidth={1.5} size={20} />
             {unreadInboxCount > 0 && (
-              <span className="absolute top-1.5 right-1.5 w-3.5 h-3.5 bg-gold-accent rounded-full border-2 border-background flex items-center justify-center text-[8px] font-bold text-background">
+              <span className="absolute top-1.5 right-1.5 w-3.5 h-3.5 bg-gold-accent rounded-full border-2 border-background flex items-center justify-center text-[10px] font-bold text-background">
                 {unreadInboxCount}
               </span>
             )}
@@ -324,7 +324,7 @@ function DashboardInner() {
             >
               🔔
               {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-error rounded-full border-2 border-background flex items-center justify-center text-[8px] font-bold text-white">
+                <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-error rounded-full border-2 border-background flex items-center justify-center text-[10px] font-bold text-white">
                   {unreadCount}
                 </span>
               )}
@@ -432,7 +432,7 @@ function DashboardInner() {
         aria-label={primaryAction.label}
       >
         <span className="text-xl leading-none font-bold">{primaryAction.icon}</span>
-        {primaryAction.label && <span className="text-[9px] font-working-title font-bold mt-0.5 tracking-tighter uppercase leading-none">{primaryAction.label}</span>}
+        {primaryAction.label && <span className="text-[10px] font-working-title font-bold mt-0.5 tracking-tighter uppercase leading-none">{primaryAction.label}</span>}
       </button>
 
       {/* Role Activation Modal (broker license / provider type) */}

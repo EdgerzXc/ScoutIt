@@ -249,7 +249,7 @@ export default function EventPlannersPage() {
         .coming-soon-badge {
           background: var(--accent);
           color: #0e0e0e;
-          font-size: 9px;
+          font-size: 10px;
           font-weight: 700;
           letter-spacing: 0.12em;
           padding: 4px 10px;
@@ -267,7 +267,7 @@ export default function EventPlannersPage() {
           position: absolute;
           top: 12px;
           left: 12px;
-          font-size: 8px;
+          font-size: 10px;
           font-weight: 700;
           letter-spacing: 0.1em;
           color: var(--text-muted);
@@ -298,6 +298,7 @@ export default function EventPlannersPage() {
         @media (max-width: 1024px) {
           .brokers-grid { grid-template-columns: 1fr; }
         }
+        
         .broker-card {
           background: var(--surface);
           border: 1px solid var(--border-solid);
@@ -408,7 +409,7 @@ export default function EventPlannersPage() {
           position: absolute;
           top: 12px;
           right: 12px;
-          font-size: 8px;
+          font-size: 10px;
           font-weight: 700;
           letter-spacing: 1px;
           padding: 3px 8px;
@@ -430,6 +431,21 @@ export default function EventPlannersPage() {
           0%   { background-position: 0% 50%; }
           50%  { background-position: 100% 50%; }
           100% { background-position: 0% 50%; }
+        }
+      
+        @media (max-width: 640px) {
+          /* Compact directory card on phones — no more one-card-per-screen */
+          .broker-image-container { height: 150px; }
+          .broker-content { padding: 16px; }
+          .broker-name { font-size: 18px; }
+          .broker-bio {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-bottom: 12px;
+          }
+          .brokers-grid { gap: 14px; }
         }
       `}</style>
     </div>

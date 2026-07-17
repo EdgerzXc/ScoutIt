@@ -313,7 +313,7 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
             font-size: 20px;
           }
           .tile-label {
-            font-size: 9px;
+            font-size: 10px;
             letter-spacing: 1px;
             margin-top: 6px;
           }

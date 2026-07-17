@@ -264,7 +264,35 @@ export default function MissionControlMode() {
       </aside>
 
       {/* Main Content */}
-      <div className="flex-1 px-4 md:px-8 py-6 flex flex-col gap-6 overflow-y-auto">
+      <div className="flex-1 min-w-0 px-4 md:px-8 py-6 flex flex-col gap-6 overflow-y-auto">
+        {/* Mobile tab bar — the sidebar is hidden below md, so phones navigate here */}
+        <div className="md:hidden -mx-4 px-4 flex gap-2 overflow-x-auto pb-2 border-b border-white/5 scrollbar-none" style={{ scrollbarWidth: "none" }}>
+          {[
+            { id: "dashboard", icon: LayoutDashboard, label: "Dashboard" },
+            { id: "portfolio", icon: Building2, label: "Portfolio" },
+            { id: "crm", icon: Users, label: "CRM" },
+            { id: "projects", icon: ClipboardList, label: "Projects" },
+            { id: "team", icon: UsersRound, label: "Team" },
+            { id: "inventory", icon: Box, label: "Inventory" },
+            { id: "finance", icon: BadgeDollarSign, label: "Finance" },
+            { id: "analytics", icon: LineChart, label: "Analytics" },
+            { id: "ai", icon: Bot, label: "AI Center" },
+            { id: "administration", icon: Settings, label: "Admin" },
+          ].map(({ id, icon: Icon, label }) => (
+            <button
+              key={id}
+              onClick={() => setActiveTab(id)}
+              className={`flex items-center gap-1.5 shrink-0 px-3 py-2 rounded-full text-[11px] font-mono uppercase tracking-wider min-h-[40px] transition-colors ${
+                activeTab === id
+                  ? "bg-gold-accent/10 text-gold-accent border border-gold-accent/30"
+                  : "text-text-secondary border border-white/10 hover:text-white"
+              }`}
+            >
+              <Icon size={13} />
+              {label}
+            </button>
+          ))}
+        </div>
         {activeTab === "dashboard" ? (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both">
             <div className="bg-gold-accent/5 border border-gold-accent/20 rounded-lg px-4 py-3 flex items-start gap-3 mb-6 backdrop-blur-md">
@@ -740,9 +768,9 @@ export default function MissionControlMode() {
               ))}
             </div>
             <GlassPanel className="flex-1 rounded-2xl border-white/5 overflow-hidden flex flex-col">
-              <div className="px-6 py-4 border-b border-white/5 flex items-center justify-between">
+              <div className="px-6 py-4 border-b border-white/5 flex items-center justify-between flex-wrap gap-3">
                 <h3 className="text-white font-medium text-sm">Enterprise Unit Delegation & Inventory</h3>
-                <div className="flex gap-4 items-center">
+                <div className="flex gap-4 items-center flex-wrap">
                   <div className="text-[10px] tracking-widest text-gold-accent uppercase">Active Estate</div>
                   <select 
                     value={activeEstateId || ""}
@@ -798,7 +826,7 @@ export default function MissionControlMode() {
                 <div className="text-4xl text-gold-accent font-display-md tracking-tighter mt-auto mb-2 relative z-10">{inventoryStats.vacant}</div>
                 <div className="text-text-secondary text-xs font-mono font-medium relative z-10">Vacant units available for lease</div>
               </GlassPanel>
-              <GlassPanel className="col-span-2 rounded-2xl border-white/5 p-6 flex flex-col">
+              <GlassPanel className="col-span-1 md:col-span-2 rounded-2xl border-white/5 p-6 flex flex-col">
                 <h4 className="text-white font-medium text-sm mb-4">Transaction Ledger</h4>
                 <div className="flex-1 flex flex-col items-center justify-center text-center py-8 gap-3">
                   <div className="w-12 h-12 rounded-full border border-white/10 bg-white/[0.02] flex items-center justify-center">
@@ -830,7 +858,7 @@ export default function MissionControlMode() {
                   <div>
                     <h3 className="text-white font-medium text-sm flex items-center gap-2">
                       Historical Property Yield
-                      <span className="text-[9px] font-mono uppercase tracking-widest text-gold-accent border border-gold-accent/30 bg-gold-accent/10 rounded px-1.5 py-0.5">Sample preview</span>
+                      <span className="text-[10px] font-mono uppercase tracking-widest text-gold-accent border border-gold-accent/30 bg-gold-accent/10 rounded px-1.5 py-0.5">Sample preview</span>
                     </h3>
                     <p className="text-[10px] text-text-secondary font-mono tracking-widest uppercase mt-1">Makati CBD vs BGC · illustrative — live data connects at launch</p>
                   </div>
@@ -856,7 +884,7 @@ export default function MissionControlMode() {
                      <polyline points="0,32 20,28 40,26 60,20 80,18 100,16" fill="none" stroke="#3b82f6" strokeWidth="1.5" className="drop-shadow-[0_0_5px_rgba(59,130,246,0.5)]" />
                      <circle cx="100" cy="16" r="1.5" fill="#3b82f6" />
                    </svg>
-                   <div className="absolute -bottom-1 left-2 right-0 flex justify-between text-[8px] text-text-secondary font-mono">
+                   <div className="absolute -bottom-1 left-2 right-0 flex justify-between text-[10px] text-text-secondary font-mono">
                      <span>2022</span>
                      <span>2023</span>
                      <span>2024</span>
@@ -874,7 +902,7 @@ export default function MissionControlMode() {
               <GlassPanel className="col-span-1 rounded-2xl border-white/5 p-6 flex flex-col">
                 <h3 className="text-white font-medium text-sm mb-1 flex items-center gap-2">
                   Space Demand Trends
-                  <span className="text-[9px] font-mono uppercase tracking-widest text-gold-accent border border-gold-accent/30 bg-gold-accent/10 rounded px-1.5 py-0.5">Sample preview</span>
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-gold-accent border border-gold-accent/30 bg-gold-accent/10 rounded px-1.5 py-0.5">Sample preview</span>
                 </h3>
                 <p className="text-[10px] text-text-secondary font-mono tracking-widest uppercase mb-6">Illustrative — live data connects at launch</p>
                 
@@ -1031,7 +1059,7 @@ export default function MissionControlMode() {
                 ))}
               </div>
 
-              <div className="col-span-2 flex flex-col gap-6">
+              <div className="col-span-1 md:col-span-2 flex flex-col gap-6">
                 {adminActiveTab === 'Organization Profile' && (
                   <GlassPanel className="rounded-2xl border-white/5 p-8 animate-in fade-in">
                     <h3 className="text-lg text-white font-medium mb-6 border-b border-white/10 pb-4">Organization Profile</h3>
@@ -1069,7 +1097,7 @@ export default function MissionControlMode() {
                 )}
 
                 {(adminActiveTab === 'Security & Access' || adminActiveTab === 'Organization Profile') && (
-                  <div className="grid grid-cols-2 gap-6 animate-in fade-in">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 animate-in fade-in">
                     <GlassPanel className="rounded-2xl border-white/5 p-6 hover:border-emerald-500/20 transition-colors">
                       <h4 className="text-white font-medium text-sm mb-2">Security</h4>
                       <p className="text-xs text-text-secondary mb-4">Require Two-Factor Authentication for all team members.</p>

@@ -281,7 +281,7 @@ export default function ResearcherHUD({ quests, activeQuestId, setActiveQuestId 
                   <div>
                     <div className="flex items-center gap-2">
                       <h4 className="font-working-title text-xl text-on-surface font-sans">ScoutIt Inspector</h4>
-                      <span className="bg-[#00f2fe]/10 text-[#00f2fe] font-label-caps text-[8px] uppercase tracking-widest px-2 py-0.5 rounded border border-[#00f2fe]/20">Cleared</span>
+                      <span className="bg-[#00f2fe]/10 text-[#00f2fe] font-label-caps text-[10px] uppercase tracking-widest px-2 py-0.5 rounded border border-[#00f2fe]/20">Cleared</span>
                     </div>
                     <p className="text-sm text-[#00f2fe] mt-0.5">{specialty}</p>
                   </div>

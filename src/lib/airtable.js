@@ -387,6 +387,9 @@ export async function fetchIntel(apiKey, baseId) {
           f.BodyParagraph2 || "",
           f.BodyParagraph3 || "",
         ].filter(Boolean),
+        // Universal block body (see src/lib/articleSchema.js) — raw JSON string;
+        // the article page parses+validates it and falls back to `body` above.
+        bodyJson:       f.Body_JSON       || "",
         recommendation: f.Recommendation || "",
       };
     });

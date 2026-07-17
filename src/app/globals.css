@@ -1052,7 +1052,7 @@ body.light-mode .toolbox-float {
 
   .bottom-nav-label {
     font-family: var(--font-mono);
-    font-size: 9px;
+    font-size: 10px;
     font-weight: 600;
     letter-spacing: 0.07em;
     text-transform: uppercase;

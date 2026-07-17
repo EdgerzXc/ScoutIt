@@ -62,7 +62,7 @@ export function RestrictedAccessBanner({ rosterLabel = "This Roster", openDate =
         .restricted-label {
           display: block;
           font-family: var(--font-mono, monospace);
-          font-size: 9px;
+          font-size: 10px;
           letter-spacing: 0.18em;
           color: var(--accent, #E8AE3C);
           font-weight: 700;
@@ -94,7 +94,7 @@ export function RestrictedAccessBanner({ rosterLabel = "This Roster", openDate =
         }
         .restricted-status {
           font-family: var(--font-mono, monospace);
-          font-size: 8px;
+          font-size: 10px;
           letter-spacing: 0.12em;
           color: var(--text-muted, #555);
           text-transform: uppercase;
@@ -153,7 +153,7 @@ export function RestrictedCardWrapper({ children, rosterType = "this roster" }) 
           position: absolute;
           top: 12px;
           left: 12px;
-          font-size: 8px;
+          font-size: 10px;
           font-weight: 700;
           letter-spacing: 0.12em;
           text-transform: uppercase;
@@ -308,7 +308,7 @@ export function EarlyAccessModal({ rosterType = "this roster", onClose }) {
         .gate-kicker {
           display: block;
           font-family: var(--font-mono, monospace);
-          font-size: 9px;
+          font-size: 10px;
           letter-spacing: 0.18em;
           color: var(--accent, #E8AE3C);
           text-transform: uppercase;
@@ -335,7 +335,7 @@ export function EarlyAccessModal({ rosterType = "this roster", onClose }) {
         .gate-field-label {
           display: block;
           font-family: var(--font-mono, monospace);
-          font-size: 9px;
+          font-size: 10px;
           letter-spacing: 0.12em;
           color: var(--accent, #E8AE3C);
           text-align: left;
@@ -490,7 +490,7 @@ export function DetailPageAccessGate({ rosterType = "this profile", providerName
         .detail-gate-kicker {
           display: block;
           font-family: var(--font-mono, monospace);
-          font-size: 9px;
+          font-size: 10px;
           letter-spacing: 0.14em;
           color: var(--accent, #E8AE3C);
           text-transform: uppercase;

@@ -24,7 +24,7 @@ export default function SpatialVaultWidget({ lumaUrl, matterportUrl, heatmapUrl 
             {!hasSubscription && (
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/60 backdrop-blur-sm">
                 <span className="font-headline-editorial text-base text-on-surface mb-2">Unlock The Spatial Vault</span>
-                <span className="font-label-caps text-[9px] text-gold-accent tracking-widest uppercase mb-4">Premium Subscription Required</span>
+                <span className="font-label-caps text-[10px] text-gold-accent tracking-widest uppercase mb-4">Premium Subscription Required</span>
                 <a href="/pricing/seeker" className="font-label-caps uppercase tracking-widest text-[11px] font-bold text-background bg-gold-accent hover:opacity-90 px-6 py-3 rounded transition-opacity">
                   Upgrade to Cluster Tier →
                 </a>

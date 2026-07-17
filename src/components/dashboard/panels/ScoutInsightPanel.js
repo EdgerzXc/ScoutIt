@@ -52,7 +52,7 @@ export default function ScoutInsightPanel({ pitches, listings, taskSummary }) {
         <h3 className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-gold-accent animate-pulse shadow-[0_0_10px_rgba(247,198,78,0.8)]"></span> Scout Insight
         </h3>
-        <span className="font-label-caps text-[9px] tracking-widest text-text-muted uppercase hidden sm:block">Rule-based · computed from your live pipeline</span>
+        <span className="font-label-caps text-[10px] tracking-widest text-text-muted uppercase hidden sm:block">Rule-based · computed from your live pipeline</span>
       </div>
       {insights.length > 0 ? (
         <div className="flex flex-col gap-2.5">

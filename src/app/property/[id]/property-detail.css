@@ -132,7 +132,7 @@
 .platform-dropdown.open { opacity: 1; visibility: visible; transform: translateY(0); }
 .platform-dropdown a { display: block; padding: 10px 12px; font-size: 12px; font-weight: 400; color: var(--text-secondary); text-decoration: none; border-radius: 4px; transition: background 0.2s, color 0.2s; }
 .platform-dropdown a:hover { background: rgba(255,255,255,0.06); color: var(--text-primary); }
-.platform-dropdown .dropdown-brand { font-size: 9px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); padding: 8px 12px 4px; pointer-events: none; }
+.platform-dropdown .dropdown-brand { font-size: 10px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); padding: 8px 12px 4px; pointer-events: none; }
 .photo-controls { position: absolute; bottom: 14px; left: 14px; right: 14px; display: flex; align-items: center; justify-content: space-between; z-index: 12; gap: 12px; }
 .photo-controls-left { display: flex; align-items: center; gap: 10px; }
 .photo-toggle { position: relative; top: auto; right: auto; display: flex; background: rgba(10,10,10,0.72); border: 0.5px solid var(--border-mid); border-radius: 20px; padding: 3px; backdrop-filter: blur(10px); z-index: 10; gap: 2px; }
@@ -296,7 +296,7 @@
 .accordion-title { font-size: 15px; font-weight: 500; color: var(--text-primary); }
 .accordion-subtitle { font-size: 15px; color: #c8c8c8; margin-top: 2px; line-height: 1.65; }
 .accordion-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-.accordion-tag { font-size: 9px; font-weight: 500; letter-spacing: 0.06em; padding: 3px 8px; border-radius: 10px; }
+.accordion-tag { font-size: 10px; font-weight: 500; letter-spacing: 0.06em; padding: 3px 8px; border-radius: 10px; }
 .tag-green { background: var(--green-dim); color: var(--green); }
 .tag-yellow { background: var(--yellow-dim); color: var(--yellow); }
 .tag-red { background: var(--red-dim); color: var(--red); }
@@ -351,7 +351,7 @@
 .where-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: var(--surface); border: 0.5px solid var(--border); border-radius: 3px; }
 .where-name { font-size: 16px; font-weight: 500; color: #f0ede8; }
 .where-dist { font-size: 15px; color: #c8c8c8; line-height: 1.65; }
-.where-badge { font-size: 9px; font-weight: 500; letter-spacing: 0.06em; padding: 2px 8px; border-radius: 10px; background: var(--accent-dim); color: var(--accent); }
+.where-badge { font-size: 10px; font-weight: 500; letter-spacing: 0.06em; padding: 2px 8px; border-radius: 10px; background: var(--accent-dim); color: var(--accent); }
 .universe-price { font-family: var(--font-display); font-size: 46px; font-weight: 300; color: var(--text-primary); line-height: 1; }
 .universe-price em { font-style: normal; color: var(--accent); }
 .universe-price-label { font-size: 11px; color: var(--text-secondary); margin-top: 4px; letter-spacing: 0.06em; text-transform: uppercase; }
@@ -495,7 +495,7 @@
   }
   .nav-inner { padding: 0 8px; gap: 0; }
   .nav-chapter { min-width: 58px; padding: 0 5px; gap: 3px; }
-  .chapter-label { font-size: 7px; letter-spacing: 0.07em; }
+  .chapter-label { font-size: 10px; letter-spacing: 0.07em; }
   .chapter-icon { width: 16px; height: 16px; }
   .nav-divider { height: 20px; }
   
@@ -1213,7 +1213,7 @@ html.lightbox-open {
   }
 
   .chapter-label {
-    font-size: 6px;
+    font-size: 10px;
   }
 
   /* Panel content tighter padding */
