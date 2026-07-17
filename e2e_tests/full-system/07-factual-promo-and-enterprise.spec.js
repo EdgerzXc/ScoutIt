@@ -61,7 +61,11 @@ test.describe('Factual share & promote pipeline', () => {
     await expect(
       page.getByText(/verified listing data/i).first()
     ).toBeVisible({ timeout: 30000 });
-    await expect(page.getByText(/Cyber Sigma Tower 3/).first()).toBeVisible();
+    // Match the modal's generated copy ("Cyber Sigma Tower 3 — Commercial …"),
+    // not the bare property name: a plain /Cyber Sigma Tower 3/ .first()
+    // resolves to the desktop hero <h1>, which is intentionally hidden on
+    // mobile (the mobile-hero-title h1 replaces it) and fails Mobile Chrome.
+    await expect(page.getByText(/Cyber Sigma Tower 3 —/).first()).toBeVisible();
   });
 
   test('promote API answers factually even for a synthetic property', async ({ request }) => {
