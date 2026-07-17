@@ -69,7 +69,10 @@ export default function FloatingToolbox() {
   }
 
   useEffect(() => {
-    const fallbackY = window.innerHeight - 80;
+    // On mobile the fixed bottom nav (~74px) owns the bottom of the screen, so
+    // default the toolbox above it instead of on top of the nav / page content.
+    const navClear = window.matchMedia("(max-width: 768px)").matches ? 88 : 0;
+    const fallbackY = window.innerHeight - 80 - navClear;
     // Migrate old key
     const legacy = localStorage.getItem("scoutit_accessibility_mode") === "high-contrast" ? "high-contrast" : null;
     const savedMode = localStorage.getItem("scoutit_display_mode") || legacy || "dark";
@@ -201,8 +204,10 @@ export default function FloatingToolbox() {
     const dx = e.clientX - anchor.current.clientX;
     const dy = e.clientY - anchor.current.clientY;
     if (Math.abs(dx) > 5 || Math.abs(dy) > 5) hasMoved.current = true;
+    // Keep the button out from under the mobile bottom nav even while dragging.
+    const navClear = window.matchMedia("(max-width: 768px)").matches ? 88 : 0;
     const nx = Math.max(0, Math.min(window.innerWidth - 56, anchor.current.posX + dx));
-    const ny = Math.max(0, Math.min(window.innerHeight - 56, anchor.current.posY + dy));
+    const ny = Math.max(0, Math.min(window.innerHeight - 56 - navClear, anchor.current.posY + dy));
     livePos.current = { x: nx, y: ny };
     // Direct DOM update — bypasses React for smooth 60fps drag
     if (containerRef.current) {

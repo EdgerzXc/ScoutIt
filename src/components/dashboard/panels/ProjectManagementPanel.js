@@ -75,22 +75,27 @@ export default function ProjectManagementPanel({ properties = [] }) {
 
       {/* Milestone Tracker — illustrative until real milestone data exists */}
       <GlassPanel className="p-6">
-        <div className="flex items-center justify-between mb-6 border-b border-white/10 pb-4">
-          <h3 className="text-lg font-medium text-white flex items-center gap-2">
+        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between mb-6 border-b border-white/10 pb-4">
+          <h3 className="text-lg font-medium text-white flex flex-wrap items-center gap-2">
             Development Milestones
             <span className="text-[10px] font-mono uppercase tracking-widest text-gold-accent border border-gold-accent/30 bg-gold-accent/10 rounded px-1.5 py-0.5">Sample preview</span>
           </h3>
           <span className="text-xs text-text-secondary font-mono">Milestone tracking connects to your project data at launch</span>
         </div>
         
-        <div className="relative pt-4 pb-8">
-          {/* Progress Bar Background */}
-          <div className="absolute top-8 left-0 w-full h-1 bg-white/10 rounded-full"></div>
-          {/* Active Progress Bar */}
-          <div className="absolute top-8 left-0 w-[55%] h-1 bg-gold-accent rounded-full shadow-[0_0_10px_rgba(232,174,60,0.5)]"></div>
+        {/* Horizontal scroll on mobile — the timeline needs ~560px for six
+            labelled nodes; the old fixed-width row collapsed them into an
+            overlapping, unreadable mess on phones. Bleeds to the panel edges on
+            mobile, reverts to the full-width static layout from md up. */}
+        <div className="-mx-6 px-6 overflow-x-auto scrollbar-none md:mx-0 md:px-0 md:overflow-x-visible" style={{ scrollbarWidth: "none" }}>
+          <div className="relative pt-4 pb-8 min-w-[560px] md:min-w-0">
+            {/* Progress Bar Background */}
+            <div className="absolute top-8 left-0 w-full h-1 bg-white/10 rounded-full"></div>
+            {/* Active Progress Bar */}
+            <div className="absolute top-8 left-0 w-[55%] h-1 bg-gold-accent rounded-full shadow-[0_0_10px_rgba(232,174,60,0.5)]"></div>
 
-          <div className="relative flex justify-between">
-            {SAMPLE_MILESTONES.map((milestone, idx) => (
+            <div className="relative flex justify-between">
+              {SAMPLE_MILESTONES.map((milestone, idx) => (
               <div key={milestone.id} className="flex flex-col items-center gap-3 w-24 relative -ml-12 first:ml-0 last:-mr-12">
                 <div className={`w-4 h-4 rounded-full z-10 border-2 ${
                   milestone.status === 'completed' ? 'bg-gold-accent border-gold-accent shadow-[0_0_8px_rgba(232,174,60,0.8)]' : 
@@ -107,6 +112,7 @@ export default function ProjectManagementPanel({ properties = [] }) {
                 </div>
               </div>
             ))}
+            </div>
           </div>
         </div>
       </GlassPanel>

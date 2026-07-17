@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useDashboard } from "../../context/DashboardContext";
+import { crmFetch } from "../../lib/crmClient";
 
 export default function BookingModal({ isOpen, onClose, brokerName, dealId, onSchedule }) {
   const { addToast } = useDashboard();
@@ -22,24 +23,18 @@ export default function BookingModal({ isOpen, onClose, brokerName, dealId, onSc
     const scheduledAt = new Date(`${selectedDate} ${selectedTime}`).toISOString();
     
     try {
-      const res = await fetch("/api/viewing-appointments", {
+      // crmFetch attaches the Supabase session token (and the dev x-mock-user-id
+      // header) — a raw fetch sent no auth, so the API resolved no user and 401'd,
+      // meaning no appointment was ever created. This creates a real `pending` row.
+      await crmFetch("/api/viewing-appointments", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          dealId,
-          scheduledAt,
-          mockOwnerId: "master-dev" // or read from context if available
-        })
+        body: { dealId, scheduledAt },
       });
-      
-      if (!res.ok) {
-        throw new Error("Failed to schedule appointment");
-      }
-      
+
       onSchedule(scheduledAt);
     } catch (e) {
       console.error(e);
-      if(addToast) addToast("Failed to schedule appointment. Please try again.", "❌");
+      if (addToast) addToast("Failed to schedule appointment. Please try again.", "❌");
     } finally {
       setIsSubmitting(false);
     }

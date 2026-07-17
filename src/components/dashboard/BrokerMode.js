@@ -788,6 +788,14 @@ export default function BrokerMode() {
         </div>
       </header>
 
+      {/* Mobile quick actions — brokers get no dashboard top-nav on mobile, so
+          surface the core destinations (schedule/availability, inbox, pipeline). */}
+      <div className="lg:hidden flex gap-2 overflow-x-auto pb-2 mb-6 -mx-4 px-4 hide-scrollbar">
+        <Link href="/dashboard/calendar" className="shrink-0 flex items-center gap-2 bg-surface-alt border border-surface-variant rounded-full px-4 py-2 text-sm font-working-title text-on-surface hover:border-gold-accent/50 transition-colors">🗓️ Availability</Link>
+        <Link href="/dashboard/inbox" className="shrink-0 flex items-center gap-2 bg-surface-alt border border-surface-variant rounded-full px-4 py-2 text-sm font-working-title text-on-surface hover:border-gold-accent/50 transition-colors">✉️ Inbox</Link>
+        <Link href="/dashboard/crm" className="shrink-0 flex items-center gap-2 bg-surface-alt border border-surface-variant rounded-full px-4 py-2 text-sm font-working-title text-on-surface hover:border-gold-accent/50 transition-colors">📊 Pipeline</Link>
+      </div>
+
       {/* Action Bar */}
       <MeshHero className="py-6 lg:py-10 px-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sticky top-0 lg:top-auto z-10 border-b border-surface-variant mb-8 hidden lg:flex rounded-2xl shadow-xl border border-[rgba(255,255,255,0.05)]">
         <div>

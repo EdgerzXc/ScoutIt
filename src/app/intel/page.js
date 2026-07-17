@@ -697,8 +697,11 @@ export default function IntelPage() {
             grid-template-columns: 1fr;
             gap: 24px;
           }
+          /* The image, overlay and content inside the hero are ALL absolutely
+             positioned, so height:auto collapses the card to a thin strip
+             (the cut-in-half picture). Give it a real height on tablet/phone. */
           .featured-card-new {
-            height: auto;
+            height: 460px;
           }
         }
 
@@ -711,6 +714,8 @@ export default function IntelPage() {
           .article-card:active { border-color: var(--accent-border); }
           .article-image-container { height: 160px; }
           .article-content { padding: 16px; }
+          .featured-card-new { height: 420px; }
+          .featured-content-new { padding: 24px; }
         }
 
         @media (max-width: 640px) {
@@ -722,6 +727,9 @@ export default function IntelPage() {
         @media (max-width: 480px) {
           .article-image-container { height: 120px; }
           .article-content { padding: 12px; }
+          .featured-card-new { height: 380px; }
+          .featured-content-new { padding: 20px; }
+          .featured-content-new h2 { font-size: 20px; }
         }
 
         .article-card {

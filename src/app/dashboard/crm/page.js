@@ -167,7 +167,17 @@ function CRMPageInner() {
           </div>
         </div>
 
-        <div className="flex items-center gap-3 md:gap-4">
+        <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
+          {/* Availability / schedule — the CRM doesn't use the dashboard top-nav,
+              so brokers had no way to reach the calendar. Icon-only on mobile. */}
+          <Link
+            href="/dashboard/calendar"
+            title="Availability & Schedule"
+            className="flex items-center gap-2 bg-surface-alt border border-surface-variant rounded-full px-3 sm:px-4 py-2 text-sm font-working-title text-on-surface hover:border-gold-accent/50 transition-colors shrink-0"
+          >
+            <Calendar size={14} className="text-gold-accent" />
+            <span className="hidden sm:inline">Availability</span>
+          </Link>
           <div className="relative">
             <button
               onClick={() => setShowViewingMenu(!showViewingMenu)}

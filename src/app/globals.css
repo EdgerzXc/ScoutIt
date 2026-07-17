@@ -109,7 +109,10 @@ html {
 }
 
 body {
-  height: 100%;
+  /* NOTE: no `height: 100%` here. A fixed body height caps the box so that when
+     page content overflows (every scrolling page), `padding-bottom` is measured
+     from the capped height and gets swallowed under the fixed bottom nav. Using
+     min-height lets the body grow with content so the nav clearance below works. */
   min-height: 100dvh;
   background: var(--bg);
   color: var(--text-primary);
@@ -431,9 +434,12 @@ html.lite-mode .cinematic-container {
 
 /* â”€â”€ MOBILE LAYOUT CONTAINERS â”€â”€ */
 @media (max-width: 768px) {
-  /* Bottom nav clearance â€” prevents content from hiding behind the fixed nav */
+  /* Bottom nav clearance — prevents content from hiding behind the fixed nav.
+     The nav is ~74px tall (8px pad + 6px item pad + 28px icon + 4px gap + 10px
+     label + 6px item pad + 12px pad), so 72px left content flush against / behind
+     it. 92px gives a comfortable gap on every page that relies on this safety net. */
   body {
-    padding-bottom: calc(72px + env(safe-area-inset-bottom));
+    padding-bottom: calc(92px + env(safe-area-inset-bottom));
   }
 
   .snap-section {

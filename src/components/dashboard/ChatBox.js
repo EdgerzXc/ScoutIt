@@ -648,8 +648,10 @@ export default function ChatBox({ deal, onCloseDeal, onOfferHandshake, onAcceptH
         </div>
       )}
 
-      {/* Booking Modal -- still local-only (viewing_appointments table exists
-          but this modal was never wired to it; out of scope for this pass) */}
+      {/* Booking Modal — creates a real `pending` viewing_appointment (via
+          crmFetch → POST /api/viewing-appointments) and posts a system message so
+          the other party sees the request in chat. The host confirms it from the
+          CRM Appointments tab or the Calendar, which flips it to `confirmed`. */}
       <BookingModal
         isOpen={showBookingModal}
         onClose={() => setShowBookingModal(false)}

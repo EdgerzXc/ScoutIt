@@ -686,17 +686,27 @@ export default function Home() {
           </Link>
 
           {/* Card 04: The Crust */}
-          <Link href="/layer/crust" className="text-left group relative bg-[#111111]/80 backdrop-blur-md border border-white/5 rounded-xl p-8 overflow-hidden hover:border-gold-accent/50 transition-all duration-500 hover:-translate-y-1 md:col-span-1 lg:col-span-2 block">
+          <Link href="/layer/crust" className="text-left group relative bg-[#111111]/80 backdrop-blur-md border border-white/5 rounded-xl p-8 overflow-hidden hover:border-gold-accent/50 transition-all duration-500 hover:-translate-y-1 block">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(232,174,60,0.05),transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="font-mono text-[10px] text-gold-accent tracking-widest mb-4">LAYER 04 // THE CRUST</div>
             <h3 className="font-display text-2xl text-white mb-2">Verified Professionals</h3>
             <p className="text-sm text-text-secondary">Connect with trusted advisors, brokers, and partners</p>
           </Link>
 
-          {/* Card 05: The Core */}
-          <Link href="/layer/core" className="text-left group relative bg-[#111111]/80 backdrop-blur-md border border-white/5 rounded-xl p-8 overflow-hidden hover:border-gold-accent/50 transition-all duration-500 hover:-translate-y-1 md:col-span-1 lg:col-span-1 block">
+          {/* Card 05: The Mantle — was missing from this grid entirely. It's the
+              deep intelligence archive between the Crust (network) and Core
+              (workspace); the route (/layer/mantle) already exists. */}
+          <Link href="/layer/mantle" className="text-left group relative bg-[#111111]/80 backdrop-blur-md border border-white/5 rounded-xl p-8 overflow-hidden hover:border-gold-accent/50 transition-all duration-500 hover:-translate-y-1 block">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(232,174,60,0.12),transparent_60%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="font-mono text-[10px] text-gold-accent tracking-widest mb-4">LAYER 05 // THE MANTLE</div>
+            <h3 className="font-display text-2xl text-white mb-2">The Deep Archive</h3>
+            <p className="text-sm text-text-secondary">ScoutIt&apos;s structured intelligence database — the heavy lifting behind every space</p>
+          </Link>
+
+          {/* Card 06: The Core */}
+          <Link href="/layer/core" className="text-left group relative bg-[#111111]/80 backdrop-blur-md border border-white/5 rounded-xl p-8 overflow-hidden hover:border-gold-accent/50 transition-all duration-500 hover:-translate-y-1 block">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(232,174,60,0.1),transparent_50%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            <div className="font-mono text-[10px] text-gold-accent tracking-widest mb-4">LAYER 05 // THE CORE</div>
+            <div className="font-mono text-[10px] text-gold-accent tracking-widest mb-4">LAYER 06 // THE CORE</div>
             <h3 className="font-display text-2xl text-white mb-2">Private Dashboard</h3>
             <p className="text-sm text-text-secondary">Manage your wishlist, properties, and direct deals</p>
           </Link>

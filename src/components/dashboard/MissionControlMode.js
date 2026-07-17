@@ -263,8 +263,10 @@ export default function MissionControlMode() {
 
       </aside>
 
-      {/* Main Content */}
-      <div className="flex-1 min-w-0 px-4 md:px-8 py-6 flex flex-col gap-6 overflow-y-auto">
+      {/* Main Content — this area scrolls internally, so it needs its own bottom
+          padding on mobile to clear the fixed bottom nav (body padding can't reach
+          an inner overflow container). */}
+      <div className="flex-1 min-w-0 px-4 md:px-8 py-6 pb-28 md:pb-6 flex flex-col gap-6 overflow-y-auto">
         {/* Mobile tab bar — the sidebar is hidden below md, so phones navigate here */}
         <div className="md:hidden -mx-4 px-4 flex gap-2 overflow-x-auto pb-2 border-b border-white/5 scrollbar-none" style={{ scrollbarWidth: "none" }}>
           {[

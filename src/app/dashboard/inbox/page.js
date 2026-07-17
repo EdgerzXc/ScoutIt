@@ -124,10 +124,12 @@ export default function InboxPage() {
   };
   return (
     <DashboardLayout>
-      <div className="flex h-[calc(100vh-64px)] bg-background">
+      {/* Mobile: single-column master/detail — show the list, then swap to the
+          chat when a lead is picked (with a Back button). Side-by-side from md up. */}
+      <div className="flex flex-col md:flex-row min-h-[calc(100vh-64px)] md:h-[calc(100vh-64px)] bg-background pb-24 md:pb-0">
 
         {/* Left Sidebar - Deal List */}
-        <div className="w-1/3 border-r border-surface-variant flex flex-col bg-[#0d0d0d]">
+        <div className={`w-full md:w-1/3 border-r border-surface-variant flex-col bg-[#0d0d0d] ${selectedDeal ? "hidden md:flex" : "flex"}`}>
           <div className="p-6 border-b border-surface-variant">
             <h1 className="font-working-title text-2xl text-on-surface">Leads & Inbox</h1>
             <p className="text-sm text-text-secondary mt-1">Manage your active negotiations.</p>
@@ -184,7 +186,15 @@ export default function InboxPage() {
         </div>
 
         {/* Right Content - ChatBox */}
-        <div className="w-2/3 flex flex-col bg-background relative">
+        <div className={`w-full md:w-2/3 flex-col bg-background relative ${selectedDeal ? "flex" : "hidden md:flex"}`}>
+          {selectedDeal && (
+            <button
+              onClick={() => setSelectedDealId(null)}
+              className="md:hidden flex items-center gap-2 text-sm font-working-title text-gold-accent px-4 py-3 border-b border-surface-variant shrink-0"
+            >
+              ← Back to leads
+            </button>
+          )}
           {selectedDeal ? (
             <ChatBox
               deal={selectedDeal}
