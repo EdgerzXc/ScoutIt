@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolveUserId } from "@/lib/serverAuth";
 import { updateEventSchema, serializeEvent, toEventRow } from "@/lib/calendar/eventSchema";
+import { syncOutbound } from "@/lib/calendar/googleSync";
 
 // Ownership is enforced by scoping every write to owner_user_id = caller, so a
 // user can never touch another user's event even by guessing an id.
@@ -64,6 +65,9 @@ export async function PATCH(request, { params }) {
       return NextResponse.json({ error: "Event not found" }, { status: 404 });
     }
 
+    // Propagate the edit to Google if connected (best-effort, non-fatal).
+    await syncOutbound(userId, id, "update");
+
     return NextResponse.json({ event: serializeEvent(data) });
   } catch (err) {
     console.error("[CALENDAR EVENTS] PATCH exception:", err);
@@ -96,6 +100,9 @@ export async function DELETE(request, { params }) {
       if (error) console.error("[CALENDAR EVENTS] DELETE error:", error);
       return NextResponse.json({ error: "Event not found" }, { status: 404 });
     }
+
+    // Mirror the deletion to Google if connected (best-effort, non-fatal).
+    await syncOutbound(userId, id, "delete");
 
     return NextResponse.json({ success: true });
   } catch (err) {

@@ -65,6 +65,25 @@ export default function ConnectCalendarPanel({ userId, addToast }) {
     }
   };
 
+  const handleSync = async () => {
+    setBusy(true);
+    try {
+      const res = await crmFetch("/api/calendar/sync", { method: "POST", mockUserId: userId });
+      const changed = (res.created || 0) + (res.updated || 0) + (res.deleted || 0);
+      addToast?.(
+        changed > 0
+          ? `Synced — ${res.created || 0} new, ${res.updated || 0} updated, ${res.deleted || 0} removed`
+          : "Already up to date",
+        "🔄"
+      );
+      window.dispatchEvent(new Event("calendar:refresh"));
+    } catch (e) {
+      addToast?.(e.message || "Sync failed.", "❌");
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const handleDisconnect = async () => {
     setBusy(true);
     try {
@@ -100,15 +119,26 @@ export default function ConnectCalendarPanel({ userId, addToast }) {
         </div>
 
         {google ? (
-          <button
-            type="button"
-            onClick={handleDisconnect}
-            disabled={busy}
-            className="text-xs text-error border border-error/30 px-4 py-2 rounded hover:bg-error/10
-              uppercase tracking-wider font-mono disabled:opacity-50 shrink-0"
-          >
-            Disconnect
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={handleSync}
+              disabled={busy}
+              className="text-xs text-background bg-gold-accent hover:bg-gold-bright px-4 py-2 rounded
+                uppercase tracking-wider font-mono disabled:opacity-50"
+            >
+              {busy ? "Syncing…" : "Sync now"}
+            </button>
+            <button
+              type="button"
+              onClick={handleDisconnect}
+              disabled={busy}
+              className="text-xs text-error border border-error/30 px-4 py-2 rounded hover:bg-error/10
+                uppercase tracking-wider font-mono disabled:opacity-50"
+            >
+              Disconnect
+            </button>
+          </div>
         ) : (
           <button
             type="button"

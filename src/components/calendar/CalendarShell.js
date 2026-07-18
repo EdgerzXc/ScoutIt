@@ -118,6 +118,13 @@ export default function CalendarShell() {
     loadData();
   }, [loadData]);
 
+  // Reload after a "Sync now" pulls new events from Google.
+  useEffect(() => {
+    const onRefresh = () => loadData();
+    window.addEventListener("calendar:refresh", onRefresh);
+    return () => window.removeEventListener("calendar:refresh", onRefresh);
+  }, [loadData]);
+
   // Merge + clamp to the active window so agenda/week don't show stray items.
   const visibleEvents = useMemo(() => {
     const { from, to } = getRange(view, viewDate);

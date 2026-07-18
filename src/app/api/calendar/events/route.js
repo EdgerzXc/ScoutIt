@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolveUserId } from "@/lib/serverAuth";
 import { createEventSchema, serializeEvent, toEventRow } from "@/lib/calendar/eventSchema";
+import { syncOutbound } from "@/lib/calendar/googleSync";
 
 // GET /api/calendar/events?from=<ISO>&to=<ISO>
 // Returns the caller's own (non-deleted) events overlapping the [from, to]
@@ -71,6 +72,9 @@ export async function POST(request) {
       console.error("[CALENDAR EVENTS] POST error:", error);
       return NextResponse.json({ error: "Failed to create event" }, { status: 500 });
     }
+
+    // Push to Google if the user has a connection (best-effort, non-fatal).
+    await syncOutbound(userId, data.id, "create");
 
     return NextResponse.json({ event: serializeEvent(data) }, { status: 201 });
   } catch (err) {
