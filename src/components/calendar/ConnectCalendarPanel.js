@@ -19,20 +19,18 @@ const ERROR_COPY = {
  */
 export default function ConnectCalendarPanel({ userId, addToast }) {
   const [loading, setLoading] = useState(true);
-  const [configured, setConfigured] = useState(false);
   const [google, setGoogle] = useState(null); // connection object or null
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      // Cache-bust: a stale edge/browser-cached "not configured" response would
-      // otherwise stick as "Setup pending" even after creds go live.
+      // Cache-bust so a stale connection response can't stick.
       const res = await crmFetch(`/api/calendar/connection?t=${Date.now()}`, { mockUserId: userId });
-      setConfigured(Boolean(res.googleConfigured));
       setGoogle((res.connections || []).find((c) => c.provider === "google") || null);
     } catch {
-      setConfigured(false);
+      /* config-check failed — still offer Connect below; the start route is the
+         real gate and returns a clear message if sync truly isn't configured. */
     } finally {
       setLoading(false);
     }
@@ -120,9 +118,7 @@ export default function ConnectCalendarPanel({ userId, addToast }) {
                   ? "Checking…"
                   : google
                     ? `Connected${google.accountEmail ? ` · ${google.accountEmail}` : ""}`
-                    : configured
-                      ? "Not connected"
-                      : "Setup pending"}
+                    : "Not connected"}
               </div>
             </div>
           </div>
@@ -146,7 +142,7 @@ export default function ConnectCalendarPanel({ userId, addToast }) {
                 Disconnect
               </button>
             </div>
-          ) : !loading && configured ? (
+          ) : !loading ? (
             <button
               type="button"
               onClick={handleConnect}
