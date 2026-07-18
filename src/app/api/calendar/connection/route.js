@@ -3,6 +3,10 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolveUserId } from "@/lib/serverAuth";
 import { isGoogleConfigured } from "@/lib/calendar/googleOAuth";
 
+// Never cache: the configured flag + per-user connection must be read live, or
+// a stale "Setup pending" can stick in the client after creds go active.
+export const dynamic = "force-dynamic";
+
 // GET /api/calendar/connection
 // Reports whether calendar sync is configured on the server and, if so, the
 // caller's current connection (provider + account email + status). NEVER
