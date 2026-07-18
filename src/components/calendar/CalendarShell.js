@@ -25,6 +25,7 @@ import AgendaView from "./AgendaView";
 import EventEditorModal from "./EventEditorModal";
 import ViewingDetailModal from "./ViewingDetailModal";
 import AvailabilityPanel from "./AvailabilityPanel";
+import ConnectCalendarPanel from "./ConnectCalendarPanel";
 
 const VIEWING_DURATION_MS = 60 * 60 * 1000;
 const VALID_VIEWS = ["month", "week", "agenda"];
@@ -251,6 +252,11 @@ export default function CalendarShell() {
             respondingId={respondingId}
           />
         )}
+      </div>
+
+      {/* Connected calendars (self-hides until Google OAuth is configured) */}
+      <div className="mt-6">
+        <ConnectCalendarPanel userId={userId} addToast={addToast} />
       </div>
 
       {/* Availability editor kept below the calendar (preserved feature) */}
