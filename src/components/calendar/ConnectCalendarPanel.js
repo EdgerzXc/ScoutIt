@@ -58,9 +58,19 @@ export default function ConnectCalendarPanel({ userId, addToast }) {
     setBusy(true);
     try {
       const res = await crmFetch("/api/oauth/google/start", { mockUserId: userId });
-      if (res.url) window.location.href = res.url;
+      if (res?.url) {
+        window.location.href = res.url; // navigating away to Google
+        return;
+      }
+      // 200 but no url — surface it instead of hanging on "Connecting…".
+      addToast?.("Couldn't start Google connect (no redirect returned). Try again.", "❌");
     } catch (e) {
-      addToast?.(e.message || "Couldn't start Google connect.", "❌");
+      // Most likely an expired sign-in session (401) — tell the user plainly.
+      const msg = /unauthor/i.test(e?.message || "")
+        ? "Your sign-in expired — please refresh and log in again, then reconnect."
+        : e?.message || "Couldn't start Google connect.";
+      addToast?.(msg, "❌");
+    } finally {
       setBusy(false);
     }
   };
