@@ -18,7 +18,7 @@ function CRMPageInner() {
   // mockOwnerId=master-dev into every request, so every visitor was reading
   // and writing the master-dev account's real deals. All requests now carry
   // the real session token; the mock id only applies without one (dev toolbox).
-  const { currentUser, isLoading: userLoading } = useDashboard();
+  const { currentUser, isLoading: userLoading, addToast } = useDashboard();
   const [deals, setDeals] = useState([]);
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -168,16 +168,8 @@ function CRMPageInner() {
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
-          {/* Availability / schedule — the CRM doesn't use the dashboard top-nav,
-              so brokers had no way to reach the calendar. Icon-only on mobile. */}
-          <Link
-            href="/dashboard/calendar"
-            title="Availability & Schedule"
-            className="flex items-center gap-2 bg-surface-alt border border-surface-variant rounded-full px-3 sm:px-4 py-2 text-sm font-working-title text-on-surface hover:border-gold-accent/50 transition-colors shrink-0"
-          >
-            <Calendar size={14} className="text-gold-accent" />
-            <span className="hidden sm:inline">Availability</span>
-          </Link>
+          {/* Availability now lives inside the Appointments tab (unified
+              schedule), so the separate top-nav shortcut was removed. */}
           <div className="relative">
             <button
               onClick={() => setShowViewingMenu(!showViewingMenu)}
@@ -309,6 +301,8 @@ function CRMPageInner() {
           <AppointmentsSheet
             appointments={appointments}
             onStatusUpdate={handleAppointmentUpdate}
+            userId={mockUserId}
+            addToast={addToast}
           />
         )}
         {activeTab === "tasks" && (
