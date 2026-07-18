@@ -12,9 +12,9 @@ const ERROR_COPY = {
 };
 
 /**
- * Connect / disconnect Google Calendar. Renders nothing until the server
- * reports the feature is configured (creds + encryption key present), so it
- * stays invisible on environments without OAuth set up.
+ * Calendar Sync panel — always visible. Google is a real connect/sync flow;
+ * Calendly is shown as coming-soon (its API needs a paid Calendly plan and
+ * isn't wired yet), so the two tools read as a matched pair like before.
  * @param {{ userId: string, addToast?: (msg, icon)=>void }} props
  */
 export default function ConnectCalendarPanel({ userId, addToast }) {
@@ -97,59 +97,78 @@ export default function ConnectCalendarPanel({ userId, addToast }) {
     }
   };
 
-  // Invisible until the server says the feature is on.
-  if (loading || !configured) return null;
-
   return (
-    <section className="bg-[#121212] border border-surface-variant rounded-lg p-4 sm:p-6">
-      <h2 className="font-working-title text-xl text-on-surface mb-2">Connected Calendars</h2>
-      <p className="text-sm text-text-secondary mb-5">
-        Sync your ScoutIt events with Google Calendar so viewings and blocks stay in one place.
-      </p>
+    <section className="bg-[#121212] border border-gold-accent/20 rounded-lg p-4 sm:p-5">
+      <div className="mb-4">
+        <h2 className="font-working-title text-lg text-on-surface">Calendar Sync</h2>
+        <p className="text-xs text-text-muted mt-1">
+          Connect your tools so viewings, events, and availability stay in one place.
+        </p>
+      </div>
 
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 border border-surface-variant/60 rounded bg-background/60">
-        <div className="flex items-center gap-3 min-w-0">
-          <span className="text-xl">📅</span>
-          <div className="min-w-0">
-            <div className="text-on-surface font-medium">Google Calendar</div>
-            <div className="text-xs text-text-muted truncate">
-              {google ? `Connected${google.accountEmail ? ` · ${google.accountEmail}` : ""}` : "Not connected"}
+      <div className="flex flex-col md:flex-row gap-3">
+        {/* Google — real connect / sync / disconnect */}
+        <div className="flex-1 bg-black/40 border border-white/5 rounded p-3 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-8 h-8 rounded bg-white text-black flex items-center justify-center font-bold text-xs shrink-0">G</div>
+            <div className="min-w-0">
+              <div className="text-sm text-on-surface font-medium">Google Calendar</div>
+              <div className={`text-[11px] truncate ${google ? "text-emerald-400" : "text-text-muted"}`}>
+                {loading
+                  ? "Checking…"
+                  : google
+                    ? `Connected${google.accountEmail ? ` · ${google.accountEmail}` : ""}`
+                    : configured
+                      ? "Not connected"
+                      : "Setup pending"}
+              </div>
             </div>
           </div>
+
+          {!loading && google ? (
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={handleSync}
+                disabled={busy}
+                className="text-[11px] text-background bg-gold-accent hover:bg-gold-bright px-3 py-1.5 rounded uppercase tracking-wider font-mono disabled:opacity-50"
+              >
+                {busy ? "Syncing…" : "Sync now"}
+              </button>
+              <button
+                type="button"
+                onClick={handleDisconnect}
+                disabled={busy}
+                className="text-[11px] text-error border border-error/30 px-3 py-1.5 rounded hover:bg-error/10 uppercase tracking-wider font-mono disabled:opacity-50"
+              >
+                Disconnect
+              </button>
+            </div>
+          ) : !loading && configured ? (
+            <button
+              type="button"
+              onClick={handleConnect}
+              disabled={busy}
+              className="text-xs text-background bg-gold-accent hover:bg-gold-bright px-4 py-2 rounded font-working-title disabled:opacity-50 shrink-0"
+            >
+              {busy ? "Connecting…" : "Connect"}
+            </button>
+          ) : null}
         </div>
 
-        {google ? (
-          <div className="flex items-center gap-2 shrink-0">
-            <button
-              type="button"
-              onClick={handleSync}
-              disabled={busy}
-              className="text-xs text-background bg-gold-accent hover:bg-gold-bright px-4 py-2 rounded
-                uppercase tracking-wider font-mono disabled:opacity-50"
-            >
-              {busy ? "Syncing…" : "Sync now"}
-            </button>
-            <button
-              type="button"
-              onClick={handleDisconnect}
-              disabled={busy}
-              className="text-xs text-error border border-error/30 px-4 py-2 rounded hover:bg-error/10
-                uppercase tracking-wider font-mono disabled:opacity-50"
-            >
-              Disconnect
-            </button>
+        {/* Calendly — visible but not yet available (API needs a paid plan) */}
+        <div className="flex-1 bg-black/40 border border-white/5 rounded p-3 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-8 h-8 rounded bg-blue-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0">Cal</div>
+            <div className="min-w-0">
+              <div className="text-sm text-on-surface font-medium">Calendly</div>
+              <div className="text-[11px] text-text-muted truncate">Coming soon · needs a Calendly paid plan</div>
+            </div>
           </div>
-        ) : (
-          <button
-            type="button"
-            onClick={handleConnect}
-            disabled={busy}
-            className="text-sm text-background bg-gold-accent hover:bg-gold-bright px-4 py-2 rounded
-              font-working-title disabled:opacity-50 shrink-0"
-          >
-            {busy ? "Connecting…" : "Connect"}
-          </button>
-        )}
+          <span className="text-[10px] uppercase tracking-widest font-mono text-text-muted border border-white/10 rounded px-2 py-1 shrink-0">
+            Soon
+          </span>
+        </div>
       </div>
     </section>
   );
