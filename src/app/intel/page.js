@@ -5,6 +5,7 @@ import Footer from "@/components/layout/Footer";
 import Link from "next/link";
 import MeshHero from "@/components/ui/MeshHero";
 import HoverCard from "@/components/ui/HoverCard";
+import ImagePlaceholder from "@/components/ui/ImagePlaceholder";
 
 function getArticleType(art) {
   if (!art) return "Analysis";
@@ -191,7 +192,9 @@ export default function IntelPage() {
                 {featuredArticle.image ? (
                   /* eslint-disable-next-line @next/next/no-img-element */
                   <img src={featuredArticle.image} alt={featuredArticle.title} className="featured-image-new" />
-                ) : null}
+                ) : (
+                  <ImagePlaceholder className="featured-image-new" label={featuredArticle.title} minimal />
+                )}
                 <div className="featured-overlay-new"></div>
               </div>
               <div className="featured-content-new">
@@ -267,8 +270,10 @@ export default function IntelPage() {
                   <div className="article-image-container">
                     {art.image ? (
                       /* eslint-disable-next-line @next/next/no-img-element */
-                      <img src={art.image} alt={art.title} className="article-image" />
-                    ) : null}
+                      <img src={art.image} alt={art.title} className="article-image" loading="lazy" />
+                    ) : (
+                      <ImagePlaceholder className="article-image" label={art.title} />
+                    )}
                     <div className="image-overlay"></div>
                   </div>
                   <div className="article-content">

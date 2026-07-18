@@ -504,6 +504,36 @@ export default function ManilaTransitMap({ propertyLat, propertyLng, propertyTit
           height: 100%;
           min-height: 600px;
         }
+        /* ── Mapbox zoom/compass controls, restyled on-brand (dark glass + gold
+              hover) instead of the default white box that clashed with the theme ── */
+        .transit-map-wrapper .mapboxgl-ctrl-group {
+          background: rgba(13, 13, 13, 0.85);
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
+          border: 0.5px solid #262626;
+          border-radius: 6px;
+          box-shadow: none;
+          overflow: hidden;
+        }
+        .transit-map-wrapper .mapboxgl-ctrl-group button {
+          background: transparent;
+          width: 32px;
+          height: 32px;
+        }
+        .transit-map-wrapper .mapboxgl-ctrl-group button + button {
+          border-top: 0.5px solid #262626;
+        }
+        .transit-map-wrapper .mapboxgl-ctrl-group button:hover {
+          background: rgba(232, 174, 60, 0.14);
+        }
+        /* Default control glyphs are dark SVGs meant for a white box — invert
+           them so they read as light on the dark control. */
+        .transit-map-wrapper .mapboxgl-ctrl-group button .mapboxgl-ctrl-icon {
+          filter: invert(0.85);
+        }
+        .transit-map-wrapper .mapboxgl-ctrl-group button:hover .mapboxgl-ctrl-icon {
+          filter: invert(1);
+        }
         .transit-map-panel {
           position: absolute;
           top: 16px;
@@ -648,6 +678,11 @@ export default function ManilaTransitMap({ propertyLat, propertyLng, propertyTit
           .transit-map-container {
             min-height: 440px;
           }
+          /* The line-toggle row spans the full width up top on mobile, so drop
+             the zoom/compass controls below it instead of letting them collide. */
+          .transit-map-wrapper .mapboxgl-ctrl-top-right {
+            top: 58px;
+          }
           /* Line toggles become one slim chip row across the top */
           .transit-map-panel {
             top: 10px;
@@ -660,6 +695,9 @@ export default function ManilaTransitMap({ propertyLat, propertyLng, propertyTit
             padding: 8px 10px;
             overflow-x: auto;
             scrollbar-width: none;
+            /* Fade the right edge so the cut-off last chip reads as "swipe for more". */
+            -webkit-mask-image: linear-gradient(to right, #000 86%, transparent 100%);
+            mask-image: linear-gradient(to right, #000 86%, transparent 100%);
           }
           .transit-map-panel::-webkit-scrollbar { display: none; }
           .transit-map-panel-title {

@@ -6,6 +6,7 @@ import Link from "next/link";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import ReactionButtons from "@/components/ui/ReactionButtons";
+import ImagePlaceholder from "@/components/ui/ImagePlaceholder";
 import dynamic from "next/dynamic";
 const InteractiveRadiusMap = dynamic(() => import("@/components/property/InteractiveRadiusMap"), { 
   ssr: false, 
@@ -407,7 +408,10 @@ function PropertyDirectoryContent() {
         </header>
 
         {loading ? (
-          <div style={{ display: "flex", justifyContent: "center", padding: "60px 0" }}>
+          // Reserve the same vertical footprint the loaded grid will occupy, so
+          // the footer stays below the fold through the swap instead of sitting
+          // high here and then leaping down when cards arrive (the CLS source).
+          <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "80vh" }}>
             <h3 style={{ fontFamily: "var(--font-mono)", color: "var(--accent)" }}>LOADING THE DIRECTORY...</h3>
           </div>
         ) : (
@@ -643,9 +647,7 @@ function PropertyDirectoryContent() {
                           /* eslint-disable-next-line @next/next/no-img-element */
           <img src={p.image} alt={p.title} className="property-card-img" loading="lazy" />
                         ) : (
-                          <div className="property-card-img" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#121212', width: '100%', height: '100%' }}>
-                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Image Pending</span>
-                          </div>
+                          <ImagePlaceholder className="property-card-img" label={p.title} />
                         )}
                       </div>
 

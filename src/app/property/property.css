@@ -6,6 +6,17 @@
   color: var(--text-primary, #f0ede8);
   font-family: var(--font-body), sans-serif;
   position: relative;
+  /* Sticky-footer column: the main content grows to fill the viewport so the
+     footer sits at the bottom edge (below the fold) during the async card load.
+     Without this the footer starts high on the short initial paint, then leaps
+     down when listings populate — a large layout shift (Lighthouse CLS 0.5–0.8
+     on /property and /brokers, 2026-07-18). */
+  display: flex;
+  flex-direction: column;
+}
+
+.directory-layout > main {
+  flex: 1 0 auto;
 }
 
 .directory-main {
@@ -14,6 +25,7 @@
   padding: 40px 45px;
   position: relative;
   z-index: 1;
+  width: 100%;
 }
 
 .directory-header {
@@ -221,6 +233,10 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 24px;
+  /* Reserve vertical space so the async-loaded cards don't start collapsed and
+     then shove the footer down on a throttled connection (the CLS source). */
+  min-height: 80vh;
+  align-content: start;
 }
 
 .property-preview-card {

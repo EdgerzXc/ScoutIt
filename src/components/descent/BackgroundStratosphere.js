@@ -144,7 +144,7 @@ export default function BackgroundStratosphere() {
 
         {/* Photorealistic City Grid Image */}
         <div className="absolute inset-0" style={{
-          backgroundImage: "url(/assets/stratosphere_city.png)",
+          backgroundImage: "url(/assets/stratosphere_city.webp)",
           backgroundSize: "cover",
           backgroundPosition: "center 70%",
           mixBlendMode: "screen",

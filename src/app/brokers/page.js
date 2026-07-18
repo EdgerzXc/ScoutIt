@@ -402,6 +402,10 @@ export default function BrokersPage() {
           display: grid;
           grid-template-columns: repeat(2, 1fr);
           gap: 24px;
+          /* Reserve height so the async-loaded broker cards don't start collapsed
+             and shove the footer down on a throttled connection (the CLS source). */
+          min-height: 80vh;
+          align-content: start;
         }
 
         @media (max-width: 1024px) {
