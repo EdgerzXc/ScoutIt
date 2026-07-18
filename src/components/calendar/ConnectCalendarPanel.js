@@ -26,7 +26,9 @@ export default function ConnectCalendarPanel({ userId, addToast }) {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await crmFetch("/api/calendar/connection", { mockUserId: userId });
+      // Cache-bust: a stale edge/browser-cached "not configured" response would
+      // otherwise stick as "Setup pending" even after creds go live.
+      const res = await crmFetch(`/api/calendar/connection?t=${Date.now()}`, { mockUserId: userId });
       setConfigured(Boolean(res.googleConfigured));
       setGoogle((res.connections || []).find((c) => c.provider === "google") || null);
     } catch {
