@@ -1,7 +1,7 @@
 export const metadata = {
   title: { absolute: "The Core — Your Workspace · ScoutIt" },
   description:
-    "Core · Workspace on ScoutIt — your private Ledger and dashboard. Save spaces, track intel, and manage your listings.",
+    "Core · Workspace on ScoutIt — Your Board and dashboard. Save spaces, track intel, and manage your listings.",
   alternates: { canonical: "/layer/core" },
 };
 

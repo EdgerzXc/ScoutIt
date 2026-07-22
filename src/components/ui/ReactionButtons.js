@@ -152,7 +152,7 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
       </div>
 
       <div className={`confirm-text ${showConfirm ? "visible" : ""}`}>
-        Intel logged to secure Ledger.
+        Saved to Your Board.
       </div>
 
       <style jsx>{`

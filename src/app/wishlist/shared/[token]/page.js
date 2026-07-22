@@ -62,7 +62,7 @@ export default async function SharedWishlistPage({ params }) {
         <Header />
         <main className="wishlist-main">
           <header className="page-header">
-            <span className="layer-label">LAYER 04 // SHARED BOARD</span>
+            <span className="layer-label">LAYER 06 // SHARED BOARD</span>
             <h1 className="page-title">Shared Board</h1>
           </header>
           <div className="empty-state" style={{ padding: "120px 0", textAlign: "center" }}>
@@ -112,7 +112,7 @@ export default async function SharedWishlistPage({ params }) {
       <Header />
       <main className="wishlist-main">
         <header className="page-header">
-          <span className="layer-label">LAYER 04 // SHARED BOARD</span>
+          <span className="layer-label">LAYER 06 // SHARED BOARD</span>
           <h1 className="page-title">Shared Board</h1>
           <p style={{ marginTop: 16, color: "var(--text-secondary)", fontFamily: "var(--font-body)", fontSize: 14 }}>
             Viewing a curated collection of properties.

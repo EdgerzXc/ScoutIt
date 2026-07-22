@@ -2,7 +2,7 @@
 /* eslint-disable react-hooks/immutability */
 "use client";
 
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { supabase } from "../lib/supabaseClient";
 import { onAuthStateChange, getSession } from "../lib/authClient";
 import { Bookmark } from "lucide-react";
@@ -97,12 +97,19 @@ export function DashboardProvider({ children }) {
     initWalletIfEmpty(role, tier);
     setConnects(getBalance(role, tier));
 
-    await syncLocalReactionsToSupabase(authUser.id);
+    // Local Board -> account merge is now an explicit, idempotent action the
+    // user triggers from /wishlist ("Bring your N saved spaces into your
+    // account"), backed by /api/wishlist/merge. The old silent auto-insert on
+    // every login was removed: it ran a naive insert with no de-dup guard
+    // (saved_intel has no unique(user_id, property_id) constraint), so it could
+    // accumulate duplicate rows.
     fetchNotifications(authUser.id);
   };
 
   // ── Notifications (persisted — Track 1, PLAN_STAFF_ENTERPRISE_ANALYTICS_NOTIFICATIONS.md) ──
-  const authedFetch = async (url, options = {}) => {
+  // Stable reference (no reactive closures — reads session/localStorage fresh
+  // on each call) so consumers can safely list it in their own hook deps.
+  const authedFetch = useCallback(async (url, options = {}) => {
     const { data: { session } } = await getSession();
     const token = session?.access_token;
     let mockUserId = "";
@@ -122,7 +129,7 @@ export function DashboardProvider({ children }) {
         ...(mockUserId ? { "x-mock-user-id": mockUserId } : {})
       },
     });
-  };
+  }, []);
 
   const fetchNotifications = async (userId) => {
     if (!userId) return;
@@ -142,22 +149,6 @@ export function DashboardProvider({ children }) {
     } catch (e) {
       console.error("Failed to fetch notifications", e);
     }
-  };
-
-  const syncLocalReactionsToSupabase = async (userId) => {
-    try {
-      const raw = localStorage.getItem("scoutit_reactions");
-      if (!raw) return;
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        for (const reaction of parsed) {
-          await supabase.from('saved_intel').insert([{
-            user_id: userId,
-            property_id: reaction.property_id
-          }]); // Simple insert, fails gracefully if RLS/unique prevents duplicate
-        }
-      }
-    } catch(e) {}
   };
 
   // Fetch from Supabase
@@ -285,7 +276,7 @@ export function DashboardProvider({ children }) {
           supabaseSavedIds = savedData.map(s => s.property_id);
         }
 
-        // Also merge local storage reactions (Ledger stays on device)
+        // Also merge local storage reactions (Your Board stays on device)
         let localSavedIds = [];
         try {
           const raw = localStorage.getItem("scoutit_reactions");
@@ -324,7 +315,7 @@ export function DashboardProvider({ children }) {
     const isSaved = savedIds.includes(item.id);
     if (isSaved) {
       setSavedIds(prev => prev.filter(id => id !== item.id));
-      addToast("Removed from your Saved Properties", <Bookmark strokeWidth={1.5} size="1em" />);
+      addToast("Removed from Your Board", <Bookmark strokeWidth={1.5} size="1em" />);
       
       // Sync Supabase
       if (currentUser?.id) await supabase.from('saved_intel').delete().eq('user_id', currentUser.id).eq('property_id', item.id);
@@ -340,7 +331,7 @@ export function DashboardProvider({ children }) {
       } catch(e) {}
     } else {
       setSavedIds(prev => [...prev, item.id]);
-      addToast("Intel logged to secure Ledger", <Bookmark strokeWidth={1.5} size="1em" />);
+      addToast("Saved to Your Board", <Bookmark strokeWidth={1.5} size="1em" />);
       
       // Sync Supabase
       if (currentUser?.id) await supabase.from('saved_intel').insert([{ user_id: currentUser.id, property_id: item.id }]);

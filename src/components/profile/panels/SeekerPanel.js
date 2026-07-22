@@ -61,7 +61,7 @@ export default function SeekerPanel({ savedCount = 0, isAnonymous = false }) {
         <div style={statCard}>
           <Bookmark size={14} strokeWidth={1.5} color="#E8AE3C" style={{ marginBottom: 6 }} />
           <span style={statValue}>{savedCount}</span>
-          <span style={statLabel}>Saved Properties</span>
+          <span style={statLabel}>Your Board</span>
         </div>
         <div style={statCard}>
           <Search size={14} strokeWidth={1.5} color="rgba(232, 174, 60,0.4)" style={{ marginBottom: 6 }} />
@@ -74,7 +74,7 @@ export default function SeekerPanel({ savedCount = 0, isAnonymous = false }) {
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <Share2 size={13} strokeWidth={1.5} color="var(--text-secondary)" />
           <span style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "var(--text-secondary)" }}>
-            Wishlist Share
+            Share Your Board
           </span>
         </div>
         {shareLink ? (

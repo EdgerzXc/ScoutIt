@@ -1,7 +1,7 @@
 export const metadata = {
-  title: "Your Ledger",
+  title: "Your Board",
   description:
-    "Your private Ledger on ScoutIt — a device-only wishlist of spaces that inspire you. No account required, never gated.",
+    "Your private Board on ScoutIt — a device-only collection of spaces that inspire you. No account required, never gated.",
   alternates: { canonical: "/wishlist" },
   robots: { index: false },
 };

@@ -264,17 +264,17 @@ export default function DescentPage() {
               {signedIn ? (
                 <div className="inner-core">
                   <div className="ic-head"><LayoutGrid strokeWidth={1.5} size={22} style={{ color: "#E8AE3C" }} /> Welcome back — here&apos;s your world.</div>
-                  <div className="ic-sub">Your board, your saved spaces, your profile. The center is yours.</div>
+                  <div className="ic-sub">Your Board and your profile. The center is yours.</div>
                   <div className="ic-links">
                     <Link href="/dashboard" className="dl-cta solid">Enter your space →</Link>
-                    <Link href="/wishlist" className="dl-cta"><Bookmark strokeWidth={1.5} size={15} /> Wishlist</Link>
+                    <Link href="/wishlist" className="dl-cta"><Bookmark strokeWidth={1.5} size={15} /> Your Board</Link>
                     <Link href="/dashboard" className="dl-cta"><User strokeWidth={1.5} size={15} /> Profile</Link>
                   </div>
                 </div>
               ) : (
                 <div className="inner-core locked">
                   <div className="ic-head"><Lock strokeWidth={1.5} size={20} style={{ color: "#E8AE3C" }} /> Your space is sealed.</div>
-                  <div className="ic-sub">Board, wishlist, profile — the inner core is yours alone, and it opens the moment you join. Becoming a pioneer is the only way to the center.</div>
+                  <div className="ic-sub">Your Board and profile — the inner core is yours alone, and it opens the moment you join. Becoming a pioneer is the only way to the center.</div>
                   <div className="ic-links"><Link href="/onboarding" className="dl-cta solid">Become a pioneer →</Link></div>
                 </div>
               )}

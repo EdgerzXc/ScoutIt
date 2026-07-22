@@ -96,7 +96,7 @@ export default function CoreLayer() {
                   {currentUser?.primaryMode === "provider"
                     ? "Profile Views"
                     : currentUser?.primaryMode === "buyer"
-                    ? "Saved Spaces"
+                    ? "Your Board"
                     : currentUser
                     ? "Active Listings"
                     : "Listings"}

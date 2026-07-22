@@ -24,7 +24,7 @@ export const CINEMATIC_LAYERS = [
   { sel: ".section-property", label: "02 — PROPERTY INTELLIGENCE", mission: "Every detail, every signal, every data point — so any user can walk into a decision with full confidence. No guesswork. No gatekeeping. Ever." },
   { sel: ".section-discover", label: "03 — DISCOVERY", mission: "Not just headlines. Real insights, real data, real location intelligence — for users, investors, and researchers who need to understand the market, not just follow it." },
   { sel: ".section-services", label: "04 — THE ECOSYSTEM", mission: "The first of its kind in the Philippines. A platform that connects buyers, owners, brokers, photographers, researchers — everyone the market needs, in one place." },
-  { sel: ".section-wishlist", label: "05 — THE LEDGER", mission: "For the dreamers. A living wishlist that keeps your goals in view, your options tracked, and your ceiling moving — because wanting more is where it all starts." },
+  { sel: ".section-wishlist", label: "05 — YOUR BOARD", mission: "For the dreamers. A living board that keeps your goals in view, your options tracked, and your ceiling moving — because wanting more is where it all starts." },
   { sel: ".section-about", label: "06 — ABOUT US", mission: "This was never about us. It was always about you." },
 ];
 

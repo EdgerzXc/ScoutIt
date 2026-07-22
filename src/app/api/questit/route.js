@@ -31,7 +31,7 @@ const tools = [
   },
   {
     name: "save_to_wishlist",
-    description: "Save a specific property to the user's wishlist/board.",
+    description: "Save a specific property to the user's Board.",
     input_schema: {
       type: "object",
       properties: {

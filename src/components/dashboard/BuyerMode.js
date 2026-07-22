@@ -16,7 +16,7 @@ export default function BuyerMode() {
   const [searchQuery, setSearchQuery] = useState("");
   const [radius, setRadius] = useState("5");
   const [radarCenter, setRadarCenter] = useState(null);
-  // Area watch — device-local (same pattern as the Ledger), so the toggle is
+  // Area watch — device-local (same pattern as Your Board), so the toggle is
   // real state instead of a fire-and-forget toast that pretends to subscribe.
   const [areaWatch, setAreaWatch] = useState(false);
   const { listings, savedIds, toggleSave, addToast, searchByRadius, MAPBOX_TOKEN, DEFAULT_MAP_CENTER } = useDashboard();
@@ -441,8 +441,8 @@ export default function BuyerMode() {
           {/* Intelligence Archive (Saved Items) */}
           <div className="flex flex-col gap-4">
             <h2 className="font-headline-editorial text-2xl text-on-surface flex items-center justify-between border-b border-surface-variant pb-2">
-              Saved Properties
-              <Link href="/wishlist" className="text-[10px] font-label-caps tracking-widest uppercase text-gold-accent hover:underline py-2.5 px-1 -my-1">Open Full Archive</Link>
+              Your Board
+              <Link href="/wishlist" className="text-[10px] font-label-caps tracking-widest uppercase text-gold-accent hover:underline py-2.5 px-1 -my-1">View all →</Link>
             </h2>
             <p className="text-xs text-text-secondary mb-2">Tracked assets and saved market briefs.</p>
             <div className="flex gap-4 overflow-x-auto pb-4 snap-x hide-scrollbar">

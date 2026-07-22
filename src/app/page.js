@@ -708,7 +708,7 @@ export default function Home() {
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(232,174,60,0.1),transparent_50%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="font-mono text-[10px] text-gold-accent tracking-widest mb-4">LAYER 06 // THE CORE</div>
             <h3 className="font-display text-2xl text-white mb-2">Private Dashboard</h3>
-            <p className="text-sm text-text-secondary">Manage your wishlist, properties, and direct deals</p>
+            <p className="text-sm text-text-secondary">Manage Your Board, properties, and direct deals</p>
           </Link>
         </div>
       </section>

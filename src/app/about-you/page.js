@@ -19,7 +19,7 @@ const DESCENT = [
 const ROLES = [
   {
     role: "Buyers & Tenants",
-    perks: ["Curated discovery filtered to how you live and work", "Save spaces and build shortlists in one ledger", "Verified neighbourhood intel before you commit"],
+    perks: ["Curated discovery filtered to how you live and work", "Save spaces and build shortlists on your Board", "Verified neighbourhood intel before you commit"],
   },
   {
     role: "Owners",
