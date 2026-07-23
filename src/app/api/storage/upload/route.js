@@ -69,6 +69,15 @@ export async function POST(request) {
     const path = `${ownerId}/${propertyId}/${timestamp}.${ext}`;
 
     const bytes = await file.arrayBuffer();
+
+    // B2 — verify the file is REALLY a video by magic bytes (the extension and
+    // declared MIME above are client-controlled; this is not).
+    const { verifyFileFamily } = await import("@/lib/fileTypeCheck");
+    const check = verifyFileFamily(new Uint8Array(bytes.slice(0, 64)), ["video"]);
+    if (!check.ok) {
+      return NextResponse.json({ error: `Rejected: ${check.reason}` }, { status: 415 });
+    }
+
     const { error: uploadError } = await supabase.storage
       .from(TEMP_BUCKET)
       .upload(path, bytes, {
@@ -79,6 +88,24 @@ export async function POST(request) {
     if (uploadError) {
       console.error('[Storage Upload]', uploadError);
       return NextResponse.json({ error: uploadError.message }, { status: 500 });
+    }
+
+    // B1 Stage 0 — register the upload in the scan pipeline. Staff only ever
+    // see/download it in Mission Control after it scans clean.
+    const { error: scanRegError } = await supabase.from('file_scans').insert({
+      bucket: TEMP_BUCKET,
+      storage_path: path,
+      uploader_id: ownerId,
+      property_id: propertyId || null,
+      original_filename: file.name,
+      declared_mime: file.type || 'video/mp4',
+      size_bytes: file.size,
+      scan_status: 'pending_scan',
+    });
+    if (scanRegError) {
+      // Non-fatal: the file is uploaded and queued for Luma; scanning catches
+      // up when the row is registered on a retry / by ops.
+      console.warn('[Storage Upload] file_scans registration failed:', scanRegError.message);
     }
 
     // Notify admin via a record in Supabase (admin checks this queue in Mission Control)

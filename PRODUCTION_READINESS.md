@@ -1,6 +1,33 @@
 # ScoutIt — Production Readiness (Road to Human Testing)
 
-_Last updated: 2026-07-22. Owner: Jerzel. Maintained by working sessions with Claude._
+_Last updated: 2026-07-23. Owner: Jerzel. Maintained by working sessions with Claude._
+
+## ✅ 2026-07-23 — Master-brief execution session (see CLAUDE_CODE_MASTER_BRIEF.md)
+
+**Mission Control (deployed live at mission-control-sigma-one-89.vercel.app):**
+- A3 publishing loop closed: "Approve & Publish to live site" now syncs Airtable
+  (`Approved_For_ScoutIt`) first, reads back the computed Slug, then marks approved. Airtable
+  failure = not approved.
+- B1 malware pipeline built + E2E-verified live: private `quarantine`/`property-videos-temp`/
+  `chat_attachments` buckets + `file_scans`/`video_upload_queue` tables (additive migration);
+  magic-byte scan engine (+ optional VirusTotal via `VIRUSTOTAL_API_KEY`); staff File Security
+  panel; tamper-checked 5-min signed-URL downloads; CRON-protected worker route.
+- A7 Phase 1 Security Center: flagged/high-velocity masked IPs + block/unblock ban list (audited).
+- A5 instant navigation: client sidebar active-state, catch-all loading skeleton + error
+  boundaries, gold token system. A6: real recharts metrics + Daily/Weekly/Monthly toggle.
+- A2: Google sign-in button (needs the provider toggled on in Supabase) + Staff IAM
+  "grant access to an existing account by email". Fixed a latent `updated_at` bug in staff actions.
+- DB: `log_masked_access` RPC (service-role-locked) + `global_read_only` kill-switch flag seeded
+  (off); `touch_calendar_events_updated_at` search_path pinned.
+
+**Main site — GATED batch BUILT & build-green, NOT pushed (awaiting founder go):**
+- Middleware: masked-IP guard (privacy-preserving hashes, 403 for banned, fail-open) +
+  fail-CLOSED rate limiting on auth/upload/AI routes + `global_read_only` kill switch +
+  `ai_search`/`deep_intel` gates that honor `pre_launch_free_mode` (no behavior change today).
+- B2 magic-byte validation on /api/storage/upload and /api/ai/read-pdf; video uploads now
+  register in the scan pipeline. `IP_SALT` set on both Vercel projects + local env.
+- B3 ready-to-run: drop storage policy `"Allow public uploads"` (all photo-upload callers
+  verified login-gated).
 
 This doc tracks what has to be true before we let real humans test ScoutIt, written in plain
 language first. Each item says **what it is**, **why it matters**, and **status**. Technical detail

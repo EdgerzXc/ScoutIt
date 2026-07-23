@@ -58,6 +58,17 @@ export async function POST(request) {
     }
 
     const buffer = new Uint8Array(await file.arrayBuffer());
+
+    // B2 — verify it REALLY is a PDF by magic bytes, not just the declared
+    // MIME (which is client-controlled and trivially spoofed).
+    const { verifyFileFamily } = await import("@/lib/fileTypeCheck");
+    const check = verifyFileFamily(buffer, ["application/pdf"]);
+    if (!check.ok) {
+      return NextResponse.json(
+        { error: `Rejected: ${check.reason}` },
+        { status: 415 }
+      );
+    }
     const pdf = await getDocumentProxy(buffer);
     const { totalPages, text } = await extractText(pdf, { mergePages: true });
 
