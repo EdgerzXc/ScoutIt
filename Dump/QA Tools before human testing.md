@@ -2,20 +2,20 @@ Yes. You can build a **professional QA pipeline for essentially free**. In fact,
 
 Here's what I'd recommend for ScoutIt.
 
-|Tool|Free?|Best for|Recommendation|
-|---|---|---|---|
-|**ESLint**|✅|Code quality|⭐⭐⭐⭐⭐ Required|
-|**TypeScript Strict Mode**|✅|Type safety|⭐⭐⭐⭐⭐ Required|
-|**Knip**|✅|Dead files, exports, dependencies|⭐⭐⭐⭐⭐|
-|**Madge**|✅|Circular dependencies|⭐⭐⭐⭐|
-|**Semgrep Community**|✅|Security|⭐⭐⭐⭐|
-|**Lighthouse**|✅|SEO, performance, accessibility|⭐⭐⭐⭐⭐|
-|**Playwright**|✅|End-to-end testing|⭐⭐⭐⭐⭐|
-|**Vitest**|✅|Unit testing|⭐⭐⭐⭐|
-|**Storybook**|✅|Component QA|⭐⭐⭐⭐|
-|**Bundle Analyzer**|✅|Bundle size|⭐⭐⭐⭐|
-|**npm audit**|✅|Vulnerable packages|⭐⭐⭐⭐|
-|**depcheck** (or Knip, which largely supersedes it)|✅|Unused dependencies|⭐⭐⭐⭐|
+| Tool                                                | Free? | Best for                          | Recommendation |
+| --------------------------------------------------- | ----- | --------------------------------- | -------------- |
+| **ESLint**                                          | ✅     | Code quality                      | ⭐⭐⭐⭐⭐ Required |
+| **TypeScript Strict Mode**                          | ✅     | Type safety                       | ⭐⭐⭐⭐⭐ Required |
+| **Knip**                                            | ✅     | Dead files, exports, dependencies | ⭐⭐⭐⭐⭐          |
+| **Madge**                                           | ✅     | Circular dependencies             | ⭐⭐⭐⭐           |
+| **Semgrep Community**                               | ✅     | Security                          | ⭐⭐⭐⭐           |
+| **Lighthouse**                                      | ✅     | SEO, performance, accessibility   | ⭐⭐⭐⭐⭐          |
+| **Playwright**                                      | ✅     | End-to-end testing                | ⭐⭐⭐⭐⭐          |
+| **Vitest**                                          | ✅     | Unit testing                      | ⭐⭐⭐⭐           |
+| **Storybook**                                       | ✅     | Component QA                      | ⭐⭐⭐⭐           |
+| **Bundle Analyzer**                                 | ✅     | Bundle size                       | ⭐⭐⭐⭐           |
+| **npm audit**                                       | ✅     | Vulnerable packages               | ⭐⭐⭐⭐           |
+| **depcheck** (or Knip, which largely supersedes it) | ✅     | Unused dependencies               | ⭐⭐⭐⭐           |
 
 ---
 

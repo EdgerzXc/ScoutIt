@@ -77,7 +77,7 @@ export default function ShareModal({ isOpen, onClose, shareText, propertyUrl }) 
         {/* Content */}
         <div className="p-5">
           <p className="text-sm text-white/60 mb-4">
-            Share this property's market intelligence with your network or clients.
+            Share this property&apos;s market intelligence with your network or clients.
           </p>
 
           {/* Social Links */}

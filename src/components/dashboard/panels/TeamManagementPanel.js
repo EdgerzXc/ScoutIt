@@ -49,21 +49,22 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
   const [memberTasks, setMemberTasks] = useState(null); // null = loading
   const [memberActivity, setMemberActivity] = useState(null);
 
+  const currentUserId = currentUser?.id;
   const loadMemberData = useCallback(async () => {
-    if (!currentUser?.id) return;
+    if (!currentUserId) return;
     try {
-      const data = await crmFetch("/api/crm/tasks", { mockUserId: currentUser.id });
+      const data = await crmFetch("/api/crm/tasks", { mockUserId: currentUserId });
       setMemberTasks(data.tasks || []);
     } catch {
       setMemberTasks([]);
     }
     try {
-      const data = await crmFetch("/api/crm/activity", { mockUserId: currentUser.id });
+      const data = await crmFetch("/api/crm/activity", { mockUserId: currentUserId });
       setMemberActivity(data.activities || data.activity || []);
     } catch {
       setMemberActivity([]);
     }
-  }, [currentUser?.id]);
+  }, [currentUserId]);
 
   useEffect(() => { loadMemberData(); }, [loadMemberData]);
   

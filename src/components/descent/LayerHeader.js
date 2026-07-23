@@ -21,7 +21,7 @@ export default function LayerHeader({ layerNum, layerName, title, description, m
         {/* TOP CENTER: KICKER */}
         <div className="layer-header-top">
           <span className="layer-kicker">
-            Layer {layerNum} // {layerName}
+            {`Layer ${layerNum} // ${layerName}`}
           </span>
         </div>
 

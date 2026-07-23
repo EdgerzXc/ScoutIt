@@ -69,5 +69,6 @@
     "vercel.json",
     "vitest.config.js",
     "_SCOUTIT_BRAIN/12_EXTERNAL_TOOLS/"
-  ]
+  ],
+  "alwaysUpdateLinks": true
 }

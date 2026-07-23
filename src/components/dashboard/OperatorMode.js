@@ -31,7 +31,7 @@ export default function OperatorMode() {
       console.error("Failed to load operated spaces", e);
       setBuildings([]);
     }
-  }, []);
+  }, [authedFetch]);
 
   useEffect(() => { load(); }, [load]);
 

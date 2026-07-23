@@ -33,6 +33,44 @@ function statusStyle(status) {
   return STATUS_STYLES[status] || { label: status || "Unknown", textClass: "text-text-muted", bgClass: "bg-surface-variant" };
 }
 
+// Shared by the desktop sidebar and the mobile tab bar so the two nav
+// surfaces can't drift out of sync.
+const NAV_ITEMS = [
+  { id: "dashboard", icon: LayoutDashboard, label: "Dashboard" },
+  { id: "portfolio", icon: Building2, label: "Portfolio" },
+  { id: "crm", icon: Users, label: "CRM" },
+  { id: "projects", icon: ClipboardList, label: "Projects" },
+  { id: "team", icon: UsersRound, label: "Team" },
+  { id: "inventory", icon: Box, label: "Inventory" },
+  { id: "finance", icon: BadgeDollarSign, label: "Finance" },
+  { id: "analytics", icon: LineChart, label: "Analytics" },
+  { id: "ai", icon: Bot, label: "AI Center" },
+  { id: "administration", icon: Settings, label: "Administration", mobileLabel: "Admin" },
+];
+
+// Module-scoped (not defined inside MissionControlMode) so it isn't recreated
+// on every render — a component redeclared each render loses React's identity
+// tracking and resets its own state/memoization on every parent re-render.
+function NavButton({ id, icon: Icon, label, activeTab, onSelect }) {
+  const isActive = activeTab === id;
+  return (
+    <button
+      onClick={() => onSelect(id)}
+      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-300 text-left w-full relative overflow-hidden group ${
+        isActive
+          ? 'text-gold-accent bg-gold-accent/5'
+          : 'text-text-secondary hover:text-white hover:bg-white/5'
+      }`}
+    >
+      {isActive && (
+        <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-gold-accent shadow-[0_0_8px_rgba(232,174,60,0.8)]" />
+      )}
+      <Icon size={18} className={`transition-transform duration-300 ${isActive ? 'scale-110 drop-shadow-[0_0_5px_rgba(232,174,60,0.5)]' : 'group-hover:scale-110 opacity-70 group-hover:opacity-100'}`} />
+      <span className={`font-mono uppercase tracking-wider text-[11px] ${isActive ? 'font-bold' : 'font-medium'}`}>{label}</span>
+    </button>
+  );
+}
+
 export default function MissionControlMode() {
   const { listings, pitches, connects, currentUser, addToast, closeListing } = useDashboard();
   const [selectedIds, setSelectedIds] = useState(new Set());
@@ -164,35 +202,6 @@ export default function MissionControlMode() {
     }
   };
 
-  const NavButton = ({ id, icon: Icon, label }) => {
-    const isActive = activeTab === id;
-    return (
-      <button
-        onClick={() => setActiveTab(id)}
-        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-300 text-left w-full relative overflow-hidden group ${
-          isActive 
-            ? 'text-gold-accent bg-gold-accent/5' 
-            : 'text-text-secondary hover:text-white hover:bg-white/5'
-        }`}
-      >
-        {isActive && (
-          <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-gold-accent shadow-[0_0_8px_rgba(232,174,60,0.8)]" />
-        )}
-        <Icon size={18} className={`transition-transform duration-300 ${isActive ? 'scale-110 drop-shadow-[0_0_5px_rgba(232,174,60,0.5)]' : 'group-hover:scale-110 opacity-70 group-hover:opacity-100'}`} />
-        <span className={`font-mono uppercase tracking-wider text-[11px] ${isActive ? 'font-bold' : 'font-medium'}`}>{label}</span>
-      </button>
-    );
-  };
-
-  const NavGroup = ({ label, children }) => (
-    <div className="mb-5">
-      <div className="text-[10px] tracking-widest text-gold-accent uppercase mb-1.5 px-3 opacity-70 font-label-caps">{label}</div>
-      <div className="flex flex-col gap-0.5">
-        {children}
-      </div>
-    </div>
-  );
-
   return (
     <div className="flex h-full w-full animate-slide-up-fade relative">
       {!isEnterprise ? (
@@ -248,16 +257,9 @@ export default function MissionControlMode() {
             Enterprise Mission Control
           </div>
           <div className="flex flex-col gap-1.5">
-            <NavButton id="dashboard" icon={LayoutDashboard} label="Dashboard" />
-            <NavButton id="portfolio" icon={Building2} label="Portfolio" />
-            <NavButton id="crm" icon={Users} label="CRM" />
-            <NavButton id="projects" icon={ClipboardList} label="Projects" />
-            <NavButton id="team" icon={UsersRound} label="Team" />
-            <NavButton id="inventory" icon={Box} label="Inventory" />
-            <NavButton id="finance" icon={BadgeDollarSign} label="Finance" />
-            <NavButton id="analytics" icon={LineChart} label="Analytics" />
-            <NavButton id="ai" icon={Bot} label="AI Center" />
-            <NavButton id="administration" icon={Settings} label="Administration" />
+            {NAV_ITEMS.map((item) => (
+              <NavButton key={item.id} {...item} activeTab={activeTab} onSelect={setActiveTab} />
+            ))}
           </div>
         </div>
 
@@ -269,18 +271,7 @@ export default function MissionControlMode() {
       <div className="flex-1 min-w-0 px-4 md:px-8 py-6 pb-28 md:pb-6 flex flex-col gap-6 overflow-y-auto">
         {/* Mobile tab bar — the sidebar is hidden below md, so phones navigate here */}
         <div className="md:hidden -mx-4 px-4 flex gap-2 overflow-x-auto pb-2 border-b border-white/5 scrollbar-none" style={{ scrollbarWidth: "none" }}>
-          {[
-            { id: "dashboard", icon: LayoutDashboard, label: "Dashboard" },
-            { id: "portfolio", icon: Building2, label: "Portfolio" },
-            { id: "crm", icon: Users, label: "CRM" },
-            { id: "projects", icon: ClipboardList, label: "Projects" },
-            { id: "team", icon: UsersRound, label: "Team" },
-            { id: "inventory", icon: Box, label: "Inventory" },
-            { id: "finance", icon: BadgeDollarSign, label: "Finance" },
-            { id: "analytics", icon: LineChart, label: "Analytics" },
-            { id: "ai", icon: Bot, label: "AI Center" },
-            { id: "administration", icon: Settings, label: "Admin" },
-          ].map(({ id, icon: Icon, label }) => (
+          {NAV_ITEMS.map(({ id, icon: Icon, label, mobileLabel }) => (
             <button
               key={id}
               onClick={() => setActiveTab(id)}
@@ -291,7 +282,7 @@ export default function MissionControlMode() {
               }`}
             >
               <Icon size={13} />
-              {label}
+              {mobileLabel || label}
             </button>
           ))}
         </div>
