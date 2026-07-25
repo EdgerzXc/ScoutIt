@@ -8,11 +8,21 @@ import UnitInquiryModal from "@/components/property/UnitInquiryModal";
 import SpatialVaultWidget from "@/components/property/SpatialVaultWidget";
 import PromoteModal from "./PromoteModal";
 import { canSee, getCurrentTier } from "@/lib/entitlements";
+import dynamic from "next/dynamic";
 import {
   unitCapacity,
   scenarioCapacity,
   unitTypeLabel,
 } from "@/lib/unitMasterPage";
+
+const SpatialCommandMap = dynamic(() => import("@/components/property/SpatialCommandMap"), {
+  ssr: false,
+  loading: () => (
+    <div style={{ height: "300px", background: "#0d0d0d", border: "0.5px solid #262626", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <span style={{ fontFamily: "'Courier New',monospace", fontSize: "10px", letterSpacing: "0.1em", textTransform: "uppercase", color: "#c8c8c8" }}>Loading spatial command map…</span>
+    </div>
+  ),
+});
 
 const SpecCard = ({ label, value }) => {
   if (value == null || value === "") return null;
@@ -475,11 +485,38 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
           <div className={`chapter-panel ${activeTab === "building" ? "active" : ""}`} id="panel-building">
             <div className="panel-content">
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>05 — The Building</div>
+                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>05 — Spatial Intelligence & Building</div>
                 <div style={{height:"1px", background:"#262626"}}/>
               </div>
               <p style={{ fontFamily: "Georgia,serif", fontSize: "18px", color: "#f0ede8", margin: "0 0 14px 0" }}>{property.title}</p>
-              <FloodRiskBadge floodRiskScore={property.flood_risk_score} floodZoneStatus={property.flood_zone_status} />
+              
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", marginBottom: "16px" }}>
+                <FloodRiskBadge floodRiskScore={property.flood_risk_score} floodZoneStatus={property.flood_zone_status} />
+                {property.details?.spatial_intel?.peza?.is_accredited && (
+                  <span style={{ fontFamily: "'Courier New',monospace", fontSize: "11px", color: "#10B981", background: "rgba(16, 185, 129, 0.12)", border: "1px solid rgba(16, 185, 129, 0.3)", borderRadius: "4px", padding: "6px 12px", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                    🏢 PEZA Certified ({property.details.spatial_intel.peza.zone_name})
+                  </span>
+                )}
+                {property.details?.spatial_intel?.transit && (
+                  <span style={{ fontFamily: "'Courier New',monospace", fontSize: "11px", color: "#F7C64E", background: "rgba(232, 174, 60, 0.12)", border: "1px solid rgba(232, 174, 60, 0.3)", borderRadius: "4px", padding: "6px 12px", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                    🚆 {property.details.spatial_intel.transit.walk_minutes}m walk ({property.details.spatial_intel.transit.station_name})
+                  </span>
+                )}
+                {property.details?.spatial_intel?.seismic && (
+                  <span style={{ fontFamily: "'Courier New',monospace", fontSize: "11px", color: "#a0a0a0", background: "#161616", border: "0.5px solid #333", borderRadius: "4px", padding: "6px 12px", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                    📐 Fault Buffer: {property.details.spatial_intel.seismic.status}
+                  </span>
+                )}
+              </div>
+
+              <div style={{ marginTop: "20px", marginBottom: "20px" }}>
+                <SpatialCommandMap
+                  lat={property.latitude || property.lat || 14.5547}
+                  lng={property.longitude || property.lng || 121.0244}
+                  propertyTitle={property.title}
+                />
+              </div>
+
               <div style={{ marginTop: "24px" }}>
                 <Link href={`/property/${property.slug}`} style={{ color: ACCENT, fontFamily: "'Courier New',monospace", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase" }}>
                   View full building intelligence →
@@ -490,7 +527,7 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
             <div className="panel-sidebar">
               <SpecCard label="Location" value={property.location || null} />
               <SpecCard label="Building Grade" value={property.building_grade || property.cm_building_grade || null} />
-              <SpecCard label="Public Transport" value={property.public_transport || null} />
+              <SpecCard label="Public Transport" value={property.public_transport || (property.details?.spatial_intel?.transit ? `${property.details.spatial_intel.transit.line} ${property.details.spatial_intel.transit.station_name}` : null)} />
               <SpecCard label="Nearest Highway" value={property.nearest_highway || null} />
             </div>
           </div>

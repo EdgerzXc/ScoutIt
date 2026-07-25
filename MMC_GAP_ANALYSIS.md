@@ -3,6 +3,17 @@
 _From a deep read of the mission-control app + `_SCOUTIT_BRAIN` (OS architecture, master build spec
 §3, Mission Control SOP, MMC & Brain vision, staff/enterprise plan). 2026-07-23._
 
+> **UPDATE 2026-07-24 — four gaps addressed (BUILT in `mission-control/`, uncommitted; migrations
+> `0005`–`0007` pending apply). See PRODUCTION_READINESS.md 2026-07-24 section for detail.**
+> - 🟠 #3 **Disputes Hub** → BUILT (`dashboard/disputes/`, migration `0006`).
+> - 🟠 #3 **Trust & Verification Center** → BUILT as a real queue (`dashboard/verification/`, `0005`).
+> - #2 **Brain / Team WIKI / RAG** → BUILT (`dashboard/brain/`, pgvector `0007`, Gemini or keyword
+>   fallback) — the signature layer now exists in scaffolded form; needs KB ingestion + `GEMINI_API_KEY`.
+> - New: **Mission Inbox** (one daily triage list) → BUILT (`dashboard/inbox/`).
+> Still open from #3: Content/Monetization/Economy modules (Airtable-only), Security Center Phase 2.
+> #1 (publish loop) already closed 2026-07-23. Next: apply the migrations, then wire the Brain to
+> `_SCOUTIT_BRAIN` docs and do a mobile-first review pass on the new screens.
+
 ## What Master Mission Control is SUPPOSED to be (4 sources agree)
 1. **Master Build Spec §3** (canonical) — the operational cockpit: Overview, **Approval Queue that
    flips the LIVE `Approved_For_ScoutIt` gate**, Trust & Badges, **Disputes**, Content, Monetization,

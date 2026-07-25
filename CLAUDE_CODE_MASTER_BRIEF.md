@@ -44,6 +44,14 @@ No `loading.js`/`error.js` yet; MMC `globals.css` still has default tokens (add 
 
 # TRACK A — Master Mission Control
 
+> **STATUS 2026-07-24 — four new cockpit modules BUILT (uncommitted), on top of A1–A7:**
+> Mission Inbox (`dashboard/inbox/`), Trust & Verification (`dashboard/verification/`, migration
+> `0005`), Disputes Hub (`dashboard/disputes/`, `0006`), Team Brain / RAG (`dashboard/brain/` +
+> `src/lib/brain.js`, `0007` pgvector, Gemini or keyword fallback). Sidebar updated. Syntax-verified
+> (`node --check` + `tsc`); full `next build` still to run locally. **Activate:** apply migrations
+> `0005`–`0007` to `yyixsuaimdzyiocswcgc`; add `GEMINI_API_KEY` to mission-control env for Brain AI
+> answers. Do NOT commit/push without founder go. Detail: PRODUCTION_READINESS.md (2026-07-24).
+
 **A1 · Run locally + verify/debug navigation.** Confirm sidebar links navigate; fix any hydration
 console errors; confirm the Overview top stat cards are non-interactive by design (not a bug).
 

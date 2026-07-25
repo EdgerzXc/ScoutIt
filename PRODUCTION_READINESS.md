@@ -1,6 +1,36 @@
 # ScoutIt — Production Readiness (Road to Human Testing)
 
-_Last updated: 2026-07-23. Owner: Jerzel. Maintained by working sessions with Claude._
+_Last updated: 2026-07-24. Owner: Jerzel. Maintained by working sessions with Claude._
+
+## ✅ 2026-07-24 — Master Mission Control: four cockpit modules built (BUILT, NOT committed)
+
+Built in `mission-control/`, all following the existing security/cms module pattern
+(server `page.js` + `"use server"` `actions.js` + `loading.js`/`error.js`; service-role admin
+client; `getCurrentStaff`/`assertTier`/`logAction`; dark+gold DNA; mobile-first single column that
+expands on `sm`/`xl`). Verified with `node --check` + `tsc --checkJs false` (all green); a full
+`next build` couldn't run in the build sandbox — run it locally to confirm.
+
+- **Mission Inbox** (`dashboard/inbox/`) — the front door. One read-only triage list aggregating
+  everything WAITING across the platform: pending approvals, verification requests, open disputes,
+  security flags (Ops+), and quarantined uploads — each lane links into the module where staff act.
+  No new table.
+- **Trust & Verification** (`dashboard/verification/`) — queue for PRC licenses / price / identity /
+  business verification; verify/reject with audit logging, priority, manual filing, decided log.
+  Migration `0005_verification_requests.sql`.
+- **Disputes Hub** (`dashboard/disputes/`) — broker-vs-broker & broker-vs-owner mediation with an
+  append-only thread (note / take-mediation / resolve / dismiss). Close requires Ops Manager (2)+.
+  Migration `0006_disputes.sql` (`disputes` + `dispute_events`).
+- **Team Brain / RAG** (`dashboard/brain/`) — natural-language Q&A over an ingestible knowledge base
+  via pgvector semantic search + AI answers with citations. `src/lib/brain.js` uses `GEMINI_API_KEY`
+  (text-embedding-004 + gemini-2.0-flash) and **degrades to keyword search** when no key is set.
+  Migration `0007_brain_rag.sql` (`brain_documents` + `brain_chunks` vector(768) + `match_brain_chunks`).
+- Sidebar (`dashboard/layout.js`) updated with all four (all Tier 1+).
+
+**To activate:** (1) apply migrations `0005`/`0006`/`0007` to Supabase `yyixsuaimdzyiocswcgc`
+(additive, idempotent, service-role only); (2) optionally add `GEMINI_API_KEY` to the mission-control
+env to turn on Brain AI answers. Until (1), each page degrades to a friendly "apply migration" note
+instead of crashing. Not committed (standing rule: no commit/push in mission-control without founder
+go). Closes gap-analysis modules #3 (Disputes, Trust) + adds Mission Inbox + the Brain/RAG layer (#2).
 
 ## ✅ 2026-07-23 — Master-brief execution session (see CLAUDE_CODE_MASTER_BRIEF.md)
 

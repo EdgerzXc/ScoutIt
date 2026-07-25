@@ -46,6 +46,14 @@ const ManilaTransitMap = dynamic(() => import("@/components/transit/ManilaTransi
     </div>
   ),
 });
+const SpatialCommandMap = dynamic(() => import("@/components/property/SpatialCommandMap"), {
+  ssr: false,
+  loading: () => (
+    <div style={{ height: "420px", background: "#0d0d0d", border: "0.5px solid #262626", borderRadius: "4px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", letterSpacing: "0.1em", textTransform: "uppercase", color: "#c8c8c8" }}>Loading spatial command HUD…</span>
+    </div>
+  ),
+});
 import { DEEP_INTEL_SCHEMA } from "../../lib/deepIntelSchema";
 
 // Loose bounding box around Metro Manila + the LRT/MRT lines' exurb extensions
@@ -343,7 +351,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
   const [isOwner, setIsOwner] = useState(false);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [whereToTab,        setWhereToTab]        = useState("map");
-  const [locTab,            setLocTab]            = useState("map");
+  const [locTab,            setLocTab]            = useState("spatial");
 
   // Per-panel accordion state (independent per section)
   const [accSpace,    setAccSpace]    = useState(null);
@@ -1609,6 +1617,9 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
 
               {/* Map / List toggle */}
               <div className="whereto-tabs" style={{marginBottom:"20px"}}>
+                <button className={`whereto-tab-btn ${locTab === "spatial" ? "active" : ""}`} onClick={() => setLocTab("spatial")}>
+                  Spatial HUD
+                </button>
                 <button className={`whereto-tab-btn ${locTab === "map" ? "active" : ""}`} onClick={() => setLocTab("map")}>
                   <span className="btn-pulse"/>Tactical Map
                 </button>
@@ -1624,6 +1635,16 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                   </button>
                 )}
               </div>
+
+              {locTab === "spatial" && (
+                <div style={{ marginBottom: "clamp(28px, 8vw, 80px)" }}>
+                  <SpatialCommandMap
+                    lat={d.lat || d.latitude || d.Latitude || 14.5547}
+                    lng={d.lng || d.longitude || d.Longitude || 121.0244}
+                    propertyTitle={d.title}
+                  />
+                </div>
+              )}
 
               {locTab === "flood" && (
                 <FloodHeatmapMap

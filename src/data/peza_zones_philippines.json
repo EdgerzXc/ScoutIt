@@ -1,0 +1,23 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    { "type": "Feature", "geometry": { "type": "Point", "coordinates": [121.0509, 14.5494] }, "properties": { "name": "Bonifacio Global City (BGC IT Zone)", "city": "Taguig", "region": "NCR" } },
+    { "type": "Feature", "geometry": { "type": "Point", "coordinates": [121.0805, 14.6097] }, "properties": { "name": "Eastwood City Cyberpark", "city": "Quezon City", "region": "NCR" } },
+    { "type": "Feature", "geometry": { "type": "Point", "coordinates": [121.0244, 14.5547] }, "properties": { "name": "Makati CBD IT Zone", "city": "Makati", "region": "NCR" } },
+    { "type": "Feature", "geometry": { "type": "Point", "coordinates": [121.0617, 14.5866] }, "properties": { "name": "Ortigas Center IT Zone", "city": "Pasig/Mandaluyong", "region": "NCR" } },
+    { "type": "Feature", "geometry": { "type": "Point", "coordinates": [121.0416, 14.4172] }, "properties": { "name": "Filinvest City Alabang", "city": "Muntinlupa", "region": "NCR" } },
+    { "type": "Feature", "geometry": { "type": "Point", "coordinates": [120.9904, 14.5262] }, "properties": { "name": "Aseana & Entertainment City", "city": "Paranaque/Pasay", "region": "NCR" } },
+    { "type": "Feature", "geometry": { "type": "Point", "coordinates": [121.0558, 14.6565] }, "properties": { "name": "UP-AyalaLand TechnoHub", "city": "Quezon City", "region": "NCR" } },
+    { "type": "Feature", "geometry": { "type": "Point", "coordinates": [121.0530, 14.6191] }, "properties": { "name": "Araneta City Cyberpark", "city": "Quezon City", "region": "NCR" } },
+    { "type": "Feature", "geometry": { "type": "Point", "coordinates": [121.0807, 14.5936] }, "properties": { "name": "Bridgetowne IT Estate", "city": "Pasig", "region": "NCR" } },
+    { "type": "Feature", "geometry": { "type": "Point", "coordinates": [123.9056, 10.3277] }, "properties": { "name": "Cebu IT Park", "city": "Cebu City", "region": "Visayas" } },
+    { "type": "Feature", "geometry": { "type": "Point", "coordinates": [123.9064, 10.3167] }, "properties": { "name": "Cebu Business Park", "city": "Cebu City", "region": "Visayas" } },
+    { "type": "Feature", "geometry": { "type": "Point", "coordinates": [123.9610, 10.3090] }, "properties": { "name": "Mactan Economic Zone (MEZ)", "city": "Lapu-Lapu", "region": "Visayas" } },
+    { "type": "Feature", "geometry": { "type": "Point", "coordinates": [122.5510, 10.7145] }, "properties": { "name": "Iloilo Business Park IT Zone", "city": "Iloilo City", "region": "Visayas" } },
+    { "type": "Feature", "geometry": { "type": "Point", "coordinates": [120.5312, 15.1856] }, "properties": { "name": "Clark Freeport Special Economic Zone", "city": "Clark/Angeles", "region": "Central Luzon" } },
+    { "type": "Feature", "geometry": { "type": "Point", "coordinates": [120.2833, 14.8217] }, "properties": { "name": "Subic Bay Freeport Zone", "city": "Subic/Olongapo", "region": "Central Luzon" } },
+    { "type": "Feature", "geometry": { "type": "Point", "coordinates": [121.1356, 14.2412] }, "properties": { "name": "Laguna Technopark PEZA Zone", "city": "Santa Rosa", "region": "CALABARZON" } },
+    { "type": "Feature", "geometry": { "type": "Point", "coordinates": [121.1512, 14.1123] }, "properties": { "name": "First Philippine Industrial Park (FPIP)", "city": "Sto. Tomas/Tanauan", "region": "CALABARZON" } },
+    { "type": "Feature", "geometry": { "type": "Point", "coordinates": [125.6128, 7.0731] }, "properties": { "name": "Davao IT Park & Matina Hub", "city": "Davao City", "region": "Mindanao" } }
+  ]
+}

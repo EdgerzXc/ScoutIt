@@ -1,0 +1,29 @@
+name: Auto-Update Spatial Transit Data
+
+on:
+  schedule:
+    # Runs at midnight on the 1st of every month
+    - cron: '0 0 1 * *'
+  workflow_dispatch:
+
+jobs:
+  update-transit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run Transit Sync Script
+        run: node scripts/sync_transit_data.js
+
+      - name: Commit and Push Changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore(data): auto-update transit stations from OpenStreetMap"
+          file_pattern: "src/data/manila_transit_stations.json"
