@@ -519,7 +519,7 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
 
         .hud-card-cat {
           font-family: var(--font-mono);
-          font-size: 7.5px;
+          font-size: 9px;
           color: #E8AE3C;
           letter-spacing: 0.08em;
           text-transform: uppercase;
@@ -527,7 +527,7 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
 
         .hud-card-dist {
           font-family: var(--font-mono);
-          font-size: 8.5px;
+          font-size: 10px;
           color: #f0ede8;
           font-weight: 600;
         }
@@ -544,8 +544,8 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
 
         .hud-card-coords {
           font-family: var(--font-mono);
-          font-size: 7.5px;
-          color: #5a5a5a;
+          font-size: 9px;
+          color: #777;
           margin-top: 2px;
           border-top: 0.5px solid #222;
           padding-top: 2px;
@@ -709,6 +709,15 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
         .leaflet-bar a:hover {
           background-color: #1a1a1a !important;
           color: #E8AE3C !important;
+        }
+        @media (max-width: 640px) {
+          .map-hud-card {
+            top: auto !important;
+            bottom: 12px !important;
+            left: 12px !important;
+            right: 12px !important;
+            width: auto !important;
+          }
         }
       `}</style>
     </div>

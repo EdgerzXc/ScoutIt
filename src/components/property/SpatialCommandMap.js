@@ -460,6 +460,7 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
 
       {/* Floating HUD Command Bar */}
       <div
+        className="scm-hud-bar"
         style={{
           position: "absolute",
           top: "16px",
@@ -467,6 +468,7 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
           zIndex: 10,
           background: "rgba(13, 13, 13, 0.92)",
           backdropFilter: "blur(14px)",
+          WebkitBackdropFilter: "blur(14px)",
           border: "1px solid rgba(232, 174, 60, 0.4)",
           borderRadius: "8px",
           padding: "12px 14px",
@@ -475,6 +477,7 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
           fontSize: "12px",
           boxShadow: "0 8px 32px rgba(0, 0, 0, 0.75)",
           maxWidth: "420px",
+          transition: "all 0.3s ease",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "10px" }}>
@@ -504,13 +507,15 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
 
             <button
               onClick={() => setShowDossierModal(true)}
-              style={{ background: "#222", border: "1px solid #444", color: "#ccc", borderRadius: "4px", padding: "2px 6px", fontSize: "10px", cursor: "pointer" }}
+              className="scm-hud-btn"
+              style={{ background: "#222", border: "1px solid #444", color: "#ccc", borderRadius: "4px", padding: "2px 8px", fontSize: "10px", cursor: "pointer", transition: "all 0.2s ease" }}
             >
               📍 DOSSIER
             </button>
             <button
               onClick={() => setShowEntityGraph(!showEntityGraph)}
-              style={{ background: showEntityGraph ? "rgba(232,174,60,0.3)" : "#222", border: "1px solid #E8AE3C", color: "#F7C64E", borderRadius: "4px", padding: "2px 6px", fontSize: "10px", cursor: "pointer" }}
+              className="scm-hud-btn"
+              style={{ background: showEntityGraph ? "rgba(232,174,60,0.3)" : "#222", border: "1px solid #E8AE3C", color: "#F7C64E", borderRadius: "4px", padding: "2px 8px", fontSize: "10px", cursor: "pointer", transition: "all 0.2s ease" }}
             >
               🕸️ GRAPH
             </button>
@@ -533,12 +538,15 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
                 background: "#161616",
                 border: "1px solid rgba(232, 174, 60, 0.3)",
                 borderRadius: "4px",
-                padding: "5px 8px",
+                padding: "6px 10px",
                 color: "#fff",
                 fontSize: "11px",
                 fontFamily: "var(--font-mono, monospace)",
                 outline: "none",
+                transition: "border-color 0.2s ease, box-shadow 0.2s ease",
               }}
+              onFocus={(e) => { e.target.style.borderColor = '#E8AE3C'; e.target.style.boxShadow = '0 0 8px rgba(232,174,60,0.3)'; }}
+              onBlur={(e) => { e.target.style.borderColor = 'rgba(232, 174, 60, 0.3)'; e.target.style.boxShadow = 'none'; }}
             />
             {aiFilterStatus && <div style={{ fontSize: "9px", color: "#10B981", marginTop: "3px" }}>✓ {aiFilterStatus}</div>}
           </form>
@@ -560,15 +568,17 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
             <button
               key={btn.id}
               onClick={() => handleToggleLayer(btn.id)}
+              className="scm-layer-btn"
               style={{
-                padding: "4px 7px",
+                padding: "4px 8px",
                 borderRadius: "4px",
                 border: activeLayer === btn.id ? "1px solid #E8AE3C" : "1px solid #333",
                 background: activeLayer === btn.id ? "rgba(232, 174, 60, 0.25)" : "#1a1a1a",
                 color: activeLayer === btn.id ? "#F7C64E" : "#aaa",
-                fontSize: "9px",
+                fontSize: "10px",
                 cursor: "pointer",
                 fontWeight: "bold",
+                transition: "all 0.2s ease",
               }}
             >
               {btn.label}
@@ -627,6 +637,7 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
       {/* Entity Graph Overlay Panel */}
       {showEntityGraph && (
         <div
+          className="scm-entity-graph"
           style={{
             position: "absolute",
             top: "16px",
@@ -635,12 +646,14 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
             width: "300px",
             background: "rgba(13, 13, 13, 0.95)",
             backdropFilter: "blur(16px)",
+            WebkitBackdropFilter: "blur(16px)",
             border: "1px solid #E8AE3C",
             borderRadius: "8px",
             padding: "14px",
             color: "#fff",
             fontFamily: "var(--font-mono, monospace)",
             boxShadow: "0 12px 40px rgba(0,0,0,0.8)",
+            animation: "scmFadeIn 0.25s ease-out",
           }}
         >
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
@@ -688,10 +701,12 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
             zIndex: 20,
             background: "rgba(0,0,0,0.75)",
             backdropFilter: "blur(8px)",
+            WebkitBackdropFilter: "blur(8px)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             padding: "20px",
+            animation: "scmFadeIn 0.2s ease-out",
           }}
         >
           <div

@@ -966,6 +966,52 @@ html.lightbox-open {
   }
 }
 
+/* ── SpatialCommandMap HUD Polish ─────────────────────────────── */
+@keyframes scmFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.scm-hud-btn:hover {
+  background: rgba(232, 174, 60, 0.15) !important;
+  border-color: #E8AE3C !important;
+  color: #F7C64E !important;
+}
+
+.scm-layer-btn:hover {
+  border-color: #E8AE3C !important;
+  color: #F7C64E !important;
+  background: rgba(232, 174, 60, 0.12) !important;
+}
+
+@media (max-width: 640px) {
+  .scm-hud-bar {
+    top: auto !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    max-width: 100% !important;
+    border-radius: 12px 12px 0 0 !important;
+    max-height: 55%;
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+  .scm-hud-bar::-webkit-scrollbar {
+    display: none;
+  }
+  .scm-entity-graph {
+    position: fixed !important;
+    top: auto !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    border-radius: 12px 12px 0 0 !important;
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+}
+
 /* WhereTo selector tabs styling */
 .whereto-tabs {
   display: flex;
@@ -1009,10 +1055,16 @@ html.lightbox-open {
 .btn-pulse {
   width: 6px;
   height: 6px;
-  background-color: #0e0e0e;
+  background-color: var(--accent);
   border-radius: 50%;
   display: inline-block;
   animation: radar-btn-pulse 1.5s ease-out infinite;
+  box-shadow: 0 0 4px var(--accent);
+}
+
+.whereto-tab-btn.active .btn-pulse {
+  background-color: #0e0e0e;
+  box-shadow: none;
 }
 
 @keyframes radar-btn-pulse {
@@ -1024,10 +1076,20 @@ html.lightbox-open {
 @media (max-width: 768px) {
   .whereto-tabs {
     gap: 6px;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 4px;
+  }
+  .whereto-tabs::-webkit-scrollbar {
+    display: none;
   }
   .whereto-tab-btn {
     font-size: 10px;
     padding: 6px 12px;
+    flex-shrink: 0;
+    white-space: nowrap;
   }
 }
 

@@ -1,0 +1,132 @@
+name: Refresh Spatial Data
+
+on:
+  schedule:
+    # Every Monday at 06:00 PHT (22:00 UTC Sunday)
+    - cron: '0 22 * * 0'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  check-data-freshness:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check Infrastructure Projects Staleness
+        id: check_infra
+        run: |
+          echo "## 🏗️ Infrastructure Megaprojects Data Check" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Check file last modified date
+          INFRA_FILE="src/data/ph_infrastructure_projects.json"
+          if [ -f "$INFRA_FILE" ]; then
+            LAST_COMMIT=$(git log -1 --format="%ci" -- "$INFRA_FILE")
+            DAYS_AGO=$(( ($(date +%s) - $(date -d "$LAST_COMMIT" +%s)) / 86400 ))
+            echo "Last updated: $LAST_COMMIT ($DAYS_AGO days ago)" >> $GITHUB_STEP_SUMMARY
+
+            if [ $DAYS_AGO -gt 90 ]; then
+              echo "⚠️ **STALE** — Infrastructure data is $DAYS_AGO days old (>90 day threshold)" >> $GITHUB_STEP_SUMMARY
+              echo "stale=true" >> $GITHUB_OUTPUT
+            else
+              echo "✅ Data is fresh ($DAYS_AGO days old)" >> $GITHUB_STEP_SUMMARY
+              echo "stale=false" >> $GITHUB_OUTPUT
+            fi
+
+            # Count projects and statuses
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### Project Status Breakdown" >> $GITHUB_STEP_SUMMARY
+            TOTAL=$(cat "$INFRA_FILE" | python3 -c "import sys,json; d=json.load(sys.stdin); print(len(d['features']))")
+            echo "- Total projects tracked: $TOTAL" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ File not found: $INFRA_FILE" >> $GITHUB_STEP_SUMMARY
+            echo "stale=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check PEZA Zones Staleness
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 🏢 PEZA Zones Data Check" >> $GITHUB_STEP_SUMMARY
+
+          PEZA_FILE="src/data/peza_zones_philippines.json"
+          if [ -f "$PEZA_FILE" ]; then
+            LAST_COMMIT=$(git log -1 --format="%ci" -- "$PEZA_FILE")
+            DAYS_AGO=$(( ($(date +%s) - $(date -d "$LAST_COMMIT" +%s)) / 86400 ))
+            echo "Last updated: $LAST_COMMIT ($DAYS_AGO days ago)" >> $GITHUB_STEP_SUMMARY
+
+            if [ $DAYS_AGO -gt 180 ]; then
+              echo "⚠️ **STALE** — PEZA data is $DAYS_AGO days old (>180 day threshold)" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "✅ Data is fresh ($DAYS_AGO days old)" >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
+
+      - name: Check Transit Data Staleness
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 🚆 Transit Data Check" >> $GITHUB_STEP_SUMMARY
+
+          for FILE in src/data/manila_transit.json src/data/manila_transit_stations.json; do
+            if [ -f "$FILE" ]; then
+              LAST_COMMIT=$(git log -1 --format="%ci" -- "$FILE")
+              DAYS_AGO=$(( ($(date +%s) - $(date -d "$LAST_COMMIT" +%s)) / 86400 ))
+              BASENAME=$(basename "$FILE")
+              echo "- **$BASENAME**: $DAYS_AGO days old" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+
+      - name: Real-Time Feed Health Check
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 📡 Real-Time Feed Health" >> $GITHUB_STEP_SUMMARY
+
+          # USGS Earthquake API
+          USGS_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_month.geojson" || echo "000")
+          if [ "$USGS_STATUS" = "200" ]; then
+            echo "- ✅ USGS Earthquake Feed: **ONLINE** (HTTP $USGS_STATUS)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- ❌ USGS Earthquake Feed: **DOWN** (HTTP $USGS_STATUS)" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # NASA FIRMS Fire
+          FIRMS_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://firms.modaps.eosdis.nasa.gov/api/area/csv" || echo "000")
+          echo "- 🔥 NASA FIRMS Fire Feed: HTTP $FIRMS_STATUS" >> $GITHUB_STEP_SUMMARY
+
+          # Copernicus Sentinel-2
+          SENTINEL_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://browser.dataspace.copernicus.eu/" || echo "000")
+          if [ "$SENTINEL_STATUS" = "200" ]; then
+            echo "- ✅ Copernicus Sentinel-2 Browser: **ONLINE**" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- ⚠️ Copernicus Sentinel-2 Browser: HTTP $SENTINEL_STATUS" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Create Issue if Stale
+        if: steps.check_infra.outputs.stale == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = `🏗️ Infrastructure Data Stale — Manual Review Required`;
+            const body = `The weekly spatial data freshness check found that \`ph_infrastructure_projects.json\` has not been updated in over 90 days.\n\n**Action Required:**\n1. Review project statuses (completion dates, construction progress)\n2. Check DOTr/DPWH announcements for new megaprojects\n3. Update the JSON file and commit\n\nThis issue was automatically created by the \`refresh-spatial-data\` workflow.`;
+            
+            // Check for existing open issue
+            const existing = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'data-freshness'
+            });
+            
+            if (existing.data.length === 0) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body,
+                labels: ['data-freshness', 'spatial-intel']
+              });
+            }

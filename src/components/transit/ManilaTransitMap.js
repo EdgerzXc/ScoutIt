@@ -563,11 +563,24 @@ export default function ManilaTransitMap({ propertyLat, propertyLng, propertyTit
           gap: 9px;
           cursor: pointer;
         }
-        .transit-map-toggle input {
-          accent-color: var(--accent-bright, #f7c64e);
+        .transit-map-toggle input[type="checkbox"] {
+          appearance: none;
+          -webkit-appearance: none;
           width: 14px;
           height: 14px;
+          border: 1.5px solid #555;
+          border-radius: 3px;
+          background: #1a1a1a;
           cursor: pointer;
+          transition: all 0.2s ease;
+          flex-shrink: 0;
+        }
+        .transit-map-toggle input[type="checkbox"]:checked {
+          background: #E8AE3C;
+          border-color: #E8AE3C;
+        }
+        .transit-map-toggle input[type="checkbox"]:hover {
+          border-color: #E8AE3C;
         }
         .transit-map-swatch {
           width: 9px;
@@ -576,7 +589,7 @@ export default function ManilaTransitMap({ propertyLat, propertyLng, propertyTit
           flex-shrink: 0;
         }
         .transit-map-toggle-label {
-          font-family: Georgia, serif;
+          font-family: var(--font-mono, 'Courier New', monospace);
           font-size: 13px;
           color: #f0ede8;
         }
@@ -617,7 +630,7 @@ export default function ManilaTransitMap({ propertyLat, propertyLng, propertyTit
           gap: 8px;
         }
         .transit-map-nearest-name {
-          font-family: Georgia, serif;
+          font-family: var(--font-mono, 'Courier New', monospace);
           font-size: 15px;
           color: #f0ede8;
         }
@@ -640,7 +653,7 @@ export default function ManilaTransitMap({ propertyLat, propertyLng, propertyTit
           font-size: 9.5px;
           letter-spacing: 0.06em;
           text-transform: uppercase;
-          color: #6a6a6a;
+          color: #888;
           margin-top: 3px;
         }
 
