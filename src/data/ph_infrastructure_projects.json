@@ -1,0 +1,81 @@
+{
+  "type": "FeatureCollection",
+  "name": "PH_Major_Infrastructure_Projects",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "name": "Metro Manila Subway", "type": "rail", "status": "Under Construction", "completion": "2029", "budget_php": "488B", "contractor": "DMCI-Shimizu-Fujita JV", "length_km": 33 },
+      "geometry": { "type": "LineString", "coordinates": [[121.0450, 14.7000],[121.0550, 14.6400],[121.0580, 14.5870],[121.0510, 14.5500],[121.0340, 14.5200],[120.9960, 14.5090]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "MRT-7 (Bulacan–North EDSA)", "type": "rail", "status": "Under Construction", "completion": "2028", "budget_php": "62.7B", "contractor": "San Miguel Corp", "length_km": 23 },
+      "geometry": { "type": "LineString", "coordinates": [[120.9700, 14.7900],[120.9850, 14.7500],[121.0000, 14.7100],[121.0200, 14.6800],[121.0380, 14.6570]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "NSCR Clark Phase 1 (PNR Tutuban–Malolos)", "type": "rail", "status": "Under Construction", "completion": "2028", "budget_php": "377.5B", "contractor": "Sumitomo-Acciona JV", "length_km": 38 },
+      "geometry": { "type": "LineString", "coordinates": [[120.9730, 14.6130],[120.9600, 14.6600],[120.9500, 14.7200],[120.9400, 14.7800],[120.9300, 14.8400],[120.9100, 14.9000]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "NLEX-SLEX Connector Road", "type": "expressway", "status": "Under Construction", "completion": "2027", "budget_php": "23.3B", "contractor": "MPTC", "length_km": 8 },
+      "geometry": { "type": "LineString", "coordinates": [[120.9830, 14.6200],[120.9950, 14.5950],[121.0050, 14.5750],[121.0100, 14.5600]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Skyway Stage 4 (FTI–NLEX)", "type": "expressway", "status": "Proposed", "completion": "2030", "budget_php": "60B", "contractor": "San Miguel Corp", "length_km": 20 },
+      "geometry": { "type": "LineString", "coordinates": [[121.0550, 14.5350],[121.0400, 14.5550],[121.0250, 14.5800],[121.0100, 14.6100],[120.9950, 14.6400],[120.9800, 14.6700]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Pasig River Expressway (PAREX)", "type": "expressway", "status": "Under Construction", "completion": "2028", "budget_php": "95B", "contractor": "San Miguel Corp", "length_km": 19.4 },
+      "geometry": { "type": "LineString", "coordinates": [[120.9600, 14.5900],[120.9800, 14.5850],[121.0000, 14.5800],[121.0200, 14.5750],[121.0400, 14.5700],[121.0600, 14.5650]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "C6 Expressway (Taguig–Batasan)", "type": "expressway", "status": "Under Construction", "completion": "2027", "budget_php": "21.2B", "contractor": "DPWH", "length_km": 21 },
+      "geometry": { "type": "LineString", "coordinates": [[121.0700, 14.5100],[121.0750, 14.5400],[121.0800, 14.5700],[121.0850, 14.6000],[121.0900, 14.6300],[121.0950, 14.6600]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "New Manila International Airport (Bulacan)", "type": "airport", "status": "Under Construction", "completion": "2027", "budget_php": "740B", "contractor": "San Miguel Corp", "length_km": null },
+      "geometry": { "type": "Point", "coordinates": [120.8500, 14.8200] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Clark International Airport New Terminal", "type": "airport", "status": "Operational", "completion": "2024", "budget_php": "12.55B", "contractor": "Megawide-GMR", "length_km": null },
+      "geometry": { "type": "Point", "coordinates": [120.5600, 15.1860] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Unified Grand Central Station (North EDSA)", "type": "intermodal", "status": "Under Construction", "completion": "2027", "budget_php": "36B", "contractor": "Megaworld Corp", "length_km": null },
+      "geometry": { "type": "Point", "coordinates": [121.0390, 14.6560] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Southeast Metro Manila Expressway (SEMME)", "type": "expressway", "status": "Proposed", "completion": "2030", "budget_php": "45B", "contractor": "TBD", "length_km": 32 },
+      "geometry": { "type": "LineString", "coordinates": [[121.0550, 14.5340],[121.0700, 14.5100],[121.0900, 14.4800],[121.1100, 14.4500],[121.1300, 14.4200]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "CCLEX (Cebu–Cordova Link Expressway)", "type": "bridge", "status": "Operational", "completion": "2022", "budget_php": "30B", "contractor": "MPTC / CCLEC", "length_km": 8.9 },
+      "geometry": { "type": "LineString", "coordinates": [[123.8900, 10.3100],[123.9200, 10.2900],[123.9500, 10.2700]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Cebu Bus Rapid Transit (BRT)", "type": "brt", "status": "Under Construction", "completion": "2028", "budget_php": "16.4B", "contractor": "DPWH-DOTr", "length_km": 23 },
+      "geometry": { "type": "LineString", "coordinates": [[123.8800, 10.3600],[123.8900, 10.3300],[123.9000, 10.3000],[123.9200, 10.2800]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Davao People Mover", "type": "rail", "status": "Proposed", "completion": "2030", "budget_php": "30B", "contractor": "TBD", "length_km": 25 },
+      "geometry": { "type": "LineString", "coordinates": [[125.6000, 7.1200],[125.6100, 7.0900],[125.6200, 7.0600],[125.6300, 7.0300]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "MRT-4 (Taytay–Ortigas)", "type": "rail", "status": "Proposed", "completion": "2031", "budget_php": "68B", "contractor": "TBD", "length_km": 15.6 },
+      "geometry": { "type": "LineString", "coordinates": [[121.0617, 14.5866],[121.0900, 14.5800],[121.1200, 14.5700],[121.1500, 14.5650],[121.1700, 14.5600]] }
+    }
+  ]
+}

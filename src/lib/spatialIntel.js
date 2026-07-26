@@ -1,10 +1,11 @@
 import manilaStations from "../data/manila_transit_stations.json";
 import pezaZonesData from "../data/peza_zones_philippines.json";
-import faultSystemData from "../data/philippines_fault_system.json";
+import phivolcsFaults from "../data/phivolcs_active_faults.json";
+import infraProjectsData from "../data/ph_infrastructure_projects.json";
 
-// Haversine distance in meters
+// ─── Haversine distance in meters ────────────────────────────────────────────
 function haversineMeters(lat1, lon1, lat2, lon2) {
-  const R = 6371000; // Earth radius in meters
+  const R = 6371000;
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
   const dLon = ((lon2 - lon1) * Math.PI) / 180;
   const a =
@@ -13,57 +14,52 @@ function haversineMeters(lat1, lon1, lat2, lon2) {
       Math.cos((lat2 * Math.PI) / 180) *
       Math.sin(dLon / 2) *
       Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return Math.round(R * c);
+  return Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
 }
 
-// Nationwide PEZA IT Parks & Ecozones parsed from GeoJSON
+// ─── Point-to-segment perpendicular distance (meters) ────────────────────────
+// Projects point P onto segment A→B and returns shortest distance (clamped to endpoints).
+function pointToSegmentMeters(pLat, pLon, aLat, aLon, bLat, bLon) {
+  const dx = bLon - aLon;
+  const dy = bLat - aLat;
+  if (dx === 0 && dy === 0) return haversineMeters(pLat, pLon, aLat, aLon);
+
+  // t = projection scalar clamped to [0, 1]
+  let t = ((pLon - aLon) * dx + (pLat - aLat) * dy) / (dx * dx + dy * dy);
+  t = Math.max(0, Math.min(1, t));
+
+  const projLon = aLon + t * dx;
+  const projLat = aLat + t * dy;
+  return haversineMeters(pLat, pLon, projLat, projLon);
+}
+
+// ─── Parse PHIVOLCS GeoJSON into fault segment arrays (single source of truth) ──
+const FAULT_LINES = (phivolcsFaults.features || []).map((f) => ({
+  name: f.properties.name,
+  code: f.properties.phivolcs_code,
+  region: f.properties.region,
+  // GeoJSON coordinates are [lng, lat] — convert to {lat, lon} pairs
+  coords: (f.geometry.coordinates || []).map(([lon, lat]) => ({ lat, lon })),
+}));
+
+// ─── Nationwide PEZA IT Parks & Ecozones ─────────────────────────────────────
 const PEZA_ZONES = (pezaZonesData.features || []).map((f) => ({
   name: f.properties.name,
   city: f.properties.city,
   region: f.properties.region,
   lon: f.geometry.coordinates[0],
   lat: f.geometry.coordinates[1],
-  radius: 2000, // 2km spatial radius per ecozone hub
+  radius: 2000,
 }));
 
-// Official PHIVOLCS Valley Fault System (VFS) Ground Trace Points
-const VFS_TRACE_POINTS = [
-  { lat: 14.9800, lon: 121.0820 }, // DRT Bulacan
-  { lat: 14.9150, lon: 121.0720 }, // Norzagaray Bulacan
-  { lat: 14.8650, lon: 121.0650 }, // San Jose del Monte North (Minuyan)
-  { lat: 14.8250, lon: 121.0580 }, // San Jose del Monte South (Kaybanban / San Isidro)
-  { lat: 14.7850, lon: 121.0680 }, // Rodriguez Montalban
-  { lat: 14.7450, lon: 121.0850 }, // San Mateo
-  { lat: 14.7100, lon: 121.0950 }, // QC Payatas
-  { lat: 14.6850, lon: 121.0910 }, // QC Batasan / Commonwealth
-  { lat: 14.6620, lon: 121.0860 }, // QC Bagong Silangan / Loyola Heights
-  { lat: 14.6420, lon: 121.0820 }, // Marikina Barangka / IVC
-  { lat: 14.6220, lon: 121.0780 }, // Pasig Ugong / C-5
-  { lat: 14.6020, lon: 121.0740 }, // Pasig Kapitolyo / Bagong Ilog
-  { lat: 14.5820, lon: 121.0700 }, // Pasig Pineda / Pioneer border
-  { lat: 14.5680, lon: 121.0650 }, // Pasig Kapitolyo / C-5 border
-  { lat: 14.5520, lon: 121.0600 }, // Makati Pembo / Comembo
-  { lat: 14.5340, lon: 121.0550 }, // Taguig Pinagsama / Signal Village
-  { lat: 14.5120, lon: 121.0500 }, // Taguig Western Bicutan
-  { lat: 14.4820, lon: 121.0450 }, // Muntinlupa Sucat
-  { lat: 14.4520, lon: 121.0410 }, // Muntinlupa Cupang / Alabang East
-  { lat: 14.4150, lon: 121.0370 }, // Muntinlupa Putatan / Poblacion
-  { lat: 14.3780, lon: 121.0330 }, // Muntinlupa Tunasan / San Pedro Laguna
-  { lat: 14.3480, lon: 121.0290 }, // San Pedro Laguna
-  { lat: 14.3120, lon: 121.0230 }, // Biñan Laguna
-  { lat: 14.2650, lon: 121.0150 }, // Santa Rosa Laguna
-  { lat: 14.2150, lon: 121.0050 }, // Cabuyao Laguna
-  { lat: 14.1650, lon: 120.9920 }, // Canlubang Calamba / Carmona Cavite
-];
-
-// Flatten all transit stations
+// ─── Flatten transit stations ────────────────────────────────────────────────
 const ALL_STATIONS = [
   ...(manilaStations.lrt1 || []).map((s) => ({ ...s, line: "LRT-1" })),
   ...(manilaStations.lrt2 || []).map((s) => ({ ...s, line: "LRT-2" })),
   ...(manilaStations.mrt3 || []).map((s) => ({ ...s, line: "MRT-3" })),
 ];
 
+// ─── Nearest Transit Station ─────────────────────────────────────────────────
 export function getNearestTransitStation(lat, lon) {
   if (!lat || !lon) return null;
 
@@ -80,16 +76,15 @@ export function getNearestTransitStation(lat, lon) {
 
   if (!closestStation) return null;
 
-  const walkMins = Math.ceil(minDistance / 75);
-
   return {
     station_name: closestStation.name,
     line: closestStation.line,
     distance_meters: minDistance,
-    walk_minutes: walkMins,
+    walk_minutes: Math.ceil(minDistance / 75),
   };
 }
 
+// ─── PEZA Ecozone Check ──────────────────────────────────────────────────────
 export function checkPezaZone(lat, lon) {
   if (!lat || !lon) return { is_accredited: false, zone_name: null };
 
@@ -117,84 +112,87 @@ export function checkPezaZone(lat, lon) {
   return { is_accredited: false, zone_name: null };
 }
 
+// ─── PHIVOLCS Fault Proximity (point-to-segment, all 6 nationwide faults) ───
 export function getFaultLineProximity(lat, lon) {
   if (!lat || !lon) return null;
 
-  let minDistanceMeters = Infinity;
+  let minDist = Infinity;
+  let nearestFault = null;
 
-  for (const pt of VFS_TRACE_POINTS) {
-    const dist = haversineMeters(lat, lon, pt.lat, pt.lon);
-    if (dist < minDistanceMeters) {
-      minDistanceMeters = dist;
+  for (const fault of FAULT_LINES) {
+    const coords = fault.coords;
+    for (let i = 0; i < coords.length - 1; i++) {
+      const dist = pointToSegmentMeters(
+        lat, lon,
+        coords[i].lat, coords[i].lon,
+        coords[i + 1].lat, coords[i + 1].lon
+      );
+      if (dist < minDist) {
+        minDist = dist;
+        nearestFault = fault;
+      }
     }
   }
 
-  const km = (minDistanceMeters / 1000).toFixed(1);
-  const isSafeBuffer = minDistanceMeters >= 5000;
+  if (!nearestFault) return null;
 
+  const km = (minDist / 1000).toFixed(1);
   return {
-    fault_line: "West Valley Fault (PHIVOLCS VFS Atlas)",
+    fault_line: nearestFault.name,
+    fault_code: nearestFault.code,
     distance_km: Number(km),
-    status: isSafeBuffer ? "Safe Buffer (>5km)" : `${km}km from PHIVOLCS VFS trace`,
+    distance_meters: minDist,
+    status: minDist >= 5000 ? "Safe Buffer (>5km)" : `${km}km from ${nearestFault.code} trace`,
   };
 }
 
-/**
- * OpenAQ Air Quality & PM2.5 Telemetry (Open Source Dataset)
- */
-export function getAirQualityInfo(lat, lon) {
-  if (!lat || !lon) return { aqi_index: 22, status: "Good / Fresh Air", pm25: "12 µg/m³" };
+// ─── Infrastructure Megaproject Proximity ────────────────────────────────────
+const INFRA_PROJECTS = (infraProjectsData.features || []).map((f) => {
+  const coords = f.geometry.coordinates;
+  // For LineStrings, use the midpoint; for Points, use the coordinate directly
+  let lat, lon;
+  if (f.geometry.type === "Point") {
+    lon = coords[0]; lat = coords[1];
+  } else {
+    const mid = coords[Math.floor(coords.length / 2)];
+    lon = mid[0]; lat = mid[1];
+  }
+  return { ...f.properties, lat, lon };
+});
+
+export function checkInfraProximity(lat, lon) {
+  if (!lat || !lon) return null;
+
+  let nearest = null;
+  let minDist = Infinity;
+
+  for (const proj of INFRA_PROJECTS) {
+    const dist = haversineMeters(lat, lon, proj.lat, proj.lon);
+    if (dist < minDist) {
+      minDist = dist;
+      nearest = proj;
+    }
+  }
+
+  if (!nearest || minDist > 5000) return null; // only report within 5km
+
   return {
-    aqi_index: 24,
-    status: "Good (Moderate Urban Freshness)",
-    pm25: "14 µg/m³",
-    source: "OpenAQ Environmental Telemetry",
+    name: nearest.name,
+    type: nearest.type,
+    status: nearest.status,
+    completion: nearest.completion,
+    budget_php: nearest.budget_php,
+    distance_km: Number((minDist / 1000).toFixed(1)),
   };
 }
 
-/**
- * VIIRS Nightlights Urban Vibrancy Score (0-100)
- */
-export function getNightVibrancyScore(lat, lon) {
-  const peza = checkPezaZone(lat, lon);
-  const transit = getNearestTransitStation(lat, lon);
-
-  let score = 65;
-  if (peza.is_accredited) score += 20;
-  if (transit && transit.walk_minutes <= 10) score += 15;
-
-  return {
-    score: Math.min(99, score),
-    label: score >= 85 ? "24/7 High Vibrancy District" : "Active Commercial Precinct",
-  };
-}
-
-/**
- * Passive Solar & Thermal Orientation Telemetry (RESA Law Compliant)
- */
-export function getSolarOrientationInfo(lat, lon) {
-  if (!lat || !lon) return { orientation: "East / South-East (Morning Sun)", heat_load: "Optimal Morning Light (Low HVAC Load)" };
-  
-  const isEastFacing = Math.floor((lon || 121) * 100) % 2 === 0;
-  return {
-    orientation: isEastFacing ? "East / South-East (Morning Sun)" : "North / North-East (Ambient Light)",
-    heat_load: isEastFacing ? "Optimal Morning Light (Low HVAC Load)" : "Cool Ambient Light (Minimal Solar Gain)",
-    solar_azimuth: "115° ESE",
-    peak_solar_hours: "06:30 - 11:30 AM",
-  };
-}
-
-/**
- * Computes a Business Continuity & Spatial Risk Index (0-100)
- */
+// ─── Business Continuity & Spatial Risk Index (0-100) ────────────────────────
 export function computeContinuityScore(spatialIntel) {
   if (!spatialIntel) return { score: 75, grade: "Tier 2 Prime Commercial", badge_color: "#F7C64E" };
 
-  let score = 50; // Base score
+  let score = 50;
 
-  if (spatialIntel.peza?.is_accredited) {
-    score += 20;
-  }
+  if (spatialIntel.peza?.is_accredited) score += 20;
 
   if (spatialIntel.transit?.walk_minutes) {
     if (spatialIntel.transit.walk_minutes <= 5) score += 20;
@@ -202,9 +200,10 @@ export function computeContinuityScore(spatialIntel) {
     else if (spatialIntel.transit.walk_minutes <= 15) score += 10;
   }
 
-  if (spatialIntel.seismic?.distance_km >= 5) {
-    score += 10;
-  }
+  if (spatialIntel.seismic?.distance_km >= 5) score += 10;
+
+  // Infrastructure proximity bonus
+  if (spatialIntel.infra) score += 10;
 
   const finalScore = Math.min(100, Math.max(0, score));
 
@@ -215,21 +214,24 @@ export function computeContinuityScore(spatialIntel) {
   };
 }
 
-/**
- * Main Pure Function: Pre-computes spatial intelligence metrics.
- * Runs on backend at publish/save time. Overhead: ~1ms.
- */
+// ─── Main: Pre-compute spatial intelligence metrics (~1ms) ───────────────────
 export function computeSpatialIntel(lat, lon) {
   if (!lat || !lon) return null;
 
   const transit = getNearestTransitStation(lat, lon);
   const peza = checkPezaZone(lat, lon);
   const seismic = getFaultLineProximity(lat, lon);
-  const airQuality = getAirQualityInfo(lat, lon);
-  const nightVibrancy = getNightVibrancyScore(lat, lon);
-  const solar = getSolarOrientationInfo(lat, lon);
 
-  const rawIntel = { transit, peza, seismic, airQuality, nightVibrancy, solar, telecom: { fiber_tier: "Enterprise Tier 4 (Multi-Carrier)" } };
+  // ponytail: solar orientation is a stub — real azimuth needs a DEM or building footprint layer
+  const isEastFacing = Math.floor((lon || 121) * 100) % 2 === 0;
+  const solar = {
+    orientation: isEastFacing ? "East / South-East (Morning Sun)" : "North / North-East (Ambient Light)",
+    heat_load: isEastFacing ? "Optimal Morning Light (Low HVAC Load)" : "Cool Ambient Light (Minimal Solar Gain)",
+  };
+
+  const infra = checkInfraProximity(lat, lon);
+
+  const rawIntel = { transit, peza, seismic, solar, infra, telecom: { fiber_tier: "Enterprise Tier 4 (Multi-Carrier)" } };
   const continuity = computeContinuityScore(rawIntel);
 
   return {
