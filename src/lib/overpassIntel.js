@@ -42,13 +42,35 @@ const OVERPASS_ENDPOINTS = [
   "https://overpass.kumi.systems/api/interpreter",
 ];
 
-const REQUEST_TIMEOUT_MS = 9000;
+// ── TIMEOUTS: sized against Vercel's function limit ──────────────────
+// Measured in production 2026-07-29: a throttled Overpass took 9s to time
+// out, then the mirror took another 9s = 18.5s total. Vercel Hobby caps
+// functions at ~10s, so that request is a guaranteed 504 — the user waits,
+// then gets nothing.
+//
+// Budget is now ~9s WORST CASE across both endpoints, so the route always
+// returns something (an honest blank) inside the platform limit.
+const REQUEST_TIMEOUT_MS = 4200;
+const TOTAL_BUDGET_MS = 9000;
+
 const MEMORY_TTL_MS = 30 * 60 * 1000;   // 30 min in-process
 const REDIS_TTL_S = 60 * 60 * 24 * 7;   // 7 days — POIs move slowly
-const DEFAULT_RADIUS_M = 1200;          // ~15 min walk
+
+// ── NEGATIVE CACHE ───────────────────────────────────────────────────
+// Failures were not cached at all, so a throttled Overpass got re-hammered
+// on every single page load — which is exactly how a temporary 429 becomes
+// a permanent one. 90s is long enough to let a rate limit clear, short
+// enough that a real outage recovers quickly.
+const FAILURE_TTL_MS = 90 * 1000;
+
+// 900 m, not 1200. Overpass cost scales with area × filter count, and 15
+// filters at 1200 m throttled repeatedly in production while 900 m returned
+// 25 POIs in 3.5s. In a Philippine CBD 900 m is still a ~11 min walk.
+const DEFAULT_RADIUS_M = 900;
 const MAX_PER_LAYER = 8;
 
 const memoryCache = new Map();
+const failureCache = new Map();
 const inflight = new Map();
 
 // ── Layer definitions ────────────────────────────────────────────────────
@@ -162,7 +184,10 @@ export function buildOverpassQuery(lat, lon, radiusM = DEFAULT_RADIUS_M) {
   // so verbosity (tags) precedes geometry (center). The parser is reportedly
   // order-tolerant, but the documented order is the one that's guaranteed.
   // `center` is what gives ways and relations a usable lat/lon.
-  return `[out:json][timeout:25];
+  // [timeout:12], not 25. Overpass honours this server-side; a value above
+  // our own client budget just means we abort a query the server is still
+  // happily working on, which wastes their capacity and earns more throttling.
+  return `[out:json][timeout:12];
 (
   ${clauses}
 );
@@ -231,10 +256,17 @@ export function shapeOverpassResponse(json, lat, lon) {
 // ── Network ──────────────────────────────────────────────────────────────
 async function fetchOverpass(query) {
   let lastError = null;
+  const deadline = Date.now() + TOTAL_BUDGET_MS;
 
   for (const endpoint of OVERPASS_ENDPOINTS) {
+    // Don't start a second attempt we can't finish inside the budget —
+    // that's how one slow endpoint plus one mirror became an 18s request
+    // and a Vercel 504.
+    const remaining = deadline - Date.now();
+    if (remaining < 800) break;
+
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+    const timer = setTimeout(() => controller.abort(), Math.min(REQUEST_TIMEOUT_MS, remaining));
     try {
       const res = await fetch(endpoint, {
         method: "POST",
@@ -289,6 +321,14 @@ export async function getOverpassIntel(lat, lon, radiusM = DEFAULT_RADIUS_M) {
     return { ...hit.value, cached: true };
   }
 
+  // Recent failure? Return the honest blank immediately instead of queuing
+  // behind another throttled request. Without this, a rate-limited Overpass
+  // gets hammered on every page load and never gets the chance to recover.
+  const failed = failureCache.get(key);
+  if (failed && Date.now() - failed.at < FAILURE_TTL_MS) {
+    return { ok: false, layers: emptyLayers(), radiusM, cached: true, throttled: true };
+  }
+
   if (inflight.has(key)) return inflight.get(key);
 
   const task = (async () => {
@@ -306,6 +346,7 @@ export async function getOverpassIntel(lat, lon, radiusM = DEFAULT_RADIUS_M) {
       const layers = shapeOverpassResponse(json, lat, lon);
       const value = { ok: true, layers, radiusM };
 
+      failureCache.delete(key); // recovered
       memoryCache.set(key, { at: Date.now(), value });
       if (redis) {
         try {
@@ -316,6 +357,9 @@ export async function getOverpassIntel(lat, lon, radiusM = DEFAULT_RADIUS_M) {
       return { ...value, cached: false };
     } catch (error) {
       console.error("[overpassIntel] lookup failed:", error.message);
+      // Remember the failure briefly so the next page load doesn't pile
+      // another request onto an endpoint that's already throttling us.
+      failureCache.set(key, { at: Date.now() });
       // Honest blank, not a crash. The chapter renders "no verified nodes".
       return { ok: false, layers: emptyLayers(), radiusM, cached: false };
     } finally {

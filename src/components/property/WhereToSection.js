@@ -23,7 +23,11 @@ import { useCallback, useEffect, useState } from "react";
 
 const MONO = "'Courier New',monospace";
 
-export default function WhereToSection({ lat, lng, radiusM = 1200, onIsochrone }) {
+// 900 m, matching DEFAULT_RADIUS_M in lib/overpassIntel.js. 1200 m throttled
+// repeatedly against live Overpass (15 filters × a large area); 900 m returned
+// 25 POIs reliably. Still roughly an 11-minute walk. If these two numbers ever
+// disagree again, the component wins and the server default is dead code.
+export default function WhereToSection({ lat, lng, radiusM = 900, onIsochrone }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
