@@ -34,6 +34,10 @@ export default function OnboardingPage() {
   // Turnstile token for Supabase's auth CAPTCHA. Single-use — the ref lets
   // us reset the widget after ANY failed attempt, otherwise a retry reuses
   // a spent token and Cloudflare rejects it as timeout-or-duplicate.
+  // True once the user has explicitly confirmed they want a NEW account on
+  // this email. Guards against a typo'd address silently becoming a phantom
+  // account — see the comment block in handleAuth.
+  const [confirmNewAccount, setConfirmNewAccount] = useState(false);
   const [captchaToken, setCaptchaToken] = useState("");
   const turnstileRef = useRef(null);
   const resetCaptcha = () => turnstileRef.current?.reset();
@@ -96,6 +100,13 @@ export default function OnboardingPage() {
     checkSession();
   }, [router]);
 
+  // Editing the email invalidates any prior "yes, create it" — otherwise
+  // confirming for jaun@ and then fixing it to juan@ would skip the check.
+  const setEmail = (value) => {
+    setConfirmNewAccount(false);
+    setFormData((d) => ({ ...d, email: value }));
+  };
+
   const handleAuth = async () => {
     try {
       if (useOtp) {
@@ -147,8 +158,28 @@ export default function OnboardingPage() {
         }
       }
 
-      // If sign in fails, try sign up.
+      // ── NEVER silently create an account on a failed sign-in ────────
       //
+      // This used to fall straight through to signUp on ANY sign-in failure,
+      // so a mistyped email ("jaun@" for "juan@") silently created a BRAND
+      // NEW account on the wrong address. The person landed in an empty
+      // dashboard and reasonably concluded their listings had vanished.
+      //
+      // We CANNOT tell the two cases apart from the error: Supabase returns
+      // the same generic "Invalid login credentials" for a wrong password and
+      // for an unknown email — deliberately, so the endpoint can't be used to
+      // enumerate who holds an account. Good security, but it means guessing
+      // is the only alternative to asking.
+      //
+      // So we ask. One extra click for genuinely new users; zero phantom
+      // accounts. The email is echoed back verbatim so a typo is visible at
+      // the moment it matters.
+      if (!confirmNewAccount) {
+        resetCaptcha();
+        setConfirmNewAccount(true);
+        return;
+      }
+
       // The sign-in attempt above already REDEEMED the captcha token — tokens
       // are single-use. Reusing it here would fail every new signup with
       // `timeout-or-duplicate`, so wait for a fresh one first. A managed
@@ -199,7 +230,7 @@ export default function OnboardingPage() {
             type="email" 
             placeholder="julian@example.com"
             value={formData.email}
-            onChange={e => setFormData({...formData, email: e.target.value})}
+            onChange={e => setEmail(e.target.value)}
           />
         </div>
         <div className="flex flex-col gap-2">
@@ -233,6 +264,30 @@ export default function OnboardingPage() {
         </div>
       </div>
       
+      {/* Typo guard (LOGIC_TO_TIGHTEN L3). Sign-in failed and we cannot tell
+          "wrong password" from "no such account" — Supabase returns the same
+          error for both on purpose. So show the address back and let them
+          decide, instead of silently creating an account on a typo. */}
+      {confirmNewAccount && (
+        <div className="mb-4 rounded border border-gold-accent/30 bg-gold-accent/5 p-4">
+          <p className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase mb-2">
+            No account signed in
+          </p>
+          <p className="text-sm text-text-secondary leading-relaxed mb-1">
+            We couldn&apos;t sign you in with that email and password.
+          </p>
+          <p className="text-sm text-on-surface font-working-title break-all mb-3">
+            {formData.email}
+          </p>
+          <p className="text-xs text-text-secondary leading-relaxed">
+            If the password is wrong, fix it and try again. If that address is
+            correct and you&apos;re new here, press the button again to create an
+            account. <strong className="text-on-surface">Check the spelling first</strong> —
+            a typo creates a separate, empty account.
+          </p>
+        </div>
+      )}
+
       {/* Bot check. Must be satisfied before any auth call so Supabase's
           Attack Protection CAPTCHA can be turned on without locking anyone
           out — see the comment block in lib/authClient.js. */}
@@ -255,7 +310,7 @@ export default function OnboardingPage() {
           !captchaToken
         }
       >
-        {useOtp && !otpSent ? "Send Verification Code →" : useOtp && otpSent ? "Verify & Continue →" : "Sign in with email →"}
+        {useOtp && !otpSent ? "Send Verification Code →" : useOtp && otpSent ? "Verify & Continue →" : confirmNewAccount ? "Yes — create my account →" : "Sign in with email →"}
       </button>
 
       {!otpSent && (
