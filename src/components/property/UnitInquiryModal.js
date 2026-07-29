@@ -23,13 +23,14 @@ const backdropVariants = {
 };
 
 const modalVariants = {
-  hidden: { y: 30, scale: 0.95, opacity: 0 },
+  hidden: { y: 16, scale: 0.95, opacity: 0 },
   visible: { y: 0, scale: 1, opacity: 1 },
-  exit: { y: 20, scale: 0.95, opacity: 0 }
+  exit: { y: 12, scale: 0.96, opacity: 0 }
 };
 
-const modalTransition = { type: "spring", stiffness: 300, damping: 30 };
-const backdropTransition = { duration: 0.4 };
+const modalTransition = { type: "spring", stiffness: 380, damping: 28 };
+const backdropTransition = { duration: 0.2 };
+
 
 const successVariants = {
   hidden: { opacity: 0, scale: 0.9 },
@@ -164,6 +165,25 @@ export default function UnitInquiryModal({ isOpen, onClose, propertyTitle, prope
                         Your email and phone number are hidden. They will only see your ScoutIt profile until you
                         choose to share contact details in the chat.
                       </p>
+
+                      {/* Transaction Integrity & Security Protocol Warning */}
+                      <div className="my-4 p-3.5 bg-white/[0.02] border border-gold-accent/20 rounded-md text-[11px] leading-relaxed text-[#a0a0a0]">
+                        <div className="flex items-center gap-1.5 text-gold-accent font-mono font-semibold uppercase tracking-wider mb-1.5 text-[10px]">
+                          <span>⚠️ TRANSACTION INTEGRITY & SECURITY PROTOCOL</span>
+                        </div>
+                        <p className="mb-1.5">
+                          <strong>ScoutIt performs baseline verification (PRC checks &amp; identity matching) for listed providers.</strong> Users must perform independent due diligence.
+                        </p>
+                        <p className="mb-1.5 text-red-400 font-medium">
+                          🛑 <strong>NEVER pay upfront reservation fees or deposits</strong> prior to in-person physical inspection and title/contract verification. ScoutIt does not manage or hold funds.
+                        </p>
+                        <p className="mb-1.5">
+                          ⏱️ <strong>7-Day Purge Window:</strong> Temporary chatboxes remain accessible in your archive for <strong>7 days</strong>, after which all raw messages are <strong>permanently deleted forever</strong> from servers.
+                        </p>
+                        <div className="pt-1.5 border-t border-white/5 font-mono text-[9px] text-[#888]">
+                          Display-only platform operating in compliance with <strong>RA 9646 (Real Estate Service Act of the Philippines)</strong>.
+                        </div>
+                      </div>
                     </div>
 
                     <form className="flex flex-col gap-4" onSubmit={handleSubmit}>

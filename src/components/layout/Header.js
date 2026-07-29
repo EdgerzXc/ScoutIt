@@ -39,9 +39,8 @@ export default function Header() {
     };
   }, []);
 
-  const profileHref = user?.name
-    ? `/profile/${encodeURIComponent(user.name)}`
-    : "/onboarding";
+  const profileHref = user ? "/profile" : "/onboarding";
+
 
   return (
     <header className="global-header">

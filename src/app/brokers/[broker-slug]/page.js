@@ -130,8 +130,9 @@ export default async function BrokerDetailPage({ params }) {
 
         {/* Connection Form Component (Client Side) */}
         <section className="portal-section">
-          <ConnectionPortal brokerName={broker.name} />
+          <ConnectionPortal brokerName={broker.name} brokerId={broker.id} />
         </section>
+
 
       </main>
       <Footer />

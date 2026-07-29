@@ -4,6 +4,8 @@ import dynamic from "next/dynamic";
 import BottomNav from "@/components/layout/BottomNav";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import DynamicOverlays from "@/components/layout/DynamicOverlays";
+import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
+import JsonLd from "@/components/seo/JsonLd";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -48,6 +50,9 @@ export const metadata = {
     title: "ScoutIt — Space Intelligence",
     description: "ScoutIt transforms Philippine real estate into intelligent property briefings. Scout smarter, move faster.",
   },
+  ...(process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
+    ? { verification: { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION } }
+    : {}),
 };
 
 export const viewport = {
@@ -61,6 +66,8 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body>
+        <GoogleAnalytics />
+        <JsonLd />
         {/* Lite Mode no-flash: apply the class before paint so low-end phones
             never render the heavy cosmic layers. Defaults on for users who ask
             for reduced motion; otherwise reads the stored preference. */}
@@ -81,3 +88,4 @@ export default function RootLayout({ children }) {
     </html>
   );
 }
+

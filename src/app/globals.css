@@ -69,13 +69,15 @@
   --font-body: var(--font-geist-sans), system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: var(--font-geist-mono), 'Courier New', monospace;
 
-  /* Motion */
-  --transition: 0.38s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-fast: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-slow: 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Motion — Emil Kowalski & Anti-Slop 160ms Snappy Transitions */
+  --transition: 0.16s cubic-bezier(0.23, 1, 0.32, 1);
+  --transition-fast: 0.12s cubic-bezier(0.23, 1, 0.32, 1);
+  --transition-slow: 0.3ms cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-out-custom: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
   --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
 
   /* Spacing Scale */
   --space-xs: 4px;
@@ -273,16 +275,16 @@ a:hover {
   50%      { box-shadow: 0 0 32px rgba(232,174,60,0.5),  0 4px 16px rgba(0,0,0,0.35); }
 }
 
-/* ── HIGH-END MOTION UTILITIES ── */
+/* ── HIGH-END MOTION UTILITIES (Emil Kowalski + Taste-Skill Precision) ── */
 .stagger-enter {
-  animation: staggerFadeIn 500ms var(--ease-out-quart) backwards;
-  animation-delay: calc(var(--i, 0) * 50ms);
+  animation: staggerFadeIn 200ms cubic-bezier(0.23, 1, 0.32, 1) backwards;
+  animation-delay: calc(var(--i, 0) * 30ms);
 }
 
 @keyframes staggerFadeIn {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -291,19 +293,55 @@ a:hover {
 }
 
 .animate-slide-up-fade {
-  animation: slideUpFade 400ms var(--ease-out-quart) forwards;
+  animation: slideUpFade 200ms cubic-bezier(0.23, 1, 0.32, 1) forwards;
 }
 
 @keyframes slideUpFade {
   from {
     opacity: 0;
-    transform: translateY(16px);
+    transform: translateY(12px) scale(0.98);
   }
   to {
     opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Modal Origin-Aware Entrance (Never scale(0)) */
+.animate-modal-entrance {
+  animation: modalScaleIn 180ms cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+@keyframes modalScaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* iOS-Style Drawer Slide Curve */
+.animate-drawer-slide {
+  animation: drawerSlideUp 220ms cubic-bezier(0.32, 0.72, 0, 1) forwards;
+}
+
+@keyframes drawerSlideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
     transform: translateY(0);
   }
 }
+
+/* Status Badge & PRC Trust Transition */
+.status-badge-transition {
+  transition: background-color 200ms ease, border-color 200ms ease, color 200ms ease, box-shadow 200ms ease;
+}
+
 
 /* â”€â”€ HOMEPAGE DESCENT ARCHITECTURE â”€â”€ */
 [data-descent-layer] {
@@ -1526,9 +1564,9 @@ html.lite-mode .atmosphere-broker::after {
   scrollbar-width: none;
 }
 
-/* ── INTERACTIVE AFFORDANCE (Objective 2) ── */
-button, [role="button"], a[class*="btn"], a[class*="cta"], .reaction-tile {
-  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.25s ease, background-color 0.25s ease, color 0.25s ease;
+/* ── INTERACTIVE AFFORDANCE (Emil Kowalski + Taste-Skill Snappy Touch) ── */
+button, [role="button"], a[class*="btn"], a[class*="cta"], .reaction-tile, .card, [class*="card"], .hov-card {
+  transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 160ms cubic-bezier(0.23, 1, 0.32, 1), border-color 160ms ease, background-color 160ms ease, color 160ms ease;
   will-change: transform;
 }
 
@@ -1541,9 +1579,11 @@ button:not(:disabled):hover, [role="button"]:not([aria-disabled="true"]):hover, 
   color: var(--brand);
 }
 
-button:not(:disabled):active, [role="button"]:not([aria-disabled="true"]):active, a[class*="btn"]:active, a[class*="cta"]:active, .reaction-tile:not(:disabled):active {
-  transform: scale(0.98);
+button:not(:disabled):active, [role="button"]:not([aria-disabled="true"]):active, a[class*="btn"]:active, a[class*="cta"]:active, .reaction-tile:not(:disabled):active, .card:active, [class*="card"]:active, .hov-card:active {
+  transform: scale(0.97) !important;
 }
+
+
 
 button:disabled, button[disabled], [aria-disabled="true"], .disabled-state {
   opacity: 0.4;
