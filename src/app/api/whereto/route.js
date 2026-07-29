@@ -35,10 +35,22 @@ export async function GET(req) {
       return NextResponse.json({ success: false, message: "Coordinates out of range" }, { status: 400 });
     }
 
-    const requested = Number(params.get("radius"));
-    const radius = Number.isFinite(requested)
-      ? Math.min(MAX_RADIUS, Math.max(MIN_RADIUS, requested))
-      : undefined;
+    // BUG (found in live verification 2026-07-29): this read
+    //   Number(params.get("radius"))
+    // and `Number(null)` is 0, which IS finite — so an omitted radius fell
+    // into the clamp and became MIN_RADIUS (300 m) instead of leaving it
+    // undefined for the 1200 m default. Every caller that didn't pass an
+    // explicit radius silently searched a quarter of the intended area. In a
+    // dense district that just under-reports; in a quiet one it renders
+    // "no verified nodes" for a perfectly walkable address.
+    const rawRadius = params.get("radius");
+    let radius;
+    if (rawRadius !== null && rawRadius.trim() !== "") {
+      const requested = Number(rawRadius);
+      if (Number.isFinite(requested)) {
+        radius = Math.min(MAX_RADIUS, Math.max(MIN_RADIUS, requested));
+      }
+    }
 
     const wantIsochrone = params.get("isochrone") !== "0";
 
