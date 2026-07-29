@@ -292,7 +292,7 @@ async function fetchOverpass(query) {
           "Content-Type": "application/x-www-form-urlencoded",
           // Overpass asks for an identifying UA so they can contact abusers
           // instead of silently banning the IP range.
-          "User-Agent": "ScoutIt/1.0 (+https://scoutit.ph)",
+          "User-Agent": "ScoutIt/1.0 (+https://scoutit.space)",
         },
         body: `data=${encodeURIComponent(query)}`,
         signal: controller.signal,

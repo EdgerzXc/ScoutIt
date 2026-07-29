@@ -25,6 +25,8 @@
 // ═══════════════════════════════════════════════════════════════
 
 /** Escapes one CSV cell per RFC 4180. */
+import { siteUrl } from "./siteUrl";
+
 function csvCell(value) {
   const s = value === null || value === undefined ? "" : String(value);
   // A leading =, +, - or @ makes Excel and Sheets treat the cell as a
@@ -65,7 +67,9 @@ export function normaliseLead(lead = {}) {
     email: lead.email || contact.email || "",
     phone: lead.phone || contact.phone || "",
     property: lead.propertyTitle || lead.property?.title || lead.targetListing?.title || "",
-    propertyUrl: lead.propertyUrl || (lead.propertySlug ? `https://scoutit.ph/property/${lead.propertySlug}` : ""),
+    // Built from siteUrl, never a hardcoded host — an exported lead with a
+    // dead link is worse than one with no link.
+    propertyUrl: lead.propertyUrl || (lead.propertySlug ? siteUrl(`/property/${lead.propertySlug}`) : ""),
     budget: lead.budget || "",
     status: lead.status || "",
     message: lead.pitchMessage || lead.pitch_message || lead.message || "",

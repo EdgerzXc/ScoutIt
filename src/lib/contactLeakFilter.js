@@ -27,6 +27,8 @@
 // is lost revenue.
 // ─────────────────────────────────────────────────────────────────────────
 
+import { ownDomainsPattern } from "./siteUrl";
+
 const WORD_DIGITS = {
   zero: "0", oh: "0", one: "1", two: "2", three: "3", four: "4",
   five: "5", six: "6", seven: "7", eight: "8", nine: "9",
@@ -124,8 +126,16 @@ const RULES = [
   {
     code: "external_link",
     view: "deob",
-    // Any URL that isn't scoutit.ph
-    pattern: /\b(?:https?:\/\/|www\.)(?!(?:[a-z0-9-]+\.)*scoutit\.ph\b)[a-z0-9-]+\.[a-z]{2,}/,
+    // Any URL that isn't one of OURS. The allowed hosts come from
+    // lib/siteUrl.js — NEVER hardcode a hostname here.
+    //
+    // This used to hardcode `scoutit\.ph`. When the domain moved to
+    // scoutit.space, that would have started rejecting legitimate links to
+    // our own site as "external" — looking like a flaky filter rather than a
+    // stale constant.
+    pattern: new RegExp(
+      `\\b(?:https?:\\/\\/|www\\.)(?!(?:[a-z0-9-]+\\.)*(?:${ownDomainsPattern()})\\b)[a-z0-9-]+\\.[a-z]{2,}`,
+    ),
     message: "External links can't be posted in public Q&A.",
   },
   {

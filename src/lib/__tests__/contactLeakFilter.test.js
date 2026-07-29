@@ -41,6 +41,7 @@ describe('contactLeakFilter — must ALLOW legitimate property talk', () => {
     'Monthly dues are 95 per sqm, turnover was 2023.',
     'Elevator wait is about 3 minutes at 8am.',
     'Yes, parking slot 14B is included in the CCT.',
+    'See https://scoutit.space/property/one-bgc for the floor plan.',
     'See https://scoutit.ph/property/one-bgc for the floor plan.',
     'Built in 2019, renovated 2024. Price is 45000000.',
     'Asking is P 145,000,000 net of taxes.',
@@ -64,9 +65,16 @@ describe('contactLeakFilter — edge cases', () => {
     expect(detectContactLeak(undefined).clean).toBe(true);
   });
 
-  it('never flags our own domain as an external link', () => {
-    expect(detectContactLeak('https://scoutit.ph/intel/bgc-flood').clean).toBe(true);
-    expect(detectContactLeak('https://www.scoutit.ph/discover').clean).toBe(true);
+  // The allowed hosts come from lib/siteUrl.js OWN_DOMAINS. When the domain
+  // moved scoutit.ph -> scoutit.space, a hardcoded hostname here would have
+  // started rejecting links to our own site as "external".
+  it.each([
+    ['https://scoutit.space/intel/bgc-flood'],
+    ['https://www.scoutit.space/discover'],
+    ['https://scoutit.ph/intel/bgc-flood'],
+    ['https://www.scoutit.ph/discover'],
+  ])('never flags our own domain as external: %s', (url) => {
+    expect(detectContactLeak(url).clean).toBe(true);
   });
 
   it('rejectIfContactLeak returns null when clean', () => {

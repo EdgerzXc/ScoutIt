@@ -73,7 +73,9 @@ describe('leadToText', () => {
 
   it('includes contact details and the property URL', () => {
     expect(text).toContain('Email: juan@example.com');
-    expect(text).toContain('scoutit.ph/property/one-bgc');
+    // Asserts the PATH, not the host — the host comes from siteUrl and
+    // changed once already (scoutit.ph -> scoutit.space).
+    expect(text).toContain('/property/one-bgc');
   });
 
   it('ends with attribution', () => {
