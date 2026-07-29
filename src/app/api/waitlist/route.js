@@ -10,6 +10,7 @@
 // import { supabase } from "@/lib/supabaseClient";
 import { z } from "zod";
 import { stripAllTags } from "@/lib/sanitize";
+import { turnstileGuard } from "@/lib/turnstile";
 
 const waitlistSchema = z.object({
   email: z.string().email("Invalid email format").max(255),
@@ -36,25 +37,14 @@ export async function POST(req) {
   const { email, role, tier, source: rawSource, turnstileToken } = result.data;
   const source = stripAllTags(rawSource || "site");
 
-  // Verify Turnstile Token
-  const TURNSTILE_SECRET_KEY = process.env.TURNSTILE_SECRET_KEY || "1x0000000000000000000000000000000AA";
-  try {
-    const cfFormData = new FormData();
-    cfFormData.append('secret', TURNSTILE_SECRET_KEY);
-    cfFormData.append('response', turnstileToken);
-
-    const cfRes = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-      method: 'POST',
-      body: cfFormData
-    });
-    
-    const cfData = await cfRes.json();
-    if (!cfData.success) {
-      return Response.json({ ok: false, error: "Captcha verification failed. Are you a bot?" }, { status: 403 });
-    }
-  } catch (error) {
-    return Response.json({ ok: false, error: "Could not reach captcha service." }, { status: 500 });
-  }
+  // ── Bot check ────────────────────────────────────────────────────────
+  // Delegated to the shared canonical helper (src/lib/turnstile.js). The
+  // previous inline version defaulted to Cloudflare's TEST secret, which
+  // makes siteverify return success for ANY token — so if the env var was
+  // ever unset in production, this endpoint had no bot protection at all
+  // while still appearing to be protected. The helper fails closed instead.
+  const captchaFailure = await turnstileGuard(req, turnstileToken);
+  if (captchaFailure) return captchaFailure;
 
   // ── POST-RESET: persist to Supabase ───────────────────────────────────────
   // const { error } = await supabase

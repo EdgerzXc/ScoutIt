@@ -5,6 +5,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { syncPropertyUnitsToAirtable } from "@/lib/unitsSync";
 import { notifyAttachedBrokers } from "@/lib/notifications";
 import { logActivity } from "@/lib/crmActivity";
+import { sanitizeError } from "@/lib/sanitizeError";
 
 // Owner accepts an operator's handshake request and picks which specific
 // units to hand over. Per SCOUTIT_MASTER_BUILD_SPEC.md §9.2/locked decision
@@ -93,7 +94,7 @@ export async function GET(request) {
     });
   } catch (err) {
     console.error("[DELEGATE API] GET error:", err);
-    return NextResponse.json({ error: err.message || "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: sanitizeError(err) }, { status: 500 });
   }
 }
 
@@ -251,6 +252,6 @@ export async function POST(request) {
     return NextResponse.json({ success: true, status: "accepted", delegatedUnitIds: unitIds, ...(warning ? { warning } : {}) });
   } catch (err) {
     console.error("[DELEGATE API] Error:", err);
-    return NextResponse.json({ error: err.message || "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: sanitizeError(err) }, { status: 500 });
   }
 }

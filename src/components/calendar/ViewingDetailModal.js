@@ -70,8 +70,8 @@ export default function ViewingDetailModal({ viewing, onRespond, respondingId, o
                 type="button"
                 onClick={() => onRespond(viewing.id, "cancelled")}
                 disabled={respondingId === viewing.id}
-                className="flex-1 text-xs text-error border border-error/30 py-2 rounded hover:bg-error/10
-                  uppercase tracking-wider font-mono disabled:opacity-50"
+                className="flex-1 text-xs text-error border border-error/30 py-2 rounded hover:bg-error/10 active:scale-[0.97]
+                  uppercase tracking-wider font-mono disabled:opacity-50 transition-all duration-160 ease-out"
               >
                 Decline
               </button>
@@ -79,8 +79,8 @@ export default function ViewingDetailModal({ viewing, onRespond, respondingId, o
                 type="button"
                 onClick={() => onRespond(viewing.id, "confirmed")}
                 disabled={respondingId === viewing.id}
-                className="flex-1 text-xs text-background bg-gold-accent py-2 rounded hover:bg-gold-bright
-                  uppercase tracking-wider font-mono disabled:opacity-50"
+                className="flex-1 text-xs text-background bg-gold-accent py-2 rounded hover:bg-gold-bright active:scale-[0.97]
+                  uppercase tracking-wider font-mono font-semibold shadow-[0_0_12px_rgba(232,174,60,0.25)] disabled:opacity-50 transition-all duration-160 ease-out"
               >
                 Accept
               </button>

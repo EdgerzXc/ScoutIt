@@ -8,6 +8,7 @@ import {
   addDays,
 } from "@/lib/calendar/calendarDates";
 import { EVENT_COLOR_STYLES } from "./EventChip";
+import { sanitizeError } from "@/lib/sanitizeError";
 
 const COLOR_KEYS = Object.keys(EVENT_COLOR_STYLES);
 
@@ -98,7 +99,7 @@ export default function EventEditorModal({ seed, onSave, onDelete, onClose, savi
         color: form.color,
       });
     } catch (err) {
-      setError(err.message || "Couldn't save the event.");
+      setError(sanitizeError(err, "Couldn't save the event."));
     }
   };
 
@@ -233,8 +234,8 @@ export default function EventEditorModal({ seed, onSave, onDelete, onClose, savi
                 type="button"
                 onClick={() => onDelete(seed.id)}
                 disabled={saving}
-                className="text-xs text-error border border-error/30 px-3 py-2 rounded hover:bg-error/10
-                  uppercase tracking-wider font-mono disabled:opacity-50"
+                className="text-xs text-error border border-error/30 px-3 py-2 rounded hover:bg-error/10 active:scale-[0.97]
+                  uppercase tracking-wider font-mono disabled:opacity-50 transition-all duration-160 ease-out"
               >
                 Delete
               </button>
@@ -245,15 +246,15 @@ export default function EventEditorModal({ seed, onSave, onDelete, onClose, savi
               <button
                 type="button"
                 onClick={onClose}
-                className="text-sm text-text-secondary px-4 py-2 rounded hover:bg-surface-variant"
+                className="text-sm text-text-secondary px-4 py-2 rounded hover:bg-surface-variant active:scale-[0.97] transition-all duration-160 ease-out"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={saving}
-                className="text-sm text-background bg-gold-accent hover:bg-gold-bright px-5 py-2 rounded
-                  font-working-title disabled:opacity-50"
+                className="text-sm text-background bg-gold-accent hover:bg-gold-bright active:scale-[0.97] px-5 py-2 rounded
+                  font-working-title font-semibold shadow-[0_0_12px_rgba(232,174,60,0.25)] transition-all duration-160 ease-out disabled:opacity-50"
               >
                 {saving ? "Saving…" : isEdit ? "Save" : "Create"}
               </button>

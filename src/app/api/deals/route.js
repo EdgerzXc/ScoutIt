@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { logActivity } from "@/lib/crmActivity";
+import { sanitizeError } from "@/lib/sanitizeError";
 
 export const dynamic = "force-dynamic";
 
@@ -126,7 +127,7 @@ export async function GET(request) {
     return NextResponse.json({ deals: result });
   } catch (err) {
     console.error("[DEALS API] GET error:", err);
-    return NextResponse.json({ error: err.message || "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: sanitizeError(err) }, { status: 500 });
   }
 }
 
@@ -212,6 +213,6 @@ export async function POST(request) {
     return NextResponse.json({ success: true, deal });
   } catch (err) {
     console.error("[DEALS API] POST error:", err);
-    return NextResponse.json({ error: err.message || "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: sanitizeError(err) }, { status: 500 });
   }
 }

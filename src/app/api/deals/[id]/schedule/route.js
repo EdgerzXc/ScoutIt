@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { logActivity } from "@/lib/crmActivity";
+import { sanitizeError } from "@/lib/sanitizeError";
 
 export async function POST(request, { params }) {
   try {
@@ -88,6 +89,6 @@ export async function POST(request, { params }) {
 
     return NextResponse.json({ success: true, appointment });
   } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: sanitizeError(error) }, { status: 500 });
   }
 }

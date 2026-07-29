@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { crmFetch } from "@/lib/crmClient";
+import { sanitizeError } from "@/lib/sanitizeError";
 
 const ERROR_COPY = {
   denied: "Google connection was cancelled.",
@@ -68,7 +69,7 @@ export default function ConnectCalendarPanel({ userId, addToast }) {
       // Most likely an expired sign-in session (401) — tell the user plainly.
       const msg = /unauthor/i.test(e?.message || "")
         ? "Your sign-in expired — please refresh and log in again, then reconnect."
-        : e?.message || "Couldn't start Google connect.";
+        : sanitizeError(e, "Couldn't start Google connect.");
       addToast?.(msg, "❌");
     } finally {
       setBusy(false);
@@ -88,7 +89,7 @@ export default function ConnectCalendarPanel({ userId, addToast }) {
       );
       window.dispatchEvent(new Event("calendar:refresh"));
     } catch (e) {
-      addToast?.(e.message || "Sync failed.", "❌");
+      addToast?.(sanitizeError(e, "Sync failed."), "❌");
     } finally {
       setBusy(false);
     }

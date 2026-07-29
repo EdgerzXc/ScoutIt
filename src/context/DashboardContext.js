@@ -14,8 +14,34 @@ const DashboardContext = createContext();
 const DEFAULT_MAP_CENTER = [121.0215, 14.5547]; 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
 
+const DEFAULT_CONTEXT_VALUE = {
+  listings: [],
+  pitches: [],
+  notifications: [],
+  connects: 5,
+  currentUser: null,
+  toasts: [],
+  savedIds: [],
+  isLoading: false,
+  addToast: () => {},
+  toggleSave: () => {},
+  raiseQuest: async () => false,
+  updateListing: async () => false,
+  closeListing: async () => {},
+  publishListing: async () => false,
+  addListing: async () => {},
+  bulkAddListings: async () => false,
+  addConciergeListing: async () => {},
+  sendPitch: async () => false,
+  inviteBroker: async () => false,
+  markNotificationsRead: async () => {},
+  clearAllNotifications: async () => {},
+  addNotification: async () => {},
+};
+
 export function useDashboard() {
-  return useContext(DashboardContext);
+  const context = useContext(DashboardContext);
+  return context || DEFAULT_CONTEXT_VALUE;
 }
 
 export function DashboardProvider({ children }) {

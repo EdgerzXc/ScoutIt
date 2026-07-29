@@ -79,7 +79,7 @@ test.describe('Viewing appointment lifecycle', () => {
       await route.fulfill({ status: 200, json: { success: true, status: body.status } });
     });
 
-    await page.goto('http://localhost:3000/dashboard/calendar');
+    await page.goto('http://localhost:3000/dashboard/calendar?view=agenda');
 
     // The real, wired viewing (not the old "John Doe" mock) is rendered.
     await expect(page.getByText('The Paragon Tower')).toBeVisible({ timeout: 15000 });
@@ -117,7 +117,7 @@ test.describe('Viewing appointment lifecycle', () => {
       });
     });
 
-    await page.goto('http://localhost:3000/dashboard/calendar');
+    await page.goto('http://localhost:3000/dashboard/calendar?view=agenda');
 
     await expect(page.getByText('The Paragon Tower')).toBeVisible({ timeout: 15000 });
     // Guests can't confirm — no Accept/Decline, just the confirmed state.

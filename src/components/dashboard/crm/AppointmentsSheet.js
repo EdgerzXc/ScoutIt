@@ -23,6 +23,7 @@ import { formatTime, toDateInputValue, fromDateTimeInputs } from "@/lib/calendar
 import ConnectCalendarPanel from "@/components/calendar/ConnectCalendarPanel";
 import AvailabilityPanel from "@/components/calendar/AvailabilityPanel";
 import EventEditorModal from "@/components/calendar/EventEditorModal";
+import { sanitizeError } from "@/lib/sanitizeError";
 
 const HOUR_MS = 60 * 60 * 1000;
 
@@ -148,7 +149,7 @@ export default function AppointmentsSheet({ appointments = [], onStatusUpdate, u
       }
       setEditorSeed(null);
     } catch (e) {
-      addToast?.(e.message || "Couldn't save the event.", "❌");
+      addToast?.(sanitizeError(e, "Couldn't save the event."), "❌");
     } finally {
       setSavingEvent(false);
     }

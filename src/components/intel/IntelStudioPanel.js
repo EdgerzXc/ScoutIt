@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { UploadCloud, FileText, Eye, Send, X } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import ArticleBlocks from "./ArticleBlocks";
+import { sanitizeError } from "@/lib/sanitizeError";
 
 // Intel Studio — turn any document into a published Intel article.
 // Upload a PDF / CSV / TXT / MD (or paste text), preview the structured
@@ -71,7 +72,7 @@ export default function IntelStudioPanel() {
         });
       }
     } catch (err) {
-      setStatus({ type: "error", text: err.message });
+      setStatus({ type: "error", text: sanitizeError(err) });
     } finally {
       setIsWorking(false);
     }

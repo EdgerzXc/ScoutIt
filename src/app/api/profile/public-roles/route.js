@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { sanitizeError } from "@/lib/sanitizeError";
 
 export const dynamic = "force-dynamic";
 
@@ -49,6 +50,6 @@ export async function GET(request) {
     });
   } catch (err) {
     console.error("[PUBLIC ROLES API] Error:", err);
-    return NextResponse.json({ error: err.message || "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: sanitizeError(err) }, { status: 500 });
   }
 }

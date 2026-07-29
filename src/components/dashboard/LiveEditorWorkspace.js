@@ -9,6 +9,7 @@ import PhotoUploader from "./PhotoUploader";
 import GeoPricingGauge from "./GeoPricingGauge";
 import { getCurrentTier } from "../../lib/entitlements";
 import { useDashboard } from "../../context/DashboardContext";
+import { sanitizeError } from "@/lib/sanitizeError";
 const CATEGORIES = [
   { id: "residential", icon: "🏠", label: "Residential" },
   { id: "commercial", icon: "🏢", label: "Commercial" },
@@ -189,7 +190,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
       addToast("Description optimized for search engines!", "success");
     } catch (err) {
       console.error(err);
-      addToast(err.message, "error");
+      addToast(sanitizeError(err), "error");
     } finally {
       setIsOptimizing(false);
     }
@@ -354,7 +355,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
       }
     } catch (err) {
       console.error(err);
-      setExtractionError(err.message);
+      setExtractionError(sanitizeError(err, "Extraction failed. Please try again."));
     } finally {
       setIsExtracting(false);
     }

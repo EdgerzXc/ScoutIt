@@ -33,7 +33,7 @@ export default function CalendarToolbar({
           onClick={onPrev}
           aria-label="Previous"
           className="w-8 h-8 flex items-center justify-center rounded border border-surface-variant text-text-secondary
-            hover:text-on-surface hover:border-gold-accent/50"
+            hover:text-on-surface hover:border-gold-accent/50 active:scale-[0.97] transition-all duration-160 ease-out"
         >
           ‹
         </button>
@@ -42,7 +42,7 @@ export default function CalendarToolbar({
           onClick={onNext}
           aria-label="Next"
           className="w-8 h-8 flex items-center justify-center rounded border border-surface-variant text-text-secondary
-            hover:text-on-surface hover:border-gold-accent/50"
+            hover:text-on-surface hover:border-gold-accent/50 active:scale-[0.97] transition-all duration-160 ease-out"
         >
           ›
         </button>
@@ -50,25 +50,25 @@ export default function CalendarToolbar({
           type="button"
           onClick={onToday}
           className="text-[11px] uppercase tracking-wider font-mono text-text-secondary border border-surface-variant
-            px-3 h-8 rounded hover:text-on-surface hover:border-gold-accent/50"
+            px-3 h-8 rounded hover:text-on-surface hover:border-gold-accent/50 active:scale-[0.97] transition-all duration-160 ease-out"
         >
           Today
         </button>
-        <h2 className="font-working-title text-lg sm:text-xl text-on-surface ml-1">
+        <h2 className="font-working-title text-lg sm:text-xl text-on-surface ml-1 font-medium">
           {formatMonthYear(viewDate)}
         </h2>
       </div>
 
       {/* Right: view switch + new event */}
       <div className="flex items-center gap-2">
-        <div className="inline-flex rounded-lg border border-surface-variant overflow-hidden">
+        <div className="inline-flex rounded-lg border border-surface-variant overflow-hidden bg-surface/50 backdrop-blur-sm">
           {VIEWS.map((v) => (
             <button
               key={v.id}
               type="button"
               onClick={() => onViewChange(v.id)}
-              className={`px-3 py-1.5 text-[11px] uppercase tracking-wider font-mono transition-colors
-                ${view === v.id ? "bg-gold-accent text-background" : "text-text-secondary hover:bg-surface-variant/40"}`}
+              className={`px-3 py-1.5 text-[11px] uppercase tracking-wider font-mono transition-all duration-160 ease-out active:scale-[0.97]
+                ${view === v.id ? "bg-gold-accent text-background font-semibold" : "text-text-secondary hover:bg-surface-variant/40 hover:text-on-surface"}`}
             >
               {v.label}
             </button>
@@ -77,8 +77,8 @@ export default function CalendarToolbar({
         <button
           type="button"
           onClick={onNewEvent}
-          className="text-sm text-background bg-gold-accent hover:bg-gold-bright px-3 sm:px-4 h-8 rounded
-            font-working-title whitespace-nowrap"
+          className="text-sm text-background bg-gold-accent hover:bg-gold-bright active:scale-[0.97] px-3 sm:px-4 h-8 rounded
+            font-working-title font-semibold whitespace-nowrap shadow-[0_0_12px_rgba(232,174,60,0.25)] transition-all duration-160 ease-out"
         >
           + New
         </button>

@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { z } from "zod";
 import { stripAllTags } from "@/lib/sanitize";
+import { sanitizeError } from "@/lib/sanitizeError";
 
 const propertySchema = z.object({
   title: z.string().max(255).optional(),
@@ -72,7 +73,7 @@ export async function POST(request) {
 
     if (error) {
       console.error("[BULK INSERT] Supabase error:", error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: sanitizeError(error) }, { status: 500 });
     }
 
     return NextResponse.json({ success: true, count: data.length, inserted: data });

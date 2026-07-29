@@ -89,8 +89,15 @@ export default withSentryConfig(nextConfig, {
   // For all available options, see:
   // https://github.com/getsentry/sentry-webpack-plugin#options
   silent: true,
-  org: "scoutit",
-  project: "scoutit-web",
+  // Read from env rather than hardcoding. These only affect SOURCE MAP
+  // UPLOAD (which additionally needs SENTRY_AUTH_TOKEN) — error capture
+  // itself works off NEXT_PUBLIC_SENTRY_DSN alone and doesn't need either.
+  //
+  // Hardcoding them meant a mismatch with the real Sentry project would
+  // silently skip source-map upload with `silent: true` swallowing the
+  // warning: stack traces would arrive minified with no clue why.
+  org: process.env.SENTRY_ORG || "scoutit",
+  project: process.env.SENTRY_PROJECT || "scoutit-web",
 }, {
   // For all available options, see:
   // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/

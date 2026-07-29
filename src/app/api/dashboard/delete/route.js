@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { deleteProperty, deletePropertyById } from "@/lib/airtable";
+import { sanitizeError } from "@/lib/sanitizeError";
 
 export async function POST(request) {
   try {
@@ -94,6 +95,6 @@ export async function POST(request) {
 
   } catch (err) {
     console.error("[DELETE API] Error:", err);
-    return NextResponse.json({ error: err.message || "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: sanitizeError(err) }, { status: 500 });
   }
 }

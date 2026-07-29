@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getShowcaseEntries, BOARD_CATEGORIES, BOARD_AWARDS } from "@/data/mockShowcase";
 import { getCmsBundle } from "@/lib/cmsCache";
+import { sanitizeError } from "@/lib/sanitizeError";
 
 // SHOWCASE_CMS proxy. Entries are derived from the live property feed with
 // seeded demo engagement numbers; when a real SHOWCASE_CMS table exists,
@@ -20,7 +21,7 @@ export async function GET() {
       categories: BOARD_CATEGORIES,
       awards: BOARD_AWARDS,
       source: "mock_error",
-      error: error.message,
+      error: sanitizeError(error, "Showcase data is temporarily unavailable."),
     });
   }
 }

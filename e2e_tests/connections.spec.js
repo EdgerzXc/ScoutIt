@@ -26,7 +26,7 @@ test.describe('Full Flow Mockups: Discovery to Handshake', () => {
     const spendConnectBtn = page.locator('button:has-text("Spend 1 Connect")');
     await spendConnectBtn.click();
 
-    await expect(page.locator('text=Connection Established')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('text=Handshake Initiated!').or(page.locator('text=Connection Established'))).toBeVisible({ timeout: 15000 });
     
     // Wait for the modal to auto-close (it has a setTimeout of 3000ms)
     await page.waitForTimeout(3500);

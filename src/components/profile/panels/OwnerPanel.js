@@ -84,10 +84,11 @@ export default function OwnerPanel({ listings = [], inquiryCount = 0 }) {
 }
 
 const panelStyle = {
-  background: "linear-gradient(165deg, #1a1917, #111110)",
-  border: "1px solid rgba(255,255,255,0.08)",
-  borderRadius: 6,
+  background: "linear-gradient(165deg, rgba(20,20,18,0.85), rgba(12,12,10,0.95))",
+  border: "1px solid var(--border-solid)",
+  borderRadius: 8,
   padding: 24,
+  backdropFilter: "blur(12px)",
 };
 
 const panelHeader = {
@@ -98,21 +99,21 @@ const panelHeader = {
 };
 
 const panelLabel = {
-  fontFamily: "var(--font-body)",
+  fontFamily: "var(--font-mono)",
   fontSize: 10,
   fontWeight: 700,
   letterSpacing: "0.14em",
   textTransform: "uppercase",
-  color: "#E8AE3C",
+  color: "var(--accent)",
 };
 
 const privateBadge = {
-  fontFamily: "var(--font-body)",
+  fontFamily: "var(--font-mono)",
   fontSize: 9,
   letterSpacing: "0.1em",
   textTransform: "uppercase",
   color: "var(--text-secondary)",
-  border: "1px solid rgba(255,255,255,0.08)",
+  border: "1px solid var(--border-solid)",
   padding: "2px 8px",
   borderRadius: 20,
 };
@@ -125,9 +126,9 @@ const statsRow = {
 };
 
 const statCard = {
-  background: "linear-gradient(165deg, #1a1917, #111110)",
-  border: "1px solid rgba(255,255,255,0.08)",
-  borderRadius: 4,
+  background: "linear-gradient(165deg, rgba(26,25,23,0.6), rgba(17,17,16,0.8))",
+  border: "1px solid var(--border-solid)",
+  borderRadius: 6,
   padding: "12px 8px",
   display: "flex",
   flexDirection: "column",
@@ -136,14 +137,14 @@ const statCard = {
 };
 
 const statValue = {
-  fontFamily: "Georgia, serif",
+  fontFamily: "var(--font-display)",
   fontSize: 24,
   color: "#e5e2e1",
   lineHeight: 1.2,
 };
 
 const statLabel = {
-  fontFamily: "var(--font-body)",
+  fontFamily: "var(--font-mono)",
   fontSize: 9,
   color: "var(--text-secondary)",
   letterSpacing: "0.06em",

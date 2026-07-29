@@ -159,6 +159,11 @@ export async function fetchProperties(apiKey, baseId) {
         spaceCategory:   f.SpaceCategory   || "",
         property_type:   f.SpaceTypography || "",
         tenure:          f.Tenure          || "",
+        // Freshness Engine (NEW_IDEAS.md §21). Without this the public
+        // staleness notice can never render — FreshnessBadge would always
+        // see undefined and bail. Null (not a date) when never verified:
+        // missing data must read as "unverified", never as "fresh".
+        last_verified_date: f.Last_Verified_Date || null,
         year_built:      f.YearBuilt       || "",
         furnishing:      f.Furnishing      || "",
         beds:            Number(f.Beds)    || 0,

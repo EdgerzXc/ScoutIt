@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { fetchProperties, updateProperty } from "@/lib/airtable";
 import { resolveUserId } from "@/lib/serverAuth";
+import { sanitizeError } from "@/lib/sanitizeError";
 
 
 
@@ -96,6 +97,6 @@ Return ONLY a raw JSON object with exactly these three keys: "title", "descripti
     return NextResponse.json({ success: true, seo: parsedResult });
   } catch (err) {
     console.error("[SEO GENERATE API] Error:", err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: sanitizeError(err) }, { status: 500 });
   }
 }

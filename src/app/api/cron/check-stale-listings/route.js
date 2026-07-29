@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { fetchPropertyVerificationDates } from "@/lib/airtable";
 import { notifyUser } from "@/lib/notifications";
+import { sanitizeError } from "@/lib/sanitizeError";
 
 // Daily Vercel Cron (see vercel.json). Track 1,
 // PLAN_STAFF_ENTERPRISE_ANALYTICS_NOTIFICATIONS.md. Flags approved
@@ -111,6 +112,6 @@ export async function GET(request) {
     });
   } catch (err) {
     console.error("[CRON check-stale-listings] Error:", err);
-    return NextResponse.json({ error: err.message || "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: sanitizeError(err) }, { status: 500 });
   }
 }

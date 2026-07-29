@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { sanitizeError } from "@/lib/sanitizeError";
 
 // GET /api/availability?userId=123
 export async function GET(request) {
@@ -57,7 +58,7 @@ export async function GET(request) {
 
     return NextResponse.json({ config, appointments });
   } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: sanitizeError(error) }, { status: 500 });
   }
 }
 
@@ -90,11 +91,11 @@ export async function POST(request) {
       .single();
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: sanitizeError(error) }, { status: 500 });
     }
 
     return NextResponse.json({ success: true, availability: data });
   } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: sanitizeError(error) }, { status: 500 });
   }
 }

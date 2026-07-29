@@ -36,8 +36,17 @@ export function listEvents(accessToken, { timeMin, timeMax, maxResults = 250 }) 
   return gfetch(`${CAL_BASE}?${qs}`, accessToken);
 }
 
-export function insertEvent(accessToken, body) {
-  return gfetch(CAL_BASE, accessToken, { method: "POST", body: JSON.stringify(body) });
+/**
+ * Create an event.
+ *
+ * `conferenceDataVersion: 1` is REQUIRED for Google to act on a
+ * conferenceData.createRequest — without the query param Google silently
+ * drops the request and returns an event with no Meet link and no error.
+ * That silent-drop is why this is an explicit option rather than always-on.
+ */
+export function insertEvent(accessToken, body, { conferenceDataVersion } = {}) {
+  const qs = conferenceDataVersion ? `?conferenceDataVersion=${conferenceDataVersion}` : "";
+  return gfetch(`${CAL_BASE}${qs}`, accessToken, { method: "POST", body: JSON.stringify(body) });
 }
 
 export function patchEvent(accessToken, googleId, body) {

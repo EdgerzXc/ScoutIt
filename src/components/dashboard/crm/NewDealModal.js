@@ -4,6 +4,7 @@ import { useState } from "react";
 import { X, Building2, UserCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { crmFetch } from "../../../lib/crmClient";
+import { sanitizeError } from "@/lib/sanitizeError";
 
 export default function NewDealModal({ isOpen, onClose, onDealCreated, mockUserId }) {
   const [loading, setLoading] = useState(false);
@@ -32,7 +33,7 @@ export default function NewDealModal({ isOpen, onClose, onDealCreated, mockUserI
       onClose();
     } catch (err) {
       console.error(err);
-      setError(err.message || "Something went wrong");
+      setError(sanitizeError(err, "Couldn't create the deal."));
     } finally {
       setLoading(false);
     }
@@ -138,7 +139,7 @@ export default function NewDealModal({ isOpen, onClose, onDealCreated, mockUserI
               <button 
                 type="submit" 
                 disabled={loading}
-                className="bg-gold-accent text-background font-bold font-working-title px-6 py-2 rounded shadow-[0_0_15px_rgba(247,198,78,0.4)] hover:-translate-y-1 transition-transform disabled:opacity-50 disabled:hover:translate-y-0"
+                className="bg-gold-accent text-background font-bold font-working-title px-6 py-2 rounded shadow-[0_0_15px_rgba(232,174,60,0.35)] hover:-translate-y-0.5 active:scale-[0.97] transition-all duration-160 ease-out disabled:opacity-50 disabled:hover:translate-y-0"
               >
                 {loading ? "Creating..." : "Create Deal"}
               </button>

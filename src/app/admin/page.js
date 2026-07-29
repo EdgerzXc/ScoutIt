@@ -6,6 +6,7 @@ import Footer from "@/components/layout/Footer";
 import { supabase } from "@/lib/supabaseClient";
 import { Building2, Check, AlertCircle, ShieldCheck, ShieldOff } from "lucide-react";
 import IntelStudioPanel from "@/components/intel/IntelStudioPanel";
+import { sanitizeError } from "@/lib/sanitizeError";
 
 export default function AdminPage() {
   const [pendingProperties, setPendingProperties] = useState([]);
@@ -51,7 +52,7 @@ export default function AdminPage() {
       setPrcQueue((prev) => prev.map((p) => (p.id === userId ? { ...p, prc_verified: verified } : p)));
       setMessage({ type: "success", text: verified ? "Credential marked PRC Verified." : "Verification revoked." });
     } catch (err) {
-      setMessage({ type: "error", text: err.message });
+      setMessage({ type: "error", text: sanitizeError(err) });
     } finally {
       setPrcProcessingId(null);
     }
@@ -107,7 +108,7 @@ export default function AdminPage() {
       setPendingProperties((prev) => prev.filter((p) => p.id !== submissionId));
     } catch (err) {
       console.error(err);
-      setMessage({ type: "error", text: err.message });
+      setMessage({ type: "error", text: sanitizeError(err, "Couldn't approve that property.") });
     } finally {
       setProcessingId(null);
     }

@@ -11,10 +11,13 @@ import MeshHero from '../ui/MeshHero';
 import TaskRail from "./crm/TaskRail";
 import DealTimeline from "./crm/DealTimeline";
 import { computeListingStrength } from "../../lib/listingStrength";
+import BrokerFieldBriefing from "./BrokerFieldBriefing";
+import LeadExportButton from './crm/LeadExportButton';
 
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import circle from '@turf/circle';
+import { sanitizeError } from "@/lib/sanitizeError";
 
 export default function BrokerMode() {
   const { connects, listings, pitches, sendPitch, updatePitchStatus, currentUser, addToast, searchByRadius, MAPBOX_TOKEN, DEFAULT_MAP_CENTER } = useDashboard();
@@ -67,6 +70,9 @@ export default function BrokerMode() {
   // persisted — a banner that resurrects on every visit stops being news.
   const [showNotification, setShowNotification] = useState(false);
   const [showIdCard, setShowIdCard] = useState(false);
+  // The listing whose field briefing is open, or null. Full-screen overlay,
+  // so one slot is enough — a broker prints one sheet at a time.
+  const [briefingListing, setBriefingListing] = useState(null);
   useEffect(() => {
     try {
       setShowNotification(localStorage.getItem("scoutit_idcard_banner_seen") !== "1");
@@ -160,7 +166,7 @@ export default function BrokerMode() {
         });
 
         map.on('error', (e) => {
-          if (e && e.error) setMapError(e.error.message || 'Unknown Mapbox Error');
+          if (e && e.error) setMapError(sanitizeError(e.error, 'Map failed to load.'));
         });
 
         map.addControl(new maplibregl.NavigationControl(), 'top-right');
@@ -222,7 +228,7 @@ export default function BrokerMode() {
           mapInstance.current = null;
         };
       } catch (err) {
-        setMapError(err.message || String(err));
+        setMapError(sanitizeError(err, 'Map failed to load.'));
       }
     }
   }, [showMap, DEFAULT_MAP_CENTER]);
@@ -484,6 +490,22 @@ export default function BrokerMode() {
                       <span className={`font-working-title ${deal.ownerContact?.email ? 'text-on-surface' : 'text-text-muted'}`}>{deal.ownerContact?.email || "Not provided — message them in your Inbox"}</span>
                     </div>
                   </div>
+                  {/* Lead export (NEW_IDEAS.md §8). Inside the unlocked branch
+                      on purpose — never a side door around the contact gate. */}
+                  <LeadExportButton
+                    lead={{
+                      name: deal.ownerName || property?.ownerName,
+                      email: deal.ownerContact?.email,
+                      phone: deal.ownerContact?.phone,
+                      propertyTitle: property?.title,
+                      propertySlug: property?.slug,
+                      status: deal.status,
+                      pitch_message: deal.pitchMessage || deal.pitch_message,
+                      created_at: deal.createdAt || deal.created_at,
+                    }}
+                    label="Take this to your CRM"
+                  />
+
                   <Link href="/dashboard/inbox" className="text-sm font-working-title text-gold-accent flex items-center gap-2 hover:underline">
                     Open conversation <span>→</span>
                   </Link>
@@ -495,6 +517,25 @@ export default function BrokerMode() {
                 </div>
               )}
             </div>
+
+            {/* Field Briefing — the A4 sheet a broker carries into a
+                walkthrough (NEW_IDEAS.md §5). Sits above Listing Strength
+                because it's an action, not a metric. */}
+            {property && (
+              <div className="card-atmosphere rounded-lg p-6">
+                <h3 className="font-label-caps text-xs tracking-widest text-text-secondary mb-3 uppercase border-b border-surface-variant pb-2">Field Briefing</h3>
+                <p className="text-xs text-text-secondary leading-relaxed mb-4">
+                  A printable walkthrough sheet — specs, transfer-cost floor and objection
+                  scripts. Fields with no published data are left out, never estimated.
+                </p>
+                <button
+                  onClick={() => setBriefingListing(property)}
+                  className="w-full min-h-[44px] rounded bg-gold-accent text-black font-mono text-[11px] font-bold uppercase tracking-widest hover:bg-gold-accent/90 transition-colors"
+                >
+                  Generate Briefing
+                </button>
+              </div>
+            )}
 
             {/* Listing Strength — rule-based field completeness, no AI */}
             {property && (() => {
@@ -582,6 +623,14 @@ export default function BrokerMode() {
 
           </div>
         </div>
+
+        {briefingListing && (
+          <BrokerFieldBriefing
+            listing={briefingListing}
+            brokerName={currentUser?.name || currentUser?.display_name}
+            onClose={() => setBriefingListing(null)}
+          />
+        )}
       </div>
     );
   }

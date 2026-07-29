@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { X, Copy, Check, Lock, Sparkles } from "lucide-react";
 import { getCurrentRole, getCurrentTier } from "@/lib/entitlements";
 import GlassPanel from "../ui/GlassPanel";
+import { sanitizeError } from "@/lib/sanitizeError";
 
 function MinorLockSection() {
   return (
@@ -94,7 +95,7 @@ export default function PromoteModal({ isOpen, onClose, propertyData, link }) {
       setData(result.data);
       setSource(result.source || null);
     } catch (err) {
-      setError(err.message);
+      setError(sanitizeError(err, "Couldn't promote this listing."));
     } finally {
       setLoading(false);
     }

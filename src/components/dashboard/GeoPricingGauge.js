@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useDebounce } from "use-debounce";
+import { sanitizeError } from "@/lib/sanitizeError";
 
 export default function GeoPricingGauge({ location, category, price }) {
   const [debouncedLocation] = useDebounce(location, 1500);
@@ -40,7 +41,7 @@ export default function GeoPricingGauge({ location, category, price }) {
         setInsight(data);
       } catch (err) {
         console.error("GeoPricing error:", err);
-        setError(err.message);
+        setError(sanitizeError(err, "Couldn't load pricing data."));
       } finally {
         setLoading(false);
       }

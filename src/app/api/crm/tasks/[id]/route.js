@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { z } from "zod";
 import { resolveUserId } from "@/lib/serverAuth";
+import { sanitizeError } from "@/lib/sanitizeError";
 
 
 
@@ -70,7 +71,7 @@ export async function PATCH(request, { params }) {
     });
   } catch (err) {
     console.error("[CRM TASKS API] PATCH error:", err);
-    return NextResponse.json({ error: err.message || "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: sanitizeError(err) }, { status: 500 });
   }
 }
 
@@ -94,6 +95,6 @@ export async function DELETE(request, { params }) {
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error("[CRM TASKS API] DELETE error:", err);
-    return NextResponse.json({ error: err.message || "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: sanitizeError(err) }, { status: 500 });
   }
 }

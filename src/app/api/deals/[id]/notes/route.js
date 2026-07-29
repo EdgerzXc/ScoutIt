@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { z } from "zod";
 import { logNoteActivityDeduped } from "@/lib/crmActivity";
+import { sanitizeError } from "@/lib/sanitizeError";
 
 // Persists the "private scratchpad" per deal -- BrokerMode.js's Deal File
 // Workspace already had this UI (dealNotes local state), it just never wrote
@@ -76,6 +77,6 @@ export async function PATCH(request, { params }) {
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error("[DEAL NOTES API] Error:", err);
-    return NextResponse.json({ error: err.message || "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: sanitizeError(err) }, { status: 500 });
   }
 }

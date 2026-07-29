@@ -4,6 +4,7 @@ import { useState } from "react";
 import Papa from "papaparse";
 import { useDashboard } from "../../context/DashboardContext";
 import { supabase } from "@/lib/supabaseClient";
+import { sanitizeError } from "@/lib/sanitizeError";
 
 export default function BulkImporterMode({ onClose }) {
   const { addToast, currentUser } = useDashboard();
@@ -38,7 +39,7 @@ export default function BulkImporterMode({ onClose }) {
       },
       error: (err) => {
         console.error("[BulkImporter] CSV parse error:", err);
-        addToast(`Could not parse CSV: ${err.message}`, "❌");
+        addToast(`Could not parse CSV: ${sanitizeError(err, "the file could not be read.")}`, "❌");
       },
     });
   };
@@ -122,7 +123,7 @@ export default function BulkImporterMode({ onClose }) {
       onClose();
     } catch (err) {
       console.error('[BulkImporter]', err);
-      addToast(`Import failed: ${err.message}`, "❌");
+      addToast(`Import failed: ${sanitizeError(err)}`, "❌");
     } finally {
       setIsProcessing(false);
     }

@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { uploadPropertyPhoto } from '../../lib/storage';
 import { useDashboard } from '../../context/DashboardContext';
+import { sanitizeError } from "@/lib/sanitizeError";
 
 export default function PhotoUploader({ photos, onChange, onSetImage, isPro = false, maxFreePhotos = 7 }) {
   const { addToast } = useDashboard();
@@ -45,7 +46,7 @@ export default function PhotoUploader({ photos, onChange, onSetImage, isPro = fa
     } catch (err) {
       clearInterval(progressInterval);
       console.error("Photo upload failed:", err);
-      setError(err.message);
+      setError(sanitizeError(err, "Upload failed. Please try again."));
       setUploadingIndex(null);
       setUploadProgress(0);
     }

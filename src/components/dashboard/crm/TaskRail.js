@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { crmFetch } from "../../../lib/crmClient";
 import { CheckCircle2, Circle, Trash2, Plus } from "lucide-react";
+import { sanitizeError } from "@/lib/sanitizeError";
 
 // The CRM "don't forget" engine (crm_tasks). Mobile-first: single column,
 // large touch targets, add-form collapses to one row. Used by BrokerMode's
@@ -57,7 +58,7 @@ export default function TaskRail({ mockUserId, dealId = null, onSummary }) {
       setTitle("");
       setDueDate("");
     } catch (err) {
-      setError(err.message || "Couldn't save the task.");
+      setError(sanitizeError(err, "Couldn't save the task."));
     } finally {
       setBusy(false);
     }

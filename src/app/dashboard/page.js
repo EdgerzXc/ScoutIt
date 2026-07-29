@@ -18,7 +18,7 @@ import Toasts from "../../components/ui/Toasts";
 import ConciergeAI from "../../components/dashboard/ConciergeAI";
 import ConnectsBreakdown from "../../components/dashboard/ConnectsBreakdown";
 import AtmosphereBackground from "../../components/ui/AtmosphereBackground";
-import { getSession } from "../../lib/authClient";
+import { getSession, signOut } from "../../lib/authClient";
 import { Camera, Search, Bookmark, MessageCircle, Briefcase } from "lucide-react";
 
 const TAG_LABELS = {
@@ -51,6 +51,15 @@ const PROVIDER_TYPES = [
 
 function DashboardInner() {
   const router = useRouter();
+
+  // Real sign-out. Both Sign Out buttons on this page previously only did
+  // localStorage.removeItem("scoutit_user") — which clears the app's profile
+  // cache but leaves the Supabase session AND refresh token valid, so the
+  // user only appeared signed out. See signOut() in lib/authClient.js.
+  const handleSignOut = async () => {
+    await signOut();
+    router.push("/onboarding");
+  };
   const { connects, currentUser, notifications, markNotificationsRead, clearAllNotifications } = useDashboard();
   const [user, setUser] = useState(null);
   const [mode, setMode] = useState("");
@@ -223,10 +232,10 @@ function DashboardInner() {
           {/* Custom Desktop Mode Switcher */}
           <div className="hidden md:block relative" ref={switcherRef}>
             <button 
-              className="flex items-center gap-2 bg-surface hover:bg-surface-alt border border-surface-variant text-on-surface text-sm font-working-title px-4 py-2 rounded-full uppercase tracking-wider transition-colors"
+              className="flex items-center gap-2 bg-surface hover:bg-surface-alt border border-surface-variant text-on-surface text-sm font-working-title px-4 py-2 rounded-full uppercase tracking-wider active:scale-[0.97] transition-all duration-160 ease-out"
               onClick={() => setShowDesktopSwitcher(!showDesktopSwitcher)}
             >
-              <span className="text-gold-accent">Mode:</span> {TAG_LABELS[mode]}
+              <span className="text-gold-accent font-semibold">Mode:</span> {TAG_LABELS[mode]}
               <span className="text-[10px] ml-1">▼</span>
             </button>
             
@@ -239,7 +248,7 @@ function DashboardInner() {
                   {user.tags.map(tagId => (
                     <button
                       key={tagId}
-                      className={`text-left px-4 py-3 font-working-title text-sm transition-colors hover:bg-surface-container ${mode === tagId ? 'text-gold-accent bg-surface-container-low border-l-2 border-gold-accent' : 'text-on-surface border-l-2 border-transparent'}`}
+                      className={`text-left px-4 py-3 font-working-title text-sm active:scale-[0.97] transition-all duration-160 ease-out hover:bg-surface-container ${mode === tagId ? 'text-gold-accent bg-surface-container-low border-l-2 border-gold-accent' : 'text-on-surface border-l-2 border-transparent'}`}
                       onClick={() => handleSwitchMode(tagId)}
                     >
                       {TAG_LABELS[tagId]}
@@ -256,7 +265,7 @@ function DashboardInner() {
                       {addableModes.map(m => (
                         <button
                           key={m.id}
-                          className="text-left px-4 py-3 transition-colors hover:bg-surface-container group"
+                          className="text-left px-4 py-3 active:scale-[0.97] transition-all duration-160 ease-out hover:bg-surface-container group"
                           onClick={() => startActivation(m.id)}
                         >
                           <span className="font-working-title text-sm text-gold-accent flex items-center gap-2">{m.icon} {m.cta}</span>
@@ -274,7 +283,7 @@ function DashboardInner() {
         <div className="flex items-center gap-4 md:gap-6">
           <div className="hidden md:block relative">
             <button
-              className="flex items-center gap-2 text-gold-accent font-label-caps text-[11px] tracking-widest bg-gold-accent/10 px-3 py-1.5 rounded-full transition-all hover:bg-gold-accent/20"
+              className="flex items-center gap-2 text-gold-accent font-label-caps text-[11px] tracking-widest bg-gold-accent/10 px-3 py-1.5 rounded-full hover:bg-gold-accent/20 active:scale-[0.97] transition-all duration-160 ease-out"
               title="View your Connects breakdown"
               onClick={() => setShowConnectsBreakdown((v) => !v)}
             >
@@ -378,7 +387,7 @@ function DashboardInner() {
             </Link>
             <button 
               className="text-lg text-text-secondary hover:text-error transition-colors ml-2"
-              onClick={() => { localStorage.removeItem("scoutit_user"); router.push("/onboarding"); }}
+              onClick={handleSignOut}
               title="Sign Out"
             >
               🚪
@@ -558,7 +567,7 @@ function DashboardInner() {
               </Link>
               <button
                 className="flex items-center gap-3 text-text-secondary hover:text-error font-working-title text-sm py-2 w-full text-left"
-                onClick={() => { localStorage.removeItem("scoutit_user"); router.push("/onboarding"); }}
+                onClick={handleSignOut}
               >
                 <span>🚪</span> Sign Out
               </button>

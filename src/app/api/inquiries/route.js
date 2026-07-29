@@ -3,6 +3,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { notifyUser } from "@/lib/notifications";
 import { logActivity } from "@/lib/crmActivity";
 import { z } from "zod";
+import { turnstileGuard } from "@/lib/turnstile";
 
 // Public lead capture. Previously a stub that console.logged the payload and
 // returned fake success -- every inquiry posted here was silently dropped.
@@ -19,6 +20,10 @@ const schema = z.object({
   email: z.string().email().max(200).optional(),
   phone: z.string().max(40).optional(),
   message: z.string().max(2000).optional(),
+  // Bot check. Optional in the SCHEMA so an older cached client bundle isn't
+  // hard-rejected mid-deploy, but enforced below whenever Turnstile is
+  // configured — see the guard in POST.
+  turnstileToken: z.string().optional(),
 });
 
 export async function POST(req) {
@@ -27,7 +32,20 @@ export async function POST(req) {
     if (!parsed.success) {
       return NextResponse.json({ success: false, message: "Invalid inquiry format" }, { status: 400 });
     }
-    const { propertyId, propertySlug, name, email, phone, message } = parsed.data;
+    const { propertyId, propertySlug, name, email, phone, message, turnstileToken } = parsed.data;
+
+    // ── Bot check ──────────────────────────────────────────────────────
+    // This is a PUBLIC, unauthenticated endpoint that writes to
+    // crm_activity_log and fires a notification to a property owner. Left
+    // open it's a spam cannon aimed at owners' notification bells, and every
+    // fake inquiry erodes trust in the one signal owners actually watch.
+    //
+    // Only enforced when Turnstile is configured, so an unconfigured
+    // environment keeps working rather than silently dropping every lead.
+    if (process.env.TURNSTILE_SECRET || process.env.TURNSTILE_SECRET_KEY) {
+      const captchaFailure = await turnstileGuard(req, turnstileToken);
+      if (captchaFailure) return captchaFailure;
+    }
 
     if (!propertyId && !propertySlug) {
       return NextResponse.json({ success: false, message: "Missing property reference" }, { status: 400 });

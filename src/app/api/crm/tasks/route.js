@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { z } from "zod";
 import { resolveUserId } from "@/lib/serverAuth";
+import { sanitizeError } from "@/lib/sanitizeError";
 
 export const dynamic = "force-dynamic";
 
@@ -55,7 +56,7 @@ export async function GET(request) {
     return NextResponse.json({ tasks: result });
   } catch (err) {
     console.error("[CRM TASKS API] GET error:", err);
-    return NextResponse.json({ error: err.message || "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: sanitizeError(err) }, { status: 500 });
   }
 }
 
@@ -116,6 +117,6 @@ export async function POST(request) {
     });
   } catch (err) {
     console.error("[CRM TASKS API] POST error:", err);
-    return NextResponse.json({ error: err.message || "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: sanitizeError(err) }, { status: 500 });
   }
 }

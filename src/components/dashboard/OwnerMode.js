@@ -15,6 +15,10 @@ import DealTimeline from './crm/DealTimeline';
 import { computeListingStrength } from '../../lib/listingStrength';
 
 import OwnerListingCard from './cards/OwnerListingCard';
+import FAQPreflightPanel from './FAQPreflightPanel';
+import MonthlyFreshnessModal from './MonthlyFreshnessModal';
+import LeadExportButton from './crm/LeadExportButton';
+import { sanitizeError } from "@/lib/sanitizeError";
 
 export default function OwnerMode() {
   const { listings, pitches, updatePitchStatus, addListing, addConciergeListing, bulkAddListings, addToast, updateListing, publishListing, closeListing, currentUser, inviteBroker, connects } = useDashboard();
@@ -100,6 +104,15 @@ export default function OwnerMode() {
   }, [myListings.length, myListingsIds, viewingDossierId]);
 
   const activeListing = myListings.find(l => l.id === viewingDossierId) || myListings[0];
+
+  // Buyer-question checklist progress, reported up by FAQPreflightPanel so the
+  // Listing Strength card can score it. Undefined until the panel loads, which
+  // is what keeps the check out of the denominator for listings that haven't
+  // been looked at yet (see appliesWhen in lib/listingStrength.js).
+  const [faqProgress, setFaqProgress] = useState(null);
+  const listingWithFaqs = activeListing
+    ? { ...activeListing, faqAnsweredCount: faqProgress ? faqProgress.answered : undefined }
+    : activeListing;
 
   // Mobile bottom-bar primary action (+ List) opens the wizard
   useEffect(() => {
@@ -333,7 +346,7 @@ export default function OwnerMode() {
                 }
               } catch (err) {
                 console.error('[Concierge]', err);
-                addToast(`AI extraction failed: ${err.message}`, "❌");
+                addToast(`AI extraction failed: ${sanitizeError(err)}`, "❌");
               } finally {
                 setIsAssimilating(false);
                 setSelectedFile(null);
@@ -404,7 +417,7 @@ export default function OwnerMode() {
         addToast("Video uploaded — your Spatial Tour will be ready in 3–5 days.", "✅");
       } catch (err) {
         console.error('[Vault upload]', err);
-        addToast(`Upload failed: ${err.message}`, "❌");
+        addToast(`Upload failed: ${sanitizeError(err)}`, "❌");
         return;
       }
 
@@ -684,7 +697,7 @@ export default function OwnerMode() {
                     setSelectedIds([]);
                     setSelectMode(false);
                   } catch (err) {
-                    addToast(err.message || 'Failed to archive listings', '⚠️');
+                    addToast(sanitizeError(err, 'Failed to archive listings'), '⚠️');
                   } finally {
                     setIsArchiving(false);
                   }
@@ -759,7 +772,17 @@ export default function OwnerMode() {
   // --- VIEW: LAYER 2 - PROPERTY DOSSIER WORKSPACE ---
   return (
     <div className="max-w-[1200px] mx-auto py-4 animate-slide-up-fade">
-      
+
+      {/* Monthly re-verification gate (NEW_IDEAS.md §21). Non-blocking and
+          dismissible for the calendar month — see the component header for
+          why this is not the blackout modal the spec described. */}
+      <MonthlyFreshnessModal
+        onOpenEditor={(item) => {
+          setViewingDossierId(item.id);
+          setShowWizard('edit');
+        }}
+      />
+
       {/* Dossier Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-surface-variant pb-6 mb-8 gap-4">
         <div>
@@ -848,7 +871,7 @@ export default function OwnerMode() {
                    // Same source as the grid ring above and the "Missing:"
                    // checklist below — see that comment for why
                    // signals.completeness is never used here.
-                   const healthScore = computeListingStrength(activeListing).score;
+                   const healthScore = computeListingStrength(listingWithFaqs).score;
                    return (
                  <div className="relative w-16 h-16 shrink-0">
                    <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
@@ -869,7 +892,7 @@ export default function OwnerMode() {
             {/* Rule-based checklist of what's actually missing (same engine
                 as the Broker's Listing Strength card, no AI) */}
             {activeListing.pipelineStatus !== 'ai_drafting' && (() => {
-              const strength = computeListingStrength(activeListing);
+              const strength = computeListingStrength(listingWithFaqs);
               if (strength.missing.length === 0) {
                 return <p className="text-xs text-success">All key fields are complete.</p>;
               }
@@ -918,6 +941,16 @@ export default function OwnerMode() {
             <h3 className="font-label-caps text-xs tracking-widest text-text-secondary mb-4 uppercase border-b border-surface-variant pb-2">Property Timeline</h3>
             <DealTimeline propertyId={activeListing.id} mockUserId={currentUser?.id} />
           </div>
+
+          {/* Buyer-question pre-flight. Needs a slug, so it only appears once
+              the listing has been published at least once (Airtable owns the
+              slug — see AGENTS.md §2). Optional: never blocks publishing. */}
+          {activeListing.slug && activeListing.pipelineStatus !== 'ai_drafting' && (
+            <FAQPreflightPanel
+              propertySlug={activeListing.slug}
+              onProgressChange={setFaqProgress}
+            />
+          )}
         </div>
 
         {/* Right Col: Active Inquiries (Pitches) */}
@@ -1054,6 +1087,25 @@ export default function OwnerMode() {
                           <span className="block text-[10px] text-text-secondary mb-1">Direct Email</span>
                           <span className="font-working-title text-on-surface text-sm">{pitch.brokerContact.email}</span>
                         </div>
+                      </div>
+
+                      {/* Lead export (NEW_IDEAS.md §8). Deliberately inside the
+                          accepted-handshake gate — this must never become a
+                          side door around the contact reveal. */}
+                      <div className="mt-4 pt-4 border-t border-success/20">
+                        <LeadExportButton
+                          lead={{
+                            name: pitch.brokerName || pitch.broker?.name,
+                            email: pitch.brokerContact.email,
+                            phone: pitch.brokerContact.phone,
+                            propertyTitle: activeListing?.title,
+                            propertySlug: activeListing?.slug,
+                            status: pitch.status,
+                            pitch_message: pitch.message || pitch.pitchMessage,
+                            created_at: pitch.createdAt || pitch.created_at,
+                          }}
+                          label="Take this to your CRM"
+                        />
                       </div>
                     </div>
                   )}

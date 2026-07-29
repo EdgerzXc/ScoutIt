@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Camera, Search } from "lucide-react";
 import { signUp, signInWithPassword, signInWithOAuth, signInWithOtp, verifyOtp, getSession } from "@/lib/authClient";
 import { supabase } from "@/lib/supabaseClient";
 import AtmosphereBackground from "@/components/ui/AtmosphereBackground";
+import { sanitizeError } from "@/lib/sanitizeError";
+import TurnstileGate from "@/components/ui/TurnstileGate";
 
 const TAGS = [
   { id: "buyer", icon: "🏠", title: "Looking to Buy or Rent", desc: "Browse, save, and get deep spatial intelligence." },
@@ -29,6 +31,12 @@ export default function OnboardingPage() {
   const [otpSent, setOtpSent] = useState(false);
   const [otpCode, setOtpCode] = useState("");
   const [toast, setToast] = useState(null);
+  // Turnstile token for Supabase's auth CAPTCHA. Single-use — the ref lets
+  // us reset the widget after ANY failed attempt, otherwise a retry reuses
+  // a spent token and Cloudflare rejects it as timeout-or-duplicate.
+  const [captchaToken, setCaptchaToken] = useState("");
+  const turnstileRef = useRef(null);
+  const resetCaptcha = () => turnstileRef.current?.reset();
 
   const showToast = (message, type = "error") => {
     setToast({ message, type });
@@ -93,9 +101,10 @@ export default function OnboardingPage() {
       if (useOtp) {
         if (!otpSent) {
           // Send OTP
-          const { error } = await signInWithOtp(formData.email);
+          const { error } = await signInWithOtp(formData.email, captchaToken);
           if (error) {
-            showToast(error.message);
+            resetCaptcha();
+            showToast(sanitizeError(error));
             return;
           }
           setOtpSent(true);
@@ -104,6 +113,7 @@ export default function OnboardingPage() {
           // Verify OTP
           const { data: verifyData, error: verifyError } = await verifyOtp(formData.email, otpCode);
           if (verifyError || !verifyData?.user) {
+            resetCaptcha();
             showToast(verifyError?.message || "Invalid code");
             return;
           }
@@ -121,7 +131,7 @@ export default function OnboardingPage() {
       }
 
       // Try to sign in first with password
-      const { data: signInData, error: signInError } = await signInWithPassword(formData.email, formData.password);
+      const { data: signInData, error: signInError } = await signInWithPassword(formData.email, formData.password, captchaToken);
       if (!signInError && signInData?.user) {
         // Successful login, check if they have a profile
         const { data: profile } = await supabase.from('user_profiles').select('*').eq('id', signInData.user.id).single();
@@ -137,16 +147,24 @@ export default function OnboardingPage() {
         }
       }
 
-      // If sign in fails, try sign up
-      const { data: signUpData, error: signUpError } = await signUp(formData.email, formData.password, { full_name: formData.name });
+      // If sign in fails, try sign up.
+      //
+      // The sign-in attempt above already REDEEMED the captcha token — tokens
+      // are single-use. Reusing it here would fail every new signup with
+      // `timeout-or-duplicate`, so wait for a fresh one first. A managed
+      // widget re-solves in about a second, invisibly.
+      const freshToken = await turnstileRef.current?.refresh();
+      const { data: signUpData, error: signUpError } = await signUp(formData.email, formData.password, { full_name: formData.name }, freshToken || "");
       if (signUpError) {
-        showToast(signUpError.message);
+        resetCaptcha();
+        showToast(sanitizeError(signUpError, signUpError.message));
         return;
       }
       
       nextStep();
     } catch (e) {
-      showToast("Authentication failed.");
+      resetCaptcha();
+      showToast(sanitizeError(e, "Authentication failed."));
     }
   };
 
@@ -215,6 +233,17 @@ export default function OnboardingPage() {
         </div>
       </div>
       
+      {/* Bot check. Must be satisfied before any auth call so Supabase's
+          Attack Protection CAPTCHA can be turned on without locking anyone
+          out — see the comment block in lib/authClient.js. */}
+      <div className="mb-4 flex justify-center">
+        <TurnstileGate
+          ref={turnstileRef}
+          onToken={setCaptchaToken}
+          onError={(msg) => showToast(msg)}
+        />
+      </div>
+
       <button 
         className="w-full bg-gold-accent text-background font-working-title text-base font-bold py-4 px-6 rounded hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed mb-3" 
         onClick={handleAuth}
@@ -222,7 +251,8 @@ export default function OnboardingPage() {
           !formData.name || 
           !formData.email.includes("@") || 
           (!useOtp && formData.password.length < 8) || 
-          (useOtp && otpSent && otpCode.length < 6)
+          (useOtp && otpSent && otpCode.length < 6) ||
+          !captchaToken
         }
       >
         {useOtp && !otpSent ? "Send Verification Code →" : useOtp && otpSent ? "Verify & Continue →" : "Sign in with email →"}

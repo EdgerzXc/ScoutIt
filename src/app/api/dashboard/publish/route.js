@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { insertProperty, updateProperty } from "@/lib/airtable";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { sanitizeError } from "@/lib/sanitizeError";
 
 export async function POST(request) {
 
@@ -111,6 +112,6 @@ export async function POST(request) {
 
   } catch (err) {
     console.error("[PUBLISH API] Error during publish process:", err);
-    return NextResponse.json({ error: err.message || "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: sanitizeError(err) }, { status: 500 });
   }
 }

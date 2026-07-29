@@ -3,6 +3,8 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { z } from "zod";
 import { logActivity, createTask } from "@/lib/crmActivity";
 import { resolveUserId } from "@/lib/serverAuth";
+import { sanitizeError } from "@/lib/sanitizeError";
+import { cancelViewingMeet } from "@/lib/calendar/meetLink";
 
 const schema = z.object({
   status: z.enum(["confirmed", "cancelled", "completed"]),
@@ -24,7 +26,7 @@ export async function PATCH(request, { params }) {
 
     const { data: appt, error: fetchError } = await supabaseAdmin
       .from("viewing_appointments")
-      .select("host_id, guest_id, deal_id, deals(property_id, properties(title))")
+      .select("host_id, guest_id, deal_id, google_event_id, deals(property_id, properties(title))")
       .eq("id", id)
       .single();
 
@@ -49,6 +51,23 @@ export async function PATCH(request, { params }) {
     if (updateError) {
       console.error("[APPOINTMENTS API] Update error:", updateError);
       return NextResponse.json({ error: "Failed to update appointment" }, { status: 500 });
+    }
+
+    // Tear down the Google event on cancellation (NEW_IDEAS.md §20.1).
+    // Without this, a cancelled viewing leaves a live Meet room and a stale
+    // entry in the host's calendar — which is exactly how someone ends up
+    // sitting alone in an empty call at the original time.
+    // Best-effort: the appointment is already cancelled in our DB either way.
+    if (status === "cancelled" && appt.google_event_id) {
+      try {
+        await cancelViewingMeet(appt.host_id, appt.google_event_id);
+        await supabaseAdmin
+          .from("viewing_appointments")
+          .update({ meet_link: null, google_event_id: null })
+          .eq("id", id);
+      } catch (meetErr) {
+        console.error("[APPOINTMENTS API] Meet cleanup failed:", meetErr?.message);
+      }
     }
 
     // CRM Timeline entry for the state change (viewing_confirmed /
@@ -76,6 +95,6 @@ export async function PATCH(request, { params }) {
     return NextResponse.json({ success: true, status });
   } catch (err) {
     console.error("[APPOINTMENTS API] PATCH error:", err);
-    return NextResponse.json({ error: err.message || "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: sanitizeError(err) }, { status: 500 });
   }
 }

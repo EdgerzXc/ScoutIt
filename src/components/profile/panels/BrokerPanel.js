@@ -74,7 +74,7 @@ export default function BrokerPanel({ data, isPublic = false, prcVerified = fals
           {/* Scout Rating */}
           <div style={metricBlock}>
             <div style={{ display: "flex", alignItems: "flex-end", gap: 10, marginBottom: 16 }}>
-              <span style={{ fontFamily: "Georgia, serif", fontSize: 48, color: "#E8AE3C", lineHeight: 1 }}>
+              <span style={{ fontFamily: "var(--font-display)", fontSize: 48, color: "var(--accent)", lineHeight: 1 }}>
                 {Number(data.scout_rating ?? 0).toFixed(1)}
               </span>
               <div style={{ display: "flex", flexDirection: "column", paddingBottom: 8 }}>
@@ -150,10 +150,11 @@ export default function BrokerPanel({ data, isPublic = false, prcVerified = fals
 }
 
 const panelStyle = {
-  background: "linear-gradient(165deg, #1a1917, #111110)",
-  border: "1px solid rgba(255,255,255,0.08)",
-  borderRadius: 6,
+  background: "linear-gradient(165deg, rgba(20,20,18,0.85), rgba(12,12,10,0.95))",
+  border: "1px solid var(--border-solid)",
+  borderRadius: 8,
   padding: 24,
+  backdropFilter: "blur(12px)",
 };
 
 const panelHeader = {
@@ -164,12 +165,12 @@ const panelHeader = {
 };
 
 const panelLabel = {
-  fontFamily: "var(--font-body)",
+  fontFamily: "var(--font-mono)",
   fontSize: 10,
   fontWeight: 700,
   letterSpacing: "0.14em",
   textTransform: "uppercase",
-  color: "#E8AE3C",
+  color: "var(--accent)",
 };
 
 const prcBadge = {
@@ -190,7 +191,7 @@ const prcBadge = {
 const metricBlock = {
   background: "rgba(232, 174, 60,0.03)",
   border: "1px solid rgba(232, 174, 60,0.08)",
-  borderRadius: 4,
+  borderRadius: 6,
   padding: 16,
 };
 
@@ -201,9 +202,9 @@ const statsRow = {
 
 const statCard = {
   flex: 1,
-  background: "linear-gradient(165deg, #1a1917, #111110)",
-  border: "1px solid rgba(255,255,255,0.08)",
-  borderRadius: 4,
+  background: "linear-gradient(165deg, rgba(26,25,23,0.6), rgba(17,17,16,0.8))",
+  border: "1px solid var(--border-solid)",
+  borderRadius: 6,
   padding: "12px 10px",
   display: "flex",
   flexDirection: "column",
@@ -212,14 +213,14 @@ const statCard = {
 };
 
 const statValue = {
-  fontFamily: "Georgia, serif",
+  fontFamily: "var(--font-display)",
   fontSize: 24,
   color: "#e5e2e1",
   lineHeight: 1.2,
 };
 
 const statLabel = {
-  fontFamily: "var(--font-body)",
+  fontFamily: "var(--font-mono)",
   fontSize: 10,
   color: "var(--text-secondary)",
   letterSpacing: "0.06em",

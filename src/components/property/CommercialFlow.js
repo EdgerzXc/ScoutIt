@@ -2,7 +2,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import ReactionButtons from "@/components/ui/ReactionButtons";
@@ -14,6 +14,9 @@ import { hasInteractiveUnitPage, hasSpatial3D, unitMasterPageOverview, formatUni
 import SpatialVaultWidget from "@/components/property/SpatialVaultWidget";
 import PromoteModal from "./PromoteModal";
 import MonthlyCostCalculator from "@/components/property/MonthlyCostCalculator";
+import PropertyFAQSection from "@/components/property/PropertyFAQSection";
+import FreshnessBadge from "@/components/ui/FreshnessBadge";
+import WhereToSection from "@/components/property/WhereToSection";
 
 // Leaflet is huge. We dynamically import the InteractiveMap so the initial page load
 // doesn't block on parsing the React Leaflet wrapper.
@@ -351,6 +354,13 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
   const [isOwner, setIsOwner] = useState(false);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [whereToTab,        setWhereToTab]        = useState("map");
+  // Reachability polygons lifted from <WhereToSection /> so the Tactical Map
+  // tab can overlay them. useCallback keeps the identity stable — WhereTo's
+  // fetch effect depends on it.
+  const [isochroneData,     setIsochroneData]     = useState(null);
+  const handleIsochrone = useCallback((geojson, contours) => {
+    setIsochroneData({ geojson, contours });
+  }, []);
   const [locTab,            setLocTab]            = useState("spatial");
 
   // Per-panel accordion state (independent per section)
@@ -1873,6 +1883,9 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                 <button className={`whereto-tab-btn ${whereToTab === "list" ? "active" : ""}`} onClick={() => setWhereToTab("list")}>
                   Directory List
                 </button>
+                <button className={`whereto-tab-btn ${whereToTab === "lifestyle" ? "active" : ""}`} onClick={() => setWhereToTab("lifestyle")}>
+                  Lifestyle Intel
+                </button>
               </div>
 
               {whereToTab === "map" && (
@@ -1883,6 +1896,8 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                     propertyTitle={d.title}
                     vicinityData={d.whereTo}
                     mapboxToken={mapboxToken}
+                    isochrone={isochroneData?.geojson || null}
+                    contours={isochroneData?.contours || []}
                   />
                 </div>
               )}
@@ -1907,6 +1922,19 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
               {whereToTab === "list" && (!d.whereTo || d.whereTo.length === 0) && (
                 <div style={{padding:"32px", background:"#161616", border:"0.5px dashed #262626", borderRadius:"2px", textAlign:"center", fontFamily:"'Courier New',monospace", fontSize:"11px", color:"#c8c8c8", letterSpacing:"0.12em", marginBottom:"24px"}}>
                   [ LOCATION DETAILS N/A — NO DATA IN CMS ]
+                </div>
+              )}
+
+              {/* Lifestyle Intel — live OpenStreetMap POIs + Mapbox reachability
+                  (NEW_IDEAS.md §3). Replaces the hand-keyed CMS list as the
+                  primary answer to "what's around here?". */}
+              {whereToTab === "lifestyle" && (
+                <div style={{marginBottom:"24px"}}>
+                  <WhereToSection
+                    lat={Number(d.lat ?? d.latitude)}
+                    lng={Number(d.lng ?? d.longitude)}
+                    onIsochrone={handleIsochrone}
+                  />
                 </div>
               )}
 
@@ -2522,6 +2550,19 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
         </div>
       )}
 
+      {/* 3-Tier public Q&A — bottom of the chapter stack. Hidden in draft
+          mode: an unpublished listing has no public audience to answer it. */}
+      {/* Buyer-facing staleness notice. Renders ONLY past 6 months —
+          see FreshnessBadge for why public surfaces stay quiet before that. */}
+      {!isDraftMode && (
+        <div style={{ padding: "0 16px", maxWidth: "900px", margin: "0 auto" }}>
+          <FreshnessBadge lastVerifiedDate={d.last_verified_date || d.lastVerifiedDate} variant="public" />
+        </div>
+      )}
+
+      {!isDraftMode && (
+        <PropertyFAQSection propertySlug={d.slug || slug} propertyTitle={d.title} />
+      )}
     </>
   );
 }

@@ -8,6 +8,7 @@ import { supabase } from "../../lib/supabaseClient";
 import { DEEP_INTEL_SCHEMA } from "../../lib/deepIntelSchema";
 import PhotoUploader from "./PhotoUploader";
 import { useDashboard } from "../../context/DashboardContext";
+import { sanitizeError } from "@/lib/sanitizeError";
 
 const CATEGORIES = [
   { id: "residential", icon: "🏠", label: "Residential" },
@@ -323,7 +324,7 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
       }
     } catch (err) {
       console.error(err);
-      setExtractionError(err.message);
+      setExtractionError(sanitizeError(err, "Extraction failed. Please try again."));
     } finally {
       setIsExtracting(false);
     }

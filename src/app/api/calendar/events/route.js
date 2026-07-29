@@ -3,6 +3,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolveUserId } from "@/lib/serverAuth";
 import { createEventSchema, serializeEvent, toEventRow } from "@/lib/calendar/eventSchema";
 import { syncOutbound } from "@/lib/calendar/googleSync";
+import { sanitizeError } from "@/lib/sanitizeError";
 
 // GET /api/calendar/events?from=<ISO>&to=<ISO>
 // Returns the caller's own (non-deleted) events overlapping the [from, to]
@@ -41,7 +42,7 @@ export async function GET(request) {
     return NextResponse.json({ events: (data || []).map(serializeEvent) });
   } catch (err) {
     console.error("[CALENDAR EVENTS] GET exception:", err);
-    return NextResponse.json({ error: err.message || "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: sanitizeError(err) }, { status: 500 });
   }
 }
 
@@ -79,6 +80,6 @@ export async function POST(request) {
     return NextResponse.json({ event: serializeEvent(data) }, { status: 201 });
   } catch (err) {
     console.error("[CALENDAR EVENTS] POST exception:", err);
-    return NextResponse.json({ error: err.message || "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: sanitizeError(err) }, { status: 500 });
   }
 }

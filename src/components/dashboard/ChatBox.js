@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import BookingModal from "./BookingModal";
 import { uploadAttachment } from "../../lib/storage";
 import { getSession } from "../../lib/authClient";
+import { sanitizeError } from "@/lib/sanitizeError";
 
 // Safe Link Parser to prevent XSS
 const renderTextWithLinks = (text) => {
@@ -177,7 +178,7 @@ export default function ChatBox({ deal, onCloseDeal, onOfferHandshake, onAcceptH
       await sendMessageBody(input.trim());
       setInput("");
     } catch (err) {
-      setUploadError(err.message);
+      setUploadError(sanitizeError(err, "Upload failed. Please try again."));
       setTimeout(() => setUploadError(null), 5000);
     } finally {
       setIsSubmitting(false);
@@ -193,7 +194,7 @@ export default function ChatBox({ deal, onCloseDeal, onOfferHandshake, onAcceptH
       const attachment = await uploadAttachment(deal.id, file);
       await sendMessageBody(encodeAttachment(attachment));
     } catch (err) {
-      setUploadError(err.message);
+      setUploadError(sanitizeError(err, "Upload failed. Please try again."));
       setTimeout(() => setUploadError(null), 5000);
     } finally {
       setIsUploading(false);
@@ -659,7 +660,7 @@ export default function ChatBox({ deal, onCloseDeal, onOfferHandshake, onAcceptH
         dealId={deal.id}
         onSchedule={(scheduledAt) => {
           sendMessageBody(`[SYSTEM] I have requested a live viewing for: ${new Date(scheduledAt).toLocaleString()}`).catch((err) => {
-            setUploadError(err.message);
+            setUploadError(sanitizeError(err, "Upload failed. Please try again."));
             setTimeout(() => setUploadError(null), 5000);
           });
           setShowBookingModal(false);

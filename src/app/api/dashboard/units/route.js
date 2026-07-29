@@ -5,6 +5,7 @@ import { sanitizeObject } from "@/lib/sanitize";
 import { syncPropertyUnitsToAirtable } from "@/lib/unitsSync";
 import { notifyAttachedBrokers } from "@/lib/notifications";
 import { resolveUserId } from "@/lib/serverAuth";
+import { sanitizeError } from "@/lib/sanitizeError";
 
 // Matches a real Postgres uuid (property_units.id). Client-side temp ids from
 // InventoryGridManager's newId() (Date.now().toString(36) + random) never match
@@ -114,7 +115,7 @@ export async function GET(request) {
     });
   } catch (err) {
     console.error("[UNITS API] GET error:", err);
-    return NextResponse.json({ error: err.message || "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: sanitizeError(err) }, { status: 500 });
   }
 }
 
@@ -293,6 +294,6 @@ export async function POST(request) {
     });
   } catch (err) {
     console.error("[UNITS API] POST error:", err);
-    return NextResponse.json({ error: err.message || "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: sanitizeError(err) }, { status: 500 });
   }
 }

@@ -4,6 +4,7 @@ import { sanitizeObject } from "@/lib/sanitize";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { syncPropertyUnitsToAirtable } from "@/lib/unitsSync";
 import { resolveUserId } from "@/lib/serverAuth";
+import { sanitizeError } from "@/lib/sanitizeError";
 
 // Operator's restricted view/edit surface (SCOUTIT_MASTER_BUILD_SPEC.md §9.2):
 // operators can rename, re-photo, and set availability on units delegated to
@@ -65,7 +66,7 @@ export async function GET(request) {
     return NextResponse.json({ buildings: [...byProperty.values()] });
   } catch (err) {
     console.error("[OPERATOR UNITS API] GET error:", err);
-    return NextResponse.json({ error: err.message || "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: sanitizeError(err) }, { status: 500 });
   }
 }
 
@@ -174,6 +175,6 @@ export async function POST(request) {
     });
   } catch (err) {
     console.error("[OPERATOR UNITS API] POST error:", err);
-    return NextResponse.json({ error: err.message || "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: sanitizeError(err) }, { status: 500 });
   }
 }

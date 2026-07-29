@@ -6,7 +6,7 @@ import {
   LayoutDashboard, Building2, Users, ClipboardList, 
   UsersRound, Box, BadgeDollarSign, LineChart, 
   Bot, Settings, AlertTriangle, ArrowRight, Activity,
-  CalendarDays, HardHat, Warehouse, BellRing
+  CalendarDays, HardHat, Warehouse, BellRing, MessageSquareQuote
 } from "lucide-react";
 import { useDashboard } from "../../context/DashboardContext";
 import { computeListingStrength } from "../../lib/listingStrength";
@@ -16,6 +16,7 @@ import ProjectManagementPanel from "./panels/ProjectManagementPanel";
 import TaskRail from "./crm/TaskRail";
 import InventoryGridManager from "./InventoryGridManager";
 import DelegationRequests from "./DelegationRequests";
+import FAQReviewQueue from "./panels/FAQReviewQueue";
 
 // Enterprise Mission Control 
 // ⚠️ DEV-TOOLBOX PREVIEW ONLY. Real Enterprise account isolation
@@ -39,6 +40,7 @@ const NAV_ITEMS = [
   { id: "dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { id: "portfolio", icon: Building2, label: "Portfolio" },
   { id: "crm", icon: Users, label: "CRM" },
+  { id: "faqs", icon: MessageSquareQuote, label: "Q&A Review", mobileLabel: "Q&A" },
   { id: "projects", icon: ClipboardList, label: "Projects" },
   { id: "team", icon: UsersRound, label: "Team" },
   { id: "inventory", icon: Box, label: "Inventory" },
@@ -51,7 +53,7 @@ const NAV_ITEMS = [
 // Module-scoped (not defined inside MissionControlMode) so it isn't recreated
 // on every render — a component redeclared each render loses React's identity
 // tracking and resets its own state/memoization on every parent re-render.
-function NavButton({ id, icon: Icon, label, activeTab, onSelect }) {
+function NavButton({ id, icon: Icon, label, activeTab, onSelect, badge = 0 }) {
   const isActive = activeTab === id;
   return (
     <button
@@ -67,6 +69,11 @@ function NavButton({ id, icon: Icon, label, activeTab, onSelect }) {
       )}
       <Icon size={18} className={`transition-transform duration-300 ${isActive ? 'scale-110 drop-shadow-[0_0_5px_rgba(232,174,60,0.5)]' : 'group-hover:scale-110 opacity-70 group-hover:opacity-100'}`} />
       <span className={`font-mono uppercase tracking-wider text-[11px] ${isActive ? 'font-bold' : 'font-medium'}`}>{label}</span>
+      {badge > 0 && (
+        <span className="ml-auto shrink-0 min-w-[18px] h-[18px] px-1.5 rounded-full bg-gold-accent text-[10px] font-mono font-bold text-black flex items-center justify-center">
+          {badge > 99 ? "99+" : badge}
+        </span>
+      )}
     </button>
   );
 }
@@ -76,6 +83,29 @@ export default function MissionControlMode() {
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [isDeleting, setIsDeleting] = useState(false);
   const [activeTab, setActiveTab] = useState("dashboard");
+  // Surfaced by <FAQReviewQueue /> so the nav can badge unreviewed answers.
+  // Also fetched once on mount with countOnly=1 — otherwise the badge would
+  // only appear AFTER opening the tab, which defeats the point of a badge.
+  const [faqPending, setFaqPending] = useState(0);
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const { getSession } = await import("@/lib/authClient");
+        const { data: { session } } = await getSession();
+        if (!session?.access_token) return;
+        const res = await fetch("/api/faqs/review?countOnly=1", {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        });
+        const json = await res.json();
+        if (alive && json?.success) setFaqPending(json.pendingCount || 0);
+      } catch {
+        /* badge is decorative — never surface a failure here */
+      }
+    })();
+    return () => { alive = false; };
+  }, []);
   const [adminActiveTab, setAdminActiveTab] = useState('Organization Profile');
   const [orgName, setOrgName] = useState("Acme Holdings");
   const [orgDomain, setOrgDomain] = useState("acme-holdings.com");
@@ -258,7 +288,13 @@ export default function MissionControlMode() {
           </div>
           <div className="flex flex-col gap-1.5">
             {NAV_ITEMS.map((item) => (
-              <NavButton key={item.id} {...item} activeTab={activeTab} onSelect={setActiveTab} />
+              <NavButton
+                key={item.id}
+                {...item}
+                activeTab={activeTab}
+                onSelect={setActiveTab}
+                badge={item.id === "faqs" ? faqPending : 0}
+              />
             ))}
           </div>
         </div>
@@ -953,6 +989,17 @@ export default function MissionControlMode() {
                  </div>
               </GlassPanel>
             </div>
+          </div>
+        ) : activeTab === "faqs" ? (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both flex flex-col gap-6">
+            <div>
+              <span className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase">Mission Control • Q&amp;A</span>
+              <h1 className="font-display-md text-3xl md:text-4xl mt-1 text-white">Answer Review</h1>
+              <p className="text-sm text-text-secondary mt-2 max-w-xl">
+                Confirm, override or hide what advisors and residents have said about your listings.
+              </p>
+            </div>
+            <FAQReviewQueue onPendingCount={setFaqPending} />
           </div>
         ) : activeTab === "ai" ? (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both h-full flex flex-col gap-6">

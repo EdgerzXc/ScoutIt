@@ -5,6 +5,7 @@ import { updateProperty } from "@/lib/airtable";
 import { z } from "zod";
 import { stripAllTags } from "@/lib/sanitize";
 import { notifyAttachedBrokers } from "@/lib/notifications";
+import { sanitizeError } from "@/lib/sanitizeError";
 
 // Price/status-ish keys across every category's details shape (Track 1,
 // PLAN_STAFF_ENTERPRISE_ANALYTICS_NOTIFICATIONS.md — "Price + status + units"
@@ -177,6 +178,6 @@ export async function POST(request) {
 
   } catch (err) {
     console.error("[UPDATE API] Error during update process:", err);
-    return NextResponse.json({ error: err.message || "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: sanitizeError(err) }, { status: 500 });
   }
 }

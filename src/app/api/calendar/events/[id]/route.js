@@ -3,6 +3,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolveUserId } from "@/lib/serverAuth";
 import { updateEventSchema, serializeEvent, toEventRow } from "@/lib/calendar/eventSchema";
 import { syncOutbound } from "@/lib/calendar/googleSync";
+import { sanitizeError } from "@/lib/sanitizeError";
 
 // Ownership is enforced by scoping every write to owner_user_id = caller, so a
 // user can never touch another user's event even by guessing an id.
@@ -71,7 +72,7 @@ export async function PATCH(request, { params }) {
     return NextResponse.json({ event: serializeEvent(data) });
   } catch (err) {
     console.error("[CALENDAR EVENTS] PATCH exception:", err);
-    return NextResponse.json({ error: err.message || "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: sanitizeError(err) }, { status: 500 });
   }
 }
 
@@ -107,6 +108,6 @@ export async function DELETE(request, { params }) {
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error("[CALENDAR EVENTS] DELETE exception:", err);
-    return NextResponse.json({ error: err.message || "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: sanitizeError(err) }, { status: 500 });
   }
 }

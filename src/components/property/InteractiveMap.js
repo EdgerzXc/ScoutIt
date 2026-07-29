@@ -2,11 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 
-export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData = [], routeDestination = "", routeDestCoords = null, routeLabel = "", mapboxToken = "" }) {
+export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData = [], routeDestination = "", routeDestCoords = null, routeLabel = "", mapboxToken = "", isochrone = null, contours = [] }) {
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
   const hoveredRef = useRef(null);
   const routeLayerRef = useRef(null);
+  const isochroneLayerRef = useRef(null);
 
   const [mapLoaded, setMapLoaded] = useState(false);
   const [hoveredAmenity, setHoveredAmenity] = useState(null);
@@ -331,12 +332,118 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lat, lng, propertyTitle, JSON.stringify(vicinityData), routeDestination, JSON.stringify(routeDestCoords), routeLabel, mapboxToken]);
 
+  // ── Isochrone overlay (NEW_IDEAS.md §3) ─────────────────────────────
+  // Reachability polygons arrive asynchronously from /api/whereto, well
+  // after the map mounts. This is a SEPARATE effect on purpose: folding it
+  // into the main one would tear down and rebuild the whole Leaflet
+  // instance every time the polygons resolve.
+  //
+  // A radius circle lies — it counts a cafe across a river as "nearby".
+  // These bands show what's actually reachable on foot and by car.
+  useEffect(() => {
+    const map = mapInstance.current;
+    if (!map || !window.L) return;
+
+    if (isochroneLayerRef.current) {
+      try { map.removeLayer(isochroneLayerRef.current); } catch { /* already gone */ }
+      isochroneLayerRef.current = null;
+    }
+
+    if (!isochrone?.features?.length) return;
+
+    try {
+      // Largest polygon first so the tighter walk band paints on top of the
+      // wider drive band rather than being buried under it.
+      const ordered = {
+        ...isochrone,
+        features: [...isochrone.features].sort((a, b) => {
+          const rank = (f) => (f?.properties?.profile === "driving" ? 0 : 1);
+          return rank(a) - rank(b);
+        }),
+      };
+
+      const layer = window.L.geoJSON(ordered, {
+        interactive: false, // never steal clicks from the property pin
+        style: (feature) => ({
+          color: feature?.properties?.color || "#E8AE3C",
+          weight: 1,
+          opacity: 0.55,
+          fillColor: feature?.properties?.color || "#E8AE3C",
+          fillOpacity: 0.07,
+          dashArray: feature?.properties?.profile === "driving" ? "4 4" : null,
+        }),
+      }).addTo(map);
+
+      // Keep the overlay beneath markers so pins stay clickable.
+      if (layer.bringToBack) layer.bringToBack();
+      isochroneLayerRef.current = layer;
+    } catch (err) {
+      // A malformed polygon must never take down the map.
+      console.error("[InteractiveMap] isochrone render failed:", err?.message);
+    }
+
+    return () => {
+      const m = mapInstance.current;
+      if (m && isochroneLayerRef.current) {
+        try { m.removeLayer(isochroneLayerRef.current); } catch { /* already gone */ }
+        isochroneLayerRef.current = null;
+      }
+    };
+  }, [isochrone, mapLoaded]);
+
   const sweepLength = 150; // Sweeps up to outer ring radius
 
   return (
     <div className="map-view-wrapper">
       <div ref={mapRef} className="leaflet-map-node" />
-      
+
+      {/* Isochrone legend — only when bands are actually drawn */}
+      {mapLoaded && isochrone?.features?.length > 0 && contours.length > 0 && (
+        <div
+          style={{
+            position: "absolute",
+            left: "10px",
+            bottom: "10px",
+            zIndex: 500,
+            background: "rgba(13,13,13,0.82)",
+            backdropFilter: "blur(6px)",
+            border: "0.5px solid #262626",
+            borderRadius: "3px",
+            padding: "8px 10px",
+            display: "flex",
+            flexDirection: "column",
+            gap: "6px",
+            pointerEvents: "none",
+          }}
+        >
+          {contours.map((c) => (
+            <div key={c.id} style={{ display: "flex", alignItems: "center", gap: "7px" }}>
+              <span
+                style={{
+                  width: "14px",
+                  height: "2px",
+                  background: c.color,
+                  flexShrink: 0,
+                  opacity: 0.9,
+                }}
+              />
+              <span
+                style={{
+                  fontFamily: "'Courier New',monospace",
+                  fontSize: "8.5px",
+                  color: "#c8c8c8",
+                  letterSpacing: "0.12em",
+                  textTransform: "uppercase",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {c.label}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* 100% Free Transparent HUD Overlay (Blocks no pointer clicks) */}
       {mapLoaded && (
         <svg className="hud-radar-svg-overlay">

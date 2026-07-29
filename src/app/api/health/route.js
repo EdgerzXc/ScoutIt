@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { sanitizeError } from '@/lib/sanitizeError';
 
 export async function GET(request) {
   try {
@@ -52,7 +53,9 @@ export async function GET(request) {
   } catch (error) {
     console.error("[Health Check] Probe failed", error);
     results.status = "error";
-    results.message = error.message;
+    // /api/health is publicly reachable — never echo the raw probe error,
+    // it names our Airtable base and Supabase host.
+    results.message = sanitizeError(error, "Health probe failed.");
     return NextResponse.json(results, { status: 500 });
   }
 }

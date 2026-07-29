@@ -10,6 +10,7 @@ import VaultOfHonor from "./VaultOfHonor";
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import circle from '@turf/circle';
+import { sanitizeError } from "@/lib/sanitizeError";
 
 export default function BuyerMode() {
   const [showMap, setShowMap] = useState(false);
@@ -65,7 +66,7 @@ export default function BuyerMode() {
         map.on('error', (e) => {
           console.error("MapLibre Error Event:", e);
           if (e && e.error) {
-             setMapError(e.error.message || 'Unknown Mapbox Error');
+             setMapError(sanitizeError(e.error, 'Map failed to load.'));
           }
         });
 
@@ -132,7 +133,7 @@ export default function BuyerMode() {
         };
       } catch (err) {
         console.error("MapLibre Initialization Error:", err);
-        setMapError(err.message || String(err));
+        setMapError(sanitizeError(err, 'Map failed to load.'));
       }
     }
   }, [showMap, DEFAULT_MAP_CENTER]);

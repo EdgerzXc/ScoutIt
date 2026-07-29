@@ -90,19 +90,21 @@ export default function KanbanBoard({ deals, viewingAs, onStatusChange, onDealCl
                     onDragStart={(e) => handleDragStart(e, deal.id)}
                     onDragEnd={() => setDraggingId(null)}
                     onClick={() => onDealClick(deal)}
-                    className={`p-4 rounded-lg cursor-grab active:cursor-grabbing transition-all border
+                    className={`p-4 rounded-lg cursor-grab active:cursor-grabbing border transition-all duration-200 ease-out
                       ${getStatusColor(deal.status)}
-                      ${draggingId === deal.id ? "opacity-50" : "hover:-translate-y-[3px] hover:shadow-[0_10px_30px_rgba(0,0,0,0.4),0_0_15px_rgba(247,198,78,0.1)] hover:border-gold-accent/50"}
-                      bg-gradient-to-br from-[#1a1917] to-[#111110]
+                      ${draggingId === deal.id 
+                        ? "opacity-40 scale-[0.98] border-gold-accent shadow-none" 
+                        : "hover:-translate-y-[2px] active:scale-[0.98] hover:shadow-[0_8px_24px_rgba(0,0,0,0.5),0_0_15px_rgba(232,174,60,0.12)] hover:border-gold-accent/40"}
+                      bg-surface/80 backdrop-blur-sm
                     `}
                   >
-                    <div className="font-working-title text-sm text-on-surface mb-1 truncate">{deal.propertyTitle}</div>
-                    <div className="text-xs text-text-secondary mb-3 flex items-center justify-between">
+                    <div className="font-working-title text-sm text-on-surface mb-1 truncate font-medium">{deal.propertyTitle}</div>
+                    <div className="text-xs text-text-secondary mb-3 flex items-center justify-between font-mono">
                       <span>{deal.otherParty}</span>
-                      <span className="capitalize">{deal.myRole}</span>
+                      <span className="capitalize text-gold-accent/80">{deal.myRole}</span>
                     </div>
                     {deal.lastMessage && (
-                      <div className="text-xs text-text-muted truncate italic border-t border-surface-variant pt-2 mt-2">
+                      <div className="text-xs text-text-muted truncate italic border-t border-surface-variant/40 pt-2 mt-2">
                         &quot;{deal.lastMessage}&quot;
                       </div>
                     )}
@@ -110,7 +112,7 @@ export default function KanbanBoard({ deals, viewingAs, onStatusChange, onDealCl
                 ))}
                 
                 {colDeals.length === 0 && (
-                  <div className="h-24 border-2 border-dashed border-surface-variant/50 rounded-lg flex items-center justify-center text-text-muted text-xs font-working-title">
+                  <div className="h-24 border border-dashed border-surface-variant/60 rounded-lg flex items-center justify-center text-text-muted text-xs font-mono tracking-wider uppercase bg-surface/20 hover:border-gold-accent/40 transition-colors">
                     Drop deals here
                   </div>
                 )}

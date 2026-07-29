@@ -2,7 +2,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import ReactionButtons from "@/components/ui/ReactionButtons";
@@ -25,6 +25,9 @@ import Image from "next/image";
 import ShareModal from "./ShareModal";
 import { buildShareText } from "@/lib/shareBriefing";
 import InquiryModal from "@/components/property/InquiryModal";
+import PropertyFAQSection from "@/components/property/PropertyFAQSection";
+import FreshnessBadge from "@/components/ui/FreshnessBadge";
+import WhereToSection from "@/components/property/WhereToSection";
 import OperatorRequestModal from "@/components/property/OperatorRequestModal";
 import GlassPanel from "@/components/ui/GlassPanel";
 import HoverCard from "@/components/ui/HoverCard";
@@ -215,6 +218,13 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [selectedUnit, setSelectedUnit] = useState(null);
   const [whereToTab,        setWhereToTab]        = useState("map");
+  // Reachability polygons lifted from <WhereToSection /> so the Tactical Map
+  // tab can overlay them. useCallback keeps the identity stable — WhereTo's
+  // fetch effect depends on it.
+  const [isochroneData,     setIsochroneData]     = useState(null);
+  const handleIsochrone = useCallback((geojson, contours) => {
+    setIsochroneData({ geojson, contours });
+  }, []);
   const [locTab,            setLocTab]            = useState("spatial");
   const [isInquiryOpen,     setIsInquiryOpen]     = useState(false);
   const [shareTextOpen,     setShareTextOpen]     = useState(null);
@@ -1584,6 +1594,9 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                 <button className={`whereto-tab-btn ${whereToTab === "list" ? "active" : ""}`} onClick={() => setWhereToTab("list")}>
                   Directory List
                 </button>
+                <button className={`whereto-tab-btn ${whereToTab === "lifestyle" ? "active" : ""}`} onClick={() => setWhereToTab("lifestyle")}>
+                  Lifestyle Intel
+                </button>
               </div>
 
               {whereToTab === "map" && (
@@ -1594,6 +1607,8 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                     propertyTitle={d.title}
                     vicinityData={d.whereTo}
                     mapboxToken={mapboxToken}
+                    isochrone={isochroneData?.geojson || null}
+                    contours={isochroneData?.contours || []}
                   />
                 </div>
               )}
@@ -1618,6 +1633,19 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
               {whereToTab === "list" && (!d.whereTo || d.whereTo.length === 0) && (
                 <div style={{padding:"32px", background:"#161616", border:"0.5px dashed #262626", borderRadius:"2px", textAlign:"center", fontFamily:"'Courier New',monospace", fontSize:"11px", color:"#c8c8c8", letterSpacing:"0.12em", marginBottom:"24px"}}>
                   [ LOCATION DETAILS N/A — NO DATA IN CMS ]
+                </div>
+              )}
+
+              {/* Lifestyle Intel — live OpenStreetMap POIs + Mapbox reachability
+                  (NEW_IDEAS.md §3). Replaces the hand-keyed CMS list as the
+                  primary answer to "what's around here?". */}
+              {whereToTab === "lifestyle" && (
+                <div style={{marginBottom:"24px"}}>
+                  <WhereToSection
+                    lat={Number(d.lat ?? d.latitude)}
+                    lng={Number(d.lng ?? d.longitude)}
+                    onIsochrone={handleIsochrone}
+                  />
                 </div>
               )}
 
@@ -2316,7 +2344,21 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
         </div>
       )}
 
-      <ShareModal 
+      {/* 3-Tier public Q&A — bottom of the chapter stack. Hidden in draft
+          mode: an unpublished listing has no public audience to answer it. */}
+      {/* Buyer-facing staleness notice. Renders ONLY past 6 months —
+          see FreshnessBadge for why public surfaces stay quiet before that. */}
+      {!isDraftMode && (
+        <div style={{ padding: "0 16px", maxWidth: "900px", margin: "0 auto" }}>
+          <FreshnessBadge lastVerifiedDate={d.last_verified_date || d.lastVerifiedDate} variant="public" />
+        </div>
+      )}
+
+      {!isDraftMode && (
+        <PropertyFAQSection propertySlug={d.slug || slug} propertyTitle={d.title} />
+      )}
+
+      <ShareModal
         isOpen={!!shareTextOpen}
         onClose={() => setShareTextOpen(null)}
         shareText={shareTextOpen}

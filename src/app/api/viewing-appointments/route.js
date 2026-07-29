@@ -3,6 +3,8 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { z } from "zod";
 import { logActivity } from "@/lib/crmActivity";
 import { resolveUserId } from "@/lib/serverAuth";
+import { sanitizeError } from "@/lib/sanitizeError";
+import { createViewingMeet } from "@/lib/calendar/meetLink";
 
 
 
@@ -25,7 +27,7 @@ export async function GET(request) {
     const { data: appointments, error } = await supabaseAdmin
       .from("viewing_appointments")
       .select(`
-        id, deal_id, host_id, guest_id, property_id, scheduled_at, status, notes, created_at
+        id, deal_id, host_id, guest_id, property_id, scheduled_at, status, notes, created_at, meet_link
       `)
       .or(`host_id.eq.${userId},guest_id.eq.${userId}`)
       .order("scheduled_at", { ascending: true });
@@ -90,14 +92,18 @@ export async function GET(request) {
         notes: appt.notes,
         isHost,
         contactName: isAccepted ? otherName : "🔒 Hidden (Accept deal to view)",
-        dealStatus: deal?.status
+        dealStatus: deal?.status,
+        // Safe to expose: this query already scopes to appointments where the
+        // caller is host or guest, so they're a party to the meeting. A Meet
+        // room for your own viewing isn't a contact detail.
+        meetLink: appt.meet_link || null,
       };
     });
 
     return NextResponse.json({ appointments: result });
   } catch (err) {
     console.error("[APPOINTMENTS API] GET error:", err);
-    return NextResponse.json({ error: err.message || "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: sanitizeError(err) }, { status: 500 });
   }
 }
 
@@ -165,6 +171,37 @@ export async function POST(request) {
       return NextResponse.json({ error: "Failed to create appointment" }, { status: 500 });
     }
 
+    // ── Google Meet room (NEW_IDEAS.md §20.1) ──────────────────────────
+    // Minted on the HOST's calendar — they own the meeting. Strictly
+    // best-effort and AFTER the insert: most hosts won't have connected
+    // Google, and a booking must never fail because a video link couldn't
+    // be created. A null meet_link is a perfectly valid appointment.
+    let meetLink = null;
+    try {
+      const { data: property } = await supabaseAdmin
+        .from("properties")
+        .select("title, location")
+        .eq("id", deal.properties.id)
+        .maybeSingle();
+
+      const meet = await createViewingMeet(hostId, {
+        propertyTitle: property?.title,
+        location: property?.location,
+        scheduledAt,
+        notes,
+      });
+
+      if (meet.meetLink || meet.googleEventId) {
+        meetLink = meet.meetLink;
+        await supabaseAdmin
+          .from("viewing_appointments")
+          .update({ meet_link: meet.meetLink, google_event_id: meet.googleEventId })
+          .eq("id", inserted.id);
+      }
+    } catch (meetErr) {
+      console.error("[APPOINTMENTS API] Meet generation failed:", meetErr?.message);
+    }
+
     await logActivity(supabaseAdmin, {
       dealId,
       propertyId: deal.properties?.id || null,
@@ -173,9 +210,9 @@ export async function POST(request) {
       metadata: { scheduledAt, appointmentId: inserted.id },
     });
 
-    return NextResponse.json({ success: true, appointment: inserted });
+    return NextResponse.json({ success: true, appointment: { ...inserted, meet_link: meetLink } });
   } catch (err) {
     console.error("[APPOINTMENTS API] POST error:", err);
-    return NextResponse.json({ error: err.message || "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: sanitizeError(err) }, { status: 500 });
   }
 }

@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import ChatBox from "@/components/dashboard/ChatBox";
 import { getSession } from "@/lib/authClient";
+import { DashboardProvider } from "@/context/DashboardContext";
 
 // Same dev fallback the rest of the deals/messages routes use -- real
 // Supabase session first, "master-dev" localStorage convention otherwise.
@@ -38,7 +39,7 @@ function toChatBoxDeal(d) {
   };
 }
 
-export default function InboxPage() {
+function InboxInner() {
   const [deals, setDeals] = useState([]);
   const [selectedDealId, setSelectedDealId] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -217,5 +218,13 @@ export default function InboxPage() {
 
       </div>
     </DashboardLayout>
+  );
+}
+
+export default function InboxPage() {
+  return (
+    <DashboardProvider>
+      <InboxInner />
+    </DashboardProvider>
   );
 }

@@ -61,12 +61,11 @@ export default function MonthView({ viewDate, events, onSelectEvent, onSelectDay
           const overflow = dayEvents.length - shown.length;
 
           return (
-            <button
+            <div
               key={day.toISOString()}
-              type="button"
               onClick={() => onSelectDay(day)}
               className={`relative text-left border-b border-r border-surface-variant/60 p-1 overflow-hidden
-                flex flex-col gap-0.5 min-h-[72px] transition-colors hover:bg-surface-variant/20
+                flex flex-col gap-0.5 min-h-[72px] transition-colors hover:bg-surface-variant/20 cursor-pointer
                 ${inMonth ? "bg-transparent" : "bg-background/40"}`}
             >
               <span
@@ -84,7 +83,7 @@ export default function MonthView({ viewDate, events, onSelectEvent, onSelectDay
                   <span className="text-[10px] font-mono text-text-muted pl-1">+{overflow} more</span>
                 )}
               </div>
-            </button>
+            </div>
           );
         })}
       </div>

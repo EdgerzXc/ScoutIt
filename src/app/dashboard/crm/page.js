@@ -11,6 +11,7 @@ import TaskRail from "../../../components/dashboard/crm/TaskRail";
 import { crmFetch } from "../../../lib/crmClient";
 import { Briefcase, Calendar, ListChecks, Mail, Zap, ChevronDown, Check, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { sanitizeError } from "@/lib/sanitizeError";
 
 function CRMPageInner() {
   // The context exposes currentUser (not `user`/`mode`) — the previous
@@ -75,7 +76,7 @@ function CRMPageInner() {
       setDeals((prev) => prev.map((d) => (d.id === dealId ? { ...d, status: newStatus } : d)));
     } catch (e) {
       console.error(e);
-      setShowToast(e.message || "Couldn't update the deal.");
+      setShowToast(sanitizeError(e, "Couldn't update the deal."));
       setTimeout(() => setShowToast(""), 4000);
     } finally {
       setIsUpdatingStatus(false);
@@ -96,7 +97,7 @@ function CRMPageInner() {
       setAppointments((prev) => prev.map((a) => (a.id === id ? { ...a, status } : a)));
     } catch (e) {
       console.error(e);
-      setShowToast(e.message || "Couldn't update the appointment.");
+      setShowToast(sanitizeError(e, "Couldn't update the appointment."));
       setTimeout(() => setShowToast(""), 4000);
     }
   };

@@ -12,6 +12,15 @@ const CHECKS = [
   { key: "coordinates", label: "Map location (geocoded)", test: (l) => !!l.coordinates },
   { key: "category", label: "Space category", test: (l) => !!l.spaceCategory && l.spaceCategory !== "Unknown" },
   { key: "details", label: "Deep intel (specs, financials)", test: (l) => l.details && Object.keys(l.details).length >= 3 },
+  // Buyer-question checklist (src/lib/faqPreflight.js). Conditional: only
+  // scored when the caller actually supplies the count, so listing models
+  // that don't carry it aren't unfairly marked down.
+  {
+    key: "faqPreflight",
+    label: "Buyer questions answered (5+)",
+    test: (l) => (l.faqAnsweredCount || 0) >= 5,
+    appliesWhen: (l) => l.faqAnsweredCount !== undefined && l.faqAnsweredCount !== null,
+  },
 ];
 
 /**
@@ -19,17 +28,26 @@ const CHECKS = [
  * @returns {{ score: number, missing: string[], total: number, passed: number }}
  */
 export function computeListingStrength(listing) {
-  if (!listing) return { score: 0, missing: CHECKS.map((c) => c.label), total: CHECKS.length, passed: 0 };
+  const unconditional = CHECKS.filter((c) => !c.appliesWhen);
+  if (!listing) {
+    return { score: 0, missing: unconditional.map((c) => c.label), total: unconditional.length, passed: 0 };
+  }
+
+  // A conditional check only counts toward the denominator when its data is
+  // actually present -- otherwise adding a check would silently drop every
+  // existing listing's score.
+  const applicable = CHECKS.filter((c) => !c.appliesWhen || c.appliesWhen(listing));
+
   const missing = [];
   let passed = 0;
-  for (const check of CHECKS) {
+  for (const check of applicable) {
     if (check.test(listing)) passed += 1;
     else missing.push(check.label);
   }
   return {
-    score: Math.round((passed / CHECKS.length) * 100),
+    score: Math.round((passed / applicable.length) * 100),
     missing,
-    total: CHECKS.length,
+    total: applicable.length,
     passed,
   };
 }

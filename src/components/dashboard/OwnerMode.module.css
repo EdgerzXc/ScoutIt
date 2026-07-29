@@ -51,12 +51,18 @@
   letter-spacing: 0.1em;
   border-radius: 4px;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 160ms cubic-bezier(0.23, 1, 0.32, 1), background-color 160ms ease-out;
 }
 
 .buttonPrimary:hover {
+  background: var(--accent-bright);
   transform: translateY(-2px);
   box-shadow: 0 4px 20px rgba(232, 174, 60, 0.3);
+}
+
+.buttonPrimary:active {
+  transform: scale(0.97);
+  box-shadow: 0 2px 10px rgba(232, 174, 60, 0.2);
 }
 
 .buttonPrimary:disabled {
@@ -74,11 +80,16 @@
   font-weight: 500;
   border-radius: 4px;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1), background-color 160ms ease-out, border-color 160ms ease-out;
 }
 
 .buttonSecondary:hover {
   background: var(--surface2);
+  border-color: var(--accent-muted);
+}
+
+.buttonSecondary:active {
+  transform: scale(0.97);
 }
 
 /* Completeness Ring */
@@ -237,6 +248,15 @@
   border-radius: 4px;
   font-weight: 600;
   cursor: pointer;
+  transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1), background-color 160ms ease-out;
+}
+
+.btnAccept:hover {
+  background: var(--accent-bright);
+}
+
+.btnAccept:active {
+  transform: scale(0.97);
 }
 
 .btnDecline {
@@ -247,6 +267,16 @@
   padding: 12px;
   border-radius: 4px;
   cursor: pointer;
+  transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1), background-color 160ms ease-out, border-color 160ms ease-out;
+}
+
+.btnDecline:hover {
+  background: var(--surface2);
+  border-color: var(--accent-muted);
+}
+
+.btnDecline:active {
+  transform: scale(0.97);
 }
 
 .emptyState {

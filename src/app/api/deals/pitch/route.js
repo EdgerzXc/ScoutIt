@@ -3,6 +3,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { notifyUser } from "@/lib/notifications";
 import { logActivity } from "@/lib/crmActivity";
 import { resolveUserId } from "@/lib/serverAuth";
+import { sanitizeError } from "@/lib/sanitizeError";
 
 // Broker-initiated pitch (Market Intelligence Feed -> "Open Deal File").
 // `deals` has an explicit RLS policy blocking ALL direct client inserts
@@ -50,8 +51,8 @@ export async function POST(request) {
     let spendError = null;
     let spendData = null;
 
-    if (process.env.NODE_ENV !== 'production' && mockOwnerId) {
-      spendData = { success: true };
+    if (process.env.NODE_ENV !== 'production' && brokerId === 'master-dev') {
+      spendData = [{ success: true, total_balance: 99 }];
     } else {
       const res = await supabaseAdmin.rpc('spend_connects', {
         p_user_id: brokerId,
@@ -111,6 +112,6 @@ export async function POST(request) {
 
   } catch (err) {
     console.error("[PITCH API] Error during pitch process:", err);
-    return NextResponse.json({ error: err.message || "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: sanitizeError(err) }, { status: 500 });
   }
 }

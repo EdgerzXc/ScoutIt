@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolveUserId } from "@/lib/serverAuth";
 import { isGoogleConfigured } from "@/lib/calendar/googleOAuth";
+import { sanitizeError } from "@/lib/sanitizeError";
 
 // Never cache: the configured flag + per-user connection must be read live, or
 // a stale "Setup pending" can stick in the client after creds go active.
@@ -41,6 +42,6 @@ export async function GET(request) {
     return NextResponse.json({ googleConfigured, connections });
   } catch (err) {
     console.error("[CALENDAR connection] exception:", err);
-    return NextResponse.json({ error: err.message || "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: sanitizeError(err) }, { status: 500 });
   }
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { signOut } from "@/lib/authClient";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import styles from "./page.module.css";
@@ -18,6 +19,15 @@ const INTENT_TAGS = [
 
 export default function SettingsPage() {
   const router = useRouter();
+
+  // Real sign-out. Previously this button only cleared the app's profile
+  // cache and left the Supabase session (and its refresh token) live — see
+  // the header of signOut() in lib/authClient.js. Redirects regardless of
+  // the result: local state is torn down either way.
+  const handleSignOut = async () => {
+    await signOut();
+    router.push("/onboarding");
+  };
   const [name, setName] = useState("");
   const [tags, setTags] = useState([]);
   const [badges, setBadges] = useState([]);
@@ -478,7 +488,7 @@ export default function SettingsPage() {
 
         <button
           className="w-full mt-4 border border-surface-variant text-text-secondary hover:text-error hover:border-error/50 font-working-title text-sm py-3 rounded transition-colors"
-          onClick={() => { localStorage.removeItem("scoutit_user"); router.push("/onboarding"); }}
+          onClick={handleSignOut}
         >
           🚪 Sign Out
         </button>

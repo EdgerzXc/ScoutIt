@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { z } from "zod";
 import { logActivity } from "@/lib/crmActivity";
+import { sanitizeError } from "@/lib/sanitizeError";
 
 const schema = z.object({
   status: z.enum(["connected", "pending", "accepted", "closed", "declined", "reported"]),
@@ -73,6 +74,6 @@ export async function PATCH(request, { params }) {
     return NextResponse.json({ success: true, status: updateData.status });
   } catch (err) {
     console.error("[DEALS API] Error:", err);
-    return NextResponse.json({ error: err.message || "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: sanitizeError(err) }, { status: 500 });
   }
 }

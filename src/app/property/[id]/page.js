@@ -4,35 +4,10 @@ import { notFound } from "next/navigation";
 import { fetchProperties } from "@/lib/airtable";
 import { siteUrl } from "@/lib/siteUrl";
 import { extractFacts } from "@/lib/shareBriefing";
+import { buildPropertyJsonLd, mergeFaqIntoOverride } from "@/lib/propertySchema";
+import { getAnsweredFaqs } from "@/lib/faqServer";
 import ResidentialFlow from "@/components/property/ResidentialFlow";
 import CommercialFlow from "@/components/property/CommercialFlow";
-
-// Fallback structured data for listings without a hand-written seo_json_ld.
-// Factual fields only, no monetary values (money renders only in "Your Move").
-function buildListingJsonLd(match, slugOrId) {
-  const facts = extractFacts(match);
-  const photo = Array.isArray(match.photos) ? match.photos.find(Boolean) : (match.photo || match.image);
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "RealEstateListing",
-    name: facts.title,
-    url: siteUrl(`/property/${match.slug || slugOrId}`),
-  };
-  if (match.seo_description) jsonLd.description = match.seo_description;
-  if (photo) jsonLd.image = photo;
-  if (facts.location || facts.city) {
-    jsonLd.address = {
-      "@type": "PostalAddress",
-      ...(facts.city ? { addressLocality: facts.city } : {}),
-      ...(facts.location ? { streetAddress: facts.location } : {}),
-      addressCountry: "PH",
-    };
-  }
-  if (facts.sqm) {
-    jsonLd.floorSize = { "@type": "QuantitativeValue", value: Number(facts.sqm) || facts.sqm, unitCode: "MTK" };
-  }
-  return JSON.stringify(jsonLd);
-}
 
 // ----------------------------------------------------------------------
 // INCREMENTAL STATIC REGENERATION (ISR)
@@ -181,7 +156,22 @@ export default async function PropertyRoute({ params }) {
   // The Chameleon Injection
   const InjectedLayout = CATEGORY_TO_LAYOUT_MAP[layoutKey] || CATEGORY_TO_LAYOUT_MAP["default"];
 
-  const jsonLd = match ? (match.seo_json_ld || buildListingJsonLd(match, resolvedParams.id)) : null;
+  // ── Structured data (NEW_IDEAS.md §1) ────────────────────────────────
+  // Read straight from Supabase rather than our own /api/faqs route: the
+  // page is statically generated with ISR, and fetching from ourselves at
+  // build time breaks static generation. Best-effort — a Supabase outage
+  // costs us the FAQPage node, not the page.
+  let jsonLd = null;
+  if (match) {
+    const canonicalUrl = siteUrl(`/property/${match.slug || resolvedParams.id}`);
+    const faqs = await getAnsweredFaqs(match.slug || resolvedParams.id);
+
+    jsonLd = match.seo_json_ld
+      // A hand-written override still gets the FAQ rich-result eligibility
+      // the owner earned by answering questions.
+      ? mergeFaqIntoOverride(match.seo_json_ld, faqs, canonicalUrl)
+      : buildPropertyJsonLd(match, resolvedParams.id, faqs);
+  }
 
   return (
     <>

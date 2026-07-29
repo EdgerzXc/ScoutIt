@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolveUserId } from "@/lib/serverAuth";
 import { z } from "zod";
+import { sanitizeError } from "@/lib/sanitizeError";
 
 // Soft-delete for the Owner dashboard's "Active Property Files" grid --
 // there's no deleted_at/archived boolean on properties, so this reuses the
@@ -70,6 +71,6 @@ export async function POST(request) {
     return NextResponse.json({ success: true, archivedCount: ownedIds.length, archivedIds: ownedIds });
   } catch (err) {
     console.error("[ARCHIVE API] Error:", err);
-    return NextResponse.json({ error: err.message || "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: sanitizeError(err) }, { status: 500 });
   }
 }
