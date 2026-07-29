@@ -5,6 +5,7 @@
 // ═══════════════════════════════════════════════════════════════
 
 import { cityToRegion } from "./regions";
+import { fetchWithRetry } from "./fetchWithRetry";
 import { DEEP_INTEL_SCHEMA } from "./deepIntelSchema";
 
 const BASE_URL = "https://api.airtable.com/v0";
@@ -68,7 +69,18 @@ async function fetchTable(tableId, apiKey, baseId, params = "") {
     fetchOptions.next = { revalidate: 60 };
   }
 
-  const res = await fetch(url, fetchOptions);
+  // Retried + circuit-broken (NEW_IDEAS.md §17.1/§17.2). Airtable rate-limits
+  // at 5 req/s per base, and ONE breach used to throw here and serve the whole
+  // site empty — see the header of cmsCache.js.
+  //
+  // GET, so retries are safe. Budget is deliberately tight: a CMS bundle fans
+  // out to 4 of these in parallel plus Mapbox geocoding, all inside Vercel's
+  // ~10s function ceiling.
+  const res = await fetchWithRetry(url, fetchOptions, {
+    circuit: "airtable",
+    budgetMs: 5000,
+    attemptTimeoutMs: 2500, // §17.2's latency threshold
+  });
 
   if (!res.ok) {
     throw new Error(`Airtable fetch failed for table "${tableId}": ${res.status} ${res.statusText}`);

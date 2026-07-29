@@ -254,18 +254,36 @@ export function shapeOverpassResponse(json, lat, lon) {
 }
 
 // ── Network ──────────────────────────────────────────────────────────────
+//
+// MIRROR POLICY (measured 2026-07-29): retrying the mirror after a TIMEOUT is
+// almost always wasted time. When Overpass is throttling or under load, both
+// public endpoints are slow together — so the second attempt burns another
+// full timeout and pushes the request from ~4.5s to ~9s, uncomfortably close
+// to Vercel's 10s function limit.
+//
+// A FAST failure is different: a 429 or 5xx from one host in a few hundred ms
+// is often host-specific, and the mirror is genuinely worth a try because it
+// costs almost nothing.
+//
+// So: retry the mirror only when the first attempt failed FAST. Give up after
+// a timeout. Worst case drops from ~9s to ~4.5s while keeping the mirror's
+// benefit exactly where it helps.
 async function fetchOverpass(query) {
   let lastError = null;
   const deadline = Date.now() + TOTAL_BUDGET_MS;
 
-  for (const endpoint of OVERPASS_ENDPOINTS) {
-    // Don't start a second attempt we can't finish inside the budget —
-    // that's how one slow endpoint plus one mirror became an 18s request
-    // and a Vercel 504.
+  for (let i = 0; i < OVERPASS_ENDPOINTS.length; i++) {
+    const endpoint = OVERPASS_ENDPOINTS[i];
+
+    // Previous attempt timed out? Overpass is slow for everyone right now.
+    if (lastError?.wasTimeout) break;
+
+    // Don't start an attempt we can't finish inside the budget.
     const remaining = deadline - Date.now();
     if (remaining < 800) break;
 
     const controller = new AbortController();
+    const startedAt = Date.now();
     const timer = setTimeout(() => controller.abort(), Math.min(REQUEST_TIMEOUT_MS, remaining));
     try {
       const res = await fetch(endpoint, {
@@ -282,13 +300,21 @@ async function fetchOverpass(query) {
       clearTimeout(timer);
 
       if (!res.ok) {
+        // A fast non-2xx (429 rate limit, 504 gateway) is often host-specific,
+        // so the mirror is worth trying — it costs almost nothing.
         lastError = new Error(`Overpass ${res.status}`);
-        continue; // 429 or 504 — try the mirror
+        lastError.wasTimeout = false;
+        continue;
       }
       return await res.json();
     } catch (err) {
       clearTimeout(timer);
       lastError = err;
+      // AbortError means OUR timeout fired. Overpass is slow right now, and
+      // the mirror will almost certainly be slow too — see the policy note
+      // above. Flagged so the loop gives up instead of doubling the wait.
+      lastError.wasTimeout =
+        err?.name === "AbortError" || Date.now() - startedAt >= Math.min(REQUEST_TIMEOUT_MS, remaining) - 50;
     }
   }
 

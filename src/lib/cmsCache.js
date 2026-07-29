@@ -16,6 +16,8 @@ import {
   fetchHomepageConfig,
 } from "@/lib/airtable";
 import { Redis } from '@upstash/redis';
+import { fetchWithRetry } from "@/lib/fetchWithRetry";
+import { CITY_HUB } from "@/lib/transit";
 
 let redis = null;
 if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
@@ -61,7 +63,15 @@ async function geocodeMissingCoords(properties) {
         } else {
           try {
             const geoUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(p.location)}.json?country=ph&limit=1&access_token=${mapboxToken}`;
-            const geoRes = await fetch(geoUrl);
+            // Retried + circuit-broken (NEW_IDEAS.md §17.1/§17.2). Tight budget
+            // because this runs once PER un-geocoded property inside the same
+            // Vercel function as 4 parallel Airtable calls.
+            const geoRes = await fetchWithRetry(geoUrl, {}, {
+              circuit: "mapbox",
+              budgetMs: 3500,
+              attemptTimeoutMs: 2500,
+              retries: 1,
+            });
             const geoData = await geoRes.json();
             if (geoData.features && geoData.features.length > 0) {
               geocodeCache.set(p.location, geoData.features[0].center);
@@ -70,12 +80,34 @@ async function geocodeMissingCoords(properties) {
               geocodeCache.set(p.location, null); // don't re-ask for unknowns
             }
           } catch (err) {
-            console.error(`[CMS] Geocoding failed for ${p.location}`, err);
+            // Circuit-open errors are expected and already explain themselves.
+            if (!err?.circuitOpen) {
+              console.error(`[CMS] Geocoding failed for ${p.location}`, err?.message);
+            }
           }
         }
       }
 
-      return { ...p, lat: propLat, lng: propLng };
+      // ── Local geocoding fallback (§17.2) ────────────────────────────
+      // Mapbox unavailable? Fall back to a known city hub so the property at
+      // least appears in the right city instead of vanishing off the map.
+      //
+      // HONESTY: a city centroid is NOT this property's address. Presenting
+      // it as exact would fabricate a location — the one thing the Honest
+      // Data Doctrine forbids. So it's flagged `coordsApproximate` and the UI
+      // is responsible for saying "approximate" wherever it renders a pin
+      // from it. Never strip this flag to make a map look tidier.
+      let coordsApproximate = false;
+      if ((!propLat || !propLng) && (p.city || p.location)) {
+        const key = String(p.city || p.location).toLowerCase().trim();
+        const hub = CITY_HUB[key] || Object.entries(CITY_HUB).find(([k]) => key.includes(k))?.[1];
+        if (hub) {
+          [propLat, propLng] = hub;
+          coordsApproximate = true;
+        }
+      }
+
+      return { ...p, lat: propLat, lng: propLng, coordsApproximate };
     })
   );
 }
