@@ -47,6 +47,9 @@ export async function generateMetadata({ params }) {
   return {
     title: seoTitle,
     description: seoDescription,
+    // Declare our own canonical, otherwise src/app/property/layout.js's
+    // "/property" canonical is inherited here too.
+    alternates: { canonical: url },
     openGraph: {
       title: seoTitle,
       description: seoDescription,

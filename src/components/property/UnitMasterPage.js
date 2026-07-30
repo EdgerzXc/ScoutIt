@@ -3,12 +3,14 @@
 import { useEffect, useState, useRef, useMemo } from "react";
 import Link from "next/link";
 import "@/app/property/[id]/property-detail.css";
-import FloodRiskBadge from "@/components/property/FloodRiskBadge";
-import UnitInquiryModal from "@/components/property/UnitInquiryModal";
-import SpatialVaultWidget from "@/components/property/SpatialVaultWidget";
-import PromoteModal from "./PromoteModal";
-import { canSee, getCurrentTier } from "@/lib/entitlements";
 import dynamic from "next/dynamic";
+import { canSee, getCurrentTier } from "@/lib/entitlements";
+
+// Dynamically import heavy modals & widgets
+const FloodRiskBadge = dynamic(() => import("@/components/property/FloodRiskBadge"), { ssr: false });
+const UnitInquiryModal = dynamic(() => import("@/components/property/UnitInquiryModal"), { ssr: false });
+const SpatialVaultWidget = dynamic(() => import("@/components/property/SpatialVaultWidget"), { ssr: false });
+const PromoteModal = dynamic(() => import("./PromoteModal"), { ssr: false });
 import {
   unitCapacity,
   scenarioCapacity,

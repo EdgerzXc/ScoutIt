@@ -61,6 +61,10 @@ export async function generateMetadata({ params }) {
   return {
     title: seoTitle,
     description: seoDescription,
+    // Without this, the page inherits `alternates.canonical: "/property"` from
+    // src/app/property/layout.js — every listing was telling Google that the
+    // directory index is its canonical URL, i.e. "don't index me".
+    alternates: { canonical: url },
     openGraph: {
       title: seoTitle,
       description: seoDescription,
@@ -152,8 +156,14 @@ export default async function PropertyRoute({ params }) {
         />
       )}
       <article className="chameleon-content-wrapper">
-        {/* We pass the slug so the client component can fetch dynamic data via API if needed */}
-        <InjectedLayout slug={resolvedParams.id} />
+        {/*
+          `match` is already resolved above for metadata and JSON-LD. Passing it
+          down as initialData lets the flow render real content during SSR
+          instead of shipping a "LOADING SPACE INTELLIGENCE…" spinner and waiting
+          on a client-side /api/cms round-trip — which is what was pushing LCP
+          past 7s on mobile. The flow still revalidates in the background.
+        */}
+        <InjectedLayout slug={resolvedParams.id} initialData={match || null} />
       </article>
     </>
   );

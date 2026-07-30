@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { Lock } from "lucide-react";
 import ServiceConnectionPortal from "@/components/connection/ServiceConnectionPortal";
 import { DetailPageAccessGate } from "@/components/ui/EarlyAccessGate";
+import { siteUrl } from "@/lib/siteUrl";
 
 
 const DUMMY_RESEARCHERS = [];
@@ -14,7 +15,10 @@ export async function generateMetadata({ params }) {
   const r = DUMMY_RESEARCHERS.find(x => x.id === slug);
   return {
     title: r ? `${r.name} · Site Intelligence Profile` : "Site Researcher Profile",
-    description: r ? r.bio : "Verified ScoutIt partner site researcher."
+    description: r ? r.bio : "Verified ScoutIt partner site researcher.",
+    // Without this the profile inherits `canonical: "/researchers"` from the
+    // parent layout, pointing Google at the directory instead of this page.
+    alternates: { canonical: siteUrl(`/researchers/${slug}`) },
   };
 }
 

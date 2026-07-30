@@ -8,7 +8,15 @@ import AtmosphereBackground from "@/components/ui/AtmosphereBackground";
 import { notFound } from "next/navigation";
 import { ReactionBadge } from "@/components/ui/ReactionButtons";
 
-const SECRET_KEY = process.env.WISHLIST_SHARE_SECRET || "scoutit_wishlist_share_default_k"; 
+// A tokenised share link is private by construction — it should never be
+// indexed. It was previously inheriting `canonical: "/wishlist"` from the
+// parent layout, which is both wrong and no protection against a crawler that
+// finds the token in a referrer or a pasted link.
+export const metadata = {
+  robots: { index: false, follow: false },
+};
+
+const SECRET_KEY = process.env.WISHLIST_SHARE_SECRET || "scoutit_wishlist_share_default_k";
 
 const getEncryptionKey = () => {
   const key = Buffer.from(SECRET_KEY, "utf-8");

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getArticleBySlug, getArticles } from "@/data/mockArticles";
 import { fetchIntel } from "@/lib/airtable";
+import { siteUrl } from "@/lib/siteUrl";
 import { parseArticleBlocks, blocksFromLegacy } from "@/lib/articleSchema";
 import ArticleBlocks from "@/components/intel/ArticleBlocks";
 import GlassPanel from "@/components/ui/GlassPanel";
@@ -75,7 +76,10 @@ export async function generateMetadata({ params }) {
   const article = await getLiveArticle(slug);
   return {
     title: article ? `${article.title} &middot; Intel Briefing` : "Intel Briefing",
-    description: article ? article.lead : "Real estate news and intelligence."
+    description: article ? article.lead : "Real estate news and intelligence.",
+    // Without this the article inherits `canonical: "/intel"` from
+    // src/app/intel/layout.js, which tells Google to index the hub instead.
+    alternates: { canonical: siteUrl(`/intel/${slug}`) },
   };
 }
 

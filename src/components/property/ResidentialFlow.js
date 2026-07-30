@@ -22,17 +22,18 @@ const InteractiveMap = dynamic(() => import("@/components/property/InteractiveMa
 import { getChapterConfig } from "./chapterConfig";
 import { Lock, Unlock, Zap, ChevronRight, Share2, MapPin, Eye, Search, Layers, X, Home, Users, ArrowUpRight, Copy, Check, Bed, Bath, Ruler, Car, Building2, Camera } from "lucide-react";
 import Image from "next/image";
-import ShareModal from "./ShareModal";
-import { buildShareText } from "@/lib/shareBriefing";
-import InquiryModal from "@/components/property/InquiryModal";
-import PropertyFAQSection from "@/components/property/PropertyFAQSection";
 import FreshnessBadge from "@/components/ui/FreshnessBadge";
-import WhereToSection from "@/components/property/WhereToSection";
-import OperatorRequestModal from "@/components/property/OperatorRequestModal";
 import GlassPanel from "@/components/ui/GlassPanel";
 import HoverCard from "@/components/ui/HoverCard";
 import MeshHero from "@/components/ui/MeshHero";
-import AffordabilityCalculator from "@/components/property/AffordabilityCalculator";
+
+// Heavy below-the-fold components dynamically imported to minimize initial mobile JS payload & TBT
+const ShareModal = dynamic(() => import("./ShareModal"), { ssr: false });
+const InquiryModal = dynamic(() => import("@/components/property/InquiryModal"), { ssr: false });
+const PropertyFAQSection = dynamic(() => import("@/components/property/PropertyFAQSection"), { ssr: false });
+const WhereToSection = dynamic(() => import("@/components/property/WhereToSection"), { ssr: false });
+const OperatorRequestModal = dynamic(() => import("@/components/property/OperatorRequestModal"), { ssr: false });
+const AffordabilityCalculator = dynamic(() => import("@/components/property/AffordabilityCalculator"), { ssr: false });
 import MonthlyCostCalculator from "@/components/property/MonthlyCostCalculator";
 import FloodRiskBadge from "@/components/property/FloodRiskBadge";
 import SpatialVaultWidget from "@/components/property/SpatialVaultWidget";
@@ -176,12 +177,24 @@ function initialChapterFromUrl(fallback) {
   return urlChapter && VALID_CHAPTERS.has(urlChapter) ? urlChapter : fallback;
 }
 
-export default function ResidentialFlow({ slug, draftData, isDraftMode, externalActiveTab }) {
+export default function ResidentialFlow({ slug, draftData, isDraftMode, externalActiveTab, initialData = null }) {
   // ── Interactive UI states ──────────────────────
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [photoMode,         setPhotoMode]         = useState("natural");
   const [isAutoPlaying,     setIsAutoPlaying]     = useState(true);
   const [isPhotoHovered,    setIsPhotoHovered]    = useState(false);
+  // See CommercialFlow: hero slides sit at opacity:0 in-viewport, so the browser
+  // downloads the whole gallery in parallel and starves the LCP image. Mount the
+  // first slide up front, the rest once the main thread is idle. No visual change.
+  const [galleryWarmed, setGalleryWarmed] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const warm = () => setGalleryWarmed(true);
+    const ric = window.requestIdleCallback;
+    if (ric) { const h = ric(warm, { timeout: 3000 }); return () => window.cancelIdleCallback?.(h); }
+    const t = setTimeout(warm, 1500);
+    return () => clearTimeout(t);
+  }, []);
   // Enhanced photos unlock at Solar+. SSR-safe — locked until the client reads the viewer's tier.
   const [canEnhance,        setCanEnhance]        = useState(false);
   useEffect(() => { setCanEnhance(canSee("enhancedPhotos", getCurrentTier())); }, []);
@@ -214,8 +227,10 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
     }
   }, [externalActiveTab]);
   const [menuOpen,   setMenuOpen]   = useState(false);
-  const [propertyData, setPropertyData] = useState(() => draftData || null);
-  const [dataLoading,  setDataLoading]  = useState(() => !draftData);
+  // Seed from the server-resolved record so the first paint is real content,
+  // not the loading gate.
+  const [propertyData, setPropertyData] = useState(() => draftData || initialData || null);
+  const [dataLoading,  setDataLoading]  = useState(() => !draftData && !initialData);
   const [isOwner, setIsOwner] = useState(false);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [selectedUnit, setSelectedUnit] = useState(null);
@@ -275,8 +290,12 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
   // ── Fetch from Airtable in background; mock data already shown ──
   useEffect(() => {
     if (isDraftMode) return;
+    // See CommercialFlow: with server-provided data this is a background refresh.
+    // Don't re-raise the loading gate over already-painted content, and don't let
+    // the /api/cms bundle compete with hydration — defer it to idle.
+    const hasServerData = !!initialData;
     async function loadProperty() {
-      setDataLoading(true);
+      if (!hasServerData) setDataLoading(true);
       try {
         const res  = await fetch("/api/cms");
         if (res.ok) {
@@ -296,8 +315,12 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
         setDataLoading(false);
       }
     }
-    loadProperty();
-  }, [slug]);
+    if (!hasServerData) { loadProperty(); return; }
+    const ric = typeof window !== "undefined" && window.requestIdleCallback;
+    if (ric) { const h = ric(loadProperty, { timeout: 4000 }); return () => window.cancelIdleCallback?.(h); }
+    const t = setTimeout(loadProperty, 2000);
+    return () => clearTimeout(t);
+  }, [slug, initialData]);
 
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
@@ -956,12 +979,14 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
         >
 
           {photos.map((url, i) => (
+            (i === 0 || galleryWarmed || Math.abs(i - currentImageIndex) <= 1) &&
             <Image
               key={i}
               src={url}
               alt={`${d.title} - ${d.spaceCategory || d.property_type || 'Residential Asset'} in ${d.location || d.city || 'Philippines'} | Photo ${i + 1} of ${photos.length}`}
               fill
               priority={i === 0}
+              fetchPriority={i === 0 ? "high" : "low"}
               loading={i === 0 ? "eager" : "lazy"}
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 75vw, 60vw"
               quality={75}

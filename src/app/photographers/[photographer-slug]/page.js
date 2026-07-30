@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { Lock } from "lucide-react";
 import ServiceConnectionPortal from "@/components/connection/ServiceConnectionPortal";
 import { DetailPageAccessGate } from "@/components/ui/EarlyAccessGate";
+import { siteUrl } from "@/lib/siteUrl";
 
 
 const DUMMY_PHOTOGRAPHERS = [];
@@ -14,7 +15,10 @@ export async function generateMetadata({ params }) {
   const ph = DUMMY_PHOTOGRAPHERS.find(p => p.id === slug);
   return {
     title: ph ? `${ph.name} · Photographer Profile` : "Photographer Profile",
-    description: ph ? ph.bio : "Verified ScoutIt partner photographer."
+    description: ph ? ph.bio : "Verified ScoutIt partner photographer.",
+    // Without this the profile inherits `canonical: "/photographers"` from the
+    // parent layout, pointing Google at the directory instead of this page.
+    alternates: { canonical: siteUrl(`/photographers/${slug}`) },
   };
 }
 

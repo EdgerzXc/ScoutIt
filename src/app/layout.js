@@ -1,4 +1,5 @@
 import { Geist, Geist_Mono } from "next/font/google";
+import { SITE_URL } from "@/lib/siteUrl";
 import "./globals.css";
 import dynamic from "next/dynamic";
 import BottomNav from "@/components/layout/BottomNav";
@@ -24,9 +25,13 @@ export const metadata = {
   // Pin all absolute URLs (OG tags, canonical, etc.) to the production domain.
   // Without this, Next.js falls back to VERCEL_URL which is the per-commit
   // preview URL (e.g. scoutit-nyjlszg3k-…vercel.app) — not publicly accessible.
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL ?? "https://scoutit.vercel.app"
-  ),
+  //
+  // This MUST come from SITE_URL. It previously had its own fallback chain
+  // ending in "https://scoutit.vercel.app" — a different host from siteUrl.js's
+  // "https://scout-it.vercel.app" (note the hyphen). With NEXT_PUBLIC_SITE_URL
+  // unset in production the two disagreed, so every page emitted a canonical on
+  // one domain and og:url on another. siteUrl.js is the single source of truth.
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "ScoutIt — Space Intelligence",
     template: "%s · ScoutIt",

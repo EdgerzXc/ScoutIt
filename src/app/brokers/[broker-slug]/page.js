@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import ConnectionPortal from "@/components/connection/ConnectionPortal";
 
 import { getCmsBundle } from "@/lib/cmsCache";
+import { siteUrl } from "@/lib/siteUrl";
 
 export async function generateMetadata({ params }) {
   const { "broker-slug": slug } = await params;
@@ -12,7 +13,11 @@ export async function generateMetadata({ params }) {
   const broker = bundle.brokers.find(b => b.id === slug);
   return {
     title: broker ? `${broker.name} · Advisor Profile` : "Advisor Profile",
-    description: broker ? broker.bio : "Vetted space intelligence advisor."
+    description: broker ? broker.bio : "Vetted space intelligence advisor.",
+    // Without this the profile inherits `canonical: "/brokers"` from
+    // src/app/brokers/layout.js, which tells Google to index the directory
+    // instead of this profile.
+    alternates: { canonical: siteUrl(`/brokers/${slug}`) },
   };
 }
 
