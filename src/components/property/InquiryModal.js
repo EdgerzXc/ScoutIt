@@ -7,6 +7,7 @@ import { X, Check } from "lucide-react";
 import GlassPanel from "../ui/GlassPanel";
 import { ImpeccableTextArea } from "../ui/ImpeccableInput";
 import { ImpeccableButton } from "../ui/ImpeccableButton";
+import { trackFrictionPoint } from "@/lib/deviceTracker";
 
 const backdropVariants = {
   hidden: { opacity: 0, backdropFilter: "blur(0px)" },
@@ -37,6 +38,13 @@ const formVariants = {
 export default function InquiryModal({ isOpen, onClose, propertyTitle, propertySlug }) {
   const [status, setStatus] = useState("composing"); // composing, submitting, success, error
   const [errorMsg, setErrorMsg] = useState("");
+
+  const handleCloseModal = () => {
+    if (status === "composing") {
+      trackFrictionPoint("abandoned_inquiry_modal", { propertyTitle, propertySlug });
+    }
+    onClose();
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();

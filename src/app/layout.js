@@ -6,6 +6,7 @@ import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import DynamicOverlays from "@/components/layout/DynamicOverlays";
 import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
 import JsonLd from "@/components/seo/JsonLd";
+import DeviceTracker from "@/components/layout/DeviceTracker";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -68,6 +69,7 @@ export default function RootLayout({ children }) {
       <body>
         <GoogleAnalytics />
         <JsonLd />
+        <DeviceTracker />
         {/* Lite Mode no-flash: apply the class before paint so low-end phones
             never render the heavy cosmic layers. Defaults on for users who ask
             for reduced motion; otherwise reads the stored preference. */}
