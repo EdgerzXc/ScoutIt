@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import { getSession } from "@/lib/authClient";
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -529,7 +530,7 @@ export default function PropertyFAQSection({ propertySlug, propertyTitle }) {
         </div>
       ) : (
         <div className="faq-signin">
-          <a href="/login">Sign in</a> to ask a question or add a verified answer.
+          <Link href="/onboarding">Sign in</Link> to ask a question or add a verified answer.
         </div>
       )}
 
