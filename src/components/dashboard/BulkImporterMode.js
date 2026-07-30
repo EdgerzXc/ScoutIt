@@ -57,9 +57,14 @@ export default function BulkImporterMode({ onClose }) {
 
     try {
       // Step 1: Get AI blueprint mapping for the CSV headers
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
       const blueprintRes = await fetch('/api/ai/blueprint', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({
           headers: columns,
           sampleData: csvData.slice(0, 3).map(r => {
@@ -104,9 +109,7 @@ export default function BulkImporterMode({ onClose }) {
       });
 
       // Step 3: Bulk insert into Supabase
-      const { data: { session } } = await supabase.auth.getSession();
-      const token = session?.access_token;
-
+      // (session/token already resolved above for the blueprint call)
       const insertRes = await fetch('/api/dashboard/bulk-insert', {
         method: 'POST',
         headers: { 

@@ -303,7 +303,10 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
       // 2. Assimilate
       const assimilateRes = await fetch("/api/ai/assimilate", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({ payload: [{ source: file.name, text }] }),
       });
 

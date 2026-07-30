@@ -319,7 +319,10 @@ export default function OwnerMode() {
                 // 2. Hand the extracted text to the schema-mapping AI.
                 const res = await fetch('/api/ai/assimilate', {
                   method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
+                  headers: {
+                    'Content-Type': 'application/json',
+                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                  },
                   body: JSON.stringify({
                     source: 'pdf_concierge',
                     payload: [{ raw_text: text, filename: selectedFile.name }]

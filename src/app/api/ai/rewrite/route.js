@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { GEMINI_MODEL } from '@/lib/geminiModel';
 import { GoogleGenAI } from '@google/genai';
+import { resolveUserId } from '@/lib/serverAuth';
 
 const SEO_OPTIMIZE_PROMPT = `
 You are an elite Real Estate SEO and Generative Engine Optimization (GEO) expert. Your job is to rewrite the provided property description so it ranks #1 on traditional search engines AND is highly citable by AI overviews (ChatGPT, Perplexity, Google AI).
@@ -26,6 +27,13 @@ Follow these strict rules:
 
 export async function POST(request) {
   try {
+    // Dashboard-only tool that spends Gemini quota on caller-supplied text.
+    // Left unauthenticated it was a free AI proxy billed to ScoutIt.
+    const userId = await resolveUserId(request);
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { text, location, category } = await request.json();
 
     if (!text || text.trim() === '') {

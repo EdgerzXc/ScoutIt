@@ -1,9 +1,17 @@
 import { NextResponse } from 'next/server';
 import { GEMINI_MODEL } from '@/lib/geminiModel';
 import { GoogleGenAI, Type } from '@google/genai';
+import { resolveUserId } from '@/lib/serverAuth';
 
 export async function POST(request) {
   try {
+    // Dashboard-only tool that spends Gemini quota on caller-supplied text.
+    // Left unauthenticated it was a free AI proxy billed to ScoutIt.
+    const userId = await resolveUserId(request);
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { headers, sampleData } = await request.json();
 
     if (!headers || !sampleData || headers.length === 0) {

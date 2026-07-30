@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { GEMINI_MODEL } from '@/lib/geminiModel';
 import { GoogleGenAI, Type } from '@google/genai';
+import { resolveUserId } from '@/lib/serverAuth';
 
 const SCOUTIT_SCHEMA_PROMPT = `
 You are an expert data extraction and Real Estate SEO assistant for ScoutIt, a Philippine real estate intelligence platform.
@@ -46,6 +47,13 @@ Put any extra details or facts found in the document that do not map to the top-
 
 export async function POST(request) {
   try {
+    // Dashboard-only tool that spends Gemini quota on caller-supplied text.
+    // Left unauthenticated it was a free AI proxy billed to ScoutIt.
+    const userId = await resolveUserId(request);
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { source, payload } = await request.json();
 
     console.log(`[Assimilate] source=${source} items=${payload?.length ?? 0}`);

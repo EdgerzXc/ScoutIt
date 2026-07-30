@@ -175,9 +175,14 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
     setIsOptimizing(true);
     addToast("SEO Council AI is rewriting your description...", "🤖");
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
       const res = await fetch('/api/ai/rewrite', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({ 
           text: formData.description,
           location: formData.location,
@@ -334,7 +339,10 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
       // 2. Assimilate
       const assimilateRes = await fetch("/api/ai/assimilate", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({ payload: [{ source: file.name, text }] }),
       });
 

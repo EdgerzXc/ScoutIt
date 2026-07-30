@@ -2,6 +2,37 @@ import { NextResponse } from 'next/server';
 import { extractFacts, factSpecs, buildPromoPack } from '@/lib/shareBriefing';
 import { SITE_URL } from '@/lib/siteUrl';
 import { GEMINI_MODEL } from '@/lib/geminiModel';
+import { resolveUserId } from '@/lib/serverAuth';
+import { isPreLaunchFreeMode } from '@/lib/featureFlags';
+import { supabaseAdmin } from '@/lib/supabaseAdmin';
+import { tierRank } from '@/lib/entitlements';
+
+// ── Tier is decided HERE, never by the caller ────────────────────────────────
+// This route used to read `tier` straight out of the request body, so anyone —
+// including a logged-out visitor — could send `tier: "universe"` and receive the
+// premium formats for free. The paywall existed in the UI only.
+//
+// While `pre_launch_free_mode` is on (its default), everyone still gets every
+// format exactly as they do today — that flag is the lever for the launch
+// period. The moment it's switched off from Mission Control, the tier comes
+// from the signed-in user's own profile row and anonymous callers drop to the
+// free tier. No deploy needed to flip it either way.
+async function resolveTier(request) {
+  if (await isPreLaunchFreeMode()) {
+    return { tier: 'universe', freeMode: true };
+  }
+
+  const userId = await resolveUserId(request);
+  if (!userId || !supabaseAdmin) return { tier: 'starry', freeMode: false };
+
+  const { data } = await supabaseAdmin
+    .from('user_profiles')
+    .select('subscription_tier')
+    .eq('id', userId)
+    .maybeSingle();
+
+  return { tier: data?.subscription_tier || 'starry', freeMode: false };
+}
 
 const PROMOTE_SYSTEM_PROMPT = `
 You are an elite real estate copywriter for ScoutIt, a premium commercial and residential real estate directory (the "Bloomberg for Space").
@@ -41,9 +72,10 @@ function renderFactSheet(property) {
 }
 
 export async function POST(request) {
-  let property, role, tier, link;
+  let property, role, link;
   try {
-    ({ property, role, tier, link } = await request.json());
+    // `tier` is deliberately NOT read from the body — see resolveTier above.
+    ({ property, role, link } = await request.json());
   } catch {
     return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
   }
@@ -54,7 +86,8 @@ export async function POST(request) {
 
   const safeLink = link || SITE_URL;
   // Premium tiers get all three formats; free tier gets the fast pitch only.
-  const generateAll = Boolean(tier && tier !== 'starry');
+  const { tier } = await resolveTier(request);
+  const generateAll = tierRank(tier) > tierRank('starry');
 
   // The deterministic pack is both the fallback AND the guarantee that this
   // endpoint always answers with factual copy — even with no AI key at all.
