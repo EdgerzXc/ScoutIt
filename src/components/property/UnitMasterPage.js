@@ -4,6 +4,7 @@ import { useEffect, useState, useRef, useMemo } from "react";
 import Link from "next/link";
 import "@/app/property/[id]/property-detail.css";
 import dynamic from "next/dynamic";
+import InViewport from "@/components/ui/InViewport";
 import { canSee, getCurrentTier } from "@/lib/entitlements";
 
 // Dynamically import heavy modals & widgets
@@ -558,13 +559,20 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
                 )}
               </div>
 
-              <div style={{ marginTop: "20px", marginBottom: "20px" }}>
+              <InViewport
+                style={{ marginTop: "20px", marginBottom: "20px" }}
+                fallback={
+                  <div style={{ height: "420px", background: "#0d0d0d", border: "0.5px solid #262626", borderRadius: "4px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", letterSpacing: "0.1em", textTransform: "uppercase", color: "#c8c8c8" }}>Spatial command HUD</span>
+                  </div>
+                }
+              >
                 <SpatialCommandMap
                   lat={property.latitude || property.lat || 14.5547}
                   lng={property.longitude || property.lng || 121.0244}
                   propertyTitle={property.title}
                 />
-              </div>
+              </InViewport>
 
               <div style={{ marginTop: "24px" }}>
                 <Link href={`/property/${property.slug}`} style={{ color: ACCENT, fontFamily: "'Courier New',monospace", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase" }}>

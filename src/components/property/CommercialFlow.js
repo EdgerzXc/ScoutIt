@@ -61,6 +61,16 @@ const SpatialCommandMap = dynamic(() => import("@/components/property/SpatialCom
 });
 import { DEEP_INTEL_SCHEMA } from "../../lib/deepIntelSchema";
 
+// Matches the dynamic-import loading states above, so an <InViewport>-gated map
+// reserves exactly the space it will occupy — nothing reflows when it mounts.
+function mapPlaceholder(height, label) {
+  return (
+    <div style={{ height, background: "#0d0d0d", border: "0.5px solid #262626", borderRadius: "4px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", letterSpacing: "0.1em", textTransform: "uppercase", color: "#c8c8c8" }}>{label}</span>
+    </div>
+  );
+}
+
 // Loose bounding box around Metro Manila + the LRT/MRT lines' exurb extensions
 // (Cavite, Antipolo) -- properties outside this simply aren&apos;t served by rail,
 // so the tab only shows where it&apos;s actually a useful signal.
@@ -77,6 +87,7 @@ import { buildShareText } from "@/lib/shareBriefing";
 const ShareModal = dynamic(() => import("./ShareModal"), { ssr: false });
 const InquiryModal = dynamic(() => import("@/components/property/InquiryModal"), { ssr: false });
 const OperatorRequestModal = dynamic(() => import("@/components/property/OperatorRequestModal"), { ssr: false });
+import InViewport from "@/components/ui/InViewport";
 import GlassPanel from "@/components/ui/GlassPanel";
 import HoverCard from "@/components/ui/HoverCard";
 import MeshHero from "@/components/ui/MeshHero";
@@ -1718,13 +1729,16 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
               </div>
 
               {locTab === "spatial" && (
-                <div style={{ marginBottom: "clamp(28px, 8vw, 80px)" }}>
+                <InViewport
+                  style={{ marginBottom: "clamp(28px, 8vw, 80px)" }}
+                  fallback={mapPlaceholder("420px", "Spatial command HUD")}
+                >
                   <SpatialCommandMap
                     lat={d.lat || d.latitude || d.Latitude || 14.5547}
                     lng={d.lng || d.longitude || d.Longitude || 121.0244}
                     propertyTitle={d.title}
                   />
-                </div>
+                </InViewport>
               )}
 
               {locTab === "flood" && (
@@ -1745,7 +1759,10 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
               )}
 
               {locTab === "map" && (
-                <div style={{height:"clamp(420px, 70vh, 850px)", minHeight:"420px", flexShrink:0, borderRadius:"4px", overflow:"hidden", border:"0.5px solid #262626", marginBottom:"clamp(28px, 8vw, 80px)"}}>
+                <InViewport
+                  style={{height:"clamp(420px, 70vh, 850px)", minHeight:"420px", flexShrink:0, borderRadius:"4px", overflow:"hidden", border:"0.5px solid #262626", marginBottom:"clamp(28px, 8vw, 80px)"}}
+                  fallback={mapPlaceholder("100%", "Tactical map")}
+                >
                   <InteractiveMap
                     lat={d.lat || d.latitude || 14.5547}
                     lng={d.lng || d.longitude || 121.0244}
@@ -1756,7 +1773,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                     routeLabel={transitLabel}
                     mapboxToken={mapboxToken}
                   />
-                </div>
+                </InViewport>
               )}
 
               {locTab === "list" && d.whereTo && d.whereTo.length > 0 && (
@@ -1960,7 +1977,10 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
               </div>
 
               {whereToTab === "map" && (
-                <div style={{height:"clamp(420px, 70vh, 850px)", minHeight:"420px", flexShrink:0, borderRadius:"4px", overflow:"hidden", border:"0.5px solid #262626", marginBottom:"clamp(32px, 9vw, 120px)"}}>
+                <InViewport
+                  style={{height:"clamp(420px, 70vh, 850px)", minHeight:"420px", flexShrink:0, borderRadius:"4px", overflow:"hidden", border:"0.5px solid #262626", marginBottom:"clamp(32px, 9vw, 120px)"}}
+                  fallback={mapPlaceholder("100%", "Tactical map")}
+                >
                   <InteractiveMap
                     lat={d.lat || d.latitude || 14.5547}
                     lng={d.lng || d.longitude || 121.0244}
@@ -1970,7 +1990,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                     isochrone={isochroneData?.geojson || null}
                     contours={isochroneData?.contours || []}
                   />
-                </div>
+                </InViewport>
               )}
 
               {whereToTab === "list" && d.whereTo && d.whereTo.length > 0 && (
