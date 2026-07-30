@@ -6,14 +6,14 @@ const __impeccableLiveDev =
 
 const cspHeader = `
     default-src 'self';
-    script-src 'self' 'unsafe-eval' 'unsafe-inline' https://unpkg.com${__impeccableLiveDev};
+    script-src 'self' 'unsafe-eval' 'unsafe-inline' https://unpkg.com https://www.googletagmanager.com${__impeccableLiveDev};
     style-src 'self' 'unsafe-inline' https://unpkg.com;
     img-src 'self' blob: data: https:;
     font-src 'self' data:;
     worker-src 'self' blob:;
     child-src 'self' blob:;
     frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://my.matterport.com https://*.matterport.com https://lumalabs.ai;
-    connect-src 'self' https://*.supabase.co https://*.mapbox.com https://events.mapbox.com https://unpkg.com https://*.cartocdn.com https://huggingface.co https://*.hf.co${__impeccableLiveDev};
+    connect-src 'self' https://*.supabase.co https://*.mapbox.com https://events.mapbox.com https://unpkg.com https://*.cartocdn.com https://huggingface.co https://*.hf.co https://www.google-analytics.com https://www.googletagmanager.com https://www.google.com https://*.google.com https://earthquake.usgs.gov${__impeccableLiveDev};
     object-src 'none';
     base-uri 'self';
     form-action 'self';

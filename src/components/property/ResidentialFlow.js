@@ -213,14 +213,11 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
   }, [externalActiveTab]);
   const [menuOpen,   setMenuOpen]   = useState(false);
   const [propertyData, setPropertyData] = useState(() => draftData || null);
-  const [dataLoading,  setDataLoading]  = useState(false);
+  const [dataLoading,  setDataLoading]  = useState(() => !draftData);
   const [isOwner, setIsOwner] = useState(false);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [selectedUnit, setSelectedUnit] = useState(null);
   const [whereToTab,        setWhereToTab]        = useState("map");
-  // Reachability polygons lifted from <WhereToSection /> so the Tactical Map
-  // tab can overlay them. useCallback keeps the identity stable — WhereTo's
-  // fetch effect depends on it.
   const [isochroneData,     setIsochroneData]     = useState(null);
   const handleIsochrone = useCallback((geojson, contours) => {
     setIsochroneData({ geojson, contours });
@@ -229,8 +226,6 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
   const [isInquiryOpen,     setIsInquiryOpen]     = useState(false);
   const [shareTextOpen,     setShareTextOpen]     = useState(null);
   const [isOperatorRequestOpen, setIsOperatorRequestOpen] = useState(false);
-  // The mobile bottom bar's "Inquire" action opens this modal via a global event,
-  // so the primary CTA is always reachable from the thumb zone on a long page.
   useEffect(() => {
     const open = () => setIsInquiryOpen(true);
     window.addEventListener("scoutit:property-inquire", open);
@@ -258,6 +253,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
   useEffect(() => {
     if (draftData) {
       setPropertyData(draftData);
+      setDataLoading(false);
     }
   }, [draftData]);
 
@@ -278,22 +274,25 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
   useEffect(() => {
     if (isDraftMode) return;
     async function loadProperty() {
+      setDataLoading(true);
       try {
         const res  = await fetch("/api/cms");
-        if (!res.ok) return;
-        const data = await res.json();
-        if (data.properties && data.properties.length > 0) {
-          // Match by slug (public links) OR by record id (dashboard links pass id)
-          const match = data.properties.find(
-            (p) =>
-              (p.slug && p.slug.toLowerCase() === (slug || "").toLowerCase()) ||
-              (p.id && p.id === slug)
-          );
-          if (match) {
-            setPropertyData({ ...match });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.properties && data.properties.length > 0) {
+            const match = (data.properties || []).find(
+              (p) =>
+                (p.slug && p.slug.toLowerCase() === (slug || "").toLowerCase()) ||
+                (p.id && p.id === slug)
+            );
+            if (match) {
+              setPropertyData({ ...match });
+            }
           }
         }
-      } catch { /* stay on mock data */ }
+      } catch { /* stay on mock data */ } finally {
+        setDataLoading(false);
+      }
     }
     loadProperty();
   }, [slug]);

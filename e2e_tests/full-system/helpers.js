@@ -52,10 +52,13 @@ const IGNORED_CONSOLE = [
   /swiftshader/i,
   /favicon/i,
   /sentry/i,
+  /google/i,
+  /usgs/i,
   /downloadable font/i,
   /net::ERR_/i,
   /the server responded with a status of (404|403|401|429)/i,
   /Failed to load resource/i,
+  /Failed to fetch/i,
   /hydration/i, // tracked separately in design-dna spec if it ever appears
   /ResizeObserver loop/i,
   /THREE\./,

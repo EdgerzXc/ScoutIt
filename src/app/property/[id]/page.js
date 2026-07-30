@@ -12,52 +12,51 @@ import CommercialFlow from "@/components/property/CommercialFlow";
 // ----------------------------------------------------------------------
 // INCREMENTAL STATIC REGENERATION (ISR)
 // ----------------------------------------------------------------------
+import { getCmsBundle } from "@/lib/cmsCache";
+
 export const revalidate = 3600; 
 
 export async function generateMetadata({ params }) {
   const resolvedParams = await params;
-  const apiKey = process.env.AIRTABLE_API_KEY;
-  const baseId = process.env.AIRTABLE_BASE_ID;
   let seoTitle = `Property Intel — ${resolvedParams.id} — ScoutIt`;
   let seoDescription = "Property Intelligence Vector";
   let imageUrl = siteUrl("/og-default.jpg");
   let url = siteUrl(`/property/${resolvedParams.id}`);
 
-  if (apiKey && baseId) {
-    try {
-      const properties = await fetchProperties(apiKey, baseId);
-      const match = properties.find(
-        (p) =>
-          (p.slug && p.slug.toLowerCase() === resolvedParams.id.toLowerCase()) ||
-          (p.id && p.id === resolvedParams.id)
-      );
-      if (match) {
-        const facts = extractFacts(match);
-        const title = facts.title;
-        const cat = facts.category;
-        const sqm = facts.sqm;
+  try {
+    const bundle = await getCmsBundle();
+    const properties = bundle.properties || [];
+    const match = properties.find(
+      (p) =>
+        (p.slug && p.slug.toLowerCase() === resolvedParams.id.toLowerCase()) ||
+        (p.id && p.id === resolvedParams.id)
+    );
+    if (match) {
+      const facts = extractFacts(match);
+      const title = facts.title;
+      const cat = facts.category;
+      const sqm = facts.sqm;
 
-        if (match.seo_title) seoTitle = match.seo_title;
-        else seoTitle = `${title} | ${sqm ? sqm + ' sqm ' : ''}${cat}`;
-        
-        if (match.seo_description) seoDescription = match.seo_description;
-        else seoDescription = `A premium architectural asset in ${match.location || "the Philippines"}. Explore the full market briefing and operational context on ScoutIt.`;
+      if (match.seo_title) seoTitle = match.seo_title;
+      else seoTitle = `${title} | ${sqm ? sqm + ' sqm ' : ''}${cat}`;
+      
+      if (match.seo_description) seoDescription = match.seo_description;
+      else seoDescription = `A premium architectural asset in ${match.location || "the Philippines"}. Explore the full market briefing and operational context on ScoutIt.`;
 
-        // Find the highest resolution photo (usually the first one)
-        const photo = Array.isArray(match.photos) ? match.photos.find(Boolean) : (match.photo || match.image);
-        
-        const ogParams = new URLSearchParams();
-        ogParams.set('title', title);
-        ogParams.set('category', cat);
-        if (sqm) ogParams.set('sqm', sqm);
-        if (photo) ogParams.set('image', photo);
+      // Find the highest resolution photo (usually the first one)
+      const photo = Array.isArray(match.photos) ? match.photos.find(Boolean) : (match.photo || match.image);
+      
+      const ogParams = new URLSearchParams();
+      ogParams.set('title', title);
+      ogParams.set('category', cat);
+      if (sqm) ogParams.set('sqm', sqm);
+      if (photo) ogParams.set('image', photo);
 
-        imageUrl = siteUrl(`/api/og?${ogParams.toString()}`);
+      imageUrl = siteUrl(`/api/og?${ogParams.toString()}`);
 
-        if (match.slug) url = siteUrl(`/property/${match.slug}`);
-      }
-    } catch {}
-  }
+      if (match.slug) url = siteUrl(`/property/${match.slug}`);
+    }
+  } catch {}
 
   return {
     title: seoTitle,
@@ -100,48 +99,19 @@ const CATEGORY_TO_LAYOUT_MAP = {
   "default": ResidentialFlow
 };
 
-// Resolve the category that picks the layout flow. Approved Airtable records are
-// the source of truth (their slug won't exist in the mock detail store, so the
-// mock fallback can't tell us the real category). Fall back to mock for local-only
-// slugs and when the CMS is unavailable.
-async function resolveCategory(slug) {
-  const apiKey = process.env.AIRTABLE_API_KEY;
-  const baseId = process.env.AIRTABLE_BASE_ID;
-  if (apiKey && baseId) {
-    try {
-      const properties = await fetchProperties(apiKey, baseId);
-      // Public links pass a slug; dashboard links pass a record id — match either.
-      const match = properties.find(
-        (p) =>
-          (p.slug && p.slug.toLowerCase() === slug.toLowerCase()) ||
-          (p.id && p.id === slug)
-      );
-      if (match) return (match.spaceCategory || match.property_type || "").toLowerCase();
-    } catch {
-      /* CMS unavailable — fall through to mock-derived category */
-    }
-  }
-  const mock = null;
-  return (mock?.spaceCategory || mock?.property_type || "default").toLowerCase();
-}
-
 export default async function PropertyRoute({ params }) {
   const resolvedParams = await params;
-
-  const apiKey = process.env.AIRTABLE_API_KEY;
-  const baseId = process.env.AIRTABLE_BASE_ID;
   let match = null;
 
-  if (apiKey && baseId) {
-    try {
-      const properties = await fetchProperties(apiKey, baseId);
-      match = properties.find(
-        (p) =>
-          (p.slug && p.slug.toLowerCase() === resolvedParams.id.toLowerCase()) ||
-          (p.id && p.id === resolvedParams.id)
-      );
-    } catch {}
-  }
+  try {
+    const bundle = await getCmsBundle();
+    const properties = bundle.properties || [];
+    match = properties.find(
+      (p) =>
+        (p.slug && p.slug.toLowerCase() === resolvedParams.id.toLowerCase()) ||
+        (p.id && p.id === resolvedParams.id)
+    );
+  } catch {}
 
   const rawCat = match ? (match.spaceCategory || match.property_type || "default").toLowerCase() : "default";
   // Find mapped layout or fallback to default

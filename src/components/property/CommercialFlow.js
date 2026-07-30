@@ -350,13 +350,10 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
     return () => window.removeEventListener("scoutit:property-inquire", open);
   }, []);
   const [propertyData, setPropertyData] = useState(() => draftData || null);
-  const [dataLoading,  setDataLoading]  = useState(false);
+  const [dataLoading,  setDataLoading]  = useState(() => !draftData);
   const [isOwner, setIsOwner] = useState(false);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [whereToTab,        setWhereToTab]        = useState("map");
-  // Reachability polygons lifted from <WhereToSection /> so the Tactical Map
-  // tab can overlay them. useCallback keeps the identity stable — WhereTo's
-  // fetch effect depends on it.
   const [isochroneData,     setIsochroneData]     = useState(null);
   const handleIsochrone = useCallback((geojson, contours) => {
     setIsochroneData({ geojson, contours });
@@ -384,6 +381,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
   useEffect(() => {
     if (draftData) {
       setPropertyData(draftData);
+      setDataLoading(false);
     }
   }, [draftData]);
 
@@ -404,22 +402,25 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
   useEffect(() => {
     if (isDraftMode) return;
     async function loadProperty() {
+      setDataLoading(true);
       try {
         const res  = await fetch("/api/cms");
-        if (!res.ok) return;
-        const data = await res.json();
-        if (data.properties && data.properties.length > 0) {
-          // Match by slug (public links) OR by record id (dashboard links pass id)
-          const match = data.properties.find(
-            (p) =>
-              (p.slug && p.slug.toLowerCase() === (slug || "").toLowerCase()) ||
-              (p.id && p.id === slug)
-          );
-          if (match) {
-            setPropertyData({ ...match });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.properties && data.properties.length > 0) {
+            const match = (data.properties || []).find(
+              (p) =>
+                (p.slug && p.slug.toLowerCase() === (slug || "").toLowerCase()) ||
+                (p.id && p.id === slug)
+            );
+            if (match) {
+              setPropertyData({ ...match });
+            }
           }
         }
-      } catch { /* stay on mock data */ }
+      } catch { /* stay on mock data */ } finally {
+        setDataLoading(false);
+      }
     }
     loadProperty();
   }, [slug]);
