@@ -7,6 +7,8 @@
 import { cityToRegion } from "./regions";
 import { fetchWithRetry } from "./fetchWithRetry";
 import { DEEP_INTEL_SCHEMA } from "./deepIntelSchema";
+import { deriveNumericTwins } from "./numericTwins";
+import { EDITOR_DETAIL_ALIASES } from "./detailKeyAliases";
 
 const BASE_URL = "https://api.airtable.com/v0";
 
@@ -442,48 +444,9 @@ featuredIntel:       f.Featured_Intel           || [], // linked record IDs
 // "Not listed yet" for rent, GLA, grade, beds, etc. even though the owner
 // filled them in. This aliases the editor's keys onto the camelCase keys the
 // mapper below already handles (reusing its correct per-field type coercion).
-const EDITOR_DETAIL_ALIASES = {
-  // Shared
-  Beds: "beds", Baths: "baths", Floor_Area_Sqm: "floor_sqm", Lot_Area_Sqm: "lot_sqm",
-  Parking_Slots: "parking", Furnishing: "furnishing", Amenities: "amenities", TitleStatus: "titleStatus",
-  // Commercial
-  CM_Rent_Per_Sqm: "rentPerSqm", CM_Total_GLA: "totalGLA", CM_Floor_Plate_Sqm: "floorPlate",
-  CM_Building_Grade: "buildingGrade", CM_Hand_Over_Condition: "handOver", CM_Availability_Status: "availability",
-  CM_Min_Lease_Term: "minLeaseTerm", CM_Certification: "certification", PEZA: "peza", Listed_Price: "listedPrice",
-  CM_CAMC_Per_Sqm: "camc", CM_AC_Charges: "acCharges", CM_AC_System: "acSystem",
-  CM_Reserved_Parking: "reservedParking", CM_Escalation_Rate: "escalation", CM_Fit_Out_Allowance: "fitOut",
-  CM_Rent_Free_Period: "rentFree", CM_Parking_Ratio: "parkingRatio", CM_Backup_Power: "backupPower",
-  CM_Floor_Loading: "floorLoading", CM_Internet_Providers: "internet", CM_Available_Units_Summary: "availableUnits",
-  CM_Towers_Zones: "towersZones", CM_Cap_Rate: "capRate", CM_NOI: "noi",
-  // Residential
-  RS_Floor_Level: "floorLevel", RS_View: "view", RS_Turnover_Date: "turnoverDate", RS_Pet_Policy: "petPolicy",
-  RS_Assoc_Dues: "assocDues", RS_Studio_Flag: "studio", RS_Price: "price", RS_Price_Per_Sqm: "pricePerSqm",
-  RS_Payment_Terms: "paymentTerms",
-  // STR
-  STR_Nightly_Rate: "nightlyRate", STR_Max_Guests: "maxGuests", STR_Avg_Rating: "rating",
-  STR_Bedrooms: "bedrooms", STR_Bathrooms: "bathrooms", STR_Min_Stay_Nights: "minStay",
-  STR_Check_In_Out: "checkInOut", STR_Weekend_Rate: "weekendRate", STR_Bed_Config: "bedConfig",
-  STR_Self_Check_In: "selfCheckIn", STR_House_Rules: "houseRules", STR_Cancellation_Policy: "cancellation",
-  STR_Permit_Accreditation: "permit", STR_WiFi_Speed: "wifiSpeed", STR_Cleaning_Fee: "cleaningFee",
-  // Hospitality
-  HOSP_Room_Count: "rooms", HOSP_Star_Rating: "stars", HOSP_FB_Outlets: "fbOutlets",
-  HOSP_Function_Rooms: "functionRooms", HOSP_Operator_Brand: "operator", HOSP_Room_Types: "roomTypes",
-  HOSP_Year_Built_Renovated: "yearRenovated", HOSP_ADR: "adr", HOSP_Occupancy_Rate: "occupancy",
-  HOSP_RevPAR: "revpar", HOSP_Cap_Rate: "capRate", HOSP_GFA: "gfa", HOSP_Land_Area: "landArea",
-  // Restaurants
-  RST_Seating_Capacity: "seating", RST_Floor_Area_Sqm: "floorArea", RST_Frontage_M: "frontage",
-  RST_Hood_Exhaust: "hoodExhaust", RST_Grease_Trap: "greaseTrap", RST_Gas_Line: "gasLine",
-  RST_Power_Capacity: "power", RST_Delivery_Access: "delivery", RST_Liquor_License: "liquor",
-  RST_FB_Zoning_Permit: "zoning", RST_Ceiling_Height: "ceiling", RST_Turnover_Condition: "turnover",
-  RST_Parking: "parking", RST_Rent_Per_Month: "rstRent", RST_Dues_CUSA: "rstDues",
-  // Venues
-  VEN_Capacity_Seated: "seated", VEN_Capacity_Standing: "standing", VEN_Floor_Area_Sqm: "floorArea",
-  VEN_Min_Booking_Hours: "minHours", VEN_Indoor_Outdoor: "indoorOutdoor", VEN_Air_Conditioning: "aircon",
-  VEN_Catering_Policy: "catering", VEN_Rental_Rate: "rentalRate", VEN_Layout_Configs: "layouts",
-  VEN_Ceiling_Height: "ceiling", VEN_AV_Equipment: "av", VEN_Power_Capacity: "power",
-  VEN_Parking: "parking", VEN_Accessibility: "accessibility", VEN_Noise_Curfew: "noiseCurfew",
-  VEN_Rate_Basis: "venRateBasis",
-};
+// Moved to src/lib/detailKeyAliases.js so airtable.js and
+// propertyFieldRegistry.js share ONE mapping and cannot drift apart.
+// (imported as EDITOR_DETAIL_ALIASES at the top of this file)
 
 function reverseMapCategoryFields(details) {
   const map = {};
@@ -545,6 +508,12 @@ function reverseMapCategoryFields(details) {
   if (details.floorLoading !== undefined) map.CM_Floor_Loading = details.floorLoading;
   if (details.internet !== undefined) map.CM_Internet_Providers = details.internet;
   if (details.availableUnits !== undefined) map.CM_Available_Units_Summary = details.availableUnits;
+
+  // Keep the filterable numbers in step with the display strings above.
+  // Without this, editing "Php 850/sqm/mo" to "Php 1,200/sqm/mo" updated the
+  // page but left CM_Rent_From at 850, so the listing kept matching a
+  // "under ₱1,000" filter. See numericTwins.js for the parsing traps.
+  Object.assign(map, deriveNumericTwins(details));
   if (details.towersZones !== undefined) map.CM_Towers_Zones = details.towersZones;
   if (details.capRate !== undefined) map.CM_Cap_Rate = toNum(details.capRate);
   if (details.noi !== undefined) map.CM_NOI = toNum(details.noi);

@@ -17,6 +17,8 @@ import TaskRail from "./crm/TaskRail";
 import InventoryGridManager from "./InventoryGridManager";
 import DelegationRequests from "./DelegationRequests";
 import FAQReviewQueue from "./panels/FAQReviewQueue";
+import PropertySectionEditor from "./PropertySectionEditor";
+import { categoryKeyFor } from "../../lib/propertyFieldRegistry";
 
 // Enterprise Mission Control 
 // ⚠️ DEV-TOOLBOX PREVIEW ONLY. Real Enterprise account isolation
@@ -49,6 +51,77 @@ const NAV_ITEMS = [
   { id: "ai", icon: Bot, label: "AI Center" },
   { id: "administration", icon: Settings, label: "Administration", mobileLabel: "Admin" },
 ];
+
+// Expanding editor row for the Portfolio table.
+//
+// The `listings` objects from DashboardContext are summaries — they carry no
+// `details`, so the full record is fetched on expand rather than up front. That
+// keeps the Portfolio table cheap for a 200-listing portfolio: one request per
+// row the staff member actually opens, not 200 on mount.
+//
+// Module-scoped for the same reason as NavButton below.
+function SectionEditorRow({ listing, colSpan, onClose }) {
+  const [state, setState] = useState({ loading: true });
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const { getSession } = await import("@/lib/authClient");
+        const { data: { session } } = await getSession();
+        const token = session?.access_token;
+        if (!token) {
+          if (!cancelled) setState({ error: "Your session expired. Sign in again to edit." });
+          return;
+        }
+        const res = await fetch(`/api/admin/property?id=${encodeURIComponent(listing.id)}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const json = await res.json();
+        if (cancelled) return;
+        if (!res.ok) {
+          setState({ error: json.error || "Could not load this property." });
+          return;
+        }
+        setState({ property: json.property, token });
+      } catch (err) {
+        if (!cancelled) setState({ error: err.message || "Could not load this property." });
+      }
+    })();
+    // Guard against a staff member collapsing the row mid-request.
+    return () => { cancelled = true; };
+  }, [listing.id]);
+
+  return (
+    <tr className="bg-[rgba(255,255,255,0.02)]">
+      <td colSpan={colSpan} className="px-4 py-4">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-[10px] font-mono uppercase tracking-widest text-gold-accent">
+            Editing · {listing.title}
+          </span>
+          <button onClick={onClose} className="text-text-secondary hover:text-white text-xs">
+            Close
+          </button>
+        </div>
+
+        {state.loading && !state.property && !state.error && (
+          <p className="text-text-secondary text-xs">Loading…</p>
+        )}
+        {state.error && <p className="text-red-400 text-xs">{state.error}</p>}
+        {state.property && (
+          <PropertySectionEditor
+            property={state.property}
+            // null category => shared fields only, rather than guessing wrong
+            // and hiding the fields that actually apply.
+            category={categoryKeyFor(state.property.space_category)}
+            isStaff
+            authToken={state.token}
+          />
+        )}
+      </td>
+    </tr>
+  );
+}
 
 // Module-scoped (not defined inside MissionControlMode) so it isn't recreated
 // on every render — a component redeclared each render loses React's identity
@@ -83,6 +156,10 @@ export default function MissionControlMode() {
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [isDeleting, setIsDeleting] = useState(false);
   const [activeTab, setActiveTab] = useState("dashboard");
+  // Which Portfolio row has its section editor expanded. Only one at a time —
+  // two open editors on the same property could hold conflicting drafts and
+  // whichever saved last would silently win.
+  const [editingId, setEditingId] = useState(null);
   // Surfaced by <FAQReviewQueue /> so the nav can badge unreviewed answers.
   // Also fetched once on mount with countOnly=1 — otherwise the badge would
   // only appear AFTER opening the tab, which defeats the point of a badge.
@@ -635,10 +712,11 @@ export default function MissionControlMode() {
                   </td>
                 </tr>
               ) : (
-                scoped.map((l) => {
+                scoped.flatMap((l) => {
                   const status = statusStyle(l.pipelineStatus);
                   const isSelected = selectedIds.has(l.id);
-                  return (
+                  const isEditing = editingId === l.id;
+                  return [
                     <tr key={l.id} className={`border-b border-[rgba(255,255,255,0.05)] hover:bg-[rgba(255,255,255,0.02)] transition-colors ${isSelected ? "bg-[rgba(247,198,78,0.05)]" : ""}`}>
                       <td className="px-4 py-2.5">
                         <input
@@ -660,6 +738,13 @@ export default function MissionControlMode() {
                       </td>
                       <td className="px-4 py-2.5 text-text-secondary">{strengthOf(l)}%</td>
                       <td className="px-4 py-2.5 text-right">
+                        <button
+                          onClick={() => setEditingId(isEditing ? null : l.id)}
+                          className="text-gold-accent hover:underline text-xs"
+                        >
+                          {isEditing ? "Editing" : "Edit"}
+                        </button>
+                        <span className="text-surface-variant mx-2">|</span>
                         <Link
                           href={`/dashboard/inventory/${l.id}`}
                           className="text-gold-accent hover:underline text-xs"
@@ -678,8 +763,16 @@ export default function MissionControlMode() {
                           Delete
                         </button>
                       </td>
-                    </tr>
-                  );
+                    </tr>,
+                    isEditing ? (
+                      <SectionEditorRow
+                        key={`${l.id}-editor`}
+                        listing={l}
+                        colSpan={6}
+                        onClose={() => setEditingId(null)}
+                      />
+                    ) : null,
+                  ];
                 })
               )}
             </tbody>
