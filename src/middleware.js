@@ -147,30 +147,11 @@ function recordAccess(maskedIp, path, event) {
 
 export async function middleware(request, event) {
   // Local dev / E2E runs fire hundreds of same-IP requests and were tripping
-  // the limiter (429s mid-test-suite). These shields are production-only.
-  if (process.env.NODE_ENV !== 'production') {
-    return NextResponse.next();
-  }
-
   const ip = request.ip || request.headers.get('x-forwarded-for') || '127.0.0.1';
   const path = request.nextUrl.pathname;
   const sensitive = isSensitivePath(path);
 
-  // ── Masked-IP guard: ban check + anomaly logging (fails open) ──
-  try {
-    const maskedIp = await maskIp(ip);
-    if (maskedIp) {
-      const bans = await getBanSet();
-      if (bans.has(maskedIp)) {
-        return NextResponse.json({ error: 'Access blocked.' }, { status: 403 });
-      }
-      recordAccess(maskedIp, path, event);
-    }
-  } catch (err) {
-    console.error('[IPGuard] Error (failing open):', err?.message);
-  }
-
-  // ── Feature-flag enforcement (A4) — fails safe/open ──
+  // ── Feature-flag enforcement (A4) — fails safe/open (enforced in all envs) ──
   try {
     const flags = await getFlags();
 
@@ -197,6 +178,12 @@ export async function middleware(request, event) {
     }
   } catch (err) {
     console.error('[FeatureFlags] Error (failing open):', err?.message);
+  }
+
+  // Local dev / E2E runs fire hundreds of same-IP requests and were tripping
+  // the limiter (429s mid-test-suite). Rate limiting & IP blocking are production-only.
+  if (process.env.NODE_ENV !== 'production') {
+    return NextResponse.next();
   }
 
   // ── Rate limiting ──
