@@ -48,6 +48,7 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
   const [photoMode, setPhotoMode] = useState("natural");
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [isPhotoHovered, setIsPhotoHovered] = useState(false);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const touchStartX = useRef(null);
 
   // Tab & scroll states
@@ -254,6 +255,12 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
           onTouchEnd={handleTouchEnd}
           onMouseEnter={() => setIsPhotoHovered(true)}
           onMouseLeave={() => setIsPhotoHovered(false)}
+          onClick={(e) => {
+            const sel = typeof window !== "undefined" && window.getSelection()?.toString();
+            if (sel && sel.trim().length > 0) return;
+            if (e.target.closest("button, a, input, select, textarea, .hero-intel, .mobile-hero-intel, .photo-controls, .photo-arrow, .platform-nav, .platform-back-btn")) return;
+            if (hasPhotos) setIsLightboxOpen(true);
+          }}
         >
           {displayPhotos.map((url, i) => (
             <div
@@ -284,7 +291,7 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
           <div className="photo-fade-bottom" />
 
           {/* Hero Intel */}
-          <div className="hero-intel" onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()} onTouchStart={(e) => e.stopPropagation()}>
+          <div className="hero-intel" onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()} onMouseUp={(e) => e.stopPropagation()} onTouchStart={(e) => e.stopPropagation()}>
             <p className="hero-label" style={{ color: ACCENT }}>ScoutIt &middot; Unit Dossier</p>
             <h1 className="hero-title">{unit.name}</h1>
             <p className="hero-location">{property.title} &middot; {property.location || property.city}</p>
@@ -657,6 +664,53 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
         }}
         link={typeof window !== 'undefined' ? window.location.href : `/property/${property.slug}/unit/${unit.id}`}
       />
+
+      {/* Lightbox Overlay Modal */}
+      {isLightboxOpen && hasPhotos && (
+        <div className="lightbox-overlay" onClick={() => setIsLightboxOpen(false)}>
+          <button 
+            className="lightbox-close" 
+            onClick={(e) => { e.stopPropagation(); setIsLightboxOpen(false); }}
+            aria-label="Close photo viewer"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
+          </button>
+          
+          {displayPhotos.length > 1 && (
+            <>
+              <button 
+                className="lightbox-arrow left" 
+                onClick={(e) => { e.stopPropagation(); goPrev(); }}
+                aria-label="Previous photo"
+              >
+                <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5"><polyline points="9,2 4,7 9,12"/></svg>
+              </button>
+              <button 
+                className="lightbox-arrow right" 
+                onClick={(e) => { e.stopPropagation(); goNext(); }}
+                aria-label="Next photo"
+              >
+                <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5"><polyline points="5,2 10,7 5,12"/></svg>
+              </button>
+            </>
+          )}
+
+          <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
+            <img 
+              src={displayPhotos[currentImageIndex]} 
+              alt={`${unit.name} fullscreen view`} 
+              className={`lightbox-image ${photoMode}`} 
+              loading="lazy"
+            />
+          </div>
+
+          <div className="lightbox-counter">
+            {currentImageIndex + 1} / {displayPhotos.length}
+          </div>
+        </div>
+      )}
     </>
   );
 }

@@ -8,13 +8,12 @@ related: ["[[MASTER_CONTEXT]]", "[[SCOUTIT_MASTER_BUILD_SPEC]]", "[[00_START_HER
 
 # ScoutIt Handoff - End of Session
 
-> ## ▶️ RESUME HERE (latest) — 2026-07-30 — Auto-Next Photo Slideshow, High-Value SEO ALT Text & 100% Green E2E Suite
-> Shipped auto-next photo slideshow, conflict-free Lightbox/hover guards, SEO ALT text, and 100% green 3-POV E2E suite:
-> - **Auto-Next Photo Carousel & Conflict-Free Controls (`UnitMasterPage.js`, `CommercialFlow.js`, `ResidentialFlow.js`):** Automatically advances property photos every 5 seconds when multiple photos are available. Automatically pauses during hover (`onMouseEnter`), touch (`onTouchStart`), or when the Lightbox is open (`isLightboxOpen`), eliminating any touch/click conflicts with "Expand Photo". Added interactive `▶ Auto` / `⏸ Auto` toggle button in photo controls bar.
-> - **High-Value SEO ALT Text & WCAG Image Accessibility:** Upgraded image `alt` attributes across all property flows and unit master pages to keyword-rich metadata (`${title} - ${category} in ${location} | Photo ${i + 1} of ${total}`) for Google Image Search indexing.
-> - **React Rules of Hooks Compliance:** Enforced top-level hook declarations in `CommercialFlow.js` and `ResidentialFlow.js` prior to early return loading guards, ensuring zero hydration mismatch or hook order errors.
-> - **100% Green 3-POV E2E Suite (2026-07-30):** All Playwright tests passed (`6 passed (12.4s)`) across Desktop Chromium and Mobile Chrome for Buyer/Seeker, Owner, and Broker POVs.
-> - **Login Route Alias & Q&A Sign-in Fix (`src/app/login/page.js` & `PropertyFAQSection.js`):** Resolved issue where clicking "Sign in" in property Q&A section went to non-existent `/login`. Updated link to `/onboarding` and added server-side redirect `src/app/login/page.js` -> `/onboarding`.
+> ## ▶️ RESUME HERE (latest) — 2026-07-30 — Direct Photo Zoom, Copyable Text Selection & Redundant Button Purge
+> Shipped direct photo click zoom, text copy protection, and 100% green E2E suite:
+> - **Direct Photo Click Zoom & Redundant Button Purge (`CommercialFlow.js`, `ResidentialFlow.js`, `UnitMasterPage.js`):** Clicking anywhere on the photo background directly opens the Fullscreen Lightbox / Zoom view. Completely removed the redundant "Expand Photo" button for a cleaner, uncluttered controls strip.
+> - **Text Copy/Paste Safeguards (`property-detail.css` & `.hero-intel`):** Configured `.hero-intel` container with `pointer-events: none` and text child elements (`.hero-title`, `.hero-location`, `.hero-hook`, `.hero-label`) with `pointer-events: auto; user-select: text !important; cursor: text;`. Users can drag, highlight, and copy property text (Ctrl+C / Cmd+C) seamlessly without triggering photo zoom or opening the lightbox.
+> - **Unit Master Page Fullscreen Lightbox:** Added `isLightboxOpen` modal rendering to `UnitMasterPage.js` for unit photo zoom.
+> - **100% Green E2E Test Suite (2026-07-30):** All 6 Playwright E2E tests passed (`6 passed (14.0s)`) across Desktop Chromium and Mobile Chrome.
 > - **Verification & Build Status:** **100% Green Playwright E2E suite** + **393/393 Vitest unit tests passing**; all changes committed & pushed to GitHub `origin/main`.
 >
 > ## Previous — 2026-07-09 → 07-11 — Security shipped, E2E suite, real-transaction rehearsal, dual-CMS drift resolved

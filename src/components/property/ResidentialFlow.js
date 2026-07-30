@@ -945,6 +945,12 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
           onTouchEnd={handleTouchEnd}
           onMouseEnter={() => setIsPhotoHovered(true)}
           onMouseLeave={() => setIsPhotoHovered(false)}
+          onClick={(e) => {
+            const sel = typeof window !== "undefined" && window.getSelection()?.toString();
+            if (sel && sel.trim().length > 0) return;
+            if (e.target.closest("button, a, input, select, textarea, .hero-intel, .mobile-hero-intel, .photo-controls, .photo-arrow, .platform-nav, .platform-back-btn")) return;
+            setIsLightboxOpen(true);
+          }}
         >
 
           {photos.map((url, i) => (
@@ -985,6 +991,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
             className="hero-intel"
             onClick={(e) => e.stopPropagation()}
             onMouseDown={(e) => e.stopPropagation()}
+            onMouseUp={(e) => e.stopPropagation()}
             onTouchStart={(e) => e.stopPropagation()}
           >
             <p className="hero-label">ScoutIt &middot; {briefLabel}</p>
@@ -1040,14 +1047,6 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                   </a>
                 )}
               </div>
-              <button 
-                className="toggle-btn off" 
-                style={{ marginLeft: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}
-                onClick={() => setIsLightboxOpen(true)}
-              >
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
-                Expand Photo
-              </button>
               {photos.length > 1 && (
                 <button
                   type="button"
