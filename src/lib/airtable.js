@@ -470,29 +470,31 @@ function reverseMapCategoryFields(details) {
     return Number.isFinite(n) && String(v).trim() !== "" ? n : null;
   };
 
+  const cleanStr = (v) => (typeof v === "string" ? v.trim() : v);
+
   // Shared
   if (details.beds !== undefined) map.Beds = toNum(details.beds);
   if (details.baths !== undefined) map.Baths = toNum(details.baths);
   if (details.floor_sqm !== undefined) map.FloorSqm = toNum(details.floor_sqm);
   if (details.lot_sqm !== undefined) map.LotSqm = toNum(details.lot_sqm);
   if (details.parking !== undefined) map.Parking = toNum(details.parking);
-  if (details.furnishing !== undefined) map.Furnishing = details.furnishing;
-  if (details.titleStatus !== undefined) map.TitleStatus = details.titleStatus;
+  if (details.furnishing !== undefined) map.Furnishing = cleanStr(details.furnishing);
+  if (details.titleStatus !== undefined) map.TitleStatus = cleanStr(details.titleStatus);
   if (details.amenities !== undefined) {
     // Airtable Amenities is multipleSelects -> needs an array; typecast:true on
     // the write auto-creates any option the owner typed that doesn't exist yet.
     map.Amenities = Array.isArray(details.amenities)
-      ? details.amenities
+      ? details.amenities.map(cleanStr).filter(Boolean)
       : String(details.amenities).split(",").map((s) => s.trim()).filter(Boolean);
   }
 
   // Commercial
-  if (details.rentPerSqm !== undefined) map.CM_Rent_Per_Sqm = details.rentPerSqm;
+  if (details.rentPerSqm !== undefined) map.CM_Rent_Per_Sqm = cleanStr(details.rentPerSqm);
   if (details.totalGLA !== undefined) map.CM_Total_GLA = Number(details.totalGLA) || null;
-  if (details.floorPlate !== undefined) map.CM_Floor_Plate_Sqm = details.floorPlate;
-  if (details.buildingGrade !== undefined) map.CM_Building_Grade = details.buildingGrade;
-  if (details.handOver !== undefined) map.CM_Hand_Over_Condition = details.handOver;
-  if (details.availability !== undefined) map.CM_Availability_Status = details.availability;
+  if (details.floorPlate !== undefined) map.CM_Floor_Plate_Sqm = cleanStr(details.floorPlate);
+  if (details.buildingGrade !== undefined) map.CM_Building_Grade = cleanStr(details.buildingGrade);
+  if (details.handOver !== undefined) map.CM_Hand_Over_Condition = cleanStr(details.handOver);
+  if (details.availability !== undefined) map.CM_Availability_Status = cleanStr(details.availability);
   if (details.minLeaseTerm !== undefined) map.CM_Min_Lease_Term = details.minLeaseTerm;
   if (details.certification !== undefined) map.CM_Certification = details.certification;
   if (details.peza !== undefined) map.CM_PEZA = !!details.peza;

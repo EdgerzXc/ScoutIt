@@ -90,14 +90,9 @@ export async function POST(request) {
       location: validatedData.location ? stripAllTags(validatedData.location) : currentSubmission.location
     };
 
-    // Merge details JSONB safely
+    // Merge details JSONB safely with deep recursive sanitization (e.g. units_inventory objects)
     if (validatedData.details) {
-      // In a real strict environment, we'd recursively sanitize or strictly validate `details`. 
-      // Assuming details is a flat object of strings for now.
-      const sanitizedDetails = {};
-      for (const [key, val] of Object.entries(validatedData.details)) {
-        sanitizedDetails[stripAllTags(key)] = typeof val === 'string' ? stripAllTags(val) : val;
-      }
+      const sanitizedDetails = sanitizeObject(validatedData.details);
 
       supabasePayload.details = {
         ...(currentSubmission.details || {}),
@@ -160,7 +155,17 @@ export async function POST(request) {
 
         try {
           console.log(`[UPDATE API] Syncing updates for slug ${slug} to Airtable...`);
-          await updateProperty(apiKey, baseId, slug, supabasePayload);
+          const atResult = await updateProperty(apiKey, baseId, slug, supabasePayload);
+          
+          // If title edit changed Airtable's computed formula Slug, sync it back to Supabase
+          const updatedSlug = atResult?.fields?.Slug;
+          if (updatedSlug && updatedSlug !== currentSubmission.slug) {
+            console.log(`[UPDATE API] Title edit updated slug: ${currentSubmission.slug} -> ${updatedSlug}`);
+            await serviceClient
+              .from('properties')
+              .update({ slug: updatedSlug })
+              .eq('id', submissionId);
+          }
         } catch (airtableErr) {
           console.error("[UPDATE API] Airtable update failed:", airtableErr);
           // Return success but with a warning, as Supabase succeeded

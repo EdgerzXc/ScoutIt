@@ -26,6 +26,7 @@ import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { updateProperty } from "@/lib/airtable";
 import { sanitizeError } from "@/lib/sanitizeError";
+import { sanitizeObject } from "@/lib/sanitize";
 import { isInternal, fieldMeta } from "@/lib/propertyFieldRegistry";
 
 /** Verify the caller is a signed-in admin. Returns {userId} or {error,status}. */
@@ -112,7 +113,7 @@ export async function PATCH(request) {
     // Strip internal fields from whatever the client sent. Staff edit notes
     // through their own dedicated controls, not by injecting field names into
     // a section payload.
-    const incoming = body.details || {};
+    const incoming = body.details ? sanitizeObject(body.details) : {};
     const rejected = Object.keys(incoming).filter(isInternal);
     const safeDetails = Object.fromEntries(
       Object.entries(incoming).filter(([key]) => !isInternal(key)),
@@ -147,7 +148,18 @@ export async function PATCH(request) {
       const baseId = process.env.AIRTABLE_BASE_ID;
       if (apiKey && baseId && current.slug) {
         try {
-          await updateProperty(apiKey, baseId, current.slug, saved);
+          const atResult = await updateProperty(apiKey, baseId, current.slug, saved);
+          
+          // If title edit changed Airtable's computed formula Slug, sync it back to Supabase
+          const updatedSlug = atResult?.fields?.Slug;
+          if (updatedSlug && updatedSlug !== current.slug) {
+            console.log(`[ADMIN PROPERTY] Title edit updated slug: ${current.slug} -> ${updatedSlug}`);
+            await supabaseAdmin
+              .from("properties")
+              .update({ slug: updatedSlug })
+              .eq("id", id);
+            saved.slug = updatedSlug;
+          }
         } catch (airtableErr) {
           console.error("[ADMIN PROPERTY] Airtable sync failed:", airtableErr);
           warning = "Saved, but the public site sync failed — it will retry on the next save.";
