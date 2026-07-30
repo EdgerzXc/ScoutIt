@@ -1,4 +1,4 @@
-import crypto from "crypto";
+import { decryptUserId } from "@/lib/wishlistCrypto";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { fetchProperties } from "@/lib/airtable";
 import Header from "@/components/layout/Header";
@@ -16,43 +16,15 @@ export const metadata = {
   robots: { index: false, follow: false },
 };
 
-const SECRET_KEY = process.env.WISHLIST_SHARE_SECRET || "scoutit_wishlist_share_default_k";
-
-const getEncryptionKey = () => {
-  const key = Buffer.from(SECRET_KEY, "utf-8");
-  if (key.length === 32) return key;
-  const hash = crypto.createHash("sha256");
-  hash.update(SECRET_KEY);
-  return hash.digest();
-};
-
 export default async function SharedWishlistPage({ params }) {
-  const token = params.token;
-  
-  let userId = null;
-  try {
-    const payloadBuffer = Buffer.from(token, "base64url").toString("utf-8");
-    const [ivStr, authTagStr, encryptedStr] = payloadBuffer.split(":");
-    
-    if (!ivStr || !authTagStr || !encryptedStr) throw new Error("Invalid token format");
-    
-    const iv = Buffer.from(ivStr, "base64");
-    const authTag = Buffer.from(authTagStr, "base64");
-    
-    const decipher = crypto.createDecipheriv("aes-256-gcm", getEncryptionKey(), iv);
-    decipher.setAuthTag(authTag);
-    
-    let decrypted = decipher.update(encryptedStr, "base64", "utf8");
-    decrypted += decipher.final("utf8");
-    
-    const data = JSON.parse(decrypted);
-    // eslint-disable-next-line react-hooks/purity
-    if (data.exp && Date.now() > data.exp) {
-      throw new Error("Token expired");
-    }
-    userId = data.userId;
-  } catch (err) {
-    console.error("[WISHLIST DECRYPT ERROR]", err);
+  const { token } = await params;
+
+  // Tokens are minted by /api/wishlist/share via the same module, so this is
+  // the only decode path. A null result means the token wasn't signed by this
+  // server — wrong shape, tampered with, or the secret is missing — and all of
+  // those should look identical to a visitor.
+  const userId = decryptUserId(token);
+  if (!userId) {
     return notFound();
   }
 
