@@ -1525,6 +1525,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                 lumaUrl={d.luma3dMapUrl} 
                 matterportUrl={d.matterportTourUrl} 
                 heatmapUrl={d.droneHeatmapUrl} 
+                floorPlans={d.floorPlans}
               />
             </div>
             <div className="panel-sidebar">
