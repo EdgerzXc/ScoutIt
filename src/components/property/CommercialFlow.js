@@ -2,7 +2,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import ReactionButtons from "@/components/ui/ReactionButtons";
@@ -501,6 +501,39 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
     mapboxToken
   );
 
+  // ── Derived values (memoized at top to respect React Rules of Hooks) ──
+  const d = propertyData || {};
+  
+  const photos = useMemo(() => {
+    const rawP = (Array.isArray(d?.photos) ? d.photos : [d?.photo || d?.image]).filter(p => typeof p === "string" && p.trim().length > 0);
+    return rawP.length > 0 ? rawP : ["https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2070&auto=format&fit=crop"];
+  }, [d?.photos, d?.photo, d?.image]);
+
+  const brokerInitials = useMemo(() => {
+    return (d?.broker_name || " ").split(" ").map(p => p[0]).join("").slice(0, 2).toUpperCase();
+  }, [d?.broker_name]);
+
+  // ── Category Detection & Custom Labels ──────────
+  const cat = useMemo(() => (d?.spaceCategory || "").toLowerCase() || (d?.property_type || "").toLowerCase(), [d?.spaceCategory, d?.property_type]);
+  const isRestaurant = cat.includes("restaurant") || cat.includes("culinary");
+  const isHospitality = cat.includes("str") || cat.includes("hospitality");
+  const isVenue = cat.includes("venue") || cat.includes("event");
+
+  // ── Chapter config (drives nav labels & chapter headings) ──
+  const chapterConfig = useMemo(() => getChapterConfig(d), [d]);
+  const ch = useMemo(() => Object.fromEntries(chapterConfig.map(c => [c.id, c])), [chapterConfig]);
+
+  // Determine brief label
+  const briefLabel = useMemo(() => {
+    if (isRestaurant) return "Culinary Details";
+    if (isHospitality) return "Hospitality Details";
+    if (isVenue) return "Venue Details";
+    if (d?.property_type?.toLowerCase().includes("commercial") || d?.property_type?.toLowerCase().includes("office") || d?.property_type?.toLowerCase().includes("retail") || cat.includes("commercial")) {
+      return "Commercial Details";
+    }
+    return "Property Details";
+  }, [isRestaurant, isHospitality, isVenue, d?.property_type, cat]);
+
   // ── Auto-next slideshow timer (pauses on hover/touch or lightbox) ──
   useEffect(() => {
     if (!isAutoPlaying || isPhotoHovered || isLightboxOpen || !propertyData) return;
@@ -530,34 +563,6 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
         LOADING SPACE INTELLIGENCE...
       </div>
     );
-  }
-
-  // ── Derived values ────────────────────────────
-  const d           = propertyData;   // short alias
-  const rawPhotos   = (Array.isArray(d.photos) ? d.photos : [d.photo || d.image]).filter(p => typeof p === "string" && p.trim().length > 0);
-  const photos      = rawPhotos.length > 0 ? rawPhotos : ["https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2070&auto=format&fit=crop"];
-  const brokerInitials = (d.broker_name || " ").split(" ").map(p => p[0]).join("").slice(0, 2).toUpperCase();
-
-  // ── Category Detection & Custom Labels ──────────
-  const cat = (d.spaceCategory || "").toLowerCase() || (d.property_type || "").toLowerCase();
-  const isRestaurant = cat.includes("restaurant") || cat.includes("culinary");
-  const isHospitality = cat.includes("str") || cat.includes("hospitality");
-  const isVenue = cat.includes("venue") || cat.includes("event");
-
-  // ── Chapter config (drives nav labels & chapter headings) ──
-  const chapterConfig = getChapterConfig(d);
-  const ch = Object.fromEntries(chapterConfig.map(c => [c.id, c]));
-
-  // Determine brief label
-  let briefLabel = "Property Details";
-  if (isRestaurant) {
-    briefLabel = "Culinary Details";
-  } else if (isHospitality) {
-    briefLabel = "Hospitality Details";
-  } else if (isVenue) {
-    briefLabel = "Venue Details";
-  } else if (d.property_type?.toLowerCase().includes("commercial") || d.property_type?.toLowerCase().includes("office") || d.property_type?.toLowerCase().includes("retail") || cat.includes("commercial")) {
-    briefLabel = "Commercial Details";
   }
 
   // ── Spec Pills Dynamic Curators ────────────────
@@ -1088,7 +1093,9 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
               alt={`${d.title} - ${d.spaceCategory || d.property_type || 'Architectural Asset'} in ${d.location || d.city || 'Philippines'} | Photo ${i + 1} of ${photos.length}`}
               fill
               priority={i === 0}
-              quality={85}
+              loading={i === 0 ? "eager" : "lazy"}
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 75vw, 60vw"
+              quality={75}
               className={`photo-slide ${photoMode} ${currentImageIndex === i ? "active" : ""}`}
             />
           ))}

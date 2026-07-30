@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import Link from "next/link";
 import "@/app/property/[id]/property-detail.css";
 import FloodRiskBadge from "@/components/property/FloodRiskBadge";
@@ -139,23 +139,23 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
   }
 
   const d = unit.details || {};
-  const scenarios = Array.isArray(unit.subdivision_scenarios) ? unit.subdivision_scenarios : [];
+  const scenarios = useMemo(() => Array.isArray(unit.subdivision_scenarios) ? unit.subdivision_scenarios : [], [unit.subdivision_scenarios]);
   const operatorName = unit.operator_display_name || null;
 
-  const photos = Array.isArray(unit.photos) && unit.photos.filter(Boolean).length
-    ? unit.photos.filter(Boolean)
-    : (unit.image || unit.photo ? [unit.image || unit.photo] : []);
+  const photos = useMemo(() => {
+    return Array.isArray(unit.photos) && unit.photos.filter(Boolean).length
+      ? unit.photos.filter(Boolean)
+      : (unit.image || unit.photo ? [unit.image || unit.photo] : []);
+  }, [unit.photos, unit.image, unit.photo]);
   
-  // No photos → keep the layout but show an honest "pending" hero instead of
-  // pointing at an image file that doesn't exist (silent 404 + blank zone).
   const hasPhotos = photos.length > 0;
-  const displayPhotos = hasPhotos ? photos : [null];
+  const displayPhotos = useMemo(() => hasPhotos ? photos : [null], [hasPhotos, photos]);
 
-  const activeScenario = scenarios.find((s) => s.id === activeScenarioId) || scenarios[0] || null;
+  const activeScenario = useMemo(() => scenarios.find((s) => s.id === activeScenarioId) || scenarios[0] || null, [scenarios, activeScenarioId]);
 
-  const cap = unitCapacity(unit);
-  const features = Array.isArray(unit.features) ? unit.features : [];
-  const inclusions = Array.isArray(d.lease_inclusions) ? d.lease_inclusions.filter(Boolean) : [];
+  const cap = useMemo(() => unitCapacity(unit), [unit]);
+  const features = useMemo(() => Array.isArray(unit.features) ? unit.features : [], [unit.features]);
+  const inclusions = useMemo(() => Array.isArray(d.lease_inclusions) ? d.lease_inclusions.filter(Boolean) : [], [d.lease_inclusions]);
 
   const availabilityLabel =
     unit.availability_status === "occupied" ? "Currently Occupied"

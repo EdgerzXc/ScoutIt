@@ -8,13 +8,13 @@ related: ["[[MASTER_CONTEXT]]", "[[SCOUTIT_MASTER_BUILD_SPEC]]", "[[00_START_HER
 
 # ScoutIt Handoff - End of Session
 
-> ## ▶️ RESUME HERE (latest) — 2026-07-30 — Compact Tear-Sheet Action Pill, Direct Photo Zoom & Copyable Text Selection
-> Shipped compact luxury action buttons, direct photo click zoom, text copy protection, and 100% green E2E suite:
-> - **Compact Action Pill UI (`CommercialFlow.js` & `ResidentialFlow.js`):** Reduced the size of the "Download Tear-Sheet" and "Edit Dossier" buttons from bulky 48px boxes (`px-6 py-3 text-sm`) to sleek, 28px high compact luxury pill badges (`px-3.5 py-1.5 text-xs font-mono rounded-full`). Lessens visual clutter in the hero section while keeping primary actions instantly accessible.
-> - **Direct Photo Click Zoom & Redundant Button Purge (`CommercialFlow.js`, `ResidentialFlow.js`, `UnitMasterPage.js`):** Clicking anywhere on the photo background directly opens the Fullscreen Lightbox / Zoom view. Completely removed the redundant "Expand Photo" button for a cleaner, uncluttered controls strip.
-> - **Text Copy/Paste Safeguards (`property-detail.css` & `.hero-intel`):** Configured `.hero-intel` container with `pointer-events: none` and text child elements (`.hero-title`, `.hero-location`, `.hero-hook`, `.hero-label`) with `pointer-events: auto; user-select: text !important; cursor: text;`. Users can drag, highlight, and copy property text (Ctrl+C / Cmd+C) seamlessly without triggering photo zoom or opening the lightbox.
-> - **100% Green E2E Test Suite (2026-07-30):** All 6 Playwright E2E tests passed (`6 passed (14.3s)`) across Desktop Chromium and Mobile Chrome.
-> - **Verification & Build Status:** **100% Green Playwright E2E suite** + **393/393 Vitest unit tests passing**; all changes committed & pushed to GitHub `origin/main`.
+> ## ▶️ RESUME HERE (latest) — 2026-07-30 — Property & Unit Master Page High-Performance Optimization
+> Shipped comprehensive rendering, GPU composite, and memory optimization for Property & Unit Master Pages:
+> - **Zero-Lag GPU Composite Layering (`property-detail.css`):** Hardware-accelerated fixed noise grain overlay (`.grain`) and photo transitions (`.photo-slide`) with `transform: translateZ(0)`, `will-change: opacity`, and `contain: layout paint / contain: strict`. Prevents full-screen repaints during mobile scrolling.
+> - **React Hook Memoization (`CommercialFlow.js`, `ResidentialFlow.js`, `UnitMasterPage.js`):** Memoized all derived data (`photos`, `category`, `chapterConfig`, `dynamicUnits`, `scenarios`, `capacity`, `features`, `inclusions`) with `useMemo` positioned at top of components before early return loading guards. Eliminates re-render cascades and memory allocations on 5-second slideshow timer ticks.
+> - **Responsive Image Sizing & Default Optimization:** Added responsive `sizes="(max-width: 768px) 100vw, (max-width: 1200px) 75vw, 60vw"`, `loading={i === 0 ? "eager" : "lazy"}`, and `quality={75}` to prevent downloading oversized desktop assets on mobile.
+> - **100% Green E2E & Unit Test Suite:** All 6 Playwright E2E tests passed (`6 passed (39.4s)`) + **402/402 Vitest unit tests passed (`402 passed (15.0s)`)**.
+> - **Verification & Build Status:** **100% Green Playwright E2E suite** + **402/402 Vitest unit tests passing**; all changes committed & pushed to GitHub `origin/main`.
 >
 > ## Previous — 2026-07-09 → 07-11 — Security shipped, E2E suite, real-transaction rehearsal, dual-CMS drift resolved
 > Four dense days; full narrative in [[SESSION_HANDOFF_2026-07-11]] and the dated entries in
