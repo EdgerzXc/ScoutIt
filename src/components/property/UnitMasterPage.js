@@ -46,6 +46,8 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
   // Photo states
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [photoMode, setPhotoMode] = useState("natural");
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  const [isPhotoHovered, setIsPhotoHovered] = useState(false);
   const touchStartX = useRef(null);
 
   // Tab & scroll states
@@ -164,11 +166,24 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
     setIsInquiryOpen(true);
   };
 
+  // ── Auto-next slideshow timer (pauses on hover/touch) ──
+  useEffect(() => {
+    if (!isAutoPlaying || isPhotoHovered || displayPhotos.length <= 1) return;
+    const timer = setInterval(() => {
+      setCurrentImageIndex((i) => (i + 1) % displayPhotos.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [isAutoPlaying, isPhotoHovered, displayPhotos.length]);
+
   // ── Photo navigation ──────────────────────────
   const goPrev = () => setCurrentImageIndex(i => (i === 0 ? displayPhotos.length - 1 : i - 1));
   const goNext = () => setCurrentImageIndex(i => (i + 1) % displayPhotos.length);
-  const handleTouchStart = (e) => { touchStartX.current = e.touches[0].clientX; };
+  const handleTouchStart = (e) => {
+    setIsPhotoHovered(true);
+    touchStartX.current = e.touches[0].clientX;
+  };
   const handleTouchEnd = (e) => {
+    setIsPhotoHovered(false);
     const diff = e.changedTouches[0].clientX - touchStartX.current;
     if (diff > 50) goPrev();
     else if (diff < -50) goNext();
@@ -232,7 +247,14 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
         </Link>
 
         {/* ════ ZONE 1 – PHOTO ════ */}
-        <div className="zone-photo" id="photoZone" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+        <div
+          className="zone-photo"
+          id="photoZone"
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+          onMouseEnter={() => setIsPhotoHovered(true)}
+          onMouseLeave={() => setIsPhotoHovered(false)}
+        >
           {displayPhotos.map((url, i) => (
             <div
               key={i}
@@ -241,7 +263,14 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
                 ? { backgroundImage: `url(${url})`, backgroundPosition: "center", backgroundSize: "cover" }
                 : { background: "linear-gradient(160deg, #141414, #0d0d0d)", display: "flex", alignItems: "center", justifyContent: "center" }}
             >
-              {!url && (
+              {url ? (
+                <img
+                  src={url}
+                  alt={`${unit.name} at ${property.title} - ${property.location || property.city || 'Philippines'} | Unit Photo ${i + 1} of ${displayPhotos.length}`}
+                  style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0 }}
+                  itemProp="image"
+                />
+              ) : (
                 <span style={{ fontFamily: "'Courier New',monospace", fontSize: "11px", color: "#5a5a5a", letterSpacing: "0.15em", textTransform: "uppercase" }}>
                   Unit imagery pending
                 </span>
@@ -282,6 +311,17 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
                   <div key={i} className={`dot ${currentImageIndex === i ? "active" : ""}`} onClick={() => setCurrentImageIndex(i)} />
                 ))}
               </div>
+              {displayPhotos.length > 1 && (
+                <button
+                  type="button"
+                  className={`toggle-btn ${isAutoPlaying ? "active" : "off"}`}
+                  style={{ marginLeft: "12px", display: "inline-flex", alignItems: "center", gap: "4px", padding: "3px 8px" }}
+                  onClick={() => setIsAutoPlaying(v => !v)}
+                  title={isAutoPlaying ? "Pause automatic slideshow" : "Start automatic slideshow"}
+                >
+                  {isAutoPlaying ? "⏸ Auto" : "▶ Auto"}
+                </button>
+              )}
             </div>
             <div className="photo-count">{currentImageIndex + 1} / {displayPhotos.length}</div>
           </div>

@@ -306,6 +306,8 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
   // ── Interactive UI states ──────────────────────
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [photoMode,         setPhotoMode]         = useState("natural");
+  const [isAutoPlaying,     setIsAutoPlaying]     = useState(true);
+  const [isPhotoHovered,    setIsPhotoHovered]    = useState(false);
   // Enhanced photos unlock at Solar+. SSR-safe — locked until the client reads the viewer's tier.
   const [canEnhance,        setCanEnhance]        = useState(false);
   useEffect(() => { setCanEnhance(canSee("enhancedPhotos", getCurrentTier())); }, []);
@@ -499,6 +501,18 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
     mapboxToken
   );
 
+  // ── Auto-next slideshow timer (pauses on hover/touch or lightbox) ──
+  useEffect(() => {
+    if (!isAutoPlaying || isPhotoHovered || isLightboxOpen || !propertyData) return;
+    const rawP = (Array.isArray(propertyData.photos) ? propertyData.photos : [propertyData.photo || propertyData.image]).filter(p => typeof p === "string" && p.trim().length > 0);
+    const count = rawP.length > 0 ? rawP.length : 1;
+    if (count <= 1) return;
+    const timer = setInterval(() => {
+      setCurrentImageIndex((i) => (i + 1) % count);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [isAutoPlaying, isPhotoHovered, isLightboxOpen, propertyData]);
+
   // ── Loading guard ─────────────────────────────
   if (dataLoading || !propertyData) {
     return (
@@ -520,7 +534,8 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
 
   // ── Derived values ────────────────────────────
   const d           = propertyData;   // short alias
-  const photos      = d.photos && d.photos.length > 0 ? d.photos : (d.image ? [d.image] : ["https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2070&auto=format&fit=crop"]);
+  const rawPhotos   = (Array.isArray(d.photos) ? d.photos : [d.photo || d.image]).filter(p => typeof p === "string" && p.trim().length > 0);
+  const photos      = rawPhotos.length > 0 ? rawPhotos : ["https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2070&auto=format&fit=crop"];
   const brokerInitials = (d.broker_name || " ").split(" ").map(p => p[0]).join("").slice(0, 2).toUpperCase();
 
   // ── Category Detection & Custom Labels ──────────
@@ -857,10 +872,12 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
   const goNext = () => setCurrentImageIndex(i => (i + 1) % photos.length);
 
   const handleTouchStart = (e) => {
+    setIsPhotoHovered(true);
     touchStartX.current = e.touches[0].clientX;
   };
 
   const handleTouchEnd = (e) => {
+    setIsPhotoHovered(false);
     const touchEndX = e.changedTouches[0].clientX;
     const diff = touchEndX - touchStartX.current;
     if (diff > 50) {
@@ -1054,13 +1071,15 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
           id="photoZone" 
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
+          onMouseEnter={() => setIsPhotoHovered(true)}
+          onMouseLeave={() => setIsPhotoHovered(false)}
         >
 
           {photos.map((url, i) => (
             <Image
               key={i}
               src={url}
-              alt={`${d.title} preview ${i+1}`}
+              alt={`${d.title} - ${d.spaceCategory || d.property_type || 'Architectural Asset'} in ${d.location || d.city || 'Philippines'} | Photo ${i + 1} of ${photos.length}`}
               fill
               priority={i === 0}
               quality={85}
@@ -1157,6 +1176,17 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
                 Expand Photo
               </button>
+              {photos.length > 1 && (
+                <button
+                  type="button"
+                  className={`toggle-btn ${isAutoPlaying ? "active" : "off"}`}
+                  style={{ marginLeft: '8px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                  onClick={() => setIsAutoPlaying(v => !v)}
+                  title={isAutoPlaying ? "Pause automatic slideshow" : "Start automatic slideshow"}
+                >
+                  {isAutoPlaying ? "⏸ Auto" : "▶ Auto"}
+                </button>
+              )}
               <div className="photo-dots">
                 {photos.map((_, i) => (
                   <div
