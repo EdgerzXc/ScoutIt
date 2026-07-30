@@ -20,7 +20,18 @@ import FAQReviewQueue from "./panels/FAQReviewQueue";
 import PropertySectionEditor from "./PropertySectionEditor";
 import { categoryKeyFor } from "../../lib/propertyFieldRegistry";
 
-// Enterprise Mission Control 
+// ENTERPRISE CONSOLE (customer-facing, future paid tier)
+//
+// ⚠️ NAMING — do not reintroduce "Mission Control" here. That name belongs to
+// exactly ONE thing: the separate staff console in `mission-control/`, which
+// deploys to its own site and is where STAFF work. This component is the
+// ENTERPRISE surface: a customer's own portfolio, in the main app.
+//
+// Both were called "Mission Control" until 2026-07-30, and the collision cost
+// real time — a handoff sent someone to "Mission Control → Portfolio" looking
+// for the property editor, which is here, while the staff console (the app they
+// opened) has no Portfolio page at all. See NEW_IDEAS_TO_CLAUDE_CODE B7.
+//
 // ⚠️ DEV-TOOLBOX PREVIEW ONLY. Real Enterprise account isolation
 // needs a real `organizations` table + enforced RLS. This
 // component fakes "your company's portfolio" as "properties you happen to own".
@@ -361,7 +372,7 @@ export default function MissionControlMode() {
         
         <div className="mb-5">
           <div className="text-[10px] tracking-widest text-gold-accent uppercase mb-3 px-3 opacity-70 font-label-caps">
-            Enterprise Mission Control
+            Enterprise Console
           </div>
           <div className="flex flex-col gap-1.5">
             {NAV_ITEMS.map((item) => (
@@ -411,7 +422,7 @@ export default function MissionControlMode() {
 
             <div>
               <span className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase drop-shadow-[0_0_10px_rgba(247,198,78,0.5)]">
-                Mission Control • Company Health
+                Enterprise Console • Company Health
               </span>
               <h1 className="font-display-md text-3xl md:text-4xl mt-1 text-gradient-sapphire">
                 Enterprise Dashboard
@@ -641,7 +652,7 @@ export default function MissionControlMode() {
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both">
             <div>
               <span className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase drop-shadow-[0_0_10px_rgba(247,198,78,0.5)]">
-                Mission Control • Portfolio
+                Enterprise Console • Portfolio
               </span>
               <h1 className="font-display-md text-3xl md:text-4xl mt-1 text-gradient-sapphire">
                 Manage Assets
@@ -787,7 +798,7 @@ export default function MissionControlMode() {
         ) : activeTab === "crm" ? (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both h-full flex flex-col gap-6">
             <div>
-              <span className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase drop-shadow-[0_0_10px_rgba(247,198,78,0.5)]">Mission Control • CRM</span>
+              <span className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase drop-shadow-[0_0_10px_rgba(247,198,78,0.5)]">Enterprise Console • CRM</span>
               <h1 className="font-display-md text-3xl md:text-4xl mt-1 text-white">Relationship Management</h1>
               <p className="text-sm text-text-secondary mt-2 max-w-xl">
                 The people around your portfolio — broker pitches, leads, and every conversation in play.
@@ -870,7 +881,7 @@ export default function MissionControlMode() {
         ) : activeTab === "inventory" ? (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both h-full flex flex-col gap-6">
             <div>
-              <span className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase drop-shadow-[0_0_10px_rgba(247,198,78,0.5)]">Mission Control • Inventory</span>
+              <span className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase drop-shadow-[0_0_10px_rgba(247,198,78,0.5)]">Enterprise Console • Inventory</span>
               <h1 className="font-display-md text-3xl md:text-4xl mt-1 text-white">Asset Inventory</h1>
               <p className="text-sm text-text-secondary mt-2 max-w-xl">
                 Unit-by-unit control of each estate — occupancy, delegation handshakes, and the floor grid.
@@ -929,7 +940,7 @@ export default function MissionControlMode() {
         ) : activeTab === "finance" ? (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both h-full flex flex-col gap-6">
             <div>
-              <span className="font-label-caps text-[10px] tracking-widest text-emerald-400 uppercase drop-shadow-[0_0_10px_rgba(52,211,153,0.5)]">Mission Control • Finance</span>
+              <span className="font-label-caps text-[10px] tracking-widest text-emerald-400 uppercase drop-shadow-[0_0_10px_rgba(52,211,153,0.5)]">Enterprise Console • Finance</span>
               <h1 className="font-display-md text-3xl md:text-4xl mt-1 text-white">Financial Hub</h1>
               <p className="text-sm text-text-secondary mt-2 max-w-xl">
                 Your Connects balance and money movement — live once billing is switched on.
@@ -965,7 +976,7 @@ export default function MissionControlMode() {
         ) : activeTab === "analytics" ? (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both h-full flex flex-col gap-6 overflow-y-auto pb-6 custom-scrollbar">
             <div>
-              <span className="font-label-caps text-[10px] tracking-widest text-blue-400 uppercase drop-shadow-[0_0_10px_rgba(59,130,246,0.5)]">Mission Control • Analytics</span>
+              <span className="font-label-caps text-[10px] tracking-widest text-blue-400 uppercase drop-shadow-[0_0_10px_rgba(59,130,246,0.5)]">Enterprise Console • Analytics</span>
               <h1 className="font-display-md text-3xl md:text-4xl mt-1 text-white">Market Intelligence</h1>
               <p className="text-sm text-text-secondary mt-2 max-w-xl">
                 How the market moves around your assets. Charts below are sample previews until live data connects.
@@ -1086,7 +1097,7 @@ export default function MissionControlMode() {
         ) : activeTab === "faqs" ? (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both flex flex-col gap-6">
             <div>
-              <span className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase">Mission Control • Q&amp;A</span>
+              <span className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase">Enterprise Console • Q&amp;A</span>
               <h1 className="font-display-md text-3xl md:text-4xl mt-1 text-white">Answer Review</h1>
               <p className="text-sm text-text-secondary mt-2 max-w-xl">
                 Confirm, override or hide what advisors and residents have said about your listings.
@@ -1097,7 +1108,7 @@ export default function MissionControlMode() {
         ) : activeTab === "ai" ? (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both h-full flex flex-col gap-6">
             <div>
-              <span className="font-label-caps text-[10px] tracking-widest text-blue-400 uppercase drop-shadow-[0_0_10px_rgba(59,130,246,0.5)]">Mission Control • AI</span>
+              <span className="font-label-caps text-[10px] tracking-widest text-blue-400 uppercase drop-shadow-[0_0_10px_rgba(59,130,246,0.5)]">Enterprise Console • AI</span>
               <h1 className="font-display-md text-3xl md:text-4xl mt-1 text-white">Intelligence Center</h1>
               <p className="text-sm text-text-secondary mt-2 max-w-xl">
                 Where AI works for your portfolio — drafting dossiers now, portfolio Q&amp;A next.
@@ -1176,7 +1187,7 @@ export default function MissionControlMode() {
         ) : (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both h-full flex flex-col gap-6">
             <div>
-              <span className="font-label-caps text-[10px] tracking-widest text-text-secondary uppercase">Mission Control • Settings</span>
+              <span className="font-label-caps text-[10px] tracking-widest text-text-secondary uppercase">Enterprise Console • Settings</span>
               <h1 className="font-display-md text-3xl md:text-4xl mt-1 text-white">Administration</h1>
             </div>
 

@@ -40,10 +40,10 @@ export default function EnterprisePage() {
         </div>
 
         <div className="enterprise-cta">
-          <p>Currently in early development. Preview the Mission Control workspace from your dashboard, or tell us about your portfolio and we&apos;ll reach out.</p>
+          <p>Currently in early development. Preview the Enterprise Console from your dashboard, or tell us about your portfolio and we&apos;ll reach out.</p>
           <div className="enterprise-cta-row">
             <a href="/dashboard" className="enterprise-cta-btn">
-              Preview Mission Control →
+              Preview the Enterprise Console →
             </a>
             <a href="mailto:hello@scout-it.vercel.app?subject=Enterprise%20Account%20Inquiry" className="enterprise-cta-secondary">
               Get in touch

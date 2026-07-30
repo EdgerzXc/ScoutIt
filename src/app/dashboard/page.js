@@ -30,8 +30,14 @@ const TAG_LABELS = {
   exploring: "Exploring",
   // Dev-toolbox-only modes -- never added to ACTIVATABLE_MODES, so a real user can
   // never self-activate these from the normal "Unlock More" switcher.
-  mc_staff: "Mission Control · Staff",
-  mc_enterprise: "Mission Control · Enterprise",
+  // ⚠️ NAMING: "Mission Control" means the SEPARATE staff console in
+  // `mission-control/`, which has its own site. These two are previews inside
+  // the MAIN app and must not reuse that name — the collision already sent one
+  // handoff to the wrong application (see NEW_IDEAS_TO_CLAUDE_CODE B7).
+  // The IDs stay `mc_*`: they are persisted on user profiles and asserted by
+  // e2e specs, so renaming them would be a data migration, not a label change.
+  mc_staff: "Staff Console · Simulated",
+  mc_enterprise: "Enterprise Console · Preview",
 };
 
 // Roles a user can activate from the Mode menu without re-onboarding

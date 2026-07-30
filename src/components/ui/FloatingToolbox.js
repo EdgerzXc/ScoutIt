@@ -146,8 +146,11 @@ export default function FloatingToolbox() {
     setDevOn(false);
   };
 
-  // Dev-only entry point into the Mission Control preview (SCOUTIT_MASTER_BUILD_SPEC.md
+  // Dev-only entry point into the in-app console PREVIEWS (SCOUTIT_MASTER_BUILD_SPEC.md
   // §3) -- there is deliberately no way to reach this from normal account activation.
+  //
+  // ⚠️ These are previews inside the MAIN app. The real staff console is the
+  // SEPARATE `mission-control/` deployment and is NOT reachable from here.
   const enterMissionControl = (modeId) => {
     try {
       let u = JSON.parse(localStorage.getItem("scoutit_user") || "null");
@@ -460,13 +463,13 @@ export default function FloatingToolbox() {
                   })}
                 </div>
 
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "rgba(255,255,255,0.4)", letterSpacing: "0.2em", textTransform: "uppercase", display: "block", margin: "10px 0 6px" }}>Mission Control (preview only)</span>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "rgba(255,255,255,0.4)", letterSpacing: "0.2em", textTransform: "uppercase", display: "block", margin: "10px 0 6px" }}>In-app console previews</span>
                 <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                   <button onClick={() => enterMissionControl("mc_staff")} style={{ fontFamily: "var(--font-mono)", fontSize: 9.5, padding: "6px 8px", borderRadius: 4, cursor: "pointer", textAlign: "left", border: "1px solid rgba(255,255,255,0.12)", background: "transparent", color: "#c8c8c8" }}>
-                    Enter as Staff (near-global access)
+                    Staff Console — simulated (not the real one)
                   </button>
                   <button onClick={() => enterMissionControl("mc_enterprise")} style={{ fontFamily: "var(--font-mono)", fontSize: 9.5, padding: "6px 8px", borderRadius: 4, cursor: "pointer", textAlign: "left", border: "1px solid rgba(255,255,255,0.12)", background: "transparent", color: "#c8c8c8" }}>
-                    Enter as Enterprise (scoped to own)
+                    Enterprise Console — preview (scoped to own)
                   </button>
                 </div>
               </div>
