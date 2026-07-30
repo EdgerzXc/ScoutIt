@@ -8,12 +8,12 @@ related: ["[[MASTER_CONTEXT]]", "[[SCOUTIT_MASTER_BUILD_SPEC]]", "[[00_START_HER
 
 # ScoutIt Handoff - End of Session
 
-> ## ▶️ RESUME HERE (latest) — 2026-07-30 — Direct Photo Zoom, Copyable Text Selection & Redundant Button Purge
-> Shipped direct photo click zoom, text copy protection, and 100% green E2E suite:
+> ## ▶️ RESUME HERE (latest) — 2026-07-30 — Compact Tear-Sheet Action Pill, Direct Photo Zoom & Copyable Text Selection
+> Shipped compact luxury action buttons, direct photo click zoom, text copy protection, and 100% green E2E suite:
+> - **Compact Action Pill UI (`CommercialFlow.js` & `ResidentialFlow.js`):** Reduced the size of the "Download Tear-Sheet" and "Edit Dossier" buttons from bulky 48px boxes (`px-6 py-3 text-sm`) to sleek, 28px high compact luxury pill badges (`px-3.5 py-1.5 text-xs font-mono rounded-full`). Lessens visual clutter in the hero section while keeping primary actions instantly accessible.
 > - **Direct Photo Click Zoom & Redundant Button Purge (`CommercialFlow.js`, `ResidentialFlow.js`, `UnitMasterPage.js`):** Clicking anywhere on the photo background directly opens the Fullscreen Lightbox / Zoom view. Completely removed the redundant "Expand Photo" button for a cleaner, uncluttered controls strip.
 > - **Text Copy/Paste Safeguards (`property-detail.css` & `.hero-intel`):** Configured `.hero-intel` container with `pointer-events: none` and text child elements (`.hero-title`, `.hero-location`, `.hero-hook`, `.hero-label`) with `pointer-events: auto; user-select: text !important; cursor: text;`. Users can drag, highlight, and copy property text (Ctrl+C / Cmd+C) seamlessly without triggering photo zoom or opening the lightbox.
-> - **Unit Master Page Fullscreen Lightbox:** Added `isLightboxOpen` modal rendering to `UnitMasterPage.js` for unit photo zoom.
-> - **100% Green E2E Test Suite (2026-07-30):** All 6 Playwright E2E tests passed (`6 passed (14.0s)`) across Desktop Chromium and Mobile Chrome.
+> - **100% Green E2E Test Suite (2026-07-30):** All 6 Playwright E2E tests passed (`6 passed (14.3s)`) across Desktop Chromium and Mobile Chrome.
 > - **Verification & Build Status:** **100% Green Playwright E2E suite** + **393/393 Vitest unit tests passing**; all changes committed & pushed to GitHub `origin/main`.
 >
 > ## Previous — 2026-07-09 → 07-11 — Security shipped, E2E suite, real-transaction rehearsal, dual-CMS drift resolved

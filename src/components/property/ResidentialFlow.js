@@ -998,15 +998,15 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
             <h1 className="hero-title">{d.title}</h1>
             <p className="hero-location">{d.location || d.city || null}</p>
             <p className="hero-hook">{d.hook}</p>
-            <div style={{ marginTop: '24px', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+            <div style={{ marginTop: '16px', display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
               <button 
                 onClick={(e) => { e.stopPropagation(); handleDownloadPdf(); }}
-                className="font-working-title text-sm tracking-widest text-background bg-gold-accent px-6 py-3 rounded hover:opacity-90 transition-opacity uppercase font-bold inline-flex items-center gap-2 border border-gold-accent shadow-[0_0_15px_rgba(232,174,60,0.4)] cursor-pointer"
+                className="font-mono text-xs tracking-wider text-black bg-gold-accent hover:opacity-90 px-3.5 py-1.5 rounded-full transition-all uppercase font-semibold inline-flex items-center gap-1.5 shadow-[0_0_12px_rgba(232,174,60,0.3)] cursor-pointer"
               >
-                <span>🖨️</span> Download Tear-Sheet
+                <span style={{ fontSize: '11px' }}>🖨️</span> Download Tear-Sheet
               </button>
               {isOwner && (
-                <Link href={`/dashboard?edit=${d.id}`} className="font-working-title text-sm tracking-widest text-text-secondary bg-surface-alt px-6 py-3 rounded hover:text-on-surface transition-colors uppercase font-bold inline-block border border-surface-variant cursor-pointer">
+                <Link href={`/dashboard?edit=${d.id}`} className="font-mono text-xs tracking-wider text-text-secondary bg-surface-alt/80 hover:text-on-surface px-3.5 py-1.5 rounded-full transition-colors uppercase font-semibold inline-block border border-surface-variant cursor-pointer backdrop-blur-sm">
                   Edit Dossier
                 </Link>
               )}
