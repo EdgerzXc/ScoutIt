@@ -27,7 +27,7 @@ const MONO = "'Courier New',monospace";
 // repeatedly against live Overpass (15 filters × a large area); 900 m returned
 // 25 POIs reliably. Still roughly an 11-minute walk. If these two numbers ever
 // disagree again, the component wins and the server default is dead code.
-export default function WhereToSection({ lat, lng, radiusM = 900, onIsochrone }) {
+export default function WhereToSection({ lat, lng, radiusM = 900, onIsochrone, onPoisLoaded }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
@@ -50,12 +50,27 @@ export default function WhereToSection({ lat, lng, radiusM = 900, onIsochrone })
       setData(json);
       // Hand the reachability polygons up so the map can overlay them.
       if (json.isochrone) onIsochrone?.(json.isochrone, json.contours);
+      // Hand all Lifestyle Intel POIs up so the Tactical Map renders white dot markers.
+      if (json.layers && Array.isArray(json.layers)) {
+        const allPois = json.layers.flatMap(layer =>
+          (layer.items || []).map(item => ({
+            ...item,
+            layerId: layer.id,
+            layerLabel: layer.label,
+            category: item.type || layer.label,
+            distance: item.distance || (item.meters ? `${item.meters} m` : ""),
+            lat: item.lat,
+            lng: item.lon ?? item.lng
+          }))
+        );
+        onPoisLoaded?.(allPois);
+      }
     } catch {
       setFailed(true);
     } finally {
       setLoading(false);
     }
-  }, [lat, lng, radiusM, onIsochrone]);
+  }, [lat, lng, radiusM, onIsochrone, onPoisLoaded]);
 
   useEffect(() => { load(); }, [load]);
 

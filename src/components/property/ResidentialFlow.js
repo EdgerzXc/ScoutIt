@@ -250,6 +250,10 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
   const handleIsochrone = useCallback((geojson, contours) => {
     setIsochroneData({ geojson, contours });
   }, []);
+  const [lifestylePois,     setLifestylePois]     = useState([]);
+  const handlePoisLoaded = useCallback((pois) => {
+    setLifestylePois(pois);
+  }, []);
   const [locTab,            setLocTab]            = useState("spatial");
   const [isInquiryOpen,     setIsInquiryOpen]     = useState(false);
   const [shareTextOpen,     setShareTextOpen]     = useState(null);
@@ -1544,6 +1548,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                     lng={d.lng || d.longitude || 121.0244}
                     propertyTitle={d.title}
                     vicinityData={d.whereTo}
+                    lifestylePois={lifestylePois}
                     routeDestination={transitDestination}
                     routeDestCoords={transitDestCoords}
                     routeLabel={transitLabel}
@@ -1684,6 +1689,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                     lng={d.lng || d.longitude || 121.0244}
                     propertyTitle={d.title}
                     vicinityData={d.whereTo}
+                    lifestylePois={lifestylePois}
                     mapboxToken={mapboxToken}
                     isochrone={isochroneData?.geojson || null}
                     contours={isochroneData?.contours || []}
@@ -1715,17 +1721,16 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
               )}
 
               {/* Lifestyle Intel — live OpenStreetMap POIs + Mapbox reachability
-                  (NEW_IDEAS.md §3). Replaces the hand-keyed CMS list as the
-                  primary answer to "what's around here?". */}
-              {whereToTab === "lifestyle" && (
-                <div style={{marginBottom:"24px"}}>
-                  <WhereToSection
-                    lat={Number(d.lat ?? d.latitude)}
-                    lng={Number(d.lng ?? d.longitude)}
-                    onIsochrone={handleIsochrone}
-                  />
-                </div>
-              )}
+                  (NEW_IDEAS.md §3). Kept mounted so POIs load immediately and render
+                  as white dots on the Tactical Map. */}
+              <div style={{ marginBottom: "24px", display: whereToTab === "lifestyle" ? "block" : "none" }}>
+                <WhereToSection
+                  lat={Number(d.lat ?? d.latitude)}
+                  lng={Number(d.lng ?? d.longitude)}
+                  onIsochrone={handleIsochrone}
+                  onPoisLoaded={handlePoisLoaded}
+                />
+              </div>
 
               <DeepIntelWidget
                 open={widgets.whereto}

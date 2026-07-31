@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
-export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData = [], routeDestination = "", routeDestCoords = null, routeLabel = "", mapboxToken = "", isochrone = null, contours = [] }) {
+export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData = [], lifestylePois = [], routeDestination = "", routeDestCoords = null, routeLabel = "", mapboxToken = "", isochrone = null, contours = [] }) {
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
   const hoveredRef = useRef(null);
@@ -38,14 +38,14 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
 
       const position = [lat || 14.5547, lng || 121.0244];
 
-      // Initialize Map
+      // Initialize Map with bounds clamping
       const map = window.L.map(mapRef.current, {
         center: position,
         zoom: 15,
         zoomControl: false,
         attributionControl: false,
         scrollWheelZoom: false,
-        dragging: !window.L.Browser.mobile // prevents swiping from moving map on mobile
+        dragging: !window.L.Browser.mobile
       });
 
       // Add CartoDB Dark Matter tile layer
@@ -85,57 +85,112 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
           className: "custom-leaflet-popup"
         });
 
-      // Plot random offsets for vicinity indicators for visual representation
-      vicinityData.forEach((item, index) => {
-        // Generate small random offset within vicinity (approx 500m)
-        const offsetLat = (Math.sin(index * 2.3) * 0.005);
-        const offsetLng = (Math.cos(index * 1.9) * 0.005);
-        const itemPosition = [position[0] + offsetLat, position[1] + offsetLng];
+      // ── PLOT LIFESTYLE INTEL POIS AS GLOWING WHITE DOTS ──
+      const activePois = (Array.isArray(lifestylePois) && lifestylePois.length > 0)
+        ? lifestylePois
+        : [];
 
-        const amenityIcon = window.L.divIcon({
-          className: "custom-leaflet-marker amenity",
-          html: `<div class="amenity-dot"></div>`,
-          iconSize: [12, 12],
-          iconAnchor: [6, 6]
+      if (activePois.length > 0) {
+        activePois.forEach((item, index) => {
+          const itemLat = Number(item.lat);
+          const itemLng = Number(item.lon ?? item.lng);
+          if (!Number.isFinite(itemLat) || !Number.isFinite(itemLng)) return;
+
+          const itemPosition = [itemLat, itemLng];
+          const whiteDotIcon = window.L.divIcon({
+            className: "custom-leaflet-marker white-dot",
+            html: `<div class="white-dot-marker-core"></div>`,
+            iconSize: [14, 14],
+            iconAnchor: [7, 7]
+          });
+
+          const marker = window.L.marker(itemPosition, { icon: whiteDotIcon }).addTo(map);
+
+          const amenityPopup = document.createElement('div');
+          const amenityTitle = document.createElement('strong');
+          amenityTitle.style.color = '#ffffff';
+          amenityTitle.textContent = item.name;
+          const amenitySub = document.createElement('span');
+          amenitySub.style.color = '#E8AE3C';
+          const catLabel = item.layerLabel || item.category || item.type || "Lifestyle Intel";
+          const distLabel = item.distance || (item.meters ? `${item.meters} m` : "");
+          amenitySub.innerHTML = `${catLabel.replace(/</g, '&lt;')} &middot; ${distLabel.replace(/</g, '&lt;')}`;
+          amenityPopup.appendChild(amenityTitle);
+          amenityPopup.appendChild(document.createElement('br'));
+          amenityPopup.appendChild(amenitySub);
+
+          marker.bindPopup(amenityPopup, { className: "custom-leaflet-popup" });
+
+          marker.on("mouseover", () => {
+            const data = {
+              id: index,
+              name: item.name,
+              category: catLabel,
+              distance: distLabel,
+              latlng: itemPosition
+            };
+            hoveredRef.current = data;
+            setHoveredAmenity(data);
+            updatePositions();
+          });
+
+          marker.on("mouseout", () => {
+            hoveredRef.current = null;
+            setHoveredAmenity(null);
+            updatePositions();
+          });
         });
+      } else {
+        // Fallback: Plot vicinity indicators if lifestylePois is not provided
+        vicinityData.forEach((item, index) => {
+          const offsetLat = (Math.sin(index * 2.3) * 0.005);
+          const offsetLng = (Math.cos(index * 1.9) * 0.005);
+          const itemPosition = [position[0] + offsetLat, position[1] + offsetLng];
 
-        const marker = window.L.marker(itemPosition, { icon: amenityIcon })
-          .addTo(map);
+          const amenityIcon = window.L.divIcon({
+            className: "custom-leaflet-marker amenity",
+            html: `<div class="amenity-dot"></div>`,
+            iconSize: [12, 12],
+            iconAnchor: [6, 6]
+          });
 
-        const amenityPopup = document.createElement('div');
-        const amenityTitle = document.createElement('strong');
-        amenityTitle.textContent = item.name;
-        const amenitySub = document.createElement('span');
-        amenitySub.style.color = '#c8c8c8';
-        amenitySub.innerHTML = `${item.category.replace(/</g, '&lt;')} &middot; ${item.distance.replace(/</g, '&lt;')}`;
-        amenityPopup.appendChild(amenityTitle);
-        amenityPopup.appendChild(document.createElement('br'));
-        amenityPopup.appendChild(amenitySub);
+          const marker = window.L.marker(itemPosition, { icon: amenityIcon })
+            .addTo(map);
 
-        // Bind custom popup & mouseover HUD trigger
-        marker.bindPopup(amenityPopup, {
-          className: "custom-leaflet-popup"
+          const amenityPopup = document.createElement('div');
+          const amenityTitle = document.createElement('strong');
+          amenityTitle.textContent = item.name;
+          const amenitySub = document.createElement('span');
+          amenitySub.style.color = '#c8c8c8';
+          amenitySub.innerHTML = `${item.category.replace(/</g, '&lt;')} &middot; ${item.distance.replace(/</g, '&lt;')}`;
+          amenityPopup.appendChild(amenityTitle);
+          amenityPopup.appendChild(document.createElement('br'));
+          amenityPopup.appendChild(amenitySub);
+
+          marker.bindPopup(amenityPopup, {
+            className: "custom-leaflet-popup"
+          });
+
+          marker.on("mouseover", () => {
+            const data = {
+              id: index,
+              name: item.name,
+              category: item.category,
+              distance: item.distance,
+              latlng: itemPosition
+            };
+            hoveredRef.current = data;
+            setHoveredAmenity(data);
+            updatePositions();
+          });
+
+          marker.on("mouseout", () => {
+            hoveredRef.current = null;
+            setHoveredAmenity(null);
+            updatePositions();
+          });
         });
-
-        marker.on("mouseover", () => {
-          const data = {
-            id: index,
-            name: item.name,
-            category: item.category,
-            distance: item.distance,
-            latlng: itemPosition
-          };
-          hoveredRef.current = data;
-          setHoveredAmenity(data);
-          updatePositions();
-        });
-
-        marker.on("mouseout", () => {
-          hoveredRef.current = null;
-          setHoveredAmenity(null);
-          updatePositions();
-        });
-      });
+      }
 
       // ── Optional: Mapbox Directions gold route line ──
       // Uses explicit destination coordinates when provided (reliable),
@@ -330,7 +385,7 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
     // We use JSON.stringify for arrays/objects to prevent reference-equality React loops 
     // that destroy and recreate the Leaflet map unnecessarily.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lat, lng, propertyTitle, JSON.stringify(vicinityData), routeDestination, JSON.stringify(routeDestCoords), routeLabel, mapboxToken]);
+  }, [lat, lng, propertyTitle, JSON.stringify(vicinityData), JSON.stringify(lifestylePois), routeDestination, JSON.stringify(routeDestCoords), routeLabel, mapboxToken]);
 
   // ── Isochrone overlay (NEW_IDEAS.md §3) ─────────────────────────────
   // Reachability polygons arrive asynchronously from /api/whereto, well
@@ -544,7 +599,32 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
           height: 100%;
           z-index: 10;
           pointer-events: none; /* Passes all clicks directly to Leaflet Map underlying */
-          overflow: visible;
+          overflow: hidden;
+        }
+
+        /* Lifestyle Intel Glowing White Dot Markers */
+        .custom-leaflet-marker.white-dot {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 50;
+        }
+
+        .white-dot-marker-core {
+          width: 9px;
+          height: 9px;
+          background: #ffffff;
+          border: 1.5px solid #0d0d0d;
+          border-radius: 50%;
+          box-shadow: 0 0 8px #ffffff, 0 0 16px rgba(232, 174, 60, 0.4);
+          cursor: pointer;
+          transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .custom-leaflet-marker.white-dot:hover .white-dot-marker-core {
+          transform: scale(1.7);
+          background: #F7C64E;
+          box-shadow: 0 0 12px #F7C64E, 0 0 24px rgba(247, 198, 78, 0.8);
         }
 
         .leaflet-radar-ring {
