@@ -42,7 +42,26 @@ ScoutIt Intel is an **OSINT (Open Source Intelligence) Spatial Radar Platform** 
 
 - **Master SQL Schema Script:** [`supabase_osint_intel_schema.sql`](file:///c:/Users/jerze/ScoutIt/supabase_osint_intel_schema.sql)
 - **Mission Control Admin API:** [`src/app/api/admin/osint/route.js`](file:///c:/Users/jerze/ScoutIt/src/app/api/admin/osint/route.js)
-- **Scheduled Scraper & AI Search Cron:** [`src/app/api/cron/osint-scraper/route.js`](file:///c:/Users/jerze/ScoutIt/src/app/api/cron/osint-scraper/route.js)
-- **3D Spatial Radar Component:** [`src/components/intel/SpatialIntelMap.js`](file:///c:/Users/jerze/ScoutIt/src/components/intel/SpatialIntelMap.js)
 - **Live OSINT Flash Ticker:** [`src/components/intel/OSINTFlashTicker.js`](file:///c:/Users/jerze/ScoutIt/src/components/intel/OSINTFlashTicker.js)
 - **Intel Hub Main Page:** [`src/app/intel/page.js`](file:///c:/Users/jerze/ScoutIt/src/app/intel/page.js)
+
+---
+
+## 4. MISSION CONTROL PRODUCTION SECURITY & VERCEL PRO TRANSITION
+
+> **FUTURE DEVELOPMENT CHECKLIST:**
+> Execute these 5 security steps when upgrading to Vercel Pro / Paid tier and attaching your custom subdomain (`mc.scoutit.space`).
+
+1. **Vercel Deployment Protection / Password Gate:**
+   - Enable **Password Protection** or **Vercel SSO** on `mc.scoutit.space` in Vercel Project Settings.
+   - Prevents unauthenticated web crawlers or unauthorized visitors from probing the login interface (`/`).
+2. **Strict Internal API Secret Header (`x-mmc-secret`):**
+   - Add `MMC_SECRET_KEY` env var in Vercel.
+   - Enforce `req.headers.get("x-mmc-secret") === process.env.MMC_SECRET_KEY` on `/api/admin/osint` and `/api/admin/property` to reject unauthorized external requests.
+3. **Cloudflare Turnstile Bot Shield:**
+   - Add Cloudflare Turnstile widget to Mission Control login page to block credential stuffing and automated brute-force attempts.
+4. **8-Hour Session TTL:**
+   - Configure Supabase Auth JWT expiration to 8 hours (1 workday) for staff sessions.
+5. **Instant Emergency Access Revocation:**
+   - Setting `admin_users.active = false` in Supabase immediately revokes access for a compromised or departing staff member across all active sessions.
+
