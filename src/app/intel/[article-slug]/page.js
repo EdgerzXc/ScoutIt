@@ -102,7 +102,14 @@ export default async function IntelArticlePage({ params }) {
         <section className="article-hero" style={{ backgroundImage: `url(${article.image})` }}>
           <div className="hero-overlay"></div>
           <div className="hero-content">
-            <span className="article-category-tag">{article.category}</span>
+            <div className="flex items-center gap-3 mb-3">
+              <span className="article-category-tag" style={{ margin: 0 }}>{article.category}</span>
+              {article.city ? (
+                <span className="font-mono text-[10px] text-text-secondary border border-surface-variant/80 px-2 py-0.5 rounded-xs uppercase bg-black/40 backdrop-blur-sm">
+                  📍 {article.city}
+                </span>
+              ) : null}
+            </div>
             <h1 className="article-title">{article.title}</h1>
             <span className="article-date-tag">{article.date}</span>
           </div>
@@ -131,6 +138,24 @@ export default async function IntelArticlePage({ params }) {
               <GlassPanel className="p-6 mt-12 bg-surface-alt border-surface-variant">
                 <span className="font-mono text-[10px] text-gold-accent tracking-[0.15em] uppercase block mb-3">SCOUTIT BRIEFING RECOMMENDATION</span>
                 <p className="font-serif text-sm text-text-primary leading-relaxed m-0">{article.recommendation}</p>
+              </GlassPanel>
+            ) : null}
+
+            {/* OSINT Source & Provenance Card */}
+            {article.sourceName ? (
+              <GlassPanel className="p-6 mt-6 bg-surface-alt/70 border border-surface-variant">
+                <div className="flex items-center justify-between gap-4 flex-wrap">
+                  <div>
+                    <span className="font-mono text-[10px] text-gold-accent tracking-[0.15em] uppercase block mb-1">OSINT SOURCE & PROVENANCE</span>
+                    <p className="font-sans text-xs text-text-secondary m-0">Synthesized from primary filing &bull; <strong className="text-text-primary">{article.sourceName}</strong></p>
+                  </div>
+                  {article.sourceUrl ? (
+                    <a href={article.sourceUrl} target="_blank" rel="noopener noreferrer" className="font-mono text-[11px] text-gold-accent hover:underline flex items-center gap-1.5 no-underline border border-gold-accent/30 px-3 py-1.5 rounded-sm hover:bg-gold-accent/10 transition-colors">
+                      <span>View Source Gazette</span>
+                      <span>↗</span>
+                    </a>
+                  ) : null}
+                </div>
               </GlassPanel>
             ) : null}
           </div>

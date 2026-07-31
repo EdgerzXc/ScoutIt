@@ -6,18 +6,21 @@ import Link from "next/link";
 import MeshHero from "@/components/ui/MeshHero";
 import HoverCard from "@/components/ui/HoverCard";
 import ImagePlaceholder from "@/components/ui/ImagePlaceholder";
+import SpatialIntelMap from "@/components/intel/SpatialIntelMap";
+import OSINTFlashTicker from "@/components/intel/OSINTFlashTicker";
+import InViewport from "@/components/ui/InViewport";
 
 function getArticleType(art) {
   if (!art) return "Analysis";
   const slug = (art.slug || "").toLowerCase();
   const title = (art.title || "").toLowerCase();
   const cat = (art.category || "").toLowerCase();
-  if (slug.includes("movement") || slug.includes("resurgence") || slug.includes("outlook") || slug.includes("insight") || title.includes("insight") || cat.includes("insight")) {
-    return "Insight";
-  }
-  if (slug.includes("demand") || slug.includes("boom") || slug.includes("surge") || slug.includes("entry") || slug.includes("report") || title.includes("report") || cat.includes("report")) {
-    return "Report";
-  }
+  const type = (art.intelType || "").toLowerCase();
+  if (type.includes("signal") || slug.includes("signal")) return "Signal";
+  if (type.includes("market") || slug.includes("market")) return "Market Intel";
+  if (type.includes("guide") || slug.includes("guide")) return "Area Guide";
+  if (type.includes("insight") || slug.includes("insight")) return "Insight";
+  if (type.includes("briefing") || slug.includes("briefing")) return "Briefing";
   return "Analysis";
 }
 import { useState, useEffect } from "react";
@@ -46,15 +49,26 @@ const MOCK_CATEGORIES = {
 
 export default function IntelPage() {
   const router = useRouter();
-  const [filter, setFilter] = useState("All");
+  const [filter, setFilter] = useState("ALL DISPATCHES");
   const [searchQuery, setSearchQuery] = useState("");
-  // Editorial mock briefings are the base layer (same set the homepage links
-  // to); live Airtable intel is merged in front once it loads. The 2026-07-05
-  // dead-code cleanup emptied this to [] which left the hub blank — and every
-  // homepage news teaser 404ing — whenever Airtable INTEL had no records.
+  const [featuredIndex, setFeaturedIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const [selectedCity, setSelectedCity] = useState(null);
   const [articles, setArticles] = useState(getArticles());
   const [propertiesList, setPropertiesList] = useState([]);
   const [sidePanelArticle, setSidePanelArticle] = useState(null);
+
+  const handleSelectCity = (city) => {
+    setSelectedCity(city);
+    if (city) {
+      setTimeout(() => {
+        const gridElem = document.getElementById("intel-dispatches-grid");
+        if (gridElem) {
+          gridElem.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }, 100);
+    }
+  };
 
   useEffect(() => {
     let alive = true;
@@ -108,7 +122,8 @@ export default function IntelPage() {
               category,
               date: item.date || "Just Now",
               excerpt: item.excerpt || "",
-              image: item.image || ""
+              image: item.image || "",
+              sourceName: item.sourceName || item.source || ""
             });
           }
         });
@@ -122,20 +137,26 @@ export default function IntelPage() {
     return () => { alive = false; };
   }, []);
 
-  const categories = ["All", "Residential", "Commercial", "STR", "Hospitality", "Culinary", "Venues", "Summary"];
+  // Auto-next timer for featured briefing hero card (7 seconds)
+  useEffect(() => {
+    if (isPaused || filter !== "All" || searchQuery.trim() !== "") return;
+    const timer = setInterval(() => {
+      setFeaturedIndex(prev => prev + 1);
+    }, 7000);
+    return () => clearInterval(timer);
+  }, [isPaused, filter, searchQuery]);
+
+  const categories = ["All Dispatches", "Market Intel", "Commercial Signals", "Area Guides", "Insights", "Briefings"];
 
   // Match and fetch property link dynamically
   const getLinkedProperty = (article) => {
-    // Match by exact city name
     if (article.city) {
       const match = propertiesList.find(p => p.city.toLowerCase().includes(article.city.toLowerCase()));
       if (match) return match;
     }
-    // Match by slug keywords
     const matchSlug = propertiesList.find(p => article.slug.toLowerCase().includes(p.slug.toLowerCase()) || p.slug.toLowerCase().includes(article.slug.toLowerCase()));
     if (matchSlug) return matchSlug;
 
-    // Match by category mapping
     let mappedCat = article.category || "";
     if (mappedCat.toLowerCase() === "hospitality") mappedCat = "Hospitality";
     if (mappedCat.toLowerCase() === "str") mappedCat = "STR";
@@ -147,25 +168,38 @@ export default function IntelPage() {
 
   // Filter and search articles dynamically
   const filteredArticles = articles.filter(art => {
-    // Category check
-    if (filter !== "All" && art.category !== filter) {
-      return false;
+    // Topic check
+    if (filter !== "All Dispatches" && filter !== "All") {
+      const artType = (art.intelType || getArticleType(art) || art.category || "").toLowerCase();
+      const targetFilter = filter.toLowerCase();
+      const matchesTopic = artType.includes(targetFilter) || targetFilter.includes(artType) || (art.category && art.category.toLowerCase().includes(targetFilter));
+      if (!matchesTopic) return false;
+    }
+    // Location check
+    if (selectedCity) {
+      if (!art.city || !art.city.toLowerCase().includes(selectedCity.toLowerCase())) {
+        return false;
+      }
     }
     // Search query check
     if (searchQuery.trim() !== "") {
       const q = searchQuery.toLowerCase();
       const matchTitle = art.title.toLowerCase().includes(q);
       const matchExcerpt = art.excerpt && art.excerpt.toLowerCase().includes(q);
-      const matchCat = art.category.toLowerCase().includes(q);
-      return matchTitle || matchExcerpt || matchCat;
+      const matchCat = art.category && art.category.toLowerCase().includes(q);
+      const matchCity = art.city && art.city.toLowerCase().includes(q);
+      return matchTitle || matchExcerpt || matchCat || matchCity;
     }
     return true;
   });
 
-  // Top picks for split hero
-  const featuredArticle = filteredArticles[0];
-  const trendingArticles = filteredArticles.slice(1, 4);
-  const remainingArticles = filteredArticles.slice(featuredArticle ? 1 : 0);
+  // Carousel selections for split hero
+  const featuredCandidates = filteredArticles.slice(0, 3);
+  const totalFeatured = Math.max(1, featuredCandidates.length);
+  const currentFeaturedIndex = featuredIndex % totalFeatured;
+  const featuredArticle = featuredCandidates[currentFeaturedIndex] || filteredArticles[0];
+  const trendingArticles = filteredArticles.filter((_, idx) => idx !== currentFeaturedIndex).slice(0, 3);
+  const remainingArticles = filteredArticles;
 
   return (
     <div className="page-wrapper">
@@ -183,49 +217,135 @@ export default function IntelPage() {
           </Link>
         </MeshHero>
 
-        {/* Featured Split Hero (Only shown when filter is All and search is empty) */}
-        {filter === "All" && searchQuery.trim() === "" && featuredArticle && (
-          <section className="featured-trending-split">
-            {/* Left Featured Card */}
-            <Link href={`/intel/${featuredArticle.slug}`} className="featured-card-new">
-              <div className="featured-image-wrapper">
-                {featuredArticle.image ? (
-                  /* eslint-disable-next-line @next/next/no-img-element */
-                  <img src={featuredArticle.image} alt={featuredArticle.title} className="featured-image-new" />
-                ) : (
-                  <ImagePlaceholder className="featured-image-new" label={featuredArticle.title} minimal />
-                )}
-                <div className="featured-overlay-new"></div>
-              </div>
-              <div className="featured-content-new">
-                <div className="featured-badge-row" style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '12px' }}>
-                  <span className="featured-tag-new" style={{ margin: 0 }}>{featuredArticle.category}</span>
-                  <span className={`article-type-badge ${getArticleType(featuredArticle).toLowerCase()}`} style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', padding: '2px 6px', borderRadius: '2px', textTransform: 'uppercase' }}>{getArticleType(featuredArticle)}</span>
-                  <span className="featured-read-time" style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>{Math.max(1, Math.round((featuredArticle.excerpt || "").split(/\s+/).length / 20))} min read</span>
-                </div>
-                <h2>{featuredArticle.title}</h2>
-                <p className="featured-excerpt-new">{featuredArticle.excerpt}</p>
-                <div className="featured-footer-new">
-                  <span className="featured-date-new">{featuredArticle.date}</span>
-                  <span className="featured-link-new">Read Deep Analysis →</span>
-                </div>
-              </div>
-            </Link>
+        {/* Live OSINT Flash News Ticker */}
+        <OSINTFlashTicker />
 
-            {/* Right Trending List */}
+        {/* Enriched Full-Width 3D Spatial Radar Map Terminal */}
+        <section className="spatial-intel-map-hero my-6 px-6 max-w-[1400px] mx-auto">
+          <InViewport placeholder={<div className="h-[500px] bg-surface-alt animate-pulse rounded-sm border border-surface-variant flex items-center justify-center font-mono text-xs text-text-muted">LOADING 3D SPATIAL RADAR...</div>}>
+            <SpatialIntelMap
+              articles={articles}
+              activeArticleSlug={featuredArticle?.slug}
+              selectedCity={selectedCity}
+              onSelectCity={handleSelectCity}
+            />
+          </InViewport>
+        </section>
+
+        {/* Active Location Filter Banner */}
+        {selectedCity ? (
+          <div className="location-filter-active max-w-[1400px] mx-auto px-6 mb-4">
+            <div className="flex items-center justify-between bg-gold-accent/10 border border-gold-accent/40 rounded-xs px-4 py-2.5 font-mono text-xs text-gold-accent">
+              <span className="flex items-center gap-2">
+                <span>📍 FILTERED BY MAP LOCATION:</span>
+                <strong className="text-text-primary uppercase font-bold">{selectedCity}</strong>
+              </span>
+              <button
+                onClick={() => setSelectedCity(null)}
+                className="hover:bg-gold-accent/20 text-[10px] uppercase cursor-pointer border border-gold-accent/40 px-3 py-1 rounded-xs transition-colors"
+              >
+                ✕ Clear Location Filter
+              </button>
+            </div>
+          </div>
+        ) : null}
+
+        {/* Featured Briefings & Archive Section (Positioned Below Map) */}
+        {featuredArticle && (
+          <section
+            className="featured-trending-split max-w-[1400px] mx-auto px-6 my-6"
+            onMouseEnter={() => setIsPaused(true)}
+            onMouseLeave={() => setIsPaused(false)}
+          >
+            {/* Left Featured Card (Carousel) */}
+            <div className="featured-card-wrapper flex flex-col flex-1 relative">
+              <div className="carousel-header-controls flex items-center justify-between mb-2 px-1 font-mono text-[10px] uppercase tracking-widest text-text-muted">
+                <span className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-gold-accent animate-pulse"></span>
+                  <span className="text-gold-accent font-bold">OUR TAKE</span>
+                  <span>&middot; FEATURED DISPATCH</span>
+                </span>
+                <div className="flex items-center gap-3">
+                  <span className="text-text-secondary">{String(currentFeaturedIndex + 1).padStart(2, '0')} / {String(totalFeatured).padStart(2, '0')}</span>
+                  <div className="flex gap-1">
+                    <button
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); setFeaturedIndex((prev) => (prev > 0 ? prev - 1 : totalFeatured - 1)); }}
+                      className="px-2.5 py-1 border border-surface-variant hover:border-gold-accent text-text-secondary hover:text-gold-accent rounded-xs text-xs transition-colors bg-surface-alt/90 cursor-pointer"
+                      title="Previous briefing"
+                    >
+                      ‹
+                    </button>
+                    <button
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); setFeaturedIndex((prev) => prev + 1); }}
+                      className="px-2.5 py-1 border border-surface-variant hover:border-gold-accent text-text-secondary hover:text-gold-accent rounded-xs text-xs transition-colors bg-surface-alt/90 cursor-pointer"
+                      title="Next briefing"
+                    >
+                      ›
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <Link href={`/intel/${featuredArticle.slug}`} className="featured-card-new block text-decoration-none h-full">
+                <div className="featured-image-wrapper">
+                  {featuredArticle.image ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img src={featuredArticle.image} alt={featuredArticle.title} className="featured-image-new transition-transform duration-700 hover:scale-105" />
+                  ) : (
+                    <ImagePlaceholder className="featured-image-new" label={featuredArticle.title} minimal />
+                  )}
+                  <div className="featured-overlay-new"></div>
+                </div>
+                <div className="featured-content-new">
+                  <div className="featured-badge-row flex flex-wrap items-center gap-2 mb-3">
+                    <span className="featured-tag-new" style={{ margin: 0 }}>{featuredArticle.category}</span>
+                    <span className={`article-type-badge ${getArticleType(featuredArticle).toLowerCase()}`} style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', padding: '2px 6px', borderRadius: '2px', textTransform: 'uppercase' }}>{getArticleType(featuredArticle)}</span>
+                    <span className="featured-read-time" style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>{Math.max(1, Math.round((featuredArticle.excerpt || "").split(/\s+/).length / 20))} min read</span>
+                    {featuredArticle.city ? (
+                      <span className="font-mono text-[9px] text-text-secondary border border-surface-variant px-2 py-0.5 rounded-xs uppercase">
+                        📍 {featuredArticle.city}
+                      </span>
+                    ) : null}
+                    {featuredArticle.sourceName ? (
+                      <span className="ml-auto font-mono text-[9px] text-gold-accent border border-gold-accent/40 px-2 py-0.5 rounded-xs tracking-wider uppercase bg-gold-accent/10">
+                        🌐 {featuredArticle.sourceName}
+                      </span>
+                    ) : null}
+                  </div>
+                  <h2>{featuredArticle.title}</h2>
+                  <p className="featured-excerpt-new">{featuredArticle.excerpt}</p>
+                  <div className="featured-footer-new">
+                    <span className="featured-date-new">{featuredArticle.date}</span>
+                    <span className="featured-link-new">Read Deep Analysis →</span>
+                  </div>
+                </div>
+              </Link>
+            </div>
+
+            {/* Right Trending / Archive List */}
             <div className="trending-list">
-              <span className="vector-label" style={{ marginBottom: "8px", display: "block" }}>Trending Briefings</span>
+              <div className="flex items-center justify-between mb-2">
+                <span className="vector-label block" style={{ margin: 0 }}>Briefings Archive</span>
+                <span className="font-mono text-[10px] text-text-muted uppercase">Past Dispatches</span>
+              </div>
               {trendingArticles.length > 0 ? (
                 trendingArticles.map((art, idx) => (
-                  <Link href={`/intel/${art.slug}`} key={art.slug} className="trending-dispatch-card">
-                    <span className="trending-meta">0{idx + 1} &middot; {art.category} &middot; {art.date}</span>
-                    <h3 className="trending-title">{art.title}</h3>
+                  <Link href={`/intel/${art.slug}`} key={art.slug} className="trending-dispatch-card group">
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <span className="trending-meta">0{idx + 1} &middot; {art.category} &middot; {art.date}</span>
+                      {art.city ? (
+                        <span className="font-mono text-[8px] text-text-muted border border-surface-variant px-1.5 py-0.2 rounded-xs uppercase">
+                          📍 {art.city.split(',')[0]}
+                        </span>
+                      ) : null}
+                    </div>
+                    <h3 className="trending-title group-hover:text-gold-accent transition-colors">{art.title}</h3>
                     <p className="trending-excerpt">{art.excerpt}</p>
                   </Link>
                 ))
               ) : (
                 <div className="trending-dispatch-card" style={{ justifyContent: "center", alignItems: "center", height: "100%" }}>
-                  <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>No trending dispatches.</span>
+                  <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>No additional dispatches.</span>
                 </div>
               )}
             </div>
@@ -233,7 +353,7 @@ export default function IntelPage() {
         )}
 
         {/* Search & Filter Section */}
-        <section className="controls-section">
+        <section className="controls-section" id="intel-dispatches-grid">
           <div className="search-bar-wrapper">
             <input
               type="text"

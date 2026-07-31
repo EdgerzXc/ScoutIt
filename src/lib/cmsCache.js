@@ -112,6 +112,8 @@ async function geocodeMissingCoords(properties) {
   );
 }
 
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
+
 async function buildBundle() {
   const apiKey = process.env.AIRTABLE_API_KEY;
   const baseId = process.env.AIRTABLE_BASE_ID;
@@ -128,9 +130,54 @@ async function buildBundle() {
     fetchHomepageConfig(apiKey, baseId),
   ]);
 
+  // Fetch published briefings from Supabase OSINT repository
+  let supabaseIntel = [];
+  try {
+    const { data: briefings } = await supabaseAdmin
+      .from("intel_briefings")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (briefings && briefings.length > 0) {
+      supabaseIntel = briefings.map((b) => ({
+        id: b.id,
+        slug: b.slug,
+        title: b.title,
+        category: b.category || "MARKET INTEL",
+        intelType: b.category || "BRIEFING",
+        date: b.published_at
+          ? new Date(b.published_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+          : "Just Now",
+        city: b.city || "BGC, Taguig",
+        region: b.region || "Metro Manila",
+        lat: Number(b.lat) || 14.5547,
+        lng: Number(b.lng) || 121.0244,
+        image: b.cover_image_url || "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=1000&auto=format&fit=crop",
+        excerpt: b.excerpt || "",
+        lead: b.lead || "",
+        ourTake: b.our_take || "",
+        sourceName: b.source_name || "OSINT Public Filing",
+        sourceUrl: b.source_url || "",
+        body: Array.isArray(b.body_json) ? b.body_json : [],
+        bodyJson: Array.isArray(b.body_json) ? JSON.stringify(b.body_json) : b.body_json,
+        source: "supabase_osint",
+      }));
+    }
+  } catch (err) {
+    console.warn("[CMS] Supabase intel_briefings fetch error:", err.message);
+  }
+
+  // Deduplicate intel array (Supabase published briefings take priority over Airtable by slug)
+  const mergedIntel = [...supabaseIntel];
+  (intel || []).forEach((item) => {
+    if (!mergedIntel.some((x) => x.slug === item.slug)) {
+      mergedIntel.push(item);
+    }
+  });
+
   return {
     properties: await geocodeMissingCoords(properties),
-    intel,
+    intel: mergedIntel,
     brokers,
     homepage,
     source: "airtable",
