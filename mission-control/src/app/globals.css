@@ -1,0 +1,55 @@
+@import "tailwindcss";
+
+/* ── ScoutIt Design DNA — Mission Control token system ──────────────────────
+   95% deep black, 5% glowing gold. Single source of truth for color:
+   components use these tokens (bg-surface, text-gold, border-gold-muted…)
+   instead of scattering raw hex. */
+:root {
+  --background: #0d0d0d;
+  --surface: #121212;
+  --surface-deep: #0a0a0a;
+  --foreground: #f0ede8;
+
+  --gold: #e8ae3c; /* primary accent */
+  --gold-bright: #f7c64e; /* interactive / hover / CTA */
+  --gold-muted: #6e531a; /* borders / dividers */
+  --gold-glow: 232, 174, 60; /* rgb tuple for glows */
+
+  --line: rgba(255, 255, 255, 0.06);
+  --text-dim: rgba(255, 255, 255, 0.5);
+  --text-faint: rgba(255, 255, 255, 0.35);
+
+  --ok: #4ade80;
+  --warn: #fb923c;
+  --danger: #f87171;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-deep: var(--surface-deep);
+  --color-foreground: var(--foreground);
+  --color-gold: var(--gold);
+  --color-gold-bright: var(--gold-bright);
+  --color-gold-muted: var(--gold-muted);
+  --color-line: var(--line);
+  --color-ok: var(--ok);
+  --color-warn: var(--warn);
+  --color-danger: var(--danger);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif);
+}
+
+/* Mono uppercase micro-labels — the ScoutIt system voice. */
+.label-mono {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
