@@ -3,10 +3,18 @@ import { insertProperty, updateProperty } from "@/lib/airtable";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { sanitizeError } from "@/lib/sanitizeError";
+import { isGlobalReadOnly } from "@/lib/featureFlags";
 
 export async function POST(request) {
 
   try {
+    if (await isGlobalReadOnly()) {
+      return NextResponse.json(
+        { error: "System is in emergency maintenance read-only mode. Database writes are currently frozen." },
+        { status: 423 }
+      );
+    }
+
     // 1. Extract token from Authorization header to prevent identity spoofing
     const authHeader = request.headers.get("Authorization");
     const token = authHeader?.replace("Bearer ", "");

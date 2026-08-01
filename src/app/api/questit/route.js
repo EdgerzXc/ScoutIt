@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { createClient } from '@supabase/supabase-js';
+import { isAiSearchActive } from '@/lib/featureFlags';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY || "missing_key", // Fallback handles gracefully
@@ -48,6 +49,13 @@ const tools = [
 export async function POST(request) {
 
   try {
+    if (!(await isAiSearchActive())) {
+      return NextResponse.json(
+        { error: "AI Search Engine is temporarily disabled by Mission Control." },
+        { status: 503 }
+      );
+    }
+
     const authHeader = request.headers.get("Authorization");
     const token = authHeader?.replace("Bearer ", "");
     if (!token) {

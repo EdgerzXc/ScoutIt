@@ -46,3 +46,13 @@ export async function isGlobalReadOnly() {
 export async function isPreLaunchFreeMode() {
   return getFlag("pre_launch_free_mode", true);
 }
+
+/** AI Search Engine (/api/questit) */
+export async function isAiSearchActive() {
+  return getFlag("ai_search", true);
+}
+
+/** Deep Intelligence Studio (cap-rate & noise metrics) */
+export async function isDeepIntelActive() {
+  return getFlag("deep_intel", true);
+}

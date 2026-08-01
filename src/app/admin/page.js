@@ -4,11 +4,13 @@ import { useState, useEffect } from "react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { supabase } from "@/lib/supabaseClient";
-import { Building2, Check, AlertCircle, ShieldCheck, ShieldOff } from "lucide-react";
+import { Building2, Check, AlertCircle, ShieldCheck, ShieldOff, Sliders, FileText, ShieldAlert } from "lucide-react";
 import IntelStudioPanel from "@/components/intel/IntelStudioPanel";
+import FeatureConsolePanel from "@/components/admin/FeatureConsolePanel";
 import { sanitizeError } from "@/lib/sanitizeError";
 
 export default function AdminPage() {
+  const [activeTab, setActiveTab] = useState("flags");
   const [pendingProperties, setPendingProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState(null);
@@ -78,7 +80,6 @@ export default function AdminPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-
   const handleApprove = async (submissionId) => {
     setProcessingId(submissionId);
     setMessage(null);
@@ -120,8 +121,8 @@ export default function AdminPage() {
       <main className="admin-main">
         <header className="admin-header">
           <span className="vector-label">LAYER 00 // RESTRICTED ACCESS</span>
-          <h1 className="page-title">Intelligence Control</h1>
-          <p className="page-subtitle">Review and sync pending property submissions to the public directory.</p>
+          <h1 className="page-title">Mission Control</h1>
+          <p className="page-subtitle">Master feature switches, verification queues, and system parameters.</p>
         </header>
 
         {message && (
@@ -131,122 +132,179 @@ export default function AdminPage() {
           </div>
         )}
 
+        {/* Tab Navigation */}
+        <div className="flex border-b border-[#222] mb-8 overflow-x-auto gap-2">
+          <button
+            onClick={() => setActiveTab("flags")}
+            className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 border-b-2 rounded-t-lg ${
+              activeTab === "flags"
+                ? "border-[#E8AE3C] text-[#E8AE3C] bg-[#E8AE3C]/10 font-bold"
+                : "border-transparent text-gray-400 hover:text-white hover:bg-[#1a1a1a]"
+            }`}
+          >
+            <Sliders size={15} />
+            Kill-Switch Console
+          </button>
+
+          <button
+            onClick={() => setActiveTab("approvals")}
+            className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 border-b-2 rounded-t-lg ${
+              activeTab === "approvals"
+                ? "border-[#E8AE3C] text-[#E8AE3C] bg-[#E8AE3C]/10 font-bold"
+                : "border-transparent text-gray-400 hover:text-white hover:bg-[#1a1a1a]"
+            }`}
+          >
+            <Building2 size={15} />
+            Pending Approvals ({pendingProperties.length})
+          </button>
+
+          <button
+            onClick={() => setActiveTab("prc")}
+            className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 border-b-2 rounded-t-lg ${
+              activeTab === "prc"
+                ? "border-[#E8AE3C] text-[#E8AE3C] bg-[#E8AE3C]/10 font-bold"
+                : "border-transparent text-gray-400 hover:text-white hover:bg-[#1a1a1a]"
+            }`}
+          >
+            <ShieldCheck size={15} />
+            PRC Verification ({prcQueue.filter((p) => !p.prc_verified).length})
+          </button>
+
+          <button
+            onClick={() => setActiveTab("intel")}
+            className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 border-b-2 rounded-t-lg ${
+              activeTab === "intel"
+                ? "border-[#E8AE3C] text-[#E8AE3C] bg-[#E8AE3C]/10 font-bold"
+                : "border-transparent text-gray-400 hover:text-white hover:bg-[#1a1a1a]"
+            }`}
+          >
+            <FileText size={15} />
+            Intel Studio
+          </button>
+        </div>
+
         <div className="admin-content">
-          <div className="admin-panel">
-            <div className="panel-header">
-              <h2>Pending Approvals</h2>
-              <span className="count-badge">{pendingProperties.length}</span>
+          {activeTab === "flags" && <FeatureConsolePanel />}
+
+          {activeTab === "approvals" && (
+            <div className="admin-panel">
+              <div className="panel-header">
+                <h2>Pending Approvals</h2>
+                <span className="count-badge">{pendingProperties.length}</span>
+              </div>
+
+              {loading ? (
+                <div className="loading-state">Scanning secure submissions...</div>
+              ) : pendingProperties.length === 0 ? (
+                <div className="empty-state">
+                  <p>No pending properties. The queue is clear.</p>
+                </div>
+              ) : (
+                <div className="submission-list">
+                  {pendingProperties.map((prop) => (
+                    <div key={prop.id} className="submission-card">
+                      <div className="submission-info">
+                        <div className="info-primary">
+                          <Building2 size={16} color="#E8AE3C" />
+                          <h3>{prop.title}</h3>
+                        </div>
+                        <div className="info-secondary">
+                          <span className="info-tag">{prop.type}</span>
+                          <span className="info-tag">{prop.location}</span>
+                          <span className="info-tag coords">
+                            {prop.coordinates ? "Geo-located" : "No Coords"}
+                          </span>
+                        </div>
+                        <div className="info-meta">
+                          Submitted by: {prop.owner_id || "Unknown"}
+                        </div>
+                      </div>
+                      
+                      <div className="submission-actions">
+                        <button 
+                          className="btn-approve"
+                          disabled={processingId === prop.id}
+                          onClick={() => handleApprove(prop.id)}
+                        >
+                          {processingId === prop.id ? "SYNCING..." : "APPROVE TO AIRTABLE"}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
+          )}
 
-            {loading ? (
-              <div className="loading-state">Scanning secure submissions...</div>
-            ) : pendingProperties.length === 0 ? (
-              <div className="empty-state">
-                <p>No pending properties. The queue is clear.</p>
+          {activeTab === "prc" && (
+            <div className="admin-panel">
+              <div className="panel-header">
+                <h2>PRC Verification</h2>
+                <span className="count-badge">{prcQueue.filter((p) => !p.prc_verified).length}</span>
               </div>
-            ) : (
-              <div className="submission-list">
-                {pendingProperties.map((prop) => (
-                  <div key={prop.id} className="submission-card">
-                    <div className="submission-info">
-                      <div className="info-primary">
-                        <Building2 size={16} color="#E8AE3C" />
-                        <h3>{prop.title}</h3>
+
+              {prcLoading ? (
+                <div className="loading-state">Loading credential submissions...</div>
+              ) : prcQueue.length === 0 ? (
+                <div className="empty-state">
+                  <p>No PRC credentials submitted yet. Brokers add theirs from their dashboard ID card.</p>
+                </div>
+              ) : (
+                <div className="submission-list">
+                  {prcQueue.map((p) => (
+                    <div key={p.id} className="submission-card">
+                      <div className="submission-info">
+                        <div className="info-primary">
+                          {p.prc_verified
+                            ? <ShieldCheck size={16} color="#4caf7d" />
+                            : <ShieldOff size={16} color="#E8AE3C" />}
+                          <h3>{p.display_name || p.id}</h3>
+                        </div>
+                        <div className="info-secondary">
+                          <span className="info-tag coords">PRC {p.prc_license}</span>
+                          {p.dhsud_number && <span className="info-tag">DHSUD {p.dhsud_number}</span>}
+                          {p.prc_expiry && <span className="info-tag">Expires {p.prc_expiry}</span>}
+                          {p.firm && <span className="info-tag">{p.firm}</span>}
+                        </div>
+                        <div className="info-meta">
+                          {p.prc_verified
+                            ? `Verified ${p.prc_verified_at ? new Date(p.prc_verified_at).toLocaleDateString() : ""} — badge live on public profile`
+                            : "Unverified — check against the PRC public registry before approving"}
+                        </div>
                       </div>
-                      <div className="info-secondary">
-                        <span className="info-tag">{prop.type}</span>
-                        <span className="info-tag">{prop.location}</span>
-                        <span className="info-tag coords">
-                          {prop.coordinates ? "Geo-located" : "No Coords"}
-                        </span>
-                      </div>
-                      <div className="info-meta">
-                        Submitted by: {prop.owner_id || "Unknown"}
+
+                      <div className="submission-actions">
+                        <button
+                          className="btn-approve"
+                          disabled={prcProcessingId === p.id}
+                          onClick={() => handlePrcToggle(p.id, !p.prc_verified)}
+                          style={p.prc_verified ? { background: "transparent", border: "1px solid rgba(255,255,255,0.2)", color: "var(--text-secondary)" } : undefined}
+                        >
+                          {prcProcessingId === p.id
+                            ? "SAVING..."
+                            : p.prc_verified ? "REVOKE BADGE" : "MARK PRC VERIFIED"}
+                        </button>
                       </div>
                     </div>
-                    
-                    <div className="submission-actions">
-                      <button 
-                        className="btn-approve"
-                        disabled={processingId === prop.id}
-                        onClick={() => handleApprove(prop.id)}
-                      >
-                        {processingId === prop.id ? "SYNCING..." : "APPROVE TO AIRTABLE"}
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* RA 9646 — PRC credential verification queue */}
-          <div className="admin-panel" style={{ marginTop: 32 }}>
-            <div className="panel-header">
-              <h2>PRC Verification</h2>
-              <span className="count-badge">{prcQueue.filter((p) => !p.prc_verified).length}</span>
+                  ))}
+                </div>
+              )}
             </div>
+          )}
 
-            {prcLoading ? (
-              <div className="loading-state">Loading credential submissions...</div>
-            ) : prcQueue.length === 0 ? (
-              <div className="empty-state">
-                <p>No PRC credentials submitted yet. Brokers add theirs from their dashboard ID card.</p>
+          {activeTab === "intel" && (
+            <div className="admin-panel">
+              <div className="panel-header">
+                <h2>Intel Studio</h2>
               </div>
-            ) : (
-              <div className="submission-list">
-                {prcQueue.map((p) => (
-                  <div key={p.id} className="submission-card">
-                    <div className="submission-info">
-                      <div className="info-primary">
-                        {p.prc_verified
-                          ? <ShieldCheck size={16} color="#4caf7d" />
-                          : <ShieldOff size={16} color="#E8AE3C" />}
-                        <h3>{p.display_name || p.id}</h3>
-                      </div>
-                      <div className="info-secondary">
-                        <span className="info-tag coords">PRC {p.prc_license}</span>
-                        {p.dhsud_number && <span className="info-tag">DHSUD {p.dhsud_number}</span>}
-                        {p.prc_expiry && <span className="info-tag">Expires {p.prc_expiry}</span>}
-                        {p.firm && <span className="info-tag">{p.firm}</span>}
-                      </div>
-                      <div className="info-meta">
-                        {p.prc_verified
-                          ? `Verified ${p.prc_verified_at ? new Date(p.prc_verified_at).toLocaleDateString() : ""} — badge live on public profile`
-                          : "Unverified — check against the PRC public registry before approving"}
-                      </div>
-                    </div>
-
-                    <div className="submission-actions">
-                      <button
-                        className="btn-approve"
-                        disabled={prcProcessingId === p.id}
-                        onClick={() => handlePrcToggle(p.id, !p.prc_verified)}
-                        style={p.prc_verified ? { background: "transparent", border: "1px solid rgba(255,255,255,0.2)", color: "var(--text-secondary)" } : undefined}
-                      >
-                        {prcProcessingId === p.id
-                          ? "SAVING..."
-                          : p.prc_verified ? "REVOKE BADGE" : "MARK PRC VERIFIED"}
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Intel Studio — upload any document, publish a readable article */}
-          <div className="admin-panel" style={{ marginTop: 32 }}>
-            <div className="panel-header">
-              <h2>Intel Studio</h2>
+              <p className="panel-hint">
+                Turn any document into an Intel article. Upload a PDF market report, a CSV data
+                sheet, or plain text — it gets structured into the universal article format,
+                previewed here, and saved to the INTEL_CMS.
+              </p>
+              <IntelStudioPanel />
             </div>
-            <p className="panel-hint">
-              Turn any document into an Intel article. Upload a PDF market report, a CSV data
-              sheet, or plain text — it gets structured into the universal article format,
-              previewed here, and saved to the INTEL_CMS.
-            </p>
-            <IntelStudioPanel />
-          </div>
+          )}
         </div>
       </main>
       <Footer />
