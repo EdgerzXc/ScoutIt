@@ -8,12 +8,14 @@ export default function SecuritySpatialMap({ velocityData = [], flaggedData = []
   const mapInstanceRef = useRef(null);
   const [selectedPoint, setSelectedPoint] = useState(null);
   const [activeFilter, setActiveFilter] = useState("all");
-  const [timeRange, setTimeRange] = useState("30d"); // 24h | 7d | 30d | all
+  const [timeRange, setTimeRange] = useState("5m"); // 5m | 1h | 24h | 7d | 30d | all
   const [leafletLoaded, setLeafletLoaded] = useState(false);
 
   // Time range calculation cutoff date
   const cutoffDate = (() => {
     const now = Date.now();
+    if (timeRange === "5m") return now - 5 * 60 * 1000; // Real-time Live (Last 5 minutes)
+    if (timeRange === "1h") return now - 60 * 60 * 1000; // Last 1 hour
     if (timeRange === "24h") return now - 24 * 60 * 60 * 1000;
     if (timeRange === "7d") return now - 7 * 24 * 60 * 60 * 1000;
     if (timeRange === "30d") return now - 30 * 24 * 60 * 60 * 1000;
@@ -222,6 +224,8 @@ export default function SecuritySpatialMap({ velocityData = [], flaggedData = []
           <div className="flex items-center gap-1.5 bg-black/60 border border-white/10 rounded-lg p-1">
             <Clock className="w-3.5 h-3.5 text-[#E8AE3C] ml-1" />
             {[
+              { id: "5m", label: "🟢 REALTIME LIVE (5m)" },
+              { id: "1h", label: "1 Hour" },
               { id: "24h", label: "24 Hours" },
               { id: "7d", label: "7 Days" },
               { id: "30d", label: "30 Days" },

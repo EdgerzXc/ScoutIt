@@ -31,7 +31,7 @@ export default async function SecurityCenterPage() {
     safe(
       admin
         .from("security_access_logs")
-        .select("id, masked_ip, route_accessed, request_count, is_flagged, flag_reason, last_request_at")
+        .select("id, masked_ip, route_accessed, request_count, is_flagged, flag_reason, last_request_at, city, country, latitude, longitude")
         .eq("is_flagged", true)
         .order("last_request_at", { ascending: false })
         .limit(50)
@@ -39,14 +39,14 @@ export default async function SecurityCenterPage() {
     safe(
       admin
         .from("security_access_logs")
-        .select("id, masked_ip, route_accessed, request_count, is_flagged, last_request_at")
+        .select("id, masked_ip, route_accessed, request_count, is_flagged, last_request_at, city, country, latitude, longitude")
         .order("request_count", { ascending: false })
         .limit(50)
     ),
     safe(
       admin
         .from("security_access_logs")
-        .select("id, masked_ip, route_accessed, request_count, is_flagged, last_request_at")
+        .select("id, masked_ip, route_accessed, request_count, is_flagged, last_request_at, city, country, latitude, longitude")
         .gte("last_request_at", since30d)
         .order("last_request_at", { ascending: false })
         .limit(1000)
