@@ -677,13 +677,9 @@ export default function ShowcaseStage({ mode = "full" }) {
             padding: 12px 16px;
             top: env(safe-area-inset-top, 0px);
           }
+          /* Hide duplicate topbar category text on mobile to prevent collision under ScoutIT logo */
           .sc-topbar-cat {
-            font-size: 9.5px;
-            letter-spacing: 0.14em;
-            max-width: 140px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            display: none !important;
           }
           
           /* Edge filter/promo buttons: horizontal mobile pills instead of vertical middle tabs */
@@ -710,11 +706,11 @@ export default function ShowcaseStage({ mode = "full" }) {
             padding-top: 70px;
           }
 
-          /* Main Overlay & Compact Card Sizing */
+          /* Main Overlay & Compact Card Vertical Centering */
           .sc-overlay {
-            padding-top: 50px !important;
-            padding-bottom: 145px !important;
-            gap: 10px !important;
+            padding-top: 76px !important;
+            padding-bottom: 165px !important;
+            gap: 8px !important;
             justify-content: center !important;
           }
 
@@ -733,7 +729,7 @@ export default function ShowcaseStage({ mode = "full" }) {
           }
 
           .sc-photo {
-            height: 130px !important;
+            height: 125px !important;
             background-color: #121214 !important;
           }
 
@@ -745,77 +741,79 @@ export default function ShowcaseStage({ mode = "full" }) {
           }
 
           .sc-body {
-            padding: 14px 16px !important;
+            padding: 12px 14px !important;
           }
 
           .sc-cat {
-            font-size: 9.5px !important;
+            font-size: 9px !important;
             letter-spacing: 0.16em !important;
             margin-bottom: 4px !important;
           }
 
           .sc-name {
-            font-size: 20px !important;
-            line-height: 1.25 !important;
+            font-size: 19px !important;
+            line-height: 1.2 !important;
             margin-bottom: 2px !important;
           }
 
           .sc-loc {
-            font-size: 9.5px !important;
-            margin-bottom: 10px !important;
+            font-size: 9px !important;
+            margin-bottom: 8px !important;
           }
 
           .sc-divider {
-            margin-bottom: 10px !important;
+            margin-bottom: 8px !important;
           }
 
           .sc-stats {
-            gap: 20px !important;
-            margin-bottom: 12px !important;
+            gap: 18px !important;
+            margin-bottom: 10px !important;
           }
 
           .sc-stat-num {
-            font-size: 22px !important;
+            font-size: 20px !important;
           }
 
           .sc-stat-lbl {
-            font-size: 9px !important;
+            font-size: 8.5px !important;
             letter-spacing: 0.14em !important;
           }
 
           :global(.sc-cta) {
-            padding-top: 10px !important;
-            font-size: 10px !important;
+            padding-top: 8px !important;
+            font-size: 9.5px !important;
           }
 
           .sc-platform {
-            width: 260px !important;
-            height: 8px !important;
-            margin-top: 4px !important;
+            width: 250px !important;
+            height: 6px !important;
+            margin-top: 2px !important;
           }
 
           /* Bottom cluster & mobile navigation bar elevation */
           .sc-bottom {
-            padding: 12px 14px calc(72px + env(safe-area-inset-bottom, 0px)) !important;
-            gap: 10px !important;
-            background: linear-gradient(to top, rgba(0,0,0,0.95) 70%, transparent) !important;
+            bottom: 60px !important;
+            flex-direction: column-reverse !important;
+            padding: 10px 12px calc(16px + env(safe-area-inset-bottom, 0px)) !important;
+            gap: 8px !important;
+            background: linear-gradient(to top, rgba(0,0,0,0.98) 75%, transparent) !important;
           }
 
           .sc-tier-nav {
             max-width: 100%;
             overflow-x: auto;
-            gap: 8px;
-            padding: 0 8px 4px;
+            gap: 6px;
+            padding: 0 4px 2px;
             scrollbar-width: none;
             -webkit-overflow-scrolling: touch;
           }
           .sc-tier-nav::-webkit-scrollbar { display: none; }
           .sc-pill { 
             flex: 0 0 auto; 
-            padding: 7px 12px; 
-            min-height: 38px; 
-            font-size: 10px;
-            letter-spacing: 0.14em;
+            padding: 6px 10px; 
+            min-height: 36px; 
+            font-size: 9.5px;
+            letter-spacing: 0.12em;
             border-radius: 4px;
           }
 
