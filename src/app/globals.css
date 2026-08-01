@@ -458,6 +458,8 @@ html.lite-mode * {
   animation-duration: 0.01ms !important;
   animation-iteration-count: 1 !important;
   transition-duration: 0.01ms !important;
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 
 html.lite-mode .grain,
@@ -1306,11 +1308,10 @@ body.light-mode .toolbox-float {
 html.lite-mode *,
 html.lite-mode *::before,
 html.lite-mode *::after {
-  animation-duration: 0s !important;
-  animation-delay: 0s !important;
-  animation-iteration-count: 1 !important;
-  transition-duration: 0s !important;
-  transition-delay: 0s !important;
+  animation: none !important;
+  transition: none !important;
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 
 html.lite-mode {

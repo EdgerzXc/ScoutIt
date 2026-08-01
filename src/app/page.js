@@ -113,6 +113,7 @@ export default function Home() {
 
   const [discoveryFeed, setDiscoveryFeed] = useState([]);
   const [categoryPreviews, setCategoryPreviews] = useState({});
+  const [cmsError, setCmsError] = useState(false);
   const [locations, setLocations] = useState([
     "BGC Core", "Makati Central", "Roxas Triangle", "Quezon City", 
     "Quezon Province", "Alabang", "Siargao"
@@ -122,8 +123,12 @@ export default function Home() {
   useEffect(() => {
     async function loadCMSData() {
       try {
+        setCmsError(false);
         const res = await fetch("/api/cms");
-        if (!res.ok) return;
+        if (!res.ok) {
+          setCmsError(true);
+          return;
+        }
         const data = await res.json();
         
         // 1. Group/format Properties for categoryPreviews
@@ -297,12 +302,8 @@ export default function Home() {
         setDiscoveryFeed(updatedFeed);
         
       } catch (err) {
-        // The old fallback here rebuilt the feed from a mock base feed that the
-        // 2026-07-05 cleanup deleted — the leftover code dereferenced an empty
-        // array and crashed inside this very catch. The CMS proxy now has its
-        // own stale-on-error cache, so if we still land here, keeping the
-        // current feed state is the correct quiet failure.
         console.error("Failed to load CMS data on homepage:", err);
+        setCmsError(true);
       }
     }
     
