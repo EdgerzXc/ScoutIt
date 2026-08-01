@@ -23,9 +23,25 @@ export async function POST(request) {
       return NextResponse.json({ success: false, error: "Database client unavailable" }, { status: 500 });
     }
 
+    async function safeInsertLog(payload) {
+      const { error } = await supabaseAdmin.from("security_access_logs").insert(payload);
+      if (error && (error.message?.includes("city") || error.message?.includes("column"))) {
+        const { city: _c, country: _cn, latitude: _lat, longitude: _lng, ...base } = payload;
+        await supabaseAdmin.from("security_access_logs").insert(base);
+      }
+    }
+
+    async function safeUpdateLog(id, updatePayload) {
+      const { error } = await supabaseAdmin.from("security_access_logs").update(updatePayload).eq("id", id);
+      if (error && (error.message?.includes("city") || error.message?.includes("column"))) {
+        const { city: _c, country: _cn, latitude: _lat, longitude: _lng, ...base } = updatePayload;
+        await supabaseAdmin.from("security_access_logs").update(base).eq("id", id);
+      }
+    }
+
     // Handle Friction Point Telemetry
     if (eventType === "friction") {
-      await supabaseAdmin.from("security_access_logs").insert({
+      await safeInsertLog({
         masked_ip: deviceId,
         route_accessed: `FRICTION: ${body.frictionType || 'dropoff'} on ${path}`,
         request_count: 1,
@@ -43,7 +59,7 @@ export async function POST(request) {
     // Handle Search Intent Telemetry
     if (eventType === "search") {
       const searchTag = `SEARCH: ${body.searchQuery || body.searchCategory || 'all'} in ${body.searchLocation || city} (${body.matchCount} results)`;
-      await supabaseAdmin.from("security_access_logs").insert({
+      await safeInsertLog({
         masked_ip: deviceId,
         route_accessed: searchTag,
         request_count: 1,
@@ -67,19 +83,16 @@ export async function POST(request) {
       .maybeSingle();
 
     if (existing) {
-      await supabaseAdmin
-        .from("security_access_logs")
-        .update({
-          request_count: (existing.request_count || 1) + 1,
-          city,
-          country,
-          latitude,
-          longitude,
-          last_request_at: new Date().toISOString()
-        })
-        .eq("id", existing.id);
+      await safeUpdateLog(existing.id, {
+        request_count: (existing.request_count || 1) + 1,
+        city,
+        country,
+        latitude,
+        longitude,
+        last_request_at: new Date().toISOString()
+      });
     } else {
-      await supabaseAdmin.from("security_access_logs").insert({
+      await safeInsertLog({
         masked_ip: deviceId,
         route_accessed: path,
         request_count: 1,

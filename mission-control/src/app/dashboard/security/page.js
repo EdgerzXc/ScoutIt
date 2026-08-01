@@ -20,6 +20,14 @@ async function safe(promise) {
   }
 }
 
+async function fetchLogsResilient(admin, queryGeoFn, queryBaseFn) {
+  const res = await safe(queryGeoFn(admin));
+  if (res.error && (res.error.includes("city") || res.error.includes("column"))) {
+    return safe(queryBaseFn(admin));
+  }
+  return res;
+}
+
 export default async function SecurityCenterPage() {
   const staff = await getCurrentStaff();
   if (!staff || staff.tier < TIERS.OPS_MANAGER) redirect("/dashboard");
@@ -28,28 +36,20 @@ export default async function SecurityCenterPage() {
   const since30d = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
 
   const [flagged, velocity, history30d, blocked] = await Promise.all([
-    safe(
-      admin
-        .from("security_access_logs")
-        .select("id, masked_ip, route_accessed, request_count, is_flagged, flag_reason, last_request_at, city, country, latitude, longitude")
-        .eq("is_flagged", true)
-        .order("last_request_at", { ascending: false })
-        .limit(50)
+    fetchLogsResilient(
+      admin,
+      (a) => a.from("security_access_logs").select("id, masked_ip, route_accessed, request_count, is_flagged, flag_reason, last_request_at, city, country, latitude, longitude").eq("is_flagged", true).order("last_request_at", { ascending: false }).limit(50),
+      (a) => a.from("security_access_logs").select("id, masked_ip, route_accessed, request_count, is_flagged, flag_reason, last_request_at").eq("is_flagged", true).order("last_request_at", { ascending: false }).limit(50)
     ),
-    safe(
-      admin
-        .from("security_access_logs")
-        .select("id, masked_ip, route_accessed, request_count, is_flagged, last_request_at, city, country, latitude, longitude")
-        .order("request_count", { ascending: false })
-        .limit(50)
+    fetchLogsResilient(
+      admin,
+      (a) => a.from("security_access_logs").select("id, masked_ip, route_accessed, request_count, is_flagged, last_request_at, city, country, latitude, longitude").order("request_count", { ascending: false }).limit(50),
+      (a) => a.from("security_access_logs").select("id, masked_ip, route_accessed, request_count, is_flagged, last_request_at").order("request_count", { ascending: false }).limit(50)
     ),
-    safe(
-      admin
-        .from("security_access_logs")
-        .select("id, masked_ip, route_accessed, request_count, is_flagged, last_request_at, city, country, latitude, longitude")
-        .gte("last_request_at", since30d)
-        .order("last_request_at", { ascending: false })
-        .limit(1000)
+    fetchLogsResilient(
+      admin,
+      (a) => a.from("security_access_logs").select("id, masked_ip, route_accessed, request_count, is_flagged, last_request_at, city, country, latitude, longitude").gte("last_request_at", since30d).order("last_request_at", { ascending: false }).limit(1000),
+      (a) => a.from("security_access_logs").select("id, masked_ip, route_accessed, request_count, is_flagged, last_request_at").gte("last_request_at", since30d).order("last_request_at", { ascending: false }).limit(1000)
     ),
     safe(
       admin
