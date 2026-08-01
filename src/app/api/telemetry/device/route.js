@@ -10,7 +10,8 @@ export async function POST(request) {
     const eventType = body.eventType || "pageview";
 
     // Extract geo metadata from request headers
-    const city = request.headers.get("x-vercel-ip-city") || request.headers.get("cf-ipcity") || "San Jose del Monte, Bulacan";
+    const rawCity = request.headers.get("x-vercel-ip-city") || request.headers.get("cf-ipcity");
+    const city = rawCity ? decodeURIComponent(rawCity) : "San Jose del Monte, Bulacan";
     const country = request.headers.get("x-vercel-ip-country") || request.headers.get("cf-ipcountry") || "PH";
     const latStr = request.headers.get("x-vercel-ip-latitude");
     const lngStr = request.headers.get("x-vercel-ip-longitude");
@@ -30,6 +31,10 @@ export async function POST(request) {
         request_count: 1,
         is_flagged: true,
         flag_reason: `User Friction: ${body.frictionType || 'abandoned'}`,
+        city,
+        country,
+        latitude,
+        longitude,
         last_request_at: new Date().toISOString()
       });
       return NextResponse.json({ success: true, eventType });
@@ -44,6 +49,10 @@ export async function POST(request) {
         request_count: 1,
         is_flagged: body.isZeroResult || false,
         flag_reason: body.isZeroResult ? "Zero Results Friction" : null,
+        city,
+        country,
+        latitude,
+        longitude,
         last_request_at: new Date().toISOString()
       });
       return NextResponse.json({ success: true, eventType });
@@ -62,6 +71,10 @@ export async function POST(request) {
         .from("security_access_logs")
         .update({
           request_count: (existing.request_count || 1) + 1,
+          city,
+          country,
+          latitude,
+          longitude,
           last_request_at: new Date().toISOString()
         })
         .eq("id", existing.id);
@@ -71,6 +84,10 @@ export async function POST(request) {
         route_accessed: path,
         request_count: 1,
         is_flagged: false,
+        city,
+        country,
+        latitude,
+        longitude,
         last_request_at: new Date().toISOString()
       });
     }
