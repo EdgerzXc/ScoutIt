@@ -454,10 +454,30 @@ a:hover {
   }
 }
 
-html.lite-mode * {
+html.lite-mode *,
+html.lite-mode *::before,
+html.lite-mode *::after {
   animation-duration: 0.01ms !important;
   animation-iteration-count: 1 !important;
   transition-duration: 0.01ms !important;
+}
+
+/* Force opacity: 1 ONLY on content elements that start at opacity 0 due to entrance keyframes */
+html.lite-mode .hero-tagline,
+html.lite-mode .hero-subheadline,
+html.lite-mode .hero-cta-btn,
+html.lite-mode .hook-subtitle,
+html.lite-mode .scoutit-wordmark,
+html.lite-mode .letter,
+html.lite-mode .snap-section,
+html.lite-mode .discover-content,
+html.lite-mode .property-split,
+html.lite-mode .section-board,
+html.lite-mode .section-property,
+html.lite-mode .section-discover,
+html.lite-mode .section-services,
+html.lite-mode .section-wishlist,
+html.lite-mode .section-about {
   opacity: 1 !important;
   visibility: visible !important;
 }
@@ -1310,8 +1330,6 @@ html.lite-mode *::before,
 html.lite-mode *::after {
   animation: none !important;
   transition: none !important;
-  opacity: 1 !important;
-  visibility: visible !important;
 }
 
 html.lite-mode {
