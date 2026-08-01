@@ -21,3 +21,14 @@ $$;
 grant execute on function search_properties_in_radius to public;
 grant execute on function search_properties_in_radius to anon;
 grant execute on function search_properties_in_radius to authenticated;
+
+-- 3. Create a function to safely auto-increment the broker profile_views_this_month
+create or replace function increment_broker_profile_views(broker_id text)
+returns void
+language sql
+security definer -- to bypass RLS, ensuring edge function can increment securely
+as $$
+  update public.broker_profiles
+  set profile_views_this_month = profile_views_this_month + 1
+  where user_id = broker_id;
+$$;
