@@ -673,21 +673,171 @@ export default function ShowcaseStage({ mode = "full" }) {
         :global(.sc-seeall:hover) { background: rgba(232, 174, 60,0.12); }
 
         @media (max-width: 768px) {
-          .sc-filter-panel, .sc-promo-panel { width: 86%; }
-          .sc-card { width: 290px; }
-          .sc-rest-row { justify-content: flex-start; }
-          /* Tier pills were wider than the phone screen and got clipped —
-             let them scroll sideways within their own row instead. */
+          .sc-topbar {
+            padding: 12px 16px;
+            top: env(safe-area-inset-top, 0px);
+          }
+          .sc-topbar-cat {
+            font-size: 9.5px;
+            letter-spacing: 0.14em;
+            max-width: 140px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+          
+          /* Edge filter/promo buttons: horizontal mobile pills instead of vertical middle tabs */
+          .sc-edge {
+            top: 64px !important;
+            transform: none !important;
+            writing-mode: horizontal-tb !important;
+            padding: 6px 12px !important;
+            font-size: 9.5px !important;
+            letter-spacing: 0.12em !important;
+            border-radius: 20px !important;
+            background: rgba(12, 12, 14, 0.85) !important;
+            border-color: rgba(232, 174, 60, 0.4) !important;
+          }
+          .sc-edge-left {
+            left: 12px !important;
+          }
+          .sc-edge-right {
+            right: 12px !important;
+          }
+
+          .sc-filter-panel, .sc-promo-panel { 
+            width: 88%; 
+            padding-top: 70px;
+          }
+
+          /* Main Overlay & Compact Card Sizing */
+          .sc-overlay {
+            padding-top: 50px !important;
+            padding-bottom: 145px !important;
+            gap: 10px !important;
+            justify-content: center !important;
+          }
+
+          .sc-rank-badge {
+            font-size: 10px !important;
+            letter-spacing: 0.18em !important;
+            padding: 5px 14px !important;
+            border-radius: 4px !important;
+          }
+
+          .sc-card { 
+            width: calc(100vw - 36px) !important; 
+            max-width: 310px !important; 
+            border-radius: 8px !important;
+            box-shadow: 0 12px 32px rgba(0,0,0,0.6) !important;
+          }
+
+          .sc-photo {
+            height: 130px !important;
+            background-color: #121214 !important;
+          }
+
+          .sc-photo-txt {
+            font-size: 9px !important;
+            letter-spacing: 1.5px !important;
+            color: var(--accent, #E8AE3C) !important;
+            opacity: 0.6 !important;
+          }
+
+          .sc-body {
+            padding: 14px 16px !important;
+          }
+
+          .sc-cat {
+            font-size: 9.5px !important;
+            letter-spacing: 0.16em !important;
+            margin-bottom: 4px !important;
+          }
+
+          .sc-name {
+            font-size: 20px !important;
+            line-height: 1.25 !important;
+            margin-bottom: 2px !important;
+          }
+
+          .sc-loc {
+            font-size: 9.5px !important;
+            margin-bottom: 10px !important;
+          }
+
+          .sc-divider {
+            margin-bottom: 10px !important;
+          }
+
+          .sc-stats {
+            gap: 20px !important;
+            margin-bottom: 12px !important;
+          }
+
+          .sc-stat-num {
+            font-size: 22px !important;
+          }
+
+          .sc-stat-lbl {
+            font-size: 9px !important;
+            letter-spacing: 0.14em !important;
+          }
+
+          :global(.sc-cta) {
+            padding-top: 10px !important;
+            font-size: 10px !important;
+          }
+
+          .sc-platform {
+            width: 260px !important;
+            height: 8px !important;
+            margin-top: 4px !important;
+          }
+
+          /* Bottom cluster & mobile navigation bar elevation */
+          .sc-bottom {
+            padding: 12px 14px calc(72px + env(safe-area-inset-bottom, 0px)) !important;
+            gap: 10px !important;
+            background: linear-gradient(to top, rgba(0,0,0,0.95) 70%, transparent) !important;
+          }
+
           .sc-tier-nav {
             max-width: 100%;
             overflow-x: auto;
             gap: 8px;
-            padding: 0 12px 4px;
+            padding: 0 8px 4px;
             scrollbar-width: none;
             -webkit-overflow-scrolling: touch;
           }
           .sc-tier-nav::-webkit-scrollbar { display: none; }
-          .sc-pill { flex: 0 0 auto; padding: 8px 12px; min-height: 40px; }
+          .sc-pill { 
+            flex: 0 0 auto; 
+            padding: 7px 12px; 
+            min-height: 38px; 
+            font-size: 10px;
+            letter-spacing: 0.14em;
+            border-radius: 4px;
+          }
+
+          .sc-rest-row { justify-content: flex-start; }
+          
+          .sc-controls {
+            gap: 10px;
+          }
+          
+          .sc-arrow {
+            padding: 7px 14px;
+            font-size: 10px;
+            min-height: 38px;
+            border-radius: 4px;
+          }
+          
+          .sc-list-toggle {
+            padding: 7px 14px;
+            font-size: 9.5px;
+            min-height: 38px;
+            border-radius: 4px;
+          }
         }
       `}</style>
     </div>
