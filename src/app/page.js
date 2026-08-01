@@ -229,11 +229,12 @@ export default function Home() {
         
         const airtableIntel = data.intel || [];
         airtableIntel.forEach((item) => {
-          let category = item.category || null;
-          if (category.toLowerCase() === "hospitality") category = "Hospitality";
-          if (category.toLowerCase() === "str") category = "STR";
-          if (category.toLowerCase() === "culinary" || category.toLowerCase() === "restaurants") category = "Restaurants";
-          if (category.toLowerCase() === "venues" || category.toLowerCase() === "events") category = "Venues";
+          let category = String(item.category || "").trim();
+          const catLower = category.toLowerCase();
+          if (catLower === "hospitality") category = "Hospitality";
+          if (catLower === "str") category = "STR";
+          if (catLower === "culinary" || catLower === "restaurants") category = "Restaurants";
+          if (catLower === "venues" || catLower === "events") category = "Venues";
           
           if (updatedFeed[category]) {
             if (!updatedFeed[category].news.some(x => x.slug === item.slug)) {
@@ -250,19 +251,21 @@ export default function Home() {
         // Dynamic Spotlight Match Logic
         const allArticles = [
           ...airtableIntel.map(item => {
-            let category = item.category || null;
-            if (category.toLowerCase() === "hospitality") category = "Hospitality";
-            if (category.toLowerCase() === "str") category = "STR";
-            if (category.toLowerCase() === "culinary" || category.toLowerCase() === "restaurants") category = "Restaurants";
-            if (category.toLowerCase() === "venues" || category.toLowerCase() === "events") category = "Venues";
+            let category = String(item.category || "").trim();
+            const catLower = category.toLowerCase();
+            if (catLower === "hospitality") category = "Hospitality";
+            if (catLower === "str") category = "STR";
+            if (catLower === "culinary" || catLower === "restaurants") category = "Restaurants";
+            if (catLower === "venues" || catLower === "events") category = "Venues";
             return { ...item, category };
           }),
           ...getArticles().map(art => {
-            let category = art.category || null;
-            if (category.toLowerCase() === "hospitality") category = "Hospitality";
-            if (category.toLowerCase() === "str") category = "STR";
-            if (category.toLowerCase() === "culinary" || category.toLowerCase() === "restaurants") category = "Restaurants";
-            if (category.toLowerCase() === "venues" || category.toLowerCase() === "events") category = "Venues";
+            let category = String(art.category || "").trim();
+            const catLower = category.toLowerCase();
+            if (catLower === "hospitality") category = "Hospitality";
+            if (catLower === "str") category = "STR";
+            if (catLower === "culinary" || catLower === "restaurants") category = "Restaurants";
+            if (catLower === "venues" || catLower === "events") category = "Venues";
             return { slug: art.slug, title: art.title, category, excerpt: art.excerpt };
           })
         ];
