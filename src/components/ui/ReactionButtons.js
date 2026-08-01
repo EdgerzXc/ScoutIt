@@ -200,6 +200,12 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
           border: none;
           padding: 0;
           border-radius: 8px;
+          touch-action: manipulation;
+          transition: transform 0.15s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .reaction-tile:active {
+          transform: scale(0.92) !important;
         }
 
         .reaction-tile:focus-visible {

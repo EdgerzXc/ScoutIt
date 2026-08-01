@@ -2719,33 +2719,49 @@ export default function Home() {
             flex-direction: row !important;
             overflow-x: auto !important;
             scrollbar-width: none !important;
-            gap: 16px !important;
+            gap: 12px !important;
             width: 100% !important;
             scroll-snap-type: x mandatory !important;
-            padding-bottom: 8px !important;
+            padding-bottom: 12px !important;
+            -webkit-overflow-scrolling: touch !important;
           }
           .mini-cards-grid::-webkit-scrollbar {
             display: none !important;
           }
           .mini-preview-card {
-            flex: 0 0 280px !important;
-            width: 280px !important;
-            scroll-snap-align: center !important;
+            flex: 0 0 250px !important;
+            width: 250px !important;
+            max-width: 250px !important;
+            scroll-snap-align: start !important;
+            touch-action: manipulation !important;
+            border-radius: 6px !important;
+          }
+          .mini-preview-card:active {
+            transform: scale(0.97) !important;
+            transition: transform 0.1s ease-out !important;
           }
           
-          /* Shorten card box to fit in 1 scroll */
+          /* Reaction buttons always visible on mobile */
+          .home-card-reaction-overlay {
+            opacity: 1 !important;
+            margin-top: 8px !important;
+          }
+          
+          /* Shorten card box to fit cleanly on mobile */
           .mini-card-visual {
-            height: 120px !important;
+            height: 125px !important;
           }
           .mini-card-body {
-            padding: 12px 16px !important;
+            padding: 12px 14px !important;
           }
           .mini-card-body h4 {
-            font-size: 16px !important;
-            margin-bottom: 8px !important;
+            font-size: 15px !important;
+            margin-bottom: 6px !important;
+            line-height: 1.25 !important;
           }
           .mini-tag-label {
-            font-size: 10px !important;
+            font-size: 9.5px !important;
+            letter-spacing: 0.12em !important;
           }
           .mini-tag {
             font-size: 10px !important;

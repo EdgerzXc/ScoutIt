@@ -118,42 +118,44 @@ export default function BoardPodium() {
         .board-runners { display: flex; flex-direction: column; gap: 14px; }
 
         :global(.bp-card) {
-          position: relative; display: flex; background: rgba(10,10,12,0.35); backdrop-filter: blur(16px);
-          border: 1px solid; border-radius: 5px; overflow: hidden; text-decoration: none;
-          transition: transform 0.28s ease, box-shadow 0.28s ease;
+          position: relative; display: flex; background: rgba(10,10,12,0.55); backdrop-filter: blur(16px);
+          border: 1px solid; border-radius: 6px; overflow: hidden; text-decoration: none;
+          transition: transform 0.22s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.22s ease, background 0.22s ease;
+          touch-action: manipulation;
         }
-        :global(.bp-card:hover) { transform: translateY(-4px); box-shadow: 0 0 0 1px var(--tg), 0 16px 44px -18px var(--tg); background: rgba(15,15,18,0.5); }
+        :global(.bp-card:hover) { transform: translateY(-4px); box-shadow: 0 0 0 1px var(--tg), 0 16px 44px -18px var(--tg); background: rgba(15,15,18,0.7); }
+        :global(.bp-card:active) { transform: scale(0.97) !important; transition: transform 0.1s ease-out; }
         :global(.bp-hero) { flex-direction: column; min-height: 240px; }
         :global(.bp-mid), :global(.bp-mini) { flex-direction: row; min-height: 110px; }
         :global(.bp-photo) { position: relative; background: #161616; background-size: cover; background-position: center; flex-shrink: 0; overflow: hidden; transition: transform 0.5s ease; }
         :global(.bp-hero .bp-photo) { width: 100%; height: 160px; }
         :global(.bp-mid .bp-photo), :global(.bp-mini .bp-photo) { width: 38%; min-width: 100px; height: auto; }
         :global(.bp-card:hover .bp-photo) { transform: scale(1.05); }
-        :global(.bp-rank) { position: absolute; top: 10px; left: 10px; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; padding: 3px 9px; border: 1px solid; background: rgba(0,0,0,0.62); backdrop-filter: blur(6px); }
-        :global(.bp-tier-tag) { position: absolute; top: 10px; right: 10px; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; padding: 3px 8px; border: 1px solid; background: rgba(0,0,0,0.55); backdrop-filter: blur(6px); }
-        :global(.bp-showcase) { position: absolute; bottom: 10px; right: 10px; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: #fff; background: rgba(0,0,0,0.6); padding: 4px 9px; opacity: 0; transform: translateY(6px); transition: all 0.28s ease; }
+        :global(.bp-rank) { position: absolute; top: 10px; left: 10px; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; padding: 3px 9px; border: 1px solid; background: rgba(0,0,0,0.62); backdrop-filter: blur(6px); border-radius: 3px; }
+        :global(.bp-tier-tag) { position: absolute; top: 10px; right: 10px; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; padding: 3px 8px; border: 1px solid; background: rgba(0,0,0,0.55); backdrop-filter: blur(6px); border-radius: 3px; }
+        :global(.bp-showcase) { position: absolute; bottom: 10px; right: 10px; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: #fff; background: rgba(0,0,0,0.6); padding: 4px 9px; opacity: 0; transform: translateY(6px); transition: all 0.28s ease; border-radius: 3px; }
         :global(.bp-card:hover .bp-showcase) { opacity: 1; transform: translateY(0); }
         :global(.bp-body) { padding: 14px; display: flex; flex-direction: column; flex: 1; min-width: 0; }
         :global(.bp-cat) { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 5px; }
-        :global(.bp-name) { font-family: Georgia, serif; color: #f0ede8; line-height: 1.25; }
+        :global(.bp-name) { font-family: var(--font-display, Georgia, serif); color: #f0ede8; line-height: 1.25; font-weight: 500; }
         :global(.bp-hero .bp-name) { font-size: 22px; }
         :global(.bp-mid .bp-name) { font-size: 16px; }
         :global(.bp-mini .bp-name) { font-size: 14px; }
-        :global(.bp-loc) { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #666; margin-top: 4px; }
+        :global(.bp-loc) { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #777; margin-top: 4px; }
         :global(.bp-divider) { height: 1px; background: rgba(255,255,255,0.08); margin: 12px 0; }
         :global(.bp-stats) { display: flex; gap: 16px; }
         :global(.bp-stat) { display: flex; flex-direction: column; }
-        :global(.bp-num) { font-family: Georgia, serif; font-size: 18px; }
+        :global(.bp-num) { font-family: var(--font-display, Georgia, serif); font-size: 18px; }
         :global(.bp-lbl) { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: #777; margin-top: 2px; }
         :global(.bp-mini-stat) { font-family: var(--font-mono); font-size: 10px; color: #777; letter-spacing: 0.1em; text-transform: uppercase; margin-top: auto; }
-        :global(.bp-mini-stat span) { font-family: Georgia, serif; font-size: 14px; }
+        :global(.bp-mini-stat span) { font-family: var(--font-display, Georgia, serif); font-size: 14px; }
 
         @media (max-width: 1024px) {
           .board-split { grid-template-columns: 260px 1fr; }
         }
         @media (max-width: 820px) {
           .board-split { grid-template-columns: 1fr; }
-          .board-menu { border-right: none; border-bottom: 1px solid #1a1a1a; padding: 32px 20px; }
+          .board-menu { border-right: none; border-bottom: 1px solid #1a1a1a; padding: 24px 16px; }
           
           /* Horizontal Carousel for Categories */
           .board-nav { 
@@ -163,15 +165,14 @@ export default function BoardPodium() {
             overflow-x: auto; 
             white-space: nowrap; 
             -webkit-overflow-scrolling: touch;
-            padding-bottom: 12px;
-            width: 100vw;
-            margin-left: -20px;
-            padding: 0 20px;
+            gap: 8px;
+            width: 100%;
+            padding: 4px 0 12px;
             scroll-snap-type: x mandatory;
           }
           .board-nav::-webkit-scrollbar { display: none; }
           .board-nav { scrollbar-width: none; }
-          .board-cat { font-size: 14px; padding: 10px 14px; flex-shrink: 0; scroll-snap-align: start; }
+          .board-cat { font-size: 13px; min-height: 44px; padding: 10px 16px; flex-shrink: 0; scroll-snap-align: start; border-radius: 4px; }
 
           /* Horizontal Carousel for Podium Cards */
           .board-podium { 
@@ -179,11 +180,12 @@ export default function BoardPodium() {
             flex-direction: row; 
             overflow-x: auto; 
             scroll-snap-type: x mandatory; 
-            padding-bottom: 24px;
-            gap: 16px;
-            width: 100vw;
-            margin-left: -28px;
-            padding: 0 28px;
+            padding-bottom: 16px;
+            gap: 14px;
+            width: 100%;
+            margin: 0;
+            padding: 4px 16px 16px;
+            box-sizing: border-box;
             -webkit-overflow-scrolling: touch;
           }
           .board-podium::-webkit-scrollbar { display: none; }
@@ -193,26 +195,32 @@ export default function BoardPodium() {
             display: contents; 
           }
 
-          /* Force cards to fit horizontal carousel */
+          /* Compact card size on mobile */
           :global(.bp-hero), :global(.bp-mid), :global(.bp-mini) { 
-            min-width: 80vw; 
+            flex: 0 0 260px !important;
+            width: 260px !important;
+            min-width: 260px !important;
+            max-width: 260px !important;
             scroll-snap-align: start; 
             flex-shrink: 0;
-            margin-right: 16px;
+            margin-right: 0;
           }
           
-          .board-title { font-size: 32px; }
-          .board-content-title { font-size: 26px; }
+          .board-title { font-size: 28px; }
+          .board-content-title { font-size: 22px; }
         }
         @media (max-width: 560px) {
           :global(.bp-hero), :global(.bp-mid), :global(.bp-mini) { 
-            flex-direction: column; 
+            flex-direction: column !important; 
+            min-height: auto !important;
           }
           :global(.bp-hero .bp-photo), :global(.bp-mid .bp-photo), :global(.bp-mini .bp-photo) { 
-            width: 100%; height: 200px; 
+            width: 100% !important; 
+            height: 130px !important; 
           }
-          :global(.bp-hero .bp-name) { font-size: 20px; }
-          :global(.bp-mid .bp-name), :global(.bp-mini .bp-name) { font-size: 16px; }
+          :global(.bp-hero .bp-name) { font-size: 18px; }
+          :global(.bp-mid .bp-name), :global(.bp-mini .bp-name) { font-size: 15px; }
+          :global(.bp-body) { padding: 12px; }
         }
       `}</style>
     </div>
