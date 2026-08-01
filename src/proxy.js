@@ -145,7 +145,7 @@ function recordAccess(maskedIp, path, event) {
   if (event?.waitUntil) event.waitUntil(p);
 }
 
-export async function middleware(request, event) {
+export async function proxy(request, event) {
   // Local dev / E2E runs fire hundreds of same-IP requests and were tripping
   const ip = request.ip || request.headers.get('x-forwarded-for') || '127.0.0.1';
   const path = request.nextUrl.pathname;
