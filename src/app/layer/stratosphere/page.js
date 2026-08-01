@@ -48,7 +48,7 @@ export default function StratosphereLayer() {
         const data = await res.json();
         if (!alive) return;
 
-        const feed = structuredClone(EMPTY_FEED);
+        const feed = JSON.parse(JSON.stringify(EMPTY_FEED));
 
         const articles = [...getArticles()].map((a) => ({
           slug: a.slug,

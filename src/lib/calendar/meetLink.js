@@ -86,7 +86,7 @@ export function buildViewingEventBody({
       createRequest: {
         // Must be unique per request. Google dedupes on it, so a retry with
         // the same id returns the SAME conference rather than a second room.
-        requestId: crypto.randomUUID(),
+        requestId: typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `req_${Math.random().toString(36).substring(2)}_${Date.now()}`,
         conferenceSolutionKey: { type: "hangoutsMeet" },
       },
     },

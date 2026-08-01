@@ -45,7 +45,7 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
         zoomControl: false,
         attributionControl: false,
         scrollWheelZoom: false,
-        dragging: !window.L.Browser.mobile
+        dragging: !(window.L?.Browser?.mobile ?? true)
       });
 
       // Add CartoDB Dark Matter tile layer
