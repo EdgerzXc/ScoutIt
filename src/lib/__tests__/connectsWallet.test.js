@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { spendConnects, getWallet, getBalance, addPurchasedConnects, addEarnedConnects } from '../connectsWallet.js';
+import { spendConnects, getWallet, getBalance, addPurchasedConnects, addEarnedConnects, spendConnectsServer } from '../connectsWallet.js';
 
 describe('spendConnects edge cases', () => {
   let store = {};
@@ -150,4 +150,36 @@ describe('spendConnects edge cases', () => {
     const result = spendConnects('seeker', 'starry', 5);
     expect(result.remaining).toBe(6); // 11 - 5
   });
+
+  it('invokes spendConnectsServer RPC cleanly', async () => {
+    const mockSupabaseAdmin = {
+      rpc: vi.fn().mockResolvedValue({
+        data: [{ success: true, remaining_total: 5, spent_granted: 1, spent_purchased: 0, spent_reward: 0 }],
+        error: null,
+      }),
+    };
+
+    const res = await spendConnectsServer({
+      supabaseAdmin: mockSupabaseAdmin,
+      userId: 'usr_test123',
+      role: 'seeker',
+      tier: 'solar',
+      amount: 1,
+      source: 'handshake',
+    });
+
+    expect(res.success).toBe(true);
+    expect(res.remaining).toBe(5);
+    expect(res.spentGranted).toBe(1);
+    expect(mockSupabaseAdmin.rpc).toHaveBeenCalledWith('spend_connects_atomic', {
+      p_user_id: 'usr_test123',
+      p_role: 'seeker',
+      p_amount: 1,
+      p_tier: 'solar',
+      p_source: 'handshake',
+      p_reason: null,
+      p_reference_id: null,
+    });
+  });
 });
+

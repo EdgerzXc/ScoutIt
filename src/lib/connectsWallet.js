@@ -168,3 +168,45 @@ export function initWalletIfEmpty(role, tier) {
     writeAllWallets(all);
   }
 }
+
+/**
+ * Server-authoritative Connect spend executing atomic hybrid wallet deduction.
+ * Spends in exact locked order:
+ *   1. Role monthly granted balance (expiring)
+ *   2. Account-wide purchased balance (permanent)
+ *   3. Account-wide reward balance (permanent)
+ */
+export async function spendConnectsServer({ supabaseAdmin, userId, role = "seeker", tier = "starry", amount = 1, source = "spend", reason = null, referenceId = null }) {
+  if (!supabaseAdmin || !userId) {
+    return { success: false, remaining: 0, reason: "authentication_required" };
+  }
+
+  try {
+    const { data, error } = await supabaseAdmin.rpc("spend_connects_atomic", {
+      p_user_id: userId,
+      p_role: String(role).toLowerCase(),
+      p_amount: amount,
+      p_tier: String(tier).toLowerCase(),
+      p_source: source,
+      p_reason: reason,
+      p_reference_id: referenceId,
+    });
+
+    if (error || !data || data.length === 0) {
+      // Fallback: try direct ledger/profile read or allow graceful execution in pre-200 mode
+      return { success: false, remaining: 0, reason: error?.message || "wallet_error" };
+    }
+
+    const row = data[0];
+    return {
+      success: row.success === true,
+      remaining: row.remaining_total ?? 0,
+      spentGranted: row.spent_granted ?? 0,
+      spentPurchased: row.spent_purchased ?? 0,
+      spentReward: row.spent_reward ?? 0,
+    };
+  } catch (err) {
+    return { success: false, remaining: 0, reason: err.message || "wallet_exception" };
+  }
+}
+
