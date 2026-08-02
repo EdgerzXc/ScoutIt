@@ -498,6 +498,15 @@ html.lite-mode .letter-i,
 html.lite-mode .ufo-float,
 html.lite-mode .title-tagline,
 html.lite-mode .title-wordmark-wrap,
+html.lite-mode .hook-content,
+html.lite-mode .cinematic-container,
+html.lite-mode .title-badge,
+html.lite-mode .title-divider,
+html.lite-mode .title-tagline-intro,
+html.lite-mode .title-tagline-1,
+html.lite-mode .title-tagline-2,
+html.lite-mode .hero-cta-row,
+html.lite-mode .hero-founding-link,
 html.lite-mode .snap-section,
 html.lite-mode .discover-content,
 html.lite-mode .property-split,
@@ -521,8 +530,7 @@ html.lite-mode .grain,
 html.lite-mode .nf-radar,
 html.lite-mode .nf-pulse,
 html.lite-mode .nf-ring,
-html.lite-mode .drifting-container,
-html.lite-mode .cinematic-container {
+html.lite-mode .drifting-container {
   display: none !important;
   animation: none !important;
 }
