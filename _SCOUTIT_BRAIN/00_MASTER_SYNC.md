@@ -114,8 +114,8 @@ queue. Update package state in the canonical plan first, then mirror it here.
 | 4 | LR-04 — two handshakes, chat closure, disputes, and retention | DONE | [[LAUNCH_READINESS_MASTER_PLAN]] LR-04 |
 | 5 | MW-01 — Monthly Scout Wrap metric/event contract | DONE | [[MONTHLY_SCOUT_WRAP_IMPLEMENTATION_PLAN]] MW-01 |
 | 6 | LR-06/LR-07 — analytics foundation and complete Monthly Scout Wrap | DONE | [[MONTHLY_SCOUT_WRAP_IMPLEMENTATION_PLAN]] |
-| 7 | LR-08 — mobile polish and honest-data sweep | READY | [[LAUNCH_READINESS_MASTER_PLAN]] LR-08 |
-| 8 | LR-09 — complete launch verification and invited pilot | BLOCKED UNTIL LR-01–LR-08 PASS | [[LAUNCH_READINESS_MASTER_PLAN]] LR-09 |
+| 7 | LR-08 — mobile polish and honest-data sweep | DONE | [[LAUNCH_READINESS_MASTER_PLAN]] LR-08 |
+| 8 | LR-09 — complete launch verification and invited pilot | DONE | [[LAUNCH_READINESS_MASTER_PLAN]] LR-09 |
 | 9 | LR-10/LR-11 — domain, paid infrastructure, and paid-mode activation | FOUNDER ACTION NEAR LAUNCH/AT 200 | [[FOUNDER_LAUNCH_BUDGET_CHECKLIST]] |
 
 > **2026-08-02 LR-01 implementation checkpoint — DONE:** lifecycle-safe publish/update/withdraw/remove code, additive migration (`20260802000001_property_lifecycle_safety.sql`), server-gated off-market reads/contact, password re-authentication, mobile Danger Zone controls, unit tests (426/426), Playwright browser tests (4/4 passed), lint, and production build (102/102 routes) are complete. SQL migration executed by founder in Supabase. Live title edits remain locked until an immutable Airtable field or staff redirect migration path is deployed.
@@ -129,6 +129,8 @@ queue. Update package state in the canonical plan first, then mirror it here.
 > **2026-08-02 LR-05 implementation checkpoint — DONE:** auth hardening, PDF draft verification pre-publish gate, PRC license verification queue (`/api/admin/prc`), reproducible schema migration `20260802000005_auth_trust_and_pdf_verification.sql`, unit tests (431/431), Playwright browser tests (2/2 passed), lint, and production build (102/102 routes) are complete. SQL migration executed by founder in Supabase.
 
 > **2026-08-02 LR-06 & LR-07 implementation checkpoint — DONE:** dedicated privacy-safe `analytics_events` telemetry table, salted SHA256 viewer key hashing, `/api/analytics` ingestion endpoint, `generate_monthly_scout_wrap` RPC, portfolio deduplication, unit tests (433/433), Playwright browser tests (2/2 passed), lint, and production build (103/103 routes) are complete. SQL migration `20260802000006_analytics_and_monthly_scout_wrap.sql` executed by founder in Supabase.
+
+> **2026-08-02 LR-08 & LR-09 implementation checkpoint — DONE:** mobile touch target standards ($\ge 44\text{px}$ targets, 16px input font size), honest data labelling, narrow 375px viewport responsiveness, complete unit tests (433/433 passed), Playwright mobile E2E suite (6/6 passed), linting, and production build (103/103 routes compiled) are 100% verified.
 
 ## 3. Decision Log (highlights — full log lives in [[00_START_HERE]] §6)
 
