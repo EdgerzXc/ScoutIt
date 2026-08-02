@@ -110,8 +110,8 @@ queue. Update package state in the canonical plan first, then mirror it here.
 | 1 | LR-01 — property URL and lifecycle safety | DONE | [[LAUNCH_READINESS_MASTER_PLAN]] LR-01 |
 | 1b | LR-05 — auth, listing trust, PDF verification, and reproducible schema | READY in parallel | [[LAUNCH_READINESS_MASTER_PLAN]] LR-05 |
 | 2 | LR-02 — broker roster, visibility, and lead routing | DONE | [[LAUNCH_READINESS_MASTER_PLAN]] LR-02 |
-| 3 | LR-03 — hybrid Connect wallet and server-side tiers | READY | [[LAUNCH_READINESS_MASTER_PLAN]] LR-03 |
-| 4 | LR-04 — two handshakes, chat closure, disputes, and retention | WAITING ON LR-02/LR-03 | [[LAUNCH_READINESS_MASTER_PLAN]] LR-04 |
+| 3 | LR-03 — hybrid Connect wallet and server-side tiers | DONE | [[LAUNCH_READINESS_MASTER_PLAN]] LR-03 |
+| 4 | LR-04 — two handshakes, chat closure, disputes, and retention | READY | [[LAUNCH_READINESS_MASTER_PLAN]] LR-04 |
 | 5 | MW-01 — Monthly Scout Wrap metric/event contract | READY in parallel | [[MONTHLY_SCOUT_WRAP_IMPLEMENTATION_PLAN]] MW-01 |
 | 6 | LR-06/LR-07 — analytics foundation and complete Monthly Scout Wrap | WAITING ON CORE EVENT SEMANTICS | [[MONTHLY_SCOUT_WRAP_IMPLEMENTATION_PLAN]] |
 | 7 | LR-08 — mobile polish and honest-data sweep | WAITING ON CORE FLOWS | [[LAUNCH_READINESS_MASTER_PLAN]] LR-08 |
