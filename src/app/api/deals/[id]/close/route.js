@@ -53,7 +53,18 @@ export async function POST(request, { params }) {
 
     if (updateError) return NextResponse.json({ error: "Failed to close deal" }, { status: 500 });
 
-    return NextResponse.json({ success: true });
+    // Write audit log event
+    try {
+      await supabaseAdmin.from('audit_logs').insert({
+        user_id: userId,
+        action: 'deal_close',
+        resource_type: 'deal',
+        resource_id: dealId,
+        metadata: { closed_at: new Date().toISOString(), retention_days: 7 }
+      });
+    } catch { /* audit logging is non-blocking */ }
+
+    return NextResponse.json({ success: true, message: "Deal closed and marked read-only with 7-day retention policy." });
   } catch (error) {
     return NextResponse.json({ error: sanitizeError(error) }, { status: 500 });
   }

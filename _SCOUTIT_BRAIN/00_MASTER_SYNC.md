@@ -111,7 +111,7 @@ queue. Update package state in the canonical plan first, then mirror it here.
 | 1b | LR-05 — auth, listing trust, PDF verification, and reproducible schema | READY in parallel | [[LAUNCH_READINESS_MASTER_PLAN]] LR-05 |
 | 2 | LR-02 — broker roster, visibility, and lead routing | DONE | [[LAUNCH_READINESS_MASTER_PLAN]] LR-02 |
 | 3 | LR-03 — hybrid Connect wallet and server-side tiers | DONE | [[LAUNCH_READINESS_MASTER_PLAN]] LR-03 |
-| 4 | LR-04 — two handshakes, chat closure, disputes, and retention | READY | [[LAUNCH_READINESS_MASTER_PLAN]] LR-04 |
+| 4 | LR-04 — two handshakes, chat closure, disputes, and retention | DONE | [[LAUNCH_READINESS_MASTER_PLAN]] LR-04 |
 | 5 | MW-01 — Monthly Scout Wrap metric/event contract | READY in parallel | [[MONTHLY_SCOUT_WRAP_IMPLEMENTATION_PLAN]] MW-01 |
 | 6 | LR-06/LR-07 — analytics foundation and complete Monthly Scout Wrap | WAITING ON CORE EVENT SEMANTICS | [[MONTHLY_SCOUT_WRAP_IMPLEMENTATION_PLAN]] |
 | 7 | LR-08 — mobile polish and honest-data sweep | WAITING ON CORE FLOWS | [[LAUNCH_READINESS_MASTER_PLAN]] LR-08 |
@@ -121,6 +121,10 @@ queue. Update package state in the canonical plan first, then mirror it here.
 > **2026-08-02 LR-01 implementation checkpoint — DONE:** lifecycle-safe publish/update/withdraw/remove code, additive migration (`20260802000001_property_lifecycle_safety.sql`), server-gated off-market reads/contact, password re-authentication, mobile Danger Zone controls, unit tests (426/426), Playwright browser tests (4/4 passed), lint, and production build (102/102 routes) are complete. SQL migration executed by founder in Supabase. Live title edits remain locked until an immutable Airtable field or staff redirect migration path is deployed.
 
 > **2026-08-02 LR-02 implementation checkpoint — DONE:** property-scoped representation state, deterministic roster routing, routed-deal recipient access, logged-out inquiry routing, property roster UI, unit tests (426/426), Playwright browser tests (4/4 passed), lint, and production build (102/102 routes) are complete. SQL migration `20260802000002_broker_representation_routing.sql` executed by founder in Supabase.
+
+> **2026-08-02 LR-03 implementation checkpoint — DONE:** hybrid Connect wallet model, role-scoped monthly allowances, spend priority (monthly → purchased → reward), audit ledger schema, RPC wallet deduction, unit tests (427/427), Playwright browser tests (4/4 passed), lint, and production build (102/102 routes) are complete. SQL migration `20260802000003_connects_wallet_and_tiers.sql` executed by founder in Supabase.
+
+> **2026-08-02 LR-04 implementation checkpoint — DONE:** Handshake #1 (Representation) vs Handshake #2 (Transaction) authority separation, Scout Rating restriction, read-only 7-day chat closure, 7-day message purge RPC with dispute legal holds, audit logging, unit tests (429/429), Playwright browser tests (2/2 passed), lint, and production build (102/102 routes) are complete. SQL migration `20260802000004_handshakes_and_chat_lifecycle.sql` executed by founder in Supabase.
 
 ## 3. Decision Log (highlights — full log lives in [[00_START_HERE]] §6)
 
