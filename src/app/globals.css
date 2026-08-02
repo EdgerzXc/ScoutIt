@@ -1,15 +1,34 @@
-
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• 
-   SCOUTIT â€” GLOBAL DESIGN TOKENS & BASE STYLES
-   Visual DNA v6 Â· Space Intelligence Platform
-   â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â•  */
+/* ═══════════════════════════════════════════════════════════════
+   LIGHT-MODE & HIGH-CONTRAST ACCESSIBILITY MODES
+   ═══════════════════════════════════════════════════════════════ */
+body.light-mode {
+  --bg:           #f8f9fa;
+  --surface:      #ffffff;
+  --surface2:     #f1f3f5;
+  --surface3:     #e9ecef;
+  --surface-variant: #e9ecef;
 
-/* â”€â”€ RESET â”€â”€ */
+  --text-primary:   #111827;
+  --text-secondary: #374151;
+  --text-muted:     #6b7280;
+
+  --border:       rgba(0, 0, 0, 0.12);
+  --border-mid:   rgba(0, 0, 0, 0.18);
+  --border-solid: rgba(0, 0, 0, 0.25);
+  --accent:       #d97706;
+  --accent-bright:#b45309;
+}
+
+/* ═══════════════════════════════════════════════════════════════ 
+   SCOUTIT — GLOBAL DESIGN TOKENS & BASE STYLES
+   Visual DNA v6 · Space Intelligence Platform
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── RESET ── */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -462,13 +481,23 @@ html.lite-mode *::after {
   transition-duration: 0.01ms !important;
 }
 
-/* Force opacity: 1 ONLY on content elements that start at opacity 0 due to entrance keyframes */
+/* Force opacity: 1 and clip-path: none on content elements that start at opacity 0 due to entrance keyframes */
 html.lite-mode .hero-tagline,
 html.lite-mode .hero-subheadline,
 html.lite-mode .hero-cta-btn,
 html.lite-mode .hook-subtitle,
 html.lite-mode .scoutit-wordmark,
 html.lite-mode .letter,
+html.lite-mode .letter-s,
+html.lite-mode .letter-c,
+html.lite-mode .letter-o,
+html.lite-mode .letter-u,
+html.lite-mode .letter-t1,
+html.lite-mode .letter-t2,
+html.lite-mode .letter-i,
+html.lite-mode .ufo-float,
+html.lite-mode .title-tagline,
+html.lite-mode .title-wordmark-wrap,
 html.lite-mode .snap-section,
 html.lite-mode .discover-content,
 html.lite-mode .property-split,
@@ -480,6 +509,12 @@ html.lite-mode .section-wishlist,
 html.lite-mode .section-about {
   opacity: 1 !important;
   visibility: visible !important;
+  clip-path: none !important;
+  transform: none !important;
+}
+
+html.lite-mode .space-bg-container {
+  background: radial-gradient(circle at 50% 30%, #1c1b18 0%, #0d0d0d 80%) !important;
 }
 
 html.lite-mode .grain,
