@@ -64,6 +64,10 @@ export async function POST(request) {
       return NextResponse.json({ error: "Unauthorized: You do not own this property" }, { status: 403 });
     }
 
+    if (currentSubmission.creation_source === 'pdf_assisted' && !currentSubmission.pdf_verified) {
+      return NextResponse.json({ error: "PDF-assisted listing drafts must be verified against source document before initial publication." }, { status: 422 });
+    }
+
     const currentLifecycle = normalizeLifecycleState(currentSubmission);
     if (currentLifecycle === PROPERTY_LIFECYCLE_STATES.LIVE && currentSubmission.canonical_slug) {
       return NextResponse.json({ error: "Listing is already live; edit it through the lifecycle-safe update path" }, { status: 409 });

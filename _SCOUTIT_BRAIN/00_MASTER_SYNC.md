@@ -108,13 +108,13 @@ queue. Update package state in the canonical plan first, then mirror it here.
 | Order | Package | State | Canonical acceptance source |
 |---|---|---|---|
 | 1 | LR-01 — property URL and lifecycle safety | DONE | [[LAUNCH_READINESS_MASTER_PLAN]] LR-01 |
-| 1b | LR-05 — auth, listing trust, PDF verification, and reproducible schema | READY in parallel | [[LAUNCH_READINESS_MASTER_PLAN]] LR-05 |
+| 1b | LR-05 — auth, listing trust, PDF verification, and reproducible schema | DONE | [[LAUNCH_READINESS_MASTER_PLAN]] LR-05 |
 | 2 | LR-02 — broker roster, visibility, and lead routing | DONE | [[LAUNCH_READINESS_MASTER_PLAN]] LR-02 |
 | 3 | LR-03 — hybrid Connect wallet and server-side tiers | DONE | [[LAUNCH_READINESS_MASTER_PLAN]] LR-03 |
 | 4 | LR-04 — two handshakes, chat closure, disputes, and retention | DONE | [[LAUNCH_READINESS_MASTER_PLAN]] LR-04 |
-| 5 | MW-01 — Monthly Scout Wrap metric/event contract | READY in parallel | [[MONTHLY_SCOUT_WRAP_IMPLEMENTATION_PLAN]] MW-01 |
-| 6 | LR-06/LR-07 — analytics foundation and complete Monthly Scout Wrap | WAITING ON CORE EVENT SEMANTICS | [[MONTHLY_SCOUT_WRAP_IMPLEMENTATION_PLAN]] |
-| 7 | LR-08 — mobile polish and honest-data sweep | WAITING ON CORE FLOWS | [[LAUNCH_READINESS_MASTER_PLAN]] LR-08 |
+| 5 | MW-01 — Monthly Scout Wrap metric/event contract | DONE | [[MONTHLY_SCOUT_WRAP_IMPLEMENTATION_PLAN]] MW-01 |
+| 6 | LR-06/LR-07 — analytics foundation and complete Monthly Scout Wrap | DONE | [[MONTHLY_SCOUT_WRAP_IMPLEMENTATION_PLAN]] |
+| 7 | LR-08 — mobile polish and honest-data sweep | READY | [[LAUNCH_READINESS_MASTER_PLAN]] LR-08 |
 | 8 | LR-09 — complete launch verification and invited pilot | BLOCKED UNTIL LR-01–LR-08 PASS | [[LAUNCH_READINESS_MASTER_PLAN]] LR-09 |
 | 9 | LR-10/LR-11 — domain, paid infrastructure, and paid-mode activation | FOUNDER ACTION NEAR LAUNCH/AT 200 | [[FOUNDER_LAUNCH_BUDGET_CHECKLIST]] |
 
@@ -125,6 +125,10 @@ queue. Update package state in the canonical plan first, then mirror it here.
 > **2026-08-02 LR-03 implementation checkpoint — DONE:** hybrid Connect wallet model, role-scoped monthly allowances, spend priority (monthly → purchased → reward), audit ledger schema, RPC wallet deduction, unit tests (427/427), Playwright browser tests (4/4 passed), lint, and production build (102/102 routes) are complete. SQL migration `20260802000003_connects_wallet_and_tiers.sql` executed by founder in Supabase.
 
 > **2026-08-02 LR-04 implementation checkpoint — DONE:** Handshake #1 (Representation) vs Handshake #2 (Transaction) authority separation, Scout Rating restriction, read-only 7-day chat closure, 7-day message purge RPC with dispute legal holds, audit logging, unit tests (429/429), Playwright browser tests (2/2 passed), lint, and production build (102/102 routes) are complete. SQL migration `20260802000004_handshakes_and_chat_lifecycle.sql` executed by founder in Supabase.
+
+> **2026-08-02 LR-05 implementation checkpoint — DONE:** auth hardening, PDF draft verification pre-publish gate, PRC license verification queue (`/api/admin/prc`), reproducible schema migration `20260802000005_auth_trust_and_pdf_verification.sql`, unit tests (431/431), Playwright browser tests (2/2 passed), lint, and production build (102/102 routes) are complete. SQL migration executed by founder in Supabase.
+
+> **2026-08-02 LR-06 & LR-07 implementation checkpoint — DONE:** dedicated privacy-safe `analytics_events` telemetry table, salted SHA256 viewer key hashing, `/api/analytics` ingestion endpoint, `generate_monthly_scout_wrap` RPC, portfolio deduplication, unit tests (433/433), Playwright browser tests (2/2 passed), lint, and production build (103/103 routes) are complete. SQL migration `20260802000006_analytics_and_monthly_scout_wrap.sql` executed by founder in Supabase.
 
 ## 3. Decision Log (highlights — full log lives in [[00_START_HERE]] §6)
 
