@@ -33,11 +33,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Lint (report-only, won't block)
-        run: npm run lint || true
+      - name: Lint
+        run: npm run lint
 
       - name: Unit tests (Vitest)
-        run: npx vitest run
+        run: npm run test:unit
 
       - name: Build check
         # Placeholder env so `next build` doesn't fail on missing vars.

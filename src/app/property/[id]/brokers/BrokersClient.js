@@ -1,243 +1,154 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import "./brokers.css";
 
-const TIER_MAP = { Diamond: 1, Platinum: 2, Gold: 3, Silver: 4, Bronze: 5 };
-
-function normalizeTier(broker) {
-  if (typeof broker.subscriptionTier === "number") return broker.subscriptionTier;
-  return TIER_MAP[broker.subscriptionLabel] ?? 5;
-}
+const EMPTY_FORM = { name: "", phone: "", message: "" };
 
 export default function BrokersClient({ slug }) {
-  const [brokers, setBrokers]             = useState([]);
-  const [loading, setLoading]             = useState(true);
+  const [brokers, setBrokers] = useState([]);
+  const [property, setProperty] = useState(null);
+  const [represented, setRepresented] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [activeFormBroker, setActiveFormBroker] = useState(null);
-  const [formData, setFormData]           = useState({ name: "", phone: "", message: "" });
+  const [formData, setFormData] = useState(EMPTY_FORM);
   const [submittedBrokerId, setSubmittedBrokerId] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    async function loadBrokers() {
+    let cancelled = false;
+    async function loadRoster() {
       try {
-        const res  = await fetch("/api/cms");
-        const data = await res.json();
-        if (data.brokers && data.brokers.length > 0) {
-          setBrokers(data.brokers);
-        } else {
-          setBrokers([]);
+        const response = await fetch(`/api/property/${encodeURIComponent(slug)}/brokers`, { cache: "no-store" });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Property roster unavailable");
+        if (!cancelled) {
+          setProperty(data.property || null);
+          setBrokers(Array.isArray(data.brokers) ? data.brokers : []);
+          setRepresented(data.represented === true);
         }
-      } catch {
-        setBrokers([]);
+      } catch (loadError) {
+        if (!cancelled) setError(loadError.message || "Property roster unavailable");
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }
-    loadBrokers();
-  }, []);
+    loadRoster();
+    return () => { cancelled = true; };
+  }, [slug]);
 
-  const handleRetainClick = (brokerId) => {
+  const toggleForm = (brokerId = null) => {
     setActiveFormBroker(activeFormBroker === brokerId ? null : brokerId);
     setSubmittedBrokerId(null);
+    setError("");
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  const handleInputChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((previous) => ({ ...previous, [name]: value }));
   };
 
-  const handleSubmit = (e, brokerId) => {
-    e.preventDefault();
-    setSubmittedBrokerId(brokerId);
-    setFormData({ name: "", phone: "", message: "" });
-    setTimeout(() => {
-      setActiveFormBroker(null);
-      setSubmittedBrokerId(null);
-    }, 4000);
-  };
-
-  // Top Rated: sort by rating descending
-  const topRatedBrokers = [...brokers].sort((a, b) => b.rating - a.rating);
-
-  // Recommended: sort by subscriptionTier ascending then rating descending
-  const recommendedBrokers = [...brokers].sort((a, b) => {
-    const ta = normalizeTier(a);
-    const tb = normalizeTier(b);
-    if (ta !== tb) return ta - tb;
-    return b.rating - a.rating;
-  });
-
-  const renderBrokerCard = (broker, isRecommended = false) => {
-    const isFormOpen = activeFormBroker === broker.id;
-    const isSuccess  = submittedBrokerId === broker.id;
-
-    let tierClass = "";
-    let tierBadgeText = "";
-    if (isRecommended) {
-      const tier = normalizeTier(broker);
-      switch (tier) {
-        case 1: tierClass = "tier-1-card diamond-card";  tierBadgeText = "DIAMOND PARTNER";  break;
-        case 2: tierClass = "tier-2-card platinum-card"; tierBadgeText = "PLATINUM PARTNER"; break;
-        case 3: tierClass = "tier-3-card gold-card";     tierBadgeText = "GOLD PARTNER";     break;
-        case 4: tierClass = "tier-4-card silver-card";   tierBadgeText = "SILVER PARTNER";   break;
-        case 5: tierClass = "tier-5-card bronze-card";   tierBadgeText = "BRONZE PARTNER";   break;
-        default: break;
-      }
+  const handleSubmit = async (event, brokerId = null) => {
+    event.preventDefault();
+    setSubmitting(true);
+    setError("");
+    try {
+      const response = await fetch("/api/inquiries", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          propertySlug: slug,
+          preferredBrokerId: brokerId || undefined,
+          ...formData,
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Inquiry could not be routed");
+      setSubmittedBrokerId(brokerId || "lister");
+      setFormData(EMPTY_FORM);
+    } catch (submitError) {
+      setError(submitError.message || "Inquiry could not be routed");
+    } finally {
+      setSubmitting(false);
     }
+  };
 
+  const renderForm = (brokerId = null) => {
+    const formKey = brokerId || "lister";
+    if (submittedBrokerId === formKey) {
+      return <div className="form-success-alert" role="status">✓ Inquiry routed to the current property recipient.</div>;
+    }
     return (
-      <div
-        key={broker.id}
-        className={`broker-item-card ${isRecommended ? "recommended-card" : "top-rated-card"} ${tierClass} ${isFormOpen ? "form-expanded" : ""}`}
-      >
-        {isRecommended && tierBadgeText && (
-          <div className="tier-badge-label">{tierBadgeText}</div>
-        )}
-        
-        <div className="broker-main-row">
-          <div
-            className="broker-avatar-img"
-            style={{ backgroundImage: `url(${broker.image})` }}
-          />
-          <div className="broker-detail-col">
-            <div className="broker-name-header">
-              <h3 className="broker-name-txt">{broker.name}</h3>
-              <span className="leris-badge">LERIS COMPLIANT</span>
-            </div>
-            <p className="broker-license-txt">{broker.license}</p>
-            <p className="broker-closures-txt">{broker.closures}</p>
-            
-            <div className="niche-pills-row">
-              {broker.niche.map((tag) => (
-                <span key={tag} className="niche-pill-tag">
-                  {tag}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          <div className="broker-rating-box">
-            <span className="rating-num">{broker.rating}</span>
-            <span className="rating-lbl">SCOUT RATING</span>
-          </div>
+      <form onSubmit={(event) => handleSubmit(event, brokerId)} className="intent-form">
+        <h4 className="form-title">Send a property inquiry</h4>
+        <div className="form-fields-grid">
+          <input type="text" name="name" required placeholder="Your Full Name" value={formData.name} onChange={handleInputChange} className="form-input-field" />
+          <input type="tel" name="phone" required placeholder="Contact Number (e.g. +63 917 ...)" value={formData.phone} onChange={handleInputChange} className="form-input-field" />
+          <textarea name="message" required rows="3" placeholder="Tell the recipient what you want to verify." value={formData.message} onChange={handleInputChange} className="form-textarea-field" />
         </div>
-
-        <div className="broker-actions-row">
-          <Link href={`/brokers/${broker.id}`} className="action-profile-btn" style={{ textDecoration: 'none', display: 'inline-block' }}>
-            View Full Profile →
-          </Link>
-          <button
-            type="button"
-            className={`action-retain-btn ${isFormOpen ? "active" : ""}`}
-            onClick={() => handleRetainClick(broker.id)}
-          >
-            {isFormOpen ? "Cancel" : "Retain via ScoutIt"}
-          </button>
-        </div>
-
-        {isFormOpen && (
-          <div className="inline-intent-form-container">
-            {isSuccess ? (
-              <div className="form-success-alert">
-                ✓ Inquiry submitted. An authorized broker will contact you shortly.
-              </div>
-            ) : (
-              <form onSubmit={(e) => handleSubmit(e, broker.id)} className="intent-form">
-                <h4 className="form-title">Submit Letter of Intent</h4>
-                <div className="form-fields-grid">
-                  <input
-                    type="text"
-                    name="name"
-                    required
-                    placeholder="Your Full Name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    className="form-input-field"
-                  />
-                  <input
-                    type="tel"
-                    name="phone"
-                    required
-                    placeholder="Contact Number (e.g. +63 917 ...)"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    className="form-input-field"
-                  />
-                  <textarea
-                    name="message"
-                    required
-                    rows="3"
-                    placeholder={`Write a brief message regarding ${slug === "batasan-hills" ? "Batasan Hills House & Lot" : "this property"}`}
-                    value={formData.message}
-                    onChange={handleInputChange}
-                    className="form-textarea-field"
-                  />
-                </div>
-                <button type="submit" className="form-submit-btn">
-                  Submit Retention Request
-                </button>
-              </form>
-            )}
-          </div>
-        )}
-      </div>
+        {error && <p className="form-error-alert" role="alert">{error}</p>}
+        <button type="submit" className="form-submit-btn" disabled={submitting}>{submitting ? "Routing inquiry…" : "Send inquiry"}</button>
+      </form>
     );
   };
 
   return (
     <div className="brokers-wrapper">
-      {/* Sticky header nav */}
       <nav className="brokers-sticky-nav">
-        <Link href={`/property/${slug || "batasan-hills"}`} className="nav-back-link">
-          ← Back to Property
-        </Link>
+        <Link href={`/property/${slug || "batasan-hills"}`} className="nav-back-link">← Back to Property</Link>
         <span className="nav-brand-logo">SCOUTIT</span>
-        <span className="nav-prop-info">
-          {slug === "batasan-hills" ? "Batasan Hills, Quezon City" : "Property Profile"}
-        </span>
+        <span className="nav-prop-info">{property?.title || "Property Profile"}</span>
       </nav>
 
       <main className="brokers-main-content">
         <header className="brokers-page-header">
-          <span className="gold-section-label">AUTHORIZED BROKERS</span>
-          <h1 className="brokers-page-title">Verified Representation</h1>
-          <p className="brokers-page-subtitle">
-            Direct coordination and transactional representation for this asset tier.
-          </p>
+          <span className="gold-section-label">PROPERTY REPRESENTATION</span>
+          <h1 className="brokers-page-title">Authorized Broker Roster</h1>
+          <p className="brokers-page-subtitle">Only the current visible, contactable representation for this property appears here.</p>
         </header>
 
-        <div className="brokers-columns-container">
-          {loading ? (
-            <div style={{ gridColumn: "1 / -1", textAlign: "center", padding: "80px 0", color: "var(--text-muted)", fontSize: "13px", letterSpacing: "0.1em" }}>
-              LOADING VERIFIED BROKERS...
-            </div>
-          ) : (
-            <>
-              {/* Column 1: Top Rated Brokers */}
-              <section className="brokers-section-group top-rated-section">
-                <h2 className="section-group-heading">Top Rated Brokers</h2>
-                <div className="brokers-cards-list">
-                  {topRatedBrokers.map((b) => renderBrokerCard(b, false))}
-                </div>
+        {loading ? (
+          <div className="roster-empty-state">LOADING PROPERTY ROSTER…</div>
+        ) : error && brokers.length === 0 ? (
+          <div className="roster-empty-state" role="alert">{error}</div>
+        ) : (
+          <>
+            {represented ? (
+              <div className="brokers-cards-list property-roster-list">
+                {brokers.map((broker) => (
+                  <div key={broker.id} className="broker-item-card recommended-card">
+                    <div className="broker-main-row">
+                      <div className="broker-avatar-img" style={broker.image ? { backgroundImage: `url(${broker.image})` } : undefined} aria-hidden="true" />
+                      <div className="broker-detail-col">
+                        <div className="broker-name-header"><h2 className="broker-name-txt">{broker.name}</h2><span className="leris-badge">AUTHORIZED ROSTER</span></div>
+                        <p className="broker-license-txt">{broker.headline || broker.firm || "Licensed property representative"}</p>
+                        {broker.license && <p className="broker-closures-txt">PRC reference on file</p>}
+                        {broker.specializations?.length > 0 && <div className="niche-pills-row">{broker.specializations.map((tag) => <span key={tag} className="niche-pill-tag">{tag}</span>)}</div>}
+                      </div>
+                      <div className="broker-rating-box"><span className="rating-num">{broker.rating || "—"}</span><span className="rating-lbl">SCOUT RATING</span></div>
+                    </div>
+                    <div className="broker-actions-row">
+                      <Link href={`/brokers/${broker.id}`} className="action-profile-btn">View Profile →</Link>
+                      <button type="button" className={`action-retain-btn ${activeFormBroker === broker.id ? "active" : ""}`} onClick={() => toggleForm(broker.id)}>{activeFormBroker === broker.id ? "Cancel" : "Contact Broker"}</button>
+                    </div>
+                    {activeFormBroker === broker.id && <div className="inline-intent-form-container">{renderForm(broker.id)}</div>}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <section className="roster-empty-state">
+                <h2>No active broker representation</h2>
+                <p>This property is currently unrepresented. New inquiries go to the uploader or lister.</p>
+                <button type="button" className="action-retain-btn" onClick={() => toggleForm("lister")}>{activeFormBroker === "lister" ? "Cancel" : "Contact uploader / lister"}</button>
+                {activeFormBroker === "lister" && <div className="inline-intent-form-container">{renderForm(null)}</div>}
               </section>
+            )}
+          </>
+        )}
 
-              {/* Column 2: Recommended Brokers */}
-              <section className="brokers-section-group recommended-section">
-                <h2 className="section-group-heading">Recommended Brokers</h2>
-                <div className="brokers-cards-list">
-                  {recommendedBrokers.map((b) => renderBrokerCard(b, true))}
-                </div>
-              </section>
-            </>
-          )}
-        </div>
-
-        <footer className="brokers-compliance-footer">
-          <p>
-            ScoutIt is a spatial intelligence archive. In compliance with R.A. 9646 (Real Estate Service Act of the Philippines), all property site visits, formal negotiation tables, and contract signings must be structured and validated by licensed real estate brokers.
-          </p>
-        </footer>
+        <footer className="brokers-compliance-footer"><p>ScoutIt displays representation state as a current operational signal. Roster visibility does not replace independent verification of license, authority, or transaction terms.</p></footer>
       </main>
     </div>
   );

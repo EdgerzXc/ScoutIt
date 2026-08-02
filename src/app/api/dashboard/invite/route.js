@@ -36,6 +36,13 @@ export async function POST(request) {
       return NextResponse.json({ error: "Server error: missing service role configuration" }, { status: 500 });
     }
 
+    const { data: property, error: propertyError } = await supabaseAdmin
+      .from('properties')
+      .select("id, owner_id")
+      .eq("id", listingId)
+      .single();
+    if (propertyError || !property) return NextResponse.json({ error: "Property not found" }, { status: 404 });
+    if (property.owner_id !== userId) return NextResponse.json({ error: "You do not own this property" }, { status: 403 });
     // Resolve the typed name to a real broker's user id — `deals.broker_id`
     // must be a UUID for GET /api/deals's `.eq("broker_id", userId)` to ever
     // find this deal. Storing the raw typed string here (the previous
@@ -58,6 +65,24 @@ export async function POST(request) {
       return NextResponse.json({ error: `Multiple brokers named "${brokerName}" found — ask them for their PRC number to disambiguate.` }, { status: 409 });
     }
     const resolvedBrokerId = brokerMatches[0].id;
+    const { data: existingRepresentation, error: representationLookupError } = await supabaseAdmin
+      .from('property_broker_representations')
+      .select("id, status")
+      .eq("property_id", listingId)
+      .eq("broker_id", resolvedBrokerId)
+      .maybeSingle();
+    if (representationLookupError) return NextResponse.json({ error: "Representation service unavailable" }, { status: 503 });
+    if (existingRepresentation?.status === "active") return NextResponse.json({ error: "This broker already represents the property" }, { status: 409 });
+    if (existingRepresentation?.status === "locked" || existingRepresentation?.status === "suspended") return NextResponse.json({ error: "This broker is not currently eligible for a new representation request" }, { status: 409 });
+    if (!existingRepresentation) {
+      const { error: representationError } = await supabaseAdmin.from("property_broker_representations").insert({
+        property_id: listingId,
+        broker_id: resolvedBrokerId,
+        status: "pending",
+        source: "owner_invite",
+      });
+      if (representationError) return NextResponse.json({ error: "Failed to create representation request" }, { status: 503 });
+    }
 
     // 1. Insert the handshake deal first — rolled back below if the Connect spend fails
     const { data: dealData, error: dealError } = await supabaseAdmin.from('deals').insert([{

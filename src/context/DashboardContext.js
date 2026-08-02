@@ -28,6 +28,7 @@ const DEFAULT_CONTEXT_VALUE = {
   raiseQuest: async () => false,
   updateListing: async () => false,
   closeListing: async () => {},
+  permanentlyRemoveListing: async () => false,
   publishListing: async () => false,
   addListing: async () => {},
   bulkAddListings: async () => false,
@@ -442,33 +443,65 @@ export function DashboardProvider({ children }) {
     }
   };
 
+  // Withdraw is a recoverable off-market transition. Keep the legacy function
+  // name as an internal compatibility alias for Mission Control callers.
   const closeListing = async (listingId) => {
-    // Optimistic UI update
-    setListings(prev => prev.filter(l => l.id !== listingId));
-    addToast("Property File closed", "🏁");
-    
     try {
       const { data: { session } } = await supabase.auth.getSession();
       const token = session?.access_token || (currentUser?.id === 'master-dev' ? 'mock-e2e-token' : '');
-      
-      const res = await fetch("/api/dashboard/delete", {
+      const res = await fetch("/api/dashboard/archive", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify({ submissionId: listingId, userId: currentUser?.id })
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify({ submissionId: listingId }),
       });
-      
-      if (!res.ok) {
-        throw new Error("Delete failed on server");
-      }
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Withdrawal failed on server");
+      setListings(prev => prev.map((listing) => listing.id === listingId
+        ? { ...listing, pipelineStatus: "off_market", lifecycleState: "off_market", quietlyOpenToOffers: false }
+        : listing));
+      addToast("Property moved off-market", "◌");
+      return true;
     } catch (err) {
-      console.error("Failed to delete property", err);
-      addToast("Error deleting from database", "❌");
+      console.error("Failed to withdraw property", err);
+      addToast(err.message || "Error withdrawing property", "❌");
+      return false;
     }
   };
 
+  const permanentlyRemoveListing = async (listingId, confirmationTitle, password) => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user?.email || !password) {
+        throw new Error("Your account password is required for permanent removal");
+      }
+      const { data: reauthenticated, error: reauthError } = await supabase.auth.signInWithPassword({
+        email: session.user.email,
+        password,
+      });
+      if (reauthError || !reauthenticated?.session?.access_token) {
+        throw new Error("Password re-authentication failed");
+      }
+      const token = reauthenticated.session.access_token;
+      const res = await fetch("/api/dashboard/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify({
+          submissionId: listingId,
+          confirmationTitle,
+          confirmPermanentRemoval: true,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Permanent removal failed");
+      setListings(prev => prev.filter((listing) => listing.id !== listingId));
+      addToast("Listing removed from the market; history retained", "◌");
+      return true;
+    } catch (err) {
+      console.error("Failed to permanently remove property", err);
+      addToast(err.message || "Removal could not be completed", "❌");
+      return false;
+    }
+  };
   const publishListing = async (listingId) => {
     if (!currentUser?.id) return false;
     addToast("Syncing to live network...", "⏳");
@@ -1024,6 +1057,9 @@ export function DashboardProvider({ children }) {
       spaceCategory: p.space_category || p.type,
       details: p.details || {},
       pipelineStatus: p.pipeline_status || 'pending',
+      lifecycleState: p.lifecycle_state || null,
+      canonicalSlug: p.canonical_slug || p.slug || null,
+      quietlyOpenToOffers: p.quietly_open_to_offers === true,
       completenessScore: p.completeness_score ?? 50,
       verified: !!p.verified,
       coordinates: p.coordinates || null,
@@ -1055,6 +1091,7 @@ export function DashboardProvider({ children }) {
       updateListing,
       publishListing,
       closeListing,
+      permanentlyRemoveListing,
       sendPitch,
       inviteBroker,
       updatePitchStatus,

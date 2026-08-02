@@ -9,6 +9,18 @@ import { fetchWithRetry } from "./fetchWithRetry";
 import { DEEP_INTEL_SCHEMA } from "./deepIntelSchema";
 import { reverseMapCategoryFields } from "./propertyFieldMapping";
 
+
+export class AirtableRecordNotFoundError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = "AirtableRecordNotFoundError";
+    this.code = "AIRTABLE_RECORD_NOT_FOUND";
+  }
+}
+
+export function isAirtableRecordNotFoundError(error) {
+  return error?.code === "AIRTABLE_RECORD_NOT_FOUND";
+}
 const BASE_URL = "https://api.airtable.com/v0";
 
 // ── Deep Intelligence values (Airtable `DeepIntel_JSON` column) ─
@@ -556,7 +568,7 @@ export async function updateProperty(apiKey, baseId, slug, data, unitsOverride =
   
   const getResult = await resGet.json();
   if (!getResult.records || getResult.records.length === 0) {
-    throw new Error(`Airtable record with slug '${slug}' not found.`);
+    throw new AirtableRecordNotFoundError(`Airtable record with slug '${slug}' not found.`);
   }
   
   const recordId = getResult.records[0].id;
@@ -572,6 +584,9 @@ export async function updateProperty(apiKey, baseId, slug, data, unitsOverride =
   if (data.seo_title) fieldsToUpdate.SEO_Title = data.seo_title;
   if (data.seo_description) fieldsToUpdate.SEO_Description = data.seo_description;
   if (data.seo_json_ld) fieldsToUpdate.SEO_JSON_LD = data.seo_json_ld;
+  if (typeof data.approved_for_scoutit === "boolean") {
+    fieldsToUpdate.Approved_For_ScoutIt = data.approved_for_scoutit;
+  }
   if (unitsOverride) {
     fieldsToUpdate.Units_JSON = JSON.stringify(unitsOverride);
   } else if (data.details?.units_inventory) {

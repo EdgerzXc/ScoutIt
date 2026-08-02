@@ -3,9 +3,10 @@ import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { updateProperty } from "@/lib/airtable";
 import { z } from "zod";
-import { stripAllTags } from "@/lib/sanitize";
+import { sanitizeObject, stripAllTags } from "@/lib/sanitize";
 import { notifyAttachedBrokers } from "@/lib/notifications";
 import { sanitizeError } from "@/lib/sanitizeError";
+import { canChangeDisplayTitle, isPermanentlyRemoved, normalizeLifecycleState, PROPERTY_LIFECYCLE_STATES } from "@/lib/propertyLifecycle";
 
 // Price/status-ish keys across every category's details shape (Track 1,
 // PLAN_STAFF_ENTERPRISE_ANALYTICS_NOTIFICATIONS.md — "Price + status + units"
@@ -19,7 +20,8 @@ const updateSchema = z.object({
   title: z.string().max(255).optional(),
   type: z.string().max(100).optional(),
   location: z.string().max(255).optional(),
-  details: z.record(z.any()).optional()
+  details: z.record(z.any()).optional(),
+  quietly_open_to_offers: z.boolean().optional()
 });
 
 export async function POST(request) {
@@ -60,6 +62,9 @@ export async function POST(request) {
     }
 
     const validatedData = validationResult.data;
+    if (!supabaseAdmin) {
+      return NextResponse.json({ error: "Server error: missing service role configuration" }, { status: 500 });
+    }
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -83,12 +88,33 @@ export async function POST(request) {
       return NextResponse.json({ error: "Unauthorized: You do not own this property" }, { status: 403 });
     }
 
+    const lifecycleState = normalizeLifecycleState(currentSubmission);
+    if (isPermanentlyRemoved(currentSubmission)) {
+      return NextResponse.json({ error: "Permanently removed listings are retained and cannot be edited" }, { status: 410 });
+    }
+    if (validatedData.title !== undefined && stripAllTags(validatedData.title) !== currentSubmission.title && !canChangeDisplayTitle(currentSubmission)) {
+      return NextResponse.json({ error: "Live listing titles are locked to protect the canonical public URL" }, { status: 409, headers: { "Cache-Control": "no-store" } });
+    }
+    if (lifecycleState === PROPERTY_LIFECYCLE_STATES.LIVE &&
+        (!process.env.AIRTABLE_API_KEY || !process.env.AIRTABLE_BASE_ID)) {
+      return NextResponse.json(
+        { error: "Live property updates are unavailable while the Airtable CMS is unavailable", retryable: true },
+        { status: 503 }
+      );
+    }
+
     // Format the payload for Supabase, sanitizing string inputs
     const supabasePayload = {
       title: validatedData.title ? stripAllTags(validatedData.title) : currentSubmission.title,
       type: validatedData.type ? stripAllTags(validatedData.type) : currentSubmission.type,
       location: validatedData.location ? stripAllTags(validatedData.location) : currentSubmission.location
     };
+    if (typeof validatedData.quietly_open_to_offers === "boolean") {
+      if (lifecycleState !== PROPERTY_LIFECYCLE_STATES.OFF_MARKET) {
+        return NextResponse.json({ error: "Quietly open to offers is only available for off-market listings" }, { status: 409 });
+      }
+      supabasePayload.quietly_open_to_offers = validatedData.quietly_open_to_offers;
+    }
 
     // Merge details JSONB safely with deep recursive sanitization (e.g. units_inventory objects)
     if (validatedData.details) {
@@ -122,7 +148,7 @@ export async function POST(request) {
     // 2b. Broker-on-change alert — only for a watched price/status field
     // actually changing value, and only on already-approved (public)
     // properties, since that's the only state where an attached broker exists.
-    if (currentSubmission.pipeline_status === 'approved' && validatedData.details) {
+    if (lifecycleState === PROPERTY_LIFECYCLE_STATES.LIVE && validatedData.details) {
       const oldDetails = currentSubmission.details || {};
       const newDetails = supabasePayload.details || {};
       const touchedKeys = Object.keys(validatedData.details);
@@ -142,37 +168,25 @@ export async function POST(request) {
     }
 
     // 3. If approved, update Airtable too!
-    if (currentSubmission.pipeline_status === 'approved') {
+    if (lifecycleState === PROPERTY_LIFECYCLE_STATES.LIVE) {
       const apiKey = process.env.AIRTABLE_API_KEY;
       const baseId = process.env.AIRTABLE_BASE_ID;
 
       if (apiKey && baseId) {
         // The slug is derived from the original title
-        const slug = currentSubmission.slug || currentSubmission.title
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, "-")
-          .replace(/(^-|-$)/g, "");
+        const slug = currentSubmission.canonical_slug || currentSubmission.slug;
+        if (!slug) {
+          return NextResponse.json({ error: "Live property is missing its canonical slug" }, { status: 409 });
+        }
 
         try {
           console.log(`[UPDATE API] Syncing updates for slug ${slug} to Airtable...`);
-          const atResult = await updateProperty(apiKey, baseId, slug, supabasePayload);
+          await updateProperty(apiKey, baseId, slug, supabasePayload);
           
-          // If title edit changed Airtable's computed formula Slug, sync it back to Supabase
-          const updatedSlug = atResult?.fields?.Slug;
-          if (updatedSlug && updatedSlug !== currentSubmission.slug) {
-            console.log(`[UPDATE API] Title edit updated slug: ${currentSubmission.slug} -> ${updatedSlug}`);
-            await serviceClient
-              .from('properties')
-              .update({ slug: updatedSlug })
-              .eq('id', submissionId);
-          }
+          // Never replace the first-publication canonical slug with Airtable's formula result.
         } catch (airtableErr) {
           console.error("[UPDATE API] Airtable update failed:", airtableErr);
-          // Return success but with a warning, as Supabase succeeded
-          return NextResponse.json({ 
-            success: true, 
-            warning: "Supabase updated, but Airtable sync failed: " + airtableErr.message 
-          });
+          return NextResponse.json({ success: false, retryable: true, warning: "Supabase updated; Airtable sync is pending and can be retried: " + airtableErr.message }, { status: 502 });
         }
       } else {
         console.warn("[UPDATE API] Airtable credentials missing, skipping sync.");

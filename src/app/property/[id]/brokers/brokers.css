@@ -569,3 +569,43 @@
   }
 }
 
+
+.property-roster-list {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.roster-empty-state {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 32px;
+  color: var(--text-secondary);
+  background: color-mix(in srgb, var(--surface) 80%, transparent);
+  border: 1px solid var(--accent-muted);
+  border-radius: 6px;
+  text-align: center;
+  font-family: var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.roster-empty-state h2 {
+  color: var(--on-surface);
+  font-size: 16px;
+  margin: 0 0 10px;
+}
+
+.roster-empty-state p {
+  font-family: Georgia, serif;
+  letter-spacing: 0;
+  text-transform: none;
+  line-height: 1.7;
+  margin: 0 auto 22px;
+  max-width: 520px;
+}
+
+.form-error-alert {
+  color: var(--error, #ef6b6b);
+  font-size: 12px;
+  line-height: 1.5;
+}

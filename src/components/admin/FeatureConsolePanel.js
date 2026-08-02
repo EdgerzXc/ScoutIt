@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { ShieldAlert, Unlock, Bot, Brain, AlertTriangle, RefreshCw, CheckCircle2, XCircle } from "lucide-react";
 import { sanitizeError } from "@/lib/sanitizeError";
@@ -15,13 +15,13 @@ export default function FeatureConsolePanel() {
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [pendingFlagToggle, setPendingFlagToggle] = useState(null);
 
-  async function authHeaders() {
+  const authHeaders = useCallback(async () => {
     const { data: { session } } = await supabase.auth.getSession();
     const token = session?.access_token;
     return { "Content-Type": "application/json", "Authorization": token ? `Bearer ${token}` : "" };
-  }
+  }, []);
 
-  async function fetchFlags() {
+  const fetchFlags = useCallback(async () => {
     setLoading(true);
     setMessage(null);
     try {
@@ -35,11 +35,11 @@ export default function FeatureConsolePanel() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [authHeaders]);
 
   useEffect(() => {
     fetchFlags();
-  }, []);
+  }, [fetchFlags]);
 
   const handleToggleClick = (flag) => {
     const nextState = !flag.is_enabled;

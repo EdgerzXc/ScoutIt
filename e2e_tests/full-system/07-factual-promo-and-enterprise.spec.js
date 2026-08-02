@@ -11,34 +11,30 @@ const {
   trackErrors,
   expectRealContent,
   gotoAndSettle,
+  getCommercialListing,
+  openYourMove,
 } = require('./helpers');
 
 const BASE = 'http://localhost:3000';
 
-// One live commercial star property (Airtable, read-only).
-const COMMERCIAL_SLUG = 'cyber-sigma-tower-3';
-
-// Share / Promote / Monthly Cost Sandbox all live inside the "Your Move"
-// chapter panel, which is hidden until its tab is activated.
-async function openYourMove(page) {
-  const tab = page.getByRole('tab', { name: /Your Move/i }).first();
-  await expect(tab).toBeVisible({ timeout: 15000 });
-  await tab.click();
+function escapeRegex(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 test.describe('Factual share & promote pipeline', () => {
-  test('Share button opens a briefing built from real listing data', async ({ page }) => {
+  test('Share button opens a briefing built from real listing data', async ({ page, request }) => {
     const errors = trackErrors(page);
-    await gotoAndSettle(page, `${BASE}/property/${COMMERCIAL_SLUG}`);
+    const listing = await getCommercialListing(request);
+    await gotoAndSettle(page, `/property/${listing.slug}`);
     await expectRealContent(page);
-    await openYourMove(page);
+    const yourMovePanel = await openYourMove(page);
 
-    await page.getByRole('button', { name: /^Share$/i }).first().click();
+    await yourMovePanel.getByRole('button', { name: /^Share$/i }).click();
     const briefing = page.locator('textarea[readonly]');
     await expect(briefing).toBeVisible({ timeout: 10000 });
     const text = await briefing.inputValue();
     expect(text).toContain('MARKET INTELLIGENCE BRIEFING');
-    expect(text).toContain('Cyber Sigma Tower 3');
+    expect(text).toContain(listing.title);
     // No money in share copy (compliance).
     expect(text).not.toMatch(/₱|PHP/);
 
@@ -46,26 +42,25 @@ test.describe('Factual share & promote pipeline', () => {
     expect(errors).toEqual([]);
   });
 
-  test('AI Promote modal produces grounded copy (AI or fact sheet)', async ({ page }) => {
+  test('AI Promote modal produces grounded copy (AI or fact sheet)', async ({ page, request }) => {
     test.setTimeout(90000);
     // Deterministic suite: force the fact-sheet path — the live AI call is
     // rate-limited/slow and belongs in targeted checks, not a parallel suite.
     await page.route('**/api/ai/promote', (route) =>
       route.continue({ headers: { ...route.request().headers(), 'x-skip-ai': '1' } })
     );
-    await gotoAndSettle(page, `${BASE}/property/${COMMERCIAL_SLUG}`);
+    const listing = await getCommercialListing(request);
+    await gotoAndSettle(page, `/property/${listing.slug}`);
     await expectRealContent(page);
-    await openYourMove(page);
+    const yourMovePanel = await openYourMove(page);
 
-    await page.getByRole('button', { name: /AI Promote/i }).click();
+    await yourMovePanel.getByRole('button', { name: /AI Promote/i }).click();
     await expect(
       page.getByText(/verified listing data/i).first()
     ).toBeVisible({ timeout: 30000 });
-    // Match the modal's generated copy ("Cyber Sigma Tower 3 — Commercial …"),
-    // not the bare property name: a plain /Cyber Sigma Tower 3/ .first()
-    // resolves to the desktop hero <h1>, which is intentionally hidden on
-    // mobile (the mobile-hero-title h1 replaces it) and fails Mobile Chrome.
-    await expect(page.getByText(/Cyber Sigma Tower 3 —/).first()).toBeVisible();
+    // Match generated copy containing the live listing title plus its em dash,
+    // not the bare title: the desktop hero is intentionally hidden on mobile.
+    await expect(page.getByText(new RegExp(`${escapeRegex(listing.title)}\\s+—`)).first()).toBeVisible();
   });
 
   test('promote API answers factually even for a synthetic property', async ({ request }) => {
@@ -95,13 +90,14 @@ test.describe('Factual share & promote pipeline', () => {
 });
 
 test.describe('Monthly Cost Sandbox (BYO-data)', () => {
-  test('renders in Your Move and totals user-typed bills', async ({ page }) => {
+  test('renders in Your Move and totals user-typed bills', async ({ page, request }) => {
     const errors = trackErrors(page);
-    await gotoAndSettle(page, `${BASE}/property/${COMMERCIAL_SLUG}`);
+    const listing = await getCommercialListing(request);
+    await gotoAndSettle(page, `/property/${listing.slug}`);
     await expectRealContent(page);
-    await openYourMove(page);
+    const yourMovePanel = await openYourMove(page);
 
-    const sandbox = page.getByTestId('monthly-cost-sandbox');
+    const sandbox = yourMovePanel.getByTestId('monthly-cost-sandbox');
     await sandbox.scrollIntoViewIfNeeded();
     await expect(sandbox).toBeVisible();
 
@@ -114,8 +110,9 @@ test.describe('Monthly Cost Sandbox (BYO-data)', () => {
 });
 
 test.describe('Honest listing claims (RA 9646)', () => {
-  test('property page never asserts an unconditional "Verified broker"', async ({ page }) => {
-    await gotoAndSettle(page, `${BASE}/property/${COMMERCIAL_SLUG}`);
+  test('property page never asserts an unconditional "Verified broker"', async ({ page, request }) => {
+    const listing = await getCommercialListing(request);
+    await gotoAndSettle(page, `/property/${listing.slug}`);
     await expectRealContent(page);
     // Old fake claim: bare "Verified broker". New states: "PRC Verified broker"
     // (data-gated) or the neutral "ScoutIt roster".

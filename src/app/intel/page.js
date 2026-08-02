@@ -49,7 +49,7 @@ const MOCK_CATEGORIES = {
 
 export default function IntelPage() {
   const router = useRouter();
-  const [filter, setFilter] = useState("ALL DISPATCHES");
+  const [filter, setFilter] = useState("All Dispatches");
   const [searchQuery, setSearchQuery] = useState("");
   const [featuredIndex, setFeaturedIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);

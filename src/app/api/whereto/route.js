@@ -21,9 +21,13 @@ const MIN_RADIUS = 300;
 const MAX_RADIUS = 3000;
 
 export async function GET(req) {
-  try {
-    const params = new URL(req.url).searchParams;
+  // Request properties are intentionally read outside the catch block. Next
+  // uses this access to classify the handler as dynamic during prerendering;
+  // catching that framework signal makes a healthy production build log a
+  // false API failure.
+  const params = new URL(req.url).searchParams;
 
+  try {
     const lat = Number(params.get("lat"));
     const lon = Number(params.get("lon"));
 

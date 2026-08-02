@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolveUserId } from "@/lib/serverAuth";
 import { sanitizeError } from "@/lib/sanitizeError";
+import { isRoutedDealRecipient } from "@/lib/dealParty";
 
 // Same dev-mock convention as /api/notifications and /api/dashboard/units --
 // ?mockOwnerId=master-dev only takes effect when no real Bearer token was
@@ -27,10 +28,13 @@ export async function POST(request, { params }) {
 
     if (dealError || !deal) return NextResponse.json({ error: "Deal not found" }, { status: 404 });
 
+    const isRoutedRecipient = await isRoutedDealRecipient(supabaseAdmin, dealId, userId);
+
     const isParty =
       deal.buyer_id === userId ||
       deal.broker_id === userId ||
-      deal.properties?.owner_id === userId;
+      deal.properties?.owner_id === userId ||
+      isRoutedRecipient;
 
     if (!isParty) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 

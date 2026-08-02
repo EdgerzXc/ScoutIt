@@ -2,7 +2,7 @@
 // read the chapters → save it to the private Ledger (device-only, safe).
 // No inquiries are ever submitted — that would write real deals rows.
 import { test, expect } from '@playwright/test';
-import { trackErrors, expectRealContent, gotoAndSettle } from './helpers';
+import { trackErrors, expectRealContent, gotoAndSettle, openYourMove } from './helpers';
 
 test.describe('Discovery engine', () => {
   test('discover page renders spotlight cards and switches categories', async ({ page }) => {
@@ -63,17 +63,24 @@ test.describe('Property directory + briefing page', () => {
 
     // The chapter-registry system: a Your Move chapter must exist. Prices are
     // ONLY allowed inside Your Move (owner-verified) — never on cards.
-    const yourMove = page
-      .getByRole('tab', { name: /your move/i })
-      .or(page.getByText(/your move/i))
-      .first();
-    await expect(yourMove).toBeVisible({ timeout: 20000 });
-    await yourMove.click();
+    const yourMovePanel = await openYourMove(page);
 
     // After opening Your Move, the page must still be alive (no crash) and
     // show either a verified price context or an honest blank — never NaN.
     const bodyText = await page.locator('body').innerText();
     expect(bodyText).not.toMatch(/NaN|undefined₱|₱undefined/);
+
+    // Opening the contact surface covers the last safe step of the buyer
+    // journey. Stop before spending a Connect or submitting an inquiry.
+    const connectButton = yourMovePanel
+      .getByRole('button', { name: /connect with an authorized broker/i })
+      .first();
+    await expect(connectButton).toBeVisible({ timeout: 15000 });
+    await connectButton.click();
+    const inquiryDialog = page.getByRole('dialog', { name: /contact the owner/i });
+    await expect(inquiryDialog).toBeVisible();
+    await inquiryDialog.getByRole('button', { name: 'Close' }).click();
+    await expect(inquiryDialog).toBeHidden();
 
     expect(errors, errors.join('\n')).toEqual([]);
   });

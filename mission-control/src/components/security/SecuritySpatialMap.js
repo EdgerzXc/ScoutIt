@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Flame, ShieldAlert, Layers, MapPin, Radio, Smartphone, Search, AlertCircle, Clock, TrendingUp } from "lucide-react";
 
 export default function SecuritySpatialMap({ velocityData = [], flaggedData = [], history30dData = [], blockedHashes = [] }) {
@@ -10,28 +10,36 @@ export default function SecuritySpatialMap({ velocityData = [], flaggedData = []
   const [activeFilter, setActiveFilter] = useState("all");
   const [timeRange, setTimeRange] = useState("5m"); // 5m | 1h | 24h | 7d | 30d | all
   const [leafletLoaded, setLeafletLoaded] = useState(false);
+  const [clockNow, setClockNow] = useState(() => new Date().getTime());
+
+  useEffect(() => {
+    const timer = setInterval(() => setClockNow(new Date().getTime()), 60 * 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   // Time range calculation cutoff date
-  const cutoffDate = (() => {
-    const now = Date.now();
-    if (timeRange === "5m") return now - 5 * 60 * 1000; // Real-time Live (Last 5 minutes)
-    if (timeRange === "1h") return now - 60 * 60 * 1000; // Last 1 hour
-    if (timeRange === "24h") return now - 24 * 60 * 60 * 1000;
-    if (timeRange === "7d") return now - 7 * 24 * 60 * 60 * 1000;
-    if (timeRange === "30d") return now - 30 * 24 * 60 * 60 * 1000;
+  const cutoffDate = useMemo(() => {
+    if (timeRange === "5m") return clockNow - 5 * 60 * 1000; // Real-time Live (Last 5 minutes)
+    if (timeRange === "1h") return clockNow - 60 * 60 * 1000; // Last 1 hour
+    if (timeRange === "24h") return clockNow - 24 * 60 * 60 * 1000;
+    if (timeRange === "7d") return clockNow - 7 * 24 * 60 * 60 * 1000;
+    if (timeRange === "30d") return clockNow - 30 * 24 * 60 * 60 * 1000;
     return 0; // All time
-  })();
+  }, [clockNow, timeRange]);
 
   // Filter raw records by 30-day time range window
-  const rawPool = history30dData.length > 0 ? history30dData : [...velocityData, ...flaggedData];
-  const timeFilteredRecords = rawPool.filter((item) => {
+  const rawPool = useMemo(
+    () => history30dData.length > 0 ? history30dData : [...velocityData, ...flaggedData],
+    [history30dData, velocityData, flaggedData],
+  );
+  const timeFilteredRecords = useMemo(() => rawPool.filter((item) => {
     if (!cutoffDate) return true;
-    const logTime = new Date(item.last_request_at || item.first_seen_at || Date.now()).getTime();
+    const logTime = new Date(item.last_request_at || item.first_seen_at || clockNow).getTime();
     return logTime >= cutoffDate;
-  });
+  }), [clockNow, cutoffDate, rawPool]);
 
   // Group location nodes, device counts, search intent, & friction records
-  const { geoPoints, searchIntents, frictionPoints } = (() => {
+  const { geoPoints, searchIntents, frictionPoints } = useMemo(() => {
     const locationMap = new Map();
     const searches = [];
     const frictions = [];
@@ -93,14 +101,14 @@ export default function SecuritySpatialMap({ velocityData = [], flaggedData = []
     }));
 
     return { geoPoints: points, searchIntents: searches, frictionPoints: frictions };
-  })();
+  }, [timeFilteredRecords]);
 
-  const filteredPoints = geoPoints.filter((p) => {
+  const filteredPoints = useMemo(() => geoPoints.filter((p) => {
     if (activeFilter === "ph") return p.country === "PH";
     if (activeFilter === "intl") return p.country !== "PH";
     if (activeFilter === "flagged") return p.isFlagged;
     return true;
-  });
+  }), [activeFilter, geoPoints]);
 
   const totalDevices = geoPoints.reduce((sum, p) => sum + p.deviceCount, 0);
   const totalRequests = geoPoints.reduce((sum, p) => sum + p.reqCount, 0);
@@ -202,7 +210,7 @@ export default function SecuritySpatialMap({ velocityData = [], flaggedData = []
         mapInstanceRef.current = null;
       }
     };
-  }, [leafletLoaded, activeFilter, timeRange, velocityData, history30dData]);
+  }, [filteredPoints, leafletLoaded, timeRange]);
 
   return (
     <div className="bg-[#121212] border border-white/5 rounded-xl p-6 space-y-6">

@@ -33,24 +33,35 @@ export async function GET(request) {
     // deduped below. No FK from buyer_id/broker_id/owner_id to a users
     // table (they're plain text columns), so this can't be one query with
     // an embedded join filter on the owner side; run it separately instead.
-    const [asBuyer, asBroker, asOwner] = await Promise.all([
+    const { data: routedRecipients, error: routedRecipientsError } = await supabaseAdmin
+      .from("deal_routing_recipients")
+      .select("deal_id")
+      .eq("recipient_id", userId);
+    if (routedRecipientsError) {
+      console.error("[DEALS API] Routed recipient lookup error:", routedRecipientsError);
+      return NextResponse.json({ error: "Failed to load routed conversations" }, { status: 503 });
+    }
+    const routedDealIds = [...new Set((routedRecipients || []).map((row) => row.deal_id).filter(Boolean))];
+
+    const [asBuyer, asBroker, asOwner, asRouted] = await Promise.all([
       supabaseAdmin.from("deals").select(DEAL_FIELDS).eq("buyer_id", userId),
       supabaseAdmin.from("deals").select(DEAL_FIELDS).eq("broker_id", userId),
       supabaseAdmin.from("deals").select(DEAL_FIELDS).eq("properties.owner_id", userId).not("properties", "is", null),
+      routedDealIds.length ? supabaseAdmin.from("deals").select(DEAL_FIELDS).in("id", routedDealIds) : Promise.resolve({ data: [], error: null }),
     ]);
 
-    const failed = [asBuyer, asBroker, asOwner].find((r) => r.error);
+    const failed = [asBuyer, asBroker, asOwner, asRouted].find((r) => r.error);
     if (failed) {
       console.error("[DEALS API] GET error:", failed.error);
       return NextResponse.json({ error: "Failed to load conversations" }, { status: 500 });
     }
 
     const byId = new Map();
-    for (const row of [...(asBuyer.data || []), ...(asBroker.data || []), ...(asOwner.data || [])]) {
+    for (const row of [...(asBuyer.data || []), ...(asBroker.data || []), ...(asOwner.data || []), ...(asRouted.data || [])]) {
       // The owner-side query embeds properties via an inner-filtered join;
       // rows where the filter didn't match come back with properties: null
       // from Supabase's left-join default -- skip those defensively.
-      if (row.properties?.owner_id === userId || row.buyer_id === userId || row.broker_id === userId) {
+      if (routedDealIds.includes(row.id) || row.properties?.owner_id === userId || row.buyer_id === userId || row.broker_id === userId) {
         byId.set(row.id, row);
       }
     }
@@ -99,7 +110,7 @@ export async function GET(request) {
 
     const result = deals
       .map((d) => {
-        const myRole = d.buyer_id === userId ? "buyer" : d.broker_id === userId ? "broker" : "owner";
+        const myRole = d.buyer_id === userId ? "buyer" : d.broker_id === userId ? "broker" : d.properties?.owner_id === userId ? "owner" : "broker";
         const otherId = myRole === "buyer" ? (d.broker_id || d.properties?.owner_id) : myRole === "broker" ? d.properties?.owner_id : (d.broker_id || d.buyer_id);
         const otherRoleLabel = myRole === "buyer" ? (d.broker_id ? "Broker" : "Owner") : myRole === "broker" ? "Owner" : (d.broker_id ? "Broker" : "Buyer");
         return {

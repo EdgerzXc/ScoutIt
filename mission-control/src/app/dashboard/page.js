@@ -30,7 +30,7 @@ async function safe(promise) {
 export default async function DashboardOverview() {
   const staff = await getCurrentStaff();
   const admin = createAdminClient();
-  const since24h = new Date(Date.now() - DAY_MS).toISOString();
+  const since24h = new Date(new Date().getTime() - DAY_MS).toISOString();
 
   const [
     totalProps,

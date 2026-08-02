@@ -387,6 +387,21 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
   const [propertyData, setPropertyData] = useState(() => draftData || initialData || null);
   const [dataLoading,  setDataLoading]  = useState(() => !draftData && !initialData);
   const [isOwner, setIsOwner] = useState(false);
+  const [propertyRoster, setPropertyRoster] = useState([]);
+  const [rosterLoaded, setRosterLoaded] = useState(false);
+  const [rosterUnavailable, setRosterUnavailable] = useState(false);
+  useEffect(() => {
+    if (isDraftMode || !slug) return undefined;
+    let cancelled = false;
+    fetch(`/api/property/${encodeURIComponent(slug)}/brokers`, { cache: "no-store" })
+      .then((response) => response.ok ? response.json() : null)
+      .then((data) => {
+        if (!cancelled) setPropertyRoster(Array.isArray(data?.brokers) ? data.brokers : []);
+      })
+      .catch(() => { if (!cancelled) { setPropertyRoster([]); setRosterUnavailable(true); } })
+      .finally(() => { if (!cancelled) setRosterLoaded(true); });
+    return () => { cancelled = true; };
+  }, [slug, isDraftMode]);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [whereToTab,        setWhereToTab]        = useState("map");
   const [isochroneData,     setIsochroneData]     = useState(null);
@@ -553,7 +568,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
   const photos = useMemo(() => {
     const rawP = (Array.isArray(d?.photos) ? d.photos : [d?.photo || d?.image]).filter(p => typeof p === "string" && p.trim().length > 0);
     return rawP.length > 0 ? rawP : ["https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2070&auto=format&fit=crop"];
-  }, [d?.photos, d?.photo, d?.image]);
+  }, [d]);
 
   const brokerInitials = useMemo(() => {
     return (d?.broker_name || " ").split(" ").map(p => p[0]).join("").slice(0, 2).toUpperCase();
@@ -2450,23 +2465,13 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
 
               <div style={{height:"1px", background:"#262626", margin:"28px 0 24px"}}/>
 
-              <div style={{marginTop:"0"}}>
-                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.15em", textTransform:"uppercase", marginBottom:"12px"}}>Assigned Representative</div>
-                <div className="broker-card">
-                  <div className="broker-avatar">{brokerInitials}</div>
-                  <div className="broker-info">
-                    <div className="broker-name-el">{d.broker_name}</div>
-                    <div className="broker-meta">Direct Listing</div>
-                    {/* "PRC Verified" is a staff-checked credential claim — never
-                        assert it unconditionally (RA 9646). */}
-                    {d.brokerLicenseVerified ? (
-                      <div className="broker-rating" style={{color:"#4caf7d"}}>PRC Verified broker</div>
-                    ) : (
-                      <div className="broker-rating" style={{color:"var(--text-secondary)"}}>ScoutIt roster</div>
-                    )}
-                  </div>
+              {rosterLoaded && (
+                <div style={{ marginTop: "0", padding: "16px", border: "1px solid var(--accent-muted)", borderRadius: "4px", background: "rgba(232,174,60,0.03)" }}>
+                  <div style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--accent)", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "8px" }}>Current Property Representation</div>
+                  <div style={{ fontFamily: "Georgia,serif", fontSize: "16px", color: "var(--on-surface)" }}>{rosterUnavailable ? "Representation status unavailable" : propertyRoster.length > 0 ? `${propertyRoster.length} active authorized broker${propertyRoster.length === 1 ? "" : "s"}` : "Unrepresented — uploader / lister route"}</div>
+                  <Link href={`/property/${slug || "batasan-hills"}/brokers`} style={{ display: "inline-block", marginTop: "10px", color: "var(--accent-bright)", fontFamily: "var(--font-mono)", fontSize: "10px", letterSpacing: "0.1em", textTransform: "uppercase" }}>View current roster →</Link>
                 </div>
-              </div>
+              )}
 
               <button onClick={() => setIsInquiryOpen(true)} className="move-cta hover-glow active:scale-[0.98] transition-all" style={{textDecoration:"none", marginTop:"16px", width:"100%", background: "#E8AE3C", color: "#000", border: "none", padding: "16px", fontFamily: "Georgia, serif", fontSize: "16px", cursor: "pointer", borderRadius: "4px"}}>
                 Connect with an Authorized Broker →

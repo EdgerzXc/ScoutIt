@@ -2,10 +2,52 @@
 section: "00_META"
 status: active
 tags: [master-sync, north-star, build-queue, decision-log, always-current]
-updated: 2026-07-30
-related: ["[[SESSION_HANDOFF_2026-07-30]]", "[[00_START_HERE]]", "[[NEXT_DAY_HANDOFF]]", "[[PRE_LAUNCH_BUILD_LIST]]", "[[SCOUTIT_FIX_LIST]]", "[[13_EXTERNAL_INPUTS/README|External Inputs README]]"]
+updated: 2026-08-02
+related: ["[[SCOUTIT_FULL_WORKFLOW]]", "[[SESSION_HANDOFF_2026-07-30]]", "[[00_START_HERE]]", "[[NEXT_DAY_HANDOFF]]", "[[PRE_LAUNCH_BUILD_LIST]]", "[[SCOUTIT_FIX_LIST]]", "[[13_EXTERNAL_INPUTS/README|External Inputs README]]"]
 ---
 
+> ✅ **2026-08-02 workflow locked and owner-reconfirmed:**
+> [[SCOUTIT_FULL_WORKFLOW]] now defines the complete platform, listing, URL,
+> Connect, off-market, and retention lifecycle. Owner-authored listings publish
+> after owner attestation; only ScoutIt-created PDF drafts require source
+> verification. Canonical URLs freeze on first publication. Withdraw creates
+> recoverable Cluster/Universe off-market inventory. Permanently Remove Listing
+> ends market access but retains internal history, the reserved URL, and
+> ScoutIt-owned Spatial Vault/3D assets. Connect spend order is monthly
+> (expiring) → purchased (permanent) → reward (permanent), with no automatic
+> refund for decline, non-response, or timeout.
+>
+> ✅ **2026-08-02 full-site logic follow-up:** initial inquiries route to the
+> lister until accepted broker relationships exist; leads never reassign
+> automatically. Off-market contact requires Quietly open to offers. Closed chat
+> messages retain a seven-day read-only window before purge, with reported-chat
+> holds. Monthly Connects are role-scoped while purchased/reward Connects are
+> permanent account-wide balances. At-cap broker invites still spend and remain
+> Pending. Subscription placement, badges, and Scout Rating remain separate.
+> Pre-200 premium features are free behind a Master Mission Control locker.
+> Scout Rating counts the completed two-sided buyer–broker transaction handshake
+> inside ScoutIt after viewing; the owner–broker representation handshake does
+> not count, and an off-platform success without the transaction handshake earns
+> no ScoutIt count or incentive.
+> One account may hold multiple independently tiered roles and multiple provider
+> specialties; Event Designer and Event Planner are distinct. Initial launch
+> operations are Seeker, Owner, and verified Broker. Provider/Operator service
+> actions remain profile/waitlist-only until their real workflows are ready.
+> Before 200 listings, Connect actions still consume free monthly Connects for
+> anti-spam/economy testing; purchases stay disabled and Mission Control may top
+> up balances. Starry Seekers may spend their monthly Connect to contact brokers
+> on represented properties. Once any active, visible, contactable broker is on
+> a property, new buyer leads route only to that broker roster—not the owner—while older
+> owner leads remain assigned. Initial geography is Philippines-wide.
+>
+> ✅ **2026-08-01 repository reconciliation:** the canonical E2E suite is now the
+> only default Playwright surface (**83 tests × desktop/mobile = 166**); useful
+> calendar, owner-editor, and buyer-contact coverage was merged before 15 legacy
+> specs and generated artifacts were removed. The repo README, lint/CI commands,
+> framework versions, design tokens, architecture, and user-flow docs now match
+> runtime reality. `Dump/` is empty again; its one unique Asset Command Center
+> idea was merged into `NEW_IDEAS.md` §32.
+>
 > ✅ **B1/B3/B4/B5 are CLEARED (2026-07-30, Claude Code).** The 2026-07-30 fixes are
 > committed (`8046b30`), pushed, and **live on both Vercel projects** — verified in production,
 > not just in a build log. The toolchain ran for the first time: **399/399 tests, build green,
@@ -43,32 +85,56 @@ related: ["[[SESSION_HANDOFF_2026-07-30]]", "[[00_START_HERE]]", "[[NEXT_DAY_HAN
 
 ## 1. North Star
 
-**200 real, approved property listings before the subscriptions and Connects economy go live.**
-One city, one category (residential) first. Prove the model, then expand. (Source:
-[[PRE_LAUNCH_BUILD_LIST]], confirmed with the owner 2026-06-26 — still the standing target.)
+**200 real, approved property listings before normal subscription paywalls and
+paid operations go live.** Before that threshold, premium features are free and
+controlled by a Master Mission Control locker. ScoutIt must remain geography-
+and category-flexible rather than hard-coding one launch city; promotion may
+focus wherever useful inventory and demand develop.
+
+> **Canonical launch execution update — 2026-08-02:** use
+> [[LAUNCH_READINESS_MASTER_PLAN]] for the ordered build and acceptance gates.
+> ScoutIt does not own its custom domain and is not yet on the paid Vercel/
+> Supabase production plans. Finish code, migrations, mobile QA, baseline
+> security, and the pre-launch [[MONTHLY_SCOUT_WRAP_IMPLEMENTATION_PLAN]] now;
+> domain purchase and paid provider controls remain founder budget actions near
+> launch. The older [[PRE_LAUNCH_BUILD_LIST]] is stale historical context.
 
 ## 2. Active Build Queue (top items, in order)
 
-Pulled from [[PRE_LAUNCH_BUILD_LIST]] + [[SCOUTIT_FIX_LIST]] + [[NEXT_DAY_HANDOFF]]'s latest entry.
-Update this list's status in place as items move — don't just append more.
+This table now mirrors [[LAUNCH_READINESS_MASTER_PLAN]]. Completed historical
+work remains recorded later in this file; it is not the current execution
+queue. Update package state in the canonical plan first, then mirror it here.
 
-| # | Task | Status | Source |
+| Order | Package | State | Canonical acceptance source |
 |---|---|---|---|
-| 1 | Persistent Device Telemetry & Ingest API (`scout_did` UUIDs, search intent, friction tracking) | ✅ **Done 2026-07-30** — `src/lib/deviceTracker.js`, `<DeviceTracker />`, `/api/telemetry/device` pushed to `origin/main` | [[NEW_IDEAS]] 2026-07-30 |
-| 2 | Master Mission Control Spatial Map & 30-Day History HUD (`<SecuritySpatialMap />`) | ✅ **Done 2026-07-30** — Dark Leaflet spatial map instance, 30-day time filters, search demand & friction drop-off HUD | [[NEW_IDEAS]] 2026-07-30 |
-| 3 | Main Site Feature Flag Enforcement (`src/middleware.js`) | ✅ **Done 2026-07-30** — `global_read_only` maintenance switch, `ai_search` gate, and `deep_intel` gate active | [[NEW_IDEAS]] 2026-07-30 |
-| 4 | 1-Click Audit Log Revert Engine (`/dashboard/audit`) | ✅ **Done 2026-07-30** — Staff `[Revert]` Server Actions for rolling back moderation status, IP bans, and verification states | [[NEW_IDEAS]] 2026-07-30 |
-| 5 | Disputes Hub & RESA Law (RA 9646) Compliance Panel (`/dashboard/disputes`) | ✅ **Done 2026-07-30** — Double-blind dispute resolution workspace with RESA Law Sec. 29/31 compliance guidance | [[NEW_IDEAS]] 2026-07-30 |
-| 6 | Security hardening completion (RLS tightening, input validation, `mockOwnerId` client-trusted-ID reads) | ✅ **Done 2026-07-09** — `mockOwnerId` gated in 17 routes, RLS permissive-policy reset executed and verified clean via advisor | [[NEXT_DAY_HANDOFF]] 2026-07-05 Part 2; [[VULNERABILITY_AUDIT_2026-06-26]] 2026-07-09 |
-| 7 | Real-user signup → transaction chain (onboarding roles/columns/wallet/session, broker pitch, owner accept, buyer inquiry) | ✅ **Done 2026-07-11** — live 3-role rehearsal with real accounts found + fixed 14 real bugs, commit `a1d0217` (see [[SESSION_HANDOFF_2026-07-11]]) | this file §3 2026-07-11 |
-| 8 | Dual-CMS slug drift (3 live properties' Contact broken) | ✅ **Done 2026-07-11** — data fixed with owner approval + publish route now syncs Airtable's computed Slug back, drift can't recur | [[SESSION_HANDOFF_2026-07-11]] |
-| 8b | Shared Airtable write mapping (W3) + `Floor_Plans` wired (F2) | ✅ **Done 2026-07-30** — commit `8046b30`, live on both projects; `floorPlans` confirmed present in the production `/api/cms` response. ⚠️ **the staff-side half is still unshipped — see B6** | [[NEW_IDEAS_TO_CLAUDE_CODE]] B5 |
-| 9 | Property & Unit Master Page High-Performance Optimization (`UnitMasterPage.js`, `CommercialFlow.js`, `ResidentialFlow.js`, `property-detail.css`) | ✅ **Done 2026-07-30** — Hardware GPU composite acceleration, top-level React hook memoization, responsive image sizing, 5s auto-advance, direct photo click zoom, `user-select: text` copy protection, compact 28px action pill UI, redundant button purge, and rich SEO ALT metadata pushed to `origin/main` | User Request 2026-07-30 |
-| 10 | CSV Bulk Importer — wire `/api/dashboard/bulk-insert` to real Supabase storage | Pending | [[PRE_LAUNCH_BUILD_LIST]] #1 |
-| 11 | PDF Concierge (Feature A) — replace mock with real Gemini 2.5 Flash extraction | Pending | [[PRE_LAUNCH_BUILD_LIST]] #2 |
+| 1 | LR-01 — property URL and lifecycle safety | DONE | [[LAUNCH_READINESS_MASTER_PLAN]] LR-01 |
+| 1b | LR-05 — auth, listing trust, PDF verification, and reproducible schema | READY in parallel | [[LAUNCH_READINESS_MASTER_PLAN]] LR-05 |
+| 2 | LR-02 — broker roster, visibility, and lead routing | FOUNDER ACTION | [[LAUNCH_READINESS_MASTER_PLAN]] LR-02 |
+| 3 | LR-03 — hybrid Connect wallet and server-side tiers | WAITING ON LR-02 CONTRACTS | [[LAUNCH_READINESS_MASTER_PLAN]] LR-03 |
+| 4 | LR-04 — two handshakes, chat closure, disputes, and retention | WAITING ON LR-02/LR-03 | [[LAUNCH_READINESS_MASTER_PLAN]] LR-04 |
+| 5 | MW-01 — Monthly Scout Wrap metric/event contract | READY in parallel | [[MONTHLY_SCOUT_WRAP_IMPLEMENTATION_PLAN]] MW-01 |
+| 6 | LR-06/LR-07 — analytics foundation and complete Monthly Scout Wrap | WAITING ON CORE EVENT SEMANTICS | [[MONTHLY_SCOUT_WRAP_IMPLEMENTATION_PLAN]] |
+| 7 | LR-08 — mobile polish and honest-data sweep | WAITING ON CORE FLOWS | [[LAUNCH_READINESS_MASTER_PLAN]] LR-08 |
+| 8 | LR-09 — complete launch verification and invited pilot | BLOCKED UNTIL LR-01–LR-08 PASS | [[LAUNCH_READINESS_MASTER_PLAN]] LR-09 |
+| 9 | LR-10/LR-11 — domain, paid infrastructure, and paid-mode activation | FOUNDER ACTION NEAR LAUNCH/AT 200 | [[FOUNDER_LAUNCH_BUDGET_CHECKLIST]] |
+
+> **2026-08-02 LR-01 implementation checkpoint — DONE:** lifecycle-safe publish/update/withdraw/remove code, additive migration (`20260802000001_property_lifecycle_safety.sql`), server-gated off-market reads/contact, password re-authentication, mobile Danger Zone controls, unit tests (426/426), Playwright browser tests (4/4 passed), lint, and production build (102/102 routes) are complete. SQL migration executed by founder in Supabase. Live title edits remain locked until an immutable Airtable field or staff redirect migration path is deployed.
+
+> **2026-08-02 LR-02 implementation checkpoint:** local property-scoped representation state, deterministic roster routing, routed-deal recipient access, logged-out inquiry routing, property roster UI, focused tests, lint, and build are complete. The package remains **FOUNDER ACTION** until `supabase/migrations/20260802000002_broker_representation_routing.sql` is reviewed and applied to the approved environment. New routing paths fail closed while that migration is pending.
 
 ## 3. Decision Log (highlights — full log lives in [[00_START_HERE]] §6)
 
+- 🆕 ✅ **2026-08-02 — full property and Connect lifecycle locked.** CSV, PDF,
+  Build from Scratch, and Advanced Editor converge into one Property Review
+  Workspace; Spatial Vault is an enhancement. Owners are the primary source of
+  truth: owner-authored listings and edits publish directly after attestation,
+  while only ScoutIt-created PDF drafts require source verification. Canonical
+  URLs freeze on first publication. Withdraw creates recoverable, authenticated
+  Cluster/Universe off-market inventory. Permanently Remove Listing is guarded
+  and non-reactivatable but retains internal history, reserved URL, and
+  ScoutIt-owned assets. Connects spend monthly → purchased → reward and are not
+  automatically refunded on decline, non-response, or timeout. →
+  [[SCOUTIT_FULL_WORKFLOW]]
 - 🆕 ✅ **2026-07-30 — `core.fsmonitor` is OFF permanently in the main repo.** It was producing a
   **false-clean `git status`** — reporting an empty tree while 6 tracked files were modified and 2
   untracked. This repo is far below the size where fsmonitor pays for itself, and the failure mode
@@ -139,7 +205,7 @@ Update this list's status in place as items move — don't just append more.
   notes. Added: [[SCENARIOS_AND_PLAYBOOKS]], [[MASTER_MISSION_CONTROL_BLUEPRINT]], [[SENTINEL_LAYER]],
   [[LAUNCH_SEQUENCE_PRIORITIES]], [[PROFESSIONAL_CRM_MODULE_MAP]], [[ENTERPRISE_MISSION_CONTROL_SPEC]],
   [[MISSION_KANBAN_AUTOMATIONS]], [[CRM_WORKFLOW_GRAVITY_AUTOMATIONS]], [[UNIFIED_SURFACE_TEST]],
-  [[SECOND_BRAIN_FIVE_LEVELS]], plus two new [[NEW_IDEAS]] entries — all `status: draft`,
+  [[SECOND_BRAIN_FIVE_LEVELS]], plus two new [[01_IDENTITY_AND_VISION/NEW_IDEAS|NEW_IDEAS]] entries — all `status: draft`,
   **not yet owner-reviewed.** Raw files archived to `13_EXTERNAL_INPUTS/_DUMP_RAW_ARCHIVE/`;
   `Dump/` is now empty. See [[13_EXTERNAL_INPUTS/2026-07-08_dump-audit-and-migration|the migration log]].
 - 🆕 **2026-07-13 — SCOUTIT OS ARCHITECTURE established:** New definitive guide on identity, roles, workspaces, and permissions created at [[SCOUTIT_OS_ARCHITECTURE]]. Firm rule: "One Person = One ScoutIt Account" with multiple concurrent roles, and Enterprise workspaces owning properties instead of individuals.
@@ -152,9 +218,9 @@ Update this list's status in place as items move — don't just append more.
   not run it** — [[MASTER_MISSION_CONTROL_BLUEPRINT]] is now idea-reference only. The **CRM build
   prompt is unaffected** (different feature, lives in the main repo) — it has since been run, see
   the entry below.
-- 🔴 **Standing operational caution:** `ScoutIt/mission-control/` has **zero git commits** despite
-  being deployed to Vercel. Do not `git add`/`commit`/`push` in that repo without the owner's
-  explicit go-ahead, in this session or any future one.
+- ✅ **Correction 2026-08-01:** `mission-control/` is tracked inside the main ScoutIt
+  repository and has commit history; it is not a zero-commit nested repository. The operational
+  rule remains unchanged: do not commit, push, or deploy without the owner's explicit go-ahead.
 - 🆕 **2026-07-09 — Professional CRM v1 built, then independently verified against the actual
   diff** (not just the build session's own report — that report understated the security finding).
   [[PROFESSIONAL_CRM_BUILD_PROMPT]] was run against the real main repo (not mission-control).
@@ -275,7 +341,7 @@ Update this list's status in place as items move — don't just append more.
   `a76b81a` (health check probed a nonexistent Airtable table — was permanently reporting 503 —
   plus roster card polish). Full detail: [[00_START_HERE]]'s handoff run + the memory notes.
 - 🆕 **2026-07-10 — the dedicated E2E pass finally happened + hero rebuilt.** Permanent
-  read-only-safe Playwright suite at `e2e_tests/full-system/` (71 tests × desktop + mobile; run
+  read-only-safe Playwright suite at `e2e_tests/full-system/` (now 83 tests × desktop + mobile; run
   `npx playwright test full-system`). It exposed that the 2026-07-05 "dead code cleanup" left
   consuming code pointing at deleted mocks (empty Board everywhere, 404 news teasers, empty
   /intel + /layer/stratosphere, self-crashing CMS catch block) — all fixed, plus new
@@ -339,26 +405,50 @@ Update this list's status in place as items move — don't just append more.
 - **Full AI Council / Phase 2 Listing Engine** — deferred, high inference cost.
 - **Always-on AI dashboard features** (live demand meters, AI property coaches) — repeatedly
   proposed by outside brainstorming, repeatedly parked by the owner as too costly pre-revenue. See
-  [[SCENARIOS_AND_PLAYBOOKS]] and the anti-bloat doctrine in [[NEW_IDEAS]].
+  [[SCENARIOS_AND_PLAYBOOKS]] and the anti-bloat doctrine in [[01_IDENTITY_AND_VISION/NEW_IDEAS|NEW_IDEAS]].
 
 ## 5. Open Decisions Needing the Owner (don't guess at these)
 
-0. 🆕 🟡 **Commit the `mission-control` fix?** (added 2026-07-30) The W3 divergence is **fixed in
-   files** — both apps now write the same ~90 fields, guarded by a drift test. But that repo carries
-   the standing *"no git commits yet, do not push without go-ahead"* rule, so the fix is sitting
-   uncommitted. **The only decision left is whether to commit and deploy it.** Until then, staff
-   publishes in production still write 6 fields. → [[MISSION_CONTROL_REAL_BUILD_STATUS]]
-0b. 🆕 🟠 **Is `published_rent` the same fact as `CM_Rent_Per_Sqm`?** (added 2026-07-30) Unanswerable
-   from the code — only whoever built the Listing Engine knows. Guessing wrong **merges two facts
-   and hides one**, so it's deliberately left unmapped meanwhile. → [[LOGIC_TO_TIGHTEN]] L14
+0. ✅ **Mission Control W3 divergence resolved.** The shared Airtable field mapping was committed
+   in `8046b30`; both applications write the same field registry and the drift test guards it.
+   Mission Control is tracked in the main repository, not a zero-commit nested repo. Deployment
+   still requires explicit owner approval. → [[MISSION_CONTROL_REAL_BUILD_STATUS]]
+0b. ✅ **`published_rent` ambiguity resolved 2026-08-02.** ScoutIt does not
+   publish a scraped or ScoutIt-estimated rent. The public rent/price is the
+   owner/lister-confirmed value; if uncertain, use an honest blank or Price on
+   request. Treat the old field as the owner-confirmed rent concept rather than
+   creating a second public market-price fact. → [[LOGIC_TO_TIGHTEN]] L14
 1. ✅ **Lexitary vs. internal-only AI Legal Council — resolved pragmatically 2026-07-09.** Both get
    built: internal AI Council is the real working path, Lexitary is a UI-only stub button
    ("somewhere to live") with the real API wired later. See [[MASTER_MISSION_CONTROL_BLUEPRINT]] §2
    and [[MASTER_MISSION_CONTROL_BUILD_PROMPT]] §3 page I.
-2. 🟡 **The `role` column gap** — docs describe per-role Connects wallets; the live
-   `connect_balances`/`connect_transactions` tables have no `role` column at all (one wallet per
-   person, today). Add the column with a real backfill plan, or formally drop "per-role wallets"
-   from the docs to match reality. Flagged 2026-07-02, still open.
+2. ✅ **Wallet scope decided 2026-08-02; schema work remains.** Monthly grants
+   are role-scoped. Purchased and reward balances are permanent and account-wide.
+   The live one-wallet schema needs a migration and backfill that implements this
+   hybrid model without duplicating permanent value.
+2b. ✅ **Pre-200 Connect behavior decided 2026-08-02:** actions consume free
+   monthly Connects for anti-spam and economy testing. Connect purchases remain
+   disabled; Mission Control may grant/top up test allowances.
+2c. ✅ **Post-handshake contact routing decided 2026-08-02:** before any
+   accepted representation, new leads go to the uploader/lister. Once at least
+   one broker is active, visible, and contactable, all new buyer leads go only to
+   that broker roster and the owner stops receiving new direct leads. Locked,
+   suspended, unavailable, or ended brokers do not appear on the listing and do
+   not count as representation. If no qualifying broker remains, the property is
+   simply unrepresented and follows the normal uploader/lister contact path—not
+   a special fallback. Earlier leads remain with their original recipient.
+2d. ✅ **Scout Rating event decided 2026-08-02:** rating credit occurs when
+   buyer and broker complete ScoutIt's two-sided post-viewing transaction
+   handshake. A private success with no completed ScoutIt transaction handshake
+   receives no platform count or incentive. The separate owner–broker
+   representation handshake never adds rating.
+2e. ✅ **Geography decided 2026-08-02:** ScoutIt is Philippines-wide for now.
+   Keep the product flexible within the country, but do not claim international
+   support until foreign currency, law, address, and credential rules are designed.
+2f. ✅ **Starry Seeker contact decided 2026-08-02:** Starry's one monthly
+   Connect may contact a broker when the selected property has an accepted broker
+   roster. Broker contact is not a Solar-only capability; higher tiers gain more
+   allowance and intelligence rather than exclusive basic contact.
 3. 🟡 **Tagline** — still undecided between the current line and a sharper "Philippine space.
    Decoded." direction.
 4. ✅ **Launch order: security-first vs. build-CRM-first — moot as of 2026-07-11.** Both are done:

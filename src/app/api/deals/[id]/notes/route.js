@@ -4,6 +4,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { z } from "zod";
 import { logNoteActivityDeduped } from "@/lib/crmActivity";
 import { sanitizeError } from "@/lib/sanitizeError";
+import { isRoutedDealRecipient } from "@/lib/dealParty";
 
 // Persists the "private scratchpad" per deal -- BrokerMode.js's Deal File
 // Workspace already had this UI (dealNotes local state), it just never wrote
@@ -47,10 +48,13 @@ export async function PATCH(request, { params }) {
 
     if (dealError || !deal) return NextResponse.json({ error: "Deal not found" }, { status: 404 });
 
+    const isRoutedRecipient = await isRoutedDealRecipient(supabaseAdmin, dealId, userId);
+
     const isParty =
       deal.buyer_id === userId ||
       deal.broker_id === userId ||
-      deal.properties?.owner_id === userId;
+      deal.properties?.owner_id === userId ||
+      isRoutedRecipient;
 
     if (!isParty) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 

@@ -4,6 +4,9 @@ import { notifyUser } from "@/lib/notifications";
 import { logActivity } from "@/lib/crmActivity";
 import { z } from "zod";
 import { turnstileGuard } from "@/lib/turnstile";
+import { getPropertyLeadRecipients, formatRoutingMetadata } from "@/lib/serverBrokerRouting";
+import { routingFailureStatus } from "@/lib/brokerRepresentation";
+import { normalizeLifecycleState, PROPERTY_LIFECYCLE_STATES } from "@/lib/propertyLifecycle";
 
 // Public lead capture. Previously a stub that console.logged the payload and
 // returned fake success -- every inquiry posted here was silently dropped.
@@ -24,6 +27,7 @@ const schema = z.object({
   // hard-rejected mid-deploy, but enforced below whenever Turnstile is
   // configured — see the guard in POST.
   turnstileToken: z.string().optional(),
+  preferredBrokerId: z.string().max(200).optional(),
 });
 
 export async function POST(req) {
@@ -32,12 +36,12 @@ export async function POST(req) {
     if (!parsed.success) {
       return NextResponse.json({ success: false, message: "Invalid inquiry format" }, { status: 400 });
     }
-    const { propertyId, propertySlug, name, email, phone, message, turnstileToken } = parsed.data;
+    const { propertyId, propertySlug, name, email, phone, message, turnstileToken, preferredBrokerId } = parsed.data;
 
     // ── Bot check ──────────────────────────────────────────────────────
     // This is a PUBLIC, unauthenticated endpoint that writes to
-    // crm_activity_log and fires a notification to a property owner. Left
-    // open it's a spam cannon aimed at owners' notification bells, and every
+    // crm_activity_log and fires a notification to the current routed recipient. Left
+    // open it's a spam cannon aimed at recipient notification bells, and every
     // fake inquiry erodes trust in the one signal owners actually watch.
     //
     // Only enforced when Turnstile is configured, so an unconfigured
@@ -51,18 +55,31 @@ export async function POST(req) {
       return NextResponse.json({ success: false, message: "Missing property reference" }, { status: 400 });
     }
     if (!email && !phone) {
-      return NextResponse.json({ success: false, message: "Provide an email or phone number so the owner can reach you" }, { status: 400 });
+      return NextResponse.json({ success: false, message: "Provide an email or phone number so the property recipient can reach you" }, { status: 400 });
     }
     if (!supabaseAdmin) {
       return NextResponse.json({ success: false, message: "Server error: missing service role configuration" }, { status: 500 });
     }
 
-    let query = supabaseAdmin.from("properties").select("id, title, owner_id");
+    let query = supabaseAdmin.from("properties").select("id, title, owner_id, lifecycle_state, pipeline_status");
     query = propertyId ? query.eq("id", propertyId) : query.eq("slug", propertySlug);
     const { data: property, error: propError } = await query.single();
 
     if (propError || !property) {
       return NextResponse.json({ success: false, message: "Property not found" }, { status: 404 });
+    }
+    const propertyState = normalizeLifecycleState(property);
+    if (propertyState === PROPERTY_LIFECYCLE_STATES.PERMANENTLY_REMOVED) {
+      return NextResponse.json({ success: false, message: "Property not found" }, { status: 410 });
+    }
+    if (propertyState !== PROPERTY_LIFECYCLE_STATES.LIVE) {
+      return NextResponse.json({ success: false, message: "Property is not available for logged-out inquiry" }, { status: 404 });
+    }
+
+    const routing = await getPropertyLeadRecipients(supabaseAdmin, property.id, preferredBrokerId || null);
+    if (!routing.ok) {
+      const reason = routing.reason === "broker_not_contactable" ? "That broker is no longer available for this property." : "Lead routing is temporarily unavailable; please try again.";
+      return NextResponse.json({ success: false, message: reason }, { status: routingFailureStatus(routing.reason) });
     }
 
     const logged = await logActivity(supabaseAdmin, {
@@ -74,6 +91,7 @@ export async function POST(req) {
         email: email || null,
         phone: phone || null,
         message: message || null,
+        routing: formatRoutingMetadata(routing),
       },
     });
 
@@ -81,18 +99,19 @@ export async function POST(req) {
       return NextResponse.json({ success: false, message: "Failed to record inquiry" }, { status: 500 });
     }
 
-    if (property.owner_id) {
+    for (const recipient of routing.recipients) {
+      if (!recipient.recipientId) continue;
       await notifyUser(supabaseAdmin, {
-        userId: property.owner_id,
+        userId: recipient.recipientId,
         title: "New inquiry",
         desc: `${name || "Someone"} is asking about "${property.title}".`,
-        icon: "💬",
+        icon: "ðŸ’¬",
         propertyId: property.id,
         notificationType: "new_inquiry",
       });
     }
 
-    return NextResponse.json({ success: true, message: "Inquiry received" }, { status: 200 });
+    return NextResponse.json({ success: true, message: "Inquiry received", routedToRoster: routing.routedToRoster, recipientCount: routing.recipients.length }, { status: 200 });
   } catch (error) {
     console.error("Error submitting inquiry:", error);
     return NextResponse.json({ success: false, message: "Failed to process inquiry" }, { status: 500 });

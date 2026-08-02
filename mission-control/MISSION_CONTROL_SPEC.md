@@ -21,15 +21,18 @@ Found while scoping this, worth knowing going in:
   columns are text (`usr-...`), not UUIDs tied to `auth.users`. Staff auth for Mission Control is
   a separate concern and does **not** depend on this changing; Mission Control uses real Supabase
   Auth (magic link) for staff, scoped to its own `admin_users` table.
-- **Current Supabase RLS on the app's own tables is a real gap.** `supabase_schema.sql` shipped
+- **Current Supabase RLS on the app's own tables is a real gap.** The historical baseline at
+  `supabase/operations/baseline/supabase_schema.sql` shipped
   with `USING (true)` on `properties`/`deals`/`projects`/`saved_intel` (anyone with the anon key
-  can read/write/delete). A hardening pass exists (`supabase_rls_hardening.sql`) but it assumes
+  can read/write/delete). A hardening pass exists at
+  `supabase/operations/security/supabase_rls_hardening.sql`, but it assumes
   `auth.uid()` matches `owner_id`, which only works once Supabase Auth is wired for end users too
   — worth confirming that migration actually landed before trusting RLS as a backstop. Until then,
   **Mission Control's service-role mutations are not "extra" security on top of RLS — for some
   tables they're the only real access control that exists.** Treat every server action as if RLS
   isn't there.
-- **An audit trigger already exists** (`supabase_audit_logs.sql`): generic `audit_record_changes()`
+- **An audit trigger already exists**
+  (`supabase/operations/security/supabase_audit_logs.sql`): generic `audit_record_changes()`
   trigger on `properties`, `deals`, `user_profiles`, `connect_balances`, writing to `audit_logs`
   (locked to service-role read only). Mission Control adds its own `mission_control_actions` table
   rather than reusing this one, because we need to log *who acted, at what tier, and why*
@@ -206,7 +209,8 @@ you'd maintain forever for a problem you don't have yet. Instead:
 
 ## 8. Open risks worth flagging back to you
 
-- Confirm whether `supabase_rls_hardening.sql` was actually applied to the live project — if not,
+- Confirm whether `supabase/operations/security/supabase_rls_hardening.sql` was actually applied
+  to the live project — if not,
   the public site's own tables are still wide open regardless of what Mission Control does.
 - Decide, before v1.1, whether Airtable or Supabase `properties` should be the long-term source of
   truth for property review — right now staff have to know which one they're looking at.

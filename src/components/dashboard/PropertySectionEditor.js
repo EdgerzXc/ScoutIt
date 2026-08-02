@@ -30,6 +30,7 @@ import { groupFields, VISIBILITY } from "@/lib/propertyFieldRegistry";
 
 const GOLD = "#E8AE3C";
 const GOLD_DIM = "#6E531A";
+const EMPTY_DETAILS = {};
 
 /** Long-form keys that deserve a textarea rather than a single-line input. */
 const LONG_TEXT = /notes|story|summary|description|rules|terms|config|policy|accessibility|equipment|breakdown/i;
@@ -42,7 +43,7 @@ export default function PropertySectionEditor({
   endpoint = "/api/admin/property",
   authToken,
 }) {
-  const details = property?.details || {};
+  const details = useMemo(() => property?.details ?? EMPTY_DETAILS, [property?.details]);
   const [draft, setDraft] = useState({});
   const [savingSection, setSavingSection] = useState(null);
   const [status, setStatus] = useState({});

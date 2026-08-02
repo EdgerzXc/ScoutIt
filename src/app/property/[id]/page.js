@@ -1,5 +1,5 @@
 // Case-sensitivity routing diagnostics trigger and async params fix
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { fetchProperties } from "@/lib/airtable";
 import { siteUrl } from "@/lib/siteUrl";
@@ -13,6 +13,7 @@ import CommercialFlow from "@/components/property/CommercialFlow";
 // INCREMENTAL STATIC REGENERATION (ISR)
 // ----------------------------------------------------------------------
 import { getCmsBundle } from "@/lib/cmsCache";
+import { getHistoricalPropertyRedirect } from "@/lib/propertyRedirects";
 
 export const revalidate = 3600; 
 
@@ -116,6 +117,12 @@ export default async function PropertyRoute({ params }) {
         (p.id && p.id === resolvedParams.id)
     );
   } catch {}
+
+  if (!match) {
+    const redirectSlug = await getHistoricalPropertyRedirect(resolvedParams.id);
+    if (redirectSlug) redirect(`/property/${redirectSlug}`);
+    notFound();
+  }
 
   const rawCat = match ? (match.spaceCategory || match.property_type || "default").toLowerCase() : "default";
   // Find mapped layout or fallback to default

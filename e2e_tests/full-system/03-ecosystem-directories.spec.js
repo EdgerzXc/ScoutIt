@@ -54,9 +54,12 @@ test('intel hub lists briefings and opens an article', async ({ page }) => {
   await gotoAndSettle(page, '/intel');
   await expectRealContent(page);
 
-  const articleLinks = page.locator('a[href^="/intel/"]');
-  await expect(articleLinks.first()).toBeVisible({ timeout: 20000 });
-  await articleLinks.first().click();
+  // The rotating OSINT ticker also contains an /intel link. Use the stable
+  // featured briefing card so its six-second headline rotation cannot replace
+  // the click target during Playwright's actionability checks.
+  const featuredBriefing = page.locator('a.featured-card-new').first();
+  await expect(featuredBriefing).toBeVisible({ timeout: 20000 });
+  await featuredBriefing.click();
   await page.waitForURL(/\/intel\/.+/, { timeout: 20000 });
   await expectRealContent(page, 150);
 

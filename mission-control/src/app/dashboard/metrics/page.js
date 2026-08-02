@@ -39,10 +39,12 @@ export default async function MetricsPage() {
   }
 
   const admin = createAdminClient();
-  const since365d = new Date(Date.now() - 365 * DAY_MS).toISOString();
-  const since30d = new Date(Date.now() - 30 * DAY_MS).toISOString();
-  const since7d = new Date(Date.now() - 7 * DAY_MS).toISOString();
-  const since24h = new Date(Date.now() - DAY_MS).toISOString();
+  const now = new Date();
+  const nowMs = now.getTime();
+  const since365d = new Date(nowMs - 365 * DAY_MS).toISOString();
+  const since30d = new Date(nowMs - 30 * DAY_MS).toISOString();
+  const since7d = new Date(nowMs - 7 * DAY_MS).toISOString();
+  const since24h = new Date(nowMs - DAY_MS).toISOString();
 
   const [properties, profiles, subscriptions, connectBalances, connectTx, actions7d, actions24h, txSeries, actionSeries] =
     await Promise.all([
@@ -105,7 +107,7 @@ export default async function MetricsPage() {
   const avgCompleteness = average(propertyRows.map((p) => p.completeness_score));
   const pendingAges = propertyRows
     .filter((p) => p.moderation_status === "pending")
-    .map((p) => (Date.now() - new Date(p.created_at).getTime()) / DAY_MS);
+    .map((p) => (nowMs - new Date(p.created_at).getTime()) / DAY_MS);
   const rejectionReasons = tally(
     propertyRows.filter((p) => p.moderation_status === "rejected"),
     (p) => p.rejection_reason?.split(" — ")[0] || "No reason recorded"

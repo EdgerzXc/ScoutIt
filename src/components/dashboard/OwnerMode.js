@@ -21,7 +21,7 @@ import LeadExportButton from './crm/LeadExportButton';
 import { sanitizeError } from "@/lib/sanitizeError";
 
 export default function OwnerMode() {
-  const { listings, pitches, updatePitchStatus, addListing, addConciergeListing, bulkAddListings, addToast, updateListing, publishListing, closeListing, currentUser, inviteBroker, connects } = useDashboard();
+  const { listings, pitches, updatePitchStatus, addListing, addConciergeListing, bulkAddListings, addToast, updateListing, publishListing, closeListing, permanentlyRemoveListing, currentUser, inviteBroker, connects } = useDashboard();
   const firstName = currentUser?.name ? currentUser.name.split(" ")[0] : "";
   const [showWizard, setShowWizard] = useState(false); // false | 'select_mode' | 'live_editor' | 'concierge' | 'edit'
   const [selectedFile, setSelectedFile] = useState(null);
@@ -36,6 +36,10 @@ export default function OwnerMode() {
   const [selectMode, setSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState([]);
   const [isArchiving, setIsArchiving] = useState(false);
+  const [dangerOpen, setDangerOpen] = useState(false);
+  const [removalTitle, setRemovalTitle] = useState("");
+  const [removalPassword, setRemovalPassword] = useState("");
+  const [isRemoving, setIsRemoving] = useState(false);
   // DashboardContext's `listings` isn't refetched after an archive call, so
   const [justArchivedIds, setJustArchivedIds] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -845,6 +849,49 @@ export default function OwnerMode() {
         </div>
       </div>
 
+      <section className="mt-6 rounded border border-surface-variant bg-surface-alt/70 p-4 md:p-5" aria-labelledby="listing-lifecycle-heading">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="font-label-caps text-[10px] tracking-[0.2em] text-text-secondary">LIFECYCLE</p>
+            <h2 id="listing-lifecycle-heading" className="mt-1 text-sm text-on-surface">{activeListing.lifecycleState === "off_market" ? "OFF-MARKET / RECOVERABLE" : "LIVE MARKET ACCESS"}</h2>
+          </div>
+          <span className="rounded border border-surface-variant px-3 py-2 font-label-caps text-[10px] tracking-widest text-text-secondary">{activeListing.lifecycleState || activeListing.pipelineStatus || "DRAFT"}</span>
+        </div>
+        {activeListing.lifecycleState === "off_market" && (
+          <label className="mt-4 flex min-h-11 cursor-pointer items-center gap-3 text-sm text-text-secondary">
+            <input
+              type="checkbox"
+              className="h-5 w-5 accent-gold-accent"
+              checked={activeListing.quietlyOpenToOffers === true || activeListing.quietly_open_to_offers === true}
+              onChange={(event) => updateListing(activeListing.id, { quietly_open_to_offers: event.target.checked })}
+            />
+            <span><strong className="text-on-surface">Quietly open to offers</strong><br />Only entitled off-market viewers can see this listing, and contact appears only when this is enabled.</span>
+          </label>
+        )}
+        <div className="mt-5 border-t border-surface-variant pt-4">
+          <button type="button" className="min-h-11 w-full text-left font-label-caps text-[10px] tracking-[0.2em] text-error hover:text-on-surface" aria-expanded={dangerOpen} aria-controls="listing-danger-zone" onClick={() => setDangerOpen((open) => { if (open) { setRemovalTitle(""); setRemovalPassword(""); } return !open; })}>
+            {dangerOpen ? "▾ CLOSE DANGER ZONE" : "▸ OPEN DANGER ZONE"}
+          </button>
+          {dangerOpen && (
+            <div id="listing-danger-zone" className="mt-3 rounded border border-error/40 bg-background/60 p-4">
+              <p className="font-label-caps text-[10px] tracking-[0.16em] text-error">PERMANENTLY REMOVE LISTING</p>
+              <p className="mt-2 text-sm leading-relaxed text-text-secondary">This ends public and premium market access. ScoutIt retains the historical row, reserved URL, audit history, FAQs, units, and ScoutIt-owned Spatial Vault/3D assets. Open deals, active viewings, delegations, or unresolved disputes block removal.</p>
+              <label className="mt-4 block text-xs text-text-secondary" htmlFor="permanent-removal-title">Type the exact property title to continue</label>
+              <input id="permanent-removal-title" value={removalTitle} onChange={(event) => setRemovalTitle(event.target.value)} className="mt-2 min-h-11 w-full rounded border border-surface-variant bg-surface px-3 py-2 text-sm text-on-surface" autoComplete="off" />
+               <label className="mt-4 block text-xs text-text-secondary" htmlFor="permanent-removal-password">Confirm your account password</label>
+               <input id="permanent-removal-password" type="password" value={removalPassword} onChange={(event) => setRemovalPassword(event.target.value)} className="mt-2 min-h-11 w-full rounded border border-surface-variant bg-surface px-3 py-2 text-base text-on-surface" autoComplete="current-password" />
+              <button type="button" disabled={isRemoving || !removalPassword || removalTitle.trim() !== String(activeListing.title || "").trim()} className="mt-4 min-h-11 w-full rounded border border-error px-4 py-3 font-label-caps text-[10px] tracking-widest text-error transition-colors hover:bg-error hover:text-white disabled:cursor-not-allowed disabled:opacity-40" onClick={async () => {
+                setIsRemoving(true);
+                const removed = await permanentlyRemoveListing(activeListing.id, removalTitle, removalPassword);
+                if (removed) { setRemovalTitle(""); setRemovalPassword(""); setDangerOpen(false); }
+                setIsRemoving(false);
+              }}>
+                {isRemoving ? "CHECKING DEPENDENCIES…" : "PERMANENTLY REMOVE LISTING"}
+              </button>
+            </div>
+          )}
+        </div>
+      </section>
       {activeListing.pipelineStatus === 'ai_drafting' && (
         <div className="card-atmosphere-gold rounded-lg p-5 mb-8 flex items-start gap-4">
            <span className="text-2xl mt-1">🤖</span>

@@ -2,8 +2,8 @@
 # already do). This overrides any developer's local core.autocrlf so editor
 # or OS differences can't silently reintroduce CRLF churn into diffs.
 #
-# Known exception: ~19 files were historically committed with CRLF (e.g.
-# package.json, src/app/layout.js, src/context/DashboardContext.js). They
+# Known exception: a small set of files were historically committed with CRLF
+# (for example src/app/layout.js and src/context/DashboardContext.js). They
 # stay untouched until a deliberate one-time normalization commit
 # (`git add --renormalize .`) — until then they may show a whole-file
 # line-ending diff the first time they're edited. That's expected, not data

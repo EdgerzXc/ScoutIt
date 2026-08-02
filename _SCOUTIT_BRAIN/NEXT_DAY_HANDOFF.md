@@ -57,11 +57,11 @@ related: ["[[MASTER_CONTEXT]]", "[[SCOUTIT_MASTER_BUILD_SPEC]]", "[[00_START_HER
 >
 > ## Previous — 2026-07-05 (Part 4) — Atmosphere UI & Feature Integration
 > - **Atmosphere UI System:** Deployed the new cinematic UI (tmosphere-bg, tmosphere-glow, tmosphere-grain, tmosphere-vignette) into globals.css and layout.js. Wrapped all dashboard views (BuyerMode.js, OwnerMode.js, etc.) with .hov-card and .hov-glow interaction classes, replacing old flat #161616 styles.
-> - **Feature Imports (Jules Sessions):** Successfully integrated Jules' previously developed features: ConnectionPortal.js, ServiceConnectionPortal.js, ComparisonMatrix.js, and the shared Wishlist viewer (wishlistCrypto.js and pi/wishlist/share). 
+> - **Feature Imports (Jules Sessions):** Successfully integrated Jules' previously developed features: ConnectionPortal.js, ServiceConnectionPortal.js, ComparisonMatrix.js, and the shared Wishlist viewer (wishlistCrypto.js and pi/wishlist/share).
 > - **Security:** Fixed a Mapbox XSS vulnerability in BuyerMode.js by removing .setHTML() and safely building the DOM via document.createElement(). Also patched the onboarding route to prevent role escalation.
 > - **Verification:** All lint errors resolved in src/. Clean build and ready for testing.
 > - **Next Steps:** Await user input on the SEO_BRAINSTORM.md document to lock in the AI tone prompts.
-> 
+>
 > ## Previous — 2026-07-05 (Part 3) — Jules Sessions, CRM Notes, & Mobile Dashboard
 > - **Jules Sessions Integrated:** Successfully mapped the new `BrokerPanel.js`, `profileClient.js`, and `increment_profile_views` edge function from the external archives. This brings native CRM metrics ("Scout Rating", "Stewardship Velocity") to public broker profiles.
 > - **Operator Security Hardening:** Installed the strict `/api/dashboard/operator/units` API route to enforce role-based access for unit modifications, patching a major vulnerability hole for multi-tenant properties.
@@ -246,13 +246,12 @@ related: ["[[MASTER_CONTEXT]]", "[[SCOUTIT_MASTER_BUILD_SPEC]]", "[[00_START_HER
 >    decremented in practice. Fixed: the function now falls back to `user_id` when `id` is
 >    absent (`to_jsonb(NEW)->>'id'`, safe instead of a hard field reference).
 > 8. **🔴 Also found:** `connect_balances` and `connect_transactions` have **no `role` column**
->    in the live database, despite every doc (and both API routes' `.eq('role', ...)` filters)
->    assuming per-role wallets exist. Today there is ONE wallet per `user_id`, full stop — a
->    broker-who's-also-an-owner shares one pot, not two. This is a real gap between the
->    documented design ([[TIER_DISTINCTION]] "per-role Connects wallets") and reality.
->    **Deliberately not auto-fixed** — adding the column means deciding what role to backfill
->    onto existing rows, which is a real judgment call, not a mechanical migration. Flagged for
->    the owner, not guessed at.
+>    in the live database. Today there is ONE wallet per `user_id`, full stop.
+>    **Owner decision added 2026-08-02:** the target is hybrid, not three complete
+>    wallets per role. Monthly grants are role-scoped; purchased/reward balances
+>    are permanent and shared account-wide. The live schema still needs a
+>    coordinated migration/backfill; do not add only a role column or duplicate
+>    permanent value into each role.
 > 9. **Built + tested `spend_connects(user_id, amount, reason, ref_type, ref_id)` RPC** — atomic
 >    balance-check + 3-bucket deduction (grantedâ†’purchasedâ†’earned) + ledger insert in one
 >    transaction. `service_role`-only execute grant (never callable by a client directly).
@@ -265,7 +264,7 @@ related: ["[[MASTER_CONTEXT]]", "[[SCOUTIT_MASTER_BUILD_SPEC]]", "[[00_START_HER
 >
 > **Also done (2026-07-02, later same session) — Connects breakdown UI:**
 > 11. `src/components/dashboard/ConnectsBreakdown.js` — click either Connects pill in the
->     dashboard header to see the 3-bucket wallet (Monthly Allowance / Purchased / Earned),
+>     dashboard header to see the 3-bucket wallet (Monthly Allowance / Purchased / Reward),
 >     each with a plain-language description + a spend-order note. Verified live in a running
 >     dev server with real wallet math (not placeholders). Reviewed `connectsWallet.js`'s
 >     underlying logic while doing this — it's already correct, nothing needed fixing there.
@@ -296,9 +295,9 @@ related: ["[[MASTER_CONTEXT]]", "[[SCOUTIT_MASTER_BUILD_SPEC]]", "[[00_START_HER
 > missing its Authorization header, found while hardening the invite route).
 >
 > **Not yet done — flagged, don't touch without asking:**
-> - **Decide the `role` column gap** (§8 above) — add it to `connect_balances`/`connect_transactions`
->   with a real backfill plan, or formally drop "per-role wallets" from the design docs to match
->   reality. Either is fine; guessing is not.
+> - **Build the owner-decided hybrid wallet migration** (§8 above): role-scoped
+>   monthly allowances plus shared permanent purchased/reward balances, including
+>   backfill, spend RPC, every paid route, UI breakdown, and E2E coverage.
 > - Wire the new `UNITS`/`property_units` tables into the editor + publish/update routes + both
 >   public flows (§6 above) — **paused, Airtable-adjacent work is on hold** per today's instruction.
 > - `INTEL_CMS.SpaceCategory` orphan "Culinary" choice — Airtable UI-only deletion (API can't) — paused.
@@ -347,7 +346,7 @@ related: ["[[MASTER_CONTEXT]]", "[[SCOUTIT_MASTER_BUILD_SPEC]]", "[[00_START_HER
    - Escaped double quotes inside `UnitBuilder.js` to clear strict ESLint rules that were causing Vercel compilation to exit with code 1. The build is now fully green and active!
 
 4. **Fixed Supabase Photo Upload Error (Invalid Compact JWS)**
-   - Identified that the `NEXT_PUBLIC_SUPABASE_ANON_KEY` was using the new non-JWT publishable key format, which caused the Supabase Storage API to crash when expecting a JWT. 
+   - Identified that the `NEXT_PUBLIC_SUPABASE_ANON_KEY` was using the new non-JWT publishable key format, which caused the Supabase Storage API to crash when expecting a JWT.
    - Replaced it with the legacy JWT anon key in `.env.local`.
 
 5. **Updated Architecture Docs**
@@ -365,15 +364,14 @@ related: ["[[MASTER_CONTEXT]]", "[[SCOUTIT_MASTER_BUILD_SPEC]]", "[[00_START_HER
 
 ## Prompt for Next Session
 ```text
-Hey! We are continuing work on ScoutIt, a premium commercial and residential real estate directory. 
+Hey! We are continuing work on ScoutIt, a premium commercial and residential real estate directory.
 
-CRITICAL FIRST STEP: Before doing *anything* else, you must familiarize yourself with this project so you aren't flying blind. 
+CRITICAL FIRST STEP: Before doing *anything* else, you must familiarize yourself with this project so you aren't flying blind.
 1. Read [[00_START_HERE]] to get the master overview.
 2. Read `_SCOUTIT_BRAIN/NEXT_DAY_HANDOFF.md` (this file) and [[SESSION_HANDOFF_2026-06-28]] to see exactly where we left off.
 3. Briefly scan the other architecture and schema docs in `_SCOUTIT_BRAIN/` to understand the Dual-CMS (Airtable + Supabase) architecture and design system.
 
-I have committed the code to GitHub and updated the Vercel environment variables with the legacy JWT anon key to fix the photo upload JWS error. 
+I have committed the code to GitHub and updated the Vercel environment variables with the legacy JWT anon key to fix the photo upload JWS error.
 
 Let's begin by testing the new Unit Builder flow in production/local. We need to verify that when an owner adds a unit with photos and publishes, the units_inventory array gets correctly pushed to Airtable's Units_JSON column and loads on the public property page. Let's create an integration test plan for this sync flow!
 ```
-

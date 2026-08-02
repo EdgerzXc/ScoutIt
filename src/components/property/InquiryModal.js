@@ -70,7 +70,7 @@ export default function InquiryModal({ isOpen, onClose, propertyTitle, propertyS
 
         if (!mockOwnerId) {
           setStatus("error");
-          setErrorMsg("Please log in to contact the owner.");
+          setErrorMsg("Please log in to contact the property recipient.");
           return;
         }
       }
@@ -104,7 +104,7 @@ export default function InquiryModal({ isOpen, onClose, propertyTitle, propertyS
     <AnimatePresence>
       {isOpen && (
         <motion.div 
-          className="fixed inset-0 z-[9999] bg-[#0a0908]/85 flex items-center justify-center p-5"
+          className="fixed inset-0 z-[9999] bg-[#0a0908]/85 flex items-center justify-center overflow-y-auto p-5"
           variants={backdropVariants}
           initial="hidden"
           animate="visible"
@@ -112,17 +112,20 @@ export default function InquiryModal({ isOpen, onClose, propertyTitle, propertyS
           transition={backdropTransition}
         >
           <motion.div 
-            className="w-full max-w-[500px]"
+            className="my-auto w-full max-w-[500px]"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="inquiry-modal-title"
             variants={modalVariants}
             initial="hidden"
             animate="visible"
             exit="exit"
             transition={modalTransition}
           >
-            <GlassPanel className="relative p-8 rounded-xl shadow-[0_24px_60px_rgba(0,0,0,0.6)]">
+            <GlassPanel className="relative max-h-[calc(100dvh-2.5rem)] overflow-y-auto p-8 rounded-xl shadow-[0_24px_60px_rgba(0,0,0,0.6)]">
               <button 
                 className="absolute top-5 right-5 text-[#f0ede8]/50 hover:text-white transition-colors"
-                onClick={onClose} 
+                onClick={handleCloseModal}
                 aria-label="Close"
               >
                 <X size={20} />
@@ -149,7 +152,7 @@ export default function InquiryModal({ isOpen, onClose, propertyTitle, propertyS
                     </div>
                     <h3 className="font-serif text-2xl text-white font-normal">Connection Established</h3>
                     <p className="text-sm text-[#f0ede8]/60 leading-relaxed max-w-sm">
-                      Your temporary chatbox with the owner of <strong className="text-white font-medium">{propertyTitle}</strong> is now open. You
+                      Your temporary chatbox with the current recipient for <strong className="text-white font-medium">{propertyTitle}</strong> is now open. You
                       can view it in your <strong className="text-white font-medium">Leads Inbox</strong>.
                     </p>
                   </motion.div>
@@ -165,9 +168,9 @@ export default function InquiryModal({ isOpen, onClose, propertyTitle, propertyS
                       <span className="font-mono text-[10px] text-gold-accent tracking-[0.15em] uppercase block mb-2">
                         1 Connect Required
                       </span>
-                      <h2 className="font-serif text-[28px] text-[#f0ede8] font-normal mb-1.5">Contact the Owner</h2>
+                      <h2 id="inquiry-modal-title" className="font-serif text-[28px] text-[#f0ede8] font-normal mb-1.5">Contact the Property Recipient</h2>
                       <p className="text-sm text-[#f0ede8]/60 leading-relaxed">
-                        Start a secure, temporary chat to ask about <strong className="text-white font-medium">{propertyTitle}</strong>.
+                        Start a secure, temporary chat with the current recipient for <strong className="text-white font-medium">{propertyTitle}</strong>.
                       </p>
                       <p className="text-xs text-text-secondary mt-3">
                         Your email and phone number are hidden. They will only see your ScoutIt profile until you

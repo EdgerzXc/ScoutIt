@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolveUserId } from "@/lib/serverAuth";
 import { sanitizeError } from "@/lib/sanitizeError";
+import { isRoutedDealRecipient } from "@/lib/dealParty";
 
 export const dynamic = "force-dynamic";
 
@@ -30,10 +31,13 @@ export async function GET(request, { params }) {
       return NextResponse.json({ error: "Deal not found" }, { status: 404 });
     }
 
+    const isRoutedRecipient = await isRoutedDealRecipient(supabaseAdmin, dealId, userId);
+
     const isParty =
       deal.buyer_id === userId ||
       deal.broker_id === userId ||
-      deal.properties?.owner_id === userId;
+      deal.properties?.owner_id === userId ||
+      isRoutedRecipient;
 
     if (!isParty) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -80,10 +84,13 @@ export async function POST(request, { params }) {
       return NextResponse.json({ error: "This conversation has been closed and is read-only." }, { status: 403 });
     }
 
+    const isRoutedRecipient = await isRoutedDealRecipient(supabaseAdmin, dealId, userId);
+
     const isParty =
       deal.buyer_id === userId ||
       deal.broker_id === userId ||
-      deal.properties?.owner_id === userId;
+      deal.properties?.owner_id === userId ||
+      isRoutedRecipient;
 
     if (!isParty) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
@@ -130,10 +137,13 @@ export async function PATCH(request, { params }) {
 
     if (dealError || !deal) return NextResponse.json({ error: "Deal not found" }, { status: 404 });
 
+    const isRoutedRecipient = await isRoutedDealRecipient(supabaseAdmin, dealId, userId);
+
     const isParty =
       deal.buyer_id === userId ||
       deal.broker_id === userId ||
-      deal.properties?.owner_id === userId;
+      deal.properties?.owner_id === userId ||
+      isRoutedRecipient;
 
     if (!isParty) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 

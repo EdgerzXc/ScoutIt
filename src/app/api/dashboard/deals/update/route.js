@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { logActivity } from "@/lib/crmActivity";
+import { representationStatusUpdate, REPRESENTATION_STATES } from "@/lib/brokerRepresentation";
 
 export async function POST(request) {
   try {
@@ -65,6 +66,23 @@ export async function POST(request) {
     if (updateError) {
       console.error("[DEAL UPDATE API] Failed to update deal:", updateError);
       return NextResponse.json({ error: "Failed to update deal status" }, { status: 500 });
+    }
+
+
+    if (deal.broker_id && (newStatus === "accepted" || newStatus === "declined")) {
+      const representationUpdate = representationStatusUpdate({
+        status: newStatus === "accepted" ? REPRESENTATION_STATES.ACTIVE : REPRESENTATION_STATES.DECLINED,
+      });
+      const { error: representationError } = await supabaseAdmin
+        .from("property_broker_representations")
+        .update(representationUpdate)
+        .eq("property_id", deal.property_id)
+        .eq("broker_id", deal.broker_id)
+        .in("status", ["pending", "active"]);
+      if (representationError) {
+        console.error("[DEAL UPDATE API] Representation state update failed:", representationError);
+        return NextResponse.json({ error: "Deal changed, but representation state needs reconciliation", retryable: true }, { status: 503 });
+      }
     }
 
     await logActivity(supabaseAdmin, {

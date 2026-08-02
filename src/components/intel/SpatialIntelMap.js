@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
@@ -141,26 +141,35 @@ export default function SpatialIntelMap({
 }) {
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
+  const selectedCityRef = useRef(selectedCity);
+  const onSelectCityRef = useRef(onSelectCity);
   const [activeCityName, setActiveCityName] = useState(null);
 
-  // Group articles by city/location
-  const locationGroups = articles.reduce((acc, art) => {
-    if (!art.city) return acc;
-    const key = art.city;
-    if (!acc[key]) {
-      acc[key] = {
-        city: art.city,
-        region: art.region || "Philippines",
-        lat: art.lat || 14.5547,
-        lng: art.lng || 121.0244,
-        articles: [],
-      };
-    }
-    acc[key].articles.push(art);
-    return acc;
-  }, {});
+  useEffect(() => {
+    selectedCityRef.current = selectedCity;
+    onSelectCityRef.current = onSelectCity;
+  }, [selectedCity, onSelectCity]);
 
-  const locations = Object.values(locationGroups);
+  // Group articles by city/location
+  const locations = useMemo(() => {
+    const locationGroups = articles.reduce((acc, art) => {
+      if (!art.city) return acc;
+      const key = art.city;
+      if (!acc[key]) {
+        acc[key] = {
+          city: art.city,
+          region: art.region || "Philippines",
+          lat: art.lat || 14.5547,
+          lng: art.lng || 121.0244,
+          articles: [],
+        };
+      }
+      acc[key].articles.push(art);
+      return acc;
+    }, {});
+
+    return Object.values(locationGroups);
+  }, [articles]);
 
   // 1. Initialize MapLibre GL Map with Native Vector Layers (100% Mathematical Precision)
   useEffect(() => {
@@ -194,13 +203,13 @@ export default function SpatialIntelMap({
         paint: {
           "fill-color": [
             "case",
-            ["==", ["get", "city"], selectedCity || ""],
+            ["==", ["get", "city"], selectedCityRef.current || ""],
             "#F7C64E",
             "rgba(232, 174, 60, 0.15)",
           ],
           "fill-opacity": [
             "case",
-            ["==", ["get", "city"], selectedCity || ""],
+            ["==", ["get", "city"], selectedCityRef.current || ""],
             0.4,
             0.15,
           ],
@@ -215,7 +224,7 @@ export default function SpatialIntelMap({
           "line-color": "#F7C64E",
           "line-width": [
             "case",
-            ["==", ["get", "city"], selectedCity || ""],
+            ["==", ["get", "city"], selectedCityRef.current || ""],
             2.5,
             1,
           ],
@@ -254,7 +263,7 @@ export default function SpatialIntelMap({
         paint: {
           "circle-radius": [
             "case",
-            ["==", ["get", "city"], selectedCity || ""],
+            ["==", ["get", "city"], selectedCityRef.current || ""],
             14,
             9,
           ],
@@ -299,14 +308,14 @@ export default function SpatialIntelMap({
       map.on("click", "zone-areas-fill", (e) => {
         const clickedCity = e.features[0]?.properties?.city;
         if (clickedCity) {
-          onSelectCity(selectedCity === clickedCity ? null : clickedCity);
+          onSelectCityRef.current(selectedCityRef.current === clickedCity ? null : clickedCity);
         }
       });
 
       map.on("click", "zone-points-glow", (e) => {
         const clickedCity = e.features[0]?.properties?.city;
         if (clickedCity) {
-          onSelectCity(selectedCity === clickedCity ? null : clickedCity);
+          onSelectCityRef.current(selectedCityRef.current === clickedCity ? null : clickedCity);
         }
       });
 
@@ -392,7 +401,7 @@ export default function SpatialIntelMap({
         essential: true,
       });
     }
-  }, [selectedCity]);
+  }, [selectedCity, locations]);
 
   return (
     <div className="spatial-intel-map-card bg-surface-alt/90 border border-surface-variant rounded-sm p-4 relative overflow-hidden flex flex-col h-full select-none">

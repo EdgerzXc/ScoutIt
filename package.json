@@ -6,8 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
-    "test": "vitest"
+    "lint": "eslint src mission-control/src",
+    "test": "vitest",
+    "test:unit": "vitest run",
+    "test:e2e": "playwright test",
+    "test:e2e:list": "playwright test --list",
+    "verify": "npm run lint && npm run test:unit && npm run test:e2e:list"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.105.0",
@@ -41,7 +45,7 @@
     "@vitest/ui": "^4.1.9",
     "autoprefixer": "^10.5.0",
     "eslint": "^9",
-    "eslint-config-next": "16.2.7",
+    "eslint-config-next": "^16.2.12",
     "jsdom": "^29.1.1",
     "postcss": "^8.5.15",
     "tailwindcss": "^3.4.19",

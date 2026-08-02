@@ -28,6 +28,7 @@ import { updateProperty } from "@/lib/airtable";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { sanitizeObject } from "@/lib/sanitize";
 import { isInternal, fieldMeta } from "@/lib/propertyFieldRegistry";
+import { canChangeDisplayTitle, normalizeLifecycleState, PROPERTY_LIFECYCLE_STATES } from "@/lib/propertyLifecycle";
 
 /** Verify the caller is a signed-in admin. Returns {userId} or {error,status}. */
 async function requireAdmin(request) {
@@ -110,6 +111,22 @@ export async function PATCH(request) {
       return NextResponse.json({ error: "Property not found" }, { status: 404 });
     }
 
+    const lifecycleState = normalizeLifecycleState(current);
+    const isLive = lifecycleState === PROPERTY_LIFECYCLE_STATES.LIVE;
+    if (body.title !== undefined && body.title !== current.title && !canChangeDisplayTitle(current)) {
+      return NextResponse.json(
+        { error: "Live listing titles are locked to protect the canonical public URL" },
+        { status: 409, headers: { "Cache-Control": "no-store" } }
+      );
+    }
+    const apiKey = process.env.AIRTABLE_API_KEY;
+    const baseId = process.env.AIRTABLE_BASE_ID;
+    const canonicalSlug = current.canonical_slug || current.slug;
+    if (isLive && (!apiKey || !baseId)) {
+      return NextResponse.json({ error: "Live property updates are unavailable while the Airtable CMS is unavailable" }, { status: 503 });
+    }
+    if (isLive && !canonicalSlug) return NextResponse.json({ error: "Live property is missing its canonical slug" }, { status: 409 });
+
     // Strip internal fields from whatever the client sent. Staff edit notes
     // through their own dedicated controls, not by injecting field names into
     // a section payload.
@@ -143,26 +160,28 @@ export async function PATCH(request) {
     // /api/dashboard/update: an Airtable failure must NOT lose the Supabase
     // write, so we return success with a warning instead of throwing.
     let warning = null;
-    if (current.pipeline_status === "approved") {
+    if (isLive) {
       const apiKey = process.env.AIRTABLE_API_KEY;
       const baseId = process.env.AIRTABLE_BASE_ID;
-      if (apiKey && baseId && current.slug) {
+      if (apiKey && baseId && canonicalSlug) {
         try {
-          const atResult = await updateProperty(apiKey, baseId, current.slug, saved);
+          const atResult = await updateProperty(apiKey, baseId, canonicalSlug, saved);
           
-          // If title edit changed Airtable's computed formula Slug, sync it back to Supabase
           const updatedSlug = atResult?.fields?.Slug;
-          if (updatedSlug && updatedSlug !== current.slug) {
-            console.log(`[ADMIN PROPERTY] Title edit updated slug: ${current.slug} -> ${updatedSlug}`);
-            await supabaseAdmin
-              .from("properties")
-              .update({ slug: updatedSlug })
-              .eq("id", id);
-            saved.slug = updatedSlug;
+          if (updatedSlug && updatedSlug !== canonicalSlug) {
+            return NextResponse.json(
+              { error: "The public CMS returned a different slug; staff reconciliation is required", retryable: false },
+              { status: 409 }
+            );
           }
         } catch (airtableErr) {
           console.error("[ADMIN PROPERTY] Airtable sync failed:", airtableErr);
+          const failureResponse = NextResponse.json(
+            { success: false, retryable: true, error: "Supabase updated, but the public CMS sync is pending" },
+            { status: 502 }
+          );
           warning = "Saved, but the public site sync failed — it will retry on the next save.";
+          return failureResponse;
         }
       } else if (!current.slug) {
         warning = "Saved. No public listing is linked yet, so nothing was published.";

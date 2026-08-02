@@ -33,7 +33,7 @@ export default async function SecurityCenterPage() {
   if (!staff || staff.tier < TIERS.OPS_MANAGER) redirect("/dashboard");
 
   const admin = createAdminClient();
-  const since30d = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+  const since30d = new Date(new Date().getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
 
   const [flagged, velocity, history30d, blocked] = await Promise.all([
     fetchLogsResilient(

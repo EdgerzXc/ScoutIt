@@ -1,5 +1,8 @@
 "use client";
 
+/* Dynamic CMS image URLs are intentionally rendered without Next's optimizer. */
+/* eslint-disable @next/next/no-img-element */
+
 import { useEffect, useState, useRef, useMemo } from "react";
 import Link from "next/link";
 import "@/app/property/[id]/property-detail.css";
@@ -116,6 +119,31 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
     };
   }, [loading]);
 
+  const unit = previewUnit || property?.units_inventory?.find((u) => u.id === unitId);
+  const d = unit?.details || {};
+  const scenarios = useMemo(() => Array.isArray(unit?.subdivision_scenarios) ? unit.subdivision_scenarios : [], [unit]);
+
+  const photos = useMemo(() => {
+    return Array.isArray(unit?.photos) && unit.photos.filter(Boolean).length
+      ? unit.photos.filter(Boolean)
+      : (unit?.image || unit?.photo ? [unit.image || unit.photo] : []);
+  }, [unit]);
+
+  const hasPhotos = photos.length > 0;
+  const displayPhotos = useMemo(() => hasPhotos ? photos : [null], [hasPhotos, photos]);
+  const activeScenario = useMemo(() => scenarios.find((s) => s.id === activeScenarioId) || scenarios[0] || null, [scenarios, activeScenarioId]);
+  const cap = useMemo(() => unit ? unitCapacity(unit) : null, [unit]);
+  const features = useMemo(() => Array.isArray(unit?.features) ? unit.features : [], [unit]);
+  const inclusions = Array.isArray(d.lease_inclusions) ? d.lease_inclusions.filter(Boolean) : [];
+
+  useEffect(() => {
+    if (!isAutoPlaying || isPhotoHovered || displayPhotos.length <= 1) return;
+    const timer = setInterval(() => {
+      setCurrentImageIndex((i) => (i + 1) % displayPhotos.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [isAutoPlaying, isPhotoHovered, displayPhotos.length]);
+
   if (loading) {
     return (
       <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg, #0e0e0e)" }}>
@@ -125,8 +153,6 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
       </div>
     );
   }
-
-  const unit = previewUnit || property?.units_inventory?.find((u) => u.id === unitId);
 
   if (!property || !unit) {
     return (
@@ -141,24 +167,7 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
     );
   }
 
-  const d = unit.details || {};
-  const scenarios = useMemo(() => Array.isArray(unit.subdivision_scenarios) ? unit.subdivision_scenarios : [], [unit.subdivision_scenarios]);
   const operatorName = unit.operator_display_name || null;
-
-  const photos = useMemo(() => {
-    return Array.isArray(unit.photos) && unit.photos.filter(Boolean).length
-      ? unit.photos.filter(Boolean)
-      : (unit.image || unit.photo ? [unit.image || unit.photo] : []);
-  }, [unit.photos, unit.image, unit.photo]);
-  
-  const hasPhotos = photos.length > 0;
-  const displayPhotos = useMemo(() => hasPhotos ? photos : [null], [hasPhotos, photos]);
-
-  const activeScenario = useMemo(() => scenarios.find((s) => s.id === activeScenarioId) || scenarios[0] || null, [scenarios, activeScenarioId]);
-
-  const cap = useMemo(() => unitCapacity(unit), [unit]);
-  const features = useMemo(() => Array.isArray(unit.features) ? unit.features : [], [unit.features]);
-  const inclusions = useMemo(() => Array.isArray(d.lease_inclusions) ? d.lease_inclusions.filter(Boolean) : [], [d.lease_inclusions]);
 
   const availabilityLabel =
     unit.availability_status === "occupied" ? "Currently Occupied"
@@ -171,14 +180,6 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
   };
 
   // ── Auto-next slideshow timer (pauses on hover/touch) ──
-  useEffect(() => {
-    if (!isAutoPlaying || isPhotoHovered || displayPhotos.length <= 1) return;
-    const timer = setInterval(() => {
-      setCurrentImageIndex((i) => (i + 1) % displayPhotos.length);
-    }, 5000);
-    return () => clearInterval(timer);
-  }, [isAutoPlaying, isPhotoHovered, displayPhotos.length]);
-
   // ── Photo navigation ──────────────────────────
   const goPrev = () => setCurrentImageIndex(i => (i === 0 ? displayPhotos.length - 1 : i - 1));
   const goNext = () => setCurrentImageIndex(i => (i + 1) % displayPhotos.length);
@@ -428,7 +429,6 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
 
                   {activeScenario.floor_plan_2d_url && (
                     <div style={{ marginTop: "16px", width: "100%", borderRadius: "6px", overflow: "hidden", border: "0.5px solid #262626" }}>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={activeScenario.floor_plan_2d_url} alt={`${activeScenario.label} layout`} style={{ width: "100%", display: "block" }} />
                     </div>
                   )}

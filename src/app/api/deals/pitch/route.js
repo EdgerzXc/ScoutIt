@@ -33,6 +33,32 @@ export async function POST(request) {
       return NextResponse.json({ error: "Server error: missing service role configuration" }, { status: 500 });
     }
 
+    const { data: property, error: propertyError } = await supabaseAdmin
+      .from("properties")
+      .select("id, owner_id, lifecycle_state, pipeline_status")
+      .eq("id", listingId)
+      .single();
+    if (propertyError || !property) return NextResponse.json({ error: "Property not found" }, { status: 404 });
+    if (property.owner_id === brokerId) return NextResponse.json({ error: "Owners cannot pitch their own property" }, { status: 400 });
+
+    const { data: existingRepresentation, error: representationLookupError } = await supabaseAdmin
+      .from("property_broker_representations")
+      .select("id, status")
+      .eq("property_id", listingId)
+      .eq("broker_id", brokerId)
+      .maybeSingle();
+    if (representationLookupError) return NextResponse.json({ error: "Representation service unavailable" }, { status: 503 });
+    if (existingRepresentation?.status === "active") return NextResponse.json({ error: "You already represent this property" }, { status: 409 });
+    if (existingRepresentation?.status === "locked" || existingRepresentation?.status === "suspended") return NextResponse.json({ error: "You are not currently eligible for a new representation request" }, { status: 409 });
+    if (!existingRepresentation) {
+      const { error: representationError } = await supabaseAdmin.from("property_broker_representations").insert({
+        property_id: listingId,
+        broker_id: brokerId,
+        status: "pending",
+        source: "broker_pitch",
+      });
+      if (representationError) return NextResponse.json({ error: "Failed to create representation request" }, { status: 503 });
+    }
     // 1. Insert the pitch deal first — rolled back below if the Connect spend fails.
     const { data: dealData, error: dealError } = await supabaseAdmin.from('deals').insert([{
       property_id: listingId,

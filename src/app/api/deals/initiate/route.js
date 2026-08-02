@@ -4,6 +4,8 @@ import { notifyUser } from "@/lib/notifications";
 import { logActivity } from "@/lib/crmActivity";
 import { resolveUserId } from "@/lib/serverAuth";
 import { sanitizeError } from "@/lib/sanitizeError";
+import { canContactProperty, normalizeLifecycleState, PROPERTY_LIFECYCLE_STATES } from "@/lib/propertyLifecycle";
+import { routingFailureStatus } from "@/lib/brokerRepresentation";
 
 // Same dev-mock convention as /api/notifications and /api/dashboard/units --
 // ?mockOwnerId=master-dev (here: a body field, since this is a POST) only
@@ -14,16 +16,20 @@ import { sanitizeError } from "@/lib/sanitizeError";
 export async function POST(request) {
   try {
     // role is a display/reason-text hint only, never persisted to a column —
-    // connect_balances/connect_transactions have no `role` column in the live
+    // connect_balances/connect_transactions have no ole` column in the live
     // schema (per-role wallets are a documented but unbuilt design; the
     // wallet is per user_id only). unitId is optional: set when this initiate
     // is scoped to one delegated unit (Unit Master Page "Your Move") or when
     // an operator (role: 'operator') is opening the initial ask to a building
     // owner about delegating units (SCOUTIT_MASTER_BUILD_SPEC.md §9.2) — left
     // null until the owner picks specific units to hand over.
-    const { listingId, propertySlug, message, role = 'buyer', unitId  } = await request.json();
+    const { listingId, propertySlug, message, role = 'buyer', unitId, preferredBrokerId, mockOwnerId } = await request.json();
 
-    const userId = await resolveUserId(request);
+    const authHeader = request.headers.get("Authorization");
+    const hasBearerToken = Boolean(authHeader?.replace("Bearer ", "").trim());
+    const isDevMock = process.env.NODE_ENV !== "production" && !hasBearerToken && typeof mockOwnerId === "string" && mockOwnerId.trim() !== "";
+
+    const userId = await resolveUserId(request) || (isDevMock ? mockOwnerId.trim() : null);
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized: Invalid session" }, { status: 401 });
     }
@@ -60,9 +66,23 @@ export async function POST(request) {
     // resolved the property (listingId vs propertySlug).
     const { data: propertyRow } = await supabaseAdmin
       .from('properties')
-      .select('title, owner_id')
+      .select('title, owner_id, lifecycle_state, pipeline_status, quietly_open_to_offers')
       .eq('id', resolvedListingId)
       .single();
+
+    if (!propertyRow) {
+      return NextResponse.json({ error: "Property not found" }, { status: 404 });
+    }
+    const propertyState = normalizeLifecycleState(propertyRow);
+    if (propertyState === PROPERTY_LIFECYCLE_STATES.OFF_MARKET && !canContactProperty(propertyRow)) {
+      return NextResponse.json({ error: "This off-market listing is view-only; the owner has not opened quiet offers" }, { status: 403 });
+    }
+    if (propertyState === PROPERTY_LIFECYCLE_STATES.PERMANENTLY_REMOVED) {
+      return NextResponse.json({ error: "This listing has been permanently removed" }, { status: 410 });
+    }
+    if (propertyState !== PROPERTY_LIFECYCLE_STATES.LIVE && propertyState !== PROPERTY_LIFECYCLE_STATES.OFF_MARKET) {
+      return NextResponse.json({ error: "Property is not available for contact" }, { status: 404 });
+    }
 
     // If this is a per-unit contact (Unit Master Page "Your Move"), look up
     // whether the unit has a delegated operator so the ledger reason text is
@@ -77,8 +97,10 @@ export async function POST(request) {
       unitOperatorId = unitRow?.operator_id || null;
     }
 
-    // 1. Insert the deal first — rolled back below if the Connect spend fails.
-    // Expire 14 days from now.
+    // The database RPC captures the active roster and inserts the deal plus its
+    // recipient snapshot under one property-roster advisory lock. This keeps
+    // concurrent representation changes from splitting one lead between owner
+    // and broker paths.
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 14);
 
@@ -88,19 +110,22 @@ export async function POST(request) {
       ? 'Buyer contacted the unit operator.'
       : 'Buyer initiated contact.';
 
-    const { data: dealData, error: dealError } = await supabaseAdmin.from('deals').insert([{
-      property_id: resolvedListingId,
-      buyer_id: userId,
-      unit_id: unitId || null,
-      status: 'connected',
-      expires_at: expiresAt.toISOString(),
-      pitch_message: message || defaultMessage
-    }]).select();
-
-    if (dealError || !dealData) {
-      console.error("[INITIATE API] Failed to insert deal:", dealError);
-      return NextResponse.json({ error: "Failed to initiate chat." }, { status: 500 });
+    const { data: routedDeal, error: routingError } = await supabaseAdmin.rpc("create_routed_buyer_deal", {
+      p_property_id: resolvedListingId,
+      p_buyer_id: userId,
+      p_message: message || defaultMessage,
+      p_expires_at: expiresAt.toISOString(),
+      p_unit_id: unitId || null,
+      p_preferred_broker_id: preferredBrokerId || null,
+    });
+    if (routingError || !routedDeal?.[0]?.deal_id) {
+      console.error("[INITIATE API] Routed deal creation failed:", routingError);
+      const reason = routingError?.message?.includes("BROKER_NOT_CONTACTABLE") ? "broker_not_contactable" : "routing_unavailable";
+      return NextResponse.json({ error: reason === "broker_not_contactable" ? "That broker is no longer available for this property." : "Lead routing is temporarily unavailable; no Connect was spent." }, { status: routingFailureStatus(reason) });
     }
+    const dealId = routedDeal[0].deal_id;
+    const recipientIds = routedDeal[0].recipient_ids || [];
+    const routedToRoster = routedDeal[0].routed_to_roster === true;
 
     // 2. Atomic Connect spend — balance check + 3-bucket deduction (granted → purchased →
     // earned) + ledger insert, all in one indivisible Postgres transaction (spend_connects RPC).
@@ -108,7 +133,7 @@ export async function POST(request) {
     let spendError = null;
     let spendData = null;
 
-    if (process.env.NODE_ENV !== 'production' && mockOwnerId) {
+    if (isDevMock) {
       // Bypass connect spend for E2E tests using mock users
       spendData = { success: true };
     } else {
@@ -129,7 +154,7 @@ export async function POST(request) {
 
     if (spendError) {
       console.error("[INITIATE API] Connect spend failed:", spendError);
-      await supabaseAdmin.from('deals').delete().eq('id', dealData[0].id);
+      await supabaseAdmin.from('deals').delete().eq('id', dealId);
       const insufficient = spendError.message?.includes('insufficient balance') || spendError.message?.includes('no wallet found');
       return NextResponse.json(
         { error: insufficient ? "Insufficient Connects balance." : "Transaction failed. No Connects spent." },
@@ -144,20 +169,19 @@ export async function POST(request) {
       await supabaseAdmin.from('user_profiles').update({ connects_balance: newBalance }).eq('id', userId);
     }
 
-    // Signal the recipient(s) through the real notification bell -- this was
-    // the actual gap: a buyer/operator contact created a deal row but nobody
-    // on the other end ever found out. Owner always gets notified (it's their
-    // listing); the unit operator also gets notified when the contact is
-    // scoped to a unit they operate, since they're the one who acts on it.
+    // Signal exactly the recipient snapshot. When the active roster is
+    // non-empty the owner is deliberately absent; when it is empty the RPC
+    // returns the owner/lister as the sole recipient.
     const propertyTitle = propertyRow?.title || 'your property';
-    if (propertyRow?.owner_id && propertyRow.owner_id !== userId) {
+    for (const recipientId of recipientIds) {
+      if (!recipientId || recipientId === userId) continue;
       await notifyUser(supabaseAdmin, {
-        userId: propertyRow.owner_id,
+        userId: recipientId,
         title: role === 'operator' ? 'New operator request' : 'New inquiry',
         desc: role === 'operator'
           ? `Someone wants to operate units in "${propertyTitle}".`
           : `Someone is asking about "${propertyTitle}".`,
-        icon: role === 'operator' ? '🏢' : '💬',
+        icon: role === 'operator' ? 'ðŸ¢' : 'ðŸ’¬',
         propertyId: resolvedListingId,
         notificationType: role === 'operator' ? 'operator_request' : 'new_inquiry',
       });
@@ -176,14 +200,14 @@ export async function POST(request) {
     // CRM Timeline: an initiated contact IS the inquiry event -- log it so it
     // shows up on the deal's and property's Timeline immediately.
     await logActivity(supabaseAdmin, {
-      dealId: dealData[0].id,
+      dealId,
       propertyId: resolvedListingId,
       activityType: role === 'operator' ? 'operator_request' : 'inquiry',
       actorId: userId,
-      metadata: { unitId: unitId || null },
+      metadata: { unitId: unitId || null, recipientIds, routedToRoster },
     });
 
-    return NextResponse.json({ success: true, dealId: dealData[0].id, newBalance });
+    return NextResponse.json({ success: true, dealId, newBalance, routedToRoster, recipientCount: recipientIds.length });
 
   } catch (err) {
     console.error("[INITIATE API] Error during initiate process:", err);

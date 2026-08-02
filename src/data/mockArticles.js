@@ -11,8 +11,8 @@ export const DISCOVER_INTEL = {
   Hospitality: [
     { id: "n4", slug: "off-grid-island-living", category: "Hospitality", date: "June 2026", region: "El Nido, Palawan", title: "Palawan Off-Grid Solar Microgrids", snippet: "Sustainable teak pavilion resorts redefine island luxury in northern Palawan." }
   ],
-  Culinary: [
-    { id: "n5", slug: "poblacion-food-architecture", category: "Culinary", date: "May 2026", region: "Poblacion, Makati", title: "Poblacion Adaptive Reuse Gastronomy", snippet: "Industrial warehouse conversions create high-density multi-floor dining destinations." }
+  Restaurants: [
+    { id: "n5", slug: "poblacion-food-architecture", category: "Restaurants", date: "May 2026", region: "Poblacion, Makati", title: "Poblacion Adaptive Reuse Gastronomy", snippet: "Industrial warehouse conversions create high-density multi-floor dining destinations." }
   ],
   Venues: [
     { id: "n6", slug: "manila-venue-trends", category: "Venues", date: "May 2026", region: "Bay Area, Manila", title: "Glass Atrium Corporate Pavilions", snippet: "Subterranean ballrooms give way to light-filled glass atrium event spaces." }

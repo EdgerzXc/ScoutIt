@@ -5,7 +5,7 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Public read APIs', () => {
-  test('/api/cms serves the property feed (Airtable or mock fallback)', async ({ request }) => {
+  test('/api/cms serves the live Airtable property feed', async ({ request }) => {
     const res = await request.get('/api/cms?type=properties');
     expect(res.status()).toBe(200);
     const data = await res.json();
@@ -35,25 +35,35 @@ test.describe('Public read APIs', () => {
 test.describe('Auth walls on mutation routes', () => {
   // Every one of these must reject an anonymous request. 2xx here would mean
   // an open write path into live data.
-  const PROTECTED_POSTS = [
-    { path: '/api/dashboard/publish', body: { submissionId: 'e2e-void' } },
-    { path: '/api/dashboard/delete', body: { submissionId: 'e2e-void' } },
-    { path: '/api/dashboard/update', body: { submissionId: 'e2e-void', data: {} } },
-    { path: '/api/dashboard/archive', body: { submissionId: 'e2e-void' } },
-    { path: '/api/dashboard/invite', body: { listingId: 'e2e-void' } },
-    { path: '/api/deals/initiate', body: { propertyId: 'e2e-void' } },
-    { path: '/api/crm/tasks', body: { title: 'e2e-void' } },
-    { path: '/api/admin/approve', body: { recordId: 'e2e-void' } },
-    { path: '/api/badges/claim', body: { badgeId: 'e2e-void' } },
-    { path: '/api/storage/upload', body: {} },
+  const PROTECTED_MUTATIONS = [
+    { method: 'POST', path: '/api/dashboard/publish', body: { submissionId: 'e2e-void' } },
+    { method: 'POST', path: '/api/dashboard/delete', body: { submissionId: 'e2e-void' } },
+    { method: 'POST', path: '/api/dashboard/update', body: { submissionId: 'e2e-void', data: {} } },
+    { method: 'POST', path: '/api/dashboard/archive', body: { submissionId: 'e2e-void' } },
+    { method: 'POST', path: '/api/dashboard/invite', body: { listingId: 'e2e-void' } },
+    { method: 'POST', path: '/api/deals/initiate', body: { propertyId: 'e2e-void' } },
+    { method: 'POST', path: '/api/crm/tasks', body: { title: 'e2e-void' } },
+    { method: 'POST', path: '/api/admin/approve', body: { recordId: 'e2e-void' } },
+    { method: 'POST', path: '/api/badges/claim', body: { badgeId: 'e2e-void' } },
+    { method: 'POST', path: '/api/storage/upload', body: {} },
+    {
+      method: 'POST',
+      path: '/api/viewing-appointments',
+      body: { dealId: 'e2e-void', scheduledAt: new Date().toISOString() },
+    },
+    {
+      method: 'PATCH',
+      path: '/api/viewing-appointments/e2e-void',
+      body: { status: 'confirmed' },
+    },
   ];
 
-  for (const { path, body } of PROTECTED_POSTS) {
-    test(`POST ${path} rejects anonymous requests`, async ({ request }) => {
-      const res = await request.post(path, { data: body });
+  for (const { method, path, body } of PROTECTED_MUTATIONS) {
+    test(`${method} ${path} rejects anonymous requests`, async ({ request }) => {
+      const res = await request.fetch(path, { method, data: body });
       expect(
         res.status(),
-        `${path} answered ${res.status()} to an unauthenticated POST — expected a 4xx auth rejection`
+        `${path} answered ${res.status()} to an unauthenticated ${method} — expected a 4xx auth rejection`
       ).toBeGreaterThanOrEqual(400);
       expect(res.status()).toBeLessThan(500);
     });

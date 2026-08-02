@@ -18,6 +18,7 @@ import {
 import { Redis } from '@upstash/redis';
 import { fetchWithRetry } from "@/lib/fetchWithRetry";
 import { CITY_HUB } from "@/lib/transit";
+import { DEFAULT_LIVE_CMS_URL, normalizeLiveCmsBundle } from "@/lib/cmsFallback";
 
 let redis = null;
 if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
@@ -37,11 +38,29 @@ const EMPTY_BUNDLE = {
   intel: [],
   brokers: [],
   homepage: null,
-  source: "mock_fallback",
+  source: "empty_fallback",
 };
 
 let cache = { bundle: null, fetchedAt: 0 };
 let inflight = null; // dedupe concurrent rebuilds into one Airtable fan-out
+
+async function fetchDevelopmentLiveCms() {
+  if (process.env.NODE_ENV !== "development") return null;
+
+  const url = process.env.SCOUTIT_LIVE_CMS_URL || DEFAULT_LIVE_CMS_URL;
+  const response = await fetchWithRetry(url, { cache: "no-store" }, {
+    circuit: "live-vercel-cms",
+    retries: 1,
+    budgetMs: 6000,
+    attemptTimeoutMs: 4000,
+  });
+
+  if (!response.ok) {
+    throw new Error(`Live Vercel CMS fallback failed: ${response.status} ${response.statusText}`);
+  }
+
+  return normalizeLiveCmsBundle(await response.json());
+}
 
 // Geocode results never change for a given location string — cache them
 // for the lifetime of the server process so Mapbox isn't re-pinged on
@@ -119,7 +138,10 @@ async function buildBundle() {
   const baseId = process.env.AIRTABLE_BASE_ID;
 
   if (!apiKey || !baseId) {
-    console.warn("[CMS] Env vars missing — serving empty fallback.");
+    if (process.env.NODE_ENV === "development") {
+      throw new Error("Local Airtable credentials are missing");
+    }
+    console.warn("[CMS] Env vars missing — serving empty CMS response.");
     return { ...EMPTY_BUNDLE };
   }
 
@@ -217,14 +239,25 @@ export async function getCmsBundle() {
       }
       return bundle;
     })
-    .catch((error) => {
+    .catch(async (error) => {
       inflight = null;
       console.error("[CMS] Airtable fetch failed:", error.message);
       // Stale data beats a blank site: keep serving the last good bundle.
       if (cache.bundle) {
         return { ...cache.bundle, source: `${cache.bundle.source}_stale` };
       }
-      return { ...EMPTY_BUNDLE, source: "mock_fallback_on_error" };
+
+      try {
+        const liveBundle = await fetchDevelopmentLiveCms();
+        if (liveBundle) {
+          cache = { bundle: liveBundle, fetchedAt: Date.now() };
+          return liveBundle;
+        }
+      } catch (fallbackError) {
+        console.error("[CMS] Live Vercel fallback failed:", fallbackError.message);
+      }
+
+      return { ...EMPTY_BUNDLE, source: "empty_fallback_on_error" };
     });
 
   return inflight;

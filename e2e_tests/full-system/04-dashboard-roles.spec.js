@@ -13,6 +13,28 @@ import {
   MASTER_DEV_READONLY,
 } from './helpers';
 
+const PENDING_APPOINTMENT = {
+  id: 'appt-e2e-1',
+  dealId: 'deal-e2e-1',
+  propertyId: 'prop-e2e-1',
+  propertyTitle: 'The Paragon Tower',
+  scheduledAt: new Date(Date.now() + 2 * 864e5).toISOString(),
+  status: 'pending',
+  notes: '',
+  isHost: true,
+  contactName: 'Jordan Buyer',
+  dealStatus: 'accepted',
+};
+
+async function mockAvailability(page) {
+  await page.route('**/api/availability**', async (route) => {
+    await route.fulfill({
+      status: 200,
+      json: { config: { weekly_schedule: {} }, appointments: [] },
+    });
+  });
+}
+
 test.describe('Logged out', () => {
   test('dashboard gates anonymous visitors gracefully', async ({ page }) => {
     const errors = trackErrors(page);
@@ -47,11 +69,20 @@ test.describe('Owner with zero listings (safe mock)', () => {
     await expect(startBtn).toBeVisible({ timeout: 25000 });
     await startBtn.click();
 
-    // The creation-mode chooser must appear. We open it and STOP — no draft
-    // is created, nothing is submitted.
+    // The creation-mode chooser must appear.
     await expect(
       page.getByText(/How do you want to create your listing\?/i)
     ).toBeVisible({ timeout: 15000 });
+
+    // Preserve the old Live Canvas regression coverage inside the safe suite:
+    // open the editor and prove the preview reacts, then STOP before saving.
+    await page.getByRole('heading', { name: /Build from Scratch/i }).click();
+    await expect(page.getByRole('heading', { name: /Basic Property Information/i })).toBeVisible();
+    await expect(page.getByText('LIVE PREVIEW / DRAFT MODE').first()).toBeVisible();
+
+    const titleInput = page.getByPlaceholder('e.g. Premium High-Rise Office in BGC Core');
+    await titleInput.fill('E2E Live Preview');
+    await expect(page.locator('.hero-title').first()).toHaveText('E2E Live Preview');
 
     expect(errors, errors.join('\n')).toEqual([]);
   });
@@ -70,6 +101,59 @@ test.describe('Owner with zero listings (safe mock)', () => {
       await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
     }
     expect(errors, errors.join('\n')).toEqual([]);
+  });
+});
+
+test.describe('Calendar viewing lifecycle (fully mocked)', () => {
+  test('host can confirm a pending viewing', async ({ page }) => {
+    await signInAsMock(page, { ...MOCK_OWNER_EMPTY, id: 'master-dev-e2e-calendar-host' });
+    await mockAvailability(page);
+
+    let patchedStatus = null;
+    await page.route('**/api/viewing-appointments', async (route) => {
+      await route.fulfill({
+        status: 200,
+        json: {
+          appointments: [
+            { ...PENDING_APPOINTMENT, status: patchedStatus || PENDING_APPOINTMENT.status },
+          ],
+        },
+      });
+    });
+    await page.route('**/api/viewing-appointments/*', async (route) => {
+      const body = JSON.parse(route.request().postData() || '{}');
+      patchedStatus = body.status;
+      await route.fulfill({ status: 200, json: { success: true, status: body.status } });
+    });
+
+    await gotoAndSettle(page, '/dashboard/calendar?view=agenda');
+    await expect(page.getByText('The Paragon Tower')).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText('Jordan Buyer')).toBeVisible();
+
+    await page.getByRole('button', { name: 'Accept' }).click();
+    await expect.poll(() => patchedStatus, { timeout: 10000 }).toBe('confirmed');
+    await expect(page.getByText('confirmed', { exact: false })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Accept' })).toHaveCount(0);
+  });
+
+  test('guest sees a confirmed viewing without host controls', async ({ page }) => {
+    await signInAsMock(page, { ...MOCK_OWNER_EMPTY, id: 'master-dev-e2e-calendar-guest' });
+    await mockAvailability(page);
+    await page.route('**/api/viewing-appointments', async (route) => {
+      await route.fulfill({
+        status: 200,
+        json: {
+          appointments: [
+            { ...PENDING_APPOINTMENT, status: 'confirmed', isHost: false },
+          ],
+        },
+      });
+    });
+
+    await gotoAndSettle(page, '/dashboard/calendar?view=agenda');
+    await expect(page.getByText('The Paragon Tower')).toBeVisible({ timeout: 15000 });
+    await expect(page.getByRole('button', { name: 'Accept' })).toHaveCount(0);
+    await expect(page.getByText('confirmed', { exact: false })).toBeVisible();
   });
 });
 

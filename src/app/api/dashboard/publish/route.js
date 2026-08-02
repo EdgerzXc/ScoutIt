@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
-import { insertProperty, updateProperty } from "@/lib/airtable";
+import { randomUUID } from "node:crypto";
+import { insertProperty, isAirtableRecordNotFoundError, updateProperty } from "@/lib/airtable";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { isGlobalReadOnly } from "@/lib/featureFlags";
+import { buildFirstPublicationUpdate, normalizeLifecycleState, PROPERTY_LIFECYCLE_STATES } from "@/lib/propertyLifecycle";
 
 export async function POST(request) {
 
@@ -62,6 +64,11 @@ export async function POST(request) {
       return NextResponse.json({ error: "Unauthorized: You do not own this property" }, { status: 403 });
     }
 
+    const currentLifecycle = normalizeLifecycleState(currentSubmission);
+    if (currentLifecycle === PROPERTY_LIFECYCLE_STATES.LIVE && currentSubmission.canonical_slug) {
+      return NextResponse.json({ error: "Listing is already live; edit it through the lifecycle-safe update path" }, { status: 409 });
+    }
+
     // 3. Sync to Airtable (Idempotent Upsert)
     const apiKey = process.env.AIRTABLE_API_KEY;
     const baseId = process.env.AIRTABLE_BASE_ID;
@@ -71,14 +78,13 @@ export async function POST(request) {
         console.log(`[PUBLISH API] Syncing slug ${currentSubmission.slug} to Airtable...`);
         const payload = {
           title: currentSubmission.title,
-          slug: currentSubmission.slug,
           location: currentSubmission.location,
           type: currentSubmission.type,
           space_category: currentSubmission.space_category,
           details: currentSubmission.details || {}
         };
         
-        let finalSlug = currentSubmission.slug;
+        let finalSlug = currentSubmission.canonical_slug || currentSubmission.slug;
 
         // Attempt update first, fallback to insert. Airtable's Slug is a
         // FORMULA field (computed from Title) — the app-side slug can drift
@@ -88,18 +94,25 @@ export async function POST(request) {
         // Airtable stays the single source of slug truth on every publish.
         try {
           // If update succeeds, the record existed
-          const updated = await updateProperty(apiKey, baseId, currentSubmission.slug, payload);
-          finalSlug = updated?.fields?.Slug || currentSubmission.slug;
+          const lookupSlug = currentSubmission.canonical_slug || currentSubmission.slug;
+          if (!lookupSlug) throw new Error("Published properties require a canonical slug before an update");
+          const updated = await updateProperty(apiKey, baseId, lookupSlug, payload);
+          finalSlug = updated?.fields?.Slug || lookupSlug;
         } catch (updateErr) {
+          if (!isAirtableRecordNotFoundError(updateErr)) throw updateErr;
           // Record doesn't exist, insert instead
           const created = await insertProperty(apiKey, baseId, payload);
           finalSlug = created?.fields?.Slug || currentSubmission.slug;
         }
 
         // 4. Update Supabase only AFTER Airtable success
+        const lifecycleUpdate = buildFirstPublicationUpdate({
+          current: currentSubmission,
+          computedSlug: finalSlug,
+        });
         const { error: updateError } = await supabaseAdmin
           .from('properties')
-          .update({ pipeline_status: 'approved', slug: finalSlug })
+          .update(lifecycleUpdate)
           .eq('id', submissionId);
 
         if (updateError) {
@@ -112,8 +125,7 @@ export async function POST(request) {
         return NextResponse.json({ error: "Airtable sync failed: " + airtableErr.message }, { status: 500 });
       }
     } else {
-      console.warn("[PUBLISH API] Airtable credentials missing, approving locally only.");
-      await supabaseAdmin.from('properties').update({ pipeline_status: 'approved' }).eq('id', submissionId);
+      return NextResponse.json({ error: "Publication is unavailable while the Airtable CMS is unavailable" }, { status: 503 });
     }
 
     return NextResponse.json({ success: true });

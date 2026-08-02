@@ -1,7 +1,5 @@
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import LedgerButtons from "@/components/property/LedgerButtons";
-import EcosystemActionBar from "@/components/property/EcosystemActionBar";
 
 export default function PropertyUniversalFrame({ children }) {
   return (
@@ -13,8 +11,6 @@ export default function PropertyUniversalFrame({ children }) {
       </main>
 
       <Footer />
-
-      <EcosystemActionBar />
     </div>
   );
 }
