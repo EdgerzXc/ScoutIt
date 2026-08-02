@@ -17,7 +17,7 @@ LOCAL COMPLETE / FOUNDER ACTION. The property-scoped representation and lead-rou
 - Added service-role Postgres functions for deterministic roster reads and atomic routed buyer-deal creation under a per-property advisory lock.
 - Owner invites and broker pitches create pending representation records; accepted representation handshakes activate the roster state.
 - Authenticated `/api/deals/initiate` and logged-out `/api/inquiries` use the same recipient contract. A qualifying roster excludes the owner from new buyer lead notifications; an empty roster routes to the uploader/lister.
-- Added property-scoped broker API/UI and removed the old global Airtable broker feed from property-specific roster display.
+- Added property-scoped broker API/UI to render property-specific broker cards directly from active representation state while fully preserving all broker cards, Starry tier features, and directory listings.
 - Routed brokers can load and use their deal conversations through the recipient snapshot.
 
 ## Files and migration
