@@ -8,6 +8,7 @@ import DynamicOverlays from "@/components/layout/DynamicOverlays";
 import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
 import JsonLd from "@/components/seo/JsonLd";
 import DeviceTracker from "@/components/layout/DeviceTracker";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -91,6 +92,7 @@ export default function RootLayout({ children }) {
         </ErrorBoundary>
         <BottomNav />
         <DynamicOverlays />
+        <SpeedInsights />
       </body>
     </html>
   );
