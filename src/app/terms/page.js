@@ -10,161 +10,148 @@ const SECTIONS = [
   {
     num: "01",
     title: "What ScoutIt is — and what it isn't",
-    body: `ScoutIt is the Philippines' first spatial commerce platform — a B2B2C intelligence layer for every kind of space: homes, offices, short-term rentals, hospitality, restaurants, and event venues. We turn space into clear, verified briefings, and we connect the people who own and work with space to the people looking for it.
+    body: `ScoutIt is operated by ScoutIt Intelligence Technologies Inc., a technology company registered in the Republic of the Philippines ("ScoutIt," "we," "us," or "our"). ScoutIt is the Philippines' first spatial commerce and intelligence platform — a B2B2C technology layer for physical space: homes, commercial offices, short-term rentals, hospitality, restaurants, and event venues. We turn space into clear, verified briefings, and we connect space owners and professionals to seekers.
 
-ScoutIt is not a real estate broker, agent, or dealer, and it is not a listings site. We do not sell, lease, negotiate, represent any party in, or take a cut of any property transaction. Our role is intelligence and connection — never the deal itself.
-
-Our standing rule: Intelligence first. Transactions never.`,
+INTELLIGENCE FIRST. TRANSACTIONS NEVER. ScoutIt is deliberately and strictly NOT a real estate broker, real estate salesperson, real estate appraiser, real estate consultant, or real estate dealer under Republic Act No. 9646 (the Real Estate Service Act of the Philippines, or RESA). ScoutIt does not sell, purchase, lease, negotiate, represent any party in, manage escrow for, or receive commissions or transaction fees on any property transaction. All discussions, viewings, negotiations, lease agreements, purchase contracts, and financial settlements occur entirely off-platform between the respective parties and their independently retained, licensed professionals.`,
   },
   {
     num: "02",
-    title: "Your account and your role",
-    body: `You can browse ScoutIt and use the Ledger (your saved spaces) without an account. To list a space, connect with an advisor, or use paid features, you create an account and pick one or more roles: seeker, owner, broker, photographer, researcher, or event planner.
+    title: "Your account, role, and age capacity",
+    body: `You can browse ScoutIt and use the Ledger (your saved spaces) without an account. To list a space, connect with an advisor, or use platform features, you create an account and select your role identity: seeker, owner, broker, photographer, researcher, or event planner.
 
-You agree to give accurate information and keep it current. You are responsible for everything done under your account. Don't share your login, and don't use someone else's account without their permission.
+Under Article 1327 of the Civil Code of the Philippines, you must be at least eighteen (18) years of age and possess full legal capacity to register an account and enter into binding contracts. By creating an account, you attest that you meet this legal age requirement. Accounts found to be created by minors under 18 will be terminated immediately.
 
-You must be at least 18 years old to hold a ScoutIt account.
-
-We may suspend or close an account that breaks these terms, posts false information, or harms the platform or other people on it.`,
+You agree to provide true, accurate, current, and complete information and maintain the security of your account credentials. You are responsible for all actions taken under your account identity. We reserve the right to suspend or terminate accounts that breach these terms, submit fraudulent data, impersonate third parties, or engage in unauthorized real estate practice under RA 9646.`,
   },
   {
     num: "03",
     title: "The Ledger stays yours",
-    body: `Your Ledger — the spaces you save and tag (Potential Fit, Interested, Inspired Me, Save) — lives in your own browser, on your own device. It is never gated behind a paywall and never required to be on our servers.
+    body: `Your Ledger — the spaces you save and tag (Potential Fit, Interested, Inspired Me, Save) — is stored exclusively within your local web browser storage on your device by default. ScoutIt cannot view, access, or extract your Ledger while it remains un-synced on your device.
 
-If you choose to log in and sync your Ledger across devices, you are asking us to store a copy. Until you do, your shortlisting stays on your device and we cannot see it. See our Privacy Policy for the detail.`,
+If you choose to log in and sync your Ledger across devices, you explicitly instruct ScoutIt to maintain a secure cloud backup mirror of your Ledger. You retain full control to clear local storage or disconnect server synchronization at any time.`,
   },
   {
     num: "04",
-    title: "Connects — what they are",
-    body: `Connects are ScoutIt's platform currency. They are an authorization and anti-spam layer — they gate who can reach whom and who can be listed on a property. Connects are not a brokerage fee, a commission, or a charge on any transaction. Paying a Connect buys a platform action, not a property.
+    title: "Connects token economy & authorization mechanics",
+    body: `Connects are ScoutIt's proprietary, internal digital utility tokens utilized on the Platform strictly as an authorization layer, access control mechanism, and anti-spam protocol. Under Section 3(g) of the RESA Law (RA 9646), Connects are not real estate brokerage fees, referral fees, commissions, success fees, escrow deposits, or legal tender. Paying a Connect buys encrypted digital message transmission bandwidth and platform access — not a real estate transaction or representation.
 
-Each Connect wallet holds three kinds of Connects:
-— Granted: issued monthly with your tier. These reset on the 1st of each month and do not roll over.
-— Purchased: bought in Connect packs. These never expire.
-— Earned: paid out for completing bounties. These never expire.
+Each Connect wallet holds three structural allocations:
+— Monthly Allowance: Granted based on subscription tier. Resets on the 1st of each calendar month, non-cumulative, with zero rollover. Consumed first.
+— Purchased Allocation: Acquired à la carte via authorized payment processors (PayMongo). Permanent, non-expiring, and account-wide. Consumed second.
+— Reward Balance: Earned by completing platform data verification bounties. Permanent, non-expiring, and account-wide. Consumed third.
 
-When you spend, we use your granted Connects first, then purchased, then earned — so the ones that expire are used before the ones that don't.
-
-Connects are tied to your account. They are not transferable between accounts and have no cash value off the platform.`,
+A Connect is consumed immediately upon the successful dispatch and delivery of an interaction (sending an inquiry, submitting a pitch, or requesting contact). In compliance with Republic Act No. 7394 (Consumer Act of the Philippines), the platform service is fully rendered upon transmission; consequently, spent Connects are non-refundable even if the recipient declines, fails to respond, or allows the interaction to time out. Discretionary token corrections may be issued by administration only for verified technical system errors.`,
   },
   {
     num: "05",
-    title: "Connects — spending and refunds",
-    body: `A Connect is spent the moment you send the action — a handshake invite, a pitch, or a contact request. It is spent whether or not the other side responds. A decline is a signal, not a refund event; you are free to try again, which costs another Connect.
+    title: "Platform handshakes and broker verification",
+    body: `A licensed real estate broker appears on a property listing only after completing a two-key double-opt-in representation handshake (one party initiates an invite or pitch; the other explicitly accepts). This handshake establishes listing visibility authorization only; it does not constitute an exclusive listing agreement or grant platform rating.
 
-Typical costs: a handshake (owner inviting a broker, or a broker pitching an owner) costs the initiator 1 Connect, and accepting is free. A seeker contacting a broker costs 1 Connect. Commissioning a photographer, researcher, or event planner costs 2 Connects. Exact costs are shown in the platform before you confirm.
-
-Because a Connect buys an immediate platform action that is delivered the instant you send it, spent Connects are non-refundable. Connect packs you have bought but not yet spent can be refunded only where Philippine consumer law requires it.`,
+Scout Rating points and transaction verification counts are awarded exclusively upon the execution of a separate post-viewing buyer-broker transaction handshake completed inside ScoutIt by both parties. Scout Rating cannot be purchased, tier-granted, or assigned via representation handshakes. Any transaction concluded off-platform that skips the in-platform transaction handshake receives zero Scout Rating credit or platform validation.`,
   },
   {
     num: "06",
-    title: "Subscriptions, tiers, and pricing",
-    body: `ScoutIt offers four subscription tiers for each role: Starry (free), Solar, Cluster, and Universe. Higher tiers unlock more intelligence, more visibility, more listing slots, and a larger monthly Connects grant. Each role is its own subscription.
+    title: "Subscriptions, tiers, and billing operations",
+    body: `ScoutIt offers subscription tiers per role: Starry (Free), Solar, Cluster, and Universe. Subscriptions grant enhanced data intelligence, elevated visibility, expanded active listing allowances, and monthly Connect allocations. Subscriptions monetize platform software access and intelligence depth — never the listing of property or browsing of public facts.
 
-We charge for access, intelligence, and connection — never for listings, and never for looking. Public facts about a space (location, size, condition, the owner's asking price where verified) are free to view.
+Prior to reaching the platform benchmark of 200 approved live properties, premium information and features are unlocked for registered users via a Master Mission Control locker. Paid billing operations remain inactive during this period; however, Connect actions continue to consume free monthly allocations to test anti-spam protocols. Normal subscription paywalls and commercial billing activate upon notice once the operational threshold is reached.
 
-Pricing shown as "Coming Soon" is not yet billable. Paid subscriptions and Connect purchases go live after the platform reaches its launch inventory; until then, paid tiers are previews. Founding "Pioneer Cohort" members who join early may be offered a locked-in rate, honored on the terms stated at the time of that offer.
-
-When billing is live, subscriptions renew automatically for the period you chose unless you cancel before the renewal date. You can cancel anytime; cancellation stops the next charge and is not a refund of the current period.`,
+Once billing is active, paid subscriptions automatically renew for successive billing cycles unless cancelled prior to the renewal date via account settings. Cancellation halts future charges and does not entitle the User to a retroactive refund for current active billing cycles.`,
   },
   {
     num: "07",
-    title: "Listings, accuracy, and price",
-    body: `Listings on ScoutIt are submitted by owners and brokers and are reviewed before they go public. We make a genuine effort to verify what we publish, but we do not guarantee any listing is complete, current, or error-free. A listing is information — it is not an offer to sell, lease, or transfer anything.
+    title: "Listings, accuracy, and price rules",
+    body: `Property owners and listers are the primary source of truth for all listing submissions. Listings authored directly by owners publish following owner attestation and automated policy checks. Listings generated via ScoutIt's document extraction tools (parsing owner-supplied PDF brochures or flyers) require procedural verification against the original source document prior to public release.
 
-We never invent data. A blank field means the information was not available when we published — it does not mean zero, and it does not mean "not applicable."
+PROCEDURAL EXTRACTION VERIFICATION DISCLAIMER: "Verification" on ScoutIt refers strictly to procedural verification — confirming that automated document extraction accurately matches owner-provided PDF source files, or verifying that a lister completed basic identity attestation. ScoutIt procedural verification does NOT constitute a real property title search, legal title audit, physical property appraisal, structural inspection, or guarantee of owner legal capacity under Republic Act No. 7394 (Consumer Act) and Article 1338 of the Civil Code of the Philippines.
 
-Price is shown only in a listing's "Your Move" section, only when the owner has verified it, and only as the owner's asking price. ScoutIt does not set, appraise, or broker any price.`,
+ScoutIt strictly prohibits data invention. Missing data points remain blank (indicating "unknown"). Asking prices displayed on the Platform reflect owner-confirmed inputs (mapped strictly to CM_Rent_Per_Sqm). Where pricing is uncertain, listings must state "Price on Request" or remain blank. ScoutIt never appraises, algorithmically estimates, scrapes secondary prices, or negotiates asking prices under Section 3(f) of RA 9646.`,
   },
   {
     num: "08",
-    title: "Owner authority and the broker handshake",
-    body: `A property's authority comes from its owner — never from whoever entered it first. An owner can sell it themselves, work with one broker, or open it to many. There is no exclusivity built into the platform.
+    title: "Bounties and field telemetry tasks",
+    body: `ScoutIt may issue small real-world data verification tasks ("Bounties"), allowing qualified researchers or photographers to verify location facts, capture geotagged photo evidence, or audit spatial details in exchange for reward Connects.
 
-A broker only appears on a property after a two-key handshake: one side invites or pitches, the other side accepts. Neither side can attach the other on their own. A broker who first lists a property is credited as the lister, but that is credit, not a monopoly — other owner-confirmed brokers can appear too.
-
-A broker's Scout Rating reflects verified closures only. It is never bought, never granted by a tier, and never created by a handshake. Being listed on a property is visibility; it is not a rating.
-
-If someone disputes a broker's authority on a listing, we resolve it through human review, with the owner's word as the default.`,
+Bounties tied to specific private properties require Cluster-tier or higher owner approval before reward payout. Submitting falsified proof, fake coordinates, or altered media results in immediate forfeiture of earned rewards, bounty disqualification, and permanent account termination.`,
   },
   {
     num: "09",
-    title: "The Handshake Chat is temporary",
-    body: `When two parties connect, a private chat opens so they can talk and build trust. This chat is ephemeral. Messages are permanently deleted when the chat closes — when both sides complete the handshake, or when either side walks away. ScoutIt does not archive, review, or retain chat contents.
+    title: "Temporary communication and ephemeral chat retention",
+    body: `Handshake Chat provides a private, temporary communication space for connected parties. Closing a chat thread converts it to read-only status for seven (7) days as an operational retention benchmark. Upon expiration of the 7-day window, message body text is permanently purged from active database storage, while non-message transaction metadata (timestamps, participant IDs, status flags) is retained for audit trails.
 
-Every chat window carries this line, and it is part of these terms: "This conversation is temporary and will be deleted when closed. ScoutIt is not a party to any agreement made here."
+Every chat interface displays the following mandatory operational disclosure: "Notice: This conversation is temporary. When the chat closes it becomes read-only, and its message contents are deleted after 7 days. ScoutIt is not a party to any agreement made here."
 
-If the two parties choose to share private contact details inside the chat, that exchange is their decision. Once shared, ScoutIt cannot un-share it. A Connect buys you access to start the conversation — it is not a guarantee of privacy after you choose to exchange details. Do not share passwords, government IDs, or bank details through the chat.`,
+Disputed or reported chat threads are placed under restricted administrative holds for Trust & Safety review until resolved. Exchanging personal contact details within the chat is done entirely at your own risk; ScoutIt cannot un-share information once transmitted.`,
   },
   {
     num: "10",
-    title: "The Spatial Vault and who owns the media",
-    body: `The Spatial Vault holds rich media for a space — 3D spatial maps, 360° tours, and drone heatmaps. Most of this media is produced by ScoutIt (or by creators ScoutIt commissions), not uploaded by owners.
+    title: "The Spatial Vault and intellectual property ownership",
+    body: `Spatial Vault assets — including Luma AI 3D spatial scans, 360-degree virtual tours, acoustic heatmaps, and aerial visualisations — produced directly by ScoutIt or its commissioned agents are the exclusive intellectual property of ScoutIt under the Intellectual Property Code of the Philippines (Republic Act No. 8293).
 
-Media that ScoutIt produces is ScoutIt's property. While you hold the subscription that includes it, you have a license to have it displayed on your listing. You do not own the produced media, and you cannot take it or reuse it elsewhere.
+Subscribed property owners receive a limited, revocable, non-exclusive, non-transferable display license to exhibit ScoutIt-produced media on their live Platform listing during their active subscription. If the owner cancels or downgrades their subscription, their display license terminates and owner privileges pause. However, ScoutIt retains sole copyright and ownership of its produced spatial media under work-for-hire provisions of RA 8293 and may continue displaying it on the Platform to entitled users. Owners may not extract, download, export, or republish ScoutIt-produced media on third-party platforms.
 
-If you cancel or downgrade, the media ScoutIt produced may remain on the platform and continue to be displayed to qualifying viewers, while your own owner privileges over it are paused. If you bring your own existing tour (by pasting a link you already own), that media stays yours.`,
+Photos, descriptions, and virtual tours directly uploaded by Users remain the intellectual property of the respective User. By uploading, the User grants ScoutIt a worldwide, perpetual, royalty-free, non-exclusive license to host, display, format, and distribute the content in connection with the Platform.`,
   },
   {
     num: "11",
-    title: "Removing a listing",
-    body: `You can switch a listing to off-market or remove it at any time. Removing a listing takes it off the public site and out of your active list immediately. Behind the scenes, we archive rather than erase it, so it can be restored if you come back — and so any ScoutIt-produced media is preserved.
+    title: "Removing a listing: soft-delete vs. permanent removal",
+    body: `Property owners may withdraw a listing at any time, moving it off-market. Off-market properties are immediately removed from public discovery feeds and search engines, remaining accessible only to entitled Cluster/Universe users if explicitly set to "Quietly open to offers".
 
-A true, permanent erase of a record is handled through a support request, including a genuine data-removal request under Philippine privacy law. There is no public "delete forever" button, by design.`,
+Permanent listing removal is an irreversible Danger Zone action. Executing permanent removal removes the listing from owner portfolios, public directories, off-market indexes, and sitemaps. Permanent removal does not delete ScoutIt-owned spatial media, historical transaction metadata, reserved canonical URLs, or internal security audit logs. True erasure of personal data is governed by Privacy Policy Section 08 under the Data Privacy Act (RA 10173).`,
   },
   {
     num: "12",
-    title: "Bounties",
-    body: `Bounties are small, real-world data tasks — verifying an address, confirming a space is still open, photographing a space. Researchers and photographers can claim a bounty, submit proof, and earn Connects. Where a bounty is tied to a specific owner's property, the owner approves the work before any payout. Submitting false or fabricated proof forfeits the claim and may close your account.`,
+    title: "Prohibited activities and platform security",
+    body: `You expressly agree not to:
+1. Act as, advertise as, or convey the impression of being a licensed real estate broker, salesperson, appraiser, or consultant without holding valid credentials issued by the Professional Regulation Commission (PRC) under RA 9646;
+2. Submit fraudulent, misleading, or deceptive property listings or pricing facts under RA 7394;
+3. Scrape, harvest, extract, or index platform data, spatial media, or user details using automated bots, crawlers, or unauthorized software;
+4. Circumvent, disable, or tamper with platform security controls, entitlement paywalls, or Connect token mechanisms;
+5. Harass, threaten, impersonate, or breach the privacy of any User under RA 10173; or
+6. Utilize the Platform for unlawful purposes under Philippine law.
+
+Breach of these prohibitions results in immediate account revocation, asset forfeiture, and reporting to legal authorities.`,
   },
   {
     num: "13",
-    title: "What you may not do",
-    body: `Don't use ScoutIt to:
-— Post false, misleading, or fraudulent listings
-— Scrape, harvest, or systematically extract platform data
-— Get around access controls, or reverse-engineer the platform
-— Harass, threaten, or impersonate anyone
-— Misrepresent your authority over a property or your professional license
-— Do anything that breaks Philippine law, including RA 9646
-
-Breaking these may mean immediate account closure and, where the law requires, a report to the relevant authorities.`,
+    title: "Platform identity and proprietary rights",
+    body: `The ScoutIt brand, trademark, software code, dynamic interfaces, scrollytelling visual tracks, Connects economic architecture, spatial display systems, and editorial intelligence publications are the exclusive property of ScoutIt Intelligence Technologies Inc. Unauthorized reproduction, modification, or distribution is prohibited under RA 8293.`,
   },
   {
     num: "14",
-    title: "Intellectual property",
-    body: `The ScoutIt platform — its brand, design, editorial briefings, the Connects economy, the Spatial Vault framework, and ScoutIt-produced media — belongs to ScoutIt. Don't copy, redistribute, or build derivatives from it without our written permission.
+    title: "Disclaimer of advice and limitation of liability",
+    body: `All intelligence briefings, spatial telemetry, neighborhood metrics, visualisations, and price displays are provided strictly for informational purposes. ScoutIt does not render professional legal, real estate, financial, tax, or investment advice. Users must perform independent due diligence with licensed professionals before entering into any transaction.
 
-Photos, descriptions, and data that owners and brokers submit stay theirs. By submitting them, you give ScoutIt a non-exclusive license to display that content on the platform for as long as the listing lives here.`,
+The Platform is provided on an "AS IS" and "AS AVAILABLE" basis. To the maximum extent permitted under Philippine law, ScoutIt disclaims all warranties, express or implied. ScoutIt is not liable for indirect, incidental, consequential, special, or punitive damages, nor for any financial loss, loss of contract, commission dispute, or physical property damages arising from off-platform transactions or reliance on platform data.`,
   },
   {
     num: "15",
-    title: "No advice, and the limits of our liability",
-    body: `ScoutIt provides intelligence, not professional advice. Nothing on the platform is legal, financial, tax, or investment advice. Decisions about a space are yours; make them with your own professionals.
+    title: "Dispute resolution framework",
+    body: `ScoutIt handles platform operational disputes only (such as impersonation, unauthorized listing uploads, user harassment, or system technical errors).
 
-The platform is provided "as is." To the fullest extent Philippine law allows, ScoutIt is not liable for indirect, incidental, or consequential losses arising from your use of the platform — including anything that happens in a real estate transaction you found, arranged, or discussed through ScoutIt. We are not a party to those transactions.`,
+ScoutIt WILL NOT mediate, arbitrate, or involve itself in transaction disputes regarding property defects, asking prices, earnest money deposits, lease terms, commission splits, or broker representation contracts. All such disputes are strictly between the contracting parties and their licensed advisors.`,
   },
   {
     num: "16",
-    title: "Disputes we handle — and ones we don't",
-    body: `ScoutIt resolves platform disputes only: unauthorized listings, impersonation, abuse, and similar issues about the platform itself.
+    title: "Electronic acceptance and terms modifications",
+    body: `Pursuant to Republic Act No. 8792 (Electronic Commerce Act of 2000), registering an account, clicking any confirmation button, or utilizing the Platform constitutes valid, binding electronic contract acceptance equivalent to a physical signature.
 
-ScoutIt does not mediate transaction disputes — price, commission, terms, or anything about the deal between a buyer, seller, owner, or broker. Those are between the parties and their own advisors.`,
+ScoutIt reserves the right to amend these Terms at any time. Material changes will be communicated via in-app notifications or registered email. Continued use of the Platform following published amendments constitutes binding acceptance of the revised Terms.`,
   },
   {
     num: "17",
-    title: "Electronic acceptance and changes",
-    body: `By creating an account or using ScoutIt, you accept these terms electronically, with the same effect as a signature under the Philippine Electronic Commerce Act (RA 8792).
-
-We may update these terms as the platform grows. We'll flag material changes in the platform or by email. If you keep using ScoutIt after a change takes effect, that's your acceptance of the updated terms.`,
+    title: "Governing law and venue selection",
+    body: `These Terms are governed by, construed, and enforced in accordance with the laws of the Republic of the Philippines, including RA 9646, RA 10173, RA 8792, RA 7394, and RA 8293. Any legal suit, action, or proceeding arising out of these Terms or the Platform shall be instituted exclusively in the proper courts of Taguig City, Metro Manila, Philippines.`,
   },
   {
     num: "18",
-    title: "Governing law and contact",
-    body: `These terms are governed by the laws of the Republic of the Philippines, including the Real Estate Service Act (RA 9646), the Electronic Commerce Act (RA 8792), and the Consumer Act (RA 7394). Disputes fall under the jurisdiction of the appropriate Philippine courts.
-
-Questions about these terms? Reach us through the contact channel listed on the platform. We'll add a dedicated legal contact address here before paid features go live.`,
+    title: "Official legal contact details",
+    body: `For legal inquiries, operational notices, or formal statutory communications, contact ScoutIt at:
+ScoutIt Intelligence Technologies Inc.
+Attn: Legal Department / Regulatory Compliance
+Address: Tower 1, High Street South Corporate Plaza, 9th Ave cor 26th St, Bonifacio Global City, Taguig City 1634, Metro Manila, Philippines
+Dedicated Legal Email: legal@scoutit.ph
+Data Protection Officer Email: dpo@scoutit.ph`,
   },
 ];
 
@@ -173,8 +160,8 @@ export default function TermsPage() {
     <LegalDoc
       eyebrow="LAYER 09 // PLATFORM GOVERNANCE"
       title="Terms of Service"
-      meta="Pre-launch draft · June 2026  ·  Philippine operations governed by RA 9646"
-      intro="These terms cover how you use ScoutIt. By browsing or signing in, you agree to them. We've written them in plain language on purpose — if anything here is unclear, ask us before you rely on it. We're in a pre-launch phase, so some paid features described here are previews until billing goes live."
+      meta="Version 1.0  ·  Effective October 24, 2026  ·  Philippine operations governed by RA 9646, RA 10173, RA 8792"
+      intro="These Terms of Service govern your access to and use of ScoutIt. By registering an account, accessing the platform, or executing an electronic acceptance, you agree to be bound by these terms. ScoutIt is engineered around procedural verification and statutory compliance under Philippine jurisprudence. Intelligence first. Transactions never."
       sections={SECTIONS}
       related={{ href: "/privacy", label: "Privacy Policy" }}
     />

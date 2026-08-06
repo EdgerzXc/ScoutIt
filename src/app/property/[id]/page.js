@@ -13,6 +13,7 @@ import CommercialFlow from "@/components/property/CommercialFlow";
 // INCREMENTAL STATIC REGENERATION (ISR)
 // ----------------------------------------------------------------------
 import { getCmsBundle } from "@/lib/cmsCache";
+import { stripPremiumFields } from "@/lib/premiumFields";
 import { getHistoricalPropertyRedirect } from "@/lib/propertyRedirects";
 
 export const revalidate = 3600; 
@@ -170,7 +171,21 @@ export default async function PropertyRoute({ params }) {
           on a client-side /api/cms round-trip — which is what was pushing LCP
           past 7s on mobile. The flow still revalidates in the background.
         */}
-        <InjectedLayout slug={resolvedParams.id} initialData={match || null} />
+        {/* §25.1 / §45 — premium fields are STRIPPED from this payload.
+            This page is ISR: one document serves every visitor, so there is
+            no session here to check a tier against. Previously the full deep
+            intel, vault URLs and enhanced photos were serialised into the
+            payload for everyone, and the UI merely hid them behind a
+            localStorage tier — readable from "view source" without even
+            running JavaScript.
+            Entitled users now fetch the real values from
+            /api/property/premium, which resolves their tier server-side.
+            `lockedFeatures` / `premiumAvailable` still ride along so the
+            teaser can advertise what this listing genuinely has. */}
+        <InjectedLayout
+          slug={resolvedParams.id}
+          initialData={match ? stripPremiumFields(match, "starry") : null}
+        />
       </article>
     </>
   );

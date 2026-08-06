@@ -41,6 +41,11 @@ yarn-error.log*
 /reference/
 /.claude/
 /.ua/
+/.agents/
+/awesome-legal-skills-temp/
+/awesome-llm-apps/
+
+
 
 # Archived/superseded local review material
 /_REVIEW_QUEUE/

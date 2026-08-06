@@ -45,7 +45,7 @@ export default function EnterprisePage() {
             <a href="/dashboard" className="enterprise-cta-btn">
               Preview the Enterprise Console →
             </a>
-            <a href="mailto:hello@scout-it.vercel.app?subject=Enterprise%20Account%20Inquiry" className="enterprise-cta-secondary">
+            <a href="mailto:hello@scoutit.space?subject=Enterprise%20Account%20Inquiry" className="enterprise-cta-secondary">
               Get in touch
             </a>
           </div>

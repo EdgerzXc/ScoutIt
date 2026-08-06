@@ -144,7 +144,7 @@ function CRMPageInner() {
   const pipelineValue = pricedDeals.reduce((sum, d) => sum + Number(d.propertyPrice), 0);
 
   return (
-    <div className="relative min-h-[calc(100vh-80px)] flex flex-col p-4 md:p-6">
+    <div className="relative min-h-[calc(100dvh-80px)] flex flex-col p-4 md:p-6">
       <AtmosphereBackground variant={viewingAs === "broker" ? "broker" : "dashboard"} />
       {/* Additional Atmosphere Layers for CRM per Handoff */}
       <div className="fixed inset-0 pointer-events-none z-[-1]" style={{

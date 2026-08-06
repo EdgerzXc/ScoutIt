@@ -50,6 +50,7 @@ export default function OnboardingPage() {
   // Data state
   const [formData, setFormData] = useState({
     name: "",
+    dateOfBirth: "",
     email: "",
     password: "",
     tags: [],
@@ -222,6 +223,24 @@ export default function OnboardingPage() {
             value={formData.name}
             onChange={e => setFormData({...formData, name: e.target.value})}
           />
+        </div>
+        {/* 18+ legal capacity (§34.2, §48). Civil Code + RA 8792: contracts
+            need a capacitated party, and a Connect opens a negotiation.
+            The real check is server-side in /api/auth/complete-onboarding —
+            this field only makes it answerable. `max` blocks obviously-future
+            dates in the picker; it is convenience, not enforcement. */}
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-bold text-on-surface">Date of Birth</label>
+          <input
+            className="bg-surface border border-surface-variant rounded px-4 py-3 text-base text-on-surface focus:outline-none focus:border-gold-accent transition-colors"
+            type="date"
+            max={new Date().toISOString().slice(0, 10)}
+            value={formData.dateOfBirth}
+            onChange={e => setFormData({...formData, dateOfBirth: e.target.value})}
+          />
+          <span className="text-[11px] text-text-muted">
+            ScoutIt is for adults 18 and over. This is never shown on your profile.
+          </span>
         </div>
         <div className="flex flex-col gap-2">
           <label className="text-sm font-bold text-on-surface">Email Address</label>
@@ -493,11 +512,16 @@ export default function OnboardingPage() {
           tags,
           providerType: formData.providerType || null,
           prcLicense: formData.prcLicense || null,
+          dateOfBirth: formData.dateOfBirth || null,
         })
       });
 
       if (!response.ok) {
-        throw new Error("Failed to save profile");
+        // Surface the server's actual reason. A 403 here is the age gate, and
+        // "Failed to save profile" would leave someone re-submitting a form
+        // that can never succeed with no idea why.
+        const errBody = await response.json().catch(() => ({}));
+        throw new Error(errBody.error || "Failed to save profile");
       }
 
       // 3. dashboard/page.js reads localStorage("scoutit_user") to pick which

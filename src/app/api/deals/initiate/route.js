@@ -2,10 +2,11 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { notifyUser } from "@/lib/notifications";
 import { logActivity } from "@/lib/crmActivity";
-import { resolveUserId } from "@/lib/serverAuth";
+import { resolveUserId, assertAdultEligibility } from "@/lib/serverAuth";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { canContactProperty, normalizeLifecycleState, PROPERTY_LIFECYCLE_STATES } from "@/lib/propertyLifecycle";
 import { routingFailureStatus } from "@/lib/brokerRepresentation";
+import { validateIntroMessage, INTRO_MAX } from "@/lib/connectIntro";
 
 // Same dev-mock convention as /api/notifications and /api/dashboard/units --
 // ?mockOwnerId=master-dev (here: a body field, since this is a POST) only
@@ -36,6 +37,32 @@ export async function POST(request) {
 
     if (!listingId && !propertySlug) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+
+    // ── 18+ legal capacity (§34.2, §48) ──
+    // Initiating a conversation spends Connects and opens a negotiation — a
+    // contractual act under RA 8792, which requires a capacitated party.
+    // Checked BEFORE the spend so an ineligible user is never charged.
+    // Accounts predating 2026-08-06 are grandfathered (AGE_GATE_CUTOFF).
+    if (!isDevMock && !(await assertAdultEligibility(userId))) {
+      return NextResponse.json(
+        { error: "You must confirm you are 18 or older before contacting a listing." },
+        { status: 403 },
+      );
+    }
+
+    // §38.3 intro cap, enforced HERE because the composer's maxLength is a
+    // suggestion to anyone posting directly. The message is optional (some
+    // callers, e.g. unit delegation, pass none and fall through to the
+    // defaultMessage below) — but if one is supplied it must fit the request
+    // card the recipient will read it on.
+    let introMessage = null;
+    if (typeof message === "string" && message.trim() !== "") {
+      const intro = validateIntroMessage(message);
+      if (!intro.ok) {
+        return NextResponse.json({ error: intro.error, maxLength: INTRO_MAX }, { status: 400 });
+      }
+      introMessage = intro.value;
     }
 
     if (!supabaseAdmin) {
@@ -113,7 +140,7 @@ export async function POST(request) {
     const { data: routedDeal, error: routingError } = await supabaseAdmin.rpc("create_routed_buyer_deal", {
       p_property_id: resolvedListingId,
       p_buyer_id: userId,
-      p_message: message || defaultMessage,
+      p_message: introMessage || defaultMessage,
       p_expires_at: expiresAt.toISOString(),
       p_unit_id: unitId || null,
       p_preferred_broker_id: preferredBrokerId || null,
@@ -164,6 +191,25 @@ export async function POST(request) {
 
     const newBalance = spendData?.[0]?.total_balance ?? null;
 
+    // Record what this conversation cost, on the conversation (§40.14).
+    // Previously the amount was returned to the client and then discarded, so
+    // nothing tied a spend to the thread it bought — which is how a hardcoded
+    // "3 Connects Spent" ended up in the chat header while the ledger charged 1.
+    //
+    // Left NULL on the dev-mock path on purpose: that branch skips
+    // spend_connects entirely, and writing a number for a spend that never
+    // happened is exactly the class of bug this column exists to prevent.
+    // Best-effort — a failure here must not undo a completed spend.
+    if (!isDevMock) {
+      const { error: stampError } = await supabaseAdmin
+        .from('deals')
+        .update({ connects_spent: 1 })
+        .eq('id', dealId);
+      if (stampError) {
+        console.error("[INITIATE API] Could not stamp connects_spent:", stampError);
+      }
+    }
+
     // Keep the user_profiles cache in sync (best-effort display cache; not the source of truth)
     if (newBalance !== null) {
       await supabaseAdmin.from('user_profiles').update({ connects_balance: newBalance }).eq('id', userId);
@@ -181,7 +227,7 @@ export async function POST(request) {
         desc: role === 'operator'
           ? `Someone wants to operate units in "${propertyTitle}".`
           : `Someone is asking about "${propertyTitle}".`,
-        icon: role === 'operator' ? 'ðŸ¢' : 'ðŸ’¬',
+        icon: role === 'operator' ? '🏢' : '💬',
         propertyId: resolvedListingId,
         notificationType: role === 'operator' ? 'operator_request' : 'new_inquiry',
       });
@@ -207,7 +253,16 @@ export async function POST(request) {
       metadata: { unitId: unitId || null, recipientIds, routedToRoster },
     });
 
-    return NextResponse.json({ success: true, dealId, newBalance, routedToRoster, recipientCount: recipientIds.length });
+    return NextResponse.json({
+      success: true,
+      dealId,
+      connects_spent: 1,
+      connects_remaining: newBalance,
+      newBalance,
+      routedToRoster,
+      recipientCount: recipientIds.length,
+      status: "pending",
+    });
 
   } catch (err) {
     console.error("[INITIATE API] Error during initiate process:", err);

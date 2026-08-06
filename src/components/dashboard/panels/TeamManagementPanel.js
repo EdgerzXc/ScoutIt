@@ -210,7 +210,7 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
   };
 
   return (
-    <div className="flex h-[calc(100vh-140px)] animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both">
+    <div className="flex flex-col md:flex-row h-[calc(100dvh-140px)] animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both">
       <div className="w-full flex rounded-2xl bg-surface/30 backdrop-blur-xl border border-white/5 overflow-hidden shadow-2xl relative group">
         <div className="absolute inset-0 bg-gradient-to-br from-gold-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
         

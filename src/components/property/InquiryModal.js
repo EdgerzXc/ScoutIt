@@ -3,11 +3,13 @@
 import { useState } from "react";
 import { getSession } from "../../lib/authClient";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Check } from "lucide-react";
+import { X } from "lucide-react";
 import GlassPanel from "../ui/GlassPanel";
 import { ImpeccableTextArea } from "../ui/ImpeccableInput";
 import { ImpeccableButton } from "../ui/ImpeccableButton";
 import { trackFrictionPoint } from "@/lib/deviceTracker";
+import { INTRO_MAX } from "@/lib/connectIntro";
+import ConnectsReceipt from "../connects/ConnectsReceipt";
 
 const backdropVariants = {
   hidden: { opacity: 0, backdropFilter: "blur(0px)" },
@@ -38,6 +40,17 @@ const formVariants = {
 export default function InquiryModal({ isOpen, onClose, propertyTitle, propertySlug }) {
   const [status, setStatus] = useState("composing"); // composing, submitting, success, error
   const [errorMsg, setErrorMsg] = useState("");
+  // NEW_IDEAS.md §38.3 State 1 — this is the pre-acceptance intro, the only
+  // thing a recipient reads before deciding whether to open the conversation.
+  // Capped because it is shown on a request card, not in a chat thread: an
+  // uncapped wall of text either overflows that card or has to be truncated,
+  // and truncating the message someone spent a Connect on is worse than
+  // making them edit it.
+  const [message, setMessage] = useState("");
+  // Server-issued spend receipt (§38.2). Null until /api/deals/initiate
+  // answers — there is deliberately no default shape, so the receipt cannot
+  // render invented figures if the call fails.
+  const [receipt, setReceipt] = useState(null);
 
   const handleCloseModal = () => {
     if (status === "composing") {
@@ -52,8 +65,17 @@ export default function InquiryModal({ isOpen, onClose, propertyTitle, propertyS
     setErrorMsg("");
 
     try {
-      const formData = new FormData(e.target);
-      const message = formData.get("message");
+      const trimmed = message.trim();
+      if (!trimmed) {
+        setStatus("error");
+        setErrorMsg("Write a short message so they know what you're asking about.");
+        return;
+      }
+      if (trimmed.length > INTRO_MAX) {
+        setStatus("error");
+        setErrorMsg(`Keep it under ${INTRO_MAX} characters.`);
+        return;
+      }
 
       const { data: { session } } = await getSession();
       const token = session?.access_token;
@@ -78,7 +100,7 @@ export default function InquiryModal({ isOpen, onClose, propertyTitle, propertyS
       const res = await fetch("/api/deals/initiate", {
         method: "POST",
         headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-        body: JSON.stringify({ propertySlug, message, mockOwnerId }),
+        body: JSON.stringify({ propertySlug, message: trimmed, mockOwnerId }),
       });
       const data = await res.json();
 
@@ -88,11 +110,17 @@ export default function InquiryModal({ isOpen, onClose, propertyTitle, propertyS
         return;
       }
 
+      // Hold the SERVER's numbers verbatim. §38.2: "This is the source of
+      // truth displayed in the receipt — never a client-computed balance."
+      setReceipt({
+        connects_spent: data.connects_spent,
+        connects_remaining: data.connects_remaining,
+        dealId: data.dealId,
+      });
       setStatus("success");
-      setTimeout(() => {
-        onClose();
-        setStatus("composing");
-      }, 3000);
+      // No auto-dismiss. The previous 3s timer yanked the confirmation away
+      // while the user was still reading it — on a receipt for real currency,
+      // that is the one thing it must not do. They close it when they're done.
     } catch (err) {
       console.error("Inquiry failed", err);
       setStatus("error");
@@ -141,20 +169,20 @@ export default function InquiryModal({ isOpen, onClose, propertyTitle, propertyS
                     animate="visible"
                     exit="exit"
                   >
-                    <div className="w-16 h-16 rounded-full bg-success/10 border border-success/30 text-success flex items-center justify-center mb-2">
-                      <motion.div
-                        initial={{ scale: 0.8, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ type: "spring", stiffness: 300, delay: 0.2 }}
-                      >
-                        <Check size={32} />
-                      </motion.div>
-                    </div>
-                    <h3 className="font-serif text-2xl text-white font-normal">Connection Established</h3>
-                    <p className="text-sm text-[#f0ede8]/60 leading-relaxed max-w-sm">
-                      Your temporary chatbox with the current recipient for <strong className="text-white font-medium">{propertyTitle}</strong> is now open. You
-                      can view it in your <strong className="text-white font-medium">Leads Inbox</strong>.
-                    </p>
+                    {/* Was a generic "Connection Established" panel that
+                        quoted no figure at all and told the user their chatbox
+                        was "now open" — untrue the moment §40.9 lands, and
+                        misleading today because the recipient hasn't agreed to
+                        anything. Replaced with the real §38.2 receipt. */}
+                    <ConnectsReceipt
+                      receipt={receipt}
+                      propertyTitle={propertyTitle}
+                      /* No recipientLabel: this modal genuinely does not know
+                         who the lead routed to — /api/deals/initiate resolves
+                         that server-side against the broker roster. The
+                         receipt omits the row rather than guessing "Owner". */
+                      onDismiss={onClose}
+                    />
                   </motion.div>
                 ) : (
                   <motion.div 
@@ -188,8 +216,15 @@ export default function InquiryModal({ isOpen, onClose, propertyTitle, propertyS
                         <p className="mb-1.5 text-red-400 font-medium">
                           🛑 <strong>NEVER pay upfront reservation fees or deposits</strong> prior to in-person physical inspection and title/contract verification. ScoutIt does not manage or hold funds.
                         </p>
+                        {/* Was a "7-Day Purge Window ... permanently deleted
+                            forever" claim -- a fifth, different retention
+                            promise on top of the four §40.6 found in the chat
+                            itself, and nothing in the codebase deletes
+                            messages on a 7-day timer. Stating a deletion
+                            guarantee we do not implement is a data-protection
+                            claim we cannot honour under RA 10173. */}
                         <p className="mb-1.5">
-                          ⏱️ <strong>7-Day Purge Window:</strong> Temporary chatboxes remain accessible in your archive for <strong>7 days</strong>, after which all raw messages are <strong>permanently deleted forever</strong> from servers.
+                          ⏱️ <strong>No deadline on their reply.</strong> Your request stays open until they answer, and you can withdraw it any time from your inbox. Connects are spent when you send the request, not when it&apos;s accepted — they aren&apos;t returned.
                         </p>
                         <div className="pt-1.5 border-t border-white/5 font-mono text-[9px] text-[#888]">
                           Display-only platform operating in compliance with <strong>RA 9646 (Real Estate Service Act of the Philippines)</strong>.
@@ -202,8 +237,23 @@ export default function InquiryModal({ isOpen, onClose, propertyTitle, propertyS
                         label="First Message"
                         name="message"
                         required
+                        maxLength={INTRO_MAX}
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value)}
                         placeholder="Hi, I am interested in viewing this property. Are there any available schedules this week?"
                       />
+                      <div className="flex justify-between items-center -mt-2">
+                        <p className="text-[10px] text-text-muted">
+                          They see this before deciding whether to reply.
+                        </p>
+                        <span
+                          className={`text-[10px] font-mono tabular-nums ${
+                            message.length > INTRO_MAX - 40 ? "text-gold-accent" : "text-text-muted"
+                          }`}
+                        >
+                          {message.length}/{INTRO_MAX}
+                        </span>
+                      </div>
 
                       {status === "error" && (
                         <p className="text-xs text-error">{errorMsg}</p>

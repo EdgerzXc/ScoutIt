@@ -60,7 +60,7 @@ export default function Footer() {
             <Link href="/about">About Us</Link>
             <Link href="/enterprise">Enterprise</Link>
             <Link href="/dashboard">Dashboard</Link>
-            <a href="mailto:hello@scout-it.vercel.app">Contact</a>
+            <a href="mailto:hello@scoutit.space">Contact</a>
           </div>
         </div>
       </div>
@@ -75,7 +75,7 @@ export default function Footer() {
             <span className="meta-separator">•</span>
             <Link href="/privacy">Privacy Policy</Link>
             <span className="meta-separator">•</span>
-            <a href="mailto:hello@scout-it.vercel.app">Contact</a>
+            <a href="mailto:hello@scoutit.space">Contact</a>
           </div>
         </div>
       </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { canSee, getCurrentTier } from "@/lib/entitlements";
+import { usePremiumFields } from "@/lib/usePremiumFields";
 
 // ═══════════════════════════════════════════════════
 // CATEGORY SPEC BLOCK
@@ -145,14 +145,25 @@ function resolveCategoryKey(category) {
 }
 
 // ── MINOR deep-intel section (mirrors DeepIntelWidget) ──
-// Below Solar → blur-locked teaser. Solar+ → reveals real values (from
-// property.deepIntel, keyed by label). SSR-safe: locked until the client reads
-// the viewer's tier. NOTE: client-trusted for now (later security pass enforces
-// server-side) — that's why real values still only ship on demo/seed data.
-function MinorLockSection({ labels, values }) {
+// Below Solar → blur-locked teaser. Solar+ → real values.
+//
+// ── §25.1 / §45: THIS IS NOW SERVER-ENFORCED ──
+// It used to read `canSee("deepIntel", getCurrentTier())`, and getCurrentTier
+// reads localStorage — so setting `subscription_tier: "universe"` in a browser
+// console unlocked it. Worse, the values were serialised into the page payload
+// regardless, readable from "view source" without running anything. The old
+// comment here admitted as much: "client-trusted for now (later security pass
+// enforces server-side)". This is that pass.
+//
+// The values no longer arrive with the page at all. They come from
+// /api/property/premium, which resolves the tier from the session server-side.
+// `unlocked` is now simply "did the server give us anything" — a browser can
+// no longer assert it.
+function MinorLockSection({ labels, slug }) {
   const [open, setOpen] = useState(false);
-  const [unlocked, setUnlocked] = useState(false);
-  useEffect(() => { setUnlocked(canSee("deepIntel", getCurrentTier())); }, []);
+  const { fields } = usePremiumFields(slug);
+  const values = fields?.deepIntel || null;
+  const unlocked = Boolean(values && Object.keys(values).length > 0);
   if (!labels || labels.length === 0) return null;
 
   const valueFor = (label) => {
@@ -273,7 +284,7 @@ export default function CategorySpecBlock({ property, extraLockedLabels = [] }) 
 
       {/* MINOR — blur-locked teaser (paywall placeholder). Editorial
           deep-intel labels are folded in so the page shows ONE locked box. */}
-      <MinorLockSection labels={[...config.minor, ...extraLockedLabels]} values={d.deepIntel} />
+      <MinorLockSection labels={[...config.minor, ...extraLockedLabels]} slug={d.slug} />
     </div>
   );
 }

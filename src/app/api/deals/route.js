@@ -16,7 +16,7 @@ export const dynamic = "force-dynamic";
 
 // No updated_at column on deals (yet) -- sort order is derived from
 // created_at + latest message timestamp instead, computed below.
-const DEAL_FIELDS = "id, status, pitch_message, private_notes, buyer_id, broker_id, unit_id, created_at, closed_at, expires_at, properties(id, title, slug, owner_id, price)";
+const DEAL_FIELDS = "id, status, pitch_message, private_notes, buyer_id, broker_id, unit_id, created_at, closed_at, expires_at, connects_spent, archived_at, pending_clock_reset_at, properties(id, title, slug, owner_id, price)";
 
 export async function GET(request) {
   try {
@@ -130,6 +130,15 @@ export async function GET(request) {
           lastActivityAt: lastActivityByDeal[d.id] || d.created_at,
           closedAt: d.closed_at,
           expiresAt: d.expires_at,
+          // NULL for every row created before 2026-08-05 (§40.14). Passed
+          // through as-is so the UI can tell "cost nothing" apart from "we
+          // never wrote it down" — it renders the badge only for real numbers.
+          connects_spent: d.connects_spent ?? null,
+          // §40.15 lifecycle. archived_at NULL = not archived; the reset
+          // timestamp is the single origin both the 7-day and 30-day
+          // deadlines are measured from, so the client never computes one.
+          archivedAt: d.archived_at ?? null,
+          pendingClockResetAt: d.pending_clock_reset_at ?? null,
           private_notes: d.private_notes,
         };
       })

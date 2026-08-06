@@ -6,6 +6,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { isGlobalReadOnly } from "@/lib/featureFlags";
 import { buildFirstPublicationUpdate, normalizeLifecycleState, PROPERTY_LIFECYCLE_STATES } from "@/lib/propertyLifecycle";
+import { validateDeclaration, hasValidAgreement } from "@/lib/listerRelationship";
 
 export async function POST(request) {
 
@@ -25,7 +26,7 @@ export async function POST(request) {
       return NextResponse.json({ error: "Unauthorized: Missing token" }, { status: 401 });
     }
 
-    const { submissionId } = await request.json();
+    const { submissionId, listerRelationship, ownerSovereigntyAgreed } = await request.json();
     
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -73,6 +74,35 @@ export async function POST(request) {
       return NextResponse.json({ error: "Listing is already live; edit it through the lifecycle-safe update path" }, { status: 409 });
     }
 
+    // ── LISTER RELATIONSHIP DECLARATION (§34.3 / NEW_IDEAS_2 §50) ──
+    // RESA RA 9646: nobody publishes without stating their relationship to the
+    // property and acknowledging that the title holder can reclaim it.
+    //
+    // Enforced at PUBLISH, not at draft creation — a draft harms nobody, and
+    // blocking the first save would make people declare before they have even
+    // decided to list. Publication is the moment the claim becomes public.
+    //
+    // Already-declared listings are not re-asked: re-publishing after an edit
+    // should not demand the same acknowledgment twice.
+    const alreadyDeclared =
+      Boolean(currentSubmission.lister_relationship) &&
+      hasValidAgreement(currentSubmission.owner_claim_agreed);
+
+    let declarationUpdate = {};
+    if (!alreadyDeclared) {
+      const declaration = validateDeclaration(listerRelationship, ownerSovereigntyAgreed);
+      if (!declaration.ok) {
+        return NextResponse.json(
+          { error: declaration.error, requiresDeclaration: true },
+          { status: 422 },
+        );
+      }
+      declarationUpdate = {
+        lister_relationship: declaration.relationship,
+        owner_claim_agreed: declaration.agreementRecord,
+      };
+    }
+
     // 3. Sync to Airtable (Idempotent Upsert)
     const apiKey = process.env.AIRTABLE_API_KEY;
     const baseId = process.env.AIRTABLE_BASE_ID;
@@ -116,7 +146,11 @@ export async function POST(request) {
         });
         const { error: updateError } = await supabaseAdmin
           .from('properties')
-          .update(lifecycleUpdate)
+          // The declaration is persisted in the SAME write that makes the
+          // listing live. Doing it in a separate call would leave a window
+          // where a published listing has no declaration attached — exactly
+          // the state §34.3 exists to prevent.
+          .update({ ...lifecycleUpdate, ...declarationUpdate })
           .eq('id', submissionId);
 
         if (updateError) {

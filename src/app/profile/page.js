@@ -86,7 +86,14 @@ export default function OwnProfilePage() {
         savedResult,
         ownerListResult,
       ] = await Promise.all([
-        loadPrivacySettings(userId),
+        // Tier + role decide only the INITIAL state of the anonymity shield
+        // (§46.8) — Cluster+ seekers and owners start with it on. Passed here
+        // because this is the one place the row gets created; the toggle
+        // itself stays free for everyone at every tier.
+        loadPrivacySettings(userId, {
+          tier: activeProfile.subscription_tier,
+          role: roles[0],
+        }),
         roles.includes("broker") ? loadBrokerProfile(userId) : Promise.resolve({ data: null }),
         roles.includes("provider") && provType === "researcher"
           ? loadResearcherProfile(userId)

@@ -178,6 +178,8 @@ function QuestionThread({ faq, onAnswered, canAnswer }) {
 // ── Main section ─────────────────────────────────────────────────────────
 export default function PropertyFAQSection({ propertySlug, propertyTitle }) {
   const [faqs, setFaqs] = useState([]);
+  const [archivedFaqs, setArchivedFaqs] = useState([]);
+  const [showArchive, setShowArchive] = useState(false);
   const [loading, setLoading] = useState(true);
   const [signedIn, setSignedIn] = useState(false);
   const [question, setQuestion] = useState("");
@@ -189,9 +191,11 @@ export default function PropertyFAQSection({ propertySlug, propertyTitle }) {
     try {
       const res = await fetch(`/api/faqs?propertyId=${encodeURIComponent(propertySlug)}`);
       const json = await res.json();
-      setFaqs(json.success ? json.faqs : []);
+      setFaqs(json.success ? (json.faqs || []) : []);
+      setArchivedFaqs(json.success ? (json.archivedFaqs || []) : []);
     } catch {
       setFaqs([]);
+      setArchivedFaqs([]);
     } finally {
       setLoading(false);
     }
@@ -536,14 +540,46 @@ export default function PropertyFAQSection({ propertySlug, propertyTitle }) {
 
       {loading ? (
         <div className="faq-thread__empty">Loading questions…</div>
-      ) : faqs.length === 0 ? (
+      ) : faqs.length === 0 && archivedFaqs.length === 0 ? (
         <div className="faq-thread__empty">
           No questions yet — be the first to ask.
         </div>
       ) : (
-        faqs.map((faq) => (
-          <QuestionThread key={faq.id} faq={faq} onAnswered={load} canAnswer={signedIn} />
-        ))
+        <>
+          {faqs.map((faq) => (
+            <QuestionThread key={faq.id} faq={faq} onAnswered={load} canAnswer={signedIn} />
+          ))}
+
+          {archivedFaqs.length > 0 && (
+            <div style={{ marginTop: "24px", paddingTop: "16px", borderTop: "1px dashed rgba(110, 83, 26, 0.4)" }}>
+              <button
+                className="faq-btn faq-btn--ghost faq-btn--block"
+                style={{
+                  transition: "transform 160ms cubic-bezier(0.23, 1, 0.32, 1), background-color 160ms ease, color 160ms ease",
+                  fontFamily: "var(--font-mono, monospace)",
+                  letterSpacing: "0.06em",
+                }}
+                onClick={() => setShowArchive(!showArchive)}
+              >
+                {showArchive
+                  ? `HIDE UNANSWERED ARCHIVE (${archivedFaqs.length}) ▲`
+                  : `SHOW UNANSWERED ARCHIVE (>90D) (${archivedFaqs.length}) ▼`}
+              </button>
+              {showArchive && (
+                <div
+                  style={{
+                    marginTop: "16px",
+                    animation: "faqArchiveFadeIn 200ms cubic-bezier(0.23, 1, 0.32, 1)",
+                  }}
+                >
+                  {archivedFaqs.map((faq) => (
+                    <QuestionThread key={faq.id} faq={faq} onAnswered={load} canAnswer={signedIn} />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </>
       )}
     </section>
   );

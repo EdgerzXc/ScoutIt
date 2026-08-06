@@ -10,12 +10,18 @@ export const REPRESENTATION_STATES = Object.freeze({
 
 export const REPRESENTATION_STATE_VALUES = new Set(Object.values(REPRESENTATION_STATES));
 
-export function isActiveRosterBroker(representation = {}) {
+export function hasExpiredRepresentation(representation = {}, now = new Date().toISOString()) {
+  if (!representation.expires_at) return false;
+  return new Date(now).getTime() >= new Date(representation.expires_at).getTime();
+}
+
+export function isActiveRosterBroker(representation = {}, now = new Date().toISOString()) {
   return representation.status === REPRESENTATION_STATES.ACTIVE &&
     representation.visible_to_public === true &&
     representation.contactable === true &&
     representation.account_eligible === true &&
     representation.inventory_eligible === true &&
+    !hasExpiredRepresentation(representation, now) &&
     !representation.locked_at &&
     !representation.suspended_at &&
     !representation.unavailable_at &&

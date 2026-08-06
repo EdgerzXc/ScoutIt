@@ -241,7 +241,7 @@ export function EarlyAccessModal({ rosterType = "this roster", onClose }) {
 
         <p className="gate-footnote">
           Already have a referral code?{" "}
-          <a href="mailto:hello@scout-it.vercel.app" className="gate-footnote-link">
+          <a href="mailto:hello@scoutit.space" className="gate-footnote-link">
             Contact the team directly →
           </a>
         </p>

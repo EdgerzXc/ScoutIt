@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCmsBundle } from "@/lib/cmsCache";
+import { resolveServerTier } from "@/lib/serverAuth";
+import { stripPremiumFields } from "@/lib/premiumFields";
 
 export const dynamic = 'force-dynamic';
 
@@ -45,12 +47,37 @@ export async function GET(request) {
     source = "supabase_radius";
   }
 
+  // ── Tier gate (NEW_IDEAS.md §25.1 / §45) ──────────────────────
+  // This route is PUBLIC and returns the whole catalog. Stripping premium
+  // fields only on the ISR property page would have been theatre: anyone could
+  // read the same deep intel, vault URLs and enhanced photos straight out of
+  // /api/cms with curl and no session at all.
+  //
+  // The tier is resolved SERVER-SIDE from the request. Anonymous callers —
+  // which is most traffic, since this feeds the public directory and map —
+  // resolve to 'starry' and get the stripped payload.
+  const { tier } = await resolveServerTier(request);
+  const gated = (properties || []).map((p) => stripPremiumFields(p, tier));
+
   // ── Return Payload ─────────────────────────────────────────────
-  return NextResponse.json({
-    properties,
-    intel: bundle.intel,
-    brokers: bundle.brokers,
-    homepage: bundle.homepage,
-    source,
-  });
+  return NextResponse.json(
+    {
+      properties: gated,
+      intel: bundle.intel,
+      brokers: bundle.brokers,
+      homepage: bundle.homepage,
+      source,
+    },
+    {
+      headers: {
+        // The payload now VARIES BY USER, so it must never be held in a shared
+        // cache. Without this, a CDN could serve a Cluster subscriber's
+        // unlocked catalog to the next anonymous visitor — reintroducing the
+        // leak one layer up. `force-dynamic` covers Next's own cache; this
+        // covers everything in front of it.
+        "Cache-Control": "no-store, private",
+        Vary: "Authorization, Cookie",
+      },
+    },
+  );
 }

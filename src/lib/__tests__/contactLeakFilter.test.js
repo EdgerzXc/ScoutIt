@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { detectContactLeak, rejectIfContactLeak } from '../contactLeakFilter.js';
+import { detectContactLeak, rejectIfContactLeak, maskContactDetails, CONTACT_MASK } from '../contactLeakFilter.js';
 
 // The FAQ layer is the widest open-text surface on ScoutIt. If this filter
 // regresses, seekers and owners can trade phone numbers in public and skip
@@ -86,5 +86,58 @@ describe('contactLeakFilter — edge cases', () => {
     expect(rejection).not.toBeNull();
     expect(rejection.code).toBe('ph_mobile');
     expect(typeof rejection.message).toBe('string');
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────
+// Display-layer masking (NEW_IDEAS.md §38.3 / §35 Layer 2)
+//
+// Chat is a DIFFERENT surface from the public FAQ. Inside a paid Connects
+// thread, swapping numbers is the legitimate end state -- so the message is
+// stored intact and only hidden at render time until both parties sign the
+// handshake. These tests pin the two failure modes that matter: a number
+// leaking BEFORE the handshake, and the text being mangled AFTER it.
+// ─────────────────────────────────────────────────────────────────────────
+describe('maskContactDetails — hides contacts until the handshake', () => {
+  it.each([
+    ['PH mobile',          'call me 09171234567'],
+    ['spaced mobile',      'my number is 0917 123 4567'],
+    ['international',      'reach me +639171234567'],
+    ['landline',           'office line (02) 8123 4567'],
+    ['plain email',        'email juan@gmail.com please'],
+    ['obfuscated email',   'juan (at) gmail (dot) com'],
+  ])('masks %s', (_label, input) => {
+    const masked = maskContactDetails(input, false);
+    expect(masked).toContain(CONTACT_MASK);
+    expect(masked).not.toMatch(/\d{7,}/);
+  });
+
+  it('leaves the rest of the sentence readable', () => {
+    const masked = maskContactDetails('Viewing Thursday, call me 09171234567 after', false);
+    expect(masked).toContain('Viewing Thursday');
+    expect(masked).toContain('after');
+  });
+
+  // A false positive here is expensive: these are the numbers a real
+  // negotiation is actually about. Masking a price or a floor area would make
+  // the shield look broken and push people off-platform to talk plainly.
+  it.each([
+    'The unit is 120 sqm with 2.8m ceiling height.',
+    'Asking is 45,000,000 pesos.',
+    'Parking slot 12B on the 34th floor.',
+    'Lease is 1,200 per sqm per month.',
+    'Turnover is Q3 2027.',
+  ])('does not mask legitimate property talk: %s', (input) => {
+    expect(maskContactDetails(input, false)).toBe(input);
+  });
+
+  it('returns the text untouched once revealed', () => {
+    const raw = 'call me 09171234567 or juan@gmail.com';
+    expect(maskContactDetails(raw, true)).toBe(raw);
+  });
+
+  it('handles null and undefined without throwing', () => {
+    expect(maskContactDetails(null, false)).toBe('');
+    expect(maskContactDetails(undefined, false)).toBe('');
   });
 });

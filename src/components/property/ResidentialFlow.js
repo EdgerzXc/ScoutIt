@@ -1397,10 +1397,15 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                 </span>
               </div>
 
-              <SpatialVaultWidget 
-                lumaUrl={d.luma3dMapUrl} 
-                matterportUrl={d.matterportTourUrl} 
-                heatmapUrl={d.droneHeatmapUrl} 
+              {/* slug drives the server-side entitlement fetch (§45). The
+                  d.* props arrive EMPTY on a public property page now — they
+                  are stripped before serialisation — and are kept only for
+                  callers that already hold entitled data. */}
+              <SpatialVaultWidget
+                slug={d.slug}
+                lumaUrl={d.luma3dMapUrl}
+                matterportUrl={d.matterportTourUrl}
+                heatmapUrl={d.droneHeatmapUrl}
                 floorPlans={d.floorPlans}
               />
             </div>

@@ -23,8 +23,15 @@ const bodySchema = z.object({
 });
 
 // Lists pending operator-initiated delegation requests for one property —
-// deals with unit_id still null and status 'connected' (the ask hasn't been
-// accepted/declined yet). Owner-only.
+// deals with unit_id still null that the owner hasn't accepted/declined yet.
+// Owner-only.
+//
+// ⚠️ Accepts BOTH 'pending' and 'connected'. `create_routed_buyer_deal` wrote
+// 'connected' until 2026-08-05 and writes 'pending' after it (NEW_IDEAS.md
+// §40.9). Matching only the new value would have made every delegation ask
+// created before that date vanish from the owner's list — silently, with no
+// error, because an empty result set looks exactly like "no requests".
+// Historical rows were deliberately not backfilled, so both must be honoured.
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -67,7 +74,7 @@ export async function GET(request) {
       .select("id, buyer_id, pitch_message, created_at")
       .eq("property_id", propertyId)
       .is("unit_id", null)
-      .eq("status", "connected")
+      .in("status", ["pending", "connected"])
       .order("created_at", { ascending: false });
     if (dealsErr) {
       return NextResponse.json({ error: "Failed to load requests" }, { status: 500 });

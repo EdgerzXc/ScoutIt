@@ -962,7 +962,10 @@ export default function IntelPage() {
           position: fixed;
           top: 0;
           right: 0;
-          height: 100vh;
+          /* Fixed + 100vh is the worst combination on mobile: the panel can't
+             scroll away from the toolbar, so its footer was permanently
+             unreachable. §41.1 */
+          height: 100dvh;
           width: 420px;
           max-width: 95vw;
           background: #111111;

@@ -79,6 +79,29 @@ const nextConfig = {
             key: 'Permissions-Policy',
             value: 'camera=(), microphone=(), geolocation=()',
           },
+          // HSTS (§25.5). Tells browsers to reach ScoutIt over HTTPS only,
+          // closing the http:// first-request window an attacker on a café or
+          // airport network can hijack — a realistic vector for Philippine
+          // brokers working from public Wi-Fi.
+          //
+          // ⚠️ DELIBERATELY CONSERVATIVE, and the ramp matters:
+          //   · max-age is 1 DAY, not the usual year. HSTS is a one-way
+          //     promise a browser caches and will not let you take back — if
+          //     HTTPS breaks on a host, that host is unreachable for the whole
+          //     max-age. Starting at a day means a mistake costs a day.
+          //   · NO includeSubDomains. It would cover mc.scoutit.space and any
+          //     future subdomain that does not have a certificate yet, taking
+          //     them offline before they exist.
+          //   · NO preload. Preload is effectively permanent and requires
+          //     includeSubDomains plus a long max-age.
+          //
+          // RAMP: once HTTPS is confirmed stable on the custom domain (§27),
+          // raise max-age to 31536000 and add includeSubDomains. Only then
+          // consider preload.
+          {
+            key: 'Strict-Transport-Security',
+            value: 'max-age=86400',
+          },
         ],
       },
     ]

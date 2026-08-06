@@ -27,6 +27,7 @@ describe("broker representation routing", () => {
     expect(isActiveRosterBroker(active({ visible_to_public: false }))).toBe(false);
     expect(isActiveRosterBroker(active({ inventory_eligible: false }))).toBe(false);
     expect(isActiveRosterBroker(active({ unavailable_at: "2026-08-02T00:00:00.000Z" }))).toBe(false);
+    expect(isActiveRosterBroker(active({ expires_at: "2026-08-01T00:00:00.000Z" }), "2026-08-02T00:00:00.000Z")).toBe(false);
   });
 
   it("produces a stable ordered roster and recipient set", () => {

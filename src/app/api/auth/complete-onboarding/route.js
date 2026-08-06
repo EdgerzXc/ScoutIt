@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { monthlyAllowance } from "@/lib/entitlements";
+import { statusFromDateOfBirth } from "@/lib/adultEligibility";
 
 // Maps an onboarding intent tag to the single legacy `role` column value the
 // rest of the app reads for wallet lookups (DashboardContext.handleUserLogin,
@@ -36,7 +37,7 @@ export async function POST(request) {
     }
 
     const payload = await request.json();
-    const { name, role: primaryMode, tags, providerType, prcLicense } = payload;
+    const { name, role: primaryMode, tags, providerType, prcLicense, dateOfBirth } = payload;
 
     if (!name || !primaryMode) {
       return NextResponse.json({ error: "Missing required profile fields" }, { status: 400 });
@@ -72,6 +73,30 @@ export async function POST(request) {
     // attempt failed at this upsert with Postgres error PGRST204 ("Could not
     // find the 'email' column"), silently trapping every real signup on
     // /onboarding — this was never just a role-mapping bug.
+    // ── 18+ LEGAL CAPACITY CHECK (§34.2, §48) ──
+    // Enforced HERE, server-side. A client-side date check is a suggestion:
+    // this endpoint is directly callable, and the whole point of the gate is
+    // that it holds against someone who does not want it to.
+    //
+    // Required for every NEW signup. Accounts created before 2026-08-06 are
+    // grandfathered by AGE_GATE_CUTOFF and are never asked retroactively —
+    // but from here on there is no route into ScoutIt without answering.
+    const ageCheck = statusFromDateOfBirth(dateOfBirth);
+    if (!ageCheck.ok) {
+      // 'underage' is PERSISTED before the rejection, deliberately. Rejecting
+      // without recording lets someone immediately retry with a different
+      // date; storing it means the answer sticks.
+      if (ageCheck.status === "underage") {
+        await supabaseAdmin
+          .from("user_profiles")
+          .upsert({ id: user.id, adult_eligibility_status: "underage" });
+      }
+      return NextResponse.json(
+        { error: ageCheck.error || "A valid date of birth is required." },
+        { status: 403 },
+      );
+    }
+
     const resolvedRole = resolveRole(primaryMode, safeProviderType);
     const startingAllowance = monthlyAllowance(resolvedRole, "starry");
 
@@ -84,6 +109,10 @@ export async function POST(request) {
       prc_license: primaryMode === "broker" && prcLicense ? prcLicense : null,
       subscription_tier: "starry",
       connects_balance: startingAllowance,
+      // RA 10173 sensitive — internal only. Absent from the public_profiles
+      // view by construction, so it cannot leak through a public profile.
+      date_of_birth: dateOfBirth,
+      adult_eligibility_status: ageCheck.status,
     };
 
     const { error: upsertError } = await supabaseAdmin

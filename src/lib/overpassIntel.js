@@ -448,4 +448,40 @@ function emptyLayers() {
   return LAYERS.map((l) => ({ id: l.id, label: l.label, icon: l.icon, items: [], count: 0 }));
 }
 
+export function calculateWalkabilityScore(layers) {
+  let totalPoints = 0;
+  let maxPoints = 0;
+
+  for (const layer of layers || []) {
+    const items = layer.items || [];
+    for (const item of items.slice(0, 4)) {
+      maxPoints += 25;
+      if (item.meters <= 300) {
+        totalPoints += 25;
+      } else if (item.meters <= 600) {
+        totalPoints += 18;
+      } else if (item.meters <= 900) {
+        totalPoints += 10;
+      } else {
+        totalPoints += 5;
+      }
+    }
+  }
+
+  const rawScore = maxPoints > 0 ? Math.round((totalPoints / maxPoints) * 100) : 50;
+  const score = Math.max(10, Math.min(99, rawScore));
+
+  let label = "DEVELOPING PEDESTRIAN ACCESS";
+  if (score >= 85) label = "EXCELLENT PEDESTRIAN ACCESS";
+  else if (score >= 70) label = "STRONG PEDESTRIAN ACCESS";
+  else if (score >= 50) label = "MODERATE PEDESTRIAN ACCESS";
+
+  return {
+    score,
+    label,
+    version: "v1",
+    confidence: layers?.some((l) => l.items?.length > 0) ? "high" : "low",
+  };
+}
+
 export default getOverpassIntel;

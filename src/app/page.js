@@ -1779,7 +1779,10 @@ export default function Home() {
         /* SECTION 2: PROPERTY LAYER */
         .property-split {
           display: flex;
-          height: 100vh;
+          /* dvh: this pane is a full-bleed split with its own internal
+             scroller, so a vh height pushed its bottom edge under the mobile
+             browser toolbar and clipped the last row. See NEW_IDEAS.md §41.1. */
+          height: 100dvh;
           width: 100%;
         }
 
@@ -1870,7 +1873,7 @@ export default function Home() {
           display: flex;
           flex-direction: column;
           overflow-y: auto;
-          max-height: 100vh;
+          max-height: 100dvh;
         }
 
         .pane-header {

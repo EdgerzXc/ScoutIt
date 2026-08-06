@@ -3,13 +3,34 @@
 import { useState } from "react";
 import { Search } from "lucide-react";
 
+// Each column owns a SET of statuses, not one id.
+//
+// This used to be `filteredDeals.filter(d => d.status === col.id)` — an exact
+// match against five hardcoded ids. Any deal whose status wasn't one of those
+// five simply did not render, anywhere on the board, with no empty state and
+// no error. `invited`, `pitching`, `reported` and `expired` were already
+// disappearing that way before `withdrawn` existed.
+//
+// A board that silently drops rows is worse than one that shows them in an
+// imperfect column: the owner counts their pipeline and the number is wrong,
+// with nothing on screen to suggest why.
 const COLUMNS = [
-  { id: "connected", ownerLabel: "New Inquiry", brokerLabel: "Connected" },
-  { id: "pending", ownerLabel: "Reviewing", brokerLabel: "Pitched" },
-  { id: "accepted", ownerLabel: "Accepted", brokerLabel: "Accepted" },
-  { id: "closed", ownerLabel: "Closed Won", brokerLabel: "Closed Won" },
-  { id: "declined", ownerLabel: "Passed", brokerLabel: "Declined" }
+  { id: "connected", ownerLabel: "New Inquiry", brokerLabel: "Connected", statuses: ["connected", "pitching"] },
+  { id: "pending", ownerLabel: "Reviewing", brokerLabel: "Pitched", statuses: ["pending", "invited"] },
+  { id: "accepted", ownerLabel: "Accepted", brokerLabel: "Accepted", statuses: ["accepted", "active"] },
+  { id: "closed", ownerLabel: "Closed Won", brokerLabel: "Closed Won", statuses: ["closed"] },
+  { id: "declined", ownerLabel: "Passed", brokerLabel: "Declined", statuses: ["declined", "withdrawn", "expired", "reported"] },
 ];
+
+// Anything genuinely unrecognised lands in the last column rather than
+// vanishing, so a new status added elsewhere in the app degrades visibly.
+const KNOWN_STATUSES = new Set(COLUMNS.flatMap((c) => c.statuses));
+const FALLBACK_COLUMN_ID = "declined";
+
+const columnIdFor = (status) => {
+  if (!KNOWN_STATUSES.has(status)) return FALLBACK_COLUMN_ID;
+  return COLUMNS.find((c) => c.statuses.includes(status)).id;
+};
 
 export default function KanbanBoard({ deals, viewingAs, onStatusChange, onDealClick }) {
   const [search, setSearch] = useState("");
@@ -25,9 +46,9 @@ export default function KanbanBoard({ deals, viewingAs, onStatusChange, onDealCl
   });
 
   const getStatusColor = (status) => {
-    if (status === "accepted" || status === "closed") return "bg-success/5 border-success/20";
-    if (status === "declined") return "bg-error/5 border-error/20";
-    if (status === "connected" || status === "pending") return "bg-gold-accent/5 border-gold-accent/20";
+    if (status === "accepted" || status === "active" || status === "closed") return "bg-success/5 border-success/20";
+    if (status === "declined" || status === "withdrawn" || status === "expired" || status === "reported") return "bg-error/5 border-error/20";
+    if (status === "connected" || status === "pending" || status === "pitching" || status === "invited") return "bg-gold-accent/5 border-gold-accent/20";
     return "bg-surface-alt border-surface-variant";
   };
 
@@ -66,7 +87,7 @@ export default function KanbanBoard({ deals, viewingAs, onStatusChange, onDealCl
       
       <div className="flex-1 flex gap-4 overflow-x-auto pb-4 snap-x">
         {COLUMNS.map(col => {
-          const colDeals = filteredDeals.filter(d => d.status === col.id);
+          const colDeals = filteredDeals.filter(d => columnIdFor(d.status) === col.id);
           
           return (
             <div 

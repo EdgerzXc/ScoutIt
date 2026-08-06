@@ -323,7 +323,7 @@ export default function MissionControlMode() {
   return (
     <div className="flex h-full w-full animate-slide-up-fade relative">
       {!isEnterprise ? (
-        <div className="flex-1 w-full min-h-[calc(100vh-100px)] z-50 flex flex-col items-center justify-center p-6 bg-[#0d0d0d] overflow-y-auto">
+        <div className="flex-1 w-full min-h-[calc(100dvh-100px)] z-50 flex flex-col items-center justify-center p-6 bg-[#0d0d0d] overflow-y-auto">
           <div className="max-w-4xl w-full flex flex-col items-center text-center space-y-8 animate-in slide-in-from-bottom-8 duration-700">
             <div className="w-20 h-20 bg-gold-accent/10 border border-gold-accent/20 rounded-full flex items-center justify-center mb-4 relative">
                <div className="absolute inset-0 bg-gold-accent blur-3xl opacity-20 rounded-full" />
@@ -368,7 +368,7 @@ export default function MissionControlMode() {
       ) : (
         <>
           {/* Left Sidebar */}
-          <aside className="w-64 border-r border-white/5 p-4 flex-col overflow-y-auto hidden md:flex min-h-[calc(100vh-80px)] custom-scrollbar">
+          <aside className="w-64 border-r border-white/5 p-4 flex-col overflow-y-auto hidden md:flex min-h-[calc(100dvh-80px)] custom-scrollbar">
         
         <div className="mb-5">
           <div className="text-[10px] tracking-widest text-gold-accent uppercase mb-3 px-3 opacity-70 font-label-caps">

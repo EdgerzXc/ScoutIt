@@ -1,4 +1,5 @@
 import { supabase } from './supabaseClient';
+import { anonymityShieldDefaultsOn } from './entitlements';
 
 // ── PROFILE UPSERT ────────────────────────────────────────────────────────────
 // Called on /profile page load. Syncs localStorage user data into Supabase.
@@ -41,20 +42,23 @@ export async function loadOwnProfile(userId) {
 }
 
 // ── PUBLIC PROFILE LOAD ───────────────────────────────────────────────────────
-// Explicitly excludes connects_balance — enforced at query level.
+// Reads the `public_profiles` VIEW, never the base table (NEW_IDEAS.md §43).
+//
+// This previously said "excludes connects_balance — enforced at query level".
+// A query is not enforcement. RLS is row-level, so the old
+// `USING (is_profile_public = true)` policy let any browser console select ANY
+// column of any public profile — connects_balance, moderation_note (internal
+// staff commentary), is_shadowbanned, role. The app asking nicely for safe
+// columns changed nothing.
+//
+// The view is now the only path a browser has to another user's profile, and
+// the sensitive columns are not in it. Do not "optimise" this back to the base
+// table.
 export async function loadPublicProfile(displayName) {
   const { data, error } = await supabase
-    .from('user_profiles')
-    .select(
-      'id, display_name, avatar_url, location, headline, bio, firm, service, ' +
-      'member_since, subscription_tier, active_roles, provider_type, ' +
-      'provider_availability, is_profile_public, is_example_account, ' +
-      // RA 9646 trust badge: public by design — but the badge renders ONLY
-      // when prc_verified is true (staff-checked), never from the raw number.
-      'prc_license, prc_verified'
-    )
+    .from('public_profiles')
+    .select('*')
     .eq('display_name', displayName)
-    .eq('is_profile_public', true)
     .maybeSingle();
   if (error || !data) return { data, error };
 
@@ -86,15 +90,17 @@ export async function loadPublicProfile(displayName) {
 // definition. Same field discipline as loadPublicProfile — never
 // connects_balance.
 export async function loadPublicProviders(providerType) {
+  // The view already filters is_profile_public, shadowbanned and archived —
+  // three conditions that had to be repeated correctly at every call site
+  // before, and were not. loadPublicProfile checked two of them; this checked
+  // three; nothing checked archived_at.
   const { data, error } = await supabase
-    .from('user_profiles')
+    .from('public_profiles')
     .select(
       'id, display_name, avatar_url, location, headline, bio, service, ' +
       'subscription_tier, provider_availability, is_example_account'
     )
     .eq('provider_type', providerType)
-    .eq('is_profile_public', true)
-    .eq('is_shadowbanned', false)
     .order('display_name', { ascending: true });
   return { data: data || [], error };
 }
@@ -117,7 +123,20 @@ export async function loadPublicRoles(userId) {
 }
 
 // ── PRIVACY SETTINGS ──────────────────────────────────────────────────────────
-export async function loadPrivacySettings(userId) {
+//
+// ── ANONYMITY SHIELD (NEW_IDEAS.md §46.8) ──
+// Owner ruling 2026-08-06: the shield is FREE FOR EVERYONE; Cluster+ only
+// changes whether it starts switched ON.
+//
+// So the tier is consulted exactly once — HERE, when the row is first created
+// — and never again. Every user can toggle these fields freely afterwards
+// regardless of tier. If you ever find a tier check guarding the toggle
+// itself, that is a bug: it would mean charging for privacy.
+//
+// ⚠️ ONLY ON FIRST CREATION. An existing row is returned untouched. Silently
+// rewriting someone's stored privacy preference on a later page load — even
+// to the safer value — is changing their settings without asking.
+export async function loadPrivacySettings(userId, { tier = null, role = null } = {}) {
   const { data, error } = await supabase
     .from('privacy_settings')
     .select('*')
@@ -125,10 +144,13 @@ export async function loadPrivacySettings(userId) {
     .single();
 
   if (error?.code === 'PGRST116') {
+    // Falls back to `false` when tier/role weren't supplied — the safe,
+    // unsurprising default, and exactly what every caller got before.
+    const shieldOn = tier ? anonymityShieldDefaultsOn(tier, role) : false;
     const defaults = {
       user_id: userId,
-      anonymous_browsing: false,
-      anonymous_byline: false,
+      anonymous_browsing: shieldOn,
+      anonymous_byline: shieldOn,
       public_roles: [],
       connects_balance_visible: false,
     };

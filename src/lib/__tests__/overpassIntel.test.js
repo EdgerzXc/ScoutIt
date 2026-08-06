@@ -3,8 +3,30 @@ import {
   buildOverpassQuery,
   shapeOverpassResponse,
   describeDistance,
+  calculateWalkabilityScore,
   LAYERS,
 } from '../overpassIntel.js';
+
+describe('calculateWalkabilityScore', () => {
+  it('calculates score and returns EXCELLENT PEDESTRIAN ACCESS for dense POIs', () => {
+    const layers = [
+      { id: 'daily', items: [{ meters: 100 }, { meters: 200 }, { meters: 250 }] },
+      { id: 'wellness', items: [{ meters: 150 }, { meters: 280 }] },
+    ];
+    const res = calculateWalkabilityScore(layers);
+    expect(res.score).toBeGreaterThanOrEqual(85);
+    expect(res.label).toBe('EXCELLENT PEDESTRIAN ACCESS');
+    expect(res.version).toBe('v1');
+    expect(res.confidence).toBe('high');
+  });
+
+  it('returns DEVELOPING PEDESTRIAN ACCESS for empty layers', () => {
+    const res = calculateWalkabilityScore([]);
+    expect(res.score).toBe(50);
+    expect(res.label).toBe('MODERATE PEDESTRIAN ACCESS');
+    expect(res.confidence).toBe('low');
+  });
+});
 
 // BGC, Taguig — the reference coordinate used throughout.
 const LAT = 14.5494;

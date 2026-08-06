@@ -154,13 +154,32 @@ export async function GET(req) {
       // real person asked DO stay visible: that's pressure on the owner, and
       // the asker deserves to see their question standing.
       .filter((f) => f.source !== "preflight" || f.answers.length > 0)
-      // Answered first, then most recent.
+      // Rank by authority of top answer (gold > silver > bronze), then by answered status, then by recency.
       .sort((a, b) => {
+        const topA = a.answers[0]?.tier ? TIER_RANK[a.answers[0].tier] : 99;
+        const topB = b.answers[0]?.tier ? TIER_RANK[b.answers[0].tier] : 99;
+        if (topA !== topB) return topA - topB;
         if (!!a.answers.length !== !!b.answers.length) return a.answers.length ? -1 : 1;
         return new Date(b.askedAt) - new Date(a.askedAt);
       });
 
-    return NextResponse.json({ success: true, faqs }, { status: 200 });
+    // 90-Day Decay: Unanswered questions older than 90 days collapse into archivedFaqs
+    const NINETY_DAYS_MS = 90 * 24 * 60 * 60 * 1000;
+    const now = Date.now();
+    const activeFaqs = [];
+    const archivedFaqs = [];
+
+    for (const f of faqs) {
+      const isUnanswered = f.answers.length === 0;
+      const ageMs = now - new Date(f.askedAt).getTime();
+      if (isUnanswered && ageMs > NINETY_DAYS_MS) {
+        archivedFaqs.push(f);
+      } else {
+        activeFaqs.push(f);
+      }
+    }
+
+    return NextResponse.json({ success: true, faqs: activeFaqs, archivedFaqs }, { status: 200 });
   } catch (error) {
     console.error("[api/faqs] GET failed:", error);
     return fail("Failed to load questions", 500);

@@ -1,17 +1,38 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { canSee, getCurrentTier } from "@/lib/entitlements";
+import { usePremiumFields } from "@/lib/usePremiumFields";
 
-export default function SpatialVaultWidget({ lumaUrl, matterportUrl, heatmapUrl, floorPlans = [] }) {
-  // Tier-gated: the Vault unlocks at Cluster+. SSR-safe — locked until the client reads the viewer's tier.
-  // NOTE: client-trusted for now; server-authoritative enforcement is the later security pass.
-  const [hasSubscription, setHasSubscription] = useState(false);
-  useEffect(() => { setHasSubscription(canSee("vault", getCurrentTier())); }, []);
+// ── §25.1 / §45: SERVER-ENFORCED ──
+// The Vault unlocks at Cluster+. This used to call
+// `canSee("vault", getCurrentTier())` — localStorage — and the asset URLs were
+// serialised into the page for everyone regardless. That mattered more here
+// than anywhere else: these are URLs to hosted 3D scans and drone captures, so
+// leaking one doesn't just bypass the paywall for a session, it hands over a
+// permanent direct link to the asset.
+//
+// URLs now arrive only from /api/property/premium, which checks the tier
+// server-side. `lumaUrl` / `matterportUrl` / `heatmapUrl` / `floorPlans` props
+// are still accepted as a fallback for callers that already hold entitled data
+// (e.g. an owner viewing their own listing in the dashboard), but for a public
+// property page they arrive empty.
+export default function SpatialVaultWidget({ slug, lumaUrl, matterportUrl, heatmapUrl, floorPlans = [] }) {
+  const { fields } = usePremiumFields(slug);
+
+  // Server value wins; the prop is only a fallback for already-entitled callers.
+  const realLuma      = fields.luma3dMapUrl     || lumaUrl       || "";
+  const realMatterport= fields.matterportTourUrl|| matterportUrl || "";
+  const realHeatmap   = fields.droneHeatmapUrl  || heatmapUrl    || "";
+  const realFloorPlans= (fields.floorPlans && fields.floorPlans.length ? fields.floorPlans : floorPlans) || [];
+
+  // "Unlocked" is now a statement about what the SERVER returned, not about
+  // what the browser claims to be.
+  const hasSubscription = Boolean(
+    realLuma || realMatterport || realHeatmap || realFloorPlans.length,
+  );
 
   return (
     <div style={{ marginTop: "32px", display: "flex", flexDirection: "column", gap: "24px" }}>
-      {lumaUrl && (
+      { (realLuma || !hasSubscription) && (
         <div className="vault-item">
           <h4 className="font-label-caps text-[10px] text-gold-accent tracking-widest uppercase mb-1">
             3D Spatial Map
@@ -20,7 +41,7 @@ export default function SpatialVaultWidget({ lumaUrl, matterportUrl, heatmapUrl,
             Illustrative capture — this property&apos;s own 3D scan is in progress
           </p>
           <div className="relative w-full h-[400px] rounded overflow-hidden border border-surface-variant">
-            <iframe src={hasSubscription ? lumaUrl : undefined} className={`w-full h-full border-none ${hasSubscription ? '' : 'blur-sm brightness-50'}`} title="3D Spatial Map" />
+            <iframe src={hasSubscription ? realLuma : undefined} className={`w-full h-full border-none ${hasSubscription ? '' : 'blur-sm brightness-50'}`} title="3D Spatial Map" />
             {!hasSubscription && (
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/60 backdrop-blur-sm">
                 <span className="font-headline-editorial text-base text-on-surface mb-2">Unlock The Spatial Vault</span>
@@ -33,7 +54,7 @@ export default function SpatialVaultWidget({ lumaUrl, matterportUrl, heatmapUrl,
           </div>
         </div>
       )}
-      {matterportUrl && (
+      { (realMatterport || !hasSubscription) && (
         <div className="vault-item">
           <h4 className="font-label-caps text-[10px] text-gold-accent tracking-widest uppercase mb-1">
             360° AR Room Tour
@@ -42,7 +63,7 @@ export default function SpatialVaultWidget({ lumaUrl, matterportUrl, heatmapUrl,
             Illustrative tour — this property&apos;s own 360° capture is in progress
           </p>
           <div className="relative w-full h-[400px] rounded overflow-hidden border border-surface-variant">
-            <iframe src={hasSubscription ? matterportUrl : undefined} className={`w-full h-full border-none ${hasSubscription ? '' : 'blur-sm brightness-50'}`} title="360 Tour" />
+            <iframe src={hasSubscription ? realMatterport : undefined} className={`w-full h-full border-none ${hasSubscription ? '' : 'blur-sm brightness-50'}`} title="360 Tour" />
             {!hasSubscription && (
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/60 backdrop-blur-sm">
                 <span className="font-headline-editorial text-base text-on-surface mb-2">Unlock The Spatial Vault</span>
@@ -54,7 +75,7 @@ export default function SpatialVaultWidget({ lumaUrl, matterportUrl, heatmapUrl,
           </div>
         </div>
       )}
-      {heatmapUrl && (
+      { (realHeatmap || !hasSubscription) && (
         <div className="vault-item">
           <h4 className="font-label-caps text-[10px] text-gold-accent tracking-widest uppercase mb-3">
             Drone Heatmap Analysis
@@ -78,15 +99,15 @@ export default function SpatialVaultWidget({ lumaUrl, matterportUrl, heatmapUrl,
           not display. Unlike the other Vault items these are ATTACHMENTS (an
           array), and they are images or PDFs, so each gets a thumbnail and a
           download rather than an iframe. */}
-      {floorPlans.length > 0 && (
+      { (realFloorPlans.length > 0 || !hasSubscription) && (
         <div className="vault-item">
           <h4 className="font-label-caps text-[10px] text-gold-accent tracking-widest uppercase mb-3">
-            Floor Plans{floorPlans.length > 1 ? ` · ${floorPlans.length}` : ""}
+            Floor Plans{realFloorPlans.length > 1 ? ` · ${realFloorPlans.length}` : ""}
           </h4>
           <div className="relative rounded overflow-hidden border border-surface-variant">
             <div className={hasSubscription ? "" : "blur-sm brightness-50 pointer-events-none"}>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-[#111]">
-                {floorPlans.map((plan) => {
+                {realFloorPlans.map((plan) => {
                   const isImage = (plan.type || "").startsWith("image/");
                   return (
                     <a

@@ -1023,7 +1023,7 @@ export default function BrokerMode() {
         </div>
 
         {/* Right Column: Tasks + Feed */}
-        <div id="broker-feed" className="lg:w-1/3 flex flex-col gap-6 mt-8 lg:mt-0 scroll-mt-20 lg:sticky lg:top-8 lg:h-[calc(100vh-4rem)]">
+        <div id="broker-feed" className="lg:w-1/3 flex flex-col gap-6 mt-8 lg:mt-0 scroll-mt-20 lg:sticky lg:top-8 lg:h-[calc(100dvh-4rem)]">
           {/* The "don't forget" engine — crm_tasks, incl. auto follow-ups after completed viewings */}
           <TaskRail mockUserId={currentUser?.id} onSummary={handleTaskSummary} />
 

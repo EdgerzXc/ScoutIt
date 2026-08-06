@@ -117,8 +117,14 @@ export default function WaitlistModal() {
                 autoFocus
                 required
               />
-              <Turnstile 
-                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "1x00000000000000000000AA"} 
+              {/* No fallback to Cloudflare's always-pass test key
+                  (1x00000000000000000000AA). The server already fails closed,
+                  so the old fallback did not open a hole — it produced
+                  something worse to diagnose: a widget that visibly succeeds
+                  while every submission is silently rejected, with no clue why.
+                  An undefined siteKey makes Turnstile fail loudly instead. §25.5 */}
+              <Turnstile
+                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
                 onSuccess={(token) => setTurnstileToken(token)}
                 onError={() => setError("Captcha verification failed. Please try again.")}
                 options={{ theme: 'dark' }}

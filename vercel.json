@@ -1,6 +1,13 @@
 {
   "framework": "nextjs",
   "crons": [
-    { "path": "/api/cron/check-stale-listings", "schedule": "0 0 * * *" }
+    {
+      "path": "/api/cron/check-stale-listings",
+      "schedule": "0 0 * * *"
+    },
+    {
+      "path": "/api/cron/sweep-pending-requests",
+      "schedule": "0 1 * * *"
+    }
   ]
 }

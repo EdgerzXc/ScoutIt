@@ -181,4 +181,51 @@ export function rejectIfContactLeak(text) {
   return result.clean ? null : { code: result.code, message: result.message };
 }
 
+// ── Display-layer masking (NEW_IDEAS.md §38.3 / §35 Layer 2) ─────────────
+//
+// DIFFERENT JOB from detectContactLeak. Detection is a gate: it REJECTS the
+// whole message before it is stored. Masking is a lens: the message is stored
+// intact and only the contact-shaped runs are hidden at render time, until
+// both parties have signed the two-sided handshake.
+//
+// Why chat can't simply reuse the gate: inside a paid Connects conversation
+// exchanging a number is the legitimate end state, not abuse. Blocking the
+// text outright would break the product. What must not happen is a number
+// becoming visible BEFORE the handshake both sides agreed to.
+//
+// This is a courtesy shield on an already-gated surface, not a security
+// boundary — the counterparty typed the digits and knows them. Do not use it
+// to protect data the viewer was never entitled to see; gate that server-side.
+
+export const CONTACT_MASK = "[ CONTACT HIDDEN ]";
+
+// Order matters: email first, otherwise the digit rule can chew through the
+// numeric part of an address like j.reyes2024@gmail.com and leave a fragment.
+const MASK_PATTERNS = [
+  // Email, including the bracket-obfuscated "juan (at) gmail (dot) com" form.
+  /[a-z0-9._%+-]+\s*(?:@|[({[]\s*at\s*[)}\]])\s*[a-z0-9.-]+\s*(?:\.|[({[]\s*dot\s*[)}\]])\s*[a-z]{2,}/gi,
+  // PH mobile / landline / any long run, tolerant of the separators and
+  // spacing people actually type. 7+ digits so sqm, prices and floor
+  // numbers survive untouched.
+  /(?:\+?63|0)?[\s._\-()]*(?:\d[\s._\-()]*){7,}\d/g,
+];
+
+/**
+ * Hides contact-shaped substrings for display. Everything else is preserved
+ * verbatim — this never rewrites, truncates or reorders the message.
+ *
+ * @param {string} text - the stored message body
+ * @param {boolean} [revealed=false] - true once the handshake is signed; the
+ *   text is then returned untouched.
+ * @returns {string}
+ */
+export function maskContactDetails(text, revealed = false) {
+  if (revealed) return String(text ?? "");
+  let out = String(text ?? "");
+  for (const pattern of MASK_PATTERNS) {
+    out = out.replace(pattern, CONTACT_MASK);
+  }
+  return out;
+}
+
 export default detectContactLeak;

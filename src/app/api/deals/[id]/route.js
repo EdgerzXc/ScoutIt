@@ -6,9 +6,16 @@ import { logActivity } from "@/lib/crmActivity";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { isRoutedDealRecipient } from "@/lib/dealParty";
 
+// 'withdrawn' = the SENDER took their own pending request back (§40.15).
+// Kept distinct from 'declined' on purpose: declined means the recipient said
+// no, withdrawn means the sender changed their mind. Collapsing them would
+// show an owner a "declined" badge for a decision they never made.
 const schema = z.object({
-  status: z.enum(["connected", "pending", "accepted", "closed", "declined", "reported"]),
+  status: z.enum(["connected", "pending", "accepted", "closed", "declined", "reported", "withdrawn"]),
   });
+
+// Statuses that end a conversation and therefore stamp closed_at.
+const TERMINAL_STATUSES = ["closed", "declined", "reported", "withdrawn"];
 
 export async function PATCH(request, { params }) {
   try {
@@ -50,8 +57,28 @@ export async function PATCH(request, { params }) {
 
     if (!isParty) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
+    // Only the SENDER may withdraw, and only while the request is still
+    // pending. Without this, a recipient could call PATCH {status:'withdrawn'}
+    // and make it look as though the seeker walked away from their own
+    // request — rewriting who ended the conversation. `isParty` above is not
+    // enough here, because both sides are parties.
+    if (status === "withdrawn") {
+      if (deal.buyer_id !== userId) {
+        return NextResponse.json(
+          { error: "Only the person who sent this request can withdraw it." },
+          { status: 403 },
+        );
+      }
+      if (deal.status !== "pending") {
+        return NextResponse.json(
+          { error: "This request has already been answered and can no longer be withdrawn." },
+          { status: 409 },
+        );
+      }
+    }
+
     const updateData = { status };
-    if (status === "closed" || status === "declined" || status === "reported") {
+    if (TERMINAL_STATUSES.includes(status)) {
        updateData.closed_at = new Date().toISOString();
     } else {
        updateData.closed_at = null;

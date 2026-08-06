@@ -22,6 +22,29 @@ export default async function sitemap() {
     { url: `${baseUrl}/privacy`, lastModified: currentDate, changeFrequency: "yearly", priority: 0.3 },
   ];
 
+  // Location Hub routes (SEO-03) — WITHHELD.
+  //
+  // These three slugs were submitted to Google from 2026-08-05, but no
+  // `/hubs/[slug]` route has ever existed — all three returned 404. Google
+  // records those as soft-404s, which suppresses crawl budget for the pages
+  // that DO work, so this was actively fighting §13's indexing effort.
+  //
+  // The data layer (`/api/hubs`) is real and correct; only the page is
+  // missing. Re-enable this block the same commit the page ships — never
+  // before. See BACKLOG/01_WORK_ORDER.md W1 → W7.
+  //
+  // ⚠️ RULE: a sitemap must never contain a URL that does not return 200.
+  // Advertising a page you have not built costs more than not advertising it.
+  const HUB_PAGE_EXISTS = false;
+  const hubRoutes = HUB_PAGE_EXISTS
+    ? ["bgc-taguig", "makati-cbd", "quezon-city-hub"].map((slug) => ({
+        url: `${baseUrl}/hubs/${slug}`,
+        lastModified: currentDate,
+        changeFrequency: "weekly",
+        priority: 0.8,
+      }))
+    : [];
+
   // Dynamic property pages from Airtable
   let propertyRoutes = [];
   try {
@@ -42,5 +65,5 @@ export default async function sitemap() {
     console.error("Sitemap: Failed to fetch property routes from Airtable", error);
   }
 
-  return [...staticRoutes, ...propertyRoutes];
+  return [...staticRoutes, ...hubRoutes, ...propertyRoutes];
 }

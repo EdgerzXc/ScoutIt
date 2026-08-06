@@ -728,7 +728,7 @@ function PropertyDirectoryContent() {
 export default function PropertyRootPage() {
   return (
     <Suspense fallback={
-      <div className="directory-layout" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
+      <div className="directory-layout" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100dvh' }}>
         <h3 style={{ fontFamily: "var(--font-mono)", color: "var(--accent)" }}>LOADING DIRECTORY LEDGER...</h3>
       </div>
     }>

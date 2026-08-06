@@ -65,7 +65,7 @@ describe('resolveDetailKey — collapse all three conventions', () => {
   });
 
   it('returns unknown keys unchanged so nothing vanishes from the editor', () => {
-    expect(resolveDetailKey('published_rent')).toBe('published_rent');
+    expect(resolveDetailKey('published_rent')).toBe('CM_Rent_Per_Sqm');
     expect(resolveDetailKey('some_future_key')).toBe('some_future_key');
   });
 

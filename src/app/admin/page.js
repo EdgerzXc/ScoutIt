@@ -4,9 +4,10 @@ import { useState, useEffect } from "react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { supabase } from "@/lib/supabaseClient";
-import { Building2, Check, AlertCircle, ShieldCheck, ShieldOff, Sliders, FileText, ShieldAlert } from "lucide-react";
+import { Building2, Check, AlertCircle, ShieldCheck, ShieldOff, Sliders, FileText, ShieldAlert, Wallet } from "lucide-react";
 import IntelStudioPanel from "@/components/intel/IntelStudioPanel";
 import FeatureConsolePanel from "@/components/admin/FeatureConsolePanel";
+import ConnectsRefundPanel from "@/components/admin/ConnectsRefundPanel";
 import { sanitizeError } from "@/lib/sanitizeError";
 
 export default function AdminPage() {
@@ -181,10 +182,34 @@ export default function AdminPage() {
             <FileText size={15} />
             Intel Studio
           </button>
+
+          {/* §40.16 — the only legitimate refund path (§38.3). Before this
+              existed, honouring the system-error exception meant hand-written
+              SQL that moved a balance and recorded nothing. */}
+          <button
+            onClick={() => setActiveTab("refunds")}
+            className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 border-b-2 rounded-t-lg ${
+              activeTab === "refunds"
+                ? "border-[#E8AE3C] text-[#E8AE3C] bg-[#E8AE3C]/10 font-bold"
+                : "border-transparent text-gray-400 hover:text-white hover:bg-[#1a1a1a]"
+            }`}
+          >
+            <Wallet size={15} />
+            Connect Refunds
+          </button>
         </div>
 
         <div className="admin-content">
           {activeTab === "flags" && <FeatureConsolePanel />}
+
+          {activeTab === "refunds" && (
+            <div className="admin-panel">
+              <div className="panel-header">
+                <h2>Connect Refunds</h2>
+              </div>
+              <ConnectsRefundPanel />
+            </div>
+          )}
 
           {activeTab === "approvals" && (
             <div className="admin-panel">

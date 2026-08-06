@@ -460,7 +460,35 @@ a:hover {
   }
 }
 
-/* â”€â”€ REDUCE MOTION FOR ACCESSIBILITY â”€â”€ */
+/* ── DYNAMIC VIEWPORT HEIGHT (NEW_IDEAS.md §41.1) ──
+   On mobile Safari and Chrome, 100vh is the viewport WITHOUT the browser
+   chrome — the address bar and toolbar sit on top of it. Anything sized to
+   100vh therefore runs underneath them, and the bottom ~100px of a "full
+   height" screen is unreachable until the user scrolls. That is where submit
+   buttons, composers and sticky footers live.
+
+   100dvh is the *dynamic* viewport height: it tracks the visible area as the
+   chrome shows and hides.
+
+   Overriding Tailwind's utilities centrally rather than editing 18 call sites
+   means new code written with `h-screen` is correct by default, instead of
+   being one more thing to remember. Desktop is unaffected — dvh equals vh
+   when there is no collapsing chrome.
+
+   @supports guards it: browsers without dvh keep the vh value rather than
+   losing the declaration entirely.
+
+   ⚠️ Keyframe transforms elsewhere in this file deliberately still use vh
+   (translateY(100vh) etc). Those want a STABLE distance to animate across —
+   a unit that changes mid-animation as the toolbar hides would make the
+   motion stutter. Do not "fix" those. */
+@supports (height: 100dvh) {
+  .h-screen { height: 100dvh; }
+  .min-h-screen { min-height: 100dvh; }
+  .max-h-screen { max-height: 100dvh; }
+}
+
+/* ── REDUCE MOTION FOR ACCESSIBILITY ── */
 @media (prefers-reduced-motion: reduce) {
   * {
     animation-duration: 0.01ms !important;

@@ -7,7 +7,7 @@ export const metadata = {
 
 export default function ShowcasePage() {
   return (
-    <main style={{ position: "fixed", inset: 0, width: "100vw", height: "100vh", background: "#000", overflow: "hidden" }}>
+    <main style={{ position: "fixed", inset: 0, width: "100vw", height: "100dvh", background: "#000", overflow: "hidden" }}>
       <ShowcaseStage mode="full" />
     </main>
   );

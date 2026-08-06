@@ -94,6 +94,7 @@ export const EDITOR_DETAIL_ALIASES = {
  * "I don't know" beats a confident wrong answer.
  */
 const LEGACY_SNAKE_ALIASES = {
+  published_rent: "CM_Rent_Per_Sqm",
   hand_over_condition: "CM_Hand_Over_Condition",
   camc_from: "CM_CAMC_From",
   ac_charge_from: "CM_AC_Charge_From",
