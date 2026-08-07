@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { reportError } from "@/lib/reportError";
 import { TIERS, TIER_LABELS } from "@/lib/entitlements";
 import { getStoredLiteMode, setLiteMode } from "@/lib/liteMode";
+import { notifyLightModeChanged } from "@/lib/lightMode";
 
 // Dev-only tier/role switcher lives inside this eye toolbox. It stays HIDDEN from
 // the public — revealed only by a secret gesture (tap the eye 5× quickly) or the
@@ -41,7 +42,7 @@ export default function FloatingToolbox() {
   const [wizardOpen, setWizardOpen] = useState(false);
   const [wizardStep, setWizardStep] = useState(0);
   const [mounted, setMounted] = useState(false);
-  const [pos, setPos] = useState({ x: 24, y: 0 });
+  const [pos, setPos] = useState({ x: 24, y: 450 });
 
   const [reportOpen, setReportOpen] = useState(false);
   const [reportText, setReportText] = useState("");
@@ -58,7 +59,7 @@ export default function FloatingToolbox() {
   const isDragging = useRef(false);
   const hasMoved = useRef(false);
   const anchor = useRef({ clientX: 0, clientY: 0, posX: 0, posY: 0 });
-  const livePos = useRef({ x: 24, y: 0 });
+  const livePos = useRef({ x: 24, y: 450 });
 
   // Apply theme classes to body
   function applyTheme(m) {
@@ -66,13 +67,19 @@ export default function FloatingToolbox() {
     document.body.classList.remove("high-contrast", "light-mode");
     if (m === "high-contrast") document.body.classList.add("high-contrast");
     if (m === "light") document.body.classList.add("light-mode");
+    // Tell canvas-based visuals to tear down / rebuild immediately.
+    // A WebGL shader cannot read a CSS variable, so the hero has to be
+    // told in JS rather than restyled (§62).
+    notifyLightModeChanged();
   }
 
   useEffect(() => {
     // On mobile the fixed bottom nav (~74px) owns the bottom of the screen, so
     // default the toolbox above it instead of on top of the nav / page content.
-    const navClear = window.matchMedia("(max-width: 768px)").matches ? 88 : 0;
-    const fallbackY = window.innerHeight - 80 - navClear;
+    const navClear = window.matchMedia("(max-width: 768px)").matches ? 88 : 24;
+    const viewH = window.innerHeight || 800;
+    const fallbackY = Math.max(100, viewH - 120 - navClear);
+    
     // Migrate old key
     const legacy = localStorage.getItem("scoutit_accessibility_mode") === "high-contrast" ? "high-contrast" : null;
     const savedMode = localStorage.getItem("scoutit_display_mode") || legacy || "dark";
@@ -80,9 +87,13 @@ export default function FloatingToolbox() {
       try { return JSON.parse(localStorage.getItem("scoutit_toolbox_pos")); }
       catch { return null; }
     })();
-    const p = savedPos ?? { x: 24, y: fallbackY };
-    livePos.current = p;
 
+    let p = savedPos;
+    if (!p || typeof p.x !== 'number' || typeof p.y !== 'number' || p.y < 80 || p.y > viewH - 60) {
+      p = { x: 24, y: fallbackY };
+    }
+
+    livePos.current = p;
     setPos(p);
 
     setMode(savedMode);
@@ -112,7 +123,12 @@ export default function FloatingToolbox() {
 
 
     setMounted(true);
-     
+
+    function handleOpenDisplay() {
+      setOpen(true);
+    }
+    window.addEventListener("scoutit:open-display-settings", handleOpenDisplay);
+    return () => window.removeEventListener("scoutit:open-display-settings", handleOpenDisplay);
   }, []);
 
   // Apply a mock tier/role and reload so entitlement gates re-read.
@@ -245,12 +261,62 @@ export default function FloatingToolbox() {
     }
   };
 
+  const [panelPos, setPanelPos] = useState(null);
+  const isDraggingPanel = useRef(false);
+  const panelRef = useRef(null);
+  const panelAnchor = useRef({ clientX: 0, clientY: 0, posX: 0, posY: 0 });
+
+  const viewW = typeof window !== 'undefined' ? window.innerWidth : 1000;
+  const viewH = typeof window !== 'undefined' ? window.innerHeight : 800;
+  const defaultPanelX = Math.max(16, Math.min(viewW - 250, pos.x > viewW - 290 ? viewW - 250 : pos.x));
+  const defaultPanelY = Math.max(60, Math.min(viewH - 450, pos.y > viewH - 300 ? viewH - 450 : pos.y));
+  const activePanelX = panelPos ? panelPos.x : defaultPanelX;
+  const activePanelY = panelPos ? panelPos.y : defaultPanelY;
+
+  useEffect(() => {
+    function handleKeyDown(e) {
+      if (e.key === "Escape") {
+        setOpen(false);
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  const onPanelPointerDown = (e) => {
+    if (e.button !== 0) return;
+    if (e.target.closest("button")) return;
+    isDraggingPanel.current = true;
+    panelAnchor.current = {
+      clientX: e.clientX,
+      clientY: e.clientY,
+      posX: activePanelX,
+      posY: activePanelY,
+    };
+    e.currentTarget.setPointerCapture(e.pointerId);
+    e.preventDefault();
+  };
+
+  const onPanelPointerMove = (e) => {
+    if (!isDraggingPanel.current) return;
+    const dx = e.clientX - panelAnchor.current.clientX;
+    const dy = e.clientY - panelAnchor.current.clientY;
+    const nx = Math.max(10, Math.min(viewW - 240, panelAnchor.current.posX + dx));
+    const ny = Math.max(10, Math.min(viewH - 450, panelAnchor.current.posY + dy));
+    setPanelPos({ x: nx, y: ny });
+    if (panelRef.current) {
+      panelRef.current.style.left = nx + "px";
+      panelRef.current.style.top = ny + "px";
+    }
+  };
+
+  const onPanelPointerUp = () => {
+    isDraggingPanel.current = false;
+  };
+
   if (!mounted) return null;
 
   const eyeActive = mode !== "dark";
-  const panelRight = pos.x > window.innerWidth - 290;
-  const panelX = panelRight ? pos.x - 222 : pos.x + 58;
-  const panelY = Math.max(8, Math.min(pos.y - 20, window.innerHeight - 300));
 
   return (
     <>
@@ -260,7 +326,7 @@ export default function FloatingToolbox() {
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
-        className="toolbox-float hidden md:block"
+        className="toolbox-float"
         style={{ position: "fixed", left: pos.x, top: pos.y, zIndex: 99999, userSelect: "none", touchAction: "none" }}
       >
         <div
@@ -301,30 +367,68 @@ export default function FloatingToolbox() {
         </div>
       </div>
 
-      {/* ── Toolbox panel ── */}
+      {/* ── Draggable Toolbox panel ── */}
       {open && (
         <div
+          ref={panelRef}
           className="toolbox-float"
           style={{
-            position: "fixed", left: panelX, top: panelY,
-            zIndex: 99998, width: 218,
-            background: "#111111",
-            border: "1px solid rgba(232, 174, 60,0.2)",
-            borderRadius: 8,
-            boxShadow: "0 12px 48px rgba(0,0,0,0.75)",
+            position: "fixed", left: activePanelX, top: activePanelY,
+            zIndex: 99998, width: 228,
+            background: "var(--surface, #111111)",
+            border: "1px solid var(--border-solid, rgba(232, 174, 60,0.25))",
+            borderRadius: 10,
+            boxShadow: "var(--shadow-lg, 0 12px 48px rgba(0,0,0,0.75))",
             overflow: "hidden",
           }}
         >
-          {/* Header */}
-          <div style={{
-            padding: "11px 14px 10px",
-            borderBottom: "1px solid rgba(255,255,255,0.05)",
-            display: "flex", alignItems: "center", justifyContent: "space-between",
-          }}>
-            <span style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "#E8AE3C", letterSpacing: "0.22em", textTransform: "uppercase" }}>
-              Display
-            </span>
-            <button onClick={() => setOpen(false)} aria-label="Close" style={{ background: "none", border: "none", color: "rgba(255,255,255,0.28)", cursor: "pointer", fontSize: 14, lineHeight: 1, padding: "1px 2px" }}>✕</button>
+          {/* Draggable Header */}
+          <div
+            onPointerDown={onPanelPointerDown}
+            onPointerMove={onPanelPointerMove}
+            onPointerUp={onPanelPointerUp}
+            style={{
+              padding: "11px 14px 10px",
+              borderBottom: "1px solid var(--border-solid, rgba(255,255,255,0.08))",
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+              cursor: "grab", userSelect: "none", touchAction: "none",
+              background: "rgba(255,255,255,0.03)"
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <span style={{ cursor: "grab", opacity: 0.5, fontSize: 12, color: "var(--accent)" }}>⠿</span>
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--accent, #E8AE3C)", letterSpacing: "0.18em", textTransform: "uppercase", fontWeight: 700 }}>
+                Display Settings
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setOpen(false);
+              }}
+              onPointerDown={(e) => e.stopPropagation()}
+              onPointerUp={(e) => e.stopPropagation()}
+              aria-label="Close Display Settings"
+              style={{
+                background: "rgba(255,255,255,0.08)",
+                border: "1px solid var(--border-mid, rgba(255,255,255,0.15))",
+                color: "var(--text-primary, #fff)",
+                cursor: "pointer",
+                fontSize: 13,
+                fontWeight: "bold",
+                lineHeight: 1,
+                width: 28,
+                height: 28,
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                transition: "background 0.2s, transform 0.1s",
+              }}
+            >
+              ✕
+            </button>
           </div>
 
           {/* Mode options */}

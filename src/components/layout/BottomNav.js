@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { getStoredLiteMode, setLiteMode } from "@/lib/liteMode";
+import { notifyLightModeChanged } from "@/lib/lightMode";
 
 // Common Icons Collection to avoid repeating SVGs
 const ICONS = {
@@ -232,6 +233,10 @@ export default function BottomNav() {
     document.body.classList.remove("high-contrast", "light-mode");
     if (m === "high-contrast") document.body.classList.add("high-contrast");
     if (m === "light") document.body.classList.add("light-mode");
+    // Tell canvas-based visuals to tear down / rebuild immediately.
+    // A WebGL shader cannot read a CSS variable, so the hero has to be
+    // told in JS rather than restyled (§62).
+    notifyLightModeChanged();
     localStorage.setItem("scoutit_display_mode", m);
     setTimeout(() => setThemeSheetOpen(false), 300);
   };

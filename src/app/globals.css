@@ -143,6 +143,94 @@ body.light-mode .btn-gold {
 body.light-mode .grain { opacity: 0.25; }
 
 /* ═══════════════════════════════════════════════════════════════
+   THE LIGHT HERO — white-gold, no WebGL
+   §62. Owner decision: reuse the existing no-canvas hero.
+   ═══════════════════════════════════════════════════════════════
+   The hero is a raymarched WebGL fragment shader whose colours are baked
+   in as `vec3` literals. A shader cannot read a CSS variable, so the token
+   theme can NEVER reach it — and a black hole cannot be "inverted" into a
+   white hole anyway: it is a light SINK, and inverting one yields grey mud,
+   not radiance.
+
+   So in light mode `BlackHoleCanvas` simply does not initialise (same guard
+   Lite Mode uses), and the hero falls back to the CSS `.event-horizon` glow
+   that was already built for Lite and for devices without WebGL. Retinted
+   here from a gold bloom on black to a warm gold bloom on near-white.
+
+   Cheapest correct answer, and it fixes the hero for no-WebGL devices too.
+   ═══════════════════════════════════════════════════════════════ */
+body.light-mode .section-hook {
+  background: var(--bg);
+}
+
+/* The horizon was a gold glow blooming out of black. On near-white it becomes
+   a soft warm wash — the same gesture, lit from the other side. */
+body.light-mode .event-horizon {
+  background: radial-gradient(
+    circle at 50% 52%,
+    rgba(232, 174, 60, 0.28) 0%,
+    rgba(232, 174, 60, 0.12) 34%,
+    rgba(244, 244, 245, 0) 68%
+  );
+  opacity: 1;
+  filter: none;   /* never a filter on this subtree — see the removal note */
+}
+
+/* The starfield reads as dirt on white, and "stars in daylight" is incoherent
+   besides. The grain goes too: it exists to sit over near-black. */
+body.light-mode .space-bg-container > *:not(.event-horizon),
+body.light-mode .section-hook .grain {
+  display: none;
+}
+
+/* The wordmark carried white + gold on black. On white it needs the ink to
+   flip while the gold letters stay gold — bronze-gold, which is the
+   text-safe accent (5.4:1). */
+/* 🔴 UNRESOLVED — these rules do NOT currently take effect. Do not trust them.
+   Verified 2026-08-06 after a clean dev-server restart: the hero wordmark still
+   computes white (1.10:1) and true gold (1.81:1) on the near-white hero, i.e.
+   effectively invisible. The rules are present in globals.css, the element
+   matches the selector (`el.matches(...)` === true), and page.js declares no
+   competing `!important`. So the cause is NOT specificity, and the `!important`
+   below is not what is failing — something else is winning and I did not find
+   it before running out of session.
+   Next things to check: whether the `.word-scout` being measured is the hero
+   instance or another wordmark earlier in the DOM; and whether styled-jsx is
+   injecting page.js's <style> AFTER globals.css in a way that changes the
+   cascade for equally-important declarations.
+   The rest of the light hero DOES work — background flips and the WebGL canvas
+   correctly does not initialise. Tracked in W22.
+
+   Original reasoning, kept because it is still the likeliest fix path: */
+/* `!important` is defensible here, not a smell.
+   The homepage hero is styled with styled-jsx, which appends a generated
+   `.jsx-<hash>` class to EVERY selector it emits. So page.js's
+   `.scoutit-wordmark.lit .word-scout` actually ships as
+   `.scoutit-wordmark.lit.jsx-abc123 .word-scout.jsx-abc123` — specificity
+   (0,5,0). No hand-written global selector can outrank a hash we cannot
+   name, and chasing it with ever-longer selectors is a losing game.
+
+   Without this the wordmark stayed WHITE on a near-white hero (1.1:1) and the
+   S/IT stayed true gold (1.81:1) — both invisible. Verified, twice.
+
+   The alternative is moving the wordmark's colours into page.js's own
+   styled-jsx block so they live with the rest of its rules. That is tidier and
+   is the right cleanup — tracked in W22 — but it edits a 3,500-line file whose
+   hero is mid-redesign, so it is not the change to make today. */
+body.light-mode .scoutit-wordmark .word-scout {
+  color: var(--text-primary) !important;
+  -webkit-text-fill-color: var(--text-primary) !important;
+  text-shadow: none !important;
+}
+body.light-mode .scoutit-wordmark .word-s,
+body.light-mode .scoutit-wordmark .word-it {
+  /* Bronze-gold, not true gold: #E8AE3C on near-white is 1.81:1. */
+  color: var(--accent) !important;
+  -webkit-text-fill-color: var(--accent) !important;
+  text-shadow: none !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
    DARK ISLANDS IN LIGHT MODE
    ═══════════════════════════════════════════════════════════════
    Some surfaces are deliberately black and must STAY black in light
@@ -179,7 +267,6 @@ body.light-mode .grain { opacity: 0.25; }
    "finish the job" by lightening the cinematic surfaces.
    ═══════════════════════════════════════════════════════════════ */
 body.light-mode .cinematic-container,
-body.light-mode .section-hook,
 body.light-mode .global-footer {
   --text-primary:       #ffffff;
   --text-primary-ch:    255 255 255;

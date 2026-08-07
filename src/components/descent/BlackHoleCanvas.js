@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { isLiteMode, LITE_MODE_EVENT } from "@/lib/liteMode";
+import { isLightMode, LIGHT_MODE_EVENT } from "@/lib/lightMode";
 
 // ═══════════════════════════════════════════════════════════════
 // Hero black hole — Interactive Mode. Raymarched WebGL (source: owner's
@@ -274,7 +275,19 @@ export default function BlackHoleCanvas({ params: paramsProp, onSnapshotReady } 
   }, [paramsProp]);
 
   useEffect(() => {
-    if (isLiteMode()) return;
+    // Lite mode = the device can't afford a per-pixel raymarch.
+    // Light mode = the user doesn't WANT it. Different reasons, same action.
+    //
+    // A black hole cannot be themed light: it is a light SINK, and the whole
+    // effect is light bending into darkness. Inverting it yields grey mud, not
+    // a white hole — and a shader cannot read a CSS variable anyway, so the
+    // token theme can never reach these colours (they are baked vec3 literals).
+    //
+    // So in light mode the hero falls back to the SAME no-canvas state that
+    // Lite Mode and no-WebGL devices already get: the CSS `.event-horizon`
+    // glow behind this canvas, retinted warm gold on near-white. That path was
+    // already built and already tested — this just routes one more case to it.
+    if (isLiteMode() || isLightMode()) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const gl = canvas.getContext("webgl", { antialias: false, alpha: false });
@@ -466,6 +479,7 @@ export default function BlackHoleCanvas({ params: paramsProp, onSnapshotReady } 
       else { killed = false; syncRunning(); }
     };
     window.addEventListener(LITE_MODE_EVENT, onLiteToggle);
+    window.addEventListener(LIGHT_MODE_EVENT, onLiteToggle);
     window.addEventListener("resize", resize);
     if (!reducedMotion) {
       canvas.addEventListener("pointermove", onPointerMove, { passive: true });
@@ -485,6 +499,7 @@ export default function BlackHoleCanvas({ params: paramsProp, onSnapshotReady } 
       observer.disconnect();
       document.removeEventListener("visibilitychange", onVisibility);
       window.removeEventListener(LITE_MODE_EVENT, onLiteToggle);
+      window.removeEventListener(LIGHT_MODE_EVENT, onLiteToggle);
       window.removeEventListener("resize", resize);
       canvas.removeEventListener("pointermove", onPointerMove);
       canvas.removeEventListener("pointerdown", onPointerDown);
