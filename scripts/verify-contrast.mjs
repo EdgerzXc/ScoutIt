@@ -53,7 +53,7 @@ const D = {
   bg: "#0d0d0d",
   surface: "#121212",
   textPrimary: "#ffffff",
-  textSecondary: "#a099b0",
+  textSecondary: "#a8a29a",
   accent: "#E8AE3C",
   accentBright: "#F7C64E",
 };

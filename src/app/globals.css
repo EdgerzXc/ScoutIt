@@ -183,8 +183,8 @@ body.light-mode .section-hook,
 body.light-mode .global-footer {
   --text-primary:       #ffffff;
   --text-primary-ch:    255 255 255;
-  --text-secondary:     #a099b0;
-  --text-secondary-ch:  160 153 176;
+  --text-secondary:     #a8a29a;
+  --text-secondary-ch:  168 162 154;
   --text-muted:         rgba(255, 255, 255, 0.55);
   --accent:             #E8AE3C;
   --accent-rgb:         232, 174, 60;
@@ -228,7 +228,17 @@ body.light-mode .global-footer {
 
   /* Typography Colors */
   --text-primary: #ffffff;
-  --text-secondary: #a099b0;
+  /* ⚠️ WAS #a099b0 until 2026-08-06 (§62). That is a LAVENDER, not a grey:
+     its channels are R160 G153 B176 — blue is the HIGHEST. On near-black it
+     passes for neutral, but anywhere lighter, and at larger sizes, it reads
+     visibly BLUE. The owner reported it as "instead of white gold some font is
+     coloured blue" on the manifesto page, and it was correct: `.eco-header`
+     and ~587 `text-text-secondary` call sites were rendering periwinkle.
+     It also introduced a THIRD hue into a brand AGENTS.md locks to 95%
+     near-black + 5% gold. Nothing in the system asks for blue.
+     Replaced with a warm neutral that sits with the gold instead of fighting
+     it. Verified by scripts/verify-contrast.mjs. */
+  --text-secondary: #a8a29a;
   --text-muted: rgba(255, 255, 255, 0.45);
 
   /* Brand Identity */
@@ -255,7 +265,7 @@ body.light-mode .global-footer {
   --surface-ch:         18 18 18;
   --surface3-ch:        34 34 34;
   --text-primary-ch:    255 255 255;
-  --text-secondary-ch:  160 153 176;
+  --text-secondary-ch:  168 162 154;
   --accent-bright: #F7C64E;
   --accent-bright-rgb: 247, 198, 78;
   --accent-muted: #6E531A;
@@ -1221,9 +1231,9 @@ body.high-contrast :focus-visible {
    images, video, canvas and the toolbox render normally by default.
    ═══════════════════════════════════════════════════════════════ */
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+/* â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• 
    LAYER 01: STRATOSPHERE ENTRY ANIMATIONS
-   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+   â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â•  */
 .perspective-container {
   perspective: 800px;
   perspective-origin: center center;
@@ -1331,10 +1341,10 @@ body.high-contrast :focus-visible {
     left: 0;
     right: 0;
     z-index: 900;
-    background: rgba(12, 11, 9, 0.96);
+    background: var(--brand-overlay);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    border-top: 1px solid var(--border-solid);
     padding: 8px 0 max(12px, env(safe-area-inset-bottom));
     justify-content: space-around;
     align-items: flex-start;
@@ -1349,7 +1359,7 @@ body.high-contrast :focus-visible {
     min-width: 48px;
     max-width: 72px;
     text-decoration: none;
-    color: rgba(200, 200, 200, 0.5);
+    color: var(--text-secondary);
     transition: color 0.2s ease;
     position: relative;
     -webkit-tap-highlight-color: transparent;
@@ -1666,10 +1676,21 @@ html.lite-mode .layer-route canvas {
     radial-gradient(ellipse 1400px 900px at 50% 40%, transparent 55%, rgba(0, 0, 0, 0.5) 100%);
 }
 
-/* Ambient glow is decorative weight on top of the base tone â€” drop it under
+/* Ambient glow is decorative weight on top of the base tone — drop it under
    Lite Mode same as .grain and the other cosmic decoration layers. */
 html.lite-mode .atmosphere-bg::after {
   display: none !important;
+}
+
+body.light-mode .atmosphere-bg::before {
+  background: linear-gradient(160deg, var(--bg) 0%, var(--surface2) 45%, var(--surface3) 100%);
+}
+
+body.light-mode .atmosphere-bg::after {
+  background:
+    radial-gradient(ellipse 900px 560px at var(--glow-x) var(--glow-y), rgba(var(--accent-rgb), 0.08), transparent 60%),
+    radial-gradient(ellipse 700px 500px at 6% 18%, rgba(var(--accent-rgb), 0.03), transparent 62%),
+    radial-gradient(ellipse 900px 700px at 30% 115%, rgba(139, 94, 16, 0.03), transparent 60%);
 }
 
 /* ROLE ATMOSPHERE: BROKER "TACTICAL VELOCITY"
@@ -1745,10 +1766,21 @@ html.lite-mode .atmosphere-broker::after {
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+body.light-mode .card-atmosphere {
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
 .card-atmosphere-gold {
   background: linear-gradient(155deg, #1d1a16, #131110);
   border: 1px solid rgba(var(--accent-rgb), 0.28);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), 0 0 40px rgba(var(--accent-rgb), 0.06);
+}
+
+body.light-mode .card-atmosphere-gold {
+  background: var(--surface2);
+  border: 1px solid rgba(var(--accent-rgb), 0.35);
+  box-shadow: var(--shadow-md), var(--shadow-glow-soft);
 }
 
 /* Hover lift â€” apply to every clickable card/tile for consistency.
