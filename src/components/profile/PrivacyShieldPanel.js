@@ -146,22 +146,22 @@ export default function PrivacyShieldPanel({ role, tier }) {
         .ps-root {
           margin-top: 24px;
           padding: 22px 18px;
-          border: 1px solid var(--surface-variant, #262626);
+          border: 1px solid var(--border-solid);
           border-radius: 12px;
-          background: var(--surface, #161616);
+          background: var(--surface);
         }
         .ps-h {
           font-family: Georgia, serif;
           font-size: 18px;
           font-weight: 400;
-          color: #f0ede8;
+          color: var(--text-primary);
           margin: 0 0 6px;
         }
         .ps-intro {
           font-family: Georgia, serif;
           font-size: 13px;
           line-height: 1.7;
-          color: #8a8a8a;
+          color: var(--text-secondary);
           margin: 0 0 6px;
           max-width: 58ch;
         }
@@ -170,7 +170,7 @@ export default function PrivacyShieldPanel({ role, tier }) {
           font-size: 9px;
           letter-spacing: 0.14em;
           text-transform: uppercase;
-          color: #4caf7d;
+          color: var(--green);
           margin: 0 0 18px;
         }
         .ps-row {
@@ -178,21 +178,21 @@ export default function PrivacyShieldPanel({ role, tier }) {
           align-items: flex-start;
           gap: 14px;
           padding: 15px 0;
-          border-top: 1px solid #1e1e1e;
+          border-top: 1px solid var(--border-solid);
         }
         .ps-row__main { min-width: 0; flex: 1; }
         .ps-row__t {
           font-family: Georgia, serif;
           font-size: 14.5px;
           line-height: 1.35;
-          color: #f0ede8;
+          color: var(--text-primary);
           margin-bottom: 4px;
         }
         .ps-row__b {
           font-family: Georgia, serif;
           font-size: 12.5px;
           line-height: 1.6;
-          color: #8a8a8a;
+          color: var(--text-secondary);
           max-width: 52ch;
         }
         .ps-row__saved {
@@ -200,7 +200,7 @@ export default function PrivacyShieldPanel({ role, tier }) {
           font-size: 8.5px;
           letter-spacing: 0.12em;
           text-transform: uppercase;
-          color: #4caf7d;
+          color: var(--green);
           margin-top: 6px;
         }
         /* 44px minimum, and the whole control is the hit area. */
@@ -214,8 +214,8 @@ export default function PrivacyShieldPanel({ role, tier }) {
           margin-top: 2px;
           padding: 3px;
           border-radius: 999px;
-          border: 0.5px solid #2e2e2e;
-          background: #101010;
+          border: 0.5px solid var(--border-solid);
+          background: var(--bg);
           cursor: pointer;
           transition: background-color 180ms ease-out, border-color 180ms ease-out;
         }
@@ -224,24 +224,24 @@ export default function PrivacyShieldPanel({ role, tier }) {
           width: 22px;
           height: 22px;
           border-radius: 50%;
-          background: #6a6a6a;
+          background: var(--text-muted);
           transition: transform 180ms ease-out, background-color 180ms ease-out;
         }
         .ps-toggle[aria-checked="true"] {
-          background: rgba(232, 174, 60, 0.16);
-          border-color: #6E531A;
+          background: rgba(var(--accent-rgb), 0.16);
+          border-color: var(--accent-muted);
         }
         .ps-toggle[aria-checked="true"]::after {
           transform: translateX(22px);
-          background: #E8AE3C;
+          background: var(--accent-fill);
         }
         .ps-toggle:disabled { opacity: 0.45; cursor: not-allowed; }
-        .ps-toggle:focus-visible { outline: 2px solid #E8AE3C; outline-offset: 3px; }
+        .ps-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 
         .ps-err {
           font-family: ${MONO};
           font-size: 10px;
-          color: #e8644a;
+          color: var(--red);
           line-height: 1.7;
           margin-top: 14px;
         }
@@ -249,7 +249,7 @@ export default function PrivacyShieldPanel({ role, tier }) {
           height: 64px;
           border-radius: 4px;
           margin-top: 10px;
-          background: linear-gradient(90deg, #141414 0%, #1a1a1a 50%, #141414 100%);
+          background: linear-gradient(90deg, var(--surface) 0%, var(--surface2) 50%, var(--surface) 100%);
           background-size: 200% 100%;
           animation: psShimmer 1.4s ease-in-out infinite;
         }

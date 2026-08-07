@@ -240,8 +240,8 @@ export default function WishlistPage() {
       <style jsx>{`
         .page-wrapper {
           min-height: 100vh;
-          background: #0e0e0e;
-          color: #f0ede8;
+          background: var(--bg);
+          color: var(--text-primary);
           position: relative;
         }
 
@@ -263,7 +263,7 @@ export default function WishlistPage() {
           font-size: 12px;
           text-transform: uppercase;
           letter-spacing: 3px;
-          color: #E8AE3C;
+          color: var(--accent);
           margin-bottom: 16px;
         }
 
@@ -271,7 +271,7 @@ export default function WishlistPage() {
           font-family: Georgia, serif;
           font-size: 40px;
           font-weight: normal;
-          color: #f0ede8;
+          color: var(--text-primary);
           margin: 0;
         }
 
@@ -422,10 +422,10 @@ export default function WishlistPage() {
           font-size: 11px;
           text-transform: uppercase;
           letter-spacing: 2px;
-          color: #E8AE3C;
+          color: var(--accent);
           margin: 0 0 4px;
           padding-bottom: 8px;
-          border-bottom: 1px solid #262626;
+          border-bottom: 1px solid var(--border-solid);
         }
 
         .cards-grid {
@@ -438,8 +438,8 @@ export default function WishlistPage() {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          background: linear-gradient(165deg, #1a1917, #111110);
-          border: 1px solid rgba(255, 255, 255, 0.08);
+          background: var(--surface2);
+          border: 1px solid var(--border);
           padding: 16px 20px;
           transition: opacity 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
           position: relative;
@@ -447,8 +447,8 @@ export default function WishlistPage() {
 
         .board-card:hover {
           transform: translateY(-3px);
-          border-color: rgba(232, 174, 60, 0.3);
-          box-shadow: 0 14px 32px rgba(0, 0, 0, 0.45), 0 0 24px rgba(232, 174, 60, 0.18);
+          border-color: rgba(var(--accent-rgb), 0.3);
+          box-shadow: var(--shadow-md), var(--shadow-glow-soft);
         }
 
         .badge-corner {

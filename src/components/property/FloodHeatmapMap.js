@@ -262,7 +262,7 @@ export default function FloodHeatmapMap({ lat, lng, propertyTitle }) {
           display: flex;
           align-items: center;
           gap: 8px;
-          font-family: var(--font-mono, 'Courier New', monospace);
+          font-family: var(--font-mono, "var(--font-mono)");
           font-size: 12px;
           color: #f0ede8;
           margin-bottom: 4px;

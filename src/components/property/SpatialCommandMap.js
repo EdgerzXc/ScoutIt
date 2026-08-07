@@ -57,6 +57,7 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
 
   // ─── Apply layer visibility to the map ─────────────────────────────────────
   const applyLayerVisibility = useCallback((map, layerId) => {
+    if (!map || !mapLoadedRef.current) return;
     const layerGroups = {
       "satellite-layer": layerId === "satellite",
       "peza-zones-layer": layerId === "all" || layerId === "peza",
@@ -73,38 +74,59 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
       "fires-layer": layerId === "all" || layerId === "fire",
     };
     for (const [lid, visible] of Object.entries(layerGroups)) {
-      if (map.getLayer(lid)) {
-        map.setLayoutProperty(lid, "visibility", visible ? "visible" : "none");
+      try {
+        if (map.getLayer(lid)) {
+          map.setLayoutProperty(lid, "visibility", visible ? "visible" : "none");
+        }
+      } catch (err) {
+        // Safe catch for layer visibility toggle
       }
     }
   }, []);
 
-  // ─── Initialize MapLibre GL Map (once) ─────────────────────────────────────
+  // ─── Initialize MapLibre GL Map (single permanent dark-mode logic) ─────────
   useEffect(() => {
     if (!mapContainerRef.current || mapInstanceRef.current) return;
 
-    const map = new maplibregl.Map({
-      container: mapContainerRef.current,
-      style: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
-      center: [targetLng, targetLat],
-      zoom: 15,
-      pitch: 35,
-    });
+    let map;
+    try {
+      map = new maplibregl.Map({
+        container: mapContainerRef.current,
+        style: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
+        center: [targetLng, targetLat],
+        zoom: 13.6,
+        pitch: 25,
+        maxPitch: 60,
+        minPitch: 0,
+        dragRotate: true,
+        pitchWithRotate: true,
+        touchPitch: true,
+        touchZoomRotate: true,
+      });
+    } catch (err) {
+      console.warn("MapLibre GL initialization error:", err);
+      return;
+    }
 
     // Assign ref immediately so cleanup always works
     mapInstanceRef.current = map;
 
-    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
+    try {
+      map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
+    } catch (err) {}
 
     map.on("error", (e) => {
+      // Ignore routine tile loading/network errors to prevent crashes
       if (e?.error?.message?.includes("tile") || e?.error?.status === 0) return;
     });
 
     map.on("contextmenu", (e) => {
-      e.preventDefault();
-      const clickedIntel = computeSpatialIntel(e.lngLat.lat, e.lngLat.lng);
-      setDossierData({ lat: e.lngLat.lat, lng: e.lngLat.lng, intel: clickedIntel });
-      setShowDossierModal(true);
+      try {
+        e.preventDefault();
+        const clickedIntel = computeSpatialIntel(e.lngLat.lat, e.lngLat.lng);
+        setDossierData({ lat: e.lngLat.lat, lng: e.lngLat.lng, intel: clickedIntel });
+        setShowDossierModal(true);
+      } catch (err) {}
     });
 
     map.on("load", () => {
@@ -173,7 +195,7 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
         source: "peza-zones",
         layout: { visibility: "visible" },
         paint: {
-          "circle-radius": ["interpolate", ["exponential", 2], ["zoom"], 9, 6, 12, 28, 15, 110, 18, 450],
+          "circle-radius": 20,
           "circle-color": "#10B981",
           "circle-opacity": 0.18,
           "circle-stroke-width": 2,
@@ -204,7 +226,7 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
         source: "office-clusters",
         layout: { visibility: "visible" },
         paint: {
-          "circle-radius": ["interpolate", ["exponential", 2], ["zoom"], 9, 8, 12, 35, 15, 140],
+          "circle-radius": 24,
           "circle-color": "#3B82F6",
           "circle-opacity": 0.15,
           "circle-stroke-width": 2,
@@ -229,7 +251,7 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
         source: "transit-rings",
         layout: { visibility: "visible" },
         paint: {
-          "circle-radius": ["interpolate", ["exponential", 2], ["zoom"], 9, 18, 12, 57, 15, 240, 18, 825],
+          "circle-radius": 84,
           "circle-color": "transparent",
           "circle-stroke-width": 1.5,
           "circle-stroke-color": "#F7C64E",
@@ -243,7 +265,7 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
         source: "transit-rings",
         layout: { visibility: "visible" },
         paint: {
-          "circle-radius": ["interpolate", ["exponential", 2], ["zoom"], 9, 12, 12, 38, 15, 160, 18, 550],
+          "circle-radius": 54,
           "circle-color": "transparent",
           "circle-stroke-width": 2,
           "circle-stroke-color": "#F7C64E",
@@ -257,8 +279,8 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
         source: "transit-rings",
         layout: { visibility: "visible" },
         paint: {
-          "circle-radius": ["interpolate", ["exponential", 2], ["zoom"], 9, 6, 12, 19, 15, 80, 18, 275],
-          "circle-color": "rgba(247, 198, 78, 0.08)",
+          "circle-radius": 28,
+          "circle-color": "transparent",
           "circle-stroke-width": 2.5,
           "circle-stroke-color": "#F7C64E",
           "circle-stroke-opacity": 0.9,
@@ -349,7 +371,9 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
     return () => {
       mapLoadedRef.current = false;
       if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
+        try {
+          mapInstanceRef.current.remove();
+        } catch (err) {}
         mapInstanceRef.current = null;
       }
     };
@@ -439,7 +463,7 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
   };
 
   return (
-    <div style={{ position: "relative", width: "100%", height: "560px", borderRadius: "12px", overflow: "hidden", border: "1px solid rgba(232, 174, 60, 0.3)" }}>
+    <div style={{ position: "relative", width: "100%", height: "clamp(380px, 60vh, 680px)", borderRadius: "12px", overflow: "hidden", border: "1px solid rgba(232, 174, 60, 0.3)" }}>
       {/* Map Container with Visual Filter Support */}
       <div ref={mapContainerRef} style={{ width: "100%", height: "100%", transition: "filter 0.3s ease", ...getContainerStyle() }} />
 
@@ -463,19 +487,21 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
         className="scm-hud-bar"
         style={{
           position: "absolute",
-          top: "16px",
-          left: "16px",
+          top: "12px",
+          left: "12px",
+          right: "12px",
           zIndex: 10,
           background: "rgba(13, 13, 13, 0.92)",
           backdropFilter: "blur(14px)",
           WebkitBackdropFilter: "blur(14px)",
           border: "1px solid rgba(232, 174, 60, 0.4)",
           borderRadius: "8px",
-          padding: "12px 14px",
+          padding: "10px 12px",
           color: visualMode === "CRT" ? "#00FF66" : "#fff",
           fontFamily: "var(--font-mono, monospace)",
-          fontSize: "12px",
+          fontSize: "11px",
           boxShadow: "0 8px 32px rgba(0, 0, 0, 0.75)",
+          width: "calc(100% - 24px)",
           maxWidth: "420px",
           transition: "all 0.3s ease",
         }}

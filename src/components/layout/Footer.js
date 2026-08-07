@@ -82,8 +82,8 @@ export default function Footer() {
 
       <style jsx global>{`
         .global-footer {
-          background: #090909;
-          border-top: 1px solid var(--border-solid, rgba(255, 255, 255, 0.08));
+          background: var(--surface2, #090909);
+          border-top: 1px solid var(--border, rgba(255, 255, 255, 0.08));
           padding: 64px 24px 24px;
           font-family: var(--font-body, sans-serif);
           color: var(--text-secondary, #a0a0a0);
@@ -115,7 +115,7 @@ export default function Footer() {
           line-height: 1;
         }
 
-        .footer-brand .brand-scout { color: #f5f3ee; }
+        .footer-brand .brand-scout { color: var(--text-primary, #f5f3ee); }
         .footer-brand .brand-s,
         .footer-brand .brand-it { color: var(--accent, #E8AE3C); }
 

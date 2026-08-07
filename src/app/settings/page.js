@@ -334,7 +334,7 @@ export default function SettingsPage() {
         </div>
 
         {/* ── Honors & Badges ── */}
-        <div className={styles.formGroup} style={{ marginTop: 24, padding: 24, border: '1px solid rgba(232, 174, 60,0.2)', borderRadius: 12, background: 'rgba(232, 174, 60,0.02)' }}>
+        <div className={styles.formGroup} style={{ marginTop: 24, padding: 24, border: '1px solid rgba(var(--accent-rgb), 0.2)', borderRadius: 12, background: 'rgba(var(--accent-rgb), 0.03)' }}>
           <div className="flex items-center gap-3 mb-2">
             <ShieldCheck className="text-gold-accent" size={20} />
             <h3 className="font-display text-lg text-on-surface">Honors & Badges</h3>
@@ -407,7 +407,7 @@ export default function SettingsPage() {
           />
 
           {securityMessage.text && (
-            <div className={`mt-3 p-3 rounded text-sm ${securityMessage.type === 'error' ? 'bg-error/10 border border-error/50 text-error' : 'bg-[#121212] border border-gold-accent text-[#E8AE3C]'}`}>
+            <div className={`mt-3 p-3 rounded text-sm ${securityMessage.type === 'error' ? 'bg-error/10 border border-error/50 text-error' : 'bg-surface border border-gold-accent text-gold-accent'}`}>
               {securityMessage.text}
             </div>
           )}
@@ -427,7 +427,7 @@ export default function SettingsPage() {
             <h4 className="font-working-title text-md text-on-surface mb-2">Two-Factor Authentication (2FA)</h4>
             
             {mfaMessage.text && (
-              <div className={`mb-4 p-3 rounded text-sm ${mfaMessage.type === 'error' ? 'bg-error/10 border border-error/50 text-error' : 'bg-[#121212] border border-gold-accent text-[#E8AE3C]'}`}>
+              <div className={`mb-4 p-3 rounded text-sm ${mfaMessage.type === 'error' ? 'bg-error/10 border border-error/50 text-error' : 'bg-surface border border-gold-accent text-gold-accent'}`}>
                 {mfaMessage.text}
               </div>
             )}

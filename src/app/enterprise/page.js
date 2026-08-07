@@ -119,7 +119,7 @@ export default function EnterprisePage() {
           display: inline-flex;
           align-items: center;
           background: var(--accent-bright);
-          color: #0e0e0e;
+          color: var(--bg, #0e0e0e);
           font-weight: 700;
           padding: 14px 30px;
           border-radius: 4px;
@@ -130,6 +130,9 @@ export default function EnterprisePage() {
         .enterprise-cta-btn:hover {
           transform: translateY(-2px);
           box-shadow: var(--shadow-glow);
+        }
+        .enterprise-cta-btn:active {
+          transform: scale(0.96);
         }
         .enterprise-cta-row {
           display: flex;

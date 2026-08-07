@@ -209,7 +209,7 @@ export default function ResearchersPage() {
         .availability-chip .availability-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border-mid); flex-shrink: 0; }
         .availability-chip.is-available { color: var(--green); }
         .availability-chip.is-available .availability-dot { background: var(--green); box-shadow: 0 0 8px rgba(76,175,125,.55); }
-        .roster-state { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 48px 24px; margin-bottom: 32px; border: 1px dashed var(--border-mid); border-radius: var(--radius-lg); background: linear-gradient(165deg, #161616, #111110); text-align: center; }
+        .roster-state { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 48px 24px; margin-bottom: 32px; border: 1px dashed var(--border-mid); border-radius: var(--radius-lg); background: var(--surface2); text-align: center; }
         .roster-state-label { font-family: var(--font-mono),monospace; font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--text-secondary); }
         .roster-state-sub { font-size: 13px; color: var(--text-muted); }
         .broker-image-fallback { display: flex; align-items: center; justify-content: center; background: var(--surface2); font-size: 40px; color: var(--accent); }
@@ -219,16 +219,16 @@ export default function ResearchersPage() {
         }
         .coming-soon-banner { background: linear-gradient(135deg,rgba(232, 174, 60,.08) 0%,rgba(232, 174, 60,.03) 100%); border: .5px solid var(--accent-border); border-radius: 6px; padding: 16px 22px; margin-bottom: 32px; }
         .coming-soon-inner { display: flex; align-items: flex-start; gap: 14px; }
-        .coming-soon-badge { background: var(--accent); color: #0e0e0e; font-size: 10px; font-weight: 700; letter-spacing: .12em; padding: 4px 10px; border-radius: 3px; white-space: nowrap; flex-shrink: 0; margin-top: 2px; }
+        .coming-soon-badge { background: var(--accent); color: var(--bg, #0e0e0e); font-size: 10px; font-weight: 700; letter-spacing: .12em; padding: 4px 10px; border-radius: 3px; white-space: nowrap; flex-shrink: 0; margin-top: 2px; }
         .coming-soon-text { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
-        .coming-soon-card-overlay { position: absolute; top: 12px; left: 12px; font-size: 10px; font-weight: 700; letter-spacing: .1em; color: var(--text-muted); background: rgba(14,14,14,.8); border: .5px solid var(--border-mid); padding: 3px 8px; border-radius: 2px; z-index: 10; font-family: var(--font-mono),monospace; }
+        .coming-soon-card-overlay { position: absolute; top: 12px; left: 12px; font-size: 10px; font-weight: 700; letter-spacing: .1em; color: var(--text-muted); background: var(--surface); border: .5px solid var(--border-mid); padding: 3px 8px; border-radius: 2px; z-index: 10; font-family: var(--font-mono),monospace; }
         .brokers-main { padding: 40px 45px; max-width: 1400px; margin: 0 auto; }
-        .page-title { font-family: var(--font-display); font-size: 38px; letter-spacing: .02em; color: #fff; margin: 8px 0; }
+        .page-title { font-family: var(--font-display); font-size: 38px; letter-spacing: .02em; color: var(--text-primary); margin: 8px 0; }
         .brokers-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 24px; }
         @media (max-width:1024px) { .brokers-grid { grid-template-columns: 1fr; } }
         
-        .broker-card { background: linear-gradient(165deg, #1a1917, #111110); border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; display: flex; flex-direction: column; transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition); position: relative; }
-        .broker-card:hover { border-color: var(--accent-border); box-shadow: 0 14px 32px rgba(0,0,0,.45), 0 0 40px rgba(232,174,60,.06); transform: translateY(-4px); }
+        .broker-card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; display: flex; flex-direction: column; transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition); position: relative; }
+        .broker-card:hover { border-color: var(--accent-border); box-shadow: var(--shadow-md), var(--shadow-glow-soft); transform: translateY(-4px); }
         .broker-image-container { position: relative; height: 240px; overflow: hidden; }
         .broker-image { width: 100%; height: 100%; object-fit: cover; filter: grayscale(80%) contrast(1.1); transition: transform .6s ease,filter .6s ease; }
         .broker-card:hover .broker-image { transform: scale(1.05); filter: grayscale(0%) contrast(1.1); }
@@ -244,7 +244,7 @@ export default function ResearchersPage() {
         .broker-stats { display: flex; flex-direction: column; gap: 2px; }
         .stat-value { font-family: var(--font-display); font-size: 24px; color: var(--text-primary); }
         .btn-contact { background: transparent; border: 1px solid var(--accent); padding: 8px 16px; border-radius: 4px; color: var(--accent); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; cursor: pointer; transition: all .2s; }
-        .btn-contact:hover { background: var(--accent); color: #000; }
+        .btn-contact:hover { background: var(--accent); color: var(--bg, #000); }
         .general-tier-badge-label { position: absolute; top: 12px; right: 12px; font-size: 10px; font-weight: 700; letter-spacing: 1px; padding: 3px 8px; border-radius: 2px; font-family: var(--font-mono),monospace; z-index: 10; }
         .tier-1-card { border-color: transparent !important; box-shadow: 0 8px 32px rgba(0,242,254,.08); }
         .tier-1-card::before { content: ""; position: absolute; inset: -1px; z-index: -1; border-radius: 6px; background: linear-gradient(90deg,#00f2fe,#4facfe,#b19ffb,#00f2fe); background-size: 300% 300%; animation: diamondGlow 6s linear infinite; }

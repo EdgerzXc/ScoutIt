@@ -139,7 +139,7 @@ export default function PricingHubPage() {
           min-height: 100vh;
           display: flex;
           flex-direction: column;
-          background: #0A0908;
+          background: var(--bg);
         }
 
         .pricing-main {

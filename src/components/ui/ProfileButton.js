@@ -60,22 +60,77 @@ export default function ProfileButton({ floating = false }) {
 
 
   return (
-    <Link
-      href={href}
-      className={`profile-btn ${floating ? "floating" : ""} ${user ? "signed-in" : ""}`}
-      aria-label={label}
-      title={label}
-    >
-      {user?.name ? (
-        <span className="profile-initial">{user.name.charAt(0).toUpperCase()}</span>
-      ) : (
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-          <circle cx="12" cy="7" r="4"/>
+    <div className={`profile-action-group ${floating ? "floating" : ""}`}>
+      <button
+        type="button"
+        className="profile-eye-btn"
+        onClick={() => window.dispatchEvent(new CustomEvent("scoutit:open-display-settings"))}
+        aria-label="Display Settings (Light / Lite / Dark Mode)"
+        title="Display Settings (Light / Lite / Dark Mode)"
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+          <circle cx="12" cy="12" r="3" />
         </svg>
-      )}
+      </button>
+
+      <Link
+        href={href}
+        className={`profile-btn ${user ? "signed-in" : ""}`}
+        aria-label={label}
+        title={label}
+      >
+        {user?.name ? (
+          <span className="profile-initial">{user.name.charAt(0).toUpperCase()}</span>
+        ) : (
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+        )}
+      </Link>
 
       <style jsx>{`
+        .profile-action-group {
+          display: inline-flex;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .profile-action-group.floating {
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          z-index: 1500;
+        }
+
+        .profile-eye-btn {
+          width: 44px;
+          height: 44px;
+          border-radius: 50%;
+          border: 1px solid var(--accent-border);
+          background: var(--brand-overlay);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          color: var(--accent);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: all 0.25s ease;
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+        }
+
+        .profile-eye-btn:hover {
+          border-color: var(--accent-bright);
+          background: rgba(232, 174, 60, 0.16);
+          transform: scale(1.05);
+        }
+
+        .profile-eye-btn:active {
+          transform: scale(0.94);
+        }
+
         .profile-btn {
           width: 44px;
           height: 44px;
@@ -89,13 +144,6 @@ export default function ProfileButton({ floating = false }) {
           justify-content: center;
           text-decoration: none;
           transition: all 0.25s ease;
-        }
-
-        .profile-btn.floating {
-          position: fixed;
-          top: 20px;
-          right: 20px;
-          z-index: 1500;
         }
 
         .profile-btn :global(svg) {
@@ -149,6 +197,6 @@ export default function ProfileButton({ floating = false }) {
           }
         }
       `}</style>
-    </Link>
+    </div>
   );
 }

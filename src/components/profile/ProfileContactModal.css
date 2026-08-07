@@ -13,7 +13,7 @@
 }
 
 .contact-modal {
-  background: #161616;
+  background: var(--surface);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   width: 100%;
@@ -39,7 +39,7 @@
 }
 
 .contact-close:hover {
-  color: #fff;
+  color: var(--text-primary);
 }
 
 .contact-modal-body {

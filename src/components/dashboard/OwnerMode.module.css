@@ -41,8 +41,8 @@
 }
 
 .buttonPrimary {
-  background: var(--accent);
-  color: #000;
+  background: var(--accent-fill);
+  color: var(--on-accent);
   border: none;
   padding: 16px 32px;
   font-size: 14px;
@@ -55,7 +55,7 @@
 }
 
 .buttonPrimary:hover {
-  background: var(--accent-bright);
+  background: var(--accent-fill);
   transform: translateY(-2px);
   box-shadow: 0 4px 20px rgba(232, 174, 60, 0.3);
 }
@@ -241,8 +241,8 @@
 
 .btnAccept {
   flex: 1;
-  background: var(--accent);
-  color: #000;
+  background: var(--accent-fill);
+  color: var(--on-accent);
   border: none;
   padding: 12px;
   border-radius: 4px;
@@ -252,7 +252,7 @@
 }
 
 .btnAccept:hover {
-  background: var(--accent-bright);
+  background: var(--accent-fill);
 }
 
 .btnAccept:active {
@@ -342,7 +342,7 @@
 }
 
 .wDot.active {
-  background: var(--accent);
+  background: var(--accent-fill);
 }
 
 .btnText {

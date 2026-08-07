@@ -34,7 +34,7 @@ import { LISTER_RELATIONSHIPS, OWNER_SOVEREIGNTY_DISCLAIMER } from "@/lib/lister
 // rather than opening a modal, so the reader keeps the property in view.
 // ─────────────────────────────────────────────────────────────────────────
 
-const MONO = "'Courier New',monospace";
+const MONO = "var(--font-mono)";
 
 const STATUS_COPY = {
   draft: "Saved, not yet submitted",
@@ -329,9 +329,9 @@ function ClaimStyles() {
         100% { background-position: -200% 0; }
       }
       .cp-card {
-        background: #131313;
-        border: 0.5px solid #262626;
-        border-left: 2px solid #6E531A;
+        background: var(--surface2, #131313);
+        border: 0.5px solid var(--border, #262626);
+        border-left: 2px solid var(--accent, #6E531A);
         border-radius: 4px;
         padding: 20px 17px;
       }
@@ -348,14 +348,14 @@ function ClaimStyles() {
         font-weight: 400;
         font-size: 18px;
         line-height: 1.3;
-        color: #f0ede8;
+        color: var(--text-primary, #f0ede8);
         margin: 0 0 9px;
       }
       .cp-body {
         font-family: Georgia, serif;
         font-size: 13.5px;
         line-height: 1.7;
-        color: #c8c8c8;
+        color: var(--text-secondary, #c8c8c8);
         margin: 0 0 16px;
         max-width: 56ch;
       }
@@ -363,14 +363,14 @@ function ClaimStyles() {
         font-family: Georgia, serif;
         font-size: 12px;
         line-height: 1.65;
-        color: #6a6a6a;
+        color: var(--text-muted, #6a6a6a);
         margin: 14px 0 0;
         max-width: 56ch;
       }
       .cp-meta {
         font-family: ${MONO};
         font-size: 9px;
-        color: #5a5a5a;
+        color: var(--text-muted, #5a5a5a);
         letter-spacing: 0.1em;
         text-transform: uppercase;
       }
@@ -380,7 +380,7 @@ function ClaimStyles() {
       .cp-legend {
         font-family: ${MONO};
         font-size: 9px;
-        color: #8a8a8a;
+        color: var(--text-muted, #8a8a8a);
         letter-spacing: 0.16em;
         text-transform: uppercase;
         padding: 0;
@@ -390,15 +390,16 @@ function ClaimStyles() {
         display: flex;
         gap: 12px;
         align-items: flex-start;
-        min-height: 44px;
+        min-height: 48px;
         padding: 13px 12px;
         margin-bottom: 8px;
-        background: #171717;
-        border: 0.5px solid #262626;
+        background: var(--surface, #171717);
+        border: 0.5px solid var(--border, #262626);
         border-radius: 4px;
         cursor: pointer;
-        transition: border-color 160ms ease-out, background-color 160ms ease-out;
+        transition: border-color 160ms ease-out, background-color 160ms ease-out, transform 120ms ease-out;
       }
+      .cp-opt:active { transform: scale(0.98); }
       .cp-opt:hover { border-color: #3a3a3a; }
       .cp-opt:focus-within { outline: 2px solid #6E531A; outline-offset: 2px; }
       .cp-opt--on { background: rgba(232, 174, 60, 0.06); border-color: #6E531A; }
@@ -416,7 +417,7 @@ function ClaimStyles() {
         font-family: Georgia, serif;
         font-size: 14.5px;
         line-height: 1.35;
-        color: #f0ede8;
+        color: var(--text-primary, #f0ede8);
         margin-bottom: 4px;
       }
       .cp-opt__detail {

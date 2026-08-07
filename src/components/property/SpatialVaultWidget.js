@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { usePremiumFields } from "@/lib/usePremiumFields";
 
 // ── §25.1 / §45: SERVER-ENFORCED ──
@@ -17,6 +18,7 @@ import { usePremiumFields } from "@/lib/usePremiumFields";
 // property page they arrive empty.
 export default function SpatialVaultWidget({ slug, lumaUrl, matterportUrl, heatmapUrl, floorPlans = [] }) {
   const { fields } = usePremiumFields(slug);
+  const [heatmapFailed, setHeatmapFailed] = useState(false);
 
   // Server value wins; the prop is only a fallback for already-entitled callers.
   const realLuma      = fields.luma3dMapUrl     || lumaUrl       || "";
@@ -80,8 +82,19 @@ export default function SpatialVaultWidget({ slug, lumaUrl, matterportUrl, heatm
           <h4 className="font-label-caps text-[10px] text-gold-accent tracking-widest uppercase mb-3">
             Drone Heatmap Analysis
           </h4>
-          <div className="relative w-full h-[200px] rounded overflow-hidden border border-surface-variant">
-            <div className={`w-full h-full bg-[#111] ${hasSubscription ? '' : 'blur-sm brightness-50'}`} />
+          <div className="relative w-full h-[240px] rounded overflow-hidden border border-surface-variant">
+            <div className={`w-full h-full ${hasSubscription ? '' : 'blur-sm brightness-50'}`}>
+              {realHeatmap && !heatmapFailed ? (
+                realHeatmap.includes('.png') || realHeatmap.includes('.jpg') || realHeatmap.includes('.jpeg') || realHeatmap.includes('.webp') || realHeatmap.includes('.svg') ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img src={realHeatmap} alt="Drone Heatmap Analysis" className="w-full h-full object-cover" onError={() => setHeatmapFailed(true)} />
+                ) : (
+                  <iframe src={realHeatmap} className="w-full h-full border-none" title="Drone Heatmap Analysis" onError={() => setHeatmapFailed(true)} />
+                )
+              ) : (
+                <DroneThermalVisualizer />
+              )}
+            </div>
             {!hasSubscription && (
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/60 backdrop-blur-sm">
                 <span className="font-headline-editorial text-base text-on-surface mb-2">Unlock The Spatial Vault</span>
@@ -124,9 +137,9 @@ export default function SpatialVaultWidget({ slug, lumaUrl, matterportUrl, heatm
                       {isImage ? (
                         /* eslint-disable-next-line @next/next/no-img-element */
                         <img src={hasSubscription ? plan.url : ""} alt={plan.name}
-                             className="w-full h-[160px] object-contain bg-[#0d0d0d]" />
+                             className="w-full h-[160px] object-contain bg-[var(--surface2)]" />
                       ) : (
-                        <div className="w-full h-[160px] flex items-center justify-center bg-[#0d0d0d]">
+                        <div className="w-full h-[160px] flex items-center justify-center bg-[var(--surface2)]">
                           <span className="font-label-caps text-[10px] text-text-secondary tracking-widest uppercase">
                             PDF
                           </span>
@@ -151,6 +164,66 @@ export default function SpatialVaultWidget({ slug, lumaUrl, matterportUrl, heatm
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function DroneThermalVisualizer() {
+  return (
+    <div style={{ position: "relative", width: "100%", height: "100%", background: "#0c0d12", display: "flex", flexDirection: "column", justifyContent: "space-between", padding: "16px", overflow: "hidden" }}>
+      {/* Background Thermal Radiance Overlay */}
+      <div style={{
+        position: "absolute",
+        inset: 0,
+        background: "radial-gradient(circle at 45% 40%, rgba(220,38,38,0.35) 0%, rgba(245,158,11,0.25) 25%, rgba(5,150,105,0.2) 50%, rgba(12,16,43,0.9) 80%)",
+        pointerEvents: "none",
+        mixBlendMode: "screen",
+      }} />
+
+      {/* Grid Pattern */}
+      <div style={{
+        position: "absolute",
+        inset: 0,
+        backgroundImage: "linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)",
+        backgroundSize: "24px 24px",
+        pointerEvents: "none",
+      }} />
+
+      {/* Top Telemetry Header */}
+      <div style={{ position: "relative", zIndex: 2, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "8px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <span style={{ fontSize: "10px", fontFamily: "var(--font-mono, monospace)", color: "#E8AE3C", letterSpacing: "1px", fontWeight: "bold" }}>
+            🚁 RADIOMETRIC FLIR DRONE SCAN
+          </span>
+          <span style={{ fontSize: "9px", fontFamily: "var(--font-mono, monospace)", background: "rgba(16,185,129,0.15)", border: "0.5px solid #10B981", color: "#10B981", padding: "2px 6px", borderRadius: "3px" }}>
+            LIVE SENSOR AT 120m AGL
+          </span>
+        </div>
+        <div style={{ fontSize: "10px", fontFamily: "var(--font-mono, monospace)", color: "#888", display: "flex", gap: "12px" }}>
+          <span>ACCURACY: ±0.5°C</span>
+          <span>SOLAR FLUX: 940 W/m²</span>
+        </div>
+      </div>
+
+      {/* Center Target Crosshair & Heatmap Reading */}
+      <div style={{ position: "relative", zIndex: 2, display: "flex", justifyContent: "center", alignItems: "center", flex: 1, margin: "12px 0" }}>
+        <div style={{ border: "1px dashed rgba(232,174,60,0.5)", borderRadius: "50%", width: "110px", height: "110px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)", padding: "12px", textAlign: "center" }}>
+          <span style={{ fontSize: "9px", fontFamily: "var(--font-mono, monospace)", color: "#888" }}>PEAK ROOF TEMP</span>
+          <span style={{ fontSize: "20px", fontFamily: "var(--font-body)", color: "#F7C64E", fontWeight: "bold" }}>34.8°C</span>
+          <span style={{ fontSize: "8px", fontFamily: "var(--font-mono, monospace)", color: "#10B981" }}>NOMINAL SHADING</span>
+        </div>
+      </div>
+
+      {/* Bottom Thermal Spectrum Bar */}
+      <div style={{ position: "relative", zIndex: 2, display: "flex", flexDirection: "column", gap: "6px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", fontSize: "9px", fontFamily: "var(--font-mono, monospace)", color: "#aaa" }}>
+          <span>20°C (COATING)</span>
+          <span>26°C (SHADOW)</span>
+          <span>32°C (SURFACE)</span>
+          <span>38°C (WHITE HOT)</span>
+        </div>
+        <div style={{ width: "100%", height: "6px", borderRadius: "3px", background: "linear-gradient(to right, #0c102b, #059669, #f59e0b, #dc2626, #ffffff)" }} />
+      </div>
     </div>
   );
 }

@@ -13,7 +13,7 @@
      plus its own safe-area padding). Without this the last card sits under the
      nav on a phone and reads as the end of the list. */
   padding: 88px 18px calc(104px + env(safe-area-inset-bottom, 0px));
-  color: #f0ede8;
+  color: var(--text-primary);
 }
 
 /* ── HERO ──────────────────────────────────────────────────────────── */
@@ -22,7 +22,7 @@
   font-size: 9px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: #e8ae3c;
+  color: var(--accent);
   margin: 0 0 10px;
 }
 .hub-title {
@@ -31,14 +31,14 @@
   font-size: clamp(1.75rem, 7vw, 3rem);
   line-height: 1.15;
   margin: 0 0 12px;
-  color: #f0ede8;
+  color: var(--text-primary);
   text-wrap: balance;
 }
 .hub-tagline {
   font-family: Georgia, serif;
   font-size: 15px;
   line-height: 1.7;
-  color: #c8c8c8;
+  color: var(--text-secondary);
   margin: 0 0 14px;
   max-width: 58ch;
 }
@@ -47,12 +47,12 @@
   font-size: 9.5px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #8a8a8a;
+  color: var(--text-secondary);
   margin: 0;
 }
 .hub-hero {
   padding-bottom: 26px;
-  border-bottom: 0.5px solid #262626;
+  border-bottom: 0.5px solid var(--border-solid);
 }
 
 /* ── SECTIONS ──────────────────────────────────────────────────────── */
@@ -60,14 +60,14 @@
 .hub-section--last {
   margin-top: 34px;
   padding-top: 26px;
-  border-top: 0.5px solid #262626;
+  border-top: 0.5px solid var(--border-solid);
 }
 .hub-h2 {
   font-family: Georgia, serif;
   font-weight: 400;
   font-size: 19px;
   line-height: 1.35;
-  color: #f0ede8;
+  color: var(--text-primary);
   margin: 0 0 16px;
 }
 
@@ -85,9 +85,9 @@
   font-size: 9.5px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #c8c8c8;
-  background: #161616;
-  border: 0.5px solid #262626;
+  color: var(--text-secondary);
+  background: var(--surface);
+  border: 0.5px solid var(--border-solid);
   border-radius: 999px;
   padding: 9px 13px;
 }
@@ -107,20 +107,20 @@
   gap: 7px;
   min-height: 44px;
   padding: 16px 15px;
-  background: #161616;
-  border: 0.5px solid #262626;
+  background: var(--surface);
+  border: 0.5px solid var(--border-solid);
   border-radius: 5px;
   text-decoration: none;
   transition: border-color 180ms ease-out, background-color 180ms ease-out;
 }
-.hub-card:hover { border-color: #3a3a3a; background: #1a1a1a; }
+.hub-card:hover { border-color: var(--border-mid); background: var(--surface2); }
 .hub-card:active { transform: scale(0.995); }
-.hub-card:focus-visible { outline: 2px solid #e8ae3c; outline-offset: 2px; }
+.hub-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .hub-card__title {
   font-family: Georgia, serif;
   font-size: 16px;
   line-height: 1.35;
-  color: #f0ede8;
+  color: var(--text-primary);
   overflow-wrap: anywhere;
 }
 .hub-card__cat {
@@ -128,42 +128,42 @@
   font-size: 8.5px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #8a8a8a;
+  color: var(--text-secondary);
 }
 .hub-card__hook {
   font-family: Georgia, serif;
   font-size: 13px;
   line-height: 1.6;
-  color: #c8c8c8;
+  color: var(--text-secondary);
 }
 .hub-card__foot {
   font-family: "Courier New", monospace;
   font-size: 9px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #6e6e6e;
+  color: var(--text-muted);
   margin-top: 2px;
 }
 
 /* ── EMPTY / ERROR STATES ──────────────────────────────────────────── */
 .hub-state {
-  background: #131313;
-  border: 0.5px solid #262626;
-  border-left: 2px solid #6e531a;
+  background: var(--surface);
+  border: 0.5px solid var(--border-solid);
+  border-left: 2px solid var(--accent-muted);
   border-radius: 4px;
   padding: 20px 18px;
 }
 .hub-state__title {
   font-family: Georgia, serif;
   font-size: 16px;
-  color: #f0ede8;
+  color: var(--text-primary);
   margin: 0 0 8px;
 }
 .hub-state__body {
   font-family: Georgia, serif;
   font-size: 13.5px;
   line-height: 1.7;
-  color: #8a8a8a;
+  color: var(--text-secondary);
   margin: 0 0 18px;
   max-width: 56ch;
 }
@@ -174,8 +174,8 @@
   justify-content: center;
   min-height: 46px;
   padding: 0 20px;
-  background: #f7c64e;
-  color: #0d0d0d;
+  background: var(--accent-fill);
+  color: var(--on-accent);
   font-family: "Courier New", monospace;
   font-size: 10px;
   font-weight: bold;
@@ -186,7 +186,7 @@
   transition: transform 140ms ease-out;
 }
 .hub-cta:active { transform: scale(0.97); }
-.hub-cta:focus-visible { outline: 2px solid #e8ae3c; outline-offset: 3px; }
+.hub-cta:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 
 /* ── OTHER HUBS ────────────────────────────────────────────────────── */
 .hub-others {
@@ -203,13 +203,13 @@
   min-height: 44px;
   font-family: Georgia, serif;
   font-size: 14.5px;
-  color: #c8c8c8;
+  color: var(--text-secondary);
   text-decoration: none;
-  border-bottom: 1px solid #1c1c1c;
+  border-bottom: 1px solid var(--border-solid);
   transition: color 160ms ease-out;
 }
-.hub-other:hover { color: #e8ae3c; }
-.hub-other:focus-visible { outline: 2px solid #e8ae3c; outline-offset: 2px; }
+.hub-other:hover { color: var(--accent); }
+.hub-other:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 /* ── WIDER ─────────────────────────────────────────────────────────── */
 @media (min-width: 768px) {

@@ -297,7 +297,7 @@ export default function PhotographersPage() {
         }
         
         .broker-card {
-          background: linear-gradient(165deg, #1a1917, #111110);
+          background: var(--surface2);
           border: 1px solid var(--border);
           border-radius: var(--radius-md);
           overflow: hidden;
@@ -308,7 +308,7 @@ export default function PhotographersPage() {
         }
         .broker-card:hover {
           border-color: var(--accent-border);
-          box-shadow: 0 14px 32px rgba(0,0,0,.45), 0 0 40px rgba(232,174,60,.06);
+          box-shadow: var(--shadow-md), var(--shadow-glow-soft);
           transform: translateY(-4px);
         }
         .broker-image-container {

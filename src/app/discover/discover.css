@@ -3,7 +3,7 @@
 /* Layout Framework */
 .discoverLayout {
   min-height: 100vh;
-  background: #0e0e0e; /* --bg */
+  background: var(--bg); /* --bg */
   position: relative;
 }
 
@@ -14,8 +14,8 @@
   left: 0;
   bottom: 0;
   width: 160px;
-  background: #161616; /* --surface */
-  border-right: 1px solid #262626; /* --border */
+  background: var(--surface); /* --surface */
+  border-right: 1px solid var(--border-solid);
   display: flex;
   flex-direction: column;
   padding: 40px 16px;
@@ -27,7 +27,7 @@
   font-size: 22px;
   font-weight: 500;
   letter-spacing: 0.08em;
-  color: #E8AE3C; /* --accent */
+  color: var(--accent); /* --accent */
   text-transform: uppercase;
   margin-bottom: 48px;
   padding-left: 8px;
@@ -45,7 +45,7 @@
   font-weight: 500;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: rgba(240, 237, 232, 0.62);
+  color: var(--text-secondary);
   padding: 12px 8px;
   border-radius: var(--radius-sm);
   cursor: pointer;
@@ -53,13 +53,13 @@
 }
 
 .navLink:hover {
-  color: #E8AE3C;
+  color: var(--accent);
   background: rgba(232, 174, 60, 0.05);
 }
 
 .navLink.active {
-  color: #0e0e0e;
-  background: #E8AE3C;
+  color: var(--on-accent);
+  background: var(--accent-fill);
   font-weight: 600;
 }
 
@@ -88,12 +88,12 @@
   font-family: var(--font-display);
   font-size: 24px;
   font-weight: 400;
-  color: #f0ede8;
+  color: var(--text-primary);
 }
 
 .sectionSubtitle {
   font-size: 11px;
-  color: rgba(240, 237, 232, 0.38);
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   margin-top: 4px;
@@ -126,8 +126,8 @@
   flex: 0 0 320px;
   width: 320px;
   height: 420px;
-  background: linear-gradient(165deg, #1a1917, #111110);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--surface2);
+  border: 1px solid var(--border);
   border-radius: var(--radius-md);
   overflow: hidden;
   transition: width 0.48s cubic-bezier(0.4, 0, 0.2, 1), border-color var(--transition), box-shadow var(--transition), transform var(--transition-fast);
@@ -137,7 +137,7 @@
 }
 
 .spotlightCard:hover {
-  border-color: rgba(232, 174, 60, 0.3);
+  border-color: rgba(var(--accent-rgb), 0.3);
   transform: translateY(-4px);
   box-shadow: 0 14px 32px rgba(0, 0, 0, 0.45), var(--shadow-glow-soft);
 }
@@ -145,7 +145,7 @@
 .spotlightCard.spotlight {
   width: 580px;
   flex: 0 0 580px;
-  border-color: #E8AE3C;
+  border-color: var(--accent);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 24px rgba(232, 174, 60, 0.08);
 }
 
@@ -189,11 +189,11 @@
 
 .cityBadge {
   background: rgba(14, 14, 14, 0.85);
-  border: 1px solid #262626;
+  border: 1px solid var(--border-solid);
   padding: 4px 10px;
   border-radius: var(--radius-sm);
   font-size: 10px;
-  color: #E8AE3C;
+  color: var(--accent);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -207,7 +207,7 @@
   font-family: var(--font-display);
   font-size: 20px;
   font-weight: 500;
-  color: #f0ede8;
+  color: var(--text-primary);
   line-height: 1.3;
 }
 
@@ -248,8 +248,8 @@
   flex: 1 1 auto;
   width: 260px;
   height: 100%;
-  background: #1c1c1c;
-  border-left: 1px solid #262626;
+  background: var(--surface2);
+  border-left: 1px solid var(--border-solid);
   padding: 24px;
   display: flex;
   flex-direction: column;
@@ -271,7 +271,7 @@
 
 .intelTitle {
   font-size: 10px;
-  color: #E8AE3C;
+  color: var(--accent);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   font-weight: 600;
@@ -295,7 +295,7 @@
 }
 
 .affinityValue {
-  color: #f0ede8;
+  color: var(--text-primary);
   font-family: var(--font-mono);
 }
 
@@ -307,8 +307,8 @@
 }
 
 .spotlightIntentBtn {
-  background: #161616;
-  border: 1px solid #262626;
+  background: var(--surface);
+  border: 1px solid var(--border-solid);
   border-radius: var(--radius-sm);
   color: rgba(240, 237, 232, 0.62);
   font-size: 10px;
@@ -320,13 +320,13 @@
 }
 
 .spotlightIntentBtn:hover {
-  background: #242424;
-  color: #f0ede8;
+  background: var(--surface3);
+  color: var(--text-primary);
 }
 
 .spotlightIntentBtn.active {
   background: rgba(232, 174, 60, 0.12);
-  color: #E8AE3C;
+  color: var(--accent);
   border-color: rgba(232, 174, 60, 0.28);
 }
 
@@ -353,73 +353,75 @@
 
 .newsCapsule {
   flex: 0 0 340px;
-  background: linear-gradient(165deg, #1a1917, #111110);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--surface2);
+  border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   padding: 20px;
   transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition-fast);
 }
 
 .newsCapsule:hover {
-  border-color: rgba(232, 174, 60, 0.3);
+  border-color: rgba(var(--accent-rgb), 0.3);
   transform: translateY(-4px);
-  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.45), var(--shadow-glow-soft);
+  box-shadow: var(--shadow-md), var(--shadow-glow-soft);
 }
 
 .capsuleMeta {
   display: flex;
   justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.capsuleCategory {
+  font-family: var(--font-mono);
   font-size: 10px;
+  color: var(--accent);
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: #E8AE3C;
-  margin-bottom: 10px;
+}
+
+.capsuleDate {
+  font-size: 11px;
+  color: var(--text-muted);
 }
 
 .capsuleTitle {
   font-family: var(--font-display);
-  font-size: 15px;
+  font-size: 18px;
+  color: var(--text-primary);
   line-height: 1.35;
-  color: #f0ede8;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
-.capsuleSnippet {
-  font-size: 12px;
-  line-height: 1.45;
-  color: rgba(240, 237, 232, 0.62);
+.capsuleExcerpt {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 /* 5. Zone 3: 10-Space Context Grids (Horizontal Slider) */
-.contextGrid {
+.contextGridSection {
+  margin-bottom: 60px;
+}
+
+.contextRow {
   display: flex;
-  gap: 24px;
-  flex-wrap: nowrap;
+  gap: 16px;
   overflow-x: auto;
-  overflow-y: hidden;
-  width: 100%;
   padding-bottom: 16px;
-  cursor: grab;
-  user-select: none;
-}
-
-.contextGrid:active {
-  cursor: grabbing;
-}
-
-.contextGrid::-webkit-scrollbar {
-  height: 3px;
-}
-
-.contextGrid::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  scrollbar-width: thin;
 }
 
 .contextCell {
   flex: 0 0 300px;
   width: 300px;
-  background: linear-gradient(165deg, #1a1917, #111110);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--surface2);
+  border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   padding: 24px;
   display: flex;
@@ -430,9 +432,9 @@
 }
 
 .contextCell:hover {
-  border-color: rgba(232, 174, 60, 0.3);
+  border-color: rgba(var(--accent-rgb), 0.3);
   transform: translateY(-4px);
-  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.45), var(--shadow-glow-soft);
+  box-shadow: var(--shadow-md), var(--shadow-glow-soft);
 }
 
 .contextLabelBlock {
@@ -442,19 +444,19 @@
 
 .contextCode {
   font-size: 10px;
-  color: rgba(240, 237, 232, 0.38);
+  color: var(--text-muted);
   font-family: var(--font-mono);
 }
 
 .contextName {
   font-family: var(--font-display);
   font-size: 16px;
-  color: #f0ede8;
+  color: var(--text-primary);
   margin-top: 4px;
 }
 
 .contextArrow {
-  color: #E8AE3C;
+  color: var(--accent);
   font-size: 14px;
   font-weight: bold;
 }
@@ -482,8 +484,8 @@
   left: 0;
   right: 0;
   height: 75vh;
-  background: rgba(22, 22, 22, 0.95);
-  border-top: 1px solid #262626;
+  background: var(--surface);
+  border-top: 1px solid var(--border-solid);
   border-top-left-radius: var(--radius-xl);
   border-top-right-radius: var(--radius-xl);
   transform: translateY(100%);
@@ -491,7 +493,7 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--shadow-lg);
 }
 
 .popupOverlay.open .popupDrawer {
@@ -500,7 +502,7 @@
 
 .drawerHead {
   padding: 24px 40px;
-  border-bottom: 1px solid #262626;
+  border-bottom: 1px solid var(--border-solid);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -514,12 +516,12 @@
 .drawerTitleText {
   font-family: var(--font-display);
   font-size: 20px;
-  color: #f0ede8;
+  color: var(--text-primary);
 }
 
 .drawerSubtitleText {
   font-size: 11px;
-  color: rgba(240, 237, 232, 0.38);
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   margin-top: 4px;
@@ -528,7 +530,7 @@
 .drawerCloseBtnText {
   background: transparent;
   border: none;
-  color: #E8AE3C;
+  color: var(--accent);
   font-family: var(--font-body);
   font-size: 12px;
   font-weight: 600;
@@ -548,8 +550,8 @@
 }
 
 .briefProfileCard {
-  background: linear-gradient(165deg, #1a1917, #111110);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--surface2);
+  border: 1px solid var(--border);
   border-radius: var(--radius-md);
   padding: 20px;
   display: flex;
@@ -563,12 +565,12 @@
   justify-content: space-between;
   font-family: var(--font-display);
   font-size: 16px;
-  color: #f0ede8;
+  color: var(--text-primary);
 }
 
 .briefProfileNum {
   font-size: 11px;
-  color: #E8AE3C;
+  color: var(--accent);
   font-family: var(--font-mono);
 }
 
@@ -581,7 +583,7 @@
 .briefProfileSpec {
   font-size: 10px;
   background: rgba(255, 255, 255, 0.03);
-  border: 1px solid #262626;
+  border: 1px solid var(--border-solid);
   padding: 2px 6px;
   border-radius: var(--radius-sm);
   color: rgba(240, 237, 232, 0.62);
@@ -596,7 +598,7 @@
     width: 100%;
     height: auto;
     border-right: none;
-    border-bottom: 1px solid #262626;
+    border-bottom: 1px solid var(--border-solid);
     padding: 20px;
   }
 
@@ -695,7 +697,7 @@
 
 .discover-briefing-btn:hover {
   background: rgba(232, 174, 60, 0.08) !important;
-  border-color: #E8AE3C !important;
+  border-color: var(--accent) !important;
 }
 
 /* ── Top bar: title + jump box ── */
@@ -734,10 +736,10 @@
   align-items: center;
   gap: 12px;
   text-decoration: none;
-  border: 1px solid #262626;
+  border: 1px solid var(--border-solid);
   border-radius: 999px;
   padding: 10px 20px;
-  background: #141414;
+  background: var(--surface);
   transition: all var(--transition);
 }
 .modeJumpBox:hover {
@@ -782,15 +784,15 @@
 .regionSearch {
   width: 100%;
   max-width: 360px;
-  background: #0e0e0e;
-  border: 1px solid #262626;
+  background: var(--bg);
+  border: 1px solid var(--border-solid);
   border-radius: var(--radius-sm);
   padding: 12px 16px;
   margin-bottom: 20px;
   font-size: 12px;
   font-family: var(--font-mono);
   letter-spacing: 0.04em;
-  color: #f0ede8;
+  color: var(--text-primary);
   transition: border-color var(--transition);
 }
 .regionSearch::placeholder { color: rgba(240, 237, 232, 0.35); }

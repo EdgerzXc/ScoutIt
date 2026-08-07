@@ -13,7 +13,8 @@
   display: flex;
   align-items: center;
   border-bottom: 1px solid var(--border-solid);
-  background: rgba(14, 14, 14, 0.95);
+  background: var(--brand-overlay);
+  backdrop-filter: blur(12px);
   position: sticky;
   top: 0;
 }
@@ -84,8 +85,8 @@
 }
 
 .tagCard {
-  background: linear-gradient(165deg, #1a1917, #111110);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--surface2);
+  border: 1px solid var(--border);
   padding: 16px;
   border-radius: 6px;
   cursor: pointer;
@@ -97,13 +98,13 @@
 
 .tagCard:hover {
   transform: translateY(-4px);
-  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.45), var(--shadow-glow-soft);
-  border-color: rgba(232, 174, 60, 0.3);
+  box-shadow: var(--shadow-md), var(--shadow-glow-soft);
+  border-color: rgba(var(--accent-rgb), 0.3);
 }
 
 .tagCard.selected {
   border-color: var(--accent);
-  background: rgba(232, 174, 60, 0.05);
+  background: rgba(var(--accent-rgb), 0.05);
 }
 
 .tagIcon {
@@ -111,8 +112,11 @@
 }
 
 .buttonPrimary {
-  background: var(--accent);
-  color: #000;
+  /* --accent is a text-safe BRONZE in light mode; #000 on it is 3.16:1.
+     A gold CTA is a fill, so it takes --accent-fill (true gold in both
+     themes) and --on-accent as its ink — 7.8:1 either way. */
+  background: var(--accent-fill);
+  color: var(--on-accent);
   border: none;
   padding: 16px;
   font-size: 14px;

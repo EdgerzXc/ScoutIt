@@ -87,13 +87,36 @@ body.light-mode {
   --accent-ch:          139 94 16;
   --accent-bright-ch:   154 98 0;
   --bg-ch:              244 244 245;
+  --bg-rgb:             244, 244, 245;
   --surface-ch:         250 250 250;
+  --surface-rgb:        250, 250, 250;
+  --surface2-ch:        240 240 242;
+  --surface2-rgb:       240, 240, 242;
   --surface3-ch:        231 231 234;
+  --surface3-rgb:       231, 231, 234;
   --text-primary-ch:    17 17 19;
+  --text-primary-rgb:   17, 17, 19;
   --text-secondary-ch:  69 69 77;
+  --text-secondary-rgb: 69, 69, 77;
   --accent-bright:     #9A6200;   /* 5.1:1 — text-safe, the loud one   */
   --accent-bright-rgb: 154, 98, 0;
   --accent-fill:       #E8AE3C;   /* true gold, FILLS ONLY + dark text */
+  --on-accent:         #111113;   /* ink that rides ON a gold fill      */
+
+  /* ── Light counterparts of the Material-3 Tailwind keys. See :root.
+     `on-surface` is INK, so it flips to near-black (17.6:1 on --surface).
+     `surface-variant` is a hairline/panel, so it becomes the light grey
+     that #353535 was on black — visible, not harsh. */
+  /* Same tier hues, dropped to a readable value on near-white. See :root. */
+  --tier-diamond:  #0e7490;   /* 4.9:1 */
+  --tier-platinum: #3f6382;   /* 6.5:1 */
+  --tier-silver:   #57575f;   /* 7.5:1 */
+  --tier-bronze:   #8a5320;   /* 6.0:1 */
+
+  --m3-on-surface-ch:            17  17  19;
+  --m3-surface-variant-ch:      214 214 219;
+  --m3-surface-container-ch:    240 240 242;
+  --m3-surface-container-low-ch: 246 246 247;
   --accent-muted:      #E0C583;   /* light-gold hairlines and dividers */
   --accent-dim:        rgba(154, 98, 0, 0.10);
   --accent-border:     rgba(154, 98, 0, 0.34);
@@ -179,8 +202,59 @@ body.light-mode .event-horizon {
 /* The starfield reads as dirt on white, and "stars in daylight" is incoherent
    besides. The grain goes too: it exists to sit over near-black. */
 body.light-mode .space-bg-container > *:not(.event-horizon),
-body.light-mode .section-hook .grain {
-  display: none;
+body.light-mode .grain,
+body.light-mode .atmosphere-grain {
+  display: none !important;
+}
+
+/* ── Light Mode Emil Kowalski & UI/UX Pro Max Typography Polish ───────────── */
+body.light-mode {
+  --text-muted: #4a4a54; /* 8.5:1 AAA contrast on #fafafa */
+}
+
+body.light-mode .nav-chapter .chapter-label {
+  color: #3b3b42 !important;
+  font-weight: 500;
+}
+
+body.light-mode .nav-chapter .chapter-icon {
+  opacity: 0.75 !important;
+}
+
+body.light-mode .nav-chapter:hover:not(.active) .chapter-label {
+  color: var(--accent) !important;
+}
+
+body.light-mode .unit-z3-row {
+  background: var(--surface) !important;
+  border: 0.5px solid var(--border-mid) !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03) !important;
+}
+
+body.light-mode .sidebar-label,
+body.light-mode .pill-label,
+body.light-mode .detail-key {
+  color: #3b3b42 !important;
+  font-weight: 600;
+}
+
+/* ── Mobile Touch Ergonomics & Safari Zoom Prevention ─────────────────────── */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (max-width: 768px) {
+  html, body {
+    overflow-x: hidden !important;
+  }
+  input[type="text"],
+  input[type="number"],
+  input[type="email"],
+  input[type="search"],
+  select,
+  textarea {
+    font-size: 16px !important; /* Prevents iOS Safari auto-zoom on input focus */
+  }
 }
 
 /* The wordmark carried white + gold on black. On white it needs the ink to
@@ -266,8 +340,14 @@ body.light-mode .scoutit-wordmark .word-it {
    be white. Scoping it this way is a decision, not an omission — do not
    "finish the job" by lightening the cinematic surfaces.
    ═══════════════════════════════════════════════════════════════ */
-body.light-mode .cinematic-container,
-body.light-mode .global-footer {
+/* `.descent-root` (src/app/descent/descent.css) joins the list on the same
+   grounds: it is the scroll-snapped descent sequence, five full-bleed animated
+   nebula frames on #05060a. Its 85 hardcoded colours are ART, not theme — a
+   light nebula is not a translation of a dark one, it is a different image.
+   Adding it here is the legitimate answer trap #3 describes: the surface is
+   genuinely meant to be dark, so it gets dark ink tokens rather than a
+   migration that would have to invent colours the design never had. */
+body.light-mode .descent-root {
   --text-primary:       #ffffff;
   --text-primary-ch:    255 255 255;
   --text-secondary:     #a8a29a;
@@ -283,6 +363,14 @@ body.light-mode .global-footer {
   --border-mid:         rgba(255, 255, 255, 0.18);
   --surface:            #121212;
   --surface-rgb:        18, 18, 18;
+
+  /* The Material-3 Tailwind keys must come back to their dark values here
+     too, or `text-on-surface` inside the starfield paints near-black ink
+     on near-black. Same reasoning as the ink tokens above. */
+  --m3-on-surface-ch:            229 226 225;
+  --m3-surface-variant-ch:        53  53  53;
+  --m3-surface-container-ch:      32  32  31;
+  --m3-surface-container-low-ch:  28  27  27;
 
   color: var(--text-primary);
 }
@@ -349,12 +437,48 @@ body.light-mode .global-footer {
   --accent-ch:          232 174 60;
   --accent-bright-ch:   247 198 78;
   --bg-ch:              13 13 13;
+  --bg-rgb:             13, 13, 13;
   --surface-ch:         18 18 18;
+  --surface-rgb:        18, 18, 18;
+  --surface2-ch:        26 26 26;
+  --surface2-rgb:       26, 26, 26;
   --surface3-ch:        34 34 34;
+  --surface3-rgb:       34, 34, 34;
   --text-primary-ch:    255 255 255;
+  --text-primary-rgb:   255, 255, 255;
   --text-secondary-ch:  168 162 154;
+  --text-secondary-rgb: 168, 162, 154;
   --accent-bright: #F7C64E;
   --accent-bright-rgb: 247, 198, 78;
+  --accent-fill: #E8AE3C;     /* true gold as a FILL — same in both themes */
+  --on-accent:   #111113;     /* ink that rides ON a gold fill             */
+
+  /* ── The Material-3 palette keys that Tailwind still exposes.
+     These three were flat hex in tailwind.config.js and are the three
+     most-used colour classes in the codebase:
+       border/bg-surface-variant  497 uses
+       text/bg-on-surface         367 uses
+       bg-surface-container        31 uses
+     Flat hex meant they stayed DARK when the theme flipped — a near-white
+     `text-on-surface` on a near-white light surface is invisible, and it
+     is the single largest source of the "light mode did nothing" report.
+     The DARK values below are byte-identical to the old hex, so rewiring
+     them through tokens is a no-op for dark mode. Only light changes. */
+  /* Broker tier identity. These are HUES with meaning (diamond/platinum/
+     silver/bronze), used as `.rating-num` text and card hairlines. The dark
+     values are the pale metals that were hardcoded in brokers.css; pale
+     metal on near-white is 1.4–1.9:1, so light gets the same hue at a
+     readable value. The badge GRADIENTS stay metallic in both themes —
+     they are fills carrying --on-accent, and a fill has no such problem. */
+  --tier-diamond:  #00f2fe;
+  --tier-platinum: #a5c2d9;
+  --tier-silver:   #dcdcdc;
+  --tier-bronze:   #cd7f32;
+
+  --m3-on-surface-ch:          229 226 225;  /* was #e5e2e1 */
+  --m3-surface-variant-ch:      53  53  53;  /* was #353535 */
+  --m3-surface-container-ch:    32  32  31;  /* was #20201f */
+  --m3-surface-container-low-ch: 28 27 27;   /* was #1c1b1b */
   --accent-muted: #6E531A;
   --accent-dim: rgba(247, 198, 78, 0.12);
   --accent-border: rgba(247, 198, 78, 0.32);

@@ -484,7 +484,7 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
               />
               <span
                 style={{
-                  fontFamily: "'Courier New',monospace",
+                  fontFamily: "var(--font-mono)",
                   fontSize: "8.5px",
                   color: "#c8c8c8",
                   letterSpacing: "0.12em",

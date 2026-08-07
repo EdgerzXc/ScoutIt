@@ -287,7 +287,7 @@ export default function EventPlannersPage() {
           font-family: var(--font-display);
           font-size: 38px;
           letter-spacing: 0.02em;
-          color: #fff;
+          color: var(--text-primary);
           margin: 8px 0;
         }
         .brokers-grid {

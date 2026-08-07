@@ -339,51 +339,6 @@ export function ReactionBadge({ reactionType }) {
         {shapeData.svg}
       </div>
       <div className="tooltip">{reactionType}</div>
-
-      <style jsx>{`
-        .badge-wrapper {
-          position: relative;
-          display: inline-block;
-          cursor: pointer;
-        }
-
-        .badge-svg-container {
-          width: 24px;
-          height: 24px;
-        }
-
-        .badge-svg-container :global(svg) {
-          width: 100%;
-          height: 100%;
-          fill: #E8AE3C;
-          stroke: #E8AE3C;
-          stroke-width: 1.5;
-        }
-
-        .tooltip {
-          visibility: hidden;
-          position: absolute;
-          bottom: 125%;
-          left: 50%;
-          transform: translateX(-50%);
-          background-color: #161616;
-          border: 1px solid #262626;
-          color: #f0ede8;
-          font-size: 11px;
-          padding: 4px 8px;
-          border-radius: 4px;
-          white-space: nowrap;
-          z-index: 10;
-          opacity: 0;
-          transition: opacity 0.2s ease, visibility 0.2s ease;
-          pointer-events: none;
-        }
-
-        .badge-wrapper:hover .tooltip {
-          visibility: visible;
-          opacity: 1;
-        }
-      `}</style>
     </div>
   );
 }

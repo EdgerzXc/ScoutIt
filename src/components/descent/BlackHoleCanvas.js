@@ -266,7 +266,17 @@ const FS = `
 export default function BlackHoleCanvas({ params: paramsProp, onSnapshotReady } = {}) {
   const canvasRef = useRef(null);
   const [revealed, setRevealed] = useState(false);
+  const [lightActive, setLightActive] = useState(false);
   const paramsRef = useRef({ ...DEFAULT_PARAMS, ...paramsProp });
+
+  useEffect(() => {
+    setLightActive(isLightMode());
+    const handler = (e) => {
+      setLightActive(e?.detail?.light ?? isLightMode());
+    };
+    window.addEventListener(LIGHT_MODE_EVENT, handler);
+    return () => window.removeEventListener(LIGHT_MODE_EVENT, handler);
+  }, []);
 
   // Keep the latest params in a ref so the render loop (which doesn't
   // re-subscribe every frame) always reads the current slider values.
@@ -287,7 +297,7 @@ export default function BlackHoleCanvas({ params: paramsProp, onSnapshotReady } 
     // Lite Mode and no-WebGL devices already get: the CSS `.event-horizon`
     // glow behind this canvas, retinted warm gold on near-white. That path was
     // already built and already tested — this just routes one more case to it.
-    if (isLiteMode() || isLightMode()) return;
+    if (isLiteMode() || lightActive || isLightMode()) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const gl = canvas.getContext("webgl", { antialias: false, alpha: false });
@@ -517,7 +527,7 @@ export default function BlackHoleCanvas({ params: paramsProp, onSnapshotReady } 
       gl.deleteShader(fs);
       gl.deleteBuffer(buffer);
     };
-  }, [onSnapshotReady]);
+  }, [onSnapshotReady, lightActive]);
 
   return (
     <canvas

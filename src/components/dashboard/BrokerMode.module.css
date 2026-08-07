@@ -49,8 +49,8 @@
 }
 
 .buttonPrimary {
-  background: var(--accent);
-  color: #000;
+  background: var(--accent-fill);
+  color: var(--on-accent);
   border: none;
   padding: 12px 24px;
   font-size: 12px;
@@ -63,7 +63,7 @@
 }
 
 .buttonPrimary:hover {
-  background: var(--accent-bright);
+  background: var(--accent-fill);
   transform: translateY(-2px);
   box-shadow: 0 4px 20px rgba(232, 174, 60, 0.3);
 }
@@ -279,8 +279,8 @@
 }
 
 .btnPitch {
-  background: var(--accent);
-  color: #000;
+  background: var(--accent-fill);
+  color: var(--on-accent);
   border: none;
   padding: 12px 24px;
   border-radius: 4px;
@@ -291,7 +291,7 @@
 }
 
 .btnPitch:hover {
-  background: var(--accent-bright);
+  background: var(--accent-fill);
   box-shadow: 0 4px 16px rgba(247, 198, 78, 0.25);
 }
 

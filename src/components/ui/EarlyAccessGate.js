@@ -265,8 +265,8 @@ export function EarlyAccessModal({ rosterType = "this roster", onClose }) {
           to { opacity: 1; }
         }
         .gate-modal {
-          background: #0e0e0e;
-          border: 1px solid rgba(232, 174, 60,0.25);
+          background: var(--surface);
+          border: 1px solid rgba(var(--accent-rgb), 0.25);
           border-top: 3px solid var(--accent, #E8AE3C);
           border-radius: 6px;
           padding: 48px 44px;
@@ -275,6 +275,7 @@ export function EarlyAccessModal({ rosterType = "this roster", onClose }) {
           position: relative;
           animation: gateSlideUp 0.26s ease;
           text-align: center;
+          box-shadow: var(--shadow-lg);
         }
         @keyframes gateSlideUp {
           from { transform: translateY(24px); opacity: 0; }
@@ -282,15 +283,23 @@ export function EarlyAccessModal({ rosterType = "this roster", onClose }) {
         }
         .gate-close-btn {
           position: absolute;
-          top: 16px;
-          right: 20px;
+          top: 12px;
+          right: 12px;
           background: none;
           border: none;
           color: var(--text-muted, #555);
           cursor: pointer;
-          font-size: 16px;
+          font-size: 18px;
           line-height: 1;
-          transition: color 0.2s;
+          width: 44px;
+          height: 44px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: color 0.2s, transform 0.15s ease;
+        }
+        .gate-close-btn:active {
+          transform: scale(0.92);
         }
         .gate-close-btn:hover { color: var(--text-primary, #f0ede8); }
         .gate-lock-icon {
@@ -521,7 +530,10 @@ export function DetailPageAccessGate({ rosterType = "this profile", providerName
         }
         .detail-gate-cta:hover {
           background: var(--accent, #E8AE3C);
-          color: #0e0e0e;
+          color: var(--bg, #0e0e0e);
+        }
+        .detail-gate-cta:active {
+          transform: scale(0.96);
         }
         @media (max-width: 640px) {
           .detail-gate-strip { padding: 16px 18px; }

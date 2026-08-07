@@ -46,7 +46,7 @@ const TIERS = {
   },
 };
 
-const MONO = "'Courier New',monospace";
+const MONO = "var(--font-mono)";
 
 function timeAgo(iso) {
   const secs = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
@@ -250,13 +250,13 @@ export default function PropertyFAQSection({ propertySlug, propertyTitle }) {
         .faq-section {
           margin: 32px 0 0;
           padding: 24px 16px 32px;
-          background: #121212;
-          border-top: 0.5px solid #262626;
+          background: var(--surface2, #121212);
+          border-top: 0.5px solid var(--border, #262626);
         }
         .faq-section__eyebrow {
           font-family: ${MONO};
           font-size: 10px;
-          color: #c8c8c8;
+          color: var(--text-muted, #c8c8c8);
           letter-spacing: 0.25em;
           text-transform: uppercase;
           margin-bottom: 8px;
@@ -265,7 +265,7 @@ export default function PropertyFAQSection({ propertySlug, propertyTitle }) {
           font-family: Georgia, serif;
           font-size: 22px;
           line-height: 1.25;
-          color: #f0ede8;
+          color: var(--text-primary, #f0ede8);
           margin: 0 0 6px;
           font-weight: 400;
         }
@@ -273,7 +273,7 @@ export default function PropertyFAQSection({ propertySlug, propertyTitle }) {
           font-family: Georgia, serif;
           font-size: 13px;
           line-height: 1.6;
-          color: #8a8a8a;
+          color: var(--text-secondary, #8a8a8a);
           margin: 0 0 20px;
         }
 
@@ -301,8 +301,8 @@ export default function PropertyFAQSection({ propertySlug, propertyTitle }) {
 
         /* Ask composer */
         .faq-ask {
-          background: #161616;
-          border: 0.5px solid #262626;
+          background: var(--surface, #161616);
+          border: 0.5px solid var(--border, #262626);
           border-radius: 4px;
           padding: 16px;
           margin-bottom: 24px;
@@ -320,11 +320,11 @@ export default function PropertyFAQSection({ propertySlug, propertyTitle }) {
         .faq-composer__input {
           width: 100%;
           box-sizing: border-box;
-          background: #0e0e0e;
-          border: 0.5px solid #262626;
+          background: var(--surface2, #0e0e0e);
+          border: 0.5px solid var(--border, #262626);
           border-radius: 2px;
           padding: 12px;
-          color: #f0ede8;
+          color: var(--text-primary, #f0ede8);
           font-family: Georgia, serif;
           /* 16px prevents iOS Safari auto-zoom on focus */
           font-size: 16px;
@@ -339,7 +339,7 @@ export default function PropertyFAQSection({ propertySlug, propertyTitle }) {
         .faq-hint {
           font-family: ${MONO};
           font-size: 9px;
-          color: #6a6a6a;
+          color: var(--text-muted, #6a6a6a);
           letter-spacing: 0.08em;
           margin-top: 8px;
         }
@@ -366,22 +366,22 @@ export default function PropertyFAQSection({ propertySlug, propertyTitle }) {
         }
         .faq-btn--ghost {
           background: transparent;
-          border: 0.5px solid #262626;
-          color: #c8c8c8;
+          border: 0.5px solid var(--border, #262626);
+          color: var(--text-primary, #c8c8c8);
         }
         .faq-btn--ghost:hover { border-color: #6E531A; color: #E8AE3C; }
 
         /* Threads */
         .faq-thread {
           padding: 20px 0;
-          border-bottom: 1px solid #1e1e1e;
+          border-bottom: 1px solid var(--border, #1e1e1e);
         }
         .faq-thread:last-child { border-bottom: none; }
         .faq-thread__q {
           font-family: Georgia, serif;
           font-size: 16px;
           line-height: 1.45;
-          color: #f0ede8;
+          color: var(--text-primary, #f0ede8);
           margin: 0 0 6px;
           font-weight: 400;
         }

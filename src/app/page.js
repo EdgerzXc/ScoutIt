@@ -666,52 +666,52 @@ export default function Home() {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
           {/* Card 01: Orbit */}
-          <Link href="/layer/orbit" className="text-left group relative bg-[#111111]/80 backdrop-blur-md border border-white/5 rounded-xl p-8 overflow-hidden hover:border-gold-accent/50 transition-all duration-500 hover:-translate-y-1 block">
+          <Link href="/layer/orbit" className="text-left group relative bg-surface/80 backdrop-blur-md border border-border rounded-xl p-8 overflow-hidden hover:border-gold-accent/50 transition-all duration-500 hover:-translate-y-1 block">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(232,174,60,0.1),transparent_50%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="font-mono text-[10px] text-gold-accent tracking-widest mb-4">LAYER 01 // ORBIT</div>
-            <h3 className="font-display text-2xl text-white mb-2">Most Inquired Properties</h3>
+            <h3 className="font-display text-2xl text-on-surface mb-2">Most Inquired Properties</h3>
             <p className="text-sm text-text-secondary">Top 100 properties ranked by real demand</p>
           </Link>
 
           {/* Card 02: Stratosphere */}
-          <Link href="/layer/stratosphere" className="text-left group relative bg-[#111111]/80 backdrop-blur-md border border-white/5 rounded-xl p-8 overflow-hidden hover:border-gold-accent/50 transition-all duration-500 hover:-translate-y-1 block">
+          <Link href="/layer/stratosphere" className="text-left group relative bg-surface/80 backdrop-blur-md border border-border rounded-xl p-8 overflow-hidden hover:border-gold-accent/50 transition-all duration-500 hover:-translate-y-1 block">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(232,174,60,0.1),transparent_50%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="font-mono text-[10px] text-gold-accent tracking-widest mb-4">LAYER 02 // STRATOSPHERE</div>
-            <h3 className="font-display text-2xl text-white mb-2">Market Intelligence</h3>
+            <h3 className="font-display text-2xl text-on-surface mb-2">Market Intelligence</h3>
             <p className="text-sm text-text-secondary">Deep-dive stories, trends, and neighborhood intel</p>
           </Link>
 
           {/* Card 03: Metropolis */}
-          <Link href="/layer/metropolis" className="text-left group relative bg-[#111111]/80 backdrop-blur-md border border-white/5 rounded-xl p-8 overflow-hidden hover:border-gold-accent/50 transition-all duration-500 hover:-translate-y-1 lg:col-span-1 block">
+          <Link href="/layer/metropolis" className="text-left group relative bg-surface/80 backdrop-blur-md border border-border rounded-xl p-8 overflow-hidden hover:border-gold-accent/50 transition-all duration-500 hover:-translate-y-1 lg:col-span-1 block">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(232,174,60,0.15),transparent_50%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="font-mono text-[10px] text-gold-accent tracking-widest mb-4">LAYER 03 // METROPOLIS</div>
-            <h3 className="font-display text-2xl text-white mb-2">Property Directory</h3>
+            <h3 className="font-display text-2xl text-on-surface mb-2">Property Directory</h3>
             <p className="text-sm text-text-secondary">Search all commercial and residential spaces</p>
           </Link>
 
           {/* Card 04: The Crust */}
-          <Link href="/layer/crust" className="text-left group relative bg-[#111111]/80 backdrop-blur-md border border-white/5 rounded-xl p-8 overflow-hidden hover:border-gold-accent/50 transition-all duration-500 hover:-translate-y-1 block">
+          <Link href="/layer/crust" className="text-left group relative bg-surface/80 backdrop-blur-md border border-border rounded-xl p-8 overflow-hidden hover:border-gold-accent/50 transition-all duration-500 hover:-translate-y-1 block">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(232,174,60,0.05),transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="font-mono text-[10px] text-gold-accent tracking-widest mb-4">LAYER 04 // THE CRUST</div>
-            <h3 className="font-display text-2xl text-white mb-2">Verified Professionals</h3>
+            <h3 className="font-display text-2xl text-on-surface mb-2">Verified Professionals</h3>
             <p className="text-sm text-text-secondary">Connect with trusted advisors, brokers, and partners</p>
           </Link>
 
           {/* Card 05: The Mantle — was missing from this grid entirely. It's the
               deep intelligence archive between the Crust (network) and Core
               (workspace); the route (/layer/mantle) already exists. */}
-          <Link href="/layer/mantle" className="text-left group relative bg-[#111111]/80 backdrop-blur-md border border-white/5 rounded-xl p-8 overflow-hidden hover:border-gold-accent/50 transition-all duration-500 hover:-translate-y-1 block">
+          <Link href="/layer/mantle" className="text-left group relative bg-surface/80 backdrop-blur-md border border-border rounded-xl p-8 overflow-hidden hover:border-gold-accent/50 transition-all duration-500 hover:-translate-y-1 block">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(232,174,60,0.12),transparent_60%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="font-mono text-[10px] text-gold-accent tracking-widest mb-4">LAYER 05 // THE MANTLE</div>
-            <h3 className="font-display text-2xl text-white mb-2">The Deep Archive</h3>
+            <h3 className="font-display text-2xl text-on-surface mb-2">The Deep Archive</h3>
             <p className="text-sm text-text-secondary">ScoutIt&apos;s structured intelligence database — the heavy lifting behind every space</p>
           </Link>
 
           {/* Card 06: The Core */}
-          <Link href="/layer/core" className="text-left group relative bg-[#111111]/80 backdrop-blur-md border border-white/5 rounded-xl p-8 overflow-hidden hover:border-gold-accent/50 transition-all duration-500 hover:-translate-y-1 block">
+          <Link href="/layer/core" className="text-left group relative bg-surface/80 backdrop-blur-md border border-border rounded-xl p-8 overflow-hidden hover:border-gold-accent/50 transition-all duration-500 hover:-translate-y-1 block">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(232,174,60,0.1),transparent_50%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="font-mono text-[10px] text-gold-accent tracking-widest mb-4">LAYER 06 // THE CORE</div>
-            <h3 className="font-display text-2xl text-white mb-2">Private Dashboard</h3>
+            <h3 className="font-display text-2xl text-on-surface mb-2">Private Dashboard</h3>
             <p className="text-sm text-text-secondary">Manage Your Board, properties, and direct deals</p>
           </Link>
         </div>
@@ -1107,6 +1107,9 @@ export default function Home() {
           pointer-events: none;
           background: radial-gradient(ellipse 44% 30% at 50% 62%, rgba(10, 9, 8, 0.34) 0%, rgba(10, 9, 8, 0.14) 55%, transparent 78%);
         }
+        :global(body.light-mode) .hero-content-scrim {
+          display: none;
+        }
 
         /* ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ TITLE SCREEN ΓÇö WORDMARK REDESIGN ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */
         .scoutit-wordmark {
@@ -1128,20 +1131,32 @@ export default function Home() {
           /* slow fade-back to resting state (2s) when the lit class is removed */
           transition: color 2s ease, text-shadow 2s ease;
         }
-        .scoutit-wordmark .word-scout { color: #ffffff; }
-        .scoutit-wordmark .word-s     { color: #E8AE3C; }
-        .scoutit-wordmark .word-it    { color: #E8AE3C; margin-right: -4px; }
+        .scoutit-wordmark .word-scout { color: var(--text-primary, #ffffff); }
+        .scoutit-wordmark .word-s     { color: var(--accent, #E8AE3C); }
+        .scoutit-wordmark .word-it    { color: var(--accent, #E8AE3C); margin-right: -4px; }
         /* beam-hit illumination snaps on fast, then fades back slowly via base transition */
         .scoutit-wordmark.lit .word-scout {
-          color: #ffffff;
+          color: var(--text-primary, #ffffff);
           text-shadow: 0 0 60px rgba(232, 174, 60, 0.8), 0 0 120px rgba(232, 174, 60, 0.3);
           transition: color 0.15s ease, text-shadow 0.15s ease;
         }
         .scoutit-wordmark.lit .word-s,
         .scoutit-wordmark.lit .word-it {
-          color: #E8AE3C;
+          color: var(--accent, #E8AE3C);
           text-shadow: 0 0 60px rgba(232, 174, 60, 0.9), 0 0 120px rgba(232, 174, 60, 0.4);
           transition: color 0.15s ease, text-shadow 0.15s ease;
+        }
+        :global(body.light-mode) .scoutit-wordmark .word-scout,
+        :global(body.light-mode) .scoutit-wordmark.lit .word-scout {
+          color: var(--text-primary);
+          text-shadow: none;
+        }
+        :global(body.light-mode) .scoutit-wordmark .word-s,
+        :global(body.light-mode) .scoutit-wordmark .word-it,
+        :global(body.light-mode) .scoutit-wordmark.lit .word-s,
+        :global(body.light-mode) .scoutit-wordmark.lit .word-it {
+          color: var(--accent);
+          text-shadow: none;
         }
 
         /* Impact flash burst at the wordmark when the beam lands */
@@ -1264,7 +1279,7 @@ export default function Home() {
           font-size: 13px;
           letter-spacing: 6px;
           text-transform: uppercase;
-          color: #777777;
+          color: var(--text-muted, #777777);
           margin-bottom: 22px;
         }
 
@@ -1281,7 +1296,7 @@ export default function Home() {
           font-family: var(--font-body, system-ui, sans-serif);
           font-size: 14px;
           line-height: 1.6;
-          color: #888888;
+          color: var(--text-secondary, #888888);
           max-width: 520px;
           margin: 0 auto 24px;
           text-align: center;

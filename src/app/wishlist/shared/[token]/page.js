@@ -136,25 +136,25 @@ export default async function SharedWishlistPage({ params }) {
       <Footer />
 
       <style>{`
-        .page-wrapper { min-height: 100vh; background: #0e0e0e; color: #f0ede8; position: relative; }
+        .page-wrapper { min-height: 100vh; background: var(--bg); color: var(--text-primary); position: relative; }
         .wishlist-main { max-width: 900px; margin: 0 auto; padding: 120px 24px 80px; position: relative; z-index: 1; }
         .page-header { margin-bottom: 48px; }
-        .layer-label { display: block; font-family: system-ui, sans-serif; font-size: 12px; text-transform: uppercase; letter-spacing: 3px; color: #E8AE3C; margin-bottom: 16px; }
-        .page-title { font-family: Georgia, serif; font-size: 40px; font-weight: normal; color: #f0ede8; margin: 0; }
+        .layer-label { display: block; font-family: system-ui, sans-serif; font-size: 12px; text-transform: uppercase; letter-spacing: 3px; color: var(--accent); margin-bottom: 16px; }
+        .page-title { font-family: Georgia, serif; font-size: 40px; font-weight: normal; color: var(--text-primary); margin: 0; }
         .board-content { display: flex; flex-direction: column; gap: 40px; }
         .reaction-group { display: flex; flex-direction: column; gap: 12px; }
-        .group-label { font-family: system-ui, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #E8AE3C; margin: 0 0 4px; padding-bottom: 8px; border-bottom: 1px solid #262626; }
+        .group-label { font-family: system-ui, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: var(--accent); margin: 0 0 4px; padding-bottom: 8px; border-bottom: 1px solid var(--border-solid); }
         .cards-grid { display: flex; flex-direction: column; gap: 8px; }
-        .board-card { display: flex; align-items: center; justify-content: space-between; background: linear-gradient(165deg, #1a1917, #111110); border: 1px solid rgba(255, 255, 255, 0.08); padding: 16px 20px; transition: opacity 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease; position: relative; }
-        .board-card:hover { transform: translateY(-3px); border-color: rgba(232, 174, 60, 0.3); box-shadow: 0 14px 32px rgba(0, 0, 0, 0.45), 0 0 24px rgba(232, 174, 60, 0.18); }
+        .board-card { display: flex; align-items: center; justify-content: space-between; background: var(--surface2); border: 1px solid var(--border); padding: 16px 20px; transition: opacity 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease; position: relative; }
+        .board-card:hover { transform: translateY(-3px); border-color: rgba(var(--accent-rgb), 0.3); box-shadow: var(--shadow-md), var(--shadow-glow-soft); }
         .badge-corner { position: absolute; top: -8px; right: -8px; z-index: 10; }
         .card-body { flex: 1; min-width: 0; }
-        .card-title { font-family: Georgia, serif; font-size: 20px; font-weight: 500; color: #f0ede8; margin: 0 0 4px; transition: color 0.2s ease; }
-        .card-title:hover { color: #E8AE3C; }
-        .card-meta { font-family: system-ui, sans-serif; font-size: 12px; color: #c8c8c8; display: flex; align-items: center; gap: 4px; }
-        .meta-dot { color: #444; }
+        .card-title { font-family: Georgia, serif; font-size: 20px; font-weight: 500; color: var(--text-primary); margin: 0 0 4px; transition: color 0.2s ease; }
+        .card-title:hover { color: var(--accent); }
+        .card-meta { font-family: system-ui, sans-serif; font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 4px; }
+        .meta-dot { color: var(--text-muted); }
         .card-actions { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
-        .reaction-badge { font-family: system-ui, sans-serif; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #E8AE3C; border: 1px solid rgba(232, 174, 60, 0.3); padding: 4px 10px; white-space: nowrap; }
+        .reaction-badge { font-family: system-ui, sans-serif; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); border: 1px solid rgba(var(--accent-rgb), 0.3); padding: 4px 10px; white-space: nowrap; }
       `}</style>
     </div>
   );

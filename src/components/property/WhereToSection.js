@@ -21,7 +21,7 @@ import { useCallback, useEffect, useState } from "react";
 // nothing depends on hover. The single 700px query is the desktop upgrade.
 // ─────────────────────────────────────────────────────────────────────────
 
-const MONO = "'Courier New',monospace";
+const MONO = "var(--font-mono)";
 
 // 900 m, matching DEFAULT_RADIUS_M in lib/overpassIntel.js. 1200 m throttled
 // repeatedly against live Overpass (15 filters × a large area); 900 m returned
@@ -110,7 +110,7 @@ export default function WhereToSection({ lat, lng, radiusM = 900, onIsochrone, o
           white-space: nowrap;
         }
         .wt-sub {
-          font-family: Georgia, serif;
+          font-family: var(--font-body);
           font-size: 12.5px;
           line-height: 1.6;
           color: #8a8a8a;
@@ -185,47 +185,91 @@ export default function WhereToSection({ lat, lng, radiusM = 900, onIsochrone, o
         .wt-row:last-child { border-bottom: none; }
         .wt-row__main { min-width: 0; }
         .wt-row__name {
-          font-family: Georgia, serif;
-          font-size: 14px;
-          color: #f0ede8;
-          line-height: 1.35;
-          overflow-wrap: anywhere;
-        }
-        .wt-row__type {
+          font-family: var(--font-body);
+        /* Group within a layer */
+        .wt-group { margin-top: 10px; }
+        .wt-group__label {
           font-family: ${MONO};
           font-size: 8.5px;
-          color: #6a6a6a;
-          letter-spacing: 0.12em;
+          letter-spacing: 0.18em;
+          color: var(--text-muted);
           text-transform: uppercase;
+          margin-bottom: 6px;
+        }
+
+        .wt-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 7px;
+        }
+        @media (max-width: 480px) {
+          .wt-grid { grid-template-columns: 1fr; }
+        }
+
+        .wt-card {
+          display: flex;
+          flex-direction: column;
+          padding: 10px 11px;
+          background: var(--surface);
+          border: 0.5px solid var(--border-solid);
+          border-radius: 2px;
+          text-decoration: none;
+          color: inherit;
+          transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.15s ease;
+        }
+        .wt-card:hover {
+          border-color: var(--accent-muted, #6E531A);
+          background: var(--surface2);
+          transform: translateY(-1px);
+        }
+        .wt-card:active {
+          transform: scale(0.98);
+        }
+        .wt-card__top {
+          display: flex;
+          align-items: baseline;
+          justify-content: space-between;
+          gap: 6px;
+        }
+        .wt-card__name {
+          font-family: var(--font-body, sans-serif);
+          font-size: 11.5px;
+          color: var(--text-primary);
+          font-weight: 500;
+        }
+        .wt-card__dist {
+          font-family: ${MONO};
+          font-size: 9px;
+          letter-spacing: 0.08em;
+          color: var(--accent, #E8AE3C);
+          white-space: nowrap;
+        }
+        .wt-card__meta {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 9.5px;
+          color: var(--text-secondary);
+          letter-spacing: 0.04em;
           margin-top: 3px;
         }
-        .wt-row__dist {
-          flex: 0 0 auto;
-          text-align: right;
-        }
-        .wt-row__m {
-          font-family: ${MONO};
-          font-size: 11px;
-          color: #c8c8c8;
-          letter-spacing: 0.06em;
-        }
-        .wt-row__walk {
-          font-family: ${MONO};
-          font-size: 8.5px;
-          color: #6a6a6a;
+        .wt-card__cat { text-transform: uppercase; font-family: ${MONO}; font-size: 8.5px; color: var(--text-muted); }
+        .wt-card__desc {
+          font-size: 9.5px;
+          color: var(--text-secondary);
           letter-spacing: 0.06em;
           margin-top: 3px;
         }
 
         .wt-blank {
           padding: 22px 16px;
-          background: #161616;
-          border: 0.5px dashed #262626;
+          background: var(--surface2);
+          border: 0.5px dashed var(--border-mid);
           border-radius: 2px;
           text-align: center;
           font-family: ${MONO};
           font-size: 10px;
-          color: #8a8a8a;
+          color: var(--text-secondary);
           letter-spacing: 0.12em;
           line-height: 1.8;
         }
@@ -240,9 +284,9 @@ export default function WhereToSection({ lat, lng, radiusM = 900, onIsochrone, o
           min-height: 40px;
           padding: 0 18px;
           background: transparent;
-          border: 0.5px solid #262626;
+          border: 0.5px solid var(--border-solid);
           border-radius: 3px;
-          color: #c8c8c8;
+          color: var(--text-secondary);
           font-family: ${MONO};
           font-size: 9px;
           letter-spacing: 0.15em;
@@ -261,7 +305,7 @@ export default function WhereToSection({ lat, lng, radiusM = 900, onIsochrone, o
           flex-wrap: wrap;
         }
         .wt-walk__score {
-          font-family: Georgia, serif;
+          font-family: var(--font-body);
           font-size: 30px;
           line-height: 1;
           color: #f0ede8;
@@ -284,7 +328,7 @@ export default function WhereToSection({ lat, lng, radiusM = 900, onIsochrone, o
           line-height: 1.5;
         }
         .wt-walk__note {
-          font-family: Georgia, serif;
+          font-family: var(--font-body);
           font-size: 12px;
           line-height: 1.6;
           color: #6a6a6a;

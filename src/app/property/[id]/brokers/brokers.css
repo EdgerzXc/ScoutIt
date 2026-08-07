@@ -1,7 +1,7 @@
 .brokers-wrapper {
   min-height: 100vh;
-  background: #0e0e0e;
-  color: #f0ede8;
+  background: var(--bg);
+  color: var(--text-primary);
   font-family: system-ui, -apple-system, sans-serif;
 }
 
@@ -12,13 +12,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #0e0e0e;
-  border-bottom: 1px solid #262626;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border-solid);
   padding: 16px 24px;
 }
 
 .nav-back-link {
-  color: #E8AE3C;
+  color: var(--accent);
   text-decoration: none;
   font-size: 13px;
   font-weight: 500;
@@ -32,12 +32,12 @@
   size: 14px;
   font-weight: 700;
   letter-spacing: 3px;
-  color: #f0ede8;
+  color: var(--text-primary);
 }
 
 .nav-prop-info {
   font-size: 12px;
-  color: #c8c8c8;
+  color: var(--text-secondary);
 }
 
 .brokers-main-content {
@@ -69,7 +69,7 @@
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 3px;
-  color: #E8AE3C;
+  color: var(--accent);
   display: block;
   margin-bottom: 12px;
 }
@@ -85,7 +85,7 @@
   font-family: Georgia, serif;
   font-size: 16px;
   font-style: italic;
-  color: #c8c8c8;
+  color: var(--text-secondary);
   margin: 0;
   line-height: 1.5;
 }
@@ -98,8 +98,8 @@
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 2px;
-  color: #E8AE3C;
-  border-bottom: 1px solid #262626;
+  color: var(--accent);
+  border-bottom: 1px solid var(--border-solid);
   padding-bottom: 10px;
   margin: 0 0 20px;
 }
@@ -111,8 +111,8 @@
 }
 
 .broker-item-card {
-  background: #161616;
-  border: 1px solid #262626;
+  background: var(--surface);
+  border: 1px solid var(--border-solid);
   border-radius: 4px;
   padding: 24px;
   position: relative;
@@ -120,7 +120,7 @@
 }
 
 .broker-item-card:hover {
-  border-color: #363636;
+  border-color: var(--border-mid);
 }
 
 .scoutit-pick-badge {
@@ -128,7 +128,7 @@
   top: 12px;
   right: 24px;
   background: rgba(232, 174, 60, 0.15);
-  color: #E8AE3C;
+  color: var(--accent);
   border: 0.5px solid rgba(232, 174, 60, 0.3);
   font-size: 10px;
   font-weight: 600;
@@ -149,7 +149,7 @@
   border-radius: 4px;
   background-size: cover;
   background-position: center;
-  border: 1px solid #262626;
+  border: 1px solid var(--border-solid);
   flex-shrink: 0;
 }
 
@@ -175,7 +175,7 @@
 
 .leris-badge {
   background: rgba(76, 175, 125, 0.12);
-  color: #4caf7d;
+  color: var(--green);
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 1px;
@@ -186,13 +186,13 @@
 
 .broker-license-txt {
   font-size: 12px;
-  color: #c8c8c8;
+  color: var(--text-secondary);
   margin: 4px 0 2px;
 }
 
 .broker-closures-txt {
   font-size: 13px;
-  color: #f0ede8;
+  color: var(--text-primary);
   margin: 4px 0 10px;
 }
 
@@ -204,8 +204,8 @@
 
 .niche-pill-tag {
   background: rgba(255, 255, 255, 0.04);
-  border: 1px solid #262626;
-  color: #c8c8c8;
+  border: 1px solid var(--border-solid);
+  color: var(--text-secondary);
   font-size: 11px;
   padding: 4px 10px;
   border-radius: 4px;
@@ -219,7 +219,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border: 1px solid #262626;
+  border: 1px solid var(--border-solid);
   background: rgba(255, 255, 255, 0.02);
   padding: 6px 10px;
   border-radius: 4px;
@@ -231,14 +231,14 @@
   font-family: Georgia, serif;
   font-size: 28px;
   font-weight: 400;
-  color: #E8AE3C;
+  color: var(--accent);
   line-height: 1;
 }
 
 .rating-lbl {
   font-size: 10px;
   font-weight: 600;
-  color: #c8c8c8;
+  color: var(--text-secondary);
   letter-spacing: 1px;
   margin-top: 4px;
   text-align: center;
@@ -248,14 +248,14 @@
   display: flex;
   gap: 12px;
   margin-top: 20px;
-  border-top: 1px solid #262626;
+  border-top: 1px solid var(--border-solid);
   padding-top: 16px;
 }
 
 .action-profile-btn {
   background: transparent;
-  border: 1px solid #262626;
-  color: #c8c8c8;
+  border: 1px solid var(--border-solid);
+  color: var(--text-secondary);
   padding: 10px 20px;
   font-size: 12px;
   font-weight: 500;
@@ -267,14 +267,14 @@
 }
 
 .action-profile-btn:hover {
-  color: #f0ede8;
-  border-color: #c8c8c8;
+  color: var(--text-primary);
+  border-color: var(--border-mid);
 }
 
 .action-retain-btn {
-  background: #E8AE3C;
+  background: var(--accent-fill);
   border: none;
-  color: #0e0e0e;
+  color: var(--on-accent);
   padding: 10px 20px;
   font-size: 12px;
   font-weight: 600;
@@ -290,22 +290,22 @@
 }
 
 .action-retain-btn.active {
-  background: #262626;
-  color: #f0ede8;
-  border: 1px solid #363636;
+  background: var(--surface3);
+  color: var(--text-primary);
+  border: 1px solid var(--border-mid);
 }
 
 /* Intent Form styling */
 .inline-intent-form-container {
   margin-top: 20px;
-  border-top: 1px dashed #262626;
+  border-top: 1px dashed var(--border-solid);
   padding-top: 20px;
 }
 
 .form-success-alert {
   background: rgba(76, 175, 125, 0.08);
   border: 1px solid rgba(76, 175, 125, 0.2);
-  color: #4caf7d;
+  color: var(--green);
   padding: 14px;
   border-radius: 4px;
   font-size: 13px;
@@ -322,7 +322,7 @@
   font-family: Georgia, serif;
   font-size: 15px;
   font-weight: 400;
-  color: #E8AE3C;
+  color: var(--accent);
   margin: 0 0 4px;
 }
 
@@ -338,9 +338,9 @@
 
 .form-input-field,
 .form-textarea-field {
-  background: #0e0e0e;
-  border: 1px solid #262626;
-  color: #f0ede8;
+  background: var(--bg);
+  border: 1px solid var(--border-solid);
+  color: var(--text-primary);
   padding: 12px;
   border-radius: 4px;
   font-size: 13px;
@@ -350,14 +350,14 @@
 
 .form-input-field:focus,
 .form-textarea-field:focus {
-  border-color: #E8AE3C;
+  border-color: var(--accent);
 }
 
 .form-submit-btn {
   align-self: flex-start;
   background: transparent;
-  border: 1px solid #E8AE3C;
-  color: #E8AE3C;
+  border: 1px solid var(--accent);
+  color: var(--accent);
   padding: 10px 24px;
   font-size: 12px;
   font-weight: 600;
@@ -369,19 +369,19 @@
 }
 
 .form-submit-btn:hover {
-  background: #E8AE3C;
-  color: #0e0e0e;
+  background: var(--accent-fill);
+  color: var(--on-accent);
 }
 
 .brokers-compliance-footer {
   margin-top: 60px;
-  border-top: 1px solid #262626;
+  border-top: 1px solid var(--border-solid);
   padding-top: 24px;
 }
 
 .brokers-compliance-footer p {
   font-size: 11px;
-  color: #c8c8c8;
+  color: var(--text-secondary);
   line-height: 1.6;
   margin: 0;
 }
@@ -424,7 +424,7 @@
 
 /* Diamond Card (Tier 1) - Animating Glowing Gradient Border */
 .diamond-card {
-  background: #111111;
+  background: var(--surface);
   border: 1px solid transparent !important;
   box-shadow: 0 8px 32px rgba(0, 242, 254, 0.12);
 }
@@ -448,70 +448,70 @@
 
 .diamond-card .tier-badge-label {
   background: linear-gradient(135deg, #00f2fe 0%, #b19ffb 100%);
-  color: #0e0e0e;
+  color: var(--on-accent);
   box-shadow: 0 0 10px rgba(0, 242, 254, 0.4);
 }
 
 .diamond-card .rating-num {
-  color: #00f2fe;
+  color: var(--tier-diamond);
 }
 
 /* Platinum Card (Tier 2) */
 .platinum-card {
-  border-color: #a5c2d9 !important;
+  border-color: var(--tier-platinum) !important;
   box-shadow: 0 4px 20px rgba(165, 194, 217, 0.08);
 }
 
 .platinum-card .tier-badge-label {
   background: linear-gradient(135deg, #a5c2d9 0%, #eef3f7 100%);
-  color: #0e0e0e;
+  color: var(--on-accent);
 }
 
 .platinum-card .rating-num {
-  color: #a5c2d9;
+  color: var(--tier-platinum);
 }
 
 /* Gold Card (Tier 3) */
 .gold-card {
-  border-color: #E8AE3C !important;
+  border-color: var(--accent) !important;
   box-shadow: 0 4px 20px rgba(232, 174, 60, 0.08);
 }
 
 .gold-card .tier-badge-label {
-  background: linear-gradient(135deg, #E8AE3C 0%, #f7ebd3 100%);
-  color: #0e0e0e;
+  background: linear-gradient(135deg, var(--accent-fill) 0%, #f7ebd3 100%);
+  color: var(--on-accent);
 }
 
 .gold-card .rating-num {
-  color: #E8AE3C;
+  color: var(--accent);
 }
 
 /* Silver Card (Tier 4) */
 .silver-card {
-  border-color: #c8c8c8 !important;
+  border-color: var(--border-mid) !important;
 }
 
 .silver-card .tier-badge-label {
   background: linear-gradient(135deg, #c8c8c8 0%, #dcdcdc 100%);
-  color: #0e0e0e;
+  color: var(--on-accent);
 }
 
 .silver-card .rating-num {
-  color: #dcdcdc;
+  color: var(--tier-silver);
 }
 
 /* Bronze Card (Tier 5) */
 .bronze-card {
-  border-color: #cd7f32 !important;
+  border-color: var(--tier-bronze) !important;
 }
 
 .bronze-card .tier-badge-label {
   background: linear-gradient(135deg, #a05a2c 0%, #cd7f32 100%);
-  color: var(--on-surface);
+  color: var(--text-primary);
 }
 
 .bronze-card .rating-num {
-  color: #cd7f32;
+  color: var(--tier-bronze);
 }
 
 @media (max-width: 1024px) {
@@ -590,7 +590,7 @@
 }
 
 .roster-empty-state h2 {
-  color: var(--on-surface);
+  color: var(--text-primary);
   font-size: 16px;
   margin: 0 0 10px;
 }

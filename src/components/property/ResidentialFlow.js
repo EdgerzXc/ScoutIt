@@ -15,7 +15,7 @@ const InteractiveMap = dynamic(() => import("@/components/property/InteractiveMa
   ssr: false,
   loading: () => (
     <div style={{ height: "100%", width: "100%", background: "#0d0d0d", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", letterSpacing: "0.1em", textTransform: "uppercase", color: "#c8c8c8" }}>Loading tactical map…</span>
+      <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" }}>Loading tactical map…</span>
     </div>
   ),
 });
@@ -48,8 +48,8 @@ import { fieldLabel } from "@/lib/fieldLabel";
 const FloodHeatmapMap = dynamic(() => import("@/components/property/FloodHeatmapMap"), {
   ssr: false,
   loading: () => (
-    <div style={{ height: "clamp(360px, 48vh, 440px)", background: "#0d0d0d", border: "0.5px solid #262626", borderRadius: "4px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", letterSpacing: "0.1em", textTransform: "uppercase", color: "#c8c8c8" }}>Loading flood hazard data…</span>
+    <div style={{ height: "clamp(360px, 48vh, 440px)", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "4px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-secondary)" }}>Loading flood hazard data…</span>
     </div>
   ),
 });
@@ -58,16 +58,16 @@ const FloodHeatmapMap = dynamic(() => import("@/components/property/FloodHeatmap
 const ManilaTransitMap = dynamic(() => import("@/components/transit/ManilaTransitMap"), {
   ssr: false,
   loading: () => (
-    <div style={{ height: "clamp(420px, 52vh, 480px)", background: "#000", border: "0.5px solid #262626", borderRadius: "4px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", letterSpacing: "0.1em", textTransform: "uppercase", color: "#c8c8c8" }}>Loading rail network…</span>
+    <div style={{ height: "clamp(420px, 52vh, 480px)", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "4px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-secondary)" }}>Loading rail network…</span>
     </div>
   ),
 });
 const SpatialCommandMap = dynamic(() => import("@/components/property/SpatialCommandMap"), {
   ssr: false,
   loading: () => (
-    <div style={{ height: "420px", background: "#0d0d0d", border: "0.5px solid #262626", borderRadius: "4px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", letterSpacing: "0.1em", textTransform: "uppercase", color: "#c8c8c8" }}>Loading spatial command HUD…</span>
+    <div style={{ height: "420px", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "4px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-secondary)" }}>Loading spatial command HUD…</span>
     </div>
   ),
 });
@@ -78,7 +78,7 @@ import { DEEP_INTEL_SCHEMA } from "@/lib/deepIntelSchema";
 function mapPlaceholder(height, label) {
   return (
     <div style={{ height, background: "#0d0d0d", border: "0.5px solid #262626", borderRadius: "4px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", letterSpacing: "0.1em", textTransform: "uppercase", color: "#c8c8c8" }}>{label}</span>
+      <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" }}>{label}</span>
     </div>
   );
 }
@@ -524,8 +524,8 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
   }
 
   // Emoji icons for the Chapter 1 editorial stat block
-  let pill1Emoji = <Bed size={24} strokeWidth={1.5} style={{color:"#f0ede8"}} />;
-  let pill2Emoji = <Bath size={24} strokeWidth={1.5} style={{color:"#f0ede8"}} />;
+  let pill1Emoji = <Bed size={24} strokeWidth={1.5} style={{color:"var(--text-primary)"}} />;
+  let pill2Emoji = <Bath size={24} strokeWidth={1.5} style={{color:"var(--text-primary)"}} />;
   if (isRestaurant)      { pill1Emoji = "🍽"; pill2Emoji = "🔪"; }
   else if (isHospitality){ pill1Emoji = "🛎"; pill2Emoji = "👥"; }
   else if (isVenue)      { pill1Emoji = "👥"; pill2Emoji = "🎚"; }
@@ -1278,13 +1278,13 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>{ch['space']?.chapterNumber || '01'} — {ch['space']?.chapterLabel || 'The Space'}</div>
-                <div style={{height:"1px", background:"#262626"}}/>
+                <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>{ch['space']?.chapterNumber || '01'} — {ch['space']?.chapterLabel || 'The Space'}</div>
+                <div style={{height:"1px", background:"var(--border)"}}/>
               </div>
 
               {(d.aesthetic_tag || d.accordion_3_rating) && (
                 <div style={{marginBottom:"30px"}}>
-                  <span style={{fontFamily:"Georgia,serif", fontStyle:"italic", fontSize:"clamp(22px,3vw,30px)", fontWeight:400, color:"#E8AE3C", letterSpacing:"0.01em", lineHeight:1.2}}>
+                  <span style={{fontFamily:"var(--font-body)", fontStyle:"italic", fontSize:"clamp(22px,3vw,30px)", fontWeight:400, color:"#E8AE3C", letterSpacing:"0.01em", lineHeight:1.2}}>
                     {d.aesthetic_tag || d.accordion_3_rating}
                   </span>
                 </div>
@@ -1294,69 +1294,69 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                 {[
                   pill1Val && pill1Val !== 0 ? { icon: pill1Emoji, val: pill1Val, label: pill1Label } : null,
                   pill2Val && pill2Val !== 0 ? { icon: pill2Emoji, val: pill2Val, label: pill2Label } : null,
-                  d.floor_sqm > 0 ? { icon: <Ruler size={24} strokeWidth={1.5} style={{color:"#f0ede8"}} />, val: d.floor_sqm, label: "sqm floor" } : null,
-                  d.parking > 0 ? { icon: <Car size={24} strokeWidth={1.5} style={{color:"#f0ede8"}} />, val: d.parking, label: "Parking Slots" } : null,
+                  d.floor_sqm > 0 ? { icon: <Ruler size={24} strokeWidth={1.5} style={{color:"var(--text-primary)"}} />, val: d.floor_sqm, label: "sqm floor" } : null,
+                  d.parking > 0 ? { icon: <Car size={24} strokeWidth={1.5} style={{color:"var(--text-primary)"}} />, val: d.parking, label: "Parking Slots" } : null,
                   d.lot_sqm > 0 ? { icon: "🌿", val: d.lot_sqm, label: "Lot sqm" } : null,
                 ].filter(Boolean).map((stat, i) => (
                   <div key={i} className="property-feature-item">
                     <div style={{display:"flex", alignItems:"center", gap:"12px"}}>
                       <span style={{fontSize:"24px", lineHeight:1, flexShrink:0}}>{stat.icon}</span>
-                      <span style={{fontFamily:"var(--font-body)", fontSize:"clamp(20px,2.5vw,26px)", fontWeight:500, color:"#f0ede8", lineHeight:1.2}}>{stat.val}</span>
+                      <span style={{fontFamily:"var(--font-body)", fontSize:"clamp(20px,2.5vw,26px)", fontWeight:500, color:"var(--text-primary)", lineHeight:1.2}}>{stat.val}</span>
                     </div>
-                    <div style={{fontFamily:"var(--font-body)", fontSize:"10px", fontWeight:600, color:"#c8c8c8", letterSpacing:"0.08em", textTransform:"uppercase", marginTop:"6px"}}>{stat.label}</div>
+                    <div style={{fontFamily:"var(--font-body)", fontSize:"11px", fontWeight:600, color:"var(--text-muted)", letterSpacing:"0.08em", textTransform:"uppercase", marginTop:"6px"}}>{stat.label}</div>
                   </div>
                 ))}
               </div>
 
-              <div style={{height:"1px", background:"#262626", margin:"0 0 24px"}}/>
+              <div style={{height:"1px", background:"var(--border)", margin:"0 0 24px"}}/>
 
               <div style={{display:"flex", flexDirection:"column"}}>
                 {d.ceiling_height_text && (
-                  <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626"}}>
-                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase"}}>Ceiling Height</span>
-                    <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{d.ceiling_height_text}</span>
+                  <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid var(--border)"}}>
+                    <span style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase"}}>Ceiling Height</span>
+                    <span style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"var(--text-primary)"}}>{d.ceiling_height_text}</span>
                   </div>
                 )}
                 {d.furnishing && (
-                  <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626"}}>
-                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase"}}>Furnishing</span>
-                    <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{d.furnishing}</span>
+                  <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid var(--border)"}}>
+                    <span style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase"}}>Furnishing</span>
+                    <span style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"var(--text-primary)"}}>{d.furnishing}</span>
                   </div>
                 )}
                 {d.view && (
-                  <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626"}}>
-                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase"}}>View</span>
-                    <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{d.view}</span>
+                  <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid var(--border)"}}>
+                    <span style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase"}}>View</span>
+                    <span style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"var(--text-primary)"}}>{d.view}</span>
                   </div>
                 )}
                 {d.turnoverDate && (
-                  <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626"}}>
-                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase"}}>Turnover Date</span>
-                    <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{d.turnoverDate}</span>
+                  <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid var(--border)"}}>
+                    <span style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase"}}>Turnover Date</span>
+                    <span style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"var(--text-primary)"}}>{d.turnoverDate}</span>
                   </div>
                 )}
                 {d.petPolicy && (
-                  <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626"}}>
-                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase"}}>Pet Policy</span>
-                    <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{d.petPolicy}</span>
+                  <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid var(--border)"}}>
+                    <span style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase"}}>Pet Policy</span>
+                    <span style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"var(--text-primary)"}}>{d.petPolicy}</span>
                   </div>
                 )}
                 {d.assocDues && (
-                  <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626"}}>
-                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase"}}>Assoc Dues</span>
-                    <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#E8AE3C"}}>₱{Number(d.assocDues).toLocaleString()} / mo <span style={{fontSize:"10px", color:"#6E531A"}}>(Verified)</span></span>
+                  <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid var(--border)"}}>
+                    <span style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase"}}>Assoc Dues</span>
+                    <span style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"#E8AE3C"}}>₱{Number(d.assocDues).toLocaleString()} / mo <span style={{fontSize:"11px", color:"#6E531A"}}>(Verified)</span></span>
                   </div>
                 )}
                 {d.outdoor_description && d.outdoor_description !== "None" && (
-                  <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626"}}>
-                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase"}}>Outdoor Space</span>
-                    <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right", maxWidth:"55%"}}>{d.outdoor_description}</span>
+                  <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid var(--border)"}}>
+                    <span style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase"}}>Outdoor Space</span>
+                    <span style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"var(--text-primary)", textAlign:"right", maxWidth:"55%"}}>{d.outdoor_description}</span>
                   </div>
                 )}
               </div>
 
               {d.accordion_3_text && (
-                <p style={{fontFamily:"Georgia,serif", fontSize:"17px", color:"#f0ede8", lineHeight:1.9, margin:"26px 0 0", maxWidth:"580px"}}>
+                <p style={{fontFamily:"var(--font-body)", fontSize:"17px", color:"var(--text-primary)", lineHeight:1.9, margin:"26px 0 0", maxWidth:"580px"}}>
                   {d.accordion_3_text}
                 </p>
               )}
@@ -1388,12 +1388,12 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
           <div className={`chapter-panel ${activeTab === "vault" ? "active" : ""}`} id="panel-vault">
             <div className="panel-content" style={{ maxWidth: "100%" }}>
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#E8AE3C", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>PREMIUM — THE SPATIAL VAULT</div>
+                <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"#E8AE3C", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>PREMIUM — THE SPATIAL VAULT</div>
                 <div style={{height:"1px", background:"#E8AE3C"}}/>
               </div>
 
               <div style={{marginBottom:"30px"}}>
-                <span style={{fontFamily:"Georgia,serif", fontStyle:"italic", fontSize:"clamp(22px,3vw,30px)", fontWeight:400, color:"#f0ede8", letterSpacing:"0.01em", lineHeight:1.2}}>
+                <span style={{fontFamily:"var(--font-body)", fontStyle:"italic", fontSize:"clamp(22px,3vw,30px)", fontWeight:400, color:"var(--text-primary)", letterSpacing:"0.01em", lineHeight:1.2}}>
                   3D Virtual Tours & Blueprints
                 </span>
               </div>
@@ -1422,17 +1422,17 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>{ch['location']?.chapterNumber || '02'} — {ch['location']?.chapterLabel || 'Location'}</div>
-                <div style={{height:"1px", background:"#262626"}}/>
+                <div style={{fontFamily:"var(--font-mono, monospace)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>{ch['location']?.chapterNumber || '02'} — {ch['location']?.chapterLabel || 'Location'}</div>
+                <div style={{height:"1px", background:"var(--border)"}}/>
               </div>
 
               {(d.location || d.city) && (
                 <div style={{margin:"0 0 28px"}}>
-                  <div style={{fontFamily:"Georgia,serif", fontSize:"clamp(28px,4.5vw,52px)", fontWeight:400, color:"#f0ede8", lineHeight:1.12}}>
+                  <div style={{fontFamily:"var(--font-body)", fontSize:"clamp(28px,4.5vw,52px)", fontWeight:400, color:"var(--text-primary)", lineHeight:1.12}}>
                     {d.location || d.city}
                   </div>
                   {d.city && d.location && d.location !== d.city && (
-                    <div style={{fontFamily:"'Courier New',monospace", fontSize:"11px", color:"#c8c8c8", letterSpacing:"0.14em", marginTop:"10px", textTransform:"uppercase"}}>
+                    <div style={{fontFamily:"var(--font-mono, monospace)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.14em", marginTop:"10px", textTransform:"uppercase"}}>
                       {d.city} · NCR
                     </div>
                   )}
@@ -1444,40 +1444,40 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
               <div style={{display:"flex", flexDirection:"column", marginBottom:"24px"}}>
                 {(d.flood_zone_status || d.zoning_classification) && (
                   <>
-                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#5a5a5a", letterSpacing:"0.18em", textTransform:"uppercase", marginBottom:"2px"}}>Risk &amp; Zoning</span>
+                    <span style={{fontFamily:"var(--font-mono, monospace)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.18em", textTransform:"uppercase", marginBottom:"2px"}}>Risk &amp; Zoning</span>
                     {d.flood_zone_status && (
-                      <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", gap:"20px"}}>
-                        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Flood Zone</span>
-                        <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right"}}>{d.flood_zone_status}</span>
+                      <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid var(--border)", gap:"20px"}}>
+                        <span style={{fontFamily:"var(--font-mono, monospace)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Flood Zone</span>
+                        <span style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"var(--text-primary)", textAlign:"right"}}>{d.flood_zone_status}</span>
                       </div>
                     )}
                     {d.zoning_classification && (
-                      <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", gap:"20px"}}>
-                        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Zoning</span>
-                        <span style={{fontFamily:"'Courier New',monospace", fontSize:"12px", color:"#f0ede8", textAlign:"right", letterSpacing:"0.04em"}}>{d.zoning_classification}</span>
+                      <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid var(--border)", gap:"20px"}}>
+                        <span style={{fontFamily:"var(--font-mono, monospace)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Zoning</span>
+                        <span style={{fontFamily:"var(--font-mono, monospace)", fontSize:"12px", color:"var(--text-primary)", textAlign:"right", letterSpacing:"0.04em"}}>{d.zoning_classification}</span>
                       </div>
                     )}
                   </>
                 )}
                 {(publicTransitObj || d.nearest_highway || d.street_type) && (
                   <>
-                    <span style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#5a5a5a", letterSpacing:"0.18em", textTransform:"uppercase", marginTop:"16px", marginBottom:"2px"}}>Access</span>
+                    <span style={{fontFamily:"var(--font-mono, monospace)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.18em", textTransform:"uppercase", marginTop:"16px", marginBottom:"2px"}}>Access</span>
                     {publicTransitObj && (
-                      <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", gap:"20px"}}>
-                        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Nearest Transit</span>
-                        <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right"}}>{publicTransitObj.name} · {publicTransitObj.distance}</span>
+                      <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid var(--border)", gap:"20px"}}>
+                        <span style={{fontFamily:"var(--font-mono, monospace)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Nearest Transit</span>
+                        <span style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"var(--text-primary)", textAlign:"right"}}>{publicTransitObj.name} · {publicTransitObj.distance}</span>
                       </div>
                     )}
                     {d.nearest_highway && (
-                      <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", gap:"20px"}}>
-                        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Major Road</span>
-                        <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right"}}>{d.nearest_highway}</span>
+                      <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid var(--border)", gap:"20px"}}>
+                        <span style={{fontFamily:"var(--font-mono, monospace)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Major Road</span>
+                        <span style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"var(--text-primary)", textAlign:"right"}}>{d.nearest_highway}</span>
                       </div>
                     )}
                     {d.street_type && (
-                      <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", gap:"20px"}}>
-                        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Street Type</span>
-                        <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right"}}>{d.street_type}</span>
+                      <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid var(--border)", gap:"20px"}}>
+                        <span style={{fontFamily:"var(--font-mono, monospace)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Street Type</span>
+                        <span style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"var(--text-primary)", textAlign:"right"}}>{d.street_type}</span>
                       </div>
                     )}
                   </>
@@ -1487,12 +1487,12 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
               {/* Commute context cards */}
               {commuteCards.length > 0 && (
                 <>
-                  <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#c8c8c8", letterSpacing:"0.2em", textTransform:"uppercase", marginBottom:"12px"}}>Commute Context</div>
+                  <div style={{fontFamily:"var(--font-mono, monospace)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.2em", textTransform:"uppercase", marginBottom:"12px"}}>Commute Context</div>
                   <div style={{display:"flex", flexWrap:"wrap", gap:"10px", marginBottom:"28px"}}>
                     {commuteCards.map(c => (
-                      <div key={c.label} style={{flex:"1 1 120px", background:"#161616", border:"0.5px solid #262626", borderRadius:"4px", padding:"14px 16px"}}>
-                        <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#c8c8c8", letterSpacing:"0.16em", textTransform:"uppercase", marginBottom:"8px"}}>To {c.label}</div>
-                        <div style={{fontFamily:"Georgia,serif", fontSize:"18px", color:"#f0ede8"}}>{c.value}</div>
+                      <div key={c.label} style={{flex:"1 1 120px", background:"var(--surface)", border:"0.5px solid var(--border)", borderRadius:"4px", padding:"14px 16px"}}>
+                        <div style={{fontFamily:"var(--font-mono, monospace)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.16em", textTransform:"uppercase", marginBottom:"8px"}}>To {c.label}</div>
+                        <div style={{fontFamily:"var(--font-body)", fontSize:"18px", color:"var(--text-primary)"}}>{c.value}</div>
                       </div>
                     ))}
                   </div>
@@ -1501,12 +1501,12 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
 
               {/* Public transport editorial */}
               {d.public_transport && (
-                <p style={{fontFamily:"Georgia,serif", fontSize:"15px", color:"#f0ede8", lineHeight:1.85, margin:"0 0 28px", maxWidth:"580px"}}>
+                <p style={{fontFamily:"var(--font-body)", fontSize:"15px", color:"var(--text-primary)", lineHeight:1.85, margin:"0 0 28px", maxWidth:"580px"}}>
                   {d.public_transport}
                 </p>
               )}
 
-              <div style={{height:"1px", background:"#262626", margin:"0 0 20px"}}/>
+              <div style={{height:"1px", background:"var(--border)", margin:"0 0 20px"}}/>
 
               {/* Map / List toggle */}
               <div className="whereto-tabs" style={{marginBottom:"20px"}}>
@@ -1581,15 +1581,15 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
               {locTab === "list" && d.whereTo && d.whereTo.length > 0 && (
                 <div style={{display:"flex", flexDirection:"column", marginBottom:"8px"}}>
                   {d.whereTo.map((item, idx) => (
-                    <div key={idx} style={{display:"flex", justifyContent:"space-between", alignItems:"center", padding:"13px 0", borderBottom:"1px solid #262626"}}>
+                    <div key={idx} style={{display:"flex", justifyContent:"space-between", alignItems:"center", padding:"13px 0", borderBottom:"1px solid var(--border)"}}>
                       <div style={{display:"flex", alignItems:"center", gap:"12px"}}>
                         <div style={{width:"5px", height:"5px", borderRadius:"50%", background:"#E8AE3C", flexShrink:0}}/>
                         <div>
-                          <div style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{item.name}</div>
-                          {item.category && <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#c8c8c8", letterSpacing:"0.1em", textTransform:"uppercase", marginTop:"2px"}}>{item.category}</div>}
+                          <div style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"var(--text-primary)"}}>{item.name}</div>
+                          {item.category && <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.1em", textTransform:"uppercase", marginTop:"2px"}}>{item.category}</div>}
                         </div>
                       </div>
-                      <span style={{fontFamily:"'Courier New',monospace", fontSize:"11px", color:"#c8c8c8", letterSpacing:"0.1em", flexShrink:0}}>{item.distance}</span>
+                      <span style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.1em", flexShrink:0}}>{item.distance}</span>
                     </div>
                   ))}
                 </div>
@@ -1620,8 +1620,8 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>{ch['life']?.chapterNumber || '03'} — {ch['life']?.chapterLabel || 'Life Here'}</div>
-                <div style={{height:"1px", background:"#262626"}}/>
+                <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>{ch['life']?.chapterNumber || '03'} — {ch['life']?.chapterLabel || 'Life Here'}</div>
+                <div style={{height:"1px", background:"var(--border)"}}/>
               </div>
 
               {/* Best Suited For — gold chips, first thing shown */}
@@ -1632,10 +1632,10 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                 if (tags.length === 0) return null;
                 return (
                   <div style={{marginBottom:"28px"}}>
-                    <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#c8c8c8", letterSpacing:"0.2em", textTransform:"uppercase", marginBottom:"14px"}}>Best Suited For</div>
+                    <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.2em", textTransform:"uppercase", marginBottom:"14px"}}>Best Suited For</div>
                     <div style={{display:"flex", flexWrap:"wrap", gap:"10px"}}>
                       {tags.map((t, i) => (
-                        <span key={i} style={{fontFamily:"Georgia,serif", fontSize:"15px", color:"#E8AE3C", border:"0.5px solid rgba(232, 174, 60,0.4)", padding:"7px 18px", borderRadius:"4px", letterSpacing:"0.02em"}}>{t}</span>
+                        <span key={i} style={{fontFamily:"var(--font-body)", fontSize:"15px", color:"#E8AE3C", border:"0.5px solid rgba(232, 174, 60,0.4)", padding:"7px 18px", borderRadius:"4px", letterSpacing:"0.02em"}}>{t}</span>
                       ))}
                     </div>
                   </div>
@@ -1643,21 +1643,21 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
               })()}
 
               {d.lifestyle_vibe && (
-                <p style={{fontFamily:"Georgia,serif", fontStyle:"italic", fontSize:"clamp(20px,2.6vw,26px)", fontWeight:400, color:"#f0ede8", lineHeight:1.45, margin:"0 0 24px", maxWidth:"560px"}}>
+                <p style={{fontFamily:"var(--font-body)", fontStyle:"italic", fontSize:"clamp(20px,2.6vw,26px)", fontWeight:400, color:"var(--text-primary)", lineHeight:1.45, margin:"0 0 24px", maxWidth:"560px"}}>
                   {d.lifestyle_vibe}
                 </p>
               )}
 
               {d.community_feel && (
-                <p style={{fontFamily:"Georgia,serif", fontSize:"16px", color:"#f0ede8", lineHeight:1.9, margin:"0 0 20px", maxWidth:"580px"}}>
+                <p style={{fontFamily:"var(--font-body)", fontSize:"16px", color:"var(--text-primary)", lineHeight:1.9, margin:"0 0 20px", maxWidth:"580px"}}>
                   {d.community_feel}
                 </p>
               )}
 
               {d.safety_perception && (
                 <>
-                  <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#c8c8c8", letterSpacing:"0.2em", textTransform:"uppercase", margin:"4px 0 12px"}}>Safety Perception</div>
-                  <p style={{fontFamily:"Georgia,serif", fontSize:"16px", color:"#f0ede8", lineHeight:1.9, margin:"0", maxWidth:"580px"}}>
+                  <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.2em", textTransform:"uppercase", margin:"4px 0 12px"}}>Safety Perception</div>
+                  <p style={{fontFamily:"var(--font-body)", fontSize:"16px", color:"var(--text-primary)", lineHeight:1.9, margin:"0", maxWidth:"580px"}}>
                     {d.safety_perception}
                   </p>
                 </>
@@ -1684,8 +1684,8 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>{ch['whereto']?.chapterNumber || '04'} — {ch['whereto']?.chapterLabel || 'Where To?'}</div>
-                <div style={{height:"1px", background:"#262626"}}/>
+                <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>{ch['whereto']?.chapterNumber || '04'} — {ch['whereto']?.chapterLabel || 'Where To?'}</div>
+                <div style={{height:"1px", background:"var(--border)"}}/>
               </div>
 
               <div className="whereto-tabs" style={{marginBottom:"20px"}}>
@@ -1721,22 +1721,22 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
               {whereToTab === "list" && d.whereTo && d.whereTo.length > 0 && (
                 <div style={{display:"flex", flexDirection:"column", marginBottom:"24px"}}>
                   {d.whereTo.map((item, idx) => (
-                    <div key={idx} style={{display:"flex", justifyContent:"space-between", alignItems:"center", padding:"13px 0", borderBottom:"1px solid #262626"}}>
+                    <div key={idx} style={{display:"flex", justifyContent:"space-between", alignItems:"center", padding:"13px 0", borderBottom:"1px solid var(--border)"}}>
                       <div style={{display:"flex", alignItems:"center", gap:"12px"}}>
                         <div style={{width:"5px", height:"5px", borderRadius:"50%", background:"#E8AE3C", flexShrink:0}}/>
                         <div>
-                          <div style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8"}}>{item.name}</div>
-                          {item.category && <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#c8c8c8", letterSpacing:"0.1em", textTransform:"uppercase", marginTop:"2px"}}>{item.category}</div>}
+                          <div style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"var(--text-primary)"}}>{item.name}</div>
+                          {item.category && <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.1em", textTransform:"uppercase", marginTop:"2px"}}>{item.category}</div>}
                         </div>
                       </div>
-                      <span style={{fontFamily:"'Courier New',monospace", fontSize:"11px", color:"#c8c8c8", letterSpacing:"0.1em", flexShrink:0}}>{item.distance}</span>
+                      <span style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.1em", flexShrink:0}}>{item.distance}</span>
                     </div>
                   ))}
                 </div>
               )}
 
               {whereToTab === "list" && (!d.whereTo || d.whereTo.length === 0) && (
-                <div style={{padding:"32px", background:"#161616", border:"0.5px dashed #262626", borderRadius:"2px", textAlign:"center", fontFamily:"'Courier New',monospace", fontSize:"11px", color:"#c8c8c8", letterSpacing:"0.12em", marginBottom:"24px"}}>
+                <div style={{padding:"32px", background:"var(--surface)", border:"0.5px dashed #262626", borderRadius:"2px", textAlign:"center", fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.12em", marginBottom:"24px"}}>
                   [ LOCATION DETAILS N/A — NO DATA IN CMS ]
                 </div>
               )}
@@ -1787,21 +1787,21 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>{ch['buildplans']?.chapterNumber || '05'} — {ch['buildplans']?.chapterLabel || 'Build Plans'}</div>
-                <div style={{height:"1px", background:"#262626"}}/>
+                <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>{ch['buildplans']?.chapterNumber || '05'} — {ch['buildplans']?.chapterLabel || 'Build Plans'}</div>
+                <div style={{height:"1px", background:"var(--border)"}}/>
               </div>
 
               {isHospitality ? (
                 /* Cell 4: STR Operating Context — short-let legality block */
                 <>
-                  <p style={{fontFamily:"Georgia,serif", fontSize:"16px", color:"#f0ede8", lineHeight:1.85, margin:"0 0 28px", maxWidth:"560px"}}>
+                  <p style={{fontFamily:"var(--font-body)", fontSize:"16px", color:"var(--text-primary)", lineHeight:1.85, margin:"0 0 28px", maxWidth:"560px"}}>
                     Before committing to a short-term rental operation, understand the regulatory context governing this unit.
                   </p>
 
                   {/* STR Legality Status — the most critical field */}
                   {d.short_let_legal && (
                     <div style={{marginBottom:"24px"}}>
-                      <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#c8c8c8", letterSpacing:"0.2em", textTransform:"uppercase", marginBottom:"12px"}}>Short-Let Legal Status</div>
+                      <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.2em", textTransform:"uppercase", marginBottom:"12px"}}>Short-Let Legal Status</div>
                       <div style={{
                         display:"inline-flex", alignItems:"center", gap:"10px",
                         padding:"12px 18px", borderRadius:"2px",
@@ -1819,10 +1819,10 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                             ? "#4caf7d" : d.short_let_legal.includes("Not")
                             ? "#c85050" : "#E8AE3C"
                         }}/>
-                        <span style={{fontFamily:"Georgia,serif", fontSize:"17px", color:"#f0ede8"}}>{d.short_let_legal}</span>
+                        <span style={{fontFamily:"var(--font-body)", fontSize:"17px", color:"var(--text-primary)"}}>{d.short_let_legal}</span>
                       </div>
                       {d.short_let_verified_date && (
-                        <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#6a6a6a", letterSpacing:"0.12em", marginTop:"10px"}}>
+                        <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.12em", marginTop:"10px"}}>
                           Verified as of {d.short_let_verified_date} · Researcher-verified
                         </div>
                       )}
@@ -1831,26 +1831,26 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
 
                   <div style={{display:"flex", flexDirection:"column", marginBottom:"28px"}}>
                     {d.expansion_potential && (
-                      <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", gap:"20px"}}>
-                        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>HOA / Building Rules</span>
-                        <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right"}}>{d.expansion_potential}</span>
+                      <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid var(--border)", gap:"20px"}}>
+                        <span style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>HOA / Building Rules</span>
+                        <span style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"var(--text-primary)", textAlign:"right"}}>{d.expansion_potential}</span>
                       </div>
                     )}
                     {d.zoning_type && (
-                      <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", gap:"20px"}}>
-                        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Zoning</span>
-                        <span style={{fontFamily:"'Courier New',monospace", fontSize:"12px", color:"#f0ede8", textAlign:"right", letterSpacing:"0.04em"}}>{d.zoning_type}</span>
+                      <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid var(--border)", gap:"20px"}}>
+                        <span style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Zoning</span>
+                        <span style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-primary)", textAlign:"right", letterSpacing:"0.04em"}}>{d.zoning_type}</span>
                       </div>
                     )}
                     {d.structural_notes && (
-                      <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", gap:"20px"}}>
-                        <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Permit Notes</span>
-                        <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#f0ede8", textAlign:"right", maxWidth:"55%"}}>{d.structural_notes}</span>
+                      <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid var(--border)", gap:"20px"}}>
+                        <span style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Permit Notes</span>
+                        <span style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"var(--text-primary)", textAlign:"right", maxWidth:"55%"}}>{d.structural_notes}</span>
                       </div>
                     )}
                   </div>
 
-                  <p style={{fontFamily:"system-ui,-apple-system,sans-serif", fontSize:"11.5px", color:"#6a6a6a", lineHeight:1.7, maxWidth:"560px"}}>
+                  <p style={{fontFamily:"system-ui,-apple-system,sans-serif", fontSize:"11.5px", color:"var(--text-muted)", lineHeight:1.7, maxWidth:"560px"}}>
                     Legality status is researcher-verified and reviewed quarterly. Short-let compliance changes frequently — confirm current rules with building management and the local government unit before listing.
                   </p>
                 </>
@@ -1859,31 +1859,31 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                 <>
                   {d.expansion_potential && (
                     <>
-                      <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#c8c8c8", letterSpacing:"0.2em", textTransform:"uppercase", marginBottom:"12px"}}>Expansion Potential</div>
-                      <p style={{fontFamily:"Georgia,serif", fontSize:"17px", color:"#f0ede8", lineHeight:1.9, margin:"0 0 28px", maxWidth:"580px"}}>
+                      <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.2em", textTransform:"uppercase", marginBottom:"12px"}}>Expansion Potential</div>
+                      <p style={{fontFamily:"var(--font-body)", fontSize:"17px", color:"var(--text-primary)", lineHeight:1.9, margin:"0 0 28px", maxWidth:"580px"}}>
                         {d.expansion_potential}
                       </p>
                     </>
                   )}
                   {d.zoning_type && (
-                    <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid #262626", marginBottom:"24px", gap:"20px"}}>
-                      <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.12em", textTransform:"uppercase"}}>Zoning Type</span>
-                      <span style={{fontFamily:"'Courier New',monospace", fontSize:"12px", color:"#f0ede8", letterSpacing:"0.04em", textAlign:"right"}}>{d.zoning_type}</span>
+                    <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid var(--border)", marginBottom:"24px", gap:"20px"}}>
+                      <span style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase"}}>Zoning Type</span>
+                      <span style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-primary)", letterSpacing:"0.04em", textAlign:"right"}}>{d.zoning_type}</span>
                     </div>
                   )}
                   {d.developer_name && (
-                    <div style={{background:"#161616", border:"0.5px solid #262626", borderRadius:"4px", padding:"18px 20px", marginBottom:"24px"}}>
-                      <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#c8c8c8", letterSpacing:"0.18em", textTransform:"uppercase", marginBottom:"8px"}}>Developer</div>
-                      <div style={{fontFamily:"Georgia,serif", fontSize:"18px", color:"#f0ede8", marginBottom: d.developer_notes ? "8px" : "0"}}>{d.developer_name}</div>
+                    <div style={{background:"var(--surface)", border:"0.5px solid #262626", borderRadius:"4px", padding:"18px 20px", marginBottom:"24px"}}>
+                      <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.18em", textTransform:"uppercase", marginBottom:"8px"}}>Developer</div>
+                      <div style={{fontFamily:"var(--font-body)", fontSize:"18px", color:"var(--text-primary)", marginBottom: d.developer_notes ? "8px" : "0"}}>{d.developer_name}</div>
                       {d.developer_notes && (
-                        <div style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#a0a0a0", lineHeight:1.7}}>{d.developer_notes}</div>
+                        <div style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"#a0a0a0", lineHeight:1.7}}>{d.developer_notes}</div>
                       )}
                     </div>
                   )}
                   {d.structural_notes && (
                     <>
-                      <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#c8c8c8", letterSpacing:"0.2em", textTransform:"uppercase", marginBottom:"12px"}}>Structural Notes</div>
-                      <p style={{fontFamily:"Georgia,serif", fontSize:"15px", color:"#f0ede8", lineHeight:1.85, margin:"0", maxWidth:"580px"}}>
+                      <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.2em", textTransform:"uppercase", marginBottom:"12px"}}>Structural Notes</div>
+                      <p style={{fontFamily:"var(--font-body)", fontSize:"15px", color:"var(--text-primary)", lineHeight:1.85, margin:"0", maxWidth:"580px"}}>
                         {d.structural_notes}
                       </p>
                     </>
@@ -1920,51 +1920,51 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>{ch['hiddenintel']?.chapterNumber || '06'} — {ch['hiddenintel']?.chapterLabel || 'The Fine Print'}</div>
-                <div style={{height:"1px", background:"#262626"}}/>
+                <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>{ch['hiddenintel']?.chapterNumber || '06'} — {ch['hiddenintel']?.chapterLabel || 'The Fine Print'}</div>
+                <div style={{height:"1px", background:"var(--border)"}}/>
               </div>
 
               <FloodRiskBadge floodRiskScore={d.flood_risk_score} floodZoneStatus={d.flood_zone_status} />
 
-              <p style={{fontFamily:"Georgia,serif", fontSize:"16px", color:"#f0ede8", lineHeight:1.85, margin:"0 0 28px", maxWidth:"540px"}}>
+              <p style={{fontFamily:"var(--font-body)", fontSize:"16px", color:"var(--text-primary)", lineHeight:1.85, margin:"0 0 28px", maxWidth:"540px"}}>
                 Market and investment intelligence for this asset — transaction history, capitalization rates, and appreciation modelling — is reserved for Verified Scouts.
               </p>
 
               {/* Market panel — unlocks at Cluster+ (canMarketIntel). Reveals real
                   values from d.deepIntel (keyed by label) when unlocked. */}
               {canMarketIntel ? (
-                <div style={{background:"#161616", border:"0.5px solid #262626", borderRadius:"4px", overflow:"hidden", padding:"20px"}}>
+                <div style={{background:"var(--surface)", border:"0.5px solid #262626", borderRadius:"4px", overflow:"hidden", padding:"20px"}}>
                   {["Cap Rate (Area Benchmark)","Transaction History","Appreciation Projection","Price History","Competitive Density","Market Position Index"].map((label, i, arr) => {
                     const raw = d.deepIntel ? d.deepIntel[label] : undefined;
                     const value = raw != null && String(raw).trim() !== "" ? raw : null;
                     return (
                       <div key={label} style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"13px 0", borderBottom: i < arr.length - 1 ? "1px solid #262626" : "none", gap:"20px"}}>
-                        <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#c8c8c8"}}>{label}</span>
+                        <span style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"var(--text-muted)"}}>{label}</span>
                         {value !== null ? (
-                          <span style={{fontFamily:"'Courier New',monospace", fontSize:"12px", color:"#E8AE3C", letterSpacing:"0.04em", textAlign:"right"}}>{value}</span>
+                          <span style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"#E8AE3C", letterSpacing:"0.04em", textAlign:"right"}}>{value}</span>
                         ) : (
-                          <span style={{fontFamily:"'Courier New',monospace", fontSize:"11px", color:"#5a5a5a", letterSpacing:"0.08em", textAlign:"right"}}>Not recorded</span>
+                          <span style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.08em", textAlign:"right"}}>Not recorded</span>
                         )}
                       </div>
                     );
                   })}
                 </div>
               ) : (
-                <div style={{position:"relative", background:"#161616", border:"0.5px solid #262626", borderRadius:"4px", overflow:"hidden"}}>
+                <div style={{position:"relative", background:"var(--surface)", border:"0.5px solid #262626", borderRadius:"4px", overflow:"hidden"}}>
                   <div style={{filter:"blur(5px)", pointerEvents:"none", userSelect:"none", padding:"20px"}}>
                     {["Cap Rate (Area Benchmark)","Transaction History","Appreciation Projection","Price History","Competitive Density","Market Position Index"].map((label, i, arr) => (
                       <div key={label} style={{display:"flex", justifyContent:"space-between", alignItems:"center", padding:"13px 0", borderBottom: i < arr.length - 1 ? "1px solid #262626" : "none"}}>
-                        <span style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#c8c8c8"}}>{label}</span>
-                        <span style={{fontFamily:"'Courier New',monospace", fontSize:"12px", color:"#3a3a3a", letterSpacing:"0.1em"}}>████████</span>
+                        <span style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"var(--text-muted)"}}>{label}</span>
+                        <span style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"#3a3a3a", letterSpacing:"0.1em"}}>████████</span>
                       </div>
                     ))}
                   </div>
                   <div style={{position:"absolute", inset:0, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:"16px", background:"rgba(22,22,22,0.9)"}}>
                     <div style={{display:"flex", alignItems:"center", gap:"8px"}}>
                       <Lock size={15} strokeWidth={1.5} style={{color:"#E8AE3C", flexShrink:0}} />
-                      <span style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#E8AE3C", letterSpacing:"0.25em", textTransform:"uppercase"}}>Market Intelligence · Cluster Tier</span>
+                      <span style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"#E8AE3C", letterSpacing:"0.25em", textTransform:"uppercase"}}>Market Intelligence · Cluster Tier</span>
                     </div>
-                    <a href="/pricing/seeker" style={{textDecoration:"none", fontFamily:"Georgia,serif", fontSize:"14px", color:"#0e0e0e", background:"#E8AE3C", border:"none", padding:"11px 28px", borderRadius:"4px", cursor:"pointer", letterSpacing:"0.03em"}}>
+                    <a href="/pricing/seeker" style={{textDecoration:"none", fontFamily:"var(--font-body)", fontSize:"14px", color:"#0e0e0e", background:"#E8AE3C", border:"none", padding:"11px 28px", borderRadius:"4px", cursor:"pointer", letterSpacing:"0.03em"}}>
                       Unlock with Cluster →
                     </a>
                   </div>
@@ -1974,8 +1974,8 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
             </div>
 
             <div className="panel-sidebar">
-              <div className="sidebar-block"><div className="sidebar-accent-line" style={{background:"#E8AE3C"}}/><div className="sidebar-label">Cap rate est.</div><div className="sidebar-value" style={{color:"#c8c8c8"}}><Lock size={13} strokeWidth={1.5} style={{verticalAlign:"-2px", marginRight:"5px"}} />Locked</div></div>
-              <div className="sidebar-block"><div className="sidebar-label">Price trend</div><div className="sidebar-value" style={{color:"#c8c8c8"}}><Lock size={13} strokeWidth={1.5} style={{verticalAlign:"-2px", marginRight:"5px"}} />Locked</div></div>
+              <div className="sidebar-block"><div className="sidebar-accent-line" style={{background:"#E8AE3C"}}/><div className="sidebar-label">Cap rate est.</div><div className="sidebar-value" style={{color:"var(--text-muted)"}}><Lock size={13} strokeWidth={1.5} style={{verticalAlign:"-2px", marginRight:"5px"}} />Locked</div></div>
+              <div className="sidebar-block"><div className="sidebar-label">Price trend</div><div className="sidebar-value" style={{color:"var(--text-muted)"}}><Lock size={13} strokeWidth={1.5} style={{verticalAlign:"-2px", marginRight:"5px"}} />Locked</div></div>
               <div className="sidebar-block"><div className="sidebar-label">Intel source</div><div className="sidebar-value">ScoutIt Verified</div></div>
             </div>
           </div>
@@ -1985,8 +1985,8 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>{ch['units']?.chapterNumber || '07'} — {ch['units']?.chapterLabel || 'Units & Spaces'}</div>
-                <div style={{height:"1px", background:"#262626"}}/>
+                <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>{ch['units']?.chapterNumber || '07'} — {ch['units']?.chapterLabel || 'Units & Spaces'}</div>
+                <div style={{height:"1px", background:"var(--border)"}}/>
               </div>
 
               <div className="units-z3-list">
@@ -2008,7 +2008,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                     >
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", width: "100%", gap: "12px", flexWrap: "wrap" }}>
                         <div style={{ minWidth: 0 }}>
-                          <div style={{fontFamily:"'Courier New',monospace", fontSize:"11px", color: "#c8c8c8", letterSpacing:"0.18em", textTransform:"uppercase", marginBottom:"8px"}}>
+                          <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color: "var(--text-muted)", letterSpacing:"0.18em", textTransform:"uppercase", marginBottom:"8px"}}>
                             UNIT {String(ui + 1).padStart(2, "0")}
                           </div>
                           <div className="unit-z3-name">{u.name}</div>
@@ -2082,10 +2082,10 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                             const el = document.getElementById(`unit-row-${ui}`);
                             if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
                           }}
-                          style={{display:"flex", alignItems:"baseline", gap:"10px", width:"100%", textAlign:"left", background:"none", border:"none", borderBottom:"1px solid #262626", padding:"9px 0", cursor:"pointer"}}
+                          style={{display:"flex", alignItems:"baseline", gap:"10px", width:"100%", textAlign:"left", background:"none", border:"none", borderBottom:"1px solid var(--border)", padding:"9px 0", cursor:"pointer"}}
                         >
-                          <span style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color: "#6a6a6a", letterSpacing:"0.12em", flexShrink:0}}>{String(ui + 1).padStart(2, "0")}</span>
-                          <span style={{fontFamily:"Georgia,serif", fontSize:"13px", color: "#c8c8c8", lineHeight:1.3}}>{u.name}</span>
+                          <span style={{fontFamily:"var(--font-mono)", fontSize:"11px", color: "var(--text-muted)", letterSpacing:"0.12em", flexShrink:0}}>{String(ui + 1).padStart(2, "0")}</span>
+                          <span style={{fontFamily:"var(--font-body)", fontSize:"13px", color: "var(--text-muted)", lineHeight:1.3}}>{u.name}</span>
                         </button>
                       );
                     })}
@@ -2100,34 +2100,34 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>{ch['universe']?.chapterNumber || '08'} — {ch['universe']?.chapterLabel || 'Property Universe'}</div>
-                <div style={{height:"1px", background:"#262626"}}/>
+                <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>{ch['universe']?.chapterNumber || '08'} — {ch['universe']?.chapterLabel || 'Property Universe'}</div>
+                <div style={{height:"1px", background:"var(--border)"}}/>
               </div>
 
               {d.building_style && (
                 <div style={{marginBottom:"24px"}}>
-                  <span style={{fontFamily:"Georgia,serif", fontStyle:"italic", fontSize:"clamp(22px,3vw,30px)", fontWeight:400, color:"#E8AE3C", letterSpacing:"0.01em"}}>
+                  <span style={{fontFamily:"var(--font-body)", fontStyle:"italic", fontSize:"clamp(22px,3vw,30px)", fontWeight:400, color:"#E8AE3C", letterSpacing:"0.01em"}}>
                     {d.building_style}
                   </span>
                 </div>
               )}
 
               {d.architect_designer && (
-                <div style={{background:"#161616", border:"0.5px solid #262626", borderRadius:"4px", padding:"16px 20px", marginBottom:"28px"}}>
-                  <div style={{fontFamily:"'Courier New',monospace", fontSize:"9px", color:"#c8c8c8", letterSpacing:"0.18em", textTransform:"uppercase", marginBottom:"8px"}}>Architect / Designer</div>
-                  <div style={{fontFamily:"Georgia,serif", fontSize:"18px", color:"#f0ede8"}}>{d.architect_designer}</div>
+                <div style={{background:"var(--surface)", border:"0.5px solid #262626", borderRadius:"4px", padding:"16px 20px", marginBottom:"28px"}}>
+                  <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.18em", textTransform:"uppercase", marginBottom:"8px"}}>Architect / Designer</div>
+                  <div style={{fontFamily:"var(--font-body)", fontSize:"18px", color:"var(--text-primary)"}}>{d.architect_designer}</div>
                 </div>
               )}
 
               {d.universe_summary && (
-                <p style={{fontFamily:"Georgia,serif", fontSize:"clamp(20px,2.5vw,26px)", color:"#f0ede8", lineHeight:1.85, margin:"0 0 8px", maxWidth:"640px"}}>
+                <p style={{fontFamily:"var(--font-body)", fontSize:"clamp(20px,2.5vw,26px)", color:"var(--text-primary)", lineHeight:1.85, margin:"0 0 8px", maxWidth:"640px"}}>
                   {d.universe_summary}
                 </p>
               )}
 
               {d.scoutit_verdict && (
                 <>
-                  <div style={{height:"1px", background:"#262626", margin:"28px 0 20px"}}/>
+                  <div style={{height:"1px", background:"var(--border)", margin:"28px 0 20px"}}/>
                   <div className="verdict-block">
                     <div className="verdict-header"><div className="verdict-dot"/><div className="verdict-title">Space Intelligence Verdict</div></div>
                     <p className="verdict-text">{d.scoutit_verdict}</p>
@@ -2152,10 +2152,10 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
             <div className="panel-sidebar">
               {/* Verdict — the ScoutIt editorial stamp, premium & final */}
               {d.scoutit_verdict && (
-                <div className="sidebar-block" style={{paddingBottom:"22px", borderBottom:"1px solid #262626", marginBottom:"4px"}}>
+                <div className="sidebar-block" style={{paddingBottom:"22px", borderBottom:"1px solid var(--border)", marginBottom:"4px"}}>
                   <div className="sidebar-accent-line" style={{background:"#E8AE3C"}}/>
-                  <div style={{fontFamily:"'Courier New',monospace", fontSize:"11px", color:"#E8AE3C", letterSpacing:"0.18em", textTransform:"uppercase", marginBottom:"10px"}}>ScoutIt Verdict</div>
-                  <div style={{fontFamily:"Georgia,serif", fontSize:"20px", color:"#E8AE3C", lineHeight:1.35}}>{d.scoutit_verdict}</div>
+                  <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"#E8AE3C", letterSpacing:"0.18em", textTransform:"uppercase", marginBottom:"10px"}}>ScoutIt Verdict</div>
+                  <div style={{fontFamily:"var(--font-body)", fontSize:"20px", color:"#E8AE3C", lineHeight:1.35}}>{d.scoutit_verdict}</div>
                 </div>
               )}
               {d.building_style && <div className="sidebar-block"><div className="sidebar-label">Building Style</div><div className="sidebar-value">{d.building_style}</div></div>}
@@ -2171,11 +2171,11 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>{ch['services']?.chapterNumber || '09'} — {ch['services']?.chapterLabel || 'Services'}</div>
-                <div style={{height:"1px", background:"#262626"}}/>
+                <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>{ch['services']?.chapterNumber || '09'} — {ch['services']?.chapterLabel || 'Services'}</div>
+                <div style={{height:"1px", background:"var(--border)"}}/>
               </div>
 
-              <p style={{fontFamily:"Georgia,serif", fontSize:"16px", color:"#f0ede8", lineHeight:1.85, margin:"0 0 28px", maxWidth:"560px"}}>
+              <p style={{fontFamily:"var(--font-body)", fontSize:"16px", color:"var(--text-primary)", lineHeight:1.85, margin:"0 0 28px", maxWidth:"560px"}}>
                 Commission a ScoutIt ecosystem partner to go deeper on this space — from spatial renders to full due-diligence research.
               </p>
 
@@ -2183,21 +2183,21 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                 {[
                   { icon:"🗺️", title:"Curated 3D Map",     desc:"Get a spatial 3D rendering of this property.",            href:"/photographers" },
                   { icon:"🎨", title:"Pre-Design Concept",  desc:"See this space redesigned to your preferences.",          href:"/event-planners" },
-                  { icon:<Search size={22} strokeWidth={1.5} style={{color:"#f0ede8"}} />, title:"Site Research",       desc:"Commission a full due-diligence report on this property.", href:"/researchers" },
-                  { icon:<Camera size={22} strokeWidth={1.5} style={{color:"#f0ede8"}} />, title:"Space Photography",   desc:"Get professional architectural photos taken.",            href:"/photographers" },
-                  { icon:<Building2 size={22} strokeWidth={1.5} style={{color:"#f0ede8"}} />, title:"Verified Advisor",    desc:"Connect with an authorized space intelligence advisor.",  href:"/brokers" },
+                  { icon:<Search size={22} strokeWidth={1.5} style={{color:"var(--text-primary)"}} />, title:"Site Research",       desc:"Commission a full due-diligence report on this property.", href:"/researchers" },
+                  { icon:<Camera size={22} strokeWidth={1.5} style={{color:"var(--text-primary)"}} />, title:"Space Photography",   desc:"Get professional architectural photos taken.",            href:"/photographers" },
+                  { icon:<Building2 size={22} strokeWidth={1.5} style={{color:"var(--text-primary)"}} />, title:"Verified Advisor",    desc:"Connect with an authorized space intelligence advisor.",  href:"/brokers" },
                 ].map(svc => (
                   <Link
                     key={svc.title}
                     href={svc.href}
-                    style={{textDecoration:"none", display:"flex", alignItems:"center", gap:"16px", padding:"18px 20px", background:"#161616", border:"0.5px solid #262626", borderRadius:"4px", transition:"border-color 0.2s ease"}}
+                    style={{textDecoration:"none", display:"flex", alignItems:"center", gap:"16px", padding:"18px 20px", background:"var(--surface)", border:"0.5px solid #262626", borderRadius:"4px", transition:"border-color 0.2s ease"}}
                   >
                     <span style={{fontSize:"22px", flexShrink:0, lineHeight:1}}>{svc.icon}</span>
                     <span style={{flex:1, minWidth:0}}>
-                      <span style={{display:"block", fontFamily:"Georgia,serif", fontSize:"17px", color:"#f0ede8", marginBottom:"3px"}}>{svc.title}</span>
-                      <span style={{display:"block", fontFamily:"system-ui,-apple-system,sans-serif", fontSize:"12.5px", color:"#c8c8c8", lineHeight:1.5}}>{svc.desc}</span>
+                      <span style={{display:"block", fontFamily:"var(--font-body)", fontSize:"17px", color:"var(--text-primary)", marginBottom:"3px"}}>{svc.title}</span>
+                      <span style={{display:"block", fontFamily:"system-ui,-apple-system,sans-serif", fontSize:"12.5px", color:"var(--text-muted)", lineHeight:1.5}}>{svc.desc}</span>
                     </span>
-                    <span style={{fontFamily:"Georgia,serif", fontSize:"16px", color:"#E8AE3C", flexShrink:0}}>→</span>
+                    <span style={{fontFamily:"var(--font-body)", fontSize:"16px", color:"#E8AE3C", flexShrink:0}}>→</span>
                   </Link>
                 ))}
               </div>
@@ -2215,16 +2215,16 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"'Courier New',monospace", fontSize:"10px", color:"#c8c8c8", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>{ch['yourmove']?.chapterNumber || '10'} — {ch['yourmove']?.chapterLabel || 'Your Move'}</div>
-                <div style={{height:"1px", background:"#262626"}}/>
+                <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>{ch['yourmove']?.chapterNumber || '10'} — {ch['yourmove']?.chapterLabel || 'Your Move'}</div>
+                <div style={{height:"1px", background:"var(--border)"}}/>
               </div>
 
-              <h2 style={{fontFamily:"Georgia,serif", fontWeight:400, fontSize:"clamp(26px,3.6vw,40px)", color:"#f0ede8", lineHeight:1.25, margin:"4px 0 28px", maxWidth:"600px"}}>
+              <h2 style={{fontFamily:"var(--font-body)", fontWeight:400, fontSize:"clamp(26px,3.6vw,40px)", color:"var(--text-primary)", lineHeight:1.25, margin:"4px 0 28px", maxWidth:"600px"}}>
                 When you&apos;re ready, we&apos;ll make the introduction.
               </h2>
 
               <div className="reactions-container" style={{marginTop:"0", display:"flex", flexDirection:"column", gap:"10px"}}>
-                <p style={{fontFamily:"'Courier New',monospace", fontSize:"10px", textTransform:"uppercase", letterSpacing:"0.2em", color:"#c8c8c8", marginBottom:"16px"}}>HOW DOES THIS SPACE MAKE YOU FEEL?</p>
+                <p style={{fontFamily:"var(--font-mono)", fontSize:"11px", textTransform:"uppercase", letterSpacing:"0.2em", color:"var(--text-muted)", marginBottom:"16px"}}>HOW DOES THIS SPACE MAKE YOU FEEL?</p>
                 <ReactionButtons propertyId={slug || "batasan-hills"} propertyTitle={d.title} category={d.property_type} city={d.city}/>
               </div>
 
@@ -2233,29 +2233,29 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                 const hasPrice = d.listed_price && d.listed_price.trim().toUpperCase() !== "N/A";
                 return (
                   <>
-                    <div style={{height:"1px", background:"#262626", margin:"28px 0 24px"}}/>
+                    <div style={{height:"1px", background:"var(--border)", margin:"28px 0 24px"}}/>
                     {hasPrice ? (
                       <GlassPanel className="p-6 rounded-md">
-                        <div style={{fontFamily:"Georgia,serif", fontSize:"clamp(30px,4.2vw,44px)", fontWeight:400, color:"#f0ede8", lineHeight:1.1}}>{d.listed_price}</div>
+                        <div style={{fontFamily:"var(--font-body)", fontSize:"clamp(30px,4.2vw,44px)", fontWeight:400, color:"var(--text-primary)", lineHeight:1.1}}>{d.listed_price}</div>
                         {d.price_source && (
-                          <div style={{fontFamily:"'Courier New',monospace", fontSize:"11px", letterSpacing:"0.1em", color:"#c8c8c8", marginTop:"10px"}}>
+                          <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", letterSpacing:"0.1em", color:"var(--text-muted)", marginTop:"10px"}}>
                             Price indicated by {d.price_source}
                           </div>
                         )}
                         {d.price_notes && (
-                          <div style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#a0a0a0", lineHeight:1.6, marginTop:"10px"}}>{d.price_notes}</div>
+                          <div style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"#a0a0a0", lineHeight: 1.75, marginTop:"10px"}}>{d.price_notes}</div>
                         )}
-                        <p style={{fontFamily:"system-ui,-apple-system,sans-serif", fontSize:"11.5px", color:"#c8c8c8", lineHeight:1.7, marginTop:"16px"}}>
+                        <p style={{fontFamily:"system-ui,-apple-system,sans-serif", fontSize:"11.5px", color:"var(--text-muted)", lineHeight:1.7, marginTop:"16px"}}>
                           Price estimates are provided solely by authorized sellers, owners, or licensed property managers. ScoutIt does not set, verify, or guarantee any stated price. For inquiries, speak directly with an authorized representative.
                         </p>
                       </GlassPanel>
                     ) : (
                       <GlassPanel className="p-6 rounded-md">
-                        <div style={{fontFamily:"Georgia,serif", fontSize:"clamp(20px,2.6vw,26px)", fontWeight:400, color:"#f0ede8", lineHeight:1.2}}>Price on request</div>
-                        <p style={{fontFamily:"Georgia,serif", fontSize:"14px", color:"#a0a0a0", lineHeight:1.7, margin:"10px 0 16px", maxWidth:"480px"}}>
+                        <div style={{fontFamily:"var(--font-body)", fontSize:"clamp(20px,2.6vw,26px)", fontWeight:400, color:"var(--text-primary)", lineHeight:1.2}}>Price on request</div>
+                        <p style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"#a0a0a0", lineHeight:1.7, margin:"10px 0 16px", maxWidth:"480px"}}>
                           No confirmed rate has been published for this space. Inquire with the owner, property manager, or broker for current pricing.
                         </p>
-                        <Link href={`/property/${slug || "batasan-hills"}/brokers`} style={{display:"inline-block", fontFamily:"Georgia,serif", fontSize:"16px", color:"#E8AE3C", textDecoration:"none", letterSpacing:"0.01em"}}>
+                        <Link href={`/property/${slug || "batasan-hills"}/brokers`} style={{display:"inline-block", fontFamily:"var(--font-body)", fontSize:"16px", color:"#E8AE3C", textDecoration:"none", letterSpacing:"0.01em"}}>
                           Inquire with an authorized broker →
                         </Link>
                       </GlassPanel>
@@ -2272,17 +2272,17 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
 
               <MonthlyCostCalculator d={d} />
 
-              <div style={{height:"1px", background:"#262626", margin:"28px 0 24px"}}/>
+              <div style={{height:"1px", background:"var(--border)", margin:"28px 0 24px"}}/>
 
               {rosterLoaded && (
                 <div style={{ marginTop: "0", padding: "16px", border: "1px solid var(--accent-muted)", borderRadius: "4px", background: "rgba(232,174,60,0.03)" }}>
-                  <div style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--accent)", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "8px" }}>Current Property Representation</div>
-                  <div style={{ fontFamily: "Georgia,serif", fontSize: "16px", color: "var(--on-surface)" }}>{rosterUnavailable ? "Representation status unavailable" : propertyRoster.length > 0 ? `${propertyRoster.length} active authorized broker${propertyRoster.length === 1 ? "" : "s"}` : "Unrepresented — uploader / lister route"}</div>
-                  <Link href={`/property/${slug || "batasan-hills"}/brokers`} style={{ display: "inline-block", marginTop: "10px", color: "var(--accent-bright)", fontFamily: "var(--font-mono)", fontSize: "10px", letterSpacing: "0.1em", textTransform: "uppercase" }}>View current roster →</Link>
+                  <div style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--accent)", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "8px" }}>Current Property Representation</div>
+                  <div style={{ fontFamily: "var(--font-body)", fontSize: "16px", color: "var(--on-surface)" }}>{rosterUnavailable ? "Representation status unavailable" : propertyRoster.length > 0 ? `${propertyRoster.length} active authorized broker${propertyRoster.length === 1 ? "" : "s"}` : "Unrepresented — uploader / lister route"}</div>
+                  <Link href={`/property/${slug || "batasan-hills"}/brokers`} style={{ display: "inline-block", marginTop: "10px", color: "var(--accent-bright)", fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase" }}>View current roster →</Link>
                 </div>
               )}
 
-              <button onClick={() => setIsInquiryOpen(true)} className="move-cta hover-glow active:scale-[0.98] transition-all" style={{textDecoration:"none", marginTop:"16px", width:"100%", background: "#E8AE3C", color: "#000", border: "none", padding: "16px", fontFamily: "Georgia, serif", fontSize: "16px", cursor: "pointer", borderRadius: "4px"}}>
+              <button onClick={() => setIsInquiryOpen(true)} className="move-cta hover-glow active:scale-[0.98] transition-all" style={{textDecoration:"none", marginTop:"16px", width:"100%", background: "#E8AE3C", color: "#000", border: "none", padding: "16px", fontFamily: "var(--font-body)", fontSize: "16px", cursor: "pointer", borderRadius: "4px"}}>
                 Connect with an Authorized Broker →
               </button>
 
@@ -2326,10 +2326,10 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
               {/* RA 9646 compliance badge */}
               <div style={{display:"inline-flex", alignItems:"center", gap:"8px", marginTop:"20px", padding:"8px 14px", border:"0.5px solid rgba(76,175,125,0.4)", borderRadius:"4px", background:"rgba(76,175,125,0.06)"}}>
                 <span style={{width:"7px", height:"7px", borderRadius:"50%", background:"#4caf7d", flexShrink:0}}/>
-                <span style={{fontFamily:"'Courier New',monospace", fontSize:"9.5px", color:"#4caf7d", letterSpacing:"0.14em", textTransform:"uppercase"}}>RA 9646 Compliant · Display-Only</span>
+                <span style={{fontFamily:"var(--font-mono)", fontSize:"9.5px", color:"#4caf7d", letterSpacing:"0.14em", textTransform:"uppercase"}}>RA 9646 Compliant · Display-Only</span>
               </div>
 
-              <p style={{fontFamily:"Georgia,serif", fontSize:"13px", color:"#c8c8c8", lineHeight:1.7, marginTop:"16px", maxWidth:"600px"}}>
+              <p style={{fontFamily:"var(--font-body)", fontSize:"13px", color:"var(--text-muted)", lineHeight:1.7, marginTop:"16px", maxWidth:"600px"}}>
                 ScoutIt is a spatial intelligence archive. In compliance with R.A. 9646, all site walks, direct inquiries, and purchase offers are facilitated exclusively by licensed, authorized real estate brokers.
               </p>
 
@@ -2359,7 +2359,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
             border: 'none',
             padding: '14px 24px',
             borderRadius: '4px',
-            fontFamily: "'Courier New',monospace",
+            fontFamily: "var(--font-mono)",
             fontSize: '12px',
             letterSpacing: '0.15em',
             textTransform: 'uppercase',

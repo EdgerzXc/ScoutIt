@@ -5,10 +5,10 @@ import { calculateMortgage, parsePriceToNumber, MORTGAGE_DEFAULTS } from "@/lib/
 
 const peso = (v) => `₱${Math.round(v).toLocaleString("en-PH")}`;
 
-const fieldLabel = { fontFamily: "'Courier New',monospace", fontSize: "9px", color: "#c8c8c8", letterSpacing: "0.1em", textTransform: "uppercase" };
+const fieldLabel = { fontFamily: "var(--font-mono)", fontSize: "9px", color: "#c8c8c8", letterSpacing: "0.1em", textTransform: "uppercase" };
 const fieldInput = { background: "#0e0e0e", border: "0.5px solid #262626", borderRadius: "2px", padding: "8px 10px", color: "#f0ede8", fontFamily: "Georgia,serif", fontSize: "14px", width: "100%" };
 const outputRow = { display: "flex", justifyContent: "space-between", alignItems: "baseline", padding: "11px 0", borderBottom: "1px solid #262626", gap: "16px" };
-const outputLabel = { fontFamily: "'Courier New',monospace", fontSize: "10px", color: "#c8c8c8", letterSpacing: "0.1em", textTransform: "uppercase" };
+const outputLabel = { fontFamily: "var(--font-mono)", fontSize: "10px", color: "#c8c8c8", letterSpacing: "0.1em", textTransform: "uppercase" };
 
 // Only meaningful for a purchase (not a lease/rental) — mortgage math doesn't
 // apply to renting a space.
@@ -33,7 +33,7 @@ export default function AffordabilityCalculator({ listedPrice, priceStatus, tenu
 
   return (
     <div style={{ marginTop: "24px", padding: "22px 24px", background: "#161616", border: "0.5px solid #262626", borderRadius: "4px" }}>
-      <div style={{ fontFamily: "'Courier New',monospace", fontSize: "10px", color: "#E8AE3C", letterSpacing: "0.18em", textTransform: "uppercase", marginBottom: "16px" }}>
+      <div style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#E8AE3C", letterSpacing: "0.18em", textTransform: "uppercase", marginBottom: "16px" }}>
         Affordability Estimate
       </div>
 

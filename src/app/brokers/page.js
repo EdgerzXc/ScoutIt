@@ -569,10 +569,10 @@ export default function BrokersPage() {
           letter-spacing: 0.18em;
           text-transform: uppercase;
           color: var(--text-primary);
-          background: rgba(14, 14, 14, 0.82);
+          background: var(--surface);
           backdrop-filter: blur(4px);
           -webkit-backdrop-filter: blur(4px);
-          border: 1px dashed rgba(240, 237, 232, 0.45);
+          border: 1px dashed var(--border-mid);
           padding: 5px 11px;
           border-radius: var(--radius-sm);
           z-index: 10;
@@ -580,8 +580,8 @@ export default function BrokersPage() {
         }
 
         .broker-card {
-          background: linear-gradient(165deg, #1a1917, #111110);
-          border: 1px solid rgba(255, 255, 255, 0.08);
+          background: var(--surface2);
+          border: 1px solid var(--border);
           border-radius: var(--radius-md);
           overflow: hidden;
           display: flex;
@@ -747,7 +747,10 @@ export default function BrokersPage() {
 
         .btn-contact:hover {
           background: var(--accent);
-          color: #000;
+          color: var(--bg, #000);
+        }
+        .btn-contact:active {
+          transform: scale(0.96);
         }
 
         .general-tier-badge-label {

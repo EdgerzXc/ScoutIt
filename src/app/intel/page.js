@@ -968,12 +968,13 @@ export default function IntelPage() {
           height: 100dvh;
           width: 420px;
           max-width: 95vw;
-          background: #111111;
+          background: var(--surface);
           border-left: 1px solid var(--border-solid);
           display: flex;
           flex-direction: column;
           overflow-y: auto;
           animation: slideInRight 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+          box-shadow: var(--shadow-lg);
         }
 
         @keyframes slideInRight {
@@ -998,6 +999,9 @@ export default function IntelPage() {
           border-radius: 2px;
           transition: all 0.2s ease;
           z-index: 2;
+        }
+        .side-panel-close:active {
+          transform: scale(0.92);
         }
 
         .side-panel-close:hover {
@@ -1030,9 +1034,9 @@ export default function IntelPage() {
         }
 
         .side-panel-insight-note {
-          background: rgba(232, 174, 60,0.07);
-          border: 1px solid rgba(232, 174, 60,0.3);
-          border-left: 3px solid #E8AE3C;
+          background: rgba(var(--accent-rgb), 0.07);
+          border: 1px solid rgba(var(--accent-rgb), 0.3);
+          border-left: 3px solid var(--accent);
           border-radius: 4px;
           padding: 12px 16px;
         }
@@ -1040,7 +1044,7 @@ export default function IntelPage() {
         .side-panel-insight-note span {
           font-family: var(--font-mono);
           font-size: 10px;
-          color: #E8AE3C;
+          color: var(--accent);
           text-transform: uppercase;
           letter-spacing: 0.1em;
           font-weight: 700;
@@ -1050,7 +1054,7 @@ export default function IntelPage() {
 
         .side-panel-insight-note p {
           font-size: 12px;
-          color: #E8AE3C;
+          color: var(--accent);
           margin: 0;
           opacity: 0.8;
         }
@@ -1058,7 +1062,7 @@ export default function IntelPage() {
         .side-panel-title {
           font-family: var(--font-display);
           font-size: 24px;
-          color: #fff;
+          color: var(--text-primary);
           line-height: 1.3;
           margin: 0;
         }
@@ -1087,10 +1091,13 @@ export default function IntelPage() {
           transition: all 0.2s ease;
           align-self: flex-start;
         }
+        .side-panel-cta:active {
+          transform: scale(0.96);
+        }
 
         .side-panel-cta:hover {
           background: var(--accent);
-          color: #0e0e0e;
+          color: var(--bg, #0e0e0e);
         }
       `}</style>
     </div>

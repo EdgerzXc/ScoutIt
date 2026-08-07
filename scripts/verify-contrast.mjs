@@ -46,6 +46,17 @@ const L = {
   yellow: "#a16207",
   sapphire: "#1d4ed8",
   amethyst: "#6d28d9",
+  // The Material-3 keys Tailwind exposes, rewired off flat hex 2026-08-07
+  // (§63). `on-surface` is 367 call sites of ink; `surface-variant` is 497
+  // call sites of hairline/panel. If these drift, light mode silently
+  // regresses across the whole app, so they are checked here.
+  tierDiamond: "#0e7490",
+  tierPlatinum: "#3f6382",
+  tierSilver: "#57575f",
+  tierBronze: "#8a5320",
+  m3OnSurface: "#111113",
+  m3SurfaceVariant: "#d6d6db",
+  onAccent: "#111113",
 };
 
 // ── The dark theme, for comparison — light mode must not be the weaker one ──
@@ -56,6 +67,10 @@ const D = {
   textSecondary: "#a8a29a",
   accent: "#E8AE3C",
   accentBright: "#F7C64E",
+  accentFill: "#E8AE3C",
+  m3OnSurface: "#e5e2e1",
+  m3SurfaceVariant: "#353535",
+  onAccent: "#111113",
 };
 
 const AA_BODY = 4.5;   // normal text
@@ -82,11 +97,25 @@ const checks = [
   ["LIGHT  sapphire       on surface", L.sapphire, L.surface, AA_BODY],
   ["LIGHT  amethyst       on surface", L.amethyst, L.surface, AA_BODY],
 
+  // ── The rewired Material-3 Tailwind keys. ─────────────────────────
+  ["LIGHT  on-surface     on surface", L.m3OnSurface, L.surface, AA_BODY],
+  ["LIGHT  on-surface  on surface-var", L.m3OnSurface, L.m3SurfaceVariant, AA_BODY],
+  ["LIGHT  on-accent  on accent-fill", L.onAccent, L.accentFill, AA_BODY],
+
+  // ── Broker tier hues as TEXT (`.rating-num`). ─────────────────────
+  ["LIGHT  tier-diamond  on surface", L.tierDiamond, L.surface, AA_BODY],
+  ["LIGHT  tier-platinum on surface", L.tierPlatinum, L.surface, AA_BODY],
+  ["LIGHT  tier-silver   on surface", L.tierSilver, L.surface, AA_BODY],
+  ["LIGHT  tier-bronze   on surface", L.tierBronze, L.surface, AA_BODY],
+
   // ── Dark mode, unchanged — regression guard. ───────────────────────
   ["DARK   text-primary   on bg", D.textPrimary, D.bg, AA_BODY],
   ["DARK   text-secondary on surface", D.textSecondary, D.surface, AA_BODY],
   ["DARK   accent (text)  on bg", D.accent, D.bg, AA_BODY],
   ["DARK   accent-bright  on bg", D.accentBright, D.bg, AA_BODY],
+  ["DARK   on-surface     on surface", D.m3OnSurface, D.surface, AA_BODY],
+  ["DARK   on-surface  on surface-var", D.m3OnSurface, D.m3SurfaceVariant, AA_BODY],
+  ["DARK   on-accent  on accent-fill", D.onAccent, D.accentFill, AA_BODY],
 ];
 
 let failed = 0;

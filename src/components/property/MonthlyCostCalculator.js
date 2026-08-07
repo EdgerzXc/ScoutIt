@@ -11,10 +11,10 @@ import { useMemo, useState } from "react";
 
 const peso = (v) => `₱${Math.round(v).toLocaleString("en-PH")}`;
 
-const fieldLabel = { fontFamily: "'Courier New',monospace", fontSize: "9px", color: "#c8c8c8", letterSpacing: "0.1em", textTransform: "uppercase" };
+const fieldLabel = { fontFamily: "var(--font-mono)", fontSize: "9px", color: "#c8c8c8", letterSpacing: "0.1em", textTransform: "uppercase" };
 const fieldInput = { background: "#0e0e0e", border: "0.5px solid #262626", borderRadius: "2px", padding: "8px 10px", color: "#f0ede8", fontFamily: "Georgia,serif", fontSize: "14px", width: "100%" };
 const outputRow = { display: "flex", justifyContent: "space-between", alignItems: "baseline", padding: "10px 0", borderBottom: "1px solid #262626", gap: "16px" };
-const outputLabel = { fontFamily: "'Courier New',monospace", fontSize: "10px", color: "#c8c8c8", letterSpacing: "0.1em", textTransform: "uppercase" };
+const outputLabel = { fontFamily: "var(--font-mono)", fontSize: "10px", color: "#c8c8c8", letterSpacing: "0.1em", textTransform: "uppercase" };
 
 // First number in a messy price-ish string ("₱1,200 / sqm / mo" → 1200).
 function parseNum(raw) {
@@ -91,7 +91,7 @@ export default function MonthlyCostCalculator({ d }) {
 
   return (
     <div data-testid="monthly-cost-sandbox" style={{ marginTop: "24px", padding: "22px 24px", background: "#161616", border: "0.5px solid #262626", borderRadius: "4px" }}>
-      <div style={{ fontFamily: "'Courier New',monospace", fontSize: "10px", color: "#E8AE3C", letterSpacing: "0.18em", textTransform: "uppercase", marginBottom: "6px" }}>
+      <div style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#E8AE3C", letterSpacing: "0.18em", textTransform: "uppercase", marginBottom: "6px" }}>
         Monthly Cost Sandbox
       </div>
       <p style={{ fontFamily: "Georgia,serif", fontSize: "13px", color: "#a0a0a0", lineHeight: 1.6, margin: "0 0 18px", maxWidth: "480px" }}>
@@ -110,7 +110,7 @@ export default function MonthlyCostCalculator({ d }) {
           ))}
         </div>
       ) : (
-        <p style={{ fontFamily: "'Courier New',monospace", fontSize: "10px", color: "#5a5a5a", letterSpacing: "0.08em", textTransform: "uppercase", margin: "0 0 18px" }}>
+        <p style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#5a5a5a", letterSpacing: "0.08em", textTransform: "uppercase", margin: "0 0 18px" }}>
           No recurring charges on record for this listing — ask the representative.
         </p>
       )}

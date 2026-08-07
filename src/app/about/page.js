@@ -219,7 +219,7 @@ export default function AboutPage() {
         .ecosystem-map {
           margin: 100px 0;
           padding: 60px 40px;
-          background: #0d0d0d;
+          background: var(--surface);
           border: 1px solid var(--border-solid);
           border-radius: var(--radius-md);
         }
@@ -248,7 +248,7 @@ export default function AboutPage() {
           left: 10%;
           right: 10%;
           height: 1px;
-          background: linear-gradient(90deg, transparent, rgba(232, 174, 60,0.3), transparent);
+          background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb), 0.3), transparent);
           z-index: 0;
         }
 
@@ -267,27 +267,27 @@ export default function AboutPage() {
           letter-spacing: 0.15em;
           text-align: center;
           margin-bottom: 16px;
-          border-bottom: 1px solid #262626;
+          border-bottom: 1px solid var(--border-solid);
           padding-bottom: 12px;
         }
 
         .center-header {
           color: var(--accent);
-          border-bottom: 1px solid rgba(232, 174, 60,0.3);
+          border-bottom: 1px solid rgba(var(--accent-rgb), 0.3);
         }
 
         .eco-node {
-          background: linear-gradient(165deg, #1a1917, #111110);
-          border: 1px solid rgba(255, 255, 255, 0.08);
+          background: var(--surface2);
+          border: 1px solid var(--border);
           padding: 24px;
           border-radius: 4px;
           transition: all 0.3s ease;
         }
 
         .eco-node:hover {
-          border-color: rgba(232, 174, 60, 0.3);
+          border-color: rgba(var(--accent-rgb), 0.3);
           transform: translateY(-4px);
-          box-shadow: 0 14px 32px rgba(0, 0, 0, 0.45), var(--shadow-glow-soft);
+          box-shadow: var(--shadow-md), var(--shadow-glow-soft);
         }
 
         .outcome-node {
@@ -295,13 +295,13 @@ export default function AboutPage() {
         }
 
         .eco-core-node {
-          background: linear-gradient(155deg, #1d1a16, #131110);
-          border: 1px solid rgba(232, 174, 60, 0.28);
+          background: var(--surface3);
+          border: 1px solid rgba(var(--accent-rgb), 0.28);
           padding: 32px 24px;
           border-radius: 4px;
           text-align: center;
           position: relative;
-          box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 40px rgba(232, 174, 60, 0.06);
+          box-shadow: var(--shadow-lg), var(--shadow-glow-soft);
           display: flex;
           flex-direction: column;
           justify-content: center;

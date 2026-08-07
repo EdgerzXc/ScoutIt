@@ -486,7 +486,7 @@ export default function ManilaTransitMap({ propertyLat, propertyLng, propertyTit
           width: 100%;
           height: 100%;
           min-height: 600px;
-          border: 0.5px solid #262626;
+          border: 0.5px solid var(--border-solid);
           border-radius: 4px;
           overflow: hidden;
           background: #000;
@@ -500,12 +500,12 @@ export default function ManilaTransitMap({ propertyLat, propertyLng, propertyTit
               hover) instead of the default white box that clashed with the theme ── */
         .transit-map-wrapper .maplibregl-ctrl-group,
         .transit-map-wrapper .mapboxgl-ctrl-group {
-          background: rgba(13, 13, 13, 0.85);
+          background: var(--surface);
           backdrop-filter: blur(10px);
           -webkit-backdrop-filter: blur(10px);
-          border: 0.5px solid #262626;
+          border: 0.5px solid var(--border-solid);
           border-radius: 6px;
-          box-shadow: none;
+          box-shadow: var(--shadow-sm);
           overflow: hidden;
         }
         .transit-map-wrapper .maplibregl-ctrl-group button,
@@ -516,36 +516,27 @@ export default function ManilaTransitMap({ propertyLat, propertyLng, propertyTit
         }
         .transit-map-wrapper .maplibregl-ctrl-group button + button,
         .transit-map-wrapper .mapboxgl-ctrl-group button + button {
-          border-top: 0.5px solid #262626;
+          border-top: 0.5px solid var(--border-solid);
         }
         .transit-map-wrapper .maplibregl-ctrl-group button:hover,
         .transit-map-wrapper .mapboxgl-ctrl-group button:hover {
-          background: rgba(232, 174, 60, 0.14);
-        }
-        /* Default control glyphs are dark SVGs meant for a white box — invert
-           them so they read as light on the dark control. */
-        .transit-map-wrapper .maplibregl-ctrl-group button .maplibregl-ctrl-icon,
-        .transit-map-wrapper .mapboxgl-ctrl-group button .mapboxgl-ctrl-icon {
-          filter: invert(0.85);
-        }
-        .transit-map-wrapper .maplibregl-ctrl-group button:hover .maplibregl-ctrl-icon,
-        .transit-map-wrapper .mapboxgl-ctrl-group button:hover .mapboxgl-ctrl-icon {
-          filter: invert(1);
+          background: rgba(var(--accent-rgb), 0.14);
         }
         .transit-map-panel {
           position: absolute;
           top: 16px;
           left: 16px;
           z-index: 5;
-          background: rgba(13, 13, 13, 0.85);
+          background: var(--surface);
           backdrop-filter: blur(10px);
-          border: 0.5px solid #262626;
+          border: 0.5px solid var(--border-solid);
           border-radius: 6px;
           padding: 14px 16px;
           display: flex;
           flex-direction: column;
           gap: 10px;
           min-width: 200px;
+          box-shadow: var(--shadow-md);
         }
         .transit-map-panel-title {
           font-family: var(--font-mono);
