@@ -62,6 +62,18 @@ export default function Header() {
       </Link>
 
       <nav className="header-nav" ref={menuRef}>
+        <button
+          className="header-eye-btn"
+          type="button"
+          onClick={() => window.dispatchEvent(new CustomEvent("scoutit:open-display-settings"))}
+          aria-label="Display Settings (Light / Lite / Dark Mode)"
+          title="Display Settings (Light / Lite / Dark Mode)"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+            <circle cx="12" cy="12" r="3" />
+          </svg>
+        </button>
         <Link
           href={profileHref}
           className={`header-profile-btn ${user ? "signed-in" : ""}`}
@@ -100,6 +112,16 @@ export default function Header() {
           <Link href="/wishlist">Your Board</Link>
           <Link href="/dashboard">Dashboard</Link>
           <Link href="/about">About</Link>
+          <button
+            type="button"
+            className="dropdown-display-btn"
+            onClick={() => {
+              setMenuOpen(false);
+              window.dispatchEvent(new CustomEvent("scoutit:open-display-settings"));
+            }}
+          >
+            👁️ Display Settings
+          </button>
         </div>
       </nav>
       
@@ -109,7 +131,7 @@ export default function Header() {
           justify-content: space-between;
           align-items: center;
           padding: 16px 24px;
-          background: rgba(14, 14, 14, 0.85);
+          background: var(--brand-overlay);
           backdrop-filter: blur(12px);
           -webkit-backdrop-filter: blur(12px);
           border-bottom: 1px solid var(--border-solid);
@@ -140,7 +162,10 @@ export default function Header() {
         .header-back-btn:hover {
           border-color: var(--accent);
           color: var(--accent);
-          background: rgba(232, 174, 60, 0.1);
+          background: rgba(var(--accent-rgb), 0.1);
+        }
+        .header-back-btn:active {
+          transform: scale(0.96);
         }
 
         .header-brand {
@@ -155,17 +180,62 @@ export default function Header() {
           white-space: nowrap;
           line-height: 1;
         }
-        .header-brand .brand-scout { color: #f5f3ee; }
+        .header-brand .brand-scout { color: var(--text-primary); }
         .header-brand .brand-s,
         .header-brand .brand-it { color: var(--accent); transition: text-shadow 0.3s ease; }
         .header-brand:hover .brand-s,
-        .header-brand:hover .brand-it { text-shadow: 0 0 14px rgba(232, 174, 60, 0.55); }
+        .header-brand:hover .brand-it { text-shadow: 0 0 14px rgba(var(--accent-rgb), 0.55); }
 
         .header-nav {
           position: relative;
           display: flex;
           align-items: center;
           gap: 10px;
+        }
+
+        .header-eye-btn {
+          width: 44px;
+          height: 44px;
+          border-radius: 50%;
+          border: 1px solid var(--accent-border);
+          background: var(--brand-overlay);
+          color: var(--accent);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: all 0.2s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        .header-eye-btn:hover {
+          border-color: var(--accent);
+          background: rgba(var(--accent-rgb), 0.12);
+        }
+        .header-eye-btn:active {
+          transform: scale(0.94);
+        }
+
+        .dropdown-display-btn {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          width: 100%;
+          text-align: left;
+          background: none;
+          border: none;
+          color: var(--accent);
+          font-family: var(--font-mono);
+          font-size: 11px;
+          font-weight: 600;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          padding: 12px 14px;
+          cursor: pointer;
+          transition: background 0.2s ease;
+          border-top: 1px solid var(--border-solid);
+          margin-top: 4px;
+        }
+        .dropdown-display-btn:hover {
+          background: var(--surface2);
         }
 
         .header-profile-btn {
@@ -178,7 +248,10 @@ export default function Header() {
           align-items: center;
           justify-content: center;
           text-decoration: none;
-          transition: all 0.25s ease;
+          transition: all 0.2s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        .header-profile-btn:active {
+          transform: scale(0.94);
         }
 
         .header-profile-btn svg {
@@ -200,7 +273,7 @@ export default function Header() {
 
         .header-profile-btn:hover {
           border-color: var(--accent-bright);
-          background: rgba(232, 174, 60, 0.16);
+          background: rgba(var(--accent-rgb), 0.16);
           box-shadow: var(--shadow-glow-soft);
           transform: translateY(-1px);
         }
@@ -228,12 +301,15 @@ export default function Header() {
           display: flex;
           align-items: center;
           justify-content: center;
-          transition: all 0.25s ease;
+          transition: all 0.2s cubic-bezier(0.23, 1, 0.32, 1);
           touch-action: manipulation;
+        }
+        .header-menu-btn:active {
+          transform: scale(0.94);
         }
 
         .header-menu-btn:hover {
-          background: rgba(232, 174, 60, 0.15);
+          background: rgba(var(--accent-rgb), 0.15);
           border-color: var(--accent-border);
         }
 
@@ -247,40 +323,41 @@ export default function Header() {
           position: absolute;
           top: calc(100% + 8px);
           right: 0;
-          min-width: 180px;
-          background: var(--brand-overlay);
-          border: 1px solid var(--border-mid);
-          border-radius: 6px;
+          min-width: 190px;
+          background: var(--surface);
+          border: 1px solid var(--border-solid);
+          border-radius: var(--radius-md);
           padding: 8px;
           backdrop-filter: blur(16px);
           -webkit-backdrop-filter: blur(16px);
-          box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+          box-shadow: var(--shadow-lg);
           opacity: 0;
           visibility: hidden;
-          transform: translateY(-6px);
-          transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+          transform: scale(0.96) translateY(-4px);
+          transform-origin: top right;
+          transition: opacity 180ms cubic-bezier(0.23, 1, 0.32, 1), transform 180ms cubic-bezier(0.23, 1, 0.32, 1), visibility 180ms cubic-bezier(0.23, 1, 0.32, 1);
           z-index: 1001;
         }
 
         .header-dropdown.open {
           opacity: 1;
           visibility: visible;
-          transform: translateY(0);
+          transform: scale(1) translateY(0);
         }
 
         .header-dropdown a {
           display: block;
-          padding: 12px 14px;
+          padding: 10px 14px;
           font-size: 13px;
           font-weight: 500;
           color: var(--text-secondary);
           text-decoration: none;
-          border-radius: 4px;
-          transition: all 0.2s ease;
+          border-radius: var(--radius-sm);
+          transition: background 150ms ease, color 150ms ease, padding-left 150ms ease;
         }
 
         .header-dropdown a:hover {
-          background: rgba(255, 255, 255, 0.06);
+          background: var(--surface2);
           color: var(--text-primary);
           padding-left: 18px;
         }
@@ -293,7 +370,7 @@ export default function Header() {
           color: var(--accent);
           padding: 8px 14px 4px;
           pointer-events: none;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+          border-bottom: 1px solid var(--border-solid);
           margin-bottom: 6px;
         }
 
@@ -310,18 +387,18 @@ export default function Header() {
 
           .header-back-btn {
             font-size: 10px;
-            padding: 0 12px;
-            min-height: 38px;
+            padding: 0 14px;
+            min-height: 44px;
           }
           
           .header-menu-btn {
-            width: 38px;
-            height: 38px;
+            width: 44px;
+            height: 44px;
           }
 
           .header-profile-btn {
-            width: 38px;
-            height: 38px;
+            width: 44px;
+            height: 44px;
           }
 
           .header-profile-btn .profile-initial {
