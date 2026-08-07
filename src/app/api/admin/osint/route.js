@@ -1,9 +1,34 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { requireAdmin } from "@/lib/adminGuard";
+
+// ⚠️ 🔴 UNAUTHENTICATED UNTIL 2026-08-06 (§59, full-system audit).
+//
+// Neither handler below checked anything, while both used the service-role
+// client. The consequences, in order of severity:
+//
+//   1. `POST { action: "publish_briefing" }` inserted directly into
+//      `intel_briefings`. `lib/cmsCache.js` reads that table into `/api/cms`,
+//      which renders the PUBLIC `/intel` page and `/intel/[article-slug]` —
+//      and Supabase briefings are merged with PRIORITY OVER AIRTABLE BY SLUG.
+//      So any anonymous caller could publish an article under ScoutIt's name,
+//      or overwrite an existing legitimate one by reusing its slug.
+//   2. `POST { action: "manual_input" }` wrote arbitrary rows to `intel_sources`.
+//   3. `GET` returned every source and briefing, including unpublished drafts.
+//
+// The path says `/api/admin/`, which is exactly why nobody looked: the name
+// implied a gate that was never there. `src/proxy.js` matches `/api/:path*`
+// but only does rate limiting, the kill switch and flags — it has NO admin
+// check, so the middleware was not covering this either.
+//
+// Both handlers are now staff-gated via the shared `requireAdmin`.
 
 // 1. GET /api/admin/osint — Fetch raw OSINT sources & staging briefings for Mission Control
 export async function GET(req) {
   try {
+    const gate = await requireAdmin(req, { label: "ADMIN OSINT" });
+    if (gate.error) return NextResponse.json({ error: gate.error }, { status: gate.status });
+
     const supabase = supabaseAdmin;
 
     // Fetch raw OSINT sources
@@ -39,6 +64,9 @@ export async function GET(req) {
 // 2. POST /api/admin/osint — Generate 1-Click Master Prompt or Publish AI Output
 export async function POST(req) {
   try {
+    const gate = await requireAdmin(req, { label: "ADMIN OSINT" });
+    if (gate.error) return NextResponse.json({ error: gate.error }, { status: gate.status });
+
     const body = await req.json();
     const { action } = body;
     const supabase = supabaseAdmin;

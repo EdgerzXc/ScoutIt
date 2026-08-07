@@ -1,23 +1,33 @@
 import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { fetchProperties, updateProperty } from "@/lib/airtable";
-import { resolveUserId } from "@/lib/serverAuth";
+import { requireAdmin } from "@/lib/adminGuard";
 import { sanitizeError } from "@/lib/sanitizeError";
 
-
+// ⚠️ 🟠 UNDER-GATED UNTIL 2026-08-06 (§59, full-system audit).
+//
+// This lives under `/api/admin/` and writes AI-generated SEO copy straight to
+// Airtable via `updateProperty()` — i.e. it mutates a listing's PUBLIC search
+// metadata. But it only checked `resolveUserId`, which answers "is anyone signed
+// in?", not "may THIS person edit THIS listing?". There was no admin check and
+// no ownership check, so any signed-in user could rewrite any property's public
+// SEO copy by passing its id.
+//
+// Now staff-gated. It has no production caller, so tightening it breaks nothing.
+// If owners are ever meant to run this on their OWN listing, add an ownership
+// branch — do not relax this back to a bare session check.
 
 export async function POST(request) {
   try {
-    const userId = await resolveUserId(request);
-    
-    // Read body exactly once
+    // Read body exactly once.
     const body = await request.json().catch(() => ({}));
-    
-    // The master-dev bypass is dev-only -- in production a verified session
-    // token is required, full stop (same gate as /api/dashboard/publish).
+
+    // The master-dev bypass is dev-only -- in production a verified staff
+    // session is required, full stop (same gate as /api/dashboard/publish).
     const isDevMock = process.env.NODE_ENV !== 'production' && body.mockOwnerId === 'master-dev';
-    if (!userId && !isDevMock) {
-       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!isDevMock) {
+      const gate = await requireAdmin(request, { label: "ADMIN GENERATE-SEO" });
+      if (gate.error) return NextResponse.json({ error: gate.error }, { status: gate.status });
     }
 
     const { id } = body;

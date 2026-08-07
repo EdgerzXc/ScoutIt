@@ -3,56 +3,47 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 
-const MOCK_OSINT_FLASH_FEED = [
-  {
-    id: "osint-1",
-    timestamp: "2 mins ago",
-    type: "PSE EDGE FILING",
-    headline: "Megaworld allocates ₱350M for BGC Commercial Core Expansion",
-    city: "BGC, Taguig",
-    slug: "bgc-spatial-movement",
-    sourceUrl: "https://edge.pse.com.ph",
-  },
-  {
-    id: "osint-2",
-    timestamp: "14 mins ago",
-    type: "DENR ECC CLEARANCE",
-    headline: "Siargao General Luna Eco-Resort Tourism Infrastructure Approved",
-    city: "Siargao, Surigao del Norte",
-    slug: "surf-front-land-rush",
-    sourceUrl: "https://emb.gov.ph",
-  },
-  {
-    id: "osint-3",
-    timestamp: "42 mins ago",
-    type: "MAKATI LGU GAZETTE",
-    headline: "Poblacion Culinary District Density Bonus Approved for Adaptive Reuse",
-    city: "Poblacion, Makati",
-    slug: "poblacion-food-architecture",
-    sourceUrl: "https://makati.gov.ph",
-  },
-  {
-    id: "osint-4",
-    timestamp: "1 hr ago",
-    type: "CAAP AVIATION NOTICE",
-    headline: "El Nido Airport Expansion Plan Opens Public Consultation",
-    city: "El Nido, Palawan",
-    slug: "off-grid-island-living",
-    sourceUrl: "https://caap.gov.ph",
-  },
-  {
-    id: "osint-5",
-    timestamp: "2 hrs ago",
-    type: "PEZA BULLETIN",
-    headline: "Makati CBD Grade-A Commercial Towers Achieve 94.8% Occupancy Peak",
-    city: "Makati CBD, Metro Manila",
-    slug: "green-office-demand",
-    sourceUrl: "https://peza.gov.ph",
-  },
-];
+// ─────────────────────────────────────────────────────────────────────────
+// 🔴 THE FABRICATED FEED THAT USED TO LIVE HERE — REMOVED 2026-08-06 (§59)
+//
+// This component shipped with a hardcoded `MOCK_OSINT_FLASH_FEED` of five
+// items, and rendered them on the PUBLIC /intel page as live intelligence:
+//
+//   "PSE EDGE FILING · 2 mins ago — Megaworld allocates ₱350M for BGC
+//    Commercial Core Expansion"        sourceUrl: https://edge.pse.com.ph
+//
+// Every part of that is invented. Megaworld is a real listed company
+// (PSE: MEG), the ₱350M figure was never disclosed, and the item linked to the
+// genuine PSE disclosure portal — which lends the fabrication the credibility
+// of the exchange itself. The other four did the same to DENR (an ECC approval
+// that does not exist), the Makati LGU (an invented ordinance), CAAP, and PEZA
+// (an invented 94.8% occupancy statistic). Each carried a fake relative
+// timestamp so the whole thing read as a live wire.
+//
+// Two things made it worse than a placeholder:
+//   1. The mock items were APPENDED to real ones
+//      (`[...formatted, ...MOCK_OSINT_FLASH_FEED]`), so once real briefings
+//      existed, invented filings would sit beside them, indistinguishable.
+//   2. `intel_briefings` has 0 rows, so 100% of what visitors actually saw was
+//      fabricated.
+//
+// Standing Rule 3 says never render a number you cannot source. This went
+// further: it attributed specific figures to named real institutions that never
+// said them. For a Philippine property platform whose entire pitch is verified
+// intelligence, that is the one mistake with no cheap recovery — and inventing
+// a material disclosure about a listed issuer is a securities problem, not just
+// a trust problem.
+//
+// The same five fabrications were also hardcoded in
+// `/api/cron/osint-scraper` as `PUBLIC_FEEDS`, ready to be INSERTED into
+// `intel_sources` as though they had been scraped. Neutralised there too.
+//
+// The replacement is the honest blank: render nothing until there is real
+// intel. An empty ticker costs a little atmosphere. This cost the truth.
+// ─────────────────────────────────────────────────────────────────────────
 
 export default function OSINTFlashTicker({ customFeed = null, onSelectArticle = () => {} }) {
-  const [feedItems, setFeedItems] = useState(customFeed || MOCK_OSINT_FLASH_FEED);
+  const [feedItems, setFeedItems] = useState(customFeed || []);
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
@@ -63,26 +54,38 @@ export default function OSINTFlashTicker({ customFeed = null, onSelectArticle = 
         return;
       }
 
+      // ⚠️ This used to fetch `/api/admin/osint` — an ADMIN endpoint — from a
+      // public page. That is why the endpoint had no authentication: gating it
+      // would have broken this ticker, so it was left open, and with it an
+      // unauthenticated write path into the public article system (§59).
+      //
+      // `/api/cms` is the public content path. It already merges published
+      // `intel_briefings` with Airtable intel and, unlike the admin route, it
+      // does NOT expose unpublished drafts or raw `intel_sources`. The ticker
+      // only ever needed published, public fields.
       try {
-        const res = await fetch("/api/admin/osint");
+        const res = await fetch("/api/cms");
         if (!alive || !res.ok) return;
         const data = await res.json();
-        if (!alive || !data.success || !data.briefings) return;
+        const intel = Array.isArray(data?.intel) ? data.intel : [];
+        if (!alive || intel.length === 0) return;
 
-        if (data.briefings.length > 0) {
-          const formatted = data.briefings.map((b, i) => ({
-            id: b.id || `live-osint-${i}`,
-            timestamp: b.published_at ? "Just Now" : "Live",
-            type: b.category || "OSINT SIGNAL",
-            headline: b.title,
-            city: b.city || "Metro Manila",
-            slug: b.slug,
-            sourceUrl: b.source_url || "",
-          }));
-          setFeedItems([...formatted, ...MOCK_OSINT_FLASH_FEED]);
-        }
-      } catch (err) {
-        // Fallback to mock feed silently
+        setFeedItems(
+          intel
+            .filter((b) => b.title && b.slug)
+            .map((b, i) => ({
+              id: b.id || `live-osint-${i}`,
+              // The real publication date, not a manufactured "2 mins ago".
+              timestamp: b.date || "",
+              type: b.intelType || b.category || "OSINT SIGNAL",
+              headline: b.title,
+              city: b.city || "",
+              slug: b.slug,
+              sourceUrl: b.sourceUrl || "",
+            }))
+        );
+      } catch {
+        // Stay empty. There is no mock fallback by design — see the note above.
       }
     }
 
