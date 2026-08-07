@@ -883,7 +883,11 @@ export default function Home() {
           display: flex;
           align-items: center;
           justify-content: center;
-          background: #000000;
+          /* Deliberately dark in BOTH themes: this is the starfield hero and
+             "outer space" is the concept. globals.css re-declares dark ink
+             tokens for it in light mode (the inverted-island rule).
+             Was #000000; DESIGN.md bans pure black, so this is void-black. */
+          background: #0d0d0d;
           overflow: hidden;
           position: relative;
         }

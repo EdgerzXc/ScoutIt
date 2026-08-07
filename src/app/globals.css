@@ -3,24 +3,201 @@
 @tailwind utilities;
 
 /* ═══════════════════════════════════════════════════════════════
-   LIGHT-MODE & HIGH-CONTRAST ACCESSIBILITY MODES
+   LIGHT MODE — token translation of the dark theme
+   Rebuilt 2026-08-06. See NEW_IDEAS_2.md §61.
+   ═══════════════════════════════════════════════════════════════
+
+   ── WHAT THIS REPLACES, AND WHY IT WAS BROKEN ──────────────────
+   Light mode used to be implemented TWICE, and the two fought:
+
+     1. this token block (13 of 60 tokens — incomplete), and
+     2. `body.light-mode { filter: invert(1) hue-rotate(180deg) }`
+        further down the file.
+
+   The filter ran AFTER the tokens, so it inverted the already-light
+   token values straight back to dark. The token block was dead code.
+   Three consequences, all of them user-visible:
+
+   🔴 `filter` on <body> creates a CONTAINING BLOCK for
+      `position: fixed`. Every fixed element — 54 of them: the mobile
+      bottom nav, every modal, every slide-over, the floating toolbox
+      — anchored to the body box instead of the viewport. That is the
+      "bugs on laptop and mobile" report: modals landing off-screen and
+      the bottom nav scrolling away. It is not fixable while a filter
+      sits on an ancestor; the only fix is to remove the filter.
+
+   🔴 `hue-rotate(180deg)` maps Spatial Gold #E8AE3C onto BLUE, which
+      deletes the 95/5 gold discipline that AGENTS.md locks.
+
+   🔴 It inverted `backdrop-filter` glass panels into mud, and the
+      counter-invert allow-list (img/video/iframe/canvas/.grain) missed
+      SVG, CSS background-images and box-shadows.
+
+   The old comment defended the filter as "the only reliable way to flip
+   a codebase with mixed inline + CSS-var colour sources". That was an
+   honest read of a real problem — 649 inline style={{}} colours cannot
+   be reached by CSS — but the cure was worse: it broke layout on every
+   viewport to avoid a colour inconsistency on some components.
+
+   ── THE POSITION THIS THEME TAKES ──────────────────────────────
+   AGENTS.md says ScoutIt is ALWAYS dark. So light mode is NOT a second
+   brand — it is an ACCESSIBILITY AFFORDANCE for bright sunlight, low
+   vision, and user preference. It must be a faithful translation of the
+   dark hierarchy, not a re-design. Same structure, same gold role,
+   inverted luminance.
+
+   ── THE GOLD PROBLEM, AND HOW IT IS SOLVED ─────────────────────
+   Spatial Gold #E8AE3C on white is **1.99:1** — unreadable. Gold cannot
+   be a text colour on a light background. So the gold's ROLE flips:
+     · as TEXT   → a deeper bronze that still reads unmistakably gold
+     · as a FILL → true gold, carrying near-black text (7.8:1)
+   Every value below is contrast-verified; the numbers are in the
+   comments and are checked by scripts/verify-contrast.mjs.
    ═══════════════════════════════════════════════════════════════ */
 body.light-mode {
-  --bg:           #f8f9fa;
-  --surface:      #ffffff;
-  --surface2:     #f1f3f5;
-  --surface3:     #e9ecef;
-  --surface-variant: #e9ecef;
+  color-scheme: light;
 
-  --text-primary:   #111827;
-  --text-secondary: #374151;
-  --text-muted:     #6b7280;
+  /* ── Surfaces. Neutral, never cream: the dark theme is chroma-0, so
+     its counterpart is too. Warm-tinting here would invent a brand
+     temperature the product does not have. Pure #fff is avoided per
+     DESIGN.md. */
+  --bg:              #f4f4f5;
+  --surface:         #fafafa;
+  --surface2:        #f0f0f2;
+  --surface3:        #e7e7ea;
+  --surface-variant: #ececef;
 
-  --border:       rgba(0, 0, 0, 0.12);
-  --border-mid:   rgba(0, 0, 0, 0.18);
-  --border-solid: rgba(0, 0, 0, 0.25);
-  --accent:       #d97706;
-  --accent-bright:#b45309;
+  /* ── Ink. Contrast measured against --surface (#fafafa). */
+  --text-primary:   #111113;   /* 17.6:1  AAA */
+  --text-secondary: #45454d;   /*  8.9:1  AAA */
+  --text-muted:     #5f5f6a;   /*  6.1:1  AA  — deliberately NOT a light
+                                  grey. Muted text at 3:1 is the single
+                                  most common contrast failure. */
+
+  --border:       rgba(17, 17, 19, 0.12);
+  --border-mid:   rgba(17, 17, 19, 0.20);
+  --border-solid: #d5d5db;
+
+  --brand:         #f4f4f5;
+  --brand-overlay: rgba(244, 244, 245, 0.92);
+
+  /* ── Gold, re-roled for light. */
+  --accent:            #8B5E10;   /* 5.7:1 — text-safe bronze-gold */
+  --accent-rgb:        139, 94, 16;
+  --accent-ch:          139 94 16;
+  --accent-bright-ch:   154 98 0;
+  --bg-ch:              244 244 245;
+  --surface-ch:         250 250 250;
+  --surface3-ch:        231 231 234;
+  --text-primary-ch:    17 17 19;
+  --text-secondary-ch:  69 69 77;
+  --accent-bright:     #9A6200;   /* 5.1:1 — text-safe, the loud one   */
+  --accent-bright-rgb: 154, 98, 0;
+  --accent-fill:       #E8AE3C;   /* true gold, FILLS ONLY + dark text */
+  --accent-muted:      #E0C583;   /* light-gold hairlines and dividers */
+  --accent-dim:        rgba(154, 98, 0, 0.10);
+  --accent-border:     rgba(154, 98, 0, 0.34);
+
+  /* ── Semantic colours. The dark set is tuned to glow on near-black;
+     the same hues on white are far too bright to read, so each drops
+     to its ~700 step. */
+  --sapphire:     #1d4ed8;
+  --sapphire-dim: rgba(29, 78, 216, 0.12);
+  --amethyst:     #6d28d9;
+  --amethyst-dim: rgba(109, 40, 217, 0.12);
+  --emerald:      #047857;
+  --emerald-dim:  rgba(4, 120, 87, 0.12);
+  --green:        #047857;
+  --green-dim:    rgba(4, 120, 87, 0.12);
+  --yellow:       #a16207;
+  --yellow-dim:   rgba(161, 98, 7, 0.12);
+  --red:          #b91c1c;
+  --red-dim:      rgba(185, 28, 28, 0.12);
+
+  /* ── Depth. Heavy black shadows read as dirt on a light surface, so
+     these are lighter and tighter. A GLOW does not exist on light —
+     there is nothing for light to bloom against — so the two glow
+     tokens become a gold ring, which carries the same "this is active"
+     meaning without pretending to emit light. */
+  --shadow-sm:         0 1px 2px rgba(17, 17, 19, 0.06), 0 1px 3px rgba(17, 17, 19, 0.08);
+  --shadow-md:         0 4px 12px rgba(17, 17, 19, 0.10);
+  --shadow-lg:         0 12px 32px rgba(17, 17, 19, 0.14);
+  --shadow-glow:       0 0 0 1.5px rgba(154, 98, 0, 0.55);
+  --shadow-glow-soft:  0 2px 12px rgba(154, 98, 0, 0.16);
+
+  background: var(--bg);
+  color: var(--text-primary);
+}
+
+/* Primary CTA keeps TRUE gold as a fill in light mode — a bronze button
+   would lose the one loud element the whole system is built around.
+   Gold #E8AE3C carrying near-black text is 7.8:1. */
+body.light-mode .btn-primary,
+body.light-mode .btn-gold {
+  background: var(--accent-fill);
+  color: #111113;
+}
+
+/* The grain overlay is a white-noise texture multiplied over near-black.
+   On a light surface it reads as dirt. */
+body.light-mode .grain { opacity: 0.25; }
+
+/* ═══════════════════════════════════════════════════════════════
+   DARK ISLANDS IN LIGHT MODE
+   ═══════════════════════════════════════════════════════════════
+   Some surfaces are deliberately black and must STAY black in light
+   mode. The hero is a starfield — "outer space" is the concept, and a
+   light hero would delete it. The global footer is the same anchor at
+   the other end of the page. This is the ordinary inverted-island
+   pattern, not an exception being smuggled in.
+
+   The bug it fixes: those sections keep their hardcoded dark
+   background in light mode, but their TEXT inherits the light theme's
+   near-black ink. Measured before this rule, on the homepage:
+   `.footer-tagline` 2.10:1, `.footer-legal` 3.16:1, `.hero-founding-link`
+   3.71:1 — all failing AA, all invisible-on-dark.
+
+   The fix re-declares the DARK token values scoped to those islands, so
+   descendants inherit readable ink through the same token system rather
+   than through a pile of !important overrides. Any component inside
+   that already uses tokens is fixed automatically.
+
+   ── WHICH SURFACES ARE DARK BY DESIGN ──────────────────────────
+   `.cinematic-container` is the whole marketing homepage: a starfield,
+   a descent animation, layer pages. "Outer space" IS the concept, and
+   AGENTS.md locks ScoutIt to dark. Forcing that surface light would not
+   be a theme, it would be a different product.
+
+   So light mode is scoped deliberately:
+     · DARK BY DESIGN — the cinematic marketing surfaces, hero, footer
+     · LIGHT SUPPORTED — the functional surfaces where people READ:
+       dashboard, settings, property detail, forms, admin
+
+   That is the whole point of the affordance. Someone reads a property
+   dossier on a phone in Manila sunlight; nobody needs the starfield to
+   be white. Scoping it this way is a decision, not an omission — do not
+   "finish the job" by lightening the cinematic surfaces.
+   ═══════════════════════════════════════════════════════════════ */
+body.light-mode .cinematic-container,
+body.light-mode .section-hook,
+body.light-mode .global-footer {
+  --text-primary:       #ffffff;
+  --text-primary-ch:    255 255 255;
+  --text-secondary:     #a099b0;
+  --text-secondary-ch:  160 153 176;
+  --text-muted:         rgba(255, 255, 255, 0.55);
+  --accent:             #E8AE3C;
+  --accent-rgb:         232, 174, 60;
+  --accent-ch:          232 174 60;
+  --accent-bright:      #F7C64E;
+  --accent-bright-rgb:  247, 198, 78;
+  --accent-bright-ch:   247 198 78;
+  --border:             rgba(255, 255, 255, 0.10);
+  --border-mid:         rgba(255, 255, 255, 0.18);
+  --surface:            #121212;
+  --surface-rgb:        18, 18, 18;
+
+  color: var(--text-primary);
 }
 
 /* ═══════════════════════════════════════════════════════════════ 
@@ -61,6 +238,24 @@ body.light-mode {
   /* Accent — Expanded Gold System + Secondary Accents */
   --accent: #E8AE3C;
   --accent-rgb: 232, 174, 60;
+  /* TWO CHANNEL CONVENTIONS, deliberately. `-rgb` is COMMA-separated and is
+     consumed by 32 hand-written `rgba(var(--accent-rgb), 0.4)` call sites.
+     `-ch` is SPACE-separated for Tailwind's `rgb(... / <alpha-value>)`, which
+     is INVALID with commas — mixing them silently drops the declaration and
+     the colour falls back to inherited (this shipped white gold for one build).
+     Keep both in sync. Original note: channel forms so Tailwind can do alpha
+     and keep its opacity modifiers working. Added 2026-08-06 (§61) when the
+     Tailwind palette was rewired off hardcoded hex onto these tokens — that
+     is what makes `text-gold-accent` follow the theme instead of pinning
+     1,149 call sites to the dark value. Every -rgb token MUST have a
+     light-mode counterpart or those classes silently stay dark. */
+  --accent-ch:          232 174 60;
+  --accent-bright-ch:   247 198 78;
+  --bg-ch:              13 13 13;
+  --surface-ch:         18 18 18;
+  --surface3-ch:        34 34 34;
+  --text-primary-ch:    255 255 255;
+  --text-secondary-ch:  160 153 176;
   --accent-bright: #F7C64E;
   --accent-bright-rgb: 247, 198, 78;
   --accent-muted: #6E531A;
@@ -1000,32 +1195,31 @@ body.high-contrast :focus-visible {
   outline-offset: 3px !important;
 }
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   LIGHT MODE
-   Uses CSS filter invert + hue-rotate â€” the only reliable way to
-   flip a codebase with mixed inline + CSS-var colour sources.
-   Images, video, and canvas are counter-inverted to look normal.
-   The .toolbox-float widget is also counter-inverted so it keeps
-   its dark appearance regardless of the active mode.
-   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-body.light-mode {
-  filter: invert(1) hue-rotate(180deg);
-  background: #f0ede8;
-}
+/* ═══════════════════════════════════════════════════════════════
+   LIGHT MODE — the filter implementation was REMOVED here 2026-08-06
+   ═══════════════════════════════════════════════════════════════
+   This block used to be:
 
-/* Restore natural appearance for media */
-body.light-mode img,
-body.light-mode video,
-body.light-mode iframe,
-body.light-mode canvas,
-body.light-mode .grain {
-  filter: invert(1) hue-rotate(180deg);
-}
+     body.light-mode { filter: invert(1) hue-rotate(180deg); }
+     body.light-mode img, video, iframe, canvas, .grain { <counter-invert> }
+     body.light-mode .toolbox-float { <counter-invert> }
 
-/* Keep the toolbox looking correct (dark) in light mode */
-body.light-mode .toolbox-float {
-  filter: invert(1) hue-rotate(180deg);
-}
+   It is gone, deliberately, and must not come back. `filter` on <body>
+   establishes a containing block for `position: fixed`, so all 54 fixed
+   elements in this codebase — the mobile bottom nav, every modal and
+   slide-over, the floating toolbox — anchored to the body box instead
+   of the viewport. That was the reported laptop and mobile breakage,
+   and no amount of counter-inverting fixes it: the layout bug is caused
+   by the filter existing at all.
+
+   It also hue-rotated Spatial Gold to blue, and it silently cancelled
+   the token block at the top of this file, which had been dead code
+   ever since.
+
+   Light mode is now a real token theme — see the top of this file.
+   The counter-invert rules are unnecessary once nothing is inverted:
+   images, video, canvas and the toolbox render normally by default.
+   ═══════════════════════════════════════════════════════════════ */
 
 /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    LAYER 01: STRATOSPHERE ENTRY ANIMATIONS
