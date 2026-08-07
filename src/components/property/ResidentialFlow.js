@@ -40,6 +40,7 @@ import FloodRiskBadge from "@/components/property/FloodRiskBadge";
 import SpatialVaultWidget from "@/components/property/SpatialVaultWidget";
 import { hasInteractiveUnitPage, hasSpatial3D, unitMasterPageOverview, formatUnitPrice } from "@/lib/unitMasterPage";
 import { canSee, getCurrentTier, hasActiveRole } from "@/lib/entitlements";
+import { fieldLabel } from "@/lib/fieldLabel";
 
 // Code-split maplibre-gl + pmtiles out of the main property-page bundle — they&apos;re
 // only needed if the visitor taps the Flood Risk Map tab, which was the real cause
@@ -141,7 +142,7 @@ function DeepIntelWidget({ open, onToggle, fields, values }) {
             const value = valueFor(field);
             return (
               <div key={(field && field.key) || i} className={`flex justify-between items-baseline py-3 gap-5 ${i < fields.length - 1 ? 'border-b border-surface-variant' : ''}`}>
-                <span className="font-serif text-[13px] text-text-secondary">{(field && field.label) || field}</span>
+                <span className="font-serif text-[13px] text-text-secondary">{fieldLabel(field)}</span>
                 {value !== null ? (
                   <span className="font-mono text-xs text-gold-accent tracking-[0.04em] text-right">{value}</span>
                 ) : (
@@ -156,7 +157,7 @@ function DeepIntelWidget({ open, onToggle, fields, values }) {
           <div className="blur-sm pointer-events-none select-none flex flex-col">
             {fields.map((field, i) => (
               <div key={(field && field.key) || i} className={`flex justify-between items-center py-3 ${i < fields.length - 1 ? 'border-b border-surface-variant' : ''}`}>
-                <span className="font-serif text-[13px] text-text-secondary">{(field && field.label) || field}</span>
+                <span className="font-serif text-[13px] text-text-secondary">{fieldLabel(field)}</span>
                 <span className="font-mono text-xs text-text-muted tracking-[0.1em]">████████</span>
               </div>
             ))}

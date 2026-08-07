@@ -12,6 +12,7 @@ import { useTrueClosestTransit } from "@/hooks/useTrueClosestTransit";
 import { resolveTransitHub } from "@/lib/transit";
 import { hasInteractiveUnitPage, hasSpatial3D, unitMasterPageOverview, formatUnitPrice } from "@/lib/unitMasterPage";
 import FreshnessBadge from "@/components/ui/FreshnessBadge";
+import { fieldLabel } from "@/lib/fieldLabel";
 
 // Heavy below-the-fold components dynamically imported to minimize initial mobile JS payload & TBT
 const SpatialVaultWidget = dynamic(() => import("@/components/property/SpatialVaultWidget"), { ssr: false });
@@ -141,7 +142,7 @@ function DeepIntelWidget({ open, onToggle, fields, values }) {
             const value = valueFor(field.key);
             return (
               <div key={field.key || i} className={`flex justify-between items-baseline py-3 gap-5 ${i < fields.length - 1 ? 'border-b border-surface-variant' : ''}`}>
-                <span className="font-serif text-[13px] text-text-secondary">{field.label || field}</span>
+                <span className="font-serif text-[13px] text-text-secondary">{fieldLabel(field)}</span>
                 {value !== null ? (
                   <span className="font-mono text-xs text-gold-accent tracking-[0.04em] text-right">{value}</span>
                 ) : (
@@ -156,7 +157,7 @@ function DeepIntelWidget({ open, onToggle, fields, values }) {
           <div className="blur-sm pointer-events-none select-none flex flex-col">
             {fields.map((field, i) => (
               <div key={field.key || i} className={`flex justify-between items-center py-3 ${i < fields.length - 1 ? 'border-b border-surface-variant' : ''}`}>
-                <span className="font-serif text-[13px] text-text-secondary">{field.label || field}</span>
+                <span className="font-serif text-[13px] text-text-secondary">{fieldLabel(field)}</span>
                 <span className="font-mono text-xs text-text-muted tracking-[0.1em]">████████</span>
               </div>
             ))}

@@ -9,6 +9,7 @@ import { getAnsweredFaqs } from "@/lib/faqServer";
 import ResidentialFlow from "@/components/property/ResidentialFlow";
 import CommercialFlow from "@/components/property/CommercialFlow";
 import ClaimPropertyPanel from "@/components/property/ClaimPropertyPanel";
+import PropertyViewTracker from "@/components/analytics/PropertyViewTracker";
 
 // ----------------------------------------------------------------------
 // INCREMENTAL STATIC REGENERATION (ISR)
@@ -206,6 +207,22 @@ export default async function PropertyRoute({ params }) {
         <div className="claim-panel-slot">
           <ClaimPropertyPanel propertyId={resolvedParams.id} />
         </div>
+
+        {/* ── VIEW TRACKING (§59 · W18.2) ───────────────────────────────
+            `/api/analytics` existed, worked, and had NO caller — so
+            `analytics_events` had 0 rows and the Monthly Scout Wrap (W9) had
+            nothing to report. This is that missing caller.
+
+            Renders nothing. It sends the SLUG, not an id: this page renders
+            from Airtable and only holds a slug, while
+            `analytics_events.property_id` is a uuid FK to Supabase
+            `properties(id)`. The server resolves the mapping via
+            `findProperty`. Sending the slug as an id would fail the uuid cast
+            on every event, silently.
+
+            Safe on an ISR page: this is a client component, so it runs per
+            visitor rather than once per cached document. */}
+        <PropertyViewTracker propertySlug={resolvedParams.id} />
       </article>
     </>
   );

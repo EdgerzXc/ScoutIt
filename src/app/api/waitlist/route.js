@@ -1,19 +1,36 @@
 // Founding Waitlist intake — pre-launch.
 //
-// ⚠️ Storage is deliberately a STUB right now: Supabase is mid-security-reset,
-// so we do not persist PII into a dev-open database. This route validates the
-// payload and acknowledges. After the reset (see SUPABASE_REBUILD_GUIDE.md →
-// `waitlist` table), uncomment the insert block below — the request shape from
-// src/lib/waitlist.js already matches the table columns, so no other change is
-// needed.
+// ✅ PERSISTS AGAIN 2026-08-06 (§59 · W18.1). It did not, for months.
+//
+// ── WHAT WAS WRONG ────────────────────────────────────────────────────
+// The insert was commented out with the note *"Supabase is mid-security-reset,
+// so we do not persist PII into a dev-open database"*. That reason expired: the
+// reset happened, `waitlist` exists, RLS is on, and it carries a deny-all client
+// policy. But the stub stayed, so every Founding Member signup was written to a
+// Vercel serverless console log and thrown away — while the visitor was told
+// `{ ok: true }`. The table had **0 rows**. This is the entire pre-launch funnel.
+//
+// ⚠️ THE COMMENTED CODE WOULD NOT HAVE WORKED IF UNCOMMENTED. It used the
+// browser `supabase` client, and the table's RLS policy is
+// "Clients cannot access waitlist directly" — `USING (false)`, which for an ALL
+// policy also governs INSERT. Restoring it verbatim would have swapped a silent
+// discard for a silent 500. It must use the service-role client, which is what
+// the deny-all policy exists to funnel writes through.
+//
+// Standing Rule 21: this had a producer and no consumer. Fixing the producer
+// without checking the policy would have produced a second silent failure.
 
-// import { supabase } from "@/lib/supabaseClient";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { z } from "zod";
 import { stripAllTags } from "@/lib/sanitize";
 import { turnstileGuard } from "@/lib/turnstile";
 
 const waitlistSchema = z.object({
-  email: z.string().email("Invalid email format").max(255),
+  // `.trim()` runs BEFORE `.email()`. Without it a pasted or autocompleted
+  // address with a trailing space — routine on mobile — fails validation and
+  // the visitor is told "Invalid input data" for an address that is fine.
+  // Found by a test asserting normalisation; the insert was never reached.
+  email: z.string().trim().toLowerCase().email("Invalid email format").max(255),
   role: z.enum(["seeker", "owner", "broker", "photographer", "researcher"]).nullable().optional(),
   tier: z.string().nullable().optional(),
   source: z.string().max(60).optional(),
@@ -46,19 +63,33 @@ export async function POST(req) {
   const captchaFailure = await turnstileGuard(req, turnstileToken);
   if (captchaFailure) return captchaFailure;
 
-  // ── POST-RESET: persist to Supabase ───────────────────────────────────────
-  // const { error } = await supabase
-  //   .from("waitlist")
-  //   .insert({ email, role, tier, source });
-  // // 23505 = unique_violation → already on the list, treat as success.
-  // if (error && error.code !== "23505") {
-  //   return Response.json({ ok: false, error: "Could not save signup." }, { status: 500 });
-  // }
-  // ──────────────────────────────────────────────────────────────────────────
+  if (!supabaseAdmin) {
+    // Never acknowledge a signup we cannot store. Returning ok:true here is
+    // exactly the bug this route is being fixed for.
+    console.error("[waitlist] No service client — cannot persist signup.");
+    return Response.json(
+      { ok: false, error: "Signups are temporarily unavailable. Please try again shortly." },
+      { status: 503 }
+    );
+  }
 
-  // Interim: acknowledge without persisting server-side. Visible in logs so the
-  // owner can see signups are flowing before the DB is connected.
-  console.log("[waitlist] signup (not yet persisted):", { email, role, tier, source });
+  // `waitlist_email_key` is a UNIQUE index on the raw column, so the address
+  // must be normalised or Test@x.com and test@x.com become two Founding
+  // Members. Normalisation happens in the schema above (trim + lowercase), so
+  // `email` is already canonical here — done there rather than here so the
+  // validated value and the stored value can never diverge.
+  const { error } = await supabaseAdmin
+    .from("waitlist")
+    .insert({ email, role: role ?? null, tier: tier ?? null, source });
 
-  return Response.json({ ok: true });
+  // 23505 = unique_violation → already on the list. That is a success from the
+  // visitor's point of view, and re-submitting must not look like a failure.
+  if (error && error.code !== "23505") {
+    // Log the failure, never the address — this is the PII the route exists to
+    // protect, and Vercel logs are not a safe place for it.
+    console.error("[waitlist] Insert failed:", error.message);
+    return Response.json({ ok: false, error: "Could not save signup." }, { status: 500 });
+  }
+
+  return Response.json({ ok: true, alreadyRegistered: error?.code === "23505" });
 }
