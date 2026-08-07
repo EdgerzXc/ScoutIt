@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { getOverpassIntel } from "@/lib/overpassIntel";
+import { getOverpassIntel, calculateWalkabilityScore } from "@/lib/overpassIntel";
 import { getIsochrones } from "@/lib/isochrone";
 import { sanitizeError } from "@/lib/sanitizeError";
 
@@ -65,9 +65,26 @@ export async function GET(req) {
 
     const totalPois = poi.layers.reduce((sum, l) => sum + l.count, 0);
 
+    // ── WALKABILITY (W10 · WALK-01) ──────────────────────────────────
+    // `calculateWalkabilityScore()` has existed in lib/overpassIntel.js since
+    // it was written and had ZERO callers — §51's inventory found it. It is
+    // computed from the POI layers this route already fetched, so surfacing it
+    // costs one function call and no extra upstream request.
+    //
+    // ⚠️ ONLY RETURNED WHEN THE LOOKUP SUCCEEDED. The function falls back to a
+    // neutral 50 when it has no layers, and a hardcoded 50 rendered as
+    // "MODERATE PEDESTRIAN ACCESS" is a claim about a neighbourhood produced
+    // by an Overpass outage. `null` is the honest answer, and the same
+    // three-state rule the POI list already follows (§3's honest-blank rule):
+    //   lookup failed  → null, the UI says it couldn't check
+    //   ok, 0 nodes    → a real score with confidence 'low'
+    //   ok, n nodes    → a real score with confidence 'high'
+    const walkability = poi.ok ? calculateWalkabilityScore(poi.layers) : null;
+
     return NextResponse.json(
       {
         success: true,
+        walkability,
         // `ok: false` means the lookup failed; zero results with ok:true means
         // the area genuinely has nothing. The UI wording differs, so the
         // distinction has to survive the response.

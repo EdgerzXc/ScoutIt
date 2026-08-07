@@ -7,6 +7,7 @@ import { supabase } from "../lib/supabaseClient";
 import { onAuthStateChange, getSession } from "../lib/authClient";
 import { Bookmark } from "lucide-react";
 import { getBalance, spendConnects, initWalletIfEmpty } from "../lib/connectsWallet";
+import ListerDeclarationModal from "../components/dashboard/ListerDeclarationModal";
 
 const DashboardContext = createContext();
 
@@ -54,6 +55,9 @@ export function DashboardProvider({ children }) {
   const [toasts, setToasts] = useState([]);
   const [savedIds, setSavedIds] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  // Open lister-declaration prompt (§50 · W2). null = closed. Holds the
+  // promise resolver so publishListing can await the user's answer.
+  const [declarationPrompt, setDeclarationPrompt] = useState(null);
 
   // Sync user from Supabase Auth
   useEffect(() => {
@@ -502,31 +506,86 @@ export function DashboardProvider({ children }) {
       return false;
     }
   };
-  const publishListing = async (listingId) => {
+  // ── LISTER DECLARATION GATE (§50 · W2) ────────────────────────────────
+  // The gate lives HERE rather than in OwnerMode, because publishListing is
+  // the single door to /api/dashboard/publish and §51's lesson was that a
+  // feature reachable from only one of several call sites is a feature that
+  // will be missed. Any future caller inherits the gate for free.
+  //
+  // The prompt is a promise: publishListing awaits the user's answer and then
+  // retries itself with the declaration attached, so callers keep their
+  // existing `await publishListing(id)` contract and their return value still
+  // means "is it live".
+  const askForDeclaration = (listingId) => {
+    const listing = listings.find((l) => l.id === listingId);
+    return new Promise((resolve) => {
+      setDeclarationPrompt({
+        listingId,
+        listingTitle: listing?.title || null,
+        busy: false,
+        error: null,
+        resolve,
+      });
+    });
+  };
+
+  const publishListing = async (listingId, declaration = null) => {
     if (!currentUser?.id) return false;
-    addToast("Syncing to live network...", "⏳");
+    // Truthful either way: the first attempt may come back asking for the
+    // declaration, and "Syncing to live network" would be a claim of progress
+    // that hasn't happened.
+    addToast(declaration ? "Syncing to live network..." : "Preparing publication...", "⏳");
     try {
       const { data: { session } } = await supabase.auth.getSession();
       const token = session?.access_token || (currentUser.id === 'master-dev' ? 'mock-e2e-token' : '');
-      
+
+      const body = { submissionId: listingId, userId: currentUser.id };
+      if (declaration) {
+        body.listerRelationship = declaration.relationship;
+        // `=== true`, never truthy — the route validates identically, and a
+        // negative/loose gate is exactly how the age gate failed open (§47.2).
+        body.ownerSovereigntyAgreed = declaration.agreed === true;
+      }
+
       const res = await fetch("/api/dashboard/publish", {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`
         },
-        body: JSON.stringify({ submissionId: listingId, userId: currentUser.id })
+        body: JSON.stringify(body)
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
+
+      if (res.status === 422 && data.requiresDeclaration === true) {
+        // If the server rejected a declaration we just sent, that is a real
+        // error. Re-opening the modal would loop and hide the reason.
+        if (declaration) {
+          throw new Error(data.error || "That declaration could not be accepted");
+        }
+        const answer = await askForDeclaration(listingId);
+        // Cancelled: the listing stays a draft, which the modal said it would.
+        // No error toast — this was a choice, not a failure.
+        if (!answer) return false;
+        return await publishListing(listingId, answer);
+      }
+
       if (!res.ok) {
         throw new Error(data.error || data.warning || "Failed to publish");
       }
       setListings(prev => prev.map(l => l.id === listingId ? { ...l, pipelineStatus: 'approved' } : l));
+      setDeclarationPrompt(null);
       addToast("Property is now LIVE", "🌍");
       return true;
     } catch (err) {
       console.error(err);
       addToast(err.message || "Failed to publish", "❌");
+      // If the declaration modal is open behind this, it must come out of its
+      // busy state and say what went wrong. A modal stuck on "Publishing…"
+      // after a failed request is the error state nobody builds.
+      setDeclarationPrompt(prev =>
+        prev ? { ...prev, busy: false, error: err.message || "Failed to publish" } : prev
+      );
       return false;
     }
   };
@@ -1103,6 +1162,32 @@ export function DashboardProvider({ children }) {
       authedFetch
     }}>
       {children}
+      {/* Rendered at provider level so every publish path is gated, not just
+          OwnerMode's. See the askForDeclaration comment above. */}
+      <ListerDeclarationModal
+        open={Boolean(declarationPrompt)}
+        listingTitle={declarationPrompt?.listingTitle}
+        busy={declarationPrompt?.busy === true}
+        error={declarationPrompt?.error || null}
+        onSubmit={(declaration) => {
+          const prompt = declarationPrompt;
+          if (!prompt) return;
+          setDeclarationPrompt(prev => prev ? { ...prev, busy: true, error: null, resolve: null } : prev);
+          if (prompt.resolve) {
+            prompt.resolve(declaration);
+          } else {
+            // Retry after a failed attempt. The original promise is already
+            // settled, so resolving it again would silently do nothing and
+            // leave the modal spinning — publish directly instead.
+            publishListing(prompt.listingId, declaration);
+          }
+        }}
+        onCancel={() => {
+          const resolve = declarationPrompt?.resolve;
+          setDeclarationPrompt(null);
+          resolve?.(null);
+        }}
+      />
     </DashboardContext.Provider>
   );
 }

@@ -16,6 +16,7 @@ import { computeListingStrength } from '../../lib/listingStrength';
 
 import OwnerListingCard from './cards/OwnerListingCard';
 import FAQPreflightPanel from './FAQPreflightPanel';
+import SeoReadinessPanel from './SeoReadinessPanel';
 import MonthlyFreshnessModal from './MonthlyFreshnessModal';
 import LeadExportButton from './crm/LeadExportButton';
 import { sanitizeError } from "@/lib/sanitizeError";
@@ -984,6 +985,16 @@ export default function OwnerMode() {
                </>
             )}
           </div>
+
+          {/* Search readiness (SEO-01 · W11). Sits next to Listing Strength on
+              purpose: Strength answers "is this listing complete?", this
+              answers "can Google reach it?". A 100%-complete DRAFT scores
+              perfectly on the first and fails the second, because a draft has
+              no page. Hidden while the AI is still drafting — there is nothing
+              to index and nothing the owner can act on yet. */}
+          {activeListing.pipelineStatus !== 'ai_drafting' && (
+            <SeoReadinessPanel propertyId={activeListing.id} />
+          )}
 
           {/* Property Timeline — inquiries, deal changes, notes, viewings on
               this property, straight from crm_activity_log */}

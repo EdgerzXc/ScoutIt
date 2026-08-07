@@ -8,6 +8,7 @@ import { buildPropertyJsonLd, mergeFaqIntoOverride } from "@/lib/propertySchema"
 import { getAnsweredFaqs } from "@/lib/faqServer";
 import ResidentialFlow from "@/components/property/ResidentialFlow";
 import CommercialFlow from "@/components/property/CommercialFlow";
+import ClaimPropertyPanel from "@/components/property/ClaimPropertyPanel";
 
 // ----------------------------------------------------------------------
 // INCREMENTAL STATIC REGENERATION (ISR)
@@ -186,6 +187,25 @@ export default async function PropertyRoute({ params }) {
           slug={resolvedParams.id}
           initialData={match ? stripPremiumFields(match, "starry") : null}
         />
+
+        {/* ── CLAIM THIS PROPERTY (§37 · W8) ────────────────────────────
+            Mounted at the page shell rather than inside ResidentialFlow and
+            CommercialFlow, for two reasons:
+
+            1. There are two flow components and four category aliases mapping
+               into them. Putting the panel in one flow would make claiming
+               work on residential listings and silently not exist on
+               commercial ones — a §51-shaped bug, where the feature is real
+               but unreachable from half the routes.
+            2. The panel asks the SERVER whether this listing is claimable.
+               It deliberately does not read `match`, because this page is ISR
+               — one cached document serves every visitor, so anything computed
+               here would be identical for the owner, a broker and a stranger.
+
+            It renders nothing at all when the listing isn't claimable. */}
+        <div className="claim-panel-slot">
+          <ClaimPropertyPanel propertyId={resolvedParams.id} />
+        </div>
       </article>
     </>
   );

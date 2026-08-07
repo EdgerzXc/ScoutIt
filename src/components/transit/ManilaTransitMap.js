@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import mapboxgl from "mapbox-gl";
-import "mapbox-gl/dist/mapbox-gl.css";
+import maplibregl from "maplibre-gl";
+import "maplibre-gl/dist/maplibre-gl.css";
 import {
   point as turfPoint,
   lineString,
@@ -90,9 +90,7 @@ export default function ManilaTransitMap({ propertyLat, propertyLng, propertyTit
   const propertyMarkerRef = useRef(null);
   const rafRef = useRef(null);
   const lineDataRef = useRef({}); // id -> { track, totalKm }
-  const [loadState, setLoadState] = useState(() => {
-    return process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN ? "loading" : "error";
-  }); // loading | ready | error
+  const [loadState, setLoadState] = useState("loading"); // loading | ready | error
   const [visibleLines, setVisibleLines] = useState(
     () => Object.fromEntries(LINE_META.map((l) => [l.id, true]))
   );
@@ -107,12 +105,6 @@ export default function ManilaTransitMap({ propertyLat, propertyLng, propertyTit
   useEffect(() => {
     if (!mapContainerRef.current || mapInstance.current) return;
 
-    const token = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || "";
-    if (!token) {
-      return;
-    }
-    mapboxgl.accessToken = token;
-
     // Frame all three lines instead of guessing a center — accurate to
     // whatever the real OSM geometry actually covers.
     const combined = {
@@ -122,16 +114,16 @@ export default function ManilaTransitMap({ propertyLat, propertyLng, propertyTit
     const [minLng, minLat, maxLng, maxLat] = turfBbox(combined);
     const { geometry: { coordinates: centerCoords } } = turfCenter(combined);
 
-    const map = new mapboxgl.Map({
+    const map = new maplibregl.Map({
       container: mapContainerRef.current,
-      style: "mapbox://styles/mapbox/dark-v11",
+      style: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
       center: centerCoords,
       zoom: 11,
       pitch: 60,
       antialias: true,
     });
 
-    map.addControl(new mapboxgl.NavigationControl({ showCompass: true }), "top-right");
+    map.addControl(new maplibregl.NavigationControl({ showCompass: true }), "top-right");
 
     map.on("load", () => {
       try {
@@ -307,9 +299,9 @@ export default function ManilaTransitMap({ propertyLat, propertyLng, propertyTit
           const el = document.createElement("div");
           el.className = "transit-property-marker";
           el.innerHTML = `<div class="transit-property-marker-pulse"></div><div class="transit-property-marker-dot"></div>`;
-          propertyMarkerRef.current = new mapboxgl.Marker({ element: el, anchor: "center" })
+          propertyMarkerRef.current = new maplibregl.Marker({ element: el, anchor: "center" })
             .setLngLat([propertyLng, propertyLat])
-            .setPopup(new mapboxgl.Popup({ offset: 16, closeButton: false }).setText(propertyTitle || "This property"))
+            .setPopup(new maplibregl.Popup({ offset: 16, closeButton: false }).setText(propertyTitle || "This property"))
             .addTo(map);
 
           const withinCoverage = nearest && nearest.distanceKm <= MAX_RELEVANT_KM;
@@ -506,6 +498,7 @@ export default function ManilaTransitMap({ propertyLat, propertyLng, propertyTit
         }
         /* ── Mapbox zoom/compass controls, restyled on-brand (dark glass + gold
               hover) instead of the default white box that clashed with the theme ── */
+        .transit-map-wrapper .maplibregl-ctrl-group,
         .transit-map-wrapper .mapboxgl-ctrl-group {
           background: rgba(13, 13, 13, 0.85);
           backdrop-filter: blur(10px);
@@ -515,22 +508,27 @@ export default function ManilaTransitMap({ propertyLat, propertyLng, propertyTit
           box-shadow: none;
           overflow: hidden;
         }
+        .transit-map-wrapper .maplibregl-ctrl-group button,
         .transit-map-wrapper .mapboxgl-ctrl-group button {
           background: transparent;
           width: 32px;
           height: 32px;
         }
+        .transit-map-wrapper .maplibregl-ctrl-group button + button,
         .transit-map-wrapper .mapboxgl-ctrl-group button + button {
           border-top: 0.5px solid #262626;
         }
+        .transit-map-wrapper .maplibregl-ctrl-group button:hover,
         .transit-map-wrapper .mapboxgl-ctrl-group button:hover {
           background: rgba(232, 174, 60, 0.14);
         }
         /* Default control glyphs are dark SVGs meant for a white box — invert
            them so they read as light on the dark control. */
+        .transit-map-wrapper .maplibregl-ctrl-group button .maplibregl-ctrl-icon,
         .transit-map-wrapper .mapboxgl-ctrl-group button .mapboxgl-ctrl-icon {
           filter: invert(0.85);
         }
+        .transit-map-wrapper .maplibregl-ctrl-group button:hover .maplibregl-ctrl-icon,
         .transit-map-wrapper .mapboxgl-ctrl-group button:hover .mapboxgl-ctrl-icon {
           filter: invert(1);
         }

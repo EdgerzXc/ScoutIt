@@ -79,6 +79,8 @@ export default function WhereToSection({ lat, lng, radiusM = 900, onIsochrone, o
   const layers = data?.layers || [];
   const visible = activeLayer === "all" ? layers : layers.filter((l) => l.id === activeLayer);
   const total = data?.totalPois ?? 0;
+  // null when the server couldn't measure it — see the render block below.
+  const walkability = data?.walkability || null;
   const radiusLabel = data?.radiusM ? `${(data.radiusM / 1000).toFixed(1)} km` : "1.2 km";
 
   return (
@@ -247,6 +249,59 @@ export default function WhereToSection({ lat, lng, radiusM = 900, onIsochrone, o
           text-transform: uppercase;
           cursor: pointer;
         }
+        /* ── WALKABILITY (W10 · WALK-01) ────────────────────────────── */
+        .wt-walk {
+          display: flex;
+          align-items: baseline;
+          gap: 12px;
+          padding: 14px 0 15px;
+          border-top: 1px solid #1e1e1e;
+          border-bottom: 1px solid #1e1e1e;
+          margin-bottom: 18px;
+          flex-wrap: wrap;
+        }
+        .wt-walk__score {
+          font-family: Georgia, serif;
+          font-size: 30px;
+          line-height: 1;
+          color: #f0ede8;
+          font-weight: 400;
+        }
+        .wt-walk__of {
+          font-family: ${MONO};
+          font-size: 9px;
+          color: #4a4a4a;
+          letter-spacing: 0.1em;
+          margin-left: -7px;
+        }
+        .wt-walk__main { min-width: 0; flex: 1; }
+        .wt-walk__label {
+          font-family: ${MONO};
+          font-size: 9.5px;
+          color: #c8c8c8;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+          line-height: 1.5;
+        }
+        .wt-walk__note {
+          font-family: Georgia, serif;
+          font-size: 12px;
+          line-height: 1.6;
+          color: #6a6a6a;
+          margin-top: 4px;
+        }
+        /* Low confidence is stated, not styled away. A score computed from
+           almost no nodes is still a number, and a number the reader trusts
+           more than it deserves is worse than no number at all. */
+        .wt-walk__flag {
+          font-family: ${MONO};
+          font-size: 8.5px;
+          color: #e8c84a;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          margin-top: 5px;
+        }
+
         .wt-source {
           font-family: ${MONO};
           font-size: 8.5px;
@@ -276,6 +331,34 @@ export default function WhereToSection({ lat, lng, radiusM = 900, onIsochrone, o
         Live OpenStreetMap data around this address. Distances are straight-line;
         walk times assume a normal urban pace.
       </p>
+
+      {/* ── WALKABILITY (W10 · WALK-01) ──────────────────────────────────
+          `calculateWalkabilityScore()` existed with zero callers until now
+          (§51). Rendered ONLY when the server actually returned one — the
+          route sends null on a failed lookup rather than the function's
+          neutral 50, so an Overpass outage can never render as "MODERATE
+          PEDESTRIAN ACCESS". Nothing here is shown while loading or failed:
+          those states are already spoken for below. */}
+      {!loading && !failed && walkability && (
+        <div className="wt-walk">
+          <div>
+            <span className="wt-walk__score">{walkability.score}</span>
+            <span className="wt-walk__of">/100</span>
+          </div>
+          <div className="wt-walk__main">
+            <div className="wt-walk__label">{walkability.label}</div>
+            <div className="wt-walk__note">
+              Scored from the {total} verified place{total === 1 ? "" : "s"} within{" "}
+              {radiusLabel}, weighted by how close the nearest few are.
+            </div>
+            {walkability.confidence === "low" && (
+              <div className="wt-walk__flag">
+                ⚠ Low confidence — too few mapped places nearby to be sure
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {loading ? (
         <div className="wt-blank">Scanning the neighbourhood…</div>

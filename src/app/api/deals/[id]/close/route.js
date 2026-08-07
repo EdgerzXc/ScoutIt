@@ -3,6 +3,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolveUserId } from "@/lib/serverAuth";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { isRoutedDealRecipient } from "@/lib/dealParty";
+import { writeAuditLog } from "@/lib/auditTrail";
 
 // Same dev-mock convention as /api/notifications and /api/dashboard/units --
 // ?mockOwnerId=master-dev only takes effect when no real Bearer token was
@@ -53,16 +54,17 @@ export async function POST(request, { params }) {
 
     if (updateError) return NextResponse.json({ error: "Failed to close deal" }, { status: 500 });
 
-    // Write audit log event
-    try {
-      await supabaseAdmin.from('audit_logs').insert({
-        user_id: userId,
-        action: 'deal_close',
-        resource_type: 'deal',
-        resource_id: dealId,
-        metadata: { closed_at: new Date().toISOString(), retention_days: 7 }
-      });
-    } catch { /* audit logging is non-blocking */ }
+    // Write audit log event. This omitted `table_name` and `record_id` — both
+    // NOT NULL — so it threw on every close, and the bare `catch {}` ate it.
+    // Still non-blocking, but now it logs when it fails. See lib/auditTrail.js.
+    await writeAuditLog(supabaseAdmin, {
+      action: 'deal_close',
+      tableName: 'deals',
+      recordId: dealId,
+      userId,
+      resourceType: 'deal',
+      metadata: { closed_at: new Date().toISOString(), retention_days: 7 },
+    });
 
     return NextResponse.json({ success: true, message: "Deal closed and marked read-only with 7-day retention policy." });
   } catch (error) {

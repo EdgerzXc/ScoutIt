@@ -8,6 +8,7 @@ import { Building2, Check, AlertCircle, ShieldCheck, ShieldOff, Sliders, FileTex
 import IntelStudioPanel from "@/components/intel/IntelStudioPanel";
 import FeatureConsolePanel from "@/components/admin/FeatureConsolePanel";
 import ConnectsRefundPanel from "@/components/admin/ConnectsRefundPanel";
+import PropertyVerifyPanel from "@/components/admin/PropertyVerifyPanel";
 import { sanitizeError } from "@/lib/sanitizeError";
 
 export default function AdminPage() {
@@ -197,6 +198,19 @@ export default function AdminPage() {
             <Wallet size={15} />
             Connect Refunds
           </button>
+
+          {/* ACQ-01 · W12 — /api/property/verify had no caller until now (§51). */}
+          <button
+            onClick={() => setActiveTab("verify")}
+            className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 border-b-2 rounded-t-lg ${
+              activeTab === "verify"
+                ? "border-[#E8AE3C] text-[#E8AE3C] bg-[#E8AE3C]/10 font-bold"
+                : "border-transparent text-gray-400 hover:text-white hover:bg-[#1a1a1a]"
+            }`}
+          >
+            <ShieldCheck size={15} />
+            Re-verification
+          </button>
         </div>
 
         <div className="admin-content">
@@ -208,6 +222,15 @@ export default function AdminPage() {
                 <h2>Connect Refunds</h2>
               </div>
               <ConnectsRefundPanel />
+            </div>
+          )}
+
+          {activeTab === "verify" && (
+            <div className="admin-panel">
+              <div className="panel-header">
+                <h2>Listing Re-verification</h2>
+              </div>
+              <PropertyVerifyPanel />
             </div>
           )}
 

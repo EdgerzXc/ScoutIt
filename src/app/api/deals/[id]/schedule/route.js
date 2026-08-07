@@ -76,8 +76,22 @@ export async function POST(request, { params }) {
       body: `[SYSTEM] The buyer has requested a live viewing for: ${new Date(scheduled_at).toLocaleString()}`
     }]);
 
-    // Reset chat inactivity timer
-    await supabaseAdmin.from('deals').update({ updated_at: new Date().toISOString() }).eq('id', dealId);
+    // No inactivity write-back here, deliberately. `deals` has NO `updated_at`
+    // column (verified against the live database 2026-08-06, §58/C28), so the
+    // statement this replaced failed on every scheduled viewing, and nothing
+    // checked its error — the "reset chat inactivity timer" it claimed to do
+    // has never once happened.
+    //
+    // The same bug was already found and fixed in /api/deals/[id]/messages,
+    // which documents the resolution: "most recent conversation" is derived
+    // from `deal_messages.created_at`, so no write-back is needed. This route
+    // inserts a [SYSTEM] deal_message just above, which is exactly that
+    // signal — the timer is already reset by the message itself.
+    //
+    // `pending_clock_reset_at` is deliberately NOT touched: it drives the
+    // pending-request archive/delete sweep for requests nobody has answered,
+    // and a scheduling action is not an answer. Repurposing it here would
+    // change a lifecycle rule, which is an owner decision, not a bug fix.
 
     await logActivity(supabaseAdmin, {
       dealId,

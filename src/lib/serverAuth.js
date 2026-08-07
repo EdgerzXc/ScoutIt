@@ -45,9 +45,20 @@ export async function resolveServerTier(request) {
 /**
  * Legal-capacity gate (Civil Code 18+, RA 8792). NEW_IDEAS.md §34.2, §47.
  *
- * ⚠️ THIS FUNCTION HAS NO CALLERS YET. It was written for PRIV-02 and marked
- * complete, but nothing invokes it — so no inquiry, handshake or Connect spend
- * is currently age-gated. Wiring it is §47.3.
+ * ✅ WIRED. Corrected 2026-08-06 (§59): this docstring said "THIS FUNCTION HAS
+ * NO CALLERS YET … wiring it is §47.3" long after §48 wired it. Verified
+ * callers:
+ *   - `/api/deals/initiate:47`  (guarded by the dev-mock bypass)
+ *   - `/api/deals/handshake:28`
+ *
+ * Left stale, this comment was worse than missing: a future session reading it
+ * would conclude the legal age gate was unenforced and either re-wire it
+ * redundantly or, worse, "discover" the gap and report it as a finding. Stale
+ * status text is Rule 12's problem in miniature — an assertion that acquires
+ * authority from sitting in the file it describes.
+ *
+ * ⚠️ Still NOT age-gated, deliberately unverified here: a plain Connect spend
+ * outside these two routes. If you add a new spend path, add the gate.
  *
  * ── IT USED TO FAIL OPEN, IN TWO WAYS ──
  *

@@ -92,6 +92,37 @@ export function validateDeclaration(relationship, agreed) {
 }
 
 /**
+ * Legacy → canonical spellings for a relationship value.
+ *
+ * `/api/property/claim` hardcoded a SECOND vocabulary — 'direct_owner',
+ * 'authorized_manager', 'authorized_broker' — of which only the third matched
+ * this module. Migration `20260806000006` unifies the database on the canonical
+ * values; this map exists so an old client, a queued request or a hand-written
+ * curl call cannot 400 during the changeover.
+ *
+ * ⚠️ This is a RAMP, not an interface. Nothing new should ever emit the legacy
+ * spellings. See NEW_IDEAS_2.md §55.
+ */
+export const LEGACY_RELATIONSHIP_ALIASES = Object.freeze({
+  direct_owner: "owner",
+  authorized_manager: "property_manager",
+  authorized_broker: "authorized_broker",
+});
+
+/**
+ * Normalise any accepted spelling to the canonical one.
+ * Returns null for anything unrecognised — never a guess, and never a default.
+ * An unrecognised relationship must fail validation, not quietly become
+ * "owner", which would manufacture the strongest possible claim out of a typo.
+ */
+export function canonicalRelationship(value) {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  if (LISTER_RELATIONSHIP_VALUES.includes(trimmed)) return trimmed;
+  return LEGACY_RELATIONSHIP_ALIASES[trimmed] || null;
+}
+
+/**
  * Should "Claim This Property" be offered on this listing? (§37.2)
  *
  * Yes when the listing is NOT owner-declared — i.e. a broker or manager put it

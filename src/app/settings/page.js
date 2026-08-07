@@ -9,6 +9,8 @@ import AtmosphereBackground from "@/components/ui/AtmosphereBackground";
 import { Camera, Search, ShieldCheck, Lock } from "lucide-react";
 import { BADGE_DEFINITIONS } from "@/lib/BadgeEngine";
 import { supabase } from "@/lib/supabaseClient";
+import PrivacyShieldPanel from "@/components/profile/PrivacyShieldPanel";
+import { getCurrentTier } from "@/lib/entitlements";
 
 const INTENT_TAGS = [
   { id: 'buyer', label: 'Looking to Buy/Rent', icon: <Search strokeWidth={1.5} size="1em" /> },
@@ -30,6 +32,12 @@ export default function SettingsPage() {
   };
   const [name, setName] = useState("");
   const [tags, setTags] = useState([]);
+  // Read in an effect, not during render: getCurrentTier() touches
+  // localStorage, which does not exist on the server and would break SSR.
+  // Only used to say whether the shield is already on by default — never to
+  // decide whether the control is shown (Standing Rule 10).
+  const [shieldTier, setShieldTier] = useState(null);
+  useEffect(() => { setShieldTier(getCurrentTier()); }, []);
   const [badges, setBadges] = useState([]);
   const [publicProfile, setPublicProfile] = useState({
     headline: "",
@@ -355,6 +363,20 @@ export default function SettingsPage() {
             View Milestones & Achievements →
           </Link>
         </div>
+
+        {/* ── Privacy & Anonymity Shield (W13 · C19 · §46.8) ──
+            Placed ABOVE Security & Login deliberately. Privacy is the thing a
+            ScoutIt user is anxious about; burying it under password fields
+            makes it feel like an advanced setting rather than a promise.
+
+            ⚠️ No tier is passed as a permission — only as a hint about what
+            the user's DEFAULT already is. Standing Rule 10: never gate a
+            privacy control behind a tier. The role decides who sees it, and
+            brokers correctly see nothing (being found is their whole value). */}
+        <PrivacyShieldPanel
+          role={tags.includes('broker') ? 'broker' : (tags.includes('owner') ? 'owner' : 'seeker')}
+          tier={shieldTier}
+        />
 
         {/* ── Security & Login ── */}
         <div className={styles.formGroup} style={{ marginTop: 24, padding: 24, border: '1px solid var(--surface-variant)', borderRadius: 12, background: 'var(--surface)' }}>

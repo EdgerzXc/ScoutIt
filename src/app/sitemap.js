@@ -1,5 +1,6 @@
 import { fetchProperties } from "@/lib/airtable";
 import { siteUrl } from "@/lib/siteUrl";
+import { LOCATION_HUB_SLUGS } from "@/lib/locationHubs";
 
 export default async function sitemap() {
   const baseUrl = siteUrl();
@@ -22,28 +23,28 @@ export default async function sitemap() {
     { url: `${baseUrl}/privacy`, lastModified: currentDate, changeFrequency: "yearly", priority: 0.3 },
   ];
 
-  // Location Hub routes (SEO-03) — WITHHELD.
+  // Location Hub routes (SEO-03) — RESTORED 2026-08-06 with W7.
   //
-  // These three slugs were submitted to Google from 2026-08-05, but no
-  // `/hubs/[slug]` route has ever existed — all three returned 404. Google
-  // records those as soft-404s, which suppresses crawl budget for the pages
-  // that DO work, so this was actively fighting §13's indexing effort.
-  //
-  // The data layer (`/api/hubs`) is real and correct; only the page is
-  // missing. Re-enable this block the same commit the page ships — never
-  // before. See BACKLOG/01_WORK_ORDER.md W1 → W7.
+  // HISTORY, kept because the sequence is the lesson: these three slugs were
+  // submitted to Google from 2026-08-05 while no `/hubs/[slug]` route existed.
+  // All three returned 404, Google recorded soft-404s, and that suppressed
+  // crawl budget for the pages that DO work — actively fighting §13's indexing
+  // effort. W1 withheld them; W7 built `src/app/hubs/[slug]/page.js`; they are
+  // now true rather than merely absent.
   //
   // ⚠️ RULE: a sitemap must never contain a URL that does not return 200.
   // Advertising a page you have not built costs more than not advertising it.
-  const HUB_PAGE_EXISTS = false;
-  const hubRoutes = HUB_PAGE_EXISTS
-    ? ["bgc-taguig", "makati-cbd", "quezon-city-hub"].map((slug) => ({
-        url: `${baseUrl}/hubs/${slug}`,
-        lastModified: currentDate,
-        changeFrequency: "weekly",
-        priority: 0.8,
-      }))
-    : [];
+  //
+  // The slugs are read from the SAME array that drives the page's
+  // `generateStaticParams`, so the two cannot drift. Hardcoding them here is
+  // what allowed the original mismatch — a literal list has no way to be wrong
+  // out loud.
+  const hubRoutes = LOCATION_HUB_SLUGS.map((slug) => ({
+    url: `${baseUrl}/hubs/${slug}`,
+    lastModified: currentDate,
+    changeFrequency: "weekly",
+    priority: 0.8,
+  }));
 
   // Dynamic property pages from Airtable
   let propertyRoutes = [];

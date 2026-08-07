@@ -1,0 +1,231 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   LOCATION HUB PAGE — W7
+   Written at 390px first, widened at 768 and 1100. Plain CSS in a route-scoped
+   file so the page ships zero client JS for its content (see page.js header).
+   Tokens mirror DESIGN.md / 02_FRONTEND_STANDARD §3.
+   ───────────────────────────────────────────────────────────────────────── */
+
+.hub-page {
+  min-height: 60dvh; /* dvh, never vh (§41) */
+  max-width: 1100px;
+  margin: 0 auto;
+  /* Bottom padding clears the fixed .bottom-nav (globals.css, ≤768px: ~62px
+     plus its own safe-area padding). Without this the last card sits under the
+     nav on a phone and reads as the end of the list. */
+  padding: 88px 18px calc(104px + env(safe-area-inset-bottom, 0px));
+  color: #f0ede8;
+}
+
+/* ── HERO ──────────────────────────────────────────────────────────── */
+.hub-eyebrow {
+  font-family: "Courier New", monospace;
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #e8ae3c;
+  margin: 0 0 10px;
+}
+.hub-title {
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 400;
+  font-size: clamp(1.75rem, 7vw, 3rem);
+  line-height: 1.15;
+  margin: 0 0 12px;
+  color: #f0ede8;
+  text-wrap: balance;
+}
+.hub-tagline {
+  font-family: Georgia, serif;
+  font-size: 15px;
+  line-height: 1.7;
+  color: #c8c8c8;
+  margin: 0 0 14px;
+  max-width: 58ch;
+}
+.hub-meta {
+  font-family: "Courier New", monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #8a8a8a;
+  margin: 0;
+}
+.hub-hero {
+  padding-bottom: 26px;
+  border-bottom: 0.5px solid #262626;
+}
+
+/* ── SECTIONS ──────────────────────────────────────────────────────── */
+.hub-section { padding-top: 34px; }
+.hub-section--last {
+  margin-top: 34px;
+  padding-top: 26px;
+  border-top: 0.5px solid #262626;
+}
+.hub-h2 {
+  font-family: Georgia, serif;
+  font-weight: 400;
+  font-size: 19px;
+  line-height: 1.35;
+  color: #f0ede8;
+  margin: 0 0 16px;
+}
+
+/* ── CATEGORY CHIPS ────────────────────────────────────────────────── */
+.hub-chips {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0;
+  margin: 0;
+}
+.hub-chip {
+  font-family: "Courier New", monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #c8c8c8;
+  background: #161616;
+  border: 0.5px solid #262626;
+  border-radius: 999px;
+  padding: 9px 13px;
+}
+
+/* ── LISTING GRID — cards at every width, never a table (§1) ───────── */
+.hub-grid {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+.hub-card {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-height: 44px;
+  padding: 16px 15px;
+  background: #161616;
+  border: 0.5px solid #262626;
+  border-radius: 5px;
+  text-decoration: none;
+  transition: border-color 180ms ease-out, background-color 180ms ease-out;
+}
+.hub-card:hover { border-color: #3a3a3a; background: #1a1a1a; }
+.hub-card:active { transform: scale(0.995); }
+.hub-card:focus-visible { outline: 2px solid #e8ae3c; outline-offset: 2px; }
+.hub-card__title {
+  font-family: Georgia, serif;
+  font-size: 16px;
+  line-height: 1.35;
+  color: #f0ede8;
+  overflow-wrap: anywhere;
+}
+.hub-card__cat {
+  font-family: "Courier New", monospace;
+  font-size: 8.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #8a8a8a;
+}
+.hub-card__hook {
+  font-family: Georgia, serif;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #c8c8c8;
+}
+.hub-card__foot {
+  font-family: "Courier New", monospace;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #6e6e6e;
+  margin-top: 2px;
+}
+
+/* ── EMPTY / ERROR STATES ──────────────────────────────────────────── */
+.hub-state {
+  background: #131313;
+  border: 0.5px solid #262626;
+  border-left: 2px solid #6e531a;
+  border-radius: 4px;
+  padding: 20px 18px;
+}
+.hub-state__title {
+  font-family: Georgia, serif;
+  font-size: 16px;
+  color: #f0ede8;
+  margin: 0 0 8px;
+}
+.hub-state__body {
+  font-family: Georgia, serif;
+  font-size: 13.5px;
+  line-height: 1.7;
+  color: #8a8a8a;
+  margin: 0 0 18px;
+  max-width: 56ch;
+}
+/* The single gold element on the page — 95/5 rule. */
+.hub-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 0 20px;
+  background: #f7c64e;
+  color: #0d0d0d;
+  font-family: "Courier New", monospace;
+  font-size: 10px;
+  font-weight: bold;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  border-radius: 3px;
+  text-decoration: none;
+  transition: transform 140ms ease-out;
+}
+.hub-cta:active { transform: scale(0.97); }
+.hub-cta:focus-visible { outline: 2px solid #e8ae3c; outline-offset: 3px; }
+
+/* ── OTHER HUBS ────────────────────────────────────────────────────── */
+.hub-others {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.hub-other {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  font-family: Georgia, serif;
+  font-size: 14.5px;
+  color: #c8c8c8;
+  text-decoration: none;
+  border-bottom: 1px solid #1c1c1c;
+  transition: color 160ms ease-out;
+}
+.hub-other:hover { color: #e8ae3c; }
+.hub-other:focus-visible { outline: 2px solid #e8ae3c; outline-offset: 2px; }
+
+/* ── WIDER ─────────────────────────────────────────────────────────── */
+@media (min-width: 768px) {
+  /* .bottom-nav is display:none above 768px, so the clearance comes back off. */
+  .hub-page { padding: 104px 32px 80px; }
+  .hub-h2 { font-size: 21px; }
+  .hub-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .hub-others { flex-direction: row; flex-wrap: wrap; gap: 10px 26px; }
+  .hub-other { border-bottom: none; }
+}
+
+@media (min-width: 1100px) {
+  .hub-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hub-card, .hub-cta, .hub-other { transition: none; }
+  .hub-card:active, .hub-cta:active { transform: none; }
+}

@@ -39,7 +39,13 @@ export async function GET(request) {
     // Now get the units
     const { data: units, error: unitError } = await supabaseAdmin
       .from('property_units')
-      .select('id, property_id, availability_status, price_monthly')
+      // `price_monthly` was here until 2026-08-06 (§58/C28). It is not a column
+      // on `property_units` (the price column is `price`), so PostgREST failed
+      // the whole select and this route returned 500 "Failed to fetch units" —
+      // taking the entire owner inventory panel down. It was also never read:
+      // the stats below only use `availability_status`. Removed rather than
+      // renamed, because adding an unused column back invites the same bug.
+      .select('id, property_id, availability_status')
       .in('property_id', propIds);
 
     if (unitError) {

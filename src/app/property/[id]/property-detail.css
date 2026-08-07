@@ -1450,3 +1450,16 @@ html.lightbox-open {
     box-shadow: var(--shadow-glow-soft) !important;
   }
 }
+
+/* ── CLAIM PANEL SLOT (§37 · W8) ─────────────────────────────────────────
+   The claim panel is mounted at the page shell (src/app/property/[id]/page.js),
+   outside the flow components' own layout, so it needs its own gutters. Bottom
+   padding clears the fixed .bottom-nav on mobile (globals.css, ≤768px). */
+.claim-panel-slot {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 18px 96px;
+}
+@media (min-width: 768px) {
+  .claim-panel-slot { padding: 0 32px 64px; }
+}
