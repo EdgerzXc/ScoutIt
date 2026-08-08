@@ -44,7 +44,7 @@ export default function GlobalError({ error, reset }) {
           <h1
             style={{
               color: "#f0ede8",
-              fontFamily: "Georgia, serif",
+              fontFamily: "var(--font-display)",
               fontSize: "28px",
               fontWeight: 400,
               margin: "0 0 12px 0",

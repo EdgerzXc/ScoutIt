@@ -116,7 +116,7 @@ export default function TaskRail({ mockUserId, dealId = null, onSummary }) {
       <form onSubmit={addTask} className="flex flex-col gap-3">
         <input
           type="text"
-          className="w-full bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-sm text-on-surface focus:outline-none focus:border-gold-accent transition-colors"
+          className="w-full bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-sm text-on-surface focus:outline-none focus:border-gold-accent transition"
           placeholder={dealId ? "Add a task for this deal…" : "Add a task…"}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
@@ -126,7 +126,7 @@ export default function TaskRail({ mockUserId, dealId = null, onSummary }) {
           <input
             type="date"
             aria-label="Due date"
-            className="flex-1 min-w-0 bg-surface-alt border border-surface-variant rounded px-2 py-2.5 text-xs text-text-secondary focus:outline-none focus:border-gold-accent transition-colors"
+            className="flex-1 min-w-0 bg-surface-alt border border-surface-variant rounded px-2 py-2.5 text-xs text-text-secondary focus:outline-none focus:border-gold-accent transition"
             value={dueDate}
             onChange={(e) => setDueDate(e.target.value)}
           />
@@ -151,8 +151,8 @@ export default function TaskRail({ mockUserId, dealId = null, onSummary }) {
         {open.map((task) => {
           const isOverdue = task.dueAt && new Date(task.dueAt) < new Date();
           return (
-            <div key={task.id} className={`group flex items-start gap-3 py-2.5 px-2 rounded transition-colors hover:bg-surface-alt/60 ${isOverdue ? "border-l-2 border-error pl-3" : ""}`}>
-              <button onClick={() => toggleTask(task)} aria-label="Mark task done" className="mt-0.5 text-text-muted hover:text-gold-accent transition-colors shrink-0">
+            <div key={task.id} className={`group flex items-start gap-3 py-2.5 px-2 rounded transition hover:bg-surface-alt/60 ${isOverdue ? "border-l-2 border-error pl-3" : ""}`}>
+              <button onClick={() => toggleTask(task)} aria-label="Mark task done" className="mt-0.5 text-text-muted hover:text-gold-accent transition shrink-0">
                 <Circle size={18} />
               </button>
               <div className="flex-1 min-w-0">
@@ -169,7 +169,7 @@ export default function TaskRail({ mockUserId, dealId = null, onSummary }) {
               <button
                 onClick={() => deleteTask(task)}
                 aria-label="Delete task"
-                className="opacity-0 group-hover:opacity-100 focus:opacity-100 text-text-muted hover:text-error transition-all shrink-0 p-1"
+                className="opacity-0 group-hover:opacity-100 focus:opacity-100 text-text-muted hover:text-error transition shrink-0 p-1"
               >
                 <Trash2 size={14} />
               </button>
@@ -180,7 +180,7 @@ export default function TaskRail({ mockUserId, dealId = null, onSummary }) {
 
       {done.length > 0 && (
         <div className="border-t border-surface-variant pt-2">
-          <button onClick={() => setShowDone((v) => !v)} className="text-[11px] font-label-caps tracking-widest uppercase text-text-secondary hover:text-on-surface transition-colors">
+          <button onClick={() => setShowDone((v) => !v)} className="text-[11px] font-label-caps tracking-widest uppercase text-text-secondary hover:text-on-surface transition">
             {showDone ? "Hide" : "Show"} completed ({done.length})
           </button>
           {showDone && (
@@ -191,7 +191,7 @@ export default function TaskRail({ mockUserId, dealId = null, onSummary }) {
                     <CheckCircle2 size={18} />
                   </button>
                   <p className="flex-1 text-sm text-text-secondary line-through leading-snug">{task.title}</p>
-                  <button onClick={() => deleteTask(task)} aria-label="Delete task" className="opacity-0 group-hover:opacity-100 text-text-muted hover:text-error transition-all shrink-0 p-1">
+                  <button onClick={() => deleteTask(task)} aria-label="Delete task" className="opacity-0 group-hover:opacity-100 text-text-muted hover:text-error transition shrink-0 p-1">
                     <Trash2 size={14} />
                   </button>
                 </div>

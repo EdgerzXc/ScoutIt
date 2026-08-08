@@ -32,22 +32,22 @@
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-/** Is this string a UUID, i.e. a `properties.id` rather than a slug? */
+/** Is this string a UUID, i.e. a 'properties.id' rather than a slug? */
 export function looksLikeUuid(value) {
   return typeof value === "string" && UUID_RE.test(value.trim());
 }
 
 /**
- * Columns that actually exist on `public.properties`.
+ * Columns that actually exist on 'public.properties'.
  *
  * ⚠️ VERIFIED AGAINST THE LIVE DATABASE 2026-08-06, not against a document.
- * `/api/seo/readiness` was reading `prop.address`, `prop.photos`,
- * `prop.category`, `prop.property_type`, `prop.metadata` and `prop.status` —
+ * '/api/seo/readiness' was reading 'prop.address', 'prop.photos',
+ * 'prop.category', 'prop.property_type', 'prop.metadata' and 'prop.status' —
  * SIX columns, none of which exist. Every check it performed evaluated against
- * `undefined` and returned false, so it reported every listing as un-indexable
- * with total confidence. Keep this list honest; a `select('*')` hides the
+ * 'undefined' and returned false, so it reported every listing as un-indexable
+ * with total confidence. Keep this list honest; a 'select('*')' hides the
  * problem instead of solving it, and also drags internal-only columns
- * (`lister_relationship`, `owner_claim_agreed`) into scope.
+ * ('lister_relationship', 'owner_claim_agreed') into scope.
  */
 export const PROPERTY_PUBLIC_COLUMNS = [
   "id",
@@ -81,7 +81,7 @@ export const PROPERTY_PUBLIC_COLUMNS = [
  * @param {string[]|string} [columns] - defaults to PROPERTY_PUBLIC_COLUMNS
  * @returns {Promise<{property: object|null, error: Error|null}>}
  *
- * Returns `{property: null, error: null}` for "no such property" and a real
+ * Returns '{property: null, error: null}' for "no such property" and a real
  * error object only when the query itself failed. The old code collapsed those
  * two into one 404, which is how a broken query masqueraded as a missing row
  * for weeks.

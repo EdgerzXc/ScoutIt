@@ -90,7 +90,7 @@ export default function ArticleBlocks({ blocks }) {
         .ab-h2 {
           font-family: var(--font-display);
           font-size: clamp(22px, 4.5vw, 28px);
-          font-weight: 500;
+          font-weight: 400;
           color: var(--text-primary);
           line-height: 1.3;
           margin-top: 18px;
@@ -99,7 +99,7 @@ export default function ArticleBlocks({ blocks }) {
         .ab-h3 {
           font-family: var(--font-display);
           font-size: clamp(18px, 4vw, 22px);
-          font-weight: 500;
+          font-weight: 400;
           color: var(--text-primary);
           line-height: 1.35;
           margin-top: 10px;

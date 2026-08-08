@@ -253,12 +253,12 @@ export default function PropertySectionEditor({
           letter-spacing: 0.06em;
           text-transform: uppercase;
           font-family: ui-monospace, monospace;
-          color: #8a8a8a;
+          color: var(--text-secondary);
         }
         .lbl em { color: ${GOLD_DIM}; font-style: normal; margin-left: 0.3rem; }
         input, textarea {
-          background: #0d0d0d;
-          border: 1px solid #262626;
+          background: var(--bg);
+          border: 1px solid var(--border-solid);
           color: #ededed;
           border-radius: 6px;
           padding: 0.7rem;

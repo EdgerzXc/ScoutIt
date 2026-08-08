@@ -75,14 +75,14 @@
 }
 
 .brokers-page-title {
-  font-family: Georgia, serif;
+  font-family: var(--font-display);
   font-size: 36px;
   font-weight: 400;
   margin: 0 0 8px;
 }
 
 .brokers-page-subtitle {
-  font-family: Georgia, serif;
+  font-family: var(--font-display);
   font-size: 16px;
   font-style: italic;
   color: var(--text-secondary);
@@ -167,7 +167,7 @@
 }
 
 .broker-name-txt {
-  font-family: Georgia, serif;
+  font-family: var(--font-display);
   font-size: 20px;
   font-weight: 400;
   margin: 0;
@@ -228,7 +228,7 @@
 }
 
 .rating-num {
-  font-family: Georgia, serif;
+  font-family: var(--font-display);
   font-size: 28px;
   font-weight: 400;
   color: var(--accent);
@@ -319,7 +319,7 @@
 }
 
 .form-title {
-  font-family: Georgia, serif;
+  font-family: var(--font-display);
   font-size: 15px;
   font-weight: 400;
   color: var(--accent);
@@ -596,7 +596,7 @@
 }
 
 .roster-empty-state p {
-  font-family: Georgia, serif;
+  font-family: var(--font-display);
   letter-spacing: 0;
   text-transform: none;
   line-height: 1.7;

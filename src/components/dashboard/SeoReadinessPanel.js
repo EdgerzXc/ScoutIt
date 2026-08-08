@@ -78,7 +78,7 @@ export default function SeoReadinessPanel({ propertyId }) {
           align-items: baseline;
           justify-content: space-between;
           gap: 10px;
-          border-bottom: 1px solid #262626;
+          border-bottom: 1px solid var(--border-solid);
           padding-bottom: 8px;
           margin-bottom: 16px;
         }
@@ -87,7 +87,7 @@ export default function SeoReadinessPanel({ propertyId }) {
           font-size: 11px;
           letter-spacing: 0.16em;
           text-transform: uppercase;
-          color: #8a8a8a;
+          color: var(--text-secondary);
         }
         .sr-refresh {
           background: none;
@@ -98,16 +98,16 @@ export default function SeoReadinessPanel({ propertyId }) {
           font-size: 9px;
           letter-spacing: 0.12em;
           text-transform: uppercase;
-          color: #6a6a6a;
+          color: var(--text-muted);
           cursor: pointer;
           text-decoration: underline;
         }
-        .sr-refresh:hover { color: #E8AE3C; }
+        .sr-refresh:hover { color: var(--accent); }
 
         .sr-skel {
           height: 96px;
           border-radius: 4px;
-          background: linear-gradient(90deg, #141414 0%, #1a1a1a 50%, #141414 100%);
+          background: linear-gradient(90deg, var(--surface) 0%, var(--surface2) 50%, var(--surface) 100%);
           background-size: 200% 100%;
           animation: srShimmer 1.4s ease-in-out infinite;
         }
@@ -123,15 +123,15 @@ export default function SeoReadinessPanel({ propertyId }) {
           margin-bottom: 6px;
         }
         .sr-score {
-          font-family: Georgia, serif;
+          font-family: var(--font-display);
           font-size: 30px;
           line-height: 1;
-          color: #f0ede8;
+          color: var(--text-primary);
         }
         .sr-of {
           font-family: ${MONO};
           font-size: 9px;
-          color: #4a4a4a;
+          color: var(--text-muted);
           letter-spacing: 0.1em;
         }
         .sr-state {
@@ -144,14 +144,14 @@ export default function SeoReadinessPanel({ propertyId }) {
           border: 0.5px solid currentColor;
         }
         /* Signal colours, used as status and never as decoration. */
-        .sr-state--yes { color: #4caf7d; }
-        .sr-state--no  { color: #e8c84a; }
+        .sr-state--yes { color: var(--green); }
+        .sr-state--no  { color: var(--yellow); }
 
         .sr-explain {
-          font-family: Georgia, serif;
+          font-family: var(--font-display);
           font-size: 12.5px;
           line-height: 1.7;
-          color: #8a8a8a;
+          color: var(--text-secondary);
           margin: 0 0 16px;
           max-width: 56ch;
         }
@@ -163,10 +163,10 @@ export default function SeoReadinessPanel({ propertyId }) {
           align-items: flex-start;
           padding: 11px 0;
           border-bottom: 1px solid #1a1a1a;
-          font-family: Georgia, serif;
+          font-family: var(--font-display);
           font-size: 13px;
           line-height: 1.6;
-          color: #c8c8c8;
+          color: var(--text-secondary);
         }
         .sr-item:last-child { border-bottom: none; }
         .sr-dot {
@@ -178,16 +178,16 @@ export default function SeoReadinessPanel({ propertyId }) {
           margin-top: 7px;
         }
         .sr-clear {
-          font-family: Georgia, serif;
+          font-family: var(--font-display);
           font-size: 13px;
           line-height: 1.7;
-          color: #4caf7d;
+          color: var(--green);
           margin: 0;
         }
         .sr-err {
           font-family: ${MONO};
           font-size: 10px;
-          color: #e8644a;
+          color: var(--red);
           line-height: 1.7;
           letter-spacing: 0.04em;
         }

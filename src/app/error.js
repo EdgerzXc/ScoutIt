@@ -80,7 +80,7 @@ export default function GlobalError({ error, reset }) {
           margin-bottom: 14px;
         }
         .err-title {
-          font-family: Georgia, 'Times New Roman', serif;
+          font-family: var(--font-display);
           font-size: 24px;
           line-height: 1.25;
           font-weight: 400;
@@ -88,7 +88,7 @@ export default function GlobalError({ error, reset }) {
           margin: 0 0 10px;
         }
         .err-message {
-          font-family: Georgia, 'Times New Roman', serif;
+          font-family: var(--font-display);
           font-size: 14px;
           line-height: 1.7;
           color: #8a8a8a;

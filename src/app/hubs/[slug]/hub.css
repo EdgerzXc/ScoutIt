@@ -26,7 +26,7 @@
   margin: 0 0 10px;
 }
 .hub-title {
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-display);
   font-weight: 400;
   font-size: clamp(1.75rem, 7vw, 3rem);
   line-height: 1.15;
@@ -35,7 +35,7 @@
   text-wrap: balance;
 }
 .hub-tagline {
-  font-family: Georgia, serif;
+  font-family: var(--font-display);
   font-size: 15px;
   line-height: 1.7;
   color: var(--text-secondary);
@@ -63,7 +63,7 @@
   border-top: 0.5px solid var(--border-solid);
 }
 .hub-h2 {
-  font-family: Georgia, serif;
+  font-family: var(--font-display);
   font-weight: 400;
   font-size: 19px;
   line-height: 1.35;
@@ -117,7 +117,7 @@
 .hub-card:active { transform: scale(0.995); }
 .hub-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .hub-card__title {
-  font-family: Georgia, serif;
+  font-family: var(--font-display);
   font-size: 16px;
   line-height: 1.35;
   color: var(--text-primary);
@@ -131,7 +131,7 @@
   color: var(--text-secondary);
 }
 .hub-card__hook {
-  font-family: Georgia, serif;
+  font-family: var(--font-display);
   font-size: 13px;
   line-height: 1.6;
   color: var(--text-secondary);
@@ -154,13 +154,13 @@
   padding: 20px 18px;
 }
 .hub-state__title {
-  font-family: Georgia, serif;
+  font-family: var(--font-display);
   font-size: 16px;
   color: var(--text-primary);
   margin: 0 0 8px;
 }
 .hub-state__body {
-  font-family: Georgia, serif;
+  font-family: var(--font-display);
   font-size: 13.5px;
   line-height: 1.7;
   color: var(--text-secondary);
@@ -201,7 +201,7 @@
   display: flex;
   align-items: center;
   min-height: 44px;
-  font-family: Georgia, serif;
+  font-family: var(--font-display);
   font-size: 14.5px;
   color: var(--text-secondary);
   text-decoration: none;

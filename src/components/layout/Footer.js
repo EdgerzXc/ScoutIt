@@ -2,7 +2,59 @@
 
 import Link from "next/link";
 
+// ═══════════════════════════════════════════════════════════════
+// SOCIAL LINKS — icons kept, URLs deliberately empty.
+//
+// Removed 2026-08-08. The footer previously linked to
+// linkedin.com/company/scoutit, twitter.com/scoutit_ph and
+// instagram.com/scoutit_ph — none of which are confirmed to be ours. There is
+// an established Scoutit in India with a LinkedIn company page, and linking to
+// it from every page of this site tells Google the two are the same company.
+// Same reason `sameAs` was removed from JsonLd.js on the same day.
+//
+// ── TO TURN ONE BACK ON ─────────────────────────────────────────
+// 1. Create the account and confirm the handle is really yours.
+// 2. Paste the URL into `url` below. That is the only change needed here —
+//    an entry with `url: null` renders nothing, and the whole row disappears
+//    if every url is null.
+// 3. ⚠️ ALSO add it to `sameAs` in src/components/seo/JsonLd.js — one at a
+//    time, only once verified. The footer link and the sameAs assertion must
+//    agree; that mismatch is what caused this in the first place.
+// ═══════════════════════════════════════════════════════════════
+const SOCIAL_LINKS = [
+  {
+    name: "LinkedIn",
+    url: null, // e.g. "https://linkedin.com/company/<your-handle>"
+    icon: (
+      <>
+        <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+        <rect x="2" y="9" width="4" height="12" />
+        <circle cx="4" cy="4" r="2" />
+      </>
+    ),
+  },
+  {
+    name: "Twitter",
+    url: null, // e.g. "https://twitter.com/<your-handle>"
+    icon: (
+      <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z" />
+    ),
+  },
+  {
+    name: "Instagram",
+    url: null, // e.g. "https://instagram.com/<your-handle>"
+    icon: (
+      <>
+        <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+        <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+      </>
+    ),
+  },
+];
+
 export default function Footer() {
+  const activeSocials = SOCIAL_LINKS.filter((s) => s.url);
   return (
     <footer className="global-footer">
       <div className="footer-container">
@@ -13,27 +65,25 @@ export default function Footer() {
           <p className="footer-tagline">
             The Philippines&apos; first spatial commerce platform. Every kind of space — homes, offices, venues, tables — decoded into clear, verified intelligence.
           </p>
-          <div className="footer-socials">
-            <a href="https://linkedin.com/company/scoutit" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="social-link">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
-                <rect x="2" y="9" width="4" height="12"/>
-                <circle cx="4" cy="4" r="2"/>
-              </svg>
-            </a>
-            <a href="https://twitter.com/scoutit_ph" target="_blank" rel="noopener noreferrer" aria-label="Twitter" className="social-link">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/>
-              </svg>
-            </a>
-            <a href="https://instagram.com/scoutit_ph" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="social-link">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
-                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
-                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
-              </svg>
-            </a>
-          </div>
+          {/* Renders nothing while every SOCIAL_LINKS url is null. */}
+          {activeSocials.length > 0 && (
+            <div className="footer-socials">
+              {activeSocials.map((s) => (
+                <a
+                  key={s.name}
+                  href={s.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={s.name}
+                  className="social-link"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    {s.icon}
+                  </svg>
+                </a>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="footer-nav-cols">
@@ -67,8 +117,24 @@ export default function Footer() {
 
       <div className="footer-bottom">
         <div className="footer-bottom-container">
+          {/* ⚠️ WAS "Philippine operations governed by RA 9646." Changed
+              2026-08-08 — ⚖️ THIS WORDING STILL NEEDS A LAWYER'S REVIEW.
+
+              RA 9646 (RESA) regulates real estate SERVICE PRACTITIONERS. The
+              old line claimed the whole of ScoutIt is governed by it, which is
+              (a) too broad — ScoutIt is intelligence, software, restaurants,
+              venues, photographers and researchers — and (b) the direct
+              opposite of what /terms says at length: that ScoutIt is
+              "deliberately and strictly NOT a real estate broker, salesperson,
+              appraiser, consultant, or real estate dealer under Republic Act
+              No. 9646."
+
+              So the footer contradicted the Terms on every page of the site.
+              The Terms wording is the careful one. This narrows the claim to
+              match it: the statute applies to the real-estate services
+              facilitated through the platform, not to the platform itself. */}
           <p className="footer-legal">
-            © {new Date().getFullYear()} ScoutIt. Space Intelligence Platform. Philippine operations governed by RA 9646. All rights reserved.
+            © {new Date().getFullYear()} ScoutIt. Space Intelligence Platform. Real-estate services facilitated through ScoutIt are subject to applicable Philippine law, including RA 9646 where relevant. All rights reserved.
           </p>
           <div className="footer-meta-links">
             <Link href="/terms">Terms of Service</Link>
@@ -107,7 +173,7 @@ export default function Footer() {
         }
 
         .footer-brand {
-          font-family: Georgia, 'Times New Roman', serif;
+          font-family: var(--font-display);
           font-weight: 400;
           font-size: 26px;
           letter-spacing: 2px;
@@ -173,7 +239,7 @@ export default function Footer() {
           font-weight: 600;
           letter-spacing: 0.15em;
           text-transform: uppercase;
-          color: #f5f3ee;
+          color: var(--text-primary);
           margin-bottom: 8px;
         }
 
@@ -229,7 +295,7 @@ export default function Footer() {
         }
 
         .meta-separator {
-          color: #444444;
+          color: var(--text-muted);
           font-size: 10px;
         }
 

@@ -159,12 +159,12 @@ export default function BuyerMode() {
       if (coords) {
         // Marker element
         const el = document.createElement('div');
-        el.className = 'w-8 h-8 rounded-full bg-gold-accent flex items-center justify-center text-sm shadow-[0_0_15px_rgba(232,174,60,0.6)] cursor-pointer hover:scale-110 transition-transform text-background font-bold border-2 border-[#121212] z-10';
+        el.className = 'w-8 h-8 rounded-full bg-gold-accent flex items-center justify-center text-sm shadow-[0_0_15px_rgba(232,174,60,0.6)] cursor-pointer hover:scale-110 transition-transform text-background font-bold border-2 border-surface z-10';
         el.innerHTML = listing.hasMedia ? '📸' : '🏢';
 
         // Secure Popup DOM Construction to prevent XSS
         const popupContent = document.createElement('div');
-        popupContent.className = 'bg-[#121110] border border-gold-accent/20 p-4 rounded-lg shadow-xl w-60';
+        popupContent.className = 'bg-surface border border-gold-accent/20 p-4 rounded-lg shadow-xl w-60';
         
         const typeEl = document.createElement('div');
         typeEl.className = 'text-[10px] text-gold-accent font-label-caps uppercase tracking-widest mb-1';
@@ -180,7 +180,7 @@ export default function BuyerMode() {
         
         const linkEl = document.createElement('a');
         linkEl.href = `/property/${listing.slug || listing.id}`;
-        linkEl.className = 'block text-center w-full text-[10px] font-label-caps tracking-widest uppercase bg-gold-accent/10 hover:bg-gold-accent/20 text-gold-accent py-2 rounded transition-colors';
+        linkEl.className = 'block text-center w-full text-[10px] font-label-caps tracking-widest uppercase bg-gold-accent/10 hover:bg-gold-accent/20 text-gold-accent py-2 rounded transition';
         linkEl.textContent = 'View Property';
         
         popupContent.appendChild(typeEl);
@@ -298,7 +298,7 @@ export default function BuyerMode() {
 
   const ListingCard = ({ item }) => (
     <Link href={`/property/${item.slug || item.id}`} className="block shrink-0 min-w-[240px] md:min-w-[280px]">
-      <div className="card-atmosphere hov-card rounded-lg p-4 flex gap-4 items-center hover:border-gold-accent transition-colors cursor-pointer h-full group">
+      <div className="card-atmosphere hov-card rounded-lg p-4 flex gap-4 items-center hover:border-gold-accent transition cursor-pointer h-full group">
         <div className="w-16 h-16 bg-surface-alt rounded flex items-center justify-center text-3xl shrink-0 group-hover:scale-105 transition-transform">
           {item.img || '🏠'}
         </div>
@@ -325,8 +325,8 @@ export default function BuyerMode() {
 
   const VerticalListingCard = ({ item }) => (
     <Link href={`/property/${item.slug || item.id}`} className="block shrink-0 w-[280px] snap-start relative">
-      <div className="card-atmosphere hov-card rounded-lg p-0 flex flex-col hover:border-text-secondary transition-colors cursor-pointer overflow-hidden group h-full">
-        <div className="h-40 bg-surface-alt flex items-center justify-center text-6xl group-hover:scale-105 transition-transform duration-500">
+      <div className="card-atmosphere hov-card rounded-lg p-0 flex flex-col hover:border-text-secondary transition cursor-pointer overflow-hidden group h-full">
+        <div className="h-40 bg-surface-alt flex items-center justify-center text-6xl group-hover:scale-105 transition-transform duration-200">
           {item.img || '🏠'}
         </div>
         <div className="p-4 flex flex-col">
@@ -361,7 +361,7 @@ export default function BuyerMode() {
             <input
               type="text"
               ref={searchRef}
-              className="w-full bg-surface border border-surface-variant rounded-full pl-11 pr-4 py-3 text-on-surface focus:outline-none focus:border-gold-accent transition-colors placeholder:text-text-muted"
+              className="w-full bg-surface border border-surface-variant rounded-full pl-11 pr-4 py-3 text-on-surface focus:outline-none focus:border-gold-accent transition placeholder:text-text-muted"
               placeholder="Search locations, asset types, or intel..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -370,7 +370,7 @@ export default function BuyerMode() {
           
           {/* Proximity / Radius Filter */}
           <select 
-            className="bg-surface border border-surface-variant rounded-full px-4 py-3 text-sm text-on-surface focus:outline-none focus:border-gold-accent transition-colors cursor-pointer w-full md:w-auto"
+            className="bg-surface border border-surface-variant rounded-full px-4 py-3 text-sm text-on-surface focus:outline-none focus:border-gold-accent transition cursor-pointer w-full md:w-auto"
             value={radius}
             onChange={handleRadiusChange}
           >
@@ -386,7 +386,7 @@ export default function BuyerMode() {
           <div className="flex items-center gap-3">
             <span className={`text-xs font-working-title ${!showMap ? 'text-gold-accent' : 'text-text-secondary'}`}>List</span>
             <button 
-              className={`w-12 h-6 rounded-full p-1 transition-colors relative ${showMap ? 'bg-gold-accent' : 'bg-surface-variant'}`}
+              className={`w-12 h-6 rounded-full p-1 transition relative ${showMap ? 'bg-gold-accent' : 'bg-surface-variant'}`}
               onClick={() => setShowMap(!showMap)}
             >
               <div className={`w-4 h-4 bg-on-surface rounded-full transition-transform absolute top-1 ${showMap ? 'translate-x-6' : 'translate-x-0'}`}></div>
@@ -419,7 +419,7 @@ export default function BuyerMode() {
             </div>
             
             <select
-              className="bg-background/90 backdrop-blur border border-surface-variant text-on-surface text-sm rounded px-3 py-2 w-full focus:outline-none focus:border-gold-accent transition-colors cursor-pointer"
+              className="bg-background/90 backdrop-blur border border-surface-variant text-on-surface text-sm rounded px-3 py-2 w-full focus:outline-none focus:border-gold-accent transition cursor-pointer"
               value={radius}
               onChange={handleRadiusChange}
             >
@@ -431,7 +431,7 @@ export default function BuyerMode() {
           </div>
             
             <button 
-              className="absolute bottom-6 right-6 pointer-events-auto bg-surface-container border border-surface-variant hover:border-gold-accent text-on-surface rounded-full w-12 h-12 flex items-center justify-center shadow-lg transition-colors"
+              className="absolute bottom-6 right-6 pointer-events-auto bg-surface-container border border-surface-variant hover:border-gold-accent text-on-surface rounded-full w-12 h-12 flex items-center justify-center shadow-lg transition"
               onClick={() => setShowMap(false)} aria-label="Close"
             >
               ✕
@@ -453,7 +453,7 @@ export default function BuyerMode() {
                 </div>
               ))}
               {savedFiltered.length === 0 && (
-                <div className="bg-[#121110] border border-dashed border-surface-variant rounded-lg p-8 w-full text-center">
+                <div className="bg-surface border border-dashed border-surface-variant rounded-lg p-8 w-full text-center">
                   <span className="text-2xl mb-2 opacity-50 block">📂</span>
                   <p className="text-sm text-text-secondary">Your archive is empty. Save listings or intel briefs to build your workspace.</p>
                 </div>
@@ -467,7 +467,7 @@ export default function BuyerMode() {
               New in Metro Manila
               <div className="flex items-center gap-4">
                 <button
-                  className={`font-label-caps tracking-widest uppercase text-[10px] px-4 py-2 rounded transition-all flex items-center gap-1.5 ${areaWatch ? 'text-gold-accent bg-gold-accent/10 border border-gold-accent/40' : 'text-background bg-gold-accent shadow-[0_0_10px_rgba(232,174,60,0.3)] hover:opacity-90 hover:scale-105'}`}
+                  className={`font-label-caps tracking-widest uppercase text-[10px] px-4 py-2 rounded transition flex items-center gap-1.5 ${areaWatch ? 'text-gold-accent bg-gold-accent/10 border border-gold-accent/40' : 'text-background bg-gold-accent shadow-[0_0_10px_rgba(232,174,60,0.3)] hover:opacity-90 hover:scale-105'}`}
                   onClick={toggleAreaWatch}
                   aria-pressed={areaWatch}
                 >
@@ -494,13 +494,13 @@ export default function BuyerMode() {
                   <p className="text-sm text-text-secondary text-center mb-6 max-w-md">
                     Nothing matches &quot;{searchQuery}&quot; right now. Broaden your search parameters or explore the full ledger to see what&apos;s active in the market.
                   </p>
-                  <Link href="/property" className="font-label-caps tracking-widest uppercase text-[10px] text-gold-accent border border-gold-accent/30 bg-gold-accent/10 px-6 py-3 rounded hover:bg-gold-accent/20 transition-colors">
+                  <Link href="/property" className="font-label-caps tracking-widest uppercase text-[10px] text-gold-accent border border-gold-accent/30 bg-gold-accent/10 px-6 py-3 rounded hover:bg-gold-accent/20 transition">
                     Explore Full Ledger ({listings.length} active spaces)
                   </Link>
                 </div>
               ) : (
                 <div className="block shrink-0 w-[280px] snap-start h-full">
-                  <Link href="/property" className="h-full min-h-[250px] rounded-lg border border-surface-variant bg-surface-alt text-on-surface hover:border-gold-accent hover:bg-gold-accent/5 transition-all flex flex-col items-center justify-center gap-4 group">
+                  <Link href="/property" className="h-full min-h-[250px] rounded-lg border border-surface-variant bg-surface-alt text-on-surface hover:border-gold-accent hover:bg-gold-accent/5 transition flex flex-col items-center justify-center gap-4 group">
                     <div className="w-16 h-16 rounded-full border border-gold-accent/30 bg-surface flex items-center justify-center text-gold-accent group-hover:scale-110 transition-transform">
                       <Search strokeWidth={1.5} size="1.5em" />
                     </div>
@@ -526,7 +526,7 @@ export default function BuyerMode() {
                   makati-yields / nuvali-expansion / pasig-zoning slugs never
                   existed and 404'd from the dashboard) */}
               <Link href="/intel/bgc-condo-yields-rise" className="block shrink-0 w-[320px] md:w-[400px] snap-start">
-                <div className="card-atmosphere-gold hov-glow rounded-lg p-6 flex flex-col justify-between transition-colors cursor-pointer group h-full">
+                <div className="card-atmosphere-gold hov-glow rounded-lg p-6 flex flex-col justify-between transition cursor-pointer group h-full">
                   <div>
                     <span className="inline-block bg-gold-accent/10 text-gold-accent font-label-caps text-[10px] tracking-widest uppercase px-2 py-1 rounded mb-4">Market Intel</span>
                     <h3 className="font-headline-editorial text-xl text-on-surface mb-2">BGC Condo Yields Rise</h3>
@@ -540,7 +540,7 @@ export default function BuyerMode() {
 
               {/* Intel Brief 2 */}
               <Link href="/intel/makati-central-resurgence" className="block shrink-0 w-[320px] md:w-[400px] snap-start">
-                <div className="card-atmosphere-gold hov-glow rounded-lg p-6 flex flex-col justify-between transition-colors cursor-pointer group h-full">
+                <div className="card-atmosphere-gold hov-glow rounded-lg p-6 flex flex-col justify-between transition cursor-pointer group h-full">
                   <div>
                     <span className="inline-block bg-gold-accent/10 text-gold-accent font-label-caps text-[10px] tracking-widest uppercase px-2 py-1 rounded mb-4">Area Guide</span>
                     <h3 className="font-headline-editorial text-xl text-on-surface mb-2">Makati Central Resurgence</h3>
@@ -554,7 +554,7 @@ export default function BuyerMode() {
 
               {/* Intel Brief 3 */}
               <Link href="/intel/high-street-expansion" className="block shrink-0 w-[320px] md:w-[400px] snap-start">
-                <div className="card-atmosphere-gold hov-glow rounded-lg p-6 flex flex-col justify-between transition-colors cursor-pointer group h-full">
+                <div className="card-atmosphere-gold hov-glow rounded-lg p-6 flex flex-col justify-between transition cursor-pointer group h-full">
                   <div>
                     <span className="inline-block bg-gold-accent/10 text-gold-accent font-label-caps text-[10px] tracking-widest uppercase px-2 py-1 rounded mb-4">Commercial Signal</span>
                     <h3 className="font-headline-editorial text-xl text-on-surface mb-2">High Street Expansion</h3>

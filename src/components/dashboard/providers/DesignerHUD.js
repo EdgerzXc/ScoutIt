@@ -7,7 +7,7 @@ const ToggleSwitch = ({ label, checked, onChange, primary = false }) => (
   <div className="flex items-center justify-between py-2 border-b border-surface-variant/50 last:border-0">
     <span className="font-working-title text-sm text-on-surface">{label}</span>
     <div 
-      className={`w-10 h-6 rounded-full flex items-center p-1 transition-colors cursor-pointer ${checked ? (primary ? 'bg-[#ff75c3]' : 'bg-on-surface') : 'bg-surface-variant'}`}
+      className={`w-10 h-6 rounded-full flex items-center p-1 transition cursor-pointer ${checked ? (primary ? 'bg-intel-magenta' : 'bg-on-surface') : 'bg-surface-variant'}`}
       onClick={() => onChange(!checked)}
     >
       <div className={`w-4 h-4 bg-background rounded-full transition-transform ${checked ? 'translate-x-4' : 'translate-x-0'}`}></div>
@@ -46,11 +46,11 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
       <div className="flex flex-col gap-6 animate-[fadeIn_0.3s_ease]">
         <div className="flex justify-between items-end border-b border-surface-variant pb-4">
           <div>
-            <button className="text-text-secondary hover:text-[#ff75c3] text-sm mb-2" onClick={() => setActiveProjectId(null)}>← Back to Workspace</button>
+            <button className="text-text-secondary hover:text-intel-magenta text-sm mb-2" onClick={() => setActiveProjectId(null)}>← Back to Workspace</button>
             <h2 className="font-display-md text-3xl text-on-surface">Space Staging: {project.title}</h2>
           </div>
           <button 
-            className="bg-[#ff75c3] text-[#0a0a0a] font-working-title font-bold px-4 py-2 rounded text-sm hover:opacity-90 transition-all"
+            className="bg-intel-magenta text-background font-working-title font-bold px-4 py-2 rounded text-sm hover:opacity-90 transition"
             onClick={() => addToast("Design Concepts Submitted.", "🎨")}
           >
             Submit Concepts
@@ -69,7 +69,7 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
               </div>
               <div className="p-3 bg-surface border border-surface-variant rounded flex justify-between items-center text-sm">
                 <span className="text-text-secondary">Raw Assets Provided:</span>
-                <button className="text-[#ff75c3] hover:underline font-working-title flex items-center gap-2">
+                <button className="text-intel-magenta hover:underline font-working-title flex items-center gap-2">
                   <span>↓</span> Download Base .DWG Files
                 </button>
               </div>
@@ -81,12 +81,12 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
               <h3 className="font-label-caps text-xs tracking-widest text-text-secondary uppercase">Asset Drop</h3>
             </div>
             <div className="p-6">
-              <div className="aspect-video bg-[#0a0a0a] rounded border border-dashed border-surface-variant flex flex-col items-center justify-center text-center hover:border-[#ff75c3] transition-colors cursor-pointer group mb-4">
+              <div className="aspect-video bg-background rounded border border-dashed border-surface-variant flex flex-col items-center justify-center text-center hover:border-intel-magenta transition cursor-pointer group mb-4">
                 <span className="text-4xl mb-2 opacity-50 group-hover:scale-110 transition-transform">🎨</span>
                 <span className="font-working-title text-on-surface">Drop .OBJ, .SKP, or Rendered Images</span>
                 <span className="text-xs text-text-muted mt-2">Max file size: 500MB</span>
               </div>
-              <input type="text" placeholder="Or paste external portfolio/drive link..." className="w-full bg-surface-alt border border-surface-variant rounded p-3 text-sm focus:outline-none focus:border-[#ff75c3] transition-colors text-on-surface" />
+              <input type="text" placeholder="Or paste external portfolio/drive link..." className="w-full bg-surface-alt border border-surface-variant rounded p-3 text-sm focus:outline-none focus:border-intel-magenta transition text-on-surface" />
             </div>
           </div>
         </div>
@@ -100,13 +100,13 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
       {/* Tab Navigation */}
       <div className="flex border-b border-surface-variant overflow-x-auto">
         <button 
-          className={`px-6 py-3 font-working-title text-sm border-b-2 transition-colors whitespace-nowrap ${activeTab === 'projects' ? 'border-[#ff75c3] text-[#ff75c3]' : 'border-transparent text-text-secondary hover:text-on-surface'}`}
+          className={`px-6 py-3 font-working-title text-sm border-b-2 transition whitespace-nowrap ${activeTab === 'projects' ? 'border-intel-magenta text-intel-magenta' : 'border-transparent text-text-secondary hover:text-on-surface'}`}
           onClick={() => setActiveTab("projects")}
         >
           Project Board
         </button>
         <button 
-          className={`px-6 py-3 font-working-title text-sm border-b-2 transition-colors whitespace-nowrap ${activeTab === 'studio' ? 'border-[#ff75c3] text-[#ff75c3]' : 'border-transparent text-text-secondary hover:text-on-surface'}`}
+          className={`px-6 py-3 font-working-title text-sm border-b-2 transition whitespace-nowrap ${activeTab === 'studio' ? 'border-intel-magenta text-intel-magenta' : 'border-transparent text-text-secondary hover:text-on-surface'}`}
           onClick={() => setActiveTab("studio")}
         >
           Design Studio (Profile)
@@ -118,7 +118,7 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
           {projects.map(project => (
             <div 
               key={project.id} 
-              className="card-atmosphere hov-card rounded-lg overflow-hidden cursor-pointer group hover:border-[#ff75c3] transition-all"
+              className="card-atmosphere hov-card rounded-lg overflow-hidden cursor-pointer group hover:border-intel-magenta transition"
               onClick={() => setActiveProjectId(project.id)}
             >
               <div className="aspect-video bg-surface-alt flex items-center justify-center text-5xl relative">
@@ -131,10 +131,10 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
                 </div>
               </div>
               <div className="p-4">
-                <h3 className="font-working-title text-lg text-on-surface line-clamp-1 mb-1 group-hover:text-[#ff75c3] transition-colors">{project.title}</h3>
+                <h3 className="font-working-title text-lg text-on-surface line-clamp-1 mb-1 group-hover:text-intel-magenta transition">{project.title}</h3>
                 <div className="flex justify-between items-center text-xs">
                   <span className="text-text-secondary">{project.date}</span>
-                  <span className="text-[#ff75c3] font-data-tabular">Bounty: {project.bounty_connects || 5} ◈</span>
+                  <span className="text-intel-magenta font-data-tabular">Bounty: {project.bounty_connects || 5} ◈</span>
                 </div>
               </div>
             </div>
@@ -157,7 +157,7 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
             <div className="card-atmosphere rounded-lg p-6 flex flex-col gap-6">
 
               <div>
-                <h3 className="font-label-caps text-[10px] tracking-widest text-[#ff75c3] uppercase mb-4 border-b border-surface-variant/50 pb-2">Studio Identity</h3>
+                <h3 className="font-label-caps text-[10px] tracking-widest text-intel-magenta uppercase mb-4 border-b border-surface-variant/50 pb-2">Studio Identity</h3>
                 
                 <div className="flex justify-between items-center mb-5 bg-surface-alt p-4 rounded border border-surface-variant">
                   <div>
@@ -165,7 +165,7 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
                     <p className="text-xs text-text-secondary mt-1">Toggle off if your studio is currently fully booked.</p>
                   </div>
                   <div 
-                    className={`w-12 h-6 rounded-full flex items-center p-1 transition-colors cursor-pointer ${acceptingCommissions ? 'bg-[#ff75c3]' : 'bg-surface-variant'}`}
+                    className={`w-12 h-6 rounded-full flex items-center p-1 transition cursor-pointer ${acceptingCommissions ? 'bg-intel-magenta' : 'bg-surface-variant'}`}
                     onClick={() => setAcceptingCommissions(!acceptingCommissions)}
                   >
                     <div className={`w-4 h-4 bg-background rounded-full transition-transform ${acceptingCommissions ? 'translate-x-6' : 'translate-x-0'}`}></div>
@@ -180,7 +180,7 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
                       value={aesthetic}
                       onChange={(e) => setAesthetic(e.target.value)}
                       placeholder="e.g. Minimalist Corporate, Biophilic"
-                      className="w-full bg-surface-alt border border-surface-variant rounded p-3 text-sm focus:outline-none focus:border-[#ff75c3] text-on-surface" 
+                      className="w-full bg-surface-alt border border-surface-variant rounded p-3 text-sm focus:outline-none focus:border-intel-magenta text-on-surface" 
                     />
                   </div>
                   <div>
@@ -190,9 +190,9 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
                         type="number" 
                         value={baseRate}
                         onChange={(e) => setBaseRate(e.target.value)}
-                        className="w-full bg-surface-alt border border-surface-variant rounded p-3 pl-8 text-sm focus:outline-none focus:border-[#ff75c3] text-[#ff75c3] font-data-tabular font-bold" 
+                        className="w-full bg-surface-alt border border-surface-variant rounded p-3 pl-8 text-sm focus:outline-none focus:border-intel-magenta text-intel-magenta font-data-tabular font-bold" 
                       />
-                      <span className="absolute left-3 top-3 text-[#ff75c3]">◈</span>
+                      <span className="absolute left-3 top-3 text-intel-magenta">◈</span>
                     </div>
                   </div>
                 </div>
@@ -200,14 +200,14 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-surface-variant/50 pt-6">
                 <div>
-                  <h3 className="font-label-caps text-[10px] tracking-widest text-[#ff75c3] uppercase mb-4 border-b border-surface-variant/50 pb-2">Service Capacity</h3>
+                  <h3 className="font-label-caps text-[10px] tracking-widest text-intel-magenta uppercase mb-4 border-b border-surface-variant/50 pb-2">Service Capacity</h3>
                   <ToggleSwitch label="Digital 3D Rendering Only" checked={capacityDigital} onChange={setCapacityDigital} primary={true} />
                   <ToggleSwitch label="Physical Furniture Staging" checked={capacityPhysical} onChange={setCapacityPhysical} primary={true} />
                   <p className="text-xs text-text-muted mt-3 leading-relaxed">Let owners know if you handle physical logistics (renting couches) or purely digital vision.</p>
                 </div>
 
                 <div>
-                  <h3 className="font-label-caps text-[10px] tracking-widest text-[#ff75c3] uppercase mb-4 border-b border-surface-variant/50 pb-2">Software Stack Deliverables</h3>
+                  <h3 className="font-label-caps text-[10px] tracking-widest text-intel-magenta uppercase mb-4 border-b border-surface-variant/50 pb-2">Software Stack Deliverables</h3>
                   <ToggleSwitch label="AutoCAD (.dwg)" checked={softAutoCAD} onChange={setSoftAutoCAD} />
                   <ToggleSwitch label="SketchUp (.skp)" checked={softSketchUp} onChange={setSoftSketchUp} />
                   <ToggleSwitch label="Blender / Maya" checked={softBlender} onChange={setSoftBlender} />
@@ -216,7 +216,7 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
               </div>
               
               <button 
-                className="w-full mt-4 bg-[#ff75c3] text-[#0a0a0a] font-working-title font-bold px-4 py-4 rounded hover:opacity-90 transition-all uppercase tracking-wider text-sm shadow-[0_0_15px_rgba(255,117,195,0.3)]"
+                className="w-full mt-4 bg-intel-magenta text-background font-working-title font-bold px-4 py-4 rounded hover:opacity-90 transition uppercase tracking-wider text-sm shadow-[0_0_15px_rgba(255,117,195,0.3)]"
                 onClick={() => addToast("Design Studio Profile Updated.", "🎨")}
               >
                 Save Studio Profile
@@ -227,15 +227,15 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
           {/* Preview Card (Right Column) */}
           <div className="xl:col-span-5 flex flex-col gap-4">
             <h3 className="font-working-title text-xl text-on-surface flex items-center gap-2">
-              Studio Preview <span className="flex h-2 w-2 relative"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#ff75c3] opacity-75"></span><span className="relative inline-flex rounded-full h-2 w-2 bg-[#ff75c3]"></span></span>
+              Studio Preview <span className="flex h-2 w-2 relative"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-intel-magenta opacity-75"></span><span className="relative inline-flex rounded-full h-2 w-2 bg-intel-magenta"></span></span>
             </h3>
             
             <div className="card-atmosphere rounded-lg p-6 relative overflow-hidden shadow-2xl sticky top-24">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-[#ff75c3] opacity-[0.04] blur-[60px] rounded-full pointer-events-none"></div>
+              <div className="absolute top-0 right-0 w-64 h-64 bg-intel-magenta opacity-[0.04] blur-[60px] rounded-full pointer-events-none"></div>
               
               <div className="flex items-start justify-between mb-6 relative z-10">
                 <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 bg-[#1a1518] border border-[#ff75c3]/30 rounded-lg flex items-center justify-center text-2xl relative shadow-[0_0_10px_rgba(255,117,195,0.1)]">
+                  <div className="w-16 h-16 bg-[#1a1518] border border-intel-magenta/30 rounded-lg flex items-center justify-center text-2xl relative shadow-[0_0_10px_rgba(255,117,195,0.1)]">
                     🎨
                     {acceptingCommissions && (
                       <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-green-500 border-2 border-surface rounded-full" title="Accepting Commissions"></div>
@@ -244,7 +244,7 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
                   <div>
                     <div className="flex items-center gap-2">
                       <h4 className="font-working-title text-xl text-on-surface">ScoutIt Studio</h4>
-                      <span className="bg-[#ff75c3]/10 text-[#ff75c3] font-label-caps text-[10px] uppercase tracking-widest px-2 py-0.5 rounded border border-[#ff75c3]/20">Verified</span>
+                      <span className="bg-intel-magenta/10 text-intel-magenta font-label-caps text-[10px] uppercase tracking-widest px-2 py-0.5 rounded border border-intel-magenta/20">Verified</span>
                     </div>
                     <p className="text-sm text-text-secondary mt-0.5">{aesthetic}</p>
                   </div>
@@ -256,12 +256,12 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
                 <span className="text-[10px] text-text-secondary uppercase tracking-widest font-label-caps mb-1 block">Service Capacity</span>
                 {capacityDigital && (
                   <div className="flex items-center gap-2 text-sm text-on-surface">
-                    <span className="text-[#ff75c3]">✦</span> Digital 3D Rendering & Concepts
+                    <span className="text-intel-magenta">✦</span> Digital 3D Rendering & Concepts
                   </div>
                 )}
                 {capacityPhysical && (
                   <div className="flex items-center gap-2 text-sm text-on-surface">
-                    <span className="text-[#ff75c3]">✦</span> Full Physical Logistics & Furniture Staging
+                    <span className="text-intel-magenta">✦</span> Full Physical Logistics & Furniture Staging
                   </div>
                 )}
                 {!capacityDigital && !capacityPhysical && (
@@ -273,10 +273,10 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
                 <div>
                   <span className="text-[10px] text-text-secondary uppercase tracking-widest font-label-caps mb-2 block">Software Stack</span>
                   <div className="flex flex-wrap gap-2">
-                    {softAutoCAD && <span className="bg-[#121110] text-text-secondary border border-surface-variant font-label-caps text-[10px] uppercase tracking-widest px-2 py-1 rounded">AutoCAD</span>}
-                    {softSketchUp && <span className="bg-[#121110] text-text-secondary border border-surface-variant font-label-caps text-[10px] uppercase tracking-widest px-2 py-1 rounded">SketchUp</span>}
-                    {softBlender && <span className="bg-[#121110] text-text-secondary border border-surface-variant font-label-caps text-[10px] uppercase tracking-widest px-2 py-1 rounded">Blender</span>}
-                    {softRevit && <span className="bg-[#121110] text-text-secondary border border-surface-variant font-label-caps text-[10px] uppercase tracking-widest px-2 py-1 rounded">Revit</span>}
+                    {softAutoCAD && <span className="bg-surface text-text-secondary border border-surface-variant font-label-caps text-[10px] uppercase tracking-widest px-2 py-1 rounded">AutoCAD</span>}
+                    {softSketchUp && <span className="bg-surface text-text-secondary border border-surface-variant font-label-caps text-[10px] uppercase tracking-widest px-2 py-1 rounded">SketchUp</span>}
+                    {softBlender && <span className="bg-surface text-text-secondary border border-surface-variant font-label-caps text-[10px] uppercase tracking-widest px-2 py-1 rounded">Blender</span>}
+                    {softRevit && <span className="bg-surface text-text-secondary border border-surface-variant font-label-caps text-[10px] uppercase tracking-widest px-2 py-1 rounded">Revit</span>}
                     {!softAutoCAD && !softSketchUp && !softBlender && !softRevit && (
                       <span className="text-xs text-text-muted italic">No specific software stack listed.</span>
                     )}
@@ -286,7 +286,7 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
                 <div className="flex gap-6 pt-4 border-t border-surface-variant">
                   <div>
                     <span className="text-[10px] text-text-secondary uppercase tracking-widest font-label-caps block mb-1">Base Design Fee</span>
-                    <span className="text-lg text-[#ff75c3] font-data-tabular font-bold">◈ {baseRate}</span>
+                    <span className="text-lg text-intel-magenta font-data-tabular font-bold">◈ {baseRate}</span>
                   </div>
                 </div>
               </div>

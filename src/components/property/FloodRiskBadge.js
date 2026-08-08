@@ -43,7 +43,7 @@ export default function FloodRiskBadge({ floodRiskScore, floodZoneStatus }) {
           Flood / Hazard Risk{severity ? ` — ${severity.label}` : ""}
         </span>
         {hasStatus && (
-          <span style={{ fontFamily: "Georgia,serif", fontSize: "13px", color: "#f0ede8" }}>{floodZoneStatus}</span>
+          <span style={{ fontFamily: "var(--font-display)", fontSize: "13px", color: "#f0ede8" }}>{floodZoneStatus}</span>
         )}
       </div>
     </div>

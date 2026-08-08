@@ -42,7 +42,7 @@ export default function BookingModal({ isOpen, onClose, brokerName, dealId, onSc
 
   return (
     <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-20 flex items-center justify-center p-6">
-      <div className="bg-[#121212] border border-surface-variant rounded-lg p-6 max-w-md w-full shadow-2xl relative">
+      <div className="bg-surface border border-surface-variant rounded-lg p-6 max-w-md w-full shadow-2xl relative">
         <button onClick={onClose} aria-label="Close" className="absolute top-4 right-4 text-text-muted hover:text-on-surface">
           ✕
         </button>
@@ -77,7 +77,7 @@ export default function BookingModal({ isOpen, onClose, brokerName, dealId, onSc
                     key={time}
                     type="button"
                     onClick={() => setSelectedTime(time)}
-                    className={`py-2 text-sm rounded border transition-colors ${
+                    className={`py-2 text-sm rounded border transition ${
                       selectedTime === time 
                         ? "bg-gold-accent text-background border-gold-accent font-medium" 
                         : "bg-background border-surface-variant text-text-secondary hover:border-gold-accent/50"
@@ -94,7 +94,7 @@ export default function BookingModal({ isOpen, onClose, brokerName, dealId, onSc
             <button 
               type="submit"
               disabled={!selectedDate || !selectedTime || isSubmitting}
-              className="w-full bg-gold-accent text-background py-3 rounded font-working-title disabled:opacity-50 hover:bg-gold-bright transition-colors"
+              className="w-full bg-gold-accent text-background py-3 rounded font-working-title disabled:opacity-50 hover:bg-gold-bright transition"
             >
               {isSubmitting ? "Requesting..." : "Send Request"}
             </button>

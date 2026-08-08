@@ -70,7 +70,7 @@ const HTTP_STATUS = {
 /**
  * Converts any thrown value into a client-safe, human-readable message.
  *
- * Pass `fallback` at call sites that already had a good contextual message
+ * Pass 'fallback' at call sites that already had a good contextual message
  * (e.g. "Couldn't save the event."). A recognised error still wins -- an
  * expired session should say so rather than blaming the save -- but an
  * unrecognised one keeps your specific wording instead of the bare generic.

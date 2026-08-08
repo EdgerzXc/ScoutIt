@@ -21,7 +21,7 @@ export const MIN_PHOTOS = 3;
 export const MIN_DESCRIPTION_CHARS = 100;
 
 /**
- * Photos live inside the `details` jsonb blob, not in a top-level column.
+ * Photos live inside the 'details' jsonb blob, not in a top-level column.
  * Accepts the two shapes the app has used: an array, or a comma-joined string
  * carried over from Airtable's Photos field.
  */
@@ -39,7 +39,7 @@ export function extractPhotos(prop) {
 }
 
 /**
- * Map a `properties` row onto the UI listing model `computeListingStrength`
+ * Map a 'properties' row onto the UI listing model 'computeListingStrength'
  * expects (it was written against DashboardContext's mapper, not the raw row).
  */
 export function toListingModel(prop) {
@@ -63,7 +63,7 @@ export function toListingModel(prop) {
 /**
  * The full readiness report.
  *
- * @param {object} prop - a `properties` row
+ * @param {object} prop - a 'properties' row
  * @param {object} deps
  * @param {(model: object) => object} deps.strength - computeListingStrength
  * @param {string} deps.lifecycle - normalised lifecycle state

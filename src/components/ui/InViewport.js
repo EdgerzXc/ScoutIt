@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from "react";
  *
  * WHY THIS EXISTS
  * ---------------
- * `next/dynamic` splits a component into its own chunk, but it does NOT delay
+ * 'next/dynamic' splits a component into its own chunk, but it does NOT delay
  * mounting: the moment the parent renders, the chunk is fetched and the
  * component initialises. On the property page that meant every visitor pulled
  * maplibre-gl (~1MB parsed, ~1.7s of CPU) and Leaflet plus ~500KB of vector
@@ -15,7 +15,7 @@ import { useEffect, useRef, useState } from "react";
  * was the single largest contributor to Total Blocking Time.
  *
  * Wrapping a map in <InViewport> keeps the split AND delays the work until the
- * section is actually approached. `rootMargin` starts the load before the map
+ * section is actually approached. 'rootMargin' starts the load before the map
  * is visible, so by the time it scrolls in it has usually already painted —
  * the reader sees no difference.
  *

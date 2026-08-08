@@ -346,7 +346,7 @@ export default function ServiceConnectionPortal({ providerName, serviceType, isM
         .disclaimer-paragraph {
           font-size: 18px;
           line-height: 1.9;
-          color: rgba(240, 237, 232, 0.9);
+          color: var(--text-primary);
           margin: 0;
           letter-spacing: 0.025em;
         }
@@ -370,7 +370,7 @@ export default function ServiceConnectionPortal({ providerName, serviceType, isM
           font-family: var(--font-mono), monospace;
           font-size: 14px;
           line-height: 1.7;
-          color: rgba(240, 237, 232, 0.6);
+          color: var(--text-secondary);
           border-top: 1px solid rgba(255, 255, 255, 0.08);
           padding-top: 20px;
           margin-top: 16px;

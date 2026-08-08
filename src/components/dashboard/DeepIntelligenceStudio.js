@@ -468,13 +468,13 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
       <div className="md:hidden flex bg-surface border-b border-surface-variant z-50">
         <button 
           onClick={() => setMobileTab('editor')}
-          className={`flex-1 py-3 text-xs font-label-caps tracking-widest uppercase transition-colors ${mobileTab === 'editor' ? 'text-gold-accent border-b-2 border-gold-accent' : 'text-text-secondary'}`}
+          className={`flex-1 py-3 text-xs font-label-caps tracking-widest uppercase transition ${mobileTab === 'editor' ? 'text-gold-accent border-b-2 border-gold-accent' : 'text-text-secondary'}`}
         >
           Editor
         </button>
         <button 
           onClick={() => setMobileTab('preview')}
-          className={`flex-1 py-3 text-xs font-label-caps tracking-widest uppercase transition-colors ${mobileTab === 'preview' ? 'text-gold-accent border-b-2 border-gold-accent' : 'text-text-secondary'}`}
+          className={`flex-1 py-3 text-xs font-label-caps tracking-widest uppercase transition ${mobileTab === 'preview' ? 'text-gold-accent border-b-2 border-gold-accent' : 'text-text-secondary'}`}
         >
           Live Preview
         </button>
@@ -491,7 +491,7 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
         
         <div className="flex items-center gap-4">
           {!isEditing && lastSaved && (
-            <button onClick={clearDraft} className="text-error/80 hover:text-error text-[10px] uppercase font-label-caps tracking-wider transition-colors">
+            <button onClick={clearDraft} className="text-error/80 hover:text-error text-[10px] uppercase font-label-caps tracking-wider transition">
               Delete draft
             </button>
           )}
@@ -506,9 +506,9 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
         onClick={jumpToEmptyField}
         title="Click to jump to next empty field"
       >
-        <div className="bg-gold-accent/40 h-3 transition-all duration-300 absolute top-0 left-0" style={{ width: `${(step / 6) * 100}%` }}></div>
-        <div className="bg-success h-3 transition-all duration-300 relative z-10" style={{ width: `${completionStats.percentage}%` }}></div>
-        <div className="absolute inset-0 bg-white/0 hover:bg-white/10 transition-colors z-20 flex items-center justify-center opacity-0 group-hover:opacity-100">
+        <div className="bg-gold-accent/40 h-3 transition duration-300 absolute top-0 left-0" style={{ width: `${(step / 6) * 100}%` }}></div>
+        <div className="bg-success h-3 transition duration-300 relative z-10" style={{ width: `${completionStats.percentage}%` }}></div>
+        <div className="absolute inset-0 bg-white/0 hover:bg-white/10 transition z-20 flex items-center justify-center opacity-0 group-hover:opacity-100">
           <span className="text-[10px] font-mono text-white bg-black/50 px-2 rounded backdrop-blur">JUMP TO NEXT EMPTY FIELD</span>
         </div>
       </div>
@@ -539,7 +539,7 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
                   {CATEGORIES.map(c => (
                     <button
                       key={c.id}
-                      className={`flex flex-col items-center justify-center gap-2 px-3 py-6 rounded border text-sm transition-colors ${formData.category === c.id ? 'bg-surface-container-low border-gold-accent text-gold-accent shadow-[0_0_15px_rgba(232,174,60,0.15)]' : 'bg-surface-alt border-surface-variant text-on-surface hover:border-gold-accent/50'}`}
+                      className={`flex flex-col items-center justify-center gap-2 px-3 py-6 rounded border text-sm transition ${formData.category === c.id ? 'bg-surface-container-low border-gold-accent text-gold-accent shadow-[0_0_15px_rgba(232,174,60,0.15)]' : 'bg-surface-alt border-surface-variant text-on-surface hover:border-gold-accent/50'}`}
                       onClick={() => setField("category", c.id)}
                     >
                       <span className="text-2xl">{c.icon}</span> {c.label}
@@ -552,7 +552,7 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
                 <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">Property Title <span className="text-error">*</span></label>
                 <input 
                   id="field-title"
-                  className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface focus:outline-none focus:border-gold-accent transition-colors" 
+                  className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface focus:outline-none focus:border-gold-accent transition" 
                   type="text" 
                   value={formData.title} 
                   onChange={e => setField("title", e.target.value)} 
@@ -564,7 +564,7 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
                 <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">Location / Address <span className="text-error">*</span></label>
                 <input 
                   id="field-location"
-                  className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface focus:outline-none focus:border-gold-accent transition-colors" 
+                  className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface focus:outline-none focus:border-gold-accent transition" 
                   type="text" 
                   value={formData.location} 
                   onChange={e => setField("location", e.target.value)} 
@@ -576,7 +576,7 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
                 <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">Listed Price (₱) <span className="text-error">*</span></label>
                 <input 
                   id="field-price"
-                  className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface focus:outline-none focus:border-gold-accent transition-colors" 
+                  className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface focus:outline-none focus:border-gold-accent transition" 
                   type="number" 
                   value={formData.price} 
                   onChange={e => setField("price", e.target.value)} 
@@ -601,7 +601,7 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
                       <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">{field.label}</label>
                       <input 
                         id={`field-${field.key}`}
-                        className="bg-surface-alt border border-surface-variant rounded px-3 py-2 text-on-surface text-sm focus:outline-none focus:border-gold-accent transition-colors" 
+                        className="bg-surface-alt border border-surface-variant rounded px-3 py-2 text-on-surface text-sm focus:outline-none focus:border-gold-accent transition" 
                         type={field.type} 
                         value={formData.details[field.key] || ''} 
                         onChange={e => setDetail(field.key, e.target.value)} 
@@ -618,7 +618,7 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
                     <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">{field.label}</label>
                     <input 
                       id={`field-${field.key}`}
-                      className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface text-sm focus:outline-none focus:border-gold-accent transition-colors" 
+                      className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface text-sm focus:outline-none focus:border-gold-accent transition" 
                       type="text" 
                       value={formData.details[field.key] || ''} 
                       onChange={e => setDetail(field.key, e.target.value)} 
@@ -651,7 +651,7 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
                       <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">{field.label}</label>
                       <input 
                         id={`field-${field.key}`}
-                        className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface text-sm focus:outline-none focus:border-gold-accent transition-colors" 
+                        className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface text-sm focus:outline-none focus:border-gold-accent transition" 
                         type={field.key === "DI_Hist_Tx" ? "textarea" : "text"} 
                         value={formData.details[field.key] || ''} 
                         onChange={e => setDetail(field.key, e.target.value)} 
@@ -669,7 +669,7 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
             {step > 1 ? (
               <button 
                 onClick={() => setStep(step - 1)}
-                className="px-6 py-2 rounded border border-surface-variant text-text-secondary text-sm font-label-caps tracking-widest uppercase hover:text-on-surface hover:border-text-secondary transition-colors"
+                className="px-6 py-2 rounded border border-surface-variant text-text-secondary text-sm font-label-caps tracking-widest uppercase hover:text-on-surface hover:border-text-secondary transition"
               >
                 ← Previous step
               </button>
@@ -679,7 +679,7 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
               <button 
                 onClick={handleSaveDraft}
                 disabled={!mustHaves.title}
-                className="px-6 py-2 rounded text-gold-accent text-sm font-label-caps tracking-widest uppercase hover:bg-gold-accent/10 disabled:opacity-50 transition-colors"
+                className="px-6 py-2 rounded text-gold-accent text-sm font-label-caps tracking-widest uppercase hover:bg-gold-accent/10 disabled:opacity-50 transition"
               >
                 Save Draft
               </button>
@@ -688,7 +688,7 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
                 <button 
                   onClick={() => setStep(step + 1)}
                   disabled={step === 1 && !formData.category} // Must select category to proceed
-                  className="px-6 py-2 rounded bg-gold-accent text-background text-sm font-label-caps tracking-widest uppercase hover:bg-gold-bright disabled:opacity-50 transition-colors shadow-[0_0_15px_rgba(232,174,60,0.2)]"
+                  className="px-6 py-2 rounded bg-gold-accent text-background text-sm font-label-caps tracking-widest uppercase hover:bg-gold-bright disabled:opacity-50 transition shadow-[0_0_15px_rgba(232,174,60,0.2)]"
                 >
                   Next Step →
                 </button>
@@ -696,7 +696,7 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
                 <button 
                   onClick={handlePublish}
                   disabled={!isPublishable}
-                  className="px-6 py-2 rounded bg-gold-accent text-background text-sm font-label-caps tracking-widest uppercase hover:bg-gold-bright disabled:opacity-50 transition-colors shadow-[0_0_15px_rgba(232,174,60,0.3)]"
+                  className="px-6 py-2 rounded bg-gold-accent text-background text-sm font-label-caps tracking-widest uppercase hover:bg-gold-bright disabled:opacity-50 transition shadow-[0_0_15px_rgba(232,174,60,0.3)]"
                 >
                   Publish listing
                 </button>
@@ -710,7 +710,7 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
       
       {/* Resizer */}
       <div 
-        className="hidden md:flex md:col-start-2 md:row-start-1 md:row-span-2 cursor-col-resize items-center justify-center bg-surface-variant z-50 hover:bg-gold-accent transition-colors pointer-events-auto"
+        className="hidden md:flex md:col-start-2 md:row-start-1 md:row-span-2 cursor-col-resize items-center justify-center bg-surface-variant z-50 hover:bg-gold-accent transition pointer-events-auto"
         onMouseDown={startResizing}
       >
         <div className="w-1 h-8 bg-on-surface/20 rounded-full"></div>
@@ -721,7 +721,7 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
         <div className="absolute top-0 left-0 w-full z-50 bg-gold-accent text-background text-center py-1.5 font-label-caps text-[10px] tracking-[0.3em] font-bold shadow-md pointer-events-none">
           LIVE PREVIEW / DRAFT MODE
         </div>
-        <div className="mt-10 opacity-90 md:scale-[0.98] origin-top transition-all pointer-events-auto">
+        <div className="mt-10 opacity-90 md:scale-[0.98] origin-top transition pointer-events-auto">
           {['commercial', 'restaurants', 'venues'].includes(formData.category) ? (
             <CommercialFlow slug={null} draftData={draftData} isDraftMode={true} externalActiveTab={['space', 'location', 'life', 'whereto', 'buildplans', 'units'][step - 1]} />
           ) : (

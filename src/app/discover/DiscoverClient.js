@@ -264,7 +264,7 @@ export default function DiscoverClient() {
                         style={{
                           background: property.image
                             ? `linear-gradient(to top, rgba(0,0,0,0.9), transparent), url('${property.image}')`
-                            : "linear-gradient(135deg, #211c12, #0e0e0e)",
+                            : "linear-gradient(135deg, rgba(var(--accent-rgb), 0.10), var(--bg))",
                           backgroundSize: "cover",
                           backgroundPosition: "center",
                         }}
@@ -404,7 +404,13 @@ export default function DiscoverClient() {
                 </div>
                 <span className="contextArrow">→</span>
               </div>
-              {shownRegions.length === 0 && (
+              {/* ⚠️ Guard on the QUERY, not on the result count. Until 2026-08-08
+                  this read `shownRegions.length === 0`, so on first paint —
+                  before regions had loaded, with regionQuery still "" — a
+                  stranger's first impression of Discover was an empty-search
+                  error quoting an empty string: No regions match "".
+                  A zero-state is only true after someone has actually searched. */}
+              {shownRegions.length === 0 && regionQuery.trim().length > 0 && (
                 <div className="newsEmpty" style={{ gridColumn: "1 / -1" }}>No regions match “{regionQuery}”.</div>
               )}
               {shownRegions.map((region, i) => (

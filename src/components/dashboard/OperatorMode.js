@@ -86,7 +86,7 @@ export default function OperatorMode() {
       </div>
 
       {buildings.length === 0 ? (
-        <div className="bg-[#121110] border border-dashed border-surface-variant rounded-lg p-16 flex flex-col items-center text-center gap-2">
+        <div className="bg-surface border border-dashed border-surface-variant rounded-lg p-16 flex flex-col items-center text-center gap-2">
           <p className="text-text-secondary text-sm">
             No units have been delegated to you yet.
           </p>
@@ -104,7 +104,7 @@ export default function OperatorMode() {
               {b.propertySlug && (
                 <Link
                   href={`/property/${b.propertySlug}`}
-                  className="text-xs text-text-secondary hover:text-gold-accent transition-colors"
+                  className="text-xs text-text-secondary hover:text-gold-accent transition"
                 >
                   View property page →
                 </Link>

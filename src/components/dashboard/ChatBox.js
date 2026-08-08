@@ -42,14 +42,14 @@ const renderTextWithLinks = (text, { onAcceptViewing, onRescheduleViewing } = {}
           <button
             onClick={onAcceptViewing}
             disabled={!onAcceptViewing}
-            className="flex-1 py-2 px-3 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-[10px] font-mono uppercase tracking-wider hover:bg-emerald-500/30 transition-colors font-bold disabled:opacity-40"
+            className="flex-1 py-2 px-3 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-[10px] font-mono uppercase tracking-wider hover:bg-emerald-500/30 transition font-bold disabled:opacity-40"
           >
             ✓ Accept Viewing
           </button>
           <button
             onClick={onRescheduleViewing}
             disabled={!onRescheduleViewing}
-            className="py-2 px-3 rounded bg-white/5 text-text-secondary border border-white/10 text-[10px] font-mono uppercase tracking-wider hover:bg-white/10 transition-colors disabled:opacity-40"
+            className="py-2 px-3 rounded bg-white/5 text-text-secondary border border-white/10 text-[10px] font-mono uppercase tracking-wider hover:bg-white/10 transition disabled:opacity-40"
           >
             Reschedule
           </button>
@@ -419,7 +419,7 @@ export default function ChatBox({
     }
     if (att.type === 'application/pdf') {
       return (
-        <a href={att.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 mt-2 p-2 bg-black/20 rounded border border-white/10 hover:bg-black/40 transition-colors">
+        <a href={att.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 mt-2 p-2 bg-black/20 rounded border border-white/10 hover:bg-black/40 transition">
           <span className="text-error text-xl">📄</span>
           <div className="flex flex-col overflow-hidden">
             <span className="text-xs truncate font-working-title">{att.name}</span>
@@ -446,8 +446,8 @@ export default function ChatBox({
     const sentLabel = sentAt ? new Date(sentAt).toLocaleString() : null;
 
     return (
-      <div className="flex flex-col h-full overflow-y-auto bg-gradient-to-b from-[#0d0d0d] to-[#121212] p-4 sm:p-6">
-        <div className="w-full max-w-md mx-auto my-auto bg-[#141414] border border-gold-accent/30 rounded-xl p-5 sm:p-6">
+      <div className="flex flex-col h-full overflow-y-auto bg-gradient-to-b from-background to-surface p-4 sm:p-6">
+        <div className="w-full max-w-md mx-auto my-auto bg-surface border border-gold-accent/30 rounded-xl p-5 sm:p-6">
           <span className="inline-block text-[10px] font-mono uppercase tracking-widest text-gold-bright bg-gold-accent/15 border border-gold-accent/40 px-2 py-1 rounded">
             {isRequestSender ? "Awaiting response" : "Connect request"}
           </span>
@@ -519,7 +519,7 @@ export default function ChatBox({
                 setPendingBusy(false);
               }}
               disabled={pendingBusy || !onUnarchive}
-              className="mt-3 w-full py-2.5 rounded-lg border border-gold-accent/50 text-gold-accent font-mono text-[11px] uppercase tracking-widest hover:bg-gold-accent/10 transition-colors disabled:opacity-50"
+              className="mt-3 w-full py-2.5 rounded-lg border border-gold-accent/50 text-gold-accent font-mono text-[11px] uppercase tracking-widest hover:bg-gold-accent/10 transition disabled:opacity-50"
             >
               {pendingBusy ? "Working…" : "Reopen — restarts the 30-day clock"}
             </button>
@@ -544,7 +544,7 @@ export default function ChatBox({
                   setPendingBusy(false);
                 }}
                 disabled={pendingBusy || !onWithdrawRequest}
-                className="w-full py-3 rounded-lg border border-white/15 text-text-secondary font-mono text-xs uppercase tracking-widest hover:text-on-surface hover:border-white/30 transition-colors disabled:opacity-50"
+                className="w-full py-3 rounded-lg border border-white/15 text-text-secondary font-mono text-xs uppercase tracking-widest hover:text-on-surface hover:border-white/30 transition disabled:opacity-50"
               >
                 {pendingBusy ? "Working…" : "Withdraw this request"}
               </button>
@@ -569,7 +569,7 @@ export default function ChatBox({
                     setPendingBusy(false);
                   }}
                   disabled={pendingBusy}
-                  className="flex-1 py-3 rounded-lg bg-gold-accent text-background font-mono text-xs uppercase tracking-widest font-bold hover:bg-gold-bright transition-colors disabled:opacity-50"
+                  className="flex-1 py-3 rounded-lg bg-gold-accent text-background font-mono text-xs uppercase tracking-widest font-bold hover:bg-gold-bright transition disabled:opacity-50"
                 >
                   {pendingBusy ? "Working…" : "Accept"}
                 </button>
@@ -580,7 +580,7 @@ export default function ChatBox({
                     setPendingBusy(false);
                   }}
                   disabled={pendingBusy}
-                  className="flex-1 py-3 rounded-lg border border-error/50 text-error font-mono text-xs uppercase tracking-widest hover:bg-error/10 transition-colors disabled:opacity-50"
+                  className="flex-1 py-3 rounded-lg border border-error/50 text-error font-mono text-xs uppercase tracking-widest hover:bg-error/10 transition disabled:opacity-50"
                 >
                   Decline
                 </button>
@@ -678,14 +678,14 @@ export default function ChatBox({
       </div>
 
       {/* Chat Header */}
-      <div className="p-3 sm:p-4 border-b border-surface-variant flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 bg-[#121212]/80 backdrop-blur-md sticky top-0 z-10">
+      <div className="p-3 sm:p-4 border-b border-surface-variant flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 bg-surface/80 backdrop-blur-md sticky top-0 z-10">
         <div className="min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <h3 className="font-working-title text-md text-on-surface truncate">
               {deal.other_party}
             </h3>
             {/* Was hardcoded "3 Connects Spent" on every deal. The ledger
-                spends 1 (see /api/deals/initiate), and `deals` carries no
+                spends 1 (see /api/deals/initiate), and 'deals' carries no
                 per-deal Connects column at all -- so the only honest options
                 were the server's number or nothing. Nothing, until the column
                 exists. Inventing a currency figure is the worst outcome. */}
@@ -705,7 +705,7 @@ export default function ChatBox({
           <div className="flex gap-2 items-center flex-wrap sm:flex-nowrap overflow-x-auto -mx-1 px-1 pb-1 sm:pb-0">
             <button
               onClick={() => setShowDealFile(true)}
-              className="bg-white/5 text-on-surface border border-white/10 px-3 py-2 rounded text-xs font-mono uppercase tracking-widest hover:bg-white/10 transition-colors flex items-center gap-1.5 whitespace-nowrap"
+              className="bg-white/5 text-on-surface border border-white/10 px-3 py-2 rounded text-xs font-mono uppercase tracking-widest hover:bg-white/10 transition flex items-center gap-1.5 whitespace-nowrap"
               title="Open Private Notes & CRM Timeline"
             >
               <span>📁 Lead File</span>
@@ -719,7 +719,7 @@ export default function ChatBox({
               <button
                 onClick={signHandshake}
                 disabled={handshakeBusy}
-                className="bg-success text-white px-3.5 py-2 rounded text-xs font-mono uppercase tracking-widest hover:bg-success/80 transition-colors flex items-center gap-1 disabled:opacity-50 whitespace-nowrap"
+                className="bg-success text-white px-3.5 py-2 rounded text-xs font-mono uppercase tracking-widest hover:bg-success/80 transition flex items-center gap-1 disabled:opacity-50 whitespace-nowrap"
                 title="Accept Handshake & Reveal Direct Phone / Email"
               >
                 <span>{handshakeBusy ? "…" : "✓ Accept Contact Reveal"}</span>
@@ -728,7 +728,7 @@ export default function ChatBox({
               <button
                 onClick={() => setShowConfirmHandshake(true)}
                 disabled={handshakeBusy}
-                className="border border-gold-accent text-gold-accent px-3 py-2 rounded text-xs font-mono uppercase tracking-widest hover:bg-gold-accent/15 transition-colors flex items-center gap-1.5 disabled:opacity-50 whitespace-nowrap"
+                className="border border-gold-accent text-gold-accent px-3 py-2 rounded text-xs font-mono uppercase tracking-widest hover:bg-gold-accent/15 transition flex items-center gap-1.5 disabled:opacity-50 whitespace-nowrap"
                 title="Mutually reveal phone number & email with this party"
               >
                 <span>📇 Exchange Contacts 🤝</span>
@@ -737,19 +737,19 @@ export default function ChatBox({
 
             <button
               onClick={() => setShowBookingModal(true)}
-              className="bg-gold-accent text-background px-3 py-2 rounded text-xs font-mono uppercase tracking-widest hover:bg-gold-bright transition-colors shadow-[0_0_10px_rgba(232,174,60,0.2)] whitespace-nowrap"
+              className="bg-gold-accent text-background px-3 py-2 rounded text-xs font-mono uppercase tracking-widest hover:bg-gold-bright transition shadow-[0_0_10px_rgba(232,174,60,0.2)] whitespace-nowrap"
             >
               Request Live Viewing
             </button>
             <button
               onClick={() => setShowConfirmClose(true)}
-              className="border border-error/50 text-error px-3 py-2 rounded text-xs font-mono uppercase tracking-widest hover:bg-error/10 transition-colors whitespace-nowrap"
+              className="border border-error/50 text-error px-3 py-2 rounded text-xs font-mono uppercase tracking-widest hover:bg-error/10 transition whitespace-nowrap"
             >
               End Conversation
             </button>
             <button
               onClick={() => setShowConfirmReport(true)}
-              className="text-error/70 hover:text-error px-2 py-2 rounded text-xs transition-colors"
+              className="text-error/70 hover:text-error px-2 py-2 rounded text-xs transition"
               title="Report / Unmatch"
             >
               🚩
@@ -762,7 +762,7 @@ export default function ChatBox({
       {deal.pitch_message && (
         <div className="bg-[#1a1a1a] border-b border-surface-variant flex flex-col z-0">
           <button 
-            className="w-full flex justify-between items-center px-4 py-2 text-xs font-mono tracking-widest uppercase text-text-secondary hover:text-on-surface hover:bg-white/5 transition-colors"
+            className="w-full flex justify-between items-center px-4 py-2 text-xs font-mono tracking-widest uppercase text-text-secondary hover:text-on-surface hover:bg-white/5 transition"
             onClick={() => setIsPitchExpanded(!isPitchExpanded)}
           >
             <span className="flex items-center gap-2">
@@ -771,7 +771,7 @@ export default function ChatBox({
             <span>{isPitchExpanded ? '▲' : '▼'}</span>
           </button>
           {isPitchExpanded && (
-            <div className="px-6 py-4 border-t border-white/5 text-sm text-text-muted bg-[#121212] animate-[fadeIn_0.2s_ease]">
+            <div className="px-6 py-4 border-t border-white/5 text-sm text-text-muted bg-surface animate-[fadeIn_0.2s_ease]">
               <p className="whitespace-pre-wrap font-serif italic border-l-2 border-gold-accent/30 pl-4">{deal.pitch_message}</p>
             </div>
           )}
@@ -792,8 +792,8 @@ export default function ChatBox({
 
       {/* Warnings & Banners */}
       {deal.status === 'accepted' ? (
-        <div className="bg-[#121212] border-b border-surface-variant p-6 flex flex-col items-center">
-          <div className="max-w-md w-full bg-gradient-to-br from-[#1a1a1a] to-[#0d0d0d] border border-gold-accent/30 rounded-xl p-6 shadow-[0_10px_40px_rgba(232,174,60,0.05)] flex flex-col items-center animate-[fadeIn_0.5s_ease]">
+        <div className="bg-surface border-b border-surface-variant p-6 flex flex-col items-center">
+          <div className="max-w-md w-full bg-gradient-to-br from-[#1a1a1a] to-background border border-gold-accent/30 rounded-xl p-6 shadow-[0_10px_40px_rgba(232,174,60,0.05)] flex flex-col items-center animate-[fadeIn_0.5s_ease]">
             <span className="text-3xl mb-3">🛡️</span>
             <span className="font-label-caps text-[10px] tracking-widest uppercase text-success bg-success/10 px-2 py-1 rounded mb-4">Verified Advisor Active</span>
             
@@ -817,14 +817,14 @@ export default function ChatBox({
 
             <div className="flex flex-wrap gap-2 justify-center w-full">
               {deal.other_party_contact?.phone && (
-                <a href={`https://wa.me/${deal.other_party_contact.phone.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer" className="flex-1 min-w-[120px] bg-[#25D366]/20 text-[#25D366] border border-[#25D366]/30 px-3 py-2 rounded text-center text-xs font-working-title hover:bg-[#25D366]/30 transition-colors">
+                <a href={`https://wa.me/${deal.other_party_contact.phone.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer" className="flex-1 min-w-[120px] bg-[#25D366]/20 text-[#25D366] border border-[#25D366]/30 px-3 py-2 rounded text-center text-xs font-working-title hover:bg-[#25D366]/30 transition">
                   WhatsApp
                 </a>
               )}
-              <button onClick={() => setShowBookingModal(true)} className="flex-1 min-w-[120px] bg-gold-accent/20 text-gold-accent border border-gold-accent/30 px-3 py-2 rounded text-xs font-working-title hover:bg-gold-accent/30 transition-colors">
+              <button onClick={() => setShowBookingModal(true)} className="flex-1 min-w-[120px] bg-gold-accent/20 text-gold-accent border border-gold-accent/30 px-3 py-2 rounded text-xs font-working-title hover:bg-gold-accent/30 transition">
                 Schedule Call
               </button>
-              <button className="flex-1 min-w-[120px] bg-surface-variant text-text-secondary border border-white/10 px-3 py-2 rounded text-xs font-working-title hover:text-white transition-colors" onClick={() => alert("Vault access coming soon.")}>
+              <button className="flex-1 min-w-[120px] bg-surface-variant text-text-secondary border border-white/10 px-3 py-2 rounded text-xs font-working-title hover:text-white transition" onClick={() => alert("Vault access coming soon.")}>
                 📂 Open Vault
               </button>
             </div>
@@ -852,7 +852,7 @@ export default function ChatBox({
       )}
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar bg-gradient-to-b from-[#0d0d0d] to-[#121212]">
+      <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar bg-gradient-to-b from-background to-surface">
         {loading && (
           <p className="text-center text-xs text-text-secondary font-mono uppercase tracking-widest">Loading conversation…</p>
         )}
@@ -915,7 +915,7 @@ export default function ChatBox({
           Was a single non-wrapping row (AI pill + attach + input + Send) which
           squeezed the text field to a sliver at 375px. Now the input owns its
           own row on mobile and the actions sit beneath it. */}
-      <div className="p-3 sm:p-4 border-t border-surface-variant bg-[#121212]/90 backdrop-blur-md relative pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+      <div className="p-3 sm:p-4 border-t border-surface-variant bg-surface/90 backdrop-blur-md relative pb-[max(0.75rem,env(safe-area-inset-bottom))]">
         <form onSubmit={handleSend} className="flex flex-wrap gap-2 items-center">
 
           <input
@@ -950,7 +950,7 @@ export default function ChatBox({
               }
             }}
             disabled={closed || isSubmitting}
-            className="px-3 py-1.5 rounded-full bg-gold-accent/10 border border-gold-accent/40 text-gold-accent hover:bg-gold-accent/20 text-xs font-mono transition-colors disabled:opacity-50 flex items-center gap-1 shrink-0"
+            className="px-3 py-1.5 rounded-full bg-gold-accent/10 border border-gold-accent/40 text-gold-accent hover:bg-gold-accent/20 text-xs font-mono transition disabled:opacity-50 flex items-center gap-1 shrink-0"
             title="Draft RESA-compliant AI Counter-Offer"
           >
             <span>🪄 AI Counter-Offer</span>
@@ -960,7 +960,7 @@ export default function ChatBox({
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={closed || isUploading}
-            className="p-2.5 rounded-full text-text-secondary hover:text-gold-accent hover:bg-gold-accent/10 transition-colors disabled:opacity-50 flex items-center justify-center"
+            className="p-2.5 rounded-full text-text-secondary hover:text-gold-accent hover:bg-gold-accent/10 transition disabled:opacity-50 flex items-center justify-center"
             title="Attach file (Max 10MB Doc/Img, 50MB Video)"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
@@ -971,19 +971,19 @@ export default function ChatBox({
               back out to read the reply they just got. */}
           <input
             type="text"
-            className="order-first w-full sm:order-none sm:w-auto flex-1 min-w-0 bg-surface border border-surface-variant rounded-full px-5 py-2.5 text-base sm:text-sm text-on-surface focus:outline-none focus:border-gold-accent/50 disabled:opacity-50 transition-colors"
+            className="order-first w-full sm:order-none sm:w-auto flex-1 min-w-0 bg-surface border border-surface-variant rounded-full px-5 py-2.5 text-base sm:text-sm text-on-surface focus:outline-none focus:border-gold-accent/50 disabled:opacity-50 transition"
             placeholder={closed ? "This chat is closed." : "Type your message or drag a file here..."}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             disabled={closed || isSubmitting}
           />
 
-          {/* Was `(!input.trim() && !isUploading)` -- which ENABLED Send on an
+          {/* Was '(!input.trim() && !isUploading)' -- which ENABLED Send on an
               empty box while a file was uploading, posting a blank message. */}
           <button
             type="submit"
             disabled={closed || isSubmitting || !input.trim()}
-            className="ml-auto bg-gold-accent text-background px-6 py-2.5 rounded-full text-sm font-working-title disabled:opacity-50 hover:bg-gold-bright transition-colors shadow-[0_4px_10px_rgba(232,174,60,0.1)]"
+            className="ml-auto bg-gold-accent text-background px-6 py-2.5 rounded-full text-sm font-working-title disabled:opacity-50 hover:bg-gold-bright transition shadow-[0_4px_10px_rgba(232,174,60,0.1)]"
           >
             {isSubmitting ? "..." : "Send"}
           </button>
@@ -993,7 +993,7 @@ export default function ChatBox({
       {/* End Conversation Modal */}
       {showConfirmClose && (
         <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-[100] flex items-center justify-center p-6 animate-[fadeIn_0.2s_ease]">
-          <div className="bg-[#121212] border border-surface-variant rounded-lg p-6 max-w-sm w-full shadow-2xl">
+          <div className="bg-surface border border-surface-variant rounded-lg p-6 max-w-sm w-full shadow-2xl">
             <h3 className="font-working-title text-lg text-error mb-2">End Conversation?</h3>
             <p className="text-sm text-text-secondary mb-6">
               Are you sure you want to close this chat? You will not be able to message this person again unless a new Connect is spent.
@@ -1001,13 +1001,13 @@ export default function ChatBox({
             <div className="flex gap-3 justify-end">
               <button
                 onClick={() => setShowConfirmClose(false)}
-                className="px-4 py-2 rounded border border-surface-variant text-sm text-text-secondary hover:text-on-surface transition-colors"
+                className="px-4 py-2 rounded border border-surface-variant text-sm text-text-secondary hover:text-on-surface transition"
               >
                 Cancel
               </button>
               <button
                 onClick={handleEndConversation}
-                className="px-4 py-2 rounded bg-error/20 text-error border border-error/50 text-sm font-working-title hover:bg-error/30 transition-colors"
+                className="px-4 py-2 rounded bg-error/20 text-error border border-error/50 text-sm font-working-title hover:bg-error/30 transition"
               >
                 Yes, Close
               </button>
@@ -1019,7 +1019,7 @@ export default function ChatBox({
       {/* Report Modal */}
       {showConfirmReport && (
         <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-[100] flex items-center justify-center p-6 animate-[fadeIn_0.2s_ease]">
-          <div className="bg-[#121212] border border-error/50 rounded-lg p-6 max-w-sm w-full shadow-[0_0_40px_rgba(255,0,0,0.1)]">
+          <div className="bg-surface border border-error/50 rounded-lg p-6 max-w-sm w-full shadow-[0_0_40px_rgba(255,0,0,0.1)]">
             <h3 className="font-working-title text-lg text-error mb-2 flex items-center gap-2">
               <span>🚩</span> Report & Unmatch
             </h3>
@@ -1029,13 +1029,13 @@ export default function ChatBox({
             <div className="flex gap-3 justify-end">
               <button
                 onClick={() => setShowConfirmReport(false)}
-                className="px-4 py-2 rounded border border-surface-variant text-sm text-text-secondary hover:text-on-surface transition-colors"
+                className="px-4 py-2 rounded border border-surface-variant text-sm text-text-secondary hover:text-on-surface transition"
               >
                 Cancel
               </button>
               <button
                 onClick={handleReportConversation}
-                className="px-4 py-2 rounded bg-error text-white text-sm font-working-title hover:bg-error/80 transition-colors"
+                className="px-4 py-2 rounded bg-error text-white text-sm font-working-title hover:bg-error/80 transition"
               >
                 Report User
               </button>
@@ -1044,10 +1044,10 @@ export default function ChatBox({
         </div>
       )}
 
-      {/* Booking Modal — creates a real `pending` viewing_appointment (via
+      {/* Booking Modal — creates a real 'pending' viewing_appointment (via
           crmFetch → POST /api/viewing-appointments) and posts a system message so
           the other party sees the request in chat. The host confirms it from the
-          CRM Appointments tab or the Calendar, which flips it to `confirmed`. */}
+          CRM Appointments tab or the Calendar, which flips it to 'confirmed'. */}
       <BookingModal
         isOpen={showBookingModal}
         onClose={() => setShowBookingModal(false)}

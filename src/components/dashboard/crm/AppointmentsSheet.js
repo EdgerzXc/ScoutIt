@@ -191,7 +191,7 @@ export default function AppointmentsSheet({ appointments = [], onStatusUpdate, u
         <button
           type="button"
           onClick={() => setShowAvailability((v) => !v)}
-          className="w-full flex items-center justify-between bg-[#121212] border border-surface-variant rounded-lg px-4 py-3 hover:border-gold-accent/40 transition-colors"
+          className="w-full flex items-center justify-between bg-surface border border-surface-variant rounded-lg px-4 py-3 hover:border-gold-accent/40 transition"
         >
           <span className="flex items-center gap-2 font-working-title text-on-surface">
             <Clock size={16} className="text-gold-accent" /> Weekly Availability
@@ -211,7 +211,7 @@ export default function AppointmentsSheet({ appointments = [], onStatusUpdate, u
         <button
           type="button"
           onClick={openNewEvent}
-          className="flex items-center gap-2 px-3 py-1.5 bg-gold-accent/10 hover:bg-gold-accent/20 text-gold-accent border border-gold-accent/30 rounded text-xs uppercase tracking-wider font-bold transition-colors"
+          className="flex items-center gap-2 px-3 py-1.5 bg-gold-accent/10 hover:bg-gold-accent/20 text-gold-accent border border-gold-accent/30 rounded text-xs uppercase tracking-wider font-bold transition"
         >
           <Plus size={14} /> Add to schedule
         </button>
@@ -277,7 +277,7 @@ function ScheduleRow({ item, updatingId, onViewingUpdate, onEditEvent }) {
   const canRespond = item.kind === "viewing" && item.status === "pending" && item.raw.isHost;
 
   return (
-    <div className="flex items-center gap-3 p-3 rounded-lg border border-surface-variant bg-surface-alt hover:border-gold-accent/30 transition-colors">
+    <div className="flex items-center gap-3 p-3 rounded-lg border border-surface-variant bg-surface-alt hover:border-gold-accent/30 transition">
       <span className={`w-2 h-2 rounded-full shrink-0 ${meta.dot}`} />
 
       <div className="flex-1 min-w-0">

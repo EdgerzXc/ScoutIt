@@ -79,7 +79,7 @@ export default function ProviderMode({ type }) {
         </p>
         <div className="flex gap-4">
           <button 
-            className="bg-gold-accent text-background font-working-title text-sm font-bold py-3 px-8 rounded shadow-lg hover:opacity-90 transition-all"
+            className="bg-gold-accent text-background font-working-title text-sm font-bold py-3 px-8 rounded shadow-lg hover:opacity-90 transition"
             onClick={() => addToast("Your account is secured in the waitlist database.", "✅")}
           >
             Secure Your Position

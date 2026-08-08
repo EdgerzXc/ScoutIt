@@ -7,7 +7,7 @@ const ToggleSwitch = ({ label, checked, onChange, gold = false }) => (
   <div className="flex items-center justify-between py-2 border-b border-surface-variant/50 last:border-0">
     <span className="font-working-title text-sm text-on-surface">{label}</span>
     <div 
-      className={`w-10 h-6 rounded-full flex items-center p-1 active:scale-95 transition-all cursor-pointer ${checked ? (gold ? 'bg-gold-accent' : 'bg-on-surface') : 'bg-surface-variant'}`}
+      className={`w-10 h-6 rounded-full flex items-center p-1 active:scale-95 transition cursor-pointer ${checked ? (gold ? 'bg-gold-accent' : 'bg-on-surface') : 'bg-surface-variant'}`}
       onClick={() => onChange(!checked)}
     >
       <div className={`w-4 h-4 bg-background rounded-full transition-transform ${checked ? 'translate-x-4' : 'translate-x-0'}`}></div>
@@ -54,7 +54,7 @@ export default function PhotographerHUD({ projects, activeProjectId, setActivePr
             <h2 className="font-display-md text-3xl text-on-surface">{project.title}</h2>
           </div>
           <button 
-            className="bg-gold-accent text-background active:scale-95 font-working-title font-bold px-4 py-2 rounded text-sm hover:opacity-90 transition-all"
+            className="bg-gold-accent text-background active:scale-95 font-working-title font-bold px-4 py-2 rounded text-sm hover:opacity-90 transition"
             onClick={() => addToast("Final Gallery Submitted.", "📸")}
           >
             Submit Final Gallery
@@ -76,11 +76,11 @@ export default function PhotographerHUD({ projects, activeProjectId, setActivePr
               <h3 className="font-label-caps text-xs tracking-widest text-text-secondary uppercase">Media Drop</h3>
             </div>
             <div className="p-6">
-              <div className="aspect-video bg-[#0a0a0a] rounded border border-dashed border-surface-variant flex flex-col items-center justify-center text-center hover:border-gold-accent transition-colors cursor-pointer group mb-4">
+              <div className="aspect-video bg-background rounded border border-dashed border-surface-variant flex flex-col items-center justify-center text-center hover:border-gold-accent transition cursor-pointer group mb-4">
                 <span className="text-4xl mb-2 opacity-50 group-hover:scale-110 transition-transform">📸</span>
                 <span className="font-working-title text-on-surface">Paste Drive/Dropbox Link</span>
               </div>
-              <input type="text" placeholder="https://drive.google.com/..." className="w-full bg-surface-alt border border-surface-variant rounded p-3 text-sm focus:outline-none focus:border-gold-accent transition-colors" />
+              <input type="text" placeholder="https://drive.google.com/..." className="w-full bg-surface-alt border border-surface-variant rounded p-3 text-sm focus:outline-none focus:border-gold-accent transition" />
             </div>
           </div>
         </div>
@@ -94,13 +94,13 @@ export default function PhotographerHUD({ projects, activeProjectId, setActivePr
       {/* Tab Navigation */}
       <div className="flex border-b border-surface-variant overflow-x-auto">
         <button 
-          className={`px-6 py-3 font-working-title text-sm border-b-2 transition-colors whitespace-nowrap ${activeTab === 'bounties' ? 'border-gold-accent text-gold-accent' : 'border-transparent text-text-secondary hover:text-on-surface'}`}
+          className={`px-6 py-3 font-working-title text-sm border-b-2 transition whitespace-nowrap ${activeTab === 'bounties' ? 'border-gold-accent text-gold-accent' : 'border-transparent text-text-secondary hover:text-on-surface'}`}
           onClick={() => setActiveTab("bounties")}
         >
           Bounty Board
         </button>
         <button 
-          className={`px-6 py-3 font-working-title text-sm border-b-2 transition-colors whitespace-nowrap ${activeTab === 'showcase' ? 'border-gold-accent text-gold-accent' : 'border-transparent text-text-secondary hover:text-on-surface'}`}
+          className={`px-6 py-3 font-working-title text-sm border-b-2 transition whitespace-nowrap ${activeTab === 'showcase' ? 'border-gold-accent text-gold-accent' : 'border-transparent text-text-secondary hover:text-on-surface'}`}
           onClick={() => setActiveTab("showcase")}
         >
           My Showcase (Promotion)
@@ -112,7 +112,7 @@ export default function PhotographerHUD({ projects, activeProjectId, setActivePr
           {projects.map((project, index) => (
             <div 
               key={project.id} 
-              className="card-atmosphere hov-card stagger-enter rounded-lg overflow-hidden cursor-pointer group transition-all"
+              className="card-atmosphere hov-card stagger-enter rounded-lg overflow-hidden cursor-pointer group transition"
               style={{ '--i': index }}
               onClick={() => setActiveProjectId(project.id)}
             >
@@ -126,7 +126,7 @@ export default function PhotographerHUD({ projects, activeProjectId, setActivePr
                 </div>
               </div>
               <div className="p-4">
-                <h3 className="font-working-title text-lg text-on-surface line-clamp-1 mb-1 group-hover:text-gold-accent transition-colors">{project.title}</h3>
+                <h3 className="font-working-title text-lg text-on-surface line-clamp-1 mb-1 group-hover:text-gold-accent transition">{project.title}</h3>
                 <div className="flex justify-between items-center text-xs">
                   <span className="text-text-secondary">{project.date}</span>
                   <span className="text-gold-accent font-data-tabular">Bounty: {project.bounty_connects || 5} ◈</span>
@@ -161,7 +161,7 @@ export default function PhotographerHUD({ projects, activeProjectId, setActivePr
                     <p className="text-xs text-text-secondary mt-1">Toggle off to create artificial scarcity if fully booked.</p>
                   </div>
                   <div 
-                    className={`w-12 h-6 rounded-full flex items-center p-1 active:scale-95 transition-all cursor-pointer ${acceptingProjects ? 'bg-gold-accent' : 'bg-surface-variant'}`}
+                    className={`w-12 h-6 rounded-full flex items-center p-1 active:scale-95 transition cursor-pointer ${acceptingProjects ? 'bg-gold-accent' : 'bg-surface-variant'}`}
                     onClick={() => setAcceptingProjects(!acceptingProjects)}
                   >
                     <div className={`w-4 h-4 bg-background rounded-full transition-transform ${acceptingProjects ? 'translate-x-6' : 'translate-x-0'}`}></div>
@@ -216,7 +216,7 @@ export default function PhotographerHUD({ projects, activeProjectId, setActivePr
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-surface-variant/50 pt-6">
                 <div>
                   <h3 className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase mb-4 border-b border-surface-variant/50 pb-2">Compliance & Certs</h3>
-                  <ToggleSwitch label="CAA Drone License" checked={certCaaDrone} onChange={setCertCaaDrone} gold={true} />
+                  <ToggleSwitch label="CAAP RPA Credentials" checked={certCaaDrone} onChange={setCertCaaDrone} gold={true} />
                   <ToggleSwitch label="Liability Insurance" checked={certInsurance} onChange={setCertInsurance} gold={true} />
                   
                   <div className="mt-4">
@@ -243,7 +243,7 @@ export default function PhotographerHUD({ projects, activeProjectId, setActivePr
               </div>
               
               <button 
-                className="w-full mt-4 bg-surface border border-gold-accent/50 text-gold-accent active:scale-95 font-working-title font-bold px-4 py-4 rounded hover:bg-gold-accent/10 transition-all uppercase tracking-wider text-sm"
+                className="w-full mt-4 bg-surface border border-gold-accent/50 text-gold-accent active:scale-95 font-working-title font-bold px-4 py-4 rounded hover:bg-gold-accent/10 transition uppercase tracking-wider text-sm"
                 onClick={() => addToast("Elite Roster Profile Updated.", "✨")}
               >
                 Save Showcase Profile
@@ -282,12 +282,12 @@ export default function PhotographerHUD({ projects, activeProjectId, setActivePr
               {/* Certifications Row */}
               <div className="flex flex-wrap gap-2 mb-6">
                 {certCaaDrone && (
-                  <span className="bg-[#1a1814] text-gold-accent border border-gold-accent/40 font-label-caps text-[10px] uppercase tracking-widest px-2 py-1 rounded flex items-center gap-1 shadow-[0_0_8px_rgba(232,174,60,0.1)]">
-                    <span className="text-[10px]">🚁</span> CAA Certified
+                  <span className="bg-surface-alt text-gold-accent border border-gold-accent/40 font-label-caps text-[10px] uppercase tracking-widest px-2 py-1 rounded flex items-center gap-1 shadow-[0_0_8px_rgba(232,174,60,0.1)]">
+                    <span className="text-[10px]">🚁</span> CAAP Certified
                   </span>
                 )}
                 {certInsurance && (
-                  <span className="bg-[#1a1814] text-gold-accent border border-gold-accent/40 font-label-caps text-[10px] uppercase tracking-widest px-2 py-1 rounded flex items-center gap-1 shadow-[0_0_8px_rgba(232,174,60,0.1)]">
+                  <span className="bg-surface-alt text-gold-accent border border-gold-accent/40 font-label-caps text-[10px] uppercase tracking-widest px-2 py-1 rounded flex items-center gap-1 shadow-[0_0_8px_rgba(232,174,60,0.1)]">
                     <span className="text-[10px]">🛡️</span> Insured
                   </span>
                 )}

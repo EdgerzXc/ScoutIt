@@ -44,7 +44,7 @@ export function isLightMode() {
  * instead of waiting for a remount.
  *
  * Call this straight after adding/removing the class. Kept separate from the
- * class write so the existing `applyTheme` functions stay the one place that
+ * class write so the existing 'applyTheme' functions stay the one place that
  * decides what the class should be.
  */
 export function notifyLightModeChanged() {

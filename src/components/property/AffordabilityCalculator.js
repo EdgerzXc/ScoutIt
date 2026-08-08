@@ -6,7 +6,7 @@ import { calculateMortgage, parsePriceToNumber, MORTGAGE_DEFAULTS } from "@/lib/
 const peso = (v) => `₱${Math.round(v).toLocaleString("en-PH")}`;
 
 const fieldLabel = { fontFamily: "var(--font-mono)", fontSize: "9px", color: "#c8c8c8", letterSpacing: "0.1em", textTransform: "uppercase" };
-const fieldInput = { background: "#0e0e0e", border: "0.5px solid #262626", borderRadius: "2px", padding: "8px 10px", color: "#f0ede8", fontFamily: "Georgia,serif", fontSize: "14px", width: "100%" };
+const fieldInput = { background: "#0e0e0e", border: "0.5px solid #262626", borderRadius: "2px", padding: "8px 10px", color: "#f0ede8", fontFamily: "var(--font-display)", fontSize: "14px", width: "100%" };
 const outputRow = { display: "flex", justifyContent: "space-between", alignItems: "baseline", padding: "11px 0", borderBottom: "1px solid #262626", gap: "16px" };
 const outputLabel = { fontFamily: "var(--font-mono)", fontSize: "10px", color: "#c8c8c8", letterSpacing: "0.1em", textTransform: "uppercase" };
 
@@ -79,15 +79,15 @@ export default function AffordabilityCalculator({ listedPrice, priceStatus, tenu
       <div style={{ display: "flex", flexDirection: "column" }}>
         <div style={outputRow}>
           <span style={outputLabel}>Est. monthly payment</span>
-          <span style={{ fontFamily: "Georgia,serif", fontSize: "22px", color: "#E8AE3C" }}>{peso(result.monthlyPayment)}</span>
+          <span style={{ fontFamily: "var(--font-display)", fontSize: "22px", color: "#E8AE3C" }}>{peso(result.monthlyPayment)}</span>
         </div>
         <div style={outputRow}>
           <span style={outputLabel}>Down payment</span>
-          <span style={{ fontFamily: "Georgia,serif", fontSize: "14px", color: "#f0ede8" }}>{peso(result.downPayment)}</span>
+          <span style={{ fontFamily: "var(--font-display)", fontSize: "14px", color: "#f0ede8" }}>{peso(result.downPayment)}</span>
         </div>
         <div style={{ ...outputRow, borderBottom: "none" }}>
           <span style={outputLabel}>Total interest over term</span>
-          <span style={{ fontFamily: "Georgia,serif", fontSize: "14px", color: "#f0ede8" }}>{peso(result.totalInterest)}</span>
+          <span style={{ fontFamily: "var(--font-display)", fontSize: "14px", color: "#f0ede8" }}>{peso(result.totalInterest)}</span>
         </div>
       </div>
 

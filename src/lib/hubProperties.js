@@ -32,7 +32,7 @@ const EARTH_RADIUS_KM = 6371;
 /**
  * Great-circle distance in km. Returns null when either point is incomplete.
  *
- * ⚠️ `Number(null)` and `Number("")` are both 0, and 0 here would read as
+ * ⚠️ 'Number(null)' and 'Number("")' are both 0, and 0 here would read as
  * "exactly at the hub centre" — the most confident possible claim produced by
  * the least possible data. Missing values are therefore rejected BEFORE the
  * numeric coercion, not by it. Caught by a test, not by review.
@@ -114,8 +114,8 @@ export function hubDistanceKm(property, hub) {
  * @param {Array<object>} properties - the CMS bundle's properties
  * @param {object} hub - one entry from LOCATION_HUBS
  * @param {{radiusKm?: number}} [options]
- * @returns {Array<object>} each property with `hubDistanceKm` (number|null)
- *   and `hubMatchBasis` ('proximity' | 'name') attached
+ * @returns {Array<object>} each property with 'hubDistanceKm' (number|null)
+ *   and 'hubMatchBasis' ('proximity' | 'name') attached
  *
  * Ordering: measured-distance matches first, nearest to furthest, then
  * name-only matches. A visitor scanning the page reads the strongest evidence

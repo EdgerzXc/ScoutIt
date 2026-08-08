@@ -77,7 +77,7 @@ function resolveSecret() {
  * unsuccessful result yields ok:false. A captcha that can't be checked is a
  * captcha that didn't pass.
  *
- * @param {string} token - the `cf-turnstile-response` value from the client
+ * @param {string} token - the 'cf-turnstile-response' value from the client
  * @param {{ remoteIp?: string|null }} [options]
  * @returns {Promise<{ ok: boolean, message: string|null, codes: string[] }>}
  */
@@ -130,7 +130,7 @@ export async function verifyTurnstile(token, { remoteIp = null } = {}) {
 }
 
 /**
- * Best usable client IP for `remoteip`.
+ * Best usable client IP for 'remoteip'.
  *
  * X-Forwarded-For may be "client, proxy1, proxy2" — the FIRST entry is the
  * original client. Passing the raw header makes Cloudflare reject it.

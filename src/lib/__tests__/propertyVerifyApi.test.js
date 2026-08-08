@@ -34,7 +34,7 @@ const REAL_ROW = {
 };
 
 /**
- * `.select().eq().maybeSingle()` — the chain findProperty uses. `.or()` is
+ * '.select().eq().maybeSingle()' — the chain findProperty uses. '.or()' is
  * deliberately absent so a regression to it throws instead of passing.
  */
 // Columns that actually exist on public.properties (live DB, 2026-08-06).

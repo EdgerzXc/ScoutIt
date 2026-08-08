@@ -129,11 +129,11 @@ export async function GET(request) {
 }
 
 /**
- * May `userId` read the wrap for this entity?
+ * May 'userId' read the wrap for this entity?
  *
  * Staff/admin may read any. Otherwise the caller must BE the subject:
- *   owner_portfolio → entityId is a `properties.owner_id`
- *   broker          → entityId is a `deals.broker_id`
+ *   owner_portfolio → entityId is a 'properties.owner_id'
+ *   broker          → entityId is a 'deals.broker_id'
  *   property        → entityId is a listing; the caller must own it
  *
  * Deliberately strict. Broker representation is NOT accepted as access to a
@@ -170,17 +170,17 @@ async function isAuthorisedForWrap(userId, entityType, entityId) {
 }
 
 /**
- * Previous calendar month as `YYYY-MM`.
+ * Previous calendar month as 'YYYY-MM'.
  *
- * ⚠️ Do not "simplify" this back to `d.setMonth(d.getMonth() - 1)`. That
+ * ⚠️ Do not "simplify" this back to 'd.setMonth(d.getMonth() - 1)'. That
  * overflows whenever today's day-of-month does not exist in the previous
- * month: on 2026-03-31, `setMonth(1)` produces "Feb 31" which JavaScript
+ * month: on 2026-03-31, 'setMonth(1)' produces "Feb 31" which JavaScript
  * normalises to 2026-03-03 — so it returns "2026-03", the CURRENT month, and
  * the wrap silently reports a partial month as if it were complete. Rule 3:
  * a wrong number is worse than a blank, and this one looks perfectly normal.
  *
  * Anchoring to day 1 before stepping back removes the overflow entirely.
- * UTC throughout, to match the `toISOString()` slice.
+ * UTC throughout, to match the 'toISOString()' slice.
  */
 function getCurrentPeriodMonth() {
   const now = new Date();

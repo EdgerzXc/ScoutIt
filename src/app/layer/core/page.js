@@ -273,7 +273,7 @@ export default function CoreLayer() {
           color: #0e0e0e;
           font-family: var(--font-display);
           font-size: 20px;
-          font-weight: 700;
+          font-weight: 400;
           display: flex;
           align-items: center;
           justify-content: center;

@@ -122,7 +122,7 @@ function CRMPageInner() {
         <AtmosphereBackground variant="dashboard" />
         <h1 className="font-headline-editorial text-3xl text-on-surface relative z-10">Master CRM</h1>
         <p className="text-text-secondary text-sm max-w-sm relative z-10">Sign in to see your pipeline, appointments, and tasks.</p>
-        <Link href="/dashboard" className="relative z-10 border border-gold-accent text-gold-accent font-working-title px-6 py-3 rounded hover:bg-gold-accent hover:text-background transition-colors text-sm font-bold">
+        <Link href="/dashboard" className="relative z-10 border border-gold-accent text-gold-accent font-working-title px-6 py-3 rounded hover:bg-gold-accent hover:text-background transition text-sm font-bold">
           ← Back to Dashboard
         </Link>
       </div>
@@ -155,7 +155,7 @@ function CRMPageInner() {
         <div className="flex items-center gap-4">
           <Link
             href="/dashboard"
-            className="p-2 border border-surface-variant rounded-full text-text-secondary hover:text-on-surface hover:border-gold-accent/50 transition-colors shrink-0"
+            className="p-2 border border-surface-variant rounded-full text-text-secondary hover:text-on-surface hover:border-gold-accent/50 transition shrink-0"
             title="Go back to Dashboard"
           >
             <ArrowLeft size={20} />
@@ -174,7 +174,7 @@ function CRMPageInner() {
           <div className="relative">
             <button
               onClick={() => setShowViewingMenu(!showViewingMenu)}
-              className="flex items-center gap-2 bg-surface-alt border border-surface-variant rounded-full px-4 py-2 text-sm font-working-title text-on-surface hover:border-gold-accent/50 transition-colors"
+              className="flex items-center gap-2 bg-surface-alt border border-surface-variant rounded-full px-4 py-2 text-sm font-working-title text-on-surface hover:border-gold-accent/50 transition"
             >
               <span className="text-text-muted">Viewing as:</span>
               <span className="text-gold-accent capitalize">{viewingAs}</span>
@@ -186,7 +186,7 @@ function CRMPageInner() {
                   <button
                     key={role}
                     onClick={() => { setViewingAs(role); setShowViewingMenu(false); }}
-                    className="w-full text-left px-4 py-2 text-sm font-working-title flex items-center justify-between hover:bg-surface-alt transition-colors"
+                    className="w-full text-left px-4 py-2 text-sm font-working-title flex items-center justify-between hover:bg-surface-alt transition"
                   >
                     <span className="capitalize text-on-surface">{role}</span>
                     {viewingAs === role && <Check size={14} className="text-gold-accent" />}
@@ -206,7 +206,7 @@ function CRMPageInner() {
 
       {/* KPI Strip */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-8 relative z-10">
-        <div className="bg-gradient-to-br from-[#1a1917] to-[#111110] border border-white/10 rounded-lg p-4 md:p-5">
+        <div className="bg-gradient-to-br from-surface-alt to-surface border border-white/10 rounded-lg p-4 md:p-5">
           <div className="text-xs text-text-secondary uppercase tracking-widest font-label-caps mb-1">Active Deals</div>
           <div className="text-2xl font-working-title text-on-surface">{activeDeals}</div>
         </div>
@@ -224,7 +224,7 @@ function CRMPageInner() {
             </>
           )}
         </div>
-        <div className="bg-gradient-to-br from-[#1a1917] to-[#111110] border border-white/10 rounded-lg p-4 md:p-5">
+        <div className="bg-gradient-to-br from-surface-alt to-surface border border-white/10 rounded-lg p-4 md:p-5">
           <div className="text-xs text-text-secondary uppercase tracking-widest font-label-caps mb-1">Win Rate</div>
           {winRate !== null ? (
             <div className="text-2xl font-working-title text-on-surface">{winRate}%</div>
@@ -235,7 +235,7 @@ function CRMPageInner() {
             </>
           )}
         </div>
-        <div className="bg-gradient-to-br from-[#1a1917] to-[#111110] border border-white/10 rounded-lg p-4 md:p-5">
+        <div className="bg-gradient-to-br from-surface-alt to-surface border border-white/10 rounded-lg p-4 md:p-5">
           <div className="text-xs text-text-secondary uppercase tracking-widest font-label-caps mb-1">Upcoming Viewings</div>
           <div className="text-2xl font-working-title text-on-surface">{upcomingViewings}</div>
         </div>
@@ -246,19 +246,19 @@ function CRMPageInner() {
         <div className="flex gap-4 md:gap-6">
           <button
             onClick={() => setActiveTab("pipeline")}
-            className={`pb-3 font-working-title text-sm flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${activeTab === "pipeline" ? "border-gold-accent text-gold-accent" : "border-transparent text-text-secondary hover:text-on-surface"}`}
+            className={`pb-3 font-working-title text-sm flex items-center gap-2 border-b-2 transition whitespace-nowrap ${activeTab === "pipeline" ? "border-gold-accent text-gold-accent" : "border-transparent text-text-secondary hover:text-on-surface"}`}
           >
             <Briefcase size={16} /> Pipeline
           </button>
           <button
             onClick={() => setActiveTab("appointments")}
-            className={`pb-3 font-working-title text-sm flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${activeTab === "appointments" ? "border-gold-accent text-gold-accent" : "border-transparent text-text-secondary hover:text-on-surface"}`}
+            className={`pb-3 font-working-title text-sm flex items-center gap-2 border-b-2 transition whitespace-nowrap ${activeTab === "appointments" ? "border-gold-accent text-gold-accent" : "border-transparent text-text-secondary hover:text-on-surface"}`}
           >
             <Calendar size={16} /> Appointments
           </button>
           <button
             onClick={() => setActiveTab("tasks")}
-            className={`pb-3 font-working-title text-sm flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${activeTab === "tasks" ? "border-gold-accent text-gold-accent" : "border-transparent text-text-secondary hover:text-on-surface"}`}
+            className={`pb-3 font-working-title text-sm flex items-center gap-2 border-b-2 transition whitespace-nowrap ${activeTab === "tasks" ? "border-gold-accent text-gold-accent" : "border-transparent text-text-secondary hover:text-on-surface"}`}
           >
             <ListChecks size={16} /> Tasks
           </button>
@@ -267,13 +267,13 @@ function CRMPageInner() {
         <div className="hidden md:flex gap-3 pb-3">
           <button
             onClick={() => triggerLockedToast("Mass Email", "Cluster")}
-            className="border border-dashed border-text-muted text-text-muted hover:text-on-surface hover:border-surface-variant rounded-full px-3 py-1 flex items-center gap-1.5 text-xs font-working-title transition-colors"
+            className="border border-dashed border-text-muted text-text-muted hover:text-on-surface hover:border-surface-variant rounded-full px-3 py-1 flex items-center gap-1.5 text-xs font-working-title transition"
           >
             <Mail size={12} /> Mass Email <span className="text-[10px] ml-1">🔒</span>
           </button>
           <button
             onClick={() => triggerLockedToast("Automations", "Universe")}
-            className="border border-dashed border-text-muted text-text-muted hover:text-on-surface hover:border-surface-variant rounded-full px-3 py-1 flex items-center gap-1.5 text-xs font-working-title transition-colors"
+            className="border border-dashed border-text-muted text-text-muted hover:text-on-surface hover:border-surface-variant rounded-full px-3 py-1 flex items-center gap-1.5 text-xs font-working-title transition"
           >
             <Zap size={12} /> Automations <span className="text-[10px] ml-1">🔒</span>
           </button>

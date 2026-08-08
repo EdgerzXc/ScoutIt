@@ -234,7 +234,7 @@ export default async function ResearcherDetailPage({ params }) {
           font-family: var(--font-display);
           font-size: 11px;
           color: var(--accent);
-          font-weight: 600;
+          font-weight: 400;
           line-height: 1.1;
           white-space: nowrap;
         }
@@ -287,7 +287,7 @@ export default async function ResearcherDetailPage({ params }) {
         .profile-name {
           font-family: var(--font-display);
           font-size: 42px;
-          font-weight: 500;
+          font-weight: 400;
           color: #fff;
           margin: 0 0 8px 0;
         }

@@ -227,7 +227,7 @@ export default function OnboardingPage() {
         {/* 18+ legal capacity (§34.2, §48). Civil Code + RA 8792: contracts
             need a capacitated party, and a Connect opens a negotiation.
             The real check is server-side in /api/auth/complete-onboarding —
-            this field only makes it answerable. `max` blocks obviously-future
+            this field only makes it answerable. 'max' blocks obviously-future
             dates in the picker; it is convenience, not enforcement. */}
         <div className="flex flex-col gap-2">
           <label className="text-sm font-bold text-on-surface">Date of Birth</label>

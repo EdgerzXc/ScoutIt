@@ -12,7 +12,7 @@ import { useMemo, useState } from "react";
 const peso = (v) => `₱${Math.round(v).toLocaleString("en-PH")}`;
 
 const fieldLabel = { fontFamily: "var(--font-mono)", fontSize: "9px", color: "#c8c8c8", letterSpacing: "0.1em", textTransform: "uppercase" };
-const fieldInput = { background: "#0e0e0e", border: "0.5px solid #262626", borderRadius: "2px", padding: "8px 10px", color: "#f0ede8", fontFamily: "Georgia,serif", fontSize: "14px", width: "100%" };
+const fieldInput = { background: "#0e0e0e", border: "0.5px solid #262626", borderRadius: "2px", padding: "8px 10px", color: "#f0ede8", fontFamily: "var(--font-display)", fontSize: "14px", width: "100%" };
 const outputRow = { display: "flex", justifyContent: "space-between", alignItems: "baseline", padding: "10px 0", borderBottom: "1px solid #262626", gap: "16px" };
 const outputLabel = { fontFamily: "var(--font-mono)", fontSize: "10px", color: "#c8c8c8", letterSpacing: "0.1em", textTransform: "uppercase" };
 
@@ -94,7 +94,7 @@ export default function MonthlyCostCalculator({ d }) {
       <div style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#E8AE3C", letterSpacing: "0.18em", textTransform: "uppercase", marginBottom: "6px" }}>
         Monthly Cost Sandbox
       </div>
-      <p style={{ fontFamily: "Georgia,serif", fontSize: "13px", color: "#a0a0a0", lineHeight: 1.6, margin: "0 0 18px", maxWidth: "480px" }}>
+      <p style={{ fontFamily: "var(--font-display)", fontSize: "13px", color: "#a0a0a0", lineHeight: 1.6, margin: "0 0 18px", maxWidth: "480px" }}>
         What would a month here actually cost you? Listing-verified charges are filled in below — add your own bills to complete the picture.
       </p>
 
@@ -105,7 +105,7 @@ export default function MonthlyCostCalculator({ d }) {
           {fromListing.map((row) => (
             <div key={row.key} style={outputRow}>
               <span style={outputLabel}>{row.label}</span>
-              <span style={{ fontFamily: "Georgia,serif", fontSize: "14px", color: "#f0ede8" }}>{peso(row.value)}</span>
+              <span style={{ fontFamily: "var(--font-display)", fontSize: "14px", color: "#f0ede8" }}>{peso(row.value)}</span>
             </div>
           ))}
         </div>
@@ -136,7 +136,7 @@ export default function MonthlyCostCalculator({ d }) {
 
       <div style={{ ...outputRow, borderBottom: "none", borderTop: "1px solid #262626", paddingTop: "14px" }}>
         <span style={outputLabel}>Est. total per month</span>
-        <span data-testid="mcs-total" style={{ fontFamily: "Georgia,serif", fontSize: "22px", color: hasAnything ? "#E8AE3C" : "#5a5a5a" }}>
+        <span data-testid="mcs-total" style={{ fontFamily: "var(--font-display)", fontSize: "22px", color: hasAnything ? "#E8AE3C" : "#5a5a5a" }}>
           {hasAnything ? peso(total) : "—"}
         </span>
       </div>

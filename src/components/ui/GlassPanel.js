@@ -3,7 +3,7 @@ import React from 'react';
 /**
  * GlassPanel
  * Reusable primitive for the "Impeccable" glassmorphism containers.
- * Applies the core `.glass-panel` class alongside optional custom styling.
+ * Applies the core '.glass-panel' class alongside optional custom styling.
  */
 export default function GlassPanel({ 
   children, 

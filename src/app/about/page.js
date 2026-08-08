@@ -134,9 +134,18 @@ export default function AboutPage() {
           margin: 0 auto;
         }
 
+        /* ── This page was centred end to end: header, lead, every section
+           heading, the closing block. Centred text is a POSTER treatment — it
+           works for four words and fights the reader for four hundred, because
+           every line starts at a different x and the eye has to re-find the
+           margin on each return sweep. A manifesto is an argument being made,
+           so it now reads like a document: one left margin, all the way down.
+           This is also the single change that makes the page stop looking like
+           a landing-page template. */
         .manifesto-header {
-          text-align: center;
-          margin-bottom: 80px;
+          text-align: left;
+          margin-bottom: 72px;
+          max-width: 22ch;
         }
 
         .vector-label {
@@ -149,20 +158,34 @@ export default function AboutPage() {
 
         .manifesto-title {
           font-family: var(--font-display);
-          font-size: 56px;
-          margin: 24px 0;
+          /* Was a fixed 56px, which is enormous on a 375px phone and timid on
+             a 27-inch display. Fluid, so it is right at both. */
+          font-size: var(--display-xl);
+          line-height: var(--display-leading);
+          margin: 20px 0 0;
           color: var(--text-primary);
-          letter-spacing: -0.02em;
+          letter-spacing: var(--display-track-xl);
+          text-wrap: balance;
         }
 
+        /* The standfirst. It was 28px of GOLD serif, centred, at 800px wide —
+           i.e. gold applied broadly as body copy, which DESIGN.md §2 rules out
+           ("never applied broadly"), and which in light mode is the exact
+           gold-as-text problem the whole theme was rebuilt around. The gold now
+           does what gold is for: it marks the passage with a rule, and the
+           words themselves are read in ink. */
         .lead-paragraph {
           font-family: var(--font-display);
-          font-size: 28px;
-          line-height: 1.5;
-          color: var(--accent);
-          text-align: center;
-          max-width: 800px;
-          margin: 0 auto 80px;
+          font-size: clamp(1.25rem, 2.2vw, 1.75rem);
+          line-height: 1.45;
+          letter-spacing: -0.011em;
+          color: var(--text-primary);
+          text-align: left;
+          max-width: 46ch;
+          margin: 0 0 80px;
+          padding-left: 24px;
+          border-left: 2px solid var(--accent);
+          text-wrap: pretty;
         }
 
         .editorial-grid {
@@ -172,9 +195,20 @@ export default function AboutPage() {
           margin-bottom: 80px;
         }
 
-        @media (max-width: 768px) {
+        /* There was one breakpoint here: three columns, then one. Between
+           768px and 1024px that meant three ~30ch columns squeezed onto a
+           tablet — too narrow to read, too wide to stack. */
+        @media (max-width: 1024px) {
+          .editorial-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 32px;
+          }
+        }
+
+        @media (max-width: 640px) {
           .editorial-grid {
             grid-template-columns: 1fr;
+            gap: 36px;
           }
         }
 
@@ -188,32 +222,38 @@ export default function AboutPage() {
         }
 
         .editorial-col p {
-          font-size: 14px;
-          line-height: 1.8;
+          font-size: 15px;
+          line-height: 1.7;
           color: var(--text-secondary);
+          max-width: 42ch;
+          text-wrap: pretty;
         }
 
         .vision-block {
           background: var(--surface);
           border: 1px solid var(--border-solid);
-          padding: 64px;
-          text-align: center;
+          padding: clamp(32px, 5vw, 64px);
+          text-align: left;
           border-radius: var(--radius-md);
         }
 
         .vision-heading {
           font-family: var(--font-display);
-          font-size: 32px;
+          font-size: var(--display-md);
+          letter-spacing: var(--display-track-md);
+          line-height: 1.12;
           color: var(--text-primary);
-          margin-bottom: 24px;
+          margin-bottom: 20px;
+          text-wrap: balance;
         }
 
         .vision-text {
-          font-size: 16px;
-          line-height: 1.8;
+          font-size: 17px;
+          line-height: 1.7;
           color: var(--text-secondary);
-          max-width: 600px;
-          margin: 0 auto;
+          max-width: var(--measure);
+          margin: 0;
+          text-wrap: pretty;
         }
 
         .ecosystem-map {
@@ -224,14 +264,19 @@ export default function AboutPage() {
           border-radius: var(--radius-md);
         }
 
+        /* UPPERCASE serif with POSITIVE tracking is the gold-and-marble
+           luxury-property cliché DESIGN.md §6 bans by name — and it is also
+           just bad typography: capitals remove the ascenders and descenders
+           the eye uses to recognise word shapes, so an all-caps line is
+           measurably slower to read. Sentence case, tracking pulled in. */
         .protocol-heading {
           font-family: var(--font-display);
-          font-size: 32px;
+          font-size: var(--display-md);
           color: var(--text-primary);
-          text-align: center;
-          margin-bottom: 60px;
-          letter-spacing: 0.05em;
-          text-transform: uppercase;
+          text-align: left;
+          margin-bottom: 48px;
+          letter-spacing: var(--display-track-md);
+          line-height: 1.12;
         }
 
         .eco-grid {
@@ -281,13 +326,23 @@ export default function AboutPage() {
           border: 1px solid var(--border);
           padding: 24px;
           border-radius: 4px;
-          transition: all 0.3s ease;
+          /* 'all 0.3s ease' — 'all' animates layout properties too, and plain
+             'ease' starts slow, which is the one thing a hover must not do.
+             Named properties, half the duration, a real ease-out curve. */
+          transition:
+            transform 160ms var(--ease-out-custom),
+            border-color 160ms var(--ease-out-custom),
+            box-shadow 160ms var(--ease-out-custom);
         }
 
         .eco-node:hover {
           border-color: rgba(var(--accent-rgb), 0.3);
-          transform: translateY(-4px);
+          transform: translateY(-2px);
           box-shadow: var(--shadow-md), var(--shadow-glow-soft);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .eco-node, .eco-node:hover { transform: none; transition: none; }
         }
 
         .outcome-node {

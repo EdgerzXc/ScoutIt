@@ -115,10 +115,10 @@ export default function ProfileBaseLayer({
                 display: "inline-flex",
                 alignItems: "center",
                 gap: 6,
-                border: "1px dashed rgba(240, 237, 232, 0.45)",
+                border: "1px dashed var(--text-muted)",
                 borderRadius: 20,
                 padding: "3px 10px",
-                background: "rgba(240, 237, 232, 0.06)",
+                background: "var(--text-muted)",
               }}
               title="This is a seeded demonstration profile, not a real person"
             >
@@ -250,7 +250,7 @@ const avatarWrap = {
 };
 
 const avatarInitials = {
-  fontFamily: "Georgia, serif",
+  fontFamily: "var(--font-display)",
   fontSize: 32,
   color: "var(--accent)",
   lineHeight: 1,
@@ -265,7 +265,7 @@ const identityBlock = {
 };
 
 const nameStyle = {
-  fontFamily: "Georgia, serif",
+  fontFamily: "var(--font-display)",
   fontSize: 36,
   color: "var(--on-surface)",
   lineHeight: 1.1,

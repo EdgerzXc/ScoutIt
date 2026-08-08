@@ -36,7 +36,7 @@ export default function PostMoveEcosystem() {
         
         {/* Left Column: Move-In Checklist */}
         <div className="lg:col-span-5 flex flex-col gap-4">
-          <div className="card-atmosphere hov-card rounded-lg p-6 transition-colors h-full">
+          <div className="card-atmosphere hov-card rounded-lg p-6 transition h-full">
             <div className="flex justify-between items-end mb-6">
               <div>
                 <span className="font-label-caps text-[10px] tracking-widest uppercase text-gold-accent block mb-1">Logistics</span>
@@ -48,7 +48,7 @@ export default function PostMoveEcosystem() {
             {/* Progress Bar */}
             <div className="w-full h-1 bg-surface-alt rounded-full mb-6 overflow-hidden">
               <div 
-                className="h-full bg-gold-accent transition-all duration-500 ease-out" 
+                className="h-full bg-gold-accent transition duration-200 ease-out" 
                 style={{ width: `${progress}%` }}
               ></div>
             </div>
@@ -63,7 +63,7 @@ export default function PostMoveEcosystem() {
                   <div className="text-gold-accent shrink-0 transition-transform group-hover:scale-110">
                     {item.done ? <CheckCircle size="1.2em" strokeWidth={1.5} /> : <Circle size="1.2em" strokeWidth={1.5} className="text-surface-variant group-hover:text-gold-accent" />}
                   </div>
-                  <span className={`text-sm transition-colors ${item.done ? 'text-text-muted line-through' : 'text-on-surface group-hover:text-gold-accent'}`}>
+                  <span className={`text-sm transition ${item.done ? 'text-text-muted line-through' : 'text-on-surface group-hover:text-gold-accent'}`}>
                     {item.text}
                   </span>
                 </li>
@@ -74,19 +74,19 @@ export default function PostMoveEcosystem() {
 
         {/* Right Column: Utilities CTA */}
         <div className="lg:col-span-7 flex flex-col justify-center">
-          <Link href="/layer/crust#wire" className="relative overflow-hidden bg-surface-alt border border-surface-variant rounded-lg p-8 flex flex-col md:flex-row items-center justify-between gap-6 hover:border-gold-accent group transition-all h-full min-h-[220px]">
-            <div className="absolute inset-0 bg-gradient-to-br from-gold-accent/10 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <Link href="/layer/crust#wire" className="relative overflow-hidden bg-surface-alt border border-surface-variant rounded-lg p-8 flex flex-col md:flex-row items-center justify-between gap-6 hover:border-gold-accent group transition h-full min-h-[220px]">
+            <div className="absolute inset-0 bg-gradient-to-br from-gold-accent/10 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
             
             <div className="flex flex-col gap-3 relative z-10 w-full max-w-sm">
               <span className="font-label-caps text-[10px] tracking-widest uppercase text-gold-accent block">The Wire</span>
-              <h3 className="font-headline-editorial text-2xl text-on-surface group-hover:text-gold-accent transition-colors">Access the Utilities Hub</h3>
+              <h3 className="font-headline-editorial text-2xl text-on-surface group-hover:text-gold-accent transition">Access the Utilities Hub</h3>
               <p className="text-sm text-text-secondary leading-relaxed">
                 Connect your fiber internet, transfer Meralco power accounts, setup water supply, and hire logistics guilds directly from our public Trust layer.
               </p>
             </div>
             
             <div className="relative z-10 shrink-0 mt-4 md:mt-0">
-              <div className="w-14 h-14 rounded-full bg-[#121110] border border-surface-variant flex items-center justify-center text-on-surface group-hover:border-gold-accent group-hover:bg-gold-accent group-hover:text-[#121110] transition-all shadow-xl group-hover:scale-110">
+              <div className="w-14 h-14 rounded-full bg-surface border border-surface-variant flex items-center justify-center text-on-surface group-hover:border-gold-accent group-hover:bg-gold-accent group-hover:text-surface transition shadow-xl group-hover:scale-110">
                 <ExternalLink size="1.2em" strokeWidth={1.5} />
               </div>
             </div>

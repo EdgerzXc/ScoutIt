@@ -570,7 +570,7 @@ export default function ShowcaseStage({ mode = "full" }) {
 
         .sc-topbar { position: absolute; top: 0; left: 0; width: 100%; z-index: 7; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 16px 24px; background: linear-gradient(to bottom, rgba(0,0,0,0.72), rgba(0,0,0,0)); pointer-events: none; }
         .sc-topbar-cat { justify-self: start; font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; }
-        :global(.sc-logo) { justify-self: center; font-family: Georgia, serif; font-size: 30px; letter-spacing: 3px; line-height: 1; text-decoration: none; pointer-events: auto; }
+        :global(.sc-logo) { justify-self: center; font-family: var(--font-display); font-size: 30px; letter-spacing: 3px; line-height: 1; text-decoration: none; pointer-events: auto; }
         :global(.sc-logo .sc-logo-scout) { color: #f5f3ee; }
         :global(.sc-logo .sc-logo-it) { color: #E8AE3C; transition: text-shadow 0.3s ease; }
         :global(.sc-logo:hover .sc-logo-it) { text-shadow: 0 0 14px rgba(232, 174, 60,0.55); }
@@ -580,7 +580,7 @@ export default function ShowcaseStage({ mode = "full" }) {
         .sc-menu-btn:hover { border-color: rgba(232, 174, 60,0.5); background: rgba(232, 174, 60,0.08); }
         .sc-menu-drop { position: absolute; top: 50px; right: 0; min-width: 188px; background: rgba(8,8,9,0.96); backdrop-filter: blur(14px); border: 1px solid #1a1a1a; padding: 10px 0; display: flex; flex-direction: column; opacity: 0; visibility: hidden; transform: translateY(-6px); transition: opacity 0.2s, transform 0.2s, visibility 0.2s; }
         .sc-menu-drop.open { opacity: 1; visibility: visible; transform: translateY(0); }
-        .sc-menu-brand { font-family: Georgia, serif; font-size: 16px; color: #E8AE3C; padding: 6px 18px 10px; border-bottom: 1px solid #1a1a1a; margin-bottom: 6px; }
+        .sc-menu-brand { font-family: var(--font-display); font-size: 16px; color: #E8AE3C; padding: 6px 18px 10px; border-bottom: 1px solid #1a1a1a; margin-bottom: 6px; }
         .sc-menu-drop :global(a) { font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #999; text-decoration: none; padding: 9px 18px; transition: color 0.15s, background 0.15s; }
         .sc-menu-drop :global(a):hover { color: #f0ede8; background: rgba(255,255,255,0.03); }
 
@@ -600,7 +600,7 @@ export default function ShowcaseStage({ mode = "full" }) {
         .sc-fp-award:hover { color: #f0ede8; }
         .sc-fp-award.on { color: #E8AE3C; border-color: rgba(232, 174, 60,0.6); background: rgba(232, 174, 60,0.08); }
         .sc-fp-cats { display: flex; flex-direction: column; gap: 2px; }
-        .sc-fp-cat { text-align: left; font-family: Georgia, serif; font-size: 17px; color: #c8c8c8; background: none; border-left: 2px solid transparent; padding: 11px 14px; cursor: pointer; transition: all 0.2s; }
+        .sc-fp-cat { text-align: left; font-family: var(--font-display); font-size: 17px; color: #c8c8c8; background: none; border-left: 2px solid transparent; padding: 11px 14px; cursor: pointer; transition: all 0.2s; }
         .sc-fp-cat:hover { color: #f0ede8; }
         .sc-fp-cat.on { color: #E8AE3C; border-left-color: #E8AE3C; background: rgba(232, 174, 60,0.06); }
 
@@ -610,13 +610,13 @@ export default function ShowcaseStage({ mode = "full" }) {
         .sc-promo-head { font-family: 'Courier New', monospace; font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; }
         .sc-promo-embed { position: relative; width: 100%; aspect-ratio: 16/9; background: #000; }
         .sc-promo-embed :global(iframe) { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
-        .sc-promo-soon { font-family: Georgia, serif; font-style: italic; font-size: 15px; color: #777; padding: 30px 4px; text-align: center; line-height: 1.6; }
+        .sc-promo-soon { font-family: var(--font-display); font-style: italic; font-size: 15px; color: #777; padding: 30px 4px; text-align: center; line-height: 1.6; }
         :global(.sc-promo-cta) { font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #999; text-decoration: none; }
         :global(.sc-promo-cta:hover) { color: #E8AE3C; }
 
         /* Spotlight card (enlarged) */
         .sc-overlay { position: absolute; inset: 0; z-index: 3; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding-bottom: 240px; pointer-events: none; }
-        .sc-empty { font-family: Georgia, serif; font-style: italic; font-size: 22px; color: #666; }
+        .sc-empty { font-family: var(--font-display); font-style: italic; font-size: 22px; color: #666; }
         .sc-rank-badge { font-family: 'Courier New', monospace; font-size: 13px; letter-spacing: 0.28em; padding: 8px 22px; text-transform: uppercase; border: 1px solid; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); }
         .sc-card { width: 330px; border: 1px solid; background: rgba(6,6,7,0.6); backdrop-filter: blur(16px); overflow: hidden; pointer-events: all; user-select: none; cursor: grab; touch-action: none; animation: scFloat 4.5s ease-in-out infinite; transition: box-shadow 0.3s ease; }
         .sc-card:hover { animation-play-state: paused; box-shadow: 0 0 0 1px var(--tg), 0 24px 60px -22px var(--tg); }
@@ -629,12 +629,12 @@ export default function ShowcaseStage({ mode = "full" }) {
         .sc-photo-txt { font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 2px; color: #2a2a2a; text-transform: uppercase; }
         .sc-body { padding: 22px; }
         .sc-cat { font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 8px; }
-        .sc-name { font-family: Georgia, serif; font-size: 25px; color: #f0ede8; margin-bottom: 4px; line-height: 1.25; }
+        .sc-name { font-family: var(--font-display); font-size: 25px; color: #f0ede8; margin-bottom: 4px; line-height: 1.25; }
         .sc-loc { font-family: 'Courier New', monospace; font-size: 10px; color: #666; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 14px; }
         .sc-divider { height: 1px; background: #222; margin-bottom: 14px; }
         .sc-stats { display: flex; gap: 26px; margin-bottom: 16px; }
         .sc-stat { display: flex; flex-direction: column; gap: 2px; }
-        .sc-stat-num { font-family: Georgia, serif; font-size: 27px; }
+        .sc-stat-num { font-family: var(--font-display); font-size: 27px; }
         .sc-stat-lbl { font-family: 'Courier New', monospace; font-size: 10px; color: #555; letter-spacing: 0.18em; text-transform: uppercase; }
         :global(.sc-cta) { font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 0.16em; color: #999; text-transform: uppercase; cursor: pointer; display: flex; justify-content: space-between; padding-top: 12px; border-top: 1px solid #1c1c1c; text-decoration: none; }
         :global(.sc-cta:hover) { color: #E8AE3C; }
@@ -659,7 +659,7 @@ export default function ShowcaseStage({ mode = "full" }) {
         .sc-rest-card:hover .sc-rest-showcase { opacity: 1; }
         .sc-rest-info { padding: 11px 12px 13px; }
         .sc-rest-cat { font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--tc); margin-bottom: 5px; }
-        .sc-rest-name { font-family: Georgia, serif; font-size: 15px; color: #e8e6e2; line-height: 1.25; }
+        .sc-rest-name { font-family: var(--font-display); font-size: 15px; color: #e8e6e2; line-height: 1.25; }
         .sc-rest-stat { font-family: 'Courier New', monospace; font-size: 10px; color: #666; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 6px; }
         .sc-controls { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; justify-content: center; pointer-events: all; }
         .sc-arrow { font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #999; background: none; border: 1px solid #2a2a2a; padding: 9px 18px; cursor: pointer; transition: all 0.2s; }

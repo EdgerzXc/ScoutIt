@@ -26,7 +26,7 @@ vi.mock('@/lib/supabaseAdmin', () => ({
   supabaseAdmin: { from: vi.fn() },
 }));
 
-/** A property row as `public.properties` actually stores one. */
+/** A property row as 'public.properties' actually stores one. */
 const REAL_ROW = {
   id: '3f2504e0-4f89-11d3-9a0c-0305e82c3301',
   slug: 'bgc-luxury-office-space',
@@ -56,8 +56,8 @@ const REAL_ROW = {
 };
 
 /**
- * Mocks the `.select().eq().maybeSingle()` chain findProperty now uses.
- * `.or()` is deliberately NOT provided — if the route regresses to it, these
+ * Mocks the '.select().eq().maybeSingle()' chain findProperty now uses.
+ * '.or()' is deliberately NOT provided — if the route regresses to it, these
  * tests fail loudly instead of quietly matching a mock that shouldn't exist.
  */
 function mockProperties(row, { error = null } = {}) {

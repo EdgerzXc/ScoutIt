@@ -1,4 +1,4 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
 import { SITE_URL } from "@/lib/siteUrl";
 import "./globals.css";
 import dynamic from "next/dynamic";
@@ -21,6 +21,23 @@ const geistMono = Geist_Mono({
   display: "swap",
 });
 
+// The display face. Georgia was here until 2026-08-07 (§64) — a system serif,
+// so it was never actually downloaded, never consistent, and rendered as a
+// different typeface on Windows, macOS and Android. It also reads BOOKISH,
+// which is the "gold-and-marble old-money" cliché DESIGN.md §6 bans by name.
+//
+// Instrument Serif is high-contrast, narrow and modern: editorial authority
+// without the antique. One weight (400) with a true italic, which is all the
+// display layer ever uses — it is headings only, never body copy, so the lack
+// of a weight range is a non-issue and the payload stays small.
+const instrumentSerif = Instrument_Serif({
+  variable: "--font-instrument-serif",
+  subsets: ["latin"],
+  weight: "400",
+  style: ["normal", "italic"],
+  display: "swap",
+});
+
 export const metadata = {
   // Pin all absolute URLs (OG tags, canonical, etc.) to the production domain.
   // Without this, Next.js falls back to VERCEL_URL which is the per-commit
@@ -32,12 +49,22 @@ export const metadata = {
   // unset in production the two disagreed, so every page emitted a canonical on
   // one domain and og:url on another. siteUrl.js is the single source of truth.
   metadataBase: new URL(SITE_URL),
+  // ⚠️ SEO TITLE, not brand language. Changed 2026-08-08.
+  //
+  // "Space Intelligence" stays everywhere in the copy — it is the brand. But as
+  // a TITLE it competes with aerospace, satellite and geospatial companies that
+  // own the phrase, and "ScoutIt" alone is contested by a longer-established
+  // Scoutit in India, an EV-battery ScoutIt, and older Scout/ScoutIt entities.
+  //
+  // "Property & Space Intelligence Philippines" disambiguates on both axes at
+  // once. "Philippines" is doing more work here than "ScoutIt" is: it separates
+  // this entity from India, from the battery, and from outer space in one word.
   title: {
-    default: "ScoutIt — Space Intelligence",
+    default: "ScoutIt — Property & Space Intelligence Philippines",
     template: "%s · ScoutIt",
   },
   description:
-    "ScoutIt transforms Philippine real estate into intelligent property briefings. Scout smarter, move faster.",
+    "The Philippines' first spatial commerce platform. ScoutIt turns homes, offices, venues and restaurants into clear, verified intelligence.",
   keywords: [
     "real estate",
     "Philippines",
@@ -53,8 +80,8 @@ export const metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "ScoutIt — Space Intelligence",
-    description: "ScoutIt transforms Philippine real estate into intelligent property briefings. Scout smarter, move faster.",
+    title: "ScoutIt — Property & Space Intelligence Philippines",
+    description: "The Philippines' first spatial commerce platform. ScoutIt turns homes, offices, venues and restaurants into clear, verified intelligence.",
   },
   ...(process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
     ? { verification: { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION } }
@@ -70,7 +97,7 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} ${instrumentSerif.variable}`}>
       <body>
         <GoogleAnalytics />
         <JsonLd />

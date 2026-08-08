@@ -199,7 +199,7 @@ function InventoryInner({ params }) {
           <div>
             <Link 
               href="/dashboard"
-              className="text-text-secondary hover:text-gold-accent text-sm font-working-title flex items-center gap-2 mb-4 transition-colors"
+              className="text-text-secondary hover:text-gold-accent text-sm font-working-title flex items-center gap-2 mb-4 transition"
             >
               ← Back to Dashboard
             </Link>
@@ -214,7 +214,7 @@ function InventoryInner({ params }) {
             <button
               onClick={manualSave}
               disabled={saveState === 'saving'}
-              className={`min-w-[150px] text-sm font-working-title font-bold px-6 py-2 rounded-full border transition-all duration-300 flex items-center justify-center gap-2 ${
+              className={`min-w-[150px] text-sm font-working-title font-bold px-6 py-2 rounded-full border transition duration-300 flex items-center justify-center gap-2 ${
                 saveState === 'saving'
                   ? 'bg-surface-variant text-text-muted border-surface-variant cursor-wait'
                   : saveState === 'saved'
@@ -237,7 +237,7 @@ function InventoryInner({ params }) {
               )}
               {saveState === 'idle' && 'Save Changes'}
             </button>
-            <span className={`text-[10px] font-working-title uppercase tracking-wider transition-colors ${
+            <span className={`text-[10px] font-working-title uppercase tracking-wider transition ${
               saveState === 'saved' ? 'text-success' : saveState === 'error' ? 'text-error' : 'text-text-secondary'
             }`}>
               {saveState === 'saving' && 'Saving your changes…'}

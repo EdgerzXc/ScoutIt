@@ -48,8 +48,8 @@ export async function resolveServerTier(request) {
  * ✅ WIRED. Corrected 2026-08-06 (§59): this docstring said "THIS FUNCTION HAS
  * NO CALLERS YET … wiring it is §47.3" long after §48 wired it. Verified
  * callers:
- *   - `/api/deals/initiate:47`  (guarded by the dev-mock bypass)
- *   - `/api/deals/handshake:28`
+ *   - '/api/deals/initiate:47'  (guarded by the dev-mock bypass)
+ *   - '/api/deals/handshake:28'
  *
  * Left stale, this comment was worse than missing: a future session reading it
  * would conclude the legal age gate was unenforced and either re-wire it
@@ -62,11 +62,11 @@ export async function resolveServerTier(request) {
  *
  * ── IT USED TO FAIL OPEN, IN TWO WAYS ──
  *
- * 1. It queried `adult_eligibility_status`, a column that did not exist until
- *    2026-08-06. Every call errored, `profile` came back null, and
- *    `undefined !== "underage"` evaluated to TRUE — so the gate passed
+ * 1. It queried 'adult_eligibility_status', a column that did not exist until
+ *    2026-08-06. Every call errored, 'profile' came back null, and
+ *    'undefined !== "underage"' evaluated to TRUE — so the gate passed
  *    everyone, always.
- * 2. `!== "underage"` is the wrong test regardless. It asks "have we proven
+ * 2. '!== "underage"' is the wrong test regardless. It asks "have we proven
  *    they are a child?" when the question is "have they told us they are an
  *    adult?" Anything unrecognised — null, a typo, a new status added later —
  *    read as eligible.

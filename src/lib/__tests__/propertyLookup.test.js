@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { looksLikeUuid, findProperty, PROPERTY_PUBLIC_COLUMNS } from '@/lib/propertyLookup';
 
 /**
- * Minimal supabase-shaped stub. Records every `.eq()` it was given so the tests
+ * Minimal supabase-shaped stub. Records every '.eq()' it was given so the tests
  * can assert WHICH COLUMN was queried — the whole point of this module is that
  * a slug never reaches the uuid column.
  */

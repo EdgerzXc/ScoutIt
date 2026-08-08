@@ -5,7 +5,7 @@
    A golden light "channeled" down the LEFT of the page. The line is
    anchored to the PAGE CONTENT (it scrolls with the page, not the
    screen) and weaves down through each layer, pooling into a loop at
-   each section. Activated by the UFO click (`scoutit:cinematic`).
+   each section. Activated by the UFO click ('scoutit:cinematic').
 
    BUILD STATUS: Checkpoint 1b
    - Line travels WITH the page content (not a fixed scrollbar)

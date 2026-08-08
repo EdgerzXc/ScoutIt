@@ -108,8 +108,8 @@ export default function FAQPreflightPanel({ propertySlug, onProgressChange }) {
       <style jsx global>{`
         /* ── MOBILE FIRST ─────────────────────────────────────────────── */
         .pf-root {
-          background: #121212;
-          border: 0.5px solid #262626;
+          background: var(--surface);
+          border: 0.5px solid var(--border-solid);
           border-radius: 4px;
           padding: 20px 16px 16px;
           margin-top: 20px;
@@ -117,24 +117,24 @@ export default function FAQPreflightPanel({ propertySlug, onProgressChange }) {
         .pf-eyebrow {
           font-family: ${MONO};
           font-size: 9px;
-          color: var(--accent, #E8AE3C);
+          color: var(--accent, var(--accent));
           letter-spacing: 0.2em;
           text-transform: uppercase;
           margin-bottom: 8px;
         }
         .pf-title {
-          font-family: Georgia, serif;
+          font-family: var(--font-display);
           font-size: 19px;
           line-height: 1.3;
-          color: #f0ede8;
+          color: var(--text-primary);
           margin: 0 0 8px;
           font-weight: 400;
         }
         .pf-sub {
-          font-family: Georgia, serif;
+          font-family: var(--font-display);
           font-size: 13px;
           line-height: 1.65;
-          color: #8a8a8a;
+          color: var(--text-secondary);
           margin: 0 0 18px;
         }
 
@@ -147,25 +147,25 @@ export default function FAQPreflightPanel({ propertySlug, onProgressChange }) {
           font-size: 9px;
           letter-spacing: 0.14em;
           text-transform: uppercase;
-          color: #c8c8c8;
+          color: var(--text-secondary);
           margin-bottom: 7px;
         }
         .pf-meter__bar {
           height: 3px;
-          background: #1e1e1e;
+          background: var(--surface2);
           border-radius: 2px;
           overflow: hidden;
         }
         .pf-meter__fill {
           height: 100%;
-          background: var(--accent, #E8AE3C);
+          background: var(--accent, var(--accent-fill));
           border-radius: 2px;
           transition: width 0.3s ease;
         }
         .pf-meter__note {
           font-family: ${MONO};
           font-size: 9px;
-          color: #6a6a6a;
+          color: var(--text-muted);
           letter-spacing: 0.08em;
           margin-top: 8px;
           line-height: 1.6;
@@ -173,7 +173,7 @@ export default function FAQPreflightPanel({ propertySlug, onProgressChange }) {
 
         .pf-q {
           padding: 16px 0;
-          border-bottom: 1px solid #1e1e1e;
+          border-bottom: 1px solid var(--border-solid);
         }
         .pf-q:last-of-type { border-bottom: none; }
         .pf-q__head {
@@ -190,17 +190,17 @@ export default function FAQPreflightPanel({ propertySlug, onProgressChange }) {
           margin-top: 7px;
           background: #2e2e2e;
         }
-        .pf-q__dot--done { background: var(--accent, #E8AE3C); }
+        .pf-q__dot--done { background: var(--accent, var(--accent-fill)); }
         .pf-q__text {
-          font-family: Georgia, serif;
+          font-family: var(--font-display);
           font-size: 15px;
           line-height: 1.45;
-          color: #f0ede8;
+          color: var(--text-primary);
         }
         .pf-q__hint {
           font-family: ${MONO};
           font-size: 9px;
-          color: #6a6a6a;
+          color: var(--text-muted);
           letter-spacing: 0.06em;
           line-height: 1.6;
           margin: 0 0 10px 14px;
@@ -208,12 +208,12 @@ export default function FAQPreflightPanel({ propertySlug, onProgressChange }) {
         .pf-q__input {
           width: 100%;
           box-sizing: border-box;
-          background: #0e0e0e;
-          border: 0.5px solid #262626;
+          background: var(--bg);
+          border: 0.5px solid var(--border-solid);
           border-radius: 2px;
           padding: 11px 12px;
-          color: #f0ede8;
-          font-family: Georgia, serif;
+          color: var(--text-primary);
+          font-family: var(--font-display);
           /* 16px prevents iOS Safari auto-zoom on focus */
           font-size: 16px;
           line-height: 1.55;
@@ -221,12 +221,12 @@ export default function FAQPreflightPanel({ propertySlug, onProgressChange }) {
         }
         .pf-q__input:focus {
           outline: none;
-          border-color: var(--accent-muted, #6E531A);
+          border-color: var(--accent-muted, var(--accent-muted));
         }
         .pf-q__skip {
           font-family: ${MONO};
           font-size: 8.5px;
-          color: #4a4a4a;
+          color: var(--text-muted);
           letter-spacing: 0.1em;
           text-transform: uppercase;
           margin-top: 6px;
@@ -235,8 +235,8 @@ export default function FAQPreflightPanel({ propertySlug, onProgressChange }) {
         .pf-bar {
           position: sticky;
           bottom: 0;
-          background: #121212;
-          border-top: 0.5px solid #262626;
+          background: var(--surface);
+          border-top: 0.5px solid var(--border-solid);
           padding: 14px 0 4px;
           margin-top: 8px;
         }
@@ -245,8 +245,8 @@ export default function FAQPreflightPanel({ propertySlug, onProgressChange }) {
           min-height: 48px;
           border-radius: 3px;
           border: none;
-          background: var(--accent-bright, #F7C64E);
-          color: #0d0d0d;
+          background: var(--accent-bright, var(--accent-fill));
+          color: var(--on-accent);
           font-family: ${MONO};
           font-size: 11px;
           font-weight: bold;
@@ -260,7 +260,7 @@ export default function FAQPreflightPanel({ propertySlug, onProgressChange }) {
           font-size: 9px;
           letter-spacing: 0.1em;
           text-transform: uppercase;
-          color: #6a6a6a;
+          color: var(--text-muted);
           text-align: center;
           margin-top: 9px;
           line-height: 1.6;
@@ -268,7 +268,7 @@ export default function FAQPreflightPanel({ propertySlug, onProgressChange }) {
         .pf-error {
           font-family: ${MONO};
           font-size: 10px;
-          color: #e06c6c;
+          color: var(--red);
           letter-spacing: 0.05em;
           line-height: 1.6;
           margin-top: 10px;
@@ -287,7 +287,7 @@ export default function FAQPreflightPanel({ propertySlug, onProgressChange }) {
       <div className="pf-eyebrow">Pre-Flight · Buyer Questions</div>
       <h3 className="pf-title">Answer what buyers always ask</h3>
       <p className="pf-sub">
-        These publish as <strong style={{ color: "#E8AE3C" }}>Owner Verified</strong> answers on your
+        These publish as <strong style={{ color: "var(--accent)" }}>Owner Verified</strong> answers on your
         listing. ScoutIt never writes them for you — an unanswered question stays blank rather than
         guessed. Skip anything that doesn&apos;t apply.
       </p>
@@ -295,7 +295,7 @@ export default function FAQPreflightPanel({ propertySlug, onProgressChange }) {
       <div className="pf-meter">
         <div className="pf-meter__row">
           <span>{answeredNow} of {questions.length} answered</span>
-          <span style={{ color: answeredNow >= target ? "#E8AE3C" : "#6a6a6a" }}>
+          <span style={{ color: answeredNow >= target ? "var(--accent)" : "var(--text-muted)" }}>
             {answeredNow >= target ? "✓ Strength bonus earned" : `${target} to earn bonus`}
           </span>
         </div>

@@ -322,7 +322,7 @@ function InboxInner() {
       <div className="flex flex-col md:flex-row h-[calc(100dvh-64px)] md:h-[calc(100vh-64px)] bg-background overflow-hidden">
 
         {/* Left Sidebar - Deal List */}
-        <div className={`w-full md:w-1/3 min-h-0 border-r border-surface-variant flex-col bg-[#0d0d0d] ${selectedDeal ? "hidden md:flex" : "flex"}`}>
+        <div className={`w-full md:w-1/3 min-h-0 border-r border-surface-variant flex-col bg-background ${selectedDeal ? "hidden md:flex" : "flex"}`}>
           <div className="p-5 border-b border-surface-variant shrink-0">
             <h1 className="font-working-title text-2xl text-on-surface">Leads &amp; Inbox</h1>
             <p className="text-sm text-text-secondary mt-1">
@@ -333,7 +333,7 @@ function InboxInner() {
             </p>
 
             {/* Three-State Inbox Tab Bar (Section 38) */}
-            <div className="flex gap-1 mt-4 p-1 bg-[#121212] rounded-lg border border-gold-accent/20">
+            <div className="flex gap-1 mt-4 p-1 bg-surface rounded-lg border border-gold-accent/20">
               {[
                 { id: "waiting", label: "WAITING", count: waitingDeals.length },
                 { id: "active", label: "ACTIVE", count: activeDeals.length },
@@ -348,7 +348,7 @@ function InboxInner() {
                     // min-h-11 -> a real 44px touch target. These were 26px
                     // tall, well under the WCAG / iOS minimum, which on a
                     // phone means mis-taps between three adjacent tabs.
-                    className={`flex-1 min-h-11 py-1.5 px-2 rounded-md text-[10px] font-mono tracking-wider transition-all ${
+                    className={`flex-1 min-h-11 py-1.5 px-2 rounded-md text-[10px] font-mono tracking-wider transition ${
                       isActive
                         ? "bg-gold-accent/20 text-gold-bright border border-gold-accent/50 font-bold"
                         : "text-text-secondary hover:text-on-surface hover:bg-white/5 border border-transparent"
@@ -384,7 +384,7 @@ function InboxInner() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.2, delay: index * 0.05 }}
                   onClick={() => handleSelectDeal(deal)}
-                  className={`p-4 min-h-16 border-b border-surface-variant cursor-pointer transition-colors ${selectedDealId === deal.id ? 'bg-surface-variant' : 'hover:bg-surface-variant/50 active:bg-surface-variant'}`}
+                  className={`p-4 min-h-16 border-b border-surface-variant cursor-pointer transition ${selectedDealId === deal.id ? 'bg-surface-variant' : 'hover:bg-surface-variant/50 active:bg-surface-variant'}`}
                 >
                   <div className="flex justify-between items-start mb-1 gap-2">
                     <h3 className="font-working-title text-sm text-on-surface truncate pr-2">

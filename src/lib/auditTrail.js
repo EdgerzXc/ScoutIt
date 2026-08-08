@@ -52,8 +52,8 @@
  * @param {string} entry.tableName     table the event concerns, e.g. 'properties'
  * @param {string} entry.recordId      affected row's id
  * @param {string} [entry.userId]      actor (text column, so an id or slug is fine)
- * @param {string} [entry.resourceType] defaults to `tableName`
- * @param {string} [entry.resourceId]   defaults to `recordId`
+ * @param {string} [entry.resourceType] defaults to 'tableName'
+ * @param {string} [entry.resourceId]   defaults to 'recordId'
  * @param {object} [entry.metadata]     free-form context
  * @returns {Promise<{ok: boolean, error: object|null}>}
  */

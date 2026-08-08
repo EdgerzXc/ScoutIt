@@ -120,7 +120,7 @@ export default function PropertyVerifyPanel() {
       <style jsx global>{`
         .pv-root { padding: 4px 0; }
         .pv-intro {
-          font-family: Georgia, serif;
+          font-family: var(--font-display);
           font-size: 13.5px;
           line-height: 1.7;
           color: #8a8a8a;
@@ -132,7 +132,7 @@ export default function PropertyVerifyPanel() {
           border-left: 2px solid #6E531A;
           padding: 12px 14px;
           margin: 0 0 20px;
-          font-family: Georgia, serif;
+          font-family: var(--font-display);
           font-size: 12.5px;
           line-height: 1.7;
           color: #c8c8c8;
@@ -174,7 +174,7 @@ export default function PropertyVerifyPanel() {
           margin-bottom: 10px;
         }
         .pv-title {
-          font-family: Georgia, serif;
+          font-family: var(--font-display);
           font-size: 15.5px;
           line-height: 1.35;
           color: #f0ede8;
@@ -219,7 +219,7 @@ export default function PropertyVerifyPanel() {
         .pv-btn--ghost { background: transparent; border: 0.5px solid #262626; color: #c8c8c8; }
 
         .pv-confirm {
-          font-family: Georgia, serif;
+          font-family: var(--font-display);
           font-size: 12.5px;
           line-height: 1.65;
           color: #c8c8c8;
@@ -236,13 +236,13 @@ export default function PropertyVerifyPanel() {
           padding: 22px 18px;
         }
         .pv-empty__t {
-          font-family: Georgia, serif;
+          font-family: var(--font-display);
           font-size: 16px;
           color: #f0ede8;
           margin: 0 0 8px;
         }
         .pv-empty__b {
-          font-family: Georgia, serif;
+          font-family: var(--font-display);
           font-size: 13px;
           line-height: 1.7;
           color: #8a8a8a;

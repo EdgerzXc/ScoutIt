@@ -80,7 +80,7 @@ export default function DelegationRequests({ propertyId, units, onDelegated }) {
       </div>
 
       {requests.map((req) => (
-        <div key={req.dealId} className="bg-[#121110] border border-surface-variant rounded-lg p-5">
+        <div key={req.dealId} className="bg-surface border border-surface-variant rounded-lg p-5">
           <div className="flex items-center justify-between mb-2">
             <span className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase">
               Incoming Handshake
@@ -107,7 +107,7 @@ export default function DelegationRequests({ propertyId, units, onDelegated }) {
               <button
                 type="button"
                 disabled={busy}
-                className="border border-surface-variant text-text-secondary hover:text-error hover:border-error px-5 py-2 rounded transition-colors text-sm font-working-title disabled:opacity-50"
+                className="border border-surface-variant text-text-secondary hover:text-error hover:border-error px-5 py-2 rounded transition text-sm font-working-title disabled:opacity-50"
                 onClick={() => respond(req.dealId, "decline")}
               >
                 Decline
@@ -125,7 +125,7 @@ export default function DelegationRequests({ propertyId, units, onDelegated }) {
                   {availableUnits.map((u) => (
                     <label
                       key={u.id}
-                      className={`flex items-center gap-2 px-3 py-1.5 rounded border text-xs cursor-pointer transition-colors ${
+                      className={`flex items-center gap-2 px-3 py-1.5 rounded border text-xs cursor-pointer transition ${
                         selectedUnitIds.has(u.id)
                           ? "border-gold-accent bg-gold-accent/10 text-gold-accent"
                           : "border-surface-variant text-text-secondary hover:border-gold-accent/40"
@@ -154,7 +154,7 @@ export default function DelegationRequests({ propertyId, units, onDelegated }) {
                 <button
                   type="button"
                   disabled={busy}
-                  className="border border-surface-variant text-text-secondary hover:text-on-surface px-5 py-2 rounded transition-colors text-sm font-working-title disabled:opacity-50"
+                  className="border border-surface-variant text-text-secondary hover:text-on-surface px-5 py-2 rounded transition text-sm font-working-title disabled:opacity-50"
                   onClick={() => { setActiveDealId(null); setSelectedUnitIds(new Set()); }}
                 >
                   Cancel

@@ -76,7 +76,7 @@ export default function DealFileSlideOver({ isOpen, onClose, deal, onDealUpdate,
               <button 
                 onClick={onClose}
                 aria-label="Close"
-                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-alt text-text-secondary transition-colors"
+                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-alt text-text-secondary transition"
               >
                 <X size={20} />
               </button>
@@ -107,7 +107,7 @@ export default function DealFileSlideOver({ isOpen, onClose, deal, onDealUpdate,
               </div>
 
               {/* Contact Card */}
-              <div className="bg-gradient-to-br from-[#1a1917] to-[#111110] border border-surface-variant rounded-lg p-5 relative overflow-hidden group hover:border-gold-accent/30 transition-colors">
+              <div className="bg-gradient-to-br from-surface-alt to-surface border border-surface-variant rounded-lg p-5 relative overflow-hidden group hover:border-gold-accent/30 transition">
                 <div className="flex items-start gap-4 relative z-10">
                   <div className="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center shrink-0 border border-surface-variant">
                     <UserCircle2 className="text-text-muted" size={24} />
@@ -141,7 +141,7 @@ export default function DealFileSlideOver({ isOpen, onClose, deal, onDealUpdate,
                   value={notes}
                   onChange={handleNotesChange}
                   placeholder="Jot down notes about this deal. Only you can see this."
-                  className="w-full h-40 bg-surface-alt border border-surface-variant rounded-lg p-4 text-sm text-on-surface focus:outline-none focus:border-gold-accent transition-colors resize-none placeholder:text-text-muted"
+                  className="w-full h-40 bg-surface-alt border border-surface-variant rounded-lg p-4 text-sm text-on-surface focus:outline-none focus:border-gold-accent transition resize-none placeholder:text-text-muted"
                 />
               </div>
 

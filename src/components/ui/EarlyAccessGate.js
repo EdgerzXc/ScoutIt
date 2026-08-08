@@ -324,9 +324,9 @@ export function EarlyAccessModal({ rosterType = "this roster", onClose }) {
           margin-bottom: 10px;
         }
         .gate-title {
-          font-family: var(--font-display, Georgia, serif);
+          font-family: var(--font-display);
           font-size: 28px;
-          font-weight: 500;
+          font-weight: 400;
           color: #fff;
           margin: 0 0 14px 0;
         }

@@ -64,7 +64,7 @@ export default function ProjectManagementPanel({ properties = [] }) {
           <select
             value={activeEstate || ""}
             onChange={(e) => setActiveEstate(e.target.value)}
-            className="w-full bg-surface-alt border border-white/10 rounded-lg px-4 py-2 text-white outline-none focus:border-gold-accent transition-colors truncate"
+            className="w-full bg-surface-alt border border-white/10 rounded-lg px-4 py-2 text-white outline-none focus:border-gold-accent transition truncate"
           >
             {estates.map(est => (
               <option key={est.id} value={est.id}>{est.title}</option>
@@ -124,7 +124,7 @@ export default function ProjectManagementPanel({ properties = [] }) {
           <GlassPanel className="p-0 overflow-hidden">
             <div className="p-6 border-b border-white/10 flex items-center justify-between">
               <h3 className="text-lg font-medium text-white">Daily Team Updates</h3>
-              <button className="bg-white text-black px-4 py-2 rounded-lg text-sm font-medium hover:bg-white/90 transition-colors">
+              <button className="bg-white text-black px-4 py-2 rounded-lg text-sm font-medium hover:bg-white/90 transition">
                 + Post Update
               </button>
             </div>

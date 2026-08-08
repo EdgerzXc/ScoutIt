@@ -30,7 +30,7 @@
 // ═══════════════════════════════════════════════════════════════
 
 /**
- * Airtable field name → the camelCase key `reverseMapCategoryFields` reads.
+ * Airtable field name → the camelCase key 'reverseMapCategoryFields' reads.
  * Moved out of airtable.js unchanged.
  */
 export const EDITOR_DETAIL_ALIASES = {
@@ -81,13 +81,13 @@ export const EDITOR_DETAIL_ALIASES = {
  * so the generic snake→camel conversion cannot find them.
  *
  * Found by grouping the real detail keys in the live database (2026-07-30):
- * `hand_over_condition` becomes `handOverCondition`, but the alias table uses
- * `handOver`. Without these overrides the same fact rendered TWICE — once under
+ * 'hand_over_condition' becomes 'handOverCondition', but the alias table uses
+ * 'handOver'. Without these overrides the same fact rendered TWICE — once under
  * "Shared" and once under "Commercial" — giving staff two editable copies of one
  * value where the last save silently wins.
  *
- * Deliberately NOT included: `published_rent` and `source`. Their meaning is
- * ambiguous (is `published_rent` the same fact as CM_Rent_Per_Sqm, or the
+ * Deliberately NOT included: 'published_rent' and 'source'. Their meaning is
+ * ambiguous (is 'published_rent' the same fact as CM_Rent_Per_Sqm, or the
  * Listing Engine's separate scraped figure?) and mapping them wrongly would
  * MERGE two different facts and hide one. They stay unmapped, which shows them
  * under "Shared" — visibly ungrouped, still editable, nothing lost. An honest
@@ -130,7 +130,7 @@ const REVERSE = (() => {
 /** Every Airtable name this table knows, for fast "is it already canonical?". */
 const KNOWN_AIRTABLE_NAMES = new Set(Object.keys(EDITOR_DETAIL_ALIASES));
 
-/** snake_case / SCREAMING_SNAKE → camelCase. `ac_charges` → `acCharges`. */
+/** snake_case / SCREAMING_SNAKE → camelCase. 'ac_charges' → 'acCharges'. */
 export function snakeToCamel(key) {
   if (!key.includes("_")) return key;
   const parts = key.split("_").filter(Boolean);
@@ -147,7 +147,7 @@ export function snakeToCamel(key) {
  * @param {string} key - a key from properties.details, in any of the three conventions
  * @param {string|null} [category] - registry category key, used to disambiguate
  *        camelCase keys that several categories share
- * @returns {string} the canonical Airtable field name, or `key` unchanged when
+ * @returns {string} the canonical Airtable field name, or 'key' unchanged when
  *          nothing is known about it (so unknown keys stay visible and editable
  *          rather than being silently dropped from the UI)
  */

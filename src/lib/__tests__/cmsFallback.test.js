@@ -1,8 +1,11 @@
 import { DEFAULT_LIVE_CMS_URL, normalizeLiveCmsBundle } from "../cmsFallback";
 
 describe("development live CMS fallback", () => {
-  it("uses the canonical Vercel CMS endpoint", () => {
-    expect(DEFAULT_LIVE_CMS_URL).toBe("https://scout-it.vercel.app/api/cms");
+  // Inverted with the source change 2026-08-08 (Standing Rule 14: a change that
+  // makes an existing test obsolete inverts the test in the SAME commit).
+  it("points at a domain we own, not a Vercel-generated host", () => {
+    expect(DEFAULT_LIVE_CMS_URL).toBe("https://www.scoutit.space/api/cms");
+    expect(DEFAULT_LIVE_CMS_URL).not.toMatch(/vercel\.app/);
   });
 
   it("accepts an Airtable-backed public bundle", () => {

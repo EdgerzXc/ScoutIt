@@ -106,7 +106,7 @@ const statCard = {
 };
 
 const statValue = {
-  fontFamily: "Georgia, serif",
+  fontFamily: "var(--font-display)",
   fontSize: 28,
   color: "#e5e2e1",
   lineHeight: 1.2,

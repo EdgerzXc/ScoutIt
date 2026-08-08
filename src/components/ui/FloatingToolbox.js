@@ -600,7 +600,7 @@ export default function FloatingToolbox() {
                 <span style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "#E8AE3C", letterSpacing: "0.22em", textTransform: "uppercase", display: "block", marginBottom: 6 }}>
                   Guide // {wizardStep + 1} of {WIZARD_STEPS.length}
                 </span>
-                <h2 style={{ fontFamily: "Georgia, serif", fontSize: 24, color: "#f0ede8", fontWeight: 400, lineHeight: 1.2 }}>
+                <h2 style={{ fontFamily: "var(--font-display)", fontSize: 24, color: "#f0ede8", fontWeight: 400, lineHeight: 1.2 }}>
                   {WIZARD_STEPS[wizardStep].title}
                 </h2>
               </div>
@@ -612,7 +612,7 @@ export default function FloatingToolbox() {
               <div style={{ fontFamily: "var(--font-mono)", fontSize: 40, color: "#E8AE3C", marginBottom: 20, lineHeight: 1 }}>
                 {WIZARD_STEPS[wizardStep].glyph}
               </div>
-              <p style={{ fontFamily: "Georgia, serif", fontStyle: "italic", fontSize: 15, color: "rgba(240,237,232,0.82)", lineHeight: 1.8, maxWidth: 380, margin: "0 auto" }}>
+              <p style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: 15, color: "var(--text-secondary)", lineHeight: 1.8, maxWidth: 380, margin: "0 auto" }}>
                 {WIZARD_STEPS[wizardStep].body}
               </p>
             </div>

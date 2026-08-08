@@ -98,7 +98,7 @@ export default function LegalDoc({ eyebrow, title, meta, intro, sections, relate
         }
 
         .legal-title {
-          font-family: Georgia, 'Times New Roman', serif;
+          font-family: var(--font-display);
           font-size: clamp(2.2rem, 5vw, 3.5rem);
           font-weight: 400;
           color: #f5f3ee;
@@ -183,7 +183,7 @@ export default function LegalDoc({ eyebrow, title, meta, intro, sections, relate
         }
 
         .legal-section-title {
-          font-family: Georgia, 'Times New Roman', serif;
+          font-family: var(--font-display);
           font-size: 1.3rem;
           font-weight: 400;
           color: #f5f3ee;

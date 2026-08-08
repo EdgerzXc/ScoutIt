@@ -43,8 +43,12 @@ for (const f of files) {
   }
 }
 
-// Declared outside CSS (Next injects these from next/font).
-const EXTERNAL = new Set(["--font-geist-sans", "--font-geist-mono"]);
+// Declared outside CSS (Next injects these from next/font as a class on <html>).
+const EXTERNAL = new Set([
+  "--font-geist-sans",
+  "--font-geist-mono",
+  "--font-instrument-serif",
+]);
 
 const missing = [...used.keys()]
   .filter((t) => !declared.has(t) && !EXTERNAL.has(t))

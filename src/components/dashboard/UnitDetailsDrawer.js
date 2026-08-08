@@ -18,7 +18,7 @@ import UnitMasterPage from "../property/UnitMasterPage";
 const newScenarioId = () => "sc_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
 
 const inputCls =
-  "w-full bg-surface-alt border border-surface-variant rounded px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-gold-accent transition-colors";
+  "w-full bg-surface-alt border border-surface-variant rounded px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-gold-accent transition";
 const labelCls = "block text-[11px] font-label-caps tracking-widest uppercase text-text-secondary mb-1.5";
 
 function Field({ label, hint, children }) {
@@ -65,12 +65,12 @@ export default function UnitDetailsDrawer({ unit, isPro, propertyId, property, o
                 href={`/property/${propertyId}/unit/${unit.id}`} 
                 target="_blank" 
                 rel="noopener noreferrer" 
-                className="px-3 py-1.5 rounded border border-surface-variant text-text-secondary hover:text-gold-accent hover:border-gold-accent text-[11px] font-label-caps uppercase tracking-widest transition-colors"
+                className="px-3 py-1.5 rounded border border-surface-variant text-text-secondary hover:text-gold-accent hover:border-gold-accent text-[11px] font-label-caps uppercase tracking-widest transition"
               >
                 Preview
               </a>
             )}
-            <button onClick={onClose} className="p-2 rounded hover:bg-surface-alt text-text-muted hover:text-on-surface transition-colors" aria-label="Close">
+            <button onClick={onClose} className="p-2 rounded hover:bg-surface-alt text-text-muted hover:text-on-surface transition" aria-label="Close">
               <X size={18} />
             </button>
           </div>
@@ -155,11 +155,11 @@ export default function UnitDetailsDrawer({ unit, isPro, propertyId, property, o
                     <button
                       onClick={() => updateScenario(s.id, "recommended", !s.recommended)}
                       title="Mark recommended"
-                      className={`p-2 rounded border transition-colors ${s.recommended ? "border-gold-accent text-gold-accent bg-gold-accent/10" : "border-surface-variant text-text-muted hover:text-gold-accent"}`}
+                      className={`p-2 rounded border transition ${s.recommended ? "border-gold-accent text-gold-accent bg-gold-accent/10" : "border-surface-variant text-text-muted hover:text-gold-accent"}`}
                     >
                       <Star size={15} fill={s.recommended ? "currentColor" : "none"} />
                     </button>
-                    <button onClick={() => removeScenario(s.id)} title="Remove" className="p-2 rounded border border-surface-variant text-text-muted hover:text-error hover:border-error transition-colors">
+                    <button onClick={() => removeScenario(s.id)} title="Remove" className="p-2 rounded border border-surface-variant text-text-muted hover:text-error hover:border-error transition">
                       <Trash2 size={15} />
                     </button>
                   </div>
@@ -174,7 +174,7 @@ export default function UnitDetailsDrawer({ unit, isPro, propertyId, property, o
               );
             })}
 
-            <button onClick={addScenario} className="flex items-center justify-center gap-2 w-full py-2.5 rounded border border-dashed border-surface-variant text-text-secondary hover:border-gold-accent hover:text-gold-accent transition-colors text-sm">
+            <button onClick={addScenario} className="flex items-center justify-center gap-2 w-full py-2.5 rounded border border-dashed border-surface-variant text-text-secondary hover:border-gold-accent hover:text-gold-accent transition text-sm">
               <Plus size={15} /> Add a subdivision option
             </button>
           </section>

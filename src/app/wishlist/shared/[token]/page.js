@@ -46,7 +46,7 @@ export default async function SharedWishlistPage({ params }) {
             <h1 className="page-title">Shared Board</h1>
           </header>
           <div className="empty-state" style={{ padding: "120px 0", textAlign: "center" }}>
-            <div className="empty-heading" style={{ fontFamily: "Georgia, serif", fontSize: 32, color: "#f0ede8" }}>This board is empty.</div>
+            <div className="empty-heading" style={{ fontFamily: "var(--font-display)", fontSize: 32, color: "#f0ede8" }}>This board is empty.</div>
           </div>
         </main>
         <Footer />
@@ -55,7 +55,7 @@ export default async function SharedWishlistPage({ params }) {
           .wishlist-main { max-width: 900px; margin: 0 auto; padding: 120px 24px 80px; position: relative; z-index: 1; }
           .page-header { margin-bottom: 48px; }
           .layer-label { display: block; font-family: system-ui, sans-serif; font-size: 12px; text-transform: uppercase; letter-spacing: 3px; color: #E8AE3C; margin-bottom: 16px; }
-          .page-title { font-family: Georgia, serif; font-size: 40px; font-weight: normal; color: #f0ede8; margin: 0; }
+          .page-title { font-family: var(--font-display); font-size: 40px; font-weight: normal; color: #f0ede8; margin: 0; }
         `}</style>
       </div>
     );
@@ -140,7 +140,7 @@ export default async function SharedWishlistPage({ params }) {
         .wishlist-main { max-width: 900px; margin: 0 auto; padding: 120px 24px 80px; position: relative; z-index: 1; }
         .page-header { margin-bottom: 48px; }
         .layer-label { display: block; font-family: system-ui, sans-serif; font-size: 12px; text-transform: uppercase; letter-spacing: 3px; color: var(--accent); margin-bottom: 16px; }
-        .page-title { font-family: Georgia, serif; font-size: 40px; font-weight: normal; color: var(--text-primary); margin: 0; }
+        .page-title { font-family: var(--font-display); font-size: 40px; font-weight: normal; color: var(--text-primary); margin: 0; }
         .board-content { display: flex; flex-direction: column; gap: 40px; }
         .reaction-group { display: flex; flex-direction: column; gap: 12px; }
         .group-label { font-family: system-ui, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: var(--accent); margin: 0 0 4px; padding-bottom: 8px; border-bottom: 1px solid var(--border-solid); }
@@ -149,7 +149,7 @@ export default async function SharedWishlistPage({ params }) {
         .board-card:hover { transform: translateY(-3px); border-color: rgba(var(--accent-rgb), 0.3); box-shadow: var(--shadow-md), var(--shadow-glow-soft); }
         .badge-corner { position: absolute; top: -8px; right: -8px; z-index: 10; }
         .card-body { flex: 1; min-width: 0; }
-        .card-title { font-family: Georgia, serif; font-size: 20px; font-weight: 500; color: var(--text-primary); margin: 0 0 4px; transition: color 0.2s ease; }
+        .card-title { font-family: var(--font-display); font-size: 20px; font-weight: 400; color: var(--text-primary); margin: 0 0 4px; transition: color 0.2s ease; }
         .card-title:hover { color: var(--accent); }
         .card-meta { font-family: system-ui, sans-serif; font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 4px; }
         .meta-dot { color: var(--text-muted); }

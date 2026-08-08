@@ -262,7 +262,7 @@ export default function PropertyFAQSection({ propertySlug, propertyTitle }) {
           margin-bottom: 8px;
         }
         .faq-section__title {
-          font-family: Georgia, serif;
+          font-family: var(--font-display);
           font-size: 22px;
           line-height: 1.25;
           color: var(--text-primary, #f0ede8);
@@ -270,7 +270,7 @@ export default function PropertyFAQSection({ propertySlug, propertyTitle }) {
           font-weight: 400;
         }
         .faq-section__sub {
-          font-family: Georgia, serif;
+          font-family: var(--font-display);
           font-size: 13px;
           line-height: 1.6;
           color: var(--text-secondary, #8a8a8a);
@@ -325,7 +325,7 @@ export default function PropertyFAQSection({ propertySlug, propertyTitle }) {
           border-radius: 2px;
           padding: 12px;
           color: var(--text-primary, #f0ede8);
-          font-family: Georgia, serif;
+          font-family: var(--font-display);
           /* 16px prevents iOS Safari auto-zoom on focus */
           font-size: 16px;
           line-height: 1.5;
@@ -378,7 +378,7 @@ export default function PropertyFAQSection({ propertySlug, propertyTitle }) {
         }
         .faq-thread:last-child { border-bottom: none; }
         .faq-thread__q {
-          font-family: Georgia, serif;
+          font-family: var(--font-display);
           font-size: 16px;
           line-height: 1.45;
           color: var(--text-primary, #f0ede8);
@@ -426,7 +426,7 @@ export default function PropertyFAQSection({ propertySlug, propertyTitle }) {
           border: 0.5px solid rgba(127, 191, 127, 0.3);
         }
         .faq-answer__text {
-          font-family: Georgia, serif;
+          font-family: var(--font-display);
           font-size: 14px;
           line-height: 1.65;
           color: #d8d5d0;

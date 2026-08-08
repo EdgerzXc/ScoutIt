@@ -221,7 +221,7 @@ export function describeDistance(meters) {
 // ── Query building ───────────────────────────────────────────────────────
 /**
  * One batched Overpass QL query covering every layer.
- * `nwr` catches nodes, ways and relations — a mall or park is usually a way,
+ * 'nwr' catches nodes, ways and relations — a mall or park is usually a way,
  * not a node, so querying only nodes silently loses the biggest POIs.
  */
 export function buildOverpassQuery(lat, lon, radiusM = DEFAULT_RADIUS_M) {
@@ -375,7 +375,7 @@ async function fetchOverpass(query) {
 /**
  * Lifestyle POI layers around a coordinate.
  *
- * Never throws. On total failure it returns empty layers with `ok: false`,
+ * Never throws. On total failure it returns empty layers with 'ok: false',
  * so the property page renders an honest blank rather than a broken chapter.
  *
  * @param {number} lat

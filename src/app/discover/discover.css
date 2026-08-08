@@ -25,7 +25,7 @@
 .brandLogo {
   font-family: var(--font-display);
   font-size: 22px;
-  font-weight: 500;
+  font-weight: 400;
   letter-spacing: 0.08em;
   color: var(--accent); /* --accent */
   text-transform: uppercase;
@@ -86,8 +86,10 @@
 
 .sectionTitle {
   font-family: var(--font-display);
-  font-size: 24px;
+  font-size: var(--display-md);
   font-weight: 400;
+  letter-spacing: var(--display-track-md);
+  line-height: 1.15;
   color: var(--text-primary);
 }
 
@@ -130,7 +132,10 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   overflow: hidden;
-  transition: width 0.48s cubic-bezier(0.4, 0, 0.2, 1), border-color var(--transition), box-shadow var(--transition), transform var(--transition-fast);
+  /* The 480ms width expansion is the one long animation on this page that
+     EARNS its length: it is a card physically growing to reveal content, so
+     the eye needs to follow it. Everything else drops to 160ms. */
+  transition: width 0.48s cubic-bezier(0.4, 0, 0.2, 1), border-color 160ms var(--ease-out-custom), box-shadow 160ms var(--ease-out-custom), transform 160ms var(--ease-out-custom);
   cursor: pointer;
   position: relative;
   display: flex;
@@ -138,15 +143,15 @@
 
 .spotlightCard:hover {
   border-color: rgba(var(--accent-rgb), 0.3);
-  transform: translateY(-4px);
-  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.45), var(--shadow-glow-soft);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md), var(--shadow-glow-soft);
 }
 
 .spotlightCard.spotlight {
   width: 580px;
   flex: 0 0 580px;
   border-color: var(--accent);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 24px rgba(232, 174, 60, 0.08);
+  box-shadow: var(--shadow-lg), 0 0 24px rgba(var(--accent-rgb), 0.08);
 }
 
 /* Inside Card Layout split */
@@ -181,6 +186,33 @@
   background: linear-gradient(180deg, rgba(14, 14, 14, 0.4) 0%, rgba(14, 14, 14, 0.95) 100%);
 }
 
+/* ── DARK ISLAND ────────────────────────────────────────────────────
+   `.visualContent` is a 95%-black scrim over a photograph. Everything inside
+   it — the title, the badges, the spec tags — has to stay light in both
+   themes. Without this, light mode painted near-black ink onto a darkened
+   photo and the whole card went blank. Re-declaring the tokens (rather than
+   hardcoding white) means anything added inside inherits correctly. */
+body.light-mode .visualContent {
+  /* .visualBg sits at opacity 0.75 behind this, so the card ground shows
+     through. Without a dark ground here the white ink lands on near-white
+     wherever the photo is thin or missing. */
+  background-color: #0d0d0d;
+  --text-primary:      #ffffff;
+  --text-primary-rgb:  255, 255, 255;
+  --text-secondary:    #d8d4cc;
+  --text-muted:        rgba(255, 255, 255, 0.62);
+  /* `-ch` twins — Tailwind colour classes resolve through these, not the
+     hex tokens. Omitting them leaves Tailwind-coloured children light. */
+  --text-primary-ch:    255 255 255;
+  --text-secondary-ch:  216 212 204;
+  --m3-on-surface-ch:   255 255 255;
+  --accent:            #E8AE3C;
+  --accent-rgb:        232, 174, 60;
+  --border:            rgba(255, 255, 255, 0.12);
+  --border-solid:      rgba(255, 255, 255, 0.18);
+  color: var(--text-primary);
+}
+
 .cardHeader {
   display: flex;
   justify-content: space-between;
@@ -190,6 +222,7 @@
 .cityBadge {
   background: rgba(14, 14, 14, 0.85);
   border: 1px solid var(--border-solid);
+  backdrop-filter: blur(6px);
   padding: 4px 10px;
   border-radius: var(--radius-sm);
   font-size: 10px;
@@ -205,10 +238,12 @@
 
 .cardTitleText {
   font-family: var(--font-display);
-  font-size: 20px;
-  font-weight: 500;
+  font-size: 22px;
+  font-weight: 400;
+  letter-spacing: -0.012em;
   color: var(--text-primary);
-  line-height: 1.3;
+  line-height: 1.2;
+  text-wrap: balance;
 }
 
 .cardSpecTags {
@@ -237,7 +272,7 @@
 
 .specBadge {
   font-size: 10px;
-  color: rgba(240, 237, 232, 0.62);
+  color: var(--text-secondary);
   background: rgba(255, 255, 255, 0.05);
   padding: 2px 8px;
   border-radius: var(--radius-sm);
@@ -291,7 +326,7 @@
 }
 
 .affinityLabel {
-  color: rgba(240, 237, 232, 0.38);
+  color: var(--text-muted);
 }
 
 .affinityValue {
@@ -310,7 +345,7 @@
   background: var(--surface);
   border: 1px solid var(--border-solid);
   border-radius: var(--radius-sm);
-  color: rgba(240, 237, 232, 0.62);
+  color: var(--text-secondary);
   font-size: 10px;
   font-weight: 500;
   padding: 10px 4px;
@@ -586,7 +621,7 @@
   border: 1px solid var(--border-solid);
   padding: 2px 6px;
   border-radius: var(--radius-sm);
-  color: rgba(240, 237, 232, 0.62);
+  color: var(--text-secondary);
 }
 
 /* ────────────────────────────────────────────────────────────────
@@ -754,7 +789,7 @@
   color: var(--accent);
 }
 .modeJumpBox .jumpArrow {
-  color: rgba(240, 237, 232, 0.4);
+  color: var(--text-muted);
   font-size: 13px;
   transition: transform var(--transition);
 }
@@ -764,19 +799,19 @@
   font-size: 11px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: rgba(240, 237, 232, 0.7);
+  color: var(--text-secondary);
 }
 
 /* Active region cell + empty news state */
 .contextCell.regionActive {
-  border-color: rgba(232, 174, 60, 0.6);
-  background: rgba(232, 174, 60, 0.08);
+  border-color: rgba(var(--accent-rgb), 0.6);
+  background: rgba(var(--accent-rgb), 0.08);
 }
 .contextCell.regionActive .contextName { color: var(--accent); }
 .newsEmpty {
-  font-family: Georgia, serif;
+  font-family: var(--font-display);
   font-style: italic;
-  color: rgba(240, 237, 232, 0.4);
+  color: var(--text-muted);
   font-size: 15px;
   padding: 24px 4px;
 }
@@ -795,7 +830,7 @@
   color: var(--text-primary);
   transition: border-color var(--transition);
 }
-.regionSearch::placeholder { color: rgba(240, 237, 232, 0.35); }
+.regionSearch::placeholder { color: var(--text-muted); }
 .regionSearch:focus { outline: none; border-color: rgba(232, 174, 60, 0.5); }
 
 

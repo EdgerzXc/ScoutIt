@@ -30,7 +30,7 @@ export default function VaultOfHonor() {
         <button
           type="button"
           onClick={() => setIsLoaded(true)}
-          className="w-full rounded-xl border border-surface-variant hover:border-gold-accent/50 bg-[#0a0a0a] py-10 flex flex-col items-center justify-center gap-2 transition-colors group"
+          className="w-full rounded-xl border border-surface-variant hover:border-gold-accent/50 bg-background py-10 flex flex-col items-center justify-center gap-2 transition group"
         >
           <span className="font-label-caps tracking-widest text-[10px] text-gold-accent group-hover:text-gold-accent-bright">
             Tap to Load
@@ -46,28 +46,28 @@ export default function VaultOfHonor() {
           return (
             <div 
               key={badge.id}
-              className={`relative group rounded-xl border p-6 flex flex-col items-center text-center transition-all duration-500 overflow-hidden min-h-[200px] justify-center ${
+              className={`relative group rounded-xl border p-6 flex flex-col items-center text-center transition duration-200 overflow-hidden min-h-[200px] justify-center ${
                 isUnlocked 
-                  ? 'bg-gradient-to-b from-[#1a1814] to-[#0d0d0d] border-gold-accent/40 hover:border-gold-accent shadow-[0_0_15px_rgba(232,174,60,0.05)] hover:shadow-[0_0_25px_rgba(232,174,60,0.15)]' 
-                  : 'bg-[#0a0a0a] border-surface-variant hover:border-surface-variant/80'
+                  ? 'bg-gradient-to-b from-surface-alt to-background border-gold-accent/40 hover:border-gold-accent shadow-[0_0_15px_rgba(232,174,60,0.05)] hover:shadow-[0_0_25px_rgba(232,174,60,0.15)]' 
+                  : 'bg-background border-surface-variant hover:border-surface-variant/80'
               }`}
             >
               {/* Background Glow for Unlocked */}
               {isUnlocked && (
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-gold-accent/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-gold-accent/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none"></div>
               )}
 
               {/* Icon Container */}
-              <div className={`relative w-16 h-16 mb-4 flex items-center justify-center transition-transform duration-500 ${isUnlocked ? 'group-hover:scale-110 group-hover:-translate-y-1' : ''}`}>
+              <div className={`relative w-16 h-16 mb-4 flex items-center justify-center transition-transform duration-200 ${isUnlocked ? 'group-hover:scale-110 group-hover:-translate-y-1' : ''}`}>
                 {/* Outer Ring */}
                 <div className={`absolute inset-0 rounded-full border-2 border-dashed ${isUnlocked ? 'border-gold-accent animate-[spin_10s_linear_infinite]' : 'border-surface-variant'}`}></div>
                 
                 {/* Inner Circle */}
-                <div className={`absolute inset-1 rounded-full flex items-center justify-center ${isUnlocked ? 'bg-[#121110] border border-gold-accent/50' : 'bg-[#0d0d0d]'}`}>
+                <div className={`absolute inset-1 rounded-full flex items-center justify-center ${isUnlocked ? 'bg-surface border border-gold-accent/50' : 'bg-background'}`}>
                   <Icon 
                     strokeWidth={isUnlocked ? 1.5 : 1} 
                     size="1.5em" 
-                    className={`transition-all duration-500 ${
+                    className={`transition duration-200 ${
                       isUnlocked 
                         ? 'text-gold-accent drop-shadow-[0_0_8px_rgba(232,174,60,0.6)]' 
                         : 'text-surface-alt' // Very dark icon to create silhouette effect
@@ -77,7 +77,7 @@ export default function VaultOfHonor() {
 
                 {/* Padlock Overlay for Locked */}
                 {!isUnlocked && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-[#0a0a0a]/50 rounded-full backdrop-blur-[1px]">
+                  <div className="absolute inset-0 flex items-center justify-center bg-background/50 rounded-full backdrop-blur-[1px]">
                     <Lock size="1em" className="text-text-muted" strokeWidth={1.5} />
                   </div>
                 )}
@@ -97,7 +97,7 @@ export default function VaultOfHonor() {
                 )}
 
                 {/* Description (Visible on unlocked, hidden on locked until hover) */}
-                <div className={`text-[10px] leading-relaxed transition-all duration-300 ${isUnlocked ? 'text-text-secondary' : 'text-text-muted/50 group-hover:text-text-secondary group-hover:-translate-y-1'}`}>
+                <div className={`text-[10px] leading-relaxed transition duration-300 ${isUnlocked ? 'text-text-secondary' : 'text-text-muted/50 group-hover:text-text-secondary group-hover:-translate-y-1'}`}>
                   {isUnlocked ? badge.description : badge.unlockCondition}
                 </div>
               </div>

@@ -254,7 +254,7 @@ const notFoundContent = {
 };
 
 const notFoundTitle = {
-  fontFamily: "Georgia, serif",
+  fontFamily: "var(--font-display)",
   fontSize: 36,
   color: "#f0ede8",
 };

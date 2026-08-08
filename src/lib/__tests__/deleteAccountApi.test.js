@@ -49,7 +49,7 @@ const USER = '11111111-2222-3333-4444-555555555555';
 
 /**
  * Records every table touched, every delete filter, and every write payload.
- * `failOn` makes one table's delete return an error so the partial-erasure
+ * 'failOn' makes one table's delete return an error so the partial-erasure
  * path can be exercised.
  */
 function installClient({ failOn = null, auditError = null } = {}) {

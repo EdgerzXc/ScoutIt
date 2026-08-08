@@ -16,14 +16,14 @@ export function startOfDay(date) {
   return d;
 }
 
-/** Add `n` days (can be negative) — returns a new Date, never mutates. */
+/** Add 'n' days (can be negative) — returns a new Date, never mutates. */
 export function addDays(date, n) {
   const d = new Date(date);
   d.setDate(d.getDate() + n);
   return d;
 }
 
-/** Add `n` months, clamping the day so e.g. Jan 31 + 1mo => Feb 28/29. */
+/** Add 'n' months, clamping the day so e.g. Jan 31 + 1mo => Feb 28/29. */
 export function addMonths(date, n) {
   const d = new Date(date);
   const targetDay = d.getDate();
@@ -34,13 +34,13 @@ export function addMonths(date, n) {
   return d;
 }
 
-/** Sunday-start week containing `date` (PH calendars conventionally start Sun). */
+/** Sunday-start week containing 'date' (PH calendars conventionally start Sun). */
 export function startOfWeek(date) {
   const d = startOfDay(date);
   return addDays(d, -d.getDay());
 }
 
-/** First day of the month containing `date`. */
+/** First day of the month containing 'date'. */
 export function startOfMonth(date) {
   const d = startOfDay(date);
   d.setDate(1);
@@ -77,7 +77,7 @@ export function getMonthGrid(date) {
   return Array.from({ length: 42 }, (_, i) => addDays(firstCell, i));
 }
 
-/** The seven days (Sun→Sat) of the week containing `date`. */
+/** The seven days (Sun→Sat) of the week containing 'date'. */
 export function getWeekDays(date) {
   const first = startOfWeek(date);
   return Array.from({ length: 7 }, (_, i) => addDays(first, i));
@@ -130,7 +130,7 @@ export function toTimeInputValue(date) {
 /**
  * Combine a "yyyy-mm-dd" date input and an "HH:mm" time input into a Date in
  * local time. Parses the parts explicitly so we never hit the "yyyy-mm-dd is
- * treated as UTC midnight" footgun of `new Date("2026-07-18")`.
+ * treated as UTC midnight" footgun of 'new Date("2026-07-18")'.
  */
 export function fromDateTimeInputs(dateStr, timeStr = "00:00") {
   const [y, m, d] = dateStr.split("-").map(Number);

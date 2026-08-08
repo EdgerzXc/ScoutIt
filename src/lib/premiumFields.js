@@ -75,12 +75,12 @@ for (const feature of Object.keys(PREMIUM_FIELD_MAP)) {
 export const ALL_PREMIUM_FIELDS = Object.values(PREMIUM_FIELD_MAP).flat();
 
 /**
- * Returns a copy of `property` with fields the tier can't see removed.
+ * Returns a copy of 'property' with fields the tier can't see removed.
  *
  * @param {object} property
  * @param {string} tier - server-resolved tier. NEVER pass a client-supplied one.
- * @returns {object} copy, plus `lockedFeatures: string[]` and
- *   `premiumAvailable: string[]` — the features this property actually HAS
+ * @returns {object} copy, plus 'lockedFeatures: string[]' and
+ *   'premiumAvailable: string[]' — the features this property actually HAS
  *   data for, so a teaser only advertises what exists.
  */
 export function stripPremiumFields(property, tier) {

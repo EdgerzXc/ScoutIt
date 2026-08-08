@@ -60,7 +60,7 @@ const TIERS = [
     price: "₱7,999",
     originalPrice: "₱18,000",
     period: "monthly",
-    description: "Top-of-roster placement for massive brokerages.",
+    description: "Maximum routing eligibility and white-glove curation for large brokerages.",
     connects: "50 Connects / month",
     features: [
       "Unlimited premium listings",
@@ -99,10 +99,10 @@ export default function BrokerPricingPage() {
             LAYER 08 // ADVISOR TIERS
           </span>
           <h1 className="page-title text-5xl md:text-6xl font-display-md text-white mb-6 drop-shadow-lg">
-            Dominate The <span className="text-gold-accent">Intelligence Roster</span>
+            Get Routed To The <span className="text-gold-accent">Right Deals</span>
           </h1>
           <p className="page-subtitle text-lg text-text-secondary max-w-2xl mx-auto leading-relaxed">
-            Stop paying for generic leads. Upgrade your tier to boost your algorithms, unlock priority lead routing from our wealthiest buyers, and pitch directly to property owners.
+            Stop paying for generic leads. A tier unlocks eligibility for ScoutIt&apos;s priority routing and lets you pitch owners directly. Your position on the independent Intelligence Roster is earned through verified results — it is never for sale.
           </p>
         </header>
 

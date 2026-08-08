@@ -51,7 +51,7 @@ export const CATEGORY_PREFIXES = {
  * The stored value is free-ish text that has drifted over time ("Commercial",
  * "Commercial Office", "Short-Term Rental", "STR", "Culinary / Restaurant"), so
  * this matches on substrings rather than equality. Mirrors the same logic in
- * airtable.js `deepIntelCategoryFor` — kept here so the editor and the public
+ * airtable.js 'deepIntelCategoryFor' — kept here so the editor and the public
  * page can never disagree about which category a property is.
  *
  * Returns null when nothing matches, which callers must treat as "show shared
@@ -123,7 +123,7 @@ const ABBREVIATIONS = new Map(
 
 /**
  * Split a field name into display words, honouring both snake_case and the
- * CamelCase names that predate the prefix convention (e.g. `OutdoorDescription`).
+ * CamelCase names that predate the prefix convention (e.g. 'OutdoorDescription').
  */
 function tokenize(name) {
   return name
@@ -275,13 +275,13 @@ export function isGated(name) {
 /**
  * Everything Mission Control needs to render one row.
  *
- * `name` may arrive in ANY of the three conventions found in
- * properties.details (`CM_AC_Charges`, `acCharges`, `ac_charges`) — see
+ * 'name' may arrive in ANY of the three conventions found in
+ * properties.details ('CM_AC_Charges', 'acCharges', 'ac_charges') — see
  * detailKeyAliases.js. It is resolved to the canonical Airtable name first, so
  * the same fact always lands in the same section with the same label instead of
  * appearing two or three times under different headings.
  *
- * `key` is the ORIGINAL key and is what a save payload must use; `name` is the
+ * 'key' is the ORIGINAL key and is what a save payload must use; 'name' is the
  * canonical name used for labelling, grouping and visibility.
  *
  * @param {string} name

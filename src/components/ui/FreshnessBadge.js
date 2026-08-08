@@ -55,7 +55,7 @@ export default function FreshnessBadge({
         </span>
         <span
           style={{
-            fontFamily: "Georgia, serif",
+            fontFamily: "var(--font-display)",
             fontSize: "12.5px",
             lineHeight: 1.6,
             color: "#d8d5d0",

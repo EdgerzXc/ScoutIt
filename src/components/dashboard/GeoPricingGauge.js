@@ -101,7 +101,7 @@ export default function GeoPricingGauge({ location, category, price }) {
           padding: 16px;
           margin-top: 12px;
           margin-bottom: 24px;
-          color: #fff;
+          color: var(--text-primary);
           font-family: var(--font-sans, sans-serif);
           transition: all 0.3s ease;
         }
@@ -117,9 +117,9 @@ export default function GeoPricingGauge({ location, category, price }) {
           font-family: var(--font-mono, monospace);
           font-size: 0.7rem;
           letter-spacing: 0.1em;
-          color: var(--accent, #E8AE3C);
+          color: var(--accent, var(--accent));
           text-transform: uppercase;
-          border: 1px solid var(--accent-muted, #6E531A);
+          border: 1px solid var(--accent-muted, var(--accent-muted));
           padding: 4px 8px;
           border-radius: 4px;
         }
@@ -151,7 +151,7 @@ export default function GeoPricingGauge({ location, category, price }) {
         .metric-value {
           font-size: 1.1rem;
           font-weight: 600;
-          color: #fff;
+          color: var(--text-primary);
         }
 
         .verdict-banner {
@@ -172,8 +172,8 @@ export default function GeoPricingGauge({ location, category, price }) {
 
         .verdict-yellow {
           background: rgba(247, 198, 78, 0.1);
-          color: var(--accent-bright, #F7C64E);
-          border-left: 3px solid var(--accent, #E8AE3C);
+          color: var(--accent-bright, var(--accent-bright));
+          border-left: 3px solid var(--accent, var(--accent));
         }
 
         .verdict-red {

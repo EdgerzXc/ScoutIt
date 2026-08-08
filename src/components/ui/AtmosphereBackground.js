@@ -7,10 +7,10 @@ const VARIANT_GLOW = {
 
 /**
  * Layered dark/gold ambient background (base tone + gold light source + vignette).
- * Purely decorative — drop it as the first child of a `position: relative` wrapper.
- * `variant` repositions the glow so it reads as sourced from a natural corner
+ * Purely decorative — drop it as the first child of a 'position: relative' wrapper.
+ * 'variant' repositions the glow so it reads as sourced from a natural corner
  * per screen (see globals.css .atmosphere-bg for the layer definitions).
- * `broker` adds the "Tactical Velocity" role layer (directional streaks +
+ * 'broker' adds the "Tactical Velocity" role layer (directional streaks +
  * signal pulses) per DASHBOARD_ATMOSPHERE_FRAMEWORK.md — ambient only,
  * never new colors.
  */

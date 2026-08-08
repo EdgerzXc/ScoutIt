@@ -3,7 +3,7 @@ import React from 'react';
 /**
  * HoverCard
  * A reusable wrapper for the Impeccable physical physical-feedback cards.
- * Applies `.hov-card` class which provides the 3D lift and scale effects.
+ * Applies '.hov-card' class which provides the 3D lift and scale effects.
  */
 export default function HoverCard({
   children,

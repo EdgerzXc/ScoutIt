@@ -125,7 +125,16 @@ export default function Header() {
         </div>
       </nav>
       
-      <style>{`
+      {/* 🔴 MUST stay '<style jsx>', not a raw '<style>'. React 19 hoists a raw
+          <style> element into <head> and treats it as a stylesheet RESOURCE.
+          An 11KB one without a 'precedence' prop leaves the enclosing
+          <Suspense> boundary pending forever — so every page that rendered
+          <Header /> alongside a <Suspense> never revealed its content.
+          That is what kept /discover on "Loading Discovery Engine Matrix..."
+          and /property on "LOADING DIRECTORY LEDGER...", permanently, with no
+          error in the console. Bisected 2026-08-07 (§65): a one-rule raw
+          <style> is fine, this block is not. */}
+      <style jsx>{`
         .global-header {
           display: flex;
           justify-content: space-between;
@@ -169,7 +178,7 @@ export default function Header() {
         }
 
         .header-brand {
-          font-family: Georgia, 'Times New Roman', serif;
+          font-family: var(--font-display);
           font-weight: 400;
           font-size: 30px;
           letter-spacing: 3px;

@@ -268,7 +268,7 @@ export default function WishlistPage() {
         }
 
         .page-title {
-          font-family: Georgia, serif;
+          font-family: var(--font-display);
           font-size: 40px;
           font-weight: normal;
           color: var(--text-primary);
@@ -360,7 +360,7 @@ export default function WishlistPage() {
         }
 
         .empty-heading {
-          font-family: Georgia, serif;
+          font-family: var(--font-display);
           font-size: 32px;
           color: #f0ede8;
         }
@@ -469,9 +469,9 @@ export default function WishlistPage() {
         }
 
         .card-title {
-          font-family: Georgia, serif;
+          font-family: var(--font-display);
           font-size: 20px;
-          font-weight: 500;
+          font-weight: 400;
           color: #f0ede8;
           margin: 0 0 4px;
           transition: color 0.2s ease;

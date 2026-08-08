@@ -78,7 +78,7 @@ export default function KanbanBoard({ deals, viewingAs, onStatusChange, onDealCl
           <input 
             type="text" 
             placeholder="Search deals..." 
-            className="w-full bg-surface-alt border border-surface-variant rounded-full pl-11 pr-4 py-2 text-sm text-on-surface focus:outline-none focus:border-gold-accent transition-colors"
+            className="w-full bg-surface-alt border border-surface-variant rounded-full pl-11 pr-4 py-2 text-sm text-on-surface focus:outline-none focus:border-gold-accent transition"
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
@@ -111,7 +111,7 @@ export default function KanbanBoard({ deals, viewingAs, onStatusChange, onDealCl
                     onDragStart={(e) => handleDragStart(e, deal.id)}
                     onDragEnd={() => setDraggingId(null)}
                     onClick={() => onDealClick(deal)}
-                    className={`p-4 rounded-lg cursor-grab active:cursor-grabbing border transition-all duration-200 ease-out
+                    className={`p-4 rounded-lg cursor-grab active:cursor-grabbing border transition duration-200 ease-out
                       ${getStatusColor(deal.status)}
                       ${draggingId === deal.id 
                         ? "opacity-40 scale-[0.98] border-gold-accent shadow-none" 
@@ -133,7 +133,7 @@ export default function KanbanBoard({ deals, viewingAs, onStatusChange, onDealCl
                 ))}
                 
                 {colDeals.length === 0 && (
-                  <div className="h-24 border border-dashed border-surface-variant/60 rounded-lg flex items-center justify-center text-text-muted text-xs font-mono tracking-wider uppercase bg-surface/20 hover:border-gold-accent/40 transition-colors">
+                  <div className="h-24 border border-dashed border-surface-variant/60 rounded-lg flex items-center justify-center text-text-muted text-xs font-mono tracking-wider uppercase bg-surface/20 hover:border-gold-accent/40 transition">
                     Drop deals here
                   </div>
                 )}

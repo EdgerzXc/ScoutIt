@@ -50,6 +50,8 @@ const L = {
   // (§63). `on-surface` is 367 call sites of ink; `surface-variant` is 497
   // call sites of hairline/panel. If these drift, light mode silently
   // regresses across the whole app, so they are checked here.
+  intelCyan: "#0b6e7f",
+  intelMagenta: "#a3186b",
   tierDiamond: "#0e7490",
   tierPlatinum: "#3f6382",
   tierSilver: "#57575f",
@@ -107,6 +109,11 @@ const checks = [
   ["LIGHT  tier-platinum on surface", L.tierPlatinum, L.surface, AA_BODY],
   ["LIGHT  tier-silver   on surface", L.tierSilver, L.surface, AA_BODY],
   ["LIGHT  tier-bronze   on surface", L.tierBronze, L.surface, AA_BODY],
+
+  // ── Dashboard signal hues. Cyan is 1.5:1 and magenta 2.1:1 at their dark
+  //    values on near-white — these are the light counterparts. ────────
+  ["LIGHT  intel-cyan     on surface", L.intelCyan, L.surface, AA_BODY],
+  ["LIGHT  intel-magenta  on surface", L.intelMagenta, L.surface, AA_BODY],
 
   // ── Dark mode, unchanged — regression guard. ───────────────────────
   ["DARK   text-primary   on bg", D.textPrimary, D.bg, AA_BODY],

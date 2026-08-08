@@ -109,8 +109,8 @@ export default function ListerDeclarationModal({
           max-height: 92dvh;
           overflow-y: auto;
           -webkit-overflow-scrolling: touch;
-          background: #121212;
-          border: 0.5px solid #262626;
+          background: var(--surface);
+          border: 0.5px solid var(--border-solid);
           border-bottom: none;
           border-radius: 10px 10px 0 0;
           padding: 22px 18px calc(18px + env(safe-area-inset-bottom, 0px));
@@ -130,30 +130,30 @@ export default function ListerDeclarationModal({
         .ld-eyebrow {
           font-family: ${MONO};
           font-size: 9px;
-          color: var(--accent, #E8AE3C);
+          color: var(--accent, var(--accent));
           letter-spacing: 0.22em;
           text-transform: uppercase;
           margin-bottom: 8px;
         }
         .ld-title {
-          font-family: Georgia, serif;
+          font-family: var(--font-display);
           font-size: 20px;
           line-height: 1.3;
-          color: #f0ede8;
+          color: var(--text-primary);
           margin: 0 0 8px;
           font-weight: 400;
         }
         .ld-sub {
-          font-family: Georgia, serif;
+          font-family: var(--font-display);
           font-size: 13px;
           line-height: 1.7;
-          color: #8a8a8a;
+          color: var(--text-secondary);
           margin: 0 0 6px;
         }
         .ld-listing {
           font-family: ${MONO};
           font-size: 9px;
-          color: #6a6a6a;
+          color: var(--text-muted);
           letter-spacing: 0.12em;
           text-transform: uppercase;
           overflow-wrap: anywhere;
@@ -163,7 +163,7 @@ export default function ListerDeclarationModal({
         .ld-legend {
           font-family: ${MONO};
           font-size: 9px;
-          color: #8a8a8a;
+          color: var(--text-secondary);
           letter-spacing: 0.16em;
           text-transform: uppercase;
           padding: 0;
@@ -180,55 +180,55 @@ export default function ListerDeclarationModal({
           min-height: 44px;
           padding: 14px 13px;
           margin-bottom: 8px;
-          background: #161616;
-          border: 0.5px solid #262626;
+          background: var(--surface);
+          border: 0.5px solid var(--border-solid);
           border-radius: 4px;
           cursor: pointer;
           transition: border-color 160ms ease-out, background-color 160ms ease-out;
         }
-        .ld-opt:hover { border-color: #3a3a3a; }
-        .ld-opt:focus-within { outline: 2px solid #6E531A; outline-offset: 2px; }
+        .ld-opt:hover { border-color: var(--border-solid); }
+        .ld-opt:focus-within { outline: 2px solid var(--accent-muted); outline-offset: 2px; }
         .ld-opt--on {
           background: rgba(232, 174, 60, 0.06);
-          border-color: var(--accent-muted, #6E531A);
+          border-color: var(--accent-muted, var(--accent-muted));
         }
         .ld-radio {
           flex: 0 0 auto;
           width: 18px;
           height: 18px;
           margin-top: 2px;
-          accent-color: #E8AE3C;
+          accent-color: var(--accent);
           cursor: pointer;
         }
         .ld-opt__main { min-width: 0; flex: 1; }
         .ld-opt__label {
-          font-family: Georgia, serif;
+          font-family: var(--font-display);
           font-size: 14.5px;
           line-height: 1.35;
-          color: #f0ede8;
+          color: var(--text-primary);
           margin-bottom: 4px;
         }
         .ld-opt__detail {
-          font-family: Georgia, serif;
+          font-family: var(--font-display);
           font-size: 12.5px;
           line-height: 1.6;
-          color: #8a8a8a;
+          color: var(--text-secondary);
         }
 
         .ld-disclaimer {
           background: rgba(232, 174, 60, 0.06);
-          border-left: 2px solid var(--accent-muted, #6E531A);
+          border-left: 2px solid var(--accent-muted, var(--accent-muted));
           padding: 12px 13px;
           margin: 16px 0 12px;
-          font-family: Georgia, serif;
+          font-family: var(--font-display);
           font-size: 12.5px;
           line-height: 1.65;
-          color: #c8c8c8;
+          color: var(--text-secondary);
         }
         .ld-disclaimer__head {
           font-family: ${MONO};
           font-size: 9px;
-          color: var(--accent, #E8AE3C);
+          color: var(--accent, var(--accent));
           letter-spacing: 0.16em;
           text-transform: uppercase;
           margin-bottom: 7px;
@@ -254,20 +254,20 @@ export default function ListerDeclarationModal({
           width: 20px;
           height: 20px;
           margin-top: 1px;
-          accent-color: #E8AE3C;
+          accent-color: var(--accent);
           cursor: pointer;
         }
         .ld-agree__text {
-          font-family: Georgia, serif;
+          font-family: var(--font-display);
           font-size: 13px;
           line-height: 1.6;
-          color: #c8c8c8;
+          color: var(--text-secondary);
         }
 
         .ld-hint {
           font-family: ${MONO};
           font-size: 9.5px;
-          color: #8a8a8a;
+          color: var(--text-secondary);
           letter-spacing: 0.06em;
           line-height: 1.7;
           margin-top: 8px;
@@ -275,7 +275,7 @@ export default function ListerDeclarationModal({
         .ld-error {
           font-family: ${MONO};
           font-size: 10px;
-          color: #e8644a;
+          color: var(--red);
           letter-spacing: 0.05em;
           line-height: 1.7;
           margin-top: 10px;
@@ -288,7 +288,7 @@ export default function ListerDeclarationModal({
           margin-top: 16px;
           position: sticky;
           bottom: 0;
-          background: #121212;
+          background: var(--surface);
           padding-top: 12px;
         }
         .ld-btn {
@@ -305,9 +305,9 @@ export default function ListerDeclarationModal({
         .ld-btn:active { transform: scale(0.97); }
         .ld-btn:disabled { opacity: 0.35; cursor: not-allowed; }
         .ld-btn:disabled:active { transform: none; }
-        .ld-btn--gold  { background: #F7C64E; border: none; color: #0d0d0d; font-weight: bold; }
-        .ld-btn--ghost { background: transparent; border: 0.5px solid #262626; color: #c8c8c8; }
-        .ld-btn:focus-visible { outline: 2px solid #E8AE3C; outline-offset: 2px; }
+        .ld-btn--gold  { background: var(--accent-fill); border: none; color: var(--on-accent); font-weight: bold; }
+        .ld-btn--ghost { background: transparent; border: 0.5px solid var(--border-solid); color: var(--text-secondary); }
+        .ld-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
         /* ── 700px+: centred card ─────────────────────────────────────── */
         @media (min-width: 700px) {
@@ -315,7 +315,7 @@ export default function ListerDeclarationModal({
           .ld-card {
             max-width: 560px;
             border-radius: 6px;
-            border-bottom: 0.5px solid #262626;
+            border-bottom: 0.5px solid var(--border-solid);
             padding: 28px 30px 24px;
           }
           .ld-title { font-size: 23px; }

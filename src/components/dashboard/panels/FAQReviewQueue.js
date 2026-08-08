@@ -145,10 +145,10 @@ export default function FAQReviewQueue({ onPendingCount }) {
         /* ── MOBILE FIRST ─────────────────────────────────────────────── */
         .fq-root { display: flex; flex-direction: column; gap: 16px; }
         .fq-intro {
-          font-family: Georgia, serif;
+          font-family: var(--font-display);
           font-size: 13px;
           line-height: 1.7;
-          color: #8a8a8a;
+          color: var(--text-secondary);
           margin: 0;
         }
         .fq-tabs {
@@ -164,9 +164,9 @@ export default function FAQReviewQueue({ onPendingCount }) {
           min-height: 38px;
           padding: 0 14px;
           background: transparent;
-          border: 0.5px solid #262626;
+          border: 0.5px solid var(--border-solid);
           border-radius: 999px;
-          color: #c8c8c8;
+          color: var(--text-secondary);
           font-family: ${MONO};
           font-size: 9.5px;
           letter-spacing: 0.12em;
@@ -176,30 +176,30 @@ export default function FAQReviewQueue({ onPendingCount }) {
         }
         .fq-tab.active {
           border-color: rgba(232, 174, 60, 0.4);
-          color: #E8AE3C;
+          color: var(--accent);
           background: rgba(232, 174, 60, 0.08);
         }
 
         .fq-card {
-          background: #161616;
-          border: 0.5px solid #262626;
+          background: var(--surface);
+          border: 0.5px solid var(--border-solid);
           border-radius: 4px;
           padding: 16px;
         }
         .fq-card__prop {
           font-family: ${MONO};
           font-size: 8.5px;
-          color: #6a6a6a;
+          color: var(--text-muted);
           letter-spacing: 0.14em;
           text-transform: uppercase;
           margin-bottom: 9px;
           overflow-wrap: anywhere;
         }
         .fq-card__q {
-          font-family: Georgia, serif;
+          font-family: var(--font-display);
           font-size: 14.5px;
           line-height: 1.45;
-          color: #f0ede8;
+          color: var(--text-primary);
           margin-bottom: 12px;
         }
         .fq-ans {
@@ -223,21 +223,21 @@ export default function FAQReviewQueue({ onPendingCount }) {
           border-radius: 2px;
           white-space: nowrap;
         }
-        .fq-badge--ok     { color: #7fbf7f; border: 0.5px solid rgba(127,191,127,0.3); }
-        .fq-badge--hidden { color: #e06c6c; border: 0.5px solid rgba(224,108,108,0.3); }
-        .fq-badge--prc    { color: #E8AE3C; border: 0.5px solid rgba(232,174,60,0.3); }
+        .fq-badge--ok     { color: var(--green); border: 0.5px solid rgba(127,191,127,0.3); }
+        .fq-badge--hidden { color: var(--red); border: 0.5px solid rgba(224,108,108,0.3); }
+        .fq-badge--prc    { color: var(--accent); border: 0.5px solid rgba(232,174,60,0.3); }
         .fq-ans__text {
-          font-family: Georgia, serif;
+          font-family: var(--font-display);
           font-size: 13.5px;
           line-height: 1.65;
-          color: #d8d5d0;
+          color: var(--text-primary);
           overflow-wrap: anywhere;
           margin-bottom: 8px;
         }
         .fq-ans__meta {
           font-family: ${MONO};
           font-size: 8.5px;
-          color: #6a6a6a;
+          color: var(--text-muted);
           letter-spacing: 0.08em;
           line-height: 1.6;
         }
@@ -255,29 +255,29 @@ export default function FAQReviewQueue({ onPendingCount }) {
           transition: opacity 0.15s ease;
         }
         .fq-btn:disabled { opacity: 0.35; cursor: not-allowed; }
-        .fq-btn--confirm { background: #F7C64E; border: none; color: #0d0d0d; font-weight: bold; }
-        .fq-btn--ghost   { background: transparent; border: 0.5px solid #262626; color: #c8c8c8; }
-        .fq-btn--danger  { background: transparent; border: 0.5px solid rgba(224,108,108,0.35); color: #e06c6c; }
+        .fq-btn--confirm { background: var(--accent-fill); border: none; color: var(--on-accent); font-weight: bold; }
+        .fq-btn--ghost   { background: transparent; border: 0.5px solid var(--border-solid); color: var(--text-secondary); }
+        .fq-btn--danger  { background: transparent; border: 0.5px solid rgba(224,108,108,0.35); color: var(--red); }
 
         .fq-override { margin-top: 10px; }
         .fq-override__input {
           width: 100%;
           box-sizing: border-box;
-          background: #0e0e0e;
-          border: 0.5px solid #262626;
+          background: var(--bg);
+          border: 0.5px solid var(--border-solid);
           border-radius: 2px;
           padding: 11px;
-          color: #f0ede8;
-          font-family: Georgia, serif;
+          color: var(--text-primary);
+          font-family: var(--font-display);
           font-size: 16px; /* no iOS zoom */
           line-height: 1.55;
           resize: vertical;
         }
-        .fq-override__input:focus { outline: none; border-color: #6E531A; }
+        .fq-override__input:focus { outline: none; border-color: var(--accent-muted); }
         .fq-override__hint {
           font-family: ${MONO};
           font-size: 8.5px;
-          color: #6a6a6a;
+          color: var(--text-muted);
           letter-spacing: 0.08em;
           line-height: 1.6;
           margin: 7px 0 9px;
@@ -285,20 +285,20 @@ export default function FAQReviewQueue({ onPendingCount }) {
 
         .fq-blank {
           padding: 26px 16px;
-          background: #161616;
-          border: 0.5px dashed #262626;
+          background: var(--surface);
+          border: 0.5px dashed var(--border-solid);
           border-radius: 3px;
           text-align: center;
           font-family: ${MONO};
           font-size: 10px;
-          color: #8a8a8a;
+          color: var(--text-secondary);
           letter-spacing: 0.12em;
           line-height: 1.9;
         }
         .fq-error {
           font-family: ${MONO};
           font-size: 10px;
-          color: #e06c6c;
+          color: var(--red);
           letter-spacing: 0.05em;
           line-height: 1.6;
         }
@@ -313,7 +313,7 @@ export default function FAQReviewQueue({ onPendingCount }) {
 
       <p className="fq-intro">
         Advisors and residents can answer questions on your listings. Their answers go live
-        immediately, but only carry a <strong style={{ color: "#7fbf7f" }}>✓ Confirmed</strong> stamp
+        immediately, but only carry a <strong style={{ color: "var(--green)" }}>✓ Confirmed</strong> stamp
         once you say so. Confirming doesn&apos;t make it your claim — it means you&apos;ve read it and
         it&apos;s accurate.
       </p>

@@ -128,7 +128,7 @@ export default function PhotographersPage() {
             <div className="intel-widget">
               <div className="intel-widget-header">What We Verify</div>
               <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "4px" }}>
-                {["Portfolio quality review", "Equipment list confirmation", "Turnaround time tested", "CAA drone license (if applicable)", "Client reference check"].map((item) => (
+                {["Portfolio quality review", "Equipment list confirmation", "Turnaround time tested", "CAAP RPA credentials / commercial drone compliance (if applicable)", "Client reference check"].map((item) => (
                   <div key={item} style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "12px", color: "var(--text-secondary)" }}>
                     <span style={{ color: "var(--green)", fontSize: "10px" }}>✓</span>
                     {item}
@@ -222,7 +222,7 @@ export default function PhotographersPage() {
 
       <style>{`
         /* Roster chrome — mono label spec from DESIGN.md (10px / .18em / uppercase) */
-        .example-badge-overlay { position: absolute; top: 12px; left: 12px; font-size: 10px; font-weight: 500; letter-spacing: .18em; text-transform: uppercase; color: var(--text-primary); background: rgba(14,14,14,.82); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); border: 1px dashed rgba(240,237,232,.45); padding: 5px 11px; border-radius: var(--radius-sm); z-index: 10; font-family: var(--font-mono),monospace; }
+        .example-badge-overlay { position: absolute; top: 12px; left: 12px; font-size: 10px; font-weight: 500; letter-spacing: .18em; text-transform: uppercase; color: var(--text-primary); background: rgba(14,14,14,.82); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); border: 1px dashed var(--text-muted); padding: 5px 11px; border-radius: var(--radius-sm); z-index: 10; font-family: var(--font-mono),monospace; }
         .availability-chip { display: inline-flex; align-items: center; gap: 7px; font-family: var(--font-mono),monospace; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--text-muted); }
         .availability-chip .availability-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border-mid); flex-shrink: 0; }
         .availability-chip.is-available { color: var(--green); }

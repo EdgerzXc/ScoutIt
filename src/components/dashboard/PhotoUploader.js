@@ -87,7 +87,7 @@ export default function PhotoUploader({ photos, onChange, onSetImage, isPro = fa
         {currentPhotos.map((photoUrl, index) => (
           <div 
             key={index} 
-            className={`relative aspect-video bg-surface-alt border rounded overflow-hidden group flex flex-col items-center justify-center cursor-pointer transition-all duration-300 ${
+            className={`relative aspect-video bg-surface-alt border rounded overflow-hidden group flex flex-col items-center justify-center cursor-pointer transition duration-300 ${
               dragOverIndex === index 
                 ? 'border-gold-accent border-2 bg-gold-accent/5 scale-[1.02] shadow-[0_0_15px_rgba(232,174,60,0.2)] z-10' 
                 : 'border-surface-variant hover:border-gold-accent/50'
@@ -127,7 +127,7 @@ export default function PhotoUploader({ photos, onChange, onSetImage, isPro = fa
                   <span className="absolute text-[10px] font-mono font-bold">{uploadProgress}%</span>
                 </div>
                 <div className="w-2/3 bg-surface-variant rounded-full h-1 mb-2 overflow-hidden">
-                  <div className="bg-gold-accent h-1 rounded-full transition-all duration-300 ease-out" style={{ width: `${uploadProgress}%` }}></div>
+                  <div className="bg-gold-accent h-1 rounded-full transition duration-300 ease-out" style={{ width: `${uploadProgress}%` }}></div>
                 </div>
                 <span className="text-[10px] uppercase tracking-widest font-mono animate-pulse">Uploading...</span>
               </div>
@@ -138,7 +138,7 @@ export default function PhotoUploader({ photos, onChange, onSetImage, isPro = fa
                 <div className="absolute inset-0 bg-background/80 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
                   <span className="text-white text-[10px] font-mono bg-black/50 px-2 py-1 rounded backdrop-blur border border-white/20">CLICK TO REPLACE</span>
                   <button 
-                    className="text-white text-[10px] font-mono bg-error/80 hover:bg-error px-2 py-1 rounded backdrop-blur border border-white/20 transition-colors"
+                    className="text-white text-[10px] font-mono bg-error/80 hover:bg-error px-2 py-1 rounded backdrop-blur border border-white/20 transition"
                     onClick={(e) => {
                       e.stopPropagation();
                       const newPhotos = [...currentPhotos];
@@ -167,7 +167,7 @@ export default function PhotoUploader({ photos, onChange, onSetImage, isPro = fa
                 )}
               </>
             ) : (
-              <div className="flex flex-col items-center justify-center w-full h-full p-2 group-hover:text-gold-accent transition-colors">
+              <div className="flex flex-col items-center justify-center w-full h-full p-2 group-hover:text-gold-accent transition">
                 <div className="flex flex-col items-center justify-center flex-1 transition-transform group-hover:-translate-y-1">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="mb-2">
                     <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
@@ -193,7 +193,7 @@ export default function PhotoUploader({ photos, onChange, onSetImage, isPro = fa
         </button>
       ) : (
         <button 
-          className="mt-2 py-2 border border-dashed border-gold-accent/50 text-gold-accent hover:bg-gold-accent/10 rounded text-sm font-label-caps tracking-widest uppercase transition-colors"
+          className="mt-2 py-2 border border-dashed border-gold-accent/50 text-gold-accent hover:bg-gold-accent/10 rounded text-sm font-label-caps tracking-widest uppercase transition"
           onClick={() => onChange([...currentPhotos, ""])}
         >
           + Add Another Slot

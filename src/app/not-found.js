@@ -118,7 +118,7 @@ export default function NotFound() {
         }
 
         .nf-title {
-          font-family: Georgia, 'Times New Roman', serif;
+          font-family: var(--font-display);
           font-size: clamp(3rem, 8vw, 6rem);
           font-weight: 400;
           color: #f5f3ee;

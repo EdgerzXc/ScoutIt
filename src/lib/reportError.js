@@ -1,7 +1,7 @@
 import { supabase } from "./supabaseClient";
 
 /**
- * Logs an error or a user-submitted problem report to Supabase `error_reports`.
+ * Logs an error or a user-submitted problem report to Supabase 'error_reports'.
  * Best-effort: never throws (we don't want the logger to cause errors).
  * @param {{ kind?: 'crash'|'user_report', message?: string, stack?: string, context?: object }} payload
  */

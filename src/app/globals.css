@@ -107,6 +107,14 @@ body.light-mode {
      `on-surface` is INK, so it flips to near-black (17.6:1 on --surface).
      `surface-variant` is a hairline/panel, so it becomes the light grey
      that #353535 was on black — visible, not harsh. */
+  /* Same signal hues at a readable value on near-white. See :root. */
+  --intel-cyan:        #0b6e7f;   /* 5.67:1 */
+  --intel-cyan-ch:      11 110 127;
+  --intel-cyan-rgb:     11, 110, 127;
+  --intel-magenta:     #a3186b;   /* 6.94:1 */
+  --intel-magenta-ch: 163  24 107;
+  --intel-magenta-rgb: 163, 24, 107;
+
   /* Same tier hues, dropped to a readable value on near-white. See :root. */
   --tier-diamond:  #0e7490;   /* 4.9:1 */
   --tier-platinum: #3f6382;   /* 6.5:1 */
@@ -347,7 +355,18 @@ body.light-mode .scoutit-wordmark .word-it {
    Adding it here is the legitimate answer trap #3 describes: the surface is
    genuinely meant to be dark, so it gets dark ink tokens rather than a
    migration that would have to invent colours the design never had. */
-body.light-mode .descent-root {
+/* 🔴 REGRESSION, restored 2026-08-07. This selector list is supposed to carry
+   THREE surfaces. `.cinematic-container` and `.global-footer` were dropped from
+   it at some point before commit 0320dbd, leaving only `.descent-root` — so the
+   marketing homepage and the site-wide footer stopped being dark islands. It is
+   silent in dark mode (the page behind them is already near-black) and obvious
+   in light: measured on /intel, the footer's `Platform` / `Services` /
+   `Company` headings were 1.03:1 — white on near-white.
+   Losing a selector from a comma list is invisible in review; if this list is
+   edited again, check `body.light-mode .global-footer` still matches. */
+body.light-mode .cinematic-container,
+body.light-mode .descent-root,
+body.light-mode .global-footer {
   --text-primary:       #ffffff;
   --text-primary-ch:    255 255 255;
   --text-secondary:     #a8a29a;
@@ -373,6 +392,15 @@ body.light-mode .descent-root {
   --m3-surface-container-low-ch:  28  27  27;
 
   color: var(--text-primary);
+
+  /* 🔴 The island had DARK INK but no DARK GROUND. In dark mode that was
+     invisible — the page behind it was already near-black, so the footer
+     inherited a dark backdrop and everything read. In light mode the page went
+     near-white and the footer's white text landed on it: measured on /intel,
+     `Platform` / `Services` / `Company` at 1.03:1. An island needs both halves
+     or it is not an island. Not a var() — these tokens are the LIGHT theme's
+     at this point in the cascade. */
+  background-color: #0d0d0d;
 }
 
 /* ═══════════════════════════════════════════════════════════════ 
@@ -464,6 +492,24 @@ body.light-mode .descent-root {
      is the single largest source of the "light mode did nothing" report.
      The DARK values below are byte-identical to the old hex, so rewiring
      them through tokens is a no-op for dark mode. Only light changes. */
+  /* ── DASHBOARD SIGNAL HUES ───────────────────────────────────────────
+     `#00f2fe` (38 uses) and `#ff75c3` (32 uses) run through the dashboard as
+     an electric cyan / magenta pair. Neither is in DESIGN.md — the documented
+     palette is near-black + gold with Sapphire, Emerald, Amber and Red as
+     SEMANTIC accents. This pair arrived without a written meaning, and it is
+     worth the owner deciding whether it stays (see §64).
+
+     What is not a judgement call: cyan is 1.5:1 and magenta 2.1:1 on
+     near-white, so on light mode both were simply invisible. The DARK values
+     below are the exact hex they replace — this changes nothing you can see
+     today — and light gets the same hue at a readable value. */
+  --intel-cyan:       #00f2fe;
+  --intel-cyan-ch:      0 242 254;
+  --intel-cyan-rgb:     0, 242, 254;
+  --intel-magenta:    #ff75c3;
+  --intel-magenta-ch: 255 117 195;
+  --intel-magenta-rgb: 255, 117, 195;
+
   /* Broker tier identity. These are HUES with meaning (diamond/platinum/
      silver/bronze), used as `.rating-num` text and card hairlines. The dark
      values are the pale metals that were hardcoded in brokers.css; pale
@@ -500,14 +546,40 @@ body.light-mode .descent-root {
   --red-dim: rgba(239, 68, 68, 0.15);
 
   /* Typography Stacks */
-  --font-display: Georgia, 'Times New Roman', serif;
+  /* Georgia until 2026-08-07 (§64). A system serif is never downloaded, so it
+     rendered as a different typeface per OS and there was no way to see what a
+     visitor saw. Instrument Serif is high-contrast and narrow — editorial
+     without the antique. Georgia stays as the fallback, so a failed font load
+     degrades to the previous look rather than to Times. */
+  --font-display: var(--font-instrument-serif), Georgia, 'Times New Roman', serif;
   --font-body: var(--font-geist-sans), system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: var(--font-geist-mono), 'Courier New', monospace;
+
+  /* ── DISPLAY TYPE SCALE ─────────────────────────────────────────────
+     Instrument Serif is drawn tight and high-contrast, so it needs NEGATIVE
+     tracking at display sizes and a line-height near 1 — the settings Georgia
+     did not want. Sizes are fluid so headings never need a media query.
+     Optical rule: the bigger the type, the tighter the tracking. */
+  --display-xl:   clamp(2.75rem, 6.2vw, 5rem);      /* hero */
+  --display-lg:   clamp(2rem, 4.2vw, 3.25rem);      /* page title */
+  --display-md:   clamp(1.5rem, 2.6vw, 2.125rem);   /* section head */
+  --display-sm:   clamp(1.25rem, 1.8vw, 1.5rem);    /* card title */
+  --display-track-xl: -0.03em;
+  --display-track-lg: -0.022em;
+  --display-track-md: -0.015em;
+  --display-leading:  1.05;
+
+  /* Body measure. Prose wider than ~68 characters loses the reader between
+     the end of one line and the start of the next. */
+  --measure: 66ch;
 
   /* Motion — Emil Kowalski & Anti-Slop 160ms Snappy Transitions */
   --transition: 0.16s cubic-bezier(0.23, 1, 0.32, 1);
   --transition-fast: 0.12s cubic-bezier(0.23, 1, 0.32, 1);
-  --transition-slow: 0.3ms cubic-bezier(0.23, 1, 0.32, 1);
+  /* ⚠️ WAS `0.3ms` — a typo, not a duration. Three ten-thousandths of a second
+     reads as no transition at all, so every rule using --transition-slow was
+     silently snapping. 0.3s is what was meant. */
+  --transition-slow: 0.3s cubic-bezier(0.23, 1, 0.32, 1);
   --ease-out-custom: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
   --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
@@ -645,31 +717,85 @@ a:hover {
 .font-display { font-family: var(--font-display); }
 .font-body { font-family: var(--font-body); }
 
+/* ── DISPLAY TYPE ────────────────────────────────────────────────────
+   Instrument Serif at display size wants tracking pulled IN. Set it once
+   here so no page has to remember; the optical rule is that the larger the
+   type, the tighter it goes. `text-wrap: balance` stops the one-word last
+   line that makes a heading look accidental. */
+.display-xl, .display-lg, .display-md, .display-sm {
+  font-family: var(--font-display);
+  font-weight: 400;
+  line-height: var(--display-leading);
+  text-wrap: balance;
+}
+.display-xl { font-size: var(--display-xl); letter-spacing: var(--display-track-xl); }
+.display-lg { font-size: var(--display-lg); letter-spacing: var(--display-track-lg); }
+.display-md { font-size: var(--display-md); letter-spacing: var(--display-track-md); line-height: 1.15; }
+.display-sm { font-size: var(--display-sm); letter-spacing: -0.01em; line-height: 1.25; }
+
+/* Prose measure. `text-wrap: pretty` kills orphans without the reflow cost
+   of `balance` on long text. */
+.prose-measure { max-width: var(--measure); text-wrap: pretty; }
+
+/* ── SURFACE CARDS ───────────────────────────────────────────────────
+   These carried a VIOLET glass gradient (`rgba(34,21,48)` fading to
+   `rgba(18,11,27)`, with a `rgba(139,92,246)` glow) until 2026-08-07 (§64).
+   Two problems, one aesthetic and one functional:
+
+   🔴 Purple is not in this brand. AGENTS.md locks ScoutIt to near-black +
+      gold; DESIGN.md admits Sapphire and Emerald as *semantic* accents with
+      specific meanings. An ambient violet on every card is a third hue with
+      no meaning attached — and "dark card, violet gradient, violet glow" is
+      the single most recognisable generic-AI-interface look there is. It made
+      12 `hov-card` and 4 `hov-glow` call sites look templated.
+
+   🔴 The literals meant these panels stayed dark in light mode while their
+      text followed the theme to near-black. Unreadable, on every card.
+
+   Now tonal: surface steps + a gold ring on hover, which is the elevation
+   model DESIGN.md §4 actually describes. Both themes, from tokens. */
 .hov-card {
-  background: linear-gradient(165deg, rgba(34, 21, 48, 0.6), rgba(18, 11, 27, 0.8));
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255,255,255,0.05);
-  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s var(--ease-out-quart), border-color 0.4s var(--ease-out-quart);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  transition:
+    transform 200ms var(--ease-out-custom),
+    box-shadow 200ms var(--ease-out-custom),
+    border-color 200ms var(--ease-out-custom);
 }
 
 .hov-card:hover {
-  transform: translateY(-6px) scale(1.01);
-  box-shadow: 0 16px 40px rgba(0,0,0,0.5), 0 0 50px rgba(139, 92, 246, 0.15);
-  border-color: rgba(139, 92, 246, 0.3);
+  /* Was translateY(-6px) scale(1.01) over 400ms with a bounce curve. A card
+     you hover dozens of times a session should acknowledge the pointer, not
+     perform. 2px and 200ms reads as responsive; 6px and 400ms reads as slow. */
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-mid);
 }
 
+.hov-card:active { transform: translateY(-1px) scale(0.995); }
+
 .hov-glow {
-  background: linear-gradient(155deg, rgba(45, 27, 78, 0.7), rgba(26, 16, 37, 0.9));
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(247, 198, 78, 0.25);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.4), 0 0 40px rgba(247, 198, 78, 0.1);
-  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s var(--ease-out-quart), border-color 0.4s var(--ease-out-quart);
+  background: var(--surface2);
+  border: 1px solid var(--accent-border);
+  box-shadow: var(--shadow-sm);
+  transition:
+    transform 200ms var(--ease-out-custom),
+    box-shadow 200ms var(--ease-out-custom),
+    border-color 200ms var(--ease-out-custom);
 }
 
 .hov-glow:hover {
-  transform: translateY(-6px) scale(1.02);
-  box-shadow: 0 16px 40px rgba(0,0,0,0.6), 0 0 60px rgba(247, 198, 78, 0.25);
-  border-color: rgba(247, 198, 78, 0.6);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md), var(--shadow-glow-soft);
+  border-color: var(--accent);
+}
+
+.hov-glow:active { transform: translateY(-1px) scale(0.995); }
+
+/* Nothing above should move for someone who asked the OS not to animate. */
+@media (prefers-reduced-motion: reduce) {
+  .hov-card, .hov-glow, .hov-card:hover, .hov-glow:hover,
+  .hov-card:active, .hov-glow:active { transform: none; transition: none; }
 }
 
 /* New Impeccable Utility Classes */
@@ -680,6 +806,15 @@ a:hover {
   background-clip: text;
   color: transparent;
 }
+/* The dark gradient runs #FFDE82 → #F7C64E, both of which are ~1.8:1 on
+   near-white — a page title nobody can read. Light mode keeps the SAME
+   gesture (a gold that shifts along the letterforms) between two text-safe
+   bronzes, so the effect survives and the heading stays legible. */
+body.light-mode .text-gradient-gold {
+  background: linear-gradient(135deg, #7A5210 0%, #9A6200 55%, #6E4A12 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
 
 .mesh-bg-hero {
   background-color: var(--bg);
@@ -689,17 +824,30 @@ a:hover {
     radial-gradient(circle at 50% 80%, rgba(247, 198, 78, 0.08), transparent 50%);
 }
 
+/* Same violet-glass problem as .hov-card — `rgba(26,16,37,0.65)` is a purple
+   panel that ignored the theme. Now the surface tint at the same translucency,
+   so the blur still reads as glass and the panel still flips. */
 .glass-panel {
-  background: rgba(26, 16, 37, 0.65);
+  background: rgba(var(--surface-rgb), 0.72);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Someone who has asked for less transparency gets a solid panel, not a
+   slightly-less-blurry one. */
+@media (prefers-reduced-transparency: reduce) {
+  .glass-panel { background: var(--surface); backdrop-filter: none; -webkit-backdrop-filter: none; }
 }
 
 .text-gold-glow {
   text-shadow: 0 0 24px rgba(255,222,130,0.45);
 }
+/* A glow is light emitted against dark. On a near-white surface there is
+   nothing for it to bloom into, and it just blurs the letterforms — which is
+   literally the "it just blurred things" the owner reported. */
+body.light-mode .text-gold-glow { text-shadow: none; }
 
 .cta-pulse {
   animation: ctaPulse 3s infinite ease-in-out;
@@ -708,6 +856,11 @@ a:hover {
 @keyframes ctaPulse {
   0%, 100% { box-shadow: 0 0 24px rgba(232,174,60,0.18), 0 4px 16px rgba(0,0,0,0.35); }
   50%      { box-shadow: 0 0 32px rgba(232,174,60,0.5),  0 4px 16px rgba(0,0,0,0.35); }
+}
+/* An infinite loop is the one animation a user cannot look away from, so it
+   has to be the one that respects the OS switch most strictly. */
+@media (prefers-reduced-motion: reduce) {
+  .cta-pulse { animation: none; box-shadow: 0 0 24px rgba(var(--accent-rgb), 0.28); }
 }
 
 /* ── HIGH-END MOTION UTILITIES (Emil Kowalski + Taste-Skill Precision) ── */

@@ -238,7 +238,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
   return (
     <div className="w-full flex flex-col gap-5">
       {/* Toolbar */}
-      <div className="flex flex-col lg:flex-row lg:items-center gap-3 lg:gap-4 bg-[#121110] border border-surface-variant rounded-lg p-3">
+      <div className="flex flex-col lg:flex-row lg:items-center gap-3 lg:gap-4 bg-surface border border-surface-variant rounded-lg p-3">
         <div className="flex items-center gap-2 font-label-caps text-[10px] tracking-widest text-gold-accent uppercase shrink-0">
           <Layers size={14} />
           <span>{units.length} {units.length === 1 ? "unit" : "units"}</span>
@@ -247,7 +247,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
         </div>
 
         {/* Search */}
-        <div className="flex items-center gap-2 flex-1 min-w-0 bg-surface-alt border border-surface-variant rounded px-3 py-1.5 focus-within:border-gold-accent transition-colors">
+        <div className="flex items-center gap-2 flex-1 min-w-0 bg-surface-alt border border-surface-variant rounded px-3 py-1.5 focus-within:border-gold-accent transition">
           <Search size={14} className="text-text-muted shrink-0" />
           <input
             type="text"
@@ -273,7 +273,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
               max={MAX_BULK}
               value={bulkQty}
               onChange={(e) => setBulkQty(e.target.value)}
-              className="w-14 bg-surface-alt border border-surface-variant rounded px-2 py-1.5 text-sm text-text-primary text-center focus:outline-none focus:border-gold-accent transition-colors"
+              className="w-14 bg-surface-alt border border-surface-variant rounded px-2 py-1.5 text-sm text-text-primary text-center focus:outline-none focus:border-gold-accent transition"
               title="How many units"
             />
             <input
@@ -282,12 +282,12 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
               value={bulkFloor}
               onChange={(e) => setBulkFloor(e.target.value)}
               placeholder="Floor"
-              className="w-20 bg-surface-alt border border-surface-variant rounded px-2 py-1.5 text-sm text-text-primary focus:outline-none focus:border-gold-accent transition-colors"
+              className="w-20 bg-surface-alt border border-surface-variant rounded px-2 py-1.5 text-sm text-text-primary focus:outline-none focus:border-gold-accent transition"
               title="Optional floor for the batch"
             />
             <button
               onClick={bulkAdd}
-              className="bg-gold-accent text-background font-working-title font-bold px-3 py-1.5 rounded text-sm hover:bg-gold-accent-hover transition-colors whitespace-nowrap"
+              className="bg-gold-accent text-background font-working-title font-bold px-3 py-1.5 rounded text-sm hover:bg-gold-accent-hover transition whitespace-nowrap"
             >
               Add
             </button>
@@ -297,7 +297,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
 
       {/* Empty state */}
       {units.length === 0 ? (
-        <div className="bg-[#121110] border border-surface-variant rounded-lg p-10 text-center">
+        <div className="bg-surface border border-surface-variant rounded-lg p-10 text-center">
           <p className="text-text-secondary text-sm italic mb-4">
             {isOperatorMode
               ? "No units have been delegated to you yet."
@@ -306,26 +306,26 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
           {!isOperatorMode && (
             <button
               onClick={() => addUnit()}
-              className="inline-flex items-center gap-2 border border-gold-accent text-gold-accent hover:bg-gold-accent/10 px-4 py-2 rounded text-sm font-working-title transition-colors"
+              className="inline-flex items-center gap-2 border border-gold-accent text-gold-accent hover:bg-gold-accent/10 px-4 py-2 rounded text-sm font-working-title transition"
             >
               <Plus size={16} /> Add your first unit
             </button>
           )}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="bg-[#121110] border border-surface-variant rounded-lg p-8 text-center text-text-secondary text-sm italic">
+        <div className="bg-surface border border-surface-variant rounded-lg p-8 text-center text-text-secondary text-sm italic">
           No units match “{search}”.
         </div>
       ) : (
         groups.map(([floorKey, floorUnits]) => {
           const collapsed = collapsedFloors.has(floorKey);
           return (
-            <div key={floorKey} className="bg-[#121110] border border-surface-variant rounded-lg overflow-hidden">
+            <div key={floorKey} className="bg-surface border border-surface-variant rounded-lg overflow-hidden">
               {/* Floor header */}
               <div className="flex items-center justify-between bg-surface-alt border-b border-surface-variant px-4 py-2.5">
                 <button
                   onClick={() => toggleFloor(floorKey)}
-                  className="flex items-center gap-2 text-gold-accent hover:text-gold-accent-hover transition-colors"
+                  className="flex items-center gap-2 text-gold-accent hover:text-gold-accent-hover transition"
                 >
                   {collapsed ? <ChevronRight size={16} /> : <ChevronDown size={16} />}
                   <span className="font-label-caps text-[11px] tracking-widest uppercase">{floorLabel(floorKey)}</span>
@@ -336,7 +336,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                 {!search && !isOperatorMode && (
                   <button
                     onClick={() => addUnit(floorKey === UNASSIGNED ? "" : floorKey)}
-                    className="flex items-center gap-1 text-text-muted hover:text-gold-accent transition-colors text-xs font-working-title"
+                    className="flex items-center gap-1 text-text-muted hover:text-gold-accent transition text-xs font-working-title"
                     title="Add a unit to this floor"
                   >
                     <Plus size={14} /> Add here
@@ -375,7 +375,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                         const lockedForOwner = isDelegated && !isOperatorMode;
                         const structuralReadOnly = isOperatorMode || lockedForOwner;
                         return (
-                          <tr key={unit.id} className={`border-b border-surface-variant/40 transition-colors group ${lockedForOwner ? "bg-gold-accent/5" : "hover:bg-surface-variant/20"}`}>
+                          <tr key={unit.id} className={`border-b border-surface-variant/40 transition group ${lockedForOwner ? "bg-gold-accent/5" : "hover:bg-surface-variant/20"}`}>
                             {/* Name */}
                             <td className="p-2.5 align-top max-w-[200px] break-words">
                               {lockedForOwner ? (
@@ -393,7 +393,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                                   onChange={(e) => updateUnit(unit.id, "name", e.target.value)}
                                   onBlur={(e) => updateUnit(unit.id, "name", e.target.value, true)}
                                   placeholder="e.g. Unit 12-A"
-                                  className="w-full bg-transparent border border-transparent hover:border-surface-variant focus:border-gold-accent rounded px-2 py-1 text-sm text-text-primary focus:outline-none transition-colors"
+                                  className="w-full bg-transparent border border-transparent hover:border-surface-variant focus:border-gold-accent rounded px-2 py-1 text-sm text-text-primary focus:outline-none transition"
                                 />
                               )}
                             </td>
@@ -409,7 +409,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                                   onChange={(e) => updateUnit(unit.id, "size", e.target.value)}
                                   onBlur={(e) => updateUnit(unit.id, "size", e.target.value, true)}
                                   placeholder="30"
-                                  className="w-full bg-transparent border border-transparent hover:border-surface-variant focus:border-gold-accent rounded px-2 py-1 text-sm text-text-primary focus:outline-none transition-colors"
+                                  className="w-full bg-transparent border border-transparent hover:border-surface-variant focus:border-gold-accent rounded px-2 py-1 text-sm text-text-primary focus:outline-none transition"
                                 />
                               )}
                             </td>
@@ -425,7 +425,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                                   onChange={(e) => updateUnit(unit.id, "floor", e.target.value)}
                                   onBlur={(e) => updateUnit(unit.id, "floor", e.target.value, true)}
                                   placeholder="e.g. 3"
-                                  className="w-full bg-transparent border border-transparent hover:border-surface-variant focus:border-gold-accent rounded px-2 py-1 text-sm text-text-primary focus:outline-none transition-colors"
+                                  className="w-full bg-transparent border border-transparent hover:border-surface-variant focus:border-gold-accent rounded px-2 py-1 text-sm text-text-primary focus:outline-none transition"
                                 />
                               )}
                             </td>
@@ -437,7 +437,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                                     <span key={idx} className="inline-flex items-center gap-1 px-2 py-1 bg-surface-variant border border-gold-accent/20 text-[11px] text-text-primary rounded uppercase tracking-wide font-working-title">
                                       {feature}
                                       {!structuralReadOnly && (
-                                        <button onClick={() => removeFeature(unit.id, feature)} aria-label={`Remove ${feature}`} className="text-text-muted hover:text-error transition-colors">
+                                        <button onClick={() => removeFeature(unit.id, feature)} aria-label={`Remove ${feature}`} className="text-text-muted hover:text-error transition">
                                           <X size={10} />
                                         </button>
                                       )}
@@ -458,7 +458,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                                       }
                                     }}
                                     placeholder="Type a feature & press Enter…"
-                                    className="bg-transparent text-sm text-text-secondary focus:outline-none placeholder-text-muted/50 border-b border-surface-variant focus:border-gold-accent transition-colors flex-1"
+                                    className="bg-transparent text-sm text-text-secondary focus:outline-none placeholder-text-muted/50 border-b border-surface-variant focus:border-gold-accent transition flex-1"
                                   />
                                   <button
                                     onClick={(e) => {
@@ -468,7 +468,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                                         input.value = "";
                                       }
                                     }}
-                                    className="text-text-muted hover:text-gold-accent transition-colors"
+                                    className="text-text-muted hover:text-gold-accent transition"
                                     title="Add feature"
                                   >
                                     <Plus size={16} />
@@ -478,14 +478,14 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                             </td>
                             {/* Media */}
                             <td
-                              className={`p-2.5 align-top text-center transition-colors ${uploadingUnitId === unit.id ? "opacity-50" : ""}`}
+                              className={`p-2.5 align-top text-center transition ${uploadingUnitId === unit.id ? "opacity-50" : ""}`}
                               onDragOver={(e) => !lockedForOwner && e.preventDefault()}
                               onDrop={(e) => !lockedForOwner && handleDirectDrop(e, unit.id)}
                             >
                               <button
                                 onClick={() => !lockedForOwner && setActivePhotoUnit(unit.id)}
                                 disabled={lockedForOwner}
-                                className={`relative h-10 w-10 flex items-center justify-center rounded border ${photoCount > 0 ? "bg-gold-accent/20 border-gold-accent text-gold-accent" : "bg-surface-alt border-surface-variant text-text-muted hover:border-gold-accent hover:text-gold-accent"} transition-colors mx-auto disabled:opacity-40 disabled:cursor-not-allowed`}
+                                className={`relative h-10 w-10 flex items-center justify-center rounded border ${photoCount > 0 ? "bg-gold-accent/20 border-gold-accent text-gold-accent" : "bg-surface-alt border-surface-variant text-text-muted hover:border-gold-accent hover:text-gold-accent"} transition mx-auto disabled:opacity-40 disabled:cursor-not-allowed`}
                                 title={lockedForOwner ? "Managed by the operator" : isPro ? "Upload photos" : "Free tier: 1 photo per unit"}
                               >
                                 <Upload size={18} />
@@ -497,7 +497,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                               {uploadingUnitId === unit.id && (
                                 <div className="mt-1 w-full max-w-[80px] mx-auto">
                                   <div className="w-full h-1 bg-surface-variant rounded-full overflow-hidden">
-                                    <div className="h-full bg-gold-accent transition-all duration-300 ease-out" style={{ width: `${uploadProgress}%` }} />
+                                    <div className="h-full bg-gold-accent transition duration-300 ease-out" style={{ width: `${uploadProgress}%` }} />
                                   </div>
                                 </div>
                               )}
@@ -507,7 +507,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                               <select
                                 value={unit.availabilityStatus || "available"}
                                 onChange={(e) => updateUnit(unit.id, "availabilityStatus", e.target.value, true)}
-                                className="w-full bg-surface-alt border border-surface-variant rounded px-2 py-1.5 text-sm text-text-primary focus:outline-none focus:border-gold-accent transition-colors"
+                                className="w-full bg-surface-alt border border-surface-variant rounded px-2 py-1.5 text-sm text-text-primary focus:outline-none focus:border-gold-accent transition"
                               >
                                 <option value="available">Available</option>
                                 <option value="occupied">Occupied</option>
@@ -532,7 +532,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                                   commit(next);
                                 }}
                                 disabled={isOperatorMode}
-                                className="w-full bg-surface-alt border border-surface-variant rounded px-2 py-1.5 text-sm text-text-primary focus:outline-none focus:border-gold-accent transition-colors disabled:opacity-50"
+                                className="w-full bg-surface-alt border border-surface-variant rounded px-2 py-1.5 text-sm text-text-primary focus:outline-none focus:border-gold-accent transition disabled:opacity-50"
                               >
                                 <option value="">None (Owner)</option>
                                 <option value="op_1">Jules (Operator)</option>
@@ -546,7 +546,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                                   {/* Always visible to the active party — the drill-in Unit Master Page editor */}
                                   <button
                                     onClick={() => setDetailsUnitId(unit.id)}
-                                    className="p-2 rounded border border-surface-variant text-text-secondary hover:bg-gold-accent/10 hover:text-gold-accent hover:border-gold-accent transition-colors"
+                                    className="p-2 rounded border border-surface-variant text-text-secondary hover:bg-gold-accent/10 hover:text-gold-accent hover:border-gold-accent transition"
                                     title="Edit Unit Master Page (details & subdivision options)"
                                   >
                                     <SlidersHorizontal size={15} />
@@ -556,21 +556,21 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                                     <span className="inline-flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                       <button
                                         onClick={() => duplicateUnit(unit.id)}
-                                        className="p-2 rounded hover:bg-gold-accent/10 text-text-muted hover:text-gold-accent transition-colors"
+                                        className="p-2 rounded hover:bg-gold-accent/10 text-text-muted hover:text-gold-accent transition"
                                         title="Duplicate unit"
                                       >
                                         <Copy size={15} />
                                       </button>
                                       <button
                                         onClick={() => setSubdivideUnitId(unit.id)}
-                                        className="p-2 rounded hover:bg-gold-accent/10 text-text-muted hover:text-gold-accent transition-colors"
+                                        className="p-2 rounded hover:bg-gold-accent/10 text-text-muted hover:text-gold-accent transition"
                                         title="Subdivide unit"
                                       >
                                         <Split size={15} />
                                       </button>
                                       <button
                                         onClick={() => removeUnit(unit.id)}
-                                        className="p-2 rounded hover:bg-error/10 text-text-muted hover:text-error transition-colors"
+                                        className="p-2 rounded hover:bg-error/10 text-text-muted hover:text-error transition"
                                         title="Delete unit"
                                       >
                                         <Trash2 size={15} />
@@ -596,7 +596,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
       {units.length > 0 && !isOperatorMode && (
         <button
           onClick={() => addUnit()}
-          className="self-start border border-gold-accent text-gold-accent hover:bg-gold-accent/10 px-4 py-2 flex items-center gap-2 rounded text-sm font-working-title transition-colors"
+          className="self-start border border-gold-accent text-gold-accent hover:bg-gold-accent/10 px-4 py-2 flex items-center gap-2 rounded text-sm font-working-title transition"
         >
           <Plus size={16} /> Add Unit
         </button>
@@ -609,13 +609,13 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
           onDragOver={(e) => e.preventDefault()}
           onDrop={(e) => e.preventDefault()}
         >
-          <div className="bg-[#121110] border border-gold-accent/30 rounded-lg p-6 max-w-2xl w-full shadow-2xl">
+          <div className="bg-surface border border-gold-accent/30 rounded-lg p-6 max-w-2xl w-full shadow-2xl">
             <div className="flex justify-between items-center mb-6">
               <h3 className="font-display-md text-2xl text-gold-accent">Unit Media</h3>
               <button
                 onClick={() => setActivePhotoUnit(null)}
                 aria-label="Close"
-                className="p-2 text-text-secondary hover:text-on-surface bg-surface-variant hover:bg-surface rounded transition-colors"
+                className="p-2 text-text-secondary hover:text-on-surface bg-surface-variant hover:bg-surface rounded transition"
               >
                 <X size={20} />
               </button>
@@ -658,7 +658,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                   <div className="mt-6 flex justify-end">
                     <button
                       onClick={() => setActivePhotoUnit(null)}
-                      className="bg-gold-accent text-background font-working-title font-bold px-6 py-2 rounded uppercase tracking-wider text-sm hover:bg-surface-tint transition-colors"
+                      className="bg-gold-accent text-background font-working-title font-bold px-6 py-2 rounded uppercase tracking-wider text-sm hover:bg-surface-tint transition"
                     >
                       Done
                     </button>
@@ -693,7 +693,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
       {/* Subdivide Modal */}
       {subdivideUnitId && (
         <div className="fixed inset-0 z-[3000] bg-background/90 backdrop-blur-md flex items-center justify-center p-4 animate-[fadeIn_0.2s_ease]">
-          <div className="bg-[#121110] border border-gold-accent/30 rounded-lg p-6 max-w-sm w-full shadow-2xl">
+          <div className="bg-surface border border-gold-accent/30 rounded-lg p-6 max-w-sm w-full shadow-2xl">
             <h3 className="font-display-md text-xl text-gold-accent mb-4">Subdivide Space</h3>
             <div className="mb-4">
               <label className="block text-[11px] text-text-secondary uppercase tracking-widest font-label-caps mb-1">How many spaces are you dividing this into?</label>
@@ -703,7 +703,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                 max={20}
                 value={subdivideQty}
                 onChange={(e) => setSubdivideQty(e.target.value)}
-                className="w-full bg-surface-alt border border-surface-variant rounded px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-gold-accent transition-colors"
+                className="w-full bg-surface-alt border border-surface-variant rounded px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-gold-accent transition"
               />
             </div>
             <div className="mb-6">
@@ -714,19 +714,19 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                 placeholder="e.g. 50"
                 value={subdivideSqm}
                 onChange={(e) => setSubdivideSqm(e.target.value)}
-                className="w-full bg-surface-alt border border-surface-variant rounded px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-gold-accent transition-colors"
+                className="w-full bg-surface-alt border border-surface-variant rounded px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-gold-accent transition"
               />
             </div>
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setSubdivideUnitId(null)}
-                className="px-4 py-2 text-sm text-text-muted hover:text-text-primary transition-colors"
+                className="px-4 py-2 text-sm text-text-muted hover:text-text-primary transition"
               >
                 Cancel
               </button>
               <button
                 onClick={executeSubdivide}
-                className="bg-gold-accent text-background font-working-title font-bold px-4 py-2 rounded text-sm hover:bg-gold-accent-hover transition-colors"
+                className="bg-gold-accent text-background font-working-title font-bold px-4 py-2 rounded text-sm hover:bg-gold-accent-hover transition"
               >
                 Subdivide
               </button>

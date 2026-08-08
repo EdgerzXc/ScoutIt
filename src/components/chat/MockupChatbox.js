@@ -79,7 +79,7 @@ export default function MockupChatbox() {
           >
             MOCKUP CHATBOX INTERACTION PREVIEW
           </div>
-          <h1 style={{ fontFamily: "Georgia, serif", fontSize: "24px", margin: "4px 0", color: "#f0ede8" }}>
+          <h1 style={{ fontFamily: "var(--font-display)", fontSize: "24px", margin: "4px 0", color: "#f0ede8" }}>
             Three-State Connects Inbox & Chatbox UI
           </h1>
           <p style={{ color: "#8a8a8a", fontSize: "13px", margin: 0 }}>

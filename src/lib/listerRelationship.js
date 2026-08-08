@@ -94,9 +94,9 @@ export function validateDeclaration(relationship, agreed) {
 /**
  * Legacy → canonical spellings for a relationship value.
  *
- * `/api/property/claim` hardcoded a SECOND vocabulary — 'direct_owner',
+ * '/api/property/claim' hardcoded a SECOND vocabulary — 'direct_owner',
  * 'authorized_manager', 'authorized_broker' — of which only the third matched
- * this module. Migration `20260806000006` unifies the database on the canonical
+ * this module. Migration '20260806000006' unifies the database on the canonical
  * values; this map exists so an old client, a queued request or a hand-written
  * curl call cannot 400 during the changeover.
  *
@@ -127,7 +127,7 @@ export function canonicalRelationship(value) {
  *
  * Yes when the listing is NOT owner-declared — i.e. a broker or manager put it
  * up, or nobody ever declared. That last case matters: every listing created
- * before 2026-08-06 has `lister_relationship = NULL`, and those are exactly
+ * before 2026-08-06 has 'lister_relationship = NULL', and those are exactly
  * the ones most likely to need claiming, since nobody was ever asked.
  *
  * ⚠️ Deliberately does NOT treat NULL as "owner". Assuming ownership from

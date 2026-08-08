@@ -60,7 +60,7 @@ export default function NewDealModal({ isOpen, onClose, onDealCreated, mockUserI
             <h2 className="font-headline-editorial text-2xl text-on-surface flex items-center gap-2">
               Create New Deal
             </h2>
-            <button onClick={onClose} aria-label="Close" className="text-text-muted hover:text-on-surface transition-colors">
+            <button onClick={onClose} aria-label="Close" className="text-text-muted hover:text-on-surface transition">
               <X size={20} />
             </button>
           </div>
@@ -74,7 +74,7 @@ export default function NewDealModal({ isOpen, onClose, onDealCreated, mockUserI
                 required
                 type="text" 
                 placeholder="e.g. recXXXXX or uuid"
-                className="w-full bg-surface-alt border border-surface-variant rounded px-4 py-2.5 text-sm text-on-surface focus:outline-none focus:border-gold-accent transition-colors"
+                className="w-full bg-surface-alt border border-surface-variant rounded px-4 py-2.5 text-sm text-on-surface focus:outline-none focus:border-gold-accent transition"
                 value={formData.propertyId}
                 onChange={e => setFormData({ ...formData, propertyId: e.target.value })}
               />
@@ -88,7 +88,7 @@ export default function NewDealModal({ isOpen, onClose, onDealCreated, mockUserI
                 required
                 type="text" 
                 placeholder="User UUID of Buyer/Broker/Owner"
-                className="w-full bg-surface-alt border border-surface-variant rounded px-4 py-2.5 text-sm text-on-surface focus:outline-none focus:border-gold-accent transition-colors"
+                className="w-full bg-surface-alt border border-surface-variant rounded px-4 py-2.5 text-sm text-on-surface focus:outline-none focus:border-gold-accent transition"
                 value={formData.otherPartyEmail}
                 onChange={e => setFormData({ ...formData, otherPartyEmail: e.target.value })}
               />
@@ -99,7 +99,7 @@ export default function NewDealModal({ isOpen, onClose, onDealCreated, mockUserI
                 Initial Status
               </label>
               <select 
-                className="w-full bg-surface-alt border border-surface-variant rounded px-4 py-2.5 text-sm text-on-surface focus:outline-none focus:border-gold-accent transition-colors appearance-none"
+                className="w-full bg-surface-alt border border-surface-variant rounded px-4 py-2.5 text-sm text-on-surface focus:outline-none focus:border-gold-accent transition appearance-none"
                 value={formData.status}
                 onChange={e => setFormData({ ...formData, status: e.target.value })}
               >
@@ -118,7 +118,7 @@ export default function NewDealModal({ isOpen, onClose, onDealCreated, mockUserI
               <textarea 
                 rows={3}
                 placeholder="Optional starting message..."
-                className="w-full bg-surface-alt border border-surface-variant rounded px-4 py-2.5 text-sm text-on-surface focus:outline-none focus:border-gold-accent transition-colors resize-none"
+                className="w-full bg-surface-alt border border-surface-variant rounded px-4 py-2.5 text-sm text-on-surface focus:outline-none focus:border-gold-accent transition resize-none"
                 value={formData.initialMessage}
                 onChange={e => setFormData({ ...formData, initialMessage: e.target.value })}
               />
@@ -132,14 +132,14 @@ export default function NewDealModal({ isOpen, onClose, onDealCreated, mockUserI
               <button 
                 type="button" 
                 onClick={onClose}
-                className="px-6 py-2 rounded text-sm font-working-title text-text-secondary hover:text-on-surface transition-colors"
+                className="px-6 py-2 rounded text-sm font-working-title text-text-secondary hover:text-on-surface transition"
               >
                 Cancel
               </button>
               <button 
                 type="submit" 
                 disabled={loading}
-                className="bg-gold-accent text-background font-bold font-working-title px-6 py-2 rounded shadow-[0_0_15px_rgba(232,174,60,0.35)] hover:-translate-y-0.5 active:scale-[0.97] transition-all duration-160 ease-out disabled:opacity-50 disabled:hover:translate-y-0"
+                className="bg-gold-accent text-background font-bold font-working-title px-6 py-2 rounded shadow-[0_0_15px_rgba(232,174,60,0.35)] hover:-translate-y-0.5 active:scale-[0.97] transition duration-160 ease-out disabled:opacity-50 disabled:hover:translate-y-0"
               >
                 {loading ? "Creating..." : "Create Deal"}
               </button>

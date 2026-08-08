@@ -167,7 +167,7 @@ export default async function PropertyRoute({ params }) {
       )}
       <article className="chameleon-content-wrapper">
         {/*
-          `match` is already resolved above for metadata and JSON-LD. Passing it
+          'match' is already resolved above for metadata and JSON-LD. Passing it
           down as initialData lets the flow render real content during SSR
           instead of shipping a "LOADING SPACE INTELLIGENCE…" spinner and waiting
           on a client-side /api/cms round-trip — which is what was pushing LCP
@@ -182,7 +182,7 @@ export default async function PropertyRoute({ params }) {
             running JavaScript.
             Entitled users now fetch the real values from
             /api/property/premium, which resolves their tier server-side.
-            `lockedFeatures` / `premiumAvailable` still ride along so the
+            'lockedFeatures' / 'premiumAvailable' still ride along so the
             teaser can advertise what this listing genuinely has. */}
         <InjectedLayout
           slug={resolvedParams.id}
@@ -199,7 +199,7 @@ export default async function PropertyRoute({ params }) {
                commercial ones — a §51-shaped bug, where the feature is real
                but unreachable from half the routes.
             2. The panel asks the SERVER whether this listing is claimable.
-               It deliberately does not read `match`, because this page is ISR
+               It deliberately does not read 'match', because this page is ISR
                — one cached document serves every visitor, so anything computed
                here would be identical for the owner, a broker and a stranger.
 
@@ -209,15 +209,15 @@ export default async function PropertyRoute({ params }) {
         </div>
 
         {/* ── VIEW TRACKING (§59 · W18.2) ───────────────────────────────
-            `/api/analytics` existed, worked, and had NO caller — so
-            `analytics_events` had 0 rows and the Monthly Scout Wrap (W9) had
+            '/api/analytics' existed, worked, and had NO caller — so
+            'analytics_events' had 0 rows and the Monthly Scout Wrap (W9) had
             nothing to report. This is that missing caller.
 
             Renders nothing. It sends the SLUG, not an id: this page renders
             from Airtable and only holds a slug, while
-            `analytics_events.property_id` is a uuid FK to Supabase
-            `properties(id)`. The server resolves the mapping via
-            `findProperty`. Sending the slug as an id would fail the uuid cast
+            'analytics_events.property_id' is a uuid FK to Supabase
+            'properties(id)'. The server resolves the mapping via
+            'findProperty'. Sending the slug as an id would fail the uuid cast
             on every event, silently.
 
             Safe on an ISR page: this is a client component, so it runs per

@@ -344,7 +344,7 @@ function ClaimStyles() {
         margin-bottom: 9px;
       }
       .cp-title {
-        font-family: Georgia, serif;
+        font-family: var(--font-display);
         font-weight: 400;
         font-size: 18px;
         line-height: 1.3;
@@ -352,7 +352,7 @@ function ClaimStyles() {
         margin: 0 0 9px;
       }
       .cp-body {
-        font-family: Georgia, serif;
+        font-family: var(--font-display);
         font-size: 13.5px;
         line-height: 1.7;
         color: var(--text-secondary, #c8c8c8);
@@ -360,7 +360,7 @@ function ClaimStyles() {
         max-width: 56ch;
       }
       .cp-note {
-        font-family: Georgia, serif;
+        font-family: var(--font-display);
         font-size: 12px;
         line-height: 1.65;
         color: var(--text-muted, #6a6a6a);
@@ -414,7 +414,7 @@ function ClaimStyles() {
       .cp-opt__main { min-width: 0; flex: 1; }
       .cp-opt__label {
         display: block;
-        font-family: Georgia, serif;
+        font-family: var(--font-display);
         font-size: 14.5px;
         line-height: 1.35;
         color: var(--text-primary, #f0ede8);
@@ -422,7 +422,7 @@ function ClaimStyles() {
       }
       .cp-opt__detail {
         display: block;
-        font-family: Georgia, serif;
+        font-family: var(--font-display);
         font-size: 12.5px;
         line-height: 1.6;
         color: #8a8a8a;
@@ -433,7 +433,7 @@ function ClaimStyles() {
         border-left: 2px solid #6E531A;
         padding: 11px 12px;
         margin: 14px 0 10px;
-        font-family: Georgia, serif;
+        font-family: var(--font-display);
         font-size: 12.5px;
         line-height: 1.65;
         color: #c8c8c8;
@@ -455,7 +455,7 @@ function ClaimStyles() {
         cursor: pointer;
       }
       .cp-agree__text {
-        font-family: Georgia, serif;
+        font-family: var(--font-display);
         font-size: 12.5px;
         line-height: 1.6;
         color: #c8c8c8;

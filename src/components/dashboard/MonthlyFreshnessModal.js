@@ -141,8 +141,8 @@ export default function MonthlyFreshnessModal({ onOpenEditor }) {
           max-height: 92vh;
           overflow-y: auto;
           -webkit-overflow-scrolling: touch;
-          background: #121212;
-          border: 0.5px solid #262626;
+          background: var(--surface);
+          border: 0.5px solid var(--border-solid);
           border-bottom: none;
           border-radius: 10px 10px 0 0;
           padding: 22px 18px 18px;
@@ -150,24 +150,24 @@ export default function MonthlyFreshnessModal({ onOpenEditor }) {
         .mf-eyebrow {
           font-family: ${MONO};
           font-size: 9px;
-          color: var(--accent, #E8AE3C);
+          color: var(--accent, var(--accent));
           letter-spacing: 0.22em;
           text-transform: uppercase;
           margin-bottom: 8px;
         }
         .mf-title {
-          font-family: Georgia, serif;
+          font-family: var(--font-display);
           font-size: 20px;
           line-height: 1.3;
-          color: #f0ede8;
+          color: var(--text-primary);
           margin: 0 0 8px;
           font-weight: 400;
         }
         .mf-sub {
-          font-family: Georgia, serif;
+          font-family: var(--font-display);
           font-size: 13px;
           line-height: 1.7;
-          color: #8a8a8a;
+          color: var(--text-secondary);
           margin: 0 0 18px;
         }
         .mf-row {
@@ -175,21 +175,21 @@ export default function MonthlyFreshnessModal({ onOpenEditor }) {
           gap: 11px;
           align-items: flex-start;
           padding: 13px 0;
-          border-bottom: 1px solid #1e1e1e;
+          border-bottom: 1px solid var(--border-solid);
         }
         .mf-check {
           flex: 0 0 auto;
           width: 20px;
           height: 20px;
           margin-top: 2px;
-          accent-color: #E8AE3C;
+          accent-color: var(--accent);
           cursor: pointer;
         }
         .mf-row__main { min-width: 0; flex: 1; }
         .mf-row__title {
-          font-family: Georgia, serif;
+          font-family: var(--font-display);
           font-size: 14.5px;
-          color: #f0ede8;
+          color: var(--text-primary);
           line-height: 1.35;
           overflow-wrap: anywhere;
           margin-bottom: 5px;
@@ -197,7 +197,7 @@ export default function MonthlyFreshnessModal({ onOpenEditor }) {
         .mf-row__loc {
           font-family: ${MONO};
           font-size: 8.5px;
-          color: #6a6a6a;
+          color: var(--text-muted);
           letter-spacing: 0.1em;
           text-transform: uppercase;
           margin-bottom: 7px;
@@ -206,7 +206,7 @@ export default function MonthlyFreshnessModal({ onOpenEditor }) {
           background: none;
           border: none;
           padding: 8px 0 0;
-          color: #8a8a8a;
+          color: var(--text-secondary);
           font-family: ${MONO};
           font-size: 9px;
           letter-spacing: 0.12em;
@@ -215,17 +215,17 @@ export default function MonthlyFreshnessModal({ onOpenEditor }) {
           text-decoration: underline;
           min-height: 36px;
         }
-        .mf-row__edit:hover { color: var(--accent, #E8AE3C); }
+        .mf-row__edit:hover { color: var(--accent, var(--accent)); }
 
         .mf-warn {
           background: rgba(232, 174, 60, 0.06);
-          border-left: 2px solid var(--accent-muted, #6E531A);
+          border-left: 2px solid var(--accent-muted, var(--accent-muted));
           padding: 11px 13px;
           margin: 16px 0;
-          font-family: Georgia, serif;
+          font-family: var(--font-display);
           font-size: 12.5px;
           line-height: 1.65;
-          color: #c8c8c8;
+          color: var(--text-secondary);
         }
         .mf-actions {
           display: flex;
@@ -234,7 +234,7 @@ export default function MonthlyFreshnessModal({ onOpenEditor }) {
           margin-top: 18px;
           position: sticky;
           bottom: 0;
-          background: #121212;
+          background: var(--surface);
           padding-top: 12px;
         }
         .mf-btn {
@@ -248,12 +248,12 @@ export default function MonthlyFreshnessModal({ onOpenEditor }) {
           cursor: pointer;
         }
         .mf-btn:disabled { opacity: 0.35; cursor: not-allowed; }
-        .mf-btn--gold  { background: #F7C64E; border: none; color: #0d0d0d; font-weight: bold; }
-        .mf-btn--ghost { background: transparent; border: 0.5px solid #262626; color: #c8c8c8; }
+        .mf-btn--gold  { background: var(--accent-fill); border: none; color: var(--on-accent); font-weight: bold; }
+        .mf-btn--ghost { background: transparent; border: 0.5px solid var(--border-solid); color: var(--text-secondary); }
         .mf-error {
           font-family: ${MONO};
           font-size: 10px;
-          color: #e06c6c;
+          color: var(--red);
           letter-spacing: 0.05em;
           line-height: 1.6;
           margin-top: 10px;
@@ -261,10 +261,10 @@ export default function MonthlyFreshnessModal({ onOpenEditor }) {
         .mf-done {
           text-align: center;
           padding: 12px 0 4px;
-          font-family: Georgia, serif;
+          font-family: var(--font-display);
           font-size: 14px;
           line-height: 1.7;
-          color: #d8d5d0;
+          color: var(--text-primary);
         }
 
         /* ── DESKTOP: centred card ────────────────────────────────────── */
@@ -273,7 +273,7 @@ export default function MonthlyFreshnessModal({ onOpenEditor }) {
           .mf-card {
             max-width: 560px;
             border-radius: 6px;
-            border-bottom: 0.5px solid #262626;
+            border-bottom: 0.5px solid var(--border-solid);
             padding: 28px 30px 24px;
           }
           .mf-title { font-size: 23px; }
@@ -291,7 +291,7 @@ export default function MonthlyFreshnessModal({ onOpenEditor }) {
             </h2>
             <div className="mf-done">
               Marked verified as of today. They&apos;ll show a{" "}
-              <span style={{ color: "#7fbf7f" }}>🥇 Verified Fresh</span> badge and return to top
+              <span style={{ color: "var(--green)" }}>🥇 Verified Fresh</span> badge and return to top
               placement in discovery.
             </div>
             {done.cmsSyncPending.length > 0 && (
@@ -313,7 +313,7 @@ export default function MonthlyFreshnessModal({ onOpenEditor }) {
             <p className="mf-sub">
               {items.length} listing{items.length === 1 ? "" : "s"} haven&apos;t been verified in
               over 30 days. Confirming means you&apos;re asserting the details are{" "}
-              <strong style={{ color: "#c8c8c8" }}>still accurate</strong> — if anything changed,
+              <strong style={{ color: "var(--text-secondary)" }}>still accurate</strong> — if anything changed,
               update it instead.
             </p>
 

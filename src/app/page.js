@@ -1123,7 +1123,7 @@ export default function Home() {
         .scoutit-wordmark .word-s,
         .scoutit-wordmark .word-scout,
         .scoutit-wordmark .word-it {
-          font-family: Georgia, 'Times New Roman', serif;
+          font-family: var(--font-display);
           font-weight: 400;
           font-size: clamp(64px, 10vw, 120px);
           letter-spacing: 4px;
@@ -1303,7 +1303,7 @@ export default function Home() {
           font-weight: 400;
         }
         .title-tagline-1 {
-          font-family: Georgia, serif;
+          font-family: var(--font-display);
           font-style: italic;
           font-size: 20px;
           color: #aaaaaa;
@@ -1612,7 +1612,7 @@ export default function Home() {
         .hero-tagline {
           font-family: var(--font-display);
           font-size: clamp(36px, 5vw, 68px);
-          font-weight: 700;
+          font-weight: 400;
           line-height: 1.2;
           letter-spacing: -0.015em;
           color: var(--text-primary);
@@ -1630,7 +1630,7 @@ export default function Home() {
           font-family: var(--font-body);
           font-size: clamp(16px, 2.2vw, 22px);
           font-weight: 300;
-          color: rgba(240, 237, 232, 0.85);
+          color: var(--text-secondary);
           margin-top: 0;
           margin-bottom: 48px;
           letter-spacing: 0.04em;
@@ -2064,7 +2064,7 @@ export default function Home() {
         .mini-card-body h4 {
           font-family: var(--font-display);
           font-size: 20px;
-          font-weight: 500;
+          font-weight: 400;
           color: var(--text-primary);
           margin-bottom: 12px;
         }
@@ -2359,14 +2359,14 @@ export default function Home() {
         .broker-ghost-lines .line-1 {
           height: 12px;
           width: 70%;
-          background: rgba(240, 237, 232, 0.1);
+          background: var(--text-muted);
           border-radius: 2px;
         }
 
         .broker-ghost-lines .line-2 {
           height: 8px;
           width: 40%;
-          background: rgba(240, 237, 232, 0.05);
+          background: var(--text-muted);
           border-radius: 2px;
         }
 
@@ -2464,7 +2464,7 @@ export default function Home() {
           font-size: 20px;
           color: #fff;
           margin-bottom: 12px;
-          font-weight: 600;
+          font-weight: 400;
           letter-spacing: 0.02em;
         }
 
@@ -2552,7 +2552,7 @@ export default function Home() {
           content: "";
           height: 12px;
           width: 30%;
-          background: rgba(240, 237, 232, 0.05);
+          background: var(--text-muted);
           border-radius: 2px;
         }
         .ledger-ghost-row::after {

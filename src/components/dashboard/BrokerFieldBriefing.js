@@ -173,8 +173,8 @@ export default function BrokerFieldBriefing({ listing, brokerName, onClose }) {
           text-transform: uppercase;
           cursor: pointer;
         }
-        .bfb-btn--gold  { background: #F7C64E; border: none; color: #0d0d0d; font-weight: bold; }
-        .bfb-btn--ghost { background: #161616; border: 0.5px solid #333; color: #c8c8c8; }
+        .bfb-btn--gold  { background: var(--accent-fill); border: none; color: var(--on-accent); font-weight: bold; }
+        .bfb-btn--ghost { background: var(--surface); border: 0.5px solid var(--border-solid); color: var(--text-secondary); }
 
         .bfb-sheet {
           background: #ffffff;
@@ -183,15 +183,15 @@ export default function BrokerFieldBriefing({ listing, brokerName, onClose }) {
           padding: 20px 18px;
           max-width: 210mm;
           margin: 0 auto;
-          font-family: Georgia, serif;
+          font-family: var(--font-display);
         }
-        .bfb-head { border-bottom: 2px solid #111; padding-bottom: 12px; margin-bottom: 16px; }
+        .bfb-head { border-bottom: 2px solid var(--border-solid); padding-bottom: 12px; margin-bottom: 16px; }
         .bfb-brand {
           font-family: ${MONO};
           font-size: 9px;
           letter-spacing: 0.28em;
           text-transform: uppercase;
-          color: #8a6d20;
+          color: var(--accent-muted);
           margin-bottom: 7px;
         }
         .bfb-title { font-size: 20px; line-height: 1.25; margin: 0 0 6px; font-weight: 600; }
@@ -199,7 +199,7 @@ export default function BrokerFieldBriefing({ listing, brokerName, onClose }) {
           font-family: ${MONO};
           font-size: 9px;
           letter-spacing: 0.1em;
-          color: #555;
+          color: var(--text-muted);
           line-height: 1.7;
           text-transform: uppercase;
         }
@@ -210,8 +210,8 @@ export default function BrokerFieldBriefing({ listing, brokerName, onClose }) {
           font-size: 9px;
           letter-spacing: 0.2em;
           text-transform: uppercase;
-          color: #8a6d20;
-          border-bottom: 1px solid #ccc;
+          color: var(--accent-muted);
+          border-bottom: 1px solid var(--border-solid);
           padding-bottom: 4px;
           margin: 0 0 8px;
         }
@@ -220,11 +220,11 @@ export default function BrokerFieldBriefing({ listing, brokerName, onClose }) {
           justify-content: space-between;
           gap: 14px;
           padding: 5px 0;
-          border-bottom: 1px dotted #ddd;
+          border-bottom: 1px dotted var(--border-solid);
           font-size: 12.5px;
           line-height: 1.5;
         }
-        .bfb-row__k { color: #555; flex-shrink: 0; }
+        .bfb-row__k { color: var(--text-muted); flex-shrink: 0; }
         .bfb-row__v { text-align: right; font-weight: 600; overflow-wrap: anywhere; }
 
         .bfb-tax { width: 100%; border-collapse: collapse; font-size: 11.5px; }
@@ -233,33 +233,33 @@ export default function BrokerFieldBriefing({ listing, brokerName, onClose }) {
           font-size: 8px;
           letter-spacing: 0.12em;
           text-transform: uppercase;
-          color: #555;
+          color: var(--text-muted);
           text-align: left;
           padding: 4px 6px 4px 0;
-          border-bottom: 1px solid #ccc;
+          border-bottom: 1px solid var(--border-solid);
         }
-        .bfb-tax td { padding: 6px 6px 6px 0; border-bottom: 1px dotted #ddd; vertical-align: top; }
+        .bfb-tax td { padding: 6px 6px 6px 0; border-bottom: 1px dotted var(--border-solid); vertical-align: top; }
         .bfb-tax .num { text-align: right; font-weight: 600; white-space: nowrap; }
-        .bfb-tax tfoot td { border-top: 2px solid #111; border-bottom: none; font-weight: 700; padding-top: 7px; }
-        .bfb-tax__note { font-size: 9.5px; color: #666; line-height: 1.5; font-style: italic; }
+        .bfb-tax tfoot td { border-top: 2px solid var(--border-solid); border-bottom: none; font-weight: 700; padding-top: 7px; }
+        .bfb-tax__note { font-size: 9.5px; color: var(--text-muted); line-height: 1.5; font-style: italic; }
 
         .bfb-warn {
           background: #fff8e6;
-          border-left: 3px solid #8a6d20;
+          border-left: 3px solid var(--accent-muted);
           padding: 9px 11px;
           font-size: 10px;
           line-height: 1.6;
           color: #4a3c10;
           margin-top: 9px;
         }
-        .bfb-obj { padding: 8px 0; border-bottom: 1px dotted #ddd; break-inside: avoid; }
+        .bfb-obj { padding: 8px 0; border-bottom: 1px dotted var(--border-solid); break-inside: avoid; }
         .bfb-obj__q { font-size: 12.5px; font-weight: 700; margin-bottom: 3px; }
         .bfb-obj__a { font-size: 11.5px; line-height: 1.6; color: #333; }
 
         .bfb-foot {
           margin-top: 18px;
           padding-top: 10px;
-          border-top: 2px solid #111;
+          border-top: 2px solid var(--border-solid);
           font-size: 8.5px;
           line-height: 1.65;
           color: #444;

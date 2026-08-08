@@ -94,7 +94,7 @@ const OwnerListingCard = memo(({
             </div>
             <div className="flex items-end justify-end">
               <button 
-                className="text-gold-accent border border-gold-accent/30 rounded px-3 py-1.5 text-[10px] uppercase font-label-caps tracking-widest hover:bg-gold-accent hover:text-background transition-colors"
+                className="text-gold-accent border border-gold-accent/30 rounded px-3 py-1.5 text-[10px] uppercase font-label-caps tracking-widest hover:bg-gold-accent hover:text-background transition"
                 onClick={handleShare}
               >
                 Share

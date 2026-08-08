@@ -36,7 +36,7 @@
 }
 
 .directory-header h1 {
-  font-family: var(--font-display), Georgia, serif;
+  font-family: var(--font-display);
   font-size: 38px;
   letter-spacing: 0.02em;
   color: var(--text-primary);
@@ -81,7 +81,7 @@
   color: var(--text-primary);
   font-family: var(--font-display), sans-serif;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 400;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   transition: background var(--transition-fast);
@@ -115,7 +115,7 @@
   min-height: 44px;
   padding: 4px 0;
   font-size: 12px;
-  color: var(--text-secondary, rgba(240, 237, 232, 0.62));
+  color: var(--text-secondary, var(--text-secondary));
   cursor: pointer;
   transition: color var(--transition-fast), transform 0.12s ease;
 }
@@ -201,12 +201,12 @@
 
 .intel-widget-item span {
   font-size: 10px;
-  color: var(--text-muted, rgba(240, 237, 232, 0.38));
+  color: var(--text-muted, var(--text-muted));
 }
 
 .intel-widget-empty {
   font-size: 11px;
-  color: var(--text-muted, rgba(240, 237, 232, 0.38));
+  color: var(--text-muted, var(--text-muted));
   line-height: 1.5;
 }
 
@@ -313,7 +313,7 @@
 }
 
 .property-card-body h3 {
-  font-family: var(--font-display), Georgia, serif;
+  font-family: var(--font-display);
   font-size: 20px;
   color: var(--text-primary);
   margin-bottom: 6px;
@@ -325,7 +325,7 @@
 
 .property-card-body p.hook {
   font-size: 12px;
-  color: var(--text-secondary, rgba(240, 237, 232, 0.62));
+  color: var(--text-secondary, var(--text-secondary));
   line-height: 1.5;
   margin-bottom: 16px;
   flex-grow: 1;
@@ -342,7 +342,7 @@
 
 .property-spec-badge {
   font-size: 10px;
-  color: var(--text-secondary, rgba(240, 237, 232, 0.62));
+  color: var(--text-secondary, var(--text-secondary));
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--border-solid);
   padding: 2px 8px;
@@ -383,15 +383,48 @@
 }
 
 .directory-empty h3 {
-  font-family: var(--font-display), Georgia, serif;
+  font-family: var(--font-display);
   font-size: 20px;
   color: var(--text-primary);
   margin-bottom: 8px;
 }
 
 .directory-empty p {
-  font-size: 12px;
-  color: var(--text-secondary, rgba(240, 237, 232, 0.62));
+  font-size: 13px;
+  line-height: 1.6;
+  max-width: 46ch;
+  margin: 0 auto;
+  color: var(--text-secondary);
+}
+
+/* The founding-cohort call to action. An empty roster is an invitation, not a
+   failed search — so the empty state gets a way to act on it. */
+.directory-empty .founding-cta {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 10px 22px;
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  text-decoration: none;
+  transition: background 160ms var(--ease-out-custom), color 160ms var(--ease-out-custom);
+}
+
+.directory-empty .founding-cta:hover {
+  background: var(--accent-fill);
+  color: var(--on-accent);
+  border-color: var(--accent-fill);
+}
+
+.directory-empty .founding-cta:active { transform: scale(0.98); }
+
+@media (prefers-reduced-motion: reduce) {
+  .directory-empty .founding-cta,
+  .directory-empty .founding-cta:active { transition: none; transform: none; }
 }
 
 /* ══════════════════════════════════════
@@ -426,7 +459,7 @@
     color: var(--text-primary);
     font-family: var(--font-display), sans-serif;
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 400;
     letter-spacing: 0.05em;
     text-transform: uppercase;
     cursor: pointer;

@@ -40,7 +40,7 @@ export const MINIMUM_AGE = 18;
 export const ADULT_STATUSES = new Set(["declared_adult", "verified_adult"]);
 
 /**
- * Whole years elapsed between a birth date and `now`.
+ * Whole years elapsed between a birth date and 'now'.
  *
  * Calendar-correct: compares month and day rather than dividing by 365.25,
  * so someone whose birthday is tomorrow is not counted as already older. On a

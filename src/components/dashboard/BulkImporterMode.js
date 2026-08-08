@@ -138,7 +138,7 @@ export default function BulkImporterMode({ onClose }) {
       <div className="p-4 border-b border-surface-variant bg-surface flex justify-between items-center shrink-0">
         <button 
           onClick={onClose} 
-          className="text-text-secondary hover:text-gold-accent text-xs font-label-caps tracking-widest uppercase transition-colors"
+          className="text-text-secondary hover:text-gold-accent text-xs font-label-caps tracking-widest uppercase transition"
         >
           ← Exit Importer
         </button>
@@ -149,7 +149,7 @@ export default function BulkImporterMode({ onClose }) {
 
       <div className="flex-1 flex flex-col p-6 lg:p-12 overflow-hidden gap-6">
         {/* TOP: Upload Zone */}
-        <div className="shrink-0 bg-[#121110] border-2 border-dashed border-surface-variant rounded-lg p-8 flex flex-col items-center justify-center relative hover:border-gold-accent transition-colors">
+        <div className="shrink-0 bg-surface border-2 border-dashed border-surface-variant rounded-lg p-8 flex flex-col items-center justify-center relative hover:border-gold-accent transition">
           <h2 className="font-display-md text-2xl text-on-surface mb-2">Upload CSV Portfolio</h2>
           <p className="text-sm text-text-secondary mb-6 text-center max-w-xl leading-relaxed">
             Ensure your CSV contains columns matching our schema (e.g., <strong>Title, Location, Category, Price, Condition, Layout, Size (sqm)</strong>). 
@@ -164,7 +164,7 @@ export default function BulkImporterMode({ onClose }) {
           />
           <label 
             htmlFor="csv-upload" 
-            className="cursor-pointer bg-surface-alt border border-gold-accent text-gold-accent font-working-title px-6 py-3 rounded hover:bg-gold-accent/10 transition-colors"
+            className="cursor-pointer bg-surface-alt border border-gold-accent text-gold-accent font-working-title px-6 py-3 rounded hover:bg-gold-accent/10 transition"
           >
             Browse CSV File
           </label>
@@ -172,7 +172,7 @@ export default function BulkImporterMode({ onClose }) {
 
         {/* MIDDLE: Data Grid */}
         <div className="flex-1 bg-surface border border-surface-variant rounded-lg flex flex-col overflow-hidden relative">
-          <div className="p-4 border-b border-surface-variant bg-[#0a0a0a] flex justify-between items-center shrink-0">
+          <div className="p-4 border-b border-surface-variant bg-background flex justify-between items-center shrink-0">
             <h3 className="font-working-title text-gold-accent text-sm">Data Grid Preview</h3>
             <span className="text-xs text-text-secondary">{csvData.length} rows loaded</span>
           </div>
@@ -192,7 +192,7 @@ export default function BulkImporterMode({ onClose }) {
                 </thead>
                 <tbody>
                   {csvData.map((row, idx) => (
-                    <tr key={row._id} className="border-b border-surface-variant/50 hover:bg-surface-alt/50 transition-colors">
+                    <tr key={row._id} className="border-b border-surface-variant/50 hover:bg-surface-alt/50 transition">
                       <td className="p-3 text-xs text-text-muted text-center bg-surface-alt/30">{idx + 1}</td>
                       {columns.map(col => (
                         <td key={col} className="p-0 border-l border-surface-variant/50">
@@ -221,7 +221,7 @@ export default function BulkImporterMode({ onClose }) {
           <button 
             onClick={handleSubmit}
             disabled={csvData.length === 0 || isProcessing}
-            className="bg-gold-accent text-background font-working-title font-bold px-8 py-4 rounded hover:opacity-90 disabled:opacity-50 transition-all uppercase tracking-widest text-sm shadow-[0_0_15px_rgba(232,174,60,0.2)]"
+            className="bg-gold-accent text-background font-working-title font-bold px-8 py-4 rounded hover:opacity-90 disabled:opacity-50 transition uppercase tracking-widest text-sm shadow-[0_0_15px_rgba(232,174,60,0.2)]"
           >
             {isProcessing ? "Processing..." : "Process & Import Portfolio"}
           </button>

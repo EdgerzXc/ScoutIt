@@ -238,7 +238,7 @@ function DashboardInner() {
           {/* Custom Desktop Mode Switcher */}
           <div className="hidden md:block relative" ref={switcherRef}>
             <button 
-              className="flex items-center gap-2 bg-surface hover:bg-surface-alt border border-surface-variant text-on-surface text-sm font-working-title px-4 py-2 rounded-full uppercase tracking-wider active:scale-[0.97] transition-all duration-160 ease-out"
+              className="flex items-center gap-2 bg-surface hover:bg-surface-alt border border-surface-variant text-on-surface text-sm font-working-title px-4 py-2 rounded-full uppercase tracking-wider active:scale-[0.97] transition duration-160 ease-out"
               onClick={() => setShowDesktopSwitcher(!showDesktopSwitcher)}
             >
               <span className="text-gold-accent font-semibold">Mode:</span> {TAG_LABELS[mode]}
@@ -254,7 +254,7 @@ function DashboardInner() {
                   {user.tags.map(tagId => (
                     <button
                       key={tagId}
-                      className={`text-left px-4 py-3 font-working-title text-sm active:scale-[0.97] transition-all duration-160 ease-out hover:bg-surface-container ${mode === tagId ? 'text-gold-accent bg-surface-container-low border-l-2 border-gold-accent' : 'text-on-surface border-l-2 border-transparent'}`}
+                      className={`text-left px-4 py-3 font-working-title text-sm active:scale-[0.97] transition duration-160 ease-out hover:bg-surface-container ${mode === tagId ? 'text-gold-accent bg-surface-container-low border-l-2 border-gold-accent' : 'text-on-surface border-l-2 border-transparent'}`}
                       onClick={() => handleSwitchMode(tagId)}
                     >
                       {TAG_LABELS[tagId]}
@@ -271,7 +271,7 @@ function DashboardInner() {
                       {addableModes.map(m => (
                         <button
                           key={m.id}
-                          className="text-left px-4 py-3 active:scale-[0.97] transition-all duration-160 ease-out hover:bg-surface-container group"
+                          className="text-left px-4 py-3 active:scale-[0.97] transition duration-160 ease-out hover:bg-surface-container group"
                           onClick={() => startActivation(m.id)}
                         >
                           <span className="font-working-title text-sm text-gold-accent flex items-center gap-2">{m.icon} {m.cta}</span>
@@ -289,7 +289,7 @@ function DashboardInner() {
         <div className="flex items-center gap-4 md:gap-6">
           <div className="hidden md:block relative">
             <button
-              className="flex items-center gap-2 text-gold-accent font-label-caps text-[11px] tracking-widest bg-gold-accent/10 px-3 py-1.5 rounded-full hover:bg-gold-accent/20 active:scale-[0.97] transition-all duration-160 ease-out"
+              className="flex items-center gap-2 text-gold-accent font-label-caps text-[11px] tracking-widest bg-gold-accent/10 px-3 py-1.5 rounded-full hover:bg-gold-accent/20 active:scale-[0.97] transition duration-160 ease-out"
               title="View your Connects breakdown"
               onClick={() => setShowConnectsBreakdown((v) => !v)}
             >
@@ -309,7 +309,7 @@ function DashboardInner() {
           {(mode === "owner" || mode === "broker") && (
             <Link
               href="/dashboard/crm"
-              className="relative w-11 h-11 flex items-center justify-center text-text-secondary hover:text-gold-accent transition-colors"
+              className="relative w-11 h-11 flex items-center justify-center text-text-secondary hover:text-gold-accent transition"
               aria-label="Master CRM"
               title="Master CRM"
             >
@@ -319,7 +319,7 @@ function DashboardInner() {
 
           <Link
             href="/dashboard/inbox"
-            className="relative w-11 h-11 flex items-center justify-center text-text-secondary hover:text-gold-accent transition-colors"
+            className="relative w-11 h-11 flex items-center justify-center text-text-secondary hover:text-gold-accent transition"
             aria-label="Inbox"
             title="Inbox"
           >
@@ -370,7 +370,7 @@ function DashboardInner() {
                               setShowNotifications(false);
                             }
                           }}
-                          className={`p-4 border-b border-surface-variant/50 flex gap-3 transition-colors ${!notif.read ? 'bg-surface-container-low' : ''} ${(notif.notificationType === 'inquiry' || notif.propertyId) ? 'cursor-pointer hover:bg-surface-variant' : ''}`}
+                          className={`p-4 border-b border-surface-variant/50 flex gap-3 transition ${!notif.read ? 'bg-surface-container-low' : ''} ${(notif.notificationType === 'inquiry' || notif.propertyId) ? 'cursor-pointer hover:bg-surface-variant' : ''}`}
                         >
                           <div className="text-2xl shrink-0">{notif.icon}</div>
                           <div>
@@ -387,12 +387,12 @@ function DashboardInner() {
 
           {/* Desktop User Menu (Hidden on mobile) */}
           <div className="hidden md:flex items-center gap-3">
-            <Link href="/settings" title="Account Settings" className="text-lg text-text-secondary hover:text-on-surface transition-colors">⚙️</Link>
-            <Link href={`/profile/${encodeURIComponent(user.name)}`} title="View Public Profile" className="w-8 h-8 rounded-full bg-surface-variant border border-surface-variant flex items-center justify-center font-working-title text-sm font-bold text-on-surface hover:border-gold-accent transition-colors">
+            <Link href="/settings" title="Account Settings" className="text-lg text-text-secondary hover:text-on-surface transition">⚙️</Link>
+            <Link href={`/profile/${encodeURIComponent(user.name)}`} title="View Public Profile" className="w-8 h-8 rounded-full bg-surface-variant border border-surface-variant flex items-center justify-center font-working-title text-sm font-bold text-on-surface hover:border-gold-accent transition">
               {user.name ? user.name.substring(0,2).toUpperCase() : 'U'}
             </Link>
             <button 
-              className="text-lg text-text-secondary hover:text-error transition-colors ml-2"
+              className="text-lg text-text-secondary hover:text-error transition ml-2"
               onClick={handleSignOut}
               title="Sign Out"
             >
@@ -420,7 +420,7 @@ function DashboardInner() {
               />
             </div>
             <button
-              className="w-10 h-10 rounded-full bg-surface-alt border border-surface-variant flex items-center justify-center font-working-title text-sm font-bold text-on-surface hover:border-gold-accent transition-colors"
+              className="w-10 h-10 rounded-full bg-surface-alt border border-surface-variant flex items-center justify-center font-working-title text-sm font-bold text-on-surface hover:border-gold-accent transition"
               onClick={() => setShowMobileProfileMenu(true)}
               title="Open Mobile Menu"
               aria-label="Open menu"
@@ -442,7 +442,7 @@ function DashboardInner() {
 
       {/* Primary Action FAB (Floating above global BottomNav) */}
       <button
-        className="md:hidden fixed bottom-24 right-4 z-40 bg-gold-accent text-background w-14 h-14 rounded-full flex flex-col items-center justify-center shadow-[0_8px_24px_rgba(232,174,60,0.4)] hover:opacity-90 transition-all border-2 border-surface-alt"
+        className="md:hidden fixed bottom-24 right-4 z-40 bg-gold-accent text-background w-14 h-14 rounded-full flex flex-col items-center justify-center shadow-[0_8px_24px_rgba(232,174,60,0.4)] hover:opacity-90 transition border-2 border-surface-alt"
         onClick={firePrimaryAction}
         aria-label={primaryAction.label}
       >
@@ -459,7 +459,7 @@ function DashboardInner() {
                 <h3 className="font-headline-editorial text-2xl text-on-surface mb-2">Become a Broker</h3>
                 <p className="text-sm text-text-secondary mb-6">Enter your PRC Real Estate Broker license number to activate Broker Mode. We check the format only — verification happens later.</p>
                 <input
-                  className="w-full bg-surface-alt border border-surface-variant rounded px-4 py-3 text-on-surface focus:outline-none focus:border-gold-accent transition-colors uppercase mb-2"
+                  className="w-full bg-surface-alt border border-surface-variant rounded px-4 py-3 text-on-surface focus:outline-none focus:border-gold-accent transition uppercase mb-2"
                   type="text"
                   placeholder="PRC-REB-XXXXXXX"
                   value={activationLicense}
@@ -470,7 +470,7 @@ function DashboardInner() {
                   <p className="text-error text-xs mb-2">Should contain at least 5 digits.</p>
                 )}
                 <div className="flex gap-3 mt-4">
-                  <button className="flex-1 px-4 py-3 border border-surface-variant text-text-secondary rounded hover:text-on-surface hover:bg-surface-container transition-colors" onClick={() => setActivating(null)}>Cancel</button>
+                  <button className="flex-1 px-4 py-3 border border-surface-variant text-text-secondary rounded hover:text-on-surface hover:bg-surface-container transition" onClick={() => setActivating(null)}>Cancel</button>
                   <button
                     className="flex-1 bg-gold-accent text-background font-working-title font-bold px-4 py-3 rounded hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
                     disabled={!prcFormatOk}
@@ -488,7 +488,7 @@ function DashboardInner() {
                   {PROVIDER_TYPES.map(pt => (
                     <button
                       key={pt.id}
-                      className={`text-left p-4 rounded border font-working-title text-sm transition-colors ${activationProviderType === pt.id ? 'bg-surface-container-low border-gold-accent text-gold-accent' : 'bg-surface-alt border-surface-variant text-on-surface hover:border-text-secondary'}`}
+                      className={`text-left p-4 rounded border font-working-title text-sm transition ${activationProviderType === pt.id ? 'bg-surface-container-low border-gold-accent text-gold-accent' : 'bg-surface-alt border-surface-variant text-on-surface hover:border-text-secondary'}`}
                       onClick={() => setActivationProviderType(pt.id)}
                     >
                       {pt.label} {activationProviderType === pt.id && "✓"}
@@ -496,7 +496,7 @@ function DashboardInner() {
                   ))}
                 </div>
                 <div className="flex gap-3 mt-4">
-                  <button className="flex-1 px-4 py-3 border border-surface-variant text-text-secondary rounded hover:text-on-surface hover:bg-surface-container transition-colors" onClick={() => setActivating(null)}>Cancel</button>
+                  <button className="flex-1 px-4 py-3 border border-surface-variant text-text-secondary rounded hover:text-on-surface hover:bg-surface-container transition" onClick={() => setActivating(null)}>Cancel</button>
                   <button
                     className="flex-1 bg-gold-accent text-background font-working-title font-bold px-4 py-3 rounded hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
                     disabled={!activationProviderType}
@@ -538,7 +538,7 @@ function DashboardInner() {
               {user.tags.length > 1 && user.tags.map(tagId => (
                 <button
                   key={tagId}
-                  className={`flex items-center justify-between p-4 rounded-lg font-working-title text-sm border transition-colors ${mode === tagId ? 'bg-surface-container-low border-gold-accent text-gold-accent' : 'bg-surface border-surface-variant text-on-surface hover:border-text-secondary'}`}
+                  className={`flex items-center justify-between p-4 rounded-lg font-working-title text-sm border transition ${mode === tagId ? 'bg-surface-container-low border-gold-accent text-gold-accent' : 'bg-surface border-surface-variant text-on-surface hover:border-text-secondary'}`}
                   onClick={() => handleSwitchMode(tagId)}
                 >
                   <span className="uppercase tracking-wider">{TAG_LABELS[tagId]}</span>
@@ -556,7 +556,7 @@ function DashboardInner() {
                   {addableModes.map(m => (
                     <button
                       key={m.id}
-                      className="text-left p-4 rounded-lg border border-dashed border-gold-accent/40 bg-surface hover:border-gold-accent transition-colors"
+                      className="text-left p-4 rounded-lg border border-dashed border-gold-accent/40 bg-surface hover:border-gold-accent transition"
                       onClick={() => startActivation(m.id)}
                     >
                       <span className="font-working-title text-sm text-gold-accent flex items-center gap-2">{m.icon} {m.cta}</span>

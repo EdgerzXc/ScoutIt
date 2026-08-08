@@ -410,7 +410,7 @@ export default function IntelPage() {
                       const linkedProp = null;
                       if (!linkedProp) return null;
                       return (
-                        <div style={{ marginTop: "12px", borderTop: "1px dashed rgba(255,255,255,0.08)", paddingTop: "12px" }}>
+                        <div style={{ marginTop: "12px", borderTop: "1px dashed var(--border)", paddingTop: "12px" }}>
                           <span style={{ fontSize: "10px", fontFamily: "var(--font-mono)", color: "var(--accent)" }}>
                             FEATURED SPACE:{" "}
                             <span
@@ -434,7 +434,7 @@ export default function IntelPage() {
               ))
             ) : (
               <div className="articles-empty-state" style={{ gridColumn: "1 / -1", textAlign: "center", padding: "60px 20px" }}>
-                <h3 style={{ fontFamily: "var(--font-display)", color: "#fff", fontSize: "20px" }}>No Briefings Found</h3>
+                <h3 style={{ fontFamily: "var(--font-display)", color: "var(--text-primary)", fontSize: "22px", letterSpacing: "-0.01em" }}>No Briefings Found</h3>
                 <p style={{ color: "var(--text-secondary)", fontSize: "12px", marginTop: "8px" }}>Try refining your search terms or selecting a different sector filter.</p>
               </div>
             )}
@@ -463,7 +463,7 @@ export default function IntelPage() {
                   <span>Briefing Integrity Deep Scan</span>
                   <span style={{ color: 'var(--accent)' }}>92% SECURE</span>
                 </div>
-                <div className="scan-progress-bar" style={{ height: '3px', background: 'rgba(255,255,255,0.05)', borderRadius: '2px', overflow: 'hidden' }}>
+                <div className="scan-progress-bar" style={{ height: '3px', background: 'var(--surface3)', borderRadius: '2px', overflow: 'hidden' }}>
                   <div className="scan-progress-fill" style={{ height: '100%', background: 'var(--accent)', width: '92%' }}></div>
                 </div>
               </div>
@@ -532,12 +532,12 @@ export default function IntelPage() {
           border: 1px solid var(--border-solid);
           border-radius: 999px;
           padding: 10px 20px;
-          background: #141414;
-          transition: all var(--transition-fast);
+          background: var(--surface);
+          transition: border-color 160ms var(--ease-out-custom), background 160ms var(--ease-out-custom);
         }
         .mode-jump-box:hover {
           border-color: var(--accent-border);
-          background: rgba(232, 174, 60, 0.06);
+          background: rgba(var(--accent-rgb), 0.06);
         }
         .mode-jump-box .jump-here {
           font-family: var(--font-mono);
@@ -568,17 +568,58 @@ export default function IntelPage() {
           margin-bottom: 64px;
         }
 
+        /* ── DARK ISLAND ──────────────────────────────────────────────
+           This card is a photograph under a 98%-opaque scrim. Its text has to
+           stay light in BOTH themes — near-black ink on a darkened photo is
+           the failure the globals.css DARK ISLANDS block exists to prevent.
+           So the dark ink tokens are re-declared here rather than the colours
+           being hardcoded, which means anything dropped inside inherits
+           readable ink automatically. Same pattern as .cinematic-container. */
         .featured-card-new {
           position: relative;
           display: flex;
           flex-direction: column;
-          background: #000;
+          /* #000 was banned by DESIGN.md §6 and is invisible anyway — the photo
+             covers it. --bg is the honest placeholder while the image loads. */
+          background: var(--bg);
           border: 1px solid var(--border-solid);
           border-radius: var(--radius-md);
           overflow: hidden;
-          transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+          transition: border-color 160ms var(--ease-out-custom), box-shadow 160ms var(--ease-out-custom);
           text-decoration: none;
-          height: 600px; /* Taller hero */
+          /* WAS height: 600px, then patched to 460 / 420 / 380 at four
+             breakpoints because everything inside is absolutely positioned and
+             height:auto collapsed the card. An aspect ratio expresses the same
+             intent once and cannot collapse — the card is a 3:2 image, at every
+             width. The min-height floor keeps the 40px of padded text from
+             overflowing on a narrow phone. */
+          aspect-ratio: 3 / 2;
+          min-height: 380px;
+        }
+
+        body.light-mode .featured-card-new {
+          /* The scrim is a SIBLING overlay, not an ancestor background, so a
+             light card ground shows through wherever the photo has not loaded
+             — and white text lands on it. The island needs its own dark
+             ground, same lesson as .global-footer. */
+          background: #0d0d0d;
+          --text-primary:      #ffffff;
+          --text-primary-rgb:  255, 255, 255;
+          --text-secondary:    #d8d4cc;
+          --text-muted:        rgba(255, 255, 255, 0.62);
+          /* Every ink token needs its '-ch' twin: the Tailwind classes
+             (text-text-secondary, text-on-surface, …) resolve through
+             'rgb(var(--x-ch) / <alpha>)', NOT through the hex token. Setting
+             only the hex leaves every Tailwind-coloured child on the LIGHT
+             value — measured 2.05:1 on the ticker's city badge. */
+          --text-primary-ch:    255 255 255;
+          --text-secondary-ch:  216 212 204;
+          --m3-on-surface-ch:   255 255 255;
+          --accent:            #E8AE3C;
+          --accent-rgb:        232, 174, 60;
+          --border:            rgba(255, 255, 255, 0.12);
+          --border-mid:        rgba(255, 255, 255, 0.22);
+          color: var(--text-primary);
         }
 
         .featured-card-new:hover {
@@ -631,20 +672,25 @@ export default function IntelPage() {
           display: inline-block;
           font-weight: 600;
         }
+        /* The three badge hues were pinned to their dark values: #007aff on a
+           4%-blue tint is 2.1:1 on near-white, and #ffffff on an 8%-white tint
+           is invisible there. Each now runs through the semantic token, which
+           already has a light counterpart tuned to its ~700 step. */
         .article-type-badge.insight {
-          background: rgba(0, 122, 255, 0.15);
-          color: #007aff;
-          border: 0.5px solid rgba(0, 122, 255, 0.3);
+          background: var(--sapphire-dim);
+          color: var(--sapphire);
+          border: 0.5px solid rgba(var(--accent-rgb), 0);
+          box-shadow: inset 0 0 0 0.5px var(--sapphire);
         }
         .article-type-badge.report {
-          background: rgba(232, 174, 60, 0.15);
-          color: #E8AE3C;
-          border: 0.5px solid rgba(232, 174, 60, 0.3);
+          background: rgba(var(--accent-rgb), 0.14);
+          color: var(--accent);
+          border: 0.5px solid rgba(var(--accent-rgb), 0.34);
         }
         .article-type-badge.analysis {
-          background: rgba(255, 255, 255, 0.08);
-          color: #ffffff;
-          border: 0.5px solid rgba(255, 255, 255, 0.2);
+          background: rgba(var(--text-primary-rgb), 0.07);
+          color: var(--text-primary);
+          border: 0.5px solid var(--border-mid);
         }
 
         .featured-tag-new {
@@ -656,16 +702,24 @@ export default function IntelPage() {
           margin-bottom: 12px;
         }
 
+        /* The lead story was set at 24px inside a 600px-tall card — the same
+           size as a body heading, in the largest element on the page. There was
+           no hierarchy: the eye had nothing to land on first. It now takes the
+           display scale, and Instrument Serif wants the tracking pulled in at
+           this size. */
         .featured-content-new h2 {
           font-family: var(--font-display);
-          font-size: 24px;
-          color: #fff;
+          font-size: var(--display-md);
+          letter-spacing: var(--display-track-md);
+          color: var(--text-primary);
           margin-bottom: 12px;
-          line-height: 1.3;
+          line-height: 1.1;
+          text-wrap: balance;
         }
 
         .featured-excerpt-new {
-          font-size: 13px;
+          font-size: 14px;
+          max-width: 54ch;
           line-height: 1.6;
           color: var(--text-secondary);
           margin-bottom: 20px;
@@ -676,7 +730,7 @@ export default function IntelPage() {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          border-top: 1px solid rgba(255, 255, 255, 0.05);
+          border-top: 1px solid var(--border);
           padding-top: 16px;
         }
 
@@ -727,9 +781,10 @@ export default function IntelPage() {
 
         .trending-title {
           font-family: var(--font-display);
-          font-size: 15px;
-          color: #fff;
-          line-height: 1.35;
+          font-size: 17px;
+          letter-spacing: -0.01em;
+          color: var(--text-primary);
+          line-height: 1.3;
           margin-bottom: 6px;
         }
 
@@ -761,12 +816,12 @@ export default function IntelPage() {
 
         .articles-search-input {
           width: 100%;
-          background: #0e0e0e;
+          background: var(--bg);
           border: 1px solid var(--border-solid);
           border-radius: var(--radius-sm);
           padding: 14px 20px;
           font-size: 13px;
-          color: #fff;
+          color: var(--text-primary);
           font-family: var(--font-mono);
           transition: border-color var(--transition-fast);
         }
@@ -798,20 +853,53 @@ export default function IntelPage() {
 
         .filter-btn:hover {
           color: var(--accent);
-          background: rgba(255, 255, 255, 0.02);
+          background: rgba(var(--text-primary-rgb), 0.03);
         }
 
         .filter-btn.active {
           color: var(--accent);
           border-color: var(--accent);
-          background: rgba(232, 174, 60, 0.08);
+          background: rgba(var(--accent-rgb), 0.08);
         }
 
-        /* Grid */
+        /* ── GRID ─────────────────────────────────────────────────────
+           Was 'repeat(3, 1fr)' — three identical cards, forever. That is the
+           single most templated layout on the web and it flattens an EDITORIAL
+           index into a product catalogue: every briefing claims equal weight,
+           so the reader has no entry point and scans nothing.
+
+           A magazine solves this with rhythm, not decoration. Every fifth card
+           runs wide and horizontal — image beside text instead of above it —
+           which breaks the grid into readable chapters and gives the eye a
+           place to land on each screenful. No new markup: it is one
+           :nth-child rule over the cards that already exist. */
         .articles-grid {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
           gap: 32px;
+        }
+
+        .articles-grid > .article-card:nth-child(5n + 1) {
+          grid-column: span 2;
+          flex-direction: row;
+        }
+        .articles-grid > .article-card:nth-child(5n + 1) .article-image-container {
+          height: auto;
+          width: 44%;
+          flex-shrink: 0;
+        }
+        .articles-grid > .article-card:nth-child(5n + 1) .article-content {
+          justify-content: center;
+        }
+        /* The wide card gets a bigger title — it is the one being promoted. */
+        .articles-grid > .article-card:nth-child(5n + 1) .article-title {
+          font-size: var(--display-sm);
+        }
+        /* The vertical gradient that fades a stacked image into the card body
+           reads as a stripe down the middle when the image is beside the text.
+           Turn it sideways. */
+        .articles-grid > .article-card:nth-child(5n + 1) .image-overlay {
+          background: linear-gradient(to right, transparent 40%, var(--surface) 100%);
         }
 
         @media (max-width: 1024px) {
@@ -825,9 +913,9 @@ export default function IntelPage() {
           /* The image, overlay and content inside the hero are ALL absolutely
              positioned, so height:auto collapses the card to a thin strip
              (the cut-in-half picture). Give it a real height on tablet/phone. */
-          .featured-card-new {
-            height: 460px;
-          }
+          /* height removed — aspect-ratio: 3/2 on .featured-card-new covers
+             every width now. Kept as a comment so the four old breakpoints are
+             not re-added by someone chasing the collapse bug again. */
         }
 
         @media (max-width: 768px) {
@@ -835,11 +923,24 @@ export default function IntelPage() {
             grid-template-columns: 1fr;
             gap: 20px;
           }
+          /* One column: a 'span 2' card would overflow the track, and a
+             side-by-side image on a phone leaves ~140px for the headline.
+             The wide card goes back to being an ordinary card. */
+          .articles-grid > .article-card:nth-child(5n + 1) {
+            grid-column: span 1;
+            flex-direction: column;
+          }
+          .articles-grid > .article-card:nth-child(5n + 1) .article-image-container {
+            width: 100%;
+            height: 160px;
+          }
+          .articles-grid > .article-card:nth-child(5n + 1) .image-overlay {
+            background: linear-gradient(to top, var(--surface) 0%, transparent 60%);
+          }
           .article-card:hover { transform: none; }
           .article-card:active { border-color: var(--accent-border); }
           .article-image-container { height: 160px; }
           .article-content { padding: 16px; }
-          .featured-card-new { height: 420px; }
           .featured-content-new { padding: 24px; }
         }
 
@@ -852,9 +953,7 @@ export default function IntelPage() {
         @media (max-width: 480px) {
           .article-image-container { height: 120px; }
           .article-content { padding: 12px; }
-          .featured-card-new { height: 380px; }
           .featured-content-new { padding: 20px; }
-          .featured-content-new h2 { font-size: 20px; }
         }
 
         .article-card {
@@ -868,10 +967,28 @@ export default function IntelPage() {
           text-decoration: none;
         }
 
+        /* -4px + shadow-lg is a card LIFTING. On an index you scroll past
+           forty of them, that is forty little jumps. 2px and the medium shadow
+           acknowledges the pointer without performing, and :active confirms the
+           press — Emil's rule that a control must feel heard. */
         .article-card:hover {
           border-color: var(--accent-border);
-          transform: translateY(-4px);
-          box-shadow: var(--shadow-lg);
+          transform: translateY(-2px);
+          box-shadow: var(--shadow-md);
+        }
+
+        .article-card:active {
+          transform: translateY(-1px) scale(0.995);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .article-card,
+          .article-card:hover,
+          .article-card:active { transform: none; transition: none; }
+          .article-image,
+          .article-card:hover .article-image,
+          .featured-image-new,
+          .featured-card-new:hover .featured-image-new { transform: none; transition: none; }
         }
 
         .article-image-container {
@@ -927,10 +1044,12 @@ export default function IntelPage() {
 
         .article-title {
           font-family: var(--font-display);
-          font-size: 20px;
+          font-size: 21px;
+          letter-spacing: -0.012em;
           color: var(--text-primary);
           margin-bottom: 12px;
-          line-height: 1.3;
+          line-height: 1.22;
+          text-wrap: balance;
         }
 
         .article-excerpt {
@@ -1097,7 +1216,7 @@ export default function IntelPage() {
 
         .side-panel-cta:hover {
           background: var(--accent);
-          color: var(--bg, #0e0e0e);
+          color: var(--on-accent);
         }
       `}</style>
     </div>

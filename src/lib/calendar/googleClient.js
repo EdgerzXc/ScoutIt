@@ -39,7 +39,7 @@ export function listEvents(accessToken, { timeMin, timeMax, maxResults = 250 }) 
 /**
  * Create an event.
  *
- * `conferenceDataVersion: 1` is REQUIRED for Google to act on a
+ * 'conferenceDataVersion: 1' is REQUIRED for Google to act on a
  * conferenceData.createRequest — without the query param Google silently
  * drops the request and returns an event with no Meet link and no error.
  * That silent-drop is why this is an explicit option rather than always-on.

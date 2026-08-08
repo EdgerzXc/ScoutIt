@@ -88,7 +88,7 @@ export function getBalance(role, tier) {
 }
 
 /**
- * Spend `amount` Connects for a role.
+ * Spend 'amount' Connects for a role.
  * Deducts from granted first, then purchased, then earned.
  * Returns { success, remaining } — does NOT spend if insufficient.
  */

@@ -481,13 +481,13 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
       <div className="md:hidden flex bg-surface border-b border-surface-variant z-50">
         <button 
           onClick={() => setMobileTab('editor')}
-          className={`flex-1 py-3 text-xs font-label-caps tracking-widest uppercase transition-colors ${mobileTab === 'editor' ? 'text-gold-accent border-b-2 border-gold-accent' : 'text-text-secondary'}`}
+          className={`flex-1 py-3 text-xs font-label-caps tracking-widest uppercase transition ${mobileTab === 'editor' ? 'text-gold-accent border-b-2 border-gold-accent' : 'text-text-secondary'}`}
         >
           Editor
         </button>
         <button 
           onClick={() => setMobileTab('preview')}
-          className={`flex-1 py-3 text-xs font-label-caps tracking-widest uppercase transition-colors ${mobileTab === 'preview' ? 'text-gold-accent border-b-2 border-gold-accent' : 'text-text-secondary'}`}
+          className={`flex-1 py-3 text-xs font-label-caps tracking-widest uppercase transition ${mobileTab === 'preview' ? 'text-gold-accent border-b-2 border-gold-accent' : 'text-text-secondary'}`}
         >
           Live Preview
         </button>
@@ -497,7 +497,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
       <div className={`${mobileTab === 'editor' ? 'flex' : 'hidden'} md:flex md:col-start-1 md:row-start-1 md:row-span-2 flex-col overflow-hidden relative pointer-events-auto`}>
       {/* AI Extraction Overlay */}
       {(isDragging || isExtracting) && (
-        <div className="absolute inset-0 z-[2000] bg-background/80 backdrop-blur-md flex flex-col items-center justify-center border-4 border-dashed border-gold-accent transition-all">
+        <div className="absolute inset-0 z-[2000] bg-background/80 backdrop-blur-md flex flex-col items-center justify-center border-4 border-dashed border-gold-accent transition">
           {isExtracting ? (
             <div className="flex flex-col items-center gap-4 animate-pulse">
               <div className="text-gold-accent">
@@ -526,12 +526,12 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
           <input type="file" accept="application/pdf" className="hidden" ref={fileInputRef} onChange={handleFileUpload} />
           <button 
             onClick={() => fileInputRef.current?.click()} 
-            className="text-gold-accent hover:text-gold-accent/80 text-[10px] uppercase font-label-caps tracking-wider transition-colors border border-gold-accent/30 rounded px-2 py-1"
+            className="text-gold-accent hover:text-gold-accent/80 text-[10px] uppercase font-label-caps tracking-wider transition border border-gold-accent/30 rounded px-2 py-1"
           >
             Upload PDF (Auto-fill)
           </button>
           {!isEditing && lastSaved && (
-            <button onClick={clearDraft} className="text-error/80 hover:text-error text-[10px] uppercase font-label-caps tracking-wider transition-colors">
+            <button onClick={clearDraft} className="text-error/80 hover:text-error text-[10px] uppercase font-label-caps tracking-wider transition">
               Clear Draft
             </button>
           )}
@@ -543,7 +543,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
 
       {/* Progress Bar */}
       <div className="w-full bg-surface-variant h-1 relative overflow-hidden">
-        <div className={`absolute top-0 left-0 h-1 transition-all duration-300 ${step === 1 ? 'w-1/2 bg-gold-accent' : 'w-full bg-gold-accent'}`}></div>
+        <div className={`absolute top-0 left-0 h-1 transition duration-300 ${step === 1 ? 'w-1/2 bg-gold-accent' : 'w-full bg-gold-accent'}`}></div>
       </div>
 
       <div className="flex-1 overflow-y-auto p-6 pb-32 md:p-12 custom-scrollbar bg-surface flex flex-col items-center">
@@ -566,7 +566,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
                   {CATEGORIES.map(c => (
                     <button
                       key={c.id}
-                      className={`flex flex-col items-center justify-center gap-2 px-3 py-6 rounded border text-sm transition-colors ${formData.category === c.id ? 'bg-surface-container-low border-gold-accent text-gold-accent shadow-[0_0_15px_rgba(232,174,60,0.15)]' : 'bg-surface-alt border-surface-variant text-on-surface hover:border-gold-accent/50'}`}
+                      className={`flex flex-col items-center justify-center gap-2 px-3 py-6 rounded border text-sm transition ${formData.category === c.id ? 'bg-surface-container-low border-gold-accent text-gold-accent shadow-[0_0_15px_rgba(232,174,60,0.15)]' : 'bg-surface-alt border-surface-variant text-on-surface hover:border-gold-accent/50'}`}
                       onClick={() => setField("category", c.id)}
                     >
                       <span className="text-2xl">{c.icon}</span> {c.label}
@@ -578,7 +578,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">Property Title <span className="text-error">*</span></label>
                 <input 
-                  className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface focus:outline-none focus:border-gold-accent transition-colors" 
+                  className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface focus:outline-none focus:border-gold-accent transition" 
                   type="text" 
                   value={formData.title} 
                   onChange={e => setField("title", e.target.value)} 
@@ -589,7 +589,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">Location / Address <span className="text-error">*</span></label>
                 <input 
-                  className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface focus:outline-none focus:border-gold-accent transition-colors" 
+                  className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface focus:outline-none focus:border-gold-accent transition" 
                   type="text" 
                   value={formData.location} 
                   onChange={e => setField("location", e.target.value)} 
@@ -600,7 +600,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">Listed Price (₱) <span className="text-error">*</span></label>
                 <input 
-                  className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface focus:outline-none focus:border-gold-accent transition-colors" 
+                  className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface focus:outline-none focus:border-gold-accent transition" 
                   type="number" 
                   value={formData.price} 
                   onChange={e => setField("price", e.target.value)} 
@@ -619,13 +619,13 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
                   <button 
                     onClick={handleSeoOptimize}
                     disabled={isOptimizing || !formData.description}
-                    className="text-[10px] font-label-caps tracking-widest text-gold-accent uppercase hover:text-gold-bright transition-colors disabled:opacity-50 flex items-center gap-1 bg-gold-accent/10 border border-gold-accent/30 px-2 py-1 rounded"
+                    className="text-[10px] font-label-caps tracking-widest text-gold-accent uppercase hover:text-gold-bright transition disabled:opacity-50 flex items-center gap-1 bg-gold-accent/10 border border-gold-accent/30 px-2 py-1 rounded"
                   >
                     {isOptimizing ? "Optimizing..." : "✨ SEO Optimize Description"}
                   </button>
                 </div>
                 <textarea 
-                  className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface focus:outline-none focus:border-gold-accent transition-colors min-h-[120px] resize-y text-sm leading-relaxed" 
+                  className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface focus:outline-none focus:border-gold-accent transition min-h-[120px] resize-y text-sm leading-relaxed" 
                   value={formData.description} 
                   onChange={e => setField("description", e.target.value)} 
                   placeholder="Describe your property. Click the 'SEO Optimize' button to have our AI restructure it for maximum search engine visibility." 
@@ -666,7 +666,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
                       </label>
                       {f.type === "select" ? (
                         <select
-                          className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-sm text-on-surface focus:outline-none focus:border-gold-accent transition-colors appearance-none"
+                          className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-sm text-on-surface focus:outline-none focus:border-gold-accent transition appearance-none"
                           value={formData.details[f.key] || formData[f.key] || ""}
                           onChange={(e) => setDetail(f.key, e.target.value)}
                         >
@@ -676,7 +676,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
                           ))}
                         </select>
                       ) : f.type === "checkbox" ? (
-                        <label className="flex items-center gap-3 bg-surface-alt border border-surface-variant rounded px-3 py-2.5 cursor-pointer hover:border-gold-accent transition-colors">
+                        <label className="flex items-center gap-3 bg-surface-alt border border-surface-variant rounded px-3 py-2.5 cursor-pointer hover:border-gold-accent transition">
                           <input
                             type="checkbox"
                             className="accent-gold-accent w-4 h-4"
@@ -687,7 +687,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
                         </label>
                       ) : (
                         <input
-                          className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-sm text-on-surface focus:outline-none focus:border-gold-accent transition-colors"
+                          className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-sm text-on-surface focus:outline-none focus:border-gold-accent transition"
                           type={f.type}
                           placeholder={`Enter ${f.label.toLowerCase()}`}
                           value={formData.details[f.key] || formData[f.key] || ""}
@@ -710,7 +710,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
             {step > 1 ? (
               <button 
                 onClick={() => setStep(step - 1)}
-                className="text-text-secondary hover:text-on-surface text-sm font-label-caps tracking-widest uppercase transition-colors"
+                className="text-text-secondary hover:text-on-surface text-sm font-label-caps tracking-widest uppercase transition"
               >
                 ← Back
               </button>
@@ -722,7 +722,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
               <button 
                 onClick={handleSaveDraft}
                 disabled={!mustHaves.title}
-                className="px-6 py-2 rounded text-gold-accent text-sm font-label-caps tracking-widest uppercase hover:bg-gold-accent/10 disabled:opacity-50 transition-colors"
+                className="px-6 py-2 rounded text-gold-accent text-sm font-label-caps tracking-widest uppercase hover:bg-gold-accent/10 disabled:opacity-50 transition"
               >
                 Save Draft
               </button>
@@ -731,7 +731,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
                 <button 
                   onClick={() => setStep(2)}
                   disabled={!Object.values(mustHaves).every(Boolean)}
-                  className="px-6 py-2 rounded bg-surface-variant text-on-surface text-sm font-label-caps tracking-widest uppercase hover:bg-gold-accent hover:text-background disabled:opacity-50 transition-colors"
+                  className="px-6 py-2 rounded bg-surface-variant text-on-surface text-sm font-label-caps tracking-widest uppercase hover:bg-gold-accent hover:text-background disabled:opacity-50 transition"
                 >
                   Next Step →
                 </button>
@@ -751,7 +751,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
                   <button 
                     onClick={handlePublish}
                     disabled={!isPublishable || !isVerified}
-                    className="px-6 py-2 rounded bg-gold-accent text-background text-sm font-label-caps tracking-widest uppercase hover:bg-gold-bright disabled:opacity-50 transition-all shadow-[0_0_15px_rgba(232,174,60,0.3)] disabled:shadow-none w-full"
+                    className="px-6 py-2 rounded bg-gold-accent text-background text-sm font-label-caps tracking-widest uppercase hover:bg-gold-bright disabled:opacity-50 transition shadow-[0_0_15px_rgba(232,174,60,0.3)] disabled:shadow-none w-full"
                   >
                     Publish to Directory
                   </button>
@@ -770,7 +770,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
       </div>
       
       <div 
-        className="hidden md:flex md:col-start-2 md:row-start-1 md:row-span-2 cursor-col-resize items-center justify-center bg-surface-variant z-50 hover:bg-gold-accent transition-colors pointer-events-auto"
+        className="hidden md:flex md:col-start-2 md:row-start-1 md:row-span-2 cursor-col-resize items-center justify-center bg-surface-variant z-50 hover:bg-gold-accent transition pointer-events-auto"
         onMouseDown={startResizing}
       >
         <div className="w-1 h-8 bg-on-surface/20 rounded-full"></div>
@@ -781,7 +781,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
         <div className="absolute top-0 left-0 w-full z-50 bg-gold-accent text-background text-center py-1.5 font-label-caps text-[10px] tracking-[0.3em] font-bold shadow-md pointer-events-none">
           LIVE PREVIEW / DRAFT MODE
         </div>
-        <div className="mt-10 opacity-90 md:scale-[0.98] origin-top transition-all pointer-events-auto">
+        <div className="mt-10 opacity-90 md:scale-[0.98] origin-top transition pointer-events-auto">
           {['commercial', 'restaurants', 'venues'].includes(formData.category) ? (
             <CommercialFlow slug={null} draftData={debouncedDraftData} isDraftMode={true} externalActiveTab={step === 3 ? 'units' : 'space'} />
           ) : (

@@ -113,7 +113,7 @@ export function daysSinceVerified(lastVerifiedDate, now = Date.now()) {
  *
  * @param {string|Date|null} lastVerifiedDate
  * @param {number} [now]
- * @returns {object} a tier object, plus `days`
+ * @returns {object} a tier object, plus 'days'
  */
 export function getFreshness(lastVerifiedDate, now = Date.now()) {
   const days = daysSinceVerified(lastVerifiedDate, now);

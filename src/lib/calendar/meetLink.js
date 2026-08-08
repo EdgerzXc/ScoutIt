@@ -32,7 +32,7 @@ import { insertEvent, patchEvent, deleteEvent } from "./googleClient";
 /**
  * Pulls the Meet URL out of a Google event response.
  *
- * Checks entryPoints as well as hangoutLink: `hangoutLink` is the classic
+ * Checks entryPoints as well as hangoutLink: 'hangoutLink' is the classic
  * field and is usually present, but the video entry point is the documented
  * source of truth and survives Google's own field deprecations.
  *

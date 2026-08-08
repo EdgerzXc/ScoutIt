@@ -151,14 +151,14 @@ export default function PrivacyShieldPanel({ role, tier }) {
           background: var(--surface);
         }
         .ps-h {
-          font-family: Georgia, serif;
+          font-family: var(--font-display);
           font-size: 18px;
           font-weight: 400;
           color: var(--text-primary);
           margin: 0 0 6px;
         }
         .ps-intro {
-          font-family: Georgia, serif;
+          font-family: var(--font-display);
           font-size: 13px;
           line-height: 1.7;
           color: var(--text-secondary);
@@ -182,14 +182,14 @@ export default function PrivacyShieldPanel({ role, tier }) {
         }
         .ps-row__main { min-width: 0; flex: 1; }
         .ps-row__t {
-          font-family: Georgia, serif;
+          font-family: var(--font-display);
           font-size: 14.5px;
           line-height: 1.35;
           color: var(--text-primary);
           margin-bottom: 4px;
         }
         .ps-row__b {
-          font-family: Georgia, serif;
+          font-family: var(--font-display);
           font-size: 12.5px;
           line-height: 1.6;
           color: var(--text-secondary);

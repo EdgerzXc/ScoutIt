@@ -79,24 +79,24 @@ export default function ConciergeAI() {
   return (
     <>
       {/* Floating Action Button */}
-      <div className={`fixed z-[1000] bottom-[88px] left-5 right-auto md:bottom-6 md:left-auto md:right-6 transition-transform duration-500 ${isOpen ? 'scale-0 opacity-0 pointer-events-none' : 'scale-100 opacity-100'}`}>
+      <div className={`fixed z-[1000] bottom-[88px] left-5 right-auto md:bottom-6 md:left-auto md:right-6 transition-transform duration-200 ${isOpen ? 'scale-0 opacity-0 pointer-events-none' : 'scale-100 opacity-100'}`}>
         <button
           onClick={() => setIsOpen(true)}
-          className="relative group w-14 h-14 bg-[#121110] border border-gold-accent/50 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(232,174,60,0.2)] hover:shadow-[0_0_30px_rgba(232,174,60,0.4)] transition-all hover:scale-105"
+          className="relative group w-14 h-14 bg-surface border border-gold-accent/50 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(232,174,60,0.2)] hover:shadow-[0_0_30px_rgba(232,174,60,0.4)] transition hover:scale-105"
         >
           {/* Rotating glow */}
           <div className="absolute inset-0 rounded-full bg-[conic-gradient(from_0deg,transparent,rgba(232,174,60,0.5),transparent)] animate-[spin_4s_linear_infinite] opacity-50"></div>
-          <div className="absolute inset-1 rounded-full bg-[#121110] flex items-center justify-center z-10">
+          <div className="absolute inset-1 rounded-full bg-surface flex items-center justify-center z-10">
             <Sparkles className="text-gold-accent group-hover:animate-pulse" size="1.5em" strokeWidth={1.5} />
           </div>
         </button>
       </div>
 
       {/* Chat Modal / Sidebar */}
-      <div className={`fixed inset-y-0 right-0 z-[1000] w-full sm:w-[400px] bg-[#0d0d0d]/95 backdrop-blur-xl border-l border-surface-variant shadow-2xl transform transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] flex flex-col ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+      <div className={`fixed inset-y-0 right-0 z-[1000] w-full sm:w-[400px] bg-background/95 backdrop-blur-xl border-l border-surface-variant shadow-2xl transform transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] flex flex-col ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
         
         {/* Header */}
-        <div className="h-16 border-b border-surface-variant px-6 flex items-center justify-between shrink-0 bg-gradient-to-b from-[#1a1814] to-transparent">
+        <div className="h-16 border-b border-surface-variant px-6 flex items-center justify-between shrink-0 bg-gradient-to-b from-surface-alt to-transparent">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded bg-gold-accent/10 border border-gold-accent/30 flex items-center justify-center text-gold-accent">
               <Sparkles size="1em" strokeWidth={1.5} />
@@ -109,7 +109,7 @@ export default function ConciergeAI() {
           <button 
             onClick={() => setIsOpen(false)}
             aria-label="Close"
-            className="w-8 h-8 flex items-center justify-center text-text-secondary hover:text-error transition-colors rounded-full hover:bg-surface-variant"
+            className="w-8 h-8 flex items-center justify-center text-text-secondary hover:text-error transition rounded-full hover:bg-surface-variant"
           >
             <X size="1.2em" />
           </button>
@@ -125,7 +125,7 @@ export default function ConciergeAI() {
               <div className={`p-4 rounded-2xl text-sm leading-relaxed font-body ${
                 msg.role === 'user' 
                   ? 'bg-surface-variant text-on-surface rounded-br-sm' 
-                  : 'bg-[#121110] border border-gold-accent/20 text-text-secondary rounded-bl-sm shadow-[0_4px_15px_rgba(232,174,60,0.05)]'
+                  : 'bg-surface border border-gold-accent/20 text-text-secondary rounded-bl-sm shadow-[0_4px_15px_rgba(232,174,60,0.05)]'
               }`}>
                 {/* Parse basic markdown bold for mock responses */}
                 {msg.content.split('**').map((part, i) => i % 2 === 1 ? <strong key={i} className="text-on-surface font-working-title">{part}</strong> : part)}
@@ -138,7 +138,7 @@ export default function ConciergeAI() {
               <span className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase mb-1 animate-pulse">
                 Processing Logic
               </span>
-              <div className="p-4 rounded-2xl bg-[#121110] border border-gold-accent/20 rounded-bl-sm flex items-center gap-2">
+              <div className="p-4 rounded-2xl bg-surface border border-gold-accent/20 rounded-bl-sm flex items-center gap-2">
                 <Loader2 size="1.2em" className="text-gold-accent animate-spin" />
               </div>
             </div>
@@ -153,7 +153,7 @@ export default function ConciergeAI() {
               <button
                 key={idx}
                 onClick={() => handleSend(prompt)}
-                className="text-left text-xs font-working-title text-text-secondary border border-surface-variant rounded-lg p-3 hover:border-gold-accent hover:text-gold-accent transition-colors bg-surface/50 backdrop-blur-md"
+                className="text-left text-xs font-working-title text-text-secondary border border-surface-variant rounded-lg p-3 hover:border-gold-accent hover:text-gold-accent transition bg-surface/50 backdrop-blur-md"
               >
                 {prompt}
               </button>
@@ -173,13 +173,13 @@ export default function ConciergeAI() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Command the AI..."
-              className="w-full bg-[#121110] border border-surface-variant rounded-full pl-11 pr-12 py-3 text-sm text-on-surface focus:outline-none focus:border-gold-accent transition-colors placeholder:text-text-muted font-working-title"
+              className="w-full bg-surface border border-surface-variant rounded-full pl-11 pr-12 py-3 text-sm text-on-surface focus:outline-none focus:border-gold-accent transition placeholder:text-text-muted font-working-title"
               disabled={isTyping}
             />
             <button
               type="submit"
               disabled={!input.trim() || isTyping}
-              className="absolute right-2 w-8 h-8 rounded-full bg-gold-accent flex items-center justify-center text-background disabled:opacity-50 disabled:bg-surface-variant disabled:text-text-muted transition-colors hover:bg-gold-accent-bright"
+              className="absolute right-2 w-8 h-8 rounded-full bg-gold-accent flex items-center justify-center text-background disabled:opacity-50 disabled:bg-surface-variant disabled:text-text-muted transition hover:bg-gold-accent-bright"
             >
               <Send size="1em" className={input.trim() && !isTyping ? "translate-x-[1px] translate-y-[-1px]" : ""} />
             </button>

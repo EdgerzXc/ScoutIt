@@ -100,7 +100,7 @@ export default function LayerNav({ prev = null, next = null }) {
           onMouseEnter={() => setLogoHover(true)}
           onMouseLeave={() => setLogoHover(false)}
           style={{
-            fontFamily: "Georgia, 'Times New Roman', serif",
+            fontFamily: "var(--font-display)",
             fontWeight: 400,
             fontSize: "22px",
             letterSpacing: "3px",

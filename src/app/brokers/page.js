@@ -362,10 +362,32 @@ export default function BrokersPage() {
                   );
                 })}
 
-                {filteredBrokers.length === 0 && (
+                {/* Two DIFFERENT empty states, because they mean opposite things.
+                    Until 2026-08-08 both rendered "No matching intelligence
+                    advisors found" — technically true, and psychologically it
+                    told a first-time visitor the platform is empty.
+
+                    If the roster itself has nobody yet, that is not a failed
+                    search; it is a founding cohort. Same database state,
+                    opposite meaning — scarcity reads as exclusivity and it
+                    converts instead of deflecting. */}
+                {filteredBrokers.length === 0 && brokers.length === 0 && (
                   <div className="directory-empty">
-                    <h3>No matching intelligence advisors found</h3>
-                    <p>Try clearing some filters or refining your search parameters.</p>
+                    <h3>The Founding Advisor cohort is being assembled</h3>
+                    <p>
+                      ScoutIt is verifying its first Intelligence Roster. Become one of the
+                      founding advisors and your profile will be here when Manila starts looking.
+                    </p>
+                    <Link href="/pricing/broker" className="founding-cta">
+                      Apply as a Founding Advisor →
+                    </Link>
+                  </div>
+                )}
+
+                {filteredBrokers.length === 0 && brokers.length > 0 && (
+                  <div className="directory-empty">
+                    <h3>No advisors match these filters</h3>
+                    <p>Try clearing a filter or widening your search.</p>
                   </div>
                 )}
               </div>
@@ -457,7 +479,7 @@ export default function BrokersPage() {
           width: 6px;
           height: 6px;
           border-radius: 50%;
-          background: var(--text-muted, rgba(240, 237, 232, 0.38));
+          background: var(--text-muted, var(--text-muted));
           margin-right: 8px;
           transition: background 0.3s ease, box-shadow 0.3s ease;
         }
@@ -468,7 +490,7 @@ export default function BrokersPage() {
         }
 
         .hotmap-name {
-          color: var(--text-secondary, rgba(240, 237, 232, 0.62));
+          color: var(--text-secondary, var(--text-secondary));
           flex-grow: 1;
           transition: color 0.3s ease;
         }
@@ -479,7 +501,7 @@ export default function BrokersPage() {
         }
 
         .hotmap-stat {
-          color: var(--text-muted, rgba(240, 237, 232, 0.38));
+          color: var(--text-muted, var(--text-muted));
           font-size: 10px;
           letter-spacing: 0.05em;
         }
@@ -522,7 +544,7 @@ export default function BrokersPage() {
           align-items: center;
           gap: 10px;
           font-size: 12px;
-          color: var(--text-secondary, rgba(240, 237, 232, 0.62));
+          color: var(--text-secondary, var(--text-secondary));
           cursor: pointer;
           transition: color var(--transition-fast, 0.2s);
         }

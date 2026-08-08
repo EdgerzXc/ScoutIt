@@ -145,7 +145,7 @@ export default function DescentPage() {
             {[{ t: "Makati CBD yields drop", k: "Market intel", href: "/intel/makati-yields" }, { t: "Nuvali expansion patterns", k: "Area guide", href: "/intel/nuvali-expansion" }, { t: "Pasig zoning changes", k: "Regulatory", href: "/intel/pasig-zoning" }].map((a) => (
               <Link key={a.href} href={a.href} style={{ flex: "1 1 240px", textDecoration: "none", background: "rgba(10,12,24,0.6)", border: "0.5px solid rgba(232, 174, 60,0.2)", borderRadius: 10, padding: "18px 20px", backdropFilter: "blur(4px)" }}>
                 <div style={{ fontFamily: "var(--font-mono, monospace)", fontSize: 10, letterSpacing: "0.16em", textTransform: "uppercase", color: "#E8AE3C", marginBottom: 10 }}>{a.k}</div>
-                <div style={{ fontFamily: "Georgia, serif", fontSize: 19, color: "#f5f1ea" }}>{a.t}</div>
+                <div style={{ fontFamily: "var(--font-display)", fontSize: 19, color: "#f5f1ea" }}>{a.t}</div>
               </Link>
             ))}
           </div>
@@ -174,7 +174,7 @@ export default function DescentPage() {
                 <div style={{ height: 120, background: "linear-gradient(135deg, #1c2340, #2a1d3e)" }} />
                 <div style={{ padding: "14px 16px" }}>
                   <div style={{ fontFamily: "var(--font-mono, monospace)", fontSize: 10, letterSpacing: "0.16em", textTransform: "uppercase", color: "#E8AE3C", marginBottom: 6 }}>{p.c}</div>
-                  <div style={{ fontFamily: "Georgia, serif", fontSize: 18, color: "#f5f1ea" }}>{p.t}</div>
+                  <div style={{ fontFamily: "var(--font-display)", fontSize: 18, color: "#f5f1ea" }}>{p.t}</div>
                   <div style={{ fontSize: 12, color: "#c8c8c8", marginTop: 4 }}>{p.l}</div>
                 </div>
               </Link>
@@ -201,7 +201,7 @@ export default function DescentPage() {
             {[{ Icon: Building2, t: "Verified advisors", d: "Licensed professionals to guide the deal.", href: "/brokers" }, { Icon: Camera, t: "Space photography", d: "Make every space look the way it deserves.", href: "/photographers" }, { Icon: Search, t: "Site research", d: "Due diligence before you commit.", href: "/researchers" }, { Icon: CalendarDays, t: "Event design", d: "Turn great spaces into great events.", href: "/event-planners" }].map((s) => (
               <Link key={s.href} href={s.href} style={{ textDecoration: "none", background: "rgba(20,14,8,0.6)", border: "0.5px solid rgba(232, 174, 60,0.22)", borderRadius: 10, padding: "18px 20px", backdropFilter: "blur(4px)" }}>
                 <s.Icon strokeWidth={1.5} size={26} style={{ color: "#E8AE3C" }} />
-                <div style={{ fontFamily: "Georgia, serif", fontSize: 18, color: "#f5f1ea", margin: "10px 0 5px" }}>{s.t}</div>
+                <div style={{ fontFamily: "var(--font-display)", fontSize: 18, color: "#f5f1ea", margin: "10px 0 5px" }}>{s.t}</div>
                 <div style={{ fontSize: 13, color: "#d6d2c8", lineHeight: 1.5 }}>{s.d}</div>
               </Link>
             ))}

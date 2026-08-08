@@ -58,7 +58,7 @@ const TurnstileGate = forwardRef(function TurnstileGate(
      * Needed whenever one user action makes two consecutive auth calls — e.g.
      * "try sign-in, fall back to sign-up". The first call REDEEMS the token,
      * so the second must have a fresh one or Cloudflare rejects it as
-     * `timeout-or-duplicate`. A managed widget re-solves in about a second.
+     * 'timeout-or-duplicate'. A managed widget re-solves in about a second.
      *
      * @returns {Promise<string>} the new token, or "" if it didn't arrive in time
      */

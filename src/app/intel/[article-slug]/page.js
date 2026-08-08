@@ -212,6 +212,26 @@ export default async function IntelArticlePage({ params }) {
           background: linear-gradient(to top, rgba(14,14,14,0.95) 0%, rgba(14,14,14,0.4) 60%, transparent 100%);
         }
 
+        /* DARK ISLAND — the hero is a photograph under a 95% scrim. Its ink
+           stays light in both themes; near-black on a darkened photo is
+           unreadable. Tokens rather than literals so children inherit. */
+        body.light-mode .article-hero {
+          background-color: #0d0d0d;
+          --text-primary:   #ffffff;
+          --text-secondary: #d8d4cc;
+          --text-muted:     rgba(255, 255, 255, 0.62);
+          /* Every ink token needs its '-ch' twin: the Tailwind classes
+             (text-text-secondary, text-on-surface, …) resolve through
+             'rgb(var(--x-ch) / <alpha>)', NOT through the hex token. Setting
+             only the hex leaves every Tailwind-coloured child on the LIGHT
+             value — measured 2.05:1 on the ticker's city badge. */
+          --text-primary-ch:    255 255 255;
+          --text-secondary-ch:  216 212 204;
+          --m3-on-surface-ch:   255 255 255;
+          --accent:         #E8AE3C;
+          color: var(--text-primary);
+        }
+
         .hero-content {
           position: relative;
           z-index: 2;
@@ -230,11 +250,17 @@ export default async function IntelArticlePage({ params }) {
 
         .article-title {
           font-family: var(--font-display);
-          font-size: clamp(32px, 5vw, 48px);
-          font-weight: bold;
-          color: #fff;
+          font-size: var(--display-lg);
+          /* 'font-weight: 400' on Instrument Serif has no bold to reach, so
+             the browser SYNTHESISES one — it smears the glyphs sideways and
+             destroys the thin strokes the face is built on. Display serif is
+             400, always. */
+          font-weight: 400;
+          letter-spacing: var(--display-track-lg);
+          color: var(--text-primary);
           margin-bottom: 16px;
-          line-height: 1.25;
+          line-height: var(--display-leading);
+          text-wrap: balance;
         }
 
         .article-date-tag {
@@ -272,15 +298,22 @@ export default async function IntelArticlePage({ params }) {
           margin-bottom: 56px;
         }
 
+        /* This is the one surface on the site people READ rather than scan,
+           so it gets real prose settings: 17px (15 is a UI size, not a reading
+           size), a measure that stops the eye losing the next line, and
+           --text-primary — body copy is not "secondary" information on an
+           article page. */
         .article-paragraph {
-          font-size: 15px;
-          line-height: 1.8;
-          color: var(--text-secondary);
+          font-size: 17px;
+          line-height: 1.75;
+          max-width: var(--measure);
+          color: var(--text-primary);
+          text-wrap: pretty;
         }
 
         /* Advisory Box */
         .advisory-box {
-          background: rgba(232, 174, 60, 0.05);
+          background: rgba(var(--accent-rgb), 0.05);
           border: 1px solid var(--accent-border);
           border-radius: var(--radius-md);
           padding: 32px;
@@ -318,9 +351,9 @@ export default async function IntelArticlePage({ params }) {
 
         /* Insight Disclaimer */
         .insight-disclaimer-banner {
-          background: rgba(232, 174, 60, 0.07);
-          border: 1px solid rgba(232, 174, 60, 0.35);
-          border-left: 3px solid #E8AE3C;
+          background: rgba(var(--accent-rgb), 0.07);
+          border: 1px solid rgba(var(--accent-rgb), 0.35);
+          border-left: 3px solid var(--accent);
           border-radius: 4px;
           padding: 20px 24px;
           margin-bottom: 36px;
@@ -329,7 +362,7 @@ export default async function IntelArticlePage({ params }) {
         .insight-disclaimer-label {
           font-family: var(--font-mono);
           font-size: 10px;
-          color: #E8AE3C;
+          color: var(--accent);
           letter-spacing: 0.12em;
           text-transform: uppercase;
           font-weight: 700;
@@ -339,9 +372,11 @@ export default async function IntelArticlePage({ params }) {
 
         .insight-disclaimer-text {
           font-size: 13px;
-          color: #E8AE3C;
+          color: var(--accent);
           margin: 0;
-          opacity: 0.85;
+          /* opacity:0.85 on gold text was quietly costing ~15% of the contrast
+             ratio the token was tuned to hit. The token is already the right
+             value; dimming it just breaks the guarantee. */
           line-height: 1.5;
         }
 
@@ -353,8 +388,10 @@ export default async function IntelArticlePage({ params }) {
 
         .related-title {
           font-family: var(--font-display);
-          font-size: 24px;
-          color: #fff;
+          font-size: var(--display-md);
+          letter-spacing: var(--display-track-md);
+          color: var(--text-primary);
+          line-height: 1.15;
           margin-bottom: 32px;
         }
 

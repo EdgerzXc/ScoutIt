@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
  * Circular account/profile button.
  * Signed in  -> gold initial, links to /profile/<name>
  * Signed out -> person icon, links to /onboarding (create account)
- * `floating` pins it to the top-right of the viewport (used on the homepage,
+ * 'floating' pins it to the top-right of the viewport (used on the homepage,
  * which has no global header).
  */
 export default function ProfileButton({ floating = false }) {

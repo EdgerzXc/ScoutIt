@@ -331,7 +331,7 @@ export default function AboutYouPage() {
           fill: #1a0f02;
           font-family: var(--font-display);
           font-size: 20px;
-          font-weight: 700;
+          font-weight: 400;
           letter-spacing: 0.08em;
         }
 

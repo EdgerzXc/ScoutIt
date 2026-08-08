@@ -31,7 +31,7 @@
 /**
  * The display label for a schema field, guaranteed renderable.
  *
- * Accepts either a field object (`{ key, label, placeholder }`) or a bare
+ * Accepts either a field object ('{ key, label, placeholder }') or a bare
  * string, because both shapes are passed by the property flows.
  *
  * @param {{label?: string, key?: string}|string|null|undefined} field

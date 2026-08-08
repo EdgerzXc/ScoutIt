@@ -75,7 +75,7 @@ function resolveKey() {
  * Mints a share token for a user id.
  *
  * @param {string} userId
- * @returns {string} token in the form `iv.ciphertext.authTag` (base64url)
+ * @returns {string} token in the form 'iv.ciphertext.authTag' (base64url)
  * @throws {Error} when the signing secret is unavailable
  */
 export function encryptUserId(userId, { ttlMs = TTL_MS } = {}) {

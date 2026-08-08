@@ -235,7 +235,7 @@ export default async function BrokerDetailPage({ params }) {
           font-family: var(--font-display);
           font-size: 11px;
           color: var(--accent);
-          font-weight: 600;
+          font-weight: 400;
           line-height: 1.1;
           white-space: nowrap;
         }
@@ -286,7 +286,7 @@ export default async function BrokerDetailPage({ params }) {
         .scout-rating-box-score {
           font-family: var(--font-display);
           font-size: 40px;
-          font-weight: bold;
+          font-weight: 400;
           line-height: 1;
         }
 
@@ -323,7 +323,7 @@ export default async function BrokerDetailPage({ params }) {
         .profile-name {
           font-family: var(--font-display);
           font-size: 42px;
-          font-weight: 500;
+          font-weight: 400;
           color: #fff;
           margin: 0 0 8px 0;
         }

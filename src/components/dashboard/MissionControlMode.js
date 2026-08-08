@@ -142,7 +142,7 @@ function NavButton({ id, icon: Icon, label, activeTab, onSelect, badge = 0 }) {
   return (
     <button
       onClick={() => onSelect(id)}
-      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-300 text-left w-full relative overflow-hidden group ${
+      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition duration-300 text-left w-full relative overflow-hidden group ${
         isActive
           ? 'text-gold-accent bg-gold-accent/5'
           : 'text-text-secondary hover:text-white hover:bg-white/5'
@@ -323,8 +323,8 @@ export default function MissionControlMode() {
   return (
     <div className="flex h-full w-full animate-slide-up-fade relative">
       {!isEnterprise ? (
-        <div className="flex-1 w-full min-h-[calc(100dvh-100px)] z-50 flex flex-col items-center justify-center p-6 bg-[#0d0d0d] overflow-y-auto">
-          <div className="max-w-4xl w-full flex flex-col items-center text-center space-y-8 animate-in slide-in-from-bottom-8 duration-700">
+        <div className="flex-1 w-full min-h-[calc(100dvh-100px)] z-50 flex flex-col items-center justify-center p-6 bg-background overflow-y-auto">
+          <div className="max-w-4xl w-full flex flex-col items-center text-center space-y-8 animate-in slide-in-from-bottom-8 duration-200">
             <div className="w-20 h-20 bg-gold-accent/10 border border-gold-accent/20 rounded-full flex items-center justify-center mb-4 relative">
                <div className="absolute inset-0 bg-gold-accent blur-3xl opacity-20 rounded-full" />
                <Building2 size={32} className="text-gold-accent relative z-10" />
@@ -338,7 +338,7 @@ export default function MissionControlMode() {
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full mt-8 text-left">
-               <GlassPanel className="p-6 rounded-2xl border-white/10 hover:border-gold-accent/30 transition-all duration-300">
+               <GlassPanel className="p-6 rounded-2xl border-white/10 hover:border-gold-accent/30 transition duration-300">
                  <Bot size={24} className="text-blue-400 mb-4" />
                  <h3 className="text-white font-medium mb-2">Intelligence Center</h3>
                  <p className="text-xs text-text-secondary leading-relaxed">Automate drafting, review pitches, and get real-time AI summaries of your entire portfolio.</p>
@@ -349,7 +349,7 @@ export default function MissionControlMode() {
                  <h3 className="text-white font-medium mb-2 relative z-10">Advanced Analytics</h3>
                  <p className="text-xs text-text-secondary leading-relaxed relative z-10">Historical location graphs, space demand trends, and precise market synergy.</p>
                </GlassPanel>
-               <GlassPanel className="p-6 rounded-2xl border-white/10 hover:border-gold-accent/30 transition-all duration-300">
+               <GlassPanel className="p-6 rounded-2xl border-white/10 hover:border-gold-accent/30 transition duration-300">
                  <UsersRound size={24} className="text-emerald-400 mb-4" />
                  <h3 className="text-white font-medium mb-2">Team & Permissions</h3>
                  <p className="text-xs text-text-secondary leading-relaxed">Granular control over agents, finance heads, and location managers with full audit logs.</p>
@@ -361,23 +361,23 @@ export default function MissionControlMode() {
                   [ Unlock Enterprise Sandbox ]
                   Dev Mode: Bypass Paywall          ← literally, on production
                 The label shipped to the live site, directly under a price, on a
-                surface reachable from the mode switcher (`mc_enterprise` in
+                surface reachable from the mode switcher ('mc_enterprise' in
                 dashboard/page.js) — not just the dev toolbox, as an earlier note
                 assumed. It advertised the paywall as unintended and bypassable.
 
-                The button still only does `setIsEnterprise(true)` — client
+                The button still only does 'setIsEnterprise(true)' — client
                 state, no payment, no server check. That is Standing Rule 5: a
                 gate the client evaluates is a suggestion. It is left working
                 because this IS a preview surface today and nothing is being
                 sold yet — but it is now labelled as a preview instead of as a
                 bypass, so the screen stops implying a broken paywall.
 
-                🔴 BEFORE PAYMENTS: wire this to `lib/entitlements.js` and drop
+                🔴 BEFORE PAYMENTS: wire this to 'lib/entitlements.js' and drop
                 the free grant. Tracked as W14/D1 (advertised benefits with no
                 implementation) — this is the same problem wearing a button. */}
             <div className="pt-10 flex flex-col items-center gap-4">
               <div className="text-3xl text-white font-display-md">₱25,000 <span className="text-sm text-text-secondary font-sans font-normal">/ month</span></div>
-              <button onClick={() => setIsEnterprise(true)} className="px-10 py-4 bg-gold-accent hover:bg-gold-accent-bright text-black rounded-full font-medium transition-all shadow-[0_0_20px_rgba(232,174,60,0.3)] hover:shadow-[0_0_30px_rgba(247,198,78,0.5)] hover:-translate-y-1">
+              <button onClick={() => setIsEnterprise(true)} className="px-10 py-4 bg-gold-accent hover:bg-gold-accent-bright text-black rounded-full font-medium transition shadow-[0_0_20px_rgba(232,174,60,0.3)] hover:shadow-[0_0_30px_rgba(247,198,78,0.5)] hover:-translate-y-1">
                 Explore the Enterprise preview
               </button>
               <p className="text-xs text-text-secondary font-mono tracking-widest uppercase mt-4">
@@ -420,7 +420,7 @@ export default function MissionControlMode() {
             <button
               key={id}
               onClick={() => setActiveTab(id)}
-              className={`flex items-center gap-1.5 shrink-0 px-3 py-2 rounded-full text-[11px] font-mono uppercase tracking-wider min-h-[40px] transition-colors ${
+              className={`flex items-center gap-1.5 shrink-0 px-3 py-2 rounded-full text-[11px] font-mono uppercase tracking-wider min-h-[40px] transition ${
                 activeTab === id
                   ? "bg-gold-accent/10 text-gold-accent border border-gold-accent/30"
                   : "text-text-secondary border border-white/10 hover:text-white"
@@ -432,7 +432,7 @@ export default function MissionControlMode() {
           ))}
         </div>
         {activeTab === "dashboard" ? (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both">
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-200 fill-mode-both">
             <div className="bg-gold-accent/5 border border-gold-accent/20 rounded-lg px-4 py-3 flex items-start gap-3 mb-6 backdrop-blur-md">
               <AlertTriangle className="text-gold-accent shrink-0 mt-0.5" size={16} />
               <div className="text-xs text-text-secondary leading-relaxed">
@@ -457,8 +457,8 @@ export default function MissionControlMode() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 mt-6 auto-rows-[minmax(160px,auto)]">
               
               {/* Hero Metric: Company Health (2x2) */}
-              <GlassPanel className="md:col-span-2 md:row-span-2 rounded-3xl p-8 flex flex-col relative overflow-hidden group border-white/10 hover:border-gold-accent/30 transition-all duration-500 shadow-xl hover:shadow-[0_8px_40px_rgba(232,174,60,0.15)]">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-gold-accent/5 rounded-full blur-3xl group-hover:bg-gold-accent/10 transition-colors duration-700 -translate-y-1/2 translate-x-1/3" />
+              <GlassPanel className="md:col-span-2 md:row-span-2 rounded-3xl p-8 flex flex-col relative overflow-hidden group border-white/10 hover:border-gold-accent/30 transition duration-200 shadow-xl hover:shadow-[0_8px_40px_rgba(232,174,60,0.15)]">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-gold-accent/5 rounded-full blur-3xl group-hover:bg-gold-accent/10 transition duration-200 -translate-y-1/2 translate-x-1/3" />
                 <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-black/60 to-transparent" />
                 
                 <div className="flex items-start justify-between relative z-10 mb-auto">
@@ -466,7 +466,7 @@ export default function MissionControlMode() {
                     <h3 className="text-white font-display-md text-2xl tracking-wide mb-1">Portfolio Strength</h3>
                     <p className="text-text-secondary text-sm font-mono uppercase tracking-widest">Average dossier completeness</p>
                   </div>
-                  <div className="w-12 h-12 rounded-2xl bg-surface-alt border border-white/10 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-500">
+                  <div className="w-12 h-12 rounded-2xl bg-surface-alt border border-white/10 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-200">
                     <Activity className="text-gold-accent" size={24} />
                   </div>
                 </div>
@@ -499,13 +499,13 @@ export default function MissionControlMode() {
               ].map((kpi) => (
                 <GlassPanel 
                   key={kpi.label} 
-                  className={`md:col-span-1 md:row-span-1 rounded-2xl p-6 flex flex-col justify-between hover:-translate-y-1 transition-all duration-300 relative group overflow-hidden ${kpi.onClick ? 'cursor-pointer border-white/5 hover:border-white/20 shadow-lg hover:shadow-[0_8px_30px_rgba(255,255,255,0.05)]' : 'border-white/5'}`} 
+                  className={`md:col-span-1 md:row-span-1 rounded-2xl p-6 flex flex-col justify-between hover:-translate-y-1 transition duration-300 relative group overflow-hidden ${kpi.onClick ? 'cursor-pointer border-white/5 hover:border-white/20 shadow-lg hover:shadow-[0_8px_30px_rgba(255,255,255,0.05)]' : 'border-white/5'}`} 
                   glowColor={kpi.glow}
                   onClick={kpi.onClick}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
                   <div className="flex items-center justify-between relative z-10 mb-4">
-                    <kpi.icon className="text-text-secondary group-hover:text-gold-accent transition-colors duration-300" size={18} />
+                    <kpi.icon className="text-text-secondary group-hover:text-gold-accent transition duration-300" size={18} />
                     {kpi.actionText && (
                       <span className="text-gold-accent text-[10px] font-mono uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center gap-1">
                         {kpi.actionText} <ArrowRight size={10} />
@@ -522,7 +522,7 @@ export default function MissionControlMode() {
               ))}
 
               {/* Wide Card: Recent Activity (2x1) */}
-              <GlassPanel className="md:col-span-2 md:row-span-1 rounded-2xl p-6 relative overflow-hidden group border-white/5 hover:border-white/10 transition-colors duration-300 flex flex-col justify-center bg-gradient-to-r from-transparent to-blue-900/5">
+              <GlassPanel className="md:col-span-2 md:row-span-1 rounded-2xl p-6 relative overflow-hidden group border-white/5 hover:border-white/10 transition duration-300 flex flex-col justify-center bg-gradient-to-r from-transparent to-blue-900/5">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-8 h-8 rounded-full bg-gold-accent/10 border border-gold-accent/20 flex items-center justify-center">
                     <Activity className="text-gold-accent" size={14} />
@@ -538,7 +538,7 @@ export default function MissionControlMode() {
               </GlassPanel>
 
               {/* Schedule (1x2) */}
-              <GlassPanel className="md:col-span-1 md:row-span-2 rounded-2xl p-6 relative overflow-hidden group border-white/5 hover:border-white/20 transition-all duration-300 shadow-lg">
+              <GlassPanel className="md:col-span-1 md:row-span-2 rounded-2xl p-6 relative overflow-hidden group border-white/5 hover:border-white/20 transition duration-300 shadow-lg">
                 <div className="flex items-center gap-2 mb-6">
                   <CalendarDays className="text-gold-accent opacity-80" size={18} />
                   <h4 className="text-white font-medium text-sm">Today&apos;s Schedule</h4>
@@ -560,11 +560,11 @@ export default function MissionControlMode() {
               {/* System Alerts (1x1) */}
               <GlassPanel 
                 onClick={() => setActiveTab("projects")}
-                className="md:col-span-1 md:row-span-1 rounded-2xl p-6 relative overflow-hidden group border-white/5 hover:border-red-500/20 transition-all duration-300 shadow-lg cursor-pointer"
+                className="md:col-span-1 md:row-span-1 rounded-2xl p-6 relative overflow-hidden group border-white/5 hover:border-red-500/20 transition duration-300 shadow-lg cursor-pointer"
               >
-                <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/5 rounded-full blur-2xl group-hover:bg-red-500/10 transition-colors duration-500 -translate-y-1/2 translate-x-1/2" />
+                <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/5 rounded-full blur-2xl group-hover:bg-red-500/10 transition duration-200 -translate-y-1/2 translate-x-1/2" />
                 <div className="flex items-center justify-between mb-4 relative z-10">
-                  <BellRing className={`${alerts.length > 0 ? "text-red-400 group-hover:text-red-300" : "text-emerald-400"} transition-colors duration-300`} size={18} />
+                  <BellRing className={`${alerts.length > 0 ? "text-red-400 group-hover:text-red-300" : "text-emerald-400"} transition duration-300`} size={18} />
                   {alerts.length > 0 && (
                     <span className="w-5 h-5 rounded-full bg-red-500/20 text-red-400 text-[10px] font-bold flex items-center justify-center">{alerts.length}</span>
                   )}
@@ -590,10 +590,10 @@ export default function MissionControlMode() {
               {/* Inventory Overview (1x1) */}
               <GlassPanel 
                 onClick={() => setActiveTab("inventory")}
-                className="md:col-span-1 md:row-span-1 rounded-2xl p-6 relative overflow-hidden group border-white/5 hover:border-white/20 transition-all duration-300 shadow-lg cursor-pointer"
+                className="md:col-span-1 md:row-span-1 rounded-2xl p-6 relative overflow-hidden group border-white/5 hover:border-white/20 transition duration-300 shadow-lg cursor-pointer"
               >
                 <div className="flex items-center justify-between mb-4">
-                  <Warehouse className="text-text-secondary group-hover:text-gold-accent transition-colors duration-300" size={18} />
+                  <Warehouse className="text-text-secondary group-hover:text-gold-accent transition duration-300" size={18} />
                   {inventoryStats.total > 0 && (
                     <span className="text-emerald-400 text-[10px] font-mono font-bold">{inventoryStats.vacant} vacant</span>
                   )}
@@ -609,10 +609,10 @@ export default function MissionControlMode() {
               {/* Active Projects (1x1) */}
               <GlassPanel
                 onClick={() => setActiveTab("projects")}
-                className="md:col-span-1 md:row-span-1 rounded-2xl p-6 relative overflow-hidden group border-white/5 hover:border-white/20 transition-all duration-300 shadow-lg cursor-pointer"
+                className="md:col-span-1 md:row-span-1 rounded-2xl p-6 relative overflow-hidden group border-white/5 hover:border-white/20 transition duration-300 shadow-lg cursor-pointer"
               >
                 <div className="flex items-center justify-between mb-4">
-                  <HardHat className="text-text-secondary group-hover:text-gold-accent transition-colors duration-300" size={18} />
+                  <HardHat className="text-text-secondary group-hover:text-gold-accent transition duration-300" size={18} />
                 </div>
                 <div>
                   <div className="font-display-md text-3xl text-white tracking-tight mb-1 group-hover:scale-[1.02] origin-left transition-transform duration-300">{kpis.drafting}</div>
@@ -625,10 +625,10 @@ export default function MissionControlMode() {
               {/* Occupancy (1x1) — live unit data */}
               <GlassPanel
                 onClick={() => setActiveTab("inventory")}
-                className="md:col-span-1 md:row-span-1 rounded-2xl p-6 relative overflow-hidden group border-white/5 hover:border-white/20 transition-all duration-300 shadow-lg cursor-pointer"
+                className="md:col-span-1 md:row-span-1 rounded-2xl p-6 relative overflow-hidden group border-white/5 hover:border-white/20 transition duration-300 shadow-lg cursor-pointer"
               >
                 <div className="flex items-center justify-between mb-4">
-                  <Activity className="text-text-secondary group-hover:text-emerald-400 transition-colors duration-300" size={18} />
+                  <Activity className="text-text-secondary group-hover:text-emerald-400 transition duration-300" size={18} />
                 </div>
                 <div>
                   <div className="font-display-md text-3xl text-white tracking-tight mb-2 group-hover:scale-[1.02] origin-left transition-transform duration-300">
@@ -636,7 +636,7 @@ export default function MissionControlMode() {
                   </div>
                   {inventoryStats.total > 0 && (
                     <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden mb-2">
-                      <div className="h-full bg-emerald-500/60 rounded-full transition-all duration-700" style={{ width: `${Math.round((inventoryStats.occupied / inventoryStats.total) * 100)}%` }} />
+                      <div className="h-full bg-emerald-500/60 rounded-full transition duration-200" style={{ width: `${Math.round((inventoryStats.occupied / inventoryStats.total) * 100)}%` }} />
                     </div>
                   )}
                   <div className="text-[10px] font-mono text-text-secondary uppercase tracking-widest">
@@ -648,10 +648,10 @@ export default function MissionControlMode() {
               {/* Connections (1x1) — live deal chatboxes */}
               <GlassPanel
                 onClick={() => setActiveTab("crm")}
-                className="md:col-span-1 md:row-span-1 rounded-2xl p-6 relative overflow-hidden group border-white/5 hover:border-white/20 transition-all duration-300 shadow-lg cursor-pointer"
+                className="md:col-span-1 md:row-span-1 rounded-2xl p-6 relative overflow-hidden group border-white/5 hover:border-white/20 transition duration-300 shadow-lg cursor-pointer"
               >
                 <div className="flex items-center justify-between mb-4">
-                  <Users className="text-text-secondary group-hover:text-blue-400 transition-colors duration-300" size={18} />
+                  <Users className="text-text-secondary group-hover:text-blue-400 transition duration-300" size={18} />
                   {(pitches || []).filter((p) => p.status === "pending").length > 0 && (
                     <span className="text-gold-accent text-[10px] font-mono font-bold">
                       {(pitches || []).filter((p) => p.status === "pending").length} sealed
@@ -670,7 +670,7 @@ export default function MissionControlMode() {
             </div>
           </div>
         ) : activeTab === "portfolio" ? (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both">
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-200 fill-mode-both">
             <div>
               <span className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase drop-shadow-[0_0_10px_rgba(247,198,78,0.5)]">
                 Enterprise Console • Portfolio
@@ -690,7 +690,7 @@ export default function MissionControlMode() {
                   type="checkbox" 
                   checked={selectedIds.size === scoped.length && scoped.length > 0}
                   onChange={handleSelectAll}
-                  className="w-4 h-4 rounded border-white/20 bg-black/50 text-[#E8AE3C] focus:ring-[#E8AE3C] focus:ring-offset-black"
+                  className="w-4 h-4 rounded border-white/20 bg-black/50 text-gold-accent focus:ring-gold-accent focus:ring-offset-black"
                 />
                 <span className="text-sm text-text-secondary">
                   {selectedIds.size} selected
@@ -699,7 +699,7 @@ export default function MissionControlMode() {
                   <button 
                     onClick={handleMassDelete}
                     disabled={isDeleting}
-                    className="ml-4 text-xs text-red-400 hover:text-red-300 bg-red-400/10 px-3 py-1.5 rounded transition-colors disabled:opacity-50"
+                    className="ml-4 text-xs text-red-400 hover:text-red-300 bg-red-400/10 px-3 py-1.5 rounded transition disabled:opacity-50"
                   >
                     {isDeleting ? "Deleting..." : "Delete Selected"}
                   </button>
@@ -749,7 +749,7 @@ export default function MissionControlMode() {
                   const isSelected = selectedIds.has(l.id);
                   const isEditing = editingId === l.id;
                   return [
-                    <tr key={l.id} className={`border-b border-[rgba(255,255,255,0.05)] hover:bg-[rgba(255,255,255,0.02)] transition-colors ${isSelected ? "bg-[rgba(247,198,78,0.05)]" : ""}`}>
+                    <tr key={l.id} className={`border-b border-[rgba(255,255,255,0.05)] hover:bg-[rgba(255,255,255,0.02)] transition ${isSelected ? "bg-[rgba(247,198,78,0.05)]" : ""}`}>
                       <td className="px-4 py-2.5">
                         <input
                           type="checkbox"
@@ -813,11 +813,11 @@ export default function MissionControlMode() {
       </GlassPanel>
           </div>
         ) : activeTab === "projects" ? (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both">
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-200 fill-mode-both">
             <ProjectManagementPanel properties={scoped} />
           </div>
         ) : activeTab === "crm" ? (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both h-full flex flex-col gap-6">
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-200 fill-mode-both h-full flex flex-col gap-6">
             <div>
               <span className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase drop-shadow-[0_0_10px_rgba(247,198,78,0.5)]">Enterprise Console • CRM</span>
               <h1 className="font-display-md text-3xl md:text-4xl mt-1 text-white">Relationship Management</h1>
@@ -849,7 +849,7 @@ export default function MissionControlMode() {
                     {(pitches || []).map((p) => {
                       const revealed = p.status === "accepted";
                       return (
-                        <div key={p.id} className="px-6 py-4 hover:bg-white/[0.02] transition-colors flex items-start justify-between gap-4">
+                        <div key={p.id} className="px-6 py-4 hover:bg-white/[0.02] transition flex items-start justify-between gap-4">
                           <div className="min-w-0">
                             <p className="text-sm text-white font-medium truncate">
                               {revealed ? p.brokerName : "Sealed connection"}
@@ -896,11 +896,11 @@ export default function MissionControlMode() {
             </div>
           </div>
         ) : activeTab === "team" ? (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both h-full">
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-200 fill-mode-both h-full">
             <TeamManagementPanel currentUser={currentUser} properties={scoped} pitches={pitches || []} />
           </div>
         ) : activeTab === "inventory" ? (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both h-full flex flex-col gap-6">
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-200 fill-mode-both h-full flex flex-col gap-6">
             <div>
               <span className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase drop-shadow-[0_0_10px_rgba(247,198,78,0.5)]">Enterprise Console • Inventory</span>
               <h1 className="font-display-md text-3xl md:text-4xl mt-1 text-white">Asset Inventory</h1>
@@ -959,7 +959,7 @@ export default function MissionControlMode() {
             </GlassPanel>
           </div>
         ) : activeTab === "finance" ? (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both h-full flex flex-col gap-6">
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-200 fill-mode-both h-full flex flex-col gap-6">
             <div>
               <span className="font-label-caps text-[10px] tracking-widest text-emerald-400 uppercase drop-shadow-[0_0_10px_rgba(52,211,153,0.5)]">Enterprise Console • Finance</span>
               <h1 className="font-display-md text-3xl md:text-4xl mt-1 text-white">Financial Hub</h1>
@@ -995,7 +995,7 @@ export default function MissionControlMode() {
             </div>
           </div>
         ) : activeTab === "analytics" ? (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both h-full flex flex-col gap-6 overflow-y-auto pb-6 custom-scrollbar">
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-200 fill-mode-both h-full flex flex-col gap-6 overflow-y-auto pb-6 custom-scrollbar">
             <div>
               <span className="font-label-caps text-[10px] tracking-widest text-blue-400 uppercase drop-shadow-[0_0_10px_rgba(59,130,246,0.5)]">Enterprise Console • Analytics</span>
               <h1 className="font-display-md text-3xl md:text-4xl mt-1 text-white">Market Intelligence</h1>
@@ -1016,7 +1016,7 @@ export default function MissionControlMode() {
                     </h3>
                     <p className="text-[10px] text-text-secondary font-mono tracking-widest uppercase mt-1">Makati CBD vs BGC · illustrative — live data connects at launch</p>
                   </div>
-                  <select className="bg-black/50 border border-white/10 text-xs text-white rounded px-2 py-1 outline-none focus:border-blue-400 transition-colors">
+                  <select className="bg-black/50 border border-white/10 text-xs text-white rounded px-2 py-1 outline-none focus:border-blue-400 transition">
                     <option>Yield (%)</option>
                     <option>Price / sqm</option>
                   </select>
@@ -1073,7 +1073,7 @@ export default function MissionControlMode() {
                         <span className={`text-[10px] font-mono ${item.up ? 'text-emerald-400' : 'text-red-400'}`}>{item.trend}</span>
                       </div>
                       <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
-                        <div className={`h-full rounded-full transition-all duration-1000 ${item.up ? 'bg-emerald-500/50' : 'bg-red-500/50'}`} style={{ width: item.bar }} />
+                        <div className={`h-full rounded-full transition duration-200 ${item.up ? 'bg-emerald-500/50' : 'bg-red-500/50'}`} style={{ width: item.bar }} />
                       </div>
                     </div>
                   ))}
@@ -1083,7 +1083,7 @@ export default function MissionControlMode() {
 
             {/* Intel Synergy Panel */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
-              <GlassPanel className="rounded-2xl border-emerald-500/10 p-6 relative overflow-hidden group hover:border-emerald-500/30 transition-colors duration-500">
+              <GlassPanel className="rounded-2xl border-emerald-500/10 p-6 relative overflow-hidden group hover:border-emerald-500/30 transition duration-200">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 blur-3xl rounded-full" />
                 <div className="flex items-start gap-4 relative z-10">
                    <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
@@ -1104,7 +1104,7 @@ export default function MissionControlMode() {
                 </div>
               </GlassPanel>
 
-              <GlassPanel className="rounded-2xl border-white/5 p-6 relative overflow-hidden flex items-center justify-between group cursor-pointer hover:border-gold-accent/30 transition-all">
+              <GlassPanel className="rounded-2xl border-white/5 p-6 relative overflow-hidden flex items-center justify-between group cursor-pointer hover:border-gold-accent/30 transition">
                  <div>
                    <div className="text-3xl font-display-md text-white group-hover:scale-105 origin-left transition-transform">{scopedPitches.length}</div>
                    <div className="text-[10px] text-text-secondary font-mono uppercase tracking-widest mt-1">Active Pipeline</div>
@@ -1116,7 +1116,7 @@ export default function MissionControlMode() {
             </div>
           </div>
         ) : activeTab === "faqs" ? (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both flex flex-col gap-6">
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-200 fill-mode-both flex flex-col gap-6">
             <div>
               <span className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase">Enterprise Console • Q&amp;A</span>
               <h1 className="font-display-md text-3xl md:text-4xl mt-1 text-white">Answer Review</h1>
@@ -1127,7 +1127,7 @@ export default function MissionControlMode() {
             <FAQReviewQueue onPendingCount={setFaqPending} />
           </div>
         ) : activeTab === "ai" ? (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both h-full flex flex-col gap-6">
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-200 fill-mode-both h-full flex flex-col gap-6">
             <div>
               <span className="font-label-caps text-[10px] tracking-widest text-blue-400 uppercase drop-shadow-[0_0_10px_rgba(59,130,246,0.5)]">Enterprise Console • AI</span>
               <h1 className="font-display-md text-3xl md:text-4xl mt-1 text-white">Intelligence Center</h1>
@@ -1138,7 +1138,7 @@ export default function MissionControlMode() {
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 flex-1">
               <GlassPanel className="col-span-1 lg:col-span-2 rounded-2xl border-blue-500/20 p-8 flex flex-col relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-blue-500/20 transition-all duration-700" />
+                <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-blue-500/20 transition duration-200" />
                 <div className="relative z-10 flex items-center gap-4 mb-6">
                   <div className="w-12 h-12 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center animate-pulse">
                     <Bot className="text-blue-400" size={24} />
@@ -1160,7 +1160,7 @@ export default function MissionControlMode() {
                     </div>
                   </div>
                   <div className="relative">
-                    <input type="text" placeholder="Portfolio Q&A unlocks when the Concierge goes live..." className="w-full bg-surface border border-white/10 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500/50 transition-colors" disabled />
+                    <input type="text" placeholder="Portfolio Q&A unlocks when the Concierge goes live..." className="w-full bg-surface border border-white/10 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500/50 transition" disabled />
                     <button className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-text-secondary hover:text-white" disabled>
                       <ArrowRight size={16} />
                     </button>
@@ -1169,7 +1169,7 @@ export default function MissionControlMode() {
               </GlassPanel>
 
               <div className="col-span-1 flex flex-col gap-6">
-                <GlassPanel className="rounded-2xl border-white/5 p-6 hover:border-blue-500/20 transition-colors">
+                <GlassPanel className="rounded-2xl border-white/5 p-6 hover:border-blue-500/20 transition">
                   <h4 className="text-white font-medium text-sm mb-4">Automated Drafting Queue</h4>
                   {scoped.filter((l) => l.pipelineStatus === "ai_drafting").length > 0 ? (
                     <div className="space-y-4">
@@ -1193,7 +1193,7 @@ export default function MissionControlMode() {
                   )}
                 </GlassPanel>
 
-                <GlassPanel className="flex-1 rounded-2xl border-white/5 p-6 flex flex-col justify-between group hover:border-gold-accent/20 transition-colors">
+                <GlassPanel className="flex-1 rounded-2xl border-white/5 p-6 flex flex-col justify-between group hover:border-gold-accent/20 transition">
                   <div>
                     <h4 className="text-white font-medium text-sm mb-2">Market Reports</h4>
                     <p className="text-xs text-text-secondary">AI comp analysis from real closings in your zones — switches on once enough market data accumulates.</p>
@@ -1206,7 +1206,7 @@ export default function MissionControlMode() {
             </div>
           </div>
         ) : (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both h-full flex flex-col gap-6">
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-200 fill-mode-both h-full flex flex-col gap-6">
             <div>
               <span className="font-label-caps text-[10px] tracking-widest text-text-secondary uppercase">Enterprise Console • Settings</span>
               <h1 className="font-display-md text-3xl md:text-4xl mt-1 text-white">Administration</h1>
@@ -1218,7 +1218,7 @@ export default function MissionControlMode() {
                   <button 
                     key={idx} 
                     onClick={() => setAdminActiveTab(item)}
-                    className={`text-left px-4 py-3 rounded-lg text-sm transition-colors ${adminActiveTab === item ? 'bg-white/10 text-white font-medium' : 'text-text-secondary hover:bg-white/5 hover:text-white'}`}>
+                    className={`text-left px-4 py-3 rounded-lg text-sm transition ${adminActiveTab === item ? 'bg-white/10 text-white font-medium' : 'text-text-secondary hover:bg-white/5 hover:text-white'}`}>
                     {item}
                   </button>
                 ))}
@@ -1236,7 +1236,7 @@ export default function MissionControlMode() {
                           type="text" 
                           value={orgName} 
                           onChange={e => setOrgName(e.target.value)}
-                          className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:border-gold-accent transition-colors" 
+                          className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:border-gold-accent transition" 
                         />
                       </div>
                       
@@ -1246,14 +1246,14 @@ export default function MissionControlMode() {
                           type="text" 
                           value={orgDomain} 
                           onChange={e => setOrgDomain(e.target.value)}
-                          className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:border-gold-accent transition-colors" 
+                          className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:border-gold-accent transition" 
                         />
                       </div>
 
                       <div className="pt-4 border-t border-white/10 flex justify-end">
                         <button 
                           onClick={() => addToast("Organization profile updated", "✅")}
-                          className="px-6 py-2 bg-gold-accent text-black rounded-lg text-sm font-medium hover:bg-gold-accent-bright transition-colors">
+                          className="px-6 py-2 bg-gold-accent text-black rounded-lg text-sm font-medium hover:bg-gold-accent-bright transition">
                           Save Changes
                         </button>
                       </div>
@@ -1263,7 +1263,7 @@ export default function MissionControlMode() {
 
                 {(adminActiveTab === 'Security & Access' || adminActiveTab === 'Organization Profile') && (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 animate-in fade-in">
-                    <GlassPanel className="rounded-2xl border-white/5 p-6 hover:border-emerald-500/20 transition-colors">
+                    <GlassPanel className="rounded-2xl border-white/5 p-6 hover:border-emerald-500/20 transition">
                       <h4 className="text-white font-medium text-sm mb-2">Security</h4>
                       <p className="text-xs text-text-secondary mb-4">Require Two-Factor Authentication for all team members.</p>
                       <div 
@@ -1273,8 +1273,8 @@ export default function MissionControlMode() {
                         }}
                         className="flex items-center gap-2 cursor-pointer w-fit"
                       >
-                        <div className={`w-8 h-4 rounded-full relative transition-colors duration-300 ${is2FAEnforced ? 'bg-emerald-500/20' : 'bg-white/10'}`}>
-                          <div className={`absolute top-0 bottom-0 w-4 rounded-full shadow-lg transition-all duration-300 ${is2FAEnforced ? 'right-0 bg-emerald-500 scale-110 shadow-[0_0_10px_rgba(16,185,129,0.5)]' : 'left-0 bg-white/40'}`} />
+                        <div className={`w-8 h-4 rounded-full relative transition duration-300 ${is2FAEnforced ? 'bg-emerald-500/20' : 'bg-white/10'}`}>
+                          <div className={`absolute top-0 bottom-0 w-4 rounded-full shadow-lg transition duration-300 ${is2FAEnforced ? 'right-0 bg-emerald-500 scale-110 shadow-[0_0_10px_rgba(16,185,129,0.5)]' : 'left-0 bg-white/40'}`} />
                         </div>
                         <span className={`text-xs ${is2FAEnforced ? 'text-emerald-400' : 'text-text-secondary'}`}>
                           {is2FAEnforced ? 'Enforced' : 'Optional'}
@@ -1282,7 +1282,7 @@ export default function MissionControlMode() {
                       </div>
                     </GlassPanel>
 
-                    <GlassPanel className="rounded-2xl border-white/5 p-6 hover:border-white/20 transition-colors cursor-pointer">
+                    <GlassPanel className="rounded-2xl border-white/5 p-6 hover:border-white/20 transition cursor-pointer">
                       <h4 className="text-white font-medium text-sm mb-2 flex justify-between items-center">
                         API Keys
                         <ArrowRight size={14} className="text-text-secondary" />

@@ -18,7 +18,14 @@ const PERSONAS = [
   {
     id: "broker",
     title: "Brokers & Advisors",
-    description: "Maximize your listings, unlock priority lead routing, and dominate the intelligence roster.",
+    // ⚠️ WAS "…and dominate the intelligence roster." Changed 2026-08-08.
+    // /about promises professionals are "rated only by verified results, never
+    // by who paid the most", and the Your Move model has two SEPARATE layers:
+    // independent ratings (untouched by tier) and ScoutIt Match (subscription +
+    // ratings + detail relevance). "Dominate the roster" sold the opposite of
+    // both, and it is the sentence a sceptical broker would quote back at you.
+    // Subscription buys ELIGIBILITY for routing — never the independent rank.
+    description: "Maximize your listings and unlock eligibility for ScoutIt's priority lead routing. Your independent rating stays earned, never bought.",
     icon: Briefcase,
     href: "/pricing/broker",
     accent: "text-gold-accent",

@@ -689,10 +689,28 @@ function PropertyDirectoryContent() {
                     );
                   })
                 ) : (
-                  <div className="directory-empty">
-                    <h3>No matching spaces found</h3>
-                    <p>Try clearing some filters or refining your search parameters.</p>
-                  </div>
+                  /* Same split as the brokers roster: an empty DIRECTORY is a
+                     founding invitation, an empty FILTER result is a search
+                     miss. Merging them tells a first-time visitor that ScoutIt
+                     has nothing, which is the one thing a directory must never
+                     accidentally say. */
+                  rawProperties.length === 0 ? (
+                    <div className="directory-empty">
+                      <h3>The first spaces are being verified</h3>
+                      <p>
+                        ScoutIt only publishes a space once its intelligence has been checked.
+                        List yours and it becomes one of the first verified spaces in the directory.
+                      </p>
+                      <Link href="/dashboard" className="founding-cta">
+                        List a space →
+                      </Link>
+                    </div>
+                  ) : (
+                    <div className="directory-empty">
+                      <h3>No spaces match these filters</h3>
+                      <p>Try clearing a filter or widening your search.</p>
+                    </div>
+                  )
                 )}
               </motion.div>
             </section>

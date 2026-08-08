@@ -102,7 +102,7 @@ export default function LeadExportButton({ lead, leads, label = "Export", compac
         .lx-label {
           font-family: ${MONO};
           font-size: 9px;
-          color: #6a6a6a;
+          color: var(--text-muted);
           letter-spacing: 0.14em;
           text-transform: uppercase;
         }
@@ -112,8 +112,8 @@ export default function LeadExportButton({ lead, leads, label = "Export", compac
           width: 100%;
           border-radius: 3px;
           background: transparent;
-          border: 0.5px solid #262626;
-          color: #c8c8c8;
+          border: 0.5px solid var(--border-solid);
+          color: var(--text-secondary);
           font-family: ${MONO};
           font-size: 9.5px;
           letter-spacing: 0.14em;
@@ -121,24 +121,24 @@ export default function LeadExportButton({ lead, leads, label = "Export", compac
           cursor: pointer;
           transition: border-color 0.15s ease, color 0.15s ease;
         }
-        .lx-btn:hover { border-color: #6E531A; color: #E8AE3C; }
+        .lx-btn:hover { border-color: var(--accent-muted); color: var(--accent); }
         .lx-btn--primary {
           background: rgba(232, 174, 60, 0.08);
           border-color: rgba(232, 174, 60, 0.32);
-          color: #E8AE3C;
+          color: var(--accent);
         }
-        .lx-btn--ok { border-color: rgba(127,191,127,0.4); color: #7fbf7f; }
+        .lx-btn--ok { border-color: rgba(127,191,127,0.4); color: var(--green); }
         .lx-hint {
           font-family: ${MONO};
           font-size: 8.5px;
-          color: #4a4a4a;
+          color: var(--text-muted);
           letter-spacing: 0.08em;
           line-height: 1.6;
         }
         .lx-error {
           font-family: ${MONO};
           font-size: 9px;
-          color: #e06c6c;
+          color: var(--red);
           letter-spacing: 0.05em;
           line-height: 1.5;
         }

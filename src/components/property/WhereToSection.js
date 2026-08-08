@@ -377,7 +377,7 @@ export default function WhereToSection({ lat, lng, radiusM = 900, onIsochrone, o
       </p>
 
       {/* ── WALKABILITY (W10 · WALK-01) ──────────────────────────────────
-          `calculateWalkabilityScore()` existed with zero callers until now
+          'calculateWalkabilityScore()' existed with zero callers until now
           (§51). Rendered ONLY when the server actually returned one — the
           route sends null on a failed lookup rather than the function's
           neutral 50, so an Overpass outage can never render as "MODERATE
