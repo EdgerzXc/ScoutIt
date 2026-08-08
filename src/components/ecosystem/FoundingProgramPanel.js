@@ -40,7 +40,7 @@ export default function FoundingProgramPanel({
         Looking to hire? {serviceName} goes live with the platform launch — and you&apos;ll be the first to know.
       </p>
 
-      <style>{`
+      <style jsx global>{`
         .founding-panel {
           padding: 56px 40px;
           background: linear-gradient(135deg, rgba(232, 174, 60,0.06) 0%, var(--surface) 60%);

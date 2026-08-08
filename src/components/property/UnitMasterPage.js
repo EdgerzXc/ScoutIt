@@ -41,9 +41,25 @@ const SpecCard = ({ label, value }) => {
   );
 };
 
-export default function UnitMasterPage({ slug, unitId, previewProperty, previewUnit }) {
-  const [property, setProperty] = useState(null);
-  const [loading, setLoading] = useState(true);
+// ── `initialProperty` — SERVER-SUPPLIED FIRST PAINT (2026-08-08) ─────
+// ACTION 01_NOW D2. This component fetched /api/cms on mount, so the whole page
+// body was "Loading Unit Intelligence…" in the first HTML response.
+// `generateMetadata` in the route IS server-side and correct, so crawlers were
+// getting a good <title> wrapped around an empty page — and unit pages are the
+// single biggest unrealised SEO asset ("Unit 3801 Ridgeline", "Penthouse
+// Ridgeline", "5BR Ridgeline"): genuinely distinct Spaces, not thin content.
+//
+// The route now loads the property server-side and passes it here. Note the
+// route was ALREADY fetching it inside generateMetadata and discarding the
+// result, while the client re-fetched the entire CMS — one page, two loads,
+// neither reaching the crawler.
+//
+// `previewProperty` (dashboard drawer) keeps its own meaning: an unsaved record
+// being previewed. `initialProperty` is the published one, server-rendered.
+export default function UnitMasterPage({ slug, unitId, previewProperty, previewUnit, initialProperty = null }) {
+  const seeded = previewProperty || initialProperty;
+  const [property, setProperty] = useState(seeded);
+  const [loading, setLoading] = useState(!seeded);
   const [isInquiryOpen, setIsInquiryOpen] = useState(false);
   const [isPromoteOpen, setIsPromoteOpen] = useState(false);
   const [inquiryPrefill, setInquiryPrefill] = useState("");
@@ -79,6 +95,14 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
       return;
     }
 
+    // Server already handed us the record — don't re-fetch the entire CMS just
+    // to arrive at the same object. This is the request that made a unit page
+    // download every property on the platform to render one unit.
+    if (initialProperty) {
+      setLoading(false);
+      return;
+    }
+
     let cancelled = false;
     (async () => {
       try {
@@ -100,7 +124,7 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
     return () => {
       cancelled = true;
     };
-  }, [slug, previewProperty]);
+  }, [slug, previewProperty, initialProperty]);
 
   // Manage nav scroll indicators
   useEffect(() => {

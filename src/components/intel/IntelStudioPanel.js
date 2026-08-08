@@ -173,7 +173,7 @@ export default function IntelStudioPanel() {
         )}
       </div>
 
-      <style>{`
+      <style jsx global>{`
         .intel-studio { width: 100%; }
         .studio-grid {
           display: flex;

@@ -33,13 +33,43 @@
 // ═══════════════════════════════════════════════════════════════
 
 import { Suspense } from "react";
+import { getCmsBundle } from "@/lib/cmsCache";
+import { stripPremiumFields } from "@/lib/premiumFields";
 import DirectoryClient from "./DirectoryClient";
 
 // The directory reads live CMS data and ?type= filters, so it must not be
 // statically prerendered at build time. Same directive /discover uses.
 export const dynamic = "force-dynamic";
 
-export default function PropertyRootPage() {
+// ── SERVER-SIDE FIRST PAINT ─────────────────────────────────────────
+// Making the shell a server component (above) was only half the fix: the grid
+// itself was fetched by a useEffect, so the crawler got a rendered page whose
+// entire body was "LOADING THE DIRECTORY...". The list is loaded here instead
+// and handed to the client as `initialProperties`.
+//
+// ⚠️ THIS PAGE IS ANONYMOUS — a public SEO surface. Server components
+// serialise their props into the HTML, so anything not stripped here is
+// readable with View Source (§45). Every record goes through
+// `stripPremiumFields(p, "starry")`, the same guard `/hubs/[slug]` uses.
+//
+// The client's useEffect still runs and replaces this with a live, radius-aware
+// fetch — so filtering behaviour is unchanged. This only decides what is in the
+// FIRST response.
+async function loadInitialProperties() {
+  try {
+    const bundle = await getCmsBundle();
+    return (bundle?.properties || []).map((p) => stripPremiumFields(p, "starry"));
+  } catch (err) {
+    // Never let a CMS hiccup 500 the directory. An empty array falls straight
+    // through to the client's existing loading state — degraded, not broken.
+    console.error("[/property] server CMS load failed:", err?.message);
+    return [];
+  }
+}
+
+export default async function PropertyRootPage() {
+  const initialProperties = await loadInitialProperties();
+
   return (
     <Suspense
       fallback={
@@ -58,7 +88,7 @@ export default function PropertyRootPage() {
         </div>
       }
     >
-      <DirectoryClient />
+      <DirectoryClient initialProperties={initialProperties} />
     </Suspense>
   );
 }

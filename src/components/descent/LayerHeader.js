@@ -9,7 +9,7 @@ import React from "react";
  *
  * @param {string} layerNum - e.g. "01"
  * @param {string} layerName - e.g. "Orbit"
- * @param {string} title - e.g. "The Board"
+ * @param {string} title - e.g. "Orbit"
  * @param {string} description - e.g. "The properties Manila is watching..."
  * @param {string} missionText - e.g. "The Orbit serves as the Showcase Layer..."
  */

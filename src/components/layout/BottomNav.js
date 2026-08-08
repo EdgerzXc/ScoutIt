@@ -91,6 +91,11 @@ const ITEMS = {
   home:      { id: "home",      href: "/",          label: "Home",      icon: ICONS.home },
   spaces:    { id: "spaces",    href: "/property",  label: "Spaces",    icon: ICONS.spaces },
   discover:  { id: "discover",  href: "/discover",  label: "Discover",  icon: ICONS.discover },
+  // "Board" here = YOUR SAVES (/wishlist), matching the "Your Board" header on
+  // that page. It kept this label in the 2026-08-08 A7 rename; what moved was
+  // the RANKINGS surface, which had also been calling itself "The Board".
+  // ⚠️ Do not reintroduce "Board" as a name for rankings — that collision is
+  // what the rename removed.
   board:     { id: "board",     href: "/wishlist",  label: "Board",     icon: ICONS.board },
   intel:     { id: "intel",     href: "/intel",     label: "Intel",     icon: ICONS.intel },
   dashboard: { id: "dashboard", href: "/dashboard", label: "Dash",      icon: ICONS.dashboard },

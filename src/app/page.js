@@ -635,7 +635,7 @@ export default function Home() {
           {/* Primary action path — gives first-time visitors a clear door in */}
           <div className="hero-cta-row">
             <Link href="/property" className="hero-cta-primary">Discover Spaces</Link>
-            <Link href="/layer/orbit" className="hero-cta-secondary">Browse The Board</Link>
+            <Link href="/layer/orbit" className="hero-cta-secondary">Browse Orbit</Link>
           </div>
 
           {/* Pre-launch founding-cohort capture */}

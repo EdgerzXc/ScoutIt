@@ -33,7 +33,7 @@ export function RestrictedAccessBanner({ rosterLabel = "This Roster", openDate =
           <span className="restricted-status">VETTING ACTIVE</span>
         </div>
       </div>
-      <style>{`
+      <style jsx global>{`
         .restricted-banner {
           background: linear-gradient(135deg, rgba(10,10,10,0.98) 0%, rgba(18,14,8,0.98) 100%);
           border: 1px solid rgba(232, 174, 60,0.2);
@@ -140,7 +140,7 @@ export function RestrictedCardWrapper({ children, rosterType = "this roster" }) 
         />
       )}
 
-      <style>{`
+      <style jsx global>{`
         .restricted-card-wrap {
           position: relative;
           cursor: pointer;
@@ -247,7 +247,7 @@ export function EarlyAccessModal({ rosterType = "this roster", onClose }) {
         </p>
       </div>
 
-      <style>{`
+      <style jsx global>{`
         .gate-modal-overlay {
           position: fixed;
           inset: 0;
@@ -462,7 +462,7 @@ export function DetailPageAccessGate({ rosterType = "this profile", providerName
         />
       )}
 
-      <style>{`
+      <style jsx global>{`
         .detail-gate-strip {
           background: linear-gradient(135deg, rgba(12,10,6,0.99) 0%, rgba(20,16,8,0.99) 100%);
           border: 1px solid rgba(232, 174, 60,0.2);

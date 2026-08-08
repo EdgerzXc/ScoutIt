@@ -27,7 +27,7 @@ export default function ServiceConnectionPortal({ providerName, serviceType, isM
           Submit Another Request
         </button>
 
-        <style>{`
+        <style jsx global>{`
           .portal-success {
             background: rgba(232, 174, 60, 0.04);
             border: 1px solid var(--accent-border);
@@ -157,7 +157,7 @@ export default function ServiceConnectionPortal({ providerName, serviceType, isM
           </button>
         </form>
       </div>
-      <style>{`
+      <style jsx global>{`
         
         .connection-portal-container.is-modal {
           gap: 32px;

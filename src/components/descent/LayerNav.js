@@ -7,7 +7,14 @@ import { useState } from "react";
 // know what "Stratosphere" or "Metropolis" actually is. Shown as "Cosmic · Plain"
 // on desktop; mobile collapses to the arrow only.
 const LAYER_PLAIN = {
-  Orbit: "The Board",
+  // 🔴 WAS "The Board" until 2026-08-08 — see ACTION 01_NOW A7.
+  // "The Board" meant RANKINGS here, while the mobile bottom nav has an item
+  // labelled "Board" that opens /wishlist (your SAVES). Two unrelated things,
+  // one word apart, both in the primary navigation. Obvious once you know
+  // ScoutIt; invisible to a stranger, and it is one of the first things tapped.
+  // Orbit is the concept that already exists AND is already indexed at
+  // /layer/orbit — only the plain-language label ever said "The Board".
+  Orbit: "Orbit",
   Stratosphere: "Intel",
   Metropolis: "Explore",
   Crust: "Network",
@@ -132,7 +139,7 @@ export default function LayerNav({ prev = null, next = null }) {
         </div>
       </nav>
 
-      <style>{`
+      <style jsx global>{`
         @media (max-width: 480px) {
           .layer-nav-pill-label {
             display: none;

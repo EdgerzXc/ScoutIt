@@ -75,7 +75,43 @@ export async function generateMetadata({ params }) {
   };
 }
 
+// ── SERVER-RENDER THE UNIT BODY (2026-08-08 · ACTION 01_NOW D2) ─────
+// This route's generateMetadata was already correct, so crawlers received a
+// good <title> around a body that said only "Loading Unit Intelligence…".
+// Unit pages are the largest unrealised SEO asset on ScoutIt — each child Space
+// is genuinely distinct content, not a spun variant — so an empty body here is
+// the original SEO thesis going unbanked.
+//
+// ⚠️ PUBLIC, ANONYMOUS SURFACE. Server components serialise props into the
+// HTML, so the record is stripped to the `starry` (public) tier before it is
+// handed to the client — same guard as /property and /hubs/[slug] (§45).
+async function loadUnitProperty(idOrSlug) {
+  try {
+    const { getCmsBundle } = await import("@/lib/cmsCache");
+    const { stripPremiumFields } = await import("@/lib/premiumFields");
+    const bundle = await getCmsBundle();
+    const match = (bundle?.properties || []).find(
+      (p) =>
+        (p.slug && p.slug.toLowerCase() === String(idOrSlug).toLowerCase()) ||
+        (p.id && p.id === idOrSlug)
+    );
+    return match ? stripPremiumFields(match, "starry") : null;
+  } catch (err) {
+    // Degrade to the client fetch rather than 500 the page.
+    console.error("[unit page] server CMS load failed:", err?.message);
+    return null;
+  }
+}
+
 export default async function UnitRoute({ params }) {
   const resolvedParams = await params;
-  return <UnitMasterPage slug={resolvedParams.id} unitId={resolvedParams.unitId} />;
+  const initialProperty = await loadUnitProperty(resolvedParams.id);
+
+  return (
+    <UnitMasterPage
+      slug={resolvedParams.id}
+      unitId={resolvedParams.unitId}
+      initialProperty={initialProperty}
+    />
+  );
 }

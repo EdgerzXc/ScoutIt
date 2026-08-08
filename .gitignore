@@ -74,3 +74,7 @@ yarn-error.log*
 /_SCOUTIT_BRAIN/*
 !/_SCOUTIT_BRAIN/15_IMPLEMENTATION_RECORDS/
 !/_SCOUTIT_BRAIN/15_IMPLEMENTATION_RECORDS/**
+
+# FUSE artifacts left by in-place edits over a mounted filesystem.
+# Not source; they are stale open handles to replaced files.
+.fuse_hidden*

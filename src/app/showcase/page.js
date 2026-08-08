@@ -1,7 +1,7 @@
 import ShowcaseStage from "@/components/board/ShowcaseStage";
 
 export const metadata = {
-  title: "The Board · ScoutIT",
+  title: "Orbit Rankings · ScoutIT",
   description: "The most-inquired Philippine properties, ranked across cosmic tiers — ScoutIT's Space Intelligence showcase.",
 };
 

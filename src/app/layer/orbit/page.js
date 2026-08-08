@@ -18,13 +18,13 @@ export default function OrbitLayer() {
         <LayerHeader 
           layerNum="01" 
           layerName="Orbit" 
-          title="The Board" 
+          title="Orbit" 
           description="The properties Manila is watching — ranked by real inquiry demand." 
           missionText="The Orbit serves as the Showcase Layer. This specific layer exists to grant the highest-ranked properties the ultimate visibility they deserve, elevating them to the apex of the platform." 
           ctaText="View Full Showcase →"
           ctaHref="/showcase"
         />
-        {/* SECTION 2: Layer 01 — The Board (ranked podium &rarr; /showcase) */}
+        {/* SECTION 2: Layer 01 — Orbit rankings (ranked podium &rarr; /showcase) */}
         <section className="snap-section section-board" id="board-section" style={{ padding: 0, position: "relative", overflow: "hidden" }}>
           <BoardPodium />
         </section>

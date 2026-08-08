@@ -148,14 +148,33 @@ const cardVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] } }
 };
 
-function PropertyDirectoryContent() {
+// `initialProperties` is server-rendered by ./page.js and arrives already
+// premium-stripped. Seeding state with it means the CRAWLER sees real cards in
+// the first HTML response instead of "LOADING THE DIRECTORY..." — the second
+// half of the 2026-08-08 fix. The useEffect below still runs and overwrites
+// this with a live fetch, so radius/filter changes behave exactly as before.
+function PropertyDirectoryContent({ initialProperties = [] }) {
   const searchParams = useSearchParams();
   const initialType = searchParams.get("type");
 
   // State
-  const [rawProperties, setRawProperties] = useState([]);
+  // Mapped here rather than in page.js so `toCard` stays in this client module
+  // — a server component importing it would drag the whole file server-side.
+  // Same validity guard the fetch path uses, so server and client agree on
+  // which records are renderable.
+  const [rawProperties, setRawProperties] = useState(() =>
+    initialProperties
+      .filter((p) => p.title && p.slug && p.spaceCategory)
+      .map((p) => toCard(p, p.spaceCategory || null, "Vetted dynamic listing brief."))
+  );
   const [rawIntel, setRawIntel] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // 🔴 Start "loaded" whenever the server already handed us cards. Defaulting
+  // to `true` unconditionally is what made a crawler see the loading state even
+  // after the markup was server-rendered — the HTML shipped correct data and
+  // then hid it behind a spinner in the very same response.
+  const [loading, setLoading] = useState(
+    !initialProperties.some((p) => p.title && p.slug && p.spaceCategory)
+  );
 
   // Filters State
   const [selectedSectors, setSelectedSectors] = useState([]);
@@ -748,5 +767,6 @@ function PropertyDirectoryContent() {
 }
 
 // Split out of src/app/property/page.js on 2026-08-08 so the page shell could
-// become a SERVER component. See the header comment in page.js for why.
+// become a SERVER component, and given an `initialProperties` prop so the
+// directory grid itself server-renders. See the header comment in page.js.
 export default PropertyDirectoryContent;
