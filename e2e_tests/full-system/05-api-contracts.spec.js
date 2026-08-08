@@ -74,4 +74,26 @@ test.describe('Auth walls on mutation routes', () => {
     expect(res.status()).toBeGreaterThanOrEqual(400);
     expect(res.status()).toBeLessThan(500);
   });
+
+  const ADMIN_ENDPOINTS = [
+    { method: 'GET', path: '/api/admin/connects-refund' },
+    { method: 'POST', path: '/api/admin/connects-refund', body: { userId: 'e2e-void', amount: 1 } },
+    { method: 'GET', path: '/api/admin/feature-flags' },
+    { method: 'POST', path: '/api/admin/feature-flags', body: { id: 'e2e-void', is_enabled: false } },
+    { method: 'POST', path: '/api/admin/generate-seo', body: { propertyId: 'e2e-void' } },
+    { method: 'GET', path: '/api/admin/osint' },
+    { method: 'POST', path: '/api/admin/osint', body: { action: 'e2e-void' } },
+    { method: 'GET', path: '/api/admin/prc' },
+    { method: 'POST', path: '/api/admin/prc', body: { action: 'e2e-void' } },
+    { method: 'GET', path: '/api/admin/property?id=e2e-void' },
+    { method: 'PATCH', path: '/api/admin/property', body: { id: 'e2e-void' } },
+  ];
+
+  for (const { method, path, body } of ADMIN_ENDPOINTS) {
+    test(`${method} ${path} uses the shared anonymous-denial gate`, async ({ request }) => {
+      const options = body ? { method, data: body } : { method };
+      const res = await request.fetch(path, options);
+      expect(res.status(), `${path} did not reject an anonymous ${method}`).toBe(401);
+    });
+  }
 });

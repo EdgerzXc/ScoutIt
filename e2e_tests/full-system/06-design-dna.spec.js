@@ -62,3 +62,33 @@ test('gold accent is actually used on interactive elements', async ({ page }) =>
   });
   expect(goldCount, 'no gold accent found above the fold on the homepage').toBeGreaterThan(0);
 });
+test('ambient rail stays inside the universal header and exposes manual controls', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('scoutit_user', JSON.stringify({ name: 'Human Tester' }));
+  });
+  await gotoAndSettle(page, '/intel');
+
+  const header = page.locator('header.global-header').first();
+  const rail = header.locator('.ambient-rail');
+  await expect(rail).toBeVisible();
+  await expect(rail.getByRole('button', { name: 'Previous ambient information' })).toBeEnabled();
+  await expect(rail.getByRole('button', { name: 'Next ambient information' })).toBeEnabled();
+
+  const ambientCopy = rail.locator('.ambient-copy');
+  const initialAmbientState = await ambientCopy.textContent();
+  await expect.poll(
+    async () => ambientCopy.textContent(),
+    { timeout: 8_000, message: 'ambient rail did not auto-advance' },
+  ).not.toBe(initialAmbientState);
+
+  const eye = header.getByRole('button', { name: 'Display Settings (Light / Lite / Dark Mode)' });
+  await eye.click();
+  await expect(eye).toHaveAttribute('aria-expanded', 'true');
+  await expect(page.locator('.toolbox-float').filter({ hasText: 'Display Settings' })).toBeVisible();
+
+  const layout = await header.evaluate((element) => ({
+    clientWidth: element.clientWidth,
+    scrollWidth: element.scrollWidth,
+  }));
+  expect(layout.scrollWidth, 'ambient rail caused horizontal header overflow').toBeLessThanOrEqual(layout.clientWidth + 1);
+});

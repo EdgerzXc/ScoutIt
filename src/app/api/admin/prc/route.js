@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { requireAdmin } from "@/lib/adminGuard";
 
 // ── RA 9646 PRC verification queue ──────────────────────────────────────────
 // GET  → every profile that submitted a PRC license, with verification state.
@@ -8,33 +8,9 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 // The "PRC Verified" badge renders ONLY from prc_verified, never from the mere
 // presence of a license number. Same admin-auth pattern as /api/admin/approve.
 
-async function requireAdmin(request) {
-  const authHeader = request.headers.get("Authorization");
-  const token = authHeader?.replace("Bearer ", "");
-  if (!token) return { error: "Unauthorized: Missing token", status: 401 };
-
-  const authClient = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  );
-  const { data: { user }, error: authError } = await authClient.auth.getUser(token);
-  if (authError || !user) return { error: "Unauthorized: Invalid session", status: 401 };
-
-  const { data: profile, error: profileError } = await supabaseAdmin
-    .from("user_profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-  if (profileError || !profile || profile.role !== "admin") {
-    console.warn(`[ADMIN PRC] Unauthorized access attempt by user ${user.id}`);
-    return { error: "Unauthorized: Admin privileges required", status: 403 };
-  }
-  return { user };
-}
-
 export async function GET(request) {
   try {
-    const gate = await requireAdmin(request);
+    const gate = await requireAdmin(request, { label: "ADMIN PRC" });
     if (gate.error) return NextResponse.json({ error: gate.error }, { status: gate.status });
 
     const { data, error } = await supabaseAdmin
@@ -58,7 +34,7 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
-    const gate = await requireAdmin(request);
+    const gate = await requireAdmin(request, { label: "ADMIN PRC" });
     if (gate.error) return NextResponse.json({ error: gate.error }, { status: gate.status });
 
     let body;

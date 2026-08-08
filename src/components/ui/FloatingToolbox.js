@@ -35,7 +35,7 @@ const WIZARD_STEPS = [
   },
 ];
 
-export default function FloatingToolbox() {
+export default function FloatingToolbox({ showTrigger = true }) {
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState("dark");
   const [lite, setLite] = useState(false);
@@ -131,6 +131,12 @@ export default function FloatingToolbox() {
     return () => window.removeEventListener("scoutit:open-display-settings", handleOpenDisplay);
   }, []);
 
+  useEffect(() => {
+    if (!mounted) return;
+    window.dispatchEvent(new CustomEvent("scoutit:display-settings-state", {
+      detail: { open },
+    }));
+  }, [mounted, open]);
   // Apply a mock tier/role and reload so entitlement gates re-read.
   const applyDev = (nextTier, nextRole) => {
     try {
@@ -321,7 +327,7 @@ export default function FloatingToolbox() {
   return (
     <>
       {/* ── Draggable eye trigger ── */}
-      <div
+      {showTrigger && <div
         ref={containerRef}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
@@ -365,7 +371,7 @@ export default function FloatingToolbox() {
             }} />
           )}
         </div>
-      </div>
+      </div>}
 
       {/* ── Draggable Toolbox panel ── */}
       {open && (

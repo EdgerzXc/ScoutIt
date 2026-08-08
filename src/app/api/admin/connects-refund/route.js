@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { requireAdmin } from "@/lib/adminGuard";
 import { z } from "zod";
 import { sanitizeError } from "@/lib/sanitizeError";
 
@@ -31,38 +31,13 @@ const schema = z.object({
   refId: z.string().optional().nullable(),
 });
 
-/** Same gate as /api/admin/property — a valid session is not enough. */
-async function requireAdmin(request) {
-  const token = request.headers.get("Authorization")?.replace("Bearer ", "");
-  if (!token) return { error: "Unauthorized: Missing token", status: 401 };
-
-  const authClient = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-  );
-  const { data: { user }, error: authError } = await authClient.auth.getUser(token);
-  if (authError || !user) return { error: "Unauthorized: Invalid session", status: 401 };
-
-  const { data: profile, error: profileError } = await supabaseAdmin
-    .from("user_profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-
-  if (profileError || profile?.role !== "admin") {
-    console.warn(`[CONNECTS REFUND] Unauthorized attempt by ${user.id}`);
-    return { error: "Unauthorized: Admin privileges required", status: 403 };
-  }
-  return { userId: user.id };
-}
-
 // ── GET /api/admin/connects-refund?userId=… ─────────────────────
 // The wallet and its recent ledger, so staff can see what actually happened
 // before crediting anything. Refunding blind is how a "double charge" that
 // was really one charge becomes two Connects out of pocket.
 export async function GET(request) {
   try {
-    const gate = await requireAdmin(request);
+    const gate = await requireAdmin(request, { label: "CONNECTS REFUND" });
     if (gate.error) return NextResponse.json({ error: gate.error }, { status: gate.status });
 
     const userId = new URL(request.url).searchParams.get("userId");
@@ -102,7 +77,7 @@ export async function GET(request) {
 // ── POST /api/admin/connects-refund ─────────────────────────────
 export async function POST(request) {
   try {
-    const gate = await requireAdmin(request);
+    const gate = await requireAdmin(request, { label: "CONNECTS REFUND" });
     if (gate.error) return NextResponse.json({ error: gate.error }, { status: gate.status });
 
     const parsed = schema.safeParse(await request.json());

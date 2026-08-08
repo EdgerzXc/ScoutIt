@@ -3,11 +3,13 @@
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
+import AmbientRail from "@/components/layout/ambient/AmbientRail";
 
 export default function Header() {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
+  const [displaySettingsOpen, setDisplaySettingsOpen] = useState(false);
   const menuRef = useRef(null);
 
   useEffect(() => {
@@ -39,34 +41,47 @@ export default function Header() {
     };
   }, []);
 
+  useEffect(() => {
+    const syncDisplaySettings = (event) => setDisplaySettingsOpen(Boolean(event.detail?.open));
+    window.addEventListener("scoutit:display-settings-state", syncDisplaySettings);
+    return () => window.removeEventListener("scoutit:display-settings-state", syncDisplaySettings);
+  }, []);
   const profileHref = user ? "/profile" : "/onboarding";
 
 
   return (
     <header className="global-header">
-      <button 
-        onClick={() => {
-          if (window.history.length > 1) {
-            router.back();
-          } else {
-            router.push("/");
-          }
-        }} 
-        className="header-back-btn"
-      >
-        ← Back
-      </button>
-      
-      <Link href="/" className="header-brand" aria-label="ScoutIT — home">
-        <span className="brand-s" style={{ color: "var(--accent)" }}>S</span><span className="brand-scout">cout</span><span className="brand-it">IT</span>
-      </Link>
+      <span className="header-gold-thread" aria-hidden="true"><span /></span>
+      <div className="header-left">
+        <button
+          onClick={() => {
+            if (window.history.length > 1) {
+              router.back();
+            } else {
+              router.push("/");
+            }
+          }}
+          className="header-back-btn"
+        >
+          ← Back
+        </button>
+
+        <Link href="/" className="header-brand" aria-label="ScoutIT — home">
+          <span className="brand-s" style={{ color: "var(--accent)" }}>S</span><span className="brand-scout">cout</span><span className="brand-it">IT</span>
+        </Link>
+      </div>
+
+      <div className="header-center">
+        <AmbientRail user={user} />
+      </div>
 
       <nav className="header-nav" ref={menuRef}>
         <button
-          className="header-eye-btn"
+          className={`header-eye-btn ${displaySettingsOpen ? "is-open" : ""}`}
           type="button"
           onClick={() => window.dispatchEvent(new CustomEvent("scoutit:open-display-settings"))}
           aria-label="Display Settings (Light / Lite / Dark Mode)"
+          aria-expanded={displaySettingsOpen}
           title="Display Settings (Light / Lite / Dark Mode)"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -120,11 +135,12 @@ export default function Header() {
               window.dispatchEvent(new CustomEvent("scoutit:open-display-settings"));
             }}
           >
-            👁️ Display Settings
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12Z" /><circle cx="12" cy="12" r="3" /></svg>
+            <span>Display Settings</span>
           </button>
         </div>
       </nav>
-      
+
       {/* 🔴 MUST stay '<style jsx>', not a raw '<style>'. React 19 hoists a raw
           <style> element into <head> and treats it as a stylesheet RESOURCE.
           An 11KB one without a 'precedence' prop leaves the enclosing
@@ -136,18 +152,45 @@ export default function Header() {
           <style> is fine, this block is not. */}
       <style jsx>{`
         .global-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 16px 24px;
-          background: var(--brand-overlay);
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
-          border-bottom: 1px solid var(--border-solid);
           position: sticky;
           top: 0;
           z-index: 1000;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 18px;
+          min-height: 72px;
+          padding: 12px 24px;
+          background: radial-gradient(circle at 50% -80%, rgba(var(--accent-rgb),.085), transparent 54%), linear-gradient(180deg, rgba(14,14,14,.94), rgba(7,7,7,.89));
+          backdrop-filter: blur(18px) saturate(118%);
+          -webkit-backdrop-filter: blur(18px) saturate(118%);
+          border-bottom: 1px solid rgba(var(--accent-rgb),.13);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,.035), 0 14px 40px rgba(0,0,0,.2);
           font-family: var(--font-body);
+          isolation: isolate;
+        }
+
+        .header-gold-thread { position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; overflow: hidden; pointer-events: none; }
+        .header-gold-thread::before { content: ""; position: absolute; inset: 0; height: 1px; background: linear-gradient(90deg, transparent 4%, rgba(var(--accent-rgb),.14) 24%, rgba(var(--accent-rgb),.32) 50%, rgba(var(--accent-rgb),.14) 76%, transparent 96%); }
+        .header-gold-thread span { position: absolute; top: 0; left: 0; width: 220px; height: 1px; background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb),.26), var(--accent-bright), rgba(var(--accent-rgb),.26), transparent); filter: drop-shadow(0 0 4px rgba(var(--accent-rgb),.42)); animation: headerThreadPass 10.5s cubic-bezier(.45,0,.55,1) infinite; }
+
+        .header-left {
+          display: flex;
+          align-items: center;
+          gap: 20px;
+          flex: 1;
+          min-width: 0;
+        }
+
+        .header-center {
+          position: relative;
+          flex: 2;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-height: 48px;
+          min-width: 70px;
+          max-width: 416px;
         }
 
         .header-back-btn {
@@ -182,13 +225,11 @@ export default function Header() {
           font-weight: 400;
           font-size: 30px;
           letter-spacing: 3px;
-          position: absolute;
-          left: 50%;
-          transform: translateX(-50%);
           text-decoration: none;
           white-space: nowrap;
           line-height: 1;
         }
+
         .header-brand .brand-scout { color: var(--text-primary); }
         .header-brand .brand-s,
         .header-brand .brand-it { color: var(--accent); transition: text-shadow 0.3s ease; }
@@ -200,28 +241,32 @@ export default function Header() {
           display: flex;
           align-items: center;
           gap: 10px;
+          flex: 1;
+          justify-content: flex-end;
+          min-width: 0;
         }
 
         .header-eye-btn {
+          position: relative;
           width: 44px;
           height: 44px;
           border-radius: 50%;
-          border: 1px solid var(--accent-border);
-          background: var(--brand-overlay);
+          border: 1px solid rgba(var(--accent-rgb),.28);
+          background: linear-gradient(180deg, rgba(255,255,255,.045), rgba(var(--accent-rgb),.025));
           color: var(--accent);
           display: flex;
           align-items: center;
           justify-content: center;
           cursor: pointer;
-          transition: all 0.2s cubic-bezier(0.23, 1, 0.32, 1);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,.06), inset 0 -1px 0 rgba(var(--accent-rgb),.05);
+          transition: border-color 180ms cubic-bezier(.23,1,.32,1), background 180ms cubic-bezier(.23,1,.32,1), color 180ms cubic-bezier(.23,1,.32,1), box-shadow 180ms cubic-bezier(.23,1,.32,1), transform 140ms cubic-bezier(.23,1,.32,1);
         }
-        .header-eye-btn:hover {
-          border-color: var(--accent);
-          background: rgba(var(--accent-rgb), 0.12);
-        }
-        .header-eye-btn:active {
-          transform: scale(0.94);
-        }
+        .header-eye-btn::after { content: ""; position: absolute; right: 5px; top: 5px; width: 4px; height: 4px; border-radius: 50%; background: var(--accent-bright); box-shadow: 0 0 7px rgba(var(--accent-rgb),.8); opacity: 0; transform: scale(.7); transition: opacity 160ms cubic-bezier(.23,1,.32,1), transform 160ms cubic-bezier(.23,1,.32,1); }
+        .header-eye-btn:hover,
+        .header-eye-btn.is-open { border-color: rgba(var(--accent-rgb),.72); color: var(--accent-bright); background: rgba(var(--accent-rgb),.105); box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 0 22px rgba(var(--accent-rgb),.11); }
+        .header-eye-btn.is-open::after { opacity: 1; transform: scale(1); }
+        .header-eye-btn:active { transform: scale(.96); }
+        .header-eye-btn:focus-visible { outline: 1px solid var(--accent-bright); outline-offset: 3px; }
 
         .dropdown-display-btn {
           display: flex;
@@ -243,9 +288,9 @@ export default function Header() {
           border-top: 1px solid var(--border-solid);
           margin-top: 4px;
         }
-        .dropdown-display-btn:hover {
-          background: var(--surface2);
-        }
+        .dropdown-display-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.35; stroke-linecap: round; stroke-linejoin: round; }
+        .dropdown-display-btn:hover { background: var(--surface2); }
+        .dropdown-display-btn:active { transform: scale(.985); }
 
         .header-profile-btn {
           width: 44px;
@@ -384,11 +429,18 @@ export default function Header() {
         }
 
         /* ── MOBILE OPTIMIZATIONS ── */
+        @keyframes headerThreadPass {
+          0% { transform: translate3d(-240px,0,0); opacity: 0; }
+          14% { opacity: .9; }
+          86% { opacity: .9; }
+          100% { transform: translate3d(calc(100vw + 240px),0,0); opacity: 0; }
+        }
+
         @media (max-width: 768px) {
           .global-header {
             padding: 10px 16px;
           }
-          
+
           .header-brand {
             font-size: 24px;
             letter-spacing: 2px;
@@ -399,7 +451,7 @@ export default function Header() {
             padding: 0 14px;
             min-height: 44px;
           }
-          
+
           .header-menu-btn {
             width: 44px;
             height: 44px;
@@ -418,19 +470,19 @@ export default function Header() {
             min-width: 160px;
             padding: 6px;
           }
-          
+
           .header-dropdown a {
             padding: 10px 12px;
             font-size: 12px;
           }
         }
-        
+
         @media (max-width: 640px) {
           .global-header {
             padding: 8px 14px;
             gap: 8px;
           }
-          
+
           .header-brand {
             font-size: 22px;
             letter-spacing: 2px;
@@ -442,7 +494,7 @@ export default function Header() {
             min-height: 36px;
             white-space: nowrap;
           }
-          
+
           .header-menu-btn {
             width: 36px;
             height: 36px;
@@ -473,11 +525,11 @@ export default function Header() {
             padding: 12px;
             box-shadow: 0 -4px 20px rgba(0,0,0,0.6);
           }
-          
+
           .header-dropdown.open {
             animation: slideUpMobile 0.3s cubic-bezier(0.4, 0, 0.2, 1);
           }
-          
+
           .header-dropdown a {
             padding: 14px 12px;
             font-size: 13px;
@@ -486,30 +538,34 @@ export default function Header() {
             align-items: center;
             border-radius: 6px;
           }
-          
+
           .header-dropdown a:active {
             background: rgba(232, 174, 60, 0.15);
           }
-          
+
           .header-dropdown .dropdown-brand {
             font-size: 10px;
             padding: 8px 12px 4px;
             margin-bottom: 8px;
           }
+          .header-left { gap: 8px; }
+          .header-center { flex: 1.25; }
+          .header-eye-btn { width: 36px; height: 36px; }
+
         }
-        
+
         @media (max-width: 480px) {
           .header-back-btn {
             font-size: 10px;
             padding: 0 8px;
             min-height: 36px;
           }
-          
+
           .header-brand {
             font-size: 20px;
             margin: 0 4px;
           }
-          
+
           .header-menu-btn {
             width: 36px;
             height: 36px;
@@ -533,8 +589,16 @@ export default function Header() {
           .header-profile-btn .profile-initial {
             font-size: 14px;
           }
+          .global-header { padding: 8px; gap: 4px; }
+          .header-left { gap: 5px; }
+          .header-center { min-width: 64px; }
+          .header-nav { gap: 4px; }
+          .header-back-btn { font-size: 8px; padding: 0 5px; min-height: 32px; }
+          .header-brand { font-size: 17px; margin: 0; letter-spacing: 1px; }
+          .header-eye-btn, .header-menu-btn, .header-profile-btn { width: 32px; height: 32px; }
+
         }
-        
+
         /* Animation for mobile dropdown */
         @keyframes slideUpMobile {
           from {
@@ -546,13 +610,17 @@ export default function Header() {
             opacity: 1;
           }
         }
-        
+
+        @media (prefers-reduced-motion: reduce) {
+          .header-gold-thread span { display: none; }
+        }
+
         /* Touch-friendly active state */
         @media (hover: none) and (pointer: coarse) {
           .header-dropdown a {
             min-height: 48px;
           }
-          
+
           .header-menu-btn,
           .header-back-btn {
             -webkit-tap-highlight-color: rgba(232, 174, 60, 0.15);

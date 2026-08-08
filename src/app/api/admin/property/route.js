@@ -22,45 +22,20 @@
 // ═══════════════════════════════════════════════════════════════
 
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { requireAdmin } from "@/lib/adminGuard";
 import { updateProperty } from "@/lib/airtable";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { sanitizeObject } from "@/lib/sanitize";
 import { isInternal, fieldMeta } from "@/lib/propertyFieldRegistry";
 import { canChangeDisplayTitle, normalizeLifecycleState, PROPERTY_LIFECYCLE_STATES } from "@/lib/propertyLifecycle";
 
-/** Verify the caller is a signed-in admin. Returns {userId} or {error,status}. */
-async function requireAdmin(request) {
-  const token = request.headers.get("Authorization")?.replace("Bearer ", "");
-  if (!token) return { error: "Unauthorized: Missing token", status: 401 };
-
-  const authClient = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-  );
-  const { data: { user }, error: authError } = await authClient.auth.getUser(token);
-  if (authError || !user) return { error: "Unauthorized: Invalid session", status: 401 };
-
-  const { data: profile, error: profileError } = await supabaseAdmin
-    .from("user_profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-
-  if (profileError || profile?.role !== "admin") {
-    console.warn(`[ADMIN PROPERTY] Unauthorized access attempt by ${user.id}`);
-    return { error: "Unauthorized: Admin privileges required", status: 403 };
-  }
-  return { userId: user.id };
-}
-
 // ── GET /api/admin/property?id=… ────────────────────────────────
 // Returns the property plus the registry metadata the editor renders from,
 // so the client never has to hardcode a field list that can drift from Airtable.
 export async function GET(request) {
   try {
-    const auth = await requireAdmin(request);
+    const auth = await requireAdmin(request, { label: "ADMIN PROPERTY" });
     if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
 
     const id = new URL(request.url).searchParams.get("id");
@@ -94,7 +69,7 @@ export async function GET(request) {
 // Commercial section cannot wipe the Residential one.
 export async function PATCH(request) {
   try {
-    const auth = await requireAdmin(request);
+    const auth = await requireAdmin(request, { label: "ADMIN PROPERTY" });
     if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
 
     const body = await request.json();

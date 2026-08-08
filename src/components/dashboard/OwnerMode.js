@@ -245,7 +245,7 @@ export default function OwnerMode() {
             onClick={() => setShowWizard('live_editor')}
           >
              <h3 className="font-working-title text-2xl text-on-surface mb-3 group-hover:text-white transition-colors duration-300">Build from Scratch</h3>
-             <p className="text-sm text-text-secondary mb-6 leading-relaxed">Build your listing manually using our step-by-step editor. Best if you don't have a deck and are starting from scratch.</p>
+             <p className="text-sm text-text-secondary mb-6 leading-relaxed">Build your listing manually using our step-by-step editor. Best if you do not have a deck and are starting from scratch.</p>
           </button>
 
           <button 

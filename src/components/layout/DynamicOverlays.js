@@ -8,7 +8,7 @@ const WaitlistModal = dynamic(() => import("@/components/waitlist/WaitlistModal"
 export default function DynamicOverlays() {
   return (
     <>
-      <FloatingToolbox />
+      <FloatingToolbox showTrigger={false} />
       <WaitlistModal />
     </>
   );

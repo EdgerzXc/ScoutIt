@@ -13,7 +13,7 @@ const cspHeader = `
     worker-src 'self' blob:;
     child-src 'self' blob:;
     frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://my.matterport.com https://*.matterport.com https://lumalabs.ai;
-    connect-src 'self' https://*.supabase.co https://*.mapbox.com https://events.mapbox.com https://unpkg.com https://*.cartocdn.com https://huggingface.co https://*.hf.co https://www.google-analytics.com https://www.googletagmanager.com https://www.google.com https://*.google.com https://earthquake.usgs.gov${__impeccableLiveDev};
+    connect-src 'self' https://*.supabase.co https://*.mapbox.com https://events.mapbox.com https://api.open-meteo.com https://air-quality-api.open-meteo.com https://unpkg.com https://*.cartocdn.com https://huggingface.co https://*.hf.co https://www.google-analytics.com https://www.googletagmanager.com https://www.google.com https://*.google.com https://earthquake.usgs.gov${__impeccableLiveDev};
     object-src 'none';
     base-uri 'self';
     form-action 'self';
@@ -77,7 +77,7 @@ const nextConfig = {
           },
           {
             key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=()',
+            value: 'camera=(), microphone=(), geolocation=(self)',
           },
           // HSTS (§25.5). Tells browsers to reach ScoutIt over HTTPS only,
           // closing the http:// first-request window an attacker on a café or
