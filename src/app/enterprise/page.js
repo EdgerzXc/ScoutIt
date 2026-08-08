@@ -53,7 +53,7 @@ export default function EnterprisePage() {
       </main>
       <Footer />
 
-      <style>{`
+      <style jsx global>{`
         .enterprise-main {
           padding: 80px 24px;
           max-width: 900px;

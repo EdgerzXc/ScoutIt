@@ -37,7 +37,23 @@ export default function FoundingProgramPanel({
 
       <div className="founding-divider" />
       <p className="founding-buyer">
-        Looking to hire? {serviceName} goes live with the platform launch — and you&apos;ll be the first to know.
+        {/*
+          🔴 Rendered as "Space photographygoes live" in production — confirmed
+          on the deployed page, not just in QA.
+
+          The JSX source was correct: `{serviceName} goes live` has the space.
+          The cause is the TEXT-NODE BOUNDARY. When an expression sits between
+          two literal strings, React server-renders three separate text nodes
+          and separates them with `<!-- -->`; the space adjacent to that comment
+          is what disappears downstream. Note the same file's line 34,
+          `{ctaLabel} →`, renders fine — it has a literal on ONE side only,
+          which is why this looked unreproducible and stayed unlocated.
+
+          Fix: build the whole sentence as a SINGLE interpolated string. One
+          text node, no boundary, no separator comment, nothing to swallow.
+          Do not "simplify" this back to inline JSX text.
+        */}
+        {`Looking to hire? ${serviceName} goes live with the platform launch — and you'll be the first to know.`}
       </p>
 
       <style jsx global>{`

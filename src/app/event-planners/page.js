@@ -172,18 +172,30 @@ export default function EventPlannersPage() {
                 <span className="roster-state-label">Scanning the roster…</span>
               </div>
             )}
-            {planners !== null && filtered.length === 0 && (
+              {/* Two DIFFERENT empty states, because they mean opposite things
+                  (ACTION 01_NOW B3, extended to this page 2026-08-08).
+
+                  The split already existed here; the ROSTER copy did not do its
+                  job. "No {noun} on the public roster yet" is accurate and it
+                  still tells a first-time visitor the platform is empty.
+
+                  An empty roster is not a failed search — it is a founding
+                  cohort. Same database state, opposite meaning: framed as
+                  scarcity it converts, framed as absence it deflects. Matches
+                  the brokers page, which was fixed first. */}
+            {planners !== null && filtered.length === 0 && planners.length === 0 && (
+              <div className="directory-empty">
+                <h3>The Founding Planner cohort is being assembled</h3>
+                <p>ScoutIt is verifying its first roster of event and space planners. Join as a Founding Planner and your work will be here when the first venues go live.</p>
+                <Link href="/onboarding" className="founding-cta">
+                  Claim Founding Planner &rarr;
+                </Link>
+              </div>
+            )}
+            {planners !== null && filtered.length === 0 && planners.length > 0 && (
               <div className="roster-state">
-                <span className="roster-state-label">
-                  {planners.length === 0
-                    ? "No event designers on the public roster yet"
-                    : "No event designers match your filters"}
-                </span>
-                <span className="roster-state-sub">
-                  {planners.length === 0
-                    ? "Founding Designer slots are open below."
-                    : "Clear a filter or broaden your search."}
-                </span>
+                <span className="roster-state-label">No planners match these filters</span>
+                <span className="roster-state-sub">Clear a filter or broaden your search.</span>
               </div>
             )}
             {filtered.length > 0 && (
@@ -237,7 +249,7 @@ export default function EventPlannersPage() {
       </main>
       <Footer />
 
-      <style>{`
+      <style jsx global>{`
         .coming-soon-banner {
           background: linear-gradient(135deg, rgba(232, 174, 60,0.08) 0%, rgba(232, 174, 60,0.03) 100%);
           border: 0.5px solid var(--accent-border);

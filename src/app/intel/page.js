@@ -484,7 +484,7 @@ export default function IntelPage() {
         </div>
       )}
 
-      <style>{`
+      <style jsx global>{`
         .page-wrapper {
           background: var(--bg);
           color: var(--text-primary);

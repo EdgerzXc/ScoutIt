@@ -137,18 +137,30 @@ export default function ResearchersPage() {
                 <span className="roster-state-label">Scanning the roster…</span>
               </div>
             )}
-            {researchers !== null && filtered.length === 0 && (
+              {/* Two DIFFERENT empty states, because they mean opposite things
+                  (ACTION 01_NOW B3, extended to this page 2026-08-08).
+
+                  The split already existed here; the ROSTER copy did not do its
+                  job. "No {noun} on the public roster yet" is accurate and it
+                  still tells a first-time visitor the platform is empty.
+
+                  An empty roster is not a failed search — it is a founding
+                  cohort. Same database state, opposite meaning: framed as
+                  scarcity it converts, framed as absence it deflects. Matches
+                  the brokers page, which was fixed first. */}
+            {researchers !== null && filtered.length === 0 && researchers.length === 0 && (
+              <div className="directory-empty">
+                <h3>The Founding Researcher cohort is being assembled</h3>
+                <p>ScoutIt is verifying its first roster of site researchers. Join as a Founding Researcher and your practice will be here when the first due-diligence briefs are commissioned.</p>
+                <Link href="/onboarding" className="founding-cta">
+                  Claim Founding Researcher &rarr;
+                </Link>
+              </div>
+            )}
+            {researchers !== null && filtered.length === 0 && researchers.length > 0 && (
               <div className="roster-state">
-                <span className="roster-state-label">
-                  {researchers.length === 0
-                    ? "No analysts on the public roster yet"
-                    : "No analysts match your filters"}
-                </span>
-                <span className="roster-state-sub">
-                  {researchers.length === 0
-                    ? "Founding Analyst slots are open below."
-                    : "Clear a filter or broaden your search."}
-                </span>
+                <span className="roster-state-label">No researchers match these filters</span>
+                <span className="roster-state-sub">Clear a filter or broaden your search.</span>
               </div>
             )}
             {filtered.length > 0 && (
@@ -202,7 +214,7 @@ export default function ResearchersPage() {
       </main>
       <Footer />
 
-      <style>{`
+      <style jsx global>{`
         /* Roster chrome — mono label spec from DESIGN.md (10px / .18em / uppercase) */
         .example-badge-overlay { position: absolute; top: 12px; left: 12px; font-size: 10px; font-weight: 500; letter-spacing: .18em; text-transform: uppercase; color: var(--text-primary); background: rgba(14,14,14,.82); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); border: 1px dashed var(--text-muted); padding: 5px 11px; border-radius: var(--radius-sm); z-index: 10; font-family: var(--font-mono),monospace; }
         .availability-chip { display: inline-flex; align-items: center; gap: 7px; font-family: var(--font-mono),monospace; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--text-muted); }

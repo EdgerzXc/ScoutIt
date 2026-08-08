@@ -26,6 +26,7 @@ export async function generateMetadata({ params }) {
   let seoDescription = "Property Intelligence Vector";
   let imageUrl = siteUrl("/og-default.jpg");
   let url = siteUrl(`/property/${resolvedParams.id}`);
+  let isSample = false;
 
   try {
     const bundle = await getCmsBundle();
@@ -36,6 +37,7 @@ export async function generateMetadata({ params }) {
         (p.id && p.id === resolvedParams.id)
     );
     if (match) {
+      isSample = Boolean(match.is_sample);
       const facts = extractFacts(match);
       const title = facts.title;
       const cat = facts.category;
@@ -65,6 +67,18 @@ export async function generateMetadata({ params }) {
   return {
     title: seoTitle,
     description: seoDescription,
+    // ── A4 · SAMPLES ARE NOINDEX (2026-08-08) ────────────────────────
+    // Samples stay public and badged — that is a deliberate product decision,
+    // and badges work on people. Google does not read badges.
+    //
+    // Two consequences this prevents, both of which only surface later:
+    //   1. Samples get removed after human testing and 404 in bulk, from a
+    //      site whose crawl budget was already suppressed once by soft-404s.
+    //   2. A real owner's first encounter with ScoutIt is a search result for
+    //      an invented listing in their own building. There is no good reply.
+    //
+    // `follow` is kept so the links out of a sample still pass to real pages.
+    ...(isSample ? { robots: { index: false, follow: true } } : {}),
     // Without this, the page inherits `alternates.canonical: "/property"` from
     // src/app/property/layout.js — every listing was telling Google that the
     // directory index is its canonical URL, i.e. "don't index me".
@@ -145,8 +159,14 @@ export default async function PropertyRoute({ params }) {
   // page is statically generated with ISR, and fetching from ourselves at
   // build time breaks static generation. Best-effort — a Supabase outage
   // costs us the FAQPage node, not the page.
+  // ⚠️ A4 (2026-08-08): a SAMPLE never emits JSON-LD. A `Product`/`Offer`
+  // schema on a fabricated listing — with a price and an availability status —
+  // is the version of this that earns a manual action, because it is a
+  // machine-readable claim that something is for sale when it is not. The
+  // human-readable page stays public and badged; only the structured assertion
+  // is withheld.
   let jsonLd = null;
-  if (match) {
+  if (match && !match.is_sample) {
     const canonicalUrl = siteUrl(`/property/${match.slug || resolvedParams.id}`);
     const faqs = await getAnsweredFaqs(match.slug || resolvedParams.id);
 

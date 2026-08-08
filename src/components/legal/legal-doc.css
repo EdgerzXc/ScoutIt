@@ -1,12 +1,12 @@
 /* ═══════════════════════════════════════════════════════════════
    Extracted from LegalDoc.js on 2026-08-08.
 
-   WHY THIS IS A .css FILE AND NOT `<style jsx>`:
+   WHY THIS IS A .css FILE AND NOT `styled-jsx`:
    LegalDoc.js is a SERVER component, and styled-jsx requires "use client".
    Converting it would have moved /terms and /privacy to client
    rendering — the exact opposite of the SEO work in ACTION D2.
 
-   It could not stay a raw <style> either: React 19 hoists those as
+   It could not stay a a raw inline style tag either: React 19 hoists those as
    stylesheet RESOURCES, which is what froze /discover and /property
    in §65. A real stylesheet import has neither problem.
    ═══════════════════════════════════════════════════════════════ */

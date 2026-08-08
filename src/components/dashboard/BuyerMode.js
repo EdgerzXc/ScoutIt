@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
 import { useDashboard } from "../../context/DashboardContext";
+import { CardGridSkeleton } from "./DashboardSkeleton";
 import { Bookmark, Search } from "lucide-react";
 import PostMoveEcosystem from "./PostMoveEcosystem";
 import VaultOfHonor from "./VaultOfHonor";
@@ -20,7 +21,7 @@ export default function BuyerMode() {
   // Area watch — device-local (same pattern as Your Board), so the toggle is
   // real state instead of a fire-and-forget toast that pretends to subscribe.
   const [areaWatch, setAreaWatch] = useState(false);
-  const { listings, savedIds, toggleSave, addToast, searchByRadius, MAPBOX_TOKEN, DEFAULT_MAP_CENTER } = useDashboard();
+  const { listings, savedIds, toggleSave, addToast, searchByRadius, MAPBOX_TOKEN, DEFAULT_MAP_CENTER, isLoading } = useDashboard();
   const searchRef = useRef(null);
   const mapContainerRef = useRef(null);
   const mapInstance = useRef(null);
@@ -452,7 +453,15 @@ export default function BuyerMode() {
                   <ListingCard item={item} />
                 </div>
               ))}
-              {savedFiltered.length === 0 && (
+              {/* 🔴 B2: gated on isLoading. Before 2026-08-08 this rendered
+                  "Your archive is empty" while the fetch was still in flight —
+                  telling a returning user their saved spaces were GONE. */}
+              {isLoading && savedFiltered.length === 0 && (
+                <div className="w-full">
+                  <CardGridSkeleton count={3} label="Loading your board" />
+                </div>
+              )}
+              {!isLoading && savedFiltered.length === 0 && (
                 <div className="bg-surface border border-dashed border-surface-variant rounded-lg p-8 w-full text-center">
                   <span className="text-2xl mb-2 opacity-50 block">📂</span>
                   <p className="text-sm text-text-secondary">Your archive is empty. Save listings or intel briefs to build your workspace.</p>
@@ -485,7 +494,12 @@ export default function BuyerMode() {
               {newFeedListings.map(item => (
                 <VerticalListingCard key={item.id} item={item} />
               ))}
-              {newFeedListings.length === 0 ? (
+              {isLoading && newFeedListings.length === 0 && (
+                <div className="w-full">
+                  <CardGridSkeleton count={3} label="Loading new spaces in your area" />
+                </div>
+              )}
+              {!isLoading && newFeedListings.length === 0 ? (
                 <div className="w-full flex flex-col items-center justify-center p-12 bg-surface/50 border border-surface-variant/50 border-dashed rounded-xl">
                   <div className="w-16 h-16 rounded-full border border-gold-accent/30 bg-surface flex items-center justify-center text-gold-accent mb-4">
                     <Search strokeWidth={1.5} size="1.5em" />

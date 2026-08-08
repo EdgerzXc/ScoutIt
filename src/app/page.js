@@ -717,7 +717,7 @@ export default function Home() {
         </div>
       </section>
 
-      <style>{`
+      <style jsx global>{`
         /* Cinematic Snap Container */
         .cinematic-container {
           height: 100dvh;

@@ -217,10 +217,40 @@ export default function BulkImporterMode({ onClose }) {
         </div>
 
         {/* BOTTOM: Action */}
-        <div className="shrink-0 flex justify-end">
+        {/* ── B2, adapted (2026-08-08) ─────────────────────────────────
+            This mode does NOT have the empty-vs-loading bug the other two had:
+            it reads a local file, so there is no remote fetch on mount and no
+            moment where "empty" is a lie.
+
+            Its gap is different and worth naming: `handleSubmit` runs TWO
+            sequential network calls — an AI column-mapping pass, then a bulk
+            insert — and the only feedback was a button reading "Processing…".
+            On a large CSV that is a long, silent wait over the user's real
+            portfolio data, with no indication of which half is running or that
+            anything is happening at all. Ambiguous progress on a destructive-
+            feeling action is where people double-submit or reload.
+
+            The button already guards against double-submit via `disabled`.
+            What was missing was telling the user, and any screen reader, that
+            work is in flight and which step it is on. */}
+        <div className="shrink-0 flex flex-col sm:flex-row gap-3 justify-end items-stretch sm:items-center">
+          {isProcessing && (
+            <p
+              role="status"
+              aria-live="polite"
+              className="text-xs text-text-secondary flex items-center gap-2 justify-center sm:justify-end"
+            >
+              <span
+                className="w-3 h-3 rounded-full border-2 border-gold-accent border-t-transparent animate-spin shrink-0"
+                aria-hidden="true"
+              />
+              Mapping columns, then importing — do not close this tab.
+            </p>
+          )}
           <button 
             onClick={handleSubmit}
             disabled={csvData.length === 0 || isProcessing}
+            aria-busy={isProcessing}
             className="bg-gold-accent text-background font-working-title font-bold px-8 py-4 rounded hover:opacity-90 disabled:opacity-50 transition uppercase tracking-widest text-sm shadow-[0_0_15px_rgba(232,174,60,0.2)]"
           >
             {isProcessing ? "Processing..." : "Process & Import Portfolio"}

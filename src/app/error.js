@@ -52,7 +52,7 @@ export default function GlobalError({ error, reset }) {
         <div className="err-ref">Reference · {reference}</div>
       </div>
 
-      <style>{`
+      <style jsx global>{`
         .err-root {
           min-height: 100vh;
           background: #0d0d0d;

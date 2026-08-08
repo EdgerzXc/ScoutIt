@@ -182,6 +182,16 @@ export async function fetchProperties(apiKey, baseId) {
         region:          f.Region          || cityToRegion(f.City || ""),
         location:        f.Location        || "",
         spaceCategory:   f.SpaceCategory   || "",
+        // ── SAMPLE / DEMO FLAG (ACTION 01_NOW A4, 2026-08-08) ──────────
+        // Samples are deliberately PUBLIC and badged — badges work on people.
+        // Google does not read badges. An indexed sample creates two problems
+        // that only appear later and cannot be undone quickly:
+        //   1. Removing samples after human testing 404s them in bulk.
+        //   2. A real owner's first contact with ScoutIt could be a search
+        //      result for an invented listing in their own building.
+        // Reading `Is_Sample` from Airtable; absent field → `false`, so this is
+        // inert until the column exists and nothing changes for real listings.
+        is_sample:       f.Is_Sample === true || f.Is_Sample === "true" || false,
         property_type:   f.SpaceTypography || "",
         tenure:          f.Tenure          || "",
         // Freshness Engine (NEW_IDEAS.md §21). Without this the public

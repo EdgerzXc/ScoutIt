@@ -403,7 +403,7 @@ export default function BrokersPage() {
       </main>
       <Footer />
 
-      <style>{`
+      <style jsx global>{`
         .brokers-main {
           padding: 40px 45px;
           max-width: 1400px;

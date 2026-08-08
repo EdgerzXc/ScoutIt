@@ -54,7 +54,17 @@ export default async function sitemap() {
     if (apiKey && baseId) {
       const properties = await fetchProperties(apiKey, baseId);
       propertyRoutes = properties
-        .filter((p) => p.slug)
+        // ── A4 · SAMPLES ARE NEVER SUBMITTED (2026-08-08) ──────────────
+        // The property page also emits `noindex` for these, but a sitemap
+        // entry and a noindex tag are a contradiction Google resolves by
+        // crawling the URL anyway to read the tag — spending budget on a page
+        // we have already said not to index.
+        //
+        // ⚠️ This file already carries the cost of getting that wrong once:
+        // three /hubs slugs were submitted before the route existed, Google
+        // recorded soft-404s, and crawl budget was suppressed. Never advertise
+        // a URL we do not want fetched.
+        .filter((p) => p.slug && !p.is_sample)
         .map((p) => ({
           url: `${baseUrl}/property/${p.slug}`,
           lastModified: currentDate,

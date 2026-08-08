@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useDashboard } from "../../context/DashboardContext";
+import { CardGridSkeleton, RowListSkeleton } from "./DashboardSkeleton";
 import Link from "next/link";
 import { Lock } from "lucide-react";
 import { getSession } from "../../lib/authClient";
@@ -20,7 +21,7 @@ import circle from '@turf/circle';
 import { sanitizeError } from "@/lib/sanitizeError";
 
 export default function BrokerMode() {
-  const { connects, listings, pitches, sendPitch, updatePitchStatus, currentUser, addToast, searchByRadius, MAPBOX_TOKEN, DEFAULT_MAP_CENTER } = useDashboard();
+  const { connects, listings, pitches, sendPitch, updatePitchStatus, currentUser, addToast, searchByRadius, MAPBOX_TOKEN, DEFAULT_MAP_CENTER, isLoading } = useDashboard();
 
   const [pitchingListing, setPitchingListing] = useState(null);
   const [pitchMessage, setPitchMessage] = useState("");
@@ -935,7 +936,15 @@ export default function BrokerMode() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {activePitches.length === 0 && (
+            {/* 🔴 B2 (2026-08-08): every empty state below is gated on
+                `isLoading`. Ungated, a broker opening the dashboard saw a
+                pipeline that said "No active deal files" while the fetch was
+                still running — an empty pipeline that was not empty, shown at
+                the exact moment first impressions are formed. */}
+            {isLoading && activePitches.length === 0 && (
+              <div className="col-span-full"><RowListSkeleton count={3} label="Loading your deal files" /></div>
+            )}
+            {!isLoading && activePitches.length === 0 && (
               <div className="col-span-full py-16 text-center border border-dashed border-surface-variant rounded-lg flex flex-col items-center">
                 <span className="text-3xl mb-4 opacity-50">📂</span>
                 <p className="text-on-surface font-working-title mb-2">No active deal files.</p>
@@ -983,7 +992,10 @@ export default function BrokerMode() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {accepted.length === 0 && (
+            {isLoading && accepted.length === 0 && (
+              <div className="col-span-full"><RowListSkeleton count={2} label="Loading verified properties" /></div>
+            )}
+            {!isLoading && accepted.length === 0 && (
               <div className="col-span-full py-12 text-center border border-dashed border-surface-variant rounded-lg flex flex-col items-center">
                 <span className="text-3xl mb-4 opacity-50">🛡️</span>
                 <p className="text-on-surface font-working-title mb-2">No Verified Properties.</p>
@@ -1033,7 +1045,14 @@ export default function BrokerMode() {
           </div>
           
           <div className="flex-1 overflow-y-auto space-y-4 pr-1 pb-12 md:pb-0 hide-scrollbar">
-            {feed.length === 0 && (
+            {isLoading && feed.length === 0 && (
+              <CardGridSkeleton count={3} label="Loading the intelligence feed" />
+            )}
+            {/* ⚠️ This copy is a CLAIM, not a neutral empty state — "you have
+                pitched all available properties" is actively false while the
+                feed is still loading. Of the three, this was the worst one to
+                show early. */}
+            {!isLoading && feed.length === 0 && (
               <div className="text-center p-8 text-text-muted border border-surface-variant rounded">
                 You have pitched all available properties in the market.
               </div>

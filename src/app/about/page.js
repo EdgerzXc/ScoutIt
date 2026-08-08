@@ -118,7 +118,7 @@ export default function AboutPage() {
       </main>
       <Footer />
 
-      <style>{`
+      <style jsx global>{`
         .page-wrapper {
           background: var(--bg);
           color: var(--text-primary);

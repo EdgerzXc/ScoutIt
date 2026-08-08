@@ -33,7 +33,7 @@ export default function TransitPage() {
       </main>
       <Footer />
 
-      <style>{`
+      <style jsx global>{`
         .transit-page-main {
           padding: 60px 24px 80px;
           max-width: 1200px;
