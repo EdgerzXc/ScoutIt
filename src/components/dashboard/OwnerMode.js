@@ -189,17 +189,19 @@ export default function OwnerMode() {
         <p className="text-text-secondary mb-8">Choose an option to get started.</p>
         
         <div className="grid md:grid-cols-2 gap-6">
-          <div 
-            className="bg-surface-alt/40 backdrop-blur-md border border-surface-variant/50 rounded-xl p-8 hover:border-gold-accent hover:bg-surface-alt/80 transition duration-300 cursor-pointer group relative overflow-hidden shadow-lg"
+          <button 
+            type="button"
+            className="bg-surface/40 backdrop-blur-xl border border-white/[0.04] rounded-xl p-8 hover:border-gold-accent/40 hover:bg-surface/60 active:scale-[0.98] transition-all duration-300 ease-out cursor-pointer group relative overflow-hidden text-left block w-full shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]"
             onClick={() => setShowWizard('bulk')}
           >
-             <h3 className="font-working-title text-2xl text-on-surface mb-3 group-hover:text-gold-accent transition">Upload Portfolio (CSV)</h3>
+             <h3 className="font-working-title text-2xl text-on-surface mb-3 group-hover:text-gold-accent transition-colors duration-300">Upload Portfolio (CSV)</h3>
              <p className="text-sm text-text-secondary mb-6 leading-relaxed">Upload a CSV to generate multiple separate Property Drafts at once. Perfect for migrating large asset portfolios.</p>
              <span className="text-gold-accent font-label-caps text-[10px] tracking-widest border border-gold-accent/30 bg-gold-accent/10 px-3 py-1.5 rounded-full">RECOMMENDED FOR PROPERTY UPLOADS</span>
-          </div>
+          </button>
 
-          <div
-            className={`bg-background backdrop-blur-xl border rounded-xl p-8 transition duration-200 relative overflow-hidden group ${canUseVault ? "border-gold-accent/20 hover:border-gold-accent/60 cursor-pointer" : "border-surface-variant cursor-not-allowed opacity-60"}`}
+          <button
+            type="button"
+            className={`bg-surface/40 backdrop-blur-xl border rounded-xl p-8 transition-all duration-300 ease-out relative overflow-hidden group text-left block w-full shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] ${canUseVault ? "border-gold-accent/20 hover:border-gold-accent/60 active:scale-[0.98] cursor-pointer" : "border-white/[0.02] cursor-not-allowed opacity-60"}`}
             onClick={() => canUseVault && setShowWizard('vip_vault')}
           >
             <div className="absolute -top-24 -right-24 w-48 h-48 bg-gold-accent/5 rounded-full blur-3xl group-hover:bg-gold-accent/10 transition duration-200"></div>
@@ -226,32 +228,35 @@ export default function OwnerMode() {
                 UPGRADE TO CLUSTER →
               </Link>
             )}
-          </div>
+          </button>
 
-          <div 
-            className="bg-surface-alt/40 backdrop-blur-md border border-surface-variant/50 rounded-xl p-8 hover:border-text-primary hover:bg-surface-alt/80 transition duration-300 cursor-pointer group relative overflow-hidden shadow-lg"
+          <button 
+            type="button"
+            className="bg-surface/40 backdrop-blur-xl border border-white/[0.04] rounded-xl p-8 hover:border-white/20 hover:bg-surface/60 active:scale-[0.98] transition-all duration-300 ease-out cursor-pointer group relative overflow-hidden text-left block w-full shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]"
             onClick={() => setShowWizard('concierge')}
           >
-             <h3 className="font-working-title text-2xl text-on-surface mb-3 group-hover:text-white transition">Upload Pitch Deck (PDF)</h3>
+             <h3 className="font-working-title text-2xl text-on-surface mb-3 group-hover:text-white transition-colors duration-300">Upload Pitch Deck (PDF)</h3>
              <p className="text-sm text-text-secondary mb-6 leading-relaxed">Upload your existing pitch deck or PDF flyer. Our Council AI will extract the data and structure the dossier for your review.</p>
-          </div>
+          </button>
 
-          <div 
-            className="bg-surface-alt/40 backdrop-blur-md border border-surface-variant/50 rounded-xl p-8 hover:border-text-primary hover:bg-surface-alt/80 transition duration-300 cursor-pointer group relative overflow-hidden shadow-lg"
+          <button 
+            type="button"
+            className="bg-surface/40 backdrop-blur-xl border border-white/[0.04] rounded-xl p-8 hover:border-white/20 hover:bg-surface/60 active:scale-[0.98] transition-all duration-300 ease-out cursor-pointer group relative overflow-hidden text-left block w-full shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]"
             onClick={() => setShowWizard('live_editor')}
           >
-             <h3 className="font-working-title text-2xl text-on-surface mb-3 group-hover:text-white transition">Build from Scratch</h3>
-             <p className="text-sm text-text-secondary mb-6 leading-relaxed">Build your listing manually using our step-by-step editor. Best if you don&apos;t have a deck and are starting from scratch.</p>
-          </div>
+             <h3 className="font-working-title text-2xl text-on-surface mb-3 group-hover:text-white transition-colors duration-300">Build from Scratch</h3>
+             <p className="text-sm text-text-secondary mb-6 leading-relaxed">Build your listing manually using our step-by-step editor. Best if you don't have a deck and are starting from scratch.</p>
+          </button>
 
-          <div 
-            className="bg-background backdrop-blur-md border border-gold-accent/20 rounded-xl p-8 hover:border-gold-accent/60 transition duration-300 cursor-pointer group relative overflow-hidden"
+          <button 
+            type="button"
+            className="bg-background backdrop-blur-md border border-gold-accent/20 rounded-xl p-8 hover:border-gold-accent/60 transition duration-300 cursor-pointer group relative overflow-hidden text-left block w-full"
             onClick={() => setShowWizard('deep_intel')}
           >
              <h3 className="font-working-title text-2xl text-gold-accent mb-3 group-hover:text-gold-bright transition">Advanced Editor</h3>
              <p className="text-sm text-text-secondary mb-6 leading-relaxed">Unlock the hidden matrix. Manually override structural specs, input financial intelligence, and map advanced logistics.</p>
              <span className="text-gold-accent font-label-caps text-[10px] tracking-widest border border-gold-accent/30 bg-gold-accent/10 px-3 py-1.5 rounded-full shadow-[0_0_10px_rgba(232,174,60,0.2)]">PRO MODE</span>
-          </div>
+          </button>
         </div>
 
         {/* Power User Bypass */}
@@ -275,20 +280,21 @@ export default function OwnerMode() {
         <h1 className="font-display-md text-4xl text-text-primary mb-2">Upload Pitch Deck or PDF</h1>
         <p className="text-text-secondary mb-8">Upload your PDF. Our AI will automatically extract property details to create a draft.</p>
         
-        <div className="bg-surface border-2 border-dashed border-surface-variant rounded-lg p-12 text-center flex flex-col items-center relative transition hover:border-gold-accent/50">
-          <span className="text-4xl mb-4">📄</span>
+        <div className="bg-surface/40 backdrop-blur-xl border border-white/[0.04] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] rounded-2xl p-12 text-center flex flex-col items-center relative transition-all duration-300 hover:bg-surface/60 overflow-hidden">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 bg-white/5 rounded-full blur-[60px]" />
+          <span className="text-4xl mb-4 relative z-10 opacity-80 filter drop-shadow-md">📄</span>
           {selectedFile ? (
-            <div className="mb-6 w-full">
-              <div className="bg-surface-alt p-4 rounded border border-surface-variant flex items-center justify-between">
+            <div className="mb-6 w-full relative z-10">
+              <div className="bg-surface-alt/50 p-4 rounded-xl border border-white/10 flex items-center justify-between backdrop-blur-md shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]">
                 <span className="text-on-surface font-working-title text-sm truncate">{selectedFile.name}</span>
-                <button onClick={() => setSelectedFile(null)} className="text-xs font-bold text-error hover:underline">Remove</button>
+                <button onClick={() => setSelectedFile(null)} className="text-xs font-bold text-error hover:text-red-400 uppercase tracking-widest transition-colors duration-200">Remove</button>
               </div>
             </div>
           ) : (
-            <div className="mb-6 w-full">
-              <p className="text-text-secondary mb-4">Drag and drop your PDF, or click to browse.</p>
+            <div className="mb-6 w-full relative z-10">
+              <p className="text-text-secondary mb-6 leading-relaxed">Drag and drop your PDF, or click to browse.</p>
               <input type="file" accept=".pdf" className="hidden" id="pdf-upload" onChange={(e) => setSelectedFile(e.target.files[0])} />
-              <label htmlFor="pdf-upload" className="cursor-pointer border border-gold-accent text-gold-accent font-working-title px-6 py-2 rounded hover:bg-gold-accent/10 transition inline-block">
+              <label htmlFor="pdf-upload" className="cursor-pointer border border-white/10 text-on-surface font-working-title text-sm px-6 py-2.5 rounded-full hover:bg-white/5 hover:border-white/20 transition-all duration-300 ease-out active:scale-[0.98] inline-block shadow-sm">
                 Choose a PDF file
               </label>
             </div>
@@ -506,9 +512,10 @@ export default function OwnerMode() {
             <p className="text-sm text-text-secondary mb-2">How do you want to get the footage?</p>
 
             {/* Option 1 — I'll record it myself */}
-            <div
+            <button
+              type="button"
               onClick={() => setVaultBuildOption("self")}
-              className="bg-gradient-to-br from-surface-alt to-background border border-surface-variant hover:border-gold-accent/60 rounded-xl p-7 cursor-pointer group transition duration-300 hover:shadow-[0_0_20px_rgba(232,174,60,0.08)] relative overflow-hidden"
+              className="bg-gradient-to-br from-surface-alt to-background border border-surface-variant hover:border-gold-accent/60 rounded-xl p-7 cursor-pointer group transition duration-300 hover:shadow-[0_0_20px_rgba(232,174,60,0.08)] relative overflow-hidden text-left block w-full"
             >
               <div className="absolute top-0 left-0 w-1 h-full bg-surface-variant group-hover:bg-gold-accent/50 transition" />
               <div className="flex items-start gap-5">
@@ -522,27 +529,28 @@ export default function OwnerMode() {
                   <p className="text-sm text-text-secondary leading-relaxed">Walk through your property with your phone and upload the raw video. Our team processes it into a full 3D tour — you just need to hit record.</p>
                 </div>
               </div>
-            </div>
+            </button>
 
             {/* Option 2 — ScoutIt Team records it */}
-            <div
+            <button
+              type="button"
               onClick={() => setVaultBuildOption("team")}
-              className="bg-gradient-to-br from-surface-alt to-background border border-surface-variant hover:border-gold-accent/60 rounded-xl p-7 cursor-pointer group transition duration-300 hover:shadow-[0_0_20px_rgba(232,174,60,0.08)] relative overflow-hidden"
+              className="bg-gradient-to-br from-surface-alt to-background border border-surface-variant hover:border-gold-accent/60 rounded-xl p-7 cursor-pointer group transition duration-300 hover:shadow-[0_0_20px_rgba(232,174,60,0.08)] relative overflow-hidden text-left block w-full"
             >
               <div className="absolute top-0 left-0 w-1 h-full bg-surface-variant group-hover:bg-gold-accent/50 transition" />
               <div className="flex items-start gap-5">
-                <div className="w-12 h-12 rounded-full bg-gold-accent/10 flex items-center justify-center shrink-0 mt-0.5">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="8" r="4"/><path d="M6 20v-2a6 6 0 0 1 12 0v2"/>
+                <div className="w-12 h-12 rounded-full bg-surface-variant flex items-center justify-center shrink-0 mt-0.5">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-on-surface">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                   </svg>
                 </div>
                 <div>
-                  <h3 className="font-working-title text-lg text-on-surface group-hover:text-gold-accent transition mb-1">ScoutIt Team records it for me</h3>
-                  <p className="text-sm text-text-secondary leading-relaxed">No video needed. Join the queue and our team will come to your property, record everything, and build the full 3D tour from scratch.</p>
+                  <h3 className="font-working-title text-lg text-on-surface group-hover:text-gold-accent transition mb-1">Send a QuestIT Professional</h3>
+                  <p className="text-sm text-text-secondary leading-relaxed">Book one of our vetted spatial capture experts. They&apos;ll shoot the property and we&apos;ll build the vault. Available in Metro Manila.</p>
                   <span className="inline-block mt-3 text-[10px] font-label-caps tracking-widest text-gold-accent/70 border border-gold-accent/30 bg-gold-accent/10 px-2.5 py-1 rounded-full">QUEUE — TYPICALLY 3–5 DAYS</span>
                 </div>
               </div>
-            </div>
+            </button>
           </div>
         )}
 
@@ -645,14 +653,15 @@ export default function OwnerMode() {
     return (
       <div className="max-w-[1200px] mx-auto pt-16 md:pt-0 py-lg px-4 md:px-0 animate-[fadeIn_0.4s_ease]">
         <div className="mb-sm">
-          <h1 className="font-display-md text-3xl md:text-5xl text-text-primary mb-2">{firstName ? `Welcome back, ${firstName}` : "Welcome back"}</h1>
+          <h1 className="font-display-md text-3xl md:text-5xl text-text-primary mb-2 tracking-tight">{firstName ? `Welcome back, ${firstName}` : "Welcome back"}</h1>
           <p className="text-text-secondary font-body-md text-sm md:text-base">Your workspace is empty.</p>
         </div>
-        <div className="bg-background rounded-lg border border-surface-variant px-4 py-16 md:p-lg flex flex-col gap-6 relative overflow-hidden items-center justify-center text-center md:py-32 mt-8 mx-4 md:mx-0">
-          <h3 className="font-display-md text-2xl md:text-3xl text-on-surface px-2">Create your first listing</h3>
-          <p className="text-text-secondary max-w-md text-sm md:text-base px-2">Build a complete property listing in under 10 minutes.</p>
-          <button className="bg-gold-accent text-background font-label-caps uppercase tracking-widest px-6 py-3 md:px-8 md:py-4 rounded hover:bg-surface-tint active:scale-95 transition text-base md:text-lg font-bold shadow-[0_0_20px_rgba(232,174,60,0.2)] mt-2" onClick={() => setShowWizard('select_mode')}>
-            Create your first listing
+        <div className="bg-surface/40 backdrop-blur-xl border border-white/[0.04] rounded-3xl px-4 py-16 md:p-lg flex flex-col gap-6 relative overflow-hidden items-center justify-center text-center md:py-32 mt-8 mx-4 md:mx-0 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gold-accent/5 rounded-full blur-[100px] pointer-events-none" />
+          <h3 className="font-display-md text-2xl md:text-3xl text-on-surface px-2 relative z-10 tracking-tight">Create your first listing</h3>
+          <p className="text-text-secondary max-w-md text-sm md:text-base px-2 relative z-10 leading-relaxed">Build a complete property listing in under 10 minutes.</p>
+          <button className="relative z-10 bg-on-surface text-background font-working-title text-sm active:scale-[0.98] transition-all duration-300 ease-out px-8 py-3.5 rounded-full hover:bg-white/90 shadow-[0_0_20px_rgba(255,255,255,0.1)] mt-2" onClick={() => setShowWizard('select_mode')}>
+            Get Started
           </button>
         </div>
       </div>
@@ -1054,14 +1063,15 @@ export default function OwnerMode() {
           </div>
 
           {incomingPitches.length === 0 ? (
-             <div className="bg-surface border border-surface-variant rounded-lg p-12 text-center flex flex-col items-center">
-               <span className="text-4xl mb-4 opacity-50">📡</span>
-               <p className="font-working-title text-lg text-on-surface mb-2">No inquiries yet.</p>
-               <p className="text-sm text-text-secondary max-w-sm">
+             <div className="bg-surface/40 backdrop-blur-xl border border-white/[0.04] rounded-2xl p-12 text-center flex flex-col items-center shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] relative overflow-hidden">
+               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 bg-gold-accent/10 rounded-full blur-[60px]" />
+               <span className="text-4xl mb-6 relative z-10 opacity-70 filter drop-shadow-md">📡</span>
+               <p className="font-working-title text-xl text-on-surface mb-3 relative z-10 tracking-tight">No inquiries yet</p>
+               <p className="text-sm text-text-secondary max-w-sm leading-relaxed relative z-10">
                  Brokers are reviewing your dossier. Listings with extensive media galleries receive inquiries 4× faster.
                </p>
                {!activeListing?.hasMedia && (
-                 <button className="mt-6 border border-gold-accent text-gold-accent font-label-caps uppercase tracking-widest px-6 py-2 rounded hover:bg-gold-accent/10 transition" onClick={() => setShowWizard('edit')}>
+                 <button className="relative z-10 mt-8 border border-white/10 text-on-surface font-working-title text-sm active:scale-[0.98] transition-all duration-300 ease-out px-6 py-2.5 rounded-full hover:bg-white/5 hover:border-white/20" onClick={() => setShowWizard('edit')}>
                    Add Media Gallery
                  </button>
                )}

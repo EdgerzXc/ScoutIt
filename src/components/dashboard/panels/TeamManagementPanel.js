@@ -268,10 +268,10 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
             </div>
             <div className="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-2">
               {teamList.map(member => (
-                <div 
+                <button type="button"
                   key={member.id}
                   onClick={() => { setActiveMemberId(member.id); setEditingRoleId(null); setShowMobileDetail(true); }}
-                  className={`p-3 rounded-lg cursor-pointer transition flex items-center gap-3 border ${
+                  className={`p-3 rounded-lg cursor-pointer transition flex items-center gap-3 border text-left block w-full ${
                     activeMemberId === member.id 
                       ? 'bg-white/10 border-white/20' 
                       : 'bg-transparent border-transparent hover:bg-white/5'
@@ -300,7 +300,7 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
                     </div>
                     <div className="text-[10px] text-white/50 uppercase tracking-widest">{member.role}</div>
                   </div>
-                </div>
+                </button>
               ))}
             </div>
           </div>
@@ -328,27 +328,27 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
                     {editingRoleId === activeMember.id ? (
                       <div className="bg-black border border-gold-accent/50 rounded overflow-hidden">
                         {ROLES.map(role => (
-                          <div 
+                          <button type="button"
                             key={role}
                             onClick={() => handleRoleChange(activeMember.id, role)}
-                            className="px-3 py-2 text-xs text-white/80 hover:bg-gold-accent/10 hover:text-gold-accent cursor-pointer flex items-center justify-between"
+                            className="w-full px-3 py-2 text-xs text-white/80 hover:bg-gold-accent/10 hover:text-gold-accent cursor-pointer flex items-center justify-between text-left"
                           >
                             {role}
                             {activeMember.role === role && <Check size={14} className="text-gold-accent" />}
-                          </div>
+                          </button>
                         ))}
                       </div>
                     ) : (
-                      <div 
+                      <button type="button"
                         onClick={() => setEditingRoleId(activeMember.id)}
-                        className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded text-sm text-white flex items-center justify-between cursor-pointer hover:border-white/30 transition"
+                        className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded text-sm text-white flex items-center justify-between cursor-pointer hover:border-white/30 transition text-left"
                       >
                         <div className="flex items-center gap-2">
                           <Shield size={14} className="text-gold-accent" />
                           {activeMember.role}
                         </div>
                         <ChevronDown size={14} className="text-white/40" />
-                      </div>
+                      </button>
                     )}
                   </div>
                 </div>
@@ -403,9 +403,9 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
                           const isGranted = perm.granted;
                           
                           return (
-                            <div 
+                            <button type="button"
                               key={perm.id} 
-                              className={`p-4 rounded-lg border transition duration-300 flex items-center justify-between gap-4 cursor-pointer hover:border-white/30 ${
+                              className={`w-full p-4 rounded-lg border transition duration-300 flex items-center justify-between gap-4 cursor-pointer hover:border-white/30 text-left ${
                                 isGranted 
                                   ? 'bg-gold-accent/5 border-gold-accent/20' 
                                   : 'bg-white/5 border-white/10'
@@ -425,7 +425,7 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
                               <div className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full transition duration-300 ease-in-out focus:outline-none ${isGranted ? 'bg-gold-accent' : 'bg-white/20'}`}>
                                 <span aria-hidden="true" className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-300 ease-in-out ${isGranted ? 'translate-x-2' : '-translate-x-2'}`} />
                               </div>
-                            </div>
+                            </button>
                           );
                         })}
                       </div>

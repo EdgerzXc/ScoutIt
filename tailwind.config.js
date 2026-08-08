@@ -89,12 +89,12 @@ module.exports = {
         "body-lg": ["var(--font-geist-sans)", "Inter", "sans-serif"],
         "working-title": ["var(--font-geist-sans)", "Inter", "sans-serif"],
         "label-caps": ["var(--font-geist-mono)", "ui-monospace", "monospace"],
-        "headline-editorial": ["var(--font-instrument-serif)", "Georgia", "serif"],
-        "display-md": ["var(--font-instrument-serif)", "Georgia", "serif"],
+        "headline-editorial": ["var(--font-geist-sans)", "Inter", "sans-serif"],
+        "display-md": ["var(--font-geist-sans)", "Inter", "sans-serif"],
         "body-md": ["var(--font-geist-sans)", "Inter", "sans-serif"],
         "data-tabular": ["var(--font-geist-mono)", "ui-monospace", "monospace"],
         "body-sm": ["var(--font-geist-sans)", "Inter", "sans-serif"],
-        "display-lg": ["Georgia", "serif"]
+        "display-lg": ["var(--font-geist-sans)", "Inter", "sans-serif"]
       },
       fontSize: {
         "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],

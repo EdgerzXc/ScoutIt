@@ -1,6 +1,7 @@
 import React, { memo } from 'react';
 import HoverCard from '../../ui/HoverCard';
 import ShareModal from "@/components/property/ShareModal";
+import ProvenanceBadge from "@/components/ui/ProvenanceBadge";
 import { buildShareText } from "@/lib/shareBriefing";
 
 const OwnerListingCard = memo(({ 
@@ -56,7 +57,10 @@ const OwnerListingCard = memo(({
         )}
         <div className="flex justify-between items-start mb-auto">
           <div className="pr-4">
-            <h3 className="font-working-title text-xl text-on-surface mb-1 group-hover:underline">{listing.title || 'Untitled Property'}</h3>
+            <h3 className="font-working-title text-xl text-on-surface mb-1 group-hover:underline">
+              {listing.title || 'Untitled Property'}
+              <ProvenanceBadge record={listing} />
+            </h3>
             <p className="text-xs text-text-secondary">{listing.location || 'Location missing'}</p>
           </div>
           {!selectMode && (
@@ -93,12 +97,14 @@ const OwnerListingCard = memo(({
               <span className="font-data-tabular text-lg text-text-muted" title="View tracking arrives once page instrumentation ships">—</span>
             </div>
             <div className="flex items-end justify-end">
-              <button 
-                className="text-gold-accent border border-gold-accent/30 rounded px-3 py-1.5 text-[10px] uppercase font-label-caps tracking-widest hover:bg-gold-accent hover:text-background transition"
-                onClick={handleShare}
-              >
-                Share
-              </button>
+              {!listing.is_sample && (
+                <button 
+                  className="text-gold-accent border border-gold-accent/30 rounded px-3 py-1.5 text-[10px] uppercase font-label-caps tracking-widest hover:bg-gold-accent hover:text-background transition"
+                  onClick={handleShare}
+                >
+                  Share
+                </button>
+              )}
             </div>
           </div>
         )}

@@ -55,17 +55,18 @@ export default function PostMoveEcosystem() {
 
             <ul className="flex flex-col gap-3">
               {checklist.map(item => (
-                <li 
-                  key={item.id}
-                  className="flex items-center gap-3 cursor-pointer group"
-                  onClick={() => toggleCheck(item.id)}
-                >
-                  <div className="text-gold-accent shrink-0 transition-transform group-hover:scale-110">
-                    {item.done ? <CheckCircle size="1.2em" strokeWidth={1.5} /> : <Circle size="1.2em" strokeWidth={1.5} className="text-surface-variant group-hover:text-gold-accent" />}
-                  </div>
-                  <span className={`text-sm transition ${item.done ? 'text-text-muted line-through' : 'text-on-surface group-hover:text-gold-accent'}`}>
-                    {item.text}
-                  </span>
+                <li key={item.id}>
+                  <button type="button"
+                    className="flex items-center gap-3 cursor-pointer group text-left block w-full"
+                    onClick={() => toggleCheck(item.id)}
+                  >
+                    <div className="text-gold-accent shrink-0 transition-transform group-hover:scale-110">
+                      {item.done ? <CheckCircle size="1.2em" strokeWidth={1.5} /> : <Circle size="1.2em" strokeWidth={1.5} className="text-surface-variant group-hover:text-gold-accent" />}
+                    </div>
+                    <span className={`text-sm transition ${item.done ? 'text-text-muted line-through' : 'text-on-surface group-hover:text-gold-accent'}`}>
+                      {item.text}
+                    </span>
+                  </button>
                 </li>
               ))}
             </ul>

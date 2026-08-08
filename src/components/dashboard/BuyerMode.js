@@ -355,14 +355,14 @@ export default function BuyerMode() {
     <div className="w-full max-w-7xl mx-auto px-4 md:px-8 flex flex-col gap-8 pb-24 animate-[fadeIn_0.5s_ease-out]">
       
       {/* Search Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-surface-variant pb-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-white/[0.04] pb-6">
         <div className="flex flex-col md:flex-row w-full md:w-auto gap-3 flex-1">
-          <div className="relative w-full md:max-w-md">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary"><Search strokeWidth={1.5} size="1em" /></span>
+          <div className="relative w-full md:max-w-md group">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary group-focus-within:text-gold-accent transition-colors duration-300"><Search strokeWidth={1.5} size="1em" /></span>
             <input
               type="text"
               ref={searchRef}
-              className="w-full bg-surface border border-surface-variant rounded-full pl-11 pr-4 py-3 text-on-surface focus:outline-none focus:border-gold-accent transition placeholder:text-text-muted"
+              className="w-full bg-surface/40 backdrop-blur-xl border border-white/[0.04] rounded-full pl-11 pr-4 py-3 text-on-surface focus:outline-none focus:border-gold-accent/50 focus:bg-surface/80 transition-all duration-300 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] placeholder:text-text-muted"
               placeholder="Search locations, asset types, or intel..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -371,7 +371,7 @@ export default function BuyerMode() {
           
           {/* Proximity / Radius Filter */}
           <select 
-            className="bg-surface border border-surface-variant rounded-full px-4 py-3 text-sm text-on-surface focus:outline-none focus:border-gold-accent transition cursor-pointer w-full md:w-auto"
+            className="bg-surface/40 backdrop-blur-xl border border-white/[0.04] rounded-full px-5 py-3 text-sm text-on-surface focus:outline-none focus:border-gold-accent/50 focus:bg-surface/80 transition-all duration-300 cursor-pointer w-full md:w-auto shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]"
             value={radius}
             onChange={handleRadiusChange}
           >
@@ -411,16 +411,16 @@ export default function BuyerMode() {
           <div ref={mapContainerRef} style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }} />
           
           <div className="absolute bottom-6 left-6 z-10 flex flex-col gap-2">
-            <div className="bg-background/90 backdrop-blur border border-surface-variant p-4 rounded shadow-lg">
+            <div className="bg-background/40 backdrop-blur-2xl border border-white/[0.04] p-5 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
               <div className="text-[10px] font-label-caps tracking-widest text-gold-accent mb-1 uppercase">
                 Spatial Intelligence
               </div>
-              <div className="font-working-title text-on-surface">{filteredListings.filter(l => l.coordinates).length} properties in radar</div>
+              <div className="font-working-title text-on-surface text-lg">{filteredListings.filter(l => l.coordinates).length} properties in radar</div>
               {radius !== 'any' && <div className="text-xs text-text-secondary mt-1">{radius}km radius from Makati CBD</div>}
             </div>
             
             <select
-              className="bg-background/90 backdrop-blur border border-surface-variant text-on-surface text-sm rounded px-3 py-2 w-full focus:outline-none focus:border-gold-accent transition cursor-pointer"
+              className="bg-background/40 backdrop-blur-2xl border border-white/[0.04] text-on-surface text-sm rounded-xl px-4 py-3 w-full focus:outline-none focus:border-gold-accent/50 transition-all duration-300 cursor-pointer shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
               value={radius}
               onChange={handleRadiusChange}
             >

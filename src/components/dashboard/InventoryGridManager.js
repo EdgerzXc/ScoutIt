@@ -320,9 +320,9 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
         groups.map(([floorKey, floorUnits]) => {
           const collapsed = collapsedFloors.has(floorKey);
           return (
-            <div key={floorKey} className="bg-surface border border-surface-variant rounded-lg overflow-hidden">
+            <div key={floorKey} className="bg-surface/40 backdrop-blur-xl border border-white/[0.04] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] rounded-2xl overflow-hidden mb-4 transition-all duration-300">
               {/* Floor header */}
-              <div className="flex items-center justify-between bg-surface-alt border-b border-surface-variant px-4 py-2.5">
+              <div className="flex items-center justify-between bg-white/[0.02] border-b border-white/[0.04] px-5 py-3.5">
                 <button
                   onClick={() => toggleFloor(floorKey)}
                   className="flex items-center gap-2 text-gold-accent hover:text-gold-accent-hover transition"
@@ -345,10 +345,11 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
               </div>
 
               {!collapsed && (
-                <div className="overflow-x-auto custom-scrollbar">
+                <>
+                <div className="hidden lg:block overflow-x-auto custom-scrollbar">
                   <table className="w-full text-left border-collapse min-w-[820px]">
                     <thead>
-                      <tr className="border-b border-surface-variant/60">
+                      <tr className="border-b border-white/[0.04]">
                         <th className="p-3 font-label-caps text-[10px] tracking-widest text-text-secondary uppercase w-[20%]">Unit Identifier</th>
                         <th className="p-3 font-label-caps text-[10px] tracking-widest text-text-secondary uppercase w-[10%]">Size (sqm)</th>
                         <th className="p-3 font-label-caps text-[10px] tracking-widest text-text-secondary uppercase w-[10%]">Floor</th>
@@ -586,6 +587,208 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                     </tbody>
                   </table>
                 </div>
+
+                {/* Mobile Card View (lg:hidden) */}
+                <div className="flex flex-col gap-4 lg:hidden p-4">
+                  {floorUnits.map((unit) => {
+                    const photoCount = (unit.photos || []).filter(Boolean).length;
+                    const atPhotoLimit = photoCount >= maxPhotos;
+                    const isDelegated = Boolean(unit.operatorId);
+                    const lockedForOwner = isDelegated && !isOperatorMode;
+                    const structuralReadOnly = isOperatorMode || lockedForOwner;
+
+                    return (
+                      <div key={unit.id} className={`flex flex-col gap-4 rounded-2xl border border-white/[0.04] p-5 transition-all duration-300 group shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] ${lockedForOwner ? "bg-gold-accent/5 backdrop-blur-xl" : "bg-surface/40 hover:bg-surface/60 backdrop-blur-xl hover:shadow-[0_8px_32px_rgba(0,0,0,0.4)]"}`}>
+                        {/* Name & Actions Header */}
+                        <div className="flex justify-between items-start gap-2">
+                          <div className="flex-1">
+                            <span className="font-label-caps text-[10px] text-text-secondary uppercase tracking-widest block mb-1">Unit Name</span>
+                            {lockedForOwner ? (
+                                <div>
+                                  <div className="text-sm text-text-primary font-working-title">{unit.name || "Unnamed unit"}</div>
+                                  <div className="flex items-center gap-1 text-[10px] text-gold-accent font-label-caps tracking-wide uppercase mt-1">
+                                    <Lock size={9} /> Operated by {unit.operatorDisplayName || "another party"}
+                                  </div>
+                                </div>
+                              ) : (
+                                <input
+                                  type="text"
+                                  maxLength={100}
+                                  value={unit.name || ""}
+                                  onChange={(e) => updateUnit(unit.id, "name", e.target.value)}
+                                  onBlur={(e) => updateUnit(unit.id, "name", e.target.value, true)}
+                                  placeholder="e.g. Unit 12-A"
+                                  className="w-full bg-transparent border border-transparent hover:border-surface-variant focus:border-gold-accent rounded px-2 py-1 text-sm font-working-title text-text-primary focus:outline-none transition -ml-2"
+                                />
+                              )}
+                          </div>
+                          {(isOperatorMode || !lockedForOwner) && (
+                            <div className="flex items-center gap-1 shrink-0">
+                                <button
+                                  onClick={() => setDetailsUnitId(unit.id)}
+                                  className="p-2 rounded border border-surface-variant text-text-secondary hover:bg-gold-accent/10 hover:text-gold-accent hover:border-gold-accent transition"
+                                  title="Edit Unit Master Page"
+                                >
+                                  <SlidersHorizontal size={15} />
+                                </button>
+                                {!isOperatorMode && !lockedForOwner && (
+                                  <>
+                                    <button
+                                      onClick={() => duplicateUnit(unit.id)}
+                                      className="p-2 rounded hover:bg-gold-accent/10 text-text-muted hover:text-gold-accent transition"
+                                    >
+                                      <Copy size={15} />
+                                    </button>
+                                    <button
+                                      onClick={() => setSubdivideUnitId(unit.id)}
+                                      className="p-2 rounded hover:bg-gold-accent/10 text-text-muted hover:text-gold-accent transition"
+                                    >
+                                      <Split size={15} />
+                                    </button>
+                                    <button
+                                      onClick={() => removeUnit(unit.id)}
+                                      className="p-2 rounded hover:bg-error/10 text-text-muted hover:text-error transition"
+                                    >
+                                      <Trash2 size={15} />
+                                    </button>
+                                  </>
+                                )}
+                            </div>
+                          )}
+                        </div>
+                        
+                        {/* Size and Floor */}
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <span className="font-label-caps text-[10px] text-text-secondary uppercase tracking-widest block mb-1">Size (sqm)</span>
+                                {structuralReadOnly ? (
+                                    <span className="text-sm text-text-secondary block">{unit.size || "—"}</span>
+                                ) : (
+                                    <input
+                                      type="text"
+                                      maxLength={50}
+                                      value={unit.size || ""}
+                                      onChange={(e) => updateUnit(unit.id, "size", e.target.value)}
+                                      onBlur={(e) => updateUnit(unit.id, "size", e.target.value, true)}
+                                      placeholder="30"
+                                      className="w-full bg-surface-alt border border-surface-variant focus:border-gold-accent rounded px-2 py-1.5 text-sm text-text-primary focus:outline-none transition"
+                                    />
+                                )}
+                            </div>
+                            <div>
+                                <span className="font-label-caps text-[10px] text-text-secondary uppercase tracking-widest block mb-1">Floor</span>
+                                {structuralReadOnly ? (
+                                    <span className="text-sm text-text-secondary block">{unit.floor || "—"}</span>
+                                ) : (
+                                    <input
+                                      type="text"
+                                      maxLength={50}
+                                      value={unit.floor || ""}
+                                      onChange={(e) => updateUnit(unit.id, "floor", e.target.value)}
+                                      onBlur={(e) => updateUnit(unit.id, "floor", e.target.value, true)}
+                                      placeholder="e.g. 3"
+                                      className="w-full bg-surface-alt border border-surface-variant focus:border-gold-accent rounded px-2 py-1.5 text-sm text-text-primary focus:outline-none transition"
+                                    />
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Features */}
+                        <div>
+                            <span className="font-label-caps text-[10px] text-text-secondary uppercase tracking-widest block mb-2">Tags & Features</span>
+                            {(unit.features || []).length > 0 && (
+                              <div className="flex flex-wrap gap-1.5 mb-2">
+                                {(unit.features || []).map((feature, idx) => (
+                                  <span key={idx} className="inline-flex items-center gap-1 px-2 py-1 bg-surface-alt border border-gold-accent/20 text-[11px] text-text-primary rounded uppercase tracking-wide font-working-title">
+                                    {feature}
+                                    {!structuralReadOnly && (
+                                      <button onClick={() => removeFeature(unit.id, feature)} className="text-text-muted hover:text-error transition">
+                                        <X size={10} />
+                                      </button>
+                                    )}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                            {!structuralReadOnly && (
+                                <div className="flex gap-2 items-center">
+                                  <input
+                                    type="text"
+                                    maxLength={50}
+                                    onKeyDown={(e) => {
+                                      if (e.key === "Enter") {
+                                        e.preventDefault();
+                                        handleFeatureAdd(unit.id, e.target.value);
+                                        e.target.value = "";
+                                      }
+                                    }}
+                                    placeholder="Type a feature & press Enter…"
+                                    className="bg-transparent text-sm text-text-secondary focus:outline-none placeholder-text-muted/50 border-b border-surface-variant focus:border-gold-accent transition flex-1"
+                                  />
+                                </div>
+                            )}
+                        </div>
+                        
+                        {/* Media, Availability, Operator Grid */}
+                        <div className="grid grid-cols-2 gap-4 mt-2 border-t border-surface-variant/40 pt-4">
+                            <div>
+                                <span className="font-label-caps text-[10px] text-text-secondary uppercase tracking-widest block mb-1">Availability</span>
+                                <select
+                                    value={unit.availabilityStatus || "available"}
+                                    onChange={(e) => updateUnit(unit.id, "availabilityStatus", e.target.value, true)}
+                                    className="w-full bg-surface-alt border border-surface-variant rounded px-2 py-1.5 text-sm text-text-primary focus:outline-none focus:border-gold-accent transition"
+                                >
+                                    <option value="available">Available</option>
+                                    <option value="occupied">Occupied</option>
+                                    <option value="coming_soon">Coming Soon</option>
+                                </select>
+                            </div>
+                            <div>
+                                <span className="font-label-caps text-[10px] text-text-secondary uppercase tracking-widest block mb-1">Operator</span>
+                                <select
+                                    value={unit.operatorId || ""}
+                                    onChange={(e) => {
+                                    const opId = e.target.value || null;
+                                    const nameMap = { "op_1": "Jules (Operator)", "op_2": "Jerzel (Operator)" };
+                                    commit(units.map((u) => u.id === unit.id ? { ...u, operatorId: opId, operatorDisplayName: nameMap[opId] || null } : u));
+                                    }}
+                                    disabled={isOperatorMode}
+                                    className="w-full bg-surface-alt border border-surface-variant rounded px-2 py-1.5 text-sm text-text-primary focus:outline-none focus:border-gold-accent transition disabled:opacity-50"
+                                >
+                                    <option value="">None (Owner)</option>
+                                    <option value="op_1">Jules (Operator)</option>
+                                    <option value="op_2">Jerzel (Operator)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div className="mt-2">
+                            <span className="font-label-caps text-[10px] text-text-secondary uppercase tracking-widest block mb-1">Media ({photoCount}/{maxPhotos})</span>
+                            <div className={`flex items-center gap-3 transition ${uploadingUnitId === unit.id ? "opacity-50" : ""}`}
+                                onDragOver={(e) => !lockedForOwner && e.preventDefault()}
+                                onDrop={(e) => !lockedForOwner && handleDirectDrop(e, unit.id)}
+                            >
+                                <button
+                                    onClick={() => !lockedForOwner && setActivePhotoUnit(unit.id)}
+                                    disabled={lockedForOwner}
+                                    className={`relative h-10 px-4 flex items-center justify-center gap-2 rounded border ${photoCount > 0 ? "bg-gold-accent/20 border-gold-accent text-gold-accent" : "bg-surface-alt border-surface-variant text-text-muted hover:border-gold-accent hover:text-gold-accent"} transition disabled:opacity-40 disabled:cursor-not-allowed`}
+                                >
+                                    <Upload size={16} /> <span className="text-sm font-working-title">Manage Photos</span>
+                                </button>
+                                {!isPro && atPhotoLimit && <Lock size={12} className="text-text-muted" />}
+                                {uploadingUnitId === unit.id && (
+                                    <div className="flex-1 max-w-[100px]">
+                                    <div className="w-full h-1 bg-surface-variant rounded-full overflow-hidden">
+                                        <div className="h-full bg-gold-accent transition duration-300 ease-out" style={{ width: `${uploadProgress}%` }} />
+                                    </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                </>
               )}
             </div>
           );

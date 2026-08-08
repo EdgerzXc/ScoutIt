@@ -501,8 +501,8 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
         </div>
       </div>
 
-      <div 
-        className="w-full bg-surface-variant h-3 cursor-pointer relative group flex overflow-hidden"
+      <button type="button" 
+        className="block text-left w-full bg-surface-variant h-3 cursor-pointer relative group flex overflow-hidden"
         onClick={jumpToEmptyField}
         title="Click to jump to next empty field"
       >
@@ -511,7 +511,7 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
         <div className="absolute inset-0 bg-white/0 hover:bg-white/10 transition z-20 flex items-center justify-center opacity-0 group-hover:opacity-100">
           <span className="text-[10px] font-mono text-white bg-black/50 px-2 rounded backdrop-blur">JUMP TO NEXT EMPTY FIELD</span>
         </div>
-      </div>
+      </button>
       
       <div className="w-full bg-surface text-center py-1 border-b border-surface-variant">
         <span className="text-[10px] font-mono text-text-secondary">

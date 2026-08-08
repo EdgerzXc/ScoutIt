@@ -25,7 +25,7 @@ import {
   setInteractiveMode,
   INTERACTIVE_MODE_EVENT,
 } from "@/lib/liteMode";
-import { getArticles } from "@/data/mockArticles";
+import { getArticles } from "@/data/mock/mockArticles";
 
 function getDBCategory(cat) {
   if (cat === "Venues/Events") return "Venues";

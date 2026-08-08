@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
-import { rankBoard, BOARD_CATEGORIES, BOARD_AWARDS } from "@/data/mockShowcase";
+import { rankBoard, BOARD_CATEGORIES, BOARD_AWARDS } from "@/data/mock/mockShowcase";
 
 // ════════════════════════════════════════════════════════════════
 // Tier definitions

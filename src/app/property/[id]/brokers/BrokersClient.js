@@ -39,8 +39,8 @@ export default function BrokersClient({ slug }) {
     return () => { cancelled = true; };
   }, [slug]);
 
-  const toggleForm = (brokerId = null) => {
-    setActiveFormBroker(activeFormBroker === brokerId ? null : brokerId);
+  const toggleForm = (formKey = null) => {
+    setActiveFormBroker(activeFormBroker === formKey ? null : formKey);
     setSubmittedBrokerId(null);
     setError("");
   };
@@ -75,9 +75,9 @@ export default function BrokersClient({ slug }) {
     }
   };
 
-  const renderForm = (brokerId = null) => {
-    const formKey = brokerId || "lister";
-    if (submittedBrokerId === formKey) {
+  const renderForm = (brokerId = null, formKey = null) => {
+    const key = formKey || brokerId || "lister";
+    if (submittedBrokerId === (brokerId || "lister")) {
       return <div className="form-success-alert" role="status">✓ Inquiry routed to the current property recipient.</div>;
     }
     return (
@@ -91,6 +91,34 @@ export default function BrokersClient({ slug }) {
         {error && <p className="form-error-alert" role="alert">{error}</p>}
         <button type="submit" className="form-submit-btn" disabled={submitting}>{submitting ? "Routing inquiry…" : "Send inquiry"}</button>
       </form>
+    );
+  };
+
+  const renderBrokerCard = (broker, formIdPrefix) => {
+    const formKey = `${formIdPrefix}-${broker.id}`;
+    const isActiveForm = activeFormBroker === formKey;
+    const isMatch = formIdPrefix === "match";
+
+    return (
+      <div key={formKey} className={`broker-item-card ${isMatch ? "recommended-card match-card" : ""}`}>
+        <div className="broker-main-row">
+          <div className="broker-avatar-img" style={broker.image ? { backgroundImage: `url(${broker.image})` } : undefined} aria-hidden="true" />
+          <div className="broker-detail-col">
+            <div className="broker-name-header"><h2 className="broker-name-txt">{broker.name}</h2><span className="leris-badge">AUTHORIZED ROSTER</span></div>
+            <p className="broker-license-txt">{broker.headline || broker.firm || "Licensed property representative"}</p>
+            {broker.license && <p className="broker-closures-txt">PRC reference on file</p>}
+            {broker.specializations?.length > 0 && <div className="niche-pills-row">{broker.specializations.map((tag) => <span key={tag} className="niche-pill-tag">{tag}</span>)}</div>}
+          </div>
+          <div className="broker-rating-box"><span className="rating-num">{broker.rating || "—"}</span><span className="rating-lbl">SCOUT RATING</span></div>
+        </div>
+        <div className="broker-actions-row">
+          <Link href={`/brokers/${broker.id}`} className="action-profile-btn">View Profile →</Link>
+          <button type="button" className={`action-retain-btn ${isActiveForm ? "active" : ""}`} onClick={() => toggleForm(formKey)}>
+            {isActiveForm ? "Cancel" : "Contact Broker"}
+          </button>
+        </div>
+        {isActiveForm && <div className="inline-intent-form-container">{renderForm(broker.id, formKey)}</div>}
+      </div>
     );
   };
 
@@ -116,26 +144,40 @@ export default function BrokersClient({ slug }) {
         ) : (
           <>
             {represented ? (
-              <div className="brokers-cards-list property-roster-list">
-                {brokers.map((broker) => (
-                  <div key={broker.id} className="broker-item-card recommended-card">
-                    <div className="broker-main-row">
-                      <div className="broker-avatar-img" style={broker.image ? { backgroundImage: `url(${broker.image})` } : undefined} aria-hidden="true" />
-                      <div className="broker-detail-col">
-                        <div className="broker-name-header"><h2 className="broker-name-txt">{broker.name}</h2><span className="leris-badge">AUTHORIZED ROSTER</span></div>
-                        <p className="broker-license-txt">{broker.headline || broker.firm || "Licensed property representative"}</p>
-                        {broker.license && <p className="broker-closures-txt">PRC reference on file</p>}
-                        {broker.specializations?.length > 0 && <div className="niche-pills-row">{broker.specializations.map((tag) => <span key={tag} className="niche-pill-tag">{tag}</span>)}</div>}
-                      </div>
-                      <div className="broker-rating-box"><span className="rating-num">{broker.rating || "—"}</span><span className="rating-lbl">SCOUT RATING</span></div>
+              <div className="broker-layers-container">
+                {/* LAYER 2: SCOUTIT MATCH */}
+                {brokers.length > 0 && (
+                  <section className="broker-layer scoutit-match-layer">
+                    <header className="layer-header" style={{ marginBottom: "20px" }}>
+                      <span className="gold-section-label" style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--accent)", letterSpacing: "0.15em", textTransform: "uppercase" }}>RECOMMENDED REPRESENTATION</span>
+                      <h2 className="layer-title" style={{ fontFamily: "var(--font-body)", fontSize: "24px", color: "var(--on-surface)", marginTop: "4px" }}>ScoutIt Match ✦</h2>
+                      <p className="layer-subtitle" style={{ fontFamily: "var(--font-body)", fontSize: "14px", color: "var(--text-muted)", lineHeight: 1.6, marginTop: "8px", maxWidth: "700px" }}>
+                        Our recommendation algorithm weights verified ratings, detail completeness, and subscription tier. 
+                        Because detail relevance is a primary input, money alone cannot buy the top slot.
+                      </p>
+                    </header>
+                    <div className="brokers-cards-list property-roster-list">
+                      {brokers.slice(0, 1).map((broker) => renderBrokerCard(broker, "match"))}
                     </div>
-                    <div className="broker-actions-row">
-                      <Link href={`/brokers/${broker.id}`} className="action-profile-btn">View Profile →</Link>
-                      <button type="button" className={`action-retain-btn ${activeFormBroker === broker.id ? "active" : ""}`} onClick={() => toggleForm(broker.id)}>{activeFormBroker === broker.id ? "Cancel" : "Contact Broker"}</button>
+                  </section>
+                )}
+
+                {/* LAYER 1: INDEPENDENT RATING (TOP RATED) */}
+                {brokers.length > 0 && (
+                  <section className="broker-layer top-rated-layer" style={{ marginTop: "48px" }}>
+                    <header className="layer-header" style={{ marginBottom: "20px" }}>
+                      <span className="gold-section-label" style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--accent)", letterSpacing: "0.15em", textTransform: "uppercase" }}>INDEPENDENT RATING</span>
+                      <h2 className="layer-title" style={{ fontFamily: "var(--font-body)", fontSize: "24px", color: "var(--on-surface)", marginTop: "4px" }}>Top Rated</h2>
+                      <p className="layer-subtitle" style={{ fontFamily: "var(--font-body)", fontSize: "14px", color: "var(--text-muted)", lineHeight: 1.6, marginTop: "8px", maxWidth: "700px" }}>
+                        The complete authorized roster for this property, ranked strictly by verified independent ratings. 
+                        This ranking is purely meritocratic and is untouched by commercial tier.
+                      </p>
+                    </header>
+                    <div className="brokers-cards-list property-roster-list">
+                      {[...brokers].sort((a, b) => b.rating - a.rating).map((broker) => renderBrokerCard(broker, "rated"))}
                     </div>
-                    {activeFormBroker === broker.id && <div className="inline-intent-form-container">{renderForm(broker.id)}</div>}
-                  </div>
-                ))}
+                  </section>
+                )}
               </div>
             ) : (
               <section className="roster-empty-state">

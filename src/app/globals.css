@@ -551,7 +551,7 @@ body.light-mode .global-footer {
      visitor saw. Instrument Serif is high-contrast and narrow — editorial
      without the antique. Georgia stays as the fallback, so a failed font load
      degrades to the previous look rather than to Times. */
-  --font-display: var(--font-instrument-serif), Georgia, 'Times New Roman', serif;
+  --font-display: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
   --font-body: var(--font-geist-sans), system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: var(--font-geist-mono), 'Courier New', monospace;
 
@@ -2124,10 +2124,13 @@ html.lite-mode .atmosphere-broker::after {
   }
 }
 
-/* Card surfaces â€” replace flat fills with subtle depth gradients */
+/* Card surfaces — replace flat fills with subtle depth gradients */
 .card-atmosphere {
-  background: linear-gradient(165deg, #1a1917, #111110);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(26, 25, 23, 0.4);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05);
 }
 
 body.light-mode .card-atmosphere {
@@ -2147,17 +2150,21 @@ body.light-mode .card-atmosphere-gold {
   box-shadow: var(--shadow-md), var(--shadow-glow-soft);
 }
 
-/* Hover lift â€” apply to every clickable card/tile for consistency.
+/* Hover lift — apply to every clickable card/tile for consistency.
    Transitions are already neutralized site-wide under Lite Mode via the
    `html.lite-mode *` rule above, so no extra override is needed here. */
 .hov-card {
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+  transition: transform 300ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 300ms cubic-bezier(0.2, 0.8, 0.2, 1), border-color 300ms ease;
 }
 
 .hov-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.45), var(--shadow-glow-soft);
-  border-color: rgba(var(--accent-rgb), 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.hov-card:active {
+  transform: scale(0.98);
 }
 
 .hov-glow {

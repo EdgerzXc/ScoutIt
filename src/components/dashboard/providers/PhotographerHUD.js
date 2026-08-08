@@ -6,12 +6,12 @@ import { useDashboard } from "../../../context/DashboardContext";
 const ToggleSwitch = ({ label, checked, onChange, gold = false }) => (
   <div className="flex items-center justify-between py-2 border-b border-surface-variant/50 last:border-0">
     <span className="font-working-title text-sm text-on-surface">{label}</span>
-    <div 
+    <button type="button"
       className={`w-10 h-6 rounded-full flex items-center p-1 active:scale-95 transition cursor-pointer ${checked ? (gold ? 'bg-gold-accent' : 'bg-on-surface') : 'bg-surface-variant'}`}
       onClick={() => onChange(!checked)}
     >
       <div className={`w-4 h-4 bg-background rounded-full transition-transform ${checked ? 'translate-x-4' : 'translate-x-0'}`}></div>
-    </div>
+    </button>
   </div>
 );
 
@@ -110,9 +110,9 @@ export default function PhotographerHUD({ projects, activeProjectId, setActivePr
       {activeTab === 'bounties' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-[fadeIn_0.2s_ease]">
           {projects.map((project, index) => (
-            <div 
+            <button type="button"
               key={project.id} 
-              className="card-atmosphere hov-card stagger-enter rounded-lg overflow-hidden cursor-pointer group transition"
+              className="card-atmosphere hov-card stagger-enter rounded-lg overflow-hidden cursor-pointer group transition text-left block w-full"
               style={{ '--i': index }}
               onClick={() => setActiveProjectId(project.id)}
             >
@@ -132,7 +132,7 @@ export default function PhotographerHUD({ projects, activeProjectId, setActivePr
                   <span className="text-gold-accent font-data-tabular">Bounty: {project.bounty_connects || 5} ◈</span>
                 </div>
               </div>
-            </div>
+            </button>
           ))}
           
           {projects.length === 0 && (
@@ -160,12 +160,12 @@ export default function PhotographerHUD({ projects, activeProjectId, setActivePr
                     <h4 className="font-working-title text-on-surface">Accepting New Projects</h4>
                     <p className="text-xs text-text-secondary mt-1">Toggle off to create artificial scarcity if fully booked.</p>
                   </div>
-                  <div 
+                  <button type="button"
                     className={`w-12 h-6 rounded-full flex items-center p-1 active:scale-95 transition cursor-pointer ${acceptingProjects ? 'bg-gold-accent' : 'bg-surface-variant'}`}
                     onClick={() => setAcceptingProjects(!acceptingProjects)}
                   >
                     <div className={`w-4 h-4 bg-background rounded-full transition-transform ${acceptingProjects ? 'translate-x-6' : 'translate-x-0'}`}></div>
-                  </div>
+                  </button>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">

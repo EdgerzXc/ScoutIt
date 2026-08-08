@@ -7,6 +7,8 @@ import { useEffect, useState, useRef, useMemo } from "react";
 import Link from "next/link";
 import "@/app/property/[id]/property-detail.css";
 import dynamic from "next/dynamic";
+import ShareModal from "@/components/property/ShareModal";
+import ProvenanceBadge from "@/components/ui/ProvenanceBadge";
 import InViewport from "@/components/ui/InViewport";
 import { canSee, getCurrentTier } from "@/lib/entitlements";
 
@@ -322,7 +324,9 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
           <div className="hero-intel" onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()} onMouseUp={(e) => e.stopPropagation()} onTouchStart={(e) => e.stopPropagation()}>
             <p className="hero-label" style={{ color: ACCENT }}>ScoutIt &middot; Unit Dossier</p>
             <h1 className="hero-title">{unit.name}</h1>
-            <p className="hero-location">{property.title} &middot; {property.location || property.city}</p>
+            <p className="hero-location">
+              {property.title} <ProvenanceBadge record={property} /> &middot; {property.location || property.city}
+            </p>
             <p className="hero-hook">{d.unit_type ? unitTypeLabel(d.unit_type) : "Premium Space"} &middot; {availabilityLabel}</p>
           </div>
 
@@ -366,7 +370,9 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
         <div className="mobile-hero-intel">
           <p className="mobile-hero-label" style={{ color: ACCENT }}>ScoutIt &middot; Unit Dossier</p>
           <h1 className="mobile-hero-title">{unit.name}</h1>
-          <p className="mobile-hero-location">{property.title} &middot; {property.location || property.city}</p>
+          <p className="mobile-hero-location">
+            {property.title} <ProvenanceBadge record={property} /> &middot; {property.location || property.city}
+          </p>
           <p className="mobile-hero-hook">{d.unit_type ? unitTypeLabel(d.unit_type) : "Premium Space"} &middot; {availabilityLabel}</p>
         </div>
 

@@ -86,11 +86,13 @@ export default function OperatorMode() {
       </div>
 
       {buildings.length === 0 ? (
-        <div className="bg-surface border border-dashed border-surface-variant rounded-lg p-16 flex flex-col items-center text-center gap-2">
-          <p className="text-text-secondary text-sm">
+        <div className="bg-surface/40 backdrop-blur-xl border border-white/[0.04] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] rounded-2xl p-16 flex flex-col items-center text-center gap-2 relative overflow-hidden transition-all duration-300">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 bg-gold-accent/5 rounded-full blur-[60px]" />
+          <span className="text-4xl mb-4 opacity-70 relative z-10 filter drop-shadow-md">⚙️</span>
+          <p className="text-on-surface font-working-title text-xl mb-2 relative z-10 tracking-tight">
             No units have been delegated to you yet.
           </p>
-          <p className="text-xs text-text-muted max-w-md">
+          <p className="text-xs text-text-secondary max-w-md relative z-10">
             Find a building you would like to operate, open its property page, and use{" "}
             <span className="text-gold-accent">Request to Operate This Building</span> to reach out to
             the owner.

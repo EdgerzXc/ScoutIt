@@ -25,7 +25,7 @@ function getArticleType(art) {
 }
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { getArticles } from "@/data/mockArticles";
+import { getArticles } from "@/data/mock/mockArticles";
 
 const MOCK_CATEGORIES = {
   "batasan-hills": "Residential",

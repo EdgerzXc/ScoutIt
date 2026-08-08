@@ -12,6 +12,7 @@ import { useTrueClosestTransit } from "@/hooks/useTrueClosestTransit";
 import { resolveTransitHub } from "@/lib/transit";
 import { hasInteractiveUnitPage, hasSpatial3D, unitMasterPageOverview, formatUnitPrice } from "@/lib/unitMasterPage";
 import FreshnessBadge from "@/components/ui/FreshnessBadge";
+import ProvenanceBadge from "@/components/ui/ProvenanceBadge";
 import { fieldLabel } from "@/lib/fieldLabel";
 
 // Heavy below-the-fold components dynamically imported to minimize initial mobile JS payload & TBT
@@ -1194,8 +1195,13 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
             onTouchStart={(e) => e.stopPropagation()}
           >
             <p className="hero-label">ScoutIt &middot; {briefLabel}</p>
-            <h1 className="hero-title">{d.title}</h1>
-            <p className="hero-location">{d.location || d.city || null}</p>
+          <div className="hero-text-overlay">
+            <h1 className="hero-title">
+              {d.title}
+              <ProvenanceBadge record={d} />
+            </h1>
+            <p className="hero-location">{d.location || d.city || "Philippines"}</p>
+          </div>
             <p className="hero-hook">{d.hook}</p>
             <div style={{ marginTop: '16px', display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
               <button 
@@ -1275,8 +1281,13 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
         {/* Mobile-only Hero Intel (visible on mobile viewport, hidden on desktop) */}
         <div className="mobile-hero-intel">
           <p className="mobile-hero-label">ScoutIt &middot; {briefLabel}</p>
-          <h1 className="mobile-hero-title">{d.title}</h1>
-          <p className="mobile-hero-location">{d.location || d.city || null}</p>
+        <div className="mobile-hero-header">
+          <h1 className="mobile-hero-title">
+            {d.title}
+            <ProvenanceBadge record={d} />
+          </h1>
+          <p className="mobile-hero-location">{d.location || d.city || "Philippines"}</p>
+        </div>
           <p className="mobile-hero-hook">{d.hook}</p>
           {isOwner && (
             <div style={{ marginTop: '20px' }}>
@@ -2484,32 +2495,34 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
               </button>
 
               <div style={{ display: "flex", gap: "10px", marginTop: "10px", width: "100%" }}>
-                <button
-                  onClick={() => {
-                    if (typeof window !== 'undefined') {
-                      const cleanUrl = window.location.origin + window.location.pathname;
-                      const shareText = buildShareText(d, cleanUrl);
+                {!d.is_sample && (
+                  <button
+                    onClick={() => {
+                      if (typeof window !== 'undefined') {
+                        const cleanUrl = window.location.origin + window.location.pathname;
+                        const shareText = buildShareText(d, cleanUrl);
 
-                      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-                      if (isMobile && navigator.share) {
-                        navigator.share({
-                          title: `${d.title || "Premium Space"} - ScoutIt`,
-                          text: shareText
-                        }).catch(err => {
-                          if (err.name !== 'AbortError') {
-                            setShareTextOpen(shareText);
-                          }
-                        });
-                      } else {
-                        setShareTextOpen(shareText);
+                        if (isMobile && navigator.share) {
+                          navigator.share({
+                            title: `${d.title || "Premium Space"} - ScoutIt`,
+                            text: shareText
+                          }).catch(err => {
+                            if (err.name !== 'AbortError') {
+                              setShareTextOpen(shareText);
+                            }
+                          });
+                        } else {
+                          setShareTextOpen(shareText);
+                        }
                       }
-                    }
-                  }}
-                  className="flex-1 bg-transparent border border-surface-variant text-text-secondary font-mono text-xs tracking-[0.12em] uppercase font-bold py-3 px-4 rounded hover:bg-surface-alt transition-colors active:scale-[0.98] flex items-center justify-center gap-2"
-                >
-                  Share
-                </button>
+                    }}
+                    className="flex-1 bg-transparent border border-surface-variant text-text-secondary font-mono text-xs tracking-[0.12em] uppercase font-bold py-3 px-4 rounded hover:bg-surface-alt transition-colors active:scale-[0.98] flex items-center justify-center gap-2"
+                  >
+                    Share
+                  </button>
+                )}
                 <button
                   onClick={() => setIsPromoteOpen(true)}
                   className="flex-1 bg-transparent border border-gold-accent/60 text-gold-accent font-mono text-xs tracking-[0.12em] uppercase font-bold py-3 px-4 rounded hover:bg-gold-accent hover:text-background transition-colors active:scale-[0.98] flex items-center justify-center gap-2 shadow-[0_0_10px_rgba(232,174,60,0.15)]"

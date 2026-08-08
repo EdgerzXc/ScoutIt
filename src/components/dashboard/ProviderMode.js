@@ -5,36 +5,7 @@ import { useDashboard } from "../../context/DashboardContext";
 import PhotographerHUD from "./providers/PhotographerHUD";
 import ResearcherHUD from "./providers/ResearcherHUD";
 import DesignerHUD from "./providers/DesignerHUD";
-
-// Fallback Mock Data just in case API fails
-const MOCK_QUESTS = [
-  { 
-    id: 'q1', 
-    title: "Ayala Corporate Shoot", 
-    type: "Commercial", 
-    status: "active", 
-    client: "Julian de Ayala", 
-    date: "June 2026", 
-    cover: "📸",
-    scope: "Full-day interior and exterior editorial shoot for upcoming high-yield commercial listing.",
-    deliverables: "35 High-Res Edited Images, 1 Drone Reel",
-    bounty_connects: 15,
-    targetField: "Media Portfolio"
-  },
-  { 
-    id: 'q2', 
-    title: "BGC High Street Floorplan", 
-    type: "Retail", 
-    status: "active", 
-    client: "Maria Clara", 
-    date: "May 2026", 
-    cover: "📐",
-    scope: "Precise laser-measured floorplan for a 120sqm retail cutout.",
-    deliverables: "PDF Floorplan, CAD File",
-    bounty_connects: 10,
-    targetField: "floor_sqm"
-  }
-];
+import { MOCK_QUESTS, USE_MOCK_DATA } from "@/data/mock";
 
 export default function ProviderMode({ type }) {
   const { addToast } = useDashboard();
@@ -54,12 +25,12 @@ export default function ProviderMode({ type }) {
         const res = await fetch("/api/v1/questit/quests");
         if (res.ok) {
           const data = await res.json();
-          setQuests(data.quests || MOCK_QUESTS);
+          setQuests(data.quests || (USE_MOCK_DATA ? MOCK_QUESTS : []));
         } else {
-          setQuests(MOCK_QUESTS);
+          setQuests(USE_MOCK_DATA ? MOCK_QUESTS : []);
         }
       } catch (err) {
-        setQuests(MOCK_QUESTS);
+        setQuests(USE_MOCK_DATA ? MOCK_QUESTS : []);
       } finally {
         setLoading(false);
       }
@@ -71,19 +42,43 @@ export default function ProviderMode({ type }) {
 
   if (!isActiveService) {
     return (
-      <div className="w-full max-w-[1200px] mx-auto flex flex-col items-center justify-center text-center animate-[fadeIn_0.5s_ease-out] py-16 md:py-32 relative border border-surface-variant rounded-lg bg-surface">
-        <span className="text-6xl mb-6 opacity-50">🔒</span>
-        <h1 className="font-display-md text-4xl md:text-5xl text-on-surface mb-4">The Roster is Curation-Only.</h1>
-        <p className="text-text-secondary font-body-md max-w-lg mb-8 leading-relaxed">
-          The <strong>{providerLabel}</strong> ecosystem is currently in Phase 2 development. We are allowing top-tier professionals to create their accounts and establish their verified identities now, ahead of the official marketplace launch.
-        </p>
-        <div className="flex gap-4">
-          <button 
-            className="bg-gold-accent text-background font-working-title text-sm font-bold py-3 px-8 rounded shadow-lg hover:opacity-90 transition"
-            onClick={() => addToast("Your account is secured in the waitlist database.", "✅")}
-          >
-            Secure Your Position
-          </button>
+      <div className="w-full max-w-[1200px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 animate-slide-up-fade py-12">
+        <div className="md:col-span-3 card-atmosphere p-12 md:p-24 rounded-3xl flex flex-col items-center text-center relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-gold-accent/5 rounded-full blur-3xl group-hover:bg-gold-accent/10 transition duration-500 -translate-y-1/2 translate-x-1/3" />
+          <div className="w-20 h-20 bg-surface/50 border border-white/[0.04] rounded-full flex items-center justify-center mb-8 relative">
+             <div className="absolute inset-0 bg-gold-accent blur-xl opacity-20 rounded-full group-hover:opacity-40 transition-opacity duration-300" />
+             <span className="text-3xl relative z-10">🔒</span>
+          </div>
+          <h1 className="font-display-md text-4xl md:text-5xl text-on-surface mb-6 relative z-10">The Roster is Curation-Only.</h1>
+          <p className="text-text-secondary font-body-md max-w-xl mb-10 leading-relaxed relative z-10">
+            The <strong>{providerLabel}</strong> ecosystem is currently in Phase 2 development. We are allowing top-tier professionals to create their accounts and establish their verified identities now, ahead of the official marketplace launch.
+          </p>
+          <div className="flex gap-4 relative z-10">
+            <button 
+              className="bg-gold-accent text-black font-working-title font-bold py-4 px-10 rounded-full shadow-[0_0_20px_rgba(232,174,60,0.3)] hover:shadow-[0_0_30px_rgba(247,198,78,0.5)] hover:-translate-y-1 transition-all duration-300 ease-out active:scale-95"
+              onClick={() => addToast("Your account is secured in the waitlist database.", "✅")}
+            >
+              Secure Your Position
+            </button>
+          </div>
+        </div>
+
+        <div className="md:col-span-1 card-atmosphere p-8 rounded-2xl flex flex-col justify-center hov-card cursor-pointer" onClick={() => addToast("Join the exclusive Slack channel", "💬")}>
+          <span className="text-2xl mb-4 opacity-70">💬</span>
+          <h3 className="text-white font-medium mb-2">Provider Community</h3>
+          <p className="text-xs text-text-secondary leading-relaxed">Connect with other top-tier operators while you wait.</p>
+        </div>
+
+        <div className="md:col-span-1 card-atmosphere p-8 rounded-2xl flex flex-col justify-center hov-card cursor-pointer" onClick={() => addToast("Downloading quality standards...", "📥")}>
+          <span className="text-2xl mb-4 opacity-70">📑</span>
+          <h3 className="text-white font-medium mb-2">Quality Standards</h3>
+          <p className="text-xs text-text-secondary leading-relaxed">Review the minimum requirements for the ScoutIt roster.</p>
+        </div>
+
+        <div className="md:col-span-1 card-atmosphere p-8 rounded-2xl flex flex-col justify-center hov-card cursor-pointer" onClick={() => addToast("Checking vetting status...", "⏳")}>
+          <span className="text-2xl mb-4 opacity-70">🛡️</span>
+          <h3 className="text-white font-medium mb-2">Vetting Status</h3>
+          <p className="text-xs text-text-secondary leading-relaxed">Track your application through the curation pipeline.</p>
         </div>
       </div>
     );
@@ -128,6 +123,11 @@ export default function ProviderMode({ type }) {
 
       {/* Render the specific HUD injected into the master layout */}
       <div className="w-full">
+        {USE_MOCK_DATA && quests === MOCK_QUESTS && (
+          <div className="text-sm text-[#e8c84a] bg-[rgba(232,200,74,0.1)] p-3 rounded-md mb-4 border border-[rgba(232,200,74,0.2)]">
+            Showing sample bounties — live feed unavailable.
+          </div>
+        )}
         {renderCuratedHUD()}
       </div>
     </div>

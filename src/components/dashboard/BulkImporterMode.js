@@ -171,42 +171,69 @@ export default function BulkImporterMode({ onClose }) {
         </div>
 
         {/* MIDDLE: Data Grid */}
-        <div className="flex-1 bg-surface border border-surface-variant rounded-lg flex flex-col overflow-hidden relative">
-          <div className="p-4 border-b border-surface-variant bg-background flex justify-between items-center shrink-0">
+        <div className="flex-1 bg-surface/40 backdrop-blur-xl border border-white/[0.04] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] rounded-2xl flex flex-col overflow-hidden relative">
+          <div className="p-5 border-b border-white/[0.04] bg-white/[0.02] flex justify-between items-center shrink-0">
             <h3 className="font-working-title text-gold-accent text-sm">Data Grid Preview</h3>
             <span className="text-xs text-text-secondary">{csvData.length} rows loaded</span>
           </div>
           
-          <div className="flex-1 overflow-auto custom-scrollbar">
+          <div className="flex-1 overflow-hidden flex flex-col">
             {csvData.length > 0 ? (
-              <table className="w-full text-left border-collapse min-w-max">
-                <thead>
-                  <tr className="bg-surface-alt border-b border-surface-variant sticky top-0 z-10">
-                    <th className="p-3 text-[10px] font-label-caps text-text-secondary uppercase tracking-widest w-12 text-center">#</th>
-                    {columns.map(col => (
-                      <th key={col} className="p-3 text-[10px] font-label-caps text-text-secondary uppercase tracking-widest border-l border-surface-variant/50">
-                        {col}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
+              <>
+                <div className="hidden lg:block flex-1 overflow-auto custom-scrollbar">
+                  <table className="w-full text-left border-collapse min-w-max">
+                    <thead>
+                      <tr className="bg-surface/60 backdrop-blur-md border-b border-white/[0.04] sticky top-0 z-10">
+                        <th className="p-3 text-[10px] font-label-caps text-gold-accent uppercase tracking-widest w-12 text-center">#</th>
+                        {columns.map(col => (
+                          <th key={col} className="p-3 text-[10px] font-label-caps text-gold-accent uppercase tracking-widest border-l border-white/[0.04]">
+                            {col}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {csvData.map((row, idx) => (
+                        <tr key={row._id} className="border-b border-surface-variant/50 hover:bg-surface-alt/50 transition">
+                          <td className="p-3 text-xs text-text-muted text-center bg-surface-alt/30">{idx + 1}</td>
+                          {columns.map(col => (
+                            <td key={col} className="p-0 border-l border-surface-variant/50">
+                              <input 
+                                className="w-full h-full bg-transparent p-3 text-xs text-on-surface focus:outline-none focus:bg-gold-accent/5 focus:ring-1 focus:ring-inset focus:ring-gold-accent"
+                                value={row[col]}
+                                onChange={(e) => handleCellChange(row._id, col, e.target.value)}
+                              />
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Mobile List View (lg:hidden) */}
+                <div className="lg:hidden flex-1 overflow-auto flex flex-col gap-4 p-4 custom-scrollbar">
                   {csvData.map((row, idx) => (
-                    <tr key={row._id} className="border-b border-surface-variant/50 hover:bg-surface-alt/50 transition">
-                      <td className="p-3 text-xs text-text-muted text-center bg-surface-alt/30">{idx + 1}</td>
+                    <div key={row._id} className="bg-surface/40 backdrop-blur-xl border border-white/[0.04] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] rounded-2xl p-5 flex flex-col gap-3 relative transition-all duration-300 hover:shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
+                      <div className="absolute top-5 right-5 bg-gold-accent/10 text-gold-accent text-[10px] font-label-caps px-2 py-0.5 rounded uppercase tracking-widest">
+                        Row {idx + 1}
+                      </div>
                       {columns.map(col => (
-                        <td key={col} className="p-0 border-l border-surface-variant/50">
+                        <div key={col} className="flex flex-col gap-1 pr-16">
+                          <label className="text-[10px] font-label-caps text-text-secondary uppercase tracking-widest">
+                            {col}
+                          </label>
                           <input 
-                            className="w-full h-full bg-transparent p-3 text-xs text-on-surface focus:outline-none focus:bg-gold-accent/5 focus:ring-1 focus:ring-inset focus:ring-gold-accent"
+                            className="w-full bg-surface-alt/50 border border-white/[0.04] rounded-lg p-2.5 text-sm text-on-surface focus:outline-none focus:border-gold-accent/50 focus:bg-surface-alt transition-all duration-300"
                             value={row[col]}
                             onChange={(e) => handleCellChange(row._id, col, e.target.value)}
                           />
-                        </td>
+                        </div>
                       ))}
-                    </tr>
+                    </div>
                   ))}
-                </tbody>
-              </table>
+                </div>
+              </>
             ) : (
               <div className="h-full flex items-center justify-center flex-col text-text-muted">
                 <span className="text-3xl mb-2">🗃️</span>
@@ -214,6 +241,7 @@ export default function BulkImporterMode({ onClose }) {
               </div>
             )}
           </div>
+
         </div>
 
         {/* BOTTOM: Action */}

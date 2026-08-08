@@ -85,9 +85,9 @@ export default function PhotoUploader({ photos, onChange, onSetImage, isPro = fa
       
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         {currentPhotos.map((photoUrl, index) => (
-          <div 
+          <button type="button" aria-label={`Upload photo ${index + 1}`}
             key={index} 
-            className={`relative aspect-video bg-surface-alt border rounded overflow-hidden group flex flex-col items-center justify-center cursor-pointer transition duration-300 ${
+            className={`block w-full text-left relative aspect-video bg-surface-alt border rounded overflow-hidden group flex flex-col items-center justify-center cursor-pointer transition duration-300 ${
               dragOverIndex === index 
                 ? 'border-gold-accent border-2 bg-gold-accent/5 scale-[1.02] shadow-[0_0_15px_rgba(232,174,60,0.2)] z-10' 
                 : 'border-surface-variant hover:border-gold-accent/50'
@@ -180,7 +180,7 @@ export default function PhotoUploader({ photos, onChange, onSetImage, isPro = fa
                 </div>
               </div>
             )}
-          </div>
+          </button>
         ))}
       </div>
       

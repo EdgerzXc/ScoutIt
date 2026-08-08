@@ -896,16 +896,16 @@ export default function BrokerMode() {
           <div ref={mapContainerRef} style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }} />
           
           <div className="absolute bottom-6 left-6 z-10 flex flex-col gap-2">
-            <div className="bg-background/90 backdrop-blur border border-surface-variant p-4 rounded shadow-lg">
+            <div className="bg-background/40 backdrop-blur-2xl border border-white/[0.04] p-5 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
               <div className="text-[10px] font-label-caps tracking-widest text-gold-accent mb-1 uppercase">
                 Spatial Intelligence
               </div>
-              <div className="font-working-title text-on-surface">{feed.filter(l => l.coordinates || (l.lng && l.lat)).length} targets in radar</div>
+              <div className="font-working-title text-on-surface text-lg">{feed.filter(l => l.coordinates || (l.lng && l.lat)).length} targets in radar</div>
               {radius !== 'any' && <div className="text-xs text-text-secondary mt-1">{radius}km radius from Makati CBD</div>}
             </div>
             
             <select
-              className="bg-background/90 backdrop-blur border border-surface-variant text-on-surface text-sm rounded px-3 py-2 w-full focus:outline-none focus:border-gold-accent transition"
+              className="bg-background/40 backdrop-blur-2xl border border-white/[0.04] text-on-surface text-sm rounded-xl px-4 py-3 w-full focus:outline-none focus:border-gold-accent/50 transition-all duration-300 cursor-pointer shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
               value={radius}
               onChange={handleRadiusChange}
             >
@@ -945,10 +945,11 @@ export default function BrokerMode() {
               <div className="col-span-full"><RowListSkeleton count={3} label="Loading your deal files" /></div>
             )}
             {!isLoading && activePitches.length === 0 && (
-              <div className="col-span-full py-16 text-center border border-dashed border-surface-variant rounded-lg flex flex-col items-center">
-                <span className="text-3xl mb-4 opacity-50">📂</span>
-                <p className="text-on-surface font-working-title mb-2">No active deal files.</p>
-                <p className="text-text-secondary text-sm">Find properties in the intelligence feed to initiate a deal file.</p>
+              <div className="col-span-full py-16 text-center bg-surface/40 backdrop-blur-xl border border-white/[0.04] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] rounded-2xl flex flex-col items-center relative overflow-hidden transition-all duration-300">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 bg-gold-accent/5 rounded-full blur-[60px]" />
+                <span className="text-4xl mb-4 opacity-70 relative z-10 filter drop-shadow-md">📂</span>
+                <p className="text-on-surface font-working-title text-xl mb-2 relative z-10 tracking-tight">No active deal files</p>
+                <p className="text-sm text-text-secondary relative z-10">Pitch to properties on the map to start building your pipeline.</p>
               </div>
             )}
             
@@ -956,9 +957,9 @@ export default function BrokerMode() {
               const pStatus = deal.status;
               const isDeclined = pStatus === 'declined';
               return (
-                <div 
+                <button type="button" 
                   key={deal.id} 
-                  className={`rounded-xl p-6 flex flex-col cursor-pointer transition group relative overflow-hidden h-52 ${isDeclined ? 'opacity-60 grayscale border border-surface-variant bg-surface-alt' : 'hov-glow'}`}
+                  className={`text-left block w-full rounded-2xl p-6 flex flex-col cursor-pointer transition-all duration-300 group relative overflow-hidden h-52 backdrop-blur-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] ${isDeclined ? 'opacity-60 grayscale border border-white/[0.04] bg-surface/20' : 'hov-glow border border-white/[0.04] bg-surface/40 hover:-translate-y-1 hover:shadow-[0_8px_32px_rgba(0,0,0,0.4)]'}`}
                   onClick={() => setActiveDealId(deal.id)}
                 >
                   
@@ -979,7 +980,7 @@ export default function BrokerMode() {
                       Open Workspace <span>→</span>
                     </span>
                   </div>
-                </div>
+                </button>
               );
             })}
           </div>
@@ -996,18 +997,19 @@ export default function BrokerMode() {
               <div className="col-span-full"><RowListSkeleton count={2} label="Loading verified properties" /></div>
             )}
             {!isLoading && accepted.length === 0 && (
-              <div className="col-span-full py-12 text-center border border-dashed border-surface-variant rounded-lg flex flex-col items-center">
-                <span className="text-3xl mb-4 opacity-50">🛡️</span>
-                <p className="text-on-surface font-working-title mb-2">No Verified Properties.</p>
-                <p className="text-text-secondary text-sm">Accept a handshake from an owner to become a Verified Advisor.</p>
+              <div className="col-span-full py-12 text-center bg-surface/40 backdrop-blur-xl border border-white/[0.04] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] rounded-2xl flex flex-col items-center relative overflow-hidden transition-all duration-300">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 bg-success/5 rounded-full blur-[60px]" />
+                <span className="text-4xl mb-4 opacity-70 relative z-10 filter drop-shadow-md">🛡️</span>
+                <p className="text-on-surface font-working-title text-xl mb-2 relative z-10 tracking-tight">No Verified Properties</p>
+                <p className="text-sm text-text-secondary relative z-10">Accept a handshake from an owner to become a Verified Advisor.</p>
               </div>
             )}
             
             {accepted.map((deal) => {
               return (
-                <div 
+                <button type="button" 
                   key={deal.id} 
-                  className="rounded-xl p-6 flex flex-col cursor-pointer transition group relative overflow-hidden h-52 border border-success/30 bg-success/5 hover:border-success/50 hover:bg-success/10 hover:-translate-y-2 shadow-[0_4px_20px_rgba(16,185,129,0.05)] hover:shadow-[0_12px_40px_rgba(0,0,0,0.5),0_0_50px_rgba(16,185,129,0.15)] backdrop-blur-md"
+                  className="text-left block w-full rounded-2xl p-6 flex flex-col cursor-pointer transition-all duration-300 group relative overflow-hidden h-52 border border-success/20 bg-success/5 hover:border-success/40 hover:bg-success/10 hover:-translate-y-1 shadow-[0_4px_20px_rgba(16,185,129,0.05),inset_0_1px_1px_rgba(255,255,255,0.05)] hover:shadow-[0_12px_40px_rgba(0,0,0,0.5),0_0_50px_rgba(16,185,129,0.15)] backdrop-blur-xl"
                   onClick={() => setActiveDealId(deal.id)}
                 >
                   
@@ -1028,7 +1030,7 @@ export default function BrokerMode() {
                       Manage Portfolio <span>→</span>
                     </span>
                   </div>
-                </div>
+                </button>
               );
             })}
           </div>

@@ -189,10 +189,10 @@ export default function ConciergeAI() {
 
       {/* Backdrop for mobile */}
       {isOpen && (
-        <div 
-          className="fixed inset-0 bg-background/60 backdrop-blur-sm z-[90] sm:hidden"
+        <button type="button" aria-label="Close Concierge" 
+          className="fixed inset-0 bg-background/60 backdrop-blur-sm z-[90] sm:hidden w-full h-full block"
           onClick={() => setIsOpen(false)}
-        ></div>
+        ></button>
       )}
     </>
   );

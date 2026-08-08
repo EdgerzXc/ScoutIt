@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getShowcaseEntries, BOARD_CATEGORIES, BOARD_AWARDS } from "@/data/mockShowcase";
+import { getShowcaseEntries, BOARD_CATEGORIES, BOARD_AWARDS } from "@/data/mock/mockShowcase";
 import { getCmsBundle } from "@/lib/cmsCache";
 import { sanitizeError } from "@/lib/sanitizeError";
 

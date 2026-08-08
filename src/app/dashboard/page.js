@@ -351,7 +351,7 @@ function DashboardInner() {
                 <div className="p-3 border-b border-surface-variant bg-surface-alt flex justify-between items-center">
                   <span className="font-label-caps text-[10px] tracking-widest uppercase text-text-secondary">Notifications</span>
                   {notifications.length > 0 && (
-                    <span className="text-xs text-gold-accent cursor-pointer hover:underline" onClick={clearAllNotifications}>Clear All</span>
+                    <button type="button" className="text-xs text-gold-accent hover:underline" onClick={clearAllNotifications}>Clear All</button>
                   )}
                 </div>
                   <div className="max-h-[300px] overflow-y-auto">
@@ -359,7 +359,7 @@ function DashboardInner() {
                       <div className="p-6 text-center text-sm text-text-secondary italic">All caught up.</div>
                     ) : (
                       notifications.map(notif => (
-                        <div 
+                        <button type="button" 
                           key={notif.id} 
                           onClick={() => {
                             if (notif.notificationType === 'inquiry') {
@@ -370,14 +370,14 @@ function DashboardInner() {
                               setShowNotifications(false);
                             }
                           }}
-                          className={`p-4 border-b border-surface-variant/50 flex gap-3 transition ${!notif.read ? 'bg-surface-container-low' : ''} ${(notif.notificationType === 'inquiry' || notif.propertyId) ? 'cursor-pointer hover:bg-surface-variant' : ''}`}
+                          className={`p-4 border-b border-surface-variant/50 flex gap-3 transition text-left block w-full ${!notif.read ? 'bg-surface-container-low' : ''} ${(notif.notificationType === 'inquiry' || notif.propertyId) ? 'cursor-pointer hover:bg-surface-variant' : ''}`}
                         >
                           <div className="text-2xl shrink-0">{notif.icon}</div>
                           <div>
                             <div className="font-working-title text-sm text-on-surface mb-1">{notif.title}</div>
                             <div className="text-xs text-text-secondary">{notif.desc}</div>
                           </div>
-                        </div>
+                        </button>
                       ))
                     )}
                   </div>
@@ -514,7 +514,7 @@ function DashboardInner() {
       {/* Mobile Profile Menu Slide-out */}
       {showMobileProfileMenu && (
         <div className="md:hidden fixed inset-0 z-50 flex flex-col justify-end animate-[fadeIn_0.3s_ease-out]">
-          <div className="absolute inset-0 bg-background/60 backdrop-blur-sm" onClick={() => setShowMobileProfileMenu(false)}></div>
+          <button type="button" aria-label="Close Mobile Profile Menu" className="absolute inset-0 w-full h-full block bg-background/60 backdrop-blur-sm" onClick={() => setShowMobileProfileMenu(false)}></button>
           <div className="bg-surface border-t border-surface-variant rounded-t-2xl w-full p-6 animate-[slideUp_0.3s_ease-out] relative z-10">
             <div className="flex justify-between items-center mb-6">
               <div className="flex items-center gap-3">

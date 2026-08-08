@@ -2,7 +2,7 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getArticleBySlug, getArticles } from "@/data/mockArticles";
+import { getArticleBySlug, getArticles } from "@/data/mock/mockArticles";
 import { fetchIntel } from "@/lib/airtable";
 import { siteUrl } from "@/lib/siteUrl";
 import { parseArticleBlocks, blocksFromLegacy } from "@/lib/articleSchema";

@@ -1,4 +1,4 @@
-import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 import { SITE_URL } from "@/lib/siteUrl";
 import "./globals.css";
 import dynamic from "next/dynamic";
@@ -18,23 +18,6 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
-  display: "swap",
-});
-
-// The display face. Georgia was here until 2026-08-07 (§64) — a system serif,
-// so it was never actually downloaded, never consistent, and rendered as a
-// different typeface on Windows, macOS and Android. It also reads BOOKISH,
-// which is the "gold-and-marble old-money" cliché DESIGN.md §6 bans by name.
-//
-// Instrument Serif is high-contrast, narrow and modern: editorial authority
-// without the antique. One weight (400) with a true italic, which is all the
-// display layer ever uses — it is headings only, never body copy, so the lack
-// of a weight range is a non-issue and the payload stays small.
-const instrumentSerif = Instrument_Serif({
-  variable: "--font-instrument-serif",
-  subsets: ["latin"],
-  weight: "400",
-  style: ["normal", "italic"],
   display: "swap",
 });
 
@@ -97,11 +80,8 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} ${instrumentSerif.variable}`}>
-      <body>
-        <GoogleAnalytics />
-        <JsonLd />
-        <DeviceTracker />
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+      <head>
         {/* Lite Mode no-flash: apply the class before paint so low-end phones
             never render the heavy cosmic layers. Defaults on for users who ask
             for reduced motion; otherwise reads the stored preference. */}
@@ -111,6 +91,11 @@ export default function RootLayout({ children }) {
               "(function(){try{var v=localStorage.getItem('scoutit_lite_mode');var on;if(v===null){var reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;var mem=navigator.deviceMemory||8;var cores=navigator.hardwareConcurrency||8;var conn=(navigator.connection||{}).effectiveType||'4g';var weakPhone=window.matchMedia('(pointer: coarse)').matches&&(mem<=4||cores<=4||conn==='2g'||conn==='slow-2g'||conn==='3g');on=reduced||weakPhone;}else{on=(v==='1');}if(on)document.documentElement.classList.add('lite-mode');}catch(e){}})();",
           }}
         />
+      </head>
+      <body>
+        <GoogleAnalytics />
+        <JsonLd />
+        <DeviceTracker />
         {/* Cinematic film grain texture overlay */}
         <div className="grain" aria-hidden="true" />
         <ErrorBoundary>

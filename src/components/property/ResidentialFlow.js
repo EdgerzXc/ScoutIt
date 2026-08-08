@@ -23,6 +23,7 @@ import { getChapterConfig } from "./chapterConfig";
 import { Lock, Unlock, Zap, ChevronRight, Share2, MapPin, Eye, Search, Layers, X, Home, Users, ArrowUpRight, Copy, Check, Bed, Bath, Ruler, Car, Building2, Camera } from "lucide-react";
 import Image from "next/image";
 import FreshnessBadge from "@/components/ui/FreshnessBadge";
+import ProvenanceBadge from "@/components/ui/ProvenanceBadge";
 import InViewport from "@/components/ui/InViewport";
 import GlassPanel from "@/components/ui/GlassPanel";
 import HoverCard from "@/components/ui/HoverCard";
@@ -213,6 +214,9 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
   // Market/investment "Hidden Intel" panel unlocks at Cluster+ (same SSR-safe pattern).
   const [canMarketIntel,    setCanMarketIntel]    = useState(false);
   useEffect(() => { setCanMarketIntel(canSee("marketIntel", getCurrentTier())); }, []);
+  // Operator role check (SSR-safe).
+  const [isOperator,        setIsOperator]        = useState(false);
+  useEffect(() => { setIsOperator(hasActiveRole("operator")); }, []);
   const [activeTab,         setActiveTab]         = useState(externalActiveTab || "space");
   // SSR-safe: useState's initializer can&apos;t read window (hydration mismatch —
   // React reuses the server-rendered value on mount instead of re-running the
@@ -1055,8 +1059,13 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
             onTouchStart={(e) => e.stopPropagation()}
           >
             <p className="hero-label">ScoutIt &middot; {briefLabel}</p>
-            <h1 className="hero-title">{d.title}</h1>
-            <p className="hero-location">{d.location || d.city || null}</p>
+            <div className="hero-text-overlay">
+              <h1 className="hero-title">
+                {d.title}
+                <ProvenanceBadge record={d} />
+              </h1>
+              <p className="hero-location">{d.location || d.city || "Philippines"}</p>
+            </div>
             <p className="hero-hook">{d.hook}</p>
             <div style={{ marginTop: '16px', display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
               <button 
@@ -2286,35 +2295,37 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                 Connect with an Authorized Broker →
               </button>
 
-              <div style={{ marginTop: "10px", width: "100%" }}>
-                <button
-                  onClick={() => {
-                    if (typeof window !== 'undefined') {
-                      const cleanUrl = window.location.origin + window.location.pathname;
-                      const shareText = buildShareText(d, cleanUrl);
+              {!d.is_sample && (
+                <div style={{ marginTop: "10px", width: "100%" }}>
+                  <button
+                    onClick={() => {
+                      if (typeof window !== 'undefined') {
+                        const cleanUrl = window.location.origin + window.location.pathname;
+                        const shareText = buildShareText(d, cleanUrl);
 
-                      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-                      if (isMobile && navigator.share) {
-                        navigator.share({
-                          title: `${d.title || "Premium Space"} - ScoutIt`,
-                          text: shareText
-                        }).catch(err => {
-                          if (err.name !== 'AbortError') {
-                            setShareTextOpen(shareText);
-                          }
-                        });
-                      } else {
-                        setShareTextOpen(shareText);
+                        if (isMobile && navigator.share) {
+                          navigator.share({
+                            title: `${d.title || "Premium Space"} - ScoutIt`,
+                            text: shareText
+                          }).catch(err => {
+                            if (err.name !== 'AbortError') {
+                              setShareTextOpen(shareText);
+                            }
+                          });
+                        } else {
+                          setShareTextOpen(shareText);
+                        }
                       }
-                    }
-                  }}
-                  className="w-full bg-transparent border border-surface-variant text-text-secondary font-mono text-xs tracking-[0.12em] uppercase font-bold py-3 px-4 rounded hover:bg-surface-alt transition-colors active:scale-[0.98] flex items-center justify-center gap-2"
-                >
-                  Share
-                </button>
-              </div>
-              {hasActiveRole("operator") && (
+                    }}
+                    className="w-full bg-transparent border border-surface-variant text-text-secondary font-mono text-xs tracking-[0.12em] uppercase font-bold py-3 px-4 rounded hover:bg-surface-alt transition-colors active:scale-[0.98] flex items-center justify-center gap-2"
+                  >
+                    Share
+                  </button>
+                </div>
+              )}
+              {isOperator && (
                 <button
                   onClick={() => setIsOperatorRequestOpen(true)}
                   className="mt-3 w-full bg-transparent border border-gold-accent/40 text-gold-accent font-mono text-[11px] tracking-[0.12em] uppercase py-3 px-4 rounded cursor-pointer hover:bg-gold-accent/10 active:scale-[0.98] transition-all"

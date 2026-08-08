@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { rankBoard, BOARD_CATEGORIES } from "@/data/mockShowcase";
+import { rankBoard, BOARD_CATEGORIES } from "@/data/mock/mockShowcase";
 
 const TIER = {
   universe: { color: "#E8AE3C", rgb: "232, 174, 60" },

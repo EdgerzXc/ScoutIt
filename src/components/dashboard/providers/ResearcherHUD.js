@@ -6,12 +6,12 @@ import { useDashboard } from "../../../context/DashboardContext";
 const ToggleSwitch = ({ label, checked, onChange, primary = false }) => (
   <div className="flex items-center justify-between py-2 border-b border-surface-variant/50 last:border-0">
     <span className="font-working-title text-sm text-on-surface">{label}</span>
-    <div 
+    <button type="button"
       className={`w-10 h-6 rounded-full flex items-center p-1 transition cursor-pointer ${checked ? (primary ? 'bg-intel-cyan' : 'bg-on-surface') : 'bg-surface-variant'}`}
       onClick={() => onChange(!checked)}
     >
       <div className={`w-4 h-4 bg-background rounded-full transition-transform ${checked ? 'translate-x-4' : 'translate-x-0'}`}></div>
-    </div>
+    </button>
   </div>
 );
 
@@ -142,9 +142,9 @@ export default function ResearcherHUD({ quests, activeQuestId, setActiveQuestId 
           </div>
 
           {quests.map(quest => (
-            <div 
+            <button type="button"
               key={quest.id} 
-              className="card-atmosphere hov-card rounded-lg p-4 grid grid-cols-1 md:grid-cols-12 gap-4 items-center cursor-pointer hover:border-intel-cyan transition group"
+              className="card-atmosphere hov-card rounded-lg p-4 grid grid-cols-1 md:grid-cols-12 gap-4 items-center cursor-pointer hover:border-intel-cyan transition group text-left block w-full"
               onClick={() => setActiveQuestId(quest.id)}
             >
               <div className="md:col-span-5">
@@ -162,7 +162,7 @@ export default function ResearcherHUD({ quests, activeQuestId, setActiveQuestId 
               <div className="md:col-span-2 text-right">
                 <span className="font-data-tabular text-intel-cyan font-bold">{quest.bounty_connects || 5} ◈</span>
               </div>
-            </div>
+            </button>
           ))}
 
           {quests.length === 0 && (
@@ -189,12 +189,12 @@ export default function ResearcherHUD({ quests, activeQuestId, setActiveQuestId 
                     <h4 className="font-working-title text-on-surface">Accepting New Audits</h4>
                     <p className="text-xs text-text-secondary mt-1">Toggle off if you do not have bandwidth for title tracing.</p>
                   </div>
-                  <div 
+                  <button type="button"
                     className={`w-12 h-6 rounded-full flex items-center p-1 transition cursor-pointer ${acceptingAudits ? 'bg-intel-cyan' : 'bg-surface-variant'}`}
                     onClick={() => setAcceptingAudits(!acceptingAudits)}
                   >
                     <div className={`w-4 h-4 bg-background rounded-full transition-transform ${acceptingAudits ? 'translate-x-6' : 'translate-x-0'}`}></div>
-                  </div>
+                  </button>
                 </div>
 
                 <div className="mb-4">

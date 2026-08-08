@@ -6,12 +6,12 @@ import { useDashboard } from "../../../context/DashboardContext";
 const ToggleSwitch = ({ label, checked, onChange, primary = false }) => (
   <div className="flex items-center justify-between py-2 border-b border-surface-variant/50 last:border-0">
     <span className="font-working-title text-sm text-on-surface">{label}</span>
-    <div 
+    <button type="button"
       className={`w-10 h-6 rounded-full flex items-center p-1 transition cursor-pointer ${checked ? (primary ? 'bg-intel-magenta' : 'bg-on-surface') : 'bg-surface-variant'}`}
       onClick={() => onChange(!checked)}
     >
       <div className={`w-4 h-4 bg-background rounded-full transition-transform ${checked ? 'translate-x-4' : 'translate-x-0'}`}></div>
-    </div>
+    </button>
   </div>
 );
 
@@ -116,9 +116,9 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
       {activeTab === 'projects' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-[fadeIn_0.2s_ease]">
           {projects.map(project => (
-            <div 
+            <button type="button"
               key={project.id} 
-              className="card-atmosphere hov-card rounded-lg overflow-hidden cursor-pointer group hover:border-intel-magenta transition"
+              className="card-atmosphere hov-card rounded-lg overflow-hidden cursor-pointer group hover:border-intel-magenta transition text-left block w-full"
               onClick={() => setActiveProjectId(project.id)}
             >
               <div className="aspect-video bg-surface-alt flex items-center justify-center text-5xl relative">
@@ -137,7 +137,7 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
                   <span className="text-intel-magenta font-data-tabular">Bounty: {project.bounty_connects || 5} ◈</span>
                 </div>
               </div>
-            </div>
+            </button>
           ))}
           
           {projects.length === 0 && (
@@ -164,12 +164,12 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
                     <h4 className="font-working-title text-on-surface">Accepting Commissions</h4>
                     <p className="text-xs text-text-secondary mt-1">Toggle off if your studio is currently fully booked.</p>
                   </div>
-                  <div 
+                  <button type="button"
                     className={`w-12 h-6 rounded-full flex items-center p-1 transition cursor-pointer ${acceptingCommissions ? 'bg-intel-magenta' : 'bg-surface-variant'}`}
                     onClick={() => setAcceptingCommissions(!acceptingCommissions)}
                   >
                     <div className={`w-4 h-4 bg-background rounded-full transition-transform ${acceptingCommissions ? 'translate-x-6' : 'translate-x-0'}`}></div>
-                  </div>
+                  </button>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">

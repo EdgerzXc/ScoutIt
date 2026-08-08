@@ -7,20 +7,11 @@ import ReactionButtons from "@/components/ui/ReactionButtons";
 import { cityToRegion, regionOf } from "@/lib/regions";
 import Footer from "@/components/layout/Footer";
 import AtmosphereBackground from "@/components/ui/AtmosphereBackground";
-import { DISCOVER_INTEL } from "@/data/mockArticles";
+import ProvenanceBadge from "@/components/ui/ProvenanceBadge";
+import { DISCOVER_INTEL, DISCOVER_PROPERTIES, USE_MOCK_DATA } from "@/data/mock";
 import "./discover.css";
 
 const CATEGORIES = ["Residential", "Commercial", "STR", "Hospitality", "Restaurants", "Venues/Events"];
-
-const DISCOVER_PROPERTIES = {
-  Residential: [],
-  Commercial: [],
-  STR: [],
-  Hospitality: [],
-  Restaurants: [],
-  Venues: []
-};
-
 function getDBCategory(cat) {
   if (cat === "Venues/Events") return "Venues";
   return cat;
@@ -48,14 +39,14 @@ export default function DiscoverClient() {
         const data = await res.json();
 
         const airtableProperties = data.properties || [];
-        const nextProps = {
+        const nextProps = USE_MOCK_DATA ? {
           Residential: [...DISCOVER_PROPERTIES.Residential],
           Commercial: [...DISCOVER_PROPERTIES.Commercial],
           STR: [...DISCOVER_PROPERTIES.STR],
           Hospitality: [...DISCOVER_PROPERTIES.Hospitality],
           Restaurants: [...DISCOVER_PROPERTIES.Restaurants],
           Venues: [...DISCOVER_PROPERTIES.Venues]
-        };
+        } : { Residential: [], Commercial: [], STR: [], Hospitality: [], Restaurants: [], Venues: [] };
 
         airtableProperties.forEach(p => {
           if (!p.title || !p.slug || !p.spaceCategory) return;
@@ -84,14 +75,14 @@ export default function DiscoverClient() {
         setAllProperties(nextProps);
 
         const airtableIntel = data.intel || [];
-        const nextIntel = {
+        const nextIntel = USE_MOCK_DATA ? {
           Residential: [...DISCOVER_INTEL.Residential],
           Commercial: [...DISCOVER_INTEL.Commercial],
           STR: [...DISCOVER_INTEL.STR],
           Hospitality: [...DISCOVER_INTEL.Hospitality],
           Restaurants: [...DISCOVER_INTEL.Restaurants],
           Venues: [...DISCOVER_INTEL.Venues]
-        };
+        } : { Residential: [], Commercial: [], STR: [], Hospitality: [], Restaurants: [], Venues: [] };
 
         airtableIntel.forEach(item => {
           let cat = item.category || "Residential";
@@ -274,7 +265,10 @@ export default function DiscoverClient() {
                           <span className="cityBadge">{property.city}</span>
                         </div>
                         <div className="cardBody">
-                          <h3 className="cardTitleText">{property.title}</h3>
+                          <h3 className="cardTitleText">
+                            {property.title}
+                            <ProvenanceBadge record={property} />
+                          </h3>
                           <div className="cardSpecTags">
                             <span className="specBadge">{property.density}</span>
                           </div>

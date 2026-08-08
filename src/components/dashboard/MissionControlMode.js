@@ -457,7 +457,7 @@ export default function MissionControlMode() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 mt-6 auto-rows-[minmax(160px,auto)]">
               
               {/* Hero Metric: Company Health (2x2) */}
-              <GlassPanel className="md:col-span-2 md:row-span-2 rounded-3xl p-8 flex flex-col relative overflow-hidden group border-white/10 hover:border-gold-accent/30 transition duration-200 shadow-xl hover:shadow-[0_8px_40px_rgba(232,174,60,0.15)]">
+              <GlassPanel className="md:col-span-2 md:row-span-2 rounded-3xl p-8 flex flex-col relative overflow-hidden group border-white/[0.04] hover:border-gold-accent/30 transition-all duration-300 ease-out shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] hover:shadow-[0_8px_40px_rgba(232,174,60,0.15)] bg-surface/40 backdrop-blur-xl">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-gold-accent/5 rounded-full blur-3xl group-hover:bg-gold-accent/10 transition duration-200 -translate-y-1/2 translate-x-1/3" />
                 <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-black/60 to-transparent" />
                 
@@ -499,7 +499,7 @@ export default function MissionControlMode() {
               ].map((kpi) => (
                 <GlassPanel 
                   key={kpi.label} 
-                  className={`md:col-span-1 md:row-span-1 rounded-2xl p-6 flex flex-col justify-between hover:-translate-y-1 transition duration-300 relative group overflow-hidden ${kpi.onClick ? 'cursor-pointer border-white/5 hover:border-white/20 shadow-lg hover:shadow-[0_8px_30px_rgba(255,255,255,0.05)]' : 'border-white/5'}`} 
+                  className={`md:col-span-1 md:row-span-1 rounded-2xl p-6 flex flex-col justify-between hover:-translate-y-1 transition-all duration-300 ease-out relative group overflow-hidden bg-surface/40 backdrop-blur-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] ${kpi.onClick ? 'cursor-pointer border-white/[0.04] hover:border-white/20 shadow-lg hover:shadow-[0_8px_30px_rgba(255,255,255,0.05)] active:scale-[0.98]' : 'border-white/[0.04]'}`} 
                   glowColor={kpi.glow}
                   onClick={kpi.onClick}
                 >
@@ -522,7 +522,7 @@ export default function MissionControlMode() {
               ))}
 
               {/* Wide Card: Recent Activity (2x1) */}
-              <GlassPanel className="md:col-span-2 md:row-span-1 rounded-2xl p-6 relative overflow-hidden group border-white/5 hover:border-white/10 transition duration-300 flex flex-col justify-center bg-gradient-to-r from-transparent to-blue-900/5">
+              <GlassPanel className="md:col-span-2 md:row-span-1 rounded-2xl p-6 relative overflow-hidden group border-white/[0.04] hover:border-white/10 transition-all duration-300 ease-out flex flex-col justify-center bg-surface/40 backdrop-blur-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] hover:shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-8 h-8 rounded-full bg-gold-accent/10 border border-gold-accent/20 flex items-center justify-center">
                     <Activity className="text-gold-accent" size={14} />
@@ -538,7 +538,7 @@ export default function MissionControlMode() {
               </GlassPanel>
 
               {/* Schedule (1x2) */}
-              <GlassPanel className="md:col-span-1 md:row-span-2 rounded-2xl p-6 relative overflow-hidden group border-white/5 hover:border-white/20 transition duration-300 shadow-lg">
+              <GlassPanel className="md:col-span-1 md:row-span-2 rounded-2xl p-6 relative overflow-hidden group border-white/[0.04] hover:border-white/20 transition-all duration-300 ease-out bg-surface/40 backdrop-blur-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] hover:shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
                 <div className="flex items-center gap-2 mb-6">
                   <CalendarDays className="text-gold-accent opacity-80" size={18} />
                   <h4 className="text-white font-medium text-sm">Today&apos;s Schedule</h4>
@@ -560,7 +560,7 @@ export default function MissionControlMode() {
               {/* System Alerts (1x1) */}
               <GlassPanel 
                 onClick={() => setActiveTab("projects")}
-                className="md:col-span-1 md:row-span-1 rounded-2xl p-6 relative overflow-hidden group border-white/5 hover:border-red-500/20 transition duration-300 shadow-lg cursor-pointer"
+                className="md:col-span-1 md:row-span-1 rounded-2xl p-6 relative overflow-hidden group border-white/[0.04] hover:border-red-500/20 transition-all duration-300 ease-out cursor-pointer active:scale-[0.98] bg-surface/40 backdrop-blur-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] hover:shadow-[0_8px_32px_rgba(239,68,68,0.15)]"
               >
                 <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/5 rounded-full blur-2xl group-hover:bg-red-500/10 transition duration-200 -translate-y-1/2 translate-x-1/2" />
                 <div className="flex items-center justify-between mb-4 relative z-10">
@@ -590,7 +590,7 @@ export default function MissionControlMode() {
               {/* Inventory Overview (1x1) */}
               <GlassPanel 
                 onClick={() => setActiveTab("inventory")}
-                className="md:col-span-1 md:row-span-1 rounded-2xl p-6 relative overflow-hidden group border-white/5 hover:border-white/20 transition duration-300 shadow-lg cursor-pointer"
+                className="md:col-span-1 md:row-span-1 rounded-2xl p-6 relative overflow-hidden group border-white/[0.04] hover:border-white/20 transition-all duration-300 ease-out cursor-pointer active:scale-[0.98] bg-surface/40 backdrop-blur-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] hover:shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
               >
                 <div className="flex items-center justify-between mb-4">
                   <Warehouse className="text-text-secondary group-hover:text-gold-accent transition duration-300" size={18} />
@@ -609,7 +609,7 @@ export default function MissionControlMode() {
               {/* Active Projects (1x1) */}
               <GlassPanel
                 onClick={() => setActiveTab("projects")}
-                className="md:col-span-1 md:row-span-1 rounded-2xl p-6 relative overflow-hidden group border-white/5 hover:border-white/20 transition duration-300 shadow-lg cursor-pointer"
+                className="md:col-span-1 md:row-span-1 rounded-2xl p-6 relative overflow-hidden group border-white/[0.04] hover:border-white/20 transition-all duration-300 ease-out cursor-pointer active:scale-[0.98] bg-surface/40 backdrop-blur-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] hover:shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
               >
                 <div className="flex items-center justify-between mb-4">
                   <HardHat className="text-text-secondary group-hover:text-gold-accent transition duration-300" size={18} />
@@ -625,7 +625,7 @@ export default function MissionControlMode() {
               {/* Occupancy (1x1) — live unit data */}
               <GlassPanel
                 onClick={() => setActiveTab("inventory")}
-                className="md:col-span-1 md:row-span-1 rounded-2xl p-6 relative overflow-hidden group border-white/5 hover:border-white/20 transition duration-300 shadow-lg cursor-pointer"
+                className="md:col-span-1 md:row-span-1 rounded-2xl p-6 relative overflow-hidden group border-white/[0.04] hover:border-white/20 transition-all duration-300 ease-out cursor-pointer active:scale-[0.98] bg-surface/40 backdrop-blur-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] hover:shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
               >
                 <div className="flex items-center justify-between mb-4">
                   <Activity className="text-text-secondary group-hover:text-emerald-400 transition duration-300" size={18} />
@@ -648,7 +648,7 @@ export default function MissionControlMode() {
               {/* Connections (1x1) — live deal chatboxes */}
               <GlassPanel
                 onClick={() => setActiveTab("crm")}
-                className="md:col-span-1 md:row-span-1 rounded-2xl p-6 relative overflow-hidden group border-white/5 hover:border-white/20 transition duration-300 shadow-lg cursor-pointer"
+                className="md:col-span-1 md:row-span-1 rounded-2xl p-6 relative overflow-hidden group border-white/[0.04] hover:border-white/20 transition-all duration-300 ease-out cursor-pointer active:scale-[0.98] bg-surface/40 backdrop-blur-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] hover:shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
               >
                 <div className="flex items-center justify-between mb-4">
                   <Users className="text-text-secondary group-hover:text-blue-400 transition duration-300" size={18} />
@@ -708,10 +708,10 @@ export default function MissionControlMode() {
             </div>
 
       {/* Property table */}
-      <GlassPanel className="rounded-xl overflow-hidden shadow-2xl border border-[rgba(255,255,255,0.1)] mt-4">
-        <div className="px-4 py-3 border-b border-surface-variant bg-surface-alt flex justify-between items-center">
+      <GlassPanel className="rounded-2xl overflow-hidden shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] border border-white/[0.04] mt-4 bg-surface/40 backdrop-blur-xl">
+        <div className="px-5 py-4 border-b border-white/[0.04] bg-white/[0.02] flex justify-between items-center">
           <div className="flex items-center gap-4">
-            <span className="font-label-caps text-[10px] tracking-widest uppercase text-text-secondary">
+            <span className="font-label-caps text-[10px] tracking-widest uppercase text-gold-accent">
               Your Properties
             </span>
           </div>
@@ -720,7 +720,7 @@ export default function MissionControlMode() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-[10px] uppercase tracking-wider text-text-secondary border-b border-[rgba(255,255,255,0.1)] bg-[rgba(0,0,0,0.2)]">
+              <tr className="text-left text-[10px] uppercase tracking-wider text-text-secondary border-b border-white/[0.04] bg-surface/60 backdrop-blur-md">
                 <th className="px-4 py-2 font-normal w-10">
                   <input
                     type="checkbox"
@@ -1266,12 +1266,12 @@ export default function MissionControlMode() {
                     <GlassPanel className="rounded-2xl border-white/5 p-6 hover:border-emerald-500/20 transition">
                       <h4 className="text-white font-medium text-sm mb-2">Security</h4>
                       <p className="text-xs text-text-secondary mb-4">Require Two-Factor Authentication for all team members.</p>
-                      <div 
+                      <button type="button"
                         onClick={() => {
                           setIs2FAEnforced(!is2FAEnforced);
                           addToast(`2FA Enforcement ${!is2FAEnforced ? 'Enabled' : 'Disabled'}`, "🛡️");
                         }}
-                        className="flex items-center gap-2 cursor-pointer w-fit"
+                        className="flex items-center gap-2 cursor-pointer w-fit text-left"
                       >
                         <div className={`w-8 h-4 rounded-full relative transition duration-300 ${is2FAEnforced ? 'bg-emerald-500/20' : 'bg-white/10'}`}>
                           <div className={`absolute top-0 bottom-0 w-4 rounded-full shadow-lg transition duration-300 ${is2FAEnforced ? 'right-0 bg-emerald-500 scale-110 shadow-[0_0_10px_rgba(16,185,129,0.5)]' : 'left-0 bg-white/40'}`} />
@@ -1279,7 +1279,7 @@ export default function MissionControlMode() {
                         <span className={`text-xs ${is2FAEnforced ? 'text-emerald-400' : 'text-text-secondary'}`}>
                           {is2FAEnforced ? 'Enforced' : 'Optional'}
                         </span>
-                      </div>
+                      </button>
                     </GlassPanel>
 
                     <GlassPanel className="rounded-2xl border-white/5 p-6 hover:border-white/20 transition cursor-pointer">

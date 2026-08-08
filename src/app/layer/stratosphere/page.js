@@ -5,7 +5,7 @@ import LayerNav from "@/components/descent/LayerNav";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { getArticles } from "@/data/mockArticles";
+import { getArticles } from "@/data/mock/mockArticles";
 
 import BackgroundStratosphere from "@/components/descent/BackgroundStratosphere";
 import LayerHeader from "@/components/descent/LayerHeader";
