@@ -89,21 +89,6 @@ export default function Header() {
             <circle cx="12" cy="12" r="3" />
           </svg>
         </button>
-        <Link
-          href={profileHref}
-          className={`header-profile-btn ${user ? "signed-in" : ""}`}
-          aria-label={user?.name ? `Your profile — ${user.name}` : "Create an account"}
-          title={user?.name ? `Your profile — ${user.name}` : "Create an account"}
-        >
-          {user?.name ? (
-            <span className="profile-initial">{user.name.charAt(0).toUpperCase()}</span>
-          ) : (
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-              <circle cx="12" cy="7" r="4"/>
-            </svg>
-          )}
-        </Link>
         <button
           className="header-menu-btn"
           type="button"
@@ -457,15 +442,6 @@ export default function Header() {
             height: 44px;
           }
 
-          .header-profile-btn {
-            width: 44px;
-            height: 44px;
-          }
-
-          .header-profile-btn .profile-initial {
-            font-size: 15px;
-          }
-
           .header-dropdown {
             min-width: 160px;
             padding: 6px;
@@ -479,35 +455,49 @@ export default function Header() {
 
         @media (max-width: 640px) {
           .global-header {
-            padding: 8px 14px;
+            padding: 6px 10px;
             gap: 8px;
+            min-height: 52px;
           }
 
-          .header-brand {
-            font-size: 22px;
-            letter-spacing: 2px;
+          .header-left {
+            flex: 0 0 auto;
+            gap: 6px;
           }
 
-          .header-back-btn {
-            font-size: 10px;
-            padding: 0 10px;
-            min-height: 36px;
-            white-space: nowrap;
-          }
-
-          .header-menu-btn {
-            width: 36px;
-            height: 36px;
-          }
-
-          .header-profile-btn {
-            width: 36px;
-            height: 36px;
+          .header-center {
+            flex: 1 1 0%;
+            max-width: none;
+            min-width: 0;
           }
 
           .header-nav {
-            gap: 8px;
+            flex: 0 0 auto;
+            gap: 4px;
           }
+
+          .header-brand {
+            font-size: 19px;
+            letter-spacing: 1.5px;
+          }
+
+          .header-back-btn {
+            font-size: 9px;
+            padding: 0 8px;
+            min-height: 30px;
+            white-space: nowrap;
+            border-radius: 14px;
+          }
+
+          .header-eye-btn {
+            display: none;
+          }
+
+          .header-menu-btn {
+            width: 30px;
+            height: 30px;
+          }
+          .header-menu-btn svg { width: 13px; height: 13px; }
 
           .header-dropdown {
             position: fixed;
@@ -516,14 +506,14 @@ export default function Header() {
             right: 0;
             left: 0;
             min-width: 100%;
-            border-radius: 12px 12px 0 0;
+            border-radius: 14px 14px 0 0;
             border-left: none;
             border-right: none;
             border-bottom: none;
             max-height: 60vh;
             overflow-y: auto;
             padding: 12px;
-            box-shadow: 0 -4px 20px rgba(0,0,0,0.6);
+            box-shadow: 0 -6px 24px rgba(0,0,0,0.65);
           }
 
           .header-dropdown.open {
@@ -548,55 +538,15 @@ export default function Header() {
             padding: 8px 12px 4px;
             margin-bottom: 8px;
           }
-          .header-left { gap: 8px; }
-          .header-center { flex: 1.25; }
-          .header-eye-btn { width: 36px; height: 36px; }
-
         }
 
         @media (max-width: 480px) {
-          .header-back-btn {
-            font-size: 10px;
-            padding: 0 8px;
-            min-height: 36px;
-          }
-
-          .header-brand {
-            font-size: 20px;
-            margin: 0 4px;
-          }
-
-          .header-menu-btn {
-            width: 36px;
-            height: 36px;
-          }
-
-          .header-menu-btn svg {
-            width: 14px;
-            height: 14px;
-          }
-
-          .header-profile-btn {
-            width: 36px;
-            height: 36px;
-          }
-
-          .header-profile-btn svg {
-            width: 15px;
-            height: 15px;
-          }
-
-          .header-profile-btn .profile-initial {
-            font-size: 14px;
-          }
-          .global-header { padding: 8px; gap: 4px; }
-          .header-left { gap: 5px; }
-          .header-center { min-width: 64px; }
-          .header-nav { gap: 4px; }
-          .header-back-btn { font-size: 8px; padding: 0 5px; min-height: 32px; }
-          .header-brand { font-size: 17px; margin: 0; letter-spacing: 1px; }
-          .header-eye-btn, .header-menu-btn, .header-profile-btn { width: 32px; height: 32px; }
-
+          .global-header { padding: 6px 8px; gap: 5px; min-height: 48px; }
+          .header-left { gap: 4px; }
+          .header-back-btn { font-size: 8px; padding: 0 6px; min-height: 28px; letter-spacing: 0.06em; border-radius: 12px; }
+          .header-brand { font-size: 16px; margin: 0; letter-spacing: 1px; }
+          .header-menu-btn { width: 28px; height: 28px; }
+          .header-menu-btn svg { width: 12px; height: 12px; }
         }
 
         /* Animation for mobile dropdown */

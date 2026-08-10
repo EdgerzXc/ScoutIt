@@ -129,18 +129,19 @@ export default function AmbientRail({ user }) {
       <style jsx>{`
         .ambient-rail {
           position: relative;
-          width: min(100%, 392px);
+          width: 100%;
+          max-width: 392px;
           min-width: 0;
           min-height: 44px;
-          padding: 3px 12px 4px;
+          padding: 4px 10px 5px;
           display: flex;
           flex-direction: column;
           justify-content: center;
           align-items: center;
           border-radius: 999px;
-          border: 1px solid rgba(var(--accent-rgb), .13);
-          background: linear-gradient(180deg, rgba(255,255,255,.035), transparent 52%), rgba(4,4,4,.34);
-          box-shadow: inset 0 1px 0 rgba(255,255,255,.045), inset 0 -1px 0 rgba(var(--accent-rgb), .035), 0 8px 32px rgba(0,0,0,.16);
+          border: 1px solid rgba(var(--accent-rgb), .16);
+          background: linear-gradient(180deg, rgba(255,255,255,.04), transparent 52%), rgba(6,6,6,.45);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,.05), inset 0 -1px 0 rgba(var(--accent-rgb), .04), 0 8px 32px rgba(0,0,0,.22);
           user-select: none;
           isolation: isolate;
         }
@@ -150,23 +151,32 @@ export default function AmbientRail({ user }) {
           inset: 2px;
           z-index: -1;
           border-radius: inherit;
-          border: 1px solid rgba(var(--accent-rgb), .045);
+          border: 1px solid rgba(var(--accent-rgb), .05);
           pointer-events: none;
         }
         .ambient-content {
           width: 100%;
-          height: 25px;
           display: grid;
-          grid-template-columns: 36px minmax(0, 1fr) 36px;
+          grid-template-columns: 24px minmax(0, 1fr) 24px;
           align-items: center;
+          justify-items: center;
         }
-        .ambient-viewport { position: relative; min-width: 0; overflow: hidden; text-align: center; }
+        .ambient-viewport {
+          position: relative;
+          width: 100%;
+          min-width: 0;
+          overflow: hidden;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 2px 0;
+        }
         .ambient-viewport::before,
         .ambient-viewport::after {
           content: "";
           position: absolute;
           top: 50%;
-          width: 18px;
+          width: 10px;
           height: 1px;
           opacity: .34;
           pointer-events: none;
@@ -174,84 +184,96 @@ export default function AmbientRail({ user }) {
         .ambient-viewport::before { left: 0; background: linear-gradient(90deg, rgba(var(--accent-rgb), .58), transparent); }
         .ambient-viewport::after { right: 0; background: linear-gradient(270deg, rgba(var(--accent-rgb), .58), transparent); }
         .ambient-copy {
-          display: block;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          max-width: 100%;
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
-          padding: 0 22px;
+          padding: 0 4px;
           font-family: var(--font-mono);
-          font-size: 9.5px;
-          font-weight: 600;
-          letter-spacing: .16em;
-          color: var(--text-secondary);
-          text-shadow: 0 0 18px rgba(var(--accent-rgb), .08);
-          animation: ambientReveal 420ms cubic-bezier(.23,1,.32,1) both;
-          transition: opacity ${FADE_MS}ms cubic-bezier(.23,1,.32,1), transform ${FADE_MS}ms cubic-bezier(.23,1,.32,1), color 180ms cubic-bezier(.23,1,.32,1);
+          font-size: 12px;
+          font-weight: 700;
+          letter-spacing: .12em;
+          line-height: 1.3;
+          color: var(--accent);
+          text-shadow: 0 0 12px rgba(var(--accent-rgb), .32), 0 0 24px rgba(var(--accent-rgb), .1);
+          animation: ambientReveal 380ms cubic-bezier(.22,1,.36,1) both;
+          transition: opacity ${FADE_MS}ms cubic-bezier(.22,1,.36,1), transform ${FADE_MS}ms cubic-bezier(.22,1,.36,1), color 180ms cubic-bezier(.22,1,.36,1);
         }
         .ambient-copy.is-leaving { opacity: 0; transform: translate3d(0,-3px,0); }
         .ambient-copy-mobile { display: none; }
         .ambient-nav {
-          width: 36px;
-          height: 36px;
+          width: 24px;
+          height: 24px;
           padding: 0;
-          display: grid;
-          place-items: center;
+          display: flex;
+          align-items: center;
+          justify-content: center;
           border: 0;
           border-radius: 50%;
           background: transparent;
           color: var(--accent);
           cursor: pointer;
-          opacity: 0;
-          pointer-events: none;
+          opacity: 0.65;
           transition: opacity 180ms cubic-bezier(.23,1,.32,1), color 160ms cubic-bezier(.23,1,.32,1), background 160ms cubic-bezier(.23,1,.32,1), transform 140ms cubic-bezier(.23,1,.32,1);
         }
-        .ambient-nav svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.15; stroke-linecap: round; stroke-linejoin: round; }
+        .ambient-nav svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
         .ambient-rail:hover .ambient-nav,
         .ambient-rail:focus-within .ambient-nav,
-        .ambient-nav:focus-visible { opacity: .72; pointer-events: auto; }
+        .ambient-nav:focus-visible { opacity: .85; }
         .ambient-nav:hover,
-        .ambient-nav:focus-visible { color: var(--accent-bright); background: rgba(var(--accent-rgb),.075); opacity: 1; }
-        .ambient-nav:active { transform: scale(.94); }
-        .ambient-nav:focus-visible { outline: 1px solid var(--accent-bright); outline-offset: -4px; }
+        .ambient-nav:focus-visible { color: var(--accent-bright); background: rgba(var(--accent-rgb),.1); opacity: 1; }
+        .ambient-nav:active { transform: scale(.92); }
+        .ambient-nav:focus-visible { outline: 1px solid var(--accent-bright); outline-offset: 1px; }
         .ambient-nav:disabled { cursor: default; opacity: 0 !important; }
-        .ambient-track { --ambient-travel: 132px; position: relative; width: 164px; height: 7px; overflow: hidden; }
+        .ambient-track {
+          --ambient-travel: 132px;
+          position: relative;
+          width: 164px;
+          height: 3px;
+          margin-top: 3px;
+          overflow: hidden;
+        }
         .ambient-track::before {
           content: "";
           position: absolute;
-          top: 3px;
+          top: 1px;
           left: 0;
           width: 100%;
           height: 1px;
-          background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb),.18) 16%, rgba(var(--accent-rgb),.34) 50%, rgba(var(--accent-rgb),.18) 84%, transparent);
+          background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb),.22) 16%, rgba(var(--accent-rgb),.44) 50%, rgba(var(--accent-rgb),.22) 84%, transparent);
         }
         .ambient-thread {
           position: absolute;
-          top: 3px;
+          top: 0;
           left: 0;
-          width: 44px;
-          height: 1px;
-          background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb),.86), transparent);
-          filter: drop-shadow(0 0 3px rgba(var(--accent-rgb),.42));
-          animation: ambientThread 6.8s cubic-bezier(.45,0,.55,1) infinite;
+          width: 56px;
+          height: 2px;
+          border-radius: 999px;
+          background: linear-gradient(90deg, transparent, var(--accent-bright), transparent);
+          filter: drop-shadow(0 0 6px rgba(var(--accent-rgb),.72)) drop-shadow(0 0 12px rgba(var(--accent-rgb),.28));
+          animation: ambientThread 6.4s cubic-bezier(.45,0,.55,1) infinite;
         }
         .ambient-segment {
           position: absolute;
-          top: 2px;
+          top: 0;
           left: 0;
-          width: 32px;
+          width: 36px;
           height: 2px;
           border-radius: 999px;
-          background: linear-gradient(90deg, rgba(var(--accent-rgb),.18), var(--accent-bright), rgba(var(--accent-rgb),.18));
-          box-shadow: 0 0 8px rgba(var(--accent-rgb),.34);
+          background: linear-gradient(90deg, rgba(var(--accent-rgb),.22), var(--accent-bright), rgba(var(--accent-rgb),.22));
+          box-shadow: 0 0 10px rgba(var(--accent-rgb),.52), 0 0 20px rgba(var(--accent-rgb),.18);
           transform: translate3d(calc(var(--ambient-progress) * var(--ambient-travel)),0,0);
           transition: transform 520ms cubic-bezier(.32,.72,0,1);
         }
         .ambient-rail:hover .ambient-copy,
-        .ambient-rail:focus-within .ambient-copy { color: var(--text-primary); }
+        .ambient-rail:focus-within .ambient-copy { color: var(--accent-bright); text-shadow: 0 0 14px rgba(var(--accent-rgb), .48); }
         .ambient-rail.is-paused .ambient-thread { animation-play-state: paused; }
         .ambient-sr-status { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
         @keyframes ambientReveal {
-          from { opacity: 0; transform: translate3d(0,4px,0); }
+          from { opacity: 0; transform: translate3d(0,3px,0); }
           to { opacity: 1; transform: translate3d(0,0,0); }
         }
         @keyframes ambientThread {
@@ -261,21 +283,46 @@ export default function AmbientRail({ user }) {
           100% { transform: translate3d(176px,0,0); opacity: 0; }
         }
         @media (max-width: 768px) {
-          .ambient-rail { padding-inline: 7px; }
-          .ambient-content { grid-template-columns: 32px minmax(0,1fr) 32px; }
-          .ambient-copy { padding-inline: 14px; font-size: 8.5px; letter-spacing: .11em; }
+          .ambient-rail {
+            min-height: 40px;
+            padding: 3px 8px 4px;
+          }
+          .ambient-content {
+            grid-template-columns: 20px minmax(0,1fr) 20px;
+          }
+          .ambient-nav {
+            width: 20px;
+            height: 20px;
+          }
+          .ambient-nav svg { width: 10px; height: 10px; }
+          .ambient-copy {
+            font-size: 11.5px;
+            letter-spacing: .1em;
+          }
           .ambient-track { --ambient-travel: 76px; width: 100px; }
-          .ambient-segment { width: 24px; }
+          .ambient-segment { width: 28px; }
         }
         @media (max-width: 560px) {
-          .ambient-rail { min-height: 38px; padding-inline: 3px; }
+          .ambient-rail {
+            min-height: 38px;
+            padding: 3px 6px 4px;
+          }
           .ambient-copy-desktop { display: none; }
           .ambient-copy-mobile { display: inline; }
-          .ambient-content { grid-template-columns: 28px minmax(0,1fr) 28px; }
-          .ambient-nav { width: 28px; height: 34px; }
-          .ambient-copy { padding-inline: 8px; }
+          .ambient-content {
+            grid-template-columns: 18px minmax(0,1fr) 18px;
+          }
+          .ambient-nav {
+            width: 18px;
+            height: 18px;
+          }
+          .ambient-nav svg { width: 9px; height: 9px; }
+          .ambient-copy {
+            font-size: 11px;
+            letter-spacing: .08em;
+          }
           .ambient-track { --ambient-travel: 52px; width: 72px; }
-          .ambient-segment { width: 20px; }
+          .ambient-segment { width: 22px; }
         }
         @media (hover: none), (pointer: coarse) { .ambient-nav { opacity: .56; pointer-events: auto; } }
         @media (prefers-reduced-motion: reduce) {
