@@ -304,27 +304,63 @@ export default function AmbientRail({ user }) {
         }
         @media (max-width: 560px) {
           .ambient-rail {
-            min-height: 38px;
-            padding: 3px 6px 4px;
+            min-height: 36px;
+            box-sizing: border-box;
+            padding: 0 4px 2px;
           }
           .ambient-copy-desktop { display: none; }
           .ambient-copy-mobile { display: inline; }
           .ambient-content {
-            grid-template-columns: 18px minmax(0,1fr) 18px;
+            grid-template-columns: 32px minmax(0,1fr) 32px;
           }
           .ambient-nav {
-            width: 18px;
-            height: 18px;
+            position: relative;
+            width: 32px;
+            height: 32px;
+            min-width: 32px;
+            min-height: 32px;
+            padding: 0;
           }
           .ambient-nav svg { width: 9px; height: 9px; }
           .ambient-copy {
             font-size: 11px;
             letter-spacing: .08em;
           }
-          .ambient-track { --ambient-travel: 52px; width: 72px; }
-          .ambient-segment { width: 22px; }
+          .ambient-track { --ambient-travel: 46px; position: absolute; bottom: 2px; width: 64px; height: 2px; margin-top: 0; }
+          .ambient-segment { width: 18px; }
         }
-        @media (hover: none), (pointer: coarse) { .ambient-nav { opacity: .56; pointer-events: auto; } }
+        @media (hover: none), (pointer: coarse) {
+          .ambient-nav {
+            position: relative;
+            width: 32px;
+            height: 32px;
+            min-width: 32px;
+            min-height: 32px;
+            padding: 0;
+            opacity: .62;
+            pointer-events: auto;
+            -webkit-tap-highlight-color: transparent;
+          }
+          .ambient-nav::before {
+            content: "";
+            position: absolute;
+            inset: -6px;
+            border-radius: 50%;
+          }
+          .ambient-nav::after {
+            content: "";
+            position: absolute;
+            inset: 7px;
+            border-radius: 50%;
+            transition: background 140ms cubic-bezier(.23,1,.32,1);
+          }
+          .ambient-nav svg { position: relative; z-index: 1; }
+          .ambient-nav:hover,
+          .ambient-nav:focus-visible { background: transparent; }
+          .ambient-nav:hover::after,
+          .ambient-nav:focus-visible::after { background: rgba(var(--accent-rgb),.055); }
+          .ambient-nav:active::after { background: rgba(var(--accent-rgb),.08); }
+        }
         @media (prefers-reduced-motion: reduce) {
           .ambient-copy { animation: none; transition: none; transform: none !important; }
           .ambient-thread { display: none; }

@@ -469,6 +469,7 @@ export default function Header() {
             flex: 1 1 0%;
             max-width: none;
             min-width: 0;
+            min-height: 0;
           }
 
           .header-nav {
@@ -541,7 +542,7 @@ export default function Header() {
         }
 
         @media (max-width: 480px) {
-          .global-header { padding: 6px 8px; gap: 5px; min-height: 48px; }
+          .global-header { padding: 4px 8px; gap: 5px; min-height: 44px; }
           .header-left { gap: 4px; }
           .header-back-btn { font-size: 8px; padding: 0 6px; min-height: 28px; letter-spacing: 0.06em; border-radius: 12px; }
           .header-brand { font-size: 16px; margin: 0; letter-spacing: 1px; }
