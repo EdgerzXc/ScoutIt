@@ -77,10 +77,38 @@ export async function POST(request) {
     }
 
     if (action === "decline") {
+      // ── Ownership is verified before any write (§1.0B) ──
+      // This route runs under the service role, which bypasses RLS. Without
+      // an explicit party check, `dealId` alone was enough for any signed-in
+      // user to decline every handshake on the platform. Read the deal first
+      // and confirm the caller is actually a party to it.
+      const { data: deal, error: dealError } = await supabaseAdmin
+        .from("deals")
+        .select("id, buyer_id, broker_id")
+        .eq("id", dealId)
+        .maybeSingle();
+
+      if (dealError) {
+        return NextResponse.json(
+          { error: sanitizeError(dealError, "Could not decline handshake.") },
+          { status: 500 }
+        );
+      }
+
+      // Same response for "no such deal" and "not your deal" so the endpoint
+      // cannot be used to enumerate deal IDs.
+      if (!deal || (deal.buyer_id !== userId && deal.broker_id !== userId)) {
+        return NextResponse.json(
+          { error: "You are not a party to this deal." },
+          { status: 403 }
+        );
+      }
+
       const { error } = await supabaseAdmin
         .from("deal_handshakes")
         .update({ status: "declined", updated_at: new Date().toISOString() })
-        .eq("deal_id", dealId);
+        .eq("deal_id", dealId)
+        .eq("status", "pending");
 
       if (error) {
         return NextResponse.json(

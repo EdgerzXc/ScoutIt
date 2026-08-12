@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { extractText, getDocumentProxy } from "unpdf";
 import Papa from "papaparse";
 import { createClient } from "@supabase/supabase-js";
+import { requireAdmin } from "@/lib/adminGuard";
 import { GoogleGenAI, Type } from "@google/genai";
 import { GEMINI_MODEL } from "@/lib/geminiModel";
 import {
@@ -20,7 +21,6 @@ import {
 //   file       — .pdf | .csv | .txt | .md   (or omit and send `text`)
 //   text       — pasted raw text (alternative to file)
 //   publish    — "true" checks Approved_For_Live_Site immediately
-//   mockOwnerId— dev-sandbox bypass (non-production only)
 //
 // Pipeline: extract text/rows → structure into the universal block
 // schema (Gemini when GEMINI_API_KEY is set, deterministic parser
@@ -55,10 +55,7 @@ Block types allowed:
   {"type":"divider"}
 `;
 
-async function authenticate(request, formData) {
-  const mockOwnerId = formData.get("mockOwnerId");
-  const isDevMock = process.env.NODE_ENV !== "production" && mockOwnerId === "master-dev";
-  if (isDevMock) return { ok: true };
+async function authenticate(request) {
 
   const token = request.headers.get("Authorization")?.replace("Bearer ", "");
   if (!token) return { ok: false, error: "Unauthorized: Missing token" };
@@ -255,7 +252,7 @@ export async function POST(request) {
   try {
     const formData = await request.formData();
 
-    const auth = await authenticate(request, formData);
+    const auth = await authenticate(request);
     if (!auth.ok) {
       return NextResponse.json({ error: auth.error }, { status: 401 });
     }
@@ -285,7 +282,24 @@ export async function POST(request) {
       return NextResponse.json({ success: true, engine, article });
     }
 
-    const publish = formData.get("publish") === "true";
+    // ── Publishing is a staff act (§1.0B) ──
+    // `Approved_For_Live_Site` puts an article on the public /intel surface.
+    // Any authenticated account could previously set it, bypassing Mission
+    // Control review entirely. Ingest stays open to authenticated users;
+    // publishing requires a verified staff/admin role, checked server-side.
+    const requestedPublish = formData.get("publish") === "true";
+    let publish = false;
+    if (requestedPublish) {
+      const staff = await requireAdmin(request, { label: "INTEL INGEST" });
+      if (staff.error) {
+        return NextResponse.json(
+          { error: "Publishing to the live Intel surface requires ScoutIt staff privileges." },
+          { status: staff.status === 401 ? 401 : 403 }
+        );
+      }
+      publish = true;
+    }
+
     const saved = await createIntelRecord(article, publish);
     if (saved.error) {
       return NextResponse.json({ error: saved.error, article }, { status: 502 });

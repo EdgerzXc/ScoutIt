@@ -364,6 +364,110 @@ scan alone—as the closure authority.
       ruleset, branch coverage, workflow policy, signed-commit decision, alert counts,
       secret resolution, environment map, open-PR count, and latest required checks
 
+## 1.0B Critical Logic & Security Flaws (2026-08-12 Audit)
+
+The following immediate security and logic flaws were identified during the 2026-08-12 audit. They present critical risks of data sabotage, unmoderated publishing, and service degradation. They must be addressed prior to enabling human testing.
+
+**Status 2026-08-12: all ten findings remediated AND the database half is APPLIED
+to production** (`yyixsuaimdzyiocswcgc`), verified live. Application-layer fixes
+(decline authorization, intel publish RBAC, telemetry metering, geocode cache cap)
+are in code and ship with the next deploy.
+
+**Four further bugs were found while fixing these ten**, none of which were in the
+audit:
+
+1. The handshake credited `user_profiles.scout_rating` — **a column that does not
+   exist**. It would have raised the first time any handshake completed. The real
+   column is `broker_profiles.scout_rating`, `numeric(3,2)`, a 0–5 rating that
+   overflows at 10.00, so incrementing it per closed deal was never right either.
+2. `properties` UPDATE had **no `WITH CHECK`**, so an owner could reassign
+   `owner_id` and hand away or take over a listing.
+3. The moderation trigger was first written `SECURITY DEFINER`, under which
+   `current_user` is the function owner — the privilege check would have passed for
+   everyone and the guard would have been decorative.
+4. **The repo's migration files do not describe the live database.** Several were
+   never applied. Written against the files, this migration would have failed — or,
+   for the property SELECT policy, silently added a permissive policy beside the one
+   it meant to replace and reported success. See
+   [[../../15_IMPLEMENTATION_RECORDS/active/launch-readiness/MIGRATION_DRIFT_2026-08-12]].
+   **Do not bulk-apply the unapplied migrations to catch up** — `20260809000001`
+   would regress the telemetry fix. Owner decisions: [[MASTER_OWNER_ACTIONS]] §1.12.
+
+Remaining owner steps: [[MASTER_OWNER_ACTIONS]] §1.10 (post-apply re-tests and the
+Scout Rating formula decision), §1.11 (telemetry rate posture), §1.12 (migration
+drift), §1.13 (pre-existing Supabase advisor findings).
+
+Full implementation record, including live before/after measurements and what was
+deliberately not verified:
+[[../../15_IMPLEMENTATION_RECORDS/active/launch-readiness/CRITICAL_LOGIC_SECURITY_1_0B_2026-08-12]].
+
+Canonical remediation artefacts:
+
+- `supabase/migrations/20260812000001_critical_logic_and_security_fixes.sql`
+- `src/app/api/deals/handshake/route.js`, `src/app/api/intel/ingest/route.js`,
+  `src/app/api/telemetry/device/route.js`
+- `src/lib/boundedCache.js`, `src/lib/rateLimit.js`, `src/lib/cmsCache.js`
+- `src/lib/__tests__/criticalSecurityFixes1_0B.test.js` (11/11),
+  `src/lib/__tests__/deviceTelemetryApi.test.js` (16/16)
+
+- [x] **Fixed Transaction Handshake Forgery:** `complete_transaction_handshake` no
+      longer writes `party_a_signed_at = now()` on the creating `INSERT`; both
+      signature columns start `NULL` and only the owning party can fill one. A caller
+      who is not a party is rejected (`42501`) instead of silently succeeding, and the
+      Scout Rating increment is guarded by `rating_incremented` so it can fire at most
+      once per handshake. **Requires the migration to be applied.**
+- [x] **Fixed Global Deal Handshake Sabotage (IDOR):** the `decline` action now reads
+      the deal first and returns 403 unless the caller is its buyer or broker; a
+      non-existent deal returns the identical 403 so the endpoint cannot enumerate
+      deal IDs. The update is additionally scoped to `status = 'pending'`. A matching
+      `decline_deal_handshake` RPC gives the database the same guarantee for any
+      future caller. Adversarial tests assert no write is attempted on denial.
+- [x] **Fixed Storage Exhaustion via Telemetry:** three layers, none sufficient alone.
+      (1) The existing Upstash limiter in `src/proxy.js` — which fails **open** for
+      this route, which is why it was not enough. (2) A new per-instance limiter
+      (120/min, metered on the platform client IP, *not* the User-Agent-derived
+      identity a caller can churn) that returns 429 with `Retry-After` **before** any
+      parse or database call. (3) The structural fix: `FRICTION:` and `SEARCH:` rows
+      were excluded from the pageview uniqueness invariant, which is what made growth
+      unbounded. They are now upserted through `record_security_event` on a total
+      `(masked_ip, route_accessed)` unique index, so a flood increments counters over
+      a bounded key space instead of adding rows. The pre-migration insert path is
+      retained as a fallback. **Full closure requires the migration.**
+- [x] **Added Unique Constraint to `saved_intel`:** existing duplicates are collapsed
+      (earliest row wins) and `uq_saved_intel_user_property` is created. The
+      read-then-insert idempotence in `/api/wishlist/merge` is a race, not a
+      constraint; the invariant now lives in the schema. **Requires the migration.**
+- [x] **Prevented Property Self-Approval:** RLS cannot express per-column `WITH CHECK`,
+      so `enforce_property_moderation_authority()` freezes `pipeline_status` and
+      `lifecycle_state` against any non-service-role session, and forces a
+      client-created property back to `pending`/`draft` if it arrives pre-approved.
+      Only the Mission Control server may move a property through review.
+      **Requires the migration** — and owner re-test of the publish path (§1.10).
+- [x] **Fixed Unrestricted Intel Ingestion:** ingest stays open to authenticated users,
+      but `publish=true` now runs through `requireAdmin` from `src/lib/adminGuard.js`
+      (the one admin gate, checking both `role` and `active_roles`). A non-staff caller
+      gets 403 and the article is never written with `Approved_For_Live_Site`.
+- [x] **Patched Deal Hijacking:** the `deals` UPDATE policy gained a `WITH CHECK`, and
+      because `WITH CHECK` cannot see the pre-update row, a companion trigger
+      (`enforce_deal_party_immutability`) makes `buyer_id`, `broker_id`, and
+      `property_id` immutable and blocks a party from closing a deal unilaterally.
+      **Requires the migration.**
+- [x] **Capped the `geocodeCache`:** replaced with `BoundedCache` (LRU, 2,000 entries)
+      from the new dependency-free `src/lib/boundedCache.js`. `location` is free text,
+      so the old `Map` grew per novel string *and* burned one Mapbox call per novel
+      key — a rate-limit exhaustion path, not merely a memory leak. Tests cover the
+      hard cap under 5,000 novel keys, true LRU eviction, and the `null`-value case
+      (cached "Mapbox knows nothing"), which a naive cap would have turned back into
+      a per-request Mapbox call.
+- [x] **Reconciled RLS Read Policies:** the public properties SELECT policy now uses
+      `lifecycle_state = 'live'`. **Requires the migration**; owner should spot-check
+      that no genuinely live listing depended on the old `pipeline_status` condition.
+- [x] **Enforced `property_id` Type:** `property_claims.property_id` converts TEXT →
+      `UUID REFERENCES public.properties(id) ON DELETE CASCADE`, with the partial
+      unique index dropped and recreated around the conversion. Guarded: the migration
+      raises rather than converting if any existing value is not a resolvable
+      property. **Requires the migration.**
+
 ## 1.1 Close the professional-directory browser contract
 
 The repository already server-loads `/brokers`, `/photographers`, `/researchers`,
@@ -1195,6 +1299,27 @@ remove the decision row. Do not duplicate it in another checklist.
 | Enterprise/white-glove operations | Paid demand and staffed SLA exist |
 | QuestIT protocol | 1,000+ honest listings and stable engagement |
 | Native mobile app | Stable web usage proves a need the web cannot meet |
+| Supabase leaked-password protection (HaveIBeenPwned) | Supabase Pro is activated for an independent reason. **Pro-plan-only feature; the ScoutIT org is on Free.** Do not buy Pro for this alone — see below |
+
+## Supabase leaked-password protection — deferred with reason (2026-08-12)
+
+The Supabase security advisor reports "Leaked Password Protection Disabled" as a
+WARN. **This is a known, accepted state, not an open task.** The feature is
+Pro-plan-and-above only, and the ScoutIT organization (`szoadayarauelryyfcdm`)
+is on the Free plan. Buying Pro solely for it would violate the standing rule
+against premature commercial spend.
+
+What is already in place instead, at no cost: a **12-character minimum password
+length** and strong required-character rules on the email provider — well above
+Supabase's own "under 8 is not recommended" guidance, and a materially better
+defence than the default 6-character floor.
+
+When Supabase Pro is activated for an independent reason (capacity, backups,
+support), enable leaked-password protection at the same time and close this
+advisor finding. Until then, expect the warning to keep appearing in every
+advisor run and do not treat it as a regression.
+
+---
 
 Only after all three R2 gates are met - North Star, paying subscribers, and a
 qualifying super-large spatial asset - the activation work must include:
