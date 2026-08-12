@@ -2,8 +2,9 @@ import { redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentStaff, TIERS } from "@/lib/rbac";
 import { blockHash, unblockHash } from "./actions";
-import { ShieldAlert, ShieldBan, ShieldCheck, Activity, Radar } from "lucide-react";
+import { ShieldAlert, ShieldBan, ShieldCheck, Activity, Radar, DatabaseZap } from "lucide-react";
 import SecuritySpatialMap from "@/components/security/SecuritySpatialMap";
+import { getDatabaseSecurityReadiness } from "@/lib/databaseSecurityReadiness";
 
 // A7 Phase 1 — Security Center (Ops Manager+). A HUD over the masked-IP
 // anomaly log (security_access_logs, populated by the Phase-2 middleware
@@ -31,6 +32,11 @@ async function fetchLogsResilient(admin, queryGeoFn, queryBaseFn) {
 export default async function SecurityCenterPage() {
   const staff = await getCurrentStaff();
   if (!staff || staff.tier < TIERS.OPS_MANAGER) redirect("/dashboard");
+
+  let databaseReadiness = null;
+  let databaseReadinessError = null;
+  try { databaseReadiness = await getDatabaseSecurityReadiness(); }
+  catch (error) { databaseReadinessError = error.message || "Database security evidence failed."; }
 
   const admin = createAdminClient();
   const since30d = new Date(new Date().getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
@@ -79,6 +85,25 @@ export default async function SecurityCenterPage() {
           {flagged.data.length} flagged · {blocked.data.length} blocked
         </span>
       </div>
+
+      <section className="rounded-xl border border-white/5 bg-[#121212] p-6" aria-labelledby="database-readiness-title">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div><h2 id="database-readiness-title" className="flex items-center gap-2 text-lg font-medium"><DatabaseZap className="h-4 w-4 text-gold" />Database policy evidence</h2>
+            <p className="mt-2 max-w-3xl text-xs leading-5 text-white/45">Fixed read-only evidence from pg_policies, RLS flags, storage.objects, and migration history. This surface cannot execute SQL.</p></div>
+          <span className={`rounded-full border px-2.5 py-1 text-xs ${databaseReadiness?.evidence?.ready ? "border-ok/25 bg-ok/10 text-ok" : "border-warn/25 bg-warn/10 text-warn"}`}>{databaseReadiness?.evidence?.ready ? "Verified" : "Evidence required"}</span>
+        </div>
+        {databaseReadinessError && <p role="alert" className="mt-4 rounded-lg border border-danger/25 bg-danger/10 p-3 text-xs text-danger">{databaseReadinessError}</p>}
+        {!databaseReadinessError && !databaseReadiness?.configuration?.ready && <p className="mt-4 rounded-lg border border-warn/25 bg-warn/10 p-3 text-xs text-white/65">Add the server-only {databaseReadiness?.configuration?.missing.join(", ")} to Mission Control. Service-role credentials cannot inspect system catalogs, so the two master-plan policy checks remain unverified.</p>}
+        {databaseReadiness?.evidence && <>
+          <dl className="mt-5 grid gap-3 sm:grid-cols-4">
+            <div className="rounded-lg border border-line bg-black/25 p-3"><dt className="label-mono text-white/40">RLS gaps</dt><dd className="mt-2 text-xl">{databaseReadiness.evidence.missingRls.length}</dd></div>
+            <div className="rounded-lg border border-line bg-black/25 p-3"><dt className="label-mono text-white/40">Unsafe policies</dt><dd className="mt-2 text-xl">{databaseReadiness.evidence.unsafePolicies.length}</dd></div>
+            <div className="rounded-lg border border-line bg-black/25 p-3"><dt className="label-mono text-white/40">Anonymous photo uploads</dt><dd className="mt-2 text-xl">{databaseReadiness.evidence.anonymousPropertyPhotoUploads.length}</dd></div>
+            <div className="rounded-lg border border-line bg-black/25 p-3"><dt className="label-mono text-white/40">Replacement migrations</dt><dd className="mt-2 text-xl">{databaseReadiness.evidence.replacementApplied ? "Present" : "Missing"}</dd></div>
+          </dl>
+          {!databaseReadiness.evidence.ready && <p role="alert" className="mt-4 text-xs text-warn">Policy evidence is not green. Review the named policies and use an approved, checksum-locked Mission Control migration before human testing.</p>}
+        </>}
+      </section>
 
       {(flagged.error || velocity.error) && (
         <div className="text-xs text-white/50 bg-white/5 border border-white/10 rounded-xl p-4">

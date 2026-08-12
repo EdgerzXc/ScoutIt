@@ -21,6 +21,7 @@
 // _SCOUTIT_BRAIN/04_DATA_AND_SCHEMA/AIRTABLE_COMPRESSION_PLAN.md.
 
 import { reverseMapCategoryFields } from "./propertyFieldMapping";
+import { escapeAirtableFormulaString } from "./airtableFormula.mjs";
 
 const BASE_URL = "https://api.airtable.com/v0";
 const TABLE = "PROPERTIES_CMS";
@@ -83,8 +84,7 @@ function listingFields(property) {
 }
 
 async function findRecordIdBySlug(apiKey, baseId, slug) {
-  // Escape single quotes for filterByFormula string literal.
-  const safe = String(slug).replace(/'/g, "\\'");
+  const safe = escapeAirtableFormulaString(slug);
   const params = `filterByFormula=${encodeURIComponent(`{Slug}='${safe}'`)}&maxRecords=1`;
   const res = await fetch(`${BASE_URL}/${baseId}/${TABLE}?${params}`, {
     headers: { Authorization: `Bearer ${apiKey}` },

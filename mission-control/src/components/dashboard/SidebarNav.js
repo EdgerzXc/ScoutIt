@@ -2,39 +2,40 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Fragment } from "react";
 
-// Client-side sidebar navigation: the active highlight updates the INSTANT a
-// link is clicked (usePathname), independent of how long the target page's
-// server queries take — paired with dashboard/loading.js this makes
-// navigation feel immediate.
-//
-// `items` come pre-resolved (tier-filtered) from the server layout as
-// [{ name, href, icon }] where `icon` is a PRE-RENDERED element — never a
-// component/function reference, which cannot cross the RSC boundary.
+// Items are tier-filtered by the server layout before crossing the RSC boundary.
 export default function SidebarNav({ items }) {
   const pathname = usePathname();
 
   return (
-    <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
-      {items.map((item) => {
-        const isActive =
-          item.href === "/dashboard"
-            ? pathname === "/dashboard"
-            : pathname.startsWith(item.href);
+    <nav aria-label="Mission Control" className="flex-1 px-4 pb-4 overflow-y-auto">
+      {items.map((item, index) => {
+        const isActive = item.href === "/dashboard"
+          ? pathname === "/dashboard"
+          : pathname.startsWith(item.href);
+        const startsGroup = index === 0 || items[index - 1].group !== item.group;
+
         return (
-          <Link
-            key={item.name}
-            href={item.href}
-            aria-current={isActive ? "page" : undefined}
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
-              isActive
-                ? "bg-[rgba(232,174,60,0.10)] text-[#F7C64E] border border-[rgba(232,174,60,0.25)]"
-                : "text-white/70 hover:text-white hover:bg-white/5 border border-transparent"
-            }`}
-          >
-            {item.icon}
-            {item.name}
-          </Link>
+          <Fragment key={item.name}>
+            {startsGroup && (
+              <div className="label-mono px-3 pb-2 pt-5 text-white/30 first:pt-1">
+                {item.group}
+              </div>
+            )}
+            <Link
+              href={item.href}
+              aria-current={isActive ? "page" : undefined}
+              className={`flex items-center gap-3 rounded-lg border px-3 py-2.5 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold ${
+                isActive
+                  ? "border-gold-muted/60 bg-gold/10 text-gold-bright"
+                  : "border-transparent text-white/70 hover:bg-white/5 hover:text-white"
+              }`}
+            >
+              {item.icon}
+              {item.name}
+            </Link>
+          </Fragment>
         );
       })}
     </nav>

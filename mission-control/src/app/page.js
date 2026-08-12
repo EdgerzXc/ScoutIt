@@ -5,6 +5,8 @@ import { useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { Shield, ArrowRight, CheckCircle2, AlertCircle } from "lucide-react";
 
+const GOOGLE_AUTH_ENABLED = process.env.NEXT_PUBLIC_SUPABASE_GOOGLE_AUTH_ENABLED === "true";
+
 const ACCESS_ERROR_MESSAGES = {
   NotAuthorized:
     "That account isn't set up as Mission Control staff, or access has been deactivated. Ask a Super Admin to check Staff IAM.",
@@ -48,9 +50,8 @@ function LoginForm() {
     }
   };
 
-  // A2 — Google SSO (PKCE; same /auth/callback exchange as the magic link).
-  // Requires the Google provider to be enabled in the Supabase dashboard —
-  // until then Supabase returns "provider is not enabled", surfaced below.
+  // Google SSO is rendered only after an explicit deployment flag confirms
+  // that the Supabase provider and redirect allowlist have been configured.
   const handleGoogle = async () => {
     setStatus("loading");
     setErrorMessage("");
@@ -147,27 +148,30 @@ function LoginForm() {
                 </>
               )}
             </button>
+            {GOOGLE_AUTH_ENABLED && (
+              <>
+                <div className="flex items-center gap-3 py-1">
+                  <div className="flex-1 h-px bg-white/10" />
+                  <span className="text-[10px] uppercase tracking-widest text-white/30">or</span>
+                  <div className="flex-1 h-px bg-white/10" />
+                </div>
 
-            <div className="flex items-center gap-3 py-1">
-              <div className="flex-1 h-px bg-white/10" />
-              <span className="text-[10px] uppercase tracking-widest text-white/30">or</span>
-              <div className="flex-1 h-px bg-white/10" />
-            </div>
-
-            <button
-              type="button"
-              onClick={handleGoogle}
-              disabled={status === "loading"}
-              className="w-full bg-white/5 hover:bg-white/10 border border-white/10 text-white/90 font-medium rounded-xl px-4 py-3 flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
-            >
-              <svg className="w-4 h-4" viewBox="0 0 24 24" aria-hidden="true">
-                <path fill="#EA4335" d="M12 5.04c1.61 0 3.05.55 4.19 1.64l3.12-3.12C17.4 1.77 14.9.75 12 .75 7.61.75 3.82 3.27 1.98 6.94l3.66 2.84C6.5 7.09 9.02 5.04 12 5.04z" />
-                <path fill="#4285F4" d="M23.25 12.26c0-.83-.07-1.62-.21-2.39H12v4.53h6.32c-.27 1.46-1.1 2.7-2.34 3.53l3.58 2.78c2.09-1.93 3.69-4.78 3.69-8.45z" />
-                <path fill="#FBBC05" d="M5.64 14.22a6.96 6.96 0 0 1 0-4.44L1.98 6.94a11.25 11.25 0 0 0 0 10.12l3.66-2.84z" />
-                <path fill="#34A853" d="M12 23.25c3.04 0 5.59-1 7.45-2.72l-3.58-2.78c-.99.67-2.28 1.06-3.87 1.06-2.98 0-5.5-2.05-6.36-4.81l-3.66 2.84C3.82 20.73 7.61 23.25 12 23.25z" />
-              </svg>
-              Sign in with Google
-            </button>
+                <button
+                  type="button"
+                  onClick={handleGoogle}
+                  disabled={status === "loading"}
+                  className="w-full bg-white/5 hover:bg-white/10 border border-white/10 text-white/90 font-medium rounded-xl px-4 py-3 flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+                >
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" aria-hidden="true">
+                    <path fill="#EA4335" d="M12 5.04c1.61 0 3.05.55 4.19 1.64l3.12-3.12C17.4 1.77 14.9.75 12 .75 7.61.75 3.82 3.27 1.98 6.94l3.66 2.84C6.5 7.09 9.02 5.04 12 5.04z" />
+                    <path fill="#4285F4" d="M23.25 12.26c0-.83-.07-1.62-.21-2.39H12v4.53h6.32c-.27 1.46-1.1 2.7-2.34 3.53l3.58 2.78c2.09-1.93 3.69-4.78 3.69-8.45z" />
+                    <path fill="#FBBC05" d="M5.64 14.22a6.96 6.96 0 0 1 0-4.44L1.98 6.94a11.25 11.25 0 0 0 0 10.12l3.66-2.84z" />
+                    <path fill="#34A853" d="M12 23.25c3.04 0 5.59-1 7.45-2.72l-3.58-2.78c-.99.67-2.28 1.06-3.87 1.06-2.98 0-5.5-2.05-6.36-4.81l-3.66 2.84C3.82 20.73 7.61 23.25 12 23.25z" />
+                  </svg>
+                  Sign in with Google
+                </button>
+              </>
+            )}
           </form>
         )}
       </div>

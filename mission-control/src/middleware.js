@@ -2,6 +2,15 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse } from "next/server";
 
 export async function middleware(request) {
+  // Mission Control does not use next/image. Keep the optimizer unreachable
+  // until the inherited Sharp advisory is removed by a compatible Next release.
+  if (request.nextUrl.pathname.startsWith("/_next/image")) {
+    return new NextResponse(null, {
+      status: 404,
+      headers: { "Cache-Control": "private, no-store" },
+    });
+  }
+
   let supabaseResponse = NextResponse.next({
     request,
   });
@@ -33,7 +42,7 @@ export async function middleware(request) {
 
   const isAuthPage = request.nextUrl.pathname === "/" || request.nextUrl.pathname.startsWith("/auth");
   // The scan-worker cron route authenticates itself with CRON_SECRET (no
-  // browser session exists on a cron call) — let it through to its own check.
+  // browser session exists on a cron call) ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â let it through to its own check.
   const isCronRoute = request.nextUrl.pathname === "/api/scan/process";
 
   if (!user && !isAuthPage && !isCronRoute) {
@@ -53,6 +62,6 @@ export async function middleware(request) {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 };

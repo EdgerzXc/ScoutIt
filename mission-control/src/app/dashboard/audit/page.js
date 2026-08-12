@@ -61,7 +61,7 @@ export default async function AuditLogPage() {
             <tbody>
               {actions.map((a) => {
                 const actor = actorsById[a.actor_id];
-                const canRevert = !a.action.startsWith("revert.");
+                const canRevert = !a.action.startsWith("revert.") && !a.action.startsWith("database.migration.");
 
                 return (
                   <tr key={a.id} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">

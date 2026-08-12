@@ -11,6 +11,7 @@ import {
   Flag,
   Users,
   ShieldBan,
+  Wrench,
 } from "lucide-react";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -191,6 +192,9 @@ export default async function DashboardOverview() {
             <QuickLink href="/dashboard/crm" icon={Users} label="Open User CRM" />
             <QuickLink href="/dashboard/features" icon={Flag} label="Feature flags & banners" />
             <QuickLink href="/dashboard/audit" icon={ScrollText} label="Audit log" />
+            {staff.tier >= 3 && (
+              <QuickLink href="/dashboard/operations" icon={Wrench} label="System operations" />
+            )}
           </div>
 
           <div className="mt-6 pt-4 border-t border-white/10">

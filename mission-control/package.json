@@ -6,13 +6,14 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:security": "node --test test/authorization-boundary.test.mjs test/image-optimizer-boundary.test.mjs test/operator-surface-protections.test.mjs test/database-security-readiness.test.mjs test/canonical-slug-boundary.test.mjs test/airtable-formula.test.mjs test/onboarding-migration-operation.test.mjs test/wishlist-revocation-migration-operation.test.mjs test/pilot-cohort-migration-operation.test.mjs test/pilot-cohort-registry.test.mjs test/sample-data-operation.test.mjs test/sample-child-space-operation.test.mjs test/property-media-operation.test.mjs test/property-lifecycle-reconciliation.test.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.0",
     "@supabase/supabase-js": "^2.110.0",
     "lucide-react": "^1.23.0",
-    "next": "15.5.20",
+    "next": "15.5.23",
     "papaparse": "^5.5.4",
     "react": "19.1.0",
     "react-dom": "19.1.0",
@@ -23,7 +24,14 @@
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
     "eslint": "^9",
-    "eslint-config-next": "15.5.20",
+    "eslint-config-next": "15.5.23",
     "tailwindcss": "^4"
+  },
+  "overrides": {
+    "brace-expansion": "^1.1.18",
+    "js-yaml": "^4.3.1",
+    "nanoid": "^3.3.18",
+    "postcss": "^8.5.25",
+    "sharp": "^0.35.3"
   }
 }

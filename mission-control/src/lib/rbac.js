@@ -87,3 +87,33 @@ export async function logAction({
     });
   }
 }
+
+/** High-assurance audit write. Throws when the immutable record cannot be persisted. */
+export async function logActionStrict({
+  staff,
+  action,
+  targetTable,
+  targetId,
+  reason = null,
+  metadata = {},
+}) {
+  const admin = createAdminClient();
+  const { data, error } = await admin
+    .from("mission_control_actions")
+    .insert({
+      actor_id: staff.id,
+      actor_tier: staff.tier,
+      action,
+      target_table: targetTable,
+      target_id: String(targetId),
+      reason,
+      metadata,
+    })
+    .select("id")
+    .single();
+
+  if (error || !data?.id) {
+    throw new Error("The immutable Mission Control audit record could not be persisted.");
+  }
+  return data.id;
+}

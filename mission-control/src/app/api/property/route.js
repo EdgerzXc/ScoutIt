@@ -1,4 +1,4 @@
-// ═══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // STAFF PROPERTY SECTION SAVE
 //
 // The staff-console counterpart to the main app's /api/admin/property.
@@ -8,16 +8,20 @@
 //
 // Why a route handler and not a Server Action: the vendored component calls
 // `fetch(endpoint, { method: "PATCH" })`. Changing it to use an action would
-// fork the copy and defeat the drift guard — the exact failure (W3) this whole
+// fork the copy and defeat the drift guard â€” the exact failure (W3) this whole
 // change set exists to fix.
 //
 // AUTH: cookie session -> getCurrentStaff() -> assertTier. Unlike the main app
 // there is no bearer token; every staff request here is already cookie-scoped.
-// ═══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentStaff, assertTier, logAction, TIERS } from "@/lib/rbac";
+import {
+  canonicalSlugFor,
+  titleChangeWouldDriftCanonicalUrl,
+} from "@/lib/canonicalSlugPolicy.mjs";
 import { publishPropertyToAirtable } from "@/lib/airtable";
 // Internal/staff-only keys must never arrive from a client payload. Import the
 // registry's own predicate rather than re-deriving one here: it is the single
@@ -25,7 +29,7 @@ import { publishPropertyToAirtable } from "@/lib/airtable";
 // the moment a field's visibility changes.
 import { isInternal } from "@/lib/propertyFieldRegistry";
 
-// ── GET /api/property?id=… ──────────────────────────────────────
+// â”€â”€ GET /api/property?id=â€¦ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Returns the FULL row (including `details`), fetched only when a staff member
 // actually expands a row. The CMS list query deliberately omits `details` so a
 // 200-listing queue stays one cheap request instead of hauling every blob.
@@ -77,6 +81,31 @@ export async function PATCH(request) {
       return NextResponse.json({ error: "Property not found" }, { status: 404 });
     }
 
+    if (titleChangeWouldDriftCanonicalUrl(current, body.title)) {
+      const canonicalSlug = canonicalSlugFor(current);
+      await logAction({
+        staff,
+        action: "property.title_change_blocked",
+        targetTable: "properties",
+        targetId: id,
+        reason: "Blocked an ordinary edit that would change a locked public URL",
+        metadata: {
+          canonical_slug: canonicalSlug,
+          current_title: current.title,
+          attempted_title: String(body.title),
+        },
+      });
+      return NextResponse.json(
+        {
+          error:
+            "This published title is locked because Airtable derives the public URL from it. Use the separately approved, audited URL-migration workflow.",
+          code: "CANONICAL_SLUG_LOCKED",
+          canonicalSlug,
+        },
+        { status: 409, headers: { "Cache-Control": "private, no-store" } }
+      );
+    }
+
     const incoming = body.details || {};
     const rejected = Object.keys(incoming).filter(isInternal);
     const safeDetails = Object.fromEntries(
@@ -86,7 +115,7 @@ export async function PATCH(request) {
       console.warn(`[MC PROPERTY] Ignored internal keys from client: ${rejected.join(", ")}`);
     }
 
-    // MERGE, never replace. Saving "Commercial" must not wipe "Residential" —
+    // MERGE, never replace. Saving "Commercial" must not wipe "Residential" â€”
     // the editor deliberately posts one section at a time.
     const patch = { details: { ...(current.details || {}), ...safeDetails } };
     for (const key of ["title", "location", "seo_title", "seo_description"]) {
@@ -106,22 +135,23 @@ export async function PATCH(request) {
     }
 
     // Mirror to the public CMS only for listings that are actually live.
-    // An Airtable failure must NOT discard the Supabase write — return success
+    // An Airtable failure must NOT discard the Supabase write â€” return success
     // with a warning so the staff member knows the public site lagged behind.
     let warning = null;
     if (current.pipeline_status === "approved") {
       try {
         const result = await publishPropertyToAirtable(saved);
-        // Airtable's Slug is a FORMULA computed from Title (see AGENTS.md §2).
-        // A title edit changes it, so read the computed value back rather than
-        // inventing one app-side — that drift broke Contact on 3 live listings.
-        if (result?.slug && result.slug !== current.slug) {
-          await admin.from("properties").update({ slug: result.slug }).eq("id", id);
-          saved.slug = result.slug;
+        // Ordinary edits must never rewrite the first-publication URL.
+        // If Airtable reports anything else, preserve Supabase's canonical value
+        // and surface reconciliation instead of silently accepting formula drift.
+        const canonicalSlug = canonicalSlugFor(current);
+        if (result?.slug && canonicalSlug && result.slug !== canonicalSlug) {
+          warning =
+            "Saved, but Airtable returned a different slug. ScoutIt preserved the canonical URL; publication reconciliation is required.";
         }
       } catch (airtableErr) {
         console.error("[MC PROPERTY] Airtable sync failed:", airtableErr);
-        warning = "Saved, but the public site sync failed — it will retry on the next save.";
+        warning = "Saved, but the public site sync failed â€” it will retry on the next save.";
       }
     }
 
