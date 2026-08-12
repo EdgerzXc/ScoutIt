@@ -1246,6 +1246,25 @@ qualifying super-large spatial asset - the activation work must include:
 
 ---
 
+# LAYER 2 DISCOVER & INTEL SYMBIOTIC INTEGRATION ARCHITECTURE
+
+1. **Bi-Directional Symbiotic Twin Concept**:
+   - Market Intelligence (`/intel`, Layer 2 Stratosphere) and Space Discovery (`/discover`) are two sides of the same coin and must operate as deeply integrated companion features.
+   - A unified navigation bar allows seamless switching: `[🔍 DISCOVER SPACES]` ↔ `[📡 MARKET INTEL & BRIEFINGS]`.
+   - Context, category filters, and active region selections persist when switching between reading research and exploring physical spaces.
+
+2. **Discovery-Embedded Space Carousels in Intel Articles**:
+   - All Intel articles, OSINT briefings, and market reports dynamically render **Embedded Space Carousels** of active verified ScoutIt properties affected by the article's topic or location.
+
+3. **Intel-Powered Discovery Dossiers**:
+   - Property cards and regional clusters on `/discover` display matching **Intel Signals & Yield Badges** (e.g. `"BGC Yield Signal +8.2%"`, `"Transit Impact Zone"`).
+   - Tapping an Intel badge on a property opens a side dossier with the underlying market research.
+
+4. **Spatial Radar Map Overlay (`[📡 SIGNALS]`)**:
+   - `/discover` features an interactive MapLibre map mode displaying geotagged market signals with dynamic impact radiuses, highlighting properties inside signal boundaries.
+
+---
+
 # CONTACT SURFACE & MMC LIVE CHAT ARCHITECTURE
 
 1. **Master Mission Control (MMC) Connected Live Chat**:

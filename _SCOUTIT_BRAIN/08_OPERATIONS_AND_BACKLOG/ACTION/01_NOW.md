@@ -455,6 +455,7 @@ not at 10,000 spaces, 20,000 children and thousands of professionals.
 - [ ] **W26 · Contact Live Chat**: Implement real-time visitor live chat on `/contact` connected directly to Master Mission Control (MMC).
 - [ ] **W27 · Google Calendar OAuth**: Audit `/api/calendar/sync` and update Google Cloud Console redirect URIs (`redirect_uri_mismatch`).
 - [ ] **W29 · Enterprise Read-Only Preview**: Enable interactive read-only browsing of Enterprise Mode and attach the Enterprise Pricing Upgrade Modal on any add/mutation action.
+- [ ] **W30 · Layer 2 Discover & Intel Integration**: Unify `/discover` and `/intel` with bi-directional navigation, embedded space carousels, intel badges, and spatial radar overlays.
 
 ---
 
