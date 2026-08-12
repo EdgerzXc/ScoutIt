@@ -1232,6 +1232,20 @@ qualifying super-large spatial asset - the activation work must include:
 
 ---
 
+# ENTERPRISE READ-ONLY PREVIEW & PRICING MODAL POLICY
+
+1. **Interactive Read-Only Preview**:
+   - Enterprise Mode is accessible as an interactive preview so any visitor or user can switch to Enterprise Mode and browse its full interface (multi-property portfolios, team seat controls, enterprise analytics, and compliance logs) to showcase ScoutIt's enterprise capabilities.
+
+2. **Read-Only Enforced Gate**:
+   - Users can freely click around and inspect Enterprise Mode panels, but **all write and mutation actions are strictly disabled** (no creating properties, adding seats, or saving configuration changes).
+
+3. **Enterprise Pricing / Upgrade Modal**:
+   - Attempting any write or add action inside Enterprise Mode (e.g. clicking "Add Property", "Create Portfolio", or "Invite Team Member") triggers a sleek **Enterprise Pricing Upgrade Modal**.
+   - The modal displays Enterprise tier feature breakdowns, seat pricing options, and a direct CTA to request an enterprise tier upgrade or schedule an onboarding call.
+
+---
+
 # CONTACT SURFACE & MMC LIVE CHAT ARCHITECTURE
 
 1. **Master Mission Control (MMC) Connected Live Chat**:

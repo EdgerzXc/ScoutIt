@@ -581,6 +581,12 @@ Every `-rgb` shipped with its `-ch` twin per the channel-syntax rule.
 - **Scope**: Continuous 600vh Three.js WebGL track flythrough, UFO trigger, gold kintsugi crack, 6-layer descent, and Founding Team showcase waypoint.
 - **Ref**: §Master Action Plan (Post-Launch Brand Experience) · `[[ORIGIN_STORY_SCROLLYTELLING]]`
 
+### W29 ⬜🎨 Enterprise Mode Read-Only Interactive Preview & Enterprise Pricing Upgrade Modal ⏱ ~2h
+- **Interactive Preview**: Restore Enterprise Mode as an interactive read-only showcase so users can browse enterprise portfolios, team seats, analytics, and compliance views.
+- **Read-Only Gate**: Prevent any write or mutation actions inside the preview.
+- **Enterprise Pricing Modal**: Trigger a sleek Enterprise Pricing Modal on any attempt to click "Add Property", "Create Portfolio", "Invite Member", or execute mutation actions.
+- **Ref**: §Master Action Plan (Enterprise Read-Only Preview & Pricing Modal Policy)
+
 **Left — inline styles, the other half:**
 - 649 inline `style={{ color: "#…" }}` in JSX. 420 of them in
   `CommercialFlow.js` (225) + `ResidentialFlow.js` (195), then
