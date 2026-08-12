@@ -576,6 +576,11 @@ Every `-rgb` shipped with its `-ch` twin per the channel-syntax rule.
 - **Fix**: Audit `/api/calendar/sync` and `/api/calendar/callback` to ensure callback URL uses `getSiteUrl()` dynamically. (Requires Owner Action 1.8 in Google Cloud Console).
 - **Ref**: Master Owner Actions 1.8
 
+### W28 ⏸️ Origin Story Scrollytelling Manifesto & Team Showcase ⏱ ~8h · PARKED / LATER STAGE
+- **Context**: Explicitly non-blocking for pre-launch or immediate launch. Post-launch brand asset.
+- **Scope**: Continuous 600vh Three.js WebGL track flythrough, UFO trigger, gold kintsugi crack, 6-layer descent, and Founding Team showcase waypoint.
+- **Ref**: §Master Action Plan (Post-Launch Brand Experience) · `[[ORIGIN_STORY_SCROLLYTELLING]]`
+
 **Left — inline styles, the other half:**
 - 649 inline `style={{ color: "#…" }}` in JSX. 420 of them in
   `CommercialFlow.js` (225) + `ResidentialFlow.js` (195), then

@@ -1253,6 +1253,22 @@ qualifying super-large spatial asset - the activation work must include:
 
 ---
 
+# POST-LAUNCH BRAND EXPERIENCE — ORIGIN STORY SCROLLYTELLING & TEAM SHOWCASE (PARKED / LATER STAGES)
+
+> ⚠️ **Context: Non-Immediate Build.** This is a post-launch brand experience asset. It is **explicitly non-blocking for pre-launch human testing** or the 200-listing North Star goal. It is parked for future brand expansion or post-launch activation.
+
+1. **Origin Story Scrollytelling Track**:
+   - Continuous 600vh Three.js WebGL scrollytelling track triggered by the homepage UFO (`scout-ufo.png`).
+   - Rhymes the origin of the universe with ScoutIt's spatial commerce mission across 5 Acts (Origin $\rightarrow$ The Gap $\rightarrow$ ScoutIt Mission $\rightarrow$ 6-Layer Descent $\rightarrow$ Core Ignition into Live Hero).
+   - Features gold kintsugi crack SVG, starfield parallax, particle fields, gold bloom glows, and smooth scroll scrubbing.
+
+2. **Founding Team & Contributors Showcase**:
+   - Integrated as an interactive waypoint near the end of Act 4 (between *Crust / People You Trust* and *Core Ignition*).
+   - Displays the founding builders, spatial engineers, data architects, and regulatory/legal advisors with gold-accented avatar cards, bio overlays, and role declarations.
+   - Reference specs: `[[ORIGIN_STORY_SCROLLYTELLING]]`, `[[SCOUTIT_SCROLLYTELLING_PROMPT]]`, and `[[scrollytelling-mission-text]]`.
+
+---
+
 # AUDIT COVERAGE AND SOURCE DISPOSITION
 
 This plan was reconciled on 2026-08-08 against **all 78 Markdown files** in
