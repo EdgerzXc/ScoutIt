@@ -263,7 +263,7 @@ claims.
 | `src/app/api/telemetry/device/route.js` | Per-IP limiter; counter upserts for friction/search. |
 | `src/lib/boundedCache.js` | New. Dependency-free LRU. |
 | `src/lib/rateLimit.js` | New. Fixed-window in-process limiter. |
-| `src/lib/cmsCache.js` | `geocodeCache` bounded to 2,000 entries. |
+| `src/lib/cmsCache.js` | `geocodeCache` bounded to 2,000 entries. ⚠️ **See §7 — this file is NOT self-contained and was pulled from the ship set.** |
 | `src/lib/__tests__/criticalSecurityFixes1_0B.test.js` | New. 11 tests. |
 | `src/lib/__tests__/deviceTelemetryApi.test.js` | 2 stale contracts updated, 4 tests added. |
 
@@ -381,6 +381,73 @@ Surfaced for the owner, recorded in
 - **WARN** — `postgis` and `vector` extensions installed in the `public` schema.
 - **INFO ×19** — tables with RLS enabled and no policies. Deny-all, therefore
   safe, but each should be a deliberate "service-role only" decision.
+
+## 7. Correction 2026-08-13 — the ship set was wrong, caught before the PR
+
+The Claude Code verification pass found a blocker this record's "Files changed"
+table did not predict. Recording it because the mistake is instructive.
+
+**What was wrong.** `src/lib/cmsCache.js` was listed as a single-purpose edit
+("`geocodeCache` bounded to 2,000 entries"). It is not. The file already carried
+two *unrelated* uncommitted changes before the §1.0B edit was layered on top:
+
+1. §1.0B — `geocodeCache` → `BoundedCache` ✅ belongs to this work
+2. `normalizeSampleBundle` at six call sites ❌ unrelated sample-inventory work
+3. `CMS_REDIS_FETCH_CACHE` fetch-cache / ISR change ❌ unrelated
+
+Change (2) imports `@/lib/sampleInventory`, which is **untracked** — one of the
+~229 uncommitted files deliberately excluded from the ship set. So committing
+`cmsCache.js` alone produces a branch that **cannot build**: module not found.
+
+**Why the local build passed anyway.** `npm run build` ran with the full working
+tree present, so `sampleInventory.js` was on disk. The branch does not contain
+it. This is exactly the local-passes / preview-fails gap the ship plan warned
+about — it just came from an unexpected direction.
+
+**Confirmed by the real build.** Vercel preview deployment `FYekzGR1h` on commit
+`2879575` failed after 58s:
+
+```
+./src/lib/cmsCache.js:23:1
+Module not found: Can't resolve '@/lib/sampleInventory'
+```
+
+The prediction and the failure match to the line. Also visible in that log:
+Vercel built with **Next.js 16.2.12**, not 16.3.0, because the `package.json`
+bump is among the uncommitted ~229 — expected, not a second fault.
+
+**Root cause.** The ship set was assembled by listing *files touched*, on the
+assumption that each file's diff was self-contained. In a working tree with 242
+uncommitted files, that assumption does not hold: editing a file that already
+has unrelated pending changes silently adopts them. **Assemble a ship set from
+hunks, not filenames, whenever the tree is dirty** — or verify each candidate
+file's full diff against `main`, not just the intended edit.
+
+**Resolution.** `src/lib/cmsCache.js` was dropped from the branch. The geocode
+cap is resource-exhaustion hardening, not an exploitable hole, and neither live
+hole (`/api/deals/handshake`, `/api/intel/ingest`) touches this file. It lands
+separately once the sample-inventory work is committed on its own terms.
+`src/lib/boundedCache.js` and its tests still ship — they are self-contained and
+the cap is a one-line consumer change afterwards.
+
+### Other verification corrections
+
+- **Test count:** the suite is **1015 tests across 95 files**, not 882. The 882
+  figure in §4 was taken from an older record and is stale.
+- **Build cache:** the first `npm run build` failed with 19 Turbopack/PostCSS
+  errors on every CSS file, including one in `node_modules`. Cause was a stale
+  gitignored `.next` directory left from the pre-bump Next version
+  (`package.json` carries an uncommitted `^16.2.12` → `^16.3.0` change). Clearing
+  `.next` and rebuilding from identical source passed. No source was changed to
+  make the build green.
+- **`/api/intel/ingest`** also removed the `mockOwnerId` development bypass,
+  which §3 did not mention. Correct and consistent with the existing
+  `mockMutationRouteContracts` test, but note
+  `src/components/intel/IntelStudioPanel.js:30` still sends that field — now a
+  no-op. Intel Studio needs a real staff session going forward.
+- **Master Action Plan §1.0B** claimed the `deals` UPDATE policy "gained a
+  `WITH CHECK`", contradicting §2.8 and the live database. That bullet described
+  the *rejected* fix; corrected 2026-08-13.
 
 ## 6. Still open after this session
 

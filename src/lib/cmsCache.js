@@ -17,24 +17,15 @@ import {
 } from "@/lib/airtable";
 import { Redis } from '@upstash/redis';
 import { fetchWithRetry } from "@/lib/fetchWithRetry";
-import { BoundedCache } from "@/lib/boundedCache";
 import { CITY_HUB } from "@/lib/transit";
 import { DEFAULT_LIVE_CMS_URL, normalizeLiveCmsBundle } from "@/lib/cmsFallback";
-import { normalizeSampleBundle } from "@/lib/sampleInventory";
 
 let redis = null;
-export const CMS_REDIS_FETCH_CACHE = "default";
-
 if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
   try {
     redis = new Redis({
       url: process.env.UPSTASH_REDIS_REST_URL,
       token: process.env.UPSTASH_REDIS_REST_TOKEN,
-      // Upstash otherwise forces `no-store`, which opts ISR callers such as
-      // `/hubs/[slug]` into dynamic rendering. Redis commands use POST, so the
-      // Next data cache does not retain command responses; the explicit memory
-      // and Redis TTLs below remain the freshness authority.
-      cache: CMS_REDIS_FETCH_CACHE,
     });
   } catch (err) {
     console.error("[CMS] Failed to initialize Redis:", err.message);
@@ -72,14 +63,9 @@ async function fetchDevelopmentLiveCms() {
 }
 
 // Geocode results never change for a given location string — cache them
-// so Mapbox isn't re-pinged on every request for the same addresses.
-//
-// BOUNDED (§1.0B): `location` is free text, so an unbounded Map grows with
-// every novel string and burns one Mapbox call per novel key — a rate-limit
-// exhaustion path, not just a memory leak. 2,000 entries comfortably covers
-// the real Philippine location vocabulary; anything beyond that is churn and
-// is evicted least-recently-used.
-const geocodeCache = new BoundedCache({ maxEntries: 2000 });
+// for the lifetime of the server process so Mapbox isn't re-pinged on
+// every request for the same addresses.
+const geocodeCache = new Map();
 
 async function geocodeMissingCoords(properties) {
   const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
@@ -223,16 +209,15 @@ async function buildBundle() {
 export async function getCmsBundle() {
   const now = Date.now();
   if (cache.bundle && now - cache.fetchedAt < FRESH_TTL_MS) {
-    return normalizeSampleBundle(cache.bundle);
+    return cache.bundle;
   }
   
   if (redis) {
     try {
       const cachedBundle = await redis.get('cms_bundle');
       if (cachedBundle) {
-        const normalizedBundle = normalizeSampleBundle(cachedBundle);
-        cache = { bundle: normalizedBundle, fetchedAt: now };
-        return { ...normalizedBundle, source: 'upstash_redis' };
+        cache = { bundle: cachedBundle, fetchedAt: now };
+        return { ...cachedBundle, source: 'upstash_redis' };
       }
     } catch (err) {
       console.error("[CMS] Redis fetch failed:", err.message);
@@ -242,8 +227,7 @@ export async function getCmsBundle() {
   if (inflight) return inflight;
 
   inflight = buildBundle()
-    .then(async (rawBundle) => {
-      const bundle = normalizeSampleBundle(rawBundle);
+    .then(async (bundle) => {
       cache = { bundle, fetchedAt: Date.now() };
       inflight = null;
       if (redis && bundle.source === 'airtable') {
@@ -260,15 +244,14 @@ export async function getCmsBundle() {
       console.error("[CMS] Airtable fetch failed:", error.message);
       // Stale data beats a blank site: keep serving the last good bundle.
       if (cache.bundle) {
-        return { ...normalizeSampleBundle(cache.bundle), source: `${cache.bundle.source}_stale` };
+        return { ...cache.bundle, source: `${cache.bundle.source}_stale` };
       }
 
       try {
         const liveBundle = await fetchDevelopmentLiveCms();
         if (liveBundle) {
-          const normalizedBundle = normalizeSampleBundle(liveBundle);
-          cache = { bundle: normalizedBundle, fetchedAt: Date.now() };
-          return normalizedBundle;
+          cache = { bundle: liveBundle, fetchedAt: Date.now() };
+          return liveBundle;
         }
       } catch (fallbackError) {
         console.error("[CMS] Live Vercel fallback failed:", fallbackError.message);

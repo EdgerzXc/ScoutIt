@@ -447,11 +447,18 @@ Canonical remediation artefacts:
       but `publish=true` now runs through `requireAdmin` from `src/lib/adminGuard.js`
       (the one admin gate, checking both `role` and `active_roles`). A non-staff caller
       gets 403 and the article is never written with `Approved_For_Live_Site`.
-- [x] **Patched Deal Hijacking:** the `deals` UPDATE policy gained a `WITH CHECK`, and
-      because `WITH CHECK` cannot see the pre-update row, a companion trigger
-      (`enforce_deal_party_immutability`) makes `buyer_id`, `broker_id`, and
-      `property_id` immutable and blocks a party from closing a deal unilaterally.
-      **Requires the migration.**
+- [x] **Patched Deal Hijacking — by inverting the requested fix.** The audit asked
+      for a `WITH CHECK` on the `deals` UPDATE policy. The live database has **no
+      UPDATE policy on `public.deals` at all**, and RLS is enabled — which is
+      deny-all, already stronger than the requested fix. Creating that policy would
+      have **granted** client update rights that do not exist today, so it was
+      deliberately **not** created; `deals` UPDATE remains deny-all (verified after
+      apply). What shipped instead is the durable half: the
+      `enforce_deal_party_immutability` trigger makes `buyer_id`, `broker_id`, and
+      `property_id` immutable and blocks a party from closing a deal unilaterally, so
+      the hole is already shut if an UPDATE policy is ever added. Applied 2026-08-12.
+      *(An earlier revision of this bullet claimed the policy "gained a `WITH CHECK`";
+      that described the rejected fix and was corrected 2026-08-13.)*
 - [x] **Capped the `geocodeCache`:** replaced with `BoundedCache` (LRU, 2,000 entries)
       from the new dependency-free `src/lib/boundedCache.js`. `location` is free text,
       so the old `Map` grew per novel string *and* burned one Mapbox call per novel
