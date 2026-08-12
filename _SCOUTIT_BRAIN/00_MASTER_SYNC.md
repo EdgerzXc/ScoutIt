@@ -2,74 +2,38 @@
 section: "00_META"
 status: active
 tags: [master-sync, north-star, build-queue, decision-log, always-current]
-updated: 2026-08-02
+updated: 2026-08-11
 related: ["[[SCOUTIT_FULL_WORKFLOW]]", "[[SESSION_HANDOFF_2026-07-30]]", "[[00_START_HERE]]", "[[NEXT_DAY_HANDOFF]]", "[[PRE_LAUNCH_BUILD_LIST]]", "[[SCOUTIT_FIX_LIST]]", "[[13_EXTERNAL_INPUTS/README|External Inputs README]]"]
 ---
 
-> ✅ **2026-08-02 workflow locked and owner-reconfirmed:**
-> [[SCOUTIT_FULL_WORKFLOW]] now defines the complete platform, listing, URL,
-> Connect, off-market, and retention lifecycle. Owner-authored listings publish
-> after owner attestation; only ScoutIt-created PDF drafts require source
-> verification. Canonical URLs freeze on first publication. Withdraw creates
-> recoverable Cluster/Universe off-market inventory. Permanently Remove Listing
-> ends market access but retains internal history, the reserved URL, and
-> ScoutIt-owned Spatial Vault/3D assets. Connect spend order is monthly
-> (expiring) → purchased (permanent) → reward (permanent), with no automatic
-> refund for decline, non-response, or timeout.
->
-> ✅ **2026-08-02 full-site logic follow-up:** initial inquiries route to the
-> lister until accepted broker relationships exist; leads never reassign
-> automatically. Off-market contact requires Quietly open to offers. Closed chat
-> messages retain a seven-day read-only window before purge, with reported-chat
-> holds. Monthly Connects are role-scoped while purchased/reward Connects are
-> permanent account-wide balances. At-cap broker invites still spend and remain
-> Pending. Subscription placement, badges, and Scout Rating remain separate.
-> Pre-200 premium features are free behind a Master Mission Control locker.
-> Scout Rating counts the completed two-sided buyer–broker transaction handshake
-> inside ScoutIt after viewing; the owner–broker representation handshake does
-> not count, and an off-platform success without the transaction handshake earns
-> no ScoutIt count or incentive.
-> One account may hold multiple independently tiered roles and multiple provider
-> specialties; Event Designer and Event Planner are distinct. Initial launch
-> operations are Seeker, Owner, and verified Broker. Provider/Operator service
-> actions remain profile/waitlist-only until their real workflows are ready.
-> Before 200 listings, Connect actions still consume free monthly Connects for
-> anti-spam/economy testing; purchases stay disabled and Mission Control may top
-> up balances. Starry Seekers may spend their monthly Connect to contact brokers
-> on represented properties. Once any active, visible, contactable broker is on
-> a property, new buyer leads route only to that broker roster—not the owner—while older
-> owner leads remain assigned. Initial geography is Philippines-wide.
->
-> ✅ **2026-08-01 repository reconciliation:** the canonical E2E suite is now the
-> only default Playwright surface (**83 tests × desktop/mobile = 166**); useful
-> calendar, owner-editor, and buyer-contact coverage was merged before 15 legacy
-> specs and generated artifacts were removed. The repo README, lint/CI commands,
-> framework versions, design tokens, architecture, and user-flow docs now match
-> runtime reality. `Dump/` is empty again; its one unique Asset Command Center
-> idea was merged into `NEW_IDEAS.md` §32.
->
-> ✅ **B1/B3/B4/B5 are CLEARED (2026-07-30, Claude Code).** The 2026-07-30 fixes are
-> committed (`8046b30`), pushed, and **live on both Vercel projects** — verified in production,
-> not just in a build log. The toolchain ran for the first time: **399/399 tests, build green,
-> eslint 0 errors.**
->
-> ✅ **B6 is CLEARED too (2026-07-30).** Owner approved the full ship. Master Mission Control is
-> committed locally (`0f28bc8`), migrations 0005–0007 applied, and **deployed live** to
-> `mission-control-sigma-one-89.vercel.app`. **Staff publishes no longer wipe listing specs.**
-> The real blocker turned out to be a **build-breaking bad import**, not the missing tables —
-> the project had never been built either.
->
-> ✅ **B7 is CLEARED (2026-07-30) — and the premise was wrong.** The property section editor was
-> in the **wrong app**: mounted only in a dev-toolbox-only surface no staff member can reach.
-> It has been **moved to the staff console's CMS page**, and the full checklist was run against
-> production (grouped/labelled sections, no duplicate fields, edit→save→reload persisted, saving
-> one section left the others intact, restaurant shows no Commercial rows). Test value restored.
->
-> ✅ **The "Mission Control" name collision is fixed.** That name now means exactly ONE thing:
-> the staff console. The in-app surface is the **Enterprise Console**.
->
-> 🔴 **All B-items are now closed.** Remaining open work is the pre-existing backlog (P1, P2,
-> I1, I3, V-items, B8's two decisions, and the **2026-08-02 freshness cliff, B9**).
+
+> **2026-08-08 execution-list consolidation:** this file remains the compact
+> project/status context, but [[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION PLAN]]
+> is now the only live task list. Do not execute older queue bullets here
+> without reconciling them against that master and the current code/live state.
+
+> **2026-08-11 controlled-pilot checkpoint:** payment controls remain inactive;
+> sample property notifications now fail closed at the shared notification boundary;
+> private cohort migration/operations and public sample-profile provenance are ready
+> locally. Live credentials, migrations, deployment verification, tester enrollment,
+> physical-device checks, and message delivery remain in Owner-Only Actions. True
+> Light Mode is still open: desktop currently withholds its failed contrast state while
+> mobile still exposes it, an explicitly documented inconsistency awaiting owner direction.
+
+> **2026-08-09 browser and dependency checkpoint:** the production-mode
+> Playwright matrix now contains 366 checks and finishes with **365 passed plus
+> one intentional mobile skip** for the desktop-only PDF control. The five
+> main-app production advisories are patched with targeted releases; its full
+> npm audit is 0, build is 113/113, unit is 882/882, and lint is clean. Mission
+> Control is independently patched on Next 15.5.23; both audits are 0, its
+> 26/26-page build and lint pass, and all 10 staff security boundaries are green.
+> Property tear-sheets now use a deterministic jsPDF brief instead of unbounded
+> full-DOM rasterization, with real PDF-signature and Sharp optimizer contracts.
+> All three location hubs now build as SSG with explicit one-hour revalidation;
+> the conflicting Upstash `no-store` warning is resolved and regression-guarded.
+> Live deployment and the Turnstile, cron, telemetry migration, Airtable, and
+> real-device assistive-technology checks remain
+> owner-gated in [[08_OPERATIONS_AND_BACKLOG/ACTION/MASTER_OWNER_ACTIONS|MASTER OWNER ACTIONS]].
 
 > **What this file is:** the one-page, always-current dashboard. Unlike [[NEXT_DAY_HANDOFF]] (a
 > long, valuable, but ever-growing chronological log of every session), this file gets

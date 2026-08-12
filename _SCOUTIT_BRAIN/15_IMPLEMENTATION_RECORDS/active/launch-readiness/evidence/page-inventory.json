@@ -1,0 +1,362 @@
+[
+    {
+        "app":  "mission-control",
+        "route":  "/dashboard/audit",
+        "file":  "mission-control/src/app\\dashboard\\audit\\page.js"
+    },
+    {
+        "app":  "mission-control",
+        "route":  "/dashboard/badges",
+        "file":  "mission-control/src/app\\dashboard\\badges\\page.js"
+    },
+    {
+        "app":  "mission-control",
+        "route":  "/dashboard/brain",
+        "file":  "mission-control/src/app\\dashboard\\brain\\page.js"
+    },
+    {
+        "app":  "mission-control",
+        "route":  "/dashboard/cms/import",
+        "file":  "mission-control/src/app\\dashboard\\cms\\import\\page.js"
+    },
+    {
+        "app":  "mission-control",
+        "route":  "/dashboard/cms",
+        "file":  "mission-control/src/app\\dashboard\\cms\\page.js"
+    },
+    {
+        "app":  "mission-control",
+        "route":  "/dashboard/crm",
+        "file":  "mission-control/src/app\\dashboard\\crm\\page.js"
+    },
+    {
+        "app":  "mission-control",
+        "route":  "/dashboard/disputes",
+        "file":  "mission-control/src/app\\dashboard\\disputes\\page.js"
+    },
+    {
+        "app":  "mission-control",
+        "route":  "/dashboard/features",
+        "file":  "mission-control/src/app\\dashboard\\features\\page.js"
+    },
+    {
+        "app":  "mission-control",
+        "route":  "/dashboard/inbox",
+        "file":  "mission-control/src/app\\dashboard\\inbox\\page.js"
+    },
+    {
+        "app":  "mission-control",
+        "route":  "/dashboard/media",
+        "file":  "mission-control/src/app\\dashboard\\media\\page.js"
+    },
+    {
+        "app":  "mission-control",
+        "route":  "/dashboard/metrics",
+        "file":  "mission-control/src/app\\dashboard\\metrics\\page.js"
+    },
+    {
+        "app":  "mission-control",
+        "route":  "/dashboard/notifications",
+        "file":  "mission-control/src/app\\dashboard\\notifications\\page.js"
+    },
+    {
+        "app":  "mission-control",
+        "route":  "/dashboard/osint",
+        "file":  "mission-control/src/app\\dashboard\\osint\\page.js"
+    },
+    {
+        "app":  "mission-control",
+        "route":  "/dashboard",
+        "file":  "mission-control/src/app\\dashboard\\page.js"
+    },
+    {
+        "app":  "mission-control",
+        "route":  "/dashboard/security",
+        "file":  "mission-control/src/app\\dashboard\\security\\page.js"
+    },
+    {
+        "app":  "mission-control",
+        "route":  "/dashboard/staff",
+        "file":  "mission-control/src/app\\dashboard\\staff\\page.js"
+    },
+    {
+        "app":  "mission-control",
+        "route":  "/dashboard/verification",
+        "file":  "mission-control/src/app\\dashboard\\verification\\page.js"
+    },
+    {
+        "app":  "mission-control",
+        "route":  "/",
+        "file":  "mission-control/src/app\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/about",
+        "file":  "src/app\\about\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/about-you",
+        "file":  "src/app\\about-you\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/admin",
+        "file":  "src/app\\admin\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/badges",
+        "file":  "src/app\\badges\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/brokers/[broker-slug]",
+        "file":  "src/app\\brokers\\[broker-slug]\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/brokers",
+        "file":  "src/app\\brokers\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/brokers/portal",
+        "file":  "src/app\\brokers\\portal\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/dashboard/calendar",
+        "file":  "src/app\\dashboard\\calendar\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/dashboard/crm",
+        "file":  "src/app\\dashboard\\crm\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/dashboard/inbox",
+        "file":  "src/app\\dashboard\\inbox\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/dashboard/inventory/[id]",
+        "file":  "src/app\\dashboard\\inventory\\[id]\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/dashboard",
+        "file":  "src/app\\dashboard\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/descent",
+        "file":  "src/app\\descent\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/discover",
+        "file":  "src/app\\discover\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/enterprise",
+        "file":  "src/app\\enterprise\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/event-planners/[planner-slug]",
+        "file":  "src/app\\event-planners\\[planner-slug]\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/event-planners",
+        "file":  "src/app\\event-planners\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/hubs/[slug]",
+        "file":  "src/app\\hubs\\[slug]\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/intel/[article-slug]",
+        "file":  "src/app\\intel\\[article-slug]\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/intel",
+        "file":  "src/app\\intel\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/layer/core",
+        "file":  "src/app\\layer\\core\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/layer/crust",
+        "file":  "src/app\\layer\\crust\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/layer/mantle",
+        "file":  "src/app\\layer\\mantle\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/layer/metropolis",
+        "file":  "src/app\\layer\\metropolis\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/layer/orbit",
+        "file":  "src/app\\layer\\orbit\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/layer/stratosphere",
+        "file":  "src/app\\layer\\stratosphere\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/login",
+        "file":  "src/app\\login\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/off-market",
+        "file":  "src/app\\off-market\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/onboarding",
+        "file":  "src/app\\onboarding\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/",
+        "file":  "src/app\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/photographers/[photographer-slug]",
+        "file":  "src/app\\photographers\\[photographer-slug]\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/photographers",
+        "file":  "src/app\\photographers\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/pricing/broker",
+        "file":  "src/app\\pricing\\broker\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/pricing/bundles",
+        "file":  "src/app\\pricing\\bundles\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/pricing/creator",
+        "file":  "src/app\\pricing\\creator\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/pricing/owner",
+        "file":  "src/app\\pricing\\owner\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/pricing",
+        "file":  "src/app\\pricing\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/pricing/seeker",
+        "file":  "src/app\\pricing\\seeker\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/privacy",
+        "file":  "src/app\\privacy\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/profile/[username]",
+        "file":  "src/app\\profile\\[username]\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/profile",
+        "file":  "src/app\\profile\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/property/[id]/brokers",
+        "file":  "src/app\\property\\[id]\\brokers\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/property/[id]",
+        "file":  "src/app\\property\\[id]\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/property/[id]/unit/[unitId]",
+        "file":  "src/app\\property\\[id]\\unit\\[unitId]\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/property",
+        "file":  "src/app\\property\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/researchers/[researcher-slug]",
+        "file":  "src/app\\researchers\\[researcher-slug]\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/researchers",
+        "file":  "src/app\\researchers\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/settings",
+        "file":  "src/app\\settings\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/showcase/chatbox",
+        "file":  "src/app\\showcase\\chatbox\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/showcase",
+        "file":  "src/app\\showcase\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/terms",
+        "file":  "src/app\\terms\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/transit",
+        "file":  "src/app\\transit\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/wishlist",
+        "file":  "src/app\\wishlist\\page.js"
+    },
+    {
+        "app":  "public-app",
+        "route":  "/wishlist/shared/[token]",
+        "file":  "src/app\\wishlist\\shared\\[token]\\page.js"
+    }
+]

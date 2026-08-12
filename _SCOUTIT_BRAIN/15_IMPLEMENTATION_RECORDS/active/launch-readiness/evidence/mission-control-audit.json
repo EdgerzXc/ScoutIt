@@ -1,0 +1,4443 @@
+{
+  "generatedAt": "2026-08-09T03:40:50.907Z",
+  "baseURL": "http://localhost:3001",
+  "limitations": [
+    "Automated audit; human visual, assistive-technology, cognition, and real-device validation remain required.",
+    "Authenticated routes are evaluated in anonymous/gated state unless a safe test fixture exposes a mock state.",
+    "Invalid dynamic URLs verify failure surfaces; discovered live links supply representative valid dynamic routes."
+  ],
+  "profiles": {
+    "desktop": [
+      {
+        "route": "/",
+        "durationMs": 2327,
+        "navigationStatus": 200,
+        "navigationError": null,
+        "facts": {
+          "url": "http://localhost:3001/",
+          "title": "Create Next App",
+          "lang": "en",
+          "bodyTextLength": 166,
+          "h1Count": 1,
+          "mainCount": 0,
+          "navCount": 0,
+          "headings": [
+            {
+              "level": 1,
+              "text": "Mission Control"
+            }
+          ],
+          "headingSkips": [],
+          "duplicateIds": [],
+          "interactiveCount": 3,
+          "horizontalOverflow": false,
+          "overflow": [],
+          "brokenImages": [],
+          "missingAltImages": [],
+          "sampleDataLabels": 0,
+          "loadingLanguage": [],
+          "canonical": null,
+          "robots": null,
+          "themeBackground": "rgb(13, 13, 13)"
+        },
+        "axe": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "help": "Elements must meet minimum color contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/color-contrast?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "span"
+                ],
+                "html": "<span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.67 (foreground color: #595959, background color: #121212, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+              },
+              {
+                "target": [
+                  ".text-xs"
+                ],
+                "html": "<p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.64 (foreground color: #565656, background color: #0d0d0d, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          },
+          {
+            "id": "landmark-one-main",
+            "impact": "moderate",
+            "description": "Ensure the document has a main landmark",
+            "help": "Document should have one main landmark",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/landmark-one-main?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "html"
+                ],
+                "html": "<html lang=\"en\">",
+                "failureSummary": "Fix all of the following:\n  Document does not have a main landmark"
+              }
+            ]
+          },
+          {
+            "id": "region",
+            "impact": "moderate",
+            "description": "Ensure all page content is contained by landmarks",
+            "help": "All page content should be contained by landmarks",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/region?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "h1"
+                ],
+                "html": "<h1 class=\"text-2xl font-semibold text-white text-center tracking-tight mb-2\">Mission Control</h1>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".text-white\\/50"
+                ],
+                "html": "<p class=\"text-white/50 text-center text-sm mb-8\">Secure staff access only. Enter your email to receive a magic link.</p>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  "form > div:nth-child(1)"
+                ],
+                "html": "<div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".gap-3"
+                ],
+                "html": "<div class=\"flex items-center gap-3 py-1\"><div class=\"flex-1 h-px bg-white/10\"></div><span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span><div class=\"flex-1 h-px bg-white/10\"></div></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".mt-8"
+                ],
+                "html": "<div class=\"mt-8 text-center\"><p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              }
+            ]
+          }
+        ],
+        "consoleErrors": [],
+        "pageErrors": [],
+        "failedRequests": [],
+        "badResponses": [],
+        "discoveredLinks": []
+      },
+      {
+        "route": "/dashboard",
+        "durationMs": 2300,
+        "navigationStatus": 200,
+        "navigationError": null,
+        "facts": {
+          "url": "http://localhost:3001/",
+          "title": "Create Next App",
+          "lang": "en",
+          "bodyTextLength": 166,
+          "h1Count": 1,
+          "mainCount": 0,
+          "navCount": 0,
+          "headings": [
+            {
+              "level": 1,
+              "text": "Mission Control"
+            }
+          ],
+          "headingSkips": [],
+          "duplicateIds": [],
+          "interactiveCount": 3,
+          "horizontalOverflow": false,
+          "overflow": [],
+          "brokenImages": [],
+          "missingAltImages": [],
+          "sampleDataLabels": 0,
+          "loadingLanguage": [],
+          "canonical": null,
+          "robots": null,
+          "themeBackground": "rgb(13, 13, 13)"
+        },
+        "axe": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "help": "Elements must meet minimum color contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/color-contrast?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "span"
+                ],
+                "html": "<span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.67 (foreground color: #595959, background color: #121212, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+              },
+              {
+                "target": [
+                  ".text-xs"
+                ],
+                "html": "<p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.64 (foreground color: #565656, background color: #0d0d0d, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          },
+          {
+            "id": "landmark-one-main",
+            "impact": "moderate",
+            "description": "Ensure the document has a main landmark",
+            "help": "Document should have one main landmark",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/landmark-one-main?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "html"
+                ],
+                "html": "<html lang=\"en\">",
+                "failureSummary": "Fix all of the following:\n  Document does not have a main landmark"
+              }
+            ]
+          },
+          {
+            "id": "region",
+            "impact": "moderate",
+            "description": "Ensure all page content is contained by landmarks",
+            "help": "All page content should be contained by landmarks",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/region?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "h1"
+                ],
+                "html": "<h1 class=\"text-2xl font-semibold text-white text-center tracking-tight mb-2\">Mission Control</h1>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".text-white\\/50"
+                ],
+                "html": "<p class=\"text-white/50 text-center text-sm mb-8\">Secure staff access only. Enter your email to receive a magic link.</p>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  "form > div:nth-child(1)"
+                ],
+                "html": "<div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".gap-3"
+                ],
+                "html": "<div class=\"flex items-center gap-3 py-1\"><div class=\"flex-1 h-px bg-white/10\"></div><span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span><div class=\"flex-1 h-px bg-white/10\"></div></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".mt-8"
+                ],
+                "html": "<div class=\"mt-8 text-center\"><p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              }
+            ]
+          }
+        ],
+        "consoleErrors": [],
+        "pageErrors": [],
+        "failedRequests": [],
+        "badResponses": [],
+        "discoveredLinks": []
+      },
+      {
+        "route": "/dashboard/audit",
+        "durationMs": 2255,
+        "navigationStatus": 200,
+        "navigationError": null,
+        "facts": {
+          "url": "http://localhost:3001/",
+          "title": "Create Next App",
+          "lang": "en",
+          "bodyTextLength": 166,
+          "h1Count": 1,
+          "mainCount": 0,
+          "navCount": 0,
+          "headings": [
+            {
+              "level": 1,
+              "text": "Mission Control"
+            }
+          ],
+          "headingSkips": [],
+          "duplicateIds": [],
+          "interactiveCount": 3,
+          "horizontalOverflow": false,
+          "overflow": [],
+          "brokenImages": [],
+          "missingAltImages": [],
+          "sampleDataLabels": 0,
+          "loadingLanguage": [],
+          "canonical": null,
+          "robots": null,
+          "themeBackground": "rgb(13, 13, 13)"
+        },
+        "axe": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "help": "Elements must meet minimum color contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/color-contrast?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "span"
+                ],
+                "html": "<span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.67 (foreground color: #595959, background color: #121212, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+              },
+              {
+                "target": [
+                  ".text-xs"
+                ],
+                "html": "<p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.64 (foreground color: #565656, background color: #0d0d0d, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          },
+          {
+            "id": "landmark-one-main",
+            "impact": "moderate",
+            "description": "Ensure the document has a main landmark",
+            "help": "Document should have one main landmark",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/landmark-one-main?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "html"
+                ],
+                "html": "<html lang=\"en\">",
+                "failureSummary": "Fix all of the following:\n  Document does not have a main landmark"
+              }
+            ]
+          },
+          {
+            "id": "region",
+            "impact": "moderate",
+            "description": "Ensure all page content is contained by landmarks",
+            "help": "All page content should be contained by landmarks",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/region?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "h1"
+                ],
+                "html": "<h1 class=\"text-2xl font-semibold text-white text-center tracking-tight mb-2\">Mission Control</h1>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".text-white\\/50"
+                ],
+                "html": "<p class=\"text-white/50 text-center text-sm mb-8\">Secure staff access only. Enter your email to receive a magic link.</p>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  "form > div:nth-child(1)"
+                ],
+                "html": "<div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".gap-3"
+                ],
+                "html": "<div class=\"flex items-center gap-3 py-1\"><div class=\"flex-1 h-px bg-white/10\"></div><span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span><div class=\"flex-1 h-px bg-white/10\"></div></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".mt-8"
+                ],
+                "html": "<div class=\"mt-8 text-center\"><p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              }
+            ]
+          }
+        ],
+        "consoleErrors": [],
+        "pageErrors": [],
+        "failedRequests": [],
+        "badResponses": [],
+        "discoveredLinks": []
+      },
+      {
+        "route": "/dashboard/badges",
+        "durationMs": 2222,
+        "navigationStatus": 200,
+        "navigationError": null,
+        "facts": {
+          "url": "http://localhost:3001/",
+          "title": "Create Next App",
+          "lang": "en",
+          "bodyTextLength": 166,
+          "h1Count": 1,
+          "mainCount": 0,
+          "navCount": 0,
+          "headings": [
+            {
+              "level": 1,
+              "text": "Mission Control"
+            }
+          ],
+          "headingSkips": [],
+          "duplicateIds": [],
+          "interactiveCount": 3,
+          "horizontalOverflow": false,
+          "overflow": [],
+          "brokenImages": [],
+          "missingAltImages": [],
+          "sampleDataLabels": 0,
+          "loadingLanguage": [],
+          "canonical": null,
+          "robots": null,
+          "themeBackground": "rgb(13, 13, 13)"
+        },
+        "axe": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "help": "Elements must meet minimum color contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/color-contrast?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "span"
+                ],
+                "html": "<span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.67 (foreground color: #595959, background color: #121212, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+              },
+              {
+                "target": [
+                  ".text-xs"
+                ],
+                "html": "<p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.64 (foreground color: #565656, background color: #0d0d0d, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          },
+          {
+            "id": "landmark-one-main",
+            "impact": "moderate",
+            "description": "Ensure the document has a main landmark",
+            "help": "Document should have one main landmark",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/landmark-one-main?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "html"
+                ],
+                "html": "<html lang=\"en\">",
+                "failureSummary": "Fix all of the following:\n  Document does not have a main landmark"
+              }
+            ]
+          },
+          {
+            "id": "region",
+            "impact": "moderate",
+            "description": "Ensure all page content is contained by landmarks",
+            "help": "All page content should be contained by landmarks",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/region?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "h1"
+                ],
+                "html": "<h1 class=\"text-2xl font-semibold text-white text-center tracking-tight mb-2\">Mission Control</h1>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".text-white\\/50"
+                ],
+                "html": "<p class=\"text-white/50 text-center text-sm mb-8\">Secure staff access only. Enter your email to receive a magic link.</p>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  "form > div:nth-child(1)"
+                ],
+                "html": "<div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".gap-3"
+                ],
+                "html": "<div class=\"flex items-center gap-3 py-1\"><div class=\"flex-1 h-px bg-white/10\"></div><span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span><div class=\"flex-1 h-px bg-white/10\"></div></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".mt-8"
+                ],
+                "html": "<div class=\"mt-8 text-center\"><p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              }
+            ]
+          }
+        ],
+        "consoleErrors": [],
+        "pageErrors": [],
+        "failedRequests": [],
+        "badResponses": [],
+        "discoveredLinks": []
+      },
+      {
+        "route": "/dashboard/brain",
+        "durationMs": 2248,
+        "navigationStatus": 200,
+        "navigationError": null,
+        "facts": {
+          "url": "http://localhost:3001/",
+          "title": "Create Next App",
+          "lang": "en",
+          "bodyTextLength": 166,
+          "h1Count": 1,
+          "mainCount": 0,
+          "navCount": 0,
+          "headings": [
+            {
+              "level": 1,
+              "text": "Mission Control"
+            }
+          ],
+          "headingSkips": [],
+          "duplicateIds": [],
+          "interactiveCount": 3,
+          "horizontalOverflow": false,
+          "overflow": [],
+          "brokenImages": [],
+          "missingAltImages": [],
+          "sampleDataLabels": 0,
+          "loadingLanguage": [],
+          "canonical": null,
+          "robots": null,
+          "themeBackground": "rgb(13, 13, 13)"
+        },
+        "axe": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "help": "Elements must meet minimum color contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/color-contrast?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "span"
+                ],
+                "html": "<span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.67 (foreground color: #595959, background color: #121212, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+              },
+              {
+                "target": [
+                  ".text-xs"
+                ],
+                "html": "<p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.64 (foreground color: #565656, background color: #0d0d0d, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          },
+          {
+            "id": "landmark-one-main",
+            "impact": "moderate",
+            "description": "Ensure the document has a main landmark",
+            "help": "Document should have one main landmark",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/landmark-one-main?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "html"
+                ],
+                "html": "<html lang=\"en\">",
+                "failureSummary": "Fix all of the following:\n  Document does not have a main landmark"
+              }
+            ]
+          },
+          {
+            "id": "region",
+            "impact": "moderate",
+            "description": "Ensure all page content is contained by landmarks",
+            "help": "All page content should be contained by landmarks",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/region?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "h1"
+                ],
+                "html": "<h1 class=\"text-2xl font-semibold text-white text-center tracking-tight mb-2\">Mission Control</h1>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".text-white\\/50"
+                ],
+                "html": "<p class=\"text-white/50 text-center text-sm mb-8\">Secure staff access only. Enter your email to receive a magic link.</p>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  "form > div:nth-child(1)"
+                ],
+                "html": "<div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".gap-3"
+                ],
+                "html": "<div class=\"flex items-center gap-3 py-1\"><div class=\"flex-1 h-px bg-white/10\"></div><span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span><div class=\"flex-1 h-px bg-white/10\"></div></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".mt-8"
+                ],
+                "html": "<div class=\"mt-8 text-center\"><p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              }
+            ]
+          }
+        ],
+        "consoleErrors": [],
+        "pageErrors": [],
+        "failedRequests": [],
+        "badResponses": [],
+        "discoveredLinks": []
+      },
+      {
+        "route": "/dashboard/cms",
+        "durationMs": 2273,
+        "navigationStatus": 200,
+        "navigationError": null,
+        "facts": {
+          "url": "http://localhost:3001/",
+          "title": "Create Next App",
+          "lang": "en",
+          "bodyTextLength": 166,
+          "h1Count": 1,
+          "mainCount": 0,
+          "navCount": 0,
+          "headings": [
+            {
+              "level": 1,
+              "text": "Mission Control"
+            }
+          ],
+          "headingSkips": [],
+          "duplicateIds": [],
+          "interactiveCount": 3,
+          "horizontalOverflow": false,
+          "overflow": [],
+          "brokenImages": [],
+          "missingAltImages": [],
+          "sampleDataLabels": 0,
+          "loadingLanguage": [],
+          "canonical": null,
+          "robots": null,
+          "themeBackground": "rgb(13, 13, 13)"
+        },
+        "axe": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "help": "Elements must meet minimum color contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/color-contrast?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "span"
+                ],
+                "html": "<span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.67 (foreground color: #595959, background color: #121212, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+              },
+              {
+                "target": [
+                  ".text-xs"
+                ],
+                "html": "<p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.64 (foreground color: #565656, background color: #0d0d0d, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          },
+          {
+            "id": "landmark-one-main",
+            "impact": "moderate",
+            "description": "Ensure the document has a main landmark",
+            "help": "Document should have one main landmark",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/landmark-one-main?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "html"
+                ],
+                "html": "<html lang=\"en\">",
+                "failureSummary": "Fix all of the following:\n  Document does not have a main landmark"
+              }
+            ]
+          },
+          {
+            "id": "region",
+            "impact": "moderate",
+            "description": "Ensure all page content is contained by landmarks",
+            "help": "All page content should be contained by landmarks",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/region?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "h1"
+                ],
+                "html": "<h1 class=\"text-2xl font-semibold text-white text-center tracking-tight mb-2\">Mission Control</h1>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".text-white\\/50"
+                ],
+                "html": "<p class=\"text-white/50 text-center text-sm mb-8\">Secure staff access only. Enter your email to receive a magic link.</p>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  "form > div:nth-child(1)"
+                ],
+                "html": "<div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".gap-3"
+                ],
+                "html": "<div class=\"flex items-center gap-3 py-1\"><div class=\"flex-1 h-px bg-white/10\"></div><span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span><div class=\"flex-1 h-px bg-white/10\"></div></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".mt-8"
+                ],
+                "html": "<div class=\"mt-8 text-center\"><p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              }
+            ]
+          }
+        ],
+        "consoleErrors": [],
+        "pageErrors": [],
+        "failedRequests": [],
+        "badResponses": [],
+        "discoveredLinks": []
+      },
+      {
+        "route": "/dashboard/cms/import",
+        "durationMs": 2249,
+        "navigationStatus": 200,
+        "navigationError": null,
+        "facts": {
+          "url": "http://localhost:3001/",
+          "title": "Create Next App",
+          "lang": "en",
+          "bodyTextLength": 166,
+          "h1Count": 1,
+          "mainCount": 0,
+          "navCount": 0,
+          "headings": [
+            {
+              "level": 1,
+              "text": "Mission Control"
+            }
+          ],
+          "headingSkips": [],
+          "duplicateIds": [],
+          "interactiveCount": 3,
+          "horizontalOverflow": false,
+          "overflow": [],
+          "brokenImages": [],
+          "missingAltImages": [],
+          "sampleDataLabels": 0,
+          "loadingLanguage": [],
+          "canonical": null,
+          "robots": null,
+          "themeBackground": "rgb(13, 13, 13)"
+        },
+        "axe": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "help": "Elements must meet minimum color contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/color-contrast?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "span"
+                ],
+                "html": "<span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.67 (foreground color: #595959, background color: #121212, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+              },
+              {
+                "target": [
+                  ".text-xs"
+                ],
+                "html": "<p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.64 (foreground color: #565656, background color: #0d0d0d, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          },
+          {
+            "id": "landmark-one-main",
+            "impact": "moderate",
+            "description": "Ensure the document has a main landmark",
+            "help": "Document should have one main landmark",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/landmark-one-main?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "html"
+                ],
+                "html": "<html lang=\"en\">",
+                "failureSummary": "Fix all of the following:\n  Document does not have a main landmark"
+              }
+            ]
+          },
+          {
+            "id": "region",
+            "impact": "moderate",
+            "description": "Ensure all page content is contained by landmarks",
+            "help": "All page content should be contained by landmarks",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/region?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "h1"
+                ],
+                "html": "<h1 class=\"text-2xl font-semibold text-white text-center tracking-tight mb-2\">Mission Control</h1>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".text-white\\/50"
+                ],
+                "html": "<p class=\"text-white/50 text-center text-sm mb-8\">Secure staff access only. Enter your email to receive a magic link.</p>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  "form > div:nth-child(1)"
+                ],
+                "html": "<div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".gap-3"
+                ],
+                "html": "<div class=\"flex items-center gap-3 py-1\"><div class=\"flex-1 h-px bg-white/10\"></div><span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span><div class=\"flex-1 h-px bg-white/10\"></div></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".mt-8"
+                ],
+                "html": "<div class=\"mt-8 text-center\"><p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              }
+            ]
+          }
+        ],
+        "consoleErrors": [],
+        "pageErrors": [],
+        "failedRequests": [],
+        "badResponses": [],
+        "discoveredLinks": []
+      },
+      {
+        "route": "/dashboard/crm",
+        "durationMs": 2262,
+        "navigationStatus": 200,
+        "navigationError": null,
+        "facts": {
+          "url": "http://localhost:3001/",
+          "title": "Create Next App",
+          "lang": "en",
+          "bodyTextLength": 166,
+          "h1Count": 1,
+          "mainCount": 0,
+          "navCount": 0,
+          "headings": [
+            {
+              "level": 1,
+              "text": "Mission Control"
+            }
+          ],
+          "headingSkips": [],
+          "duplicateIds": [],
+          "interactiveCount": 3,
+          "horizontalOverflow": false,
+          "overflow": [],
+          "brokenImages": [],
+          "missingAltImages": [],
+          "sampleDataLabels": 0,
+          "loadingLanguage": [],
+          "canonical": null,
+          "robots": null,
+          "themeBackground": "rgb(13, 13, 13)"
+        },
+        "axe": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "help": "Elements must meet minimum color contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/color-contrast?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "span"
+                ],
+                "html": "<span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.67 (foreground color: #595959, background color: #121212, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+              },
+              {
+                "target": [
+                  ".text-xs"
+                ],
+                "html": "<p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.64 (foreground color: #565656, background color: #0d0d0d, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          },
+          {
+            "id": "landmark-one-main",
+            "impact": "moderate",
+            "description": "Ensure the document has a main landmark",
+            "help": "Document should have one main landmark",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/landmark-one-main?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "html"
+                ],
+                "html": "<html lang=\"en\">",
+                "failureSummary": "Fix all of the following:\n  Document does not have a main landmark"
+              }
+            ]
+          },
+          {
+            "id": "region",
+            "impact": "moderate",
+            "description": "Ensure all page content is contained by landmarks",
+            "help": "All page content should be contained by landmarks",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/region?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "h1"
+                ],
+                "html": "<h1 class=\"text-2xl font-semibold text-white text-center tracking-tight mb-2\">Mission Control</h1>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".text-white\\/50"
+                ],
+                "html": "<p class=\"text-white/50 text-center text-sm mb-8\">Secure staff access only. Enter your email to receive a magic link.</p>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  "form > div:nth-child(1)"
+                ],
+                "html": "<div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".gap-3"
+                ],
+                "html": "<div class=\"flex items-center gap-3 py-1\"><div class=\"flex-1 h-px bg-white/10\"></div><span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span><div class=\"flex-1 h-px bg-white/10\"></div></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".mt-8"
+                ],
+                "html": "<div class=\"mt-8 text-center\"><p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              }
+            ]
+          }
+        ],
+        "consoleErrors": [],
+        "pageErrors": [],
+        "failedRequests": [],
+        "badResponses": [],
+        "discoveredLinks": []
+      },
+      {
+        "route": "/dashboard/disputes",
+        "durationMs": 2271,
+        "navigationStatus": 200,
+        "navigationError": null,
+        "facts": {
+          "url": "http://localhost:3001/",
+          "title": "Create Next App",
+          "lang": "en",
+          "bodyTextLength": 166,
+          "h1Count": 1,
+          "mainCount": 0,
+          "navCount": 0,
+          "headings": [
+            {
+              "level": 1,
+              "text": "Mission Control"
+            }
+          ],
+          "headingSkips": [],
+          "duplicateIds": [],
+          "interactiveCount": 3,
+          "horizontalOverflow": false,
+          "overflow": [],
+          "brokenImages": [],
+          "missingAltImages": [],
+          "sampleDataLabels": 0,
+          "loadingLanguage": [],
+          "canonical": null,
+          "robots": null,
+          "themeBackground": "rgb(13, 13, 13)"
+        },
+        "axe": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "help": "Elements must meet minimum color contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/color-contrast?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "span"
+                ],
+                "html": "<span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.67 (foreground color: #595959, background color: #121212, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+              },
+              {
+                "target": [
+                  ".text-xs"
+                ],
+                "html": "<p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.64 (foreground color: #565656, background color: #0d0d0d, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          },
+          {
+            "id": "landmark-one-main",
+            "impact": "moderate",
+            "description": "Ensure the document has a main landmark",
+            "help": "Document should have one main landmark",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/landmark-one-main?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "html"
+                ],
+                "html": "<html lang=\"en\">",
+                "failureSummary": "Fix all of the following:\n  Document does not have a main landmark"
+              }
+            ]
+          },
+          {
+            "id": "region",
+            "impact": "moderate",
+            "description": "Ensure all page content is contained by landmarks",
+            "help": "All page content should be contained by landmarks",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/region?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "h1"
+                ],
+                "html": "<h1 class=\"text-2xl font-semibold text-white text-center tracking-tight mb-2\">Mission Control</h1>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".text-white\\/50"
+                ],
+                "html": "<p class=\"text-white/50 text-center text-sm mb-8\">Secure staff access only. Enter your email to receive a magic link.</p>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  "form > div:nth-child(1)"
+                ],
+                "html": "<div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".gap-3"
+                ],
+                "html": "<div class=\"flex items-center gap-3 py-1\"><div class=\"flex-1 h-px bg-white/10\"></div><span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span><div class=\"flex-1 h-px bg-white/10\"></div></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".mt-8"
+                ],
+                "html": "<div class=\"mt-8 text-center\"><p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              }
+            ]
+          }
+        ],
+        "consoleErrors": [],
+        "pageErrors": [],
+        "failedRequests": [],
+        "badResponses": [],
+        "discoveredLinks": []
+      },
+      {
+        "route": "/dashboard/features",
+        "durationMs": 2295,
+        "navigationStatus": 200,
+        "navigationError": null,
+        "facts": {
+          "url": "http://localhost:3001/",
+          "title": "Create Next App",
+          "lang": "en",
+          "bodyTextLength": 166,
+          "h1Count": 1,
+          "mainCount": 0,
+          "navCount": 0,
+          "headings": [
+            {
+              "level": 1,
+              "text": "Mission Control"
+            }
+          ],
+          "headingSkips": [],
+          "duplicateIds": [],
+          "interactiveCount": 3,
+          "horizontalOverflow": false,
+          "overflow": [],
+          "brokenImages": [],
+          "missingAltImages": [],
+          "sampleDataLabels": 0,
+          "loadingLanguage": [],
+          "canonical": null,
+          "robots": null,
+          "themeBackground": "rgb(13, 13, 13)"
+        },
+        "axe": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "help": "Elements must meet minimum color contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/color-contrast?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "span"
+                ],
+                "html": "<span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.67 (foreground color: #595959, background color: #121212, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+              },
+              {
+                "target": [
+                  ".text-xs"
+                ],
+                "html": "<p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.64 (foreground color: #565656, background color: #0d0d0d, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          },
+          {
+            "id": "landmark-one-main",
+            "impact": "moderate",
+            "description": "Ensure the document has a main landmark",
+            "help": "Document should have one main landmark",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/landmark-one-main?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "html"
+                ],
+                "html": "<html lang=\"en\">",
+                "failureSummary": "Fix all of the following:\n  Document does not have a main landmark"
+              }
+            ]
+          },
+          {
+            "id": "region",
+            "impact": "moderate",
+            "description": "Ensure all page content is contained by landmarks",
+            "help": "All page content should be contained by landmarks",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/region?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "h1"
+                ],
+                "html": "<h1 class=\"text-2xl font-semibold text-white text-center tracking-tight mb-2\">Mission Control</h1>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".text-white\\/50"
+                ],
+                "html": "<p class=\"text-white/50 text-center text-sm mb-8\">Secure staff access only. Enter your email to receive a magic link.</p>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  "form > div:nth-child(1)"
+                ],
+                "html": "<div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".gap-3"
+                ],
+                "html": "<div class=\"flex items-center gap-3 py-1\"><div class=\"flex-1 h-px bg-white/10\"></div><span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span><div class=\"flex-1 h-px bg-white/10\"></div></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".mt-8"
+                ],
+                "html": "<div class=\"mt-8 text-center\"><p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              }
+            ]
+          }
+        ],
+        "consoleErrors": [],
+        "pageErrors": [],
+        "failedRequests": [],
+        "badResponses": [],
+        "discoveredLinks": []
+      },
+      {
+        "route": "/dashboard/inbox",
+        "durationMs": 2342,
+        "navigationStatus": 200,
+        "navigationError": null,
+        "facts": {
+          "url": "http://localhost:3001/",
+          "title": "Create Next App",
+          "lang": "en",
+          "bodyTextLength": 166,
+          "h1Count": 1,
+          "mainCount": 0,
+          "navCount": 0,
+          "headings": [
+            {
+              "level": 1,
+              "text": "Mission Control"
+            }
+          ],
+          "headingSkips": [],
+          "duplicateIds": [],
+          "interactiveCount": 3,
+          "horizontalOverflow": false,
+          "overflow": [],
+          "brokenImages": [],
+          "missingAltImages": [],
+          "sampleDataLabels": 0,
+          "loadingLanguage": [],
+          "canonical": null,
+          "robots": null,
+          "themeBackground": "rgb(13, 13, 13)"
+        },
+        "axe": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "help": "Elements must meet minimum color contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/color-contrast?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "span"
+                ],
+                "html": "<span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.67 (foreground color: #595959, background color: #121212, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+              },
+              {
+                "target": [
+                  ".text-xs"
+                ],
+                "html": "<p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.64 (foreground color: #565656, background color: #0d0d0d, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          },
+          {
+            "id": "landmark-one-main",
+            "impact": "moderate",
+            "description": "Ensure the document has a main landmark",
+            "help": "Document should have one main landmark",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/landmark-one-main?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "html"
+                ],
+                "html": "<html lang=\"en\">",
+                "failureSummary": "Fix all of the following:\n  Document does not have a main landmark"
+              }
+            ]
+          },
+          {
+            "id": "region",
+            "impact": "moderate",
+            "description": "Ensure all page content is contained by landmarks",
+            "help": "All page content should be contained by landmarks",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/region?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "h1"
+                ],
+                "html": "<h1 class=\"text-2xl font-semibold text-white text-center tracking-tight mb-2\">Mission Control</h1>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".text-white\\/50"
+                ],
+                "html": "<p class=\"text-white/50 text-center text-sm mb-8\">Secure staff access only. Enter your email to receive a magic link.</p>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  "form > div:nth-child(1)"
+                ],
+                "html": "<div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".gap-3"
+                ],
+                "html": "<div class=\"flex items-center gap-3 py-1\"><div class=\"flex-1 h-px bg-white/10\"></div><span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span><div class=\"flex-1 h-px bg-white/10\"></div></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".mt-8"
+                ],
+                "html": "<div class=\"mt-8 text-center\"><p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              }
+            ]
+          }
+        ],
+        "consoleErrors": [],
+        "pageErrors": [],
+        "failedRequests": [],
+        "badResponses": [],
+        "discoveredLinks": []
+      },
+      {
+        "route": "/dashboard/media",
+        "durationMs": 2233,
+        "navigationStatus": 200,
+        "navigationError": null,
+        "facts": {
+          "url": "http://localhost:3001/",
+          "title": "Create Next App",
+          "lang": "en",
+          "bodyTextLength": 166,
+          "h1Count": 1,
+          "mainCount": 0,
+          "navCount": 0,
+          "headings": [
+            {
+              "level": 1,
+              "text": "Mission Control"
+            }
+          ],
+          "headingSkips": [],
+          "duplicateIds": [],
+          "interactiveCount": 3,
+          "horizontalOverflow": false,
+          "overflow": [],
+          "brokenImages": [],
+          "missingAltImages": [],
+          "sampleDataLabels": 0,
+          "loadingLanguage": [],
+          "canonical": null,
+          "robots": null,
+          "themeBackground": "rgb(13, 13, 13)"
+        },
+        "axe": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "help": "Elements must meet minimum color contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/color-contrast?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "span"
+                ],
+                "html": "<span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.67 (foreground color: #595959, background color: #121212, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+              },
+              {
+                "target": [
+                  ".text-xs"
+                ],
+                "html": "<p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.64 (foreground color: #565656, background color: #0d0d0d, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          },
+          {
+            "id": "landmark-one-main",
+            "impact": "moderate",
+            "description": "Ensure the document has a main landmark",
+            "help": "Document should have one main landmark",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/landmark-one-main?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "html"
+                ],
+                "html": "<html lang=\"en\">",
+                "failureSummary": "Fix all of the following:\n  Document does not have a main landmark"
+              }
+            ]
+          },
+          {
+            "id": "region",
+            "impact": "moderate",
+            "description": "Ensure all page content is contained by landmarks",
+            "help": "All page content should be contained by landmarks",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/region?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "h1"
+                ],
+                "html": "<h1 class=\"text-2xl font-semibold text-white text-center tracking-tight mb-2\">Mission Control</h1>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".text-white\\/50"
+                ],
+                "html": "<p class=\"text-white/50 text-center text-sm mb-8\">Secure staff access only. Enter your email to receive a magic link.</p>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  "form > div:nth-child(1)"
+                ],
+                "html": "<div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".gap-3"
+                ],
+                "html": "<div class=\"flex items-center gap-3 py-1\"><div class=\"flex-1 h-px bg-white/10\"></div><span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span><div class=\"flex-1 h-px bg-white/10\"></div></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".mt-8"
+                ],
+                "html": "<div class=\"mt-8 text-center\"><p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              }
+            ]
+          }
+        ],
+        "consoleErrors": [],
+        "pageErrors": [],
+        "failedRequests": [],
+        "badResponses": [],
+        "discoveredLinks": []
+      },
+      {
+        "route": "/dashboard/metrics",
+        "durationMs": 2262,
+        "navigationStatus": 200,
+        "navigationError": null,
+        "facts": {
+          "url": "http://localhost:3001/",
+          "title": "Create Next App",
+          "lang": "en",
+          "bodyTextLength": 166,
+          "h1Count": 1,
+          "mainCount": 0,
+          "navCount": 0,
+          "headings": [
+            {
+              "level": 1,
+              "text": "Mission Control"
+            }
+          ],
+          "headingSkips": [],
+          "duplicateIds": [],
+          "interactiveCount": 3,
+          "horizontalOverflow": false,
+          "overflow": [],
+          "brokenImages": [],
+          "missingAltImages": [],
+          "sampleDataLabels": 0,
+          "loadingLanguage": [],
+          "canonical": null,
+          "robots": null,
+          "themeBackground": "rgb(13, 13, 13)"
+        },
+        "axe": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "help": "Elements must meet minimum color contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/color-contrast?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "span"
+                ],
+                "html": "<span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.67 (foreground color: #595959, background color: #121212, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+              },
+              {
+                "target": [
+                  ".text-xs"
+                ],
+                "html": "<p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.64 (foreground color: #565656, background color: #0d0d0d, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          },
+          {
+            "id": "landmark-one-main",
+            "impact": "moderate",
+            "description": "Ensure the document has a main landmark",
+            "help": "Document should have one main landmark",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/landmark-one-main?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "html"
+                ],
+                "html": "<html lang=\"en\">",
+                "failureSummary": "Fix all of the following:\n  Document does not have a main landmark"
+              }
+            ]
+          },
+          {
+            "id": "region",
+            "impact": "moderate",
+            "description": "Ensure all page content is contained by landmarks",
+            "help": "All page content should be contained by landmarks",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/region?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "h1"
+                ],
+                "html": "<h1 class=\"text-2xl font-semibold text-white text-center tracking-tight mb-2\">Mission Control</h1>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".text-white\\/50"
+                ],
+                "html": "<p class=\"text-white/50 text-center text-sm mb-8\">Secure staff access only. Enter your email to receive a magic link.</p>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  "form > div:nth-child(1)"
+                ],
+                "html": "<div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".gap-3"
+                ],
+                "html": "<div class=\"flex items-center gap-3 py-1\"><div class=\"flex-1 h-px bg-white/10\"></div><span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span><div class=\"flex-1 h-px bg-white/10\"></div></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".mt-8"
+                ],
+                "html": "<div class=\"mt-8 text-center\"><p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              }
+            ]
+          }
+        ],
+        "consoleErrors": [],
+        "pageErrors": [],
+        "failedRequests": [],
+        "badResponses": [],
+        "discoveredLinks": []
+      },
+      {
+        "route": "/dashboard/notifications",
+        "durationMs": 2246,
+        "navigationStatus": 200,
+        "navigationError": null,
+        "facts": {
+          "url": "http://localhost:3001/",
+          "title": "Create Next App",
+          "lang": "en",
+          "bodyTextLength": 166,
+          "h1Count": 1,
+          "mainCount": 0,
+          "navCount": 0,
+          "headings": [
+            {
+              "level": 1,
+              "text": "Mission Control"
+            }
+          ],
+          "headingSkips": [],
+          "duplicateIds": [],
+          "interactiveCount": 3,
+          "horizontalOverflow": false,
+          "overflow": [],
+          "brokenImages": [],
+          "missingAltImages": [],
+          "sampleDataLabels": 0,
+          "loadingLanguage": [],
+          "canonical": null,
+          "robots": null,
+          "themeBackground": "rgb(13, 13, 13)"
+        },
+        "axe": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "help": "Elements must meet minimum color contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/color-contrast?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "span"
+                ],
+                "html": "<span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.67 (foreground color: #595959, background color: #121212, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+              },
+              {
+                "target": [
+                  ".text-xs"
+                ],
+                "html": "<p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.64 (foreground color: #565656, background color: #0d0d0d, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          },
+          {
+            "id": "landmark-one-main",
+            "impact": "moderate",
+            "description": "Ensure the document has a main landmark",
+            "help": "Document should have one main landmark",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/landmark-one-main?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "html"
+                ],
+                "html": "<html lang=\"en\">",
+                "failureSummary": "Fix all of the following:\n  Document does not have a main landmark"
+              }
+            ]
+          },
+          {
+            "id": "region",
+            "impact": "moderate",
+            "description": "Ensure all page content is contained by landmarks",
+            "help": "All page content should be contained by landmarks",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/region?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "h1"
+                ],
+                "html": "<h1 class=\"text-2xl font-semibold text-white text-center tracking-tight mb-2\">Mission Control</h1>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".text-white\\/50"
+                ],
+                "html": "<p class=\"text-white/50 text-center text-sm mb-8\">Secure staff access only. Enter your email to receive a magic link.</p>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  "form > div:nth-child(1)"
+                ],
+                "html": "<div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".gap-3"
+                ],
+                "html": "<div class=\"flex items-center gap-3 py-1\"><div class=\"flex-1 h-px bg-white/10\"></div><span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span><div class=\"flex-1 h-px bg-white/10\"></div></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".mt-8"
+                ],
+                "html": "<div class=\"mt-8 text-center\"><p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              }
+            ]
+          }
+        ],
+        "consoleErrors": [],
+        "pageErrors": [],
+        "failedRequests": [],
+        "badResponses": [],
+        "discoveredLinks": []
+      },
+      {
+        "route": "/dashboard/osint",
+        "durationMs": 2211,
+        "navigationStatus": 200,
+        "navigationError": null,
+        "facts": {
+          "url": "http://localhost:3001/",
+          "title": "Create Next App",
+          "lang": "en",
+          "bodyTextLength": 166,
+          "h1Count": 1,
+          "mainCount": 0,
+          "navCount": 0,
+          "headings": [
+            {
+              "level": 1,
+              "text": "Mission Control"
+            }
+          ],
+          "headingSkips": [],
+          "duplicateIds": [],
+          "interactiveCount": 3,
+          "horizontalOverflow": false,
+          "overflow": [],
+          "brokenImages": [],
+          "missingAltImages": [],
+          "sampleDataLabels": 0,
+          "loadingLanguage": [],
+          "canonical": null,
+          "robots": null,
+          "themeBackground": "rgb(13, 13, 13)"
+        },
+        "axe": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "help": "Elements must meet minimum color contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/color-contrast?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "span"
+                ],
+                "html": "<span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.67 (foreground color: #595959, background color: #121212, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+              },
+              {
+                "target": [
+                  ".text-xs"
+                ],
+                "html": "<p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.64 (foreground color: #565656, background color: #0d0d0d, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          },
+          {
+            "id": "landmark-one-main",
+            "impact": "moderate",
+            "description": "Ensure the document has a main landmark",
+            "help": "Document should have one main landmark",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/landmark-one-main?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "html"
+                ],
+                "html": "<html lang=\"en\">",
+                "failureSummary": "Fix all of the following:\n  Document does not have a main landmark"
+              }
+            ]
+          },
+          {
+            "id": "region",
+            "impact": "moderate",
+            "description": "Ensure all page content is contained by landmarks",
+            "help": "All page content should be contained by landmarks",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/region?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "h1"
+                ],
+                "html": "<h1 class=\"text-2xl font-semibold text-white text-center tracking-tight mb-2\">Mission Control</h1>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".text-white\\/50"
+                ],
+                "html": "<p class=\"text-white/50 text-center text-sm mb-8\">Secure staff access only. Enter your email to receive a magic link.</p>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  "form > div:nth-child(1)"
+                ],
+                "html": "<div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".gap-3"
+                ],
+                "html": "<div class=\"flex items-center gap-3 py-1\"><div class=\"flex-1 h-px bg-white/10\"></div><span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span><div class=\"flex-1 h-px bg-white/10\"></div></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".mt-8"
+                ],
+                "html": "<div class=\"mt-8 text-center\"><p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              }
+            ]
+          }
+        ],
+        "consoleErrors": [],
+        "pageErrors": [],
+        "failedRequests": [],
+        "badResponses": [],
+        "discoveredLinks": []
+      },
+      {
+        "route": "/dashboard/security",
+        "durationMs": 2255,
+        "navigationStatus": 200,
+        "navigationError": null,
+        "facts": {
+          "url": "http://localhost:3001/",
+          "title": "Create Next App",
+          "lang": "en",
+          "bodyTextLength": 166,
+          "h1Count": 1,
+          "mainCount": 0,
+          "navCount": 0,
+          "headings": [
+            {
+              "level": 1,
+              "text": "Mission Control"
+            }
+          ],
+          "headingSkips": [],
+          "duplicateIds": [],
+          "interactiveCount": 3,
+          "horizontalOverflow": false,
+          "overflow": [],
+          "brokenImages": [],
+          "missingAltImages": [],
+          "sampleDataLabels": 0,
+          "loadingLanguage": [],
+          "canonical": null,
+          "robots": null,
+          "themeBackground": "rgb(13, 13, 13)"
+        },
+        "axe": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "help": "Elements must meet minimum color contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/color-contrast?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "span"
+                ],
+                "html": "<span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.67 (foreground color: #595959, background color: #121212, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+              },
+              {
+                "target": [
+                  ".text-xs"
+                ],
+                "html": "<p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.64 (foreground color: #565656, background color: #0d0d0d, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          },
+          {
+            "id": "landmark-one-main",
+            "impact": "moderate",
+            "description": "Ensure the document has a main landmark",
+            "help": "Document should have one main landmark",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/landmark-one-main?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "html"
+                ],
+                "html": "<html lang=\"en\">",
+                "failureSummary": "Fix all of the following:\n  Document does not have a main landmark"
+              }
+            ]
+          },
+          {
+            "id": "region",
+            "impact": "moderate",
+            "description": "Ensure all page content is contained by landmarks",
+            "help": "All page content should be contained by landmarks",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/region?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "h1"
+                ],
+                "html": "<h1 class=\"text-2xl font-semibold text-white text-center tracking-tight mb-2\">Mission Control</h1>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".text-white\\/50"
+                ],
+                "html": "<p class=\"text-white/50 text-center text-sm mb-8\">Secure staff access only. Enter your email to receive a magic link.</p>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  "form > div:nth-child(1)"
+                ],
+                "html": "<div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".gap-3"
+                ],
+                "html": "<div class=\"flex items-center gap-3 py-1\"><div class=\"flex-1 h-px bg-white/10\"></div><span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span><div class=\"flex-1 h-px bg-white/10\"></div></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".mt-8"
+                ],
+                "html": "<div class=\"mt-8 text-center\"><p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              }
+            ]
+          }
+        ],
+        "consoleErrors": [],
+        "pageErrors": [],
+        "failedRequests": [],
+        "badResponses": [],
+        "discoveredLinks": []
+      },
+      {
+        "route": "/dashboard/staff",
+        "durationMs": 2259,
+        "navigationStatus": 200,
+        "navigationError": null,
+        "facts": {
+          "url": "http://localhost:3001/",
+          "title": "Create Next App",
+          "lang": "en",
+          "bodyTextLength": 166,
+          "h1Count": 1,
+          "mainCount": 0,
+          "navCount": 0,
+          "headings": [
+            {
+              "level": 1,
+              "text": "Mission Control"
+            }
+          ],
+          "headingSkips": [],
+          "duplicateIds": [],
+          "interactiveCount": 3,
+          "horizontalOverflow": false,
+          "overflow": [],
+          "brokenImages": [],
+          "missingAltImages": [],
+          "sampleDataLabels": 0,
+          "loadingLanguage": [],
+          "canonical": null,
+          "robots": null,
+          "themeBackground": "rgb(13, 13, 13)"
+        },
+        "axe": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "help": "Elements must meet minimum color contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/color-contrast?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "span"
+                ],
+                "html": "<span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.67 (foreground color: #595959, background color: #121212, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+              },
+              {
+                "target": [
+                  ".text-xs"
+                ],
+                "html": "<p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.64 (foreground color: #565656, background color: #0d0d0d, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          },
+          {
+            "id": "landmark-one-main",
+            "impact": "moderate",
+            "description": "Ensure the document has a main landmark",
+            "help": "Document should have one main landmark",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/landmark-one-main?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "html"
+                ],
+                "html": "<html lang=\"en\">",
+                "failureSummary": "Fix all of the following:\n  Document does not have a main landmark"
+              }
+            ]
+          },
+          {
+            "id": "region",
+            "impact": "moderate",
+            "description": "Ensure all page content is contained by landmarks",
+            "help": "All page content should be contained by landmarks",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/region?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "h1"
+                ],
+                "html": "<h1 class=\"text-2xl font-semibold text-white text-center tracking-tight mb-2\">Mission Control</h1>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".text-white\\/50"
+                ],
+                "html": "<p class=\"text-white/50 text-center text-sm mb-8\">Secure staff access only. Enter your email to receive a magic link.</p>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  "form > div:nth-child(1)"
+                ],
+                "html": "<div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".gap-3"
+                ],
+                "html": "<div class=\"flex items-center gap-3 py-1\"><div class=\"flex-1 h-px bg-white/10\"></div><span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span><div class=\"flex-1 h-px bg-white/10\"></div></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".mt-8"
+                ],
+                "html": "<div class=\"mt-8 text-center\"><p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              }
+            ]
+          }
+        ],
+        "consoleErrors": [],
+        "pageErrors": [],
+        "failedRequests": [],
+        "badResponses": [],
+        "discoveredLinks": []
+      },
+      {
+        "route": "/dashboard/verification",
+        "durationMs": 2240,
+        "navigationStatus": 200,
+        "navigationError": null,
+        "facts": {
+          "url": "http://localhost:3001/",
+          "title": "Create Next App",
+          "lang": "en",
+          "bodyTextLength": 166,
+          "h1Count": 1,
+          "mainCount": 0,
+          "navCount": 0,
+          "headings": [
+            {
+              "level": 1,
+              "text": "Mission Control"
+            }
+          ],
+          "headingSkips": [],
+          "duplicateIds": [],
+          "interactiveCount": 3,
+          "horizontalOverflow": false,
+          "overflow": [],
+          "brokenImages": [],
+          "missingAltImages": [],
+          "sampleDataLabels": 0,
+          "loadingLanguage": [],
+          "canonical": null,
+          "robots": null,
+          "themeBackground": "rgb(13, 13, 13)"
+        },
+        "axe": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "help": "Elements must meet minimum color contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/color-contrast?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "span"
+                ],
+                "html": "<span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.67 (foreground color: #595959, background color: #121212, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+              },
+              {
+                "target": [
+                  ".text-xs"
+                ],
+                "html": "<p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.64 (foreground color: #565656, background color: #0d0d0d, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          },
+          {
+            "id": "landmark-one-main",
+            "impact": "moderate",
+            "description": "Ensure the document has a main landmark",
+            "help": "Document should have one main landmark",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/landmark-one-main?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "html"
+                ],
+                "html": "<html lang=\"en\">",
+                "failureSummary": "Fix all of the following:\n  Document does not have a main landmark"
+              }
+            ]
+          },
+          {
+            "id": "region",
+            "impact": "moderate",
+            "description": "Ensure all page content is contained by landmarks",
+            "help": "All page content should be contained by landmarks",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/region?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "h1"
+                ],
+                "html": "<h1 class=\"text-2xl font-semibold text-white text-center tracking-tight mb-2\">Mission Control</h1>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".text-white\\/50"
+                ],
+                "html": "<p class=\"text-white/50 text-center text-sm mb-8\">Secure staff access only. Enter your email to receive a magic link.</p>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  "form > div:nth-child(1)"
+                ],
+                "html": "<div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".gap-3"
+                ],
+                "html": "<div class=\"flex items-center gap-3 py-1\"><div class=\"flex-1 h-px bg-white/10\"></div><span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span><div class=\"flex-1 h-px bg-white/10\"></div></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".mt-8"
+                ],
+                "html": "<div class=\"mt-8 text-center\"><p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              }
+            ]
+          }
+        ],
+        "consoleErrors": [],
+        "pageErrors": [],
+        "failedRequests": [],
+        "badResponses": [],
+        "discoveredLinks": []
+      }
+    ],
+    "mobile": [
+      {
+        "route": "/",
+        "durationMs": 2259,
+        "navigationStatus": 200,
+        "navigationError": null,
+        "facts": {
+          "url": "http://localhost:3001/",
+          "title": "Create Next App",
+          "lang": "en",
+          "bodyTextLength": 166,
+          "h1Count": 1,
+          "mainCount": 0,
+          "navCount": 0,
+          "headings": [
+            {
+              "level": 1,
+              "text": "Mission Control"
+            }
+          ],
+          "headingSkips": [],
+          "duplicateIds": [],
+          "interactiveCount": 3,
+          "horizontalOverflow": false,
+          "overflow": [],
+          "brokenImages": [],
+          "missingAltImages": [],
+          "sampleDataLabels": 0,
+          "loadingLanguage": [],
+          "canonical": null,
+          "robots": null,
+          "themeBackground": "rgb(13, 13, 13)"
+        },
+        "axe": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "help": "Elements must meet minimum color contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/color-contrast?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "span"
+                ],
+                "html": "<span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.67 (foreground color: #595959, background color: #121212, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+              },
+              {
+                "target": [
+                  ".text-xs"
+                ],
+                "html": "<p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.64 (foreground color: #565656, background color: #0d0d0d, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          },
+          {
+            "id": "landmark-one-main",
+            "impact": "moderate",
+            "description": "Ensure the document has a main landmark",
+            "help": "Document should have one main landmark",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/landmark-one-main?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "html"
+                ],
+                "html": "<html lang=\"en\">",
+                "failureSummary": "Fix all of the following:\n  Document does not have a main landmark"
+              }
+            ]
+          },
+          {
+            "id": "region",
+            "impact": "moderate",
+            "description": "Ensure all page content is contained by landmarks",
+            "help": "All page content should be contained by landmarks",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/region?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "h1"
+                ],
+                "html": "<h1 class=\"text-2xl font-semibold text-white text-center tracking-tight mb-2\">Mission Control</h1>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".text-white\\/50"
+                ],
+                "html": "<p class=\"text-white/50 text-center text-sm mb-8\">Secure staff access only. Enter your email to receive a magic link.</p>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  "form > div:nth-child(1)"
+                ],
+                "html": "<div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".gap-3"
+                ],
+                "html": "<div class=\"flex items-center gap-3 py-1\"><div class=\"flex-1 h-px bg-white/10\"></div><span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span><div class=\"flex-1 h-px bg-white/10\"></div></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".mt-8"
+                ],
+                "html": "<div class=\"mt-8 text-center\"><p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              }
+            ]
+          }
+        ],
+        "consoleErrors": [],
+        "pageErrors": [],
+        "failedRequests": [],
+        "badResponses": [],
+        "discoveredLinks": []
+      },
+      {
+        "route": "/dashboard",
+        "durationMs": 2267,
+        "navigationStatus": 200,
+        "navigationError": null,
+        "facts": {
+          "url": "http://localhost:3001/",
+          "title": "Create Next App",
+          "lang": "en",
+          "bodyTextLength": 166,
+          "h1Count": 1,
+          "mainCount": 0,
+          "navCount": 0,
+          "headings": [
+            {
+              "level": 1,
+              "text": "Mission Control"
+            }
+          ],
+          "headingSkips": [],
+          "duplicateIds": [],
+          "interactiveCount": 3,
+          "horizontalOverflow": false,
+          "overflow": [],
+          "brokenImages": [],
+          "missingAltImages": [],
+          "sampleDataLabels": 0,
+          "loadingLanguage": [],
+          "canonical": null,
+          "robots": null,
+          "themeBackground": "rgb(13, 13, 13)"
+        },
+        "axe": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "help": "Elements must meet minimum color contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/color-contrast?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "span"
+                ],
+                "html": "<span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.67 (foreground color: #595959, background color: #121212, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+              },
+              {
+                "target": [
+                  ".text-xs"
+                ],
+                "html": "<p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.64 (foreground color: #565656, background color: #0d0d0d, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          },
+          {
+            "id": "landmark-one-main",
+            "impact": "moderate",
+            "description": "Ensure the document has a main landmark",
+            "help": "Document should have one main landmark",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/landmark-one-main?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "html"
+                ],
+                "html": "<html lang=\"en\">",
+                "failureSummary": "Fix all of the following:\n  Document does not have a main landmark"
+              }
+            ]
+          },
+          {
+            "id": "region",
+            "impact": "moderate",
+            "description": "Ensure all page content is contained by landmarks",
+            "help": "All page content should be contained by landmarks",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/region?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "h1"
+                ],
+                "html": "<h1 class=\"text-2xl font-semibold text-white text-center tracking-tight mb-2\">Mission Control</h1>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".text-white\\/50"
+                ],
+                "html": "<p class=\"text-white/50 text-center text-sm mb-8\">Secure staff access only. Enter your email to receive a magic link.</p>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  "form > div:nth-child(1)"
+                ],
+                "html": "<div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".gap-3"
+                ],
+                "html": "<div class=\"flex items-center gap-3 py-1\"><div class=\"flex-1 h-px bg-white/10\"></div><span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span><div class=\"flex-1 h-px bg-white/10\"></div></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".mt-8"
+                ],
+                "html": "<div class=\"mt-8 text-center\"><p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              }
+            ]
+          }
+        ],
+        "consoleErrors": [],
+        "pageErrors": [],
+        "failedRequests": [],
+        "badResponses": [],
+        "discoveredLinks": []
+      },
+      {
+        "route": "/dashboard/audit",
+        "durationMs": 2225,
+        "navigationStatus": 200,
+        "navigationError": null,
+        "facts": {
+          "url": "http://localhost:3001/",
+          "title": "Create Next App",
+          "lang": "en",
+          "bodyTextLength": 166,
+          "h1Count": 1,
+          "mainCount": 0,
+          "navCount": 0,
+          "headings": [
+            {
+              "level": 1,
+              "text": "Mission Control"
+            }
+          ],
+          "headingSkips": [],
+          "duplicateIds": [],
+          "interactiveCount": 3,
+          "horizontalOverflow": false,
+          "overflow": [],
+          "brokenImages": [],
+          "missingAltImages": [],
+          "sampleDataLabels": 0,
+          "loadingLanguage": [],
+          "canonical": null,
+          "robots": null,
+          "themeBackground": "rgb(13, 13, 13)"
+        },
+        "axe": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "help": "Elements must meet minimum color contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/color-contrast?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "span"
+                ],
+                "html": "<span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.67 (foreground color: #595959, background color: #121212, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+              },
+              {
+                "target": [
+                  ".text-xs"
+                ],
+                "html": "<p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.64 (foreground color: #565656, background color: #0d0d0d, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          },
+          {
+            "id": "landmark-one-main",
+            "impact": "moderate",
+            "description": "Ensure the document has a main landmark",
+            "help": "Document should have one main landmark",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/landmark-one-main?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "html"
+                ],
+                "html": "<html lang=\"en\">",
+                "failureSummary": "Fix all of the following:\n  Document does not have a main landmark"
+              }
+            ]
+          },
+          {
+            "id": "region",
+            "impact": "moderate",
+            "description": "Ensure all page content is contained by landmarks",
+            "help": "All page content should be contained by landmarks",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/region?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "h1"
+                ],
+                "html": "<h1 class=\"text-2xl font-semibold text-white text-center tracking-tight mb-2\">Mission Control</h1>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".text-white\\/50"
+                ],
+                "html": "<p class=\"text-white/50 text-center text-sm mb-8\">Secure staff access only. Enter your email to receive a magic link.</p>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  "form > div:nth-child(1)"
+                ],
+                "html": "<div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".gap-3"
+                ],
+                "html": "<div class=\"flex items-center gap-3 py-1\"><div class=\"flex-1 h-px bg-white/10\"></div><span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span><div class=\"flex-1 h-px bg-white/10\"></div></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".mt-8"
+                ],
+                "html": "<div class=\"mt-8 text-center\"><p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              }
+            ]
+          }
+        ],
+        "consoleErrors": [],
+        "pageErrors": [],
+        "failedRequests": [],
+        "badResponses": [],
+        "discoveredLinks": []
+      },
+      {
+        "route": "/dashboard/badges",
+        "durationMs": 2244,
+        "navigationStatus": 200,
+        "navigationError": null,
+        "facts": {
+          "url": "http://localhost:3001/",
+          "title": "Create Next App",
+          "lang": "en",
+          "bodyTextLength": 166,
+          "h1Count": 1,
+          "mainCount": 0,
+          "navCount": 0,
+          "headings": [
+            {
+              "level": 1,
+              "text": "Mission Control"
+            }
+          ],
+          "headingSkips": [],
+          "duplicateIds": [],
+          "interactiveCount": 3,
+          "horizontalOverflow": false,
+          "overflow": [],
+          "brokenImages": [],
+          "missingAltImages": [],
+          "sampleDataLabels": 0,
+          "loadingLanguage": [],
+          "canonical": null,
+          "robots": null,
+          "themeBackground": "rgb(13, 13, 13)"
+        },
+        "axe": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "help": "Elements must meet minimum color contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/color-contrast?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "span"
+                ],
+                "html": "<span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.67 (foreground color: #595959, background color: #121212, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+              },
+              {
+                "target": [
+                  ".text-xs"
+                ],
+                "html": "<p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.64 (foreground color: #565656, background color: #0d0d0d, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          },
+          {
+            "id": "landmark-one-main",
+            "impact": "moderate",
+            "description": "Ensure the document has a main landmark",
+            "help": "Document should have one main landmark",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/landmark-one-main?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "html"
+                ],
+                "html": "<html lang=\"en\">",
+                "failureSummary": "Fix all of the following:\n  Document does not have a main landmark"
+              }
+            ]
+          },
+          {
+            "id": "region",
+            "impact": "moderate",
+            "description": "Ensure all page content is contained by landmarks",
+            "help": "All page content should be contained by landmarks",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/region?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "h1"
+                ],
+                "html": "<h1 class=\"text-2xl font-semibold text-white text-center tracking-tight mb-2\">Mission Control</h1>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".text-white\\/50"
+                ],
+                "html": "<p class=\"text-white/50 text-center text-sm mb-8\">Secure staff access only. Enter your email to receive a magic link.</p>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  "form > div:nth-child(1)"
+                ],
+                "html": "<div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".gap-3"
+                ],
+                "html": "<div class=\"flex items-center gap-3 py-1\"><div class=\"flex-1 h-px bg-white/10\"></div><span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span><div class=\"flex-1 h-px bg-white/10\"></div></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".mt-8"
+                ],
+                "html": "<div class=\"mt-8 text-center\"><p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              }
+            ]
+          }
+        ],
+        "consoleErrors": [],
+        "pageErrors": [],
+        "failedRequests": [],
+        "badResponses": [],
+        "discoveredLinks": []
+      },
+      {
+        "route": "/dashboard/brain",
+        "durationMs": 2264,
+        "navigationStatus": 200,
+        "navigationError": null,
+        "facts": {
+          "url": "http://localhost:3001/",
+          "title": "Create Next App",
+          "lang": "en",
+          "bodyTextLength": 166,
+          "h1Count": 1,
+          "mainCount": 0,
+          "navCount": 0,
+          "headings": [
+            {
+              "level": 1,
+              "text": "Mission Control"
+            }
+          ],
+          "headingSkips": [],
+          "duplicateIds": [],
+          "interactiveCount": 3,
+          "horizontalOverflow": false,
+          "overflow": [],
+          "brokenImages": [],
+          "missingAltImages": [],
+          "sampleDataLabels": 0,
+          "loadingLanguage": [],
+          "canonical": null,
+          "robots": null,
+          "themeBackground": "rgb(13, 13, 13)"
+        },
+        "axe": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "help": "Elements must meet minimum color contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/color-contrast?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "span"
+                ],
+                "html": "<span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.67 (foreground color: #595959, background color: #121212, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+              },
+              {
+                "target": [
+                  ".text-xs"
+                ],
+                "html": "<p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.64 (foreground color: #565656, background color: #0d0d0d, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          },
+          {
+            "id": "landmark-one-main",
+            "impact": "moderate",
+            "description": "Ensure the document has a main landmark",
+            "help": "Document should have one main landmark",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/landmark-one-main?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "html"
+                ],
+                "html": "<html lang=\"en\">",
+                "failureSummary": "Fix all of the following:\n  Document does not have a main landmark"
+              }
+            ]
+          },
+          {
+            "id": "region",
+            "impact": "moderate",
+            "description": "Ensure all page content is contained by landmarks",
+            "help": "All page content should be contained by landmarks",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/region?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "h1"
+                ],
+                "html": "<h1 class=\"text-2xl font-semibold text-white text-center tracking-tight mb-2\">Mission Control</h1>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".text-white\\/50"
+                ],
+                "html": "<p class=\"text-white/50 text-center text-sm mb-8\">Secure staff access only. Enter your email to receive a magic link.</p>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  "form > div:nth-child(1)"
+                ],
+                "html": "<div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".gap-3"
+                ],
+                "html": "<div class=\"flex items-center gap-3 py-1\"><div class=\"flex-1 h-px bg-white/10\"></div><span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span><div class=\"flex-1 h-px bg-white/10\"></div></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".mt-8"
+                ],
+                "html": "<div class=\"mt-8 text-center\"><p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              }
+            ]
+          }
+        ],
+        "consoleErrors": [],
+        "pageErrors": [],
+        "failedRequests": [],
+        "badResponses": [],
+        "discoveredLinks": []
+      },
+      {
+        "route": "/dashboard/cms",
+        "durationMs": 2230,
+        "navigationStatus": 200,
+        "navigationError": null,
+        "facts": {
+          "url": "http://localhost:3001/",
+          "title": "Create Next App",
+          "lang": "en",
+          "bodyTextLength": 166,
+          "h1Count": 1,
+          "mainCount": 0,
+          "navCount": 0,
+          "headings": [
+            {
+              "level": 1,
+              "text": "Mission Control"
+            }
+          ],
+          "headingSkips": [],
+          "duplicateIds": [],
+          "interactiveCount": 3,
+          "horizontalOverflow": false,
+          "overflow": [],
+          "brokenImages": [],
+          "missingAltImages": [],
+          "sampleDataLabels": 0,
+          "loadingLanguage": [],
+          "canonical": null,
+          "robots": null,
+          "themeBackground": "rgb(13, 13, 13)"
+        },
+        "axe": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "help": "Elements must meet minimum color contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/color-contrast?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "span"
+                ],
+                "html": "<span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.67 (foreground color: #595959, background color: #121212, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+              },
+              {
+                "target": [
+                  ".text-xs"
+                ],
+                "html": "<p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.64 (foreground color: #565656, background color: #0d0d0d, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          },
+          {
+            "id": "landmark-one-main",
+            "impact": "moderate",
+            "description": "Ensure the document has a main landmark",
+            "help": "Document should have one main landmark",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/landmark-one-main?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "html"
+                ],
+                "html": "<html lang=\"en\">",
+                "failureSummary": "Fix all of the following:\n  Document does not have a main landmark"
+              }
+            ]
+          },
+          {
+            "id": "region",
+            "impact": "moderate",
+            "description": "Ensure all page content is contained by landmarks",
+            "help": "All page content should be contained by landmarks",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/region?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "h1"
+                ],
+                "html": "<h1 class=\"text-2xl font-semibold text-white text-center tracking-tight mb-2\">Mission Control</h1>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".text-white\\/50"
+                ],
+                "html": "<p class=\"text-white/50 text-center text-sm mb-8\">Secure staff access only. Enter your email to receive a magic link.</p>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  "form > div:nth-child(1)"
+                ],
+                "html": "<div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".gap-3"
+                ],
+                "html": "<div class=\"flex items-center gap-3 py-1\"><div class=\"flex-1 h-px bg-white/10\"></div><span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span><div class=\"flex-1 h-px bg-white/10\"></div></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".mt-8"
+                ],
+                "html": "<div class=\"mt-8 text-center\"><p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              }
+            ]
+          }
+        ],
+        "consoleErrors": [],
+        "pageErrors": [],
+        "failedRequests": [],
+        "badResponses": [],
+        "discoveredLinks": []
+      },
+      {
+        "route": "/dashboard/cms/import",
+        "durationMs": 2260,
+        "navigationStatus": 200,
+        "navigationError": null,
+        "facts": {
+          "url": "http://localhost:3001/",
+          "title": "Create Next App",
+          "lang": "en",
+          "bodyTextLength": 166,
+          "h1Count": 1,
+          "mainCount": 0,
+          "navCount": 0,
+          "headings": [
+            {
+              "level": 1,
+              "text": "Mission Control"
+            }
+          ],
+          "headingSkips": [],
+          "duplicateIds": [],
+          "interactiveCount": 3,
+          "horizontalOverflow": false,
+          "overflow": [],
+          "brokenImages": [],
+          "missingAltImages": [],
+          "sampleDataLabels": 0,
+          "loadingLanguage": [],
+          "canonical": null,
+          "robots": null,
+          "themeBackground": "rgb(13, 13, 13)"
+        },
+        "axe": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "help": "Elements must meet minimum color contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/color-contrast?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "span"
+                ],
+                "html": "<span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.67 (foreground color: #595959, background color: #121212, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+              },
+              {
+                "target": [
+                  ".text-xs"
+                ],
+                "html": "<p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.64 (foreground color: #565656, background color: #0d0d0d, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          },
+          {
+            "id": "landmark-one-main",
+            "impact": "moderate",
+            "description": "Ensure the document has a main landmark",
+            "help": "Document should have one main landmark",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/landmark-one-main?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "html"
+                ],
+                "html": "<html lang=\"en\">",
+                "failureSummary": "Fix all of the following:\n  Document does not have a main landmark"
+              }
+            ]
+          },
+          {
+            "id": "region",
+            "impact": "moderate",
+            "description": "Ensure all page content is contained by landmarks",
+            "help": "All page content should be contained by landmarks",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/region?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "h1"
+                ],
+                "html": "<h1 class=\"text-2xl font-semibold text-white text-center tracking-tight mb-2\">Mission Control</h1>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".text-white\\/50"
+                ],
+                "html": "<p class=\"text-white/50 text-center text-sm mb-8\">Secure staff access only. Enter your email to receive a magic link.</p>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  "form > div:nth-child(1)"
+                ],
+                "html": "<div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".gap-3"
+                ],
+                "html": "<div class=\"flex items-center gap-3 py-1\"><div class=\"flex-1 h-px bg-white/10\"></div><span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span><div class=\"flex-1 h-px bg-white/10\"></div></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".mt-8"
+                ],
+                "html": "<div class=\"mt-8 text-center\"><p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              }
+            ]
+          }
+        ],
+        "consoleErrors": [],
+        "pageErrors": [],
+        "failedRequests": [],
+        "badResponses": [],
+        "discoveredLinks": []
+      },
+      {
+        "route": "/dashboard/crm",
+        "durationMs": 2218,
+        "navigationStatus": 200,
+        "navigationError": null,
+        "facts": {
+          "url": "http://localhost:3001/",
+          "title": "Create Next App",
+          "lang": "en",
+          "bodyTextLength": 166,
+          "h1Count": 1,
+          "mainCount": 0,
+          "navCount": 0,
+          "headings": [
+            {
+              "level": 1,
+              "text": "Mission Control"
+            }
+          ],
+          "headingSkips": [],
+          "duplicateIds": [],
+          "interactiveCount": 3,
+          "horizontalOverflow": false,
+          "overflow": [],
+          "brokenImages": [],
+          "missingAltImages": [],
+          "sampleDataLabels": 0,
+          "loadingLanguage": [],
+          "canonical": null,
+          "robots": null,
+          "themeBackground": "rgb(13, 13, 13)"
+        },
+        "axe": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "help": "Elements must meet minimum color contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/color-contrast?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "span"
+                ],
+                "html": "<span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.67 (foreground color: #595959, background color: #121212, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+              },
+              {
+                "target": [
+                  ".text-xs"
+                ],
+                "html": "<p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.64 (foreground color: #565656, background color: #0d0d0d, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          },
+          {
+            "id": "landmark-one-main",
+            "impact": "moderate",
+            "description": "Ensure the document has a main landmark",
+            "help": "Document should have one main landmark",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/landmark-one-main?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "html"
+                ],
+                "html": "<html lang=\"en\">",
+                "failureSummary": "Fix all of the following:\n  Document does not have a main landmark"
+              }
+            ]
+          },
+          {
+            "id": "region",
+            "impact": "moderate",
+            "description": "Ensure all page content is contained by landmarks",
+            "help": "All page content should be contained by landmarks",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/region?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "h1"
+                ],
+                "html": "<h1 class=\"text-2xl font-semibold text-white text-center tracking-tight mb-2\">Mission Control</h1>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".text-white\\/50"
+                ],
+                "html": "<p class=\"text-white/50 text-center text-sm mb-8\">Secure staff access only. Enter your email to receive a magic link.</p>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  "form > div:nth-child(1)"
+                ],
+                "html": "<div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".gap-3"
+                ],
+                "html": "<div class=\"flex items-center gap-3 py-1\"><div class=\"flex-1 h-px bg-white/10\"></div><span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span><div class=\"flex-1 h-px bg-white/10\"></div></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".mt-8"
+                ],
+                "html": "<div class=\"mt-8 text-center\"><p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              }
+            ]
+          }
+        ],
+        "consoleErrors": [],
+        "pageErrors": [],
+        "failedRequests": [],
+        "badResponses": [],
+        "discoveredLinks": []
+      },
+      {
+        "route": "/dashboard/disputes",
+        "durationMs": 2212,
+        "navigationStatus": 200,
+        "navigationError": null,
+        "facts": {
+          "url": "http://localhost:3001/",
+          "title": "Create Next App",
+          "lang": "en",
+          "bodyTextLength": 166,
+          "h1Count": 1,
+          "mainCount": 0,
+          "navCount": 0,
+          "headings": [
+            {
+              "level": 1,
+              "text": "Mission Control"
+            }
+          ],
+          "headingSkips": [],
+          "duplicateIds": [],
+          "interactiveCount": 3,
+          "horizontalOverflow": false,
+          "overflow": [],
+          "brokenImages": [],
+          "missingAltImages": [],
+          "sampleDataLabels": 0,
+          "loadingLanguage": [],
+          "canonical": null,
+          "robots": null,
+          "themeBackground": "rgb(13, 13, 13)"
+        },
+        "axe": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "help": "Elements must meet minimum color contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/color-contrast?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "span"
+                ],
+                "html": "<span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.67 (foreground color: #595959, background color: #121212, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+              },
+              {
+                "target": [
+                  ".text-xs"
+                ],
+                "html": "<p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.64 (foreground color: #565656, background color: #0d0d0d, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          },
+          {
+            "id": "landmark-one-main",
+            "impact": "moderate",
+            "description": "Ensure the document has a main landmark",
+            "help": "Document should have one main landmark",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/landmark-one-main?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "html"
+                ],
+                "html": "<html lang=\"en\">",
+                "failureSummary": "Fix all of the following:\n  Document does not have a main landmark"
+              }
+            ]
+          },
+          {
+            "id": "region",
+            "impact": "moderate",
+            "description": "Ensure all page content is contained by landmarks",
+            "help": "All page content should be contained by landmarks",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/region?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "h1"
+                ],
+                "html": "<h1 class=\"text-2xl font-semibold text-white text-center tracking-tight mb-2\">Mission Control</h1>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".text-white\\/50"
+                ],
+                "html": "<p class=\"text-white/50 text-center text-sm mb-8\">Secure staff access only. Enter your email to receive a magic link.</p>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  "form > div:nth-child(1)"
+                ],
+                "html": "<div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".gap-3"
+                ],
+                "html": "<div class=\"flex items-center gap-3 py-1\"><div class=\"flex-1 h-px bg-white/10\"></div><span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span><div class=\"flex-1 h-px bg-white/10\"></div></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".mt-8"
+                ],
+                "html": "<div class=\"mt-8 text-center\"><p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              }
+            ]
+          }
+        ],
+        "consoleErrors": [],
+        "pageErrors": [],
+        "failedRequests": [],
+        "badResponses": [],
+        "discoveredLinks": []
+      },
+      {
+        "route": "/dashboard/features",
+        "durationMs": 2205,
+        "navigationStatus": 200,
+        "navigationError": null,
+        "facts": {
+          "url": "http://localhost:3001/",
+          "title": "Create Next App",
+          "lang": "en",
+          "bodyTextLength": 166,
+          "h1Count": 1,
+          "mainCount": 0,
+          "navCount": 0,
+          "headings": [
+            {
+              "level": 1,
+              "text": "Mission Control"
+            }
+          ],
+          "headingSkips": [],
+          "duplicateIds": [],
+          "interactiveCount": 3,
+          "horizontalOverflow": false,
+          "overflow": [],
+          "brokenImages": [],
+          "missingAltImages": [],
+          "sampleDataLabels": 0,
+          "loadingLanguage": [],
+          "canonical": null,
+          "robots": null,
+          "themeBackground": "rgb(13, 13, 13)"
+        },
+        "axe": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "help": "Elements must meet minimum color contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/color-contrast?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "span"
+                ],
+                "html": "<span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.67 (foreground color: #595959, background color: #121212, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+              },
+              {
+                "target": [
+                  ".text-xs"
+                ],
+                "html": "<p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.64 (foreground color: #565656, background color: #0d0d0d, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          },
+          {
+            "id": "landmark-one-main",
+            "impact": "moderate",
+            "description": "Ensure the document has a main landmark",
+            "help": "Document should have one main landmark",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/landmark-one-main?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "html"
+                ],
+                "html": "<html lang=\"en\">",
+                "failureSummary": "Fix all of the following:\n  Document does not have a main landmark"
+              }
+            ]
+          },
+          {
+            "id": "region",
+            "impact": "moderate",
+            "description": "Ensure all page content is contained by landmarks",
+            "help": "All page content should be contained by landmarks",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/region?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "h1"
+                ],
+                "html": "<h1 class=\"text-2xl font-semibold text-white text-center tracking-tight mb-2\">Mission Control</h1>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".text-white\\/50"
+                ],
+                "html": "<p class=\"text-white/50 text-center text-sm mb-8\">Secure staff access only. Enter your email to receive a magic link.</p>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  "form > div:nth-child(1)"
+                ],
+                "html": "<div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".gap-3"
+                ],
+                "html": "<div class=\"flex items-center gap-3 py-1\"><div class=\"flex-1 h-px bg-white/10\"></div><span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span><div class=\"flex-1 h-px bg-white/10\"></div></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".mt-8"
+                ],
+                "html": "<div class=\"mt-8 text-center\"><p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              }
+            ]
+          }
+        ],
+        "consoleErrors": [],
+        "pageErrors": [],
+        "failedRequests": [],
+        "badResponses": [],
+        "discoveredLinks": []
+      },
+      {
+        "route": "/dashboard/inbox",
+        "durationMs": 2259,
+        "navigationStatus": 200,
+        "navigationError": null,
+        "facts": {
+          "url": "http://localhost:3001/",
+          "title": "Create Next App",
+          "lang": "en",
+          "bodyTextLength": 166,
+          "h1Count": 1,
+          "mainCount": 0,
+          "navCount": 0,
+          "headings": [
+            {
+              "level": 1,
+              "text": "Mission Control"
+            }
+          ],
+          "headingSkips": [],
+          "duplicateIds": [],
+          "interactiveCount": 3,
+          "horizontalOverflow": false,
+          "overflow": [],
+          "brokenImages": [],
+          "missingAltImages": [],
+          "sampleDataLabels": 0,
+          "loadingLanguage": [],
+          "canonical": null,
+          "robots": null,
+          "themeBackground": "rgb(13, 13, 13)"
+        },
+        "axe": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "help": "Elements must meet minimum color contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/color-contrast?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "span"
+                ],
+                "html": "<span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.67 (foreground color: #595959, background color: #121212, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+              },
+              {
+                "target": [
+                  ".text-xs"
+                ],
+                "html": "<p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.64 (foreground color: #565656, background color: #0d0d0d, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          },
+          {
+            "id": "landmark-one-main",
+            "impact": "moderate",
+            "description": "Ensure the document has a main landmark",
+            "help": "Document should have one main landmark",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/landmark-one-main?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "html"
+                ],
+                "html": "<html lang=\"en\">",
+                "failureSummary": "Fix all of the following:\n  Document does not have a main landmark"
+              }
+            ]
+          },
+          {
+            "id": "region",
+            "impact": "moderate",
+            "description": "Ensure all page content is contained by landmarks",
+            "help": "All page content should be contained by landmarks",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/region?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "h1"
+                ],
+                "html": "<h1 class=\"text-2xl font-semibold text-white text-center tracking-tight mb-2\">Mission Control</h1>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".text-white\\/50"
+                ],
+                "html": "<p class=\"text-white/50 text-center text-sm mb-8\">Secure staff access only. Enter your email to receive a magic link.</p>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  "form > div:nth-child(1)"
+                ],
+                "html": "<div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".gap-3"
+                ],
+                "html": "<div class=\"flex items-center gap-3 py-1\"><div class=\"flex-1 h-px bg-white/10\"></div><span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span><div class=\"flex-1 h-px bg-white/10\"></div></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".mt-8"
+                ],
+                "html": "<div class=\"mt-8 text-center\"><p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              }
+            ]
+          }
+        ],
+        "consoleErrors": [],
+        "pageErrors": [],
+        "failedRequests": [],
+        "badResponses": [],
+        "discoveredLinks": []
+      },
+      {
+        "route": "/dashboard/media",
+        "durationMs": 2247,
+        "navigationStatus": 200,
+        "navigationError": null,
+        "facts": {
+          "url": "http://localhost:3001/",
+          "title": "Create Next App",
+          "lang": "en",
+          "bodyTextLength": 166,
+          "h1Count": 1,
+          "mainCount": 0,
+          "navCount": 0,
+          "headings": [
+            {
+              "level": 1,
+              "text": "Mission Control"
+            }
+          ],
+          "headingSkips": [],
+          "duplicateIds": [],
+          "interactiveCount": 3,
+          "horizontalOverflow": false,
+          "overflow": [],
+          "brokenImages": [],
+          "missingAltImages": [],
+          "sampleDataLabels": 0,
+          "loadingLanguage": [],
+          "canonical": null,
+          "robots": null,
+          "themeBackground": "rgb(13, 13, 13)"
+        },
+        "axe": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "help": "Elements must meet minimum color contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/color-contrast?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "span"
+                ],
+                "html": "<span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.67 (foreground color: #595959, background color: #121212, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+              },
+              {
+                "target": [
+                  ".text-xs"
+                ],
+                "html": "<p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.64 (foreground color: #565656, background color: #0d0d0d, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          },
+          {
+            "id": "landmark-one-main",
+            "impact": "moderate",
+            "description": "Ensure the document has a main landmark",
+            "help": "Document should have one main landmark",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/landmark-one-main?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "html"
+                ],
+                "html": "<html lang=\"en\">",
+                "failureSummary": "Fix all of the following:\n  Document does not have a main landmark"
+              }
+            ]
+          },
+          {
+            "id": "region",
+            "impact": "moderate",
+            "description": "Ensure all page content is contained by landmarks",
+            "help": "All page content should be contained by landmarks",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/region?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "h1"
+                ],
+                "html": "<h1 class=\"text-2xl font-semibold text-white text-center tracking-tight mb-2\">Mission Control</h1>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".text-white\\/50"
+                ],
+                "html": "<p class=\"text-white/50 text-center text-sm mb-8\">Secure staff access only. Enter your email to receive a magic link.</p>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  "form > div:nth-child(1)"
+                ],
+                "html": "<div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".gap-3"
+                ],
+                "html": "<div class=\"flex items-center gap-3 py-1\"><div class=\"flex-1 h-px bg-white/10\"></div><span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span><div class=\"flex-1 h-px bg-white/10\"></div></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".mt-8"
+                ],
+                "html": "<div class=\"mt-8 text-center\"><p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              }
+            ]
+          }
+        ],
+        "consoleErrors": [],
+        "pageErrors": [],
+        "failedRequests": [],
+        "badResponses": [],
+        "discoveredLinks": []
+      },
+      {
+        "route": "/dashboard/metrics",
+        "durationMs": 2204,
+        "navigationStatus": 200,
+        "navigationError": null,
+        "facts": {
+          "url": "http://localhost:3001/",
+          "title": "Create Next App",
+          "lang": "en",
+          "bodyTextLength": 166,
+          "h1Count": 1,
+          "mainCount": 0,
+          "navCount": 0,
+          "headings": [
+            {
+              "level": 1,
+              "text": "Mission Control"
+            }
+          ],
+          "headingSkips": [],
+          "duplicateIds": [],
+          "interactiveCount": 3,
+          "horizontalOverflow": false,
+          "overflow": [],
+          "brokenImages": [],
+          "missingAltImages": [],
+          "sampleDataLabels": 0,
+          "loadingLanguage": [],
+          "canonical": null,
+          "robots": null,
+          "themeBackground": "rgb(13, 13, 13)"
+        },
+        "axe": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "help": "Elements must meet minimum color contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/color-contrast?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "span"
+                ],
+                "html": "<span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.67 (foreground color: #595959, background color: #121212, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+              },
+              {
+                "target": [
+                  ".text-xs"
+                ],
+                "html": "<p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.64 (foreground color: #565656, background color: #0d0d0d, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          },
+          {
+            "id": "landmark-one-main",
+            "impact": "moderate",
+            "description": "Ensure the document has a main landmark",
+            "help": "Document should have one main landmark",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/landmark-one-main?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "html"
+                ],
+                "html": "<html lang=\"en\">",
+                "failureSummary": "Fix all of the following:\n  Document does not have a main landmark"
+              }
+            ]
+          },
+          {
+            "id": "region",
+            "impact": "moderate",
+            "description": "Ensure all page content is contained by landmarks",
+            "help": "All page content should be contained by landmarks",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/region?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "h1"
+                ],
+                "html": "<h1 class=\"text-2xl font-semibold text-white text-center tracking-tight mb-2\">Mission Control</h1>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".text-white\\/50"
+                ],
+                "html": "<p class=\"text-white/50 text-center text-sm mb-8\">Secure staff access only. Enter your email to receive a magic link.</p>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  "form > div:nth-child(1)"
+                ],
+                "html": "<div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".gap-3"
+                ],
+                "html": "<div class=\"flex items-center gap-3 py-1\"><div class=\"flex-1 h-px bg-white/10\"></div><span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span><div class=\"flex-1 h-px bg-white/10\"></div></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".mt-8"
+                ],
+                "html": "<div class=\"mt-8 text-center\"><p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              }
+            ]
+          }
+        ],
+        "consoleErrors": [],
+        "pageErrors": [],
+        "failedRequests": [],
+        "badResponses": [],
+        "discoveredLinks": []
+      },
+      {
+        "route": "/dashboard/notifications",
+        "durationMs": 2284,
+        "navigationStatus": 200,
+        "navigationError": null,
+        "facts": {
+          "url": "http://localhost:3001/",
+          "title": "Create Next App",
+          "lang": "en",
+          "bodyTextLength": 166,
+          "h1Count": 1,
+          "mainCount": 0,
+          "navCount": 0,
+          "headings": [
+            {
+              "level": 1,
+              "text": "Mission Control"
+            }
+          ],
+          "headingSkips": [],
+          "duplicateIds": [],
+          "interactiveCount": 3,
+          "horizontalOverflow": false,
+          "overflow": [],
+          "brokenImages": [],
+          "missingAltImages": [],
+          "sampleDataLabels": 0,
+          "loadingLanguage": [],
+          "canonical": null,
+          "robots": null,
+          "themeBackground": "rgb(13, 13, 13)"
+        },
+        "axe": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "help": "Elements must meet minimum color contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/color-contrast?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "span"
+                ],
+                "html": "<span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.67 (foreground color: #595959, background color: #121212, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+              },
+              {
+                "target": [
+                  ".text-xs"
+                ],
+                "html": "<p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.64 (foreground color: #565656, background color: #0d0d0d, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          },
+          {
+            "id": "landmark-one-main",
+            "impact": "moderate",
+            "description": "Ensure the document has a main landmark",
+            "help": "Document should have one main landmark",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/landmark-one-main?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "html"
+                ],
+                "html": "<html lang=\"en\">",
+                "failureSummary": "Fix all of the following:\n  Document does not have a main landmark"
+              }
+            ]
+          },
+          {
+            "id": "region",
+            "impact": "moderate",
+            "description": "Ensure all page content is contained by landmarks",
+            "help": "All page content should be contained by landmarks",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/region?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "h1"
+                ],
+                "html": "<h1 class=\"text-2xl font-semibold text-white text-center tracking-tight mb-2\">Mission Control</h1>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".text-white\\/50"
+                ],
+                "html": "<p class=\"text-white/50 text-center text-sm mb-8\">Secure staff access only. Enter your email to receive a magic link.</p>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  "form > div:nth-child(1)"
+                ],
+                "html": "<div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".gap-3"
+                ],
+                "html": "<div class=\"flex items-center gap-3 py-1\"><div class=\"flex-1 h-px bg-white/10\"></div><span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span><div class=\"flex-1 h-px bg-white/10\"></div></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".mt-8"
+                ],
+                "html": "<div class=\"mt-8 text-center\"><p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              }
+            ]
+          }
+        ],
+        "consoleErrors": [],
+        "pageErrors": [],
+        "failedRequests": [],
+        "badResponses": [],
+        "discoveredLinks": []
+      },
+      {
+        "route": "/dashboard/osint",
+        "durationMs": 2236,
+        "navigationStatus": 200,
+        "navigationError": null,
+        "facts": {
+          "url": "http://localhost:3001/",
+          "title": "Create Next App",
+          "lang": "en",
+          "bodyTextLength": 166,
+          "h1Count": 1,
+          "mainCount": 0,
+          "navCount": 0,
+          "headings": [
+            {
+              "level": 1,
+              "text": "Mission Control"
+            }
+          ],
+          "headingSkips": [],
+          "duplicateIds": [],
+          "interactiveCount": 3,
+          "horizontalOverflow": false,
+          "overflow": [],
+          "brokenImages": [],
+          "missingAltImages": [],
+          "sampleDataLabels": 0,
+          "loadingLanguage": [],
+          "canonical": null,
+          "robots": null,
+          "themeBackground": "rgb(13, 13, 13)"
+        },
+        "axe": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "help": "Elements must meet minimum color contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/color-contrast?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "span"
+                ],
+                "html": "<span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.67 (foreground color: #595959, background color: #121212, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+              },
+              {
+                "target": [
+                  ".text-xs"
+                ],
+                "html": "<p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.64 (foreground color: #565656, background color: #0d0d0d, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          },
+          {
+            "id": "landmark-one-main",
+            "impact": "moderate",
+            "description": "Ensure the document has a main landmark",
+            "help": "Document should have one main landmark",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/landmark-one-main?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "html"
+                ],
+                "html": "<html lang=\"en\">",
+                "failureSummary": "Fix all of the following:\n  Document does not have a main landmark"
+              }
+            ]
+          },
+          {
+            "id": "region",
+            "impact": "moderate",
+            "description": "Ensure all page content is contained by landmarks",
+            "help": "All page content should be contained by landmarks",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/region?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "h1"
+                ],
+                "html": "<h1 class=\"text-2xl font-semibold text-white text-center tracking-tight mb-2\">Mission Control</h1>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".text-white\\/50"
+                ],
+                "html": "<p class=\"text-white/50 text-center text-sm mb-8\">Secure staff access only. Enter your email to receive a magic link.</p>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  "form > div:nth-child(1)"
+                ],
+                "html": "<div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".gap-3"
+                ],
+                "html": "<div class=\"flex items-center gap-3 py-1\"><div class=\"flex-1 h-px bg-white/10\"></div><span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span><div class=\"flex-1 h-px bg-white/10\"></div></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".mt-8"
+                ],
+                "html": "<div class=\"mt-8 text-center\"><p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              }
+            ]
+          }
+        ],
+        "consoleErrors": [],
+        "pageErrors": [],
+        "failedRequests": [],
+        "badResponses": [],
+        "discoveredLinks": []
+      },
+      {
+        "route": "/dashboard/security",
+        "durationMs": 2266,
+        "navigationStatus": 200,
+        "navigationError": null,
+        "facts": {
+          "url": "http://localhost:3001/",
+          "title": "Create Next App",
+          "lang": "en",
+          "bodyTextLength": 166,
+          "h1Count": 1,
+          "mainCount": 0,
+          "navCount": 0,
+          "headings": [
+            {
+              "level": 1,
+              "text": "Mission Control"
+            }
+          ],
+          "headingSkips": [],
+          "duplicateIds": [],
+          "interactiveCount": 3,
+          "horizontalOverflow": false,
+          "overflow": [],
+          "brokenImages": [],
+          "missingAltImages": [],
+          "sampleDataLabels": 0,
+          "loadingLanguage": [],
+          "canonical": null,
+          "robots": null,
+          "themeBackground": "rgb(13, 13, 13)"
+        },
+        "axe": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "help": "Elements must meet minimum color contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/color-contrast?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "span"
+                ],
+                "html": "<span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.67 (foreground color: #595959, background color: #121212, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+              },
+              {
+                "target": [
+                  ".text-xs"
+                ],
+                "html": "<p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.64 (foreground color: #565656, background color: #0d0d0d, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          },
+          {
+            "id": "landmark-one-main",
+            "impact": "moderate",
+            "description": "Ensure the document has a main landmark",
+            "help": "Document should have one main landmark",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/landmark-one-main?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "html"
+                ],
+                "html": "<html lang=\"en\">",
+                "failureSummary": "Fix all of the following:\n  Document does not have a main landmark"
+              }
+            ]
+          },
+          {
+            "id": "region",
+            "impact": "moderate",
+            "description": "Ensure all page content is contained by landmarks",
+            "help": "All page content should be contained by landmarks",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/region?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "h1"
+                ],
+                "html": "<h1 class=\"text-2xl font-semibold text-white text-center tracking-tight mb-2\">Mission Control</h1>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".text-white\\/50"
+                ],
+                "html": "<p class=\"text-white/50 text-center text-sm mb-8\">Secure staff access only. Enter your email to receive a magic link.</p>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  "form > div:nth-child(1)"
+                ],
+                "html": "<div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".gap-3"
+                ],
+                "html": "<div class=\"flex items-center gap-3 py-1\"><div class=\"flex-1 h-px bg-white/10\"></div><span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span><div class=\"flex-1 h-px bg-white/10\"></div></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".mt-8"
+                ],
+                "html": "<div class=\"mt-8 text-center\"><p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              }
+            ]
+          }
+        ],
+        "consoleErrors": [],
+        "pageErrors": [],
+        "failedRequests": [],
+        "badResponses": [],
+        "discoveredLinks": []
+      },
+      {
+        "route": "/dashboard/staff",
+        "durationMs": 2308,
+        "navigationStatus": 200,
+        "navigationError": null,
+        "facts": {
+          "url": "http://localhost:3001/",
+          "title": "Create Next App",
+          "lang": "en",
+          "bodyTextLength": 166,
+          "h1Count": 1,
+          "mainCount": 0,
+          "navCount": 0,
+          "headings": [
+            {
+              "level": 1,
+              "text": "Mission Control"
+            }
+          ],
+          "headingSkips": [],
+          "duplicateIds": [],
+          "interactiveCount": 3,
+          "horizontalOverflow": false,
+          "overflow": [],
+          "brokenImages": [],
+          "missingAltImages": [],
+          "sampleDataLabels": 0,
+          "loadingLanguage": [],
+          "canonical": null,
+          "robots": null,
+          "themeBackground": "rgb(13, 13, 13)"
+        },
+        "axe": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "help": "Elements must meet minimum color contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/color-contrast?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "span"
+                ],
+                "html": "<span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.67 (foreground color: #595959, background color: #121212, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+              },
+              {
+                "target": [
+                  ".text-xs"
+                ],
+                "html": "<p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.64 (foreground color: #565656, background color: #0d0d0d, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          },
+          {
+            "id": "landmark-one-main",
+            "impact": "moderate",
+            "description": "Ensure the document has a main landmark",
+            "help": "Document should have one main landmark",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/landmark-one-main?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "html"
+                ],
+                "html": "<html lang=\"en\">",
+                "failureSummary": "Fix all of the following:\n  Document does not have a main landmark"
+              }
+            ]
+          },
+          {
+            "id": "region",
+            "impact": "moderate",
+            "description": "Ensure all page content is contained by landmarks",
+            "help": "All page content should be contained by landmarks",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/region?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "h1"
+                ],
+                "html": "<h1 class=\"text-2xl font-semibold text-white text-center tracking-tight mb-2\">Mission Control</h1>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".text-white\\/50"
+                ],
+                "html": "<p class=\"text-white/50 text-center text-sm mb-8\">Secure staff access only. Enter your email to receive a magic link.</p>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  "form > div:nth-child(1)"
+                ],
+                "html": "<div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".gap-3"
+                ],
+                "html": "<div class=\"flex items-center gap-3 py-1\"><div class=\"flex-1 h-px bg-white/10\"></div><span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span><div class=\"flex-1 h-px bg-white/10\"></div></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".mt-8"
+                ],
+                "html": "<div class=\"mt-8 text-center\"><p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              }
+            ]
+          }
+        ],
+        "consoleErrors": [],
+        "pageErrors": [],
+        "failedRequests": [],
+        "badResponses": [],
+        "discoveredLinks": []
+      },
+      {
+        "route": "/dashboard/verification",
+        "durationMs": 2256,
+        "navigationStatus": 200,
+        "navigationError": null,
+        "facts": {
+          "url": "http://localhost:3001/",
+          "title": "Create Next App",
+          "lang": "en",
+          "bodyTextLength": 166,
+          "h1Count": 1,
+          "mainCount": 0,
+          "navCount": 0,
+          "headings": [
+            {
+              "level": 1,
+              "text": "Mission Control"
+            }
+          ],
+          "headingSkips": [],
+          "duplicateIds": [],
+          "interactiveCount": 3,
+          "horizontalOverflow": false,
+          "overflow": [],
+          "brokenImages": [],
+          "missingAltImages": [],
+          "sampleDataLabels": 0,
+          "loadingLanguage": [],
+          "canonical": null,
+          "robots": null,
+          "themeBackground": "rgb(13, 13, 13)"
+        },
+        "axe": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "help": "Elements must meet minimum color contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/color-contrast?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "span"
+                ],
+                "html": "<span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.67 (foreground color: #595959, background color: #121212, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+              },
+              {
+                "target": [
+                  ".text-xs"
+                ],
+                "html": "<p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p>",
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.64 (foreground color: #565656, background color: #0d0d0d, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          },
+          {
+            "id": "landmark-one-main",
+            "impact": "moderate",
+            "description": "Ensure the document has a main landmark",
+            "help": "Document should have one main landmark",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/landmark-one-main?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "html"
+                ],
+                "html": "<html lang=\"en\">",
+                "failureSummary": "Fix all of the following:\n  Document does not have a main landmark"
+              }
+            ]
+          },
+          {
+            "id": "region",
+            "impact": "moderate",
+            "description": "Ensure all page content is contained by landmarks",
+            "help": "All page content should be contained by landmarks",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/region?application=axeAPI",
+            "nodes": [
+              {
+                "target": [
+                  "h1"
+                ],
+                "html": "<h1 class=\"text-2xl font-semibold text-white text-center tracking-tight mb-2\">Mission Control</h1>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".text-white\\/50"
+                ],
+                "html": "<p class=\"text-white/50 text-center text-sm mb-8\">Secure staff access only. Enter your email to receive a magic link.</p>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  "form > div:nth-child(1)"
+                ],
+                "html": "<div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".gap-3"
+                ],
+                "html": "<div class=\"flex items-center gap-3 py-1\"><div class=\"flex-1 h-px bg-white/10\"></div><span class=\"text-[10px] uppercase tracking-widest text-white/30\">or</span><div class=\"flex-1 h-px bg-white/10\"></div></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              },
+              {
+                "target": [
+                  ".mt-8"
+                ],
+                "html": "<div class=\"mt-8 text-center\"><p class=\"text-white/30 text-xs font-mono uppercase tracking-widest\">ScoutIt Space Intelligence</p></div>",
+                "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+              }
+            ]
+          }
+        ],
+        "consoleErrors": [],
+        "pageErrors": [],
+        "failedRequests": [],
+        "badResponses": [],
+        "discoveredLinks": []
+      }
+    ]
+  }
+}

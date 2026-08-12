@@ -1,0 +1,1239 @@
+[
+    {
+        "route":  "/api/admin/approve",
+        "methods":  "POST",
+        "file":  "src/app/api\\admin\\approve\\route.js",
+        "authSignals":  [
+                            "adminGuard"
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "staff"
+    },
+    {
+        "route":  "/api/admin/connects-refund",
+        "methods":  [
+                        "GET",
+                        "POST"
+                    ],
+        "file":  "src/app/api\\admin\\connects-refund\\route.js",
+        "authSignals":  [
+                            "adminGuard"
+                        ],
+        "validationSignals":  [
+                                  "zod",
+                                  "bounds"
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "staff"
+    },
+    {
+        "route":  "/api/admin/feature-flags",
+        "methods":  [
+                        "GET",
+                        "POST"
+                    ],
+        "file":  "src/app/api\\admin\\feature-flags\\route.js",
+        "authSignals":  [
+                            "adminGuard"
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "staff"
+    },
+    {
+        "route":  "/api/admin/generate-seo",
+        "methods":  "POST",
+        "file":  "src/app/api\\admin\\generate-seo\\route.js",
+        "authSignals":  [
+                            "adminGuard",
+                            "resolveUserId"
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  false,
+        "classification":  "staff"
+    },
+    {
+        "route":  "/api/admin/osint",
+        "methods":  [
+                        "GET",
+                        "POST"
+                    ],
+        "file":  "src/app/api\\admin\\osint\\route.js",
+        "authSignals":  [
+                            "adminGuard"
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "staff"
+    },
+    {
+        "route":  "/api/admin/prc",
+        "methods":  [
+                        "GET",
+                        "POST"
+                    ],
+        "file":  "src/app/api\\admin\\prc\\route.js",
+        "authSignals":  [
+                            "adminGuard"
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "staff"
+    },
+    {
+        "route":  "/api/admin/property",
+        "methods":  [
+                        "GET",
+                        "PATCH"
+                    ],
+        "file":  "src/app/api\\admin\\property\\route.js",
+        "authSignals":  [
+                            "adminGuard"
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "staff"
+    },
+    {
+        "route":  "/api/ai/assimilate",
+        "methods":  "POST",
+        "file":  "src/app/api\\ai\\assimilate\\route.js",
+        "authSignals":  [
+                            "resolveUserId"
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  false,
+        "classification":  "authenticated-or-mixed-write"
+    },
+    {
+        "route":  "/api/ai/blueprint",
+        "methods":  "POST",
+        "file":  "src/app/api\\ai\\blueprint\\route.js",
+        "authSignals":  [
+                            "resolveUserId"
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  false,
+        "classification":  "authenticated-or-mixed-write"
+    },
+    {
+        "route":  "/api/ai/counter-offer",
+        "methods":  "POST",
+        "file":  "src/app/api\\ai\\counter-offer\\route.js",
+        "authSignals":  [
+                            "resolveUserId"
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  false,
+        "classification":  "authenticated-or-mixed-write"
+    },
+    {
+        "route":  "/api/ai/promote",
+        "methods":  "POST",
+        "file":  "src/app/api\\ai\\promote\\route.js",
+        "authSignals":  [
+                            "resolveUserId"
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "authenticated-or-mixed-write"
+    },
+    {
+        "route":  "/api/ai/read-pdf",
+        "methods":  "POST",
+        "file":  "src/app/api\\ai\\read-pdf\\route.js",
+        "authSignals":  [
+                            "getUser"
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  false,
+        "classification":  "authenticated-or-mixed-write"
+    },
+    {
+        "route":  "/api/ai/rewrite",
+        "methods":  "POST",
+        "file":  "src/app/api\\ai\\rewrite\\route.js",
+        "authSignals":  [
+                            "resolveUserId"
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  false,
+        "classification":  "authenticated-or-mixed-write"
+    },
+    {
+        "route":  "/api/analytics",
+        "methods":  "POST",
+        "file":  "src/app/api\\analytics\\route.js",
+        "authSignals":  [
+                            "resolveUserId"
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "authenticated-or-mixed-write"
+    },
+    {
+        "route":  "/api/auth/complete-onboarding",
+        "methods":  "POST",
+        "file":  "src/app/api\\auth\\complete-onboarding\\route.js",
+        "authSignals":  [
+                            "getUser"
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "authenticated-or-mixed-write"
+    },
+    {
+        "route":  "/api/availability",
+        "methods":  [
+                        "GET",
+                        "POST"
+                    ],
+        "file":  "src/app/api\\availability\\route.js",
+        "authSignals":  [
+                            "getUser"
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "authenticated-or-mixed-write"
+    },
+    {
+        "route":  "/api/badges/claim",
+        "methods":  "POST",
+        "file":  "src/app/api\\badges\\claim\\route.js",
+        "authSignals":  [
+                            "getUser"
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "authenticated-or-mixed-write"
+    },
+    {
+        "route":  "/api/badges",
+        "methods":  "GET",
+        "file":  "src/app/api\\badges\\route.js",
+        "authSignals":  [
+
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "public-or-mixed-read"
+    },
+    {
+        "route":  "/api/broker/briefing-log",
+        "methods":  "POST",
+        "file":  "src/app/api\\broker\\briefing-log\\route.js",
+        "authSignals":  [
+                            "resolveUserId"
+                        ],
+        "validationSignals":  [
+                                  "zod",
+                                  "bounds"
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "authenticated-or-mixed-write"
+    },
+    {
+        "route":  "/api/calendar/connection",
+        "methods":  "GET",
+        "file":  "src/app/api\\calendar\\connection\\route.js",
+        "authSignals":  [
+                            "resolveUserId"
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "public-or-mixed-read"
+    },
+    {
+        "route":  "/api/calendar/events/[id]",
+        "methods":  [
+                        "DELETE",
+                        "PATCH"
+                    ],
+        "file":  "src/app/api\\calendar\\events\\[id]\\route.js",
+        "authSignals":  [
+                            "resolveUserId"
+                        ],
+        "validationSignals":  [
+                                  "zod"
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "authenticated-or-mixed-write"
+    },
+    {
+        "route":  "/api/calendar/events",
+        "methods":  [
+                        "GET",
+                        "POST"
+                    ],
+        "file":  "src/app/api\\calendar\\events\\route.js",
+        "authSignals":  [
+                            "resolveUserId"
+                        ],
+        "validationSignals":  [
+                                  "zod"
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "authenticated-or-mixed-write"
+    },
+    {
+        "route":  "/api/calendar/sync",
+        "methods":  "POST",
+        "file":  "src/app/api\\calendar\\sync\\route.js",
+        "authSignals":  [
+                            "resolveUserId"
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  false,
+        "classification":  "authenticated-or-mixed-write"
+    },
+    {
+        "route":  "/api/cms",
+        "methods":  "GET",
+        "file":  "src/app/api\\cms\\route.js",
+        "authSignals":  [
+
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  false,
+        "classification":  "public-or-mixed-read"
+    },
+    {
+        "route":  "/api/crm/activity",
+        "methods":  "GET",
+        "file":  "src/app/api\\crm\\activity\\route.js",
+        "authSignals":  [
+                            "resolveUserId"
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "public-or-mixed-read"
+    },
+    {
+        "route":  "/api/crm/tasks/[id]",
+        "methods":  [
+                        "DELETE",
+                        "PATCH"
+                    ],
+        "file":  "src/app/api\\crm\\tasks\\[id]\\route.js",
+        "authSignals":  [
+                            "resolveUserId"
+                        ],
+        "validationSignals":  [
+                                  "zod",
+                                  "bounds"
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "authenticated-or-mixed-write"
+    },
+    {
+        "route":  "/api/crm/tasks",
+        "methods":  [
+                        "GET",
+                        "POST"
+                    ],
+        "file":  "src/app/api\\crm\\tasks\\route.js",
+        "authSignals":  [
+                            "resolveUserId"
+                        ],
+        "validationSignals":  [
+                                  "zod",
+                                  "bounds"
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "authenticated-or-mixed-write"
+    },
+    {
+        "route":  "/api/cron/check-stale-listings",
+        "methods":  "GET",
+        "file":  "src/app/api\\cron\\check-stale-listings\\route.js",
+        "authSignals":  [
+                            "cronSecret"
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "cron"
+    },
+    {
+        "route":  "/api/cron/osint-scraper",
+        "methods":  "GET",
+        "file":  "src/app/api\\cron\\osint-scraper\\route.js",
+        "authSignals":  [
+                            "adminGuard",
+                            "cronSecret"
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "cron"
+    },
+    {
+        "route":  "/api/cron/sweep-pending-requests",
+        "methods":  "GET",
+        "file":  "src/app/api\\cron\\sweep-pending-requests\\route.js",
+        "authSignals":  [
+                            "cronSecret"
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "cron"
+    },
+    {
+        "route":  "/api/dashboard/archive",
+        "methods":  "POST",
+        "file":  "src/app/api\\dashboard\\archive\\route.js",
+        "authSignals":  [
+                            "resolveUserId"
+                        ],
+        "validationSignals":  [
+                                  "zod",
+                                  "bounds"
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "authenticated-or-mixed-write"
+    },
+    {
+        "route":  "/api/dashboard/bulk-insert",
+        "methods":  "POST",
+        "file":  "src/app/api\\dashboard\\bulk-insert\\route.js",
+        "authSignals":  [
+                            "getUser"
+                        ],
+        "validationSignals":  [
+                                  "zod",
+                                  "bounds"
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "authenticated-or-mixed-write"
+    },
+    {
+        "route":  "/api/dashboard/deals/update",
+        "methods":  "POST",
+        "file":  "src/app/api\\dashboard\\deals\\update\\route.js",
+        "authSignals":  [
+                            "getUser"
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "authenticated-or-mixed-write"
+    },
+    {
+        "route":  "/api/dashboard/delete",
+        "methods":  "POST",
+        "file":  "src/app/api\\dashboard\\delete\\route.js",
+        "authSignals":  [
+                            "resolveUserId"
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "authenticated-or-mixed-write"
+    },
+    {
+        "route":  "/api/dashboard/inventory",
+        "methods":  "GET",
+        "file":  "src/app/api\\dashboard\\inventory\\route.js",
+        "authSignals":  [
+
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "public-or-mixed-read"
+    },
+    {
+        "route":  "/api/dashboard/invite",
+        "methods":  "POST",
+        "file":  "src/app/api\\dashboard\\invite\\route.js",
+        "authSignals":  [
+                            "getUser"
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "authenticated-or-mixed-write"
+    },
+    {
+        "route":  "/api/dashboard/operator/units",
+        "methods":  [
+                        "GET",
+                        "POST"
+                    ],
+        "file":  "src/app/api\\dashboard\\operator\\units\\route.js",
+        "authSignals":  [
+                            "resolveUserId"
+                        ],
+        "validationSignals":  [
+                                  "zod",
+                                  "bounds"
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "authenticated-or-mixed-write"
+    },
+    {
+        "route":  "/api/dashboard/publish",
+        "methods":  "POST",
+        "file":  "src/app/api\\dashboard\\publish\\route.js",
+        "authSignals":  [
+                            "getUser"
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "authenticated-or-mixed-write"
+    },
+    {
+        "route":  "/api/dashboard/units/delegate",
+        "methods":  [
+                        "GET",
+                        "POST"
+                    ],
+        "file":  "src/app/api\\dashboard\\units\\delegate\\route.js",
+        "authSignals":  [
+                            "getUser"
+                        ],
+        "validationSignals":  [
+                                  "zod",
+                                  "bounds"
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "authenticated-or-mixed-write"
+    },
+    {
+        "route":  "/api/dashboard/units",
+        "methods":  [
+                        "GET",
+                        "POST"
+                    ],
+        "file":  "src/app/api\\dashboard\\units\\route.js",
+        "authSignals":  [
+                            "resolveUserId"
+                        ],
+        "validationSignals":  [
+                                  "zod",
+                                  "uuid",
+                                  "bounds"
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "authenticated-or-mixed-write"
+    },
+    {
+        "route":  "/api/dashboard/update",
+        "methods":  "POST",
+        "file":  "src/app/api\\dashboard\\update\\route.js",
+        "authSignals":  [
+                            "getUser"
+                        ],
+        "validationSignals":  [
+                                  "zod",
+                                  "bounds"
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "authenticated-or-mixed-write"
+    },
+    {
+        "route":  "/api/dashboard/verify-freshness",
+        "methods":  [
+                        "GET",
+                        "POST"
+                    ],
+        "file":  "src/app/api\\dashboard\\verify-freshness\\route.js",
+        "authSignals":  [
+                            "resolveUserId"
+                        ],
+        "validationSignals":  [
+                                  "zod",
+                                  "bounds"
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "authenticated-or-mixed-write"
+    },
+    {
+        "route":  "/api/deals/[id]/close",
+        "methods":  "POST",
+        "file":  "src/app/api\\deals\\[id]\\close\\route.js",
+        "authSignals":  [
+                            "resolveUserId"
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "authenticated-or-mixed-write"
+    },
+    {
+        "route":  "/api/deals/[id]/messages",
+        "methods":  [
+                        "GET",
+                        "PATCH",
+                        "POST"
+                    ],
+        "file":  "src/app/api\\deals\\[id]\\messages\\route.js",
+        "authSignals":  [
+                            "resolveUserId"
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "authenticated-or-mixed-write"
+    },
+    {
+        "route":  "/api/deals/[id]/notes",
+        "methods":  "PATCH",
+        "file":  "src/app/api\\deals\\[id]\\notes\\route.js",
+        "authSignals":  [
+                            "getUser"
+                        ],
+        "validationSignals":  [
+                                  "zod",
+                                  "bounds"
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "authenticated-or-mixed-write"
+    },
+    {
+        "route":  "/api/deals/[id]",
+        "methods":  "PATCH",
+        "file":  "src/app/api\\deals\\[id]\\route.js",
+        "authSignals":  [
+                            "getUser"
+                        ],
+        "validationSignals":  [
+                                  "zod"
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "authenticated-or-mixed-write"
+    },
+    {
+        "route":  "/api/deals/[id]/schedule",
+        "methods":  "POST",
+        "file":  "src/app/api\\deals\\[id]\\schedule\\route.js",
+        "authSignals":  [
+                            "getUser"
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "authenticated-or-mixed-write"
+    },
+    {
+        "route":  "/api/deals/[id]/unarchive",
+        "methods":  "POST",
+        "file":  "src/app/api\\deals\\[id]\\unarchive\\route.js",
+        "authSignals":  [
+                            "resolveUserId"
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "authenticated-or-mixed-write"
+    },
+    {
+        "route":  "/api/deals/handshake",
+        "methods":  "POST",
+        "file":  "src/app/api\\deals\\handshake\\route.js",
+        "authSignals":  [
+                            "resolveUserId"
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "authenticated-or-mixed-write"
+    },
+    {
+        "route":  "/api/deals/initiate",
+        "methods":  "POST",
+        "file":  "src/app/api\\deals\\initiate\\route.js",
+        "authSignals":  [
+                            "resolveUserId"
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "authenticated-or-mixed-write"
+    },
+    {
+        "route":  "/api/deals/pitch",
+        "methods":  "POST",
+        "file":  "src/app/api\\deals\\pitch\\route.js",
+        "authSignals":  [
+                            "resolveUserId"
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "authenticated-or-mixed-write"
+    },
+    {
+        "route":  "/api/deals",
+        "methods":  [
+                        "GET",
+                        "POST"
+                    ],
+        "file":  "src/app/api\\deals\\route.js",
+        "authSignals":  [
+                            "resolveUserId"
+                        ],
+        "validationSignals":  [
+                                  "zod"
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "authenticated-or-mixed-write"
+    },
+    {
+        "route":  "/api/faqs/preflight",
+        "methods":  [
+                        "GET",
+                        "POST"
+                    ],
+        "file":  "src/app/api\\faqs\\preflight\\route.js",
+        "authSignals":  [
+                            "resolveUserId"
+                        ],
+        "validationSignals":  [
+                                  "zod",
+                                  "bounds"
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "authenticated-or-mixed-write"
+    },
+    {
+        "route":  "/api/faqs/review",
+        "methods":  [
+                        "GET",
+                        "PATCH"
+                    ],
+        "file":  "src/app/api\\faqs\\review\\route.js",
+        "authSignals":  [
+                            "resolveUserId"
+                        ],
+        "validationSignals":  [
+                                  "zod"
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "authenticated-or-mixed-write"
+    },
+    {
+        "route":  "/api/faqs",
+        "methods":  [
+                        "GET",
+                        "POST"
+                    ],
+        "file":  "src/app/api\\faqs\\route.js",
+        "authSignals":  [
+                            "resolveUserId"
+                        ],
+        "validationSignals":  [
+                                  "zod",
+                                  "bounds"
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "authenticated-or-mixed-write"
+    },
+    {
+        "route":  "/api/geo-pricing",
+        "methods":  "POST",
+        "file":  "src/app/api\\geo-pricing\\route.js",
+        "authSignals":  [
+
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  false,
+        "classification":  "public-write-review-required"
+    },
+    {
+        "route":  "/api/health",
+        "methods":  "GET",
+        "file":  "src/app/api\\health\\route.js",
+        "authSignals":  [
+
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  false,
+        "classification":  "public-or-mixed-read"
+    },
+    {
+        "route":  "/api/hubs",
+        "methods":  "GET",
+        "file":  "src/app/api\\hubs\\route.js",
+        "authSignals":  [
+
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  false,
+        "classification":  "public-or-mixed-read"
+    },
+    {
+        "route":  "/api/inquiries",
+        "methods":  "POST",
+        "file":  "src/app/api\\inquiries\\route.js",
+        "authSignals":  [
+
+                        ],
+        "validationSignals":  [
+                                  "zod",
+                                  "bounds"
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "public-write-review-required"
+    },
+    {
+        "route":  "/api/intel/ingest",
+        "methods":  "POST",
+        "file":  "src/app/api\\intel\\ingest\\route.js",
+        "authSignals":  [
+                            "getUser"
+                        ],
+        "validationSignals":  [
+                                  "zod"
+                              ],
+        "usesServiceRole":  false,
+        "classification":  "authenticated-or-mixed-write"
+    },
+    {
+        "route":  "/api/notifications",
+        "methods":  [
+                        "DELETE",
+                        "GET",
+                        "PATCH",
+                        "POST"
+                    ],
+        "file":  "src/app/api\\notifications\\route.js",
+        "authSignals":  [
+                            "resolveUserId"
+                        ],
+        "validationSignals":  [
+                                  "zod",
+                                  "bounds"
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "authenticated-or-mixed-write"
+    },
+    {
+        "route":  "/api/oauth/google/callback",
+        "methods":  "GET",
+        "file":  "src/app/api\\oauth\\google\\callback\\route.js",
+        "authSignals":  [
+
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "public-or-mixed-read"
+    },
+    {
+        "route":  "/api/oauth/google/disconnect",
+        "methods":  "POST",
+        "file":  "src/app/api\\oauth\\google\\disconnect\\route.js",
+        "authSignals":  [
+                            "resolveUserId"
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "authenticated-or-mixed-write"
+    },
+    {
+        "route":  "/api/oauth/google/start",
+        "methods":  "GET",
+        "file":  "src/app/api\\oauth\\google\\start\\route.js",
+        "authSignals":  [
+                            "resolveUserId"
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  false,
+        "classification":  "public-or-mixed-read"
+    },
+    {
+        "route":  "/api/off-market",
+        "methods":  "GET",
+        "file":  "src/app/api\\off-market\\route.js",
+        "authSignals":  [
+                            "resolveUserId"
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "public-or-mixed-read"
+    },
+    {
+        "route":  "/api/og",
+        "methods":  "GET",
+        "file":  "src/app/api\\og\\route.js",
+        "authSignals":  [
+
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  false,
+        "classification":  "public-or-mixed-read"
+    },
+    {
+        "route":  "/api/profile/public-roles",
+        "methods":  "GET",
+        "file":  "src/app/api\\profile\\public-roles\\route.js",
+        "authSignals":  [
+
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "public-or-mixed-read"
+    },
+    {
+        "route":  "/api/property/[id]/brokers",
+        "methods":  "GET",
+        "file":  "src/app/api\\property\\[id]\\brokers\\route.js",
+        "authSignals":  [
+
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "public-or-mixed-read"
+    },
+    {
+        "route":  "/api/property/claim",
+        "methods":  [
+                        "GET",
+                        "POST"
+                    ],
+        "file":  "src/app/api\\property\\claim\\route.js",
+        "authSignals":  [
+                            "resolveUserId"
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "authenticated-or-mixed-write"
+    },
+    {
+        "route":  "/api/property/premium",
+        "methods":  "GET",
+        "file":  "src/app/api\\property\\premium\\route.js",
+        "authSignals":  [
+
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  false,
+        "classification":  "public-or-mixed-read"
+    },
+    {
+        "route":  "/api/property/verify",
+        "methods":  "POST",
+        "file":  "src/app/api\\property\\verify\\route.js",
+        "authSignals":  [
+                            "resolveUserId"
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "authenticated-or-mixed-write"
+    },
+    {
+        "route":  "/api/questit",
+        "methods":  "POST",
+        "file":  "src/app/api\\questit\\route.js",
+        "authSignals":  [
+                            "getUser"
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  false,
+        "classification":  "authenticated-or-mixed-write"
+    },
+    {
+        "route":  "/api/reactions",
+        "methods":  "POST",
+        "file":  "src/app/api\\reactions\\route.js",
+        "authSignals":  [
+
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  false,
+        "classification":  "public-write-review-required"
+    },
+    {
+        "route":  "/api/seo/readiness",
+        "methods":  "GET",
+        "file":  "src/app/api\\seo\\readiness\\route.js",
+        "authSignals":  [
+                            "resolveUserId"
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "public-or-mixed-read"
+    },
+    {
+        "route":  "/api/showcase",
+        "methods":  "GET",
+        "file":  "src/app/api\\showcase\\route.js",
+        "authSignals":  [
+
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  false,
+        "classification":  "public-or-mixed-read"
+    },
+    {
+        "route":  "/api/storage/upload",
+        "methods":  "POST",
+        "file":  "src/app/api\\storage\\upload\\route.js",
+        "authSignals":  [
+                            "getUser"
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "authenticated-or-mixed-write"
+    },
+    {
+        "route":  "/api/telemetry/device",
+        "methods":  "POST",
+        "file":  "src/app/api\\telemetry\\device\\route.js",
+        "authSignals":  [
+
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "public-write-review-required"
+    },
+    {
+        "route":  "/api/user/delete-account",
+        "methods":  "POST",
+        "file":  "src/app/api\\user\\delete-account\\route.js",
+        "authSignals":  [
+                            "resolveUserId"
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "authenticated-or-mixed-write"
+    },
+    {
+        "route":  "/api/user/privacy-settings",
+        "methods":  [
+                        "GET",
+                        "POST"
+                    ],
+        "file":  "src/app/api\\user\\privacy-settings\\route.js",
+        "authSignals":  [
+                            "resolveUserId"
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "authenticated-or-mixed-write"
+    },
+    {
+        "route":  "/api/v1/questit/quests",
+        "methods":  "GET",
+        "file":  "src/app/api\\v1\\questit\\quests\\route.js",
+        "authSignals":  [
+
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "public-or-mixed-read"
+    },
+    {
+        "route":  "/api/v1/questit/raise",
+        "methods":  "POST",
+        "file":  "src/app/api\\v1\\questit\\raise\\route.js",
+        "authSignals":  [
+
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "public-write-review-required"
+    },
+    {
+        "route":  "/api/viewing-appointments/[id]",
+        "methods":  "PATCH",
+        "file":  "src/app/api\\viewing-appointments\\[id]\\route.js",
+        "authSignals":  [
+                            "resolveUserId"
+                        ],
+        "validationSignals":  [
+                                  "zod"
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "authenticated-or-mixed-write"
+    },
+    {
+        "route":  "/api/viewing-appointments",
+        "methods":  [
+                        "GET",
+                        "POST"
+                    ],
+        "file":  "src/app/api\\viewing-appointments\\route.js",
+        "authSignals":  [
+                            "resolveUserId"
+                        ],
+        "validationSignals":  [
+                                  "zod",
+                                  "uuid"
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "authenticated-or-mixed-write"
+    },
+    {
+        "route":  "/api/waitlist",
+        "methods":  "POST",
+        "file":  "src/app/api\\waitlist\\route.js",
+        "authSignals":  [
+
+                        ],
+        "validationSignals":  [
+                                  "zod",
+                                  "bounds"
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "public-write-review-required"
+    },
+    {
+        "route":  "/api/whereto",
+        "methods":  "GET",
+        "file":  "src/app/api\\whereto\\route.js",
+        "authSignals":  [
+
+                        ],
+        "validationSignals":  [
+                                  "bounds"
+                              ],
+        "usesServiceRole":  false,
+        "classification":  "public-or-mixed-read"
+    },
+    {
+        "route":  "/api/wishlist/merge",
+        "methods":  "POST",
+        "file":  "src/app/api\\wishlist\\merge\\route.js",
+        "authSignals":  [
+                            "resolveUserId"
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "authenticated-or-mixed-write"
+    },
+    {
+        "route":  "/api/wishlist/share",
+        "methods":  "POST",
+        "file":  "src/app/api\\wishlist\\share\\route.js",
+        "authSignals":  [
+                            "getUser"
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  false,
+        "classification":  "authenticated-or-mixed-write"
+    },
+    {
+        "route":  "/api/wrap",
+        "methods":  "GET",
+        "file":  "src/app/api\\wrap\\route.js",
+        "authSignals":  [
+                            "resolveUserId"
+                        ],
+        "validationSignals":  [
+
+                              ],
+        "usesServiceRole":  true,
+        "classification":  "public-or-mixed-read"
+    }
+]
