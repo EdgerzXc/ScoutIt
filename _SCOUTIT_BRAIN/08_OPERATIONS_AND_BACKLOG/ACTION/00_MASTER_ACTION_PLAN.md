@@ -1246,22 +1246,24 @@ qualifying super-large spatial asset - the activation work must include:
 
 ---
 
-# LAYER 2 DISCOVER & INTEL SYMBIOTIC INTEGRATION ARCHITECTURE
+# LAYER 2 DISCOVER & INTEL SYMBIOTIC INTEGRATION ARCHITECTURE (PRAGMATIC LAUNCH SCOPE)
 
-1. **Bi-Directional Symbiotic Twin Concept**:
-   - Market Intelligence (`/intel`, Layer 2 Stratosphere) and Space Discovery (`/discover`) are two sides of the same coin and must operate as deeply integrated companion features.
-   - A unified navigation bar allows seamless switching: `[🔍 DISCOVER SPACES]` ↔ `[📡 MARKET INTEL & BRIEFINGS]`.
-   - Context, category filters, and active region selections persist when switching between reading research and exploring physical spaces.
+1. **Bi-Directional Symbiotic Navigation**:
+   - Market Intelligence (`/intel`, Layer 2 Stratosphere) and Space Discovery (`/discover`) operate as deeply connected twin surfaces.
+   - A persistent header bar allows seamless switching: `[🔍 DISCOVER SPACES]` ↔ `[📡 MARKET INTEL & BRIEFINGS]`, preserving active city, category, and keyword filters.
 
-2. **Discovery-Embedded Space Carousels in Intel Articles**:
-   - All Intel articles, OSINT briefings, and market reports dynamically render **Embedded Space Carousels** of active verified ScoutIt properties affected by the article's topic or location.
+2. **Intel → Discover (Launch Integration)**:
+   - **Micro-Market Summary Banners**: Selecting a city/region on `/discover` (e.g. BGC, Makati) displays a 1-sentence plain-language note sourced directly from `INTEL_CMS.Excerpt` with a `[Read Full Guide →]` link.
+   - **Simple Feature Badges**: Property cards display clear, lightweight tags (`Commercial Hub`, `Pet-Friendly`, `Prime Location`) derived from standard Airtable fields.
+   - **Property Detail Market Guide Link**: Property pages include a gold link to the corresponding city/category intel briefing.
 
-3. **Intel-Powered Discovery Dossiers**:
-   - Property cards and regional clusters on `/discover` display matching **Intel Signals & Yield Badges** (e.g. `"BGC Yield Signal +8.2%"`, `"Transit Impact Zone"`).
-   - Tapping an Intel badge on a property opens a side dossier with the underlying market research.
+3. **Discover → Intel (Launch Integration)**:
+   - **Article-Bottom Related Space Carousel**: Intel articles (`/intel/[slug]`) dynamically render a 3-card carousel of active verified ScoutIt listings matching the article's `SpaceCategory` or `City`.
+   - **Direct Filter CTAs**: Articles conclude with a `[SEE PROPERTIES IN THIS AREA →]` button deep-linking directly to `/discover?city=...&type=...`.
 
-4. **Spatial Radar Map Overlay (`[📡 SIGNALS]`)**:
-   - `/discover` features an interactive MapLibre map mode displaying geotagged market signals with dynamic impact radiuses, highlighting properties inside signal boundaries.
+4. **Pragmatic Scope Guard (Post-Launch Deferral)**:
+   - Complex financial yield formulas, predictive algorithms, transit heatmaps, and formal financial certifications are **explicitly deferred to post-launch Phase 8**.
+   - Pre-launch integration relies 100% on existing Airtable CMS fields (`City`, `SpaceCategory`, `Excerpt`, `Slug`).
 
 ---
 

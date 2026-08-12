@@ -587,11 +587,11 @@ Every `-rgb` shipped with its `-ch` twin per the channel-syntax rule.
 - **Enterprise Pricing Modal**: Trigger a sleek Enterprise Pricing Modal on any attempt to click "Add Property", "Create Portfolio", "Invite Member", or execute mutation actions.
 - **Ref**: §Master Action Plan (Enterprise Read-Only Preview & Pricing Modal Policy)
 
-### W30 ⬜🎨 Layer 2 Discover & Intel Symbiotic Integration ⏱ ~3h
+### W30 ⬜🎨 Pragmatic Layer 2 Discover & Intel Integration ⏱ ~2.5h
 - **Bi-Directional Navigation**: Add a unified header toggle bar (`[🔍 DISCOVER SPACES]` ↔ `[📡 MARKET INTEL & BRIEFINGS]`) that preserves filter context when switching.
-- **Intel Tags & Dossiers**: Display matching Intel badges on discovery property cards that open market research dossiers.
-- **Embedded Space Carousels**: Embed property carousels inside Intel/OSINT articles so readers can inspect spaces without leaving research.
-- **Spatial Radar Overlay**: Implement MapLibre `[📡 SIGNALS]` layer on `/discover` displaying geotagged market signals with dynamic impact radiuses.
+- **Micro-Market Summary Banners**: Render a 1-sentence plain-language intel note on `/discover` when filtering by city/region (sourced from `INTEL_CMS.Excerpt`).
+- **Embedded Space Carousels**: Render a 3-card active property carousel at the bottom of Intel/OSINT articles matching category/city.
+- **Simple Feature Badges & Links**: Display simple property badges (`Commercial Hub`, `Prime Location`) and add gold market guide links on property detail pages.
 - **Ref**: §Master Action Plan (Layer 2 Discover & Intel Symbiotic Integration Architecture)
 
 **Left — inline styles, the other half:**
