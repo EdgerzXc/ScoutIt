@@ -23,7 +23,7 @@ export async function GET(request) {
             flexDirection: 'column',
             justifyContent: 'flex-end',
             backgroundColor: '#0d0d0d',
-            backgroundImage: image ? `url(${image})` : 'none',
+            ...(image ? { backgroundImage: `url(${image})` } : {}),
             backgroundSize: 'cover',
             backgroundPosition: 'center',
           }}
