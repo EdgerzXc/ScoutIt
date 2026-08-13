@@ -22,13 +22,10 @@ export async function POST(request) {
     // Read body exactly once.
     const body = await request.json().catch(() => ({}));
 
-    // The master-dev bypass is dev-only -- in production a verified staff
-    // session is required, full stop (same gate as /api/dashboard/publish).
-    const isDevMock = process.env.NODE_ENV !== 'production' && body.mockOwnerId === 'master-dev';
-    if (!isDevMock) {
-      const gate = await requireAdmin(request, { label: "ADMIN GENERATE-SEO" });
-      if (gate.error) return NextResponse.json({ error: gate.error }, { status: gate.status });
-    }
+    // Public Airtable metadata is a real mutation. Preview identities never
+    // authorize it; staff authority must be validated for every environment.
+    const gate = await requireAdmin(request, { label: "ADMIN GENERATE-SEO" });
+    if (gate.error) return NextResponse.json({ error: gate.error }, { status: gate.status });
 
     const { id } = body;
     if (!id) {

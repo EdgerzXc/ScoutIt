@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import ProfileContactModal from "./ProfileContactModal";
+import ProfileProvenanceBadge from "./ProfileProvenanceBadge";
 import { MapPin, Calendar, Edit2, MessageSquare } from "lucide-react";
 
 const TIER_CONFIG = {
@@ -115,10 +116,10 @@ export default function ProfileBaseLayer({
                 display: "inline-flex",
                 alignItems: "center",
                 gap: 6,
-                border: "1px dashed var(--text-muted)",
+                border: "1px dashed var(--accent-muted)",
                 borderRadius: 20,
                 padding: "3px 10px",
-                background: "var(--text-muted)",
+                background: "var(--accent-dim)",
               }}
               title="This is a seeded demonstration profile, not a real person"
             >
@@ -136,6 +137,7 @@ export default function ProfileBaseLayer({
               </span>
             </div>
           )}
+          <ProfileProvenanceBadge isPilotParticipant={profile.is_pilot_participant === true} />
         </div>
 
         {/* Meta row */}
@@ -373,7 +375,7 @@ const contactBtn = {
   gap: 6,
   fontFamily: "var(--font-body)",
   fontSize: 12,
-  color: "var(--background)",
+  color: "var(--on-accent)",
   background: "var(--accent)",
   border: "none",
   borderRadius: 20,

@@ -5,15 +5,15 @@ tags: [master-owner-actions, founder-actions, decisions, credentials, approvals,
 updated: 2026-08-12
 related:
   - "[[00_MASTER_ACTION_PLAN]]"
-  - "[[../BACKLOG/00_START_HERE]]"
+  - "[[../00_START_HERE]]"
   - "[[../../00_MASTER_SYNC]]"
-  - "[[../../15_IMPLEMENTATION_RECORDS/active/launch-readiness/FULL_SYSTEM_REAUDIT_2026-08-09]]"
+  - "[[../../15_IMPLEMENTATION_RECORDS/historical/launch-readiness/FULL_SYSTEM_REAUDIT_2026-08-09]]"
 ---
 
 # 👑 MASTER OWNER ACTIONS
 
 > **This is the single canonical checklist for work requiring Jerzel personally.**
-> It unifies all founder actions, credential setups, external service dashboards, device passes, 
+> It unifies all founder actions, credential setups, external service dashboards, device passes,
 > product/legal decisions, and launch gates into one master file.
 > Engineering work lives in [[00_MASTER_ACTION_PLAN]]. If another file conflicts with this master list, this file wins.
 
@@ -89,9 +89,11 @@ related:
 
 ---
 
-### 1.10 🧨 Apply the §1.0B Critical Security Migration — **BLOCKS HUMAN TESTING**
+### 1.10 ✅ §1.0B Critical Security Migration — **APPLIED 2026-08-12.** Re-tests remain
 
-*Engineering closed all ten §1.0B findings on 2026-08-12, plus four further bugs found while fixing them. The database half is inert until this migration is applied. Full detail: [[../../15_IMPLEMENTATION_RECORDS/active/launch-readiness/CRITICAL_LOGIC_SECURITY_1_0B_2026-08-12]].*
+> **Heading corrected 2026-08-13.** It previously read *"Apply the … Migration — BLOCKS HUMAN TESTING"*, which contradicted the ticked item directly beneath it. **The migration is applied and verified; it is not blocking anything.** What is still open here are the owner re-tests and the Scout Rating decision.
+
+*Engineering closed all ten §1.0B findings on 2026-08-12, plus four further bugs found while fixing them. Full detail: [[../../15_IMPLEMENTATION_RECORDS/active/launch-readiness/CRITICAL_LOGIC_SECURITY_1_0B_2026-08-12]].*
 
 **File:** `supabase/migrations/20260812000001_critical_logic_and_security_fixes.sql`
 **Project:** `yyixsuaimdzyiocswcgc` (ScoutIT) — the only project; there is no staging.
@@ -103,7 +105,7 @@ related:
 - [ ] **Re-test owner property intake.** A client-created property can no longer arrive `approved` or `live`; it is forced to `pending` / `draft`. Confirm the listing flow completes and lands in review.
 - [ ] **Spot-check the public property list and one property page** still render after the SELECT policy swap.
 - [ ] **Decide the Scout Rating formula (product, not security).** The handshake used to write `user_profiles.scout_rating`, a column that does not exist — it would have errored the first time any handshake completed. The real column is `broker_profiles.scout_rating`, `numeric(3,2)`, a 0–5 rating that **overflows at 10.00**, so incrementing it per closed deal was never right. The migration now credits `broker_profiles.verified_closures` instead. **How a verified closure should move the displayed 0–5 rating is your call, and no broker rating is being computed until you make it.**
-- [ ] **Record applied date:** `______`
+- [x] **Applied date: 2026-08-12** (five tracked migrations, all succeeded — recorded 2026-08-13; this line was previously left blank)
 
 ### 1.12 🗂️ Migration Drift — the repo does not describe the live database — **DECISION NEEDED**
 
@@ -134,6 +136,21 @@ related:
 - [ ] **Confirm `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` are set in Vercel production.** Without them the strong distributed limiter is silently inactive site-wide, not just for telemetry.
 - [ ] **Decide whether 120 events/min/IP is right for real traffic.** A shared office or campus NAT can legitimately exceed it. If pilot testers hit 429s on telemetry, raise it — telemetry failing is harmless, but a wrongly-metered visitor is a false signal in the data.
 
+### 1.14 📣 Sharing — Owner Actions (added 2026-08-13, Cowork share-engine pass)
+
+*The share engine was rebuilt on 2026-08-13 (mobile curated share, Viber/Messenger, copy-then-open, attribution, tests). These five items are the parts code cannot do. Implementation record: `_SCOUTIT_BRAIN/15_IMPLEMENTATION_RECORDS/active/sharing/2026-08-13_SHARE_ENGINE.md`.*
+
+- [ ] **Register a Facebook App and record its App ID.** Messenger's proper send dialog (`facebook.com/dialog/send`) requires one. Without it the Messenger button uses the `fb-messenger://share` app scheme, which works on a phone with Messenger installed and does **nothing on desktop**. No App ID was found anywhere in the repo, and inventing one produces a broken dialog, so none was used. Once you have it, add `NEXT_PUBLIC_FACEBOOK_APP_ID` to Vercel and the desktop path can be wired.
+- [ ] **Mark `share_completed` as a key event in GA4** (`G-36WQZF409S` → Admin → Events → Mark as key event). The event now fires on every completed share with `channel`, `property_slug` and `ref` params, but GA4 will not treat it as a conversion until it is promoted in the dashboard. Code cannot do this.
+- [ ] **Enter the floor area for One E-Com Center.** Measured 2026-08-13 against the live Airtable base: of the **7 approved listings, exactly 1 — One E-Com Center — has no floor area on record** in any field (`FloorSqm`, `CM_Total_GLA`, `HOSP_GFA`). It is the only listing that now falls back to the shorter share copy. Every other listing carries at least one measured spec and gets the full briefing. This is data entry, not a code fix — ScoutIt must never estimate a specification.
+- [ ] **Decide whether `ref` codes should be resolvable back to people, and where that mapping lives.** You chose person-level attribution. The code in a public link is an opaque SHA-256-derived string; to learn *which* broker a code belongs to you must hash your own user list and match. Nothing does that today. If crediting brokers matters commercially, an internal lookup page is a small future build — and worth writing down as a decision either way.
+- [ ] **Decide Unit Master Page sharing:** wire its currently unreachable share
+      modal using parent-property context and sample gating, or remove the dead
+      state. Do not let an agent silently choose.
+- [x] **Sharing push/merge approved and completed 2026-08-13.** Commits
+      `ce51bc9` and `d36d965` are on `origin/main` through merge `5289be5`.
+
+
 ---
 
 ## 🚀 2. Human Testing & Invited Pilot Unblocking
@@ -157,12 +174,92 @@ related:
 - [ ] **Account 2FA & Passkey**: Verify strong 2FA and hardware passkey on Jerzel's GitHub account; store offline recovery codes.
 - [ ] **Branch Protection Ruleset**: Review and approve proposed `main` ruleset ensuring sole owner, Vercel, and emergency recovery cannot be locked out.
 - [ ] **Commit Signing**: Establish and test GPG/SSH commit signing before enforcing signed commits on `main`.
-- [ ] **Secret Scanning Alert**: Review alert #1 in GitHub; mark synthetic test fixtures as false positives or rotate active credentials immediately if exposed.
+- [ ] **Secret Scanning Alert — one dashboard action remains.** The defanged
+      fixture and `.agents/` removal are already on `origin/main` through merge
+      `a312ce7`; CI was reported green. GitHub does not auto-close this alert.
+      Open `https://github.com/EdgerzXc/ScoutIt/security/secret-scanning/1` and
+      close it as a synthetic Clerk test fixture. ScoutIt uses Supabase Auth, so
+      there is no Clerk webhook secret to rotate.
 - [ ] **Least-Privilege Actions**: Approve GitHub Actions workflow permissions (read-only default, SHA-pinned actions).
+
+### 3.0 ✅ TWO LIVE AUTHORIZATION HOLES — CLOSED 2026-08-13
+
+**Both applied to production with owner approval and verified in both directions.**
+Full evidence: `[[../../15_IMPLEMENTATION_RECORDS/historical/launch-readiness/AUTHZ_FIXES_APPLIED_2026-08-13]]`.
+
+- [x] **`public.public_profiles` write path closed.** Was: `anon` held
+      `INSERT/UPDATE/DELETE/TRUNCATE` on an auto-updatable `SECURITY DEFINER`
+      view, bypassing `user_profiles` RLS over **15 real rows**. Proven live
+      (rolled back): anon UPDATE affected 1 row. Now `SELECT` only.
+      **Verified:** anon write blocked ✅, anon read still returns 12 profiles ✅,
+      and the live `/brokers` page still renders all three real broker profiles
+      on a cache-busting fetch ✅.
+- [x] **`intel_briefings` / `intel_sources` write access scoped.** Was: policies
+      *named* "Service role full access" were actually `roles={public}` (which
+      includes `anon`), `FOR ALL`, `USING (true)`. Both tables were empty, so
+      nothing leaked. **Verified:** anon INSERT blocked ✅, signed-in INSERT
+      blocked ✅, **Mission Control service-role publish still works** ✅,
+      0 probe rows left behind ✅.
+- [x] **DECISION RESOLVED — `/intel` is EDITORIAL.** Owner confirmed 2026-08-13:
+      authored by the ScoutIt team, published through **Mission Control**, each
+      category becoming a library of presentation methods (scrollytelling,
+      interactives, WebGL) chosen per piece; OSINT gathers source material for
+      the team's own take. Not user-generated. The four `authenticated`
+      insert/update policies were therefore dropped; the two `SELECT` policies
+      were kept so signed-in users can still read.
+
+> ⚠️ **Lesson worth keeping:** Supabase's security advisor reported **30 findings
+> before these fixes and 30 after** — it never flagged either hole. Both were
+> found by querying grants and policy *roles* directly. A policy named "Service
+> role full access" was open to the public. **A clean advisor run is not evidence
+> that access control is correct** (Rule 2).
+
+### 3.0-OPEN Remaining database items (prepared, not applied)
+
+- [ ] `…000003_rls_initplan_wrap_auth_calls.sql` — 17 policies re-evaluate
+      `auth.uid()` per row instead of once per query. Compounds badly at 200 listings.
+- [ ] `…000004_revoke_st_estimatedextent.sql` — closes 6 advisor warnings at once.
+- [ ] `…000005_spatial_ref_sys_rls.sql` — ⚠️ highest breakage risk of the five;
+      the table is owned by the PostGIS extension. Apply alone, then immediately
+      re-test a map / radius search.
+- [ ] **Decide on two exposed regulatory fields.** `public_profiles` exposes
+      `dhsud_number` and `prc_expiry` to anonymous visitors alongside
+      `prc_license` / `prc_verified`. Public license verification is plausibly
+      the intent for the PRC pair; the other two deserve a deliberate decision
+      rather than an inherited default.
+
+> **How to apply the remaining three:** one migration at a time, verifying after
+> each. Verification SQL is written as comments at the foot of each file.
+> ⚠️ `supabase/migrations/` is known to have **drifted from the live database**.
+> These files were generated from live introspection, not from that directory's
+> history. Always query the live schema before trusting anything in that folder.
+
+### 3.1 Supabase Platform Toggles (live advisor read 2026-08-13)
+
+Evidence: `[[../../15_IMPLEMENTATION_RECORDS/active/launch-readiness/THREE_PLATFORM_SECURITY_AUDIT_2026-08-13]]`.
+Full engineering queue is in **§1.0E** of [[00_MASTER_ACTION_PLAN]]; only the
+owner-gated items are repeated here.
+
+- [x] **Leaked Password Protection — intentionally deferred.** It is unavailable
+      on the current Supabase Free plan. Revisit only when Pro is activated for
+      an independent reason; do not purchase Pro solely for this toggle.
+- [ ] **Schema Change Approval — `spatial_ref_sys`**: Approve enabling RLS on this PostGIS system table. It is the only object in the whole audit with **no policy gate at all**. Content is public reference data (coordinate systems), not user data, so the real risk is low — but it is the one place the honest answer to "is this open?" is *yes*.
+- [ ] **Awareness only, no action yet — `postgis` / `vector` in `public` schema**: Supabase flags these. ⚠️ Moving them **rewrites every spatial query in the app**. Do not approve a relocation as routine cleanup; it needs its own plan.
 
 ---
 
 ## 🌐 4. Infrastructure, DNS & Mission Control Setup
+
+### 4.0 🔴 Finish Google Search Console Verification (live check 2026-08-13)
+
+Evidence: `[[../../15_IMPLEMENTATION_RECORDS/active/launch-readiness/SEARCH_ANALYTICS_DNS_AUDIT_2026-08-13]]`.
+
+- [ ] **Finish the Search Console property.** It was **started and never completed**. The DNS `TXT` token is already live on the apex (`google-site-verification=7JuJY3yeardpNnfXokGbh7l5QUUXen4CJESset64uuM`), but `search.google.com/search-console` shows the **welcome/onboarding** screen with Google's own *"Already started? finish verification"* prompt. **Consequence: zero query, impression, click, position, and coverage data exists, and none is accumulating.** The sitemap has never been submitted. Verification takes minutes — the DNS token is in place and GA4 is already installed, so either route works.
+- [ ] **Check which Google account holds it.** Not ruled out: the property may sit under a **different Google account** than the one in daily use. Only you can confirm this.
+- [ ] **Submit `https://www.scoutit.space/sitemap.xml`** once the property is verified. It serves valid XML and is already advertised in `robots.txt`.
+- [ ] **Set `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` in Vercel** as a *second* verification method, so the property survives the DNS cutover below.
+
+> ⚠️ **Order matters.** Doing §4.1 **before** the items above would drop the only verification token and reset Search Console to zero again. **Verify first, then migrate DNS.** Either way, carry the `google-site-verification` TXT record across.
 
 ### 4.1 GoDaddy to Cloudflare DNS Cutover
 - [ ] Export complete live GoDaddy DNS zone (including non-public records).
@@ -186,7 +283,10 @@ related:
 - [ ] Verify `X-Robots-Tag: noindex`, private cache policy, and watermark deterrence.
 - [ ] Apply Supabase migration `20260809000002_onboarding_completion_contract` via Mission Control System Operations panel.
 - [ ] Apply pilot cohort registry migration `20260811000002_pilot_cohort_registry` via MMC using checksum `C3910F49F333B023FF2B99F558F0057E954314E8302AA12C5DB018C03ED36140`.
-- [ ] Apply telemetry retention migration `20260809000001_security_telemetry_retention.sql` and verify `scoutit-clean-security-telemetry` pg_cron job.
+- [x] **Do not apply** `20260809000001_security_telemetry_retention.sql`; it was
+      superseded by `20260812000001` and would regress the live telemetry fix.
+- [ ] Approve a replacement **compaction** migration only after its aggregate
+      contract, flagged-row exemption, retention, and scheduler are documented.
 
 ---
 
@@ -195,6 +295,43 @@ related:
 ### 5.1 Pricing & Copy Alignment
 - [ ] **Six Pricing Benefits**: For the 6 advertised but unbuilt pricing features, choose: **(A) Build**, **(B) Deliver manually**, or **(C) Remove from pricing page**.
 - [ ] **Broker Traffic Visibility**: Decide whether a broker can see listing view analytics on a property *before* their representation pitch is formally accepted by the owner.
+
+### 5.3 💳 Payment Provider — **DECISION NEEDED, may block the payment build** *(added 2026-08-13)*
+
+Engineering can build the payment **logic** now behind a provider-agnostic
+adapter, so this decision does not block starting. It **does** block finishing.
+
+- [ ] **Verify whether Stripe is even available to a Philippine-registered
+      business** for accepting payments *and* receiving payouts, against Stripe's
+      own current documentation. Historically the Philippines has **not** been on
+      its supported list for local entities. **Do not assume — confirm.** If it is
+      not available, Stripe is out regardless of preference
+- [ ] **Evaluate the local/regional options**: PayMongo, Xendit, Maya Business,
+      Dragonpay, PayPal
+- [ ] **Decide which payment methods ScoutIt must accept.** In the Philippines
+      **GCash and Maya** dominate, alongside bank transfer/InstaPay and
+      over-the-counter. A card-only provider can satisfy the code and still fail
+      the customer
+- [ ] **Confirm recurring-billing support specifically.** Several local providers
+      handle one-off payments well and subscriptions poorly — and ScoutIt's model
+      is subscription tiers plus Connects top-ups
+- [ ] Compare on: PH entity eligibility · GCash/Maya · settlement time · fees ·
+      sandbox quality · refunds · BIR-compliant invoicing
+
+**Engineering constraint already recorded** ([[00_MASTER_ACTION_PLAN]] §Priority
+tiers): no payment SDK may be imported outside the single adapter module, so
+switching providers later touches one file rather than the product.
+
+### 5.4 Legal and Privacy Sign-off
+
+- [ ] Appoint the accountable privacy owner/DPO and have Philippine counsel classify mandatory NPC registration versus the applicable exemption or sworn-declaration route using ScoutIt actual processing, risk, profiling/automation, staffing, and sensitive-personal-information volume.
+- [ ] Complete and retain the approved NPCRS registration or exemption/SDAU evidence; do not infer the filing path from record count alone.
+- [ ] Approve the PIA/DPIA, records of processing, breach-response ownership, data-subject request procedure, and retention schedule.
+- [ ] Approve processor/vendor DPAs and cross-border transfer terms for the providers actually used in production.
+- [ ] Confirm the legal entity name, business address, contact channels, governing law/venue, Terms version, Privacy version, and real effective date before pilot enrollment.
+- [ ] Obtain counsel review of RESA/non-brokerage boundaries, listing and price representations, professional/event-planner roles, Connect terms, refunds, and payment-provider disclosures.
+- [ ] Approve work-for-hire, contributor, media, 3D/spatial capture, and IP/license terms before accepting third-party production assets.
+- [ ] Decide and document a private backup location and restore owner for the mostly gitignored ScoutIt Brain; do not make the private vault public merely to back it up.
 
 ### 5.2 Ecosystem & Design Choices
 - [ ] **Public Profile Indexability**: Decide when public professional profiles should be indexable by Google. *(Recommendation: Keep `noindex`ed until demo accounts are replaced with real users).*

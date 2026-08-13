@@ -3,6 +3,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { fetchPropertyVerificationDates } from "@/lib/airtable";
 import { notifyUser } from "@/lib/notifications";
 import { sanitizeError } from "@/lib/sanitizeError";
+import { authorizeCronRequest } from "@/lib/cronAuth";
 
 // Daily Vercel Cron (see vercel.json). Track 1,
 // PLAN_STAFF_ENTERPRISE_ANALYTICS_NOTIFICATIONS.md. Flags approved
@@ -14,17 +15,8 @@ import { sanitizeError } from "@/lib/sanitizeError";
 const STALE_DAYS = 30;
 
 export async function GET(request) {
-  // Vercel sets this header automatically when invoking a configured cron
-  // job if CRON_SECRET is set in the project's env vars. Soft-enforced: if
-  // CRON_SECRET isn't set (e.g. local dev), the check is skipped rather than
-  // locking the route out.
-  const cronSecret = process.env.CRON_SECRET;
-  if (cronSecret) {
-    const authHeader = request.headers.get("Authorization");
-    if (authHeader !== `Bearer ${cronSecret}`) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-  }
+  const authFailure = authorizeCronRequest(request);
+  if (authFailure) return authFailure;
 
   if (!supabaseAdmin) {
     return NextResponse.json({ error: "Server error: missing service role configuration" }, { status: 500 });

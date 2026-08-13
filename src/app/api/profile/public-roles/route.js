@@ -43,10 +43,20 @@ export async function GET(request) {
       .from("user_badges")
       .select("badge_id, earned_at")
       .eq("user_id", userId);
+    // Cohort membership itself stays service-role-only. Public profiles receive
+    // only this boolean provenance signal so invited testers cannot be mistaken
+    // for ordinary real people; no cohort metadata or email identity is exposed.
+    const { data: pilotParticipant } = await supabaseAdmin
+      .from("pilot_participants")
+      .select("user_id")
+      .eq("user_id", userId)
+      .is("offboarded_at", null)
+      .maybeSingle();
 
     return NextResponse.json({
       publicRoles: privacy?.public_roles || [],
       badges: badgeRows || [],
+      isPilotParticipant: Boolean(pilotParticipant?.user_id),
     });
   } catch (err) {
     console.error("[PUBLIC ROLES API] Error:", err);

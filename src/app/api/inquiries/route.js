@@ -7,6 +7,7 @@ import { turnstileGuard } from "@/lib/turnstile";
 import { getPropertyLeadRecipients, formatRoutingMetadata } from "@/lib/serverBrokerRouting";
 import { routingFailureStatus } from "@/lib/brokerRepresentation";
 import { normalizeLifecycleState, PROPERTY_LIFECYCLE_STATES } from "@/lib/propertyLifecycle";
+import { validateSampleInquiryRecipients } from "@/lib/sampleInventory";
 
 // Public lead capture. Previously a stub that console.logged the payload and
 // returned fake success -- every inquiry posted here was silently dropped.
@@ -23,10 +24,9 @@ const schema = z.object({
   email: z.string().email().max(200).optional(),
   phone: z.string().max(40).optional(),
   message: z.string().max(2000).optional(),
-  // Bot check. Optional in the SCHEMA so an older cached client bundle isn't
-  // hard-rejected mid-deploy, but enforced below whenever Turnstile is
-  // configured — see the guard in POST.
-  turnstileToken: z.string().optional(),
+  // Public writes require a token in the request shape and server-side
+  // verification below. There is no configuration-dependent bypass.
+  turnstileToken: z.string().min(1, "Captcha token is required"),
   preferredBrokerId: z.string().max(200).optional(),
 });
 
@@ -44,12 +44,10 @@ export async function POST(req) {
     // open it's a spam cannon aimed at recipient notification bells, and every
     // fake inquiry erodes trust in the one signal owners actually watch.
     //
-    // Only enforced when Turnstile is configured, so an unconfigured
-    // environment keeps working rather than silently dropping every lead.
-    if (process.env.TURNSTILE_SECRET || process.env.TURNSTILE_SECRET_KEY) {
-      const captchaFailure = await turnstileGuard(req, turnstileToken);
-      if (captchaFailure) return captchaFailure;
-    }
+    // Always fail closed. Missing production configuration is a security error,
+    // not permission to accept unauthenticated service-role writes.
+    const captchaFailure = await turnstileGuard(req, turnstileToken);
+    if (captchaFailure) return captchaFailure;
 
     if (!propertyId && !propertySlug) {
       return NextResponse.json({ success: false, message: "Missing property reference" }, { status: 400 });
@@ -61,7 +59,7 @@ export async function POST(req) {
       return NextResponse.json({ success: false, message: "Server error: missing service role configuration" }, { status: 500 });
     }
 
-    let query = supabaseAdmin.from("properties").select("id, title, owner_id, lifecycle_state, pipeline_status");
+    let query = supabaseAdmin.from("properties").select("id, title, slug, owner_id, lifecycle_state, pipeline_status");
     query = propertyId ? query.eq("id", propertyId) : query.eq("slug", propertySlug);
     const { data: property, error: propError } = await query.single();
 
@@ -82,6 +80,17 @@ export async function POST(req) {
       return NextResponse.json({ success: false, message: reason }, { status: routingFailureStatus(routing.reason) });
     }
 
+    const sampleRouting = validateSampleInquiryRecipients({
+      slug: property.slug || propertySlug,
+      recipientIds: routing.recipients.map((recipient) => recipient.recipientId),
+      allowlistValue: process.env.HUMAN_TEST_SAMPLE_RECIPIENT_IDS,
+    });
+    if (!sampleRouting.ok) {
+      return NextResponse.json(
+        { success: false, message: "Sample inquiries are unavailable until test routing is configured." },
+        { status: 503 },
+      );
+    }
     const logged = await logActivity(supabaseAdmin, {
       propertyId: property.id,
       activityType: "inquiry",

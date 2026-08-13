@@ -25,6 +25,7 @@
 // ─────────────────────────────────────────────────────────────────────────
 
 import { SITE_URL } from "./siteUrl";
+import { stripAllTags } from "./sanitize";
 
 const RESEND_ENDPOINT = "https://api.resend.com/emails";
 
@@ -66,7 +67,7 @@ export async function sendEmail({ to, subject, html, text }) {
         // A text part is not optional politeness: HTML-only mail scores worse
         // with spam filters, and ScoutIt is sending from a new domain with no
         // sending reputation.
-        text: text || stripHtml(html),
+        text: text || stripAllTags(html),
       }),
     });
 
@@ -83,14 +84,6 @@ export async function sendEmail({ to, subject, html, text }) {
     console.error("[email] Send failed:", err?.message);
     return { sent: false, error: "network" };
   }
-}
-
-function stripHtml(html) {
-  return String(html || "")
-    .replace(/<style[\s\S]*?<\/style>/gi, "")
-    .replace(/<[^>]+>/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
 }
 
 /**

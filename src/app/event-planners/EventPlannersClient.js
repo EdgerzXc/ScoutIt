@@ -25,6 +25,7 @@ const LOCATIONS = [
 ];
 
 export default function EventPlannersClient({ initialPlanners = null }) {
+  const hadInitialPlanners = initialPlanners !== null;
   const [planners, setPlanners] = useState(() => initialPlanners);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSpecialties, setSelectedSpecialties] = useState([]);
@@ -38,7 +39,7 @@ export default function EventPlannersClient({ initialPlanners = null }) {
       if (cancelled) return;
       if (error) {
         console.error("Failed to load event planners", error);
-        if (planners === null) setPlanners([]);
+        if (!hadInitialPlanners) setPlanners([]);
         return;
       }
       setPlanners(data.map((p) => ({
@@ -49,11 +50,12 @@ export default function EventPlannersClient({ initialPlanners = null }) {
         bio: p.bio || "",
         image: p.avatar_url || "",
         isExample: !!p.is_example_account,
+        isPilot: !!p.is_pilot_participant,
         available: p.provider_availability !== false,
       })));
     })();
     return () => { cancelled = true; };
-  }, []);
+  }, [hadInitialPlanners]);
 
   const toggleFilter = (section) => setOpenFilters((p) => ({ ...p, [section]: !p[section] }));
   const toggle = (val, state, setState) => {
@@ -188,7 +190,11 @@ export default function EventPlannersClient({ initialPlanners = null }) {
               <div className="brokers-grid" style={{ marginBottom: 32 }}>
                 {filtered.map((ep) => (
                   <Link key={ep.name} href={`/profile/${encodeURIComponent(ep.name)}`} className="broker-card" style={{ textDecoration: "none" }}>
-                    {ep.isExample && <div className="example-badge-overlay">Example Profile</div>}
+                    {(ep.isPilot || ep.isExample) && (
+                      <div className="example-badge-overlay">
+                        {ep.isPilot ? "Sample Profile — For Human Testing" : "Example Profile"}
+                      </div>
+                    )}
                     <div className="broker-image-container">
                       {ep.image ? (
                         /* eslint-disable-next-line @next/next/no-img-element */
@@ -268,7 +274,7 @@ export default function EventPlannersClient({ initialPlanners = null }) {
           font-size: 10px;
           font-weight: 700;
           letter-spacing: 0.1em;
-          color: var(--text-muted);
+          color: var(--text-secondary);
           background: rgba(14,14,14,0.8);
           border: 0.5px solid var(--border-mid);
           padding: 3px 8px;
@@ -362,7 +368,7 @@ export default function EventPlannersClient({ initialPlanners = null }) {
         }
         .broker-specialty {
           font-size: 13px;
-          color: var(--text-muted);
+          color: var(--text-secondary);
           margin-bottom: 16px;
         }
         .broker-specialty span { color: var(--text-primary); }

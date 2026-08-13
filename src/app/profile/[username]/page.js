@@ -86,7 +86,8 @@ export default function PublicProfilePage() {
 
   if (loading) {
     return (
-      <div style={loadingScreen}>
+      <div role="main" style={loadingScreen}>
+        <h1 className="sr-only">ScoutIt Profile</h1>
         <span style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "var(--text-secondary)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
           Loading…
         </span>
@@ -100,13 +101,13 @@ export default function PublicProfilePage() {
         <header style={navBar}>
           <Link href="/" style={backLink}>← ScoutIt</Link>
         </header>
-        <div style={notFoundContent}>
+        <main style={notFoundContent}>
           <h1 style={notFoundTitle}>Profile Unavailable</h1>
           <p style={notFoundDesc}>
             This profile is private or does not exist.
           </p>
           <Link href="/discover" style={notFoundCta}>Explore Properties</Link>
-        </div>
+        </main>
       </div>
     );
   }

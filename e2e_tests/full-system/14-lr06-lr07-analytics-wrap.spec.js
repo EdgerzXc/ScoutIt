@@ -5,10 +5,11 @@ test.describe('LR-06 and LR-07 Analytics foundation and Monthly Scout Wrap', () 
     const response = await request.post('/api/analytics', {
       data: {
         eventType: 'property_view',
-        propertyId: '00000000-0000-0000-0000-000000000001',
+        propertySlug: 'one-ecom-center',
         dwellSeconds: 15
       }
     });
     expect(response.status()).toBe(200);
+    expect(await response.json()).toMatchObject({ success: true, recorded: true });
   });
 });

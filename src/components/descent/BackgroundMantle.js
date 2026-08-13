@@ -22,7 +22,7 @@ function easeInOut(t) {
 const TUBE_R = 75;
 const TUBE_H = 1800;
 
-export default function BackgroundMantle() {
+export default function BackgroundMantle({ paused = false }) {
   const mountRef = useRef(null);
 
   useEffect(() => {
@@ -30,7 +30,7 @@ export default function BackgroundMantle() {
     if (!mount) return;
     // Lite Mode: never start the WebGL scene on low-power devices — the CSS
     // layer background stays, only the animated canvas is skipped.
-    if (isLiteMode()) return;
+    if (paused || isLiteMode() || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     let cancelled = false, frameId, renderer, resizeObs;
     const disposables = [];
@@ -309,7 +309,7 @@ export default function BackgroundMantle() {
         if (mount.contains(renderer.domElement)) mount.removeChild(renderer.domElement);
       }
     };
-  }, []);
+  }, [paused]);
 
   return (
     <div className="absolute inset-0 w-full h-full" style={{ zIndex: 0 }}>

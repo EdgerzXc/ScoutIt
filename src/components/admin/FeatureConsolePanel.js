@@ -101,10 +101,10 @@ export default function FeatureConsolePanel() {
       {/* Header info */}
       <div className="flex items-center justify-between p-4 bg-[#121212] border border-[#E8AE3C]/20 rounded-xl">
         <div>
-          <h3 className="text-base font-semibold text-white flex items-center gap-2">
+          <h2 className="text-base font-semibold text-white flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-[#E8AE3C] animate-pulse" />
             Live Feature & Kill-Switch Console
-          </h3>
+          </h2>
           <p className="text-xs text-gray-400 mt-1">
             Real-time system controls. Toggles update site behavior across database endpoints immediately.
           </p>

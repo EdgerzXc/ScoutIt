@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { resolveServerTier } from '../serverAuth.js';
+import { resolveServerTier, resolveUserId } from '../serverAuth.js';
 import * as featureFlags from '../featureFlags.js';
 import * as supabaseAdminModule from '../supabaseAdmin.js';
 
@@ -13,6 +13,27 @@ vi.mock('../supabaseAdmin.js', () => ({
   },
 }));
 
+describe('serverAuth local E2E identity boundary', () => {
+  it('accepts a mock identity only on the flagged localhost server', async () => {
+    process.env.SCOUTIT_E2E = '1';
+    const request = new Request('http://localhost:3000/api/crm/deals', {
+      headers: { 'x-mock-user-id': 'master-dev' },
+    });
+
+    await expect(resolveUserId(request)).resolves.toBe('master-dev');
+    delete process.env.SCOUTIT_E2E;
+  });
+
+  it('never accepts the E2E mock identity on the public host', async () => {
+    process.env.SCOUTIT_E2E = '1';
+    const request = new Request('https://www.scoutit.space/api/crm/deals', {
+      headers: { 'x-mock-user-id': 'master-dev' },
+    });
+
+    await expect(resolveUserId(request)).resolves.toBeNull();
+    delete process.env.SCOUTIT_E2E;
+  });
+});
 describe('serverAuth — resolveServerTier', () => {
   beforeEach(() => {
     vi.clearAllMocks();

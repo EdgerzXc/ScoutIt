@@ -3,6 +3,7 @@
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import ConnectsExplainer from "@/components/pricing/ConnectsExplainer";
+import PilotPaymentControls, { PilotPaymentNotice } from "@/components/pricing/PilotPaymentControls";
 import Link from "next/link";
 import { Check, Layers } from "lucide-react";
 
@@ -154,6 +155,8 @@ export default function BundlesPricingPage() {
           </p>
         </header>
 
+        <PilotPaymentNotice />
+
         <div className="bundles-grid z-10 relative w-full max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 px-4 mb-16">
           {BUNDLES.map((bundle) => (
             <div
@@ -217,7 +220,7 @@ export default function BundlesPricingPage() {
                 <div className="mt-3 pt-3 border-t border-white/5 flex items-center gap-2">
                   <span className="text-gold-accent font-mono font-bold text-sm">◈ {bundle.connects}</span>
                   <span className="text-xs text-text-muted">Connects / month</span>
-                  <span className="ml-auto text-xs font-mono text-gold-accent/60 bg-gold-accent/10 px-2 py-0.5 rounded">
+                  <span className="ml-auto text-xs font-mono text-gold-accent bg-gold-accent/10 px-2 py-0.5 rounded">
                     +{bundle.connectsBonus} loyalty bonus
                   </span>
                 </div>
@@ -233,14 +236,8 @@ export default function BundlesPricingPage() {
                 ))}
               </ul>
 
-              {/* CTA */}
-              <button
-                type="button"
-                onClick={() => window.dispatchEvent(new CustomEvent("scoutit:open-waitlist", { detail: { role: null, tier: bundle.name, source: "pricing-bundles" } }))}
-                className="block w-full text-center py-3 rounded font-working-title text-xs uppercase tracking-widest font-bold cursor-pointer transition-all bg-transparent border border-gold-accent/40 text-gold-accent hover:bg-gold-accent/10"
-              >
-                Join the Waitlist
-              </button>
+              {/* Pilot payment state + non-payment waitlist */}
+              <PilotPaymentControls tier={bundle.name} source="pricing-bundles" />
             </div>
           ))}
         </div>

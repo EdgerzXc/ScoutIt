@@ -74,7 +74,7 @@ export default function BoardPodium() {
       {/* RIGHT — leaderboard preview */}
       <div className="descent-content">
         <div className="board-content-head">
-          <h3 className="board-content-title">{category === "All" ? "Overall" : category} · Most Inquired</h3>
+          <h2 className="board-content-title">{category === "All" ? "Overall" : category} · Most Inquired</h2>
           <div className="board-content-sub">Live Leaderboard — Updated Monthly</div>
         </div>
 
@@ -111,8 +111,8 @@ export default function BoardPodium() {
         .board-content { scrollbar-width: none; }
         .board-content-head { margin-bottom: 24px; text-align: right; }
         .board-content-title { font-family: var(--font-display); font-weight: 400; font-size: clamp(24px, 3vw, 34px); color: #f0ede8; }
-        .board-content-sub { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.22em; color: #555; text-transform: uppercase; margin-top: 8px; }
-        .board-empty { font-family: var(--font-display); font-style: italic; color: #666; font-size: 18px; padding: 60px 0; text-align: right; }
+        .board-content-sub { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.22em; color: var(--text-secondary); text-transform: uppercase; margin-top: 8px; }
+        .board-empty { font-family: var(--font-display); font-style: italic; color: var(--text-secondary); font-size: 18px; padding: 60px 0; text-align: right; }
 
         .board-podium { display: flex; flex-direction: column; gap: 14px; max-width: 440px; margin-left: auto; }
         .board-runners { display: flex; flex-direction: column; gap: 14px; }
@@ -141,13 +141,13 @@ export default function BoardPodium() {
         :global(.bp-hero .bp-name) { font-size: 22px; }
         :global(.bp-mid .bp-name) { font-size: 16px; }
         :global(.bp-mini .bp-name) { font-size: 14px; }
-        :global(.bp-loc) { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #777; margin-top: 4px; }
+        :global(.bp-loc) { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-secondary); margin-top: 4px; }
         :global(.bp-divider) { height: 1px; background: rgba(255,255,255,0.08); margin: 12px 0; }
         :global(.bp-stats) { display: flex; gap: 16px; }
         :global(.bp-stat) { display: flex; flex-direction: column; }
         :global(.bp-num) { font-family: var(--font-display); font-size: 18px; }
-        :global(.bp-lbl) { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: #777; margin-top: 2px; }
-        :global(.bp-mini-stat) { font-family: var(--font-mono); font-size: 10px; color: #777; letter-spacing: 0.1em; text-transform: uppercase; margin-top: auto; }
+        :global(.bp-lbl) { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-secondary); margin-top: 2px; }
+        :global(.bp-mini-stat) { font-family: var(--font-mono); font-size: 10px; color: var(--text-secondary); letter-spacing: 0.1em; text-transform: uppercase; margin-top: auto; }
         :global(.bp-mini-stat span) { font-family: var(--font-display); font-size: 14px; }
 
         @media (max-width: 1024px) {

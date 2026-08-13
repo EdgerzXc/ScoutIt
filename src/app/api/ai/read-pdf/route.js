@@ -16,28 +16,20 @@ export async function POST(request) {
 
   try {
     const formData = await request.formData();
-    const mockOwnerId = formData.get('mockOwnerId');
 
-    // Authenticate user via JWT to prevent unauthenticated DoS on PDF parsing
-    const authHeader = request.headers.get("Authorization");
-    const token = authHeader?.replace("Bearer ", "");
-    
-    // The master-dev bypass is dev-only -- in production a verified session
-    // token is required, full stop (same gate as /api/dashboard/publish).
-    const isDevMock = process.env.NODE_ENV !== 'production' && mockOwnerId === 'master-dev';
-    if (!isDevMock) {
-      if (!token) {
-        return NextResponse.json({ error: "Unauthorized: Missing token" }, { status: 401 });
-      }
+    // PDF processing is available only to a Supabase-validated account.
+    const token = request.headers.get("Authorization")?.replace("Bearer ", "");
+    if (!token) {
+      return NextResponse.json({ error: "Unauthorized: Missing token" }, { status: 401 });
+    }
 
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-      const authClient = createClient(supabaseUrl, supabaseAnonKey);
-      const { data: { user }, error: authError } = await authClient.auth.getUser(token);
-      
-      if (authError || !user) {
-        return NextResponse.json({ error: "Unauthorized: Invalid session" }, { status: 401 });
-      }
+    const authClient = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    );
+    const { data: { user }, error: authError } = await authClient.auth.getUser(token);
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized: Invalid session" }, { status: 401 });
     }
 
     const file = formData.get('file');

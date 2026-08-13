@@ -115,7 +115,7 @@ export default function AgendaView({ events, onSelectEvent, onRespondViewing, re
                         className="text-xs text-background bg-gold-accent px-2.5 py-1.5 rounded hover:bg-gold-bright
                           uppercase tracking-wider font-mono disabled:opacity-50"
                       >
-                        Accept
+                        Confirm
                       </button>
                     </div>
                   ) : (

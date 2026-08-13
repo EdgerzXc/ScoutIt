@@ -17,6 +17,7 @@ function stubFetch(mode = 'success') {
     if (mode === 'nonjson') return { ok: true, json: async () => { throw new Error('bad json'); } };
     if (mode === 'badsecret') return { ok: true, json: async () => ({ success: false, 'error-codes': ['invalid-input-secret'] }) };
     if (mode === 'dupe') return { ok: true, json: async () => ({ success: false, 'error-codes': ['timeout-or-duplicate'] }) };
+    if (mode === 'invalid') return { ok: true, json: async () => ({ success: false, 'error-codes': ['invalid-input-response'] }) };
     return { ok: true, json: async () => ({ success: true }) };
   });
 }
@@ -159,8 +160,17 @@ describe('error mapping', () => {
     expect(result.codes).toContain('invalid-input-secret');
   });
 
-  // Tokens are single-use. This is the code a user hits when the widget
-  // wasn't reset after a failed submit — the message must tell them to retry.
+  it('rejects an invalid token with a retryable message', async () => {
+    stubFetch('invalid');
+    const { verifyTurnstile } = await loadFresh();
+    const result = await verifyTurnstile('forged-token');
+    expect(result.ok).toBe(false);
+    expect(result.codes).toContain('invalid-input-response');
+    expect(result.message).toMatch(/try again/i);
+  });
+
+  // Expired and replayed tokens share Cloudflare's timeout-or-duplicate code.
+  // The message must tell the user to retry with the freshly reset widget.
   it('maps timeout-or-duplicate to a retry message', async () => {
     stubFetch('dupe');
     const { verifyTurnstile } = await loadFresh();

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolveUserId } from "@/lib/serverAuth";
 import { sanitizeError } from "@/lib/sanitizeError";
+import { notifyUser, validateSampleNotificationRouting } from "@/lib/notifications";
 
 export const dynamic = "force-dynamic";
 
@@ -114,7 +115,7 @@ const postSchema = z.object({
   title: z.string().max(200),
   desc: z.string().max(1000),
   icon: z.string().max(20).optional(),
-  propertyId: z.string().optional(),
+  propertyId: z.string().uuid().optional(),
   notificationType: z.string().max(100),
 });
 
@@ -136,19 +137,19 @@ export async function POST(request) {
       return NextResponse.json({ error: "Server error: missing service role configuration" }, { status: 500 });
     }
 
-    const { error } = await supabaseAdmin.from("user_notifications").insert([{
-      user_id: userId,
+    const routing = await validateSampleNotificationRouting(supabaseAdmin, { userId, propertyId });
+    if (!routing.ok) {
+      return NextResponse.json({ error: "Property notification routing is unavailable for this recipient." }, { status: 403 });
+    }
+    const notified = await notifyUser(supabaseAdmin, {
+      userId,
       title,
       desc,
       icon: icon || "🔔",
-      property_id: propertyId || null,
-      notification_type: notificationType,
-    }]);
-
-    if (error) {
-      console.error("[NOTIFICATIONS API] POST error:", error);
-      return NextResponse.json({ error: "Failed to save notification" }, { status: 500 });
-    }
+      propertyId: propertyId || null,
+      notificationType,
+    });
+    if (!notified) return NextResponse.json({ error: "Failed to save notification" }, { status: 500 });
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error("[NOTIFICATIONS API] POST error:", err);

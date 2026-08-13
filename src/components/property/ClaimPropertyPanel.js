@@ -363,7 +363,7 @@ function ClaimStyles() {
         font-family: var(--font-display);
         font-size: 12px;
         line-height: 1.65;
-        color: var(--text-muted, #6a6a6a);
+        color: var(--text-secondary);
         margin: 14px 0 0;
         max-width: 56ch;
       }

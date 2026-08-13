@@ -3,6 +3,7 @@ import UnitMasterPage from "@/components/property/UnitMasterPage";
 import { getCmsBundle } from "@/lib/cmsCache";
 import { stripPremiumFields } from "@/lib/premiumFields";
 import { siteUrl } from "@/lib/siteUrl";
+import { childSpaceDisplayName, getPropertyHierarchy } from "@/lib/propertyHierarchy";
 
 // ═══════════════════════════════════════════════════════════════
 // ONE CACHED LOAD FOR BOTH generateMetadata AND THE PAGE.
@@ -41,8 +42,8 @@ async function findProperty(idOrSlug) {
 export async function generateMetadata({ params }) {
   const resolvedParams = await params;
 
-  let seoTitle = `Unit Intel — ${resolvedParams.id} — ScoutIt`;
-  let seoDescription = "Unit-level Space Intelligence Vector";
+  let seoTitle = `Child-space Intel — ${resolvedParams.id} — ScoutIt`;
+  let seoDescription = "Child-space level property intelligence.";
   let imageUrl = siteUrl("/og-default.jpg");
   let url = siteUrl(`/property/${resolvedParams.id}/unit/${resolvedParams.unitId}`);
   let isSample = false;
@@ -52,10 +53,13 @@ export async function generateMetadata({ params }) {
       const match = await findProperty(resolvedParams.id);
       if (match) {
         isSample = Boolean(match.is_sample);
-        const unit = (match.units_inventory || []).find(u => u.id === resolvedParams.unitId);
+        const unitIndex = (match.units_inventory || []).findIndex(u => u.id === resolvedParams.unitId);
+        const unit = unitIndex >= 0 ? match.units_inventory[unitIndex] : null;
         if (unit) {
-          seoTitle = `${unit.name} · ${match.title} | ScoutIt`;
-          seoDescription = `Premium ${unit.size ? `${unit.size} sqm ` : ""}space at ${match.title}. Explore floor plans, 3D layouts, and pricing on ScoutIt.`;
+          const hierarchy = getPropertyHierarchy(match);
+          const displayName = childSpaceDisplayName(unit.name, unitIndex, match);
+          seoTitle = `${displayName} · ${match.title} | ScoutIt`;
+          seoDescription = `${hierarchy.childLabel} at ${match.title}${unit.size ? `, ${unit.size} sqm` : ""}. Explore its floor plan, layout, and listing context on ScoutIt.`;
           
           const photo = Array.isArray(unit.photos) && unit.photos.length > 0 
             ? unit.photos.find(Boolean) 

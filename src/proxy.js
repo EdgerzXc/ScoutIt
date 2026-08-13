@@ -182,7 +182,11 @@ export async function proxy(request, event) {
 
   // Local dev / E2E runs fire hundreds of same-IP requests and were tripping
   // the limiter (429s mid-test-suite). Rate limiting & IP blocking are production-only.
-  if (process.env.NODE_ENV !== 'production') {
+  const isLocalE2E =
+    process.env.SCOUTIT_E2E === '1' &&
+    ['localhost', '127.0.0.1'].includes(request.nextUrl.hostname);
+
+  if (process.env.NODE_ENV !== 'production' || isLocalE2E) {
     return NextResponse.next();
   }
 

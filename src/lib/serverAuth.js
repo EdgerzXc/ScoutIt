@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { isDevelopmentMockAllowed } from "@/lib/developmentMock";
 
 export async function resolveUserId(request) {
   const authHeader = request.headers.get("Authorization");
@@ -12,10 +13,19 @@ export async function resolveUserId(request) {
     if (!error && user) return user.id;
   }
   
-  if (process.env.NODE_ENV === "development") {
-    const mockUser = request.headers.get("x-mock-user-id");
-    if (mockUser) return mockUser;
-  }
+  const requestHost = new URL(request.url).hostname;
+  const isLocalE2E =
+    process.env.SCOUTIT_E2E === "1" &&
+    ["localhost", "127.0.0.1"].includes(requestHost);
+
+  const mockUser = request.headers.get("x-mock-user-id");
+  const readOnlyRequest = ["GET", "HEAD"].includes(request.method);
+  if (isLocalE2E && readOnlyRequest && isDevelopmentMockAllowed({
+    nodeEnv: process.env.NODE_ENV,
+    e2eFlag: "1",
+    hostname: requestHost,
+    userId: mockUser,
+  })) return mockUser;
 
   // Dev-only fallback -- rejected in production, where identity must come
   // from a verified session token (same gate as /api/dashboard/publish).

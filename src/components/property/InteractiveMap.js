@@ -79,7 +79,7 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
       mainPopup.appendChild(mainSub);
 
       // Add Main Property Marker
-      window.L.marker(position, { icon: mainPropertyIcon })
+      window.L.marker(position, { icon: mainPropertyIcon, title: propertyTitle || "ScoutIt property location", alt: propertyTitle || "ScoutIt property location" })
         .addTo(map)
         .bindPopup(mainPopup, {
           className: "custom-leaflet-popup"
@@ -104,7 +104,7 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
             iconAnchor: [7, 7]
           });
 
-          const marker = window.L.marker(itemPosition, { icon: whiteDotIcon }).addTo(map);
+          const marker = window.L.marker(itemPosition, { icon: whiteDotIcon, title: item.name || "Nearby lifestyle point", alt: item.name || "Nearby lifestyle point" }).addTo(map);
 
           const amenityPopup = document.createElement('div');
           const amenityTitle = document.createElement('strong');
@@ -154,7 +154,7 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
             iconAnchor: [6, 6]
           });
 
-          const marker = window.L.marker(itemPosition, { icon: amenityIcon })
+          const marker = window.L.marker(itemPosition, { icon: amenityIcon, title: item.name || "Nearby amenity", alt: item.name || "Nearby amenity" })
             .addTo(map);
 
           const amenityPopup = document.createElement('div');
@@ -256,7 +256,7 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
             routePopup.appendChild(document.createElement('br'));
             routePopup.appendChild(routeSub);
 
-            window.L.marker([destLat, destLng], { icon: originIcon })
+            window.L.marker([destLat, destLng], { icon: originIcon, title: destName || "Transit route origin", alt: destName || "Transit route origin" })
               .addTo(map)
               .bindPopup(routePopup, { className: "custom-leaflet-popup" });
 

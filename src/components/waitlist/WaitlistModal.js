@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { joinWaitlist } from "@/lib/waitlist";
-import { Turnstile } from '@marsidev/react-turnstile';
+import TurnstileGate from "@/components/ui/TurnstileGate";
 
 // Single global waitlist modal. Mounted once in the root layout; opened from
 // anywhere by dispatching:
@@ -25,11 +25,14 @@ export default function WaitlistModal() {
   const [status, setStatus] = useState("idle"); // idle | sending | done | already | error
   const [error, setError] = useState("");
   const [turnstileToken, setTurnstileToken] = useState("");
+  const turnstileRef = useRef(null);
 
   const reset = useCallback(() => {
     setEmail("");
     setStatus("idle");
     setError("");
+    setTurnstileToken("");
+    turnstileRef.current?.reset();
   }, []);
 
   useEffect(() => {
@@ -65,6 +68,7 @@ export default function WaitlistModal() {
     if (!res.ok) {
       setStatus("error");
       setError(res.error || "Something went wrong.");
+      turnstileRef.current?.reset();
       return;
     }
     setStatus(res.already ? "already" : "done");
@@ -117,17 +121,11 @@ export default function WaitlistModal() {
                 autoFocus
                 required
               />
-              {/* No fallback to Cloudflare's always-pass test key
-                  (1x00000000000000000000AA). The server already fails closed,
-                  so the old fallback did not open a hole — it produced
-                  something worse to diagnose: a widget that visibly succeeds
-                  while every submission is silently rejected, with no clue why.
-                  An undefined siteKey makes Turnstile fail loudly instead. §25.5 */}
-              <Turnstile
-                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
-                onSuccess={(token) => setTurnstileToken(token)}
-                onError={() => setError("Captcha verification failed. Please try again.")}
-                options={{ theme: 'dark' }}
+              <TurnstileGate
+                ref={turnstileRef}
+                action="waitlist-signup"
+                onToken={setTurnstileToken}
+                onError={setError}
               />
               <button type="submit" className="w-full bg-gold-accent-bright text-background border-none rounded-lg p-3.5 font-label-caps text-[13px] font-bold tracking-wide uppercase cursor-pointer transition-all hover:-translate-y-px hover:bg-gold-accent hover:shadow-[0_8px_26px_rgba(232,174,60,0.25)] disabled:opacity-60 disabled:cursor-default" disabled={status === "sending" || !turnstileToken}>
                 {status === "sending" ? "Joining…" : "Join the Waitlist"}

@@ -24,10 +24,12 @@ test.describe('LR-02 property-scoped broker roster', () => {
     await gotoAndSettle(page, '/property/lr02-property/brokers');
     await expectRealContent(page);
     await expect(page.getByRole('heading', { name: /Authorized Broker Roster/i })).toBeVisible();
-    await expect(page.getByText('Active Broker')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Active Broker' }).first()).toBeVisible();
     await expect(page.getByText(/current visible, contactable representation/i)).toBeVisible();
-    await expect(page.getByText(/Active Broker/)).toHaveCount(1);
-    await page.getByRole('button', { name: /Contact Broker/i }).click();
+    // The same broker can be surfaced in the recommended and ranked layers;
+    // both must remain honest, and the recommended action routes to that ID.
+    await expect(page.getByRole('heading', { name: 'Active Broker' })).toHaveCount(2);
+    await page.getByRole('button', { name: /Contact Broker/i }).first().click();
     await page.getByPlaceholder('Your Full Name').fill('Buyer One');
     await page.getByPlaceholder(/Contact Number/i).fill('+63 917 000 0000');
     await page.getByPlaceholder(/Tell the recipient/i).fill('Please share the current viewing terms.');
@@ -42,7 +44,7 @@ test.describe('LR-02 property-scoped broker roster', () => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        json: { property: { id: 'lr02-unrepresented', title: 'Unrepresented Property', slug: 'lr02-unrepresented' }, represented: false, brokers: [] },
+        json: { property: { id: 'lr02-unrepresented', title: 'Unrepresented Property', slug: 'lr02-unrepresented' }, represented: false, contactable: true, brokers: [] },
       });
     });
     await gotoAndSettle(page, '/property/lr02-unrepresented/brokers');

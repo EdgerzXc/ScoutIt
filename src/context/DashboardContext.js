@@ -1,13 +1,16 @@
  
-/* eslint-disable react-hooks/immutability */
+
 "use client";
 
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { supabase } from "../lib/supabaseClient";
-import { onAuthStateChange, getSession } from "../lib/authClient";
+import { onAuthStateChange, getSession, getUser, signInWithPassword } from "../lib/authClient";
 import { Bookmark } from "lucide-react";
 import { getBalance, spendConnects, initWalletIfEmpty } from "../lib/connectsWallet";
 import ListerDeclarationModal from "../components/dashboard/ListerDeclarationModal";
+import { isOnboardingComplete } from "../lib/onboardingProfile";
+import { readDevelopmentMockUser } from "../lib/developmentMock";
+import { trackEvent, GA_EVENTS } from "../lib/analytics";
 
 const DashboardContext = createContext();
 
@@ -59,49 +62,41 @@ export function DashboardProvider({ children }) {
   // promise resolver so publishListing can await the user's answer.
   const [declarationPrompt, setDeclarationPrompt] = useState(null);
 
-  // Sync user from Supabase Auth
+  // A dashboard identity is either validated by Supabase Auth or an explicit
+  // localhost-only development mock. Browser profile cache is never authority.
   useEffect(() => {
-    const fetchSession = async () => {
-      let session = null;
+    const localDevelopmentUser = () => readDevelopmentMockUser(localStorage, {
+      nodeEnv: process.env.NODE_ENV,
+      hostname: window.location.hostname,
+    });
+
+    const fetchVerifiedUser = async () => {
       try {
-        const res = await getSession();
-        session = res?.data?.session;
-      } catch (err) {
-        console.warn("Supabase getSession failed, falling back to mock:", err);
+        const { data: { user }, error } = await getUser();
+        if (!error && user) {
+          await handleUserLogin(user);
+          return;
+        }
+      } catch (error) {
+        console.warn("Supabase user validation failed:", error);
       }
 
-      if (session?.user) {
-        await handleUserLogin(session.user);
-      } else {
-        // If they are using the DEV Toolbox mock user, preserve it
-        const mockStr = typeof window !== 'undefined' ? localStorage.getItem("scoutit_user") : null;
-        if (mockStr && mockStr.includes("master-dev")) {
-          try {
-            const parsed = JSON.parse(mockStr);
-            setCurrentUser(parsed);
-            setIsLoading(false);
-            fetchNotifications(parsed.id);
-            return;
-          } catch(e) {}
-        }
-
-        // Otherwise, clear old mock data if no real session exists
-        if (typeof window !== 'undefined') localStorage.removeItem("scoutit_user");
-        setCurrentUser(null);
+      const mockUser = localDevelopmentUser();
+      if (mockUser) {
+        setCurrentUser(mockUser);
         setIsLoading(false);
+        fetchNotifications(mockUser.id);
+        return;
       }
-    };
-    fetchSession();
 
-    const { data: { subscription } } = onAuthStateChange(async (_event, session) => {
-      if (session?.user) {
-        await handleUserLogin(session.user);
-      } else {
-        const mockStr = typeof window !== 'undefined' ? localStorage.getItem("scoutit_user") : null;
-        if (!(mockStr && mockStr.includes("master-dev"))) {
-          setCurrentUser(null);
-        }
-      }
+      localStorage.removeItem("scoutit_user");
+      setCurrentUser(null);
+      setIsLoading(false);
+    };
+    fetchVerifiedUser();
+
+    const { data: { subscription } } = onAuthStateChange(async () => {
+      await fetchVerifiedUser();
     });
 
     return () => subscription?.unsubscribe();
@@ -115,6 +110,18 @@ export function DashboardProvider({ children }) {
       .select('*')
       .eq('id', authUser.id)
       .single();
+
+    if (!isOnboardingComplete(profile)) {
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("scoutit_user");
+        setCurrentUser(null);
+        setIsLoading(false);
+        if (window.location.pathname !== "/onboarding") {
+          window.location.replace("/onboarding");
+        }
+      }
+      return;
+    }
 
     const mergedUser = {
       ...authUser,
@@ -143,15 +150,13 @@ export function DashboardProvider({ children }) {
   const authedFetch = useCallback(async (url, options = {}) => {
     const { data: { session } } = await getSession();
     const token = session?.access_token;
-    let mockUserId = "";
-    if (!token && typeof window !== 'undefined') {
-      try {
-        const mockStr = localStorage.getItem("scoutit_user");
-        if (mockStr && mockStr.includes("master-dev")) {
-          mockUserId = JSON.parse(mockStr).id;
-        }
-      } catch (e) {}
-    }
+    const mockUser = !token && typeof window !== "undefined"
+      ? readDevelopmentMockUser(localStorage, {
+          nodeEnv: process.env.NODE_ENV,
+          hostname: window.location.hostname,
+        })
+      : null;
+    const mockUserId = mockUser?.id || "";
     return fetch(url, {
       ...options,
       headers: {
@@ -363,6 +368,7 @@ export function DashboardProvider({ children }) {
     } else {
       setSavedIds(prev => [...prev, item.id]);
       addToast("Saved to Your Board", <Bookmark strokeWidth={1.5} size="1em" />);
+      trackEvent(GA_EVENTS.BOARD_SAVE, { property_id: item.id, signed_in: Boolean(currentUser?.id) });
       
       // Sync Supabase
       if (currentUser?.id) await supabase.from('saved_intel').insert([{ user_id: currentUser.id, property_id: item.id }]);
@@ -472,16 +478,18 @@ export function DashboardProvider({ children }) {
     }
   };
 
-  const permanentlyRemoveListing = async (listingId, confirmationTitle, password) => {
+  const permanentlyRemoveListing = async (listingId, confirmationTitle, password, captchaToken) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user?.email || !password) {
         throw new Error("Your account password is required for permanent removal");
       }
-      const { data: reauthenticated, error: reauthError } = await supabase.auth.signInWithPassword({
-        email: session.user.email,
+      if (!captchaToken) throw new Error("Complete the security check before permanent removal");
+      const { data: reauthenticated, error: reauthError } = await signInWithPassword(
+        session.user.email,
         password,
-      });
+        captchaToken,
+      );
       if (reauthError || !reauthenticated?.session?.access_token) {
         throw new Error("Password re-authentication failed");
       }
@@ -576,6 +584,7 @@ export function DashboardProvider({ children }) {
       setListings(prev => prev.map(l => l.id === listingId ? { ...l, pipelineStatus: 'approved' } : l));
       setDeclarationPrompt(null);
       addToast("Property is now LIVE", "🌍");
+      trackEvent(GA_EVENTS.PROPERTY_PUBLISHED, { property_id: listingId, with_declaration: Boolean(declaration) });
       return true;
     } catch (err) {
       console.error(err);
@@ -831,6 +840,7 @@ export function DashboardProvider({ children }) {
       // authoritative newBalance (real sessions) over the local sim total.
       const localSpend = spendConnects(role, tier, 1);
       setConnects(typeof data.newBalance === 'number' ? data.newBalance : localSpend.remaining);
+      trackEvent(GA_EVENTS.CONNECT_SPENT, { spend_reason: 'pitch', property_id: listingId, role, tier, amount: 1 });
 
       const targetListing = listings.find(l => l.id === listingId);
       const newPitch = {
@@ -893,6 +903,7 @@ export function DashboardProvider({ children }) {
       // Server confirmed — mirror the spend locally, prefer server truth.
       const localSpend = spendConnects(role, tier, 1);
       setConnects(typeof data.newBalance === 'number' ? data.newBalance : localSpend.remaining);
+      trackEvent(GA_EVENTS.CONNECT_SPENT, { spend_reason: 'handshake', property_id: listingId, role, tier, amount: 1 });
 
       const targetListing = listings.find(l => l.id === listingId);
       setPitches(prev => [{

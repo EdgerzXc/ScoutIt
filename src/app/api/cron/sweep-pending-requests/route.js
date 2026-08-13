@@ -4,6 +4,7 @@ import { notifyUser } from "@/lib/notifications";
 import { logActivity } from "@/lib/crmActivity";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { ARCHIVE_AFTER_DAYS, DELETE_AFTER_DAYS } from "@/lib/pendingRequestLifecycle";
+import { authorizeCronRequest } from "@/lib/cronAuth";
 
 // ═══════════════════════════════════════════════════════════════
 // PENDING REQUEST SWEEP — 7-day archive, 30-day delete
@@ -35,13 +36,8 @@ const daysAgoIso = (days) =>
   new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
 
 export async function GET(request) {
-  const cronSecret = process.env.CRON_SECRET;
-  if (cronSecret) {
-    const authHeader = request.headers.get("Authorization");
-    if (authHeader !== `Bearer ${cronSecret}`) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-  }
+  const authFailure = authorizeCronRequest(request);
+  if (authFailure) return authFailure;
 
   if (!supabaseAdmin) {
     return NextResponse.json(

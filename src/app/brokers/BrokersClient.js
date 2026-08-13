@@ -33,8 +33,9 @@ function getClosureCount(closuresStr) {
 }
 
 export default function BrokersClient({ initialBrokers = [] }) {
+  const hadInitialBrokers = initialBrokers.length > 0;
   const [brokers, setBrokers]     = useState(() => initialBrokers);
-  const [source, setSource]       = useState(() => (initialBrokers.length > 0 ? "cms_server" : "loading"));
+  const [source, setSource]       = useState(() => (hadInitialBrokers ? "cms_server" : "loading"));
   const [searchTerm, setSearchTerm] = useState("");
 
   // Filters State
@@ -58,13 +59,13 @@ export default function BrokersClient({ initialBrokers = [] }) {
           setSource(data.source || "cms_api");
         }
       } catch {
-        if (brokers.length === 0) {
+        if (!hadInitialBrokers) {
           setSource("network_error");
         }
       }
     }
     load();
-  }, []);
+  }, [hadInitialBrokers]);
 
   const toggleFilterSection = (section) => {
     setOpenFilters((prev) => ({ ...prev, [section]: !prev[section] }));
@@ -666,7 +667,7 @@ export default function BrokersClient({ initialBrokers = [] }) {
 
         .broker-specialty {
           font-size: 13px;
-          color: var(--text-muted);
+          color: var(--text-secondary);
           margin-bottom: 16px;
         }
 

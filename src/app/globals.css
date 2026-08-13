@@ -1698,6 +1698,11 @@ body.high-contrast :focus-visible {
 }
 
 @media (max-width: 768px) {
+  :root {
+    /* Keeps property-specific sticky actions above the universal nav. */
+    --mobile-nav-height: 82px;
+  }
+
   .bottom-nav {
     display: flex;
     position: fixed;

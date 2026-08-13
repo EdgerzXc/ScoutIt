@@ -513,6 +513,7 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
           <div style={{ display: "flex", gap: "6px" }}>
             {/* Visual Mode Selector Dropdown */}
             <select
+              aria-label="Spatial map visual mode"
               value={visualMode}
               onChange={(e) => setVisualMode(e.target.value)}
               style={{

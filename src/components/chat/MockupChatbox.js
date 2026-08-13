@@ -50,7 +50,7 @@ export default function MockupChatbox() {
   ];
 
   return (
-    <div
+    <main
       style={{
         minHeight: "100vh",
         background: "#0d0d0d",
@@ -115,7 +115,7 @@ export default function MockupChatbox() {
                   background: isActive ? "rgba(232, 174, 60, 0.15)" : "transparent",
                   border: isActive ? "1px solid #E8AE3C" : "1px solid transparent",
                   borderRadius: "6px",
-                  color: isActive ? "#F7C64E" : "#8a8a8a",
+                  color: isActive ? "var(--accent-bright)" : "var(--text-secondary)",
                   fontFamily: "var(--font-mono, monospace)",
                   fontSize: "11px",
                   fontWeight: 600,
@@ -125,7 +125,7 @@ export default function MockupChatbox() {
                 }}
               >
                 <div>{tab.label}</div>
-                <div style={{ fontSize: "9px", opacity: 0.8, marginTop: "2px" }}>{tab.badge}</div>
+                <div style={{ fontSize: "9px", marginTop: "2px" }}>{tab.badge}</div>
               </button>
             );
           })}
@@ -334,6 +334,7 @@ export default function MockupChatbox() {
                 </div>
 
                 <label
+                  htmlFor="showcase-intro-message"
                   style={{
                     fontSize: "11px",
                     fontFamily: "var(--font-mono, monospace)",
@@ -344,6 +345,7 @@ export default function MockupChatbox() {
                   INTRO MESSAGE TO LISTER (MAX 300 CHARACTERS):
                 </label>
                 <textarea
+                  id="showcase-intro-message"
                   value={introText}
                   onChange={(e) => setIntroText(e.target.value.slice(0, 300))}
                   style={{
@@ -510,6 +512,6 @@ export default function MockupChatbox() {
           </div>
         )}
       </div>
-    </div>
+    </main>
   );
 }

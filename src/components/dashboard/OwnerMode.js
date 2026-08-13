@@ -20,6 +20,7 @@ import SeoReadinessPanel from './SeoReadinessPanel';
 import MonthlyFreshnessModal from './MonthlyFreshnessModal';
 import LeadExportButton from './crm/LeadExportButton';
 import { sanitizeError } from "@/lib/sanitizeError";
+import TurnstileGate from "@/components/ui/TurnstileGate";
 
 export default function OwnerMode() {
   const { listings, pitches, updatePitchStatus, addListing, addConciergeListing, bulkAddListings, addToast, updateListing, publishListing, closeListing, permanentlyRemoveListing, currentUser, inviteBroker, connects } = useDashboard();
@@ -40,6 +41,8 @@ export default function OwnerMode() {
   const [dangerOpen, setDangerOpen] = useState(false);
   const [removalTitle, setRemovalTitle] = useState("");
   const [removalPassword, setRemovalPassword] = useState("");
+  const [removalCaptchaToken, setRemovalCaptchaToken] = useState("");
+  const removalTurnstileRef = useRef(null);
   const [isRemoving, setIsRemoving] = useState(false);
   // DashboardContext's `listings` isn't refetched after an archive call, so
   const [justArchivedIds, setJustArchivedIds] = useState([]);
@@ -879,7 +882,7 @@ export default function OwnerMode() {
           </label>
         )}
         <div className="mt-5 border-t border-surface-variant pt-4">
-          <button type="button" className="min-h-11 w-full text-left font-label-caps text-[10px] tracking-[0.2em] text-error hover:text-on-surface" aria-expanded={dangerOpen} aria-controls="listing-danger-zone" onClick={() => setDangerOpen((open) => { if (open) { setRemovalTitle(""); setRemovalPassword(""); } return !open; })}>
+          <button type="button" className="min-h-11 w-full text-left font-label-caps text-[10px] tracking-[0.2em] text-error hover:text-on-surface" aria-expanded={dangerOpen} aria-controls="listing-danger-zone" onClick={() => setDangerOpen((open) => { if (open) { setRemovalTitle(""); setRemovalPassword(""); setRemovalCaptchaToken(""); removalTurnstileRef.current?.reset(); } return !open; })}>
             {dangerOpen ? "▾ CLOSE DANGER ZONE" : "▸ OPEN DANGER ZONE"}
           </button>
           {dangerOpen && (
@@ -890,10 +893,19 @@ export default function OwnerMode() {
               <input id="permanent-removal-title" value={removalTitle} onChange={(event) => setRemovalTitle(event.target.value)} className="mt-2 min-h-11 w-full rounded border border-surface-variant bg-surface px-3 py-2 text-sm text-on-surface" autoComplete="off" />
                <label className="mt-4 block text-xs text-text-secondary" htmlFor="permanent-removal-password">Confirm your account password</label>
                <input id="permanent-removal-password" type="password" value={removalPassword} onChange={(event) => setRemovalPassword(event.target.value)} className="mt-2 min-h-11 w-full rounded border border-surface-variant bg-surface px-3 py-2 text-base text-on-surface" autoComplete="current-password" />
-              <button type="button" disabled={isRemoving || !removalPassword || removalTitle.trim() !== String(activeListing.title || "").trim()} className="mt-4 min-h-11 w-full rounded border border-error px-4 py-3 font-label-caps text-[10px] tracking-widest text-error transition hover:bg-error hover:text-white disabled:cursor-not-allowed disabled:opacity-40" onClick={async () => {
+              <div className="mt-4 flex justify-center">
+                <TurnstileGate
+                  ref={removalTurnstileRef}
+                  action="permanent-listing-removal"
+                  onToken={setRemovalCaptchaToken}
+                  onError={(message) => addToast(message, "❌")}
+                />
+              </div>
+              <button type="button" disabled={isRemoving || !removalPassword || !removalCaptchaToken || removalTitle.trim() !== String(activeListing.title || "").trim()} className="mt-4 min-h-11 w-full rounded border border-error px-4 py-3 font-label-caps text-[10px] tracking-widest text-error transition hover:bg-error hover:text-white disabled:cursor-not-allowed disabled:opacity-40" onClick={async () => {
                 setIsRemoving(true);
-                const removed = await permanentlyRemoveListing(activeListing.id, removalTitle, removalPassword);
-                if (removed) { setRemovalTitle(""); setRemovalPassword(""); setDangerOpen(false); }
+                const removed = await permanentlyRemoveListing(activeListing.id, removalTitle, removalPassword, removalCaptchaToken);
+                if (removed) { setRemovalTitle(""); setRemovalPassword(""); setRemovalCaptchaToken(""); setDangerOpen(false); }
+                else { setRemovalCaptchaToken(""); removalTurnstileRef.current?.reset(); }
                 setIsRemoving(false);
               }}>
                 {isRemoving ? "CHECKING DEPENDENCIES…" : "PERMANENTLY REMOVE LISTING"}

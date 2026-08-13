@@ -256,7 +256,7 @@ export default function PropertyFAQSection({ propertySlug, propertyTitle }) {
         .faq-section__eyebrow {
           font-family: ${MONO};
           font-size: 10px;
-          color: var(--text-muted, #c8c8c8);
+          color: var(--text-secondary);
           letter-spacing: 0.25em;
           text-transform: uppercase;
           margin-bottom: 8px;
@@ -388,7 +388,7 @@ export default function PropertyFAQSection({ propertySlug, propertyTitle }) {
         .faq-thread__asked {
           font-family: ${MONO};
           font-size: 9px;
-          color: #6a6a6a;
+          color: var(--text-secondary);
           letter-spacing: 0.08em;
           text-transform: uppercase;
           margin-bottom: 14px;
@@ -397,7 +397,7 @@ export default function PropertyFAQSection({ propertySlug, propertyTitle }) {
         .faq-thread__empty {
           font-family: ${MONO};
           font-size: 10px;
-          color: #6a6a6a;
+          color: var(--text-secondary);
           letter-spacing: 0.12em;
           text-transform: uppercase;
           padding: 12px;
@@ -436,7 +436,7 @@ export default function PropertyFAQSection({ propertySlug, propertyTitle }) {
         .faq-answer__meta {
           font-family: ${MONO};
           font-size: 9px;
-          color: #6a6a6a;
+          color: var(--text-secondary);
           letter-spacing: 0.08em;
         }
 
@@ -470,7 +470,7 @@ export default function PropertyFAQSection({ propertySlug, propertyTitle }) {
           margin-bottom: 24px;
           line-height: 1.7;
         }
-        .faq-signin a { color: #E8AE3C; text-decoration: none; }
+        .faq-signin a { color: var(--accent); text-decoration: underline; text-underline-offset: 0.2em; }
 
         /* ── DESKTOP ENHANCEMENT (only divergence from mobile) ────────── */
         @media (min-width: 700px) {
@@ -494,7 +494,7 @@ export default function PropertyFAQSection({ propertySlug, propertyTitle }) {
         if no one has answered, the space stays blank.
       </p>
 
-      <div className="faq-legend">
+      <div className="faq-legend" tabIndex={0} aria-label="Answer authority legend">
         {Object.entries(TIERS).map(([key, t]) => (
           <div
             key={key}

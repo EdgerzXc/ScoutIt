@@ -3,93 +3,71 @@ import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { monthlyAllowance } from "@/lib/entitlements";
 import { statusFromDateOfBirth } from "@/lib/adultEligibility";
+import {
+  isPrcLicenseFormatValid,
+  normalizeSignupPrimaryMode,
+  sanitizeLocationFocus,
+} from "@/lib/onboardingProfile";
 
-// Maps an onboarding intent tag to the single legacy `role` column value the
-// rest of the app reads for wallet lookups (DashboardContext.handleUserLogin,
-// connectsWallet.js) and entitlements (CONNECTS_ALLOWANCE keys: seeker/owner/
-// broker/photographer/researcher). 'buyer' -> 'seeker' matches the wallet
-// convention already documented in connectsWallet.js; providers resolve to
-// their specific sub-type so their real Connects allowance applies instead
-// of silently falling back to the seeker tier.
-function resolveRole(primaryMode, providerType) {
-  if (primaryMode === "buyer" || primaryMode === "exploring") return "seeker";
-  if (primaryMode === "provider") return providerType || "provider";
-  return primaryMode; // owner | broker
+function databaseRole(primaryMode) {
+  return primaryMode === "buyer" ? "seeker" : primaryMode;
 }
 
 export async function POST(request) {
   try {
-    const authHeader = request.headers.get("Authorization");
-    const token = authHeader?.replace("Bearer ", "");
-
+    const token = request.headers.get("Authorization")?.replace("Bearer ", "");
     if (!token) {
       return NextResponse.json({ error: "Unauthorized: Missing token" }, { status: 401 });
     }
 
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    const authClient = createClient(supabaseUrl, supabaseAnonKey);
-
+    const authClient = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    );
     const { data: { user }, error: authError } = await authClient.auth.getUser(token);
-
     if (authError || !user) {
       return NextResponse.json({ error: "Unauthorized: Invalid session" }, { status: 401 });
     }
 
+    const { data: existingProfile, error: existingProfileError } = await supabaseAdmin
+      .from("user_profiles")
+      .select("adult_eligibility_status")
+      .eq("id", user.id)
+      .maybeSingle();
+    if (existingProfileError) {
+      console.error("[ONBOARDING API] Eligibility lookup failed:", existingProfileError);
+      return NextResponse.json({ error: "Unable to verify account eligibility." }, { status: 500 });
+    }
+    // An explicit underage answer is sticky. Without this lookup, the same
+    // account could immediately resubmit a different birth date.
+    if (existingProfile?.adult_eligibility_status === "underage") {
+      return NextResponse.json({ error: "You must be at least 18 to use ScoutIt." }, { status: 403 });
+    }
+
     const payload = await request.json();
-    const { name, role: primaryMode, tags, providerType, prcLicense, dateOfBirth } = payload;
+    const name = typeof payload.name === "string" ? payload.name.trim().slice(0, 120) : "";
+    const primaryMode = normalizeSignupPrimaryMode(payload.role);
+    const locationFocus = primaryMode === "buyer"
+      ? sanitizeLocationFocus(payload.locationFocus)
+      : null;
+    const prcLicense = typeof payload.prcLicense === "string"
+      ? payload.prcLicense.trim().slice(0, 80)
+      : "";
 
     if (!name || !primaryMode) {
-      return NextResponse.json({ error: "Missing required profile fields" }, { status: 400 });
+      return NextResponse.json({ error: "Name and a valid primary role are required." }, { status: 400 });
+    }
+    if (primaryMode === "broker" && !isPrcLicenseFormatValid(prcLicense)) {
+      return NextResponse.json({ error: "Enter a valid PRC broker license number." }, { status: 400 });
     }
 
-    // Validate against the real onboarding intent tags — this previously
-    // whitelisted ['owner','broker','investor','tenant'], none of which match
-    // the actual tag ids onboarding/page.js collects ('buyer','owner','broker',
-    // 'provider','exploring'). Every buyer, provider, and "just exploring"
-    // signup was silently coerced to 'owner' here.
-    const allowedModes = ["buyer", "owner", "broker", "provider", "exploring"];
-    if (!allowedModes.includes(primaryMode)) {
-      console.warn(`[ONBOARDING API] Rejected unrecognized primaryMode "${primaryMode}" for user ${user.id}`);
-      return NextResponse.json({ error: "Invalid role specified" }, { status: 403 });
-    }
-
-    const allowedProviderTypes = ["photographer", "researcher", "designer"];
-    const safeProviderType = providerType && allowedProviderTypes.includes(providerType) ? providerType : null;
-
-    // Multi-role tags (buyer/owner/broker/provider/exploring subset) power
-    // the dashboard's mode switcher and public-profile role panels
-    // (profileClient.js checks active_roles) — previously never persisted at
-    // all, so every account effectively had zero switchable capabilities.
-    const safeTags = Array.isArray(tags) ? tags.filter((t) => allowedModes.includes(t)) : [primaryMode];
-
-    // Force secure defaults on the server. Columns must match the live
-    // user_profiles schema exactly — this previously wrote `email`,
-    // `full_name`, and `profile_completeness`, none of which exist as columns
-    // (confirmed via information_schema: id/display_name/avatar_url/location/
-    // headline/bio/firm/service/prc_license/provider_type/
-    // provider_availability/member_since/subscription_tier/connects_balance/
-    // active_roles/is_profile_public/role/... ). Every real onboarding
-    // attempt failed at this upsert with Postgres error PGRST204 ("Could not
-    // find the 'email' column"), silently trapping every real signup on
-    // /onboarding — this was never just a role-mapping bug.
-    // ── 18+ LEGAL CAPACITY CHECK (§34.2, §48) ──
-    // Enforced HERE, server-side. A client-side date check is a suggestion:
-    // this endpoint is directly callable, and the whole point of the gate is
-    // that it holds against someone who does not want it to.
-    //
-    // Required for every NEW signup. Accounts created before 2026-08-06 are
-    // grandfathered by AGE_GATE_CUTOFF and are never asked retroactively —
-    // but from here on there is no route into ScoutIt without answering.
-    const ageCheck = statusFromDateOfBirth(dateOfBirth);
+    const ageCheck = statusFromDateOfBirth(payload.dateOfBirth);
     if (!ageCheck.ok) {
-      // 'underage' is PERSISTED before the rejection, deliberately. Rejecting
-      // without recording lets someone immediately retry with a different
-      // date; storing it means the answer sticks.
       if (ageCheck.status === "underage") {
-        await supabaseAdmin
-          .from("user_profiles")
-          .upsert({ id: user.id, adult_eligibility_status: "underage" });
+        await supabaseAdmin.from("user_profiles").upsert({
+          id: user.id,
+          adult_eligibility_status: "underage",
+        });
       }
       return NextResponse.json(
         { error: ageCheck.error || "A valid date of birth is required." },
@@ -97,66 +75,71 @@ export async function POST(request) {
       );
     }
 
-    const resolvedRole = resolveRole(primaryMode, safeProviderType);
-    const startingAllowance = monthlyAllowance(resolvedRole, "starry");
+    const role = databaseRole(primaryMode);
+    const startingAllowance = monthlyAllowance(role, "starry");
 
-    const finalUser = {
+    // Keep the completion marker null until every required resource exists.
+    // A retry is safe: the profile is an upsert and the wallet never resets an
+    // existing balance.
+    const { error: profileError } = await supabaseAdmin.from("user_profiles").upsert({
       id: user.id,
       display_name: name,
-      role: resolvedRole,
-      active_roles: safeTags,
-      provider_type: safeProviderType,
-      prc_license: primaryMode === "broker" && prcLicense ? prcLicense : null,
+      role,
+      active_roles: [primaryMode],
+      primary_mode: primaryMode,
+      location_focus: locationFocus,
+      provider_type: null,
+      prc_license: primaryMode === "broker" ? prcLicense : null,
       subscription_tier: "starry",
       connects_balance: startingAllowance,
-      // RA 10173 sensitive — internal only. Absent from the public_profiles
-      // view by construction, so it cannot leak through a public profile.
-      date_of_birth: dateOfBirth,
+      date_of_birth: payload.dateOfBirth,
       adult_eligibility_status: ageCheck.status,
-    };
-
-    const { error: upsertError } = await supabaseAdmin
-      .from('user_profiles')
-      .upsert(finalUser);
-
-    if (upsertError) {
-      console.error("[ONBOARDING API] Upsert Error:", upsertError);
-      return NextResponse.json({ error: "Failed to create profile" }, { status: 500 });
+      onboarding_completed_at: null,
+    });
+    if (profileError) {
+      console.error("[ONBOARDING API] Profile upsert failed:", profileError);
+      return NextResponse.json({ error: "Failed to create the private profile." }, { status: 500 });
     }
 
-    // Provision the REAL server-side wallet spend_connects() reads from.
-    // connect_balances has never had an auto-provisioning path anywhere
-    // (no signup trigger, no default row) — the client's localStorage wallet
-    // simulation (connectsWallet.js) shows the correct starting allowance and
-    // lets the UI light up "Send Handshake" / "Connect" buttons, but every
-    // real spend attempt hit spend_connects()'s `raise exception 'no wallet
-    // found'`, so no real user could ever actually complete a paid action
-    // (broker pitch, owner invite, buyer inquiry) on their first session.
-    // onConflict + ignoreDuplicates: re-running onboarding (e.g. the user
-    // changes their primary mode later) must never reset an existing wallet.
-    const { error: walletError } = await supabaseAdmin
-      .from('connect_balances')
-      .upsert(
-        {
-          user_id: user.id,
-          granted_balance: startingAllowance,
-          purchased_balance: 0,
-          earned_balance: 0,
-          last_granted_reset: new Date().toISOString().slice(0, 10),
-        },
-        { onConflict: 'user_id', ignoreDuplicates: true }
-      );
-
+    const { error: walletError } = await supabaseAdmin.from("connect_balances").upsert(
+      {
+        user_id: user.id,
+        granted_balance: startingAllowance,
+        purchased_balance: 0,
+        earned_balance: 0,
+        last_granted_reset: new Date().toISOString().slice(0, 10),
+      },
+      { onConflict: "user_id", ignoreDuplicates: true },
+    );
     if (walletError) {
-      // Don't fail onboarding over this — but log loudly, since a missing
-      // wallet silently blocks every paid action later.
       console.error("[ONBOARDING API] Wallet provisioning failed:", walletError);
+      return NextResponse.json(
+        { error: "Profile saved, but account provisioning is incomplete. Please retry." },
+        { status: 500 },
+      );
     }
 
-    return NextResponse.json({ success: true, activeRoles: safeTags, primaryMode });
+    const completedAt = new Date().toISOString();
+    const { error: completionError } = await supabaseAdmin
+      .from("user_profiles")
+      .update({ onboarding_completed_at: completedAt })
+      .eq("id", user.id);
+    if (completionError) {
+      console.error("[ONBOARDING API] Completion marker failed:", completionError);
+      return NextResponse.json(
+        { error: "Account provisioning is incomplete. Please retry." },
+        { status: 500 },
+      );
+    }
 
-  } catch (err) {
-    console.error("[ONBOARDING API] Server Error:", err);
+    return NextResponse.json({
+      success: true,
+      activeRoles: [primaryMode],
+      primaryMode,
+      onboardingCompletedAt: completedAt,
+    });
+  } catch (error) {
+    console.error("[ONBOARDING API] Server error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

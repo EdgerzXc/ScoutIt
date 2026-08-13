@@ -8,9 +8,11 @@ import Link from "next/link";
 import "@/app/property/[id]/property-detail.css";
 import dynamic from "next/dynamic";
 import ShareModal from "@/components/property/ShareModal";
+import { buildShareText } from "@/lib/shareBriefing";
 import ProvenanceBadge from "@/components/ui/ProvenanceBadge";
 import InViewport from "@/components/ui/InViewport";
 import { canSee, getCurrentTier } from "@/lib/entitlements";
+import { CHILD_SPACE_LEVEL_LABEL, childSpaceDisplayName, getPropertyHierarchy } from "@/lib/propertyHierarchy";
 
 // Dynamically import heavy modals & widgets
 const FloodRiskBadge = dynamic(() => import("@/components/property/FloodRiskBadge"), { ssr: false });
@@ -35,17 +37,16 @@ const SpatialCommandMap = dynamic(() => import("@/components/property/SpatialCom
 const SpecCard = ({ label, value }) => {
   if (value == null || value === "") return null;
   return (
-    <div className="sidebar-block">
-      <div className="sidebar-accent-line" />
-      <div className="sidebar-label">{label}</div>
-      <div className="sidebar-value">{value}</div>
+    <div className="spec-bento">
+      <div className="spec-bento-label">{label}</div>
+      <div className="spec-bento-value">{value}</div>
     </div>
   );
 };
 
 // ── `initialProperty` — SERVER-SUPPLIED FIRST PAINT (2026-08-08) ─────
 // ACTION 01_NOW D2. This component fetched /api/cms on mount, so the whole page
-// body was "Loading Unit Intelligence…" in the first HTML response.
+// body was "Loading Child-space Intelligence…" in the first HTML response.
 // `generateMetadata` in the route IS server-side and correct, so crawlers were
 // getting a good <title> wrapped around an empty page — and unit pages are the
 // single biggest unrealised SEO asset ("Unit 3801 Ridgeline", "Penthouse
@@ -66,6 +67,7 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
   const [isPromoteOpen, setIsPromoteOpen] = useState(false);
   const [inquiryPrefill, setInquiryPrefill] = useState("");
   const [unlockedVault, setUnlockedVault] = useState(false);
+  const [shareTextOpen, setShareTextOpen] = useState(null);
   
   // Photo states
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -145,7 +147,10 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
     };
   }, [loading]);
 
-  const unit = previewUnit || property?.units_inventory?.find((u) => u.id === unitId);
+  const unitIndex = property?.units_inventory?.findIndex((u) => u.id === unitId) ?? -1;
+  const unit = previewUnit || (unitIndex >= 0 ? property?.units_inventory?.[unitIndex] : null);
+  const hierarchy = getPropertyHierarchy(property);
+  const unitDisplayName = childSpaceDisplayName(unit?.name, Math.max(unitIndex, 0), property);
   const d = unit?.details || {};
   const scenarios = useMemo(() => Array.isArray(unit?.subdivision_scenarios) ? unit.subdivision_scenarios : [], [unit]);
 
@@ -173,8 +178,9 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
   if (loading) {
     return (
       <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg, #0e0e0e)" }}>
+        <h1 className="sr-only">Child-space Intelligence</h1>
         <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-muted)", letterSpacing: "0.12em", textTransform: "uppercase" }}>
-          Loading Unit Intelligence…
+          Loading Child-space Intelligence…
         </span>
       </div>
     );
@@ -183,7 +189,7 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
   if (!property || !unit) {
     return (
       <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "var(--bg, #0e0e0e)", gap: "16px" }}>
-        <p style={{ fontFamily: "var(--font-body)", fontSize: "20px", color: "var(--text-primary)" }}>This unit could not be found.</p>
+        <h1 style={{ fontFamily: "var(--font-body)", fontSize: "20px", color: "var(--text-primary)" }}>This {hierarchy.childLabel.toLowerCase()} could not be found.</h1>
         {property?.slug && (
           <Link href={`/property/${property.slug}`} style={{ color: "var(--accent, #E8AE3C)", fontFamily: "var(--font-mono)", fontSize: "12px", letterSpacing: "0.1em", textTransform: "uppercase" }}>
             ← Back to {property.title}
@@ -303,7 +309,7 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
               {url ? (
                 <img
                   src={url}
-                  alt={`${unit.name} at ${property.title} - ${property.location || property.city || 'Philippines'} | Unit Photo ${i + 1} of ${displayPhotos.length}`}
+                  alt={`${unitDisplayName} at ${property.title} - ${property.location || property.city || 'Philippines'} | Unit Photo ${i + 1} of ${displayPhotos.length}`}
                   style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0 }}
                   itemProp="image"
                 />
@@ -322,8 +328,8 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
 
           {/* Hero Intel */}
           <div className="hero-intel" onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()} onMouseUp={(e) => e.stopPropagation()} onTouchStart={(e) => e.stopPropagation()}>
-            <p className="hero-label" style={{ color: ACCENT }}>ScoutIt &middot; Unit Dossier</p>
-            <h1 className="hero-title">{unit.name}</h1>
+            <p className="hero-label" style={{ color: ACCENT }}>ScoutIt &middot; {CHILD_SPACE_LEVEL_LABEL} &middot; {hierarchy.dossierLabel}</p>
+            <h1 className="hero-title">{unitDisplayName}</h1>
             <p className="hero-location">
               {property.title} <ProvenanceBadge record={property} /> &middot; {property.location || property.city}
             </p>
@@ -368,8 +374,8 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
 
         {/* Mobile Hero Intel */}
         <div className="mobile-hero-intel">
-          <p className="mobile-hero-label" style={{ color: ACCENT }}>ScoutIt &middot; Unit Dossier</p>
-          <h1 className="mobile-hero-title">{unit.name}</h1>
+          <p className="mobile-hero-label" style={{ color: ACCENT }}>ScoutIt &middot; {CHILD_SPACE_LEVEL_LABEL} &middot; {hierarchy.dossierLabel}</p>
+          <h1 className="mobile-hero-title">{unitDisplayName}</h1>
           <p className="mobile-hero-location">
             {property.title} <ProvenanceBadge record={property} /> &middot; {property.location || property.city}
           </p>
@@ -377,7 +383,7 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
         </div>
 
         {/* ════ ZONE 2 – NAV (drag-to-scroll) ════ */}
-        <div className={`zone-nav ${canScrollLeft ? "can-scroll-left" : ""} ${canScrollRight ? "can-scroll-right" : ""}`}>
+        <div className={`zone-nav ${canScrollLeft ? "can-scroll-left" : ""} ${canScrollRight ? "can-scroll-right" : ""}`} style={{ background: "rgba(14, 14, 14, 0.7)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", borderTop: "0.5px solid rgba(255,255,255,0.08)", borderBottom: "0.5px solid rgba(255,255,255,0.08)", zIndex: 40 }}>
           <div className="nav-inner" role="tablist" ref={scrollRef} style={{ scrollbarWidth: "none", msOverflowStyle: "none", cursor: "grab" }} onPointerDown={onDragStart} onPointerUp={onDragEnd} onPointerCancel={onDragEnd} onPointerMove={onDragMove}>
             {[
               { id: "space", label: "The Space" },
@@ -493,7 +499,7 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
 
           {/* ── 03: THE VAULT ── */}
           <div className={`chapter-panel ${activeTab === "vault" ? "active" : ""}`} id="panel-vault">
-            <div className="panel-content" style={{ maxWidth: "100%" }}>
+            <div className="panel-content" style={{ maxWidth: "100%" }} tabIndex={0} aria-label="Scrollable Spatial Vault content">
               <div style={{marginBottom:"32px"}}>
                 <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:ACCENT, letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>PREMIUM — THE SPATIAL VAULT</div>
                 <div style={{height:"1px", background:ACCENT}}/>
@@ -506,16 +512,16 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
                   heatmapUrl={d.floor_plan_2d_url || unit.heatmap_url}
                 />
               ) : (
-                <div style={{ position: "relative", width: "100%", padding: "24px", borderRadius: "8px", background: "var(--surface)", border: "0.5px solid var(--border)", overflow: "hidden", minHeight: "180px" }}>
-                  <div style={{ filter: "blur(6px)", opacity: 0.4, pointerEvents: "none" }}>
-                    <div style={{ width: "100%", height: "20px", background: "#333", marginBottom: "8px", borderRadius: "2px" }} />
-                    <div style={{ width: "80%", height: "20px", background: "#333", marginBottom: "8px", borderRadius: "2px" }} />
-                  </div>
-                  <div style={{ position: "absolute", inset: 0, backdropFilter: "blur(4px)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "10px", textAlign: "center", padding: "20px" }}>
-                    <span style={{ fontFamily: "var(--font-body)", fontSize: "15px", color: "var(--text-primary)", maxWidth: "360px" }}>
-                      Interactive 3D floor plan {"&"} unit-specific spatial media.
+                <div style={{ position: "relative", width: "100%", padding: "24px", borderRadius: "8px", background: "linear-gradient(160deg, #111, #0a0a0a)", border: "0.5px solid var(--border)", overflow: "hidden", minHeight: "220px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+                  <div style={{ position: "absolute", inset: 0, backgroundImage: "url(/grid-pattern.svg)", opacity: 0.05 }} />
+                  <div style={{ position: "relative", zIndex: 2, display: "flex", flexDirection: "column", alignItems: "center", gap: "16px", textAlign: "center", padding: "20px" }}>
+                    <div style={{ width: "48px", height: "48px", borderRadius: "50%", background: "rgba(232, 174, 60, 0.1)", border: "1px solid rgba(232, 174, 60, 0.3)", display: "flex", alignItems: "center", justifyContent: "center", color: "#E8AE3C" }}>
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+                    </div>
+                    <span style={{ fontFamily: "var(--font-body)", fontSize: "15px", color: "var(--text-primary)", maxWidth: "360px", lineHeight: 1.5 }}>
+                      Interactive 3D floor plan {"&"} unit-specific spatial media are locked.
                     </span>
-                    <a href="/pricing/cluster" style={{ textDecoration: "none", fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", background: ACCENT, padding: "10px 16px", borderRadius: "2px", color: "var(--on-accent)", fontWeight: "bold" }}>
+                    <a href="/pricing/seeker" className="hover-glow" style={{ textDecoration: "none", fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", background: "transparent", border: "1px solid #E8AE3C", color: "#E8AE3C", padding: "12px 20px", borderRadius: "4px", fontWeight: "bold", transition: "all 0.3s ease" }}>
                       Unlock the Unit Vault // Cluster+
                     </a>
                   </div>
@@ -677,13 +683,19 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
 
       </div>{/* /page */}
 
+      <ShareModal
+        isOpen={!!shareTextOpen}
+        onClose={() => setShareTextOpen(null)}
+        shareText={shareTextOpen || ""}
+      />
+
       <UnitInquiryModal
         isOpen={isInquiryOpen}
         onClose={() => setIsInquiryOpen(false)}
         propertyTitle={property.title}
         propertySlug={property.slug}
         unitId={unit.id}
-        unitName={unit.name}
+        unitName={unitDisplayName}
         operatorDisplayName={operatorName}
         prefillMessage={inquiryPrefill}
       />
@@ -695,7 +707,7 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
           // Merge building context into the unit so promo copy carries real
           // facts (location, category, size) instead of a bare unit row.
           ...unit,
-          title: `${unit.name} · ${property.title}`,
+          title: `${unitDisplayName} · ${property.title}`,
           location: property.location || property.city || "",
           city: property.city || "",
           spaceCategory: property.spaceCategory || property.category || "",
@@ -740,7 +752,7 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
           <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
             <img 
               src={displayPhotos[currentImageIndex]} 
-              alt={`${unit.name} fullscreen view`} 
+              alt={`${unitDisplayName} fullscreen view`}
               className={`lightbox-image ${photoMode}`} 
               loading="lazy"
             />

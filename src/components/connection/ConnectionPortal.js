@@ -188,7 +188,7 @@ export default function ConnectionPortal({ brokerName, brokerId, isModal = false
       <div className="safety-disclaimer-box">
         <div className="disclaimer-header">
           <span className="disclaimer-icon">⚠️</span>
-          <h5>TRANSACTION INTEGRITY &amp; SECURITY PROTOCOL</h5>
+          <h2>TRANSACTION INTEGRITY &amp; SECURITY PROTOCOL</h2>
         </div>
         <div className="disclaimer-content">
           <p className="disclaimer-paragraph">
@@ -210,7 +210,7 @@ export default function ConnectionPortal({ brokerName, brokerId, isModal = false
       <div className="connection-portal-card">
         <div className="portal-header">
           <div className="portal-header-title-row">
-            <h4>Initiate Verified Handshake</h4>
+            <h2>Initiate Verified Handshake</h2>
             <span className="connects-cost-badge">✦ 1 Connect Required</span>
           </div>
           <p>Establish a high-priority, spam-protected direct channel with <strong>{brokerName}</strong>.</p>
@@ -249,7 +249,7 @@ export default function ConnectionPortal({ brokerName, brokerId, isModal = false
         ) : (
           <div className="sign-in-gate-box">
             <div className="gate-icon">🔒</div>
-            <h5>Sign In to Connect with {brokerName}</h5>
+            <h2>Sign In to Connect with {brokerName}</h2>
             <p>
               To protect advisor integrity and ensure zero-spam inquiries, direct communication requires 1 Connect. 
               Sign up or log in to claim your <strong>Free Monthly Connects</strong>.
@@ -294,7 +294,7 @@ export default function ConnectionPortal({ brokerName, brokerId, isModal = false
           margin-bottom: 8px;
         }
 
-        .portal-header h4 {
+        .portal-header h2 {
           font-family: var(--font-display);
           font-size: 28px;
           color: #fff;
@@ -482,7 +482,7 @@ export default function ConnectionPortal({ brokerName, brokerId, isModal = false
           margin-bottom: 12px;
         }
 
-        .disclaimer-header h5 {
+        .disclaimer-header h2 {
           font-family: var(--font-mono);
           font-size: 11px;
           color: var(--accent);
@@ -514,7 +514,7 @@ export default function ConnectionPortal({ brokerName, brokerId, isModal = false
           .connection-portal-card {
             padding: 32px 24px;
           }
-          .portal-header h4 {
+          .portal-header h2 {
             font-size: 22px;
           }
           .portal-submit-btn {

@@ -6,8 +6,9 @@ import { reportError } from "@/lib/reportError";
 
 /**
  * Global crash catcher. If any child component throws during render, this shows a
- * calm fallback instead of a broken screen, and logs the crash to Supabase so we
- * see it. Must be a class component (React has no functional error boundary yet).
+ * calm fallback instead of a broken screen, and sends the crash through the
+ * privacy-limited Sentry helper. Must be a class component (React has no
+ * functional error boundary yet).
  */
 export default class ErrorBoundary extends Component {
   constructor(props) {

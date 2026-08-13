@@ -12,6 +12,7 @@ const FOCUS_AREAS = ["Residential Due Diligence", "Commercial Investment Analysi
 const MARKETS = ["Metro Manila", "Cebu & Visayas", "Davao & Mindanao", "Clark & Central Luzon", "Iloilo & Western Visayas"];
 
 export default function ResearchersClient({ initialResearchers = null }) {
+  const hadInitialResearchers = initialResearchers !== null;
   const [researchers, setResearchers] = useState(() => initialResearchers);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedFocus, setSelectedFocus] = useState([]);
@@ -25,7 +26,7 @@ export default function ResearchersClient({ initialResearchers = null }) {
       if (cancelled) return;
       if (error) {
         console.error("Failed to load researchers", error);
-        if (researchers === null) setResearchers([]);
+        if (!hadInitialResearchers) setResearchers([]);
         return;
       }
       setResearchers(data.map((p) => ({
@@ -36,11 +37,12 @@ export default function ResearchersClient({ initialResearchers = null }) {
         bio: p.bio || "",
         image: p.avatar_url || "",
         isExample: !!p.is_example_account,
+        isPilot: !!p.is_pilot_participant,
         available: p.provider_availability !== false,
       })));
     })();
     return () => { cancelled = true; };
-  }, []);
+  }, [hadInitialResearchers]);
 
   const toggleFilter = (section) => setOpenFilters((p) => ({ ...p, [section]: !p[section] }));
   const toggle = (val, state, setState) => {
@@ -153,7 +155,11 @@ export default function ResearchersClient({ initialResearchers = null }) {
               <div className="brokers-grid" style={{ marginBottom: 32 }}>
                 {filtered.map((r) => (
                   <Link key={r.name} href={`/profile/${encodeURIComponent(r.name)}`} className="broker-card" style={{ textDecoration: "none" }}>
-                    {r.isExample && <div className="example-badge-overlay">Example Profile</div>}
+                    {(r.isPilot || r.isExample) && (
+                      <div className="example-badge-overlay">
+                        {r.isPilot ? "Sample Profile — For Human Testing" : "Example Profile"}
+                      </div>
+                    )}
                     <div className="broker-image-container">
                       {r.image ? (
                         /* eslint-disable-next-line @next/next/no-img-element */
@@ -235,7 +241,7 @@ export default function ResearchersClient({ initialResearchers = null }) {
         .broker-location { font-family: var(--font-mono); font-size: 10px; color: var(--accent); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 8px; }
         .broker-name { font-family: var(--font-display); font-size: 22px; color: var(--text-primary); margin-bottom: 4px; }
         .broker-title { font-size: 12px; color: var(--text-secondary); margin-bottom: 16px; text-transform: uppercase; letter-spacing: .05em; }
-        .broker-specialty { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
+        .broker-specialty { font-size: 13px; color: var(--text-secondary); margin-bottom: 16px; }
         .broker-specialty span { color: var(--text-primary); }
         .broker-bio { font-size: 14px; line-height: 1.6; color: var(--text-secondary); margin-bottom: 16px; flex: 1; }
         .broker-footer { display: flex; justify-content: space-between; align-items: flex-end; border-top: 1px solid var(--border-solid); padding-top: 16px; }

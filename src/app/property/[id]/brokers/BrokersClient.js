@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import TurnstileGate from "@/components/ui/TurnstileGate";
+import { trackEvent, GA_EVENTS } from "@/lib/analytics";
 import "./brokers.css";
 
 const EMPTY_FORM = { name: "", phone: "", message: "" };
@@ -10,12 +12,15 @@ export default function BrokersClient({ slug }) {
   const [brokers, setBrokers] = useState([]);
   const [property, setProperty] = useState(null);
   const [represented, setRepresented] = useState(false);
+  const [contactable, setContactable] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activeFormBroker, setActiveFormBroker] = useState(null);
   const [formData, setFormData] = useState(EMPTY_FORM);
   const [submittedBrokerId, setSubmittedBrokerId] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const turnstileRef = useRef(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -28,6 +33,7 @@ export default function BrokersClient({ slug }) {
           setProperty(data.property || null);
           setBrokers(Array.isArray(data.brokers) ? data.brokers : []);
           setRepresented(data.represented === true);
+          setContactable(data.contactable === true);
         }
       } catch (loadError) {
         if (!cancelled) setError(loadError.message || "Property roster unavailable");
@@ -43,6 +49,8 @@ export default function BrokersClient({ slug }) {
     setActiveFormBroker(activeFormBroker === formKey ? null : formKey);
     setSubmittedBrokerId(null);
     setError("");
+    setTurnstileToken("");
+    turnstileRef.current?.reset();
   };
 
   const handleInputChange = (event) => {
@@ -61,6 +69,7 @@ export default function BrokersClient({ slug }) {
         body: JSON.stringify({
           propertySlug: slug,
           preferredBrokerId: brokerId || undefined,
+          turnstileToken,
           ...formData,
         }),
       });
@@ -68,8 +77,10 @@ export default function BrokersClient({ slug }) {
       if (!response.ok) throw new Error(data.message || "Inquiry could not be routed");
       setSubmittedBrokerId(brokerId || "lister");
       setFormData(EMPTY_FORM);
+      trackEvent(GA_EVENTS.INQUIRY_SENT, { channel: 'broker_form', property_slug: slug, routed_to: brokerId ? 'broker' : 'lister' });
     } catch (submitError) {
       setError(submitError.message || "Inquiry could not be routed");
+      turnstileRef.current?.reset();
     } finally {
       setSubmitting(false);
     }
@@ -88,8 +99,14 @@ export default function BrokersClient({ slug }) {
           <input type="tel" name="phone" required placeholder="Contact Number (e.g. +63 917 ...)" value={formData.phone} onChange={handleInputChange} className="form-input-field" />
           <textarea name="message" required rows="3" placeholder="Tell the recipient what you want to verify." value={formData.message} onChange={handleInputChange} className="form-textarea-field" />
         </div>
+        <TurnstileGate
+          ref={turnstileRef}
+          action="property-inquiry"
+          onToken={setTurnstileToken}
+          onError={setError}
+        />
         {error && <p className="form-error-alert" role="alert">{error}</p>}
-        <button type="submit" className="form-submit-btn" disabled={submitting}>{submitting ? "Routing inquiry…" : "Send inquiry"}</button>
+        <button type="submit" className="form-submit-btn" disabled={submitting || !turnstileToken}>{submitting ? "Routing inquiry…" : "Send inquiry"}</button>
       </form>
     );
   };
@@ -124,13 +141,13 @@ export default function BrokersClient({ slug }) {
 
   return (
     <div className="brokers-wrapper">
-      <nav className="brokers-sticky-nav">
+      <nav className="brokers-sticky-nav" aria-label="Property broker roster navigation">
         <Link href={`/property/${slug || "batasan-hills"}`} className="nav-back-link">← Back to Property</Link>
         <span className="nav-brand-logo">SCOUTIT</span>
         <span className="nav-prop-info">{property?.title || "Property Profile"}</span>
       </nav>
 
-      <main className="brokers-main-content">
+      <div className="brokers-main-content">
         <header className="brokers-page-header">
           <span className="gold-section-label">PROPERTY REPRESENTATION</span>
           <h1 className="brokers-page-title">Authorized Broker Roster</h1>
@@ -179,19 +196,24 @@ export default function BrokersClient({ slug }) {
                   </section>
                 )}
               </div>
-            ) : (
+            ) : contactable ? (
               <section className="roster-empty-state">
                 <h2>No active broker representation</h2>
-                <p>This property is currently unrepresented. New inquiries go to the uploader or lister.</p>
+                <p>This property is currently unrepresented. New inquiries route to the verified uploader or lister.</p>
                 <button type="button" className="action-retain-btn" onClick={() => toggleForm("lister")}>{activeFormBroker === "lister" ? "Cancel" : "Contact uploader / lister"}</button>
                 {activeFormBroker === "lister" && <div className="inline-intent-form-container">{renderForm(null)}</div>}
+              </section>
+            ) : (
+              <section className="roster-empty-state" role="status">
+                <h2>Representation details unavailable</h2>
+                <p>This public listing does not yet have a verified routing record. No broker or recipient is being implied.</p>
               </section>
             )}
           </>
         )}
 
         <footer className="brokers-compliance-footer"><p>ScoutIt displays representation state as a current operational signal. Roster visibility does not replace independent verification of license, authority, or transaction terms.</p></footer>
-      </main>
+      </div>
     </div>
   );
 }

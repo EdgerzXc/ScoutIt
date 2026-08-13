@@ -4,20 +4,24 @@ import { useEffect, useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import ChatBox from "@/components/dashboard/ChatBox";
-import { getSession } from "@/lib/authClient";
+import { getSession, getUser } from "@/lib/authClient";
+import { readDevelopmentMockUser } from "@/lib/developmentMock";
 import { DashboardProvider } from "@/context/DashboardContext";
 
 // Same dev fallback the rest of the deals/messages routes use -- real
 // Supabase session first, "master-dev" localStorage convention otherwise.
 async function resolveAuth() {
-  const { data: { session } } = await getSession();
-  if (session?.access_token) return { token: session.access_token, mockOwnerId: null };
-  try {
-    const raw = localStorage.getItem("scoutit_user");
-    const u = raw ? JSON.parse(raw) : null;
-    if (u?.id) return { token: null, mockOwnerId: u.id };
-  } catch {}
-  return { token: null, mockOwnerId: null };
+  const [{ data: { user } }, { data: { session } }] = await Promise.all([getUser(), getSession()]);
+  if (user && session?.access_token && session.user?.id === user.id) {
+    return { token: session.access_token, mockOwnerId: null };
+  }
+  const mockUser = readDevelopmentMockUser(localStorage, {
+    nodeEnv: process.env.NODE_ENV,
+    hostname: window.location.hostname,
+  });
+  return mockUser
+    ? { token: null, mockOwnerId: mockUser.id }
+    : { token: null, mockOwnerId: null };
 }
 
 // GET /api/deals returns camelCase fields; ChatBox (built against the old

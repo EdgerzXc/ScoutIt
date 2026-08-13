@@ -51,7 +51,7 @@ export default function MetropolisLayer() {
         <aside className="descent-sidebar" style={{ justifyContent: "space-between" }}>
           <div>
 
-            <nav className="descent-nav">
+            <nav className="descent-nav" aria-label="Layer categories">
               {CATEGORIES.map(c => (
                 <button
                   key={c}
@@ -158,7 +158,7 @@ export default function MetropolisLayer() {
           font-size: 10px;
           letter-spacing: 0.16em;
           text-transform: uppercase;
-          color: rgba(255,255,255,0.35);
+          color: var(--text-secondary);
         }
 
         /* Search */
@@ -176,7 +176,7 @@ export default function MetropolisLayer() {
           outline: none;
           transition: border-color 0.2s;
         }
-        .metro-search::placeholder { color: rgba(255,255,255,0.28); }
+        .metro-search::placeholder { color: var(--text-secondary); }
         .metro-search:focus { border-color: rgba(232, 174, 60,0.45); }
 
         /* Property grid */
@@ -242,14 +242,14 @@ export default function MetropolisLayer() {
         }
 
         .metro-empty {
-          color: rgba(255,255,255,0.35);
+          color: var(--text-secondary);
           font-style: italic;
           grid-column: 1/-1;
           padding: 40px 0;
         }
         .metro-hint {
           font-size: 12px;
-          color: rgba(255,255,255,0.28);
+          color: var(--text-secondary);
           font-style: italic;
         }
 

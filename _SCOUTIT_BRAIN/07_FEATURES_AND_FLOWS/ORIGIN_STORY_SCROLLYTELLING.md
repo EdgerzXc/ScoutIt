@@ -3,7 +3,7 @@ section: "07_FEATURES_AND_FLOWS"
 status: parked
 tags: [origin-story, scrollytelling, three-js, cinematic]
 updated: 2026-06-26
-related: ["[[SCOUTIT_SCROLLYTELLING_PROMPT]]", "[[scrollytelling-mission-text]]", "[[FABLE_ONBOARDING_PROMPT]]"]
+related: ["[[SCOUTIT_SCROLLYTELLING_PROMPT]]", "[[scrollytelling-mission-text]]", "[[SCOUTIT_SCROLLYTELLING_PROMPT]]"]
 ---
 
 # Origin-Story Scrollytelling — Full Spec (PARKED)

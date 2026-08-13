@@ -39,7 +39,7 @@ export default function LayerHeader({ layerNum, layerName, title, description, m
           {missionText && (
             <div className="layer-header-right">
               <div className="layer-mission-block">
-                <h3 className="layer-mission-label">MISSION</h3>
+                <h2 className="layer-mission-label">MISSION</h2>
                 <p className="layer-mission-text">{missionText}</p>
               </div>
             </div>

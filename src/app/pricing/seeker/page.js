@@ -3,6 +3,7 @@
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import ConnectsExplainer from "@/components/pricing/ConnectsExplainer";
+import PilotPaymentControls, { PilotPaymentNotice } from "@/components/pricing/PilotPaymentControls";
 import Link from "next/link";
 import { Check } from "lucide-react";
 
@@ -93,6 +94,8 @@ export default function SeekerPricingPage() {
           </p>
         </header>
 
+        <PilotPaymentNotice />
+
         <div className="pricing-grid z-10 relative w-full max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 px-4">
           {TIERS.map((tier) => (
             <div 
@@ -141,17 +144,7 @@ export default function SeekerPricingPage() {
               </ul>
 
               <div className="mt-auto">
-                <button
-                  type="button"
-                  onClick={() => window.dispatchEvent(new CustomEvent("scoutit:open-waitlist", { detail: { role: "seeker", tier: tier.name, source: "pricing-seeker" } }))}
-                  className={`block w-full text-center py-4 rounded font-working-title text-sm uppercase tracking-widest font-bold cursor-pointer transition-all ${
-                    tier.highlight
-                      ? 'bg-gold-accent text-background hover:bg-gold-bright'
-                      : 'bg-transparent border border-gold-accent/40 text-gold-accent hover:bg-gold-accent/10'
-                  }`}
-                >
-                  Join the Waitlist
-                </button>
+                <PilotPaymentControls role="seeker" tier={tier.name} source="pricing-seeker" />
               </div>
             </div>
           ))}

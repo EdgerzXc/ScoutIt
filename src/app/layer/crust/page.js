@@ -86,7 +86,7 @@ export default function CrustLayer() {
         <div className="descent-split">
           {/* ── LEFT SIDEBAR ── */}
           <aside className="descent-sidebar">
-            <nav className="descent-nav">
+            <nav className="descent-nav" aria-label="Layer categories">
               {SERVICE_CATEGORIES.map(c => (
                 <button
                   key={c.key}

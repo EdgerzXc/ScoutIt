@@ -4,6 +4,12 @@ export const getSession = async () => {
   return await supabase.auth.getSession();
 };
 
+// Unlike getSession(), getUser() validates the access token with Supabase Auth.
+// Use this for public UI that makes identity or verification claims.
+export const getUser = async () => {
+  return await supabase.auth.getUser();
+};
+
 export const onAuthStateChange = (callback) => {
   return supabase.auth.onAuthStateChange(callback);
 };
@@ -25,13 +31,25 @@ export const onAuthStateChange = (callback) => {
 // calls fails, the caller must reset the widget before retrying.
 // ─────────────────────────────────────────────────────────────────────────
 
-export const signUp = async (email, password, metadata, captchaToken) => {
+export const signUp = async (email, password, metadata, captchaToken, emailRedirectTo) => {
   const options = {};
   if (metadata) options.data = metadata;
   if (captchaToken) options.captchaToken = captchaToken;
+  if (emailRedirectTo) options.emailRedirectTo = emailRedirectTo;
   return await supabase.auth.signUp({
     email,
     password,
+    ...(Object.keys(options).length ? { options } : {}),
+  });
+};
+
+export const resendSignupConfirmation = async (email, captchaToken, emailRedirectTo) => {
+  const options = {};
+  if (captchaToken) options.captchaToken = captchaToken;
+  if (emailRedirectTo) options.emailRedirectTo = emailRedirectTo;
+  return await supabase.auth.resend({
+    type: 'signup',
+    email,
     ...(Object.keys(options).length ? { options } : {}),
   });
 };

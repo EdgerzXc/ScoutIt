@@ -109,7 +109,7 @@ function CRMPageInner() {
 
   if (userLoading || loading) {
     return (
-      <div className="flex-1 flex justify-center items-center text-text-secondary h-screen">
+      <div role="main" className="flex-1 flex justify-center items-center text-text-secondary h-screen">
         <AtmosphereBackground variant="dashboard" />
         <span className="font-working-title animate-pulse relative z-10">Loading Pipeline...</span>
       </div>
@@ -118,7 +118,7 @@ function CRMPageInner() {
 
   if (!currentUser?.id) {
     return (
-      <div className="flex-1 flex flex-col gap-4 justify-center items-center text-center h-screen px-6 relative">
+      <div role="main" className="flex-1 flex flex-col gap-4 justify-center items-center text-center h-screen px-6 relative">
         <AtmosphereBackground variant="dashboard" />
         <h1 className="font-headline-editorial text-3xl text-on-surface relative z-10">Master CRM</h1>
         <p className="text-text-secondary text-sm max-w-sm relative z-10">Sign in to see your pipeline, appointments, and tasks.</p>
@@ -144,7 +144,7 @@ function CRMPageInner() {
   const pipelineValue = pricedDeals.reduce((sum, d) => sum + Number(d.propertyPrice), 0);
 
   return (
-    <div className="relative min-h-[calc(100dvh-80px)] flex flex-col p-4 md:p-6">
+    <div role="main" className="relative min-h-[calc(100dvh-80px)] flex flex-col p-4 md:p-6">
       <AtmosphereBackground variant={viewingAs === "broker" ? "broker" : "dashboard"} />
       {/* Additional Atmosphere Layers for CRM per Handoff */}
       <div className="fixed inset-0 pointer-events-none z-[-1]" style={{

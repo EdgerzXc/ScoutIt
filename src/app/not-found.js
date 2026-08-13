@@ -7,7 +7,7 @@ export const metadata = {
 
 export default function NotFound() {
   return (
-    <div className="nf-root">
+    <main className="nf-root">
       <div className="nf-grid" aria-hidden="true">
         {Array.from({ length: 64 }).map((_, i) => (
           <span key={i} className="nf-dot" />
@@ -36,6 +36,6 @@ export default function NotFound() {
         </div>
       </div>
 
-    </div>
+    </main>
   );
 }

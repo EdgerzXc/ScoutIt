@@ -6,6 +6,8 @@ import { resolveUserId } from "@/lib/serverAuth";
 import { stripAllTags } from "@/lib/sanitize";
 import { rejectIfContactLeak } from "@/lib/contactLeakFilter";
 import { notifyUser } from "@/lib/notifications";
+import { recordFaqContactLeakTelemetry } from "@/lib/faqContactLeakTelemetry";
+import { validateSampleInquiryRecipients } from "@/lib/sampleInventory";
 
 // ─────────────────────────────────────────────────────────────────────────
 // PER-PROPERTY 3-TIER FAQ API  (NEW_IDEAS.md §4)
@@ -39,6 +41,14 @@ const TIER_BY_ROLE = { owner: "gold", advisor: "silver", resident: "bronze" };
 
 function fail(message, status = 400, extra = {}) {
   return NextResponse.json({ success: false, message, ...extra }, { status });
+}
+
+async function recordBlockedFaq(ruleCode, context) {
+  try {
+    await recordFaqContactLeakTelemetry(supabaseAdmin, { ruleCode, context });
+  } catch (error) {
+    console.warn("[api/faqs] Contact-leak telemetry unavailable:", error?.message || "unknown");
+  }
 }
 
 /**
@@ -205,7 +215,10 @@ export async function POST(req) {
       if (answer.length < 2) return fail("Answer is empty");
 
       const leak = rejectIfContactLeak(answer);
-      if (leak) return fail(leak.message, 422, { code: leak.code });
+      if (leak) {
+        await recordBlockedFaq(leak.code, "public_answer");
+        return fail(leak.message, 422, { code: leak.code });
+      }
 
       const { data: faq } = await supabaseAdmin
         .from("property_faqs")
@@ -246,6 +259,7 @@ export async function POST(req) {
           title: "Your question was answered",
           desc: `A ${role} answered: "${faq.question_text.slice(0, 80)}"`,
           icon: tier === "gold" ? "🥇" : tier === "silver" ? "🥈" : "🥉",
+          propertySlug: faq.property_id,
           notificationType: "faq_answered",
         });
       }
@@ -264,7 +278,26 @@ export async function POST(req) {
     if (question.length < 5) return fail("A question must be at least 5 characters.");
 
     const leak = rejectIfContactLeak(question);
-    if (leak) return fail(leak.message, 422, { code: leak.code });
+    if (leak) {
+      await recordBlockedFaq(leak.code, "public_question");
+      return fail(leak.message, 422, { code: leak.code });
+    }
+    const { data: property, error: propertyError } = await supabaseAdmin
+      .from("properties")
+      .select("id, title, slug, owner_id")
+      .eq("slug", parsed.data.propertyId)
+      .maybeSingle();
+    if (propertyError) throw propertyError;
+    if (!property) return fail("Property not found", 404);
+
+    const sampleRouting = validateSampleInquiryRecipients({
+      slug: property.slug,
+      recipientIds: [property.owner_id].filter(Boolean),
+      allowlistValue: process.env.HUMAN_TEST_SAMPLE_RECIPIENT_IDS,
+    });
+    if (!sampleRouting.ok) {
+      return fail("Sample questions are unavailable until test routing is configured.", 503);
+    }
 
     // Rate limit: 5 questions per property per user per 24h. Cheap guard
     // against a seeker spamming an owner's listing.
@@ -292,12 +325,7 @@ export async function POST(req) {
 
     if (error) throw error;
 
-    // Ping the owner so the question lands in their Mission Control queue.
-    const { data: property } = await supabaseAdmin
-      .from("properties")
-      .select("id, title, owner_id")
-      .eq("slug", parsed.data.propertyId)
-      .maybeSingle();
+    // Ping the already-verified owner so the question lands in their Mission Control queue.
 
     if (property?.owner_id && property.owner_id !== userId) {
       await notifyUser(supabaseAdmin, {

@@ -27,8 +27,9 @@ const IV_LENGTH = 12; // standard for GCM
 
 // ── EXPIRY (§25.5, owner decision 2026-08-06: 90 days) ──────────────────
 //
-// A share token is a bearer credential with no revocation: whoever holds the
-// link can read that board. Without an expiry, a link pasted into a group chat
+// A share token is a bearer credential: whoever holds the
+// link can read that board until expiry or the owner's server-side revocation
+// watermark. Without an expiry, a link pasted into a group chat
 // in 2026 still works in 2030.
 //
 // 90 days is long enough to cover a real property search — which in PH runs
@@ -38,7 +39,9 @@ const IV_LENGTH = 12; // standard for GCM
 export const SHARE_TOKEN_TTL_DAYS = 90;
 const TTL_MS = SHARE_TOKEN_TTL_DAYS * 24 * 60 * 60 * 1000;
 
-// Payload is `userId|expiresAtMs`. The separator is '|' because a Supabase
+// Payload is `userId|issuedAtMs|expiresAtMs`. Tokens from the earlier
+// expiry-only format (`userId|expiresAtMs`) remain readable. The separator is
+// '|' because a Supabase
 // user id is a UUID and can never contain one — so splitting is unambiguous
 // even if an id format changes later.
 const PAYLOAD_SEPARATOR = '|';
@@ -78,14 +81,14 @@ function resolveKey() {
  * @returns {string} token in the form 'iv.ciphertext.authTag' (base64url)
  * @throws {Error} when the signing secret is unavailable
  */
-export function encryptUserId(userId, { ttlMs = TTL_MS } = {}) {
+export function encryptUserId(userId, { ttlMs = TTL_MS, issuedAt = Date.now() } = {}) {
   const key = resolveKey();
   if (!key) throw new Error('Share links are not configured on this server.');
 
   const iv = crypto.randomBytes(IV_LENGTH);
   const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
 
-  const payload = `${userId}${PAYLOAD_SEPARATOR}${Date.now() + ttlMs}`;
+  const payload = `${userId}${PAYLOAD_SEPARATOR}${issuedAt}${PAYLOAD_SEPARATOR}${issuedAt + ttlMs}`;
   let encrypted = cipher.update(payload, 'utf8', 'base64url');
   encrypted += cipher.final('base64url');
 
@@ -105,7 +108,7 @@ export function encryptUserId(userId, { ttlMs = TTL_MS } = {}) {
  * @param {string} token
  * @returns {string|null}
  */
-export function decryptUserId(token) {
+export function decodeWishlistShareToken(token, { allowExpired = false } = {}) {
   try {
     const key = resolveKey();
     if (!key) return null;
@@ -123,27 +126,46 @@ export function decryptUserId(token) {
     let decrypted = decipher.update(encrypted, 'base64url', 'utf8');
     decrypted += decipher.final('utf8');
 
-    // Tokens minted before the expiry existed carry no separator. They are
-    // honoured indefinitely, by owner decision (2026-08-06): links already
-    // shared must not break, and the auth tag still proves this server signed
-    // them. Only NEW links get a lifetime.
-    const sepIndex = decrypted.lastIndexOf(PAYLOAD_SEPARATOR);
-    if (sepIndex === -1) return decrypted;
+    const segments = decrypted.split(PAYLOAD_SEPARATOR);
+    if (segments.length === 1) {
+      return { userId: decrypted, issuedAt: null, expiresAt: null, legacy: true };
+    }
 
-    const userId = decrypted.slice(0, sepIndex);
-    const expiresAt = Number(decrypted.slice(sepIndex + 1));
+    let userId;
+    let issuedAt;
+    let expiresAt;
+    if (segments.length === 2) {
+      [userId] = segments;
+      expiresAt = Number(segments[1]);
+      issuedAt = expiresAt - TTL_MS;
+    } else if (segments.length === 3) {
+      [userId] = segments;
+      issuedAt = Number(segments[1]);
+      expiresAt = Number(segments[2]);
+    } else {
+      return null;
+    }
 
-    // A malformed expiry means a token this server did not mint the way it
-    // mints them now. Fail closed rather than guessing it is still valid.
-    if (!Number.isFinite(expiresAt)) return null;
-    if (Date.now() > expiresAt) return null;
+    if (!userId || !Number.isFinite(issuedAt) || !Number.isFinite(expiresAt)) return null;
+    if (!allowExpired && Date.now() > expiresAt) return null;
 
-    return userId;
+    return { userId, issuedAt, expiresAt, legacy: false };
   } catch {
     return null;
   }
 }
 
+export function decryptUserId(token) {
+  return decodeWishlistShareToken(token)?.userId || null;
+}
+
+export function isWishlistShareRevoked(tokenDetails, revokedBefore) {
+  if (!tokenDetails || !revokedBefore) return false;
+  const revokedAt = new Date(revokedBefore).getTime();
+  if (!Number.isFinite(revokedAt)) return true;
+  if (!Number.isFinite(tokenDetails.issuedAt)) return true;
+  return tokenDetails.issuedAt <= revokedAt;
+}
 /**
  * Reads a token's expiry WITHOUT asserting it is still valid.
  *
@@ -155,30 +177,5 @@ export function decryptUserId(token) {
  * @returns {number|null} epoch ms
  */
 export function shareTokenExpiry(token) {
-  try {
-    const key = resolveKey();
-    if (!key) return null;
-
-    const parts = String(token).split('.');
-    if (parts.length !== 3) return null;
-
-    const [ivHex, encrypted, authTag] = parts;
-    const decipher = crypto.createDecipheriv(
-      'aes-256-gcm',
-      key,
-      Buffer.from(ivHex, 'base64url'),
-    );
-    decipher.setAuthTag(Buffer.from(authTag, 'base64url'));
-
-    let decrypted = decipher.update(encrypted, 'base64url', 'utf8');
-    decrypted += decipher.final('utf8');
-
-    const sepIndex = decrypted.lastIndexOf(PAYLOAD_SEPARATOR);
-    if (sepIndex === -1) return null; // legacy token, no expiry
-
-    const expiresAt = Number(decrypted.slice(sepIndex + 1));
-    return Number.isFinite(expiresAt) ? expiresAt : null;
-  } catch {
-    return null;
-  }
+  return decodeWishlistShareToken(token, { allowExpired: true })?.expiresAt || null;
 }

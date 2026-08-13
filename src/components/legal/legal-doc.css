@@ -52,7 +52,7 @@
   font-family: var(--font-geist-mono, monospace);
   font-size: 11px;
   letter-spacing: 0.07em;
-  color: rgba(200, 200, 200, 0.45);
+  color: var(--text-secondary);
   text-transform: uppercase;
   line-height: 1.6;
 }
@@ -150,12 +150,12 @@
 .legal-footer-note {
   padding-top: 44px;
   font-size: 13px;
-  color: rgba(200, 200, 200, 0.45);
+  color: var(--text-secondary);
 }
 
 .legal-footer-note a {
   color: var(--accent, #E8AE3C);
-  text-decoration: none;
+  text-decoration: underline;
 }
 .legal-footer-note a:hover {
   text-decoration: underline;

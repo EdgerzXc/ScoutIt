@@ -6,6 +6,7 @@
 // dev_all_* convention — see the migration comment).
 
 import { isEmailConfigured, sendEmail, renderEmail } from "./email";
+import { validateSampleInquiryRecipients } from "./sampleInventory";
 
 // How long a user must have been away before email is worth sending.
 // §38.6 says "24h+ inactive". Emailing someone who is looking at the app is
@@ -27,7 +28,31 @@ const EMAIL_WORTHY = new Set([
   "request_deleted",
 ]);
 
-export async function notifyUser(serviceClient, { userId, title, desc, icon = "🔔", propertyId = null, notificationType }) {
+export async function validateSampleNotificationRouting(serviceClient, { userId, propertyId = null, propertySlug = null }) {
+  if (!userId) return { ok: false, sample: false, reason: "missing_recipient" };
+  let slug = String(propertySlug || "").trim();
+  if (!slug && propertyId) {
+    const { data: property, error } = await serviceClient.from("properties")
+      .select("slug").eq("id", propertyId).maybeSingle();
+    if (error || !property?.slug) {
+      return { ok: false, sample: false, reason: "property_routing_unverified" };
+    }
+    slug = property.slug;
+  }
+  if (!slug) return { ok: true, sample: false };
+  return validateSampleInquiryRecipients({
+    slug,
+    recipientIds: [userId],
+    allowlistValue: process.env.HUMAN_TEST_SAMPLE_RECIPIENT_IDS,
+  });
+}
+
+export async function notifyUser(serviceClient, { userId, title, desc, icon = "🔔", propertyId = null, propertySlug = null, notificationType }) {
+  const routing = await validateSampleNotificationRouting(serviceClient, { userId, propertyId, propertySlug });
+  if (!routing.ok) {
+    console.warn("[notifications] Blocked unverified or non-designated property notification:", routing.reason);
+    return null;
+  }
   if (!userId) return null;
   const { error } = await serviceClient.from("user_notifications").insert([{
     user_id: userId,

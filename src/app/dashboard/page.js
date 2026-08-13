@@ -18,7 +18,9 @@ import Toasts from "../../components/ui/Toasts";
 import ConciergeAI from "../../components/dashboard/ConciergeAI";
 import ConnectsBreakdown from "../../components/dashboard/ConnectsBreakdown";
 import AtmosphereBackground from "../../components/ui/AtmosphereBackground";
-import { getSession, signOut } from "../../lib/authClient";
+import { getSession, getUser, signOut } from "../../lib/authClient";
+import { normalizeDashboardMode, normalizeDashboardModes } from "../../lib/dashboardModes";
+import { readDevelopmentMockUser } from "../../lib/developmentMock";
 import { Camera, Search, Bookmark, MessageCircle, Briefcase } from "lucide-react";
 
 const TAG_LABELS = {
@@ -81,23 +83,71 @@ function DashboardInner() {
   const switcherRef = useRef(null);
 
   useEffect(() => {
-    // Read mock auth from LocalStorage
-    const saved = localStorage.getItem("scoutit_user");
-    if (!saved) {
+    // A cached profile can shape presentation only after Supabase validates the
+    // user. The sole exception is the explicit localhost development toolbox.
+    let cancelled = false;
+    const hydrateDevelopmentUser = async () => {
+      const { data: { user: verifiedUser } } = await getUser();
+      if (cancelled || verifiedUser) return;
+
+      const parsed = readDevelopmentMockUser(localStorage, {
+        nodeEnv: process.env.NODE_ENV,
+        hostname: window.location.hostname,
+      });
+      if (!parsed) {
+        localStorage.removeItem("scoutit_user");
+        router.replace("/onboarding");
+        return;
+      }
+
+      parsed.tags = normalizeDashboardModes(parsed.tags, parsed.primaryMode);
+      parsed.primaryMode = normalizeDashboardMode(parsed.primaryMode) || parsed.tags[0];
+      if (!parsed.primaryMode || parsed.tags.length === 0) {
+        router.replace("/onboarding");
+        return;
+      }
+      setUser(parsed);
+      setMode(parsed.primaryMode);
+    };
+    hydrateDevelopmentUser();
+    return () => { cancelled = true; };
+  }, [router]);
+
+  useEffect(() => {
+    if (!currentUser?.id) return;
+
+    // DashboardContext also exposes the localhost E2E identity as currentUser.
+    // Its fields already use the client preview shape (tags/primaryMode), not
+    // the Supabase profile shape (active_roles/primary_mode). Let the dedicated
+    // development hydration effect above own it instead of collapsing it back
+    // to the fallback owner role.
+    const developmentUser = readDevelopmentMockUser(localStorage, {
+      nodeEnv: process.env.NODE_ENV,
+      hostname: window.location.hostname,
+    });
+    if (developmentUser?.id === currentUser.id) return;
+    const tags = normalizeDashboardModes(
+      currentUser.active_roles,
+      currentUser.primary_mode || currentUser.role,
+    );
+    const primaryMode = normalizeDashboardMode(currentUser.primary_mode) || tags[0];
+    if (!primaryMode || tags.length === 0) {
       router.push("/onboarding");
       return;
     }
-    try {
-      const parsed = JSON.parse(saved);
-      if (!parsed.tags || parsed.tags.length === 0) {
-        parsed.tags = ["exploring"];
-      }
-      setUser(parsed);
-      setMode(parsed.primaryMode || parsed.tags[0]);
-    } catch (e) {
-      router.push("/onboarding");
-    }
-  }, [router]);
+
+    const serverUser = {
+      ...currentUser,
+      name: currentUser.display_name || currentUser.user_metadata?.full_name || "ScoutIt User",
+      tags,
+      primaryMode,
+      providerType: currentUser.provider_type || undefined,
+      prcLicense: currentUser.prc_license || undefined,
+    };
+    // Keep verified profile data in React state; never persist it in the browser.
+    setUser(serverUser);
+    setMode(primaryMode);
+  }, [currentUser, router]);
 
   // Unread-message badge on the Inbox nav entry -- separate from the
   // notification bell (that's for the "new inquiry" ping; this is for
@@ -151,14 +201,20 @@ function DashboardInner() {
     setShowDesktopSwitcher(false);
     setShowMobileProfileMenu(false);
     
-    // Optimistically update the primaryMode setting in localStorage
+    // Optimistically update the in-memory display mode. Supabase remains the
+    // identity authority; authenticated profile data is never browser-cached.
     const updatedUser = { ...user, primaryMode: newMode };
-    localStorage.setItem("scoutit_user", JSON.stringify(updatedUser));
+    // The server-approved profile refresh is authoritative after navigation.
     setUser(updatedUser);
   };
 
-  // Roles the user doesn't have yet ("exploring" isn't an activatable role)
-  const addableModes = ACTIVATABLE_MODES.filter(m => !user.tags.includes(m.id));
+  // Existing server-approved roles remain switchable. New capabilities must be
+  // activated through a future authenticated server workflow; a real user must
+  // never grant themselves a role by editing browser storage. Keep the legacy
+  // activation controls available only to the explicit development toolbox user.
+  const addableModes = user.id === "master-dev"
+    ? ACTIVATABLE_MODES.filter(m => !user.tags.includes(m.id))
+    : [];
 
   const startActivation = (modeId) => {
     setShowDesktopSwitcher(false);
@@ -179,7 +235,7 @@ function DashboardInner() {
       tags: [...user.tags.filter(t => t !== "exploring" || modeId === "exploring"), modeId],
       primaryMode: modeId,
     };
-    localStorage.setItem("scoutit_user", JSON.stringify(updatedUser));
+    // Do not persist role/profile changes in browser storage.
     setUser(updatedUser);
     setMode(modeId);
     setActivating(null);

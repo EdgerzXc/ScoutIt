@@ -1,8 +1,7 @@
 // The private dashboard in its three meaningful auth states:
 //  1. logged out  → must gate, not crash
 //  2. empty owner → must show the zero-listings state + a working wizard
-//  3. master-dev  → READ-ONLY roster/inbox/CRM render (real production data —
-//                   never click anything that mutates)
+//  3. master-dev: local preview roster/inbox/CRM render with isolated data
 import { test, expect } from '@playwright/test';
 import {
   signInAsMock,
@@ -35,6 +34,15 @@ async function mockAvailability(page) {
   });
 }
 
+async function openAgenda(page) {
+  const agendaButton = page.getByRole('button', { name: 'Agenda' });
+  await expect.poll(async () => {
+    const classes = await agendaButton.getAttribute('class');
+    if (!classes?.includes('bg-gold-accent')) await agendaButton.click();
+    return agendaButton.getAttribute('class');
+  }, { timeout: 15000 }).toContain('bg-gold-accent');
+}
+
 test.describe('Logged out', () => {
   test('dashboard gates anonymous visitors gracefully', async ({ page }) => {
     const errors = trackErrors(page);
@@ -60,12 +68,8 @@ test.describe('Owner with zero listings (safe mock)', () => {
     await gotoAndSettle(page, '/dashboard');
     await expectRealContent(page);
 
-    // Zero-listings owner state → the first-listing CTA. (Button copy was
-    // renamed from "Start My First Listing" to "Create your first listing".)
-    const startBtn = page
-      .getByRole('button', { name: /Create your first listing/i })
-      .or(page.getByText('+ New Property File', { exact: true }))
-      .first();
+    // Zero-listings owner state → the first-listing CTA.
+    const startBtn = page.getByRole('button', { name: /Get Started/i }).first();
     await expect(startBtn).toBeVisible({ timeout: 25000 });
     await startBtn.click();
 
@@ -127,13 +131,14 @@ test.describe('Calendar viewing lifecycle (fully mocked)', () => {
     });
 
     await gotoAndSettle(page, '/dashboard/calendar?view=agenda');
+    await openAgenda(page);
     await expect(page.getByText('The Paragon Tower')).toBeVisible({ timeout: 15000 });
     await expect(page.getByText('Jordan Buyer')).toBeVisible();
 
-    await page.getByRole('button', { name: 'Accept' }).click();
+    await page.getByRole('button', { name: 'Confirm' }).click();
     await expect.poll(() => patchedStatus, { timeout: 10000 }).toBe('confirmed');
-    await expect(page.getByText('confirmed', { exact: false })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Accept' })).toHaveCount(0);
+    await expect(page.getByText('confirmed', { exact: false })).toBeVisible({ timeout: 15000 });
+    await expect(page.getByRole('button', { name: 'Confirm' })).toHaveCount(0);
   });
 
   test('guest sees a confirmed viewing without host controls', async ({ page }) => {
@@ -151,13 +156,14 @@ test.describe('Calendar viewing lifecycle (fully mocked)', () => {
     });
 
     await gotoAndSettle(page, '/dashboard/calendar?view=agenda');
+    await openAgenda(page);
     await expect(page.getByText('The Paragon Tower')).toBeVisible({ timeout: 15000 });
-    await expect(page.getByRole('button', { name: 'Accept' })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Confirm' })).toHaveCount(0);
     await expect(page.getByText('confirmed', { exact: false })).toBeVisible();
   });
 });
 
-test.describe('master-dev (READ-ONLY — real data)', () => {
+test.describe('master-dev (isolated local preview)', () => {
   test.use({ viewport: { width: 1440, height: 900 } });
 
   test('owner dashboard renders the live roster without errors', async ({ page }) => {
@@ -188,6 +194,9 @@ test.describe('master-dev (READ-ONLY — real data)', () => {
   test('CRM cockpit renders pipeline surfaces', async ({ page }) => {
     const errors = trackErrors(page);
     await signInAsMock(page, MASTER_DEV_READONLY);
+    await page.route('**/api/deals**', (route) => route.fulfill({ status: 200, json: { deals: [] } }));
+    await page.route('**/api/viewing-appointments**', (route) => route.fulfill({ status: 200, json: { appointments: [] } }));
+    await page.route('**/api/crm/tasks**', (route) => route.fulfill({ status: 200, json: { tasks: [] } }));
     await gotoAndSettle(page, '/dashboard/crm');
     await expectRealContent(page);
     expect(errors, errors.join('\n')).toEqual([]);

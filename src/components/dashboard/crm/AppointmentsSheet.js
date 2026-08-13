@@ -284,6 +284,11 @@ function ScheduleRow({ item, updatingId, onViewingUpdate, onEditEvent }) {
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-[9px] uppercase tracking-widest font-mono text-text-muted">{meta.tag}</span>
           <span className="font-working-title text-sm text-on-surface truncate">{item.title}</span>
+          {item.kind === "viewing" && item.status && (
+            <span className="text-[9px] uppercase tracking-widest font-mono text-gold-accent">
+              {item.status}
+            </span>
+          )}
           {overdue && (
             <span className="flex items-center gap-1 text-[9px] uppercase tracking-widest font-bold text-error">
               <AlertTriangle size={11} /> Overdue

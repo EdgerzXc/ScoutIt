@@ -121,7 +121,7 @@
 .icon-badge {
   font-family: var(--font-mono);
   font-size: 10px;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   letter-spacing: 0.1em;
   display: block;
   margin-bottom: 6px;

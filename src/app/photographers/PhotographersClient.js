@@ -13,6 +13,7 @@ const SPECIALTIES = ["Interior Architecture", "Drone Aerial + Lifestyle", "Comme
 const LOCATIONS = ["BGC, Taguig", "Makati, Metro Manila", "Cebu City", "Quezon City", "Alabang"];
 
 export default function PhotographersClient({ initialPhotographers = null }) {
+  const hadInitialPhotographers = initialPhotographers !== null;
   const [photographers, setPhotographers] = useState(() => initialPhotographers);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSpecialties, setSelectedSpecialties] = useState([]);
@@ -26,7 +27,7 @@ export default function PhotographersClient({ initialPhotographers = null }) {
       if (cancelled) return;
       if (error) {
         console.error("Failed to load photographers", error);
-        if (photographers === null) setPhotographers([]);
+        if (!hadInitialPhotographers) setPhotographers([]);
         return;
       }
       setPhotographers(data.map((p) => ({
@@ -37,11 +38,12 @@ export default function PhotographersClient({ initialPhotographers = null }) {
         bio: p.bio || "",
         image: p.avatar_url || "",
         isExample: !!p.is_example_account,
+        isPilot: !!p.is_pilot_participant,
         available: p.provider_availability !== false,
       })));
     })();
     return () => { cancelled = true; };
-  }, []);
+  }, [hadInitialPhotographers]);
 
   const toggleFilter = (section) => setOpenFilters((p) => ({ ...p, [section]: !p[section] }));
 
@@ -171,7 +173,11 @@ export default function PhotographersClient({ initialPhotographers = null }) {
               <div className="brokers-grid" style={{ marginBottom: 32 }}>
                 {filtered.map((p) => (
                   <Link key={p.name} href={`/profile/${encodeURIComponent(p.name)}`} className="broker-card" style={{ textDecoration: "none" }}>
-                    {p.isExample && <div className="example-badge-overlay">Example Profile</div>}
+                    {(p.isPilot || p.isExample) && (
+                      <div className="example-badge-overlay">
+                        {p.isPilot ? "Sample Profile — For Human Testing" : "Example Profile"}
+                      </div>
+                    )}
                     <div className="broker-image-container">
                       {p.image ? (
                         /* eslint-disable-next-line @next/next/no-img-element */
@@ -265,7 +271,7 @@ export default function PhotographersClient({ initialPhotographers = null }) {
           font-size: 10px;
           font-weight: 700;
           letter-spacing: 0.1em;
-          color: var(--text-muted);
+          color: var(--text-secondary);
           background: rgba(14,14,14,0.8);
           border: 0.5px solid var(--border-mid);
           padding: 3px 8px;
@@ -359,7 +365,7 @@ export default function PhotographersClient({ initialPhotographers = null }) {
         }
         .broker-specialty {
           font-size: 13px;
-          color: var(--text-muted);
+          color: var(--text-secondary);
           margin-bottom: 16px;
         }
         .broker-specialty span { color: var(--text-primary); }

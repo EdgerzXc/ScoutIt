@@ -8,6 +8,8 @@ import { cityToRegion } from "./regions";
 import { fetchWithRetry } from "./fetchWithRetry";
 import { DEEP_INTEL_SCHEMA } from "./deepIntelSchema";
 import { reverseMapCategoryFields } from "./propertyFieldMapping";
+import { imageMediaUrl, safeFloorPlans, spatialEmbedUrl, videoEmbedUrl } from "./propertyMedia";
+import { isSamplePropertySlug } from "./sampleInventory";
 
 
 export class AirtableRecordNotFoundError extends Error {
@@ -191,7 +193,7 @@ export async function fetchProperties(apiKey, baseId) {
         //      result for an invented listing in their own building.
         // Reading `Is_Sample` from Airtable; absent field → `false`, so this is
         // inert until the column exists and nothing changes for real listings.
-        is_sample:       f.Is_Sample === true || f.Is_Sample === "true" || false,
+        is_sample:       f.Is_Sample === true || f.Is_Sample === "true" || isSamplePropertySlug(f.Slug),
         property_type:   f.SpaceTypography || "",
         tenure:          f.Tenure          || "",
         // Freshness Engine (NEW_IDEAS.md §21). Without this the public
@@ -286,23 +288,25 @@ export async function fetchProperties(apiKey, baseId) {
         enhanced_photos: f.Enhanced_Photos
           ? f.Enhanced_Photos.split(",").map((u) => u.trim()).filter(Boolean)
           : [],
-        video_url:        f.Video_URL        || "",
-        virtual_tour_url: f.Virtual_Tour_URL || "",
+        // Provider-aware classification happens at the public CMS boundary.
+        // A photo in Video_URL/Luma/Matterport must never become an iframe.
+        video_url:        videoEmbedUrl(f.Video_URL),
+        virtual_tour_url: spatialEmbedUrl(f.Virtual_Tour_URL, "matterport"),
         // camelCase aliases consumed by SpatialVaultWidget in CommercialFlow / ResidentialFlow
-        matterportTourUrl: f.Virtual_Tour_URL || "",
-        luma3dMapUrl:      f.Luma_3D_Map_URL  || "",
-        droneHeatmapUrl:   f.Drone_Heatmap_URL || "",
+        matterportTourUrl: spatialEmbedUrl(f.Virtual_Tour_URL, "matterport"),
+        luma3dMapUrl:      spatialEmbedUrl(f.Luma_3D_Map_URL, "luma"),
+        droneHeatmapUrl:   imageMediaUrl(f.Drone_Heatmap_URL),
         // Floor_Plans is a multipleAttachments field, so Airtable returns an
         // ARRAY of {url, filename, type} — not a URL string like the other
         // Vault fields. It was the only VAULT field never mapped here (finding
         // F2, 2026-07-30): specced as a Cluster+ benefit, uploadable by owners,
         // and impossible for the site to display. A subscriber was being billed
         // for something the page could not render.
-        floorPlans: Array.isArray(f.Floor_Plans)
-          ? f.Floor_Plans
-              .map((a) => ({ url: a?.url || "", name: a?.filename || "Floor plan", type: a?.type || "" }))
-              .filter((a) => a.url)
-          : [],
+        floorPlans: safeFloorPlans(
+          Array.isArray(f.Floor_Plans)
+            ? f.Floor_Plans.map((a) => ({ url: a?.url, name: a?.filename || "Floor plan", type: a?.type || "" }))
+            : [],
+        ),
 
         // ── Category bridge keys (feed the existing stat-pills) ───
         seating_capacity:  f.RST_Seating_Capacity || f.VEN_Capacity_Seated || "",

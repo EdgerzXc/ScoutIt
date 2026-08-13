@@ -6,9 +6,10 @@
 // with `ERR_REQUIRE_ESM` (jsdom -> html-encoding-sniffer -> @exodus/bytes),
 // taking down any API route that imported it — e.g. /api/dashboard/update.
 //
-// All fields we sanitize here are plain text (titles, locations, unit names,
-// detail keys/values), so we strip HTML rather than allow-list rich markup.
-// This is both safer (no XSS surface) and has zero native/ESM dependencies.
+// All fields handled here are plain text (titles, locations, unit names, detail
+// keys/values). This module is not an HTML allow-list and its output must never
+// be passed to dangerouslySetInnerHTML. It removes tag-shaped sections and all
+// remaining angle brackets so ordinary text rendering remains the security sink.
 // ─────────────────────────────────────────────────────────────────────────
 
 /**
@@ -19,14 +20,34 @@
  */
 export function stripAllTags(text) {
   if (typeof text !== "string") return text;
-  return text
-    // Drop dangerous elements together with their contents
-    .replace(/<(script|style|iframe|object|embed|svg|math)[^>]*>[\s\S]*?<\/\1>/gi, "")
-    // Remove any remaining HTML tags
-    .replace(/<\/?[a-z][^>]*>/gi, "")
-    // Neutralize stray angle brackets so nothing can be reconstructed as a tag
-    .replace(/[<>]/g, "")
-    .trim();
+  let output = "";
+  let insideTag = false;
+  let quote = null;
+
+  for (const character of text) {
+    if (!insideTag) {
+      if (character === "<") {
+        insideTag = true;
+        output += " ";
+      } else if (character !== ">") {
+        output += character;
+      }
+      continue;
+    }
+
+    if (quote) {
+      if (character === quote) quote = null;
+      continue;
+    }
+    if (character === '"' || character === "'") {
+      quote = character;
+    } else if (character === ">") {
+      insideTag = false;
+      quote = null;
+    }
+  }
+
+  return output.replace(/\s+/g, " ").trim();
 }
 
 /**
@@ -47,7 +68,9 @@ export function sanitizeObject(obj) {
     const sanitized = {};
     for (const key in obj) {
       if (Object.prototype.hasOwnProperty.call(obj, key)) {
-        sanitized[stripAllTags(key)] = sanitizeObject(obj[key]);
+        const sanitizedKey = stripAllTags(key);
+        if (["__proto__", "prototype", "constructor"].includes(sanitizedKey)) continue;
+        sanitized[sanitizedKey] = sanitizeObject(obj[key]);
       }
     }
     return sanitized;

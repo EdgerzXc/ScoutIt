@@ -38,8 +38,9 @@ export default function ArticleBlocks({ blocks }) {
             );
           case "table":
             return (
-              <div key={idx} className="ab-table-rail">
-                <table className="ab-table">
+              <div key={idx} className="ab-table-rail" tabIndex={0} aria-label="Scrollable article data table">
+                <div className="ab-table-canvas">
+                  <table className="ab-table" tabIndex={0} aria-label={block.caption || "Article data"}>
                   <thead>
                     <tr>{block.headers.map((h, i) => <th key={i}>{h}</th>)}</tr>
                   </thead>
@@ -48,7 +49,8 @@ export default function ArticleBlocks({ blocks }) {
                       <tr key={r}>{row.map((cell, c) => <td key={c}>{cell}</td>)}</tr>
                     ))}
                   </tbody>
-                </table>
+                  </table>
+                </div>
               </div>
             );
           case "stat":

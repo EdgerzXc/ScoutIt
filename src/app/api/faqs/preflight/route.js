@@ -6,6 +6,7 @@ import { resolveUserId } from "@/lib/serverAuth";
 import { stripAllTags } from "@/lib/sanitize";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { rejectIfContactLeak } from "@/lib/contactLeakFilter";
+import { recordFaqContactLeakTelemetry } from "@/lib/faqContactLeakTelemetry";
 import {
   getPreflightQuestions,
   findPreflightQuestion,
@@ -171,6 +172,14 @@ export async function POST(req) {
 
       const leak = rejectIfContactLeak(text);
       if (leak) {
+        try {
+          await recordFaqContactLeakTelemetry(supabaseAdmin, {
+            ruleCode: leak.code,
+            context: "owner_preflight_answer",
+          });
+        } catch (error) {
+          console.warn("[api/faqs/preflight] Contact-leak telemetry unavailable:", error?.message || "unknown");
+        }
         return fail(`${leak.message} (on: "${question.question}")`, 422, { code: leak.code, key: entry.key });
       }
 

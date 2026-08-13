@@ -132,7 +132,7 @@ export default function BackgroundCore({ isLoggedIn }) {
     if (!mount) return;
     // Lite Mode: never start the WebGL scene on low-power devices — the CSS
     // layer background stays, only the animated canvas is skipped.
-    if (isLiteMode()) return;
+    if (isLiteMode() || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     let cancelled = false, frameId, renderer, resizeObs;
     const disposables = [];

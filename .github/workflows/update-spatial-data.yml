@@ -6,16 +6,24 @@ on:
     - cron: '0 0 1 * *'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
+concurrency:
+  group: update-spatial-data
+  cancel-in-progress: false
+
 jobs:
   update-transit:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: '20'
 
@@ -23,7 +31,7 @@ jobs:
         run: node scripts/sync_transit_data.js
 
       - name: Commit and Push Changes
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@b863ae1933cb653a53c021fe36dbb774e1fb9403 # v5
         with:
           commit_message: "chore(data): auto-update transit stations from OpenStreetMap"
           file_pattern: "src/data/manila_transit_stations.json"

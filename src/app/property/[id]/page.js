@@ -1,5 +1,5 @@
 // Case-sensitivity routing diagnostics trigger and async params fix
-import { notFound, redirect } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 
 import { fetchProperties } from "@/lib/airtable";
 import { siteUrl } from "@/lib/siteUrl";
@@ -22,7 +22,7 @@ export const revalidate = 3600;
 
 export async function generateMetadata({ params }) {
   const resolvedParams = await params;
-  let seoTitle = `Property Intel — ${resolvedParams.id} — ScoutIt`;
+  let seoTitle = `Property Intel â€” ${resolvedParams.id} â€” ScoutIt`;
   let seoDescription = "Property Intelligence Vector";
   let imageUrl = siteUrl("/og-default.jpg");
   let url = siteUrl(`/property/${resolvedParams.id}`);
@@ -67,8 +67,8 @@ export async function generateMetadata({ params }) {
   return {
     title: seoTitle,
     description: seoDescription,
-    // ── A4 · SAMPLES ARE NOINDEX (2026-08-08) ────────────────────────
-    // Samples stay public and badged — that is a deliberate product decision,
+    // â”€â”€ A4 Â· SAMPLES ARE NOINDEX (2026-08-08) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // Samples stay public and badged â€” that is a deliberate product decision,
     // and badges work on people. Google does not read badges.
     //
     // Two consequences this prevents, both of which only surface later:
@@ -80,7 +80,7 @@ export async function generateMetadata({ params }) {
     // `follow` is kept so the links out of a sample still pass to real pages.
     ...(isSample ? { robots: { index: false, follow: true } } : {}),
     // Without this, the page inherits `alternates.canonical: "/property"` from
-    // src/app/property/layout.js — every listing was telling Google that the
+    // src/app/property/layout.js â€” every listing was telling Google that the
     // directory index is its canonical URL, i.e. "don't index me".
     alternates: { canonical: url },
     ...(isSample ? {} : {
@@ -139,7 +139,7 @@ export default async function PropertyRoute({ params }) {
 
   if (!match) {
     const redirectSlug = await getHistoricalPropertyRedirect(resolvedParams.id);
-    if (redirectSlug) redirect(`/property/${redirectSlug}`);
+    if (redirectSlug) permanentRedirect(`/property/${redirectSlug}`);
     notFound();
   }
 
@@ -156,13 +156,13 @@ export default async function PropertyRoute({ params }) {
   // The Chameleon Injection
   const InjectedLayout = CATEGORY_TO_LAYOUT_MAP[layoutKey] || CATEGORY_TO_LAYOUT_MAP["default"];
 
-  // ── Structured data (NEW_IDEAS.md §1) ────────────────────────────────
+  // â”€â”€ Structured data (NEW_IDEAS.md Â§1) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   // Read straight from Supabase rather than our own /api/faqs route: the
   // page is statically generated with ISR, and fetching from ourselves at
-  // build time breaks static generation. Best-effort — a Supabase outage
+  // build time breaks static generation. Best-effort â€” a Supabase outage
   // costs us the FAQPage node, not the page.
-  // ⚠️ A4 (2026-08-08): a SAMPLE never emits JSON-LD. A `Product`/`Offer`
-  // schema on a fabricated listing — with a price and an availability status —
+  // âš ï¸ A4 (2026-08-08): a SAMPLE never emits JSON-LD. A `Product`/`Offer`
+  // schema on a fabricated listing â€” with a price and an availability status â€”
   // is the version of this that earns a manual action, because it is a
   // machine-readable claim that something is for sale when it is not. The
   // human-readable page stays public and badged; only the structured assertion
@@ -191,16 +191,16 @@ export default async function PropertyRoute({ params }) {
         {/*
           'match' is already resolved above for metadata and JSON-LD. Passing it
           down as initialData lets the flow render real content during SSR
-          instead of shipping a "LOADING SPACE INTELLIGENCE…" spinner and waiting
-          on a client-side /api/cms round-trip — which is what was pushing LCP
+          instead of shipping a "LOADING SPACE INTELLIGENCEâ€¦" spinner and waiting
+          on a client-side /api/cms round-trip â€” which is what was pushing LCP
           past 7s on mobile. The flow still revalidates in the background.
         */}
-        {/* §25.1 / §45 — premium fields are STRIPPED from this payload.
+        {/* Â§25.1 / Â§45 â€” premium fields are STRIPPED from this payload.
             This page is ISR: one document serves every visitor, so there is
             no session here to check a tier against. Previously the full deep
             intel, vault URLs and enhanced photos were serialised into the
             payload for everyone, and the UI merely hid them behind a
-            localStorage tier — readable from "view source" without even
+            localStorage tier â€” readable from "view source" without even
             running JavaScript.
             Entitled users now fetch the real values from
             /api/property/premium, which resolves their tier server-side.
@@ -211,18 +211,18 @@ export default async function PropertyRoute({ params }) {
           initialData={match ? stripPremiumFields(match, "starry") : null}
         />
 
-        {/* ── CLAIM THIS PROPERTY (§37 · W8) ────────────────────────────
+        {/* â”€â”€ CLAIM THIS PROPERTY (Â§37 Â· W8) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             Mounted at the page shell rather than inside ResidentialFlow and
             CommercialFlow, for two reasons:
 
             1. There are two flow components and four category aliases mapping
                into them. Putting the panel in one flow would make claiming
                work on residential listings and silently not exist on
-               commercial ones — a §51-shaped bug, where the feature is real
+               commercial ones â€” a Â§51-shaped bug, where the feature is real
                but unreachable from half the routes.
             2. The panel asks the SERVER whether this listing is claimable.
                It deliberately does not read 'match', because this page is ISR
-               — one cached document serves every visitor, so anything computed
+               â€” one cached document serves every visitor, so anything computed
                here would be identical for the owner, a broker and a stranger.
 
             It renders nothing at all when the listing isn't claimable. */}
@@ -230,8 +230,8 @@ export default async function PropertyRoute({ params }) {
           <ClaimPropertyPanel propertyId={resolvedParams.id} />
         </div>
 
-        {/* ── VIEW TRACKING (§59 · W18.2) ───────────────────────────────
-            '/api/analytics' existed, worked, and had NO caller — so
+        {/* â”€â”€ VIEW TRACKING (Â§59 Â· W18.2) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+            '/api/analytics' existed, worked, and had NO caller â€” so
             'analytics_events' had 0 rows and the Monthly Scout Wrap (W9) had
             nothing to report. This is that missing caller.
 

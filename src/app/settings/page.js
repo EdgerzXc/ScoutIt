@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { signOut } from "@/lib/authClient";
+import { getUser, signOut } from "@/lib/authClient";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import styles from "./page.module.css";
@@ -32,6 +32,7 @@ export default function SettingsPage() {
   };
   const [name, setName] = useState("");
   const [tags, setTags] = useState([]);
+  const [primaryMode, setPrimaryMode] = useState("");
   // Read in an effect, not during render: getCurrentTier() touches
   // localStorage, which does not exist on the server and would break SSR.
   // Only used to say whether the shield is already on by default — never to
@@ -62,27 +63,41 @@ export default function SettingsPage() {
   const [mfaMessage, setMfaMessage] = useState({ type: '', text: '' });
 
   useEffect(() => {
-    async function loadFactors() {
-      const { data, error } = await supabase.auth.mfa.listFactors();
-      if (data && data.totp) {
-        setFactors(data.totp);
-      }
-    }
-    loadFactors();
+    async function loadSettings() {
+      const [factorsResult, userResult] = await Promise.all([
+        supabase.auth.mfa.listFactors(),
+        getUser(),
+      ]);
+      if (factorsResult.data?.totp) setFactors(factorsResult.data.totp);
 
-    const userStr = localStorage.getItem("scoutit_user");
-    if (userStr) {
-      const user = JSON.parse(userStr);
-      setName(user.name || "");
-      setTags(user.tags || []);
-      if (user.publicProfile) setPublicProfile(p => ({ ...p, ...user.publicProfile }));
-      // Temporary mock badges for the user, normally fetched from Supabase
-      if (!user.badges) {
-        user.badges = [{ id: "FOUNDING_SEEKER" }];
+      const user = userResult.data?.user;
+      if (!user) {
+        router.replace("/onboarding");
+        return;
       }
-      setBadges(user.badges);
+      const { data: profile } = await supabase
+        .from("user_profiles")
+        .select("display_name,active_roles,primary_mode,role,headline,bio,location,firm,service")
+        .eq("id", user.id)
+        .maybeSingle();
+      if (!profile) return;
+
+      setName(profile.display_name || "");
+      const nextTags = Array.isArray(profile.active_roles) ? profile.active_roles : [];
+      setTags(nextTags);
+      setPrimaryMode(profile.primary_mode || profile.role || nextTags[0] || "");
+      setPublicProfile((current) => ({
+        ...current,
+        headline: profile.headline || "",
+        bio: profile.bio || "",
+        location: profile.location || "",
+        firm: profile.firm || "",
+        service: profile.service || "",
+      }));
+      setBadges([{ id: "FOUNDING_SEEKER" }]);
     }
-  }, []);
+    loadSettings();
+  }, [router]);
 
   const setField = (field, value) => setPublicProfile(p => ({ ...p, [field]: value }));
 
@@ -94,21 +109,37 @@ export default function SettingsPage() {
     );
   };
 
-  const handleSave = () => {
-    const userStr = localStorage.getItem("scoutit_user");
-    let user = userStr ? JSON.parse(userStr) : {};
-    
-    user.name = name;
-    user.tags = tags;
-    user.publicProfile = publicProfile;
-
-
-    // If they removed their primary mode tag, fallback to the first available tag
-    if (!tags.includes(user.primaryMode) && tags.length > 0) {
-      user.primaryMode = tags[0];
+  const handleSave = async () => {
+    setSecurityMessage({ type: "", text: "" });
+    const { data: { user }, error: userError } = await getUser();
+    if (userError || !user) {
+      router.replace("/onboarding");
+      return;
     }
     
-    localStorage.setItem("scoutit_user", JSON.stringify(user));
+    const nextPrimaryMode = tags.includes(primaryMode) ? primaryMode : tags[0];
+    const { error } = await supabase
+      .from("user_profiles")
+      .update({
+        display_name: name.trim(),
+        active_roles: tags,
+        primary_mode: nextPrimaryMode,
+        headline: publicProfile.headline.trim() || null,
+        bio: publicProfile.bio.trim() || null,
+        location: publicProfile.location.trim() || null,
+        firm: publicProfile.firm.trim() || null,
+        service: publicProfile.service.trim() || null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", user.id);
+
+
+    if (error) {
+      setSecurityMessage({ type: "error", text: "Profile update failed. Please try again." });
+      return;
+    }
+    
+    // Supabase is the only persistent profile store.
     router.push("/dashboard");
   };
 
@@ -217,6 +248,7 @@ export default function SettingsPage() {
           <input 
             type="text" 
             className={styles.input} 
+            aria-label="Display name"
             value={name} 
             onChange={(e) => setName(e.target.value)} 
           />
@@ -249,8 +281,9 @@ export default function SettingsPage() {
             This is how you appear in public directories and lists. A complete card gets noticed first.
           </p>
 
-          <label className={styles.label} style={{fontSize: 13}}>Headline</label>
+          <label htmlFor="public-profile-headline" className={styles.label} style={{fontSize: 13}}>Headline</label>
           <input
+            id="public-profile-headline"
             type="text"
             className={styles.input}
             placeholder={tags.includes('broker') ? "e.g. Makati CBD specialist — 10 yrs in commercial leasing" : "One line that says what you're about"}
@@ -259,8 +292,9 @@ export default function SettingsPage() {
             onChange={(e) => setField('headline', e.target.value)}
           />
 
-          <label className={styles.label} style={{fontSize: 13, marginTop: 12}}>About You</label>
+          <label htmlFor="public-profile-bio" className={styles.label} style={{fontSize: 13, marginTop: 12}}>About You</label>
           <textarea
+            id="public-profile-bio"
             className={styles.input}
             style={{minHeight: 90, resize: 'vertical', fontFamily: 'inherit'}}
             placeholder="A short bio. What should owners, brokers, or clients know about you?"
@@ -269,8 +303,9 @@ export default function SettingsPage() {
             onChange={(e) => setField('bio', e.target.value)}
           />
 
-          <label className={styles.label} style={{fontSize: 13, marginTop: 12}}>Location</label>
+          <label htmlFor="public-profile-location" className={styles.label} style={{fontSize: 13, marginTop: 12}}>Location</label>
           <input
+            id="public-profile-location"
             type="text"
             className={styles.input}
             placeholder="e.g. Metro Manila"
@@ -285,6 +320,7 @@ export default function SettingsPage() {
                 type="text"
                 className={styles.input}
                 placeholder="e.g. Santos Realty Group — or Independent"
+                aria-label="Firm or affiliation"
                 value={publicProfile.firm}
                 onChange={(e) => setField('firm', e.target.value)}
               />
@@ -298,6 +334,7 @@ export default function SettingsPage() {
                 type="text"
                 className={styles.input}
                 placeholder="e.g. Architectural photography, drone shots, floorplans"
+                aria-label="Services offered"
                 value={publicProfile.service}
                 onChange={(e) => setField('service', e.target.value)}
               />
@@ -337,7 +374,7 @@ export default function SettingsPage() {
         <div className={styles.formGroup} style={{ marginTop: 24, padding: 24, border: '1px solid rgba(var(--accent-rgb), 0.2)', borderRadius: 12, background: 'rgba(var(--accent-rgb), 0.03)' }}>
           <div className="flex items-center gap-3 mb-2">
             <ShieldCheck className="text-gold-accent" size={20} />
-            <h3 className="font-display text-lg text-on-surface">Honors & Badges</h3>
+            <h2 className="font-display text-lg text-on-surface">Honors & Badges</h2>
           </div>
           <p style={{color: 'var(--text-secondary)', fontSize: 13, marginBottom: 16}}>
             Your exclusive ScoutIt honors. Badges grant lifetime privileges and discounts.
@@ -382,7 +419,7 @@ export default function SettingsPage() {
         <div className={styles.formGroup} style={{ marginTop: 24, padding: 24, border: '1px solid var(--surface-variant)', borderRadius: 12, background: 'var(--surface)' }}>
           <div className="flex items-center gap-3 mb-2">
             <Lock className="text-on-surface" size={20} />
-            <h3 className="font-display text-lg text-on-surface">Security & Login</h3>
+            <h2 className="font-display text-lg text-on-surface">Security & Login</h2>
           </div>
           <p style={{color: 'var(--text-secondary)', fontSize: 13, marginBottom: 16}}>
             Update your password or enable Two-Factor Authentication (2FA) to secure your properties.
@@ -393,6 +430,7 @@ export default function SettingsPage() {
             type="password"
             className={styles.input}
             placeholder="At least 6 characters"
+            aria-label="New password"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
           />
@@ -402,6 +440,7 @@ export default function SettingsPage() {
             type="password"
             className={styles.input}
             placeholder="Re-type new password"
+            aria-label="Confirm new password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
           />
@@ -424,7 +463,7 @@ export default function SettingsPage() {
 
           {/* 2FA Section */}
           <div className="mt-8 pt-8 border-t border-surface-variant">
-            <h4 className="font-working-title text-md text-on-surface mb-2">Two-Factor Authentication (2FA)</h4>
+            <h3 className="font-working-title text-md text-on-surface mb-2">Two-Factor Authentication (2FA)</h3>
             
             {mfaMessage.text && (
               <div className={`mb-4 p-3 rounded text-sm ${mfaMessage.type === 'error' ? 'bg-error/10 border border-error/50 text-error' : 'bg-surface border border-gold-accent text-gold-accent'}`}>
@@ -472,6 +511,7 @@ export default function SettingsPage() {
                     className={`${styles.input} text-center font-mono tracking-widest text-lg`}
                     placeholder="000000"
                     maxLength={6}
+                    aria-label="Authenticator verification code"
                     value={verifyCode}
                     onChange={(e) => setVerifyCode(e.target.value)}
                   />

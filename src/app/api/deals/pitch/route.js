@@ -4,6 +4,7 @@ import { notifyUser } from "@/lib/notifications";
 import { logActivity } from "@/lib/crmActivity";
 import { resolveUserId } from "@/lib/serverAuth";
 import { sanitizeError } from "@/lib/sanitizeError";
+import { validateSampleInquiryRecipients } from "@/lib/sampleInventory";
 
 // Broker-initiated pitch (Market Intelligence Feed -> "Open Deal File").
 // `deals` has an explicit RLS policy blocking ALL direct client inserts
@@ -35,11 +36,22 @@ export async function POST(request) {
 
     const { data: property, error: propertyError } = await supabaseAdmin
       .from("properties")
-      .select("id, owner_id, lifecycle_state, pipeline_status")
+      .select("id, slug, owner_id, lifecycle_state, pipeline_status")
       .eq("id", listingId)
       .single();
     if (propertyError || !property) return NextResponse.json({ error: "Property not found" }, { status: 404 });
     if (property.owner_id === brokerId) return NextResponse.json({ error: "Owners cannot pitch their own property" }, { status: 400 });
+    const sampleRouting = validateSampleInquiryRecipients({
+      slug: property.slug,
+      recipientIds: [property.owner_id].filter(Boolean),
+      allowlistValue: process.env.HUMAN_TEST_SAMPLE_RECIPIENT_IDS,
+    });
+    if (!sampleRouting.ok) {
+      return NextResponse.json(
+        { error: "Sample broker pitches are unavailable until test routing is configured. No Connect was spent." },
+        { status: 503 },
+      );
+    }
 
     const { data: existingRepresentation, error: representationLookupError } = await supabaseAdmin
       .from("property_broker_representations")
