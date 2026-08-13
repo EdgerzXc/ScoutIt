@@ -66,9 +66,11 @@ export async function POST(request) {
       return NextResponse.json({ error: "Server error: missing service role configuration" }, { status: 500 });
     }
 
+    // No anon-key fallback: `supabaseAdmin` above is non-null only when the
+    // service role key is present, so falling back here could never be correct —
+    // it could only mask a misconfiguration by quietly downgrading privileges.
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    const serviceClient = createClient(supabaseUrl, process.env.SUPABASE_SERVICE_ROLE_KEY || supabaseAnonKey, {
+    const serviceClient = createClient(supabaseUrl, process.env.SUPABASE_SERVICE_ROLE_KEY, {
       auth: { persistSession: false }
     });
 
