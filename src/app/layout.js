@@ -1,4 +1,5 @@
 import { Geist, Geist_Mono } from "next/font/google";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { SITE_URL } from "@/lib/siteUrl";
 import "./globals.css";
 import dynamic from "next/dynamic";
@@ -103,6 +104,7 @@ export default function RootLayout({ children }) {
         </ErrorBoundary>
         <BottomNav />
         <DynamicOverlays />
+        <SpeedInsights />
       </body>
     </html>
   );
