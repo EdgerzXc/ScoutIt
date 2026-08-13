@@ -21,7 +21,10 @@ test.describe("property trust edges", () => {
     await trustPage.open(property.slug);
     await trustPage.expectClassifiedSpatialMedia();
 
-    expect(requestedUrls.some((url) => url.includes("images.unsplash.com") && url.includes("embed"))).toBe(false);
+    expect(requestedUrls.some((value) => {
+      const url = new URL(value);
+      return url.hostname === "images.unsplash.com" && url.pathname.includes("embed");
+    })).toBe(false);
     expect(requestedUrls.some((url) => url.includes("YWayaXpaJyH"))).toBe(false);
     expect(requestedUrls.some((url) => url.includes("b86b7928-f130-40a5-8cac-8095f30eed54"))).toBe(false);
     expect(pageErrors.filter((message) => /Please log in again|localStorage.*Access is denied/i.test(message))).toEqual([]);

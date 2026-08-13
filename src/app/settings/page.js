@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { signOut } from "@/lib/authClient";
+import { getUser, signOut } from "@/lib/authClient";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import styles from "./page.module.css";
@@ -32,6 +32,7 @@ export default function SettingsPage() {
   };
   const [name, setName] = useState("");
   const [tags, setTags] = useState([]);
+  const [primaryMode, setPrimaryMode] = useState("");
   // Read in an effect, not during render: getCurrentTier() touches
   // localStorage, which does not exist on the server and would break SSR.
   // Only used to say whether the shield is already on by default — never to
@@ -62,27 +63,41 @@ export default function SettingsPage() {
   const [mfaMessage, setMfaMessage] = useState({ type: '', text: '' });
 
   useEffect(() => {
-    async function loadFactors() {
-      const { data, error } = await supabase.auth.mfa.listFactors();
-      if (data && data.totp) {
-        setFactors(data.totp);
-      }
-    }
-    loadFactors();
+    async function loadSettings() {
+      const [factorsResult, userResult] = await Promise.all([
+        supabase.auth.mfa.listFactors(),
+        getUser(),
+      ]);
+      if (factorsResult.data?.totp) setFactors(factorsResult.data.totp);
 
-    const userStr = localStorage.getItem("scoutit_user");
-    if (userStr) {
-      const user = JSON.parse(userStr);
-      setName(user.name || "");
-      setTags(user.tags || []);
-      if (user.publicProfile) setPublicProfile(p => ({ ...p, ...user.publicProfile }));
-      // Temporary mock badges for the user, normally fetched from Supabase
-      if (!user.badges) {
-        user.badges = [{ id: "FOUNDING_SEEKER" }];
+      const user = userResult.data?.user;
+      if (!user) {
+        router.replace("/onboarding");
+        return;
       }
-      setBadges(user.badges);
+      const { data: profile } = await supabase
+        .from("user_profiles")
+        .select("display_name,active_roles,primary_mode,role,headline,bio,location,firm,service")
+        .eq("id", user.id)
+        .maybeSingle();
+      if (!profile) return;
+
+      setName(profile.display_name || "");
+      const nextTags = Array.isArray(profile.active_roles) ? profile.active_roles : [];
+      setTags(nextTags);
+      setPrimaryMode(profile.primary_mode || profile.role || nextTags[0] || "");
+      setPublicProfile((current) => ({
+        ...current,
+        headline: profile.headline || "",
+        bio: profile.bio || "",
+        location: profile.location || "",
+        firm: profile.firm || "",
+        service: profile.service || "",
+      }));
+      setBadges([{ id: "FOUNDING_SEEKER" }]);
     }
-  }, []);
+    loadSettings();
+  }, [router]);
 
   const setField = (field, value) => setPublicProfile(p => ({ ...p, [field]: value }));
 
@@ -94,21 +109,37 @@ export default function SettingsPage() {
     );
   };
 
-  const handleSave = () => {
-    const userStr = localStorage.getItem("scoutit_user");
-    let user = userStr ? JSON.parse(userStr) : {};
-    
-    user.name = name;
-    user.tags = tags;
-    user.publicProfile = publicProfile;
-
-
-    // If they removed their primary mode tag, fallback to the first available tag
-    if (!tags.includes(user.primaryMode) && tags.length > 0) {
-      user.primaryMode = tags[0];
+  const handleSave = async () => {
+    setSecurityMessage({ type: "", text: "" });
+    const { data: { user }, error: userError } = await getUser();
+    if (userError || !user) {
+      router.replace("/onboarding");
+      return;
     }
     
-    localStorage.setItem("scoutit_user", JSON.stringify(user));
+    const nextPrimaryMode = tags.includes(primaryMode) ? primaryMode : tags[0];
+    const { error } = await supabase
+      .from("user_profiles")
+      .update({
+        display_name: name.trim(),
+        active_roles: tags,
+        primary_mode: nextPrimaryMode,
+        headline: publicProfile.headline.trim() || null,
+        bio: publicProfile.bio.trim() || null,
+        location: publicProfile.location.trim() || null,
+        firm: publicProfile.firm.trim() || null,
+        service: publicProfile.service.trim() || null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", user.id);
+
+
+    if (error) {
+      setSecurityMessage({ type: "error", text: "Profile update failed. Please try again." });
+      return;
+    }
+    
+    // Supabase is the only persistent profile store.
     router.push("/dashboard");
   };
 

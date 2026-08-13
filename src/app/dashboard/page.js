@@ -144,7 +144,7 @@ function DashboardInner() {
       providerType: currentUser.provider_type || undefined,
       prcLicense: currentUser.prc_license || undefined,
     };
-    localStorage.setItem("scoutit_user", JSON.stringify(serverUser));
+    // Keep verified profile data in React state; never persist it in the browser.
     setUser(serverUser);
     setMode(primaryMode);
   }, [currentUser, router]);
@@ -201,9 +201,10 @@ function DashboardInner() {
     setShowDesktopSwitcher(false);
     setShowMobileProfileMenu(false);
     
-    // Optimistically update the primaryMode setting in localStorage
+    // Optimistically update the in-memory display mode. Supabase remains the
+    // identity authority; authenticated profile data is never browser-cached.
     const updatedUser = { ...user, primaryMode: newMode };
-    localStorage.setItem("scoutit_user", JSON.stringify(updatedUser));
+    // The server-approved profile refresh is authoritative after navigation.
     setUser(updatedUser);
   };
 
@@ -234,7 +235,7 @@ function DashboardInner() {
       tags: [...user.tags.filter(t => t !== "exploring" || modeId === "exploring"), modeId],
       primaryMode: modeId,
     };
-    localStorage.setItem("scoutit_user", JSON.stringify(updatedUser));
+    // Do not persist role/profile changes in browser storage.
     setUser(updatedUser);
     setMode(modeId);
     setActivating(null);

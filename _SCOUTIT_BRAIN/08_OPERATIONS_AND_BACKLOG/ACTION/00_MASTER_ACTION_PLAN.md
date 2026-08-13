@@ -478,6 +478,16 @@ inspection was read-only; no GitHub alert, pull request, rule, setting, secret, 
 workflow was mutated. Treat GitHub's refreshed default-branch evidence—not a local
 scan alone—as the closure authority.
 
+**Live reconciliation ? 2026-08-13, 21:15 SGT.** GitHub reports **13
+Dependabot alerts and 13 CodeQL alerts on `main`**. Every vulnerable package
+listed by Dependabot resolves to a patched version on the security branch; both
+package audits report zero vulnerabilities. PR #49 now carries the final release
+commit that was pushed after PR #48 had already merged. Its dependency review
+passes. The first fresh CodeQL policy check correctly found six residual paths:
+five authenticated-profile browser-cache writes and one weak E2E URL assertion.
+Those paths are now remediated and locally verified; keep this gate open until
+the updated PR scan and subsequent default-branch scan both pass.
+
 - [ ] Land the already-targeted root and Mission Control dependency remediation only
       after the complete release gate passes. Local re-verification on 2026-08-13:
       both lockfiles audit at zero; the main app lint, 1,057-unit-test suite, and
@@ -497,7 +507,8 @@ scan alone—as the closure authority.
       bump must be checked against `lib/sanitize.js` first — see
       [[REMEDIATION_RECORD_2026-08-13]] §Dependency remediation. Confirm the dependency graph refreshes and alerts
       close before closing or superseding the related Dependabot PRs
-- [ ] Resolve all **18** open CodeQL findings (live 2026-08-13; was 19) by
+- [ ] Resolve all **13** currently open CodeQL findings (live 2026-08-13; down
+      from 19, then 18) by
       source-specific remediation or an
       evidence-backed false-positive decision. Workstreams are legacy
       `scoutit_user` localStorage flows, persisted visitor coordinates, regex HTML

@@ -99,12 +99,8 @@ export default function OnboardingPage() {
       .maybeSingle();
 
     if (isOnboardingComplete(profile)) {
-      const localSession = localSessionFromProfile(user.id, profile);
-      if (localSession) {
-        localStorage.setItem("scoutit_user", JSON.stringify(localSession));
-        router.replace("/dashboard");
-        return;
-      }
+      router.replace("/dashboard");
+      return;
     }
 
     setFormData((current) => ({
@@ -265,13 +261,8 @@ export default function OnboardingPage() {
       const body = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(body.error || "Failed to save profile.");
 
-      localStorage.setItem("scoutit_user", JSON.stringify({
-        id: session.user.id,
-        name: formData.name.trim(),
-        tags: [formData.primaryMode],
-        primaryMode: formData.primaryMode,
-        prcLicense: formData.prcLicense.trim() || undefined,
-      }));
+      // The verified Supabase session and profile remain the identity source;
+      // authentication/profile data is never copied into browser storage.
       if (openOwnerWizard) localStorage.setItem("scoutit_open_wizard", "1");
       trackEvent(GA_EVENTS.SIGNUP_COMPLETED, { role: formData.primaryMode, opened_owner_wizard: Boolean(openOwnerWizard) });
       router.replace("/dashboard");

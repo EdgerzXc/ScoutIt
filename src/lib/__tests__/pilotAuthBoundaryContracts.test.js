@@ -14,6 +14,20 @@ describe("controlled-pilot authentication boundary", () => {
     expect(context).not.toContain('mockStr.includes("master-dev")');
   });
 
+  it("never persists authenticated profile data in browser storage", () => {
+    const sources = [
+      "src/app/onboarding/page.js",
+      "src/app/settings/page.js",
+      "src/app/dashboard/page.js",
+    ].map(read);
+    for (const source of sources) {
+      expect(source).not.toContain('localStorage.setItem("scoutit_user"');
+    }
+
+    const developmentMock = read("src/lib/developmentMock.js");
+    expect(developmentMock).toContain('DEVELOPMENT_MOCK_STORAGE_KEY = "scoutit_dev_user"');
+  });
+
   it("routes inventory identity through the shared server verifier", () => {
     const inventory = read("src/app/api/dashboard/inventory/route.js");
     expect(inventory).toContain("resolveUserId(request)");

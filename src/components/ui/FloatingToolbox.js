@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { reportError } from "@/lib/reportError";
 import { TIERS, TIER_LABELS } from "@/lib/entitlements";
 import { getStoredLiteMode, setLiteMode } from "@/lib/liteMode";
+import { DEVELOPMENT_MOCK_STORAGE_KEY } from "@/lib/developmentMock";
 import { notifyLightModeChanged } from "@/lib/lightMode";
 
 // Dev-only tier/role switcher lives inside this eye toolbox. It stays HIDDEN from
@@ -116,7 +117,7 @@ export default function FloatingToolbox({ showTrigger = true }) {
 
     setDevOn(localStorage.getItem("scoutit_dev") === "1");
     try {
-      const u = JSON.parse(localStorage.getItem("scoutit_user") || "null");
+      const u = JSON.parse(localStorage.getItem(DEVELOPMENT_MOCK_STORAGE_KEY) || "null");
       if (u) {
 
         setDevTier(String(u.subscription_tier || u.tier || "starry").toLowerCase());
@@ -158,7 +159,7 @@ export default function FloatingToolbox({ showTrigger = true }) {
   // Apply a mock tier/role and reload so entitlement gates re-read.
   const applyDev = (nextTier, nextRole) => {
     try {
-      let u = JSON.parse(localStorage.getItem("scoutit_user") || "null");
+      let u = JSON.parse(localStorage.getItem(DEVELOPMENT_MOCK_STORAGE_KEY) || "null");
       if (!u) {
         u = {
           id: "master-dev",
@@ -171,7 +172,7 @@ export default function FloatingToolbox({ showTrigger = true }) {
       u.tier = nextTier;
       u.active_roles = ["buyer", "owner", "broker"]; // User wanted a master account with everything
       u.tags = ["buyer", "owner", "broker"];
-      localStorage.setItem("scoutit_user", JSON.stringify(u));
+      localStorage.setItem(DEVELOPMENT_MOCK_STORAGE_KEY, JSON.stringify(u));
       
       if (window.location.pathname.includes("/onboarding")) {
         router.push("/dashboard");
@@ -193,14 +194,14 @@ export default function FloatingToolbox({ showTrigger = true }) {
   // SEPARATE `mission-control/` deployment and is NOT reachable from here.
   const enterMissionControl = (modeId) => {
     try {
-      let u = JSON.parse(localStorage.getItem("scoutit_user") || "null");
+      let u = JSON.parse(localStorage.getItem(DEVELOPMENT_MOCK_STORAGE_KEY) || "null");
       if (!u) {
         u = { id: "master-dev", full_name: "Master Developer", email: "dev@scoutit.com", connects_balance: 9999 };
       }
       u.tags = [...new Set([...(u.tags || []), modeId])];
       u.active_roles = [...new Set([...(u.active_roles || []), modeId])];
       u.primaryMode = modeId;
-      localStorage.setItem("scoutit_user", JSON.stringify(u));
+      localStorage.setItem(DEVELOPMENT_MOCK_STORAGE_KEY, JSON.stringify(u));
       router.push("/dashboard");
     } catch {}
   };

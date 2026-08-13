@@ -1,5 +1,6 @@
 const LOCAL_DEVELOPMENT_HOSTS = new Set(["localhost", "127.0.0.1", "::1"]);
 const PUBLIC_E2E_FLAG = process.env.NEXT_PUBLIC_SCOUTIT_E2E;
+export const DEVELOPMENT_MOCK_STORAGE_KEY = "scoutit_dev_user";
 
 export function isDevelopmentMockId(userId) {
   return typeof userId === "string" && /^master-dev(?:$|[-_])/.test(userId.trim());
@@ -20,7 +21,7 @@ export function readDevelopmentMockUser(storage, runtime = {}) {
   if (!storage) return null;
 
   try {
-    const raw = storage.getItem("scoutit_user");
+    const raw = storage.getItem(DEVELOPMENT_MOCK_STORAGE_KEY);
     const user = raw ? JSON.parse(raw) : null;
     return isDevelopmentMockAllowed({ ...runtime, userId: user?.id }) ? user : null;
   } catch {
