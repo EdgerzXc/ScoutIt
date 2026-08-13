@@ -60,6 +60,13 @@ function CopyBox({ label, text }) {
   );
 }
 
+// NOTE (2026-08-13): the same three formats are now also available, ungated,
+// inside ShareModal — built client-side by buildPromoPack() from the listing's
+// own recorded facts, with no AI call and no tier resolution. This modal
+// remains the AI-drafted route; its tier gate is decided server-side in
+// /api/ai/promote (and is currently open to everyone while the
+// `pre_launch_free_mode` flag is on). Do not re-add a client-side gate here —
+// the paywall used to live in the UI only, which is exactly the hole §45 closed.
 export default function PromoteModal({ isOpen, onClose, propertyData, link }) {
   const [role, setRole] = useState('seeker');
   const [tier, setTier] = useState('starry');
@@ -154,7 +161,10 @@ export default function PromoteModal({ isOpen, onClose, propertyData, link }) {
                 {source === "ai" ? "AI-drafted · grounded in verified listing data" : "Composed from verified listing data"}
               </p>
 
-              <CopyBox label="Short Summary (X / WhatsApp)" text={data.fastPitch} />
+              {/* Relabelled 2026-08-13: this said "X / WhatsApp". Neither is
+                  the Philippine default — listings get forwarded on Viber and
+                  Messenger, which is also why ShareModal now leads with them. */}
+              <CopyBox label="Short Summary (Viber / X)" text={data.fastPitch} />
 
               {isUnlocked ? (
                 <>

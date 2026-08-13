@@ -206,18 +206,36 @@ export default function BottomNav() {
     }
   };
 
+  // ── Share (fixed 2026-08-13) ──────────────────────────────────────────────
+  // This button used to be the ONLY Share reachable on a phone — the curated
+  // one in "Your Move" is `hidden md:block`, measured invisible at 375×812 —
+  // and it bypassed the entire curated engine: it never imported
+  // shareBriefing.js, and it scraped `document.querySelector("h1")` for a title
+  // instead of using the property data it was sharing. Most Philippine traffic
+  // is mobile, so in practice almost nobody ever saw the briefing copy.
+  //
+  // BottomNav is a global layout component and holds no property data, so it
+  // asks rather than guesses. It dispatches the same kind of global event
+  // already used for Inquire; the property flow (CommercialFlow /
+  // ResidentialFlow / UnitMasterPage) owns the property object, runs the
+  // curated path, and flips `detail.handled`.
+  //
+  // Two properties of that handshake matter:
+  //   • CustomEvent listeners run synchronously, so `handled` is readable on
+  //     the next line.
+  //   • The flows register the listener ONLY for non-sample listings, which is
+  //     how the `{!d.is_sample && ...}` rule survives the move. A sample
+  //     listing leaves `handled` false and falls through to the bare link
+  //     below — exactly the old behaviour, which is what samples should get.
   const handleShare = async () => {
     const url = typeof window !== "undefined" ? window.location.href : "";
-    const title = document.querySelector("h1")?.textContent?.trim() || "ScoutIT";
-    // Native share sheet is the primary path on mobile; the rest is desktop fallback.
-    if (navigator.share) {
-      try {
-        await navigator.share({ title, text: `${title} · ScoutIT`, url });
-      } catch {
-        /* user dismissed the share sheet — no-op */
-      }
-      return;
-    }
+
+    const detail = { handled: false };
+    window.dispatchEvent(new CustomEvent("scoutit:property-share", { detail }));
+    if (detail.handled) return;
+
+    // No curated handler (sample listing, or a property page shape that does
+    // not own share copy): degrade to the link, and say what happened.
     const ok = await copyLink(url);
     setShareToast(ok ? "Link copied" : "Couldn't copy — long-press the address bar");
     setTimeout(() => setShareToast(""), 2400);

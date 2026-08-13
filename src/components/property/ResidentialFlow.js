@@ -1,5 +1,11 @@
 /* eslint-disable react-hooks/immutability */
 /* eslint-disable react-hooks/exhaustive-deps */
+// Third React Compiler disable, added 2026-08-13 — see the matching note in
+// CommercialFlow.js. Introducing the useCuratedShare hook changed what the compiler
+// can infer across this component, so it can no longer preserve the pre-existing
+// manual memo on `cat`. Nothing is broken; the rule reports that the compiler is
+// declining to auto-optimize, not that the memo is wrong.
+/* eslint-disable react-hooks/preserve-manual-memoization */
 "use client";
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
@@ -41,6 +47,7 @@ import FloodRiskBadge from "@/components/property/FloodRiskBadge";
 import SpatialVaultWidget from "@/components/property/SpatialVaultWidget";
 import { hasInteractiveUnitPage, hasSpatial3D, unitMasterPageOverview, formatUnitPrice } from "@/lib/unitMasterPage";
 import { canSee, getCurrentTier, hasActiveRole } from "@/lib/entitlements";
+import useCuratedShare from "@/lib/useCuratedShare";
 import { fieldLabel } from "@/lib/fieldLabel";
 
 // Code-split maplibre-gl + pmtiles out of the main property-page bundle — they&apos;re
@@ -276,7 +283,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
   }, []);
   const [locTab,            setLocTab]            = useState("spatial");
   const [isInquiryOpen,     setIsInquiryOpen]     = useState(false);
-  const [shareTextOpen,     setShareTextOpen]     = useState(null);
+  // Share state now lives in useCuratedShare (declared below, once `d` exists).
   const [isOperatorRequestOpen, setIsOperatorRequestOpen] = useState(false);
   useEffect(() => {
     const open = () => setIsInquiryOpen(true);
@@ -433,7 +440,14 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
 
   // ── Derived values (memoized at top to respect React Rules of Hooks) ──
   const d = propertyData || {};
-  
+
+  // The one curated share path — desktop button, mobile bottom bar, and the
+  // modal fallback all run through this. `enabled: !d.is_sample` is what keeps
+  // sample listings from getting promotable copy; see useCuratedShare.
+  const { shareTextOpen, setShareTextOpen, openCuratedShare } = useCuratedShare(d, {
+    enabled: !d.is_sample,
+  });
+
   const photos = useMemo(() => {
     const rawP = (Array.isArray(d?.photos) ? d.photos : [d?.photo || d?.image]).filter(p => typeof p === "string" && p.trim().length > 0);
     return rawP.length > 0 ? rawP : ["https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1920&q=80"];
@@ -2298,27 +2312,8 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
               {!d.is_sample && (
                 <div style={{ marginTop: "10px", width: "100%" }}>
                   <button
-                    onClick={() => {
-                      if (typeof window !== 'undefined') {
-                        const cleanUrl = window.location.origin + window.location.pathname;
-                        const shareText = buildShareText(d, cleanUrl);
-
-                        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
-                        if (isMobile && navigator.share) {
-                          navigator.share({
-                            title: `${d.title || "Premium Space"} - ScoutIt`,
-                            text: shareText
-                          }).catch(err => {
-                            if (err.name !== 'AbortError') {
-                              setShareTextOpen(shareText);
-                            }
-                          });
-                        } else {
-                          setShareTextOpen(shareText);
-                        }
-                      }
-                    }}
+                    onClick={openCuratedShare}
+                    aria-label="Share this property's briefing"
                     className="w-full bg-transparent border border-surface-variant text-text-secondary font-mono text-xs tracking-[0.12em] uppercase font-bold py-3 px-4 rounded hover:bg-surface-alt transition-colors active:scale-[0.98] flex items-center justify-center gap-2"
                   >
                     Share
@@ -2467,6 +2462,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
         isOpen={!!shareTextOpen}
         onClose={() => setShareTextOpen(null)}
         shareText={shareTextOpen}
+        property={d}
         propertyUrl={typeof window !== 'undefined' ? window.location.href : ''}
       />
     </>
