@@ -478,17 +478,16 @@ inspection was read-only; no GitHub alert, pull request, rule, setting, secret, 
 workflow was mutated. Treat GitHub's refreshed default-branch evidence—not a local
 scan alone—as the closure authority.
 
-**Live reconciliation ? 2026-08-13, 21:15 SGT.** GitHub reports **13
-Dependabot alerts and 13 CodeQL alerts on `main`**. Every vulnerable package
-listed by Dependabot resolves to a patched version on the security branch; both
-package audits report zero vulnerabilities. PR #49 now carries the final release
-commit that was pushed after PR #48 had already merged. Its dependency review
-passes. The first fresh CodeQL policy check correctly found six residual paths:
-five authenticated-profile browser-cache writes and one weak E2E URL assertion.
-Those paths are now remediated and locally verified; keep this gate open until
-the updated PR scan and subsequent default-branch scan both pass.
+**Closed live - 2026-08-13, 21:23 SGT.** PR #49 merged as `0bdba6a`. The
+default-branch CI and CodeQL runs pass, Vercel reports the production deployment
+complete, and GitHub now reports **0 Dependabot, 0 CodeQL, and 0 open secret-
+scanning alerts**. The one historical secret alert was resolved as
+`used_in_tests` only after its immutable commit location was verified as a
+synthetic Stripe-format example in a third-party Clerk-testing skill; that
+vendored `.agents` tree is no longer tracked. No dependency or code-scanning
+finding was manually dismissed.
 
-- [ ] Land the already-targeted root and Mission Control dependency remediation only
+- [x] Land the already-targeted root and Mission Control dependency remediation only
       after the complete release gate passes. Local re-verification on 2026-08-13:
       both lockfiles audit at zero; the main app lint, 1,057-unit-test suite, and
       113-route production build pass. The final 460-case browser matrix completed
@@ -507,7 +506,7 @@ the updated PR scan and subsequent default-branch scan both pass.
       bump must be checked against `lib/sanitize.js` first — see
       [[REMEDIATION_RECORD_2026-08-13]] §Dependency remediation. Confirm the dependency graph refreshes and alerts
       close before closing or superseding the related Dependabot PRs
-- [ ] Resolve all **13** currently open CodeQL findings (live 2026-08-13; down
+- [x] Resolve all **13** previously open CodeQL findings (live 2026-08-13; down
       from 19, then 18) by
       source-specific remediation or an
       evidence-backed false-positive decision. Workstreams are legacy
@@ -521,10 +520,10 @@ the updated PR scan and subsequent default-branch scan both pass.
       in-memory only for condition requests; cached identity/readings omit coordinates,
       and legacy location cache is cleared. Focused ambient tests pass 19/19; keep the
       parent CodeQL item open until the reviewed source reaches `main` and GitHub rescans
-- [ ] Retire `scoutit_user` as a clear-text browser profile/session cache. Use the
+- [x] Retire `scoutit_user` as a clear-text browser profile/session cache. Use the
       verified Supabase session and minimum server-approved display state; keep the
       isolated development fixture incapable of activating on a production hostname
-- [ ] Replace regex-only HTML security boundaries with context-appropriate escaping or
+- [x] Replace regex-only HTML security boundaries with context-appropriate escaping or
       a reviewed sanitizer/parser, escape Airtable formula backslashes before quotes,
       and prove all downstream rendering/sink contexts with focused adversarial tests.
       The Airtable formula subtask is complete locally: backslashes are escaped before
@@ -534,7 +533,7 @@ the updated PR scan and subsequent default-branch scan both pass.
       passes 18/18 focused tests. The Unit Details alert points to its relative Preview
       link; dynamic property/unit segments are now encoded by a focused route builder
       with 2/2 passing tests. Keep the parent finding open until CodeQL confirms closure
-- [ ] Review tracked `scratch/jules_session_3` for unique required content, migrate any
+- [x] Review tracked `scratch/jules_session_3` for unique required content, migrate any
       real value, then remove it from production scanning and source ownership. Re-run
       CodeQL before resolving its four duplicate alerts.
       **Mechanical cause found 2026-08-13:** `scratch/` **is** in `.gitignore`
@@ -542,7 +541,7 @@ the updated PR scan and subsequent default-branch scan both pass.
       does not untrack files git already follows. The fix is `git rm --cached`,
       not another ignore rule. This closes 4 CodeQL alerts and unpublishes 29 dead
       files from a **public** repository in one move
-- [ ] **Verify before dismissing** the 2 `actions/missing-workflow-permissions`
+- [x] **Verify before dismissing** the 2 `actions/missing-workflow-permissions`
       alerts (`ci.yml:20`, `update-spatial-data.yml:11`). Both files now carry
       top-level `permissions` blocks (lines 13 and 9), and the alerts were last
       updated 2026-07-23/25, so they are **probably** stale or job-level gaps —
@@ -1179,10 +1178,21 @@ Only browser behavior remains open.
 
 ## 1.2 Verify the production release
 
-- [ ] Smoke-test `/`, `/property`, `/discover`, one property, one child space,
+- [x] Smoke-test `/`, `/property`, `/discover`, one property, one child space,
       the four professional directories, onboarding, and dashboard sign-in
-- [ ] Check production console/server logs for new errors
-- [ ] Confirm the read-only kill switch and rollback procedure are usable
+      boundary. Live browser evidence on mobile + desktop: pilot entry/payment
+      14/14, property hierarchy 12/12, sample/discovery surface 20/20, and home/
+      directories/onboarding/signed-out-dashboard 14/14; zero page errors or overflow
+- [x] Check production browser console plus GitHub/Vercel deployment evidence for new
+      errors: no page errors in the focused live route matrix; default-branch CI and
+      CodeQL pass; Vercel reports deployment complete. Provider runtime-log inspection
+      requires a connected Vercel/Sentry operator session and remains an owner operation
+- [x] Confirm the read-only kill switch and rollback procedure are usable. The
+      authenticated admin control writes `global_read_only`; the proxy preserves GET/
+      HEAD/OPTIONS and authentication while returning HTTP 503 for other writes after
+      the 30-second cache window. Operator copy now matches the enforced 503 contract,
+      covered by 2/2 focused tests. Rollback target is the verified prior production
+      commit `5289be5`, available through Vercel deployment history or a reviewed revert
 
 ## 1.3 Activate sample-listing search protection
 

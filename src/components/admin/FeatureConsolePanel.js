@@ -254,7 +254,7 @@ export default function FeatureConsolePanel() {
                 ENABLE EMERGENCY READ-ONLY MODE?
               </h3>
               <p className="text-xs text-gray-300 leading-relaxed">
-                Enabling <strong className="text-red-400">global_read_only</strong> will freeze all site-wide database writes (publishing properties, deal updates, archiving listings) with HTTP 423 Locked. Public browsing remains active.
+                Enabling <strong className="text-red-400">global_read_only</strong> will freeze all site-wide database writes (publishing properties, deal updates, archiving listings) with HTTP 503 Service Unavailable. Public browsing and authentication remain active.
               </p>
             </div>
 
