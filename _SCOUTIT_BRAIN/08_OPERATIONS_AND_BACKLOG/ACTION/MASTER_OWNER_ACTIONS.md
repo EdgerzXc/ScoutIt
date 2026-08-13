@@ -89,6 +89,53 @@ related:
 
 ---
 
+### 1.10 🧨 Apply the §1.0B Critical Security Migration — **BLOCKS HUMAN TESTING**
+
+*Engineering closed all ten §1.0B findings on 2026-08-12, plus four further bugs found while fixing them. The database half is inert until this migration is applied. Full detail: [[../../15_IMPLEMENTATION_RECORDS/active/launch-readiness/CRITICAL_LOGIC_SECURITY_1_0B_2026-08-12]].*
+
+**File:** `supabase/migrations/20260812000001_critical_logic_and_security_fixes.sql`
+**Project:** `yyixsuaimdzyiocswcgc` (ScoutIT) — the only project; there is no staging.
+
+**Pre-flight was run live on 2026-08-12 and every destructive statement measured as a no-op on current data:** `saved_intel` 0 rows / 0 duplicates, `property_claims` 0 rows, and 0 properties change public visibility (10 approved = 10 live). The only data change is collapsing 145 duplicate telemetry rows into counters.
+
+- [x] **✅ APPLIED 2026-08-12** to `yyixsuaimdzyiocswcgc`, as five isolated tracked migrations, all succeeded. Verified after: forgery path gone, both triggers active and confirmed `SECURITY INVOKER`, `property_claims.property_id` now UUID with FK, 145 duplicate telemetry rows collapsed with all 4,205 observations preserved, 0 duplicate groups remaining, public property count unchanged at 10, `deals` UPDATE still deny-all. Supabase security advisor clean of anything this created. Evidence: [[../../15_IMPLEMENTATION_RECORDS/active/launch-readiness/CRITICAL_LOGIC_SECURITY_1_0B_2026-08-12]] §5.
+- [ ] **Re-test the Mission Control publish path.** `pipeline_status` and `lifecycle_state` are now writable only by the service role. Verified in code that all lifecycle routes and Mission Control CMS actions use the admin client, so this *should* be transparent — but confirm approve / publish / withdraw / suspend end to end anyway.
+- [ ] **Re-test owner property intake.** A client-created property can no longer arrive `approved` or `live`; it is forced to `pending` / `draft`. Confirm the listing flow completes and lands in review.
+- [ ] **Spot-check the public property list and one property page** still render after the SELECT policy swap.
+- [ ] **Decide the Scout Rating formula (product, not security).** The handshake used to write `user_profiles.scout_rating`, a column that does not exist — it would have errored the first time any handshake completed. The real column is `broker_profiles.scout_rating`, `numeric(3,2)`, a 0–5 rating that **overflows at 10.00**, so incrementing it per closed deal was never right. The migration now credits `broker_profiles.verified_closures` instead. **How a verified closure should move the displayed 0–5 rating is your call, and no broker rating is being computed until you make it.**
+- [ ] **Record applied date:** `______`
+
+### 1.12 🗂️ Migration Drift — the repo does not describe the live database — **DECISION NEEDED**
+
+*Found 2026-08-12 during pre-flight. Several migration files in `supabase/migrations/` were never applied to production, and some live objects were applied outside the tracked history. Full detail and evidence: [[../../15_IMPLEMENTATION_RECORDS/active/launch-readiness/MIGRATION_DRIFT_2026-08-12]].*
+
+**Confirmed never applied:** `20260803000001_production_security_rls`, `20260809000001_security_telemetry_retention`, `20260809000002_onboarding_completion_contract`, `20260811000001_wishlist_share_revocation`, `20260811000002_pilot_cohort_registry`.
+
+- [ ] **Do NOT bulk-apply the backlog to "catch up."** `20260809000001` would actively regress the §1.0B telemetry fix — it recreates the partial index that `20260812000001` deliberately replaces. At least two files now conflict.
+- [ ] **Approve annotating `20260803000001` and `20260809000001` as superseded** in-file, so a future session does not apply them.
+- [ ] **Approve an individual audit of the remaining three** unapplied migrations against the live schema, applying only what is still needed and still correct.
+- [ ] **Choose one source of truth:** drive everything through tracked Supabase migrations, or declare the SQL editor authoritative and stop maintaining files that imply otherwise. The split history is the root cause and will keep producing this.
+- [ ] **Note for future audits:** any finding derived from reading `supabase/migrations/` may describe a database that does not exist. One §1.0B finding was actively wrong for production — it asked to add a `WITH CHECK` to a `deals` UPDATE policy that does not exist, which would have *granted* access that is currently denied.
+
+### 1.13 🩺 Supabase Advisor Findings (pre-existing, ~15 min) — surfaced 2026-08-12
+
+*Found while verifying the §1.0B migration. **None of these were caused by that work** — they were already present. Listed so they are decided rather than drifted past.*
+
+- [x] ✅ **CLOSED 2026-08-12 — leaked-password protection is deferred with reason, not outstanding.** It is a Supabase **Pro-plan-only** feature and the ScoutIT org (`szoadayarauelryyfcdm`) is on **Free**; buying Pro for it alone would violate the no-premature-spend rule. Password length is already set to **12 characters**, well above Supabase's "under 8 is not recommended" guidance and double the default floor of 6 — so the practical risk is already addressed. Moved to the trigger-gated table in [[00_MASTER_ACTION_PLAN]]; it activates only if Supabase Pro is turned on for an independent reason. **Expect this WARN in every future advisor run — it is not a regression.**
+- [ ] **Review view `public.public_profiles`** — flagged ERROR for being `SECURITY DEFINER`, meaning it enforces the creator's permissions and RLS rather than the querying user's. Confirm that is intentional for a public profile projection, or convert it.
+- [ ] **Record a decision on `public.spatial_ref_sys`** (RLS disabled, flagged ERROR). It is a PostGIS system table and this is commonly accepted — but it should be a written decision, not an oversight.
+- [ ] **Decide on `postgis` and `vector` extensions installed in the `public` schema** (WARN). Moving them is disruptive; accepting them is reasonable. Either way, record the choice.
+- [ ] **Review the 19 tables with RLS enabled and no policies** (INFO — deny-all, therefore safe today). Each should be a deliberate "service-role only" decision. Includes `deal_handshakes`, `deal_messages`, `disputes`, `subscriptions`, `property_units`, `verification_requests`.
+
+### 1.11 🔎 Decide the Telemetry Rate-Limit Posture (~5 min)
+
+*`/api/telemetry/device` is unauthenticated by design. It now has a per-instance limiter (120 events/minute/IP) as a fail-closed backstop, because the existing Upstash limiter in `src/proxy.js` fails **open** for this route when Redis is unconfigured or unreachable.*
+
+- [ ] **Confirm `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` are set in Vercel production.** Without them the strong distributed limiter is silently inactive site-wide, not just for telemetry.
+- [ ] **Decide whether 120 events/min/IP is right for real traffic.** A shared office or campus NAT can legitimately exceed it. If pilot testers hit 429s on telemetry, raise it — telemetry failing is harmless, but a wrongly-metered visitor is a false signal in the data.
+
+---
+
 ## 🚀 2. Human Testing & Invited Pilot Unblocking
 
 *Locked human-testing decisions: Testers use valid temporary email identities they control. Sample data remains public on live `scoutit.space` but explicitly badged and `noindex`ed. Account deletion notice given without separate consent workflow.*

@@ -10,6 +10,7 @@ import { ImpeccableButton } from "../ui/ImpeccableButton";
 import { trackFrictionPoint } from "@/lib/deviceTracker";
 import { INTRO_MAX } from "@/lib/connectIntro";
 import ConnectsReceipt from "../connects/ConnectsReceipt";
+import { trackEvent, GA_EVENTS } from "@/lib/analytics";
 
 const backdropVariants = {
   hidden: { opacity: 0, backdropFilter: "blur(0px)" },
@@ -118,6 +119,7 @@ export default function InquiryModal({ isOpen, onClose, propertyTitle, propertyS
         dealId: data.dealId,
       });
       setStatus("success");
+      trackEvent(GA_EVENTS.INQUIRY_SENT, { channel: 'deal_intro', property_slug: propertySlug, connects_spent: data.connects_spent });
       // No auto-dismiss. The previous 3s timer yanked the confirmation away
       // while the user was still reading it — on a receipt for real currency,
       // that is the one thing it must not do. They close it when they're done.

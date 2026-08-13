@@ -41,11 +41,20 @@ function authClientFor() {
 
 function serviceClientFor() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  // Ownership is verified in application code below — RLS on property_units
-  // is currently a dev_all_* passthrough (see VULNERABILITY_AUDIT_2026-06-26.md),
-  // so the service client is required, not just convenient.
-  return createClient(supabaseUrl, process.env.SUPABASE_SERVICE_ROLE_KEY || supabaseAnonKey, {
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  // Ownership is verified in application code below. `property_units` has RLS
+  // enabled with ZERO policies (verified against the live database 2026-08-13),
+  // which is deny-all — so the service client is required, not just convenient.
+  //
+  // This used to fall back to the anon key. That was silent data loss, not a
+  // safety net: against a deny-all table an anon client returns an empty set
+  // rather than an error, so a missing env var blanked the Unit Master Page with
+  // nothing logged anywhere. Same lesson as the GA measurement-id fallback
+  // (§25.5) — a fallback that hides a misconfiguration is worse than no fallback.
+  if (!serviceRoleKey) {
+    throw new Error("SUPABASE_SERVICE_ROLE_KEY is not configured; refusing to fall back to the anon key.");
+  }
+  return createClient(supabaseUrl, serviceRoleKey, {
     auth: { persistSession: false },
   });
 }
