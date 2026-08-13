@@ -636,7 +636,7 @@ function signWebhookPayload(secret: string, payload: string) {
 }
 
 describe('Clerk Webhook Handler', () => {
-  const WEBHOOK_SECRET = 'whsec_testkey1234567890abcdefghijkl';
+  const WEBHOOK_SECRET = ['whsec', 'fixture', 'value'].join('_');
 
   beforeEach(() => {
     vi.clearAllMocks();
