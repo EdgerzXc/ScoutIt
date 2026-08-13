@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -202,15 +202,39 @@ describe("/api/telemetry/device", () => {
     expect(migration).toContain("record_security_event");
   });
 
-  it("defines a daily 30-day retention job", () => {
-    const migration = readFileSync(
-      resolve(process.cwd(), "supabase/migrations/20260809000001_security_telemetry_retention.sql"),
-      "utf8",
-    );
-    expect(migration).toContain("interval '30 days'");
-    expect(migration).toContain("scoutit-clean-security-telemetry");
-    expect(migration).toContain("cron.schedule");
-    expect(migration).toContain("uq_security_pageview_identity_route");
-    expect(migration).toContain("record_security_pageview");
+  // Replaces "defines a daily 30-day retention job" (removed 2026-08-13).
+  //
+  // That test read supabase/migrations/20260809000001_security_telemetry_retention.sql
+  // and asserted it scheduled a daily hard-delete cron. Two things were wrong with
+  // it: the file is deliberately untracked, so the test passed locally and failed
+  // in CI on every clean checkout; and the design it guarded was retired. The owner
+  // decided on 2026-08-13 that the visitor-traffic log is a METRICS ASSET and old
+  // rows must be COMPRESSED INTO AGGREGATES, NOT DELETED (§1.0C).
+  //
+  // clean_old_security_logs() still exists in the live database and is a straight
+  // DELETE ... WHERE last_request_at < now() - interval '30 days'. It is harmless
+  // only because nothing calls it. Scheduling it would destroy exactly the history
+  // the owner wants to keep, so this test now guards the decision instead of the
+  // retired migration: no tracked migration may schedule that job.
+  // The retired file itself is excluded by name: it is deliberately left
+  // untracked on the author's machine and must never be committed, so it is
+  // present locally and absent in CI. Excluding it is what keeps this test
+  // honest in both places — the invariant being guarded is that no OTHER
+  // migration reintroduces the job.
+  const RETIRED_MIGRATION = "20260809000001_security_telemetry_retention.sql";
+
+  it("never schedules the retired hard-delete telemetry job", () => {
+    const migrationsDir = resolve(process.cwd(), "supabase/migrations");
+    const offenders = readdirSync(migrationsDir)
+      .filter((name) => name.endsWith(".sql") && name !== RETIRED_MIGRATION)
+      .filter((name) => {
+        const sql = readFileSync(resolve(migrationsDir, name), "utf8");
+        return (
+          sql.includes("scoutit-clean-security-telemetry") &&
+          /cron\.schedule/.test(sql)
+        );
+      });
+
+    expect(offenders).toEqual([]);
   });
 });
