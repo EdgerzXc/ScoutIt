@@ -95,16 +95,58 @@ export function factSpecs(facts) {
   return out;
 }
 
+// How much measured substance does this listing actually carry?
+//
+// "MARKET INTELLIGENCE BRIEFING" is a promise. One E-Com Center (measured
+// 2026-08-13) produced a briefing with exactly two bullets — Category and
+// Location — because the listing has no recorded floor area, so factSpecs()
+// returned nothing. A briefing header over near-nothing reads as a data
+// platform with no data, which is worse for the brand than a shorter note.
+//
+// So the shape is chosen from the facts on hand. We do NOT pad, estimate, or
+// infer a single specification to reach the richer shape (never render a number
+// you cannot source) — a thin listing gets an honest short form, and the fix is
+// owner data entry, not copywriting.
+//
+// Exported so this decision is directly testable rather than buried in string
+// assembly.
+export function briefingShape(facts) {
+  return factSpecs(facts).length >= 1 ? "briefing" : "compact";
+}
+
+function hashTags(f) {
+  const locTag = f.location
+    ? "#" + String(f.location).split(",")[0].replace(/[^a-zA-Z0-9]/g, "")
+    : "";
+  const catTag = "#" + String(f.category).replace(/[^a-zA-Z0-9]/g, "");
+  return `#ScoutIt ${catTag} ${locTag} #RealEstatePH`.replace(/\s+/g, " ").trim();
+}
+
 // The structured "Market Intelligence Briefing" text used by every Share
 // button (native share sheet + ShareModal). 100% factual.
 export function buildShareText(property, url) {
   const f = extractFacts(property);
   const specs = factSpecs(f);
-  const locTag = f.location
-    ? "#" + String(f.location).split(",")[0].replace(/[^a-zA-Z0-9]/g, "")
-    : "";
-  const catTag = "#" + String(f.category).replace(/[^a-zA-Z0-9]/g, "");
 
+  // ── Compact shape: no measured specs on record ──
+  // States only what is true (title, category, where) and points at the
+  // record, without promising a dossier of specifications behind the link.
+  if (briefingShape(f) === "compact") {
+    const compact = [`${f.title} — ${f.category}`];
+    if (f.location) compact.push(f.location);
+    compact.push(
+      "",
+      "Now on record at ScoutIt, the Philippines' spatial commerce platform.",
+      "",
+      "View the listing:",
+      url,
+      "",
+      hashTags(f)
+    );
+    return compact.join("\n");
+  }
+
+  // ── Briefing shape: at least one measured specification ──
   const lines = [
     "■ MARKET INTELLIGENCE BRIEFING",
     f.title,
@@ -120,7 +162,7 @@ export function buildShareText(property, url) {
     `Access the full dossier:`,
     url,
     "",
-    `#ScoutIt ${catTag} ${locTag} #RealEstatePH`.replace(/\s+/g, " ").trim()
+    hashTags(f)
   );
   return lines.join("\n");
 }

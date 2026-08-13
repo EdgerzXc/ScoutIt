@@ -82,7 +82,7 @@ function isNearManilaRail(lat, lng) {
 import "@/app/property/[id]/property-detail.css";
 import { getChapterConfig } from "./chapterConfig";
 import { Bed, Bath, Ruler, Car, Lock, Search, Camera, Building2 } from "lucide-react";
-import { buildShareText } from "@/lib/shareBriefing";
+import useCuratedShare from "@/lib/useCuratedShare";
 // Modals are closed on load but were pulling framer-motion (~60kb gzip) into the
 // initial property-page bundle, inflating TBT/TTI on mobile. They render null when
 // closed, so deferring them is visually identical.
@@ -375,7 +375,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
   const [isInquiryOpen, setIsInquiryOpen] = useState(false);
   const [isOperatorRequestOpen, setIsOperatorRequestOpen] = useState(false);
   const [isPromoteOpen, setIsPromoteOpen] = useState(false);
-  const [shareTextOpen, setShareTextOpen] = useState(null);
+  // Share state now lives in useCuratedShare (declared below, once `d` exists).
   // The mobile bottom bar's "Inquire" action opens this modal via a global event,
   // so the primary CTA is always reachable from the thumb zone on a long page.
   useEffect(() => {
@@ -566,7 +566,14 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
 
   // ── Derived values (memoized at top to respect React Rules of Hooks) ──
   const d = propertyData || {};
-  
+
+  // The one curated share path — desktop button, mobile bottom bar, and the
+  // modal fallback all run through this. `enabled: !d.is_sample` is what keeps
+  // sample listings from getting promotable copy; see useCuratedShare.
+  const { shareTextOpen, setShareTextOpen, openCuratedShare } = useCuratedShare(d, {
+    enabled: !d.is_sample,
+  });
+
   const photos = useMemo(() => {
     const rawP = (Array.isArray(d?.photos) ? d.photos : [d?.photo || d?.image]).filter(p => typeof p === "string" && p.trim().length > 0);
     return rawP.length > 0 ? rawP : ["https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2070&auto=format&fit=crop"];
@@ -2497,27 +2504,8 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
               <div style={{ display: "flex", gap: "10px", marginTop: "10px", width: "100%" }}>
                 {!d.is_sample && (
                   <button
-                    onClick={() => {
-                      if (typeof window !== 'undefined') {
-                        const cleanUrl = window.location.origin + window.location.pathname;
-                        const shareText = buildShareText(d, cleanUrl);
-
-                        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
-                        if (isMobile && navigator.share) {
-                          navigator.share({
-                            title: `${d.title || "Premium Space"} - ScoutIt`,
-                            text: shareText
-                          }).catch(err => {
-                            if (err.name !== 'AbortError') {
-                              setShareTextOpen(shareText);
-                            }
-                          });
-                        } else {
-                          setShareTextOpen(shareText);
-                        }
-                      }
-                    }}
+                    onClick={openCuratedShare}
+                    aria-label="Share this property's briefing"
                     className="flex-1 bg-transparent border border-surface-variant text-text-secondary font-mono text-xs tracking-[0.12em] uppercase font-bold py-3 px-4 rounded hover:bg-surface-alt transition-colors active:scale-[0.98] flex items-center justify-center gap-2"
                   >
                     Share
@@ -2601,6 +2589,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
         isOpen={!!shareTextOpen}
         onClose={() => setShareTextOpen(null)}
         shareText={shareTextOpen}
+        property={d}
         propertyUrl={typeof window !== 'undefined' ? window.location.href : ''}
       />
 

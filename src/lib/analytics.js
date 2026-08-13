@@ -23,6 +23,11 @@ export const GA_EVENTS = {
   CONNECT_SPENT: "connect_spent",
   SIGNUP_COMPLETED: "signup_completed",
   PROPERTY_PUBLISHED: "property_published",
+  // Fired when a share actually LEAVES the app — the clipboard write resolved,
+  // the OS share sheet resolved, or the platform window was opened. Never on
+  // the mere click of a Share button, matching the outcomes-not-intent
+  // convention above. Params: { channel, property_slug, ref }.
+  SHARE_COMPLETED: "share_completed",
 };
 
 /**

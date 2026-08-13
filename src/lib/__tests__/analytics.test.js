@@ -11,12 +11,16 @@ describe("GA4 outcome events", () => {
     delete globalThis.window;
   });
 
-  it("exposes the five outcome events the audit asked for", () => {
+  it("exposes the outcome events the audit asked for, plus share", () => {
     expect(Object.values(GA_EVENTS).sort()).toEqual([
       "board_save",
       "connect_spent",
       "inquiry_sent",
       "property_published",
+      // Added 2026-08-13 alongside share attribution. Until then a shared link
+      // that produced an inquiry was invisible: every share surface stripped
+      // the URL to origin+pathname, so GA4 booked it as "Direct".
+      "share_completed",
       "signup_completed",
     ]);
   });
