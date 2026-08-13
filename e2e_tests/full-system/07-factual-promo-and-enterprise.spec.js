@@ -22,14 +22,33 @@ function escapeRegex(value) {
 }
 
 test.describe('Factual share & promote pipeline', () => {
-  test('Share button opens a briefing built from real listing data', async ({ page, request }) => {
+  test('Share behavior preserves the sample gate or opens a factual briefing', async ({ page, request }) => {
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, 'share', { configurable: true, value: undefined });
+    });
     const errors = trackErrors(page);
     const listing = await getCommercialListing(request);
     await gotoAndSettle(page, `/property/${listing.slug}`);
     await expectRealContent(page);
     const yourMovePanel = await openYourMove(page);
 
-    await yourMovePanel.getByRole('button', { name: /^Share$/i }).click();
+    const isMobile = page.viewportSize().width < 900;
+    const shareButton = isMobile
+      ? page.getByRole('button', { name: /Share this space/i })
+      : yourMovePanel.getByRole('button', { name: /Share this property's briefing/i });
+
+    if (listing.isSample) {
+      if (isMobile) {
+        await shareButton.click();
+        await expect(page.locator('textarea[readonly]')).toHaveCount(0);
+      } else {
+        await expect(shareButton).toHaveCount(0);
+      }
+      expect(errors).toEqual([]);
+      return;
+    }
+
+    await shareButton.click();
     const briefing = page.locator('textarea[readonly]');
     await expect(briefing).toBeVisible({ timeout: 10000 });
     const text = await briefing.inputValue();
@@ -44,6 +63,7 @@ test.describe('Factual share & promote pipeline', () => {
 
   test('AI Promote modal produces grounded copy (AI or fact sheet)', async ({ page, request }) => {
     test.setTimeout(90000);
+    test.skip(page.viewportSize().width < 900, 'AI Promote is desktop-only; mobile Share exposes the deterministic formats.');
     // Deterministic suite: force the fact-sheet path — the live AI call is
     // rate-limited/slow and belongs in targeted checks, not a parallel suite.
     await page.route('**/api/ai/promote', (route) =>
@@ -54,7 +74,8 @@ test.describe('Factual share & promote pipeline', () => {
     await expectRealContent(page);
     const yourMovePanel = await openYourMove(page);
 
-    await yourMovePanel.getByRole('button', { name: /AI Promote/i }).click();
+    const promoteButton = yourMovePanel.getByRole('button', { name: /AI Promote/i });
+    await promoteButton.click();
     await expect(
       page.getByText(/verified listing data/i).first()
     ).toBeVisible({ timeout: 30000 });
@@ -148,7 +169,7 @@ test.describe('Enterprise Mission Control (honest data)', () => {
     await gotoAndSettle(page, `${BASE}/dashboard`);
     await expectRealContent(page);
 
-    await page.getByRole('button', { name: /Unlock Enterprise Sandbox/i }).click();
+    await page.getByRole('button', { name: /Open the Enterprise preview/i }).click();
     await expect(page.getByText('Enterprise Dashboard')).toBeVisible({ timeout: 15000 });
 
     // Honest signals present; the old fabricated ones gone.

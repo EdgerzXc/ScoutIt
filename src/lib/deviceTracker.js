@@ -33,14 +33,13 @@ export async function pingDeviceTelemetry(extraData = {}) {
   if (typeof window === "undefined") return;
 
   try {
-    const deviceId = getOrCreateDeviceId();
     const deviceType = detectDeviceType();
 
     fetch("/api/telemetry/device", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        deviceId,
+        eventType: extraData.eventType || "pageview",
         deviceType,
         path: window.location.pathname,
         ...extraData
@@ -52,23 +51,21 @@ export async function pingDeviceTelemetry(extraData = {}) {
   }
 }
 
-export function trackSearchIntent(query, category, location, minPrice, maxPrice, matchCount = 0) {
+export function trackSearchIntent(_query, category, _location, _minPrice, _maxPrice, matchCount = 0) {
+  const allowedCategories = new Set([
+    "commercial", "residential", "industrial", "land", "office",
+    "retail", "warehouse", "hospitality", "mixed_use",
+  ]);
+  const normalizedCategory = String(category || "").toLowerCase().replace(/[ -]+/g, "_");
   pingDeviceTelemetry({
     eventType: "search",
-    searchQuery: query,
-    searchCategory: category,
-    searchLocation: location,
-    minPrice,
-    maxPrice,
-    matchCount,
-    isZeroResult: matchCount === 0
+    searchCategory: allowedCategories.has(normalizedCategory) ? normalizedCategory : "all",
+    matchCount: Number.isInteger(matchCount) && matchCount >= 0 ? Math.min(matchCount, 100000) : 0,
   });
 }
 
-export function trackFrictionPoint(frictionType, details = {}) {
-  pingDeviceTelemetry({
-    eventType: "friction",
-    frictionType, // e.g. 'abandoned_inquiry', 'zero_search_results', 'slow_page'
-    details
-  });
+export function trackFrictionPoint(frictionType, _details = {}) {
+  const allowed = new Set(["abandoned_inquiry_modal", "zero_search_results", "slow_page"]);
+  if (!allowed.has(frictionType)) return;
+  pingDeviceTelemetry({ eventType: "friction", frictionType });
 }

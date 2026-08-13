@@ -8,7 +8,7 @@
 // rendering again in a browser. That was only half the bug. Fetching the live
 // page WITHOUT JavaScript — which is what a crawler does — returned:
 //
-//     <h3>LOADING DIRECTORY LEDGER...</h3>
+//     <h3>LOADING DIRECTORY LEDGER...</h1>
 //
 // …and nothing else. HTTP 200, correct <title>, correct canonical, empty body.
 //
@@ -82,9 +82,9 @@ export default async function PropertyRootPage() {
             height: "100dvh",
           }}
         >
-          <h3 style={{ fontFamily: "var(--font-mono)", color: "var(--accent)" }}>
+          <h1 style={{ fontFamily: "var(--font-mono)", color: "var(--accent)" }}>
             LOADING DIRECTORY LEDGER...
-          </h3>
+          </h1>
         </div>
       }
     >

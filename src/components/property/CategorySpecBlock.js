@@ -255,7 +255,7 @@ export default function CategorySpecBlock({ property, extraLockedLabels = [] }) 
 
       {/* Hero facts (present MAJOR numeric/currency) */}
       {heroFacts.length > 0 && (
-        <div className="property-features-scroll mb-6">
+        <div className="property-features-scroll mb-6" role="group" tabIndex={0} aria-label="Scrollable property highlights">
           {heroFacts.map(({ field, value }, i) => (
             <div key={i} className="property-feature-item">
               <span className="font-body text-[clamp(20px,2.5vw,26px)] font-medium text-on-surface leading-[1.2]">{value}</span>

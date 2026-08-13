@@ -7,11 +7,8 @@ import { sanitizeError } from "@/lib/sanitizeError";
 import { canContactProperty, normalizeLifecycleState, PROPERTY_LIFECYCLE_STATES } from "@/lib/propertyLifecycle";
 import { routingFailureStatus } from "@/lib/brokerRepresentation";
 import { validateIntroMessage, INTRO_MAX } from "@/lib/connectIntro";
+import { validateSampleInquiryRecipients } from "@/lib/sampleInventory";
 
-// Same dev-mock convention as /api/notifications and /api/dashboard/units --
-// ?mockOwnerId=master-dev (here: a body field, since this is a POST) only
-// takes effect when no real Bearer token was sent, so real sessions are
-// unaffected.
 
 
 export async function POST(request) {
@@ -24,13 +21,9 @@ export async function POST(request) {
     // an operator (role: 'operator') is opening the initial ask to a building
     // owner about delegating units (SCOUTIT_MASTER_BUILD_SPEC.md §9.2) — left
     // null until the owner picks specific units to hand over.
-    const { listingId, propertySlug, message, role = 'buyer', unitId, preferredBrokerId, mockOwnerId } = await request.json();
+    const { listingId, propertySlug, message, role = 'buyer', unitId, preferredBrokerId } = await request.json();
 
-    const authHeader = request.headers.get("Authorization");
-    const hasBearerToken = Boolean(authHeader?.replace("Bearer ", "").trim());
-    const isDevMock = process.env.NODE_ENV !== "production" && !hasBearerToken && typeof mockOwnerId === "string" && mockOwnerId.trim() !== "";
-
-    const userId = await resolveUserId(request) || (isDevMock ? mockOwnerId.trim() : null);
+    const userId = await resolveUserId(request);
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized: Invalid session" }, { status: 401 });
     }
@@ -44,7 +37,7 @@ export async function POST(request) {
     // contractual act under RA 8792, which requires a capacitated party.
     // Checked BEFORE the spend so an ineligible user is never charged.
     // Accounts predating 2026-08-06 are grandfathered (AGE_GATE_CUTOFF).
-    if (!isDevMock && !(await assertAdultEligibility(userId))) {
+    if (!(await assertAdultEligibility(userId))) {
       return NextResponse.json(
         { error: "You must confirm you are 18 or older before contacting a listing." },
         { status: 403 },
@@ -93,7 +86,7 @@ export async function POST(request) {
     // resolved the property (listingId vs propertySlug).
     const { data: propertyRow } = await supabaseAdmin
       .from('properties')
-      .select('title, owner_id, lifecycle_state, pipeline_status, quietly_open_to_offers')
+      .select('title, slug, owner_id, lifecycle_state, pipeline_status, quietly_open_to_offers')
       .eq('id', resolvedListingId)
       .single();
 
@@ -153,6 +146,21 @@ export async function POST(request) {
     const dealId = routedDeal[0].deal_id;
     const recipientIds = routedDeal[0].recipient_ids || [];
     const routedToRoster = routedDeal[0].routed_to_roster === true;
+    // Human-testing samples may notify only explicitly designated test accounts.
+    // Validate the server-resolved recipient snapshot before spending a Connect.
+    // A missing allowlist fails closed and removes the just-created pending deal.
+    const sampleRouting = validateSampleInquiryRecipients({
+      slug: propertyRow.slug || propertySlug,
+      recipientIds: [...recipientIds, unitOperatorId].filter(Boolean),
+      allowlistValue: process.env.HUMAN_TEST_SAMPLE_RECIPIENT_IDS,
+    });
+    if (!sampleRouting.ok) {
+      await supabaseAdmin.from('deals').delete().eq('id', dealId);
+      return NextResponse.json(
+        { error: "Sample inquiries are unavailable until test routing is configured. No Connect was spent." },
+        { status: 503 },
+      );
+    }
 
     // 2. Atomic Connect spend — balance check + 3-bucket deduction (granted → purchased →
     // earned) + ledger insert, all in one indivisible Postgres transaction (spend_connects RPC).
@@ -160,24 +168,19 @@ export async function POST(request) {
     let spendError = null;
     let spendData = null;
 
-    if (isDevMock) {
-      // Bypass connect spend for E2E tests using mock users
-      spendData = { success: true };
-    } else {
-      const res = await supabaseAdmin.rpc('spend_connects', {
-        p_user_id: userId,
-        p_amount: 1,
-        p_reason: role === 'operator'
-          ? 'Operator contacted building owner'
-          : unitOperatorId
-          ? 'Buyer contacted unit operator'
-          : 'Buyer contacted owner',
-        p_ref_type: 'initiate_chat',
-        p_ref_id: resolvedListingId,
-      });
-      spendError = res.error;
-      spendData = res.data;
-    }
+    const spendResult = await supabaseAdmin.rpc('spend_connects', {
+      p_user_id: userId,
+      p_amount: 1,
+      p_reason: role === 'operator'
+        ? 'Operator contacted building owner'
+        : unitOperatorId
+        ? 'Buyer contacted unit operator'
+        : 'Buyer contacted owner',
+      p_ref_type: 'initiate_chat',
+      p_ref_id: resolvedListingId,
+    });
+    spendError = spendResult.error;
+    spendData = spendResult.data;
 
     if (spendError) {
       console.error("[INITIATE API] Connect spend failed:", spendError);
@@ -196,19 +199,14 @@ export async function POST(request) {
     // nothing tied a spend to the thread it bought — which is how a hardcoded
     // "3 Connects Spent" ended up in the chat header while the ledger charged 1.
     //
-    // Left NULL on the dev-mock path on purpose: that branch skips
-    // spend_connects entirely, and writing a number for a spend that never
-    // happened is exactly the class of bug this column exists to prevent.
-    // Best-effort — a failure here must not undo a completed spend.
-    if (!isDevMock) {
-      const { error: stampError } = await supabaseAdmin
-        .from('deals')
-        .update({ connects_spent: 1 })
-        .eq('id', dealId);
+    // Tie the successful one-Connect ledger spend to this conversation.
+    const { error: stampError } = await supabaseAdmin
+      .from('deals')
+      .update({ connects_spent: 1 })
+      .eq('id', dealId);
       if (stampError) {
         console.error("[INITIATE API] Could not stamp connects_spent:", stampError);
       }
-    }
 
     // Keep the user_profiles cache in sync (best-effort display cache; not the source of truth)
     if (newBalance !== null) {

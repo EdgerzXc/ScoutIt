@@ -36,8 +36,11 @@ for (const { path, profilePrefix } of DIRECTORIES) {
         /no .{0,20}(roster|match|found)|coming soon|founding (member|lens|designer|analyst)/i
       );
     } else {
-      await profileLinks.first().click();
-      await page.waitForURL(new RegExp(`${profilePrefix.replace(/\//g, '\\/')}.+`), {
+      await profileLinks.first().focus();
+      await page.keyboard.press('Enter');
+      await expect(page).toHaveURL((url) => (
+        url.pathname.startsWith(profilePrefix) && url.pathname.length > profilePrefix.length
+      ), {
         timeout: 20000,
       });
       await expectRealContent(page, 100);
@@ -60,7 +63,7 @@ test('intel hub lists briefings and opens an article', async ({ page }) => {
   const featuredBriefing = page.locator('a.featured-card-new').first();
   await expect(featuredBriefing).toBeVisible({ timeout: 20000 });
   await featuredBriefing.click();
-  await page.waitForURL(/\/intel\/.+/, { timeout: 20000 });
+  await expect(page).toHaveURL(/\/intel\/.+/, { timeout: 20000 });
   await expectRealContent(page, 150);
 
   expect(errors, errors.join('\n')).toEqual([]);

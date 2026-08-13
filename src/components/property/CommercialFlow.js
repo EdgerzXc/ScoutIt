@@ -12,6 +12,7 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import ReactionButtons from "@/components/ui/ReactionButtons";
 import CategorySpecBlock from "@/components/property/CategorySpecBlock";
@@ -22,6 +23,7 @@ import { hasInteractiveUnitPage, hasSpatial3D, unitMasterPageOverview, formatUni
 import FreshnessBadge from "@/components/ui/FreshnessBadge";
 import ProvenanceBadge from "@/components/ui/ProvenanceBadge";
 import { fieldLabel } from "@/lib/fieldLabel";
+import { downloadPropertyTearSheet } from "@/lib/propertyTearSheet";
 
 // Heavy below-the-fold components dynamically imported to minimize initial mobile JS payload & TBT
 const SpatialVaultWidget = dynamic(() => import("@/components/property/SpatialVaultWidget"), { ssr: false });
@@ -89,6 +91,7 @@ function isNearManilaRail(lat, lng) {
 }
 import "@/app/property/[id]/property-detail.css";
 import { getChapterConfig } from "./chapterConfig";
+import { PROPERTY_LEVEL_LABEL, childSpaceDisplayName, getPropertyHierarchy } from "@/lib/propertyHierarchy";
 import { Bed, Bath, Ruler, Car, Lock, Search, Camera, Building2 } from "lucide-react";
 import useCuratedShare from "@/lib/useCuratedShare";
 // Modals are closed on load but were pulling framer-motion (~60kb gzip) into the
@@ -329,6 +332,7 @@ function initialChapterFromUrl(fallback) {
 }
 
 export default function CommercialFlow({ slug, draftData, isDraftMode, externalActiveTab, initialData = null }) {
+  const router = useRouter();
   // ── Interactive UI states ──────────────────────
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [photoMode,         setPhotoMode]         = useState("natural");
@@ -596,6 +600,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
   const isRestaurant = cat.includes("restaurant") || cat.includes("culinary");
   const isHospitality = cat.includes("str") || cat.includes("hospitality");
   const isVenue = cat.includes("venue") || cat.includes("event");
+  const hierarchy = useMemo(() => getPropertyHierarchy(d), [d]);
 
   // ── Chapter config (drives nav labels & chapter headings) ──
   const chapterConfig = useMemo(() => getChapterConfig(d), [d]);
@@ -931,7 +936,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
       // absent for any older/mock unit data, in which case no Unit Master
       // Page link renders (see the "View Unit Master Page" guard below).
       id: u.id || null,
-      name: u.name || `Unit ${String(i + 1).padStart(2, "0")}`,
+      name: childSpaceDisplayName(u.name, i, d),
       specs: [
         u.size  ? `${u.size} sqm`     : null,
         u.floor ? `Floor ${u.floor}`  : null,
@@ -1104,44 +1109,21 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
     ));
   };
 
-  // ── PDF Tear-Sheet Generation ─────────────────
+  // PDF tear-sheet generation is intentionally limited to the hero briefing.
   const handleDownloadPdf = async () => {
-    const element = document.querySelector('.page');
-    if (!element) return;
-    
     try {
-      const html2pdf = (await import('html2pdf.js')).default;
-      const opt = {
-        margin:       [0.5, 0.5, 0.5, 0.5],
-        filename:     `ScoutIt_${d.title.replace(/\s+/g, '_')}.pdf`,
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true, logging: false },
-        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
-      };
-      
-      // Temporarily hide elements that shouldn't be in the PDF
-      const nav = element.querySelector('.zone-nav');
-      const mobileHero = element.querySelector('.mobile-hero-intel');
-      const inquiryBar = document.querySelector('.inquiry-bar');
-      
-      if (nav) nav.style.display = 'none';
-      if (mobileHero) mobileHero.style.display = 'none';
-      if (inquiryBar) inquiryBar.style.display = 'none';
-      
-      await html2pdf().set(opt).from(element).save();
-      
-      // Restore elements
-      if (nav) nav.style.display = '';
-      if (mobileHero) mobileHero.style.display = '';
-      if (inquiryBar) inquiryBar.style.display = '';
+      await downloadPropertyTearSheet({
+        element: document.querySelector('#photoZone'),
+        title: d.title,
+      });
     } catch (err) {
       console.error("[PDF] Generation failed:", err);
     }
   };
 
-  // ══════════════════════════════════════════════
   // RENDER
   // ══════════════════════════════════════════════
+
   return (
     <>
       <div className="grain" />
@@ -1209,7 +1191,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
             onMouseUp={(e) => e.stopPropagation()}
             onTouchStart={(e) => e.stopPropagation()}
           >
-            <p className="hero-label">ScoutIt &middot; {briefLabel}</p>
+            <p className="hero-label">ScoutIt &middot; {PROPERTY_LEVEL_LABEL} &middot; {briefLabel}</p>
           <div className="hero-text-overlay">
             <h1 className="hero-title">
               {d.title}
@@ -1295,7 +1277,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
 
         {/* Mobile-only Hero Intel (visible on mobile viewport, hidden on desktop) */}
         <div className="mobile-hero-intel">
-          <p className="mobile-hero-label">ScoutIt &middot; {briefLabel}</p>
+          <p className="mobile-hero-label">ScoutIt &middot; {PROPERTY_LEVEL_LABEL} &middot; {briefLabel}</p>
         <div className="mobile-hero-header">
           <h1 className="mobile-hero-title">
             {d.title}
@@ -1376,7 +1358,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                     <rect x="3"  y="11" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.3"/>
                     <rect x="11" y="11" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.3"/>
                   </svg>
-                  <span className="chapter-label">Units</span>
+                  <span className="chapter-label">{hierarchy.collectionLabel}</span>
                 </button>
                 <div className="nav-divider" />
               </>
@@ -1457,7 +1439,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                       </span>
                     </div>
                   )}
-                  <div className="property-features-scroll">
+                  <div className="property-features-scroll" role="group" tabIndex={0} aria-label="Scrollable property highlights">
                     {[
                       d.seating_capacity || d.cover_count ? { icon:"🍽", val: d.seating_capacity || d.cover_count, label:"Cover Count" } : null,
                       d.kitchen_grade                     ? { icon:"🔪", val: d.kitchen_grade, label:"Kitchen Grade" } : null,
@@ -1510,7 +1492,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                       </span>
                     </div>
                   )}
-                  <div className="property-features-scroll">
+                  <div className="property-features-scroll" role="group" tabIndex={0} aria-label="Scrollable property highlights">
                     {[
                       d.seating_capacity ? { icon:"🪑", val: d.seating_capacity, label:"Seated Capacity" } : null,
                       d.standing_capacity ? { icon:"👥", val: d.standing_capacity, label:"Standing Capacity" } : null,
@@ -1557,7 +1539,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                       </span>
                     </div>
                   )}
-                  <div className="property-features-scroll">
+                  <div className="property-features-scroll" role="group" tabIndex={0} aria-label="Scrollable property highlights">
                     {[
                       pill1Val && pill1Val !== 0 ? { icon: pill1Emoji, val: pill1Val, label: pill1Label } : null,
                       pill2Val && pill2Val !== 0 ? { icon: pill2Emoji, val: pill2Val, label: pill2Label } : null,
@@ -1636,7 +1618,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
 
           {/* ── THE VAULT (Ch. Premium) ── */}
           <div className={`chapter-panel ${activeTab === "vault" ? "active" : ""}`} id="panel-vault">
-            <div className="panel-content" style={{ maxWidth: "100%" }}>
+            <div className="panel-content" style={{ maxWidth: "100%" }} tabIndex={0} aria-label="Scrollable Spatial Vault content">
               <div style={{marginBottom:"32px"}}>
                 <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"#E8AE3C", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>PREMIUM — THE SPATIAL VAULT</div>
                 <div style={{height:"1px", background:"#E8AE3C"}}/>
@@ -1658,6 +1640,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                 matterportUrl={d.matterportTourUrl}
                 heatmapUrl={d.droneHeatmapUrl}
                 floorPlans={d.floorPlans}
+                hasVaultMedia={d.premiumAvailable?.includes("vault")}
               />
             </div>
             <div className="panel-sidebar">
@@ -2198,7 +2181,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>07 — Units &amp; Spaces</div>
+                <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>{ch['units']?.chapterNumber || '07'} — {ch['units']?.chapterLabel || hierarchy.collectionLabel}</div>
                 <div style={{height:"1px", background:"var(--border)"}}/>
               </div>
 
@@ -2263,7 +2246,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
             </div>
 
             <div className="panel-sidebar">
-              <div className="sidebar-block"><div className="sidebar-accent-line"/><div className="sidebar-label">Total Areas</div><div className="sidebar-value">{dynamicUnits.length}</div></div>
+              <div className="sidebar-block"><div className="sidebar-accent-line"/><div className="sidebar-label">Total {hierarchy.collectionLabel}</div><div className="sidebar-value">{dynamicUnits.length}</div></div>
 
               {/* Photo preview thumbnail */}
               {photos && photos.length > 0 && photos[0] && (
@@ -2367,7 +2350,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
 
             </div>
 
-            <div className="panel-sidebar">
+            <div className="panel-sidebar" tabIndex={0} aria-label="Scrollable property universe summary">
               {/* Verdict — the ScoutIt editorial stamp, premium & final */}
               {d.scoutit_verdict && (
                 <div className="sidebar-block" style={{paddingBottom:"22px", borderBottom:"1px solid var(--border)", marginBottom:"4px"}}>
@@ -2505,26 +2488,28 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                 </div>
               )}
 
-              <button onClick={() => setIsInquiryOpen(true)} className="move-cta hover-glow active:scale-[0.98] transition-all" style={{textDecoration:"none", marginTop:"16px", width:"100%", background: "#E8AE3C", color: "#000", border: "none", padding: "16px", fontFamily: "var(--font-body)", fontSize: "16px", cursor: "pointer", borderRadius: "4px"}}>
-                Connect with an Authorized Broker →
-              </button>
-
-              <div style={{ display: "flex", gap: "10px", marginTop: "10px", width: "100%" }}>
-                {!d.is_sample && (
-                  <button
-                    onClick={openCuratedShare}
-                    aria-label="Share this property's briefing"
-                    className="flex-1 bg-transparent border border-surface-variant text-text-secondary font-mono text-xs tracking-[0.12em] uppercase font-bold py-3 px-4 rounded hover:bg-surface-alt transition-colors active:scale-[0.98] flex items-center justify-center gap-2"
-                  >
-                    Share
-                  </button>
-                )}
-                <button
-                  onClick={() => setIsPromoteOpen(true)}
-                  className="flex-1 bg-transparent border border-gold-accent/60 text-gold-accent font-mono text-xs tracking-[0.12em] uppercase font-bold py-3 px-4 rounded hover:bg-gold-accent hover:text-background transition-colors active:scale-[0.98] flex items-center justify-center gap-2 shadow-[0_0_10px_rgba(232,174,60,0.15)]"
-                >
-                  AI Promote ✦
+              <div className="hidden md:block w-full">
+                <button onClick={() => setIsInquiryOpen(true)} className="move-cta hover-glow active:scale-[0.98] transition-all" style={{textDecoration:"none", marginTop:"16px", width:"100%", background: "#E8AE3C", color: "#000", border: "none", padding: "16px", fontFamily: "var(--font-body)", fontSize: "16px", cursor: "pointer", borderRadius: "4px"}}>
+                  Connect with an Authorized Broker →
                 </button>
+
+                <div style={{ display: "flex", gap: "10px", marginTop: "10px", width: "100%" }}>
+                  {!d.is_sample && (
+                    <button
+                      onClick={openCuratedShare}
+                      aria-label="Share this property's briefing"
+                      className="flex-1 bg-transparent border border-surface-variant text-text-secondary font-mono text-xs tracking-[0.12em] uppercase font-bold py-3 px-4 rounded hover:bg-surface-alt transition-colors active:scale-[0.98] flex items-center justify-center gap-2"
+                    >
+                      Share
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setIsPromoteOpen(true)}
+                    className="flex-1 bg-transparent border border-gold-accent/60 text-gold-accent font-mono text-xs tracking-[0.12em] uppercase font-bold py-3 px-4 rounded hover:bg-gold-accent hover:text-background transition-colors active:scale-[0.98] flex items-center justify-center gap-2 shadow-[0_0_10px_rgba(232,174,60,0.15)]"
+                  >
+                    AI Promote ✦
+                  </button>
+                </div>
               </div>
 
               {/* Co-working operators only (Operator hat) — §9.2 delegation handshake */}
@@ -2557,12 +2542,11 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
 
          </div>{/* /zone-story */}
 
-
        </div>{/* /page */}
 
       {isOwner && !isDraftMode && (
         <button
-          onClick={() => window.location.href = `/dashboard?edit=${d.id}`}
+          onClick={() => router.push(`/dashboard?edit=${d.id}`)}
           style={{
             position: 'fixed',
             bottom: '24px',
@@ -2593,7 +2577,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
         </button>
       )}
 
-      <ShareModal 
+      <ShareModal
         isOpen={!!shareTextOpen}
         onClose={() => setShareTextOpen(null)}
         shareText={shareTextOpen}

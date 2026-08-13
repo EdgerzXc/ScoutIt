@@ -86,7 +86,7 @@ export default function ServiceConnectionPortal({ providerName, serviceType, isM
       <div className="safety-disclaimer-box">
         <div className="disclaimer-header">
           <span className="disclaimer-icon">⚠️</span>
-          <h5>TRANSACTION INTEGRITY &amp; SECURITY PROTOCOL</h5>
+          <h2>TRANSACTION INTEGRITY &amp; SECURITY PROTOCOL</h2>
         </div>
         <div className="disclaimer-content">
           <p className="disclaimer-paragraph">
@@ -328,7 +328,7 @@ export default function ServiceConnectionPortal({ providerName, serviceType, isM
           filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.7));
         }
 
-        .disclaimer-header h5 {
+        .disclaimer-header h2 {
           font-family: var(--font-mono), monospace;
           font-size: 20px;
           font-weight: 700;

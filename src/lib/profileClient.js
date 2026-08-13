@@ -68,18 +68,20 @@ export async function loadPublicProfile(displayName) {
   // serves is_profile_public profiles). Best-effort: a failed badge fetch
   // never blocks the profile itself.
   let badgeRows = [];
+  let isPilotParticipant = false;
   try {
     const res = await fetch(`/api/profile/public-roles?userId=${encodeURIComponent(data.id)}`);
     if (res.ok) {
       const payload = await res.json();
       badgeRows = payload.badges || [];
+      isPilotParticipant = payload.isPilotParticipant === true;
     }
   } catch (badgeErr) {
     console.error('Failed to load public badges', badgeErr);
   }
 
   return {
-    data: { ...data, badges: badgeRows.map((b) => ({ id: b.badge_id, minted_at: b.earned_at })) },
+    data: { ...data, is_pilot_participant: isPilotParticipant, badges: badgeRows.map((b) => ({ id: b.badge_id, minted_at: b.earned_at })) },
     error: null,
   };
 }
@@ -102,7 +104,12 @@ export async function loadPublicProviders(providerType) {
     )
     .eq('provider_type', providerType)
     .order('display_name', { ascending: true });
-  return { data: data || [], error };
+  if (error || typeof window === "undefined") return { data: data || [], error };
+  const enriched = await Promise.all((data || []).map(async (profile) => {
+    const provenance = await loadPublicRoles(profile.id);
+    return { ...profile, is_pilot_participant: provenance.isPilotParticipant === true };
+  }));
+  return { data: enriched, error: null };
 }
 
 // ── PUBLIC ROLES (for viewing someone else's profile) ─────────────────────────
@@ -113,12 +120,12 @@ export async function loadPublicProviders(providerType) {
 export async function loadPublicRoles(userId) {
   try {
     const res = await fetch(`/api/profile/public-roles?userId=${encodeURIComponent(userId)}`);
-    if (!res.ok) return { publicRoles: [], error: null };
+    if (!res.ok) return { publicRoles: [], isPilotParticipant: false, error: null };
     const data = await res.json();
-    return { publicRoles: data.publicRoles || [], error: null };
+    return { publicRoles: data.publicRoles || [], isPilotParticipant: data.isPilotParticipant === true, error: null };
   } catch (error) {
     console.error("Failed to load public roles", error);
-    return { publicRoles: [], error };
+    return { publicRoles: [], isPilotParticipant: false, error };
   }
 }
 

@@ -1,35 +1,68 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { resolveUserId } from "@/lib/serverAuth";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { encryptUserId } from "@/lib/wishlistCrypto";
+
+async function requireShareOwner(request) {
+  const userId = await resolveUserId(request);
+  if (!userId) {
+    return { response: NextResponse.json({ error: "Unauthorized" }, { status: 401 }) };
+  }
+  if (!supabaseAdmin) {
+    return { response: NextResponse.json({ error: "Share links are unavailable" }, { status: 503 }) };
+  }
+  return { userId };
+}
 
 export async function POST(request) {
   try {
-    const authHeader = request.headers.get("Authorization");
-    const token = authHeader?.replace("Bearer ", "");
+    const auth = await requireShareOwner(request);
+    if (auth.response) return auth.response;
 
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized: Missing token" }, { status: 401 });
+    const { data, error } = await supabaseAdmin
+      .from("wishlist_share_revocations")
+      .select("revoked_before")
+      .eq("user_id", auth.userId)
+      .maybeSingle();
+
+    if (error) {
+      console.error("[WISHLIST SHARE] Revocation lookup failed:", error.message);
+      return NextResponse.json({ error: "Share links are unavailable" }, { status: 503 });
     }
 
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    const authClient = createClient(supabaseUrl, supabaseAnonKey);
-
-    const { data: { user }, error: authError } = await authClient.auth.getUser(token);
-
-    if (authError || !user) {
-      return NextResponse.json({ error: "Unauthorized: Invalid session" }, { status: 401 });
-    }
-
-    if (!user || !user.id || typeof user.id !== 'string') {
-      return NextResponse.json({ error: "Unauthorized: Invalid user data" }, { status: 401 });
-    }
-
-    const shareToken = encryptUserId(user.id);
+    const revokedAt = data?.revoked_before ? new Date(data.revoked_before).getTime() : 0;
+    const issuedAt = Math.max(Date.now(), Number.isFinite(revokedAt) ? revokedAt + 1 : 0);
+    const shareToken = encryptUserId(auth.userId, { issuedAt });
 
     return NextResponse.json({ success: true, shareToken });
-  } catch (e) {
-    console.error("[SHARE API] Error:", e);
+  } catch (error) {
+    console.error("[WISHLIST SHARE] Mint failed:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}
+
+export async function DELETE(request) {
+  try {
+    const auth = await requireShareOwner(request);
+    if (auth.response) return auth.response;
+
+    const revokedBefore = new Date().toISOString();
+    const { error } = await supabaseAdmin
+      .from("wishlist_share_revocations")
+      .upsert({
+        user_id: auth.userId,
+        revoked_before: revokedBefore,
+        updated_at: revokedBefore,
+      }, { onConflict: "user_id" });
+
+    if (error) {
+      console.error("[WISHLIST SHARE] Revocation failed:", error.message);
+      return NextResponse.json({ error: "Could not deactivate shared links" }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true, revokedBefore });
+  } catch (error) {
+    console.error("[WISHLIST SHARE] Revocation failed:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

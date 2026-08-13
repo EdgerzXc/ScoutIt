@@ -400,7 +400,7 @@ export default function IntelPage() {
                     <div className="article-header" style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '12px' }}>
                       <span className="article-category" style={{ marginRight: 'auto' }}>{art.category}</span>
                       <span className={`article-type-badge ${getArticleType(art).toLowerCase()}`} style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', padding: '2px 6px', borderRadius: '2px', textTransform: 'uppercase' }}>{getArticleType(art)}</span>
-                      <span className="article-read-time" style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{Math.max(1, Math.round((art.excerpt || "").split(/\s+/).length / 20))} min read</span>
+                      <span className="article-read-time" style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>{Math.max(1, Math.round((art.excerpt || "").split(/\s+/).length / 20))} min read</span>
                     </div>
                     <h3 className="article-title">{art.title}</h3>
                     <p className="article-excerpt">{art.excerpt}</p>
@@ -678,7 +678,7 @@ export default function IntelPage() {
            already has a light counterpart tuned to its ~700 step. */
         .article-type-badge.insight {
           background: var(--sapphire-dim);
-          color: var(--sapphire);
+          color: var(--text-primary);
           border: 0.5px solid rgba(var(--accent-rgb), 0);
           box-shadow: inset 0 0 0 0.5px var(--sapphire);
         }

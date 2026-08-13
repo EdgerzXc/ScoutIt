@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { X, Plus, Trash2, Star } from "lucide-react";
 import { UNIT_TYPES, estimateCapacity } from "../../lib/unitMasterPage";
+import { unitDetailPath } from "../../lib/propertyRoutes";
 import UnitMasterPage from "../property/UnitMasterPage";
 
 // Drill-in editor for one unit's Unit Master Page — the rich co-working fields
@@ -62,7 +63,7 @@ export default function UnitDetailsDrawer({ unit, isPro, propertyId, property, o
           <div className="flex items-center gap-3">
             {propertyId && unit.id && (
               <a 
-                href={`/property/${propertyId}/unit/${unit.id}`} 
+                href={unitDetailPath(propertyId, unit.id)}
                 target="_blank" 
                 rel="noopener noreferrer" 
                 className="px-3 py-1.5 rounded border border-surface-variant text-text-secondary hover:text-gold-accent hover:border-gold-accent text-[11px] font-label-caps uppercase tracking-widest transition"

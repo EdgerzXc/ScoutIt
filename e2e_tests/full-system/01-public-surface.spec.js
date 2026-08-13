@@ -9,6 +9,7 @@ import { trackErrors, expectDesignDNA, expectRealContent, gotoAndSettle } from '
 const PUBLIC_ROUTES = [
   { path: '/', anchor: /scout/i },
   { path: '/about', anchor: /scout/i },
+  { path: '/about-you', anchor: /center|about you/i },
   { path: '/discover', anchor: /Discovery|Spotlights/i },
   { path: '/property', anchor: /director|space|propert/i },
   { path: '/intel', anchor: /intel/i },

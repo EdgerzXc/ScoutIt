@@ -6,15 +6,14 @@
 //   Connects, or send inquiries. Opening modals/wizards without submitting
 //   is fine. The wishlist (scoutit_reactions) is device-local and safe.
 // - `master-dev` is the owner's real dev account with real production
-//   listings. Only MASTER_DEV_READONLY tests may use it, and they must not
-//   click anything destructive.
+//   listings. The legacy MASTER_DEV_READONLY fixture is a local UI preview;
+//   its private network responses must be mocked and it must never mutate.
 import { expect } from '@playwright/test';
 
-// Mock users. DashboardContext only preserves a localStorage mock whose id
-// contains "master-dev"; anything else is wiped on mount unless a real
-// Supabase session exists.
+// Mock users. DashboardContext accepts this identity family only in the
+// localhost E2E build; public hosts reject it even when a flag is present.
 export const MOCK_OWNER_EMPTY = {
-  id: 'master-dev-e2e-empty', // passes the includes("master-dev") check, owns zero rows
+  id: 'master-dev-e2e-empty',
   name: 'E2E Owner',
   role: 'owner',
   tags: ['owner'],
@@ -154,5 +153,9 @@ export async function getCommercialListing(request) {
 
   expect(listing, 'the live CMS feed needs at least one Commercial listing').toBeTruthy();
   expect(listing.slug, 'the Commercial listing needs its Airtable-computed slug').toBeTruthy();
-  return { slug: listing.slug, title: listing.title || listing.slug };
+  return {
+    slug: listing.slug,
+    title: listing.title || listing.slug,
+    isSample: listing.is_sample === true || listing.isSample === true,
+  };
 }

@@ -65,7 +65,6 @@ function InventoryInner({ params }) {
       const { data: { session } } = await getSession();
       const token = session?.access_token;
       const params = new URLSearchParams({ propertyId: listingRef.current.id });
-      if (currentUser?.id) params.set("mockOwnerId", currentUser.id);
 
       const res = await fetch(`/api/dashboard/units?${params.toString()}`, {
         headers: { Authorization: token ? `Bearer ${token}` : "" },
@@ -82,7 +81,7 @@ function InventoryInner({ params }) {
     } finally {
       setUnitsLoaded(true);
     }
-  }, [currentUser, addToast]);
+  }, [addToast]);
 
   useEffect(() => {
     if (!listing || initializedForId.current === id) return;
@@ -139,7 +138,6 @@ function InventoryInner({ params }) {
         body: JSON.stringify({
           propertyId: listingRef.current.id,
           units,
-          mockOwnerId: currentUser?.id,
         }),
       });
       const data = await res.json();

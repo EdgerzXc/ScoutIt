@@ -11,6 +11,7 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import ReactionButtons from "@/components/ui/ReactionButtons";
 import ImagePlaceholder from "@/components/ui/ImagePlaceholder";
+import ProvenanceBadge from "@/components/ui/ProvenanceBadge";
 import dynamic from "next/dynamic";
 const InteractiveRadiusMap = dynamic(() => import("@/components/property/InteractiveRadiusMap"), { 
   ssr: false, 
@@ -77,6 +78,7 @@ function toCard(p, cat, fallbackHook) {
     floor_sqm:     p.floor_sqm,
     image:         p.image || p.photos?.[0] || "",
     hook:          p.hook || fallbackHook,
+    is_sample:     p.is_sample === true,
     ...cardExtras(p),
   };
 }
@@ -435,7 +437,7 @@ function PropertyDirectoryContent({ initialProperties = [] }) {
           // the footer stays below the fold through the swap instead of sitting
           // high here and then leaping down when cards arrive (the CLS source).
           <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "80vh" }}>
-            <h3 style={{ fontFamily: "var(--font-mono)", color: "var(--accent)" }}>LOADING THE DIRECTORY...</h3>
+            <h2 style={{ fontFamily: "var(--font-mono)", color: "var(--accent)" }}>LOADING THE DIRECTORY...</h2>
           </div>
         ) : (
           <div className="directory-container">
@@ -593,12 +595,12 @@ function PropertyDirectoryContent({ initialProperties = [] }) {
 
               {/* Dynamic Sidebar Widget: Neighborhood Intel */}
               <div className="intel-widget">
-                <div className="intel-widget-header">Neighborhood Intel</div>
+                <h2 className="intel-widget-header">Neighborhood Intel</h2>
                 <div className="intel-widget-list">
                   {widgetArticles.length > 0 ? (
                     widgetArticles.map(art => (
                       <Link href={`/intel/${art.slug}`} key={art.slug} className="intel-widget-item">
-                        <h4>{art.title}</h4>
+                        <h3>{art.title}</h3>
                         <span>{art.category} &middot; {art.date}</span>
                       </Link>
                     ))
@@ -675,7 +677,7 @@ function PropertyDirectoryContent({ initialProperties = [] }) {
                       </div>
 
                       <div className="property-card-body">
-                        <h3>{p.title}</h3>
+                        <h2>{p.title}<ProvenanceBadge record={p} /></h2>
                         <p className="hook">{p.hook}</p>
 
                         {/* Price intentionally omitted on cards — shown only in "Your Move" (compliance). */}
@@ -719,7 +721,7 @@ function PropertyDirectoryContent({ initialProperties = [] }) {
                      accidentally say. */
                   rawProperties.length === 0 ? (
                     <div className="directory-empty">
-                      <h3>The first spaces are being verified</h3>
+                      <h2>The first spaces are being verified</h2>
                       <p>
                         ScoutIt only publishes a space once its intelligence has been checked.
                         List yours and it becomes one of the first verified spaces in the directory.
@@ -730,7 +732,7 @@ function PropertyDirectoryContent({ initialProperties = [] }) {
                     </div>
                   ) : (
                     <div className="directory-empty">
-                      <h3>No spaces match these filters</h3>
+                      <h2>No spaces match these filters</h2>
                       <p>Try clearing a filter or widening your search.</p>
                     </div>
                   )

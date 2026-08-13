@@ -19,10 +19,20 @@ export default defineConfig({
     trace: 'on-first-retry',
   },
   webServer: {
-    command: 'npm run dev',
+    // Next.js recommends production code for E2E parity. It also prevents the
+    // dev overlay and hot-compiled chunk churn from corrupting launch results.
+    command: 'npm run build && npm run start',
     url: 'http://localhost:3000',
-    reuseExistingServer: true,
-    timeout: 120000,
+    reuseExistingServer: false,
+    timeout: 300000,
+    env: {
+      SCOUTIT_E2E: '1',
+      // Client components need an explicit build-time flag. It exists only in
+      // this localhost E2E build and is still rejected on public hostnames.
+      NEXT_PUBLIC_SCOUTIT_E2E: '1',
+      // Cloudflare's documented always-pass test key; never shipped by the app.
+      NEXT_PUBLIC_TURNSTILE_SITE_KEY: '1x00000000000000000000AA',
+    },
   },
   projects: [
     {

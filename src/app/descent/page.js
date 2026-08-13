@@ -82,7 +82,7 @@ export default function DescentPage() {
   }, []);
 
   return (
-    <div className="descent-root" ref={rootRef}>
+    <main className="descent-root" ref={rootRef}>
       {/* minimal brand bar */}
       <div style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 20, display: "flex", justifyContent: "space-between", alignItems: "center", padding: "18px clamp(20px, 6vw, 90px)", pointerEvents: "none" }}>
         <Link href="/" style={{ fontFamily: "var(--font-mono, monospace)", letterSpacing: "0.24em", fontSize: 13, color: "#f0ede8", textDecoration: "none", pointerEvents: "auto" }}>
@@ -108,7 +108,7 @@ export default function DescentPage() {
               <circle className="porthole porthole-1" cx="49" cy="28" r="4" /><circle className="porthole porthole-2" cx="60" cy="24" r="4" /><circle className="porthole porthole-3" cx="71" cy="28" r="4" />
             </svg>
           </div>
-          <div className="dz-wordmark"><span className="w-scout">Scout</span><span className="w-it">IT</span></div>
+          <h1 className="dz-wordmark"><span className="w-scout">Scout</span><span className="w-it">IT</span></h1>
           <div className="dz-badge">SPACE · INTELLIGENCE · TECHNOLOGY</div>
           <div className="dz-divider" />
           <p className="dz-tag1">Get lost in spaces that actually inspire you.</p>
@@ -142,7 +142,7 @@ export default function DescentPage() {
           <h2 className="dl-title">News travels in the air.</h2>
           <p className="dl-sub">Before your feet touch the ground — what&apos;s moving, what&apos;s shifting, what&apos;s worth knowing. The market, read from above.</p>
           <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 30 }}>
-            {[{ t: "Makati CBD yields drop", k: "Market intel", href: "/intel/makati-yields" }, { t: "Nuvali expansion patterns", k: "Area guide", href: "/intel/nuvali-expansion" }, { t: "Pasig zoning changes", k: "Regulatory", href: "/intel/pasig-zoning" }].map((a) => (
+            {[{ t: "Makati CBD yields drop", k: "Market intel", href: "/intel" }, { t: "Nuvali expansion patterns", k: "Area guide", href: "/intel" }, { t: "Pasig zoning changes", k: "Regulatory", href: "/intel" }].map((a) => (
               <Link key={a.href} href={a.href} style={{ flex: "1 1 240px", textDecoration: "none", background: "rgba(10,12,24,0.6)", border: "0.5px solid rgba(232, 174, 60,0.2)", borderRadius: 10, padding: "18px 20px", backdropFilter: "blur(4px)" }}>
                 <div style={{ fontFamily: "var(--font-mono, monospace)", fontSize: 10, letterSpacing: "0.16em", textTransform: "uppercase", color: "#E8AE3C", marginBottom: 10 }}>{a.k}</div>
                 <div style={{ fontFamily: "var(--font-display)", fontSize: 19, color: "#f5f1ea" }}>{a.t}</div>
@@ -284,6 +284,6 @@ export default function DescentPage() {
       </section>
 
       <Footer />
-    </div>
+    </main>
   );
 }

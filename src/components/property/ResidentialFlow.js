@@ -10,6 +10,7 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import ReactionButtons from "@/components/ui/ReactionButtons";
 import { useTrueClosestTransit } from "@/hooks/useTrueClosestTransit";
@@ -26,6 +27,7 @@ const InteractiveMap = dynamic(() => import("@/components/property/InteractiveMa
   ),
 });
 import { getChapterConfig } from "./chapterConfig";
+import { PROPERTY_LEVEL_LABEL, childSpaceDisplayName, getPropertyHierarchy } from "@/lib/propertyHierarchy";
 import { Lock, Unlock, Zap, ChevronRight, Share2, MapPin, Eye, Search, Layers, X, Home, Users, ArrowUpRight, Copy, Check, Bed, Bath, Ruler, Car, Building2, Camera } from "lucide-react";
 import Image from "next/image";
 import FreshnessBadge from "@/components/ui/FreshnessBadge";
@@ -49,6 +51,7 @@ import { hasInteractiveUnitPage, hasSpatial3D, unitMasterPageOverview, formatUni
 import { canSee, getCurrentTier, hasActiveRole } from "@/lib/entitlements";
 import useCuratedShare from "@/lib/useCuratedShare";
 import { fieldLabel } from "@/lib/fieldLabel";
+import { downloadPropertyTearSheet } from "@/lib/propertyTearSheet";
 
 // Code-split maplibre-gl + pmtiles out of the main property-page bundle — they&apos;re
 // only needed if the visitor taps the Flood Risk Map tab, which was the real cause
@@ -198,6 +201,7 @@ function initialChapterFromUrl(fallback) {
 }
 
 export default function ResidentialFlow({ slug, draftData, isDraftMode, externalActiveTab, initialData = null }) {
+  const router = useRouter();
   // ── Interactive UI states ──────────────────────
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [photoMode,         setPhotoMode]         = useState("natural");
@@ -462,6 +466,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
   const isRestaurant = cat.includes("restaurant") || cat.includes("culinary");
   const isHospitality = cat.includes("str") || cat.includes("hospitality");
   const isVenue = cat.includes("venue") || cat.includes("event");
+  const hierarchy = useMemo(() => getPropertyHierarchy(d), [d]);
 
   // ── Chapter config (drives nav labels & chapter headings) ──
   const chapterConfig = useMemo(() => getChapterConfig(d), [d]);
@@ -793,7 +798,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
       // absent for any older/mock unit data, in which case no Unit Master
       // Page link renders (see the "View Unit Master Page" guard below).
       id: u.id || null,
-      name: u.name || `Unit ${String(i + 1).padStart(2, "0")}`,
+      name: childSpaceDisplayName(u.name, i, d),
       specs: [
         u.size  ? `${u.size} sqm`       : null,
         u.floor ? `Floor ${u.floor}`    : null,
@@ -967,44 +972,21 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
     ));
   };
 
-  // ── PDF Tear-Sheet Generation ─────────────────
+  // PDF tear-sheet generation is intentionally limited to the hero briefing.
   const handleDownloadPdf = async () => {
-    const element = document.querySelector('.page');
-    if (!element) return;
-    
     try {
-      const html2pdf = (await import('html2pdf.js')).default;
-      const opt = {
-        margin:       [0.5, 0.5, 0.5, 0.5],
-        filename:     `ScoutIt_${d.title.replace(/\s+/g, '_')}.pdf`,
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true, logging: false },
-        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
-      };
-      
-      // Temporarily hide elements that shouldn't be in the PDF
-      const nav = element.querySelector('.zone-nav');
-      const mobileHero = element.querySelector('.mobile-hero-intel');
-      const inquiryBar = document.querySelector('.inquiry-bar');
-      
-      if (nav) nav.style.display = 'none';
-      if (mobileHero) mobileHero.style.display = 'none';
-      if (inquiryBar) inquiryBar.style.display = 'none';
-      
-      await html2pdf().set(opt).from(element).save();
-      
-      // Restore elements
-      if (nav) nav.style.display = '';
-      if (mobileHero) mobileHero.style.display = '';
-      if (inquiryBar) inquiryBar.style.display = '';
+      await downloadPropertyTearSheet({
+        element: document.querySelector('#photoZone'),
+        title: d.title,
+      });
     } catch (err) {
       console.error("[PDF] Generation failed:", err);
     }
   };
 
-  // ══════════════════════════════════════════════
   // RENDER
   // ══════════════════════════════════════════════
+
   return (
     <>
       <div className="grain" />
@@ -1072,7 +1054,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
             onMouseUp={(e) => e.stopPropagation()}
             onTouchStart={(e) => e.stopPropagation()}
           >
-            <p className="hero-label">ScoutIt &middot; {briefLabel}</p>
+            <p className="hero-label">ScoutIt &middot; {PROPERTY_LEVEL_LABEL} &middot; {briefLabel}</p>
             <div className="hero-text-overlay">
               <h1 className="hero-title">
                 {d.title}
@@ -1158,8 +1140,8 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
 
         {/* Mobile-only Hero Intel (visible on mobile viewport, hidden on desktop) */}
         <div className="mobile-hero-intel">
-          <p className="mobile-hero-label">ScoutIt &middot; {briefLabel}</p>
-          <h1 className="mobile-hero-title">{d.title}</h1>
+          <p className="mobile-hero-label">ScoutIt &middot; {PROPERTY_LEVEL_LABEL} &middot; {briefLabel}</p>
+          <h1 className="mobile-hero-title">{d.title}<ProvenanceBadge record={d} /></h1>
           <p className="mobile-hero-location">{d.location || d.city || null}</p>
           <p className="mobile-hero-hook">{d.hook}</p>
           {isOwner && (
@@ -1235,7 +1217,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                     <rect x="3"  y="11" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.3"/>
                     <rect x="11" y="11" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.3"/>
                   </svg>
-                  <span className="chapter-label">Units</span>
+                  <span className="chapter-label">{hierarchy.collectionLabel}</span>
                 </button>
                 <div className="nav-divider" />
               </>
@@ -1313,7 +1295,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                 </div>
               )}
 
-              <div className="property-features-scroll">
+              <div className="property-features-scroll" role="group" tabIndex={0} aria-label="Scrollable property highlights">
                 {[
                   pill1Val && pill1Val !== 0 ? { icon: pill1Emoji, val: pill1Val, label: pill1Label } : null,
                   pill2Val && pill2Val !== 0 ? { icon: pill2Emoji, val: pill2Val, label: pill2Label } : null,
@@ -1409,7 +1391,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
 
           {/* ── THE VAULT (Ch. Premium) ── */}
           <div className={`chapter-panel ${activeTab === "vault" ? "active" : ""}`} id="panel-vault">
-            <div className="panel-content" style={{ maxWidth: "100%" }}>
+            <div className="panel-content" style={{ maxWidth: "100%" }} tabIndex={0} aria-label="Scrollable Spatial Vault content">
               <div style={{marginBottom:"32px"}}>
                 <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"#E8AE3C", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>PREMIUM — THE SPATIAL VAULT</div>
                 <div style={{height:"1px", background:"#E8AE3C"}}/>
@@ -1431,6 +1413,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                 matterportUrl={d.matterportTourUrl}
                 heatmapUrl={d.droneHeatmapUrl}
                 floorPlans={d.floorPlans}
+                hasVaultMedia={d.premiumAvailable?.includes("vault")}
               />
             </div>
             <div className="panel-sidebar">
@@ -2068,7 +2051,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
             </div>
 
             <div className="panel-sidebar">
-              <div className="sidebar-block"><div className="sidebar-accent-line"/><div className="sidebar-label">Total Areas</div><div className="sidebar-value">{dynamicUnits.length}</div></div>
+              <div className="sidebar-block"><div className="sidebar-accent-line"/><div className="sidebar-label">Total {hierarchy.collectionLabel}</div><div className="sidebar-value">{dynamicUnits.length}</div></div>
 
               {/* Photo preview thumbnail */}
               {photos && photos.length > 0 && photos[0] && (
@@ -2172,7 +2155,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
 
             </div>
 
-            <div className="panel-sidebar">
+            <div className="panel-sidebar" tabIndex={0} aria-label="Scrollable property universe summary">
               {/* Verdict — the ScoutIt editorial stamp, premium & final */}
               {d.scoutit_verdict && (
                 <div className="sidebar-block" style={{paddingBottom:"22px", borderBottom:"1px solid var(--border)", marginBottom:"4px"}}>
@@ -2305,21 +2288,23 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                 </div>
               )}
 
-              <button onClick={() => setIsInquiryOpen(true)} className="move-cta hover-glow active:scale-[0.98] transition-all" style={{textDecoration:"none", marginTop:"16px", width:"100%", background: "#E8AE3C", color: "#000", border: "none", padding: "16px", fontFamily: "var(--font-body)", fontSize: "16px", cursor: "pointer", borderRadius: "4px"}}>
-                Connect with an Authorized Broker →
-              </button>
+              <div className="hidden md:block w-full">
+                <button onClick={() => setIsInquiryOpen(true)} className="move-cta hover-glow active:scale-[0.98] transition-all" style={{textDecoration:"none", marginTop:"16px", width:"100%", background: "#E8AE3C", color: "#000", border: "none", padding: "16px", fontFamily: "var(--font-body)", fontSize: "16px", cursor: "pointer", borderRadius: "4px"}}>
+                  Connect with an Authorized Broker →
+                </button>
 
-              {!d.is_sample && (
-                <div style={{ marginTop: "10px", width: "100%" }}>
-                  <button
-                    onClick={openCuratedShare}
-                    aria-label="Share this property's briefing"
-                    className="w-full bg-transparent border border-surface-variant text-text-secondary font-mono text-xs tracking-[0.12em] uppercase font-bold py-3 px-4 rounded hover:bg-surface-alt transition-colors active:scale-[0.98] flex items-center justify-center gap-2"
-                  >
-                    Share
-                  </button>
-                </div>
-              )}
+                {!d.is_sample && (
+                  <div style={{ marginTop: "10px", width: "100%" }}>
+                    <button
+                      onClick={openCuratedShare}
+                      aria-label="Share this property's briefing"
+                      className="w-full bg-transparent border border-surface-variant text-text-secondary font-mono text-xs tracking-[0.12em] uppercase font-bold py-3 px-4 rounded hover:bg-surface-alt transition-colors active:scale-[0.98] flex items-center justify-center gap-2"
+                    >
+                      Share
+                    </button>
+                  </div>
+                )}
+              </div>
               {isOperator && (
                 <button
                   onClick={() => setIsOperatorRequestOpen(true)}
@@ -2349,12 +2334,11 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
 
          </div>{/* /zone-story */}
 
-
        </div>{/* /page */}
 
       {isOwner && !isDraftMode && (
         <button
-          onClick={() => window.location.href = `/dashboard?edit=${d.id}`}
+          onClick={() => router.push(`/dashboard?edit=${d.id}`)}
           style={{
             position: 'fixed',
             bottom: '24px',

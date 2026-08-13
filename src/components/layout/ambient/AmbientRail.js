@@ -7,8 +7,8 @@ const FADE_MS = 240;
 const HOVER_RESUME_MS = 1800;
 const MANUAL_RESUME_MS = 8000;
 
-export default function AmbientRail({ user }) {
-  const items = useAmbientData(user);
+export default function AmbientRail({ user, context = null }) {
+  const items = useAmbientData(user, context);
   const [activeIndex, setActiveIndex] = useState(0);
   const [transitioning, setTransitioning] = useState(false);
   const [hovered, setHovered] = useState(false);
@@ -88,7 +88,7 @@ export default function AmbientRail({ user }) {
     <div
       className={`ambient-rail ${paused ? "is-paused" : ""}`}
       role="group"
-      aria-label="Local ambient information"
+      aria-label={context?.source === "property" ? `Property conditions for ${context.shortName}` : "Local ambient information"}
       onMouseEnter={() => { window.clearTimeout(resumeTimer.current); setResumePending(false); setHovered(true); }}
       onMouseLeave={() => { setHovered(false); scheduleResume(); }}
       onFocusCapture={() => { window.clearTimeout(resumeTimer.current); setResumePending(false); setFocused(true); }}
@@ -112,8 +112,16 @@ export default function AmbientRail({ user }) {
         <div id="ambient-rail-status" className="ambient-viewport" aria-hidden="true">
           {currentItem && (
             <span key={currentItem.id} className={`ambient-copy ${transitioning ? "is-leaving" : ""}`}>
-              <span className="ambient-copy-desktop">{currentItem.text}</span>
-              <span className="ambient-copy-mobile">{currentItem.mobileText || currentItem.text}</span>
+              <span className="ambient-copy-desktop">
+                {(currentItem.segments || []).map((segment, index) => (
+                  <span key={`${segment.text}-${index}`} className={`ambient-token ambient-token-${segment.tone}`}>{segment.text}</span>
+                ))}
+              </span>
+              <span className="ambient-copy-mobile">
+                {(currentItem.mobileSegments || currentItem.segments || []).map((segment, index) => (
+                  <span key={`${segment.text}-${index}`} className={`ambient-token ambient-token-${segment.tone}`}>{segment.text}</span>
+                ))}
+              </span>
             </span>
           )}
         </div>
@@ -122,9 +130,9 @@ export default function AmbientRail({ user }) {
         </button>
       </div>
       <div className="ambient-track" aria-hidden="true" style={{ "--ambient-progress": progress }}>
-        <span className="ambient-thread" />
         <span className="ambient-segment" />
-      </div>      <span className="ambient-sr-status" aria-live="polite" aria-atomic="true">{announcement}</span>
+      </div>
+      <span className="ambient-sr-status" aria-live="polite" aria-atomic="true">{announcement}</span>
 
       <style jsx>{`
         .ambient-rail {
@@ -195,15 +203,29 @@ export default function AmbientRail({ user }) {
           font-family: var(--font-mono);
           font-size: 12px;
           font-weight: 700;
-          letter-spacing: .12em;
+          letter-spacing: .09em;
           line-height: 1.3;
-          color: var(--accent);
-          text-shadow: 0 0 12px rgba(var(--accent-rgb), .32), 0 0 24px rgba(var(--accent-rgb), .1);
-          animation: ambientReveal 380ms cubic-bezier(.22,1,.36,1) both;
-          transition: opacity ${FADE_MS}ms cubic-bezier(.22,1,.36,1), transform ${FADE_MS}ms cubic-bezier(.22,1,.36,1), color 180ms cubic-bezier(.22,1,.36,1);
+          color: var(--text-secondary);
+          text-shadow: none;
+          animation: ambientReveal 260ms cubic-bezier(.23,1,.32,1) both;
+          transition: opacity ${FADE_MS}ms cubic-bezier(.23,1,.32,1), transform ${FADE_MS}ms cubic-bezier(.23,1,.32,1);
         }
         .ambient-copy.is-leaving { opacity: 0; transform: translate3d(0,-3px,0); }
+        .ambient-copy-desktop { display: inline-flex; }
         .ambient-copy-mobile { display: none; }
+        .ambient-copy-desktop,
+        .ambient-copy-mobile { align-items: center; justify-content: center; min-width: 0; }
+        .ambient-token { display: inline-flex; align-items: center; min-width: 0; transition: color 160ms ease, text-shadow 160ms ease; }
+        .ambient-token + .ambient-token::before {
+          content: "\\00B7";
+          flex: 0 0 auto;
+          margin: 0 .48em;
+          color: rgba(var(--accent-rgb),.42);
+        }
+        .ambient-token-context { color: var(--text-primary); }
+        .ambient-token-label { color: var(--text-secondary); font-weight: 600; }
+        .ambient-token-detail { color: var(--text-muted); font-weight: 600; }
+        .ambient-token-value { color: var(--accent-bright); text-shadow: 0 0 10px rgba(var(--accent-rgb),.24); }
         .ambient-nav {
           width: 24px;
           height: 24px;
@@ -245,17 +267,6 @@ export default function AmbientRail({ user }) {
           height: 1px;
           background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb),.22) 16%, rgba(var(--accent-rgb),.44) 50%, rgba(var(--accent-rgb),.22) 84%, transparent);
         }
-        .ambient-thread {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 56px;
-          height: 2px;
-          border-radius: 999px;
-          background: linear-gradient(90deg, transparent, var(--accent-bright), transparent);
-          filter: drop-shadow(0 0 6px rgba(var(--accent-rgb),.72)) drop-shadow(0 0 12px rgba(var(--accent-rgb),.28));
-          animation: ambientThread 6.4s cubic-bezier(.45,0,.55,1) infinite;
-        }
         .ambient-segment {
           position: absolute;
           top: 0;
@@ -266,21 +277,15 @@ export default function AmbientRail({ user }) {
           background: linear-gradient(90deg, rgba(var(--accent-rgb),.22), var(--accent-bright), rgba(var(--accent-rgb),.22));
           box-shadow: 0 0 10px rgba(var(--accent-rgb),.52), 0 0 20px rgba(var(--accent-rgb),.18);
           transform: translate3d(calc(var(--ambient-progress) * var(--ambient-travel)),0,0);
-          transition: transform 520ms cubic-bezier(.32,.72,0,1);
+          transition: transform 260ms cubic-bezier(.32,.72,0,1);
         }
-        .ambient-rail:hover .ambient-copy,
-        .ambient-rail:focus-within .ambient-copy { color: var(--accent-bright); text-shadow: 0 0 14px rgba(var(--accent-rgb), .48); }
-        .ambient-rail.is-paused .ambient-thread { animation-play-state: paused; }
+        .ambient-rail:hover .ambient-token-value,
+        .ambient-rail:focus-within .ambient-token-value { color: var(--accent-bright); text-shadow: 0 0 12px rgba(var(--accent-rgb),.38); }
+        .ambient-rail:hover .ambient-token-context { color: var(--text-primary); }
         .ambient-sr-status { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
         @keyframes ambientReveal {
           from { opacity: 0; transform: translate3d(0,3px,0); }
           to { opacity: 1; transform: translate3d(0,0,0); }
-        }
-        @keyframes ambientThread {
-          0% { transform: translate3d(-56px,0,0); opacity: 0; }
-          18% { opacity: .9; }
-          82% { opacity: .9; }
-          100% { transform: translate3d(176px,0,0); opacity: 0; }
         }
         @media (max-width: 768px) {
           .ambient-rail {
@@ -297,7 +302,7 @@ export default function AmbientRail({ user }) {
           .ambient-nav svg { width: 10px; height: 10px; }
           .ambient-copy {
             font-size: 11.5px;
-            letter-spacing: .1em;
+            letter-spacing: .075em;
           }
           .ambient-track { --ambient-travel: 76px; width: 100px; }
           .ambient-segment { width: 28px; }
@@ -309,7 +314,7 @@ export default function AmbientRail({ user }) {
             padding: 0 4px 2px;
           }
           .ambient-copy-desktop { display: none; }
-          .ambient-copy-mobile { display: inline; }
+          .ambient-copy-mobile { display: inline-flex; }
           .ambient-content {
             grid-template-columns: 32px minmax(0,1fr) 32px;
           }
@@ -324,7 +329,7 @@ export default function AmbientRail({ user }) {
           .ambient-nav svg { width: 9px; height: 9px; }
           .ambient-copy {
             font-size: 11px;
-            letter-spacing: .08em;
+            letter-spacing: .06em;
           }
           .ambient-track { --ambient-travel: 46px; position: absolute; bottom: 2px; width: 64px; height: 2px; margin-top: 0; }
           .ambient-segment { width: 18px; }
@@ -363,7 +368,6 @@ export default function AmbientRail({ user }) {
         }
         @media (prefers-reduced-motion: reduce) {
           .ambient-copy { animation: none; transition: none; transform: none !important; }
-          .ambient-thread { display: none; }
           .ambient-segment { transition: none; }
         }
       `}</style>

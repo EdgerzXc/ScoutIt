@@ -217,6 +217,7 @@ export default function SettingsPage() {
           <input 
             type="text" 
             className={styles.input} 
+            aria-label="Display name"
             value={name} 
             onChange={(e) => setName(e.target.value)} 
           />
@@ -249,8 +250,9 @@ export default function SettingsPage() {
             This is how you appear in public directories and lists. A complete card gets noticed first.
           </p>
 
-          <label className={styles.label} style={{fontSize: 13}}>Headline</label>
+          <label htmlFor="public-profile-headline" className={styles.label} style={{fontSize: 13}}>Headline</label>
           <input
+            id="public-profile-headline"
             type="text"
             className={styles.input}
             placeholder={tags.includes('broker') ? "e.g. Makati CBD specialist — 10 yrs in commercial leasing" : "One line that says what you're about"}
@@ -259,8 +261,9 @@ export default function SettingsPage() {
             onChange={(e) => setField('headline', e.target.value)}
           />
 
-          <label className={styles.label} style={{fontSize: 13, marginTop: 12}}>About You</label>
+          <label htmlFor="public-profile-bio" className={styles.label} style={{fontSize: 13, marginTop: 12}}>About You</label>
           <textarea
+            id="public-profile-bio"
             className={styles.input}
             style={{minHeight: 90, resize: 'vertical', fontFamily: 'inherit'}}
             placeholder="A short bio. What should owners, brokers, or clients know about you?"
@@ -269,8 +272,9 @@ export default function SettingsPage() {
             onChange={(e) => setField('bio', e.target.value)}
           />
 
-          <label className={styles.label} style={{fontSize: 13, marginTop: 12}}>Location</label>
+          <label htmlFor="public-profile-location" className={styles.label} style={{fontSize: 13, marginTop: 12}}>Location</label>
           <input
+            id="public-profile-location"
             type="text"
             className={styles.input}
             placeholder="e.g. Metro Manila"
@@ -285,6 +289,7 @@ export default function SettingsPage() {
                 type="text"
                 className={styles.input}
                 placeholder="e.g. Santos Realty Group — or Independent"
+                aria-label="Firm or affiliation"
                 value={publicProfile.firm}
                 onChange={(e) => setField('firm', e.target.value)}
               />
@@ -298,6 +303,7 @@ export default function SettingsPage() {
                 type="text"
                 className={styles.input}
                 placeholder="e.g. Architectural photography, drone shots, floorplans"
+                aria-label="Services offered"
                 value={publicProfile.service}
                 onChange={(e) => setField('service', e.target.value)}
               />
@@ -337,7 +343,7 @@ export default function SettingsPage() {
         <div className={styles.formGroup} style={{ marginTop: 24, padding: 24, border: '1px solid rgba(var(--accent-rgb), 0.2)', borderRadius: 12, background: 'rgba(var(--accent-rgb), 0.03)' }}>
           <div className="flex items-center gap-3 mb-2">
             <ShieldCheck className="text-gold-accent" size={20} />
-            <h3 className="font-display text-lg text-on-surface">Honors & Badges</h3>
+            <h2 className="font-display text-lg text-on-surface">Honors & Badges</h2>
           </div>
           <p style={{color: 'var(--text-secondary)', fontSize: 13, marginBottom: 16}}>
             Your exclusive ScoutIt honors. Badges grant lifetime privileges and discounts.
@@ -382,7 +388,7 @@ export default function SettingsPage() {
         <div className={styles.formGroup} style={{ marginTop: 24, padding: 24, border: '1px solid var(--surface-variant)', borderRadius: 12, background: 'var(--surface)' }}>
           <div className="flex items-center gap-3 mb-2">
             <Lock className="text-on-surface" size={20} />
-            <h3 className="font-display text-lg text-on-surface">Security & Login</h3>
+            <h2 className="font-display text-lg text-on-surface">Security & Login</h2>
           </div>
           <p style={{color: 'var(--text-secondary)', fontSize: 13, marginBottom: 16}}>
             Update your password or enable Two-Factor Authentication (2FA) to secure your properties.
@@ -393,6 +399,7 @@ export default function SettingsPage() {
             type="password"
             className={styles.input}
             placeholder="At least 6 characters"
+            aria-label="New password"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
           />
@@ -402,6 +409,7 @@ export default function SettingsPage() {
             type="password"
             className={styles.input}
             placeholder="Re-type new password"
+            aria-label="Confirm new password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
           />
@@ -424,7 +432,7 @@ export default function SettingsPage() {
 
           {/* 2FA Section */}
           <div className="mt-8 pt-8 border-t border-surface-variant">
-            <h4 className="font-working-title text-md text-on-surface mb-2">Two-Factor Authentication (2FA)</h4>
+            <h3 className="font-working-title text-md text-on-surface mb-2">Two-Factor Authentication (2FA)</h3>
             
             {mfaMessage.text && (
               <div className={`mb-4 p-3 rounded text-sm ${mfaMessage.type === 'error' ? 'bg-error/10 border border-error/50 text-error' : 'bg-surface border border-gold-accent text-gold-accent'}`}>
@@ -472,6 +480,7 @@ export default function SettingsPage() {
                     className={`${styles.input} text-center font-mono tracking-widest text-lg`}
                     placeholder="000000"
                     maxLength={6}
+                    aria-label="Authenticator verification code"
                     value={verifyCode}
                     onChange={(e) => setVerifyCode(e.target.value)}
                   />

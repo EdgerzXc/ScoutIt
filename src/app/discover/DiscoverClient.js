@@ -40,12 +40,12 @@ export default function DiscoverClient() {
 
         const airtableProperties = data.properties || [];
         const nextProps = USE_MOCK_DATA ? {
-          Residential: [...DISCOVER_PROPERTIES.Residential],
-          Commercial: [...DISCOVER_PROPERTIES.Commercial],
-          STR: [...DISCOVER_PROPERTIES.STR],
-          Hospitality: [...DISCOVER_PROPERTIES.Hospitality],
-          Restaurants: [...DISCOVER_PROPERTIES.Restaurants],
-          Venues: [...DISCOVER_PROPERTIES.Venues]
+          Residential: DISCOVER_PROPERTIES.Residential.map((property) => ({ ...property, is_sample: true })),
+          Commercial: DISCOVER_PROPERTIES.Commercial.map((property) => ({ ...property, is_sample: true })),
+          STR: DISCOVER_PROPERTIES.STR.map((property) => ({ ...property, is_sample: true })),
+          Hospitality: DISCOVER_PROPERTIES.Hospitality.map((property) => ({ ...property, is_sample: true })),
+          Restaurants: DISCOVER_PROPERTIES.Restaurants.map((property) => ({ ...property, is_sample: true })),
+          Venues: DISCOVER_PROPERTIES.Venues.map((property) => ({ ...property, is_sample: true }))
         } : { Residential: [], Commercial: [], STR: [], Hospitality: [], Restaurants: [], Venues: [] };
 
         airtableProperties.forEach(p => {
@@ -67,7 +67,8 @@ export default function DiscoverClient() {
                 region: p.region || cityToRegion(p.city || ""),
                 location: p.location || "",
                 image: p.image || p.photos?.[0] || "",
-                density
+                density,
+                is_sample: p.is_sample === true,
               });
             }
           }

@@ -1,7 +1,19 @@
 version: 2
 updates:
-  # Instructs Dependabot where to look and what language you are using
-  - package-ecosystem: "npm" # Change to "pip" for Python, "composer" for PHP, etc.
-    directory: "/" # Where your dependency file is located
+  - package-ecosystem: "npm"
+    directory: "/"
     schedule:
-      interval: "weekly" # Options: "daily", "weekly", or "monthly"
+      interval: "weekly"
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: "npm"
+    directory: "/mission-control"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5

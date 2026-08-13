@@ -91,12 +91,12 @@ export default async function BrokerDetailPage({ params }) {
 
             <div className="profile-body-content">
               <div className="detail-section">
-                <h3>Operational Profile biography</h3>
+                <h2>Operational Profile biography</h2>
                 <p className="bio-paragraph">{broker.bio}</p>
               </div>
 
               <div className="detail-section">
-                <h3>Operational Focus area</h3>
+                <h2>Operational Focus area</h2>
                 <div className="focus-pills-list">
                   <span className="focus-pill">Specialty: {broker.specialty}</span>
                   <span className="focus-pill">Location: {broker.location}</span>
@@ -109,7 +109,7 @@ export default async function BrokerDetailPage({ params }) {
 
         {/* Curated Spaces Grid */}
         <section className="detail-curations-section">
-          <h3>Curated Spaces under Management</h3>
+          <h2>Curated Spaces under Management</h2>
           <p className="section-desc">Active listings and structural briefs managed by this advisor.</p>
           
           <div className="detail-curations-grid">
@@ -121,7 +121,7 @@ export default async function BrokerDetailPage({ params }) {
                 ></div>
                 <div className="curation-card-body">
                   <span className="curation-card-cat">{prop.category}</span>
-                  <h4>{prop.title}</h4>
+                  <h3>{prop.title}</h3>
                   <span className="curation-card-link">View Showcase Briefing →</span>
                 </div>
               </Link>

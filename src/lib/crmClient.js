@@ -1,5 +1,6 @@
 // Client-side fetch helper for the CRM surfaces.
 import { getSession } from "./authClient";
+import { isDevelopmentMockAllowed } from "./developmentMock";
 
 export async function crmFetch(path, { method = "GET", body, mockUserId } = {}) {
   const { data: { session } } = await getSession();
@@ -12,9 +13,15 @@ export async function crmFetch(path, { method = "GET", body, mockUserId } = {}) 
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
 
-  if (mockUserId && process.env.NODE_ENV === "development") {
-    headers["x-mock-user-id"] = mockUserId;
-  }
+  const canSendDevelopmentMock =
+    !token &&
+    typeof window !== "undefined" &&
+    isDevelopmentMockAllowed({
+      nodeEnv: process.env.NODE_ENV,
+      hostname: window.location.hostname,
+      userId: mockUserId,
+    });
+  if (canSendDevelopmentMock) headers["x-mock-user-id"] = mockUserId;
 
   const res = await fetch(url, {
     method,

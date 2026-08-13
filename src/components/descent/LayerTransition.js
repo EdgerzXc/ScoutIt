@@ -58,7 +58,7 @@ export default function LayerTransition({ nextNum, nextName, nextHref, teaser })
           letter-spacing: 0.28em;
           text-transform: uppercase;
           color: var(--accent);
-          opacity: 0.7;
+          opacity: 1;
         }
         .layer-transition-link {
           display: flex;
@@ -85,7 +85,7 @@ export default function LayerTransition({ nextNum, nextName, nextHref, teaser })
           letter-spacing: 0.2em;
           text-transform: uppercase;
           color: var(--accent);
-          opacity: 0.6;
+          opacity: 1;
         }
         .layer-transition-name {
           font-family: var(--font-display);
@@ -98,7 +98,7 @@ export default function LayerTransition({ nextNum, nextName, nextHref, teaser })
           font-family: var(--font-body);
           font-size: 14px;
           line-height: 1.6;
-          color: rgba(255, 255, 255, 0.5);
+          color: var(--text-secondary);
           max-width: 360px;
         }
         .layer-transition-arrow {

@@ -1,19 +1,10 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
-import { getSession } from '@/lib/authClient';
+import { resolveUserId } from '@/lib/serverAuth';
 
 export async function GET(request) {
   try {
-    const { data: { session } } = await getSession();
-    
-    // Auth Check
-    let userId = session?.user?.id;
-    
-    // Fallback for dev mocks
-    if (!userId) {
-      const mockId = request.headers.get("x-mock-user-id");
-      if (mockId) userId = mockId;
-    }
+    const userId = await resolveUserId(request);
 
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

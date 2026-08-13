@@ -76,7 +76,7 @@ export const BASE_CHAPTERS = [
     id:              'units',
     navLabel:        'Units',
     chapterNumber:   '07',
-    chapterLabel:    'Units & Spaces',
+    chapterLabel:    'Units',
     defaultCollapsed: false,
     operatorToggle:  false,
   },
@@ -153,8 +153,8 @@ export const COMMERCIAL_CONFIG = buildConfig({
     chapterLabel:  'Fit-Out Potential',
   },
   units: {
-    navLabel:      'Floors',
-    chapterLabel:  'Floors & Suites',
+    navLabel:      'Available Spaces',
+    chapterLabel:  'Available Spaces',
   },
 });
 
@@ -183,8 +183,8 @@ export const STR_CONFIG = buildConfig({
     chapterLabel:  'Operating Context',
   },
   units: {
-    navLabel:      'Rooms',
-    chapterLabel:  'Rooms & Beds',
+    navLabel:      'Rooms & Facilities',
+    chapterLabel:  'Rooms & Facilities',
   },
 });
 
@@ -213,8 +213,8 @@ export const HOSPITALITY_CONFIG = buildConfig({
     chapterLabel:  'The Operational Shell',
   },
   units: {
-    navLabel:      'Room Types',
-    chapterLabel:  'Room Types',
+    navLabel:      'Rooms & Facilities',
+    chapterLabel:  'Rooms & Facilities',
   },
 });
 
@@ -248,8 +248,8 @@ export const RESTAURANT_CONFIG = buildConfig({
     operatorToggle:   true,
   },
   units: {
-    navLabel:      'The Rooms',
-    chapterLabel:  'The Rooms',
+    navLabel:      'Areas',
+    chapterLabel:  'Areas',
   },
 });
 
@@ -282,8 +282,8 @@ export const VENUE_CONFIG = buildConfig({
     operatorToggle:   true,
   },
   units: {
-    navLabel:      'Space Segments',
-    chapterLabel:  'Space Segmentation',
+    navLabel:      'Zones',
+    chapterLabel:  'Zones',
   },
 });
 

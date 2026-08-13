@@ -3,7 +3,8 @@ import { motion } from "framer-motion";
 import BookingModal from "./BookingModal";
 import DealFileSlideOver from "./crm/DealFileSlideOver";
 import { uploadAttachment } from "../../lib/storage";
-import { getSession } from "../../lib/authClient";
+import { getSession, getUser } from "../../lib/authClient";
+import { readDevelopmentMockUser } from "../../lib/developmentMock";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { maskContactDetails } from "@/lib/contactLeakFilter";
 import { lifecycleNotice } from "@/lib/pendingRequestLifecycle";
@@ -107,15 +108,15 @@ const decodeAttachment = (body) => {
 // convention (see FloatingToolbox.js) when there's no real session, matching
 // the same pattern InquiryModal/UnitInquiryModal/OperatorRequestModal use.
 async function resolveAuth() {
-  const { data: { session } } = await getSession();
-  if (session?.access_token) {
-    return { token: session.access_token, mockOwnerId: null, userId: session.user.id };
+  const [{ data: { user } }, { data: { session } }] = await Promise.all([getUser(), getSession()]);
+  if (user && session?.access_token && session.user?.id === user.id) {
+    return { token: session.access_token, mockOwnerId: null, userId: user.id };
   }
-  try {
-    const raw = localStorage.getItem("scoutit_user");
-    const u = raw ? JSON.parse(raw) : null;
-    if (u?.id) return { token: null, mockOwnerId: u.id, userId: u.id };
-  } catch {}
+  const mockUser = readDevelopmentMockUser(localStorage, {
+    nodeEnv: process.env.NODE_ENV,
+    hostname: window.location.hostname,
+  });
+  if (mockUser) return { token: null, mockOwnerId: mockUser.id, userId: mockUser.id };
   return { token: null, mockOwnerId: null, userId: null };
 }
 

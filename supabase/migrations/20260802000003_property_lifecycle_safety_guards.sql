@@ -43,6 +43,7 @@ ALTER TABLE public.properties
     'pending',
     'external_applied',
     'reconciliation_required'
+  ));
 
 ALTER TABLE public.property_lifecycle_events
   ADD COLUMN IF NOT EXISTS operation_key TEXT;

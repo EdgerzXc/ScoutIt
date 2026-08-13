@@ -1,0 +1,13 @@
+# ScoutIt currently has one repository administrator. Keep ownership explicit so
+# sensitive paths can become required-review boundaries when a ruleset is enabled.
+* @EdgerzXc
+
+/.github/ @EdgerzXc
+/package.json @EdgerzXc
+/package-lock.json @EdgerzXc
+/mission-control/package.json @EdgerzXc
+/mission-control/package-lock.json @EdgerzXc
+/src/app/api/ @EdgerzXc
+/src/lib/ @EdgerzXc
+/mission-control/src/ @EdgerzXc
+/supabase/migrations/ @EdgerzXc

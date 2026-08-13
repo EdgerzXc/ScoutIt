@@ -355,36 +355,18 @@ export default function MissionControlMode() {
                  <p className="text-xs text-text-secondary leading-relaxed">Granular control over agents, finance heads, and location managers with full audit logs.</p>
                </GlassPanel>
             </div>
-
-            {/* ⚠️ P1, fixed 2026-08-06 (§59). This block read:
-                  ₱25,000 / month
-                  [ Unlock Enterprise Sandbox ]
-                  Dev Mode: Bypass Paywall          ← literally, on production
-                The label shipped to the live site, directly under a price, on a
-                surface reachable from the mode switcher ('mc_enterprise' in
-                dashboard/page.js) — not just the dev toolbox, as an earlier note
-                assumed. It advertised the paywall as unintended and bypassable.
-
-                The button still only does 'setIsEnterprise(true)' — client
-                state, no payment, no server check. That is Standing Rule 5: a
-                gate the client evaluates is a suggestion. It is left working
-                because this IS a preview surface today and nothing is being
-                sold yet — but it is now labelled as a preview instead of as a
-                bypass, so the screen stops implying a broken paywall.
-
-                🔴 BEFORE PAYMENTS: wire this to 'lib/entitlements.js' and drop
-                the free grant. Tracked as W14/D1 (advertised benefits with no
-                implementation) — this is the same problem wearing a button. */}
+            {/* Controlled-pilot preview: client state may reveal this demo, but
+                it never creates an entitlement, checkout, or subscription. */}
             <div className="pt-10 flex flex-col items-center gap-4">
-              <div className="text-3xl text-white font-display-md">₱25,000 <span className="text-sm text-text-secondary font-sans font-normal">/ month</span></div>
+              <div className="text-3xl text-white font-display-md">Pilot access</div>
               <button onClick={() => setIsEnterprise(true)} className="px-10 py-4 bg-gold-accent hover:bg-gold-accent-bright text-black rounded-full font-medium transition shadow-[0_0_20px_rgba(232,174,60,0.3)] hover:shadow-[0_0_30px_rgba(247,198,78,0.5)] hover:-translate-y-1">
-                Explore the Enterprise preview
+                Open the Enterprise preview
               </button>
               <p className="text-xs text-text-secondary font-mono tracking-widest uppercase mt-4">
-                Preview only — no payment, no account changes
+                No checkout. No subscription change.
               </p>
             </div>
-          </div>
+        </div>
         </div>
       ) : (
         <>

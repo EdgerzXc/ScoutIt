@@ -33,7 +33,7 @@ export default function EnterprisePage() {
         <div className="enterprise-grid">
           {CAPABILITIES.map((c) => (
             <div key={c.title} className="enterprise-card">
-              <h3>{c.title}</h3>
+              <h2>{c.title}</h2>
               <p>{c.body}</p>
             </div>
           ))}

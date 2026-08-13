@@ -88,7 +88,7 @@ export default function Footer() {
 
         <div className="footer-nav-cols">
           <div className="nav-col">
-            <h3>Platform</h3>
+            <h2>Platform</h2>
             <Link href="/discover">Discover</Link>
             <Link href="/property">Space Directory</Link>
             <Link href="/intel">Intel briefings</Link>
@@ -97,7 +97,7 @@ export default function Footer() {
           </div>
 
           <div className="nav-col">
-            <h3>Services</h3>
+            <h2>Services</h2>
             <Link href="/brokers">Brokers</Link>
             <Link href="/photographers">Photographers</Link>
             <Link href="/researchers">Researchers</Link>
@@ -106,7 +106,7 @@ export default function Footer() {
           </div>
 
           <div className="nav-col">
-            <h3>Company</h3>
+            <h2>Company</h2>
             <Link href="/about">About Us</Link>
             <Link href="/enterprise">Enterprise</Link>
             <Link href="/dashboard">Dashboard</Link>
@@ -234,7 +234,7 @@ export default function Footer() {
           gap: 12px;
         }
 
-        .nav-col h3 {
+        .nav-col h2 {
           font-size: 11px;
           font-weight: 600;
           letter-spacing: 0.15em;
@@ -273,7 +273,7 @@ export default function Footer() {
 
         .footer-legal {
           font-size: 12px;
-          color: var(--text-muted, #8f8c87);
+          color: var(--text-secondary);
           line-height: 1.5;
         }
 
@@ -285,7 +285,7 @@ export default function Footer() {
         }
 
         .footer-meta-links a {
-          color: var(--text-muted, #8f8c87);
+          color: var(--text-secondary);
           text-decoration: none;
           transition: color 0.2s ease;
         }

@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { loadPublicProviders } from "@/lib/profileClient";
+import { activePilotParticipantIds } from "@/lib/pilotProvenance.server";
 import EventPlannersClient from "./EventPlannersClient";
 
 export const dynamic = "force-dynamic";
@@ -11,6 +12,7 @@ async function loadInitialPlanners() {
       console.error("[/event-planners] server Supabase load failed:", error);
       return [];
     }
+    const pilotIds = await activePilotParticipantIds((data || []).map((profile) => profile.id));
     return (data || []).map((p) => ({
       name: p.display_name || "Unnamed Planner",
       location: p.location || "",
@@ -19,6 +21,7 @@ async function loadInitialPlanners() {
       bio: p.bio || "",
       image: p.avatar_url || "",
       isExample: !!p.is_example_account,
+      isPilot: pilotIds.has(p.id),
       available: p.provider_availability !== false,
     }));
   } catch (err) {

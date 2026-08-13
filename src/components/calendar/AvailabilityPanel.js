@@ -84,6 +84,7 @@ export default function AvailabilityPanel({ userId, addToast }) {
               <div className="flex items-center gap-2 w-full sm:w-auto">
                 <input
                   type="time"
+                  aria-label={`${day} availability start time`}
                   value={config.start}
                   onChange={(e) => setSchedule({ ...schedule, [day]: { ...config, start: e.target.value } })}
                   className="flex-1 sm:flex-none min-w-0 bg-background border border-surface-variant rounded px-2 py-2 sm:py-1 text-sm text-on-surface focus:outline-none focus:border-gold-accent"
@@ -91,6 +92,7 @@ export default function AvailabilityPanel({ userId, addToast }) {
                 <span className="text-text-muted shrink-0">-</span>
                 <input
                   type="time"
+                  aria-label={`${day} availability end time`}
                   value={config.end}
                   onChange={(e) => setSchedule({ ...schedule, [day]: { ...config, end: e.target.value } })}
                   className="flex-1 sm:flex-none min-w-0 bg-background border border-surface-variant rounded px-2 py-2 sm:py-1 text-sm text-on-surface focus:outline-none focus:border-gold-accent"

@@ -137,7 +137,7 @@ export default function StratosphereLayer() {
         <div className="descent-split">
           {/* Left Menu Panel */}
           <div className="descent-sidebar" style={{ justifyContent: "space-between" }}>
-            <nav className="descent-nav">
+            <nav className="descent-nav" aria-label="Layer categories">
               {propertyTypes.map((type) => (
                 <button
                   key={type}
@@ -218,7 +218,7 @@ export default function StratosphereLayer() {
               </div>
 
               {/* Part 2: Split News & Collections */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', borderTop: '1px solid #262626', paddingTop: '24px' }}>
+              <div role="region" tabIndex={0} aria-label="Scrollable intelligence stories" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', borderTop: '1px solid #262626', paddingTop: '24px' }}>
                 {/* News & Stories */}
                 <div>
                   <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', textTransform: 'uppercase', color: 'var(--accent)', letterSpacing: '0.1em', marginBottom: '16px' }}>News &amp; Stories</h4>

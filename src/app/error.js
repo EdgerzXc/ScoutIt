@@ -12,7 +12,7 @@ import { reportError } from "@/lib/reportError";
 // in practice means a broker mid-walkthrough, phone in hand, looking at
 // nothing. This intercepts the crash and renders a dark-gold recovery card
 // with a working Reload, while logging the real error to Sentry (via the
-// global handler) and to Supabase error_reports.
+// global handler) and through the privacy-limited Sentry report helper.
 //
 // MOBILE FIRST: single-column stack, full-width 48px buttons, generous
 // padding. The one media query widens it on desktop.

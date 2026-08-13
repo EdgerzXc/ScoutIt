@@ -33,7 +33,7 @@ test.describe('Discovery engine', () => {
     await expect(briefingLink).toBeVisible({ timeout: 10000 });
     await briefingLink.click();
 
-    await page.waitForURL(/\/property\/.+/, { timeout: 20000 });
+    await expect(page).toHaveURL(/\/property\/.+/, { timeout: 20000 });
     await expectRealContent(page, 200);
   });
 });
@@ -57,8 +57,9 @@ test.describe('Property directory + briefing page', () => {
     await gotoAndSettle(page, '/property');
     const firstLink = page.locator('a[href^="/property/"]').first();
     await expect(firstLink).toBeVisible({ timeout: 25000 });
-    await firstLink.click();
-    await page.waitForURL(/\/property\/.+/, { timeout: 20000 });
+    await firstLink.focus();
+    await page.keyboard.press('Enter');
+    await expect(page).toHaveURL(/\/property\/.+/, { timeout: 20000 });
     await expectRealContent(page, 200);
 
     // The chapter-registry system: a Your Move chapter must exist. Prices are
@@ -72,12 +73,12 @@ test.describe('Property directory + briefing page', () => {
 
     // Opening the contact surface covers the last safe step of the buyer
     // journey. Stop before spending a Connect or submitting an inquiry.
-    const connectButton = yourMovePanel
-      .getByRole('button', { name: /connect with an authorized broker/i })
-      .first();
+    const connectButton = page.viewportSize().width < 900
+      ? page.getByRole('button', { name: /inquire about this space/i }).first()
+      : yourMovePanel.getByRole('button', { name: /connect with an authorized broker/i }).first();
     await expect(connectButton).toBeVisible({ timeout: 15000 });
     await connectButton.click();
-    const inquiryDialog = page.getByRole('dialog', { name: /contact the owner/i });
+    const inquiryDialog = page.getByRole('dialog', { name: /contact the property recipient/i });
     await expect(inquiryDialog).toBeVisible();
     await inquiryDialog.getByRole('button', { name: 'Close' }).click();
     await expect(inquiryDialog).toBeHidden();
@@ -100,7 +101,7 @@ test.describe('The Ledger (device-only wishlist)', () => {
       const briefing = card.getByRole('link', { name: /view full briefing/i }).first();
       await expect(briefing).toBeVisible({ timeout: 10000 });
       await briefing.click();
-      await page.waitForURL(/\/property\/.+/, { timeout: 20000 });
+      await expect(page).toHaveURL(/\/property\/.+/, { timeout: 20000 });
 
       const saveBtn = page.getByRole('button', { name: /save to your board/i }).first();
       await expect(saveBtn).toBeVisible({ timeout: 20000 });

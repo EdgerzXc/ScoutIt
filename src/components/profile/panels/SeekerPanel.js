@@ -6,37 +6,63 @@
 import Link from "next/link";
 import { Bookmark, Search, Share2 } from "lucide-react";
 import { useState } from "react";
+import { getSession } from "@/lib/authClient";
 
 export default function SeekerPanel({ savedCount = 0, isAnonymous = false }) {
   const [shareLink, setShareLink] = useState(null);
   const [generating, setGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [shareMessage, setShareMessage] = useState("");
+  const [confirmRevoke, setConfirmRevoke] = useState(false);
+
+  const shareRequest = async (method) => {
+    const { data } = await getSession();
+    const token = data?.session?.access_token;
+    if (!token) throw new Error("Sign in again to manage shared links.");
+    const response = await fetch("/api/wishlist/share", {
+      method,
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(body.error || "Could not manage shared links.");
+    return body;
+  };
 
   const handleGenerateLink = async () => {
     setGenerating(true);
+    setShareMessage("");
     try {
-      const mockStr = localStorage.getItem("scoutit_user");
-      let mockOwnerId = "master-dev"; // Default fallback
-      if (mockStr) {
-        try {
-          const userObj = JSON.parse(mockStr);
-          if (userObj.id) mockOwnerId = userObj.id;
-        } catch (e) {}
-      }
-
-      const res = await fetch("/api/wishlist/share", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mockOwnerId })
-      });
-      const data = await res.json();
+      const data = await shareRequest("POST");
       if (data.shareToken) {
         setShareLink(`${window.location.origin}/wishlist/shared/${data.shareToken}`);
+        setShareMessage("A new 90-day link is ready. Older deactivated links stay closed.");
       }
-    } catch (e) {
-      console.error(e);
+    } catch (error) {
+      setShareMessage(error.message);
     } finally {
       setGenerating(false);
+    }
+  };
+
+  const handleRevokeLinks = async () => {
+    if (!confirmRevoke) {
+      setConfirmRevoke(true);
+      setShareMessage("Select confirm to deactivate every Board link you shared before now.");
+      return;
+    }
+
+    setGenerating(true);
+    setShareMessage("");
+    try {
+      await shareRequest("DELETE");
+      setShareLink(null);
+      setCopied(false);
+      setShareMessage("All previously shared Board links are now deactivated.");
+    } catch (error) {
+      setShareMessage(error.message);
+    } finally {
+      setGenerating(false);
+      setConfirmRevoke(false);
     }
   };
 
@@ -47,6 +73,7 @@ export default function SeekerPanel({ savedCount = 0, isAnonymous = false }) {
       setTimeout(() => setCopied(false), 2000);
     }
   };
+
   return (
     <section style={panelStyle}>
       <div style={panelHeader}>
@@ -77,43 +104,34 @@ export default function SeekerPanel({ savedCount = 0, isAnonymous = false }) {
             Share Your Board
           </span>
         </div>
-        {shareLink ? (
+        <div style={shareActions}>
           <button
-            onClick={copyToClipboard}
-            style={{
-              fontFamily: "var(--font-body)",
-              fontSize: 11,
-              color: copied ? "#22c55e" : "#E8AE3C",
-              border: `1px solid ${copied ? "rgba(34, 197, 94, 0.4)" : "rgba(232, 174, 60,0.3)"}`,
-              borderRadius: 20,
-              padding: "4px 12px",
-              cursor: "pointer",
-              background: copied ? "rgba(34, 197, 94, 0.1)" : "rgba(232, 174, 60, 0.05)",
-              transition: "all 0.2s ease"
-            }}
-          >
-            {copied ? "Copied to Clipboard!" : "Copy Share Link"}
-          </button>
-        ) : (
-          <button
-            onClick={handleGenerateLink}
+            type="button"
+            onClick={shareLink ? copyToClipboard : handleGenerateLink}
             disabled={generating}
             style={{
-              fontFamily: "var(--font-body)",
-              fontSize: 11,
-              color: generating ? "rgba(232, 174, 60,0.5)" : "#E8AE3C",
-              border: "1px solid rgba(232, 174, 60,0.3)",
-              borderRadius: 20,
-              padding: "4px 12px",
-              cursor: generating ? "not-allowed" : "pointer",
-              background: "rgba(232, 174, 60,0.05)",
-              transition: "all 0.2s ease"
+              ...shareButton,
+              color: copied ? "var(--success)" : "var(--accent)",
+              opacity: generating ? 0.55 : 1,
             }}
           >
-            {generating ? "Generating..." : "Generate Token Link"}
+            {generating
+              ? "Working…"
+              : shareLink
+                ? copied ? "Copied" : "Copy link"
+                : "Create 90-day link"}
           </button>
-        )}
+          <button
+            type="button"
+            onClick={handleRevokeLinks}
+            disabled={generating}
+            style={revokeButton}
+          >
+            {confirmRevoke ? "Confirm deactivation" : "Deactivate links"}
+          </button>
+        </div>
       </div>
+      {shareMessage && <p role="status" style={shareStatus}>{shareMessage}</p>}
 
       {isAnonymous && (
         <div style={anonNotice}>
@@ -199,6 +217,41 @@ const wishlistRow = {
   justifyContent: "space-between",
   padding: "12px 0",
   borderTop: "1px solid rgba(255,255,255,0.04)",
+};
+
+const shareActions = {
+  display: "flex",
+  flexWrap: "wrap",
+  justifyContent: "flex-end",
+  gap: 8,
+};
+
+const shareButton = {
+  minHeight: 36,
+  padding: "7px 12px",
+  border: "1px solid rgba(var(--accent-rgb), 0.3)",
+  borderRadius: 20,
+  background: "rgba(var(--accent-rgb), 0.06)",
+  fontFamily: "var(--font-mono)",
+  fontSize: 10,
+  letterSpacing: "0.06em",
+  textTransform: "uppercase",
+  cursor: "pointer",
+};
+
+const revokeButton = {
+  ...shareButton,
+  color: "var(--text-secondary)",
+  border: "1px solid rgba(255,255,255,0.1)",
+  background: "transparent",
+};
+
+const shareStatus = {
+  margin: "-2px 0 12px",
+  color: "var(--text-secondary)",
+  fontFamily: "var(--font-body)",
+  fontSize: 11,
+  lineHeight: 1.5,
 };
 
 const anonNotice = {

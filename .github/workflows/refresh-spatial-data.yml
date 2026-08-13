@@ -6,16 +6,21 @@ on:
     - cron: '0 22 * * 0'
   workflow_dispatch: # Allow manual trigger
 
+concurrency:
+  group: refresh-spatial-data
+  cancel-in-progress: false
+
 jobs:
   check-data-freshness:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       contents: read
       issues: write
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Check Infrastructure Projects Staleness
         id: check_infra
@@ -107,7 +112,7 @@ jobs:
 
       - name: Create Issue if Stale
         if: steps.check_infra.outputs.stale == 'true'
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           script: |
             const title = `🏗️ Infrastructure Data Stale — Manual Review Required`;

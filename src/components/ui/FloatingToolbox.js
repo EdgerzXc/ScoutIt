@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { reportError } from "@/lib/reportError";
 import { TIERS, TIER_LABELS } from "@/lib/entitlements";
 import { getStoredLiteMode, setLiteMode } from "@/lib/liteMode";
@@ -36,6 +37,7 @@ const WIZARD_STEPS = [
 ];
 
 export default function FloatingToolbox({ showTrigger = true }) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState("dark");
   const [lite, setLite] = useState(false);
@@ -48,6 +50,7 @@ export default function FloatingToolbox({ showTrigger = true }) {
   const [reportText, setReportText] = useState("");
   const [reportSent, setReportSent] = useState(false);
   const [reportSending, setReportSending] = useState(false);
+  const [reportFailed, setReportFailed] = useState(false);
 
   // ── Dev tools (hidden) ──
   const [devOn, setDevOn] = useState(false);
@@ -82,7 +85,11 @@ export default function FloatingToolbox({ showTrigger = true }) {
     
     // Migrate old key
     const legacy = localStorage.getItem("scoutit_accessibility_mode") === "high-contrast" ? "high-contrast" : null;
-    const savedMode = localStorage.getItem("scoutit_display_mode") || legacy || "dark";
+    const requestedMode = localStorage.getItem("scoutit_display_mode") || legacy || "dark";
+    // Light Mode remains implemented for later remediation, but its full-route
+    // contrast audit failed the pilot gate. Normalize old selections to Dark.
+    const savedMode = requestedMode === "light" ? "dark" : requestedMode;
+    if (requestedMode === "light") localStorage.setItem("scoutit_display_mode", "dark");
     const savedPos = (() => {
       try { return JSON.parse(localStorage.getItem("scoutit_toolbox_pos")); }
       catch { return null; }
@@ -127,8 +134,19 @@ export default function FloatingToolbox({ showTrigger = true }) {
     function handleOpenDisplay() {
       setOpen(true);
     }
+    window.__scoutitOpenDisplaySettings = handleOpenDisplay;
     window.addEventListener("scoutit:open-display-settings", handleOpenDisplay);
-    return () => window.removeEventListener("scoutit:open-display-settings", handleOpenDisplay);
+    if (window.__scoutitDisplaySettingsRequested) {
+      delete window.__scoutitDisplaySettingsRequested;
+      handleOpenDisplay();
+    }
+    window.dispatchEvent(new CustomEvent("scoutit:display-settings-ready"));
+    return () => {
+      window.removeEventListener("scoutit:open-display-settings", handleOpenDisplay);
+      if (window.__scoutitOpenDisplaySettings === handleOpenDisplay) {
+        delete window.__scoutitOpenDisplaySettings;
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -156,7 +174,7 @@ export default function FloatingToolbox({ showTrigger = true }) {
       localStorage.setItem("scoutit_user", JSON.stringify(u));
       
       if (window.location.pathname.includes("/onboarding")) {
-        window.location.assign("/dashboard");
+        router.push("/dashboard");
       } else {
         window.location.reload();
       }
@@ -183,7 +201,7 @@ export default function FloatingToolbox({ showTrigger = true }) {
       u.active_roles = [...new Set([...(u.active_roles || []), modeId])];
       u.primaryMode = modeId;
       localStorage.setItem("scoutit_user", JSON.stringify(u));
-      window.location.assign("/dashboard");
+      router.push("/dashboard");
     } catch {}
   };
 
@@ -202,8 +220,13 @@ export default function FloatingToolbox({ showTrigger = true }) {
   const submitReport = async () => {
     if (!reportText.trim()) return;
     setReportSending(true);
-    await reportError({ kind: "user_report", message: reportText.trim() });
+    setReportFailed(false);
+    const delivered = await reportError({ kind: "user_report", message: reportText.trim() });
     setReportSending(false);
+    if (!delivered) {
+      setReportFailed(true);
+      return;
+    }
     setReportSent(true);
     setReportText("");
     setTimeout(() => { setReportSent(false); setReportOpen(false); }, 2200);
@@ -441,7 +464,6 @@ export default function FloatingToolbox({ showTrigger = true }) {
           <div style={{ padding: "9px 9px 7px", display: "flex", flexDirection: "column", gap: 5 }}>
             {[
               { key: "dark",          label: "Dark Mode",     desc: "Cosmic default",        dot: "#1e1e1e", dotBorder: "rgba(255,255,255,0.18)" },
-              { key: "light",         label: "Light Mode",    desc: "Bright, open reading",  dot: "#f0ede8", dotBorder: "rgba(0,0,0,0.18)" },
               { key: "high-contrast", label: "High Contrast", desc: "Maximum readability",   dot: "#E8AE3C", dotBorder: "rgba(232, 174, 60,0.4)" },
             ].map(({ key, label, desc, dot, dotBorder }) => (
               <button
@@ -671,14 +693,16 @@ export default function FloatingToolbox({ showTrigger = true }) {
             ) : (
               <>
                 <h3 className="font-headline-editorial text-xl text-[#f0ede8] mb-1">Report a problem</h3>
-                <p className="text-xs text-[rgba(255,255,255,0.6)] mb-4">Tell us what went wrong or felt off. This goes straight to the team.</p>
+                <p className="text-xs text-[rgba(255,255,255,0.6)] mb-4">Tell us what went wrong or felt off. This goes straight to the team without session recording.</p>
                 <textarea
                   className="w-full bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.1)] rounded px-4 py-3 text-[#f0ede8] text-sm min-h-[120px] focus:outline-none focus:border-gold-accent transition-colors"
                   placeholder="What happened?"
                   value={reportText}
-                  onChange={e => setReportText(e.target.value)}
+                  onChange={e => { setReportText(e.target.value); setReportFailed(false); }}
+                  maxLength={2000}
                   autoFocus
                 />
+                {reportFailed && <p role="alert" className="mt-3 text-xs text-error">The report was not delivered. Please keep your text and try again after reconnecting.</p>}
                 <div className="flex gap-3 mt-4">
                   <button type="button" className="flex-1 border border-[rgba(255,255,255,0.1)] text-[rgba(255,255,255,0.6)] hover:text-white font-label-caps uppercase tracking-widest text-sm py-3 rounded transition-colors" onClick={() => setReportOpen(false)}>Cancel</button>
                   <button type="button" className="flex-1 bg-gold-accent text-black font-label-caps uppercase tracking-widest font-bold text-sm py-3 rounded hover:opacity-90 transition-opacity disabled:opacity-50" disabled={!reportText.trim() || reportSending} onClick={submitReport}>{reportSending ? "Sending…" : "Send report"}</button>

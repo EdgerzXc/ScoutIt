@@ -21,9 +21,29 @@ export async function GET(_request, { params }) {
       console.error("[PROPERTY BROKERS API] Property lookup failed:", propertyError);
       return NextResponse.json({ error: "Property roster unavailable" }, { status: 503 });
     }
-    if (!property) return NextResponse.json({ error: "Property not found" }, { status: 404 });
+    if (!property) {
+      // A public Airtable listing may predate its Supabase publishing bridge.
+      // That is an honest "roster not configured" state, not a missing page and
+      // not permission to invent a contact recipient.
+      return NextResponse.json({
+        property: { id: null, title: null, slug },
+        brokers: [],
+        represented: false,
+        contactable: false,
+        rosterStatus: "not_configured",
+      });
+    }
     if (normalizeLifecycleState(property) !== PROPERTY_LIFECYCLE_STATES.LIVE) {
-      return NextResponse.json({ error: "Property roster is not publicly available" }, { status: 404 });
+      // The Airtable public catalog and Supabase lifecycle can temporarily drift.
+      // Do not leak a private roster or emit a false missing-page error; render a
+      // non-contactable state until the publishing bridge is reconciled.
+      return NextResponse.json({
+        property: { id: property.id, title: property.title, slug: property.canonical_slug || property.slug },
+        brokers: [],
+        represented: false,
+        contactable: false,
+        rosterStatus: "not_public",
+      });
     }
 
     const routing = await getPropertyLeadRecipients(supabaseAdmin, property.id);
@@ -31,7 +51,13 @@ export async function GET(_request, { params }) {
 
     const brokerIds = routing.roster.map((recipient) => recipient.recipientId);
     if (brokerIds.length === 0) {
-      return NextResponse.json({ property: { id: property.id, title: property.title, slug: property.canonical_slug || property.slug }, brokers: [], represented: false });
+      return NextResponse.json({
+        property: { id: property.id, title: property.title, slug: property.canonical_slug || property.slug },
+        brokers: [],
+        represented: false,
+        contactable: routing.recipients.some((recipient) => Boolean(recipient.recipientId)),
+        rosterStatus: "unrepresented",
+      });
     }
 
     const [{ data: profiles, error: profilesError }, { data: brokerProfiles, error: brokerProfilesError }] = await Promise.all([
@@ -70,6 +96,8 @@ export async function GET(_request, { params }) {
       property: { id: property.id, title: property.title, slug: property.canonical_slug || property.slug },
       brokers,
       represented: brokers.length > 0,
+      contactable: routing.recipients.some((recipient) => Boolean(recipient.recipientId)),
+      rosterStatus: brokers.length > 0 ? "represented" : "unrepresented",
     });
   } catch (error) {
     console.error("[PROPERTY BROKERS API] Error:", error);

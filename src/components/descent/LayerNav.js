@@ -78,6 +78,7 @@ export default function LayerNav({ prev = null, next = null }) {
   return (
     <>
       <nav
+        aria-label="Layer navigation"
         style={{
           position: "fixed",
           top: 0,

@@ -1,14 +1,15 @@
 import React from 'react';
+import { isSamplePropertySlug } from '@/lib/sampleInventory';
 
 export default function ProvenanceBadge({ record }) {
-  if (!record || !record.is_sample) return null;
+  if (!record || (!record.is_sample && !isSamplePropertySlug(record.slug))) return null;
 
   return (
-    <span 
-      className="inline-flex items-center justify-center px-1.5 py-0.5 rounded-[2px] bg-[rgba(232,174,60,0.15)] border border-[rgba(232,174,60,0.3)] text-[#E8AE3C] text-[10px] uppercase font-mono tracking-widest leading-none ml-2 align-middle select-none whitespace-nowrap"
-      title="This is a demonstration listing"
+    <span
+      className="ml-2 inline-flex select-none items-center justify-center whitespace-nowrap rounded-sm border border-gold-accent/30 bg-gold-accent/10 px-2 py-1 align-middle font-mono text-[9px] uppercase leading-none tracking-[0.14em] text-gold-accent"
+      title="Sample data retained only for invited human testing"
     >
-      Sample
+      Sample data &mdash; for human testing
     </span>
   );
 }

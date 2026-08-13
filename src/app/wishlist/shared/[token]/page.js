@@ -1,4 +1,4 @@
-import { decryptUserId } from "@/lib/wishlistCrypto";
+import { decodeWishlistShareToken, isWishlistShareRevoked } from "@/lib/wishlistCrypto";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { fetchProperties } from "@/lib/airtable";
 import Header from "@/components/layout/Header";
@@ -24,10 +24,24 @@ export default async function SharedWishlistPage({ params }) {
   // the only decode path. A null result means the token wasn't signed by this
   // server — wrong shape, tampered with, or the secret is missing — and all of
   // those should look identical to a visitor.
-  const userId = decryptUserId(token);
-  if (!userId) {
+  const tokenDetails = decodeWishlistShareToken(token);
+  if (!tokenDetails || !supabaseAdmin) {
     return notFound();
   }
+
+  const { data: revocation, error: revocationError } = await supabaseAdmin
+    .from("wishlist_share_revocations")
+    .select("revoked_before")
+    .eq("user_id", tokenDetails.userId)
+    .maybeSingle();
+
+  // Revocation storage is part of the share-link security boundary. If it is
+  // unavailable, fail closed instead of accidentally reviving a disabled link.
+  if (revocationError || isWishlistShareRevoked(tokenDetails, revocation?.revoked_before)) {
+    return notFound();
+  }
+
+  const userId = tokenDetails.userId;
 
   // Fetch saved_intel for this user
   const { data: savedItems, error } = await supabaseAdmin

@@ -5,11 +5,12 @@ import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import AmbientRail from "@/components/layout/ambient/AmbientRail";
 
-export default function Header() {
+export default function Header({ ambientContext = null }) {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [displaySettingsOpen, setDisplaySettingsOpen] = useState(false);
+
   const menuRef = useRef(null);
 
   useEffect(() => {
@@ -46,6 +47,16 @@ export default function Header() {
     window.addEventListener("scoutit:display-settings-state", syncDisplaySettings);
     return () => window.removeEventListener("scoutit:display-settings-state", syncDisplaySettings);
   }, []);
+
+  function openDisplaySettings() {
+    if (typeof window.__scoutitOpenDisplaySettings === "function") {
+      window.__scoutitOpenDisplaySettings();
+      return;
+    }
+    window.__scoutitDisplaySettingsRequested = true;
+    window.dispatchEvent(new CustomEvent("scoutit:open-display-settings"));
+  }
+
   const profileHref = user ? "/profile" : "/onboarding";
 
 
@@ -72,17 +83,18 @@ export default function Header() {
       </div>
 
       <div className="header-center">
-        <AmbientRail user={user} />
+        <AmbientRail user={user} context={ambientContext} />
       </div>
 
       <nav className="header-nav" ref={menuRef}>
         <button
           className={`header-eye-btn ${displaySettingsOpen ? "is-open" : ""}`}
           type="button"
-          onClick={() => window.dispatchEvent(new CustomEvent("scoutit:open-display-settings"))}
-          aria-label="Display Settings (Light / Lite / Dark Mode)"
+          onClick={openDisplaySettings}
+
+          aria-label="Display Settings (Dark / High Contrast / Lite Mode)"
           aria-expanded={displaySettingsOpen}
-          title="Display Settings (Light / Lite / Dark Mode)"
+          title="Display Settings (Dark / High Contrast / Lite Mode)"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
@@ -117,8 +129,9 @@ export default function Header() {
             className="dropdown-display-btn"
             onClick={() => {
               setMenuOpen(false);
-              window.dispatchEvent(new CustomEvent("scoutit:open-display-settings"));
+              openDisplaySettings();
             }}
+
           >
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12Z" /><circle cx="12" cy="12" r="3" /></svg>
             <span>Display Settings</span>
@@ -157,7 +170,7 @@ export default function Header() {
 
         .header-gold-thread { position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; overflow: hidden; pointer-events: none; }
         .header-gold-thread::before { content: ""; position: absolute; inset: 0; height: 1px; background: linear-gradient(90deg, transparent 4%, rgba(var(--accent-rgb),.14) 24%, rgba(var(--accent-rgb),.32) 50%, rgba(var(--accent-rgb),.14) 76%, transparent 96%); }
-        .header-gold-thread span { position: absolute; top: 0; left: 0; width: 220px; height: 1px; background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb),.26), var(--accent-bright), rgba(var(--accent-rgb),.26), transparent); filter: drop-shadow(0 0 4px rgba(var(--accent-rgb),.42)); animation: headerThreadPass 10.5s cubic-bezier(.45,0,.55,1) infinite; }
+        .header-gold-thread span { position: absolute; top: 0; left: 0; width: 220px; height: 1px; background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb),.26), var(--accent-bright), rgba(var(--accent-rgb),.26), transparent); filter: drop-shadow(0 0 4px rgba(var(--accent-rgb),.42)); animation: headerThreadPass 1.4s var(--ease-out-custom) 180ms both; }
 
         .header-left {
           display: flex;
@@ -189,7 +202,7 @@ export default function Header() {
           padding: 8px 16px;
           border-radius: 20px;
           cursor: pointer;
-          transition: all 0.25s ease;
+          transition: transform 160ms var(--ease-out-custom), border-color 180ms ease, color 180ms ease, background-color 180ms ease;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -287,7 +300,7 @@ export default function Header() {
           align-items: center;
           justify-content: center;
           text-decoration: none;
-          transition: all 0.2s cubic-bezier(0.23, 1, 0.32, 1);
+          transition: transform 160ms var(--ease-out-custom), border-color 180ms ease, background-color 180ms ease;
         }
         .header-profile-btn:active {
           transform: scale(0.94);
@@ -340,7 +353,7 @@ export default function Header() {
           display: flex;
           align-items: center;
           justify-content: center;
-          transition: all 0.2s cubic-bezier(0.23, 1, 0.32, 1);
+          transition: transform 160ms var(--ease-out-custom), border-color 180ms ease, background-color 180ms ease;
           touch-action: manipulation;
         }
         .header-menu-btn:active {
@@ -483,9 +496,9 @@ export default function Header() {
           }
 
           .header-back-btn {
-            font-size: 9px;
+            font-size: 10px;
             padding: 0 8px;
-            min-height: 30px;
+            min-height: 36px;
             white-space: nowrap;
             border-radius: 14px;
           }
@@ -495,8 +508,8 @@ export default function Header() {
           }
 
           .header-menu-btn {
-            width: 30px;
-            height: 30px;
+            width: 36px;
+            height: 36px;
           }
           .header-menu-btn svg { width: 13px; height: 13px; }
 
@@ -544,9 +557,9 @@ export default function Header() {
         @media (max-width: 480px) {
           .global-header { padding: 4px 8px; gap: 5px; min-height: 44px; }
           .header-left { gap: 4px; }
-          .header-back-btn { font-size: 8px; padding: 0 6px; min-height: 28px; letter-spacing: 0.06em; border-radius: 12px; }
+          .header-back-btn { font-size: 10px; padding: 0 6px; min-height: 36px; letter-spacing: 0.06em; border-radius: 14px; }
           .header-brand { font-size: 16px; margin: 0; letter-spacing: 1px; }
-          .header-menu-btn { width: 28px; height: 28px; }
+          .header-menu-btn { width: 36px; height: 36px; }
           .header-menu-btn svg { width: 12px; height: 12px; }
         }
 
@@ -574,7 +587,7 @@ export default function Header() {
 
           .header-menu-btn,
           .header-back-btn {
-            -webkit-tap-highlight-color: rgba(232, 174, 60, 0.15);
+            -webkit-tap-highlight-color: rgba(var(--accent-rgb), 0.15);
           }
         }
       `}</style>

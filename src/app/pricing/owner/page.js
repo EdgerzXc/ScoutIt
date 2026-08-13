@@ -3,6 +3,7 @@
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import ConnectsExplainer from "@/components/pricing/ConnectsExplainer";
+import PilotPaymentControls, { PilotPaymentNotice } from "@/components/pricing/PilotPaymentControls";
 import Link from "next/link";
 import { Check } from "lucide-react";
 
@@ -106,6 +107,8 @@ export default function OwnerPricingPage() {
           </p>
         </header>
 
+        <PilotPaymentNotice />
+
         <div className="pricing-grid z-10 relative w-full max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-6 px-4">
           {TIERS.map((tier) => (
             <div 
@@ -161,17 +164,7 @@ export default function OwnerPricingPage() {
               </ul>
 
               <div className="mt-auto">
-                <button
-                  type="button"
-                  onClick={() => window.dispatchEvent(new CustomEvent("scoutit:open-waitlist", { detail: { role: "owner", tier: tier.name, source: "pricing-owner" } }))}
-                  className={`block w-full text-center py-3 rounded font-working-title text-xs uppercase tracking-widest font-bold cursor-pointer transition-all ${
-                    tier.highlight
-                      ? 'bg-gold-accent text-background hover:bg-gold-bright shadow-[0_0_20px_rgba(232,174,60,0.2)] hover:shadow-[0_0_30px_rgba(232,174,60,0.4)]'
-                      : 'bg-transparent border border-gold-accent/40 text-gold-accent hover:bg-gold-accent/10'
-                  }`}
-                >
-                  Join the Waitlist
-                </button>
+                <PilotPaymentControls role="owner" tier={tier.name} source="pricing-owner" />
               </div>
             </div>
           ))}

@@ -326,7 +326,7 @@ body.light-mode .visualContent {
 }
 
 .affinityLabel {
-  color: var(--text-muted);
+  color: var(--text-secondary);
 }
 
 .affinityValue {
@@ -479,7 +479,7 @@ body.light-mode .visualContent {
 
 .contextCode {
   font-size: 10px;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   font-family: var(--font-mono);
 }
 

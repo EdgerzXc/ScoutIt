@@ -539,7 +539,7 @@ export default function BuyerMode() {
               {/* Intel Brief 1 — links must point at REAL briefings (the old
                   makati-yields / nuvali-expansion / pasig-zoning slugs never
                   existed and 404'd from the dashboard) */}
-              <Link href="/intel/bgc-condo-yields-rise" className="block shrink-0 w-[320px] md:w-[400px] snap-start">
+              <Link href="/intel" className="block shrink-0 w-[320px] md:w-[400px] snap-start">
                 <div className="card-atmosphere-gold hov-glow rounded-lg p-6 flex flex-col justify-between transition cursor-pointer group h-full">
                   <div>
                     <span className="inline-block bg-gold-accent/10 text-gold-accent font-label-caps text-[10px] tracking-widest uppercase px-2 py-1 rounded mb-4">Market Intel</span>
@@ -553,7 +553,7 @@ export default function BuyerMode() {
               </Link>
 
               {/* Intel Brief 2 */}
-              <Link href="/intel/makati-central-resurgence" className="block shrink-0 w-[320px] md:w-[400px] snap-start">
+              <Link href="/intel" className="block shrink-0 w-[320px] md:w-[400px] snap-start">
                 <div className="card-atmosphere-gold hov-glow rounded-lg p-6 flex flex-col justify-between transition cursor-pointer group h-full">
                   <div>
                     <span className="inline-block bg-gold-accent/10 text-gold-accent font-label-caps text-[10px] tracking-widest uppercase px-2 py-1 rounded mb-4">Area Guide</span>
@@ -567,7 +567,7 @@ export default function BuyerMode() {
               </Link>
 
               {/* Intel Brief 3 */}
-              <Link href="/intel/high-street-expansion" className="block shrink-0 w-[320px] md:w-[400px] snap-start">
+              <Link href="/intel" className="block shrink-0 w-[320px] md:w-[400px] snap-start">
                 <div className="card-atmosphere-gold hov-glow rounded-lg p-6 flex flex-col justify-between transition cursor-pointer group h-full">
                   <div>
                     <span className="inline-block bg-gold-accent/10 text-gold-accent font-label-caps text-[10px] tracking-widest uppercase px-2 py-1 rounded mb-4">Commercial Signal</span>
