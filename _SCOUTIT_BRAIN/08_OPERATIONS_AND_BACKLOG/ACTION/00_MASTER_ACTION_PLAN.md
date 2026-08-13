@@ -2,13 +2,13 @@
 section: "08_OPERATIONS_AND_BACKLOG/ACTION"
 status: active
 tags: [canonical, master-action-plan, open-work, launch, roadmap]
-updated: 2026-08-11
+updated: 2026-08-13
 related:
-  - "[[05_DONE_VERIFICATION_2026-08-08]]"
-  - "[[06_SESSION_HANDOFF_2026-08-08]]"
+  - "[[2026-08-13_BRAIN_PRUNING_RECORD|Brain Pruning Record]]"
   - "[[MASTER_OWNER_ACTIONS]]"
-  - "[[../ROADMAP_TRIAGE_2026-08-08]]"
-  - "[[../../15_IMPLEMENTATION_RECORDS/active/launch-readiness/FULL_SYSTEM_REAUDIT_2026-08-09]]"
+  - "[[08_OPERATIONS_AND_BACKLOG/ACTION/FUTURE|FUTURE]]"
+  - "[[../../15_IMPLEMENTATION_RECORDS/historical/launch-readiness/FULL_SYSTEM_REAUDIT_2026-08-09]]"
+  - "[[../../15_IMPLEMENTATION_RECORDS/active/launch-readiness/THREE_PLATFORM_SECURITY_AUDIT_2026-08-13]]"
 ---
 
 # SCOUTIT MASTER ACTION PLAN
@@ -16,7 +16,7 @@ related:
 > **This is the only live execution list.** It contains work that is still open,
 > including founder actions, unresolved decisions, verification, and
 > trigger-gated obligations. Finished work belongs in
-> [[05_DONE_VERIFICATION_2026-08-08]], not here.
+> [[2026-08-13_BRAIN_PRUNING_RECORD|Brain Pruning Record]], not here.
 
 ## Operating rule
 
@@ -32,6 +32,184 @@ related:
 7. Do not create another engineering task list. [[MASTER_OWNER_ACTIONS]] is the
    permitted filtered companion for work only the founder can do. Backlog, idea,
    prompt, and handoff files remain sources/history only.
+
+## Where we stand — audit 2026-08-13
+
+**This file is the queue, not a manually maintained dashboard counter.** The
+previous headline said 237 items while the file actually contained 285 unchecked
+boxes after later additions. Hard-coded totals have therefore been retired: they
+drift whenever work is merged. Use the priority tiers below and the first open
+acceptance item in the current phase; count checkboxes only when a dated audit
+specifically needs a snapshot.
+
+**Current pilot gate:** the previously exploitable authorization defects are fixed and the 1.0B database change is applied. That does **not** mean code is fully ready: open T0 defects, migration reconciliation, retention/cron work, legal assent, and verification remain below, alongside owner credentials and real-device checks.
+
+**Corrections made in this audit (things that no longer made sense):**
+
+1. §1.0 told a future session to *"apply the prepared telemetry migration … and verify
+   the scheduled cleanup."* That instruction is now **actively dangerous** — the
+   migration it names (`20260809000001`) was superseded by `20260812000001` and would
+   regress the storage-exhaustion fix. Struck through and replaced; the still-valid half
+   (`IP_SALT` in production) was split out as its own item so it is not lost.
+2. §1.0B claimed the `deals` UPDATE policy *"gained a `WITH CHECK`."* It did not — that
+   was the rejected fix. The live database has **no UPDATE policy on `deals` at all**,
+   which is deny-all and stronger. Corrected to describe the inverted fix that shipped.
+3. Added §1.0C recording the owner's **compress-don't-delete** decision for telemetry,
+   and the warning that the existing `clean_old_security_logs()` is a hard delete and
+   must not be scheduled as-is.
+
+## Addendum — live three-platform read, 2026-08-13 (later same day)
+
+A connected read of **GitHub, Vercel, and Supabase** was taken after the audit
+above. Evidence:
+`[[../../15_IMPLEMENTATION_RECORDS/active/launch-readiness/THREE_PLATFORM_SECURITY_AUDIT_2026-08-13]]`.
+It changes three things:
+
+1. **Two counts in §1.0A were stale and are corrected in place.** Dependabot is
+   **13**, not 25. CodeQL is **18**, not 19. Both were read from GitHub's API,
+   per Rule 2.
+2. **A whole platform was undocumented.** Supabase reports **30 security + 113
+   performance advisors**; this plan previously mentioned only leaked-password
+   protection. Vercel runtime health was absent entirely. Both now live in the
+   new **§1.0E**.
+3. **One item moved up sharply, and it is not a security item.** The OG-image
+   renderer has been failing for **56 users continuously since 2026-08-01**, so
+   every shared listing link has gone out with no preview image for 12 days.
+
+**Still not blocking human testing.** The two ERROR-level database findings are
+a PostGIS reference table and a view that needs reading — neither is a live data
+leak. The credential-shaped Clerk test fixture was defanged, and vendored agent
+tooling was removed from tracked publication. Both are on `origin/main` through
+merge `a312ce7`; only the owner dashboard close remains.
+
+**Known stale figure, left alone deliberately:** §1.0's completed entry cites
+"unit is 882/882". The suite now runs **1015/1015**. That line is a historical record of
+what was true that day, so it has not been rewritten.
+
+## Priority tiers — what is urgent, what waits, what is locked
+
+Added 2026-08-13. Every section belongs to exactly one tier. **The tier is set by
+what an item BLOCKS, not by how interesting or how large it is.**
+
+The founder-confirmed sequence (§"Strategy to confirm once") is:
+**stabilise → invited free pilot → build supply to 200 listings → activate
+payments → expand later features at their triggers.** The tiers below are that
+sentence, applied.
+
+| Tier | Meaning | Sections | Open |
+|---|---|---|---|
+| **T0 · NOW** | Blocks inviting a single human tester | §1.0, §1.0A, §1.0C, §1.0D, §1.1–§1.5, §2.1–§2.5 | ~119 |
+| **T1 · THE PILOT** | The pilot run itself | §2.6, §2.7 | 18 |
+| **T2 · AFTER PILOT** | Before mocks come out and real data goes in | §3.0A, §3.0, §3.1, §3.2, §3.3, §3.4, §3.5 | ~58 |
+| **T3 · SUPPLY** | The North Star climb — 200 real approved listings | §3.6 | 11 |
+| **🔒 T4 · LOCKED** | **Cannot start until the North Star is reached** | §5.1, §5.2, §5.3 | 16 |
+| **T5 · FUTURE** | Parked with a reason or a trigger | §4.1, [[FUTURE]] | 25+ |
+
+### 🔒 What "locked" actually means
+
+**Payments, subscription tiers, and Connects monetisation do not begin until
+there are 200 real approved listings.** That is the North Star, and it is a
+locked constraint, not a preference. Payments stay **disabled** throughout human
+testing.
+
+Three things are locked to it explicitly:
+
+| Locked item | Gate |
+|---|---|
+| Payments, tiers, Connects (§5.3) | North Star reached, offer made truthful first |
+| Cloudflare R2 Spatial Vault | North Star **and** paying subscribers **and** a real large-file need — all three |
+| Voice briefing / co-pilot | 200 verified listings **and** demand **and** sufficient verified data |
+
+⚠️ **§5.1 and §5.2 are the exception inside the lock.** "Make the offer truthful"
+(six advertised benefits with no implementation) and "Production infrastructure"
+(backups, credential rotation, spend alerts) must be **finished before the first
+payment**, not after. They are locked *with* payments, not *behind* them — so
+they cannot be left to the week money switches on.
+
+### 💳 Build the payment LOGIC now — provider NOT chosen (owner decision 2026-08-13)
+
+**Owner instruction:** *"just put the logic since I need to decide first if
+Stripe is the only way."*
+
+So this section describes **provider-agnostic payment logic**. Stripe is **not**
+assumed and must not be hard-wired anywhere.
+
+The lock is on **taking money**, not on **being able to**:
+
+| Can be built NOW (T2) — provider-neutral | Locked until North Star (T4) |
+|---|---|
+| The subscription **state machine** (active, past-due, cancelled, grace) | Live keys / real charges |
+| Tier → entitlement mapping (already exists) | Switching `pre_launch_free_mode` OFF |
+| Connects purchase, ledger, receipts | Publishing paid pricing as purchasable |
+| Refund, proration, failed-payment and dunning **paths** | Real payouts |
+| Invoice/receipt records + the fields PH tax requires | — |
+| An **adapter interface** the chosen provider plugs into | — |
+
+**The design rule that keeps the decision open:** every provider call goes
+through **one adapter module** (`createCheckout`, `cancelSubscription`,
+`handleWebhook`, `refund`). Nothing else in the codebase may import a payment
+SDK. Choosing or switching providers then touches one file, not the product.
+
+⚠️ **Two guards so "ready" never becomes "accidentally live":**
+1. **No live keys in any environment** until the North Star is reached.
+2. The flag enabling purchase must **fail closed** — a missing flag row means
+   payments OFF, never ON (Standing Rule 6: a negative check fails open).
+
+- [ ] Build the provider-agnostic payment logic and adapter interface above;
+      rehearse subscribe → renew → fail → refund → cancel against a sandbox before
+      any live credential exists. **Do not import a provider SDK outside the adapter**
+
+#### ⚠️ Provider choice is an OPEN OWNER DECISION — and it may not be Stripe
+
+Recorded because it could block everything above, and it is not an engineering call.
+
+**ScoutIt is a Philippine business taking payments from Philippine customers.**
+That materially narrows the field, and it is the reason the owner is right to
+question whether Stripe is even available.
+
+- **Verify Stripe's current availability for a Philippine-registered entity
+  before designing around it.** Stripe's supported-country list for *accepting
+  payments and receiving payouts as a local business* has historically **not
+  included the Philippines**, with access via partners or other arrangements.
+  This must be confirmed against Stripe's own current documentation — do not
+  design a checkout on an assumption here.
+- **Local/regional options to evaluate:** PayMongo, Xendit, Maya Business,
+  Dragonpay, PayPal.
+- **What Filipino customers actually pay with matters more than card support:**
+  **GCash and Maya** are dominant, alongside bank transfer/InstaPay and
+  over-the-counter. A card-only provider may fit the code and still fail the
+  customer.
+
+**Evaluate on:** PH entity eligibility · GCash/Maya support · settlement time ·
+fees · sandbox quality · subscription/recurring support (several local providers
+handle one-off payments far better than recurring) · refunds · invoicing for BIR.
+
+- [ ] **Owner:** choose the payment provider. Recorded in [[MASTER_OWNER_ACTIONS]].
+      Until chosen, build only against the adapter interface — never a specific SDK
+
+### Where the honest edges are
+
+- **§2.5 Operational security — 35 open, the largest block anywhere.**
+  ✅ **Owner ruled 2026-08-13: security is urgent. Do not downgrade it.** Work it
+  as T0 in full; do not split it into "pilot-sufficient" and "later."
+- **§1.5 Responsive brand experience — 21 open.**
+  ✅ **Owner ruled 2026-08-13: design polish on BOTH web and mobile is important.**
+  Stays T0 in full. ScoutIt sells judgement, and judgement is read off the
+  interface before a word is (see [[RULES]] Part B).
+
+*Both of these overrule an earlier agent suggestion to triage them downward. The
+suggestion was wrong for this product; the record is kept so it is not re-proposed.*
+
+**§1.0C (telemetry compaction) is in T0 by date, not by risk.** Nothing is
+overdue until ~2026-08-22 and no user is affected; it sits here only so the date
+is not missed.
+
+### The one thing that is genuinely blocking today
+
+Nothing in the code. The two live security holes are fixed and verified. **What
+remains in T0 is mostly owner-only confirmation work** — environment variables,
+hostnames, deploys, and real-device passes that an agent cannot perform. See
+[[MASTER_OWNER_ACTIONS]].
 
 ## Strategy to confirm once
 
@@ -55,7 +233,7 @@ Until changed explicitly, use these locked constraints:
   only the ScoutIt platform accounts at launch; the external Gmail accounts remain
   the testers' property and are never promoted automatically;
 - sample listings remain publicly navigable on live `scoutit.space`, explicitly
-  labelled **SAMPLE DATA â€” FOR HUMAN TESTING**, and excluded from indexing;
+  labelled **SAMPLE DATA — FOR HUMAN TESTING**, and excluded from indexing;
 - sample inquiries route only to designated test recipients, never uninvolved real
   owners/brokers. Testers use real authentication email only; phones, listings,
   profiles, and other public contact data remain sample data;
@@ -116,7 +294,7 @@ Until changed explicitly, use these locked constraints:
   capture deterrence and accountability, but the plan must never claim a web page can
   reliably prevent operating-system screenshots or screen recording;
 - web-first; no native app for launch optics;
-- owner/lister-confirmed prices only; blank or â€œPrice on requestâ€ is honest;
+- owner/lister-confirmed prices only; blank or “Price on request” is honest;
 - Provider and Operator remain profile/waitlist surfaces until real workflows exist;
 - Airtable is public content; Supabase is private user/submission data;
 - owner-authored listings publish after attestation, while ScoutIt-produced PDF
@@ -189,7 +367,7 @@ as authorization.
 
 ---
 
-# LOCKED EXPERIENCE LOGIC â€” LUXURY WITH PURPOSE
+# LOCKED EXPERIENCE LOGIC — LUXURY WITH PURPOSE
 
 ScoutIt's primary visual language remains spatial intelligence in deep black, warm
 gold, cinematic depth, and precise editorial typography. This is a direction, not a
@@ -199,13 +377,13 @@ still meet contrast requirements. Do not add color as random decoration.
 
 For any material design decision, use the following combination before implementation:
 
-1. **Taste Skill** â€” write a one-line Design Read, reject templated AI patterns, and
+1. **Taste Skill** — write a one-line Design Read, reject templated AI patterns, and
    set explicit variance/motion/density dials for the page. Use it chiefly for public
    narrative, editorial, and brand surfaces, not as a dashboard component system.
-2. **UI/UX Pro Max** â€” generate or consult the design-system recommendation, then
+2. **UI/UX Pro Max** — generate or consult the design-system recommendation, then
    validate responsive layout, touch targets, safe areas, theme contrast, loading,
    focus, accessibility, and reduced-motion behavior.
-3. **Emil Kowalski design engineering** â€” decide whether each motion should exist,
+3. **Emil Kowalski design engineering** — decide whether each motion should exist,
    state its purpose and frequency, use responsive easing/duration, and review UI
    changes with a Before/After/Why table.
 
@@ -228,7 +406,7 @@ whole product into a cartoon spaceship, noisy cyberpunk HUD, or gaming interface
 
 ---
 
-# PHASE 1 â€” GET READY FOR HUMAN TESTING
+# PHASE 1 — GET READY FOR HUMAN TESTING
 
 The first deliverable is a stable human-testing build on live `scoutit.space`.
 Deployment, explicit sample-data labelling, authentication safety, and
@@ -237,7 +415,7 @@ in this phase.
 
 ## 1.0 Close the 2026-08-09 re-audit blockers
 
-Canonical evidence: [[../../15_IMPLEMENTATION_RECORDS/active/launch-readiness/FULL_SYSTEM_REAUDIT_2026-08-09]].
+Canonical evidence: [[../../15_IMPLEMENTATION_RECORDS/historical/launch-readiness/FULL_SYSTEM_REAUDIT_2026-08-09]].
 Do not split repeated desktop/mobile symptoms into separate backlog items.
 
 
@@ -248,11 +426,19 @@ Do not split repeated desktop/mobile symptoms into separate backlog items.
 - [ ] After the owner confirms `CRON_SECRET` and deploys, verify Vercel Cron Jobs
       history records successful production runs for both configured routes;
       fail-closed authorization and scheduled-run tests are already complete
-- [ ] After owner review, apply the prepared telemetry migration (30-day retention,
-      count-preserving pageview dedupe, atomic counter RPC, and uniqueness invariant),
-      confirm `IP_SALT` in production, deploy, and verify the scheduled cleanup;
+- [ ] ~~After owner review, apply the prepared telemetry migration~~ — **SUPERSEDED
+      2026-08-13. Do not do this.** The telemetry storage fix already shipped in
+      `20260812000001` (applied to production 2026-08-12): count-preserving pageview
+      dedupe, the total `(masked_ip, route_accessed)` uniqueness invariant, and the
+      atomic counter RPC `record_security_event` are all live and verified.
+      **`20260809000001_security_telemetry_retention.sql` must NOT be applied** — it
+      recreates the *partial* index that `20260812000001` deliberately replaced with a
+      total one, and would regress the storage-exhaustion fix. See §1.0C below for the
+      only telemetry work still open, and
+      [[../../15_IMPLEMENTATION_RECORDS/active/launch-readiness/MIGRATION_DRIFT_2026-08-12]].
+- [ ] Confirm `IP_SALT` is set in the production environment (still open; the
       schema/length allowlists, server-derived identity, redaction, safe errors,
-      centralized rate coverage, and abuse tests are already complete
+      centralized rate coverage, and abuse tests are already complete)
 
 - [ ] After the owner audits live Airtable media fields and reconciles Airtable-public
       listings whose Supabase lifecycle/roster record is missing or non-public, deploy
@@ -293,11 +479,26 @@ workflow was mutated. Treat GitHub's refreshed default-branch evidence—not a l
 scan alone—as the closure authority.
 
 - [ ] Land the already-targeted root and Mission Control dependency remediation only
-      after the complete release gate passes; both current local lockfiles audit at
-      zero, while GitHub `main` still reports 25 open Dependabot alerts (13 high,
-      12 medium). Confirm the dependency graph refreshes and alerts close before
-      closing or superseding the related Dependabot PRs
-- [ ] Resolve all 19 open CodeQL findings by source-specific remediation or an
+      after the complete release gate passes. Local re-verification on 2026-08-13:
+      both lockfiles audit at zero; the main app lint, 1,057-unit-test suite, and
+      113-route production build pass. The final 460-case browser matrix completed
+      with 457 passed, 2 intentional skips, and one mobile Orbit contrast failure:
+      the empty-state text used hard-coded `#666` at 3.38:1. It now uses the
+      shared secondary-text token; focused lint and the exact mobile axe regression
+      pass, so every non-skipped browser case has passing evidence without repeating
+      the whole matrix. Mission Control lint, both dependency audits, all 42
+      security-boundary tests, and its 27-route production build pass. The local
+      release gate is complete. GitHub `main` reports
+      **13 open Dependabot alerts (8 high, 5 medium)**
+      as of the live 2026-08-13 read — down from the 25 recorded on 2026-08-11.
+      **Only 4 of the 13 are runtime scope** (`fast-uri`, `nanoid`, `sharp`,
+      `dompurify`); the other 9 are development-scope and not visitor-reachable.
+      All 5 `undici` alerts collapse into one bump to `7.29.0`. ⚠️ The `dompurify`
+      bump must be checked against `lib/sanitize.js` first — see
+      [[REMEDIATION_RECORD_2026-08-13]] §Dependency remediation. Confirm the dependency graph refreshes and alerts
+      close before closing or superseding the related Dependabot PRs
+- [ ] Resolve all **18** open CodeQL findings (live 2026-08-13; was 19) by
+      source-specific remediation or an
       evidence-backed false-positive decision. Workstreams are legacy
       `scoutit_user` localStorage flows, persisted visitor coordinates, regex HTML
       sanitization, email text extraction, Airtable formula escaping, the unit-preview
@@ -324,7 +525,17 @@ scan alone—as the closure authority.
       with 2/2 passing tests. Keep the parent finding open until CodeQL confirms closure
 - [ ] Review tracked `scratch/jules_session_3` for unique required content, migrate any
       real value, then remove it from production scanning and source ownership. Re-run
-      CodeQL before resolving its four duplicate alerts
+      CodeQL before resolving its four duplicate alerts.
+      **Mechanical cause found 2026-08-13:** `scratch/` **is** in `.gitignore`
+      (line 67), but **29 files under it are already tracked**, and `.gitignore`
+      does not untrack files git already follows. The fix is `git rm --cached`,
+      not another ignore rule. This closes 4 CodeQL alerts and unpublishes 29 dead
+      files from a **public** repository in one move
+- [ ] **Verify before dismissing** the 2 `actions/missing-workflow-permissions`
+      alerts (`ci.yml:20`, `update-spatial-data.yml:11`). Both files now carry
+      top-level `permissions` blocks (lines 13 and 9), and the alerts were last
+      updated 2026-07-23/25, so they are **probably** stale or job-level gaps —
+      but that must be confirmed by a fresh scan, not assumed
 - [x] Remove the ecosystem-directory test's dynamic URL regular expression. The test
       now checks the parsed pathname directly; lint passes and Playwright lists all
       10 expected desktop/mobile cases
@@ -475,6 +686,472 @@ Canonical remediation artefacts:
       raises rather than converting if any existing value is not a resolvable
       property. **Requires the migration.**
 
+## 1.0C Telemetry retention — COMPRESS, do not delete (owner decision 2026-08-13)
+
+**Owner decision:** the visitor-traffic log is a **metrics asset**. Old rows must be
+**compressed into aggregates, not deleted.** This overrides the 30-day hard-delete
+design carried in the retired `20260809000001` migration.
+
+**Consequence — `clean_old_security_logs()` must NOT be scheduled as it stands.**
+That function already exists in the live database and is a straight
+`DELETE ... WHERE last_request_at < now() - interval '30 days'`. Scheduling it would
+destroy exactly the history the owner wants to keep. It is currently harmless only
+because nothing calls it.
+
+**Live state, measured 2026-08-13 (read-only):**
+
+| Fact | Value |
+|---|---|
+| `security_access_logs` rows | 1,414 |
+| Oldest / newest activity | 2026-07-23 / 2026-08-12 |
+| Rows already past 30 days | **0** |
+| Rows flagged suspicious | 10 |
+| Distinct routes tracked | 126 |
+| `clean_old_security_logs()` exists | yes |
+| `pg_cron` installed | **no** |
+
+Nothing is overdue. The first rows cross 30 days around **2026-08-22**, so this is a
+dated to-do, not an incident. Growth is already bounded because `20260812000001`
+converted these rows from one-per-request into counters.
+
+- [ ] Design the compaction rule: roll detail rows older than 30 days into a periodic
+      aggregate (route, period, total requests, distinct masked identities) and drop
+      only the detail rows the aggregate now represents. Sum of `request_count` must be
+      preserved across the operation — the same invariant `20260812000001` honored when
+      it collapsed 145 duplicates while preserving all 4,205 observations
+- [ ] **Exempt flagged rows.** `is_flagged` rows are the record that someone probed the
+      site; they must survive compaction at full detail, or the abuse history is lost
+      exactly when it becomes useful
+- [ ] Choose the scheduler. Two routes, no wrong answer:
+      (a) install `pg_cron` and schedule in-database, or (b) call a compaction endpoint
+      from a **Vercel cron**, which needs no database extension and matches the cron
+      jobs this repo already runs. (b) is the lower-change option
+- [ ] Decide the aggregate's own retention — aggregates are small and privacy-safe, so
+      "keep indefinitely" is a legitimate answer and should be recorded either way
+- [ ] Confirm the privacy position: the log stores a one-way-scrambled identity and a
+      route *shape* (`/property/:item`), never the specific listing, so compaction is a
+      privacy improvement, not a regression. Record this in the retention rules under §3.4
+
+## 1.0D Recovered from the backlog merge (2026-08-13)
+
+These were live, open items in `BACKLOG/01_WORK_ORDER.md` and `LOGIC_TO_TIGHTEN.md`
+that **this plan never carried.** They were found by diffing the two lists during
+the 2026-08-13 folder reorganisation, not by re-auditing the code. Both source
+files are now in `_ARCHIVE/`, so these are the surviving copy — **do not assume a
+second home exists.**
+
+### Real defects
+
+- [ ] 🔴 **`MOCK_CATEGORIES` silently overrides the real category.** Duplicated in
+      `src/app/intel/page.js` and `src/app/property/page.js`, evaluated as
+      `MOCK_CATEGORIES[p.slug] || p.spaceCategory` — **the hardcoded map wins over
+      the live Airtable field**, so a category corrected in Airtable is ignored for
+      those slugs. Invert the precedence and share one map
+- [ ] 🔴 **15 files still render a bare `<style>{…}</style>`** (was 17; count
+      re-verified 2026-08-13). React 19 hoists a raw `<style>` into `<head>` as a
+      stylesheet *resource*; without `precedence` it leaves an enclosing
+      `<Suspense>` boundary **pending forever**. This exact bug froze `/discover`
+      and `/property` — HTTP 200, clean console, page never arrives. Harmless today
+      only because none of the 15 currently sits beside a Suspense boundary; adding
+      one reproduces the freeze. Sweep them to `<style jsx>`
+- [ ] 🟠 **Sign-in-then-sign-up creates an account on a typo** (L3).
+      `src/app/onboarding/page.js` calls `signInWithPassword` and falls through to
+      `signUp` on **any** failure. A typo'd email silently creates a new account;
+      the user sees an empty dashboard and assumes their listings vanished. A wrong
+      *password* attempts a signup and returns "already registered". **Fix: only
+      fall through when the error is specifically "user not found."**
+- [ ] 🟡 **`connect_balances` / `connect_transactions` have no `role` column.**
+      Owner-resolved 2026-08-02; the migration was never written
+
+### Decisions that block other work (owner)
+
+- [ ] 🔴 **L1 — seven overlapping "is this listing real?" fields across two
+      systems.** Supabase: `verified` (TRUE on 0 of 20 — dead), `moderation_status`
+      ('pending' on all 20 including live ones — dead), `pipeline_status` (the only
+      one doing real work), `archived_at` (a second way to archive),
+      `last_verified_date`. Airtable adds `Verification_Status` and `Pipeline_Status`,
+      **neither of which any code reads**. Different parts of the codebase already
+      guess differently. **Recommendation: declare `pipeline_status` the single
+      source of truth.** ⚠️ Decide before building search ranking, trust badges, or
+      the AEO schema — and do **not** wire `Verification_Status` into a public badge
+      first, which would add a seventh reader to a contradictory set
+- [ ] 🟠 **L5 — a blocked FAQ answer has no appeal path**
+- [ ] 🔵 **L12 — lead export moves PII with no record.** Ties to §3.4's
+      "log exports of lead PII with actor, subject, time, purpose"
+- [ ] 🔵 **L13 — the Google Meet link depends on the HOST having Google.** Measure
+      NULL-link frequency before designing a guest-host fallback (§3.5 has the
+      measurement item; this is the decision behind it)
+- [ ] 🟡 **L6 — nothing consumes `rankModifier`.** Either wire it into ranking or
+      retire the field; a scoring input nothing reads is a promise in the schema
+
+### Smaller, still open
+
+- [ ] **Google Calendar OAuth `redirect_uri_mismatch`.** Audit `/api/calendar/sync`
+      and `/api/calendar/callback` to confirm the callback uses `getSiteUrl()`
+      dynamically. Pairs with the owner's Google Cloud Console step (Owner Actions §1.8)
+- [ ] **649 inline `style={{ color: "#…" }}` colours** remain from the light-mode
+      migration — 420 in `CommercialFlow.js` (225) and `ResidentialFlow.js` (195),
+      then `SpatialCommandMap.js` (48), `UnitMasterPage.js` (37). The CSS-file half
+      is done and measures zero. Inline `style` accepts `var()` fine
+- [ ] **Light mode is only measured on `/` and `/settings`.** `/discover`,
+      `/property`, `/property/[id]`, `/hubs/[slug]`, brokers and dashboard were
+      changed but never scanned. ⚠️ Inject
+      `* { transition: none !important; animation: none !important; }` before
+      measuring or the scan under-reports (9 phantom failures on `/settings`)
+- [ ] **The hero wordmark is still white-on-white** in light mode. Unsolved
+- [ ] **Two competing profile URL schemes.** Directories link to
+      `/profile/[username]`; `/photographers/[slug]`, `/researchers/[slug]`,
+      `/event-planners/[slug]` also exist and are reachable from nowhere.
+      `robots.js` disallows `/profile/`, so every indexable directory points at a
+      blocked destination. Pick one canonical URL, redirect the other
+
+## 1.0H Sharing + SEO surface — verified state (2026-08-13)
+
+Measured against **production** (`scout-it` — owner confirmed 2026-08-13 that this
+is the **only** production project; `scoutit` is not a staging environment relied
+on, so its Airtable 401s are ignorable).
+
+### ✅ Per-property link previews ARE built and DO work
+
+**Correcting an over-claim made earlier the same day.** The statement "every
+shared listing link has gone out with no preview image since 2026-08-01" was
+**wrong**. The 208-error cluster was on `/opengraph-image` and `/twitter-image` —
+the **homepage** card. Property cards were never in that cluster.
+
+`src/app/property/[id]/page.js:23` `generateMetadata()` builds a **unique card per
+listing**: title, category, floor area, and the listing's first photo are passed
+to `/api/og`, and the result is set as both `openGraph.images` and
+`twitter.images`. Verified live: the Cyber Sigma Tower 3 card returns **HTTP 200,
+image/png, 1,031,638 bytes** and renders the building photo with the SCOUTIT
+wordmark and COMMERCIAL / 1500 SQM chips.
+
+| Sharing… | Preview state |
+|---|---|
+| Property **with** a photo | ✅ works — bespoke card |
+| Homepage / root | ❌ blank (0 bytes) — fix is on the branch, unmerged |
+| Property **without** a photo | ❌ blank — no `image` param hits the `backgroundImage:'none'` bug |
+| **Sample** listing | no OG block at all — deliberate, samples are `noindex` |
+
+**No brand logo is required for this.** The card leads with the property photo
+and the gold SCOUTIT wordmark.
+
+- [ ] Merge the branch so the homepage/no-photo cards stop returning 0 bytes.
+- [ ] **Decide the no-photo fallback.** A listing with no photo currently produces
+      a blank card. It should fall back to the branded generic card, not nothing.
+
+### 📄 sitemap.xml EXISTS — it has simply never been submitted
+
+**Correcting a second assumption.** `sitemap.xml` is live, valid, and correctly
+announced in `robots.txt`.
+
+| Fact | Value |
+|---|---|
+| HTTP / size | 200, 4,010 bytes |
+| Total URLs | **23** |
+| Property URLs | **7** |
+| Directory URLs | 4 (`brokers`, `photographers`, `researchers`, `event-planners`) |
+| Intel URLs | 1 |
+| `lastmod` | 2026-08-12 |
+
+- [ ] ⚠️ **The real SEO ceiling is supply, not technology: only 7 properties are
+      in the sitemap.** No amount of technical SEO changes that. This is the
+      200-listing north star restated as a crawl fact.
+- [ ] Submit the sitemap — **blocked on Search Console verification** (§1.4).
+- [ ] Confirm the directory `/profile/` conflict from §1.0D does not put blocked
+      destinations in the sitemap.
+
+### 🔗 Sharing feature — merged state and remaining verification
+
+Owner intent confirmed 2026-08-13: sharing must serve **both** public broadcast
+**and** direct person-to-person send.
+
+Already built and merged to `origin/main` in `5289be5` (do not rebuild):
+
+- `src/lib/shareBriefing.js` — the ONE source of share copy. `buildShareText()`
+  for the briefing block, `buildPromoPack()` for three ready-to-post formats.
+  Compliance rule enforced here: **no monetary values ever appear in share copy.**
+- `ShareModal` — the mobile and desktop curated path, with Viber, Messenger,
+  Facebook, LinkedIn, X, Email, Copy, copy-then-open guidance, opaque attribution,
+  and the three ready-to-post formats in one surface.
+- `PromoteModal` — remains a separate promotion surface, but the ordinary Share
+  path no longer hides or gates the deterministic formats.
+- `BottomNav` + `useCuratedShare` — the bottom mobile Share action now reaches
+  the curated engine for real listings and preserves bare-link fallback for samples.
+
+Verified after merge: the real commercial-property mobile path opens the curated
+modal in production; Viber and Messenger appear first; expanding ready-to-post
+formats produces no 375px horizontal overflow. The local sample branch leaves the
+curated handler disabled as intended. Full-repo verification passed lint and
+**1057/1057 unit tests across 98 files**.
+
+- [x] Completed the interrupted production verification on a **residential**
+      property (`The Ridgeline at Capitol Commons`) on 2026-08-13. At 375x812,
+      the bottom Share action opened the curated briefing with the live category,
+      location, beds, baths, and floor area; no page error or horizontal overflow
+      occurred, including with ready-to-post formats expanded.
+- [x] Verified a real attributed Facebook handoff after merge on 2026-08-13.
+      The clipboard received the complete residential briefing, the UI displayed
+      the copy-then-open instruction, and the outbound dossier URL contained
+      `utm_source=facebook`, `utm_medium=share`, `utm_campaign=property_share`,
+      and an opaque `ref` value without exposing user identity.
+- [ ] Decide whether Unit Master Page sharing should be wired with parent-property
+      context and sample gating, or whether its unreachable modal/state should be
+      removed. This is a product choice, not automatic cleanup.
+- [ ] Once a real Facebook App ID exists, add the desktop Messenger send-dialog
+      branch. Until then the mobile `fb-messenger://` scheme is the honest fallback.
+- [ ] If individual broker credit matters, build an internal, admin-guarded lookup
+      that resolves opaque `ref` values by hashing the private user list. Never put
+      raw identity or a public mapping in the URL or database projection.
+
+## 1.0G The gitignored-but-tracked trap — TWO instances, both closed (2026-08-13)
+
+**This has now happened twice. Treat it as a standing check, not a one-off.**
+
+`.gitignore` has **no effect on files git already tracks**. Adding a rule after
+files are indexed silently does nothing, and the folder keeps being published to
+a **public** repository while everyone assumes it is private.
+
+| Folder | Ignore rule | Files that were still tracked | Fixed in |
+|---|---|---:|---|
+| `scratch/` | `.gitignore:67` | 29 | `d8984c5` |
+| `.agents/` | `.gitignore:44` | **1,770** | `37cf2a4` |
+
+### Why `.agents/` mattered beyond noise
+
+It is **856 vendored agent skills** plus `rules/`, `workflows/`, and 69 files
+under an accidental doubled `.agents/.agents/` nesting. None of it is ScoutIt
+product code — but **GitHub and CodeQL scan vendored third-party documentation as
+if it were production source**, so example credentials inside tutorial skills
+surface as alerts against ScoutIt. **This directory is why secret-scanning alert
+#1 existed at all.**
+
+### Scanned before untracking — no real secret was ever in there
+
+- 4 JWT-shaped strings, all decoding to `{"exp":1600000000}` — a fabricated token
+  that "expired" in September 2020, used as an expired-token fixture
+- Every password match is a documentation fixture (`admin@test.com` /
+  `AdminPass789!`, `user@example.com` / `correct-password`, `hunter2hunter2`)
+- **0** `.env`, `.pem`, `.key`, or `id_rsa` files
+- **0** references to ScoutIt's own project ref, domain, Airtable or Mapbox keys
+
+The one genuine alert was the fabricated Clerk `whsec_` literal, fixed in
+`4b65e8d`.
+
+### Safety checks run before untracking
+
+Nothing in `.github/workflows`, `package.json`, `next.config.mjs`, the
+playwright/vitest configs, `src/`, or `mission-control/src/` references
+`.agents/`. ⚠️ **The root `AGENTS.md` that `CLAUDE.md` loads via `@AGENTS.md` is a
+separate tracked file and is untouched** — `.agents/AGENTS.md` is a different
+file inside the vendored folder. Verified still published after the change.
+
+`--cached` left all **2,560** files on disk, so local agent tooling keeps
+working. Verified after: eslint clean, vitest 1021/1021, **CI green**.
+
+- [ ] **Standing check for any future session:** run
+      `git ls-files <ignored-dir>` for every entry in `.gitignore`. A non-zero
+      count means the rule is doing nothing and the folder is public. Two of
+      three checked so far were leaking.
+- [ ] **Note on history:** untracking stops *future* publication. The files
+      remain in git history and are still reachable by commit SHA. Acceptable
+      here because nothing real was ever in them — but a genuine credential
+      would additionally require history rewriting plus rotation.
+
+## 1.0F Uncommitted working tree — inventory + deletion candidates (2026-08-13)
+
+The owner asked what the ~240 uncommitted files are, having lost track across
+many parallel agent sessions. **They are not junk.** Inventory below; nothing has
+been deleted or committed.
+
+### The real work sitting uncommitted
+
+| Count | What |
+|---:|---|
+| 23 | New source files under `src/lib/` and `src/components/` |
+| 34 | New unit tests |
+| 9 | New end-to-end specs |
+| 4 | New database migrations |
+| ~180 | Modified files under `src/` |
+
+**This work is healthy, not abandoned:** the full suite passes **1021/1021**,
+lint is clean, and `npm run build` succeeds *with all of it in the tree*.
+
+Identifiable clusters:
+
+- **Onboarding contract** — `src/lib/onboardingProfile.js` (+ test), a rewrite of
+  `src/app/onboarding/page.js` (634 → 443 lines), `authClient.js`
+  (`resendSignupConfirmation`), `api/auth/complete-onboarding/route.js`
+- **Descent / About You experience** — `src/components/descent/`
+  (`AboutYouExperience`, `CoreGateway`, `MantleArchive`,
+  `coreAccountPresentation`, `coreExperienceData`, `useVerifiedIdentity`),
+  `src/components/about/`
+- **Pilot readiness** — `PilotPaymentControls.js`, `ProfileProvenanceBadge.js`,
+  `pilotProvenance.server.js`, and pilot auth-boundary / display-policy tests
+- **Property domain libraries** — `propertyHierarchy.js`, `propertyMedia.js`,
+  `propertyRoutes.js`, `propertyTearSheet.js`
+- **Turnstile hardening** — bot protection added to the broker inquiry form plus
+  a `contactable` gate so no recipient is implied without a verified routing record
+- **Sample-data protection, telemetry, Sentry** — `sampleInventory.js`,
+  `sentryEventPolicy.js`, `faqContactLeakTelemetry.js`, `instrumentation.js`
+- **Repo security** — `.github/CODEOWNERS`, `.github/workflows/dependency-review.yml`
+
+### ⚠️ The local/CI test split — CI was silently red for days
+
+**The local suite and the CI suite are not the same suite.** Locally: **1021
+tests / 96 files**. In CI: **856 tests / 62 files**. The gap is the **34
+untracked test files** above — they only exist on this machine.
+
+That gap hid a real failure. `deviceTelemetryApi.test.js` (**committed**) read
+`supabase/migrations/20260809000001_security_telemetry_retention.sql`
+(**untracked**), so it passed locally and failed on every clean checkout. CI had
+been red since at least 2026-08-12 (run `31618915594`) and nobody noticed,
+because local was green.
+
+Fixed in `a81cdac`. **Committing the migration would have been the wrong repair**
+— it schedules the retired 30-day hard delete that §1.0C explicitly overrode. The
+stale assertion was replaced with one that guards the actual decision: no
+migration may schedule `scoutit-clean-security-telemetry`. Verified passing both
+with the retired file present and with it moved aside to simulate CI.
+
+**Standing lesson:** a green local run is not evidence CI is green while this
+many test files are untracked. Check the CI count, not just the local one.
+
+### ⚠️ Two traps if anyone tries to commit part of this
+
+- [ ] **The GA4 analytics wiring cannot be committed on its own.**
+      `src/lib/onboardingProfile.js` is untracked but imported by three separate
+      files, so committing the analytics lines alone yields a broken half-state.
+      The minimum coherent unit is a six-file bundle.
+- [ ] **`package.json` cannot be committed on its own.** It does not merely bump
+      versions — it **swaps `html2pdf.js` for `jspdf`**. `html2pdf.js` is already
+      gone from the lockfile and from `node_modules`, but `HEAD` still imports it
+      in `CommercialFlow.js` and `ResidentialFlow.js`; the only `jspdf` consumer
+      (`propertyTearSheet.js`) is untracked. Committing the lockfile alone would
+      build locally and **fail on a clean CI install**. This corrects the
+      2026-08-13 Cowork handoff, which said the lockfile "just needs committing".
+- [ ] **OWNER DECISION: is this work finished and meant to ship?** It blocks the
+      GA4 conversion tracking and the closure of 13 Dependabot alerts.
+
+### 🗑️ Deletion candidates — owner to review, NOT deleted
+
+Everything below is disposable output, not project content. **Left in place
+deliberately pending owner review.**
+
+| File | Size | Dated | Why disposable |
+|---|---:|---|---|
+| `.codex-dev.err.log` | 401 B | 08-11 | dev-server console capture |
+| `.codex-dev.out.log` | 239 B | 08-11 | dev-server console capture |
+| `.next-dev.stderr.log` | 519 B | 08-11 | dev-server console capture |
+| `.next-dev.stdout.log` | 1.1 KB | 08-11 | dev-server console capture |
+| `com_diff.patch` | 27 KB | 08-08 | scratch diff export |
+| `css_diff.patch` | 4.6 KB | 08-08 | scratch diff export |
+| `res_diff.patch` | 56 KB | 08-08 | scratch diff export |
+| `COWORK_PROMPT_2026-08-13.md` | 14 KB | 08-13 | work order, superseded — content lives in the audit records |
+| `CLAUDE_CODE_PROMPT_2026-08-13_FINISH_REMEDIATION.md` | 19 KB | 08-13 | work order, superseded — outcomes recorded in [[../../15_IMPLEMENTATION_RECORDS/historical/launch-readiness/AUTHZ_FIXES_APPLIED_2026-08-13]] |
+
+⚠️ **Check the three `.patch` files before deleting.** They are dated 2026-08-08,
+predate the current tree, and their headers did not parse cleanly — so it is not
+established whether their contents were ever applied. The four `.log` files and
+the two prompt documents are safe to remove; their content is recorded elsewhere.
+
+Already cleared 2026-08-13 with owner approval: `_to_delete/gitjunk/` (157 git
+internal scratch files, 1.6 MB, zero readable content). Verified before removal
+via `git fsck` (clean), commit reachability, and a full 1021/1021 test run.
+
+## 1.0E Supabase advisors + Vercel runtime health (live read 2026-08-13)
+
+Canonical evidence:
+`[[../../15_IMPLEMENTATION_RECORDS/active/launch-readiness/THREE_PLATFORM_SECURITY_AUDIT_2026-08-13]]`.
+Read-only pull from each platform's own API. Nothing was dismissed, bumped,
+enabled, altered, or pushed.
+
+**Why this section exists:** §1.0A covers GitHub thoroughly. The Supabase advisor
+surface — **30 security + 113 performance findings** — was not documented
+anywhere in this plan beyond a single leaked-password line, and Vercel runtime
+health was not documented at all.
+
+### The database findings, ranked by real risk
+
+- [ ] **Review `public.public_profiles` — a `SECURITY DEFINER` view (ERROR).** It
+      runs with its creator's permissions, bypassing the querying user's RLS.
+      Given the name, this view almost certainly backs the public profile pages
+      and the ecosystem directories, making it the most-read object in the app
+      and the likeliest place to leak an unaudited column. Establish which
+      columns it exposes before deciding whether `SECURITY DEFINER` is intentional
+- [ ] **Enable RLS on `public.spatial_ref_sys` (ERROR).** The only object in the
+      entire audit where data is genuinely reachable with no policy gate. It is a
+      PostGIS system table (coordinate reference definitions — public reference
+      data, not user data), so the content is harmless. It is still ranked at the
+      top of the database list because it is the one place the answer to "is this
+      open?" is **yes**
+- [ ] **Audit the 41 `multiple_permissive_policies` as authorization, not
+      performance.** Supabase files these as a perf warning; they are not.
+      Multiple permissive policies on the same table/role/action are combined
+      with **`OR`**, so every additional policy **widens** access. Forty-one of
+      them means the effective access rule for those tables is written down
+      nowhere — it is the union of policies nobody has read together. This is the
+      single item most likely to be hiding a real authorization bug
+- [ ] **Answer the 20 `rls_enabled_no_policy` tables (INFO).** RLS enabled with
+      zero policies is **deny-all** — these tables are *sealed*, not exposed, and
+      the INFO level is correct. The real question each raises is **Rule 13**:
+      is this table sealed on purpose, or is a shipped feature quietly broken
+      because nothing can read it? `property_units` is the sharpest case — the
+      Unit Master Page is built and documented, yet no client role can select
+      from its table. Either it is served exclusively through the service role
+      (fine — record that), or a live feature is running on an unreadable table.
+      Affected: `analytics_events`, `brain_chunks`, `brain_documents`,
+      `deal_disputes`, `deal_handshakes`, `deal_messages`,
+      `deal_routing_recipients`, `dispute_events`, `disputes`, `file_scans`,
+      `monthly_scout_wraps`, `property_broker_representations`,
+      `property_claim_events`, `property_lifecycle_events`,
+      `property_slug_redirects`, `property_units`, `subscriptions`,
+      `verification_requests`, `video_upload_queue`
+- [ ] **Wrap `auth.uid()` / `auth.jwt()` as `(select auth.uid())` in the 18
+      `auth_rls_initplan` policies.** Currently re-evaluated per row instead of
+      once per query. Mechanical and safe, but it compounds badly — these are the
+      queries that fall over first at 200 listings
+- [ ] **`REVOKE EXECUTE` on `st_estimatedextent`** — one PostGIS function counted
+      six times (three signatures × `anon` and `authenticated`). It returns table
+      extent estimates, not rows. Low real risk; one statement closes six warnings
+- [ ] **Reconcile 27 `unindexed_foreign_keys` against 26 `unused_index` +
+      1 `duplicate_index` together, using real query patterns.** ⚠️ These two
+      lists pull in opposite directions. Applying both blindly is worse than
+      applying neither
+- [ ] ⚠️ **Do not** move `postgis` / `vector` out of the `public` schema without a
+      dedicated plan (2 × `extension_in_public` WARN). Relocating PostGIS
+      rewrites every spatial query in the app. Listed last deliberately
+- [ ] **Leaked-password protection is still disabled** (HaveIBeenPwned checking).
+      Already deferred with reason elsewhere in this plan; this audit does not
+      overturn that. Noted only because it is a **one-toggle owner action** with
+      zero code cost — see [[MASTER_OWNER_ACTIONS]]
+
+> **Sequencing:** the `public_profiles` review, the 41-policy audit, and the
+> `property_units` question are the same investigation from three angles — *who
+> can actually read what*. Do them together. Doing the policy audit alone risks
+> "fixing" a policy another policy was silently depending on.
+
+### Vercel runtime health
+
+- [x] ✅ **Social-card renderer fixed and merged to `origin/main` on
+      2026-08-13.** Commit `d97a4cf`, included by merge `a312ce7`, adds Satori's
+      required explicit flex display and omits the invalid
+      `backgroundImage: "none"`. The implementation run rendered the homepage,
+      Twitter, and `/api/og` variants as non-empty `image/png` responses. This
+      closes the 208-error cluster; production monitoring remains the ordinary
+      follow-through, not a new implementation task
+- [x] The `aborted` errors on `/api/whereto` (Overpass, 6) and `/property/[id]`
+      (Airtable, 1) are **timeouts, not failures** — both correctly served
+      fallbacks. Fallback behaviour is working as designed. No action
+- [x] The two `401 Unauthorized` Airtable errors on `scoutit`'s `/api/cms`
+      (`BROKERS_CMS`, `INTEL_CMS`) are the **known** 2026-07-03 condition
+      recorded in [[THREE_PLATFORM_SECURITY_AUDIT_2026-08-13]] §4.3 — a broken `AIRTABLE_API_KEY`
+      serving mock fallback data, fixed on `scout-it` only **by owner decision**.
+      Not a regression. Recorded so the next session does not rediscover it
+- [ ] Add one data point to §1.0A's open Vercel-reconciliation item: the two
+      projects' **runtime error profiles are completely different**, confirming
+      they are not interchangeable and neither can be disconnected on the
+      assumption it is a duplicate
+
 ## 1.1 Close the professional-directory browser contract
 
 The repository already server-loads `/brokers`, `/photographers`, `/researchers`,
@@ -507,19 +1184,88 @@ Only browser behavior remains open.
 
 - [ ] Verify sample properties and child-space routes emit `noindex`
 - [ ] Verify samples are absent from the sitemap and property JSON-LD
-- [ ] Display **SAMPLE DATA â€” FOR HUMAN TESTING** on every sample card, detail
+- [ ] Display **SAMPLE DATA — FOR HUMAN TESTING** on every sample card, detail
       page, child space, profile, dashboard record, and affected interaction
 
 ## 1.4 Search indexing follow-through
 
+> 🔴 **BLOCKED AT STEP ZERO — corrected 2026-08-13.** Every monitoring item below
+> assumed a verified Search Console property exists. **It does not.**
+> `search.google.com/search-console` renders the **welcome/onboarding** screen and
+> Google itself shows *"Already started? finish verification."* The DNS `TXT`
+> token **is** live on the apex
+> (`google-site-verification=7JuJY3yeardpNnfXokGbh7l5QUUXen4CJESset64uuM`) — the
+> property was simply never finished. So there is **no query, impression, click,
+> position, or coverage data at all**, and none accumulating. The sitemap serves
+> valid XML and is advertised in `robots.txt`, but has never been submitted.
+> Evidence:
+> `[[../../15_IMPLEMENTATION_RECORDS/active/launch-readiness/SEARCH_ANALYTICS_DNS_AUDIT_2026-08-13]]`.
+> ⚠️ Not fully ruled out: the property may belong to a **different Google
+> account** than the one in daily use — only the owner can settle that.
+> ⚠️ **Ordering trap:** completing the GoDaddy→Cloudflare cutover
+> ([[MASTER_OWNER_ACTIONS]] §4.1) **before** verifying would drop the only token
+> and reset this to zero. **Verify first, then migrate DNS.**
+
+- [ ] **PREREQUISITE — finish Search Console verification.** The DNS token is
+      already live and GA4 is already installed; either route completes in
+      minutes. Nothing else in this section can start until this is done
+- [ ] Set `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` in Vercel as a **second**
+      verification method, so the property survives the Cloudflare DNS cutover
+- [ ] Submit `sitemap.xml` once the property exists
 - [ ] Recheck the deployed `scoutit.space` sitemap and canonical URLs
-- [ ] Monitor the existing Google index in Search Console; submit individual
+- [ ] ~~Monitor the **existing** Google index in Search Console~~ — there is no
+      existing property. Re-scoped: **establish** monitoring after verification;
+      submit individual
       routes only when a material page or metadata change requires recrawling
 - [ ] Inspect `/property`, `/discover`, `/layer/orbit`, and `/showcase` after
       deployment rather than treating initial discoverability as unfinished
-- [ ] Review soft-404, excluded, and â€œcrawled â€” currently not indexedâ€ coverage
+- [ ] Review soft-404, excluded, and “crawled — currently not indexed” coverage
 - [ ] Record a baseline for the four agreed non-branded search queries before the
-      first article batch
+      first article batch — **only possible after verification**
+
+## 1.4A Google Analytics — measuring arrivals, not outcomes (live read 2026-08-13)
+
+Evidence:
+`[[../../15_IMPLEMENTATION_RECORDS/active/launch-readiness/SEARCH_ANALYTICS_DNS_AUDIT_2026-08-13]]`.
+GA4 property `a402814034p547706435`, measurement ID `G-36WQZF409S`, confirmed
+live in production HTML.
+
+- [x] The env-var remediation worked. `GoogleAnalytics.js` reads
+      `NEXT_PUBLIC_GA_ID` with no hardcoded fallback, and the variable is set in
+      Vercel production. Silent cross-environment misattribution is closed
+- [ ] 🔴 **Define GA4 key events. There are currently zero.** In the last 7 days,
+      across ~1.15K sessions: `page_view` 2K, `session_start` 1.1K,
+      `user_engagement` 649, `scroll` 175 — but `form_start` **2**, `click` **1**,
+      and **key events 0**. Nothing measures save-to-board, inquiry sent,
+      Connects spent, signup, or publish. **This is the "real instrumentation"
+      that self-serve analytics was put on hold pending** — it was never built
+- [ ] **Do not quote "1.1K users" as reach (Rule 12).** `first_visit` ≈
+      `session_start` ≈ Direct sessions ≈ 1.1K, meaning almost every session is
+      simultaneously brand-new *and* referrer-less, and essentially nobody
+      returns. That is the signature of testing traffic, crawlers, or
+      referrer-stripping shares — not an audience. Treat it as **unattributed
+      volume** until conversions exist to qualify it
+- [x] **Organic Social = 2 sessions in 7 days corroborates the OG-image outage**
+      found in [[THREE_PLATFORM_SECURITY_AUDIT_2026-08-13]] (renderer failing
+      208×/56 users since 2026-08-01). Two independent platforms, one root cause.
+      Fixing the renderer is tracked in §1.0E
+- [x] **Organic Search = 30 sessions (+1,400%), `google/organic` reaching the
+      site with no Search Console property.** Google *is* indexing ScoutIt. §1.4
+      is therefore a missed-**measurement** problem, not a missed-indexing one
+
+## 1.4B DNS and domain state (public resolver read 2026-08-13)
+
+- [x] **GoDaddy is still authoritative** — `ns57`/`ns58.domaincontrol.com`. The
+      Cloudflare cutover in [[MASTER_OWNER_ACTIONS]] §4.1 has **not** started;
+      that item is accurate and still open. Apex `A` → `216.198.79.1` (Vercel);
+      `www` `CNAME` → `3b76710be3bb321d.vercel-dns-017.com`. Zone is small and
+      clean, so the migration is low-risk whenever the owner chooses
+- [x] **No `MX` records at all** — DNS-side proof of the deferred email decision
+      in [[MASTER_OWNER_ACTIONS]] §§1.3 and 1.8. Signup mail still
+      leaves via Resend's shared `onboarding@resend.dev` test domain, and nothing
+      can be *received* at `@scoutit.space`
+- [ ] **Carry the `google-site-verification` TXT record across** during the
+      Cloudflare migration, or Search Console verification is lost
 
 ## 1.5 Complete the responsive brand experience
 
@@ -597,7 +1343,7 @@ human testing until the behavior and information architecture below are proven.
       Include mobile touch, desktop keyboard, outside click, Escape, focus return,
       session-state changes, and zero console/page errors
 
-### True Light Mode â€” not Lite Mode
+### True Light Mode — not Lite Mode
 
 - [ ] Treat **Light Mode** as a complete first-class visual theme across every public,
       profile, property, dashboard, modal, menu, form, empty, loading, error, and success
@@ -606,7 +1352,7 @@ human testing until the behavior and information architecture below are proven.
       for, rename, or silently activate Light Mode
 - [ ] Replace dark-only raw colors and component-local theme assumptions with semantic
       tokens. Give Light Mode deliberate warm-ivory/ink/gold hierarchy, readable surfaces,
-      visible dividers, intentional shadows, and equal state contrastâ€”not washed gray,
+      visible dividers, intentional shadows, and equal state contrast—not washed gray,
       yellow-on-white, or inverted dark-mode leftovers
 - [ ] Run screenshot comparison and human visual review for all 54 public routes plus
       representative authenticated states at desktop/mobile. Verify text 4.5:1, large
@@ -620,7 +1366,7 @@ human testing until the behavior and information architecture below are proven.
     Do not mark this section complete until the owner chooses full remediation now or
     consistent pilot withholding, and the resulting behavior is re-audited.
 
-### ScoutIt Manifesto â€” comprehensive interactive explanation
+### ScoutIt Manifesto — comprehensive interactive explanation
 
 - [x] Rewrite `/about` as the complete ScoutIt Manifesto: the market problem, what
       ScoutIt is and is not, the people it serves, the six-layer model, the end-to-end
@@ -636,10 +1382,10 @@ human testing until the behavior and information architecture below are proven.
       reduced-transparency versions, mobile-safe fallbacks, and performance budgets;
       interaction must clarify the story rather than delay it
 
-### Layer 05 Mantle â€” who ScoutIt is and how it works
+### Layer 05 Mantle — who ScoutIt is and how it works
 
-- [x] Keep the four existing categoriesâ€”**Our Story**, **Platform Architecture**,
-      **Data Philosophy**, and **Trust & Verification**â€”and make every category solely
+- [x] Keep the four existing categories—**Our Story**, **Platform Architecture**,
+      **Data Philosophy**, and **Trust & Verification**—and make every category solely
       about ScoutIt, why it exists, and how the company/platform operates
 - [x] Replace the current short tab-and-CTA treatment with a self-contained editorial
       disclosure system: FAQ-like in clarity, but not a generic stack of accordion
@@ -653,19 +1399,19 @@ human testing until the behavior and information architecture below are proven.
       mobile performance, contrast, and a non-WebGL fallback. The visual flex must
       reveal how ScoutIt thinks, not become decoration competing with the explanation
 
-### Layer 06 Inner Core â€” â€œIt is all about youâ€
+### Layer 06 Inner Core — “It is all about you”
 
 - [x] Redesign `/layer/core` and `/about-you` as one coherent final chapter: Mantle
       explains ScoutIt; Inner Core turns the model toward the seeker, owner, broker, or
       professional and shows the exact workflow and value for that person
-- [x] Make the â€œyou at the centerâ€ schematic interactive and role-aware with accessible
+- [x] Make the “you at the center” schematic interactive and role-aware with accessible
       list/diagram parity, clear next steps, and no duplicate explanation between Core
       and About You
 - [x] Use the verified server session and real permitted data for personalization.
       Never treat `scoutit_user` localStorage as authentication or show invented portal
       metrics (`142`, `07`, `03`, `12`) as truth; keep them only if explicitly marked
-      **SAMPLE DATA â€” FOR HUMAN TESTING** or replace them with honest empty states
-- [x] Make the Mantle â†’ Core â†’ About You transition narratively continuous, mobile-safe,
+      **SAMPLE DATA — FOR HUMAN TESTING** or replace them with honest empty states
+- [x] Make the Mantle → Core → About You transition narratively continuous, mobile-safe,
       keyboard/screen-reader operable, reduced-motion aware, and useful when signed out,
       signed in with no activity, or signed in with real role-specific activity
 
@@ -682,7 +1428,7 @@ human testing until the behavior and information architecture below are proven.
 
 ---
 
-# PHASE 2 Ã¢â‚¬â€ CONTROLLED PILOT SAFETY
+# PHASE 2 — CONTROLLED PILOT SAFETY
 
 ## 2.1 Authentication and onboarding truth
 
@@ -692,7 +1438,7 @@ human testing until the behavior and information architecture below are proven.
       treat `scoutit_user` local storage as authentication
 - [x] Keep demo/mock mode isolated from real APIs and impossible to enable in
       production accidentally
-- [x] Rename or remove the production-facing Ã¢â‚¬Å“Dev Mode: Bypass PaywallÃ¢â‚¬Â label;
+- [x] Rename or remove the production-facing “Dev Mode: Bypass Paywall” label;
       enforce real server entitlements before charging
 - [x] Confirm Supabase Google provider credentials for Mission Control, or hide
       its Google button until the provider is enabled
@@ -875,7 +1621,7 @@ this phase.
     Focused contracts pass 15/15. Keep the parent item open until the registry is
     owner-applied, a real enrolled profile is verified live, and tester-entered public
     fields are observed to contain sample data only.
-- [ ] Test with 5 owners, 5 seekers, 2â€“3 brokers, and 2 photographers/researchers
+- [ ] Test with 5 owners, 5 seekers, 2–3 brokers, and 2 photographers/researchers
 - [ ] Tell testers before entry that their ScoutIt account is temporary and will be
       deleted at launch; notice is required, separate deletion consent is not
       The pre-authentication entry screen now gives this notice and also states that
@@ -889,7 +1635,7 @@ this phase.
 - [ ] Keep all mock/sample data after this test so it remains available for
       further human-testing rounds
 - [ ] Confirm every mock/sample surface on live `scoutit.space` explicitly says
-      **SAMPLE DATA â€” FOR HUMAN TESTING** and cannot be confused with verified
+      **SAMPLE DATA — FOR HUMAN TESTING** and cannot be confused with verified
       real inventory or user data
       Local rendered evidence passes 20/20 across 390px and 1280px, including all
       seven known sample listings and Discover. Keep open until the same audit passes
@@ -931,17 +1677,20 @@ this phase.
       verify Turnstile after the CSP fix rather than accepting variable presence alone
 - [ ] Deliberately test the error-monitoring path before inviting users
       Engineering is ready: Next.js 16 instrumentation is current, Replay is off,
-      failed reports no longer show success, local development telemetry is disabled,
-      and the exact Node `abortIncoming`/`Error: aborted` client-disconnect signature
-      is discarded without suppressing application exceptions. Focused monitoring
-      tests and lint pass. Keep this open until one sanitized deployed-production
-      event is visibly received in Sentry.
+      failed reports no longer show success, and both local development and
+      production-mode E2E telemetry are disabled. The exact legacy Node
+      `abortIncoming`/`Error: aborted` signature and Next renderer
+      `The destination stream closed early.` signature are discarded only when
+      their framework stream stacks match, without suppressing application
+      exceptions. Focused monitoring/privacy tests pass 11/11, lint is clean, and
+      the 113-route production build passes. Keep this open until one sanitized
+      deployed-production event is visibly received in Sentry.
 - [ ] Record support owner, incident path, pilot feature flags, and rollback steps
 - [ ] Observe clean logs and support behavior before widening the cohort
 
 ---
 
-# PHASE 3 â€” DATA TRUST AND INVENTORY SCALE
+# PHASE 3 — DATA TRUST AND INVENTORY SCALE
 
 ## 3.0A Post-pilot engineering hygiene
 
@@ -958,7 +1707,7 @@ this phase.
 - [ ] Review nonce/hash CSP hardening after Turnstile works; do not accept
       `unsafe-inline`/`unsafe-eval` as the permanent production policy
 
-## 3.0 Actual launch cutover â€” remove mocks here, not during testing
+## 3.0 Actual launch cutover — remove mocks here, not during testing
 
 Run this only when the founder explicitly declares the real public launch.
 
@@ -1092,7 +1841,7 @@ Keep the chosen property-with-child-rows model; do not rewrite into a graph now.
 - [ ] Build the property-acquisition operating system: intake, evidence,
       verification, freshness, SEO readiness, and handoff
 - [ ] Run a five-property pilot through that system
-- [ ] Publish 3â€“5 plain, sourced intelligence briefings before building an
+- [ ] Publish 3–5 plain, sourced intelligence briefings before building an
       interactive newsroom framework
 - [ ] Establish profile/roster acquisition and verification operations
 - [ ] Progress toward 200 real approved listings; report verified count separately
@@ -1100,7 +1849,7 @@ Keep the chosen property-with-child-rows model; do not rewrite into a graph now.
 
 ---
 
-# PHASE 4 â€” PRODUCT DEVELOPMENT AFTER PILOT STABILITY
+# PHASE 4 — PRODUCT DEVELOPMENT AFTER PILOT STABILITY
 
 These are approved directions, but none may interrupt an earlier open phase.
 
@@ -1225,7 +1974,39 @@ The prose, evidence, and sources must remain readable when every interactive fai
 
 ---
 
-# PHASE 5 â€” COMMERCIAL ACTIVATION
+# PHASE 4.5 - LEGAL AND PRIVACY LAUNCH CONTROLS
+
+These are engineering controls, not legal conclusions. Owner, counsel, filing, and approval work lives in [[MASTER_OWNER_ACTIONS]]. Supporting analysis lives in [[16_LEGAL_AND_COMPLIANCE/README|Legal and Compliance]].
+
+## 4.5.1 Versioned terms acceptance
+
+- [ ] Re-verify that TermsAcceptanceModal is mounted in every applicable signup/onboarding path; do not rely on an unused component.
+- [ ] Add an additive, reviewed migration for terms_accepted_at, terms_version, and server-derived acceptance evidence only after confirming the live schema.
+- [ ] Persist acceptance through an authenticated server route with a versioned Terms snapshot, timestamp, actor, and auditable failure behavior; client-only or local state is not evidence.
+- [ ] Add tests for first acceptance, version change/re-consent, failed persistence, unauthenticated calls, and already-accepted users.
+
+## 4.5.2 Retention and data-subject rights
+
+- [ ] Schedule purge_expired_chat_messages through an authenticated, monitored cron path and prove legal holds prevent deletion.
+- [ ] Implement a documented access, correction, export, erasure/blocking, and appeal workflow with identity verification, retention exceptions, audit evidence, and response ownership.
+- [ ] Reconcile chat, analytics, security telemetry, submissions, backups, vendor logs, and public-content retention against the actual Privacy notice.
+
+## 4.5.3 Truthful legal surfaces and platform boundaries
+
+- [ ] Replace the future-dated 2026-10-24 Terms/Privacy effective date before any invited pilot; publish only the version actually in force.
+- [ ] Reconcile Terms and Privacy disclosures with actual analytics, telemetry, cookies, processors, cross-border transfers, retention, notifications, and AI-assisted processing.
+- [ ] Keep payment language provider-neutral until the owner selects and counsel reviews the real provider, refund, receipt, tax, recurring-billing, and outage flows.
+- [ ] Test listing, lead-routing, event-planner, broker, rating, price, and contact copy against the approved RESA/non-brokerage boundary; route legal interpretation to counsel.
+- [ ] Re-verify every 2026-08-03 blueprint fault against current code and production before implementing it; several recorded findings are stale.
+
+## 4.5.4 Release evidence
+
+- [ ] Record counsel-approved Terms and Privacy versions, effective date, acceptance migration, automated tests, cron evidence, and data-rights runbook in a dated implementation record.
+- [ ] Do not describe ScoutIt as compliant or legally verified until the owner closes the corresponding counsel and filing gates in [[MASTER_OWNER_ACTIONS]].
+
+---
+
+# PHASE 5 — COMMERCIAL ACTIVATION
 
 Do not accept money until every item in this phase is complete.
 
@@ -1265,7 +2046,7 @@ Do not accept money until every item in this phase is complete.
 
 ---
 
-# FOUNDER DECISIONS â€” NO ENGINEERING UNTIL ANSWERED
+# FOUNDER DECISIONS — NO ENGINEERING UNTIL ANSWERED
 
 | ID | Decision | Recommended default / deadline |
 |---|---|---|
@@ -1275,7 +2056,7 @@ Do not accept money until every item in this phase is complete.
 | D4 | When may public profiles be indexed? | After demo profiles are removed; otherwise per-demo `noindex` |
 | D5 | FAQ Silver meaning | Separate licensed Advisor Spec from Contributor |
 | D6 | May delegated brokers confirm freshness? | Yes, with verifier audit trail |
-| D7 | Hidden FAQ retention period | 90â€“180 days plus manual erasure |
+| D7 | Hidden FAQ retention period | 90–180 days plus manual erasure |
 | D8 | Is legacy `source` metadata or public display data? | Treat as internal provenance unless proven otherwise |
 | D9 | Keep cyan/magenta accents? | Only with explicit semantic roles |
 | D10 | Keep bounce easing? | Replace with restrained motion |
@@ -1285,7 +2066,7 @@ remove the decision row. Do not duplicate it in another checklist.
 
 ---
 
-# TRIGGER-GATED FUTURE WORK â€” NOT THE CURRENT QUEUE
+# TRIGGER-GATED FUTURE WORK — NOT THE CURRENT QUEUE
 
 | Work | Trigger |
 |---|---|
@@ -1463,4 +2244,4 @@ Disposition rules:
   exist and were not resurrected.
 
 If a source produces a new valid task later, add only the reconciled action,
-owner, phase, and acceptance gate hereâ€”never reactivate the whole source file.
+owner, phase, and acceptance gate here—never reactivate the whole source file.

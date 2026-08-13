@@ -2,8 +2,8 @@
 section: "15_IMPLEMENTATION_RECORDS"
 status: active
 tags: [implementation-records, handoffs, archive, moc]
-updated: 2026-08-02
-related: ["[[00_START_HERE]]", "[[02_ARCHITECTURE_AND_STRUCTURE/STRUCTURE|STRUCTURE]]", "[[00_MASTER_SYNC]]", "[[08_OPERATIONS_AND_BACKLOG/NEW_IDEAS|NEW_IDEAS]]"]
+updated: 2026-08-13
+related: ["[[00_START_HERE]]", "[[02_ARCHITECTURE_AND_STRUCTURE/STRUCTURE|STRUCTURE]]", "[[00_MASTER_SYNC]]", "[[08_OPERATIONS_AND_BACKLOG/00_START_HERE|Operations & Backlog]]"]
 ---
 
 # Implementation Records
@@ -27,51 +27,36 @@ Use the records with these rules:
 
 ### Launch readiness
 
-- [[START_LAUNCH_READINESS_IMPLEMENTATION_PROMPT]] — current execution prompt;
-  starts with LR-01 and stops for review before LR-02.
-- Canonical program: [[LAUNCH_READINESS_MASTER_PLAN]].
+- Canonical program: [[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION PLAN]].
 - Monthly metrics program: [[MONTHLY_SCOUT_WRAP_IMPLEMENTATION_PLAN]].
 - Founder activation/budget: [[FOUNDER_LAUNCH_BUDGET_CHECKLIST]].
+- [[CRITICAL_LOGIC_SECURITY_1_0B_2026-08-12]] — applied critical-logic and
+  security corrections, including the live-schema reasoning.
+- [[MIGRATION_DRIFT_2026-08-12]] — why migration files cannot be assumed to
+  describe production.
+- [[THREE_PLATFORM_SECURITY_AUDIT_2026-08-13]] — GitHub, Vercel, and Supabase
+  evidence snapshot.
+### Sharing
+
+- [[2026-08-13_SHARE_ENGINE]] — mobile curated share, Viber/Messenger, opaque
+  attribution, tests, merge evidence, and the small remaining verification list.
 
 ### Spatial OSINT and Intel
 
 - [[HANDOFF_PROMPT_SPATIAL_OSINT_AND_ARTICLES]] — phased execution handoff.
 - [[SCOUTIT_OSINT_INTEL_BLUEPRINT]] — supporting system blueprint.
 - Canonical product architecture: [[OSINT_INTEL_ARCHITECTURE]].
-- Current backlog: [[08_OPERATIONS_AND_BACKLOG/NEW_IDEAS|NEW_IDEAS]] §23.
+- Current sequencing: [[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION PLAN]] and [[08_OPERATIONS_AND_BACKLOG/ACTION/FUTURE|FUTURE]].
 
 ## Historical
 
-### Coordination
+- [[15_IMPLEMENTATION_RECORDS/historical/launch-readiness/README|Launch-readiness evidence]] contains the retained LR implementation records, full reaudit, authorization evidence, and remediation evidence.
+- [[2026-08-13_BRAIN_PRUNING_RECORD|Brain Pruning Record]] records the removal of obsolete coordination, documentation, prompt, and Mission Control packets.
+- Deleted handoff/planning packets must not be reconstructed as active queues. For current Mission Control state use [[MISSION_CONTROL_REAL_BUILD_STATUS]].
 
-- [[CLAUDE_CODE_MASTER_BRIEF]] — dated multi-track implementation brief.
-- [[WORK_SPLIT_AND_CLAUDE_CODE_QUEUE]] — dated agent work split and prompt index.
+## Documentation history
 
-### Launch readiness
-
-- [[HANDOFF_PROMPT_FOR_CLAUDE_CODE]] — earlier human-testing handoff.
-- [[PRODUCTION_READINESS]] — dated launch-readiness snapshot.
-- [[PRODUCTION_SECURITY_AUDIT]] — dated security-readiness audit.
-
-### Master Mission Control handoffs
-
-- [[HANDOFF_PROMPT_DEPLOY_MISSION_CONTROL]]
-- [[HANDOFF_PROMPT_METRICS_AND_IP_GUARD]]
-- [[HANDOFF_PROMPT_MMC_PASSWORD_LOGIN]]
-- [[HANDOFF_PROMPT_REDESIGN_MISSION_CONTROL]]
-- [[HANDOFF_PROMPT_RUN_MISSION_CONTROL_LOCAL]]
-
-### Master Mission Control planning
-
-- [[MASTER_MISSION_CONTROL_HARDENING]]
-- [[MMC_ACCESS_SETUP]]
-- [[MMC_CLAUDE_CODE_BRIEF]]
-- [[MMC_GAP_ANALYSIS]]
-
-For the real current staff-console state, use
-[[MISSION_CONTROL_REAL_BUILD_STATUS]] and the application-local
-`mission-control/README.md` plus `mission-control/MISSION_CONTROL_SPEC.md`.
-
+- [[2026-08-13_BRAIN_PRUNING_RECORD|Brain Pruning Record]]
 ## Reference
 
 ### Enterprise Mission Control
@@ -84,4 +69,20 @@ For the real current staff-console state, use
 
 - [[Unit master page]] — original product framework.
 - Canonical current model: [[PROPERTY_ARCHITECTURE]], [[DATA_DICTIONARY]], and
-  [[SCOUTIT_MASTER_BUILD_SPEC]].
+  [[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION PLAN]].
+
+<!-- BEGIN:GENERATED_LOGIC_INDEX -->
+
+## Complete logic index
+
+> Generated navigation block. Keep human explanation above this marker; regenerate this block whenever files move.
+
+- **Parent:** [[00_LOGIC_HIERARCHY|ScoutIt Logic Hierarchy]]
+
+### Child logic folders
+
+- [[15_IMPLEMENTATION_RECORDS/active/README|active]]
+- [[15_IMPLEMENTATION_RECORDS/historical/README|historical]]
+- [[15_IMPLEMENTATION_RECORDS/reference/README|reference]]
+
+<!-- END:GENERATED_LOGIC_INDEX -->

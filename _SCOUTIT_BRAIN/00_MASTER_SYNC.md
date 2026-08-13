@@ -2,10 +2,20 @@
 section: "00_META"
 status: active
 tags: [master-sync, north-star, build-queue, decision-log, always-current]
-updated: 2026-08-11
-related: ["[[SCOUTIT_FULL_WORKFLOW]]", "[[SESSION_HANDOFF_2026-07-30]]", "[[00_START_HERE]]", "[[NEXT_DAY_HANDOFF]]", "[[PRE_LAUNCH_BUILD_LIST]]", "[[SCOUTIT_FIX_LIST]]", "[[13_EXTERNAL_INPUTS/README|External Inputs README]]"]
+updated: 2026-08-13
+related: ["[[SCOUTIT_FULL_WORKFLOW]]", "[[SESSION_HANDOFF_2026-07-30]]", "[[00_START_HERE]]", "[[15_IMPLEMENTATION_RECORDS/README|Implementation Records]]", "[[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION PLAN]]", "[[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION PLAN]]", "[[13_EXTERNAL_INPUTS/README|External Inputs README]]"]
 ---
 
+> **2026-08-13 merge and documentation checkpoint:** critical security,
+> repository-hygiene, OG-image, analytics, and sharing work is now present on
+> `origin/main` through merges `a312ce7` and `5289be5`. The curated mobile share
+> path, Viber/Messenger, opaque attribution, and share tests are therefore not
+> pending builds. A separate 242-entry working tree (145 modified, 5 deleted,
+> 92 untracked at the documentation audit) remains local and must not be described
+> as deployed or swept into one commit. The canonical queue is
+> [[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION PLAN]];
+> executed root work-order prompts have been retired after their evidence was
+> consolidated into implementation records.
 
 > **2026-08-08 execution-list consolidation:** this file remains the compact
 > project/status context, but [[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION PLAN]]
@@ -35,11 +45,7 @@ related: ["[[SCOUTIT_FULL_WORKFLOW]]", "[[SESSION_HANDOFF_2026-07-30]]", "[[00_S
 > real-device assistive-technology checks remain
 > owner-gated in [[08_OPERATIONS_AND_BACKLOG/ACTION/MASTER_OWNER_ACTIONS|MASTER OWNER ACTIONS]].
 
-> **What this file is:** the one-page, always-current dashboard. Unlike [[NEXT_DAY_HANDOFF]] (a
-> long, valuable, but ever-growing chronological log of every session), this file gets
-> **overwritten in place** each session — not appended to. If you only read one file to know
-> "where are we right now," read this one, then go deeper into [[NEXT_DAY_HANDOFF]] or the specific
-> doc only if you need history or detail.
+> **What this file is:** the compact, always-current status checkpoint. It is not a task list and it does not replace [[00_LOGIC_HIERARCHY]]. For current work use the two canonical action files; for chronology use the historical [[15_IMPLEMENTATION_RECORDS/README|Implementation Records]] only when older session detail is genuinely needed.
 >
 > **The rule going forward:** update this file at the end of every session (or ask the AI to).
 > Don't create a new sync file each time — that's exactly the proliferation this file exists to
@@ -55,31 +61,32 @@ controlled by a Master Mission Control locker. ScoutIt must remain geography-
 and category-flexible rather than hard-coding one launch city; promotion may
 focus wherever useful inventory and demand develop.
 
-> **Canonical launch execution update — 2026-08-02:** use
-> [[LAUNCH_READINESS_MASTER_PLAN]] for the ordered build and acceptance gates.
-> ScoutIt does not own its custom domain and is not yet on the paid Vercel/
-> Supabase production plans. Finish code, migrations, mobile QA, baseline
-> security, and the pre-launch [[MONTHLY_SCOUT_WRAP_IMPLEMENTATION_PLAN]] now;
-> domain purchase and paid provider controls remain founder budget actions near
-> launch. The older [[PRE_LAUNCH_BUILD_LIST]] is stale historical context.
+> **Canonical launch execution update - corrected 2026-08-13:** scoutit.space is live and
+> NEXT_PUBLIC_SITE_URL is verified. Paid-provider activation is still trigger-gated,
+> and the invited pilot is **not complete**. Use
+> [[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION PLAN]]
+> for engineering order and
+> [[08_OPERATIONS_AND_BACKLOG/ACTION/MASTER_OWNER_ACTIONS|MASTER OWNER ACTIONS]]
+> for credentials, real-device checks, legal decisions, and external dashboards.
+> [[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION PLAN]] is implementation history, not the live queue.
 
 ## 2. Active Build Queue (top items, in order)
 
-This table now mirrors [[LAUNCH_READINESS_MASTER_PLAN]]. Completed historical
+This table now mirrors [[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION PLAN]]. Completed historical
 work remains recorded later in this file; it is not the current execution
 queue. Update package state in the canonical plan first, then mirror it here.
 
 | Order | Package | State | Canonical acceptance source |
 |---|---|---|---|
-| 1 | LR-01 — property URL and lifecycle safety | DONE | [[LAUNCH_READINESS_MASTER_PLAN]] LR-01 |
-| 1b | LR-05 — auth, listing trust, PDF verification, and reproducible schema | DONE | [[LAUNCH_READINESS_MASTER_PLAN]] LR-05 |
-| 2 | LR-02 — broker roster, visibility, and lead routing | DONE | [[LAUNCH_READINESS_MASTER_PLAN]] LR-02 |
-| 3 | LR-03 — hybrid Connect wallet and server-side tiers | DONE | [[LAUNCH_READINESS_MASTER_PLAN]] LR-03 |
-| 4 | LR-04 — two handshakes, chat closure, disputes, and retention | DONE | [[LAUNCH_READINESS_MASTER_PLAN]] LR-04 |
+| 1 | LR-01 — property URL and lifecycle safety | DONE | [[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION PLAN]] LR-01 |
+| 1b | LR-05 — auth, listing trust, PDF verification, and reproducible schema | DONE | [[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION PLAN]] LR-05 |
+| 2 | LR-02 — broker roster, visibility, and lead routing | DONE | [[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION PLAN]] LR-02 |
+| 3 | LR-03 — hybrid Connect wallet and server-side tiers | DONE | [[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION PLAN]] LR-03 |
+| 4 | LR-04 — two handshakes, chat closure, disputes, and retention | DONE | [[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION PLAN]] LR-04 |
 | 5 | MW-01 — Monthly Scout Wrap metric/event contract | DONE | [[MONTHLY_SCOUT_WRAP_IMPLEMENTATION_PLAN]] MW-01 |
 | 6 | LR-06/LR-07 — analytics foundation and complete Monthly Scout Wrap | DONE | [[MONTHLY_SCOUT_WRAP_IMPLEMENTATION_PLAN]] |
-| 7 | LR-08 — mobile polish and honest-data sweep | DONE | [[LAUNCH_READINESS_MASTER_PLAN]] LR-08 |
-| 8 | LR-09 — complete launch verification and invited pilot | DONE | [[LAUNCH_READINESS_MASTER_PLAN]] LR-09 |
+| 7 | LR-08 — mobile polish and honest-data sweep | DONE | [[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION PLAN]] LR-08 |
+| 8 | Invited pilot and live verification | OPEN - code fixes, migrations, credentials, legal sign-off, and real-device checks remain | [[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION PLAN]] + [[08_OPERATIONS_AND_BACKLOG/ACTION/MASTER_OWNER_ACTIONS|MASTER OWNER ACTIONS]] |
 | 9 | LR-10/LR-11 — domain, paid infrastructure, and paid-mode activation | FOUNDER ACTION NEAR LAUNCH/AT 200 | [[FOUNDER_LAUNCH_BUDGET_CHECKLIST]] |
 
 > **2026-08-02 LR-01 implementation checkpoint — DONE:** lifecycle-safe publish/update/withdraw/remove code, additive migration (`20260802000001_property_lifecycle_safety.sql`), server-gated off-market reads/contact, password re-authentication, mobile Danger Zone controls, unit tests (426/426), Playwright browser tests (4/4 passed), lint, and production build (102/102 routes) are complete. SQL migration executed by founder in Supabase. Live title edits remain locked until an immutable Airtable field or staff redirect migration path is deployed.
@@ -94,7 +101,7 @@ queue. Update package state in the canonical plan first, then mirror it here.
 
 > **2026-08-02 LR-06 & LR-07 implementation checkpoint — DONE:** dedicated privacy-safe `analytics_events` telemetry table, salted SHA256 viewer key hashing, `/api/analytics` ingestion endpoint, `generate_monthly_scout_wrap` RPC, portfolio deduplication, unit tests (433/433), Playwright browser tests (2/2 passed), lint, and production build (103/103 routes) are complete. SQL migration `20260802000006_analytics_and_monthly_scout_wrap.sql` executed by founder in Supabase.
 
-> **2026-08-02 LR-08 & LR-09 implementation checkpoint — DONE:** mobile touch target standards ($\ge 44\text{px}$ targets, 16px input font size), honest data labelling, narrow 375px viewport responsiveness, complete unit tests (433/433 passed), Playwright mobile E2E suite (6/6 passed), linting, and production build (103/103 routes compiled) are 100% verified.
+> **2026-08-02 LR-08 implementation checkpoint - historical evidence only:** the recorded mobile suite, unit suite, lint, and build passed at that checkpoint. This does **not** close LR-09 or the current pilot gate; later audits found additional code, migration, operational, and legal work in the canonical action files.
 
 ## 3. Decision Log (highlights — full log lives in [[00_START_HERE]] §6)
 
@@ -116,7 +123,7 @@ queue. Update package state in the canonical plan first, then mirror it here.
   incomplete change set ships believing it was complete. Correctness beats milliseconds.
   ⚠️ It did **not** reproduce on every check, so it is intermittent: a passing spot-check proves
   nothing. Verify with `git hash-object <file>` vs `git rev-parse HEAD:<file>`.
-  → [[NEW_IDEAS_TO_CLAUDE_CODE]] **B4**
+  → [[01_IDENTITY_AND_VISION/NEW_IDEAS|NEW IDEAS]] **B4**
 - 🆕 ✅ **2026-07-30 — Master Mission Control shipped in full, with owner approval.** Commit
   `0f28bc8` (local backup), migrations 0005–0007 applied, deployed live. The staff-publish field
   wipe (W3) is fixed in production. Corrections to the prior record: the repo **has** 2 commits
@@ -124,14 +131,14 @@ queue. Update package state in the canonical plan first, then mirror it here.
   actual blocker was a **build failure**, not the missing tables: `audit/actions.js` imported
   `@/lib/auditLog`, a module that does not exist. `logAction` was already in `@/lib/rbac` with the
   same signature; the fix was one import line, not a new file. ⚠️ Still no off-machine backup.
-  → [[NEW_IDEAS_TO_CLAUDE_CODE]] **B6**
+  → [[01_IDENTITY_AND_VISION/NEW_IDEAS|NEW IDEAS]] **B6**
 - 🆕 ✅ **2026-07-30 — "Mission Control" now names exactly ONE product: the staff console.** The
   in-app surface is the **Enterprise Console** (`0872e88`). Two things shared the name, and the
   collision hid a real defect: the property section editor was mounted only in the MAIN app's
   dev-toolbox-only `MissionControlMode`, so **no staff member could reach it** — while the staff
   console has no Portfolio page at all. The editor was **moved to the staff console's CMS page**
   and verified against production. Mode IDs (`mc_staff`, `mc_enterprise`) stay as-is: they are
-  persisted on profiles and asserted by e2e specs. → [[NEW_IDEAS_TO_CLAUDE_CODE]] **B7**
+  persisted on profiles and asserted by e2e specs. → [[01_IDENTITY_AND_VISION/NEW_IDEAS|NEW IDEAS]] **B7**
 - 🆕 ⚠️ **2026-07-30 — local `.env.local` Airtable credentials are STALE in both apps.** The
   main and mission-control values both 404, including the metadata endpoint. Production is fine
   (Vercel env vars). Consequence: anything run locally against Airtable silently talks to
@@ -160,7 +167,7 @@ queue. Update package state in the canonical plan first, then mirror it here.
   from Airtable's real `2026-07-03` date, so Supabase and Airtable finally agree. The other 14 were
   **deliberately left NULL**: `created_at` is when a record was typed, not when a human checked it,
   and writing it would fabricate a trust signal. ⏰ The **2026-08-02 cliff still arrives** — all 6
-  flip to Re-Verification Due together. → [[LOGIC_TO_TIGHTEN]] L2
+  flip to Re-Verification Due together. → [[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION PLAN]] L2
 - 🆕 ✅ **2026-07-30 — `Floor_Plans` now actually renders (F2).** A Cluster+ benefit owners could
   upload and the site could not display. It's an *attachment* field (array, not URL), so it renders
   as a gated thumbnail grid.
@@ -172,24 +179,24 @@ queue. Update package state in the canonical plan first, then mirror it here.
   superseded, not authoritative.
 - 🆕 **2026-07-08 vault reorg:** folder-numbering bug fixed (old duplicate `08_SECURITY` merged
   into [[09_SECURITY/README|09_SECURITY]]), `SEO_REPOS` vendored tools relocated to
-  `12_EXTERNAL_TOOLS/`, every note given frontmatter + real `[[wikilinks]]`. See
+  `12_EXTERNAL_TOOLS/`, every note given frontmatter + real `wikilinks`. See
   [[00_VAULT_CONVENTIONS]].
 - 🆕 **2026-07-08 Dump migration — complete:** all 27 raw Dump files read in full across two
   passes, cross-checked against the brain, and either confirmed already-covered or cut into atomic
-  notes. Added: [[SCENARIOS_AND_PLAYBOOKS]], [[MASTER_MISSION_CONTROL_BLUEPRINT]], [[SENTINEL_LAYER]],
-  [[LAUNCH_SEQUENCE_PRIORITIES]], [[PROFESSIONAL_CRM_MODULE_MAP]], [[ENTERPRISE_MISSION_CONTROL_SPEC]],
+  notes. Added: [[SCENARIOS_AND_PLAYBOOKS]], [[MISSION_CONTROL_REAL_BUILD_STATUS]], [[SENTINEL_LAYER]],
+  [[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION PLAN]], [[PROFESSIONAL_CRM_MODULE_MAP]], [[ENTERPRISE_MISSION_CONTROL_SPEC]],
   [[MISSION_KANBAN_AUTOMATIONS]], [[CRM_WORKFLOW_GRAVITY_AUTOMATIONS]], [[UNIFIED_SURFACE_TEST]],
   [[SECOND_BRAIN_FIVE_LEVELS]], plus two new [[01_IDENTITY_AND_VISION/NEW_IDEAS|NEW_IDEAS]] entries — all `status: draft`,
-  **not yet owner-reviewed.** Raw files archived to `13_EXTERNAL_INPUTS/_DUMP_RAW_ARCHIVE/`;
-  `Dump/` is now empty. See [[13_EXTERNAL_INPUTS/2026-07-08_dump-audit-and-migration|the migration log]].
+  **not yet owner-reviewed.** Raw source was fully migrated and pruned on 2026-08-13;
+  `Dump/` is now empty. See [[2026-08-13_BRAIN_PRUNING_RECORD|Brain Pruning Record]].
 - 🆕 **2026-07-13 — SCOUTIT OS ARCHITECTURE established:** New definitive guide on identity, roles, workspaces, and permissions created at [[SCOUTIT_OS_ARCHITECTURE]]. Firm rule: "One Person = One ScoutIt Account" with multiple concurrent roles, and Enterprise workspaces owning properties instead of individuals.
-- 🆕 **2026-07-09 — Two build prompts written** ([[MASTER_MISSION_CONTROL_BUILD_PROMPT]],
-  [[PROFESSIONAL_CRM_BUILD_PROMPT]]), **then Mission Control's turned out to be moot:** a real,
+- 🆕 **2026-07-09 — Two build prompts written** ([[MISSION_CONTROL_REAL_BUILD_STATUS]],
+  [[CRM_INITIATIVE]]), **then Mission Control's turned out to be moot:** a real,
   already-deployed Mission Control app was found at `ScoutIt/mission-control/` (RBAC core, User
   CRM, Property Review Queue, Audit Log, Feature Gates, Staff IAM, Badges, CSV import, Metrics —
   see [[MISSION_CONTROL_REAL_BUILD_STATUS]]). Its architecture (3-tier RBAC) is different from and
   better-grounded than the Dump blueprint. **The Mission Control build prompt is superseded, do
-  not run it** — [[MASTER_MISSION_CONTROL_BLUEPRINT]] is now idea-reference only. The **CRM build
+  not run it** — [[MISSION_CONTROL_REAL_BUILD_STATUS]] is now idea-reference only. The **CRM build
   prompt is unaffected** (different feature, lives in the main repo) — it has since been run, see
   the entry below.
 - ✅ **Correction 2026-08-01:** `mission-control/` is tracked inside the main ScoutIt
@@ -197,7 +204,7 @@ queue. Update package state in the canonical plan first, then mirror it here.
   rule remains unchanged: do not commit, push, or deploy without the owner's explicit go-ahead.
 - 🆕 **2026-07-09 — Professional CRM v1 built, then independently verified against the actual
   diff** (not just the build session's own report — that report understated the security finding).
-  [[PROFESSIONAL_CRM_BUILD_PROMPT]] was run against the real main repo (not mission-control).
+  [[CRM_INITIATIVE]] was run against the real main repo (not mission-control).
   **Built:** `crm_tasks` + `crm_activity_log` tables (⚠️ live but no migration file checked in), a
   Timeline engine, rule-based Listing Strength scoring, Broker mode's "Tactical Velocity"
   atmosphere, Owner mode dossier updates. **Genuinely fixed:** the real inquiries stub now
@@ -207,17 +214,17 @@ queue. Update package state in the canonical plan first, then mirror it here.
   account's real deals, now fixed. 🔴 **NOT fixed, worse than first reported:** the server-side
   `mockOwnerId` fallback has no production env-gate and accepts *any* client-supplied ID as a real
   user — and the three brand-new CRM API routes this pass added use the exact same pattern. Full
-  corrected writeup: [[VULNERABILITY_AUDIT_2026-06-26]]. **Also found on review:** CRLF
+  corrected writeup: [[09_SECURITY/README|Security]]. **Also found on review:** CRLF
   line-ending noise inflating ~15 unrelated files' diffs, and a stale `.git/index.lock`. **Correctly
   left alone:** `dealNotes` persistence — already fixed 2026-07-04 a different way
   (`deals.private_notes`). **Not committed or pushed** — working tree has the changes, several
   things (migration file, CRLF cleanup, the mockOwnerId pattern, the stale lock file) should be
-  resolved before it is. See [[CRM_INITIATIVE]] §6 and [[PROFESSIONAL_CRM_BUILD_PROMPT]]'s
+  resolved before it is. See [[CRM_INITIATIVE]] §6 and [[CRM_INITIATIVE]]'s
   "Outcome" section for full detail.
 
 - ✅ **2026-07-09 — combined review done, independently verified against real files.** The
   mockOwnerId gap is genuinely closed (17 routes, not the original 10 — see
-  [[VULNERABILITY_AUDIT_2026-06-26]]), the missing migration is genuinely written, and the CRLF
+  [[09_SECURITY/README|Security]]), the missing migration is genuinely written, and the CRLF
   cleanup genuinely worked. 🔴 **New blocker found during verification, not in the fix report: the
   git index is corrupt** (`bad index file sha1 signature`) — likely caused by the repeated manual
   index-refresh steps the fix pass ran. **Not data loss** — commit history and file content are
@@ -226,7 +233,7 @@ queue. Update package state in the canonical plan first, then mirror it here.
   mount won't allow deleting that file — **needs to be done on the machine with real write access**
   before any `git add`/`commit` is attempted. Once that's done and `git status` shows the expected
   changes cleanly, the actual code (CRM build + security fix) is verified ready to review-and-commit.
-- 🆕 **2026-07-09 — [[GIT_REPAIR_AND_ADMIN_BOOTSTRAP_PROMPT]] written.** Covers the git index
+- 🆕 **2026-07-09 — [[00_MASTER_SYNC]] written.** Covers the git index
   repair above, plus a real lockout-prevention check the security tightening made newly urgent:
   confirming the owner (jerzelguerra26@gmail.com) has a real, verified `role='admin'` account on
   the main site and a bootstrapped Tier 3 Super Admin row in Mission Control's `admin_users`
@@ -236,7 +243,7 @@ queue. Update package state in the canonical plan first, then mirror it here.
   GitHub/Vercel yet for either the CRM build or the security fix, and MMC isn't in production yet
   either — so production is still on old code, meaning `master-dev` still works live today as a
   safety net. **Order locked in: bootstrap the real admin accounts first (§3–4 of
-  [[GIT_REPAIR_AND_ADMIN_BOOTSTRAP_PROMPT]]), verify they work, only then push/deploy the security
+  [[00_MASTER_SYNC]]), verify they work, only then push/deploy the security
   fix.** Reversing that order would cut off the fallback before a tested real account replaces it.
 - 🔴 **2026-07-09 — sign-up is completely broken on production, found while trying to follow the
   sequencing above.** `src/app/onboarding/page.js` (the site's only sign-up/sign-in page — no
@@ -245,7 +252,7 @@ queue. Update package state in the canonical plan first, then mirror it here.
   silently dropped, the real Supabase SDK throws, and users see a generic "Authentication failed."
   with no real detail. **Pre-existing, unrelated to the CRM/security work, has been live this whole
   session.** Fix (5 short function bodies) written into
-  [[GIT_REPAIR_AND_ADMIN_BOOTSTRAP_PROMPT]] §1 — must ship as its own isolated hotfix before
+  [[00_MASTER_SYNC]] §1 — must ship as its own isolated hotfix before
   anything else in that prompt (or any real signup) can proceed. **Fixed directly in the working
   tree and verified** (2026-07-09) — `src/lib/authClient.js` now matches its only caller's
   calling convention.
@@ -259,7 +266,7 @@ queue. Update package state in the canonical plan first, then mirror it here.
   API key. **Resolved 2026-07-09** — owner signed up successfully on production after fixing both.
 - 🆕 **2026-07-09 — new flow bug found post-signup, logged not fixed:** onboarding doesn't tell
   users email confirmation is required until the very last step, three steps too late — see
-  [[E2E_TEST_FIX_LIST]] #7 for the exact cause and recommended fix shape. Not blocking (workaround:
+  [[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION PLAN]] #7 for the exact cause and recommended fix shape. Not blocking (workaround:
   manually check email), queued for a future build prompt.
 - 🆕 **2026-07-09 — third onboarding blocker, config not code:** Supabase Auth's **Site URL** is
   still set to `localhost:3000`, so confirmation email links redirect to a dead local address
@@ -281,18 +288,18 @@ queue. Update package state in the canonical plan first, then mirror it here.
   (see the RLS reset item at the top of this file) mean any user could self-grant `role='admin'`
   the same way right now — one more reason that reset is overdue, not a new problem.
 - 🆕 **2026-07-09 — owner decision: push everything now, sign in and QA manually afterward**,
-  rather than bootstrapping admin accounts first. [[FINAL_COMMIT_AND_PUSH_PROMPT]] written as the
+  rather than bootstrapping admin accounts first. [[00_MASTER_SYNC]] written as the
   single, self-contained prompt to run in a real terminal session — repairs the git index
   (sandboxed attempts hit a hard filesystem wall trying to write git's index on this mount and had
   to be abandoned, leaving harmless stray `index.hotfix*`/`index.readonly3` files to clean up),
   stages exactly the CRM+security+authfix scope, commits, pushes to `origin/main`. Admin bootstrap
-  ([[GIT_REPAIR_AND_ADMIN_BOOTSTRAP_PROMPT]] §3–5) is deferred until the owner actually needs
+  ([[00_MASTER_SYNC]] §3–5) is deferred until the owner actually needs
   admin-gated access. **✅ Since run — commit `ef5a8c1` landed and the git index is healthy again;
   every commit since (through `a1d0217`, 2026-07-11) has gone through cleanly. The git-index
   blocker above is fully resolved.**
 - ✅ **2026-07-09 — RLS security reset done, executed directly via Supabase MCP** (migration
   `rls_security_reset_remove_permissive_policies`, project `yyixsuaimdzyiocswcgc`). This is the
-  top-priority item that's been sitting open since 2026-06-26 — see [[VULNERABILITY_AUDIT_2026-06-26]]
+  top-priority item that's been sitting open since 2026-06-26 — see [[09_SECURITY/README|Security]]
   for the full per-table breakdown. Short version: re-pulled the real policy list from live
   `pg_policies` (17 tables affected, 2 more than the original estimate), dropped every `dev_all_*`
   and "Allow public *" (`true`/`true`) policy, kept the real scoped policies already sitting
@@ -322,7 +329,7 @@ queue. Update package state in the canonical plan first, then mirror it here.
   `src/lib/cmsCache.js` (60s cache, geocode memoization, serve-stale-on-error) now the one way
   routes read Airtable. Same day: raymarched golden black-hole hero shipped per the owner's
   Golden Horizon spec (`75b2384`, `1fbe181`) with a three-tier system — Balance (raymarched),
-  Interactive (Golden Horizon simulator, 5-click UFO), Lite (off). See [[E2E_TEST_FIX_LIST]]
+  Interactive (Golden Horizon simulator, 5-click UFO), Lite (off). See [[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION PLAN]]
   2026-07-10 block.
 - 🆕 **2026-07-11 (morning) — pre-launch audit + role-dashboard sense audit, commit `d8388e9`:**
   gold-standard data verified, `image` fallback fix (8/10 live cards were gradient placeholders),
@@ -331,7 +338,7 @@ queue. Update package state in the canonical plan first, then mirror it here.
   swept for tokens; then the Buyer/Owner/Broker coherence pass purged fake data (hardcoded
   "Miguel Torres" ID card, fake owner phone numbers, flattering 100% completeness rings, 404
   intel cards) — the **Honest Blank Rule** is now the standing dashboard pattern. See
-  [[E2E_TEST_FIX_LIST]] 2026-07-11 blocks.
+  [[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION PLAN]] 2026-07-11 blocks.
 - 🆕 **2026-07-11 (afternoon) — full-role transaction rehearsal, commit `a1d0217`, NOT yet
   pushed:** owner's `/goal` — act as broker/owner/buyer with REAL accounts, complete one real
   transaction, verify the CRM makes sense. It worked end-to-end — but only after finding and
@@ -391,11 +398,11 @@ queue. Update package state in the canonical plan first, then mirror it here.
    publish a scraped or ScoutIt-estimated rent. The public rent/price is the
    owner/lister-confirmed value; if uncertain, use an honest blank or Price on
    request. Treat the old field as the owner-confirmed rent concept rather than
-   creating a second public market-price fact. → [[LOGIC_TO_TIGHTEN]] L14
+   creating a second public market-price fact. → [[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION PLAN]] L14
 1. ✅ **Lexitary vs. internal-only AI Legal Council — resolved pragmatically 2026-07-09.** Both get
    built: internal AI Council is the real working path, Lexitary is a UI-only stub button
-   ("somewhere to live") with the real API wired later. See [[MASTER_MISSION_CONTROL_BLUEPRINT]] §2
-   and [[MASTER_MISSION_CONTROL_BUILD_PROMPT]] §3 page I.
+   ("somewhere to live") with the real API wired later. See [[MISSION_CONTROL_REAL_BUILD_STATUS]] §2
+   and [[MISSION_CONTROL_REAL_BUILD_STATUS]] §3 page I.
 2. ✅ **Wallet scope decided 2026-08-02; schema work remains.** Monthly grants
    are role-scoped. Purchased and reward balances are permanent and account-wide.
    The live one-wallet schema needs a migration and backfill that implements this
@@ -427,13 +434,13 @@ queue. Update package state in the canonical plan first, then mirror it here.
    Decoded." direction.
 4. ✅ **Launch order: security-first vs. build-CRM-first — moot as of 2026-07-11.** Both are done:
    the security hardening shipped 2026-07-09 (RLS reset + mockOwnerId gating) and CRM v1 + the
-   full transaction chain are live-verified. [[LAUNCH_SEQUENCE_PRIORITIES]] is historical now.
+   full transaction chain are live-verified. [[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION PLAN]] is historical now.
 5. ✅ **Housekeeping done** — the empty leftover folders (`08_SECURITY/`, `10_CYBER_SECURITY/`,
    `_REVIEW_QUEUE/*`) are confirmed gone as of 2026-07-11. Same pass also: `Dump/` re-emptied
    (3 Blackhole hero specs archived — already consumed by the 2026-07-10 hero build, see
    `13_EXTERNAL_INPUTS/2026-07-11_blackhole-hero-dump-triage`), a root debug script with a
    hardcoded Supabase secret key moved into gitignored `scratch/` (it was untracked, never
-   committed), empty `docs/` husk + `Untitled.canvas` removed, and NEXT_DAY_HANDOFF's 71
+   committed), empty `docs/` husk + `Untitled.canvas` removed, and the former handoff log's 71
    mojibake-corrupted lines repaired.
 
 ## 6. How to keep this file honest (the update ritual)
@@ -441,20 +448,19 @@ queue. Update package state in the canonical plan first, then mirror it here.
 At the end of any working session — human or AI — update this file **in place**:
 
 ```
-Update 00_MASTER_SYNC.md:
-1. Move any completed Build Queue item's status to Done, and pull the next item up from
-   PRE_LAUNCH_BUILD_LIST.md / SCOUTIT_FIX_LIST.md if the queue is getting short.
-2. Add any new locked decision to §3 (one line, link to the full doc).
-3. Add anything newly parked to §4, anything newly blocking-on-owner to §5.
-4. Do NOT create a new dated sync file. Overwrite this one. NEXT_DAY_HANDOFF.md is still the
-   place for the long-form session narrative if you want to keep that habit too.
+Update 00_MASTER_SYNC.md in place:
+1. Reconcile current status against runtime code, verified live systems, and the two canonical action files.
+2. Record newly locked decisions with a link to their canonical logic note.
+3. Record newly parked work, owner blockers, and deployment evidence without creating duplicate checklists.
+4. If files moved, regenerate folder MOC indexes and verify 00_LOGIC_HIERARCHY still reaches every owned note.
+5. Do not create a new sync file. Put dated execution evidence in 15_IMPLEMENTATION_RECORDS.
 ```
 
 If you're starting a *new AI session* (fresh chat, different tool), paste this instead:
 
 ```
-Read _SCOUTIT_BRAIN/00_MASTER_SYNC.md first — that's the current state. Then read
-NEXT_DAY_HANDOFF.md's most recent entry only if you need more detail on how we got here. Confirm
-the North Star, the top 3 Active Build Queue items, and anything in Open Decisions, then tell me
-you're ready.
+Open _SCOUTIT_BRAIN/00_START_HERE.md, then read 00_MASTER_SYNC.md for current status.
+Use 00_LOGIC_HIERARCHY.md to enter the relevant branch. Read the Master Action Plan
+for engineering work or Master Owner Actions for founder work. Consult historical
+handoffs only when current documents explicitly require older evidence.
 ```
