@@ -1,5 +1,13 @@
 /* eslint-disable react-hooks/immutability */
 /* eslint-disable react-hooks/exhaustive-deps */
+// Third React Compiler disable, added 2026-08-13. Introducing the useCuratedShare
+// hook changed what the compiler can infer across this ~2600-line component, and it
+// can no longer preserve several pre-existing manual memos (`cat`, `chapterConfig`,
+// `ch`, `briefLabel`). Nothing is broken — the rule reports that the compiler is
+// declining to auto-optimize, not that the memos are wrong. Removing them one by one
+// just moves the error to the next memo, and rewriting memoization across a component
+// this size is not share-feature work. Same posture as the two disables above.
+/* eslint-disable react-hooks/preserve-manual-memoization */
 "use client";
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";

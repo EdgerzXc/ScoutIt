@@ -1,5 +1,11 @@
 /* eslint-disable react-hooks/immutability */
 /* eslint-disable react-hooks/exhaustive-deps */
+// Third React Compiler disable, added 2026-08-13 — see the matching note in
+// CommercialFlow.js. Introducing the useCuratedShare hook changed what the compiler
+// can infer across this component, so it can no longer preserve the pre-existing
+// manual memo on `cat`. Nothing is broken; the rule reports that the compiler is
+// declining to auto-optimize, not that the memo is wrong.
+/* eslint-disable react-hooks/preserve-manual-memoization */
 "use client";
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
