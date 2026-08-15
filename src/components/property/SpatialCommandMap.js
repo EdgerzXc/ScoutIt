@@ -146,6 +146,126 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
         paint: { "raster-opacity": 1.0 },
       });
 
+      // ── 1b. REAL BUILDING MASSING ────────────────────────────────────────
+      // The CARTO vector tiles this map already downloads carry render_height /
+      // render_min_height on the `building` source-layer — CARTO's stylesheet
+      // simply paints them as flat fills and throws the third dimension away.
+      // Extruding them costs no new dependency, no new source and no new
+      // network request. hide_3d is CARTO's own "don't extrude this" flag.
+      //
+      // GOLD AS LIGHT, NOT AS PAINT. A city painted solid gold reads as the
+      // old-money luxury cliché PRODUCT.md bans, and flattens into one shape
+      // because nothing varies in value. So height decides how much light a
+      // building catches: low-rise recedes into the void, mid-rise reaches
+      // --accent-muted, only towers earn --accent. --accent-bright is reserved
+      // for exactly one building on the page — the listing itself.
+      //
+      // Tokens are read off documentElement rather than body on purpose: the
+      // light-mode overrides in globals.css are scoped to `body.light-mode`,
+      // so :root always resolves to the dark values. This map is always dark.
+      const rootStyle = getComputedStyle(document.documentElement);
+      const token = (name, fallback) =>
+        (rootStyle.getPropertyValue(name) || "").trim() || fallback;
+      const GOLD_MUTED = token("--accent-muted", "#6E531A");
+      const GOLD = token("--accent", "#E8AE3C");
+      const GOLD_BRIGHT = token("--accent-bright", "#F7C64E");
+
+      const reduceMotion =
+        typeof window !== "undefined" &&
+        typeof window.matchMedia === "function" &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      // Without directional light every face shades identically and the massing
+      // collapses into a single silhouette. This is the line that makes a cube
+      // read as a cube.
+      try {
+        map.setLight({ anchor: "viewport", position: [1.4, 210, 30], color: "#ffffff", intensity: 0.4 });
+      } catch (err) {}
+
+      const massHeight = reduceMotion
+        // Reduced motion gets the finished city immediately — same destination,
+        // no journey. Not a degraded view.
+        ? ["coalesce", ["get", "render_height"], 6]
+        : ["interpolate", ["linear"], ["zoom"],
+            13, 0,
+            15.2, ["coalesce", ["get", "render_height"], 6]];
+
+      map.addLayer({
+        id: "buildings-3d",
+        type: "fill-extrusion",
+        source: "carto",
+        "source-layer": "building",
+        minzoom: 13,
+        filter: ["!=", ["get", "hide_3d"], true],
+        paint: {
+          "fill-extrusion-color": [
+            "interpolate", ["linear"], ["coalesce", ["get", "render_height"], 6],
+            0, "#1a1a1a",
+            12, GOLD_MUTED,
+            60, GOLD,
+          ],
+          "fill-extrusion-height": massHeight,
+          "fill-extrusion-base": ["coalesce", ["get", "render_min_height"], 0],
+          "fill-extrusion-opacity": 0.95,
+          "fill-extrusion-vertical-gradient": true,
+        },
+      });
+
+      // ── 1c. THE STAR PROPERTY ────────────────────────────────────────────
+      // Not a pin near a building — the building. Its real footprint is lifted
+      // out of the rendered tiles and promoted into its own layer so it can be
+      // the single brightest object in the frame.
+      map.addSource("star-building", {
+        type: "geojson",
+        data: { type: "FeatureCollection", features: [] },
+      });
+      map.addLayer({
+        id: "star-building-bloom",
+        type: "fill-extrusion",
+        source: "star-building",
+        paint: {
+          "fill-extrusion-color": GOLD_BRIGHT,
+          "fill-extrusion-height": ["*", 1.18, ["coalesce", ["get", "render_height"], 14]],
+          "fill-extrusion-base": 0,
+          "fill-extrusion-opacity": 0.22,
+        },
+      });
+      map.addLayer({
+        id: "star-building-core",
+        type: "fill-extrusion",
+        source: "star-building",
+        paint: {
+          "fill-extrusion-color": GOLD_BRIGHT,
+          "fill-extrusion-height": ["coalesce", ["get", "render_height"], 14],
+          "fill-extrusion-base": 0,
+          "fill-extrusion-opacity": 1,
+        },
+      });
+
+      // Footprints only exist once tiles have painted, so this runs on idle.
+      // It never clears an existing star: panning the property off-screen
+      // returns no hit, and blanking it then would make the listing blink.
+      const promoteStarBuilding = () => {
+        try {
+          const pt = map.project([targetLng, targetLat]);
+          const hits = map.queryRenderedFeatures(
+            [[pt.x - 12, pt.y - 12], [pt.x + 12, pt.y + 12]],
+            { layers: ["buildings-3d"] }
+          );
+          if (!hits.length) return;
+          const src = map.getSource("star-building");
+          if (!src) return;
+          src.setData({
+            type: "FeatureCollection",
+            features: [{ type: "Feature", properties: hits[0].properties, geometry: hits[0].geometry }],
+          });
+        } catch (err) {
+          // A missing footprint must never take down the map — the gold pin
+          // marker below still marks the spot.
+        }
+      };
+      map.on("idle", promoteStarBuilding);
+
       // 2. Target Property Marker
       const el = document.createElement("div");
       el.innerHTML = `
