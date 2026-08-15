@@ -991,6 +991,42 @@ html.lightbox-open {
   background: rgba(232, 174, 60, 0.12) !important;
 }
 
+/* The spatial HUD's controls are sized for a cursor: 10px type in 4px/8px
+   padding lands around 18px tall, against the 44x44px minimum a fingertip
+   needs. On a phone they are close to unhittable.
+
+   Keyed on (pointer: coarse) rather than a width breakpoint on purpose. The
+   thing that decides how big a target must be is what is pointing at it, not
+   how wide the screen is — a narrow desktop window does not need fat buttons,
+   and a large tablet does. Padding does the growing so the label stays the
+   same size and the HUD keeps its instrument-panel type scale.
+
+   !important is required because these values are set inline on the elements,
+   matching how the rest of this HUD's overrides already work. */
+@media (pointer: coarse) {
+  .scm-layer-btn,
+  .scm-hud-btn {
+    min-height: 44px !important;
+    padding: 10px 14px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+  }
+
+  /* A select cannot take inline-flex without losing its native control
+     rendering, so it gets height and padding only. */
+  .scm-hud-select {
+    min-height: 44px !important;
+    padding: 10px 8px !important;
+  }
+
+  /* The collapse chevron was an 11px glyph with no padding at all — the
+     smallest target in the HUD and the one that hides everything else. */
+  .scm-hud-toggle {
+    min-width: 44px !important;
+    min-height: 44px !important;
+  }
+}
+
 @media (max-width: 640px) {
   .scm-hud-bar {
     top: auto !important;

@@ -762,10 +762,14 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
           <span style={{ color: "#E8AE3C", fontWeight: "bold", letterSpacing: "1px" }}>
             🛡️ SPATIAL HUD COMMAND
           </span>
-          <div style={{ display: "flex", gap: "6px" }}>
+          {/* Wraps because on a touch screen these controls grow to a 44px
+              target and no longer fit one row — without it GRAPH is pushed off
+              the right edge of the HUD. */}
+          <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
             {/* Visual Mode Selector Dropdown */}
             <select
               aria-label="Spatial map visual mode"
+              className="scm-hud-select"
               value={visualMode}
               onChange={(e) => setVisualMode(e.target.value)}
               style={{
@@ -798,7 +802,7 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
             >
               🕸️ GRAPH
             </button>
-            <button onClick={() => setHudExpanded(!hudExpanded)} style={{ background: "none", border: "none", color: "#888", cursor: "pointer", fontSize: "11px" }}>
+            <button onClick={() => setHudExpanded(!hudExpanded)} className="scm-hud-toggle" aria-label={hudExpanded ? "Collapse spatial HUD" : "Expand spatial HUD"} style={{ background: "none", border: "none", color: "#888", cursor: "pointer", fontSize: "11px" }}>
               {hudExpanded ? "▲" : "▼"}
             </button>
           </div>
