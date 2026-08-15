@@ -33,6 +33,15 @@ const SpatialCommandMap = dynamic(() => import("@/components/property/SpatialCom
     </div>
   ),
 });
+const SpatialCanvas = dynamic(() => import("@/components/maps/SpatialCanvas"), {
+  ssr: false,
+  loading: () => (
+    <div style={{ height: "300px", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" }}>Loading spatial canvas…</span>
+    </div>
+  ),
+});
+const USE_SPATIAL_CANVAS = true;
 
 const SpecCard = ({ label, value }) => {
   if (value == null || value === "") return null;
@@ -603,11 +612,21 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
                   </div>
                 }
               >
-                <SpatialCommandMap
-                  lat={property.latitude || property.lat || 14.5547}
-                  lng={property.longitude || property.lng || 121.0244}
-                  propertyTitle={property.title}
-                />
+                {USE_SPATIAL_CANVAS ? (
+                  <SpatialCanvas
+                    lat={property.latitude || property.lat || 14.5547}
+                    lng={property.longitude || property.lng || 121.0244}
+                    propertyTitle={property.title}
+                    initialLens="command"
+                    availableLenses={["command", "location", "flood", "transit"]}
+                  />
+                ) : (
+                  <SpatialCommandMap
+                    lat={property.latitude || property.lat || 14.5547}
+                    lng={property.longitude || property.lng || 121.0244}
+                    propertyTitle={property.title}
+                  />
+                )}
               </InViewport>
 
               <div style={{ marginTop: "24px" }}>

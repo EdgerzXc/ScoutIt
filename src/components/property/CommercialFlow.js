@@ -71,6 +71,15 @@ const SpatialCommandMap = dynamic(() => import("@/components/property/SpatialCom
     </div>
   ),
 });
+const SpatialCanvas = dynamic(() => import("@/components/maps/SpatialCanvas"), {
+  ssr: false,
+  loading: () => (
+    <div style={{ height: "420px", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "4px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-secondary)" }}>Loading spatial canvas…</span>
+    </div>
+  ),
+});
+const USE_SPATIAL_CANVAS = true;
 import { DEEP_INTEL_SCHEMA } from "../../lib/deepIntelSchema";
 
 // Matches the dynamic-import loading states above, so an <InViewport>-gated map
@@ -1731,7 +1740,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
               </div>
 
               {/* Commute context cards */}
-              {commuteCards.length > 0 && (
+                  {commuteCards.length > 0 && (
                 <>
                   <div style={{fontFamily:"var(--font-mono, monospace)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.2em", textTransform:"uppercase", marginBottom:"12px"}}>Commute Context</div>
                   <div style={{display:"flex", flexWrap:"wrap", gap:"10px", marginBottom:"28px"}}>
@@ -1780,29 +1789,59 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                   style={{ marginBottom: "clamp(28px, 8vw, 80px)" }}
                   fallback={mapPlaceholder("420px", "Spatial command HUD")}
                 >
-                  <SpatialCommandMap
-                    lat={d.lat || d.latitude || d.Latitude || 14.5547}
-                    lng={d.lng || d.longitude || d.Longitude || 121.0244}
-                    propertyTitle={d.title}
-                  />
+                  {USE_SPATIAL_CANVAS ? (
+                    <SpatialCanvas
+                      lat={d.lat || d.latitude || d.Latitude || 14.5547}
+                      lng={d.lng || d.longitude || d.Longitude || 121.0244}
+                      propertyTitle={d.title}
+                      initialLens="command"
+                      availableLenses={["command", "location", "flood", "transit"]}
+                    />
+                  ) : (
+                    <SpatialCommandMap
+                      lat={d.lat || d.latitude || d.Latitude || 14.5547}
+                      lng={d.lng || d.longitude || d.Longitude || 121.0244}
+                      propertyTitle={d.title}
+                    />
+                  )}
                 </InViewport>
               )}
 
               {locTab === "flood" && (
-                <FloodHeatmapMap
-                  lat={d.lat || d.latitude}
-                  lng={d.lng || d.longitude}
-                  propertyTitle={d.title}
-                />
+                USE_SPATIAL_CANVAS ? (
+                  <SpatialCanvas
+                    lat={d.lat || d.latitude || 14.5547}
+                    lng={d.lng || d.longitude || 121.0244}
+                    propertyTitle={d.title}
+                    initialLens="flood"
+                    availableLenses={["flood", "command", "location", "transit"]}
+                  />
+                ) : (
+                  <FloodHeatmapMap
+                    lat={d.lat || d.latitude}
+                    lng={d.lng || d.longitude}
+                    propertyTitle={d.title}
+                  />
+                )
               )}
 
               {locTab === "transit" && (
-                <ManilaTransitMap
-                  propertyLat={d.lat || d.latitude}
-                  propertyLng={d.lng || d.longitude}
-                  propertyTitle={d.title}
-                  trueTransitCoords={transitDestCoords}
-                />
+                USE_SPATIAL_CANVAS ? (
+                  <SpatialCanvas
+                    lat={d.lat || d.latitude || 14.5547}
+                    lng={d.lng || d.longitude || 121.0244}
+                    propertyTitle={d.title}
+                    initialLens="transit"
+                    availableLenses={["transit", "command", "location", "flood"]}
+                  />
+                ) : (
+                  <ManilaTransitMap
+                    propertyLat={d.lat || d.latitude}
+                    propertyLng={d.lng || d.longitude}
+                    propertyTitle={d.title}
+                    trueTransitCoords={transitDestCoords}
+                  />
+                )
               )}
 
               {locTab === "map" && (

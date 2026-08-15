@@ -82,6 +82,15 @@ const SpatialCommandMap = dynamic(() => import("@/components/property/SpatialCom
     </div>
   ),
 });
+const SpatialCanvas = dynamic(() => import("@/components/maps/SpatialCanvas"), {
+  ssr: false,
+  loading: () => (
+    <div style={{ height: "420px", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "4px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-secondary)" }}>Loading spatial canvas…</span>
+    </div>
+  ),
+});
+const USE_SPATIAL_CANVAS = true;
 import { DEEP_INTEL_SCHEMA } from "@/lib/deepIntelSchema";
 
 // Matches the dynamic-import loading states above, so an <InViewport>-gated map
@@ -1553,29 +1562,59 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                   style={{ marginBottom: "clamp(28px, 8vw, 80px)" }}
                   fallback={mapPlaceholder("420px", "Spatial command HUD")}
                 >
-                  <SpatialCommandMap
-                    lat={d.lat || d.latitude || d.Latitude || 14.5547}
-                    lng={d.lng || d.longitude || d.Longitude || 121.0244}
-                    propertyTitle={d.title}
-                  />
+                  {USE_SPATIAL_CANVAS ? (
+                    <SpatialCanvas
+                      lat={d.lat || d.latitude || d.Latitude || 14.5547}
+                      lng={d.lng || d.longitude || d.Longitude || 121.0244}
+                      propertyTitle={d.title}
+                      initialLens="command"
+                      availableLenses={["command", "location", "flood", "transit"]}
+                    />
+                  ) : (
+                    <SpatialCommandMap
+                      lat={d.lat || d.latitude || d.Latitude || 14.5547}
+                      lng={d.lng || d.longitude || d.Longitude || 121.0244}
+                      propertyTitle={d.title}
+                    />
+                  )}
                 </InViewport>
               )}
 
               {locTab === "flood" && (
-                <FloodHeatmapMap
-                  lat={d.lat || d.latitude}
-                  lng={d.lng || d.longitude}
-                  propertyTitle={d.title}
-                />
+                USE_SPATIAL_CANVAS ? (
+                  <SpatialCanvas
+                    lat={d.lat || d.latitude || 14.5547}
+                    lng={d.lng || d.longitude || 121.0244}
+                    propertyTitle={d.title}
+                    initialLens="flood"
+                    availableLenses={["flood", "command", "location", "transit"]}
+                  />
+                ) : (
+                  <FloodHeatmapMap
+                    lat={d.lat || d.latitude}
+                    lng={d.lng || d.longitude}
+                    propertyTitle={d.title}
+                  />
+                )
               )}
 
               {locTab === "transit" && (
-                <ManilaTransitMap
-                  propertyLat={d.lat || d.latitude}
-                  propertyLng={d.lng || d.longitude}
-                  propertyTitle={d.title}
-                  trueTransitCoords={transitDestCoords}
-                />
+                USE_SPATIAL_CANVAS ? (
+                  <SpatialCanvas
+                    lat={d.lat || d.latitude || 14.5547}
+                    lng={d.lng || d.longitude || 121.0244}
+                    propertyTitle={d.title}
+                    initialLens="transit"
+                    availableLenses={["transit", "command", "location", "flood"]}
+                  />
+                ) : (
+                  <ManilaTransitMap
+                    propertyLat={d.lat || d.latitude}
+                    propertyLng={d.lng || d.longitude}
+                    propertyTitle={d.title}
+                    trueTransitCoords={transitDestCoords}
+                  />
+                )
               )}
 
               {locTab === "map" && (
@@ -1583,17 +1622,33 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                   style={{height:"clamp(420px, 70vh, 850px)", minHeight:"420px", flexShrink:0, borderRadius:"4px", overflow:"hidden", border:"0.5px solid #262626", marginBottom:"clamp(28px, 8vw, 80px)"}}
                   fallback={mapPlaceholder("100%", "Tactical map")}
                 >
-                  <InteractiveMap
-                    lat={d.lat || d.latitude || 14.5547}
-                    lng={d.lng || d.longitude || 121.0244}
-                    propertyTitle={d.title}
-                    vicinityData={d.whereTo}
-                    lifestylePois={lifestylePois}
-                    routeDestination={transitDestination}
-                    routeDestCoords={transitDestCoords}
-                    routeLabel={transitLabel}
-                    mapboxToken={mapboxToken}
-                  />
+                  {USE_SPATIAL_CANVAS ? (
+                    <SpatialCanvas
+                      lat={d.lat || d.latitude || 14.5547}
+                      lng={d.lng || d.longitude || 121.0244}
+                      propertyTitle={d.title}
+                      initialLens="location"
+                      availableLenses={["location", "command", "flood", "transit"]}
+                      vicinityData={d.whereTo}
+                      lifestylePois={lifestylePois}
+                      routeDestination={transitDestination}
+                      routeDestCoords={transitDestCoords}
+                      routeLabel={transitLabel}
+                      mapboxToken={mapboxToken}
+                    />
+                  ) : (
+                    <InteractiveMap
+                      lat={d.lat || d.latitude || 14.5547}
+                      lng={d.lng || d.longitude || 121.0244}
+                      propertyTitle={d.title}
+                      vicinityData={d.whereTo}
+                      lifestylePois={lifestylePois}
+                      routeDestination={transitDestination}
+                      routeDestCoords={transitDestCoords}
+                      routeLabel={transitLabel}
+                      mapboxToken={mapboxToken}
+                    />
+                  )}
                 </InViewport>
               )}
 
@@ -1724,16 +1779,29 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                   style={{height:"clamp(420px, 70vh, 850px)", minHeight:"420px", flexShrink:0, borderRadius:"4px", overflow:"hidden", border:"0.5px solid #262626", marginBottom:"clamp(32px, 9vw, 120px)"}}
                   fallback={mapPlaceholder("100%", "Tactical map")}
                 >
-                  <InteractiveMap
-                    lat={d.lat || d.latitude || 14.5547}
-                    lng={d.lng || d.longitude || 121.0244}
-                    propertyTitle={d.title}
-                    vicinityData={d.whereTo}
-                    lifestylePois={lifestylePois}
-                    mapboxToken={mapboxToken}
-                    isochrone={isochroneData?.geojson || null}
-                    contours={isochroneData?.contours || []}
-                  />
+                  {USE_SPATIAL_CANVAS ? (
+                    <SpatialCanvas
+                      lat={d.lat || d.latitude || 14.5547}
+                      lng={d.lng || d.longitude || 121.0244}
+                      propertyTitle={d.title}
+                      initialLens="location"
+                      availableLenses={["location", "command"]}
+                      vicinityData={d.whereTo}
+                      lifestylePois={lifestylePois}
+                      mapboxToken={mapboxToken}
+                    />
+                  ) : (
+                    <InteractiveMap
+                      lat={d.lat || d.latitude || 14.5547}
+                      lng={d.lng || d.longitude || 121.0244}
+                      propertyTitle={d.title}
+                      vicinityData={d.whereTo}
+                      lifestylePois={lifestylePois}
+                      mapboxToken={mapboxToken}
+                      isochrone={isochroneData?.geojson || null}
+                      contours={isochroneData?.contours || []}
+                    />
+                  )}
                 </InViewport>
               )}
 
