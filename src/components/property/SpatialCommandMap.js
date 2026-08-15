@@ -245,6 +245,72 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
         type: "geojson",
         data: { type: "FeatureCollection", features: [] },
       });
+
+      // A pool of light on the ground under the listing.
+      //
+      // Colour alone cannot carry "this one is yours". The city's tallest
+      // buildings reach --accent and the star is --accent-bright, and at a
+      // glance in a tower district those two read as the same gold — which is
+      // exactly what happened in Ortigas. So the star is separated by SHAPE,
+      // something no other building on the map has, rather than by inventing a
+      // fourth gold outside the palette.
+      //
+      // Kept as its own point source because a circle layer draws one circle
+      // per vertex when handed a polygon — it would ring the building in
+      // beads instead of pooling under it.
+      map.addSource("star-glow", {
+        type: "geojson",
+        data: { type: "FeatureCollection", features: [] },
+      });
+      map.addLayer({
+        id: "star-glow",
+        type: "circle",
+        source: "star-glow",
+        paint: {
+          "circle-color": GOLD_BRIGHT,
+          // Soft all the way to the centre, so it reads as light rather than
+          // as a gold disc someone dropped on the map.
+          "circle-blur": 1,
+          "circle-opacity": 0.38,
+          // Lie flat on the ground rather than facing the camera, so when the
+          // view is tilted the glow stays a pool under the building instead of
+          // a disc hovering in front of it.
+          "circle-pitch-alignment": "map",
+          "circle-pitch-scale": "map",
+          // Roughly ground-locked: the radius grows with zoom so the pool stays
+          // the same patch of city rather than the same patch of screen. The
+          // transit rings above are the counter-example — their radius is in
+          // screen pixels, so they claim minutes but measure nothing.
+          "circle-radius": [
+            "interpolate", ["exponential", 2], ["zoom"],
+            13, 26,
+            15, 46,
+            17, 90,
+            19, 170,
+          ],
+        },
+        layout: {},
+      }, firstLabelLayerId);
+
+      // A hairline tracing the listing's footprint on the ground.
+      //
+      // The glow carries the wide view, where the building is only a few
+      // pixels. Up close it is the weaker cue, because at that zoom the
+      // neighbouring towers are large and fully gold too. An outline is the
+      // opposite: negligible from far away, unmistakable close up, and no
+      // other building on the map has one. Between them the listing reads at
+      // every zoom.
+      map.addLayer({
+        id: "star-building-outline",
+        type: "line",
+        source: "star-building",
+        paint: {
+          "line-color": GOLD_BRIGHT,
+          "line-width": ["interpolate", ["linear"], ["zoom"], 14, 1, 17, 2.5, 19, 4],
+          "line-opacity": 0.9,
+        },
+      }, firstLabelLayerId);
+
       map.addLayer({
         id: "star-building-bloom",
         type: "fill-extrusion",
@@ -265,6 +331,12 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
           "fill-extrusion-height": ["coalesce", ["get", "render_height"], 14],
           "fill-extrusion-base": 0,
           "fill-extrusion-opacity": 1,
+          // Every other building in the city carries a vertical gradient, so
+          // it darkens toward the ground and reads as a solid lit from
+          // outside. The star does not: it stays evenly bright top to bottom,
+          // so it reads as lit from within. A second difference that survives
+          // even where a neighbouring tower is nearly the same gold.
+          "fill-extrusion-vertical-gradient": false,
         },
       }, firstLabelLayerId);
 
@@ -391,6 +463,33 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
                 },
               ],
             });
+
+            // Centre the glow on the footprint's bounding box rather than on
+            // the listing coordinate, which sits off to one side, and rather
+            // than on the average of the vertices, which drifts toward
+            // whichever end of an L-shaped building has more corners.
+            const outer = best.rings[0];
+            let minLng = Infinity, maxLng = -Infinity, minLat = Infinity, maxLat = -Infinity;
+            for (const [lng, latt] of outer) {
+              if (lng < minLng) minLng = lng;
+              if (lng > maxLng) maxLng = lng;
+              if (latt < minLat) minLat = latt;
+              if (latt > maxLat) maxLat = latt;
+            }
+            map.getSource("star-glow")?.setData({
+              type: "FeatureCollection",
+              features: [
+                {
+                  type: "Feature",
+                  properties: {},
+                  geometry: {
+                    type: "Point",
+                    coordinates: [(minLng + maxLng) / 2, (minLat + maxLat) / 2],
+                  },
+                },
+              ],
+            });
+
             starLocked = true;
             return;
           }
