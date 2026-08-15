@@ -23,56 +23,41 @@ import { useCallback, useEffect, useState } from "react";
 
 const MONO = "var(--font-mono)";
 
+import { useReach } from "@/components/maps/useReach";
+
 // 900 m, matching DEFAULT_RADIUS_M in lib/overpassIntel.js. 1200 m throttled
 // repeatedly against live Overpass (15 filters × a large area); 900 m returned
 // 25 POIs reliably. Still roughly an 11-minute walk. If these two numbers ever
 // disagree again, the component wins and the server default is dead code.
 export default function WhereToSection({ lat, lng, radiusM = 900, onIsochrone, onPoisLoaded }) {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [failed, setFailed] = useState(false);
+  const { data, loading, error, reload } = useReach(lat, lng, radiusM);
+  const failed = Boolean(error);
   const [activeLayer, setActiveLayer] = useState("all");
 
-  const load = useCallback(async () => {
-    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
-      setLoading(false);
-      return;
+  useEffect(() => {
+    if (!data) return;
+    // Hand the reachability polygons up so the map can overlay them.
+    if (data.isochrone) onIsochrone?.(data.isochrone, data.contours);
+    // Hand all Lifestyle Intel POIs up so the Tactical Map renders white dot markers.
+    if (data.layers && Array.isArray(data.layers)) {
+      const allPois = data.layers.flatMap((layer) =>
+        (layer.items || []).map((item) => ({
+          ...item,
+          layerId: layer.id,
+          layerLabel: layer.label,
+          category: item.type || layer.label,
+          distance: item.distance || (item.meters ? `${item.meters} m` : ""),
+          lat: item.lat,
+          lng: item.lon ?? item.lng,
+        }))
+      );
+      onPoisLoaded?.(allPois);
     }
-    setLoading(true);
-    setFailed(false);
-    try {
-      const res = await fetch(`/api/whereto?lat=${lat}&lon=${lng}&radius=${radiusM}`);
-      const json = await res.json();
-      if (!res.ok || !json.success) {
-        setFailed(true);
-        return;
-      }
-      setData(json);
-      // Hand the reachability polygons up so the map can overlay them.
-      if (json.isochrone) onIsochrone?.(json.isochrone, json.contours);
-      // Hand all Lifestyle Intel POIs up so the Tactical Map renders white dot markers.
-      if (json.layers && Array.isArray(json.layers)) {
-        const allPois = json.layers.flatMap(layer =>
-          (layer.items || []).map(item => ({
-            ...item,
-            layerId: layer.id,
-            layerLabel: layer.label,
-            category: item.type || layer.label,
-            distance: item.distance || (item.meters ? `${item.meters} m` : ""),
-            lat: item.lat,
-            lng: item.lon ?? item.lng
-          }))
-        );
-        onPoisLoaded?.(allPois);
-      }
-    } catch {
-      setFailed(true);
-    } finally {
-      setLoading(false);
-    }
-  }, [lat, lng, radiusM, onIsochrone, onPoisLoaded]);
+  }, [data, onIsochrone, onPoisLoaded]);
 
-  useEffect(() => { load(); }, [load]);
+  const load = useCallback(() => {
+    reload();
+  }, [reload]);
 
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
 

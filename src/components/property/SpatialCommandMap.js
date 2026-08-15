@@ -6,6 +6,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import pezaZonesData from "@/data/peza_zones_philippines.json";
 import infraProjectsData from "@/data/ph_infrastructure_projects.json";
 import { computeSpatialIntel, computeContinuityScore } from "@/lib/spatialIntel";
+import { useReach } from "@/components/maps/useReach";
 
 // Major Philippine Enterprise Office Density Clusters GeoJSON
 const OFFICE_CLUSTERS_GEOJSON = {
@@ -46,6 +47,9 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
   const [recentQuakes, setRecentQuakes] = useState([]);
   const [fireCount, setFireCount] = useState(0);
 
+  // Fetch real reachability isochrone via shared useReach hook
+  const { isochrone, contours, loading: reachLoading, error: reachError } = useReach(targetLat, targetLng);
+
   // Compute spatial intel metrics on mount / coord change
   useEffect(() => {
     if (targetLat && targetLng) {
@@ -65,9 +69,8 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
       "fault-line-glow": layerId === "all" || layerId === "seismic",
       "fault-line-layer": layerId === "all" || layerId === "seismic",
       "office-clusters-layer": layerId === "all" || layerId === "clusters",
-      "transit-ring-5": layerId === "all" || layerId === "isochrones",
-      "transit-ring-10": layerId === "all" || layerId === "isochrones",
-      "transit-ring-15": layerId === "all" || layerId === "isochrones",
+      "reach-isochrone-fill": layerId === "all" || layerId === "isochrones",
+      "reach-isochrone-outline": layerId === "all" || layerId === "isochrones",
       "infra-lines-layer": layerId === "all" || layerId === "infra",
       "infra-points-layer": layerId === "all" || layerId === "infra",
       "quakes-layer": layerId === "all" || layerId === "quake",
@@ -595,58 +598,41 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
         },
       });
 
-      // 6. Concentric Transit Walking Rings (5-min / 10-min / 15-min)
-      const ringSource = {
+      // 6. Real Reachability Isochrones (Mapbox via /api/whereto)
+      map.addSource("reach-isochrones", {
         type: "geojson",
-        data: {
-          type: "FeatureCollection",
-          features: [{ type: "Feature", geometry: { type: "Point", coordinates: [targetLng, targetLat] }, properties: {} }],
-        },
-      };
-      map.addSource("transit-rings", ringSource);
+        data: isochrone || { type: "FeatureCollection", features: [] },
+      });
 
-      // 15-min ring (~1125m) — outermost, most transparent
-      map.addLayer({
-        id: "transit-ring-15",
-        type: "circle",
-        source: "transit-rings",
-        layout: { visibility: "visible" },
-        paint: {
-          "circle-radius": 84,
-          "circle-color": "transparent",
-          "circle-stroke-width": 1.5,
-          "circle-stroke-color": "#F7C64E",
-          "circle-stroke-opacity": 0.35,
+      map.addLayer(
+        {
+          id: "reach-isochrone-fill",
+          type: "fill",
+          source: "reach-isochrones",
+          layout: { visibility: "visible" },
+          paint: {
+            "fill-color": ["coalesce", ["get", "color"], GOLD],
+            "fill-opacity": 0.05,
+          },
         },
-      });
-      // 10-min ring (~750m)
-      map.addLayer({
-        id: "transit-ring-10",
-        type: "circle",
-        source: "transit-rings",
-        layout: { visibility: "visible" },
-        paint: {
-          "circle-radius": 54,
-          "circle-color": "transparent",
-          "circle-stroke-width": 2,
-          "circle-stroke-color": "#F7C64E",
-          "circle-stroke-opacity": 0.55,
+        firstLabelLayerId
+      );
+
+      map.addLayer(
+        {
+          id: "reach-isochrone-outline",
+          type: "line",
+          source: "reach-isochrones",
+          layout: { visibility: "visible" },
+          paint: {
+            "line-color": ["coalesce", ["get", "color"], GOLD],
+            "line-width": 1.5,
+            "line-opacity": 0.75,
+            "line-dasharray": [3, 2],
+          },
         },
-      });
-      // 5-min ring (~375m) — innermost, most visible
-      map.addLayer({
-        id: "transit-ring-5",
-        type: "circle",
-        source: "transit-rings",
-        layout: { visibility: "visible" },
-        paint: {
-          "circle-radius": 28,
-          "circle-color": "transparent",
-          "circle-stroke-width": 2.5,
-          "circle-stroke-color": "#F7C64E",
-          "circle-stroke-opacity": 0.9,
-        },
-      });
+        firstLabelLayerId
+      );
 
       // 7. Philippine Major Infrastructure Megaprojects Layer
       map.addSource("infra-projects", { type: "geojson", data: infraProjectsData });
@@ -748,6 +734,18 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
     map.flyTo({ center: [targetLng, targetLat], zoom: 15, essential: true });
     if (markerRef.current) markerRef.current.setLngLat([targetLng, targetLat]);
   }, [targetLat, targetLng]);
+
+  // ─── Sync real isochrone data to MapLibre source ─────────────────────────────
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map || !mapLoadedRef.current) return;
+    try {
+      const src = map.getSource("reach-isochrones");
+      if (src) {
+        src.setData(isochrone || { type: "FeatureCollection", features: [] });
+      }
+    } catch (err) {}
+  }, [isochrone]);
 
   // ─── Toggle Map Layer Visibility ───────────────────────────────────────────
   const handleToggleLayer = (layerId) => {
