@@ -89,6 +89,7 @@ export default function ManilaTransitMap({ propertyLat, propertyLng, propertyTit
   const mapInstance = useRef(null);
   const propertyMarkerRef = useRef(null);
   const rafRef = useRef(null);
+  const animateRef = useRef(null);   // set once the load handler builds the loop
   const lineDataRef = useRef({}); // id -> { track, totalKm }
   const [loadState, setLoadState] = useState("loading"); // loading | ready | error
   const [visibleLines, setVisibleLines] = useState(
@@ -390,6 +391,8 @@ export default function ManilaTransitMap({ propertyLat, propertyLng, propertyTit
             }
           });
         };
+        // Handed to the visibility effect below, which decides when it may run.
+        animateRef.current = animate;
         rafRef.current = requestAnimationFrame(animate);
       } catch (err) {
         console.error("[ManilaTransitMap] Failed to build layers:", err);
@@ -410,6 +413,53 @@ export default function ManilaTransitMap({ propertyLat, propertyLng, propertyTit
       mapInstance.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ── Pause the telemetry loop whenever nobody can actually see it ──────────
+  // The loop runs turf geodesic slicing for every train on every frame. On a
+  // property page the map can be mounted but invisible: the chapter panels are
+  // hidden with opacity:0 at inset:0, so they still occupy a box and still
+  // report as "intersecting" — IntersectionObserver alone is blind to it.
+  // Hence an explicit visibility test (checkVisibility walks opacity for us,
+  // with a computed-style fallback) on a cheap interval. One style read every
+  // 400ms is nothing against 30fps of geodesic math.
+  useEffect(() => {
+    const isReallyVisible = (el) => {
+      if (!el || typeof window === "undefined") return false;
+      if (typeof document !== "undefined" && document.hidden) return false;
+      if (typeof el.checkVisibility === "function") {
+        return el.checkVisibility({ opacityProperty: true, visibilityProperty: true });
+      }
+      let node = el;
+      while (node && node.nodeType === 1) {
+        const cs = window.getComputedStyle(node);
+        if (cs.display === "none" || cs.visibility === "hidden" || Number(cs.opacity) === 0) return false;
+        node = node.parentElement;
+      }
+      return true;
+    };
+
+    const sync = () => {
+      const shouldRun = isReallyVisible(mapContainerRef.current);
+      if (shouldRun) {
+        if (!rafRef.current && animateRef.current) {
+          rafRef.current = requestAnimationFrame(animateRef.current);
+        }
+      } else if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+    };
+
+    const onVisibility = () => sync();
+    document.addEventListener("visibilitychange", onVisibility);
+    const poll = setInterval(sync, 400);
+    sync();
+
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibility);
+      clearInterval(poll);
+    };
   }, []);
 
   const toggleLine = (id) => {

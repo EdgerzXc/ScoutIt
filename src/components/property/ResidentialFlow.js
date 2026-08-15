@@ -229,6 +229,19 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
   const [isOperator,        setIsOperator]        = useState(false);
   useEffect(() => { setIsOperator(hasActiveRole("operator")); }, []);
   const [activeTab,         setActiveTab]         = useState(externalActiveTab || "space");
+
+  // ── Chapters mount their maps only once the reader has opened them ────────
+  // Chapter panels stay in the DOM at opacity:0 (property-detail.css), so every
+  // reader sitting on chapter 01 was still paying to spin up a MapLibre context
+  // in Location and a Leaflet one in Where To — two live maps for a page they
+  // may never scroll to. Once a chapter has been opened we keep it mounted, so
+  // going back to it is instant.
+  const [openedChapters, setOpenedChapters] = useState(
+    () => new Set([externalActiveTab || "space"])
+  );
+  useEffect(() => {
+    setOpenedChapters((prev) => (prev.has(activeTab) ? prev : new Set(prev).add(activeTab)));
+  }, [activeTab]);
   // SSR-safe: useState's initializer can&apos;t read window (hydration mismatch —
   // React reuses the server-rendered value on mount instead of re-running the
   // initializer). Read the real ?chapter= param client-side, after mount, one
@@ -1535,7 +1548,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                 )}
               </div>
 
-              {locTab === "spatial" && (
+              {locTab === "spatial" && openedChapters.has("location") && (
                 <InViewport
                   style={{ marginBottom: "clamp(28px, 8vw, 80px)" }}
                   fallback={mapPlaceholder("420px", "Spatial command HUD")}
@@ -1706,7 +1719,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                 </button>
               </div>
 
-              {whereToTab === "map" && (
+              {whereToTab === "map" && openedChapters.has("whereto") && (
                 <InViewport
                   style={{height:"clamp(420px, 70vh, 850px)", minHeight:"420px", flexShrink:0, borderRadius:"4px", overflow:"hidden", border:"0.5px solid #262626", marginBottom:"clamp(32px, 9vw, 120px)"}}
                   fallback={mapPlaceholder("100%", "Tactical map")}
