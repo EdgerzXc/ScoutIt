@@ -195,6 +195,16 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
             13, 0,
             15.2, ["coalesce", ["get", "render_height"], 6]];
 
+      // Street names and place labels have to stay on top of the massing.
+      // addLayer() with no beforeId appends to the very top of the stack, so
+      // the extrusions were painting straight over the labels and a tower
+      // could swallow the street it stands on. Inserting before the basemap's
+      // first symbol layer puts the whole 3D stack underneath every label
+      // while keeping it above the flat basemap.
+      const firstLabelLayerId = map
+        .getStyle()
+        .layers.find((l) => l.type === "symbol")?.id;
+
       map.addLayer({
         id: "buildings-3d",
         type: "fill-extrusion",
@@ -225,7 +235,7 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
           "fill-extrusion-opacity": 0.95,
           "fill-extrusion-vertical-gradient": true,
         },
-      });
+      }, firstLabelLayerId);
 
       // ── 1c. THE STAR PROPERTY ────────────────────────────────────────────
       // Not a pin near a building — the building. Its real footprint is lifted
@@ -245,7 +255,7 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
           "fill-extrusion-base": 0,
           "fill-extrusion-opacity": 0.22,
         },
-      });
+      }, firstLabelLayerId);
       map.addLayer({
         id: "star-building-core",
         type: "fill-extrusion",
@@ -256,7 +266,7 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
           "fill-extrusion-base": 0,
           "fill-extrusion-opacity": 1,
         },
-      });
+      }, firstLabelLayerId);
 
       // Footprints only exist once tiles have painted, so this runs on idle.
       // It never clears an existing star: panning the property off-screen
