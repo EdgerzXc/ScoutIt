@@ -166,6 +166,7 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
       const rootStyle = getComputedStyle(document.documentElement);
       const token = (name, fallback) =>
         (rootStyle.getPropertyValue(name) || "").trim() || fallback;
+      const INK_SURFACE = token("--surface", "#121212");
       const GOLD_MUTED = token("--accent-muted", "#6E531A");
       const GOLD = token("--accent", "#E8AE3C");
       const GOLD_BRIGHT = token("--accent-bright", "#F7C64E");
@@ -178,8 +179,12 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
       // Without directional light every face shades identically and the massing
       // collapses into a single silhouette. This is the line that makes a cube
       // read as a cube.
+      // Paper White rather than #ffffff: DESIGN.md forbids pure white, and a
+      // warm light is the right call anyway — white light over gold massing
+      // pushes the highlights green.
+      const PAPER_WHITE = token("--text-primary", "#f0ede8");
       try {
-        map.setLight({ anchor: "viewport", position: [1.4, 210, 30], color: "#ffffff", intensity: 0.4 });
+        map.setLight({ anchor: "viewport", position: [1.4, 210, 30], color: PAPER_WHITE, intensity: 0.4 });
       } catch (err) {}
 
       const massHeight = reduceMotion
@@ -198,11 +203,22 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
         minzoom: 13,
         filter: ["!=", ["get", "hide_3d"], true],
         paint: {
+          // Calibrated against the tiles, not against intuition. Measured over
+          // Taguig: median building 15m, p75 22m, p90 45m, p99 61m. The first
+          // draft reached full --accent-muted at 12m, which is a four-storey
+          // building — so 54% of the city sat at or past full gold and the
+          // frame turned to mustard. Stretching the ramp to --accent-muted at
+          // 55m and --accent at 110m puts roughly three buildings in four in
+          // the near-black band and leaves real gold to genuine towers, which
+          // is what keeps this inside 95/5.
+          //
+          // Only the two endpoints are tokens; every colour between them is
+          // interpolated, so the ramp invents no new brand colour.
           "fill-extrusion-color": [
             "interpolate", ["linear"], ["coalesce", ["get", "render_height"], 6],
-            0, "#1a1a1a",
-            12, GOLD_MUTED,
-            60, GOLD,
+            0, INK_SURFACE,
+            55, GOLD_MUTED,
+            110, GOLD,
           ],
           "fill-extrusion-height": massHeight,
           "fill-extrusion-base": ["coalesce", ["get", "render_min_height"], 0],
@@ -245,23 +261,139 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
       // Footprints only exist once tiles have painted, so this runs on idle.
       // It never clears an existing star: panning the property off-screen
       // returns no hit, and blanking it then would make the listing blink.
+      //
+      // A feature returned from this tileset is NOT one building. CARTO groups
+      // every building in a tile that shares a render_height into a single
+      // MultiPolygon — measured on Taguig, one returned feature carried 9,451
+      // rings across 1.6km × 2.4km. Taking hits[0].geometry wholesale therefore
+      // promoted the entire neighbourhood to --accent-bright, which is what put
+      // a solid gold carpet over the city. We have to reach inside the
+      // MultiPolygon and take the one ring the listing actually stands on.
+      const ringContains = ([x, y], ring) => {
+        let inside = false;
+        for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+          const [xi, yi] = ring[i];
+          const [xj, yj] = ring[j];
+          if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) {
+            inside = !inside;
+          }
+        }
+        return inside;
+      };
+
+      // rings[0] is the outer boundary; any further ring is a hole (a courtyard),
+      // and a point in a hole is outside the building.
+      const polygonContains = (pt, rings) => {
+        if (!rings?.length || !ringContains(pt, rings[0])) return false;
+        for (let i = 1; i < rings.length; i++) {
+          if (ringContains(pt, rings[i])) return false;
+        }
+        return true;
+      };
+
+      const polygonsOf = (feature) => {
+        const g = feature?.geometry;
+        if (!g) return [];
+        return g.type === "MultiPolygon" ? g.coordinates : g.type === "Polygon" ? [g.coordinates] : [];
+      };
+
+      // Local metres around the listing. Over the tens of metres that matter
+      // here a flat approximation is exact enough and avoids a geodesy import.
+      const M_PER_DEG_LAT = 110540;
+      const M_PER_DEG_LNG = 111320 * Math.cos((targetLat * Math.PI) / 180);
+      const toLocal = ([lng, latt]) => [
+        (lng - targetLng) * M_PER_DEG_LNG,
+        (latt - targetLat) * M_PER_DEG_LAT,
+      ];
+
+      // Distance from the listing to the nearest point on a ring's edge —
+      // segment distance, not vertex distance. A warehouse wall can run 40m
+      // between two vertices, so measuring to vertices would call a building
+      // the listing is standing against "far away".
+      const metresToRing = (ring) => {
+        let best = Infinity;
+        for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+          const [x1, y1] = toLocal(ring[j]);
+          const [x2, y2] = toLocal(ring[i]);
+          const dx = x2 - x1;
+          const dy = y2 - y1;
+          const len2 = dx * dx + dy * dy;
+          let t = len2 ? -((x1 * dx + y1 * dy) / len2) : 0;
+          t = Math.max(0, Math.min(1, t));
+          best = Math.min(best, Math.hypot(x1 + t * dx, y1 + t * dy));
+        }
+        return best;
+      };
+
+      // How far off a footprint a coordinate may sit and still be treated as
+      // that building. Listing coordinates are geocoded from a text address
+      // (see the Mapbox geocoding path in api/cms), so they land on the parcel
+      // or the street frontage rather than the roof: measured across live
+      // listings the nearest footprint sat 3.6m, 5.9m and 7.4m away, and never
+      // strictly inside. Requiring containment would mean the star never
+      // lights. 10m is inside the building's own frontage and well short of
+      // the far side of any street, so it cannot jump the road to a neighbour.
+      const STAR_SNAP_METRES = 10;
+
+      // Once the listing's footprint is found it cannot change, so stop paying
+      // for the ray-cast on every subsequent idle.
+      let starLocked = false;
       const promoteStarBuilding = () => {
+        if (starLocked) return;
         try {
-          const pt = map.project([targetLng, targetLat]);
-          const hits = map.queryRenderedFeatures(
-            [[pt.x - 12, pt.y - 12], [pt.x + 12, pt.y + 12]],
-            { layers: ["buildings-3d"] }
-          );
-          if (!hits.length) return;
           const src = map.getSource("star-building");
           if (!src) return;
-          src.setData({
-            type: "FeatureCollection",
-            features: [{ type: "Feature", properties: hits[0].properties, geometry: hits[0].geometry }],
-          });
+          const target = [targetLng, targetLat];
+          const pt = map.project(target);
+          // The box is deliberately generous. Querying a fill-extrusion layer
+          // ray-casts against extruded volumes, so a tight box around the
+          // coordinate returns nothing at all — measured: ±2px and ±12px both
+          // returned 0 features where ±40px returned 7. The box only has to
+          // catch the candidate groups; the precision comes from the ray-cast
+          // below, not from the box.
+          const hits = map.queryRenderedFeatures(
+            [[pt.x - 48, pt.y - 48], [pt.x + 48, pt.y + 48]],
+            { layers: ["buildings-3d"] }
+          );
+          let best = null;
+          for (const hit of hits) {
+            for (const rings of polygonsOf(hit)) {
+              if (polygonContains(target, rings)) {
+                best = { distance: 0, properties: hit.properties, rings };
+                break;
+              }
+              const distance = metresToRing(rings[0]);
+              if (distance <= STAR_SNAP_METRES && (!best || distance < best.distance)) {
+                best = { distance, properties: hit.properties, rings };
+              }
+            }
+            if (best?.distance === 0) break;
+          }
+
+          if (best) {
+            src.setData({
+              type: "FeatureCollection",
+              features: [
+                {
+                  type: "Feature",
+                  properties: best.properties,
+                  geometry: { type: "Polygon", coordinates: best.rings },
+                },
+              ],
+            });
+            starLocked = true;
+            return;
+          }
+
+          // Nothing within reach — the listing sits on unmapped ground. Light
+          // nothing rather than light a neighbour: on a product that sells
+          // verified intelligence, the wrong building is a false claim. The
+          // gold pin marker below still marks the spot. Once the tiles have
+          // finished loading this answer will not improve, so stop re-scanning
+          // tens of thousands of rings on every idle.
+          if (map.areTilesLoaded()) starLocked = true;
         } catch (err) {
-          // A missing footprint must never take down the map — the gold pin
-          // marker below still marks the spot.
+          // A missing footprint must never take down the map.
         }
       };
       map.on("idle", promoteStarBuilding);
