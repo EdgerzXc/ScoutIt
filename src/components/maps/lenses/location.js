@@ -1,6 +1,7 @@
 // Location / Tactical Map Lens for Spatial Canvas
 // Utilizes CARTO vector tile 'poi' source-layer directly for zero extra network requests,
 // filtered to the 4 canonical groups (Daily, Wellness, Social, Transit).
+import maplibregl from "maplibre-gl";
 
 const NOISE_CLASSES = [
   "gate",
@@ -38,7 +39,7 @@ export const locationLens = {
     ];
   },
 
-  mount(map, { firstLabelLayerId, targetLat, targetLng, vicinityData = [], lifestylePois = [], nearbyListings = [], routeDestCoords = null, routeLabel = "" }) {
+  mount(map, { firstLabelLayerId, targetLat, targetLng, nearbyListings = [], routeDestCoords = null, routeLabel = "" }) {
     const rootStyle = typeof window !== "undefined" ? getComputedStyle(document.documentElement) : null;
     const token = (name, fallback) => (rootStyle?.getPropertyValue(name) || "").trim() || fallback;
     const GOLD = token("--accent", "#E8AE3C");
@@ -194,6 +195,58 @@ export const locationLens = {
         }
       }
     }
+
+    // 4. Interactive Click & Hover Handlers
+    this._onPoiClick = (e) => {
+      if (!e.features?.length) return;
+      const f = e.features[0];
+      const name = f.properties?.name || "Nearby Point";
+      const cls = f.properties?.class || f.properties?.subclass || "Amenity";
+      new maplibregl.Popup({ offset: 12, className: "scoutit-popup" })
+        .setLngLat(e.lngLat)
+        .setHTML(
+          `<div style="font-family:var(--font-body, sans-serif); color:#fff;">
+             <strong style="font-size:12px; color:#f0ede8;">${name}</strong><br/>
+             <span style="color:#E8AE3C; font-family:var(--font-mono, monospace); font-size:9.5px; text-transform:uppercase; letter-spacing:0.08em;">${cls}</span>
+           </div>`
+        )
+        .addTo(map);
+    };
+
+    this._onListingClick = (e) => {
+      if (!e.features?.length) return;
+      const f = e.features[0];
+      const coordinates = f.geometry.coordinates.slice();
+      const title = f.properties?.title || "ScoutIt Listing";
+      const slug = f.properties?.slug;
+      const link = slug ? `<div style="margin-top:4px;"><a href="/property/${slug}" style="color:#F7C64E; font-size:10px; font-family:var(--font-mono, monospace); text-decoration:none; letter-spacing:0.05em;">View intelligence &rarr;</a></div>` : "";
+
+      new maplibregl.Popup({ offset: 12, className: "scoutit-popup" })
+        .setLngLat(coordinates)
+        .setHTML(
+          `<div style="font-family:var(--font-body, sans-serif); color:#fff;">
+             <strong style="font-size:12px; color:#E8AE3C;">${title}</strong>
+             ${link}
+           </div>`
+        )
+        .addTo(map);
+    };
+
+    this._onMouseEnter = () => {
+      map.getCanvas().style.cursor = "pointer";
+    };
+    this._onMouseLeave = () => {
+      map.getCanvas().style.cursor = "";
+    };
+
+    try {
+      map.on("click", "carto-pois-circle", this._onPoiClick);
+      map.on("click", "nearby-listings-circles", this._onListingClick);
+      map.on("mouseenter", "carto-pois-circle", this._onMouseEnter);
+      map.on("mouseleave", "carto-pois-circle", this._onMouseLeave);
+      map.on("mouseenter", "nearby-listings-circles", this._onMouseEnter);
+      map.on("mouseleave", "nearby-listings-circles", this._onMouseLeave);
+    } catch (err) {}
   },
 
   applyVisibility(map, activeSubLayer) {
@@ -220,6 +273,19 @@ export const locationLens = {
   },
 
   unmount(map) {
+    try {
+      if (this._onPoiClick) map.off("click", "carto-pois-circle", this._onPoiClick);
+      if (this._onListingClick) map.off("click", "nearby-listings-circles", this._onListingClick);
+      if (this._onMouseEnter) {
+        map.off("mouseenter", "carto-pois-circle", this._onMouseEnter);
+        map.off("mouseenter", "nearby-listings-circles", this._onMouseEnter);
+      }
+      if (this._onMouseLeave) {
+        map.off("mouseleave", "carto-pois-circle", this._onMouseLeave);
+        map.off("mouseleave", "nearby-listings-circles", this._onMouseLeave);
+      }
+    } catch (e) {}
+
     const layerIds = [
       "location-route-line-layer",
       "nearby-listings-labels",
