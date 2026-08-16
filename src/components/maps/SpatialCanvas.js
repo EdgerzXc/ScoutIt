@@ -163,11 +163,17 @@ export default function SpatialCanvas({
         pitch: isMobile ? 20 : 25,
         maxPitch: isMobile ? 50 : 60,
         minPitch: 0,
-        dragRotate: true,
-        pitchWithRotate: true,
-        touchPitch: true,
+        // On a phone every one of these rides the SAME two-finger gesture, so a
+        // pinch was simultaneously zooming, rotating and tilting: the slightest
+        // twist spun the city, and with no compass shown there was no way back
+        // to north. Two fingers now pan and zoom, and nothing else.
+        dragRotate: !isMobile,
+        pitchWithRotate: !isMobile,
+        touchPitch: !isMobile,
         touchZoomRotate: true,
-        cooperativeGestures: true, // Prevents scroll trapping on page scroll
+        // One finger scrolls the page, two move the map. Without this the map
+        // swallows the page scroll and the reader is trapped in it.
+        cooperativeGestures: true,
       });
     } catch (err) {
       console.warn("MapLibre GL initialization error:", err);
@@ -176,8 +182,18 @@ export default function SpatialCanvas({
 
     mapInstanceRef.current = map;
 
+    // Rotation stays off on touch even within the pinch handler. `pinch to
+    // zoom` and `twist to rotate` are the same two fingers, and on a small
+    // screen the twist is almost always accidental.
     try {
-      map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
+      if (isMobile) map.touchZoomRotate.disableRotation();
+    } catch (err) {}
+
+    try {
+      // The compass appears wherever rotation is possible, so there is always a
+      // way back to north. On touch, where rotation is off, it would be a dead
+      // button.
+      map.addControl(new maplibregl.NavigationControl({ showCompass: !isMobile }), "top-right");
     } catch (err) {}
 
     map.on("error", (e) => {
