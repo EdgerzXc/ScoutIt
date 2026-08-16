@@ -1520,3 +1520,34 @@ html.lightbox-open {
 .panel-content.chapter-frame--map .whereto-tabs {
   margin-top: 0;
 }
+
+/* The map's height has to work in two different layouts.
+
+   On desktop the chapter is a fixed frame: the panel has a definite height and
+   the map should take what is left after the header, so the whole chapter fits
+   one screen. On mobile the panel has no height of its own — the page scrolls
+   and the panel grows with its content — so a percentage has nothing to measure
+   against. `calc(100% - 186px)` silently resolved to zero there and the map
+   vanished on every phone while looking correct on every desktop.
+
+   Expressing it as a viewport height with the frame calculation as a MAX gets
+   both: the max-height is ignored on mobile (indefinite parent) leaving 62vh,
+   and on desktop it clamps the map to the space the frame actually has. */
+.panel-content.chapter-frame--map .map-frame {
+  height: 62vh;
+  /* Low floor on desktop: a short laptop frame must still fit rather than force
+     a scrollbar. The generous floor belongs to mobile, below. */
+  min-height: 180px;
+  max-height: calc(100% - 186px);
+}
+
+/* Phones and narrow tablets: the page scrolls rather than the panel, so there
+   is no frame to fit and the map can simply be a comfortable size. max-height
+   is cleared so an indefinite parent can never collapse it again. */
+@media (max-width: 900px) {
+  .panel-content.chapter-frame--map .map-frame {
+    height: 58vh;
+    min-height: 320px;
+    max-height: none;
+  }
+}

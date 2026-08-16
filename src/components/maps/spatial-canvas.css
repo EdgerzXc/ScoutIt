@@ -257,3 +257,71 @@
     transition: none;
   }
 }
+
+/* ── Chip rows ─────────────────────────────────────────────────────────────
+   On a phone these are 44px tall by design, and five of them wrapped into
+   three rows — roughly 150px of a 384px-wide map spent on controls before the
+   telemetry panel even opened. One scrolling row keeps every category reachable
+   with a thumb while giving the map back its space. */
+.scc-chiprow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 8px;
+}
+
+@media (max-width: 700px) {
+  .scc-chiprow {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Without this the chips shrink to fit instead of scrolling, and every
+     label ends up truncated — "ALL P", "WELLN", "SOCI". */
+  .scc-chiprow .scc-chip {
+    flex: 0 0 auto;
+  }
+
+  /* The lens bar wrapped onto two rows and collided with the reach legend.
+     One scrolling row keeps it to a single band. */
+  .spatial-canvas-root [role="tablist"] {
+    left: 10px !important;
+    right: 10px !important;
+    transform: none !important;
+    max-width: none !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
+    scrollbar-width: none;
+    justify-content: flex-start !important;
+  }
+  .spatial-canvas-root [role="tablist"]::-webkit-scrollbar {
+    display: none;
+  }
+  .spatial-canvas-root [role="tablist"] .scc-chip--lens {
+    flex: 0 0 auto;
+  }
+
+  /* Legend sits just above the lens bar: top-right collided with the HUD,
+     which is nearly full width on a phone. */
+  .scc-legend {
+    top: auto;
+    bottom: 84px;
+    left: 10px;
+    right: auto;
+    padding: 5px 8px;
+  }
+  .scc-chiprow::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* The HUD was 340px wide against a 384px map — effectively a full-screen
+     sheet pretending to be an overlay. */
+  .spatial-canvas-root .scm-hud {
+    max-width: calc(100% - 20px) !important;
+    left: 10px !important;
+    top: 10px !important;
+    padding: 10px !important;
+  }
+}

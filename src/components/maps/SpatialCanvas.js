@@ -196,11 +196,14 @@ export default function SpatialCanvas({
     map.on("load", () => {
       mapLoadedRef.current = true;
 
-      // On a short frame the expanded HUD covers most of the map it is
-      // annotating. Start it collapsed there and let the reader open it, rather
-      // than making them close it before they can see anything.
+      // The expanded HUD covers most of the map it is annotating whenever the
+      // frame is small — short on a laptop, or narrow on a phone, where the
+      // panel is 340px wide against a 384px map. Start collapsed there and let
+      // the reader open it, rather than making them close it before they can
+      // see anything.
       const frameHeight = mapContainerRef.current?.clientHeight || 0;
-      if (frameHeight && frameHeight < 420) setHudExpanded(false);
+      const narrow = typeof window !== "undefined" && window.innerWidth < 700;
+      if (narrow || (frameHeight && frameHeight < 420)) setHudExpanded(false);
       const tokens = getDesignTokens();
 
       // The basemap's own labels — street and place names — were drawn for a
@@ -782,7 +785,7 @@ export default function SpatialCanvas({
 
           {/* Sublayer Buttons */}
           {subLayerButtons.length > 0 && (
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "5px", marginBottom: "8px" }}>
+            <div className="scc-chiprow">
               {subLayerButtons.map((btn) => (
                 <button
                   key={btn.id}

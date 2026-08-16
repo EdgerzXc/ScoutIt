@@ -1726,7 +1726,8 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
 
               {locTab === "map" && (
                 <InViewport
-                  style={{flex:"0 0 auto", height:"calc(100% - 186px)", minHeight:"180px", borderRadius:"4px", overflow:"hidden", border:"0.5px solid #262626", marginBottom:"20px"}}
+                  className="map-frame"
+                  style={{flex:"0 0 auto", borderRadius:"4px", overflow:"hidden", border:"0.5px solid #262626", marginBottom:"20px"}}
                   fallback={mapPlaceholder("100%", "Tactical map")}
                 >
                   {USE_SPATIAL_CANVAS ? (
