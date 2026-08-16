@@ -2079,16 +2079,27 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                   style={{height:"clamp(420px, 70vh, 850px)", minHeight:"420px", flexShrink:0, borderRadius:"4px", overflow:"hidden", border:"0.5px solid #262626", marginBottom:"clamp(32px, 9vw, 120px)"}}
                   fallback={mapPlaceholder("100%", "Tactical map")}
                 >
-                  <InteractiveMap
-                    lat={d.lat || d.latitude || 14.5547}
-                    lng={d.lng || d.longitude || 121.0244}
-                    propertyTitle={d.title}
-                    vicinityData={d.whereTo}
-                    lifestylePois={lifestylePois}
-                    mapboxToken={mapboxToken}
-                    isochrone={isochroneData?.geojson || null}
-                    contours={isochroneData?.contours || []}
-                  />
+                  {USE_SPATIAL_CANVAS ? (
+                    <SpatialCanvas
+                      lat={d.lat || d.latitude || 14.5547}
+                      lng={d.lng || d.longitude || 121.0244}
+                      propertyTitle={d.title}
+                      initialLens="location"
+                      availableLenses={["location", "command", "flood", "transit"]}
+                      height="100%"
+                    />
+                  ) : (
+                    <InteractiveMap
+                      lat={d.lat || d.latitude || 14.5547}
+                      lng={d.lng || d.longitude || 121.0244}
+                      propertyTitle={d.title}
+                      vicinityData={d.whereTo}
+                      lifestylePois={lifestylePois}
+                      mapboxToken={mapboxToken}
+                      isochrone={isochroneData?.geojson || null}
+                      contours={isochroneData?.contours || []}
+                    />
+                  )}
                 </InViewport>
               )}
 

@@ -1780,10 +1780,8 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                       lng={d.lng || d.longitude || 121.0244}
                       propertyTitle={d.title}
                       initialLens="location"
-                      availableLenses={["location", "command"]}
-                      vicinityData={d.whereTo}
-                      lifestylePois={lifestylePois}
-                      mapboxToken={mapboxToken}
+                      availableLenses={["location", "command", "flood", "transit"]}
+                      height="100%"
                     />
                   ) : (
                     <InteractiveMap
