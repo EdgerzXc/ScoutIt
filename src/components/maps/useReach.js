@@ -16,6 +16,42 @@ const reachInflightMap = new Map();
  * @param {number} [radiusM=900] - Search radius in metres
  * @returns {object} { data, isochrone, contours, walkability, layers, totalPois, poiOk, loading, error, reload }
  */
+/**
+ * A true-distance circle, in metres, as GeoJSON.
+ *
+ * Used only when Mapbox cannot supply a travel-time isochrone. Measured
+ * 2026-08-15: the Isochrone API returns 403 Forbidden for the token in
+ * .env.local, so on this account the real reach never arrives.
+ *
+ * This is NOT a re-run of the fake rings that were removed. Those had a radius
+ * in screen pixels, so they stayed the same size on screen and measured
+ * nothing at any zoom. This is a real distance on the ground: it stays locked
+ * to the same patch of city, and every point inside it genuinely is within
+ * `radiusM` metres of the listing. It is a weaker claim than travel time — it
+ * cannot know about the river or the expressway — so it must be labelled as a
+ * distance, never as minutes. `isFallback` carries that so the UI can say so.
+ */
+export function distanceCircle(lat, lon, radiusM, steps = 96) {
+  const latRad = (lat * Math.PI) / 180;
+  const dLat = radiusM / 110540;
+  const dLon = radiusM / (111320 * Math.cos(latRad));
+  const ring = [];
+  for (let i = 0; i <= steps; i++) {
+    const theta = (i / steps) * 2 * Math.PI;
+    ring.push([lon + dLon * Math.cos(theta), lat + dLat * Math.sin(theta)]);
+  }
+  return {
+    type: "FeatureCollection",
+    features: [
+      {
+        type: "Feature",
+        properties: { id: "radius", label: `${radiusM} m radius`, isFallback: true },
+        geometry: { type: "Polygon", coordinates: [ring] },
+      },
+    ],
+  };
+}
+
 export function useReach(lat, lon, radiusM = 900) {
   const targetLat = typeof lat === "number" && Number.isFinite(lat) ? lat : null;
   const targetLon = typeof lon === "number" && Number.isFinite(lon) ? lon : null;
@@ -156,8 +192,20 @@ export function useReach(lat, lon, radiusM = 900) {
     fetchReach();
   }, [fetchReach]);
 
+  // A shape is only useful if it exists. When Mapbox declines the isochrone we
+  // fall back to a true-distance circle rather than rendering nothing, because
+  // the reach is the spine every lens clips its contents to — without it the
+  // nearby-places layer has no boundary and shows nothing at all.
+  const hasIsochrone = Boolean(state.isochrone?.features?.length);
+  const reach =
+    hasIsochrone || targetLat === null || targetLon === null
+      ? state.isochrone
+      : distanceCircle(targetLat, targetLon, radiusM);
+
   return {
     ...state,
+    reach,
+    reachIsFallback: !hasIsochrone && targetLat !== null && targetLon !== null,
     reload: () => fetchReach(true),
   };
 }

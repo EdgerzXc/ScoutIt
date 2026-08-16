@@ -1,8 +1,13 @@
 // Location / Tactical Map Lens for Spatial Canvas
-// Utilizes CARTO vector tile 'poi' source-layer directly for zero extra network requests,
-// filtered to the 4 canonical groups (Daily, Wellness, Social, Transit).
+//
+// Real-world places come from the `poi` source-layer of the CARTO vector tiles
+// the map already downloads — the same trick as the building heights. No extra
+// request, no new service. Measured: one Makati tile carries 4,857 POI features
+// with class / subclass / name / rank.
 import maplibregl from "maplibre-gl";
 
+// ~900 features per tile in the sample are pure infrastructure clutter — the
+// map must never show a bollard next to a restaurant.
 const NOISE_CLASSES = [
   "gate",
   "lift_gate",
@@ -24,6 +29,90 @@ const WELLNESS_CLASSES = ["fitness_centre", "park", "pharmacy", "clinic", "hospi
 const SOCIAL_CLASSES = ["restaurant", "bar", "mall", "pub", "fast_food", "nightclub", "cinema", "theatre", "museum", "gallery", "attraction"];
 const TRANSIT_CLASSES = ["station", "bus_stop", "fuel", "bus_station", "subway_entrance", "tram_stop", "ferry_terminal", "bus"];
 
+const GROUP_CLASSES = {
+  daily: DAILY_CLASSES,
+  wellness: WELLNESS_CLASSES,
+  social: SOCIAL_CLASSES,
+  transit: TRANSIT_CLASSES,
+};
+
+// MapLibre validates `filter` against the style spec and, when it fails, fires
+// an `error` EVENT and silently declines to add the layer — it does not throw.
+// The first draft of this file used ["!in", ["get","class"], ["literal", [...]]],
+// which is legacy filter syntax requiring a plain string key. Validation
+// rejected it with "filter[1][1]: string expected, array found", the layer was
+// never added, no exception surfaced, and the entire nearby-places feature
+// rendered nothing while looking perfectly correct in source.
+//
+// The expression form of "not in" is ["!", ["in", ...]]. There is no "!in"
+// expression.
+const NOT_NOISE = ["!", ["in", ["get", "class"], ["literal", NOISE_CLASSES]]];
+
+/**
+ * Builds the POI filter.
+ *
+ * `reachGeometry` is the isochrone — the owner's rule is that only what is
+ * genuinely inside the glowing shape may appear. MapLibre's ["within", geom]
+ * does that natively against the tile geometry, so nothing has to be fetched or
+ * computed client-side. When the isochrone is unavailable we show nothing
+ * rather than falling back to "everything in view", which would quietly break
+ * the promise the circle makes.
+ */
+export function buildPoiFilter(group, reachGeometry) {
+  const parts = [NOT_NOISE, ["has", "name"]];
+
+  const classes = GROUP_CLASSES[group];
+  if (classes) parts.push(["in", ["get", "class"], ["literal", classes]]);
+
+  if (reachGeometry) {
+    parts.push(["within", reachGeometry]);
+  } else {
+    // No measured reach yet — render nothing.
+    parts.push(false);
+  }
+
+  return ["all", ...parts];
+}
+
+// Popup content is built as DOM nodes, never as an HTML string.
+//
+// maplibregl.Popup#setHTML assigns the string to innerHTML. POI names come from
+// OpenStreetMap, which anyone in the world can edit, so a place named
+// `<img src=x onerror=...>` would execute script on a ScoutIt property page.
+// textContent cannot be parsed as markup, which closes that off entirely.
+function buildPopupNode({ title, titleColor, subtitle, href, hrefLabel }) {
+  const root = document.createElement("div");
+  root.style.fontFamily = "var(--font-body, sans-serif)";
+
+  const strong = document.createElement("strong");
+  strong.textContent = title;
+  strong.style.cssText = `font-size:12px;color:${titleColor};`;
+  root.appendChild(strong);
+
+  if (subtitle) {
+    root.appendChild(document.createElement("br"));
+    const span = document.createElement("span");
+    span.textContent = subtitle;
+    span.style.cssText =
+      "color:var(--accent,#E8AE3C);font-family:var(--font-mono,monospace);font-size:9.5px;text-transform:uppercase;letter-spacing:0.08em;";
+    root.appendChild(span);
+  }
+
+  if (href) {
+    const wrap = document.createElement("div");
+    wrap.style.marginTop = "4px";
+    const a = document.createElement("a");
+    a.href = href;
+    a.textContent = hrefLabel;
+    a.style.cssText =
+      "color:var(--accent-bright,#F7C64E);font-size:10px;font-family:var(--font-mono,monospace);text-decoration:none;letter-spacing:0.05em;";
+    wrap.appendChild(a);
+    root.appendChild(wrap);
+  }
+
+  return root;
+}
+
 export const locationLens = {
   id: "location",
   label: "Tactical",
@@ -39,16 +128,21 @@ export const locationLens = {
     ];
   },
 
-  mount(map, { firstLabelLayerId, targetLat, targetLng, nearbyListings = [], routeDestCoords = null, routeLabel = "" }) {
+  mount(map, { firstLabelLayerId, nearbyListings = [], isochrone = null }) {
     const rootStyle = typeof window !== "undefined" ? getComputedStyle(document.documentElement) : null;
     const token = (name, fallback) => (rootStyle?.getPropertyValue(name) || "").trim() || fallback;
     const GOLD = token("--accent", "#E8AE3C");
-    const GOLD_BRIGHT = token("--accent-bright", "#F7C64E");
     const PAPER_WHITE = token("--text-primary", "#f0ede8");
-    const SOFT_GREY = "#c8c8c8";
-    const VOID_BLACK = token("--bg-root", "#0e0e0e");
+    const SOFT_GREY = token("--text-secondary", "#c8c8c8");
+    const VOID_BLACK = token("--bg", "#0e0e0e");
 
-    // 1. Vector Tile POI Symbol Layer (from existing carto source)
+    // The reach is a FeatureCollection of bands; the outermost is the whole
+    // reachable area, so POIs are clipped to that.
+    const reachGeometry = widestReachGeometry(isochrone);
+    this._reachGeometry = reachGeometry;
+
+    const baseFilter = buildPoiFilter(null, reachGeometry);
+
     if (!map.getLayer("carto-pois-symbol")) {
       map.addLayer(
         {
@@ -57,16 +151,20 @@ export const locationLens = {
           source: "carto",
           "source-layer": "poi",
           minzoom: 14,
-          filter: ["all", ["!in", ["get", "class"], ["literal", NOISE_CLASSES]], ["has", "name"]],
+          filter: baseFilter,
           layout: {
             visibility: "visible",
             "text-field": ["get", "name"],
-            "text-font": ["Open Sans Regular", "Arial Unicode MS Regular"],
+            "text-font": ["Open Sans Regular", "Noto Sans Regular"],
             "text-size": ["interpolate", ["linear"], ["zoom"], 14, 9, 16, 11, 18, 13],
             "text-offset": [0, 0.6],
             "text-anchor": "top",
             "text-optional": true,
             "text-max-width": 9,
+            // The tiles carry `rank` — lower is more important. Sorting by it
+            // means that when labels collide the significant place survives
+            // rather than whichever happened to be drawn first.
+            "symbol-sort-key": ["coalesce", ["get", "rank"], 99],
           },
           paint: {
             "text-color": SOFT_GREY,
@@ -77,7 +175,6 @@ export const locationLens = {
         firstLabelLayerId
       );
 
-      // Visual point dot for each POI
       map.addLayer(
         {
           id: "carto-pois-circle",
@@ -85,7 +182,7 @@ export const locationLens = {
           source: "carto",
           "source-layer": "poi",
           minzoom: 14,
-          filter: ["all", ["!in", ["get", "class"], ["literal", NOISE_CLASSES]], ["has", "name"]],
+          filter: baseFilter,
           paint: {
             "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 3, 16, 4.5, 18, 6],
             "circle-color": SOFT_GREY,
@@ -98,30 +195,34 @@ export const locationLens = {
       );
     }
 
-    // 2. Nearby ScoutIt Listings (Gold markers + labels)
+    // ── Nearby ScoutIt listings ────────────────────────────────────────────
+    // A listing without coordinates is skipped entirely. It must never be
+    // placed at a fallback position — a mark in the wrong city is worse than
+    // no mark at all.
     const validListings = (nearbyListings || []).filter(
-      (l) => typeof l.lat === "number" && Number.isFinite(l.lat) && typeof l.lng === "number" && Number.isFinite(l.lng)
+      (l) => Number.isFinite(Number(l?.lat)) && Number.isFinite(Number(l?.lng))
     );
 
     const listingsGeoJson = {
       type: "FeatureCollection",
       features: validListings.map((l) => ({
         type: "Feature",
-        geometry: { type: "Point", coordinates: [l.lng, l.lat] },
+        geometry: { type: "Point", coordinates: [Number(l.lng), Number(l.lat)] },
         properties: {
           title: l.title || "ScoutIt Listing",
-          price: l.price || "",
           slug: l.slug || "",
         },
       })),
     };
 
     if (!map.getSource("nearby-scoutit-listings")) {
-      map.addSource("nearby-scoutit-listings", {
-        type: "geojson",
-        data: listingsGeoJson,
-      });
+      map.addSource("nearby-scoutit-listings", { type: "geojson", data: listingsGeoJson });
 
+      // --accent, not --accent-muted: muted gold measures 2.66:1 against Void
+      // Black, under the 3:1 minimum for a non-text UI element, and it is also
+      // the colour the massing gives mid-rise buildings, so muted marks would
+      // camouflage against the city. The star property stays distinct because
+      // it is a whole glowing building, not because it is a brighter dot.
       map.addLayer({
         id: "nearby-listings-circles",
         type: "circle",
@@ -141,7 +242,7 @@ export const locationLens = {
         source: "nearby-scoutit-listings",
         layout: {
           "text-field": ["get", "title"],
-          "text-font": ["Open Sans Bold", "Arial Unicode MS Bold"],
+          "text-font": ["Open Sans Bold", "Noto Sans Regular"],
           "text-size": 10,
           "text-offset": [0, 1.2],
           "text-anchor": "top",
@@ -153,158 +254,136 @@ export const locationLens = {
           "text-halo-width": 2,
         },
       });
+    } else {
+      map.getSource("nearby-scoutit-listings").setData(listingsGeoJson);
     }
 
-    // 3. Optional Destination Route Line
-    if (routeDestCoords && Array.isArray(routeDestCoords) && routeDestCoords.length === 2) {
-      const [destLat, destLng] = routeDestCoords;
-      if (Number.isFinite(destLat) && Number.isFinite(destLng)) {
-        const routeGeoJson = {
-          type: "FeatureCollection",
-          features: [
-            {
-              type: "Feature",
-              geometry: {
-                type: "LineString",
-                coordinates: [
-                  [targetLng, targetLat],
-                  [destLng, destLat],
-                ],
-              },
-              properties: { label: routeLabel || "Route" },
-            },
-          ],
-        };
-
-        if (!map.getSource("location-route-line")) {
-          map.addSource("location-route-line", { type: "geojson", data: routeGeoJson });
-          map.addLayer(
-            {
-              id: "location-route-line-layer",
-              type: "line",
-              source: "location-route-line",
-              paint: {
-                "line-color": GOLD_BRIGHT,
-                "line-width": 2.5,
-                "line-dasharray": [2, 2],
-                "line-opacity": 0.85,
-              },
-            },
-            firstLabelLayerId
-          );
-        }
-      }
-    }
-
-    // 4. Interactive Click & Hover Handlers
-    this._onPoiClick = (e) => {
-      if (!e.features?.length) return;
-      const f = e.features[0];
-      const name = f.properties?.name || "Nearby Point";
-      const cls = f.properties?.class || f.properties?.subclass || "Amenity";
-      new maplibregl.Popup({ offset: 12, className: "scoutit-popup" })
-        .setLngLat(e.lngLat)
-        .setHTML(
-          `<div style="font-family:var(--font-body, sans-serif); color:#fff;">
-             <strong style="font-size:12px; color:#f0ede8;">${name}</strong><br/>
-             <span style="color:#E8AE3C; font-family:var(--font-mono, monospace); font-size:9.5px; text-transform:uppercase; letter-spacing:0.08em;">${cls}</span>
-           </div>`
-        )
-        .addTo(map);
+    // ── Interaction ────────────────────────────────────────────────────────
+    // Handlers are stored per map instance, not on the lens object. The lens is
+    // a module singleton shared by every canvas on the page, so writing them to
+    // `this` means a second canvas overwrites the first one's handlers and
+    // unmount then detaches the wrong listeners.
+    const handlers = {
+      poiClick: (e) => {
+        const f = e.features?.[0];
+        if (!f) return;
+        new maplibregl.Popup({ offset: 12, className: "scoutit-popup" })
+          .setLngLat(e.lngLat)
+          .setDOMContent(
+            buildPopupNode({
+              title: f.properties?.name || "Nearby Point",
+              titleColor: PAPER_WHITE,
+              subtitle: f.properties?.class || f.properties?.subclass || "Amenity",
+            })
+          )
+          .addTo(map);
+      },
+      listingClick: (e) => {
+        const f = e.features?.[0];
+        if (!f) return;
+        const slug = f.properties?.slug;
+        new maplibregl.Popup({ offset: 12, className: "scoutit-popup" })
+          .setLngLat(f.geometry.coordinates.slice())
+          .setDOMContent(
+            buildPopupNode({
+              title: f.properties?.title || "ScoutIt Listing",
+              titleColor: GOLD,
+              href: slug ? `/property/${encodeURIComponent(slug)}` : null,
+              hrefLabel: "View intelligence →",
+            })
+          )
+          .addTo(map);
+      },
+      enter: () => {
+        map.getCanvas().style.cursor = "pointer";
+      },
+      leave: () => {
+        map.getCanvas().style.cursor = "";
+      },
     };
-
-    this._onListingClick = (e) => {
-      if (!e.features?.length) return;
-      const f = e.features[0];
-      const coordinates = f.geometry.coordinates.slice();
-      const title = f.properties?.title || "ScoutIt Listing";
-      const slug = f.properties?.slug;
-      const link = slug ? `<div style="margin-top:4px;"><a href="/property/${slug}" style="color:#F7C64E; font-size:10px; font-family:var(--font-mono, monospace); text-decoration:none; letter-spacing:0.05em;">View intelligence &rarr;</a></div>` : "";
-
-      new maplibregl.Popup({ offset: 12, className: "scoutit-popup" })
-        .setLngLat(coordinates)
-        .setHTML(
-          `<div style="font-family:var(--font-body, sans-serif); color:#fff;">
-             <strong style="font-size:12px; color:#E8AE3C;">${title}</strong>
-             ${link}
-           </div>`
-        )
-        .addTo(map);
-    };
-
-    this._onMouseEnter = () => {
-      map.getCanvas().style.cursor = "pointer";
-    };
-    this._onMouseLeave = () => {
-      map.getCanvas().style.cursor = "";
-    };
+    this._handlersByMap = this._handlersByMap || new WeakMap();
+    this._handlersByMap.set(map, handlers);
 
     try {
-      map.on("click", "carto-pois-circle", this._onPoiClick);
-      map.on("click", "nearby-listings-circles", this._onListingClick);
-      map.on("mouseenter", "carto-pois-circle", this._onMouseEnter);
-      map.on("mouseleave", "carto-pois-circle", this._onMouseLeave);
-      map.on("mouseenter", "nearby-listings-circles", this._onMouseEnter);
-      map.on("mouseleave", "nearby-listings-circles", this._onMouseLeave);
+      map.on("click", "carto-pois-circle", handlers.poiClick);
+      map.on("click", "nearby-listings-circles", handlers.listingClick);
+      map.on("mouseenter", "carto-pois-circle", handlers.enter);
+      map.on("mouseleave", "carto-pois-circle", handlers.leave);
+      map.on("mouseenter", "nearby-listings-circles", handlers.enter);
+      map.on("mouseleave", "nearby-listings-circles", handlers.leave);
     } catch (err) {}
+  },
+
+  // Called when the reach arrives after the lens has already mounted.
+  setReach(map, isochrone, activeSubLayer = "all") {
+    this._reachGeometry = widestReachGeometry(isochrone);
+    this.applyVisibility(map, activeSubLayer);
   },
 
   applyVisibility(map, activeSubLayer) {
     if (!map.getLayer("carto-pois-symbol") || !map.getLayer("carto-pois-circle")) return;
-
-    let classFilter = null;
-    if (activeSubLayer === "daily") {
-      classFilter = ["in", ["get", "class"], ["literal", DAILY_CLASSES]];
-    } else if (activeSubLayer === "wellness") {
-      classFilter = ["in", ["get", "class"], ["literal", WELLNESS_CLASSES]];
-    } else if (activeSubLayer === "social") {
-      classFilter = ["in", ["get", "class"], ["literal", SOCIAL_CLASSES]];
-    } else if (activeSubLayer === "transit") {
-      classFilter = ["in", ["get", "class"], ["literal", TRANSIT_CLASSES]];
-    }
-
-    const baseFilter = ["all", ["!in", ["get", "class"], ["literal", NOISE_CLASSES]], ["has", "name"]];
-    const finalFilter = classFilter ? ["all", baseFilter, classFilter] : baseFilter;
-
+    const group = activeSubLayer && activeSubLayer !== "all" ? activeSubLayer : null;
+    const filter = buildPoiFilter(group, this._reachGeometry);
     try {
-      map.setFilter("carto-pois-symbol", finalFilter);
-      map.setFilter("carto-pois-circle", finalFilter);
+      map.setFilter("carto-pois-symbol", filter);
+      map.setFilter("carto-pois-circle", filter);
     } catch (err) {}
   },
 
   unmount(map) {
-    try {
-      if (this._onPoiClick) map.off("click", "carto-pois-circle", this._onPoiClick);
-      if (this._onListingClick) map.off("click", "nearby-listings-circles", this._onListingClick);
-      if (this._onMouseEnter) {
-        map.off("mouseenter", "carto-pois-circle", this._onMouseEnter);
-        map.off("mouseenter", "nearby-listings-circles", this._onMouseEnter);
-      }
-      if (this._onMouseLeave) {
-        map.off("mouseleave", "carto-pois-circle", this._onMouseLeave);
-        map.off("mouseleave", "nearby-listings-circles", this._onMouseLeave);
-      }
-    } catch (e) {}
+    const handlers = this._handlersByMap?.get(map);
+    if (handlers) {
+      try {
+        map.off("click", "carto-pois-circle", handlers.poiClick);
+        map.off("click", "nearby-listings-circles", handlers.listingClick);
+        map.off("mouseenter", "carto-pois-circle", handlers.enter);
+        map.off("mouseleave", "carto-pois-circle", handlers.leave);
+        map.off("mouseenter", "nearby-listings-circles", handlers.enter);
+        map.off("mouseleave", "nearby-listings-circles", handlers.leave);
+      } catch (e) {}
+      this._handlersByMap.delete(map);
+    }
 
-    const layerIds = [
-      "location-route-line-layer",
-      "nearby-listings-labels",
-      "nearby-listings-circles",
-      "carto-pois-circle",
-      "carto-pois-symbol",
-    ];
-    layerIds.forEach((id) => {
+    ["nearby-listings-labels", "nearby-listings-circles", "carto-pois-circle", "carto-pois-symbol"].forEach((id) => {
       try {
         if (map.getLayer(id)) map.removeLayer(id);
       } catch (e) {}
     });
-    const sourceIds = ["location-route-line", "nearby-scoutit-listings"];
-    sourceIds.forEach((id) => {
-      try {
-        if (map.getSource(id)) map.removeSource(id);
-      } catch (e) {}
-    });
+    try {
+      if (map.getSource("nearby-scoutit-listings")) map.removeSource("nearby-scoutit-listings");
+    } catch (e) {}
   },
 };
+
+/**
+ * The isochrone comes back as bands (5 / 10 / 15 min). The widest one is the
+ * whole reachable area — that is the boundary POIs are clipped to.
+ */
+export function widestReachGeometry(isochrone) {
+  const features = isochrone?.features;
+  if (!Array.isArray(features) || features.length === 0) return null;
+
+  let widest = null;
+  let widestSpan = -Infinity;
+  for (const f of features) {
+    const g = f?.geometry;
+    if (!g || (g.type !== "Polygon" && g.type !== "MultiPolygon")) continue;
+    const coords = [];
+    const walk = (a) => {
+      if (typeof a[0] === "number") coords.push(a);
+      else a.forEach(walk);
+    };
+    walk(g.coordinates);
+    if (!coords.length) continue;
+    const lngs = coords.map((c) => c[0]);
+    const lats = coords.map((c) => c[1]);
+    const span = Math.max(...lngs) - Math.min(...lngs) + (Math.max(...lats) - Math.min(...lats));
+    if (span > widestSpan) {
+      widestSpan = span;
+      widest = g;
+    }
+  }
+  return widest;
+}
 
 export default locationLens;
