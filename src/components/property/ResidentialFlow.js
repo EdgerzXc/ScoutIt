@@ -467,6 +467,22 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
   // ── Derived values (memoized at top to respect React Rules of Hooks) ──
   const d = propertyData || {};
 
+  // Whether this listing has a real position at all.
+  //
+  // Coordinates are not entered by owners. They are geocoded from the location
+  // text — in the browser when the listing is created, and again server-side in
+  // cmsCache for anything published without them. Both can come back empty if
+  // the address is vague or the geocoder is down.
+  //
+  // Every map here used to fall back to 14.5547 / 121.0244 when that happened,
+  // which is Makati CBD. The result was a listing anywhere in the country
+  // rendering a confident, fully detailed map of a place it is not — buildings,
+  // reach ring, nearby shops and all. On a product that sells verified
+  // intelligence that is worse than showing nothing.
+  const propLat = Number(d.lat ?? d.latitude ?? d.Latitude);
+  const propLng = Number(d.lng ?? d.longitude ?? d.Longitude);
+  const hasCoords = Number.isFinite(propLat) && Number.isFinite(propLng) && !(propLat === 0 && propLng === 0);
+
   // The one curated share path — desktop button, mobile bottom bar, and the
   // modal fallback all run through this. `enabled: !d.is_sample` is what keeps
   // sample listings from getting promotable copy; see useCuratedShare.
@@ -1498,7 +1514,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
 
               
 
-              {locTab === "map" && (
+              {locTab === "map" && hasCoords && (
                 <InViewport
                   className="map-frame"
                   style={{flex:"0 0 auto", borderRadius:"4px", overflow:"hidden", border:"0.5px solid #262626", marginBottom:"20px"}}
@@ -1506,8 +1522,8 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                 >
                   {USE_SPATIAL_CANVAS ? (
                     <SpatialCanvas
-                      lat={d.lat || d.latitude || 14.5547}
-                      lng={d.lng || d.longitude || 121.0244}
+                      lat={propLat}
+                      lng={propLng}
                       propertyTitle={d.title}
                       initialLens="location"
                       availableLenses={isNearManilaRail(d.lat || d.latitude, d.lng || d.longitude)
@@ -1517,8 +1533,8 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                     />
                   ) : (
                     <InteractiveMap
-                      lat={d.lat || d.latitude || 14.5547}
-                      lng={d.lng || d.longitude || 121.0244}
+                      lat={propLat}
+                      lng={propLng}
                       propertyTitle={d.title}
                       vicinityData={d.whereTo}
                       lifestylePois={lifestylePois}
@@ -1531,6 +1547,15 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                 </InViewport>
               )}
 
+
+              {locTab === "map" && !hasCoords && (
+                <div className="map-frame" style={{display:"flex", flexDirection:"column", justifyContent:"center", alignItems:"center", gap:"10px", textAlign:"center", padding:"28px", borderRadius:"4px", border:"0.5px dashed var(--border-mid, #333)", background:"var(--surface, #161616)", marginBottom:"20px"}}>
+                  <div style={{fontFamily:"var(--font-mono, monospace)", fontSize:"11px", letterSpacing:"0.2em", textTransform:"uppercase", color:"var(--accent, #E8AE3C)"}}>Position not verified</div>
+                  <div style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"var(--text-secondary, #c8c8c8)", maxWidth:"46ch", lineHeight:1.6}}>
+                    This listing has no confirmed coordinates yet, so there is no map to show. The written detail below is unaffected.
+                  </div>
+                </div>
+              )}
               {locTab === "list" && d.whereTo && d.whereTo.length > 0 && (
                 <div style={{display:"flex", flexDirection:"column", marginBottom:"8px"}}>
                   {d.whereTo.map((item, idx) => (
@@ -1713,15 +1738,15 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                 </button>
               </div>
 
-              {whereToTab === "map" && openedChapters.has("whereto") && (
+              {whereToTab === "map" && hasCoords && openedChapters.has("whereto") && (
                 <InViewport
                   style={{height:"clamp(420px, 70vh, 850px)", minHeight:"420px", flexShrink:0, borderRadius:"4px", overflow:"hidden", border:"0.5px solid #262626", marginBottom:"clamp(32px, 9vw, 120px)"}}
                   fallback={mapPlaceholder("100%", "Tactical map")}
                 >
                   {USE_SPATIAL_CANVAS ? (
                     <SpatialCanvas
-                      lat={d.lat || d.latitude || 14.5547}
-                      lng={d.lng || d.longitude || 121.0244}
+                      lat={propLat}
+                      lng={propLng}
                       propertyTitle={d.title}
                       initialLens="location"
                       availableLenses={isNearManilaRail(d.lat || d.latitude, d.lng || d.longitude)
@@ -1731,8 +1756,8 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                     />
                   ) : (
                     <InteractiveMap
-                      lat={d.lat || d.latitude || 14.5547}
-                      lng={d.lng || d.longitude || 121.0244}
+                      lat={propLat}
+                      lng={propLng}
                       propertyTitle={d.title}
                       vicinityData={d.whereTo}
                       lifestylePois={lifestylePois}
