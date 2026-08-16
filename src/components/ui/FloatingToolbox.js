@@ -26,12 +26,32 @@ export default function FloatingToolbox({ showTrigger = true }) {
   // one fixed four-card sequence shown identically everywhere, which is why it
   // never landed — see src/lib/pageGuides.js.
   //
-  // No role is passed yet: the only role signal available to this client
-  // component today is `scoutit_user` in localStorage, and §1.5 forbids using
-  // that as an authorization signal. The manifest already carries owner and
-  // broker variants; wiring them needs the verified session, tracked in §1.6D.
+  // The role comes from /api/profile/me/role, which verifies the session and
+  // reads the role FROM THE DATABASE. It is deliberately not read from
+  // `scoutit_user` in localStorage: §1.5 forbids treating that as an
+  // authorization signal, and this component cannot be the exception.
+  //
+  // Null role is the normal signed-out case and yields the role-neutral copy,
+  // so nothing waits on the fetch — the guide is usable before it resolves.
   const pathname = usePathname();
-  const activeGuide = guideForPath(pathname);
+  const [role, setRole] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/profile/me/role")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (!cancelled && d?.role) setRole(d.role);
+      })
+      .catch(() => {
+        // Neutral copy is a fine outcome. A guide is not worth an error state.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const activeGuide = guideForPath(pathname, role);
   const WIZARD_STEPS = activeGuide.steps;
 
   const [wizardOpen, setWizardOpen] = useState(false);
