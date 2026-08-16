@@ -1,0 +1,259 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   SPATIAL CANVAS — HUD chrome
+   ═══════════════════════════════════════════════════════════════════════
+
+   One control vocabulary for the whole canvas. Before this file the canvas
+   had four: lens switching, layer toggles, flood periods and transit lines
+   each carried their own inline styles at their own sizes, so "change what
+   the map shows" looked like four different kinds of action.
+
+   Everything here is a *chip*: mono, uppercase, hairline border, one active
+   state. What changes between them is only what they say.
+
+   Values come from the DESIGN.md tokens — label type is mono 10px at 0.18em,
+   radius sm 3px / md 4px / lg 6px, surfaces #161616 / #1e1e1e. The 10px floor
+   is deliberate: 9.5px was in use and is below the site-wide minimum set
+   during the mobile pass.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.spatial-canvas-root {
+  --scc-chip-bg: var(--surface, #161616);
+  --scc-chip-border: #2a2a2a;
+  --scc-chip-ink: var(--text-secondary, #c8c8c8);
+  --scc-chip-bg-active: rgba(232, 174, 60, 0.16);
+  --scc-panel-bg: rgba(14, 14, 14, 0.92);
+
+  /* A local stacking scale. The canvas sits inside a chapter panel that has
+     its own z-index, so arbitrary values here would fight it. */
+  --scc-z-map: 0;
+  --scc-z-hud: 10;
+  --scc-z-legend: 11;
+  --scc-z-popup: 20;
+}
+
+/* ── Chips ─────────────────────────────────────────────────────────────── */
+
+.scc-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 3px;
+  border: 1px solid var(--scc-chip-border);
+  background: var(--scc-chip-bg);
+  color: var(--scc-chip-ink);
+  font-family: var(--font-mono, monospace);
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    border-color 160ms cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 160ms cubic-bezier(0.16, 1, 0.3, 1),
+    color 160ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.scc-chip:hover {
+  border-color: var(--accent-muted, #6E531A);
+  color: var(--text-primary, #f0ede8);
+}
+
+.scc-chip:focus-visible {
+  outline: 2px solid var(--accent, #E8AE3C);
+  outline-offset: 2px;
+}
+
+.scc-chip[aria-pressed="true"],
+.scc-chip.is-active {
+  border-color: var(--accent, #E8AE3C);
+  background: var(--scc-chip-bg-active);
+  color: var(--accent-bright, #F7C64E);
+}
+
+/* The lens switcher is the same chip one step up: it changes what the map
+   IS, not which layer is on, so it earns slightly more presence. */
+.scc-chip--lens {
+  padding: 6px 12px;
+  letter-spacing: 0.18em;
+  background: transparent;
+  border-color: transparent;
+}
+
+.scc-chip--lens:hover {
+  background: var(--scc-chip-bg);
+}
+
+.scc-chip--lens.is-active {
+  background: var(--scc-chip-bg-active);
+  border-color: var(--accent, #E8AE3C);
+}
+
+/* A fingertip needs 44px; a cursor does not. Keyed on the pointer rather than
+   a width breakpoint — what decides target size is what is pointing at it. */
+@media (pointer: coarse) {
+  .scc-chip {
+    min-height: 44px;
+    padding: 12px 14px;
+  }
+  .scc-chip--lens {
+    min-height: 44px;
+    padding: 12px 16px;
+  }
+}
+
+/* ── Panels ────────────────────────────────────────────────────────────── */
+
+.scc-panel {
+  background: var(--scc-panel-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--accent-muted, #6E531A);
+  border-radius: 6px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.75);
+  color: var(--text-primary, #f0ede8);
+  font-family: var(--font-mono, monospace);
+}
+
+.scc-panel__title {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent, #E8AE3C);
+}
+
+/* ── Reach legend ──────────────────────────────────────────────────────── */
+
+.scc-legend {
+  position: absolute;
+  right: 12px;
+  bottom: 28px;
+  z-index: var(--scc-z-legend);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 11px;
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+.scc-legend__swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px dashed var(--accent, #E8AE3C);
+  flex-shrink: 0;
+}
+
+.scc-legend__text {
+  font-family: var(--font-mono, monospace);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-secondary, #c8c8c8);
+}
+
+/* ── Popups ────────────────────────────────────────────────────────────────
+   MapLibre ships a white bubble with a white tip. Unstyled, it lands on the
+   near-black map as the single brightest object on screen — brighter than the
+   listing itself, which is the one thing that is supposed to hold that role.
+   ───────────────────────────────────────────────────────────────────────── */
+
+.scoutit-popup .maplibregl-popup-content {
+  background: var(--surface, #161616);
+  border: 1px solid var(--accent-muted, #6E531A);
+  border-radius: 4px;
+  padding: 10px 12px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.8);
+  color: var(--text-primary, #f0ede8);
+  font-family: var(--font-body, system-ui, sans-serif);
+}
+
+.scoutit-popup .maplibregl-popup-tip {
+  border-top-color: var(--surface, #161616);
+  border-bottom-color: var(--surface, #161616);
+  border-left-color: var(--surface, #161616);
+  border-right-color: var(--surface, #161616);
+}
+
+.scoutit-popup .maplibregl-popup-close-button {
+  color: var(--text-secondary, #c8c8c8);
+  font-size: 16px;
+  line-height: 1;
+  padding: 2px 7px 4px;
+  border-radius: 3px;
+  background: transparent;
+  transition: color 160ms ease, background-color 160ms ease;
+}
+
+.scoutit-popup .maplibregl-popup-close-button:hover {
+  color: var(--accent-bright, #F7C64E);
+  background: rgba(232, 174, 60, 0.12);
+}
+
+.scoutit-popup a:hover {
+  text-decoration: underline;
+}
+
+@media (pointer: coarse) {
+  .scoutit-popup .maplibregl-popup-close-button {
+    min-width: 40px;
+    min-height: 40px;
+  }
+}
+
+/* ── MapLibre's own controls ───────────────────────────────────────────────
+   Left alone they are a white browser-chrome artefact sitting on an
+   instrument panel. */
+
+.spatial-canvas-root .maplibregl-ctrl-group {
+  background: var(--scc-panel-bg);
+  border: 1px solid var(--scc-chip-border);
+  border-radius: 4px;
+  box-shadow: none;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.spatial-canvas-root .maplibregl-ctrl-group button + button {
+  border-top: 1px solid var(--scc-chip-border);
+}
+
+.spatial-canvas-root .maplibregl-ctrl-group button .maplibregl-ctrl-icon {
+  filter: invert(85%) sepia(18%) saturate(360%) hue-rotate(357deg) brightness(95%);
+}
+
+.spatial-canvas-root .maplibregl-ctrl-group button:hover {
+  background: rgba(232, 174, 60, 0.12);
+}
+
+.spatial-canvas-root .maplibregl-ctrl-attrib {
+  background: rgba(14, 14, 14, 0.7);
+  font-size: 9px;
+}
+
+.spatial-canvas-root .maplibregl-ctrl-attrib a {
+  color: var(--text-secondary, #c8c8c8);
+}
+
+/* The cooperative-gesture overlay ("use ctrl + scroll to zoom") is a white
+   sheet by default. */
+.spatial-canvas-root .maplibregl-cooperative-gesture-screen {
+  background: rgba(14, 14, 14, 0.72);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--text-primary, #f0ede8);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scc-chip,
+  .scoutit-popup .maplibregl-popup-close-button {
+    transition: none;
+  }
+}

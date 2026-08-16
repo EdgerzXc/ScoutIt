@@ -5,12 +5,20 @@ import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { computeSpatialIntel, computeContinuityScore } from "@/lib/spatialIntel";
 import { useReach } from "@/components/maps/useReach";
+import "@/components/maps/spatial-canvas.css";
 import { commandLens } from "@/components/maps/lenses/command";
 import { locationLens } from "@/components/maps/lenses/location";
 import { floodLens } from "@/components/maps/lenses/flood";
 import { transitLens } from "@/components/maps/lenses/transit";
 
 // Registry of available lenses
+const LENS_LABELS = {
+  command: "Command",
+  location: "Tactical",
+  flood: "Flood",
+  transit: "Transit",
+};
+
 const LENS_REGISTRY = {
   command: commandLens,
   location: locationLens,
@@ -74,6 +82,17 @@ export default function SpatialCanvas({
     contours,
     loading: reachLoading,
   } = useReach(targetLat, targetLng);
+
+  // Says what the ring is. A travel-time shape and a distance circle look
+  // similar and mean different things, and claiming minutes we did not measure
+  // is the exact failure the pixel rings were removed for.
+  const reachShapeLabel = useMemo(() => {
+    if (reachLoading) return null;
+    if (!isochrone?.features?.length) return null;
+    if (reachIsFallback) return isochrone.features[0]?.properties?.label || "Distance radius";
+    const mins = contours?.map((c) => c.minutes).filter(Boolean);
+    return mins?.length ? `${Math.max(...mins)} min reach` : "Travel-time reach";
+  }, [reachLoading, isochrone, reachIsFallback, contours]);
 
   // Compute telemetry metrics on mount / coordinate update
   useEffect(() => {
@@ -690,23 +709,18 @@ export default function SpatialCanvas({
       {/* HUD Telemetry Overlay */}
       {showHud && (
         <div
-          className="scm-hud"
+          className="scm-hud scc-panel"
           style={{
             position: "absolute",
             top: "16px",
             left: "16px",
-            zIndex: 11,
-            background: "rgba(14, 14, 14, 0.92)",
-            backdropFilter: "blur(12px)",
-            WebkitBackdropFilter: "blur(12px)",
-            border: "1px solid var(--accent-muted, #6E531A)",
-            borderRadius: "6px",
+            zIndex: "var(--scc-z-hud)",
             padding: "12px",
-            color: "var(--text-primary, #f0ede8)",
-            fontFamily: "var(--font-mono, monospace)",
             maxWidth: "340px",
             width: "calc(100% - 32px)",
-            boxShadow: "0 8px 32px rgba(0, 0, 0, 0.75)",
+            // The HUD must never grow taller than the map it sits on.
+            maxHeight: "calc(100% - 88px)",
+            overflowY: "auto",
           }}
         >
           {/* Header */}
@@ -722,21 +736,16 @@ export default function SpatialCanvas({
                   boxShadow: "0 0 8px var(--accent, #E8AE3C)",
                 }}
               />
-              <span style={{ fontSize: "11px", fontWeight: "bold", letterSpacing: "0.12em", color: "var(--accent, #E8AE3C)" }}>
-                SPATIAL RADAR HUD
-              </span>
+              <span className="scc-panel__title">{LENS_LABELS[activeLensId] || "Spatial"} lens</span>
             </div>
             <button
+              type="button"
+              className="scc-chip"
+              aria-expanded={hudExpanded}
               onClick={() => setHudExpanded(!hudExpanded)}
-              style={{
-                background: "transparent",
-                border: "none",
-                color: "var(--text-secondary, #a0a0a0)",
-                fontSize: "10px",
-                cursor: "pointer",
-              }}
+              style={{ border: "1px solid transparent", background: "transparent" }}
             >
-              {hudExpanded ? "▲ COLLAPSE" : "▼ EXPAND"}
+              {hudExpanded ? "▲" : "▼"}
             </button>
           </div>
 
@@ -746,21 +755,10 @@ export default function SpatialCanvas({
               {subLayerButtons.map((btn) => (
                 <button
                   key={btn.id}
-                  className="scm-layer-btn"
+                  type="button"
+                  className={`scc-chip ${activeSubLayer === btn.id ? "is-active" : ""}`}
+                  aria-pressed={activeSubLayer === btn.id}
                   onClick={() => handleToggleSubLayer(btn.id)}
-                  style={{
-                    padding: "4px 8px",
-                    borderRadius: "3px",
-                    border: activeSubLayer === btn.id ? "1px solid var(--accent, #E8AE3C)" : "1px solid #2e2e2e",
-                    background: activeSubLayer === btn.id ? "rgba(232, 174, 60, 0.2)" : "#161616",
-                    color: activeSubLayer === btn.id ? "var(--accent-bright, #F7C64E)" : "#999",
-                    fontSize: "9.5px",
-                    cursor: "pointer",
-                    fontWeight: "600",
-                    letterSpacing: "0.05em",
-                    textTransform: "uppercase",
-                    transition: "all 0.15s ease",
-                  }}
                 >
                   {btn.label}
                 </button>
@@ -816,53 +814,48 @@ export default function SpatialCanvas({
         </div>
       )}
 
-      {/* Lens Mode Bar at bottom */}
+      {/* What the reach actually measures. Without this the ring is an
+          unlabelled circle and the reader is left to assume it means minutes —
+          which, on the fallback, it does not. */}
+      {reachShapeLabel && (
+        <div className="scc-legend scc-panel">
+          <span className="scc-legend__swatch" aria-hidden="true" />
+          <span className="scc-legend__text">{reachShapeLabel}</span>
+        </div>
+      )}
+
+      {/* Lens bar. The map does not move when this changes — only the meaning
+          does — so it reads as one instrument being re-read rather than four
+          maps. */}
       {availableLenses.length > 1 && (
         <div
+          className="scc-panel"
+          role="tablist"
+          aria-label="Map lens"
           style={{
             position: "absolute",
             bottom: "16px",
             left: "50%",
             transform: "translateX(-50%)",
-            zIndex: 11,
+            zIndex: "var(--scc-z-hud)",
             display: "flex",
-            gap: "6px",
-            background: "rgba(14, 14, 14, 0.94)",
-            backdropFilter: "blur(12px)",
-            WebkitBackdropFilter: "blur(12px)",
-            padding: "5px 8px",
-            borderRadius: "6px",
-            border: "1px solid var(--accent-muted, #6E531A)",
-            boxShadow: "0 6px 24px rgba(0,0,0,0.8)",
+            flexWrap: "wrap",
+            justifyContent: "center",
+            gap: "4px",
+            padding: "5px",
+            maxWidth: "calc(100% - 24px)",
           }}
         >
           {availableLenses.map((lensKey) => (
             <button
               key={lensKey}
-              className="scm-layer-btn"
+              type="button"
+              role="tab"
+              aria-selected={activeLensId === lensKey}
+              className={`scc-chip scc-chip--lens ${activeLensId === lensKey ? "is-active" : ""}`}
               onClick={() => handleSwitchLens(lensKey)}
-              style={{
-                background: activeLensId === lensKey ? "rgba(232, 174, 60, 0.2)" : "transparent",
-                border: activeLensId === lensKey ? "1px solid var(--accent, #E8AE3C)" : "1px solid transparent",
-                color: activeLensId === lensKey ? "var(--accent-bright, #F7C64E)" : "#888",
-                padding: "5px 10px",
-                borderRadius: "4px",
-                fontFamily: "var(--font-mono, monospace)",
-                fontSize: "10px",
-                fontWeight: "600",
-                letterSpacing: "0.1em",
-                textTransform: "uppercase",
-                cursor: "pointer",
-                transition: "all 0.15s ease",
-              }}
             >
-              {lensKey === "command"
-                ? "Command"
-                : lensKey === "location"
-                ? "Tactical"
-                : lensKey === "flood"
-                ? "Flood"
-                : "Transit"}
+              {LENS_LABELS[lensKey] || lensKey}
             </button>
           ))}
         </div>
