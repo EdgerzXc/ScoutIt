@@ -219,10 +219,21 @@ export const locationLens = {
             "symbol-sort-key": ["coalesce", ["get", "rank"], 99],
           },
           paint: {
-            "text-color": SOFT_GREY,
+            // Paper White, not Soft Grey. But the colour was never the real
+            // problem: zoomed in, these labels sit on top of gold buildings, and
+            // against --accent even pure white measures 1.99:1 — Soft Grey is
+            // 1.19:1 — against a 4.5:1 threshold. No fill colour in the system
+            // can win that fight.
+            //
+            // The halo is what makes it readable. Widened so every label carries
+            // its own dark backing whatever it lands on, which takes Paper White
+            // to 16.5:1 against the halo instead of 1.7:1 against a gold roof.
+            // Blur softens the edge so it reads as a shadow, not an outline.
+            "text-color": PAPER_WHITE,
             "text-halo-color": VOID_BLACK,
-            "text-halo-width": 1.5,
-            "icon-opacity": 0.9,
+            "text-halo-width": 2,
+            "text-halo-blur": 0.6,
+            "icon-opacity": 1,
           },
         },
         firstLabelLayerId
@@ -280,7 +291,8 @@ export const locationLens = {
         paint: {
           "text-color": PAPER_WHITE,
           "text-halo-color": VOID_BLACK,
-          "text-halo-width": 2,
+          "text-halo-width": 2.4,
+          "text-halo-blur": 0.6,
         },
       });
     } else {

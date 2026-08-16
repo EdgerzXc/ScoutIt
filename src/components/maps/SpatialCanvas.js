@@ -203,6 +203,27 @@ export default function SpatialCanvas({
       if (frameHeight && frameHeight < 420) setHudExpanded(false);
       const tokens = getDesignTokens();
 
+      // The basemap's own labels — street and place names — were drawn for a
+      // flat map. Once buildings are extruded in gold, a street name crossing a
+      // tower has to survive on --accent, where even pure white measures 1.99:1.
+      // Widening their halo gives each one its own dark backing, the same fix
+      // applied to the POI labels. Only the halo is touched; CARTO's type,
+      // colour and placement are left alone.
+      // Restricted to the label families that are light-on-dark and actually
+      // cross the massing. Applying it to every symbol layer also hit ones
+      // CARTO draws in dark type — house numbers and the like — where a dark
+      // halo erases them instead of rescuing them.
+      const HALO_SOURCE_LAYERS = new Set(["transportation_name", "place", "water_name"]);
+      try {
+        for (const layer of map.getStyle().layers) {
+          if (layer.type !== "symbol" || !layer.layout?.["text-field"]) continue;
+          if (!HALO_SOURCE_LAYERS.has(layer["source-layer"])) continue;
+          map.setPaintProperty(layer.id, "text-halo-color", "#0e0e0e");
+          map.setPaintProperty(layer.id, "text-halo-width", 1.8);
+          map.setPaintProperty(layer.id, "text-halo-blur", 0.5);
+        }
+      } catch (err) {}
+
       // Find first symbol layer so 3D massing and ground fills sit below text labels
       const firstLabel = map.getStyle().layers.find((l) => l.type === "symbol");
       const firstLabelId = firstLabel?.id;
