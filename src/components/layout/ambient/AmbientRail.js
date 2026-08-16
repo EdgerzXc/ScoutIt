@@ -345,6 +345,21 @@ export default function AmbientRail({ user, context = null }) {
             font-size: 11px;
             letter-spacing: .06em;
           }
+        }
+
+        /* The smallest phones still could not fit a whole message inline:
+           "LOCAL TIME 1:01 AM" wanted 124px and had 102px at 320px. Tracking
+           is the cheapest thing to give back — at this size the wide letter
+           spacing is costing legibility more than it adds, and the label keeps
+           its meaning where dropping it would have left a bare "1:01 AM". */
+        @media (max-width: 380px) {
+          .ambient-copy {
+            font-size: 10px;
+            letter-spacing: .01em;
+          }
+          .ambient-rail {
+            padding: 0 2px 2px;
+          }
           /* The timer becomes a full-width hairline on the header's bottom edge.
              ──────────────────────────────────────────────────────────────
              It used to be a 64px stub tucked under the text, which nobody

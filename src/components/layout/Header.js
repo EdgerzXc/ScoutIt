@@ -73,8 +73,10 @@ export default function Header({ ambientContext = null }) {
             }
           }}
           className="header-back-btn"
+          aria-label="Go back"
         >
-          ← Back
+          <span aria-hidden="true">←</span>
+          <span className="header-back-label">Back</span>
         </button>
 
         <Link href="/" className="header-brand" aria-label="ScoutIT — home">
@@ -558,9 +560,23 @@ export default function Header({ ambientContext = null }) {
           .global-header { padding: 4px 8px; gap: 5px; min-height: 44px; }
           .header-left { gap: 4px; }
           .header-back-btn { font-size: 10px; padding: 0 6px; min-height: 36px; letter-spacing: 0.06em; border-radius: 14px; }
-          .header-brand { font-size: 16px; margin: 0; letter-spacing: 1px; }
+          .header-brand { font-size: 15px; margin: 0; letter-spacing: 0.5px; }
           .header-menu-btn { width: 36px; height: 36px; }
           .header-menu-btn svg { width: 12px; height: 12px; }
+        }
+
+        /* 320px is the narrowest supported width and the message was still
+           6px over. Taken from padding and the gap rather than the type: 10px
+           is the site-wide font floor set during the mobile pass and going
+           under it to win six pixels is the wrong trade.
+
+           Placed after the 480px block on purpose: that block sets padding and
+           gap as shorthands, so an earlier rule here is silently overwritten.
+           Third time this ordering has bitten in this file. */
+        @media (max-width: 340px) {
+          .global-header { padding: 4px 4px; gap: 2px; }
+          .header-back-btn { padding: 0 4px; }
+          .header-eye-btn, .header-menu-btn { width: 34px; height: 34px; }
         }
 
         /* ── The ambient rail stops competing for the same row ──────────────
@@ -594,73 +610,21 @@ export default function Header({ ambientContext = null }) {
            500px scroll while the 900px header held at 0. Hence this approach,
            which keeps the proven sticky element and changes what is inside it. */
         @media (max-width: 560px) {
-          .global-header {
-            flex-wrap: wrap;
-            row-gap: 0;
-            /* The 480px block above re-sets gap and padding as shorthands, so
-               these must come after it or the second row pays for a gap and a
-               bottom pad it does not need. */
-            padding-bottom: 0;
-          }
+          /* The word "Back" goes; the arrow stays. It was the least
+             informative thing on the row and it was costing the rail the
+             space it needed to render a whole message. */
+          .header-back-label { display: none; }
+          .header-back-btn { gap: 0; }
 
-          .header-left { order: 1; }
-          .header-nav { order: 2; }
-
-          /* The row retracts rather than blinking out.
-             ──────────────────────────────────────────────────────────────
-             display: none did the job but read as a glitch: one frame it is
-             there, the next it is not. The row genuinely has to stop taking
-             space though, so a plain opacity fade is not enough either, and
-             animating height is the layout thrash the design rules forbid.
-
-             Animating the grid track solves both. The row is a single-track
-             grid going from 1fr to 0fr, which the browser can interpolate, and
-             overflow hidden clips the rail as the track closes. It collapses
-             for real, and it looks like it decided to leave. */
+          /* Back inline, as it was. The rail keeps its own line only in the
+             sense of being the flexible middle column: it shrinks to whatever
+             the controls leave, and the controls now leave enough. */
           .header-center {
-            order: 3;
-            flex: 1 0 100%;
+            flex: 1 1 0%;
             max-width: none;
             min-width: 0;
             min-height: 0;
-            display: grid;
-            grid-template-rows: 1fr;
-            overflow: hidden;
-            opacity: 1;
-            transition:
-              grid-template-rows 260ms cubic-bezier(.23,1,.32,1),
-              opacity 180ms cubic-bezier(.23,1,.32,1);
           }
-
-          /* Driven by scroll position, with no scroll listener.
-             ──────────────────────────────────────────────────────────────
-             This was a rAF-throttled window scroll handler setting a class.
-             It worked, but a scroll listener that mutates React state runs a
-             render on a thread that should only be compositing, and the taste
-             pre-flight bans it outright. A scroll timeline hands the whole
-             thing to the compositor: no listener, no state, no re-render, and
-             the rail tracks scroll continuously rather than snapping at a
-             threshold.
-
-             Wrapped in @supports because Firefox and older Safari do not have
-             it yet. Where it is missing nothing is applied and the rail simply
-             stays open, which is the behaviour before any of this and is not
-             broken, only less generous with space. */
-          @supports (animation-timeline: scroll()) {
-            .header-center {
-              animation: scc-rail-retract linear both;
-              animation-timeline: scroll(root block);
-              /* Fully closed by 64px, so it clears on the first real flick
-                 rather than lingering half-open. */
-              animation-range: 0px 64px;
-            }
-
-            @keyframes scc-rail-retract {
-              to {
-                grid-template-rows: 0fr;
-                opacity: 0;
-              }
-            }
           }
         }
 
