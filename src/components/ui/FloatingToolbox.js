@@ -7,6 +7,8 @@ import { TIERS, TIER_LABELS } from "@/lib/entitlements";
 import { getStoredLiteMode, setLiteMode } from "@/lib/liteMode";
 import { DEVELOPMENT_MOCK_STORAGE_KEY } from "@/lib/developmentMock";
 import { notifyLightModeChanged } from "@/lib/lightMode";
+import { usePathname } from "next/navigation";
+import { guideForPath } from "@/lib/pageGuides";
 
 // Dev-only tier/role switcher lives inside this eye toolbox. It stays HIDDEN from
 // the public — revealed only by a secret gesture (tap the eye 5× quickly) or the
@@ -14,34 +16,24 @@ import { notifyLightModeChanged } from "@/lib/lightMode";
 // the entitlement gates re-read. ⚠️ remove before launch — scaffolding.
 const DEV_ROLES = ["seeker", "owner", "broker", "photographer", "researcher"];
 
-const WIZARD_STEPS = [
-  {
-    glyph: "◈",
-    title: "The Descent",
-    body: "ScoutIt is structured as layers — Stratosphere down to Core. Each layer reveals a deeper dimension of a space. Start at the top and descend before you commit.",
-  },
-  {
-    glyph: "◉",
-    title: "Space Directory",
-    body: "Every property, office, and venue lives at /property. Filter by sector, location, and aesthetic. Use Proximity Radar to find spaces within a radius of any point on the map.",
-  },
-  {
-    glyph: "◐",
-    title: "Roles & Connects",
-    body: "Your role shapes what you see. Brokers build Scout Ratings through verified closings. Providers showcase portfolios. Seekers track saved spaces. Connects are the platform currency.",
-  },
-  {
-    glyph: "◑",
-    title: "Your Profile",
-    body: "Your public profile is opt-in. Toggle visibility per role. Seeker activity and your Connects balance are always private — never visible to anyone but you.",
-  },
-];
 
 export default function FloatingToolbox({ showTrigger = true }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState("dark");
   const [lite, setLite] = useState(false);
+  // The guide is resolved from the surface the reader is actually on. It was
+  // one fixed four-card sequence shown identically everywhere, which is why it
+  // never landed — see src/lib/pageGuides.js.
+  //
+  // No role is passed yet: the only role signal available to this client
+  // component today is `scoutit_user` in localStorage, and §1.5 forbids using
+  // that as an authorization signal. The manifest already carries owner and
+  // broker variants; wiring them needs the verified session, tracked in §1.6D.
+  const pathname = usePathname();
+  const activeGuide = guideForPath(pathname);
+  const WIZARD_STEPS = activeGuide.steps;
+
   const [wizardOpen, setWizardOpen] = useState(false);
   const [wizardStep, setWizardStep] = useState(0);
   const [mounted, setMounted] = useState(false);
