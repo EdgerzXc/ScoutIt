@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { sanitizeError } from "@/lib/sanitizeError";
+import { getServerMapboxToken } from "@/lib/mapboxToken";
 
 function calculateDistance(lat1, lon1, lat2, lon2) {
   const R = 6371; // Radius of the earth in km
@@ -38,7 +39,7 @@ export async function POST(request) {
     const targetPrice = parseFloat(price);
 
     // 1. Geocode the location
-    const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
+    const mapboxToken = getServerMapboxToken();
     const geocodeUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(location)}.json?access_token=${mapboxToken}&limit=1`;
     
     const geocodeRes = await fetch(geocodeUrl);

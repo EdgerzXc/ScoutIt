@@ -17,6 +17,7 @@
 // ═══════════════════════════════════════════════════════════════
 
 import { Redis } from "@upstash/redis";
+import { getServerMapboxToken } from "@/lib/mapboxToken";
 
 let redis = null;
 if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
@@ -73,7 +74,7 @@ async function fetchContour(profile, minutes, lat, lon, token) {
  * @returns {Promise<{ ok: boolean, geojson: object|null, contours: Array, cached: boolean }>}
  */
 export async function getIsochrones(lat, lon) {
-  const token = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
+  const token = getServerMapboxToken();
 
   if (!token) {
     // Not an error worth logging on every request — the feature is simply

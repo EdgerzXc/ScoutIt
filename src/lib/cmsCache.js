@@ -21,6 +21,7 @@ import { BoundedCache } from "@/lib/boundedCache";
 import { CITY_HUB } from "@/lib/transit";
 import { DEFAULT_LIVE_CMS_URL, normalizeLiveCmsBundle } from "@/lib/cmsFallback";
 import { normalizeSampleBundle } from "@/lib/sampleInventory";
+import { getServerMapboxToken } from "@/lib/mapboxToken";
 
 let redis = null;
 export const CMS_REDIS_FETCH_CACHE = "default";
@@ -82,7 +83,7 @@ async function fetchDevelopmentLiveCms() {
 const geocodeCache = new BoundedCache({ maxEntries: 2000 });
 
 async function geocodeMissingCoords(properties) {
-  const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
+  const mapboxToken = getServerMapboxToken();
 
   return Promise.all(
     properties.map(async (p) => {
