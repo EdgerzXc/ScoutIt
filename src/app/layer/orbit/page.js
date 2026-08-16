@@ -19,7 +19,7 @@ export default function OrbitLayer() {
           layerNum="01" 
           layerName="Orbit" 
           title="Orbit" 
-          description="The properties Manila is watching — ranked by real inquiry demand." 
+          description="The properties Manila is watching, ranked by real inquiry demand." 
           missionText="The Orbit serves as the Showcase Layer. This specific layer exists to grant the highest-ranked properties the ultimate visibility they deserve, elevating them to the apex of the platform." 
           ctaText="View Full Showcase →"
           ctaHref="/showcase"

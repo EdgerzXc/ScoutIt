@@ -563,6 +563,108 @@ export default function Header({ ambientContext = null }) {
           .header-menu-btn svg { width: 12px; height: 12px; }
         }
 
+        /* ── The ambient rail stops competing for the same row ──────────────
+           It used to sit between the back/brand cluster and the nav buttons,
+           all three on one line, with min-width 0 on this one alone. The other
+           two are touch targets and refuse to shrink, so the rail absorbed
+           every shortfall. Measured: at 320px it was handed 28px to render text
+           needing 93px, and at 390px it got 98px for 128px. The ellipsis
+           everyone saw was the symptom, not the cause. No message could ever
+           have fitted, however short it was written.
+
+           §1.5 of the action plan already prescribes the answer: preserve
+           brand, context and essential actions, and let secondary ambient
+           content shorten, scroll or move rather than be squeezed. So below
+           560px the header wraps and the rail takes its own full-width line.
+
+           560px, not the 640px used above, because the single row still fits
+           between roughly 560 and 640. Wrapping there only bought a taller
+           header for no gain.
+
+           AND THE RAIL SCROLLS AWAY, so the extra line is not paid for on every
+           screen of every page. Once the reader has scrolled past the top, the
+           rail is removed and the header returns to a single compact row. It is
+           ambient information, not navigation, so losing it on scroll costs
+           nothing — and it comes back at the top of the page.
+
+           An earlier attempt made only the control row sticky and left the rail
+           outside it. That does not work: a sticky element is bounded by its
+           parent's box, so with a short static wrapper the "pinned" row simply
+           left with the header. Measured at 390px it sat at -500px after a
+           500px scroll while the 900px header held at 0. Hence this approach,
+           which keeps the proven sticky element and changes what is inside it. */
+        @media (max-width: 560px) {
+          .global-header {
+            flex-wrap: wrap;
+            row-gap: 0;
+            /* The 480px block above re-sets gap and padding as shorthands, so
+               these must come after it or the second row pays for a gap and a
+               bottom pad it does not need. */
+            padding-bottom: 0;
+          }
+
+          .header-left { order: 1; }
+          .header-nav { order: 2; }
+
+          /* The row retracts rather than blinking out.
+             ──────────────────────────────────────────────────────────────
+             display: none did the job but read as a glitch: one frame it is
+             there, the next it is not. The row genuinely has to stop taking
+             space though, so a plain opacity fade is not enough either, and
+             animating height is the layout thrash the design rules forbid.
+
+             Animating the grid track solves both. The row is a single-track
+             grid going from 1fr to 0fr, which the browser can interpolate, and
+             overflow hidden clips the rail as the track closes. It collapses
+             for real, and it looks like it decided to leave. */
+          .header-center {
+            order: 3;
+            flex: 1 0 100%;
+            max-width: none;
+            min-width: 0;
+            min-height: 0;
+            display: grid;
+            grid-template-rows: 1fr;
+            overflow: hidden;
+            opacity: 1;
+            transition:
+              grid-template-rows 260ms cubic-bezier(.23,1,.32,1),
+              opacity 180ms cubic-bezier(.23,1,.32,1);
+          }
+
+          /* Driven by scroll position, with no scroll listener.
+             ──────────────────────────────────────────────────────────────
+             This was a rAF-throttled window scroll handler setting a class.
+             It worked, but a scroll listener that mutates React state runs a
+             render on a thread that should only be compositing, and the taste
+             pre-flight bans it outright. A scroll timeline hands the whole
+             thing to the compositor: no listener, no state, no re-render, and
+             the rail tracks scroll continuously rather than snapping at a
+             threshold.
+
+             Wrapped in @supports because Firefox and older Safari do not have
+             it yet. Where it is missing nothing is applied and the rail simply
+             stays open, which is the behaviour before any of this and is not
+             broken, only less generous with space. */
+          @supports (animation-timeline: scroll()) {
+            .header-center {
+              animation: scc-rail-retract linear both;
+              animation-timeline: scroll(root block);
+              /* Fully closed by 64px, so it clears on the first real flick
+                 rather than lingering half-open. */
+              animation-range: 0px 64px;
+            }
+
+            @keyframes scc-rail-retract {
+              to {
+                grid-template-rows: 0fr;
+                opacity: 0;
+              }
+            }
+          }
+        }
+
+
         /* Animation for mobile dropdown */
         @keyframes slideUpMobile {
           from {
@@ -577,6 +679,8 @@ export default function Header({ ambientContext = null }) {
 
         @media (prefers-reduced-motion: reduce) {
           .header-gold-thread span { display: none; }
+          /* The row still collapses, it just stops animating on the way. */
+          .header-center { transition: none; }
         }
 
         /* Touch-friendly active state */

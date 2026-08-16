@@ -562,7 +562,7 @@ export default function Home() {
 
           {/* SEO / a11y heading — visually hidden; the styled wordmark below is decorative */}
           <h1 className="visually-hidden-h1">
-            ScoutIt — Philippine Space Intelligence Platform
+            ScoutIt: Philippine Space Intelligence Platform
           </h1>
 
           {/* UFO (clickable easter egg) hovering above the wordmark + tractor beam */}
@@ -625,7 +625,7 @@ export default function Home() {
 
           {/* Plain-Language Value Proposition */}
           <p className="title-tagline-intro">
-            The Philippines&apos; first spatial commerce platform. We turn every kind of space — homes, offices, venues, restaurants — into clear, verified intelligence. No fake listings. No pressure. Just the signals that matter.
+            The Philippines&apos; first spatial commerce platform. We turn every kind of space into clear, verified intelligence. Homes, offices, venues, restaurants. No fake listings. No pressure. Just the signals that matter.
           </p>
 
           {/* Taglines */}

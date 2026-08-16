@@ -75,7 +75,7 @@ export default function BoardPodium() {
       <div className="descent-content">
         <div className="board-content-head">
           <h2 className="board-content-title">{category === "All" ? "Overall" : category} · Most Inquired</h2>
-          <div className="board-content-sub">Live Leaderboard — Updated Monthly</div>
+          <div className="board-content-sub">Live Leaderboard · Updated Monthly</div>
         </div>
 
         {ranked.length === 0 ? (
@@ -153,26 +153,26 @@ export default function BoardPodium() {
         @media (max-width: 1024px) {
           .board-split { grid-template-columns: 260px 1fr; }
         }
-        @media (max-width: 820px) {
-          .board-split { grid-template-columns: 1fr; }
-          .board-menu { border-right: none; border-bottom: 1px solid #1a1a1a; padding: 24px 16px; }
-          
-          /* Horizontal Carousel for Categories */
-          .board-nav { 
-            display: flex;
-            flex-direction: row; 
-            flex-wrap: nowrap; 
-            overflow-x: auto; 
-            white-space: nowrap; 
-            -webkit-overflow-scrolling: touch;
-            gap: 8px;
-            width: 100%;
-            padding: 4px 0 12px;
-            scroll-snap-type: x mandatory;
-          }
-          .board-nav::-webkit-scrollbar { display: none; }
-          .board-nav { scrollbar-width: none; }
-          .board-cat { font-size: 13px; min-height: 44px; padding: 10px 16px; flex-shrink: 0; scroll-snap-align: start; border-radius: 4px; }
+        /* 800px, matching the .descent-split breakpoint in
+           src/app/layer/layer-descent.css. It was 820px, which left a 20px
+           window where the heading had already switched to its single-column
+           treatment while the sidebar was still a desktop column. */
+        @media (max-width: 800px) {
+          /* NOTE — the category-carousel rules that used to live here targeted
+             .board-split / .board-menu / .board-nav / .board-cat. This
+             component renders .descent-split / .descent-sidebar / .descent-nav
+             / .descent-cat: the markup was renamed and these were never
+             updated, so they matched zero elements and the filter stayed a
+             vertical stack on every phone. Verified with a live query before
+             deleting them. The working implementation now lives beside the
+             other .descent-* rules in src/app/layer/layer-descent.css, so the
+             layout and its breakpoint sit in one file instead of two. */
+
+          /* The head is right-aligned on desktop to balance against the
+             sidebar. There is no sidebar here, so right-aligned reads as a
+             mistake rather than a composition. */
+          .board-content-head { text-align: left; }
+          .board-empty { text-align: left; }
 
           /* Horizontal Carousel for Podium Cards */
           .board-podium { 
@@ -195,8 +195,20 @@ export default function BoardPodium() {
             display: contents; 
           }
 
+          /* The card has to win against the backdrop.
+             The layer pages run a full-viewport fixed WebGL scene behind the
+             content, and the card sits at 55% opacity with a blur — fine over
+             flat black, but on Orbit the planet passes directly beneath and
+             reads straight through the card, so the property name competes
+             with a lit sphere. There is already a fix for this in descent.css,
+             scoped to .descent-root, which these layer pages do not use.
+             Opacity up until the card is a surface again. */
+          :global(.bp-card) {
+            background: rgba(12, 12, 16, 0.92);
+          }
+
           /* Compact card size on mobile */
-          :global(.bp-hero), :global(.bp-mid), :global(.bp-mini) { 
+          :global(.bp-hero), :global(.bp-mid), :global(.bp-mini) {
             flex: 0 0 260px !important;
             width: 260px !important;
             min-width: 260px !important;

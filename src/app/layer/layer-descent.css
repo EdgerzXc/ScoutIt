@@ -1015,13 +1015,88 @@
           .descent-sidebar {
             border-right: none;
             border-bottom: 1px solid rgba(232, 174, 60, 0.12);
-            padding: 24px 20px;
+            padding: 16px 20px 14px;
             position: static;
             height: auto;
+            overflow: visible;
           }
           .descent-content {
             padding: 24px 20px;
           }
+
+          /* ── The category filter becomes one scrolling band ──────────────
+             A sidebar is a desktop shape. Dropped into a single column it
+             kept `flex-direction: column`, so five categories at ~60px each
+             plus the CTA spent roughly 430px of a 780px screen before the
+             leaderboard began — measured, the first card started at y=1177,
+             three screens down. Nobody scrolled that far to find the thing
+             the layer is named after.
+
+             The rules that were meant to fix this already existed in
+             BoardPodium, written against .board-nav / .board-cat / .board-menu.
+             The markup was renamed to .descent-* and the responsive block was
+             never updated, so it has been styling nothing at all. This is that
+             intent, reconnected and rebuilt against the real class names. */
+          .descent-nav {
+            flex-direction: row;
+            flex-wrap: nowrap;
+            gap: 8px;
+            overflow-x: auto;
+            overscroll-behavior-x: contain;
+            scroll-snap-type: x proximity;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            /* Bleeds to both edges so the row reads as continuing past the
+               screen rather than stopping at a margin. The padding keeps the
+               first and last chip off the glass. */
+            margin: 0 -20px;
+            padding: 2px 20px 10px;
+          }
+          .descent-nav::-webkit-scrollbar { display: none; }
+
+          .descent-cat {
+            flex: 0 0 auto;
+            scroll-snap-align: start;
+            white-space: nowrap;
+            font-size: 14px;
+            /* 44px of target, and the same padding in both states so
+               selecting a chip never shifts the row under the thumb. */
+            min-height: 44px;
+            padding: 11px 16px;
+            border: 1px solid rgba(232, 174, 60, 0.16);
+            border-left-width: 1px;
+            border-radius: 999px;
+            background: rgba(232, 174, 60, 0.03);
+          }
+
+          .descent-cat:hover,
+          .descent-cat.on {
+            /* Cancels the desktop side-stripe and its padding jump. A 2px
+               left border is a leading edge on a vertical list and simply
+               noise on a horizontal one. */
+            border-left: 1px solid rgba(232, 174, 60, 0.16);
+            padding-left: 16px;
+          }
+
+          .descent-cat.on {
+            border-color: var(--accent);
+            background: rgba(232, 174, 60, 0.14);
+            box-shadow: none;
+            text-shadow: none;
+          }
+
+          /* The CTA is a full-width bordered slab on desktop, where it anchors
+             the bottom of a tall sidebar. Here it is just the last thing in a
+             14px band, so it stops shouting. */
+          .descent-sidebar .board-seeall {
+            margin-top: 12px;
+            padding: 12px;
+            font-size: 10px;
+          }
+        }
+
+        @media (max-width: 800px) and (prefers-reduced-motion: reduce) {
+          .descent-nav { scroll-behavior: auto; }
         }
 
         /* SECTION 2: PROPERTY LAYER */

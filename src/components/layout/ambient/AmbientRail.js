@@ -315,24 +315,68 @@ export default function AmbientRail({ user, context = null }) {
           }
           .ambient-copy-desktop { display: none; }
           .ambient-copy-mobile { display: inline-flex; }
+
+          /* The header collapses this row by animating a grid track to 0fr.
+             That only works if the grid item can actually reach zero, and the
+             min-height above stops it dead: the row measured 89px collapsed
+             and 89px open until this was added. The grid track holds the open
+             height, so releasing the min-height costs nothing at rest. */
+          :global(.global-header) .ambient-rail {
+            min-height: 0;
+            overflow: hidden;
+          }
+
+          /* The arrows go, and the text takes the whole line.
+             ──────────────────────────────────────────────────────────────
+             Two 32px buttons plus their grid gutters were spending ~70px of a
+             ~300px line on controls, on the one screen size with no room to
+             spare. They are not lost, only made implicit: this rail already
+             advances on its own timer, and the swipe handler above (36px
+             threshold, calls next/previous) is the manual control on touch.
+             So §1.5's requirement that manual previous/next stay deterministic
+             still holds — a thumb swipes here rather than hunting a 32px
+             target. Desktop keeps the visible arrows, where there is room and
+             no swipe. */
           .ambient-content {
-            grid-template-columns: 32px minmax(0,1fr) 32px;
+            grid-template-columns: minmax(0,1fr);
           }
-          .ambient-nav {
-            position: relative;
-            width: 32px;
-            height: 32px;
-            min-width: 32px;
-            min-height: 32px;
-            padding: 0;
-          }
-          .ambient-nav svg { width: 9px; height: 9px; }
+          .ambient-nav { display: none; }
           .ambient-copy {
             font-size: 11px;
             letter-spacing: .06em;
           }
-          .ambient-track { --ambient-travel: 46px; position: absolute; bottom: 2px; width: 64px; height: 2px; margin-top: 0; }
-          .ambient-segment { width: 18px; }
+          /* The timer becomes a full-width hairline on the header's bottom edge.
+             ──────────────────────────────────────────────────────────────
+             It used to be a 64px stub tucked under the text, which nobody
+             notices — and it matters more now than it did, because with the
+             arrows gone this is the only visible sign that the rail advances
+             on its own.
+
+             Two changes of substance. It spans the whole width and rides the
+             border that is already there, so it costs no vertical space. And
+             it fills rather than slides: a bar scaling from the left reads as
+             "time until the next one" without needing a label, where a small
+             travelling dot reads as decoration. scaleX is a compositor
+             property, so this is free to animate. */
+          .ambient-track {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: auto;
+            height: 1px;
+            margin-top: 0;
+            border-radius: 0;
+          }
+          .ambient-track::before { top: 0; }
+          .ambient-segment {
+            width: 100%;
+            height: 1px;
+            border-radius: 0;
+            transform: scaleX(var(--ambient-progress));
+            transform-origin: left center;
+            transition: transform 260ms linear;
+          }
         }
         @media (hover: none), (pointer: coarse) {
           .ambient-nav {
