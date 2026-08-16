@@ -142,7 +142,11 @@ export function buildAmbientItems({ ambient, now, user }) {
   }
   if (!isProperty && now) {
     const localTime = new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" }).format(now).toUpperCase();
-    items.push(item("time", [token("LOCAL TIME", "label"), token(formatLocalTime(now), "value")], [token("LOCAL TIME", "label"), token(localTime, "value")]));
+    // Phone drops the "LOCAL TIME" label: a clock reads as a clock, and the
+    // label was the difference between fitting the rail and being cut off.
+    // Labels stay wherever the value cannot speak for itself (RAIN CHANCE,
+    // FEELS LIKE) — "45%" alone means nothing.
+    items.push(item("time", [token("LOCAL TIME", "label"), token(formatLocalTime(now), "value")], [token(localTime, "value")]));
   }
 
   if (location?.shortName && ambient?.weather) {
@@ -153,22 +157,22 @@ export function buildAmbientItems({ ambient, now, user }) {
     ], [token(shortName, "context"), token(`${temperature}°C`, "value")], 6000));
 
     if (Number.isFinite(rainChance)) {
-      items.push(item("rain", [token("RAIN CHANCE", "label"), token(`${rainChance}%`, "value")], [token("RAIN CHANCE", "label"), token(`${rainChance}%`, "value")]));
+      items.push(item("rain", [token("RAIN CHANCE", "label"), token(`${rainChance}%`, "value")], [token("RAIN", "label"), token(`${rainChance}%`, "value")]));
     }
     if (Number.isFinite(feelsLike)) {
       const comfortSegments = [token("FEELS LIKE", "label"), token(`${feelsLike}°C`, "value")];
       if (Number.isFinite(humidity)) comfortSegments.push(token(`HUMIDITY ${humidity}%`, "detail"));
-      items.push(item("comfort", comfortSegments, [token("FEELS LIKE", "label"), token(`${feelsLike}°C`, "value")]));
+      items.push(item("comfort", comfortSegments, [token("FEELS", "label"), token(`${feelsLike}°C`, "value")]));
     }
     if (isProperty && now && hasDifferentLocalTime(now, timezone)) {
       const propertyTime = formatZonedTime(now, timezone);
-      if (propertyTime) items.push(item("property-time", [token("LOCAL TIME", "label"), token(propertyTime, "value")], [token("LOCAL TIME", "label"), token(propertyTime, "value")]));
+      if (propertyTime) items.push(item("property-time", [token("LOCAL TIME", "label"), token(propertyTime, "value")], [token(propertyTime, "value")]));
     }
   }
 
   if (ambient?.air && Number.isFinite(ambient.air.aqi)) {
     const { aqi, label } = ambient.air;
-    items.push(item("air", [token("AIR", "label"), token(label, "detail"), token(`AQI ${aqi}`, "value")], [token(`AIR ${label}`, "label"), token(`AQI ${aqi}`, "value")]));
+    items.push(item("air", [token("AIR", "label"), token(label, "detail"), token(`AQI ${aqi}`, "value")], [token("AIR", "label"), token(`AQI ${aqi}`, "value")]));
   }
   return items;
 }

@@ -321,26 +321,19 @@ export default function AmbientRail({ user, context = null }) {
              min-height above stops it dead: the row measured 89px collapsed
              and 89px open until this was added. The grid track holds the open
              height, so releasing the min-height costs nothing at rest. */
-          :global(.global-header) .ambient-rail {
-            min-height: 0;
-            overflow: hidden;
-          }
 
-          /* The arrows go, and the text takes the whole line.
-             ──────────────────────────────────────────────────────────────
-             Two 32px buttons plus their grid gutters were spending ~70px of a
-             ~300px line on controls, on the one screen size with no room to
-             spare. They are not lost, only made implicit: this rail already
-             advances on its own timer, and the swipe handler above (36px
-             threshold, calls next/previous) is the manual control on touch.
-             So §1.5's requirement that manual previous/next stay deterministic
-             still holds — a thumb swipes here rather than hunting a 32px
-             target. Desktop keeps the visible arrows, where there is room and
-             no swipe. */
           .ambient-content {
-            grid-template-columns: minmax(0,1fr);
+            grid-template-columns: 32px minmax(0,1fr) 32px;
           }
-          .ambient-nav { display: none; }
+          .ambient-nav {
+            position: relative;
+            width: 32px;
+            height: 32px;
+            min-width: 32px;
+            min-height: 32px;
+            padding: 0;
+          }
+          .ambient-nav svg { width: 9px; height: 9px; }
           .ambient-copy {
             font-size: 11px;
             letter-spacing: .06em;
@@ -353,6 +346,14 @@ export default function AmbientRail({ user, context = null }) {
            spacing is costing legibility more than it adds, and the label keeps
            its meaning where dropping it would have left a bare "1:01 AM". */
         @media (max-width: 380px) {
+          /* The arrows survive everywhere they physically fit. Below 380px they
+             do not: two 32px controls take 64px of a rail that has 53px of text
+             room to begin with, so keeping them means guaranteeing a cut-off
+             message. Swipe still works here, and the rail still auto-advances,
+             so nothing is actually lost except the visible control. */
+          .ambient-content { grid-template-columns: minmax(0,1fr); }
+          .ambient-nav { display: none; }
+
           .ambient-copy {
             font-size: 10px;
             letter-spacing: .01em;
@@ -373,25 +374,8 @@ export default function AmbientRail({ user, context = null }) {
              "time until the next one" without needing a label, where a small
              travelling dot reads as decoration. scaleX is a compositor
              property, so this is free to animate. */
-          .ambient-track {
-            position: absolute;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            width: auto;
-            height: 1px;
-            margin-top: 0;
-            border-radius: 0;
-          }
-          .ambient-track::before { top: 0; }
-          .ambient-segment {
-            width: 100%;
-            height: 1px;
-            border-radius: 0;
-            transform: scaleX(var(--ambient-progress));
-            transform-origin: left center;
-            transition: transform 260ms linear;
-          }
+          .ambient-track { --ambient-travel: 46px; position: absolute; bottom: 2px; width: 64px; height: 2px; margin-top: 0; }
+          .ambient-segment { width: 18px; }
         }
         @media (hover: none), (pointer: coarse) {
           .ambient-nav {

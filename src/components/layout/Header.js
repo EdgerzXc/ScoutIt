@@ -208,6 +208,9 @@ export default function Header({ ambientContext = null }) {
           display: flex;
           align-items: center;
           justify-content: center;
+          /* The arrow and the word are separate elements now, so the space
+             that used to come from the text node has to be declared. */
+          gap: 5px;
           min-height: 44px; /* Mobile touch target compliance */
         }
 
@@ -560,7 +563,7 @@ export default function Header({ ambientContext = null }) {
           .global-header { padding: 4px 8px; gap: 5px; min-height: 44px; }
           .header-left { gap: 4px; }
           .header-back-btn { font-size: 10px; padding: 0 6px; min-height: 36px; letter-spacing: 0.06em; border-radius: 14px; }
-          .header-brand { font-size: 15px; margin: 0; letter-spacing: 0.5px; }
+          .header-brand { font-size: 16px; margin: 0; letter-spacing: 1px; }
           .header-menu-btn { width: 36px; height: 36px; }
           .header-menu-btn svg { width: 12px; height: 12px; }
         }
@@ -610,11 +613,6 @@ export default function Header({ ambientContext = null }) {
            500px scroll while the 900px header held at 0. Hence this approach,
            which keeps the proven sticky element and changes what is inside it. */
         @media (max-width: 560px) {
-          /* The word "Back" goes; the arrow stays. It was the least
-             informative thing on the row and it was costing the rail the
-             space it needed to render a whole message. */
-          .header-back-label { display: none; }
-          .header-back-btn { gap: 0; }
 
           /* Back inline, as it was. The rail keeps its own line only in the
              sense of being the flexible middle column: it shrinks to whatever
