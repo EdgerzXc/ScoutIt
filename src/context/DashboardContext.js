@@ -605,12 +605,18 @@ export function DashboardProvider({ children }) {
     // 1. Mapbox Geocoding
     let lat = null;
     let lng = null;
-    if (MAPBOX_TOKEN && listing.location) {
+    // Through our own server, not Mapbox directly. The public token is
+    // URL-restricted and its allow-list never covered the production domain, so
+    // this call returned 403 on the live site — which is why listings published
+    // by owners arrived with no coordinates and then rendered a map of the
+    // wrong place. No longer gated on a client-side token either.
+    if (listing.location) {
       try {
-        const res = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(listing.location)}.json?country=ph&limit=1&access_token=${MAPBOX_TOKEN}`);
-        const geoData = await res.json();
-        if (geoData.features && geoData.features.length > 0) {
-          [lng, lat] = geoData.features[0].center;
+        const res = await fetch(`/api/mapbox?op=geocode&q=${encodeURIComponent(listing.location)}`);
+        const json = await res.json();
+        const feature = json?.data?.features?.[0];
+        if (feature?.center) {
+          [lng, lat] = feature.center;
         }
       } catch (err) {
         console.error("Geocoding failed", err);

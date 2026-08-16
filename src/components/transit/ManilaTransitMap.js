@@ -329,12 +329,17 @@ export default function ManilaTransitMap({ propertyLat, propertyLng, propertyTit
               },
             });
 
-            const token = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
-            if (token) {
-              const dirUrl = `https://api.mapbox.com/directions/v5/mapbox/driving/${propertyLng},${propertyLat};${nearest.lon},${nearest.lat}?geometries=geojson&overview=full&access_token=${token}`;
+            {
+              // Via our own server: the public token is URL-restricted and was
+              // returning 403 on the production domain, so this connector line
+              // silently never drew there.
+              const dirUrl =
+                `/api/mapbox?op=directions&profile=driving&coordinates=` +
+                encodeURIComponent(`${propertyLng},${propertyLat};${nearest.lon},${nearest.lat}`);
               fetch(dirUrl)
                 .then(r => r.json())
-                .then(data => {
+                .then(json => {
+                  const data = json?.data || {};
                   if (data.routes && data.routes[0]) {
                     const source = map.getSource(PROPERTY_CONNECTOR_SOURCE);
                     if (source) {

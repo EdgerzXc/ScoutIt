@@ -17,7 +17,10 @@ export function useTrueClosestTransit(whereTo, propertyLat, propertyLng, city, m
   const [closestTransit, setClosestTransit] = useState(null);
 
   useEffect(() => {
-    if (!propertyLat || !propertyLng || !mapboxToken) return;
+    // No longer gated on a client-side Mapbox token — the proxy holds the
+    // credential now, so the readout works even where the public token is
+    // restricted.
+    if (!propertyLat || !propertyLng) return;
 
     let isMounted = true;
 
@@ -42,10 +45,20 @@ export function useTrueClosestTransit(whereTo, propertyLat, propertyLng, city, m
 
         const coordinatesString = allPoints.map(p => `${p[0]},${p[1]}`).join(';');
         const destIndices = topCandidates.map((_, i) => i + 1).join(';');
-        const matrixUrl = `https://api.mapbox.com/directions-matrix/v1/mapbox/driving/${coordinatesString}?sources=0&destinations=${destIndices}&annotations=duration,distance&access_token=${mapboxToken}`;
-        
+
+        // Routed through our own server rather than calling Mapbox directly.
+        // The public token is URL-restricted and its allow-list does not cover
+        // the production domain, so this request returned 403 on the live site
+        // — silently, leaving the nearest-transit readout wrong. The proxy uses
+        // the unrestricted server token and keeps the credential off the client.
+        const matrixUrl =
+          `/api/mapbox?op=matrix&profile=driving` +
+          `&coordinates=${encodeURIComponent(coordinatesString)}` +
+          `&destinations=${encodeURIComponent(destIndices)}`;
+
         const matrixRes = await fetch(matrixUrl);
-        const matrixData = await matrixRes.json();
+        const matrixJson = await matrixRes.json();
+        const matrixData = matrixJson?.data || {};
 
         if (matrixData.code === 'Ok' && matrixData.distances && matrixData.distances[0] && matrixData.durations && matrixData.durations[0]) {
           const distances = matrixData.distances[0]; // array of meters
