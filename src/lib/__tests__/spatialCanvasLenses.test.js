@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { featureFilter, validateStyleMin } from "@maplibre/maplibre-gl-style-spec";
 import { commandLens } from "@/components/maps/lenses/command";
-import { locationLens, buildPoiFilter, widestReachGeometry } from "@/components/maps/lenses/location";
+import { locationLens, buildPoiFilter, poiReachGeometry } from "@/components/maps/lenses/location";
 import { floodLens } from "@/components/maps/lenses/flood";
 import { transitLens } from "@/components/maps/lenses/transit";
 import { distanceCircle } from "@/components/maps/useReach";
@@ -108,7 +108,7 @@ describe("SpatialCanvas Lenses", () => {
     });
   });
 
-  describe("widestReachGeometry", () => {
+  describe("poiReachGeometry", () => {
     const band = (size) => ({
       type: "Feature",
       geometry: {
@@ -117,14 +117,17 @@ describe("SpatialCanvas Lenses", () => {
       },
     });
 
-    it("picks the outermost band, whatever order they arrive in", () => {
-      const geom = widestReachGeometry({ type: "FeatureCollection", features: [band(3), band(1), band(2)] });
-      expect(geom.coordinates[0][1][0]).toBe(3);
+    it("picks the tightest band, whatever order they arrive in", () => {
+      // The pedestrian band. Measured over Ortigas the 5-min walk is 0.76km
+      // across and the 10-min drive 4.46km; clipping shops to the driving band
+      // answers a question nobody asked.
+      const geom = poiReachGeometry({ type: "FeatureCollection", features: [band(3), band(1), band(2)] });
+      expect(geom.coordinates[0][1][0]).toBe(1);
     });
 
     it("returns null rather than guessing when there is no usable shape", () => {
-      expect(widestReachGeometry(null)).toBeNull();
-      expect(widestReachGeometry({ type: "FeatureCollection", features: [] })).toBeNull();
+      expect(poiReachGeometry(null)).toBeNull();
+      expect(poiReachGeometry({ type: "FeatureCollection", features: [] })).toBeNull();
     });
   });
 

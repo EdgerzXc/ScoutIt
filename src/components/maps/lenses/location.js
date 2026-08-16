@@ -137,9 +137,9 @@ export const locationLens = {
     const SOFT_GREY = token("--text-secondary", "#c8c8c8");
     const VOID_BLACK = token("--bg", "#0e0e0e");
 
-    // The reach is a FeatureCollection of bands; the outermost is the whole
-    // reachable area, so POIs are clipped to that.
-    const reachGeometry = widestReachGeometry(isochrone);
+    // Clipped to the pedestrian band — see poiReachGeometry for why the widest
+    // band is the wrong boundary for shops.
+    const reachGeometry = poiReachGeometry(isochrone);
     this._reachGeometry = reachGeometry;
 
     const baseFilter = buildPoiFilter(null, reachGeometry);
@@ -313,7 +313,7 @@ export const locationLens = {
 
   // Called when the reach arrives after the lens has already mounted.
   setReach(map, isochrone, activeSubLayer = "all") {
-    this._reachGeometry = widestReachGeometry(isochrone);
+    this._reachGeometry = poiReachGeometry(isochrone);
     this.applyVisibility(map, activeSubLayer);
   },
 
@@ -348,34 +348,51 @@ export const locationLens = {
 };
 
 /**
- * The isochrone comes back as bands (5 / 10 / 15 min). The widest one is the
- * whole reachable area — that is the boundary POIs are clipped to.
+ * The boundary nearby places are clipped to.
+ *
+ * The reach comes back as bands, and they are not the same kind of thing: a
+ * 5-minute WALK and a 10-minute DRIVE. Measured over Ortigas the walk band is
+ * 0.76km across and the drive band 4.46km — nearly six times wider. Clipping
+ * cafes and pharmacies to a driving band would answer a question nobody asked
+ * ("what could I drive to") and put several thousand places on the map.
+ *
+ * So the tightest band wins: that is the pedestrian reach, and "what is around
+ * it that I would actually use" is a walking question. The wider band is still
+ * drawn — it is real, and it says something about access — it just does not
+ * govern which shops appear.
+ *
+ * With the distance-circle fallback there is only one band, so this returns it.
  */
-export function widestReachGeometry(isochrone) {
+export function poiReachGeometry(isochrone) {
   const features = isochrone?.features;
   if (!Array.isArray(features) || features.length === 0) return null;
 
-  let widest = null;
-  let widestSpan = -Infinity;
-  for (const f of features) {
-    const g = f?.geometry;
-    if (!g || (g.type !== "Polygon" && g.type !== "MultiPolygon")) continue;
+  const spanOf = (g) => {
     const coords = [];
     const walk = (a) => {
       if (typeof a[0] === "number") coords.push(a);
       else a.forEach(walk);
     };
     walk(g.coordinates);
-    if (!coords.length) continue;
+    if (!coords.length) return null;
     const lngs = coords.map((c) => c[0]);
     const lats = coords.map((c) => c[1]);
-    const span = Math.max(...lngs) - Math.min(...lngs) + (Math.max(...lats) - Math.min(...lats));
-    if (span > widestSpan) {
-      widestSpan = span;
-      widest = g;
+    return Math.max(...lngs) - Math.min(...lngs) + (Math.max(...lats) - Math.min(...lats));
+  };
+
+  let tightest = null;
+  let tightestSpan = Infinity;
+  for (const f of features) {
+    const g = f?.geometry;
+    if (!g || (g.type !== "Polygon" && g.type !== "MultiPolygon")) continue;
+    const span = spanOf(g);
+    if (span === null) continue;
+    if (span < tightestSpan) {
+      tightestSpan = span;
+      tightest = g;
     }
   }
-  return widest;
+  return tightest;
 }
 
 export default locationLens;

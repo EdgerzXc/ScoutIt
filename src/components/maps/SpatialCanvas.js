@@ -90,8 +90,12 @@ export default function SpatialCanvas({
     if (reachLoading) return null;
     if (!isochrone?.features?.length) return null;
     if (reachIsFallback) return isochrone.features[0]?.properties?.label || "Distance radius";
-    const mins = contours?.map((c) => c.minutes).filter(Boolean);
-    return mins?.length ? `${Math.max(...mins)} min reach` : "Travel-time reach";
+    // Name every band rather than only the widest. There are two rings on the
+    // map and they are different kinds of thing — a walk and a drive — so a
+    // single "10 min reach" would describe the outer ring while the places on
+    // the map follow the inner one.
+    const labels = (contours || []).map((c) => c.label).filter(Boolean);
+    return labels.length ? labels.join(" · ") : "Travel-time reach";
   }, [reachLoading, isochrone, reachIsFallback, contours]);
 
   // Compute telemetry metrics on mount / coordinate update
