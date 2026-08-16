@@ -125,6 +125,34 @@ export default async function ContactQueuePage() {
             </p>
 
             <div className="flex items-center gap-2 mt-4 flex-wrap">
+              {/* Reply opens the staff member's own mail client, pre-filled and
+                  quoting the original.
+
+                  Deliberately not a send-from-the-app feature. A visitor who has
+                  not signed up has no identity and no inbox here, so a reply has
+                  to reach them by email either way — and routing it through
+                  ScoutIt would mean the staff member never sees the thread in
+                  their own sent mail, cannot be replied to directly, and needs
+                  new infrastructure to say something they can already say.
+
+                  The honest upgrade path is a real threaded reply, and it is
+                  recorded in the plan. This makes replying possible today rather
+                  than leaving the queue read-only. */}
+              <a
+                href={`mailto:${encodeURIComponent(m.email)}?subject=${encodeURIComponent(
+                  `Re: ${m.subject || "Your message to ScoutIt"}`,
+                )}&body=${encodeURIComponent(
+                  `
+
+— — —
+You wrote to ScoutIt on ${formatWhen(m.created_at)}:
+
+${m.message}`,
+                )}`}
+                className="text-xs px-3 py-1.5 rounded-lg border border-[#E8AE3C]/30 text-[#E8AE3C] hover:border-[#E8AE3C]/60 hover:text-[#F7C64E] transition-colors"
+              >
+                Reply by email
+              </a>
               {(NEXT_ACTIONS[m.status] || []).map(([next, label]) => (
                 <form key={next} action={setContactStatus}>
                   <input type="hidden" name="id" value={m.id} />
