@@ -48,7 +48,7 @@ export default function JsonLd() {
     // Matches the positioning already landing in the index, rather than the
     // earlier "real estate directory" framing that /about explicitly rejects.
     description:
-      "ScoutIt is the Philippines' first spatial commerce platform. It turns every kind of space — homes, offices, venues and restaurants — into clear, verified intelligence.",
+      "ScoutIt is the Philippines' first spatial commerce platform. It turns every kind of space into clear, verified intelligence: homes, offices, venues and restaurants.",
     knowsAbout: [
       "Spatial commerce",
       "Property intelligence",

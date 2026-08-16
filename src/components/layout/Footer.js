@@ -63,7 +63,7 @@ export default function Footer() {
             <span className="brand-s">S</span><span className="brand-scout">cout</span><span className="brand-it">IT</span>
           </Link>
           <p className="footer-tagline">
-            The Philippines&apos; first spatial commerce platform. Every kind of space — homes, offices, venues, tables — decoded into clear, verified intelligence.
+            The Philippines&apos; first spatial commerce platform. Every kind of space decoded into clear, verified intelligence. Homes, offices, venues, tables.
           </p>
           {/* Renders nothing while every SOCIAL_LINKS url is null. */}
           {activeSocials.length > 0 && (
