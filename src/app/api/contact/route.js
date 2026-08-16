@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { turnstileGuard, clientIpFrom } from "@/lib/turnstile";
+import { sendEmail, renderEmail, isEmailConfigured } from "@/lib/email";
 
 // Public contact intake — the logged-out path for someone who has not signed up
 // and has a question.
@@ -102,6 +103,34 @@ export async function POST(request) {
         { ok: false, message: "We could not save your message. Please try again shortly." },
         { status: 500 },
       );
+    }
+
+    // Tell a human, without letting that failure reach the sender.
+    //
+    // The row is already committed by this point, and Mission Control's contact
+    // queue is the system of record — this email is a nudge so the queue gets
+    // opened, not the delivery mechanism. Awaited so a provider rejection is
+    // logged rather than lost to an unhandled rejection after the response, but
+    // never surfaced: the visitor's message IS saved, and telling them it
+    // failed because our own notification bounced would be a lie in the
+    // direction that loses their message.
+    if (isEmailConfigured() && process.env.CONTACT_NOTIFY_TO) {
+      const result = await sendEmail({
+        to: process.env.CONTACT_NOTIFY_TO,
+        subject: `New contact message — ${subject || "no subject"}`,
+        html: renderEmail({
+          heading: "Someone used the contact form",
+          // Never interpolate the sender's text into HTML by hand — renderEmail
+          // escapes what it is given, and the message is attacker-controlled.
+          body: `${name} <${email}> wrote:\n\n${message}`,
+          ctaLabel: "Open the contact queue",
+          ctaPath: "/contact",
+          footnote: "Reply from Mission Control → Contact Queue.",
+        }),
+      });
+      if (!result.sent) {
+        console.error("[Contact] Staff notification not sent:", result.error || result.skipped);
+      }
     }
 
     return NextResponse.json({ ok: true, message: "Message received." }, { status: 201 });
