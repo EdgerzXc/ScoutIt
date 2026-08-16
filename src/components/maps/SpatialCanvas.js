@@ -161,15 +161,18 @@ export default function SpatialCanvas({
         center: [targetLng, targetLat],
         zoom: 13.6,
         pitch: isMobile ? 20 : 25,
-        maxPitch: isMobile ? 50 : 60,
+        // Full tilt on touch too: a shallow cap makes "look around" feel
+        // like the map is refusing rather than responding.
+        maxPitch: 60,
         minPitch: 0,
-        // On a phone every one of these rides the SAME two-finger gesture, so a
-        // pinch was simultaneously zooming, rotating and tilting: the slightest
-        // twist spun the city, and with no compass shown there was no way back
-        // to north. Two fingers now pan and zoom, and nothing else.
-        dragRotate: !isMobile,
-        pitchWithRotate: !isMobile,
-        touchPitch: !isMobile,
+        // Two fingers orbit and tilt the city — the whole point of building it
+        // in 3D. MapLibre already requires a deliberate 25px twist before
+        // rotation engages, so this is not hair-trigger; what made it feel
+        // unpredictable before was that there was no way back once the view was
+        // crooked. The compass below is that way back.
+        dragRotate: true,
+        pitchWithRotate: true,
+        touchPitch: true,
         touchZoomRotate: true,
         // One finger scrolls the page, two move the map. Without this the map
         // swallows the page scroll and the reader is trapped in it.
@@ -182,18 +185,16 @@ export default function SpatialCanvas({
 
     mapInstanceRef.current = map;
 
-    // Rotation stays off on touch even within the pinch handler. `pinch to
-    // zoom` and `twist to rotate` are the same two fingers, and on a small
-    // screen the twist is almost always accidental.
     try {
-      if (isMobile) map.touchZoomRotate.disableRotation();
-    } catch (err) {}
-
-    try {
-      // The compass appears wherever rotation is possible, so there is always a
-      // way back to north. On touch, where rotation is off, it would be a dead
-      // button.
-      map.addControl(new maplibregl.NavigationControl({ showCompass: !isMobile }), "top-right");
+      // The compass is the escape hatch that makes free rotation safe to offer:
+      // it points north, one tap returns the view to it, and visualizePitch
+      // tilts the needle so the current angle is legible rather than something
+      // you have to infer from the buildings. Shown on touch as well — that is
+      // exactly where an accidental twist is most likely and hardest to undo.
+      map.addControl(
+        new maplibregl.NavigationControl({ showCompass: true, visualizePitch: true }),
+        "top-right"
+      );
     } catch (err) {}
 
     map.on("error", (e) => {

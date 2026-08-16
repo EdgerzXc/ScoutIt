@@ -311,6 +311,10 @@
     left: 10px;
     right: auto;
     padding: 5px 8px;
+    /* On a 320px screen the legend text otherwise runs under the camera
+       controls on the right. It wraps instead. */
+    max-width: calc(100% - 92px);
+    flex-wrap: wrap;
   }
   .scc-chiprow::-webkit-scrollbar {
     display: none;
@@ -338,9 +342,13 @@
   .spatial-canvas-root .maplibregl-ctrl-group button .maplibregl-ctrl-icon {
     background-size: 20px 20px;
   }
-  /* Clear of the reach legend and the lens bar at the bottom. */
+  /* The HUD spans nearly the full width on a phone, so anything pinned to the
+     top-right sits behind it. The camera controls move to the bottom-right,
+     above the lens bar and clear of the reach legend on the left — and closer
+     to where a thumb already is. */
   .spatial-canvas-root .maplibregl-ctrl-top-right {
-    top: 4px;
-    right: 4px;
+    top: auto;
+    bottom: 80px;
+    right: 6px;
   }
 }
