@@ -245,6 +245,64 @@
   background: rgba(232, 174, 60, 0.12);
 }
 
+/* Tilt buttons. MapLibre's own controls draw their glyph as a background
+   image; these are text, so they need the type treatment the others get for
+   free — matched to the zoom +/- beside them so the stack reads as one
+   instrument rather than a native control with something bolted under it. */
+.spatial-canvas-root .scc-tilt-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 29px;
+  height: 29px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--accent, #E8AE3C);
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color 160ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Row, not column — see the note in SpatialCanvas.js. MapLibre's group rule
+   divides stacked buttons with a top border; laid out as a row the divider has
+   to move to the side or the two buttons merge into one slab. */
+.spatial-canvas-root .scc-tilt-group {
+  display: flex;
+  flex-direction: row;
+  margin-top: 6px;
+}
+
+.spatial-canvas-root .scc-tilt-group button + button {
+  border-top: 0;
+  border-left: 1px solid var(--scc-chip-border);
+}
+
+.spatial-canvas-root .scc-tilt-btn:hover {
+  background: rgba(232, 174, 60, 0.12);
+}
+
+.spatial-canvas-root .scc-tilt-btn:focus-visible {
+  outline: 2px solid var(--accent, #E8AE3C);
+  outline-offset: -2px;
+}
+
+@media (pointer: coarse) {
+  .spatial-canvas-root .scc-tilt-btn {
+    width: 44px;
+    height: 44px;
+    font-size: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spatial-canvas-root .scc-tilt-btn {
+    transition: none;
+  }
+}
+
 .spatial-canvas-root .maplibregl-ctrl-attrib {
   background: rgba(14, 14, 14, 0.7);
   font-size: 9px;

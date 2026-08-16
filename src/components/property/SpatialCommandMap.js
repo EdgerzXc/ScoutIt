@@ -115,7 +115,17 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
     mapInstanceRef.current = map;
 
     try {
-      map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
+      // The compass is the way back from a crooked view. Rotation and tilt are
+      // both enabled above, and this map has no cooperativeGestures, so two
+      // fingers genuinely twist and tilt it — which means a stray twist is easy
+      // and was, until now, permanent: there was no control to undo it and
+      // every later gesture compounded it. One tap returns to north, and
+      // visualizePitch tilts the needle so the current angle is legible rather
+      // than something to infer from the buildings.
+      map.addControl(
+        new maplibregl.NavigationControl({ showCompass: true, visualizePitch: true }),
+        "top-right"
+      );
     } catch (err) {}
 
     map.on("error", (e) => {

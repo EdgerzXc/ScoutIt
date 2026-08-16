@@ -26,6 +26,67 @@ const LENS_REGISTRY = {
   transit: transitLens,
 };
 
+const PITCH_STEP_DEGREES = 15;
+
+/**
+ * Tilt buttons, because on touch there is no gesture left to do it with.
+ *
+ * `cooperativeGestures` below is what keeps one finger scrolling the page
+ * instead of dragging the map — without it the map swallows the scroll and
+ * traps the reader. But MapLibre coupled that setting to something unrelated:
+ * `TwoFingersTouchPitchHandler` refuses to pitch at all unless THREE fingers
+ * are down whenever cooperative gestures are enabled. So `touchPitch: true`
+ * was honest and still did nothing, and the up/down angle — the half of
+ * "look around" that makes a 3D city read as 3D — had no gesture on a phone.
+ *
+ * Two-finger twist still rotates (that handler has no such rule), so the
+ * compass half of exploring works. This supplies the other half as one tap,
+ * which is also the half a thumb is worst at expressing as a gesture.
+ */
+class TiltControl {
+  onAdd(map) {
+    this._map = map;
+    const container = document.createElement("div");
+    // Laid out as a row, not a column: stacked, two more 44px buttons would add
+    // 88px to a control tower that already runs half the height of the map on a
+    // phone. Side by side they cost 44px once.
+    container.className = "maplibregl-ctrl maplibregl-ctrl-group scc-tilt-group";
+    container.appendChild(this._makeButton("Tilt the view up", "▲", PITCH_STEP_DEGREES));
+    container.appendChild(this._makeButton("Tilt the view down", "▼", -PITCH_STEP_DEGREES));
+    this._container = container;
+    return container;
+  }
+
+  _makeButton(label, glyph, delta) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "scc-tilt-btn";
+    button.setAttribute("aria-label", label);
+    button.title = label;
+    button.textContent = glyph;
+    button.addEventListener("click", () => this._nudge(delta));
+    return button;
+  }
+
+  _nudge(delta) {
+    const map = this._map;
+    if (!map) return;
+    const clamped = Math.min(
+      map.getMaxPitch(),
+      Math.max(map.getMinPitch(), map.getPitch() + delta)
+    );
+    const reduceMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    map.easeTo({ pitch: clamped, duration: reduceMotion ? 0 : 250 });
+  }
+
+  onRemove() {
+    this._container?.parentNode?.removeChild(this._container);
+    this._map = null;
+  }
+}
+
 export default function SpatialCanvas({
   lat = 14.5547,
   lng = 121.0244,
@@ -195,6 +256,10 @@ export default function SpatialCanvas({
         new maplibregl.NavigationControl({ showCompass: true, visualizePitch: true }),
         "top-right"
       );
+      // Sits directly under the compass: together they are the whole camera —
+      // the compass says which way you are facing and puts it back, these say
+      // how steeply you are looking down.
+      map.addControl(new TiltControl(), "top-right");
     } catch (err) {}
 
     map.on("error", (e) => {
