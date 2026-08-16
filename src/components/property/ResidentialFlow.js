@@ -307,7 +307,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
   const handlePoisLoaded = useCallback((pois) => {
     setLifestylePois(pois);
   }, []);
-  const [locTab,            setLocTab]            = useState("spatial");
+  const [locTab,            setLocTab]            = useState("map");
   const [isInquiryOpen,     setIsInquiryOpen]     = useState(false);
   // Share state now lives in useCuratedShare (declared below, once `d` exists).
   const [isOperatorRequestOpen, setIsOperatorRequestOpen] = useState(false);
@@ -1447,7 +1447,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
 
           {/* ── LOCATION (Ch. 2) ── */}
           <div className={`chapter-panel ${activeTab === "location" ? "active" : ""}`} id="panel-location">
-            <div className="panel-content">
+            <div className="panel-content chapter-frame--map">
 
               <div style={{marginBottom:"32px"}}>
                 <div style={{fontFamily:"var(--font-mono, monospace)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>{ch['location']?.chapterNumber || '02'} — {ch['location']?.chapterLabel || 'Location'}</div>
@@ -1455,15 +1455,95 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
               </div>
 
               {(d.location || d.city) && (
-                <div style={{margin:"0 0 28px"}}>
-                  <div style={{fontFamily:"var(--font-body)", fontSize:"clamp(28px,4.5vw,52px)", fontWeight:400, color:"var(--text-primary)", lineHeight:1.12}}>
+                <div style={{margin:"0"}}>
+                  <div style={{fontFamily:"var(--font-body)", fontSize:"clamp(20px,2.1vw,26px)", fontWeight:400, color:"var(--text-primary)", lineHeight:1.2}}>
                     {d.location || d.city}
                   </div>
-                  {d.city && d.location && d.location !== d.city && (
-                    <div style={{fontFamily:"var(--font-mono, monospace)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.14em", marginTop:"10px", textTransform:"uppercase"}}>
-                      {d.city} · NCR
+
+                </div>
+              )}
+
+              {/* The facts that used to sit in the right rail. As a strip above the
+                  map they cost one line instead of a column, which is what lets
+                  the chapter fit a single frame. */}
+              {(d.street_type || publicTransitObj) && (
+                <div style={{display:"flex", flexWrap:"wrap", gap:"18px", alignItems:"baseline", marginBottom:"0", paddingBottom:"10px", borderBottom:"1px solid var(--border)"}}>
+                  {publicTransitObj && (
+                    <div>
+                      <div style={{fontFamily:"var(--font-mono, monospace)", fontSize:"10px", color:"var(--text-muted)", letterSpacing:"0.18em", textTransform:"uppercase"}}>Nearest transit</div>
+                      <div style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"var(--text-primary)"}}>{publicTransitObj.name} · {publicTransitObj.distance}</div>
                     </div>
                   )}
+                  {d.street_type && (
+                    <div>
+                      <div style={{fontFamily:"var(--font-mono, monospace)", fontSize:"10px", color:"var(--text-muted)", letterSpacing:"0.18em", textTransform:"uppercase"}}>Street type</div>
+                      <div style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"var(--text-primary)"}}>{d.street_type}</div>
+                    </div>
+                  )}
+                </div>
+              )}
+              {/* Map / List toggle */}
+              <div className="whereto-tabs" style={{marginBottom:"0", marginTop:"0"}}>
+                <button className={`whereto-tab-btn ${locTab === "map" ? "active" : ""}`} onClick={() => setLocTab("map")}>
+                  <span className="btn-pulse"/>Map
+                </button>
+                <button className={`whereto-tab-btn ${locTab === "list" ? "active" : ""}`} onClick={() => setLocTab("list")}>
+                  Directory List
+                </button>
+              </div>
+
+              
+
+              
+
+              
+
+              {locTab === "map" && (
+                <InViewport
+                  style={{flex:"1 1 auto", minHeight:"240px", borderRadius:"4px", overflow:"hidden", border:"0.5px solid #262626", marginBottom:"20px"}}
+                  fallback={mapPlaceholder("100%", "Tactical map")}
+                >
+                  {USE_SPATIAL_CANVAS ? (
+                    <SpatialCanvas
+                      lat={d.lat || d.latitude || 14.5547}
+                      lng={d.lng || d.longitude || 121.0244}
+                      propertyTitle={d.title}
+                      initialLens="location"
+                      availableLenses={isNearManilaRail(d.lat || d.latitude, d.lng || d.longitude)
+                        ? ["location", "command", "flood", "transit"]
+                        : ["location", "command", "flood"]}
+                      height="100%"
+                    />
+                  ) : (
+                    <InteractiveMap
+                      lat={d.lat || d.latitude || 14.5547}
+                      lng={d.lng || d.longitude || 121.0244}
+                      propertyTitle={d.title}
+                      vicinityData={d.whereTo}
+                      lifestylePois={lifestylePois}
+                      routeDestination={transitDestination}
+                      routeDestCoords={transitDestCoords}
+                      routeLabel={transitLabel}
+                      mapboxToken={mapboxToken}
+                    />
+                  )}
+                </InViewport>
+              )}
+
+              {locTab === "list" && d.whereTo && d.whereTo.length > 0 && (
+                <div style={{display:"flex", flexDirection:"column", marginBottom:"8px"}}>
+                  {d.whereTo.map((item, idx) => (
+                    <div key={idx} style={{display:"flex", justifyContent:"space-between", alignItems:"center", padding:"13px 0", borderBottom:"1px solid var(--border)"}}>
+                      <div style={{display:"flex", alignItems:"center", gap:"12px"}}>
+                        <div style={{width:"5px", height:"5px", borderRadius:"50%", background:"#E8AE3C", flexShrink:0}}/>
+                        <div>
+                          <div style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"var(--text-primary)"}}>{item.name}</div>
+                          {item.category && <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.1em", textTransform:"uppercase", marginTop:"2px"}}>{item.category}</div>}
+                        </div>
+                      </div>
+                      <span style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.1em", flexShrink:0}}>{item.distance}</span>
+                    </div>
+                  ))}
                 </div>
               )}
 
@@ -1536,134 +1616,6 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
 
               <div style={{height:"1px", background:"var(--border)", margin:"0 0 20px"}}/>
 
-              {/* Map / List toggle */}
-              <div className="whereto-tabs" style={{marginBottom:"20px"}}>
-                <button className={`whereto-tab-btn ${locTab === "spatial" ? "active" : ""}`} onClick={() => setLocTab("spatial")}>
-                  Spatial HUD
-                </button>
-                <button className={`whereto-tab-btn ${locTab === "map" ? "active" : ""}`} onClick={() => setLocTab("map")}>
-                  <span className="btn-pulse"/>Tactical Map
-                </button>
-                <button className={`whereto-tab-btn ${locTab === "list" ? "active" : ""}`} onClick={() => setLocTab("list")}>
-                  Directory List
-                </button>
-                <button className={`whereto-tab-btn ${locTab === "flood" ? "active" : ""}`} onClick={() => setLocTab("flood")}>
-                  Flood Risk Map
-                </button>
-                {isNearManilaRail(d.lat || d.latitude, d.lng || d.longitude) && (
-                  <button className={`whereto-tab-btn ${locTab === "transit" ? "active" : ""}`} onClick={() => setLocTab("transit")}>
-                    Rail Network
-                  </button>
-                )}
-              </div>
-
-              {locTab === "spatial" && openedChapters.has("location") && (
-                <InViewport
-                  style={{ marginBottom: "clamp(28px, 8vw, 80px)" }}
-                  fallback={mapPlaceholder("420px", "Spatial command HUD")}
-                >
-                  {USE_SPATIAL_CANVAS ? (
-                    <SpatialCanvas
-                      lat={d.lat || d.latitude || d.Latitude || 14.5547}
-                      lng={d.lng || d.longitude || d.Longitude || 121.0244}
-                      propertyTitle={d.title}
-                      initialLens="command"
-                      availableLenses={["command", "location", "flood", "transit"]}
-                    />
-                  ) : (
-                    <SpatialCommandMap
-                      lat={d.lat || d.latitude || d.Latitude || 14.5547}
-                      lng={d.lng || d.longitude || d.Longitude || 121.0244}
-                      propertyTitle={d.title}
-                    />
-                  )}
-                </InViewport>
-              )}
-
-              {locTab === "flood" && (
-                USE_SPATIAL_CANVAS ? (
-                  <SpatialCanvas
-                    lat={d.lat || d.latitude || 14.5547}
-                    lng={d.lng || d.longitude || 121.0244}
-                    propertyTitle={d.title}
-                    initialLens="flood"
-                    availableLenses={["flood", "command", "location", "transit"]}
-                  />
-                ) : (
-                  <FloodHeatmapMap
-                    lat={d.lat || d.latitude}
-                    lng={d.lng || d.longitude}
-                    propertyTitle={d.title}
-                  />
-                )
-              )}
-
-              {locTab === "transit" && (
-                USE_SPATIAL_CANVAS ? (
-                  <SpatialCanvas
-                    lat={d.lat || d.latitude || 14.5547}
-                    lng={d.lng || d.longitude || 121.0244}
-                    propertyTitle={d.title}
-                    initialLens="transit"
-                    availableLenses={["transit", "command", "location", "flood"]}
-                  />
-                ) : (
-                  <ManilaTransitMap
-                    propertyLat={d.lat || d.latitude}
-                    propertyLng={d.lng || d.longitude}
-                    propertyTitle={d.title}
-                    trueTransitCoords={transitDestCoords}
-                  />
-                )
-              )}
-
-              {locTab === "map" && (
-                <InViewport
-                  style={{height:"clamp(420px, 70vh, 850px)", minHeight:"420px", flexShrink:0, borderRadius:"4px", overflow:"hidden", border:"0.5px solid #262626", marginBottom:"clamp(28px, 8vw, 80px)"}}
-                  fallback={mapPlaceholder("100%", "Tactical map")}
-                >
-                  {USE_SPATIAL_CANVAS ? (
-                    <SpatialCanvas
-                      lat={d.lat || d.latitude || 14.5547}
-                      lng={d.lng || d.longitude || 121.0244}
-                      propertyTitle={d.title}
-                      initialLens="location"
-                      availableLenses={["location", "command", "flood", "transit"]}
-                      height="100%"
-                    />
-                  ) : (
-                    <InteractiveMap
-                      lat={d.lat || d.latitude || 14.5547}
-                      lng={d.lng || d.longitude || 121.0244}
-                      propertyTitle={d.title}
-                      vicinityData={d.whereTo}
-                      lifestylePois={lifestylePois}
-                      routeDestination={transitDestination}
-                      routeDestCoords={transitDestCoords}
-                      routeLabel={transitLabel}
-                      mapboxToken={mapboxToken}
-                    />
-                  )}
-                </InViewport>
-              )}
-
-              {locTab === "list" && d.whereTo && d.whereTo.length > 0 && (
-                <div style={{display:"flex", flexDirection:"column", marginBottom:"8px"}}>
-                  {d.whereTo.map((item, idx) => (
-                    <div key={idx} style={{display:"flex", justifyContent:"space-between", alignItems:"center", padding:"13px 0", borderBottom:"1px solid var(--border)"}}>
-                      <div style={{display:"flex", alignItems:"center", gap:"12px"}}>
-                        <div style={{width:"5px", height:"5px", borderRadius:"50%", background:"#E8AE3C", flexShrink:0}}/>
-                        <div>
-                          <div style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"var(--text-primary)"}}>{item.name}</div>
-                          {item.category && <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.1em", textTransform:"uppercase", marginTop:"2px"}}>{item.category}</div>}
-                        </div>
-                      </div>
-                      <span style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.1em", flexShrink:0}}>{item.distance}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-
               <DeepIntelWidget
                 open={widgets.location}
                 onToggle={() => setWidgets(w => ({...w, location: !w.location}))}
@@ -1673,15 +1625,6 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
 
             </div>
 
-            <div className="panel-sidebar">
-              {d.city && <div className="sidebar-block"><div className="sidebar-accent-line"/><div className="sidebar-label">District</div><div className="sidebar-value">{d.city}</div><div className="sidebar-sub">NCR</div></div>}
-              <div className="mini-map">
-                <div className="map-road-h" style={{top:"33%"}}/><div className="map-road-h" style={{top:"55%"}}/>
-                <div className="map-road-v" style={{left:"30%"}}/><div className="map-road-v" style={{left:"60%"}}/>
-                <div className="map-pulse"/><div className="map-pin"/>
-              </div>
-              {d.street_type && <div className="sidebar-block"><div className="sidebar-label">Street type</div><div className="sidebar-value">{d.street_type}</div></div>}
-            </div>
           </div>
 
           {/* ── LIFE HERE (Ch. 3) ── */}
@@ -1780,7 +1723,9 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                       lng={d.lng || d.longitude || 121.0244}
                       propertyTitle={d.title}
                       initialLens="location"
-                      availableLenses={["location", "command", "flood", "transit"]}
+                      availableLenses={isNearManilaRail(d.lat || d.latitude, d.lng || d.longitude)
+                        ? ["location", "command", "flood", "transit"]
+                        : ["location", "command", "flood"]}
                       height="100%"
                     />
                   ) : (

@@ -1499,3 +1499,24 @@ html.lightbox-open {
 @media (min-width: 768px) {
   .claim-panel-slot { padding: 0 32px 64px; }
 }
+
+/* ── Map-led chapters ──────────────────────────────────────────────────────
+   The Location chapter is a map with a caption, not an essay with a map at the
+   bottom. The default column rhythm (18px between every block, 26px of padding,
+   a 32px margin under the chapter eyebrow) spent close to 300px before the map
+   began, which is why the map sat below the fold and had to be scrolled to.
+   Tightening the lead-in is what lets the whole chapter sit in one frame. */
+.panel-content.chapter-frame--map {
+  gap: 8px;
+  padding-top: 16px;
+}
+
+/* The eyebrow block carries its own 32px in one flow and 12px in the other;
+   inside a gapped column that margin is doing nothing but pushing the map down. */
+.panel-content.chapter-frame--map > div:first-child {
+  margin-bottom: 0;
+}
+
+.panel-content.chapter-frame--map .whereto-tabs {
+  margin-top: 0;
+}
