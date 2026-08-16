@@ -110,12 +110,21 @@ export async function POST(request) {
     if (apiKey && baseId) {
       try {
         console.log(`[PUBLISH API] Syncing slug ${currentSubmission.slug} to Airtable...`);
+        // Supabase stores the position as PostGIS POINT(lng lat); Airtable
+        // wants two numbers. Parsed here so the public page inherits the exact
+        // coordinate the owner's listing resolved to, instead of re-geocoding
+        // the location text and possibly landing somewhere else.
+        const point = typeof currentSubmission.coordinates === "string"
+          ? currentSubmission.coordinates.match(/POINT\(([-\d.]+)\s+([-\d.]+)\)/)
+          : null;
+
         const payload = {
           title: currentSubmission.title,
           location: currentSubmission.location,
           type: currentSubmission.type,
           space_category: currentSubmission.space_category,
-          details: currentSubmission.details || {}
+          details: currentSubmission.details || {},
+          ...(point ? { longitude: Number(point[1]), latitude: Number(point[2]) } : {})
         };
         
         let finalSlug = currentSubmission.canonical_slug || currentSubmission.slug;

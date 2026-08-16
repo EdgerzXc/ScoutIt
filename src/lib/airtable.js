@@ -538,6 +538,13 @@ export async function insertProperty(apiKey, baseId, data, unitsOverride = null)
             "Unknown",
           Units_JSON: unitsJson,
           Approved_For_ScoutIt: true,
+          // Carry the position the owner's submission already resolved. Without
+          // these, publish sent only the location TEXT and the public page had
+          // to geocode it a second time — a different lookup that can land
+          // somewhere else, so the owner and the visitor saw different maps.
+          ...(Number.isFinite(Number(data.latitude)) && Number.isFinite(Number(data.longitude))
+            ? { Latitude: Number(data.latitude), Longitude: Number(data.longitude) }
+            : {}),
           ...photoFields(data),
           ...categoryFields
         }
@@ -594,6 +601,10 @@ export async function updateProperty(apiKey, baseId, slug, data, unitsOverride =
   const fieldsToUpdate = {};
   if (data.title) fieldsToUpdate.Title = data.title;
   if (data.location) fieldsToUpdate.Location = data.location;
+  if (Number.isFinite(Number(data.latitude)) && Number.isFinite(Number(data.longitude))) {
+    fieldsToUpdate.Latitude = Number(data.latitude);
+    fieldsToUpdate.Longitude = Number(data.longitude);
+  }
   if (data.type) fieldsToUpdate.SpaceTypography = data.type.charAt(0).toUpperCase() + data.type.slice(1);
   if (data.seo_title) fieldsToUpdate.SEO_Title = data.seo_title;
   if (data.seo_description) fieldsToUpdate.SEO_Description = data.seo_description;

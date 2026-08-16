@@ -11,6 +11,7 @@ import ListerDeclarationModal from "../components/dashboard/ListerDeclarationMod
 import { isOnboardingComplete } from "../lib/onboardingProfile";
 import { readDevelopmentMockUser } from "../lib/developmentMock";
 import { trackEvent, GA_EVENTS } from "../lib/analytics";
+import { assessGeocode } from "../lib/geocodeConfidence";
 
 const DashboardContext = createContext();
 
@@ -610,17 +611,26 @@ export function DashboardProvider({ children }) {
     // this call returned 403 on the live site — which is why listings published
     // by owners arrived with no coordinates and then rendered a map of the
     // wrong place. No longer gated on a client-side token either.
+    let geo = null;
     if (listing.location) {
       try {
         const res = await fetch(`/api/mapbox?op=geocode&q=${encodeURIComponent(listing.location)}`);
         const json = await res.json();
-        const feature = json?.data?.features?.[0];
-        if (feature?.center) {
-          [lng, lat] = feature.center;
+        geo = assessGeocode(json?.data?.features?.[0], listing.location);
+        if (geo.lat != null && geo.lng != null) {
+          lat = geo.lat;
+          lng = geo.lng;
         }
       } catch (err) {
         console.error("Geocoding failed", err);
+        geo = assessGeocode(null, listing.location);
       }
+    }
+
+    // The owner is told when the position is only approximate, so they can
+    // sharpen the address now rather than discover a wrong map later.
+    if (geo?.uncertain && geo.lat != null) {
+      addToast("Location is approximate — staff will verify", "📍");
     }
 
     addToast("Initializing Dossier...", "⏳");
@@ -650,6 +660,10 @@ export function DashboardProvider({ children }) {
         ...(Array.isArray(listing.photos) && listing.photos.filter(Boolean).length
           ? { photos: listing.photos.filter(Boolean) }
           : {}),
+        // How the position was arrived at and how much to trust it. Kept in
+        // details rather than a new column so this needs no migration, and read
+        // by Mission Control to queue anything approximate for a human check.
+        ...(geo ? { geo } : {}),
       },
       coordinates
     }]).select();
