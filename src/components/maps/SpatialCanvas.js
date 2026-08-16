@@ -50,6 +50,10 @@ export default function SpatialCanvas({
 
   const [activeLensId, setActiveLensId] = useState(initialLens);
   const [activeSubLayer, setActiveSubLayer] = useState("all");
+  // Mirrored into a ref so the reach effect can read the current group without
+  // taking activeSubLayer as a dependency, which would re-run it on every
+  // toggle and re-filter layers that have not changed.
+  const activeSubLayerRef = useRef("all");
   const [visualMode, setVisualMode] = useState("DEFAULT"); // DEFAULT | FLIR | CRT
   const [spatialIntel, setSpatialIntel] = useState(null);
   const [hudExpanded, setHudExpanded] = useState(true);
@@ -59,7 +63,17 @@ export default function SpatialCanvas({
   const [fireCount, setFireCount] = useState(0);
 
   // Shared Reach isochrone data (spine)
-  const { isochrone, contours, loading: reachLoading } = useReach(targetLat, targetLng);
+  // `reach` is the isochrone when Mapbox supplies one and a true-distance
+  // circle when it does not. Everything downstream — the ring rendering and the
+  // POI clipping — uses `reach`, never the raw isochrone, so the spine is never
+  // absent. `reachIsFallback` is what the UI must use to avoid claiming minutes
+  // it cannot measure.
+  const {
+    reach: isochrone,
+    reachIsFallback,
+    contours,
+    loading: reachLoading,
+  } = useReach(targetLat, targetLng);
 
   // Compute telemetry metrics on mount / coordinate update
   useEffect(() => {
@@ -466,8 +480,21 @@ export default function SpatialCanvas({
       markerRef.current = new maplibregl.Marker({ element: el })
         .setLngLat([targetLng, targetLat])
         .setPopup(
-          new maplibregl.Popup({ offset: 25, className: "scoutit-popup" }).setHTML(
-            `<strong style="color:${tokens.GOLD}">${propertyTitle}</strong><br/><span style="color:#ccc;font-size:11px;">Target Space</span>`
+          // Built as DOM nodes rather than an HTML string: setHTML assigns to
+          // innerHTML, and propertyTitle is CMS-authored content. textContent
+          // cannot be parsed as markup.
+          new maplibregl.Popup({ offset: 25, className: "scoutit-popup" }).setDOMContent(
+            (() => {
+              const wrap = document.createElement("div");
+              const strong = document.createElement("strong");
+              strong.textContent = propertyTitle || "This space";
+              strong.style.color = tokens.GOLD;
+              const label = document.createElement("span");
+              label.textContent = "Target Space";
+              label.style.cssText = "color:var(--text-secondary,#c8c8c8);font-size:11px;";
+              wrap.append(strong, document.createElement("br"), label);
+              return wrap;
+            })()
           )
         )
         .addTo(map);
@@ -505,6 +532,10 @@ export default function SpatialCanvas({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    activeSubLayerRef.current = activeSubLayer;
+  }, [activeSubLayer]);
+
   // Update real isochrone data dynamically when loaded
   useEffect(() => {
     const map = mapInstanceRef.current;
@@ -515,6 +546,16 @@ export default function SpatialCanvas({
         src.setData(isochrone || { type: "FeatureCollection", features: [] });
       }
     } catch (err) {}
+
+    // The reach usually arrives after the lens has mounted. Lenses that clip
+    // their contents to it need telling, or they keep the empty filter they
+    // were built with and render nothing forever.
+    const lens = LENS_REGISTRY[activeLensRef.current];
+    if (lens?.setReach) {
+      try {
+        lens.setReach(map, isochrone, activeSubLayerRef.current);
+      } catch (err) {}
+    }
   }, [isochrone]);
 
   // Recenter marker when lat/lng change
@@ -705,6 +746,7 @@ export default function SpatialCanvas({
               {subLayerButtons.map((btn) => (
                 <button
                   key={btn.id}
+                  className="scm-layer-btn"
                   onClick={() => handleToggleSubLayer(btn.id)}
                   style={{
                     padding: "4px 8px",
@@ -797,6 +839,7 @@ export default function SpatialCanvas({
           {availableLenses.map((lensKey) => (
             <button
               key={lensKey}
+              className="scm-layer-btn"
               onClick={() => handleSwitchLens(lensKey)}
               style={{
                 background: activeLensId === lensKey ? "rgba(232, 174, 60, 0.2)" : "transparent",
