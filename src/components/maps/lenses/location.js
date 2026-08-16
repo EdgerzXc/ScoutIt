@@ -75,6 +75,49 @@ export function buildPoiFilter(group, reachGeometry) {
   return ["all", ...parts];
 }
 
+// ── Routing from the listing to a place you tapped ─────────────────────────
+//
+// CLICK, NOT HOVER. Hover fires continuously as the cursor crosses the map and
+// every one of those is a billed Mapbox request, so hover-routing would burn
+// quota just from moving the mouse. A tap is a deliberate "tell me about this
+// one", it is cacheable, and it is the same gesture on a phone — where hover
+// does not exist at all.
+//
+// Requests go through /api/mapbox so the token stays on the server.
+const routeCache = new Map();
+
+async function fetchRoute(from, to, profile) {
+  const key = `${profile}:${from.join(",")}:${to.join(",")}`;
+  if (routeCache.has(key)) return routeCache.get(key);
+
+  const promise = (async () => {
+    try {
+      const url =
+        `/api/mapbox?op=directions&profile=${profile}&coordinates=` +
+        encodeURIComponent(`${from[0]},${from[1]};${to[0]},${to[1]}`);
+      const res = await fetch(url);
+      const json = await res.json();
+      const route = json?.data?.routes?.[0];
+      if (!route) return null;
+      return { geometry: route.geometry, seconds: route.duration, metres: route.distance };
+    } catch (err) {
+      // A failed route must leave the popup standing, just without a time.
+      return null;
+    }
+  })();
+
+  routeCache.set(key, promise);
+  return promise;
+}
+
+function formatDuration(seconds) {
+  const mins = Math.max(1, Math.round(seconds / 60));
+  if (mins < 60) return `${mins} min`;
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  return m ? `${h}h ${m}m` : `${h}h`;
+}
+
 // Popup content is built as DOM nodes, never as an HTML string.
 //
 // maplibregl.Popup#setHTML assigns the string to innerHTML. POI names come from
@@ -129,7 +172,7 @@ export const locationLens = {
     ];
   },
 
-  mount(map, { firstLabelLayerId, nearbyListings = [], isochrone = null }) {
+  mount(map, { firstLabelLayerId, nearbyListings = [], isochrone = null, targetLat, targetLng }) {
     const rootStyle = typeof window !== "undefined" ? getComputedStyle(document.documentElement) : null;
     const token = (name, fallback) => (rootStyle?.getPropertyValue(name) || "").trim() || fallback;
     const GOLD = token("--accent", "#E8AE3C");
@@ -244,6 +287,27 @@ export const locationLens = {
       map.getSource("nearby-scoutit-listings").setData(listingsGeoJson);
     }
 
+    // The path drawn from the listing to whatever was tapped. Empty until then.
+    if (!map.getSource("tap-route")) {
+      map.addSource("tap-route", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
+      map.addLayer(
+        {
+          id: "tap-route-line",
+          type: "line",
+          source: "tap-route",
+          layout: { "line-cap": "round", "line-join": "round" },
+          paint: {
+            "line-color": GOLD,
+            "line-width": ["interpolate", ["linear"], ["zoom"], 13, 1.5, 17, 3],
+            "line-opacity": 0.9,
+            // Dashed so it never reads as a street the basemap drew.
+            "line-dasharray": [1.5, 1.4],
+          },
+        },
+        firstLabelLayerId
+      );
+    }
+
     // ── Interaction ────────────────────────────────────────────────────────
     // Handlers are stored per map instance, not on the lens object. The lens is
     // a module singleton shared by every canvas on the page, so writing them to
@@ -270,33 +334,86 @@ export const locationLens = {
       return null;
     };
 
+    const clearRoute = () => {
+      try {
+        map.getSource("tap-route")?.setData({ type: "FeatureCollection", features: [] });
+      } catch (err) {}
+    };
+
     const handlers = {
       click: (e) => {
         const found = featureAt(e.point);
-        if (!found) return;
+        if (!found) {
+          clearRoute();
+          return;
+        }
         const { hit, layer } = found;
         const isListing = layer === "nearby-listings-symbol";
-        const coords = hit.geometry?.type === "Point" ? hit.geometry.coordinates.slice() : e.lngLat;
+        const coords = hit.geometry?.type === "Point" ? hit.geometry.coordinates.slice() : [e.lngLat.lng, e.lngLat.lat];
         const slug = hit.properties?.slug;
 
-        new maplibregl.Popup({ offset: 14, className: "scoutit-popup", maxWidth: "240px" })
+        const node = isListing
+          ? buildPopupNode({
+              title: hit.properties?.title || "ScoutIt Listing",
+              titleColor: GOLD,
+              subtitle: "ScoutIt listing",
+              href: slug ? `/property/${encodeURIComponent(slug)}` : null,
+              hrefLabel: "View intelligence →",
+            })
+          : buildPopupNode({
+              title: hit.properties?.name || "Nearby place",
+              titleColor: PAPER_WHITE,
+              subtitle: String(hit.properties?.class || hit.properties?.subclass || "Amenity").replace(/_/g, " "),
+            });
+
+        // The time is filled in when the route lands. Saying "measuring" rather
+        // than showing nothing means the popup never looks broken while it waits.
+        const travel = document.createElement("div");
+        travel.style.cssText =
+          "margin-top:6px;font-family:var(--font-mono,monospace);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-secondary,#c8c8c8);";
+        travel.textContent = "Measuring route…";
+        node.appendChild(travel);
+
+        const popup = new maplibregl.Popup({ offset: 14, className: "scoutit-popup", maxWidth: "260px" })
           .setLngLat(coords)
-          .setDOMContent(
-            isListing
-              ? buildPopupNode({
-                  title: hit.properties?.title || "ScoutIt Listing",
-                  titleColor: GOLD,
-                  subtitle: "ScoutIt listing",
-                  href: slug ? `/property/${encodeURIComponent(slug)}` : null,
-                  hrefLabel: "View intelligence →",
-                })
-              : buildPopupNode({
-                  title: hit.properties?.name || "Nearby place",
-                  titleColor: PAPER_WHITE,
-                  subtitle: String(hit.properties?.class || hit.properties?.subclass || "Amenity").replace(/_/g, " "),
-                })
-          )
+          .setDOMContent(node)
           .addTo(map);
+
+        popup.on("close", clearRoute);
+
+        const from = [targetLng, targetLat];
+        if (!Number.isFinite(from[0]) || !Number.isFinite(from[1])) {
+          travel.textContent = "";
+          return;
+        }
+
+        // Walk first: it is the pedestrian question, and it is the route worth
+        // drawing. If the walk is long enough to be unrealistic, the drive is
+        // the honest answer instead — so ask for that too and prefer it.
+        Promise.all([fetchRoute(from, coords, "walking"), fetchRoute(from, coords, "driving")])
+          .then(([walk, drive]) => {
+            const walkTooFar = !walk || walk.seconds > 25 * 60;
+            const shown = walkTooFar ? drive : walk;
+            if (!shown) {
+              travel.textContent = "Route unavailable";
+              return;
+            }
+
+            const parts = [];
+            if (walk && !walkTooFar) parts.push(`${formatDuration(walk.seconds)} walk`);
+            if (drive) parts.push(`${formatDuration(drive.seconds)} drive`);
+            travel.textContent = parts.join(" · ") || "Route unavailable";
+
+            try {
+              map.getSource("tap-route")?.setData({
+                type: "FeatureCollection",
+                features: [{ type: "Feature", properties: {}, geometry: shown.geometry }],
+              });
+            } catch (err) {}
+          })
+          .catch(() => {
+            travel.textContent = "Route unavailable";
+          });
       },
       move: (e) => {
         map.getCanvas().style.cursor = featureAt(e.point) ? "pointer" : "";
@@ -336,13 +453,14 @@ export const locationLens = {
       this._handlersByMap.delete(map);
     }
 
-    ["nearby-listings-symbol", "carto-pois-symbol"].forEach((id) => {
+    ["tap-route-line", "nearby-listings-symbol", "carto-pois-symbol"].forEach((id) => {
       try {
         if (map.getLayer(id)) map.removeLayer(id);
       } catch (e) {}
     });
     try {
       if (map.getSource("nearby-scoutit-listings")) map.removeSource("nearby-scoutit-listings");
+      if (map.getSource("tap-route")) map.removeSource("tap-route");
     } catch (e) {}
   },
 };

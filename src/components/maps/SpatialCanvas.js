@@ -195,6 +195,12 @@ export default function SpatialCanvas({
 
     map.on("load", () => {
       mapLoadedRef.current = true;
+
+      // On a short frame the expanded HUD covers most of the map it is
+      // annotating. Start it collapsed there and let the reader open it, rather
+      // than making them close it before they can see anything.
+      const frameHeight = mapContainerRef.current?.clientHeight || 0;
+      if (frameHeight && frameHeight < 420) setHudExpanded(false);
       const tokens = getDesignTokens();
 
       // Find first symbol layer so 3D massing and ground fills sit below text labels
