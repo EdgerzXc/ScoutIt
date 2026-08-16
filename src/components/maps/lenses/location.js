@@ -5,6 +5,7 @@
 // request, no new service. Measured: one Makati tile carries 4,857 POI features
 // with class / subclass / name / rank.
 import maplibregl from "maplibre-gl";
+import { registerMapIcons, iconImageExpression } from "@/components/maps/mapIcons";
 
 // ~900 features per tile in the sample are pure infrastructure clutter — the
 // map must never show a bollard next to a restaurant.
@@ -143,6 +144,8 @@ export const locationLens = {
 
     const baseFilter = buildPoiFilter(null, reachGeometry);
 
+    registerMapIcons(map, { world: SOFT_GREY, ours: GOLD });
+
     if (!map.getLayer("carto-pois-symbol")) {
       map.addLayer(
         {
@@ -154,10 +157,16 @@ export const locationLens = {
           filter: baseFilter,
           layout: {
             visibility: "visible",
+            "icon-image": iconImageExpression("world", GROUP_CLASSES),
+            "icon-size": ["interpolate", ["linear"], ["zoom"], 14, 0.72, 17, 0.95],
+            // The icon is the anchor; the name hangs beneath it and is allowed
+            // to drop out when space is tight, so a dense block still reads as
+            // a field of marks rather than a wall of text.
+            "icon-allow-overlap": false,
             "text-field": ["get", "name"],
             "text-font": ["Open Sans Regular", "Noto Sans Regular"],
-            "text-size": ["interpolate", ["linear"], ["zoom"], 14, 9, 16, 11, 18, 13],
-            "text-offset": [0, 0.6],
+            "text-size": ["interpolate", ["linear"], ["zoom"], 14, 9, 16, 10.5, 18, 12],
+            "text-offset": [0, 1.15],
             "text-anchor": "top",
             "text-optional": true,
             "text-max-width": 9,
@@ -170,28 +179,10 @@ export const locationLens = {
             "text-color": SOFT_GREY,
             "text-halo-color": VOID_BLACK,
             "text-halo-width": 1.5,
+            "icon-opacity": 0.9,
           },
         },
         firstLabelLayerId
-      );
-
-      map.addLayer(
-        {
-          id: "carto-pois-circle",
-          type: "circle",
-          source: "carto",
-          "source-layer": "poi",
-          minzoom: 14,
-          filter: baseFilter,
-          paint: {
-            "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 3, 16, 4.5, 18, 6],
-            "circle-color": SOFT_GREY,
-            "circle-opacity": 0.85,
-            "circle-stroke-width": 1,
-            "circle-stroke-color": VOID_BLACK,
-          },
-        },
-        "carto-pois-symbol"
       );
     }
 
@@ -223,30 +214,25 @@ export const locationLens = {
       // the colour the massing gives mid-rise buildings, so muted marks would
       // camouflage against the city. The star property stays distinct because
       // it is a whole glowing building, not because it is a brighter dot.
+      // One symbol layer, not a circle plus a label: a listing's diamond and
+      // its name are one object and must collide as one.
       map.addLayer({
-        id: "nearby-listings-circles",
-        type: "circle",
-        source: "nearby-scoutit-listings",
-        paint: {
-          "circle-radius": 6,
-          "circle-color": GOLD,
-          "circle-opacity": 0.95,
-          "circle-stroke-width": 2,
-          "circle-stroke-color": VOID_BLACK,
-        },
-      });
-
-      map.addLayer({
-        id: "nearby-listings-labels",
+        id: "nearby-listings-symbol",
         type: "symbol",
         source: "nearby-scoutit-listings",
         layout: {
+          "icon-image": "icon-listing-ours",
+          "icon-size": ["interpolate", ["linear"], ["zoom"], 13, 0.8, 17, 1.05],
+          // Ours always wins a collision against the world's amenities.
+          "icon-allow-overlap": true,
+          "text-allow-overlap": false,
           "text-field": ["get", "title"],
           "text-font": ["Open Sans Bold", "Noto Sans Regular"],
           "text-size": 10,
-          "text-offset": [0, 1.2],
+          "text-offset": [0, 1.25],
           "text-anchor": "top",
           "text-optional": true,
+          "symbol-sort-key": 0,
         },
         paint: {
           "text-color": PAPER_WHITE,
@@ -263,54 +249,65 @@ export const locationLens = {
     // a module singleton shared by every canvas on the page, so writing them to
     // `this` means a second canvas overwrites the first one's handlers and
     // unmount then detaches the wrong listeners.
+    //
+    // Hit-testing is done against a padded box rather than by binding to the
+    // layers directly. A 22px icon is a 22px target, and a fingertip needs 44.
+    // Querying a box around the tap gives the larger target without drawing
+    // anything bigger, so the map stays visually restrained and still takes a
+    // thumb. Listings are searched first so ours always wins a tie.
+    const TAP_PAD = 22;
+    const featureAt = (point) => {
+      const box = [
+        [point.x - TAP_PAD, point.y - TAP_PAD],
+        [point.x + TAP_PAD, point.y + TAP_PAD],
+      ];
+      const layers = ["nearby-listings-symbol", "carto-pois-symbol"].filter((id) => map.getLayer(id));
+      if (!layers.length) return null;
+      for (const layer of layers) {
+        const hit = map.queryRenderedFeatures(box, { layers: [layer] })[0];
+        if (hit) return { hit, layer };
+      }
+      return null;
+    };
+
     const handlers = {
-      poiClick: (e) => {
-        const f = e.features?.[0];
-        if (!f) return;
-        new maplibregl.Popup({ offset: 12, className: "scoutit-popup" })
-          .setLngLat(e.lngLat)
+      click: (e) => {
+        const found = featureAt(e.point);
+        if (!found) return;
+        const { hit, layer } = found;
+        const isListing = layer === "nearby-listings-symbol";
+        const coords = hit.geometry?.type === "Point" ? hit.geometry.coordinates.slice() : e.lngLat;
+        const slug = hit.properties?.slug;
+
+        new maplibregl.Popup({ offset: 14, className: "scoutit-popup", maxWidth: "240px" })
+          .setLngLat(coords)
           .setDOMContent(
-            buildPopupNode({
-              title: f.properties?.name || "Nearby Point",
-              titleColor: PAPER_WHITE,
-              subtitle: f.properties?.class || f.properties?.subclass || "Amenity",
-            })
+            isListing
+              ? buildPopupNode({
+                  title: hit.properties?.title || "ScoutIt Listing",
+                  titleColor: GOLD,
+                  subtitle: "ScoutIt listing",
+                  href: slug ? `/property/${encodeURIComponent(slug)}` : null,
+                  hrefLabel: "View intelligence →",
+                })
+              : buildPopupNode({
+                  title: hit.properties?.name || "Nearby place",
+                  titleColor: PAPER_WHITE,
+                  subtitle: String(hit.properties?.class || hit.properties?.subclass || "Amenity").replace(/_/g, " "),
+                })
           )
           .addTo(map);
       },
-      listingClick: (e) => {
-        const f = e.features?.[0];
-        if (!f) return;
-        const slug = f.properties?.slug;
-        new maplibregl.Popup({ offset: 12, className: "scoutit-popup" })
-          .setLngLat(f.geometry.coordinates.slice())
-          .setDOMContent(
-            buildPopupNode({
-              title: f.properties?.title || "ScoutIt Listing",
-              titleColor: GOLD,
-              href: slug ? `/property/${encodeURIComponent(slug)}` : null,
-              hrefLabel: "View intelligence →",
-            })
-          )
-          .addTo(map);
-      },
-      enter: () => {
-        map.getCanvas().style.cursor = "pointer";
-      },
-      leave: () => {
-        map.getCanvas().style.cursor = "";
+      move: (e) => {
+        map.getCanvas().style.cursor = featureAt(e.point) ? "pointer" : "";
       },
     };
     this._handlersByMap = this._handlersByMap || new WeakMap();
     this._handlersByMap.set(map, handlers);
 
     try {
-      map.on("click", "carto-pois-circle", handlers.poiClick);
-      map.on("click", "nearby-listings-circles", handlers.listingClick);
-      map.on("mouseenter", "carto-pois-circle", handlers.enter);
-      map.on("mouseleave", "carto-pois-circle", handlers.leave);
-      map.on("mouseenter", "nearby-listings-circles", handlers.enter);
-      map.on("mouseleave", "nearby-listings-circles", handlers.leave);
+      map.on("click", handlers.click);
+      map.on("mousemove", handlers.move);
     } catch (err) {}
   },
 
@@ -321,12 +318,10 @@ export const locationLens = {
   },
 
   applyVisibility(map, activeSubLayer) {
-    if (!map.getLayer("carto-pois-symbol") || !map.getLayer("carto-pois-circle")) return;
+    if (!map.getLayer("carto-pois-symbol")) return;
     const group = activeSubLayer && activeSubLayer !== "all" ? activeSubLayer : null;
-    const filter = buildPoiFilter(group, this._reachGeometry);
     try {
-      map.setFilter("carto-pois-symbol", filter);
-      map.setFilter("carto-pois-circle", filter);
+      map.setFilter("carto-pois-symbol", buildPoiFilter(group, this._reachGeometry));
     } catch (err) {}
   },
 
@@ -334,17 +329,14 @@ export const locationLens = {
     const handlers = this._handlersByMap?.get(map);
     if (handlers) {
       try {
-        map.off("click", "carto-pois-circle", handlers.poiClick);
-        map.off("click", "nearby-listings-circles", handlers.listingClick);
-        map.off("mouseenter", "carto-pois-circle", handlers.enter);
-        map.off("mouseleave", "carto-pois-circle", handlers.leave);
-        map.off("mouseenter", "nearby-listings-circles", handlers.enter);
-        map.off("mouseleave", "nearby-listings-circles", handlers.leave);
+        map.off("click", handlers.click);
+        map.off("mousemove", handlers.move);
+        map.getCanvas().style.cursor = "";
       } catch (e) {}
       this._handlersByMap.delete(map);
     }
 
-    ["nearby-listings-labels", "nearby-listings-circles", "carto-pois-circle", "carto-pois-symbol"].forEach((id) => {
+    ["nearby-listings-symbol", "carto-pois-symbol"].forEach((id) => {
       try {
         if (map.getLayer(id)) map.removeLayer(id);
       } catch (e) {}
