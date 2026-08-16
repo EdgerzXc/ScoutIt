@@ -1849,17 +1849,28 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                   style={{height:"clamp(420px, 70vh, 850px)", minHeight:"420px", flexShrink:0, borderRadius:"4px", overflow:"hidden", border:"0.5px solid #262626", marginBottom:"clamp(28px, 8vw, 80px)"}}
                   fallback={mapPlaceholder("100%", "Tactical map")}
                 >
-                  <InteractiveMap
-                    lat={d.lat || d.latitude || 14.5547}
-                    lng={d.lng || d.longitude || 121.0244}
-                    propertyTitle={d.title}
-                    vicinityData={d.whereTo}
-                    lifestylePois={lifestylePois}
-                    routeDestination={transitDestination}
-                    routeDestCoords={transitDestCoords}
-                    routeLabel={transitLabel}
-                    mapboxToken={mapboxToken}
-                  />
+                  {USE_SPATIAL_CANVAS ? (
+                    <SpatialCanvas
+                      lat={d.lat || d.latitude || 14.5547}
+                      lng={d.lng || d.longitude || 121.0244}
+                      propertyTitle={d.title}
+                      initialLens="location"
+                      availableLenses={["location", "command", "flood", "transit"]}
+                      height="100%"
+                    />
+                  ) : (
+                    <InteractiveMap
+                      lat={d.lat || d.latitude || 14.5547}
+                      lng={d.lng || d.longitude || 121.0244}
+                      propertyTitle={d.title}
+                      vicinityData={d.whereTo}
+                      lifestylePois={lifestylePois}
+                      routeDestination={transitDestination}
+                      routeDestCoords={transitDestCoords}
+                      routeLabel={transitLabel}
+                      mapboxToken={mapboxToken}
+                    />
+                  )}
                 </InViewport>
               )}
 
