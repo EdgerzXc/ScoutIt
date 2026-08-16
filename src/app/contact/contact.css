@@ -1,0 +1,285 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   CONTACT SURFACE
+
+   Built at 390px first, then widened (RULES.md Part B). The form is a single
+   column at every width — a two-column contact form is a template tell, and
+   there is nothing here that benefits from sitting side by side.
+
+   Gold appears once, on the submit button. That is the 95/5 rule: this page
+   has exactly one thing to do.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.contact-page {
+  min-height: 100dvh;
+  background: var(--bg-root, #0d0d0d);
+  padding: clamp(4.5rem, 4rem + 6vw, 8rem) 1.25rem clamp(4rem, 3rem + 5vw, 7rem);
+}
+
+.contact-shell {
+  max-width: 44rem;
+  margin: 0 auto;
+}
+
+/* ── Header ───────────────────────────────────────────────────────────── */
+
+.contact-header {
+  margin-bottom: clamp(2rem, 1.5rem + 2vw, 3rem);
+}
+
+.contact-eyebrow {
+  display: block;
+  font-family: var(--font-mono, monospace);
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--accent, #E8AE3C);
+  margin-bottom: 0.9rem;
+}
+
+.contact-title {
+  font-size: clamp(2rem, 1.4rem + 3vw, 3.25rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--text-primary, #f0ede8);
+  margin: 0 0 0.85rem;
+}
+
+.contact-lede {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--text-secondary, #c8c8c8);
+  max-width: 34rem;
+  margin: 0;
+}
+
+/* ── Panel ────────────────────────────────────────────────────────────── */
+
+.contact-panel {
+  background: linear-gradient(180deg, var(--surface, #161616), #121212);
+  border: 1px solid var(--border-solid, #262626);
+  border-radius: 6px;
+  padding: clamp(1.25rem, 1rem + 2vw, 2rem);
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+
+.contact-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.contact-label {
+  font-family: var(--font-mono, monospace);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-secondary, #c8c8c8);
+}
+
+.contact-optional {
+  color: var(--text-secondary, #c8c8c8);
+  opacity: 0.7;
+  letter-spacing: 0.12em;
+}
+
+/* 16px minimum: iOS zooms the whole page on focus for anything smaller, which
+   reads as the layout breaking the moment someone taps a field. */
+.contact-input {
+  width: 100%;
+  font-family: inherit;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--text-primary, #f0ede8);
+  background: var(--bg-root, #0e0e0e);
+  border: 1px solid var(--border-solid, #262626);
+  border-radius: 4px;
+  padding: 0.7rem 0.85rem;
+  transition: border-color 160ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.contact-input:hover:not(:disabled) {
+  border-color: var(--accent-muted, #6E531A);
+}
+
+.contact-input:focus {
+  outline: none;
+  border-color: var(--accent, #E8AE3C);
+}
+
+.contact-input:focus-visible {
+  outline: 2px solid var(--accent, #E8AE3C);
+  outline-offset: 1px;
+}
+
+.contact-input:disabled {
+  opacity: 0.55;
+}
+
+.contact-textarea {
+  resize: vertical;
+  min-height: 9rem;
+}
+
+.contact-hint {
+  font-family: var(--font-mono, monospace);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  /* No tertiary text token exists in DESIGN.md. Dim the documented secondary
+     rather than inventing a new grey — one fewer colour nobody approved. */
+  color: var(--text-secondary, #c8c8c8);
+  opacity: 0.7;
+  margin: 0;
+}
+
+.contact-hint--center {
+  text-align: center;
+}
+
+/* ── Error ────────────────────────────────────────────────────────────── */
+
+.contact-error {
+  margin: 0;
+  padding: 0.7rem 0.85rem;
+  border-radius: 4px;
+  border: 1px solid #e8644a;
+  background: rgba(232, 100, 74, 0.1);
+  color: var(--signal-red, #e8644a);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ── Submit — the one gold element on the page ────────────────────────── */
+
+.contact-submit {
+  min-height: 48px;
+  border: 0;
+  border-radius: 4px;
+  background: var(--accent-bright, #F7C64E);
+  color: var(--bg-root, #0d0d0d);
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    transform 160ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 160ms cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 160ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.contact-submit:hover:not(:disabled) {
+  background: var(--accent, #E8AE3C);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 26px rgba(232, 174, 60, 0.25);
+}
+
+.contact-submit:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.contact-submit:focus-visible {
+  outline: 2px solid var(--accent-bright, #F7C64E);
+  outline-offset: 3px;
+}
+
+.contact-submit:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ── Success ──────────────────────────────────────────────────────────── */
+
+.contact-panel--done {
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.contact-done-title {
+  font-size: clamp(1.5rem, 1.2rem + 1.5vw, 2rem);
+  color: var(--text-primary, #f0ede8);
+  margin: 0;
+}
+
+.contact-done-body {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--text-secondary, #c8c8c8);
+  margin: 0;
+}
+
+.contact-done-body strong {
+  color: var(--accent, #E8AE3C);
+  font-weight: 500;
+}
+
+.contact-secondary {
+  min-height: 44px;
+  margin-top: 0.5rem;
+  padding: 0 1.1rem;
+  background: transparent;
+  border: 1px solid var(--accent-muted, #6E531A);
+  border-radius: 4px;
+  color: var(--text-secondary, #c8c8c8);
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 160ms ease, color 160ms ease;
+}
+
+.contact-secondary:hover {
+  border-color: var(--accent, #E8AE3C);
+  color: var(--text-primary, #f0ede8);
+}
+
+/* ── Aside ────────────────────────────────────────────────────────────── */
+
+.contact-aside {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-solid, #262626);
+}
+
+.contact-aside-title {
+  font-family: var(--font-mono, monospace);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent, #E8AE3C);
+  margin: 0 0 0.85rem;
+}
+
+.contact-aside-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.contact-aside-list li {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-secondary, #c8c8c8);
+}
+
+.contact-aside-list strong {
+  color: var(--text-primary, #f0ede8);
+  font-weight: 500;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .contact-input,
+  .contact-submit,
+  .contact-secondary {
+    transition: none;
+  }
+  .contact-submit:hover:not(:disabled) {
+    transform: none;
+  }
+}
