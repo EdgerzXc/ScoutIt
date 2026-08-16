@@ -286,7 +286,7 @@ export default function IntelPage() {
                 </div>
               </div>
 
-              <Link href={`/intel/${featuredArticle.slug}`} className="featured-card-new block text-decoration-none h-full">
+              <Link href={`/intel/${featuredArticle.slug}`} className={`featured-card-new block text-decoration-none h-full ${featuredArticle.image ? "" : "featured-card-new--noimage"}`}>
                 <div className="featured-image-wrapper">
                   {featuredArticle.image ? (
                     /* eslint-disable-next-line @next/next/no-img-element */
@@ -566,6 +566,17 @@ export default function IntelPage() {
           grid-template-columns: 1.6fr 1fr;
           gap: 32px;
           margin-bottom: 64px;
+        }
+
+        /* A grid item's min-width is auto, so the widest unbreakable child sets
+           the track. The carousel header measured 654px on a 412px screen and
+           dragged the whole column out with it: the featured card, every
+           archive card and their headlines were laid out past the viewport and
+           then clipped by the body's overflow-x, which is why titles broke
+           mid-word instead of wrapping. One line, and the column can be
+           narrower than its contents again. */
+        .featured-trending-split > * {
+          min-width: 0;
         }
 
         /* ── DARK ISLAND ──────────────────────────────────────────────
@@ -923,6 +934,24 @@ export default function IntelPage() {
             grid-template-columns: 1fr;
             gap: 20px;
           }
+          /* An article with no image was still reserving the full 3/2 frame,
+             because the image wrapper IS the card and the text is overlaid on
+             it. Measured on a Pixel 7: a 380px-tall card whose top ~300px was
+             empty black, since there is no photograph to fill it. The aspect
+             ratio exists to keep a real photograph from being letterboxed; with
+             no photograph there is nothing to protect, so the card sizes to its
+             own text instead. */
+          .featured-card-new--noimage {
+            aspect-ratio: auto;
+          }
+          .featured-card-new--noimage .featured-image-wrapper {
+            position: relative;
+            height: 96px;
+          }
+          .featured-card-new--noimage .featured-content-new {
+            position: relative;
+          }
+
           /* One column: a 'span 2' card would overflow the track, and a
              side-by-side image on a phone leaves ~140px for the headline.
              The wide card goes back to being an ordinary card. */
@@ -945,9 +974,35 @@ export default function IntelPage() {
         }
 
         @media (max-width: 640px) {
+          /* 45px of page padding plus 24px of section padding was spending
+             138px of a 412px screen on margins before a single card began, so
+             the featured card rendered 274px wide and everything inside it ran
+             out of room: two-word headline lines, and a footer with no space
+             left to separate the date from its call to action. Desktop padding
+             that was never reduced. */
+          .intel-main { padding: 32px 16px; }
+          .featured-trending-split { padding-left: 0; padding-right: 0; }
+
           .articles-grid { gap: 14px; }
           .article-image-container { height: 140px; }
           .article-content { padding: 14px; }
+
+          /* "OUR TAKE · FEATURED DISPATCH" plus a counter plus two arrows is
+             654px of unbreakable content at this tracking. It cannot sit on
+             one line at 412px, so it takes two: the label, then the controls
+             beneath it. Both stay readable and neither is clipped. */
+          .carousel-header-controls {
+            flex-wrap: wrap;
+            gap: 8px;
+          }
+          .carousel-header-controls > span:first-child {
+            min-width: 0;
+            flex: 1 1 100%;
+          }
+          .carousel-header-controls > div {
+            flex: 0 0 auto;
+            margin-left: auto;
+          }
         }
 
         @media (max-width: 480px) {

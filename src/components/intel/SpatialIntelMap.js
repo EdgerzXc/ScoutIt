@@ -452,6 +452,69 @@ export default function SpatialIntelMap({
           {selectedCity ? `Area Locked: ${selectedCity}` : "Click Zone Polygon To Filter"}
         </span>
       </div>
+
+      {/* MapLibre ships its controls as white browser chrome. On the property
+          canvas those are restyled; this map never got the same treatment, so
+          on a phone the attribution rendered as a 64px white slab and the zoom
+          buttons as two white squares sitting on a near-black instrument card.
+          Same treatment as spatial-canvas.css, scoped to this card. */}
+      <style jsx global>{`
+        .spatial-intel-map-card .maplibregl-ctrl-group {
+          background: rgba(14, 14, 14, 0.92);
+          border: 1px solid #2a2a2a;
+          border-radius: 4px;
+          box-shadow: none;
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+        }
+        .spatial-intel-map-card .maplibregl-ctrl-group button + button {
+          border-top: 1px solid #2a2a2a;
+        }
+        .spatial-intel-map-card .maplibregl-ctrl-group button .maplibregl-ctrl-icon {
+          filter: invert(85%) sepia(18%) saturate(360%) hue-rotate(357deg) brightness(95%);
+        }
+        .spatial-intel-map-card .maplibregl-ctrl-group button:hover {
+          background: rgba(232, 174, 60, 0.12);
+        }
+
+        /* Collapsed to the ⓘ toggle by default. Expanded it was four wrapped
+           lines and 64px tall on a 412px screen, covering the city it credits.
+           The attribution stays reachable, which is the licence requirement;
+           it just stops being the brightest object on the map. */
+        .spatial-intel-map-card .maplibregl-ctrl-attrib {
+          background: rgba(14, 14, 14, 0.7);
+          font-size: 9px;
+        }
+        .spatial-intel-map-card .maplibregl-ctrl-attrib a,
+        .spatial-intel-map-card .maplibregl-ctrl-attrib {
+          color: #c8c8c8;
+        }
+        .spatial-intel-map-card .maplibregl-ctrl-attrib-button {
+          background-color: rgba(14, 14, 14, 0.7);
+          filter: invert(85%) sepia(18%) saturate(360%) hue-rotate(357deg) brightness(95%);
+        }
+
+        /* "Use two fingers to move the map" was unstyled system white. */
+        .spatial-intel-map-card .maplibregl-cooperative-gesture-screen {
+          background: rgba(14, 14, 14, 0.72);
+          backdrop-filter: blur(3px);
+          -webkit-backdrop-filter: blur(3px);
+          font-family: var(--font-mono, monospace);
+          font-size: 12px;
+          letter-spacing: 0.08em;
+          color: #f0ede8;
+        }
+
+        @media (pointer: coarse) {
+          .spatial-intel-map-card .maplibregl-ctrl-group button {
+            width: 44px;
+            height: 44px;
+          }
+          .spatial-intel-map-card .maplibregl-ctrl-group button .maplibregl-ctrl-icon {
+            background-size: 20px 20px;
+          }
+        }
+      `}</style>
     </div>
   );
 }
