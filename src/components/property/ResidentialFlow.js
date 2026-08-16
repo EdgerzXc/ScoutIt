@@ -1500,7 +1500,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
 
               {locTab === "map" && (
                 <InViewport
-                  style={{flex:"1 1 auto", minHeight:"240px", borderRadius:"4px", overflow:"hidden", border:"0.5px solid #262626", marginBottom:"20px"}}
+                  style={{flex:"0 0 auto", height:"calc(100% - 186px)", minHeight:"180px", borderRadius:"4px", overflow:"hidden", border:"0.5px solid #262626", marginBottom:"20px"}}
                   fallback={mapPlaceholder("100%", "Tactical map")}
                 >
                   {USE_SPATIAL_CANVAS ? (
