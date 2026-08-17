@@ -28,6 +28,9 @@ export default function FAQPreflightPanel({ propertySlug, onProgressChange }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [savedAt, setSavedAt] = useState(null);
+  const [appeal, setAppeal] = useState(null);
+  const [appealExplanation, setAppealExplanation] = useState("");
+  const [appealBusy, setAppealBusy] = useState(false);
 
   const authHeaders = async () => {
     const { data: { session } } = await getSession();
@@ -85,6 +88,7 @@ export default function FAQPreflightPanel({ propertySlug, onProgressChange }) {
       const json = await res.json();
       if (!res.ok || !json.success) {
         setError(json.message || "Couldn't save your answers.");
+        setAppeal(json.appealAvailable && json.evidenceId ? { evidenceId: json.evidenceId, status: "ready" } : null);
         return;
       }
       setProgress(json.progress);
@@ -98,6 +102,27 @@ export default function FAQPreflightPanel({ propertySlug, onProgressChange }) {
     }
   };
 
+  const submitAppeal = async () => {
+    if (!appeal?.evidenceId || appealBusy || appealExplanation.trim().length < 10) return;
+    setAppealBusy(true);
+    try {
+      const res = await fetch("/api/faqs/appeal", {
+        method: "POST",
+        headers: await authHeaders(),
+        body: JSON.stringify({ evidenceId: appeal.evidenceId, explanation: appealExplanation.trim() }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || !json.success) {
+        setAppeal((current) => ({ ...current, status: "error", message: json.message || "Appeal could not be submitted." }));
+        return;
+      }
+      setAppeal((current) => ({ ...current, status: "pending", message: "Appeal submitted for review." }));
+    } catch {
+      setAppeal((current) => ({ ...current, status: "error", message: "Network error. Try again." }));
+    } finally {
+      setAppealBusy(false);
+    }
+  };
   if (!propertySlug) return null;
 
   const target = progress?.target ?? 5;
@@ -337,6 +362,22 @@ export default function FAQPreflightPanel({ propertySlug, onProgressChange }) {
       )}
 
       {error && <div className="pf-error">{error}</div>}
+      {appeal && (
+        <div className="pf-error" role="status" aria-live="polite">
+          {appeal.status === "ready" || appeal.status === "error" ? (
+            <>
+              <label htmlFor="faq-appeal-explanation">Think this was blocked by mistake?</label>
+              <textarea id="faq-appeal-explanation" className="pf-q__input" value={appealExplanation}
+                onChange={(event) => setAppealExplanation(event.target.value)} maxLength={500} disabled={appealBusy}
+                placeholder="Explain why the answer is legitimate without repeating contact details." />
+              <button className="pf-btn" onClick={submitAppeal} disabled={appealBusy || appealExplanation.trim().length < 10}>
+                {appealBusy ? "Submitting..." : "Request review"}
+              </button>
+              {appeal.message && <div>{appeal.message}</div>}
+            </>
+          ) : <div>{appeal.message}</div>}
+        </div>
+      )}
 
       <div className="pf-bar">
         <button className="pf-btn" onClick={save} disabled={saving || !dirty}>

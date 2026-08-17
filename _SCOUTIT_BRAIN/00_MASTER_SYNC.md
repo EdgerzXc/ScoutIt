@@ -2,10 +2,48 @@
 section: "00_META"
 status: active
 tags: [master-sync, north-star, build-queue, decision-log, always-current]
-updated: 2026-08-13
+updated: 2026-08-14
 related: ["[[SCOUTIT_FULL_WORKFLOW]]", "[[SESSION_HANDOFF_2026-07-30]]", "[[00_START_HERE]]", "[[15_IMPLEMENTATION_RECORDS/README|Implementation Records]]", "[[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION PLAN]]", "[[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION PLAN]]", "[[13_EXTERNAL_INPUTS/README|External Inputs README]]"]
 ---
+> **2026-08-17 UX direction & workspace cohesion checkpoint:** canonical UX decisions and
+> implementation logic recorded in [[03_DESIGN/SCOUTIT_UX_DIRECTION|SCOUTIT_UX_DIRECTION]],
+> [[07_FEATURES_AND_FLOWS/DASHBOARD_AND_WORKSPACE_COHESION_SPEC|DASHBOARD_AND_WORKSPACE_COHESION_SPEC]], and
+> [[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION PLAN]].
+> Key tenets: preserve ScoutIt's distinctive branded nomenclature paired with plain-language
+> human translations (*translation, not replacement*); keep the 11-tool non-linear
+> property environment; treat Discover and Intelligence as twin modes of a unified layer;
+> maintain transparent sample data and capability demo notices; zero dead ends (*doorway principle*);
+> establish the *Context Bridges $\rightarrow$ Notifications $\rightarrow$ Return Brief $\rightarrow$ Continue Where You Left Off $\rightarrow$ Board Intelligence* loop;
+> and enforce Mission Control isolation and server-side RBAC security.
 
+> **2026-08-14 migration authority checkpoint:** tracked Supabase migrations are
+> now the owner-approved database source of truth. The complete read-only live
+> reconciliation found five migrations ready conditionally and held the PostGIS
+> `spatial_ref_sys` change. Two conflicting historical migrations are marked
+> superseded. Nothing was applied; separate approval is required for the
+> documented one-at-a-time sequence. The next direct owner task is Search Console.
+
+
+> **2026-08-13 release merge correction:** GitHub PR #63 merged
+> `codex/production-release-verification` into `main` as `77f0ce4`. The branch
+> comparison therefore correctly has zero changes. Checkpoint 1 now requires only
+> confirmation that Vercel deployed `77f0ce4` as Ready on the production domain.
+> **2026-08-13 execution-order reconciliation:** work now follows the execution
+> router at the top of [[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION PLAN]],
+> not the physical position of its stable section IDs. ScoutIt is **not fully
+> blocked**: agents may continue deterministic T0 code/tests, responsive work,
+> JSON-LD safety, documentation, and read-only security analysis. The next
+> high-leverage human move is the six-package **Current checkpoint** in
+> [[08_OPERATIONS_AND_BACKLOG/ACTION/MASTER_OWNER_ACTIONS|MASTER OWNER ACTIONS]]:
+> release baseline -> migration authority -> Search Console before DNS -> production
+> credentials -> public profile contract -> real-device acceptance. No live DB,
+> DNS, provider, repository-setting, or physical-device claim may bypass that lane.
+
+> **Correction to the earlier merge checkpoint:** the former 242-entry working
+> tree was reviewed and shipped coherently in `43aa7c7`. The current working tree
+> has zero untracked files; do not route work through the historical inventory.
+
+<!-- BEGIN:SUPERSEDED_242_FILE_CHECKPOINT
 > **2026-08-13 merge and documentation checkpoint:** critical security,
 > repository-hygiene, OG-image, analytics, and sharing work is now present on
 > `origin/main` through merges `a312ce7` and `5289be5`. The curated mobile share
@@ -16,6 +54,8 @@ related: ["[[SCOUTIT_FULL_WORKFLOW]]", "[[SESSION_HANDOFF_2026-07-30]]", "[[00_S
 > [[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION PLAN]];
 > executed root work-order prompts have been retired after their evidence was
 > consolidated into implementation records.
+
+END:SUPERSEDED_242_FILE_CHECKPOINT -->
 
 > **2026-08-08 execution-list consolidation:** this file remains the compact
 > project/status context, but [[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION PLAN]]

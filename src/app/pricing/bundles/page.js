@@ -137,10 +137,10 @@ export default function BundlesPricingPage() {
 
           <div className="mb-8 p-4 rounded-xl bg-gradient-to-r from-[#1A1710]/80 to-[#101820]/80 border border-gold-accent/30 inline-block">
             <p className="text-gold-accent font-mono text-xs uppercase tracking-widest font-bold">
-              ✦ MULTI-ROLE BUNDLES
+              ◈ MULTI-ROLE BUNDLES
             </p>
             <p className="text-white text-sm mt-1">
-              Hold multiple roles — pay as one. Pioneer rates locked forever.
+              Hold multiple roles, pay as one. Pioneer rates locked forever.
             </p>
           </div>
 
@@ -151,7 +151,7 @@ export default function BundlesPricingPage() {
             Every Role. <span className="text-gold-accent">One Plan.</span>
           </h1>
           <p className="page-subtitle text-lg text-text-secondary max-w-2xl mx-auto leading-relaxed">
-            Most serious players in real estate wear more than one hat. Bundles give you Cluster-tier access across all your roles — with a loyalty Connect bonus and genuine savings versus buying separately.
+            Many real estate operators fulfill multiple roles. Bundles combine Cluster-tier access across all your perspectives with a monthly Connect bonus and reduced total cost.
           </p>
         </header>
 

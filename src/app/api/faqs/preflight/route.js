@@ -7,6 +7,7 @@ import { stripAllTags } from "@/lib/sanitize";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { rejectIfContactLeak } from "@/lib/contactLeakFilter";
 import { recordFaqContactLeakTelemetry } from "@/lib/faqContactLeakTelemetry";
+import { issueFaqBlockEvidence } from "@/lib/faqAppealEvidence";
 import {
   getPreflightQuestions,
   findPreflightQuestion,
@@ -180,7 +181,19 @@ export async function POST(req) {
         } catch (error) {
           console.warn("[api/faqs/preflight] Contact-leak telemetry unavailable:", error?.message || "unknown");
         }
-        return fail(`${leak.message} (on: "${question.question}")`, 422, { code: leak.code, key: entry.key });
+        const evidenceId = await issueFaqBlockEvidence({
+          userId,
+          propertyId: slug,
+          preflightKey: entry.key,
+          ruleCode: leak.code,
+          context: "owner_preflight_answer",
+        });
+        return fail(`${leak.message} (on: "${question.question}")`, 422, {
+          code: leak.code,
+          key: entry.key,
+          evidenceId,
+          appealAvailable: Boolean(evidenceId),
+        });
       }
 
       staged.push({ question, text, clear: false });

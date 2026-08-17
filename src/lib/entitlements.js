@@ -124,8 +124,17 @@ export const ANONYMITY_SHIELD_DEFAULT_FROM_TIER = "cluster";
  * @param {string} role
  * @returns {boolean}
  */
+function normalizeRole(role, defaultRole = null) {
+  if (!role || typeof role !== "string") return defaultRole;
+  const r = role.trim().toLowerCase();
+  if (r === "buyer") return "seeker";
+  if (["seeker", "owner", "broker", "photographer", "researcher"].includes(r)) return r;
+  return null;
+}
+
 export function anonymityShieldDefaultsOn(tier, role) {
-  if (!ANONYMITY_SHIELD_ROLES.includes(String(role || "seeker").toLowerCase())) {
+  const normRole = normalizeRole(role, "seeker");
+  if (!normRole || !ANONYMITY_SHIELD_ROLES.includes(normRole)) {
     return false; // brokers etc. — being found is the point
   }
   return tierRank(tier) >= tierRank(ANONYMITY_SHIELD_DEFAULT_FROM_TIER);
@@ -138,7 +147,8 @@ export function anonymityShieldDefaultsOn(tier, role) {
  * honestly and nobody later "optimises" it into a tier check.
  */
 export function canUseAnonymityShield(role) {
-  return ANONYMITY_SHIELD_ROLES.includes(String(role || "seeker").toLowerCase());
+  const normRole = normalizeRole(role, "seeker");
+  return normRole ? ANONYMITY_SHIELD_ROLES.includes(normRole) : false;
 }
 
 // True if a viewer on `tier` can access `feature`.
@@ -158,7 +168,8 @@ export const CONNECTS_ALLOWANCE = {
 };
 
 export function monthlyAllowance(role, tier) {
-  const r = CONNECTS_ALLOWANCE[String(role || "seeker").toLowerCase()] || CONNECTS_ALLOWANCE.seeker;
+  const normRole = normalizeRole(role) || "seeker";
+  const r = CONNECTS_ALLOWANCE[normRole] || CONNECTS_ALLOWANCE.seeker;
   return r[String(tier || "starry").toLowerCase()] ?? 1;
 }
 

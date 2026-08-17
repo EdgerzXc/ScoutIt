@@ -216,17 +216,13 @@ describe("/api/telemetry/device", () => {
   // only because nothing calls it. Scheduling it would destroy exactly the history
   // the owner wants to keep, so this test now guards the decision instead of the
   // retired migration: no tracked migration may schedule that job.
-  // The retired file itself is excluded by name: it is deliberately left
-  // untracked on the author's machine and must never be committed, so it is
-  // present locally and absent in CI. Excluding it is what keeps this test
+  // The retired SQL file is intentionally absent. Scanning every SQL file keeps this
   // honest in both places — the invariant being guarded is that no OTHER
   // migration reintroduces the job.
-  const RETIRED_MIGRATION = "20260809000001_security_telemetry_retention.sql";
-
-  it("never schedules the retired hard-delete telemetry job", () => {
+  it("never schedules a hard-delete telemetry job", () => {
     const migrationsDir = resolve(process.cwd(), "supabase/migrations");
     const offenders = readdirSync(migrationsDir)
-      .filter((name) => name.endsWith(".sql") && name !== RETIRED_MIGRATION)
+      .filter((name) => name.endsWith(".sql"))
       .filter((name) => {
         const sql = readFileSync(resolve(migrationsDir, name), "utf8");
         return (

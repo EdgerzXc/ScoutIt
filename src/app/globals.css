@@ -190,9 +190,28 @@ body.light-mode .grain { opacity: 0.25; }
 
    Cheapest correct answer, and it fixes the hero for no-WebGL devices too.
    ═══════════════════════════════════════════════════════════════ */
+/* 🔴 REMOVED 2026-08-17 — this rule was the "hero wordmark is white-on-white in
+   light mode" defect (§1.0D). It repainted the hero near-white while the
+   inverted-island rule below (`body.light-mode .cinematic-container`) kept the
+   hero's ink WHITE, so the wordmark's "cout" measured 1.10:1 and the gold "S"
+   and "IT" 1.81:1 — along with the tagline (2.11:1), "Browse Orbit" (1.81:1)
+   and the founding-access button (1.81:1). Six of the seven text nodes above
+   the fold were below WCAG AA; it was never only the wordmark.
+
+   `var(--bg)` is the LIGHT canvas at this point in the cascade, and `--bg` is
+   deliberately NOT re-declared in the island block — same trap the footer hit
+   on 2026-08-07: dark ink with no dark ground. `.section-hook` in page.js
+   already states the intent outright, "Deliberately dark in BOTH themes: this
+   is the starfield hero and 'outer space' is the concept", so the component's
+   own `background: #0d0d0d` is the correct ground and this override contradicted
+   it. The `.event-horizon` retint below is kept: its outer stop is transparent,
+   so the warm bloom still reads on the dark ground, and it remains the fallback
+   for light mode and for devices with no WebGL.
+
 body.light-mode .section-hook {
   background: var(--bg);
 }
+*/
 
 /* The horizon was a gold glow blooming out of black. On near-white it becomes
    a soft warm wash — the same gesture, lit from the other side. */
@@ -2362,4 +2381,23 @@ button:disabled, button[disabled], [aria-disabled="true"], .disabled-state {
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--text-muted);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ENTRANCE KEYFRAMES — deliberately TOP LEVEL.
+   The pre-existing `fadeIn` / `slideUpFromBottom` pair is nested inside
+   `@media (max-width: 768px)` (see ~line 1952), so those names resolve to
+   nothing above 769px. These two are declared here, unscoped, so the motion
+   runs at every width. Curve is the strong ease-out; durations sit inside the
+   tooltip (125–200ms) and dropdown (150–250ms) budgets.
+   ═══════════════════════════════════════════════════════════════ */
+
+@keyframes badgePopIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes compareBarIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
 }

@@ -625,7 +625,7 @@ export default function Home() {
 
           {/* Plain-Language Value Proposition */}
           <p className="title-tagline-intro">
-            The Philippines&apos; first spatial commerce platform. We turn every kind of space — homes, offices, venues, restaurants — into clear, verified intelligence. No fake listings. No pressure. Just the signals that matter.
+            The Philippines&apos; first spatial commerce platform. We turn every kind of space into clear, verified intelligence. Homes, offices, venues, restaurants. No fake listings. No pressure. Just the signals that matter.
           </p>
 
           {/* Taglines */}
@@ -648,11 +648,11 @@ export default function Home() {
               )
             }
           >
-            ◈ Founding access — lock your rate before launch
+            ◈ Founding access · Lock your rate before launch
           </button>
         </div>
 
-        {/* Scroll indicator removed ΓÇö beam sequence begins the story */}
+        {/* Scroll indicator removed — beam sequence begins the story */}
       </section>
 
 
@@ -669,50 +669,48 @@ export default function Home() {
           <Link href="/layer/orbit" className="text-left group relative bg-surface/80 backdrop-blur-md border border-border rounded-xl p-8 overflow-hidden hover:border-gold-accent/50 transition-all duration-500 hover:-translate-y-1 block">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(232,174,60,0.1),transparent_50%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="font-mono text-[10px] text-gold-accent tracking-widest mb-4">LAYER 01 // ORBIT</div>
-            <h3 className="font-display text-2xl text-on-surface mb-2">Most Inquired Properties</h3>
-            <p className="text-sm text-text-secondary">Top 100 properties ranked by real demand</p>
+            <h3 className="font-display text-2xl text-on-surface mb-2">Orbit: Top Demand</h3>
+            <p className="text-sm text-text-secondary">Properties ranked by real buyer and seeker inquiry demand across the market.</p>
           </Link>
 
           {/* Card 02: Stratosphere */}
           <Link href="/layer/stratosphere" className="text-left group relative bg-surface/80 backdrop-blur-md border border-border rounded-xl p-8 overflow-hidden hover:border-gold-accent/50 transition-all duration-500 hover:-translate-y-1 block">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(232,174,60,0.1),transparent_50%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="font-mono text-[10px] text-gold-accent tracking-widest mb-4">LAYER 02 // STRATOSPHERE</div>
-            <h3 className="font-display text-2xl text-on-surface mb-2">Market Intelligence</h3>
-            <p className="text-sm text-text-secondary">Deep-dive stories, trends, and neighborhood intel</p>
+            <h3 className="font-display text-2xl text-on-surface mb-2">Stratosphere: Market Intel</h3>
+            <p className="text-sm text-text-secondary">Independent neighborhood reports, pricing trends, and zoning analysis.</p>
           </Link>
 
           {/* Card 03: Metropolis */}
           <Link href="/layer/metropolis" className="text-left group relative bg-surface/80 backdrop-blur-md border border-border rounded-xl p-8 overflow-hidden hover:border-gold-accent/50 transition-all duration-500 hover:-translate-y-1 lg:col-span-1 block">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(232,174,60,0.15),transparent_50%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="font-mono text-[10px] text-gold-accent tracking-widest mb-4">LAYER 03 // METROPOLIS</div>
-            <h3 className="font-display text-2xl text-on-surface mb-2">Property Directory</h3>
-            <p className="text-sm text-text-secondary">Search all commercial and residential spaces</p>
+            <h3 className="font-display text-2xl text-on-surface mb-2">Metropolis: Directory</h3>
+            <p className="text-sm text-text-secondary">Search commercial, residential, and event spaces across the Philippines.</p>
           </Link>
 
           {/* Card 04: The Crust */}
           <Link href="/layer/crust" className="text-left group relative bg-surface/80 backdrop-blur-md border border-border rounded-xl p-8 overflow-hidden hover:border-gold-accent/50 transition-all duration-500 hover:-translate-y-1 block">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(232,174,60,0.05),transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="font-mono text-[10px] text-gold-accent tracking-widest mb-4">LAYER 04 // THE CRUST</div>
-            <h3 className="font-display text-2xl text-on-surface mb-2">Verified Professionals</h3>
-            <p className="text-sm text-text-secondary">Connect with trusted advisors, brokers, and partners</p>
+            <h3 className="font-display text-2xl text-on-surface mb-2">The Crust: Professional Roster</h3>
+            <p className="text-sm text-text-secondary">Licensed brokers, spatial photographers, site researchers, and event planners.</p>
           </Link>
 
-          {/* Card 05: The Mantle — was missing from this grid entirely. It's the
-              deep intelligence archive between the Crust (network) and Core
-              (workspace); the route (/layer/mantle) already exists. */}
+          {/* Card 05: The Mantle */}
           <Link href="/layer/mantle" className="text-left group relative bg-surface/80 backdrop-blur-md border border-border rounded-xl p-8 overflow-hidden hover:border-gold-accent/50 transition-all duration-500 hover:-translate-y-1 block">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(232,174,60,0.12),transparent_60%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="font-mono text-[10px] text-gold-accent tracking-widest mb-4">LAYER 05 // THE MANTLE</div>
-            <h3 className="font-display text-2xl text-on-surface mb-2">The Deep Archive</h3>
-            <p className="text-sm text-text-secondary">ScoutIt&apos;s structured intelligence database — the heavy lifting behind every space</p>
+            <h3 className="font-display text-2xl text-on-surface mb-2">The Mantle: Platform Truth</h3>
+            <p className="text-sm text-text-secondary">How ScoutIt works. Our data philosophy, verification standards, and dual-system architecture.</p>
           </Link>
 
           {/* Card 06: The Core */}
           <Link href="/layer/core" className="text-left group relative bg-surface/80 backdrop-blur-md border border-border rounded-xl p-8 overflow-hidden hover:border-gold-accent/50 transition-all duration-500 hover:-translate-y-1 block">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(232,174,60,0.1),transparent_50%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="font-mono text-[10px] text-gold-accent tracking-widest mb-4">LAYER 06 // THE CORE</div>
-            <h3 className="font-display text-2xl text-on-surface mb-2">Private Dashboard</h3>
-            <p className="text-sm text-text-secondary">Manage Your Board, properties, and direct deals</p>
+            <h3 className="font-display text-2xl text-on-surface mb-2">The Core: Private Command</h3>
+            <p className="text-sm text-text-secondary">Your personal board, saved comparisons, property portfolio, and deal inbox.</p>
           </Link>
         </div>
       </section>

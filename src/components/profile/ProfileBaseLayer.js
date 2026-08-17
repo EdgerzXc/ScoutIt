@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import ProfileContactModal from "./ProfileContactModal";
 import ProfileProvenanceBadge from "./ProfileProvenanceBadge";
+import TrustBadge from "@/components/ui/TrustBadge";
 import { MapPin, Calendar, Edit2, MessageSquare } from "lucide-react";
 
 const TIER_CONFIG = {
@@ -138,6 +139,8 @@ export default function ProfileBaseLayer({
             </div>
           )}
           <ProfileProvenanceBadge isPilotParticipant={profile.is_pilot_participant === true} />
+          {profile.is_verified && <TrustBadge badgeId="IDENTITY_VERIFIED" />}
+          {displayRoles.includes("broker") && <TrustBadge badgeId="AUTHORIZED_REPRESENTATION" />}
         </div>
 
         {/* Meta row */}

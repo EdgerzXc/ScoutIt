@@ -135,7 +135,7 @@ export default function ScoutItManifesto() {
           <ChapterMark number="02" label="The six-layer model" />
           <div className="section-heading split-heading">
             <h2>One platform.<br />Six depths.</h2>
-            <p>The descent is not decoration. Each layer changes the type of information—and the responsibility attached to it.</p>
+            <p>The descent is not decorative. Each layer changes the depth of information and the responsibility attached to it.</p>
           </div>
           <div className="layer-system">
             <div className="layer-list" role="group" aria-label="ScoutIt layers">
@@ -166,7 +166,7 @@ export default function ScoutItManifesto() {
           <ChapterMark number="03" label="How a property moves" />
           <div className="section-heading">
             <h2>One record.<br />A visible chain of responsibility.</h2>
-            <p>The public page is the result of a controlled lifecycle—not an isolated marketing card.</p>
+            <p>The public page is the result of a verified lifecycle, not an isolated marketing card.</p>
           </div>
           <div className="workflow-shell">
             <ol className="workflow-steps" aria-label="Property lifecycle">
@@ -218,7 +218,7 @@ export default function ScoutItManifesto() {
           <ChapterMark number="05" label="Your path" />
           <div className="section-heading">
             <h2>The system changes<br />with your responsibility.</h2>
-            <p>Choose the perspective closest to yours. This changes the explanation—not your account permissions.</p>
+            <p>Choose the perspective closest to yours. This changes the explanation, not your account permissions.</p>
           </div>
           <div className="role-system">
             <div className="role-tabs" role="group" aria-label="Choose your ScoutIt role">
@@ -240,7 +240,7 @@ export default function ScoutItManifesto() {
           <ChapterMark number="06" label="Current limits" />
           <div className="section-heading split-heading">
             <h2>What is true<br />right now.</h2>
-            <p>ScoutIt is preparing for invited human testing. Accuracy requires being explicit about what is—and is not—active.</p>
+            <p>ScoutIt is preparing for invited human testing. Accuracy requires being explicit about what is and is not active.</p>
           </div>
           <ul className="limits-list">
             <li><span>01</span><div><strong>No active payments</strong><p>Pricing and Connect concepts may be explained in the product, but payment collection is not active during this pilot.</p></div></li>

@@ -285,7 +285,7 @@ export default function BrokerMode() {
         const popup = new maplibregl.Popup({ offset: 25, closeButton: false })
           .setDOMContent(popupContent);
 
-        const marker = new maplibregl.Marker(el)
+        const marker = new maplibregl.Marker({ element: el })
           .setLngLat(coords)
           .setPopup(popup)
           .addTo(mapInstance.current);
@@ -949,7 +949,17 @@ export default function BrokerMode() {
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 bg-gold-accent/5 rounded-full blur-[60px]" />
                 <span className="text-4xl mb-4 opacity-70 relative z-10 filter drop-shadow-md">📂</span>
                 <p className="text-on-surface font-working-title text-xl mb-2 relative z-10 tracking-tight">No active deal files</p>
-                <p className="text-sm text-text-secondary relative z-10">Pitch to properties on the map to start building your pipeline.</p>
+                <p className="text-sm text-text-secondary relative z-10 max-w-sm mb-4 leading-relaxed">Pitch to properties on the map or discover unrepresented assets to start building your pipeline.</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowMap(true);
+                    setTimeout(() => document.getElementById('broker-map-section')?.scrollIntoView({ behavior: 'smooth' }), 100);
+                  }}
+                  className="relative z-10 font-label-caps text-[10px] tracking-widest uppercase text-background bg-gold-accent hover:opacity-90 px-5 py-2.5 rounded transition active:scale-95 shadow-[0_0_12px_rgba(232,174,60,0.2)] font-bold"
+                >
+                  Explore Opportunities on Map →
+                </button>
               </div>
             )}
             
@@ -1000,8 +1010,14 @@ export default function BrokerMode() {
               <div className="col-span-full py-12 text-center bg-surface/40 backdrop-blur-xl border border-white/[0.04] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] rounded-2xl flex flex-col items-center relative overflow-hidden transition-all duration-300">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 bg-success/5 rounded-full blur-[60px]" />
                 <span className="text-4xl mb-4 opacity-70 relative z-10 filter drop-shadow-md">🛡️</span>
-                <p className="text-on-surface font-working-title text-xl mb-2 relative z-10 tracking-tight">No Verified Properties</p>
-                <p className="text-sm text-text-secondary relative z-10">Accept a handshake from an owner to become a Verified Advisor.</p>
+                <p className="text-on-surface font-working-title text-xl mb-2 relative z-10 tracking-tight">No Verified Advisory Mandates</p>
+                <p className="text-sm text-text-secondary relative z-10 max-w-sm mb-4 leading-relaxed">When property owners accept your representation handshake, your authorized advisory files will appear here.</p>
+                <Link
+                  href="/property"
+                  className="relative z-10 font-label-caps text-[10px] tracking-widest uppercase text-gold-accent border border-gold-accent/40 bg-gold-accent/10 hover:bg-gold-accent/20 px-5 py-2.5 rounded transition active:scale-95"
+                >
+                  Browse Available Spaces →
+                </Link>
               </div>
             )}
             

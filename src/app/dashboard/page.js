@@ -24,31 +24,23 @@ import { readDevelopmentMockUser } from "../../lib/developmentMock";
 import { Camera, Search, Bookmark, MessageCircle, Briefcase } from "lucide-react";
 
 const TAG_LABELS = {
-  buyer: "Buyer / Scout",
-  owner: "Owner",
-  broker: "Broker",
-  provider: "Service Provider",
-  operator: "Operator",
-  exploring: "Exploring",
-  // Dev-toolbox-only modes -- never added to ACTIVATABLE_MODES, so a real user can
-  // never self-activate these from the normal "Unlock More" switcher.
-  // ⚠️ NAMING: "Mission Control" means the SEPARATE staff console in
-  // `mission-control/`, which has its own site. These two are previews inside
-  // the MAIN app and must not reuse that name — the collision already sent one
-  // handoff to the wrong application (see NEW_IDEAS_TO_CLAUDE_CODE B7).
-  // The IDs stay `mc_*`: they are persisted on user profiles and asserted by
-  // e2e specs, so renaming them would be a data migration, not a label change.
+  buyer: "Buyer Workspace",
+  owner: "Owner Workspace",
+  broker: "Broker Workspace",
+  provider: "Provider Workspace",
+  operator: "Operator Workspace",
+  exploring: "Buyer Workspace",
   mc_staff: "Staff Console · Simulated",
   mc_enterprise: "Enterprise Console · Preview",
 };
 
-// Roles a user can activate from the Mode menu without re-onboarding
+// Roles a user can activate from the Workspace menu without re-onboarding
 const ACTIVATABLE_MODES = [
-  { id: "buyer", icon: "🏠", cta: "Scout Properties", desc: "Browse, save listings, and get market intel." },
-  { id: "owner", icon: "📋", cta: "List as an Owner", desc: "List your property and receive broker pitches." },
-  { id: "broker", icon: "🤝", cta: "Become a Broker", desc: "Pitch owners and manage your pipeline. PRC license required." },
-  { id: "provider", icon: <Camera strokeWidth={1.5} size="1em" />, cta: "Join as a Service Provider", desc: "Photographer, researcher, or event designer." },
-  { id: "operator", icon: "🏢", cta: "Operate Spaces", desc: "Manage units delegated to you inside buildings you don't own." },
+  { id: "buyer", icon: "🏠", cta: "Buyer Workspace", desc: "Browse, save spaces, and evaluate market intelligence." },
+  { id: "owner", icon: "📋", cta: "Owner Workspace", desc: "List your property and review broker pitches." },
+  { id: "broker", icon: "🤝", cta: "Broker Workspace", desc: "Pitch owners and manage your transaction pipeline." },
+  { id: "provider", icon: <Camera strokeWidth={1.5} size="1em" />, cta: "Provider Workspace", desc: "Deliver photography, site research, or staging services." },
+  { id: "operator", icon: "🏢", cta: "Operator Workspace", desc: "Manage assigned units in commercial and residential developments." },
 ];
 
 const PROVIDER_TYPES = [
@@ -291,20 +283,20 @@ function DashboardInner() {
         <div className="flex items-center gap-6">
           <Link href="/" className="font-display-md text-xl md:text-2xl text-gold-accent tracking-tighter text-glow">S<span className="text-on-surface">cout</span>IT</Link>
           
-          {/* Custom Desktop Mode Switcher */}
+          {/* Custom Desktop Workspace Switcher */}
           <div className="hidden md:block relative" ref={switcherRef}>
             <button 
               className="flex items-center gap-2 bg-surface hover:bg-surface-alt border border-surface-variant text-on-surface text-sm font-working-title px-4 py-2 rounded-full uppercase tracking-wider active:scale-[0.97] transition duration-160 ease-out"
               onClick={() => setShowDesktopSwitcher(!showDesktopSwitcher)}
             >
-              <span className="text-gold-accent font-semibold">Mode:</span> {TAG_LABELS[mode]}
+              <span className="text-gold-accent font-semibold">Workspace:</span> {TAG_LABELS[mode]}
               <span className="text-[10px] ml-1">▼</span>
             </button>
             
             {showDesktopSwitcher && (
-              <div className="absolute top-full left-0 mt-2 w-56 bg-surface border border-surface-variant rounded-lg shadow-2xl overflow-hidden z-50 animate-[fadeIn_0.2s_ease-out]">
+              <div className="absolute top-full left-0 mt-2 w-64 bg-surface border border-surface-variant rounded-lg shadow-2xl overflow-hidden z-50 animate-[fadeIn_0.2s_ease-out]">
                 <div className="px-4 py-3 border-b border-surface-variant bg-surface-alt">
-                  <span className="font-label-caps text-[10px] tracking-widest uppercase text-text-secondary">Switch Capability</span>
+                  <span className="font-label-caps text-[10px] tracking-widest uppercase text-text-secondary">Switch Workspace</span>
                 </div>
                 <div className="flex flex-col py-2">
                   {user.tags.map(tagId => (
@@ -513,7 +505,7 @@ function DashboardInner() {
             {activating === "broker" ? (
               <>
                 <h3 className="font-headline-editorial text-2xl text-on-surface mb-2">Become a Broker</h3>
-                <p className="text-sm text-text-secondary mb-6">Enter your PRC Real Estate Broker license number to activate Broker Mode. We check the format only — verification happens later.</p>
+                <p className="text-sm text-text-secondary mb-6">Enter your PRC Real Estate Broker license number to activate Broker Workspace. We check the format only — verification happens later.</p>
                 <input
                   className="w-full bg-surface-alt border border-surface-variant rounded px-4 py-3 text-on-surface focus:outline-none focus:border-gold-accent transition uppercase mb-2"
                   type="text"
@@ -532,7 +524,7 @@ function DashboardInner() {
                     disabled={!prcFormatOk}
                     onClick={() => finishActivation("broker", { prcLicense: activationLicense })}
                   >
-                    Activate Broker Mode
+                    Activate Broker Workspace
                   </button>
                 </div>
               </>
@@ -558,7 +550,7 @@ function DashboardInner() {
                     disabled={!activationProviderType}
                     onClick={() => finishActivation("provider", { providerType: activationProviderType })}
                   >
-                    Activate Provider Mode
+                    Activate Provider Workspace
                   </button>
                 </div>
               </>
@@ -587,7 +579,7 @@ function DashboardInner() {
             
             {user.tags.length > 1 && (
             <div className="mb-2">
-              <span className="font-label-caps text-[10px] tracking-widest uppercase text-text-secondary">Switch Capability</span>
+              <span className="font-label-caps text-[10px] tracking-widest uppercase text-text-secondary">Switch Workspace</span>
             </div>
             )}
             <div className="flex flex-col gap-2 mb-4">

@@ -81,7 +81,7 @@ export default function PricingHubPage() {
             Choose Your <span className="text-gold-accent">Role</span> in the Ecosystem
           </h1>
           <p className="page-subtitle text-lg text-text-secondary max-w-2xl mx-auto leading-relaxed">
-            The planned commercial model charges for access, intelligence, and connection — never for listings, and never for looking. Pick your role to see plans built around what you actually do.
+            The planned commercial model charges for access, intelligence, and direct connection. Browsing and searching are always free. Pick your role to see plans built around what you do.
           </p>
         </header>
 

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { usePremiumFields } from "@/lib/usePremiumFields";
 import { imageMediaUrl, safeFloorPlans, spatialEmbedUrl } from "@/lib/propertyMedia";
+import { isSamplePropertySlug } from "@/lib/sampleInventory";
 
 export default function SpatialVaultWidget({
   slug,
@@ -14,6 +15,7 @@ export default function SpatialVaultWidget({
 }) {
   const { fields, loading } = usePremiumFields(slug);
   const [failedImages, setFailedImages] = useState(new Set());
+  const isSample = isSamplePropertySlug(slug);
 
   const realLuma =
     spatialEmbedUrl(fields.luma3dMapUrl, "luma") ||
@@ -40,7 +42,7 @@ export default function SpatialVaultWidget({
       <VaultStatus
         locked
         title="Spatial media is access-controlled"
-        detail="This listing has verified spatial assets available to Cluster-tier scouts."
+        detail="This listing includes interactive 3D spatial models and drone media, available on Cluster tier."
       />
     ) : (
       <VaultStatus
@@ -52,6 +54,21 @@ export default function SpatialVaultWidget({
 
   return (
     <div className="mt-8 flex flex-col gap-6">
+      {/* Demonstration notice for sample properties (§4 & §6) */}
+      {isSample && (
+        <div className="p-3.5 rounded bg-surface/80 border border-gold-accent/25 flex items-start gap-3">
+          <span className="font-mono text-gold-accent text-sm leading-none font-bold">◈</span>
+          <div>
+            <span className="font-mono text-[9px] uppercase tracking-widest text-gold-accent font-bold block mb-0.5">
+              Spatial Vault Demonstration
+            </span>
+            <p className="font-sans text-xs text-text-secondary m-0 leading-relaxed">
+              Sample spatial formats ScoutIt supports. Production properties display only the verified media captured for that space.
+            </p>
+          </div>
+        </div>
+      )}
+
       {realLuma && (
         <EmbedCard title="3D Spatial Map" url={realLuma} iframeTitle="Verified 3D spatial map" />
       )}

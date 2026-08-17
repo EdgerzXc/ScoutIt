@@ -3,12 +3,14 @@
 // Phase 2 scope: run the consent flow, exchange the code, read the account
 // email, and (for Phase 3) refresh the access token. Actual event sync lives in
 // a later phase.
-import { SITE_URL } from "@/lib/siteUrl";
+import { siteUrl } from "@/lib/siteUrl";
 import { isTokenCryptoConfigured } from "./tokenCrypto";
 
 const AUTH_ENDPOINT = "https://accounts.google.com/o/oauth2/v2/auth";
 const TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
 const USERINFO_ENDPOINT = "https://www.googleapis.com/oauth2/v2/userinfo";
+
+export const GOOGLE_OAUTH_CALLBACK_PATH = "/api/oauth/google/callback";
 
 export const GOOGLE_SCOPES = [
   "openid",
@@ -27,7 +29,7 @@ export function isGoogleConfigured() {
 }
 
 export function getRedirectUri() {
-  return `${SITE_URL}/api/oauth/google/callback`;
+  return siteUrl(GOOGLE_OAUTH_CALLBACK_PATH);
 }
 
 /** Build the Google consent URL. access_type=offline + prompt=consent so we

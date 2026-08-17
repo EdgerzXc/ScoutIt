@@ -606,6 +606,12 @@
       "sourceType": "github",
       "skillPath": "video-downloader/SKILL.md",
       "computedHash": "baf53606f73fc1c23ed61eda0d534d3c2ab59838562075a6af6bdc85ac6bd07d"
+    },
+    "humanizer": {
+      "source": "blader/humanizer",
+      "sourceType": "github",
+      "skillPath": "skills/humanizer/SKILL.md",
+      "computedHash": "54472020cae053394f68506cbd06d838943e3afbbb933c141952b7b83fe516e6"
     }
   }
 }

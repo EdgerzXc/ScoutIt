@@ -6,27 +6,21 @@ import {
   leadToVCard,
   leadsToCsv,
   exportFilename,
+  requestLeadExportAudit,
+  normalizeLeadIds,
+  hasValidLeadExportReceipt,
 } from "@/lib/leadExport";
 
 // ─────────────────────────────────────────────────────────────────────────
-// LEAD EXPORT BUTTON  (NEW_IDEAS.md §8, redesigned)
+// LEAD EXPORT BUTTON (NEW_IDEAS.md §8, audited)
 //
-// Replaces the webhook dispatcher the spec originally called for. See the
-// header of src/lib/leadExport.js for why — short version: a webhook makes
-// ScoutIt a feeder into a competitor's system of record, and the strategy
-// is for brokers to eventually not need one.
+// THREE PATHS:
+//   Copy → paste into any CRM note, email or chat
+//   .csv → import wizard in HubSpot / Salesforce / Zoho, or a spreadsheet
+//   .vcf → straight into phone contacts
 //
-// Everything here is client-side. No API route, no keys, no cost, and
-// nothing that can silently fail the way a webhook delivery can.
-//
-// THREE PATHS, because brokers work in three places:
-//   Copy    → paste into any CRM note, email or chat
-//   .csv    → import wizard in HubSpot / Salesforce / Zoho, or a spreadsheet
-//   .vcf    → straight into a phone's contacts, which is where a broker in
-//             the field actually is
-//
-// PRIVACY: renders nothing until the handshake is accepted. Contact details
-// are gated in the UI for a reason and this must not become the side door.
+// PRIVACY & AUDIT:
+// Server-side audit authorization is requested prior to PII release.
 // ─────────────────────────────────────────────────────────────────────────
 
 const MONO = "'Courier New',monospace";
@@ -40,49 +34,74 @@ function download(content, filename, mime) {
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
-  // Revoke on the next tick — Safari cancels the download if the URL dies
-  // synchronously after click().
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 export default function LeadExportButton({ lead, leads, label = "Export", compact = false }) {
   const [copied, setCopied] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const [error, setError] = useState(null);
 
   const isBulk = Array.isArray(leads);
   const items = isBulk ? leads : lead ? [lead] : [];
   if (items.length === 0) return null;
 
-  const copy = async () => {
+  const leadIds = normalizeLeadIds(items);
+
+  const auditAndExecute = async (format, releaseCallback) => {
     setError(null);
-    const text = isBulk ? leadsToCsv(items) : leadToText(items[0]);
+    setExporting(true);
     try {
-      await navigator.clipboard.writeText(text);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // Clipboard API needs a secure context and can be blocked outright.
-      // Fall back to the legacy path rather than leaving a dead button.
-      try {
-        const ta = document.createElement("textarea");
-        ta.value = text;
-        ta.style.position = "fixed";
-        ta.style.opacity = "0";
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand("copy");
-        document.body.removeChild(ta);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      } catch {
-        setError("Couldn't copy — select the text manually.");
+      if (!leadIds) {
+        setError("Export blocked: every selected lead needs a unique verified ID.");
+        return;
       }
+      const auditRes = await requestLeadExportAudit({ leadIds, format });
+
+      if (!hasValidLeadExportReceipt(auditRes, leadIds.length, format)) {
+        setError(auditRes?.data?.message || "Export authorization failed. No contact data was released.");
+        return;
+      }
+
+      await releaseCallback();
+    } catch (err) {
+      setError(err?.message || "Export failed.");
+    } finally {
+      setExporting(false);
     }
   };
 
+  const copy = () => {
+    auditAndExecute("clipboard_copy", async () => {
+      const text = isBulk ? leadsToCsv(items) : leadToText(items[0]);
+      try {
+        await navigator.clipboard.writeText(text);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } catch {
+        try {
+          const ta = document.createElement("textarea");
+          ta.value = text;
+          ta.style.position = "fixed";
+          ta.style.opacity = "0";
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand("copy");
+          document.body.removeChild(ta);
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        } catch {
+          setError("Couldn't copy — select the text manually.");
+        }
+      }
+    });
+  };
+
   const downloadCsv = () => {
-    const name = isBulk ? "scoutit-leads" : `lead-${items[0]?.name || "export"}`;
-    download(leadsToCsv(items), exportFilename(name, "csv"), "text/csv");
+    auditAndExecute("csv", () => {
+      const name = isBulk ? "scoutit-leads" : `lead-${items[0]?.name || "export"}`;
+      download(leadsToCsv(items), exportFilename(name, "csv"), "text/csv");
+    });
   };
 
   const downloadVCard = () => {
@@ -91,13 +110,14 @@ export default function LeadExportButton({ lead, leads, label = "Export", compac
       setError("No contact details to save yet.");
       return;
     }
-    download(vcard, exportFilename(`contact-${items[0]?.name || "lead"}`, "vcf"), "text/vcard");
+    auditAndExecute("vcard", () => {
+      download(vcard, exportFilename(`contact-${items[0]?.name || "lead"}`, "vcf"), "text/vcard");
+    });
   };
 
   return (
     <div className="lx-root">
       <style jsx global>{`
-        /* ── MOBILE FIRST ─────────────────────────────────────────────── */
         .lx-root { display: flex; flex-direction: column; gap: 7px; }
         .lx-label {
           font-family: ${MONO};
@@ -121,7 +141,8 @@ export default function LeadExportButton({ lead, leads, label = "Export", compac
           cursor: pointer;
           transition: border-color 0.15s ease, color 0.15s ease;
         }
-        .lx-btn:hover { border-color: var(--accent-muted); color: var(--accent); }
+        .lx-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .lx-btn:hover:not(:disabled) { border-color: var(--accent-muted); color: var(--accent); }
         .lx-btn--primary {
           background: rgba(232, 174, 60, 0.08);
           border-color: rgba(232, 174, 60, 0.32);
@@ -155,17 +176,18 @@ export default function LeadExportButton({ lead, leads, label = "Export", compac
         <button
           className={`lx-btn lx-btn--primary ${copied ? "lx-btn--ok" : ""}`}
           onClick={copy}
+          disabled={exporting}
         >
-          {copied ? "✓ Copied" : isBulk ? `Copy ${items.length} as CSV` : "Copy details"}
+          {copied ? "✓ Copied" : exporting ? "Authorizing..." : isBulk ? `Copy ${items.length} as CSV` : "Copy details"}
         </button>
 
-        <button className="lx-btn" onClick={downloadCsv}>
-          Download .csv
+        <button className="lx-btn" onClick={downloadCsv} disabled={exporting}>
+          {exporting ? "Authorizing..." : "Download .csv"}
         </button>
 
         {!isBulk && (
-          <button className="lx-btn" onClick={downloadVCard}>
-            Save contact
+          <button className="lx-btn" onClick={downloadVCard} disabled={exporting}>
+            {exporting ? "Authorizing..." : "Save contact"}
           </button>
         )}
       </div>

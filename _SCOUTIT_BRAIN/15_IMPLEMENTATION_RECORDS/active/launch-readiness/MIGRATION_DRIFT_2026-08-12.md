@@ -2,12 +2,57 @@
 section: "15_IMPLEMENTATION_RECORDS/active/launch-readiness"
 status: active
 tags: [migration-drift, supabase, schema, risk, blocker, launch-readiness]
-updated: 2026-08-12
+updated: 2026-08-14
 related:
   - "[[CRITICAL_LOGIC_SECURITY_1_0B_2026-08-12]]"
   - "[[../../../08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN]]"
   - "[[../../../08_OPERATIONS_AND_BACKLOG/ACTION/MASTER_OWNER_ACTIONS]]"
 ---
+
+## Owner decision and live reconciliation - 2026-08-14
+
+The owner approved tracked Supabase migrations as ScoutIt's database source of
+truth. This is authority to annotate and audit, not authority to mutate the live
+database. The audit below was read-only; **nothing was applied**.
+
+Production migration history now includes the five 2026-08-12 critical fixes and
+the first two 2026-08-13 security fixes. Six tracked files remain unapplied.
+
+| Migration | Live finding | Decision |
+|---|---|---|
+| `20260809000002_onboarding_completion_contract.sql` | Three columns and the check constraint are absent. The fixed backfill would complete 5 of 15 legacy/sample profiles. | **READY CONDITIONALLY.** Reconfirm the 5/15 impact immediately before apply. |
+| `20260811000001_wishlist_share_revocation.sql` | Table is absent; application code already expects it. The design is service-role-only. | **READY.** Apply and verify RLS/grants before testing issue/revoke. |
+| `20260811000002_pilot_cohort_registry.sql` | Both registry tables are absent; application and Mission Control expect them. | **READY.** Apply schema only; do not enroll users in the migration. |
+| `20260813000003_rls_initplan_wrap_auth_calls.sql` | All 17 target policies exist and still use bare `auth.uid()` calls. | **READY.** Behavior-preserving RLS performance fix; verify access semantics afterward. |
+| `20260813000004_revoke_st_estimatedextent.sql` | All three function signatures exist and anon/authenticated can execute them; no runtime caller was found. | **READY.** Revoke public execution, retain service role, then smoke-test map/radius search. |
+| `20260813000005_spatial_ref_sys_rls.sql` | PostGIS owns the 8,500-row public reference table; RLS is off and public SELECT is expected. | **HOLD - DO NOT APPLY AS WRITTEN.** No staging exists, breakage risk is high, and this is not user data. |
+
+Two conflicting historical migrations are superseded:
+
+- `20260803000001_production_security_rls.sql` is retained with an in-file
+  `SUPERSEDED - DO NOT APPLY` warning. It would weaken live policy behavior and
+  create an obsolete function overload.
+- `20260809000001_security_telemetry_retention.sql` is deliberately absent and
+  documented in `supabase/migrations/README.md`. Recreating it would regress the
+  telemetry counter and compress-not-delete decisions.
+
+### Proposed controlled apply order - not yet authorized
+
+1. `20260809000002_onboarding_completion_contract.sql`
+2. `20260811000001_wishlist_share_revocation.sql`
+3. `20260811000002_pilot_cohort_registry.sql`
+4. `20260813000003_rls_initplan_wrap_auth_calls.sql`
+5. `20260813000004_revoke_st_estimatedextent.sql`
+6. Hold `20260813000005_spatial_ref_sys_rls.sql`.
+
+For each ready migration: require a current recoverable backup/PITR window,
+repeat the live preflight, compare the exact reviewed checksum, apply only that
+one migration through Mission Control, run its verification and product smoke
+test, and stop on any mismatch.
+
+The remainder of this note is the historical 2026-08-12 discovery snapshot.
+Where it conflicts with this section, this 2026-08-14 reconciliation wins.
+
 
 # ⚠️ MIGRATION DRIFT — the repo and the live database disagree
 

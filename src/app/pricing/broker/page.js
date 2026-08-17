@@ -90,20 +90,20 @@ export default function BrokerPricingPage() {
           </Link>
           <div className="mb-8 p-4 rounded-xl bg-gradient-to-r from-[#1A1710]/80 to-[#101820]/80 border border-gold-accent/30 inline-block">
             <p className="text-gold-bright font-mono text-xs uppercase tracking-widest font-bold">
-              🚀 PIONEER COHORT
+              ◈ PIONEER COHORT
             </p>
             <p className="text-white text-sm mt-1">
               Lock in <span className="text-gold-accent font-bold">Pioneer Member</span> rates forever. Only 20 slots per role.
             </p>
           </div>
           <span className="vector-label text-gold-accent tracking-[0.3em] uppercase text-xs font-bold mb-4 block drop-shadow-md">
-            LAYER 08 // ADVISOR TIERS
+            LAYER 08 // ADVISOR PLANS
           </span>
           <h1 className="page-title text-5xl md:text-6xl font-display-md text-white mb-6 drop-shadow-lg">
-            Get Routed To The <span className="text-gold-accent">Right Deals</span>
+            Connect with <span className="text-gold-accent">Qualified Deals</span>
           </h1>
           <p className="page-subtitle text-lg text-text-secondary max-w-2xl mx-auto leading-relaxed">
-            Stop paying for generic leads. A tier unlocks eligibility for ScoutIt&apos;s priority routing and lets you pitch owners directly. Your position on the independent Intelligence Roster is earned through verified results — it is never for sale.
+            A subscription opens eligibility for ScoutIt&apos;s priority lead routing and direct owner pitches. Your position on the independent Advisor Roster is earned through verified performance, not paid placement.
           </p>
         </header>
 

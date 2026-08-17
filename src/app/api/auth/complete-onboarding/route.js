@@ -2,121 +2,220 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { monthlyAllowance } from "@/lib/entitlements";
-import { statusFromDateOfBirth } from "@/lib/adultEligibility";
-import {
-  isPrcLicenseFormatValid,
-  normalizeSignupPrimaryMode,
-  sanitizeLocationFocus,
-} from "@/lib/onboardingProfile";
+import { isCanonicalConnectWalletActive } from "@/lib/connectsSchemaGate";
 
-function databaseRole(primaryMode) {
-  return primaryMode === "buyer" ? "seeker" : primaryMode;
+function parseDateOfBirth(value) {
+  if (!value || typeof value !== "string") return null;
+  const trimmed = value.trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return null;
+  const [year, month, day] = trimmed.split("-").map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  if (
+    date.getUTCFullYear() !== year ||
+    date.getUTCMonth() !== month - 1 ||
+    date.getUTCDate() !== day
+  ) {
+    return null;
+  }
+  return date;
+}
+
+function evaluateAdultEligibility(dateOfBirth) {
+  if (!dateOfBirth) return "underage";
+  const now = new Date();
+  let age = now.getUTCFullYear() - dateOfBirth.getUTCFullYear();
+  const monthDiff = now.getUTCMonth() - dateOfBirth.getUTCMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && now.getUTCDate() < dateOfBirth.getUTCDate())) {
+    age -= 1;
+  }
+  return age >= 18 ? "confirmed" : "underage";
+}
+
+function normalizeLicense(value) {
+  if (typeof value !== "string") return null;
+  const digits = value.replace(/\D/g, "");
+  return digits.length >= 7 && digits.length <= 8 ? digits : null;
+}
+
+function normalizeLocationFocus(value) {
+  if (typeof value !== "string") return null;
+  const normalized = value
+    .split(",")
+    .map((s) => s.trim().replace(/\s+/g, " "))
+    .filter(Boolean)
+    .join(", ");
+  return normalized.length > 0 ? normalized : null;
 }
 
 export async function POST(request) {
   try {
-    const token = request.headers.get("Authorization")?.replace("Bearer ", "");
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized: Missing token" }, { status: 401 });
+    const authHeader = request.headers.get("authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+    const token = authHeader.replace("Bearer ", "").trim();
 
-    const authClient = createClient(
+    const userClient = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      {
+        auth: { persistSession: false },
+        global: { headers: { Authorization: `Bearer ${token}` } },
+      },
     );
-    const { data: { user }, error: authError } = await authClient.auth.getUser(token);
-    if (authError || !user) {
-      return NextResponse.json({ error: "Unauthorized: Invalid session" }, { status: 401 });
+
+    const {
+      data: { user },
+      error: userError,
+    } = await userClient.auth.getUser();
+
+    if (userError || !user) {
+      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
     }
 
-    const { data: existingProfile, error: existingProfileError } = await supabaseAdmin
+    const body = await request.json();
+    const { name, role, dateOfBirth, prcLicense, locationFocus } = body;
+
+    const allowedRoles = ["buyer", "seeker", "owner", "broker"];
+    if (!role || !allowedRoles.includes(role)) {
+      return NextResponse.json({ error: "Invalid role selection" }, { status: 400 });
+    }
+
+    const trimmedName = typeof name === "string" ? name.trim().replace(/\s+/g, " ") : "";
+    if (!trimmedName || trimmedName.length < 2) {
+      return NextResponse.json({ error: "Full name is required." }, { status: 400 });
+    }
+
+    const { data: existingProfile } = await supabaseAdmin
       .from("user_profiles")
       .select("adult_eligibility_status")
       .eq("id", user.id)
       .maybeSingle();
-    if (existingProfileError) {
-      console.error("[ONBOARDING API] Eligibility lookup failed:", existingProfileError);
-      return NextResponse.json({ error: "Unable to verify account eligibility." }, { status: 500 });
-    }
-    // An explicit underage answer is sticky. Without this lookup, the same
-    // account could immediately resubmit a different birth date.
+
     if (existingProfile?.adult_eligibility_status === "underage") {
-      return NextResponse.json({ error: "You must be at least 18 to use ScoutIt." }, { status: 403 });
-    }
-
-    const payload = await request.json();
-    const name = typeof payload.name === "string" ? payload.name.trim().slice(0, 120) : "";
-    const primaryMode = normalizeSignupPrimaryMode(payload.role);
-    const locationFocus = primaryMode === "buyer"
-      ? sanitizeLocationFocus(payload.locationFocus)
-      : null;
-    const prcLicense = typeof payload.prcLicense === "string"
-      ? payload.prcLicense.trim().slice(0, 80)
-      : "";
-
-    if (!name || !primaryMode) {
-      return NextResponse.json({ error: "Name and a valid primary role are required." }, { status: 400 });
-    }
-    if (primaryMode === "broker" && !isPrcLicenseFormatValid(prcLicense)) {
-      return NextResponse.json({ error: "Enter a valid PRC broker license number." }, { status: 400 });
-    }
-
-    const ageCheck = statusFromDateOfBirth(payload.dateOfBirth);
-    if (!ageCheck.ok) {
-      if (ageCheck.status === "underage") {
-        await supabaseAdmin.from("user_profiles").upsert({
-          id: user.id,
-          adult_eligibility_status: "underage",
-        });
-      }
       return NextResponse.json(
-        { error: ageCheck.error || "A valid date of birth is required." },
+        { error: "Account ineligible under ScoutIt age requirement." },
         { status: 403 },
       );
     }
 
-    const role = databaseRole(primaryMode);
-    const startingAllowance = monthlyAllowance(role, "starry");
+    const parsedDob = parseDateOfBirth(dateOfBirth);
+    const adultStatus = evaluateAdultEligibility(parsedDob);
+    if (adultStatus !== "confirmed") {
+      return NextResponse.json(
+        { error: "You must be at least 18 years old to use ScoutIt." },
+        { status: 403 },
+      );
+    }
 
-    // Keep the completion marker null until every required resource exists.
-    // A retry is safe: the profile is an upsert and the wallet never resets an
-    // existing balance.
-    const { error: profileError } = await supabaseAdmin.from("user_profiles").upsert({
-      id: user.id,
-      display_name: name,
-      role,
-      active_roles: [primaryMode],
-      primary_mode: primaryMode,
-      location_focus: locationFocus,
-      provider_type: null,
-      prc_license: primaryMode === "broker" ? prcLicense : null,
-      subscription_tier: "starry",
-      connects_balance: startingAllowance,
-      date_of_birth: payload.dateOfBirth,
-      adult_eligibility_status: ageCheck.status,
-      onboarding_completed_at: null,
-    });
+    let normalizedPrc = null;
+    if (role === "broker") {
+      normalizedPrc = normalizeLicense(prcLicense);
+      if (!normalizedPrc) {
+        return NextResponse.json(
+          { error: "Brokers must provide a valid 7- or 8-digit PRC license number." },
+          { status: 400 },
+        );
+      }
+    }
+
+    const normalizedLocation = normalizeLocationFocus(locationFocus);
+    const primaryMode = role === "seeker" ? "buyer" : role;
+    const dbRole = role === "buyer" ? "seeker" : role;
+    const tier = "starry";
+    const startingAllowance = monthlyAllowance(dbRole, tier);
+
+    const { error: profileError } = await supabaseAdmin.from("user_profiles").upsert(
+      {
+        id: user.id,
+        display_name: trimmedName,
+        role: dbRole,
+        active_roles: [primaryMode],
+        primary_mode: primaryMode,
+        date_of_birth: dateOfBirth,
+        adult_eligibility_status: adultStatus,
+        prc_license: normalizedPrc,
+        location_focus: normalizedLocation,
+        subscription_tier: tier,
+        onboarding_completed_at: null,
+      },
+      { onConflict: "id" },
+    );
+
     if (profileError) {
       console.error("[ONBOARDING API] Profile upsert failed:", profileError);
       return NextResponse.json({ error: "Failed to create the private profile." }, { status: 500 });
     }
 
-    const { error: walletError } = await supabaseAdmin.from("connect_balances").upsert(
-      {
-        user_id: user.id,
-        granted_balance: startingAllowance,
-        purchased_balance: 0,
-        earned_balance: 0,
-        last_granted_reset: new Date().toISOString().slice(0, 10),
-      },
-      { onConflict: "user_id", ignoreDuplicates: true },
-    );
-    if (walletError) {
-      console.error("[ONBOARDING API] Wallet provisioning failed:", walletError);
-      return NextResponse.json(
-        { error: "Profile saved, but account provisioning is incomplete. Please retry." },
-        { status: 500 },
+    const currentMonth = new Date().toISOString().slice(0, 7);
+    const canonicalRole = role === "buyer" ? "seeker" : role;
+
+    if (isCanonicalConnectWalletActive()) {
+      // 1. Authoritative canonical provisioning: role wallet + account permanent pool
+      const [{ error: canonicalWalletError }, { error: canonicalAcctError }] = await Promise.all([
+        supabaseAdmin.from("user_connect_wallets").upsert(
+          {
+            user_id: user.id,
+            role: canonicalRole,
+            granted_balance: startingAllowance,
+            granted_month: currentMonth,
+          },
+          { onConflict: "user_id,role", ignoreDuplicates: true },
+        ),
+        supabaseAdmin.from("user_connect_accounts").upsert(
+          {
+            user_id: user.id,
+            purchased_balance: 0,
+            reward_balance: 0,
+          },
+          { onConflict: "user_id", ignoreDuplicates: true },
+        ),
+      ]);
+
+      if (canonicalWalletError || canonicalAcctError) {
+        console.error("[ONBOARDING API] Canonical wallet provisioning failed:", {
+          canonicalWalletError,
+          canonicalAcctError,
+        });
+        return NextResponse.json(
+          { error: "Profile saved, but account provisioning is incomplete. Please retry." },
+          { status: 500 },
+        );
+      }
+
+      // 2. Transitional non-authoritative mirror to legacy connect_balances
+      const { error: legacyWalletError } = await supabaseAdmin.from("connect_balances").upsert(
+        {
+          user_id: user.id,
+          granted_balance: startingAllowance,
+          purchased_balance: 0,
+          earned_balance: 0,
+          last_granted_reset: new Date().toISOString().slice(0, 10),
+        },
+        { onConflict: "user_id", ignoreDuplicates: true },
       );
+      if (legacyWalletError) {
+        console.warn("[ONBOARDING API] Non-fatal legacy connect_balances mirror notice:", legacyWalletError);
+      }
+    } else {
+      // Pre-migration stage: legacy connect_balances is authoritative
+      const { error: legacyWalletError } = await supabaseAdmin.from("connect_balances").upsert(
+        {
+          user_id: user.id,
+          granted_balance: startingAllowance,
+          purchased_balance: 0,
+          earned_balance: 0,
+          last_granted_reset: new Date().toISOString().slice(0, 10),
+        },
+        { onConflict: "user_id", ignoreDuplicates: true },
+      );
+      if (legacyWalletError) {
+        console.error("[ONBOARDING API] Legacy wallet provisioning failed:", legacyWalletError);
+        return NextResponse.json(
+          { error: "Profile saved, but account provisioning is incomplete. Please retry." },
+          { status: 500 },
+        );
+      }
     }
 
     const completedAt = new Date().toISOString();

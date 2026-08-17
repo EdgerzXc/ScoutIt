@@ -2,7 +2,7 @@
 section: "08_OPERATIONS_AND_BACKLOG/ACTION"
 status: active
 tags: [master-owner-actions, founder-actions, decisions, credentials, approvals, launch-readiness]
-updated: 2026-08-12
+updated: 2026-08-14
 related:
   - "[[00_MASTER_ACTION_PLAN]]"
   - "[[../00_START_HERE]]"
@@ -18,6 +18,311 @@ related:
 > Engineering work lives in [[00_MASTER_ACTION_PLAN]]. If another file conflicts with this master list, this file wins.
 
 ---
+## Jerzel's actual queue - ignore the size of the full ledger
+
+The rest of this file is a complete owner ledger, including later launch and
+trigger-gated work. **Jerzel does not need to work all of it now.** At the current
+pre-pilot stage, these are the only owner packages that deserve attention.
+
+### Do now - short decisions and dashboards
+
+1. **DONE 2026-08-14 - Database authority policy approved and live audit completed.**
+   Five migrations are ready conditionally; PostGIS `spatial_ref_sys` is held. Nothing was applied.
+2. **DONE 2026-08-16 — and the premise was wrong.** This was recorded as *"the
+   clearest real owner blocker"* and as *"started and never completed"*, with
+   the stated consequence that **"zero query, impression, click, position and
+   coverage data exists, and none is accumulating."**
+
+   **That was false.** Read directly from Search Console on 2026-08-16, the
+   property `sc-domain:scoutit.space` is **verified and has been collecting for
+   months**:
+
+   | | |
+   |---|---|
+   | Verification | ✅ Complete — domain property, not pending |
+   | Search clicks | 14 in the trailing window |
+   | Indexed pages | 17 indexed, 3 not indexed |
+   | History | Coverage data back to 2026-05-18 |
+
+   The half that *was* true: **zero sitemaps had been submitted** (`0-0 of 0`).
+   Submitted `https://www.scoutit.space/sitemap.xml` on 2026-08-16 — 16 URLs,
+   HTTP 200, valid XML. It initially reports **"Couldn't fetch"**, which is
+   normal immediately after submission; ruled out the real causes rather than
+   assuming: `robots.txt` allows it and already declares the same sitemap URL,
+   a Googlebot user-agent fetch returns 200, and the apex 308-redirects to
+   `www`. Re-check the status in a day.
+
+   - [ ] Confirm the sitemap status flips off "Couldn't fetch" within ~48h. If
+         it has not, that is then a real finding rather than a fresh-submission
+         artefact
+
+   > **Why this item was wrong for months, and it is the same root cause as
+   > everywhere else in this file:** the original note recorded that
+   > `search.google.com/search-console` *"shows the welcome/onboarding screen"*.
+   > That is what Search Console shows when you are signed out or land without a
+   > property selected — it is not evidence that verification is incomplete. A
+   > UI impression was written down as a system fact and then repeated, and
+   > Standing Rule 2 exists for exactly this: **check the system, not the layer
+   > that describes it.** Nobody re-opened it because the item said only *who*
+   > could do it, never *how to look*.
+3. **MOSTLY DONE 2026-08-16 - four of five credentials proved present from
+   outside, without any value being read.** No dashboard access was needed: each
+   was confirmed by the behaviour it causes in production, which is stronger
+   evidence than a settings screenshot anyway (Standing Rule 2 — check the
+   system, not the layer that describes it).
+
+   | Credential | Verdict | Evidence |
+   |---|---|---|
+   | `CRON_SECRET` | **present** | `cronAuth.js` returns **503** when the secret is absent and **401** when it is set but the caller is wrong. All three `/api/cron/*` routes returned **401** unauthenticated and with a deliberately wrong bearer token |
+   | `UPSTASH_REDIS_REST_URL` | **present** | `proxy.js` constructs the limiter only when **both** Upstash vars exist, with no in-memory fallback |
+   | `UPSTASH_REDIS_REST_TOKEN` | **present** | `/api/cms` returned `X-Ratelimit-Limit: 30`, matching `Ratelimit.slidingWindow(30, '10 s')` exactly |
+   | `NEXT_PUBLIC_GA_ID` | **present** | `G-36WQZF409S` served in the live homepage |
+   | `RESEND_API_KEY` | **UNKNOWN — owner must check** | Not externally observable. Nothing renders it and `/api/health` does not report it; the only external probe is sending mail, which was deliberately not done |
+
+   **Owner reported 2026-08-16: `RESEND_API_KEY` is believed NOT set.** Traced
+   what that actually costs, because the answer is reassuring in one direction
+   and not in the other.
+
+   **Nothing breaks.** `notifyUser` in `src/lib/notifications.js` writes the
+   in-app notification first and only then checks `isEmailConfigured()`,
+   returning early when it is false. The in-app notification is the system of
+   record and still fires. This is the documented design in `src/lib/email.js`
+   — email is a courtesy layer, and the whole path is written, tested, and inert
+   until the key exists. It fails safe, exactly as intended.
+
+   **But nobody is told anything unless they are already looking at the site.**
+   Eleven routes call into notifications, and they are precisely the moments a
+   human is waiting on another human:
+
+   - `api/deals/initiate` — **a Connect was just spent on them**
+   - `api/deals/pitch`, `api/inquiries` — someone is asking about a property
+   - `api/cron/check-stale-listings`, `api/cron/sweep-pending-requests` — the
+     freshness and expiry warnings that assume the owner gets told
+   - `api/dashboard/units/delegate` — a delegation handshake awaiting a response
+
+   For an invited pilot this is a quality problem rather than a correctness one:
+   a tester who spends a Connect and closes the tab hears nothing back, and the
+   thing being tested is precisely whether the connection loop feels alive.
+
+   **UPDATE — owner set `RESEND_API_KEY` on 2026-08-16**, shortly after reporting
+   it was probably missing. Awaiting confirmation in production.
+
+   - [x] Owner set the key. The near-miss variable name recorded in an earlier
+         session was the likely original cause; setting it under the exact name
+         `RESEND_API_KEY` is the fix either way
+   - [ ] **Confirm it in production rather than trusting the dashboard.** A key
+         set under a near-miss name looks identical to a key set correctly when
+         read off a settings screen — which is exactly how this was missed the
+         first time. `/api/health` now reports `services.email` as `configured`
+         or `unconfigured`, so one unauthenticated request settles it:
+
+         `curl -s https://www.scoutit.space/api/health`
+
+         Ships with the health-endpoint change; verify after that deploy.
+   - [ ] **Then verify the sending domain separately.** `configured` proves the
+         key exists, not that mail arrives. Until the Resend domain is verified,
+         delivery fails for every recipient except the account owner's own
+         address, and `src/lib/email.js` sends *from* `notifications@scoutit.space`
+         — a domain with **no MX records** (2026-08-16 addendum), so replies and
+         bounces have nowhere to land. Setting the key moves the failure from
+         "nothing sent" to "sent and possibly undeliverable," which is harder to
+         notice, not easier
+   **ANSWERED 2026-08-16 by reading the Resend dashboard directly: there is NO
+   verified sending domain. Resend reports "No domains yet."**
+
+   So email is still not working, and it now fails in a *worse* way than before:
+
+   | | Before the key | After the key |
+   |---|---|---|
+   | Behaviour | `sendEmail` returns `skipped: "no_provider"` | Resend is called and **rejects the send** |
+   | Visibility | Silent by design, documented, expected | A provider error on every notification |
+
+   `EMAIL_FROM` is **not set** either, so `src/lib/email.js` falls back to
+   `notifications@scoutit.space` — a domain that is not registered in Resend at
+   all, and which has **no MX records** (2026-08-16 addendum). Every send will be
+   from an unverified domain.
+
+   **This is the predicted failure mode, arriving on schedule:** setting the key
+   moved the problem from "nothing is sent" to "sent and rejected," which is
+   harder to notice because it looks configured.
+
+   **RESOLVED 2026-08-16 — route 1 taken at the owner's instruction. Domain
+   added in Resend and the DNS records placed at GoDaddy.**
+
+   `scoutit.space` (the apex, so it matches the existing
+   `notifications@scoutit.space` sender without a code change) was added to
+   Resend, region Tokyo `ap-northeast-1`. **Manual setup was chosen over Resend's
+   "Auto configure" deliberately:** auto-configure asks for authorization to make
+   DNS changes on the account, which grants write access to the whole zone. Three
+   named records is a smaller blast radius than delegated zone control.
+
+   Records added at GoDaddy — the zone went from 8 records to 11:
+
+   | Type | Name | Value | Priority |
+   |---|---|---|---|
+   | TXT | `resend._domainkey` | `p=MIGfMA0GCSqGSIb3…JdS0wIDAQAB` (DKIM) | — |
+   | TXT | `send` | `v=spf1 include:amazonses.com ~all` | — |
+   | MX | `send` | `feedback-smtp.ap-northeast-1.amazonses.com` | 10 |
+
+   Every value was read back from the form and compared against Resend's own
+   page before saving, then confirmed present in GoDaddy's record list after.
+
+   **The Google Search Console TXT token survived, as required.** Verified twice:
+   in GoDaddy's list after saving, and against a public resolver — still
+   `google-site-verification=7JuJY3yeardpNnfXokGbh7l5QUUXen4CJESset64uuM`,
+   unchanged. Nothing existing was edited or deleted; all three records are
+   additive.
+
+   Public resolver check immediately after saving: **MX already resolves**
+   (`10 feedback-smtp.ap-northeast-1.amazonses.com`); the two TXT records had not
+   propagated yet, which is normal. Resend status moved `Not Started` → **Pending**
+   and it is now polling ("this may take a few hours depending on GoDaddy's
+   propagation time"). It flips to Verified on its own.
+
+   - [ ] Confirm Resend reports **Verified**, then send one real test message.
+         `configured` proved the key exists; only a delivered message proves the
+         chain. Until then email remains functionally off
+   - [ ] `EMAIL_FROM` still unset. The fallback in `src/lib/email.js` is
+         `ScoutIt <notifications@scoutit.space>`, which now matches the domain
+         being verified — so it will work as-is. Set it explicitly anyway: a
+         hardcoded default that happens to be right is how the unverified-domain
+         problem stayed invisible in the first place
+
+   <!-- Original decision, kept for provenance:
+   - [ ] **Decide the sending identity.** Two routes, and this is a real choice:
+         1. **Verify `scoutit.space` in Resend** (recommended). Add the domain in
+            Resend, then add the DKIM/SPF records it issues at GoDaddy. Gives a
+            real `notifications@scoutit.space` sender. **Requires a DNS change** —
+            additive only, and the Google Search Console TXT token must be left
+            untouched
+         2. **Ship the pilot in-app-only.** Leave email off deliberately, and
+            tell testers the site is the place to check. Honest and zero-risk,
+            but the connection loop stays quiet
+   - [ ] Whichever route: set `EMAIL_FROM` explicitly rather than relying on the
+         fallback. A hardcoded default that names a domain nobody verified is how
+         this stayed invisible
+   -->
+   - [ ] **Decide before the pilot:** either configure Resend, or accept and
+         document that the pilot runs in-app-only and tell testers to check the
+         site. Do not leave it ambiguous — see §1.6A, which forbids promising a
+         reply channel that cannot deliver
+   **Google Calendar redirect URIs — DIAGNOSED AND FIXED 2026-08-16.** The owner
+   reported Calendar "was already working before, now it's not." It was a
+   `redirect_uri_mismatch`, and both halves were verifiable:
+
+   `src/lib/calendar/googleOAuth.js` builds the callback as
+   `${SITE_URL}/api/oauth/google/callback`, and `SITE_URL` resolves from
+   `NEXT_PUBLIC_SITE_URL` — which Vercel shows as **updated Aug 8**. Production
+   `SITE_URL` is `https://www.scoutit.space` (confirmed independently: the live
+   sitemap is generated from the same helper and emits that host).
+
+   Google Cloud had only two authorized redirect URIs registered, both from
+   Jul 18: `http://localhost:3000/...` and `https://scout-it.vercel.app/...`.
+   Neither matches, so Google refused every consent attempt. The console's own
+   **"Last used date: July 18, 2026"** — the day the client was created —
+   confirms it has not completed a flow since.
+
+   | Date | Event |
+   |---|---|
+   | Jul 18 | Calendar OAuth client created against `scout-it.vercel.app`; worked |
+   | Aug 8 | `NEXT_PUBLIC_SITE_URL` changed to the custom domain |
+   | Aug 8 → 16 | Every Calendar connect failed on `redirect_uri_mismatch` |
+
+   - [x] Added `https://www.scoutit.space/api/oauth/google/callback` as a third
+         authorized redirect URI on the **ScoutIt Calendar** client. Additive —
+         localhost and the vercel.app host were left in place, so local
+         development is unaffected. Verified persisted by re-reading the client
+         after save. Google notes propagation takes 5 minutes to a few hours
+   - [ ] Owner to confirm a real Calendar connect succeeds end to end
+   - [x] **Checked the second OAuth client, "ScoutIt Auth" (Jul 23) — NOT
+         affected, no action needed.** Its only authorized redirect URI is
+         `https://yyixsuaimdzyiocswcgc.supabase.co/auth/v1/callback`, i.e.
+         Supabase's own callback host. Google sign-in therefore never depended on
+         `NEXT_PUBLIC_SITE_URL` and could not have broken on Aug 8. Its last-used
+         date is Jul 23, consistent with the owner's recorded sign-in test.
+
+         Worth noting *why* the two differ: Supabase-brokered auth keeps the
+         redirect on Supabase's domain, so the app's own hostname never enters
+         the contract. The Calendar flow is hand-rolled in
+         `src/lib/calendar/googleOAuth.js` and points at our host, which is what
+         exposed it. Any future hand-rolled OAuth flow inherits the same
+         fragility
+
+   > **The generalisable bug:** `NEXT_PUBLIC_SITE_URL` is an input to every
+   > absolute URL the product emits — OAuth callbacks, OG images, share links,
+   > the sitemap. Changing it silently invalidates every external system holding
+   > a copy. Treat a change to it as a migration with a checklist, not a config
+   > edit.
+   - [ ] Consider extending `/api/health` to report *configured/not configured*
+         booleans (never values) for the credentials that have no other outward
+         symptom. This item needed a code read plus three live probes to answer a
+         question the system could answer about itself in one request.
+4. **APPROVED BY OWNER 2026-08-16 — public-profile policy.** The recommendation
+   as written is now the ruling: canonical `/profile/[username]`; index **only**
+   profiles that are real, verified, **and** explicitly made public by the
+   person; samples and private profiles stay `noindex`; exposure is governed by
+   an **explicit public-field allowlist**, not by whatever happens to be on the
+   record.
+
+   The allowlist is the load-bearing half. Without it, any column added to a
+   profile table later becomes public the moment it ships, with no decision
+   taken. Treat adding a field to the allowlist as a privacy decision.
+
+   Unblocks: §1.4 search-indexing follow-through, and the public-profile
+   canonical/indexing work previously held behind the owner checkpoint.
+
+5. **APPROVED BY OWNER 2026-08-16 — listing truth.** `pipeline_status` is the
+   single lifecycle source of truth for whether a listing is publicly live.
+   Verification and moderation fields are supporting information and carry **no
+   public authority** unless a deliberate, recorded migration changes that.
+
+   - [ ] Audit every read path that currently decides "is this listing live?"
+         and confirm it consults `pipeline_status` and nothing else. Standing
+         Rule 4 applies — an exact-match filter on a status string fails by
+         showing nothing, and showing nothing looks exactly like having nothing
+   - [ ] Record the permitted `pipeline_status` values against the live schema,
+         not against this document (Standing Rule 20 — `information_schema` is a
+         test fixture)
+6. **ALREADY DONE - closed 2026-08-13 by EdgerzXc; verified via the GitHub API
+   2026-08-16.** The alert reports `"state": "resolved"`, `"resolution":
+   "used_in_tests"`. **This item had been sitting in the owner queue for three
+   days after it was finished.**
+
+   Two corrections to the description that was here: the secret was a
+   **Stripe webhook signing secret** (`stripe_webhook_signing_secret`), not a
+   Clerk key — it merely lived inside a vendored Clerk testing skill at
+   `.agents/skills/clerk-auth-testing/SKILL.md`. Nothing needed rotating either
+   way, so the conclusion held, but the label did not.
+
+   > **Process finding.** Nothing in this queue re-reads its own external state,
+   > so a finished item stays "open" until a human happens to look. This is the
+   > mirror of the §1.6 finding (prose with no checkbox is never executed): a
+   > checkbox with no re-check is never closed. Both are cheap to verify from
+   > outside — this one took a single API call.
+
+### Do before inviting outside testers - not necessarily today
+
+- Add/tag `Is_Sample` records and configure the sample inquiry recipient UUIDs.
+- Complete one iPhone and one Android physical-device pass after the intended
+  release/environment is confirmed.
+- Rehearse Mission Control publish, owner intake, public property read, cron
+  authentication, and the 1-Connect refund with test data.
+- Establish owner/staff MFA, recovery, Mission Control access, and device posture.
+- Complete the legal/privacy identity, terms, retention, DPO/privacy-owner, and
+  counsel gates before collecting external tester data.
+- Recruit the small invited cohort only after those gates pass.
+
+### Not needed now
+
+Do not spend time now choosing a payment provider, activating paid mode, buying
+Vercel/Supabase Pro, enabling R2, creating Google Workspace mailboxes, scaling to
+200 listings, or building future SEO/Ownership/Intel modules. Those remain
+trigger-gated.
+
+### Already done - no owner action
+
+GitHub PR #63 is merged as `77f0ce4`; Speed Insights and the release-contract
+commit are already on `main`. Do not create another PR or repeat that comparison.
 
 ## 🧭 Operating Rules
 
@@ -26,6 +331,173 @@ related:
 3. **Tick and date when complete.** An untracked "I think I did that" leads to broken environment states.
 4. **When an item is finished**, notify the implementing AI agent so evidence can be recorded in the done log and cross-references updated.
 5. **No premature commercial spend.** Do not enable paid infrastructure (Vercel Pro, Supabase Pro, R2) until stated trigger thresholds are reached.
+
+---
+
+## Detailed how-to reference - use only when an item enters the actual queue
+
+> This preserves click paths and evidence requirements. It is not a second queue.
+> Use [[#Jerzel's actual queue - ignore the size of the full ledger]] to decide
+> what Jerzel should actually do now.
+
+| Order | Owner package | Why it comes now | Existing checklist |
+|---:|---|---|---|
+| **Done** | Release merge | GitHub PR #63 is merged as `77f0ce4`. No owner action remains in this queue. | Historical evidence below |
+| **Done** | Migration source of truth | Authority is recorded and all remaining migrations were audited read-only on 2026-08-14. Applying the five ready migrations still requires separate approval. | Sections 1.12, 3.0-OPEN, and 4.4 |
+| **3** | Search Console before DNS | Verification and sitemap submission must precede Cloudflare nameserver changes, and the Google TXT record must survive the cutover. | Sections 4.0 then 4.1 |
+| **4** | Production credentials and limiters | Email, GA4, cron verification, Upstash, and calendar OAuth require dashboard access and block truthful live testing. | Sections 1.3, 1.4, 1.8, and 1.11 |
+| **5** | Public profile contract | Choose canonical profile URLs, indexability timing, and public regulatory fields together; they affect robots, sitemap, JSON-LD, privacy, and directory navigation. | Sections 3.0-OPEN and 5.2; engineering detail in [[00_MASTER_ACTION_PLAN]] sections 1.0D/1.1/1.4D |
+| **6** | Real-device acceptance | Run only against the intended deployed release, after the environment and sample gates above are correct. | Sections 1.2 and 2 |
+
+### Owner-instruction standard
+
+Whenever an agent asks Jerzel to act, it must provide: **where to go, exact clicks,
+exact value/decision, expected success state, safety warning, and what evidence to
+return.** Never assign a vague task such as "verify Vercel" or "review security."
+Never ask Jerzel to paste a secret into chat or documentation.
+
+### Completed reference - GitHub release merge (no owner action)
+
+GitHub is complete. User screenshot and refreshed remote history verify that pull
+request **#63** merged the branch into `main` as commit `77f0ce4`. The compare page
+correctly says there is nothing left to compare. Do not create another pull request.
+
+Do this now:
+
+1. Open [Vercel Dashboard](https://vercel.com/dashboard).
+2. Select the **`scout-it`** project. Do not select the obsolete similarly named project.
+3. Click **Deployments**.
+4. Find the newest deployment whose source is `main` and whose commit is `77f0ce4`
+   or whose title says pull request #63 / release verification.
+5. If its status is **Building**, wait. If it is **Error**, open it and send a
+   screenshot of the error summary; do not redeploy repeatedly.
+6. If its status is **Ready**, open the deployment and confirm the assigned domains
+   include `www.scoutit.space` or `scoutit.space`.
+7. Open `https://www.scoutit.space` in an incognito window and confirm the homepage loads.
+8. Return: a screenshot showing the Vercel deployment status and commit, the
+   deployment URL, and whether the homepage loaded. Do not send environment values.
+
+Expected result: a Ready production deployment sourced from merge `77f0ce4`, with
+the ScoutIt production domain attached and the homepage loading.
+
+<!-- BEGIN:SUPERSEDED_CHECKPOINT_1_GITHUB_STEPS
+### Checkpoint 1 - merge and verify the release baseline (do this now)
+
+Current evidence: `codex/production-release-verification` is pushed and is two
+commits ahead of `main`: `aa76899` (emergency-mode release contract) and `dbe7dfb`
+(Vercel Speed Insights). The documentation edits from this session are local and
+are not part of those two commits.
+
+1. Open [GitHub's branch comparison](https://github.com/EdgerzXc/ScoutIt/compare/main...codex/production-release-verification?expand=1).
+2. Confirm the base says **`main`** and compare says **`codex/production-release-verification`**.
+3. Click **Create pull request**. Title it `Release verification and Speed Insights`.
+4. Wait for every required GitHub check to finish. Do not merge if any required
+   check is red or still pending.
+5. Click **Merge pull request**, then **Confirm merge**. Do not use force push,
+   rebase locally, or delete `main`.
+6. Open [Vercel](https://vercel.com/dashboard), select the **`scout-it`** production
+   project (not the obsolete similarly named project), then open **Deployments**.
+7. Open the newest deployment sourced from `main`. Wait until it says **Ready**
+   and its domains include `www.scoutit.space` or `scoutit.space`.
+8. Open `https://www.scoutit.space` in a private/incognito window and confirm the
+   homepage loads. Do not treat this as the later full physical-device pass.
+9. Return only: the GitHub pull-request URL, the merge commit SHA, the Vercel
+   deployment status/URL, and whether the homepage loaded. Do not send secrets.
+
+Expected result: `main` contains both commits and Vercel shows a Ready production
+deployment sourced from that merged `main` commit.
+
+END:SUPERSEDED_CHECKPOINT_1_GITHUB_STEPS -->
+
+### Checkpoint 2 - approve the migration authority (reply in chat; no dashboard)
+
+Copy and send this exact sentence if you approve the recommended safe policy:
+
+> I approve tracked Supabase migrations as ScoutIt's database source of truth. Mark `20260803000001_production_security_rls.sql` and `20260809000001_security_telemetry_retention.sql` as superseded. Audit the remaining unapplied migrations individually against the live schema and show me the plan and verification before applying anything.
+
+This authorizes documentation/annotation and a read-only audit. It does **not**
+authorize applying a migration, deleting live data, or scheduling retention.
+
+### Checkpoint 3 - finish Search Console before touching DNS
+
+1. Open [Google Search Console](https://search.google.com/search-console) using
+   each ScoutIt-related Google account if necessary.
+2. Use the property selector in the upper-left and look for `scoutit.space`.
+3. If it exists, select it. If Google shows **Finish verification**, click it and
+   click **Verify**; the DNS TXT token is already present.
+4. If it does not exist, choose **Add property** -> **Domain**, enter
+   `scoutit.space` (no `https://`, no `www`, no path), then click **Continue** and
+   **Verify**. Do not replace the existing TXT record.
+5. After ownership succeeds, open **Sitemaps** in the left menu. Under **Add a new
+   sitemap**, enter `sitemap.xml` and click **Submit**.
+6. Expected state: property ownership says verified and the submitted sitemap
+   appears with status **Success**. Processing counts may take time.
+7. Return a screenshot or text containing the verified property name, sitemap
+   status, and Google account email used. Do not start the Cloudflare DNS cutover.
+
+### Checkpoint 4 - production credentials and external settings
+
+Perform these in order and report each as `present`, `set`, or `blocked`; never
+send the value itself.
+
+1. Vercel -> **scout-it** -> **Settings** -> **Environment Variables** -> filter
+   **Production**. Confirm `NEXT_PUBLIC_GA_ID`, `CRON_SECRET`,
+   `UPSTASH_REDIS_REST_URL`, and `UPSTASH_REDIS_REST_TOKEN` exist.
+2. If `NEXT_PUBLIC_GA_ID` is missing, add the real GA4 Measurement ID already
+   associated with ScoutIt and select **Production**.
+3. If `CRON_SECRET` is missing, generate a new private random secret of at least
+   32 bytes, add it for **Production**, and store it in your password manager.
+4. If either Upstash variable is missing, open the ScoutIt Upstash Redis database,
+   copy its REST URL and REST token into the matching Vercel variables, and select
+   **Production**. If no database exists, report `blocked - no Upstash database`;
+   do not choose a paid plan without review.
+5. Open [Resend](https://resend.com/domains). Verify `scoutit.space`. Then place
+   its active API key in Vercel as `RESEND_API_KEY` for **Production**. If DNS
+   verification records are missing, stop and report the exact record names/types
+   without exposing the API key.
+6. Open Google Cloud Console -> **APIs & Services** -> **Credentials** -> ScoutIt
+   OAuth web client -> **Authorized redirect URIs**. Ensure these exact URIs exist:
+   `https://www.scoutit.space/api/oauth/google/callback`,
+   `https://scoutit.space/api/oauth/google/callback`, and
+   `http://localhost:3000/api/oauth/google/callback`. Click **Save**.
+7. Redeploy only after all changed Vercel variables are saved. Return the variable
+   names/statuses, Resend domain status, OAuth URI status, and deployment status.
+
+### Checkpoint 5 - approve the public-profile contract (reply in chat)
+
+Recommended decision: use `/profile/[username]` as the one canonical professional
+profile route; permanently redirect role-specific detail routes to it; index only
+real, verified, explicitly public profiles; keep demo/sample/private profiles
+`noindex` and out of the sitemap; expose only fields explicitly approved for public
+professional verification; do not expose expiry or extra regulatory identifiers
+by inheritance.
+
+Copy and send this if approved:
+
+> I approve `/profile/[username]` as the canonical professional profile route. Redirect the role-specific profile routes to it. Index only real, verified, explicitly public profiles. Keep sample, demo, incomplete, and private profiles noindex and out of the sitemap. Public regulatory fields must use an explicit allowlist; do not expose PRC expiry, DHSUD number, or other fields until individually approved.
+
+### Checkpoint 6 - physical-device acceptance (only after deployed release is Ready)
+
+1. On a real iPhone using Safari and a real Android phone using Chrome, open
+   `https://www.scoutit.space` in private/incognito mode.
+2. Test sign up/sign in, Discover, one real property, one sample property, one
+   public professional profile, dashboard entry, mobile navigation, bottom sheets,
+   property claim, SEO readiness, and privacy shield.
+3. Temporarily turn `pre_launch_free_mode` off only for the entitlement test, then
+   restore it immediately. Record both changes.
+4. Confirm no horizontal scrolling at normal zoom, controls are comfortably
+   tappable, keyboard fields remain visible, and rotation does not trap content.
+5. Test one journey with VoiceOver on iPhone or TalkBack on Android and one at
+   200% text/zoom.
+6. Return device model, OS/browser version, date, each route tested, pass/fail,
+   screenshots of failures, and confirmation that `pre_launch_free_mode` was restored.
+
+### Parallel agent lane while this checkpoint is open
+
+The agent may continue deterministic T0 fixes, focused tests, responsive work,
+JSON-LD validation/safe serialization, documentation reconciliation, and read-only
+security analysis. It must not apply migrations, change DNS/provider/repository
+settings, choose product policy, or claim physical-device/live-dashboard acceptance.
 
 ---
 
@@ -82,9 +554,9 @@ related:
 
 - [ ] Open **Google Cloud Console > APIs & Services > Credentials > OAuth 2.0 Client IDs**.
 - [ ] Under **Authorized redirect URIs**, add:
-  - `https://www.scoutit.space/api/calendar/callback`
-  - `https://scoutit.space/api/calendar/callback`
-  - `http://localhost:3000/api/calendar/callback` (for local development)
+  - `https://www.scoutit.space/api/oauth/google/callback`
+  - `https://scoutit.space/api/oauth/google/callback`
+  - `http://localhost:3000/api/oauth/google/callback` (for local development)
 - [ ] Save changes and verify calendar handshake flow completes cleanly without `redirect_uri_mismatch`.
 
 ---
@@ -107,6 +579,7 @@ related:
 - [ ] **Decide the Scout Rating formula (product, not security).** The handshake used to write `user_profiles.scout_rating`, a column that does not exist — it would have errored the first time any handshake completed. The real column is `broker_profiles.scout_rating`, `numeric(3,2)`, a 0–5 rating that **overflows at 10.00**, so incrementing it per closed deal was never right. The migration now credits `broker_profiles.verified_closures` instead. **How a verified closure should move the displayed 0–5 rating is your call, and no broker rating is being computed until you make it.**
 - [x] **Applied date: 2026-08-12** (five tracked migrations, all succeeded — recorded 2026-08-13; this line was previously left blank)
 
+<!-- BEGIN:SUPERSEDED_PRE_DECISION_MIGRATION_CHECKLIST
 ### 1.12 🗂️ Migration Drift — the repo does not describe the live database — **DECISION NEEDED**
 
 *Found 2026-08-12 during pre-flight. Several migration files in `supabase/migrations/` were never applied to production, and some live objects were applied outside the tracked history. Full detail and evidence: [[../../15_IMPLEMENTATION_RECORDS/active/launch-readiness/MIGRATION_DRIFT_2026-08-12]].*
@@ -118,6 +591,22 @@ related:
 - [ ] **Approve an individual audit of the remaining three** unapplied migrations against the live schema, applying only what is still needed and still correct.
 - [ ] **Choose one source of truth:** drive everything through tracked Supabase migrations, or declare the SQL editor authoritative and stop maintaining files that imply otherwise. The split history is the root cause and will keep producing this.
 - [ ] **Note for future audits:** any finding derived from reading `supabase/migrations/` may describe a database that does not exist. One §1.0B finding was actively wrong for production — it asked to add a `WITH CHECK` to a `deals` UPDATE policy that does not exist, which would have *granted* access that is currently denied.
+<!-- END:SUPERSEDED_PRE_DECISION_MIGRATION_CHECKLIST -->
+
+### 1.12 Migration authority - decided and audited; apply approval still required
+
+*Reconciled read-only on 2026-08-14. Full evidence and the proposed sequence:
+[[../../15_IMPLEMENTATION_RECORDS/active/launch-readiness/MIGRATION_DRIFT_2026-08-12]].*
+
+**Owner decision:** tracked migrations are the database source of truth. Historical
+drift must be reconciled, never bulk-applied.
+
+- [x] Do not bulk-apply the backlog.
+- [x] Mark both conflicting migrations superseded.
+- [x] Audit every remaining migration against live: five are ready conditionally and one is held.
+- [x] Make live preflight a standing rule.
+- [x] Hold `20260813000005_spatial_ref_sys_rls.sql`; do not apply it as written.
+- [ ] Approve the five-migration apply sequence after reviewing the plan. This is separate live-change authorization; nothing was applied during this audit.
 
 ### 1.13 🩺 Supabase Advisor Findings (pre-existing, ~15 min) — surfaced 2026-08-12
 

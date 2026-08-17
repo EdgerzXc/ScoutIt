@@ -5,6 +5,7 @@ import LiveEditorWorkspace from "./LiveEditorWorkspace";
 import DeepIntelligenceStudio from "./DeepIntelligenceStudio";
 import BulkImporterMode from "./BulkImporterMode";
 import { useDashboard } from "../../context/DashboardContext";
+import { CardGridSkeleton } from "./DashboardSkeleton";
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
 import Papa from 'papaparse';
@@ -23,7 +24,7 @@ import { sanitizeError } from "@/lib/sanitizeError";
 import TurnstileGate from "@/components/ui/TurnstileGate";
 
 export default function OwnerMode() {
-  const { listings, pitches, updatePitchStatus, addListing, addConciergeListing, bulkAddListings, addToast, updateListing, publishListing, closeListing, permanentlyRemoveListing, currentUser, inviteBroker, connects } = useDashboard();
+  const { listings, pitches, updatePitchStatus, addListing, addConciergeListing, bulkAddListings, addToast, updateListing, publishListing, closeListing, permanentlyRemoveListing, currentUser, inviteBroker, connects, isLoading } = useDashboard();
   const firstName = currentUser?.name ? currentUser.name.split(" ")[0] : "";
   const [showWizard, setShowWizard] = useState(false); // false | 'select_mode' | 'live_editor' | 'concierge' | 'edit'
   const [selectedFile, setSelectedFile] = useState(null);
@@ -44,6 +45,7 @@ export default function OwnerMode() {
   const [removalCaptchaToken, setRemovalCaptchaToken] = useState("");
   const removalTurnstileRef = useRef(null);
   const [isRemoving, setIsRemoving] = useState(false);
+  const [showAdvancedIngest, setShowAdvancedIngest] = useState(false);
   // DashboardContext's `listings` isn't refetched after an archive call, so
   const [justArchivedIds, setJustArchivedIds] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -186,91 +188,102 @@ export default function OwnerMode() {
 
   if (showWizard === 'select_mode') {
     return (
-      <div className="max-w-[800px] mx-auto py-lg animate-[fadeIn_0.3s_ease]">
-        <button onClick={() => setShowWizard(false)} className="text-text-secondary hover:text-gold-accent mb-8 font-working-title active:scale-95 transition inline-block">← Back to Dashboard</button>
-        <h1 className="font-display-md text-4xl text-text-primary mb-2">How do you want to create your listing?</h1>
-        <p className="text-text-secondary mb-8">Choose an option to get started.</p>
+      <div className="max-w-[840px] mx-auto py-lg animate-[fadeIn_0.3s_ease]">
+        <button onClick={() => setShowWizard(false)} className="text-text-secondary hover:text-gold-accent mb-8 font-working-title active:scale-95 transition inline-block">← Back to Workspace</button>
+        <h1 className="font-display-md text-3xl md:text-4xl text-text-primary mb-2">How would you like to add this property?</h1>
+        <p className="text-text-secondary mb-8 text-base">Select your starting point. You can refine and add details at any stage before publishing.</p>
         
-        <div className="grid md:grid-cols-2 gap-6">
+        {/* Primary 2 Choices (Progressive Disclosure) */}
+        <div className="grid md:grid-cols-2 gap-6 mb-8">
+          {/* Choice A: PDF / Brochure Ingestion */}
           <button 
             type="button"
-            className="bg-surface/40 backdrop-blur-xl border border-white/[0.04] rounded-xl p-8 hover:border-gold-accent/40 hover:bg-surface/60 active:scale-[0.98] transition-all duration-300 ease-out cursor-pointer group relative overflow-hidden text-left block w-full shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]"
-            onClick={() => setShowWizard('bulk')}
-          >
-             <h3 className="font-working-title text-2xl text-on-surface mb-3 group-hover:text-gold-accent transition-colors duration-300">Upload Portfolio (CSV)</h3>
-             <p className="text-sm text-text-secondary mb-6 leading-relaxed">Upload a CSV to generate multiple separate Property Drafts at once. Perfect for migrating large asset portfolios.</p>
-             <span className="text-gold-accent font-label-caps text-[10px] tracking-widest border border-gold-accent/30 bg-gold-accent/10 px-3 py-1.5 rounded-full">RECOMMENDED FOR PROPERTY UPLOADS</span>
-          </button>
-
-          <button
-            type="button"
-            className={`bg-surface/40 backdrop-blur-xl border rounded-xl p-8 transition-all duration-300 ease-out relative overflow-hidden group text-left block w-full shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] ${canUseVault ? "border-gold-accent/20 hover:border-gold-accent/60 active:scale-[0.98] cursor-pointer" : "border-white/[0.02] cursor-not-allowed opacity-60"}`}
-            onClick={() => canUseVault && setShowWizard('vip_vault')}
-          >
-            <div className="absolute -top-24 -right-24 w-48 h-48 bg-gold-accent/5 rounded-full blur-3xl group-hover:bg-gold-accent/10 transition duration-200"></div>
-
-            {/* Lock badge — visible when locked */}
-            {!canUseVault && (
-              <div className="absolute top-4 right-4 flex items-center gap-1.5 bg-surface-alt border border-surface-variant rounded-full px-3 py-1">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-text-secondary"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                <span className="font-label-caps text-[10px] tracking-widest text-text-secondary uppercase">Cluster+</span>
-              </div>
-            )}
-
-            <h3 className={`font-working-title text-2xl mb-3 drop-shadow-md ${canUseVault ? "text-gold-accent" : "text-text-secondary"}`}>The Spatial Vault</h3>
-            <p className="text-sm text-text-secondary mb-6 leading-relaxed group-hover:text-on-surface transition">
-              {canUseVault
-                ? "Link a Matterport or Luma URL, or drop raw videos for our QuestIT Pros to convert into immersive 3D tours."
-                : "Upgrade to Cluster or higher to unlock 360° tours, 3D maps, and drone heatmaps for your listing."}
-            </p>
-
-            {canUseVault ? (
-              <span className="text-background font-label-caps font-bold text-[10px] tracking-widest bg-gold-accent px-3 py-1.5 rounded-full shadow-[0_0_10px_rgba(232,174,60,0.3)]">QUEST-IT ASSISTED</span>
-            ) : (
-              <Link href="/pricing/owner" className="inline-block text-gold-accent font-label-caps text-[10px] tracking-widest border border-gold-accent/40 bg-gold-accent/10 px-3 py-1.5 rounded-full hover:bg-gold-accent/20 active:scale-95 transition" onClick={e => e.stopPropagation()}>
-                UPGRADE TO CLUSTER →
-              </Link>
-            )}
-          </button>
-
-          <button 
-            type="button"
-            className="bg-surface/40 backdrop-blur-xl border border-white/[0.04] rounded-xl p-8 hover:border-white/20 hover:bg-surface/60 active:scale-[0.98] transition-all duration-300 ease-out cursor-pointer group relative overflow-hidden text-left block w-full shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]"
+            className="bg-surface/40 backdrop-blur-xl border border-gold-accent/30 rounded-xl p-8 hover:border-gold-accent hover:bg-surface/70 active:scale-[0.98] transition-all duration-300 ease-out cursor-pointer group relative overflow-hidden text-left block w-full shadow-[0_4px_24px_rgba(0,0,0,0.4)]"
             onClick={() => setShowWizard('concierge')}
           >
-             <h3 className="font-working-title text-2xl text-on-surface mb-3 group-hover:text-white transition-colors duration-300">Upload Pitch Deck (PDF)</h3>
-             <p className="text-sm text-text-secondary mb-6 leading-relaxed">Upload your existing pitch deck or PDF flyer. Our Council AI will extract the data and structure the dossier for your review.</p>
+             <div className="flex items-center gap-3 mb-4">
+               <span className="text-3xl">📄</span>
+               <span className="text-gold-accent font-mono text-[10px] tracking-widest uppercase border border-gold-accent/30 bg-gold-accent/10 px-2.5 py-1 rounded">Fastest Route</span>
+             </div>
+             <h3 className="font-working-title text-2xl text-on-surface mb-3 group-hover:text-gold-accent transition-colors duration-300">I already have property materials</h3>
+             <p className="text-sm text-text-secondary leading-relaxed">Upload a PDF brochure, flyer, or pitch deck. ScoutIt reads the key specs and structures your draft automatically for review.</p>
           </button>
 
+          {/* Choice B: Step-by-Step Guided Setup */}
           <button 
             type="button"
-            className="bg-surface/40 backdrop-blur-xl border border-white/[0.04] rounded-xl p-8 hover:border-white/20 hover:bg-surface/60 active:scale-[0.98] transition-all duration-300 ease-out cursor-pointer group relative overflow-hidden text-left block w-full shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]"
+            className="bg-surface/40 backdrop-blur-xl border border-white/[0.08] rounded-xl p-8 hover:border-gold-accent/50 hover:bg-surface/70 active:scale-[0.98] transition-all duration-300 ease-out cursor-pointer group relative overflow-hidden text-left block w-full shadow-[0_4px_24px_rgba(0,0,0,0.4)]"
             onClick={() => setShowWizard('live_editor')}
           >
-             <h3 className="font-working-title text-2xl text-on-surface mb-3 group-hover:text-white transition-colors duration-300">Build from Scratch</h3>
-             <p className="text-sm text-text-secondary mb-6 leading-relaxed">Build your listing manually using our step-by-step editor. Best if you do not have a deck and are starting from scratch.</p>
-          </button>
-
-          <button 
-            type="button"
-            className="bg-background backdrop-blur-md border border-gold-accent/20 rounded-xl p-8 hover:border-gold-accent/60 transition duration-300 cursor-pointer group relative overflow-hidden text-left block w-full"
-            onClick={() => setShowWizard('deep_intel')}
-          >
-             <h3 className="font-working-title text-2xl text-gold-accent mb-3 group-hover:text-gold-bright transition">Advanced Editor</h3>
-             <p className="text-sm text-text-secondary mb-6 leading-relaxed">Unlock the hidden matrix. Manually override structural specs, input financial intelligence, and map advanced logistics.</p>
-             <span className="text-gold-accent font-label-caps text-[10px] tracking-widest border border-gold-accent/30 bg-gold-accent/10 px-3 py-1.5 rounded-full shadow-[0_0_10px_rgba(232,174,60,0.2)]">PRO MODE</span>
+             <div className="flex items-center gap-3 mb-4">
+               <span className="text-3xl">✍️</span>
+               <span className="text-text-muted font-mono text-[10px] tracking-widest uppercase border border-white/10 bg-white/5 px-2.5 py-1 rounded">Guided Builder</span>
+             </div>
+             <h3 className="font-working-title text-2xl text-on-surface mb-3 group-hover:text-gold-accent transition-colors duration-300">I&apos;ll build it myself</h3>
+             <p className="text-sm text-text-secondary leading-relaxed">Enter property specifications, address, pricing, and photos step by step in the guided property editor.</p>
           </button>
         </div>
 
-        {/* Power User Bypass */}
-        <div className="mt-8 text-center animate-[fadeIn_0.5s_ease_0.2s]">
-          <p className="text-text-secondary text-sm mb-2">Already know what you&apos;re doing?</p>
-          <button 
-            onClick={() => setShowWizard('live_editor')} 
-            className="text-text-secondary hover:text-gold-accent border-b border-transparent hover:border-gold-accent/30 pb-0.5 font-working-title text-sm active:scale-95 inline-block transition"
+        {/* Secondary Accordion / Drawer: More ways to add */}
+        <div className="border border-white/[0.06] rounded-xl bg-surface/20 backdrop-blur-md overflow-hidden transition-all duration-300">
+          <button
+            type="button"
+            onClick={() => setShowAdvancedIngest(prev => !prev)}
+            className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-white/[0.02] transition cursor-pointer"
           >
-            Skip to Editor (Quick Add)
+            <div className="flex items-center gap-3">
+              <span className="font-mono text-xs uppercase tracking-[0.14em] text-text-muted">More ways to add</span>
+              <span className="text-[11px] text-text-muted font-body">(Bulk CSV, Advanced Matrix, 3D Spatial)</span>
+            </div>
+            <span className="text-text-muted text-sm transition-transform duration-200" style={{ transform: showAdvancedIngest ? "rotate(180deg)" : "rotate(0deg)" }}>
+              ▼
+            </span>
           </button>
+
+          {showAdvancedIngest && (
+            <div className="p-6 pt-2 grid md:grid-cols-3 gap-4 border-t border-white/[0.04] animate-[fadeIn_0.2s_ease]">
+              {/* Option 1: Bulk CSV */}
+              <button
+                type="button"
+                onClick={() => setShowWizard('bulk')}
+                className="bg-surface/50 border border-white/[0.06] rounded-lg p-5 text-left hover:border-gold-accent/40 hover:bg-surface-alt transition cursor-pointer group"
+              >
+                <div className="font-mono text-[10px] text-gold-accent uppercase tracking-widest mb-2">Portfolio Import</div>
+                <div className="font-working-title text-lg text-on-surface mb-2 group-hover:text-gold-accent transition-colors">Spreadsheet (CSV)</div>
+                <p className="text-xs text-text-secondary leading-relaxed">Upload a multi-property CSV file to generate several drafts simultaneously.</p>
+              </button>
+
+              {/* Option 2: Advanced Deep Intel Editor */}
+              <button
+                type="button"
+                onClick={() => setShowWizard('deep_intel')}
+                className="bg-surface/50 border border-white/[0.06] rounded-lg p-5 text-left hover:border-gold-accent/40 hover:bg-surface-alt transition cursor-pointer group"
+              >
+                <div className="font-mono text-[10px] text-gold-accent uppercase tracking-widest mb-2">Direct Spec Matrix</div>
+                <div className="font-working-title text-lg text-on-surface mb-2 group-hover:text-gold-accent transition-colors">Advanced Studio</div>
+                <p className="text-xs text-text-secondary leading-relaxed">Directly input zoning, ceiling clearance, structural load, and financial models.</p>
+              </button>
+
+              {/* Option 3: Spatial Vault / 3D Capture */}
+              <button
+                type="button"
+                disabled={!canUseVault}
+                onClick={() => canUseVault && setShowWizard('vip_vault')}
+                className={`bg-surface/50 border rounded-lg p-5 text-left transition ${
+                  canUseVault 
+                    ? "border-white/[0.06] hover:border-gold-accent/40 hover:bg-surface-alt cursor-pointer group" 
+                    : "border-white/[0.02] opacity-50 cursor-not-allowed"
+                }`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-mono text-[10px] text-gold-accent uppercase tracking-widest">3D Spatial</span>
+                  {!canUseVault && <span className="font-mono text-[9px] text-text-muted uppercase tracking-wider">Cluster+</span>}
+                </div>
+                <div className="font-working-title text-lg text-on-surface mb-2 group-hover:text-gold-accent transition-colors">The Spatial Vault</div>
+                <p className="text-xs text-text-secondary leading-relaxed">Integrate Matterport, Luma 3D maps, drone heatmaps, and spatial scans.</p>
+              </button>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -280,25 +293,49 @@ export default function OwnerMode() {
     return (
       <div className="max-w-[600px] mx-auto py-lg animate-[fadeIn_0.3s_ease]">
         <button onClick={() => setShowWizard('select_mode')} className="text-text-secondary hover:text-gold-accent mb-8 font-working-title">← Back</button>
-        <h1 className="font-display-md text-4xl text-text-primary mb-2">Upload Pitch Deck or PDF</h1>
-        <p className="text-text-secondary mb-8">Upload your PDF. Our AI will automatically extract property details to create a draft.</p>
+        <h1 className="font-display-md text-4xl text-text-primary mb-2">Upload Property Materials</h1>
+        <p className="text-text-secondary mb-6 leading-relaxed">
+          Upload your brochure, floor plan packet, or pitch deck. ScoutIt parses specifications and creates an editable draft.
+        </p>
+
+        {/* Accepted Formats Chips */}
+        <div className="flex flex-wrap items-center gap-2 mb-6">
+          <span className="font-mono text-[10px] text-gold-accent uppercase tracking-wider font-semibold">Accepted:</span>
+          <span className="px-2 py-0.5 rounded bg-surface border border-white/10 font-mono text-[10px] text-text-secondary">PDF Brochures</span>
+          <span className="px-2 py-0.5 rounded bg-surface border border-white/10 font-mono text-[10px] text-text-secondary">Pitch Decks</span>
+          <span className="px-2 py-0.5 rounded bg-surface border border-white/10 font-mono text-[10px] text-text-secondary">Rent Rolls</span>
+          <span className="px-2 py-0.5 rounded bg-surface border border-white/10 font-mono text-[10px] text-text-secondary">Floor Plans</span>
+          <span className="font-mono text-[9px] text-text-muted ml-auto">Max 25MB</span>
+        </div>
         
-        <div className="bg-surface/40 backdrop-blur-xl border border-white/[0.04] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] rounded-2xl p-12 text-center flex flex-col items-center relative transition-all duration-300 hover:bg-surface/60 overflow-hidden">
+        <div className="bg-surface/40 backdrop-blur-xl border border-white/[0.04] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] rounded-2xl p-10 text-center flex flex-col items-center relative transition-all duration-300 hover:bg-surface/60 overflow-hidden">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 bg-white/5 rounded-full blur-[60px]" />
           <span className="text-4xl mb-4 relative z-10 opacity-80 filter drop-shadow-md">📄</span>
           {selectedFile ? (
             <div className="mb-6 w-full relative z-10">
               <div className="bg-surface-alt/50 p-4 rounded-xl border border-white/10 flex items-center justify-between backdrop-blur-md shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]">
-                <span className="text-on-surface font-working-title text-sm truncate">{selectedFile.name}</span>
+                <div className="flex flex-col text-left truncate mr-2">
+                  <span className="text-on-surface font-working-title text-sm truncate">{selectedFile.name}</span>
+                  <span className="text-[10px] font-mono text-text-muted">{(selectedFile.size / (1024 * 1024)).toFixed(2)} MB</span>
+                </div>
                 <button onClick={() => setSelectedFile(null)} className="text-xs font-bold text-error hover:text-red-400 uppercase tracking-widest transition-colors duration-200">Remove</button>
               </div>
             </div>
           ) : (
             <div className="mb-6 w-full relative z-10">
-              <p className="text-text-secondary mb-6 leading-relaxed">Drag and drop your PDF, or click to browse.</p>
-              <input type="file" accept=".pdf" className="hidden" id="pdf-upload" onChange={(e) => setSelectedFile(e.target.files[0])} />
+              <p className="text-text-secondary mb-6 leading-relaxed">Drag and drop your property document, or click to browse.</p>
+              <input type="file" accept=".pdf" className="hidden" id="pdf-upload" onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  if (file.size > 25 * 1024 * 1024) {
+                    addToast("File exceeds 25MB limit. Please upload a smaller document.", "⚠️");
+                    return;
+                  }
+                  setSelectedFile(file);
+                }
+              }} />
               <label htmlFor="pdf-upload" className="cursor-pointer border border-white/10 text-on-surface font-working-title text-sm px-6 py-2.5 rounded-full hover:bg-white/5 hover:border-white/20 transition-all duration-300 ease-out active:scale-[0.98] inline-block shadow-sm">
-                Choose a PDF file
+                Choose Document (PDF)
               </label>
             </div>
           )}
@@ -653,19 +690,35 @@ export default function OwnerMode() {
 
   // --- VIEW: ZERO LISTINGS ---
   if (!hasListing) {
+    if (isLoading) {
+      return (
+        <div className="max-w-[1200px] mx-auto pt-16 md:pt-0 py-lg px-4 md:px-0 animate-[fadeIn_0.4s_ease]">
+          <div className="mb-sm">
+            <h1 className="font-display-md text-3xl md:text-5xl text-text-primary mb-2 tracking-tight">{firstName ? `Welcome back, ${firstName}` : "Welcome back"}</h1>
+            <p className="text-text-secondary font-body-md text-sm md:text-base">Connecting to your workspace...</p>
+          </div>
+          <CardGridSkeleton count={2} label="Loading your listings" />
+        </div>
+      );
+    }
     return (
       <div className="max-w-[1200px] mx-auto pt-16 md:pt-0 py-lg px-4 md:px-0 animate-[fadeIn_0.4s_ease]">
         <div className="mb-sm">
           <h1 className="font-display-md text-3xl md:text-5xl text-text-primary mb-2 tracking-tight">{firstName ? `Welcome back, ${firstName}` : "Welcome back"}</h1>
-          <p className="text-text-secondary font-body-md text-sm md:text-base">Your workspace is empty.</p>
+          <p className="text-text-secondary font-body-md text-sm md:text-base">Your workspace is ready.</p>
         </div>
         <div className="bg-surface/40 backdrop-blur-xl border border-white/[0.04] rounded-3xl px-4 py-16 md:p-lg flex flex-col gap-6 relative overflow-hidden items-center justify-center text-center md:py-32 mt-8 mx-4 md:mx-0 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gold-accent/5 rounded-full blur-[100px] pointer-events-none" />
-          <h3 className="font-display-md text-2xl md:text-3xl text-on-surface px-2 relative z-10 tracking-tight">Create your first listing</h3>
-          <p className="text-text-secondary max-w-md text-sm md:text-base px-2 relative z-10 leading-relaxed">Build a complete property listing in under 10 minutes.</p>
-          <button className="relative z-10 bg-on-surface text-background font-working-title text-sm active:scale-[0.98] transition-all duration-300 ease-out px-8 py-3.5 rounded-full hover:bg-white/90 shadow-[0_0_20px_rgba(255,255,255,0.1)] mt-2" onClick={() => setShowWizard('select_mode')}>
-            Get Started
-          </button>
+          <h3 className="font-display-md text-2xl md:text-3xl text-on-surface px-2 relative z-10 tracking-tight">Add your first property</h3>
+          <p className="text-text-secondary max-w-md text-sm md:text-base px-2 relative z-10 leading-relaxed">Upload a brochure, flyer, or pitch deck to build a complete property dossier in under 10 minutes.</p>
+          <div className="flex flex-col sm:flex-row gap-3 relative z-10 mt-2">
+            <button className="bg-gold-accent text-background font-working-title text-sm active:scale-[0.98] transition-all duration-300 ease-out px-8 py-3.5 rounded-full hover:bg-gold-bright shadow-[0_0_20px_rgba(232,174,60,0.2)] font-bold" onClick={() => setShowWizard('select_mode')}>
+              Add Property →
+            </button>
+            <Link href="/property" className="border border-white/10 text-text-secondary font-working-title text-sm active:scale-[0.98] transition-all duration-300 ease-out px-8 py-3.5 rounded-full hover:bg-white/5 hover:text-on-surface">
+              Explore Live Feed
+            </Link>
+          </div>
         </div>
       </div>
     );

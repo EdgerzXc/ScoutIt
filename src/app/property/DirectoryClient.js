@@ -23,26 +23,6 @@ import ComparisonMatrix from "@/components/property/ComparisonMatrix";
 import { motion, AnimatePresence } from "framer-motion";
 import "./property.css";
 
-// Dictionary mapping local mockDb slugs to correct UI SpaceCategories
-const MOCK_CATEGORIES = {
-  "batasan-hills": "Residential",
-  "aurelia-residences": "Residential",
-  "the-estate-makati": "Residential",
-  "gridwork-studio": "Commercial",
-  "zuellig-building": "Commercial",
-  "arthaland-century-pacific": "Commercial",
-  "pacific-edge-villa": "STR",
-  "siargao-tropical-villa": "STR",
-  "boracay-bamboo-hideaway": "STR",
-  "palawan-eco-retreat": "Hospitality",
-  "coron-island-resort": "Hospitality",
-  "bohol-treehouse-lodge": "Hospitality",
-  "gallery-by-chele": "Restaurants",
-  "antonios-tagaytay": "Restaurants",
-  "the-glasshouse-bgc": "Venues",
-  "solaire-grand-ballroom": "Venues",
-  "sky-pavilion-makati": "Venues"
-};
 
 // Carry the category-spec + price fields through the card mappers (the source
 // objects have them; the old mappers cherry-picked them away). Spread into each
@@ -237,6 +217,17 @@ function PropertyDirectoryContent({ initialProperties = [] }) {
       }
     }
   }, [initialType]);
+
+  const resetAllFilters = () => {
+    setSelectedSectors([]);
+    setSelectedLocations([]);
+    setSelectedAesthetics([]);
+    setSelectedPriceBands([]);
+    setSelectedBuildingGrades([]);
+    setSelectedBeds([]);
+    setSearchQuery("");
+    setRadius("any");
+  };
 
   // Load Airtable CMS data with mock fallback (now supports Supabase Radius)
   useEffect(() => {
@@ -615,6 +606,26 @@ function PropertyDirectoryContent({ initialProperties = [] }) {
 
             {/* Right Search Input & Properties Grid */}
             <section style={{ display: "flex", flexDirection: "column", flexGrow: 1 }}>
+              {/* Contextual Intelligence Insight Strip */}
+              {widgetArticles.length > 0 && (
+                <div className="mb-4 p-3 rounded-xl bg-surface/80 border border-gold-accent/20 backdrop-blur-md flex items-center justify-between gap-3 text-xs shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]">
+                  <div className="flex items-center gap-2.5 overflow-hidden">
+                    <span className="font-mono text-[9px] tracking-widest uppercase text-gold-accent bg-gold-accent/10 px-2 py-0.5 rounded border border-gold-accent/30 shrink-0 font-bold">
+                      District Intel
+                    </span>
+                    <span className="text-text-secondary truncate">
+                      {widgetArticles[0].title}
+                    </span>
+                  </div>
+                  <Link
+                    href={`/intel/${widgetArticles[0].slug}`}
+                    className="font-mono text-[10px] tracking-wider uppercase text-gold-accent hover:underline shrink-0 flex items-center gap-1 font-semibold"
+                  >
+                    Read Briefing →
+                  </Link>
+                </div>
+              )}
+
               <div className="search-wrapper" style={{ display: "flex", gap: "12px", alignItems: "center", marginBottom: "16px" }}>
                 <input
                   type="text"
@@ -733,7 +744,15 @@ function PropertyDirectoryContent({ initialProperties = [] }) {
                   ) : (
                     <div className="directory-empty">
                       <h2>No spaces match these filters</h2>
-                      <p>Try clearing a filter or widening your search.</p>
+                      <p>Try clearing a filter or widening your search parameters.</p>
+                      <button
+                        type="button"
+                        onClick={resetAllFilters}
+                        className="founding-cta"
+                        style={{ marginTop: "16px", cursor: "pointer", background: "none", border: "1px solid var(--accent-muted)" }}
+                      >
+                        Reset all filters ({rawProperties.length} spaces available) →
+                      </button>
                     </div>
                   )
                 )}
