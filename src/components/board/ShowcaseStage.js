@@ -1194,9 +1194,10 @@ export default function ShowcaseStage({ mode = "full" }) {
         {/* ROW 1: BRAND, DESKTOP AWARDS, & ORBIT RETURN */}
         <div className="sc-top-primary-row">
           <div className="sc-top-brand-block">
-            <Link href="/" className="sc-brand-logo">
-              <span className="sc-logo-scout">Scout</span>
-              <span className="sc-logo-it">It</span>
+            <Link href="/" className="sc-brand-logo" aria-label="ScoutIT — home">
+              <span className="brand-s">S</span>
+              <span className="brand-scout">cout</span>
+              <span className="brand-it">IT</span>
             </Link>
             <div className="sc-telemetry-chip">
               <span className="sc-pulse-dot" />
@@ -1644,13 +1645,15 @@ export default function ShowcaseStage({ mode = "full" }) {
           font-family: var(--font-display), var(--font-geist-sans), sans-serif;
           font-size: 22px;
           font-weight: 700;
-          letter-spacing: 1px;
+          letter-spacing: 1.5px;
           text-decoration: none;
           display: inline-flex;
+          align-items: center;
           line-height: 1;
         }
-        :global(.sc-logo-scout) { color: #f5f3ee; }
-        :global(.sc-logo-it) { color: var(--accent); }
+        :global(.sc-brand-logo .brand-scout) { color: #f5f3ee; }
+        :global(.sc-brand-logo .brand-s),
+        :global(.sc-brand-logo .brand-it) { color: var(--accent); }
 
         .sc-telemetry-chip {
           display: inline-flex;

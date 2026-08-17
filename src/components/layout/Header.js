@@ -113,7 +113,11 @@ export default function Header({ ambientContext = null }) {
           </svg>
         </button>
         <div className={`header-dropdown ${menuOpen ? "open" : ""}`}>
-          <div className="dropdown-brand">ScoutIt</div>
+          <div className="dropdown-brand">
+            <span className="brand-s" style={{ color: "var(--accent)" }}>S</span>
+            <span className="brand-scout">cout</span>
+            <span className="brand-it">IT</span>
+          </div>
           <Link href={profileHref}>{user ? "My Profile" : "Create Account"}</Link>
           <Link href="/">Home</Link>
           <Link href="/discover">Discover</Link>
