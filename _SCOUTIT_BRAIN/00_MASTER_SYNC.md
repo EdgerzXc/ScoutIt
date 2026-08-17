@@ -2,9 +2,27 @@
 section: "00_META"
 status: active
 tags: [master-sync, north-star, build-queue, decision-log, always-current]
-updated: 2026-08-14
+updated: 2026-08-18
 related: ["[[SCOUTIT_FULL_WORKFLOW]]", "[[SESSION_HANDOFF_2026-07-30]]", "[[00_START_HERE]]", "[[15_IMPLEMENTATION_RECORDS/README|Implementation Records]]", "[[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION PLAN]]", "[[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION PLAN]]", "[[13_EXTERNAL_INPUTS/README|External Inputs README]]"]
 ---
+> **2026-08-18 Showcase & 6-Layer Descent session checkpoint:** The Orbit Showcase
+> (`/showcase`) received a complete visual overhaul: cosmic periphery canvas with
+> per-rank atmospheric backgrounds (Universe = deep-space nebula & orbit rings,
+> Cluster = galactic cluster gas clouds, Solar = planetary orbit system, Starry =
+> Van Gogh beach horizon), mobile layout recalibration (3-row compact header, full-width
+> swipeable category rail, restored 16:9 media glass, bottom clearance above floating nav),
+> and the "Asset Specifications" table was replaced with curated **Showcase Distinction &
+> Merits** cards (Demand Standing, Inquiry Momentum, Curation Standard) plus a gold
+> `Explore Full Briefing →` CTA. Two new Master Action Plan sections were added: **§16
+> Monthly Showcase Curation & Merit Calibration SOP** (P0 Operating Rhythm — operators
+> calibrate property merits monthly) and **§17 6-Layer Spatial Descent Visual Style &
+> Layer Navigation Polish** (P1 Experience — cosmic-to-terrestrial transitions across
+> `/layer/orbit` → `/layer/stratosphere` → `/layer/metropolis` → `/layer/crust` →
+> `/layer/mantle` → `/layer/core`). The Showcase Curation Invariant was codified in
+> [[00_SOP]] §2. All changes passed Vitest (1,189/1,189 tests), Next.js production
+> build (116/116 static pages), and were pushed to GitHub as `e8b939d` on
+> `codex/production-release-verification`.
+
 > **2026-08-17 UX direction & workspace cohesion checkpoint:** canonical UX decisions and
 > implementation logic recorded in [[03_DESIGN/SCOUTIT_UX_DIRECTION|SCOUTIT_UX_DIRECTION]],
 > [[07_FEATURES_AND_FLOWS/DASHBOARD_AND_WORKSPACE_COHESION_SPEC|DASHBOARD_AND_WORKSPACE_COHESION_SPEC]], and
@@ -145,6 +163,21 @@ queue. Update package state in the canonical plan first, then mirror it here.
 
 ## 3. Decision Log (highlights — full log lives in [[00_START_HERE]] §6)
 
+- 🆕 ✅ **2026-08-18 — Showcase Curation Invariant codified.** The `/showcase` (The Board)
+  is ScoutIt's premier editorial and spatial showcase. It displays curated **Showcase
+  Distinction & Merits** (Demand Standing, Inquiry Momentum, Curation Standard) — never
+  raw technical specifications or generic data tables. Deep technical briefings live on the
+  dedicated Property Page (`/property/[slug]`), accessed via the gold `Explore Full Briefing →`
+  CTA. Every month, operators calibrate property merits per Master Action Plan §16. Invariant
+  codified in [[00_SOP]] §2. → [[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION PLAN]] §16
+- 🆕 ✅ **2026-08-18 — 6-Layer Spatial Descent architecture documented.** The descent
+  from orbit to core now has a standing specification: Layer 1 Orbit/Universe (`/layer/orbit`
+  & `/showcase`), Layer 2 Stratosphere (`/layer/stratosphere`), Layer 3 Metropolis
+  (`/layer/metropolis`), Layer 4 Crust (`/layer/crust`), Layer 5 Mantle (`/layer/mantle`),
+  Layer 6 Core (`/layer/core` & `/property/[slug]`). Each layer has atmospheric telemetry,
+  particle transitions, and altitude indicators. Per-rank cosmic periphery backgrounds
+  (Universe, Cluster, Solar, Starry) shipped on the Showcase. →
+  [[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION PLAN]] §17
 - 🆕 ✅ **2026-08-02 — full property and Connect lifecycle locked.** CSV, PDF,
   Build from Scratch, and Advanced Editor converge into one Property Review
   Workspace; Spatial Vault is an enhancement. Owners are the primary source of
