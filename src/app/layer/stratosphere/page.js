@@ -101,7 +101,7 @@ export default function StratosphereLayer() {
     return () => { alive = false; };
   }, []);
 
-  const propertyTypes = ["Residential", "Commercial", "STR", "Hospitality", "Restaurants", "Venues/Events"];
+  const propertyTypes = ["Residential", "Commercial", "STR", "Hospitality", "Restaurants", "Venues"];
 
   const getDBCategory = (displayType) => {
     switch (displayType) {
@@ -110,6 +110,7 @@ export default function StratosphereLayer() {
       case "STR": return "STR";
       case "Hospitality": return "Hospitality";
       case "Restaurants": return "Restaurants";
+      case "Venues":
       case "Venues/Events": return "Venues";
       default: return "Residential";
     }
@@ -126,10 +127,10 @@ export default function StratosphereLayer() {
         <LayerHeader 
           layerNum="02" 
           layerName="Stratosphere" 
-          title="Stories & Market Intel" 
-          description="Neighborhood stories, market reports, and design features from around the Philippines." 
+          title="Spatial Intel & Stories" 
+          description="Neighborhood stories, regional market reports, and design features from across the Philippines." 
           missionText="Stratosphere is ScoutIt's intelligence layer. It gathers neighborhood reporting, market signals, and design analyses so you understand the context behind an area before evaluating individual buildings." 
-          ctaText="Discover Stories →"
+          ctaText="Explore Intel Briefings →"
           ctaHref="/intel"
         />
         {/* SECTION 3: Layer 02 */}
@@ -151,7 +152,7 @@ export default function StratosphereLayer() {
 
             <div className="menu-footer" style={{ marginTop: "32px" }}>
               <Link href="/intel" className="prominent-action-link">
-                Read the Stories &rarr;
+                Explore Intel Briefings &rarr;
               </Link>
             </div>
           </div>
@@ -159,8 +160,8 @@ export default function StratosphereLayer() {
           {/* Right Visual Canvas */}
           <div className="descent-content matrix-preview-pane">
             <header className="pane-header">
-              <h3>{activeDiscoverType} Stories</h3>
-              <p>Spotlights, articles &amp; collections</p>
+              <h3>{activeDiscoverType} Intel &amp; Stories</h3>
+              <p>Spotlights, articles &amp; regional market analysis</p>
             </header>
             
             <div className="discover-feed-preview" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
@@ -219,9 +220,9 @@ export default function StratosphereLayer() {
 
               {/* Part 2: Split News & Collections */}
               <div role="region" tabIndex={0} aria-label="Scrollable intelligence stories" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', borderTop: '1px solid #262626', paddingTop: '24px' }}>
-                {/* News & Stories */}
+                {/* Market Intel & Stories */}
                 <div>
-                  <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', textTransform: 'uppercase', color: 'var(--accent)', letterSpacing: '0.1em', marginBottom: '16px' }}>News &amp; Stories</h4>
+                  <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', textTransform: 'uppercase', color: 'var(--accent)', letterSpacing: '0.1em', marginBottom: '16px' }}>Market Intel &amp; Stories</h4>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                     {discoveryFeed[getDBCategory(activeDiscoverType)].news.map((item, idx) => (
                       <Link

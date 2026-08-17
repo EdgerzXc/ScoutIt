@@ -233,25 +233,28 @@ export default function BoardPodium() {
                   style={{ "--tier-color": theme.color, "--tier-border": theme.border }}
                 >
                   <Link href="/showcase" className="orbit-runner-link">
-                    <div
-                      className="orbit-runner-photo"
-                      style={item.photo ? { backgroundImage: `url(${item.photo})` } : undefined}
-                    >
-                      <span className="orbit-runner-rank" style={{ borderColor: theme.border, color: theme.color }}>
-                        #{String(item.rank).padStart(2, "0")}
-                      </span>
-                      <span className="orbit-runner-tier-tag" style={{ color: theme.color }}>
-                        {theme.label}
-                      </span>
-                    </div>
-
                     <div className="orbit-runner-body">
-                      <div className="orbit-card-topbar">
-                        <span className="orbit-prop-category" style={{ color: theme.color }}>{item.category}</span>
-                        <span className="orbit-prop-location">{item.location}</span>
+                      {/* TOP BAR: BADGES (LEFT) + CATEGORY/LOCATION (RIGHT) */}
+                      <div className="orbit-runner-topbar">
+                        <div className="orbit-runner-badges-group">
+                          <span className="orbit-runner-rank" style={{ borderColor: theme.border, color: theme.color }}>
+                            #{String(item.rank).padStart(2, "0")}
+                          </span>
+                          <span className="orbit-runner-tier-tag" style={{ color: theme.color, borderColor: theme.border }}>
+                            {theme.label}
+                          </span>
+                        </div>
+                        <div className="orbit-runner-meta-group">
+                          <span className="orbit-prop-category" style={{ color: theme.color }}>{item.category}</span>
+                          <span className="orbit-prop-dot">·</span>
+                          <span className="orbit-prop-location">{item.location}</span>
+                        </div>
                       </div>
+
+                      {/* MAIN PROPERTY NAME */}
                       <h3 className="orbit-runner-name">{item.name}</h3>
 
+                      {/* BOTTOM STATS + SAVE */}
                       <div className="orbit-runner-stats">
                         <div className="orbit-runner-stat-item">
                           <strong style={{ color: theme.color }}>{item.inquiry_count}</strong>
@@ -821,52 +824,76 @@ export default function BoardPodium() {
         .orbit-runner-link {
           text-decoration: none;
           color: inherit;
-          display: grid;
-          grid-template-columns: 135px 1fr;
+          display: block;
           height: 100%;
         }
 
-        .orbit-runner-photo {
-          position: relative;
-          background: #161618;
-          background-size: cover;
-          background-position: center;
+        .orbit-runner-body {
+          padding: 18px 20px;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        .orbit-runner-topbar {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          flex-wrap: wrap;
+          gap: 8px;
+        }
+
+        .orbit-runner-badges-group {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
         }
 
         .orbit-runner-rank {
-          position: absolute;
-          top: 10px;
-          left: 10px;
-          padding: 3px 8px;
+          padding: 2px 7px;
           border-radius: 4px;
-          background: rgba(0, 0, 0, 0.8);
+          background: rgba(0, 0, 0, 0.7);
           border: 1px solid;
           font-family: var(--font-mono);
           font-size: 11px;
           font-weight: 700;
           font-variant-numeric: tabular-nums;
-          backdrop-filter: blur(6px);
         }
 
         .orbit-runner-tier-tag {
-          position: absolute;
-          bottom: 10px;
-          left: 10px;
           font-family: var(--font-mono);
           font-size: 9px;
           font-weight: 700;
           letter-spacing: 0.14em;
           text-transform: uppercase;
-          background: rgba(0, 0, 0, 0.8);
+          background: rgba(0, 0, 0, 0.7);
+          border: 1px solid;
           padding: 2px 6px;
-          border-radius: 3px;
+          border-radius: 4px;
         }
 
-        .orbit-runner-body {
-          padding: 16px 18px;
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
+        .orbit-runner-meta-group {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          font-family: var(--font-mono);
+          font-size: 10.5px;
+          font-weight: 600;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+        }
+
+        .orbit-prop-dot {
+          color: rgba(255, 255, 255, 0.2);
+        }
+
+        .orbit-prop-category {
+          font-weight: 700;
+        }
+
+        .orbit-prop-location {
+          color: #a8a69f;
+          font-weight: 500;
         }
 
         .orbit-runner-name {
@@ -875,7 +902,7 @@ export default function BoardPodium() {
           font-weight: 500;
           letter-spacing: -0.018em;
           color: #f7f5f0;
-          margin: 4px 0 10px;
+          margin: 0;
           line-height: 1.24;
         }
 
@@ -1106,25 +1133,26 @@ export default function BoardPodium() {
         }
 
         @media (max-width: 640px) {
+          .orbit-showcase-container {
+            padding-bottom: calc(88px + env(safe-area-inset-bottom));
+          }
           .orbit-apex-media {
             height: 200px;
           }
           .orbit-apex-content {
             padding: 16px;
           }
-          .orbit-runner-link {
-            grid-template-columns: 95px 1fr;
-          }
           .orbit-runner-body {
-            padding: 12px 14px;
+            padding: 14px 16px;
+            gap: 8px;
           }
           .orbit-runner-name {
-            font-size: 14.5px;
-            margin: 2px 0 6px;
+            font-size: 15.5px;
+            margin: 0;
           }
           .orbit-runner-stats {
             gap: 10px;
-            padding-top: 6px;
+            padding-top: 8px;
           }
           .orbit-runner-save {
             width: 32px;
