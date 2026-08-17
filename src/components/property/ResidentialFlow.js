@@ -280,6 +280,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
   // not the loading gate.
   const [propertyData, setPropertyData] = useState(() => draftData || initialData || null);
   const [dataLoading,  setDataLoading]  = useState(() => !draftData && !initialData);
+  const [intentStage,  setIntentStage]  = useState("explore");
   const [isOwner, setIsOwner] = useState(false);
   const [propertyRoster, setPropertyRoster] = useState([]);
   const [rosterLoaded, setRosterLoaded] = useState(false);
@@ -1321,7 +1322,10 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>{ch['space']?.chapterNumber || '01'} — {ch['space']?.chapterLabel || 'The Space'}</div>
+                <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['space']?.chapterNumber || '01'} — {ch['space']?.chapterLabel || 'The Space'}</div>
+                {ch['space']?.subtitle && (
+                  <div style={{fontFamily:"var(--font-body)", fontSize:"13px", color:"var(--text-secondary)", marginBottom:"10px", letterSpacing:"0.01em"}}>{ch['space'].subtitle}</div>
+                )}
                 <div style={{height:"1px", background:"var(--border)"}}/>
               </div>
 
@@ -1431,7 +1435,8 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
           <div className={`chapter-panel ${activeTab === "vault" ? "active" : ""}`} id="panel-vault">
             <div className="panel-content" style={{ maxWidth: "100%" }} tabIndex={0} aria-label="Scrollable Spatial Vault content">
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"#E8AE3C", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>PREMIUM — THE SPATIAL VAULT</div>
+                <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"#E8AE3C", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"6px"}}>THE VAULT</div>
+                <div style={{fontFamily:"var(--font-body)", fontSize:"13px", color:"var(--text-secondary)", marginBottom:"10px", letterSpacing:"0.01em"}}>Floor plans, scans & spatial records</div>
                 <div style={{height:"1px", background:"#E8AE3C"}}/>
               </div>
 
@@ -1466,7 +1471,10 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
             <div className="panel-content chapter-frame--map">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono, monospace)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>{ch['location']?.chapterNumber || '02'} — {ch['location']?.chapterLabel || 'Location'}</div>
+                <div style={{fontFamily:"var(--font-mono, monospace)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['location']?.chapterNumber || '02'} — {ch['location']?.chapterLabel || 'Location'}</div>
+                {ch['location']?.subtitle && (
+                  <div style={{fontFamily:"var(--font-body)", fontSize:"13px", color:"var(--text-secondary)", marginBottom:"10px", letterSpacing:"0.01em"}}>{ch['location'].subtitle}</div>
+                )}
                 <div style={{height:"1px", background:"var(--border)"}}/>
               </div>
 
@@ -1658,7 +1666,10 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>{ch['life']?.chapterNumber || '03'} — {ch['life']?.chapterLabel || 'Life Here'}</div>
+                <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['life']?.chapterNumber || '03'} — {ch['life']?.chapterLabel || 'Life Here'}</div>
+                {ch['life']?.subtitle && (
+                  <div style={{fontFamily:"var(--font-body)", fontSize:"13px", color:"var(--text-secondary)", marginBottom:"10px", letterSpacing:"0.01em"}}>{ch['life'].subtitle}</div>
+                )}
                 <div style={{height:"1px", background:"var(--border)"}}/>
               </div>
 
@@ -1722,7 +1733,10 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>{ch['whereto']?.chapterNumber || '04'} — {ch['whereto']?.chapterLabel || 'Where To?'}</div>
+                <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['whereto']?.chapterNumber || '04'} — {ch['whereto']?.chapterLabel || 'Where To?'}</div>
+                {ch['whereto']?.subtitle && (
+                  <div style={{fontFamily:"var(--font-body)", fontSize:"13px", color:"var(--text-secondary)", marginBottom:"10px", letterSpacing:"0.01em"}}>{ch['whereto'].subtitle}</div>
+                )}
                 <div style={{height:"1px", background:"var(--border)"}}/>
               </div>
 
@@ -1838,7 +1852,10 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>{ch['buildplans']?.chapterNumber || '05'} — {ch['buildplans']?.chapterLabel || 'Build Plans'}</div>
+                <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['buildplans']?.chapterNumber || '05'} — {ch['buildplans']?.chapterLabel || 'Build Plans'}</div>
+                {ch['buildplans']?.subtitle && (
+                  <div style={{fontFamily:"var(--font-body)", fontSize:"13px", color:"var(--text-secondary)", marginBottom:"10px", letterSpacing:"0.01em"}}>{ch['buildplans'].subtitle}</div>
+                )}
                 <div style={{height:"1px", background:"var(--border)"}}/>
               </div>
 
@@ -1971,7 +1988,10 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>{ch['hiddenintel']?.chapterNumber || '06'} — {ch['hiddenintel']?.chapterLabel || 'The Fine Print'}</div>
+                <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['hiddenintel']?.chapterNumber || '06'} — {ch['hiddenintel']?.chapterLabel || 'The Fine Print'}</div>
+                {ch['hiddenintel']?.subtitle && (
+                  <div style={{fontFamily:"var(--font-body)", fontSize:"13px", color:"var(--text-secondary)", marginBottom:"10px", letterSpacing:"0.01em"}}>{ch['hiddenintel'].subtitle}</div>
+                )}
                 <div style={{height:"1px", background:"var(--border)"}}/>
               </div>
 
@@ -2036,7 +2056,10 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>{ch['units']?.chapterNumber || '07'} — {ch['units']?.chapterLabel || 'Units & Spaces'}</div>
+                <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['units']?.chapterNumber || '07'} — {ch['units']?.chapterLabel || 'Units & Spaces'}</div>
+                {ch['units']?.subtitle && (
+                  <div style={{fontFamily:"var(--font-body)", fontSize:"13px", color:"var(--text-secondary)", marginBottom:"10px", letterSpacing:"0.01em"}}>{ch['units'].subtitle}</div>
+                )}
                 <div style={{height:"1px", background:"var(--border)"}}/>
               </div>
 
@@ -2151,7 +2174,10 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>{ch['universe']?.chapterNumber || '08'} — {ch['universe']?.chapterLabel || 'Property Universe'}</div>
+                <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['universe']?.chapterNumber || '08'} — {ch['universe']?.chapterLabel || 'Property Universe'}</div>
+                {ch['universe']?.subtitle && (
+                  <div style={{fontFamily:"var(--font-body)", fontSize:"13px", color:"var(--text-secondary)", marginBottom:"10px", letterSpacing:"0.01em"}}>{ch['universe'].subtitle}</div>
+                )}
                 <div style={{height:"1px", background:"var(--border)"}}/>
               </div>
 
@@ -2222,7 +2248,10 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>{ch['services']?.chapterNumber || '09'} — {ch['services']?.chapterLabel || 'Services'}</div>
+                <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['services']?.chapterNumber || '09'} — {ch['services']?.chapterLabel || 'Services'}</div>
+                {ch['services']?.subtitle && (
+                  <div style={{fontFamily:"var(--font-body)", fontSize:"13px", color:"var(--text-secondary)", marginBottom:"10px", letterSpacing:"0.01em"}}>{ch['services'].subtitle}</div>
+                )}
                 <div style={{height:"1px", background:"var(--border)"}}/>
               </div>
 
@@ -2266,7 +2295,10 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>{ch['yourmove']?.chapterNumber || '10'} — {ch['yourmove']?.chapterLabel || 'Your Move'}</div>
+                <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['yourmove']?.chapterNumber || '10'} — {ch['yourmove']?.chapterLabel || 'Your Move'}</div>
+                {ch['yourmove']?.subtitle && (
+                  <div style={{fontFamily:"var(--font-body)", fontSize:"13px", color:"var(--text-secondary)", marginBottom:"10px", letterSpacing:"0.01em"}}>{ch['yourmove'].subtitle}</div>
+                )}
                 <div style={{height:"1px", background:"var(--border)"}}/>
               </div>
 
@@ -2333,23 +2365,123 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                 </div>
               )}
 
-              <div className="hidden md:block w-full">
-                <button onClick={() => setIsInquiryOpen(true)} className="move-cta hover-glow active:scale-[0.98] transition-all" style={{textDecoration:"none", marginTop:"16px", width:"100%", background: "#E8AE3C", color: "#000", border: "none", padding: "16px", fontFamily: "var(--font-body)", fontSize: "16px", cursor: "pointer", borderRadius: "4px"}}>
-                  Connect with an Authorized Broker →
-                </button>
+              {/* Progressive Intent Ladder (§7) */}
+              <div style={{ marginTop: "24px", padding: "20px", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "8px" }}>
+                <div style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--accent)", letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: "8px" }}>
+                  Where are you in your evaluation?
+                </div>
+                <p style={{ fontFamily: "var(--font-body)", fontSize: "14px", color: "var(--text-secondary)", marginBottom: "16px", lineHeight: 1.5 }}>
+                  Choose your level of interest. ScoutIt only connects you with authorized representatives when you ask.
+                </p>
 
-                {!d.is_sample && (
-                  <div style={{ marginTop: "10px", width: "100%" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "10px", marginBottom: "16px" }}>
+                  <button
+                    type="button"
+                    onClick={() => setIntentStage(intentStage === "inspired" ? "explore" : "inspired")}
+                    style={{
+                      padding: "12px 14px",
+                      borderRadius: "6px",
+                      border: intentStage === "inspired" ? "1px solid var(--accent)" : "1px solid var(--border)",
+                      background: intentStage === "inspired" ? "rgba(232,174,60,0.12)" : "rgba(255,255,255,0.02)",
+                      color: intentStage === "inspired" ? "var(--accent-bright)" : "var(--text-primary)",
+                      cursor: "pointer",
+                      textAlign: "left",
+                      transition: "all 0.2s ease"
+                    }}
+                  >
+                    <span style={{ display: "block", fontFamily: "var(--font-mono)", fontSize: "10px", letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: "4px" }}>Tier 1</span>
+                    <span style={{ display: "block", fontFamily: "var(--font-body)", fontSize: "14px", fontWeight: 500 }}>Inspired Me</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setIntentStage(intentStage === "fit" ? "explore" : "fit")}
+                    style={{
+                      padding: "12px 14px",
+                      borderRadius: "6px",
+                      border: intentStage === "fit" ? "1px solid var(--accent)" : "1px solid var(--border)",
+                      background: intentStage === "fit" ? "rgba(232,174,60,0.12)" : "rgba(255,255,255,0.02)",
+                      color: intentStage === "fit" ? "var(--accent-bright)" : "var(--text-primary)",
+                      cursor: "pointer",
+                      textAlign: "left",
+                      transition: "all 0.2s ease"
+                    }}
+                  >
+                    <span style={{ display: "block", fontFamily: "var(--font-mono)", fontSize: "10px", letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: "4px" }}>Tier 2</span>
+                    <span style={{ display: "block", fontFamily: "var(--font-body)", fontSize: "14px", fontWeight: 500 }}>Potential Fit</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setIntentStage(intentStage === "interested" ? "explore" : "interested")}
+                    style={{
+                      padding: "12px 14px",
+                      borderRadius: "6px",
+                      border: intentStage === "interested" ? "1px solid var(--accent)" : "1px solid var(--border)",
+                      background: intentStage === "interested" ? "rgba(232,174,60,0.12)" : "rgba(255,255,255,0.02)",
+                      color: intentStage === "interested" ? "var(--accent-bright)" : "var(--text-primary)",
+                      cursor: "pointer",
+                      textAlign: "left",
+                      transition: "all 0.2s ease"
+                    }}
+                  >
+                    <span style={{ display: "block", fontFamily: "var(--font-mono)", fontSize: "10px", letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: "4px" }}>Tier 3</span>
+                    <span style={{ display: "block", fontFamily: "var(--font-body)", fontSize: "14px", fontWeight: 500 }}>Interested</span>
+                  </button>
+                </div>
+
+                {/* Intent Stage Feedback & Actions */}
+                {intentStage === "inspired" && (
+                  <div style={{ padding: "12px 14px", background: "rgba(255,255,255,0.03)", border: "1px solid var(--border)", borderRadius: "4px", fontSize: "13px", color: "var(--text-secondary)", lineHeight: 1.5 }}>
+                    Space recorded to your inspiration signals. Use the reaction buttons above to bookmark architectural details.
+                  </div>
+                )}
+
+                {intentStage === "fit" && (
+                  <div style={{ padding: "12px 14px", background: "rgba(255,255,255,0.03)", border: "1px solid var(--border)", borderRadius: "4px", fontSize: "13px", color: "var(--text-secondary)", lineHeight: 1.5 }}>
+                    Space added to your evaluation shortlist. You can compare specs against other properties in your Dashboard Board.
+                  </div>
+                )}
+
+                {intentStage === "interested" && (
+                  <div style={{ marginTop: "12px" }}>
+                    <div style={{ padding: "12px 14px", background: "rgba(232,174,60,0.08)", border: "1px solid var(--accent-muted)", borderRadius: "4px", fontSize: "13px", color: "var(--on-surface)", lineHeight: 1.5, marginBottom: "12px" }}>
+                      Ready for introduction. Connect with an authorized, verified broker to arrange a private walkthrough or review title files.
+                    </div>
                     <button
-                      onClick={openCuratedShare}
-                      aria-label="Share this property's briefing"
-                      className="w-full bg-transparent border border-surface-variant text-text-secondary font-mono text-xs tracking-[0.12em] uppercase font-bold py-3 px-4 rounded hover:bg-surface-alt transition-colors active:scale-[0.98] flex items-center justify-center gap-2"
+                      type="button"
+                      onClick={() => setIsInquiryOpen(true)}
+                      className="move-cta hover-glow active:scale-[0.98] transition-all"
+                      style={{
+                        width: "100%",
+                        background: "#E8AE3C",
+                        color: "#000",
+                        border: "none",
+                        padding: "16px",
+                        fontFamily: "var(--font-body)",
+                        fontSize: "16px",
+                        cursor: "pointer",
+                        borderRadius: "4px",
+                        fontWeight: "bold"
+                      }}
                     >
-                      Share
+                      Connect with an Authorized Broker →
                     </button>
                   </div>
                 )}
               </div>
+
+              {!d.is_sample && (
+                <div style={{ marginTop: "12px", width: "100%" }}>
+                  <button
+                    onClick={openCuratedShare}
+                    aria-label="Share this property's briefing"
+                    className="w-full bg-transparent border border-surface-variant text-text-secondary font-mono text-xs tracking-[0.12em] uppercase font-bold py-3 px-4 rounded hover:bg-surface-alt transition-colors active:scale-[0.98] flex items-center justify-center gap-2"
+                  >
+                    Share
+                  </button>
+                </div>
+              )}
               {isOperator && (
                 <button
                   onClick={() => setIsOperatorRequestOpen(true)}

@@ -11,14 +11,14 @@ export async function POST(request) {
     request.headers.get("x-cron-secret") ||
     request.headers.get("authorization")?.replace("Bearer ", "");
   if (!secret || provided !== secret) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401, headers: { "Cache-Control": "private, no-store" } });
   }
 
   try {
     const admin = createAdminClient();
     const summary = await processPendingScans(admin);
-    return NextResponse.json({ ok: true, ...summary });
+    return NextResponse.json({ ok: true, ...summary }, { headers: { "Cache-Control": "private, no-store" } });
   } catch (err) {
-    return NextResponse.json({ ok: false, error: err.message }, { status: 500 });
+    return NextResponse.json({ ok: false, error: err.message }, { status: 500, headers: { "Cache-Control": "private, no-store" } });
   }
 }

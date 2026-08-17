@@ -38,8 +38,7 @@ export default function ConnectsExplainer() {
           Connects are how you make contact.
         </h2>
         <p className="text-sm text-text-secondary leading-relaxed max-w-2xl mb-8">
-          ScoutIt monetizes connection, not discovery. You never pay to look —
-          Connects are only spent when you reach out. Here&apos;s how they work.
+          ScoutIt monetizes direct outreach, not discovery. You never pay to look. Connects are only spent when you reach out to someone or commission a specialist.
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { requireAdmin } from "@/lib/adminGuard";
+import { normalizeConnectRole } from "@/lib/connectsWallet";
+import { isCanonicalConnectWalletActive } from "@/lib/connectsSchemaGate";
 import { z } from "zod";
 import { sanitizeError } from "@/lib/sanitizeError";
 
@@ -14,12 +16,6 @@ import { sanitizeError } from "@/lib/sanitizeError";
 // failed write that never delivered the request, a double charge, a deduction
 // with no conversation created.
 //
-// That exception was policy with no mechanism. Until this route existed,
-// honouring it meant hand-writing an UPDATE against connect_balances, which
-// moves a balance and records nothing: no who, no why, no incident. A refund
-// path with no audit trail is worse than no refund path, because it is
-// indistinguishable from someone quietly topping up a friend's wallet.
-//
 // Deliberately NOT automated anywhere. No cron, no error handler, no retry
 // path calls this. A human decides that ScoutIt was at fault, and their name
 // goes on the ledger row.
@@ -31,10 +27,12 @@ const schema = z.object({
   refId: z.string().optional().nullable(),
 });
 
+function currentYearMonth() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
+
 // ── GET /api/admin/connects-refund?userId=… ─────────────────────
-// The wallet and its recent ledger, so staff can see what actually happened
-// before crediting anything. Refunding blind is how a "double charge" that
-// was really one charge becomes two Connects out of pocket.
 export async function GET(request) {
   try {
     const gate = await requireAdmin(request, { label: "CONNECTS REFUND" });
@@ -43,7 +41,145 @@ export async function GET(request) {
     const userId = new URL(request.url).searchParams.get("userId");
     if (!userId) return NextResponse.json({ error: "Missing userId" }, { status: 400 });
 
-    const [{ data: balance }, { data: ledger }] = await Promise.all([
+    const isCanonical = isCanonicalConnectWalletActive();
+
+    // ─────────────────────────────────────────────────────────────
+    // 1. CANONICAL MODE (Active only when explicitly enabled)
+    // ─────────────────────────────────────────────────────────────
+    if (isCanonical) {
+      const thisMonth = currentYearMonth();
+
+      const [
+        { data: canonicalAcct, error: acctErr },
+        { data: canonicalWallets, error: walletsErr },
+        { data: canonicalLedger, error: ledgerErr },
+        { data: userProfile, error: profileErr },
+        { data: activeHolds, error: holdsErr },
+      ] = await Promise.all([
+        supabaseAdmin
+          .from("user_connect_accounts")
+          .select("user_id, purchased_balance, reward_balance, updated_at")
+          .eq("user_id", userId)
+          .maybeSingle(),
+        supabaseAdmin
+          .from("user_connect_wallets")
+          .select("id, role, granted_balance, granted_month, updated_at")
+          .eq("user_id", userId),
+        supabaseAdmin
+          .from("connect_wallet_ledger")
+          .select("id, role, amount, transaction_type, source, reason, reference_id, created_at")
+          .eq("user_id", userId)
+          .order("created_at", { ascending: false })
+          .limit(25),
+        supabaseAdmin
+          .from("user_profiles")
+          .select("id, primary_mode, role, active_roles, subscription_tier")
+          .eq("id", userId)
+          .maybeSingle(),
+        supabaseAdmin
+          .from("connect_backfill_holds")
+          .select("id, hold_reason, legacy_data, canonical_data, created_at")
+          .eq("user_id", userId)
+          .eq("resolved", false),
+      ]);
+
+      if (acctErr || walletsErr || ledgerErr || profileErr || holdsErr) {
+        console.error("[CONNECTS REFUND] Canonical read error:", {
+          acctErr,
+          walletsErr,
+          ledgerErr,
+          profileErr,
+          holdsErr,
+        });
+        return NextResponse.json({ error: "Failed to query canonical wallet state." }, { status: 500 });
+      }
+
+      const holdsList = activeHolds || [];
+      const hasActiveHold = holdsList.length > 0;
+
+      if (canonicalAcct || (canonicalWallets && canonicalWallets.length > 0) || hasActiveHold) {
+        const primaryRole =
+          normalizeConnectRole(userProfile?.primary_mode) ||
+          normalizeConnectRole(userProfile?.role) ||
+          "seeker";
+
+        const primaryRoleWallet = (canonicalWallets || []).find((w) => w.role === primaryRole);
+        const isPrimaryCurrent = primaryRoleWallet?.granted_month === thisMonth;
+        const primaryGranted = isPrimaryCurrent ? (primaryRoleWallet?.granted_balance || 0) : 0;
+
+        const purchased = canonicalAcct?.purchased_balance || 0;
+        const reward = canonicalAcct?.reward_balance || 0;
+        const permanentBalance = purchased + reward;
+        const primarySpendable = primaryGranted + permanentBalance;
+
+        // Normalized active roles
+        const activeRolesSet = new Set(
+          (userProfile?.active_roles || []).map((r) => normalizeConnectRole(r)).filter(Boolean),
+        );
+        if (activeRolesSet.size === 0) activeRolesSet.add(primaryRole);
+
+        // Sum current-month grants for currently active roles
+        const activeGrantsTotal = (canonicalWallets || []).reduce((sum, w) => {
+          if (w.granted_month === thisMonth && activeRolesSet.has(w.role)) {
+            return sum + (w.granted_balance || 0);
+          }
+          return sum;
+        }, 0);
+        const portfolioTotal = activeGrantsTotal + permanentBalance;
+
+        const balancePayload = {
+          userId,
+          authority: "canonical",
+          purchasedBalance: purchased,
+          rewardBalance: reward,
+          accountPermanentBalance: permanentBalance,
+          primaryRole,
+          primaryRoleGrantedBalance: primaryGranted,
+          primaryRoleSpendableBalance: primarySpendable,
+          portfolioTotalBalance: portfolioTotal,
+          hasActiveHold,
+          activeHolds: holdsList,
+          activeHold: holdsList[0] || null,
+          roleWallets: (canonicalWallets || []).map((w) => ({
+            ...w,
+            isCurrentMonth: w.granted_month === thisMonth,
+            isActiveRole: activeRolesSet.has(w.role),
+          })),
+          // Legacy flat compatibility fields
+          user_id: userId,
+          granted_balance: primaryGranted,
+          purchased_balance: purchased,
+          earned_balance: reward,
+          total_balance: primarySpendable,
+          updated_at: canonicalAcct?.updated_at || new Date().toISOString(),
+        };
+
+        const ledgerPayload = (canonicalLedger || []).map((cl) => ({
+          id: cl.id,
+          role: cl.role,
+          kind: cl.transaction_type,
+          bucket: cl.transaction_type === "refund" ? "purchased" : "hybrid",
+          amount: cl.amount,
+          reason: cl.reason,
+          ref_type: cl.source,
+          ref_id: cl.reference_id,
+          created_at: cl.created_at,
+        }));
+
+        return NextResponse.json({
+          balance: balancePayload,
+          ledger: ledgerPayload,
+          priorRefunds: ledgerPayload.filter((t) => t.ref_type === "system_error_refund" || t.kind === "refund").length,
+        });
+      }
+
+      return NextResponse.json({ error: "No wallet found for that user." }, { status: 404 });
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // 2. LEGACY MODE (Pre-migration default: queries only legacy tables)
+    // ─────────────────────────────────────────────────────────────
+    const [{ data: legacyBalance, error: legBalErr }, { data: legacyLedger, error: legLedgErr }] = await Promise.all([
       supabaseAdmin
         .from("connect_balances")
         .select("user_id, granted_balance, earned_balance, purchased_balance, total_balance, updated_at")
@@ -57,16 +193,28 @@ export async function GET(request) {
         .limit(25),
     ]);
 
-    if (!balance) {
+    if (legBalErr || legLedgErr) {
+      console.error("[CONNECTS REFUND] Legacy read error:", { legBalErr, legLedgErr });
+      return NextResponse.json({ error: "Failed to query wallet state." }, { status: 500 });
+    }
+
+    if (!legacyBalance) {
       return NextResponse.json({ error: "No wallet found for that user." }, { status: 404 });
     }
 
     return NextResponse.json({
-      balance,
-      ledger: ledger || [],
-      // Surfaced so staff can spot a user who has been refunded repeatedly —
-      // a pattern that usually means an unfixed bug, not bad luck.
-      priorRefunds: (ledger || []).filter((t) => t.ref_type === "system_error_refund").length,
+      balance: {
+        ...legacyBalance,
+        authority: "legacy",
+        accountPermanentBalance: (legacyBalance.purchased_balance || 0) + (legacyBalance.earned_balance || 0),
+        primaryRoleSpendableBalance: legacyBalance.total_balance || 0,
+        portfolioTotalBalance: legacyBalance.total_balance || 0,
+        hasActiveHold: false,
+        activeHolds: [],
+        activeHold: null,
+      },
+      ledger: legacyLedger || [],
+      priorRefunds: (legacyLedger || []).filter((t) => t.ref_type === "system_error_refund" || t.kind === "refund").length,
     });
   } catch (err) {
     console.error("[CONNECTS REFUND] GET error:", err);
@@ -82,9 +230,6 @@ export async function POST(request) {
 
     const parsed = schema.safeParse(await request.json());
     if (!parsed.success) {
-      // The 10-character minimum on `reason` is enforced, not advisory. "fix"
-      // or "refund" tells a future auditor nothing about which incident this
-      // was, which defeats the audit row's only purpose.
       return NextResponse.json(
         { error: "A userId, a positive amount, and a reason of at least 10 characters are required." },
         { status: 400 },
@@ -92,9 +237,10 @@ export async function POST(request) {
     }
     const { userId, amount, reason, refId } = parsed.data;
 
-    // The RPC is the atomic part: balance credit + ledger row in one block,
-    // so a credit can never exist without its audit entry.
-    const { data, error } = await supabaseAdmin.rpc("refund_connects_system_error", {
+    const canonical = isCanonicalConnectWalletActive();
+    const refundRpc = canonical ? "refund_connects_system_error_canonical" : "refund_connects_system_error";
+    // Separate names keep the inactive legacy runtime from changing semantics when the proposal is applied.
+    const { data, error } = await supabaseAdmin.rpc(refundRpc, {
       p_user_id: userId,
       p_amount: amount,
       p_reason: reason,
@@ -107,6 +253,12 @@ export async function POST(request) {
       if (msg.includes("WALLET_NOT_FOUND")) {
         return NextResponse.json({ error: "No wallet found for that user." }, { status: 404 });
       }
+      if (msg.includes("WALLET_HOLD_ACTIVE")) {
+        return NextResponse.json(
+          { error: "Refund blocked: user balance is held pending reconciliation resolution." },
+          { status: 409 },
+        );
+      }
       console.error("[CONNECTS REFUND] RPC failed:", error);
       return NextResponse.json({ error: "Refund failed. No Connects were credited." }, { status: 500 });
     }
@@ -118,7 +270,10 @@ export async function POST(request) {
 
     return NextResponse.json({
       success: true,
-      newBalance: result?.total_balance ?? null,
+      balanceAuthority: canonical ? "canonical_account_permanent" : "legacy_spendable",
+      ...(canonical
+        ? { accountPermanentBalance: result?.total_balance ?? null }
+        : { legacySpendableBalance: result?.total_balance ?? null }),
       transactionId: result?.transaction_id ?? null,
     });
   } catch (err) {

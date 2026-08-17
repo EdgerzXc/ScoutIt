@@ -49,9 +49,9 @@ export async function GET(request) {
   const { data, error } = await admin.from("properties").select("*").eq("id", id).single();
 
   if (error || !data) {
-    return NextResponse.json({ error: "Property not found" }, { status: 404 });
+    return NextResponse.json({ error: "Property not found" }, { status: 404, headers: { "Cache-Control": "private, no-store" } });
   }
-  return NextResponse.json({ property: data });
+  return NextResponse.json({ property: data }, { headers: { "Cache-Control": "private, no-store" } });
 }
 
 export async function PATCH(request) {
@@ -164,14 +164,17 @@ export async function PATCH(request) {
       metadata: { fields: Object.keys(safeDetails), airtable_warning: warning },
     });
 
-    return NextResponse.json({
-      success: true,
-      property: saved,
-      ...(warning ? { warning } : {}),
-      ...(rejected.length ? { ignoredFields: rejected } : {}),
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        property: saved,
+        ...(warning ? { warning } : {}),
+        ...(rejected.length ? { ignoredFields: rejected } : {}),
+      },
+      { headers: { "Cache-Control": "private, no-store" } }
+    );
   } catch (err) {
     console.error("[MC PROPERTY] PATCH failed:", err);
-    return NextResponse.json({ error: "Could not save the property." }, { status: 500 });
+    return NextResponse.json({ error: "Could not save the property." }, { status: 500, headers: { "Cache-Control": "private, no-store" } });
   }
 }

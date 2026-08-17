@@ -1,3 +1,11 @@
+-- SUPERSEDED - DO NOT APPLY.
+-- Retained only as historical intent. Live production now has stricter lifecycle,
+-- deal-update, and atomic Connect-spend controls established by the 2026-08-12
+-- critical fixes. Applying this file would weaken those controls and create an
+-- obsolete spend_connects overload.
+-- Authority decision and audit:
+-- _SCOUTIT_BRAIN/15_IMPLEMENTATION_RECORDS/active/launch-readiness/MIGRATION_DRIFT_2026-08-12.md
+
 -- Production Security RLS & Permission Hardening
 -- Drops legacy dev_all_* policies and enforces strict authenticated owner RLS rules.
 

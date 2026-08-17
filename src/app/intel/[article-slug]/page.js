@@ -159,6 +159,32 @@ export default async function IntelArticlePage({ params }) {
                 </div>
               </GlassPanel>
             ) : null}
+
+            {/* Bi-Directional Discovery Gateway */}
+            <GlassPanel className="p-6 mt-10 bg-surface-alt/90 border border-gold-accent/30 rounded-xl relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-48 h-48 bg-gold-accent/5 rounded-full blur-3xl pointer-events-none" />
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
+                <div>
+                  <span className="font-mono text-[10px] text-gold-accent tracking-[0.15em] uppercase block mb-1">
+                    APPLY THIS INTELLIGENCE
+                  </span>
+                  <h4 className="font-serif text-lg text-text-primary mb-1">
+                    Explore spaces connected to this briefing
+                  </h4>
+                  <p className="font-sans text-xs text-text-secondary m-0 max-w-md">
+                    {article.city
+                      ? `Discover verified listings, developments, and opportunities across ${article.city}.`
+                      : `View verified properties matching the ${article.category || 'market'} intelligence profile.`}
+                  </p>
+                </div>
+                <Link
+                  href={article.city ? `/property?q=${encodeURIComponent(article.city)}` : `/property?type=${encodeURIComponent(article.category || 'Commercial')}`}
+                  className="font-mono text-[11px] tracking-wider uppercase font-semibold text-background bg-gold-accent hover:opacity-90 px-5 py-3 rounded transition-all active:scale-95 text-center shrink-0 shadow-[0_0_15px_rgba(232,174,60,0.25)]"
+                >
+                  Explore Affected Spaces →
+                </Link>
+              </div>
+            </GlassPanel>
           </div>
         </section>
 

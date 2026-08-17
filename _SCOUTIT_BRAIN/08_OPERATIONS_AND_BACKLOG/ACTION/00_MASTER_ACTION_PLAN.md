@@ -2,7 +2,7 @@
 section: "08_OPERATIONS_AND_BACKLOG/ACTION"
 status: active
 tags: [canonical, master-action-plan, open-work, launch, roadmap]
-updated: 2026-08-13
+updated: 2026-08-14
 related:
   - "[[2026-08-13_BRAIN_PRUNING_RECORD|Brain Pruning Record]]"
   - "[[MASTER_OWNER_ACTIONS]]"
@@ -43,6 +43,12 @@ acceptance item in the current phase; count checkboxes only when a dated audit
 specifically needs a snapshot.
 
 **Current pilot gate:** the previously exploitable authorization defects are fixed and the 1.0B database change is applied. That does **not** mean code is fully ready: open T0 defects, migration reconciliation, retention/cron work, legal assent, and verification remain below, alongside owner credentials and real-device checks.
+**Migration checkpoint - 2026-08-14:** the owner chose tracked migrations as
+authority and the read-only live audit is complete. Five migrations are ready
+conditionally; `spatial_ref_sys` is held. Nothing was applied. The exact sequence
+and gates are in [[../../15_IMPLEMENTATION_RECORDS/active/launch-readiness/MIGRATION_DRIFT_2026-08-12]].
+
+
 
 **Corrections made in this audit (things that no longer made sense):**
 
@@ -86,8 +92,153 @@ merge `a312ce7`; only the owner dashboard close remains.
 "unit is 882/882". The suite now runs **1015/1015**. That line is a historical record of
 what was true that day, so it has not been rewritten.
 
+## Addendum — re-verification of external claims, 2026-08-16
+
+Read-only pull from GitHub, Vercel, Supabase, and public DNS. Nothing was
+applied, dismissed, enabled, or altered. The purpose was narrow: **this plan
+asserts many things about systems it does not control, and nothing re-reads
+them.** Every claim below was cheap to check and none had been checked since it
+was written.
+
+### What was already true and stays true
+
+| Claim | Verdict |
+|---|---|
+| Five migrations prepared, none applied | ✅ **Confirmed.** Live `list_migrations` shows the last applied is `20260813043104`. None of the five named versions appear |
+| DNS still on GoDaddy | ✅ **Confirmed.** `ns57/ns58.domaincontrol.com` |
+| Google verification token still live on the apex | ✅ **Confirmed.** `google-site-verification=7JuJY3yeardpNnfXokGbh7l5QUUXen4CJESset64uuM`, byte-identical to the value recorded here. **This is the record that must survive any Cloudflare cutover** |
+| No MX records | ✅ **Confirmed.** Zero MX answers |
+| `spatial_ref_sys` RLS still open (ERROR) | ✅ **Confirmed.** Still the one object where "is this reachable?" is yes |
+| `public_profiles` still a `SECURITY DEFINER` view (ERROR) | ✅ **Confirmed.** The 2026-08-13 work closed the anonymous *write* path; the view's `SECURITY DEFINER` property is unchanged and still flagged |
+
+### What had drifted
+
+- [ ] **`rls_enabled_no_policy` is now 19 tables, not 20.** Minor, but it is the
+      kind of number Standing Rule 12 warns about — repeat it often enough and it
+      acquires authority it never earned. Re-count rather than re-copy.
+
+- [ ] **Two advisor categories exist now that did not exist at the 2026-08-13
+      audit**, so they appear in no prior record and no checklist:
+      `anon_security_definer_function_executable` (lint 0028) and
+      `authenticated_security_definer_function_executable` (lint 0029). Six
+      findings, all on PostGIS `public.st_estimatedextent` in its three
+      overloads, callable by both `anon` and `authenticated` via
+      `/rest/v1/rpc/st_estimatedextent`.
+
+      **Assessment: low risk, but do not dismiss it unread.** These are PostGIS
+      built-ins, not ScoutIt functions, and they arrived with the extension
+      rather than with any of our migrations. `st_estimatedextent` returns
+      estimated bounding boxes from planner statistics — it leaks approximate
+      geometry extents, not rows. It is the same root cause as the existing
+      `extension_in_public` warnings for `postgis` and `vector`: **the extension
+      is installed in `public`, so everything it ships is on the public API
+      surface.** Fixing the schema placement retires this whole family at once.
+
+      Note the tension with Standing Rule 8 — new `SECURITY DEFINER` functions
+      must revoke EXECUTE in the same migration — which was written for functions
+      *we* create. An extension installed into `public` sidesteps it entirely by
+      bringing its own. Worth adding to Rule 8's scope.
+
+- [ ] **Advisor findings should be re-read on a schedule, not per-audit.** The
+      lint set itself changes under us; a one-time snapshot silently ages. This
+      is one MCP call and belongs in the same cadence as the freshness crons.
+
+### The process finding underneath all of this
+
+Two items in [[MASTER_OWNER_ACTIONS]] were verifiable from outside and neither
+had been re-checked: item 6 was **finished three days before** and still sat in
+the owner queue, and four of item 3's five credentials were provable by
+observable production behaviour without any dashboard access.
+
+- [ ] **Adopt the rule: an item whose state lives in an external system must
+      record how to re-check it, in one command.** Not who to ask — how to look.
+      Every claim in the table above took under a minute because the check was
+      obvious; the ones that rotted were the ones where it was not written down.
+
+- [ ] Extend `/api/health` to report configured/not-configured booleans (never
+      values) for credentials with no other outward symptom. `RESEND_API_KEY` is
+      the current example: it is the only one of five that could not be verified
+      from outside, and the only way left to test it is to send mail.
+
+### One consequence for §1.6
+
+**There are no MX records on `scoutit.space`.** A contact surface must not
+publish `support@scoutit.space`, or any address at that domain, as a reply
+channel — nothing can receive there. `src/lib/email.js` also sends *from*
+`notifications@scoutit.space`, so replies to ScoutIt's own outbound mail
+currently go nowhere. Recorded against §1.6A, which already forbids publishing
+unmonitored channels; this is the specific evidence for it.
+
+---
+
+## Current execution router - canonical order as of 2026-08-13
+
+> **For future agents:** execute this router, not the physical position of a
+> section farther down the file. Section IDs remain stable because implementation
+> records and Obsidian notes link to them. Completed sections stay in place as
+> evidence; they do not re-enter the queue merely because they appear earlier.
+
+| Order | Gate | Owner lane | Agent-safe lane | Exit condition |
+|---:|---|---|---|---|
+| **0** | Reconcile the release baseline | ✅ **MET, and superseded — see note below the table** | Verify remote ancestry and the deployed commit without changing live systems | Vercel production is `READY` on the current `main` HEAD and the homepage loads |
+| **1** | Short owner checkpoint | Work the **Current checkpoint** at the top of [[MASTER_OWNER_ACTIONS]] | Continue only T0 work that does not mutate live DB, DNS, or provider settings | High-fan-out decisions and credentials are recorded |
+| **2** | Close pre-pilot T0 | Complete real-device, external-dashboard, security-setting, and legal/privacy actions | Close open work in sections 1.0/1.0A/1.0C-F/1.0H, 1.1-1.7, 2.1-2.5, and the pre-pilot 4.5 gate | One release candidate passes code, browser, live-service, legal, and owner evidence |
+| **3** | Run the invited free pilot | Approve cohort, identities, recipients, and monitoring | Support sections 2.6-2.7; fix only evidenced pilot defects | Pilot exit review is recorded |
+| **4** | Post-pilot truth hardening | Approve product/data rules that cannot be inferred | Execute sections 3.0A-3.5 and provider-neutral payment logic only | Real-data cutover is reproducible and trustworthy |
+| **5** | Build honest supply | Lead owner/listing acquisition and verification | Execute section 3.6 supply, freshness, and measured discovery improvements | 200 real approved listings |
+| **6** | Commercial activation | Choose provider, approve offer/legal/infrastructure, and activate paid mode | Finish sections 5.1-5.3 behind fail-closed gates | First payment is truthful, supportable, and reversible |
+| **7** | Trigger-gated expansion | Approve a measured trigger | Activate qualified 4.1/4.2, dormant SEO modules, or [[FUTURE]] items | Module-specific success and rollback gate passes |
+
+> **Gate 0 note, 2026-08-16.** This gate named `77f0ce4` as its exit condition.
+> That was met, and `main` has since advanced eight commits to `53c3b1c`, with
+> Vercel production `READY` on it and `www.scoutit.space` serving it — verified
+> today. The gate is restated against *"the current `main` HEAD"* rather than a
+> fixed SHA, for the same reason the §1.2 rollback target was corrected.
+>
+> **The distinction worth keeping:** a SHA pinned as **evidence** ("this was
+> verified at `77f0ce4`") is correct and should never be updated — that is the
+> historical record. A SHA pinned as an **instruction or exit condition** rots
+> the moment the branch moves. This file contains both; only the second kind
+> needs sweeping.
+
+### What can continue before the owner checkpoint is finished
+
+- Code and test work that does not assume an unresolved data authority, public
+  profile policy, payment provider, or live migration state.
+- Deterministic section 1.0D engineering: Connect ledger role scope correction 3 ready for review; category precedence, Google OAuth redirect contract, raw-style, and silent typo-account defects are closed.
+- Read-only Supabase policy/effective-access analysis and preparation of reviewable
+  migration proposals; never apply against drifted production history without the
+  section 1.12 owner decision and a fresh live-schema read.
+- Section 1.5 responsive experience work, current JSON-LD safety/validation
+  foundations, focused tests, documentation reconciliation, and release evidence.
+
+### What must wait for the owner checkpoint
+
+- Applying or scheduling database migrations, retention jobs, or policy changes.
+- DNS/Cloudflare changes; Search Console must be verified and its TXT record
+  preserved first.
+- Public-profile canonical/indexing changes, live credentials, repository settings,
+
+  paid-provider SDK selection, legal sign-off, and physical-device acceptance.
 ## Priority tiers — what is urgent, what waits, what is locked
 
+> **Current authority:** the table below is the effective tier map. The older
+> dated snapshot is retained in a hidden comment for provenance only.
+
+| Tier | Meaning | Sections/modules |
+|---|---|---|
+| **T0 - NOW** | Blocks a safe invited tester | Open work in 1.0, 1.0A, 1.0C-F, 1.0H, 1.1-1.7, 2.1-2.5, and 4.5. For SEO, only 1.4C foundations/prerequisites and 1.4D Phases 0-2 are T0. |
+| **T1 - THE PILOT** | The pilot run and evidence | 2.6-2.7 |
+| **T2 - AFTER PILOT** | Real-data and trust hardening | 3.0A-3.5 plus provider-neutral payment logic; no live provider activation |
+| **T3 - SUPPLY** | North Star climb | 3.6 until 200 real approved listings |
+| **T4 - COMMERCIAL LOCK** | Cannot take money until North Star and release gates pass | 5.1-5.3; offer/infrastructure preparation may finish before activation |
+| **T5 - FUTURE** | Requires an explicit measured trigger | 4.1, 4.2, 1.4C dormant modules, 1.4D Phases 3-4 where page/data gates are unmet, and [[FUTURE]] |
+
+Completed evidence such as 1.0B and 1.0G is excluded from the open tiers.
+Approximate checkbox totals were removed because nested strategy checklists and
+historical acceptance evidence made them misleading.
+
+<!-- BEGIN:SUPERSEDED_TIER_SNAPSHOT
 Added 2026-08-13. Every section belongs to exactly one tier. **The tier is set by
 what an item BLOCKS, not by how interesting or how large it is.**
 
@@ -104,6 +255,7 @@ sentence, applied.
 | **T3 · SUPPLY** | The North Star climb — 200 real approved listings | §3.6 | 11 |
 | **🔒 T4 · LOCKED** | **Cannot start until the North Star is reached** | §5.1, §5.2, §5.3 | 16 |
 | **T5 · FUTURE** | Parked with a reason or a trigger | §4.1, [[FUTURE]] | 25+ |
+END:SUPERSEDED_TIER_SNAPSHOT -->
 
 ### 🔒 What "locked" actually means
 
@@ -204,12 +356,28 @@ suggestion was wrong for this product; the record is kept so it is not re-propos
 overdue until ~2026-08-22 and no user is affected; it sits here only so the date
 is not missed.
 
+### Current ruling - owner checkpoint now, agent work may continue in parallel
+
+The repository is not generally blocked: the working tree contains no untracked
+code and the former 242-file release bundle is already represented in committed
+history. There is still useful T0 code, test, SEO-safety, responsive-design, and
+read-only security analysis that an agent can perform.
+
+However, **the next high-leverage move is the short owner checkpoint in
+[[MASTER_OWNER_ACTIONS]]**, because migration authority, live platform settings,
+Search Console, public-profile policy, and credentials each block multiple later
+acceptance items. Do not wait for the entire owner checklist before continuing;
+finish its Current checkpoint first, then run owner and agent lanes in parallel.
+
+<!-- BEGIN:SUPERSEDED_BLOCKER_SUMMARY
 ### The one thing that is genuinely blocking today
 
 Nothing in the code. The two live security holes are fixed and verified. **What
 remains in T0 is mostly owner-only confirmation work** — environment variables,
 hostnames, deploys, and real-device passes that an agent cannot perform. See
 [[MASTER_OWNER_ACTIONS]].
+
+END:SUPERSEDED_BLOCKER_SUMMARY -->
 
 ## Strategy to confirm once
 
@@ -404,6 +572,15 @@ optics around a central intelligence rail, joined by thin glowing gold filaments
 controlled signal movement. Extend that design language selectively; do not turn the
 whole product into a cartoon spaceship, noisy cyberpunk HUD, or gaming interface.
 
+## Canonical UX Principle: Humanization Without Flattening
+Canonical spec: `[[03_DESIGN/SCOUTIT_UX_DIRECTION|SCOUTIT_UX_DIRECTION]]`.
+1. **Simple at first contact. Deep on demand.** Do not reduce intelligence — reduce the effort required to find and understand the right intelligence.
+2. **Translation, not replacement.** ScoutIt's branded vocabulary (*The Vault*, *Universe*, *Orbit*, *The Board*, *Where To?*, *Your Move*) remains intact, paired with immediate human-language explanations (e.g. `THE VAULT` / *Floor plans, scans & spatial records*).
+3. **Tool-based, non-linear property experience.** Users choose the intelligence relevant to them; do not consolidate into a generic single-column long scroll.
+4. **Symbiotic Discover & Intelligence.** Search and Intelligence are twin modes of one unified discovery layer.
+5. **No dead ends.** Every empty state becomes a doorway to related spaces or intelligence.
+6. **Progressive intent in Your Move.** Intent is recognized gradually (Inspired Me $\rightarrow$ Potential Fit $\rightarrow$ Interested $\rightarrow$ Connect) rather than aggressively pushing salesperson forms up front.
+
 ---
 
 # PHASE 1 — GET READY FOR HUMAN TESTING
@@ -436,9 +613,29 @@ Do not split repeated desktop/mobile symptoms into separate backlog items.
       total one, and would regress the storage-exhaustion fix. See §1.0C below for the
       only telemetry work still open, and
       [[../../15_IMPLEMENTATION_RECORDS/active/launch-readiness/MIGRATION_DRIFT_2026-08-12]].
-- [ ] Confirm `IP_SALT` is set in the production environment (still open; the
-      schema/length allowlists, server-derived identity, redaction, safe errors,
-      centralized rate coverage, and abuse tests are already complete)
+- [x] **`IP_SALT` is set in production — confirmed 2026-08-16** by reading the
+      Vercel environment-variable list directly (present, Production scope,
+      added Jul 23). The schema/length allowlists, server-derived identity,
+      redaction, safe errors, centralized rate coverage, and abuse tests were
+      already complete, so this closes the item entirely.
+
+      `GEMINI_API_KEY` is also present (Production and Preview), which retires a
+      separate long-standing owner to-do recorded elsewhere as unset.
+
+      Both had been set for weeks. Neither was re-checked because the items said
+      only that someone should confirm, never how — the same pattern corrected in
+      the 2026-08-16 addendum. The full variable inventory read that day was:
+      `AIRTABLE_API_KEY`, `AIRTABLE_BASE_ID`, `CALENDAR_TOKEN_KEY`,
+      `CRON_SECRET`, `GEMINI_API_KEY`, `GOOGLE_OAUTH_CLIENT_ID`,
+      `GOOGLE_OAUTH_CLIENT_SECRET`, `IP_SALT`, `MAPBOX_SERVER_TOKEN`,
+      `NEXT_PUBLIC_GA_ID`, `NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN`,
+      `NEXT_PUBLIC_SENTRY_DSN`, `NEXT_PUBLIC_SITE_URL`,
+      `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_TURNSTILE_SITE_KEY`,
+      `RESEND_API_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `TURNSTILE_SECRET_KEY`,
+      `UPSTASH_REDIS_REST_TOKEN`, `UPSTASH_REDIS_REST_URL`,
+      `WISHLIST_SHARE_SECRET`. **`EMAIL_FROM` is absent** — see
+      [[MASTER_OWNER_ACTIONS]] item 3 for why that matters now that Resend has a
+      key but no verified domain.
 
 - [ ] After the owner audits live Airtable media fields and reconciles Airtable-public
       listings whose Supabase lifecycle/roster record is missing or non-public, deploy
@@ -752,11 +949,16 @@ second home exists.**
 
 ### Real defects
 
+- [x] Closed category precedence defect (2026-08-14): removed obsolete unused `MOCK_CATEGORIES` maps and dead scaffolding across `src/app/property/DirectoryClient.js` and `src/app/intel/page.js`; normalized Airtable `spaceCategory` is authoritative; missing category preserved honestly (not coerced to "Residential") and guarded by `src/lib/__tests__/categoryAuthority.test.js`.
+<!-- BEGIN:HISTORICAL_CATEGORY_PRECEDENCE_DEFECT
 - [ ] 🔴 **`MOCK_CATEGORIES` silently overrides the real category.** Duplicated in
       `src/app/intel/page.js` and `src/app/property/page.js`, evaluated as
       `MOCK_CATEGORIES[p.slug] || p.spaceCategory` — **the hardcoded map wins over
       the live Airtable field**, so a category corrected in Airtable is ignored for
       those slugs. Invert the precedence and share one map
+END:HISTORICAL_CATEGORY_PRECEDENCE_DEFECT -->
+- [x] Closed the raw-style resource hazard: the focused source scan now finds zero bare `<style>{...}</style>` blocks.
+<!-- BEGIN:HISTORICAL_RAW_STYLE_DEFECT
 - [ ] 🔴 **15 files still render a bare `<style>{…}</style>`** (was 17; count
       re-verified 2026-08-13). React 19 hoists a raw `<style>` into `<head>` as a
       stylesheet *resource*; without `precedence` it leaves an enclosing
@@ -764,14 +966,18 @@ second home exists.**
       and `/property` — HTTP 200, clean console, page never arrives. Harmless today
       only because none of the 15 currently sits beside a Suspense boundary; adding
       one reproduces the freeze. Sweep them to `<style jsx>`
+END:HISTORICAL_RAW_STYLE_DEFECT -->
+- [x] Closed silent typo-account creation: onboarding now requires an explicit second confirmation before signup and handles unconfirmed email separately.
+<!-- BEGIN:HISTORICAL_SIGNIN_SIGNUP_DEFECT
 - [ ] 🟠 **Sign-in-then-sign-up creates an account on a typo** (L3).
       `src/app/onboarding/page.js` calls `signInWithPassword` and falls through to
       `signUp` on **any** failure. A typo'd email silently creates a new account;
       the user sees an empty dashboard and assumes their listings vanished. A wrong
       *password* attempts a signup and returns "already registered". **Fix: only
       fall through when the error is specifically "user not found."**
-- [ ] 🟡 **`connect_balances` / `connect_transactions` have no `role` column.**
-      Owner-resolved 2026-08-02; the migration was never written
+END:HISTORICAL_SIGNIN_SIGNUP_DEFECT -->
+- [ ] 🟡 **`connect_balances` / `connect_transactions` role scope and authority unification.**
+      Correction 3 ready for review (2026-08-14): 3-store union reconciliation without MAX masking across differing role rows, hold enforcement across spend/refund/admin RPCs, orphan refund prevention (WALLET_NOT_FOUND/404), typed grant rollover handling, runtime schema capability gate, dedicated reviewable non-auto-run rollback artifact, client fail-closed role normalization across all public methods, and 100% passing test suite (1109/1109). Live application remains owner-gated.
 
 ### Decisions that block other work (owner)
 
@@ -796,9 +1002,12 @@ second home exists.**
 
 ### Smaller, still open
 
+- [x] **Google Calendar OAuth redirect URI contract audited (2026-08-14).** Confirmed canonical callback route is `/api/oauth/google/callback` (not `/api/calendar/callback`); `src/lib/calendar/googleOAuth.js` uses `siteUrl()` for both consent generation and token exchange; guarded by `src/lib/__tests__/googleOAuthRedirect.test.js`. Live Google Cloud Console authorization remains owner-gated in [[MASTER_OWNER_ACTIONS]] §1.8.
+<!-- BEGIN:HISTORICAL_GOOGLE_OAUTH_REDIRECT_AUDIT
 - [ ] **Google Calendar OAuth `redirect_uri_mismatch`.** Audit `/api/calendar/sync`
       and `/api/calendar/callback` to confirm the callback uses `getSiteUrl()`
       dynamically. Pairs with the owner's Google Cloud Console step (Owner Actions §1.8)
+END:HISTORICAL_GOOGLE_OAUTH_REDIRECT_AUDIT -->
 - [ ] **649 inline `style={{ color: "#…" }}` colours** remain from the light-mode
       migration — 420 in `CommercialFlow.js` (225) and `ResidentialFlow.js` (195),
       then `SpatialCommandMap.js` (48), `UnitMasterPage.js` (37). The CSS-file half
@@ -845,9 +1054,13 @@ wordmark and COMMERCIAL / 1500 SQM chips.
 **No brand logo is required for this.** The card leads with the property photo
 and the gold SCOUTIT wordmark.
 
+- [x] OG renderer fix is on `main` in `d97a4cf`; no-photo output now uses the branded dark fallback rather than invalid `backgroundImage: "none"`.
+<!-- BEGIN:HISTORICAL_OG_OPEN_ITEMS
+
 - [ ] Merge the branch so the homepage/no-photo cards stop returning 0 bytes.
 - [ ] **Decide the no-photo fallback.** A listing with no photo currently produces
       a blank card. It should fall back to the branded generic card, not nothing.
+END:HISTORICAL_OG_OPEN_ITEMS -->
 
 ### 📄 sitemap.xml EXISTS — it has simply never been submitted
 
@@ -967,6 +1180,13 @@ working. Verified after: eslint clean, vitest 1021/1021, **CI green**.
       here because nothing real was ever in them — but a genuine credential
       would additionally require history rewriting plus rotation.
 
+## 1.0F Release-bundle inventory - CLOSED 2026-08-13
+
+The former 242-file working tree was reviewed and shipped coherently in `43aa7c7`.
+The repository now has zero untracked files; the disposable logs, patch exports,
+and superseded prompt files listed in the historical snapshot are no longer present.
+
+<!-- BEGIN:HISTORICAL_UNCOMMITTED_TREE
 ## 1.0F Uncommitted working tree — inventory + deletion candidates (2026-08-13)
 
 The owner asked what the ~240 uncommitted files are, having lost track across
@@ -1068,6 +1288,8 @@ Already cleared 2026-08-13 with owner approval: `_to_delete/gitjunk/` (157 git
 internal scratch files, 1.6 MB, zero readable content). Verified before removal
 via `git fsck` (clean), commit reachability, and a full 1021/1021 test run.
 
+END:HISTORICAL_UNCOMMITTED_TREE -->
+
 ## 1.0E Supabase advisors + Vercel runtime health (live read 2026-08-13)
 
 Canonical evidence:
@@ -1082,12 +1304,15 @@ health was not documented at all.
 
 ### The database findings, ranked by real risk
 
+- [x] `public.public_profiles` effective access was audited and its anonymous write path was closed in production on 2026-08-13; anonymous safe-profile reads and `/brokers` were re-verified.
+<!-- BEGIN:HISTORICAL_PUBLIC_PROFILES_FINDING
 - [ ] **Review `public.public_profiles` — a `SECURITY DEFINER` view (ERROR).** It
       runs with its creator's permissions, bypassing the querying user's RLS.
       Given the name, this view almost certainly backs the public profile pages
       and the ecosystem directories, making it the most-read object in the app
       and the likeliest place to leak an unaudited column. Establish which
       columns it exposes before deciding whether `SECURITY DEFINER` is intentional
+END:HISTORICAL_PUBLIC_PROFILES_FINDING -->
 - [ ] **Enable RLS on `public.spatial_ref_sys` (ERROR).** The only object in the
       entire audit where data is genuinely reachable with no policy gate. It is a
       PostGIS system table (coordinate reference definitions — public reference
@@ -1191,8 +1416,32 @@ Only browser behavior remains open.
       authenticated admin control writes `global_read_only`; the proxy preserves GET/
       HEAD/OPTIONS and authentication while returning HTTP 503 for other writes after
       the 30-second cache window. Operator copy now matches the enforced 503 contract,
-      covered by 2/2 focused tests. Rollback target is the verified prior production
-      commit `5289be5`, available through Vercel deployment history or a reviewed revert
+      covered by 2/2 focused tests. <del>Rollback target is the verified prior production
+      commit `5289be5`</del> — see the correction below — available through Vercel
+      deployment history or a reviewed revert
+
+### ⚠️ The rollback target rotted — corrected 2026-08-16
+
+**A hardcoded rollback SHA is a liability, and this one had already become one.**
+`5289be5` was correct when written. Production has since moved through `77f0ce4`
+and then eight further commits to `53c3b1c`. Rolling back to `5289be5` during an
+incident would now silently revert the entire 2026-08-12 authorization fix set
+(`fix_1_0b_*`), the geocode-confidence work, and every map fix — while the
+operator believed they were undoing one bad release.
+
+This is the same failure as the stale owner items in the 2026-08-16 addendum,
+except the cost is paid during an outage, at the worst possible moment, by
+someone who trusted the document.
+
+- [ ] **Replace the hardcoded SHA with a procedure.** The rollback target is
+      *"the most recent Vercel production deployment with `readyState: READY`
+      that precedes the current one"* — which Vercel already tracks and exposes
+      as `isRollbackCandidate`. Read it at incident time; never carry it in prose
+- [ ] Record the rollback drill's **date and outcome** rather than its target.
+      The target changes every release; whether the drill has ever actually been
+      rehearsed does not, and that is the fact worth keeping
+- [ ] Sweep this file for other hardcoded external identifiers that rot the same
+      way — commit SHAs, deployment IDs, and dashboard URLs are the usual set
 
 ## 1.3 Activate sample-listing search protection
 
@@ -1288,6 +1537,276 @@ live in production HTML.
 - [ ] **Carry the `google-site-verification` TXT record across** during the
       Cloudflare migration, or Search Console verification is lost
 
+## 1.4C Adaptive SEO Defense and Counter-Strategy (logic ready; activation gated)
+
+**Owner direction, 2026-08-13:** build for maximum SEO capability, but do not
+operate at maximum SEO intensity until evidence justifies it. **Do not postpone
+the foundations; postpone the weapons.** The architecture should support the full
+strategy while expensive expansion modules remain dormant until supply,
+measurement, conversion, and competitive pressure cross their gates.
+
+This is a counter-strategy, not permission to create a generic content farm or an
+SEO arms race against ScoutIt itself. The long-term moat is proprietary, verified
+property information and entity relationships. AI transforms those facts into
+useful interfaces; it does not invent thousands of pages to capture keyword
+variations.
+
+Google's current guidance supports maintaining a clear technical structure and
+unique, valuable, non-commodity content; it warns against creating separate pages
+for every search variation primarily to manipulate rankings. It also says no
+special AEO/GEO markup or `llms.txt` file is needed for Google Search and recommends
+Search Console for measurement (verified 2026-08-13):
+https://developers.google.com/search/docs/fundamentals/ai-optimization-guide
+
+### Foundations that stay active now
+
+These are product/infrastructure requirements, not optional competitive weapons:
+
+- stable, permanently governed canonical property URLs and redirects;
+- crawlability, indexability, canonical tags, duplicate protection, and honest
+  `noindex` for samples, drafts, thin/unready entities, and unsafe programmatic pages;
+- accurate titles, descriptions, Open Graph data, image alt text, and image metadata;
+- sitemap generation, truthful `lastmod`, Search Console verification, submission,
+  coverage monitoring, and URL inspection;
+- a versioned structured-data framework that mirrors visible, verified facts and
+  can expand without inventing unsupported schema claims;
+- crawlable, descriptive internal links joining property, building, location,
+  units, related properties, comparisons, and later market/history entities;
+- freshness, provenance, confidence, source, verification, and update fields;
+- conversion instrumentation for signup, save, inquiry, Connect spend, viewing,
+  owner registration, and property publication; and
+- a source-backed AI -> deterministic validation -> confidence/routing -> human
+  review when required -> publish pipeline.
+
+Google confirms that crawlable links help discovery and understanding and that
+image alt text becomes anchor text when an image is linked (verified 2026-08-13):
+https://developers.google.com/search/docs/crawling-indexing/links-crawlable
+
+### Prerequisites before competitive expansion
+
+No Yellow/Orange/Red module may activate until all applicable prerequisites exist:
+
+- [ ] Search Console is verified, the sitemap is submitted, and coverage/query data
+      has accumulated long enough to establish a useful baseline
+- [ ] GA4 key events measure qualified outcomes, so rank and traffic are connected
+      to saves, signups, inquiries, viewings, owner registrations, and publications
+- [ ] Canonicals, redirects, robots/noindex, metadata, structured data, page speed,
+      mobile rendering, and internal links pass production checks
+- [ ] ScoutIt has enough real, approved, fresh inventory for entity/location pages
+      to contain unique value; seven sitemap properties cannot support an SEO offensive
+- [ ] Property, building, location, unit, ownership, availability, and history
+      relationships have explicit source/provenance and public-visibility rules
+- [ ] The team can maintain every activated page family, correct it, refresh it,
+      and remove/noindex thin or unsafe pages
+- [ ] A competitor/query monitoring set and activation thresholds are recorded
+      before the first escalation
+
+### SEO Defense Level
+
+Do not use ranking position alone. The defense level is determined by a combined
+view of **position, impressions/qualified traffic, conversion value, inventory
+coverage, and competitive pressure**. A #1 query with no commercial value may
+need maintenance only; a #4 query producing qualified demand may justify focused
+investment.
+
+#### GREEN - maintain and deepen the product
+
+Conditions: important entities are stable or improving, qualified organic demand
+is growing, and no credible competitor is gaining materially.
+
+- maintain foundations, freshness, accuracy, and internal links;
+- grow verified supply toward the 200-listing North Star;
+- deepen proprietary property/location information;
+- fix measured technical or conversion weaknesses; and
+- keep unused expansion modules private and dormant.
+
+#### YELLOW - targeted defense
+
+Trigger: a credible competitor begins gaining impressions or positions 2-5 on
+important property, building, location, or category queries, or ScoutIt loses
+qualified traffic/conversion on those entities across a sustained review window.
+
+- diagnose the affected query/entity cluster rather than changing the whole site;
+- strengthen relevant internal linking and entity relationships;
+- deepen the affected property, building, location, and unit records;
+- expand only the missing structured data supported by visible facts;
+- improve freshness, media, comparisons, and user-task completion; and
+- begin selective, authentic authority/link acquisition.
+
+#### ORANGE - activate expansion modules
+
+Trigger: a competitor is approaching or displacing ScoutIt on commercially
+important query clusters, copying its directory/entity strategy, or capturing
+meaningful qualified demand.
+
+- activate selected location/building/entity hubs with strict minimum-data gates;
+- launch useful comparison, availability, history, and proprietary market-data pages;
+- publish source-backed owner information, local intelligence, and original research;
+- build topic clusters around real datasets and user decisions, not keyword variants;
+- increase editorial/research capacity only for modules with measured opportunity; and
+- test each module against conversion and content-quality thresholds before scaling.
+
+#### RED - full evidence-led offensive
+
+Trigger: sustained market-share threat from a serious property intelligence
+platform across multiple commercially valuable clusters, with verified loss of
+qualified demand or conversion.
+
+- deploy the proven Orange modules across qualified entities;
+- accelerate proprietary datasets, update/availability signals, ownership/history
+  intelligence, comparisons, and original market research;
+- coordinate technical SEO, product, research, owner acquisition, PR, and authentic
+  authority building around the threatened market segments;
+- increase crawl/render capacity and monitoring only where measured scale requires it;
+- protect quality gates, privacy, provenance, and correction rights during expansion; and
+- review defense level at a fixed cadence so emergency intensity does not become
+  permanent operating bloat.
+
+### Dormant SEO Expansion Modules
+
+Keep these designed and documented but inactive until their triggers fire:
+
+- deeper building and location entity pages;
+- unit, comparison, availability, property-history, and market-data page families;
+- proprietary rental/price histories where ScoutIt has lawful, reliable sources;
+- owner-generated and researcher-verified intelligence;
+- selective editorial clusters tied to actual user questions and ScoutIt datasets;
+- authentic digital PR and authority acquisition;
+- multilingual/international SEO only after country/language operations exist; and
+- additional supported structured-data types only when visible product content
+  qualifies for them.
+
+Do not activate mass neighborhood articles, near-duplicate keyword/location pages,
+every conceivable schema type, inauthentic backlink/mention campaigns, speculative
+AI-search hacks, or an editorial organization without measured demand.
+
+### AI content and publishing boundary
+
+Use AI aggressively **behind** ScoutIt's source-of-truth system:
+
+```text
+Proprietary or owner-supplied fact
+  -> source/provenance attached
+  -> deterministic normalization and validation
+  -> confidence and conflict check
+  -> human review when confidence/risk/importance requires it
+  -> useful page, summary, metadata, comparison, FAQ, or explanation
+```
+
+AI may express, organize, compare, and explain verified data. It must not fabricate
+property facts, citations, availability, ownership, prices, histories, or local
+claims. Automatically generated metadata and structured data receive the same
+accuracy checks as visible copy. Google permits responsible generative-AI
+assistance but warns that scaled low-value pages made to manipulate rankings can
+violate spam policies (verified 2026-08-13):
+https://developers.google.com/search/docs/fundamentals/using-gen-ai-content
+
+### Measurement and escalation controls
+
+- [ ] Define the initial commercially important query/entity set only after Search
+      Console verification and the first real supply baseline
+- [ ] Create an SEO Defense dashboard combining position, impressions, qualified
+      organic sessions, conversion, inventory/data completeness, freshness, and
+      named competitor movement
+- [ ] Define sustained-window thresholds and minimum sample sizes for Green ->
+      Yellow -> Orange -> Red; never escalate on one daily ranking fluctuation
+- [ ] Give every expansion module an owner, cost ceiling, expected user value,
+      success metric, rollback/noindex path, and maintenance burden
+- [ ] Record every activation and deactivation decision with its evidence
+- [ ] Review whether organic visitors perform valuable actions rather than treating
+      raw clicks as success; Google likewise recommends assessing conversions and
+      engagement quality (verified 2026-08-13):
+      https://developers.google.com/search/blog/2025/05/succeeding-in-ai-search
+- [ ] Preserve strategic reserve: competitors should be able to observe ScoutIt's
+      current public execution, not every module the architecture can later activate
+
+### 1.4D Structured-data registry and search entity graph (logic ready; build ordered)
+
+**Canonical logic:** [[07_FEATURES_AND_FLOWS/SEO_STRATEGY/README|SEO Strategy]] / [[07_FEATURES_AND_FLOWS/SEO_STRATEGY/SCOUTIT_STRUCTURED_DATA_REGISTRY|Structured Data Registry]] / [[07_FEATURES_AND_FLOWS/SEO_STRATEGY/SEO_IMPLEMENTATION_AND_VALIDATION_RUNBOOK|Implementation and Validation Runbook]] / [[07_FEATURES_AND_FLOWS/SEO_STRATEGY/JSON_LD_SOURCE_CURATION|Source Curation]]
+
+This is an ordered implementation program, not authorization to add every schema
+type from the source guide. Build only truthful page/entity graphs backed by visible,
+authoritative ScoutIt data. Complete Phase 0 before measuring an SEO rollout; Phase 1
+is the safety prerequisite for every later schema expansion.
+
+**Phase 0 - establish measurement and truth**
+
+- [ ] Verify Search Console ownership, submit the production sitemap, and record the
+      initial Page Indexing, Core Web Vitals, rich-result, and crawl baseline
+- [ ] Resolve the public-profile contract before adding `ProfilePage`: decide which
+      verified profiles are public/indexable, then align `robots.js`, metadata,
+      sitemap membership, consent, and privacy rules
+- [ ] Replace raw-traffic reporting with qualified organic actions and GA4 key events;
+      record the baseline before any schema rollout
+- [ ] Inventory every indexable template against the registry and record which visible
+      field is authoritative for every proposed structured-data property
+- [ ] Define a fixed high-intent question set and record the pre-rollout citation/source
+      baseline across major search-assisted answer systems; measure answer accuracy and
+      qualified referrals, not citation count alone
+- [ ] Audit crawler directives by purpose (search indexing, user-triggered answer retrieval,
+      and model training) and record the owner/legal privacy decision before changing access
+
+**Phase 1 - critical JSON-LD safety foundation**
+
+- [ ] Create one code-owned page/schema registry, builder contract, deterministic
+      validator, and safe serializer that escapes `<` before script emission
+- [ ] Reject malformed/unapproved CMS overrides; a parse failure must emit no override
+      or a validated generated fallback, never the original arbitrary text
+- [ ] Change `/api/admin/generate-seo` output into a reviewable proposal; AI may draft
+      expression but cannot create facts, select unsupported types, or directly publish
+      JSON-LD without deterministic validation
+- [ ] Add allowlists and tests for schema types, URLs, dates, coordinates, image URLs,
+      field lengths, empty/legacy records, privacy boundaries, and script-breakout input
+
+**Phase 2 - repair the graphs that already exist**
+
+- [ ] Remove the obsolete Google sitelinks-search-box `SearchAction` assumption and
+      place `WebSite`/`Organization` identity nodes according to the final homepage graph
+- [ ] Repair property breadcrumbs, category-to-type mapping, the inaccurate `Residence`
+      fallback, and the hard-coded Metro Manila region assumption for national inventory
+- [ ] Treat `RealEstateListing` as semantic markup, not promised Google rich-result
+      eligibility; document which more-specific asset node each category can truthfully use
+- [ ] Reclassify property `FAQPage` as semantic-only and retain it only where every answer
+      is visible, authoritative, and the UI is genuinely single-answer rather than community Q&A
+- [ ] Replace sitemap request-time `lastModified` values with real publication/update
+      timestamps or omit them; preserve the existing real-record and SEO-readiness gates
+- [ ] Add focused unit/integration tests for each current page family, category, and
+      malformed/partial data shape before releasing any repaired graph
+
+**Phase 3 - add only qualified, visible page schemas**
+
+- [ ] Add `Article`/`NewsArticle` only to real editorial pages with canonical author,
+      dates, headline, image, and visible body content
+- [ ] Add `ProfilePage` only after the public-profile decision, using the correct main
+      entity (`Person` or `Organization`) and only consented public facts
+- [ ] Add `VideoObject` only where a real watch page exposes stable thumbnail, upload
+      date, duration, and embed/content URL
+- [ ] Keep `Product`/`Offer`, `SoftwareApplication`, `Event`, `Course`, `VacationRental`,
+      and `LocalBusiness` trigger-gated until ScoutIt has the exact real product/page and
+      all required visible fields; never invent price, reviews, ratings, location, or dates
+- [ ] Make qualified public Intel/data pages answer-ready with direct headings,
+      self-contained sourced passages, useful tables, author/reviewer identity,
+      methodology, meaningful update dates, and corrections where applicable
+
+**Phase 4 - connect the search entity graph without thin-page sprawl**
+
+- [ ] Give each public entity one canonical stable `@id` and connect only supported
+      Property -> Place -> Owner/Organization -> Broker/Profile -> Article/Video relationships
+- [ ] Build city, district, building, owner/developer, broker, and research pages only
+      when their readiness threshold is met and they add unique user value; otherwise
+      keep them unpublished/noindex rather than manufacturing doorway pages
+- [ ] Maintain old property URLs and slug history permanently; structured-data IDs and
+      canonical URLs must follow the first-publication slug-lock rule
+
+**Release gate for every phase**
+
+- [ ] Pass schema-unit tests, rendered-page parsing, Google Rich Results Test where the
+      type is supported, Schema.org validation for semantic-only nodes, crawler checks,
+      visible-content comparison, and production canary monitoring
+- [ ] Store before/after evidence, release date, owner, affected templates, and rollback
+      path; remove or roll back markup that becomes inaccurate or produces regressions
+
+---
 ## 1.5 Complete the responsive brand experience
 
 Implement this after the security/data blockers in 1.0, but before inviting human
@@ -1447,6 +1966,543 @@ human testing until the behavior and information architecture below are proven.
       purpose, and luxury styling that breaks accessibility or performance. Existing
       ScoutIt tokens remain canonical unless a deliberate system-wide migration is approved
 
+## 1.6 Reaching a human, and being introduced to the product (added 2026-08-16)
+
+> **Why this section exists.** Two of these three were already described in this
+> file and neither could ever be executed. The
+> [[#CONTACT SURFACE & MMC LIVE CHAT ARCHITECTURE]] block near the end specifies
+> live chat into Mission Control in full prose and contains **no checkbox**, so
+> nothing in the queue ever pointed at it. Confirmed 2026-08-16: there is **no
+> `src/app/contact` route in the repository at all**, and the only chat mockup,
+> `src/components/chat/MockupChatbox.js`, opens by declaring itself *"a static
+> preview, NOT the product."*
+>
+> This is the general failure mode worth naming: **a policy section with no
+> checkbox is a wish, not a plan** (Standing Rule 13 — an endpoint with no caller
+> is not a feature; the same applies to a specification with no queue entry).
+>
+> **Tier: T0 — CONFIRMED BY OWNER 2026-08-16.** An invited tester who cannot
+> reach a human, and cannot tell what a property page is offering them, produces
+> no usable pilot signal. This sits alongside §1.5 (responsive experience) and
+> §2.5 (operational security) as pre-pilot work that is not to be triaged down.
+
+### Status — 2026-08-16 end of session
+
+**1.6A SHIPPED AND VERIFIED IN PRODUCTION.** `/contact` is live, the
+`contact_messages` migration is applied, and the whole path was proven end to
+end against the real deployment rather than asserted:
+
+| Check | Result |
+|---|---|
+| `/contact` | HTTP 200 |
+| `GET /api/contact` | 405 — POST-only, as intended |
+| `POST` with a malformed body | 400 — validation live |
+| Real submission through the live form | `{"ok":true,"message":"Message received."}`, success state rendered |
+| Row in `contact_messages` | Landed with `status='new'` set **server-side**, `ip_hash` populated (salted, never raw), user-agent captured |
+| Table posture | RLS enabled, **0 policies**, `anon` SELECT denied, `authenticated` INSERT denied |
+
+The test row was deleted afterwards so the triage queue starts clean.
+
+Also closed: **four dead `mailto:hello@scoutit.space` links** — two in the
+footer, one on `/enterprise`, one in `EarlyAccessGate` — all repointed. That
+domain has no MX records, so every message sent through the site's own Contact
+link had been going nowhere, silently, with no bounce.
+
+**Email is now genuinely configured.** `/api/health` reports
+`services.email: "configured"` in production, confirming `RESEND_API_KEY` is set
+under the correct name. The sending domain `scoutit.space` was added to Resend
+and its three DNS records placed at GoDaddy — SPF and MX already resolve
+publicly, DKIM was still propagating at end of session. Resend flips itself to
+Verified. **The Google Search Console token was re-checked after every DNS
+change and is intact.**
+
+**1.6D SHIPPED (partial, and the gap is deliberate).** The single global
+four-card wizard is gone; guides now resolve per surface through
+`src/lib/pageGuides.js`, with the property page authored first and in the most
+detail. Owner and broker variants are written and sit in `byRole`, but are **not
+wired**: the only role signal available to that client component is
+`scoutit_user` in localStorage, which §1.5 forbids treating as authorization.
+`guideForPath` already accepts the role, so this is one line once the verified
+session reaches the component.
+
+- [ ] Wire the verified session role into `guideForPath` and enable the owner
+      and broker property-page variants
+- [x] **EMAIL CHAIN PROVEN 2026-08-16 — status `Delivered`.** Resend verified,
+      then a real submission through the live contact form triggered a real send.
+      Resend's own log shows it: `jerzelguerra26@gmail.com · Delivered · "New
+      contact message — Proving Resend delivery…"`.
+
+      The whole path is now evidenced rather than inferred: **public form →
+      Turnstile → API → Postgres row → Resend → a real inbox.** Nobody read the
+      API key to prove it; the send was triggered through the product's own code
+      path, which is the only proof that means anything anyway.
+
+      This also closed the notification gap. `/api/contact` now emails staff on
+      arrival, gated on `CONTACT_NOTIFY_TO` so no recipient is hardcoded, awaited
+      so a provider rejection reaches the logs, and never surfaced to the sender
+      — the row is committed by then, and telling a visitor their message failed
+      because *our* notification bounced would be a lie in the direction that
+      loses their message.
+
+**RESEND VERIFIED 2026-08-16.** DKIM finished propagating and Resend now reports
+**Verified — "Your domain is ready to send emails."** All three records resolve
+publicly; the Google Search Console token was re-checked once more and is intact.
+Email is configured end to end. The one remaining step is a delivered message,
+which needs the API key value and so belongs to the owner or the next real
+notification — not to a read-only check.
+
+**1.6C VERIFIED 2026-08-16, by test rather than by reading.**
+
+| Claim | How it was checked | Result |
+|---|---|---|
+| Exactly one Connect per initiation | `spend_connects` RPC called with `p_amount: 1`; `connects_spent: 1` stamped on the deal | ✅ |
+| Connect / wallet / handshake logic | Ran `connectIntro`, `connectsWallet`, `dealHandshakeApi` | ✅ **24/24 passing** |
+| Contact shielding exists | `maskContactDetails` in `contactLeakFilter.js`, applied on an already-gated surface | ✅ |
+| `MockupChatbox` agrees with the product | Shows **"1 Connect Spent"**, matching the ledger — the "3 Connects" drift recorded in its own header is already corrected | ✅ |
+| Mockup is labelled as a preview | Renders "MOCKUP CHATBOX INTERACTION PREVIEW"; header declares "THIS IS A STATIC PREVIEW, NOT THE PRODUCT" | ✅ |
+
+Worth recording: `MockupChatbox` is **not orphaned** — it backs the public route
+`/showcase/chatbox`. The "update it or delete it" instruction in its header is
+therefore live maintenance on a public page, not cleanup of dead code.
+
+**The Connect money path WAS rehearsed against production — 2026-08-16 — by
+exercising the server logic rather than by signing in as anyone.** Reading the
+live function and its effective grants proves more about whether Connects can be
+abused than one happy-path click-through would, and it spends nothing.
+
+`spend_connects` read from `pg_get_functiondef` on the live database:
+
+| Invariant | Implementation | Verdict |
+|---|---|---|
+| Cannot credit via a negative spend | `if p_amount <= 0 then raise exception` | ✅ |
+| Cannot double-spend under concurrency | `select … for update` row lock | ✅ |
+| Missing wallet fails closed | raises, never silently succeeds | ✅ |
+| Cannot overdraw | balance checked and raises **before** any mutation | ✅ |
+| Ledger matches the debit | one `connect_transactions` row per bucket touched, negative amounts | ✅ |
+| Spend order | granted → purchased → earned, i.e. free balance first | ✅ user-favourable |
+| Search-path hardening | `SECURITY DEFINER` with `SET search_path TO 'public'` | ✅ |
+
+Effective access, checked with `has_function_privilege` / `pg_policies`:
+
+- `spend_connects`: `anon` ❌, `authenticated` ❌, `service_role` ✅ — **Standing
+  Rule 8 satisfied**; the wallet cannot be moved from a browser.
+- `connect_balances`: policy *"Users cannot modify balances"* is `ALL` with
+  `qual: false`; the only other policy is SELECT-own. Writes denied.
+- `connect_transactions`: same shape — read your own, insert nothing.
+
+- [ ] **Defence-in-depth note, not a live defect:** `authenticated` still holds
+      the table-level `UPDATE` **grant** on `connect_balances`. RLS is currently
+      the only thing standing between a signed-in user and their own balance —
+      and the paywall is exactly where two independent gates are worth having.
+      `REVOKE UPDATE ON public.connect_balances FROM authenticated` costs nothing
+      (all writes go through the service role) and removes the reliance on a
+      policy staying correct forever. Prepare with the next migration batch.
+
+**The behaviour behind the screens is covered — 89 tests passing across five
+suites (2026-08-16):** `contactLeakFilter`, `connectIntro`, `connectsWallet`,
+`dealHandshakeApi`, `pageGuides`.
+
+That set includes the part of the walkthrough that actually carries risk: the
+double-blind reveal. `maskContactDetails(text, revealed)` returns the message
+untouched only once `revealed` is true — i.e. after the handshake — and masks
+email and phone-shaped substrings before that. Its own header is worth heeding:
+it is a **courtesy shield on an already-gated surface, not a security boundary**.
+Anything the viewer was never entitled to see must be gated server-side, not
+hidden in the render.
+
+- [ ] **Remaining, and it needs the owner: the manual UI walkthrough**
+      (inquiry → chatbox opens → handshake → identity reveal → close).
+
+      **Not something an agent should do.** It requires authenticating as a test
+      user, and signing in on the owner's behalf is out of scope for an agent
+      regardless of instruction. The practical risk is on record too:
+      `master-dev` owns real production listings and a previous verification pass
+      briefly archived two of them.
+
+      What is already proven, so the walkthrough is confirming screens rather
+      than correctness: the money path (live function + grant audit above), the
+      handshake API, the wallet, and the reveal rule (89 tests).
+
+      Two ways to close it:
+      1. **Owner clicks it through** with one of the flagged demo accounts and
+         records what they see.
+      2. **A dedicated non-production identity is created** — not a demo account
+         layered on production data — after which an agent can drive it end to
+         end safely.
+
+**1.6B — STAFF SIDE BUILT 2026-08-16. `/dashboard/contact` in Mission Control.**
+
+The contact surface was not actually finished when `/contact` shipped: messages
+landed in `contact_messages` and nothing read them. A queue nobody opens is the
+same failure as the mailto it replaced.
+
+- [x] Staff can read, triage and act on visitor messages. `new → in_progress →
+      resolved`, with spam and reopen paths, gated at **OPS_MANAGER** and served
+      only through the service role — the table stays RLS deny-all and holds a
+      stranger's name, email and free text
+- [x] Every status change writes to `mission_control_actions` via
+      `logActionStrict`, so contact triage is covered by the existing audit log
+      and revert engine rather than being a mutation nobody can trace
+- [x] `handled_at` / `handled_by` clear when a message returns to `new`, so
+      "nobody picked this up" stays distinguishable from "someone picked it up
+      and did nothing" (Standing Rule 14 — a NULL is not an assertion)
+- [x] Mission Control builds clean with the route registered
+
+Caught during the build and worth keeping: `logActionStrict` takes `staff`, not
+`actor`. The wrong key would have logged `actor_id: undefined` and thrown inside
+the audit insert — turning a successful triage into a failed request *after* the
+status had already been written. Exactly the class of silent-write bug Standing
+Rule 18 exists for.
+
+- [x] **Staff can now answer, not just triage (2026-08-16).** Reply opens the
+      staff member's own mail client, pre-filled with a `Re:` subject and the
+      original quoted. A queue that can only be marked resolved without anyone
+      having resolved anything is not finished.
+
+      Not a send-from-the-app feature, deliberately. A visitor who has not signed
+      up has no identity and no inbox on ScoutIt, so a reply reaches them by
+      email whichever route it takes — and routing it through the product means
+      the staff member never sees the thread in their own sent mail, the visitor
+      cannot simply reply to a human, and it needs new infrastructure to say
+      something that can already be said.
+
+- [ ] **Remaining for 1.6B: the realtime half.** What exists is a polled queue,
+      not a live chat — staff read and triage, but there is no threaded reply to
+      the visitor and no realtime push. Deciding factor before building it: a
+      visitor who has not signed up has no identity and no inbox, so a "reply"
+      has to go by email. **That now works** (Resend verified 2026-08-16), which
+      makes an email reply the honest next increment rather than a socket.
+- [ ] Decide the retention rule for visitor contact messages before the pilot.
+      The SCOUTIT BIBLE commits to chat being ephemeral and deleted on close;
+      confirm whether that governs staff support messages or only deal chat. It remains fully specced below, and now has its
+storage pattern established by `contact_messages`.
+
+### 1.6A Contact surface — the way a stranger reaches ScoutIt
+
+There is currently no contact page. Reaching ScoutIt depends on `mailto:` links,
+which was a deliberate earlier decision under the Connects model — but that
+decision assumed a registered user inside the product, not a visitor who has not
+signed up and has a question.
+
+- [ ] Build `/contact` as a real route. Reachable from **both** the universal
+      navigation menu and the footer (`src/components/layout/Footer.js`) — a
+      contact surface that exists but cannot be found is the same as none
+- [ ] Ship all four states (Rule: loading / empty / error / success). A contact
+      form whose failure is silent is worse than no form: the visitor believes
+      they have been heard. `InquiryModal.js` already did exactly this once and
+      discarded every real inquiry behind a fake success message
+- [ ] Do not publish a phone number, office address, or support mailbox that is
+      not monitored. Publish only channels that are actually answered; the
+      architecture block lists `support@scoutit.space` and physical addresses as
+      **future placeholder modules**, and Standing Rule 3 forbids rendering what
+      cannot be sourced
+- [ ] Confirm whether `RESEND_API_KEY` is live before contact email is promised.
+      As of 2026-08-16 this is the one production credential that could not be
+      verified from outside, and `src/lib/email.js` states unset is the current
+      production state. If it is unset, contact must not claim an email reply
+
+### 1.6B Live chat into Mission Control — give the existing spec a queue
+
+Implements the [[#CONTACT SURFACE & MMC LIVE CHAT ARCHITECTURE]] block, which
+until now had no executable entry anywhere in this plan.
+
+- [ ] Stream visitor chats from `/contact` into the Mission Control real-time
+      operations queue; staff triage and reply from MMC
+- [ ] **Keep this strictly separate from the post-Connect chatbox (1.6C).** They
+      are different products for different people: this one is an unauthenticated
+      stranger asking ScoutIt a question; that one is two identified parties
+      transacting after a Connect is spent. Never let one inherit the other's
+      identity, retention, or billing rules — Standing Rule 9 (a tier buys data
+      about a property, never access to a person) governs the boundary
+- [ ] Decide and record the retention rule for visitor chat before launch. The
+      SCOUTIT BIBLE commits to chat being ephemeral and deleted on close; confirm
+      whether that applies to staff support chat or only to deal chat
+- [ ] Rate-limit and abuse-guard the intake. It is an unauthenticated write path
+      reachable by anyone; `src/proxy.js` already classifies sensitive routes as
+      fail-closed and this belongs in that set
+
+### 1.6C Verify the post-Connect chatbox still works end to end
+
+**Not new work — verification of a system already built and never re-proven.**
+`src/components/dashboard/ChatBox.js` and `src/app/api/deals/{initiate,handshake,pitch}`
+carry substantial existing logic (Connect spend, double-blind identity, the
+handshake, the ledger, refunds). The owner's concern on 2026-08-16 was that this
+logic is easy to break silently and has real value for ease of use.
+
+- [ ] Rehearse the full path against real records: inquiry → Connect spent →
+      chatbox opens → handshake → identity reveal → close. Standing Rule 15 — run
+      the endpoint before trusting the UI built on it
+- [ ] Confirm exactly **one** Connect is spent per initiation and the ledger
+      agrees. `MockupChatbox.js` drifted to showing "3 Connects" once while the
+      ledger charged 1; a mockup disagreeing with the product is how fabricated
+      figures spread
+- [ ] Confirm the double-blind rule still holds: accepted connections show a
+      name, pending ones stay sealed. Verify against the live UI, not the spec
+- [ ] Re-verify the 1-Connect refund path
+- [ ] Either update `MockupChatbox.js` to match the shipped product or delete it.
+      Its own header says: *"If you change either, update this or delete it."*
+
+### 1.6D Per-page guided introduction — replace the single global wizard
+
+The current guide is not per-page and not role-aware. `WIZARD_STEPS` in
+`src/components/ui/FloatingToolbox.js` is one fixed four-card sequence — The
+Descent, Space Directory, Roles & Connects, Your Profile — shown identically on
+every page in the product, with no owner or broker variant. That is why it does
+not land: it explains ScoutIt in general to someone who is standing on one
+specific screen with one specific question.
+
+- [ ] Replace the global constant with a per-surface guide manifest, one entry
+      per surface, consumed by a single component. **One source, like the
+      navigation manifest in §1.5** — never parallel copies that drift
+- [ ] Author the property-page guide first, since it is the surface the owner
+      named and the densest screen in the product: the chapter rail, the lens
+      bar, the reach ring, the tilt and compass controls, the Vault, and what a
+      Connect actually buys
+- [ ] Make the guide **role-aware** for the three audiences named: seeker/buyer,
+      owner, and broker. Derive the role from the verified Supabase session and
+      server-approved roles — never from `scoutit_user` localStorage (§1.5 sets
+      the same rule for navigation)
+- [ ] Show it once, let it be dismissed, and let it be reopened deliberately. A
+      guide that reappears on every visit is an obstacle; one that can never be
+      found again is a missed explanation
+- [ ] Meet the accessibility bar the rest of the product is held to: focus
+      containment and restoration, Escape to dismiss, no hover-only affordance,
+      reduced-motion honoured, and readable at 360px
+- [ ] **Remove the developer role/tier switcher from the same component before
+      launch.** It is currently revealed by tapping the eye five times or by
+      `?dev=1`, and it writes a mock role and tier to localStorage. Its own
+      comment says *"remove before launch — scaffolding."* Shipping a public
+      control that changes a visitor's apparent entitlements is a gate defect,
+      not a UI defect (Standing Rule 5 — a gate the client evaluates is a
+      suggestion)
+
+---
+
+## 1.7 About page, founder letter, and the written-by-us voice (added 2026-08-16)
+
+> **Full brief: [[../../01_IDENTITY_AND_VISION/ABOUT_PAGE_AND_FOUNDER_VOICE|ABOUT_PAGE_AND_FOUNDER_VOICE]].**
+> That file holds the approved founder letter, the four opening scenarios, the
+> page structure, the voice rules, and the money constraints. Read it before
+> writing a line of this. Do not restate it here; this section is the queue.
+
+> **Tier: owner to set.** Argument for T0: this is the first impression for
+> visitors *and* investors, and the founder is recruiting a team off the back of
+> it. Argument for later: it does not block an invited tester from using the
+> product. Recommend T0 for the letter and copy, and the interactive build
+> after the pilot, since the letter is cheap and the interactive comparison is
+> not.
+
+### 1.7A The letter and the copy
+
+- [ ] Ship the approved founder letter. It is written and signed **Von**; treat
+      changes as founder edits, not as a rewrite brief
+- [ ] Render the four opening scenarios **as scenarios, never as testimonials**.
+      Presented as real user quotes they are invented reviews, which would break
+      the one thing this page is arguing
+- [ ] Keep money claims exactly as ruled: looking is never charged, Starry is
+      free forever and genuinely useful, depth/visibility/reaching a person are
+      what cost. **No prices** — the pricing doc marks every figure placeholder
+      until validated with real users
+- [ ] Say nothing that implies a registered company. ScoutIt is operated by an
+      individual until registration, which is deliberate and comes after demand
+      is proven
+
+### 1.7B The voice pass across the whole site
+
+The founder's instruction was not limited to this page: existing copy reads as
+AI-written and needs humanising. Most of it was drafted by agents.
+
+- [ ] **Start with the homepage.** Founder ruling 2026-08-16: the voice pass is
+      site-wide and the home page is explicitly included, not exempt as
+      "already done". It is the page most people read and the one most likely
+      to have been agent-drafted
+- [ ] Sweep every other surface for the tells listed in the brief. **The em
+      dash rule is necessity, not abolition** (founder correction 2026-08-17):
+      remove the ones doing no work, keep the ones carrying a real break in
+      thought. Test by replacing the dash with a full stop; if the meaning
+      survives, it was decoration. Full worked example in 1.7B-AG below
+- [ ] Audit headings site-wide for the same problem. Generated headings are
+      uniformly balanced and say nothing specific
+- [ ] Replace generic claims with specific ones wherever a specific one exists.
+      "We saw a gap in the market" is generated; "I spent months digging through
+      Maps for answers" happened
+- [ ] Use "I" and never "we" in founder-voice copy while ScoutIt is one person
+
+### 1.7B-AG — Agent execution brief: the voice pass (written for Google Antigravity / Gemini, 2026-08-17)
+
+> **You are the agent. This section is self-contained.** It assumes no prior
+> conversation. Read it fully before editing. If something here contradicts
+> what you infer from the code, this file wins; raise the conflict rather than
+> guessing.
+
+#### What you are doing
+
+Removing the AI-written texture from ScoutIt's user-facing copy, starting with
+the **homepage**, then every other public surface. Most of this copy was drafted
+by AI agents and reads like it.
+
+You are **not** redesigning anything. Copy and micro-typography only. If you
+find a layout or logic bug, write it down and move on.
+
+#### Before you write a single word: load the skills
+
+Two are installed at `.claude/skills/` in this worktree and both are mandatory
+for this task:
+
+| Skill | Path | Why |
+|---|---|---|
+| **taste-skill** (registers as `design-taste-frontend`) | `.claude/skills/taste-skill/skills/taste-skill/SKILL.md` | The anti-slop framework. **Section 14 is the pre-flight checklist — run every box.** |
+| **impeccable** | `.claude/skills/impeccable/` | Loads PRODUCT.md + DESIGN.md + the brand register. Run `node .claude/skills/impeccable/scripts/context.mjs` first |
+
+Originals live at `.agents/skills/` in the repo root if the worktree copies are
+missing.
+
+#### The em dash rule, stated correctly
+
+**Do not delete every em dash.** An earlier pass of this plan said "banned
+outright" and that was wrong. Prose that contorts around missing punctuation
+reads as strange in its own way.
+
+**The tell is the unnecessary one.** AI reaches for a dash where a full stop, a
+colon, or nothing would do, because it is a cheap way to sound considered.
+
+**The test:** replace the dash with a full stop and reread. If the meaning
+survives, the dash was decoration. Remove it.
+
+Worked example, already applied to `src/app/page.js`:
+
+```
+❌  We turn every kind of space — homes, offices, venues, restaurants — into
+    clear, verified intelligence.
+✅  We turn every kind of space into clear, verified intelligence. Homes,
+    offices, venues, restaurants.
+```
+
+The dashes were fencing a plain list. Removing them shortened the sentence and
+the fragment gives the paragraph a short beat between two long ones.
+
+#### The other tells, in priority order
+
+1. **Rhythm.** The strongest signal and the one most agents miss. AI writes
+   sentences of near-identical length with balanced clauses. Humans write a long
+   winding one and then a short one. Vary it deliberately.
+2. **"Not just X, it's Y."** Delete on sight.
+3. **Three-item lists where two would do.**
+4. **Opening with "Here's the thing."**
+5. **Vocabulary nobody says aloud:** robust, seamless, leverage, delve,
+   comprehensive, elevate, unlock, empower, transformative, cutting-edge.
+6. **Generic claims where a specific one exists.** "We saw a gap in the market"
+   is generated. "I spent months digging through Maps for answers" happened.
+
+#### Order of work
+
+1. `src/app/page.js` — the homepage. **Start here.** Founder ruling: the home
+   page is explicitly in scope and not exempt for looking finished.
+2. `src/app/about/`, `src/app/enterprise/`, `src/app/pricing/`
+3. Property page chapter copy under `src/components/property/`
+4. Dashboard empty states and helper text
+5. `src/app/terms/`, `src/app/privacy/` — **STOP. Do not touch these.** They are
+   under a documentation-only hold (§1.7D) pending a legal audit. Changing the
+   voice of a legal page risks changing what it says.
+
+#### Hard constraints
+
+- **"I", never "we", in founder-voice copy.** ScoutIt is one person today.
+- **Never invent a fact, number, testimonial, or capability.** If copy claims
+  something you cannot verify in the code, flag it; do not smooth it over.
+- **The mono-uppercase chapter eyebrows (`01 — THE SPACE`) are a locked brand
+  system**, per `AGENTS.md` and PRODUCT.md principle 5. Generic anti-eyebrow
+  guidance does **not** apply to them. Leave them.
+- **Do not touch the 95/5 dark-to-gold ratio, the palette, or the type scale.**
+- Copy changes only. No component restructuring.
+
+#### How to verify
+
+```bash
+npm run build          # must compile
+```
+
+Then check the surface you changed at 390px and 1280px, and confirm no string
+overflows its container. `src/app/page.js` is the highest-risk file for that
+because the hero uses large `clamp()` scales.
+
+**Known issue, not yours:** the build may fail in `src/app/globals.css` with
+`TypeError: __turbopack_context__.a is not a function`. That is `.next` cache
+corruption, present before this work and reproducible with all changes stashed.
+Fix with `rm -rf .next && npm run build`. Do not chase it into postcss config.
+
+#### Uncommitted work in the tree as of 2026-08-17
+
+Five files carry finished, browser-verified changes that are **not yet
+committed**. Do not revert them:
+
+- `src/components/layout/Header.js` and `ambient/AmbientRail.js` — mobile header
+  fix: the ambient rail was being handed 28px to render 93px of text
+- `src/app/layer/layer-descent.css`, `src/components/board/BoardPodium.js`,
+  `src/app/layer/orbit/page.js` — layer 2 mobile fix: the responsive rules
+  targeted `.board-*` classes while the markup renders `.descent-*`
+
+### 1.7C The interactive build
+
+- [x] **DECIDED 2026-08-16: build new. Do NOT revive the parked UFO origin
+      scrollytelling.** It was tried before and it did not work. The reason is
+      worth keeping: scrollytelling is a *narrative* device that tells the reader
+      a story about the company, and this page needs an *evidence* device that
+      shows the product and lets the reader conclude for themselves. The parked
+      concept stays parked as brand material
+- [ ] Interactivity must prove the argument, not decorate it. The strongest
+      available demonstration is a typical PH listing beside a ScoutIt one, with
+      the visitor able to move between them
+- [ ] **Animation is a layer, never a dependency.** Write the copy so it reads
+      perfectly with every animation switched off, then add motion on top. This
+      is the likely reason the earlier scrollytelling failed: it made the
+      animation load-bearing, so when scroll behaved badly on a phone the page
+      became nonsense. Full direction in the brief
+- [ ] **Stick figure first, black hole later** (recommendation, founder to
+      confirm). The walking figure is a few lines with the already-installed
+      `framer-motion`, costs almost nothing, and matches a letter about doing
+      the work by hand. Keep the walk cycle frame-based rather than smoothly
+      interpolated: slight jank reads as hand-drawn, perfect smoothness reads as
+      computed
+- [ ] If the WebGL version is ever built, **reuse `BlackHoleCanvas.js`** — it
+      already exists at 551 lines, alongside `EventHorizonCanvas` and six
+      background canvases. Lazy-mount it through `InViewport`, gate it behind
+      Lite Mode and `prefers-reduced-motion`, and test on a mid-range Android at
+      320px. Three.js alone blows the 150kb landing-page JS budget several times
+      over, which is fine on the descent pages and is not fine here by default
+- [ ] Meet the same bar as the rest of the product: 320px up, keyboard operable,
+      reduced-motion honoured, no motion that blocks reading
+
+### 1.7D Legal surfaces — DOCUMENTATION ONLY FOR NOW
+
+> ⚠️ **Founder instruction 2026-08-16: document, do not execute.** Nothing in
+> this subsection is authorised to be built, rewritten, or published yet. The
+> task right now is to establish what actually exists and whether it is correct.
+> Drafting new legal text before that audit would be writing over an unknown.
+
+**The order the founder set:** look at what we have right now, then look at
+everything, and confirm what we have is the right and correct way. Audit before
+authorship.
+
+- [ ] **The privacy policy is the urgent one, not the Terms.** RA 10173 applies
+      to whoever is processing personal data, registered or not. Signups,
+      property inquiries and the new contact form are already collecting it
+- [ ] **Build the data inventory first.** A truthful privacy policy is impossible
+      without one, and almost nobody writes it first, which is why most privacy
+      policies are fiction. Enumerate from the codebase: every field collected,
+      where it is stored, and every third party it reaches. The current
+      processor list includes Supabase, Airtable, Mapbox, Cloudflare Turnstile,
+      Google Analytics, Sentry, Upstash, Vercel, Resend and Gemini — ten
+      disclosures owed to users
+- [ ] That inventory is the artefact to hand to counsel or a PH-law-focused
+      review later. It turns their job from guessing into checking, and it can be
+      produced today without registration or a lawyer
+- [ ] Audit the existing `/terms` and `/privacy` pages against what the product
+      actually does. The founder's note: these were written earlier and need
+      tightening against "what we actually have and use and get from others"
+- [ ] Designate a Data Protection Officer. It can be the founder. Already open
+      in [[MASTER_OWNER_ACTIONS]] as part of the legal gate
+
 ---
 
 # PHASE 2 — CONTROLLED PILOT SAFETY
@@ -1510,6 +2566,98 @@ were identified and the exact Mission Control cleanup is ready. The test-record
 checkbox remains open until the owner runs it and the post-write scan is clean.
 
 ## 2.5 Operational security checks
+
+### 2.5.0 Table GRANTs were never audited — money tables fixed 2026-08-16, rest OPEN
+
+**This section had 35 items and none of them looked at the grant layer.** Every
+prior database review — including the 2026-08-13 three-platform audit — examined
+RLS policies. RLS is the *second* gate. The first is the SQL `GRANT`, and on the
+billing tables it was wide open to the public.
+
+Measured on the live database, before the fix:
+
+| Table | `anon` (not signed in) | `authenticated` |
+|---|---|---|
+| `connect_balances` | SELECT, INSERT, UPDATE, DELETE, **TRUNCATE**, REFERENCES, TRIGGER | identical |
+| `connect_transactions` | SELECT, INSERT, UPDATE, DELETE, **TRUNCATE**, REFERENCES, TRIGGER | identical |
+| `subscriptions` | SELECT, INSERT, UPDATE, DELETE, **TRUNCATE**, REFERENCES, TRIGGER | identical |
+
+`TRUNCATE` empties the table. `anon` is a visitor who has not logged in.
+
+`subscriptions` carries this comment in its own schema — *"RLS deny-all BY
+DESIGN. Service-role only. Billing state must never be client-writable - it is
+the paywall"* — while granting TRUNCATE to anonymous callers. The intent was
+written down correctly and enforced in only one of the two places it needed to be.
+
+**Not exploitable when found.** RLS denied the writes, verified by reading the
+policies. The defect is that RLS was the *only* thing denying them: one mistaken
+policy edit, or one migration that drops a policy, turns the paywall into a
+public write endpoint. The plan already flags 41 `multiple_permissive_policies`
+as "the effective access rule is written down nowhere" — this is the same
+exposure one layer lower, and worse, because a grant needs no policy to be
+reached.
+
+- [x] **Fixed 2026-08-16** — migration `lock_down_money_table_grants` applied to
+      production. `anon` now holds nothing on any of the three.
+      `authenticated` keeps SELECT on the two wallet tables only, because the
+      existing "read your own balance / transactions" policies scope it to the
+      caller's own rows; `subscriptions` has zero policies, so its SELECT grant
+      was dead surface and went too. `service_role` retains full access, which
+      is how every legitimate write already happens.
+
+      Verified before applying: no client-side read or write of these tables
+      exists anywhere in `src/`. Every path goes through `supabaseAdmin`
+      (`spend_connects`, `/api/admin/connects-refund`,
+      `/api/auth/complete-onboarding`). Verified after: grant matrix re-read from
+      `has_table_privilege`, live site healthy, `/`, `/property`, `/dashboard`
+      and `/api/cms` all 200.
+
+#### The part that is still open
+
+The three money tables were fixed because they are the paywall and the owner
+asked for those specifically. **They are almost certainly not the only ones.**
+A uniform `SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER` across
+three unrelated tables is the signature of a blanket `GRANT ALL ... TO anon,
+authenticated` in an early migration, not of three separate decisions.
+
+- [ ] **Audit the grant layer for every table in `public`.** One query answers
+      it — this is the "how to re-check it in one command" rule from the
+      2026-08-16 addendum, applied to grants:
+
+      ```sql
+      select c.relname, r.rolname,
+             string_agg(distinct p.priv, ', ' order by p.priv) as granted
+      from pg_class c
+      join pg_namespace n on n.oid = c.relnamespace
+      cross join (values ('anon'),('authenticated')) as roles(rolname)
+      join pg_roles r on r.rolname = roles.rolname
+      cross join lateral (select unnest(array[
+        'SELECT','INSERT','UPDATE','DELETE','TRUNCATE','REFERENCES','TRIGGER'
+      ]) as priv) p
+      where n.nspname = 'public' and c.relkind = 'r'
+        and has_table_privilege(r.rolname, c.oid, p.priv)
+      group by c.relname, r.rolname
+      order by c.relname, r.rolname;
+      ```
+
+- [ ] Expect the 19 `rls_enabled_no_policy` tables to be the sharpest cases.
+      Those are sealed by deny-all RLS *and nothing else*; if they also carry
+      write grants, each is one dropped policy away from public. Several hold
+      exactly what must never be client-reachable — `verification_requests`
+      (identity documents), `deal_disputes`, `file_scans`, `brain_chunks`.
+- [ ] Prefer revoking to the narrowest grant that keeps the product working,
+      then let RLS narrow further. Two gates, not one.
+- [ ] **Add a grant assertion to the release checks.** A finding fixed by hand
+      returns the next time someone writes `grant all` for convenience. This is
+      cheap to assert and expensive to rediscover.
+
+> **Why this was missed for so long, and it is not carelessness:** Supabase's own
+> advisor lints RLS thoroughly and does not lint grants at all. Every review that
+> trusted the advisor inherited that blind spot — including this file's
+> §1.0E, which ranked 30 security findings and contains no grant row. A tool's
+> coverage silently becomes the audit's scope unless someone checks what the tool
+> does not look at.
+
 
 - [ ] Confirm the anonymous `property_photos` upload policy was actually removed;
       apply the prepared migration if it remains
@@ -1995,7 +3143,182 @@ The prose, evidence, and sources must remain readable when every interactive fai
 
 ---
 
-# PHASE 4.5 - LEGAL AND PRIVACY LAUNCH CONTROLS
+## 4.2 Ownership Intelligence and Succession (future)
+
+**Owner direction, 2026-08-13:** this is bigger than a `Property Inheritor`
+field. ScoutIt should eventually have an **Ownership Intelligence** system, with
+**Succession and Heirs** as one module beneath it.
+
+### Locked conceptual model
+
+ScoutIt must keep these layers separate:
+
+```text
+Property
+  -> Registered title holder
+  -> People/entities behind the holder
+  -> Estates or succession events
+  -> Potential successors
+  -> Evidence and verification
+```
+
+The system must distinguish:
+
+1. **Registered ownership** - who appears as the legal/title holder.
+2. **Entity ownership or economic interest** - shareholders, partners, or other
+   interests behind a corporation or partnership.
+3. **Listing authority** - who may manage and publish the ScoutIt listing.
+4. **Succession claim** - who may have inherited an interest.
+5. **Verified succession** - who has sufficient reviewed evidence.
+6. **Registered transfer** - whether the applicable official record changed.
+
+A status at one layer never grants another. A shareholder's heir may inherit an
+interest in the shares while the corporation remains the property's registered
+holder. An OPC nominee may temporarily manage the corporation without becoming
+the heir. A family relationship never automatically determines an ownership
+percentage or transfers the ScoutIt account.
+
+### Holder-specific branches
+
+The first workflow question is: **who legally holds the title?** Branch into:
+
+- individual or multiple individual co-owners;
+- sole proprietor/proprietor;
+- corporation;
+- One Person Corporation, including nominee and alternate nominee;
+- partnership;
+- estate, trust, or another legal structure; or
+- unknown/under research.
+
+Each branch has different succession logic. Do not force every holder through a
+family tree, and do not treat heirs of shareholders or partners as direct owners
+of each property held by the entity.
+
+### Property registration integration
+
+Ownership Intelligence begins inside **property registration**, not as a detached
+research tool added later. The registration flow must progressively ask:
+
+1. Who is registering or listing the property, and what is their relationship to it?
+2. Who is shown as the registered title holder?
+3. What holder type applies?
+4. If there are co-owners or an entity holder, what interests and authorized
+   representatives are known?
+5. Is there a known death, incapacity, estate, succession, nominee, trustee,
+   executor, or unresolved ownership event?
+6. Which statements are owner-supplied claims, and which have supporting evidence?
+
+Registration creates the first ownership **claims**, not automatic legal truth.
+Owner attestation may support publication under ScoutIt's existing publishing
+rule, but it must not produce `legal_verified` or `registered` status by itself.
+The form must support `unknown`, `under research`, `not applicable`, and `complete
+later` so owners are not forced to invent family or corporate information.
+
+The first release should use progressive disclosure:
+
+- **Core registration:** lister relationship, registered-holder name/type, listing
+  authority, and owner attestation.
+- **Conditional branch:** co-owner, corporation, OPC, sole proprietor,
+  partnership, estate/trust, or representative questions only when applicable.
+- **Optional private evidence:** title/entity/authority documents and known
+  succession facts, subject to the legal/privacy gates below.
+- **Research follow-up:** missing or conflicting evidence becomes a private task;
+  it does not silently rewrite the property or block an honest draft.
+
+### User visibility and high-intent entitlement
+
+Users should be able to see useful Ownership Intelligence on a property, but the
+system must separate a safe public summary, paid derived intelligence, and
+case-authorized private evidence:
+
+- **Public/free candidate:** holder type, approved holder display name when lawful,
+  coarse verification badge/date, and whether ownership history or unresolved
+  research exists.
+- **High-intent paid candidate:** a derived ownership map/timeline, entity-versus-
+  property distinction, verification trail, material conflicts, missing-evidence
+  summary, and researcher-approved ownership report.
+- **Never unlocked by payment alone:** birth/marriage/death records, IDs, private
+  addresses, title or stock-book source documents, probate files, family contact
+  data, privileged legal material, raw research notes, or unrestricted exports.
+
+The exact tier is an **open monetization decision**. The working product hypothesis
+is to place detailed derived Ownership Intelligence in a high-intent tier such as
+Cluster+ or Universe, while keeping a trustworthy basic summary visible to all.
+Validate willingness to pay and legal/privacy feasibility before locking the tier.
+A paid entitlement controls product depth; lawful purpose, relationship/case scope,
+and role authorization control sensitive-data access. Both checks are required.
+
+### Evidence graph and verification states
+
+Plan a normalized private relationship graph for `property`, `person`, `entity`,
+`estate`, `document`, `claim`, `relationship`, `verification`, `ownership_event`,
+and `research_task`. Every claim and relationship must carry its own source,
+effective date, learned date, visibility, verification state, and immutable audit
+history.
+
+Use six evidence states:
+
+1. `claimed`
+2. `sourced`
+3. `research_verified`
+4. `conflicted`
+5. `legal_verified`
+6. `registered`
+
+A GIS match alone must not be labelled a verified shareholder. Automation may
+propose claims and research tasks, but it may never declare heirs, calculate legal
+shares, grant high-trust verification, change `properties.owner_id`, publish a
+listing, or transfer account authority.
+
+### Privacy boundary
+
+This system is **private by default**. Family trees, birth/marriage/death records,
+title numbers, stock records, probate/estate documents, IDs, addresses, research
+notes, and conflicts must not enter Airtable or the public CMS. A future public
+property page may show only an expressly approved minimal summary such as holder
+type, coarse verification status/date, and ownership-history availability.
+
+A subscription tier never grants access to genealogy or source documents. Access
+requires a lawful purpose plus case-scoped authority. Account succession and legal
+property succession are separate workflows.
+
+### Trigger and ordered work
+
+This is approved future direction, not launch scope. Until the gates below pass,
+use synthetic data only and do not solicit real genealogy or succession documents.
+
+- [ ] Founder selects the first justified use case and activation trigger: paid
+      title research, enterprise portfolio diligence, or an internal verification need
+- [ ] Philippine counsel reviews terminology, holder branches, source hierarchy,
+      professional-review scope, public labels, correction/dispute handling, and
+      the distinction between legal verification and registered transfer
+- [ ] Complete a privacy impact assessment, threat model, and lawful-basis/purpose
+      matrix covering living non-users, minors, civil-registry data, government IDs,
+      privileged material, public records, retention, objections, and legal holds
+- [ ] Decide whether ScoutIt stores source documents, verified extracts,
+      hashes/references, or a controlled combination
+- [ ] Design normalized private tables and case-scoped RLS for parties, title
+      interests, entity interests, relationships, claims, evidence, verification,
+      events, research tasks, and access logs; do not place genealogy JSON in
+      `properties.details`
+- [ ] Prove graph operations cannot change listing ownership, publishing, lead
+      routing, entitlements, or account access
+- [ ] Build a synthetic Mission Control research workspace with Ownership Map,
+      accessible table/timeline, Evidence Drawer, conflicts, missing-evidence queue,
+      corrections, and audit trail
+- [ ] Pilot individual/co-owner and corporation branches first; add OPC, sole
+      proprietor, partnership, estate/trust, and representative branches afterward
+- [ ] Red-team forged evidence, identity collisions, malicious family claims,
+      unauthorized merging/export, insider browsing, self-approval, and account takeover
+- [ ] Release only a counsel/privacy-approved minimal public projection after real
+      correction, dispute, access-review, retention, and incident rehearsals pass
+
+---
+# PRE-PILOT LEGAL AND PRIVACY GATE (stable section 4.5)
+
+This gate executes during router Order 2, before invited humans enter the pilot.
+Its stable 4.5 identifier and physical location are retained only to preserve
+existing cross-references; it is not post-pilot work.
 
 These are engineering controls, not legal conclusions. Owner, counsel, filing, and approval work lives in [[MASTER_OWNER_ACTIONS]]. Supporting analysis lives in [[16_LEGAL_AND_COMPLIANCE/README|Legal and Compliance]].
 
@@ -2074,7 +3397,6 @@ Do not accept money until every item in this phase is complete.
 | D1 | Confirm the strategy at the top of this file | Confirm now |
 | D2 | Delivery choice for each of six pricing benefits | Before any payment |
 | D3 | May a broker see property traffic before representation is accepted? | No |
-| D4 | When may public profiles be indexed? | After demo profiles are removed; otherwise per-demo `noindex` |
 | D5 | FAQ Silver meaning | Separate licensed Advisor Spec from Contributor |
 | D6 | May delegated brokers confirm freshness? | Yes, with verifier audit trail |
 | D7 | Hidden FAQ retention period | 90–180 days plus manual erasure |
@@ -2084,6 +3406,25 @@ Do not accept money until every item in this phase is complete.
 
 Record the answer here, convert it into an action in the correct phase, and
 remove the decision row. Do not duplicate it in another checklist.
+
+## Answered and removed
+
+**D4 — when may public profiles be indexed? Answered by the owner 2026-08-16.**
+Removed from the table above per this section's own rule.
+
+The ruling is *not* the recommended default that sat here. The default made
+indexing wait on **demo profiles being removed**, treating them as a temporary
+obstacle. The approved policy instead makes the gate a property of each profile:
+index only profiles that are **real, verified, and explicitly made public by the
+person**, with exposure governed by an **explicit public-field allowlist**.
+
+Demo and sample profiles therefore stay `noindex` permanently because they are
+not real and verified — not because they are awaiting deletion. That removes the
+dependency entirely, and it survives new demo data being added later, which the
+original default would not have.
+
+Full text and consequences: [[MASTER_OWNER_ACTIONS]] item 4. Execution lands in
+§1.4 search-indexing follow-through.
 
 ---
 
@@ -2219,6 +3560,189 @@ qualifying super-large spatial asset - the activation work must include:
 
 2. **Universal Header Integration**:
    - The platform's **Universal Header (`Header.js`)** must remain accessible across all dashboard pages to provide seamless navigation between public discovery and private workspace environments.
+
+---
+
+# SCOUTIT UX DIRECTION — HUMANIZATION, NAVIGATION & PROPERTY EXPERIENCE
+
+> **Canonical Spec:** `[[03_DESIGN/SCOUTIT_UX_DIRECTION|SCOUTIT_UX_DIRECTION]]`.
+> **Core Commitment:** *ScoutIt should help someone understand a space before asking them to act on it.* Simple at first contact; deep on demand. Do not reduce intelligence — reduce the effort required to find and understand the right intelligence.
+
+1. **Humanize Without Removing Identity (Translation, Not Replacement)**:
+   - ScoutIt's distinctive branded nomenclature (*The Vault*, *Universe*, *Orbit*, *Intelligence*, *The Board*, *Where To?*, *Your Move*) remains intact.
+   - Do not replace branded vocabulary with generic real-estate terms. Instead, pair each with immediate plain-language subtitles:
+     - **THE VAULT** — *Floor plans, scans & spatial records*
+     - **UNIVERSE** — *Building history & wider property context*
+     - **THE BOARD** — *Your saved and compared spaces*
+     - **WHERE TO?** — *Travel times & nearby destinations*
+     - **YOUR MOVE** — *Save, evaluate or connect when you're ready*
+
+2. **Discover and Intelligence As One Unified System**:
+   - Market Intelligence (`/intel`) and Space Discovery (`/discover`) are two modes of one single layer: `[Search]` | `[Intelligence]`.
+   - **Intelligence $\rightarrow$ Discovery:** Micro-market insights and signals prompt links to explore spaces in that district.
+   - **Discovery $\rightarrow$ Intelligence:** Search results provide context on *why* these locations match the intelligence criteria.
+   - Desired user loop: **Discover $\rightarrow$ Understand $\rightarrow$ Refine $\rightarrow$ Discover**.
+
+3. **Tool-Based, Non-Linear Property Experience**:
+   - The 11 property experience tools will **not** be flattened into a single linear long scroll.
+   - Preserves non-linear user journeys (e.g. Seeker A: Location $\rightarrow$ Units $\rightarrow$ Your Move; Seeker B: The Space $\rightarrow$ Fine Print $\rightarrow$ Build Plans).
+   - Improves **orientation** (*"Explore this property: Choose what matters to you"*) while keeping individual tools independently accessible.
+
+4. **Spatial Vault as Capability Demonstration (Human Testing Logic)**:
+   - Showcases multiple spatial formats (floor plans, 360° tours, Matterport, drone scans, BIM, walkthroughs) to demonstrate platform capabilities.
+   - In production, properties render only the spatial intelligence actually captured for that space.
+   - Demo label: *"Spatial Vault Demonstration: Sample spatial formats ScoutIt can support. Actual properties display only intelligence available for that space."*
+
+5. **Explanatory Verification & Trust System**:
+   - Verification badges must explain **why** something or someone can be trusted rather than displaying an arbitrary score.
+   - Categories: Property (Owner Verified, Availability Confirmed, Floor Plan Verified), Owner (Identity Verified, Responsive Owner), Broker (Identity Verified, Owner Authorized, Local Specialist).
+
+6. **Transparent Mock/Sample Data Demarcation**:
+   - Demonstration listings retain deep mock intelligence during human testing so testers experience the full vision.
+   - Clear global banner: *"DEMONSTRATION PROPERTY: Some intelligence, availability, pricing and spatial information shown here is illustrative."*
+   - Explicit `DEMO DATA` tags on sensitive sections (legal, risk, structural, pricing, sensor/drone).
+
+7. **Progressive Intent in Your Move**:
+   - Do not aggressively push broker contact forms across every section.
+   - Early interactions offer low-pressure tools (Save, Compare, Share).
+   - As engagement deepens (multiple images, Units, Fine Print, Vault), gently suggest *"Seen enough? Your Move $\rightarrow$"*.
+   - Progression inside Your Move: `Inspired Me` $\rightarrow$ `Potential Fit` $\rightarrow$ `Interested` (reveals *"Connect with an authorized professional"*).
+
+8. **Comparison System Foundations**:
+   - Normalized data fields preserved across listings (area, price/sqm, type, availability, commute, risks, verification status).
+   - Long-term goal for The Board: help users understand *why* one space fits them better than another.
+
+9. **Zero Dead Ends (Doorway Principle)**:
+   - Empty search results or unavailable records must never end the journey.
+   - Replace *"No properties available"* with *"Nothing matching this search yet"* accompanied by proactive doorways: *Explore all spaces $\rightarrow$*, *Change your search $\rightarrow$*, *Explore another area $\rightarrow$*, *View related intelligence $\rightarrow$*.
+
+---
+
+# INITIATIVE — DASHBOARD & WORKSPACE COHESION (v1.0 • 2026-08-17)
+
+> **Canonical Specification:** `[[07_FEATURES_AND_FLOWS/DASHBOARD_AND_WORKSPACE_COHESION_SPEC|DASHBOARD_AND_WORKSPACE_COHESION_SPEC]]`.
+> **North Star:** Make ScoutIt satisfying and coherent at the 10–20 listing stage before expanding into large-enterprise complexity.
+> **Core Architectural Loop:** *Context Bridges create activity $\rightarrow$ Notifications understand it $\rightarrow$ Return Brief summarizes it $\rightarrow$ Continue remembers where you were $\rightarrow$ Your Board interprets what you've accumulated.*
+
+## Sequenced Execution Router (Order of Work)
+
+| Step | Work | Ref | Why Now / Objective |
+|---|---|---|---|
+| **16.1** | Mission Control isolation/security | §14 | Protect internal operating surface before increasing real usage |
+| **16.2** | Context Bridge foundation | §15 | Establish canonical entity relationships that later dashboard intelligence depends on |
+| **16.3** | Workspace language pass | §2 | Humanize the core multi-role mental model (`Mode` $\rightarrow$ `Workspace`) |
+| **16.4** | Owner creation simplification | §5 | Reduce first-use complexity for a key supply-side workflow |
+| **16.5** | Return Brief | §1 | Make every return visit immediately useful without duplicating notification state |
+| **16.6** | Continue Where You Left Off | §6 | Add workflow continuity across sessions and workspaces |
+| **16.7** | Buyer Saved Intelligence | §3 | Complete the Buyer Workspace as a personal library rather than a second discovery engine |
+| **16.8** | Board Intelligence | §7 | Turn accumulated saves/research into neutral, explainable insight |
+| **16.9** | Broker Match Explanation | §9 | Establish transparent ranking logic before inventory scale |
+| **16.10** | Connects explanation | §10 | Remove currency/action-credit ambiguity |
+| **16.11** | Terminology cleanup | §11 | Standardize product language after structural decisions are stable |
+| **16.12** | Universal empty-state pass | §8 | Eliminate dead ends across all core surfaces |
+
+## Active Workstreams & "Done When" Acceptance Gates
+
+### §1. Return Brief — Useful Every Login (P0)
+- [ ] Returning users receive a concise role-aware brief derived from real notification/activity data.
+- [ ] Each brief item deep-links into the exact relevant property, deal, message, job, or workspace.
+- [ ] When nothing changed, display confident all-clear state (*"You're up to date. Everything you follow is unchanged."*).
+- [ ] **Guardrails:** Do not create a second notification database; do not manufacture fake urgency.
+
+### §2. Mode $\rightarrow$ Workspace Terminology Pass (P0)
+- [ ] User-facing copy completely retires "Mode" in favor of "Workspace" (`MODE: OWNER` $\rightarrow$ `WORKSPACE: OWNER`, `Switch Capability` $\rightarrow$ `Switch Workspace`, `Working as: Owner`).
+- [ ] Workspace switching preserves the same signed-in identity and changes only the active working context.
+- [ ] **Guardrails:** Keep internal code variables (`mode`) intact unless deliberate migration is scheduled; never use "Mission Control" for customer-facing workspaces.
+
+### §3. Buyer Workspace Scope — Manage, Do Not Duplicate Discovery (P0 Foundation / P1 Enhancement)
+- [ ] Buyer Workspace centers on personal management: **Your Board** (saved spaces), **Saved Intelligence** (saved briefs/guides), **Watches** (monitored districts), **Recent Changes**, **Continue Comparing**, and **Radar** (purposeful geographic scanning).
+- [ ] Public ScoutIt (`/discover`, `/intel`, Space Directory) remains the primary exploration and search engine.
+- [ ] **Guardrails:** Do not duplicate the layered public discovery flow inside the personal dashboard.
+
+### §4. Notifications, Inbox & CRM Semantic Separation (P0 Semantics)
+- [ ] Maintain semantic separation: **Notifications** (*something happened*), **Inbox** (*somebody communicated with me*), **CRM / Deal Files** (*something I am actively working toward*).
+- [ ] Notifications act as pointers to communication/work objects without creating redundant work queues requiring multiple dismissals.
+
+### §5. Owner Property Creation — Humanize Ingestion Choices (P0)
+- [ ] First screen progressively discloses two primary paths: **[I already have property materials]** (*PDF, brochure, deck, existing file*) and **[I'll build it myself]** (*guided property setup*).
+- [ ] Secondary drawer / *"More ways to add"* houses bulk CSV import, Advanced Property Editor, and Spatial Vault requests.
+- [ ] **Guardrails:** Do not remove CSV, PDF extraction, advanced editor, or Spatial Vault capabilities.
+
+### §6. Continue Where You Left Off (P0)
+- [ ] Persist lightweight continuation state (`user_id`, `workspace`, `entity_type`, `entity_id`, `surface`, `subsection`, `last_meaningful_action`, `updated_at`).
+- [ ] Resumes meaningful workflow state upon login (e.g. *"Ridgeline at Capitol Commons — you were editing Fine Print"*).
+- [ ] **Guardrails:** Do not restore every scroll position or destructive confirmation modal; invalidate safely if access or underlying data changes.
+
+### §7. Your Board Intelligence — Turn Saves into a Research Workspace (P0 Foundation / P1 Intelligence)
+- [ ] Start without AI: derive neutral, deterministic patterns from normalized metadata (location clusters, price/size ranges, amenities, lifestyle signals, building age, saved intel topics).
+- [ ] Neutral framing: *"Your Board is taking shape"* / *"Patterns we can observe"* — strictly never *"We think you should buy X."*
+- [ ] Surface saved intelligence connections when relevant to saved spaces.
+
+### §8. Universal Empty-State Rule (P0)
+- [ ] Every empty state explains why it is empty and provides one obvious next doorway (Empty Board $\rightarrow$ Explore spaces; Empty Intel $\rightarrow$ Explore Intelligence; No watches $\rightarrow$ Explore space/area to watch).
+- [ ] Loading and empty states are visually and logically distinct (skeleton loaders first; no false empty flash).
+
+### §9. Broker Opportunity Explanation — Build Logic Before Scale (P0 Foundation / Next Calibration)
+- [ ] Rule-based scoring engine based on `authorization_score`, `geographic_fit`, `asset_type_fit`, `listing_freshness`, `listing_strength`, `owner_intent`, `broker_service_area`, and `broker_verified_capabilities`.
+- [ ] Transparent human explanation layer: *"Why this surfaced: Owner accepts broker representation; within your service area; matches your commercial specialization; verified recently; dossier is 91% complete."*
+- [ ] **Guardrail:** Verification, relevance, owner authorization, freshness, and quality strictly outrank monetization.
+
+### §10. Connects — Humanize Currency & Action Credits (P0)
+- [ ] Add explicit explanation: *"Connects are ScoutIt action credits. Certain professional introductions and actions use Connects. You'll always see the cost before confirming."*
+- [ ] Provide clear balance ledger (available balance, used in period, transaction history, cost confirmation before action).
+
+### §11. Terminology Standardization (P0 Copy Pass)
+- [ ] Enforce naming law: **Workspace** (user), **Organization Workspace / Enterprise Console** (company), **Mission Control** (staff-only).
+- [ ] Standardize labels: `Provider Workspace`, `Photography Workspace / Photo Jobs`, `Research Workspace`, `Event Design Workspace`, `Broker Workspace`, `Opportunity Feed`, `Active Representations`, `Advanced Property Editor`.
+- [ ] Subtitle branded terms: `Spatial Vault` (*3D tours & immersive property media*), `Universe` (*building history & wider property context*), `The Board` (*your saved spaces & research*), `Where To?` (*travel times & nearby destinations*), `Your Move` (*evaluate, save or connect when ready*).
+
+### §12. Operator Workspace — Preserve Boundary, Defer Product (P2)
+- [ ] Preserve clean architectural boundary (*delegated units only; building ownership remains with owner*).
+- [ ] Keep data relationships compatible with unit delegation while deferring heavy UI expansion until real-user need.
+
+### §13. Enterprise — Explicitly Deferred from 10–20 Listing North Star (DEFERRED)
+- [ ] Preserve organization schema, seat models, and RBAC roles in data layer.
+- [ ] Stop spending pre-pilot attention on Enterprise UI polish or 200-property portfolio optimization.
+
+### §14. Mission Control Isolation & Security Pass (P0 SECURITY)
+- [ ] Isolate `mission-control/` source from the public GitHub repository into a private repository or separate private project.
+- [ ] Enforce server-side staff authorization (Supabase `admin_users` + `aal2` MFA) on every route, API handler, and Server Action.
+- [ ] Enforce `Cache-Control: no-store` on sensitive responses, strict CSP (`frame-ancestors 'none'`), strip source maps/verbose server errors.
+- [ ] Run repository-history secret scan and rotate any legacy credentials.
+- [ ] **Security Principle:** *Noindex is not access control; source secrecy is not access control.*
+
+### §15. Context Bridge Architecture — One Ecosystem, Different Perspectives (P0 Foundation)
+- [ ] Connect canonical entities (`PROPERTY ↔ UNIT`, `PROPERTY ↔ DEAL ↔ OWNER/BROKER/BUYER`, `PROPERTY/AREA ↔ INTELLIGENCE`, `PROPERTY/DEAL ↔ VIEWINGS/TASKS/ACTIVITY`).
+- [ ] Every actionable record carries relational bridge fields (`entity_type`, `entity_id`, `related_entity_type`, `related_entity_id`, `event_type`, `actor_id`, `target_user_id`, `workspace_context`).
+- [ ] Powers Return Brief (§1), Continue Where You Left Off (§6), Board Intelligence (§7), and deep-linking notifications (§4).
+
+### §16. Monthly Showcase Curation & Merit Calibration SOP (P0 Operating Rhythm)
+- [ ] **Core Showcase Identity & Human Curation Principle:** The Showcase (`/showcase` / Orbit Demand Board) is ScoutIt's flagship spatial & demand showcase. It cannot and must not be treated as a generic, 100% blind automated feed. Because it represents ScoutIt's prestige demand tier, every featured property requires human-curated, truthful, and high-impact merit calibration every month.
+- [ ] **Monthly Audit & Curation Cadence (1st of every Month):**
+  - **Audit Cycle Verification:** Review and verify top-ranked spaces across categories (`Commercial`, `Residential`, `STR`, `Hospitality`, `Restaurants`, `Venues/Events`) and awards (`Most Inquired`, `Top Rated`, `New This Month`, `Staff Pick`). Update active audit cycle stamp (`Active_Month`, e.g., "June 2026 Audit").
+  - **Merit & Distinction Calibration (The "Best Things" Rule):** Operators/curators evaluate and input the specific best-in-class highlights for each featured property:
+    - ⚡ **Response & Connect Velocity:** e.g., verified broker response times under 15 mins, highest inquiry response rate.
+    - 🗺️ **Spatial & Heatmap Location Proximity:** e.g., walking distance to primary commercial hubs, central transit arterial access, flood-free elevation, high pedestrian footfall heatmaps.
+    - 💎 **Architectural & Spatial Merits:** e.g., unobstructed skyline views, column-free layouts, high-ceiling spatial clearance, LEED/WELL green certifications.
+    - 📈 **Organic Demand Momentum:** e.g., Top Inquired Commercial Space in Taguig, record private saves cohort, 100% earned demand score.
+- [ ] **Showcase vs. Briefing Boundary Law:**
+  - The Showcase card is strictly reserved for **Prestige Highlights, Demand Distinction, and Merits**.
+  - Raw specification data tables, mechanical specs, and full broker directory rosters are explicitly excluded from the Showcase stage. They belong on the dedicated Property Briefing Page (`/property/[slug]`), accessible via the primary gold **`Explore Full Briefing →`** button.
+- [ ] **Integrity Guardrails:** No automated placeholder text, no false velocity scores, and zero paid manipulation of rank positions. 100% earned demand verification required.
+
+### §17. 6-Layer Spatial Descent Visual Style & Layer Navigation Polish (P1 Experience)
+- [ ] **Descent Narrative & Spatial Cohesion:** Solidify the visual and psychological progression as users descend from high-altitude market intelligence down to granular unit transactions:
+  - **Layer 1: Orbit / Universe (`/layer/orbit` & `/showcase`):** Cosmic demand rankings, planetary orbital velocity, sweeping galaxy canvas, high-altitude demand signals.
+  - **Layer 2: Stratosphere (`/layer/stratosphere`):** Regional macro climate, macro economic indicators, transport and logistics flight corridors, macro heatmap overview.
+  - **Layer 3: Metropolis (`/layer/metropolis`):** Urban district clusters, skyline vantage points, commercial district density, arterial transit connectivity.
+  - **Layer 4: Crust (`/layer/crust`):** Neighborhood reality, street-level walkability, local commercial foot traffic, community vibe, and flood/elevation topography.
+  - **Layer 5: Mantle (`/layer/mantle`):** Architectural structure, building envelope, engineering specs, facade materials, lobby atmosphere, shared facilities.
+  - **Layer 6: Core (`/layer/core` & `/property/[slug]`):** Private unit level, 3D Spatial Vault, verified transaction ledgers, deep financial intel room.
+- [ ] **Descent Style Polish & UI Aesthetics:**
+  - **Altitude & Atmospheric Telemetry:** Implement micro-telemetry altitude indicators and subtle atmospheric particle color transitions as users transition between layers (deep cosmic black `#0d0d0d` $\rightarrow$ atmospheric navy/slate $\rightarrow$ architectural gold & graphite).
+  - **Fluid Layer Switcher & Waypoint HUD:** Provide intuitive, high-touch waypoint navigation enabling users to jump between layers or descend sequentially with smooth transitions.
+  - **Mobile-First Adaptive Performance (`Lite Mode`):** Guarantee 60fps responsiveness across all descent layers by pairing Canvas/WebGL particle systems with low-power device fallbacks (auto-disabling heavy particle loops on mobile battery-saver modes).
+  - **Unified Dark Luxury Aesthetics:** Adhere strictly to 95% deep black / 5% glowing gold CSS variables (`--accent`, `--accent-bright`, `--accent-muted`), glassmorphism overlays, and tabular monospace telemetry numbers.
 
 ---
 

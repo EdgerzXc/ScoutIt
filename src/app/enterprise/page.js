@@ -6,15 +6,15 @@ import Footer from "@/components/layout/Footer";
 const CAPABILITIES = [
   {
     title: "One account, your whole portfolio",
-    body: "A single company account for your organization — your own properties, your own brokers, your own team.",
+    body: "A single company account for your organization. Manage your properties, brokers, and internal teams in one place.",
   },
   {
     title: "Invite your team, scope their access",
-    body: "Your super-admin invites named colleagues and grants each exactly what they need — specific properties, specific broker relationships, nothing more.",
+    body: "Your admin invites colleagues and assigns granular permissions for specific properties and broker relationships.",
   },
   {
-    title: "Company-wide updates in one move",
-    body: "Push a change across every property or every broker relationship your company manages, instead of one listing at a time.",
+    title: "Portfolio-wide updates in one move",
+    body: "Publish updates across every property or broker relationship your company manages, without editing each listing one by one.",
   },
 ];
 
@@ -26,8 +26,8 @@ export default function EnterprisePage() {
         <span className="vector-label">SCOUTIT FOR BUSINESS</span>
         <h1 className="enterprise-title">Enterprise Accounts</h1>
         <p className="enterprise-subtitle">
-          For developers, brokerages, and property groups managing more than a handful of listings —
-          a company account built for teams, not individuals.
+          For developers, brokerages, and property groups managing multi-asset portfolios.
+          A company workspace built for collaborative teams.
         </p>
 
         <div className="enterprise-grid">
@@ -40,7 +40,7 @@ export default function EnterprisePage() {
         </div>
 
         <div className="enterprise-cta">
-          <p>Currently in early development. Preview the Enterprise Console from your dashboard, or tell us about your portfolio and we&apos;ll reach out.</p>
+          <p>Currently in private preview. Explore the Enterprise Console from your dashboard, or reach out directly to discuss your portfolio.</p>
           <div className="enterprise-cta-row">
             <a href="/dashboard" className="enterprise-cta-btn">
               Preview the Enterprise Console →

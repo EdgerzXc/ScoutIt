@@ -27,25 +27,6 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getArticles } from "@/data/mock/mockArticles";
 
-const MOCK_CATEGORIES = {
-  "batasan-hills": "Residential",
-  "aurelia-residences": "Residential",
-  "the-estate-makati": "Residential",
-  "gridwork-studio": "Commercial",
-  "zuellig-building": "Commercial",
-  "arthaland-century-pacific": "Commercial",
-  "pacific-edge-villa": "STR",
-  "siargao-tropical-villa": "STR",
-  "boracay-bamboo-hideaway": "STR",
-  "palawan-eco-retreat": "Hospitality",
-  "coron-island-resort": "Hospitality",
-  "bohol-treehouse-lodge": "Hospitality",
-  "gallery-by-chele": "Restaurants",
-  "antonios-tagaytay": "Restaurants",
-  "the-glasshouse-bgc": "Venues",
-  "solaire-grand-ballroom": "Venues",
-  "sky-pavilion-makati": "Venues"
-};
 
 export default function IntelPage() {
   const router = useRouter();
@@ -82,19 +63,10 @@ export default function IntelPage() {
 
         // 1. Setup properties for asset back-linking
         const airtableProperties = data.properties || [];
-        const baseProperties = [].map(p => {
-          let cat = MOCK_CATEGORIES[p.slug] || p.spaceCategory || "Residential";
-          return {
-            slug: p.slug,
-            title: p.title,
-            city: p.city,
-            spaceCategory: cat
-          };
-        });
-        const mergedProperties = [...baseProperties];
+        const mergedProperties = [];
         airtableProperties.forEach(p => {
           if (!mergedProperties.some(x => x.slug === p.slug)) {
-            let cat = p.spaceCategory || "Residential";
+            let cat = p.spaceCategory || "";
             mergedProperties.push({
               slug: p.slug || p.id,
               title: p.title,

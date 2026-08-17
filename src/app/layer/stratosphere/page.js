@@ -128,7 +128,7 @@ export default function StratosphereLayer() {
           layerName="Stratosphere" 
           title="Stories & Market Intel" 
           description="Neighborhood stories, market reports, and design features from around the Philippines." 
-          missionText="The Stratosphere serves as the Intelligence Layer. This is where market signals travel before they ever touch the ground — neighborhood stories, regional data, and design narratives that let you read the market from above, long before you descend into it." 
+          missionText="Stratosphere is ScoutIt's intelligence layer. It gathers neighborhood reporting, market signals, and design analyses so you understand the context behind an area before evaluating individual buildings." 
           ctaText="Discover Stories →"
           ctaHref="/intel"
         />

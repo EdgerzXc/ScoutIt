@@ -29,6 +29,7 @@ export const BASE_CHAPTERS = [
     navLabel:        'The Space',
     chapterNumber:   '01',
     chapterLabel:    'The Space',
+    subtitle:        'Floor plate, layout & physical specifications',
     defaultCollapsed: false,
     operatorToggle:  false,
   },
@@ -37,6 +38,7 @@ export const BASE_CHAPTERS = [
     navLabel:        'Location',
     chapterNumber:   '02',
     chapterLabel:    'Location',
+    subtitle:        'Micro-location, district & transit access',
     defaultCollapsed: false,
     operatorToggle:  false,
   },
@@ -45,6 +47,7 @@ export const BASE_CHAPTERS = [
     navLabel:        'Life Here',
     chapterNumber:   '03',
     chapterLabel:    'Life Here',
+    subtitle:        'Daily environment & neighborhood feel',
     defaultCollapsed: false,
     operatorToggle:  false,
   },
@@ -53,6 +56,7 @@ export const BASE_CHAPTERS = [
     navLabel:        'Where To?',
     chapterNumber:   '04',
     chapterLabel:    'Where To?',
+    subtitle:        'Travel times & nearby destinations',
     defaultCollapsed: false,
     operatorToggle:  false,
   },
@@ -61,6 +65,7 @@ export const BASE_CHAPTERS = [
     navLabel:        'Build Plans',
     chapterNumber:   '05',
     chapterLabel:    'Build Plans',
+    subtitle:        'Floor plans, blueprints & architectural records',
     defaultCollapsed: false,
     operatorToggle:  false,
   },
@@ -69,6 +74,7 @@ export const BASE_CHAPTERS = [
     navLabel:        'The Fine Print',  // renamed from Hidden Intel
     chapterNumber:   '06',
     chapterLabel:    'The Fine Print',
+    subtitle:        'Title classification, zoning & risk assessments',
     defaultCollapsed: false,
     operatorToggle:  false,
   },
@@ -77,6 +83,7 @@ export const BASE_CHAPTERS = [
     navLabel:        'Units',
     chapterNumber:   '07',
     chapterLabel:    'Units',
+    subtitle:        'Available inventory, pricing & layouts',
     defaultCollapsed: false,
     operatorToggle:  false,
   },
@@ -85,6 +92,7 @@ export const BASE_CHAPTERS = [
     navLabel:        'Universe',
     chapterNumber:   '08',
     chapterLabel:    'Property Universe',
+    subtitle:        'Building history & wider property context',
     defaultCollapsed: false,
     operatorToggle:  false,
   },
@@ -93,6 +101,7 @@ export const BASE_CHAPTERS = [
     navLabel:        'Services',
     chapterNumber:   '09',
     chapterLabel:    'Services',
+    subtitle:        'On-site amenities & verified providers',
     defaultCollapsed: false,
     operatorToggle:  false,
   },
@@ -101,6 +110,7 @@ export const BASE_CHAPTERS = [
     navLabel:        'Your Move',
     chapterNumber:   '10',
     chapterLabel:    'Your Move',
+    subtitle:        'Save, evaluate, or connect when you are ready',
     defaultCollapsed: false,
     operatorToggle:  false,
   },
@@ -135,26 +145,32 @@ export const COMMERCIAL_CONFIG = buildConfig({
   space: {
     navLabel:      'Floor Plate',
     chapterLabel:  'The Floor Plate',
+    subtitle:      'Floor plate, column grid & usable volume',
   },
   location: {
     navLabel:      'Access',
     chapterLabel:  'Access & Logistics',
+    subtitle:      'Transit hubs, arterial roads & freight access',
   },
   life: {
     navLabel:      'The Workday',
     chapterLabel:  'The Workday',
+    subtitle:      'Amenities, dining & tenant ecosystem',
   },
   whereto: {
     navLabel:      'The Block',
     chapterLabel:  'The Block',
+    subtitle:      'District radius & surrounding commercial hubs',
   },
   buildplans: {
     navLabel:      'Fit-Out',
     chapterLabel:  'Fit-Out Potential',
+    subtitle:      'Mechanical specs, MEP & fit-out potential',
   },
   units: {
     navLabel:      'Available Spaces',
     chapterLabel:  'Available Spaces',
+    subtitle:      'Available floors, wings & contiguous spaces',
   },
 });
 
@@ -165,26 +181,32 @@ export const STR_CONFIG = buildConfig({
   life: {
     navLabel:      'The Experience',
     chapterLabel:  'The Experience',
+    subtitle:      'Guest ambience & surrounding lifestyle attractions',
   },
   space: {
     navLabel:      'The Stay',
     chapterLabel:  'The Stay',
+    subtitle:      'Living suites, sleeping capacity & interior layout',
   },
   location: {
     navLabel:      'Getting There',
     chapterLabel:  'Getting There',
+    subtitle:      'Airport routes, parking & arrival logistics',
   },
   whereto: {
     navLabel:      'The Radius',
     chapterLabel:  'The Radius',
+    subtitle:      'Dining, landmarks & recreational points of interest',
   },
   buildplans: {
     navLabel:      'Operating',
     chapterLabel:  'Operating Context',
+    subtitle:      'Host storage, utility infrastructure & lock-off spaces',
   },
   units: {
     navLabel:      'Rooms & Facilities',
     chapterLabel:  'Rooms & Facilities',
+    subtitle:      'Available keys, suites & shared guest amenities',
   },
 });
 
@@ -195,26 +217,32 @@ export const HOSPITALITY_CONFIG = buildConfig({
   life: {
     navLabel:      'Guest Experience',
     chapterLabel:  'The Guest Experience',
+    subtitle:      'Resort atmosphere, wellness & guest activities',
   },
   space: {
     navLabel:      'The Grounds',
     chapterLabel:  'The Grounds',
+    subtitle:      'Master layout, landscape architecture & villas',
   },
   location: {
     navLabel:      'The Transfer',
     chapterLabel:  'The Transfer',
+    subtitle:      'Private transfer routes, helipad & access corridors',
   },
   whereto: {
     navLabel:      'The Radius',
     chapterLabel:  'The Radius',
+    subtitle:      'Coastal attractions, golf clubs & excursion hubs',
   },
   buildplans: {
     navLabel:      'The Shell',
     chapterLabel:  'The Operational Shell',
+    subtitle:      'Back-of-house facilities, laundry & power redundancy',
   },
   units: {
     navLabel:      'Rooms & Facilities',
     chapterLabel:  'Rooms & Facilities',
+    subtitle:      'Villa inventory, suites & recreational facilities',
   },
 });
 
@@ -226,23 +254,28 @@ export const RESTAURANT_CONFIG = buildConfig({
   life: {
     navLabel:      'The Vibe',
     chapterLabel:  'The Vibe',
+    subtitle:      'Dining room atmosphere & acoustic character',
   },
   space: {
     navLabel:      'Kitchen & Dining',
     chapterLabel:  'The Kitchen & Dining Room',
+    subtitle:      'Seating capacity, kitchen line & bar stations',
     variant:       'replace',  // new stat block: covers + kitchen grade
   },
   location: {
     navLabel:      'How Guests Arrive',
     chapterLabel:  'How Guests Arrive',
+    subtitle:      'Valet drop-off, footfall corridors & parking access',
   },
   whereto: {
     navLabel:      'Around the Table',
     chapterLabel:  'Around the Table',
+    subtitle:      'Adjacent nightlife, hotels & complementary dining',
   },
   buildplans: {
     navLabel:      'Engine Room',
     chapterLabel:  'The Engine Room',
+    subtitle:      'Exhaust ventilation, grease traps & gas supply',
     variant:       'replace',   // ventilation, exhaust, electrical
     defaultCollapsed: true,
     operatorToggle:   true,
@@ -250,6 +283,7 @@ export const RESTAURANT_CONFIG = buildConfig({
   units: {
     navLabel:      'Areas',
     chapterLabel:  'Areas',
+    subtitle:      'Main dining, mezzanine, private dining & patio zones',
   },
 });
 
@@ -261,29 +295,35 @@ export const VENUE_CONFIG = buildConfig({
   life: {
     navLabel:      'Atmosphere',
     chapterLabel:  'Event Atmosphere',
+    subtitle:      'Production lighting, acoustics & spatial volume',
   },
   space: {
     navLabel:      'Capacity',
     chapterLabel:  'Production Capacity',
+    subtitle:      'Standing, banquet & theater capacities',
     variant:       'replace',  // standing/seated capacity + setup grade
   },
   location: {
     navLabel:      'Guest Logistics',
     chapterLabel:  'Guest Logistics',
+    subtitle:      'VIP arrivals, bus staging & guest transit links',
   },
   whereto: {
     navLabel:      'Guest Radius',
     chapterLabel:  'Guest Radius',
+    subtitle:      'Partner hotels, restaurants & airport corridors',
   },
   buildplans: {
     navLabel:      'Back of House',
     chapterLabel:  'Back of House',
+    subtitle:      'Green rooms, loading docks & production power grids',
     defaultCollapsed: true,
     operatorToggle:   true,
   },
   units: {
     navLabel:      'Zones',
     chapterLabel:  'Zones',
+    subtitle:      'Grand ballroom, breakout studios & outdoor terraces',
   },
 });
 

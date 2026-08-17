@@ -30,10 +30,10 @@ export default function ComparisonMatrix({ properties, onClose }) {
         </div>
 
         <div className="matrix-scroll-container">
-          <div className="matrix-grid" style={{ gridTemplateColumns: `140px repeat(${properties.length}, minmax(250px, 1fr))` }}>
+          <div className="matrix-grid" style={{ gridTemplateColumns: `160px repeat(${properties.length}, minmax(260px, 1fr))` }}>
             
             {/* Visual Row */}
-            <div className="matrix-cell row-header sticky-col"></div>
+            <div className="matrix-cell row-header sticky-col">Property</div>
             {properties.map((p) => (
               <div key={p.id} className="matrix-cell">
                 <div 
@@ -47,11 +47,11 @@ export default function ComparisonMatrix({ properties, onClose }) {
               </div>
             ))}
 
-            {/* Price Row */}
-            <div className="matrix-cell row-header sticky-col">Est. Valuation</div>
+            {/* Price Band Row */}
+            <div className="matrix-cell row-header sticky-col">Price Tier</div>
             {properties.map((p) => (
               <div key={p.id} className="matrix-cell data-cell highlight">
-                {p.listed_price ? `₱${Number(p.listed_price).toLocaleString()}` : "Upon Request"}
+                {p.listed_price ? (typeof p.listed_price === "string" && isNaN(Number(p.listed_price)) ? p.listed_price : `₱${Number(p.listed_price).toLocaleString()}`) : "Upon Request"}
               </div>
             ))}
 
@@ -59,35 +59,57 @@ export default function ComparisonMatrix({ properties, onClose }) {
             <div className="matrix-cell row-header sticky-col">Classification</div>
             {properties.map((p) => (
               <div key={p.id} className="matrix-cell data-cell">
-                <span className="spec-badge">{p.spaceCategory}</span>
-                {p.aestheticTag && <span className="spec-badge">{p.aestheticTag}</span>}
+                <div className="flex flex-wrap gap-1.5">
+                  <span className="spec-badge">{p.spaceCategory || "Asset"}</span>
+                  {p.aestheticTag && <span className="spec-badge">{p.aestheticTag}</span>}
+                </div>
               </div>
             ))}
 
-            {/* Location */}
-            <div className="matrix-cell row-header sticky-col">Location</div>
+            {/* Location & Transit */}
+            <div className="matrix-cell row-header sticky-col">Micro-Location</div>
             {properties.map((p) => (
               <div key={p.id} className="matrix-cell data-cell">
-                {p.location || p.city || "Undisclosed"}
+                <span style={{ color: "#f0ede8", fontWeight: 500 }}>{p.location || p.city || "Undisclosed"}</span>
+                {p.city && <span style={{ fontSize: "0.75rem", color: "#888", marginTop: "2px" }}>{p.city} Metro Hub</span>}
               </div>
             ))}
 
-            {/* Size / Specs */}
-            <div className="matrix-cell row-header sticky-col">Key Specs</div>
+            {/* Spatial Records / Vault Completeness */}
+            <div className="matrix-cell row-header sticky-col">Spatial Records</div>
+            {properties.map((p) => {
+              const has3D = Boolean(p.luma3dMapUrl || p.matterportTourUrl || p.has_3d);
+              const hasFloorPlan = Boolean(p.floor_sqm || p.floorPlans?.length);
+              return (
+                <div key={p.id} className="matrix-cell data-cell">
+                  <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                    <span style={{ fontSize: "0.8rem", color: has3D ? "var(--accent, #E8AE3C)" : "#666" }}>
+                      {has3D ? "✓ 3D Spatial Scan" : "○ Spatial Scan Pending"}
+                    </span>
+                    <span style={{ fontSize: "0.8rem", color: hasFloorPlan ? "#4caf7d" : "#666" }}>
+                      {hasFloorPlan ? "✓ Verified Floor Plan" : "○ Floor Plan Pending"}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* Key Specs */}
+            <div className="matrix-cell row-header sticky-col">Area & Capacity</div>
             {properties.map((p) => (
               <div key={p.id} className="matrix-cell data-cell">
-                {p.floor_sqm ? `${p.floor_sqm} sqm` : "—"}
+                {p.floor_sqm ? `${p.floor_sqm} sqm` : "Specs on inquiry"}
                 {p.beds > 0 && ` • ${p.beds} Bed`}
                 {p.baths > 0 && ` • ${p.baths} Bath`}
                 {p.seating_capacity && ` • ${p.seating_capacity} seats`}
               </div>
             ))}
 
-            {/* Verdict / Hook */}
-            <div className="matrix-cell row-header sticky-col">ScoutIt Verdict</div>
+            {/* ScoutIt Verdict */}
+            <div className="matrix-cell row-header sticky-col">Space Intelligence</div>
             {properties.map((p) => (
               <div key={p.id} className="matrix-cell data-cell italic-hook">
-                &quot;{p.hook || "Premium curated property briefing."}&quot;
+                &quot;{p.hook || "Vetted dynamic listing brief."}&quot;
               </div>
             ))}
 

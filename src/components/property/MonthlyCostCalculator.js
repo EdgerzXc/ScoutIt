@@ -91,8 +91,15 @@ export default function MonthlyCostCalculator({ d }) {
 
   return (
     <div data-testid="monthly-cost-sandbox" style={{ marginTop: "24px", padding: "22px 24px", background: "#161616", border: "0.5px solid #262626", borderRadius: "4px" }}>
-      <div style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#E8AE3C", letterSpacing: "0.18em", textTransform: "uppercase", marginBottom: "6px" }}>
-        Monthly Cost Sandbox
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#E8AE3C", letterSpacing: "0.18em", textTransform: "uppercase" }}>
+          Monthly Cost Sandbox
+        </span>
+        {d?.is_sample && (
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: "9px", color: "var(--text-muted)", letterSpacing: "0.12em", textTransform: "uppercase", padding: "2px 6px", borderRadius: "2px", background: "rgba(255,255,255,0.04)", border: "0.5px solid #333" }}>
+            Demo Data
+          </span>
+        )}
       </div>
       <p style={{ fontFamily: "var(--font-display)", fontSize: "13px", color: "#a0a0a0", lineHeight: 1.6, margin: "0 0 18px", maxWidth: "480px" }}>
         What would a month here actually cost you? Listing-verified charges are filled in below — add your own bills to complete the picture.

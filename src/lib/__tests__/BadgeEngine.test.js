@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { hasBadge } from '../BadgeEngine.js';
+import { hasBadge, getBadgeDetails, TRUST_BADGES } from '../BadgeEngine.js';
 
 describe('BadgeEngine - hasBadge', () => {
   describe('Happy Paths', () => {
@@ -42,5 +42,27 @@ describe('BadgeEngine - hasBadge', () => {
     it('should return false if userBadges is an empty array', () => {
       expect(hasBadge([], 'PIONEER_BROKER')).toBe(false);
     });
+  });
+});
+
+describe('BadgeEngine - getBadgeDetails & TRUST_BADGES', () => {
+  it('resolves system badge definitions', () => {
+    const details = getBadgeDetails('PIONEER_BROKER');
+    expect(details).toBeDefined();
+    expect(details.name).toBe('Pioneer Advisor');
+  });
+
+  it('resolves explainable trust badges with criteria and descriptions', () => {
+    const details = getBadgeDetails('OWNER_VERIFIED');
+    expect(details).toBeDefined();
+    expect(details.name).toBe('Owner Verified');
+    expect(details.badgeType).toBe('trust');
+    expect(details.description).toContain('title records');
+    expect(details.criteria).toContain('corporate registration');
+  });
+
+  it('returns null for missing or invalid badge IDs', () => {
+    expect(getBadgeDetails(null)).toBeNull();
+    expect(getBadgeDetails('NONEXISTENT_BADGE')).toBeNull();
   });
 });

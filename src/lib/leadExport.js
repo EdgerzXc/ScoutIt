@@ -157,4 +157,41 @@ export function exportFilename(prefix = "scoutit-leads", ext = "csv") {
   return `${safe || "scoutit-leads"}-${stamp}.${ext}`;
 }
 
+/**
+ * Requests server audit authorization before releasing lead contact details.
+ */
+export async function requestLeadExportAudit({ leadIds, format }) {
+  try {
+    const res = await fetch("/api/leads/export-audit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ leadIds, format }),
+    });
+    const data = await res.json().catch(() => null);
+    return { ok: res.ok, status: res.status, data };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+}
+
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+export function normalizeLeadIds(items = []) {
+  const ids = items.map((item) => item?.id || item?.dealId || item?.deal_id).map((id) =>
+    typeof id === "string" ? id.trim().toLowerCase() : "",
+  );
+  if (ids.length === 0 || ids.some((id) => !UUID_PATTERN.test(id))) return null;
+  if (new Set(ids).size !== ids.length) return null;
+  return ids;
+}
+
+export function hasValidLeadExportReceipt(result, expectedLeadCount, format) {
+  const data = result?.data;
+  return Boolean(
+    result?.ok === true && result?.status >= 200 && result?.status < 300 &&
+    data?.success === true && data?.authorized === true && UUID_PATTERN.test(data?.auditId || "") &&
+    typeof data?.auditedAt === "string" && !Number.isNaN(Date.parse(data.auditedAt)) &&
+    data?.leadCount === expectedLeadCount && data?.format === format
+  );
+}
 export default leadsToCsv;

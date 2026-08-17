@@ -1,0 +1,29 @@
+import { readFileSync } from "node:fs";
+import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
+const E="11111111-1111-4111-8111-111111111111", A="22222222-2222-4222-8222-222222222222";
+const mocks=vi.hoisted(()=>({resolveUserId:vi.fn(),requireAdmin:vi.fn(),rpc:vi.fn(),appealsLimit:vi.fn()}));
+vi.mock("@/lib/serverAuth",()=>({resolveUserId:mocks.resolveUserId}));
+vi.mock("@/lib/adminGuard",()=>({requireAdmin:mocks.requireAdmin}));
+vi.mock("@/lib/supabaseAdmin",()=>({supabaseAdmin:{rpc:mocks.rpc,from:(table)=>{if(table!=="faq_block_appeals")throw new Error(`Unexpected ${table}`);return{select:()=>({in:()=>({order:()=>({limit:mocks.appealsLimit})})})};}}}));
+import { GET, PATCH, POST } from "@/app/api/faqs/appeal/route";
+const req=(method,body)=>new Request("https://scoutit.space/api/faqs/appeal",{method,headers:{"Content-Type":"application/json"},...(body?{body:JSON.stringify(body)}:{})});
+
+describe("FAQ appeal evidence and review API",()=>{
+ const original=process.env.FAQ_APPEAL_ACTIVE;
+ beforeEach(()=>{vi.clearAllMocks();process.env.FAQ_APPEAL_ACTIVE="true";mocks.resolveUserId.mockResolvedValue("owner-1");mocks.requireAdmin.mockResolvedValue({userId:"staff-1",error:null});mocks.rpc.mockResolvedValue({data:[{appeal_id:A,appeal_status:"pending"}],error:null});mocks.appealsLimit.mockResolvedValue({data:[],error:null});});
+ afterEach(()=>{if(original===undefined)delete process.env.FAQ_APPEAL_ACTIVE;else process.env.FAQ_APPEAL_ACTIVE=original;});
+ it("gates every handler before schema access",async()=>{delete process.env.FAQ_APPEAL_ACTIVE;for(const call of [POST(req("POST",{evidenceId:E,explanation:"Legitimate cadastral reference"})),GET(req("GET")),PATCH(req("PATCH",{appealId:A,expectedStatus:"pending",action:"start_review"}))])expect((await call).status).toBe(503);expect(mocks.rpc).not.toHaveBeenCalled();expect(mocks.appealsLimit).not.toHaveBeenCalled();});
+ it("rejects anonymous, malformed, and contact-bearing submissions",async()=>{mocks.resolveUserId.mockResolvedValue(null);expect((await POST(req("POST",{evidenceId:E,explanation:"Legitimate cadastral reference"}))).status).toBe(401);mocks.resolveUserId.mockResolvedValue("owner-1");expect((await POST(req("POST",{evidenceId:"tampered",explanation:"Legitimate cadastral reference"}))).status).toBe(400);expect((await POST(req("POST",{evidenceId:E,explanation:"Call 0917 123 4567 about this"}))).status).toBe(422);});
+ it.each(["cross-user","cross-property","nonexistent","replayed","expired"])("rejects %s evidence without leaking which check failed",async()=>{mocks.rpc.mockResolvedValue({data:null,error:{message:"EVIDENCE_INVALID"}});const res=await POST(req("POST",{evidenceId:E,explanation:"Legitimate title registry reference"}));expect(res.status).toBe(409);expect((await res.json()).message).toContain("invalid, expired, or already used");});
+ it("submits only evidence plus sanitized explanation through atomic RPC",async()=>{const res=await POST(req("POST",{evidenceId:E,explanation:"<b>Legitimate title registry reference</b>"}));expect(res.status).toBe(201);expect(mocks.rpc).toHaveBeenCalledWith("submit_faq_block_appeal",{p_evidence_id:E,p_user_id:"owner-1",p_explanation:"Legitimate title registry reference"});});
+ it("maps atomic pending-limit enforcement",async()=>{mocks.rpc.mockResolvedValue({data:null,error:{message:"APPEAL_LIMIT"}});expect((await POST(req("POST",{evidenceId:E,explanation:"Legitimate title registry reference"}))).status).toBe(429);});
+ it("requires admin for queue and transitions",async()=>{mocks.requireAdmin.mockResolvedValue({userId:null,error:"Forbidden",status:403});expect((await GET(req("GET"))).status).toBe(403);expect((await PATCH(req("PATCH",{appealId:A,expectedStatus:"pending",action:"start_review"}))).status).toBe(403);});
+ it("performs optimistic-concurrency review transitions",async()=>{mocks.rpc.mockResolvedValueOnce({data:[{appeal_status:"under_review",reviewed_at:null}],error:null});const res=await PATCH(req("PATCH",{appealId:A,expectedStatus:"pending",action:"start_review",reviewerNotes:"Checking title reference"}));expect(res.status).toBe(200);expect(mocks.rpc).toHaveBeenCalledWith("review_faq_block_appeal",{p_appeal_id:A,p_reviewer_id:"staff-1",p_expected_status:"pending",p_action:"start_review",p_reviewer_notes:"Checking title reference"});mocks.rpc.mockResolvedValueOnce({data:null,error:{message:"APPEAL_CONFLICT"}});expect((await PATCH(req("PATCH",{appealId:A,expectedStatus:"pending",action:"reject"}))).status).toBe(409);});
+});
+
+describe("FAQ appeal migration and UI contract",()=>{
+ const sql=readFileSync("supabase/migrations/20260814000003_faq_block_appeals.sql","utf8");
+ it("binds one-time evidence to actor and context with atomic rate limiting",()=>{expect(sql).toContain("v_evidence.user_id IS DISTINCT FROM p_user_id");expect(sql).toContain("v_evidence.used_at IS NOT NULL");expect(sql).toContain("pg_advisory_xact_lock");expect(sql).toContain("evidence_id UUID NOT NULL UNIQUE");});
+ it("denies browser writes and records reviewer evidence without publishing",()=>{expect(sql).toContain("REVOKE ALL ON TABLE public.faq_block_evidence, public.faq_block_appeals FROM PUBLIC, anon, authenticated");expect(sql).toContain("reviewer_id");expect(sql).toContain("reviewed_at");expect(sql).not.toMatch(/answer_text|question_text|blocked_content/);});
+ it("offers appeal UI only when server evidence exists",()=>{const panel=readFileSync("src/components/dashboard/FAQPreflightPanel.js","utf8");expect(panel).toContain("json.appealAvailable && json.evidenceId");expect(panel).toContain('aria-live="polite"');expect(panel).not.toMatch(/hours|days|SLA/i);});
+});

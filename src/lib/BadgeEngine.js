@@ -107,6 +107,68 @@ export const getAllBadges = (statusFilter = null) => {
 };
 
 /**
+ * Master Directory of Explainable Trust Badges (§5)
+ * Communicates why and how entities are verified on ScoutIt.
+ */
+export const TRUST_BADGES = {
+  OWNER_VERIFIED: {
+    id: "OWNER_VERIFIED",
+    name: "Owner Verified",
+    icon: "🛡️",
+    badgeType: "trust",
+    description: "Property authority, corporate registration, and ownership verified directly with land title records.",
+    criteria: "Owner government ID, notarized deed/authority, and corporate registration submitted.",
+    color: "#E8AE3C"
+  },
+  AVAILABILITY_CONFIRMED: {
+    id: "AVAILABILITY_CONFIRMED",
+    name: "Availability Confirmed",
+    icon: "✓",
+    badgeType: "trust",
+    description: "Active unit inventory and lease availability re-validated in the past 14 days.",
+    criteria: "Owner or authorized listing broker confirms real-time unit status.",
+    color: "#34D399"
+  },
+  FLOOR_PLAN_VERIFIED: {
+    id: "FLOOR_PLAN_VERIFIED",
+    name: "Floor Plan Verified",
+    icon: "📐",
+    badgeType: "trust",
+    description: "Architectural dimensions and unit measurements verified against CAD blueprints.",
+    criteria: "Architectural CAD drawings, measurement scan, or as-built plan verified.",
+    color: "#60A5FA"
+  },
+  IDENTITY_VERIFIED: {
+    id: "IDENTITY_VERIFIED",
+    name: "Identity Verified",
+    icon: "👤",
+    badgeType: "trust",
+    description: "Professional PRC broker license or company officer credentials verified.",
+    criteria: "PRC real estate broker license or government corporate filings validated.",
+    color: "#A78BFA"
+  },
+  AUTHORIZED_REPRESENTATION: {
+    id: "AUTHORIZED_REPRESENTATION",
+    name: "Authorized Mandate",
+    icon: "🤝",
+    badgeType: "trust",
+    description: "Direct written representation agreement signed between owner and broker.",
+    criteria: "Mutual digital handshake or exclusive/non-exclusive authority letter on file.",
+    color: "#F472B6"
+  }
+};
+
+/**
+ * Resolves details for either a system badge or trust badge.
+ * @param {String} badgeId
+ * @returns {Object|null}
+ */
+export const getBadgeDetails = (badgeId) => {
+  if (!badgeId) return null;
+  return BADGE_DEFINITIONS[badgeId] || TRUST_BADGES[badgeId] || null;
+};
+
+/**
  * Gets the number of remaining slots for an active badge.
  */
 export const getRemainingSlots = (badgeId) => {

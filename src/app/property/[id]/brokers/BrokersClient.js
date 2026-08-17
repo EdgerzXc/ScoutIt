@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import TurnstileGate from "@/components/ui/TurnstileGate";
+import TrustBadge from "@/components/ui/TrustBadge";
 import { trackEvent, GA_EVENTS } from "@/lib/analytics";
 import "./brokers.css";
 
@@ -121,8 +122,18 @@ export default function BrokersClient({ slug }) {
         <div className="broker-main-row">
           <div className="broker-avatar-img" style={broker.image ? { backgroundImage: `url(${broker.image})` } : undefined} aria-hidden="true" />
           <div className="broker-detail-col">
-            <div className="broker-name-header"><h2 className="broker-name-txt">{broker.name}</h2><span className="leris-badge">AUTHORIZED ROSTER</span></div>
+            <div className="broker-name-header">
+              <h2 className="broker-name-txt">{broker.name}</h2>
+              <span className="leris-badge">AUTHORIZED ROSTER</span>
+            </div>
             <p className="broker-license-txt">{broker.headline || broker.firm || "Licensed property representative"}</p>
+            
+            {/* Trust Badges */}
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", margin: "8px 0" }}>
+              <TrustBadge badgeId="IDENTITY_VERIFIED" />
+              <TrustBadge badgeId="AUTHORIZED_REPRESENTATION" />
+            </div>
+
             {broker.license && <p className="broker-closures-txt">PRC reference on file</p>}
             {broker.specializations?.length > 0 && <div className="niche-pills-row">{broker.specializations.map((tag) => <span key={tag} className="niche-pill-tag">{tag}</span>)}</div>}
           </div>

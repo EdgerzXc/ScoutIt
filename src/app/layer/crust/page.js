@@ -77,8 +77,8 @@ export default function CrustLayer() {
           layerNum="04" 
           layerName="Crust" 
           title="The Service Ecosystem" 
-          description="Verified advisors, photographers, site researchers, and event designers — the professionals who make every space decision count." 
-          missionText="The Crust serves as the Trust Layer. It is the solid ground the whole platform rests on — verified advisors, photographers, researchers, and planners — the people who make every space decision real, accountable, and worth committing to." 
+          description="Verified advisors, photographers, site researchers, and event designers. The professionals who help you evaluate and document spaces." 
+          missionText="The Crust connects you with verified spatial professionals. From licensed PRC brokers and site researchers to architectural photographers, these are the specialists who make space decisions grounded and accountable." 
           ctaText="Meet Our Advisors →"
           ctaHref="/brokers"
         />

@@ -63,7 +63,7 @@ export default function Footer() {
             <span className="brand-s">S</span><span className="brand-scout">cout</span><span className="brand-it">IT</span>
           </Link>
           <p className="footer-tagline">
-            The Philippines&apos; first spatial commerce platform. Every kind of space decoded into clear, verified intelligence. Homes, offices, venues, tables.
+            The Philippines&apos; first spatial commerce platform. We decode every kind of space into clear, verified intelligence. Homes, offices, venues, tables.
           </p>
           {/* Renders nothing while every SOCIAL_LINKS url is null. */}
           {activeSocials.length > 0 && (
@@ -110,7 +110,7 @@ export default function Footer() {
             <Link href="/about">About Us</Link>
             <Link href="/enterprise">Enterprise</Link>
             <Link href="/dashboard">Dashboard</Link>
-            <Link href="/contact">Contact</Link>
+            <a href="mailto:hello@scoutit.space">Contact</a>
           </div>
         </div>
       </div>
@@ -141,7 +141,7 @@ export default function Footer() {
             <span className="meta-separator">•</span>
             <Link href="/privacy">Privacy Policy</Link>
             <span className="meta-separator">•</span>
-            <Link href="/contact">Contact</Link>
+            <a href="mailto:hello@scoutit.space">Contact</a>
           </div>
         </div>
       </div>

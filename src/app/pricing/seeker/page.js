@@ -12,12 +12,12 @@ const TIERS = [
     name: "Starry Wanderer",
     price: "₱0",
     period: "forever",
-    description: "Basic access to standard property data and public listings.",
+    description: "Full access to public listings and standard property records.",
     connects: "1 Connect / month",
     features: [
-      "View public photos & descriptions",
+      "View public photos & specifications",
       "Full editorial property intel",
-      "Unlimited private saves — no account needed",
+      "Unlimited private saves on your device",
       "Anonymous on-device board"
     ],
     highlight: false,
@@ -27,12 +27,12 @@ const TIERS = [
     name: "Solar Seeker",
     price: "₱149",
     period: "monthly",
-    description: "Unlock Deep Intelligence metrics and enhanced visuals.",
+    description: "Expanded intelligence metrics and enhanced property visuals.",
     connects: "6 Connects / month",
     features: [
-      "Deep Intel (Cap Rates, Noise Levels)",
-      "Enhanced property photos unlocked",
-      "Guide Wizard full access",
+      "Deep Intel: Cap rates, noise ratings & zoning",
+      "High-resolution property photography",
+      "Guide Wizard property matcher",
       "Anonymous connect proxy enabled"
     ],
     highlight: false,
@@ -42,12 +42,12 @@ const TIERS = [
     name: "Cluster Scout",
     price: "₱499",
     period: "monthly",
-    description: "Unlock the Spatial Vault and total Identity Reveal Control.",
+    description: "The Spatial Vault 3D models and Identity Reveal Control.",
     connects: "15 Connects / month",
     features: [
-      "The Vault Unlocked (Luma 3D Maps)",
-      "Unlock Drone Heatmaps & Spatial intel",
-      "Identity reveal control (Anonymity shield)",
+      "The Spatial Vault: Interactive 3D maps & floor models",
+      "Drone heatmaps & aerial spatial intel",
+      "Identity Reveal Control: Contact brokers anonymously",
       "Priority broker matching",
       "Bounty task participation"
     ],
@@ -58,14 +58,14 @@ const TIERS = [
     name: "Universe Principal",
     price: "₱2,499",
     period: "monthly",
-    description: "White-glove intelligence for corporate scouts.",
+    description: "Curated intelligence and private sourcing for corporate scouts.",
     connects: "40 Connects / month",
     features: [
       "Everything in Cluster Scout",
-      "Exclusive Universe-only listings",
-      "Custom briefing requests",
+      "Private off-market listings",
+      "Custom market briefing requests",
       "Dedicated space curator",
-      "Full off-market pipeline view"
+      "Full transaction pipeline view"
     ],
     highlight: false,
     buttonText: "Contact Sales"
@@ -84,13 +84,13 @@ export default function SeekerPricingPage() {
 
         <header className="pricing-header z-10 relative">
           <span className="vector-label text-gold-accent tracking-[0.3em] uppercase text-xs font-bold mb-4 block drop-shadow-md">
-            LAYER 09 // DEMAND-SIDE INTELLIGENCE
+            LAYER 08 // SEEKER INTELLIGENCE
           </span>
           <h1 className="page-title text-5xl md:text-6xl font-display-md text-white mb-6 drop-shadow-lg">
-            Unlock The <span className="text-gold-accent">Spatial Vault</span>
+            Explore with the <span className="text-gold-accent">Spatial Vault</span>
           </h1>
           <p className="page-subtitle text-lg text-text-secondary max-w-2xl mx-auto leading-relaxed">
-            Standard data is free. Deep Intelligence is a premium asset. Upgrade your account to bypass the Escrow paywalls and access immersive 3D maps, heatmaps, and classified coordinates.
+            Public property records are free forever. Paid tiers add deeper spatial metrics, 3D interactive maps, noise ratings, and verified broker routing.
           </p>
         </header>
 

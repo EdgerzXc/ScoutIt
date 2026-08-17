@@ -2,11 +2,14 @@
 
 import { useState, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useDashboard } from "../../context/DashboardContext";
 import { CardGridSkeleton } from "./DashboardSkeleton";
 import { Bookmark, Search } from "lucide-react";
 import PostMoveEcosystem from "./PostMoveEcosystem";
 import VaultOfHonor from "./VaultOfHonor";
+
+const ComparisonMatrix = dynamic(() => import("@/components/property/ComparisonMatrix"), { ssr: false });
 
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
@@ -18,6 +21,8 @@ export default function BuyerMode() {
   const [searchQuery, setSearchQuery] = useState("");
   const [radius, setRadius] = useState("5");
   const [radarCenter, setRadarCenter] = useState(null);
+  const [selectedForCompare, setSelectedForCompare] = useState([]);
+  const [isComparisonOpen, setIsComparisonOpen] = useState(false);
   // Area watch — device-local (same pattern as Your Board), so the toggle is
   // real state instead of a fire-and-forget toast that pretends to subscribe.
   const [areaWatch, setAreaWatch] = useState(false);
@@ -192,7 +197,7 @@ export default function BuyerMode() {
         const popup = new maplibregl.Popup({ offset: 25, closeButton: false })
           .setDOMContent(popupContent);
 
-        const marker = new maplibregl.Marker(el)
+        const marker = new maplibregl.Marker({ element: el })
           .setLngLat(coords)
           .setPopup(popup)
           .addTo(mapInstance.current);
@@ -297,32 +302,62 @@ export default function BuyerMode() {
     );
   }, [listings, savedIds, searchQuery]);
 
-  const ListingCard = ({ item }) => (
-    <Link href={`/property/${item.slug || item.id}`} className="block shrink-0 min-w-[240px] md:min-w-[280px]">
-      <div className="card-atmosphere hov-card rounded-lg p-4 flex gap-4 items-center hover:border-gold-accent transition cursor-pointer h-full group">
-        <div className="w-16 h-16 bg-surface-alt rounded flex items-center justify-center text-3xl shrink-0 group-hover:scale-105 transition-transform">
-          {item.img || '🏠'}
+  const toggleCompareSelect = (id) => {
+    setSelectedForCompare(prev =>
+      prev.includes(id) ? prev.filter(x => x !== id) : (prev.length < 4 ? [...prev, id] : prev)
+    );
+  };
+
+  const comparedProperties = useMemo(() => {
+    if (selectedForCompare.length > 0) {
+      return listings.filter(l => selectedForCompare.includes(l.id));
+    }
+    return listings.filter(l => savedIds.includes(l.id) && l.ownerId === 'scoutit-cms' && !l.isDuplicateOfAirtable).slice(0, 4);
+  }, [listings, selectedForCompare, savedIds]);
+
+  const ListingCard = ({ item }) => {
+    const isSelected = selectedForCompare.includes(item.id);
+    return (
+      <Link href={`/property/${item.slug || item.id}`} className="block shrink-0 min-w-[240px] md:min-w-[280px]">
+        <div className={`card-atmosphere hov-card rounded-lg p-4 flex gap-4 items-center transition cursor-pointer h-full group relative ${isSelected ? 'border-gold-accent bg-gold-accent/5' : 'hover:border-gold-accent'}`}>
+          <div className="w-16 h-16 bg-surface-alt rounded flex items-center justify-center text-3xl shrink-0 group-hover:scale-105 transition-transform">
+            {item.img || '🏠'}
+          </div>
+          <div className="flex flex-col overflow-hidden">
+            <div className="text-gold-accent font-label-caps text-[10px] tracking-widest uppercase mb-1">{item.type}</div>
+            <div className="font-working-title text-on-surface truncate group-hover:underline">{item.title}</div>
+            <div className="text-xs text-text-secondary truncate mt-0.5">{item.loc || 'Metro Manila'}</div>
+          </div>
+          <div className="absolute top-3 right-3 flex items-center gap-1.5">
+            <button
+              type="button"
+              title={isSelected ? "Remove from comparison" : "Select for comparison"}
+              className={`p-1 rounded text-xs transition ${isSelected ? 'bg-gold-accent text-black font-bold' : 'bg-surface/80 text-text-secondary hover:text-gold-accent'}`}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleCompareSelect(item.id);
+              }}
+            >
+              {isSelected ? "✓" : "+"}
+            </button>
+            <button 
+              className="text-xl drop-shadow-md hover:scale-110 transition-transform p-0.5"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleSave(item);
+              }}
+            >
+              {savedIds.includes(item.id)
+                ? <Bookmark strokeWidth={1.5} size="1em" className="text-gold-accent" />
+                : <Bookmark strokeWidth={1.5} size="1em" className="text-text-secondary" />}
+            </button>
+          </div>
         </div>
-        <div className="flex flex-col overflow-hidden">
-          <div className="text-gold-accent font-label-caps text-[10px] tracking-widest uppercase mb-1">{item.type}</div>
-          <div className="font-working-title text-on-surface truncate group-hover:underline">{item.title}</div>
-          <div className="text-xs text-text-secondary truncate mt-0.5">{item.loc || 'Metro Manila'}</div>
-        </div>
-        <button 
-          className="absolute top-4 right-4 text-2xl drop-shadow-md hover:scale-110 transition-transform"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            toggleSave(item);
-          }}
-        >
-          {savedIds.includes(item.id)
-            ? <Bookmark strokeWidth={1.5} size="1em" className="text-gold-accent" />
-            : <Bookmark strokeWidth={1.5} size="1em" className="text-text-secondary" />}
-        </button>
-      </div>
-    </Link>
-  );
+      </Link>
+    );
+  };
 
   const VerticalListingCard = ({ item }) => (
     <Link href={`/property/${item.slug || item.id}`} className="block shrink-0 w-[280px] snap-start relative">
@@ -442,11 +477,29 @@ export default function BuyerMode() {
         <>
           {/* Intelligence Archive (Saved Items) */}
           <div className="flex flex-col gap-4">
-            <h2 className="font-headline-editorial text-2xl text-on-surface flex items-center justify-between border-b border-surface-variant pb-2">
-              Your Board
-              <Link href="/wishlist" className="text-[10px] font-label-caps tracking-widest uppercase text-gold-accent hover:underline py-2.5 px-1 -my-1">View all →</Link>
-            </h2>
-            <p className="text-xs text-text-secondary mb-2">Tracked assets and saved market briefs.</p>
+            <div className="flex items-center justify-between border-b border-surface-variant pb-2">
+              <h2 className="font-headline-editorial text-2xl text-on-surface flex items-center gap-3">
+                Your Board
+                {savedFiltered.length > 0 && (
+                  <span className="font-mono text-xs text-text-muted">
+                    ({savedFiltered.length})
+                  </span>
+                )}
+              </h2>
+              <div className="flex items-center gap-3">
+                {savedFiltered.length >= 2 && (
+                  <button
+                    type="button"
+                    onClick={() => setIsComparisonOpen(true)}
+                    className="font-label-caps text-[10px] tracking-widest uppercase text-gold-accent hover:bg-gold-accent/10 border border-gold-accent/30 px-3 py-1.5 rounded transition cursor-pointer font-bold"
+                  >
+                    Compare Board ({selectedForCompare.length > 0 ? selectedForCompare.length : Math.min(4, savedFiltered.length)}) ➔
+                  </button>
+                )}
+                <Link href="/wishlist" className="text-[10px] font-label-caps tracking-widest uppercase text-gold-accent hover:underline py-2.5 px-1 -my-1">View all →</Link>
+              </div>
+            </div>
+            <p className="text-xs text-text-secondary mb-2">Tracked assets and saved market briefs. Select items to compare specifications side-by-side.</p>
             <div className="flex gap-4 overflow-x-auto pb-4 snap-x hide-scrollbar">
               {savedFiltered.map(item => (
                 <div key={item.id} className="snap-start">
@@ -462,9 +515,13 @@ export default function BuyerMode() {
                 </div>
               )}
               {!isLoading && savedFiltered.length === 0 && (
-                <div className="bg-surface border border-dashed border-surface-variant rounded-lg p-8 w-full text-center">
-                  <span className="text-2xl mb-2 opacity-50 block">📂</span>
-                  <p className="text-sm text-text-secondary">Your archive is empty. Save listings or intel briefs to build your workspace.</p>
+                <div className="bg-surface/50 border border-dashed border-white/[0.08] rounded-xl p-8 w-full text-center flex flex-col items-center justify-center">
+                  <span className="text-3xl mb-3 opacity-60 block">📂</span>
+                  <div className="font-working-title text-base text-on-surface mb-1">Your Board is ready</div>
+                  <p className="text-xs text-text-secondary max-w-sm mb-4 leading-relaxed">Save properties, floor plans, and intelligence briefs as you research to build your private evaluation board.</p>
+                  <Link href="/property" className="font-label-caps text-[10px] tracking-widest uppercase text-background bg-gold-accent hover:opacity-90 px-4 py-2 rounded transition active:scale-95 shadow-[0_0_12px_rgba(232,174,60,0.2)] font-bold">
+                    Explore Curated Spaces →
+                  </Link>
                 </div>
               )}
             </div>
@@ -590,6 +647,42 @@ export default function BuyerMode() {
 
       {/* Vault of Honor — badges/achievements sit below the core content (search + saved + intel) */}
       <VaultOfHonor />
+
+      {/* Floating Compare Action Bar (UX Direction §8 & MAP §15).
+          Full-width bar on a phone, centred pill from sm up: one non-wrapping
+          pill at this content width overruns a 390px viewport, and because it
+          is centred it clips both ends at once rather than one. */}
+      {selectedForCompare.length >= 2 && (
+        <div className="fixed z-50 bottom-4 left-3 right-3 sm:bottom-6 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:max-w-[calc(100vw-2rem)] bg-surface/95 backdrop-blur-xl border border-gold-accent/40 rounded-2xl sm:rounded-full px-4 sm:px-6 py-3 sm:py-3.5 shadow-[0_8px_32px_rgba(0,0,0,0.8)] flex items-center justify-between sm:justify-start gap-3 sm:gap-4 motion-safe:animate-[compareBarIn_200ms_cubic-bezier(0.23,1,0.32,1)]">
+          <span className="font-mono text-xs uppercase tracking-widest text-gold-accent font-bold truncate">
+            <span className="sm:hidden">{selectedForCompare.length} Selected</span>
+            <span className="hidden sm:inline">{selectedForCompare.length} Spaces Selected</span>
+          </span>
+          <button
+            type="button"
+            onClick={() => setIsComparisonOpen(true)}
+            className="shrink-0 px-4 min-h-11 sm:min-h-0 sm:py-1.5 rounded-full bg-gold-accent text-black font-mono text-xs uppercase tracking-wider font-bold hover:opacity-90 transition active:scale-95 shadow-[0_0_15px_rgba(232,174,60,0.4)]"
+          >
+            <span className="sm:hidden">Compare</span>
+            <span className="hidden sm:inline">Launch Comparison Matrix ➔</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setSelectedForCompare([])}
+            className="shrink-0 min-h-11 sm:min-h-0 px-2 sm:px-1 text-muted hover:text-text-primary text-xs font-mono uppercase tracking-wider transition"
+          >
+            Clear
+          </button>
+        </div>
+      )}
+
+      {/* Comparison Matrix Modal */}
+      {isComparisonOpen && comparedProperties.length > 0 && (
+        <ComparisonMatrix
+          properties={comparedProperties}
+          onClose={() => setIsComparisonOpen(false)}
+        />
+      )}
 
       <style jsx global>{`
         .hide-scrollbar::-webkit-scrollbar {
