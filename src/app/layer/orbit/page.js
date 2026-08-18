@@ -4,6 +4,7 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import BoardPodium from "@/components/board/BoardPodium";
 import BackgroundOrbit from "@/components/descent/BackgroundOrbit";
+import LayerTransition from "@/components/descent/LayerTransition";
 
 export default function OrbitLayer() {
   return (
@@ -19,6 +20,12 @@ export default function OrbitLayer() {
       {/* Main Orbital Demand Showcase & Leaderboard */}
       <main className="orbit-main-content">
         <BoardPodium />
+        <LayerTransition
+          nextNum="02"
+          nextName="Stratosphere"
+          nextHref="/layer/stratosphere"
+          teaser="Enter the atmosphere. Discover spatial intelligence, market stories, and neighborhood briefings."
+        />
       </main>
 
       {/* Universal Footer */}

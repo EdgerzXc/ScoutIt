@@ -5,6 +5,13 @@ tags: [master-sync, north-star, build-queue, decision-log, always-current]
 updated: 2026-08-18
 related: ["[[SCOUTIT_FULL_WORKFLOW]]", "[[SESSION_HANDOFF_2026-07-30]]", "[[00_START_HERE]]", "[[15_IMPLEMENTATION_RECORDS/README|Implementation Records]]", "[[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION PLAN]]", "[[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION PLAN]]", "[[13_EXTERNAL_INPUTS/README|External Inputs README]]"]
 ---
+> **2026-08-18 Stratosphere (Layer 02) 40/60 Split-Canvas & Spatial Discovery overhaul:**
+> Layer 02 (`/layer/stratosphere`) has been fully re-engineered into a bespoke **Spatial Intelligence & Discovery Terminal** using the 40/60 Split-Canvas architecture:
+> 1. **Left Discovery & Spatial Radar Pane (~40%)**: Dual-axis Category & Regional corridor selectors (BGC, Makati, Siargao, Palawan, Cebu), live Discovered News & Development signal cards with status badges and impact radiuses, and dynamic **Impacted Property Nodes** (linking physical directory listings directly affected by the active news item).
+> 2. **Right Interactive Intelligence Dossier Pane (~60%)**: OSINT header with verified source provenance citations, **Chronological Scrollytelling Timeline** tracking development milestones (Origin $\rightarrow$ Construction $\rightarrow$ Activation), **ScoutIt "Our Take" Spatial Impact Matrix** (⚡ The Catalysts/Boosts, ⚠️ Friction/Disadvantages, 🏛️ Spatial Promises), and architectural massing/specification projections.
+> 3. **3D WebGL Stratosphere Archipelago Background**: Descended from Orbit to stratospheric altitude over the Philippine Island Archipelago with high-density glowing city lights (Metro Manila, Cebu, Clark, Davao, Siargao, El Nido), arterial highway corridors (NLEX, SLEX, SCTEX, CCLEX), and drifting stratospheric cloud bands.
+> 4. **Continuous Spatial Descent**: Connected with top `LayerNav` and bottom `LayerTransition` leading to **Layer 03: Metropolis** (`/layer/metropolis`). Passes 100% Vitest tests (1,189/1,189) and clean ESLint.
+
 > **2026-08-18 Showcase & 6-Layer Descent session checkpoint:** The Orbit Showcase
 > (`/showcase`) received a complete visual overhaul: cosmic periphery canvas with
 > per-rank atmospheric backgrounds (Universe = deep-space nebula & orbit rings,
