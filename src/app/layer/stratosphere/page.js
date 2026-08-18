@@ -33,6 +33,7 @@ import {
 
 import LayerNav from "@/components/descent/LayerNav";
 import LayerTransition from "@/components/descent/LayerTransition";
+import StratosphereRadarMap from "@/components/intel/StratosphereRadarMap";
 
 // ── TECHNICAL CATEGORIES & TERRITORY CORRIDORS ──────────────────
 const CATEGORIES = [
@@ -748,99 +749,23 @@ export default function StratosphereWorkbench() {
               /* Full Discovery Radar Column (~32%) */
               <aside className={`discovery-radar-column ${mobileSection === "radar" ? "is-mobile-active" : ""}`}>
                 
-                {/* ── A. Interactive Spatial Coordinate Radar Field ── */}
+                {/* ── A. Interactive Spatial Map Deck with Pin Dropping ── */}
                 <section className="radar-cartographic-deck">
                   <div className="deck-header">
                     <div className="deck-kicker">
                       <Crosshair size={12} className="text-gold" />
                       <span>SPATIAL RADAR // {currentSignal.corridorName.toUpperCase()}</span>
                     </div>
-                    <span className="deck-status">REAL-TIME GRAPH</span>
+                    <span className="deck-status">CARTOGRAPHIC INTEL</span>
                   </div>
 
-                  {/* Abstract SVG Vector Field with Tactical Corridors & Relationships */}
-                  <div className="radar-vector-field">
-                    <div className="radar-grid-lines" />
-                    
-                    {/* SVG Vector Roads & Influence Catchment Vectors */}
-                    <svg className="radar-svg-layer" viewBox="0 0 100 100" preserveAspectRatio="none">
-                      {/* Tactical Arterial Road Corridors */}
-                      <line x1="10" y1="48" x2="90" y2="48" stroke="rgba(255, 255, 255, 0.12)" strokeWidth="1.2" strokeDasharray="3 3" />
-                      <line x1="52" y1="10" x2="52" y2="90" stroke="rgba(255, 255, 255, 0.12)" strokeWidth="1.2" strokeDasharray="3 3" />
-                      <path d="M 20 80 Q 50 50 85 20" fill="none" stroke="rgba(232, 174, 60, 0.15)" strokeWidth="0.8" />
-                      
-                      {/* Active Signal Concentric Influence Catchment Rings */}
-                      <circle cx={currentSignal.coords.x} cy={currentSignal.coords.y} r="14" fill="rgba(232, 174, 60, 0.04)" stroke="rgba(232, 174, 60, 0.35)" strokeWidth="0.8" strokeDasharray="2 2" />
-                      <circle cx={currentSignal.coords.x} cy={currentSignal.coords.y} r="28" fill="rgba(232, 174, 60, 0.02)" stroke="rgba(232, 174, 60, 0.2)" strokeWidth="0.6" strokeDasharray="4 4" />
-
-                      {/* Dynamic Connection Vectors linking Signal (●) to Affected Properties (■) */}
-                      {currentSignal.affectedSpaces.map((prop) => {
-                        const isHovered = hoveredPropertyId === prop.id;
-                        return (
-                          <g key={prop.id}>
-                            <line 
-                              x1={currentSignal.coords.x} 
-                              y1={currentSignal.coords.y} 
-                              x2={prop.coords.x} 
-                              y2={prop.coords.y} 
-                              stroke={isHovered ? "var(--accent-bright)" : "rgba(232, 174, 60, 0.4)"} 
-                              strokeWidth={isHovered ? "1.5" : "0.8"} 
-                              strokeDasharray={isHovered ? "none" : "2 2"} 
-                            />
-                            <circle 
-                              cx={prop.coords.x} 
-                              cy={prop.coords.y} 
-                              r={isHovered ? "3.2" : "2.2"} 
-                              fill={isHovered ? "var(--accent-bright)" : "#f0ede8"} 
-                              stroke="var(--accent)"
-                              strokeWidth="0.8"
-                            />
-                          </g>
-                        );
-                      })}
-                    </svg>
-
-                    {/* Plotted Signal Nodes */}
-                    {filteredSignals.map(sig => {
-                      const isFocused = sig.id === currentSignal.id;
-                      const isHovered = hoveredSignalId === sig.id;
-                      return (
-                        <button
-                          key={sig.id}
-                          type="button"
-                          className={`radar-signal-node ${isFocused ? "is-focused" : ""} ${isHovered ? "is-hovered" : ""}`}
-                          style={{ left: `${sig.coords.x}%`, top: `${sig.coords.y}%` }}
-                          onClick={() => {
-                            setActiveSignalId(sig.id);
-                            setMobileSection("brief");
-                          }}
-                          onMouseEnter={() => setHoveredSignalId(sig.id)}
-                          onMouseLeave={() => setHoveredSignalId(null)}
-                          title={`${sig.title} (${sig.location})`}
-                        >
-                          <span className="node-pulse" />
-                          <span className="node-label">{sig.region}</span>
-                        </button>
-                      );
-                    })}
-
-                    {/* Active Target Reticle Overlay */}
-                    <div 
-                      className="radar-active-reticle"
-                      style={{ left: `${currentSignal.coords.x}%`, top: `${currentSignal.coords.y}%` }}
-                    >
-                      <div className="reticle-box" />
-                      <span className="reticle-coords">
-                        {currentSignal.coords.lat.toFixed(4)}°N, {currentSignal.coords.lng.toFixed(4)}°E
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="deck-footer-legend">
-                    <span className="legend-item"><span className="legend-dot is-gold" /> SIGNAL DETECTED</span>
-                    <span className="legend-item"><span className="legend-dot is-white" /> LINKED PROPERTY</span>
-                    <span className="legend-item"><span className="legend-dot is-dashed" /> INFLUENCE RADIUS</span>
-                  </div>
+                  {/* Real Map System with Animated Dropping Beacon Pin & Linked Properties */}
+                  <StratosphereRadarMap
+                    currentSignal={currentSignal}
+                    affectedSpaces={currentSignal.affectedSpaces}
+                    hoveredPropertyId={hoveredPropertyId}
+                    onSelectProperty={(prop) => router.push(`/property/${prop.slug}`)}
+                  />
                 </section>
 
                 {/* ── B. Compact Signal Detection Feed ── */}
