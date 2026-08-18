@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { 
@@ -14,242 +14,404 @@ import {
   Clock,
   FileText,
   TrendingUp,
+  TrendingDown,
   AlertTriangle,
   Sparkles,
   Layers,
   ChevronRight,
-  ExternalLink
+  ExternalLink,
+  Crosshair,
+  Maximize2,
+  Minimize2,
+  CheckCircle2,
+  HelpCircle,
+  Eye,
+  ArrowUpRight,
+  ChevronDown,
+  ChevronUp,
+  Info
 } from "lucide-react";
 
 import LayerNav from "@/components/descent/LayerNav";
-import BackgroundStratosphere from "@/components/descent/BackgroundStratosphere";
 import LayerTransition from "@/components/descent/LayerTransition";
-import { getArticles } from "@/data/mock/mockArticles";
 
+// ── TECHNICAL CATEGORIES & TERRITORY CORRIDORS ──────────────────
 const CATEGORIES = [
   "All",
-  "Residential",
+  "Development",
+  "Infrastructure",
+  "Zoning",
+  "Transit",
   "Commercial",
-  "STR",
   "Hospitality",
-  "Restaurants",
-  "Venues"
+  "STR"
 ];
 
 const REGIONS = [
   "All Regions",
+  "Manila Bay",
   "BGC & Taguig",
   "Makati CBD",
   "Siargao",
-  "Palawan & MIMAROPA",
+  "Palawan",
   "Metro Cebu"
 ];
 
-const REGION_FILTER_MAP = {
-  "BGC & Taguig": ["BGC", "Taguig"],
-  "Makati CBD": ["Makati", "Poblacion"],
-  "Siargao": ["Siargao", "General Luna"],
-  "Palawan & MIMAROPA": ["Palawan", "El Nido", "Coron", "Puerto Princesa"],
-  "Metro Cebu": ["Cebu", "Mactan", "Visayas"]
-};
-
-// Rich Intelligence & Scrollytelling Dossiers
-const OSINT_DOSSIERS = [
+// ── COMPREHENSIVE OSINT SPATIAL SIGNALS DATABASE ────────────────
+const SPATIAL_SIGNALS = [
   {
-    id: "bgc-subway-expansion",
-    slug: "bgc-spatial-movement",
-    title: "BGC West Block Subway Tunneling & Low-Density Villa Migration",
-    category: "Residential",
-    intelType: "INFRASTRUCTURE RADAR",
-    statusBadge: "TUNNELING PHASE 1",
-    location: "BGC West Block, Taguig",
-    region: "BGC & Taguig",
-    impactRadius: "800m station catchment",
-    date: "July 2026",
-    readTime: "4 MIN READ",
-    sourceName: "Taguig Zoning Gazette & DOTr Metro Manila Subway Registry Q2 2026",
-    lead: "Tunnel boring machines advancing toward BGC West Station have triggered a rapid spatial realignment: private capital is aggressively acquiring low-density modernist villas with private acoustic buffers before station activation.",
-    timeline: [
-      { year: "2024", phase: "Right-of-Way & Title Consolidation", detail: "DOTr and BCDA finalized underground subterranean easement rights along the western perimeter." },
-      { year: "2026", phase: "Shaft Excavation & Zoning Reclassification", detail: "Ground settlement sensors installed; surrounding residential blocks received acoustic density overlay." },
-      { year: "2028", phase: "Target Passenger Activation", detail: "Direct 18-minute subterranean transit connection from BGC Station to NAIA International Airport Terminal 3." }
-    ],
-    ourTake: {
-      boosts: "Direct high-speed airport transit link; projected +38% capital appreciation on properties within 500m.",
-      friction: "30 months of localized vibration and deep-bore utility rerouting; temporary heavy vehicle traffic along perimeter roads.",
-      promises: "Complete transformation of West BGC into an ultra-connected, car-free transit district with dedicated subterranean pedestrian links."
-    },
-    projection: {
-      title: "Planned Subterranean Pedestrian Concourse",
-      specs: ["Depth: -24.5m", "Access Points: 4 Direct Plazas", "Integrated Buffer: 80mm Acoustic Glass"]
-    }
-  },
-  {
-    id: "makati-leed-retrofit",
-    slug: "green-office-demand",
-    title: "LEED Platinum Mandate & Makati CBD Office Modernization",
-    category: "Commercial",
-    intelType: "ZONING SHIFT",
-    statusBadge: "ORDINANCE RATIFIED",
-    location: "Ayala Avenue, Makati CBD",
-    region: "Makati CBD",
-    impactRadius: "Ayala & Paseo Corridors",
+    id: "sig-manila-bay-pavilion",
+    slug: "manila-venue-trends",
+    title: "Bay Area Glass Atrium Pavilions & Corporate Spatial Tech",
+    category: "Development",
+    statusBadge: "UNDERWAY · Q4 2028",
+    statusType: "active",
+    location: "Manila Bay, Pasay / Parañaque",
+    region: "Manila Bay",
+    coords: { lat: 14.5320, lng: 120.9820, x: 42, y: 55 },
+    impactRadius: "1.2 km Coastal Catchment",
     date: "July 2026",
     readTime: "5 MIN READ",
-    sourceName: "Makati Urban Redevelopment Authority & Colliers Philippine Office Report",
-    lead: "New municipal carbon taxation thresholds have forced legacy tower landlords to execute aggressive green retrofits, driving institutional tenants into net-zero floorplates.",
-    timeline: [
-      { year: "2023", phase: "ESG Carbon Framework Drafted", detail: "Makati City Council drafted the progressive commercial energy cap for prime CBD towers." },
-      { year: "2025", phase: "Double-Glazing & Solar Retrofit Mandate", detail: "Over 24 prime commercial buildings commenced façade replacements and HVAC magnetic-bearing upgrades." },
-      { year: "2027", phase: "Full Compliance & Penalty Enforcement", detail: "Non-compliant legacy buildings face tiered municipal surcharges and tenant occupancy restrictions." }
-    ],
-    ourTake: {
-      boosts: "Compressed operating expenses by 28%; surge in multinational headquarters leasing interest for certified spaces.",
-      friction: "CapEx expenditure exceeding ₱180M per tower; temporary tenant relocations during core HVAC overhauls.",
-      promises: "Establishes Makati CBD as the premier green-certified commercial financial center in Southeast Asia."
+    verificationStatus: "VERIFIED PRIMARY",
+    confidence: "98%",
+    summary: {
+      whatHappened: "A 4.8-hectare reclaimed waterfront parcel in Pasay has broken ground for two double-height, photovoltaic glass atrium pavilions designed for corporate tech summits and hybrid physical-virtual international conferences.",
+      whyItMatters: "Directly shifts Manila's corporate event gravity from traditional subterranean hotel ballrooms to daylight-drenched waterfront assets, triggering a 28% surge in surrounding commercial property inquiries.",
+      affectedCount: 3
     },
-    projection: {
-      title: "Active Facade Thermal Enclosure Standard",
-      specs: ["Low-E Double Glazed", "Solar Shading: 45% Reflection", "Energy Reduction: -32%"]
+    // The 8-Chapter Modular Investigation Story
+    investigation: {
+      chapter01: {
+        headline: "Something is changing across the Manila Bay waterfront.",
+        lede: "For two decades, corporate gatherings in Metro Manila were confined to underground hotel ballrooms with artificial lighting. The ground-breaking of the Bay Area Glass Atrium Pavilions marks a permanent architectural break: a 4.8-hectare waterfront campus that uses structural glass and solar shading to merge maritime sunset vistas with high-bandwidth spatial computing infrastructure.",
+        territoryContext: "Situated along the reclaimed coastal corridor between Pasay and Parañaque, the site directly anchors the northern perimeter of the Bay Area Entertainment City."
+      },
+      chapter02: {
+        siteNotes: "The site directly borders Seaside Boulevard and is situated within an 8-minute drive from NAIA Expressway Terminal 1 & 2 on-ramps.",
+        radiusZones: [
+          { radius: "250m", impact: "Immediate acoustic & footfall zone; direct pedestrian promenade connection." },
+          { radius: "500m", impact: "High-density hospitality & commercial leasing catchment." },
+          { radius: "1.0km", impact: "Macro traffic dispersal & premium residential appreciation corridor." }
+        ]
+      },
+      chapter03: {
+        announcementTitle: "Official Ground-Breaking & Framework Approval",
+        announcer: "Philippine Convention & Exhibition Bureau (PCEB) & Pasay City Planning Office",
+        filingRef: "PCEB-2026-WZ-0941",
+        verifiedFacts: [
+          "48,000 sqm total gross land allocation on consolidated reclaimed title.",
+          "Two double-curved panoramic glass pavilions with 14-meter clear interior ceiling heights.",
+          "Integrated 2.4 MW rooftop building-integrated photovoltaic (BIPV) solar array.",
+          "Dedicated subterranean pedestrian concourse linking directly to the Seaside Monorail station."
+        ]
+      },
+      chapter04: {
+        timeline: [
+          { year: "2024", phase: "Right-of-Way & Environmental Compliance", status: "COMPLETED", detail: "DENR issued Environmental Compliance Certificate (ECC-2024-082) after hydrodynamic tidal surge modeling." },
+          { year: "2025", phase: "Deep Caisson Piling & Marine Defense", status: "COMPLETED", detail: "Installation of 420 reinforced concrete friction piles and a 4.2-meter wave-attenuation perimeter seawall." },
+          { year: "2026", phase: "Superstructure & Glass Enclosure", status: "WE ARE HERE", current: true, detail: "Erection of specialized diagrid steel arches and German-engineered triple-laminated low-emissivity glass panels." },
+          { year: "2027", phase: "Spatial Tech & Acoustic Fitout", status: "PLANNED", detail: "Deployment of spatial audio arrays, ceiling-integrated lidar tracking, and redundant fiber-optic trunks." },
+          { year: "2028", phase: "Operational Commissioning", status: "TARGET", detail: "Inaugural hosting of the Asia-Pacific Spatial Computing Summit Q4 2028." }
+        ]
+      },
+      chapter05: {
+        proposalName: "The Horizon Glass Pavilion Specifications",
+        specs: [
+          { label: "Clear Ceiling Height", value: "14.0 Meters" },
+          { label: "Simultaneous Guest Capacity", value: "3,500 Attendees" },
+          { label: "Solar Energy Offset", value: "64% Annual Campus Power" },
+          { label: "Acoustic Attenuation", value: "Rw 52 dB Noise Barrier" },
+          { label: "Waterfront Setback", value: "35-Meter Public Boardwalk" }
+        ],
+        architecturalLogic: "Designed with an aerodynamic cantilever that diffuses typhoon wind loads while providing unobstructed sunset views across Manila Bay."
+      },
+      chapter06: {
+        developerClaims: "The consortium claims the complex will generate ₱4.2B in annual regional economic activity and position Manila as Asia's top corporate waterfront destination.",
+        scoutItAudit: "While tourism and executive summit demand are historically high, regional road bottlenecks along Roxas Boulevard during evening rush hours remain an unmitigated operational friction point until the NAIAX connector is completed."
+      },
+      chapter07: {
+        // Multi-Factor Institutional Impact Matrix
+        impactMatrix: [
+          { factor: "Accessibility", shortTerm: "STABLE", longTerm: "HIGH BOOST", rationale: "Short-term construction rerouting shifts to a direct monorail and expressway link upon commissioning." },
+          { factor: "Traffic Load", shortTerm: "MODERATE FRICTION", longTerm: "MANAGED", rationale: "Localized heavy vehicle congestion during façade installation; long-term subterranean parking mitigates street queuing." },
+          { factor: "Commercial Footfall", shortTerm: "LOW", longTerm: "HIGH BOOST", rationale: "Estimated 14,000 weekly executive visitors entering the surrounding retail and dining promenade." },
+          { factor: "Property Values", shortTerm: "HIGH BOOST", longTerm: "HIGH BOOST", rationale: "Surrounding commercial spaces commanding a +24% pre-completion leasing premium." },
+          { factor: "Construction Acoustics", shortTerm: "MODERATE FRICTION", longTerm: "RESOLVED", rationale: "Deep-bore piling completed; current steel erection generates localized daytime decibel spikes." },
+          { factor: "Public Realm Quality", shortTerm: "STABLE", longTerm: "HIGH BOOST", rationale: "Creation of a 35-meter landscaped public sunset esplanade accessible to residents." }
+        ]
+      },
+      chapter08: {
+        sources: [
+          { type: "PRIMARY", name: "Philippine Convention & Exhibition Bureau Gazette", date: "June 2026", verified: true },
+          { type: "GOVERNMENT", name: "Pasay City Urban Planning & Zoning Registry", date: "April 2026", verified: true },
+          { type: "DEVELOPER", name: "Bay Horizon Consortium Masterplan Disclosure", date: "January 2026", verified: true },
+          { type: "SCOUTIT VERIFIED", name: "On-Site Drone Telemetry & Cadastral Audit", date: "July 2026", verified: true }
+        ]
+      }
     }
   },
   {
-    id: "siargao-coastal-rush",
+    id: "sig-bgc-subway",
+    slug: "bgc-spatial-movement",
+    title: "BGC West Block Subway Tunneling & Low-Density Villa Migration",
+    category: "Transit",
+    statusBadge: "TUNNELING PHASE 1",
+    statusType: "active",
+    location: "BGC West Block, Taguig",
+    region: "BGC & Taguig",
+    coords: { lat: 14.5409, lng: 121.0503, x: 62, y: 48 },
+    impactRadius: "800m Station Catchment",
+    date: "July 2026",
+    readTime: "4 MIN READ",
+    verificationStatus: "VERIFIED PRIMARY",
+    confidence: "99%",
+    summary: {
+      whatHappened: "Tunnel boring machines advancing toward BGC West Station have triggered a rapid spatial realignment: private capital is aggressively acquiring low-density modernist villas with private acoustic buffers before station activation.",
+      whyItMatters: "Direct 18-minute subterranean transit connection to NAIA Airport is driving a 38% price premium on single-detached homes within walking distance.",
+      affectedCount: 3
+    },
+    investigation: {
+      chapter01: {
+        headline: "Subterranean mobility is restructuring BGC's perimeter value.",
+        lede: "The arrival of the Metro Manila Subway beneath 11th Avenue represents the most profound transit intervention in Bonifacio Global City since its 1995 master plan. As tunnel boring progresses 24 meters below street level, private family offices and institutional buyers are executing off-market acquisitions of surrounding low-density residences.",
+        territoryContext: "Bonifacio Global City West Perimeter bordering Forbes Park and Kalayaan Avenue."
+      },
+      chapter02: {
+        siteNotes: "The station box excavation spans 280 meters along the western perimeter, creating a permanent high-frequency transit anchor.",
+        radiusZones: [
+          { radius: "200m", impact: "Direct underground pedestrian concourse portal." },
+          { radius: "450m", impact: "Prime residential appreciation zone with minimal street noise." },
+          { radius: "800m", impact: "Outer 10-minute pedestrian walking catchment." }
+        ]
+      },
+      chapter03: {
+        announcementTitle: "DOTr Subterranean Easement & Station Structural Works",
+        announcer: "Department of Transportation & Bases Conversion and Development Authority",
+        filingRef: "DOTr-MMS-PKG-104",
+        verifiedFacts: [
+          "BGC West Station excavation depth reaches -24.5 meters below street grade.",
+          "Four integrated station entrances designed with acoustic baffles and glass canopies.",
+          "Subterranean utility rerouting for water and fiber-optic grids completed in Q1 2026."
+        ]
+      },
+      chapter04: {
+        timeline: [
+          { year: "2023", phase: "Right-of-Way & Utility Relocation", status: "COMPLETED", detail: "Subterranean utilities mapped and diverted along perimeter corridors." },
+          { year: "2025", phase: "Diaphragm Wall & Shaft Excavation", status: "COMPLETED", detail: "Reinforced concrete perimeter walls poured to prevent ground settlement." },
+          { year: "2026", phase: "Tunnel Boring Machine (TBM) Transit", status: "WE ARE HERE", current: true, detail: "Dual TBMs excavating northbound and southbound running tunnels simultaneously." },
+          { year: "2027", phase: "Trackwork & Station Interior Architecture", status: "PLANNED", detail: "Platform screen doors, ventilation shafts, and high-speed elevators installed." },
+          { year: "2028", phase: "Commercial Passenger Activation", status: "TARGET", detail: "Opening of direct transit link to NAIA Terminal 3 and Ortigas CBD." }
+        ]
+      },
+      chapter05: {
+        proposalName: "BGC West Subterranean Concourse Architecture",
+        specs: [
+          { label: "Excavation Depth", value: "-24.5 Meters" },
+          { label: "Daily Passenger Capacity", value: "85,000 Commuters" },
+          { label: "Travel Time to NAIA", value: "18 Minutes" },
+          { label: "Acoustic Vibration Buffer", value: "Floating Slab Trackbed" }
+        ],
+        architecturalLogic: "Floating trackbeds absorb mechanical vibrations, isolating surface villas from underground resonance."
+      },
+      chapter06: {
+        developerClaims: "DOTr asserts the station will eliminate 35,000 daily vehicular trips into BGC's western corridor.",
+        scoutItAudit: "Surface-level drop-off traffic will require rigorous municipal enforcement to prevent bottlenecks along 11th Avenue during peak arrival hours."
+      },
+      chapter07: {
+        impactMatrix: [
+          { factor: "Accessibility", shortTerm: "STABLE", longTerm: "HIGH BOOST", rationale: "Direct airport and regional subway rail connectivity." },
+          { factor: "Traffic Load", shortTerm: "MODERATE FRICTION", longTerm: "POSITIVE", rationale: "Surface traffic diverted subterranean upon completion." },
+          { factor: "Commercial Footfall", shortTerm: "LOW", longTerm: "HIGH BOOST", rationale: "High-net-worth commuter density entering retail blocks." },
+          { factor: "Property Values", shortTerm: "HIGH BOOST", longTerm: "HIGH BOOST", rationale: "Historical +35% appreciation on transit-linked prime real estate." },
+          { factor: "Construction Noise", shortTerm: "MODERATE FRICTION", longTerm: "RESOLVED", rationale: "Deep tunnel boring produces zero surface disturbance." }
+        ]
+      },
+      chapter08: {
+        sources: [
+          { type: "PRIMARY", name: "DOTr Metro Manila Subway Project Ledger", date: "July 2026", verified: true },
+          { type: "GOVERNMENT", name: "Taguig City Urban Development Authority", date: "May 2026", verified: true },
+          { type: "SCOUTIT VERIFIED", name: "Field Lidar & Ground Settlement Telemetry", date: "July 2026", verified: true }
+        ]
+      }
+    }
+  },
+  {
+    id: "sig-makati-leed",
+    slug: "green-office-demand",
+    title: "LEED Platinum Mandate & Makati CBD Office Modernization",
+    category: "Zoning",
+    statusBadge: "ORDINANCE RATIFIED",
+    statusType: "active",
+    location: "Ayala Avenue, Makati CBD",
+    region: "Makati CBD",
+    coords: { lat: 14.5547, lng: 121.0244, x: 55, y: 44 },
+    impactRadius: "Ayala & Paseo Corridors",
+    date: "July 2026",
+    readTime: "4 MIN READ",
+    verificationStatus: "VERIFIED PRIMARY",
+    confidence: "97%",
+    summary: {
+      whatHappened: "Makati City has ratified a progressive carbon taxation ordinance mandating that prime office towers achieve minimum LEED Gold or Platinum certification by 2027.",
+      whyItMatters: "Forces legacy building owners into ₱180M+ façade and HVAC overhauls while driving multinational tenants to secure certified green spaces.",
+      affectedCount: 2
+    },
+    investigation: {
+      chapter01: {
+        headline: "The green threshold is reshaping Makati's skyline economics.",
+        lede: "The passage of the Makati Sustainable Skyscraper Ordinance has introduced a mandatory carbon ceiling for commercial buildings along Ayala Avenue, Paseo de Roxas, and Makati Avenue. Uncertified legacy towers face progressive municipal tax surcharges, creating an unprecedented wave of architectural retrofits.",
+        territoryContext: "Central Business District core encompassing 68 prime office towers."
+      },
+      chapter02: {
+        siteNotes: "Affects all commercial properties exceeding 12 stories built prior to 2018.",
+        radiusZones: [
+          { radius: "Core CBD", impact: "Immediate mandate compliance required by Q4 2027." },
+          { radius: "Perimeter Salcedo/Legazpi", impact: "Secondary compliance deadline Q4 2028." }
+        ]
+      },
+      chapter03: {
+        announcementTitle: "Makati City Ordinance No. 2026-042: Green Building Standards",
+        announcer: "Makati City Council & Department of Environmental Services",
+        filingRef: "MKT-ORD-2026-042",
+        verifiedFacts: [
+          "Mandatory 25% energy reduction baseline compared to ASHRAE 90.1 standards.",
+          "Tiered tax incentives for properties achieving LEED Platinum or WELL Building Standard.",
+          "Non-compliant properties penalized with 1.8% annual commercial property tax surcharge starting 2028."
+        ]
+      },
+      chapter04: {
+        timeline: [
+          { year: "2024", phase: "Energy Audit & Carbon Baseline Mapping", status: "COMPLETED", detail: "Citywide sensor mapping completed across 140 commercial towers." },
+          { year: "2026", phase: "Ordinance Ratification & Retrofit Launch", status: "WE ARE HERE", current: true, detail: "Over 24 prime commercial buildings commenced façade replacements and HVAC upgrades." },
+          { year: "2027", phase: "First Verification Audit & Certification", status: "PLANNED", detail: "Third-party USGBC engineering audits submitted to city hall." },
+          { year: "2028", phase: "Penalty Enforcement & Tax Adjustment", status: "TARGET", detail: "Surcharges applied to uncertified commercial assets." }
+        ]
+      },
+      chapter05: {
+        proposalName: "Active Façade Thermal Enclosure Standard",
+        specs: [
+          { label: "Glazing Spec", value: "Low-E Double Glazed (U-factor < 1.4)" },
+          { label: "HVAC Efficiency", value: "Magnetic-Bearing Chillers (COP > 6.8)" },
+          { label: "Energy Reduction", value: "-28% Operating Power" }
+        ],
+        architecturalLogic: "High-performance solar control coatings reduce cooling load by 32% without sacrificing natural daylight."
+      },
+      chapter06: {
+        developerClaims: "City planning projects a 42,000-ton annual reduction in carbon emissions across the CBD.",
+        scoutItAudit: "Building owners without available CapEx capital will likely face tenant flight to newer certified developments like Ayala Triangle Tower Two."
+      },
+      chapter07: {
+        impactMatrix: [
+          { factor: "Operating Efficiency", shortTerm: "MODERATE FRICTION", longTerm: "HIGH BOOST", rationale: "Initial retrofit CapEx recovered through 28% reduced power bills." },
+          { factor: "Tenant Demand", shortTerm: "HIGH BOOST", longTerm: "HIGH BOOST", rationale: "Multinational ESG mandates restrict leasing to certified green towers." },
+          { factor: "Asset Valuation", shortTerm: "STABLE", longTerm: "HIGH BOOST", rationale: "Certified buildings maintain 15-20% rental rate premiums over legacy stock." }
+        ]
+      },
+      chapter08: {
+        sources: [
+          { type: "PRIMARY", name: "Makati City Official Gazette No. 2026-042", date: "July 2026", verified: true },
+          { type: "GOVERNMENT", name: "Philippine Green Building Council (PHILGBC)", date: "June 2026", verified: true },
+          { type: "SCOUTIT VERIFIED", name: "Engineering Telemetry & Façade Inspections", date: "July 2026", verified: true }
+        ]
+      }
+    }
+  },
+  {
+    id: "sig-siargao-coastal",
     slug: "surf-front-land-rush",
     title: "General Luna Coastal Frontage Expansion & Yield Dynamics",
     category: "STR",
-    intelType: "COMMERCIAL SIGNAL",
     statusBadge: "OFF-MARKET SURGE",
+    statusType: "active",
     location: "General Luna, Siargao",
     region: "Siargao",
+    coords: { lat: 9.7800, lng: 126.1550, x: 80, y: 72 },
     impactRadius: "Cloud 9 to Tuason Beach",
     date: "June 2026",
     readTime: "3 MIN READ",
-    sourceName: "DENR Coastal Cadastral Survey & Tourism Infrastructure Fund Registry",
-    lead: "Boutique hospitality syndicates are executing off-market land consolidations along Siargao's extended surf breaks, generating annual short-term rental yields exceeding 22%.",
-    timeline: [
-      { year: "2024", phase: "Island Airport Runway Extension", detail: "Sayak Airport runway paved to accommodate direct regional jet arrivals from Singapore and Hong Kong." },
-      { year: "2026", phase: "Boutique Eco-Resort Land Acquisitions", detail: "Coastal plots command over ₱45,000/sqm as international lifestyle investors outbid traditional operators." },
-      { year: "2028", phase: "Sustainable Masterplanned Enclaves", detail: "Opening of five low-impact luxury pavilion resorts built on off-grid solar microgrids." }
-    ],
-    ourTake: {
-      boosts: "Extraordinary ADR (Average Daily Rate) potential of ₱35,000/night; resilient foreign tourist demand curve.",
-      friction: "Island grid reliability constraints; rigorous DENR 25-meter coastal easement setback enforcement.",
-      promises: "Solidifies Siargao as the undisputed global luxury surfing capital with strictly regulated low-density zoning."
+    verificationStatus: "VERIFIED PRIMARY",
+    confidence: "96%",
+    summary: {
+      whatHappened: "Boutique hospitality syndicates are executing off-market land consolidations along Siargao's extended surf breaks, generating annual short-term rental yields exceeding 22%.",
+      whyItMatters: "Runway expansion at Sayak Airport allowing direct regional flights has accelerated private acquisitions of titled beachfront land.",
+      affectedCount: 2
     },
-    projection: {
-      title: "Coastal Teak Pavilion Standard",
-      specs: ["Off-Grid Solar: 100%", "Setback: 25m Coastal Buffer", "ARR Target: 22.4%"]
-    }
-  },
-  {
-    id: "palawan-microgrid-resorts",
-    slug: "off-grid-island-living",
-    title: "Palawan Eco-Resort Solar Microgrids & Teak Architectural Standards",
-    category: "Hospitality",
-    intelType: "AREA GUIDE",
-    statusBadge: "MICROGRID ACTIVE",
-    location: "El Nido & Bacuit Bay, Palawan",
-    region: "Palawan & MIMAROPA",
-    impactRadius: "Bacuit Archipelago",
-    date: "June 2026",
-    readTime: "4 MIN READ",
-    sourceName: "Department of Energy Microgrid Register & Palawan Council for Sustainable Development",
-    lead: "Northern Palawan's resort landscape is undergoing a zero-carbon transition: off-grid solar-battery microgrids and sustainable teak construction have become the standard for ultra-luxury island villas.",
-    timeline: [
-      { year: "2024", phase: "PCSD Environmental Masterplan", detail: "Strict moratorium on heavy diesel generators across the marine reserve islands." },
-      { year: "2026", phase: "Solar Microgrid & Desalination Standard", detail: "Bespoke island resorts deploy lithium-iron battery banks and reverse-osmosis water systems." },
-      { year: "2027", phase: "Zero-Carbon Certification", detail: "Mandatory eco-luxury audit for all marine hospitality operators in Bacuit Bay." }
-    ],
-    ourTake: {
-      boosts: "Elimination of noisy diesel generators; premium guest pricing justified by verified sustainability credentials.",
-      friction: "High initial CapEx on battery storage; marine logistics complexity for maintenance parts.",
-      promises: "Pristine marine acoustic environment and world-class luxury eco-living without compromising comfort."
-    },
-    projection: {
-      title: "Zero-Emission Island Pavilion Model",
-      specs: ["Solar Capacity: 120kWp", "Battery Bank: 400kWh", "Acoustic Noise: 0 dB"]
-    }
-  },
-  {
-    id: "poblacion-adaptive-reuse",
-    slug: "poblacion-food-architecture",
-    title: "Poblacion Industrial Warehouse Adaptive Reuse & Night Gastronomy",
-    category: "Restaurants",
-    intelType: "LIFESTYLE DISPATCH",
-    statusBadge: "ZONING PILOT",
-    location: "Poblacion Heritage Quarter, Makati",
-    region: "Makati CBD",
-    impactRadius: "Kalayaan to J.P. Rizal",
-    date: "May 2026",
-    readTime: "3 MIN READ",
-    sourceName: "Makati Urban Redevelopment Task Force & Heritage Zoning Board",
-    lead: "Industrial modernist architecture overlays are reshaping vintage mid-century warehouses into multi-floor culinary destinations, driving street-level footfall up 44%.",
-    timeline: [
-      { year: "2023", phase: "Creative District Ordinance", detail: "Barangay Poblacion approved flexible multi-concept food and beverage zoning permits." },
-      { year: "2025", phase: "Structural Reinforcement Wave", detail: "Heritage residential warehouses retrofitted with exposed steel frames and rooftop terraces." },
-      { year: "2027", phase: "Pedestrian Walkability Network", detail: "Closure of key inner alleys to vehicular traffic during evening dining hours." }
-    ],
-    ourTake: {
-      boosts: "Unmatched culinary culture and vibrant nightlife; prime venue for innovative F&B concepts.",
-      friction: "Severe parking limitations; strict 1:00 AM noise ordinances near residential boundaries.",
-      promises: "A dense, walkable cultural and gastronomy cluster rivaling Tokyo's Shimokitazawa or New York's Lower East Side."
-    },
-    projection: {
-      title: "Exposed Steel Warehouse Conversion",
-      specs: ["Multi-Level Dining", "Acoustic Baffles Installed", "Footfall: +44% YoY"]
-    }
-  },
-  {
-    id: "bay-area-venues",
-    slug: "manila-venue-trends",
-    title: "Bay Area Glass Atrium Pavilions & Corporate Spatial Tech",
-    category: "Venues",
-    intelType: "COMMERCIAL SIGNAL",
-    statusBadge: "DEVELOPMENT ACTIVE",
-    location: "Bay Area, Pasay / Parañaque",
-    region: "BGC & Taguig",
-    impactRadius: "Reclamation District",
-    date: "May 2026",
-    readTime: "3 MIN READ",
-    sourceName: "Philippine Convention & Exhibition Bureau Gazette",
-    lead: "Corporate event spaces in Manila's Bay Area are transitioning from subterranean hotel ballrooms to natural light-filled glass atrium pavilions equipped with immersive spatial technology.",
-    timeline: [
-      { year: "2024", phase: "Coastal Masterplan Phase 2", detail: "Reclamation parcels designated for cultural and international convention centers." },
-      { year: "2026", phase: "Glass Atrium Construction", detail: "Double-height panoramic pavilions breaking ground facing Manila Bay sunset." },
-      { year: "2028", phase: "Global Tech Summit Delivery", detail: "Opening of three 2,000-capacity hybrid physical/virtual event centers." }
-    ],
-    ourTake: {
-      boosts: "Stunning waterfront sunset backdrops; high capacity for corporate product launches and conferences.",
-      friction: "Coastal wind and typhoon weatherproofing requirements; traffic congestion along Roxas Boulevard.",
-      promises: "Positions Manila Bay as the premier coastal corporate gathering and entertainment arena in Asia."
-    },
-    projection: {
-      title: "Panoramic Coastal Glass Pavilion",
-      specs: ["Capacity: 2,000 Guests", "Ceiling: 14m Clear Height", "Manila Bay Sunset View"]
+    investigation: {
+      chapter01: {
+        headline: "Direct regional aviation is reshaping Siargao's coastal land values.",
+        lede: "The extension of the runway at Sayak Airport to accommodate regional jet flights from Singapore and Hong Kong has permanently altered Siargao's tourism velocity. Prime beachfront parcels between Cloud 9 and Tuason Beach are seeing rapid off-market transactions.",
+        territoryContext: "General Luna coastal corridor spanning 6.4 kilometers."
+      },
+      chapter02: {
+        siteNotes: "Strict 25-meter coastal easement setback enforced by DENR on all new structural developments.",
+        radiusZones: [
+          { radius: "Beachfront", impact: "Zero-density buffer zone with elevated teak boardwalks." },
+          { radius: "50-100m Inland", impact: "Prime luxury pavilion villa footprint." }
+        ]
+      },
+      chapter03: {
+        announcementTitle: "Civil Aviation Authority of the Philippines (CAAP) Runway Expansion",
+        announcer: "CAAP & Department of Tourism (DOT)",
+        filingRef: "CAAP-SYK-2025-019",
+        verifiedFacts: [
+          "Runway lengthened to 1,800 meters to accept Airbus A320 and Embraer E190 aircraft.",
+          "Direct flights from Singapore (Changi) slated for commencement Q1 2027.",
+          "Municipal moratorium on non-biodegradable construction materials in coastal zones."
+        ]
+      },
+      chapter04: {
+        timeline: [
+          { year: "2024", phase: "Airport Land Acquisition & Paving", status: "COMPLETED", detail: "Runway foundation paved and instrument landing systems installed." },
+          { year: "2026", phase: "Boutique Land Consolidation Wave", status: "WE ARE HERE", current: true, detail: "Hospitality syndicates securing titled agricultural-to-commercial conversions." },
+          { year: "2027", phase: "Direct International Flight Inflow", status: "PLANNED", detail: "First direct scheduled international arrivals." },
+          { year: "2028", phase: "Masterplanned Eco-Resort Deliveries", status: "TARGET", detail: "Opening of five low-density, off-grid luxury pavilion estates." }
+        ]
+      },
+      chapter05: {
+        proposalName: "Sustainable Teak Pavilion Standard",
+        specs: [
+          { label: "Renewable Power", value: "100% Off-Grid Solar & Battery" },
+          { label: "Coastal Setback", value: "25-Meter Protected Easement" },
+          { label: "Target ARR", value: "22.4% Annual Rental Yield" }
+        ],
+        architecturalLogic: "Open-air pavilions elevated on stilts to respect natural dune topography and maximize sea breezes."
+      },
+      chapter06: {
+        developerClaims: "Syndicates project consistent 85% year-round occupancy from international surf and wellness travelers.",
+        scoutItAudit: "Island grid reliability and water desalination infrastructure require private onsite solutions to maintain five-star luxury standards."
+      },
+      chapter07: {
+        impactMatrix: [
+          { factor: "Rental Yields", shortTerm: "HIGH BOOST", longTerm: "HIGH BOOST", rationale: "Current nightly ADRs of ₱35,000+ with minimal luxury inventory." },
+          { factor: "Land Scarcity", shortTerm: "HIGH BOOST", longTerm: "HIGH BOOST", rationale: "Only 14 titled coastal parcels remain available along primary breaks." },
+          { factor: "Infrastructure Risk", shortTerm: "MODERATE FRICTION", longTerm: "MANAGED", rationale: "Requires private solar microgrid and deep-well water filtration." }
+        ]
+      },
+      chapter08: {
+        sources: [
+          { type: "PRIMARY", name: "CAAP Sayak Airport Development Record", date: "June 2026", verified: true },
+          { type: "GOVERNMENT", name: "DENR Region XIII Coastal Cadastral Survey", date: "May 2026", verified: true },
+          { type: "SCOUTIT VERIFIED", name: "Title Verification & Land Registry Audit", date: "June 2026", verified: true }
+        ]
+      }
     }
   }
 ];
 
-const normalizeCategory = (raw) => {
-  const c = (raw || "Residential").toLowerCase();
-  if (c === "hospitality") return "Hospitality";
-  if (c === "str") return "STR";
-  if (c === "culinary" || c === "restaurants") return "Restaurants";
-  if (c === "venues" || c === "events") return "Venues";
-  if (c === "commercial") return "Commercial";
-  return "Residential";
-};
-
-export default function StratosphereLayer() {
+export default function StratosphereWorkbench() {
   const router = useRouter();
+  
+  // ── WORKBENCH STATE ──────────────────────────────────────────
+  const [activeSignalId, setActiveSignalId] = useState("sig-manila-bay-pavilion");
+  const [investigationMode, setInvestigationMode] = useState(false);
   const [activeCategory, setActiveCategory] = useState("All");
   const [activeRegion, setActiveRegion] = useState("All Regions");
-  const [activeDossierId, setActiveDossierId] = useState("bgc-subway-expansion");
+  const [activeChapter, setActiveChapter] = useState(1);
   const [properties, setProperties] = useState([]);
-  const [mobileTab, setMobileTab] = useState("discovery"); // 'discovery' | 'intelligence'
+  const [evidenceDrawerOpen, setEvidenceDrawerOpen] = useState(false);
+  const [hoveredPropertyId, setHoveredPropertyId] = useState(null);
+  const [mobileSection, setMobileSection] = useState("radar"); // 'radar' | 'brief' | 'investigation'
 
-  // Fetch live CMS properties to link to spatial news
+  // Fetch Live Directory Properties from Dual-CMS API
   useEffect(() => {
     let alive = true;
     async function loadProperties() {
@@ -259,464 +421,760 @@ export default function StratosphereLayer() {
         const data = await res.json();
         if (data.properties && Array.isArray(data.properties)) {
           const list = data.properties.filter(p => p.title && p.slug).map(p => ({
-            id: p.id,
+            id: p.id || p.slug,
             slug: p.slug,
             title: p.title,
-            category: normalizeCategory(p.spaceCategory),
+            category: p.spaceCategory || "Commercial",
             city: p.location || p.city || "Philippines",
             style: p.aestheticTag || "Modernist",
             image: p.image || (p.photos?.[0]) || "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1200&q=80",
-            desc: p.hook || p.description || "Verified architectural asset with recorded spatial provenance.",
             beds: p.beds || 3,
-            sqm: p.floor_sqm || 320,
-            price: p.price_raw ? `₱${(p.price_raw / 1000000).toFixed(1)}M` : "Price on Request"
+            sqm: p.floor_sqm || 340,
+            price: p.price_raw ? `₱${(p.price_raw / 1000000).toFixed(1)}M` : "Price on Request",
+            distance: "350m radius",
+            influence: "High Demand Surge"
           }));
-          if (alive) setProperties(list);
+          if (alive && list.length > 0) setProperties(list);
         }
       } catch (err) {
-        if (alive) console.error("Properties load error:", err);
+        if (alive) console.error("CMS properties load error:", err);
       }
     }
     loadProperties();
     return () => { alive = false; };
   }, []);
 
-  // Filtered Dossiers based on Category and Region
-  const filteredDossiers = useMemo(() => {
-    return OSINT_DOSSIERS.filter(d => {
-      const matchCat = activeCategory === "All" || d.category === activeCategory;
-      let matchReg = true;
-      if (activeRegion !== "All Regions") {
-        const allowed = REGION_FILTER_MAP[activeRegion] || [];
-        matchReg = allowed.some(loc => d.location.toLowerCase().includes(loc.toLowerCase()));
-      }
+  // Filter Signals
+  const filteredSignals = useMemo(() => {
+    return SPATIAL_SIGNALS.filter(sig => {
+      const matchCat = activeCategory === "All" || sig.category.toLowerCase() === activeCategory.toLowerCase();
+      const matchReg = activeRegion === "All Regions" || sig.region.toLowerCase().includes(activeRegion.toLowerCase()) || sig.location.toLowerCase().includes(activeRegion.toLowerCase());
       return matchCat && matchReg;
     });
   }, [activeCategory, activeRegion]);
 
-  // Ensure active dossier is valid
-  useEffect(() => {
-    if (filteredDossiers.length > 0) {
-      if (!filteredDossiers.some(d => d.id === activeDossierId)) {
-        setActiveDossierId(filteredDossiers[0].id);
-      }
-    }
-  }, [filteredDossiers, activeDossierId]);
+  // Active Signal Object
+  const currentSignal = useMemo(() => {
+    return SPATIAL_SIGNALS.find(s => s.id === activeSignalId) || SPATIAL_SIGNALS[0];
+  }, [activeSignalId]);
 
-  // Selected Active Dossier
-  const currentDossier = useMemo(() => {
-    return OSINT_DOSSIERS.find(d => d.id === activeDossierId) || OSINT_DOSSIERS[0];
-  }, [activeDossierId]);
-
-  // Impacted Properties situated in the Active Dossier's territory
-  const impactedProperties = useMemo(() => {
-    if (!currentDossier) return [];
-    // Match by space category or location
+  // Linked Affected Properties for the Active Signal
+  const affectedProperties = useMemo(() => {
+    if (!currentSignal) return [];
     const matched = properties.filter(p => 
-      p.category === currentDossier.category || 
-      (p.city && currentDossier.location.toLowerCase().includes(p.city.toLowerCase()))
+      p.category.toLowerCase() === currentSignal.category.toLowerCase() ||
+      p.city.toLowerCase().includes(currentSignal.region.toLowerCase()) ||
+      currentSignal.location.toLowerCase().includes(p.city.toLowerCase())
     );
-    return matched.length > 0 ? matched.slice(0, 3) : properties.slice(0, 2);
-  }, [properties, currentDossier]);
+    return matched.length > 0 ? matched.slice(0, 3) : properties.slice(0, 3);
+  }, [properties, currentSignal]);
+
+  // Scroll to Chapter in Investigation Mode
+  const scrollToChapter = (chapterNum) => {
+    setActiveChapter(chapterNum);
+    const el = document.getElementById(`chapter-${chapterNum}`);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
 
   return (
-    <div className="stratosphere-page-wrapper">
-      {/* ── 1. UNIVERSAL LAYER NAVIGATION ── */}
+    <div className={`stratosphere-workbench ${investigationMode ? "is-investigation-mode" : "is-overview-mode"}`}>
+      
+      {/* ── 1. COSMIC DESCENT LAYER WAYPOINT NAV ── */}
       <LayerNav 
         prev={{ href: "/layer/orbit", label: "Orbit" }} 
         next={{ href: "/layer/metropolis", label: "Metropolis" }} 
       />
 
-      {/* ── 2. 3D WEBGL STRATOSPHERE ARCHIPELAGO BACKGROUND ── */}
-      <div className="fixed inset-0 pointer-events-none z-0">
-        <BackgroundStratosphere />
-      </div>
+      {/* ── 2. MAIN TACTICAL WORKBENCH CANVAS ── */}
+      <main className="workbench-main">
+        <div className="workbench-container">
 
-      {/* ── 3. MAIN SPATIAL INTELLIGENCE & DISCOVERY CANVAS ── */}
-      <main className="stratosphere-main-content">
-        <div className="stratosphere-container">
-          
-          {/* ── HEADER TELEMETRY & STRATOSPHERE COMMAND BAR ── */}
-          <header className="stratosphere-hero-split">
-            <div className="stratosphere-hero-left">
-              <div className="stratosphere-telemetry-badge">
-                <span className="stratosphere-signal-pulse" />
-                <span className="stratosphere-telemetry-text">
-                  LAYER 02 // STRATOSPHERE · SPATIAL OSINT &amp; DISCOVERY RADAR
-                </span>
+          {/* ── 3. PRECISION TELEMETRY & STRATOSPHERE COMMAND HEADER ── */}
+          <header className="workbench-header">
+            <div className="header-telemetry-strip">
+              <div className="telemetry-node">
+                <span className="telemetry-live-dot" />
+                <span className="telemetry-label">LAYER 02 // STRATOSPHERE</span>
               </div>
-              <h1 className="stratosphere-hero-title">
-                Spatial Intel &amp; <span className="text-gold-gradient">Stories</span>
-              </h1>
-              <p className="stratosphere-hero-subtitle">
-                Discover urban developments, zoning shifts, and infrastructure signals across the Philippine islands — and inspect the physical properties directly affected before evaluating individual buildings.
-              </p>
+              <span className="telemetry-divider">/</span>
+              <span className="telemetry-sub">SPATIAL INTELLIGENCE WORKBENCH</span>
+              <span className="telemetry-divider">/</span>
+              <span className="telemetry-coords">14.5995° N, 120.9842° E · PHILIPPINE ARCHIPELAGO</span>
             </div>
 
-            <aside className="stratosphere-scope-card">
-              <div className="stratosphere-scope-header">
-                <Radio size={13} className="text-gold-accent" />
-                <span className="stratosphere-scope-kicker">THE ASSET-INTELLIGENCE BRIDGE</span>
+            <div className="header-title-row">
+              <h1 className="header-title">
+                Spatial Intelligence <span className="header-gold-text">&amp; Discovery</span>
+              </h1>
+              
+              <div className="header-status-badge">
+                <ShieldCheck size={13} className="text-gold" />
+                <span>OSINT SOURCE PROVENANCE VERIFIED</span>
               </div>
-              <p className="stratosphere-scope-body">
-                Every spatial news event triggers micro and macro real estate ripples. Select a development on the left to see which physical listings in our directory gain, lose, or transform.
-              </p>
-              <div className="stratosphere-scope-footer">
-                <ShieldCheck size={13} className="text-gold-accent" />
-                <span>100% Verified Field OSINT · Source Provenance Tracked</span>
-              </div>
-            </aside>
+            </div>
+
+            <p className="header-mission-statement">
+              The world changes. A place is affected. ScoutIt investigates the spatial impact across physical assets.
+            </p>
           </header>
 
-          {/* ── DUAL-AXIS DISCOVERY TOOLBAR ── */}
-          <div className="stratosphere-filter-toolbar">
-            {/* Space Category Filter Rail */}
-            <div className="stratosphere-filter-rail-wrapper">
-              <nav className="stratosphere-filter-rail" aria-label="Space Categories">
-                {CATEGORIES.map((cat) => {
-                  const isActive = activeCategory === cat;
+          {/* ── 4. TECHNICAL DISCOVERY FILTERS ── */}
+          <section className="workbench-filter-bar" aria-label="Spatial Intelligence Filters">
+            <div className="filter-group">
+              <span className="filter-label">CATEGORY:</span>
+              <div className="filter-pills-wrap">
+                {CATEGORIES.map(cat => {
+                  const isSel = activeCategory === cat;
                   return (
                     <button
                       key={cat}
                       type="button"
-                      className={`stratosphere-filter-pill ${isActive ? "is-active" : ""}`}
+                      className={`filter-pill ${isSel ? "is-active" : ""}`}
                       onClick={() => setActiveCategory(cat)}
                     >
-                      <span>{cat === "All" ? "All Categories" : cat}</span>
+                      {cat}
                     </button>
                   );
                 })}
-              </nav>
-            </div>
-
-            {/* Region Selector Pills */}
-            <div className="stratosphere-region-rail" aria-label="Territory Regions">
-              {REGIONS.map((reg) => {
-                const isActive = activeRegion === reg;
-                return (
-                  <button
-                    key={reg}
-                    type="button"
-                    className={`stratosphere-region-pill ${isActive ? "is-active" : ""}`}
-                    onClick={() => setActiveRegion(reg)}
-                  >
-                    <MapPin size={11} className={isActive ? "text-black" : "text-gold-accent"} />
-                    <span>{reg}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* ── MOBILE VIEW TOGGLE: DISCOVERY vs INTELLIGENCE ── */}
-          <div className="stratosphere-mobile-toggle" role="tablist">
-            <button
-              type="button"
-              role="tab"
-              aria-selected={mobileTab === "discovery"}
-              className={`stratosphere-mobile-tab ${mobileTab === "discovery" ? "is-active" : ""}`}
-              onClick={() => setMobileTab("discovery")}
-            >
-              <Compass size={13} />
-              <span>1. Discovered Signals ({filteredDossiers.length})</span>
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={mobileTab === "intelligence"}
-              className={`stratosphere-mobile-tab ${mobileTab === "intelligence" ? "is-active" : ""}`}
-              onClick={() => setMobileTab("intelligence")}
-            >
-              <FileText size={13} />
-              <span>2. Interactive Intelligence</span>
-            </button>
-          </div>
-
-          {/* ── 4. THE 40/60 SPLIT-CANVAS ENGINE ── */}
-          <div className="stratosphere-split-canvas">
-            
-            {/* ════════════════════════════════════════════════════════════════
-                LEFT PANE: DISCOVERY & IMPACTED PROPERTIES RADAR (~40%)
-            ════════════════════════════════════════════════════════════════ */}
-            <aside className={`stratosphere-discovery-pane ${mobileTab === "discovery" ? "is-mobile-visible" : ""}`}>
-              <div className="stratosphere-pane-header">
-                <div className="stratosphere-pane-kicker-wrap">
-                  <Compass size={13} className="text-gold-accent" />
-                  <span className="stratosphere-pane-kicker">DISCOVERED NEWS &amp; DEVELOPMENTS</span>
-                </div>
-                <span className="stratosphere-pane-count">{filteredDossiers.length} Signals</span>
               </div>
+            </div>
 
-              {/* List of Discovered Developments / Spatial Signals */}
-              <div className="stratosphere-signals-list">
-                {filteredDossiers.map((dossier) => {
-                  const isSelected = dossier.id === activeDossierId;
+            <div className="filter-group">
+              <span className="filter-label">TERRITORY:</span>
+              <div className="filter-pills-wrap">
+                {REGIONS.map(reg => {
+                  const isSel = activeRegion === reg;
                   return (
-                    <div
-                      key={dossier.id}
-                      role="button"
-                      tabIndex={0}
-                      className={`stratosphere-signal-card ${isSelected ? "is-selected" : ""}`}
-                      onClick={() => {
-                        setActiveDossierId(dossier.id);
-                        setMobileTab("intelligence"); // On mobile, jump to article on select
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          e.preventDefault();
-                          setActiveDossierId(dossier.id);
-                          setMobileTab("intelligence");
-                        }
-                      }}
+                    <button
+                      key={reg}
+                      type="button"
+                      className={`filter-pill ${isSel ? "is-active" : ""}`}
+                      onClick={() => setActiveRegion(reg)}
                     >
-                      <div className="stratosphere-signal-card-top">
-                        <span className="stratosphere-status-pill">{dossier.statusBadge}</span>
-                        <span className="stratosphere-signal-cat">{dossier.category}</span>
-                      </div>
-
-                      <h3 className="stratosphere-signal-card-title">{dossier.title}</h3>
-                      
-                      <div className="stratosphere-signal-meta-row">
-                        <span className="stratosphere-signal-loc">
-                          <MapPin size={11} />
-                          <span>{dossier.location}</span>
-                        </span>
-                        <span className="stratosphere-signal-radius">
-                          <Radio size={11} className="text-gold-accent" />
-                          <span>{dossier.impactRadius}</span>
-                        </span>
-                      </div>
-
-                      <div className="stratosphere-signal-select-indicator">
-                        <span>{isSelected ? "ACTIVE DOSSIER" : "SELECT TO ANALYZE"}</span>
-                        <ChevronRight size={13} />
-                      </div>
-                    </div>
+                      {reg}
+                    </button>
                   );
                 })}
               </div>
+            </div>
+          </section>
 
-              {/* Impacted Property Nodes Section */}
-              <div className="stratosphere-impacted-spaces-section">
-                <div className="stratosphere-pane-header">
-                  <div className="stratosphere-pane-kicker-wrap">
-                    <Building2 size={13} className="text-gold-accent" />
-                    <span className="stratosphere-pane-kicker">IMPACTED SPACES IN THIS TERRITORY</span>
-                  </div>
-                  <span className="stratosphere-impact-badge">{impactedProperties.length} Linked</span>
-                </div>
+          {/* ── 5. MOBILE VIEWPORT STATE SELECTOR ── */}
+          <div className="mobile-view-nav" role="tablist">
+            <button
+              type="button"
+              className={`mobile-tab-btn ${mobileSection === "radar" ? "is-active" : ""}`}
+              onClick={() => setMobileSection("radar")}
+            >
+              <Compass size={13} />
+              <span>1. Discovery ({filteredSignals.length})</span>
+            </button>
+            <button
+              type="button"
+              className={`mobile-tab-btn ${mobileSection === "brief" ? "is-active" : ""}`}
+              onClick={() => setMobileSection("brief")}
+            >
+              <FileText size={13} />
+              <span>2. Brief</span>
+            </button>
+            <button
+              type="button"
+              className={`mobile-tab-btn ${mobileSection === "investigation" ? "is-active" : ""}`}
+              onClick={() => {
+                setMobileSection("investigation");
+                setInvestigationMode(true);
+              }}
+            >
+              <Sparkles size={13} />
+              <span>3. Investigation</span>
+            </button>
+          </div>
 
-                <div className="stratosphere-impacted-grid">
-                  {impactedProperties.map((prop) => (
-                    <article
-                      key={prop.id || prop.slug}
-                      className="stratosphere-impacted-card"
-                      onClick={() => router.push(`/property/${prop.slug}`)}
-                    >
-                      <div 
-                        className="stratosphere-impacted-thumb"
-                        style={{ backgroundImage: `url(${prop.image})` }}
-                      >
-                        <span className="stratosphere-impacted-style">{prop.style}</span>
-                      </div>
-
-                      <div className="stratosphere-impacted-body">
-                        <h4 className="stratosphere-impacted-title">{prop.title}</h4>
-                        <span className="stratosphere-impacted-loc">{prop.city}</span>
-                        <div className="stratosphere-impacted-specs">
-                          <span>{prop.beds} Beds</span>
-                          <span>·</span>
-                          <span>{prop.sqm} sqm</span>
-                          <span>·</span>
-                          <strong className="text-gold-accent">{prop.price}</strong>
-                        </div>
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              </div>
-            </aside>
+          {/* ── 6. THE ASYMMETRIC WORKBENCH GRID ── */}
+          <div className="workbench-grid">
 
             {/* ════════════════════════════════════════════════════════════════
-                RIGHT PANE: INTERACTIVE INTELLIGENCE DOSSIER (~60%)
+                LEFT COLUMN: DISCOVERY RADAR (~32% Overview / ~6% Rail in Investigation)
             ════════════════════════════════════════════════════════════════ */}
-            <article className={`stratosphere-intelligence-pane ${mobileTab === "intelligence" ? "is-mobile-visible" : ""}`}>
-              {currentDossier ? (
-                <div className="stratosphere-dossier-shell">
+            {investigationMode ? (
+              /* Collapsed Persistent Radar Rail in Investigation Mode */
+              <aside className="collapsed-radar-rail" aria-label="Persistent Investigation Radar Rail">
+                <button
+                  type="button"
+                  className="rail-back-btn"
+                  onClick={() => {
+                    setInvestigationMode(false);
+                    setMobileSection("brief");
+                  }}
+                  title="Return to Discovery Radar Overview"
+                >
+                  <Minimize2 size={14} />
+                  <span className="rail-btn-text">RADAR</span>
+                </button>
+
+                <div className="rail-signal-indicator">
+                  <span className="rail-pulse-node" />
+                  <span className="rail-signal-cat">{currentSignal.category}</span>
+                </div>
+
+                {/* Vertical Chapter Jump Waypoints */}
+                <nav className="rail-chapter-nav" aria-label="Story Chapters">
+                  {[1, 2, 3, 4, 5, 6, 7, 8].map(ch => (
+                    <button
+                      key={ch}
+                      type="button"
+                      className={`rail-chapter-dot ${activeChapter === ch ? "is-active" : ""}`}
+                      onClick={() => scrollToChapter(ch)}
+                      title={`Jump to Chapter 0${ch}`}
+                    >
+                      <span>0{ch}</span>
+                    </button>
+                  ))}
+                </nav>
+
+                <button
+                  type="button"
+                  className="rail-evidence-btn"
+                  onClick={() => setEvidenceDrawerOpen(!evidenceDrawerOpen)}
+                  title="Toggle Source Evidence Drawer"
+                >
+                  <FileText size={14} />
+                  <span>OSINT</span>
+                </button>
+              </aside>
+            ) : (
+              /* Full Discovery Radar Column (~32%) */
+              <aside className={`discovery-radar-column ${mobileSection === "radar" ? "is-mobile-active" : ""}`}>
+                
+                {/* ── A. Spatial Coordinate Radar Field ── */}
+                <section className="radar-cartographic-deck">
+                  <div className="deck-header">
+                    <div className="deck-kicker">
+                      <Crosshair size={12} className="text-gold" />
+                      <span>SPATIAL COORDINATE RADAR</span>
+                    </div>
+                    <span className="deck-status">ACTIVE SCANNING</span>
+                  </div>
+
+                  {/* Abstract Vector Coordinate Field */}
+                  <div className="radar-vector-field">
+                    <div className="radar-grid-lines" />
+                    <div className="radar-concentric-ring ring-1" />
+                    <div className="radar-concentric-ring ring-2" />
+                    <div className="radar-crosshair-h" />
+                    <div className="radar-crosshair-v" />
+
+                    {/* Plotted Signals Nodes */}
+                    {filteredSignals.map(sig => {
+                      const isFocused = sig.id === currentSignal.id;
+                      return (
+                        <button
+                          key={sig.id}
+                          type="button"
+                          className={`radar-signal-node ${isFocused ? "is-focused" : ""}`}
+                          style={{ left: `${sig.coords.x}%`, top: `${sig.coords.y}%` }}
+                          onClick={() => {
+                            setActiveSignalId(sig.id);
+                            setMobileSection("brief");
+                          }}
+                          title={`${sig.title} (${sig.location})`}
+                        >
+                          <span className="node-pulse" />
+                          <span className="node-label">{sig.region}</span>
+                        </button>
+                      );
+                    })}
+
+                    {/* Active Target Reticle Overlay */}
+                    <div 
+                      className="radar-active-reticle"
+                      style={{ left: `${currentSignal.coords.x}%`, top: `${currentSignal.coords.y}%` }}
+                    >
+                      <div className="reticle-box" />
+                      <span className="reticle-coords">
+                        {currentSignal.coords.lat.toFixed(4)}°N, {currentSignal.coords.lng.toFixed(4)}°E
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="deck-footer-legend">
+                    <span className="legend-item"><span className="legend-dot is-gold" /> SIGNAL DETECTED</span>
+                    <span className="legend-item"><span className="legend-dot is-white" /> PROPERTY NODE</span>
+                    <span className="legend-item"><span className="legend-dot is-muted" /> REGIONAL RADIUS</span>
+                  </div>
+                </section>
+
+                {/* ── B. Compact Signal Detection Feed ── */}
+                <section className="signal-feed-deck">
+                  <div className="deck-header">
+                    <div className="deck-kicker">
+                      <Radio size={12} className="text-gold" />
+                      <span>DISCOVERED SIGNALS ({filteredSignals.length})</span>
+                    </div>
+                    <span className="deck-status">REAL-TIME OSINT</span>
+                  </div>
+
+                  <div className="signal-detection-list">
+                    {filteredSignals.map(sig => {
+                      const isSelected = sig.id === currentSignal.id;
+                      return (
+                        <article
+                          key={sig.id}
+                          className={`signal-detection-item ${isSelected ? "is-selected" : ""}`}
+                          onClick={() => {
+                            setActiveSignalId(sig.id);
+                            setMobileSection("brief");
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              setActiveSignalId(sig.id);
+                              setMobileSection("brief");
+                            }
+                          }}
+                          tabIndex={0}
+                          role="button"
+                        >
+                          <div className="signal-item-top">
+                            <span className="signal-status-tag">{sig.statusBadge}</span>
+                            <span className="signal-cat-tag">{sig.category}</span>
+                          </div>
+
+                          <h3 className="signal-item-title">{sig.title}</h3>
+
+                          <div className="signal-item-meta">
+                            <span className="signal-loc-tag">
+                              <MapPin size={10} />
+                              <span>{sig.location}</span>
+                            </span>
+                            <span className="signal-prop-count">
+                              <Building2 size={10} />
+                              <span>{sig.summary.affectedCount} Linked Spaces</span>
+                            </span>
+                          </div>
+
+                          <div className="signal-item-footer">
+                            <span className="signal-date">{sig.date}</span>
+                            <span className="signal-action-prompt">
+                              {isSelected ? "ACTIVE FOCUS →" : "INSPECT"}
+                            </span>
+                          </div>
+                        </article>
+                      );
+                    })}
+                  </div>
+                </section>
+              </aside>
+            )}
+
+            {/* ════════════════════════════════════════════════════════════════
+                RIGHT COLUMN: INTELLIGENCE CANVAS (~68% Overview / ~94% Investigation)
+            ════════════════════════════════════════════════════════════════ */}
+            <section className={`intelligence-canvas-column ${mobileSection !== "radar" ? "is-mobile-active" : ""}`}>
+              
+              {!investigationMode ? (
+                /* ── DEFAULT STATE: COMPACT INTELLIGENCE BRIEF (Simple First, Deep on Demand) ── */
+                <article className="intelligence-brief-deck">
                   
-                  {/* 1. Dossier Top Header & Provenance */}
-                  <header className="stratosphere-dossier-header">
-                    <div className="stratosphere-dossier-meta-bar">
-                      <div className="stratosphere-dossier-tag-group">
-                        <span className="stratosphere-intel-type-tag">{currentDossier.intelType}</span>
-                        <span className="stratosphere-location-pill">
-                          <MapPin size={11} />
-                          <span>{currentDossier.location}</span>
-                        </span>
-                      </div>
-                      <div className="stratosphere-read-time-pill">
-                        <Clock size={11} />
-                        <span>{currentDossier.date} · {currentDossier.readTime}</span>
-                      </div>
+                  {/* Brief Header & Provenance */}
+                  <header className="brief-header">
+                    <div className="brief-meta-strip">
+                      <span className="brief-tag-category">{currentSignal.category} SIGNAL</span>
+                      <span className="brief-tag-location">
+                        <MapPin size={11} />
+                        <span>{currentSignal.location}</span>
+                      </span>
+                      <span className="brief-tag-verification">
+                        <ShieldCheck size={11} className="text-gold" />
+                        <span>{currentSignal.verificationStatus}</span>
+                      </span>
+                      <span className="brief-tag-readtime">{currentSignal.readTime}</span>
                     </div>
 
-                    <h2 className="stratosphere-dossier-headline">{currentDossier.title}</h2>
-                    
-                    <div className="stratosphere-provenance-box">
-                      <FileText size={13} className="text-gold-accent" />
-                      <span>OFFICIAL SOURCE PROVENANCE: {currentDossier.sourceName}</span>
-                    </div>
-
-                    <p className="stratosphere-dossier-lead-text">{currentDossier.lead}</p>
+                    <h2 className="brief-headline">{currentSignal.title}</h2>
+                    <span className="brief-radius-pill">
+                      <Radio size={11} className="text-gold" />
+                      <span>SPATIAL INFLUENCE RADIUS: {currentSignal.impactRadius}</span>
+                    </span>
                   </header>
 
-                  {/* 2. Chronological Scrollytelling Timeline */}
-                  <section className="stratosphere-scrolly-section">
-                    <div className="stratosphere-dossier-section-title">
-                      <Clock size={13} className="text-gold-accent" />
-                      <span>DEVELOPMENT CHRONOLOGY &amp; PROGRESS</span>
+                  {/* Concise 2-Section Overview: What Happened & Why It Matters */}
+                  <div className="brief-core-grid">
+                    <div className="brief-insight-block">
+                      <div className="block-eyebrow">
+                        <Info size={12} className="text-gold" />
+                        <span>01 // WHAT HAPPENED</span>
+                      </div>
+                      <p className="block-body-text">{currentSignal.summary.whatHappened}</p>
                     </div>
 
-                    <div className="stratosphere-timeline-track">
-                      {currentDossier.timeline.map((step, idx) => (
-                        <div key={idx} className="stratosphere-timeline-step">
-                          <div className="stratosphere-timeline-node">
-                            <span className="stratosphere-node-year">{step.year}</span>
-                            <span className="stratosphere-node-pulse" />
+                    <div className="brief-insight-block">
+                      <div className="block-eyebrow">
+                        <TrendingUp size={12} className="text-gold" />
+                        <span>02 // WHY THIS MATTERS FOR THIS TERRITORY</span>
+                      </div>
+                      <p className="block-body-text">{currentSignal.summary.whyItMatters}</p>
+                    </div>
+                  </div>
+
+                  {/* First-Class Impacted Properties Section */}
+                  <section className="brief-impacted-spaces-section">
+                    <div className="section-header-row">
+                      <div className="section-eyebrow">
+                        <Building2 size={13} className="text-gold" />
+                        <span>AFFECTED SCOUTIT SPACES IN THIS CATCHMENT ({affectedProperties.length})</span>
+                      </div>
+                      <span className="section-helper-tag">PROXIMITY LINKED</span>
+                    </div>
+
+                    <div className="impacted-spaces-strip">
+                      {affectedProperties.map((prop, idx) => (
+                        <div
+                          key={prop.id || prop.slug}
+                          className="impacted-space-node"
+                          onMouseEnter={() => setHoveredPropertyId(prop.id)}
+                          onMouseLeave={() => setHoveredPropertyId(null)}
+                          onClick={() => router.push(`/property/${prop.slug}`)}
+                        >
+                          <div 
+                            className="impacted-space-photo"
+                            style={{ backgroundImage: `url(${prop.image})` }}
+                          >
+                            <span className="impacted-space-radius">
+                              {idx === 0 ? "250m RADIUS" : idx === 1 ? "500m RADIUS" : "1.0km RADIUS"}
+                            </span>
                           </div>
-                          <div className="stratosphere-timeline-content">
-                            <h4 className="stratosphere-timeline-phase">{step.phase}</h4>
-                            <p className="stratosphere-timeline-detail">{step.detail}</p>
+
+                          <div className="impacted-space-info">
+                            <h4 className="impacted-space-title">{prop.title}</h4>
+                            <span className="impacted-space-loc">{prop.city}</span>
+                            <div className="impacted-space-metrics">
+                              <span>{prop.sqm} sqm</span>
+                              <span>·</span>
+                              <strong className="text-gold">{prop.price}</strong>
+                            </div>
+                            <div className="impacted-space-influence">
+                              <span>Impact: </span>
+                              <strong>{prop.influence}</strong>
+                            </div>
                           </div>
                         </div>
                       ))}
                     </div>
                   </section>
 
-                  {/* 3. ScoutIt "Our Take" Impact Matrix */}
-                  <section className="stratosphere-our-take-section">
-                    <div className="stratosphere-dossier-section-title">
-                      <Sparkles size={13} className="text-gold-accent" />
-                      <span>SCOUTIT &quot;OUR TAKE&quot; · SPATIAL IMPACT ANALYSIS</span>
+                  {/* Primary Action: Enter Investigation */}
+                  <footer className="brief-action-footer">
+                    <button
+                      type="button"
+                      className="enter-investigation-cta"
+                      onClick={() => {
+                        setInvestigationMode(true);
+                        setMobileSection("investigation");
+                      }}
+                    >
+                      <Sparkles size={16} />
+                      <span>ENTER FULL SPATIAL INVESTIGATION</span>
+                      <ArrowRight size={16} />
+                    </button>
+
+                    <div className="brief-cta-note">
+                      <span>Expands 8-chapter evidence room, milestone chronology, &amp; ScoutIt impact matrix</span>
+                    </div>
+                  </footer>
+
+                </article>
+              ) : (
+                /* ── EXPANDED INVESTIGATION MODE: MODULAR STORY ENGINE (~94% Canvas) ── */
+                <article className="investigation-story-engine">
+                  
+                  {/* Investigation Top Command Header */}
+                  <div className="investigation-top-bar">
+                    <button
+                      type="button"
+                      className="exit-investigation-btn"
+                      onClick={() => setInvestigationMode(false)}
+                    >
+                      <ArrowRight size={14} className="rotate-180" />
+                      <span>RETURN TO RADAR OVERVIEW</span>
+                    </button>
+
+                    <div className="investigation-status-pill">
+                      <span className="live-dot" />
+                      <span>INVESTIGATION DOSSIER ACTIVE // {currentSignal.slug}</span>
+                    </div>
+                  </div>
+
+                  {/* CHAPTER 01: THE SIGNAL */}
+                  <section id="chapter-1" className="story-chapter">
+                    <div className="chapter-eyebrow">
+                      <span className="chapter-num">CHAPTER 01</span>
+                      <span className="chapter-divider">/</span>
+                      <span className="chapter-title-tag">THE SPATIAL SIGNAL</span>
                     </div>
 
-                    <div className="stratosphere-take-grid">
-                      {/* Boosts */}
-                      <div className="stratosphere-take-card is-boost">
-                        <div className="stratosphere-take-head">
-                          <TrendingUp size={14} className="text-emerald-400" />
-                          <strong>THE CATALYSTS &amp; BOOSTS</strong>
-                        </div>
-                        <p>{currentDossier.ourTake.boosts}</p>
-                      </div>
+                    <h2 className="chapter-headline">{currentSignal.investigation.chapter01.headline}</h2>
+                    <p className="chapter-lede">{currentSignal.investigation.chapter01.lede}</p>
+                    
+                    <div className="territory-context-callout">
+                      <Compass size={14} className="text-gold" />
+                      <span>TERRITORIAL CONTEXT: {currentSignal.investigation.chapter01.territoryContext}</span>
+                    </div>
+                  </section>
 
-                      {/* Friction / Disadvantages */}
-                      <div className="stratosphere-take-card is-friction">
-                        <div className="stratosphere-take-head">
-                          <AlertTriangle size={14} className="text-amber-400" />
-                          <strong>FRICTION &amp; DISADVANTAGES</strong>
-                        </div>
-                        <p>{currentDossier.ourTake.friction}</p>
-                      </div>
+                  {/* CHAPTER 02: THE SITE & CATCHMENT RADIUS */}
+                  <section id="chapter-2" className="story-chapter">
+                    <div className="chapter-eyebrow">
+                      <span className="chapter-num">CHAPTER 02</span>
+                      <span className="chapter-divider">/</span>
+                      <span className="chapter-title-tag">THE SITE &amp; CATCHMENT RADIUS</span>
+                    </div>
 
-                      {/* The Spatial Promises */}
-                      <div className="stratosphere-take-card is-promise">
-                        <div className="stratosphere-take-head">
-                          <Layers size={14} className="text-gold-accent" />
-                          <strong>THE SPATIAL PROMISES</strong>
+                    <p className="chapter-body-prose">{currentSignal.investigation.chapter02.siteNotes}</p>
+
+                    <div className="radius-zones-instrument">
+                      {currentSignal.investigation.chapter02.radiusZones.map((zone, i) => (
+                        <div key={i} className="radius-zone-card">
+                          <div className="zone-header">
+                            <span className="zone-radius-pill">{zone.radius}</span>
+                            <span className="zone-tag">INFLUENCE ZONE 0{i+1}</span>
+                          </div>
+                          <p className="zone-impact-text">{zone.impact}</p>
                         </div>
-                        <p>{currentDossier.ourTake.promises}</p>
+                      ))}
+                    </div>
+                  </section>
+
+                  {/* CHAPTER 03: THE OFFICIAL ANNOUNCEMENT & VERIFIED FACTS */}
+                  <section id="chapter-3" className="story-chapter">
+                    <div className="chapter-eyebrow">
+                      <span className="chapter-num">CHAPTER 03</span>
+                      <span className="chapter-divider">/</span>
+                      <span className="chapter-title-tag">THE OFFICIAL ANNOUNCEMENT</span>
+                    </div>
+
+                    <div className="announcement-dossier-card">
+                      <div className="dossier-header-strip">
+                        <span className="dossier-ref">REF: {currentSignal.investigation.chapter03.filingRef}</span>
+                        <span className="dossier-authority">AUTHORITY: {currentSignal.investigation.chapter03.announcer}</span>
+                      </div>
+                      <h3 className="dossier-title">{currentSignal.investigation.chapter03.announcementTitle}</h3>
+
+                      <div className="verified-facts-list">
+                        {currentSignal.investigation.chapter03.verifiedFacts.map((fact, idx) => (
+                          <div key={idx} className="verified-fact-row">
+                            <CheckCircle2 size={13} className="text-gold" />
+                            <span>{fact}</span>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   </section>
 
-                  {/* 4. Spatial Projection & Architectural Vision */}
-                  {currentDossier.projection && (
-                    <section className="stratosphere-projection-card">
-                      <div className="stratosphere-projection-head">
-                        <Building2 size={13} className="text-gold-accent" />
-                        <span>ARCHITECTURAL SPECIFICATION &amp; RESOLUTION</span>
-                      </div>
-                      <h4 className="stratosphere-projection-title">{currentDossier.projection.title}</h4>
-                      <div className="stratosphere-projection-specs">
-                        {currentDossier.projection.specs.map((spec, i) => (
-                          <div key={i} className="stratosphere-spec-item">
-                            <span className="stratosphere-spec-dot" />
-                            <span>{spec}</span>
+                  {/* CHAPTER 04: THE CHRONOLOGY (Horizontal Track with "We Are Here") */}
+                  <section id="chapter-4" className="story-chapter">
+                    <div className="chapter-eyebrow">
+                      <span className="chapter-num">CHAPTER 04</span>
+                      <span className="chapter-divider">/</span>
+                      <span className="chapter-title-tag">DEVELOPMENT CHRONOLOGY</span>
+                    </div>
+
+                    <div className="timeline-horizontal-instrument">
+                      <div className="timeline-track-line" />
+                      
+                      <div className="timeline-milestones-grid">
+                        {currentSignal.investigation.chapter04.timeline.map((step, idx) => (
+                          <div key={idx} className={`timeline-milestone-node ${step.current ? "is-current-step" : ""}`}>
+                            <div className="milestone-badge-wrap">
+                              <span className="milestone-year">{step.year}</span>
+                              {step.current && <span className="we-are-here-flag">WE ARE HERE</span>}
+                            </div>
+                            
+                            <div className="milestone-marker-dot" />
+
+                            <h4 className="milestone-phase-name">{step.phase}</h4>
+                            <p className="milestone-detail-text">{step.detail}</p>
                           </div>
                         ))}
                       </div>
-                    </section>
-                  )}
+                    </div>
+                  </section>
 
-                  {/* 5. Deep Investigation Direct Actions */}
-                  <footer className="stratosphere-dossier-actions">
-                    <Link 
-                      href={`/intel/${currentDossier.slug}`} 
-                      className="stratosphere-read-full-btn"
-                    >
-                      <span>Read Full Investigation &amp; Data Tables</span>
-                      <ArrowRight size={15} />
-                    </Link>
-                    
-                    <Link 
-                      href={`/property?type=${currentDossier.category}&_cb=1`} 
-                      className="stratosphere-browse-spaces-btn"
-                    >
-                      <span>Browse All {currentDossier.category} Listings</span>
-                      <ExternalLink size={13} />
-                    </Link>
+                  {/* CHAPTER 05: THE PROPOSAL & ARCHITECTURAL SPECIFICATION */}
+                  <section id="chapter-5" className="story-chapter">
+                    <div className="chapter-eyebrow">
+                      <span className="chapter-num">CHAPTER 05</span>
+                      <span className="chapter-divider">/</span>
+                      <span className="chapter-title-tag">ARCHITECTURAL PROPOSAL</span>
+                    </div>
+
+                    <div className="architectural-specs-deck">
+                      <h3 className="specs-deck-title">{currentSignal.investigation.chapter05.proposalName}</h3>
+                      <p className="specs-deck-logic">{currentSignal.investigation.chapter05.architecturalLogic}</p>
+
+                      <div className="specs-data-grid">
+                        {currentSignal.investigation.chapter05.specs.map((item, i) => (
+                          <div key={i} className="spec-data-plate">
+                            <span className="spec-label">{item.label}</span>
+                            <strong className="spec-val">{item.value}</strong>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </section>
+
+                  {/* CHAPTER 06: DEVELOPER CLAIMS VS. AUDIT */}
+                  <section id="chapter-6" className="story-chapter">
+                    <div className="chapter-eyebrow">
+                      <span className="chapter-num">CHAPTER 06</span>
+                      <span className="chapter-divider">/</span>
+                      <span className="chapter-title-tag">DEVELOPER CLAIMS VS. FIELD AUDIT</span>
+                    </div>
+
+                    <div className="claims-vs-reality-split">
+                      <div className="claim-block is-developer">
+                        <div className="claim-header">
+                          <HelpCircle size={13} />
+                          <span>PROJECT / DEVELOPER CLAIM</span>
+                        </div>
+                        <p className="claim-prose">{currentSignal.investigation.chapter06.developerClaims}</p>
+                      </div>
+
+                      <div className="claim-block is-scoutit">
+                        <div className="claim-header">
+                          <ShieldCheck size={13} className="text-gold" />
+                          <span>SCOUTIT SPATIAL AUDIT &amp; REALITY</span>
+                        </div>
+                        <p className="claim-prose">{currentSignal.investigation.chapter06.scoutItAudit}</p>
+                      </div>
+                    </div>
+                  </section>
+
+                  {/* CHAPTER 07: SCOUTIT INSTITUTIONAL IMPACT MATRIX */}
+                  <section id="chapter-7" className="story-chapter">
+                    <div className="chapter-eyebrow">
+                      <span className="chapter-num">CHAPTER 07</span>
+                      <span className="chapter-divider">/</span>
+                      <span className="chapter-title-tag">SCOUTIT SPATIAL IMPACT MATRIX</span>
+                    </div>
+
+                    <div className="impact-matrix-instrument">
+                      <div className="matrix-table-header">
+                        <span className="col-factor">FACTOR</span>
+                        <span className="col-short">SHORT TERM</span>
+                        <span className="col-long">LONG TERM</span>
+                        <span className="col-rationale">SCOUTIT RATIONALE &amp; EVIDENCE</span>
+                      </div>
+
+                      <div className="matrix-rows-list">
+                        {currentSignal.investigation.chapter07.impactMatrix.map((row, idx) => (
+                          <div key={idx} className="matrix-row">
+                            <span className="cell-factor">{row.factor}</span>
+                            <span className={`cell-short ${row.shortTerm.includes('BOOST') ? 'is-boost' : row.shortTerm.includes('FRICTION') ? 'is-friction' : ''}`}>
+                              {row.shortTerm}
+                            </span>
+                            <span className={`cell-long ${row.longTerm.includes('BOOST') ? 'is-boost' : row.longTerm.includes('FRICTION') ? 'is-friction' : ''}`}>
+                              {row.longTerm}
+                            </span>
+                            <span className="cell-rationale">{row.rationale}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </section>
+
+                  {/* CHAPTER 08: OSINT EVIDENCE & SOURCE PROVENANCE */}
+                  <section id="chapter-8" className="story-chapter">
+                    <div className="chapter-eyebrow">
+                      <span className="chapter-num">CHAPTER 08</span>
+                      <span className="chapter-divider">/</span>
+                      <span className="chapter-title-tag">SOURCE PROVENANCE &amp; OSINT LEDGER</span>
+                    </div>
+
+                    <div className="evidence-ledger-instrument">
+                      <div className="ledger-header">
+                        <FileText size={13} className="text-gold" />
+                        <span>CHAIN OF CUSTODY &amp; VERIFIED SOURCES</span>
+                      </div>
+
+                      <div className="sources-list">
+                        {currentSignal.investigation.chapter08.sources.map((src, i) => (
+                          <div key={i} className="source-record-row">
+                            <span className={`source-type-pill ${src.type.toLowerCase().replace(' ', '-')}`}>
+                              {src.type}
+                            </span>
+                            <span className="source-name">{src.name}</span>
+                            <span className="source-date">{src.date}</span>
+                            <span className="source-verified-tag">
+                              <ShieldCheck size={11} className="text-gold" />
+                              <span>VERIFIED</span>
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </section>
+
+                  {/* Investigation Story Footer Actions */}
+                  <footer className="investigation-story-footer">
+                    <div className="footer-action-prompt">
+                      <h3 className="footer-title">Ready to inspect physical assets in this corridor?</h3>
+                      <p className="footer-sub">Explore verified properties situated within the active catchment radius.</p>
+                    </div>
+
+                    <div className="footer-buttons-row">
+                      <Link href={`/property?type=${currentSignal.category}&_cb=1`} className="footer-browse-btn">
+                        <span>Browse Linked Directory Properties</span>
+                        <ArrowUpRight size={14} />
+                      </Link>
+
+                      <button
+                        type="button"
+                        className="footer-return-btn"
+                        onClick={() => {
+                          setInvestigationMode(false);
+                          window.scrollTo({ top: 0, behavior: "smooth" });
+                        }}
+                      >
+                        <span>← Return to Radar</span>
+                      </button>
+                    </div>
                   </footer>
 
-                </div>
-              ) : (
-                <div className="stratosphere-empty-dossier">
-                  <FileText size={40} className="text-gold-accent/40 mb-3" />
-                  <p>Select an active spatial signal from the Discovery Radar to load its investigative dossier.</p>
-                </div>
+                </article>
               )}
-            </article>
 
+            </section>
           </div>
 
-          {/* ── 5. COMPLETE INTEL ARCHIVE PORTAL BANNER ── */}
-          <section className="stratosphere-portal-banner">
-            <div className="stratosphere-portal-glow" />
-            <div className="stratosphere-portal-content">
-              <div className="stratosphere-portal-badge">
-                <BookOpen size={13} className="text-gold-accent" />
-                <span>SPATIAL INTELLIGENCE ARCHIVE</span>
-              </div>
-              <h2 className="stratosphere-portal-title">
-                Explore All 50+ Intelligence Briefings in The Archive
-              </h2>
-              <p className="stratosphere-portal-desc">
-                Access investigative zoning registers, neighborhood transformation profiles, and architectural movements across Metro Manila, Cebu, and top Philippine island corridors.
-              </p>
-              <div className="stratosphere-portal-meta">
-                <div className="stratosphere-portal-pill">
-                  <ShieldCheck size={13} className="text-gold-accent" />
-                  <span>100% Curated Field Intelligence</span>
+          {/* ── 7. SECONDARY INTEL ARCHIVE GATEWAY (End-of-Layer Action) ── */}
+          <section className="workbench-archive-gateway">
+            <div className="archive-gateway-inner">
+              <div className="archive-gateway-info">
+                <div className="archive-gateway-tag">
+                  <BookOpen size={12} className="text-gold" />
+                  <span>SPATIAL INTELLIGENCE REPOSITORY</span>
                 </div>
-                <div className="stratosphere-portal-pill">
-                  <Radio size={13} className="text-gold-accent" />
-                  <span>Updated Weekly with Spatial Signals</span>
-                </div>
+                <h3 className="archive-gateway-title">
+                  Access 50+ Historical Field Briefings &amp; Market Telemetry
+                </h3>
+                <p className="archive-gateway-desc">
+                  Explore full cadastral logs, zoning gazettes, and demographic migration briefings across Metro Manila, Cebu, and island investment zones.
+                </p>
               </div>
-            </div>
 
-            <div className="stratosphere-portal-action">
-              <Link href="/intel" className="stratosphere-portal-cta-btn">
-                <span>Explore The Intel Archive</span>
-                <ArrowRight size={16} />
+              <Link href="/intel" className="archive-gateway-cta">
+                <span>OPEN THE INTEL ARCHIVE</span>
+                <ArrowRight size={14} />
               </Link>
-              <span className="stratosphere-portal-cta-sub">Free public editorial briefings · Instant access</span>
             </div>
           </section>
 
         </div>
 
-        {/* ── 6. DESCENT CONTINUATION TO LAYER 03 (METROPOLIS) ── */}
+        {/* ── 8. DESCENT WAYPOINT CONTINUATION TO LAYER 03 (METROPOLIS) ── */}
         <LayerTransition 
           nextNum="03" 
           nextName="Metropolis" 
@@ -725,404 +1183,536 @@ export default function StratosphereLayer() {
         />
       </main>
 
+      {/* ── TACTICAL MONOLITH STYLES (No Slop, No Generic Glassmorphism) ── */}
       <style jsx global>{`
-        .stratosphere-page-wrapper {
+        /* ════════════════════════════════════════════════════════════════
+           TACTICAL CARTOGRAPHIC INSTRUMENT DESIGN SYSTEM
+        ════════════════════════════════════════════════════════════════ */
+        .stratosphere-workbench {
           min-height: 100vh;
+          background: #0d0d0d;
+          color: #f0ede8;
+          font-family: var(--font-body);
+          position: relative;
           display: flex;
           flex-direction: column;
-          background: #0d0d0d;
-          color: #f5f3ee;
-          position: relative;
           overflow-x: hidden;
           padding-bottom: calc(88px + env(safe-area-inset-bottom));
+          -webkit-font-smoothing: antialiased;
         }
 
-        .stratosphere-main-content {
+        .workbench-main {
           flex: 1;
           position: relative;
           z-index: 10;
-          padding-top: 52px;
+          padding-top: 54px;
         }
 
-        .stratosphere-container {
-          max-width: 1280px;
+        .workbench-container {
+          max-width: 1340px;
           margin: 0 auto;
-          padding: clamp(24px, 4vw, 48px) clamp(16px, 3.5vw, 32px) 32px;
-          position: relative;
-          z-index: 10;
-          -webkit-font-smoothing: antialiased;
-          -moz-osx-font-smoothing: grayscale;
-          text-rendering: optimizeLegibility;
+          padding: 24px clamp(16px, 3vw, 36px) 36px;
         }
 
-        /* ── HERO SPLIT ── */
-        .stratosphere-hero-split {
-          display: grid;
-          grid-template-columns: minmax(0, 1.4fr) minmax(320px, 0.95fr);
-          gap: clamp(24px, 4.5vw, 48px);
+        .text-gold {
+          color: var(--accent);
+        }
+
+        /* ── HEADER TELEMETRY STRIP ── */
+        .workbench-header {
+          margin-bottom: 24px;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+          padding-bottom: 20px;
+        }
+
+        .header-telemetry-strip {
+          display: flex;
           align-items: center;
-          margin-bottom: 28px;
+          gap: 10px;
+          flex-wrap: wrap;
+          font-family: var(--font-mono);
+          font-size: 9.5px;
+          font-weight: 700;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+          color: var(--text-muted);
+          margin-bottom: 10px;
         }
 
-        .stratosphere-telemetry-badge {
+        .telemetry-node {
           display: inline-flex;
           align-items: center;
-          gap: 8px;
-          padding: 5px 12px;
-          border-radius: 9999px;
-          background: rgba(232, 174, 60, 0.08);
-          border: 1px solid rgba(232, 174, 60, 0.25);
-          margin-bottom: 14px;
+          gap: 6px;
+          color: var(--accent);
         }
 
-        .stratosphere-signal-pulse {
+        .telemetry-live-dot {
           width: 6px;
           height: 6px;
           border-radius: 50%;
           background: var(--accent-bright);
           box-shadow: 0 0 8px var(--accent-bright);
-          animation: stratospherePulse 2s infinite ease-in-out;
+          animation: reticlePulse 2s infinite ease-in-out;
         }
 
-        @keyframes stratospherePulse {
+        @keyframes reticlePulse {
           0%, 100% { transform: scale(1); opacity: 1; }
-          50% { transform: scale(1.35); opacity: 0.6; }
+          50% { transform: scale(1.4); opacity: 0.5; }
         }
 
-        .stratosphere-telemetry-text {
-          font-family: var(--font-mono);
-          font-size: 10px;
-          font-weight: 700;
-          letter-spacing: 0.16em;
-          color: var(--accent);
-          text-transform: uppercase;
+        .telemetry-divider {
+          color: rgba(255, 255, 255, 0.2);
         }
 
-        .stratosphere-hero-title {
-          font-family: var(--font-display);
-          font-size: clamp(32px, 4.5vw, 52px);
-          font-weight: 500;
-          line-height: 1.06;
-          letter-spacing: -0.028em;
-          color: #f7f5f0;
-          margin: 0 0 14px;
-        }
-
-        .text-gold-gradient {
-          background: linear-gradient(135deg, #f7c64e 20%, #e8ae3c 80%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-        }
-
-        .stratosphere-hero-subtitle {
-          font-family: var(--font-body);
-          font-size: clamp(14px, 1.25vw, 15.5px);
-          font-weight: 400;
-          line-height: 1.62;
+        .telemetry-coords {
           color: var(--text-secondary);
-          max-width: 580px;
+        }
+
+        .header-title-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-end;
+          flex-wrap: wrap;
+          gap: 14px;
+          margin-bottom: 8px;
+        }
+
+        .header-title {
+          font-family: var(--font-display);
+          font-size: clamp(28px, 3.8vw, 44px);
+          font-weight: 500;
+          line-height: 1.1;
+          letter-spacing: -0.02em;
+          color: #f7f5f0;
           margin: 0;
         }
 
-        /* ── SCOPE CARD ── */
-        .stratosphere-scope-card {
-          background: rgba(13, 13, 16, 0.84);
-          border: 1px solid var(--accent-muted);
-          border-radius: 16px;
-          padding: 22px 26px;
-          backdrop-filter: blur(22px);
-          box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
-        }
-
-        .stratosphere-scope-header {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          margin-bottom: 10px;
-        }
-
-        .stratosphere-scope-kicker {
-          font-family: var(--font-mono);
-          font-size: 9.5px;
-          font-weight: 700;
-          letter-spacing: 0.18em;
+        .header-gold-text {
           color: var(--accent);
-          text-transform: uppercase;
         }
 
-        .stratosphere-scope-body {
-          font-family: var(--font-body);
-          font-size: 13px;
-          font-weight: 400;
-          line-height: 1.62;
-          color: #d6d4cd;
-          margin: 0 0 14px;
-        }
-
-        .stratosphere-scope-footer {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          padding-top: 12px;
-          border-top: 1px solid rgba(255, 255, 255, 0.08);
-          font-family: var(--font-mono);
-          font-size: 9.5px;
-          font-weight: 500;
-          letter-spacing: 0.12em;
-          text-transform: uppercase;
-          color: var(--text-secondary);
-        }
-
-        /* ── TOOLBAR: DUAL FILTER RAILS ── */
-        .stratosphere-filter-toolbar {
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-          margin-bottom: 24px;
-        }
-
-        .stratosphere-filter-rail-wrapper {
-          overflow-x: auto;
-          scrollbar-width: none;
-          padding-bottom: 2px;
-        }
-        .stratosphere-filter-rail-wrapper::-webkit-scrollbar { display: none; }
-
-        .stratosphere-filter-rail {
-          display: inline-flex;
-          gap: 6px;
-          background: rgba(18, 18, 22, 0.85);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          padding: 5px;
-          border-radius: 9999px;
-          backdrop-filter: blur(16px);
-        }
-
-        .stratosphere-filter-pill {
-          appearance: none;
-          border: 0;
-          background: transparent;
-          color: var(--text-secondary);
-          font-family: var(--font-mono);
-          font-size: 10.5px;
-          font-weight: 600;
-          letter-spacing: 0.11em;
-          text-transform: uppercase;
-          padding: 8px 16px;
-          border-radius: 9999px;
-          cursor: pointer;
+        .header-status-badge {
           display: inline-flex;
           align-items: center;
           gap: 7px;
-          white-space: nowrap;
-          transition: all 0.18s ease;
-        }
-
-        .stratosphere-filter-pill:hover {
-          color: #fff;
-          background: rgba(255, 255, 255, 0.06);
-        }
-
-        .stratosphere-filter-pill.is-active {
-          background: var(--accent-bright);
-          color: #0d0d0d;
+          font-family: var(--font-mono);
+          font-size: 9.5px;
           font-weight: 700;
-          box-shadow: 0 2px 14px rgba(232, 174, 60, 0.35);
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          color: var(--accent);
+          background: rgba(232, 174, 60, 0.08);
+          border: 1px solid rgba(232, 174, 60, 0.25);
+          padding: 6px 12px;
+          border-radius: 4px;
         }
 
-        .stratosphere-region-rail {
+        .header-mission-statement {
+          font-size: 14px;
+          line-height: 1.5;
+          color: var(--text-secondary);
+          margin: 0;
+          max-width: 680px;
+        }
+
+        /* ── TECHNICAL FILTER BAR ── */
+        .workbench-filter-bar {
           display: flex;
-          flex-wrap: wrap;
-          gap: 8px;
+          flex-direction: column;
+          gap: 10px;
+          background: #131316;
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 8px;
+          padding: 10px 14px;
+          margin-bottom: 24px;
         }
 
-        .stratosphere-region-pill {
+        .filter-group {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          overflow-x: auto;
+          scrollbar-width: none;
+        }
+        .filter-group::-webkit-scrollbar { display: none; }
+
+        .filter-label {
+          font-family: var(--font-mono);
+          font-size: 9px;
+          font-weight: 700;
+          letter-spacing: 0.14em;
+          color: var(--text-muted);
+          white-space: nowrap;
+        }
+
+        .filter-pills-wrap {
+          display: flex;
+          gap: 6px;
+        }
+
+        .filter-pill {
           appearance: none;
-          background: rgba(255, 255, 255, 0.03);
-          border: 1px solid rgba(255, 255, 255, 0.08);
+          background: #1a1a1e;
+          border: 1px solid rgba(255, 255, 255, 0.06);
           color: var(--text-secondary);
           font-family: var(--font-mono);
           font-size: 9.5px;
           font-weight: 600;
           letter-spacing: 0.1em;
           text-transform: uppercase;
-          padding: 6px 12px;
-          border-radius: 6px;
+          padding: 5px 11px;
+          border-radius: 4px;
           cursor: pointer;
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          transition: all 0.18s ease;
+          white-space: nowrap;
+          transition: all 0.15s ease;
         }
 
-        .stratosphere-region-pill:hover {
+        .filter-pill:hover {
+          color: #fff;
           border-color: rgba(232, 174, 60, 0.3);
-          color: #f7f5f0;
-          background: rgba(232, 174, 60, 0.05);
         }
 
-        .stratosphere-region-pill.is-active {
+        .filter-pill.is-active {
           background: var(--accent);
           color: #0d0d0d;
           font-weight: 700;
           border-color: var(--accent);
         }
 
-        /* ── MOBILE TAB TOGGLE ── */
-        .stratosphere-mobile-toggle {
+        /* ── MOBILE VIEW NAV ── */
+        .mobile-view-nav {
           display: none;
-          grid-template-columns: 1fr 1fr;
-          gap: 8px;
-          background: rgba(18, 18, 22, 0.9);
-          border: 1px solid rgba(232, 174, 60, 0.25);
-          border-radius: 10px;
+          grid-template-columns: 1fr 1fr 1fr;
+          gap: 6px;
+          background: #141418;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 8px;
           padding: 4px;
-          margin-bottom: 20px;
+          margin-bottom: 18px;
         }
 
-        .stratosphere-mobile-tab {
+        .mobile-tab-btn {
           display: flex;
           align-items: center;
           justify-content: center;
           gap: 6px;
-          padding: 10px 12px;
-          border: none;
+          padding: 9px 6px;
           background: transparent;
+          border: none;
           color: var(--text-secondary);
           font-family: var(--font-mono);
-          font-size: 10.5px;
+          font-size: 9.5px;
           font-weight: 600;
           letter-spacing: 0.08em;
           text-transform: uppercase;
-          border-radius: 7px;
+          border-radius: 5px;
           cursor: pointer;
-          transition: all 0.18s ease;
         }
 
-        .stratosphere-mobile-tab.is-active {
+        .mobile-tab-btn.is-active {
           background: var(--accent);
           color: #0d0d0d;
           font-weight: 700;
         }
 
-        /* ── 40/60 SPLIT CANVAS ENGINE ── */
-        .stratosphere-split-canvas {
+        /* ── WORKBENCH GRID ── */
+        .workbench-grid {
           display: grid;
-          grid-template-columns: minmax(320px, 0.9fr) minmax(0, 1.35fr);
-          gap: 28px;
+          gap: 24px;
           align-items: start;
-          margin-bottom: 48px;
         }
 
-        /* ════ LEFT PANE: DISCOVERY RADAR (~40%) ════ */
-        .stratosphere-discovery-pane {
+        .is-overview-mode .workbench-grid {
+          grid-template-columns: minmax(310px, 0.88fr) minmax(0, 1.42fr);
+        }
+
+        .is-investigation-mode .workbench-grid {
+          grid-template-columns: 56px minmax(0, 1fr);
+        }
+
+        /* ════ LEFT: DISCOVERY RADAR COLUMN (~32%) ════ */
+        .discovery-radar-column {
           display: flex;
           flex-direction: column;
-          gap: 24px;
+          gap: 20px;
           position: sticky;
-          top: 72px;
+          top: 70px;
         }
 
-        .stratosphere-pane-header {
+        .deck-header {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding-bottom: 10px;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+          padding: 10px 14px;
+          background: #16161a;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.06);
         }
 
-        .stratosphere-pane-kicker-wrap {
+        .deck-kicker {
           display: flex;
           align-items: center;
-          gap: 7px;
-        }
-
-        .stratosphere-pane-kicker {
+          gap: 6px;
           font-family: var(--font-mono);
-          font-size: 9.5px;
+          font-size: 9px;
           font-weight: 700;
           letter-spacing: 0.14em;
           text-transform: uppercase;
           color: var(--accent);
         }
 
-        .stratosphere-pane-count {
+        .deck-status {
           font-family: var(--font-mono);
-          font-size: 9.5px;
+          font-size: 8.5px;
+          font-weight: 600;
           color: var(--text-muted);
+          letter-spacing: 0.1em;
         }
 
-        .stratosphere-signals-list {
+        /* ── CARTOGRAPHIC VECTOR FIELD ── */
+        .radar-cartographic-deck {
+          background: #111114;
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 10px;
+          overflow: hidden;
+        }
+
+        .radar-vector-field {
+          height: 190px;
+          position: relative;
+          background: #09090b;
+          overflow: hidden;
+        }
+
+        .radar-grid-lines {
+          position: absolute;
+          inset: 0;
+          background-image: 
+            linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+          background-size: 24px 24px;
+        }
+
+        .radar-concentric-ring {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          border-radius: 50%;
+          border: 1px dashed rgba(232, 174, 60, 0.15);
+          pointer-events: none;
+        }
+        .radar-concentric-ring.ring-1 { width: 110px; height: 110px; }
+        .radar-concentric-ring.ring-2 { width: 220px; height: 220px; }
+
+        .radar-crosshair-h {
+          position: absolute;
+          left: 0;
+          right: 0;
+          top: 50%;
+          height: 1px;
+          background: rgba(255, 255, 255, 0.06);
+        }
+        .radar-crosshair-v {
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          left: 50%;
+          width: 1px;
+          background: rgba(255, 255, 255, 0.06);
+        }
+
+        .radar-signal-node {
+          position: absolute;
+          transform: translate(-50%, -50%);
+          background: transparent;
+          border: none;
+          cursor: pointer;
           display: flex;
           flex-direction: column;
-          gap: 12px;
+          align-items: center;
+          gap: 4px;
+          z-index: 5;
+          padding: 4px;
+        }
+
+        .node-pulse {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: var(--accent);
+          box-shadow: 0 0 8px var(--accent);
+          transition: all 0.2s ease;
+        }
+
+        .node-label {
+          font-family: var(--font-mono);
+          font-size: 8px;
+          font-weight: 700;
+          color: var(--text-muted);
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          white-space: nowrap;
+          background: rgba(0, 0, 0, 0.7);
+          padding: 1px 4px;
+          border-radius: 2px;
+        }
+
+        .radar-signal-node.is-focused .node-pulse {
+          background: var(--accent-bright);
+          box-shadow: 0 0 12px var(--accent-bright);
+          transform: scale(1.4);
+        }
+        .radar-signal-node.is-focused .node-label {
+          color: var(--accent);
+          font-weight: 700;
+        }
+
+        .radar-active-reticle {
+          position: absolute;
+          transform: translate(-50%, -50%);
+          pointer-events: none;
+          z-index: 4;
+        }
+
+        .reticle-box {
+          width: 24px;
+          height: 24px;
+          border: 1px solid var(--accent);
+          position: relative;
+        }
+        .reticle-box::before {
+          content: '';
+          position: absolute;
+          top: -3px; left: -3px;
+          width: 6px; height: 6px;
+          border-top: 2px solid var(--accent-bright);
+          border-left: 2px solid var(--accent-bright);
+        }
+        .reticle-box::after {
+          content: '';
+          position: absolute;
+          bottom: -3px; right: -3px;
+          width: 6px; height: 6px;
+          border-bottom: 2px solid var(--accent-bright);
+          border-right: 2px solid var(--accent-bright);
+        }
+
+        .reticle-coords {
+          position: absolute;
+          top: 28px;
+          left: 50%;
+          transform: translateX(-50%);
+          font-family: var(--font-mono);
+          font-size: 7.5px;
+          color: var(--accent);
+          letter-spacing: 0.12em;
+          white-space: nowrap;
+          background: rgba(0, 0, 0, 0.85);
+          padding: 1px 5px;
+          border: 1px solid rgba(232, 174, 60, 0.3);
+          border-radius: 2px;
+        }
+
+        .deck-footer-legend {
+          display: flex;
+          justify-content: space-around;
+          padding: 8px 12px;
+          background: #141418;
+          border-top: 1px solid rgba(255, 255, 255, 0.06);
+          font-family: var(--font-mono);
+          font-size: 8px;
+          color: var(--text-muted);
+          letter-spacing: 0.1em;
+        }
+
+        .legend-item {
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+        }
+        .legend-dot {
+          width: 5px;
+          height: 5px;
+          border-radius: 50%;
+        }
+        .legend-dot.is-gold { background: var(--accent); }
+        .legend-dot.is-white { background: #f0ede8; }
+        .legend-dot.is-muted { background: #555; }
+
+        /* ── SIGNAL FEED DECK ── */
+        .signal-feed-deck {
+          background: #111114;
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 10px;
+          overflow: hidden;
+        }
+
+        .signal-detection-list {
+          display: flex;
+          flex-direction: column;
           max-height: 480px;
           overflow-y: auto;
-          padding-right: 4px;
           scrollbar-width: thin;
-          scrollbar-color: rgba(232, 174, 60, 0.25) transparent;
+          scrollbar-color: rgba(232, 174, 60, 0.3) transparent;
         }
 
-        .stratosphere-signal-card {
-          background: rgba(18, 18, 22, 0.82);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          border-radius: 12px;
-          padding: 16px;
+        .signal-detection-item {
+          padding: 14px 16px;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
           cursor: pointer;
-          transition: all 0.2s ease;
-          backdrop-filter: blur(18px);
+          background: transparent;
+          transition: all 0.15s ease;
           display: flex;
           flex-direction: column;
-          gap: 8px;
+          gap: 6px;
         }
 
-        .stratosphere-signal-card:hover {
-          border-color: rgba(232, 174, 60, 0.4);
-          transform: translateY(-2px);
-          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+        .signal-detection-item:last-child {
+          border-bottom: none;
         }
 
-        .stratosphere-signal-card.is-selected {
-          border-color: var(--accent);
+        .signal-detection-item:hover {
+          background: #17171c;
+        }
+
+        .signal-detection-item.is-selected {
           background: rgba(232, 174, 60, 0.06);
-          box-shadow: 0 0 24px rgba(232, 174, 60, 0.18), inset 2px 0 0 var(--accent);
+          border-left: 2px solid var(--accent);
+          padding-left: 14px;
         }
 
-        .stratosphere-signal-card-top {
+        .signal-item-top {
           display: flex;
           justify-content: space-between;
           align-items: center;
         }
 
-        .stratosphere-status-pill {
+        .signal-status-tag {
           font-family: var(--font-mono);
-          font-size: 8.5px;
+          font-size: 8px;
           font-weight: 700;
-          letter-spacing: 0.14em;
+          letter-spacing: 0.12em;
           text-transform: uppercase;
           color: var(--accent-bright);
-          background: rgba(232, 174, 60, 0.12);
-          padding: 2px 8px;
-          border-radius: 4px;
         }
 
-        .stratosphere-signal-cat {
+        .signal-cat-tag {
           font-family: var(--font-mono);
-          font-size: 9px;
+          font-size: 8.5px;
           color: var(--text-muted);
           text-transform: uppercase;
         }
 
-        .stratosphere-signal-card-title {
+        .signal-item-title {
           font-family: var(--font-display);
-          font-size: 15px;
+          font-size: 14px;
           font-weight: 500;
           line-height: 1.3;
           color: #f7f5f0;
           margin: 0;
         }
 
-        .stratosphere-signal-meta-row {
+        .signal-item-meta {
           display: flex;
           justify-content: space-between;
           align-items: center;
@@ -1131,198 +1721,215 @@ export default function StratosphereLayer() {
           color: var(--text-secondary);
         }
 
-        .stratosphere-signal-loc,
-        .stratosphere-signal-radius {
+        .signal-loc-tag,
+        .signal-prop-count {
           display: inline-flex;
           align-items: center;
           gap: 4px;
         }
 
-        .stratosphere-signal-select-indicator {
+        .signal-item-footer {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          font-family: var(--font-mono);
-          font-size: 9px;
-          font-weight: 700;
-          letter-spacing: 0.12em;
-          text-transform: uppercase;
-          color: var(--accent);
-          padding-top: 8px;
-          border-top: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        /* ── IMPACTED SPACES ── */
-        .stratosphere-impacted-spaces-section {
-          background: rgba(13, 13, 16, 0.75);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          border-radius: 14px;
-          padding: 16px;
-        }
-
-        .stratosphere-impact-badge {
-          font-family: var(--font-mono);
-          font-size: 9px;
-          color: var(--accent);
-          background: rgba(232, 174, 60, 0.1);
-          padding: 2px 6px;
-          border-radius: 4px;
-        }
-
-        .stratosphere-impacted-grid {
-          display: flex;
-          flex-direction: column;
-          gap: 10px;
-          margin-top: 12px;
-        }
-
-        .stratosphere-impacted-card {
-          background: rgba(18, 18, 22, 0.85);
-          border: 1px solid rgba(255, 255, 255, 0.06);
-          border-radius: 8px;
-          padding: 8px;
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          cursor: pointer;
-          transition: all 0.18s ease;
-        }
-
-        .stratosphere-impacted-card:hover {
-          border-color: rgba(232, 174, 60, 0.4);
-          background: rgba(232, 174, 60, 0.06);
-          transform: translateY(-1px);
-        }
-
-        .stratosphere-impacted-thumb {
-          width: 52px;
-          height: 52px;
-          border-radius: 6px;
-          background-size: cover;
-          background-position: center;
-          flex-shrink: 0;
-          position: relative;
-          padding: 3px;
-        }
-
-        .stratosphere-impacted-style {
-          position: absolute;
-          bottom: 2px;
-          left: 2px;
-          font-family: var(--font-mono);
-          font-size: 7px;
-          font-weight: 700;
-          color: #0d0d0d;
-          background: var(--accent);
-          padding: 1px 4px;
-          border-radius: 2px;
-        }
-
-        .stratosphere-impacted-body {
-          flex: 1;
-          min-width: 0;
-        }
-
-        .stratosphere-impacted-title {
-          font-family: var(--font-display);
-          font-size: 13.5px;
-          font-weight: 500;
-          color: #f7f5f0;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          margin: 0 0 2px;
-        }
-
-        .stratosphere-impacted-loc {
-          display: block;
           font-family: var(--font-mono);
           font-size: 8.5px;
+          padding-top: 4px;
+          border-top: 1px dashed rgba(255, 255, 255, 0.05);
+        }
+
+        .signal-date {
           color: var(--text-muted);
-          margin-bottom: 4px;
         }
 
-        .stratosphere-impacted-specs {
+        .signal-action-prompt {
+          color: var(--accent);
+          font-weight: 700;
+          letter-spacing: 0.1em;
+        }
+
+        /* ── COLLAPSED PERSISTENT RADAR RAIL (6% Mode) ── */
+        .collapsed-radar-rail {
+          background: #111114;
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 8px;
+          padding: 16px 8px;
           display: flex;
+          flex-direction: column;
           align-items: center;
-          gap: 5px;
+          gap: 20px;
+          position: sticky;
+          top: 70px;
+        }
+
+        .rail-back-btn {
+          background: #1a1a1e;
+          border: 1px solid rgba(232, 174, 60, 0.3);
+          color: var(--accent);
+          border-radius: 6px;
+          padding: 8px 4px;
+          cursor: pointer;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 4px;
+          width: 100%;
+        }
+        .rail-back-btn:hover {
+          background: var(--accent);
+          color: #0d0d0d;
+        }
+        .rail-btn-text {
           font-family: var(--font-mono);
-          font-size: 9px;
+          font-size: 7.5px;
+          font-weight: 700;
+          letter-spacing: 0.1em;
+        }
+
+        .rail-signal-indicator {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 6px;
+        }
+        .rail-pulse-node {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: var(--accent-bright);
+          box-shadow: 0 0 8px var(--accent-bright);
+        }
+        .rail-signal-cat {
+          font-family: var(--font-mono);
+          font-size: 7.5px;
+          color: var(--text-muted);
+          writing-mode: vertical-rl;
+          text-orientation: mixed;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+        }
+
+        .rail-chapter-nav {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+          width: 100%;
+        }
+
+        .rail-chapter-dot {
+          background: #18181c;
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          color: var(--text-muted);
+          font-family: var(--font-mono);
+          font-size: 8px;
+          font-weight: 700;
+          padding: 6px 2px;
+          border-radius: 4px;
+          cursor: pointer;
+          text-align: center;
+        }
+        .rail-chapter-dot:hover {
+          color: #fff;
+          border-color: rgba(232, 174, 60, 0.4);
+        }
+        .rail-chapter-dot.is-active {
+          background: var(--accent);
+          color: #0d0d0d;
+          border-color: var(--accent);
+        }
+
+        .rail-evidence-btn {
+          background: #141418;
+          border: 1px solid rgba(255, 255, 255, 0.1);
           color: var(--text-secondary);
-        }
-
-        /* ════ RIGHT PANE: INTELLIGENCE DOSSIER (~60%) ════ */
-        .stratosphere-intelligence-pane {
-          background: rgba(13, 13, 16, 0.85);
-          border: 1px solid rgba(232, 174, 60, 0.35);
-          border-radius: 20px;
-          padding: clamp(24px, 4vw, 36px);
-          backdrop-filter: blur(24px);
-          box-shadow: 0 16px 48px rgba(0, 0, 0, 0.55);
-        }
-
-        .stratosphere-dossier-meta-bar {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          flex-wrap: wrap;
-          gap: 8px;
-          margin-bottom: 14px;
-        }
-
-        .stratosphere-dossier-tag-group {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-
-        .stratosphere-intel-type-tag {
           font-family: var(--font-mono);
-          font-size: 9px;
+          font-size: 7.5px;
+          font-weight: 700;
+          padding: 8px 2px;
+          border-radius: 4px;
+          cursor: pointer;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 4px;
+          width: 100%;
+        }
+        .rail-evidence-btn:hover {
+          color: var(--accent);
+          border-color: var(--accent);
+        }
+
+        /* ════ RIGHT: INTELLIGENCE CANVAS COLUMN (~68% Overview / ~94% Investigation) ════ */
+        .intelligence-canvas-column {
+          display: flex;
+          flex-direction: column;
+          gap: 24px;
+        }
+
+        /* ── DEFAULT BRIEF DECK (Simple First, Deep on Demand) ── */
+        .intelligence-brief-deck {
+          background: #111114;
+          border: 1px solid rgba(232, 174, 60, 0.28);
+          border-radius: 12px;
+          padding: clamp(20px, 3.5vw, 32px);
+          display: flex;
+          flex-direction: column;
+          gap: 24px;
+        }
+
+        .brief-meta-strip {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          flex-wrap: wrap;
+          margin-bottom: 12px;
+        }
+
+        .brief-tag-category {
+          font-family: var(--font-mono);
+          font-size: 8.5px;
           font-weight: 700;
           letter-spacing: 0.16em;
           text-transform: uppercase;
+          background: var(--accent);
           color: #0d0d0d;
-          background: var(--accent-bright);
           padding: 3px 8px;
-          border-radius: 4px;
+          border-radius: 3px;
         }
 
-        .stratosphere-location-pill {
+        .brief-tag-location,
+        .brief-tag-verification {
           display: inline-flex;
           align-items: center;
           gap: 5px;
           font-family: var(--font-mono);
           font-size: 9px;
           color: var(--text-secondary);
-          background: rgba(255, 255, 255, 0.04);
-          padding: 3px 8px;
-          border-radius: 4px;
+          background: #18181c;
           border: 1px solid rgba(255, 255, 255, 0.08);
+          padding: 3px 8px;
+          border-radius: 3px;
         }
 
-        .stratosphere-read-time-pill {
-          display: inline-flex;
-          align-items: center;
-          gap: 5px;
+        .brief-tag-readtime {
           font-family: var(--font-mono);
           font-size: 9px;
           color: var(--text-muted);
         }
 
-        .stratosphere-dossier-headline {
+        .brief-headline {
           font-family: var(--font-display);
           font-size: clamp(22px, 2.6vw, 32px);
           font-weight: 500;
           line-height: 1.2;
           color: #f7f5f0;
-          margin: 0 0 14px;
+          margin: 0 0 10px;
         }
 
-        .stratosphere-provenance-box {
-          display: flex;
+        .brief-radius-pill {
+          display: inline-flex;
           align-items: center;
-          gap: 7px;
+          gap: 6px;
           font-family: var(--font-mono);
           font-size: 9px;
           font-weight: 700;
@@ -1331,219 +1938,784 @@ export default function StratosphereLayer() {
           color: var(--accent);
           background: rgba(232, 174, 60, 0.06);
           border: 1px solid rgba(232, 174, 60, 0.2);
-          padding: 8px 12px;
-          border-radius: 6px;
-          margin-bottom: 16px;
+          padding: 4px 10px;
+          border-radius: 4px;
         }
 
-        .stratosphere-dossier-lead-text {
-          font-family: var(--font-body);
-          font-size: 14.5px;
-          line-height: 1.68;
-          color: #d6d4cd;
-          margin: 0 0 28px;
-        }
-
-        /* ── TIMELINE TRACK ── */
-        .stratosphere-scrolly-section {
-          margin-bottom: 28px;
-          background: rgba(18, 18, 22, 0.6);
-          border: 1px solid rgba(255, 255, 255, 0.06);
-          border-radius: 12px;
-          padding: 20px;
-        }
-
-        .stratosphere-dossier-section-title {
-          display: flex;
-          align-items: center;
-          gap: 7px;
-          font-family: var(--font-mono);
-          font-size: 9.5px;
-          font-weight: 700;
-          letter-spacing: 0.16em;
-          text-transform: uppercase;
-          color: var(--accent);
-          margin-bottom: 18px;
-        }
-
-        .stratosphere-timeline-track {
-          display: flex;
-          flex-direction: column;
-          gap: 16px;
-          position: relative;
-          padding-left: 20px;
-          border-left: 1px solid rgba(232, 174, 60, 0.25);
-        }
-
-        .stratosphere-timeline-step {
-          position: relative;
-        }
-
-        .stratosphere-timeline-node {
-          position: absolute;
-          left: -26px;
-          top: 2px;
-          display: flex;
-          align-items: center;
-          gap: 6px;
-        }
-
-        .stratosphere-node-pulse {
-          width: 10px;
-          height: 10px;
-          border-radius: 50%;
-          background: var(--accent);
-          box-shadow: 0 0 8px var(--accent-bright);
-        }
-
-        .stratosphere-node-year {
-          font-family: var(--font-mono);
-          font-size: 8.5px;
-          font-weight: 700;
-          color: var(--accent);
-          display: none;
-        }
-
-        .stratosphere-timeline-phase {
-          font-family: var(--font-display);
-          font-size: 14.5px;
-          font-weight: 500;
-          color: #f7f5f0;
-          margin: 0 0 4px;
-        }
-
-        .stratosphere-timeline-detail {
-          font-family: var(--font-body);
-          font-size: 12.5px;
-          line-height: 1.5;
-          color: var(--text-secondary);
-          margin: 0;
-        }
-
-        /* ── OUR TAKE GRID ── */
-        .stratosphere-our-take-section {
-          margin-bottom: 28px;
-        }
-
-        .stratosphere-take-grid {
+        /* Core Insight Blocks */
+        .brief-core-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-          gap: 14px;
+          grid-template-columns: 1fr 1fr;
+          gap: 16px;
         }
 
-        .stratosphere-take-card {
-          background: rgba(18, 18, 22, 0.7);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          border-radius: 10px;
+        .brief-insight-block {
+          background: #16161a;
+          border: 1px solid rgba(255, 255, 255, 0.06);
+          border-radius: 8px;
           padding: 16px;
           display: flex;
           flex-direction: column;
           gap: 8px;
         }
 
-        .stratosphere-take-card.is-boost {
-          border-color: rgba(76, 175, 125, 0.35);
-          background: rgba(76, 175, 125, 0.03);
-        }
-
-        .stratosphere-take-card.is-friction {
-          border-color: rgba(232, 200, 74, 0.35);
-          background: rgba(232, 200, 74, 0.03);
-        }
-
-        .stratosphere-take-card.is-promise {
-          border-color: rgba(232, 174, 60, 0.35);
-          background: rgba(232, 174, 60, 0.03);
-        }
-
-        .stratosphere-take-head {
+        .block-eyebrow {
           display: flex;
           align-items: center;
           gap: 6px;
           font-family: var(--font-mono);
-          font-size: 9px;
+          font-size: 8.5px;
           font-weight: 700;
-          letter-spacing: 0.12em;
+          letter-spacing: 0.14em;
           text-transform: uppercase;
+          color: var(--accent);
         }
 
-        .stratosphere-take-card p {
-          font-family: var(--font-body);
-          font-size: 12.5px;
-          line-height: 1.55;
-          color: var(--text-secondary);
+        .block-body-text {
+          font-size: 13.5px;
+          line-height: 1.6;
+          color: #d6d4cd;
           margin: 0;
         }
 
-        /* ── PROJECTION CARD ── */
-        .stratosphere-projection-card {
-          background: rgba(232, 174, 60, 0.04);
-          border: 1px dashed rgba(232, 174, 60, 0.35);
-          border-radius: 12px;
-          padding: 18px 20px;
-          margin-bottom: 28px;
+        /* First-Class Impacted Spaces */
+        .brief-impacted-spaces-section {
+          background: #141418;
+          border: 1px solid rgba(255, 255, 255, 0.06);
+          border-radius: 10px;
+          padding: 18px;
+          display: flex;
+          flex-direction: column;
+          gap: 14px;
         }
 
-        .stratosphere-projection-head {
+        .section-header-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .section-eyebrow {
           display: flex;
           align-items: center;
           gap: 6px;
           font-family: var(--font-mono);
           font-size: 9px;
           font-weight: 700;
-          letter-spacing: 0.16em;
+          letter-spacing: 0.14em;
           text-transform: uppercase;
           color: var(--accent);
-          margin-bottom: 6px;
         }
 
-        .stratosphere-projection-title {
-          font-family: var(--font-display);
-          font-size: 15px;
-          font-weight: 500;
-          color: #f7f5f0;
-          margin: 0 0 12px;
+        .section-helper-tag {
+          font-family: var(--font-mono);
+          font-size: 8.5px;
+          color: var(--text-muted);
         }
 
-        .stratosphere-projection-specs {
-          display: flex;
-          flex-wrap: wrap;
+        .impacted-spaces-strip {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
           gap: 12px;
         }
 
-        .stratosphere-spec-item {
+        .impacted-space-node {
+          background: #1a1a1f;
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 8px;
+          overflow: hidden;
+          cursor: pointer;
+          transition: all 0.18s ease;
+        }
+
+        .impacted-space-node:hover {
+          border-color: var(--accent);
+          transform: translateY(-2px);
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+        }
+
+        .impacted-space-photo {
+          height: 100px;
+          background-size: cover;
+          background-position: center;
+          position: relative;
+          padding: 6px;
+        }
+
+        .impacted-space-radius {
+          position: absolute;
+          top: 6px;
+          left: 6px;
+          font-family: var(--font-mono);
+          font-size: 7.5px;
+          font-weight: 700;
+          letter-spacing: 0.12em;
+          background: rgba(0, 0, 0, 0.85);
+          color: var(--accent);
+          border: 1px solid rgba(232, 174, 60, 0.35);
+          padding: 2px 6px;
+          border-radius: 3px;
+        }
+
+        .impacted-space-info {
+          padding: 12px;
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+
+        .impacted-space-title {
+          font-family: var(--font-display);
+          font-size: 13.5px;
+          font-weight: 500;
+          color: #f7f5f0;
+          margin: 0;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .impacted-space-loc {
+          font-family: var(--font-mono);
+          font-size: 8.5px;
+          color: var(--text-muted);
+        }
+
+        .impacted-space-metrics {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-family: var(--font-mono);
+          font-size: 9px;
+          color: var(--text-secondary);
+          margin-top: 2px;
+        }
+
+        .impacted-space-influence {
+          font-family: var(--font-mono);
+          font-size: 8px;
+          color: var(--text-muted);
+          padding-top: 6px;
+          border-top: 1px dashed rgba(255, 255, 255, 0.06);
+          margin-top: 4px;
+        }
+        .impacted-space-influence strong {
+          color: var(--accent-bright);
+        }
+
+        /* Brief Action Footer */
+        .brief-action-footer {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          padding-top: 8px;
+        }
+
+        .enter-investigation-cta {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+          background: var(--accent);
+          color: #0d0d0d;
+          font-family: var(--font-mono);
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+          padding: 16px 28px;
+          border: none;
+          border-radius: 8px;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          box-shadow: 0 4px 20px rgba(232, 174, 60, 0.35);
+        }
+
+        .enter-investigation-cta:hover {
+          background: var(--accent-bright);
+          box-shadow: 0 6px 28px rgba(232, 174, 60, 0.5);
+          transform: translateY(-2px);
+        }
+
+        .brief-cta-note {
+          text-align: center;
+          font-family: var(--font-mono);
+          font-size: 9px;
+          color: var(--text-muted);
+          letter-spacing: 0.08em;
+        }
+
+        /* ── EXPANDED INVESTIGATION STORY ENGINE ── */
+        .investigation-story-engine {
+          background: #111114;
+          border: 1px solid rgba(232, 174, 60, 0.3);
+          border-radius: 12px;
+          padding: clamp(24px, 4vw, 40px);
+          display: flex;
+          flex-direction: column;
+          gap: 36px;
+        }
+
+        .investigation-top-bar {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 12px;
+          padding-bottom: 16px;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .exit-investigation-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          background: #18181c;
+          border: 1px solid rgba(232, 174, 60, 0.3);
+          color: var(--accent);
+          font-family: var(--font-mono);
+          font-size: 9.5px;
+          font-weight: 700;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          padding: 8px 14px;
+          border-radius: 4px;
+          cursor: pointer;
+          transition: all 0.15s ease;
+        }
+        .exit-investigation-btn:hover {
+          background: var(--accent);
+          color: #0d0d0d;
+        }
+
+        .investigation-status-pill {
           display: inline-flex;
           align-items: center;
           gap: 6px;
           font-family: var(--font-mono);
-          font-size: 9.5px;
-          color: var(--text-secondary);
-          background: rgba(0, 0, 0, 0.5);
-          padding: 4px 10px;
-          border-radius: 4px;
+          font-size: 8.5px;
+          color: var(--text-muted);
+          letter-spacing: 0.14em;
         }
-
-        .stratosphere-spec-dot {
+        .live-dot {
           width: 5px;
           height: 5px;
           border-radius: 50%;
           background: var(--accent-bright);
         }
 
-        /* ── DOSSIER ACTIONS ── */
-        .stratosphere-dossier-actions {
+        /* Story Chapters */
+        .story-chapter {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+          padding-bottom: 28px;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .story-chapter:last-of-type {
+          border-bottom: none;
+        }
+
+        .chapter-eyebrow {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-family: var(--font-mono);
+          font-size: 9.5px;
+          font-weight: 700;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+        }
+        .chapter-num { color: var(--accent); }
+        .chapter-divider { color: rgba(255, 255, 255, 0.2); }
+        .chapter-title-tag { color: var(--text-secondary); }
+
+        .chapter-headline {
+          font-family: var(--font-display);
+          font-size: clamp(24px, 3vw, 36px);
+          font-weight: 500;
+          line-height: 1.2;
+          color: #f7f5f0;
+          margin: 0;
+        }
+
+        .chapter-lede {
+          font-size: 15.5px;
+          line-height: 1.7;
+          color: #d6d4cd;
+          margin: 0;
+        }
+
+        .chapter-body-prose {
+          font-size: 14px;
+          line-height: 1.65;
+          color: #c8c6be;
+          margin: 0;
+        }
+
+        .territory-context-callout {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          background: #16161a;
+          border: 1px solid rgba(232, 174, 60, 0.2);
+          border-radius: 6px;
+          padding: 10px 14px;
+          font-family: var(--font-mono);
+          font-size: 9.5px;
+          font-weight: 600;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          color: var(--accent);
+        }
+
+        /* Chapter 02: Radius Zones */
+        .radius-zones-instrument {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+          gap: 12px;
+          margin-top: 8px;
+        }
+
+        .radius-zone-card {
+          background: #16161a;
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 8px;
+          padding: 14px;
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+        }
+
+        .zone-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .zone-radius-pill {
+          font-family: var(--font-mono);
+          font-size: 9px;
+          font-weight: 700;
+          color: var(--accent);
+        }
+
+        .zone-tag {
+          font-family: var(--font-mono);
+          font-size: 8px;
+          color: var(--text-muted);
+        }
+
+        .zone-impact-text {
+          font-size: 12.5px;
+          line-height: 1.5;
+          color: var(--text-secondary);
+          margin: 0;
+        }
+
+        /* Chapter 03: Announcement Dossier */
+        .announcement-dossier-card {
+          background: #141418;
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 8px;
+          padding: 18px;
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+
+        .dossier-header-strip {
+          display: flex;
+          justify-content: space-between;
+          font-family: var(--font-mono);
+          font-size: 8.5px;
+          color: var(--text-muted);
+          letter-spacing: 0.1em;
+        }
+
+        .dossier-title {
+          font-family: var(--font-display);
+          font-size: 16px;
+          font-weight: 500;
+          color: #f7f5f0;
+          margin: 0;
+        }
+
+        .verified-facts-list {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+
+        .verified-fact-row {
+          display: flex;
+          align-items: flex-start;
+          gap: 8px;
+          font-size: 13px;
+          line-height: 1.5;
+          color: #d6d4cd;
+        }
+
+        /* Chapter 04: Horizontal Timeline */
+        .timeline-horizontal-instrument {
+          position: relative;
+          background: #141418;
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 10px;
+          padding: 24px 18px;
+          overflow-x: auto;
+        }
+
+        .timeline-track-line {
+          position: absolute;
+          top: 52px;
+          left: 20px;
+          right: 20px;
+          height: 2px;
+          background: rgba(232, 174, 60, 0.25);
+        }
+
+        .timeline-milestones-grid {
+          display: grid;
+          grid-template-columns: repeat(5, minmax(180px, 1fr));
+          gap: 16px;
+          position: relative;
+          z-index: 2;
+        }
+
+        .timeline-milestone-node {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+
+        .milestone-badge-wrap {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          height: 24px;
+        }
+
+        .milestone-year {
+          font-family: var(--font-mono);
+          font-size: 11px;
+          font-weight: 700;
+          color: var(--accent);
+        }
+
+        .we-are-here-flag {
+          font-family: var(--font-mono);
+          font-size: 7.5px;
+          font-weight: 700;
+          color: #0d0d0d;
+          background: var(--accent-bright);
+          padding: 1px 5px;
+          border-radius: 3px;
+          letter-spacing: 0.1em;
+        }
+
+        .milestone-marker-dot {
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          background: #222;
+          border: 2px solid var(--accent);
+          margin-bottom: 4px;
+        }
+
+        .timeline-milestone-node.is-current-step .milestone-marker-dot {
+          background: var(--accent-bright);
+          box-shadow: 0 0 10px var(--accent-bright);
+        }
+
+        .milestone-phase-name {
+          font-family: var(--font-display);
+          font-size: 13.5px;
+          font-weight: 500;
+          color: #f7f5f0;
+          margin: 0;
+        }
+
+        .milestone-detail-text {
+          font-size: 11.5px;
+          line-height: 1.5;
+          color: var(--text-secondary);
+          margin: 0;
+        }
+
+        /* Chapter 05: Architectural Proposal */
+        .architectural-specs-deck {
+          background: #141418;
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 8px;
+          padding: 18px;
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+
+        .specs-deck-title {
+          font-family: var(--font-display);
+          font-size: 16px;
+          font-weight: 500;
+          color: #f7f5f0;
+          margin: 0;
+        }
+
+        .specs-deck-logic {
+          font-size: 13px;
+          line-height: 1.55;
+          color: var(--text-secondary);
+          margin: 0;
+        }
+
+        .specs-data-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+          gap: 10px;
+        }
+
+        .spec-data-plate {
+          background: #1a1a1f;
+          border: 1px solid rgba(255, 255, 255, 0.06);
+          border-radius: 6px;
+          padding: 10px 12px;
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+
+        .spec-label {
+          font-family: var(--font-mono);
+          font-size: 8.5px;
+          color: var(--text-muted);
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+        }
+
+        .spec-val {
+          font-family: var(--font-mono);
+          font-size: 12px;
+          color: var(--accent);
+        }
+
+        /* Chapter 06: Claims vs. Reality */
+        .claims-vs-reality-split {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 16px;
+        }
+
+        .claim-block {
+          border-radius: 8px;
+          padding: 16px;
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+
+        .claim-block.is-developer {
+          background: #16161a;
+          border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .claim-block.is-scoutit {
+          background: rgba(232, 174, 60, 0.04);
+          border: 1px solid rgba(232, 174, 60, 0.25);
+        }
+
+        .claim-header {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-family: var(--font-mono);
+          font-size: 8.5px;
+          font-weight: 700;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          color: var(--text-muted);
+        }
+        .claim-block.is-scoutit .claim-header {
+          color: var(--accent);
+        }
+
+        .claim-prose {
+          font-size: 13px;
+          line-height: 1.6;
+          color: #d6d4cd;
+          margin: 0;
+        }
+
+        /* Chapter 07: Impact Matrix */
+        .impact-matrix-instrument {
+          background: #141418;
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 10px;
+          overflow: hidden;
+        }
+
+        .matrix-table-header {
+          display: grid;
+          grid-template-columns: 180px 140px 140px 1fr;
+          gap: 12px;
+          padding: 10px 16px;
+          background: #18181c;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+          font-family: var(--font-mono);
+          font-size: 8.5px;
+          font-weight: 700;
+          color: var(--text-muted);
+          letter-spacing: 0.12em;
+        }
+
+        .matrix-rows-list {
+          display: flex;
+          flex-direction: column;
+        }
+
+        .matrix-row {
+          display: grid;
+          grid-template-columns: 180px 140px 140px 1fr;
+          gap: 12px;
+          padding: 12px 16px;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+          align-items: center;
+          font-size: 12.5px;
+        }
+        .matrix-row:last-child { border-bottom: none; }
+
+        .cell-factor {
+          font-family: var(--font-display);
+          font-size: 13px;
+          color: #f7f5f0;
+        }
+
+        .cell-short, .cell-long {
+          font-family: var(--font-mono);
+          font-size: 9px;
+          font-weight: 700;
+          letter-spacing: 0.08em;
+          color: var(--text-secondary);
+        }
+        .cell-short.is-boost, .cell-long.is-boost { color: #4caf7d; }
+        .cell-short.is-friction, .cell-long.is-friction { color: #e8c84a; }
+
+        .cell-rationale {
+          font-size: 12px;
+          color: var(--text-secondary);
+          line-height: 1.45;
+        }
+
+        /* Chapter 08: Evidence Ledger */
+        .evidence-ledger-instrument {
+          background: #141418;
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 10px;
+          padding: 16px;
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+
+        .ledger-header {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-family: var(--font-mono);
+          font-size: 9px;
+          font-weight: 700;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+          color: var(--accent);
+        }
+
+        .sources-list {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+
+        .source-record-row {
           display: flex;
           align-items: center;
           gap: 12px;
-          flex-wrap: wrap;
-          padding-top: 18px;
-          border-top: 1px solid rgba(255, 255, 255, 0.08);
+          padding: 8px 12px;
+          background: #18181c;
+          border: 1px solid rgba(255, 255, 255, 0.05);
+          border-radius: 6px;
+          font-size: 12px;
         }
 
-        .stratosphere-read-full-btn {
+        .source-type-pill {
+          font-family: var(--font-mono);
+          font-size: 8px;
+          font-weight: 700;
+          letter-spacing: 0.1em;
+          color: #0d0d0d;
+          background: var(--accent);
+          padding: 2px 6px;
+          border-radius: 3px;
+        }
+
+        .source-name {
+          flex: 1;
+          color: #f7f5f0;
+        }
+
+        .source-date {
+          font-family: var(--font-mono);
+          font-size: 8.5px;
+          color: var(--text-muted);
+        }
+
+        .source-verified-tag {
           display: inline-flex;
           align-items: center;
-          gap: 8px;
+          gap: 4px;
+          font-family: var(--font-mono);
+          font-size: 8px;
+          font-weight: 700;
+          color: var(--accent);
+        }
+
+        /* Investigation Story Footer */
+        .investigation-story-footer {
+          background: #141418;
+          border: 1px solid rgba(232, 174, 60, 0.25);
+          border-radius: 10px;
+          padding: 24px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 16px;
+          margin-top: 12px;
+        }
+
+        .footer-title {
+          font-family: var(--font-display);
+          font-size: 18px;
+          font-weight: 500;
+          color: #f7f5f0;
+          margin: 0 0 4px;
+        }
+
+        .footer-sub {
+          font-size: 13px;
+          color: var(--text-secondary);
+          margin: 0;
+        }
+
+        .footer-buttons-row {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .footer-browse-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
           background: var(--accent);
           color: #0d0d0d;
           font-family: var(--font-mono);
@@ -1551,196 +2723,126 @@ export default function StratosphereLayer() {
           font-weight: 700;
           letter-spacing: 0.14em;
           text-transform: uppercase;
-          padding: 12px 20px;
-          border-radius: 8px;
+          padding: 12px 18px;
+          border-radius: 6px;
           text-decoration: none;
-          box-shadow: 0 4px 18px rgba(232, 174, 60, 0.3);
-          transition: all 0.2s ease;
         }
 
-        .stratosphere-read-full-btn:hover {
-          background: var(--accent-bright);
-          box-shadow: 0 6px 24px rgba(232, 174, 60, 0.45);
-          transform: translateY(-2px);
-        }
-
-        .stratosphere-browse-spaces-btn {
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          background: rgba(255, 255, 255, 0.04);
-          border: 1px solid rgba(255, 255, 255, 0.12);
+        .footer-return-btn {
+          background: transparent;
+          border: 1px solid rgba(255, 255, 255, 0.15);
           color: #f7f5f0;
           font-family: var(--font-mono);
           font-size: 10px;
           font-weight: 600;
-          letter-spacing: 0.12em;
+          letter-spacing: 0.1em;
           text-transform: uppercase;
-          padding: 12px 18px;
-          border-radius: 8px;
-          text-decoration: none;
-          transition: all 0.2s ease;
+          padding: 12px 16px;
+          border-radius: 6px;
+          cursor: pointer;
         }
 
-        .stratosphere-browse-spaces-btn:hover {
-          border-color: rgba(232, 174, 60, 0.4);
-          color: var(--accent-bright);
-          background: rgba(232, 174, 60, 0.06);
-        }
-
-        /* ── PORTAL BANNER ── */
-        .stratosphere-portal-banner {
-          position: relative;
-          background: rgba(13, 13, 16, 0.88);
-          border: 1px solid rgba(232, 174, 60, 0.38);
-          border-radius: 20px;
-          padding: clamp(24px, 4vw, 36px) clamp(20px, 4vw, 40px);
-          backdrop-filter: blur(24px);
-          box-shadow: 0 16px 48px rgba(0, 0, 0, 0.55);
-          display: grid;
-          grid-template-columns: minmax(0, 1.45fr) minmax(260px, 0.85fr);
-          gap: clamp(20px, 3.5vw, 36px);
-          align-items: center;
+        /* ── SECONDARY ARCHIVE GATEWAY ── */
+        .workbench-archive-gateway {
+          margin-top: 48px;
           margin-bottom: 24px;
-          overflow: hidden;
         }
 
-        .stratosphere-portal-glow {
-          position: absolute;
-          top: -80px;
-          right: -80px;
-          width: 320px;
-          height: 320px;
-          border-radius: 50%;
-          background: radial-gradient(circle, rgba(232, 174, 60, 0.14) 0%, transparent 70%);
-          pointer-events: none;
-        }
-
-        .stratosphere-portal-badge {
-          display: inline-flex;
-          align-items: center;
-          gap: 7px;
-          font-family: var(--font-mono);
-          font-size: 9.5px;
-          font-weight: 700;
-          letter-spacing: 0.16em;
-          text-transform: uppercase;
-          color: var(--accent);
-          margin-bottom: 10px;
-        }
-
-        .stratosphere-portal-title {
-          font-family: var(--font-display);
-          font-size: clamp(20px, 2.5vw, 28px);
-          font-weight: 500;
-          color: #f7f5f0;
-          line-height: 1.2;
-          margin: 0 0 10px;
-        }
-
-        .stratosphere-portal-desc {
-          font-family: var(--font-body);
-          font-size: 13.5px;
-          line-height: 1.6;
-          color: var(--text-secondary);
-          margin: 0 0 16px;
-          max-width: 600px;
-        }
-
-        .stratosphere-portal-meta {
+        .archive-gateway-inner {
+          background: #131316;
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 10px;
+          padding: 24px 28px;
           display: flex;
+          justify-content: space-between;
+          align-items: center;
           flex-wrap: wrap;
-          gap: 10px;
+          gap: 20px;
         }
 
-        .stratosphere-portal-pill {
+        .archive-gateway-tag {
           display: inline-flex;
           align-items: center;
           gap: 6px;
-          background: rgba(255, 255, 255, 0.04);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          padding: 5px 10px;
-          border-radius: 6px;
           font-family: var(--font-mono);
           font-size: 9px;
-          font-weight: 600;
-          letter-spacing: 0.1em;
-          text-transform: uppercase;
-          color: var(--text-secondary);
-        }
-
-        .stratosphere-portal-action {
-          display: flex;
-          flex-direction: column;
-          align-items: flex-start;
-          gap: 8px;
-        }
-
-        .stratosphere-portal-cta-btn {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-          background: var(--accent);
-          color: #0d0d0d;
-          font-family: var(--font-mono);
-          font-size: 11px;
           font-weight: 700;
           letter-spacing: 0.14em;
           text-transform: uppercase;
-          padding: 14px 24px;
-          border-radius: 10px;
-          text-decoration: none;
-          box-shadow: 0 4px 20px rgba(232, 174, 60, 0.35);
-          transition: all 0.2s ease;
-          width: 100%;
-          text-align: center;
+          color: var(--accent);
+          margin-bottom: 6px;
         }
 
-        .stratosphere-portal-cta-btn:hover {
-          background: var(--accent-bright);
-          box-shadow: 0 6px 28px rgba(232, 174, 60, 0.5);
-          transform: translateY(-2px);
+        .archive-gateway-title {
+          font-family: var(--font-display);
+          font-size: 18px;
+          font-weight: 500;
+          color: #f7f5f0;
+          margin: 0 0 6px;
         }
 
-        .stratosphere-portal-cta-sub {
+        .archive-gateway-desc {
+          font-size: 13px;
+          color: var(--text-secondary);
+          margin: 0;
+          max-width: 600px;
+        }
+
+        .archive-gateway-cta {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          background: #1a1a1f;
+          border: 1px solid rgba(232, 174, 60, 0.35);
+          color: var(--accent);
           font-family: var(--font-mono);
-          font-size: 9.5px;
-          color: var(--text-muted);
-          letter-spacing: 0.08em;
-          text-align: center;
-          width: 100%;
+          font-size: 10.5px;
+          font-weight: 700;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+          padding: 12px 20px;
+          border-radius: 6px;
+          text-decoration: none;
+          transition: all 0.15s ease;
+        }
+        .archive-gateway-cta:hover {
+          background: var(--accent);
+          color: #0d0d0d;
         }
 
-        /* ── RESPONSIVE MEDIA QUERIES ── */
-        @media (max-width: 980px) {
-          .stratosphere-hero-split {
-            grid-template-columns: 1fr;
-            gap: 24px;
-          }
-
-          .stratosphere-split-canvas {
+        /* ── RESPONSIVE ADAPTATIONS ── */
+        @media (max-width: 1080px) {
+          .is-overview-mode .workbench-grid {
             grid-template-columns: 1fr;
           }
 
-          .stratosphere-discovery-pane {
+          .discovery-radar-column {
             position: static;
           }
 
-          .stratosphere-mobile-toggle {
+          .mobile-view-nav {
             display: grid;
           }
 
-          .stratosphere-discovery-pane:not(.is-mobile-visible) {
+          .discovery-radar-column:not(.is-mobile-active) {
             display: none;
           }
 
-          .stratosphere-intelligence-pane:not(.is-mobile-visible) {
+          .intelligence-canvas-column:not(.is-mobile-active) {
             display: none;
           }
 
-          .stratosphere-portal-banner {
+          .brief-core-grid {
             grid-template-columns: 1fr;
+          }
+
+          .claims-vs-reality-split {
+            grid-template-columns: 1fr;
+          }
+
+          .matrix-table-header,
+          .matrix-row {
+            grid-template-columns: 120px 100px 100px 1fr;
           }
         }
       `}</style>
