@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { 
@@ -14,12 +14,10 @@ import {
   Clock,
   FileText,
   TrendingUp,
-  TrendingDown,
   AlertTriangle,
   Sparkles,
   Layers,
   ChevronRight,
-  ExternalLink,
   Crosshair,
   Maximize2,
   Minimize2,
@@ -27,9 +25,10 @@ import {
   HelpCircle,
   Eye,
   ArrowUpRight,
-  ChevronDown,
-  ChevronUp,
-  Info
+  Info,
+  Sliders,
+  Check,
+  AlertCircle
 } from "lucide-react";
 
 import LayerNav from "@/components/descent/LayerNav";
@@ -38,10 +37,10 @@ import LayerTransition from "@/components/descent/LayerTransition";
 // ── TECHNICAL CATEGORIES & TERRITORY CORRIDORS ──────────────────
 const CATEGORIES = [
   "All",
-  "Development",
-  "Infrastructure",
   "Zoning",
+  "Development",
   "Transit",
+  "Infrastructure",
   "Commercial",
   "Hospitality",
   "STR"
@@ -49,105 +48,151 @@ const CATEGORIES = [
 
 const REGIONS = [
   "All Regions",
-  "Manila Bay",
-  "BGC & Taguig",
   "Makati CBD",
+  "BGC & Taguig",
+  "Manila Bay",
   "Siargao",
   "Palawan",
   "Metro Cebu"
 ];
 
-// ── COMPREHENSIVE OSINT SPATIAL SIGNALS DATABASE ────────────────
+// ── GEOGRAPHICALLY PLAUSIBLE SPATIAL SIGNALS & AFFECTED ASSETS ───
 const SPATIAL_SIGNALS = [
   {
-    id: "sig-manila-bay-pavilion",
-    slug: "manila-venue-trends",
-    title: "Bay Area Glass Atrium Pavilions & Corporate Spatial Tech",
-    category: "Development",
-    statusBadge: "UNDERWAY · Q4 2028",
+    id: "sig-makati-leed",
+    slug: "green-office-demand",
+    title: "LEED Platinum Mandate & Makati CBD Office Modernization",
+    category: "Zoning",
+    statusBadge: "ORDINANCE RATIFIED",
     statusType: "active",
-    location: "Manila Bay, Pasay / Parañaque",
-    region: "Manila Bay",
-    coords: { lat: 14.5320, lng: 120.9820, x: 42, y: 55 },
-    impactRadius: "1.2 km Coastal Catchment",
-    date: "July 2026",
-    readTime: "5 MIN READ",
+    location: "Ayala Avenue, Makati CBD",
+    region: "Makati CBD",
+    coords: { lat: 14.5547, lng: 121.0244, x: 52, y: 48 },
+    corridorName: "Ayala Avenue & Paseo de Roxas",
+    impactRadius: "Ayala Corridor // 800m Zone",
+    date: "August 2026",
+    readTime: "4 MIN READ",
     verificationStatus: "VERIFIED PRIMARY",
-    confidence: "98%",
+    confidence: "99% CONFIDENCE",
+    evidenceStats: "3 PRIMARY SOURCES · 1 GOVERNMENT RECORD · LAST AUDITED 16 AUG 2026",
     summary: {
-      whatHappened: "A 4.8-hectare reclaimed waterfront parcel in Pasay has broken ground for two double-height, photovoltaic glass atrium pavilions designed for corporate tech summits and hybrid physical-virtual international conferences.",
-      whyItMatters: "Directly shifts Manila's corporate event gravity from traditional subterranean hotel ballrooms to daylight-drenched waterfront assets, triggering a 28% surge in surrounding commercial property inquiries.",
+      whatHappened: "Makati City has ratified Ordinance No. 2026-042, mandating that all commercial office towers along Ayala Avenue and Paseo de Roxas achieve minimum LEED Gold or Platinum energy certification by Q4 2027.",
+      whyItMatters: "Forces legacy building owners into ₱180M+ façade and HVAC upgrades while driving multinational institutional tenants to secure certified green spaces, creating a 22% rental divergence between certified and uncertified inventory.",
       affectedCount: 3
     },
-    // The 8-Chapter Modular Investigation Story
+    // Geographically Plausible Affected ScoutIt Properties situated in Makati CBD
+    affectedSpaces: [
+      {
+        id: "prop-makati-one-ayala",
+        slug: "the-estate-makati",
+        title: "One Ayala Corporate Tower",
+        location: "Ayala Avenue, Makati CBD",
+        distance: "260m FROM CORRIDOR CORE",
+        relationReason: "Covered territory · Existing office inventory",
+        impactTag: "↑ Modernization Pressure",
+        classification: "UPGRADE REQUIRED",
+        image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1200&q=80",
+        specs: "42,000 sqm · 32 Floors",
+        coords: { x: 50, y: 46 }
+      },
+      {
+        id: "prop-makati-estate",
+        slug: "sky-pavilion-makati",
+        title: "The Estate Makati Tower",
+        location: "Paseo de Roxas, Makati CBD",
+        distance: "480m FROM AYALA INTERSECTION",
+        relationReason: "Adjacent luxury buffer · Low-E glass installed",
+        impactTag: "● Pre-Compliant Asset",
+        classification: "ALREADY COMPLIANT",
+        image: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1200&q=80",
+        specs: "650 sqm Penthouse · Floor 54",
+        coords: { x: 56, y: 52 }
+      },
+      {
+        id: "prop-makati-salcedo-center",
+        slug: "the-estate-makati",
+        title: "Salcedo Commercial Heritage Block",
+        location: "Salcedo Village, Makati CBD",
+        distance: "820m SECONDARY PERIMETER",
+        relationReason: "Secondary compliance deadline Q4 2028",
+        impactTag: "⚠ CapEx Retrofit Pending",
+        classification: "LIKELY RETROFIT REQUIRED",
+        image: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=1200&q=80",
+        specs: "14,500 sqm · Mid-Rise Office",
+        coords: { x: 46, y: 42 }
+      }
+    ],
+    // The 8-Chapter Investigation Story Engine
     investigation: {
       chapter01: {
-        headline: "Something is changing across the Manila Bay waterfront.",
-        lede: "For two decades, corporate gatherings in Metro Manila were confined to underground hotel ballrooms with artificial lighting. The ground-breaking of the Bay Area Glass Atrium Pavilions marks a permanent architectural break: a 4.8-hectare waterfront campus that uses structural glass and solar shading to merge maritime sunset vistas with high-bandwidth spatial computing infrastructure.",
-        territoryContext: "Situated along the reclaimed coastal corridor between Pasay and Parañaque, the site directly anchors the northern perimeter of the Bay Area Entertainment City."
+        headline: "The green threshold is reshaping Makati's skyline economics.",
+        lede: "The ratification of Makati City Ordinance No. 2026-042 establishes an irreversible carbon ceiling for commercial buildings across Ayala Avenue, Paseo de Roxas, and Makati Avenue. Uncertified legacy towers face progressive municipal tax surcharges, creating an unprecedented wave of architectural retrofits.",
+        jurisdiction: "Makati City Urban Planning & Environmental Services Department",
+        statusSummary: "RATIFIED & ENFORCEABLE · COMPLIANCE DEADLINE Q4 2027"
       },
       chapter02: {
-        siteNotes: "The site directly borders Seaside Boulevard and is situated within an 8-minute drive from NAIA Expressway Terminal 1 & 2 on-ramps.",
-        radiusZones: [
-          { radius: "250m", impact: "Immediate acoustic & footfall zone; direct pedestrian promenade connection." },
-          { radius: "500m", impact: "High-density hospitality & commercial leasing catchment." },
-          { radius: "1.0km", impact: "Macro traffic dispersal & premium residential appreciation corridor." }
+        territoryHeadline: "Ayala Avenue & Paseo de Roxas Catchment Corridor",
+        territoryNotes: "The ordinance applies strictly to commercial assets exceeding 12 stories within the Makati Central Business District core.",
+        corridors: [
+          { name: "Ayala Avenue Core", length: "2.4 km", towerCount: 38, focus: "Primary Tier-1 Tower Focus" },
+          { name: "Paseo de Roxas Strip", length: "1.8 km", towerCount: 22, focus: "Financial & Legal Headquarters" },
+          { name: "Salcedo / Legazpi Buffer", length: "3.1 km", towerCount: 16, focus: "Secondary Mixed-Use Compliance" }
         ]
       },
       chapter03: {
-        announcementTitle: "Official Ground-Breaking & Framework Approval",
-        announcer: "Philippine Convention & Exhibition Bureau (PCEB) & Pasay City Planning Office",
-        filingRef: "PCEB-2026-WZ-0941",
-        verifiedFacts: [
-          "48,000 sqm total gross land allocation on consolidated reclaimed title.",
-          "Two double-curved panoramic glass pavilions with 14-meter clear interior ceiling heights.",
-          "Integrated 2.4 MW rooftop building-integrated photovoltaic (BIPV) solar array.",
-          "Dedicated subterranean pedestrian concourse linking directly to the Seaside Monorail station."
+        requirementHeadline: "What the Ordinance Mandates",
+        frameworkSteps: [
+          { step: "01", title: "ENERGY BASELINE", desc: "Mandatory 25% energy reduction below baseline ASHRAE 90.1 energy performance standards." },
+          { step: "02", title: "LOW-E GLAZING", desc: "Façade retrofits requiring double-glazed Low-E glass with solar heat gain coefficient (SHGC) < 0.28." },
+          { step: "03", title: "HVAC DECARBONIZATION", desc: "Replacement of legacy CFC/HCFC chillers with magnetic-bearing variable speed systems." },
+          { step: "04", title: "CERTIFICATION AUDIT", desc: "USGBC LEED Gold/Platinum or PHILGBC BERDE 4-Star certification filed by Q4 2027." }
         ]
       },
       chapter04: {
-        timeline: [
-          { year: "2024", phase: "Right-of-Way & Environmental Compliance", status: "COMPLETED", detail: "DENR issued Environmental Compliance Certificate (ECC-2024-082) after hydrodynamic tidal surge modeling." },
-          { year: "2025", phase: "Deep Caisson Piling & Marine Defense", status: "COMPLETED", detail: "Installation of 420 reinforced concrete friction piles and a 4.2-meter wave-attenuation perimeter seawall." },
-          { year: "2026", phase: "Superstructure & Glass Enclosure", status: "WE ARE HERE", current: true, detail: "Erection of specialized diagrid steel arches and German-engineered triple-laminated low-emissivity glass panels." },
-          { year: "2027", phase: "Spatial Tech & Acoustic Fitout", status: "PLANNED", detail: "Deployment of spatial audio arrays, ceiling-integrated lidar tracking, and redundant fiber-optic trunks." },
-          { year: "2028", phase: "Operational Commissioning", status: "TARGET", detail: "Inaugural hosting of the Asia-Pacific Spatial Computing Summit Q4 2028." }
+        classificationHeadline: "Building Exposure & Compliance Ledger",
+        buildingLedger: [
+          { name: "One Ayala Corporate Tower", status: "UPGRADE REQUIRED", risk: "HIGH", detail: "Chiller overhaul required; façade meets 80% of thermal specs." },
+          { name: "The Estate Makati", status: "ALREADY COMPLIANT", risk: "NONE", detail: "Pre-certified LEED Gold upon structural completion in 2024." },
+          { name: "Salcedo Commercial Heritage Block", status: "RETROFIT REQUIRED", risk: "MODERATE", detail: "Secondary deadline allows phased CapEx deployment across 24 months." },
+          { name: "Ayala Triangle Tower Two", status: "ALREADY COMPLIANT", risk: "NONE", detail: "LEED Platinum benchmark asset with zero penalty exposure." }
         ]
       },
       chapter05: {
-        proposalName: "The Horizon Glass Pavilion Specifications",
-        specs: [
-          { label: "Clear Ceiling Height", value: "14.0 Meters" },
-          { label: "Simultaneous Guest Capacity", value: "3,500 Attendees" },
-          { label: "Solar Energy Offset", value: "64% Annual Campus Power" },
-          { label: "Acoustic Attenuation", value: "Rw 52 dB Noise Barrier" },
-          { label: "Waterfront Setback", value: "35-Meter Public Boardwalk" }
-        ],
-        architecturalLogic: "Designed with an aerodynamic cantilever that diffuses typhoon wind loads while providing unobstructed sunset views across Manila Bay."
+        timeline: [
+          { year: "2024", phase: "Baseline Carbon Mapping", status: "COMPLETED", detail: "Sensor telemetry mapped energy usage across 140 commercial towers." },
+          { year: "2026", phase: "Ordinance Ratification", status: "WE ARE HERE", current: true, detail: "City Council enacts mandatory compliance schedule with tax incentives." },
+          { year: "2027", phase: "Verification Audit Deadline", status: "PLANNED", detail: "Final deadline to submit certified third-party engineering audits." },
+          { year: "2028", phase: "Penalty Surcharges Active", status: "TARGET", detail: "1.8% annual commercial property tax surcharge applied to uncertified stock." }
+        ]
       },
       chapter06: {
-        developerClaims: "The consortium claims the complex will generate ₱4.2B in annual regional economic activity and position Manila as Asia's top corporate waterfront destination.",
-        scoutItAudit: "While tourism and executive summit demand are historically high, regional road bottlenecks along Roxas Boulevard during evening rush hours remain an unmitigated operational friction point until the NAIAX connector is completed."
+        pressures: [
+          { title: "CAPEX UPGRADE COSTS", severity: "HIGH", text: "Average retrofit CapEx ranges between ₱120M to ₱210M per commercial high-rise tower." },
+          { title: "TENANT ESG COVENANTS", severity: "CRITICAL", text: "Multinational tech and banking tenants legally barred by global corporate policies from renewing leases in uncertified buildings." },
+          { title: "OPERATIONAL ADVANTAGE", severity: "POSITIVE", text: "Certified retrofits yield a 28% reduction in recurring building electricity bills." }
+        ]
       },
       chapter07: {
-        // Multi-Factor Institutional Impact Matrix
-        impactMatrix: [
-          { factor: "Accessibility", shortTerm: "STABLE", longTerm: "HIGH BOOST", rationale: "Short-term construction rerouting shifts to a direct monorail and expressway link upon commissioning." },
-          { factor: "Traffic Load", shortTerm: "MODERATE FRICTION", longTerm: "MANAGED", rationale: "Localized heavy vehicle congestion during façade installation; long-term subterranean parking mitigates street queuing." },
-          { factor: "Commercial Footfall", shortTerm: "LOW", longTerm: "HIGH BOOST", rationale: "Estimated 14,000 weekly executive visitors entering the surrounding retail and dining promenade." },
-          { factor: "Property Values", shortTerm: "HIGH BOOST", longTerm: "HIGH BOOST", rationale: "Surrounding commercial spaces commanding a +24% pre-completion leasing premium." },
-          { factor: "Construction Acoustics", shortTerm: "MODERATE FRICTION", longTerm: "RESOLVED", rationale: "Deep-bore piling completed; current steel erection generates localized daytime decibel spikes." },
-          { factor: "Public Realm Quality", shortTerm: "STABLE", longTerm: "HIGH BOOST", rationale: "Creation of a 35-meter landscaped public sunset esplanade accessible to residents." }
-        ]
+        marketShift: {
+          certifiedStock: { title: "CERTIFIED / RETROFITTED ASSETS", points: ["Commanding +18% to +24% rental premiums", "100% occupancy retention from global firms", "Eligible for municipal property tax rebates"] },
+          legacyStock: { title: "UNCERTIFIED LEGACY ASSETS", points: ["Tenant flight to newer certified buildings", "1.8% annual municipal property tax penalties", "Substantial asset valuation write-downs"] }
+        }
       },
       chapter08: {
-        sources: [
-          { type: "PRIMARY", name: "Philippine Convention & Exhibition Bureau Gazette", date: "June 2026", verified: true },
-          { type: "GOVERNMENT", name: "Pasay City Urban Planning & Zoning Registry", date: "April 2026", verified: true },
-          { type: "DEVELOPER", name: "Bay Horizon Consortium Masterplan Disclosure", date: "January 2026", verified: true },
-          { type: "SCOUTIT VERIFIED", name: "On-Site Drone Telemetry & Cadastral Audit", date: "July 2026", verified: true }
+        impactMatrix: [
+          { factor: "Tenant Demand", shortTerm: "HIGH BOOST", longTerm: "HIGH BOOST", rationale: "Multinational ESG procurement mandates demand certified space." },
+          { factor: "Retrofit CapEx", shortTerm: "MODERATE FRICTION", longTerm: "RESOLVED", rationale: "Heavy initial capital outlays recovered via 28% lower operating power costs." },
+          { factor: "Rental Rate Spread", shortTerm: "STABLE", longTerm: "HIGH BOOST", rationale: "Growing 22% rental price divergence between green and legacy floorplates." },
+          { factor: "Vacancy Risk (Legacy)", shortTerm: "LOW", longTerm: "MODERATE FRICTION", rationale: "Uncertified older buildings face steady tenant attrition." },
+          { factor: "Grid Energy Load", shortTerm: "STABLE", longTerm: "HIGH BOOST", rationale: "Projected 42,000-ton annual carbon reduction across the CBD." }
         ]
-      }
+      },
+      evidenceSources: [
+        { type: "PRIMARY", name: "Makati City Council Ordinance No. 2026-042", date: "July 2026", verified: true },
+        { type: "GOVERNMENT", name: "Philippine Green Building Council (PHILGBC) Register", date: "June 2026", verified: true },
+        { type: "SECONDARY", name: "Colliers Philippine Office Market Intelligence Report Q2 2026", date: "August 2026", verified: true },
+        { type: "SCOUTIT VERIFIED", name: "On-Site Façade & Chiller Engineering Audit", date: "August 2026", verified: true }
+      ]
     }
   },
   {
@@ -159,160 +204,225 @@ const SPATIAL_SIGNALS = [
     statusType: "active",
     location: "BGC West Block, Taguig",
     region: "BGC & Taguig",
-    coords: { lat: 14.5409, lng: 121.0503, x: 62, y: 48 },
-    impactRadius: "800m Station Catchment",
+    coords: { lat: 14.5409, lng: 121.0503, x: 64, y: 54 },
+    corridorName: "11th Avenue & Kalayaan Perimeter",
+    impactRadius: "BGC West // 800m Station Catchment",
     date: "July 2026",
     readTime: "4 MIN READ",
     verificationStatus: "VERIFIED PRIMARY",
-    confidence: "99%",
+    confidence: "99% CONFIDENCE",
+    evidenceStats: "4 PRIMARY SOURCES · 2 GOVERNMENT RECORDS · LAST AUDITED 12 AUG 2026",
     summary: {
       whatHappened: "Tunnel boring machines advancing toward BGC West Station have triggered a rapid spatial realignment: private capital is aggressively acquiring low-density modernist villas with private acoustic buffers before station activation.",
-      whyItMatters: "Direct 18-minute subterranean transit connection to NAIA Airport is driving a 38% price premium on single-detached homes within walking distance.",
+      whyItMatters: "Direct 18-minute subterranean transit connection to NAIA Airport is driving a 38% price premium on single-detached residences within walking distance.",
       affectedCount: 3
     },
+    affectedSpaces: [
+      {
+        id: "prop-bgc-glasshouse",
+        slug: "the-glasshouse-bgc",
+        title: "The Glasshouse BGC",
+        location: "11th Avenue, BGC, Taguig",
+        distance: "180m FROM WEST STATION PORTAL",
+        relationReason: "Direct subterranean concourse portal link",
+        impactTag: "↑ +38% Appreciation Surge",
+        classification: "PRIME BENEFICIARY",
+        image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1200&q=80",
+        specs: "450 sqm · Modernist Villa",
+        coords: { x: 62, y: 52 }
+      },
+      {
+        id: "prop-bgc-aurelia",
+        slug: "aurelia-residences",
+        title: "Aurelia Residences",
+        location: "5th Avenue, BGC, Taguig",
+        distance: "450m FROM TUNNEL ALIGNMENT",
+        relationReason: "Acoustic buffer verified · Floating trackbed isolation",
+        impactTag: "● High Demand Hold",
+        classification: "PRIME BENEFICIARY",
+        image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1200&q=80",
+        specs: "380 sqm · Signature Suite",
+        coords: { x: 66, y: 58 }
+      },
+      {
+        id: "prop-bgc-villa-4",
+        slug: "the-glasshouse-bgc",
+        title: "Kalayaan Border Villa #04",
+        location: "West Perimeter, BGC, Taguig",
+        distance: "780m WALKING CATCHMENT",
+        relationReason: "Off-market acquisition surge · Transit proximity",
+        impactTag: "↑ Private Inquiries +45%",
+        classification: "HIGH IMPACT",
+        image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&q=80",
+        specs: "520 sqm · Acoustic Compound",
+        coords: { x: 60, y: 50 }
+      }
+    ],
     investigation: {
       chapter01: {
         headline: "Subterranean mobility is restructuring BGC's perimeter value.",
-        lede: "The arrival of the Metro Manila Subway beneath 11th Avenue represents the most profound transit intervention in Bonifacio Global City since its 1995 master plan. As tunnel boring progresses 24 meters below street level, private family offices and institutional buyers are executing off-market acquisitions of surrounding low-density residences.",
-        territoryContext: "Bonifacio Global City West Perimeter bordering Forbes Park and Kalayaan Avenue."
+        lede: "The arrival of the Metro Manila Subway beneath 11th Avenue represents the most profound transit intervention in Bonifacio Global City since its original master plan. Private family offices are aggressively acquiring surrounding residential assets.",
+        jurisdiction: "Department of Transportation & BCDA",
+        statusSummary: "TUNNEL BORING UNDERWAY · TARGET ACTIVATION 2028"
       },
       chapter02: {
-        siteNotes: "The station box excavation spans 280 meters along the western perimeter, creating a permanent high-frequency transit anchor.",
-        radiusZones: [
-          { radius: "200m", impact: "Direct underground pedestrian concourse portal." },
-          { radius: "450m", impact: "Prime residential appreciation zone with minimal street noise." },
-          { radius: "800m", impact: "Outer 10-minute pedestrian walking catchment." }
+        territoryHeadline: "BGC West Station 800-Meter Pedestrian Catchment",
+        territoryNotes: "Encompasses the western commercial boundary along 11th Avenue and low-density residential buffers.",
+        corridors: [
+          { name: "11th Avenue Transit Spine", length: "1.4 km", towerCount: 18, focus: "Direct Subway Station Access" },
+          { name: "5th Avenue Luxury Corridor", length: "1.8 km", towerCount: 14, focus: "High-End Residential Nodes" }
         ]
       },
       chapter03: {
-        announcementTitle: "DOTr Subterranean Easement & Station Structural Works",
-        announcer: "Department of Transportation & Bases Conversion and Development Authority",
-        filingRef: "DOTr-MMS-PKG-104",
-        verifiedFacts: [
-          "BGC West Station excavation depth reaches -24.5 meters below street grade.",
-          "Four integrated station entrances designed with acoustic baffles and glass canopies.",
-          "Subterranean utility rerouting for water and fiber-optic grids completed in Q1 2026."
+        requirementHeadline: "Subterranean Transit Specifications",
+        frameworkSteps: [
+          { step: "01", title: "STATION DEPTH", desc: "-24.5 meters below street grade with 4 integrated concourse plazas." },
+          { step: "02", title: "AIRPORT LINK", desc: "Direct 18-minute express transit connection to NAIA Terminal 3." },
+          { step: "03", title: "VIBRATION DAMPING", desc: "Floating slab trackbeds absorb all kinetic subterranean vibration." }
         ]
       },
       chapter04: {
-        timeline: [
-          { year: "2023", phase: "Right-of-Way & Utility Relocation", status: "COMPLETED", detail: "Subterranean utilities mapped and diverted along perimeter corridors." },
-          { year: "2025", phase: "Diaphragm Wall & Shaft Excavation", status: "COMPLETED", detail: "Reinforced concrete perimeter walls poured to prevent ground settlement." },
-          { year: "2026", phase: "Tunnel Boring Machine (TBM) Transit", status: "WE ARE HERE", current: true, detail: "Dual TBMs excavating northbound and southbound running tunnels simultaneously." },
-          { year: "2027", phase: "Trackwork & Station Interior Architecture", status: "PLANNED", detail: "Platform screen doors, ventilation shafts, and high-speed elevators installed." },
-          { year: "2028", phase: "Commercial Passenger Activation", status: "TARGET", detail: "Opening of direct transit link to NAIA Terminal 3 and Ortigas CBD." }
+        classificationHeadline: "Catchment Exposure Ledger",
+        buildingLedger: [
+          { name: "The Glasshouse BGC", status: "PRIME BENEFICIARY", risk: "NONE", detail: "Direct subterranean concourse portal link within 180m." },
+          { name: "Aurelia Residences", status: "HIGH DEMAND", risk: "NONE", detail: "Acoustic buffer verified; zero track noise transmission." }
         ]
       },
       chapter05: {
-        proposalName: "BGC West Subterranean Concourse Architecture",
-        specs: [
-          { label: "Excavation Depth", value: "-24.5 Meters" },
-          { label: "Daily Passenger Capacity", value: "85,000 Commuters" },
-          { label: "Travel Time to NAIA", value: "18 Minutes" },
-          { label: "Acoustic Vibration Buffer", value: "Floating Slab Trackbed" }
-        ],
-        architecturalLogic: "Floating trackbeds absorb mechanical vibrations, isolating surface villas from underground resonance."
+        timeline: [
+          { year: "2024", phase: "Shaft Excavation & Piling", status: "COMPLETED", detail: "Diaphragm perimeter walls completed." },
+          { year: "2026", phase: "Tunnel Boring Active", status: "WE ARE HERE", current: true, detail: "Dual TBMs advancing toward BGC West." },
+          { year: "2028", phase: "Commercial Activation", status: "TARGET", detail: "Passenger revenue service opens." }
+        ]
       },
       chapter06: {
-        developerClaims: "DOTr asserts the station will eliminate 35,000 daily vehicular trips into BGC's western corridor.",
-        scoutItAudit: "Surface-level drop-off traffic will require rigorous municipal enforcement to prevent bottlenecks along 11th Avenue during peak arrival hours."
+        pressures: [
+          { title: "TRANSIT VELOCITY", severity: "POSITIVE", text: "Eliminates surface highway congestion for airport travel." },
+          { title: "SURFACE TRAFFIC", severity: "MODERATE", text: "Station drop-off zones require strict municipal curb management." }
+        ]
       },
       chapter07: {
-        impactMatrix: [
-          { factor: "Accessibility", shortTerm: "STABLE", longTerm: "HIGH BOOST", rationale: "Direct airport and regional subway rail connectivity." },
-          { factor: "Traffic Load", shortTerm: "MODERATE FRICTION", longTerm: "POSITIVE", rationale: "Surface traffic diverted subterranean upon completion." },
-          { factor: "Commercial Footfall", shortTerm: "LOW", longTerm: "HIGH BOOST", rationale: "High-net-worth commuter density entering retail blocks." },
-          { factor: "Property Values", shortTerm: "HIGH BOOST", longTerm: "HIGH BOOST", rationale: "Historical +35% appreciation on transit-linked prime real estate." },
-          { factor: "Construction Noise", shortTerm: "MODERATE FRICTION", longTerm: "RESOLVED", rationale: "Deep tunnel boring produces zero surface disturbance." }
-        ]
+        marketShift: {
+          certifiedStock: { title: "STATION-LINKED ASSETS", points: ["+38% capital appreciation surge", "Rapid off-market acquisition velocity", "Guaranteed high-net-worth rental demand"] },
+          legacyStock: { title: "OUTER CORRIDOR ASSETS", points: ["Slower relative capital growth", "Dependent on surface vehicular travel"] }
+        }
       },
       chapter08: {
-        sources: [
-          { type: "PRIMARY", name: "DOTr Metro Manila Subway Project Ledger", date: "July 2026", verified: true },
-          { type: "GOVERNMENT", name: "Taguig City Urban Development Authority", date: "May 2026", verified: true },
-          { type: "SCOUTIT VERIFIED", name: "Field Lidar & Ground Settlement Telemetry", date: "July 2026", verified: true }
+        impactMatrix: [
+          { factor: "Transit Access", shortTerm: "STABLE", longTerm: "HIGH BOOST", rationale: "Direct 18-minute airport subway connection." },
+          { factor: "Property Values", shortTerm: "HIGH BOOST", longTerm: "HIGH BOOST", rationale: "Historical +38% premium on transit-linked prime residences." }
         ]
-      }
+      },
+      evidenceSources: [
+        { type: "PRIMARY", name: "DOTr Metro Manila Subway Project Ledger", date: "July 2026", verified: true },
+        { type: "GOVERNMENT", name: "Taguig City Urban Development Authority", date: "May 2026", verified: true }
+      ]
     }
   },
   {
-    id: "sig-makati-leed",
-    slug: "green-office-demand",
-    title: "LEED Platinum Mandate & Makati CBD Office Modernization",
-    category: "Zoning",
-    statusBadge: "ORDINANCE RATIFIED",
+    id: "sig-manila-bay",
+    slug: "manila-venue-trends",
+    title: "Bay Area Glass Atrium Pavilions & Corporate Spatial Tech",
+    category: "Development",
+    statusBadge: "UNDERWAY · Q4 2028",
     statusType: "active",
-    location: "Ayala Avenue, Makati CBD",
-    region: "Makati CBD",
-    coords: { lat: 14.5547, lng: 121.0244, x: 55, y: 44 },
-    impactRadius: "Ayala & Paseo Corridors",
+    location: "Manila Bay, Pasay / Parañaque",
+    region: "Manila Bay",
+    coords: { lat: 14.5320, lng: 120.9820, x: 42, y: 58 },
+    corridorName: "Seaside Boulevard & Aseana City",
+    impactRadius: "Bay Area // 1.2km Coastal Catchment",
     date: "July 2026",
-    readTime: "4 MIN READ",
+    readTime: "5 MIN READ",
     verificationStatus: "VERIFIED PRIMARY",
-    confidence: "97%",
+    confidence: "98% CONFIDENCE",
+    evidenceStats: "3 PRIMARY SOURCES · 1 GOVERNMENT RECORD · LAST AUDITED 14 AUG 2026",
     summary: {
-      whatHappened: "Makati City has ratified a progressive carbon taxation ordinance mandating that prime office towers achieve minimum LEED Gold or Platinum certification by 2027.",
-      whyItMatters: "Forces legacy building owners into ₱180M+ façade and HVAC overhauls while driving multinational tenants to secure certified green spaces.",
+      whatHappened: "A 4.8-hectare reclaimed waterfront parcel in Pasay has broken ground for two double-height, photovoltaic glass atrium pavilions designed for international corporate tech summits.",
+      whyItMatters: "Directly shifts Manila's corporate event gravity from traditional subterranean ballrooms to daylight-drenched waterfront assets, triggering a 28% surge in surrounding commercial property inquiries.",
       affectedCount: 2
     },
+    affectedSpaces: [
+      {
+        id: "prop-bay-solaire-ballroom",
+        slug: "solaire-grand-ballroom",
+        title: "Bayfront Glass Pavilion & Event Suite",
+        location: "Aseana City, Pasay",
+        distance: "250m DIRECT WATERFRONT",
+        relationReason: "Directly facing new atrium campus · Hospitality surge",
+        impactTag: "↑ +28% Inquiry Surge",
+        classification: "PRIME BENEFICIARY",
+        image: "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=1200&q=80",
+        specs: "1,200 sqm · Coastal Pavilion",
+        coords: { x: 40, y: 56 }
+      },
+      {
+        id: "prop-bay-aseana-tower",
+        slug: "solaire-grand-ballroom",
+        title: "Aseana Waterfront Commercial Floorplates",
+        location: "Seaside Blvd, Parañaque",
+        distance: "600m FROM CAMPUS",
+        relationReason: "Corporate spillover & executive lodging catchment",
+        impactTag: "↑ High Commercial Demand",
+        classification: "HIGH IMPACT",
+        image: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=1200&q=80",
+        specs: "2,400 sqm · Grade A Floorplate",
+        coords: { x: 44, y: 60 }
+      }
+    ],
     investigation: {
       chapter01: {
-        headline: "The green threshold is reshaping Makati's skyline economics.",
-        lede: "The passage of the Makati Sustainable Skyscraper Ordinance has introduced a mandatory carbon ceiling for commercial buildings along Ayala Avenue, Paseo de Roxas, and Makati Avenue. Uncertified legacy towers face progressive municipal tax surcharges, creating an unprecedented wave of architectural retrofits.",
-        territoryContext: "Central Business District core encompassing 68 prime office towers."
+        headline: "Something is changing across the Manila Bay waterfront.",
+        lede: "The ground-breaking of the Bay Area Glass Atrium Pavilions marks a permanent architectural break: a 4.8-hectare waterfront campus that merges maritime sunset vistas with high-bandwidth spatial computing infrastructure.",
+        jurisdiction: "Philippine Convention & Exhibition Bureau (PCEB) & Pasay City",
+        statusSummary: "FOUNDATIONS COMPLETE · SUPERSTRUCTURE UNDERWAY"
       },
       chapter02: {
-        siteNotes: "Affects all commercial properties exceeding 12 stories built prior to 2018.",
-        radiusZones: [
-          { radius: "Core CBD", impact: "Immediate mandate compliance required by Q4 2027." },
-          { radius: "Perimeter Salcedo/Legazpi", impact: "Secondary compliance deadline Q4 2028." }
+        territoryHeadline: "Seaside Boulevard & Aseana Coastal Corridor",
+        territoryNotes: "Directly anchors the northern perimeter of the Bay Area Entertainment City with 35-meter public boardwalk setback.",
+        corridors: [
+          { name: "Seaside Boulevard Waterfront", length: "3.2 km", towerCount: 24, focus: "Waterfront Atrium & Event Hub" }
         ]
       },
       chapter03: {
-        announcementTitle: "Makati City Ordinance No. 2026-042: Green Building Standards",
-        announcer: "Makati City Council & Department of Environmental Services",
-        filingRef: "MKT-ORD-2026-042",
-        verifiedFacts: [
-          "Mandatory 25% energy reduction baseline compared to ASHRAE 90.1 standards.",
-          "Tiered tax incentives for properties achieving LEED Platinum or WELL Building Standard.",
-          "Non-compliant properties penalized with 1.8% annual commercial property tax surcharge starting 2028."
+        requirementHeadline: "Architectural & Spatial Specifications",
+        frameworkSteps: [
+          { step: "01", title: "14M CEILING CLEAR", desc: "Double-curved panoramic glass pavilions with unobstructed bay views." },
+          { step: "02", title: "BIPV SOLAR ARRAY", desc: "2.4 MW rooftop solar glass offsetting 64% of campus energy." }
         ]
       },
       chapter04: {
-        timeline: [
-          { year: "2024", phase: "Energy Audit & Carbon Baseline Mapping", status: "COMPLETED", detail: "Citywide sensor mapping completed across 140 commercial towers." },
-          { year: "2026", phase: "Ordinance Ratification & Retrofit Launch", status: "WE ARE HERE", current: true, detail: "Over 24 prime commercial buildings commenced façade replacements and HVAC upgrades." },
-          { year: "2027", phase: "First Verification Audit & Certification", status: "PLANNED", detail: "Third-party USGBC engineering audits submitted to city hall." },
-          { year: "2028", phase: "Penalty Enforcement & Tax Adjustment", status: "TARGET", detail: "Surcharges applied to uncertified commercial assets." }
+        classificationHeadline: "Catchment Exposure Ledger",
+        buildingLedger: [
+          { name: "Bayfront Glass Pavilion", status: "PRIME BENEFICIARY", risk: "NONE", detail: "Direct pedestrian esplanade connection." }
         ]
       },
       chapter05: {
-        proposalName: "Active Façade Thermal Enclosure Standard",
-        specs: [
-          { label: "Glazing Spec", value: "Low-E Double Glazed (U-factor < 1.4)" },
-          { label: "HVAC Efficiency", value: "Magnetic-Bearing Chillers (COP > 6.8)" },
-          { label: "Energy Reduction", value: "-28% Operating Power" }
-        ],
-        architecturalLogic: "High-performance solar control coatings reduce cooling load by 32% without sacrificing natural daylight."
+        timeline: [
+          { year: "2025", phase: "Deep Caisson Piling", status: "COMPLETED", detail: "420 reinforced concrete piles driven into bedrock." },
+          { year: "2026", phase: "Diagrid Steel Erection", status: "WE ARE HERE", current: true, detail: "Superstructure assembly active." },
+          { year: "2028", phase: "Global Summit Opening", status: "TARGET", detail: "Commissioning for Asia-Pacific Spatial Summit." }
+        ]
       },
       chapter06: {
-        developerClaims: "City planning projects a 42,000-ton annual reduction in carbon emissions across the CBD.",
-        scoutItAudit: "Building owners without available CapEx capital will likely face tenant flight to newer certified developments like Ayala Triangle Tower Two."
+        pressures: [
+          { title: "EVENT GRAVITY", severity: "POSITIVE", text: "Attracts 14,000 weekly executive delegates." }
+        ]
       },
       chapter07: {
-        impactMatrix: [
-          { factor: "Operating Efficiency", shortTerm: "MODERATE FRICTION", longTerm: "HIGH BOOST", rationale: "Initial retrofit CapEx recovered through 28% reduced power bills." },
-          { factor: "Tenant Demand", shortTerm: "HIGH BOOST", longTerm: "HIGH BOOST", rationale: "Multinational ESG mandates restrict leasing to certified green towers." },
-          { factor: "Asset Valuation", shortTerm: "STABLE", longTerm: "HIGH BOOST", rationale: "Certified buildings maintain 15-20% rental rate premiums over legacy stock." }
-        ]
+        marketShift: {
+          certifiedStock: { title: "WATERFRONT VENUES", points: ["Premium booking rates", "High corporate tech demand"] },
+          legacyStock: { title: "SUBTERRANEAN HALLS", points: ["Discounted pricing pressure", "Loss of tech event market share"] }
+        }
       },
       chapter08: {
-        sources: [
-          { type: "PRIMARY", name: "Makati City Official Gazette No. 2026-042", date: "July 2026", verified: true },
-          { type: "GOVERNMENT", name: "Philippine Green Building Council (PHILGBC)", date: "June 2026", verified: true },
-          { type: "SCOUTIT VERIFIED", name: "Engineering Telemetry & Façade Inspections", date: "July 2026", verified: true }
+        impactMatrix: [
+          { factor: "Commercial Footfall", shortTerm: "LOW", longTerm: "HIGH BOOST", rationale: "Estimated 14,000 weekly executive visitors." },
+          { factor: "Property Values", shortTerm: "HIGH BOOST", longTerm: "HIGH BOOST", rationale: "Surrounding commercial spaces command +24% pre-completion leasing premium." }
         ]
-      }
+      },
+      evidenceSources: [
+        { type: "PRIMARY", name: "Philippine Convention & Exhibition Bureau Gazette", date: "June 2026", verified: true }
+      ]
     }
   },
   {
@@ -324,75 +434,100 @@ const SPATIAL_SIGNALS = [
     statusType: "active",
     location: "General Luna, Siargao",
     region: "Siargao",
-    coords: { lat: 9.7800, lng: 126.1550, x: 80, y: 72 },
-    impactRadius: "Cloud 9 to Tuason Beach",
+    coords: { lat: 9.7800, lng: 126.1550, x: 78, y: 72 },
+    corridorName: "Tourism Road & Tuason Beach",
+    impactRadius: "Cloud 9 to Tuason Beach // 6km Corridor",
     date: "June 2026",
     readTime: "3 MIN READ",
     verificationStatus: "VERIFIED PRIMARY",
-    confidence: "96%",
+    confidence: "97% CONFIDENCE",
+    evidenceStats: "2 PRIMARY SOURCES · 1 GOVERNMENT RECORD · LAST AUDITED 10 AUG 2026",
     summary: {
       whatHappened: "Boutique hospitality syndicates are executing off-market land consolidations along Siargao's extended surf breaks, generating annual short-term rental yields exceeding 22%.",
       whyItMatters: "Runway expansion at Sayak Airport allowing direct regional flights has accelerated private acquisitions of titled beachfront land.",
       affectedCount: 2
     },
+    affectedSpaces: [
+      {
+        id: "prop-siargao-villa",
+        slug: "siargao-tropical-villa",
+        title: "Siargao Tropical Surf Pavilion",
+        location: "General Luna, Siargao",
+        distance: "120m FROM TUASON POINT",
+        relationReason: "25m coastal easement compliant · 22.4% ARR target",
+        impactTag: "↑ 22.4% Annual Yield",
+        classification: "PRIME BENEFICIARY",
+        image: "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=1200&q=80",
+        specs: "320 sqm · Teak Surf Villa",
+        coords: { x: 76, y: 70 }
+      },
+      {
+        id: "prop-siargao-cloud9",
+        slug: "siargao-tropical-villa",
+        title: "Cloud 9 Off-Grid Villa Compound",
+        location: "General Luna, Siargao",
+        distance: "380m FROM SURF BREAK",
+        relationReason: "Titled beachfront parcel · 100% solar microgrid",
+        impactTag: "● High Occupancy Asset",
+        classification: "PRIME BENEFICIARY",
+        image: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=1200&q=80",
+        specs: "480 sqm · 4 Pavilions",
+        coords: { x: 80, y: 74 }
+      }
+    ],
     investigation: {
       chapter01: {
         headline: "Direct regional aviation is reshaping Siargao's coastal land values.",
-        lede: "The extension of the runway at Sayak Airport to accommodate regional jet flights from Singapore and Hong Kong has permanently altered Siargao's tourism velocity. Prime beachfront parcels between Cloud 9 and Tuason Beach are seeing rapid off-market transactions.",
-        territoryContext: "General Luna coastal corridor spanning 6.4 kilometers."
+        lede: "The extension of the runway at Sayak Airport to accommodate direct regional jet arrivals from Singapore and Hong Kong has permanently altered Siargao's investment velocity.",
+        jurisdiction: "Civil Aviation Authority of the Philippines & DOT",
+        statusSummary: "RUNWAY PAVING COMPLETED · DIRECT FLIGHTS Q1 2027"
       },
       chapter02: {
-        siteNotes: "Strict 25-meter coastal easement setback enforced by DENR on all new structural developments.",
-        radiusZones: [
-          { radius: "Beachfront", impact: "Zero-density buffer zone with elevated teak boardwalks." },
-          { radius: "50-100m Inland", impact: "Prime luxury pavilion villa footprint." }
+        territoryHeadline: "General Luna 6.4-Kilometer Coastal Strip",
+        territoryNotes: "Strict 25-meter coastal easement setback enforced by DENR on all new structural developments.",
+        corridors: [
+          { name: "Tourism Road Beachfront", length: "6.4 km", towerCount: 0, focus: "Eco-Luxury Teak Pavilions" }
         ]
       },
       chapter03: {
-        announcementTitle: "Civil Aviation Authority of the Philippines (CAAP) Runway Expansion",
-        announcer: "CAAP & Department of Tourism (DOT)",
-        filingRef: "CAAP-SYK-2025-019",
-        verifiedFacts: [
-          "Runway lengthened to 1,800 meters to accept Airbus A320 and Embraer E190 aircraft.",
-          "Direct flights from Singapore (Changi) slated for commencement Q1 2027.",
-          "Municipal moratorium on non-biodegradable construction materials in coastal zones."
+        requirementHeadline: "Eco-Luxury Construction Standards",
+        frameworkSteps: [
+          { step: "01", title: "SETBACK COMPLIANCE", desc: "25-meter coastal buffer zone with elevated teak boardwalks." },
+          { step: "02", title: "SOLAR MICROGRID", desc: "100% off-grid solar-battery systems mandatory." }
         ]
       },
       chapter04: {
-        timeline: [
-          { year: "2024", phase: "Airport Land Acquisition & Paving", status: "COMPLETED", detail: "Runway foundation paved and instrument landing systems installed." },
-          { year: "2026", phase: "Boutique Land Consolidation Wave", status: "WE ARE HERE", current: true, detail: "Hospitality syndicates securing titled agricultural-to-commercial conversions." },
-          { year: "2027", phase: "Direct International Flight Inflow", status: "PLANNED", detail: "First direct scheduled international arrivals." },
-          { year: "2028", phase: "Masterplanned Eco-Resort Deliveries", status: "TARGET", detail: "Opening of five low-density, off-grid luxury pavilion estates." }
+        classificationHeadline: "Coastal Asset Ledger",
+        buildingLedger: [
+          { name: "Siargao Tropical Surf Pavilion", status: "PRIME BENEFICIARY", risk: "NONE", detail: "Full DENR coastal easement compliance." }
         ]
       },
       chapter05: {
-        proposalName: "Sustainable Teak Pavilion Standard",
-        specs: [
-          { label: "Renewable Power", value: "100% Off-Grid Solar & Battery" },
-          { label: "Coastal Setback", value: "25-Meter Protected Easement" },
-          { label: "Target ARR", value: "22.4% Annual Rental Yield" }
-        ],
-        architecturalLogic: "Open-air pavilions elevated on stilts to respect natural dune topography and maximize sea breezes."
+        timeline: [
+          { year: "2024", phase: "Airport Foundation Paved", status: "COMPLETED", detail: "Runway foundation extended to 1,800m." },
+          { year: "2026", phase: "Land Consolidation Wave", status: "WE ARE HERE", current: true, detail: "Syndicates acquiring titled plots." },
+          { year: "2027", phase: "International Flight Inflow", status: "TARGET", detail: "Direct flights from Singapore and HK." }
+        ]
       },
       chapter06: {
-        developerClaims: "Syndicates project consistent 85% year-round occupancy from international surf and wellness travelers.",
-        scoutItAudit: "Island grid reliability and water desalination infrastructure require private onsite solutions to maintain five-star luxury standards."
+        pressures: [
+          { title: "SCARCITY DYNAMICS", severity: "HIGH", text: "Only 14 titled coastal parcels remain along primary surf breaks." }
+        ]
       },
       chapter07: {
-        impactMatrix: [
-          { factor: "Rental Yields", shortTerm: "HIGH BOOST", longTerm: "HIGH BOOST", rationale: "Current nightly ADRs of ₱35,000+ with minimal luxury inventory." },
-          { factor: "Land Scarcity", shortTerm: "HIGH BOOST", longTerm: "HIGH BOOST", rationale: "Only 14 titled coastal parcels remain available along primary breaks." },
-          { factor: "Infrastructure Risk", shortTerm: "MODERATE FRICTION", longTerm: "MANAGED", rationale: "Requires private solar microgrid and deep-well water filtration." }
-        ]
+        marketShift: {
+          certifiedStock: { title: "TITLED OFF-GRID ESTATES", points: ["22%+ annual rental yield", "High international tourist ADRs"] },
+          legacyStock: { title: "UNTITLED / NON-COMPLIANT", points: ["High regulatory demolition risk", "Grid blackouts"] }
+        }
       },
       chapter08: {
-        sources: [
-          { type: "PRIMARY", name: "CAAP Sayak Airport Development Record", date: "June 2026", verified: true },
-          { type: "GOVERNMENT", name: "DENR Region XIII Coastal Cadastral Survey", date: "May 2026", verified: true },
-          { type: "SCOUTIT VERIFIED", name: "Title Verification & Land Registry Audit", date: "June 2026", verified: true }
+        impactMatrix: [
+          { factor: "Rental Yield", shortTerm: "HIGH BOOST", longTerm: "HIGH BOOST", rationale: "Current ADRs of ₱35,000/night with extreme luxury scarcity." }
         ]
-      }
+      },
+      evidenceSources: [
+        { type: "PRIMARY", name: "CAAP Sayak Airport Development Record", date: "June 2026", verified: true }
+      ]
     }
   }
 ];
@@ -401,48 +536,15 @@ export default function StratosphereWorkbench() {
   const router = useRouter();
   
   // ── WORKBENCH STATE ──────────────────────────────────────────
-  const [activeSignalId, setActiveSignalId] = useState("sig-manila-bay-pavilion");
+  const [activeSignalId, setActiveSignalId] = useState("sig-makati-leed");
   const [investigationMode, setInvestigationMode] = useState(false);
   const [activeCategory, setActiveCategory] = useState("All");
   const [activeRegion, setActiveRegion] = useState("All Regions");
   const [activeChapter, setActiveChapter] = useState(1);
-  const [properties, setProperties] = useState([]);
-  const [evidenceDrawerOpen, setEvidenceDrawerOpen] = useState(false);
   const [hoveredPropertyId, setHoveredPropertyId] = useState(null);
+  const [hoveredSignalId, setHoveredSignalId] = useState(null);
+  const [evidenceDrawerOpen, setEvidenceDrawerOpen] = useState(false);
   const [mobileSection, setMobileSection] = useState("radar"); // 'radar' | 'brief' | 'investigation'
-
-  // Fetch Live Directory Properties from Dual-CMS API
-  useEffect(() => {
-    let alive = true;
-    async function loadProperties() {
-      try {
-        const res = await fetch("/api/cms");
-        if (!alive || !res.ok) return;
-        const data = await res.json();
-        if (data.properties && Array.isArray(data.properties)) {
-          const list = data.properties.filter(p => p.title && p.slug).map(p => ({
-            id: p.id || p.slug,
-            slug: p.slug,
-            title: p.title,
-            category: p.spaceCategory || "Commercial",
-            city: p.location || p.city || "Philippines",
-            style: p.aestheticTag || "Modernist",
-            image: p.image || (p.photos?.[0]) || "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1200&q=80",
-            beds: p.beds || 3,
-            sqm: p.floor_sqm || 340,
-            price: p.price_raw ? `₱${(p.price_raw / 1000000).toFixed(1)}M` : "Price on Request",
-            distance: "350m radius",
-            influence: "High Demand Surge"
-          }));
-          if (alive && list.length > 0) setProperties(list);
-        }
-      } catch (err) {
-        if (alive) console.error("CMS properties load error:", err);
-      }
-    }
-    loadProperties();
-    return () => { alive = false; };
-  }, []);
 
   // Filter Signals
   const filteredSignals = useMemo(() => {
@@ -458,16 +560,14 @@ export default function StratosphereWorkbench() {
     return SPATIAL_SIGNALS.find(s => s.id === activeSignalId) || SPATIAL_SIGNALS[0];
   }, [activeSignalId]);
 
-  // Linked Affected Properties for the Active Signal
-  const affectedProperties = useMemo(() => {
-    if (!currentSignal) return [];
-    const matched = properties.filter(p => 
-      p.category.toLowerCase() === currentSignal.category.toLowerCase() ||
-      p.city.toLowerCase().includes(currentSignal.region.toLowerCase()) ||
-      currentSignal.location.toLowerCase().includes(p.city.toLowerCase())
-    );
-    return matched.length > 0 ? matched.slice(0, 3) : properties.slice(0, 3);
-  }, [properties, currentSignal]);
+  // Ensure active signal is valid
+  useEffect(() => {
+    if (filteredSignals.length > 0) {
+      if (!filteredSignals.some(s => s.id === activeSignalId)) {
+        setActiveSignalId(filteredSignals[0].id);
+      }
+    }
+  }, [filteredSignals, activeSignalId]);
 
   // Scroll to Chapter in Investigation Mode
   const scrollToChapter = (chapterNum) => {
@@ -501,7 +601,7 @@ export default function StratosphereWorkbench() {
               <span className="telemetry-divider">/</span>
               <span className="telemetry-sub">SPATIAL INTELLIGENCE WORKBENCH</span>
               <span className="telemetry-divider">/</span>
-              <span className="telemetry-coords">14.5995° N, 120.9842° E · PHILIPPINE ARCHIPELAGO</span>
+              <span className="telemetry-coords">{currentSignal.coords.lat.toFixed(4)}° N, {currentSignal.coords.lng.toFixed(4)}° E · {currentSignal.region.toUpperCase()}</span>
             </div>
 
             <div className="header-title-row">
@@ -516,7 +616,7 @@ export default function StratosphereWorkbench() {
             </div>
 
             <p className="header-mission-statement">
-              The world changes. A place is affected. ScoutIt investigates the spatial impact across physical assets.
+              The physical world changes. ScoutIt detects the signal, maps its territory, connects it to affected spaces, and investigates what happens next.
             </p>
           </header>
 
@@ -569,7 +669,7 @@ export default function StratosphereWorkbench() {
               onClick={() => setMobileSection("radar")}
             >
               <Compass size={13} />
-              <span>1. Discovery ({filteredSignals.length})</span>
+              <span>1. Radar ({filteredSignals.length})</span>
             </button>
             <button
               type="button"
@@ -636,7 +736,7 @@ export default function StratosphereWorkbench() {
 
                 <button
                   type="button"
-                  className="rail-evidence-btn"
+                  className={`rail-evidence-btn ${evidenceDrawerOpen ? "is-active" : ""}`}
                   onClick={() => setEvidenceDrawerOpen(!evidenceDrawerOpen)}
                   title="Toggle Source Evidence Drawer"
                 >
@@ -648,37 +748,74 @@ export default function StratosphereWorkbench() {
               /* Full Discovery Radar Column (~32%) */
               <aside className={`discovery-radar-column ${mobileSection === "radar" ? "is-mobile-active" : ""}`}>
                 
-                {/* ── A. Spatial Coordinate Radar Field ── */}
+                {/* ── A. Interactive Spatial Coordinate Radar Field ── */}
                 <section className="radar-cartographic-deck">
                   <div className="deck-header">
                     <div className="deck-kicker">
                       <Crosshair size={12} className="text-gold" />
-                      <span>SPATIAL COORDINATE RADAR</span>
+                      <span>SPATIAL RADAR // {currentSignal.corridorName.toUpperCase()}</span>
                     </div>
-                    <span className="deck-status">ACTIVE SCANNING</span>
+                    <span className="deck-status">REAL-TIME GRAPH</span>
                   </div>
 
-                  {/* Abstract Vector Coordinate Field */}
+                  {/* Abstract SVG Vector Field with Tactical Corridors & Relationships */}
                   <div className="radar-vector-field">
                     <div className="radar-grid-lines" />
-                    <div className="radar-concentric-ring ring-1" />
-                    <div className="radar-concentric-ring ring-2" />
-                    <div className="radar-crosshair-h" />
-                    <div className="radar-crosshair-v" />
+                    
+                    {/* SVG Vector Roads & Influence Catchment Vectors */}
+                    <svg className="radar-svg-layer" viewBox="0 0 100 100" preserveAspectRatio="none">
+                      {/* Tactical Arterial Road Corridors */}
+                      <line x1="10" y1="48" x2="90" y2="48" stroke="rgba(255, 255, 255, 0.12)" strokeWidth="1.2" strokeDasharray="3 3" />
+                      <line x1="52" y1="10" x2="52" y2="90" stroke="rgba(255, 255, 255, 0.12)" strokeWidth="1.2" strokeDasharray="3 3" />
+                      <path d="M 20 80 Q 50 50 85 20" fill="none" stroke="rgba(232, 174, 60, 0.15)" strokeWidth="0.8" />
+                      
+                      {/* Active Signal Concentric Influence Catchment Rings */}
+                      <circle cx={currentSignal.coords.x} cy={currentSignal.coords.y} r="14" fill="rgba(232, 174, 60, 0.04)" stroke="rgba(232, 174, 60, 0.35)" strokeWidth="0.8" strokeDasharray="2 2" />
+                      <circle cx={currentSignal.coords.x} cy={currentSignal.coords.y} r="28" fill="rgba(232, 174, 60, 0.02)" stroke="rgba(232, 174, 60, 0.2)" strokeWidth="0.6" strokeDasharray="4 4" />
 
-                    {/* Plotted Signals Nodes */}
+                      {/* Dynamic Connection Vectors linking Signal (●) to Affected Properties (■) */}
+                      {currentSignal.affectedSpaces.map((prop) => {
+                        const isHovered = hoveredPropertyId === prop.id;
+                        return (
+                          <g key={prop.id}>
+                            <line 
+                              x1={currentSignal.coords.x} 
+                              y1={currentSignal.coords.y} 
+                              x2={prop.coords.x} 
+                              y2={prop.coords.y} 
+                              stroke={isHovered ? "var(--accent-bright)" : "rgba(232, 174, 60, 0.4)"} 
+                              strokeWidth={isHovered ? "1.5" : "0.8"} 
+                              strokeDasharray={isHovered ? "none" : "2 2"} 
+                            />
+                            <circle 
+                              cx={prop.coords.x} 
+                              cy={prop.coords.y} 
+                              r={isHovered ? "3.2" : "2.2"} 
+                              fill={isHovered ? "var(--accent-bright)" : "#f0ede8"} 
+                              stroke="var(--accent)"
+                              strokeWidth="0.8"
+                            />
+                          </g>
+                        );
+                      })}
+                    </svg>
+
+                    {/* Plotted Signal Nodes */}
                     {filteredSignals.map(sig => {
                       const isFocused = sig.id === currentSignal.id;
+                      const isHovered = hoveredSignalId === sig.id;
                       return (
                         <button
                           key={sig.id}
                           type="button"
-                          className={`radar-signal-node ${isFocused ? "is-focused" : ""}`}
+                          className={`radar-signal-node ${isFocused ? "is-focused" : ""} ${isHovered ? "is-hovered" : ""}`}
                           style={{ left: `${sig.coords.x}%`, top: `${sig.coords.y}%` }}
                           onClick={() => {
                             setActiveSignalId(sig.id);
                             setMobileSection("brief");
                           }}
+                          onMouseEnter={() => setHoveredSignalId(sig.id)}
+                          onMouseLeave={() => setHoveredSignalId(null)}
                           title={`${sig.title} (${sig.location})`}
                         >
                           <span className="node-pulse" />
@@ -701,8 +838,8 @@ export default function StratosphereWorkbench() {
 
                   <div className="deck-footer-legend">
                     <span className="legend-item"><span className="legend-dot is-gold" /> SIGNAL DETECTED</span>
-                    <span className="legend-item"><span className="legend-dot is-white" /> PROPERTY NODE</span>
-                    <span className="legend-item"><span className="legend-dot is-muted" /> REGIONAL RADIUS</span>
+                    <span className="legend-item"><span className="legend-dot is-white" /> LINKED PROPERTY</span>
+                    <span className="legend-item"><span className="legend-dot is-dashed" /> INFLUENCE RADIUS</span>
                   </div>
                 </section>
 
@@ -713,7 +850,7 @@ export default function StratosphereWorkbench() {
                       <Radio size={12} className="text-gold" />
                       <span>DISCOVERED SIGNALS ({filteredSignals.length})</span>
                     </div>
-                    <span className="deck-status">REAL-TIME OSINT</span>
+                    <span className="deck-status">REAL-TIME RADAR</span>
                   </div>
 
                   <div className="signal-detection-list">
@@ -727,6 +864,8 @@ export default function StratosphereWorkbench() {
                             setActiveSignalId(sig.id);
                             setMobileSection("brief");
                           }}
+                          onMouseEnter={() => setHoveredSignalId(sig.id)}
+                          onMouseLeave={() => setHoveredSignalId(null)}
                           onKeyDown={(e) => {
                             if (e.key === "Enter" || e.key === " ") {
                               e.preventDefault();
@@ -758,7 +897,7 @@ export default function StratosphereWorkbench() {
                           <div className="signal-item-footer">
                             <span className="signal-date">{sig.date}</span>
                             <span className="signal-action-prompt">
-                              {isSelected ? "ACTIVE FOCUS →" : "INSPECT"}
+                              {isSelected ? "● ACTIVE INTELLIGENCE" : "INSPECT"}
                             </span>
                           </div>
                         </article>
@@ -778,7 +917,7 @@ export default function StratosphereWorkbench() {
                 /* ── DEFAULT STATE: COMPACT INTELLIGENCE BRIEF (Simple First, Deep on Demand) ── */
                 <article className="intelligence-brief-deck">
                   
-                  {/* Brief Header & Provenance */}
+                  {/* Brief Header & Provenance Strip */}
                   <header className="brief-header">
                     <div className="brief-meta-strip">
                       <span className="brief-tag-category">{currentSignal.category} SIGNAL</span>
@@ -794,10 +933,14 @@ export default function StratosphereWorkbench() {
                     </div>
 
                     <h2 className="brief-headline">{currentSignal.title}</h2>
-                    <span className="brief-radius-pill">
-                      <Radio size={11} className="text-gold" />
-                      <span>SPATIAL INFLUENCE RADIUS: {currentSignal.impactRadius}</span>
-                    </span>
+                    
+                    <div className="brief-provenance-strip">
+                      <div className="provenance-strip-left">
+                        <FileText size={11} className="text-gold" />
+                        <span>{currentSignal.evidenceStats}</span>
+                      </div>
+                      <span className="confidence-pill">{currentSignal.confidence}</span>
+                    </div>
                   </header>
 
                   {/* Concise 2-Section Overview: What Happened & Why It Matters */}
@@ -813,51 +956,50 @@ export default function StratosphereWorkbench() {
                     <div className="brief-insight-block">
                       <div className="block-eyebrow">
                         <TrendingUp size={12} className="text-gold" />
-                        <span>02 // WHY THIS MATTERS FOR THIS TERRITORY</span>
+                        <span>02 // WHY THIS MATTERS FOR THIS PLACE</span>
                       </div>
                       <p className="block-body-text">{currentSignal.summary.whyItMatters}</p>
                     </div>
                   </div>
 
-                  {/* First-Class Impacted Properties Section */}
+                  {/* First-Class Spatially Plausible Affected Properties */}
                   <section className="brief-impacted-spaces-section">
                     <div className="section-header-row">
                       <div className="section-eyebrow">
                         <Building2 size={13} className="text-gold" />
-                        <span>AFFECTED SCOUTIT SPACES IN THIS CATCHMENT ({affectedProperties.length})</span>
+                        <span>AFFECTED SCOUTIT SPACES IN THIS CATCHMENT ({currentSignal.affectedSpaces.length})</span>
                       </div>
-                      <span className="section-helper-tag">PROXIMITY LINKED</span>
+                      <span className="section-helper-tag">HOVER TO HIGHLIGHT ON RADAR</span>
                     </div>
 
                     <div className="impacted-spaces-strip">
-                      {affectedProperties.map((prop, idx) => (
+                      {currentSignal.affectedSpaces.map((prop) => (
                         <div
-                          key={prop.id || prop.slug}
-                          className="impacted-space-node"
+                          key={prop.id}
+                          className={`impacted-space-node ${hoveredPropertyId === prop.id ? "is-radar-focused" : ""}`}
                           onMouseEnter={() => setHoveredPropertyId(prop.id)}
                           onMouseLeave={() => setHoveredPropertyId(null)}
                           onClick={() => router.push(`/property/${prop.slug}`)}
                         >
-                          <div 
-                            className="impacted-space-photo"
-                            style={{ backgroundImage: `url(${prop.image})` }}
-                          >
-                            <span className="impacted-space-radius">
-                              {idx === 0 ? "250m RADIUS" : idx === 1 ? "500m RADIUS" : "1.0km RADIUS"}
+                          <div className="impacted-space-header">
+                            <span className="impacted-space-dist">{prop.distance}</span>
+                            <span className={`impacted-space-class ${prop.classification.replace(' ', '-').toLowerCase()}`}>
+                              {prop.classification}
                             </span>
                           </div>
 
-                          <div className="impacted-space-info">
+                          <div className="impacted-space-body">
                             <h4 className="impacted-space-title">{prop.title}</h4>
-                            <span className="impacted-space-loc">{prop.city}</span>
-                            <div className="impacted-space-metrics">
-                              <span>{prop.sqm} sqm</span>
-                              <span>·</span>
-                              <strong className="text-gold">{prop.price}</strong>
+                            <span className="impacted-space-loc">{prop.location}</span>
+                            
+                            <div className="impacted-space-reason">
+                              <span className="reason-bullet">●</span>
+                              <span>{prop.relationReason}</span>
                             </div>
-                            <div className="impacted-space-influence">
-                              <span>Impact: </span>
-                              <strong>{prop.influence}</strong>
+
+                            <div className="impacted-space-footer">
+                              <span className="impact-tag-text">{prop.impactTag}</span>
+                              <span className="view-space-link">VIEW SPACE →</span>
                             </div>
                           </div>
                         </div>
@@ -873,6 +1015,7 @@ export default function StratosphereWorkbench() {
                       onClick={() => {
                         setInvestigationMode(true);
                         setMobileSection("investigation");
+                        window.scrollTo({ top: 0, behavior: "smooth" });
                       }}
                     >
                       <Sparkles size={16} />
@@ -881,7 +1024,7 @@ export default function StratosphereWorkbench() {
                     </button>
 
                     <div className="brief-cta-note">
-                      <span>Expands 8-chapter evidence room, milestone chronology, &amp; ScoutIt impact matrix</span>
+                      <span>Expands 8-chapter evidence room, timeline, &amp; ScoutIt impact matrix</span>
                     </div>
                   </footer>
 
@@ -903,7 +1046,7 @@ export default function StratosphereWorkbench() {
 
                     <div className="investigation-status-pill">
                       <span className="live-dot" />
-                      <span>INVESTIGATION DOSSIER ACTIVE // {currentSignal.slug}</span>
+                      <span>INVESTIGATION ACTIVE // {currentSignal.slug}</span>
                     </div>
                   </div>
 
@@ -919,73 +1062,99 @@ export default function StratosphereWorkbench() {
                     <p className="chapter-lede">{currentSignal.investigation.chapter01.lede}</p>
                     
                     <div className="territory-context-callout">
-                      <Compass size={14} className="text-gold" />
-                      <span>TERRITORIAL CONTEXT: {currentSignal.investigation.chapter01.territoryContext}</span>
+                      <ShieldCheck size={14} className="text-gold" />
+                      <span>JURISDICTION &amp; STATUS: {currentSignal.investigation.chapter01.jurisdiction} · {currentSignal.investigation.chapter01.statusSummary}</span>
                     </div>
                   </section>
 
-                  {/* CHAPTER 02: THE SITE & CATCHMENT RADIUS */}
+                  {/* CHAPTER 02: THE TERRITORY */}
                   <section id="chapter-2" className="story-chapter">
                     <div className="chapter-eyebrow">
                       <span className="chapter-num">CHAPTER 02</span>
                       <span className="chapter-divider">/</span>
-                      <span className="chapter-title-tag">THE SITE &amp; CATCHMENT RADIUS</span>
+                      <span className="chapter-title-tag">TERRITORY &amp; CORRIDORS</span>
                     </div>
 
-                    <p className="chapter-body-prose">{currentSignal.investigation.chapter02.siteNotes}</p>
+                    <h3 className="chapter-subheading">{currentSignal.investigation.chapter02.territoryHeadline}</h3>
+                    <p className="chapter-body-prose">{currentSignal.investigation.chapter02.territoryNotes}</p>
 
-                    <div className="radius-zones-instrument">
-                      {currentSignal.investigation.chapter02.radiusZones.map((zone, i) => (
-                        <div key={i} className="radius-zone-card">
-                          <div className="zone-header">
-                            <span className="zone-radius-pill">{zone.radius}</span>
-                            <span className="zone-tag">INFLUENCE ZONE 0{i+1}</span>
+                    <div className="corridor-breakdown-grid">
+                      {currentSignal.investigation.chapter02.corridors.map((c, i) => (
+                        <div key={i} className="corridor-card">
+                          <div className="corridor-head">
+                            <span className="corridor-name">{c.name}</span>
+                            <span className="corridor-length">{c.length}</span>
                           </div>
-                          <p className="zone-impact-text">{zone.impact}</p>
+                          <div className="corridor-metric">
+                            <span>{c.towerCount} Prime Towers</span>
+                            <span>·</span>
+                            <strong className="text-gold">{c.focus}</strong>
+                          </div>
                         </div>
                       ))}
                     </div>
                   </section>
 
-                  {/* CHAPTER 03: THE OFFICIAL ANNOUNCEMENT & VERIFIED FACTS */}
+                  {/* CHAPTER 03: WHAT THE RULE REQUIRES */}
                   <section id="chapter-3" className="story-chapter">
                     <div className="chapter-eyebrow">
                       <span className="chapter-num">CHAPTER 03</span>
                       <span className="chapter-divider">/</span>
-                      <span className="chapter-title-tag">THE OFFICIAL ANNOUNCEMENT</span>
+                      <span className="chapter-title-tag">WHAT THE ORDINANCE REQUIRES</span>
                     </div>
 
-                    <div className="announcement-dossier-card">
-                      <div className="dossier-header-strip">
-                        <span className="dossier-ref">REF: {currentSignal.investigation.chapter03.filingRef}</span>
-                        <span className="dossier-authority">AUTHORITY: {currentSignal.investigation.chapter03.announcer}</span>
-                      </div>
-                      <h3 className="dossier-title">{currentSignal.investigation.chapter03.announcementTitle}</h3>
+                    <h3 className="chapter-subheading">{currentSignal.investigation.chapter03.requirementHeadline}</h3>
 
-                      <div className="verified-facts-list">
-                        {currentSignal.investigation.chapter03.verifiedFacts.map((fact, idx) => (
-                          <div key={idx} className="verified-fact-row">
-                            <CheckCircle2 size={13} className="text-gold" />
-                            <span>{fact}</span>
-                          </div>
-                        ))}
-                      </div>
+                    <div className="framework-steps-grid">
+                      {currentSignal.investigation.chapter03.frameworkSteps.map((s, idx) => (
+                        <div key={idx} className="framework-step-card">
+                          <span className="step-num">{s.step}</span>
+                          <h4 className="step-title">{s.title}</h4>
+                          <p className="step-desc">{s.desc}</p>
+                        </div>
+                      ))}
                     </div>
                   </section>
 
-                  {/* CHAPTER 04: THE CHRONOLOGY (Horizontal Track with "We Are Here") */}
+                  {/* CHAPTER 04: WHICH BUILDINGS ARE EXPOSED */}
                   <section id="chapter-4" className="story-chapter">
                     <div className="chapter-eyebrow">
                       <span className="chapter-num">CHAPTER 04</span>
                       <span className="chapter-divider">/</span>
-                      <span className="chapter-title-tag">DEVELOPMENT CHRONOLOGY</span>
+                      <span className="chapter-title-tag">BUILDING EXPOSURE &amp; COMPLIANCE LEDGER</span>
+                    </div>
+
+                    <h3 className="chapter-subheading">{currentSignal.investigation.chapter04.classificationHeadline}</h3>
+
+                    <div className="exposure-table-deck">
+                      {currentSignal.investigation.chapter04.buildingLedger.map((b, idx) => (
+                        <div key={idx} className="exposure-row">
+                          <div className="exposure-building-name">
+                            <Building2 size={13} className="text-gold" />
+                            <span>{b.name}</span>
+                          </div>
+                          <span className={`exposure-status-pill ${b.status.toLowerCase().replace(' ', '-')}`}>
+                            {b.status}
+                          </span>
+                          <span className="exposure-detail">{b.detail}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+
+                  {/* CHAPTER 05: THE TIMELINE (Horizontal Track with "We Are Here") */}
+                  <section id="chapter-5" className="story-chapter">
+                    <div className="chapter-eyebrow">
+                      <span className="chapter-num">CHAPTER 05</span>
+                      <span className="chapter-divider">/</span>
+                      <span className="chapter-title-tag">COMPLIANCE TIMELINE</span>
                     </div>
 
                     <div className="timeline-horizontal-instrument">
                       <div className="timeline-track-line" />
                       
                       <div className="timeline-milestones-grid">
-                        {currentSignal.investigation.chapter04.timeline.map((step, idx) => (
+                        {currentSignal.investigation.chapter05.timeline.map((step, idx) => (
                           <div key={idx} className={`timeline-milestone-node ${step.current ? "is-current-step" : ""}`}>
                             <div className="milestone-badge-wrap">
                               <span className="milestone-year">{step.year}</span>
@@ -1002,60 +1171,66 @@ export default function StratosphereWorkbench() {
                     </div>
                   </section>
 
-                  {/* CHAPTER 05: THE PROPOSAL & ARCHITECTURAL SPECIFICATION */}
-                  <section id="chapter-5" className="story-chapter">
-                    <div className="chapter-eyebrow">
-                      <span className="chapter-num">CHAPTER 05</span>
-                      <span className="chapter-divider">/</span>
-                      <span className="chapter-title-tag">ARCHITECTURAL PROPOSAL</span>
-                    </div>
-
-                    <div className="architectural-specs-deck">
-                      <h3 className="specs-deck-title">{currentSignal.investigation.chapter05.proposalName}</h3>
-                      <p className="specs-deck-logic">{currentSignal.investigation.chapter05.architecturalLogic}</p>
-
-                      <div className="specs-data-grid">
-                        {currentSignal.investigation.chapter05.specs.map((item, i) => (
-                          <div key={i} className="spec-data-plate">
-                            <span className="spec-label">{item.label}</span>
-                            <strong className="spec-val">{item.value}</strong>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </section>
-
-                  {/* CHAPTER 06: DEVELOPER CLAIMS VS. AUDIT */}
+                  {/* CHAPTER 06: MODERNIZATION PRESSURE */}
                   <section id="chapter-6" className="story-chapter">
                     <div className="chapter-eyebrow">
                       <span className="chapter-num">CHAPTER 06</span>
                       <span className="chapter-divider">/</span>
-                      <span className="chapter-title-tag">DEVELOPER CLAIMS VS. FIELD AUDIT</span>
+                      <span className="chapter-title-tag">THE MODERNIZATION PRESSURE</span>
+                    </div>
+
+                    <div className="pressures-grid">
+                      {currentSignal.investigation.chapter06.pressures.map((p, idx) => (
+                        <div key={idx} className="pressure-card">
+                          <div className="pressure-head">
+                            <span className="pressure-title">{p.title}</span>
+                            <span className={`pressure-sev ${p.severity.toLowerCase()}`}>{p.severity}</span>
+                          </div>
+                          <p className="pressure-text">{p.text}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+
+                  {/* CHAPTER 07: WINNERS VS. PRESSURES */}
+                  <section id="chapter-7" className="story-chapter">
+                    <div className="chapter-eyebrow">
+                      <span className="chapter-num">CHAPTER 07</span>
+                      <span className="chapter-divider">/</span>
+                      <span className="chapter-title-tag">MARKET DIVERGENCE ANALYSIS</span>
                     </div>
 
                     <div className="claims-vs-reality-split">
-                      <div className="claim-block is-developer">
+                      <div className="claim-block is-certified">
                         <div className="claim-header">
-                          <HelpCircle size={13} />
-                          <span>PROJECT / DEVELOPER CLAIM</span>
+                          <CheckCircle2 size={13} className="text-emerald-400" />
+                          <span>{currentSignal.investigation.chapter07.marketShift.certifiedStock.title}</span>
                         </div>
-                        <p className="claim-prose">{currentSignal.investigation.chapter06.developerClaims}</p>
+                        <ul className="claim-bullets">
+                          {currentSignal.investigation.chapter07.marketShift.certifiedStock.points.map((pt, i) => (
+                            <li key={i}>{pt}</li>
+                          ))}
+                        </ul>
                       </div>
 
-                      <div className="claim-block is-scoutit">
+                      <div className="claim-block is-legacy">
                         <div className="claim-header">
-                          <ShieldCheck size={13} className="text-gold" />
-                          <span>SCOUTIT SPATIAL AUDIT &amp; REALITY</span>
+                          <AlertTriangle size={13} className="text-amber-400" />
+                          <span>{currentSignal.investigation.chapter07.marketShift.legacyStock.title}</span>
                         </div>
-                        <p className="claim-prose">{currentSignal.investigation.chapter06.scoutItAudit}</p>
+                        <ul className="claim-bullets">
+                          {currentSignal.investigation.chapter07.marketShift.legacyStock.points.map((pt, i) => (
+                            <li key={i}>{pt}</li>
+                          ))}
+                        </ul>
                       </div>
                     </div>
                   </section>
 
-                  {/* CHAPTER 07: SCOUTIT INSTITUTIONAL IMPACT MATRIX */}
-                  <section id="chapter-7" className="story-chapter">
+                  {/* CHAPTER 08: SCOUTIT INSTITUTIONAL IMPACT MATRIX */}
+                  <section id="chapter-8" className="story-chapter">
                     <div className="chapter-eyebrow">
-                      <span className="chapter-num">CHAPTER 07</span>
+                      <span className="chapter-num">CHAPTER 08</span>
                       <span className="chapter-divider">/</span>
                       <span className="chapter-title-tag">SCOUTIT SPATIAL IMPACT MATRIX</span>
                     </div>
@@ -1069,7 +1244,7 @@ export default function StratosphereWorkbench() {
                       </div>
 
                       <div className="matrix-rows-list">
-                        {currentSignal.investigation.chapter07.impactMatrix.map((row, idx) => (
+                        {currentSignal.investigation.chapter08.impactMatrix.map((row, idx) => (
                           <div key={idx} className="matrix-row">
                             <span className="cell-factor">{row.factor}</span>
                             <span className={`cell-short ${row.shortTerm.includes('BOOST') ? 'is-boost' : row.shortTerm.includes('FRICTION') ? 'is-friction' : ''}`}>
@@ -1085,35 +1260,27 @@ export default function StratosphereWorkbench() {
                     </div>
                   </section>
 
-                  {/* CHAPTER 08: OSINT EVIDENCE & SOURCE PROVENANCE */}
-                  <section id="chapter-8" className="story-chapter">
-                    <div className="chapter-eyebrow">
-                      <span className="chapter-num">CHAPTER 08</span>
-                      <span className="chapter-divider">/</span>
-                      <span className="chapter-title-tag">SOURCE PROVENANCE &amp; OSINT LEDGER</span>
+                  {/* SOURCE EVIDENCE DRAWER SECTION */}
+                  <section className="evidence-ledger-instrument">
+                    <div className="ledger-header">
+                      <FileText size={13} className="text-gold" />
+                      <span>CHAIN OF CUSTODY &amp; SOURCE PROVENANCE LEDGER</span>
                     </div>
 
-                    <div className="evidence-ledger-instrument">
-                      <div className="ledger-header">
-                        <FileText size={13} className="text-gold" />
-                        <span>CHAIN OF CUSTODY &amp; VERIFIED SOURCES</span>
-                      </div>
-
-                      <div className="sources-list">
-                        {currentSignal.investigation.chapter08.sources.map((src, i) => (
-                          <div key={i} className="source-record-row">
-                            <span className={`source-type-pill ${src.type.toLowerCase().replace(' ', '-')}`}>
-                              {src.type}
-                            </span>
-                            <span className="source-name">{src.name}</span>
-                            <span className="source-date">{src.date}</span>
-                            <span className="source-verified-tag">
-                              <ShieldCheck size={11} className="text-gold" />
-                              <span>VERIFIED</span>
-                            </span>
-                          </div>
-                        ))}
-                      </div>
+                    <div className="sources-list">
+                      {currentSignal.investigation.evidenceSources.map((src, i) => (
+                        <div key={i} className="source-record-row">
+                          <span className={`source-type-pill ${src.type.toLowerCase().replace(' ', '-')}`}>
+                            {src.type}
+                          </span>
+                          <span className="source-name">{src.name}</span>
+                          <span className="source-date">{src.date}</span>
+                          <span className="source-verified-tag">
+                            <ShieldCheck size={11} className="text-gold" />
+                            <span>VERIFIED</span>
+                          </span>
+                        </div>
+                      ))}
                     </div>
                   </section>
 
@@ -1175,19 +1342,18 @@ export default function StratosphereWorkbench() {
         </div>
 
         {/* ── 8. DESCENT WAYPOINT CONTINUATION TO LAYER 03 (METROPOLIS) ── */}
-        <LayerTransition 
-          nextNum="03" 
-          nextName="Metropolis" 
-          nextHref="/layer/metropolis" 
-          teaser="Drop below the clouds. The city directory opens up." 
-        />
+        <div className="descent-transition-wrap">
+          <LayerTransition 
+            nextNum="03" 
+            nextName="Metropolis" 
+            nextHref="/layer/metropolis" 
+            teaser="Drop below the clouds. The city directory opens up." 
+          />
+        </div>
       </main>
 
-      {/* ── TACTICAL MONOLITH STYLES (No Slop, No Generic Glassmorphism) ── */}
+      {/* ── TACTICAL MONOLITH STYLES ── */}
       <style jsx global>{`
-        /* ════════════════════════════════════════════════════════════════
-           TACTICAL CARTOGRAPHIC INSTRUMENT DESIGN SYSTEM
-        ════════════════════════════════════════════════════════════════ */
         .stratosphere-workbench {
           min-height: 100vh;
           background: #0d0d0d;
@@ -1205,13 +1371,13 @@ export default function StratosphereWorkbench() {
           flex: 1;
           position: relative;
           z-index: 10;
-          padding-top: 54px;
+          padding-top: 64px;
         }
 
         .workbench-container {
           max-width: 1340px;
           margin: 0 auto;
-          padding: 24px clamp(16px, 3vw, 36px) 36px;
+          padding: 16px clamp(16px, 3vw, 36px) 24px;
         }
 
         .text-gold {
@@ -1220,9 +1386,9 @@ export default function StratosphereWorkbench() {
 
         /* ── HEADER TELEMETRY STRIP ── */
         .workbench-header {
-          margin-bottom: 24px;
+          margin-bottom: 20px;
           border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-          padding-bottom: 20px;
+          padding-bottom: 18px;
         }
 
         .header-telemetry-strip {
@@ -1312,7 +1478,7 @@ export default function StratosphereWorkbench() {
           line-height: 1.5;
           color: var(--text-secondary);
           margin: 0;
-          max-width: 680px;
+          max-width: 720px;
         }
 
         /* ── TECHNICAL FILTER BAR ── */
@@ -1436,7 +1602,7 @@ export default function StratosphereWorkbench() {
           flex-direction: column;
           gap: 20px;
           position: sticky;
-          top: 70px;
+          top: 76px;
         }
 
         .deck-header {
@@ -1468,7 +1634,7 @@ export default function StratosphereWorkbench() {
           letter-spacing: 0.1em;
         }
 
-        /* ── CARTOGRAPHIC VECTOR FIELD ── */
+        /* ── CARTOGRAPHIC VECTOR RADAR FIELD ── */
         .radar-cartographic-deck {
           background: #111114;
           border: 1px solid rgba(255, 255, 255, 0.08);
@@ -1477,7 +1643,7 @@ export default function StratosphereWorkbench() {
         }
 
         .radar-vector-field {
-          height: 190px;
+          height: 210px;
           position: relative;
           background: #09090b;
           overflow: hidden;
@@ -1489,36 +1655,15 @@ export default function StratosphereWorkbench() {
           background-image: 
             linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
             linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-          background-size: 24px 24px;
+          background-size: 20px 20px;
         }
 
-        .radar-concentric-ring {
+        .radar-svg-layer {
           position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          border-radius: 50%;
-          border: 1px dashed rgba(232, 174, 60, 0.15);
+          inset: 0;
+          width: 100%;
+          height: 100%;
           pointer-events: none;
-        }
-        .radar-concentric-ring.ring-1 { width: 110px; height: 110px; }
-        .radar-concentric-ring.ring-2 { width: 220px; height: 220px; }
-
-        .radar-crosshair-h {
-          position: absolute;
-          left: 0;
-          right: 0;
-          top: 50%;
-          height: 1px;
-          background: rgba(255, 255, 255, 0.06);
-        }
-        .radar-crosshair-v {
-          position: absolute;
-          top: 0;
-          bottom: 0;
-          left: 50%;
-          width: 1px;
-          background: rgba(255, 255, 255, 0.06);
         }
 
         .radar-signal-node {
@@ -1552,7 +1697,7 @@ export default function StratosphereWorkbench() {
           letter-spacing: 0.1em;
           text-transform: uppercase;
           white-space: nowrap;
-          background: rgba(0, 0, 0, 0.7);
+          background: rgba(0, 0, 0, 0.75);
           padding: 1px 4px;
           border-radius: 2px;
         }
@@ -1637,7 +1782,7 @@ export default function StratosphereWorkbench() {
         }
         .legend-dot.is-gold { background: var(--accent); }
         .legend-dot.is-white { background: #f0ede8; }
-        .legend-dot.is-muted { background: #555; }
+        .legend-dot.is-dashed { border: 1px dashed var(--accent); width: 6px; height: 6px; }
 
         /* ── SIGNAL FEED DECK ── */
         .signal-feed-deck {
@@ -1676,7 +1821,7 @@ export default function StratosphereWorkbench() {
         }
 
         .signal-detection-item.is-selected {
-          background: rgba(232, 174, 60, 0.06);
+          background: #16161b;
           border-left: 2px solid var(--accent);
           padding-left: 14px;
         }
@@ -1759,7 +1904,7 @@ export default function StratosphereWorkbench() {
           align-items: center;
           gap: 20px;
           position: sticky;
-          top: 70px;
+          top: 76px;
         }
 
         .rail-back-btn {
@@ -1854,7 +1999,8 @@ export default function StratosphereWorkbench() {
           gap: 4px;
           width: 100%;
         }
-        .rail-evidence-btn:hover {
+        .rail-evidence-btn:hover,
+        .rail-evidence-btn.is-active {
           color: var(--accent);
           border-color: var(--accent);
         }
@@ -1874,7 +2020,7 @@ export default function StratosphereWorkbench() {
           padding: clamp(20px, 3.5vw, 32px);
           display: flex;
           flex-direction: column;
-          gap: 24px;
+          gap: 22px;
         }
 
         .brief-meta-strip {
@@ -1882,7 +2028,7 @@ export default function StratosphereWorkbench() {
           align-items: center;
           gap: 10px;
           flex-wrap: wrap;
-          margin-bottom: 12px;
+          margin-bottom: 10px;
         }
 
         .brief-tag-category {
@@ -1923,23 +2069,38 @@ export default function StratosphereWorkbench() {
           font-weight: 500;
           line-height: 1.2;
           color: #f7f5f0;
-          margin: 0 0 10px;
+          margin: 0 0 12px;
         }
 
-        .brief-radius-pill {
-          display: inline-flex;
+        .brief-provenance-strip {
+          display: flex;
+          justify-content: space-between;
           align-items: center;
-          gap: 6px;
+          flex-wrap: wrap;
+          gap: 8px;
+          background: #16161b;
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 6px;
+          padding: 8px 12px;
+        }
+
+        .provenance-strip-left {
+          display: flex;
+          align-items: center;
+          gap: 7px;
           font-family: var(--font-mono);
-          font-size: 9px;
+          font-size: 8.5px;
+          font-weight: 600;
+          letter-spacing: 0.1em;
+          color: var(--text-secondary);
+        }
+
+        .confidence-pill {
+          font-family: var(--font-mono);
+          font-size: 8px;
           font-weight: 700;
+          color: var(--accent-bright);
           letter-spacing: 0.12em;
-          text-transform: uppercase;
-          color: var(--accent);
-          background: rgba(232, 174, 60, 0.06);
-          border: 1px solid rgba(232, 174, 60, 0.2);
-          padding: 4px 10px;
-          border-radius: 4px;
         }
 
         /* Core Insight Blocks */
@@ -1978,7 +2139,7 @@ export default function StratosphereWorkbench() {
           margin: 0;
         }
 
-        /* First-Class Impacted Spaces */
+        /* First-Class Spatially Plausible Affected Spaces */
         .brief-impacted-spaces-section {
           background: #141418;
           border: 1px solid rgba(255, 255, 255, 0.06);
@@ -2023,56 +2184,64 @@ export default function StratosphereWorkbench() {
           background: #1a1a1f;
           border: 1px solid rgba(255, 255, 255, 0.08);
           border-radius: 8px;
-          overflow: hidden;
+          padding: 14px;
           cursor: pointer;
           transition: all 0.18s ease;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
         }
 
-        .impacted-space-node:hover {
+        .impacted-space-node:hover,
+        .impacted-space-node.is-radar-focused {
           border-color: var(--accent);
+          background: #1e1e24;
           transform: translateY(-2px);
           box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
         }
 
-        .impacted-space-photo {
-          height: 100px;
-          background-size: cover;
-          background-position: center;
-          position: relative;
-          padding: 6px;
+        .impacted-space-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding-bottom: 8px;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.06);
         }
 
-        .impacted-space-radius {
-          position: absolute;
-          top: 6px;
-          left: 6px;
+        .impacted-space-dist {
+          font-family: var(--font-mono);
+          font-size: 8px;
+          font-weight: 700;
+          letter-spacing: 0.12em;
+          color: var(--accent);
+        }
+
+        .impacted-space-class {
           font-family: var(--font-mono);
           font-size: 7.5px;
           font-weight: 700;
-          letter-spacing: 0.12em;
-          background: rgba(0, 0, 0, 0.85);
-          color: var(--accent);
-          border: 1px solid rgba(232, 174, 60, 0.35);
           padding: 2px 6px;
           border-radius: 3px;
+          text-transform: uppercase;
         }
+        .impacted-space-class.already-compliant { background: rgba(76, 175, 125, 0.15); color: #4caf7d; }
+        .impacted-space-class.upgrade-required { background: rgba(232, 174, 60, 0.15); color: var(--accent-bright); }
+        .impacted-space-class.likely-retrofit-required { background: rgba(232, 200, 74, 0.15); color: #e8c84a; }
+        .impacted-space-class.prime-beneficiary { background: rgba(76, 175, 125, 0.15); color: #4caf7d; }
+        .impacted-space-class.high-impact { background: rgba(232, 174, 60, 0.15); color: var(--accent-bright); }
 
-        .impacted-space-info {
-          padding: 12px;
+        .impacted-space-body {
           display: flex;
           flex-direction: column;
-          gap: 4px;
+          gap: 6px;
         }
 
         .impacted-space-title {
           font-family: var(--font-display);
-          font-size: 13.5px;
+          font-size: 14px;
           font-weight: 500;
           color: #f7f5f0;
           margin: 0;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
         }
 
         .impacted-space-loc {
@@ -2081,26 +2250,41 @@ export default function StratosphereWorkbench() {
           color: var(--text-muted);
         }
 
-        .impacted-space-metrics {
+        .impacted-space-reason {
           display: flex;
-          align-items: center;
+          align-items: flex-start;
           gap: 6px;
-          font-family: var(--font-mono);
-          font-size: 9px;
+          font-size: 11.5px;
+          line-height: 1.45;
           color: var(--text-secondary);
-          margin-top: 2px;
+        }
+        .reason-bullet {
+          color: var(--accent);
+          font-size: 8px;
         }
 
-        .impacted-space-influence {
-          font-family: var(--font-mono);
-          font-size: 8px;
-          color: var(--text-muted);
-          padding-top: 6px;
+        .impacted-space-footer {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding-top: 8px;
           border-top: 1px dashed rgba(255, 255, 255, 0.06);
           margin-top: 4px;
         }
-        .impacted-space-influence strong {
+
+        .impact-tag-text {
+          font-family: var(--font-mono);
+          font-size: 8.5px;
+          font-weight: 700;
           color: var(--accent-bright);
+        }
+
+        .view-space-link {
+          font-family: var(--font-mono);
+          font-size: 8px;
+          font-weight: 700;
+          color: var(--text-muted);
+          letter-spacing: 0.1em;
         }
 
         /* Brief Action Footer */
@@ -2108,7 +2292,7 @@ export default function StratosphereWorkbench() {
           display: flex;
           flex-direction: column;
           gap: 8px;
-          padding-top: 8px;
+          padding-top: 4px;
         }
 
         .enter-investigation-cta {
@@ -2239,6 +2423,14 @@ export default function StratosphereWorkbench() {
           margin: 0;
         }
 
+        .chapter-subheading {
+          font-family: var(--font-display);
+          font-size: 18px;
+          font-weight: 500;
+          color: #f7f5f0;
+          margin: 0;
+        }
+
         .chapter-lede {
           font-size: 15.5px;
           line-height: 1.7;
@@ -2269,15 +2461,15 @@ export default function StratosphereWorkbench() {
           color: var(--accent);
         }
 
-        /* Chapter 02: Radius Zones */
-        .radius-zones-instrument {
+        /* Chapter 02: Corridors Breakdown */
+        .corridor-breakdown-grid {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
           gap: 12px;
-          margin-top: 8px;
+          margin-top: 6px;
         }
 
-        .radius-zone-card {
+        .corridor-card {
           background: #16161a;
           border: 1px solid rgba(255, 255, 255, 0.08);
           border-radius: 8px;
@@ -2287,76 +2479,122 @@ export default function StratosphereWorkbench() {
           gap: 6px;
         }
 
-        .zone-header {
+        .corridor-head {
           display: flex;
           justify-content: space-between;
           align-items: center;
         }
 
-        .zone-radius-pill {
+        .corridor-name {
+          font-family: var(--font-display);
+          font-size: 14px;
+          color: #f7f5f0;
+        }
+
+        .corridor-length {
+          font-family: var(--font-mono);
+          font-size: 8.5px;
+          color: var(--accent);
+        }
+
+        .corridor-metric {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-family: var(--font-mono);
+          font-size: 9px;
+          color: var(--text-secondary);
+        }
+
+        /* Chapter 03: Framework Steps */
+        .framework-steps-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+          gap: 12px;
+          margin-top: 6px;
+        }
+
+        .framework-step-card {
+          background: #141418;
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 8px;
+          padding: 16px;
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+        }
+
+        .step-num {
           font-family: var(--font-mono);
           font-size: 9px;
           font-weight: 700;
           color: var(--accent);
         }
 
-        .zone-tag {
+        .step-title {
           font-family: var(--font-mono);
-          font-size: 8px;
-          color: var(--text-muted);
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.1em;
+          color: #f7f5f0;
+          margin: 0;
         }
 
-        .zone-impact-text {
+        .step-desc {
           font-size: 12.5px;
           line-height: 1.5;
           color: var(--text-secondary);
           margin: 0;
         }
 
-        /* Chapter 03: Announcement Dossier */
-        .announcement-dossier-card {
+        /* Chapter 04: Exposure Table Deck */
+        .exposure-table-deck {
           background: #141418;
           border: 1px solid rgba(255, 255, 255, 0.08);
           border-radius: 8px;
-          padding: 18px;
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
+          overflow: hidden;
+          margin-top: 6px;
         }
 
-        .dossier-header-strip {
-          display: flex;
-          justify-content: space-between;
-          font-family: var(--font-mono);
-          font-size: 8.5px;
-          color: var(--text-muted);
-          letter-spacing: 0.1em;
+        .exposure-row {
+          display: grid;
+          grid-template-columns: 240px 160px 1fr;
+          gap: 14px;
+          padding: 12px 16px;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+          align-items: center;
         }
+        .exposure-row:last-child { border-bottom: none; }
 
-        .dossier-title {
+        .exposure-building-name {
+          display: flex;
+          align-items: center;
+          gap: 8px;
           font-family: var(--font-display);
-          font-size: 16px;
-          font-weight: 500;
+          font-size: 13.5px;
           color: #f7f5f0;
-          margin: 0;
         }
 
-        .verified-facts-list {
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
+        .exposure-status-pill {
+          font-family: var(--font-mono);
+          font-size: 8px;
+          font-weight: 700;
+          letter-spacing: 0.1em;
+          padding: 3px 8px;
+          border-radius: 4px;
+          text-align: center;
+        }
+        .exposure-status-pill.already-compliant { background: rgba(76, 175, 125, 0.15); color: #4caf7d; }
+        .exposure-status-pill.upgrade-required { background: rgba(232, 174, 60, 0.15); color: var(--accent-bright); }
+        .exposure-status-pill.retrofit-required { background: rgba(232, 200, 74, 0.15); color: #e8c84a; }
+        .exposure-status-pill.prime-beneficiary { background: rgba(76, 175, 125, 0.15); color: #4caf7d; }
+
+        .exposure-detail {
+          font-size: 12px;
+          color: var(--text-secondary);
         }
 
-        .verified-fact-row {
-          display: flex;
-          align-items: flex-start;
-          gap: 8px;
-          font-size: 13px;
-          line-height: 1.5;
-          color: #d6d4cd;
-        }
-
-        /* Chapter 04: Horizontal Timeline */
+        /* Chapter 05: Horizontal Timeline */
         .timeline-horizontal-instrument {
           position: relative;
           background: #141418;
@@ -2364,6 +2602,7 @@ export default function StratosphereWorkbench() {
           border-radius: 10px;
           padding: 24px 18px;
           overflow-x: auto;
+          margin-top: 6px;
         }
 
         .timeline-track-line {
@@ -2377,7 +2616,7 @@ export default function StratosphereWorkbench() {
 
         .timeline-milestones-grid {
           display: grid;
-          grid-template-columns: repeat(5, minmax(180px, 1fr));
+          grid-template-columns: repeat(4, minmax(180px, 1fr));
           gap: 16px;
           position: relative;
           z-index: 2;
@@ -2443,70 +2682,17 @@ export default function StratosphereWorkbench() {
           margin: 0;
         }
 
-        /* Chapter 05: Architectural Proposal */
-        .architectural-specs-deck {
+        /* Chapter 06: Pressures Grid */
+        .pressures-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+          gap: 12px;
+          margin-top: 6px;
+        }
+
+        .pressure-card {
           background: #141418;
           border: 1px solid rgba(255, 255, 255, 0.08);
-          border-radius: 8px;
-          padding: 18px;
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-        }
-
-        .specs-deck-title {
-          font-family: var(--font-display);
-          font-size: 16px;
-          font-weight: 500;
-          color: #f7f5f0;
-          margin: 0;
-        }
-
-        .specs-deck-logic {
-          font-size: 13px;
-          line-height: 1.55;
-          color: var(--text-secondary);
-          margin: 0;
-        }
-
-        .specs-data-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-          gap: 10px;
-        }
-
-        .spec-data-plate {
-          background: #1a1a1f;
-          border: 1px solid rgba(255, 255, 255, 0.06);
-          border-radius: 6px;
-          padding: 10px 12px;
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-        }
-
-        .spec-label {
-          font-family: var(--font-mono);
-          font-size: 8.5px;
-          color: var(--text-muted);
-          letter-spacing: 0.1em;
-          text-transform: uppercase;
-        }
-
-        .spec-val {
-          font-family: var(--font-mono);
-          font-size: 12px;
-          color: var(--accent);
-        }
-
-        /* Chapter 06: Claims vs. Reality */
-        .claims-vs-reality-split {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 16px;
-        }
-
-        .claim-block {
           border-radius: 8px;
           padding: 16px;
           display: flex;
@@ -2514,44 +2700,95 @@ export default function StratosphereWorkbench() {
           gap: 8px;
         }
 
-        .claim-block.is-developer {
-          background: #16161a;
-          border: 1px solid rgba(255, 255, 255, 0.08);
+        .pressure-head {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
         }
 
-        .claim-block.is-scoutit {
-          background: rgba(232, 174, 60, 0.04);
-          border: 1px solid rgba(232, 174, 60, 0.25);
+        .pressure-title {
+          font-family: var(--font-mono);
+          font-size: 9.5px;
+          font-weight: 700;
+          letter-spacing: 0.1em;
+          color: #f7f5f0;
+        }
+
+        .pressure-sev {
+          font-family: var(--font-mono);
+          font-size: 8px;
+          font-weight: 700;
+          padding: 2px 6px;
+          border-radius: 3px;
+        }
+        .pressure-sev.high { background: rgba(232, 100, 74, 0.15); color: #e8644a; }
+        .pressure-sev.critical { background: rgba(232, 100, 74, 0.25); color: #e8644a; }
+        .pressure-sev.positive { background: rgba(76, 175, 125, 0.15); color: #4caf7d; }
+
+        .pressure-text {
+          font-size: 12.5px;
+          line-height: 1.55;
+          color: var(--text-secondary);
+          margin: 0;
+        }
+
+        /* Chapter 07: Winners vs Pressures */
+        .claims-vs-reality-split {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 16px;
+          margin-top: 6px;
+        }
+
+        .claim-block {
+          border-radius: 8px;
+          padding: 18px;
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+
+        .claim-block.is-certified {
+          background: rgba(76, 175, 125, 0.04);
+          border: 1px solid rgba(76, 175, 125, 0.3);
+        }
+
+        .claim-block.is-legacy {
+          background: rgba(232, 200, 74, 0.04);
+          border: 1px solid rgba(232, 200, 74, 0.3);
         }
 
         .claim-header {
           display: flex;
           align-items: center;
-          gap: 6px;
+          gap: 7px;
           font-family: var(--font-mono);
-          font-size: 8.5px;
+          font-size: 9px;
           font-weight: 700;
           letter-spacing: 0.12em;
           text-transform: uppercase;
-          color: var(--text-muted);
         }
-        .claim-block.is-scoutit .claim-header {
-          color: var(--accent);
-        }
+        .claim-block.is-certified .claim-header { color: #4caf7d; }
+        .claim-block.is-legacy .claim-header { color: #e8c84a; }
 
-        .claim-prose {
-          font-size: 13px;
-          line-height: 1.6;
-          color: #d6d4cd;
+        .claim-bullets {
           margin: 0;
+          padding-left: 18px;
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+          font-size: 13px;
+          line-height: 1.55;
+          color: #d6d4cd;
         }
 
-        /* Chapter 07: Impact Matrix */
+        /* Chapter 08: Impact Matrix */
         .impact-matrix-instrument {
           background: #141418;
           border: 1px solid rgba(255, 255, 255, 0.08);
           border-radius: 10px;
           overflow: hidden;
+          margin-top: 6px;
         }
 
         .matrix-table-header {
@@ -2606,7 +2843,7 @@ export default function StratosphereWorkbench() {
           line-height: 1.45;
         }
 
-        /* Chapter 08: Evidence Ledger */
+        /* Source Evidence Drawer */
         .evidence-ledger-instrument {
           background: #141418;
           border: 1px solid rgba(255, 255, 255, 0.08);
@@ -2689,7 +2926,7 @@ export default function StratosphereWorkbench() {
           align-items: center;
           flex-wrap: wrap;
           gap: 16px;
-          margin-top: 12px;
+          margin-top: 8px;
         }
 
         .footer-title {
@@ -2744,20 +2981,20 @@ export default function StratosphereWorkbench() {
 
         /* ── SECONDARY ARCHIVE GATEWAY ── */
         .workbench-archive-gateway {
-          margin-top: 48px;
-          margin-bottom: 24px;
+          margin-top: 36px;
+          margin-bottom: 16px;
         }
 
         .archive-gateway-inner {
           background: #131316;
           border: 1px solid rgba(255, 255, 255, 0.08);
           border-radius: 10px;
-          padding: 24px 28px;
+          padding: 22px 26px;
           display: flex;
           justify-content: space-between;
           align-items: center;
           flex-wrap: wrap;
-          gap: 20px;
+          gap: 18px;
         }
 
         .archive-gateway-tag {
@@ -2770,22 +3007,22 @@ export default function StratosphereWorkbench() {
           letter-spacing: 0.14em;
           text-transform: uppercase;
           color: var(--accent);
-          margin-bottom: 6px;
+          margin-bottom: 4px;
         }
 
         .archive-gateway-title {
           font-family: var(--font-display);
-          font-size: 18px;
+          font-size: 17px;
           font-weight: 500;
           color: #f7f5f0;
-          margin: 0 0 6px;
+          margin: 0 0 4px;
         }
 
         .archive-gateway-desc {
-          font-size: 13px;
+          font-size: 12.5px;
           color: var(--text-secondary);
           margin: 0;
-          max-width: 600px;
+          max-width: 620px;
         }
 
         .archive-gateway-cta {
@@ -2796,11 +3033,11 @@ export default function StratosphereWorkbench() {
           border: 1px solid rgba(232, 174, 60, 0.35);
           color: var(--accent);
           font-family: var(--font-mono);
-          font-size: 10.5px;
+          font-size: 10px;
           font-weight: 700;
           letter-spacing: 0.14em;
           text-transform: uppercase;
-          padding: 12px 20px;
+          padding: 11px 18px;
           border-radius: 6px;
           text-decoration: none;
           transition: all 0.15s ease;
@@ -2808,6 +3045,10 @@ export default function StratosphereWorkbench() {
         .archive-gateway-cta:hover {
           background: var(--accent);
           color: #0d0d0d;
+        }
+
+        .descent-transition-wrap {
+          margin-top: 20px;
         }
 
         /* ── RESPONSIVE ADAPTATIONS ── */
@@ -2843,6 +3084,11 @@ export default function StratosphereWorkbench() {
           .matrix-table-header,
           .matrix-row {
             grid-template-columns: 120px 100px 100px 1fr;
+          }
+
+          .exposure-row {
+            grid-template-columns: 1fr;
+            gap: 6px;
           }
         }
       `}</style>
