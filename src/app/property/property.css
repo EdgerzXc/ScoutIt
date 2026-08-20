@@ -50,6 +50,16 @@
   gap: 40px;
 }
 
+/* A grid item's min-width defaults to `auto`, so its widest unbreakable child
+   sets the whole track and the track then overruns the container. Measured at
+   360px: this container was correctly 336px while the results column inside it
+   was 357px, putting every card 9px past the viewport. Same root cause as the
+   layer 2 and intel-page overflows — the fix is the same, and it belongs on the
+   base rule rather than in a breakpoint, because the trap is not width-specific. */
+.directory-container > * {
+  min-width: 0;
+}
+
 /* Sidebar Filters */
 .filters-sidebar {
   display: flex;
@@ -239,10 +249,23 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 24px;
+  /* Same reason as `.directory-container > *`: this is a flex item of the
+     results section, so it inherits the same auto-min-width floor. */
+  min-width: 0;
   /* Reserve vertical space so the async-loaded cards don't start collapsed and
      then shove the footer down on a throttled connection (the CLS source). */
   min-height: 80vh;
   align-content: start;
+}
+
+/* The card wrappers are grid items too, and fixing only the container and the
+   grid left them at 357px inside a 336px grid — the auto-min-width floor
+   propagates down every level, so every level has to be told. Measured at
+   360px: container and grid correct, 14 elements still 9px over; with this
+   rule, zero. Nothing is clipped by it — no descendant of a card was ever
+   wider than 330px, so the 357px was the floor talking, not real content. */
+.directory-grid > * {
+  min-width: 0;
 }
 
 .property-preview-card {

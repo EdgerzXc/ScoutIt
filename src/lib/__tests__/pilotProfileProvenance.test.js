@@ -46,11 +46,25 @@ describe("controlled-pilot public profile provenance", () => {
     }
   });
 
+  // Re-aimed 2026-08-20, not deleted (Standing Rule 14). The indexability gate
+  // in this layout was rewritten from "spread a noindex object when the caller
+  // is a pilot participant" into an allowlist with a single NOINDEX constant,
+  // which broke the literal string this asserted. The BEHAVIOUR it guards is
+  // unchanged and is now covered directly, by calling generateMetadata, in
+  // src/lib/__tests__/publicProfileIndexability.test.js.
+  //
+  // What stays here is this file's actual job: proving the pilot registry is
+  // still consulted, and consulted the narrow way. The literal-string check was
+  // replaced with the decision it stands for, because a source test that
+  // matches formatting fails on a refactor that changes nothing real.
   it("keeps active pilot profile URLs out of search indexes", () => {
     const layout = read("src/app/profile/[username]/layout.js");
     expect(layout).toContain('.from("public_profiles")');
     expect(layout).toContain('.from("pilot_participants")');
     expect(layout).toContain('.is("offboarded_at", null)');
-    expect(layout).toContain("robots: { index: false, follow: true }");
+
+    // A noindex value exists, and the index decision depends on pilot status.
+    expect(layout).toMatch(/index:\s*false,\s*follow:\s*true/);
+    expect(layout).toMatch(/isIndexable\s*=[^;]*!isPilotParticipant/);
   });
 });

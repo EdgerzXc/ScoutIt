@@ -504,10 +504,16 @@ export default function Header({ ambientContext = null }) {
             letter-spacing: 1.5px;
           }
 
+          /* 44px, not 36px. The reduction was an over-correction made while
+             fighting the header onto one line: measured at 320, 360 and 390 the
+             header is 57px tall either way, the brand does not move, the three
+             child rows stay three, and nothing overflows. The height was being
+             paid for a problem it did not solve, and a 36px control is under the
+             touch floor on every phone in the test matrix. */
           .header-back-btn {
             font-size: 10px;
             padding: 0 8px;
-            min-height: 36px;
+            min-height: 44px;
             white-space: nowrap;
             border-radius: 14px;
           }
@@ -566,7 +572,7 @@ export default function Header({ ambientContext = null }) {
         @media (max-width: 480px) {
           .global-header { padding: 4px 8px; gap: 5px; min-height: 44px; }
           .header-left { gap: 4px; }
-          .header-back-btn { font-size: 10px; padding: 0 6px; min-height: 36px; letter-spacing: 0.06em; border-radius: 14px; }
+          .header-back-btn { font-size: 10px; padding: 0 6px; min-height: 44px; letter-spacing: 0.06em; border-radius: 14px; }
           .header-brand { font-size: 16px; margin: 0; letter-spacing: 1px; }
           .header-menu-btn { width: 36px; height: 36px; }
           .header-menu-btn svg { width: 12px; height: 12px; }
