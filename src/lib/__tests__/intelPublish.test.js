@@ -1,4 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
+import { readFileSync } from "node:fs";
 import { buildIntelFields, pushBriefingToAirtable, publishedMarkers } from "@/lib/intelPublish";
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -149,5 +150,54 @@ describe("publishedMarkers", () => {
     expect(m.airtable_record_id).toBe("recABC123456789");
     expect(m.published_to_airtable).toBe(true);
     expect(typeof m.published_at).toBe("string");
+  });
+});
+
+
+// ─────────────────────────────────────────────────────────────────────────
+// The bridge now HAS a caller: /api/admin/osint `publish_briefing`.
+// Standing Rule 13 — an endpoint with no caller is a plan, not a feature —
+// so the wiring is asserted, not assumed. Source-level, because the route is
+// staff-gated and service-role backed; the behaviour it guards is covered by
+// the unit tests above.
+// ─────────────────────────────────────────────────────────────────────────
+describe("publish_briefing wiring", () => {
+  const route = readFileSync("src/app/api/admin/osint/route.js", "utf8");
+
+  it("calls the bridge from the publish action", () => {
+    expect(route).toContain("pushBriefingToAirtable");
+  });
+
+  it("writes the published markers only after a record id comes back", () => {
+    // publishedMarkers throws without an id, so its presence INSIDE the try
+    // that follows the push is what makes the ordering safe.
+    const idx = route.indexOf("pushBriefingToAirtable");
+    const markersIdx = route.indexOf("publishedMarkers(recordId)");
+    expect(idx).toBeGreaterThan(-1);
+    expect(markersIdx).toBeGreaterThan(idx);
+  });
+
+  it("never re-introduces the hardcoded published_to_airtable: true", () => {
+    // The original defect. If this ever returns, the column lies again.
+    //
+    // Comments are stripped first: the route deliberately QUOTES the old bad
+    // line while explaining why it is gone, and a naive match on the raw file
+    // flags that explanation as the bug. Caught by this test failing on its
+    // own first run — a source-text assertion has to read code, not prose.
+    const code = route
+      .split(String.fromCharCode(10))
+      .filter((line) => !line.trim().startsWith("//") && !line.trim().startsWith("*"))
+      .join(" ");
+    expect(code).not.toMatch(/published_to_airtable:\s*true/);
+    expect(code).toMatch(/published_to_airtable:\s*false/);
+  });
+
+  it("keeps the bridge non-fatal so a sync failure cannot lose the draft", () => {
+    expect(route).toContain('airtableStatus = "failed"');
+    expect(route).toContain("success: true");
+  });
+
+  it("reports the Airtable outcome instead of claiming success blindly", () => {
+    expect(route).toContain("airtable: { status: airtableStatus");
   });
 });
