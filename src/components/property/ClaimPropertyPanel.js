@@ -471,7 +471,7 @@ function ClaimStyles() {
       }
       .cp-error {
         font-family: ${MONO};
-        font-size: 10px;
+        font-size: var(--type-micro);
         color: #e8644a;
         letter-spacing: 0.05em;
         line-height: 1.7;
@@ -493,7 +493,7 @@ function ClaimStyles() {
         padding: 0 18px;
         border-radius: 3px;
         font-family: ${MONO};
-        font-size: 10px;
+        font-size: var(--type-micro);
         letter-spacing: 0.15em;
         text-transform: uppercase;
         text-decoration: none;

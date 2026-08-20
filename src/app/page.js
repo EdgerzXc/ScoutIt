@@ -860,7 +860,7 @@ export default function Home() {
           border: none;
           cursor: pointer;
           font-family: var(--font-mono);
-          font-size: 11px;
+          font-size: var(--type-micro);
           letter-spacing: 0.16em;
           text-transform: uppercase;
           color: var(--accent);
@@ -1310,7 +1310,7 @@ export default function Home() {
         }
         .title-tagline-2 {
           font-family: var(--font-mono), 'Courier New', monospace;
-          font-size: 11px;
+          font-size: var(--type-micro);
           letter-spacing: 4px;
           text-transform: uppercase;
           color: rgba(232, 174, 60, 0.55);
@@ -1575,7 +1575,7 @@ export default function Home() {
 
         .scroll-text {
           font-family: 'Courier New', monospace;
-          font-size: 11px;
+          font-size: var(--type-micro);
           text-transform: uppercase;
           letter-spacing: 4px;
           color: #888888;
@@ -1830,7 +1830,7 @@ export default function Home() {
 
         .vector-label {
           font-family: var(--font-mono);
-          font-size: 11px;
+          font-size: var(--type-micro);
           text-transform: uppercase;
           letter-spacing: 0.3em;
           color: var(--accent);
@@ -1930,7 +1930,7 @@ export default function Home() {
           padding: 12px 16px;
           color: var(--text-primary);
           font-family: var(--font-body);
-          font-size: 11px;
+          font-size: var(--type-micro);
           letter-spacing: 0.05em;
           outline: none;
           transition: border-color 0.3s ease, box-shadow 0.3s ease;
@@ -1962,7 +1962,7 @@ export default function Home() {
           padding: 10px 16px;
           color: var(--text-muted);
           font-family: var(--font-body);
-          font-size: 11px;
+          font-size: var(--type-micro);
           cursor: pointer;
           transition: background 0.2s ease, color 0.2s ease;
         }
@@ -2080,7 +2080,7 @@ export default function Home() {
 
         .mini-tag-label {
           color: var(--accent);
-          font-size: 10px;
+          font-size: var(--type-micro);
           letter-spacing: 0.1em;
           opacity: 0.75;
           margin-bottom: 2px;
@@ -2088,7 +2088,7 @@ export default function Home() {
         }
 
         .mini-tag {
-          font-size: 11px;
+          font-size: var(--type-micro);
           color: var(--text-secondary);
           background: rgba(255, 255, 255, 0.03);
           border: 1px solid rgba(255, 255, 255, 0.05);
@@ -2436,7 +2436,7 @@ export default function Home() {
 
         .service-status-badge {
           font-family: var(--font-mono);
-          font-size: 10px;
+          font-size: var(--type-micro);
           font-weight: 700;
           letter-spacing: 0.1em;
           padding: 4px 8px;
@@ -2476,7 +2476,7 @@ export default function Home() {
 
         .service-cta {
           font-family: var(--font-body);
-          font-size: 11px;
+          font-size: var(--type-micro);
           font-weight: 600;
           text-transform: uppercase;
           letter-spacing: 0.14em;
@@ -2784,7 +2784,7 @@ export default function Home() {
             letter-spacing: 0.12em !important;
           }
           .mini-tag {
-            font-size: 10px !important;
+            font-size: var(--type-micro) !important;
             padding: 2px 6px !important;
           }
 
@@ -2878,7 +2878,7 @@ export default function Home() {
             display: none !important;
           }
           .service-cta {
-            font-size: 10px !important;
+            font-size: var(--type-micro) !important;
           }
 
           /* 4. Layer 04: Horizontally draggable flow cards */
@@ -2905,7 +2905,7 @@ export default function Home() {
             font-size: 12px !important;
           }
           .flow-card p {
-            font-size: 10px !important;
+            font-size: var(--type-micro) !important;
           }
           .flow-card svg {
             width: 32px !important;
@@ -3067,7 +3067,7 @@ export default function Home() {
           }
 
           .pane-header p {
-            font-size: 11px;
+            font-size: var(--type-micro);
           }
 
           .menu-nav {
@@ -3148,13 +3148,13 @@ export default function Home() {
           }
 
           .hook-subtitle {
-            font-size: 11px;
+            font-size: var(--type-micro);
             letter-spacing: 0.15em;
           }
 
           .hero-cta-btn {
             padding: 14px 24px;
-            font-size: 11px;
+            font-size: var(--type-micro);
             min-height: 44px;
             letter-spacing: 0.15em;
           }
@@ -3165,7 +3165,7 @@ export default function Home() {
           }
 
           .scroll-text {
-            font-size: 10px;
+            font-size: var(--type-micro);
           }
 
           .scroll-line {
@@ -3192,7 +3192,7 @@ export default function Home() {
           }
 
           .vector-label {
-            font-size: 10px;
+            font-size: var(--type-micro);
           }
 
           .matrix-preview-pane {
@@ -3209,7 +3209,7 @@ export default function Home() {
           }
 
           .pane-header p {
-            font-size: 10px;
+            font-size: var(--type-micro);
           }
 
           .menu-nav {
@@ -3235,7 +3235,7 @@ export default function Home() {
           }
 
           .prominent-action-link {
-            font-size: 11px;
+            font-size: var(--type-micro);
             padding: 14px 20px;
             min-height: 44px;
             width: 100%;
@@ -3303,13 +3303,13 @@ export default function Home() {
           }
 
           .hook-subtitle {
-            font-size: 10px;
+            font-size: var(--type-micro);
             letter-spacing: 0.1em;
           }
 
           .hero-cta-btn {
             padding: 12px 20px;
-            font-size: 10px;
+            font-size: var(--type-micro);
             min-height: 42px;
             letter-spacing: 0.1em;
           }
@@ -3330,7 +3330,7 @@ export default function Home() {
           }
 
           .menu-header p {
-            font-size: 11px;
+            font-size: var(--type-micro);
           }
 
           .menu-nav {
@@ -3362,11 +3362,11 @@ export default function Home() {
           }
 
           .pane-header p {
-            font-size: 10px;
+            font-size: var(--type-micro);
           }
 
           .vector-label {
-            font-size: 10px;
+            font-size: var(--type-micro);
           }
 
           .search-container {
@@ -3381,7 +3381,7 @@ export default function Home() {
           }
 
           .prominent-action-link {
-            font-size: 10px;
+            font-size: var(--type-micro);
             padding: 12px 16px;
             min-height: 42px;
             width: 100%;
@@ -3417,7 +3417,7 @@ export default function Home() {
           }
 
           .discover-spotlight-card-link p {
-            font-size: 11px !important;
+            font-size: var(--type-micro) !important;
           }
 
           .mini-preview-card {

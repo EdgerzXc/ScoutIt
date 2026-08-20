@@ -595,7 +595,7 @@ export default function ManilaTransitMap({ propertyLat, propertyLng, propertyTit
         }
         .transit-map-panel-title {
           font-family: var(--font-mono);
-          font-size: 10px;
+          font-size: var(--type-micro);
           letter-spacing: 0.1em;
           text-transform: uppercase;
           color: var(--accent, #e8ae3c);
@@ -648,7 +648,7 @@ export default function ManilaTransitMap({ propertyLat, propertyLng, propertyTit
           border-radius: 4px;
           padding: 6px 12px;
           font-family: var(--font-mono);
-          font-size: 10px;
+          font-size: var(--type-micro);
           letter-spacing: 0.08em;
           text-transform: uppercase;
           color: #c8c8c8;
@@ -680,7 +680,7 @@ export default function ManilaTransitMap({ propertyLat, propertyLng, propertyTit
         }
         .transit-map-nearest-sub {
           font-family: var(--font-mono);
-          font-size: 10px;
+          font-size: var(--type-micro);
           letter-spacing: 0.04em;
           color: #c8c8c8;
           margin-top: 4px;
@@ -775,7 +775,7 @@ export default function ManilaTransitMap({ propertyLat, propertyLng, propertyTit
           }
           .transit-map-toggle-label {
             font-family: var(--font-mono);
-            font-size: 10px;
+            font-size: var(--type-micro);
             letter-spacing: 0.06em;
             text-transform: uppercase;
             white-space: nowrap;
@@ -791,7 +791,7 @@ export default function ManilaTransitMap({ propertyLat, propertyLng, propertyTit
           }
           .transit-map-nearest .transit-map-panel-title {
             display: block;
-            font-size: 10px;
+            font-size: var(--type-micro);
             margin-bottom: 4px;
           }
           .transit-map-nearest-name { font-size: 14px; }

@@ -1,3 +1,6 @@
+/* Sizes below the legibility floor were raised to the shared token
+   (globals.css TYPOGRAPHY LEGIBILITY FLOOR). Measured at 8-9.5px,
+   which is under every reference this project follows. */
 /* ─────────────────────────────────────────────────────────────────────────
    LOCATION HUB PAGE — W7
    Written at 390px first, widened at 768 and 1100. Plain CSS in a route-scoped
@@ -19,7 +22,7 @@
 /* ── HERO ──────────────────────────────────────────────────────────── */
 .hub-eyebrow {
   font-family: "Courier New", monospace;
-  font-size: 9px;
+  font-size: var(--type-floor);
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--accent);
@@ -44,7 +47,7 @@
 }
 .hub-meta {
   font-family: "Courier New", monospace;
-  font-size: 9.5px;
+  font-size: var(--type-floor);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--text-secondary);
@@ -82,7 +85,7 @@
 }
 .hub-chip {
   font-family: "Courier New", monospace;
-  font-size: 9.5px;
+  font-size: var(--type-floor);
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--text-secondary);
@@ -125,7 +128,7 @@
 }
 .hub-card__cat {
   font-family: "Courier New", monospace;
-  font-size: 8.5px;
+  font-size: var(--type-floor);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--text-secondary);
@@ -138,7 +141,7 @@
 }
 .hub-card__foot {
   font-family: "Courier New", monospace;
-  font-size: 9px;
+  font-size: var(--type-floor);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--text-muted);
@@ -177,7 +180,7 @@
   background: var(--accent-fill);
   color: var(--on-accent);
   font-family: "Courier New", monospace;
-  font-size: 10px;
+  font-size: var(--type-micro);
   font-weight: bold;
   letter-spacing: 0.15em;
   text-transform: uppercase;

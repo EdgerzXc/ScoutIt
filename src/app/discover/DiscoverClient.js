@@ -310,7 +310,7 @@ export default function DiscoverClient() {
                           style={{
                             display: "inline-block",
                             fontFamily: "var(--font-mono)",
-                            fontSize: "11px",
+                            fontSize: "var(--type-micro)",
                             color: "var(--accent)",
                             textDecoration: "none",
                             border: "1px solid rgba(232, 174, 60, 0.4)",

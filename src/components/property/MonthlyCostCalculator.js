@@ -11,10 +11,10 @@ import { useMemo, useState } from "react";
 
 const peso = (v) => `₱${Math.round(v).toLocaleString("en-PH")}`;
 
-const fieldLabel = { fontFamily: "var(--font-mono)", fontSize: "9px", color: "#c8c8c8", letterSpacing: "0.1em", textTransform: "uppercase" };
+const fieldLabel = { fontFamily: "var(--font-mono)", fontSize: "var(--type-floor)", color: "#c8c8c8", letterSpacing: "0.1em", textTransform: "uppercase" };
 const fieldInput = { background: "#0e0e0e", border: "0.5px solid #262626", borderRadius: "2px", padding: "8px 10px", color: "#f0ede8", fontFamily: "var(--font-display)", fontSize: "14px", width: "100%" };
 const outputRow = { display: "flex", justifyContent: "space-between", alignItems: "baseline", padding: "10px 0", borderBottom: "1px solid #262626", gap: "16px" };
-const outputLabel = { fontFamily: "var(--font-mono)", fontSize: "10px", color: "#c8c8c8", letterSpacing: "0.1em", textTransform: "uppercase" };
+const outputLabel = { fontFamily: "var(--font-mono)", fontSize: "var(--type-micro)", color: "#c8c8c8", letterSpacing: "0.1em", textTransform: "uppercase" };
 
 // First number in a messy price-ish string ("₱1,200 / sqm / mo" → 1200).
 function parseNum(raw) {
@@ -92,11 +92,11 @@ export default function MonthlyCostCalculator({ d }) {
   return (
     <div data-testid="monthly-cost-sandbox" style={{ marginTop: "24px", padding: "22px 24px", background: "#161616", border: "0.5px solid #262626", borderRadius: "4px" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
-        <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#E8AE3C", letterSpacing: "0.18em", textTransform: "uppercase" }}>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--type-micro)", color: "#E8AE3C", letterSpacing: "0.18em", textTransform: "uppercase" }}>
           Monthly Cost Sandbox
         </span>
         {d?.is_sample && (
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: "9px", color: "var(--text-muted)", letterSpacing: "0.12em", textTransform: "uppercase", padding: "2px 6px", borderRadius: "2px", background: "rgba(255,255,255,0.04)", border: "0.5px solid #333" }}>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--type-floor)", color: "var(--text-muted)", letterSpacing: "0.12em", textTransform: "uppercase", padding: "2px 6px", borderRadius: "2px", background: "rgba(255,255,255,0.04)", border: "0.5px solid #333" }}>
             Demo Data
           </span>
         )}
@@ -117,7 +117,7 @@ export default function MonthlyCostCalculator({ d }) {
           ))}
         </div>
       ) : (
-        <p style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#5a5a5a", letterSpacing: "0.08em", textTransform: "uppercase", margin: "0 0 18px" }}>
+        <p style={{ fontFamily: "var(--font-mono)", fontSize: "var(--type-micro)", color: "#5a5a5a", letterSpacing: "0.08em", textTransform: "uppercase", margin: "0 0 18px" }}>
           No recurring charges on record for this listing — ask the representative.
         </p>
       )}
@@ -148,7 +148,7 @@ export default function MonthlyCostCalculator({ d }) {
         </span>
       </div>
 
-      <p style={{ fontFamily: "system-ui,-apple-system,sans-serif", fontSize: "11px", color: "#5a5a5a", lineHeight: 1.6, marginTop: "14px" }}>
+      <p style={{ fontFamily: "system-ui,-apple-system,sans-serif", fontSize: "var(--type-micro)", color: "#5a5a5a", lineHeight: 1.6, marginTop: "14px" }}>
         Listing charges are provided by the owner or property manager and shown as-is. Utility and lifestyle figures are your own inputs — ScoutIt does not estimate, verify, or advise on personal costs.
       </p>
     </div>

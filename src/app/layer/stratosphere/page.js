@@ -2179,7 +2179,7 @@ export default function StratosphereWorkbench() {
           display: flex;
           align-items: flex-start;
           gap: 6px;
-          font-size: 11.5px;
+          font-size: var(--type-micro);
           line-height: 1.45;
           color: var(--text-secondary);
         }
@@ -2228,7 +2228,7 @@ export default function StratosphereWorkbench() {
           background: var(--accent);
           color: #0d0d0d;
           font-family: var(--font-mono);
-          font-size: 11px;
+          font-size: var(--type-micro);
           font-weight: 700;
           letter-spacing: 0.16em;
           text-transform: uppercase;
@@ -2458,7 +2458,7 @@ export default function StratosphereWorkbench() {
 
         .step-title {
           font-family: var(--font-mono);
-          font-size: 11px;
+          font-size: var(--type-micro);
           font-weight: 700;
           letter-spacing: 0.1em;
           color: #f7f5f0;
@@ -2562,7 +2562,7 @@ export default function StratosphereWorkbench() {
 
         .milestone-year {
           font-family: var(--font-mono);
-          font-size: 11px;
+          font-size: var(--type-micro);
           font-weight: 700;
           color: var(--accent);
         }
@@ -2601,7 +2601,7 @@ export default function StratosphereWorkbench() {
         }
 
         .milestone-detail-text {
-          font-size: 11.5px;
+          font-size: var(--type-micro);
           line-height: 1.5;
           color: var(--text-secondary);
           margin: 0;
@@ -2881,7 +2881,7 @@ export default function StratosphereWorkbench() {
           background: var(--accent);
           color: #0d0d0d;
           font-family: var(--font-mono);
-          font-size: 10.5px;
+          font-size: var(--type-micro);
           font-weight: 700;
           letter-spacing: 0.14em;
           text-transform: uppercase;
@@ -2895,7 +2895,7 @@ export default function StratosphereWorkbench() {
           border: 1px solid rgba(255, 255, 255, 0.15);
           color: #f7f5f0;
           font-family: var(--font-mono);
-          font-size: 10px;
+          font-size: var(--type-micro);
           font-weight: 600;
           letter-spacing: 0.1em;
           text-transform: uppercase;
@@ -2958,7 +2958,7 @@ export default function StratosphereWorkbench() {
           border: 1px solid rgba(232, 174, 60, 0.35);
           color: var(--accent);
           font-family: var(--font-mono);
-          font-size: 10px;
+          font-size: var(--type-micro);
           font-weight: 700;
           letter-spacing: 0.14em;
           text-transform: uppercase;

@@ -196,7 +196,7 @@ export default function IntelStudioPanel() {
           background: rgba(232, 174, 60, 0.03);
           color: var(--text-secondary);
           font-family: var(--font-mono), monospace;
-          font-size: 11px;
+          font-size: var(--type-micro);
           letter-spacing: 0.08em;
           text-transform: uppercase;
           cursor: pointer;
@@ -222,7 +222,7 @@ export default function IntelStudioPanel() {
           gap: 12px;
           color: var(--text-muted);
           font-family: var(--font-mono), monospace;
-          font-size: 10px;
+          font-size: var(--type-micro);
           letter-spacing: 0.14em;
           text-transform: uppercase;
         }
@@ -267,7 +267,7 @@ export default function IntelStudioPanel() {
           padding: 12px 22px;
           border-radius: 999px;
           font-family: var(--font-mono), monospace;
-          font-size: 11px;
+          font-size: var(--type-micro);
           letter-spacing: 0.1em;
           text-transform: uppercase;
           cursor: pointer;
@@ -314,7 +314,7 @@ export default function IntelStudioPanel() {
         .preview-head { margin-bottom: 20px; }
         .preview-engine {
           font-family: var(--font-mono), monospace;
-          font-size: 10px;
+          font-size: var(--type-micro);
           letter-spacing: 0.12em;
           text-transform: uppercase;
           color: var(--accent);

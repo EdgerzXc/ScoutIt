@@ -70,7 +70,7 @@ export default function MockupChatbox() {
               background: "rgba(232, 174, 60, 0.1)",
               border: "1px solid rgba(232, 174, 60, 0.3)",
               borderRadius: "20px",
-              fontSize: "11px",
+              fontSize: "var(--type-micro)",
               fontFamily: "var(--font-mono, monospace)",
               letterSpacing: "0.15em",
               color: "#E8AE3C",
@@ -117,7 +117,7 @@ export default function MockupChatbox() {
                   borderRadius: "6px",
                   color: isActive ? "var(--accent-bright)" : "var(--text-secondary)",
                   fontFamily: "var(--font-mono, monospace)",
-                  fontSize: "11px",
+                  fontSize: "var(--type-micro)",
                   fontWeight: 600,
                   letterSpacing: "0.06em",
                   cursor: "pointer",
@@ -125,7 +125,7 @@ export default function MockupChatbox() {
                 }}
               >
                 <div>{tab.label}</div>
-                <div style={{ fontSize: "9px", marginTop: "2px" }}>{tab.badge}</div>
+                <div style={{ fontSize: "var(--type-floor)", marginTop: "2px" }}>{tab.badge}</div>
               </button>
             );
           })}
@@ -141,7 +141,7 @@ export default function MockupChatbox() {
               border: "1px solid #F7C64E",
               color: "#F7C64E",
               borderRadius: "6px",
-              fontSize: "11px",
+              fontSize: "var(--type-micro)",
               fontFamily: "var(--font-mono, monospace)",
               letterSpacing: "0.08em",
               cursor: "pointer",
@@ -180,7 +180,7 @@ export default function MockupChatbox() {
             <div>
               <div
                 style={{
-                  fontSize: "10px",
+                  fontSize: "var(--type-micro)",
                   fontFamily: "var(--font-mono, monospace)",
                   letterSpacing: "0.12em",
                   color: "#E8AE3C",
@@ -202,7 +202,7 @@ export default function MockupChatbox() {
                   display: "inline-block",
                   padding: "4px 8px",
                   borderRadius: "4px",
-                  fontSize: "10px",
+                  fontSize: "var(--type-micro)",
                   fontFamily: "var(--font-mono, monospace)",
                   letterSpacing: "0.08em",
                   background:
@@ -228,7 +228,7 @@ export default function MockupChatbox() {
               >
                 STATUS: {activeTab.toUpperCase()}
               </div>
-              <div style={{ fontSize: "10px", color: "#8a8a8a", marginTop: "4px", fontFamily: "var(--font-mono, monospace)" }}>
+              <div style={{ fontSize: "var(--type-micro)", color: "#8a8a8a", marginTop: "4px", fontFamily: "var(--font-mono, monospace)" }}>
                 3 CONNECTS SPENT
               </div>
             </div>
@@ -266,7 +266,7 @@ export default function MockupChatbox() {
               </div>
               <div>
                 <div style={{ fontWeight: 600, color: "#f0ede8" }}>{mockProperty.lister}</div>
-                <div style={{ fontSize: "10px", color: "#E8AE3C", fontFamily: "var(--font-mono, monospace)" }}>
+                <div style={{ fontSize: "var(--type-micro)", color: "#E8AE3C", fontFamily: "var(--font-mono, monospace)" }}>
                   {mockProperty.listerRole}
                 </div>
               </div>
@@ -281,7 +281,7 @@ export default function MockupChatbox() {
                     background: "rgba(46, 204, 113, 0.1)",
                     border: "1px solid rgba(46, 204, 113, 0.3)",
                     borderRadius: "4px",
-                    fontSize: "11px",
+                    fontSize: "var(--type-micro)",
                     fontFamily: "var(--font-mono, monospace)",
                     color: "#2ecc71",
                   }}
@@ -295,7 +295,7 @@ export default function MockupChatbox() {
                     background: "rgba(255, 255, 255, 0.04)",
                     border: "1px dashed rgba(255, 255, 255, 0.2)",
                     borderRadius: "4px",
-                    fontSize: "10px",
+                    fontSize: "var(--type-micro)",
                     fontFamily: "var(--font-mono, monospace)",
                     color: "#8a8a8a",
                   }}
@@ -322,7 +322,7 @@ export default function MockupChatbox() {
                 >
                   <div
                     style={{
-                      fontSize: "10px",
+                      fontSize: "var(--type-micro)",
                       fontFamily: "var(--font-mono, monospace)",
                       color: "#E8AE3C",
                       marginBottom: "4px",
@@ -336,7 +336,7 @@ export default function MockupChatbox() {
                 <label
                   htmlFor="showcase-intro-message"
                   style={{
-                    fontSize: "11px",
+                    fontSize: "var(--type-micro)",
                     fontFamily: "var(--font-mono, monospace)",
                     color: "#8a8a8a",
                     letterSpacing: "0.06em",
@@ -361,7 +361,7 @@ export default function MockupChatbox() {
                     outline: "none",
                   }}
                 />
-                <div style={{ fontSize: "10px", color: "#8a8a8a", textAlign: "right", fontFamily: "var(--font-mono, monospace)" }}>
+                <div style={{ fontSize: "var(--type-micro)", color: "#8a8a8a", textAlign: "right", fontFamily: "var(--font-mono, monospace)" }}>
                   {introText.length}/300 CHARACTERS
                 </div>
               </div>
@@ -387,7 +387,7 @@ export default function MockupChatbox() {
                     <div>{msg.text}</div>
                     <div
                       style={{
-                        fontSize: "9px",
+                        fontSize: "var(--type-floor)",
                         fontFamily: "var(--font-mono, monospace)",
                         color: "#8a8a8a",
                         marginTop: "6px",
@@ -452,7 +452,7 @@ export default function MockupChatbox() {
             >
               <div
                 style={{
-                  fontSize: "10px",
+                  fontSize: "var(--type-micro)",
                   fontFamily: "var(--font-mono, monospace)",
                   letterSpacing: "0.2em",
                   color: "#F7C64E",
@@ -473,7 +473,7 @@ export default function MockupChatbox() {
                   background: "#0d0d0d",
                   padding: "12px",
                   borderRadius: "6px",
-                  fontSize: "11px",
+                  fontSize: "var(--type-micro)",
                   fontFamily: "var(--font-mono, monospace)",
                   color: "#8a8a8a",
                   textAlign: "left",
@@ -498,7 +498,7 @@ export default function MockupChatbox() {
                   borderRadius: "6px",
                   fontWeight: 700,
                   fontFamily: "var(--font-mono, monospace)",
-                  fontSize: "11px",
+                  fontSize: "var(--type-micro)",
                   letterSpacing: "0.08em",
                   cursor: "pointer",
                   transition: "transform 160ms ease",

@@ -201,7 +201,7 @@ export default function Header({ ambientContext = null }) {
           background: var(--brand-overlay);
           border: 1px solid var(--border-mid);
           color: var(--text-secondary);
-          font-size: 11px;
+          font-size: var(--type-micro);
           font-weight: 600;
           letter-spacing: 0.1em;
           text-transform: uppercase;
@@ -285,7 +285,7 @@ export default function Header({ ambientContext = null }) {
           border: none;
           color: var(--accent);
           font-family: var(--font-mono);
-          font-size: 11px;
+          font-size: var(--type-micro);
           font-weight: 600;
           letter-spacing: 0.08em;
           text-transform: uppercase;
@@ -424,7 +424,7 @@ export default function Header({ ambientContext = null }) {
         }
 
         .header-dropdown .dropdown-brand {
-          font-size: 10px;
+          font-size: var(--type-micro);
           font-weight: 600;
           letter-spacing: 0.15em;
           text-transform: uppercase;
@@ -454,7 +454,7 @@ export default function Header({ ambientContext = null }) {
           }
 
           .header-back-btn {
-            font-size: 10px;
+            font-size: var(--type-micro);
             padding: 0 14px;
             min-height: 44px;
           }
@@ -511,7 +511,7 @@ export default function Header({ ambientContext = null }) {
              paid for a problem it did not solve, and a 36px control is under the
              touch floor on every phone in the test matrix. */
           .header-back-btn {
-            font-size: 10px;
+            font-size: var(--type-micro);
             padding: 0 8px;
             min-height: 44px;
             white-space: nowrap;
@@ -563,7 +563,7 @@ export default function Header({ ambientContext = null }) {
           }
 
           .header-dropdown .dropdown-brand {
-            font-size: 10px;
+            font-size: var(--type-micro);
             padding: 8px 12px 4px;
             margin-bottom: 8px;
           }
@@ -572,7 +572,7 @@ export default function Header({ ambientContext = null }) {
         @media (max-width: 480px) {
           .global-header { padding: 4px 8px; gap: 5px; min-height: 44px; }
           .header-left { gap: 4px; }
-          .header-back-btn { font-size: 10px; padding: 0 6px; min-height: 44px; letter-spacing: 0.06em; border-radius: 14px; }
+          .header-back-btn { font-size: var(--type-micro); padding: 0 6px; min-height: 44px; letter-spacing: 0.06em; border-radius: 14px; }
           .header-brand { font-size: 16px; margin: 0; letter-spacing: 1px; }
           .header-menu-btn { width: 36px; height: 36px; }
           .header-menu-btn svg { width: 12px; height: 12px; }

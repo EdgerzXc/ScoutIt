@@ -169,7 +169,7 @@ export default function InteractiveRadiusMap({ onSearch, onClose, initialLng = 1
           align-items: center;
           padding: 0 16px;
           font-family: var(--font-mono);
-          font-size: 11px;
+          font-size: var(--type-micro);
           color: #E8AE3C;
           border-bottom: 1px solid #262626;
           text-transform: uppercase;
@@ -209,14 +209,14 @@ export default function InteractiveRadiusMap({ onSearch, onClose, initialLng = 1
         }
         .control-label {
           font-family: var(--font-mono);
-          font-size: 10px;
+          font-size: var(--type-micro);
           color: #c8c8c8;
           text-transform: uppercase;
           letter-spacing: 0.05em;
         }
         .control-value {
           font-family: var(--font-mono);
-          font-size: 10px;
+          font-size: var(--type-micro);
           color: #E8AE3C;
           font-weight: bold;
         }
@@ -239,7 +239,7 @@ export default function InteractiveRadiusMap({ onSearch, onClose, initialLng = 1
           border: 2px solid #1a1a1a;
         }
         .control-hint {
-          font-size: 10px;
+          font-size: var(--type-micro);
           color: #6a6a6a;
           line-height: 1.4;
           border-top: 1px dashed #262626;
@@ -284,7 +284,7 @@ export default function InteractiveRadiusMap({ onSearch, onClose, initialLng = 1
           border: none;
           padding: 12px 0;
           font-family: var(--font-mono);
-          font-size: 11px;
+          font-size: var(--type-micro);
           font-weight: bold;
           letter-spacing: 0.05em;
           text-transform: uppercase;
