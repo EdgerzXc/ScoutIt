@@ -12,7 +12,7 @@ export const CHAPTER_IDS = {
   LIFE:        'life',
   WHERETO:     'whereto',
   BUILDPLANS:  'buildplans',
-  FINDEPRINT:  'hiddenintel', // kept same tab ID to avoid CSS changes; label changes
+  MARKET:      'hiddenintel', // tab ID frozen; the label has changed twice
   UNITS:       'units',
   UNIVERSE:    'universe',
   SERVICES:    'services',
@@ -71,10 +71,22 @@ export const BASE_CHAPTERS = [
   },
   {
     id:              'hiddenintel',
-    navLabel:        'The Fine Print',  // renamed from Hidden Intel
+    // Renamed 2026-08-20: Hidden Intel → The Fine Print → The Market.
+    //
+    // "The Fine Print" was a misnomer twice over. It means legal caveats and
+    // terms, and this chapter has never held either — it renders cap rate,
+    // transaction history, appreciation projection, price history, competitive
+    // density and market position. The old subtitle promised something else
+    // again ("Title classification, zoning & risk assessments"), none of which
+    // this chapter has ever rendered. Three names, none of them the content.
+    //
+    // The tab ID stays `hiddenintel` deliberately: it is in every deep link,
+    // in VALID_CHAPTERS on both flows, and in the panel CSS. Renaming the
+    // label is free; renaming the id breaks saved URLs.
+    navLabel:        'The Market',
     chapterNumber:   '06',
-    chapterLabel:    'The Fine Print',
-    subtitle:        'Title classification, zoning & risk assessments',
+    chapterLabel:    'The Market',
+    subtitle:        'What is being written about this space, and the numbers underneath',
     defaultCollapsed: false,
     operatorToggle:  false,
   },
