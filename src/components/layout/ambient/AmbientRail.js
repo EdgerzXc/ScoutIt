@@ -226,6 +226,31 @@ export default function AmbientRail({ user, context = null }) {
         .ambient-token-label { color: var(--text-secondary); font-weight: 600; }
         .ambient-token-detail { color: var(--text-muted); font-weight: 600; }
         .ambient-token-value { color: var(--accent-bright); text-shadow: 0 0 10px rgba(var(--accent-rgb),.24); }
+
+        /* ── Light mode: give the rail a light ground ──────────────────────
+           The rail's default background is rgba(6,6,6,.45) — dark GLASS, not
+           a dark surface. Over a near-black page that reads as intended. Over
+           light mode's near-white page it composites to roughly rgb(137,137,137),
+           a mid grey, and light mode's amber (--accent-bright: #9a6200) is
+           chosen to sit on near-white rather than on grey. Measured at 390px:
+           the clock and temperature read 1.46:1 on EVERY page that renders a
+           header, which is every page.
+
+           A translucent dark layer is the trap: it looks like a dark surface in
+           the file and becomes whatever is behind it. Rather than make this a
+           dark island — the rail is meant to sit *in* the header, not punch a
+           hole through it — the ground is flipped to match the theme, so the
+           existing light tokens land on the surface they were designed for.
+           #9a6200 on this ground measures 4.9:1. */
+        :global(body.light-mode) .ambient-rail {
+          background:
+            linear-gradient(180deg, rgba(0,0,0,.03), transparent 52%),
+            rgba(252, 252, 253, .72);
+          box-shadow:
+            inset 0 1px 0 rgba(255,255,255,.6),
+            inset 0 -1px 0 rgba(var(--accent-rgb), .06),
+            0 6px 22px rgba(0,0,0,.08);
+        }
         .ambient-nav {
           width: 24px;
           height: 24px;
