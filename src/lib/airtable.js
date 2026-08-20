@@ -449,6 +449,13 @@ export async function fetchIntel(apiKey, baseId) {
         // that produces data must have a named consumer, and the direction to
         // look is the one you are NOT looking at.
         relatedPropertyIds: Array.isArray(f.Related_Property) ? f.Related_Property : [],
+        // Interactive experience reference. The experience is CODE, resolved by
+        // the Experience Registry (MASTER ACTION PLAN 4.1 Stage B) — only the
+        // key and a small config travel with the article, which is why adding
+        // articles costs kilobytes rather than bundle weight. Blank is the
+        // normal case and means a plain block article.
+        experienceId:     f.Experience_ID     || "",
+        experienceConfig: f.Experience_Config || "",
         image:        f.Image            || "",
         excerpt:      f.Excerpt          || "",
         lead:         f.Lead             || "",

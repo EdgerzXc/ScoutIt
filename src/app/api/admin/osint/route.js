@@ -152,8 +152,16 @@ export async function POST(req) {
           lng: briefingData.lng || 121.0244,
           source_name: briefingData.sourceName || briefingData.source_name || "OSINT Gazette",
           source_url: briefingData.sourceUrl || briefingData.source_url || "",
-          published_to_airtable: true,
-          published_at: new Date().toISOString(),
+          // ⚠️ NOT `published_to_airtable: true`. This used to be hardcoded
+          // true here, at insert, while nothing in the codebase ever wrote to
+          // Airtable and nothing ever read the column back — a column that
+          // certified something that never happened (Standing Rule 7: a schema
+          // must never manufacture a claim).
+          //
+          // The flag is now set in exactly one place: publishedMarkers() in
+          // lib/intelPublish.js, which refuses to produce it without a real
+          // Airtable record id. A briefing lands here as a DRAFT.
+          published_to_airtable: false,
         })
         .select()
         .single();
