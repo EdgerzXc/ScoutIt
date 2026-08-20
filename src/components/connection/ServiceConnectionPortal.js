@@ -64,7 +64,7 @@ export default function ServiceConnectionPortal({ providerName, serviceType, isM
             border: 1px solid var(--accent);
             color: var(--accent);
             font-family: var(--font-mono);
-            font-size: 11px;
+            font-size: var(--type-micro);
             font-weight: 600;
             padding: 10px 20px;
             border-radius: 4px;

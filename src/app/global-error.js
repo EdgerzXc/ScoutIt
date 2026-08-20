@@ -31,7 +31,7 @@ export default function GlobalError({ error, reset }) {
         >
           <div
             style={{
-              fontSize: "11px",
+              fontSize: "var(--type-micro)",
               fontFamily: "var(--font-mono, monospace)",
               letterSpacing: "0.15em",
               textTransform: "uppercase",

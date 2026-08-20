@@ -165,7 +165,7 @@ export default function ConnectionPortal({ brokerName, brokerId, isModal = false
             border: 1px solid var(--accent-muted);
             color: var(--accent);
             font-family: var(--font-mono);
-            font-size: 11px;
+            font-size: var(--type-micro);
             font-weight: 600;
             padding: 12px 20px;
             border-radius: 4px;
@@ -306,7 +306,7 @@ export default function ConnectionPortal({ brokerName, brokerId, isModal = false
           border: 1px solid var(--accent-muted, #6E531A);
           color: var(--accent-bright, #F7C64E);
           font-family: var(--font-mono);
-          font-size: 11px;
+          font-size: var(--type-micro);
           font-weight: 700;
           padding: 6px 14px;
           border-radius: 20px;
@@ -484,7 +484,7 @@ export default function ConnectionPortal({ brokerName, brokerId, isModal = false
 
         .disclaimer-header h2 {
           font-family: var(--font-mono);
-          font-size: 11px;
+          font-size: var(--type-micro);
           color: var(--accent);
           margin: 0;
           letter-spacing: 0.08em;
@@ -503,7 +503,7 @@ export default function ConnectionPortal({ brokerName, brokerId, isModal = false
 
         .disclaimer-footer-compliance {
           font-family: var(--font-mono);
-          font-size: 10px;
+          font-size: var(--type-micro);
           color: var(--text-secondary);
           margin-top: 12px;
           border-top: 1px solid rgba(255, 255, 255, 0.05);

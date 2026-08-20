@@ -383,7 +383,7 @@ export default function IntelPage() {
                       if (!linkedProp) return null;
                       return (
                         <div style={{ marginTop: "12px", borderTop: "1px dashed var(--border)", paddingTop: "12px" }}>
-                          <span style={{ fontSize: "10px", fontFamily: "var(--font-mono)", color: "var(--accent)" }}>
+                          <span style={{ fontSize: "var(--type-micro)", fontFamily: "var(--font-mono)", color: "var(--accent)" }}>
                             FEATURED SPACE:{" "}
                             <span
                               onClick={(e) => {
@@ -476,7 +476,7 @@ export default function IntelPage() {
 
         .vector-label {
           font-family: var(--font-mono);
-          font-size: 11px;
+          font-size: var(--type-micro);
           color: var(--accent);
           letter-spacing: 0.15em;
           text-transform: uppercase;
@@ -513,7 +513,7 @@ export default function IntelPage() {
         }
         .mode-jump-box .jump-here {
           font-family: var(--font-mono);
-          font-size: 11px;
+          font-size: var(--type-micro);
           letter-spacing: 0.12em;
           text-transform: uppercase;
           color: var(--accent);
@@ -526,7 +526,7 @@ export default function IntelPage() {
         .mode-jump-box:hover .jump-arrow { transform: translateX(3px); }
         .mode-jump-box .jump-there {
           font-family: var(--font-mono);
-          font-size: 11px;
+          font-size: var(--type-micro);
           letter-spacing: 0.12em;
           text-transform: uppercase;
           color: var(--text-secondary);
@@ -678,7 +678,7 @@ export default function IntelPage() {
 
         .featured-tag-new {
           font-family: var(--font-mono);
-          font-size: 10px;
+          font-size: var(--type-micro);
           color: var(--accent);
           text-transform: uppercase;
           letter-spacing: 0.1em;
@@ -755,7 +755,7 @@ export default function IntelPage() {
 
         .trending-meta {
           font-family: var(--font-mono);
-          font-size: 10px;
+          font-size: var(--type-micro);
           color: var(--accent);
           text-transform: uppercase;
           letter-spacing: 0.05em;
@@ -772,7 +772,7 @@ export default function IntelPage() {
         }
 
         .trending-excerpt {
-          font-size: 11px;
+          font-size: var(--type-micro);
           color: var(--text-secondary);
           line-height: 1.45;
           display: -webkit-box;
@@ -1058,14 +1058,14 @@ export default function IntelPage() {
 
         .article-category {
           font-family: var(--font-mono);
-          font-size: 10px;
+          font-size: var(--type-micro);
           color: var(--accent);
           text-transform: uppercase;
           letter-spacing: 0.05em;
         }
 
         .article-date {
-          font-size: 11px;
+          font-size: var(--type-micro);
           color: var(--text-muted);
         }
 
@@ -1088,7 +1088,7 @@ export default function IntelPage() {
         }
 
         .read-more-btn {
-          font-size: 11px;
+          font-size: var(--type-micro);
           font-weight: 600;
           color: var(--accent);
           text-transform: uppercase;
@@ -1173,7 +1173,7 @@ export default function IntelPage() {
 
         .side-panel-cat {
           font-family: var(--font-mono);
-          font-size: 10px;
+          font-size: var(--type-micro);
           color: var(--accent);
           text-transform: uppercase;
           letter-spacing: 0.12em;
@@ -1189,7 +1189,7 @@ export default function IntelPage() {
 
         .side-panel-insight-note span {
           font-family: var(--font-mono);
-          font-size: 10px;
+          font-size: var(--type-micro);
           color: var(--accent);
           text-transform: uppercase;
           letter-spacing: 0.1em;
@@ -1228,7 +1228,7 @@ export default function IntelPage() {
           border: 1px solid var(--accent);
           color: var(--accent);
           font-family: var(--font-mono);
-          font-size: 11px;
+          font-size: var(--type-micro);
           font-weight: 600;
           text-transform: uppercase;
           letter-spacing: 0.08em;

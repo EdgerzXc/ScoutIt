@@ -22,7 +22,7 @@ const InteractiveMap = dynamic(() => import("@/components/property/InteractiveMa
   ssr: false,
   loading: () => (
     <div style={{ height: "100%", width: "100%", background: "#0d0d0d", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" }}>Loading tactical map…</span>
+      <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--type-micro)", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" }}>Loading tactical map…</span>
     </div>
   ),
 });
@@ -61,7 +61,7 @@ const FloodHeatmapMap = dynamic(() => import("@/components/property/FloodHeatmap
   ssr: false,
   loading: () => (
     <div style={{ height: "clamp(360px, 48vh, 440px)", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "4px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-secondary)" }}>Loading flood hazard data…</span>
+      <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--type-micro)", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-secondary)" }}>Loading flood hazard data…</span>
     </div>
   ),
 });
@@ -71,7 +71,7 @@ const ManilaTransitMap = dynamic(() => import("@/components/transit/ManilaTransi
   ssr: false,
   loading: () => (
     <div style={{ height: "clamp(420px, 52vh, 480px)", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "4px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-secondary)" }}>Loading rail network…</span>
+      <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--type-micro)", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-secondary)" }}>Loading rail network…</span>
     </div>
   ),
 });
@@ -79,7 +79,7 @@ const SpatialCommandMap = dynamic(() => import("@/components/property/SpatialCom
   ssr: false,
   loading: () => (
     <div style={{ height: "420px", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "4px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-secondary)" }}>Loading spatial command HUD…</span>
+      <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--type-micro)", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-secondary)" }}>Loading spatial command HUD…</span>
     </div>
   ),
 });
@@ -87,7 +87,7 @@ const SpatialCanvas = dynamic(() => import("@/components/maps/SpatialCanvas"), {
   ssr: false,
   loading: () => (
     <div style={{ height: "420px", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "4px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-secondary)" }}>Loading spatial canvas…</span>
+      <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--type-micro)", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-secondary)" }}>Loading spatial canvas…</span>
     </div>
   ),
 });
@@ -99,7 +99,7 @@ import { DEEP_INTEL_SCHEMA } from "@/lib/deepIntelSchema";
 function mapPlaceholder(height, label) {
   return (
     <div style={{ height, background: "#0d0d0d", border: "0.5px solid #262626", borderRadius: "4px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" }}>{label}</span>
+      <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--type-micro)", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" }}>{label}</span>
     </div>
   );
 }
@@ -1321,7 +1321,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['space']?.chapterNumber || '01'} — {ch['space']?.chapterLabel || 'The Space'}</div>
+                <div style={{fontFamily:"var(--font-mono)", fontSize:"var(--type-micro)", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['space']?.chapterNumber || '01'} — {ch['space']?.chapterLabel || 'The Space'}</div>
                 {ch['space']?.subtitle && (
                   <div style={{fontFamily:"var(--font-body)", fontSize:"13px", color:"var(--text-secondary)", marginBottom:"10px", letterSpacing:"0.01em"}}>{ch['space'].subtitle}</div>
                 )}
@@ -1349,7 +1349,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                       <span style={{fontSize:"24px", lineHeight:1, flexShrink:0}}>{stat.icon}</span>
                       <span style={{fontFamily:"var(--font-body)", fontSize:"clamp(20px,2.5vw,26px)", fontWeight:500, color:"var(--text-primary)", lineHeight:1.2}}>{stat.val}</span>
                     </div>
-                    <div style={{fontFamily:"var(--font-body)", fontSize:"11px", fontWeight:600, color:"var(--text-muted)", letterSpacing:"0.08em", textTransform:"uppercase", marginTop:"6px"}}>{stat.label}</div>
+                    <div style={{fontFamily:"var(--font-body)", fontSize:"var(--type-micro)", fontWeight:600, color:"var(--text-muted)", letterSpacing:"0.08em", textTransform:"uppercase", marginTop:"6px"}}>{stat.label}</div>
                   </div>
                 ))}
               </div>
@@ -1359,43 +1359,43 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
               <div style={{display:"flex", flexDirection:"column"}}>
                 {d.ceiling_height_text && (
                   <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid var(--border)"}}>
-                    <span style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase"}}>Ceiling Height</span>
+                    <span style={{fontFamily:"var(--font-mono)", fontSize:"var(--type-micro)", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase"}}>Ceiling Height</span>
                     <span style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"var(--text-primary)"}}>{d.ceiling_height_text}</span>
                   </div>
                 )}
                 {d.furnishing && (
                   <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid var(--border)"}}>
-                    <span style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase"}}>Furnishing</span>
+                    <span style={{fontFamily:"var(--font-mono)", fontSize:"var(--type-micro)", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase"}}>Furnishing</span>
                     <span style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"var(--text-primary)"}}>{d.furnishing}</span>
                   </div>
                 )}
                 {d.view && (
                   <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid var(--border)"}}>
-                    <span style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase"}}>View</span>
+                    <span style={{fontFamily:"var(--font-mono)", fontSize:"var(--type-micro)", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase"}}>View</span>
                     <span style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"var(--text-primary)"}}>{d.view}</span>
                   </div>
                 )}
                 {d.turnoverDate && (
                   <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid var(--border)"}}>
-                    <span style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase"}}>Turnover Date</span>
+                    <span style={{fontFamily:"var(--font-mono)", fontSize:"var(--type-micro)", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase"}}>Turnover Date</span>
                     <span style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"var(--text-primary)"}}>{d.turnoverDate}</span>
                   </div>
                 )}
                 {d.petPolicy && (
                   <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid var(--border)"}}>
-                    <span style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase"}}>Pet Policy</span>
+                    <span style={{fontFamily:"var(--font-mono)", fontSize:"var(--type-micro)", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase"}}>Pet Policy</span>
                     <span style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"var(--text-primary)"}}>{d.petPolicy}</span>
                   </div>
                 )}
                 {d.assocDues && (
                   <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid var(--border)"}}>
-                    <span style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase"}}>Assoc Dues</span>
-                    <span style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"#E8AE3C"}}>₱{Number(d.assocDues).toLocaleString()} / mo <span style={{fontSize:"11px", color:"#6E531A"}}>(Verified)</span></span>
+                    <span style={{fontFamily:"var(--font-mono)", fontSize:"var(--type-micro)", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase"}}>Assoc Dues</span>
+                    <span style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"#E8AE3C"}}>₱{Number(d.assocDues).toLocaleString()} / mo <span style={{fontSize:"var(--type-micro)", color:"#6E531A"}}>(Verified)</span></span>
                   </div>
                 )}
                 {d.outdoor_description && d.outdoor_description !== "None" && (
                   <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid var(--border)"}}>
-                    <span style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase"}}>Outdoor Space</span>
+                    <span style={{fontFamily:"var(--font-mono)", fontSize:"var(--type-micro)", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase"}}>Outdoor Space</span>
                     <span style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"var(--text-primary)", textAlign:"right", maxWidth:"55%"}}>{d.outdoor_description}</span>
                   </div>
                 )}
@@ -1434,7 +1434,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
           <div className={`chapter-panel ${activeTab === "vault" ? "active" : ""}`} id="panel-vault">
             <div className="panel-content" style={{ maxWidth: "100%" }} tabIndex={0} aria-label="Scrollable Spatial Vault content">
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"#E8AE3C", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"6px"}}>THE VAULT</div>
+                <div style={{fontFamily:"var(--font-mono)", fontSize:"var(--type-micro)", color:"#E8AE3C", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"6px"}}>THE VAULT</div>
                 <div style={{fontFamily:"var(--font-body)", fontSize:"13px", color:"var(--text-secondary)", marginBottom:"10px", letterSpacing:"0.01em"}}>Floor plans, scans & spatial records</div>
                 <div style={{height:"1px", background:"#E8AE3C"}}/>
               </div>
@@ -1470,7 +1470,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
             <div className="panel-content chapter-frame--map">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono, monospace)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['location']?.chapterNumber || '02'} — {ch['location']?.chapterLabel || 'Location'}</div>
+                <div style={{fontFamily:"var(--font-mono, monospace)", fontSize:"var(--type-micro)", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['location']?.chapterNumber || '02'} — {ch['location']?.chapterLabel || 'Location'}</div>
                 {ch['location']?.subtitle && (
                   <div style={{fontFamily:"var(--font-body)", fontSize:"13px", color:"var(--text-secondary)", marginBottom:"10px", letterSpacing:"0.01em"}}>{ch['location'].subtitle}</div>
                 )}
@@ -1493,13 +1493,13 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                 <div style={{display:"flex", flexWrap:"wrap", gap:"18px", alignItems:"baseline", marginBottom:"0", paddingBottom:"10px", borderBottom:"1px solid var(--border)"}}>
                   {publicTransitObj && (
                     <div>
-                      <div style={{fontFamily:"var(--font-mono, monospace)", fontSize:"10px", color:"var(--text-muted)", letterSpacing:"0.18em", textTransform:"uppercase"}}>Nearest transit</div>
+                      <div style={{fontFamily:"var(--font-mono, monospace)", fontSize:"var(--type-micro)", color:"var(--text-muted)", letterSpacing:"0.18em", textTransform:"uppercase"}}>Nearest transit</div>
                       <div style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"var(--text-primary)"}}>{publicTransitObj.name} · {publicTransitObj.distance}</div>
                     </div>
                   )}
                   {d.street_type && (
                     <div>
-                      <div style={{fontFamily:"var(--font-mono, monospace)", fontSize:"10px", color:"var(--text-muted)", letterSpacing:"0.18em", textTransform:"uppercase"}}>Street type</div>
+                      <div style={{fontFamily:"var(--font-mono, monospace)", fontSize:"var(--type-micro)", color:"var(--text-muted)", letterSpacing:"0.18em", textTransform:"uppercase"}}>Street type</div>
                       <div style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"var(--text-primary)"}}>{d.street_type}</div>
                     </div>
                   )}
@@ -1557,7 +1557,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
 
               {locTab === "map" && !hasCoords && (
                 <div className="map-frame" style={{display:"flex", flexDirection:"column", justifyContent:"center", alignItems:"center", gap:"10px", textAlign:"center", padding:"28px", borderRadius:"4px", border:"0.5px dashed var(--border-mid, #333)", background:"var(--surface, #161616)", marginBottom:"20px"}}>
-                  <div style={{fontFamily:"var(--font-mono, monospace)", fontSize:"11px", letterSpacing:"0.2em", textTransform:"uppercase", color:"var(--accent, #E8AE3C)"}}>Position not verified</div>
+                  <div style={{fontFamily:"var(--font-mono, monospace)", fontSize:"var(--type-micro)", letterSpacing:"0.2em", textTransform:"uppercase", color:"var(--accent, #E8AE3C)"}}>Position not verified</div>
                   <div style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"var(--text-secondary, #c8c8c8)", maxWidth:"46ch", lineHeight:1.6}}>
                     This listing has no confirmed coordinates yet, so there is no map to show. The written detail below is unaffected.
                   </div>
@@ -1571,10 +1571,10 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                         <div style={{width:"5px", height:"5px", borderRadius:"50%", background:"#E8AE3C", flexShrink:0}}/>
                         <div>
                           <div style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"var(--text-primary)"}}>{item.name}</div>
-                          {item.category && <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.1em", textTransform:"uppercase", marginTop:"2px"}}>{item.category}</div>}
+                          {item.category && <div style={{fontFamily:"var(--font-mono)", fontSize:"var(--type-micro)", color:"var(--text-muted)", letterSpacing:"0.1em", textTransform:"uppercase", marginTop:"2px"}}>{item.category}</div>}
                         </div>
                       </div>
-                      <span style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.1em", flexShrink:0}}>{item.distance}</span>
+                      <span style={{fontFamily:"var(--font-mono)", fontSize:"var(--type-micro)", color:"var(--text-muted)", letterSpacing:"0.1em", flexShrink:0}}>{item.distance}</span>
                     </div>
                   ))}
                 </div>
@@ -1585,16 +1585,16 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
               <div style={{display:"flex", flexDirection:"column", marginBottom:"24px"}}>
                 {(d.flood_zone_status || d.zoning_classification) && (
                   <>
-                    <span style={{fontFamily:"var(--font-mono, monospace)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.18em", textTransform:"uppercase", marginBottom:"2px"}}>Risk &amp; Zoning</span>
+                    <span style={{fontFamily:"var(--font-mono, monospace)", fontSize:"var(--type-micro)", color:"var(--text-muted)", letterSpacing:"0.18em", textTransform:"uppercase", marginBottom:"2px"}}>Risk &amp; Zoning</span>
                     {d.flood_zone_status && (
                       <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid var(--border)", gap:"20px"}}>
-                        <span style={{fontFamily:"var(--font-mono, monospace)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Flood Zone</span>
+                        <span style={{fontFamily:"var(--font-mono, monospace)", fontSize:"var(--type-micro)", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Flood Zone</span>
                         <span style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"var(--text-primary)", textAlign:"right"}}>{d.flood_zone_status}</span>
                       </div>
                     )}
                     {d.zoning_classification && (
                       <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid var(--border)", gap:"20px"}}>
-                        <span style={{fontFamily:"var(--font-mono, monospace)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Zoning</span>
+                        <span style={{fontFamily:"var(--font-mono, monospace)", fontSize:"var(--type-micro)", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Zoning</span>
                         <span style={{fontFamily:"var(--font-mono, monospace)", fontSize:"12px", color:"var(--text-primary)", textAlign:"right", letterSpacing:"0.04em"}}>{d.zoning_classification}</span>
                       </div>
                     )}
@@ -1602,22 +1602,22 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                 )}
                 {(publicTransitObj || d.nearest_highway || d.street_type) && (
                   <>
-                    <span style={{fontFamily:"var(--font-mono, monospace)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.18em", textTransform:"uppercase", marginTop:"16px", marginBottom:"2px"}}>Access</span>
+                    <span style={{fontFamily:"var(--font-mono, monospace)", fontSize:"var(--type-micro)", color:"var(--text-muted)", letterSpacing:"0.18em", textTransform:"uppercase", marginTop:"16px", marginBottom:"2px"}}>Access</span>
                     {publicTransitObj && (
                       <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid var(--border)", gap:"20px"}}>
-                        <span style={{fontFamily:"var(--font-mono, monospace)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Nearest Transit</span>
+                        <span style={{fontFamily:"var(--font-mono, monospace)", fontSize:"var(--type-micro)", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Nearest Transit</span>
                         <span style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"var(--text-primary)", textAlign:"right"}}>{publicTransitObj.name} · {publicTransitObj.distance}</span>
                       </div>
                     )}
                     {d.nearest_highway && (
                       <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid var(--border)", gap:"20px"}}>
-                        <span style={{fontFamily:"var(--font-mono, monospace)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Major Road</span>
+                        <span style={{fontFamily:"var(--font-mono, monospace)", fontSize:"var(--type-micro)", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Major Road</span>
                         <span style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"var(--text-primary)", textAlign:"right"}}>{d.nearest_highway}</span>
                       </div>
                     )}
                     {d.street_type && (
                       <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid var(--border)", gap:"20px"}}>
-                        <span style={{fontFamily:"var(--font-mono, monospace)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Street Type</span>
+                        <span style={{fontFamily:"var(--font-mono, monospace)", fontSize:"var(--type-micro)", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Street Type</span>
                         <span style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"var(--text-primary)", textAlign:"right"}}>{d.street_type}</span>
                       </div>
                     )}
@@ -1628,11 +1628,11 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
               {/* Commute context cards */}
               {commuteCards.length > 0 && (
                 <>
-                  <div style={{fontFamily:"var(--font-mono, monospace)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.2em", textTransform:"uppercase", marginBottom:"12px"}}>Commute Context</div>
+                  <div style={{fontFamily:"var(--font-mono, monospace)", fontSize:"var(--type-micro)", color:"var(--text-muted)", letterSpacing:"0.2em", textTransform:"uppercase", marginBottom:"12px"}}>Commute Context</div>
                   <div style={{display:"flex", flexWrap:"wrap", gap:"10px", marginBottom:"28px"}}>
                     {commuteCards.map(c => (
                       <div key={c.label} style={{flex:"1 1 120px", background:"var(--surface)", border:"0.5px solid var(--border)", borderRadius:"4px", padding:"14px 16px"}}>
-                        <div style={{fontFamily:"var(--font-mono, monospace)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.16em", textTransform:"uppercase", marginBottom:"8px"}}>To {c.label}</div>
+                        <div style={{fontFamily:"var(--font-mono, monospace)", fontSize:"var(--type-micro)", color:"var(--text-muted)", letterSpacing:"0.16em", textTransform:"uppercase", marginBottom:"8px"}}>To {c.label}</div>
                         <div style={{fontFamily:"var(--font-body)", fontSize:"18px", color:"var(--text-primary)"}}>{c.value}</div>
                       </div>
                     ))}
@@ -1665,7 +1665,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['life']?.chapterNumber || '03'} — {ch['life']?.chapterLabel || 'Life Here'}</div>
+                <div style={{fontFamily:"var(--font-mono)", fontSize:"var(--type-micro)", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['life']?.chapterNumber || '03'} — {ch['life']?.chapterLabel || 'Life Here'}</div>
                 {ch['life']?.subtitle && (
                   <div style={{fontFamily:"var(--font-body)", fontSize:"13px", color:"var(--text-secondary)", marginBottom:"10px", letterSpacing:"0.01em"}}>{ch['life'].subtitle}</div>
                 )}
@@ -1680,7 +1680,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                 if (tags.length === 0) return null;
                 return (
                   <div style={{marginBottom:"28px"}}>
-                    <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.2em", textTransform:"uppercase", marginBottom:"14px"}}>Best Suited For</div>
+                    <div style={{fontFamily:"var(--font-mono)", fontSize:"var(--type-micro)", color:"var(--text-muted)", letterSpacing:"0.2em", textTransform:"uppercase", marginBottom:"14px"}}>Best Suited For</div>
                     <div style={{display:"flex", flexWrap:"wrap", gap:"10px"}}>
                       {tags.map((t, i) => (
                         <span key={i} style={{fontFamily:"var(--font-body)", fontSize:"15px", color:"#E8AE3C", border:"0.5px solid rgba(232, 174, 60,0.4)", padding:"7px 18px", borderRadius:"4px", letterSpacing:"0.02em"}}>{t}</span>
@@ -1704,7 +1704,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
 
               {d.safety_perception && (
                 <>
-                  <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.2em", textTransform:"uppercase", margin:"4px 0 12px"}}>Safety Perception</div>
+                  <div style={{fontFamily:"var(--font-mono)", fontSize:"var(--type-micro)", color:"var(--text-muted)", letterSpacing:"0.2em", textTransform:"uppercase", margin:"4px 0 12px"}}>Safety Perception</div>
                   <p style={{fontFamily:"var(--font-body)", fontSize:"16px", color:"var(--text-primary)", lineHeight:1.9, margin:"0", maxWidth:"580px"}}>
                     {d.safety_perception}
                   </p>
@@ -1732,7 +1732,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['whereto']?.chapterNumber || '04'} — {ch['whereto']?.chapterLabel || 'Where To?'}</div>
+                <div style={{fontFamily:"var(--font-mono)", fontSize:"var(--type-micro)", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['whereto']?.chapterNumber || '04'} — {ch['whereto']?.chapterLabel || 'Where To?'}</div>
                 {ch['whereto']?.subtitle && (
                   <div style={{fontFamily:"var(--font-body)", fontSize:"13px", color:"var(--text-secondary)", marginBottom:"10px", letterSpacing:"0.01em"}}>{ch['whereto'].subtitle}</div>
                 )}
@@ -1790,17 +1790,17 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                         <div style={{width:"5px", height:"5px", borderRadius:"50%", background:"#E8AE3C", flexShrink:0}}/>
                         <div>
                           <div style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"var(--text-primary)"}}>{item.name}</div>
-                          {item.category && <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.1em", textTransform:"uppercase", marginTop:"2px"}}>{item.category}</div>}
+                          {item.category && <div style={{fontFamily:"var(--font-mono)", fontSize:"var(--type-micro)", color:"var(--text-muted)", letterSpacing:"0.1em", textTransform:"uppercase", marginTop:"2px"}}>{item.category}</div>}
                         </div>
                       </div>
-                      <span style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.1em", flexShrink:0}}>{item.distance}</span>
+                      <span style={{fontFamily:"var(--font-mono)", fontSize:"var(--type-micro)", color:"var(--text-muted)", letterSpacing:"0.1em", flexShrink:0}}>{item.distance}</span>
                     </div>
                   ))}
                 </div>
               )}
 
               {whereToTab === "list" && (!d.whereTo || d.whereTo.length === 0) && (
-                <div style={{padding:"32px", background:"var(--surface)", border:"0.5px dashed #262626", borderRadius:"2px", textAlign:"center", fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.12em", marginBottom:"24px"}}>
+                <div style={{padding:"32px", background:"var(--surface)", border:"0.5px dashed #262626", borderRadius:"2px", textAlign:"center", fontFamily:"var(--font-mono)", fontSize:"var(--type-micro)", color:"var(--text-muted)", letterSpacing:"0.12em", marginBottom:"24px"}}>
                   [ LOCATION DETAILS N/A — NO DATA IN CMS ]
                 </div>
               )}
@@ -1851,7 +1851,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['buildplans']?.chapterNumber || '05'} — {ch['buildplans']?.chapterLabel || 'Build Plans'}</div>
+                <div style={{fontFamily:"var(--font-mono)", fontSize:"var(--type-micro)", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['buildplans']?.chapterNumber || '05'} — {ch['buildplans']?.chapterLabel || 'Build Plans'}</div>
                 {ch['buildplans']?.subtitle && (
                   <div style={{fontFamily:"var(--font-body)", fontSize:"13px", color:"var(--text-secondary)", marginBottom:"10px", letterSpacing:"0.01em"}}>{ch['buildplans'].subtitle}</div>
                 )}
@@ -1868,7 +1868,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                   {/* STR Legality Status — the most critical field */}
                   {d.short_let_legal && (
                     <div style={{marginBottom:"24px"}}>
-                      <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.2em", textTransform:"uppercase", marginBottom:"12px"}}>Short-Let Legal Status</div>
+                      <div style={{fontFamily:"var(--font-mono)", fontSize:"var(--type-micro)", color:"var(--text-muted)", letterSpacing:"0.2em", textTransform:"uppercase", marginBottom:"12px"}}>Short-Let Legal Status</div>
                       <div style={{
                         display:"inline-flex", alignItems:"center", gap:"10px",
                         padding:"12px 18px", borderRadius:"2px",
@@ -1889,7 +1889,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                         <span style={{fontFamily:"var(--font-body)", fontSize:"17px", color:"var(--text-primary)"}}>{d.short_let_legal}</span>
                       </div>
                       {d.short_let_verified_date && (
-                        <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.12em", marginTop:"10px"}}>
+                        <div style={{fontFamily:"var(--font-mono)", fontSize:"var(--type-micro)", color:"var(--text-muted)", letterSpacing:"0.12em", marginTop:"10px"}}>
                           Verified as of {d.short_let_verified_date} · Researcher-verified
                         </div>
                       )}
@@ -1899,25 +1899,25 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                   <div style={{display:"flex", flexDirection:"column", marginBottom:"28px"}}>
                     {d.expansion_potential && (
                       <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid var(--border)", gap:"20px"}}>
-                        <span style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>HOA / Building Rules</span>
+                        <span style={{fontFamily:"var(--font-mono)", fontSize:"var(--type-micro)", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>HOA / Building Rules</span>
                         <span style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"var(--text-primary)", textAlign:"right"}}>{d.expansion_potential}</span>
                       </div>
                     )}
                     {d.zoning_type && (
                       <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid var(--border)", gap:"20px"}}>
-                        <span style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Zoning</span>
+                        <span style={{fontFamily:"var(--font-mono)", fontSize:"var(--type-micro)", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Zoning</span>
                         <span style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-primary)", textAlign:"right", letterSpacing:"0.04em"}}>{d.zoning_type}</span>
                       </div>
                     )}
                     {d.structural_notes && (
                       <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid var(--border)", gap:"20px"}}>
-                        <span style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Permit Notes</span>
+                        <span style={{fontFamily:"var(--font-mono)", fontSize:"var(--type-micro)", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", flexShrink:0}}>Permit Notes</span>
                         <span style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"var(--text-primary)", textAlign:"right", maxWidth:"55%"}}>{d.structural_notes}</span>
                       </div>
                     )}
                   </div>
 
-                  <p style={{fontFamily:"system-ui,-apple-system,sans-serif", fontSize:"11.5px", color:"var(--text-muted)", lineHeight:1.7, maxWidth:"560px"}}>
+                  <p style={{fontFamily:"system-ui,-apple-system,sans-serif", fontSize:"var(--type-micro)", color:"var(--text-muted)", lineHeight:1.7, maxWidth:"560px"}}>
                     Legality status is researcher-verified and reviewed quarterly. Short-let compliance changes frequently — confirm current rules with building management and the local government unit before listing.
                   </p>
                 </>
@@ -1926,7 +1926,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                 <>
                   {d.expansion_potential && (
                     <>
-                      <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.2em", textTransform:"uppercase", marginBottom:"12px"}}>Expansion Potential</div>
+                      <div style={{fontFamily:"var(--font-mono)", fontSize:"var(--type-micro)", color:"var(--text-muted)", letterSpacing:"0.2em", textTransform:"uppercase", marginBottom:"12px"}}>Expansion Potential</div>
                       <p style={{fontFamily:"var(--font-body)", fontSize:"17px", color:"var(--text-primary)", lineHeight:1.9, margin:"0 0 28px", maxWidth:"580px"}}>
                         {d.expansion_potential}
                       </p>
@@ -1934,13 +1934,13 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                   )}
                   {d.zoning_type && (
                     <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid var(--border)", marginBottom:"24px", gap:"20px"}}>
-                      <span style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase"}}>Zoning Type</span>
+                      <span style={{fontFamily:"var(--font-mono)", fontSize:"var(--type-micro)", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase"}}>Zoning Type</span>
                       <span style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-primary)", letterSpacing:"0.04em", textAlign:"right"}}>{d.zoning_type}</span>
                     </div>
                   )}
                   {d.developer_name && (
                     <div style={{background:"var(--surface)", border:"0.5px solid #262626", borderRadius:"4px", padding:"18px 20px", marginBottom:"24px"}}>
-                      <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.18em", textTransform:"uppercase", marginBottom:"8px"}}>Developer</div>
+                      <div style={{fontFamily:"var(--font-mono)", fontSize:"var(--type-micro)", color:"var(--text-muted)", letterSpacing:"0.18em", textTransform:"uppercase", marginBottom:"8px"}}>Developer</div>
                       <div style={{fontFamily:"var(--font-body)", fontSize:"18px", color:"var(--text-primary)", marginBottom: d.developer_notes ? "8px" : "0"}}>{d.developer_name}</div>
                       {d.developer_notes && (
                         <div style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"#a0a0a0", lineHeight:1.7}}>{d.developer_notes}</div>
@@ -1949,7 +1949,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                   )}
                   {d.structural_notes && (
                     <>
-                      <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.2em", textTransform:"uppercase", marginBottom:"12px"}}>Structural Notes</div>
+                      <div style={{fontFamily:"var(--font-mono)", fontSize:"var(--type-micro)", color:"var(--text-muted)", letterSpacing:"0.2em", textTransform:"uppercase", marginBottom:"12px"}}>Structural Notes</div>
                       <p style={{fontFamily:"var(--font-body)", fontSize:"15px", color:"var(--text-primary)", lineHeight:1.85, margin:"0", maxWidth:"580px"}}>
                         {d.structural_notes}
                       </p>
@@ -2010,7 +2010,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['units']?.chapterNumber || '07'} — {ch['units']?.chapterLabel || 'Units & Spaces'}</div>
+                <div style={{fontFamily:"var(--font-mono)", fontSize:"var(--type-micro)", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['units']?.chapterNumber || '07'} — {ch['units']?.chapterLabel || 'Units & Spaces'}</div>
                 {ch['units']?.subtitle && (
                   <div style={{fontFamily:"var(--font-body)", fontSize:"13px", color:"var(--text-secondary)", marginBottom:"10px", letterSpacing:"0.01em"}}>{ch['units'].subtitle}</div>
                 )}
@@ -2036,7 +2036,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                     >
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", width: "100%", gap: "12px", flexWrap: "wrap" }}>
                         <div style={{ minWidth: 0 }}>
-                          <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color: "var(--text-muted)", letterSpacing:"0.18em", textTransform:"uppercase", marginBottom:"8px"}}>
+                          <div style={{fontFamily:"var(--font-mono)", fontSize:"var(--type-micro)", color: "var(--text-muted)", letterSpacing:"0.18em", textTransform:"uppercase", marginBottom:"8px"}}>
                             UNIT {String(ui + 1).padStart(2, "0")}
                           </div>
                           <div className="unit-z3-name">{u.name}</div>
@@ -2112,7 +2112,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                           }}
                           style={{display:"flex", alignItems:"baseline", gap:"10px", width:"100%", textAlign:"left", background:"none", border:"none", borderBottom:"1px solid var(--border)", padding:"9px 0", cursor:"pointer"}}
                         >
-                          <span style={{fontFamily:"var(--font-mono)", fontSize:"11px", color: "var(--text-muted)", letterSpacing:"0.12em", flexShrink:0}}>{String(ui + 1).padStart(2, "0")}</span>
+                          <span style={{fontFamily:"var(--font-mono)", fontSize:"var(--type-micro)", color: "var(--text-muted)", letterSpacing:"0.12em", flexShrink:0}}>{String(ui + 1).padStart(2, "0")}</span>
                           <span style={{fontFamily:"var(--font-body)", fontSize:"13px", color: "var(--text-muted)", lineHeight:1.3}}>{u.name}</span>
                         </button>
                       );
@@ -2128,7 +2128,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['universe']?.chapterNumber || '08'} — {ch['universe']?.chapterLabel || 'Property Universe'}</div>
+                <div style={{fontFamily:"var(--font-mono)", fontSize:"var(--type-micro)", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['universe']?.chapterNumber || '08'} — {ch['universe']?.chapterLabel || 'Property Universe'}</div>
                 {ch['universe']?.subtitle && (
                   <div style={{fontFamily:"var(--font-body)", fontSize:"13px", color:"var(--text-secondary)", marginBottom:"10px", letterSpacing:"0.01em"}}>{ch['universe'].subtitle}</div>
                 )}
@@ -2145,7 +2145,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
 
               {d.architect_designer && (
                 <div style={{background:"var(--surface)", border:"0.5px solid #262626", borderRadius:"4px", padding:"16px 20px", marginBottom:"28px"}}>
-                  <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.18em", textTransform:"uppercase", marginBottom:"8px"}}>Architect / Designer</div>
+                  <div style={{fontFamily:"var(--font-mono)", fontSize:"var(--type-micro)", color:"var(--text-muted)", letterSpacing:"0.18em", textTransform:"uppercase", marginBottom:"8px"}}>Architect / Designer</div>
                   <div style={{fontFamily:"var(--font-body)", fontSize:"18px", color:"var(--text-primary)"}}>{d.architect_designer}</div>
                 </div>
               )}
@@ -2185,7 +2185,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
               {d.scoutit_verdict && (
                 <div className="sidebar-block" style={{paddingBottom:"22px", borderBottom:"1px solid var(--border)", marginBottom:"4px"}}>
                   <div className="sidebar-accent-line" style={{background:"#E8AE3C"}}/>
-                  <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"#E8AE3C", letterSpacing:"0.18em", textTransform:"uppercase", marginBottom:"10px"}}>ScoutIt Verdict</div>
+                  <div style={{fontFamily:"var(--font-mono)", fontSize:"var(--type-micro)", color:"#E8AE3C", letterSpacing:"0.18em", textTransform:"uppercase", marginBottom:"10px"}}>ScoutIt Verdict</div>
                   <div style={{fontFamily:"var(--font-body)", fontSize:"20px", color:"#E8AE3C", lineHeight:1.35}}>{d.scoutit_verdict}</div>
                 </div>
               )}
@@ -2202,7 +2202,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['services']?.chapterNumber || '09'} — {ch['services']?.chapterLabel || 'Services'}</div>
+                <div style={{fontFamily:"var(--font-mono)", fontSize:"var(--type-micro)", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['services']?.chapterNumber || '09'} — {ch['services']?.chapterLabel || 'Services'}</div>
                 {ch['services']?.subtitle && (
                   <div style={{fontFamily:"var(--font-body)", fontSize:"13px", color:"var(--text-secondary)", marginBottom:"10px", letterSpacing:"0.01em"}}>{ch['services'].subtitle}</div>
                 )}
@@ -2249,7 +2249,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['yourmove']?.chapterNumber || '10'} — {ch['yourmove']?.chapterLabel || 'Your Move'}</div>
+                <div style={{fontFamily:"var(--font-mono)", fontSize:"var(--type-micro)", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['yourmove']?.chapterNumber || '10'} — {ch['yourmove']?.chapterLabel || 'Your Move'}</div>
                 {ch['yourmove']?.subtitle && (
                   <div style={{fontFamily:"var(--font-body)", fontSize:"13px", color:"var(--text-secondary)", marginBottom:"10px", letterSpacing:"0.01em"}}>{ch['yourmove'].subtitle}</div>
                 )}
@@ -2261,7 +2261,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
               </h2>
 
               <div className="reactions-container" style={{marginTop:"0", display:"flex", flexDirection:"column", gap:"10px"}}>
-                <p style={{fontFamily:"var(--font-mono)", fontSize:"11px", textTransform:"uppercase", letterSpacing:"0.2em", color:"var(--text-muted)", marginBottom:"16px"}}>HOW DOES THIS SPACE MAKE YOU FEEL?</p>
+                <p style={{fontFamily:"var(--font-mono)", fontSize:"var(--type-micro)", textTransform:"uppercase", letterSpacing:"0.2em", color:"var(--text-muted)", marginBottom:"16px"}}>HOW DOES THIS SPACE MAKE YOU FEEL?</p>
                 <ReactionButtons propertyId={slug || "batasan-hills"} propertyTitle={d.title} category={d.property_type} city={d.city}/>
               </div>
 
@@ -2275,14 +2275,14 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                       <GlassPanel className="p-6 rounded-md">
                         <div style={{fontFamily:"var(--font-body)", fontSize:"clamp(30px,4.2vw,44px)", fontWeight:400, color:"var(--text-primary)", lineHeight:1.1}}>{d.listed_price}</div>
                         {d.price_source && (
-                          <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", letterSpacing:"0.1em", color:"var(--text-muted)", marginTop:"10px"}}>
+                          <div style={{fontFamily:"var(--font-mono)", fontSize:"var(--type-micro)", letterSpacing:"0.1em", color:"var(--text-muted)", marginTop:"10px"}}>
                             Price indicated by {d.price_source}
                           </div>
                         )}
                         {d.price_notes && (
                           <div style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"#a0a0a0", lineHeight: 1.75, marginTop:"10px"}}>{d.price_notes}</div>
                         )}
-                        <p style={{fontFamily:"system-ui,-apple-system,sans-serif", fontSize:"11.5px", color:"var(--text-muted)", lineHeight:1.7, marginTop:"16px"}}>
+                        <p style={{fontFamily:"system-ui,-apple-system,sans-serif", fontSize:"var(--type-micro)", color:"var(--text-muted)", lineHeight:1.7, marginTop:"16px"}}>
                           Price estimates are provided solely by authorized sellers, owners, or licensed property managers. ScoutIt does not set, verify, or guarantee any stated price. For inquiries, speak directly with an authorized representative.
                         </p>
                       </GlassPanel>
@@ -2313,15 +2313,15 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
 
               {rosterLoaded && (
                 <div style={{ marginTop: "0", padding: "16px", border: "1px solid var(--accent-muted)", borderRadius: "4px", background: "rgba(232,174,60,0.03)" }}>
-                  <div style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--accent)", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "8px" }}>Current Property Representation</div>
+                  <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--type-micro)", color: "var(--accent)", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "8px" }}>Current Property Representation</div>
                   <div style={{ fontFamily: "var(--font-body)", fontSize: "16px", color: "var(--on-surface)" }}>{rosterUnavailable ? "Representation status unavailable" : propertyRoster.length > 0 ? `${propertyRoster.length} active authorized broker${propertyRoster.length === 1 ? "" : "s"}` : "Unrepresented — uploader / lister route"}</div>
-                  <Link href={`/property/${slug || "batasan-hills"}/brokers`} style={{ display: "inline-block", marginTop: "10px", color: "var(--accent-bright)", fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase" }}>View current roster →</Link>
+                  <Link href={`/property/${slug || "batasan-hills"}/brokers`} style={{ display: "inline-block", marginTop: "10px", color: "var(--accent-bright)", fontFamily: "var(--font-mono)", fontSize: "var(--type-micro)", letterSpacing: "0.1em", textTransform: "uppercase" }}>View current roster →</Link>
                 </div>
               )}
 
               {/* Progressive Intent Ladder (§7) */}
               <div style={{ marginTop: "24px", padding: "20px", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "8px" }}>
-                <div style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--accent)", letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: "8px" }}>
+                <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--type-micro)", color: "var(--accent)", letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: "8px" }}>
                   Where are you in your evaluation?
                 </div>
                 <p style={{ fontFamily: "var(--font-body)", fontSize: "14px", color: "var(--text-secondary)", marginBottom: "16px", lineHeight: 1.5 }}>
@@ -2343,7 +2343,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                       transition: "all 0.2s ease"
                     }}
                   >
-                    <span style={{ display: "block", fontFamily: "var(--font-mono)", fontSize: "10px", letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: "4px" }}>Tier 1</span>
+                    <span style={{ display: "block", fontFamily: "var(--font-mono)", fontSize: "var(--type-micro)", letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: "4px" }}>Tier 1</span>
                     <span style={{ display: "block", fontFamily: "var(--font-body)", fontSize: "14px", fontWeight: 500 }}>Inspired Me</span>
                   </button>
 
@@ -2361,7 +2361,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                       transition: "all 0.2s ease"
                     }}
                   >
-                    <span style={{ display: "block", fontFamily: "var(--font-mono)", fontSize: "10px", letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: "4px" }}>Tier 2</span>
+                    <span style={{ display: "block", fontFamily: "var(--font-mono)", fontSize: "var(--type-micro)", letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: "4px" }}>Tier 2</span>
                     <span style={{ display: "block", fontFamily: "var(--font-body)", fontSize: "14px", fontWeight: 500 }}>Potential Fit</span>
                   </button>
 
@@ -2379,7 +2379,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                       transition: "all 0.2s ease"
                     }}
                   >
-                    <span style={{ display: "block", fontFamily: "var(--font-mono)", fontSize: "10px", letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: "4px" }}>Tier 3</span>
+                    <span style={{ display: "block", fontFamily: "var(--font-mono)", fontSize: "var(--type-micro)", letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: "4px" }}>Tier 3</span>
                     <span style={{ display: "block", fontFamily: "var(--font-body)", fontSize: "14px", fontWeight: 500 }}>Interested</span>
                   </button>
                 </div>
@@ -2448,7 +2448,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
               {/* RA 9646 compliance badge */}
               <div style={{display:"inline-flex", alignItems:"center", gap:"8px", marginTop:"20px", padding:"8px 14px", border:"0.5px solid rgba(76,175,125,0.4)", borderRadius:"4px", background:"rgba(76,175,125,0.06)"}}>
                 <span style={{width:"7px", height:"7px", borderRadius:"50%", background:"#4caf7d", flexShrink:0}}/>
-                <span style={{fontFamily:"var(--font-mono)", fontSize:"9.5px", color:"#4caf7d", letterSpacing:"0.14em", textTransform:"uppercase"}}>RA 9646 Compliant · Display-Only</span>
+                <span style={{fontFamily:"var(--font-mono)", fontSize:"var(--type-floor)", color:"#4caf7d", letterSpacing:"0.14em", textTransform:"uppercase"}}>RA 9646 Compliant · Display-Only</span>
               </div>
 
               <p style={{fontFamily:"var(--font-body)", fontSize:"13px", color:"var(--text-muted)", lineHeight:1.7, marginTop:"16px", maxWidth:"600px"}}>

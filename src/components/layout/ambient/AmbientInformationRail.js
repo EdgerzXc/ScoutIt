@@ -230,7 +230,7 @@ export default function AmbientInformationRail({ user }) {
 
         .ambient-text-node {
           font-family: var(--font-mono, monospace);
-          font-size: 11px;
+          font-size: var(--type-micro);
           font-weight: 500;
           letter-spacing: 0.12em;
           text-transform: uppercase;
@@ -296,7 +296,7 @@ export default function AmbientInformationRail({ user }) {
             max-width: 240px;
           }
           .ambient-text-node {
-            font-size: 10px;
+            font-size: var(--type-micro);
             letter-spacing: 0.08em;
           }
           .ambient-track {

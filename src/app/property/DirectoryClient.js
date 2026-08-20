@@ -644,7 +644,7 @@ function PropertyDirectoryContent({ initialProperties = [] }) {
                     padding: "0 24px",
                     height: "44px",
                     fontFamily: "var(--font-mono)",
-                    fontSize: "11px",
+                    fontSize: "var(--type-micro)",
                     letterSpacing: "0.1em",
                     cursor: "pointer",
                     textTransform: "uppercase",

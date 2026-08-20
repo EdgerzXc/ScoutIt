@@ -290,14 +290,14 @@ export default function FAQReviewQueue({ onPendingCount }) {
           border-radius: 3px;
           text-align: center;
           font-family: ${MONO};
-          font-size: 10px;
+          font-size: var(--type-micro);
           color: var(--text-secondary);
           letter-spacing: 0.12em;
           line-height: 1.9;
         }
         .fq-error {
           font-family: ${MONO};
-          font-size: 10px;
+          font-size: var(--type-micro);
           color: var(--red);
           letter-spacing: 0.05em;
           line-height: 1.6;
