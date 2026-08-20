@@ -126,10 +126,15 @@ const CATEGORY_TO_LAYOUT_MAP = {
 export default async function PropertyRoute({ params }) {
   const resolvedParams = await params;
   let match = null;
+  // The Intel feed rides along with the properties in the same cached bundle,
+  // so surfacing briefings on a property page costs no extra fetch. Matching
+  // happens in lib/propertyArticles.js, not here.
+  let articles = [];
 
   try {
     const bundle = await getCmsBundle();
     const properties = bundle.properties || [];
+    articles = bundle.intel || [];
     match = properties.find(
       (p) =>
         (p.slug && p.slug.toLowerCase() === resolvedParams.id.toLowerCase()) ||
@@ -209,6 +214,7 @@ export default async function PropertyRoute({ params }) {
         <InjectedLayout
           slug={resolvedParams.id}
           initialData={match ? stripPremiumFields(match, "starry") : null}
+          articles={articles}
         />
 
         {/* â”€â”€ CLAIM THIS PROPERTY (Â§37 Â· W8) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
