@@ -434,6 +434,21 @@ export async function fetchIntel(apiKey, baseId) {
         date:         f.Date             || "",
         city:         f.City             || "",
         region:       f.Region           || cityToRegion(f.City || ""),
+        // Airtable link field → array of PROPERTIES_CMS record ids. Powers the
+        // "About this property" tier in lib/propertyArticles.js.
+        //
+        // ⚠️ THE FIELD ALREADY EXISTED. `Related_Property` (fldzcxvHiIQIbDYlh)
+        // has been on INTEL_CMS all along, with its reciprocal `INTEL_CMS`
+        // (fldxfQC3YgTsmH7GP) on PROPERTIES_CMS — it was simply never read
+        // here, so the strongest article↔property signal in the base was
+        // invisible to the product. Same class as the SEO_Title / Floor_Plans /
+        // Verification_Status findings in AIRTABLE_COMPRESSION_PLAN: a field
+        // that exists in Airtable and has no consumer in code.
+        //
+        // Standing Rule 21 is the check that would have caught it: a feature
+        // that produces data must have a named consumer, and the direction to
+        // look is the one you are NOT looking at.
+        relatedPropertyIds: Array.isArray(f.Related_Property) ? f.Related_Property : [],
         image:        f.Image            || "",
         excerpt:      f.Excerpt          || "",
         lead:         f.Lead             || "",
