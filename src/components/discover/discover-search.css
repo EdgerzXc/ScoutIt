@@ -1,0 +1,581 @@
+/*
+ * Discover — the search engine.
+ *
+ * A real stylesheet, not <style jsx>: styled-jsx drops grid-template-columns
+ * and grid-template-areas from the emitted rule, and this layout is grid.
+ * Also: never pair -webkit-backdrop-filter with backdrop-filter here — the
+ * pipeline keeps only the prefixed one and Chrome rejects it.
+ */
+
+.dsc {
+  --dsc-hairline: var(--border);
+  --dsc-ink: var(--text-primary);
+  --dsc-ink-soft: var(--text-secondary);
+
+  max-width: 1340px;
+  margin: 0 auto;
+  padding: clamp(28px, 5vw, 56px) clamp(16px, 4vw, 40px) clamp(40px, 6vw, 72px);
+  color: var(--dsc-ink);
+}
+
+/* ── HEAD ───────────────────────────────────────────────────────── */
+.dsc-head {
+  margin-bottom: clamp(22px, 3.4vw, 34px);
+}
+
+.dsc-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+  font-variant-numeric: tabular-nums;
+}
+
+.dsc-title {
+  margin: 0;
+  max-width: 20ch;
+  font-family: var(--font-display);
+  font-weight: 500;
+  /* !important: globals.css caps every h1 to 28px/24px with !important
+     under 768px/480px, which would flatten this heading on mobile. */
+  font-size: clamp(28px, 4vw, 44px) !important;
+  line-height: 1.06 !important;
+  letter-spacing: -0.028em;
+  text-wrap: balance;
+}
+
+.dsc-title-accent {
+  color: var(--accent);
+}
+
+/* ── QUERY BAR ──────────────────────────────────────────────────── */
+.dsc-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.dsc-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1 1 280px;
+  padding: 0 14px;
+  border: 1px solid var(--dsc-hairline);
+  border-radius: 6px;
+  background: var(--surface);
+  transition: border-color 180ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.dsc-input-wrap:focus-within {
+  border-color: var(--accent);
+}
+
+.dsc-input-wrap > svg {
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.dsc-input {
+  flex: 1;
+  min-width: 0;
+  padding: 14px 0;
+  border: 0;
+  background: transparent;
+  color: var(--dsc-ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+}
+
+.dsc-input:focus {
+  outline: none;
+}
+
+/* Placeholder needs the same 4.5:1 as body text — the muted-grey default
+   is the most common contrast failure in dark UI. Soft Grey from the
+   palette measures 8.8:1 here, so there is no reason to invent a dimmer
+   off-palette value. */
+.dsc-input::placeholder {
+  color: var(--text-secondary);
+}
+
+.dsc-input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.dsc-input-clear {
+  display: flex;
+  padding: 4px;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--dsc-ink-soft);
+  cursor: pointer;
+}
+
+.dsc-input-clear:hover {
+  color: var(--accent);
+}
+
+.dsc-filter-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 18px;
+  border: 1px solid var(--accent-muted);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--dsc-ink);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color 180ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.dsc-filter-toggle:hover {
+  background: rgba(232, 174, 60, 0.1);
+}
+
+.dsc-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 3px;
+  background: var(--accent-bright);
+  color: #0d0d0d;
+  font-size: 10px;
+}
+
+/* ── FILTERS ────────────────────────────────────────────────────── */
+.dsc-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px 28px;
+  margin-bottom: 20px;
+  padding: 20px;
+  border: 1px solid var(--dsc-hairline);
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+.dsc-group {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.dsc-group legend {
+  padding: 0 0 10px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--dsc-ink-soft);
+}
+
+.dsc-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.dsc-chip {
+  padding: 7px 12px;
+  border: 1px solid var(--dsc-hairline);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--dsc-ink-soft);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    border-color 180ms cubic-bezier(0.23, 1, 0.32, 1),
+    color 180ms cubic-bezier(0.23, 1, 0.32, 1),
+    background-color 180ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.dsc-chip:hover {
+  border-color: var(--accent-muted);
+  color: var(--dsc-ink);
+}
+
+.dsc-chip.is-on {
+  border-color: var(--accent);
+  background: rgba(232, 174, 60, 0.14);
+  color: var(--accent);
+}
+
+.dsc-chip:active {
+  transform: scale(0.98);
+}
+
+.dsc-chip:focus-visible,
+.dsc-filter-toggle:focus-visible,
+.dsc-input-clear:focus-visible {
+  outline: 1.5px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ── BODY: map beside results ───────────────────────────────────── */
+.dsc-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 20px;
+}
+
+@media (min-width: 1000px) {
+  .dsc-body {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
+  }
+
+  .dsc-map {
+    position: sticky;
+    top: 84px;
+  }
+}
+
+.dsc-map {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+/* ── RADAR CONTROL ──────────────────────────────────────────────── */
+.dsc-radar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--dsc-hairline);
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+.dsc-radar-label {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--dsc-ink-soft);
+  white-space: nowrap;
+}
+
+.dsc-radar-value {
+  font-size: 13px;
+  color: var(--accent);
+}
+
+.dsc-radar-range {
+  flex: 1 1 140px;
+  min-width: 120px;
+  accent-color: var(--accent-bright);
+  cursor: pointer;
+}
+
+.dsc-radar-start,
+.dsc-radar-clear {
+  padding: 9px 15px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color 180ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.dsc-radar-start {
+  border: 1px solid var(--accent-muted);
+  background: transparent;
+  color: var(--accent);
+}
+
+.dsc-radar-start:hover {
+  background: rgba(232, 174, 60, 0.1);
+}
+
+.dsc-radar-clear {
+  border: 1px solid var(--dsc-hairline);
+  background: transparent;
+  color: var(--dsc-ink-soft);
+}
+
+.dsc-radar-clear:hover {
+  color: var(--dsc-ink);
+}
+
+.dsc-radar-range:focus-visible,
+.dsc-radar-start:focus-visible,
+.dsc-radar-clear:focus-visible {
+  outline: 1.5px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ── RESULTS ────────────────────────────────────────────────────── */
+.dsc-results {
+  min-width: 0;
+  border: 1px solid var(--dsc-hairline);
+  border-radius: 6px;
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.dsc-results-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--dsc-hairline);
+}
+
+.dsc-results-title {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.dsc-clear-all {
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid var(--accent-muted);
+  background: transparent;
+  color: var(--dsc-ink-soft);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.dsc-clear-all:hover {
+  color: var(--accent);
+}
+
+.dsc-clear-all:focus-visible {
+  outline: 1.5px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.dsc-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  /* The archive will outgrow the viewport. Scroll the list, not the page. */
+  max-height: 620px;
+  overflow-y: auto;
+}
+
+.dsc-row + .dsc-row {
+  border-top: 1px solid var(--border);
+}
+
+.dsc-link {
+  position: relative;
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr) 18px;
+  align-items: center;
+  gap: 0 14px;
+  padding: 15px 18px;
+  text-decoration: none;
+  color: inherit;
+  transition:
+    background-color 180ms cubic-bezier(0.23, 1, 0.32, 1),
+    padding-left 180ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.dsc-link::before {
+  content: "";
+  position: absolute;
+  top: 14%;
+  bottom: 14%;
+  left: 0;
+  width: 2px;
+  background: var(--accent-bright);
+  transform: scaleY(0);
+  opacity: 0;
+  transition:
+    transform 200ms cubic-bezier(0.23, 1, 0.32, 1),
+    opacity 200ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.dsc-index {
+  align-self: start;
+  padding-top: 2px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: rgba(240, 237, 232, 0.34);
+  transition: color 180ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.dsc-row-body {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.dsc-status {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.dsc-row-title {
+  font-size: 15px;
+  line-height: 1.35;
+  color: var(--dsc-ink);
+}
+
+.dsc-row-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--dsc-ink-soft);
+}
+
+.dsc-row-meta svg {
+  color: var(--accent-muted);
+  flex-shrink: 0;
+}
+
+.dsc-sep {
+  color: var(--accent-muted);
+}
+
+/* lucide-react replaces any className on its icons, so target structurally. */
+.dsc-link > svg:last-child {
+  color: rgba(240, 237, 232, 0.36);
+  transition:
+    color 180ms cubic-bezier(0.23, 1, 0.32, 1),
+    transform 180ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .dsc-link:hover {
+    background: rgba(232, 174, 60, 0.06);
+    padding-left: 24px;
+  }
+
+  .dsc-link:hover::before {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+
+  .dsc-link:hover .dsc-index {
+    color: var(--accent);
+  }
+
+  .dsc-link:hover > svg:last-child {
+    color: var(--accent-bright);
+    transform: translateX(4px);
+  }
+}
+
+.dsc-link:focus-visible {
+  outline: 1.5px solid var(--accent);
+  outline-offset: -2px;
+}
+
+/* ── EMPTY ──────────────────────────────────────────────────────── */
+.dsc-empty {
+  padding: 40px 22px 46px;
+  text-align: center;
+}
+
+.dsc-empty-lead {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: var(--dsc-ink);
+}
+
+.dsc-empty-sub {
+  margin: 0 auto 20px;
+  max-width: 42ch;
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: var(--dsc-ink-soft);
+}
+
+.dsc-empty-action {
+  padding: 10px 18px;
+  border: 1px solid var(--accent-muted);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.dsc-empty-action:hover {
+  background: rgba(232, 174, 60, 0.1);
+}
+
+.dsc-empty-action:focus-visible {
+  outline: 1.5px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Read by assistive tech, never painted. */
+.dsc-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dsc-link:hover,
+  .dsc-chip:active {
+    padding-left: 18px;
+    transform: none;
+  }
+
+  .dsc-link:hover > svg:last-child {
+    transform: none;
+  }
+}

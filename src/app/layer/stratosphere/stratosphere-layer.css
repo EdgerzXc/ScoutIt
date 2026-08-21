@@ -1,0 +1,621 @@
+/*
+ * LAYER 02 — STRATOSPHERE
+ *
+ * These styles deliberately live in a real stylesheet rather than a
+ * <style jsx> block. styled-jsx silently drops `grid-template-columns` and
+ * `grid-template-areas` from the emitted rule, which shipped a layout where
+ * every arrow wrapped onto its own line.
+ *
+ * Separately: do NOT add `-webkit-backdrop-filter` next to `backdrop-filter`
+ * anywhere in this project. When both are present the CSS pipeline keeps
+ * only the prefixed one, and current Chrome rejects it
+ * (`CSS.supports('-webkit-backdrop-filter')` is false), so the blur silently
+ * disappears. Unprefixed alone works; Safari 18+ no longer needs the prefix.
+ */
+
+.stratosphere-layer {
+  /* dvh, not vh: vh causes a layout jump on iOS Safari when the URL bar
+     collapses, which visibly hitches the descent behind. */
+  min-height: 100dvh;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  background: #0d0d0d;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  padding-bottom: calc(88px + env(safe-area-inset-bottom));
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── THE DESCENT BACKDROP ───────────────────────────────────────────
+   A three-part treatment, not a flat scrim: a soft top wash so the
+   headline never fights the sky, a near-transparent middle so the fall
+   stays visible, and a deep floor that grounds the composition where the
+   metropolis blooms. */
+.descent-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.descent-backdrop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      120% 78% at 72% 8%,
+      rgba(232, 174, 60, 0.09) 0%,
+      transparent 58%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(13, 13, 13, 0.72) 0%,
+      rgba(13, 13, 13, 0.24) 34%,
+      rgba(13, 13, 13, 0.34) 62%,
+      rgba(13, 13, 13, 0.93) 100%
+    );
+}
+
+/* A vignette pulls the eye to the centre and stops the WebGL scene from
+   bleeding hard into the browser chrome. */
+.descent-backdrop::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  box-shadow: inset 0 0 clamp(120px, 18vw, 260px) rgba(0, 0, 0, 0.72);
+}
+
+/* ── SHELL ──────────────────────────────────────────────────────────── */
+.strat-main {
+  position: relative;
+  z-index: 10;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-top: clamp(96px, 13vh, 160px);
+}
+
+.strat-container {
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 clamp(20px, 5vw, 64px);
+  /* Editorial split: the headline holds the left, the instrument panel
+     sits right and slightly low, so the descent keeps the diagonal
+     between them instead of being covered by a centred stack. */
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(36px, 6vh, 72px);
+  align-items: start;
+}
+
+@media (min-width: 1040px) {
+  .strat-container {
+    grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+    column-gap: clamp(40px, 5vw, 80px);
+    row-gap: 34px;
+    align-items: center;
+  }
+
+  .strat-intro {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .strat-signals {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    margin-top: clamp(0px, 4vh, 48px);
+  }
+
+  .strat-doors {
+    grid-column: 1;
+    grid-row: 2;
+    align-self: start;
+  }
+}
+
+/* ── INTRO ──────────────────────────────────────────────────────────── */
+.strat-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 14px;
+  padding: 5px 12px;
+  border: 1px solid rgba(232, 174, 60, 0.25);
+  border-radius: 9999px;
+  background: rgba(232, 174, 60, 0.08);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.strat-live-dot {
+  position: relative;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-bright);
+  box-shadow: 0 0 8px var(--accent-bright);
+  animation: stratPulse 2s infinite ease-in-out;
+}
+
+.strat-headline {
+  margin: 0;
+  max-width: 15ch;
+  font-family: var(--font-display);
+  font-weight: 500;
+  /* !important is required, not preferred: globals.css caps every h1 to
+     28px/24px with !important under 768px/480px, which flattens this
+     layer's single headline. Scoped override rather than touching a
+     global rule that affects every page. */
+  font-size: clamp(32px, 5.2vw, 60px) !important;
+  line-height: 1.06 !important;
+  letter-spacing: -0.028em;
+  text-wrap: balance;
+  /* Light type on a moving scene needs a shadow to hold its edge. */
+  text-shadow: 0 2px 34px rgba(0, 0, 0, 0.72);
+}
+
+.strat-headline-accent {
+  color: var(--accent);
+}
+
+.strat-underline {
+  display: block;
+  width: clamp(72px, 9vw, 128px);
+  height: 1px;
+  margin-top: clamp(22px, 3.4vh, 38px);
+  background: linear-gradient(
+    90deg,
+    var(--accent) 0%,
+    rgba(232, 174, 60, 0.08) 100%
+  );
+}
+
+/* ── SIGNAL PANEL ────────────────────────────────────────────────────
+   Real glass, used once and for the reason glass exists: this panel is
+   the only surface with a live WebGL scene moving behind it. Lightest
+   blur that holds the copy, an inner rim light for physical edge, and a
+   single wide shadow for lift. */
+.strat-signals {
+  position: relative;
+  max-width: 620px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  /* 0.72, not lower. The blur is real at this alpha, but 0.58 dropped the
+     9px gold status text to 3.2:1 where the panel crosses the brightest
+     part of the metropolis bloom. 0.72 holds 4.85:1 in that worst case. */
+  background: rgba(16, 16, 16, 0.72);
+  backdrop-filter: blur(14px) saturate(130%);
+  box-shadow:
+    inset 0 1px 0 var(--border),
+    0 24px 60px -20px rgba(0, 0, 0, 0.85);
+  overflow: hidden;
+}
+
+/* A gold hairline across the top edge — the instrument's power rail. */
+.strat-signals::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(232, 174, 60, 0.55) 22%,
+    rgba(247, 198, 78, 0.8) 50%,
+    rgba(232, 174, 60, 0.55) 78%,
+    transparent 100%
+  );
+}
+
+.strat-signals-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0;
+  padding: 15px 20px;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.strat-signals-title svg {
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.strat-signals-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 21px;
+  height: 21px;
+  margin-left: auto;
+  padding: 0 6px;
+  border: 1px solid rgba(232, 174, 60, 0.3);
+  border-radius: 4px;
+  background: rgba(232, 174, 60, 0.1);
+  font-size: 10px;
+  color: var(--accent);
+}
+
+.strat-signal-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.strat-signal-row + .strat-signal-row {
+  border-top: 1px solid var(--border);
+}
+
+/* Explicit columns rather than named areas — and defined here, in a real
+   stylesheet, so they actually survive to the browser. */
+.strat-signal-link {
+  position: relative;
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr) 18px;
+  align-items: center;
+  gap: 0 14px;
+  padding: 16px 20px;
+  text-decoration: none;
+  color: inherit;
+  transition:
+    background-color 200ms cubic-bezier(0.23, 1, 0.32, 1),
+    padding-left 200ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* The gold edge that lights up on hover — a rail, not a side-stripe
+   border: it is a pseudo-element indicator tied to interaction state. */
+.strat-signal-link::before {
+  content: "";
+  position: absolute;
+  top: 12%;
+  bottom: 12%;
+  left: 0;
+  width: 2px;
+  background: var(--accent-bright);
+  transform: scaleY(0);
+  transform-origin: center;
+  opacity: 0;
+  transition:
+    transform 220ms cubic-bezier(0.23, 1, 0.32, 1),
+    opacity 220ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.strat-signal-index {
+  align-self: start;
+  padding-top: 2px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: rgba(240, 237, 232, 0.34);
+  transition: color 200ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.strat-signal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.strat-signal-status {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.strat-signal-title {
+  font-size: 15.5px;
+  line-height: 1.36;
+  color: var(--text-primary);
+}
+
+.strat-signal-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  /* var(--text-secondary) on this surface clears 4.5:1 comfortably. */
+  color: var(--text-secondary);
+}
+
+.strat-signal-meta svg {
+  color: var(--accent-muted);
+  flex-shrink: 0;
+}
+
+.strat-signal-sep {
+  color: var(--accent-muted);
+}
+
+/* Read by assistive tech, never painted. Without it the accessible name
+   collapses to "BGC, TaguigTransit" - the visible "/" is aria-hidden. */
+.strat-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Targeted structurally: lucide-react replaces any className passed to
+   its components, so a class hook on the icon never survives to the DOM. */
+.strat-signal-link > svg:last-child {
+  color: rgba(240, 237, 232, 0.36);
+  transition:
+    color 200ms cubic-bezier(0.23, 1, 0.32, 1),
+    transform 200ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* Hover is gated: touch devices fire it on tap, which would flash every
+   row's hover state on the way to navigating. */
+@media (hover: hover) and (pointer: fine) {
+  .strat-signal-link:hover {
+    background: rgba(232, 174, 60, 0.06);
+    padding-left: 26px;
+  }
+
+  .strat-signal-link:hover::before {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+
+  .strat-signal-link:hover .strat-signal-index {
+    color: var(--accent);
+  }
+
+  .strat-signal-link:hover > svg:last-child {
+    color: var(--accent-bright);
+    transform: translateX(4px);
+  }
+}
+
+.strat-signal-link:active {
+  transform: scale(0.995);
+}
+
+.strat-signal-link:focus-visible {
+  outline: 1.5px solid var(--accent);
+  outline-offset: -2px;
+}
+
+/* ── DOORS ──────────────────────────────────────────────────────────── */
+.strat-doors {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(228px, 1fr));
+  gap: 12px;
+  max-width: 560px;
+}
+
+.strat-door {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 18px;
+  align-items: center;
+  gap: 4px 14px;
+  padding: 18px 20px;
+  border: 1px solid var(--accent-muted);
+  border-radius: 6px;
+  overflow: hidden;
+  text-decoration: none;
+  color: var(--text-primary);
+  background: rgba(16, 16, 16, 0.72);
+  backdrop-filter: blur(10px);
+  transition:
+    border-color 200ms cubic-bezier(0.23, 1, 0.32, 1),
+    background-color 200ms cubic-bezier(0.23, 1, 0.32, 1),
+    transform 180ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.strat-door-label {
+  grid-column: 1;
+  grid-row: 1;
+  font-size: 15.5px;
+  font-weight: 500;
+}
+
+.strat-door-sub {
+  grid-column: 1;
+  grid-row: 2;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.strat-door > svg {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  transition: transform 200ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.strat-door--primary {
+  border-color: transparent;
+  background: var(--accent-bright);
+  color: #0d0d0d;
+  backdrop-filter: none;
+  box-shadow: 0 16px 40px -18px rgba(247, 198, 78, 0.65);
+}
+
+.strat-door--primary .strat-door-sub {
+  /* Dark-on-gold: a mid grey here would drop under 4.5:1. */
+  color: rgba(13, 13, 13, 0.74);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .strat-door:hover {
+    border-color: var(--accent);
+    background: rgba(232, 174, 60, 0.1);
+  }
+
+  .strat-door--primary:hover {
+    background: var(--accent);
+    border-color: transparent;
+  }
+
+  .strat-door:hover > svg {
+    transform: translateX(4px);
+  }
+}
+
+.strat-door:active {
+  transform: scale(0.985);
+}
+
+.strat-door:focus-visible {
+  outline: 1.5px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ── ENTRANCE ────────────────────────────────────────────────────────
+   Content is visible by default; the animation only enhances it. Gating
+   visibility on a transition ships a blank layer to headless renderers
+   and background tabs. */
+.strat-intro,
+.strat-signals,
+.strat-doors {
+  animation: stratRise 700ms cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+.strat-signals {
+  animation-delay: 120ms;
+}
+
+.strat-doors {
+  animation-delay: 220ms;
+}
+
+.strat-signal-row {
+  animation: stratRise 480ms cubic-bezier(0.23, 1, 0.32, 1) both;
+  animation-delay: calc(300ms + var(--row-index) * 70ms);
+}
+
+@keyframes stratRise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+@keyframes stratFade {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Orbit's pulseGlow verbatim — scale plus fade, not fade alone. */
+@keyframes stratPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.35);
+    opacity: 0.6;
+  }
+}
+
+/* Reduced motion keeps the fade, drops every movement. */
+@media (prefers-reduced-motion: reduce) {
+  .strat-intro,
+  .strat-signals,
+  .strat-doors,
+  .strat-signal-row {
+    animation: stratFade 200ms ease both;
+  }
+
+  .strat-live-dot {
+    animation: none;
+  }
+
+  .strat-signal-link:hover,
+  .strat-signal-link:active,
+  .strat-door:active {
+    padding-left: 20px;
+    transform: none;
+  }
+
+  .strat-signal-link:hover > svg:last-child,
+  .strat-door:hover > svg {
+    transform: none;
+  }
+}
+
+/* Blur is expensive on low-end mobile GPUs and the panel is nearly
+   full-width there, so it buys little. Fall back to a tonal surface. */
+@media (max-width: 720px) {
+  .strat-signals,
+  .strat-door {
+    backdrop-filter: none;
+    background: rgba(16, 16, 16, 0.86);
+  }
+
+  .strat-door--primary {
+    background: var(--accent-bright);
+  }
+}
+
+@media (max-width: 640px) {
+  .strat-main {
+    justify-content: flex-start;
+    padding-top: clamp(84px, 12vh, 124px);
+  }
+
+  .strat-signal-link {
+    padding: 15px 16px;
+    grid-template-columns: 22px minmax(0, 1fr) 16px;
+    gap: 0 11px;
+  }
+
+  .strat-door {
+    padding: 16px 17px;
+  }
+}
+
+/* ── THE DESCENT GLOBE ───────────────────────────────────────────────
+   Same component as Orbit, but scenery rather than subject: it fills the
+   fixed backdrop instead of sitting in the content flow, and it must not
+   take pointer events away from the layer's links. */
+.descent-backdrop .scout-earth--backdrop {
+  width: 100%;
+  height: 100%;
+  cursor: default;
+  pointer-events: none;
+}
+
+/* Orbit's separation glow is unnecessary here — the scrim above the globe
+   already does that job, and two overlapping washes read as haze. */
+.descent-backdrop .scout-earth--backdrop .scout-earth__glow {
+  display: none;
+}

@@ -2931,7 +2931,7 @@
 /* ── Stratosphere (Layer 02) only: glass panels over the atmosphere ──────────
    Scoped to .section-discover, which exists only on /layer/stratosphere, so the
    other layers keep their solid panels. Translucent dark + blur lets the
-   BackgroundStratosphere limb-glow and cirrus read behind the content. */
+   two-stage descent backdrop (globe -> city) read behind the content. */
 .section-discover {
   background: transparent;   /* override the opaque var(--bg) above so the fixed atmosphere shows */
 }

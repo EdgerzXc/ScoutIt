@@ -24,6 +24,9 @@ export const ARTICLES = [
     slug: "bgc-spatial-movement",
     title: "BGC Spatial Movement & Villa Acquisition Surge",
     category: "Residential",
+    event: "Transit",
+    corridor: "Bonifacio High Street Corridor",
+    status: "REGISTRY CONFIRMED",
     intelType: "COMMERCIAL SIGNAL",
     date: "July 2026",
     city: "BGC, Taguig",
@@ -39,6 +42,9 @@ export const ARTICLES = [
     slug: "green-office-demand",
     title: "LEED-Mandated Office Conversions in Makati CBD",
     category: "Commercial",
+    event: "Zoning",
+    corridor: "Ayala Avenue & Paseo de Roxas",
+    status: "ORDINANCE RATIFIED",
     intelType: "MARKET INTEL",
     date: "July 2026",
     city: "Makati CBD",
@@ -54,6 +60,9 @@ export const ARTICLES = [
     slug: "surf-front-land-rush",
     title: "Siargao Coastal Frontage Land Rush & Yield Dynamics",
     category: "STR",
+    event: "Development",
+    corridor: "General Luna Coastal Frontage",
+    status: "TITLES MOVING",
     intelType: "AREA GUIDE",
     date: "June 2026",
     city: "General Luna, Siargao",
@@ -69,6 +78,8 @@ export const ARTICLES = [
     slug: "off-grid-island-living",
     title: "Palawan Eco-Resort Microgrids & Teak Pavilion Standards",
     category: "Hospitality",
+    event: "Infrastructure",
+    corridor: "Bacuit Bay North Shore",
     intelType: "INSIGHT",
     date: "June 2026",
     city: "El Nido, Palawan",
@@ -84,6 +95,8 @@ export const ARTICLES = [
     slug: "poblacion-food-architecture",
     title: "Poblacion Adaptive Reuse & Multi-Concept Gastronomy",
     category: "Culinary",
+    event: "Development",
+    corridor: "Poblacion Adaptive-Reuse Blocks",
     intelType: "BRIEFING",
     date: "May 2026",
     city: "Poblacion, Makati",
@@ -99,6 +112,9 @@ export const ARTICLES = [
     slug: "manila-venue-trends",
     title: "Glass Atrium Venues & Corporate Spatial Tech Integration",
     category: "Venues",
+    event: "Development",
+    corridor: "Manila Bay Reclamation Front",
+    status: "PERMIT FILED",
     intelType: "MARKET INTEL",
     date: "May 2026",
     city: "Bay Area, Manila",
@@ -282,6 +298,58 @@ export const ARTICLE_DB = {
     recommendation: "Acquire or develop event spaces featuring clear-span glass architecture and integrated stage rigging systems."
   }
 };
+
+/* ── THE TWO AXES ──────────────────────────────────────────────────
+   Space type answers "what kind of space do I care about".
+   Event type answers "what changed".
+   They are orthogonal. An article is tagged with both, which is what
+   lets Discover (map lens) and Intel (list lens) share one query.
+   A previous iteration treated these as two competing taxonomies and
+   invented a third "investigation layer" to bridge them — don't.     */
+
+export const SPACE_TYPES = [
+  "Residential",
+  "Commercial",
+  "STR",
+  "Hospitality",
+  "Culinary",
+  "Venues",
+];
+
+export const EVENT_TYPES = [
+  "Zoning",
+  "Development",
+  "Transit",
+  "Infrastructure",
+];
+
+/** Territories, derived from the data so they can never drift from it. */
+export function getTerritories() {
+  return [...new Set(ARTICLES.map((a) => a.city))].sort();
+}
+
+/**
+ * A "signal" is simply an article carrying a live status badge. There is no
+ * separate signals dataset — that split is what let the map and the article
+ * list disagree (slug `green-office-demand` once existed in both with
+ * different categories).
+ */
+export function getSignals() {
+  return ARTICLES.filter((a) => Boolean(a.status));
+}
+
+/**
+ * The shared investigation query. Both lenses read and write this shape.
+ * Any slot may be null, which means "unfiltered on that axis".
+ */
+export function filterByInvestigation(articles, { event, place, space } = {}) {
+  return articles.filter((a) => {
+    if (event && a.event !== event) return false;
+    if (space && a.category !== space) return false;
+    if (place && a.city !== place) return false;
+    return true;
+  });
+}
 
 export function getArticles(category = "All") {
   if (category === "All") {

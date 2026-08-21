@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 
+import AmbientRail from "@/components/layout/ambient/AmbientRail";
+
 // Plain-language companion for each cosmic layer name, so first-time visitors
 // know what "Stratosphere" or "Metropolis" actually is. Shown as "Cosmic · Plain"
 // on desktop; mobile collapses to the arrow only.
@@ -72,7 +74,14 @@ function NavPill({ href, label, dir }) {
   );
 }
 
-export default function LayerNav({ prev = null, next = null }) {
+export default function LayerNav({
+  prev = null,
+  next = null,
+  /* Location for the ambient readout, same shape the property page already
+     passes to <Header ambientContext={...}>: { key, source, latitude,
+     longitude, shortName }. Null falls back to the rail's own default. */
+  ambientContext = null,
+}) {
   const [logoHover, setLogoHover] = useState(false);
 
   return (
@@ -91,8 +100,10 @@ export default function LayerNav({ prev = null, next = null }) {
           justifyContent: "space-between",
           padding: "0 16px",
           background: "rgba(10,10,10,0.80)",
+          // Unprefixed ONLY. Paired with -webkit-backdrop-filter the pipeline
+          // keeps just the prefixed one and current Chrome rejects it, so the
+          // header silently loses its blur. Safari 18+ needs no prefix.
           backdropFilter: "blur(14px)",
-          WebkitBackdropFilter: "blur(14px)",
           borderBottom: "1px solid rgba(232, 174, 60,0.12)",
         }}
       >
@@ -134,8 +145,29 @@ export default function LayerNav({ prev = null, next = null }) {
           </span>
         </Link>
 
-        {/* CONTINUE */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", minWidth: "40px" }}>
+        {/* AMBIENT + CONTINUE
+            The logo is absolutely centred, so this side can carry the
+            ambient readout without pushing it off centre.
+
+            This is the SAME <AmbientRail> the site header and the property
+            master page use — not a second weather readout. An earlier pass
+            here built its own, which silently pulled from the wrong hook:
+            there are two exporting `useAmbientData`, and only
+            `ambient/ambientData.js` accepts a location context. The one in
+            `ambient/useAmbientData.js` does not, so a bespoke readout could
+            never show the weather for a given place. */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "flex-end",
+            gap: "14px",
+            minWidth: "40px",
+          }}
+        >
+          <div className="layer-nav-ambient">
+            <AmbientRail user={null} context={ambientContext} />
+          </div>
           {next && <NavPill href={next.href} label={next.label} dir="next" />}
         </div>
       </nav>
@@ -144,6 +176,14 @@ export default function LayerNav({ prev = null, next = null }) {
         @media (max-width: 480px) {
           .layer-nav-pill-label {
             display: none;
+          }
+        }
+
+        /* The header's job on a phone is back / logo / next. Conditions are
+           the first thing to go when there is no room for all three. */
+        @media (max-width: 860px) {
+          .layer-nav-ambient {
+            display: none !important;
           }
         }
       `}</style>

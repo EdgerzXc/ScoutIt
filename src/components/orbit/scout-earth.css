@@ -1,0 +1,94 @@
+/*
+ * Scout Earth — Orbit layer container.
+ *
+ * The globe canvas is transparent; the Orbit page owns the background. The
+ * only thing added here is one very restrained glow whose entire job is to
+ * separate the planet from the ground behind it.
+ */
+
+.scout-earth {
+  position: relative;
+  width: 100%;
+  /* Never a fixed pixel box — the ResizeObserver reads this. */
+  height: min(78vh, 850px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* The planet is draggable, not a button. */
+  cursor: grab;
+  /* VISIBLE, not hidden. `overflow: hidden` here clipped the bottom of the
+     sphere and turned the composition into a horizon. Nothing about this
+     container should crop the planet; the page wrapper already handles
+     horizontal overflow with its own overflow-x. Only reintroduce hidden
+     for a deliberate transition. */
+  overflow: visible;
+}
+
+.scout-earth.is-dragging {
+  cursor: grabbing;
+}
+
+/* Barely visible by design. If this reads as a gold circle it is wrong. */
+.scout-earth__glow {
+  position: absolute;
+  width: 58%;
+  aspect-ratio: 1;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  background: radial-gradient(
+    circle,
+    rgba(212, 175, 55, 0.075) 0%,
+    rgba(212, 175, 55, 0.025) 38%,
+    rgba(212, 175, 55, 0) 72%
+  );
+  filter: blur(28px);
+}
+
+.scout-earth__stage {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Globe.gl injects its own canvas; keep it from introducing a scrollbar. */
+.scout-earth__stage canvas {
+  display: block;
+  max-width: 100%;
+}
+
+@media (max-width: 768px) {
+  .scout-earth {
+    height: 64vh;
+    min-height: 430px;
+  }
+}
+
+/* No transforms, offsets or scaling anywhere in this file by design: the
+   globe is centred by the flex box above and by the camera, never nudged
+   into place with translateY / bottom / scale. Those tricks are what push a
+   sphere half out of frame. */
+
+/* ── LOADING RESERVE ─────────────────────────────────────────────────
+   Same box as .scout-earth, but empty. No spinner, no skeleton, no card —
+   it exists purely so the Earth's arrival causes zero layout shift. */
+.scout-earth-reserve {
+  width: 100%;
+  height: min(78vh, 850px);
+}
+
+@media (max-width: 768px) {
+  .scout-earth-reserve {
+    height: 64vh;
+    min-height: 430px;
+  }
+}
+
+/* Reduced motion is handled in JS, not here: Globe.gl reads no CSS, so the
+   auto-rotation is switched off against the same media query inside
+   ScoutEarth.js. The planet stays; the drift stops. */

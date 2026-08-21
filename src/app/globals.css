@@ -385,7 +385,16 @@ body.light-mode .scoutit-wordmark .word-it {
    edited again, check `body.light-mode .global-footer` still matches. */
 body.light-mode .cinematic-container,
 body.light-mode .descent-root,
-body.light-mode .global-footer {
+body.light-mode .global-footer,
+/* Layer 02 surfaces are dark islands too: the Stratosphere layer sits over a
+   WebGL night sky, and the Discover / radar / nearby-signals instruments are
+   readouts over that same material. Without these they inherited the light
+   ground and painted near-white ink on near-white — the same failure the
+   footer had. */
+body.light-mode .stratosphere-layer,
+body.light-mode .dsc,
+body.light-mode .nbs,
+body.light-mode .spatial-intel-map-card {
   --text-primary:       #ffffff;
   --text-primary-ch:    255 255 255;
   --text-secondary:     #a8a29a;

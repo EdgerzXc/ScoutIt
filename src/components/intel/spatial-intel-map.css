@@ -1,0 +1,233 @@
+/*
+ * Spatial Intel Map — instrument chrome.
+ *
+ * Note on blur: never pair `-webkit-backdrop-filter` with `backdrop-filter`
+ * in this project. When both are present the CSS pipeline keeps only the
+ * prefixed one, and current Chrome rejects it, so the blur silently
+ * disappears. Unprefixed alone works everywhere we target.
+ */
+
+.spatial-intel-map-card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  overflow: hidden;
+}
+
+/* ── HEADER ─────────────────────────────────────────────────────── */
+.sim-header {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+  font-variant-numeric: tabular-nums;
+}
+
+.sim-live {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-bright);
+  box-shadow: 0 0 8px var(--accent-bright);
+  animation: simPulse 2s infinite ease-in-out;
+  flex-shrink: 0;
+}
+
+.sim-title {
+  color: var(--accent);
+}
+
+.sim-count {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-left: auto;
+  /* var(--text-secondary) on var(--surface) clears 4.5:1. */
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.sim-sep {
+  color: var(--accent-muted);
+}
+
+/* ── CANVAS ─────────────────────────────────────────────────────── */
+.sim-canvas {
+  position: relative;
+  flex: 1;
+}
+
+.sim-gl {
+  width: 100%;
+  height: 100%;
+}
+
+.sim-overlay {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 13px;
+  border: 1px solid rgba(232, 174, 60, 0.34);
+  border-radius: 4px;
+  /* This one floats over a live map, which is the case glass exists for. */
+  background: rgba(14, 14, 14, 0.82);
+  backdrop-filter: blur(10px);
+}
+
+.sim-overlay-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.sim-overlay-kicker {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.sim-overlay-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sim-reset {
+  flex-shrink: 0;
+  padding: 6px 11px;
+  border: 1px solid rgba(232, 174, 60, 0.4);
+  border-radius: 3px;
+  background: transparent;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color 180ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .sim-reset:hover {
+    background: rgba(232, 174, 60, 0.12);
+  }
+}
+
+.sim-reset:focus-visible {
+  outline: 1.5px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.sim-hint {
+  margin: 0;
+  padding: 11px 16px;
+  border-top: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+/* Orbit's pulseGlow verbatim. */
+@keyframes simPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.35);
+    opacity: 0.6;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sim-live {
+    animation: none;
+  }
+}
+
+/* ── MAPLIBRE CHROME ──────────────────────────────────────────────
+   MapLibre ships white browser chrome. Unstyled, the attribution rendered
+   as a 64px white slab on a phone and the zoom buttons as two white
+   squares on a near-black instrument card. */
+.spatial-intel-map-card .maplibregl-ctrl-group {
+  background: rgba(14, 14, 14, 0.92);
+  border: 1px solid #2a2a2a;
+  border-radius: 4px;
+  box-shadow: none;
+}
+
+.spatial-intel-map-card .maplibregl-ctrl-group button + button {
+  border-top: 1px solid #2a2a2a;
+}
+
+.spatial-intel-map-card .maplibregl-ctrl-group button .maplibregl-ctrl-icon {
+  filter: invert(85%) sepia(18%) saturate(360%) hue-rotate(357deg)
+    brightness(95%);
+}
+
+.spatial-intel-map-card .maplibregl-ctrl-group button:hover {
+  background: rgba(232, 174, 60, 0.12);
+}
+
+/* Collapsed to the info toggle by default. The attribution stays reachable,
+   which is the licence requirement; it just stops being the brightest
+   object on the map. */
+.spatial-intel-map-card .maplibregl-ctrl-attrib {
+  background: rgba(14, 14, 14, 0.7);
+  font-size: 9px;
+}
+
+.spatial-intel-map-card .maplibregl-ctrl-attrib,
+.spatial-intel-map-card .maplibregl-ctrl-attrib a {
+  color: var(--text-secondary);
+}
+
+.spatial-intel-map-card .maplibregl-ctrl-attrib-button {
+  background-color: rgba(14, 14, 14, 0.7);
+  filter: invert(85%) sepia(18%) saturate(360%) hue-rotate(357deg)
+    brightness(95%);
+}
+
+/* "Use two fingers to move the map" was unstyled system white. */
+.spatial-intel-map-card .maplibregl-cooperative-gesture-screen {
+  background: rgba(14, 14, 14, 0.72);
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--text-primary);
+}
+
+@media (pointer: coarse) {
+  .spatial-intel-map-card .maplibregl-ctrl-group button {
+    width: 44px;
+    height: 44px;
+  }
+
+  .spatial-intel-map-card .maplibregl-ctrl-group button .maplibregl-ctrl-icon {
+    background-size: 20px 20px;
+  }
+}

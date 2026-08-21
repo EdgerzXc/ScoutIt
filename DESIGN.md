@@ -16,7 +16,7 @@ colors:
   signal-red: "#e8644a"
 typography:
   display:
-    fontFamily: "Georgia, 'Times New Roman', serif"
+    fontFamily: "var(--font-geist-sans), system-ui, sans-serif"
     fontSize: "clamp(1.75rem, 4vw, 3rem)"
     fontWeight: 400
     lineHeight: 1.2
@@ -67,16 +67,16 @@ components:
 
 **Creative North Star: "The Spatial Commerce"**
 
-ScoutIt isn't a real estate listings board wearing a dark theme — it's an intelligence terminal for Philippine space, built for people deciding whether to trust it enough to act. With the introduction of the **Impeccable Phase**, the system has evolved from its strict 95% void-black / 5% gold origins into a rich, dynamic, and premium platform. We now embrace deep mesh gradients, advanced glassmorphism, and secondary jewel tones (Sapphire, Emerald) to create a breathtaking SaaS experience while maintaining our intelligence-first DNA.
+ScoutIt isn't a real estate listings board wearing a dark theme — it's an intelligence terminal for Philippine space, built for people deciding whether to trust it enough to act. The 95% void-black / 5% gold ratio is the working default, not a cage. Deviation is allowed when a surface earns it — but it must be argued for, not reached for. Depth comes first from tonal surface steps, atmosphere, and motion; blur and gradient are the last tools picked up, not the first.
 
 This system explicitly rejects: generic PH listing-directory aesthetics (Lamudi/Zillow-style boards) and the "common luxury real estate" cliché (gold-and-marble old-money tropes, ornate serif-everywhere, stock-photo-mansion imagery). We lean into high-end modern SaaS aesthetics.
 
 **Key Characteristics:**
-- Rich deep-void canvas enhanced by subtle radial mesh gradients to provide atmospheric depth.
-- Gold is our primary signature, augmented by Sapphire and Emerald to denote specific intelligence domains.
+- Deep-void canvas. Atmosphere comes from tonal surface steps and real scene lighting (WebGL, glow), not from decorative gradient washes.
+- Gold is the signature and carries the accent budget. Sapphire and Emerald are semantic signal colors only (state, verification, AI attribution) — never decorative, never a second brand color.
 - Mono-spaced, wide-tracked, uppercase labels for system chrome (eyebrows, badges, metadata)
-- Georgia serif for display headlines — editorial weight, occasionally featuring premium gradient clips for hero moments.
-- Scoped, purposeful glassmorphism — heavy backdrop blurs, multi-layered shadows, and translucent borders.
+- Georgia serif for display headlines — editorial weight, always a single solid color. Gradient-clipped text is banned; emphasis comes from weight, size, and color.
+- Glassmorphism is a rare, minimal exception — used where a surface genuinely floats over live content (over the WebGL layer backgrounds, a sticky bar over moving media). Never the default card treatment. Lightest blur that achieves the effect.
 - Hover physics (scale down, tilt, multi-layered glowing shadows) make the interface feel highly tactile and alive.
 
 ## 2. Colors
@@ -101,20 +101,20 @@ The palette is a strict two-role system by design: void-black carries everything
 - **Tech Sapphire** (`#3b82f6`): High-tech intelligence, AI insights, command center data.
 
 ### Named Rules
-**The Dynamic Canvas Rule.** Pure `#000000` is forbidden. The base canvas must utilize our deep purple/blue void tones (`#0a0510`) and incorporate subtle radial mesh gradients for high-impact areas (like headers and hero sections).
+**The Dynamic Canvas Rule.** Pure `#000000` is forbidden. The base canvas is Void Black `#0e0e0e` — warm-leaning, never purple/blue. Depth on high-impact surfaces comes from tonal surface steps and scene lighting first; a radial wash is permitted only where there is no live background doing that job already.
 
 **The Tactile Interface Rule.** All primary interactive surfaces (cards, buttons) must respond physically. Use `active:scale-[0.98]` and multi-layered glow shadows on hover to ensure the app feels alive and premium.
 
 ## 3. Typography
 
-**Display Font:** Georgia, 'Times New Roman', serif
+**Display Font:** Geist Sans (`--font-display`)
 **Body Font:** Geist Sans (via `next/font`), system-ui fallback
 **Label/Mono Font:** Geist Mono, 'Courier New' fallback
 
-**Character:** Serif display against a sans body is the system's core typographic contrast — editorial authority up top, clean readability underneath. The mono label layer is where the "intelligence terminal" feeling actually lives: every eyebrow, badge, and system-chrome label runs uppercase and wide-tracked in mono, deliberately looking like instrument-panel text.
+**Character:** Corrected 2026-08-20 — this section claimed a Georgia serif display face, but `--font-display` in `globals.css` has always resolved to Geist Sans. Nothing on the site rendered Georgia; CSS written as `var(--font-display, Georgia, serif)` never reached the fallback. The real contrast is WEIGHT and TRACKING, not serif-vs-sans: display runs Geist at 500 with tight negative tracking (-0.028em), body runs Geist at 400. The mono label layer is where the "intelligence terminal" feeling actually lives: every eyebrow, badge, and system-chrome label runs uppercase and wide-tracked in mono, deliberately looking like instrument-panel text.
 
 ### Hierarchy
-- **Display** (400 weight, `clamp(1.75rem, 4vw, 3rem)`, 1.2 line-height): hero headlines, property titles, section headers. Georgia serif — never sans for these.
+- **Display** (500 weight, `clamp(32px, 5vw, 60px)`, 1.06 line-height, -0.028em tracking): hero headlines, layer titles, section headers. These are Layer 01 Orbit's values (`.orbit-hero-title`) — Layer 02 matches them exactly so the descent reads as one system.
 - **Headline** (400 weight, 24px, 1.4 line-height): sub-headlines and editorial text.
 - **Title** (600 weight, 20px, 1.2 line-height): working titles, section headings.
 - **Body** (450 weight, 16px, 1.65 line-height): all prose copy.
@@ -130,12 +130,12 @@ Flat by default, tonal layering for depth. Surfaces step through `void-black` �
 ### Shadow & Glass Vocabulary
 - **sm** (`0 2px 8px rgba(0,0,0,0.25)`): subtle lift, list items.
 - **md** (`0 4px 16px rgba(0,0,0,0.35)`): standard dropdowns.
-- **glass-panel**: `rgba(26,16,37,0.65)` background, `16px` blur, 1px translucent border, large shadow. Used for high-impact dashboard cards.
+- **glass-panel** (rare): `rgba(14,14,14,0.72)` background, `10px` blur, 1px hairline border. Reserved for surfaces that genuinely float over live/moving content. Not for static cards.
 - **glow** (`0 0 24px rgba(247,198,78,0.55)`): active/focused accent elements, vibrant hover states.
 - **sapphire-glow** (`0 0 32px rgba(59,130,246,0.35)`): Used for AI or deep-insight elements.
 
 ### Named Rules
-**The Premium Glass Rule.** Standard opaque surfaces are for secondary UI. Primary data cards, KPI strips, and hero containers must utilize the `glass-panel` or `hov-glow` patterns to maximize the feeling of spatial depth.
+**The Glass Restraint Rule.** Opaque tonal surfaces are the default for all cards, KPI strips, and containers. `glass-panel` is permitted only when something live is moving behind the surface and must remain legible through it — at most one or two such surfaces per screen. If you cannot name what is moving behind it, use an opaque surface.
 
 ## 5. Components
 
@@ -171,9 +171,9 @@ The numbered chapter marker (`01 — THE SPACE`, `02 — LOCATION`, ...) that op
 ## 6. Do's and Don'ts
 
 ### Do:
-- **Do** utilize our rich gradient texts (`text-gradient-gold`, `text-gradient-sapphire`) for major page titles to establish a premium presence.
+- **Do** set major page titles in a single solid color — Paper White with a gold accent span where emphasis is needed.
 - **Do** use the mono/uppercase/wide-tracked treatment for every piece of system chrome (eyebrows, badges, labels).
-- **Do** wrap primary intelligence data in `glass-panel` to provide depth.
+- **Do** build depth from tonal surface steps (`#0e0e0e` → `#161616` → `#1e1e1e` → `#242424`). Reach for `glass-panel` only when live content moves behind the surface.
 - **Do** ensure physical, tactile feedback on all interactive elements via `active:scale-[0.98]` and expansive hover glows.
 
 ### Don't:

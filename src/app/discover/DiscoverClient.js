@@ -9,6 +9,7 @@ import Footer from "@/components/layout/Footer";
 import AtmosphereBackground from "@/components/ui/AtmosphereBackground";
 import ProvenanceBadge from "@/components/ui/ProvenanceBadge";
 import { DISCOVER_INTEL, DISCOVER_PROPERTIES, USE_MOCK_DATA } from "@/data/mock";
+import DiscoverSearch from "@/components/discover/DiscoverSearch";
 import "./discover.css";
 
 const CATEGORIES = ["Residential", "Commercial", "STR", "Hospitality", "Restaurants", "Venues/Events"];
@@ -231,11 +232,23 @@ export default function DiscoverClient() {
             </Link>
           </div>
 
-          {/* Zone 1: Spotlights */}
-          <section>
+          {/* ── PRIMARY: the search engine. Articles are the main result;
+                 everything below this is the secondary property band. Layer
+                 03 Metropolis remains the real property directory — this is
+                 "and here are spaces around here", not a second catalogue. */}
+          <DiscoverSearch />
+
+          {/* Zone 1: Spotlights — SECONDARY */}
+          <section className="discoverSecondary">
             <div className="sectionHeader">
-              <h2 className="sectionTitle">Spotlights</h2>
-              <p className="sectionSubtitle">Drag left & right · Tap a space to load its local news</p>
+              <span className="secondaryKicker">Also in this area</span>
+              <h2 className="sectionTitle">Spaces</h2>
+              <p className="sectionSubtitle">
+                Drag left &amp; right · Tap a space to load its local news ·{" "}
+                <Link href="/layer/metropolis" className="secondaryJump">
+                  Browse the full directory
+                </Link>
+              </p>
             </div>
             <div
               className="spotlightMatrix"

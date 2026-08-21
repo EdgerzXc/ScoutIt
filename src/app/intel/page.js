@@ -7,6 +7,7 @@ import MeshHero from "@/components/ui/MeshHero";
 import HoverCard from "@/components/ui/HoverCard";
 import ImagePlaceholder from "@/components/ui/ImagePlaceholder";
 import SpatialIntelMap from "@/components/intel/SpatialIntelMap";
+import { distanceKm } from "@/lib/geo";
 import OSINTFlashTicker from "@/components/intel/OSINTFlashTicker";
 import InViewport from "@/components/ui/InViewport";
 
@@ -31,7 +32,9 @@ import { getArticles } from "@/data/mock/mockArticles";
 export default function IntelPage() {
   const router = useRouter();
   const [filter, setFilter] = useState("All Dispatches");
-  const [searchQuery, setSearchQuery] = useState("");
+  // Intel has NO text search by design. You browse Intel; you query on
+  // Discover. What replaces it here is the radar: a centre and a radius.
+  const [radar, setRadar] = useState(null); // { lat, lng, radiusKm } | null
   const [featuredIndex, setFeaturedIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [selectedCity, setSelectedCity] = useState(null);
@@ -111,12 +114,12 @@ export default function IntelPage() {
 
   // Auto-next timer for featured briefing hero card (7 seconds)
   useEffect(() => {
-    if (isPaused || filter !== "All" || searchQuery.trim() !== "") return;
+    if (isPaused || filter !== "All") return;
     const timer = setInterval(() => {
       setFeaturedIndex(prev => prev + 1);
     }, 7000);
     return () => clearInterval(timer);
-  }, [isPaused, filter, searchQuery]);
+  }, [isPaused, filter]);
 
   const categories = ["All Dispatches", "Market Intel", "Commercial Signals", "Area Guides", "Insights", "Briefings"];
 
@@ -153,14 +156,13 @@ export default function IntelPage() {
         return false;
       }
     }
-    // Search query check
-    if (searchQuery.trim() !== "") {
-      const q = searchQuery.toLowerCase();
-      const matchTitle = art.title.toLowerCase().includes(q);
-      const matchExcerpt = art.excerpt && art.excerpt.toLowerCase().includes(q);
-      const matchCat = art.category && art.category.toLowerCase().includes(q);
-      const matchCity = art.city && art.city.toLowerCase().includes(q);
-      return matchTitle || matchExcerpt || matchCat || matchCity;
+    // Radar check — same Haversine the /api/cms radius filter uses, so the
+    // map ring and the article list can never disagree about what is inside.
+    if (radar) {
+      if (art.lat == null || art.lng == null) return false;
+      if (distanceKm(radar.lat, radar.lng, art.lat, art.lng) > radar.radiusKm) {
+        return false;
+      }
     }
     return true;
   });
@@ -194,12 +196,27 @@ export default function IntelPage() {
 
         {/* Enriched Full-Width 3D Spatial Radar Map Terminal */}
         <section className="spatial-intel-map-hero my-6 px-6 max-w-[1400px] mx-auto">
-          <InViewport placeholder={<div className="h-[500px] bg-surface-alt animate-pulse rounded-sm border border-surface-variant flex items-center justify-center font-mono text-xs text-text-muted">LOADING 3D SPATIAL RADAR...</div>}>
+          {/* `fallback`, not `placeholder` — InViewport has no `placeholder`
+              prop, so the skeleton silently never rendered and readers
+              saw an empty box while maplibre loaded. */}
+          <InViewport
+            style={{ minHeight: 500 }}
+            fallback={
+              <div className="h-[500px] bg-surface-alt animate-pulse rounded-sm border border-surface-variant flex items-center justify-center font-mono text-xs text-text-muted">
+                LOADING SPATIAL RADAR...
+              </div>
+            }
+          >
             <SpatialIntelMap
               articles={articles}
-              activeArticleSlug={featuredArticle?.slug}
+              mode="radar"
               selectedCity={selectedCity}
               onSelectCity={handleSelectCity}
+              radiusKm={radar ? radar.radiusKm : null}
+              center={radar}
+              onRadarChange={(next) =>
+                setRadar((r) => ({ radiusKm: r ? r.radiusKm : 12, ...next }))
+              }
             />
           </InViewport>
         </section>
@@ -324,16 +341,59 @@ export default function IntelPage() {
           </section>
         )}
 
-        {/* Search & Filter Section */}
+        {/* Filter Section. There is deliberately no search box here — Intel
+            is browsed, Discover is queried. */}
         <section className="controls-section" id="intel-dispatches-grid">
-          <div className="search-bar-wrapper">
-            <input
-              type="text"
-              className="articles-search-input"
-              placeholder="SEARCH BRIEFINGS BY TOPIC, HEADLINE, OR DESIGN KEYWORDS..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
+          <div className="intel-radar-strip">
+            {radar ? (
+              <>
+                <label className="intel-radar-label" htmlFor="intel-radius">
+                  Radius
+                  <output className="intel-radar-value">{radar.radiusKm} km</output>
+                </label>
+                <input
+                  id="intel-radius"
+                  type="range"
+                  min="1"
+                  max="80"
+                  step="1"
+                  value={radar.radiusKm}
+                  onChange={(e) =>
+                    setRadar((r) => ({ ...r, radiusKm: Number(e.target.value) }))
+                  }
+                  className="intel-radar-range"
+                />
+                <span className="intel-radar-result">
+                  {filteredArticles.length}{" "}
+                  {filteredArticles.length === 1 ? "signal" : "signals"} inside
+                </span>
+                <button
+                  type="button"
+                  className="intel-radar-clear"
+                  onClick={() => setRadar(null)}
+                >
+                  Clear radar
+                </button>
+              </>
+            ) : (
+              <>
+                <span className="intel-radar-idle">
+                  Drop a radar to see only what is near one place.
+                </span>
+                <button
+                  type="button"
+                  className="intel-radar-start"
+                  onClick={() =>
+                    setRadar({ lat: 14.5547, lng: 121.0244, radiusKm: 12 })
+                  }
+                >
+                  Drop a radar
+                </button>
+                <Link href="/discover" className="intel-radar-search-link">
+                  Need to search? Open Discover
+                </Link>
+              </>
+            )}
           </div>
           <div className="filter-tabs-wrapper">
             {categories.map(cat => (
@@ -793,25 +853,126 @@ export default function IntelPage() {
           gap: 20px;
         }
 
-        .search-bar-wrapper {
+        /* ── THE RADAR STRIP ────────────────────────────────────────
+           Replaces the old text search. Intel is browsed, not queried —
+           the one spatial control it keeps is "only what is near here".
+           Flex, not grid: styled-jsx drops grid-template-* from the
+           emitted rule. */
+        .intel-radar-strip {
           width: 100%;
+          display: flex;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 14px;
         }
 
-        .articles-search-input {
-          width: 100%;
-          background: var(--bg);
-          border: 1px solid var(--border-solid);
-          border-radius: var(--radius-sm);
-          padding: 14px 20px;
+        .intel-radar-idle {
           font-size: 13px;
-          color: var(--text-primary);
-          font-family: var(--font-mono);
-          transition: border-color var(--transition-fast);
+          color: var(--text-secondary);
         }
 
-        .articles-search-input:focus {
-          outline: none;
-          border-color: var(--accent);
+        .intel-radar-label {
+          display: flex;
+          align-items: baseline;
+          gap: 8px;
+          font-family: var(--font-mono);
+          font-size: 10px;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+          color: var(--text-secondary);
+          white-space: nowrap;
+        }
+
+        .intel-radar-value {
+          font-size: 13px;
+          letter-spacing: 0.04em;
+          color: var(--accent);
+        }
+
+        .intel-radar-range {
+          flex: 1 1 200px;
+          min-width: 160px;
+          accent-color: var(--accent-bright);
+          cursor: pointer;
+        }
+
+        .intel-radar-result {
+          font-family: var(--font-mono);
+          font-size: 10px;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+          color: var(--accent);
+          white-space: nowrap;
+        }
+
+        .intel-radar-start,
+        .intel-radar-clear {
+          padding: 9px 16px;
+          border-radius: var(--radius-sm);
+          font-family: var(--font-mono);
+          font-size: 10px;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+          cursor: pointer;
+          transition: background-color 180ms cubic-bezier(0.23, 1, 0.32, 1),
+            border-color 180ms cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .intel-radar-start {
+          border: 1px solid transparent;
+          background: var(--accent-bright);
+          color: var(--bg);
+        }
+
+        .intel-radar-clear {
+          border: 1px solid var(--accent-muted);
+          background: transparent;
+          color: var(--accent);
+        }
+
+        .intel-radar-start:hover {
+          background: var(--accent);
+        }
+
+        .intel-radar-clear:hover {
+          background: rgba(232, 174, 60, 0.1);
+        }
+
+        .intel-radar-start:active,
+        .intel-radar-clear:active {
+          transform: scale(0.98);
+        }
+
+        .intel-radar-start:focus-visible,
+        .intel-radar-clear:focus-visible,
+        .intel-radar-range:focus-visible {
+          outline: 1.5px solid var(--accent);
+          outline-offset: 2px;
+        }
+
+        /* The escape hatch. Someone who came here wanting to search should
+           be pointed at Discover rather than left hunting for a box. */
+        .intel-radar-search-link {
+          margin-left: auto;
+          font-family: var(--font-mono);
+          font-size: 10px;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          color: var(--text-secondary);
+          text-decoration: none;
+          border-bottom: 1px solid var(--accent-muted);
+          padding-bottom: 2px;
+          transition: color 180ms cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .intel-radar-search-link:hover {
+          color: var(--accent);
+        }
+
+        @media (max-width: 640px) {
+          .intel-radar-search-link {
+            margin-left: 0;
+          }
         }
 
         .filter-tabs-wrapper {

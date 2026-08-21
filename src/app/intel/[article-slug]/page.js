@@ -7,6 +7,8 @@ import { fetchIntel } from "@/lib/airtable";
 import { siteUrl } from "@/lib/siteUrl";
 import { parseArticleBlocks, blocksFromLegacy } from "@/lib/articleSchema";
 import ArticleBlocks from "@/components/intel/ArticleBlocks";
+import InvestigationDossier from "@/components/intel/InvestigationDossier";
+import { getInvestigation } from "@/data/mock/investigations";
 import GlassPanel from "@/components/ui/GlassPanel";
 import HoverCard from "@/components/ui/HoverCard";
 import "./article-detail.css";
@@ -93,6 +95,11 @@ export default async function IntelArticlePage({ params }) {
   }
 
   const related = await getLiveRelated(slug);
+
+  // The chaptered dossier used to live on the Stratosphere layer page. It
+  // belongs here: the reader has already chosen this story. Articles
+  // without a dossier simply render without the section.
+  const dossier = getInvestigation(slug);
 
   return (
     <div className="page-wrapper">
@@ -187,6 +194,8 @@ export default async function IntelArticlePage({ params }) {
             </GlassPanel>
           </div>
         </section>
+
+        {dossier ? <InvestigationDossier dossier={dossier} /> : null}
 
         {/* Related Briefings Section */}
         <section className="related-section">

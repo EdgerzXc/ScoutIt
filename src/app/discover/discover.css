@@ -928,3 +928,35 @@ body.light-mode .visualContent {
     padding: 14px;
   }
 }
+
+/* ── SECONDARY PROPERTY BAND ────────────────────────────────────────
+   Discover leads with intel. Spaces stay, but visually subordinate and
+   pointing at Layer 03 Metropolis, which is the real property directory.
+   Two competing catalogues is how this codebase ended up with two article
+   datasets disagreeing about the same slug. */
+.discoverSecondary {
+  margin-top: clamp(36px, 6vw, 64px);
+  padding-top: clamp(24px, 4vw, 36px);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.secondaryKicker {
+  display: block;
+  margin-bottom: 6px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #c8c8c8;
+}
+
+.secondaryJump {
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid var(--accent-muted);
+}
+
+.secondaryJump:hover {
+  border-bottom-color: var(--accent);
+}
