@@ -6,6 +6,11 @@
   "outputDirectory": "public",
   "redirects": [
     {
+      "source": "/",
+      "destination": "https://www.scoutit.space/",
+      "permanent": true
+    },
+    {
       "source": "/:path*",
       "destination": "https://www.scoutit.space/:path*",
       "permanent": true
