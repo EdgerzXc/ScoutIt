@@ -94,26 +94,54 @@ export function validateGraphAgainstSchema(graphData) {
  */
 export function validateBrainReferences(nodes = MASTER_FLOW_NODES) {
   const unresolved = [];
+  const unavailable = [];
   const rootDir = process.cwd();
 
   nodes.forEach(node => {
     const refs = node.brainRefs || [];
     refs.forEach(ref => {
       const fullPath = path.resolve(rootDir, ref);
-      if (!fs.existsSync(fullPath)) {
-        unresolved.push({
-          nodeId: node.id,
-          reference: ref
-        });
+      if (fs.existsSync(fullPath)) return;
+
+      /* `.gitignore` line 74 excludes `_SCOUTIT_BRAIN/*` on purpose, keeping
+         everything except 15_IMPLEMENTATION_RECORDS out of the repo. Those
+         docs exist on the author's machine and nowhere else — not in CI, not
+         in a fresh clone, not in a second worktree.
+
+         Treating their absence as a failure made this assert something git
+         is deliberately configured never to provide, so the suite passed on
+         exactly one machine and went red everywhere else. A reference into
+         a private directory is UNAVAILABLE, which is a fact about the repo,
+         not UNRESOLVED, which would mean the graph points at nothing. */
+      if (isPrivateBrainRef(ref)) {
+        unavailable.push({ nodeId: node.id, reference: ref });
+        return;
       }
+
+      unresolved.push({ nodeId: node.id, reference: ref });
     });
   });
 
   return {
     valid: unresolved.length === 0,
     unresolvedCount: unresolved.length,
-    unresolved
+    unresolved,
+    // Surfaced so a caller can still report them; simply not a failure.
+    unavailableCount: unavailable.length,
+    unavailable
   };
+}
+
+/**
+ * True when a reference points inside the private half of _SCOUTIT_BRAIN.
+ * Mirrors `.gitignore`: everything under _SCOUTIT_BRAIN is excluded except
+ * 15_IMPLEMENTATION_RECORDS, which IS tracked and so must still resolve.
+ */
+function isPrivateBrainRef(ref) {
+  // split/join rather than a regex — backslashes survive tooling better.
+  const normalised = String(ref).split("\\").join("/");
+  if (!normalised.startsWith("_SCOUTIT_BRAIN/")) return false;
+  return !normalised.startsWith("_SCOUTIT_BRAIN/15_IMPLEMENTATION_RECORDS/");
 }
 
 /**
