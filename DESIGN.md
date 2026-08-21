@@ -181,3 +181,8 @@ The numbered chapter marker (`01 — THE SPACE`, `02 — LOCATION`, ...) that op
 - **Don't** use the "common luxury real estate" cliché (gold-and-marble old-money tropes).
 - **Don't** use pure `#000000` or `#FFFFFF` for any backgrounds.
 - **Don't** make flat interfaces; if a primary card has no hover physics, it's a bug.
+## Owner-approved surface baseline
+
+Some high-risk public surfaces are protected by `npm run verify:surfaces`. The lock is deliberately stricter than a style guideline: it detects any source drift in the approved Showcase, Metropolis foreground, and Metropolis background files. The manifest checksum represents owner acceptance, not merely a passing build.
+
+Do not “fix” a lock failure by regenerating its checksum. Restore the accepted source unless the owner requested the visual change, reviewed the local result at desktop and mobile widths, and explicitly approved replacing the baseline. Performance work on a locked WebGL background must preserve its composition and art direction unless the approval says otherwise.

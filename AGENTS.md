@@ -39,3 +39,10 @@ Before writing complex code or modifying data structures, you must immediately r
 
 > All knowledge/strategy/handoff docs now live in ONE home: `_SCOUTIT_BRAIN/`. Start at
 > `_SCOUTIT_BRAIN/00_START_HERE.md`. (Consolidated 2026-06-24 — root/docs/automations no longer hold doc copies.)
+## 5. OWNER-APPROVED SURFACE LOCKS
+- Run `npm run verify:surfaces` before and after edits. CI enforces the same gate.
+- The checksum manifest is `scripts/approved-surfaces.json`. It records the last appearance explicitly accepted by the owner for regression-prone public surfaces.
+- A failed lock is a stop signal, not an invitation to refresh the checksum. Restore the approved file unless the owner explicitly authorized that exact surface change.
+- Never update a surface checksum during cleanup, formatting, conflict resolution, dependency work, or an unrelated fix.
+- For an intentional visual change: edit locally, verify desktop/mobile behavior, let the owner review it, and update the checksum only after explicit owner acceptance.
+- Mock/demo property scaffolding stays until the owner separately approves its retirement; it is not cleanup debris.

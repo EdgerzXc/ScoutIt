@@ -75,6 +75,7 @@ These protect other parts of the platform. Breaking one to fix something else is
   Tailwind arbitrary values), the UFO stays. Tailwind IS allowed (2026-06-26 correction —
   dashboards use it; public/marketing surfaces stay vanilla CSS). Dark is the default; light/
   high-contrast live in the Display panel only. **Mobile-first** is the default lens.
+- **Owner-approved surfaces are checksum-locked.** Run `npm run verify:surfaces` before and after edits. A failure is a stop signal: restore the accepted source unless the owner explicitly approved that exact visual change. Never refresh the manifest during unrelated work.
 - **Showcase Curation Invariant (The Board / Orbit Showcase).** The Showcase (`/showcase`)
   is ScoutIt's premier editorial and spatial showcase. It cannot be automated with generic
   placeholders. Every month, operators calibrate property merits (fast connect reply speed,

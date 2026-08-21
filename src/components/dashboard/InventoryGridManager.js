@@ -884,6 +884,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
             propertyId={propertyId}
             property={property}
             onClose={() => setDetailsUnitId(null)}
+            onField={(key, value) => updateUnit(detailsUnitId, key, value, true)}
             onDetail={(key, value) => {
               const cur = units.find((u) => u.id === detailsUnitId);
               updateUnit(detailsUnitId, "details", { ...(cur?.details || {}), [key]: value }, true);

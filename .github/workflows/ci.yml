@@ -36,6 +36,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Owner-approved surface locks
+        run: npm run verify:surfaces
+
       - name: Lint
         run: npm run lint
 

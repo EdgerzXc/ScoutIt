@@ -16,7 +16,6 @@ import {
   ShieldCheck,
   Building2,
   ExternalLink,
-  Layers,
   Sparkles,
   Award,
   TrendingUp,
@@ -1225,9 +1224,14 @@ export default function ShowcaseStage({ mode = "full" }) {
           </div>
 
           <div className="sc-top-actions">
-            <Link href="/layer/orbit" className="sc-orbit-return-btn">
-              <Layers size={14} />
-              <span>Orbit View</span>
+            <Link
+              href="/layer/orbit"
+              className="sc-orbit-return-btn"
+              aria-label="Back to Orbit"
+              title="Back to Orbit"
+            >
+              <ChevronLeft size={14} aria-hidden="true" />
+              <span>Back to Orbit</span>
             </Link>
           </div>
         </div>

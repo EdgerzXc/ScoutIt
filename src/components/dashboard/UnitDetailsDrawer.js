@@ -32,7 +32,7 @@ function Field({ label, hint, children }) {
   );
 }
 
-export default function UnitDetailsDrawer({ unit, isPro, propertyId, property, onDetail, onScenarios, onClose }) {
+export default function UnitDetailsDrawer({ unit, isPro, propertyId, property, onField, onDetail, onScenarios, onClose }) {
   const d = unit.details || {};
   const scenarios = Array.isArray(unit.subdivisionScenarios) ? unit.subdivisionScenarios : [];
 
@@ -82,7 +82,7 @@ export default function UnitDetailsDrawer({ unit, isPro, propertyId, property, o
           <section className="flex flex-col gap-4">
             <div className="text-[12px] font-label-caps tracking-widest uppercase text-text-secondary">The Space</div>
             <Field label="Base listed rate">
-              <input className={inputCls} value={d.price || ""} onChange={(e) => onDetail("price", e.target.value)} placeholder="e.g. ₱200,000 / mo or ₱1,500/sqm" />
+              <input className={inputCls} value={unit.price || d.price || ""} onChange={(e) => onField("price", e.target.value)} placeholder="e.g. ₱200,000 / mo or ₱1,500/sqm" />
             </Field>
             <Field label="Unit type">
               <select className={inputCls} value={d.unit_type || ""} onChange={(e) => onDetail("unit_type", e.target.value)}>
@@ -105,7 +105,7 @@ export default function UnitDetailsDrawer({ unit, isPro, propertyId, property, o
               <input className={inputCls} value={d.fit_out_status || ""} onChange={(e) => onDetail("fit_out_status", e.target.value)} placeholder="Warm shell / Fully fitted / Plug-and-play" />
             </Field>
             <Field label="Availability">
-              <select className={inputCls} value={d.availabilityStatus || "available"} onChange={(e) => onDetail("availabilityStatus", e.target.value)}>
+              <select className={inputCls} value={unit.availabilityStatus || d.availabilityStatus || "available"} onChange={(e) => onField("availabilityStatus", e.target.value)}>
                 <option value="available">Available</option>
                 <option value="occupied">Occupied</option>
                 <option value="coming_soon">Coming Soon</option>
@@ -114,6 +114,32 @@ export default function UnitDetailsDrawer({ unit, isPro, propertyId, property, o
           </section>
 
 
+
+          {/* Terms shown by the public Unit Master Page */}
+          <section className="flex flex-col gap-4 pt-2 border-t border-surface-variant">
+            <div className="text-[12px] font-label-caps tracking-widest uppercase text-text-secondary">Terms & Fit-Out</div>
+            <Field label="Operating hours">
+              <input className={inputCls} value={d.operating_hours || ""} onChange={(e) => onDetail("operating_hours", e.target.value)} placeholder="e.g. 24/7 access or Mon–Sat, 8 AM–8 PM" />
+            </Field>
+            <Field label="Minimum term">
+              <input className={inputCls} value={d.min_term || ""} onChange={(e) => onDetail("min_term", e.target.value)} placeholder="e.g. 12 months" />
+            </Field>
+            <Field label="Deposit">
+              <input className={inputCls} value={d.deposit || ""} onChange={(e) => onDetail("deposit", e.target.value)} placeholder="e.g. 2 months" />
+            </Field>
+            <Field label="Lease inclusions" hint="One inclusion per line. These appear as verified chips on the public unit page.">
+              <textarea
+                rows={4}
+                className={inputCls}
+                value={Array.isArray(d.lease_inclusions) ? d.lease_inclusions.join("\n") : ""}
+                onChange={(e) => onDetail("lease_inclusions", e.target.value.split("\n").map((item) => item.trim()).filter(Boolean))}
+                placeholder={"Internet\nMeeting-room credits\nUtilities"}
+              />
+            </Field>
+            <Field label="House rules">
+              <textarea rows={4} className={inputCls} value={d.house_rules || ""} onChange={(e) => onDetail("house_rules", e.target.value)} placeholder="Access, visitor, signage, noise, and shared-space rules." />
+            </Field>
+          </section>
 
           {/* Floor plan & Vault */}
           <section className="flex flex-col gap-4 pt-2 border-t border-surface-variant">

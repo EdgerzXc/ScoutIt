@@ -17,6 +17,12 @@ function rnd(seed) {
 function easeInOut(t) {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
+function windowColor(seed, alpha) {
+  const temperature = rnd(seed + 991);
+  if (temperature < 0.08) return `rgba(188, 205, 218, ${Math.min(alpha * 0.55, 0.58).toFixed(2)})`;
+  if (temperature < 0.48) return `rgba(255, 224, 176, ${Math.min(alpha, 0.82).toFixed(2)})`;
+  return `rgba(232, 174, 60, ${Math.min(alpha * 0.72, 0.68).toFixed(2)})`;
+}
 
 /* ── SKY ── deep space black fading into a glowing gold horizon down the avenue. */
 const SKY_VERT = `
@@ -29,9 +35,9 @@ const SKY_FRAG = `
     vec3 d = normalize(vDir);
     float t = d.y * 0.5 + 0.5;
     vec3 c;
-    if      (t > 0.50) c = mix(vec3(0.02, 0.02, 0.02), vec3(0.00, 0.00, 0.00), (t-0.50)/0.50);
-    else if (t > 0.20) c = mix(vec3(0.12, 0.09, 0.00), vec3(0.02, 0.02, 0.02), (t-0.20)/0.30);
-    else               c = mix(vec3(1.00, 0.72, 0.00), vec3(0.12, 0.09, 0.00), t/0.20);
+    if      (t > 0.52) c = mix(vec3(0.018, 0.020, 0.026), vec3(0.003, 0.004, 0.006), (t-0.52)/0.48);
+    else if (t > 0.18) c = mix(vec3(0.17, 0.105, 0.035), vec3(0.018, 0.020, 0.026), (t-0.18)/0.34);
+    else               c = mix(vec3(0.56, 0.30, 0.065), vec3(0.17, 0.105, 0.035), t/0.18);
 
     gl_FragColor = vec4(c, 1.0);
   }
@@ -129,8 +135,8 @@ function makeFacadeCanvas(fw, fh, density, seed, type, isMobile) {
     const g = ctx.createLinearGradient(0, 0, 0, H);
     g.addColorStop(0.00, "#030303");    // deep black zenith
     g.addColorStop(0.60, "#080808");    // dark grey
-    g.addColorStop(0.85, "#332400");    // dark gold band
-    g.addColorStop(1.00, "#E8AE3C");    // glowing gold horizon catch
+    g.addColorStop(0.85, "#241b10");    // warm reflected horizon
+    g.addColorStop(1.00, "#8c5b24");    // restrained amber horizon catch
     ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
 
     /* faint vertical sheen variation across panels */
@@ -145,13 +151,17 @@ function makeFacadeCanvas(fw, fh, density, seed, type, isMobile) {
     for (let c = 0; c <= cols; c++) ctx.fillRect(c * CW, 0, 1, H);
     for (let r = 0; r <= rows; r++) ctx.fillRect(0, r * CH, W, 1);
 
-    /* scattered warm interior lights behind the glass */
-    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
-      const s = seed + r * 131 + c * 17;
-      if (rnd(s) < density * 0.45) {
-        const br = (0.50 + rnd(s * 7) * 0.5).toFixed(2);
-        ctx.fillStyle = `rgba(232, 174, 60,${br})`; // True ScoutIt Gold
-        ctx.fillRect(c * CW + 1, r * CH + 1, CW - 2, CH - 2);
+    /* Offices illuminate in floor clusters, not independent checkerboard noise. */
+    for (let r = 0; r < rows; r++) {
+      const floorActivity = rnd(seed + r * 337);
+      const floorDensity = density * 0.45 * (floorActivity < 0.28 ? 0.12 : 0.72 + floorActivity * 0.28);
+      for (let c = 0; c < cols; c++) {
+        const s = seed + r * 131 + c * 17;
+        if (rnd(s) < floorDensity) {
+          const brightness = 0.36 + rnd(s * 7) * 0.46;
+          ctx.fillStyle = windowColor(s, brightness);
+          ctx.fillRect(c * CW + 1, r * CH + 1, CW - 2, CH - 2);
+        }
       }
     }
   } else {
@@ -161,21 +171,25 @@ function makeFacadeCanvas(fw, fh, density, seed, type, isMobile) {
     /* subtle gold wash on lower third */
     const wg = ctx.createLinearGradient(0, H * 0.65, 0, H);
     wg.addColorStop(0, "rgba(232, 174, 60,0)");
-    wg.addColorStop(1, "rgba(232, 174, 60,0.15)");
+    wg.addColorStop(1, "rgba(232, 174, 60,0.07)");
     ctx.fillStyle = wg; ctx.fillRect(0, 0, W, H);
     /* floor slab lines */
-    ctx.fillStyle = "rgba(232, 174, 60,0.06)";
+    ctx.fillStyle = "rgba(188, 176, 154, 0.055)";
     for (let r = 0; r <= rows; r++) ctx.fillRect(0, r * CH, W, 1);
-    /* punched windows, lit warm */
-    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
-      const s = seed + r * 211 + c * 29;
-      if (rnd(s) < density) {
-        const br = (0.6 + rnd(s * 7) * 0.4).toFixed(2);
-        ctx.fillStyle = `rgba(232, 174, 60,${br})`; // True ScoutIt Gold
-      } else {
-        ctx.fillStyle = "rgba(5,5,5,0.95)";
+    /* Residential and concrete floors retain believable occupancy bands. */
+    for (let r = 0; r < rows; r++) {
+      const floorActivity = rnd(seed + r * 419);
+      const floorDensity = density * (floorActivity < 0.22 ? 0.16 : 0.68 + floorActivity * 0.24);
+      for (let c = 0; c < cols; c++) {
+        const s = seed + r * 211 + c * 29;
+        if (rnd(s) < floorDensity) {
+          const brightness = 0.38 + rnd(s * 7) * 0.42;
+          ctx.fillStyle = windowColor(s + 41, brightness);
+        } else {
+          ctx.fillStyle = "rgba(4, 4, 5, 0.96)";
+        }
+        ctx.fillRect(c * CW + 1, r * CH + 1, CW - 2, CH - 2);
       }
-      ctx.fillRect(c * CW + 1, r * CH + 1, CW - 2, CH - 2);
     }
   }
   return cv;
@@ -191,7 +205,7 @@ export default function BackgroundMetropolis() {
     if (!mount) return;
     // Lite Mode: never start the WebGL scene on low-power devices — the CSS
     // layer background stays, only the animated canvas is skipped.
-    if (isLiteMode()) return;
+    if (isLiteMode() || window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
 
     let cancelled = false, frameId, renderer, resizeObs;
     const disposables = [];
@@ -204,17 +218,25 @@ export default function BackgroundMetropolis() {
       const H = mount.clientHeight || window.innerHeight;
       const isMobile = (W || window.innerWidth) < 768; // cheaper render on phones
 
-      scene.fog = isMobile ? new THREE.Fog(0x0a0a0a, 40, 260) : new THREE.FogExp2(0x0a0a0a, 0.0035); // Dark grey/black fog
+      scene.fog = isMobile ? new THREE.Fog(0x100f0c, 42, 245) : new THREE.FogExp2(0x100f0c, 0.0042);
 
-      const camera = new THREE.PerspectiveCamera(60, W/H, 0.3, 900);
+      const camera = new THREE.PerspectiveCamera(isMobile ? 58 : 54, W/H, 0.3, 900);
       camera.position.set(0, 200, 90);
       camera.lookAt(0, 0, 0);
 
-      renderer = new THREE.WebGLRenderer({ antialias: !isMobile });
+      renderer = new THREE.WebGLRenderer({
+        antialias: !isMobile,
+        alpha: false,
+        depth: true,
+        stencil: false,
+        powerPreference: "high-performance",
+      });
       renderer.setSize(W, H);
-      renderer.setPixelRatio(isMobile ? 1.0 : Math.min(window.devicePixelRatio, 2));
+      renderer.setPixelRatio(isMobile ? 1 : Math.min(window.devicePixelRatio, 1.25));
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 1.08;
+      renderer.toneMappingExposure = 0.92;
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      renderer.setClearColor(0x0d0d0d, 1);
       mount.appendChild(renderer.domElement);
 
       /* SKY */
@@ -228,29 +250,21 @@ export default function BackgroundMetropolis() {
       disposables.push(skyGeo, skyMat);
 
       /* LIGHTS — pure gold and pitch black */
-      scene.add(new THREE.HemisphereLight(0x111111, 0x1a1500, 1.5)); // Dark grey/gold hemisphere
-      const sun = new THREE.DirectionalLight(0xE8AE3C, 1.80); // Bright pure gold horizon
-      sun.position.set(30, 40, -180); scene.add(sun);
-      /* strong gold rim fill from down the avenue */
-      const sunFill = new THREE.DirectionalLight(0x6E531A, 0.80);
-      sunFill.position.set(0, 15, -200); scene.add(sunFill);
-      scene.add(new THREE.AmbientLight(0x0d0d0d, 1.0)); // Pitch black ambient
+      scene.add(new THREE.HemisphereLight(0x1b2029, 0x1b1208, 0.72));
+      const sun = new THREE.DirectionalLight(0xf0b45a, 1.18);
+      sun.position.set(30, 44, -180); scene.add(sun);
+      /* A restrained cool fill separates silhouettes without turning the scene blue. */
+      const sunFill = new THREE.DirectionalLight(0x39424c, 0.28);
+      sunFill.position.set(-45, 28, 80); scene.add(sunFill);
+      scene.add(new THREE.AmbientLight(0x11100e, 0.38));
 
-      const mkP = (x, y, z, c, i, d) => {
-        const l = new THREE.PointLight(c, i, d);
-        l.position.set(x, y, z); scene.add(l);
-      };
       const lampSpacing = isMobile ? 56 : 28;
-      for (let lz = -120; lz < 160; lz += lampSpacing) {
-        mkP(-17, 9, lz, 0xFFE4A0, 1.8, 55);
-        mkP( 17, 9, lz, 0xFFE4A0, 1.8, 55);
-      }
 
       /* GROUND — glossy dark asphalt reflecting the gold */
       const gGeo = new THREE.PlaneGeometry(900, 900);
       const gMat = isMobile 
         ? new THREE.MeshBasicMaterial({ color: 0x050505 })
-        : new THREE.MeshStandardMaterial({ color: 0x050505, roughness: 0.2, metalness: 0.8 });
+        : new THREE.MeshStandardMaterial({ color: 0x080807, roughness: 0.62, metalness: 0.12 });
       const gnd  = new THREE.Mesh(gGeo, gMat);
       gnd.rotation.x = -Math.PI/2;
       scene.add(gnd);
@@ -273,80 +287,150 @@ export default function BackgroundMetropolis() {
         disposables.push(m); return m;
       });
       const activeBushes = isMobile ? MEDIAN_BUSHES.filter((_, i) => i % 2 === 0) : MEDIAN_BUSHES;
-      activeBushes.forEach((b, i) => {
-        const bg = new THREE.SphereGeometry(b.r, 6, 4);
-        const bsh = new THREE.Mesh(bg, bushMats[i % bushMats.length]);
-        bsh.scale.set(1, 0.55, 1);
-        bsh.position.set(b.x, 0.28 + b.r*0.3, b.z);
-        scene.add(bsh); disposables.push(bg);
+      const bushGeo = new THREE.SphereGeometry(1, 6, 4);
+      const bushGroups = bushMats.map(() => []);
+      activeBushes.forEach((b, i) => bushGroups[i % bushMats.length].push(b));
+      const bushDummy = new THREE.Object3D();
+      bushGroups.forEach((group, materialIndex) => {
+        if (group.length === 0) return;
+        const bushes = new THREE.InstancedMesh(bushGeo, bushMats[materialIndex], group.length);
+        group.forEach((b, index) => {
+          bushDummy.position.set(b.x, 0.28 + b.r * 0.3, b.z);
+          bushDummy.rotation.set(0, 0, 0);
+          bushDummy.scale.set(b.r, b.r * 0.55, b.r);
+          bushDummy.updateMatrix();
+          bushes.setMatrixAt(index, bushDummy.matrix);
+        });
+        bushes.instanceMatrix.setUsage(THREE.StaticDrawUsage);
+        bushes.computeBoundingSphere();
+        scene.add(bushes);
       });
+      disposables.push(bushGeo);
 
-      /* ROAD MARKINGS */
-      for (let rz = -140; rz < 165; rz += (isMobile ? 24 : 12)) {
-        const dg = new THREE.PlaneGeometry(0.22, 7);
-        const dm = isMobile
-          ? new THREE.MeshBasicMaterial({ color: 0x221800 }) // Opaque dark gold, much cheaper
-          : new THREE.MeshBasicMaterial({ color: 0xE8AE3C, transparent: true, opacity: 0.15 }); // Glowing gold road lines
-        const d  = new THREE.Mesh(dg, dm);
-        d.rotation.x = -Math.PI/2;
-        d.position.set(6.5, 0.06, rz); scene.add(d);
-        disposables.push(dg, dm);
-      }
+      /* ROAD MARKINGS — one instanced draw rather than one mesh per dash. */
+      const roadPositions = [];
+      for (let rz = -140; rz < 165; rz += (isMobile ? 24 : 12)) roadPositions.push(rz);
+      const roadGeo = new THREE.PlaneGeometry(0.22, 7);
+      const roadMat = isMobile
+        ? new THREE.MeshBasicMaterial({ color: 0x221800 })
+        : new THREE.MeshBasicMaterial({ color: 0xd3b36f, transparent: true, opacity: 0.22 });
+      const roadMarks = new THREE.InstancedMesh(roadGeo, roadMat, roadPositions.length);
+      const roadDummy = new THREE.Object3D();
+      roadPositions.forEach((rz, index) => {
+        roadDummy.position.set(6.5, 0.06, rz);
+        roadDummy.rotation.set(-Math.PI / 2, 0, 0);
+        roadDummy.scale.set(1, 1, 1);
+        roadDummy.updateMatrix();
+        roadMarks.setMatrixAt(index, roadDummy.matrix);
+      });
+      roadMarks.instanceMatrix.setUsage(THREE.StaticDrawUsage);
+      roadMarks.computeBoundingSphere();
+      scene.add(roadMarks);
+      disposables.push(roadGeo, roadMat);
 
       /* STREET LAMPS */
-      const lpMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.6 });
-      const lbMat = new THREE.MeshBasicMaterial({ color: 0xE8AE3C });
-      disposables.push(lpMat, lbMat);
+      const lpMat = new THREE.MeshBasicMaterial({ color: 0x111111 });
+      const lbMat = new THREE.MeshBasicMaterial({ color: 0xe9bd74 });
+      const lampLocations = [];
       for (let lz = -120; lz < 160; lz += lampSpacing) {
-        [-17, 17].forEach((sx) => {
-          const pg = new THREE.CylinderGeometry(0.1, 0.16, 10, 5);
-          const p  = new THREE.Mesh(pg, lpMat);
-          p.position.set(sx, 5, lz); scene.add(p); disposables.push(pg);
-
-          const ag = new THREE.CylinderGeometry(0.06, 0.06, 4, 4);
-          const arm = new THREE.Mesh(ag, lpMat);
-          arm.rotation.z = Math.PI/2;
-          arm.position.set(sx > 0 ? sx - 2 : sx + 2, 10, lz);
-          scene.add(arm); disposables.push(ag);
-
-          const bg = new THREE.SphereGeometry(0.35, 6, 5);
-          const bl = new THREE.Mesh(bg, lbMat);
-          bl.position.set(sx > 0 ? sx - 4 : sx + 4, 10, lz);
-          scene.add(bl); disposables.push(bg);
-        });
+        lampLocations.push({ x: -17, z: lz }, { x: 17, z: lz });
       }
+      const poleGeo = new THREE.CylinderGeometry(0.1, 0.16, 10, 5);
+      const armGeo = new THREE.CylinderGeometry(0.06, 0.06, 4, 4);
+      const bulbGeo = new THREE.SphereGeometry(0.35, 6, 5);
+      const poles = new THREE.InstancedMesh(poleGeo, lpMat, lampLocations.length);
+      const arms = new THREE.InstancedMesh(armGeo, lpMat, lampLocations.length);
+      const bulbs = new THREE.InstancedMesh(bulbGeo, lbMat, lampLocations.length);
+      const lampDummy = new THREE.Object3D();
+      lampLocations.forEach(({ x, z }, index) => {
+        lampDummy.position.set(x, 5, z);
+        lampDummy.rotation.set(0, 0, 0);
+        lampDummy.scale.set(1, 1, 1);
+        lampDummy.updateMatrix();
+        poles.setMatrixAt(index, lampDummy.matrix);
+
+        lampDummy.position.set(x > 0 ? x - 2 : x + 2, 10, z);
+        lampDummy.rotation.set(0, 0, Math.PI / 2);
+        lampDummy.updateMatrix();
+        arms.setMatrixAt(index, lampDummy.matrix);
+
+        lampDummy.position.set(x > 0 ? x - 4 : x + 4, 10, z);
+        lampDummy.rotation.set(0, 0, 0);
+        lampDummy.updateMatrix();
+        bulbs.setMatrixAt(index, lampDummy.matrix);
+      });
+      [poles, arms, bulbs].forEach((mesh) => {
+        mesh.instanceMatrix.setUsage(THREE.StaticDrawUsage);
+        mesh.computeBoundingSphere();
+        scene.add(mesh);
+      });
+
+      /* Soft, baked pools imply street-light bounce without forcing every
+         building material through a bank of expensive point lights. */
+      if (!isMobile) {
+        const poolCanvas = document.createElement("canvas");
+        poolCanvas.width = poolCanvas.height = 64;
+        const poolContext = poolCanvas.getContext("2d");
+        const poolGradient = poolContext.createRadialGradient(32, 32, 0, 32, 32, 32);
+        poolGradient.addColorStop(0, "rgba(255, 220, 160, 0.30)");
+        poolGradient.addColorStop(0.35, "rgba(232, 174, 60, 0.13)");
+        poolGradient.addColorStop(1, "rgba(232, 174, 60, 0)");
+        poolContext.fillStyle = poolGradient;
+        poolContext.fillRect(0, 0, 64, 64);
+        const poolTexture = new THREE.CanvasTexture(poolCanvas);
+        const poolMaterial = new THREE.MeshBasicMaterial({
+          map: poolTexture,
+          color: 0xffd9a3,
+          transparent: true,
+          opacity: 0.24,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false,
+          fog: true,
+        });
+        const poolGeometry = new THREE.PlaneGeometry(1, 1);
+        const pools = new THREE.InstancedMesh(poolGeometry, poolMaterial, lampLocations.length);
+        lampLocations.forEach(({ x, z }, index) => {
+          lampDummy.position.set(x > 0 ? x - 4 : x + 4, 0.075, z);
+          lampDummy.rotation.set(-Math.PI / 2, 0, 0);
+          lampDummy.scale.set(7, 15, 1);
+          lampDummy.updateMatrix();
+          pools.setMatrixAt(index, lampDummy.matrix);
+        });
+        pools.instanceMatrix.setUsage(THREE.StaticDrawUsage);
+        pools.computeBoundingSphere();
+        scene.add(pools);
+        disposables.push(poolTexture, poolMaterial, poolGeometry);
+      }
+      disposables.push(lpMat, lbMat, poleGeo, armGeo, bulbGeo);
 
       /* ── TREES ── realistic dense canopies ──
          Deep black silhouettes against the gold sky. */
-      const trunkMat = isMobile
-        ? new THREE.MeshBasicMaterial({ color: 0x020202 })
-        : new THREE.MeshStandardMaterial({ color: 0x020202, roughness: 1 });
+      const trunkMat = new THREE.MeshBasicMaterial({ color: 0x020202 });
       const canopyColors = [0x050505, 0x080808, 0x030303, 0x060606];
       const canopyMats = canopyColors.map((c) => {
-        const m = isMobile
-          ? new THREE.MeshBasicMaterial({ color: c })
-          : new THREE.MeshStandardMaterial({ color: c, roughness: 0.95, flatShading: true });
+        const m = new THREE.MeshBasicMaterial({ color: c });
         disposables.push(m); return m;
       });
       disposables.push(trunkMat);
 
+      const foliageInstances = canopyMats.map(() => []);
+
       const addFoliageCluster = (cx, cy, cz, radius, matBase, seed) => {
-        /* a clump = 4-6 small spheres jittered around a centre, or just 1 on mobile */
-        const blobs = isMobile ? 1 : 4 + Math.floor(rnd(seed) * 3);
+        /* Reuse one low-poly sphere per foliage tone. The layered placement keeps
+           the broad acacia silhouette without creating hundreds of draw calls. */
+        const blobs = isMobile ? 1 : 3 + Math.floor(rnd(seed) * 2);
         for (let b = 0; b < blobs; b++) {
           const br = radius * (0.45 + rnd(seed + b * 17) * 0.5);
-          const bg = new THREE.SphereGeometry(br, 6, 5);
-          const mat = canopyMats[(matBase + b) % canopyMats.length];
-          const m = new THREE.Mesh(bg, mat);
           const a = rnd(seed + b * 7) * Math.PI * 2;
           const rr = rnd(seed + b * 11) * radius * 0.7;
-          m.position.set(
-            cx + Math.cos(a) * rr,
-            cy + (rnd(seed + b * 5) - 0.4) * radius * 0.5,
-            cz + Math.sin(a) * rr,
-          );
-          m.scale.set(1, 0.85, 1);
-          scene.add(m); disposables.push(bg);
+          foliageInstances[(matBase + b) % canopyMats.length].push({
+            x: cx + Math.cos(a) * rr,
+            y: cy + (rnd(seed + b * 5) - 0.4) * radius * 0.5,
+            z: cz + Math.sin(a) * rr,
+            sx: br,
+            sy: br * 0.85,
+            sz: br,
+          });
         }
       };
 
@@ -406,7 +490,7 @@ export default function BackgroundMetropolis() {
           /* broad crown: a ring of foliage clusters + a central cap,
              wider than tall → the classic acacia umbrella */
           const crownY = t.trunkH + t.canopyR * 0.35;
-          const ringN = isMobile ? 3 : 5 + Math.floor(rnd(t.seed + 3) * 3);
+          const ringN = isMobile ? 3 : 4 + Math.floor(rnd(t.seed + 3) * 2);
           for (let c = 0; c < ringN; c++) {
             const a = (c / ringN) * Math.PI * 2 + rnd(t.seed + c) * 0.5;
             const rr = t.canopyR * (0.75 + rnd(t.seed + c * 9) * 0.35);
@@ -424,12 +508,31 @@ export default function BackgroundMetropolis() {
         }
       });
 
+      const foliageGeo = new THREE.SphereGeometry(1, 6, 5);
+      const foliageDummy = new THREE.Object3D();
+      foliageInstances.forEach((instances, materialIndex) => {
+        if (!instances.length) return;
+        const mesh = new THREE.InstancedMesh(foliageGeo, canopyMats[materialIndex], instances.length);
+        instances.forEach(({ x, y, z, sx, sy, sz }, index) => {
+          foliageDummy.position.set(x, y, z);
+          foliageDummy.rotation.set(0, 0, 0);
+          foliageDummy.scale.set(sx, sy, sz);
+          foliageDummy.updateMatrix();
+          mesh.setMatrixAt(index, foliageDummy.matrix);
+        });
+        mesh.instanceMatrix.setUsage(THREE.StaticDrawUsage);
+        mesh.computeBoundingSphere();
+        scene.add(mesh);
+      });
+      disposables.push(foliageGeo);
+
       /* BUILDINGS — style-driven silhouettes */
       const topMat = isMobile
         ? new THREE.MeshBasicMaterial({ color: 0x020202 })
         : new THREE.MeshStandardMaterial({ color: 0x020202, roughness: 0.9 });
       disposables.push(topMat);
       const blinkMeshes = [];
+      const roofInstances = [];
 
       /* facade material for a given footprint slice */
       const makeFacade = (w, h, seed, type) => {
@@ -447,13 +550,13 @@ export default function BackgroundMetropolis() {
           : (type === 1
             ? new THREE.MeshStandardMaterial({
                 color: 0x0d0d0d, map: tex, emissiveMap: tex,
-                emissive: 0xffffff, emissiveIntensity: 1.0,
-                roughness: 0.05, metalness: 0.95, // Highly reflective black glass
+                emissive: 0xffffff, emissiveIntensity: 0.72,
+                roughness: 0.22, metalness: 0.68, // Dark curtain wall, not mirror chrome
               })
             : new THREE.MeshStandardMaterial({
                 color: 0x0d0d0d, map: tex, emissiveMap: tex,
-                emissive: 0xffffff, emissiveIntensity: 0.95,
-                roughness: 0.40, metalness: 0.50, // Dark matte metallic
+                emissive: 0xffffff, emissiveIntensity: 0.68,
+                roughness: 0.68, metalness: 0.16, // Concrete reads matte and weighty
               }));
         disposables.push(mat);
         return mat;
@@ -463,10 +566,11 @@ export default function BackgroundMetropolis() {
       const addVolume = (x, y0, z, w, h, d, type, seed, rot, geomFn) => {
         const mat = makeFacade(Math.max(w, d), h, seed, type);
         const geo = geomFn ? geomFn(w, h, d) : new THREE.BoxGeometry(w, h, d);
-        const mesh = new THREE.Mesh(geo, geomFn ? mat : [mat, mat, topMat, topMat, mat, mat]);
+        const mesh = new THREE.Mesh(geo, mat);
         mesh.position.set(x, y0 + h / 2, z);
         mesh.rotation.y = rot;
         scene.add(mesh); disposables.push(geo);
+        if (!geomFn) roofInstances.push({ x, y: y0 + h + 0.015, z, w, d, rot });
         return mesh;
       };
 
@@ -499,7 +603,7 @@ export default function BackgroundMetropolis() {
       disposables.push(roofMat);
       const addRoofClutter = (x, topY, z, w, d, rot, seed) => {
         if (isMobile) return;
-        const n = 1 + Math.floor(rnd(seed + 1) * 3);
+        const n = 1;
         for (let i = 0; i < n; i++) {
           const bw = 1.2 + rnd(seed + i * 7) * Math.min(4, w * 0.25);
           const bd = 1.2 + rnd(seed + i * 11) * Math.min(4, d * 0.25);
@@ -516,7 +620,7 @@ export default function BackgroundMetropolis() {
       };
 
       /* glowing billboard sign mounted on a building face */
-      const SIGN_COLORS = [0xff3d6e, 0x35d0ff, 0xffd23d, 0x7dff5a, 0xff7a26];
+      const SIGN_COLORS = [0xe8ae3c, 0xf0d8ae, 0xc47b3d, 0x9da7ae];
       const addBillboard = (x, y, z, w, d, rot, seed) => {
         const col = SIGN_COLORS[Math.floor(rnd(seed + 9) * SIGN_COLORS.length)];
         const sw = 2 + rnd(seed) * 4, sh = 3 + rnd(seed + 1) * 6;
@@ -532,7 +636,7 @@ export default function BackgroundMetropolis() {
         if (!isMobile) {
           const glow = new THREE.Mesh(
             new THREE.PlaneGeometry(sw * 1.6, sh * 1.6),
-            new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.18, blending: THREE.AdditiveBlending, depthWrite: false })
+            new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.08, blending: THREE.AdditiveBlending, depthWrite: false })
           );
           glow.position.copy(sign.position);
           glow.rotation.copy(sign.rotation);
@@ -556,8 +660,8 @@ export default function BackgroundMetropolis() {
           }
           const topW = w * (1 - (tiers - 1) * 0.24), topD = d * (1 - (tiers - 1) * 0.24);
           goldTrim(x, y, z, topW, topD, rot);
-          addRoofClutter(x, y, z, topW, topD, rot, seed + 5);
-          if (h > 80) addAntenna(x, y, z, seed);
+          if (rnd(seed + 101) > 0.65) addRoofClutter(x, y, z, topW, topD, rot, seed + 5);
+          if (h > 105 && rnd(seed + 102) > 0.45) addAntenna(x, y, z, seed);
 
         } else if (style === 2) {
           /* TAPERED GLASS TOWER — a cylinder narrowing toward the top */
@@ -573,7 +677,7 @@ export default function BackgroundMetropolis() {
           const cr = new THREE.Mesh(cg, cm);
           cr.position.set(x, h + 0.4, z);
           scene.add(cr); disposables.push(cg, cm);
-          if (h > 80) addAntenna(x, h, z, seed);
+          if (h > 105 && rnd(seed + 102) > 0.45) addAntenna(x, h, z, seed);
 
         } else if (style === 3) {
           /* PODIUM + SLIM TOWER — wide base, narrow tower offset on top */
@@ -586,9 +690,9 @@ export default function BackgroundMetropolis() {
           const tx = x + offX * Math.cos(rot), tz = z + offX * Math.sin(rot);
           addVolume(tx, podH, tz, tw, towerH, td, type, seed + 30, rot);
           goldTrim(tx, h, tz, tw, td, rot);
-          addRoofClutter(tx, h, tz, tw, td, rot, seed + 9);
+          if (rnd(seed + 101) > 0.65) addRoofClutter(tx, h, tz, tw, td, rot, seed + 9);
           /* podium-top billboard sometimes */
-          if (rnd(seed + 17) > 0.6) addBillboard(x, podH + h * 0.18, z, w, d, rot, seed + 21);
+          if (rnd(seed + 17) > 0.82) addBillboard(x, podH + h * 0.18, z, w, d, rot, seed + 21);
           if (h > 80) addAntenna(tx, h, tz, seed);
 
         } else if (style === 5) {
@@ -597,7 +701,7 @@ export default function BackgroundMetropolis() {
           addVolume(x, 0, z, w, bodyH, d, type, seed, rot);
           const capGeo = new THREE.ConeGeometry(Math.min(w, d) * 0.62, h * 0.18, 4);
           const capMat = new THREE.MeshStandardMaterial({
-            color: 0x05050f, emissive: new THREE.Color(1, 0.72, 0.2), emissiveIntensity: 0.55,
+            color: 0x05050f, emissive: new THREE.Color(0.43, 0.33, 0.1), emissiveIntensity: 0.18,
             roughness: 0.4, metalness: 0.3,
           });
           disposables.push(capGeo, capMat);
@@ -610,11 +714,11 @@ export default function BackgroundMetropolis() {
         } else {
           /* 0 plain slab / 4 rotated slab — single box, varied proportions */
           addVolume(x, 0, z, w, h, d, type, seed, rot);
-          if (h > 50) goldTrim(x, h, z, w, d, rot);
-          if (h > 30) addRoofClutter(x, h, z, w, d, rot, seed + 7);
+          if (h > 75 && rnd(seed + 44) > 0.55) goldTrim(x, h, z, w, d, rot);
+          if (h > 65 && rnd(seed + 101) > 0.55) addRoofClutter(x, h, z, w, d, rot, seed + 7);
           /* low/mid commercial blocks sometimes carry a façade billboard */
-          if (h < 60 && rnd(seed + 23) > 0.55) addBillboard(x, h * 0.6, z, w, d, rot, seed + 31);
-          if (h > 90 && rnd(seed + 99) > 0.55) addAntenna(x, h, z, seed);
+          if (h < 60 && rnd(seed + 23) > 0.82) addBillboard(x, h * 0.6, z, w, d, rot, seed + 31);
+          if (h > 110 && rnd(seed + 99) > 0.72) addAntenna(x, h, z, seed);
         }
       });
 
@@ -640,14 +744,12 @@ export default function BackgroundMetropolis() {
         crown.position.set(0, hy + 1.75, HERO_Z);
         scene.add(crown); disposables.push(crownGeo, crownMat);
         addAntenna(0, hy + 3.5, HERO_Z, hseed);
-        /* dedicated beacon light + additive halo so it reads from far off */
+        /* Restrained additive halo keeps the crown legible without a global
+           point-light pass across the entire skyline. */
         if (!isMobile) {
-          const heroLight = new THREE.PointLight(0xF7C64E, 3.4, 460, 1.1);
-          heroLight.position.set(0, hh * 0.7, HERO_Z + 36);
-          scene.add(heroLight);
           const haloGeo = new THREE.PlaneGeometry(topW * 5.5, hh * 1.25);
           const haloMat = new THREE.MeshBasicMaterial({
-            color: 0xE8AE3C, transparent: true, opacity: 0.1,
+            color: 0xE8AE3C, transparent: true, opacity: 0.055,
             blending: THREE.AdditiveBlending, depthWrite: false, fog: false,
           });
           const halo = new THREE.Mesh(haloGeo, haloMat);
@@ -656,11 +758,30 @@ export default function BackgroundMetropolis() {
         }
       }
 
+      /* A single instanced roof layer hides the facade texture on horizontal
+         surfaces while avoiding six material groups for every box volume. */
+      if (roofInstances.length) {
+        const roofGeo = new THREE.PlaneGeometry(1, 1);
+        const roofs = new THREE.InstancedMesh(roofGeo, topMat, roofInstances.length);
+        const roofDummy = new THREE.Object3D();
+        roofInstances.forEach(({ x, y, z, w, d, rot }, index) => {
+          roofDummy.position.set(x, y, z);
+          roofDummy.rotation.set(-Math.PI / 2, 0, -rot);
+          roofDummy.scale.set(w, d, 1);
+          roofDummy.updateMatrix();
+          roofs.setMatrixAt(index, roofDummy.matrix);
+        });
+        roofs.instanceMatrix.setUsage(THREE.StaticDrawUsage);
+        roofs.computeBoundingSphere();
+        scene.add(roofs);
+        disposables.push(roofGeo);
+      }
+
       /* ── ANIMATION (seamless looping fly-through) ──
          Aerial descent → drive down the avenue → arrive at the hero tower →
          fade to black across the seam → restart. */
       const PHASE1 = 0.30;          // fraction of the loop spent on the aerial descent
-      const CYCLE_FRAMES = 2400;    // full loop length (~40s at 60fps)
+      const CYCLE_MS = 46000;       // stable duration regardless of display refresh rate
       const FADE = 0.05;            // fraction at the seam used to fade through black
       const HERO_END = -140;        // camera stops this far down the avenue (in front of the hero)
 
@@ -668,20 +789,35 @@ export default function BackgroundMetropolis() {
       const p1E = new THREE.Vector3(4,   4, 42);
       const l1S = new THREE.Vector3(0,   0,  0);
       const l1E = new THREE.Vector3(4,   6, -38);
+      const lookTarget = new THREE.Vector3();
+      const renderInterval = isMobile ? 1000 / 30 : 1000 / 45;
 
-      let cycle = 0, tick = 0;
+      let cycle = 0;
+      let lastNow = performance.now();
+      let renderAccumulator = renderInterval;
 
-      const animate = () => {
+      const animate = (now = performance.now()) => {
         frameId = requestAnimationFrame(animate);
-        tick++;
+        const deltaMs = Math.min(Math.max(now - lastNow, 0), 100);
+        lastNow = now;
 
-        cycle += 1 / CYCLE_FRAMES;
-        if (cycle >= 1) cycle -= 1;           // loop
+        /* Keep background work out of hidden tabs and cap the cinematic layer.
+           A steady 45/30 fps is smoother than an overloaded, variable 60 fps. */
+        if (document.hidden) {
+          renderAccumulator = 0;
+          return;
+        }
+        renderAccumulator += deltaMs;
+        if (renderAccumulator < renderInterval) return;
+        const stepMs = renderAccumulator;
+        renderAccumulator %= renderInterval;
+
+        cycle = (cycle + stepMs / CYCLE_MS) % 1;
 
         if (cycle <= PHASE1) {
           const t1 = easeInOut(cycle / PHASE1);
           camera.position.lerpVectors(p1S, p1E, t1);
-          camera.lookAt(new THREE.Vector3().lerpVectors(l1S, l1E, t1));
+          camera.lookAt(lookTarget.lerpVectors(l1S, l1E, t1));
         } else {
           const t2 = easeInOut((cycle - PHASE1) / (1 - PHASE1));
           const camZ = 42 + t2 * (HERO_END - 42);   // drive 42 → -140
@@ -703,12 +839,14 @@ export default function BackgroundMetropolis() {
       animate();
 
       resizeObs = new ResizeObserver(() => {
-        if (!mount || !renderer) return;
-        camera.aspect = mount.clientWidth/mount.clientHeight;
+        if (!mount || !renderer || !mount.clientWidth || !mount.clientHeight) return;
+        camera.aspect = mount.clientWidth / mount.clientHeight;
         camera.updateProjectionMatrix();
-        renderer.setSize(mount.clientWidth, mount.clientHeight);
+        renderer.setSize(mount.clientWidth, mount.clientHeight, false);
       });
       resizeObs.observe(mount);
+    }).catch(() => {
+      if (!cancelled) mount.dataset.webglFallback = "true";
     });
 
     return () => {

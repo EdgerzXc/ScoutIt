@@ -5,6 +5,14 @@ tags: [master-sync, north-star, build-queue, decision-log, always-current]
 updated: 2026-08-18
 related: ["[[SCOUTIT_FULL_WORKFLOW]]", "[[SESSION_HANDOFF_2026-07-30]]", "[[00_START_HERE]]", "[[15_IMPLEMENTATION_RECORDS/README|Implementation Records]]", "[[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION PLAN]]", "[[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION PLAN]]", "[[13_EXTERNAL_INPUTS/README|External Inputs README]]"]
 ---
+
+> **2026-08-21 Owner-approved surface lock checkpoint:** the accepted Showcase stage,
+> Metropolis foreground, and Metropolis WebGL background are protected by normalized
+> source checksums in `scripts/approved-surfaces.json`. `npm run verify:surfaces` and CI
+> fail on drift. Checksums may change only after the owner reviews and explicitly accepts
+> the new local appearance; cleanup and unrelated fixes must restore the approved source.
+> The root README, AGENTS contract, and tracked design contract carry the same rule.
+
 > **2026-08-18 Stratosphere (Layer 02) 40/60 Split-Canvas & Spatial Discovery overhaul:**
 > Layer 02 (`/layer/stratosphere`) has been fully re-engineered into a bespoke **Spatial Intelligence & Discovery Terminal** using the 40/60 Split-Canvas architecture:
 > 1. **Left Discovery & Spatial Radar Pane (~40%)**: Dual-axis Category & Regional corridor selectors (BGC, Makati, Siargao, Palawan, Cebu), live Discovered News & Development signal cards with status badges and impact radiuses, and dynamic **Impacted Property Nodes** (linking physical directory listings directly affected by the active news item).

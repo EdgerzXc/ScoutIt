@@ -21,6 +21,7 @@ const unitSchema = z.object({
   photos: z.array(z.string().max(2000)).optional().default([]),
   image: z.string().max(2000).optional().default(""),
   price: z.union([z.string(), z.number()]).optional(),
+  availabilityStatus: z.enum(["available", "occupied", "coming_soon"]).nullable().optional(),
   // Unit Master Page rich fields (co-working detail) + the subdivision
   // scenarios that power the "This space flexes" toggle. Free-form jsonb —
   // shape validated at the editor, stored as display data.
@@ -74,7 +75,7 @@ function toClientUnit(row) {
     price: row.price || "",
     operatorId: row.operator_id || null,
     operatorDisplayName: row.operator_display_name || null,
-    availabilityStatus: row.availability_status || null,
+    availabilityStatus: row.availability_status || row.details?.availabilityStatus || null,
     details: row.details || {},
     subdivisionScenarios: row.subdivision_scenarios || [],
   };
@@ -207,6 +208,7 @@ export async function POST(request) {
           photos: u.photos || [],
           image: u.image || (u.photos || []).find(Boolean) || "",
           price: u.price != null ? String(u.price) : "",
+          availability_status: u.availabilityStatus || "available",
           details: u.details || {},
           subdivision_scenarios: u.subdivisionScenarios || [],
           sort_order: index,
@@ -228,6 +230,7 @@ export async function POST(request) {
         photos: u.photos || [],
         image: u.image || (u.photos || []).find(Boolean) || "",
         price: u.price != null ? String(u.price) : "",
+        availability_status: u.availabilityStatus || "available",
         details: u.details || {},
         subdivision_scenarios: u.subdivisionScenarios || [],
         sort_order: toUpdate.length + i,

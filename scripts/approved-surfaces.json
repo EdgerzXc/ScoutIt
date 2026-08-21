@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "approvedAt": "2026-08-21",
+  "policy": "Checksums may change only after the owner explicitly approves the new local appearance. Never refresh them as part of an unrelated fix, cleanup, merge, or formatting pass.",
+  "surfaces": [
+    {
+      "name": "Showcase stage and parent navigation",
+      "path": "src/components/board/ShowcaseStage.js",
+      "sha256": "dca3e17774fd8b7b66a98f3e1570e5c174e16dadcbc14d02cd8cfae8e99f7d62"
+    },
+    {
+      "name": "Metropolis foreground surface",
+      "path": "src/app/layer/metropolis/page.js",
+      "sha256": "b0396aaf1936472a7327b375ac633f125af63e5cc21ee654fc5f540d0624f267"
+    },
+    {
+      "name": "Metropolis city background composition",
+      "path": "src/components/descent/BackgroundMetropolis.js",
+      "sha256": "98049129d76fc01c24ff2e8922f481779bdea6e38b3d5e38ebcf780010be7eb4"
+    }
+  ]
+}

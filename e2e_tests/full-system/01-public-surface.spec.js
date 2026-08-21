@@ -58,6 +58,32 @@ for (const { path, anchor } of PUBLIC_ROUTES) {
   });
 }
 
+test('showcase keeps explicit parent and home navigation', async ({ page }) => {
+  await gotoAndSettle(page, '/showcase');
+
+  const orbitLink = page.getByRole('link', { name: 'Back to Orbit' });
+  await expect(orbitLink).toBeVisible();
+  await expect(orbitLink).toHaveAttribute('href', '/layer/orbit');
+
+  const homeLink = page.getByRole('link', { name: /ScoutIT.*home/i });
+  await expect(homeLink).toBeVisible();
+  await expect(homeLink).toHaveAttribute('href', '/');
+});
+
+
+test('metropolis category surface stays operable', async ({ page }) => {
+  await gotoAndSettle(page, '/layer/metropolis');
+
+  const commercialCategory = page.getByRole('button', { name: 'Commercial' });
+  await expect(commercialCategory).toBeVisible();
+  await commercialCategory.click();
+  await expect(commercialCategory).toHaveAttribute('aria-pressed', 'true');
+
+  const categorySearch = page.locator('.metro-search');
+  await expect(categorySearch).toBeVisible();
+  await expect(categorySearch).toHaveAttribute('aria-label', 'Search Commercial spaces');
+  await expect(page.getByRole('heading', { name: 'No commercial previews yet' })).toBeVisible();
+});
 test('unknown route returns the 404 surface, not a crash', async ({ page }) => {
   const response = await page.goto('/definitely-not-a-real-page-e2e', {
     waitUntil: 'domcontentloaded',

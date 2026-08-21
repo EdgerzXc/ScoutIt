@@ -11,7 +11,8 @@
     "test:unit": "vitest run",
     "test:e2e": "playwright test",
     "test:e2e:list": "playwright test --list",
-    "verify": "npm run lint && npm run audit:typography && npm run test:unit && npm run test:e2e:list",
+    "verify": "npm run verify:surfaces && npm run lint && npm run audit:typography && npm run test:unit && npm run test:e2e:list",
+    "verify:surfaces": "node scripts/verify-approved-surfaces.mjs",
     "audit:typography": "node scripts/audit-typography.mjs"
   },
   "dependencies": {

@@ -11,3 +11,9 @@
 /src/lib/ @EdgerzXc
 /mission-control/src/ @EdgerzXc
 /supabase/migrations/ @EdgerzXc
+# Owner-approved visual baselines. CI also verifies their normalized checksums.
+/scripts/approved-surfaces.json @EdgerzXc
+/scripts/verify-approved-surfaces.mjs @EdgerzXc
+/src/components/board/ShowcaseStage.js @EdgerzXc
+/src/app/layer/metropolis/page.js @EdgerzXc
+/src/components/descent/BackgroundMetropolis.js @EdgerzXc

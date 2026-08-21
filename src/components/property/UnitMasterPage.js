@@ -161,7 +161,10 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
   const hierarchy = getPropertyHierarchy(property);
   const unitDisplayName = childSpaceDisplayName(unit?.name, Math.max(unitIndex, 0), property);
   const d = unit?.details || {};
-  const scenarios = useMemo(() => Array.isArray(unit?.subdivision_scenarios) ? unit.subdivision_scenarios : [], [unit]);
+  const scenarios = useMemo(() => {
+    const value = unit?.subdivision_scenarios ?? unit?.subdivisionScenarios;
+    return Array.isArray(value) ? value : [];
+  }, [unit]);
 
   const photos = useMemo(() => {
     return Array.isArray(unit?.photos) && unit.photos.filter(Boolean).length
@@ -208,11 +211,12 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
     );
   }
 
-  const operatorName = unit.operator_display_name || null;
+  const operatorName = unit.operator_display_name || unit.operatorDisplayName || null;
 
+  const availabilityStatus = unit.availability_status || unit.availabilityStatus || "available";
   const availabilityLabel =
-    unit.availability_status === "occupied" ? "Currently Occupied"
-      : unit.availability_status === "coming_soon" ? "Coming Soon"
+    availabilityStatus === "occupied" ? "Currently Occupied"
+      : availabilityStatus === "coming_soon" ? "Coming Soon"
         : "Available";
 
   const openInquiry = (prefill) => {
@@ -691,7 +695,7 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
             </div>
 
             <div className="panel-sidebar">
-              <SpecCard label="Listed Rate" value={d.price || unit.price || null} />
+              <SpecCard label="Listed Rate" value={unit.price || d.price || null} />
               {activeScenario && activeScenario.price_each && (
                 <SpecCard label={`Rate (${activeScenario.label})`} value={activeScenario.price_each} />
               )}

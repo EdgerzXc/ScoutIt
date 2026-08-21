@@ -64,6 +64,8 @@ yarn-error.log*
 /scratch_debug*.js
 
 # Scratch workspace and captures
+/shots/
+/find-clicks*.js
 /scratch/
 /scratch_*.png
 /scratch_*.js

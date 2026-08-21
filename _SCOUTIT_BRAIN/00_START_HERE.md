@@ -119,7 +119,7 @@ different altitude. That is ScoutIT in the market. The UFO stays. Always.
 - **Never mix them.** Airtable = public display. Supabase = private state.
 - **Mapbox** geocodes string locations server-side; a **Haversine** formula in the API route
   powers radius search. **Leaflet** draws static property maps.
-- **Stack:** Next.js 16.2.12 (App Router, *modified* — check
+- **Stack:** Next.js 16.3.0 (App Router, *modified* — check
   `node_modules/next/dist/docs/`), React 19, plain JS, vanilla CSS + CSS Modules on public
   surfaces + **Tailwind on the dashboards** (allowed since the 2026-06-26 correction — see
   Design DNA below), deployed on Vercel (`EdgerzXc/ScoutIt`).
@@ -181,7 +181,7 @@ different altitude. That is ScoutIT in the market. The UFO stays. Always.
 ## 4. The non-negotiable rules (for anyone — human or AI — working on ScoutIT)
 
 1. Read [[SCOUTIT_BIBLE]] and `02_ARCHITECTURE_AND_STRUCTURE/AGENTS.md` first.
-2. This is a **modified Next.js 16.2.12** — check `node_modules/next/dist/docs/` before writing
+2. This is a **modified Next.js 16.3.0** — check `node_modules/next/dist/docs/` before writing
    framework code. **The code is always the source of truth** over any doc.
 3. **Use CSS variables, never raw hex.** Count the gold before adding more — 95/5.
 4. **Airtable = public display. Supabase = private state. Never mix.**
