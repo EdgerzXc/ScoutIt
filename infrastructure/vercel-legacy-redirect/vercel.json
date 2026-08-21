@@ -1,0 +1,14 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "echo No dependencies to install",
+  "buildCommand": "echo Redirect guard ready",
+  "outputDirectory": "public",
+  "redirects": [
+    {
+      "source": "/:path*",
+      "destination": "https://www.scoutit.space/:path*",
+      "permanent": true
+    }
+  ]
+}
