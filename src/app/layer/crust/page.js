@@ -148,7 +148,7 @@ export default function CrustLayer() {
         .service-status-badge {
           display: inline-block;
           font-family: var(--font-mono);
-          font-size: var(--type-micro);
+          font-size: 10px;
           letter-spacing: 0.2em;
           text-transform: uppercase;
           padding: 4px 10px;
@@ -180,7 +180,7 @@ export default function CrustLayer() {
         }
         .service-cta {
           font-family: var(--font-mono);
-          font-size: var(--type-micro);
+          font-size: 10px;
           letter-spacing: 0.18em;
           text-transform: uppercase;
           color: var(--accent);

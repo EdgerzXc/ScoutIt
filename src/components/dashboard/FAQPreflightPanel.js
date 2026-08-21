@@ -273,7 +273,7 @@ export default function FAQPreflightPanel({ propertySlug, onProgressChange }) {
           background: var(--accent-bright, var(--accent-fill));
           color: var(--on-accent);
           font-family: ${MONO};
-          font-size: var(--type-micro);
+          font-size: 11px;
           font-weight: bold;
           letter-spacing: 0.15em;
           text-transform: uppercase;
@@ -292,7 +292,7 @@ export default function FAQPreflightPanel({ propertySlug, onProgressChange }) {
         }
         .pf-error {
           font-family: ${MONO};
-          font-size: var(--type-micro);
+          font-size: 10px;
           color: var(--red);
           letter-spacing: 0.05em;
           line-height: 1.6;

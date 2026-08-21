@@ -32,7 +32,7 @@
 .legal-eyebrow {
   display: block;
   font-family: var(--font-geist-mono, monospace);
-  font-size: var(--type-micro);
+  font-size: 10px;
   letter-spacing: 0.2em;
   color: var(--accent, #E8AE3C);
   text-transform: uppercase;
@@ -50,7 +50,7 @@
 
 .legal-meta {
   font-family: var(--font-geist-mono, monospace);
-  font-size: var(--type-micro);
+  font-size: 11px;
   letter-spacing: 0.07em;
   color: var(--text-secondary);
   text-transform: uppercase;
@@ -73,7 +73,7 @@
 .legal-disclaimer-label {
   display: block;
   font-family: var(--font-geist-mono, monospace);
-  font-size: var(--type-micro);
+  font-size: 10px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--accent, #E8AE3C);
@@ -118,7 +118,7 @@
 
 .legal-section-num {
   font-family: var(--font-geist-mono, monospace);
-  font-size: var(--type-micro);
+  font-size: 11px;
   letter-spacing: 0.1em;
   color: var(--accent, #E8AE3C);
   flex-shrink: 0;

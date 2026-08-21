@@ -1680,7 +1680,7 @@ export default function ShowcaseStage({ mode = "full" }) {
         }
 
         .sc-telemetry-text {
-          font-size: var(--type-micro);
+          font-size: 11.5px;
           font-weight: 600;
           color: var(--accent-bright);
           letter-spacing: 0.02em;
@@ -1833,7 +1833,7 @@ export default function ShowcaseStage({ mode = "full" }) {
 
         .sc-cat-count {
           font-family: var(--font-mono), monospace;
-          font-size: var(--type-micro);
+          font-size: 10.5px;
           font-weight: 700;
           font-variant-numeric: tabular-nums;
           padding: 2px 6px;
@@ -1902,7 +1902,7 @@ export default function ShowcaseStage({ mode = "full" }) {
           border-radius: 7px;
           background: rgba(0, 0, 0, 0.7);
           border: 1px solid;
-          font-size: var(--type-micro);
+          font-size: 11.5px;
           font-weight: 700;
           letter-spacing: 0.04em;
           align-self: flex-start;
@@ -1914,7 +1914,7 @@ export default function ShowcaseStage({ mode = "full" }) {
         }
 
         .sc-prop-cat {
-          font-size: var(--type-micro);
+          font-size: 11px;
           font-weight: 700;
           letter-spacing: 0.08em;
           text-transform: uppercase;
@@ -2005,7 +2005,7 @@ export default function ShowcaseStage({ mode = "full" }) {
         }
 
         .sc-stat-lbl {
-          font-size: var(--type-micro);
+          font-size: 11px;
           font-weight: 500;
           color: #a8a69f;
           margin-top: 3px;
@@ -2125,7 +2125,7 @@ export default function ShowcaseStage({ mode = "full" }) {
           background: rgba(0, 0, 0, 0.88);
           border: 1px solid rgba(255, 255, 255, 0.15);
           backdrop-filter: blur(10px);
-          font-size: var(--type-micro);
+          font-size: 11.5px;
           font-weight: 600;
         }
 
@@ -2201,7 +2201,7 @@ export default function ShowcaseStage({ mode = "full" }) {
         }
 
         .sc-distinction-title {
-          font-size: var(--type-micro);
+          font-size: 11.5px;
           font-weight: 700;
           letter-spacing: 0.06em;
           text-transform: uppercase;
@@ -2212,7 +2212,7 @@ export default function ShowcaseStage({ mode = "full" }) {
           display: inline-flex;
           align-items: center;
           gap: 5px;
-          font-size: var(--type-micro);
+          font-size: 11px;
           color: var(--accent-bright);
           font-weight: 600;
           background: rgba(232, 174, 60, 0.1);
@@ -2266,7 +2266,7 @@ export default function ShowcaseStage({ mode = "full" }) {
 
         .sc-merit-kicker {
           font-family: var(--font-mono), monospace;
-          font-size: var(--type-floor);
+          font-size: 9.5px;
           font-weight: 700;
           color: #a8a69f;
           text-transform: uppercase;
@@ -2283,7 +2283,7 @@ export default function ShowcaseStage({ mode = "full" }) {
         }
 
         .sc-merit-sub {
-          font-size: var(--type-micro);
+          font-size: 11px;
           color: #8c8a82;
           line-height: 1.3;
         }
@@ -2340,7 +2340,7 @@ export default function ShowcaseStage({ mode = "full" }) {
           display: flex;
           align-items: center;
           gap: 7px;
-          font-size: var(--type-micro);
+          font-size: 11.5px;
           font-weight: 600;
           color: #d8d6cf;
         }
@@ -2436,7 +2436,7 @@ export default function ShowcaseStage({ mode = "full" }) {
           top: 2px;
           left: 2px;
           font-family: var(--font-mono), monospace;
-          font-size: var(--type-floor);
+          font-size: 8.5px;
           font-weight: 700;
           background: rgba(0, 0, 0, 0.88);
           border: 1px solid;
@@ -2452,7 +2452,7 @@ export default function ShowcaseStage({ mode = "full" }) {
         }
 
         .sc-tray-cat {
-          font-size: var(--type-floor);
+          font-size: 9.5px;
           font-weight: 700;
           letter-spacing: 0.05em;
           text-transform: uppercase;
@@ -2473,7 +2473,7 @@ export default function ShowcaseStage({ mode = "full" }) {
         }
 
         .sc-tray-inq {
-          font-size: var(--type-micro);
+          font-size: 10.5px;
           color: #a8a69f;
         }
 
@@ -2540,7 +2540,7 @@ export default function ShowcaseStage({ mode = "full" }) {
             padding: 3px 4px;
           }
           .sc-mobile-awards-row .sc-award-pill {
-            font-size: var(--type-micro);
+            font-size: 11.5px;
             padding: 5px 13px;
             flex-shrink: 0;
             white-space: nowrap;
@@ -2556,11 +2556,11 @@ export default function ShowcaseStage({ mode = "full" }) {
             gap: 5px;
           }
           .sc-telemetry-text {
-            font-size: var(--type-micro);
+            font-size: 10.5px;
           }
           :global(.sc-orbit-return-btn) {
             padding: 5px 11px;
-            font-size: var(--type-micro);
+            font-size: 11.5px;
             min-height: 32px;
             gap: 5px;
           }
@@ -2577,13 +2577,13 @@ export default function ShowcaseStage({ mode = "full" }) {
             gap: 6px;
           }
           .sc-cat-pill {
-            font-size: var(--type-micro);
+            font-size: 11.5px;
             padding: 5px 12px;
             min-height: 32px;
             gap: 6px;
           }
           .sc-cat-count {
-            font-size: var(--type-floor);
+            font-size: 9.5px;
             padding: 1px 5px;
           }
         }

@@ -29,7 +29,7 @@
 .contact-eyebrow {
   display: block;
   font-family: var(--font-mono, monospace);
-  font-size: var(--type-micro);
+  font-size: 10px;
   letter-spacing: 0.24em;
   text-transform: uppercase;
   color: var(--accent, #E8AE3C);
@@ -72,7 +72,7 @@
 
 .contact-label {
   font-family: var(--font-mono, monospace);
-  font-size: var(--type-micro);
+  font-size: 10px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--text-secondary, #c8c8c8);
@@ -124,7 +124,7 @@
 
 .contact-hint {
   font-family: var(--font-mono, monospace);
-  font-size: var(--type-micro);
+  font-size: 10px;
   letter-spacing: 0.1em;
   /* No tertiary text token exists in DESIGN.md. Dim the documented secondary
      rather than inventing a new grey — one fewer colour nobody approved. */
@@ -224,7 +224,7 @@
   border-radius: 4px;
   color: var(--text-secondary, #c8c8c8);
   font-family: var(--font-mono, monospace);
-  font-size: var(--type-micro);
+  font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   cursor: pointer;
@@ -246,7 +246,7 @@
 
 .contact-aside-title {
   font-family: var(--font-mono, monospace);
-  font-size: var(--type-micro);
+  font-size: 10px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--accent, #E8AE3C);

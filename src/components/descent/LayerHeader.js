@@ -73,7 +73,7 @@ export default function LayerHeader({ layerNum, layerName, title, description, m
 
         .layer-kicker {
           font-family: var(--font-mono);
-          font-size: var(--type-micro);
+          font-size: 11px;
           letter-spacing: 0.22em;
           color: var(--accent);
           text-transform: uppercase;
@@ -121,7 +121,7 @@ export default function LayerHeader({ layerNum, layerName, title, description, m
 
         .layer-mission-label {
           font-family: var(--font-mono);
-          font-size: var(--type-micro);
+          font-size: 10px;
           letter-spacing: 0.15em;
           color: var(--accent);
           text-transform: uppercase;
@@ -139,7 +139,7 @@ export default function LayerHeader({ layerNum, layerName, title, description, m
         .layer-primary-cta {
           display: inline-block;
           font-family: var(--font-mono);
-          font-size: var(--type-micro);
+          font-size: 11px;
           letter-spacing: 0.18em;
           text-transform: uppercase;
           color: var(--accent);

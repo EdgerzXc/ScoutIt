@@ -68,7 +68,7 @@ body.light-mode .article-hero {
 
 .article-category-tag {
   font-family: var(--font-mono);
-  font-size: var(--type-micro);
+  font-size: 11px;
   color: var(--accent);
   text-transform: uppercase;
   letter-spacing: 0.15em;
@@ -161,7 +161,7 @@ body.light-mode .article-hero {
 
 .advisory-label {
   font-family: var(--font-mono);
-  font-size: var(--type-micro);
+  font-size: 10px;
   color: var(--accent);
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -189,7 +189,7 @@ body.light-mode .article-hero {
 
 .insight-disclaimer-label {
   font-family: var(--font-mono);
-  font-size: var(--type-micro);
+  font-size: 10px;
   color: var(--accent);
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -272,7 +272,7 @@ body.light-mode .article-hero {
 
 .related-cat {
   font-family: var(--font-mono);
-  font-size: var(--type-micro);
+  font-size: 10px;
   color: var(--accent);
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -289,7 +289,7 @@ body.light-mode .article-hero {
 }
 
 .related-link {
-  font-size: var(--type-micro);
+  font-size: 11px;
   font-weight: 600;
   color: var(--accent);
   text-transform: uppercase;

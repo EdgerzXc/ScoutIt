@@ -83,7 +83,7 @@
 
 .tag {
   font-family: var(--font-mono);
-  font-size: var(--type-micro);
+  font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   background: var(--surface);
@@ -139,7 +139,7 @@
 
 .badgeName {
   font-family: var(--font-mono);
-  font-size: var(--type-micro);
+  font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: var(--text-primary);

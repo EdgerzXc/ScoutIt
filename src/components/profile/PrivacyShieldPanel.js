@@ -240,7 +240,7 @@ export default function PrivacyShieldPanel({ role, tier }) {
 
         .ps-err {
           font-family: ${MONO};
-          font-size: var(--type-micro);
+          font-size: 10px;
           color: var(--red);
           line-height: 1.7;
           margin-top: 14px;

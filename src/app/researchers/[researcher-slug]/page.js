@@ -97,7 +97,7 @@ export default async function ResearcherDetailPage({ params }) {
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginTop: "10px" }}>
                   {r.deliverables.map((item) => (
                     <div key={item} style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", color: "var(--text-secondary)" }}>
-                      <span style={{ color: "var(--accent)", fontSize: "var(--type-micro)" }}>✓</span>
+                      <span style={{ color: "var(--accent)", fontSize: "11px" }}>✓</span>
                       {item}
                     </div>
                   ))}

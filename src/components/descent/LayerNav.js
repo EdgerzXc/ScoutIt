@@ -37,7 +37,7 @@ function NavPill({ href, label, dir }) {
         alignItems: "center",
         gap: "6px",
         fontFamily: "var(--font-mono)",
-        fontSize: "var(--type-micro)",
+        fontSize: "10px",
         fontWeight: 600,
         letterSpacing: "0.15em",
         textTransform: "uppercase",
