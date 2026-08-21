@@ -177,6 +177,18 @@ export function buildAmbientItems({ ambient, now, user }) {
   return items;
 }
 
+/*
+ * THE ambient hook. Singular, deliberately.
+ *
+ * There used to be a second `useAmbientData` in `useAmbientData.js` that took
+ * only `(user)` and could not accept a location. Anything importing that one
+ * silently showed a default location forever — which is exactly what happened
+ * when the layer header was first built. It served one component,
+ * AmbientInformationRail, which had no callers at all; both were deleted.
+ *
+ * Takes `(user, context)`. `context` is the shape the property page passes to
+ * <Header ambientContext={...}>: { key, source, latitude, longitude, shortName }.
+ */
 export function useAmbientData(user, context = null) {
   const [now, setNow] = useState(null);
   const [ambient, setAmbient] = useState(null);
