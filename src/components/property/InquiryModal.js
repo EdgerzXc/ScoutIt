@@ -38,7 +38,7 @@ const formVariants = {
   exit: { opacity: 0, y: -10 }
 };
 
-export default function InquiryModal({ isOpen, onClose, propertyTitle, propertySlug }) {
+export default function InquiryModal({ isOpen, onClose, propertyTitle, propertySlug, defaultMessage = "" }) {
   const [status, setStatus] = useState("composing"); // composing, submitting, success, error
   const [errorMsg, setErrorMsg] = useState("");
   // NEW_IDEAS.md §38.3 State 1 — this is the pre-acceptance intro, the only
@@ -47,11 +47,18 @@ export default function InquiryModal({ isOpen, onClose, propertyTitle, propertyS
   // uncapped wall of text either overflows that card or has to be truncated,
   // and truncating the message someone spent a Connect on is worse than
   // making them edit it.
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState(defaultMessage || "");
   // Server-issued spend receipt (§38.2). Null until /api/deals/initiate
   // answers — there is deliberately no default shape, so the receipt cannot
   // render invented figures if the call fails.
   const [receipt, setReceipt] = useState(null);
+
+  // Sync default message when modal opens with new pre-filled finding
+  useEffect(() => {
+    if (isOpen && defaultMessage && !message) {
+      setMessage(defaultMessage);
+    }
+  }, [isOpen, defaultMessage, message]);
 
   const handleCloseModal = () => {
     if (status === "composing") {
@@ -265,6 +272,7 @@ export default function InquiryModal({ isOpen, onClose, propertyTitle, propertyS
                         type="submit"
                         className="mt-2"
                         isLoading={status === "submitting"}
+                        data-scoutit-guide="send-inquiry-modal-btn"
                       >
                         Spend 1 Connect →
                       </ImpeccableButton>

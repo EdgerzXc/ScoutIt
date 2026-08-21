@@ -12,16 +12,19 @@ import Link from "next/link";
  * @param {string} nextHref  - e.g. "/layer/stratosphere"
  * @param {string} teaser    - one-line poetic hint about the next layer
  */
-export default function LayerTransition({ nextNum, nextName, nextHref, teaser }) {
+export default function LayerTransition({ nextNum, nextName, nextHref, teaser, altitude }) {
   return (
     <div className="layer-transition">
       <div className="layer-transition-inner">
         <div className="layer-transition-divider" />
         <span className="layer-transition-kicker">
-          Continue Descent
+          Continue Cascading Descent
         </span>
         <Link href={nextHref} className="layer-transition-link">
-          <span className="layer-transition-num">Layer {nextNum}</span>
+          <div className="layer-transition-badge-row">
+            <span className="layer-transition-num">Layer {nextNum}</span>
+            {altitude && <span className="layer-transition-alt-tag">{altitude}</span>}
+          </div>
           <span className="layer-transition-name">{nextName}</span>
           <span className="layer-transition-teaser">{teaser}</span>
           <span className="layer-transition-arrow">↓</span>
@@ -79,6 +82,11 @@ export default function LayerTransition({ nextNum, nextName, nextHref, teaser })
           box-shadow: 0 0 30px rgba(232, 174, 60, 0.1);
           transform: translateY(-2px);
         }
+        .layer-transition-badge-row {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
         .layer-transition-num {
           font-family: var(--font-mono);
           font-size: 10px;
@@ -86,6 +94,15 @@ export default function LayerTransition({ nextNum, nextName, nextHref, teaser })
           text-transform: uppercase;
           color: var(--accent);
           opacity: 1;
+        }
+        .layer-transition-alt-tag {
+          font-family: var(--font-mono);
+          font-size: 9px;
+          color: var(--text-muted);
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          padding: 1px 6px;
+          border-radius: 4px;
         }
         .layer-transition-name {
           font-family: var(--font-display);

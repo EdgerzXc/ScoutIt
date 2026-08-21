@@ -632,10 +632,11 @@ export default function Home() {
           <p className="title-tagline-1">Get lost in spaces that actually inspire you.</p>
           <div className="title-tagline-2">SPACE INTELLIGENCE &middot; PHILIPPINE PROPERTY</div>
 
-          {/* Primary action path — gives first-time visitors a clear door in */}
+          {/* Primary action path — gives first-time visitors clear cascading doors in */}
           <div className="hero-cta-row">
             <Link href="/property" className="hero-cta-primary">Discover Spaces</Link>
-            <Link href="/layer/orbit" className="hero-cta-secondary">Browse Orbit</Link>
+            <Link href="/showcase" className="hero-cta-secondary">Orbit Showcase</Link>
+            <Link href="/layer/orbit" className="hero-cta-secondary">6-Layer Descent</Link>
           </div>
 
           {/* Pre-launch founding-cohort capture */}

@@ -1,0 +1,173 @@
+{
+  "buyer_guide": {
+    "id": "buyer_guide",
+    "title": "Buyer Journey: Search to Handshake",
+    "type": "EXECUTABLE_GUIDE",
+    "role": "seeker",
+    "description": "Step-by-step verified workflow guide for property seekers.",
+    "steps": [
+      {
+        "step": 1,
+        "nodeId": "hero",
+        "title": "Global Search & Filters",
+        "action": "Enter desired city or property type in the hero search.",
+        "tip": "Use natural language search.",
+        "guideTarget": "hero-search-input"
+      },
+      {
+        "step": 2,
+        "nodeId": "discover_directory",
+        "title": "Catalog & Neighborhood Intel",
+        "action": "Filter listings and view spatial map intelligence.",
+        "tip": "Toggle Satellite and Traffic layers.",
+        "guideTarget": "property-catalog-grid"
+      },
+      {
+        "step": 3,
+        "nodeId": "pep",
+        "title": "Property Detail Exploration",
+        "action": "Review chapters, verified title documents, and pricing.",
+        "tip": "Scroll to Chapter 10: Your Move.",
+        "guideTarget": "property-detail-container"
+      },
+      {
+        "step": 4,
+        "nodeId": "pep_ch10_your_move",
+        "title": "Initiate Deal or Inquiry",
+        "action": "Click 'Inquire' or 'Schedule Viewing'.",
+        "tip": "Requires 1 Connect token.",
+        "guideTarget": "property-your-move-actions"
+      },
+      {
+        "step": 5,
+        "nodeId": "inquiry_modal",
+        "title": "Direct Connect Authorization",
+        "action": "Authorize 1 Connect to establish private communication.",
+        "tip": "Protected by Zero-Knowledge masking.",
+        "guideTarget": "send-inquiry-modal-btn"
+      },
+      {
+        "step": 6,
+        "nodeId": "deal_room",
+        "title": "Deal Room Negotiation",
+        "action": "Enter the private transaction workspace with owner/broker.",
+        "tip": "All offers recorded in audit log.",
+        "guideTarget": "deal-room-negotiation-panel"
+      },
+      {
+        "step": 7,
+        "nodeId": "offer_modal",
+        "title": "Formal Offer Submission",
+        "action": "Submit formal purchase price and terms.",
+        "tip": "Valid for 72 hours.",
+        "guideTarget": "submit-offer-form-btn"
+      },
+      {
+        "step": 8,
+        "nodeId": "sys_transaction_handshake",
+        "title": "Two-Sided Deal Handshake",
+        "action": "Co-confirm two-sided deal closure and transaction milestones.",
+        "tip": "Boosts Scout Trust Rating.",
+        "guideTarget": "deal-handshake-two-sided-signature"
+      }
+    ]
+  },
+  "owner_guide": {
+    "id": "owner_guide",
+    "title": "Owner Pipeline: Listing to Handshake",
+    "type": "MACRO_GUIDE",
+    "role": "owner",
+    "description": "Step-by-step verified guide for property owners.",
+    "steps": [
+      {
+        "step": 1,
+        "nodeId": "dashboard_owner",
+        "title": "Owner Workspace",
+        "action": "View current property listings and performance metrics.",
+        "tip": "Check inquiry response rates.",
+        "guideTarget": "owner-portfolio-table"
+      },
+      {
+        "step": 2,
+        "nodeId": "owner_creation_pipeline",
+        "title": "Create Property Listing",
+        "action": "Configure property details, unit types, pricing, and amenities.",
+        "tip": "Automated OCR extracts building data.",
+        "guideTarget": "owner-claim-submit-btn"
+      },
+      {
+        "step": 3,
+        "nodeId": "comp_return_brief_owner",
+        "title": "Leads & Freshness Intelligence",
+        "action": "Review active buyer leads and freshness metrics.",
+        "tip": "Keep listing fresh to rank higher.",
+        "guideTarget": "owner-leads-brief"
+      },
+      {
+        "step": 4,
+        "nodeId": "deal_room",
+        "title": "Review Inquiries & Offers",
+        "action": "Accept, counter, or decline buyer offers directly.",
+        "tip": "Counter-offers keep original deal terms intact.",
+        "guideTarget": "deal-room-negotiation-panel"
+      },
+      {
+        "step": 5,
+        "nodeId": "sys_transaction_handshake",
+        "title": "Two-Sided Deal Handshake",
+        "action": "Co-confirm two-sided deal closure and transaction milestones.",
+        "tip": "Unlocks seller rating reward.",
+        "guideTarget": "deal-handshake-two-sided-signature"
+      }
+    ]
+  },
+  "broker_guide": {
+    "id": "broker_guide",
+    "title": "Broker Guide: Roster to Deal Closure",
+    "type": "MACRO_GUIDE",
+    "role": "broker",
+    "description": "Step-by-step verified workflow guide for licensed real estate brokers.",
+    "steps": [
+      {
+        "step": 1,
+        "nodeId": "dashboard_broker",
+        "title": "Broker Command Hub",
+        "action": "View assigned leads, roster listings, and client communications.",
+        "tip": "RESA Law compliant.",
+        "guideTarget": "broker-lead-roster-view"
+      },
+      {
+        "step": 2,
+        "nodeId": "brokers_roster",
+        "title": "Verified Broker Directory",
+        "action": "View verified broker directory and client representation roster.",
+        "tip": "PRC accredited.",
+        "guideTarget": "broker-prc-license-form"
+      },
+      {
+        "step": 3,
+        "nodeId": "broker_field_briefing",
+        "title": "Field Briefing & Client Management",
+        "action": "Access tactical property briefing notes and verified clients.",
+        "tip": "Ensures legal compliance.",
+        "guideTarget": "broker-client-agreement-panel"
+      },
+      {
+        "step": 4,
+        "nodeId": "deal_room",
+        "title": "Facilitate Deal Room Negotiations",
+        "action": "Guide buyer and seller through offer terms.",
+        "tip": "Maintain fiduciary duty.",
+        "guideTarget": "deal-room-negotiation-panel"
+      },
+      {
+        "step": 5,
+        "nodeId": "sys_transaction_handshake",
+        "title": "Two-Sided Deal Handshake",
+        "action": "Co-confirm two-sided deal closure and transaction milestones.",
+        "tip": "Boosts public broker trust score.",
+        "guideTarget": "deal-handshake-two-sided-signature"
+      }
+    ]
+  }
+}

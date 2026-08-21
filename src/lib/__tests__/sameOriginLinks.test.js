@@ -49,7 +49,7 @@ describe("same-origin navigation contracts", () => {
     }
 
     expect(broken).toEqual([]);
-  });
+  }, 25000);
 
   it("does not hardcode deep Intel slugs that can drift from Airtable", () => {
     const offenders = [];

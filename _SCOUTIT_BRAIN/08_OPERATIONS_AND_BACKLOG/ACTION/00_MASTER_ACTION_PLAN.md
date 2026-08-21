@@ -92,6 +92,119 @@ merge `a312ce7`; only the owner dashboard close remains.
 "unit is 882/882". The suite now runs **1015/1015**. That line is a historical record of
 what was true that day, so it has not been rewritten.
 
+## Release record — PR #64, 2026-08-20
+
+Branch `claude/scoutit-launch-plan-322a11` pushed to GitHub and opened as
+**[PR #64](https://github.com/EdgerzXc/ScoutIt/pull/64)**. Four commits, one
+concern each:
+
+| Commit | Concern |
+|---|---|
+| `091ae5e` | `/property` viewport overflow + header back button under the touch floor |
+| `1576053` | Public-profile indexability now fails closed |
+| `6a974a9` | `private, no-store` on every exit of `/api/profile/me/role` |
+| `08578dc` | Re-aimed two stale tests that had left the suite red |
+
+**Evidence at push time:** local production build exit 0 · **1210/1210 tests
+across 110 files** · ESLint clean on every changed file · all **8 CI checks
+pass** (both `verify` jobs, CodeQL, both Analyze jobs, review, Vercel) ·
+`mergeable: MERGEABLE`.
+
+**MERGED 2026-08-20 as `41bbb4b`.** Owner approved. Post-merge CI on the merge
+commit: `verify`, `Analyze (actions)`, `Analyze (javascript-typescript)` — all
+success. Production redeployed and healthy.
+
+### Post-merge production audit — clean
+
+Re-measured the deployed site, because the pre-merge evidence was a local build
+plus injected CSS, not the shipped artifact. 10 routes × 5 widths = **50 page
+loads**:
+
+| Check | Result |
+|---|---|
+| Non-200 responses | **none** |
+| Pages that failed to render (the false-pass guard) | **none** |
+| Horizontal overflow, any route, any width | **zero** |
+| Back button height at 320/360/390/768/1280 | **44px everywhere** |
+| `/property` card width by width | 296 / 336 / 366 / 736 / 423 — all correct |
+| `/api/profile/me/role` | `Cache-Control: private, no-store` (was `public`) |
+| Demo profile robots | `noindex, follow` |
+| **Nonexistent** profile robots | `noindex, follow` — the actual bug, confirmed fixed |
+| `/api/contact` contract | GET 405, malformed POST 400, form and Turnstile intact |
+
+`/property` went from 20 overflowing elements at 320px, worst 49px over, to
+**zero**. The auto-min-width fix is live and verified on the real deployment.
+
+**The guard earned its place immediately.** Every page in this run was checked
+for a render anchor before its zero was trusted — which is precisely what caught
+the preview deployment lying earlier the same day.
+
+**One console error remains site-wide and it is not ours.** `/contact` logs
+`%c%d font-size:0;color:transparent NaN` at every width. Traced to its source:
+`challenges.cloudflare.com/.../turnstile/...` — Cloudflare Turnstile's own
+iframe. Third-party noise, no action. Recorded so the next audit does not
+re-investigate it.
+
+### ⚠️ The preview deployment cannot be measured — and a check nearly reported a false pass
+
+Vercel **Deployment Protection is on for preview deployments**, so
+`scout-it-git-claude-…vercel.app` **302s to an SSO wall**. Playwright followed
+that redirect, rendered an empty shell, and the overflow probe returned a clean
+**0 at every width** — which looked exactly like the fix working and was in fact
+a measurement of a login page. It was caught only because `cardW`, `backH` and
+`headerH` all came back `null`: the elements did not exist.
+
+**The generalisable trap:** an overflow or layout assertion passes trivially
+against a page that has no content. Any such check must assert that a known
+element **exists** before trusting a zero. A "0 problems" result from a probe
+that never found the app is the most convincing wrong answer available.
+
+Recorded rather than fixed, because the protection itself is wanted — §2.5
+explicitly asks for Deployment Protection. What is missing is a way to measure
+behind it.
+
+- [ ] Decide how deployed previews get verified: a bypass token for automation,
+      or accept that verification happens against production after merge. Today
+      it is neither, and the gap was invisible until a probe lied convincingly
+
+**So what this PR's layout fix actually rests on:** the local production build,
+the full suite, and a live measurement on production with the exact final CSS
+injected — which took `/property` from 20 overflowing elements (49px worst at
+320px) to **0 at 320/360/390/768/1280**, desktop grid unchanged. That is strong,
+but it is *not* the same as verifying the deployed artifact, and it should be
+re-measured on production once merged.
+
+## Addendum — the suite was red, 2026-08-20
+
+**The test suite had two failing tests before this session started**, and no
+entry in this file said so. Confirmed by stashing the session's changes and
+re-running against a clean tree, rather than by assuming.
+
+Both were in `src/components/layout/ambient/ambientData.test.js`, and both were
+the same mistake: they asserted **desktop wording against `mobileSegments`**.
+The mobile pass deliberately shortened those labels to fit the ambient rail —
+`RAIN CHANCE` → `RAIN`, `AIR GOOD` → `AIR`, and the `LOCAL TIME` label dropped
+entirely because a clock reads as a clock. `ambientData.js` explains each of
+these in a comment beside the code. **The behaviour was right the whole time and
+the tests were left behind**, which is Standing Rule 14 in the direction nobody
+watches: the rule is usually read as "do not delete a test", but leaving one red
+is the same failure with worse ergonomics, because a permanently red suite stops
+being a signal.
+
+Both were re-aimed at what the code actually guarantees — including the narrower
+rule the code really follows, which is not "always label" but *"a label survives
+on mobile only where the value cannot speak for itself"*. Suite after:
+**1210/1210 across 110 files.**
+
+- [ ] **Decide how a red suite becomes visible.** Nothing surfaced this for an
+      unknown number of days; it was found only because an unrelated change
+      required a baseline run. The 2026-08-13 addendum already noted CI was
+      "silently red for days" once before (§1.0F). That is twice.
+
+> **Counting note, per Standing Rule 12.** Totals in this file now read 882 →
+> 1015 → 1109 → 1210 at four different dates. Each was true when written. Do not
+> reconcile them into one number — re-run the suite instead.
+
 ## Addendum — re-verification of external claims, 2026-08-16
 
 Read-only pull from GitHub, Vercel, Supabase, and public DNS. Nothing was
@@ -1012,17 +1125,169 @@ END:HISTORICAL_GOOGLE_OAUTH_REDIRECT_AUDIT -->
       migration — 420 in `CommercialFlow.js` (225) and `ResidentialFlow.js` (195),
       then `SpatialCommandMap.js` (48), `UnitMasterPage.js` (37). The CSS-file half
       is done and measures zero. Inline `style` accepts `var()` fine
-- [ ] **Light mode is only measured on `/` and `/settings`.** `/discover`,
-      `/property`, `/property/[id]`, `/hubs/[slug]`, brokers and dashboard were
-      changed but never scanned. ⚠️ Inject
-      `* { transition: none !important; animation: none !important; }` before
-      measuring or the scan under-reports (9 phantom failures on `/settings`)
+- [x] **SCANNED 2026-08-20 — 10 public routes, both themes, WCAG contrast at
+      390px.** The headline result is worth stating plainly:
+
+      **Dark mode is clean.** One failure site-wide (`title-tagline-2`, an 11px
+      decorative tagline at 55% gold, 3.62:1). The product's default theme is in
+      good shape.
+
+      **Light mode is broken on every page tested**, and it was far worse than
+      "only `/` and `/settings` were measured" implied:
+
+      | Route | Light-mode failures |
+      |---|---|
+      | `/contact` | **11** (17 when scoped to the page) |
+      | `/property/[id]` | 9 |
+      | `/` · `/pricing` | 4 each |
+      | `/brokers` | 3 |
+      | `/discover` · `/property` · `/intel` | 2 each |
+      | `/hubs/[slug]` · `/about` | 1 each |
+
+      ⚠️ **The scanner lied twice before it told the truth, and both lessons
+      generalise.**
+
+      *First:* it required a background with alpha > 0.92 before treating an
+      ancestor as the ground, so it walked straight past a 0.86-alpha dark bar
+      and compared white text to the light page behind it — reporting `/intel`'s
+      article title as 1.1:1 and invisible. Composited properly it is ~13:1 and
+      perfectly legible. **A contrast checker must composite every translucent
+      layer from the page ground up, not hunt for one "opaque enough" ancestor.**
+
+      *Second:* the freeze CSS must be injected **before** the theme is toggled,
+      not after. This file already warned that transitions produce phantom
+      failures; the ordering is the half that was missing.
+
+- [x] **Fixed: `/contact` was unreadable in light mode.** `.contact-page` sets
+      `background: var(--bg-root, #0d0d0d)` — a hardcoded dark ground — but was
+      never registered in the dark-island selector list in `globals.css`, so in
+      light mode it kept dark ground while the ink tokens flipped to near-black.
+      The `Talk to a person.` heading measured **1.03:1**.
+
+      This is the 2026-08-07 regression arriving from the opposite direction:
+      that one was an island with dark ink and no dark ground; this was dark
+      ground and no dark ink. **Either half alone is broken.** Added
+      `body.light-mode .contact-page` to the list. Verified by applying the real
+      rule to the live page: **17 failures → 0**, title `rgb(17,17,19)` →
+      `rgb(255,255,255)`.
+
+      🔒 **Standing rule earned here: a surface that hardcodes a dark background
+      must be added to that selector list in the same change.** The list has now
+      failed twice.
+
+- [x] **Fixed: the ambient rail failed on every page that renders a header —
+      which is every page.** `.ambient-rail` is `rgba(6,6,6,.45)`, dark *glass*
+      rather than a dark surface. Over light mode's near-white page it
+      composites to about `rgb(137,137,137)`, and light mode's amber `#9a6200`
+      is chosen for near-white, not mid-grey. The clock and temperature measured
+      **1.46:1** on `/`, `/discover`, `/property`, `/brokers`, `/intel`,
+      `/about`, `/hubs/*` and `/pricing`.
+
+      Fixed by giving the rail a light ground under `body.light-mode` rather
+      than making it a dark island — the rail is meant to sit *in* the header,
+      not punch a hole through it. Verified across five routes: **1.46 → 4.88:1**
+      everywhere.
+
+      🔒 **The trap: a translucent dark layer looks like a dark surface in the
+      file and becomes whatever is behind it.** It cannot be reasoned about from
+      the stylesheet alone; it has to be composited.
+
+      ⚠️ Cost a build break on the way in — backticks inside a styled-jsx CSS
+      comment end the template literal. The session handoff lists this as having
+      broken the build four times already. Caught by lint before commit.
+
+> ✅ **Both fixes MERGED as `a445b4a` ([PR #65](https://github.com/EdgerzXc/ScoutIt/pull/65))
+> and re-measured on production.** Post-merge CI green. The re-scan is the proof,
+> not the deploy log:
+>
+> | Route | Light before → after | Dark before → after |
+> |---|---|---|
+> | `/contact` | **11 → 0** | 0 → 0 |
+> | `/hubs/bgc-taguig` · `/about` | 1 → **0** | 0 → 0 |
+> | `/discover` · `/property` · `/intel` | 2 → 1 | 0 → 0 |
+> | `/brokers` | 3 → 2 | 0 → 0 |
+> | `/pricing` | 4 → 3 | 0 → 0 |
+> | `/property/[id]` | 9 → 8 | 0 → 0 |
+> | `/` | 4 → 4 | 1 → 1 |
+>
+> Every page that renders a header dropped exactly one failure — the ambient
+> rail — which is the signature of a site-wide fix landing. `/` stayed at 4
+> because its failures are the Orbit card and the tagline, not the rail.
+> **Dark mode is byte-for-byte unchanged**, which is the regression that
+> mattered most.
+
+- [ ] **Light mode remains broken elsewhere — NOT fixed, listed honestly.**
+      Remaining known failures, worst first: `/pricing` page title white on
+      near-white (**1.1:1**, invisible); `/brokers` `general-tier-badge-label`
+      white on light (**1.14:1**); `/property/[id]` gold-on-near-white across
+      `faq-legend__item`, `cp-eyebrow` and the aesthetic tag (1.68–1.81:1); the
+      homepage Orbit card (1.22–1.55:1).
+
+      These share one cause with the two fixed above — **surfaces that assume a
+      dark ground** — but each needs its own decision about whether the surface
+      should become light or become a declared dark island. Not mechanical.
+
+- [ ] **Decide whether light mode ships for the pilot at all.** It is a
+      user-facing toggle today. On this evidence it is not finished, and the
+      honest options are to finish it or to hide the toggle until it is. Shipping
+      a theme that makes the contact page unreadable is worse than not offering
+      one.
 - [ ] **The hero wordmark is still white-on-white** in light mode. Unsolved
-- [ ] **Two competing profile URL schemes.** Directories link to
-      `/profile/[username]`; `/photographers/[slug]`, `/researchers/[slug]`,
-      `/event-planners/[slug]` also exist and are reachable from nowhere.
-      `robots.js` disallows `/profile/`, so every indexable directory points at a
-      blocked destination. Pick one canonical URL, redirect the other
+- [x] **Indexability gate built and tested 2026-08-20 — the prerequisite is now
+      done.** `src/app/profile/[username]/layout.js` emits an explicit robots
+      directive in every branch, as an allowlist: index only when the profile
+      resolves in `public_profiles` **and** is not an example account **and** is
+      not a pilot identity. Everything else, including a username that resolves
+      to nothing, is `noindex, follow`.
+
+      **The bug this closed is the one Standing Rule 6 describes.** An unresolved
+      username previously returned metadata with **no robots key at all**, and
+      absent means indexable. Guarded by
+      `src/lib/__tests__/publicProfileIndexability.test.js` — 7 tests, and the
+      guard was **watched going red** by re-introducing the missing directive
+      (2 failures) before being restored, per Standing Rule 19.
+
+      ⚠️ Two process notes worth more than the fix. First, three of those tests
+      initially passed *for the wrong reason*: when the profile query returns
+      nothing the layout returns early and never calls the second query, so its
+      queued `mockResolvedValueOnce` survived into the next test as that test's
+      profile row. `vi.clearAllMocks()` does not drain a queue — `mockReset()`
+      does. Only the positive-path test could not pass accidentally, and it is
+      what exposed it. **A suite of denial tests needs at least one test that
+      fails if everything denies.** Second, "verified" in the owner's ruling is
+      still ambiguous and was deliberately not guessed: `prc_verified` is
+      broker-only, so requiring it would exclude every photographer and
+      researcher. Current reading is *real + explicitly public*. Confirm.
+
+- [ ] **KEEP `Disallow: /profile/` FOR NOW — decided 2026-08-20 on evidence, and
+      this reverses the previous instruction to "pick one canonical URL" as the
+      immediate action.** The contradiction is real (four directories link to a
+      robots-blocked destination) but it currently costs nothing, because there
+      is nothing behind it worth indexing:
+
+      | Measured on the live database | |
+      |---|---|
+      | Rows in `public_profiles` | **12** |
+      | Example/demo accounts | **12** |
+      | Real public profiles | **0** |
+
+      Unblocking the crawl today would send Google to 12 demo pages that all
+      correctly answer `noindex` — spending crawl budget to read a refusal. That
+      is precisely the mistake `src/app/sitemap.js` already carries a comment
+      about after the `/hubs` soft-404 incident: **never advertise a URL you do
+      not want fetched.**
+
+      **The trigger, not a date:** remove the disallow when the first real,
+      explicitly public profile exists. The gate above is what makes that removal
+      safe, so the order is now correct rather than merely pending.
+
+- [ ] **The competing role-slug routes still exist and are still unreachable.**
+      `/brokers/[broker-slug]`, `/photographers/[photographer-slug]`,
+      `/researchers/[researcher-slug]` and `/event-planners/[planner-slug]` are
+      all present in the app tree while every directory links to
+      `/profile/[username]`. Decide per the approved canonical: redirect them, or
+      delete them. Not urgent while `/profile/` is blocked, but it is dead
+      surface that will rot
 
 ## 1.0H Sharing + SEO surface — verified state (2026-08-13)
 
@@ -1445,20 +1710,77 @@ someone who trusted the document.
 
 ## 1.3 Activate sample-listing search protection
 
+> ⚠️ **RE-OPENED 2026-08-20, later the same day. The closure below was
+> premature and the mistake is instructive.** Every item was verified against
+> **properties**, and properties are correctly labelled. **Articles were never
+> checked, and they are not labelled at all.** `/intel` serves four mock
+> articles from `src/data/mock/mockArticles.js` with no sample marking, while
+> the real CMS holds exactly one article.
+>
+> This item requires the disclosure on *"every sample card, detail page, child
+> space, profile, dashboard record, and affected interaction."* An article is a
+> card. Closing the item on one class of sample data and assuming the rest is
+> the same error the 2026-08-16 addendum describes — verified in one place,
+> assumed everywhere else — committed by the very session that wrote that
+> warning down.
+>
+> - [ ] Label the sample articles on `/intel`, or stop serving them
+> - [ ] Only then re-close this section
+>
+> The property-specific checks below remain true and verified; they are left
+> ticked because they were re-measured against production.
+
+> ✅ **Properties verified 2026-08-20.** This section was fully unchecked while
+> all five property items were already live. It was not re-read because nothing
+> in it said *how to look*.
+
 **Founder through the deployed Mission Control System Operations workspace:**
 
-- [ ] Run the audited control to add checkbox field `Is_Sample` to `PROPERTIES_CMS`
-- [ ] Run the audited control to mark the seven seeded/sample records
+- [x] `Is_Sample` exists on `PROPERTIES_CMS` — `/api/cms?type=properties` returns
+      a normalized `is_sample` boolean per record
+- [x] The seeded records are marked — all 8 properties currently served return
+      `is_sample: true`. (The item said "seven"; it is eight. Standing Rule 12 —
+      re-count rather than re-copy)
 
 **Engineering after the field exists:**
 
-- [ ] Verify sample properties and child-space routes emit `noindex`
-- [ ] Verify samples are absent from the sitemap and property JSON-LD
-- [ ] Display **SAMPLE DATA — FOR HUMAN TESTING** on every sample card, detail
-      page, child space, profile, dashboard record, and affected interaction
+- [x] Sample property routes emit `noindex` — live check on
+      `/property/cyber-sigma-tower-3` returns
+      `<meta name="robots" content="noindex, follow">`
+- [x] Samples are absent from the sitemap and from property JSON-LD. The live
+      `sitemap.xml` serves 16 URLs and **zero** property URLs, which is correct
+      rather than broken: `src/app/sitemap.js` filters on `!p.is_sample`, and
+      every listing is currently a sample. The sample page carries only the
+      site-wide `Organization` and `WebSite` JSON-LD — no listing entity
+- [x] The disclosure renders on every sample surface, via `ProvenanceBadge` on
+      the directory, discover, both property flows, the unit master page and the
+      owner dashboard card. Wording is sentence case — *"Sample data — for human
+      testing"* — not the uppercase in this checklist; the rendered wording is
+      the standard, and `src/lib/__tests__/sampleProtectionContract.test.js`
+      guards the whole contract
+
+> **The one thing to re-check at launch cutover, not now:** the sitemap serving
+> zero listings is correct *because* everything is a sample. The moment a real
+> listing publishes it must appear. That is a §3.0 cutover assertion, not a
+> defect today.
 
 ## 1.4 Search indexing follow-through
 
+> ⚠️ **THE RED BANNER BELOW IS WRONG AND IS KEPT ONLY AS PROVENANCE — do not
+> act on it.** It was disproven on 2026-08-16 by reading Search Console directly
+> (see [[MASTER_OWNER_ACTIONS]] item 2): the property `sc-domain:scoutit.space`
+> **is verified**, has coverage data back to 2026-05-18, and the sitemap was
+> submitted on 2026-08-16. Re-confirmed 2026-08-20: `robots.txt` advertises the
+> sitemap and `sitemap.xml` returns HTTP 200 with valid XML.
+>
+> **Why it was wrong is the part worth keeping:** someone recorded that Search
+> Console *"shows the welcome/onboarding screen"* — which is what it shows when
+> you are signed out or have no property selected — and that UI impression became
+> a system fact repeated for months. Standing Rule 2 exactly. The prerequisite
+> checkbox below is therefore already satisfied; the remaining items in this
+> section are genuinely open and no longer blocked by it.
+
+<!-- BEGIN:SUPERSEDED_SEARCH_CONSOLE_BLOCKER
 > 🔴 **BLOCKED AT STEP ZERO — corrected 2026-08-13.** Every monitoring item below
 > assumed a verified Search Console property exists. **It does not.**
 > `search.google.com/search-console` renders the **welcome/onboarding** screen and
@@ -1476,12 +1798,14 @@ someone who trusted the document.
 > ([[MASTER_OWNER_ACTIONS]] §4.1) **before** verifying would drop the only token
 > and reset this to zero. **Verify first, then migrate DNS.**
 
-- [ ] **PREREQUISITE — finish Search Console verification.** The DNS token is
-      already live and GA4 is already installed; either route completes in
-      minutes. Nothing else in this section can start until this is done
+END:SUPERSEDED_SEARCH_CONSOLE_BLOCKER -->
+
+- [x] **PREREQUISITE — Search Console verification.** Already complete; see the
+      correction above. This was never actually blocking
 - [ ] Set `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` in Vercel as a **second**
       verification method, so the property survives the Cloudflare DNS cutover
-- [ ] Submit `sitemap.xml` once the property exists
+- [x] Submit `sitemap.xml` — done 2026-08-16; re-verified 2026-08-20 as HTTP 200
+      with 16 valid URLs and declared in `robots.txt`
 - [ ] Recheck the deployed `scoutit.space` sitemap and canonical URLs
 - [ ] ~~Monitor the **existing** Google index in Search Console~~ — there is no
       existing property. Re-scoped: **establish** monitoring after verification;
@@ -1813,6 +2137,122 @@ Implement this after the security/data blockers in 1.0, but before inviting huma
 testers. Preserve mock/sample data and label it; this is experience work, not launch
 cleanup.
 
+### Typography legibility pass — 2026-08-21
+
+**Owner reported type had become hard to read. It had, and far more broadly than
+the change that prompted the report.** Full write-up:
+[[../../04_DATA_AND_SCHEMA/TYPOGRAPHY_LEGIBILITY_SYSTEM]].
+
+Measured across 10 routes at 390 and 1280: **50 distinct styles rendering below
+10px — down to 8px — and 255 below 12px**, against roughly **900 sub-12px
+declarations** in source.
+
+| Measure | Before | After |
+|---|---|---|
+| Styles under 10px | **50** | **4** (MapLibre's own attribution only) |
+| Styles under 12px | **255** | **36** |
+| Overflow, 10 routes × 5 widths | 0 | **0** |
+
+**I owned one of them:** the Market chapter shipped a `9.5px` tag, below this
+project's own stated floor. The other ~48 predate it.
+
+**The finding worth keeping is not "make it bigger."** This codebase applied
+`letter-spacing: 0.25em` to **9px** mono labels. That is a display-word value on
+label-scale type; at 9px the eye loses the word shape entirely. All four loaded
+design references say tracking is **size-specific** — small text wants
+*slightly* positive tracking, not a quarter em. So the fix was three moves at
+once: size up to a token floor, tracking **down** to `0.06–0.08em`, and weight
+**up** to 500–600, which buys presence at zero layout cost — the lever this
+dense UI had never used.
+
+Four design skills were loaded first per [[RULES]] Part B: `design-taste-frontend`,
+`apple-design`, `emil-design-eng`, `ui-ux-pro-max`.
+
+- [ ] **The floor is now a token, so hold the line.** `--type-floor` /
+      `--type-micro` / `--type-small`, mobile stepping *up* not down. A raw
+      font-size below 12px in new code is a regression
+- [ ] MapLibre attribution stays at 9px deliberately — vendor chrome, legally
+      required credit, restyling it risks breaking their layout
+
+### Measured responsive pass — 2026-08-20
+
+A width sweep was run against **production** (not the source, not a dev server)
+across 320 / 360 / 390 / 768 / 1280 on `/`, `/discover`, `/property`, a sample
+property, `/brokers`, `/intel`, `/contact`, `/about`, `/pricing` and `/showcase`.
+
+**Method note worth keeping, because the first run was wrong.** A naive
+"element extends past the viewport" check reported 60 failures on `/showcase`
+and 38 on the property page. Nearly all were children of horizontal scroll
+rails, where extending past the viewport is the entire point. The detector was
+made ancestor-aware — it now ignores any element with an `overflow-x` of
+`auto`/`scroll`/`hidden`/`clip` anywhere in its ancestry — and the real count
+collapsed to one page. **An overflow audit that does not understand scroll
+containers manufactures work.** Same for tap targets: the first hit-test counted
+an *ancestor* under the probe point as a hit, so every control passed. Both
+scripts are in the session scratchpad; the corrected logic is the reusable part.
+
+Result: **no route returned non-200, no input renders under 16px, and no inline
+`100vh` survives anywhere.** Two real defects, both now fixed:
+
+- [x] **`/property` listing grid overran the viewport — 49px at 320px, 9px at
+      360px, clean at 390 and above.** Root cause was the auto-min-width trap
+      named in the session handoff: a grid item's `min-width` defaults to `auto`,
+      so its widest unbreakable child sets the whole track and the track then
+      overruns its own container. **This is the third surface with this exact
+      cause**, after layer 2 and the intel page.
+
+      The lesson beyond the fix: **the floor propagates down every nesting
+      level, so every level has to be told.** Fixing the container and the grid
+      moved it from 20 overflowing elements to 14, not to zero — the card
+      wrappers were a third level. Fixed in `src/app/property/property.css` with
+      `min-width: 0` on `.directory-container > *`, `.directory-grid`, and
+      `.directory-grid > *`.
+
+      Verified after: **0 overflow at 320, 360, 390, 768 and 1280**, desktop grid
+      unchanged at two 423px columns, and nothing clipped — no descendant of a
+      card was ever wider than 330px, so the excess was the floor talking rather
+      than real content demand.
+
+- [x] **The header back button was 36px tall on every page, under the 44px touch
+      floor, at both 360 and 390.** Restored to 44px in
+      `src/components/layout/Header.js` (two breakpoint blocks).
+
+      **The 36px was an over-correction and cost nothing to undo.** It had been
+      reduced while fighting the header onto one line, but measurement showed the
+      header is 57px tall either way: at 320, 360 and 390 the header height, the
+      brand position, the three child rows and the zero-overflow count are all
+      identical before and after. The height was being paid for a problem it did
+      not solve.
+
+      ⚠️ **A pseudo-element hit area was tried first and abandoned.** Extending
+      the tap region past the painted box only won the 4px *above* the button —
+      paint order gave the space below to a later sibling. It measured as a
+      half-fix, which is worse than none, because it looks like a fix in a diff.
+
+#### Still open from the same pass
+
+- [ ] **`/showcase` has 10 controls at 32px height** (category pills, the
+      gallery/reel switcher, the orbit-return link) at both 360 and 390.
+      **A hit-area pseudo-element cannot solve this one and was removed after it
+      measured 2/9.** The pills sit inside `.sc-category-drag-track`, which is
+      34px tall with `overflow: auto`, so any hit region taller than the track is
+      clipped by the scroll container before it reaches a thumb.
+
+      Two honest options, and the choice is the owner's because it is
+      compositional: **(a)** grow the track and the pills to 44px, which pushes
+      the showcase stage down roughly 12px, or **(b)** accept the density on this
+      one browsing surface and record the exception. Do not attempt a third
+      "clever" fix — the clipping is structural.
+
+- [ ] **`.header-menu-btn` declares `36px` at `max-width: 480px` but measures
+      48×48 at 360px**, so something later overrides it. Harmless today because
+      the measured size passes, but a rule that does not do what it says is a
+      trap for the next person who edits that block. Reconcile or delete it.
+
+- [ ] Re-run the sweep against `/dashboard` and the signed-in surfaces. This pass
+      covered public routes only, because the measurement was unauthenticated —
+      the dashboard maps noted in the handoff are still unverified by anyone.
+
 ### Responsive universal header
 
 - [ ] Use the current futuristic header as the reference standard for ScoutIt's
@@ -2025,8 +2465,30 @@ wired**: the only role signal available to that client component is
 `guideForPath` already accepts the role, so this is one line once the verified
 session reaches the component.
 
-- [ ] Wire the verified session role into `guideForPath` and enable the owner
-      and broker property-page variants
+- [x] **DONE — verified 2026-08-20, and it was already done when this checkbox
+      was written.** `/api/profile/me/role` resolves the session server-side with
+      `resolveUserId` and reads `role` from `user_profiles`; `FloatingToolbox`
+      fetches it and passes it to `guideForPath`, which selects `byRole`. The
+      owner and broker property-page variants are live. Confirmed against
+      production: the endpoint returns `{"role":null}` / HTTP 200 when signed
+      out, which is the intended neutral-copy path rather than an error.
+
+      The design holds the line §1.5 asks for: the role is never read from
+      `scoutit_user` in localStorage, and the route's own comment states it is a
+      presentation hint, not an entitlement — anything granting access must
+      re-derive server-side (Standing Rule 5).
+
+- [x] **Fixed a real defect found while verifying the above:
+      `/api/profile/me/role` was serving `Cache-Control: public, max-age=0,
+      must-revalidate` on its signed-out paths.** Only the signed-in branch set
+      `private, no-store`; the three `{ role: null }` early returns fell through
+      to the Next default. Measured on the live endpoint, not read from source.
+
+      `public` is the wrong word on a per-caller endpoint even when the body is
+      harmless — it tells shared caches one visitor's answer may be handed to
+      another. The body is `null` today, and *today* is the qualifier that rots.
+      All five exits now share one `NO_STORE` constant declared at the top, so a
+      future early return cannot forget it.
 - [x] **EMAIL CHAIN PROVEN 2026-08-16 — status `Delivered`.** Resend verified,
       then a real submission through the live contact form triggered a real send.
       Resend's own log shows it: `jerzelguerra26@gmail.com · Delivered · "New
@@ -2619,6 +3081,40 @@ asked for those specifically. **They are almost certainly not the only ones.**
 A uniform `SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER` across
 three unrelated tables is the signature of a blanket `GRANT ALL ... TO anon,
 authenticated` in an early migration, not of three separate decisions.
+
+- [x] **DONE 2026-08-20 — the query below was run against production, read-only.
+      The finding is recorded here rather than fixed, because the owner ruled the
+      same day that the lockdown belongs to the single security overhaul at the
+      end, not to pre-pilot work.** Do not re-run this as discovery; re-run it as
+      verification when the overhaul happens.
+
+      | Measured | Value |
+      |---|---|
+      | Tables in `public` | **59** |
+      | Granting `anon` SELECT + INSERT + UPDATE + DELETE + TRUNCATE | **55** |
+      | RLS enabled with **zero** policies (deny-all is the only gate) | **20** |
+      | RLS **off** *and* anon-writable — no gate at any layer | **1** |
+
+      The hypothesis in this section was right: a uniform grant across 55
+      unrelated tables is one blanket `GRANT ALL … TO anon, authenticated`, not
+      55 decisions. The three money tables fixed on 2026-08-16 are the only
+      exceptions in the whole schema.
+
+      **The one that is not merely theoretical: `spatial_ref_sys`.** It is the
+      single table with RLS *off* and full anon write grants, so unlike the other
+      54 there is no second gate behind the grant. Confirmed reachable: an
+      anonymous REST read through the public API returned rows. **A write was
+      deliberately not attempted** — the grant matrix plus RLS-off is proof
+      enough, and the test itself would be the damage. Prior audits called this
+      "a PostGIS reference table, not a live data leak", which is true of
+      *reading* and was never checked for *writing* — Standing Rule 18 exactly.
+      PostGIS reads this table for every coordinate transform, so emptying it
+      breaks the maps rather than leaking anything.
+
+      **The other 20 hold, today.** Probed `verification_requests` and
+      `deal_messages` anonymously: both correctly returned empty. They are one
+      dropped policy away from public, which is the argument for two gates, not
+      evidence of a live hole.
 
 - [ ] **Audit the grant layer for every table in `public`.** One query answers
       it — this is the "how to re-check it in one command" rule from the
@@ -3518,6 +4014,180 @@ qualifying super-large spatial asset - the activation work must include:
 3. **Enterprise Pricing / Upgrade Modal**:
    - Attempting any write or add action inside Enterprise Mode (e.g. clicking "Add Property", "Create Portfolio", or "Invite Team Member") triggers a sleek **Enterprise Pricing Upgrade Modal**.
    - The modal displays Enterprise tier feature breakdowns, seat pricing options, and a direct CTA to request an enterprise tier upgrade or schedule an onboarding call.
+
+---
+
+# THE MARKET CHAPTER — articles on property pages (built 2026-08-20)
+
+Owner asked for a section on property pages carrying **articles for that
+property's location, plus articles written specifically about that property.**
+This supersedes §Layer 2 item 2 below, which specified only *"a gold link to the
+corresponding city/category intel briefing"* — a link, not a section.
+
+## What shipped
+
+**One shared component, `components/property/MarketChapter.js`, used by both
+flows.** Two layers in one chapter:
+
+| Layer | Content | Audience |
+|---|---|---|
+| Free | Briefings about this property and its market | Everyone |
+| Paid | Cap rate · Transaction history · Appreciation · Price history · Competitive density · Market position | Cluster+ |
+
+Matching lives in `lib/propertyArticles.js`, 31 unit tests.
+
+## Three real defects found on the way in
+
+- [x] **`canMarketIntel` in `CommercialFlow` was declared, computed on mount,
+      and never read.** One reference in the whole file. So commercial, STR,
+      hospitality, restaurants and venues — **five of seven categories** —
+      rendered no market intelligence at all, not even the locked teaser
+      residential got. Cap rate and transaction history are commercial metrics
+      first; the only flow that had them was the one that needed them least.
+      Standing Rules 13 and 21, both.
+
+- [x] **Exact city matching would have returned nothing, on every property.**
+      Articles are authored at district level and properties recorded at city
+      level — `"BGC, Taguig"` vs `"Taguig"`, `"Makati CBD"` vs `"Makati"`,
+      `"Poblacion, Makati"` vs `"Makati"`. Not one pair is string-equal, and
+      every pair is obviously the same market. Found by testing against the live
+      feed rather than by reading the schema. Standing Rule 4 exactly: it fails
+      by showing nothing, and showing nothing looks exactly like having nothing.
+
+      Fixed with meaningful-token overlap plus a stopword list — without it
+      `"Cebu City"` matches `"Quezon City"` on the shared token `city`, which is
+      worse than no match.
+
+- [x] **"The Fine Print" was a misnomer twice over.** It means legal caveats and
+      terms; the chapter renders investment metrics. Its subtitle promised a
+      third thing again — *"Title classification, zoning & risk assessments"* —
+      which it has never rendered. Renamed to **The Market** in
+      `chapterConfig.js`. **The tab id stays `hiddenintel`** because it is in
+      every deep link, in `VALID_CHAPTERS` on both flows, and in the panel CSS.
+
+## ⚠️ A correction to this file's own §1.3 entry
+
+**§1.3 was marked closed on the strength of PROPERTIES being labelled. Articles
+were never checked, and they are not labelled.** `/intel` renders **four mock
+articles** from `src/data/mock/mockArticles.js` with **no sample marking at
+all**, while the real CMS holds exactly **one** article (`test-intel`, blank
+city).
+
+- [ ] Label the sample articles on `/intel`, or stop serving them. §1.3 requires
+      the disclosure on "every sample card, detail page, child space, profile,
+      dashboard record, and affected interaction" — an article is a card
+- [ ] Re-open §1.3 until that is done. Closing it on a partial check is the
+      same error the 2026-08-16 addendum describes: a claim verified in one
+      place and assumed everywhere else
+
+**Because of this, the property page deliberately reads only `bundle.intel`
+(real CMS) and NOT the mock feed.** Piping unlabelled sample articles onto
+property pages would have spread the problem rather than shown the feature
+working. The consequence is that the empty state is what ships today — which is
+correct, and is why it was designed first.
+
+## Verified
+
+Dev server, both flows, four widths:
+
+| Check | Result |
+|---|---|
+| Chapter present on commercial (`cyber-sigma-tower-3`) | ✅ new — had nothing before |
+| Chapter present on residential (`the-ridgeline-…`) | ✅ |
+| Nav label on both | **The Market** |
+| Populated state (temporarily fed the mock feed, then reverted) | 1 row, tagged *"This market"*, links to `/intel/bgc-spatial-movement` |
+| Empty state with real data | *"No briefings cover this part of Taguig yet"* + Browse market intel |
+| Overflow at 320 / 390 / 768 / 1280 | **0** |
+| Tap targets under 44px | **0** |
+| Build | exit 0 · Suite **1241/1241** |
+
+## MERGED `51066fb` ([PR #66](https://github.com/EdgerzXc/ScoutIt/pull/66)) — production audit clean
+
+Post-merge CI green. Verified on the deployed site, **one property per category**:
+
+| Category | Chapter | Label | Stale "Fine Print" |
+|---|---|---|---|
+| Commercial (×2) · STR · Hospitality · Residential · Restaurants · Venues | present on **all 7** | **The Market** | **none** |
+
+Five of those seven had **no market chapter at all** before this. Regression
+sweep across 10 routes × 5 widths: no non-200s, every page rendered, **zero
+overflow at every route and width**, and the only console error remains the
+third-party Turnstile one on `/contact`.
+
+`?chapter=hiddenintel` still returns 200 — the frozen tab id did its job.
+
+## Article storage decided — see [[../../04_DATA_AND_SCHEMA/ARTICLE_CREATION_LOGIC]]
+
+Owner asked where articles live given each category will get its own
+interactive. Decided and written up 2026-08-20; the short version:
+
+**Supabase captures, Airtable publishes** — the same shape as properties, per
+the Dual-CMS Golden Rule. `intel_sources` (raw, **7-day** retention) →
+`intel_briefings` (draft) → **`INTEL_CMS` (published, permanent)**.
+
+**The 7 days applies to raw sources, never to published articles.** A published
+article is SEO surface and is what the Market chapter links to; expiring them
+would rot every property page's list and feed Google dead URLs — the `/hubs`
+soft-404 mistake again.
+
+**Interactives are code, not storage.** Measured: MapLibre **267 KB gzipped**,
+Three.js **178 KB**. The article stores only a registry key plus a small config,
+so one more article in a category that already has its interactive costs
+**~2–15 KB of text and zero experience weight**. The binding constraints are
+bandwidth (≈1.2 MB if a reader opens one article per category) and WebGL
+contexts — not disk. Airtable's real limit is records per base (16 properties,
+2 articles today).
+
+Built with it: `Experience_ID` + `Experience_Config` on `INTEL_CMS`, the publish
+bridge `src/lib/intelPublish.js` (16 tests), and the end of the
+`published_to_airtable` lie.
+
+## Still open
+
+- [x] **CORRECTION 2026-08-20 — `Related_Property` ALREADY EXISTED, and the
+      claim that this was owner-only was wrong twice over.**
+
+      I recorded this as *"owner-only, the Airtable connector is not authorised"*
+      and asked the owner to create the field. Both halves were false:
+
+      1. **The connector was authorised.** I read the deferred-tool list once at
+         session start, saw `plugin:airtable:airtable` under "requires
+         authentication", and never checked that a *second*, working Airtable
+         server was also present. I reported a capability as unavailable without
+         testing it.
+      2. **The field was already there.** `Related_Property`
+         (`fldzcxvHiIQIbDYlh`) has been on `INTEL_CMS` all along — a
+         `multipleRecordLinks` to `PROPERTIES_CMS` (`tbly4IqdfwkAoUsd4`), with
+         its reciprocal `INTEL_CMS` field (`fldxfQC3YgTsmH7GP`) already on
+         `PROPERTIES_CMS`. Exactly the shape specced, built long before it was
+         specced.
+
+      **The real gap was in code, not in Airtable:** `fetchIntel()` in
+      `src/lib/airtable.js` never read the field, so the strongest
+      article↔property signal in the base was invisible to the product. Fixed —
+      one mapped line plus a contract test.
+
+      **This is the fourth instance of the same class**, after `SEO_Title`,
+      `Floor_Plans` and `Verification_Status` in
+      [[../../04_DATA_AND_SCHEMA/AIRTABLE_COMPRESSION_PLAN]]: a field that
+      exists in Airtable with no consumer in code. It fails silently — nothing
+      errors, nothing logs, the feature just does nothing. Standing Rule 21 is
+      the check that catches it, and the direction to look is the one you are
+      not looking at.
+
+      🔒 **Rule earned: before asking the owner to create an Airtable field,
+      read the live schema.** The base has 186 fields on `PROPERTIES_CMS` alone;
+      assuming something is absent is not the same as looking.
+
+- [ ] **Populate it.** The field is wired and empty. `INTEL_CMS` currently holds
+      **two records** — one blank, one `test-intel` — and neither has
+      `Related_Property` or `City` set. Nothing was written to Airtable: the
+      owner's instruction was to read the schema, not to change the base
+- [ ] `DATA_DICTIONARY.md`'s `INTEL_CMS` entry lists 7 fields; the code reads
+      15. `City`, `Region`, `SpaceCategory` and `Body_JSON` are all missing from
+      the doc
+- [ ] Decide whether the Unit Master Page inherits its parent's list. A unit has
+      no separate location, so it should inherit rather than match on its own
 
 ---
 
