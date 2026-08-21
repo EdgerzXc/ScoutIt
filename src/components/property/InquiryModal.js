@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { getSession } from "../../lib/authClient";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
