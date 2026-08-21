@@ -61,8 +61,8 @@ describe("Master Cascade Navigation & Altitude Hierarchy Contracts", () => {
     expect(dashboardExists, "Base /dashboard must exist").toBe(true);
   });
 
-  it("ensures interactive workflow flowchart page exists at /flow", () => {
+  it("keeps the internal master workflow unavailable as a public route", () => {
     const flowExists = checkPageExists("/flow");
-    expect(flowExists, "Visual Flowchart page at /flow must exist").toBe(true);
+    expect(flowExists, "Internal master workflow must not be exposed at /flow").toBe(false);
   });
 });
