@@ -8,6 +8,8 @@ import { siteUrl } from "@/lib/siteUrl";
 import { parseArticleBlocks, blocksFromLegacy } from "@/lib/articleSchema";
 import ArticleBlocks from "@/components/intel/ArticleBlocks";
 import InvestigationDossier from "@/components/intel/InvestigationDossier";
+import ActiveDetourHud from "@/components/intel/ActiveDetourHud";
+import FulfilmentTerminal from "@/components/intel/FulfilmentTerminal";
 import { getInvestigation } from "@/data/mock/investigations";
 import GlassPanel from "@/components/ui/GlassPanel";
 import HoverCard from "@/components/ui/HoverCard";
@@ -86,8 +88,22 @@ export async function generateMetadata({ params }) {
   };
 }
 
-export default async function IntelArticlePage({ params }) {
+export default async function IntelArticlePage({ params, searchParams }) {
   const { "article-slug": slug } = await params;
+
+  /* ── THE DETOUR ────────────────────────────────────────────────────
+     A reader can arrive here two ways: browsing Intel, or through a door
+     on a property page ("how does this ordinance affect my building?").
+     The second is a round trip — it has to end by putting them back where
+     they started, on Chapter 10 "Your Move", with a verdict.
+
+     `fromProperty` is what distinguishes the two. Without it this is just
+     an article and both the HUD and the terminal render nothing. */
+  const sp = (await searchParams) || {};
+  const fromProperty = typeof sp.fromProperty === "string" && sp.fromProperty
+    ? sp.fromProperty
+    : null;
+  const door = typeof sp.door === "string" ? sp.door : null;
   const article = await getLiveArticle(slug);
 
   if (!article) {
@@ -105,6 +121,15 @@ export default async function IntelArticlePage({ params }) {
     <div className="page-wrapper">
       <Header />
       
+      {fromProperty ? (
+        <ActiveDetourHud
+          fromProperty={fromProperty}
+          propertyTitle={null}
+          door={door}
+          relationReason={dossier?.impactRadius || null}
+        />
+      ) : null}
+
       <main className="article-main">
         {/* Dynamic Hero Banner */}
         <section className="article-hero" style={{ backgroundImage: `url(${article.image})` }}>
@@ -196,6 +221,15 @@ export default async function IntelArticlePage({ params }) {
         </section>
 
         {dossier ? <InvestigationDossier dossier={dossier} /> : null}
+
+        {fromProperty && dossier ? (
+          <FulfilmentTerminal
+            signal={dossier}
+            fromProperty={fromProperty}
+            originPropertyTitle={null}
+            affectedSpaces={dossier.affectedSpaces || []}
+          />
+        ) : null}
 
         {/* Related Briefings Section */}
         <section className="related-section">

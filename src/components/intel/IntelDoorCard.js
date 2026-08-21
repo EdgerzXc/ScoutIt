@@ -21,7 +21,14 @@ export default function IntelDoorCard({
   );
 
   const question = overrideQuestion || signal.doorQuestion || `How does the ${signal.title} affect this building?`;
-  const href = `/layer/stratosphere?fromProperty=${encodeURIComponent(propertySlug || "")}&door=${encodeURIComponent(doorChapterId)}&signal=${encodeURIComponent(signal.slug)}`;
+  /* Points at the ARTICLE, not the layer. Investigations used to live on
+     /layer/stratosphere as an 8-chapter workbench; that layer is now a
+     preview and the chapters moved to /intel/[slug]. The signal slug IS the
+     article slug, so the door needs no lookup table — it just goes straight
+     to the story it was always opening. `fromProperty` and `door` ride
+     along so the article can show the detour HUD and return the reader
+     home afterwards. */
+  const href = `/intel/${encodeURIComponent(signal.slug)}?fromProperty=${encodeURIComponent(propertySlug || "")}&door=${encodeURIComponent(doorChapterId)}`;
 
   const isSevere = signal.severity === "high";
 
@@ -79,7 +86,7 @@ export default function IntelDoorCard({
               }}
             >
               <Radio size={11} className="animate-pulse" style={{ color: "#E8AE3C" }} />
-              Ch {doorChapterNumber} · Stratosphere Detour · {signal.intelType || "SPATIAL SIGNAL"}
+              Ch {doorChapterNumber} · Intel Detour · {signal.intelType || "SPATIAL SIGNAL"}
             </span>
           </div>
 
