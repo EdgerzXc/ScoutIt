@@ -186,7 +186,7 @@
     "title": "Direct Canonical Slug URL",
     "domain": "property",
     "layer": "global",
-    "route": "/property/[slug]",
+    "route": "/property/[id]",
     "roles": [
       "visitor",
       "seeker",
@@ -1498,7 +1498,7 @@
     "title": "Spatial Canvas (2D/3D Infinite Map)",
     "domain": "discovery",
     "layer": "metropolis",
-    "route": "/spatial-canvas",
+    "route": "/property/[id]?chapter=location",
     "roles": [
       "visitor",
       "seeker",
@@ -1924,7 +1924,7 @@
     "title": "Regional Transport & Location Hubs",
     "domain": "discovery",
     "layer": "stratosphere",
-    "route": "/hubs",
+    "route": "/hubs/[slug]",
     "roles": [
       "visitor",
       "seeker",
@@ -2632,7 +2632,7 @@
     "title": "Event Designers & Venue Curators",
     "domain": "discovery",
     "layer": "crust",
-    "route": "/planners",
+    "route": "/event-planners",
     "roles": [
       "visitor",
       "seeker",
@@ -3057,7 +3057,7 @@
     "title": "Chapter 01 — The Space / Floor Plate / Capacity",
     "domain": "property",
     "layer": "core",
-    "route": "/property/[slug]#the-space",
+    "route": "/property/[id]?chapter=space",
     "roles": [
       "visitor",
       "seeker",
@@ -3166,7 +3166,7 @@
     "title": "Chapter 02 — Location & Transit Logistics",
     "domain": "property",
     "layer": "crust",
-    "route": "/property/[slug]#location",
+    "route": "/property/[id]?chapter=location",
     "roles": [
       "visitor",
       "seeker",
@@ -3275,7 +3275,7 @@
     "title": "Chapter 03 — Life Here / Workday / Atmosphere",
     "domain": "property",
     "layer": "core",
-    "route": "/property/[slug]#life-here",
+    "route": "/property/[id]?chapter=life",
     "roles": [
       "visitor",
       "seeker",
@@ -3384,7 +3384,7 @@
     "title": "Chapter 04 — Where To? (The Neighborhood Radius)",
     "domain": "property",
     "layer": "crust",
-    "route": "/property/[slug]#where-to",
+    "route": "/property/[id]?chapter=whereto",
     "roles": [
       "visitor",
       "seeker",
@@ -3493,7 +3493,7 @@
     "title": "Chapter 05 — Build Plans & Fit-Out Engineering",
     "domain": "property",
     "layer": "mantle",
-    "route": "/property/[slug]#build-plans",
+    "route": "/property/[id]?chapter=buildplans",
     "roles": [
       "visitor",
       "seeker",
@@ -3602,7 +3602,7 @@
     "title": "Chapter 06 — The Fine Print (Deep & Hidden Intel)",
     "domain": "property",
     "layer": "core",
-    "route": "/property/[slug]#fine-print",
+    "route": "/property/[id]?chapter=hiddenintel",
     "roles": [
       "seeker",
       "owner",
@@ -3716,7 +3716,7 @@
     "title": "Decision Gate: Deep Intel Tier Entitlement (Solar+)",
     "domain": "layer",
     "layer": "core",
-    "route": "/lib/entitlements.js#deep-intel",
+    "route": "/property/[id]?chapter=hiddenintel",
     "roles": [
       "seeker",
       "owner",
@@ -3826,7 +3826,7 @@
     "title": "Decision Gate: Hidden Intel & Valuation Models (Cluster+)",
     "domain": "layer",
     "layer": "core",
-    "route": "/lib/entitlements.js#hidden-intel",
+    "route": "/property/[id]?chapter=hiddenintel",
     "roles": [
       "seeker",
       "enterprise"
@@ -3933,7 +3933,7 @@
     "title": "Chapter 07 — Units & Spaces (Inventory Grid)",
     "domain": "property",
     "layer": "core",
-    "route": "/property/[slug]#units",
+    "route": "/property/[id]?chapter=units",
     "roles": [
       "visitor",
       "seeker",
@@ -4043,7 +4043,7 @@
     "title": "Chapter 08 — Property Universe & Developer Credentials",
     "domain": "property",
     "layer": "orbit",
-    "route": "/property/[slug]#universe",
+    "route": "/property/[id]?chapter=universe",
     "roles": [
       "visitor",
       "seeker",
@@ -4152,7 +4152,7 @@
     "title": "Chapter 09 — Ecosystem Services & Creator Booking",
     "domain": "property",
     "layer": "crust",
-    "route": "/property/[slug]#services",
+    "route": "/property/[id]?chapter=services",
     "roles": [
       "visitor",
       "seeker",
@@ -4261,7 +4261,7 @@
     "title": "Chapter 10 — Your Move (Action Cockpit)",
     "domain": "property",
     "layer": "core",
-    "route": "/property/[slug]#your-move",
+    "route": "/property/[id]?chapter=yourmove",
     "roles": [
       "visitor",
       "seeker",
@@ -4405,7 +4405,7 @@
     "title": "Action: Save to Board / Reaction",
     "domain": "seeker",
     "layer": "core",
-    "route": "/property/[slug]",
+    "route": "/api/reactions",
     "roles": [
       "visitor",
       "seeker",
@@ -4511,7 +4511,7 @@
     "title": "Action: Ask Public Question (Community FAQ)",
     "domain": "faq",
     "layer": "core",
-    "route": "/api/faq/ask",
+    "route": "/api/faqs",
     "roles": [
       "visitor",
       "seeker",
@@ -4778,7 +4778,7 @@
     "title": "Viewing Booking & Schedule Modal",
     "domain": "deal",
     "layer": "core",
-    "route": "/api/deals/schedule-viewing",
+    "route": "/dashboard/inbox",
     "roles": [
       "seeker",
       "provider"
@@ -4920,7 +4920,7 @@
     "title": "Deal Negotiation & Offer Proposal",
     "domain": "deal",
     "layer": "core",
-    "route": "/api/deals/make-offer",
+    "route": "/dashboard/crm",
     "roles": [
       "seeker",
       "enterprise"
@@ -5062,7 +5062,7 @@
     "title": "Claim Listing Due Diligence Modal",
     "domain": "layer",
     "layer": "core",
-    "route": "/api/properties/claim",
+    "route": "/api/property/claim",
     "roles": [
       "owner",
       "broker"
@@ -5309,7 +5309,7 @@
     "title": "Exception: Zero Connects Balance",
     "domain": "connects",
     "layer": "global",
-    "route": "/api/deals/spend-connect",
+    "route": "/api/deals/initiate",
     "roles": [
       "seeker",
       "owner",
@@ -5422,7 +5422,7 @@
     "title": "Exception: Viewing Slot Schedule Conflict",
     "domain": "layer",
     "layer": "core",
-    "route": "/api/deals/schedule-viewing",
+    "route": "/api/deals/[id]/schedule",
     "roles": [
       "seeker",
       "broker",
@@ -5532,7 +5532,7 @@
     "title": "Outcome: Verified Handshake & Rating Increment",
     "domain": "deal",
     "layer": "core",
-    "route": "/deal/[id]/success",
+    "route": "/dashboard/inbox",
     "roles": [
       "seeker",
       "broker",
@@ -5606,7 +5606,7 @@
     "title": "Outcome: Deal Closed / Archived",
     "domain": "layer",
     "layer": "core",
-    "route": "/deal/[id]/closed",
+    "route": "/dashboard/inbox",
     "roles": [
       "seeker",
       "broker",
@@ -5680,7 +5680,7 @@
     "title": "Side-by-Side Spatial Comparison Matrix",
     "domain": "property",
     "layer": "crust",
-    "route": "/compare",
+    "route": "/property",
     "roles": [
       "visitor",
       "seeker",
@@ -5822,7 +5822,7 @@
     "title": "Broker Tactical Field Briefing & Voice Copilot",
     "domain": "broker",
     "layer": "core",
-    "route": "/property/[slug]/field-briefing",
+    "route": "/dashboard",
     "roles": [
       "broker"
     ],

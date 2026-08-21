@@ -3,29 +3,29 @@
   "schemaVersion": "2.2.0",
   "graphVersion": "2.2.0",
   "bundleVersion": "2.2.0",
-  "dataRevision": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43",
+  "dataRevision": "7e6e09a024d576c7d40d13f90dd0311da20b5a79",
   "lastVerifiedAt": "2026-08-19",
-  "generatedAt": "2026-08-19T12:39:54.029Z",
+  "generatedAt": "2026-08-21T06:35:44.659Z",
   "repo": {
     "repository": "ScoutIt",
     "branch": "main",
-    "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+    "commitSha": "7e6e09a024d576c7d40d13f90dd0311da20b5a79"
   },
   "brain": {
     "repository": "ScoutIt",
     "branch": "main",
-    "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+    "commitSha": "7e6e09a024d576c7d40d13f90dd0311da20b5a79"
   },
   "generator": {
     "version": "2.2.0",
-    "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+    "commitSha": "7e6e09a024d576c7d40d13f90dd0311da20b5a79"
   },
   "stats": {
     "totalNodes": 117,
     "totalEdges": 233,
-    "verifiedNodes": 81,
+    "verifiedNodes": 80,
     "partialNodes": 9,
-    "plannedNodes": 27,
+    "plannedNodes": 28,
     "proposedNodes": 0
   },
   "productStats": {
@@ -35,25 +35,25 @@
     "deprecated": 0
   },
   "implementationStats": {
-    "notStarted": 27,
+    "notStarted": 28,
     "partial": 9,
     "implemented": 0,
-    "verified": 81,
+    "verified": 80,
     "contradicted": 0
   },
   "evidenceStats": {
-    "unverified": 23,
+    "unverified": 24,
     "documented": 13,
-    "codeGrounded": 81,
+    "codeGrounded": 80,
     "testGrounded": 0,
     "runtimeGrounded": 0
   },
   "releaseStats": {
-    "notDeployed": 25,
+    "notDeployed": 28,
     "deployedDisabled": 0,
-    "privatePilot": 6,
+    "privatePilot": 4,
     "limitedLive": 9,
-    "publicLive": 77,
+    "publicLive": 76,
     "rolledBack": 0
   },
   "nodes": [
@@ -127,7 +127,7 @@
         },
         {
           "kind": "COMPONENT",
-          "path": "src/components/cinematic/BlackHoleCanvas.js",
+          "path": "src/components/descent/BlackHoleCanvas.js",
           "provenance": "EXTRACTED",
           "confidence": 1,
           "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -298,7 +298,7 @@
       "nodeType": "SYSTEM",
       "domain": "sentinel",
       "category": "architecture",
-      "route": "/middleware.js",
+      "route": "/",
       "layer": "global",
       "roles": [
         "visitor",
@@ -347,7 +347,7 @@
       "evidence": [
         {
           "kind": "CODE",
-          "path": "src/middleware.js",
+          "path": "src/proxy.js",
           "symbol": "middleware",
           "provenance": "EXTRACTED",
           "confidence": 1,
@@ -400,7 +400,7 @@
           "evidence": [
             {
               "kind": "CODE",
-              "path": "src/middleware.js",
+              "path": "src/proxy.js",
               "symbol": "middleware",
               "provenance": "EXTRACTED",
               "confidence": 1
@@ -450,7 +450,7 @@
       "nodeType": "PAGE",
       "domain": "property",
       "category": "architecture",
-      "route": "/property/[slug]",
+      "route": "/property/[id]",
       "layer": "global",
       "roles": [
         "visitor",
@@ -793,7 +793,7 @@
       "nodeType": "GATE",
       "domain": "auth",
       "category": "architecture",
-      "route": "/api/user/verify-age",
+      "route": "/onboarding",
       "layer": "global",
       "roles": [
         "seeker",
@@ -1012,7 +1012,7 @@
         "src/app/onboarding/page.js"
       ],
       "apis": [
-        "/api/user/complete-onboarding"
+        "/api/auth/complete-onboarding"
       ],
       "dataRefs": [
         "Supabase user_profiles & connect_balances"
@@ -1036,7 +1036,7 @@
         },
         {
           "kind": "API",
-          "path": "src/app/api/user/complete-onboarding/route.js",
+          "path": "src/app/api/auth/complete-onboarding/route.js",
           "symbol": "POST",
           "provenance": "EXTRACTED",
           "confidence": 1,
@@ -1105,7 +1105,7 @@
             },
             {
               "kind": "API",
-              "path": "src/app/api/user/complete-onboarding/route.js",
+              "path": "src/app/api/auth/complete-onboarding/route.js",
               "symbol": "POST",
               "provenance": "EXTRACTED",
               "confidence": 1
@@ -1509,7 +1509,7 @@
         },
         {
           "kind": "COMPONENT",
-          "path": "src/components/cinematic-layers/OrbitCanvas.js",
+          "path": "src/components/orbit/ScoutEarthClient.js",
           "provenance": "EXTRACTED",
           "confidence": 1,
           "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -1566,7 +1566,7 @@
             },
             {
               "kind": "COMPONENT",
-              "path": "src/components/cinematic-layers/OrbitCanvas.js",
+              "path": "src/components/orbit/ScoutEarthClient.js",
               "provenance": "EXTRACTED",
               "confidence": 1
             }
@@ -2854,7 +2854,7 @@
       "nodeType": "PAGE",
       "domain": "discovery",
       "category": "architecture",
-      "route": "/spatial-canvas",
+      "route": "/property/[id]?chapter=location",
       "layer": "metropolis",
       "roles": [
         "visitor",
@@ -3343,7 +3343,7 @@
       "nodeType": "PAGE",
       "domain": "discovery",
       "category": "architecture",
-      "route": "/hubs",
+      "route": "/hubs/[slug]",
       "layer": "stratosphere",
       "roles": [
         "visitor",
@@ -3369,10 +3369,10 @@
         "Publicly accessible"
       ],
       "systems": [
-        "src/app/hubs/page.js"
+        "src/app/hubs/[slug]/page.js"
       ],
       "components": [
-        "src/app/hubs/page.js"
+        "src/app/hubs/[slug]/page.js"
       ],
       "apis": [],
       "dataRefs": [
@@ -3389,7 +3389,7 @@
       "evidence": [
         {
           "kind": "ROUTE",
-          "path": "src/app/hubs/page.js",
+          "path": "src/app/hubs/[slug]/page.js",
           "provenance": "EXTRACTED",
           "confidence": 1,
           "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -3452,7 +3452,7 @@
           "evidence": [
             {
               "kind": "ROUTE",
-              "path": "src/app/hubs/page.js",
+              "path": "src/app/hubs/[slug]/page.js",
               "provenance": "EXTRACTED",
               "confidence": 1
             },
@@ -4138,7 +4138,7 @@
       "nodeType": "PAGE",
       "domain": "discovery",
       "category": "architecture",
-      "route": "/planners",
+      "route": "/event-planners",
       "layer": "crust",
       "roles": [
         "visitor",
@@ -4828,7 +4828,7 @@
       "nodeType": "SECTION",
       "domain": "property",
       "category": "architecture",
-      "route": "/property/[slug]#the-space",
+      "route": "/property/[id]?chapter=space",
       "layer": "core",
       "roles": [
         "visitor",
@@ -4976,7 +4976,7 @@
       "nodeType": "SECTION",
       "domain": "property",
       "category": "architecture",
-      "route": "/property/[slug]#location",
+      "route": "/property/[id]?chapter=location",
       "layer": "crust",
       "roles": [
         "visitor",
@@ -5140,7 +5140,7 @@
       "nodeType": "SECTION",
       "domain": "property",
       "category": "architecture",
-      "route": "/property/[slug]#life-here",
+      "route": "/property/[id]?chapter=life",
       "layer": "core",
       "roles": [
         "visitor",
@@ -5286,7 +5286,7 @@
       "nodeType": "SECTION",
       "domain": "property",
       "category": "architecture",
-      "route": "/property/[slug]#where-to",
+      "route": "/property/[id]?chapter=whereto",
       "layer": "crust",
       "roles": [
         "visitor",
@@ -5445,7 +5445,7 @@
       "nodeType": "SECTION",
       "domain": "property",
       "category": "architecture",
-      "route": "/property/[slug]#build-plans",
+      "route": "/property/[id]?chapter=buildplans",
       "layer": "mantle",
       "roles": [
         "visitor",
@@ -5591,7 +5591,7 @@
       "nodeType": "SECTION",
       "domain": "property",
       "category": "architecture",
-      "route": "/property/[slug]#fine-print",
+      "route": "/property/[id]?chapter=hiddenintel",
       "layer": "core",
       "roles": [
         "seeker",
@@ -5749,7 +5749,7 @@
       "nodeType": "GATE",
       "domain": "layer",
       "category": "architecture",
-      "route": "/lib/entitlements.js#deep-intel",
+      "route": "/property/[id]?chapter=hiddenintel",
       "layer": "core",
       "roles": [
         "seeker",
@@ -5898,7 +5898,7 @@
       "nodeType": "GATE",
       "domain": "layer",
       "category": "architecture",
-      "route": "/lib/entitlements.js#hidden-intel",
+      "route": "/property/[id]?chapter=hiddenintel",
       "layer": "core",
       "roles": [
         "seeker",
@@ -6043,7 +6043,7 @@
       "nodeType": "SECTION",
       "domain": "property",
       "category": "architecture",
-      "route": "/property/[slug]#units",
+      "route": "/property/[id]?chapter=units",
       "layer": "core",
       "roles": [
         "visitor",
@@ -6209,7 +6209,7 @@
       "nodeType": "SECTION",
       "domain": "property",
       "category": "architecture",
-      "route": "/property/[slug]#universe",
+      "route": "/property/[id]?chapter=universe",
       "layer": "orbit",
       "roles": [
         "visitor",
@@ -6371,7 +6371,7 @@
       "nodeType": "SECTION",
       "domain": "property",
       "category": "architecture",
-      "route": "/property/[slug]#services",
+      "route": "/property/[id]?chapter=services",
       "layer": "crust",
       "roles": [
         "visitor",
@@ -6521,7 +6521,7 @@
       "nodeType": "SECTION",
       "domain": "property",
       "category": "architecture",
-      "route": "/property/[slug]#your-move",
+      "route": "/property/[id]?chapter=yourmove",
       "layer": "core",
       "roles": [
         "visitor",
@@ -6704,7 +6704,7 @@
       "nodeType": "ACTION",
       "domain": "seeker",
       "category": "architecture",
-      "route": "/property/[slug]",
+      "route": "/api/reactions",
       "layer": "core",
       "roles": [
         "visitor",
@@ -6848,7 +6848,7 @@
       "nodeType": "ACTION",
       "domain": "faq",
       "category": "architecture",
-      "route": "/api/faq/ask",
+      "route": "/api/faqs",
       "layer": "core",
       "roles": [
         "visitor",
@@ -7213,7 +7213,7 @@
       "nodeType": "ACTION",
       "domain": "deal",
       "category": "architecture",
-      "route": "/api/deals/schedule-viewing",
+      "route": "/dashboard/inbox",
       "layer": "core",
       "roles": [
         "seeker",
@@ -7246,7 +7246,9 @@
         "ViewingScheduler.js"
       ],
       "apis": [
-        "/api/deals/schedule-viewing"
+        "/api/deals/[id]/schedule",
+        "/api/viewing-appointments",
+        "/api/calendar/sync"
       ],
       "dataRefs": [
         "Supabase deals & viewing_schedules"
@@ -7401,7 +7403,7 @@
       "nodeType": "ACTION",
       "domain": "deal",
       "category": "architecture",
-      "route": "/api/deals/make-offer",
+      "route": "/dashboard/crm",
       "layer": "core",
       "roles": [
         "seeker",
@@ -7436,7 +7438,8 @@
       ],
       "apis": [
         "/api/ai/counter-offer",
-        "/api/deals"
+        "/api/deals/[id]",
+        "/api/deals/handshake"
       ],
       "dataRefs": [
         "Supabase deals & offers"
@@ -7579,7 +7582,7 @@
       "nodeType": "ACTION",
       "domain": "layer",
       "category": "architecture",
-      "route": "/api/properties/claim",
+      "route": "/api/property/claim",
       "layer": "core",
       "roles": [
         "owner",
@@ -7611,7 +7614,7 @@
         "ClaimListingModal.js"
       ],
       "apis": [
-        "/api/properties/claim"
+        "/api/property/claim"
       ],
       "dataRefs": [
         "Supabase property_claims"
@@ -7759,7 +7762,7 @@
       "nodeType": "ACTION",
       "domain": "owner",
       "category": "architecture",
-      "route": "/dashboard/create",
+      "route": "/dashboard",
       "layer": "core",
       "roles": [
         "owner",
@@ -7794,7 +7797,11 @@
         "src/app/dashboard/create/page.js",
         "ListingMethodSelector.js"
       ],
-      "apis": [],
+      "apis": [
+        "/api/dashboard/publish",
+        "/api/dashboard/bulk-insert",
+        "/api/ai/read-pdf"
+      ],
       "dataRefs": [
         "Supabase properties (drafts)"
       ],
@@ -7919,7 +7926,7 @@
       "nodeType": "ACTION",
       "domain": "owner",
       "category": "architecture",
-      "route": "/dashboard/create/scratch",
+      "route": "/dashboard",
       "layer": "core",
       "roles": [
         "owner",
@@ -8066,7 +8073,7 @@
       "nodeType": "ACTION",
       "domain": "owner",
       "category": "architecture",
-      "route": "/dashboard/create/advanced",
+      "route": "/dashboard",
       "layer": "core",
       "roles": [
         "owner",
@@ -8218,7 +8225,7 @@
       "nodeType": "ACTION",
       "domain": "owner",
       "category": "architecture",
-      "route": "/dashboard/create/csv",
+      "route": "/dashboard",
       "layer": "core",
       "roles": [
         "owner",
@@ -8371,7 +8378,7 @@
       "nodeType": "ACTION",
       "domain": "owner",
       "category": "architecture",
-      "route": "/dashboard/create/pdf",
+      "route": "/dashboard",
       "layer": "core",
       "roles": [
         "owner",
@@ -8535,7 +8542,7 @@
       "nodeType": "SYSTEM",
       "domain": "layer",
       "category": "architecture",
-      "route": "/lib/ingestExtractor.js",
+      "route": "/api/ai/read-pdf",
       "layer": "mantle",
       "roles": [
         "owner",
@@ -8833,7 +8840,7 @@
       "nodeType": "GATE",
       "domain": "auth",
       "category": "architecture",
-      "route": "/lib/serverAuth.js",
+      "route": "/login",
       "layer": "global",
       "roles": [
         "seeker",
@@ -9003,7 +9010,7 @@
       "nodeType": "DECISION",
       "domain": "core",
       "category": "architecture",
-      "route": "/lib/entitlements.js",
+      "route": "/pricing",
       "layer": "global",
       "roles": [
         "seeker",
@@ -9157,7 +9164,7 @@
       "nodeType": "SYSTEM",
       "domain": "connects",
       "category": "architecture",
-      "route": "/api/deals/spend-connect",
+      "route": "/api/deals/initiate",
       "layer": "global",
       "roles": [
         "seeker",
@@ -9193,7 +9200,10 @@
         "src/app/api/deals/spend-connect/route.js"
       ],
       "apis": [
-        "src/app/api/deals/spend-connect/route.js"
+        "/api/deals/initiate",
+        "/api/deals/pitch",
+        "/api/dashboard/invite",
+        "/api/v1/questit/raise"
       ],
       "dataRefs": [
         "Supabase connect_balances & connect_transactions"
@@ -9217,7 +9227,7 @@
         },
         {
           "kind": "DATABASE",
-          "path": "supabase/migrations/20260710000000_schema_v2_core.sql",
+          "path": "supabase/migrations/20260802000003_connects_wallet_and_tiers.sql",
           "symbol": "connect_balances",
           "provenance": "EXTRACTED",
           "confidence": 1,
@@ -9292,7 +9302,7 @@
             },
             {
               "kind": "DATABASE",
-              "path": "supabase/migrations/20260710000000_schema_v2_core.sql",
+              "path": "supabase/migrations/20260802000003_connects_wallet_and_tiers.sql",
               "symbol": "connect_balances",
               "provenance": "EXTRACTED",
               "confidence": 1
@@ -9348,7 +9358,7 @@
       "nodeType": "SYSTEM",
       "domain": "connects",
       "category": "architecture",
-      "route": "/lib/sentinel/hemorrhageGuard.js",
+      "route": "/api/deals/initiate",
       "layer": "global",
       "roles": [
         "seeker",
@@ -9809,7 +9819,7 @@
       "nodeType": "SYSTEM",
       "domain": "sentinel",
       "category": "architecture",
-      "route": "/lib/sanitize.js",
+      "route": "/api/faqs/preflight",
       "layer": "global",
       "roles": [
         "visitor",
@@ -9839,7 +9849,10 @@
       "components": [
         "src/lib/sanitize.js"
       ],
-      "apis": [],
+      "apis": [
+        "/api/faqs/preflight",
+        "/api/faqs"
+      ],
       "dataRefs": [
         "None"
       ],
@@ -10323,7 +10336,7 @@
       "nodeType": "PAGE",
       "domain": "owner",
       "category": "architecture",
-      "route": "/lib/aiListingEngine.js",
+      "route": "/dashboard",
       "layer": "mantle",
       "roles": [
         "owner",
@@ -10478,7 +10491,7 @@
       "nodeType": "SYSTEM",
       "domain": "layer",
       "category": "architecture",
-      "route": "/lib/aiCouncil.js",
+      "route": "/dashboard",
       "layer": "mantle",
       "roles": [
         "owner",
@@ -10628,7 +10641,7 @@
       "nodeType": "SYSTEM",
       "domain": "layer",
       "category": "architecture",
-      "route": "/lib/aiArbiter.js",
+      "route": "/dashboard",
       "layer": "mantle",
       "roles": [
         "owner",
@@ -10833,7 +10846,7 @@
       "evidence": [
         {
           "kind": "API",
-          "path": "src/app/api/property/route.js",
+          "path": "src/app/api/dashboard/publish/route.js",
           "symbol": "POST",
           "provenance": "EXTRACTED",
           "confidence": 1,
@@ -10892,7 +10905,7 @@
           "evidence": [
             {
               "kind": "API",
-              "path": "src/app/api/property/route.js",
+              "path": "src/app/api/dashboard/publish/route.js",
               "symbol": "POST",
               "provenance": "EXTRACTED",
               "confidence": 1
@@ -10946,7 +10959,7 @@
       "nodeType": "OUTCOME",
       "domain": "legal",
       "category": "scenario",
-      "route": "/api/user/dpo-erasure",
+      "route": "/api/user/delete-account",
       "layer": "global",
       "roles": [
         "staff",
@@ -10979,7 +10992,7 @@
         "SentinelLayer.js"
       ],
       "apis": [
-        "/api/user/dpo-erasure"
+        "/api/user/delete-account"
       ],
       "dataRefs": [
         "Supabase user_profiles, auth.users, properties"
@@ -11250,7 +11263,7 @@
       "securityReviewStatus": "RESEARCHED",
       "productStatus": "PROPOSED",
       "evidenceStatus": "UNVERIFIED",
-      "releaseStatus": "PRIVATE_PILOT"
+      "releaseStatus": "NOT_DEPLOYED"
     },
     {
       "id": "exc_bot_quarantine",
@@ -12476,7 +12489,7 @@
       "nodeType": "PAGE",
       "domain": "deal",
       "category": "architecture",
-      "route": "/deal/[id]",
+      "route": "/dashboard/inbox",
       "layer": "core",
       "roles": [
         "seeker",
@@ -12515,7 +12528,13 @@
         "ChatBox.js",
         "ViewingCalendar.js"
       ],
-      "apis": [],
+      "apis": [
+        "/api/deals",
+        "/api/deals/[id]",
+        "/api/deals/[id]/messages",
+        "/api/deals/[id]/schedule",
+        "/api/deals/handshake"
+      ],
       "dataRefs": [
         "Supabase deals, messages, viewing_schedules"
       ],
@@ -12666,7 +12685,7 @@
       "nodeType": "PAGE",
       "domain": "admin",
       "category": "architecture",
-      "route": "/mission-control",
+      "route": "/dashboard",
       "layer": "core",
       "roles": [
         "staff",
@@ -12833,7 +12852,7 @@
       "securityReviewStatus": "RESEARCHED",
       "productStatus": "APPROVED",
       "evidenceStatus": "CODE_GROUNDED",
-      "releaseStatus": "PUBLIC_LIVE"
+      "releaseStatus": "PRIVATE_PILOT"
     },
     {
       "id": "exc_insufficient_connects",
@@ -12844,7 +12863,7 @@
       "nodeType": "EXCEPTION",
       "domain": "connects",
       "category": "scenario",
-      "route": "/api/deals/spend-connect",
+      "route": "/api/deals/initiate",
       "layer": "global",
       "roles": [
         "seeker",
@@ -13010,7 +13029,7 @@
       "nodeType": "RECOVERY",
       "domain": "connects",
       "category": "scenario",
-      "route": "/checkout/connects",
+      "route": "/pricing/bundles",
       "layer": "global",
       "roles": [
         "seeker",
@@ -13027,7 +13046,7 @@
       "goals": [
         "connects"
       ],
-      "implementationStatus": "VERIFIED",
+      "implementationStatus": "NOT_STARTED",
       "purpose": "User purchases a permanent Connects pack (PayMongo / GCash / Card) to replenish their wallet.",
       "description": "Adds permanent Purchased Connects to the user's wallet and returns them directly to their staged inquiry modal.",
       "actions": [
@@ -13162,8 +13181,8 @@
       "productReviewStatus": "RESEARCHED",
       "securityReviewStatus": "RESEARCHED",
       "productStatus": "APPROVED",
-      "evidenceStatus": "CODE_GROUNDED",
-      "releaseStatus": "PRIVATE_PILOT"
+      "evidenceStatus": "UNVERIFIED",
+      "releaseStatus": "NOT_DEPLOYED"
     },
     {
       "id": "exc_slot_conflict",
@@ -13174,7 +13193,7 @@
       "nodeType": "EXCEPTION",
       "domain": "layer",
       "category": "scenario",
-      "route": "/api/deals/schedule-viewing",
+      "route": "/api/deals/[id]/schedule",
       "layer": "core",
       "roles": [
         "seeker",
@@ -13323,7 +13342,7 @@
       "nodeType": "RECOVERY",
       "domain": "layer",
       "category": "scenario",
-      "route": "/api/deals/schedule-viewing",
+      "route": "/api/deals/[id]/schedule",
       "layer": "core",
       "roles": [
         "seeker",
@@ -13756,7 +13775,7 @@
       "nodeType": "EXCEPTION",
       "domain": "deal",
       "category": "scenario",
-      "route": "/api/deals/viewing-noshow",
+      "route": "/dashboard/inbox",
       "layer": "core",
       "roles": [
         "seeker",
@@ -13906,7 +13925,7 @@
       "nodeType": "ACTION",
       "domain": "deal",
       "category": "scenario",
-      "route": "/deal/[id]/reschedule",
+      "route": "/dashboard/inbox",
       "layer": "core",
       "roles": [
         "seeker",
@@ -14368,7 +14387,7 @@
       "nodeType": "EXCEPTION",
       "domain": "layer",
       "category": "scenario",
-      "route": "/mission-control/deadlocks",
+      "route": "/dashboard",
       "layer": "mantle",
       "roles": [
         "staff"
@@ -15821,7 +15840,7 @@
       "nodeType": "TERMINAL",
       "domain": "deal",
       "category": "scenario",
-      "route": "/deal/[id]/success",
+      "route": "/dashboard/inbox",
       "layer": "core",
       "roles": [
         "seeker",
@@ -15975,7 +15994,7 @@
       "nodeType": "TERMINAL",
       "domain": "layer",
       "category": "scenario",
-      "route": "/deal/[id]/closed",
+      "route": "/dashboard/inbox",
       "layer": "core",
       "roles": [
         "seeker",
@@ -16129,7 +16148,7 @@
       "nodeType": "PAGE",
       "domain": "property",
       "category": "architecture",
-      "route": "/compare",
+      "route": "/property",
       "layer": "crust",
       "roles": [
         "visitor",
@@ -16286,7 +16305,7 @@
       "nodeType": "PAGE",
       "domain": "broker",
       "category": "architecture",
-      "route": "/property/[slug]/field-briefing",
+      "route": "/dashboard",
       "layer": "core",
       "roles": [
         "broker"
@@ -16319,7 +16338,10 @@
         "VoiceCopilotEngine.js",
         "TaxCalculator.js"
       ],
-      "apis": [],
+      "apis": [
+        "/api/broker/briefing-log",
+        "/api/leads/export-audit"
+      ],
       "dataRefs": [
         "Supabase properties & broker_field_notes"
       ],
@@ -16435,7 +16457,7 @@
       "nodeType": "SYSTEM",
       "domain": "crm",
       "category": "architecture",
-      "route": "/api/crm/deal-summarizer",
+      "route": "/api/crm/activity",
       "layer": "core",
       "roles": [
         "broker",
@@ -16469,7 +16491,9 @@
         "src/lib/crm/zeroLogSummarizer.js",
         "EdgeAIWorker.js"
       ],
-      "apis": [],
+      "apis": [
+        "/api/crm/activity"
+      ],
       "dataRefs": [
         "Supabase deal_notes & crm_activity_log"
       ],
@@ -16587,7 +16611,7 @@
       "nodeType": "SYSTEM",
       "domain": "crm",
       "category": "architecture",
-      "route": "/dashboard/wrap",
+      "route": "/dashboard",
       "layer": "orbit",
       "roles": [
         "owner",
@@ -16623,7 +16647,10 @@
         "src/app/dashboard/wrap/page.js",
         "MonthlyWrapEngine.js"
       ],
-      "apis": [],
+      "apis": [
+        "/api/wrap",
+        "/api/analytics"
+      ],
       "dataRefs": [
         "Supabase analytics_events & monthly_wrap_snapshots"
       ],
@@ -16645,7 +16672,7 @@
         },
         {
           "kind": "API",
-          "path": "src/app/api/wrap/monthly/route.js",
+          "path": "src/app/api/wrap/route.js",
           "provenance": "EXTRACTED",
           "confidence": 1,
           "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -16706,7 +16733,7 @@
             },
             {
               "kind": "API",
-              "path": "src/app/api/wrap/monthly/route.js",
+              "path": "src/app/api/wrap/route.js",
               "provenance": "EXTRACTED",
               "confidence": 1
             }
@@ -16926,7 +16953,7 @@
       "nodeType": "EXCEPTION",
       "domain": "freshness",
       "category": "architecture",
-      "route": "/dashboard/owner/stale-audit",
+      "route": "/dashboard",
       "layer": "crust",
       "roles": [
         "owner",
@@ -17073,7 +17100,7 @@
       "nodeType": "RECOVERY",
       "domain": "freshness",
       "category": "architecture",
-      "route": "/api/property/confirm-freshness",
+      "route": "/api/dashboard/verify-freshness",
       "layer": "crust",
       "roles": [
         "owner",
@@ -17106,7 +17133,7 @@
         "src/app/api/property/confirm-freshness/route.js"
       ],
       "apis": [
-        "src/app/api/property/confirm-freshness/route.js"
+        "/api/dashboard/verify-freshness"
       ],
       "dataRefs": [
         "Supabase properties & Airtable sync"
@@ -17223,7 +17250,7 @@
       "nodeType": "SYSTEM",
       "domain": "gis",
       "category": "architecture",
-      "route": "/api/gis/noah-hazard",
+      "route": "/property/[id]?chapter=location",
       "layer": "metropolis",
       "roles": [
         "visitor",
@@ -17828,7 +17855,7 @@
       "securityReviewStatus": "RESEARCHED",
       "productStatus": "PLANNED",
       "evidenceStatus": "UNVERIFIED",
-      "releaseStatus": "PRIVATE_PILOT"
+      "releaseStatus": "NOT_DEPLOYED"
     },
     {
       "id": "exc_sso_domain_mismatch",
@@ -18625,7 +18652,7 @@
         },
         {
           "kind": "COMPONENT",
-          "path": "src/components/cinematic/BlackHoleCanvas.js",
+          "path": "src/components/descent/BlackHoleCanvas.js",
           "provenance": "EXTRACTED",
           "confidence": 1,
           "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -18682,7 +18709,7 @@
       "evidence": [
         {
           "kind": "CODE",
-          "path": "src/middleware.js",
+          "path": "src/proxy.js",
           "symbol": "middleware",
           "provenance": "EXTRACTED",
           "confidence": 1,
@@ -18939,7 +18966,7 @@
         },
         {
           "kind": "COMPONENT",
-          "path": "src/components/cinematic/BlackHoleCanvas.js",
+          "path": "src/components/descent/BlackHoleCanvas.js",
           "provenance": "EXTRACTED",
           "confidence": 1,
           "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -19009,7 +19036,7 @@
         },
         {
           "kind": "COMPONENT",
-          "path": "src/components/cinematic/BlackHoleCanvas.js",
+          "path": "src/components/descent/BlackHoleCanvas.js",
           "provenance": "EXTRACTED",
           "confidence": 1,
           "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -19079,7 +19106,7 @@
         },
         {
           "kind": "COMPONENT",
-          "path": "src/components/cinematic/BlackHoleCanvas.js",
+          "path": "src/components/descent/BlackHoleCanvas.js",
           "provenance": "EXTRACTED",
           "confidence": 1,
           "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -19149,7 +19176,7 @@
         },
         {
           "kind": "COMPONENT",
-          "path": "src/components/cinematic/BlackHoleCanvas.js",
+          "path": "src/components/descent/BlackHoleCanvas.js",
           "provenance": "EXTRACTED",
           "confidence": 1,
           "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -19219,7 +19246,7 @@
         },
         {
           "kind": "COMPONENT",
-          "path": "src/components/cinematic/BlackHoleCanvas.js",
+          "path": "src/components/descent/BlackHoleCanvas.js",
           "provenance": "EXTRACTED",
           "confidence": 1,
           "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -19289,7 +19316,7 @@
         },
         {
           "kind": "COMPONENT",
-          "path": "src/components/cinematic/BlackHoleCanvas.js",
+          "path": "src/components/descent/BlackHoleCanvas.js",
           "provenance": "EXTRACTED",
           "confidence": 1,
           "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -19359,7 +19386,7 @@
         },
         {
           "kind": "COMPONENT",
-          "path": "src/components/cinematic/BlackHoleCanvas.js",
+          "path": "src/components/descent/BlackHoleCanvas.js",
           "provenance": "EXTRACTED",
           "confidence": 1,
           "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -19431,7 +19458,7 @@
         },
         {
           "kind": "COMPONENT",
-          "path": "src/components/cinematic/BlackHoleCanvas.js",
+          "path": "src/components/descent/BlackHoleCanvas.js",
           "provenance": "EXTRACTED",
           "confidence": 1,
           "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -19501,7 +19528,7 @@
         },
         {
           "kind": "COMPONENT",
-          "path": "src/components/cinematic/BlackHoleCanvas.js",
+          "path": "src/components/descent/BlackHoleCanvas.js",
           "provenance": "EXTRACTED",
           "confidence": 1,
           "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -19571,7 +19598,7 @@
         },
         {
           "kind": "COMPONENT",
-          "path": "src/components/cinematic/BlackHoleCanvas.js",
+          "path": "src/components/descent/BlackHoleCanvas.js",
           "provenance": "EXTRACTED",
           "confidence": 1,
           "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -19643,7 +19670,7 @@
         },
         {
           "kind": "COMPONENT",
-          "path": "src/components/cinematic/BlackHoleCanvas.js",
+          "path": "src/components/descent/BlackHoleCanvas.js",
           "provenance": "EXTRACTED",
           "confidence": 1,
           "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -19713,7 +19740,7 @@
         },
         {
           "kind": "COMPONENT",
-          "path": "src/components/cinematic/BlackHoleCanvas.js",
+          "path": "src/components/descent/BlackHoleCanvas.js",
           "provenance": "EXTRACTED",
           "confidence": 1,
           "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -19783,7 +19810,7 @@
         },
         {
           "kind": "COMPONENT",
-          "path": "src/components/cinematic/BlackHoleCanvas.js",
+          "path": "src/components/descent/BlackHoleCanvas.js",
           "provenance": "EXTRACTED",
           "confidence": 1,
           "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -19855,7 +19882,7 @@
         },
         {
           "kind": "COMPONENT",
-          "path": "src/components/cinematic/BlackHoleCanvas.js",
+          "path": "src/components/descent/BlackHoleCanvas.js",
           "provenance": "EXTRACTED",
           "confidence": 1,
           "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -19925,7 +19952,7 @@
         },
         {
           "kind": "COMPONENT",
-          "path": "src/components/cinematic/BlackHoleCanvas.js",
+          "path": "src/components/descent/BlackHoleCanvas.js",
           "provenance": "EXTRACTED",
           "confidence": 1,
           "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -19995,7 +20022,7 @@
         },
         {
           "kind": "COMPONENT",
-          "path": "src/components/cinematic/BlackHoleCanvas.js",
+          "path": "src/components/descent/BlackHoleCanvas.js",
           "provenance": "EXTRACTED",
           "confidence": 1,
           "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -20065,7 +20092,7 @@
         },
         {
           "kind": "COMPONENT",
-          "path": "src/components/cinematic/BlackHoleCanvas.js",
+          "path": "src/components/descent/BlackHoleCanvas.js",
           "provenance": "EXTRACTED",
           "confidence": 1,
           "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -20135,7 +20162,7 @@
         },
         {
           "kind": "COMPONENT",
-          "path": "src/components/cinematic/BlackHoleCanvas.js",
+          "path": "src/components/descent/BlackHoleCanvas.js",
           "provenance": "EXTRACTED",
           "confidence": 1,
           "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -20205,7 +20232,7 @@
         },
         {
           "kind": "COMPONENT",
-          "path": "src/components/cinematic/BlackHoleCanvas.js",
+          "path": "src/components/descent/BlackHoleCanvas.js",
           "provenance": "EXTRACTED",
           "confidence": 1,
           "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -20275,7 +20302,7 @@
         },
         {
           "kind": "COMPONENT",
-          "path": "src/components/cinematic/BlackHoleCanvas.js",
+          "path": "src/components/descent/BlackHoleCanvas.js",
           "provenance": "EXTRACTED",
           "confidence": 1,
           "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -20345,7 +20372,7 @@
         },
         {
           "kind": "COMPONENT",
-          "path": "src/components/cinematic/BlackHoleCanvas.js",
+          "path": "src/components/descent/BlackHoleCanvas.js",
           "provenance": "EXTRACTED",
           "confidence": 1,
           "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -20936,7 +20963,7 @@
         },
         {
           "kind": "API",
-          "path": "src/app/api/user/complete-onboarding/route.js",
+          "path": "src/app/api/auth/complete-onboarding/route.js",
           "symbol": "POST",
           "provenance": "EXTRACTED",
           "confidence": 1,
@@ -21008,7 +21035,7 @@
         },
         {
           "kind": "API",
-          "path": "src/app/api/user/complete-onboarding/route.js",
+          "path": "src/app/api/auth/complete-onboarding/route.js",
           "symbol": "POST",
           "provenance": "EXTRACTED",
           "confidence": 1,
@@ -21080,7 +21107,7 @@
         },
         {
           "kind": "API",
-          "path": "src/app/api/user/complete-onboarding/route.js",
+          "path": "src/app/api/auth/complete-onboarding/route.js",
           "symbol": "POST",
           "provenance": "EXTRACTED",
           "confidence": 1,
@@ -21152,7 +21179,7 @@
         },
         {
           "kind": "API",
-          "path": "src/app/api/user/complete-onboarding/route.js",
+          "path": "src/app/api/auth/complete-onboarding/route.js",
           "symbol": "POST",
           "provenance": "EXTRACTED",
           "confidence": 1,
@@ -21222,7 +21249,7 @@
         },
         {
           "kind": "COMPONENT",
-          "path": "src/components/cinematic-layers/OrbitCanvas.js",
+          "path": "src/components/orbit/ScoutEarthClient.js",
           "provenance": "EXTRACTED",
           "confidence": 1,
           "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -21284,7 +21311,7 @@
         },
         {
           "kind": "COMPONENT",
-          "path": "src/components/cinematic-layers/OrbitCanvas.js",
+          "path": "src/components/orbit/ScoutEarthClient.js",
           "provenance": "EXTRACTED",
           "confidence": 1,
           "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -22653,7 +22680,7 @@
       "evidence": [
         {
           "kind": "ROUTE",
-          "path": "src/app/hubs/page.js",
+          "path": "src/app/hubs/[slug]/page.js",
           "provenance": "EXTRACTED",
           "confidence": 1,
           "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -25159,7 +25186,7 @@
         },
         {
           "kind": "DATABASE",
-          "path": "supabase/migrations/20260710000000_schema_v2_core.sql",
+          "path": "supabase/migrations/20260802000003_connects_wallet_and_tiers.sql",
           "symbol": "connect_balances",
           "provenance": "EXTRACTED",
           "confidence": 1,
@@ -25232,7 +25259,7 @@
         },
         {
           "kind": "DATABASE",
-          "path": "supabase/migrations/20260710000000_schema_v2_core.sql",
+          "path": "supabase/migrations/20260802000003_connects_wallet_and_tiers.sql",
           "symbol": "connect_balances",
           "provenance": "EXTRACTED",
           "confidence": 1,
@@ -25300,7 +25327,7 @@
         },
         {
           "kind": "DATABASE",
-          "path": "supabase/migrations/20260710000000_schema_v2_core.sql",
+          "path": "supabase/migrations/20260802000003_connects_wallet_and_tiers.sql",
           "symbol": "connect_balances",
           "provenance": "EXTRACTED",
           "confidence": 1,
@@ -27045,7 +27072,7 @@
       "evidence": [
         {
           "kind": "API",
-          "path": "src/app/api/property/route.js",
+          "path": "src/app/api/dashboard/publish/route.js",
           "symbol": "POST",
           "provenance": "EXTRACTED",
           "confidence": 1,
@@ -29638,7 +29665,7 @@
         },
         {
           "kind": "API",
-          "path": "src/app/api/wrap/monthly/route.js",
+          "path": "src/app/api/wrap/route.js",
           "provenance": "EXTRACTED",
           "confidence": 1,
           "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -29700,7 +29727,7 @@
         },
         {
           "kind": "API",
-          "path": "src/app/api/wrap/monthly/route.js",
+          "path": "src/app/api/wrap/route.js",
           "provenance": "EXTRACTED",
           "confidence": 1,
           "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -31296,7 +31323,7 @@
       "evidence": [
         {
           "kind": "CODE",
-          "path": "src/middleware.js",
+          "path": "src/proxy.js",
           "symbol": "middleware",
           "provenance": "EXTRACTED",
           "confidence": 1,

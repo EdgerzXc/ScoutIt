@@ -2,7 +2,7 @@
 section: "08_OPERATIONS_AND_BACKLOG/ACTION"
 status: active
 tags: [canonical, master-action-plan, open-work, launch, roadmap]
-updated: 2026-08-14
+updated: 2026-08-21
 related:
   - "[[2026-08-13_BRAIN_PRUNING_RECORD|Brain Pruning Record]]"
   - "[[MASTER_OWNER_ACTIONS]]"
@@ -17,6 +17,36 @@ related:
 > including founder actions, unresolved decisions, verification, and
 > trigger-gated obligations. Finished work belongs in
 > [[2026-08-13_BRAIN_PRUNING_RECORD|Brain Pruning Record]], not here.
+
+## Reconciliation checkpoint — 2026-08-21
+
+This checkpoint supersedes older status prose when the two conflict.
+
+- **Production:** `origin/main` and Vercel production are on commit `7e6e09a`
+  (deployment `dpl_DLDiBGGqgo8gDLN3bS92H8kQhUyn`, READY). `/onboarding` and the
+  Ridgeline property route both return 200 on `www.scoutit.space`.
+- **Authentication:** onboarding now uses Google Identity Services in the app and
+  exchanges the Google ID token through `/api/auth/complete-onboarding`. The
+  Supabase project hostname is no longer the Google account chooser's public
+  product label. Google Cloud consent-screen/app branding is a separate owner
+  configuration and is **deferred because that configuration is not available
+  now**; do not treat it as an executable engineering task in this checkpoint.
+- **Private onboarding data:** the live Supabase onboarding contract/migration is
+  applied; dashboard entry after successful completion is the current contract.
+- **Market article bridge:** code reads `Related_Property`, `City`, `Location`,
+  `District`, and `Region`; the live `test-intel` record is now truthfully tagged
+  `Makati / Makati CBD / Metro Manila`. The blank live-approved record was
+  unpublished. No approved Pasig/Capitol Commons briefing exists, so Ridgeline's
+  empty state is correct; do not fabricate content or attach the Makati article.
+- **Master Flow:** public Flow Map exposure remains removed. The graph is an
+  internal staff knowledge source and future user guidance must be cut into
+  contextual, role-safe slices. The 117-node/233-edge audit is now route-grounded:
+  canonical routes 15/15, evidence 80/117, state transitions 7/20, recovery
+  14/19. A 92% trust score means the recorded claims are grounded; it does **not**
+  mean the product or state machine is 100% complete.
+- **Search Console:** the 2026-08-16 connected read (verified domain property,
+  historical data present) overrides older unchecked statements claiming setup
+  or data collection never happened.
 
 ## Operating rule
 
@@ -4179,13 +4209,16 @@ bridge `src/lib/intelPublish.js` (16 tests), and the end of the
       read the live schema.** The base has 186 fields on `PROPERTIES_CMS` alone;
       assuming something is absent is not the same as looking.
 
-- [ ] **Populate it.** The field is wired and empty. `INTEL_CMS` currently holds
-      **two records** — one blank, one `test-intel` — and neither has
-      `Related_Property` or `City` set. Nothing was written to Airtable: the
-      owner's instruction was to read the schema, not to change the base
-- [ ] `DATA_DICTIONARY.md`'s `INTEL_CMS` entry lists 7 fields; the code reads
-      15. `City`, `Region`, `SpaceCategory` and `Body_JSON` are all missing from
-      the doc
+- [x] **Location metadata repaired 2026-08-21.** `test-intel` is an area-level
+      Makati CBD briefing, so `City=Makati`, `Location=Makati CBD`,
+      `District=Makati CBD`, and `Region=Metro Manila` are now populated.
+      `Related_Property` remains blank deliberately: the article does not name a
+      specific property. The otherwise blank record was removed from the live
+      feed by clearing `Approved_For_Live_Site`. No Pasig/Capitol Commons article
+      exists yet, so Ridgeline correctly retains the honest empty state.
+- [x] `DATA_DICTIONARY.md` now records the full `INTEL_CMS` read contract,
+      including `City`, `Location`, `District`, `Region`, `Related_Property`,
+      experience fields, and `Body_JSON` (2026-08-21).
 - [ ] Decide whether the Unit Master Page inherits its parent's list. A unit has
       no separate location, so it should inherit rather than match on its own
 

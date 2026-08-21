@@ -2,7 +2,7 @@
 section: "08_OPERATIONS_AND_BACKLOG/ACTION"
 status: active
 tags: [master-owner-actions, founder-actions, decisions, credentials, approvals, launch-readiness]
-updated: 2026-08-14
+updated: 2026-08-21
 related:
   - "[[00_MASTER_ACTION_PLAN]]"
   - "[[../00_START_HERE]]"
@@ -234,20 +234,18 @@ pre-pilot stage, these are the only owner packages that deserve attention.
          development is unaffected. Verified persisted by re-reading the client
          after save. Google notes propagation takes 5 minutes to a few hours
    - [ ] Owner to confirm a real Calendar connect succeeds end to end
-   - [x] **Checked the second OAuth client, "ScoutIt Auth" (Jul 23) — NOT
-         affected, no action needed.** Its only authorized redirect URI is
-         `https://yyixsuaimdzyiocswcgc.supabase.co/auth/v1/callback`, i.e.
-         Supabase's own callback host. Google sign-in therefore never depended on
-         `NEXT_PUBLIC_SITE_URL` and could not have broken on Aug 8. Its last-used
-         date is Jul 23, consistent with the owner's recorded sign-in test.
+   - [x] **Authentication flow corrected 2026-08-21.** Onboarding now uses
+         Google Identity Services directly in the ScoutIt page and exchanges the
+         returned ID token through `/api/auth/complete-onboarding`. The Google
+         account chooser no longer presents the Supabase project hostname as the
+         product being entered. The project URL itself is a public API endpoint,
+         not a secret; the defect was public-facing identity/branding, not key
+         exposure.
 
-         Worth noting *why* the two differ: Supabase-brokered auth keeps the
-         redirect on Supabase's domain, so the app's own hostname never enters
-         the contract. The Calendar flow is hand-rolled in
-         `src/lib/calendar/googleOAuth.js` and points at our host, which is what
-         exposed it. Any future hand-rolled OAuth flow inherits the same
-         fragility
-
+         Google Cloud consent-screen and app branding remain a separate owner
+         configuration. The owner confirmed that configuration is not available
+         now, so it is deferred and must not be attempted as part of the current
+         engineering queue.
    > **The generalisable bug:** `NEXT_PUBLIC_SITE_URL` is an input to every
    > absolute URL the product emits — OAuth callbacks, OG images, share links,
    > the sitemap. Changing it silently invalidates every external system holding

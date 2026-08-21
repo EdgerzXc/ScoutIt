@@ -1,20 +1,9 @@
 {
-  "unmappedRoutes": [
-    "/api/calendar/sync",
-    "/api/connects/spend",
-    "/api/leads/export-audit",
-    "/api/property/claim",
-    "/api/user/delete-account"
-  ],
+  "unmappedRoutes": [],
   "routeClassifications": [
     {
-      "route": "/property/[slug]",
-      "classification": "EXACT_MATCH",
-      "type": "PAGE"
-    },
-    {
       "route": "/property/[id]",
-      "classification": "DYNAMIC_EQUIVALENT",
+      "classification": "EXACT_MATCH",
       "type": "PAGE"
     },
     {
@@ -64,7 +53,7 @@
     },
     {
       "route": "/api/calendar/sync",
-      "classification": "REAL_UNMAPPED_ROUTE",
+      "classification": "EXACT_MATCH",
       "type": "API"
     },
     {
@@ -73,23 +62,18 @@
       "type": "API"
     },
     {
-      "route": "/api/connects/spend",
-      "classification": "REAL_UNMAPPED_ROUTE",
-      "type": "API"
-    },
-    {
       "route": "/api/leads/export-audit",
-      "classification": "REAL_UNMAPPED_ROUTE",
+      "classification": "EXACT_MATCH",
       "type": "API"
     },
     {
       "route": "/api/property/claim",
-      "classification": "REAL_UNMAPPED_ROUTE",
+      "classification": "EXACT_MATCH",
       "type": "API"
     },
     {
       "route": "/api/user/delete-account",
-      "classification": "REAL_UNMAPPED_ROUTE",
+      "classification": "EXACT_MATCH",
       "type": "API"
     }
   ],
@@ -115,7 +99,6 @@
   },
   "repositoryFidelityReport": {
     "canonicalRoutes": [
-      "/property/[slug]",
       "/property/[id]",
       "/dashboard",
       "/discover",
@@ -128,13 +111,11 @@
       "/api/deals/initiate",
       "/api/calendar/sync",
       "/api/ai/counter-offer",
-      "/api/connects/spend",
       "/api/leads/export-audit",
       "/api/property/claim",
       "/api/user/delete-account"
     ],
     "canonicalRoutesMapped": [
-      "/property/[slug]",
       "/property/[id]",
       "/dashboard",
       "/discover",
@@ -145,7 +126,11 @@
       "/brokers",
       "/api/deals/handshake",
       "/api/deals/initiate",
-      "/api/ai/counter-offer"
+      "/api/calendar/sync",
+      "/api/ai/counter-offer",
+      "/api/leads/export-audit",
+      "/api/property/claim",
+      "/api/user/delete-account"
     ],
     "allDiscoveredRoutes": [
       "/about",
@@ -175,6 +160,7 @@
       "/api/calendar/events/[id]",
       "/api/calendar/sync",
       "/api/cms",
+      "/api/contact",
       "/api/crm/activity",
       "/api/crm/tasks",
       "/api/crm/tasks/[id]",
@@ -220,6 +206,7 @@
       "/api/oauth/google/start",
       "/api/off-market",
       "/api/og",
+      "/api/profile/me/role",
       "/api/profile/public-roles",
       "/api/property/claim",
       "/api/property/premium",
@@ -246,6 +233,7 @@
       "/brokers",
       "/brokers/portal",
       "/brokers/[broker-slug]",
+      "/contact",
       "/dashboard/calendar",
       "/dashboard/crm",
       "/dashboard/inbox",
@@ -256,7 +244,6 @@
       "/enterprise",
       "/event-planners",
       "/event-planners/[planner-slug]",
-      "/flow",
       "/hubs/[slug]",
       "/intel",
       "/intel/[article-slug]",
@@ -295,14 +282,11 @@
       "/wishlist",
       "/wishlist/shared/[token]"
     ],
-    "totalCodebaseRoutesDiscovered": 146,
+    "totalCodebaseRoutesDiscovered": 148,
     "dynamicAliases": [
-      "/property/[slug] -> /property/:param",
       "/property/[id] -> /property/:param"
     ],
-    "redirectAliases": [
-      "/login -> /onboarding"
-    ],
+    "redirectAliases": [],
     "componentsReferenced": [
       "CommercialFlow.js",
       "ResidentialFlow.js",
@@ -317,16 +301,72 @@
     "componentsMissing": [],
     "apiRoutesMapped": [
       "/api/deals/handshake",
+      "/api/deals/initiate",
       "/api/calendar/sync",
       "/api/ai/counter-offer",
-      "/api/connects/spend",
-      "/api/property/claim",
       "/api/leads/export-audit",
+      "/api/property/claim",
       "/api/user/delete-account"
     ],
     "apiRoutesMissing": [],
-    "graphOnlyRoutes": [],
-    "verifiedCodeEvidenceCount": 81,
+    "graphOnlyRoutes": [
+      "/api/auth/refresh",
+      "/api/cron/purge-messages",
+      "/api/deals/escrow-trap",
+      "/api/deals/offer-review",
+      "/api/deals/route-lead",
+      "/api/deals/viewing-status",
+      "/api/faq/ask",
+      "/api/property/faq-vote",
+      "/api/security/scoped-token",
+      "/api/security/token-expired",
+      "/api/sentinel/quarantine",
+      "/auth/sso",
+      "/auth/sso/error",
+      "/auth/sso/reauth",
+      "/blocked",
+      "/bounties",
+      "/challenge",
+      "/dashboard/create/advanced",
+      "/dashboard/property/[id]/settings",
+      "/lib/aiListingEngine.js",
+      "/lib/connectRules.js",
+      "/lib/sanitize.js",
+      "/lib/sentinel/velocityRadar.js",
+      "/lib/webResearcher.js",
+      "/mission-control/approval",
+      "/mission-control/prc-audit"
+    ],
+    "plannedGraphOnlyRoutes": [
+      "/api/auth/refresh",
+      "/api/cron/purge-messages",
+      "/api/deals/escrow-trap",
+      "/api/deals/offer-review",
+      "/api/deals/route-lead",
+      "/api/deals/viewing-status",
+      "/api/faq/ask",
+      "/api/property/faq-vote",
+      "/api/security/scoped-token",
+      "/api/security/token-expired",
+      "/api/sentinel/quarantine",
+      "/auth/sso",
+      "/auth/sso/error",
+      "/auth/sso/reauth",
+      "/blocked",
+      "/bounties",
+      "/challenge",
+      "/dashboard/create/advanced",
+      "/dashboard/property/[id]/settings",
+      "/lib/aiListingEngine.js",
+      "/lib/connectRules.js",
+      "/lib/sanitize.js",
+      "/lib/sentinel/velocityRadar.js",
+      "/lib/webResearcher.js",
+      "/mission-control/approval",
+      "/mission-control/prc-audit"
+    ],
+    "staleReleasedGraphOnlyRoutes": [],
+    "verifiedCodeEvidenceCount": 80,
     "staleCodeEvidenceCount": 0
   },
   "scores": {
@@ -338,10 +378,10 @@
       "failingItems": []
     },
     "graphEvidenceScore": {
-      "numerator": 81,
+      "numerator": 80,
       "denominator": 117,
-      "percentage": "69%",
-      "formula": "verified nodes with grounded code evidence / total nodes",
+      "percentage": "68%",
+      "formula": "verified nodes with existing grounded code evidence / total nodes",
       "failingItems": [
         "sys_velocity_radar",
         "sys_gemini_ocr_extractor",
@@ -356,6 +396,7 @@
         "comp_return_brief_buyer",
         "comp_return_brief_owner",
         "comp_return_brief_broker",
+        "rec_topup_connects",
         "exc_contact_leak_blocked",
         "rec_redact_contact_faq",
         "exc_viewing_noshow",
@@ -382,37 +423,31 @@
       ]
     },
     "routeCoverageScore": {
-      "numerator": 12,
-      "denominator": 17,
-      "percentage": "71%",
+      "numerator": 15,
+      "denominator": 15,
+      "percentage": "100%",
       "formula": "mapped canonical product routes / total canonical product routes",
-      "failingItems": [
-        "/api/calendar/sync",
-        "/api/connects/spend",
-        "/api/leads/export-audit",
-        "/api/property/claim",
-        "/api/user/delete-account"
-      ]
+      "failingItems": []
     },
     "workflowIntegrityScore": {
       "numerator": 5,
       "denominator": 5,
       "percentage": "100%",
-      "formula": "traversable start-to-terminal workflows / total defined workflows",
+      "formula": "dynamically traversable start-to-terminal workflows / total defined workflows",
       "failingItems": []
     },
     "guideIntegrityScore": {
-      "numerator": 15,
-      "denominator": 15,
+      "numerator": 3,
+      "denominator": 3,
       "percentage": "100%",
-      "formula": "unbroken consecutive guide step transitions / total guide step transitions",
+      "formula": "actor-safe guides with grounded transitions / total defined guides",
       "failingItems": []
     },
     "ragSafetyScore": {
       "numerator": 192,
       "denominator": 192,
       "percentage": "100%",
-      "formula": "sanitized public chunks with zero internal leakage / total public chunks",
+      "formula": "public chunks passing access and content sanitization checks / total public chunks",
       "failingItems": []
     },
     "stateMachineCoverageScore": {
@@ -438,28 +473,28 @@
     },
     "recoveryCoverageScore": {
       "numerator": 14,
-      "denominator": 14,
-      "percentage": "100%",
-      "formula": "failure branches with recovery or terminal resolution / total mapped failure branches",
+      "denominator": 19,
+      "percentage": "74%",
+      "formula": "mapped failures with recovery or terminal resolution / total mapped failures",
       "failingItems": []
     },
     "ghostGraphScore": {
-      "numerator": 81,
-      "denominator": 81,
+      "numerator": 80,
+      "denominator": 80,
       "percentage": "100%",
       "formula": "verified nodes with real codebase artifacts / total verified nodes",
       "failingItems": []
     },
     "overallTrustScore": {
-      "percentage": "77.9%",
+      "percentage": "92.0%",
       "formula": "weighted sum: (evidence * 0.25) + (route * 0.15) + (ghost * 0.15) + (workflow * 0.15) + (guide * 0.15) + (rag * 0.15) - penalties",
       "penalties": {
         "placeholderPredicates": 0,
-        "unmappedRoutes": 5,
-        "penaltyPointsDeducted": 10
+        "unmappedRoutes": 0,
+        "penaltyPointsDeducted": 0
       },
       "failingItems": []
     }
   },
-  "auditScore": "77.9% TRUST GROUNDED"
+  "auditScore": "92.0% TRUST GROUNDED"
 }

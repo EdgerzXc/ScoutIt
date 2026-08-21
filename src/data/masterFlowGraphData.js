@@ -76,7 +76,7 @@ export const MASTER_FLOW_NODES = [
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic/BlackHoleCanvas.js",
+        "path": "src/components/descent/BlackHoleCanvas.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -249,7 +249,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "SYSTEM",
     "domain": "sentinel",
     "category": "architecture",
-    "route": "/middleware.js",
+    "route": "/",
     "layer": "global",
     "roles": [
       "visitor",
@@ -298,7 +298,7 @@ export const MASTER_FLOW_NODES = [
     "evidence": [
       {
         "kind": "CODE",
-        "path": "src/middleware.js",
+        "path": "src/proxy.js",
         "symbol": "middleware",
         "provenance": "EXTRACTED",
         "confidence": 1,
@@ -353,7 +353,7 @@ export const MASTER_FLOW_NODES = [
         "evidence": [
           {
             "kind": "CODE",
-            "path": "src/middleware.js",
+            "path": "src/proxy.js",
             "symbol": "middleware",
             "provenance": "EXTRACTED",
             "confidence": 1
@@ -403,7 +403,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "PAGE",
     "domain": "property",
     "category": "architecture",
-    "route": "/property/[slug]",
+    "route": "/property/[id]",
     "layer": "global",
     "roles": [
       "visitor",
@@ -745,7 +745,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "GATE",
     "domain": "auth",
     "category": "architecture",
-    "route": "/api/user/verify-age",
+    "route": "/onboarding",
     "layer": "global",
     "roles": [
       "seeker",
@@ -966,7 +966,7 @@ export const MASTER_FLOW_NODES = [
       "src/app/onboarding/page.js"
     ],
     "apis": [
-      "/api/user/complete-onboarding"
+      "/api/auth/complete-onboarding"
     ],
     "dataRefs": [
       "Supabase user_profiles & connect_balances"
@@ -990,7 +990,7 @@ export const MASTER_FLOW_NODES = [
       },
       {
         "kind": "API",
-        "path": "src/app/api/user/complete-onboarding/route.js",
+        "path": "src/app/api/auth/complete-onboarding/route.js",
         "symbol": "POST",
         "provenance": "EXTRACTED",
         "confidence": 1,
@@ -1061,7 +1061,7 @@ export const MASTER_FLOW_NODES = [
           },
           {
             "kind": "API",
-            "path": "src/app/api/user/complete-onboarding/route.js",
+            "path": "src/app/api/auth/complete-onboarding/route.js",
             "symbol": "POST",
             "provenance": "EXTRACTED",
             "confidence": 1
@@ -1469,7 +1469,7 @@ export const MASTER_FLOW_NODES = [
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic-layers/OrbitCanvas.js",
+        "path": "src/components/orbit/ScoutEarthClient.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -1528,7 +1528,7 @@ export const MASTER_FLOW_NODES = [
           },
           {
             "kind": "COMPONENT",
-            "path": "src/components/cinematic-layers/OrbitCanvas.js",
+            "path": "src/components/orbit/ScoutEarthClient.js",
             "provenance": "EXTRACTED",
             "confidence": 1
           }
@@ -2832,7 +2832,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "PAGE",
     "domain": "discovery",
     "category": "architecture",
-    "route": "/spatial-canvas",
+    "route": "/property/[id]?chapter=location",
     "layer": "metropolis",
     "roles": [
       "visitor",
@@ -3327,7 +3327,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "PAGE",
     "domain": "discovery",
     "category": "architecture",
-    "route": "/hubs",
+    "route": "/hubs/[slug]",
     "layer": "stratosphere",
     "roles": [
       "visitor",
@@ -3353,10 +3353,10 @@ export const MASTER_FLOW_NODES = [
       "Publicly accessible"
     ],
     "systems": [
-      "src/app/hubs/page.js"
+      "src/app/hubs/[slug]/page.js"
     ],
     "components": [
-      "src/app/hubs/page.js"
+      "src/app/hubs/[slug]/page.js"
     ],
     "apis": [],
     "dataRefs": [
@@ -3373,7 +3373,7 @@ export const MASTER_FLOW_NODES = [
     "evidence": [
       {
         "kind": "ROUTE",
-        "path": "src/app/hubs/page.js",
+        "path": "src/app/hubs/[slug]/page.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -3438,7 +3438,7 @@ export const MASTER_FLOW_NODES = [
         "evidence": [
           {
             "kind": "ROUTE",
-            "path": "src/app/hubs/page.js",
+            "path": "src/app/hubs/[slug]/page.js",
             "provenance": "EXTRACTED",
             "confidence": 1
           },
@@ -4131,7 +4131,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "PAGE",
     "domain": "discovery",
     "category": "architecture",
-    "route": "/planners",
+    "route": "/event-planners",
     "layer": "crust",
     "roles": [
       "visitor",
@@ -4829,7 +4829,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "SECTION",
     "domain": "property",
     "category": "architecture",
-    "route": "/property/[slug]#the-space",
+    "route": "/property/[id]?chapter=space",
     "layer": "core",
     "roles": [
       "visitor",
@@ -4979,7 +4979,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "SECTION",
     "domain": "property",
     "category": "architecture",
-    "route": "/property/[slug]#location",
+    "route": "/property/[id]?chapter=location",
     "layer": "crust",
     "roles": [
       "visitor",
@@ -5145,7 +5145,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "SECTION",
     "domain": "property",
     "category": "architecture",
-    "route": "/property/[slug]#life-here",
+    "route": "/property/[id]?chapter=life",
     "layer": "core",
     "roles": [
       "visitor",
@@ -5293,7 +5293,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "SECTION",
     "domain": "property",
     "category": "architecture",
-    "route": "/property/[slug]#where-to",
+    "route": "/property/[id]?chapter=whereto",
     "layer": "crust",
     "roles": [
       "visitor",
@@ -5454,7 +5454,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "SECTION",
     "domain": "property",
     "category": "architecture",
-    "route": "/property/[slug]#build-plans",
+    "route": "/property/[id]?chapter=buildplans",
     "layer": "mantle",
     "roles": [
       "visitor",
@@ -5602,7 +5602,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "SECTION",
     "domain": "property",
     "category": "architecture",
-    "route": "/property/[slug]#fine-print",
+    "route": "/property/[id]?chapter=hiddenintel",
     "layer": "core",
     "roles": [
       "seeker",
@@ -5762,7 +5762,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "GATE",
     "domain": "layer",
     "category": "architecture",
-    "route": "/lib/entitlements.js#deep-intel",
+    "route": "/property/[id]?chapter=hiddenintel",
     "layer": "core",
     "roles": [
       "seeker",
@@ -5913,7 +5913,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "GATE",
     "domain": "layer",
     "category": "architecture",
-    "route": "/lib/entitlements.js#hidden-intel",
+    "route": "/property/[id]?chapter=hiddenintel",
     "layer": "core",
     "roles": [
       "seeker",
@@ -6060,7 +6060,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "SECTION",
     "domain": "property",
     "category": "architecture",
-    "route": "/property/[slug]#units",
+    "route": "/property/[id]?chapter=units",
     "layer": "core",
     "roles": [
       "visitor",
@@ -6228,7 +6228,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "SECTION",
     "domain": "property",
     "category": "architecture",
-    "route": "/property/[slug]#universe",
+    "route": "/property/[id]?chapter=universe",
     "layer": "orbit",
     "roles": [
       "visitor",
@@ -6392,7 +6392,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "SECTION",
     "domain": "property",
     "category": "architecture",
-    "route": "/property/[slug]#services",
+    "route": "/property/[id]?chapter=services",
     "layer": "crust",
     "roles": [
       "visitor",
@@ -6544,7 +6544,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "SECTION",
     "domain": "property",
     "category": "architecture",
-    "route": "/property/[slug]#your-move",
+    "route": "/property/[id]?chapter=yourmove",
     "layer": "core",
     "roles": [
       "visitor",
@@ -6728,7 +6728,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "ACTION",
     "domain": "seeker",
     "category": "architecture",
-    "route": "/property/[slug]",
+    "route": "/api/reactions",
     "layer": "core",
     "roles": [
       "visitor",
@@ -6874,7 +6874,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "ACTION",
     "domain": "faq",
     "category": "architecture",
-    "route": "/api/faq/ask",
+    "route": "/api/faqs",
     "layer": "core",
     "roles": [
       "visitor",
@@ -7241,7 +7241,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "ACTION",
     "domain": "deal",
     "category": "architecture",
-    "route": "/api/deals/schedule-viewing",
+    "route": "/dashboard/inbox",
     "layer": "core",
     "roles": [
       "seeker",
@@ -7274,7 +7274,9 @@ export const MASTER_FLOW_NODES = [
       "ViewingScheduler.js"
     ],
     "apis": [
-      "/api/deals/schedule-viewing"
+      "/api/deals/[id]/schedule",
+      "/api/viewing-appointments",
+      "/api/calendar/sync"
     ],
     "dataRefs": [
       "Supabase deals & viewing_schedules"
@@ -7429,7 +7431,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "ACTION",
     "domain": "deal",
     "category": "architecture",
-    "route": "/api/deals/make-offer",
+    "route": "/dashboard/crm",
     "layer": "core",
     "roles": [
       "seeker",
@@ -7464,7 +7466,8 @@ export const MASTER_FLOW_NODES = [
     ],
     "apis": [
       "/api/ai/counter-offer",
-      "/api/deals"
+      "/api/deals/[id]",
+      "/api/deals/handshake"
     ],
     "dataRefs": [
       "Supabase deals & offers"
@@ -7607,7 +7610,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "ACTION",
     "domain": "layer",
     "category": "architecture",
-    "route": "/api/properties/claim",
+    "route": "/api/property/claim",
     "layer": "core",
     "roles": [
       "owner",
@@ -7639,7 +7642,7 @@ export const MASTER_FLOW_NODES = [
       "ClaimListingModal.js"
     ],
     "apis": [
-      "/api/properties/claim"
+      "/api/property/claim"
     ],
     "dataRefs": [
       "Supabase property_claims"
@@ -7789,7 +7792,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "ACTION",
     "domain": "owner",
     "category": "architecture",
-    "route": "/dashboard/create",
+    "route": "/dashboard",
     "layer": "core",
     "roles": [
       "owner",
@@ -7824,7 +7827,11 @@ export const MASTER_FLOW_NODES = [
       "src/app/dashboard/create/page.js",
       "ListingMethodSelector.js"
     ],
-    "apis": [],
+    "apis": [
+      "/api/dashboard/publish",
+      "/api/dashboard/bulk-insert",
+      "/api/ai/read-pdf"
+    ],
     "dataRefs": [
       "Supabase properties (drafts)"
     ],
@@ -7951,7 +7958,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "ACTION",
     "domain": "owner",
     "category": "architecture",
-    "route": "/dashboard/create/scratch",
+    "route": "/dashboard",
     "layer": "core",
     "roles": [
       "owner",
@@ -8100,7 +8107,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "ACTION",
     "domain": "owner",
     "category": "architecture",
-    "route": "/dashboard/create/advanced",
+    "route": "/dashboard",
     "layer": "core",
     "roles": [
       "owner",
@@ -8254,7 +8261,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "ACTION",
     "domain": "owner",
     "category": "architecture",
-    "route": "/dashboard/create/csv",
+    "route": "/dashboard",
     "layer": "core",
     "roles": [
       "owner",
@@ -8409,7 +8416,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "ACTION",
     "domain": "owner",
     "category": "architecture",
-    "route": "/dashboard/create/pdf",
+    "route": "/dashboard",
     "layer": "core",
     "roles": [
       "owner",
@@ -8575,7 +8582,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "SYSTEM",
     "domain": "layer",
     "category": "architecture",
-    "route": "/lib/ingestExtractor.js",
+    "route": "/api/ai/read-pdf",
     "layer": "mantle",
     "roles": [
       "owner",
@@ -8877,7 +8884,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "GATE",
     "domain": "auth",
     "category": "architecture",
-    "route": "/lib/serverAuth.js",
+    "route": "/login",
     "layer": "global",
     "roles": [
       "seeker",
@@ -9041,7 +9048,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "DECISION",
     "domain": "core",
     "category": "architecture",
-    "route": "/lib/entitlements.js",
+    "route": "/pricing",
     "layer": "global",
     "roles": [
       "seeker",
@@ -9197,7 +9204,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "SYSTEM",
     "domain": "connects",
     "category": "architecture",
-    "route": "/api/deals/spend-connect",
+    "route": "/api/deals/initiate",
     "layer": "global",
     "roles": [
       "seeker",
@@ -9233,7 +9240,10 @@ export const MASTER_FLOW_NODES = [
       "src/app/api/deals/spend-connect/route.js"
     ],
     "apis": [
-      "src/app/api/deals/spend-connect/route.js"
+      "/api/deals/initiate",
+      "/api/deals/pitch",
+      "/api/dashboard/invite",
+      "/api/v1/questit/raise"
     ],
     "dataRefs": [
       "Supabase connect_balances & connect_transactions"
@@ -9257,7 +9267,7 @@ export const MASTER_FLOW_NODES = [
       },
       {
         "kind": "DATABASE",
-        "path": "supabase/migrations/20260710000000_schema_v2_core.sql",
+        "path": "supabase/migrations/20260802000003_connects_wallet_and_tiers.sql",
         "symbol": "connect_balances",
         "provenance": "EXTRACTED",
         "confidence": 1,
@@ -9334,7 +9344,7 @@ export const MASTER_FLOW_NODES = [
           },
           {
             "kind": "DATABASE",
-            "path": "supabase/migrations/20260710000000_schema_v2_core.sql",
+            "path": "supabase/migrations/20260802000003_connects_wallet_and_tiers.sql",
             "symbol": "connect_balances",
             "provenance": "EXTRACTED",
             "confidence": 1
@@ -9390,7 +9400,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "SYSTEM",
     "domain": "connects",
     "category": "architecture",
-    "route": "/lib/sentinel/hemorrhageGuard.js",
+    "route": "/api/deals/initiate",
     "layer": "global",
     "roles": [
       "seeker",
@@ -9857,7 +9867,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "SYSTEM",
     "domain": "sentinel",
     "category": "architecture",
-    "route": "/lib/sanitize.js",
+    "route": "/api/faqs/preflight",
     "layer": "global",
     "roles": [
       "visitor",
@@ -9887,7 +9897,10 @@ export const MASTER_FLOW_NODES = [
     "components": [
       "src/lib/sanitize.js"
     ],
-    "apis": [],
+    "apis": [
+      "/api/faqs/preflight",
+      "/api/faqs"
+    ],
     "dataRefs": [
       "None"
     ],
@@ -10377,7 +10390,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "PAGE",
     "domain": "owner",
     "category": "architecture",
-    "route": "/lib/aiListingEngine.js",
+    "route": "/dashboard",
     "layer": "mantle",
     "roles": [
       "owner",
@@ -10534,7 +10547,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "SYSTEM",
     "domain": "layer",
     "category": "architecture",
-    "route": "/lib/aiCouncil.js",
+    "route": "/dashboard",
     "layer": "mantle",
     "roles": [
       "owner",
@@ -10686,7 +10699,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "SYSTEM",
     "domain": "layer",
     "category": "architecture",
-    "route": "/lib/aiArbiter.js",
+    "route": "/dashboard",
     "layer": "mantle",
     "roles": [
       "owner",
@@ -10893,7 +10906,7 @@ export const MASTER_FLOW_NODES = [
     "evidence": [
       {
         "kind": "API",
-        "path": "src/app/api/property/route.js",
+        "path": "src/app/api/dashboard/publish/route.js",
         "symbol": "POST",
         "provenance": "EXTRACTED",
         "confidence": 1,
@@ -10954,7 +10967,7 @@ export const MASTER_FLOW_NODES = [
         "evidence": [
           {
             "kind": "API",
-            "path": "src/app/api/property/route.js",
+            "path": "src/app/api/dashboard/publish/route.js",
             "symbol": "POST",
             "provenance": "EXTRACTED",
             "confidence": 1
@@ -11008,7 +11021,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "OUTCOME",
     "domain": "legal",
     "category": "scenario",
-    "route": "/api/user/dpo-erasure",
+    "route": "/api/user/delete-account",
     "layer": "global",
     "roles": [
       "staff",
@@ -11041,7 +11054,7 @@ export const MASTER_FLOW_NODES = [
       "SentinelLayer.js"
     ],
     "apis": [
-      "/api/user/dpo-erasure"
+      "/api/user/delete-account"
     ],
     "dataRefs": [
       "Supabase user_profiles, auth.users, properties"
@@ -11316,7 +11329,7 @@ export const MASTER_FLOW_NODES = [
     "securityReviewStatus": "RESEARCHED",
     "productStatus": "PROPOSED",
     "evidenceStatus": "UNVERIFIED",
-    "releaseStatus": "PRIVATE_PILOT"
+    "releaseStatus": "NOT_DEPLOYED",
   },
   {
     "id": "exc_bot_quarantine",
@@ -12555,7 +12568,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "PAGE",
     "domain": "deal",
     "category": "architecture",
-    "route": "/deal/[id]",
+    "route": "/dashboard/inbox",
     "layer": "core",
     "roles": [
       "seeker",
@@ -12594,7 +12607,13 @@ export const MASTER_FLOW_NODES = [
       "ChatBox.js",
       "ViewingCalendar.js"
     ],
-    "apis": [],
+    "apis": [
+      "/api/deals",
+      "/api/deals/[id]",
+      "/api/deals/[id]/messages",
+      "/api/deals/[id]/schedule",
+      "/api/deals/handshake"
+    ],
     "dataRefs": [
       "Supabase deals, messages, viewing_schedules"
     ],
@@ -12744,7 +12763,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "PAGE",
     "domain": "admin",
     "category": "architecture",
-    "route": "/mission-control",
+    "route": "/dashboard",
     "layer": "core",
     "roles": [
       "staff",
@@ -12913,7 +12932,7 @@ export const MASTER_FLOW_NODES = [
     "securityReviewStatus": "RESEARCHED",
     "productStatus": "APPROVED",
     "evidenceStatus": "CODE_GROUNDED",
-    "releaseStatus": "PUBLIC_LIVE"
+    "releaseStatus": "PRIVATE_PILOT",
   },
   {
     "id": "exc_insufficient_connects",
@@ -12924,7 +12943,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "EXCEPTION",
     "domain": "connects",
     "category": "scenario",
-    "route": "/api/deals/spend-connect",
+    "route": "/api/deals/initiate",
     "layer": "global",
     "roles": [
       "seeker",
@@ -13092,7 +13111,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "RECOVERY",
     "domain": "connects",
     "category": "scenario",
-    "route": "/checkout/connects",
+    "route": "/pricing/bundles",
     "layer": "global",
     "roles": [
       "seeker",
@@ -13109,7 +13128,7 @@ export const MASTER_FLOW_NODES = [
     "goals": [
       "connects"
     ],
-    "implementationStatus": "VERIFIED",
+    "implementationStatus": "NOT_STARTED",
     "purpose": "User purchases a permanent Connects pack (PayMongo / GCash / Card) to replenish their wallet.",
     "description": "Adds permanent Purchased Connects to the user's wallet and returns them directly to their staged inquiry modal.",
     "actions": [
@@ -13246,8 +13265,8 @@ export const MASTER_FLOW_NODES = [
     "productReviewStatus": "RESEARCHED",
     "securityReviewStatus": "RESEARCHED",
     "productStatus": "APPROVED",
-    "evidenceStatus": "CODE_GROUNDED",
-    "releaseStatus": "PRIVATE_PILOT"
+    "evidenceStatus": "UNVERIFIED",
+    "releaseStatus": "NOT_DEPLOYED",
   },
   {
     "id": "exc_slot_conflict",
@@ -13258,7 +13277,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "EXCEPTION",
     "domain": "layer",
     "category": "scenario",
-    "route": "/api/deals/schedule-viewing",
+    "route": "/api/deals/[id]/schedule",
     "layer": "core",
     "roles": [
       "seeker",
@@ -13409,7 +13428,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "RECOVERY",
     "domain": "layer",
     "category": "scenario",
-    "route": "/api/deals/schedule-viewing",
+    "route": "/api/deals/[id]/schedule",
     "layer": "core",
     "roles": [
       "seeker",
@@ -13848,7 +13867,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "EXCEPTION",
     "domain": "deal",
     "category": "scenario",
-    "route": "/api/deals/viewing-noshow",
+    "route": "/dashboard/inbox",
     "layer": "core",
     "roles": [
       "seeker",
@@ -14000,7 +14019,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "ACTION",
     "domain": "deal",
     "category": "scenario",
-    "route": "/deal/[id]/reschedule",
+    "route": "/dashboard/inbox",
     "layer": "core",
     "roles": [
       "seeker",
@@ -14468,7 +14487,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "EXCEPTION",
     "domain": "layer",
     "category": "scenario",
-    "route": "/mission-control/deadlocks",
+    "route": "/dashboard",
     "layer": "mantle",
     "roles": [
       "staff"
@@ -15941,7 +15960,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "TERMINAL",
     "domain": "deal",
     "category": "scenario",
-    "route": "/deal/[id]/success",
+    "route": "/dashboard/inbox",
     "layer": "core",
     "roles": [
       "seeker",
@@ -16097,7 +16116,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "TERMINAL",
     "domain": "layer",
     "category": "scenario",
-    "route": "/deal/[id]/closed",
+    "route": "/dashboard/inbox",
     "layer": "core",
     "roles": [
       "seeker",
@@ -16253,7 +16272,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "PAGE",
     "domain": "property",
     "category": "architecture",
-    "route": "/compare",
+    "route": "/property",
     "layer": "crust",
     "roles": [
       "visitor",
@@ -16412,7 +16431,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "PAGE",
     "domain": "broker",
     "category": "architecture",
-    "route": "/property/[slug]/field-briefing",
+    "route": "/dashboard",
     "layer": "core",
     "roles": [
       "broker"
@@ -16445,7 +16464,10 @@ export const MASTER_FLOW_NODES = [
       "VoiceCopilotEngine.js",
       "TaxCalculator.js"
     ],
-    "apis": [],
+    "apis": [
+      "/api/broker/briefing-log",
+      "/api/leads/export-audit"
+    ],
     "dataRefs": [
       "Supabase properties & broker_field_notes"
     ],
@@ -16563,7 +16585,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "SYSTEM",
     "domain": "crm",
     "category": "architecture",
-    "route": "/api/crm/deal-summarizer",
+    "route": "/api/crm/activity",
     "layer": "core",
     "roles": [
       "broker",
@@ -16597,7 +16619,9 @@ export const MASTER_FLOW_NODES = [
       "src/lib/crm/zeroLogSummarizer.js",
       "EdgeAIWorker.js"
     ],
-    "apis": [],
+    "apis": [
+      "/api/crm/activity"
+    ],
     "dataRefs": [
       "Supabase deal_notes & crm_activity_log"
     ],
@@ -16717,7 +16741,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "SYSTEM",
     "domain": "crm",
     "category": "architecture",
-    "route": "/dashboard/wrap",
+    "route": "/dashboard",
     "layer": "orbit",
     "roles": [
       "owner",
@@ -16753,7 +16777,10 @@ export const MASTER_FLOW_NODES = [
       "src/app/dashboard/wrap/page.js",
       "MonthlyWrapEngine.js"
     ],
-    "apis": [],
+    "apis": [
+      "/api/wrap",
+      "/api/analytics"
+    ],
     "dataRefs": [
       "Supabase analytics_events & monthly_wrap_snapshots"
     ],
@@ -16775,7 +16802,7 @@ export const MASTER_FLOW_NODES = [
       },
       {
         "kind": "API",
-        "path": "src/app/api/wrap/monthly/route.js",
+        "path": "src/app/api/wrap/route.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -16838,7 +16865,7 @@ export const MASTER_FLOW_NODES = [
           },
           {
             "kind": "API",
-            "path": "src/app/api/wrap/monthly/route.js",
+            "path": "src/app/api/wrap/route.js",
             "provenance": "EXTRACTED",
             "confidence": 1
           }
@@ -17060,7 +17087,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "EXCEPTION",
     "domain": "freshness",
     "category": "architecture",
-    "route": "/dashboard/owner/stale-audit",
+    "route": "/dashboard",
     "layer": "crust",
     "roles": [
       "owner",
@@ -17209,7 +17236,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "RECOVERY",
     "domain": "freshness",
     "category": "architecture",
-    "route": "/api/property/confirm-freshness",
+    "route": "/api/dashboard/verify-freshness",
     "layer": "crust",
     "roles": [
       "owner",
@@ -17242,7 +17269,7 @@ export const MASTER_FLOW_NODES = [
       "src/app/api/property/confirm-freshness/route.js"
     ],
     "apis": [
-      "src/app/api/property/confirm-freshness/route.js"
+      "/api/dashboard/verify-freshness"
     ],
     "dataRefs": [
       "Supabase properties & Airtable sync"
@@ -17361,7 +17388,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "SYSTEM",
     "domain": "gis",
     "category": "architecture",
-    "route": "/api/gis/noah-hazard",
+    "route": "/property/[id]?chapter=location",
     "layer": "metropolis",
     "roles": [
       "visitor",
@@ -17974,7 +18001,7 @@ export const MASTER_FLOW_NODES = [
     "securityReviewStatus": "RESEARCHED",
     "productStatus": "PLANNED",
     "evidenceStatus": "UNVERIFIED",
-    "releaseStatus": "PRIVATE_PILOT"
+    "releaseStatus": "NOT_DEPLOYED",
   },
   {
     "id": "exc_sso_domain_mismatch",
@@ -18782,7 +18809,7 @@ export const MASTER_FLOW_EDGES = [
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic/BlackHoleCanvas.js",
+        "path": "src/components/descent/BlackHoleCanvas.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -18839,7 +18866,7 @@ export const MASTER_FLOW_EDGES = [
     "evidence": [
       {
         "kind": "CODE",
-        "path": "src/middleware.js",
+        "path": "src/proxy.js",
         "symbol": "middleware",
         "provenance": "EXTRACTED",
         "confidence": 1,
@@ -19096,7 +19123,7 @@ export const MASTER_FLOW_EDGES = [
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic/BlackHoleCanvas.js",
+        "path": "src/components/descent/BlackHoleCanvas.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -19166,7 +19193,7 @@ export const MASTER_FLOW_EDGES = [
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic/BlackHoleCanvas.js",
+        "path": "src/components/descent/BlackHoleCanvas.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -19236,7 +19263,7 @@ export const MASTER_FLOW_EDGES = [
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic/BlackHoleCanvas.js",
+        "path": "src/components/descent/BlackHoleCanvas.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -19306,7 +19333,7 @@ export const MASTER_FLOW_EDGES = [
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic/BlackHoleCanvas.js",
+        "path": "src/components/descent/BlackHoleCanvas.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -19376,7 +19403,7 @@ export const MASTER_FLOW_EDGES = [
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic/BlackHoleCanvas.js",
+        "path": "src/components/descent/BlackHoleCanvas.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -19446,7 +19473,7 @@ export const MASTER_FLOW_EDGES = [
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic/BlackHoleCanvas.js",
+        "path": "src/components/descent/BlackHoleCanvas.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -19516,7 +19543,7 @@ export const MASTER_FLOW_EDGES = [
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic/BlackHoleCanvas.js",
+        "path": "src/components/descent/BlackHoleCanvas.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -19588,7 +19615,7 @@ export const MASTER_FLOW_EDGES = [
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic/BlackHoleCanvas.js",
+        "path": "src/components/descent/BlackHoleCanvas.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -19658,7 +19685,7 @@ export const MASTER_FLOW_EDGES = [
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic/BlackHoleCanvas.js",
+        "path": "src/components/descent/BlackHoleCanvas.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -19728,7 +19755,7 @@ export const MASTER_FLOW_EDGES = [
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic/BlackHoleCanvas.js",
+        "path": "src/components/descent/BlackHoleCanvas.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -19800,7 +19827,7 @@ export const MASTER_FLOW_EDGES = [
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic/BlackHoleCanvas.js",
+        "path": "src/components/descent/BlackHoleCanvas.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -19870,7 +19897,7 @@ export const MASTER_FLOW_EDGES = [
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic/BlackHoleCanvas.js",
+        "path": "src/components/descent/BlackHoleCanvas.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -19940,7 +19967,7 @@ export const MASTER_FLOW_EDGES = [
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic/BlackHoleCanvas.js",
+        "path": "src/components/descent/BlackHoleCanvas.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -20012,7 +20039,7 @@ export const MASTER_FLOW_EDGES = [
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic/BlackHoleCanvas.js",
+        "path": "src/components/descent/BlackHoleCanvas.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -20082,7 +20109,7 @@ export const MASTER_FLOW_EDGES = [
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic/BlackHoleCanvas.js",
+        "path": "src/components/descent/BlackHoleCanvas.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -20152,7 +20179,7 @@ export const MASTER_FLOW_EDGES = [
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic/BlackHoleCanvas.js",
+        "path": "src/components/descent/BlackHoleCanvas.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -20222,7 +20249,7 @@ export const MASTER_FLOW_EDGES = [
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic/BlackHoleCanvas.js",
+        "path": "src/components/descent/BlackHoleCanvas.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -20292,7 +20319,7 @@ export const MASTER_FLOW_EDGES = [
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic/BlackHoleCanvas.js",
+        "path": "src/components/descent/BlackHoleCanvas.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -20362,7 +20389,7 @@ export const MASTER_FLOW_EDGES = [
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic/BlackHoleCanvas.js",
+        "path": "src/components/descent/BlackHoleCanvas.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -20432,7 +20459,7 @@ export const MASTER_FLOW_EDGES = [
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic/BlackHoleCanvas.js",
+        "path": "src/components/descent/BlackHoleCanvas.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -20502,7 +20529,7 @@ export const MASTER_FLOW_EDGES = [
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic/BlackHoleCanvas.js",
+        "path": "src/components/descent/BlackHoleCanvas.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -21093,7 +21120,7 @@ export const MASTER_FLOW_EDGES = [
       },
       {
         "kind": "API",
-        "path": "src/app/api/user/complete-onboarding/route.js",
+        "path": "src/app/api/auth/complete-onboarding/route.js",
         "symbol": "POST",
         "provenance": "EXTRACTED",
         "confidence": 1,
@@ -21165,7 +21192,7 @@ export const MASTER_FLOW_EDGES = [
       },
       {
         "kind": "API",
-        "path": "src/app/api/user/complete-onboarding/route.js",
+        "path": "src/app/api/auth/complete-onboarding/route.js",
         "symbol": "POST",
         "provenance": "EXTRACTED",
         "confidence": 1,
@@ -21237,7 +21264,7 @@ export const MASTER_FLOW_EDGES = [
       },
       {
         "kind": "API",
-        "path": "src/app/api/user/complete-onboarding/route.js",
+        "path": "src/app/api/auth/complete-onboarding/route.js",
         "symbol": "POST",
         "provenance": "EXTRACTED",
         "confidence": 1,
@@ -21309,7 +21336,7 @@ export const MASTER_FLOW_EDGES = [
       },
       {
         "kind": "API",
-        "path": "src/app/api/user/complete-onboarding/route.js",
+        "path": "src/app/api/auth/complete-onboarding/route.js",
         "symbol": "POST",
         "provenance": "EXTRACTED",
         "confidence": 1,
@@ -21379,7 +21406,7 @@ export const MASTER_FLOW_EDGES = [
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic-layers/OrbitCanvas.js",
+        "path": "src/components/orbit/ScoutEarthClient.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -21441,7 +21468,7 @@ export const MASTER_FLOW_EDGES = [
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic-layers/OrbitCanvas.js",
+        "path": "src/components/orbit/ScoutEarthClient.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -22810,7 +22837,7 @@ export const MASTER_FLOW_EDGES = [
     "evidence": [
       {
         "kind": "ROUTE",
-        "path": "src/app/hubs/page.js",
+        "path": "src/app/hubs/[slug]/page.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -25316,7 +25343,7 @@ export const MASTER_FLOW_EDGES = [
       },
       {
         "kind": "DATABASE",
-        "path": "supabase/migrations/20260710000000_schema_v2_core.sql",
+        "path": "supabase/migrations/20260802000003_connects_wallet_and_tiers.sql",
         "symbol": "connect_balances",
         "provenance": "EXTRACTED",
         "confidence": 1,
@@ -25389,7 +25416,7 @@ export const MASTER_FLOW_EDGES = [
       },
       {
         "kind": "DATABASE",
-        "path": "supabase/migrations/20260710000000_schema_v2_core.sql",
+        "path": "supabase/migrations/20260802000003_connects_wallet_and_tiers.sql",
         "symbol": "connect_balances",
         "provenance": "EXTRACTED",
         "confidence": 1,
@@ -25457,7 +25484,7 @@ export const MASTER_FLOW_EDGES = [
       },
       {
         "kind": "DATABASE",
-        "path": "supabase/migrations/20260710000000_schema_v2_core.sql",
+        "path": "supabase/migrations/20260802000003_connects_wallet_and_tiers.sql",
         "symbol": "connect_balances",
         "provenance": "EXTRACTED",
         "confidence": 1,
@@ -27202,7 +27229,7 @@ export const MASTER_FLOW_EDGES = [
     "evidence": [
       {
         "kind": "API",
-        "path": "src/app/api/property/route.js",
+        "path": "src/app/api/dashboard/publish/route.js",
         "symbol": "POST",
         "provenance": "EXTRACTED",
         "confidence": 1,
@@ -29795,7 +29822,7 @@ export const MASTER_FLOW_EDGES = [
       },
       {
         "kind": "API",
-        "path": "src/app/api/wrap/monthly/route.js",
+        "path": "src/app/api/wrap/route.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -29857,7 +29884,7 @@ export const MASTER_FLOW_EDGES = [
       },
       {
         "kind": "API",
-        "path": "src/app/api/wrap/monthly/route.js",
+        "path": "src/app/api/wrap/route.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -31453,7 +31480,7 @@ export const MASTER_FLOW_EDGES = [
     "evidence": [
       {
         "kind": "CODE",
-        "path": "src/middleware.js",
+        "path": "src/proxy.js",
         "symbol": "middleware",
         "provenance": "EXTRACTED",
         "confidence": 1,

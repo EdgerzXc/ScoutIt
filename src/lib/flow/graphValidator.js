@@ -20,6 +20,7 @@ import Ajv from 'ajv';
 import fs from 'fs';
 import path from 'path';
 import { MASTER_FLOW_NODES, MASTER_FLOW_EDGES } from '../../data/masterFlowGraphData.js';
+import { WORKFLOW_DEFINITIONS, LINEAR_GUIDE_DEFINITIONS } from './subgraphExtractor.js';
 
 export const VALID_NODE_TYPES = new Set([
   'ENTRY', 'LAYER', 'PAGE', 'SECTION', 'ACTION', 'DECISION',
@@ -757,7 +758,6 @@ function discoverRepositoryRoutes() {
  */
 export function auditGraphAgainstCodebase(nodes = MASTER_FLOW_NODES, edges = MASTER_FLOW_EDGES, publicChunks = []) {
   const canonicalProductRoutes = [
-    { raw: '/property/[slug]', normalized: '/property/:param', type: 'PAGE' },
     { raw: '/property/[id]', normalized: '/property/:param', type: 'PAGE' },
     { raw: '/dashboard', normalized: '/dashboard', type: 'PAGE' },
     { raw: '/discover', normalized: '/discover', type: 'PAGE' },
@@ -770,7 +770,6 @@ export function auditGraphAgainstCodebase(nodes = MASTER_FLOW_NODES, edges = MAS
     { raw: '/api/deals/initiate', normalized: '/api/deals/initiate', type: 'API' },
     { raw: '/api/calendar/sync', normalized: '/api/calendar/sync', type: 'API' },
     { raw: '/api/ai/counter-offer', normalized: '/api/ai/counter-offer', type: 'API' },
-    { raw: '/api/connects/spend', normalized: '/api/connects/spend', type: 'API' },
     { raw: '/api/leads/export-audit', normalized: '/api/leads/export-audit', type: 'API' },
     { raw: '/api/property/claim', normalized: '/api/property/claim', type: 'API' },
     { raw: '/api/user/delete-account', normalized: '/api/user/delete-account', type: 'API' }
@@ -781,24 +780,36 @@ export function auditGraphAgainstCodebase(nodes = MASTER_FLOW_NODES, edges = MAS
   const graphRoutes = new Set(nodes.map(n => n.route).filter(Boolean));
   const graphApis = new Set(nodes.flatMap(n => n.apis || []));
 
-  const routeAuditResults = canonicalProductRoutes.map(r => {
-    if (graphRoutes.has(r.raw) || graphApis.has(r.raw)) {
-      return { route: r.raw, classification: 'EXACT_MATCH', type: r.type };
+  const normalizeRoute = value => value.split(/[?#]/)[0].replace(/\[[a-zA-Z0-9_-]+\]/g, ':param');
+  const repositoryRouteSet = new Set(fsRoutes.map(route => route.normalized));
+  const claimedRoutes = [...graphRoutes, ...graphApis];
+
+  const routeAuditResults = canonicalProductRoutes.map(route => {
+    const existsInRepository = repositoryRouteSet.has(route.normalized);
+    if (!existsInRepository) {
+      return { route: route.raw, classification: 'NOT_IN_REPOSITORY', type: route.type };
     }
-    const hasDynamicMatch = Array.from(graphRoutes).some(gr => {
-      const normGr = gr.replace(/\[[a-zA-Z0-9_-]+\]/g, ':param');
-      return normGr === r.normalized;
-    });
+    if (graphRoutes.has(route.raw) || graphApis.has(route.raw)) {
+      return { route: route.raw, classification: 'EXACT_MATCH', type: route.type };
+    }
+    const hasDynamicMatch = claimedRoutes.some(claim => normalizeRoute(claim) === route.normalized);
     if (hasDynamicMatch) {
-      return { route: r.raw, classification: 'DYNAMIC_EQUIVALENT', type: r.type };
+      return { route: route.raw, classification: 'DYNAMIC_EQUIVALENT', type: route.type };
     }
-    if (r.raw === '/login' && graphRoutes.has('/onboarding')) {
-      return { route: r.raw, classification: 'REDIRECT_ALIAS', target: '/onboarding', type: r.type };
-    }
-    return { route: r.raw, classification: 'REAL_UNMAPPED_ROUTE', type: r.type };
+    return { route: route.raw, classification: 'REAL_UNMAPPED_ROUTE', type: route.type };
   });
 
-  const unmappedRoutes = routeAuditResults.filter(r => r.classification === 'REAL_UNMAPPED_ROUTE').map(r => r.route);
+  const unmappedRoutes = routeAuditResults
+    .filter(result => ['REAL_UNMAPPED_ROUTE', 'NOT_IN_REPOSITORY'].includes(result.classification))
+    .map(result => result.route);
+  const graphOnlyRouteNodes = nodes.filter(node => node.route && !repositoryRouteSet.has(normalizeRoute(node.route)));
+  const graphOnlyRoutes = [...new Set(graphOnlyRouteNodes.map(node => node.route))].sort();
+  const plannedGraphOnlyRoutes = [...new Set(graphOnlyRouteNodes
+    .filter(node => node.implementationStatus === 'NOT_STARTED' && node.releaseStatus === 'NOT_DEPLOYED')
+    .map(node => node.route))].sort();
+  const staleReleasedGraphOnlyRoutes = [...new Set(graphOnlyRouteNodes
+    .filter(node => node.implementationStatus !== 'NOT_STARTED' || node.releaseStatus !== 'NOT_DEPLOYED')
+    .map(node => node.route))].sort();
 
   // State machine transition calculations based on actual stateTransition contracts
   const expectedStateTransitions = [
@@ -846,11 +857,14 @@ export function auditGraphAgainstCodebase(nodes = MASTER_FLOW_NODES, edges = MAS
   const ghostNodes = nodes.filter(n => {
     if (n.implementationStatus !== 'VERIFIED') return false;
     if (!n.evidence || n.evidence.length === 0) return true;
-    return n.evidence.every(ev => ev.provenance === 'UNVERIFIED' || !ev.path);
+    return n.evidence.every(ev => ev.provenance === 'UNVERIFIED' || !ev.path || !fs.existsSync(path.resolve(ev.path)));
   }).map(n => n.id);
 
   const verifiedNodes = nodes.filter(n => n.implementationStatus === 'VERIFIED');
-  const failingEvidenceNodes = nodes.filter(n => n.implementationStatus === 'UNVERIFIED' || n.implementationStatus === 'CONTRADICTED').map(n => n.id);
+  const failingEvidenceNodes = [...new Set([
+    ...nodes.filter(n => n.implementationStatus === 'UNVERIFIED' || n.implementationStatus === 'CONTRADICTED').map(n => n.id),
+    ...ghostNodes
+  ])];
 
   const schemaValidity = {
     numerator: nodes.length,
@@ -861,11 +875,11 @@ export function auditGraphAgainstCodebase(nodes = MASTER_FLOW_NODES, edges = MAS
   };
 
   const graphEvidence = {
-    numerator: verifiedNodes.length,
+    numerator: verifiedNodes.length - ghostNodes.length,
     denominator: nodes.length,
-    percentage: `${Math.round((verifiedNodes.length / nodes.length) * 100)}%`,
-    formula: 'verified nodes with grounded code evidence / total nodes',
-    failingItems: nodes.filter(n => n.implementationStatus !== 'VERIFIED').map(n => n.id)
+    percentage: `${Math.round(((verifiedNodes.length - ghostNodes.length) / nodes.length) * 100)}%`,
+    formula: 'verified nodes with existing grounded code evidence / total nodes',
+    failingItems: [...new Set([...nodes.filter(n => n.implementationStatus !== 'VERIFIED').map(n => n.id), ...ghostNodes])]
   };
 
   const routeCoverage = {
@@ -876,43 +890,54 @@ export function auditGraphAgainstCodebase(nodes = MASTER_FLOW_NODES, edges = MAS
     failingItems: unmappedRoutes
   };
 
+  const workflowReport = validateWorkflowTraversals(WORKFLOW_DEFINITIONS, nodes, edges);
+  const workflowResults = Object.values(workflowReport.workflows);
+  const traversableWorkflows = workflowResults.filter(workflow => workflow.traversable);
   const workflowIntegrity = {
-    numerator: 5,
-    denominator: 5,
-    percentage: '100%',
-    formula: 'traversable start-to-terminal workflows / total defined workflows',
-    failingItems: []
+    numerator: traversableWorkflows.length,
+    denominator: workflowResults.length,
+    percentage: `${Math.round((traversableWorkflows.length / Math.max(1, workflowResults.length)) * 100)}%`,
+    formula: 'dynamically traversable start-to-terminal workflows / total defined workflows',
+    failingItems: workflowResults.filter(workflow => !workflow.traversable).map(workflow => workflow.id)
   };
 
+  const guideResults = Object.entries(LINEAR_GUIDE_DEFINITIONS).map(([guideId, guide]) => ({
+    guideId,
+    ...validateGuideSafety({ [guideId]: guide }, nodes, edges)
+  }));
+  const safeGuides = guideResults.filter(result => result.safe);
   const guideIntegrity = {
-    numerator: 15,
-    denominator: 15,
-    percentage: '100%',
-    formula: 'unbroken consecutive guide step transitions / total guide step transitions',
-    failingItems: []
+    numerator: safeGuides.length,
+    denominator: guideResults.length,
+    percentage: `${Math.round((safeGuides.length / Math.max(1, guideResults.length)) * 100)}%`,
+    formula: 'actor-safe guides with grounded transitions / total defined guides',
+    failingItems: guideResults.filter(result => !result.safe).flatMap(result => result.violations)
   };
 
-  const ragChunkCount = publicChunks.length > 0 ? publicChunks.length : 192;
+  const ragReport = validateRAGSecurity(publicChunks, nodes);
   const ragSafety = {
-    numerator: ragChunkCount,
-    denominator: ragChunkCount,
-    percentage: '100%',
-    formula: 'sanitized public chunks with zero internal leakage / total public chunks',
-    failingItems: []
+    numerator: publicChunks.length - ragReport.accessViolations.length - ragReport.sanitizationViolations.length,
+    denominator: publicChunks.length,
+    percentage: ragReport.overallRagSafetyScore,
+    formula: 'public chunks passing access and content sanitization checks / total public chunks',
+    failingItems: [...ragReport.accessViolations, ...ragReport.sanitizationViolations]
   };
 
+  const lifecycleCoverage = calculateGraphCoverage(nodes, edges);
+  const recoveryNumerator = Object.values(lifecycleCoverage).reduce((sum, lifecycle) => sum + lifecycle.recoveryCoverage.numerator, 0);
+  const recoveryDenominator = Object.values(lifecycleCoverage).reduce((sum, lifecycle) => sum + lifecycle.recoveryCoverage.denominator, 0);
   const recoveryCoverage = {
-    numerator: 14,
-    denominator: 14,
-    percentage: '100%',
-    formula: 'failure branches with recovery or terminal resolution / total mapped failure branches',
+    numerator: recoveryNumerator,
+    denominator: recoveryDenominator,
+    percentage: `${Math.round((recoveryNumerator / Math.max(1, recoveryDenominator)) * 100)}%`,
+    formula: 'mapped failures with recovery or terminal resolution / total mapped failures',
     failingItems: []
   };
 
   const ghostGraph = {
-    numerator: verifiedNodes.length,
+    numerator: verifiedNodes.length - ghostNodes.length,
     denominator: verifiedNodes.length,
-    percentage: '100%',
+    percentage: `${Math.round(((verifiedNodes.length - ghostNodes.length) / Math.max(1, verifiedNodes.length)) * 100)}%`,
     formula: 'verified nodes with real codebase artifacts / total verified nodes',
     failingItems: ghostNodes
   };
@@ -949,15 +974,17 @@ export function auditGraphAgainstCodebase(nodes = MASTER_FLOW_NODES, edges = MAS
     canonicalRoutesMapped: canonicalProductRoutes.filter(r => !unmappedRoutes.includes(r.raw)).map(r => r.raw),
     allDiscoveredRoutes: fsRoutes.map(r => r.raw),
     totalCodebaseRoutesDiscovered: fsRoutes.length,
-    dynamicAliases: ['/property/[slug] -> /property/:param', '/property/[id] -> /property/:param'],
-    redirectAliases: ['/login -> /onboarding'],
+    dynamicAliases: ['/property/[id] -> /property/:param'],
+    redirectAliases: [],
     componentsReferenced: ['CommercialFlow.js', 'ResidentialFlow.js', 'InquiryModal.js', 'ChatBox.js', 'OwnerMode.js', 'BrokerMode.js', 'DiscoverClient.js', 'DirectoryClient.js', 'DealRoom.js'],
     componentsMissing: [],
-    apiRoutesMapped: ['/api/deals/handshake', '/api/calendar/sync', '/api/ai/counter-offer', '/api/connects/spend', '/api/property/claim', '/api/leads/export-audit', '/api/user/delete-account'],
-    apiRoutesMissing: [],
-    graphOnlyRoutes: [],
-    verifiedCodeEvidenceCount: verifiedNodes.length,
-    staleCodeEvidenceCount: 0
+    apiRoutesMapped: routeAuditResults.filter(result => result.type === 'API' && !unmappedRoutes.includes(result.route)).map(result => result.route),
+    apiRoutesMissing: routeAuditResults.filter(result => result.type === 'API' && unmappedRoutes.includes(result.route)).map(result => result.route),
+    graphOnlyRoutes,
+    plannedGraphOnlyRoutes,
+    staleReleasedGraphOnlyRoutes,
+    verifiedCodeEvidenceCount: verifiedNodes.length - ghostNodes.length,
+    staleCodeEvidenceCount: ghostNodes.length
   };
 
   return {

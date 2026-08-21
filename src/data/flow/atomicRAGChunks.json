@@ -49,7 +49,7 @@
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic/BlackHoleCanvas.js",
+        "path": "src/components/descent/BlackHoleCanvas.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -166,7 +166,7 @@
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic/BlackHoleCanvas.js",
+        "path": "src/components/descent/BlackHoleCanvas.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -215,7 +215,7 @@
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic/BlackHoleCanvas.js",
+        "path": "src/components/descent/BlackHoleCanvas.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -273,7 +273,7 @@
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic/BlackHoleCanvas.js",
+        "path": "src/components/descent/BlackHoleCanvas.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -363,7 +363,7 @@
     "title": "System: Vercel Edge IP Masking (RA 10173 Zero-Knowledge)",
     "domain": "sentinel",
     "layer": "global",
-    "route": "/middleware.js",
+    "route": "/",
     "roles": [
       "visitor",
       "seeker",
@@ -395,7 +395,7 @@
     "evidence": [
       {
         "kind": "CODE",
-        "path": "src/middleware.js",
+        "path": "src/proxy.js",
         "symbol": "middleware",
         "provenance": "EXTRACTED",
         "confidence": 1,
@@ -411,7 +411,7 @@
         "evidence": [
           {
             "kind": "CODE",
-            "path": "src/middleware.js",
+            "path": "src/proxy.js",
             "symbol": "middleware",
             "provenance": "EXTRACTED",
             "confidence": 1
@@ -460,7 +460,7 @@
     "evidence": [
       {
         "kind": "CODE",
-        "path": "src/middleware.js",
+        "path": "src/proxy.js",
         "symbol": "middleware",
         "provenance": "EXTRACTED",
         "confidence": 1,
@@ -503,7 +503,7 @@
     "evidence": [
       {
         "kind": "CODE",
-        "path": "src/middleware.js",
+        "path": "src/proxy.js",
         "symbol": "middleware",
         "provenance": "EXTRACTED",
         "confidence": 1,
@@ -519,7 +519,7 @@
         "evidence": [
           {
             "kind": "CODE",
-            "path": "src/middleware.js",
+            "path": "src/proxy.js",
             "symbol": "middleware",
             "provenance": "EXTRACTED",
             "confidence": 1
@@ -548,7 +548,7 @@
     "title": "Direct Canonical Slug URL",
     "domain": "property",
     "layer": "global",
-    "route": "/property/[slug]",
+    "route": "/property/[id]",
     "roles": [
       "visitor",
       "seeker",
@@ -986,7 +986,7 @@
     "title": "Decision Gate: Adult Eligibility Check (NPC Circular 2024-03)",
     "domain": "auth",
     "layer": "global",
-    "route": "/api/user/verify-age",
+    "route": "/onboarding",
     "roles": [
       "seeker",
       "owner",
@@ -1289,7 +1289,7 @@
       },
       {
         "kind": "API",
-        "path": "src/app/api/user/complete-onboarding/route.js",
+        "path": "src/app/api/auth/complete-onboarding/route.js",
         "symbol": "POST",
         "provenance": "EXTRACTED",
         "confidence": 1,
@@ -1318,7 +1318,7 @@
           },
           {
             "kind": "API",
-            "path": "src/app/api/user/complete-onboarding/route.js",
+            "path": "src/app/api/auth/complete-onboarding/route.js",
             "symbol": "POST",
             "provenance": "EXTRACTED",
             "confidence": 1
@@ -1384,7 +1384,7 @@
       },
       {
         "kind": "API",
-        "path": "src/app/api/user/complete-onboarding/route.js",
+        "path": "src/app/api/auth/complete-onboarding/route.js",
         "symbol": "POST",
         "provenance": "EXTRACTED",
         "confidence": 1,
@@ -1429,7 +1429,7 @@
       "src/app/onboarding/page.js"
     ],
     "apis": [
-      "/api/user/complete-onboarding"
+      "/api/auth/complete-onboarding"
     ],
     "database": "Supabase user_profiles & connect_balances",
     "evidence": [
@@ -1442,7 +1442,7 @@
       },
       {
         "kind": "API",
-        "path": "src/app/api/user/complete-onboarding/route.js",
+        "path": "src/app/api/auth/complete-onboarding/route.js",
         "symbol": "POST",
         "provenance": "EXTRACTED",
         "confidence": 1,
@@ -1471,7 +1471,7 @@
           },
           {
             "kind": "API",
-            "path": "src/app/api/user/complete-onboarding/route.js",
+            "path": "src/app/api/auth/complete-onboarding/route.js",
             "symbol": "POST",
             "provenance": "EXTRACTED",
             "confidence": 1
@@ -1825,7 +1825,7 @@
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic-layers/OrbitCanvas.js",
+        "path": "src/components/orbit/ScoutEarthClient.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -1846,7 +1846,7 @@
           },
           {
             "kind": "COMPONENT",
-            "path": "src/components/cinematic-layers/OrbitCanvas.js",
+            "path": "src/components/orbit/ScoutEarthClient.js",
             "provenance": "EXTRACTED",
             "confidence": 1
           }
@@ -1901,7 +1901,7 @@
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic-layers/OrbitCanvas.js",
+        "path": "src/components/orbit/ScoutEarthClient.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -1950,7 +1950,7 @@
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic-layers/OrbitCanvas.js",
+        "path": "src/components/orbit/ScoutEarthClient.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -1971,7 +1971,7 @@
           },
           {
             "kind": "COMPONENT",
-            "path": "src/components/cinematic-layers/OrbitCanvas.js",
+            "path": "src/components/orbit/ScoutEarthClient.js",
             "provenance": "EXTRACTED",
             "confidence": 1
           }
@@ -3564,7 +3564,7 @@
     "title": "Spatial Canvas (2D/3D Infinite Map)",
     "domain": "discovery",
     "layer": "metropolis",
-    "route": "/spatial-canvas",
+    "route": "/property/[id]?chapter=location",
     "roles": [
       "visitor",
       "seeker",
@@ -4290,7 +4290,7 @@
     "title": "Regional Transport & Location Hubs",
     "domain": "discovery",
     "layer": "stratosphere",
-    "route": "/hubs",
+    "route": "/hubs/[slug]",
     "roles": [
       "visitor",
       "seeker",
@@ -4321,7 +4321,7 @@
     "evidence": [
       {
         "kind": "ROUTE",
-        "path": "src/app/hubs/page.js",
+        "path": "src/app/hubs/[slug]/page.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -4343,7 +4343,7 @@
         "evidence": [
           {
             "kind": "ROUTE",
-            "path": "src/app/hubs/page.js",
+            "path": "src/app/hubs/[slug]/page.js",
             "provenance": "EXTRACTED",
             "confidence": 1
           },
@@ -4397,7 +4397,7 @@
     "evidence": [
       {
         "kind": "ROUTE",
-        "path": "src/app/hubs/page.js",
+        "path": "src/app/hubs/[slug]/page.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -4439,7 +4439,7 @@
     "evidence": [
       {
         "kind": "ROUTE",
-        "path": "src/app/hubs/page.js",
+        "path": "src/app/hubs/[slug]/page.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -4476,17 +4476,17 @@
     ],
     "securityClassification": "INTERNAL",
     "systems": [
-      "src/app/hubs/page.js"
+      "src/app/hubs/[slug]/page.js"
     ],
     "components": [
-      "src/app/hubs/page.js"
+      "src/app/hubs/[slug]/page.js"
     ],
     "apis": [],
     "database": "Airtable HUBS_CMS",
     "evidence": [
       {
         "kind": "ROUTE",
-        "path": "src/app/hubs/page.js",
+        "path": "src/app/hubs/[slug]/page.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -4508,7 +4508,7 @@
         "evidence": [
           {
             "kind": "ROUTE",
-            "path": "src/app/hubs/page.js",
+            "path": "src/app/hubs/[slug]/page.js",
             "provenance": "EXTRACTED",
             "confidence": 1
           },
@@ -5437,7 +5437,7 @@
     "title": "Event Designers & Venue Curators",
     "domain": "discovery",
     "layer": "crust",
-    "route": "/planners",
+    "route": "/event-planners",
     "roles": [
       "visitor",
       "seeker",
@@ -6419,7 +6419,7 @@
     "title": "Chapter 01 — The Space / Floor Plate / Capacity",
     "domain": "property",
     "layer": "core",
-    "route": "/property/[slug]#the-space",
+    "route": "/property/[id]?chapter=space",
     "roles": [
       "visitor",
       "seeker",
@@ -6604,7 +6604,7 @@
     "title": "Chapter 02 — Location & Transit Logistics",
     "domain": "property",
     "layer": "crust",
-    "route": "/property/[slug]#location",
+    "route": "/property/[id]?chapter=location",
     "roles": [
       "visitor",
       "seeker",
@@ -6822,7 +6822,7 @@
     "title": "Chapter 03 — Life Here / Workday / Atmosphere",
     "domain": "property",
     "layer": "core",
-    "route": "/property/[slug]#life-here",
+    "route": "/property/[id]?chapter=life",
     "roles": [
       "visitor",
       "seeker",
@@ -7005,7 +7005,7 @@
     "title": "Chapter 04 — Where To? (The Neighborhood Radius)",
     "domain": "property",
     "layer": "crust",
-    "route": "/property/[slug]#where-to",
+    "route": "/property/[id]?chapter=whereto",
     "roles": [
       "visitor",
       "seeker",
@@ -7221,7 +7221,7 @@
     "title": "Chapter 05 — Build Plans & Fit-Out Engineering",
     "domain": "property",
     "layer": "mantle",
-    "route": "/property/[slug]#build-plans",
+    "route": "/property/[id]?chapter=buildplans",
     "roles": [
       "visitor",
       "seeker",
@@ -7404,7 +7404,7 @@
     "title": "Chapter 06 — The Fine Print (Deep & Hidden Intel)",
     "domain": "property",
     "layer": "core",
-    "route": "/property/[slug]#fine-print",
+    "route": "/property/[id]?chapter=hiddenintel",
     "roles": [
       "seeker",
       "owner",
@@ -7596,7 +7596,7 @@
     "title": "Decision Gate: Deep Intel Tier Entitlement (Solar+)",
     "domain": "layer",
     "layer": "core",
-    "route": "/lib/entitlements.js#deep-intel",
+    "route": "/property/[id]?chapter=hiddenintel",
     "roles": [
       "seeker",
       "owner",
@@ -7782,7 +7782,7 @@
     "title": "Decision Gate: Hidden Intel & Valuation Models (Cluster+)",
     "domain": "layer",
     "layer": "core",
-    "route": "/lib/entitlements.js#hidden-intel",
+    "route": "/property/[id]?chapter=hiddenintel",
     "roles": [
       "seeker",
       "enterprise"
@@ -7965,7 +7965,7 @@
     "title": "Chapter 07 — Units & Spaces (Inventory Grid)",
     "domain": "property",
     "layer": "core",
-    "route": "/property/[slug]#units",
+    "route": "/property/[id]?chapter=units",
     "roles": [
       "visitor",
       "seeker",
@@ -8186,7 +8186,7 @@
     "title": "Chapter 08 — Property Universe & Developer Credentials",
     "domain": "property",
     "layer": "orbit",
-    "route": "/property/[slug]#universe",
+    "route": "/property/[id]?chapter=universe",
     "roles": [
       "visitor",
       "seeker",
@@ -8402,7 +8402,7 @@
     "title": "Chapter 09 — Ecosystem Services & Creator Booking",
     "domain": "property",
     "layer": "crust",
-    "route": "/property/[slug]#services",
+    "route": "/property/[id]?chapter=services",
     "roles": [
       "visitor",
       "seeker",
@@ -8587,7 +8587,7 @@
     "title": "Chapter 10 — Your Move (Action Cockpit)",
     "domain": "property",
     "layer": "core",
-    "route": "/property/[slug]#your-move",
+    "route": "/property/[id]?chapter=yourmove",
     "roles": [
       "visitor",
       "seeker",
@@ -8854,7 +8854,7 @@
     "title": "Action: Save to Board / Reaction",
     "domain": "seeker",
     "layer": "core",
-    "route": "/property/[slug]",
+    "route": "/api/reactions",
     "roles": [
       "visitor",
       "seeker",
@@ -9035,7 +9035,7 @@
     "title": "Action: Ask Public Question (Community FAQ)",
     "domain": "faq",
     "layer": "core",
-    "route": "/api/faq/ask",
+    "route": "/api/faqs",
     "roles": [
       "visitor",
       "seeker",
@@ -9578,7 +9578,7 @@
     "title": "Viewing Booking & Schedule Modal",
     "domain": "deal",
     "layer": "core",
-    "route": "/api/deals/schedule-viewing",
+    "route": "/dashboard/inbox",
     "roles": [
       "seeker",
       "provider"
@@ -9803,7 +9803,9 @@
       "ViewingScheduler.js"
     ],
     "apis": [
-      "/api/deals/schedule-viewing"
+      "/api/deals/[id]/schedule",
+      "/api/viewing-appointments",
+      "/api/calendar/sync"
     ],
     "database": "Supabase deals & viewing_schedules",
     "evidence": [
@@ -9880,7 +9882,7 @@
     "title": "Deal Negotiation & Offer Proposal",
     "domain": "deal",
     "layer": "core",
-    "route": "/api/deals/make-offer",
+    "route": "/dashboard/crm",
     "roles": [
       "seeker",
       "enterprise"
@@ -10081,7 +10083,8 @@
     ],
     "apis": [
       "/api/ai/counter-offer",
-      "/api/deals"
+      "/api/deals/[id]",
+      "/api/deals/handshake"
     ],
     "database": "Supabase deals & offers",
     "evidence": [
@@ -10148,7 +10151,7 @@
     "title": "Claim Listing Due Diligence Modal",
     "domain": "layer",
     "layer": "core",
-    "route": "/api/properties/claim",
+    "route": "/api/property/claim",
     "roles": [
       "owner",
       "broker"
@@ -10319,7 +10322,7 @@
       "ClaimListingModal.js"
     ],
     "apis": [
-      "/api/properties/claim"
+      "/api/property/claim"
     ],
     "database": "Supabase property_claims",
     "evidence": [
@@ -10394,7 +10397,7 @@
     "title": "Owner Listing Creation Hub",
     "domain": "owner",
     "layer": "core",
-    "route": "/dashboard/create",
+    "route": "/dashboard",
     "roles": [
       "owner",
       "broker",
@@ -10565,7 +10568,11 @@
       "src/app/dashboard/create/page.js",
       "ListingMethodSelector.js"
     ],
-    "apis": [],
+    "apis": [
+      "/api/dashboard/publish",
+      "/api/dashboard/bulk-insert",
+      "/api/ai/read-pdf"
+    ],
     "database": "Supabase properties (drafts)",
     "evidence": [
       {
@@ -10613,7 +10620,7 @@
     "title": "Method 1 — Build from Scratch (Streamlined)",
     "domain": "owner",
     "layer": "core",
-    "route": "/dashboard/create/scratch",
+    "route": "/dashboard",
     "roles": [
       "owner",
       "broker"
@@ -10792,7 +10799,7 @@
     "title": "Method 2 — Advanced 10-Chapter Editor",
     "domain": "owner",
     "layer": "core",
-    "route": "/dashboard/create/advanced",
+    "route": "/dashboard",
     "roles": [
       "owner",
       "broker",
@@ -10975,7 +10982,7 @@
     "title": "Method 3 — CSV Portfolio Bulk Import",
     "domain": "owner",
     "layer": "core",
-    "route": "/dashboard/create/csv",
+    "route": "/dashboard",
     "roles": [
       "owner",
       "broker",
@@ -11159,7 +11166,7 @@
     "title": "Method 4 — PDF Pitch Deck Intake",
     "domain": "owner",
     "layer": "core",
-    "route": "/dashboard/create/pdf",
+    "route": "/dashboard",
     "roles": [
       "owner",
       "broker",
@@ -11374,7 +11381,7 @@
     "title": "System: Gemini OCR & Fact Extractor (Phase-1 Ingest)",
     "domain": "layer",
     "layer": "mantle",
-    "route": "/lib/ingestExtractor.js",
+    "route": "/api/ai/read-pdf",
     "roles": [
       "owner",
       "broker"
@@ -11730,7 +11737,7 @@
     "title": "Decision Gate: Auth & Capability Verification",
     "domain": "auth",
     "layer": "global",
-    "route": "/lib/serverAuth.js",
+    "route": "/login",
     "roles": [
       "seeker",
       "owner",
@@ -11924,7 +11931,7 @@
     "title": "Decision Gate: Tier Entitlement Check",
     "domain": "core",
     "layer": "global",
-    "route": "/lib/entitlements.js",
+    "route": "/pricing",
     "roles": [
       "seeker",
       "owner",
@@ -12110,7 +12117,7 @@
     "title": "System: Connects Wallet & Deduct RPC",
     "domain": "connects",
     "layer": "global",
-    "route": "/api/deals/spend-connect",
+    "route": "/api/deals/initiate",
     "roles": [
       "seeker",
       "owner",
@@ -12152,7 +12159,7 @@
       },
       {
         "kind": "DATABASE",
-        "path": "supabase/migrations/20260710000000_schema_v2_core.sql",
+        "path": "supabase/migrations/20260802000003_connects_wallet_and_tiers.sql",
         "symbol": "connect_balances",
         "provenance": "EXTRACTED",
         "confidence": 1,
@@ -12182,7 +12189,7 @@
           },
           {
             "kind": "DATABASE",
-            "path": "supabase/migrations/20260710000000_schema_v2_core.sql",
+            "path": "supabase/migrations/20260802000003_connects_wallet_and_tiers.sql",
             "symbol": "connect_balances",
             "provenance": "EXTRACTED",
             "confidence": 1
@@ -12248,7 +12255,7 @@
       },
       {
         "kind": "DATABASE",
-        "path": "supabase/migrations/20260710000000_schema_v2_core.sql",
+        "path": "supabase/migrations/20260802000003_connects_wallet_and_tiers.sql",
         "symbol": "connect_balances",
         "provenance": "EXTRACTED",
         "confidence": 1,
@@ -12293,7 +12300,10 @@
       "src/app/api/deals/spend-connect/route.js"
     ],
     "apis": [
-      "src/app/api/deals/spend-connect/route.js"
+      "/api/deals/initiate",
+      "/api/deals/pitch",
+      "/api/dashboard/invite",
+      "/api/v1/questit/raise"
     ],
     "database": "Supabase connect_balances & connect_transactions",
     "evidence": [
@@ -12307,7 +12317,7 @@
       },
       {
         "kind": "DATABASE",
-        "path": "supabase/migrations/20260710000000_schema_v2_core.sql",
+        "path": "supabase/migrations/20260802000003_connects_wallet_and_tiers.sql",
         "symbol": "connect_balances",
         "provenance": "EXTRACTED",
         "confidence": 1,
@@ -12337,7 +12347,7 @@
           },
           {
             "kind": "DATABASE",
-            "path": "supabase/migrations/20260710000000_schema_v2_core.sql",
+            "path": "supabase/migrations/20260802000003_connects_wallet_and_tiers.sql",
             "symbol": "connect_balances",
             "provenance": "EXTRACTED",
             "confidence": 1
@@ -12372,7 +12382,7 @@
     "title": "System: Connects Hemorrhage Guard (Economy Radar)",
     "domain": "connects",
     "layer": "global",
-    "route": "/lib/sentinel/hemorrhageGuard.js",
+    "route": "/api/deals/initiate",
     "roles": [
       "seeker",
       "owner",
@@ -12922,7 +12932,7 @@
     "title": "System: Regex Contact Leak Detector",
     "domain": "sentinel",
     "layer": "global",
-    "route": "/lib/sanitize.js",
+    "route": "/api/faqs/preflight",
     "roles": [
       "visitor",
       "seeker",
@@ -13073,7 +13083,10 @@
     "components": [
       "src/lib/sanitize.js"
     ],
-    "apis": [],
+    "apis": [
+      "/api/faqs/preflight",
+      "/api/faqs"
+    ],
     "database": "None",
     "evidence": [
       {
@@ -13601,7 +13614,7 @@
     "title": "System: AI Listing Engine Coordinator",
     "domain": "owner",
     "layer": "mantle",
-    "route": "/lib/aiListingEngine.js",
+    "route": "/dashboard",
     "roles": [
       "owner",
       "broker"
@@ -13783,7 +13796,7 @@
     "title": "System: The AI Council (4-Voice Expert Panel)",
     "domain": "layer",
     "layer": "mantle",
-    "route": "/lib/aiCouncil.js",
+    "route": "/dashboard",
     "roles": [
       "owner",
       "broker"
@@ -13962,7 +13975,7 @@
     "title": "System: The AI Arbiter & Loop Cap Judge",
     "domain": "layer",
     "layer": "mantle",
-    "route": "/lib/aiArbiter.js",
+    "route": "/dashboard",
     "roles": [
       "owner",
       "broker",
@@ -14175,7 +14188,7 @@
     "evidence": [
       {
         "kind": "API",
-        "path": "src/app/api/property/route.js",
+        "path": "src/app/api/dashboard/publish/route.js",
         "symbol": "POST",
         "provenance": "EXTRACTED",
         "confidence": 1,
@@ -14191,7 +14204,7 @@
         "evidence": [
           {
             "kind": "API",
-            "path": "src/app/api/property/route.js",
+            "path": "src/app/api/dashboard/publish/route.js",
             "symbol": "POST",
             "provenance": "EXTRACTED",
             "confidence": 1
@@ -14242,7 +14255,7 @@
     "evidence": [
       {
         "kind": "API",
-        "path": "src/app/api/property/route.js",
+        "path": "src/app/api/dashboard/publish/route.js",
         "symbol": "POST",
         "provenance": "EXTRACTED",
         "confidence": 1,
@@ -14286,7 +14299,7 @@
     "evidence": [
       {
         "kind": "API",
-        "path": "src/app/api/property/route.js",
+        "path": "src/app/api/dashboard/publish/route.js",
         "symbol": "POST",
         "provenance": "EXTRACTED",
         "confidence": 1,
@@ -14302,7 +14315,7 @@
         "evidence": [
           {
             "kind": "API",
-            "path": "src/app/api/property/route.js",
+            "path": "src/app/api/dashboard/publish/route.js",
             "symbol": "POST",
             "provenance": "EXTRACTED",
             "confidence": 1
@@ -14331,7 +14344,7 @@
     "title": "System: PII-Detachment & Estate Retention (RA 10173)",
     "domain": "legal",
     "layer": "global",
-    "route": "/api/user/dpo-erasure",
+    "route": "/api/user/delete-account",
     "roles": [
       "staff",
       "enterprise"
@@ -14486,7 +14499,7 @@
       "SentinelLayer.js"
     ],
     "apis": [
-      "/api/user/dpo-erasure"
+      "/api/user/delete-account"
     ],
     "database": "Supabase user_profiles, auth.users, properties",
     "evidence": [
@@ -14570,7 +14583,7 @@
     "productStatus": "PROPOSED",
     "implementationStatus": "NOT_STARTED",
     "evidenceStatus": "UNVERIFIED",
-    "releaseStatus": "PRIVATE_PILOT",
+    "releaseStatus": "NOT_DEPLOYED",
     "purpose": "Enforces that spent Connects are non-refundable on decline, timeout, or non-response.",
     "description": "Protects platform tokenomics. Only severe administrative errors receive discretionary staff corrections in Mission Control.",
     "available_actions": [
@@ -14632,7 +14645,7 @@
     "productStatus": "PROPOSED",
     "implementationStatus": "NOT_STARTED",
     "evidenceStatus": "UNVERIFIED",
-    "releaseStatus": "PRIVATE_PILOT",
+    "releaseStatus": "NOT_DEPLOYED",
     "visibility": [
       "SEEKER",
       "OWNER",
@@ -14675,7 +14688,7 @@
     "productStatus": "PROPOSED",
     "implementationStatus": "NOT_STARTED",
     "evidenceStatus": "UNVERIFIED",
-    "releaseStatus": "PRIVATE_PILOT",
+    "releaseStatus": "NOT_DEPLOYED",
     "visibility": [
       "STAFF",
       "ADMIN"
@@ -16335,7 +16348,7 @@
     "title": "Private Deal Room & Scheduling Cockpit",
     "domain": "deal",
     "layer": "core",
-    "route": "/deal/[id]",
+    "route": "/dashboard/inbox",
     "roles": [
       "seeker",
       "broker",
@@ -16540,7 +16553,13 @@
       "ChatBox.js",
       "ViewingCalendar.js"
     ],
-    "apis": [],
+    "apis": [
+      "/api/deals",
+      "/api/deals/[id]",
+      "/api/deals/[id]/messages",
+      "/api/deals/[id]/schedule",
+      "/api/deals/handshake"
+    ],
     "database": "Supabase deals, messages, viewing_schedules",
     "evidence": [
       {
@@ -16601,7 +16620,7 @@
     "title": "Mission Control (Staff Operations Hub)",
     "domain": "admin",
     "layer": "core",
-    "route": "/mission-control",
+    "route": "/dashboard",
     "roles": [
       "staff",
       "enterprise"
@@ -16615,7 +16634,7 @@
     "productStatus": "APPROVED",
     "implementationStatus": "VERIFIED",
     "evidenceStatus": "CODE_GROUNDED",
-    "releaseStatus": "PUBLIC_LIVE",
+    "releaseStatus": "PRIVATE_PILOT",
     "purpose": "Staff-only exceptions-first operations hub: Disputes Hub, Mission Kanban, PRC compliance queue, and Sentinel Radar.",
     "description": "Internal operations center for ScoutIt operators. Resolves AI Council deadlocks, monitors scrapers, and audits listings.",
     "available_actions": [
@@ -16692,7 +16711,7 @@
     "productStatus": "APPROVED",
     "implementationStatus": "VERIFIED",
     "evidenceStatus": "CODE_GROUNDED",
-    "releaseStatus": "PUBLIC_LIVE",
+    "releaseStatus": "PRIVATE_PILOT",
     "visibility": [
       "STAFF",
       "ADMIN"
@@ -16739,7 +16758,7 @@
     "productStatus": "APPROVED",
     "implementationStatus": "VERIFIED",
     "evidenceStatus": "CODE_GROUNDED",
-    "releaseStatus": "PUBLIC_LIVE",
+    "releaseStatus": "PRIVATE_PILOT",
     "visibility": [
       "STAFF",
       "ADMIN"
@@ -16782,7 +16801,7 @@
     "productStatus": "APPROVED",
     "implementationStatus": "VERIFIED",
     "evidenceStatus": "CODE_GROUNDED",
-    "releaseStatus": "PUBLIC_LIVE",
+    "releaseStatus": "PRIVATE_PILOT",
     "visibility": [
       "STAFF",
       "ADMIN"
@@ -16859,7 +16878,7 @@
     "title": "Exception: Zero Connects Balance",
     "domain": "connects",
     "layer": "global",
-    "route": "/api/deals/spend-connect",
+    "route": "/api/deals/initiate",
     "roles": [
       "seeker",
       "owner",
@@ -17080,7 +17099,7 @@
     "title": "Recovery: Top-Up Connects Pack Checkout",
     "domain": "connects",
     "layer": "global",
-    "route": "/checkout/connects",
+    "route": "/pricing/bundles",
     "roles": [
       "seeker",
       "owner",
@@ -17094,11 +17113,11 @@
       "PROVIDER"
     ],
     "securityClassification": "AUTHENTICATED",
-    "status": "VERIFIED",
+    "status": "NOT_STARTED",
     "productStatus": "APPROVED",
-    "implementationStatus": "VERIFIED",
-    "evidenceStatus": "CODE_GROUNDED",
-    "releaseStatus": "PRIVATE_PILOT",
+    "implementationStatus": "NOT_STARTED",
+    "evidenceStatus": "UNVERIFIED",
+    "releaseStatus": "NOT_DEPLOYED",
     "purpose": "User purchases a permanent Connects pack (PayMongo / GCash / Card) to replenish their wallet.",
     "description": "Adds permanent Purchased Connects to the user's wallet and returns them directly to their staged inquiry modal.",
     "available_actions": [
@@ -17170,11 +17189,11 @@
     "canonicalId": "connects.rec.topup",
     "title": "Recovery Protocol: Recovery: Top-Up Connects Pack Checkout",
     "domain": "connects",
-    "status": "VERIFIED",
+    "status": "NOT_STARTED",
     "productStatus": "APPROVED",
-    "implementationStatus": "VERIFIED",
-    "evidenceStatus": "CODE_GROUNDED",
-    "releaseStatus": "PRIVATE_PILOT",
+    "implementationStatus": "NOT_STARTED",
+    "evidenceStatus": "UNVERIFIED",
+    "releaseStatus": "NOT_DEPLOYED",
     "visibility": [
       "SEEKER",
       "OWNER",
@@ -17219,11 +17238,11 @@
     "canonicalId": "connects.rec.topup",
     "title": "Implementation Evidence: Recovery: Top-Up Connects Pack Checkout",
     "domain": "connects",
-    "status": "VERIFIED",
+    "status": "NOT_STARTED",
     "productStatus": "APPROVED",
-    "implementationStatus": "VERIFIED",
-    "evidenceStatus": "CODE_GROUNDED",
-    "releaseStatus": "PRIVATE_PILOT",
+    "implementationStatus": "NOT_STARTED",
+    "evidenceStatus": "UNVERIFIED",
+    "releaseStatus": "NOT_DEPLOYED",
     "visibility": [
       "STAFF",
       "ADMIN"
@@ -17297,7 +17316,7 @@
     "title": "Exception: Viewing Slot Schedule Conflict",
     "domain": "layer",
     "layer": "core",
-    "route": "/api/deals/schedule-viewing",
+    "route": "/api/deals/[id]/schedule",
     "roles": [
       "seeker",
       "broker",
@@ -17476,7 +17495,7 @@
     "title": "Recovery: Select Alternative Open Slot",
     "domain": "layer",
     "layer": "core",
-    "route": "/api/deals/schedule-viewing",
+    "route": "/api/deals/[id]/schedule",
     "roles": [
       "seeker",
       "broker",
@@ -17927,7 +17946,7 @@
     "title": "Exception: Viewing No-Show / Cancellation",
     "domain": "deal",
     "layer": "core",
-    "route": "/api/deals/viewing-noshow",
+    "route": "/dashboard/inbox",
     "roles": [
       "seeker",
       "broker",
@@ -18107,7 +18126,7 @@
     "title": "Recovery: Viewing Reschedule Modal",
     "domain": "deal",
     "layer": "core",
-    "route": "/deal/[id]/reschedule",
+    "route": "/dashboard/inbox",
     "roles": [
       "seeker",
       "broker",
@@ -18630,7 +18649,7 @@
     "title": "Playbook 2.3 — AI Council Deadlock Exception",
     "domain": "layer",
     "layer": "mantle",
-    "route": "/mission-control/deadlocks",
+    "route": "/dashboard",
     "roles": [
       "staff"
     ],
@@ -20366,7 +20385,7 @@
     "title": "Outcome: Verified Handshake & Rating Increment",
     "domain": "deal",
     "layer": "core",
-    "route": "/deal/[id]/success",
+    "route": "/dashboard/inbox",
     "roles": [
       "seeker",
       "broker",
@@ -20508,7 +20527,7 @@
     "title": "Outcome: Deal Closed / Archived",
     "domain": "layer",
     "layer": "core",
-    "route": "/deal/[id]/closed",
+    "route": "/dashboard/inbox",
     "roles": [
       "seeker",
       "broker",
@@ -20649,7 +20668,7 @@
     "title": "Side-by-Side Spatial Comparison Matrix",
     "domain": "property",
     "layer": "crust",
-    "route": "/compare",
+    "route": "/property",
     "roles": [
       "visitor",
       "seeker",
@@ -20866,7 +20885,7 @@
     "title": "Broker Tactical Field Briefing & Voice Copilot",
     "domain": "broker",
     "layer": "core",
-    "route": "/property/[slug]/field-briefing",
+    "route": "/dashboard",
     "roles": [
       "broker"
     ],
@@ -20997,7 +21016,10 @@
       "VoiceCopilotEngine.js",
       "TaxCalculator.js"
     ],
-    "apis": [],
+    "apis": [
+      "/api/broker/briefing-log",
+      "/api/leads/export-audit"
+    ],
     "database": "Supabase properties & broker_field_notes",
     "evidence": [
       {
@@ -21045,7 +21067,7 @@
     "title": "System: Zero-Log AI Broker CRM & 7-Day Purge",
     "domain": "crm",
     "layer": "core",
-    "route": "/api/crm/deal-summarizer",
+    "route": "/api/crm/activity",
     "roles": [
       "broker",
       "staff"
@@ -21181,7 +21203,9 @@
       "src/lib/crm/zeroLogSummarizer.js",
       "EdgeAIWorker.js"
     ],
-    "apis": [],
+    "apis": [
+      "/api/crm/activity"
+    ],
     "database": "Supabase deal_notes & crm_activity_log",
     "evidence": [
       {
@@ -21231,7 +21255,7 @@
     "title": "System: Monthly Scout Wrap Engine (Spotify-Style)",
     "domain": "crm",
     "layer": "orbit",
-    "route": "/dashboard/wrap",
+    "route": "/dashboard",
     "roles": [
       "owner",
       "broker",
@@ -21271,7 +21295,7 @@
       },
       {
         "kind": "API",
-        "path": "src/app/api/wrap/monthly/route.js",
+        "path": "src/app/api/wrap/route.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -21292,7 +21316,7 @@
           },
           {
             "kind": "API",
-            "path": "src/app/api/wrap/monthly/route.js",
+            "path": "src/app/api/wrap/route.js",
             "provenance": "EXTRACTED",
             "confidence": 1
           }
@@ -21349,7 +21373,7 @@
       },
       {
         "kind": "API",
-        "path": "src/app/api/wrap/monthly/route.js",
+        "path": "src/app/api/wrap/route.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -21387,7 +21411,10 @@
       "src/app/dashboard/wrap/page.js",
       "MonthlyWrapEngine.js"
     ],
-    "apis": [],
+    "apis": [
+      "/api/wrap",
+      "/api/analytics"
+    ],
     "database": "Supabase analytics_events & monthly_wrap_snapshots",
     "evidence": [
       {
@@ -21399,7 +21426,7 @@
       },
       {
         "kind": "API",
-        "path": "src/app/api/wrap/monthly/route.js",
+        "path": "src/app/api/wrap/route.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -21420,7 +21447,7 @@
           },
           {
             "kind": "API",
-            "path": "src/app/api/wrap/monthly/route.js",
+            "path": "src/app/api/wrap/route.js",
             "provenance": "EXTRACTED",
             "confidence": 1
           }
@@ -21671,7 +21698,7 @@
     "title": "Exception: Stale Listing Soft-Quarantine",
     "domain": "freshness",
     "layer": "crust",
-    "route": "/dashboard/owner/stale-audit",
+    "route": "/dashboard",
     "roles": [
       "owner",
       "broker"
@@ -21855,7 +21882,7 @@
     "title": "Action: One-Click Portfolio Freshness Re-Verification",
     "domain": "freshness",
     "layer": "crust",
-    "route": "/api/property/confirm-freshness",
+    "route": "/api/dashboard/verify-freshness",
     "roles": [
       "owner",
       "broker"
@@ -21987,7 +22014,7 @@
       "src/app/api/property/confirm-freshness/route.js"
     ],
     "apis": [
-      "src/app/api/property/confirm-freshness/route.js"
+      "/api/dashboard/verify-freshness"
     ],
     "database": "Supabase properties & Airtable sync",
     "evidence": [
@@ -22036,7 +22063,7 @@
     "title": "System: UP NOAH & HazardHunter GIS Flood/Fault Radar",
     "domain": "gis",
     "layer": "metropolis",
-    "route": "/api/gis/noah-hazard",
+    "route": "/property/[id]?chapter=location",
     "roles": [
       "visitor",
       "seeker",
@@ -22596,7 +22623,7 @@
     "productStatus": "PLANNED",
     "implementationStatus": "NOT_STARTED",
     "evidenceStatus": "UNVERIFIED",
-    "releaseStatus": "PRIVATE_PILOT",
+    "releaseStatus": "NOT_DEPLOYED",
     "purpose": "Enterprise SAML 2.0 / Okta / Azure AD Entra ID gateway with corporate domain validation and JIT provisioning.",
     "description": "Provides institutional developers, REITs, and enterprise brokerage teams with centralized corporate Single Sign-On.",
     "available_actions": [
@@ -22660,7 +22687,7 @@
     "productStatus": "PLANNED",
     "implementationStatus": "NOT_STARTED",
     "evidenceStatus": "UNVERIFIED",
-    "releaseStatus": "PRIVATE_PILOT",
+    "releaseStatus": "NOT_DEPLOYED",
     "visibility": [
       "OWNER",
       "BROKER",
@@ -22702,7 +22729,7 @@
     "productStatus": "PLANNED",
     "implementationStatus": "NOT_STARTED",
     "evidenceStatus": "UNVERIFIED",
-    "releaseStatus": "PRIVATE_PILOT",
+    "releaseStatus": "NOT_DEPLOYED",
     "visibility": [
       "STAFF",
       "ADMIN"
@@ -23688,7 +23715,7 @@
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic/BlackHoleCanvas.js",
+        "path": "src/components/descent/BlackHoleCanvas.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -23732,7 +23759,7 @@
     "evidence": [
       {
         "kind": "CODE",
-        "path": "src/middleware.js",
+        "path": "src/proxy.js",
         "symbol": "middleware",
         "provenance": "EXTRACTED",
         "confidence": 1,
@@ -23935,7 +23962,7 @@
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic/BlackHoleCanvas.js",
+        "path": "src/components/descent/BlackHoleCanvas.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -23991,7 +24018,7 @@
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic/BlackHoleCanvas.js",
+        "path": "src/components/descent/BlackHoleCanvas.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -24047,7 +24074,7 @@
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic/BlackHoleCanvas.js",
+        "path": "src/components/descent/BlackHoleCanvas.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -24103,7 +24130,7 @@
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic/BlackHoleCanvas.js",
+        "path": "src/components/descent/BlackHoleCanvas.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -24159,7 +24186,7 @@
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic/BlackHoleCanvas.js",
+        "path": "src/components/descent/BlackHoleCanvas.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -24215,7 +24242,7 @@
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic/BlackHoleCanvas.js",
+        "path": "src/components/descent/BlackHoleCanvas.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -24271,7 +24298,7 @@
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic/BlackHoleCanvas.js",
+        "path": "src/components/descent/BlackHoleCanvas.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -24327,7 +24354,7 @@
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic/BlackHoleCanvas.js",
+        "path": "src/components/descent/BlackHoleCanvas.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -24383,7 +24410,7 @@
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic/BlackHoleCanvas.js",
+        "path": "src/components/descent/BlackHoleCanvas.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -24439,7 +24466,7 @@
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic/BlackHoleCanvas.js",
+        "path": "src/components/descent/BlackHoleCanvas.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -24495,7 +24522,7 @@
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic/BlackHoleCanvas.js",
+        "path": "src/components/descent/BlackHoleCanvas.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -24551,7 +24578,7 @@
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic/BlackHoleCanvas.js",
+        "path": "src/components/descent/BlackHoleCanvas.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -24607,7 +24634,7 @@
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic/BlackHoleCanvas.js",
+        "path": "src/components/descent/BlackHoleCanvas.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -24663,7 +24690,7 @@
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic/BlackHoleCanvas.js",
+        "path": "src/components/descent/BlackHoleCanvas.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -24719,7 +24746,7 @@
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic/BlackHoleCanvas.js",
+        "path": "src/components/descent/BlackHoleCanvas.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -24775,7 +24802,7 @@
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic/BlackHoleCanvas.js",
+        "path": "src/components/descent/BlackHoleCanvas.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -24831,7 +24858,7 @@
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic/BlackHoleCanvas.js",
+        "path": "src/components/descent/BlackHoleCanvas.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -24887,7 +24914,7 @@
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic/BlackHoleCanvas.js",
+        "path": "src/components/descent/BlackHoleCanvas.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -24943,7 +24970,7 @@
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic/BlackHoleCanvas.js",
+        "path": "src/components/descent/BlackHoleCanvas.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -24999,7 +25026,7 @@
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic/BlackHoleCanvas.js",
+        "path": "src/components/descent/BlackHoleCanvas.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -25050,7 +25077,7 @@
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic/BlackHoleCanvas.js",
+        "path": "src/components/descent/BlackHoleCanvas.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -25510,7 +25537,7 @@
       },
       {
         "kind": "API",
-        "path": "src/app/api/user/complete-onboarding/route.js",
+        "path": "src/app/api/auth/complete-onboarding/route.js",
         "symbol": "POST",
         "provenance": "EXTRACTED",
         "confidence": 1,
@@ -25570,7 +25597,7 @@
       },
       {
         "kind": "API",
-        "path": "src/app/api/user/complete-onboarding/route.js",
+        "path": "src/app/api/auth/complete-onboarding/route.js",
         "symbol": "POST",
         "provenance": "EXTRACTED",
         "confidence": 1,
@@ -25630,7 +25657,7 @@
       },
       {
         "kind": "API",
-        "path": "src/app/api/user/complete-onboarding/route.js",
+        "path": "src/app/api/auth/complete-onboarding/route.js",
         "symbol": "POST",
         "provenance": "EXTRACTED",
         "confidence": 1,
@@ -25690,7 +25717,7 @@
       },
       {
         "kind": "API",
-        "path": "src/app/api/user/complete-onboarding/route.js",
+        "path": "src/app/api/auth/complete-onboarding/route.js",
         "symbol": "POST",
         "provenance": "EXTRACTED",
         "confidence": 1,
@@ -25747,7 +25774,7 @@
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic-layers/OrbitCanvas.js",
+        "path": "src/components/orbit/ScoutEarthClient.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -25796,7 +25823,7 @@
       },
       {
         "kind": "COMPONENT",
-        "path": "src/components/cinematic-layers/OrbitCanvas.js",
+        "path": "src/components/orbit/ScoutEarthClient.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -26845,7 +26872,7 @@
     "evidence": [
       {
         "kind": "ROUTE",
-        "path": "src/app/hubs/page.js",
+        "path": "src/app/hubs/[slug]/page.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -28823,7 +28850,7 @@
       },
       {
         "kind": "DATABASE",
-        "path": "supabase/migrations/20260710000000_schema_v2_core.sql",
+        "path": "supabase/migrations/20260802000003_connects_wallet_and_tiers.sql",
         "symbol": "connect_balances",
         "provenance": "EXTRACTED",
         "confidence": 1,
@@ -28879,7 +28906,7 @@
       },
       {
         "kind": "DATABASE",
-        "path": "supabase/migrations/20260710000000_schema_v2_core.sql",
+        "path": "supabase/migrations/20260802000003_connects_wallet_and_tiers.sql",
         "symbol": "connect_balances",
         "provenance": "EXTRACTED",
         "confidence": 1,
@@ -28935,7 +28962,7 @@
       },
       {
         "kind": "DATABASE",
-        "path": "supabase/migrations/20260710000000_schema_v2_core.sql",
+        "path": "supabase/migrations/20260802000003_connects_wallet_and_tiers.sql",
         "symbol": "connect_balances",
         "provenance": "EXTRACTED",
         "confidence": 1,
@@ -30313,7 +30340,7 @@
     "evidence": [
       {
         "kind": "API",
-        "path": "src/app/api/property/route.js",
+        "path": "src/app/api/dashboard/publish/route.js",
         "symbol": "POST",
         "provenance": "EXTRACTED",
         "confidence": 1,
@@ -32387,7 +32414,7 @@
       },
       {
         "kind": "API",
-        "path": "src/app/api/wrap/monthly/route.js",
+        "path": "src/app/api/wrap/route.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -32438,7 +32465,7 @@
       },
       {
         "kind": "API",
-        "path": "src/app/api/wrap/monthly/route.js",
+        "path": "src/app/api/wrap/route.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -33689,7 +33716,7 @@
     "evidence": [
       {
         "kind": "CODE",
-        "path": "src/middleware.js",
+        "path": "src/proxy.js",
         "symbol": "middleware",
         "provenance": "EXTRACTED",
         "confidence": 1,

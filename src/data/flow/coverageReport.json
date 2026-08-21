@@ -80,9 +80,9 @@
   "CONNECTS_WALLET": {
     "totalNodes": 5,
     "happyPathCoverage": {
-      "numerator": 4,
+      "numerator": 3,
       "denominator": 4,
-      "percentage": "100%",
+      "percentage": "75%",
       "formula": "implemented expected happy paths / total expected happy paths"
     },
     "failureCoverage": {

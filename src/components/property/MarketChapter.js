@@ -107,11 +107,10 @@ function ArticlesBlock({ property, articles }) {
     });
   }
 
-  // The empty state is the COMMON case, not the edge case: there are currently
-  // four published briefings against eight properties, and the property link
-  // field does not exist in Airtable yet. A section that silently renders
-  // nothing makes a page look broken, so this says what it is and offers the
-  // one thing that always works — the area's own intel feed.
+  // Empty is a valid data state. `Related_Property` exists but is intentionally
+  // blank for area-level briefings; locations also vary by current editorial
+  // coverage. Say that plainly and offer the area's broader intel feed instead
+  // of making an empty chapter look broken.
   if (matched.length === 0) {
     return (
       <div className="market-articles market-articles--empty">

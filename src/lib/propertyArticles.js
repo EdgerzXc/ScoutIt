@@ -18,11 +18,10 @@
 // ScoutIt investigated that specific building. Property-specific articles sort
 // first and carry a flag the UI can label. See Standing Rule 22.
 //
-// ⚠️ `Related_Property` DOES NOT EXIST IN AIRTABLE YET.
-// The matching path is written and tested so that adding the field is the only
-// remaining step — but until it exists, `aboutThisProperty` is always empty and
-// every match is an area match. That is a data gap, not a bug, and the UI must
-// not imply otherwise.
+// `Related_Property` exists in Airtable and is read by `fetchIntel()`. It is the
+// strongest explicit signal when populated. Area matching remains necessary for
+// market-level briefings that truthfully cover a district/city but are not about
+// one named building.
 // ═══════════════════════════════════════════════════════════════
 
 /** Normalise a place string for comparison: trim, collapse spaces, lowercase. */
