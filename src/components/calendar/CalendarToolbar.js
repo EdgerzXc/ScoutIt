@@ -49,7 +49,7 @@ export default function CalendarToolbar({
         <button
           type="button"
           onClick={onToday}
-          className="text-[11px] uppercase tracking-wider font-mono text-text-secondary border border-surface-variant
+          className="text-[12px] uppercase tracking-wider font-mono text-text-secondary border border-surface-variant
             px-3 h-8 rounded hover:text-on-surface hover:border-gold-accent/50 active:scale-[0.97] transition-all duration-160 ease-out"
         >
           Today
@@ -67,7 +67,7 @@ export default function CalendarToolbar({
               key={v.id}
               type="button"
               onClick={() => onViewChange(v.id)}
-              className={`px-3 py-1.5 text-[11px] uppercase tracking-wider font-mono transition-all duration-160 ease-out active:scale-[0.97]
+              className={`px-3 py-1.5 text-[12px] uppercase tracking-wider font-mono transition-all duration-160 ease-out active:scale-[0.97]
                 ${view === v.id ? "bg-gold-accent text-background font-semibold" : "text-text-secondary hover:bg-surface-variant/40 hover:text-on-surface"}`}
             >
               {v.label}

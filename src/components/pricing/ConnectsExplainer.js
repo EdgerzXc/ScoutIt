@@ -30,7 +30,7 @@ export default function ConnectsExplainer() {
       <div className="rounded-2xl border border-gold-accent/20 bg-surface-alt/40 backdrop-blur-md p-8 md:p-10">
         <div className="flex items-center gap-3 mb-3">
           <span className="text-gold-accent font-mono font-bold text-lg">◈</span>
-          <span className="vector-label text-gold-accent tracking-[0.3em] uppercase text-xs font-bold">
+          <span className="vector-label text-gold-accent tracking-[0.12em] uppercase text-xs font-bold">
             Understanding Connects
           </span>
         </div>

@@ -140,7 +140,7 @@ export default function PropertyVerifyPanel() {
         }
         .pv-notice {
           font-family: ${MONO};
-          font-size: 10px;
+          font-size: 12px;
           letter-spacing: 0.06em;
           line-height: 1.7;
           padding: 10px 12px;
@@ -183,7 +183,7 @@ export default function PropertyVerifyPanel() {
         }
         .pv-loc {
           font-family: ${MONO};
-          font-size: 8.5px;
+          font-size: 12px;
           letter-spacing: 0.12em;
           text-transform: uppercase;
           color: #6a6a6a;
@@ -191,7 +191,7 @@ export default function PropertyVerifyPanel() {
         }
         .pv-age {
           font-family: ${MONO};
-          font-size: 9.5px;
+          font-size: 12px;
           letter-spacing: 0.1em;
           text-transform: uppercase;
           margin-bottom: 12px;
@@ -205,7 +205,7 @@ export default function PropertyVerifyPanel() {
           width: 100%;
           border-radius: 3px;
           font-family: ${MONO};
-          font-size: 9.5px;
+          font-size: 12px;
           letter-spacing: 0.14em;
           text-transform: uppercase;
           cursor: pointer;

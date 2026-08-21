@@ -122,7 +122,7 @@ export default function PropertySectionEditor({
       <p className="empty">
         No editable fields recorded for this listing yet.
         <style jsx>{`
-          .empty { color: #777; font-size: 0.9rem; padding: 1rem 0; }
+          .empty { color: #777; font-size: 0.75rem; padding: 1rem 0; }
         `}</style>
       </p>
     );
@@ -222,7 +222,7 @@ export default function PropertySectionEditor({
         }
         h3 {
           margin: 0;
-          font-size: 0.7rem;
+          font-size: 0.75rem;
           letter-spacing: 0.14em;
           text-transform: uppercase;
           font-family: ui-monospace, monospace;
@@ -233,7 +233,7 @@ export default function PropertySectionEditor({
           border: 1px solid ${GOLD_DIM};
           color: ${GOLD};
           font-family: ui-monospace, monospace;
-          font-size: 0.68rem;
+          font-size: 0.75rem;
           letter-spacing: 0.1em;
           text-transform: uppercase;
           padding: 0.55rem 0.9rem;
@@ -243,13 +243,13 @@ export default function PropertySectionEditor({
           cursor: pointer;
         }
         button:disabled { opacity: 0.4; cursor: default; }
-        .msg { font-size: 0.78rem; margin: 0 0 0.75rem; }
+        .msg { font-size: 0.75rem; margin: 0 0 0.75rem; }
         .msg.ok { color: #7cc47c; }
         .msg.err { color: #d98080; }
         .grid { display: grid; grid-template-columns: 1fr; gap: 0.85rem; }
         .field { display: flex; flex-direction: column; gap: 0.3rem; }
         .lbl {
-          font-size: 0.72rem;
+          font-size: 0.75rem;
           letter-spacing: 0.06em;
           text-transform: uppercase;
           font-family: ui-monospace, monospace;

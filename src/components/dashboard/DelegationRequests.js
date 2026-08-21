@@ -74,7 +74,7 @@ export default function DelegationRequests({ propertyId, units, onDelegated }) {
     <div className="w-full flex flex-col gap-3 mb-2">
       <div className="flex items-center justify-between">
         <h3 className="font-working-title text-base text-on-surface">Operator Requests</h3>
-        <span className="bg-gold-accent/10 text-gold-accent font-label-caps text-[10px] px-2 py-1 rounded-sm tracking-wider">
+        <span className="bg-gold-accent/10 text-gold-accent font-label-caps text-[12px] px-2 py-1 rounded-sm tracking-wider">
           {requests.length} PENDING
         </span>
       </div>
@@ -82,10 +82,10 @@ export default function DelegationRequests({ propertyId, units, onDelegated }) {
       {requests.map((req) => (
         <div key={req.dealId} className="bg-surface border border-surface-variant rounded-lg p-5">
           <div className="flex items-center justify-between mb-2">
-            <span className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase">
+            <span className="font-label-caps text-[12px] tracking-widest text-gold-accent uppercase">
               Incoming Handshake
             </span>
-            <span className="text-[10px] text-text-muted font-working-title">
+            <span className="text-[12px] text-text-muted font-working-title">
               {new Date(req.createdAt).toLocaleDateString()}
             </span>
           </div>

@@ -69,7 +69,7 @@ export default function ConnectsBreakdown({ open, onClose, mode, providerType, t
       className="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-surface border border-gold-accent/20 rounded-lg shadow-2xl overflow-hidden z-50"
     >
       <div className="p-3 border-b border-surface-variant bg-surface-alt flex justify-between items-center">
-        <span className="font-label-caps text-[10px] tracking-widest uppercase text-text-secondary">
+        <span className="font-label-caps text-[12px] tracking-widest uppercase text-text-secondary">
           Your Connects
         </span>
         <span className="flex items-center gap-1.5 font-working-title text-base text-gold-accent">
@@ -95,7 +95,7 @@ export default function ConnectsBreakdown({ open, onClose, mode, providerType, t
       </div>
 
       <div className="px-4 pb-4">
-        <p className="text-[11px] text-text-secondary leading-relaxed italic border-t border-surface-variant/60 pt-3">
+        <p className="text-[12px] text-text-secondary leading-relaxed italic border-t border-surface-variant/60 pt-3">
           {SPEND_ORDER_NOTE}
         </p>
       </div>

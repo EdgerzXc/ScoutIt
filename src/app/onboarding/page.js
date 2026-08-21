@@ -335,7 +335,7 @@ export default function OnboardingPage() {
       <h1 className="font-headline-editorial text-4xl md:text-5xl text-on-surface mb-2">Sign in or create an account</h1>
       <p className="text-text-secondary font-body-md mb-8">Authenticate first. New email accounts must be confirmed before private profile setup.</p>
       <aside className="mb-6 rounded-lg border border-gold-accent/30 bg-gold-accent/5 p-4" aria-label="Invited human-testing notice">
-        <p className="font-label-caps text-[10px] uppercase tracking-widest text-gold-accent">Invited human-testing pilot</p>
+        <p className="font-label-caps text-[12px] uppercase tracking-widest text-gold-accent">Invited human-testing pilot</p>
         <p className="mt-2 text-sm leading-6 text-text-secondary">
           Invited testers should use a testing email they control. Your ScoutIt
           testing account is temporary and will be deleted at the real public
@@ -357,7 +357,7 @@ export default function OnboardingPage() {
           {!useOtp ? (
             <input className="bg-surface border border-surface-variant rounded px-4 py-3 text-on-surface focus:outline-none focus:border-gold-accent" type="password" autoComplete="current-password" minLength={8} value={formData.password} onChange={(event) => setFormData({ ...formData, password: event.target.value })} />
           ) : otpSent ? (
-            <input className="bg-surface border border-surface-variant rounded px-4 py-3 text-on-surface text-center tracking-[0.5em] font-mono focus:outline-none focus:border-gold-accent" inputMode="numeric" maxLength={6} value={otpCode} onChange={(event) => setOtpCode(event.target.value.replace(/\D/g, ""))} />
+            <input className="bg-surface border border-surface-variant rounded px-4 py-3 text-on-surface text-center tracking-[0.12em] font-mono focus:outline-none focus:border-gold-accent" inputMode="numeric" maxLength={6} value={otpCode} onChange={(event) => setOtpCode(event.target.value.replace(/\D/g, ""))} />
           ) : (
             <span className="font-normal text-text-secondary">We will email a secure code and sign-in link.</span>
           )}
@@ -366,7 +366,7 @@ export default function OnboardingPage() {
 
       {authIntent === "signup" && (
         <div className="mb-4 rounded border border-gold-accent/30 bg-gold-accent/5 p-4">
-          <p className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase mb-2">Create a new account</p>
+          <p className="font-label-caps text-[12px] tracking-widest text-gold-accent uppercase mb-2">Create a new account</p>
           <p className="text-sm text-text-secondary leading-relaxed">A new ScoutIt account will be created for <strong className="text-on-surface break-all">{formData.email}</strong>.</p>
           <p className="text-xs text-text-muted leading-relaxed mt-3">Email confirmation is required before private profile setup. Confirm that this address is correct; the link can expire and account access cannot continue until it is verified.</p>
         </div>
@@ -374,7 +374,7 @@ export default function OnboardingPage() {
 
       {emailConfirmationSent && (
         <div className="mb-4 rounded border border-success/40 bg-success/5 p-4" role="status">
-          <p className="font-label-caps text-[10px] tracking-widest text-success uppercase mb-2">Confirm your email</p>
+          <p className="font-label-caps text-[12px] tracking-widest text-success uppercase mb-2">Confirm your email</p>
           <p className="text-sm text-text-secondary">We sent a confirmation link to <strong className="text-on-surface break-all">{formData.email}</strong>. Open it, then return here to finish your profile.</p>
           <p className="text-xs text-text-muted leading-relaxed mt-3">If your link expired, request a fresh one. If this is the wrong address, change it before creating another account.</p>
           <div className="flex flex-wrap gap-3 mt-4">
@@ -404,7 +404,7 @@ export default function OnboardingPage() {
           {authIntent === "signin" ? "Create a new ScoutIt account" : "I already have an account"}
         </button>
       )}
-      <div className="flex items-center text-text-secondary text-sm my-5 gap-4"><div className="flex-1 h-px bg-surface-variant" /><span className="uppercase tracking-widest text-[10px]">Or</span><div className="flex-1 h-px bg-surface-variant" /></div>
+      <div className="flex items-center text-text-secondary text-sm my-5 gap-4"><div className="flex-1 h-px bg-surface-variant" /><span className="uppercase tracking-widest text-[12px]">Or</span><div className="flex-1 h-px bg-surface-variant" /></div>
       <Script
         id="google-identity-services"
         src="https://accounts.google.com/gsi/client"
@@ -436,7 +436,7 @@ export default function OnboardingPage() {
         <label className="flex flex-col gap-2 text-sm font-bold text-on-surface">
           Date of birth
           <input className="bg-surface border border-surface-variant rounded px-4 py-3 text-base text-on-surface focus:outline-none focus:border-gold-accent" type="date" max={new Date().toISOString().slice(0, 10)} value={formData.dateOfBirth} onChange={(event) => setFormData({ ...formData, dateOfBirth: event.target.value })} />
-          <span className="font-normal text-[11px] text-text-muted">Required. ScoutIt is for adults 18 and over.</span>
+          <span className="font-normal text-[12px] text-text-muted">Required. ScoutIt is for adults 18 and over.</span>
         </label>
       </div>
       <button className="w-full bg-gold-accent text-background font-working-title font-bold py-4 px-6 rounded disabled:opacity-50" onClick={() => setStep(3)} disabled={!formData.name.trim() || !formData.dateOfBirth}>Choose my role →</button>

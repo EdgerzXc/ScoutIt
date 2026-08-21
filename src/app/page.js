@@ -661,7 +661,7 @@ export default function Home() {
           LAUNCHPAD (ELEVATOR MENU)
           ========================================= */}
       <section className="relative w-full max-w-6xl mx-auto px-6 py-24 z-20 flex flex-col items-center" style={{ backgroundColor: 'transparent' }}>
-        <h2 className="font-mono text-sm tracking-[0.3em] uppercase text-gold-accent mb-12 text-center opacity-80" style={{ textShadow: '0 0 10px rgba(232, 174, 60,0.3)' }}>
+        <h2 className="font-mono text-sm tracking-[0.12em] uppercase text-gold-accent mb-12 text-center opacity-80" style={{ textShadow: '0 0 10px rgba(232, 174, 60,0.3)' }}>
           Browse Space Catalog
         </h2>
         
@@ -669,7 +669,7 @@ export default function Home() {
           {/* Card 01: Orbit */}
           <Link href="/layer/orbit" className="text-left group relative bg-surface/80 backdrop-blur-md border border-border rounded-xl p-8 overflow-hidden hover:border-gold-accent/50 transition-all duration-500 hover:-translate-y-1 block">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(232,174,60,0.1),transparent_50%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            <div className="font-mono text-[10px] text-gold-accent tracking-widest mb-4">LAYER 01 // ORBIT</div>
+            <div className="font-mono text-[12px] text-gold-accent tracking-widest mb-4">LAYER 01 // ORBIT</div>
             <h3 className="font-display text-2xl text-on-surface mb-2">Orbit: Top Demand</h3>
             <p className="text-sm text-text-secondary">Properties ranked by real buyer and seeker inquiry demand across the market.</p>
           </Link>
@@ -677,7 +677,7 @@ export default function Home() {
           {/* Card 02: Stratosphere */}
           <Link href="/layer/stratosphere" className="text-left group relative bg-surface/80 backdrop-blur-md border border-border rounded-xl p-8 overflow-hidden hover:border-gold-accent/50 transition-all duration-500 hover:-translate-y-1 block">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(232,174,60,0.1),transparent_50%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            <div className="font-mono text-[10px] text-gold-accent tracking-widest mb-4">LAYER 02 // STRATOSPHERE</div>
+            <div className="font-mono text-[12px] text-gold-accent tracking-widest mb-4">LAYER 02 // STRATOSPHERE</div>
             <h3 className="font-display text-2xl text-on-surface mb-2">Stratosphere: Market Intel</h3>
             <p className="text-sm text-text-secondary">Independent neighborhood reports, pricing trends, and zoning analysis.</p>
           </Link>
@@ -685,7 +685,7 @@ export default function Home() {
           {/* Card 03: Metropolis */}
           <Link href="/layer/metropolis" className="text-left group relative bg-surface/80 backdrop-blur-md border border-border rounded-xl p-8 overflow-hidden hover:border-gold-accent/50 transition-all duration-500 hover:-translate-y-1 lg:col-span-1 block">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(232,174,60,0.15),transparent_50%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            <div className="font-mono text-[10px] text-gold-accent tracking-widest mb-4">LAYER 03 // METROPOLIS</div>
+            <div className="font-mono text-[12px] text-gold-accent tracking-widest mb-4">LAYER 03 // METROPOLIS</div>
             <h3 className="font-display text-2xl text-on-surface mb-2">Metropolis: Directory</h3>
             <p className="text-sm text-text-secondary">Search commercial, residential, and event spaces across the Philippines.</p>
           </Link>
@@ -693,7 +693,7 @@ export default function Home() {
           {/* Card 04: The Crust */}
           <Link href="/layer/crust" className="text-left group relative bg-surface/80 backdrop-blur-md border border-border rounded-xl p-8 overflow-hidden hover:border-gold-accent/50 transition-all duration-500 hover:-translate-y-1 block">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(232,174,60,0.05),transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            <div className="font-mono text-[10px] text-gold-accent tracking-widest mb-4">LAYER 04 // THE CRUST</div>
+            <div className="font-mono text-[12px] text-gold-accent tracking-widest mb-4">LAYER 04 // THE CRUST</div>
             <h3 className="font-display text-2xl text-on-surface mb-2">The Crust: Professional Roster</h3>
             <p className="text-sm text-text-secondary">Licensed brokers, spatial photographers, site researchers, and event planners.</p>
           </Link>
@@ -701,7 +701,7 @@ export default function Home() {
           {/* Card 05: The Mantle */}
           <Link href="/layer/mantle" className="text-left group relative bg-surface/80 backdrop-blur-md border border-border rounded-xl p-8 overflow-hidden hover:border-gold-accent/50 transition-all duration-500 hover:-translate-y-1 block">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(232,174,60,0.12),transparent_60%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            <div className="font-mono text-[10px] text-gold-accent tracking-widest mb-4">LAYER 05 // THE MANTLE</div>
+            <div className="font-mono text-[12px] text-gold-accent tracking-widest mb-4">LAYER 05 // THE MANTLE</div>
             <h3 className="font-display text-2xl text-on-surface mb-2">The Mantle: Platform Truth</h3>
             <p className="text-sm text-text-secondary">How ScoutIt works. Our data philosophy, verification standards, and dual-system architecture.</p>
           </Link>
@@ -709,7 +709,7 @@ export default function Home() {
           {/* Card 06: The Core */}
           <Link href="/layer/core" className="text-left group relative bg-surface/80 backdrop-blur-md border border-border rounded-xl p-8 overflow-hidden hover:border-gold-accent/50 transition-all duration-500 hover:-translate-y-1 block">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(232,174,60,0.1),transparent_50%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            <div className="font-mono text-[10px] text-gold-accent tracking-widest mb-4">LAYER 06 // THE CORE</div>
+            <div className="font-mono text-[12px] text-gold-accent tracking-widest mb-4">LAYER 06 // THE CORE</div>
             <h3 className="font-display text-2xl text-on-surface mb-2">The Core: Private Command</h3>
             <p className="text-sm text-text-secondary">Your personal board, saved comparisons, property portfolio, and deal inbox.</p>
           </Link>
@@ -752,7 +752,7 @@ export default function Home() {
           font-size: 13px;
           font-weight: 600;
           text-transform: uppercase;
-          letter-spacing: 0.2em;
+          letter-spacing: 0.12em;
           color: var(--accent);
           background: transparent;
           border: 1px solid var(--accent);
@@ -808,7 +808,7 @@ export default function Home() {
           font-size: 13px;
           font-weight: 600;
           text-transform: uppercase;
-          letter-spacing: 0.18em;
+          letter-spacing: 0.12em;
           color: #0a0a0a;
           background: var(--accent);
           border: 1px solid var(--accent);
@@ -835,7 +835,7 @@ export default function Home() {
           font-size: 13px;
           font-weight: 600;
           text-transform: uppercase;
-          letter-spacing: 0.18em;
+          letter-spacing: 0.12em;
           color: var(--accent);
           background: transparent;
           border: 1px solid var(--accent-muted);
@@ -861,8 +861,8 @@ export default function Home() {
           border: none;
           cursor: pointer;
           font-family: var(--font-mono);
-          font-size: 11px;
-          letter-spacing: 0.16em;
+          font-size: 12px;
+          letter-spacing: 0.12em;
           text-transform: uppercase;
           color: var(--accent);
           opacity: 0.78;
@@ -1125,7 +1125,7 @@ export default function Home() {
           font-family: var(--font-display);
           font-weight: 400;
           font-size: clamp(64px, 10vw, 120px);
-          letter-spacing: 4px;
+          letter-spacing: 0.12em;
           line-height: 1;
           /* slow fade-back to resting state (2s) when the lit class is removed */
           transition: color 2s ease, text-shadow 2s ease;
@@ -1276,7 +1276,7 @@ export default function Home() {
         .title-badge {
           font-family: 'Courier New', monospace;
           font-size: 13px;
-          letter-spacing: 6px;
+          letter-spacing: 0.12em;
           text-transform: uppercase;
           color: var(--text-muted, #777777);
           margin-bottom: 22px;
@@ -1311,8 +1311,8 @@ export default function Home() {
         }
         .title-tagline-2 {
           font-family: var(--font-mono), 'Courier New', monospace;
-          font-size: 11px;
-          letter-spacing: 4px;
+          font-size: 12px;
+          letter-spacing: 0.12em;
           text-transform: uppercase;
           color: rgba(232, 174, 60, 0.55);
           text-align: center;
@@ -1555,7 +1555,7 @@ export default function Home() {
           font-family: var(--font-mono);
           font-size: 13px;
           text-transform: uppercase;
-          letter-spacing: 0.25em;
+          letter-spacing: 0.12em;
           color: var(--text-muted);
           animation: fadeUp 1s ease 4.0s forwards;
           opacity: 0;
@@ -1576,9 +1576,9 @@ export default function Home() {
 
         .scroll-text {
           font-family: 'Courier New', monospace;
-          font-size: 11px;
+          font-size: 12px;
           text-transform: uppercase;
-          letter-spacing: 4px;
+          letter-spacing: 0.12em;
           color: #888888;
         }
 
@@ -1644,7 +1644,7 @@ export default function Home() {
           font-size: 13px;
           font-weight: 600;
           text-transform: uppercase;
-          letter-spacing: 0.25em;
+          letter-spacing: 0.12em;
           color: var(--accent);
           background: transparent;
           border: 1px solid var(--accent);
@@ -1831,9 +1831,9 @@ export default function Home() {
 
         .vector-label {
           font-family: var(--font-mono);
-          font-size: 11px;
+          font-size: 12px;
           text-transform: uppercase;
-          letter-spacing: 0.3em;
+          letter-spacing: 0.12em;
           color: var(--accent);
         }
 
@@ -1931,7 +1931,7 @@ export default function Home() {
           padding: 12px 16px;
           color: var(--text-primary);
           font-family: var(--font-body);
-          font-size: 11px;
+          font-size: 12px;
           letter-spacing: 0.05em;
           outline: none;
           transition: border-color 0.3s ease, box-shadow 0.3s ease;
@@ -1963,7 +1963,7 @@ export default function Home() {
           padding: 10px 16px;
           color: var(--text-muted);
           font-family: var(--font-body);
-          font-size: 11px;
+          font-size: 12px;
           cursor: pointer;
           transition: background 0.2s ease, color 0.2s ease;
         }
@@ -2081,7 +2081,7 @@ export default function Home() {
 
         .mini-tag-label {
           color: var(--accent);
-          font-size: 10px;
+          font-size: 12px;
           letter-spacing: 0.1em;
           opacity: 0.75;
           margin-bottom: 2px;
@@ -2089,7 +2089,7 @@ export default function Home() {
         }
 
         .mini-tag {
-          font-size: 11px;
+          font-size: 12px;
           color: var(--text-secondary);
           background: rgba(255, 255, 255, 0.03);
           border: 1px solid rgba(255, 255, 255, 0.05);
@@ -2437,7 +2437,7 @@ export default function Home() {
 
         .service-status-badge {
           font-family: var(--font-mono);
-          font-size: 10px;
+          font-size: 12px;
           font-weight: 700;
           letter-spacing: 0.1em;
           padding: 4px 8px;
@@ -2477,7 +2477,7 @@ export default function Home() {
 
         .service-cta {
           font-family: var(--font-body);
-          font-size: 11px;
+          font-size: 12px;
           font-weight: 600;
           text-transform: uppercase;
           letter-spacing: 0.14em;
@@ -2781,11 +2781,11 @@ export default function Home() {
             line-height: 1.25 !important;
           }
           .mini-tag-label {
-            font-size: 9.5px !important;
+            font-size: 12px !important;
             letter-spacing: 0.12em !important;
           }
           .mini-tag {
-            font-size: 10px !important;
+            font-size: 12px !important;
             padding: 2px 6px !important;
           }
 
@@ -2867,7 +2867,7 @@ export default function Home() {
             margin-bottom: 12px !important;
           }
           .service-status-badge {
-            font-size: 7.5px !important;
+            font-size: 12px !important;
             padding: 2px 4px !important;
             margin-bottom: 10px !important;
           }
@@ -2879,7 +2879,7 @@ export default function Home() {
             display: none !important;
           }
           .service-cta {
-            font-size: 10px !important;
+            font-size: 12px !important;
           }
 
           /* 4. Layer 04: Horizontally draggable flow cards */
@@ -2906,7 +2906,7 @@ export default function Home() {
             font-size: 12px !important;
           }
           .flow-card p {
-            font-size: 10px !important;
+            font-size: 12px !important;
           }
           .flow-card svg {
             width: 32px !important;
@@ -3068,7 +3068,7 @@ export default function Home() {
           }
 
           .pane-header p {
-            font-size: 11px;
+            font-size: 12px;
           }
 
           .menu-nav {
@@ -3149,15 +3149,15 @@ export default function Home() {
           }
 
           .hook-subtitle {
-            font-size: 11px;
-            letter-spacing: 0.15em;
+            font-size: 12px;
+            letter-spacing: 0.12em;
           }
 
           .hero-cta-btn {
             padding: 14px 24px;
-            font-size: 11px;
+            font-size: 12px;
             min-height: 44px;
-            letter-spacing: 0.15em;
+            letter-spacing: 0.12em;
           }
 
           .hook-scroll-indicator {
@@ -3166,7 +3166,7 @@ export default function Home() {
           }
 
           .scroll-text {
-            font-size: 10px;
+            font-size: 12px;
           }
 
           .scroll-line {
@@ -3193,7 +3193,7 @@ export default function Home() {
           }
 
           .vector-label {
-            font-size: 10px;
+            font-size: 12px;
           }
 
           .matrix-preview-pane {
@@ -3210,7 +3210,7 @@ export default function Home() {
           }
 
           .pane-header p {
-            font-size: 10px;
+            font-size: 12px;
           }
 
           .menu-nav {
@@ -3236,11 +3236,11 @@ export default function Home() {
           }
 
           .prominent-action-link {
-            font-size: 11px;
+            font-size: 12px;
             padding: 14px 20px;
             min-height: 44px;
             width: 100%;
-            letter-spacing: 0.15em;
+            letter-spacing: 0.12em;
           }
 
           .discover-spotlight-card-link {
@@ -3304,13 +3304,13 @@ export default function Home() {
           }
 
           .hook-subtitle {
-            font-size: 10px;
+            font-size: 12px;
             letter-spacing: 0.1em;
           }
 
           .hero-cta-btn {
             padding: 12px 20px;
-            font-size: 10px;
+            font-size: 12px;
             min-height: 42px;
             letter-spacing: 0.1em;
           }
@@ -3331,7 +3331,7 @@ export default function Home() {
           }
 
           .menu-header p {
-            font-size: 11px;
+            font-size: 12px;
           }
 
           .menu-nav {
@@ -3363,11 +3363,11 @@ export default function Home() {
           }
 
           .pane-header p {
-            font-size: 10px;
+            font-size: 12px;
           }
 
           .vector-label {
-            font-size: 10px;
+            font-size: 12px;
           }
 
           .search-container {
@@ -3382,7 +3382,7 @@ export default function Home() {
           }
 
           .prominent-action-link {
-            font-size: 10px;
+            font-size: 12px;
             padding: 12px 16px;
             min-height: 42px;
             width: 100%;
@@ -3418,7 +3418,7 @@ export default function Home() {
           }
 
           .discover-spotlight-card-link p {
-            font-size: 11px !important;
+            font-size: 12px !important;
           }
 
           .mini-preview-card {

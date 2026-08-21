@@ -65,7 +65,7 @@ export default function AgendaView({ events, onSelectEvent, onRespondViewing, re
           <div className="flex items-baseline gap-2 mb-2 sticky top-0 bg-[#121212] py-1 z-10">
             <h3 className="font-working-title text-on-surface">{formatDayHeading(date)}</h3>
             {isToday(date) && (
-              <span className="text-[10px] uppercase tracking-wider font-mono text-gold-accent">Today</span>
+              <span className="text-[12px] uppercase tracking-wider font-mono text-gold-accent">Today</span>
             )}
           </div>
 
@@ -120,7 +120,7 @@ export default function AgendaView({ events, onSelectEvent, onRespondViewing, re
                     </div>
                   ) : (
                     ev.kind === "viewing" && (
-                      <span className="text-[10px] uppercase tracking-wider font-mono text-text-muted shrink-0">
+                      <span className="text-[12px] uppercase tracking-wider font-mono text-text-muted shrink-0">
                         {ev.status === "pending" ? "Awaiting host" : ev.status}
                       </span>
                     )

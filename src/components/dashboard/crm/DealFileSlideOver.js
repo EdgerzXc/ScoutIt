@@ -86,7 +86,7 @@ export default function DealFileSlideOver({ isOpen, onClose, deal, onDealUpdate,
               {/* Status Pill */}
               <div className="flex items-center gap-3">
                 <span className="text-xs uppercase tracking-widest font-label-caps text-text-secondary">Stage</span>
-                <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${getStatusColor(deal.status)}`}>
+                <span className={`px-3 py-1 rounded-full text-[12px] font-bold uppercase tracking-widest ${getStatusColor(deal.status)}`}>
                   {deal.status}
                 </span>
               </div>
@@ -134,8 +134,8 @@ export default function DealFileSlideOver({ isOpen, onClose, deal, onDealUpdate,
                   <h3 className="font-working-title text-sm text-on-surface flex items-center gap-2">
                     <FileText size={16} className="text-gold-accent" /> Private Notes
                   </h3>
-                  {savingState === "saving" && <span className="text-[10px] uppercase text-text-muted animate-pulse">Saving...</span>}
-                  {savingState === "saved" && <span className="text-[10px] uppercase text-success flex items-center gap-1"><CheckCircle2 size={12}/> Saved</span>}
+                  {savingState === "saving" && <span className="text-[12px] uppercase text-text-muted animate-pulse">Saving...</span>}
+                  {savingState === "saved" && <span className="text-[12px] uppercase text-success flex items-center gap-1"><CheckCircle2 size={12}/> Saved</span>}
                 </div>
                 <textarea
                   value={notes}

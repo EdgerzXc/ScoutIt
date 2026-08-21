@@ -107,7 +107,7 @@ function SectionEditorRow({ listing, colSpan, onClose }) {
     <tr className="bg-[rgba(255,255,255,0.02)]">
       <td colSpan={colSpan} className="px-4 py-4">
         <div className="flex items-center justify-between mb-3">
-          <span className="text-[10px] font-mono uppercase tracking-widest text-gold-accent">
+          <span className="text-[12px] font-mono uppercase tracking-widest text-gold-accent">
             Editing · {listing.title}
           </span>
           <button onClick={onClose} className="text-text-secondary hover:text-white text-xs">
@@ -152,9 +152,9 @@ function NavButton({ id, icon: Icon, label, activeTab, onSelect, badge = 0 }) {
         <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-gold-accent shadow-[0_0_8px_rgba(232,174,60,0.8)]" />
       )}
       <Icon size={18} className={`transition-transform duration-300 ${isActive ? 'scale-110 drop-shadow-[0_0_5px_rgba(232,174,60,0.5)]' : 'group-hover:scale-110 opacity-70 group-hover:opacity-100'}`} />
-      <span className={`font-mono uppercase tracking-wider text-[11px] ${isActive ? 'font-bold' : 'font-medium'}`}>{label}</span>
+      <span className={`font-mono uppercase tracking-wider text-[12px] ${isActive ? 'font-bold' : 'font-medium'}`}>{label}</span>
       {badge > 0 && (
-        <span className="ml-auto shrink-0 min-w-[18px] h-[18px] px-1.5 rounded-full bg-gold-accent text-[10px] font-mono font-bold text-black flex items-center justify-center">
+        <span className="ml-auto shrink-0 min-w-[18px] h-[18px] px-1.5 rounded-full bg-gold-accent text-[12px] font-mono font-bold text-black flex items-center justify-center">
           {badge > 99 ? "99+" : badge}
         </span>
       )}
@@ -374,7 +374,7 @@ export default function MissionControlMode() {
           <aside className="w-64 border-r border-white/5 p-4 flex-col overflow-y-auto hidden md:flex min-h-[calc(100dvh-80px)] custom-scrollbar">
         
         <div className="mb-5">
-          <div className="text-[10px] tracking-widest text-gold-accent uppercase mb-3 px-3 opacity-70 font-label-caps">
+          <div className="text-[12px] tracking-widest text-gold-accent uppercase mb-3 px-3 opacity-70 font-label-caps">
             Enterprise Console
           </div>
           <div className="flex flex-col gap-1.5">
@@ -402,7 +402,7 @@ export default function MissionControlMode() {
             <button
               key={id}
               onClick={() => setActiveTab(id)}
-              className={`flex items-center gap-1.5 shrink-0 px-3 py-2 rounded-full text-[11px] font-mono uppercase tracking-wider min-h-[40px] transition ${
+              className={`flex items-center gap-1.5 shrink-0 px-3 py-2 rounded-full text-[12px] font-mono uppercase tracking-wider min-h-[40px] transition ${
                 activeTab === id
                   ? "bg-gold-accent/10 text-gold-accent border border-gold-accent/30"
                   : "text-text-secondary border border-white/10 hover:text-white"
@@ -418,13 +418,13 @@ export default function MissionControlMode() {
             <div className="bg-gold-accent/5 border border-gold-accent/20 rounded-lg px-4 py-3 flex items-start gap-3 mb-6 backdrop-blur-md">
               <AlertTriangle className="text-gold-accent shrink-0 mt-0.5" size={16} />
               <div className="text-xs text-text-secondary leading-relaxed">
-                <span className="text-gold-accent font-mono uppercase tracking-widest text-[10px]">Dev preview</span>{" "}
+                <span className="text-gold-accent font-mono uppercase tracking-widest text-[12px]">Dev preview</span>{" "}
                 <span className="ml-2">Real Enterprise account isolation isn&apos;t built yet — this filters by &quot;properties you own&quot; as a stand-in for a real company scope. Not safe to expose to real users until the RLS security reset happens.</span>
               </div>
             </div>
 
             <div>
-              <span className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase drop-shadow-[0_0_10px_rgba(247,198,78,0.5)]">
+              <span className="font-label-caps text-[12px] tracking-widest text-gold-accent uppercase drop-shadow-[0_0_10px_rgba(247,198,78,0.5)]">
                 Enterprise Console • Company Health
               </span>
               <h1 className="font-display-md text-3xl md:text-4xl mt-1 text-gradient-sapphire">
@@ -461,7 +461,7 @@ export default function MissionControlMode() {
                     </div>
                   ) : (
                     <div className="flex items-baseline gap-3">
-                      <span className="font-display-md text-7xl text-white/30 tracking-tighter">—</span>
+                      <span className="font-display-md text-7xl text-white/70 tracking-tighter">—</span>
                       <span className="text-text-secondary font-mono text-sm uppercase tracking-widest">No assets yet</span>
                     </div>
                   )}
@@ -489,14 +489,14 @@ export default function MissionControlMode() {
                   <div className="flex items-center justify-between relative z-10 mb-4">
                     <kpi.icon className="text-text-secondary group-hover:text-gold-accent transition duration-300" size={18} />
                     {kpi.actionText && (
-                      <span className="text-gold-accent text-[10px] font-mono uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center gap-1">
+                      <span className="text-gold-accent text-[12px] font-mono uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center gap-1">
                         {kpi.actionText} <ArrowRight size={10} />
                       </span>
                     )}
                   </div>
                   <div className="relative z-10">
                     <div className="font-display-md text-4xl text-white tracking-tight mb-2 group-hover:scale-[1.02] origin-left transition-transform duration-300">{kpi.value}</div>
-                    <div className="text-[10px] font-mono text-text-secondary uppercase tracking-widest line-clamp-1">
+                    <div className="text-[12px] font-mono text-text-secondary uppercase tracking-widest line-clamp-1">
                       {kpi.label}
                     </div>
                   </div>
@@ -511,7 +511,7 @@ export default function MissionControlMode() {
                   </div>
                   <div>
                     <h4 className="text-white font-medium text-sm">Portfolio Signal</h4>
-                    <p className="text-text-secondary text-[11px] font-mono tracking-widest uppercase">Live · read from your data</p>
+                    <p className="text-text-secondary text-[12px] font-mono tracking-widest uppercase">Live · read from your data</p>
                   </div>
                 </div>
                 <p className="text-sm text-text-secondary leading-relaxed pl-11">
@@ -533,7 +533,7 @@ export default function MissionControlMode() {
                   <p className="text-text-secondary/60 text-xs leading-relaxed max-w-[180px]">
                     Site visits and client meetings will line up here once your calendar connects.
                   </p>
-                  <Link href="/dashboard/calendar" className="text-gold-accent text-[10px] font-mono uppercase tracking-widest hover:underline mt-1">
+                  <Link href="/dashboard/calendar" className="text-gold-accent text-[12px] font-mono uppercase tracking-widest hover:underline mt-1">
                     Open Calendar →
                   </Link>
                 </div>
@@ -548,7 +548,7 @@ export default function MissionControlMode() {
                 <div className="flex items-center justify-between mb-4 relative z-10">
                   <BellRing className={`${alerts.length > 0 ? "text-red-400 group-hover:text-red-300" : "text-emerald-400"} transition duration-300`} size={18} />
                   {alerts.length > 0 && (
-                    <span className="w-5 h-5 rounded-full bg-red-500/20 text-red-400 text-[10px] font-bold flex items-center justify-center">{alerts.length}</span>
+                    <span className="w-5 h-5 rounded-full bg-red-500/20 text-red-400 text-[12px] font-bold flex items-center justify-center">{alerts.length}</span>
                   )}
                 </div>
                 <div className="relative z-10">
@@ -577,12 +577,12 @@ export default function MissionControlMode() {
                 <div className="flex items-center justify-between mb-4">
                   <Warehouse className="text-text-secondary group-hover:text-gold-accent transition duration-300" size={18} />
                   {inventoryStats.total > 0 && (
-                    <span className="text-emerald-400 text-[10px] font-mono font-bold">{inventoryStats.vacant} vacant</span>
+                    <span className="text-emerald-400 text-[12px] font-mono font-bold">{inventoryStats.vacant} vacant</span>
                   )}
                 </div>
                 <div>
                   <div className="font-display-md text-3xl text-white tracking-tight mb-1 group-hover:scale-[1.02] origin-left transition-transform duration-300">{inventoryStats.total}</div>
-                  <div className="text-[10px] font-mono text-text-secondary uppercase tracking-widest">
+                  <div className="text-[12px] font-mono text-text-secondary uppercase tracking-widest">
                     Units Tracked
                   </div>
                 </div>
@@ -598,7 +598,7 @@ export default function MissionControlMode() {
                 </div>
                 <div>
                   <div className="font-display-md text-3xl text-white tracking-tight mb-1 group-hover:scale-[1.02] origin-left transition-transform duration-300">{kpis.drafting}</div>
-                  <div className="text-[10px] font-mono text-text-secondary uppercase tracking-widest">
+                  <div className="text-[12px] font-mono text-text-secondary uppercase tracking-widest">
                     Drafts in Progress
                   </div>
                 </div>
@@ -621,7 +621,7 @@ export default function MissionControlMode() {
                       <div className="h-full bg-emerald-500/60 rounded-full transition duration-200" style={{ width: `${Math.round((inventoryStats.occupied / inventoryStats.total) * 100)}%` }} />
                     </div>
                   )}
-                  <div className="text-[10px] font-mono text-text-secondary uppercase tracking-widest">
+                  <div className="text-[12px] font-mono text-text-secondary uppercase tracking-widest">
                     Occupancy Rate
                   </div>
                 </div>
@@ -635,7 +635,7 @@ export default function MissionControlMode() {
                 <div className="flex items-center justify-between mb-4">
                   <Users className="text-text-secondary group-hover:text-blue-400 transition duration-300" size={18} />
                   {(pitches || []).filter((p) => p.status === "pending").length > 0 && (
-                    <span className="text-gold-accent text-[10px] font-mono font-bold">
+                    <span className="text-gold-accent text-[12px] font-mono font-bold">
                       {(pitches || []).filter((p) => p.status === "pending").length} sealed
                     </span>
                   )}
@@ -644,7 +644,7 @@ export default function MissionControlMode() {
                   <div className="font-display-md text-3xl text-white tracking-tight mb-1 group-hover:scale-[1.02] origin-left transition-transform duration-300">
                     {(pitches || []).filter((p) => p.status === "accepted" || p.status === "pending").length}
                   </div>
-                  <div className="text-[10px] font-mono text-text-secondary uppercase tracking-widest">
+                  <div className="text-[12px] font-mono text-text-secondary uppercase tracking-widest">
                     Active Chatboxes
                   </div>
                 </div>
@@ -654,7 +654,7 @@ export default function MissionControlMode() {
         ) : activeTab === "portfolio" ? (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-200 fill-mode-both">
             <div>
-              <span className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase drop-shadow-[0_0_10px_rgba(247,198,78,0.5)]">
+              <span className="font-label-caps text-[12px] tracking-widest text-gold-accent uppercase drop-shadow-[0_0_10px_rgba(247,198,78,0.5)]">
                 Enterprise Console • Portfolio
               </span>
               <h1 className="font-display-md text-3xl md:text-4xl mt-1 text-gradient-sapphire">
@@ -693,7 +693,7 @@ export default function MissionControlMode() {
       <GlassPanel className="rounded-2xl overflow-hidden shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] border border-white/[0.04] mt-4 bg-surface/40 backdrop-blur-xl">
         <div className="px-5 py-4 border-b border-white/[0.04] bg-white/[0.02] flex justify-between items-center">
           <div className="flex items-center gap-4">
-            <span className="font-label-caps text-[10px] tracking-widest uppercase text-gold-accent">
+            <span className="font-label-caps text-[12px] tracking-widest uppercase text-gold-accent">
               Your Properties
             </span>
           </div>
@@ -702,7 +702,7 @@ export default function MissionControlMode() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-[10px] uppercase tracking-wider text-text-secondary border-b border-white/[0.04] bg-surface/60 backdrop-blur-md">
+              <tr className="text-left text-[12px] uppercase tracking-wider text-text-secondary border-b border-white/[0.04] bg-surface/60 backdrop-blur-md">
                 <th className="px-4 py-2 font-normal w-10">
                   <input
                     type="checkbox"
@@ -801,7 +801,7 @@ export default function MissionControlMode() {
         ) : activeTab === "crm" ? (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-200 fill-mode-both h-full flex flex-col gap-6">
             <div>
-              <span className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase drop-shadow-[0_0_10px_rgba(247,198,78,0.5)]">Enterprise Console • CRM</span>
+              <span className="font-label-caps text-[12px] tracking-widest text-gold-accent uppercase drop-shadow-[0_0_10px_rgba(247,198,78,0.5)]">Enterprise Console • CRM</span>
               <h1 className="font-display-md text-3xl md:text-4xl mt-1 text-white">Relationship Management</h1>
               <p className="text-sm text-text-secondary mt-2 max-w-xl">
                 The people around your portfolio — broker pitches, leads, and every conversation in play.
@@ -812,7 +812,7 @@ export default function MissionControlMode() {
               <GlassPanel className="lg:col-span-2 rounded-2xl border-white/5 overflow-hidden flex flex-col">
                 <div className="px-6 py-4 border-b border-white/5 flex items-center justify-between">
                   <h3 className="text-white font-medium text-sm">Connection Pipeline</h3>
-                  <span className="text-[10px] font-mono uppercase tracking-widest text-text-secondary">
+                  <span className="text-[12px] font-mono uppercase tracking-widest text-text-secondary">
                     {(pitches || []).length} {(pitches || []).length === 1 ? "conversation" : "conversations"} on record
                   </span>
                 </div>
@@ -835,23 +835,23 @@ export default function MissionControlMode() {
                           <div className="min-w-0">
                             <p className="text-sm text-white font-medium truncate">
                               {revealed ? p.brokerName : "Sealed connection"}
-                              <span className="text-text-secondary text-[10px] font-normal uppercase tracking-widest ml-2">
+                              <span className="text-text-secondary text-[12px] font-normal uppercase tracking-widest ml-2">
                                 {revealed ? (p.otherPartyRole || "connected party") : "identity held until both sides connect"}
                               </span>
                             </p>
                             <p className="text-xs text-text-secondary mt-1 truncate">{p.title}</p>
                             {!revealed && p.status === "pending" && (
-                              <p className="text-[10px] font-mono uppercase tracking-widest text-gold-accent mt-1.5 flex items-center gap-1.5">
+                              <p className="text-[12px] font-mono uppercase tracking-widest text-gold-accent mt-1.5 flex items-center gap-1.5">
                                 <span className="w-1.5 h-1.5 rounded-full bg-gold-accent animate-pulse" />
                                 Active temporary chatbox
                               </p>
                             )}
                           </div>
                           <div className="text-right shrink-0">
-                            <span className={`text-[10px] font-mono uppercase tracking-widest ${p.status === "accepted" ? "text-success" : p.status === "rejected" ? "text-error" : "text-gold-accent"}`}>
+                            <span className={`text-[12px] font-mono uppercase tracking-widest ${p.status === "accepted" ? "text-success" : p.status === "rejected" ? "text-error" : "text-gold-accent"}`}>
                               {p.statusText}
                             </span>
-                            <p className="text-[10px] text-text-secondary mt-1">{p.timeRemaining}</p>
+                            <p className="text-[12px] text-text-secondary mt-1">{p.timeRemaining}</p>
                           </div>
                         </div>
                       );
@@ -865,11 +865,11 @@ export default function MissionControlMode() {
                 <GlassPanel className="flex-1 rounded-2xl border-white/5 p-6 overflow-y-auto custom-scrollbar">
                   <div className="flex items-center justify-between mb-4">
                     <h4 className="text-white font-medium text-sm">Schedule & Tasks</h4>
-                    <Link href="/dashboard/calendar" className="text-[10px] font-mono uppercase tracking-widest text-gold-accent hover:underline">
+                    <Link href="/dashboard/calendar" className="text-[12px] font-mono uppercase tracking-widest text-gold-accent hover:underline">
                       Calendar →
                     </Link>
                   </div>
-                  <p className="text-[11px] text-text-secondary mb-4 leading-relaxed">
+                  <p className="text-[12px] text-text-secondary mb-4 leading-relaxed">
                     Site visits, follow-ups, document deadlines — add anything with a due date and tick it off when done.
                   </p>
                   <TaskRail mockUserId={currentUser?.id} />
@@ -884,7 +884,7 @@ export default function MissionControlMode() {
         ) : activeTab === "inventory" ? (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-200 fill-mode-both h-full flex flex-col gap-6">
             <div>
-              <span className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase drop-shadow-[0_0_10px_rgba(247,198,78,0.5)]">Enterprise Console • Inventory</span>
+              <span className="font-label-caps text-[12px] tracking-widest text-gold-accent uppercase drop-shadow-[0_0_10px_rgba(247,198,78,0.5)]">Enterprise Console • Inventory</span>
               <h1 className="font-display-md text-3xl md:text-4xl mt-1 text-white">Asset Inventory</h1>
               <p className="text-sm text-text-secondary mt-2 max-w-xl">
                 Unit-by-unit control of each estate — occupancy, delegation handshakes, and the floor grid.
@@ -899,7 +899,7 @@ export default function MissionControlMode() {
               ].map(stat => (
                 <GlassPanel key={stat.label} className="p-6 rounded-2xl border-white/5">
                   <div className="text-3xl text-white font-display-md">{stat.val}</div>
-                  <div className="text-[10px] uppercase tracking-widest text-text-secondary mt-1">{stat.label}</div>
+                  <div className="text-[12px] uppercase tracking-widest text-text-secondary mt-1">{stat.label}</div>
                 </GlassPanel>
               ))}
             </div>
@@ -907,7 +907,7 @@ export default function MissionControlMode() {
               <div className="px-6 py-4 border-b border-white/5 flex items-center justify-between flex-wrap gap-3">
                 <h3 className="text-white font-medium text-sm">Enterprise Unit Delegation & Inventory</h3>
                 <div className="flex gap-4 items-center flex-wrap">
-                  <div className="text-[10px] tracking-widest text-gold-accent uppercase">Active Estate</div>
+                  <div className="text-[12px] tracking-widest text-gold-accent uppercase">Active Estate</div>
                   <select 
                     value={activeEstateId || ""}
                     onChange={(e) => setActiveEstateId(e.target.value)}
@@ -943,7 +943,7 @@ export default function MissionControlMode() {
         ) : activeTab === "finance" ? (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-200 fill-mode-both h-full flex flex-col gap-6">
             <div>
-              <span className="font-label-caps text-[10px] tracking-widest text-emerald-400 uppercase drop-shadow-[0_0_10px_rgba(52,211,153,0.5)]">Enterprise Console • Finance</span>
+              <span className="font-label-caps text-[12px] tracking-widest text-emerald-400 uppercase drop-shadow-[0_0_10px_rgba(52,211,153,0.5)]">Enterprise Console • Finance</span>
               <h1 className="font-display-md text-3xl md:text-4xl mt-1 text-white">Financial Hub</h1>
               <p className="text-sm text-text-secondary mt-2 max-w-xl">
                 Your Connects balance and money movement — live once billing is switched on.
@@ -979,7 +979,7 @@ export default function MissionControlMode() {
         ) : activeTab === "analytics" ? (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-200 fill-mode-both h-full flex flex-col gap-6 overflow-y-auto pb-6 custom-scrollbar">
             <div>
-              <span className="font-label-caps text-[10px] tracking-widest text-blue-400 uppercase drop-shadow-[0_0_10px_rgba(59,130,246,0.5)]">Enterprise Console • Analytics</span>
+              <span className="font-label-caps text-[12px] tracking-widest text-blue-400 uppercase drop-shadow-[0_0_10px_rgba(59,130,246,0.5)]">Enterprise Console • Analytics</span>
               <h1 className="font-display-md text-3xl md:text-4xl mt-1 text-white">Market Intelligence</h1>
               <p className="text-sm text-text-secondary mt-2 max-w-xl">
                 How the market moves around your assets. Charts below are sample previews until live data connects.
@@ -994,9 +994,9 @@ export default function MissionControlMode() {
                   <div>
                     <h3 className="text-white font-medium text-sm flex items-center gap-2">
                       Historical Property Yield
-                      <span className="text-[10px] font-mono uppercase tracking-widest text-gold-accent border border-gold-accent/30 bg-gold-accent/10 rounded px-1.5 py-0.5">Sample preview</span>
+                      <span className="text-[12px] font-mono uppercase tracking-widest text-gold-accent border border-gold-accent/30 bg-gold-accent/10 rounded px-1.5 py-0.5">Sample preview</span>
                     </h3>
-                    <p className="text-[10px] text-text-secondary font-mono tracking-widest uppercase mt-1">Makati CBD vs BGC · illustrative — live data connects at launch</p>
+                    <p className="text-[12px] text-text-secondary font-mono tracking-widest uppercase mt-1">Makati CBD vs BGC · illustrative — live data connects at launch</p>
                   </div>
                   <select className="bg-black/50 border border-white/10 text-xs text-white rounded px-2 py-1 outline-none focus:border-blue-400 transition">
                     <option>Yield (%)</option>
@@ -1020,7 +1020,7 @@ export default function MissionControlMode() {
                      <polyline points="0,32 20,28 40,26 60,20 80,18 100,16" fill="none" stroke="#3b82f6" strokeWidth="1.5" className="drop-shadow-[0_0_5px_rgba(59,130,246,0.5)]" />
                      <circle cx="100" cy="16" r="1.5" fill="#3b82f6" />
                    </svg>
-                   <div className="absolute -bottom-1 left-2 right-0 flex justify-between text-[10px] text-text-secondary font-mono">
+                   <div className="absolute -bottom-1 left-2 right-0 flex justify-between text-[12px] text-text-secondary font-mono">
                      <span>2022</span>
                      <span>2023</span>
                      <span>2024</span>
@@ -1028,8 +1028,8 @@ export default function MissionControlMode() {
                      <span>2026</span>
                    </div>
                    <div className="absolute top-2 right-4 flex flex-col gap-2 bg-black/40 backdrop-blur border border-white/5 p-2 rounded-lg">
-                      <div className="flex items-center gap-2 text-[10px] text-white"><span className="w-2 h-2 rounded-full bg-gold-accent" /> BGC (+14%)</div>
-                      <div className="flex items-center gap-2 text-[10px] text-white"><span className="w-2 h-2 rounded-full bg-blue-500" /> Makati (+6%)</div>
+                      <div className="flex items-center gap-2 text-[12px] text-white"><span className="w-2 h-2 rounded-full bg-gold-accent" /> BGC (+14%)</div>
+                      <div className="flex items-center gap-2 text-[12px] text-white"><span className="w-2 h-2 rounded-full bg-blue-500" /> Makati (+6%)</div>
                    </div>
                 </div>
               </GlassPanel>
@@ -1038,9 +1038,9 @@ export default function MissionControlMode() {
               <GlassPanel className="col-span-1 rounded-2xl border-white/5 p-6 flex flex-col">
                 <h3 className="text-white font-medium text-sm mb-1 flex items-center gap-2">
                   Space Demand Trends
-                  <span className="text-[10px] font-mono uppercase tracking-widest text-gold-accent border border-gold-accent/30 bg-gold-accent/10 rounded px-1.5 py-0.5">Sample preview</span>
+                  <span className="text-[12px] font-mono uppercase tracking-widest text-gold-accent border border-gold-accent/30 bg-gold-accent/10 rounded px-1.5 py-0.5">Sample preview</span>
                 </h3>
-                <p className="text-[10px] text-text-secondary font-mono tracking-widest uppercase mb-6">Illustrative — live data connects at launch</p>
+                <p className="text-[12px] text-text-secondary font-mono tracking-widest uppercase mb-6">Illustrative — live data connects at launch</p>
                 
                 <div className="space-y-4 flex-1">
                   {[
@@ -1052,7 +1052,7 @@ export default function MissionControlMode() {
                     <div key={idx} className="group">
                       <div className="flex justify-between items-end mb-1">
                         <span className="text-xs text-white">{item.label}</span>
-                        <span className={`text-[10px] font-mono ${item.up ? 'text-emerald-400' : 'text-red-400'}`}>{item.trend}</span>
+                        <span className={`text-[12px] font-mono ${item.up ? 'text-emerald-400' : 'text-red-400'}`}>{item.trend}</span>
                       </div>
                       <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
                         <div className={`h-full rounded-full transition duration-200 ${item.up ? 'bg-emerald-500/50' : 'bg-red-500/50'}`} style={{ width: item.bar }} />
@@ -1089,7 +1089,7 @@ export default function MissionControlMode() {
               <GlassPanel className="rounded-2xl border-white/5 p-6 relative overflow-hidden flex items-center justify-between group cursor-pointer hover:border-gold-accent/30 transition">
                  <div>
                    <div className="text-3xl font-display-md text-white group-hover:scale-105 origin-left transition-transform">{scopedPitches.length}</div>
-                   <div className="text-[10px] text-text-secondary font-mono uppercase tracking-widest mt-1">Active Pipeline</div>
+                   <div className="text-[12px] text-text-secondary font-mono uppercase tracking-widest mt-1">Active Pipeline</div>
                  </div>
                  <div className="w-12 h-12 rounded-full border border-gold-accent/20 flex items-center justify-center bg-gold-accent/5">
                    <ArrowRight size={20} className="text-gold-accent group-hover:translate-x-1 transition-transform" />
@@ -1100,7 +1100,7 @@ export default function MissionControlMode() {
         ) : activeTab === "faqs" ? (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-200 fill-mode-both flex flex-col gap-6">
             <div>
-              <span className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase">Enterprise Console • Q&amp;A</span>
+              <span className="font-label-caps text-[12px] tracking-widest text-gold-accent uppercase">Enterprise Console • Q&amp;A</span>
               <h1 className="font-display-md text-3xl md:text-4xl mt-1 text-white">Answer Review</h1>
               <p className="text-sm text-text-secondary mt-2 max-w-xl">
                 Confirm, override or hide what advisors and residents have said about your listings.
@@ -1111,7 +1111,7 @@ export default function MissionControlMode() {
         ) : activeTab === "ai" ? (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-200 fill-mode-both h-full flex flex-col gap-6">
             <div>
-              <span className="font-label-caps text-[10px] tracking-widest text-blue-400 uppercase drop-shadow-[0_0_10px_rgba(59,130,246,0.5)]">Enterprise Console • AI</span>
+              <span className="font-label-caps text-[12px] tracking-widest text-blue-400 uppercase drop-shadow-[0_0_10px_rgba(59,130,246,0.5)]">Enterprise Console • AI</span>
               <h1 className="font-display-md text-3xl md:text-4xl mt-1 text-white">Intelligence Center</h1>
               <p className="text-sm text-text-secondary mt-2 max-w-xl">
                 Where AI works for your portfolio — drafting dossiers now, portfolio Q&amp;A next.
@@ -1164,7 +1164,7 @@ export default function MissionControlMode() {
                           <div className="w-full bg-black/50 h-1.5 rounded-full overflow-hidden">
                             <div className="bg-blue-500 h-full rounded-full w-1/2 animate-pulse" />
                           </div>
-                          <div className="text-[10px] text-text-secondary mt-1">Council AI is composing this dossier</div>
+                          <div className="text-[12px] text-text-secondary mt-1">Council AI is composing this dossier</div>
                         </div>
                       ))}
                     </div>
@@ -1180,7 +1180,7 @@ export default function MissionControlMode() {
                     <h4 className="text-white font-medium text-sm mb-2">Market Reports</h4>
                     <p className="text-xs text-text-secondary">AI comp analysis from real closings in your zones — switches on once enough market data accumulates.</p>
                   </div>
-                  <div className="text-text-secondary text-[10px] font-mono uppercase tracking-widest">
+                  <div className="text-text-secondary text-[12px] font-mono uppercase tracking-widest">
                     Coming online
                   </div>
                 </GlassPanel>
@@ -1190,7 +1190,7 @@ export default function MissionControlMode() {
         ) : (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-200 fill-mode-both h-full flex flex-col gap-6">
             <div>
-              <span className="font-label-caps text-[10px] tracking-widest text-text-secondary uppercase">Enterprise Console • Settings</span>
+              <span className="font-label-caps text-[12px] tracking-widest text-text-secondary uppercase">Enterprise Console • Settings</span>
               <h1 className="font-display-md text-3xl md:text-4xl mt-1 text-white">Administration</h1>
             </div>
 
@@ -1277,7 +1277,7 @@ export default function MissionControlMode() {
 
                 {adminActiveTab !== 'Organization Profile' && adminActiveTab !== 'Security & Access' && (
                   <GlassPanel className="rounded-2xl border-white/5 p-8 flex flex-col items-center justify-center text-center animate-in fade-in min-h-[300px]">
-                    <Settings size={32} className="text-white/20 mb-4" />
+                    <Settings size={32} className="text-white/70 mb-4" />
                     <h3 className="text-lg text-white font-medium mb-2">{adminActiveTab}</h3>
                     <p className="text-sm text-text-secondary max-w-sm">This settings module is currently locked in the Developer Preview Sandbox.</p>
                   </GlassPanel>

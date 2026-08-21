@@ -146,7 +146,7 @@ export default function EventPlannersClient({ initialPlanners = null }) {
                   "Client satisfaction & testimonials",
                 ].map((item) => (
                   <div key={item} style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "12px", color: "var(--text-secondary)" }}>
-                    <span style={{ color: "var(--green)", fontSize: "10px" }}>✓</span>
+                    <span style={{ color: "var(--green)", fontSize: "12px" }}>✓</span>
                     {item}
                   </div>
                 ))}
@@ -253,7 +253,7 @@ export default function EventPlannersClient({ initialPlanners = null }) {
         .coming-soon-badge {
           background: var(--accent);
           color: #0e0e0e;
-          font-size: 10px;
+          font-size: 12px;
           font-weight: 700;
           letter-spacing: 0.12em;
           padding: 4px 10px;
@@ -271,7 +271,7 @@ export default function EventPlannersClient({ initialPlanners = null }) {
           position: absolute;
           top: 12px;
           left: 12px;
-          font-size: 10px;
+          font-size: 12px;
           font-weight: 700;
           letter-spacing: 0.1em;
           color: var(--text-secondary);
@@ -347,7 +347,7 @@ export default function EventPlannersClient({ initialPlanners = null }) {
         }
         .broker-location {
           font-family: var(--font-mono);
-          font-size: 10px;
+          font-size: 12px;
           color: var(--accent);
           text-transform: uppercase;
           letter-spacing: 0.1em;
@@ -398,7 +398,7 @@ export default function EventPlannersClient({ initialPlanners = null }) {
           padding: 8px 16px;
           border-radius: 4px;
           color: var(--accent);
-          font-size: 11px;
+          font-size: 12px;
           font-weight: 600;
           text-transform: uppercase;
           letter-spacing: 0.1em;
@@ -413,7 +413,7 @@ export default function EventPlannersClient({ initialPlanners = null }) {
           position: absolute;
           top: 12px;
           right: 12px;
-          font-size: 10px;
+          font-size: 12px;
           font-weight: 700;
           letter-spacing: 1px;
           padding: 3px 8px;

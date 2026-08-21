@@ -379,10 +379,10 @@ export default function AdminPage() {
 
         .vector-label {
           font-family: var(--font-mono), monospace;
-          font-size: 10px;
+          font-size: 12px;
           color: #ff3333; /* Red accent for restricted/admin */
           text-transform: uppercase;
-          letter-spacing: 0.2em;
+          letter-spacing: 0.12em;
           display: block;
           margin-bottom: 16px;
         }
@@ -528,7 +528,7 @@ export default function AdminPage() {
 
         .info-tag {
           font-family: var(--font-mono), monospace;
-          font-size: 10px;
+          font-size: 12px;
           color: var(--text-secondary);
           background: rgba(255, 255, 255, 0.05);
           padding: 4px 8px;
@@ -544,7 +544,7 @@ export default function AdminPage() {
 
         .info-meta {
           font-family: var(--font-mono), monospace;
-          font-size: 10px;
+          font-size: 12px;
           color: var(--text-muted);
         }
 
@@ -553,7 +553,7 @@ export default function AdminPage() {
           color: #000;
           border: none;
           font-family: var(--font-mono), monospace;
-          font-size: 11px;
+          font-size: 12px;
           font-weight: 700;
           text-transform: uppercase;
           letter-spacing: 0.1em;

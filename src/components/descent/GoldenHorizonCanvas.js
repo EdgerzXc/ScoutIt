@@ -832,8 +832,8 @@ export default function GoldenHorizonCanvas({ params: paramsProp }) {
           top: 16px;
           left: 16px;
           padding: 6px 12px;
-          font-size: 10px;
-          letter-spacing: 0.18em;
+          font-size: 12px;
+          letter-spacing: 0.12em;
           opacity: 0;
           transition: opacity 0.3s ease;
         }
@@ -901,7 +901,7 @@ export default function GoldenHorizonCanvas({ params: paramsProp }) {
         .gh-label {
           position: absolute;
           font-family: var(--font-mono), 'Courier New', monospace;
-          font-size: 10px;
+          font-size: 12px;
           letter-spacing: 0.12em;
           color: rgba(232, 174, 60, 0.4);
         }
@@ -917,7 +917,7 @@ export default function GoldenHorizonCanvas({ params: paramsProp }) {
           left: 50%;
           transform: translateX(-50%);
           padding: 8px 16px;
-          font-size: 10px;
+          font-size: 12px;
           border-color: rgba(232, 174, 60, 0.3);
           box-shadow: 0 0 20px rgba(232, 174, 60, 0.15);
           animation: ghPulse 2s ease-in-out infinite;
@@ -926,7 +926,7 @@ export default function GoldenHorizonCanvas({ params: paramsProp }) {
         }
         .gh-status-title {
           font-weight: 700;
-          letter-spacing: 0.18em;
+          letter-spacing: 0.12em;
         }
         .gh-sep { color: rgba(255, 255, 255, 0.2); }
         .gh-status span:not(.gh-status-title):not(.gh-sep):not(.gh-ping) {
@@ -941,7 +941,7 @@ export default function GoldenHorizonCanvas({ params: paramsProp }) {
           top: 16px;
           right: 16px;
           padding: 10px 12px;
-          font-size: 10px;
+          font-size: 12px;
           flex-direction: column;
           align-items: stretch;
           gap: 5px;

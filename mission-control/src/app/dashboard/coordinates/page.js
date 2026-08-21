@@ -37,7 +37,7 @@ export default async function CoordinatesPage() {
       <header className="space-y-2">
         <div className="flex items-center gap-2 text-amber-400">
           <Crosshair className="w-4 h-4" />
-          <h1 className="font-mono text-xs tracking-[0.2em] uppercase">Position Queue</h1>
+          <h1 className="font-mono text-xs tracking-[0.12em] uppercase">Position Queue</h1>
         </div>
         <p className="text-sm text-neutral-400 max-w-2xl leading-relaxed">
           Owners never type coordinates — every pin is geocoded from the listing&apos;s location
@@ -75,7 +75,7 @@ export default async function CoordinatesPage() {
                     )}
                     <span className="text-sm text-neutral-100 truncate">{row.title || row.slug || row.id}</span>
                     <span
-                      className={`font-mono text-[10px] tracking-widest uppercase px-2 py-0.5 rounded border ${
+                      className={`font-mono text-[12px] tracking-widest uppercase px-2 py-0.5 rounded border ${
                         label.tone === "bad"
                           ? "border-red-900 text-red-300 bg-red-950/40"
                           : "border-amber-900 text-amber-300 bg-amber-950/40"
@@ -98,7 +98,7 @@ export default async function CoordinatesPage() {
                     </p>
                   )}
                   {row.point && (
-                    <p className="font-mono text-[11px] text-neutral-500 mt-1">
+                    <p className="font-mono text-[12px] text-neutral-500 mt-1">
                       Current: {row.point.lat.toFixed(6)}, {row.point.lng.toFixed(6)}
                     </p>
                   )}
@@ -127,7 +127,7 @@ export default async function CoordinatesPage() {
                   />
                   <button
                     type="submit"
-                    className="px-3 py-1.5 rounded bg-amber-500 hover:bg-amber-400 text-neutral-950 font-mono text-[11px] tracking-widest uppercase"
+                    className="px-3 py-1.5 rounded bg-amber-500 hover:bg-amber-400 text-neutral-950 font-mono text-[12px] tracking-widest uppercase"
                   >
                     Verify
                   </button>
@@ -136,7 +136,7 @@ export default async function CoordinatesPage() {
                       href={`https://www.scoutit.space/property/${row.slug}`}
                       target="_blank"
                       rel="noreferrer"
-                      className="px-3 py-1.5 rounded border border-neutral-700 text-neutral-300 font-mono text-[11px] tracking-widest uppercase hover:border-amber-700"
+                      className="px-3 py-1.5 rounded border border-neutral-700 text-neutral-300 font-mono text-[12px] tracking-widest uppercase hover:border-amber-700"
                     >
                       View
                     </a>

@@ -203,7 +203,7 @@ const navBar = {
 
 const backLink = {
   fontFamily: "var(--font-body)",
-  fontSize: 11,
+  fontSize: 12,
   color: "var(--text-secondary)",
   letterSpacing: "0.1em",
   textTransform: "uppercase",

@@ -124,7 +124,7 @@ export default function ConnectCalendarPanel({ userId, addToast }) {
             <div className="w-8 h-8 rounded bg-white text-black flex items-center justify-center font-bold text-xs shrink-0">G</div>
             <div className="min-w-0">
               <div className="text-sm text-on-surface font-medium">Google Calendar</div>
-              <div className={`text-[11px] truncate ${google ? "text-emerald-400" : "text-text-muted"}`}>
+              <div className={`text-[12px] truncate ${google ? "text-emerald-400" : "text-text-muted"}`}>
                 {loading
                   ? "Checking…"
                   : google
@@ -140,7 +140,7 @@ export default function ConnectCalendarPanel({ userId, addToast }) {
                 type="button"
                 onClick={handleSync}
                 disabled={busy}
-                className="text-[11px] text-background bg-gold-accent hover:bg-gold-bright px-3 py-1.5 rounded uppercase tracking-wider font-mono disabled:opacity-50"
+                className="text-[12px] text-background bg-gold-accent hover:bg-gold-bright px-3 py-1.5 rounded uppercase tracking-wider font-mono disabled:opacity-50"
               >
                 {busy ? "Syncing…" : "Sync now"}
               </button>
@@ -148,7 +148,7 @@ export default function ConnectCalendarPanel({ userId, addToast }) {
                 type="button"
                 onClick={handleDisconnect}
                 disabled={busy}
-                className="text-[11px] text-error border border-error/30 px-3 py-1.5 rounded hover:bg-error/10 uppercase tracking-wider font-mono disabled:opacity-50"
+                className="text-[12px] text-error border border-error/30 px-3 py-1.5 rounded hover:bg-error/10 uppercase tracking-wider font-mono disabled:opacity-50"
               >
                 Disconnect
               </button>
@@ -168,13 +168,13 @@ export default function ConnectCalendarPanel({ userId, addToast }) {
         {/* Calendly — visible but not yet available (API needs a paid plan) */}
         <div className="flex-1 bg-black/40 border border-white/5 rounded p-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-8 h-8 rounded bg-blue-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0">Cal</div>
+            <div className="w-8 h-8 rounded bg-blue-600 text-white flex items-center justify-center font-bold text-[12px] shrink-0">Cal</div>
             <div className="min-w-0">
               <div className="text-sm text-on-surface font-medium">Calendly</div>
-              <div className="text-[11px] text-text-muted truncate">Coming soon · needs a Calendly paid plan</div>
+              <div className="text-[12px] text-text-muted truncate">Coming soon · needs a Calendly paid plan</div>
             </div>
           </div>
-          <span className="text-[10px] uppercase tracking-widest font-mono text-text-muted border border-white/10 rounded px-2 py-1 shrink-0">
+          <span className="text-[12px] uppercase tracking-widest font-mono text-text-muted border border-white/10 rounded px-2 py-1 shrink-0">
             Soon
           </span>
         </div>

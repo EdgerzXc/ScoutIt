@@ -20,14 +20,14 @@ const newScenarioId = () => "sc_" + Date.now().toString(36) + Math.random().toSt
 
 const inputCls =
   "w-full bg-surface-alt border border-surface-variant rounded px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-gold-accent transition";
-const labelCls = "block text-[11px] font-label-caps tracking-widest uppercase text-text-secondary mb-1.5";
+const labelCls = "block text-[12px] font-label-caps tracking-widest uppercase text-text-secondary mb-1.5";
 
 function Field({ label, hint, children }) {
   return (
     <div>
       <label className={labelCls}>{label}</label>
       {children}
-      {hint && <p className="text-[10px] text-text-muted mt-1">{hint}</p>}
+      {hint && <p className="text-[12px] text-text-muted mt-1">{hint}</p>}
     </div>
   );
 }
@@ -57,7 +57,7 @@ export default function UnitDetailsDrawer({ unit, isPro, propertyId, property, o
       <div className="relative w-full h-full overflow-y-auto bg-background border-r border-surface-variant flex flex-col">
         <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 bg-background/95 backdrop-blur border-b border-surface-variant">
           <div>
-            <div className="text-[10px] font-label-caps tracking-widest uppercase text-gold-accent">Unit Master Page</div>
+            <div className="text-[12px] font-label-caps tracking-widest uppercase text-gold-accent">Unit Master Page</div>
             <h2 className="font-display-md text-lg text-on-surface">{unit.name || "Untitled Unit"}</h2>
           </div>
           <div className="flex items-center gap-3">
@@ -66,7 +66,7 @@ export default function UnitDetailsDrawer({ unit, isPro, propertyId, property, o
                 href={unitDetailPath(propertyId, unit.id)}
                 target="_blank" 
                 rel="noopener noreferrer" 
-                className="px-3 py-1.5 rounded border border-surface-variant text-text-secondary hover:text-gold-accent hover:border-gold-accent text-[11px] font-label-caps uppercase tracking-widest transition"
+                className="px-3 py-1.5 rounded border border-surface-variant text-text-secondary hover:text-gold-accent hover:border-gold-accent text-[12px] font-label-caps uppercase tracking-widest transition"
               >
                 Preview
               </a>
@@ -80,7 +80,7 @@ export default function UnitDetailsDrawer({ unit, isPro, propertyId, property, o
         <div className="px-6 py-5 flex flex-col gap-6">
           {/* Overview */}
           <section className="flex flex-col gap-4">
-            <div className="text-[11px] font-label-caps tracking-widest uppercase text-text-secondary">The Space</div>
+            <div className="text-[12px] font-label-caps tracking-widest uppercase text-text-secondary">The Space</div>
             <Field label="Base listed rate">
               <input className={inputCls} value={d.price || ""} onChange={(e) => onDetail("price", e.target.value)} placeholder="e.g. ₱200,000 / mo or ₱1,500/sqm" />
             </Field>
@@ -117,7 +117,7 @@ export default function UnitDetailsDrawer({ unit, isPro, propertyId, property, o
 
           {/* Floor plan & Vault */}
           <section className="flex flex-col gap-4 pt-2 border-t border-surface-variant">
-            <div className="text-[11px] font-label-caps tracking-widest uppercase text-text-secondary">The Unit Vault</div>
+            <div className="text-[12px] font-label-caps tracking-widest uppercase text-text-secondary">The Unit Vault</div>
             <Field label="2D floor plan URL" hint="Uploaded blueprint. Used as the base for 3D generation.">
               <input className={inputCls} value={d.floor_plan_2d_url || ""} onChange={(e) => onDetail("floor_plan_2d_url", e.target.value)} placeholder="https://…/floor-12.png" />
             </Field>
@@ -127,7 +127,7 @@ export default function UnitDetailsDrawer({ unit, isPro, propertyId, property, o
             <Field label="Matterport URL" hint="A commissioned professional 3D scan link.">
               <input className={inputCls} value={d.matterport_url || ""} onChange={(e) => onDetail("matterport_url", e.target.value)} placeholder="https://my.matterport.com/show/?m=..." />
             </Field>
-            <p className="text-[11px] text-text-muted -mt-1">
+            <p className="text-[12px] text-text-muted -mt-1">
               3D conversion is generated on our side and shown gated behind Cluster+ — no Connect cost. A commissioned pro model is a separate paid ecosystem service.
             </p>
           </section>
@@ -135,9 +135,9 @@ export default function UnitDetailsDrawer({ unit, isPro, propertyId, property, o
           {/* Subdivision scenarios */}
           <section className="flex flex-col gap-3 pt-2 border-t border-surface-variant">
             <div className="flex items-center justify-between">
-              <div className="text-[11px] font-label-caps tracking-widest uppercase text-text-secondary">This space flexes — subdivision options</div>
+              <div className="text-[12px] font-label-caps tracking-widest uppercase text-text-secondary">This space flexes — subdivision options</div>
             </div>
-            <p className="text-[11px] text-text-muted -mt-1">
+            <p className="text-[12px] text-text-muted -mt-1">
               Curate the real ways this space can be carved. Buyers pick from these on the unit page (they don&apos;t invent cuts). Add a &ldquo;Whole floor&rdquo;, &ldquo;Halves&rdquo;, &ldquo;Quarters&rdquo;, etc.
             </p>
 

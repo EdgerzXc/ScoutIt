@@ -31,9 +31,9 @@ export default function GlobalError({ error, reset }) {
         >
           <div
             style={{
-              fontSize: "11px",
+              fontSize: "12px",
               fontFamily: "var(--font-mono, monospace)",
-              letterSpacing: "0.15em",
+              letterSpacing: "0.12em",
               textTransform: "uppercase",
               color: "#E8AE3C",
               marginBottom: "16px",

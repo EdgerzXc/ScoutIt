@@ -5,7 +5,7 @@ import { useId } from "react";
 export function PilotPaymentNotice() {
   return (
     <aside className="mx-auto mb-8 max-w-3xl rounded-xl border border-gold-accent/30 bg-gold-accent/5 px-5 py-4 text-center" aria-label="Human-testing payment status">
-      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-gold-accent">Invited human-testing pilot</p>
+      <p className="font-mono text-[12px] font-bold uppercase tracking-[0.12em] text-gold-accent">Invited human-testing pilot</p>
       <p className="mt-2 text-sm leading-6 text-text-secondary">
         Plan concepts and prices are visible for evaluation. Payments, upgrades,
         subscriptions, and Connect purchases are not active during human testing.
@@ -28,7 +28,7 @@ export default function PilotPaymentControls({ role = null, tier, source }) {
         type="button"
         disabled
         aria-describedby={statusId}
-        className="w-full cursor-not-allowed rounded border border-surface-variant bg-surface/70 px-3 py-3 text-center font-mono text-[10px] font-bold uppercase tracking-widest text-text-muted opacity-75"
+        className="w-full cursor-not-allowed rounded border border-surface-variant bg-surface/70 px-3 py-3 text-center font-mono text-[12px] font-bold uppercase tracking-widest text-text-muted opacity-75"
       >
         Payments unavailable during pilot
       </button>

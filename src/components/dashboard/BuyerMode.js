@@ -173,7 +173,7 @@ export default function BuyerMode() {
         popupContent.className = 'bg-surface border border-gold-accent/20 p-4 rounded-lg shadow-xl w-60';
         
         const typeEl = document.createElement('div');
-        typeEl.className = 'text-[10px] text-gold-accent font-label-caps uppercase tracking-widest mb-1';
+        typeEl.className = 'text-[12px] text-gold-accent font-label-caps uppercase tracking-widest mb-1';
         typeEl.textContent = listing.type;
         
         const titleEl = document.createElement('div');
@@ -186,7 +186,7 @@ export default function BuyerMode() {
         
         const linkEl = document.createElement('a');
         linkEl.href = `/property/${listing.slug || listing.id}`;
-        linkEl.className = 'block text-center w-full text-[10px] font-label-caps tracking-widest uppercase bg-gold-accent/10 hover:bg-gold-accent/20 text-gold-accent py-2 rounded transition';
+        linkEl.className = 'block text-center w-full text-[12px] font-label-caps tracking-widest uppercase bg-gold-accent/10 hover:bg-gold-accent/20 text-gold-accent py-2 rounded transition';
         linkEl.textContent = 'View Property';
         
         popupContent.appendChild(typeEl);
@@ -324,7 +324,7 @@ export default function BuyerMode() {
             {item.img || '🏠'}
           </div>
           <div className="flex flex-col overflow-hidden">
-            <div className="text-gold-accent font-label-caps text-[10px] tracking-widest uppercase mb-1">{item.type}</div>
+            <div className="text-gold-accent font-label-caps text-[12px] tracking-widest uppercase mb-1">{item.type}</div>
             <div className="font-working-title text-on-surface truncate group-hover:underline">{item.title}</div>
             <div className="text-xs text-text-secondary truncate mt-0.5">{item.loc || 'Metro Manila'}</div>
           </div>
@@ -366,7 +366,7 @@ export default function BuyerMode() {
           {item.img || '🏠'}
         </div>
         <div className="p-4 flex flex-col">
-          <div className="text-gold-accent font-label-caps text-[10px] tracking-widest uppercase mb-1">{item.type}</div>
+          <div className="text-gold-accent font-label-caps text-[12px] tracking-widest uppercase mb-1">{item.type}</div>
           <div className="font-working-title text-on-surface mb-1 truncate group-hover:underline">{item.title}</div>
           <div className="text-xs text-text-secondary truncate">{item.loc || 'Location hidden'}</div>
         </div>
@@ -447,7 +447,7 @@ export default function BuyerMode() {
           
           <div className="absolute bottom-6 left-6 z-10 flex flex-col gap-2">
             <div className="bg-background/40 backdrop-blur-2xl border border-white/[0.04] p-5 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
-              <div className="text-[10px] font-label-caps tracking-widest text-gold-accent mb-1 uppercase">
+              <div className="text-[12px] font-label-caps tracking-widest text-gold-accent mb-1 uppercase">
                 Spatial Intelligence
               </div>
               <div className="font-working-title text-on-surface text-lg">{filteredListings.filter(l => l.coordinates).length} properties in radar</div>
@@ -491,12 +491,12 @@ export default function BuyerMode() {
                   <button
                     type="button"
                     onClick={() => setIsComparisonOpen(true)}
-                    className="font-label-caps text-[10px] tracking-widest uppercase text-gold-accent hover:bg-gold-accent/10 border border-gold-accent/30 px-3 py-1.5 rounded transition cursor-pointer font-bold"
+                    className="font-label-caps text-[12px] tracking-widest uppercase text-gold-accent hover:bg-gold-accent/10 border border-gold-accent/30 px-3 py-1.5 rounded transition cursor-pointer font-bold"
                   >
                     Compare Board ({selectedForCompare.length > 0 ? selectedForCompare.length : Math.min(4, savedFiltered.length)}) ➔
                   </button>
                 )}
-                <Link href="/wishlist" className="text-[10px] font-label-caps tracking-widest uppercase text-gold-accent hover:underline py-2.5 px-1 -my-1">View all →</Link>
+                <Link href="/wishlist" className="text-[12px] font-label-caps tracking-widest uppercase text-gold-accent hover:underline py-2.5 px-1 -my-1">View all →</Link>
               </div>
             </div>
             <p className="text-xs text-text-secondary mb-2">Tracked assets and saved market briefs. Select items to compare specifications side-by-side.</p>
@@ -519,7 +519,7 @@ export default function BuyerMode() {
                   <span className="text-3xl mb-3 opacity-60 block">📂</span>
                   <div className="font-working-title text-base text-on-surface mb-1">Your Board is ready</div>
                   <p className="text-xs text-text-secondary max-w-sm mb-4 leading-relaxed">Save properties, floor plans, and intelligence briefs as you research to build your private evaluation board.</p>
-                  <Link href="/property" className="font-label-caps text-[10px] tracking-widest uppercase text-background bg-gold-accent hover:opacity-90 px-4 py-2 rounded transition active:scale-95 shadow-[0_0_12px_rgba(232,174,60,0.2)] font-bold">
+                  <Link href="/property" className="font-label-caps text-[12px] tracking-widest uppercase text-background bg-gold-accent hover:opacity-90 px-4 py-2 rounded transition active:scale-95 shadow-[0_0_12px_rgba(232,174,60,0.2)] font-bold">
                     Explore Curated Spaces →
                   </Link>
                 </div>
@@ -533,14 +533,14 @@ export default function BuyerMode() {
               New in Metro Manila
               <div className="flex items-center gap-4">
                 <button
-                  className={`font-label-caps tracking-widest uppercase text-[10px] px-4 py-2 rounded transition flex items-center gap-1.5 ${areaWatch ? 'text-gold-accent bg-gold-accent/10 border border-gold-accent/40' : 'text-background bg-gold-accent shadow-[0_0_10px_rgba(232,174,60,0.3)] hover:opacity-90 hover:scale-105'}`}
+                  className={`font-label-caps tracking-widest uppercase text-[12px] px-4 py-2 rounded transition flex items-center gap-1.5 ${areaWatch ? 'text-gold-accent bg-gold-accent/10 border border-gold-accent/40' : 'text-background bg-gold-accent shadow-[0_0_10px_rgba(232,174,60,0.3)] hover:opacity-90 hover:scale-105'}`}
                   onClick={toggleAreaWatch}
                   aria-pressed={areaWatch}
                 >
                   {areaWatch ? '✓ Watching Area' : '+ Watch Area'}
                 </button>
                 <button
-                  className="text-[10px] font-label-caps tracking-widest uppercase text-gold-accent hover:underline py-2.5 px-1 -my-1"
+                  className="text-[12px] font-label-caps tracking-widest uppercase text-gold-accent hover:underline py-2.5 px-1 -my-1"
                   onClick={() => setShowMap(true)}
                 >
                   View Map
@@ -565,7 +565,7 @@ export default function BuyerMode() {
                   <p className="text-sm text-text-secondary text-center mb-6 max-w-md">
                     Nothing matches &quot;{searchQuery}&quot; right now. Broaden your search parameters or explore the full ledger to see what&apos;s active in the market.
                   </p>
-                  <Link href="/property" className="font-label-caps tracking-widest uppercase text-[10px] text-gold-accent border border-gold-accent/30 bg-gold-accent/10 px-6 py-3 rounded hover:bg-gold-accent/20 transition">
+                  <Link href="/property" className="font-label-caps tracking-widest uppercase text-[12px] text-gold-accent border border-gold-accent/30 bg-gold-accent/10 px-6 py-3 rounded hover:bg-gold-accent/20 transition">
                     Explore Full Ledger ({listings.length} active spaces)
                   </Link>
                 </div>
@@ -599,7 +599,7 @@ export default function BuyerMode() {
               <Link href="/intel" className="block shrink-0 w-[320px] md:w-[400px] snap-start">
                 <div className="card-atmosphere-gold hov-glow rounded-lg p-6 flex flex-col justify-between transition cursor-pointer group h-full">
                   <div>
-                    <span className="inline-block bg-gold-accent/10 text-gold-accent font-label-caps text-[10px] tracking-widest uppercase px-2 py-1 rounded mb-4">Market Intel</span>
+                    <span className="inline-block bg-gold-accent/10 text-gold-accent font-label-caps text-[12px] tracking-widest uppercase px-2 py-1 rounded mb-4">Market Intel</span>
                     <h3 className="font-headline-editorial text-xl text-on-surface mb-2">BGC Condo Yields Rise</h3>
                     <p className="text-sm text-text-secondary leading-relaxed line-clamp-3">Premium residential spaces post 4.2% year-on-year growth. What the transaction data says about where BGC rental demand is heading — and which unit profiles are capturing it.</p>
                   </div>
@@ -613,7 +613,7 @@ export default function BuyerMode() {
               <Link href="/intel" className="block shrink-0 w-[320px] md:w-[400px] snap-start">
                 <div className="card-atmosphere-gold hov-glow rounded-lg p-6 flex flex-col justify-between transition cursor-pointer group h-full">
                   <div>
-                    <span className="inline-block bg-gold-accent/10 text-gold-accent font-label-caps text-[10px] tracking-widest uppercase px-2 py-1 rounded mb-4">Area Guide</span>
+                    <span className="inline-block bg-gold-accent/10 text-gold-accent font-label-caps text-[12px] tracking-widest uppercase px-2 py-1 rounded mb-4">Area Guide</span>
                     <h3 className="font-headline-editorial text-xl text-on-surface mb-2">Makati Central Resurgence</h3>
                     <p className="text-sm text-text-secondary leading-relaxed line-clamp-3">Older luxury buildings across the Makati core are undergoing massive renovations. How the retrofit wave is repricing the district — and what it means if you&apos;re scouting for value.</p>
                   </div>
@@ -627,7 +627,7 @@ export default function BuyerMode() {
               <Link href="/intel" className="block shrink-0 w-[320px] md:w-[400px] snap-start">
                 <div className="card-atmosphere-gold hov-glow rounded-lg p-6 flex flex-col justify-between transition cursor-pointer group h-full">
                   <div>
-                    <span className="inline-block bg-gold-accent/10 text-gold-accent font-label-caps text-[10px] tracking-widest uppercase px-2 py-1 rounded mb-4">Commercial Signal</span>
+                    <span className="inline-block bg-gold-accent/10 text-gold-accent font-label-caps text-[12px] tracking-widest uppercase px-2 py-1 rounded mb-4">Commercial Signal</span>
                     <h3 className="font-headline-editorial text-xl text-on-surface mb-2">High Street Expansion</h3>
                     <p className="text-sm text-text-secondary leading-relaxed line-clamp-3">Retail spaces along the High Street corridor are fully occupied for the next 24 months. What the occupancy squeeze signals for surrounding residential and mixed-use assets.</p>
                   </div>

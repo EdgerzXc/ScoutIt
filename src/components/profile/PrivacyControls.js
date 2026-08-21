@@ -77,7 +77,7 @@ export default function PrivacyControls({
         <Shield size={14} strokeWidth={1.5} className="text-gold-accent" />
         <span style={sectionTitle}>Privacy</span>
         {saving && (
-          <span style={{ fontFamily: "var(--font-body)", fontSize: 10, color: "var(--text-secondary)", marginLeft: "auto" }}>
+          <span style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "var(--text-secondary)", marginLeft: "auto" }}>
             Saving…
           </span>
         )}
@@ -237,7 +237,7 @@ const sectionHeader = {
 
 const sectionTitle = {
   fontFamily: "var(--font-body)",
-  fontSize: 10,
+  fontSize: 12,
   fontWeight: 700,
   letterSpacing: "0.14em",
   textTransform: "uppercase",
@@ -278,14 +278,14 @@ const controlLabel = {
 
 const controlDesc = {
   fontFamily: "var(--font-body)",
-  fontSize: 11,
+  fontSize: 12,
   color: "var(--text-secondary)",
   lineHeight: 1.5,
 };
 
 const blockLabel = {
   fontFamily: "var(--font-body)",
-  fontSize: 11,
+  fontSize: 12,
   color: "var(--text-secondary)",
   letterSpacing: "0.06em",
   marginBottom: 4,
@@ -293,7 +293,7 @@ const blockLabel = {
 
 const blockDesc = {
   fontFamily: "var(--font-body)",
-  fontSize: 11,
+  fontSize: 12,
   color: "rgba(255,255,255,0.25)",
   fontStyle: "italic",
   marginBottom: 10,
@@ -301,7 +301,7 @@ const blockDesc = {
 
 const hardRulesNote = {
   fontFamily: "var(--font-body)",
-  fontSize: 11,
+  fontSize: 12,
   color: "rgba(255,255,255,0.2)",
   borderTop: "1px solid rgba(255,255,255,0.04)",
   paddingTop: 14,

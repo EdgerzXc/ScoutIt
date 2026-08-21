@@ -115,7 +115,7 @@ export default async function DashboardOverview() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold tracking-tight">System Overview</h1>
-        <span className="text-xs text-white/40">
+        <span className="text-xs text-white/70">
           {TIER_LABELS[staff.tier]} · live data
         </span>
       </div>
@@ -125,7 +125,7 @@ export default async function DashboardOverview() {
           const Icon = stat.icon;
           return (
             <div key={stat.name} className="bg-[#121212] border border-white/5 rounded-xl p-5">
-              <div className="flex items-center gap-3 text-white/50 mb-3">
+              <div className="flex items-center gap-3 text-white/70 mb-3">
                 <Icon className="w-4 h-4" />
                 <h3 className="text-sm font-medium">{stat.name}</h3>
               </div>
@@ -136,7 +136,7 @@ export default async function DashboardOverview() {
               >
                 {stat.value}
               </div>
-              <div className="text-xs text-white/40">{stat.sub}</div>
+              <div className="text-xs text-white/70">{stat.sub}</div>
             </div>
           );
         })}
@@ -157,8 +157,8 @@ export default async function DashboardOverview() {
               Failed to load audit stream: {recentActions.error}
             </div>
           ) : (recentActions.data ?? []).length === 0 ? (
-            <div className="text-sm text-white/50 bg-black/40 border border-white/5 rounded-lg p-8 text-center flex flex-col items-center gap-2">
-              <ScrollText className="w-5 h-5 text-white/30" />
+            <div className="text-sm text-white/70 bg-black/40 border border-white/5 rounded-lg p-8 text-center flex flex-col items-center gap-2">
+              <ScrollText className="w-5 h-5 text-white/70" />
               No staff actions yet. Every approve, reject, block, and edit will stream here.
             </div>
           ) : (
@@ -170,10 +170,10 @@ export default async function DashboardOverview() {
                     <span className="text-[#E8AE3C] font-mono text-xs whitespace-nowrap">
                       {a.action}
                     </span>
-                    <span className="text-white/50 text-xs truncate">
+                    <span className="text-white/70 text-xs truncate">
                       {a.target_table}#{a.target_id}
                     </span>
-                    <span className="ml-auto text-white/40 text-xs whitespace-nowrap">
+                    <span className="ml-auto text-white/70 text-xs whitespace-nowrap">
                       {actor?.display_name || actor?.email || "system"} ·{" "}
                       {new Date(a.created_at).toLocaleString()}
                     </span>
@@ -198,7 +198,7 @@ export default async function DashboardOverview() {
           </div>
 
           <div className="mt-6 pt-4 border-t border-white/10">
-            <div className="flex items-center gap-2 text-xs text-white/40">
+            <div className="flex items-center gap-2 text-xs text-white/70">
               <ShieldBan className="w-3.5 h-3.5" />
               <span>
                 Blocked entries:{" "}
@@ -220,7 +220,7 @@ function QuickLink({ href, icon: Icon, label }) {
       href={href}
       className="flex items-center gap-3 px-4 py-3 bg-black/40 hover:bg-white/5 border border-white/5 rounded-lg text-sm text-white/80 transition-colors"
     >
-      <Icon className="w-4 h-4 text-white/50" />
+      <Icon className="w-4 h-4 text-white/70" />
       {label}
     </Link>
   );

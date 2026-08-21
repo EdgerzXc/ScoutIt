@@ -62,8 +62,8 @@ export default function EnterprisePage() {
         }
         .vector-label {
           font-family: var(--font-mono), monospace;
-          font-size: 11px;
-          letter-spacing: 0.25em;
+          font-size: 12px;
+          letter-spacing: 0.12em;
           color: var(--accent);
           text-transform: uppercase;
         }

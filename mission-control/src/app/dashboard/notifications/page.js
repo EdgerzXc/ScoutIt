@@ -26,12 +26,12 @@ export default async function NotificationsPage() {
             <Send className="w-4 h-4 text-[#E8AE3C]" />
             <h2 className="text-lg font-medium">Send Notification</h2>
           </div>
-          <p className="text-xs text-white/50 mb-6">
+          <p className="text-xs text-white/70 mb-6">
             Send a direct notification to a user&apos;s dashboard. It will appear as an alert they must read.
           </p>
 
           <form action={sendNotification} className="space-y-4">
-            <label className="block text-xs text-white/50">
+            <label className="block text-xs text-white/70">
               User ID (auth.users UUID)
               <input
                 name="userId"
@@ -41,7 +41,7 @@ export default async function NotificationsPage() {
               />
             </label>
 
-            <label className="block text-xs text-white/50">
+            <label className="block text-xs text-white/70">
               Title
               <input
                 name="title"
@@ -51,7 +51,7 @@ export default async function NotificationsPage() {
               />
             </label>
 
-            <label className="block text-xs text-white/50">
+            <label className="block text-xs text-white/70">
               Message
               <textarea
                 name="message"
@@ -62,7 +62,7 @@ export default async function NotificationsPage() {
               />
             </label>
 
-            <label className="block text-xs text-white/50">
+            <label className="block text-xs text-white/70">
               Target URL (Optional)
               <input
                 name="targetUrl"
@@ -95,10 +95,10 @@ export default async function NotificationsPage() {
                   <div className="flex items-center justify-between gap-4 mb-2">
                     <h3 className="font-medium text-white text-sm">{notif.title}</h3>
                     <div className="flex items-center gap-2">
-                      <span className={`text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full border ${
+                      <span className={`text-[12px] uppercase tracking-wide px-2 py-0.5 rounded-full border ${
                         notif.is_read 
                           ? "bg-green-400/10 text-green-400 border-green-400/20" 
-                          : "bg-white/5 text-white/50 border-white/10"
+                          : "bg-white/5 text-white/70 border-white/10"
                       }`}>
                         {notif.is_read ? "Read" : "Unread"}
                       </span>
@@ -106,11 +106,11 @@ export default async function NotificationsPage() {
                   </div>
                   <p className="text-xs text-white/70 mb-2 line-clamp-2">{notif.message}</p>
                   {notif.target_url && (
-                    <div className="mb-3 text-[10px] font-mono text-white/40 truncate">
+                    <div className="mb-3 text-[12px] font-mono text-white/70 truncate">
                       Link: {notif.target_url}
                     </div>
                   )}
-                  <div className="flex items-center justify-between text-[10px] text-white/40 border-t border-white/5 pt-2">
+                  <div className="flex items-center justify-between text-[12px] text-white/70 border-t border-white/5 pt-2">
                     <span>To: {notif.user_id}</span>
                     <span>Sent by {notif.admin_users?.email} · {new Date(notif.created_at).toLocaleString()}</span>
                   </div>
@@ -118,7 +118,7 @@ export default async function NotificationsPage() {
               ))}
               
               {notifications && notifications.length === 0 && (
-                <div className="text-sm text-white/50 text-center py-8">
+                <div className="text-sm text-white/70 text-center py-8">
                   No notifications sent yet.
                 </div>
               )}

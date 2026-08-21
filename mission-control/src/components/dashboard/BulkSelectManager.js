@@ -64,7 +64,7 @@ export function BulkSelectManager({ items, bulkActions = [], itemName = "items" 
       {/* List */}
       <div className="space-y-3">
         {items.length > 0 && hasBulk && (
-          <div className="flex items-center px-2 py-1 text-sm text-white/50">
+          <div className="flex items-center px-2 py-1 text-sm text-white/70">
             <button
               onClick={toggleSelectAll}
               className="flex items-center gap-2 hover:text-white transition-colors"
@@ -101,7 +101,7 @@ export function BulkSelectManager({ items, bulkActions = [], itemName = "items" 
         })}
 
         {items.length === 0 && (
-          <div className="text-sm text-white/50 bg-[#121212] border border-white/5 rounded-xl p-8 text-center">
+          <div className="text-sm text-white/70 bg-[#121212] border border-white/5 rounded-xl p-8 text-center">
             No {itemName} found.
           </div>
         )}

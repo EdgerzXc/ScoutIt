@@ -116,7 +116,7 @@ function CopyRow({ label, text }) {
   return (
     <div className="mb-4">
       <div className="flex items-center justify-between mb-1.5 gap-2">
-        <span className="text-[10px] font-mono uppercase tracking-[0.14em] text-gold-accent truncate">
+        <span className="text-[12px] font-mono uppercase tracking-[0.14em] text-gold-accent truncate">
           {label}
         </span>
         <button
@@ -127,7 +127,7 @@ function CopyRow({ label, text }) {
             setTimeout(() => setDone(false), 2000);
           }}
           aria-label={`Copy ${label}`}
-          className="shrink-0 flex items-center gap-1 text-[11px] text-on-surface/50 hover:text-gold-accent transition-colors"
+          className="shrink-0 flex items-center gap-1 text-[12px] text-on-surface/70 hover:text-gold-accent transition-colors"
         >
           {done ? <Check size={13} /> : <Copy size={13} />}
           {done ? "Copied" : "Copy"}
@@ -260,7 +260,7 @@ export default function ShareModal({
           <button
             onClick={onClose}
             aria-label="Close share modal"
-            className="w-8 h-8 shrink-0 flex items-center justify-center rounded-full text-on-surface/50 hover:text-on-surface hover:bg-on-surface/5 transition-colors"
+            className="w-8 h-8 shrink-0 flex items-center justify-center rounded-full text-on-surface/70 hover:text-on-surface hover:bg-on-surface/5 transition-colors"
           >
             <X size={18} />
           </button>
@@ -282,7 +282,7 @@ export default function ShareModal({
                 className="min-w-0 flex flex-col items-center justify-center gap-1.5 py-3 px-1 rounded-lg bg-on-surface/5 border border-on-surface/5 text-on-surface/70 transition-all hover:bg-on-surface/10 hover:text-gold-accent active:scale-[0.97]"
               >
                 {c.icon}
-                <span className="text-[9px] font-mono uppercase tracking-[0.08em] truncate max-w-full">
+                <span className="text-[12px] font-mono uppercase tracking-[0.08em] truncate max-w-full">
                   {c.name}
                 </span>
               </button>
@@ -302,7 +302,7 @@ export default function ShareModal({
           )}
 
           <div className="relative mt-5">
-            <div className="absolute -top-2.5 left-3 px-2 bg-surface text-[10px] uppercase tracking-[0.14em] text-gold-accent font-mono">
+            <div className="absolute -top-2.5 left-3 px-2 bg-surface text-[12px] uppercase tracking-[0.14em] text-gold-accent font-mono">
               Raw Briefing Text
             </div>
             <textarea
@@ -320,7 +320,7 @@ export default function ShareModal({
                 type="button"
                 onClick={() => setShowFormats((v) => !v)}
                 aria-expanded={showFormats}
-                className="w-full flex items-center justify-between text-[10px] font-mono uppercase tracking-[0.14em] text-on-surface/60 hover:text-gold-accent transition-colors"
+                className="w-full flex items-center justify-between text-[12px] font-mono uppercase tracking-[0.14em] text-on-surface/60 hover:text-gold-accent transition-colors"
               >
                 <span>Ready-to-post formats</span>
                 <span aria-hidden="true">{showFormats ? "−" : "+"}</span>

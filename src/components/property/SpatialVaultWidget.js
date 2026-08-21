@@ -59,7 +59,7 @@ export default function SpatialVaultWidget({
         <div className="p-3.5 rounded bg-surface/80 border border-gold-accent/25 flex items-start gap-3">
           <span className="font-mono text-gold-accent text-sm leading-none font-bold">◈</span>
           <div>
-            <span className="font-mono text-[9px] uppercase tracking-widest text-gold-accent font-bold block mb-0.5">
+            <span className="font-mono text-[12px] uppercase tracking-widest text-gold-accent font-bold block mb-0.5">
               Spatial Vault Demonstration
             </span>
             <p className="font-sans text-xs text-text-secondary m-0 leading-relaxed">
@@ -79,7 +79,7 @@ export default function SpatialVaultWidget({
 
       {realHeatmap && !failedImages.has(realHeatmap) && (
         <section className="vault-item">
-          <h2 className="mb-3 font-label-caps text-[10px] uppercase tracking-widest text-gold-accent">
+          <h2 className="mb-3 font-label-caps text-[12px] uppercase tracking-widest text-gold-accent">
             Drone Heatmap Analysis
           </h2>
           <div className="h-[240px] overflow-hidden rounded border border-surface-variant">
@@ -96,7 +96,7 @@ export default function SpatialVaultWidget({
 
       {realFloorPlans.length > 0 && (
         <section className="vault-item">
-          <h2 className="mb-3 font-label-caps text-[10px] uppercase tracking-widest text-gold-accent">
+          <h2 className="mb-3 font-label-caps text-[12px] uppercase tracking-widest text-gold-accent">
             Floor Plans{realFloorPlans.length > 1 ? ` · ${realFloorPlans.length}` : ""}
           </h2>
           <div className="grid grid-cols-1 gap-3 rounded border border-surface-variant bg-surface p-3 sm:grid-cols-2">
@@ -115,10 +115,10 @@ export default function SpatialVaultWidget({
                     <img src={plan.url} alt={plan.name} className="h-[160px] w-full bg-surface object-contain" />
                   ) : (
                     <div className="flex h-[160px] w-full items-center justify-center bg-surface">
-                      <span className="font-label-caps text-[10px] uppercase tracking-widest text-text-secondary">PDF</span>
+                      <span className="font-label-caps text-[12px] uppercase tracking-widest text-text-secondary">PDF</span>
                     </div>
                   )}
-                  <span className="block truncate px-3 py-2 font-label-caps text-[10px] uppercase tracking-widest text-text-secondary">
+                  <span className="block truncate px-3 py-2 font-label-caps text-[12px] uppercase tracking-widest text-text-secondary">
                     {plan.name}
                   </span>
                 </a>
@@ -134,7 +134,7 @@ export default function SpatialVaultWidget({
 function EmbedCard({ title, url, iframeTitle }) {
   return (
     <section className="vault-item">
-      <h2 className="mb-3 font-label-caps text-[10px] uppercase tracking-widest text-gold-accent">{title}</h2>
+      <h2 className="mb-3 font-label-caps text-[12px] uppercase tracking-widest text-gold-accent">{title}</h2>
       <div className="h-[400px] overflow-hidden rounded border border-surface-variant bg-surface">
         <iframe
           src={url}
@@ -152,7 +152,7 @@ function EmbedCard({ title, url, iframeTitle }) {
 function VaultStatus({ title, detail, locked = false }) {
   return (
     <section className="mt-8 rounded border border-surface-variant bg-surface p-6 text-center" role="status">
-      <span className="font-label-caps text-[10px] uppercase tracking-widest text-gold-accent">
+      <span className="font-label-caps text-[12px] uppercase tracking-widest text-gold-accent">
         {locked ? "Cluster access" : "Verified media status"}
       </span>
       <h2 className="mt-3 font-headline-editorial text-lg text-on-surface">{title}</h2>
@@ -160,7 +160,7 @@ function VaultStatus({ title, detail, locked = false }) {
       {locked && (
         <a
           href="/pricing/seeker"
-          className="mt-5 inline-flex rounded bg-gold-accent px-6 py-3 font-label-caps text-[11px] font-bold uppercase tracking-widest text-background transition-opacity hover:opacity-90"
+          className="mt-5 inline-flex rounded bg-gold-accent px-6 py-3 font-label-caps text-[12px] font-bold uppercase tracking-widest text-background transition-opacity hover:opacity-90"
         >
           View Cluster access →
         </a>

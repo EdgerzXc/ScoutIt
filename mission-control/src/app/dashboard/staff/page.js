@@ -24,7 +24,7 @@ export default async function StaffIamPage() {
       </div>
 
       <section className="bg-[#121212] border border-white/5 rounded-xl p-5">
-        <h2 className="text-sm font-medium text-white/50 uppercase tracking-wide mb-4 flex items-center gap-2">
+        <h2 className="text-sm font-medium text-white/70 uppercase tracking-wide mb-4 flex items-center gap-2">
           <UserPlus className="w-4 h-4" />
           Invite staff
         </h2>
@@ -34,7 +34,7 @@ export default async function StaffIamPage() {
             type="email"
             required
             placeholder="name@scoutit.com"
-            className="flex-1 min-w-[200px] bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-white/30"
+            className="flex-1 min-w-[200px] bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-white/70"
           />
           <select
             name="tier"
@@ -49,14 +49,14 @@ export default async function StaffIamPage() {
             Send invite
           </button>
         </form>
-        <p className="text-xs text-white/30 mt-2">
+        <p className="text-xs text-white/70 mt-2">
           Sends a real Supabase Auth invite email and creates their admin_users row at the chosen
           tier immediately.
         </p>
       </section>
 
       <section className="bg-[#121212] border border-white/5 rounded-xl p-5">
-        <h2 className="text-sm font-medium text-white/50 uppercase tracking-wide mb-4 flex items-center gap-2">
+        <h2 className="text-sm font-medium text-white/70 uppercase tracking-wide mb-4 flex items-center gap-2">
           <KeyRound className="w-4 h-4" />
           Grant access to an existing account
         </h2>
@@ -66,12 +66,12 @@ export default async function StaffIamPage() {
             type="email"
             required
             placeholder="already-registered@email.com"
-            className="flex-1 min-w-[200px] bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-white/30"
+            className="flex-1 min-w-[200px] bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-white/70"
           />
           <input
             name="displayName"
             placeholder="Display name (optional)"
-            className="flex-1 min-w-[160px] bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-white/30"
+            className="flex-1 min-w-[160px] bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-white/70"
           />
           <select
             name="tier"
@@ -86,7 +86,7 @@ export default async function StaffIamPage() {
             Grant access
           </button>
         </form>
-        <p className="text-xs text-white/30 mt-2">
+        <p className="text-xs text-white/70 mt-2">
           For someone who already has a ScoutIt account (e.g. signed in with Google) — no invite
           email; their existing login becomes staff at the chosen tier.
         </p>
@@ -114,21 +114,21 @@ function StaffRow({ member, isSelf }) {
         <div className="text-sm font-medium text-white flex items-center gap-2">
           {member.display_name || member.email}
           {isSelf && (
-            <span className="text-[10px] uppercase tracking-wide bg-white/5 text-white/40 border border-white/10 rounded-full px-2 py-0.5">
+            <span className="text-[12px] uppercase tracking-wide bg-white/5 text-white/70 border border-white/10 rounded-full px-2 py-0.5">
               You
             </span>
           )}
           {!member.active && (
-            <span className="text-[10px] uppercase tracking-wide bg-red-400/10 text-red-400 border border-red-400/20 rounded-full px-2 py-0.5">
+            <span className="text-[12px] uppercase tracking-wide bg-red-400/10 text-red-400 border border-red-400/20 rounded-full px-2 py-0.5">
               Deactivated
             </span>
           )}
         </div>
-        <div className="text-xs text-white/40">{member.email}</div>
+        <div className="text-xs text-white/70">{member.email}</div>
       </div>
 
       {isSelf ? (
-        <div className="text-xs text-white/40">
+        <div className="text-xs text-white/70">
           {TIER_LABELS[member.tier]} · Tier {member.tier}
         </div>
       ) : (

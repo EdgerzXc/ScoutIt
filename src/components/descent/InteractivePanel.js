@@ -56,7 +56,7 @@ function SliderGroup({ sliders, params, onSet }) {
     <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
       {sliders.map(({ key, label, min, max, step }) => (
         <div key={key}>
-          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 9.5, marginBottom: 3 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 3 }}>
             <span style={{ color: "rgba(255,255,255,0.55)" }}>{label}</span>
             <span style={{ color: "#E8AE3C" }}>{Number(params[key]).toFixed(2)}</span>
           </div>
@@ -76,7 +76,7 @@ function SliderGroup({ sliders, params, onSet }) {
 }
 
 const sectionTitleStyle = {
-  fontSize: 9,
+  fontSize: 12,
   color: "rgba(255,255,255,0.4)",
   letterSpacing: "0.14em",
   textTransform: "uppercase",
@@ -137,12 +137,12 @@ export default function InteractivePanel({ params, onChange, onClose }) {
       >
         <span style={{ display: "flex", alignItems: "center", gap: 7 }}>
           <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#E8AE3C" }} />
-          <span style={{ fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", color: "#E8AE3C" }}>
+          <span style={{ fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase", color: "#E8AE3C" }}>
             Golden Horizon
           </span>
         </span>
         <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ fontSize: 11, color: "rgba(255,255,255,0.4)" }}>{minimized ? "▸" : "▾"}</span>
+          <span style={{ fontSize: 12, color: "rgba(255,255,255,0.4)" }}>{minimized ? "▸" : "▾"}</span>
           {onClose && !minimized && (
             <button
               onClick={(e) => { e.stopPropagation(); onClose(); }}
@@ -169,7 +169,7 @@ export default function InteractivePanel({ params, onChange, onClose }) {
                     onClick={() => onChange({ ...preset.params })}
                     title={preset.description}
                     style={{
-                      fontSize: 9,
+                      fontSize: 12,
                       padding: "6px 8px",
                       borderRadius: 5,
                       cursor: "pointer",
@@ -201,7 +201,7 @@ export default function InteractivePanel({ params, onChange, onClose }) {
                     key={name}
                     onClick={() => setParam("colorShift", idx)}
                     style={{
-                      fontSize: 9,
+                      fontSize: 12,
                       padding: "6px 6px",
                       borderRadius: 5,
                       cursor: "pointer",
@@ -234,7 +234,7 @@ export default function InteractivePanel({ params, onChange, onClose }) {
             <SliderGroup sliders={AESTHETIC_SLIDERS} params={params} onSet={setParam} />
           </div>
 
-          <p style={{ margin: 0, fontSize: 9.5, color: "rgba(255,255,255,0.35)", lineHeight: 1.4 }}>
+          <p style={{ margin: 0, fontSize: 12, color: "rgba(255,255,255,0.35)", lineHeight: 1.4 }}>
             Drag the black hole to orbit it in 3D. Click for a spacetime shockwave. Hover to bend light around your cursor.
           </p>
 
@@ -242,7 +242,7 @@ export default function InteractivePanel({ params, onChange, onClose }) {
             onClick={() => onChange({ ...GOLDEN_DEFAULT_PARAMS })}
             style={{
               marginTop: 2,
-              fontSize: 9.5,
+              fontSize: 12,
               padding: "7px 0",
               borderRadius: 6,
               cursor: "pointer",

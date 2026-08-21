@@ -102,7 +102,7 @@ export default function ResearcherHUD({ quests, activeQuestId, setActiveQuestId 
               <p className="text-xs text-text-secondary mb-6 leading-relaxed">This Connect reward will be credited to your ledger immediately upon Owner or Admin approval of this audit.</p>
               
               <div className="border-t border-surface-variant pt-4">
-                <div className="text-[10px] uppercase tracking-widest font-label-caps text-text-secondary mb-1">Audit Trail</div>
+                <div className="text-[12px] uppercase tracking-widest font-label-caps text-text-secondary mb-1">Audit Trail</div>
                 <div className="text-xs text-on-surface">Quest Opened: {quest.date}</div>
               </div>
             </div>
@@ -134,7 +134,7 @@ export default function ResearcherHUD({ quests, activeQuestId, setActiveQuestId 
       {activeTab === 'audits' && (
         <div className="flex flex-col gap-4 animate-[fadeIn_0.2s_ease]">
           {/* Table Header */}
-          <div className="hidden md:grid grid-cols-12 gap-4 px-4 py-2 font-label-caps text-[10px] tracking-widest text-text-secondary uppercase border-b border-surface-variant">
+          <div className="hidden md:grid grid-cols-12 gap-4 px-4 py-2 font-label-caps text-[12px] tracking-widest text-text-secondary uppercase border-b border-surface-variant">
             <div className="col-span-5">Property Target</div>
             <div className="col-span-3">Audit Scope</div>
             <div className="col-span-2">Date Raised</div>
@@ -152,7 +152,7 @@ export default function ResearcherHUD({ quests, activeQuestId, setActiveQuestId 
                 <span className="text-xs text-text-secondary">{quest.client || "Owner"}</span>
               </div>
               <div className="md:col-span-3">
-                <span className="inline-block bg-surface-alt border border-surface-variant text-text-secondary text-[10px] px-2 py-1 rounded">
+                <span className="inline-block bg-surface-alt border border-surface-variant text-text-secondary text-[12px] px-2 py-1 rounded">
                   {quest.targetField || "Document Verification"}
                 </span>
               </div>
@@ -182,7 +182,7 @@ export default function ResearcherHUD({ quests, activeQuestId, setActiveQuestId 
             <div className="card-atmosphere rounded-lg p-6 flex flex-col gap-6">
 
               <div>
-                <h3 className="font-label-caps text-[10px] tracking-widest text-intel-cyan uppercase mb-4 border-b border-surface-variant/50 pb-2">Operational Status</h3>
+                <h3 className="font-label-caps text-[12px] tracking-widest text-intel-cyan uppercase mb-4 border-b border-surface-variant/50 pb-2">Operational Status</h3>
                 
                 <div className="flex justify-between items-center mb-5 bg-surface-alt p-4 rounded border border-surface-variant">
                   <div>
@@ -214,17 +214,17 @@ export default function ResearcherHUD({ quests, activeQuestId, setActiveQuestId 
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-surface-variant/50 pt-6">
                 <div>
-                  <h3 className="font-label-caps text-[10px] tracking-widest text-intel-cyan uppercase mb-4 border-b border-surface-variant/50 pb-2">Legal & Access Credentials</h3>
+                  <h3 className="font-label-caps text-[12px] tracking-widest text-intel-cyan uppercase mb-4 border-b border-surface-variant/50 pb-2">Legal & Access Credentials</h3>
                   <ToggleSwitch label="PRC Licensed Appraiser" checked={certPRC} onChange={setCertPRC} primary={true} />
                   <ToggleSwitch label="LRA Direct Access (Title Tracing)" checked={certLRA} onChange={setCertLRA} primary={true} />
                   <ToggleSwitch label="LGU Zoning Expediter" checked={certLGU} onChange={setCertLGU} primary={true} />
                 </div>
 
                 <div>
-                  <h3 className="font-label-caps text-[10px] tracking-widest text-intel-cyan uppercase mb-4 border-b border-surface-variant/50 pb-2">Base Rates (Connects)</h3>
+                  <h3 className="font-label-caps text-[12px] tracking-widest text-intel-cyan uppercase mb-4 border-b border-surface-variant/50 pb-2">Base Rates (Connects)</h3>
                   
                   <div className="mb-4">
-                    <h4 className="font-label-caps text-[10px] tracking-widest text-text-secondary uppercase mb-1">Physical Ocular Inspection</h4>
+                    <h4 className="font-label-caps text-[12px] tracking-widest text-text-secondary uppercase mb-1">Physical Ocular Inspection</h4>
                     <div className="relative">
                       <input 
                         type="number" 
@@ -237,7 +237,7 @@ export default function ResearcherHUD({ quests, activeQuestId, setActiveQuestId 
                   </div>
 
                   <div>
-                    <h4 className="font-label-caps text-[10px] tracking-widest text-text-secondary uppercase mb-1">Full Title & Lien Trace</h4>
+                    <h4 className="font-label-caps text-[12px] tracking-widest text-text-secondary uppercase mb-1">Full Title & Lien Trace</h4>
                     <div className="relative">
                       <input 
                         type="number" 
@@ -281,7 +281,7 @@ export default function ResearcherHUD({ quests, activeQuestId, setActiveQuestId 
                   <div>
                     <div className="flex items-center gap-2">
                       <h4 className="font-working-title text-xl text-on-surface font-sans">ScoutIt Inspector</h4>
-                      <span className="bg-intel-cyan/10 text-intel-cyan font-label-caps text-[10px] uppercase tracking-widest px-2 py-0.5 rounded border border-intel-cyan/20">Cleared</span>
+                      <span className="bg-intel-cyan/10 text-intel-cyan font-label-caps text-[12px] uppercase tracking-widest px-2 py-0.5 rounded border border-intel-cyan/20">Cleared</span>
                     </div>
                     <p className="text-sm text-intel-cyan mt-0.5">{specialty}</p>
                   </div>
@@ -290,7 +290,7 @@ export default function ResearcherHUD({ quests, activeQuestId, setActiveQuestId 
               
               {/* Certifications Row */}
               <div className="flex flex-col gap-2 mb-6 border-y border-surface-variant py-4">
-                <span className="text-[10px] text-text-secondary uppercase tracking-widest font-label-caps mb-1 block font-sans">Verified Credentials</span>
+                <span className="text-[12px] text-text-secondary uppercase tracking-widest font-label-caps mb-1 block font-sans">Verified Credentials</span>
                 {certPRC && (
                   <div className="flex items-center gap-2 text-sm text-on-surface">
                     <span className="text-intel-cyan">✓</span> PRC Licensed Real Estate Appraiser
@@ -313,11 +313,11 @@ export default function ResearcherHUD({ quests, activeQuestId, setActiveQuestId 
               
               <div className="space-y-4">
                 <div className="flex justify-between items-center bg-surface p-3 rounded border border-surface-variant/50">
-                  <span className="text-[10px] text-text-secondary uppercase tracking-widest font-label-caps font-sans">Ocular Inspection</span>
+                  <span className="text-[12px] text-text-secondary uppercase tracking-widest font-label-caps font-sans">Ocular Inspection</span>
                   <span className="text-sm text-intel-cyan font-bold">◈ {rateOcular}</span>
                 </div>
                 <div className="flex justify-between items-center bg-surface p-3 rounded border border-surface-variant/50">
-                  <span className="text-[10px] text-text-secondary uppercase tracking-widest font-label-caps font-sans">Full Title Trace</span>
+                  <span className="text-[12px] text-text-secondary uppercase tracking-widest font-label-caps font-sans">Full Title Trace</span>
                   <span className="text-sm text-intel-cyan font-bold">◈ {rateTrace}</span>
                 </div>
               </div>

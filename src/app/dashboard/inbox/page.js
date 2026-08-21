@@ -352,7 +352,7 @@ function InboxInner() {
                     // min-h-11 -> a real 44px touch target. These were 26px
                     // tall, well under the WCAG / iOS minimum, which on a
                     // phone means mis-taps between three adjacent tabs.
-                    className={`flex-1 min-h-11 py-1.5 px-2 rounded-md text-[10px] font-mono tracking-wider transition ${
+                    className={`flex-1 min-h-11 py-1.5 px-2 rounded-md text-[12px] font-mono tracking-wider transition ${
                       isActive
                         ? "bg-gold-accent/20 text-gold-bright border border-gold-accent/50 font-bold"
                         : "text-text-secondary hover:text-on-surface hover:bg-white/5 border border-transparent"
@@ -399,7 +399,7 @@ function InboxInner() {
                           a declined thread is a notification for nothing. */}
                       {deal.unreadCount > 0 && bucketOf(deal) === "active" && (
                         <motion.span 
-                          className="min-w-[18px] h-[18px] px-1 rounded-full bg-gold-accent text-background text-[10px] font-bold font-mono flex items-center justify-center"
+                          className="min-w-[18px] h-[18px] px-1 rounded-full bg-gold-accent text-background text-[12px] font-bold font-mono flex items-center justify-center"
                           animate={{ boxShadow: ["0px 0px 0px rgba(232,174,60,0)", "0px 0px 10px rgba(232,174,60,0.8)", "0px 0px 0px rgba(232,174,60,0)"] }}
                           transition={{ repeat: Infinity, duration: 2 }}
                         >
@@ -407,11 +407,11 @@ function InboxInner() {
                         </motion.span>
                       )}
                       {bucketOf(deal) === "archived" ? (
-                        <span className="px-2 py-0.5 rounded bg-white/5 text-text-secondary border border-white/15 text-[10px] font-mono uppercase tracking-wider whitespace-nowrap">
+                        <span className="px-2 py-0.5 rounded bg-white/5 text-text-secondary border border-white/15 text-[12px] font-mono uppercase tracking-wider whitespace-nowrap">
                           Archived
                         </span>
                       ) : bucketOf(deal) === "waiting" ? (
-                        <span className="px-2 py-0.5 rounded bg-gold-accent/20 text-gold-bright border border-gold-accent/40 text-[10px] font-mono uppercase tracking-wider whitespace-nowrap">
+                        <span className="px-2 py-0.5 rounded bg-gold-accent/20 text-gold-bright border border-gold-accent/40 text-[12px] font-mono uppercase tracking-wider whitespace-nowrap">
                           Pending
                         </span>
                       ) : bucketOf(deal) === "closed" ? (
@@ -419,7 +419,7 @@ function InboxInner() {
                         // conversation is a Trust & Safety matter and a
                         // declined one is a rejection -- burying both under the
                         // same grey pill hides which is which.
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-mono uppercase tracking-wider whitespace-nowrap ${
+                        <span className={`px-2 py-0.5 rounded text-[12px] font-mono uppercase tracking-wider whitespace-nowrap ${
                           deal.status === "reported"
                             ? "bg-error/20 text-error border border-error/40"
                             : "bg-surface-variant text-text-secondary"
@@ -431,7 +431,7 @@ function InboxInner() {
                             : "Closed"}
                         </span>
                       ) : (
-                        <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-mono uppercase tracking-wider whitespace-nowrap">
+                        <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[12px] font-mono uppercase tracking-wider whitespace-nowrap">
                           Active
                         </span>
                       )}

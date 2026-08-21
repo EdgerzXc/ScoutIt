@@ -77,11 +77,11 @@ export default async function SecurityCenterPage() {
             <Radar className="w-5 h-5 text-[#E8AE3C]" />
             Security Center
           </h1>
-          <p className="text-[10px] uppercase tracking-wide text-white/40 mt-1">
+          <p className="text-[12px] uppercase tracking-wide text-white/70 mt-1">
             Masked-IP anomaly guard · no raw IPs are ever stored
           </p>
         </div>
-        <span className="text-xs text-white/40">
+        <span className="text-xs text-white/70">
           {flagged.data.length} flagged · {blocked.data.length} blocked
         </span>
       </div>
@@ -89,24 +89,24 @@ export default async function SecurityCenterPage() {
       <section className="rounded-xl border border-white/5 bg-[#121212] p-6" aria-labelledby="database-readiness-title">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div><h2 id="database-readiness-title" className="flex items-center gap-2 text-lg font-medium"><DatabaseZap className="h-4 w-4 text-gold" />Database policy evidence</h2>
-            <p className="mt-2 max-w-3xl text-xs leading-5 text-white/45">Fixed read-only evidence from pg_policies, RLS flags, storage.objects, and migration history. This surface cannot execute SQL.</p></div>
+            <p className="mt-2 max-w-3xl text-xs leading-5 text-white/70">Fixed read-only evidence from pg_policies, RLS flags, storage.objects, and migration history. This surface cannot execute SQL.</p></div>
           <span className={`rounded-full border px-2.5 py-1 text-xs ${databaseReadiness?.evidence?.ready ? "border-ok/25 bg-ok/10 text-ok" : "border-warn/25 bg-warn/10 text-warn"}`}>{databaseReadiness?.evidence?.ready ? "Verified" : "Evidence required"}</span>
         </div>
         {databaseReadinessError && <p role="alert" className="mt-4 rounded-lg border border-danger/25 bg-danger/10 p-3 text-xs text-danger">{databaseReadinessError}</p>}
         {!databaseReadinessError && !databaseReadiness?.configuration?.ready && <p className="mt-4 rounded-lg border border-warn/25 bg-warn/10 p-3 text-xs text-white/65">Add the server-only {databaseReadiness?.configuration?.missing.join(", ")} to Mission Control. Service-role credentials cannot inspect system catalogs, so the two master-plan policy checks remain unverified.</p>}
         {databaseReadiness?.evidence && <>
           <dl className="mt-5 grid gap-3 sm:grid-cols-4">
-            <div className="rounded-lg border border-line bg-black/25 p-3"><dt className="label-mono text-white/40">RLS gaps</dt><dd className="mt-2 text-xl">{databaseReadiness.evidence.missingRls.length}</dd></div>
-            <div className="rounded-lg border border-line bg-black/25 p-3"><dt className="label-mono text-white/40">Unsafe policies</dt><dd className="mt-2 text-xl">{databaseReadiness.evidence.unsafePolicies.length}</dd></div>
-            <div className="rounded-lg border border-line bg-black/25 p-3"><dt className="label-mono text-white/40">Anonymous photo uploads</dt><dd className="mt-2 text-xl">{databaseReadiness.evidence.anonymousPropertyPhotoUploads.length}</dd></div>
-            <div className="rounded-lg border border-line bg-black/25 p-3"><dt className="label-mono text-white/40">Replacement migrations</dt><dd className="mt-2 text-xl">{databaseReadiness.evidence.replacementApplied ? "Present" : "Missing"}</dd></div>
+            <div className="rounded-lg border border-line bg-black/25 p-3"><dt className="label-mono text-white/70">RLS gaps</dt><dd className="mt-2 text-xl">{databaseReadiness.evidence.missingRls.length}</dd></div>
+            <div className="rounded-lg border border-line bg-black/25 p-3"><dt className="label-mono text-white/70">Unsafe policies</dt><dd className="mt-2 text-xl">{databaseReadiness.evidence.unsafePolicies.length}</dd></div>
+            <div className="rounded-lg border border-line bg-black/25 p-3"><dt className="label-mono text-white/70">Anonymous photo uploads</dt><dd className="mt-2 text-xl">{databaseReadiness.evidence.anonymousPropertyPhotoUploads.length}</dd></div>
+            <div className="rounded-lg border border-line bg-black/25 p-3"><dt className="label-mono text-white/70">Replacement migrations</dt><dd className="mt-2 text-xl">{databaseReadiness.evidence.replacementApplied ? "Present" : "Missing"}</dd></div>
           </dl>
           {!databaseReadiness.evidence.ready && <p role="alert" className="mt-4 text-xs text-warn">Policy evidence is not green. Review the named policies and use an approved, checksum-locked Mission Control migration before human testing.</p>}
         </>}
       </section>
 
       {(flagged.error || velocity.error) && (
-        <div className="text-xs text-white/50 bg-white/5 border border-white/10 rounded-xl p-4">
+        <div className="text-xs text-white/70 bg-white/5 border border-white/10 rounded-xl p-4">
           Traffic log unavailable ({flagged.error || velocity.error}). The log fills once the
           Phase-2 middleware guard on the public site is enabled — the ban list below already works.
         </div>
@@ -127,7 +127,7 @@ export default async function SecurityCenterPage() {
           Flagged Anomalies
         </h2>
         {flagged.data.length === 0 ? (
-          <p className="text-xs text-white/40">No flagged traffic. Quiet skies.</p>
+          <p className="text-xs text-white/70">No flagged traffic. Quiet skies.</p>
         ) : (
           <div className="divide-y divide-white/5">
             {flagged.data.map((row) => (
@@ -144,7 +144,7 @@ export default async function SecurityCenterPage() {
           Highest-Velocity Sources
         </h2>
         {velocity.data.length === 0 ? (
-          <p className="text-xs text-white/40">No traffic recorded yet.</p>
+          <p className="text-xs text-white/70">No traffic recorded yet.</p>
         ) : (
           <div className="divide-y divide-white/5">
             {velocity.data.map((row) => (
@@ -163,22 +163,22 @@ export default async function SecurityCenterPage() {
 
         {/* Manual block */}
         <form action={blockHash} className="flex flex-wrap items-end gap-2 mb-5 pb-5 border-b border-white/5">
-          <label className="text-xs text-white/50 flex-1 min-w-[220px]">
+          <label className="text-xs text-white/70 flex-1 min-w-[220px]">
             Masked IP hash
             <input
               name="maskedIp"
               required
               placeholder="ip_anon_…"
-              className="mt-1 w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white font-mono placeholder:text-white/20"
+              className="mt-1 w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white font-mono placeholder:text-white/70"
             />
           </label>
-          <label className="text-xs text-white/50 flex-1 min-w-[220px]">
+          <label className="text-xs text-white/70 flex-1 min-w-[220px]">
             Reason (required)
             <input
               name="reason"
               required
               placeholder="e.g. scraper hammering /api/cms"
-              className="mt-1 w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-white/20"
+              className="mt-1 w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-white/70"
             />
           </label>
           <button className="px-4 py-2 rounded-lg text-sm font-medium bg-red-400/10 hover:bg-red-400/20 text-red-400 border border-red-400/20 transition-colors">
@@ -187,14 +187,14 @@ export default async function SecurityCenterPage() {
         </form>
 
         {blocked.data.length === 0 ? (
-          <p className="text-xs text-white/40">No active blocks.</p>
+          <p className="text-xs text-white/70">No active blocks.</p>
         ) : (
           <div className="divide-y divide-white/5">
             {blocked.data.map((b) => (
               <div key={b.id} className="flex items-center gap-3 py-2.5 text-sm">
                 <ShieldBan className="w-3.5 h-3.5 text-red-400 shrink-0" />
                 <span className="font-mono text-xs text-white/80 truncate">{b.value}</span>
-                <span className="text-xs text-white/40 truncate flex-1">
+                <span className="text-xs text-white/70 truncate flex-1">
                   {b.reason} · {new Date(b.created_at).toLocaleString()}
                 </span>
                 <form action={unblockHash}>
@@ -218,25 +218,25 @@ function TrafficRow({ row, isBlocked }) {
   return (
     <div className="flex items-center gap-3 py-2.5 text-sm">
       <span className="font-mono text-xs text-white/80 truncate max-w-[200px]">{row.masked_ip}</span>
-      <span className="text-xs text-white/50 truncate">{row.route_accessed}</span>
+      <span className="text-xs text-white/70 truncate">{row.route_accessed}</span>
       <span className="text-xs text-[#E8AE3C] font-mono whitespace-nowrap">
         {row.request_count} req
       </span>
       {row.flag_reason && (
-        <span className="text-[10px] text-orange-400/80 truncate">{row.flag_reason}</span>
+        <span className="text-[12px] text-orange-400/80 truncate">{row.flag_reason}</span>
       )}
-      <span className="ml-auto text-[10px] text-white/40 whitespace-nowrap">
+      <span className="ml-auto text-[12px] text-white/70 whitespace-nowrap">
         {row.last_request_at ? new Date(row.last_request_at).toLocaleString() : "—"}
       </span>
       {isBlocked ? (
-        <span className="text-[10px] uppercase tracking-wide text-red-400 border border-red-400/20 bg-red-400/10 rounded-full px-2 py-0.5">
+        <span className="text-[12px] uppercase tracking-wide text-red-400 border border-red-400/20 bg-red-400/10 rounded-full px-2 py-0.5">
           blocked
         </span>
       ) : (
         <form action={blockHash}>
           <input type="hidden" name="maskedIp" value={row.masked_ip} />
           <input type="hidden" name="reason" value={row.flag_reason || `High velocity: ${row.request_count} requests on ${row.route_accessed}`} />
-          <button className="text-[10px] uppercase tracking-wide text-red-400/80 hover:text-red-400 border border-red-400/20 hover:bg-red-400/10 rounded-full px-2 py-0.5 transition-colors">
+          <button className="text-[12px] uppercase tracking-wide text-red-400/80 hover:text-red-400 border border-red-400/20 hover:bg-red-400/10 rounded-full px-2 py-0.5 transition-colors">
             block
           </button>
         </form>

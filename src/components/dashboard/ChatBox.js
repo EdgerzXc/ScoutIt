@@ -31,10 +31,10 @@ const renderTextWithLinks = (text, { onAcceptViewing, onRescheduleViewing, onAcc
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <h4 className="text-[10px] font-mono uppercase tracking-widest text-gold-bright font-bold">
+              <h4 className="text-[12px] font-mono uppercase tracking-widest text-gold-bright font-bold">
                 Live Viewing Requested
               </h4>
-              <span className="text-[8px] font-mono uppercase bg-gold-accent/20 text-gold-accent px-1.5 py-0.5 rounded">
+              <span className="text-[12px] font-mono uppercase bg-gold-accent/20 text-gold-accent px-1.5 py-0.5 rounded">
                 Pending Approval
               </span>
             </div>
@@ -45,14 +45,14 @@ const renderTextWithLinks = (text, { onAcceptViewing, onRescheduleViewing, onAcc
           <button
             onClick={onAcceptViewing}
             disabled={!onAcceptViewing}
-            className="flex-1 py-2 px-3 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-[10px] font-mono uppercase tracking-wider hover:bg-emerald-500/30 transition font-bold disabled:opacity-40"
+            className="flex-1 py-2 px-3 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-[12px] font-mono uppercase tracking-wider hover:bg-emerald-500/30 transition font-bold disabled:opacity-40"
           >
             ✓ Accept Viewing
           </button>
           <button
             onClick={onRescheduleViewing}
             disabled={!onRescheduleViewing}
-            className="py-2 px-3 rounded-lg bg-white/5 text-text-secondary border border-white/10 text-[10px] font-mono uppercase tracking-wider hover:bg-white/10 hover:text-white transition disabled:opacity-40"
+            className="py-2 px-3 rounded-lg bg-white/5 text-text-secondary border border-white/10 text-[12px] font-mono uppercase tracking-wider hover:bg-white/10 hover:text-white transition disabled:opacity-40"
           >
             Reschedule
           </button>
@@ -72,10 +72,10 @@ const renderTextWithLinks = (text, { onAcceptViewing, onRescheduleViewing, onAcc
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <h4 className="text-[10px] font-mono uppercase tracking-widest text-amber-400 font-bold">
+              <h4 className="text-[12px] font-mono uppercase tracking-widest text-amber-400 font-bold">
                 Reschedule Proposed
               </h4>
-              <span className="text-[8px] font-mono uppercase bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded">
+              <span className="text-[12px] font-mono uppercase bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded">
                 Action Required
               </span>
             </div>
@@ -85,13 +85,13 @@ const renderTextWithLinks = (text, { onAcceptViewing, onRescheduleViewing, onAcc
         <div className="flex gap-2 pt-2 border-t border-white/10">
           <button
             onClick={() => onAcceptReschedule?.(details)}
-            className="flex-1 py-2 px-3 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-[10px] font-mono uppercase tracking-wider hover:bg-emerald-500/30 transition font-bold"
+            className="flex-1 py-2 px-3 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-[12px] font-mono uppercase tracking-wider hover:bg-emerald-500/30 transition font-bold"
           >
             ✓ Accept New Slot
           </button>
           <button
             onClick={onRescheduleViewing}
-            className="py-2 px-3 rounded-lg bg-white/5 text-text-secondary border border-white/10 text-[10px] font-mono uppercase tracking-wider hover:bg-white/10 hover:text-white transition"
+            className="py-2 px-3 rounded-lg bg-white/5 text-text-secondary border border-white/10 text-[12px] font-mono uppercase tracking-wider hover:bg-white/10 hover:text-white transition"
           >
             Propose Other
           </button>
@@ -107,7 +107,7 @@ const renderTextWithLinks = (text, { onAcceptViewing, onRescheduleViewing, onAcc
         <div className="flex items-center gap-2.5">
           <span className="text-xl">✅</span>
           <div>
-            <h4 className="text-[10px] font-mono uppercase tracking-widest text-emerald-400 font-bold">
+            <h4 className="text-[12px] font-mono uppercase tracking-widest text-emerald-400 font-bold">
               Viewing Confirmed &amp; Calendar Synced
             </h4>
             <p className="text-xs text-text-secondary mt-0.5">{text.replace("[SYSTEM] ", "")}</p>
@@ -124,7 +124,7 @@ const renderTextWithLinks = (text, { onAcceptViewing, onRescheduleViewing, onAcc
         <div className="flex items-center gap-2.5">
           <span className="text-xl">🔒</span>
           <div>
-            <h4 className="text-[10px] font-mono uppercase tracking-widest text-text-secondary font-bold">
+            <h4 className="text-[12px] font-mono uppercase tracking-widest text-text-secondary font-bold">
               Deal Room Concluded
             </h4>
             <p className="text-xs text-text-muted mt-0.5">{text.replace("[SYSTEM] ", "")}</p>
@@ -141,7 +141,7 @@ const renderTextWithLinks = (text, { onAcceptViewing, onRescheduleViewing, onAcc
         <div className="flex items-center gap-2.5">
           <span className="text-xl">🛡️</span>
           <div>
-            <h4 className="text-[10px] font-mono uppercase tracking-widest text-blue-400 font-bold">
+            <h4 className="text-[12px] font-mono uppercase tracking-widest text-blue-400 font-bold">
               Staff Diagnostic Incident Logged
             </h4>
             <p className="text-xs text-text-secondary mt-0.5">{text.replace("[SYSTEM] ", "")}</p>
@@ -581,7 +581,7 @@ export default function ChatBox({
           <span className="text-error text-xl">📄</span>
           <div className="flex flex-col overflow-hidden">
             <span className="text-xs truncate font-working-title">{att.name}</span>
-            <span className="text-[10px] text-text-muted">{(att.size / 1024 / 1024).toFixed(1)} MB</span>
+            <span className="text-[12px] text-text-muted">{(att.size / 1024 / 1024).toFixed(1)} MB</span>
           </div>
         </a>
       );
@@ -606,7 +606,7 @@ export default function ChatBox({
     return (
       <div className="flex flex-col h-full overflow-y-auto bg-gradient-to-b from-background to-surface p-4 sm:p-6">
         <div className="w-full max-w-md mx-auto my-auto bg-surface border border-gold-accent/30 rounded-xl p-5 sm:p-6">
-          <span className="inline-block text-[10px] font-mono uppercase tracking-widest text-gold-bright bg-gold-accent/15 border border-gold-accent/40 px-2 py-1 rounded">
+          <span className="inline-block text-[12px] font-mono uppercase tracking-widest text-gold-bright bg-gold-accent/15 border border-gold-accent/40 px-2 py-1 rounded">
             {isRequestSender ? "Awaiting response" : "Connect request"}
           </span>
 
@@ -624,7 +624,7 @@ export default function ChatBox({
 
           {deal.pitch_message && (
             <div className="mt-5 border-l-2 border-gold-accent/30 pl-4">
-              <p className="text-[10px] font-mono uppercase tracking-widest text-text-muted mb-1">
+              <p className="text-[12px] font-mono uppercase tracking-widest text-text-muted mb-1">
                 Their message
               </p>
               <p className="text-sm text-text-primary whitespace-pre-wrap break-words">
@@ -636,7 +636,7 @@ export default function ChatBox({
           )}
 
           {sentLabel && (
-            <p className="text-[10px] font-mono uppercase tracking-widest text-text-muted mt-5">
+            <p className="text-[12px] font-mono uppercase tracking-widest text-text-muted mt-5">
               Sent {sentLabel}
             </p>
           )}
@@ -658,7 +658,7 @@ export default function ChatBox({
                   ? "bg-white/[0.03] border-white/15"
                   : "bg-gold-accent/5 border-gold-accent/20"
               }`}>
-                <p className="text-[11px] leading-relaxed text-text-secondary">
+                <p className="text-[12px] leading-relaxed text-text-secondary">
                   {deal.archived_at ? "📥 " : "⏳ "}{notice}
                 </p>
               </div>
@@ -677,7 +677,7 @@ export default function ChatBox({
                 setPendingBusy(false);
               }}
               disabled={pendingBusy || !onUnarchive}
-              className="mt-3 w-full py-2.5 rounded-lg border border-gold-accent/50 text-gold-accent font-mono text-[11px] uppercase tracking-widest hover:bg-gold-accent/10 transition disabled:opacity-50"
+              className="mt-3 w-full py-2.5 rounded-lg border border-gold-accent/50 text-gold-accent font-mono text-[12px] uppercase tracking-widest hover:bg-gold-accent/10 transition disabled:opacity-50"
             >
               {pendingBusy ? "Working…" : "Reopen — restarts the 30-day clock"}
             </button>
@@ -706,7 +706,7 @@ export default function ChatBox({
               >
                 {pendingBusy ? "Working…" : "Withdraw this request"}
               </button>
-              <p className="text-[10px] text-text-muted mt-2">
+              <p className="text-[12px] text-text-muted mt-2">
                 Withdrawing closes the request on both sides. Your Connect is not returned.
               </p>
             </>
@@ -845,7 +845,7 @@ export default function ChatBox({
                 were the server's number or nothing. Nothing, until the column
                 exists. Inventing a currency figure is the worst outcome. */}
             {Number.isFinite(deal.connects_spent) && (
-              <span className="px-2 py-0.5 rounded bg-gold-accent/15 text-gold-accent border border-gold-accent/30 text-[9px] font-mono uppercase tracking-widest whitespace-nowrap">
+              <span className="px-2 py-0.5 rounded bg-gold-accent/15 text-gold-accent border border-gold-accent/30 text-[12px] font-mono uppercase tracking-widest whitespace-nowrap">
                 {deal.connects_spent} {deal.connects_spent === 1 ? "Connect" : "Connects"} spent
               </span>
             )}
@@ -957,7 +957,7 @@ export default function ChatBox({
         <div className="bg-surface border-b border-surface-variant p-6 flex flex-col items-center">
           <div className="max-w-md w-full bg-gradient-to-br from-[#1a1a1a] to-background border border-gold-accent/30 rounded-xl p-6 shadow-[0_10px_40px_rgba(232,174,60,0.05)] flex flex-col items-center animate-[fadeIn_0.5s_ease]">
             <span className="text-3xl mb-3">🛡️</span>
-            <span className="font-label-caps text-[10px] tracking-widest uppercase text-success bg-success/10 px-2 py-1 rounded mb-4">Verified Advisor Active</span>
+            <span className="font-label-caps text-[12px] tracking-widest uppercase text-success bg-success/10 px-2 py-1 rounded mb-4">Verified Advisor Active</span>
             
             <h3 className="text-2xl font-headline-editorial text-on-surface mb-1">{deal.other_party}</h3>
             {/* deal.other_party_contact has never existed on any deals row or
@@ -1001,7 +1001,7 @@ export default function ChatBox({
           This conversation is closed. The history stays here for your records.
         </div>
       ) : daysLeft !== null ? (
-        <div className="bg-surface-container-low p-2 text-center text-[10px] uppercase font-mono tracking-widest text-text-secondary border-b border-surface-variant">
+        <div className="bg-surface-container-low p-2 text-center text-[12px] uppercase font-mono tracking-widest text-text-secondary border-b border-surface-variant">
           {daysLeft === 0 ? "Closes today" : `Closes in ${daysLeft} ${daysLeft === 1 ? "day" : "days"}`}
         </div>
       ) : null}
@@ -1055,7 +1055,7 @@ export default function ChatBox({
                   </div>
                 )}
               </div>
-              <span className="text-[10px] text-text-muted mt-1 px-1 font-mono uppercase">
+              <span className="text-[12px] text-text-muted mt-1 px-1 font-mono uppercase">
                 {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </span>
             </motion.div>
@@ -1157,7 +1157,7 @@ export default function ChatBox({
             </div>
 
             <div className="space-y-2">
-              <label className="block text-[10px] font-mono uppercase tracking-widest text-gold-accent font-bold">
+              <label className="block text-[12px] font-mono uppercase tracking-widest text-gold-accent font-bold">
                 Reason for Closing
               </label>
               <select
@@ -1175,7 +1175,7 @@ export default function ChatBox({
             </div>
 
             <div className="space-y-2">
-              <label className="block text-[10px] font-mono uppercase tracking-widest text-text-muted">
+              <label className="block text-[12px] font-mono uppercase tracking-widest text-text-muted">
                 Optional Concluding Note
               </label>
               <input
@@ -1187,7 +1187,7 @@ export default function ChatBox({
               />
             </div>
 
-            <p className="text-[11px] text-text-muted leading-relaxed">
+            <p className="text-[12px] text-text-muted leading-relaxed">
               Closing locks the active composer. All message history, attachments, and timestamps remain accessible in read-only audit mode for both parties.
             </p>
 
@@ -1226,7 +1226,7 @@ export default function ChatBox({
             <form onSubmit={submitReschedule} className="space-y-3.5">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[10px] font-mono uppercase tracking-widest text-gold-accent font-bold mb-1">
+                  <label className="block text-[12px] font-mono uppercase tracking-widest text-gold-accent font-bold mb-1">
                     New Date
                   </label>
                   <input
@@ -1238,7 +1238,7 @@ export default function ChatBox({
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-mono uppercase tracking-widest text-gold-accent font-bold mb-1">
+                  <label className="block text-[12px] font-mono uppercase tracking-widest text-gold-accent font-bold mb-1">
                     Preferred Time
                   </label>
                   <input
@@ -1252,7 +1252,7 @@ export default function ChatBox({
               </div>
 
               <div>
-                <label className="block text-[10px] font-mono uppercase tracking-widest text-gold-accent font-bold mb-1">
+                <label className="block text-[12px] font-mono uppercase tracking-widest text-gold-accent font-bold mb-1">
                   Viewing Format
                 </label>
                 <div className="grid grid-cols-2 gap-2">
@@ -1274,7 +1274,7 @@ export default function ChatBox({
               </div>
 
               <div>
-                <label className="block text-[10px] font-mono uppercase tracking-widest text-text-muted mb-1">
+                <label className="block text-[12px] font-mono uppercase tracking-widest text-text-muted mb-1">
                   Adjustment Reason
                 </label>
                 <select
@@ -1334,7 +1334,7 @@ export default function ChatBox({
             ) : (
               <form onSubmit={submitStaffSupport} className="space-y-3.5">
                 <div>
-                  <label className="block text-[10px] font-mono uppercase tracking-widest text-blue-400 font-bold mb-1">
+                  <label className="block text-[12px] font-mono uppercase tracking-widest text-blue-400 font-bold mb-1">
                     Assistance Type
                   </label>
                   <select
@@ -1350,7 +1350,7 @@ export default function ChatBox({
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-mono uppercase tracking-widest text-text-muted mb-1">
+                  <label className="block text-[12px] font-mono uppercase tracking-widest text-text-muted mb-1">
                     Describe the Issue
                   </label>
                   <textarea

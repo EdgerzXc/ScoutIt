@@ -24,7 +24,7 @@ export default async function FeatureFlagsPage() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold tracking-tight">Feature Flags</h1>
-        <span className="text-xs text-white/40">Public site reads these live</span>
+        <span className="text-xs text-white/70">Public site reads these live</span>
       </div>
 
       <section className="space-y-3">
@@ -40,7 +40,7 @@ export default async function FeatureFlagsPage() {
               <div className="min-w-0">
                 <div className="text-sm font-medium text-white font-mono">{flag.id}</div>
                 {flag.description && (
-                  <div className="text-xs text-white/40">{flag.description}</div>
+                  <div className="text-xs text-white/70">{flag.description}</div>
                 )}
               </div>
               <form action={toggleFeatureFlag}>
@@ -63,7 +63,7 @@ export default async function FeatureFlagsPage() {
             </div>
           ))}
           {flags && flags.length === 0 && !error && (
-            <div className="text-sm text-white/50 p-8 text-center">
+            <div className="text-sm text-white/70 p-8 text-center">
               No feature flags yet. Create one below.
             </div>
           )}
@@ -71,7 +71,7 @@ export default async function FeatureFlagsPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-sm font-medium text-white/50 uppercase tracking-wide flex items-center gap-2">
+        <h2 className="text-sm font-medium text-white/70 uppercase tracking-wide flex items-center gap-2">
           <Flag className="w-4 h-4" />
           Add a flag
         </h2>
@@ -80,22 +80,22 @@ export default async function FeatureFlagsPage() {
           className="bg-[#121212] border border-white/5 rounded-xl p-5 space-y-3"
         >
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <label className="block text-xs text-white/50 md:col-span-1">
+            <label className="block text-xs text-white/70 md:col-span-1">
               Key (lowercase_snake)
               <input
                 name="id"
                 required
                 pattern="[a-z0-9_]+"
                 placeholder="e.g. deep_intel"
-                className="mt-1 w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white font-mono placeholder:text-white/30"
+                className="mt-1 w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white font-mono placeholder:text-white/70"
               />
             </label>
-            <label className="block text-xs text-white/50 md:col-span-2">
+            <label className="block text-xs text-white/70 md:col-span-2">
               Description
               <input
                 name="description"
                 placeholder="What this flag controls on the public site."
-                className="mt-1 w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-white/30"
+                className="mt-1 w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-white/70"
               />
             </label>
           </div>

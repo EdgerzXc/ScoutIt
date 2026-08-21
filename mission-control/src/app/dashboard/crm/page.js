@@ -49,7 +49,7 @@ export default async function UserCrmPage({ searchParams }) {
           name="q"
           defaultValue={q}
           placeholder="Search by display name or user id..."
-          className="flex-1 bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-[#E8AE3C]/50"
+          className="flex-1 bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-white/70 focus:outline-none focus:border-[#E8AE3C]/50"
         />
         <button className="px-4 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-sm text-white/80 transition-colors">
           Search
@@ -88,28 +88,28 @@ function UserRow({ user, staff }) {
               {user.display_name || user.id}
             </span>
             {user.is_shadowbanned && (
-              <span className="text-[10px] uppercase tracking-wide bg-red-400/10 text-red-400 border border-red-400/20 rounded-full px-2 py-0.5">
+              <span className="text-[12px] uppercase tracking-wide bg-red-400/10 text-red-400 border border-red-400/20 rounded-full px-2 py-0.5">
                 Shadowbanned
               </span>
             )}
             {user.archived_at && (
-              <span className="text-[10px] uppercase tracking-wide bg-white/5 text-white/50 border border-white/10 rounded-full px-2 py-0.5">
+              <span className="text-[12px] uppercase tracking-wide bg-white/5 text-white/70 border border-white/10 rounded-full px-2 py-0.5">
                 Archived
               </span>
             )}
           </div>
-          <div className="text-xs text-white/40 truncate">
+          <div className="text-xs text-white/70 truncate">
             {user.id} · {(user.active_roles || []).join(", ") || "no roles"} ·{" "}
             {user.subscription_tier || "no tier"}
           </div>
         </div>
-        <span className="text-xs text-white/30 shrink-0 group-open:hidden">Manage</span>
+        <span className="text-xs text-white/70 shrink-0 group-open:hidden">Manage</span>
       </summary>
 
       <div className="border-t border-white/5 p-5 space-y-5">
         <form action={updateUserProfile} className="grid grid-cols-2 gap-3">
           <input type="hidden" name="userId" value={user.id} />
-          <label className="text-xs text-white/50 col-span-2">
+          <label className="text-xs text-white/70 col-span-2">
             Display name
             <input
               name="display_name"
@@ -117,7 +117,7 @@ function UserRow({ user, staff }) {
               className="mt-1 w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white"
             />
           </label>
-          <label className="text-xs text-white/50">
+          <label className="text-xs text-white/70">
             Headline
             <input
               name="headline"
@@ -125,7 +125,7 @@ function UserRow({ user, staff }) {
               className="mt-1 w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white"
             />
           </label>
-          <label className="text-xs text-white/50">
+          <label className="text-xs text-white/70">
             Location
             <input
               name="location"
@@ -133,7 +133,7 @@ function UserRow({ user, staff }) {
               className="mt-1 w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white"
             />
           </label>
-          <label className="text-xs text-white/50 col-span-2">
+          <label className="text-xs text-white/70 col-span-2">
             Bio
             <textarea
               name="bio"
@@ -200,7 +200,7 @@ function UserRow({ user, staff }) {
         </div>
 
         {user.moderation_note && (
-          <div className="text-xs text-white/40 italic">Note: {user.moderation_note}</div>
+          <div className="text-xs text-white/70 italic">Note: {user.moderation_note}</div>
         )}
       </div>
     </details>

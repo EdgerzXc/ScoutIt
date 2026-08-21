@@ -125,6 +125,28 @@ async function auditRoute(context, route) {
       const ids = [...document.querySelectorAll('[id]')].map((element) => element.id).filter(Boolean);
       const duplicateIds = [...new Set(ids.filter((id, index) => ids.indexOf(id) !== index))];
       const images = [...document.images];
+      const typographyViolations = [...document.querySelectorAll('body *')]
+        .filter((element) => {
+          if (!visible(element) || element.closest('[aria-hidden="true"]')) return false;
+          if (['SCRIPT', 'STYLE', 'SVG', 'CANVAS'].includes(element.tagName)) return false;
+          return [...element.childNodes].some(
+            (node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim(),
+          );
+        })
+        .map((element) => {
+          const style = getComputedStyle(element);
+          const fontSize = Number.parseFloat(style.fontSize);
+          const letterSpacing = style.letterSpacing === 'normal' ? 0 : Number.parseFloat(style.letterSpacing);
+          return {
+            tag: element.tagName.toLowerCase(),
+            text: element.textContent.trim().replace(/\s+/g, ' ').slice(0, 100),
+            fontSize,
+            letterSpacing,
+            className: typeof element.className === 'string' ? element.className.slice(0, 120) : null,
+          };
+        })
+        .filter((entry) => entry.fontSize < 12 || (entry.fontSize > 0 && entry.letterSpacing / entry.fontSize > 0.14))
+        .slice(0, 30);
       return {
         url: location.href,
         title: document.title,
@@ -148,6 +170,7 @@ async function auditRoute(context, route) {
         canonical: document.querySelector('link[rel="canonical"]')?.href || null,
         robots: document.querySelector('meta[name="robots"]')?.content || null,
         themeBackground: getComputedStyle(document.body).backgroundColor,
+        typographyViolations,
       };
     });
 

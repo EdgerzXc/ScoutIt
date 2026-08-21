@@ -10,7 +10,7 @@ const ManilaTransitMap = dynamic(() => import("@/components/transit/ManilaTransi
   ssr: false,
   loading: () => (
     <div style={{ minHeight: 600, background: "#000", border: "0.5px solid #262626", borderRadius: 4, display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "#c8c8c8" }}>
+      <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, letterSpacing: "0.1em", textTransform: "uppercase", color: "#c8c8c8" }}>
         Loading transit network…
       </span>
     </div>
@@ -41,8 +41,8 @@ export default function TransitPage() {
         }
         .vector-label {
           font-family: var(--font-mono), monospace;
-          font-size: 11px;
-          letter-spacing: 0.25em;
+          font-size: 12px;
+          letter-spacing: 0.12em;
           color: var(--accent);
           text-transform: uppercase;
         }

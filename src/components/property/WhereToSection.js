@@ -82,14 +82,14 @@ export default function WhereToSection({ lat, lng, radiusM = 900, onIsochrone, o
         }
         .wt-title {
           font-family: ${MONO};
-          font-size: 10px;
+          font-size: 12px;
           color: var(--accent, #E8AE3C);
-          letter-spacing: 0.2em;
+          letter-spacing: 0.12em;
           text-transform: uppercase;
         }
         .wt-count {
           font-family: ${MONO};
-          font-size: 9px;
+          font-size: 12px;
           color: #6a6a6a;
           letter-spacing: 0.1em;
           white-space: nowrap;
@@ -122,7 +122,7 @@ export default function WhereToSection({ lat, lng, radiusM = 900, onIsochrone, o
           border-radius: 3px;
           color: #c8c8c8;
           font-family: ${MONO};
-          font-size: 9px;
+          font-size: 12px;
           letter-spacing: 0.12em;
           text-transform: uppercase;
           white-space: nowrap;
@@ -147,14 +147,14 @@ export default function WhereToSection({ lat, lng, radiusM = 900, onIsochrone, o
         }
         .wt-layer__label {
           font-family: ${MONO};
-          font-size: 9.5px;
+          font-size: 12px;
           color: #c8c8c8;
-          letter-spacing: 0.16em;
+          letter-spacing: 0.12em;
           text-transform: uppercase;
         }
         .wt-layer__n {
           font-family: ${MONO};
-          font-size: 9px;
+          font-size: 12px;
           color: #4a4a4a;
           margin-left: auto;
         }
@@ -175,8 +175,8 @@ export default function WhereToSection({ lat, lng, radiusM = 900, onIsochrone, o
         .wt-group { margin-top: 10px; }
         .wt-group__label {
           font-family: ${MONO};
-          font-size: 8.5px;
-          letter-spacing: 0.18em;
+          font-size: 12px;
+          letter-spacing: 0.12em;
           color: var(--text-muted);
           text-transform: uppercase;
           margin-bottom: 6px;
@@ -218,13 +218,13 @@ export default function WhereToSection({ lat, lng, radiusM = 900, onIsochrone, o
         }
         .wt-card__name {
           font-family: var(--font-body, sans-serif);
-          font-size: 11.5px;
+          font-size: 12px;
           color: var(--text-primary);
           font-weight: 500;
         }
         .wt-card__dist {
           font-family: ${MONO};
-          font-size: 9px;
+          font-size: 12px;
           letter-spacing: 0.08em;
           color: var(--accent, #E8AE3C);
           white-space: nowrap;
@@ -233,14 +233,14 @@ export default function WhereToSection({ lat, lng, radiusM = 900, onIsochrone, o
           display: flex;
           align-items: center;
           gap: 6px;
-          font-size: 9.5px;
+          font-size: 12px;
           color: var(--text-secondary);
           letter-spacing: 0.04em;
           margin-top: 3px;
         }
-        .wt-card__cat { text-transform: uppercase; font-family: ${MONO}; font-size: 8.5px; color: var(--text-muted); }
+        .wt-card__cat { text-transform: uppercase; font-family: ${MONO}; font-size: 12px; color: var(--text-muted); }
         .wt-card__desc {
-          font-size: 9.5px;
+          font-size: 12px;
           color: var(--text-secondary);
           letter-spacing: 0.06em;
           margin-top: 3px;
@@ -253,14 +253,14 @@ export default function WhereToSection({ lat, lng, radiusM = 900, onIsochrone, o
           border-radius: 2px;
           text-align: center;
           font-family: ${MONO};
-          font-size: 10px;
+          font-size: 12px;
           color: var(--text-secondary);
           letter-spacing: 0.12em;
           line-height: 1.8;
         }
         .wt-blank--layer {
           padding: 14px;
-          font-size: 9px;
+          font-size: 12px;
           text-align: left;
           letter-spacing: 0.1em;
         }
@@ -273,8 +273,8 @@ export default function WhereToSection({ lat, lng, radiusM = 900, onIsochrone, o
           border-radius: 3px;
           color: var(--text-secondary);
           font-family: ${MONO};
-          font-size: 9px;
-          letter-spacing: 0.15em;
+          font-size: 12px;
+          letter-spacing: 0.12em;
           text-transform: uppercase;
           cursor: pointer;
         }
@@ -298,7 +298,7 @@ export default function WhereToSection({ lat, lng, radiusM = 900, onIsochrone, o
         }
         .wt-walk__of {
           font-family: ${MONO};
-          font-size: 9px;
+          font-size: 12px;
           color: #4a4a4a;
           letter-spacing: 0.1em;
           margin-left: -7px;
@@ -306,9 +306,9 @@ export default function WhereToSection({ lat, lng, radiusM = 900, onIsochrone, o
         .wt-walk__main { min-width: 0; flex: 1; }
         .wt-walk__label {
           font-family: ${MONO};
-          font-size: 9.5px;
+          font-size: 12px;
           color: #c8c8c8;
-          letter-spacing: 0.16em;
+          letter-spacing: 0.12em;
           text-transform: uppercase;
           line-height: 1.5;
         }
@@ -324,7 +324,7 @@ export default function WhereToSection({ lat, lng, radiusM = 900, onIsochrone, o
            more than it deserves is worse than no number at all. */
         .wt-walk__flag {
           font-family: ${MONO};
-          font-size: 8.5px;
+          font-size: 12px;
           color: #e8c84a;
           letter-spacing: 0.12em;
           text-transform: uppercase;
@@ -333,7 +333,7 @@ export default function WhereToSection({ lat, lng, radiusM = 900, onIsochrone, o
 
         .wt-source {
           font-family: ${MONO};
-          font-size: 8.5px;
+          font-size: 12px;
           color: #4a4a4a;
           letter-spacing: 0.1em;
           margin-top: 14px;

@@ -201,7 +201,7 @@ function InventoryInner({ params }) {
             >
               ← Back to Dashboard
             </Link>
-            <span className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase mb-1 block">
+            <span className="font-label-caps text-[12px] tracking-widest text-gold-accent uppercase mb-1 block">
               Inventory Manager
             </span>
             <h1 className="font-display-md text-3xl md:text-5xl text-on-surface">
@@ -235,7 +235,7 @@ function InventoryInner({ params }) {
               )}
               {saveState === 'idle' && 'Save Changes'}
             </button>
-            <span className={`text-[10px] font-working-title uppercase tracking-wider transition ${
+            <span className={`text-[12px] font-working-title uppercase tracking-wider transition ${
               saveState === 'saved' ? 'text-success' : saveState === 'error' ? 'text-error' : 'text-text-secondary'
             }`}>
               {saveState === 'saving' && 'Saving your changes…'}

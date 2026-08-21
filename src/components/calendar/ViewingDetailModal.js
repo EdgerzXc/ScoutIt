@@ -30,7 +30,7 @@ export default function ViewingDetailModal({ viewing, onRespond, respondingId, o
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-5 py-4 border-b border-surface-variant">
-          <span className="text-[11px] uppercase tracking-wider font-mono text-sky-300">👁 Property Viewing</span>
+          <span className="text-[12px] uppercase tracking-wider font-mono text-sky-300">👁 Property Viewing</span>
           <button
             type="button"
             onClick={onClose}

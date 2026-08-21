@@ -104,7 +104,7 @@ const MemoizedNodeCard = React.memo(function MemoizedNodeCard({
       {/* Incoming Connection Port */}
       {node.parents?.length > 0 && (
         <div
-          className="absolute -left-3.5 top-1/2 -translate-y-1/2 flex items-center justify-center w-6 h-6 rounded-full bg-[#181832] border-2 border-white/50 text-[10.5px] font-mono font-bold text-white shadow-md"
+          className="absolute -left-3.5 top-1/2 -translate-y-1/2 flex items-center justify-center w-6 h-6 rounded-full bg-[#181832] border-2 border-white/50 text-[12px] font-mono font-bold text-white shadow-md"
           title={`${node.parents.length} incoming connections`}
         >
           {node.parents.length > 1 ? node.parents.length : "•"}
@@ -114,7 +114,7 @@ const MemoizedNodeCard = React.memo(function MemoizedNodeCard({
       {/* Outgoing Connection Port */}
       {node.children?.length > 0 && (
         <div
-          className="absolute -right-3.5 top-1/2 -translate-y-1/2 flex items-center justify-center w-6 h-6 rounded-full bg-[#181832] border-2 border-white/50 text-[10.5px] font-mono font-bold text-white shadow-md"
+          className="absolute -right-3.5 top-1/2 -translate-y-1/2 flex items-center justify-center w-6 h-6 rounded-full bg-[#181832] border-2 border-white/50 text-[12px] font-mono font-bold text-white shadow-md"
           title={`${node.children.length} outgoing paths`}
         >
           {node.children.length > 1 ? node.children.length : "•"}
@@ -124,7 +124,7 @@ const MemoizedNodeCard = React.memo(function MemoizedNodeCard({
       {/* Header: Type Pill & Status Badge */}
       <div className="flex items-center justify-between gap-1.5 pb-1 border-b border-white/10">
         <span
-          className="text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded-md border flex items-center gap-1.5 shadow-sm"
+          className="text-[12px] font-mono font-bold uppercase px-2 py-0.5 rounded-md border flex items-center gap-1.5 shadow-sm"
           style={{ color: tc.color, borderColor: tc.border, background: tc.badgeBg }}
         >
           <span>{tc.icon}</span>
@@ -132,14 +132,14 @@ const MemoizedNodeCard = React.memo(function MemoizedNodeCard({
         </span>
         <div className="flex items-center gap-1">
           <span
-            className="text-[9.5px] font-mono uppercase px-1.5 py-0.5 rounded border flex items-center gap-1 font-semibold"
+            className="text-[12px] font-mono uppercase px-1.5 py-0.5 rounded border flex items-center gap-1 font-semibold"
             style={{ color: sc.color, borderColor: sc.border, background: sc.bg }}
             title={`Implementation Status: ${sc.label}`}
           >
             <span>{sc.icon}</span>
             <span>{sc.label}</span>
           </span>
-          <span className="text-[9px] font-mono uppercase px-1.5 py-0.5 rounded bg-white/10 border border-white/15 text-white/80 font-semibold">
+          <span className="text-[12px] font-mono uppercase px-1.5 py-0.5 rounded bg-white/10 border border-white/15 text-white/80 font-semibold">
             {node.domain || (isArch ? "Arch" : "Flow")}
           </span>
         </div>
@@ -152,19 +152,19 @@ const MemoizedNodeCard = React.memo(function MemoizedNodeCard({
             {node.name}
           </h4>
         </div>
-        <span className="text-[9.5px] font-mono text-[#E8AE3C]/90 block truncate">
+        <span className="text-[12px] font-mono text-[#E8AE3C]/90 block truncate">
           {node.canonicalId || node.id}
         </span>
-        <p className="text-[11px] text-white/85 leading-relaxed line-clamp-2 font-normal pt-0.5">
+        <p className="text-[12px] text-white/85 leading-relaxed line-clamp-2 font-normal pt-0.5">
           {node.purpose || node.description}
         </p>
       </div>
 
       {/* Footer: Route indicator, Focus Button & In/Out Stats */}
-      <div className="flex items-center justify-between pt-1.5 border-t border-white/10 text-[10.5px] font-mono">
+      <div className="flex items-center justify-between pt-1.5 border-t border-white/10 text-[12px] font-mono">
         <button
           onClick={(e) => { e.stopPropagation(); onToggleFocus(node.id); }}
-          className={`px-2 py-0.5 rounded-md transition font-semibold text-[10.5px] ${
+          className={`px-2 py-0.5 rounded-md transition font-semibold text-[12px] ${
             isFocusedBranch
               ? "text-[#E8AE3C] font-bold bg-[#E8AE3C]/25 border border-[#E8AE3C]/60"
               : "text-white/70 hover:text-white hover:bg-white/15 border border-transparent"
@@ -853,7 +853,7 @@ export default function MasterFlowGraph({ onNavigate }) {
         {/* Center: Path Tracer (Master Mode only) */}
         {graphMode === "master" && (
           <div className="hidden xl:flex items-center gap-2 bg-[#0e0e1a]/95 backdrop-blur-xl px-3.5 py-2 rounded-2xl border border-white/25 shadow-2xl pointer-events-auto">
-            <span className="text-[10.5px] font-mono uppercase text-[#E8AE3C] font-bold tracking-wider">Path Tracer</span>
+            <span className="text-[12px] font-mono uppercase text-[#E8AE3C] font-bold tracking-wider">Path Tracer</span>
             <select
               value={traceSourceId}
               onChange={e => setTraceSourceId(e.target.value)}
@@ -1000,7 +1000,7 @@ export default function MasterFlowGraph({ onNavigate }) {
               </span>
               <h3 className="font-bold text-[15px] text-white tracking-tight">{activeGuideStep.title}</h3>
             </div>
-            <span className="text-[11px] font-mono text-white/70 uppercase font-bold bg-white/10 px-2.5 py-0.5 rounded-md">
+            <span className="text-[12px] font-mono text-white/70 uppercase font-bold bg-white/10 px-2.5 py-0.5 rounded-md">
               Role: {currentGuide?.role}
             </span>
           </div>
@@ -1054,7 +1054,7 @@ export default function MasterFlowGraph({ onNavigate }) {
             <div className="pb-3 border-b border-white/15 space-y-2">
               <div className="flex items-center justify-between">
                 <span
-                  className="text-[11px] font-mono uppercase px-2.5 py-1 rounded-lg border font-bold flex items-center gap-1.5"
+                  className="text-[12px] font-mono uppercase px-2.5 py-1 rounded-lg border font-bold flex items-center gap-1.5"
                   style={{
                     color: TYPE_CONFIG[selectedNode.nodeType || selectedNode.type]?.color,
                     borderColor: TYPE_CONFIG[selectedNode.nodeType || selectedNode.type]?.border,
@@ -1066,7 +1066,7 @@ export default function MasterFlowGraph({ onNavigate }) {
                 
                 <div className="flex items-center gap-1.5">
                   <span
-                    className="text-[10.5px] font-mono uppercase px-2 py-0.5 rounded border font-semibold flex items-center gap-1"
+                    className="text-[12px] font-mono uppercase px-2 py-0.5 rounded border font-semibold flex items-center gap-1"
                     style={{
                       color: STATUS_CONFIG[selectedNode.implementationStatus]?.color,
                       borderColor: STATUS_CONFIG[selectedNode.implementationStatus]?.border,
@@ -1083,7 +1083,7 @@ export default function MasterFlowGraph({ onNavigate }) {
               </div>
 
               <div>
-                <span className="text-[10px] font-mono text-[#E8AE3C] font-bold block truncate">
+                <span className="text-[12px] font-mono text-[#E8AE3C] font-bold block truncate">
                   CANONICAL: {selectedNode.canonicalId || selectedNode.id}
                 </span>
                 <h3 className="text-[15px] font-bold text-white leading-snug tracking-tight mt-0.5">
@@ -1095,7 +1095,7 @@ export default function MasterFlowGraph({ onNavigate }) {
                 {selectedNode.description || selectedNode.purpose}
               </p>
               
-              <div className="pt-2 flex items-center justify-between text-[11px] font-mono">
+              <div className="pt-2 flex items-center justify-between text-[12px] font-mono">
                 <span className="text-[#E8AE3C] truncate max-w-[240px] font-semibold">{selectedNode.route}</span>
                 {selectedNode.route?.startsWith("/") && (
                   <button
@@ -1112,19 +1112,19 @@ export default function MasterFlowGraph({ onNavigate }) {
             {/* Codebase & Grounding Evidence Section */}
             {selectedNode.evidence && selectedNode.evidence.length > 0 && (
               <div className="space-y-2 p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/30">
-                <span className="font-mono text-[11px] uppercase text-emerald-400 font-bold flex items-center gap-1.5">
+                <span className="font-mono text-[12px] uppercase text-emerald-400 font-bold flex items-center gap-1.5">
                   <ShieldCheck size={14} />
                   <span>Grounding Evidence ({selectedNode.evidence.length})</span>
                 </span>
                 <div className="space-y-1.5">
                   {selectedNode.evidence.map((ev, i) => (
-                    <div key={i} className="text-[11px] font-mono bg-black/40 p-2 rounded-lg border border-white/10 space-y-0.5">
-                      <div className="flex items-center justify-between text-emerald-300 font-bold text-[10px]">
+                    <div key={i} className="text-[12px] font-mono bg-black/40 p-2 rounded-lg border border-white/10 space-y-0.5">
+                      <div className="flex items-center justify-between text-emerald-300 font-bold text-[12px]">
                         <span>[{ev.kind}] {ev.symbol ? `· ${ev.symbol}` : ''}</span>
-                        <span className="text-[9px] text-white/60">{ev.provenance}</span>
+                        <span className="text-[12px] text-white/60">{ev.provenance}</span>
                       </div>
                       {ev.path && (
-                        <div className="text-white/80 truncate text-[10px]" title={ev.path}>
+                        <div className="text-white/80 truncate text-[12px]" title={ev.path}>
                           {ev.path}
                         </div>
                       )}
@@ -1136,7 +1136,7 @@ export default function MasterFlowGraph({ onNavigate }) {
 
             {/* 1. Where did we come from? (Upstream steps) */}
             <div className="space-y-2">
-              <span className="font-mono text-[11.5px] uppercase text-white/85 font-bold flex items-center gap-2">
+              <span className="font-mono text-[12px] uppercase text-white/85 font-bold flex items-center gap-2">
                 <MapPin size={14} className="text-sky-400" />
                 <span>1. Where did we come from? ({selectedNode.parents?.length || 0})</span>
               </span>
@@ -1151,13 +1151,13 @@ export default function MasterFlowGraph({ onNavigate }) {
                     >
                       <div className="truncate pr-2">
                         <span className="text-white font-bold text-[12px] group-hover:text-white truncate block">{pn?.name || pid}</span>
-                        <span className="text-[10px] font-mono text-white/60 block">{pn?.canonicalId || pn?.type}</span>
+                        <span className="text-[12px] font-mono text-white/60 block">{pn?.canonicalId || pn?.type}</span>
                       </div>
-                      <ChevronLeft size={15} className="text-white/50 group-hover:text-[#E8AE3C] shrink-0" />
+                      <ChevronLeft size={15} className="text-white/70 group-hover:text-[#E8AE3C] shrink-0" />
                     </button>
                   );
                 }) : (
-                  <p className="text-[11px] text-white/60 italic p-2.5 bg-black/40 rounded-xl border border-white/10">
+                  <p className="text-[12px] text-white/60 italic p-2.5 bg-black/40 rounded-xl border border-white/10">
                     Root starting point (No upstream steps)
                   </p>
                 )}
@@ -1167,13 +1167,13 @@ export default function MasterFlowGraph({ onNavigate }) {
             {/* 2. What can you do here? */}
             {selectedNode.actions?.length > 0 && (
               <div className="space-y-2">
-                <span className="font-mono text-[11.5px] uppercase text-emerald-400 font-bold flex items-center gap-2">
+                <span className="font-mono text-[12px] uppercase text-emerald-400 font-bold flex items-center gap-2">
                   <Zap size={14} />
                   <span>2. What can you do here?</span>
                 </span>
                 <ul className="space-y-1.5">
                   {selectedNode.actions.map((a, i) => (
-                    <li key={i} className="p-2 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-200 text-[11.5px] flex items-center gap-2 font-medium">
+                    <li key={i} className="p-2 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-200 text-[12px] flex items-center gap-2 font-medium">
                       <Zap size={13} className="shrink-0 text-emerald-400" />
                       <span>{a}</span>
                     </li>
@@ -1184,7 +1184,7 @@ export default function MasterFlowGraph({ onNavigate }) {
 
             {/* 3. Where does this lead next? */}
             <div className="space-y-2">
-              <span className="font-mono text-[11.5px] uppercase text-white/85 font-bold flex items-center gap-2">
+              <span className="font-mono text-[12px] uppercase text-white/85 font-bold flex items-center gap-2">
                 <ChevronRight size={15} className="text-emerald-400" />
                 <span>3. Where does this lead next? ({selectedNode.children?.length || 0})</span>
               </span>
@@ -1199,13 +1199,13 @@ export default function MasterFlowGraph({ onNavigate }) {
                     >
                       <div className="truncate pr-2">
                         <span className="text-white font-bold text-[12px] group-hover:text-white truncate block">{cn?.name || cid}</span>
-                        <span className="text-[10px] font-mono text-white/60 block">{cn?.canonicalId || cn?.type}</span>
+                        <span className="text-[12px] font-mono text-white/60 block">{cn?.canonicalId || cn?.type}</span>
                       </div>
-                      <ChevronRight size={15} className="text-white/50 group-hover:text-[#E8AE3C] shrink-0" />
+                      <ChevronRight size={15} className="text-white/70 group-hover:text-[#E8AE3C] shrink-0" />
                     </button>
                   );
                 }) : (
-                  <p className="text-[11px] text-white/60 italic p-2.5 bg-black/40 rounded-xl border border-white/10">
+                  <p className="text-[12px] text-white/60 italic p-2.5 bg-black/40 rounded-xl border border-white/10">
                     Terminal milestone (Journey completes here)
                   </p>
                 )}
@@ -1215,13 +1215,13 @@ export default function MasterFlowGraph({ onNavigate }) {
             {/* 4. What if something goes wrong? (Exceptions) */}
             {selectedNode.exceptions?.length > 0 && (
               <div className="space-y-2">
-                <span className="font-mono text-[11.5px] uppercase text-amber-400 font-bold flex items-center gap-2">
+                <span className="font-mono text-[12px] uppercase text-amber-400 font-bold flex items-center gap-2">
                   <AlertCircle size={14} />
                   <span>4. What if something goes wrong?</span>
                 </span>
                 <ul className="space-y-1.5">
                   {selectedNode.exceptions.map((exc, i) => (
-                    <li key={i} className="p-2.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-100 text-[11.5px] flex items-start gap-2">
+                    <li key={i} className="p-2.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-100 text-[12px] flex items-start gap-2">
                       <AlertCircle size={14} className="shrink-0 text-amber-400 mt-0.5" />
                       <span className="leading-relaxed">{exc}</span>
                     </li>
@@ -1233,13 +1233,13 @@ export default function MasterFlowGraph({ onNavigate }) {
             {/* 5. How to fix it (Recovery) */}
             {selectedNode.recovery?.length > 0 && (
               <div className="space-y-2">
-                <span className="font-mono text-[11.5px] uppercase text-sky-400 font-bold flex items-center gap-2">
+                <span className="font-mono text-[12px] uppercase text-sky-400 font-bold flex items-center gap-2">
                   <RotateCcw size={14} />
                   <span>5. How to recover & continue</span>
                 </span>
                 <ul className="space-y-1.5">
                   {selectedNode.recovery.map((rec, i) => (
-                    <li key={i} className="p-2.5 rounded-xl bg-sky-500/15 border border-sky-500/30 text-sky-100 text-[11.5px] flex items-start gap-2">
+                    <li key={i} className="p-2.5 rounded-xl bg-sky-500/15 border border-sky-500/30 text-sky-100 text-[12px] flex items-start gap-2">
                       <CheckCircle2 size={14} className="shrink-0 text-sky-400 mt-0.5" />
                       <span className="leading-relaxed">{rec}</span>
                     </li>
@@ -1250,17 +1250,17 @@ export default function MasterFlowGraph({ onNavigate }) {
 
             {/* 6. Data & System Contract */}
             <div className="space-y-2">
-              <span className="font-mono text-[11.5px] uppercase text-blue-400 font-bold flex items-center gap-2">
+              <span className="font-mono text-[12px] uppercase text-blue-400 font-bold flex items-center gap-2">
                 <Database size={14} />
                 <span>6. Data & System Contract</span>
               </span>
-              <div className="p-3 rounded-xl bg-blue-500/15 border border-blue-500/30 text-blue-100 text-[11.5px] space-y-1.5">
+              <div className="p-3 rounded-xl bg-blue-500/15 border border-blue-500/30 text-blue-100 text-[12px] space-y-1.5">
                 <div><strong className="text-blue-200">Database:</strong> {selectedNode.database || "None"}</div>
                 <div><strong className="text-blue-200">Auth Gate:</strong> {selectedNode.auth || "Public access"}</div>
                 {selectedNode.telemetry && (
                   <div>
                     <strong className="text-blue-200">Telemetry:</strong>
-                    <span className="font-mono text-[10.5px] text-amber-300 ml-1">
+                    <span className="font-mono text-[12px] text-amber-300 ml-1">
                       {selectedNode.telemetry.eventName}
                     </span>
                   </div>
@@ -1270,7 +1270,7 @@ export default function MasterFlowGraph({ onNavigate }) {
                     <strong className="text-blue-200">Files & APIs:</strong>
                     <div className="mt-1 space-y-0.5">
                       {selectedNode.systems.map((sys, i) => (
-                        <div key={i} className="font-mono text-[10.5px] text-white/90 truncate">• {sys}</div>
+                        <div key={i} className="font-mono text-[12px] text-white/90 truncate">• {sys}</div>
                       ))}
                     </div>
                   </div>
@@ -1283,7 +1283,7 @@ export default function MasterFlowGraph({ onNavigate }) {
       )}
 
       {/* Stats Bar */}
-      <div className="absolute bottom-3 left-3 z-30 flex items-center gap-3 bg-[#0e0e1a]/95 backdrop-blur-xl px-3.5 py-1.5 rounded-xl border border-white/20 text-[11px] font-mono text-white/80 pointer-events-none shadow-xl">
+      <div className="absolute bottom-3 left-3 z-30 flex items-center gap-3 bg-[#0e0e1a]/95 backdrop-blur-xl px-3.5 py-1.5 rounded-xl border border-white/20 text-[12px] font-mono text-white/80 pointer-events-none shadow-xl">
         <span>Mode: <strong className="text-[#E8AE3C] uppercase font-bold">{graphMode}</strong></span>
         <span>·</span>
         <span>{culledNodes.length}/{visibleNodes.length} nodes visible</span>

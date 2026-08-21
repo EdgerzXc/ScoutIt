@@ -108,7 +108,7 @@ export default function TaskRail({ mockUserId, dealId = null, onSummary }) {
     <div className="card-atmosphere rounded-lg p-5 flex flex-col gap-4">
       <div className="flex justify-between items-center border-b border-surface-variant pb-2">
         <h3 className="font-working-title text-base text-on-surface">Tasks</h3>
-        <span className="text-text-secondary font-label-caps text-[10px] tracking-widest uppercase">
+        <span className="text-text-secondary font-label-caps text-[12px] tracking-widest uppercase">
           {tasks === null ? "…" : `${open.length} open`}
         </span>
       </div>
@@ -159,11 +159,11 @@ export default function TaskRail({ mockUserId, dealId = null, onSummary }) {
                 <p className="text-sm text-on-surface leading-snug">{task.title}</p>
                 <div className="flex flex-wrap gap-x-3 mt-0.5">
                   {task.dueAt && (
-                    <span className={`text-[11px] font-data-tabular ${isOverdue ? "text-error font-bold" : "text-text-secondary"}`}>
+                    <span className={`text-[12px] font-data-tabular ${isOverdue ? "text-error font-bold" : "text-text-secondary"}`}>
                       {formatDue(task.dueAt)}
                     </span>
                   )}
-                  {task.dealTitle && <span className="text-[11px] text-text-muted truncate">{task.dealTitle}</span>}
+                  {task.dealTitle && <span className="text-[12px] text-text-muted truncate">{task.dealTitle}</span>}
                 </div>
               </div>
               <button
@@ -180,7 +180,7 @@ export default function TaskRail({ mockUserId, dealId = null, onSummary }) {
 
       {done.length > 0 && (
         <div className="border-t border-surface-variant pt-2">
-          <button onClick={() => setShowDone((v) => !v)} className="text-[11px] font-label-caps tracking-widest uppercase text-text-secondary hover:text-on-surface transition">
+          <button onClick={() => setShowDone((v) => !v)} className="text-[12px] font-label-caps tracking-widest uppercase text-text-secondary hover:text-on-surface transition">
             {showDone ? "Hide" : "Show"} completed ({done.length})
           </button>
           {showDone && (

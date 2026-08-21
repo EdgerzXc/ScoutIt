@@ -636,7 +636,7 @@ export default function MasterCascadeMap() {
           border-radius: 9999px;
           color: #f5f3ee;
           font-family: var(--font-mono, monospace);
-          font-size: 11px;
+          font-size: 12px;
           letter-spacing: 0.12em;
           text-transform: uppercase;
           cursor: pointer;
@@ -680,7 +680,7 @@ export default function MasterCascadeMap() {
           border-radius: 4px;
           background: rgba(255, 255, 255, 0.1);
           border: 1px solid rgba(255, 255, 255, 0.15);
-          font-size: 10px;
+          font-size: 12px;
           color: var(--accent, #E8AE3C);
         }
 
@@ -767,7 +767,7 @@ export default function MasterCascadeMap() {
           padding: 6px 12px;
           border-radius: 8px;
           font-family: var(--font-mono, monospace);
-          font-size: 11px;
+          font-size: 12px;
           text-transform: uppercase;
           cursor: pointer;
           transition: all 0.2s ease;
@@ -835,7 +835,7 @@ export default function MasterCascadeMap() {
           border-bottom: 2px solid transparent;
           color: rgba(255, 255, 255, 0.55);
           font-family: var(--font-mono, monospace);
-          font-size: 11px;
+          font-size: 12px;
           letter-spacing: 0.08em;
           text-transform: uppercase;
           cursor: pointer;
@@ -900,7 +900,7 @@ export default function MasterCascadeMap() {
 
         .sc-badge {
           font-family: var(--font-mono, monospace);
-          font-size: 9px;
+          font-size: 12px;
           text-transform: uppercase;
           letter-spacing: 0.08em;
           font-weight: 700;
@@ -930,7 +930,7 @@ export default function MasterCascadeMap() {
         }
 
         .current-scenario-sub {
-          font-size: 11px;
+          font-size: 12px;
           color: rgba(255, 255, 255, 0.5);
           display: block;
         }
@@ -948,7 +948,7 @@ export default function MasterCascadeMap() {
           background: var(--accent, #E8AE3C);
           color: #000000;
           font-family: var(--font-mono, monospace);
-          font-size: 11px;
+          font-size: 12px;
           font-weight: 700;
           text-transform: uppercase;
           padding: 6px 14px;
@@ -1034,14 +1034,14 @@ export default function MasterCascadeMap() {
 
         .step-num {
           font-family: var(--font-mono, monospace);
-          font-size: 10px;
+          font-size: 12px;
           color: var(--accent, #E8AE3C);
           font-weight: 700;
         }
 
         .cat-tag {
           font-family: var(--font-mono, monospace);
-          font-size: 9px;
+          font-size: 12px;
           background: rgba(255, 255, 255, 0.08);
           color: rgba(255, 255, 255, 0.7);
           padding: 1px 6px;
@@ -1074,13 +1074,13 @@ export default function MasterCascadeMap() {
 
         .route-url {
           font-family: var(--font-mono, monospace);
-          font-size: 11px;
+          font-size: 12px;
           color: rgba(255, 255, 255, 0.4);
         }
 
         .node-jump-link {
           font-family: var(--font-mono, monospace);
-          font-size: 10px;
+          font-size: 12px;
           color: var(--accent, #E8AE3C);
           background: rgba(232, 174, 60, 0.1);
           border: 1px solid rgba(232, 174, 60, 0.25);
@@ -1130,10 +1130,10 @@ export default function MasterCascadeMap() {
 
         .banner-kicker {
           font-family: var(--font-mono, monospace);
-          font-size: 10px;
+          font-size: 12px;
           font-weight: 700;
           color: var(--accent, #E8AE3C);
-          letter-spacing: 0.15em;
+          letter-spacing: 0.12em;
           text-transform: uppercase;
           display: block;
           margin-bottom: 4px;
@@ -1198,7 +1198,7 @@ export default function MasterCascadeMap() {
 
         .alt-label {
           font-family: var(--font-mono, monospace);
-          font-size: 10px;
+          font-size: 12px;
           color: rgba(255, 255, 255, 0.45);
         }
 
@@ -1224,7 +1224,7 @@ export default function MasterCascadeMap() {
 
         .layer-type-badge {
           font-family: var(--font-mono, monospace);
-          font-size: 9px;
+          font-size: 12px;
           padding: 1px 6px;
           border-radius: 4px;
           background: rgba(255, 255, 255, 0.08);
@@ -1234,7 +1234,7 @@ export default function MasterCascadeMap() {
 
         .current-layer-pill {
           font-family: var(--font-mono, monospace);
-          font-size: 9px;
+          font-size: 12px;
           font-weight: 700;
           padding: 1px 7px;
           border-radius: 4px;
@@ -1261,7 +1261,7 @@ export default function MasterCascadeMap() {
           border: 1px solid rgba(232, 174, 60, 0.25);
           color: var(--accent, #E8AE3C);
           font-family: var(--font-mono, monospace);
-          font-size: 10px;
+          font-size: 12px;
           font-weight: 600;
           text-transform: uppercase;
           cursor: pointer;
@@ -1318,7 +1318,7 @@ export default function MasterCascadeMap() {
 
         .portal-badge {
           font-family: var(--font-mono, monospace);
-          font-size: 9px;
+          font-size: 12px;
           padding: 2px 6px;
           border-radius: 4px;
           background: rgba(255, 255, 255, 0.08);
@@ -1350,14 +1350,14 @@ export default function MasterCascadeMap() {
 
         .portal-category {
           font-family: var(--font-mono, monospace);
-          font-size: 10px;
+          font-size: 12px;
           color: rgba(255, 255, 255, 0.4);
           text-transform: uppercase;
         }
 
         .portal-action-link {
           font-family: var(--font-mono, monospace);
-          font-size: 10px;
+          font-size: 12px;
           color: var(--accent, #E8AE3C);
           font-weight: 600;
           text-transform: uppercase;
@@ -1404,7 +1404,7 @@ export default function MasterCascadeMap() {
 
         .workspace-badge {
           font-family: var(--font-mono, monospace);
-          font-size: 9px;
+          font-size: 12px;
           padding: 2px 6px;
           border-radius: 4px;
           background: rgba(232, 174, 60, 0.15);
@@ -1436,7 +1436,7 @@ export default function MasterCascadeMap() {
           border: 1px solid rgba(255, 255, 255, 0.1);
           color: #ffffff;
           font-family: var(--font-mono, monospace);
-          font-size: 10px;
+          font-size: 12px;
           font-weight: 600;
           text-transform: uppercase;
           cursor: pointer;
@@ -1506,7 +1506,7 @@ export default function MasterCascadeMap() {
 
         .ecosystem-link-text {
           font-family: var(--font-mono, monospace);
-          font-size: 10px;
+          font-size: 12px;
           color: var(--accent, #E8AE3C);
           font-weight: 600;
           text-transform: uppercase;
@@ -1576,7 +1576,7 @@ export default function MasterCascadeMap() {
 
         .form-label {
           font-family: var(--font-mono, monospace);
-          font-size: 10px;
+          font-size: 12px;
           text-transform: uppercase;
           color: var(--accent, #E8AE3C);
           font-weight: 600;
@@ -1611,7 +1611,7 @@ export default function MasterCascadeMap() {
           border: 1px solid rgba(255, 255, 255, 0.1);
           color: rgba(255, 255, 255, 0.6);
           font-family: var(--font-mono, monospace);
-          font-size: 11px;
+          font-size: 12px;
           text-transform: uppercase;
           cursor: pointer;
         }
@@ -1624,7 +1624,7 @@ export default function MasterCascadeMap() {
           border: none;
           color: #000000;
           font-family: var(--font-mono, monospace);
-          font-size: 11px;
+          font-size: 12px;
           font-weight: 700;
           text-transform: uppercase;
           cursor: pointer;
@@ -1667,7 +1667,7 @@ export default function MasterCascadeMap() {
           background: #111116;
           border-top: 1px solid rgba(255, 255, 255, 0.06);
           font-family: var(--font-mono, monospace);
-          font-size: 10px;
+          font-size: 12px;
         }
 
         .footer-keys {

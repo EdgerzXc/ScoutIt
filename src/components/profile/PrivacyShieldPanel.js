@@ -167,7 +167,7 @@ export default function PrivacyShieldPanel({ role, tier }) {
         }
         .ps-free {
           font-family: ${MONO};
-          font-size: 9px;
+          font-size: 12px;
           letter-spacing: 0.14em;
           text-transform: uppercase;
           color: var(--green);
@@ -197,7 +197,7 @@ export default function PrivacyShieldPanel({ role, tier }) {
         }
         .ps-row__saved {
           font-family: ${MONO};
-          font-size: 8.5px;
+          font-size: 12px;
           letter-spacing: 0.12em;
           text-transform: uppercase;
           color: var(--green);
@@ -240,7 +240,7 @@ export default function PrivacyShieldPanel({ role, tier }) {
 
         .ps-err {
           font-family: ${MONO};
-          font-size: 10px;
+          font-size: 12px;
           color: var(--red);
           line-height: 1.7;
           margin-top: 14px;

@@ -56,9 +56,9 @@ export default function AttachedFindingCard({
             <span
               style={{
                 fontFamily: "var(--font-mono)",
-                fontSize: "10px",
+                fontSize: "12px",
                 fontWeight: 600,
-                letterSpacing: "0.18em",
+                letterSpacing: "0.12em",
                 textTransform: "uppercase",
                 color: color,
                 display: "inline-flex",
@@ -75,7 +75,7 @@ export default function AttachedFindingCard({
             <span
               style={{
                 fontFamily: "var(--font-mono)",
-                fontSize: "9.5px",
+                fontSize: "12px",
                 fontWeight: 700,
                 letterSpacing: "0.1em",
                 textTransform: "uppercase",
@@ -96,7 +96,7 @@ export default function AttachedFindingCard({
                   background: "none",
                   border: "none",
                   fontFamily: "var(--font-mono)",
-                  fontSize: "10px",
+                  fontSize: "12px",
                   color: "rgba(240, 237, 232, 0.4)",
                   cursor: "pointer",
                   padding: "2px 4px",
@@ -153,7 +153,7 @@ export default function AttachedFindingCard({
             <span
               style={{
                 fontFamily: "var(--font-mono)",
-                fontSize: "11px",
+                fontSize: "12px",
                 color: "#E8AE3C",
               }}
             >
@@ -169,7 +169,7 @@ export default function AttachedFindingCard({
               alignItems: "center",
               gap: "4px",
               fontFamily: "var(--font-mono)",
-              fontSize: "10.5px",
+              fontSize: "12px",
               color: "rgba(240, 237, 232, 0.7)",
               transition: "color 0.15s ease",
             }}

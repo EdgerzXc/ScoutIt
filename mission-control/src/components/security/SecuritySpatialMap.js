@@ -169,8 +169,8 @@ export default function SecuritySpatialMap({ velocityData = [], flaggedData = []
         html: `
           <div style="position: relative; display: flex; align-items: center; gap: 6px; background: #0d0d0d; color: #fff; padding: 6px 12px; border-radius: 20px; border: 1px solid ${badgeColor}; box-shadow: 0 0 16px rgba(232,174,60,0.3); font-family: monospace; white-space: nowrap; cursor: pointer;">
             <span style="width: 8px; height: 8px; border-radius: 50%; background: ${badgeColor}; display: inline-block; box-shadow: 0 0 8px ${badgeColor};"></span>
-            <span style="font-size: 11px; font-weight: bold; text-transform: uppercase;">${pt.city}</span>
-            <span style="font-size: 10px; background: rgba(232,174,60,0.15); color: ${badgeColor}; padding: 2px 6px; border-radius: 10px; font-weight: 700;">
+            <span style="font-size: 12px; font-weight: bold; text-transform: uppercase;">${pt.city}</span>
+            <span style="font-size: 12px; background: rgba(232,174,60,0.15); color: ${badgeColor}; padding: 2px 6px; border-radius: 10px; font-weight: 700;">
               📱 ${pt.deviceCount} ${pt.deviceCount === 1 ? 'DEV' : 'DEVS'}
             </span>
           </div>
@@ -189,10 +189,10 @@ export default function SecuritySpatialMap({ velocityData = [], flaggedData = []
           <div style="font-size: 12px; color: #fff; margin-bottom: 4px;">
             📱 <strong>${pt.deviceCount} Active Device${pt.deviceCount > 1 ? 's' : ''}</strong>
           </div>
-          <div style="font-size: 11px; color: rgba(255,255,255,0.6); margin-bottom: 6px;">
+          <div style="font-size: 12px; color: rgba(255,255,255,0.6); margin-bottom: 6px;">
             ⚡ <strong>${pt.reqCount} Total Requests (${timeRange.toUpperCase()})</strong>
           </div>
-          <div style="font-size: 9px; color: rgba(255,255,255,0.4); word-break: break-all;">
+          <div style="font-size: 12px; color: rgba(255,255,255,0.4); word-break: break-all;">
             Hash: ${pt.hashes[0]}
           </div>
         </div>
@@ -221,7 +221,7 @@ export default function SecuritySpatialMap({ velocityData = [], flaggedData = []
             <Radio className="w-5 h-5 text-[#E8AE3C] animate-pulse" />
             Sentinel Eye · 30-Day Historical Spatial & Intent Intel
           </h2>
-          <p className="text-xs text-white/40 mt-0.5">
+          <p className="text-xs text-white/70 mt-0.5">
             Geographic Device Density, User Search Intent & Friction Point Analytics
           </p>
         </div>
@@ -242,7 +242,7 @@ export default function SecuritySpatialMap({ velocityData = [], flaggedData = []
               <button
                 key={t.id}
                 onClick={() => setTimeRange(t.id)}
-                className={`px-2.5 py-1 rounded-md text-[11px] font-mono transition-all ${
+                className={`px-2.5 py-1 rounded-md text-[12px] font-mono transition-all ${
                   timeRange === t.id
                     ? "bg-[#E8AE3C] text-black font-semibold"
                     : "text-white/60 hover:text-white"
@@ -255,7 +255,7 @@ export default function SecuritySpatialMap({ velocityData = [], flaggedData = []
 
           {/* Region Scope */}
           <div className="flex items-center gap-1.5 bg-black/60 border border-white/10 rounded-lg p-1">
-            <Layers className="w-3.5 h-3.5 text-white/40 ml-1" />
+            <Layers className="w-3.5 h-3.5 text-white/70 ml-1" />
             {[
               { id: "all", label: "All" },
               { id: "ph", label: "Philippines" },
@@ -264,10 +264,10 @@ export default function SecuritySpatialMap({ velocityData = [], flaggedData = []
               <button
                 key={f.id}
                 onClick={() => setActiveFilter(f.id)}
-                className={`px-2.5 py-1 rounded-md text-[11px] font-mono transition-all ${
+                className={`px-2.5 py-1 rounded-md text-[12px] font-mono transition-all ${
                   activeFilter === f.id
                     ? "bg-white/20 text-white font-semibold"
-                    : "text-white/50 hover:text-white"
+                    : "text-white/70 hover:text-white"
                 }`}
               >
                 {f.label}
@@ -294,7 +294,7 @@ export default function SecuritySpatialMap({ velocityData = [], flaggedData = []
               <Smartphone className="w-4 h-4 text-[#E8AE3C]" />
               <span>Active Devices ({timeRange.toUpperCase()}): <strong className="text-[#E8AE3C] text-sm">{totalDevices}</strong></span>
             </div>
-            <div className="text-white/40 border-l border-white/10 pl-3">
+            <div className="text-white/70 border-l border-white/10 pl-3">
               Total Traffic: <strong className="text-white">{totalRequests} reqs</strong>
             </div>
           </div>
@@ -310,7 +310,7 @@ export default function SecuritySpatialMap({ velocityData = [], flaggedData = []
 
             <div className="space-y-2.5 max-h-[320px] overflow-y-auto pr-1">
               {filteredPoints.length === 0 ? (
-                <div className="text-xs text-white/40 py-4 text-center">No location traffic in this window.</div>
+                <div className="text-xs text-white/70 py-4 text-center">No location traffic in this window.</div>
               ) : (
                 filteredPoints.map((pt, idx) => (
                   <div
@@ -332,7 +332,7 @@ export default function SecuritySpatialMap({ velocityData = [], flaggedData = []
                       </span>
                     </div>
 
-                    <div className="flex justify-between items-center text-[10px] text-white/40 font-mono mt-1">
+                    <div className="flex justify-between items-center text-[12px] text-white/70 font-mono mt-1">
                       <span>{pt.region}</span>
                       <span className="text-[#E8AE3C]">{pt.reqCount} requests</span>
                     </div>
@@ -342,7 +342,7 @@ export default function SecuritySpatialMap({ velocityData = [], flaggedData = []
             </div>
           </div>
 
-          <div className="text-[10px] text-white/40 border-t border-white/5 pt-3 leading-relaxed font-mono">
+          <div className="text-[12px] text-white/70 border-t border-white/5 pt-3 leading-relaxed font-mono">
             * Window: {timeRange.toUpperCase()} · Anonymized via persistent `scout_did` device tokens.
           </div>
         </div>
@@ -357,18 +357,18 @@ export default function SecuritySpatialMap({ velocityData = [], flaggedData = []
             What Users Are Looking For (Search Demand)
           </h3>
           {searchIntents.length === 0 ? (
-            <p className="text-xs text-white/40 py-3">No search query logs in this time window.</p>
+            <p className="text-xs text-white/70 py-3">No search query logs in this time window.</p>
           ) : (
             <div className="space-y-2 max-h-[180px] overflow-y-auto">
               {searchIntents.map((s, i) => (
                 <div key={i} className="flex items-center justify-between text-xs bg-white/5 p-2 rounded-lg border border-white/5">
                   <span className="font-mono text-white/80 truncate">🔍 {s.query}</span>
                   {s.isZero ? (
-                    <span className="text-[10px] text-orange-400 border border-orange-400/20 px-2 py-0.5 rounded-full font-mono">
+                    <span className="text-[12px] text-orange-400 border border-orange-400/20 px-2 py-0.5 rounded-full font-mono">
                       0 Matches (Demand Gap)
                     </span>
                   ) : (
-                    <span className="text-[10px] text-emerald-400 font-mono">Active Intent</span>
+                    <span className="text-[12px] text-emerald-400 font-mono">Active Intent</span>
                   )}
                 </div>
               ))}
@@ -383,13 +383,13 @@ export default function SecuritySpatialMap({ velocityData = [], flaggedData = []
             User Friction & Drop-Off Points
           </h3>
           {frictionPoints.length === 0 ? (
-            <p className="text-xs text-white/40 py-3">No active friction drop-offs detected. Clean conversion flow.</p>
+            <p className="text-xs text-white/70 py-3">No active friction drop-offs detected. Clean conversion flow.</p>
           ) : (
             <div className="space-y-2 max-h-[180px] overflow-y-auto">
               {frictionPoints.map((f, i) => (
                 <div key={i} className="flex items-center justify-between text-xs bg-red-500/10 p-2 rounded-lg border border-red-500/20">
                   <span className="font-mono text-red-300 truncate">⚠️ {f.type}</span>
-                  <span className="text-[10px] text-white/40 font-mono">
+                  <span className="text-[12px] text-white/70 font-mono">
                     {f.time ? new Date(f.time).toLocaleTimeString() : 'Recent'}
                   </span>
                 </div>

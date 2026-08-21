@@ -44,7 +44,7 @@ export default function PhotographerPanel({ projects = [], userId, isAvailable, 
             ) : (
               <ToggleLeft size={20} strokeWidth={1.5} color="var(--text-secondary)" />
             )}
-            <span style={{ fontFamily: "var(--font-body)", fontSize: 11, color: available ? "#E8AE3C" : "var(--text-secondary)", letterSpacing: "0.06em" }}>
+            <span style={{ fontFamily: "var(--font-body)", fontSize: 12, color: available ? "#E8AE3C" : "var(--text-secondary)", letterSpacing: "0.06em" }}>
               {available ? "Available" : "Unavailable"}
             </span>
           </button>
@@ -53,7 +53,7 @@ export default function PhotographerPanel({ projects = [], userId, isAvailable, 
           <span
             style={{
               fontFamily: "var(--font-body)",
-              fontSize: 10,
+              fontSize: 12,
               letterSpacing: "0.08em",
               color: available ? "#4caf7d" : "var(--text-secondary)",
               textTransform: "uppercase",
@@ -76,7 +76,7 @@ export default function PhotographerPanel({ projects = [], userId, isAvailable, 
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
             <Image size={12} strokeWidth={1.5} color="var(--text-secondary)" />
-            <span style={{ fontFamily: "var(--font-body)", fontSize: 11, color: "var(--text-secondary)" }}>
+            <span style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "var(--text-secondary)" }}>
               {projects.length} project{projects.length !== 1 ? "s" : ""}
             </span>
           </div>
@@ -101,7 +101,7 @@ export default function PhotographerPanel({ projects = [], userId, isAvailable, 
           </div>
 
           {projects.length > 6 && (
-            <span style={{ fontFamily: "var(--font-body)", fontSize: 11, color: "var(--text-secondary)" }}>
+            <span style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "var(--text-secondary)" }}>
               +{projects.length - 6} more projects
             </span>
           )}
@@ -127,7 +127,7 @@ const panelHeader = {
 
 const panelLabel = {
   fontFamily: "var(--font-body)",
-  fontSize: 10,
+  fontSize: 12,
   fontWeight: 700,
   letterSpacing: "0.14em",
   textTransform: "uppercase",
@@ -157,7 +157,7 @@ const portfolioCellLabel = {
   padding: "4px 6px",
   background: "rgba(0,0,0,0.7)",
   fontFamily: "var(--font-body)",
-  fontSize: 9,
+  fontSize: 12,
   color: "rgba(255,255,255,0.7)",
   whiteSpace: "nowrap",
   overflow: "hidden",

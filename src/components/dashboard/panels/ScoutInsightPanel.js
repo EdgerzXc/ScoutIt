@@ -49,10 +49,10 @@ export default function ScoutInsightPanel({ pitches, listings, taskSummary }) {
     <GlassPanel className="rounded-2xl p-6 mb-10 shadow-[0_8px_30px_rgba(0,0,0,0.4)] relative overflow-hidden">
       <div className="absolute top-0 right-0 w-64 h-64 bg-gold-accent opacity-5 rounded-full blur-[80px] pointer-events-none"></div>
       <div className="flex items-center justify-between mb-4 relative z-10">
-        <h3 className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase flex items-center gap-2">
+        <h3 className="font-label-caps text-[12px] tracking-widest text-gold-accent uppercase flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-gold-accent animate-pulse shadow-[0_0_10px_rgba(247,198,78,0.8)]"></span> Scout Insight
         </h3>
-        <span className="font-label-caps text-[10px] tracking-widest text-text-muted uppercase hidden sm:block">Rule-based · computed from your live pipeline</span>
+        <span className="font-label-caps text-[12px] tracking-widest text-text-muted uppercase hidden sm:block">Rule-based · computed from your live pipeline</span>
       </div>
       {insights.length > 0 ? (
         <div className="flex flex-col gap-2.5">
@@ -61,7 +61,7 @@ export default function ScoutInsightPanel({ pitches, listings, taskSummary }) {
               <span className="text-base shrink-0 mt-[-1px]" aria-hidden="true">{insight.icon}</span>
               <div>
                 <p className="text-sm text-on-surface leading-snug">{insight.text}</p>
-                <p className="text-[10px] text-text-muted mt-0.5">Rule: {insight.rule}</p>
+                <p className="text-[12px] text-text-muted mt-0.5">Rule: {insight.rule}</p>
               </div>
             </div>
           ))}

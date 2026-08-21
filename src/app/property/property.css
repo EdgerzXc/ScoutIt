@@ -162,7 +162,7 @@
   left: 50%;
   transform: translate(-50%, -50%);
   color: var(--on-accent);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: bold;
 }
 
@@ -176,7 +176,7 @@
 
 .intel-widget-header {
   font-family: var(--font-mono), monospace;
-  font-size: 10px;
+  font-size: 12px;
   color: var(--accent);
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -210,12 +210,12 @@
 }
 
 .intel-widget-item span {
-  font-size: 10px;
+  font-size: 12px;
   color: var(--text-muted, var(--text-muted));
 }
 
 .intel-widget-empty {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-muted, var(--text-muted));
   line-height: 1.5;
 }
@@ -320,7 +320,7 @@
   border: 1px solid var(--border-solid);
   padding: 4px 10px;
   border-radius: 2px;
-  font-size: 10px;
+  font-size: 12px;
   color: var(--accent);
   font-weight: 600;
   text-transform: uppercase;
@@ -364,7 +364,7 @@
 }
 
 .property-spec-badge {
-  font-size: 10px;
+  font-size: 12px;
   color: var(--text-secondary, var(--text-secondary));
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--border-solid);
@@ -383,7 +383,7 @@
 }
 
 .property-action-btn {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--accent);
   letter-spacing: 0.05em;
@@ -429,7 +429,7 @@
   border: 1px solid var(--accent);
   border-radius: 999px;
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--accent);
@@ -643,7 +643,7 @@
   }
 
   .property-spec-badge {
-    font-size: 10px;
+    font-size: 12px;
     padding: 2px 6px;
   }
 }
@@ -654,7 +654,7 @@
   border: 1px solid rgba(232, 174, 60, 0.4);
   color: var(--accent);
   font-family: var(--font-mono), monospace;
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   padding: 6px 10px;
@@ -692,7 +692,7 @@
 
 .compare-count {
   font-family: var(--font-mono), monospace;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-primary);
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -708,7 +708,7 @@
   border: 1px solid var(--border);
   color: var(--text-secondary);
   font-family: var(--font-mono), monospace;
-  font-size: 10px;
+  font-size: 12px;
   padding: 8px 16px;
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -727,7 +727,7 @@
   border: 1px solid var(--accent);
   color: var(--on-accent);
   font-family: var(--font-mono), monospace;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: bold;
   padding: 8px 24px;
   text-transform: uppercase;

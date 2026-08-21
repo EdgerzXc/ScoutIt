@@ -61,7 +61,7 @@ export async function GET(request) {
                   color: '#E8AE3C',
                   fontSize: 28,
                   fontWeight: 'bold',
-                  letterSpacing: '0.2em',
+                  letterSpacing: '0.12em',
                   textTransform: 'uppercase',
                   fontFamily: 'monospace',
                 }}

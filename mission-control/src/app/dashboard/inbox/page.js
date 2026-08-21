@@ -175,11 +175,11 @@ export default async function MissionInboxPage() {
             <Inbox className="w-5 h-5 text-[#E8AE3C]" />
             Mission Inbox
           </h1>
-          <p className="text-[10px] uppercase tracking-wide text-white/40 mt-1">
+          <p className="text-[12px] uppercase tracking-wide text-white/70 mt-1">
             One list · everything waiting on the team right now
           </p>
         </div>
-        <span className="text-xs text-white/40 whitespace-nowrap">
+        <span className="text-xs text-white/70 whitespace-nowrap">
           {total} item{total === 1 ? "" : "s"} across {lanes.length} lanes
         </span>
       </div>
@@ -188,7 +188,7 @@ export default async function MissionInboxPage() {
         <div className="bg-[#121212] border border-white/5 rounded-xl p-8 text-center">
           <Sparkles className="w-6 h-6 text-[#E8AE3C] mx-auto mb-3" />
           <p className="text-sm text-white/70">Inbox zero. Nothing is waiting on the team.</p>
-          <p className="text-xs text-white/40 mt-1">
+          <p className="text-xs text-white/70 mt-1">
             New approvals, disputes, verifications and flags will surface here automatically.
           </p>
         </div>
@@ -208,17 +208,17 @@ export default async function MissionInboxPage() {
                 className={`text-xs font-mono px-2 py-0.5 rounded-full border ${
                   lane.count > 0
                     ? "text-[#F7C64E] border-[rgba(232,174,60,0.25)] bg-[rgba(232,174,60,0.10)]"
-                    : "text-white/30 border-white/10"
+                    : "text-white/70 border-white/10"
                 }`}
               >
                 {lane.count}
               </span>
             </div>
-            <p className="text-[11px] text-white/40 mb-3">{lane.subtitle}</p>
+            <p className="text-[12px] text-white/70 mb-3">{lane.subtitle}</p>
 
             <div className="flex-1">
               {lane.items.length === 0 ? (
-                <p className="text-xs text-white/30 py-2">Clear.</p>
+                <p className="text-xs text-white/70 py-2">Clear.</p>
               ) : (
                 <ul className="divide-y divide-white/5">
                   {lane.items.map((item) => {
@@ -233,15 +233,15 @@ export default async function MissionInboxPage() {
                               {item.primary}
                             </span>
                             {isSlaBreach && (
-                              <span className="text-[9px] uppercase font-mono px-1.5 py-0.5 rounded bg-red-500/20 text-red-400 border border-red-500/30">
+                              <span className="text-[12px] uppercase font-mono px-1.5 py-0.5 rounded bg-red-500/20 text-red-400 border border-red-500/30">
                                 SLA &gt; 24h
                               </span>
                             )}
                           </div>
-                          <div className="text-[11px] text-white/40 truncate">{item.secondary}</div>
+                          <div className="text-[12px] text-white/70 truncate">{item.secondary}</div>
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
-                          <span className="text-[10px] text-white/30 font-mono">
+                          <span className="text-[12px] text-white/70 font-mono">
                             {relTime(item.at)}
                           </span>
                         </div>

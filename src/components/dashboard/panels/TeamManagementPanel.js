@@ -220,7 +220,7 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
             <div className="bg-surface border border-gold-accent/30 rounded-xl p-6 w-full max-w-md shadow-2xl">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-medium text-white">Invite New Member</h3>
-                <button onClick={() => setIsInvitingMember(false)} className="text-white/50 hover:text-white transition">
+                <button onClick={() => setIsInvitingMember(false)} className="text-white/70 hover:text-white transition">
                   <X size={18} />
                 </button>
               </div>
@@ -285,12 +285,12 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
                       {member.id === 'current_user' && (
                         <div className="flex items-center gap-1.5 shrink-0">
                           {(memberTasks || []).filter((t) => !t.completedAt).length > 0 && (
-                            <div className="text-[10px] font-mono bg-gold-accent/20 text-gold-accent px-1.5 py-0.5 rounded">
+                            <div className="text-[12px] font-mono bg-gold-accent/20 text-gold-accent px-1.5 py-0.5 rounded">
                               {(memberTasks || []).filter((t) => !t.completedAt).length} Tasks
                             </div>
                           )}
                           {pitches.filter((p) => p.status === 'pending' || p.status === 'accepted').length > 0 && (
-                            <div className="text-[10px] font-mono bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded flex items-center gap-1">
+                            <div className="text-[12px] font-mono bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded flex items-center gap-1">
                               <Link2 size={9} />
                               {pitches.filter((p) => p.status === 'pending' || p.status === 'accepted').length}
                             </div>
@@ -298,7 +298,7 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
                         </div>
                       )}
                     </div>
-                    <div className="text-[10px] text-white/50 uppercase tracking-widest">{member.role}</div>
+                    <div className="text-[12px] text-white/70 uppercase tracking-widest">{member.role}</div>
                   </div>
                 </button>
               ))}
@@ -312,19 +312,19 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
                 <div className="p-6 border-b border-white/5 flex flex-col items-center text-center relative">
                   <button
                     onClick={() => setShowMobileDetail(false)}
-                    className="md:hidden absolute left-4 top-4 flex items-center gap-1 text-[11px] font-mono uppercase tracking-widest text-gold-accent min-h-[40px]"
+                    className="md:hidden absolute left-4 top-4 flex items-center gap-1 text-[12px] font-mono uppercase tracking-widest text-gold-accent min-h-[40px]"
                   >
                     ← Team
                   </button>
                   <div className="mb-4"><MemberAvatar member={activeMember} size="w-20 h-20" textSize="text-xl" /></div>
                   <h3 className="text-lg text-white font-medium">{activeMember.name}</h3>
-                  <div className="flex items-center gap-1 text-xs text-white/50 mt-1 mb-4">
+                  <div className="flex items-center gap-1 text-xs text-white/70 mt-1 mb-4">
                     <Mail size={12} /> {activeMember.email}
                   </div>
                   
                   {/* Role Editor */}
                   <div className="w-full relative">
-                    <div className="text-[10px] uppercase tracking-widest text-white/40 mb-1 text-left">Assigned Role</div>
+                    <div className="text-[12px] uppercase tracking-widest text-white/70 mb-1 text-left">Assigned Role</div>
                     {editingRoleId === activeMember.id ? (
                       <div className="bg-black border border-gold-accent/50 rounded overflow-hidden">
                         {ROLES.map(role => (
@@ -347,7 +347,7 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
                           <Shield size={14} className="text-gold-accent" />
                           {activeMember.role}
                         </div>
-                        <ChevronDown size={14} className="text-white/40" />
+                        <ChevronDown size={14} className="text-white/70" />
                       </button>
                     )}
                   </div>
@@ -357,32 +357,32 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
                 <div className="flex border-b border-white/5">
                   <button 
                     onClick={() => setActiveTab('permissions')}
-                    className={`flex-1 py-3 text-[11px] font-medium tracking-wide uppercase transition flex items-center justify-center gap-1.5 ${
-                      activeTab === 'permissions' ? 'text-gold-accent border-b-2 border-gold-accent' : 'text-white/40 hover:text-white/80 border-b-2 border-transparent'
+                    className={`flex-1 py-3 text-[12px] font-medium tracking-wide uppercase transition flex items-center justify-center gap-1.5 ${
+                      activeTab === 'permissions' ? 'text-gold-accent border-b-2 border-gold-accent' : 'text-white/70 hover:text-white/80 border-b-2 border-transparent'
                     }`}
                   >
                     <Key size={14} /> Permissions
                   </button>
                   <button 
                     onClick={() => setActiveTab('tasks')}
-                    className={`flex-1 py-3 text-[11px] font-medium tracking-wide uppercase transition flex items-center justify-center gap-1.5 ${
-                      activeTab === 'tasks' ? 'text-gold-accent border-b-2 border-gold-accent' : 'text-white/40 hover:text-white/80 border-b-2 border-transparent'
+                    className={`flex-1 py-3 text-[12px] font-medium tracking-wide uppercase transition flex items-center justify-center gap-1.5 ${
+                      activeTab === 'tasks' ? 'text-gold-accent border-b-2 border-gold-accent' : 'text-white/70 hover:text-white/80 border-b-2 border-transparent'
                     }`}
                   >
                     <CheckSquare size={14} /> Alignment
                   </button>
                   <button
                     onClick={() => setActiveTab('activity')}
-                    className={`flex-1 py-3 text-[11px] font-medium tracking-wide uppercase transition flex items-center justify-center gap-1.5 ${
-                      activeTab === 'activity' ? 'text-gold-accent border-b-2 border-gold-accent' : 'text-white/40 hover:text-white/80 border-b-2 border-transparent'
+                    className={`flex-1 py-3 text-[12px] font-medium tracking-wide uppercase transition flex items-center justify-center gap-1.5 ${
+                      activeTab === 'activity' ? 'text-gold-accent border-b-2 border-gold-accent' : 'text-white/70 hover:text-white/80 border-b-2 border-transparent'
                     }`}
                   >
                     <Activity size={14} /> Activity Log
                   </button>
                   <button
                     onClick={() => setActiveTab('connections')}
-                    className={`flex-1 py-3 text-[11px] font-medium tracking-wide uppercase transition flex items-center justify-center gap-1.5 ${
-                      activeTab === 'connections' ? 'text-gold-accent border-b-2 border-gold-accent' : 'text-white/40 hover:text-white/80 border-b-2 border-transparent'
+                    className={`flex-1 py-3 text-[12px] font-medium tracking-wide uppercase transition flex items-center justify-center gap-1.5 ${
+                      activeTab === 'connections' ? 'text-gold-accent border-b-2 border-gold-accent' : 'text-white/70 hover:text-white/80 border-b-2 border-transparent'
                     }`}
                   >
                     <Link2 size={14} /> Connections
@@ -395,7 +395,7 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
                   {activeTab === 'permissions' && (
                     <div className="flex flex-col h-full animate-in fade-in duration-300">
                       <div className="flex justify-between items-center mb-4">
-                        <div className="text-xs text-white/40 uppercase tracking-widest">Access Control</div>
+                        <div className="text-xs text-white/70 uppercase tracking-widest">Access Control</div>
                       </div>
                       
                       <div className="space-y-3 flex-1">
@@ -416,7 +416,7 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
                                 <div className={`text-sm font-medium mb-1 transition ${isGranted ? 'text-gold-accent' : 'text-white/80'}`}>
                                   {perm.label}
                                 </div>
-                                <div className="text-[11px] text-white/40 leading-relaxed">
+                                <div className="text-[12px] text-white/70 leading-relaxed">
                                   {perm.description}
                                 </div>
                               </div>
@@ -435,13 +435,13 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
                   {activeTab === 'activity' && (
                     <div className="space-y-4 animate-in fade-in duration-300">
                       {activeMemberId !== 'current_user' ? (
-                        <div className="text-xs text-white/40 italic text-center py-8">
+                        <div className="text-xs text-white/70 italic text-center py-8">
                           This seat hasn&apos;t been activated yet — activity appears once they join and start working.
                         </div>
                       ) : memberActivity === null ? (
-                        <div className="text-xs text-white/40 italic text-center py-8">Loading activity…</div>
+                        <div className="text-xs text-white/70 italic text-center py-8">Loading activity…</div>
                       ) : memberActivity.length === 0 ? (
-                        <div className="text-xs text-white/40 italic text-center py-8">
+                        <div className="text-xs text-white/70 italic text-center py-8">
                           No recorded activity yet. Deal moves, notes, and viewings will build this timeline automatically.
                         </div>
                       ) : (
@@ -452,7 +452,7 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
                               <span className="font-medium text-white">{ACTIVITY_LABELS[act.activityType] || act.activityType}</span>
                               {act.propertyTitle ? ` — ${act.propertyTitle}` : ""}
                             </div>
-                            <div className="flex items-center gap-1 text-[10px] text-white/40 mt-1 uppercase tracking-widest">
+                            <div className="flex items-center gap-1 text-[12px] text-white/70 mt-1 uppercase tracking-widest">
                               <Clock size={10} /> {act.createdAt ? new Date(act.createdAt).toLocaleString() : ""}
                             </div>
                           </div>
@@ -463,16 +463,16 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
 
                   {activeTab === 'connections' && (
                     <div className="space-y-3 animate-in fade-in duration-300">
-                      <div className="text-xs text-white/40 uppercase tracking-widest mb-1">Connection History</div>
-                      <p className="text-[11px] text-white/40 leading-relaxed mb-3">
+                      <div className="text-xs text-white/70 uppercase tracking-widest mb-1">Connection History</div>
+                      <p className="text-[12px] text-white/70 leading-relaxed mb-3">
                         Everyone this member is talking to through ScoutIt Connects. Names stay sealed until both sides reveal themselves inside the chatbox.
                       </p>
                       {activeMemberId !== 'current_user' ? (
-                        <div className="text-xs text-white/40 italic text-center py-8">
+                        <div className="text-xs text-white/70 italic text-center py-8">
                           This seat hasn&apos;t been activated yet — connections appear once they join.
                         </div>
                       ) : pitches.length === 0 ? (
-                        <div className="text-xs text-white/40 italic text-center py-8">
+                        <div className="text-xs text-white/70 italic text-center py-8">
                           No connections on record yet. When a buyer or broker spends a Connect on your portfolio, it shows here.
                         </div>
                       ) : (
@@ -484,19 +484,19 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
                                 <div className="text-sm text-white font-medium truncate">
                                   {revealed ? p.brokerName : 'Sealed connection'}
                                 </div>
-                                <div className="text-[11px] text-white/50 truncate mt-0.5">{p.title}</div>
+                                <div className="text-[12px] text-white/70 truncate mt-0.5">{p.title}</div>
                                 {!revealed && p.status === 'pending' && (
-                                  <div className="text-[10px] font-mono uppercase tracking-widest text-gold-accent mt-1.5 flex items-center gap-1.5">
+                                  <div className="text-[12px] font-mono uppercase tracking-widest text-gold-accent mt-1.5 flex items-center gap-1.5">
                                     <span className="w-1.5 h-1.5 rounded-full bg-gold-accent animate-pulse" />
                                     Active temporary chatbox
                                   </div>
                                 )}
                               </div>
                               <div className="text-right shrink-0">
-                                <span className={`text-[10px] font-mono uppercase tracking-widest ${p.status === 'accepted' ? 'text-green-400' : p.status === 'rejected' ? 'text-red-400' : 'text-gold-accent'}`}>
+                                <span className={`text-[12px] font-mono uppercase tracking-widest ${p.status === 'accepted' ? 'text-green-400' : p.status === 'rejected' ? 'text-red-400' : 'text-gold-accent'}`}>
                                   {p.statusText}
                                 </span>
-                                <div className="text-[10px] text-white/40 mt-1">{p.timeRemaining}</div>
+                                <div className="text-[12px] text-white/70 mt-1">{p.timeRemaining}</div>
                               </div>
                             </div>
                           );
@@ -508,10 +508,10 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
                   {activeTab === 'tasks' && (
                     <div className="flex flex-col h-full animate-in fade-in duration-300">
                       <div className="flex justify-between items-center mb-4">
-                        <div className="text-xs text-white/40 uppercase tracking-widest">Delegated Tasks</div>
+                        <div className="text-xs text-white/70 uppercase tracking-widest">Delegated Tasks</div>
                         <button 
                           onClick={() => setIsAssigningTask(!isAssigningTask)}
-                          className={`text-[10px] uppercase font-bold tracking-wider px-2 py-1 rounded flex items-center gap-1 transition ${isAssigningTask ? 'bg-white/10 text-white' : 'bg-gold-accent/10 text-gold-accent hover:bg-gold-accent/20 border border-gold-accent/20 shadow-[0_0_10px_rgba(232,174,60,0.1)]'}`}
+                          className={`text-[12px] uppercase font-bold tracking-wider px-2 py-1 rounded flex items-center gap-1 transition ${isAssigningTask ? 'bg-white/10 text-white' : 'bg-gold-accent/10 text-gold-accent hover:bg-gold-accent/20 border border-gold-accent/20 shadow-[0_0_10px_rgba(232,174,60,0.1)]'}`}
                         >
                           {isAssigningTask ? <X size={12} /> : <Plus size={12} />} 
                           {isAssigningTask ? 'Cancel' : 'Assign Task'}
@@ -521,7 +521,7 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
                       {isAssigningTask && (
                         <form onSubmit={handleAssignTask} className="mb-4 bg-black/40 border border-gold-accent/30 p-4 rounded-xl flex flex-col gap-3 animate-in fade-in slide-in-from-top-2">
                           <div>
-                            <label className="text-[10px] text-white/60 uppercase tracking-widest mb-1 block">Task Name</label>
+                            <label className="text-[12px] text-white/60 uppercase tracking-widest mb-1 block">Task Name</label>
                             <input 
                               type="text" 
                               required
@@ -532,7 +532,7 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
                             />
                           </div>
                           <div>
-                            <label className="text-[10px] text-white/60 uppercase tracking-widest mb-1 block">Due Date</label>
+                            <label className="text-[12px] text-white/60 uppercase tracking-widest mb-1 block">Due Date</label>
                             <input
                               type="date"
                               value={newTaskDue}
@@ -547,11 +547,11 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
                       )}
 
                       {activeMemberId !== 'current_user' ? (
-                        <div className="text-xs text-white/40 italic text-center py-8">
+                        <div className="text-xs text-white/70 italic text-center py-8">
                           This seat hasn&apos;t been activated yet — delegate tasks once they join.
                         </div>
                       ) : memberTasks === null ? (
-                        <div className="text-xs text-white/40 italic text-center py-8">Loading tasks…</div>
+                        <div className="text-xs text-white/70 italic text-center py-8">Loading tasks…</div>
                       ) : (
                         <>
                           {/* Open tasks — persisted crm_tasks rows */}
@@ -563,17 +563,17 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
                                   <div className="flex justify-between items-start gap-4">
                                     <div className="text-sm font-medium text-white">
                                       {task.title}
-                                      {task.dealTitle && <span className="text-white/40 text-xs font-normal ml-2">· {task.dealTitle}</span>}
+                                      {task.dealTitle && <span className="text-white/70 text-xs font-normal ml-2">· {task.dealTitle}</span>}
                                     </div>
                                     <button
                                       onClick={() => handleMarkTaskDone(task.id)}
-                                      className="text-white/30 hover:text-green-400 transition shrink-0"
+                                      className="text-white/70 hover:text-green-400 transition shrink-0"
                                       title="Mark as Done"
                                     >
                                       <CheckCircle size={14} />
                                     </button>
                                   </div>
-                                  <div className={`flex items-center gap-1 text-[10px] uppercase tracking-widest ${overdue ? 'text-red-400' : 'text-white/40'}`}>
+                                  <div className={`flex items-center gap-1 text-[12px] uppercase tracking-widest ${overdue ? 'text-red-400' : 'text-white/70'}`}>
                                     <AlertCircle size={10} />
                                     {task.dueAt ? `Due ${new Date(task.dueAt).toLocaleDateString()}${overdue ? ' — overdue' : ''}` : 'No due date'}
                                   </div>
@@ -581,7 +581,7 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
                               );
                             })}
                             {memberTasks.filter((t) => !t.completedAt).length === 0 && (
-                              <div className="text-xs text-white/40 italic text-center py-6">No open tasks. Everything&apos;s done.</div>
+                              <div className="text-xs text-white/70 italic text-center py-6">No open tasks. Everything&apos;s done.</div>
                             )}
                           </div>
 
@@ -590,7 +590,7 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
                             <div className="mt-6">
                               <button
                                 onClick={() => setShowTaskHistory((s) => !s)}
-                                className="flex items-center gap-2 text-[10px] uppercase font-bold tracking-wider text-white/50 hover:text-white transition"
+                                className="flex items-center gap-2 text-[12px] uppercase font-bold tracking-wider text-white/70 hover:text-white transition"
                               >
                                 <History size={12} />
                                 Task History ({memberTasks.filter((t) => t.completedAt).length})
@@ -603,8 +603,8 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
                                     .sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt))
                                     .map((task) => (
                                       <div key={task.id} className="p-2.5 bg-black/30 border border-white/5 rounded-lg flex items-center justify-between gap-3">
-                                        <div className="text-xs text-white/50 line-through truncate">{task.title}</div>
-                                        <div className="text-[10px] text-white/30 font-mono shrink-0">
+                                        <div className="text-xs text-white/70 line-through truncate">{task.title}</div>
+                                        <div className="text-[12px] text-white/70 font-mono shrink-0">
                                           ✓ {new Date(task.completedAt).toLocaleDateString()}
                                         </div>
                                       </div>
@@ -620,7 +620,7 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
                 </div>
               </>
             ) : (
-              <div className="flex-1 flex items-center justify-center text-white/30 text-sm">
+              <div className="flex-1 flex items-center justify-center text-white/70 text-sm">
                 Select a member
               </div>
             )}

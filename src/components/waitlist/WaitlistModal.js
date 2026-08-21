@@ -83,9 +83,9 @@ export default function WaitlistModal() {
       aria-label="Join the founding waitlist"
     >
       <div className="relative w-full max-w-[440px] bg-surface border border-gold-accent/30 rounded-2xl px-7 pt-8 pb-7 shadow-[0_24px_80px_rgba(0,0,0,0.7),0_0_60px_rgba(232,174,60,0.06)]">
-        <button className="absolute top-3.5 right-4 bg-transparent border-none text-on-surface/30 text-base cursor-pointer leading-none p-1 hover:text-on-surface/70" onClick={() => setOpen(false)} aria-label="Close">✕</button>
+        <button className="absolute top-3.5 right-4 bg-transparent border-none text-on-surface/70 text-base cursor-pointer leading-none p-1 hover:text-on-surface/70" onClick={() => setOpen(false)} aria-label="Close">✕</button>
 
-        <span className="block font-label-caps text-[11px] tracking-widest uppercase text-gold-accent mb-3.5">◈ Founding Access</span>
+        <span className="block font-label-caps text-[12px] tracking-widest uppercase text-gold-accent mb-3.5">◈ Founding Access</span>
 
         {done ? (
           <div className="text-center py-1.5">
@@ -132,7 +132,7 @@ export default function WaitlistModal() {
               </button>
             </form>
             {status === "error" && <p className="text-[#ff8f6b] text-[12.5px] mt-2.5">{error}</p>}
-            <p className="text-[11px] text-on-surface/30 mt-3.5 text-center">Intelligence first. We never sell or share your email.</p>
+            <p className="text-[12px] text-on-surface/70 mt-3.5 text-center">Intelligence first. We never sell or share your email.</p>
           </>
         )}
       </div>

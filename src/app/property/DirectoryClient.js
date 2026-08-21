@@ -497,7 +497,7 @@ function PropertyDirectoryContent({ initialProperties = [] }) {
               {selectedSectors.includes("Residential") && (
                 <div className="filter-card animate-[fadeIn_0.3s_ease-out]">
                   <div className="filter-options mt-2">
-                    <span className="text-[10px] text-text-secondary uppercase tracking-widest mb-2 block">Bedrooms</span>
+                    <span className="text-[12px] text-text-secondary uppercase tracking-widest mb-2 block">Bedrooms</span>
                     <div className="flex gap-2 flex-wrap">
                       {bedOptions.map(bed => (
                         <button
@@ -610,7 +610,7 @@ function PropertyDirectoryContent({ initialProperties = [] }) {
               {widgetArticles.length > 0 && (
                 <div className="mb-4 p-3 rounded-xl bg-surface/80 border border-gold-accent/20 backdrop-blur-md flex items-center justify-between gap-3 text-xs shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]">
                   <div className="flex items-center gap-2.5 overflow-hidden">
-                    <span className="font-mono text-[9px] tracking-widest uppercase text-gold-accent bg-gold-accent/10 px-2 py-0.5 rounded border border-gold-accent/30 shrink-0 font-bold">
+                    <span className="font-mono text-[12px] tracking-widest uppercase text-gold-accent bg-gold-accent/10 px-2 py-0.5 rounded border border-gold-accent/30 shrink-0 font-bold">
                       District Intel
                     </span>
                     <span className="text-text-secondary truncate">
@@ -619,7 +619,7 @@ function PropertyDirectoryContent({ initialProperties = [] }) {
                   </div>
                   <Link
                     href={`/intel/${widgetArticles[0].slug}`}
-                    className="font-mono text-[10px] tracking-wider uppercase text-gold-accent hover:underline shrink-0 flex items-center gap-1 font-semibold"
+                    className="font-mono text-[12px] tracking-wider uppercase text-gold-accent hover:underline shrink-0 flex items-center gap-1 font-semibold"
                   >
                     Read Briefing →
                   </Link>
@@ -644,7 +644,7 @@ function PropertyDirectoryContent({ initialProperties = [] }) {
                     padding: "0 24px",
                     height: "44px",
                     fontFamily: "var(--font-mono)",
-                    fontSize: "11px",
+                    fontSize: "12px",
                     letterSpacing: "0.1em",
                     cursor: "pointer",
                     textTransform: "uppercase",

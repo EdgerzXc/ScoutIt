@@ -85,7 +85,7 @@ export default function DescentPage() {
     <main className="descent-root" ref={rootRef}>
       {/* minimal brand bar */}
       <div style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 20, display: "flex", justifyContent: "space-between", alignItems: "center", padding: "18px clamp(20px, 6vw, 90px)", pointerEvents: "none" }}>
-        <Link href="/" style={{ fontFamily: "var(--font-mono, monospace)", letterSpacing: "0.24em", fontSize: 13, color: "#f0ede8", textDecoration: "none", pointerEvents: "auto" }}>
+        <Link href="/" style={{ fontFamily: "var(--font-mono, monospace)", letterSpacing: "0.12em", fontSize: 13, color: "#f0ede8", textDecoration: "none", pointerEvents: "auto" }}>
           SCOUT<span style={{ color: "#E8AE3C" }}>IT</span>
         </Link>
         <div style={{ pointerEvents: "auto" }}><ProfileButton /></div>
@@ -144,7 +144,7 @@ export default function DescentPage() {
           <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 30 }}>
             {[{ t: "Makati CBD yields drop", k: "Market intel", href: "/intel" }, { t: "Nuvali expansion patterns", k: "Area guide", href: "/intel" }, { t: "Pasig zoning changes", k: "Regulatory", href: "/intel" }].map((a) => (
               <Link key={a.href} href={a.href} style={{ flex: "1 1 240px", textDecoration: "none", background: "rgba(10,12,24,0.6)", border: "0.5px solid rgba(232, 174, 60,0.2)", borderRadius: 10, padding: "18px 20px", backdropFilter: "blur(4px)" }}>
-                <div style={{ fontFamily: "var(--font-mono, monospace)", fontSize: 10, letterSpacing: "0.16em", textTransform: "uppercase", color: "#E8AE3C", marginBottom: 10 }}>{a.k}</div>
+                <div style={{ fontFamily: "var(--font-mono, monospace)", fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase", color: "#E8AE3C", marginBottom: 10 }}>{a.k}</div>
                 <div style={{ fontFamily: "var(--font-display)", fontSize: 19, color: "#f5f1ea" }}>{a.t}</div>
               </Link>
             ))}
@@ -173,7 +173,7 @@ export default function DescentPage() {
               <Link key={p.t} href="/property" style={{ flex: "1 1 240px", textDecoration: "none", background: "rgba(10,12,24,0.55)", border: "0.5px solid rgba(255,255,255,0.1)", borderRadius: 10, overflow: "hidden", backdropFilter: "blur(4px)" }}>
                 <div style={{ height: 120, background: "linear-gradient(135deg, #1c2340, #2a1d3e)" }} />
                 <div style={{ padding: "14px 16px" }}>
-                  <div style={{ fontFamily: "var(--font-mono, monospace)", fontSize: 10, letterSpacing: "0.16em", textTransform: "uppercase", color: "#E8AE3C", marginBottom: 6 }}>{p.c}</div>
+                  <div style={{ fontFamily: "var(--font-mono, monospace)", fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase", color: "#E8AE3C", marginBottom: 6 }}>{p.c}</div>
                   <div style={{ fontFamily: "var(--font-display)", fontSize: 18, color: "#f5f1ea" }}>{p.t}</div>
                   <div style={{ fontSize: 12, color: "#c8c8c8", marginTop: 4 }}>{p.l}</div>
                 </div>
@@ -250,7 +250,7 @@ export default function DescentPage() {
                 ))}
               </div>
               <div className="pioneer-strip" style={{ marginTop: 18 }}>
-                <span style={{ fontFamily: "var(--font-mono, monospace)", fontSize: 10, letterSpacing: "0.16em", textTransform: "uppercase", color: "#c8c8c8" }}>The pioneers</span>
+                <span style={{ fontFamily: "var(--font-mono, monospace)", fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase", color: "#c8c8c8" }}>The pioneers</span>
                 {PIONEERS.map((p) => (
                   <div className="pioneer" key={p.name}>
                     <span className="pi-av">{p.initials}</span>

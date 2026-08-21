@@ -81,7 +81,7 @@ export default function PhotoUploader({ photos, onChange, onSetImage, isPro = fa
 
   return (
     <div id="field-photos" className="flex flex-col gap-3 w-full">
-      {error && <div className="text-error text-[10px] font-mono bg-error/10 border border-error/20 p-2 rounded uppercase tracking-wider">{error}</div>}
+      {error && <div className="text-error text-[12px] font-mono bg-error/10 border border-error/20 p-2 rounded uppercase tracking-wider">{error}</div>}
       
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         {currentPhotos.map((photoUrl, index) => (
@@ -124,21 +124,21 @@ export default function PhotoUploader({ photos, onChange, onSetImage, isPro = fa
                   <svg className="animate-spin absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  <span className="absolute text-[10px] font-mono font-bold">{uploadProgress}%</span>
+                  <span className="absolute text-[12px] font-mono font-bold">{uploadProgress}%</span>
                 </div>
                 <div className="w-2/3 bg-surface-variant rounded-full h-1 mb-2 overflow-hidden">
                   <div className="bg-gold-accent h-1 rounded-full transition duration-300 ease-out" style={{ width: `${uploadProgress}%` }}></div>
                 </div>
-                <span className="text-[10px] uppercase tracking-widest font-mono animate-pulse">Uploading...</span>
+                <span className="text-[12px] uppercase tracking-widest font-mono animate-pulse">Uploading...</span>
               </div>
             ) : photoUrl && typeof photoUrl === 'string' && photoUrl.trim() !== "" ? (
               <>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={photoUrl} alt={`Property view ${index + 1}`} className="object-cover w-full h-full" />
                 <div className="absolute inset-0 bg-background/80 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
-                  <span className="text-white text-[10px] font-mono bg-black/50 px-2 py-1 rounded backdrop-blur border border-white/20">CLICK TO REPLACE</span>
+                  <span className="text-white text-[12px] font-mono bg-black/50 px-2 py-1 rounded backdrop-blur border border-white/20">CLICK TO REPLACE</span>
                   <button 
-                    className="text-white text-[10px] font-mono bg-error/80 hover:bg-error px-2 py-1 rounded backdrop-blur border border-white/20 transition"
+                    className="text-white text-[12px] font-mono bg-error/80 hover:bg-error px-2 py-1 rounded backdrop-blur border border-white/20 transition"
                     onClick={(e) => {
                       e.stopPropagation();
                       const newPhotos = [...currentPhotos];
@@ -161,7 +161,7 @@ export default function PhotoUploader({ photos, onChange, onSetImage, isPro = fa
                   </button>
                 )}
                 {index === 0 && (
-                  <div className="absolute bottom-2 left-2 bg-gold-accent text-background text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider shadow">
+                  <div className="absolute bottom-2 left-2 bg-gold-accent text-background text-[12px] font-bold px-2 py-0.5 rounded uppercase tracking-wider shadow">
                     Primary
                   </div>
                 )}
@@ -174,7 +174,7 @@ export default function PhotoUploader({ photos, onChange, onSetImage, isPro = fa
                     <circle cx="8.5" cy="8.5" r="1.5"/>
                     <polyline points="21 15 16 10 5 21"/>
                   </svg>
-                  <span className="text-[10px] uppercase tracking-widest font-mono text-center px-2">
+                  <span className="text-[12px] uppercase tracking-widest font-mono text-center px-2">
                     {index === 0 ? "Upload Primary" : "Upload Photo"}
                   </span>
                 </div>

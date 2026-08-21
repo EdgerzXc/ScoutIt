@@ -43,7 +43,7 @@
   background: var(--scc-chip-bg);
   color: var(--scc-chip-ink);
   font-family: var(--font-mono, monospace);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 500;
   line-height: 1.3;
   letter-spacing: 0.14em;
@@ -77,7 +77,7 @@
    IS, not which layer is on, so it earns slightly more presence. */
 .scc-chip--lens {
   padding: 6px 12px;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.12em;
   background: transparent;
   border-color: transparent;
 }
@@ -133,9 +133,9 @@
 }
 
 .scc-panel__title {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--accent, #E8AE3C);
 }
@@ -165,7 +165,7 @@
 
 .scc-legend__text {
   font-family: var(--font-mono, monospace);
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--text-secondary, #c8c8c8);
@@ -260,7 +260,7 @@
   background: transparent;
   color: var(--accent, #E8AE3C);
   font-family: var(--font-mono, monospace);
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1;
   cursor: pointer;
   transition: background-color 160ms cubic-bezier(0.16, 1, 0.3, 1);
@@ -305,7 +305,7 @@
 
 .spatial-canvas-root .maplibregl-ctrl-attrib {
   background: rgba(14, 14, 14, 0.7);
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .spatial-canvas-root .maplibregl-ctrl-attrib a {

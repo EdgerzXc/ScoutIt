@@ -101,7 +101,7 @@ export default function ProfileBaseLayer({
             <span
               style={{
                 fontFamily: "var(--font-body)",
-                fontSize: 10,
+                fontSize: 12,
                 letterSpacing: "0.1em",
                 textTransform: "uppercase",
                 color: tier.color,
@@ -127,9 +127,9 @@ export default function ProfileBaseLayer({
               <span
                 style={{
                   fontFamily: "var(--font-mono)",
-                  fontSize: 10,
+                  fontSize: 12,
                   fontWeight: 500,
-                  letterSpacing: "0.18em",
+                  letterSpacing: "0.12em",
                   textTransform: "uppercase",
                   color: "var(--text-secondary)",
                 }}
@@ -191,7 +191,7 @@ export default function ProfileBaseLayer({
             <span className="text-gold-accent font-mono text-[13px]">
               ◈ {profile.connects_balance}
             </span>
-            <span className="font-body text-[11px] text-text-secondary tracking-widest uppercase">
+            <span className="font-body text-[12px] text-text-secondary tracking-widest uppercase">
               Connects
             </span>
           </div>
@@ -302,7 +302,7 @@ const rolesRow = {
 
 const roleTag = {
   fontFamily: "var(--font-body)",
-  fontSize: 9,
+  fontSize: 12,
   fontWeight: 700,
   letterSpacing: "0.12em",
   textTransform: "uppercase",
@@ -332,7 +332,7 @@ const bio = {
 
 const firmText = {
   fontFamily: "var(--font-body)",
-  fontSize: 11,
+  fontSize: 12,
   color: "var(--text-secondary)",
   letterSpacing: "0.08em",
   textTransform: "uppercase",

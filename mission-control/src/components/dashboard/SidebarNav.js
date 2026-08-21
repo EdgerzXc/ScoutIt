@@ -19,7 +19,7 @@ export default function SidebarNav({ items }) {
         return (
           <Fragment key={item.name}>
             {startsGroup && (
-              <div className="label-mono px-3 pb-2 pt-5 text-white/30 first:pt-1">
+              <div className="label-mono px-3 pb-2 pt-5 text-white/70 first:pt-1">
                 {item.group}
               </div>
             )}

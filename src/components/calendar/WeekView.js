@@ -70,7 +70,7 @@ export default function WeekView({ viewDate, events, onSelectEvent, onSelectSlot
         <div />
         {days.map((day) => (
           <div key={day.toISOString()} className="px-1 py-2 text-center">
-            <div className="text-[10px] uppercase tracking-wider font-mono text-text-muted">
+            <div className="text-[12px] uppercase tracking-wider font-mono text-text-muted">
               {WEEKDAY_LABELS[day.getDay()]}
             </div>
             <div
@@ -88,7 +88,7 @@ export default function WeekView({ viewDate, events, onSelectEvent, onSelectSlot
         className="grid border-b border-surface-variant bg-background/40"
         style={{ gridTemplateColumns: "3.5rem repeat(7, 1fr)" }}
       >
-        <div className="text-[9px] uppercase font-mono text-text-muted flex items-center justify-end pr-1 py-1">
+        <div className="text-[12px] uppercase font-mono text-text-muted flex items-center justify-end pr-1 py-1">
           all-day
         </div>
         {days.map((day) => {
@@ -100,7 +100,7 @@ export default function WeekView({ viewDate, events, onSelectEvent, onSelectSlot
                   key={ev.id}
                   type="button"
                   onClick={() => onSelectEvent(ev)}
-                  className={`w-full truncate text-left px-1 rounded border text-[10px] ${eventStyle(ev)}`}
+                  className={`w-full truncate text-left px-1 rounded border text-[12px] ${eventStyle(ev)}`}
                 >
                   {ev.kind === "viewing" ? "👁 " : ""}
                   {ev.title}
@@ -128,7 +128,7 @@ export default function WeekView({ viewDate, events, onSelectEvent, onSelectSlot
               <div
                 key={h}
                 style={{ height: HOUR_HEIGHT }}
-                className="text-[10px] font-mono text-text-muted text-right pr-1 -translate-y-2"
+                className="text-[12px] font-mono text-text-muted text-right pr-1 -translate-y-2"
               >
                 {h === 0 ? "" : formatTime(new Date(2000, 0, 1, h))}
               </div>
@@ -181,7 +181,7 @@ export default function WeekView({ viewDate, events, onSelectEvent, onSelectSlot
                       key={ev.id}
                       type="button"
                       onClick={() => onSelectEvent(ev)}
-                      className={`absolute rounded border px-1 py-0.5 text-[10px] leading-tight overflow-hidden
+                      className={`absolute rounded border px-1 py-0.5 text-[12px] leading-tight overflow-hidden
                         text-left z-10 ${eventStyle(ev)} ${ev.status === "cancelled" ? "line-through opacity-50" : ""}`}
                       style={{
                         top: (minsFromMidnight / 60) * HOUR_HEIGHT,

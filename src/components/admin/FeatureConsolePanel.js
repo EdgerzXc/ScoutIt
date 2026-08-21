@@ -174,12 +174,12 @@ export default function FeatureConsolePanel() {
                         <h4 className="text-sm font-bold text-white flex items-center gap-2">
                           {flag.name}
                           {isDanger && (
-                            <span className="px-1.5 py-0.5 text-[9px] font-mono tracking-wider uppercase rounded bg-red-500/20 text-red-400 border border-red-500/30">
+                            <span className="px-1.5 py-0.5 text-[12px] font-mono tracking-wider uppercase rounded bg-red-500/20 text-red-400 border border-red-500/30">
                               SAFETY CRITICAL
                             </span>
                           )}
                         </h4>
-                        <span className="text-[10px] font-mono text-gray-500 uppercase tracking-widest">
+                        <span className="text-[12px] font-mono text-gray-500 uppercase tracking-widest">
                           ID: {flag.id}
                         </span>
                       </div>
@@ -214,7 +214,7 @@ export default function FeatureConsolePanel() {
                 </div>
 
                 {/* Bottom Row: Status Badge */}
-                <div className="pt-3 border-t border-[#1e1e1e] flex items-center justify-between text-[11px]">
+                <div className="pt-3 border-t border-[#1e1e1e] flex items-center justify-between text-[12px]">
                   <span className="text-gray-500 font-mono">
                     State:{" "}
                     <strong
@@ -230,7 +230,7 @@ export default function FeatureConsolePanel() {
                     </strong>
                   </span>
                   {flag.updated_at && (
-                    <span className="text-[10px] text-gray-600 font-mono">
+                    <span className="text-[12px] text-gray-600 font-mono">
                       Updated {new Date(flag.updated_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
                   )}
@@ -258,7 +258,7 @@ export default function FeatureConsolePanel() {
               </p>
             </div>
 
-            <div className="p-3 bg-red-950/30 border border-red-500/30 rounded-lg text-[11px] text-red-300 font-mono text-center">
+            <div className="p-3 bg-red-950/30 border border-red-500/30 rounded-lg text-[12px] text-red-300 font-mono text-center">
               ⚠️ Use only during database maintenance or emergency outages.
             </div>
 

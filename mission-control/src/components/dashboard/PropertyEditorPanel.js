@@ -65,7 +65,7 @@ export default function PropertyEditorPanel({ propertyId, spaceCategory }) {
         type="button"
         onClick={toggle}
         aria-expanded={open}
-        className="w-full flex items-center gap-2 px-6 py-3 text-[10px] uppercase tracking-wide text-white/40 hover:text-[#E8AE3C] hover:bg-white/[0.02] transition-colors"
+        className="w-full flex items-center gap-2 px-6 py-3 text-[12px] uppercase tracking-wide text-white/70 hover:text-[#E8AE3C] hover:bg-white/[0.02] transition-colors"
       >
         {open ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
         Edit listing details
@@ -80,7 +80,7 @@ export default function PropertyEditorPanel({ propertyId, spaceCategory }) {
             </p>
           )}
           {!error && !property && !loading && (
-            <p className="text-xs text-white/40">No details recorded for this listing yet.</p>
+            <p className="text-xs text-white/70">No details recorded for this listing yet.</p>
           )}
           {property && (
             <PropertySectionEditor

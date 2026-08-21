@@ -86,8 +86,8 @@
 }
 
 .nf-layer-label {
-  font-size: 10px;
-  letter-spacing: 0.2em;
+  font-size: 12px;
+  letter-spacing: 0.12em;
   color: var(--accent, #E8AE3C);
   text-transform: uppercase;
 }
@@ -122,7 +122,7 @@
   padding: 12px 28px;
   background: var(--accent, #E8AE3C);
   color: #0a0a0a;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -139,7 +139,7 @@
   padding: 12px 28px;
   background: transparent;
   color: #f5f3ee;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;

@@ -177,7 +177,7 @@ function MinorLockSection({ labels, slug }) {
         onClick={() => setOpen((v) => !v)}
         className="w-full bg-surface border border-surface-variant px-5 py-3.5 cursor-pointer flex justify-between items-center rounded-sm hover:border-gold-accent/50 transition-colors"
       >
-        <span className="font-label-caps text-[10px] text-gold-accent tracking-widest uppercase">
+        <span className="font-label-caps text-[12px] text-gold-accent tracking-widest uppercase">
           Deeper Intelligence // {unlocked ? "Unlocked" : "Verified Scout"}
         </span>
         <svg viewBox="0 0 10 6" width="10" height="6" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-gold-accent">
@@ -194,7 +194,7 @@ function MinorLockSection({ labels, slug }) {
                 {value !== null ? (
                   <span className="font-label-caps text-[12px] text-gold-accent tracking-widest text-right">{value}</span>
                 ) : (
-                  <span className="font-label-caps text-[11px] text-[#5a5a5a] tracking-widest text-right">Not recorded</span>
+                  <span className="font-label-caps text-[12px] text-[#5a5a5a] tracking-widest text-right">Not recorded</span>
                 )}
               </div>
             );
@@ -211,8 +211,8 @@ function MinorLockSection({ labels, slug }) {
             ))}
           </div>
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3.5 bg-background/90 rounded-b-sm backdrop-blur-sm">
-            <span className="font-label-caps text-[10px] text-gold-accent tracking-widest uppercase">Solar Tier Unlocks This</span>
-            <a href="/pricing/seeker" className="font-label-caps uppercase tracking-widest text-[11px] font-bold text-background bg-gold-accent hover:opacity-90 px-6 py-2.5 rounded-sm transition-opacity">
+            <span className="font-label-caps text-[12px] text-gold-accent tracking-widest uppercase">Solar Tier Unlocks This</span>
+            <a href="/pricing/seeker" className="font-label-caps uppercase tracking-widest text-[12px] font-bold text-background bg-gold-accent hover:opacity-90 px-6 py-2.5 rounded-sm transition-opacity">
               Unlock Full Intelligence →
             </a>
           </div>
@@ -247,7 +247,7 @@ export default function CategorySpecBlock({ property, extraLockedLabels = [] }) 
     <div className="mb-9">
       {/* Section header */}
       <div className="mb-5">
-        <div className="font-label-caps text-[10px] text-gold-accent tracking-widest uppercase mb-2.5">
+        <div className="font-label-caps text-[12px] text-gold-accent tracking-widest uppercase mb-2.5">
           {config.label}
         </div>
         <div className="h-[1px] bg-surface-variant" />
@@ -259,7 +259,7 @@ export default function CategorySpecBlock({ property, extraLockedLabels = [] }) 
           {heroFacts.map(({ field, value }, i) => (
             <div key={i} className="property-feature-item">
               <span className="font-body text-[clamp(20px,2.5vw,26px)] font-medium text-on-surface leading-[1.2]">{value}</span>
-              <div className="font-body text-[10px] font-semibold text-text-secondary tracking-widest uppercase mt-1.5">{field.label}</div>
+              <div className="font-body text-[12px] font-semibold text-text-secondary tracking-widest uppercase mt-1.5">{field.label}</div>
             </div>
           ))}
         </div>
@@ -271,11 +271,11 @@ export default function CategorySpecBlock({ property, extraLockedLabels = [] }) 
           const value = formatValue(field, data[field.key]);
           return (
             <div key={field.key} className={`flex justify-between items-baseline py-2.5 gap-5 ${i < rows.length - 1 ? 'border-b border-surface-variant' : ''}`}>
-              <span className="font-label-caps text-[10px] text-text-secondary tracking-widest uppercase shrink-0">{field.label}</span>
+              <span className="font-label-caps text-[12px] text-text-secondary tracking-widest uppercase shrink-0">{field.label}</span>
               {value !== null ? (
                 <span className="font-headline-editorial text-[14px] text-on-surface text-right">{value}</span>
               ) : (
-                <span className="font-label-caps text-[11px] text-[#5a5a5a] tracking-widest text-right">Not listed yet</span>
+                <span className="font-label-caps text-[12px] text-[#5a5a5a] tracking-widest text-right">Not listed yet</span>
               )}
             </div>
           );

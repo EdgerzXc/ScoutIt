@@ -56,7 +56,7 @@ export default async function DashboardLayout({ children }) {
         <div className="border-t border-line p-4">
           <div className="mb-2 px-3 py-2">
             <div className="truncate text-xs text-white/70">{staff.email}</div>
-            <div className="mt-0.5 text-[10px] uppercase tracking-wide text-gold/80">
+            <div className="mt-0.5 text-[12px] uppercase tracking-wide text-gold/80">
               {TIER_LABELS[staff.tier]} - Tier {staff.tier}{staff.is_finance ? " - Finance" : ""}
             </div>
           </div>

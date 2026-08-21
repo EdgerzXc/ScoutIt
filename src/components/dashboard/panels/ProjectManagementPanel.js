@@ -60,7 +60,7 @@ export default function ProjectManagementPanel({ properties = [] }) {
           </p>
         </div>
         <div className="w-full md:w-64">
-          <label className="block text-[10px] tracking-widest text-gold-accent uppercase mb-2">Select Active Project</label>
+          <label className="block text-[12px] tracking-widest text-gold-accent uppercase mb-2">Select Active Project</label>
           <select
             value={activeEstate || ""}
             onChange={(e) => setActiveEstate(e.target.value)}
@@ -78,7 +78,7 @@ export default function ProjectManagementPanel({ properties = [] }) {
         <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between mb-6 border-b border-white/10 pb-4">
           <h3 className="text-lg font-medium text-white flex flex-wrap items-center gap-2">
             Development Milestones
-            <span className="text-[10px] font-mono uppercase tracking-widest text-gold-accent border border-gold-accent/30 bg-gold-accent/10 rounded px-1.5 py-0.5">Sample preview</span>
+            <span className="text-[12px] font-mono uppercase tracking-widest text-gold-accent border border-gold-accent/30 bg-gold-accent/10 rounded px-1.5 py-0.5">Sample preview</span>
           </h3>
           <span className="text-xs text-text-secondary font-mono">Milestone tracking connects to your project data at launch</span>
         </div>
@@ -107,7 +107,7 @@ export default function ProjectManagementPanel({ properties = [] }) {
                     {milestone.label}
                   </div>
                   {milestone.status === 'in-progress' && (
-                    <div className="text-[10px] text-gold-accent mt-1 font-mono">{milestone.progress}%</div>
+                    <div className="text-[12px] text-gold-accent mt-1 font-mono">{milestone.progress}%</div>
                   )}
                 </div>
               </div>
@@ -153,7 +153,7 @@ export default function ProjectManagementPanel({ properties = [] }) {
               <p className="text-sm text-text-secondary leading-relaxed">
                 Once your team posts daily updates for <span className="text-white font-medium">{currentEstate?.title || "this project"}</span>, the AI distills them into a morning briefing — progress, risks, and momentum in three lines instead of thirty posts.
               </p>
-              <div className="text-[10px] font-mono uppercase tracking-widest text-text-secondary border border-white/10 bg-white/[0.02] rounded px-2 py-1.5 inline-block">
+              <div className="text-[12px] font-mono uppercase tracking-widest text-text-secondary border border-white/10 bg-white/[0.02] rounded px-2 py-1.5 inline-block">
                 Waiting for first updates
               </div>
             </div>

@@ -45,15 +45,15 @@ export default async function BrainPage() {
             <BrainCircuit className="w-5 h-5 text-[#E8AE3C]" />
             Team Brain
           </h1>
-          <p className="text-[10px] uppercase tracking-wide text-white/40 mt-1">
+          <p className="text-[12px] uppercase tracking-wide text-white/70 mt-1">
             Ask the knowledge base in plain language
           </p>
         </div>
         <span
-          className={`text-[10px] uppercase tracking-wide rounded-full px-2.5 py-1 border whitespace-nowrap flex items-center gap-1.5 ${
+          className={`text-[12px] uppercase tracking-wide rounded-full px-2.5 py-1 border whitespace-nowrap flex items-center gap-1.5 ${
             aiAvailable
               ? "text-emerald-400 border-emerald-400/25 bg-emerald-400/10"
-              : "text-white/40 border-white/10"
+              : "text-white/70 border-white/10"
           }`}
         >
           <Zap className="w-3 h-3" />
@@ -65,7 +65,7 @@ export default async function BrainPage() {
       <BrainSearch aiAvailable={aiAvailable} />
 
       {docs.error && (
-        <div className="text-xs text-white/50 bg-white/5 border border-white/10 rounded-xl p-4">
+        <div className="text-xs text-white/70 bg-white/5 border border-white/10 rounded-xl p-4">
           Brain unavailable ({docs.error}). Apply migration
           <span className="font-mono text-white/70"> 0007_brain_rag.sql </span>
           to activate this module.
@@ -79,31 +79,31 @@ export default async function BrainPage() {
           Add knowledge to the Brain
         </summary>
         <form action={ingestDocument} className="px-6 pb-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <label className="text-xs text-white/50">
+          <label className="text-xs text-white/70">
             Title (required)
             <input
               name="title"
               required
               placeholder="e.g. Commercial upload playbook"
-              className="mt-1 w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-white/20"
+              className="mt-1 w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-white/70"
             />
           </label>
-          <label className="text-xs text-white/50">
+          <label className="text-xs text-white/70">
             Category
             <input
               name="category"
               placeholder="e.g. SOP, Pricing, Onboarding"
-              className="mt-1 w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-white/20"
+              className="mt-1 w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-white/70"
             />
           </label>
-          <label className="text-xs text-white/50 sm:col-span-2">
+          <label className="text-xs text-white/70 sm:col-span-2">
             Content (required)
             <textarea
               name="content"
               required
               rows={6}
               placeholder="Paste the SOP, playbook, or reference text. It will be chunked and embedded automatically."
-              className="mt-1 w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-white/20"
+              className="mt-1 w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-white/70"
             />
           </label>
           <input type="hidden" name="source" value="manual" />
@@ -118,12 +118,12 @@ export default async function BrainPage() {
       {/* Library */}
       <section className="bg-[#121212] border border-white/5 rounded-xl p-6">
         <h2 className="text-sm font-medium text-white/70 mb-4 flex items-center gap-2">
-          <FileText className="w-4 h-4 text-white/40" />
+          <FileText className="w-4 h-4 text-white/70" />
           Knowledge library
-          <span className="text-white/30">· {docs.data.length}</span>
+          <span className="text-white/70">· {docs.data.length}</span>
         </h2>
         {docs.data.length === 0 ? (
-          <p className="text-xs text-white/40">
+          <p className="text-xs text-white/70">
             The Brain is empty. Add your first SOP or playbook above.
           </p>
         ) : (
@@ -132,7 +132,7 @@ export default async function BrainPage() {
               <div key={d.id} className="flex items-center gap-3 py-3">
                 <div className="min-w-0 flex-1">
                   <div className="text-sm text-white/90 truncate">{d.title}</div>
-                  <div className="text-[11px] text-white/40 truncate">
+                  <div className="text-[12px] text-white/70 truncate">
                     {d.category ? `${d.category} · ` : ""}
                     {d.source} · {d.created_by || "—"} ·{" "}
                     {new Date(d.created_at).toLocaleDateString()}

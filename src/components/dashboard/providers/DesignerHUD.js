@@ -125,7 +125,7 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
                 <span className="group-hover:scale-110 transition-transform">{project.cover || "📐"}</span>
                 <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent"></div>
                 <div className="absolute bottom-3 left-3 flex gap-2">
-                  <span className="bg-background/80 backdrop-blur text-text-primary text-[10px] font-label-caps tracking-widest uppercase px-2 py-1 rounded">
+                  <span className="bg-background/80 backdrop-blur text-text-primary text-[12px] font-label-caps tracking-widest uppercase px-2 py-1 rounded">
                     {project.type || "Design"}
                   </span>
                 </div>
@@ -157,7 +157,7 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
             <div className="card-atmosphere rounded-lg p-6 flex flex-col gap-6">
 
               <div>
-                <h3 className="font-label-caps text-[10px] tracking-widest text-intel-magenta uppercase mb-4 border-b border-surface-variant/50 pb-2">Studio Identity</h3>
+                <h3 className="font-label-caps text-[12px] tracking-widest text-intel-magenta uppercase mb-4 border-b border-surface-variant/50 pb-2">Studio Identity</h3>
                 
                 <div className="flex justify-between items-center mb-5 bg-surface-alt p-4 rounded border border-surface-variant">
                   <div>
@@ -200,14 +200,14 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-surface-variant/50 pt-6">
                 <div>
-                  <h3 className="font-label-caps text-[10px] tracking-widest text-intel-magenta uppercase mb-4 border-b border-surface-variant/50 pb-2">Service Capacity</h3>
+                  <h3 className="font-label-caps text-[12px] tracking-widest text-intel-magenta uppercase mb-4 border-b border-surface-variant/50 pb-2">Service Capacity</h3>
                   <ToggleSwitch label="Digital 3D Rendering Only" checked={capacityDigital} onChange={setCapacityDigital} primary={true} />
                   <ToggleSwitch label="Physical Furniture Staging" checked={capacityPhysical} onChange={setCapacityPhysical} primary={true} />
                   <p className="text-xs text-text-muted mt-3 leading-relaxed">Let owners know if you handle physical logistics (renting couches) or purely digital vision.</p>
                 </div>
 
                 <div>
-                  <h3 className="font-label-caps text-[10px] tracking-widest text-intel-magenta uppercase mb-4 border-b border-surface-variant/50 pb-2">Software Stack Deliverables</h3>
+                  <h3 className="font-label-caps text-[12px] tracking-widest text-intel-magenta uppercase mb-4 border-b border-surface-variant/50 pb-2">Software Stack Deliverables</h3>
                   <ToggleSwitch label="AutoCAD (.dwg)" checked={softAutoCAD} onChange={setSoftAutoCAD} />
                   <ToggleSwitch label="SketchUp (.skp)" checked={softSketchUp} onChange={setSoftSketchUp} />
                   <ToggleSwitch label="Blender / Maya" checked={softBlender} onChange={setSoftBlender} />
@@ -244,7 +244,7 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
                   <div>
                     <div className="flex items-center gap-2">
                       <h4 className="font-working-title text-xl text-on-surface">ScoutIt Studio</h4>
-                      <span className="bg-intel-magenta/10 text-intel-magenta font-label-caps text-[10px] uppercase tracking-widest px-2 py-0.5 rounded border border-intel-magenta/20">Verified</span>
+                      <span className="bg-intel-magenta/10 text-intel-magenta font-label-caps text-[12px] uppercase tracking-widest px-2 py-0.5 rounded border border-intel-magenta/20">Verified</span>
                     </div>
                     <p className="text-sm text-text-secondary mt-0.5">{aesthetic}</p>
                   </div>
@@ -253,7 +253,7 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
               
               {/* Capacity Row */}
               <div className="flex flex-col gap-2 mb-6 bg-surface-alt p-3 rounded border border-surface-variant/50">
-                <span className="text-[10px] text-text-secondary uppercase tracking-widest font-label-caps mb-1 block">Service Capacity</span>
+                <span className="text-[12px] text-text-secondary uppercase tracking-widest font-label-caps mb-1 block">Service Capacity</span>
                 {capacityDigital && (
                   <div className="flex items-center gap-2 text-sm text-on-surface">
                     <span className="text-intel-magenta">✦</span> Digital 3D Rendering & Concepts
@@ -271,12 +271,12 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
               
               <div className="space-y-4 border-t border-surface-variant pt-4">
                 <div>
-                  <span className="text-[10px] text-text-secondary uppercase tracking-widest font-label-caps mb-2 block">Software Stack</span>
+                  <span className="text-[12px] text-text-secondary uppercase tracking-widest font-label-caps mb-2 block">Software Stack</span>
                   <div className="flex flex-wrap gap-2">
-                    {softAutoCAD && <span className="bg-surface text-text-secondary border border-surface-variant font-label-caps text-[10px] uppercase tracking-widest px-2 py-1 rounded">AutoCAD</span>}
-                    {softSketchUp && <span className="bg-surface text-text-secondary border border-surface-variant font-label-caps text-[10px] uppercase tracking-widest px-2 py-1 rounded">SketchUp</span>}
-                    {softBlender && <span className="bg-surface text-text-secondary border border-surface-variant font-label-caps text-[10px] uppercase tracking-widest px-2 py-1 rounded">Blender</span>}
-                    {softRevit && <span className="bg-surface text-text-secondary border border-surface-variant font-label-caps text-[10px] uppercase tracking-widest px-2 py-1 rounded">Revit</span>}
+                    {softAutoCAD && <span className="bg-surface text-text-secondary border border-surface-variant font-label-caps text-[12px] uppercase tracking-widest px-2 py-1 rounded">AutoCAD</span>}
+                    {softSketchUp && <span className="bg-surface text-text-secondary border border-surface-variant font-label-caps text-[12px] uppercase tracking-widest px-2 py-1 rounded">SketchUp</span>}
+                    {softBlender && <span className="bg-surface text-text-secondary border border-surface-variant font-label-caps text-[12px] uppercase tracking-widest px-2 py-1 rounded">Blender</span>}
+                    {softRevit && <span className="bg-surface text-text-secondary border border-surface-variant font-label-caps text-[12px] uppercase tracking-widest px-2 py-1 rounded">Revit</span>}
                     {!softAutoCAD && !softSketchUp && !softBlender && !softRevit && (
                       <span className="text-xs text-text-muted italic">No specific software stack listed.</span>
                     )}
@@ -285,7 +285,7 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
                 
                 <div className="flex gap-6 pt-4 border-t border-surface-variant">
                   <div>
-                    <span className="text-[10px] text-text-secondary uppercase tracking-widest font-label-caps block mb-1">Base Design Fee</span>
+                    <span className="text-[12px] text-text-secondary uppercase tracking-widest font-label-caps block mb-1">Base Design Fee</span>
                     <span className="text-lg text-intel-magenta font-data-tabular font-bold">◈ {baseRate}</span>
                   </div>
                 </div>

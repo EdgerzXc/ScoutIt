@@ -97,9 +97,10 @@ module.exports = {
         "display-lg": ["var(--font-geist-sans)", "Inter", "sans-serif"]
       },
       fontSize: {
+        "xs": ["13px", { "lineHeight": "1.45" }],
         "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
         "working-title": ["20px", { "lineHeight": "1.2", "fontWeight": "600" }],
-        "label-caps": ["12px", { "lineHeight": "1", "letterSpacing": "0.1em", "fontWeight": "700" }],
+        "label-caps": ["12px", { "lineHeight": "1.4", "letterSpacing": "0.1em", "fontWeight": "700" }],
         "headline-editorial": ["24px", { "lineHeight": "1.4", "fontWeight": "400" }],
         "display-md": ["36px", { "lineHeight": "1.2", "fontWeight": "700" }],
         "body-md": ["16px", { "lineHeight": "1.5", "fontWeight": "400" }],

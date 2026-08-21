@@ -271,7 +271,7 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
         /* Label styling */
         .tile-label {
           font-family: var(--font-mono, monospace);
-          font-size: 10px;
+          font-size: 12px;
           text-transform: uppercase;
           letter-spacing: 0.12em;
           color: var(--text-secondary, #c8c8c8);
@@ -293,7 +293,7 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
           font-family: var(--font-mono, monospace);
           color: var(--accent, #E8AE3C);
           letter-spacing: 0.1em;
-          font-size: 11px;
+          font-size: 12px;
           text-transform: uppercase;
           margin-top: 16px;
           text-align: center;
@@ -319,7 +319,7 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
             font-size: 20px;
           }
           .tile-label {
-            font-size: 10px;
+            font-size: 12px;
             letter-spacing: 1px;
             margin-top: 6px;
           }

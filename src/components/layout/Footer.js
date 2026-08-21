@@ -176,7 +176,7 @@ export default function Footer() {
           font-family: var(--font-display);
           font-weight: 400;
           font-size: 26px;
-          letter-spacing: 2px;
+          letter-spacing: 0.12em;
           text-decoration: none;
           line-height: 1;
         }
@@ -235,9 +235,9 @@ export default function Footer() {
         }
 
         .nav-col h2 {
-          font-size: 11px;
+          font-size: 12px;
           font-weight: 600;
-          letter-spacing: 0.15em;
+          letter-spacing: 0.12em;
           text-transform: uppercase;
           color: var(--text-primary);
           margin-bottom: 8px;
@@ -296,7 +296,7 @@ export default function Footer() {
 
         .meta-separator {
           color: var(--text-muted);
-          font-size: 10px;
+          font-size: 12px;
         }
 
         @media (max-width: 768px) {

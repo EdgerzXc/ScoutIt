@@ -120,7 +120,7 @@ export default function PhotographerHUD({ projects, activeProjectId, setActivePr
                 <span className="group-hover:scale-110 transition-transform">{project.cover || "🏙️"}</span>
                 <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent"></div>
                 <div className="absolute bottom-3 left-3 flex gap-2">
-                  <span className="bg-background/80 backdrop-blur text-text-primary text-[10px] font-label-caps tracking-widest uppercase px-2 py-1 rounded">
+                  <span className="bg-background/80 backdrop-blur text-text-primary text-[12px] font-label-caps tracking-widest uppercase px-2 py-1 rounded">
                     {project.type || "Shoot"}
                   </span>
                 </div>
@@ -153,7 +153,7 @@ export default function PhotographerHUD({ projects, activeProjectId, setActivePr
 
               {/* Core Profile */}
               <div>
-                <h3 className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase mb-4 border-b border-surface-variant/50 pb-2">Core Profile</h3>
+                <h3 className="font-label-caps text-[12px] tracking-widest text-gold-accent uppercase mb-4 border-b border-surface-variant/50 pb-2">Core Profile</h3>
                 
                 <div className="flex justify-between items-center mb-5 bg-surface-alt p-4 rounded border border-surface-variant">
                   <div>
@@ -215,12 +215,12 @@ export default function PhotographerHUD({ projects, activeProjectId, setActivePr
               {/* Council Metrics: Certifications & Add-ons */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-surface-variant/50 pt-6">
                 <div>
-                  <h3 className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase mb-4 border-b border-surface-variant/50 pb-2">Compliance & Certs</h3>
+                  <h3 className="font-label-caps text-[12px] tracking-widest text-gold-accent uppercase mb-4 border-b border-surface-variant/50 pb-2">Compliance & Certs</h3>
                   <ToggleSwitch label="CAAP RPA Credentials" checked={certCaaDrone} onChange={setCertCaaDrone} gold={true} />
                   <ToggleSwitch label="Liability Insurance" checked={certInsurance} onChange={setCertInsurance} gold={true} />
                   
                   <div className="mt-4">
-                    <h4 className="font-label-caps text-[10px] tracking-widest text-text-secondary uppercase mb-2">Guaranteed Turnaround</h4>
+                    <h4 className="font-label-caps text-[12px] tracking-widest text-text-secondary uppercase mb-2">Guaranteed Turnaround</h4>
                     <select 
                       value={turnaroundTime}
                       onChange={(e) => setTurnaroundTime(e.target.value)}
@@ -235,7 +235,7 @@ export default function PhotographerHUD({ projects, activeProjectId, setActivePr
                 </div>
 
                 <div>
-                  <h3 className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase mb-4 border-b border-surface-variant/50 pb-2">Premium Add-ons</h3>
+                  <h3 className="font-label-caps text-[12px] tracking-widest text-gold-accent uppercase mb-4 border-b border-surface-variant/50 pb-2">Premium Add-ons</h3>
                   <ToggleSwitch label="Matterport 3D Tours" checked={addonMatterport} onChange={setAddonMatterport} />
                   <ToggleSwitch label="Virtual Twilight Rendering" checked={addonTwilight} onChange={setAddonTwilight} />
                   <ToggleSwitch label="Laser Floorplan Drafting" checked={addonFloorplan} onChange={setAddonFloorplan} />
@@ -271,10 +271,10 @@ export default function PhotographerHUD({ projects, activeProjectId, setActivePr
                   <div>
                     <div className="flex items-center gap-2">
                       <h4 className="font-working-title text-xl text-on-surface">ScoutIt Pro</h4>
-                      <span className="bg-gold-accent/10 text-gold-accent font-label-caps text-[10px] uppercase tracking-widest px-2 py-0.5 rounded border border-gold-accent/20">Verified</span>
+                      <span className="bg-gold-accent/10 text-gold-accent font-label-caps text-[12px] uppercase tracking-widest px-2 py-0.5 rounded border border-gold-accent/20">Verified</span>
                     </div>
                     <p className="text-sm text-gold-accent mt-0.5">{specialty}</p>
-                    <p className="text-[10px] text-text-muted mt-1 uppercase tracking-widest font-label-caps">{turnaroundTime}</p>
+                    <p className="text-[12px] text-text-muted mt-1 uppercase tracking-widest font-label-caps">{turnaroundTime}</p>
                   </div>
                 </div>
               </div>
@@ -282,13 +282,13 @@ export default function PhotographerHUD({ projects, activeProjectId, setActivePr
               {/* Certifications Row */}
               <div className="flex flex-wrap gap-2 mb-6">
                 {certCaaDrone && (
-                  <span className="bg-surface-alt text-gold-accent border border-gold-accent/40 font-label-caps text-[10px] uppercase tracking-widest px-2 py-1 rounded flex items-center gap-1 shadow-[0_0_8px_rgba(232,174,60,0.1)]">
-                    <span className="text-[10px]">🚁</span> CAAP Certified
+                  <span className="bg-surface-alt text-gold-accent border border-gold-accent/40 font-label-caps text-[12px] uppercase tracking-widest px-2 py-1 rounded flex items-center gap-1 shadow-[0_0_8px_rgba(232,174,60,0.1)]">
+                    <span className="text-[12px]">🚁</span> CAAP Certified
                   </span>
                 )}
                 {certInsurance && (
-                  <span className="bg-surface-alt text-gold-accent border border-gold-accent/40 font-label-caps text-[10px] uppercase tracking-widest px-2 py-1 rounded flex items-center gap-1 shadow-[0_0_8px_rgba(232,174,60,0.1)]">
-                    <span className="text-[10px]">🛡️</span> Insured
+                  <span className="bg-surface-alt text-gold-accent border border-gold-accent/40 font-label-caps text-[12px] uppercase tracking-widest px-2 py-1 rounded flex items-center gap-1 shadow-[0_0_8px_rgba(232,174,60,0.1)]">
+                    <span className="text-[12px]">🛡️</span> Insured
                   </span>
                 )}
                 {!certCaaDrone && !certInsurance && (
@@ -298,14 +298,14 @@ export default function PhotographerHUD({ projects, activeProjectId, setActivePr
               
               <div className="space-y-5">
                 <div>
-                  <span className="text-[10px] text-text-secondary uppercase tracking-widest font-label-caps mb-1 block">Gear List</span>
+                  <span className="text-[12px] text-text-secondary uppercase tracking-widest font-label-caps mb-1 block">Gear List</span>
                   <p className="text-sm text-on-surface font-body-md leading-relaxed">{gear}</p>
                 </div>
 
                 {/* Add-ons List */}
                 {(addonMatterport || addonTwilight || addonFloorplan) && (
                   <div>
-                    <span className="text-[10px] text-text-secondary uppercase tracking-widest font-label-caps mb-2 block">Premium Add-ons Available</span>
+                    <span className="text-[12px] text-text-secondary uppercase tracking-widest font-label-caps mb-2 block">Premium Add-ons Available</span>
                     <ul className="text-xs text-on-surface space-y-1">
                       {addonMatterport && <li><span className="text-gold-accent mr-1">✦</span> Matterport 3D Tours</li>}
                       {addonTwilight && <li><span className="text-gold-accent mr-1">✦</span> Virtual Twilight Rendering</li>}
@@ -316,11 +316,11 @@ export default function PhotographerHUD({ projects, activeProjectId, setActivePr
                 
                 <div className="flex gap-6 pt-4 border-t border-surface-variant">
                   <div>
-                    <span className="text-[10px] text-text-secondary uppercase tracking-widest font-label-caps block mb-1">Base Rate</span>
+                    <span className="text-[12px] text-text-secondary uppercase tracking-widest font-label-caps block mb-1">Base Rate</span>
                     <span className="text-lg text-gold-accent font-data-tabular font-bold">◈ {baseRate}</span>
                   </div>
                   <div className="flex-1 overflow-hidden">
-                    <span className="text-[10px] text-text-secondary uppercase tracking-widest font-label-caps block mb-1">Portfolio</span>
+                    <span className="text-[12px] text-text-secondary uppercase tracking-widest font-label-caps block mb-1">Portfolio</span>
                     <a href={(() => { try { const u = new URL(portfolio); return ["http:", "https:"].includes(u.protocol) ? u.href : "#"; } catch { return "#"; } })()} target="_blank" rel="noopener noreferrer" className="text-sm text-on-surface underline hover:text-gold-accent block truncate">{portfolio}</a>
                   </div>
                 </div>

@@ -4,7 +4,7 @@ export const ImpeccableInput = forwardRef(({ label, className = "", ...props }, 
   return (
     <div className="flex flex-col gap-1.5 flex-1">
       {label && (
-        <label className="font-label-caps text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-widest">
+        <label className="font-label-caps text-[12px] font-semibold text-[var(--text-secondary)] uppercase tracking-widest">
           {label}
         </label>
       )}
@@ -22,7 +22,7 @@ export const ImpeccableTextArea = forwardRef(({ label, className = "", ...props 
   return (
     <div className="flex flex-col gap-1.5 flex-1">
       {label && (
-        <label className="font-label-caps text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-widest">
+        <label className="font-label-caps text-[12px] font-semibold text-[var(--text-secondary)] uppercase tracking-widest">
           {label}
         </label>
       )}

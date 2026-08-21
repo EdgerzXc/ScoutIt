@@ -73,8 +73,8 @@ export default function GlobalError({ error, reset }) {
         }
         .err-eyebrow {
           font-family: var(--font-mono, 'Courier New', monospace);
-          font-size: 10px;
-          letter-spacing: 0.25em;
+          font-size: 12px;
+          letter-spacing: 0.12em;
           text-transform: uppercase;
           color: var(--accent, #E8AE3C);
           margin-bottom: 14px;
@@ -108,9 +108,9 @@ export default function GlobalError({ error, reset }) {
           box-sizing: border-box;
           border-radius: 3px;
           font-family: var(--font-mono, 'Courier New', monospace);
-          font-size: 11px;
+          font-size: 12px;
           font-weight: 600;
-          letter-spacing: 0.15em;
+          letter-spacing: 0.12em;
           text-transform: uppercase;
           text-decoration: none;
           cursor: pointer;
@@ -133,7 +133,7 @@ export default function GlobalError({ error, reset }) {
         }
         .err-ref {
           font-family: var(--font-mono, 'Courier New', monospace);
-          font-size: 9px;
+          font-size: 12px;
           letter-spacing: 0.14em;
           text-transform: uppercase;
           color: #4a4a4a;

@@ -135,7 +135,7 @@ export default function SeekerPanel({ savedCount = 0, isAnonymous = false }) {
 
       {isAnonymous && (
         <div style={anonNotice}>
-          <span style={{ fontFamily: "var(--font-body)", fontSize: 11, color: "var(--text-secondary)" }}>
+          <span style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "var(--text-secondary)" }}>
             Anonymous Browsing is active. Property views are not logged to your name.
           </span>
         </div>
@@ -160,7 +160,7 @@ const panelHeader = {
 
 const panelLabel = {
   fontFamily: "var(--font-body)",
-  fontSize: 10,
+  fontSize: 12,
   fontWeight: 700,
   letterSpacing: "0.14em",
   textTransform: "uppercase",
@@ -169,7 +169,7 @@ const panelLabel = {
 
 const privateBadge = {
   fontFamily: "var(--font-body)",
-  fontSize: 9,
+  fontSize: 12,
   letterSpacing: "0.1em",
   textTransform: "uppercase",
   color: "var(--text-secondary)",
@@ -205,7 +205,7 @@ const statValue = {
 
 const statLabel = {
   fontFamily: "var(--font-body)",
-  fontSize: 10,
+  fontSize: 12,
   color: "var(--text-secondary)",
   letterSpacing: "0.06em",
   marginTop: 2,
@@ -233,7 +233,7 @@ const shareButton = {
   borderRadius: 20,
   background: "rgba(var(--accent-rgb), 0.06)",
   fontFamily: "var(--font-mono)",
-  fontSize: 10,
+  fontSize: 12,
   letterSpacing: "0.06em",
   textTransform: "uppercase",
   cursor: "pointer",
@@ -250,7 +250,7 @@ const shareStatus = {
   margin: "-2px 0 12px",
   color: "var(--text-secondary)",
   fontFamily: "var(--font-body)",
-  fontSize: 11,
+  fontSize: 12,
   lineHeight: 1.5,
 };
 

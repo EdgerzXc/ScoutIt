@@ -290,13 +290,13 @@ function DashboardInner() {
               onClick={() => setShowDesktopSwitcher(!showDesktopSwitcher)}
             >
               <span className="text-gold-accent font-semibold">Workspace:</span> {TAG_LABELS[mode]}
-              <span className="text-[10px] ml-1">▼</span>
+              <span className="text-[12px] ml-1">▼</span>
             </button>
             
             {showDesktopSwitcher && (
               <div className="absolute top-full left-0 mt-2 w-64 bg-surface border border-surface-variant rounded-lg shadow-2xl overflow-hidden z-50 animate-[fadeIn_0.2s_ease-out]">
                 <div className="px-4 py-3 border-b border-surface-variant bg-surface-alt">
-                  <span className="font-label-caps text-[10px] tracking-widest uppercase text-text-secondary">Switch Workspace</span>
+                  <span className="font-label-caps text-[12px] tracking-widest uppercase text-text-secondary">Switch Workspace</span>
                 </div>
                 <div className="flex flex-col py-2">
                   {user.tags.map(tagId => (
@@ -313,7 +313,7 @@ function DashboardInner() {
                 {addableModes.length > 0 && (
                   <>
                     <div className="px-4 py-2 border-t border-surface-variant bg-surface-alt">
-                      <span className="font-label-caps text-[10px] tracking-widest uppercase text-text-secondary">Unlock More</span>
+                      <span className="font-label-caps text-[12px] tracking-widest uppercase text-text-secondary">Unlock More</span>
                     </div>
                     <div className="flex flex-col py-2">
                       {addableModes.map(m => (
@@ -337,7 +337,7 @@ function DashboardInner() {
         <div className="flex items-center gap-4 md:gap-6">
           <div className="hidden md:block relative">
             <button
-              className="flex items-center gap-2 text-gold-accent font-label-caps text-[11px] tracking-widest bg-gold-accent/10 px-3 py-1.5 rounded-full hover:bg-gold-accent/20 active:scale-[0.97] transition duration-160 ease-out"
+              className="flex items-center gap-2 text-gold-accent font-label-caps text-[12px] tracking-widest bg-gold-accent/10 px-3 py-1.5 rounded-full hover:bg-gold-accent/20 active:scale-[0.97] transition duration-160 ease-out"
               title="View your Connects breakdown"
               onClick={() => setShowConnectsBreakdown((v) => !v)}
             >
@@ -373,7 +373,7 @@ function DashboardInner() {
           >
             <MessageCircle strokeWidth={1.5} size={20} />
             {unreadInboxCount > 0 && (
-              <span className="absolute top-1.5 right-1.5 w-3.5 h-3.5 bg-gold-accent rounded-full border-2 border-background flex items-center justify-center text-[10px] font-bold text-background">
+              <span className="absolute top-1.5 right-1.5 w-3.5 h-3.5 bg-gold-accent rounded-full border-2 border-background flex items-center justify-center text-[12px] font-bold text-background">
                 {unreadInboxCount}
               </span>
             )}
@@ -387,7 +387,7 @@ function DashboardInner() {
             >
               🔔
               {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-error rounded-full border-2 border-background flex items-center justify-center text-[10px] font-bold text-white">
+                <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-error rounded-full border-2 border-background flex items-center justify-center text-[12px] font-bold text-white">
                   {unreadCount}
                 </span>
               )}
@@ -397,7 +397,7 @@ function DashboardInner() {
             {showNotifications && (
               <div className="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-surface border border-surface-variant rounded-lg shadow-2xl overflow-hidden z-50">
                 <div className="p-3 border-b border-surface-variant bg-surface-alt flex justify-between items-center">
-                  <span className="font-label-caps text-[10px] tracking-widest uppercase text-text-secondary">Notifications</span>
+                  <span className="font-label-caps text-[12px] tracking-widest uppercase text-text-secondary">Notifications</span>
                   {notifications.length > 0 && (
                     <button type="button" className="text-xs text-gold-accent hover:underline" onClick={clearAllNotifications}>Clear All</button>
                   )}
@@ -452,7 +452,7 @@ function DashboardInner() {
           <div className="md:hidden flex items-center gap-3">
             <div className="relative">
               <button
-                className="flex items-center gap-1 text-gold-accent font-label-caps text-[10px] tracking-widest"
+                className="flex items-center gap-1 text-gold-accent font-label-caps text-[12px] tracking-widest"
                 title="View your Connects breakdown"
                 onClick={() => setShowConnectsBreakdown((v) => !v)}
               >
@@ -495,7 +495,7 @@ function DashboardInner() {
         aria-label={primaryAction.label}
       >
         <span className="text-xl leading-none font-bold">{primaryAction.icon}</span>
-        {primaryAction.label && <span className="text-[10px] font-working-title font-bold mt-0.5 tracking-tighter uppercase leading-none">{primaryAction.label}</span>}
+        {primaryAction.label && <span className="text-[12px] font-working-title font-bold mt-0.5 tracking-tighter uppercase leading-none">{primaryAction.label}</span>}
       </button>
 
       {/* Role Activation Modal (broker license / provider type) */}
@@ -579,7 +579,7 @@ function DashboardInner() {
             
             {user.tags.length > 1 && (
             <div className="mb-2">
-              <span className="font-label-caps text-[10px] tracking-widest uppercase text-text-secondary">Switch Workspace</span>
+              <span className="font-label-caps text-[12px] tracking-widest uppercase text-text-secondary">Switch Workspace</span>
             </div>
             )}
             <div className="flex flex-col gap-2 mb-4">
@@ -598,7 +598,7 @@ function DashboardInner() {
             {addableModes.length > 0 && (
               <>
                 <div className="mb-2">
-                  <span className="font-label-caps text-[10px] tracking-widest uppercase text-text-secondary">Unlock More</span>
+                  <span className="font-label-caps text-[12px] tracking-widest uppercase text-text-secondary">Unlock More</span>
                 </div>
                 <div className="flex flex-col gap-2 mb-6">
                   {addableModes.map(m => (

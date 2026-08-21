@@ -255,9 +255,9 @@ export default function PropertyFAQSection({ propertySlug, propertyTitle }) {
         }
         .faq-section__eyebrow {
           font-family: ${MONO};
-          font-size: 10px;
+          font-size: 12px;
           color: var(--text-secondary);
-          letter-spacing: 0.25em;
+          letter-spacing: 0.12em;
           text-transform: uppercase;
           margin-bottom: 8px;
         }
@@ -293,7 +293,7 @@ export default function PropertyFAQSection({ propertySlug, propertyTitle }) {
           padding: 8px 12px;
           border-radius: 3px;
           font-family: ${MONO};
-          font-size: 9px;
+          font-size: 12px;
           letter-spacing: 0.12em;
           text-transform: uppercase;
           white-space: nowrap;
@@ -309,9 +309,9 @@ export default function PropertyFAQSection({ propertySlug, propertyTitle }) {
         }
         .faq-ask__label {
           font-family: ${MONO};
-          font-size: 9px;
+          font-size: 12px;
           color: #E8AE3C;
-          letter-spacing: 0.18em;
+          letter-spacing: 0.12em;
           text-transform: uppercase;
           display: block;
           margin-bottom: 10px;
@@ -338,7 +338,7 @@ export default function PropertyFAQSection({ propertySlug, propertyTitle }) {
         }
         .faq-hint {
           font-family: ${MONO};
-          font-size: 9px;
+          font-size: 12px;
           color: var(--text-muted, #6a6a6a);
           letter-spacing: 0.08em;
           margin-top: 8px;
@@ -350,8 +350,8 @@ export default function PropertyFAQSection({ propertySlug, propertyTitle }) {
           padding: 0 18px;
           border-radius: 3px;
           font-family: ${MONO};
-          font-size: 10px;
-          letter-spacing: 0.15em;
+          font-size: 12px;
+          letter-spacing: 0.12em;
           text-transform: uppercase;
           cursor: pointer;
           transition: opacity 0.15s ease, border-color 0.15s ease;
@@ -387,7 +387,7 @@ export default function PropertyFAQSection({ propertySlug, propertyTitle }) {
         }
         .faq-thread__asked {
           font-family: ${MONO};
-          font-size: 9px;
+          font-size: 12px;
           color: var(--text-secondary);
           letter-spacing: 0.08em;
           text-transform: uppercase;
@@ -396,7 +396,7 @@ export default function PropertyFAQSection({ propertySlug, propertyTitle }) {
         .faq-thread__answers { display: flex; flex-direction: column; gap: 10px; }
         .faq-thread__empty {
           font-family: ${MONO};
-          font-size: 10px;
+          font-size: 12px;
           color: var(--text-secondary);
           letter-spacing: 0.12em;
           text-transform: uppercase;
@@ -414,7 +414,7 @@ export default function PropertyFAQSection({ propertySlug, propertyTitle }) {
         }
         .faq-badge {
           font-family: ${MONO};
-          font-size: 8.5px;
+          font-size: 12px;
           letter-spacing: 0.14em;
           text-transform: uppercase;
           padding: 4px 8px;
@@ -435,7 +435,7 @@ export default function PropertyFAQSection({ propertySlug, propertyTitle }) {
         }
         .faq-answer__meta {
           font-family: ${MONO};
-          font-size: 9px;
+          font-size: 12px;
           color: var(--text-secondary);
           letter-spacing: 0.08em;
         }
@@ -450,7 +450,7 @@ export default function PropertyFAQSection({ propertySlug, propertyTitle }) {
 
         .faq-error {
           font-family: ${MONO};
-          font-size: 10px;
+          font-size: 12px;
           color: #e06c6c;
           letter-spacing: 0.06em;
           margin-top: 8px;
@@ -459,7 +459,7 @@ export default function PropertyFAQSection({ propertySlug, propertyTitle }) {
 
         .faq-signin {
           font-family: ${MONO};
-          font-size: 10px;
+          font-size: 12px;
           color: #8a8a8a;
           letter-spacing: 0.1em;
           text-transform: uppercase;

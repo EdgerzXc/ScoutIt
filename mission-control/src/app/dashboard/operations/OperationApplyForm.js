@@ -11,7 +11,7 @@ export default function OperationApplyForm({ checksum, confirmationPhrase, disab
   return (
     <form action={formAction} className="space-y-4" aria-describedby="migration-execution-help">
       <input type="hidden" name="checksum" value={checksum} />
-      <p id="migration-execution-help" className="text-sm text-white/55 leading-6">
+      <p id="migration-execution-help" className="text-sm text-white/70 leading-6">
         This is the only write control. Mission Control re-runs every preflight check immediately
         before sending the fixed, checksum-locked migration.
       </p>
@@ -23,7 +23,7 @@ export default function OperationApplyForm({ checksum, confirmationPhrase, disab
           minLength={12}
           rows={3}
           placeholder="Why this schema change is being applied now"
-          className="mt-2 w-full rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-white placeholder:text-white/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
+          className="mt-2 w-full rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-white placeholder:text-white/70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
         />
       </label>
       <label className="block text-sm text-white/75">

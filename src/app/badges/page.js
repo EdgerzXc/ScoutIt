@@ -110,7 +110,7 @@ export default function BadgeRegistryPage() {
         
         {/* Header Section */}
         <div className="mb-16 text-center">
-          <p className="text-accent font-mono text-xs uppercase tracking-[0.3em] font-bold mb-4 drop-shadow-md">
+          <p className="text-accent font-mono text-xs uppercase tracking-[0.12em] font-bold mb-4 drop-shadow-md">
             Milestones & Achievements
           </p>
           <h1 className="font-display text-4xl sm:text-5xl text-text-primary mb-6 drop-shadow-lg">
@@ -158,11 +158,11 @@ export default function BadgeRegistryPage() {
                     )}
                   </div>
                   {userHasIt ? (
-                    <span className="font-mono text-[10px] uppercase tracking-widest px-2 py-1 rounded border border-white/10 text-white/90 bg-white/10 shadow-[0_0_10px_rgba(255,255,255,0.1)]">
+                    <span className="font-mono text-[12px] uppercase tracking-widest px-2 py-1 rounded border border-white/10 text-white/90 bg-white/10 shadow-[0_0_10px_rgba(255,255,255,0.1)]">
                       ★ OWNED
                     </span>
                   ) : (
-                    <span className="font-mono text-[10px] uppercase tracking-widest px-2 py-1 rounded border border-white/10 text-text-secondary bg-black/50">
+                    <span className="font-mono text-[12px] uppercase tracking-widest px-2 py-1 rounded border border-white/10 text-text-secondary bg-black/50">
                       LOCKED SILHOUETTE
                     </span>
                   )}
@@ -177,7 +177,7 @@ export default function BadgeRegistryPage() {
 
                 {/* Progress Bar */}
                 <div className="mt-auto">
-                  <div className="flex justify-between font-mono text-[10px] uppercase tracking-widest mb-2" style={{ color: 'var(--text-secondary)' }}>
+                  <div className="flex justify-between font-mono text-[12px] uppercase tracking-widest mb-2" style={{ color: 'var(--text-secondary)' }}>
                     <span>Slots Claimed</span>
                     <span style={{ color: userHasIt ? badge.color : 'var(--text-secondary)', fontWeight: 'bold' }}>{badge.claimed} / {badge.max_slots}</span>
                   </div>
@@ -198,12 +198,12 @@ export default function BadgeRegistryPage() {
                     <button 
                       onClick={() => handleClaimBadge(badge.id)}
                       disabled={claimingId === badge.id}
-                      className="mt-6 w-full block text-center font-mono text-[10px] uppercase tracking-[0.2em] py-3 rounded border border-white/20 bg-white/10 hover:bg-white/20 transition-colors text-white hover:text-white"
+                      className="mt-6 w-full block text-center font-mono text-[12px] uppercase tracking-[0.12em] py-3 rounded border border-white/20 bg-white/10 hover:bg-white/20 transition-colors text-white hover:text-white"
                     >
                       {claimingId === badge.id ? 'CLAIMING...' : 'CLAIM FREE BADGE →'}
                     </button>
                   ) : (
-                    <Link href="/pricing" className="mt-6 block text-center font-mono text-[10px] uppercase tracking-[0.2em] py-3 rounded border border-white/5 bg-white/5 hover:bg-white/10 transition-colors text-text-secondary hover:text-white">
+                    <Link href="/pricing" className="mt-6 block text-center font-mono text-[12px] uppercase tracking-[0.12em] py-3 rounded border border-white/5 bg-white/5 hover:bg-white/10 transition-colors text-text-secondary hover:text-white">
                       Unlock Now →
                     </Link>
                   )
@@ -241,11 +241,11 @@ export default function BadgeRegistryPage() {
                     <ShieldAlert size={20} color="#666" strokeWidth={1.5} />
                   )}
                   {userHasIt ? (
-                    <span className="font-mono text-[10px] uppercase tracking-widest text-gold-accent border border-gold-accent/30 px-1.5 rounded">
+                    <span className="font-mono text-[12px] uppercase tracking-widest text-gold-accent border border-gold-accent/30 px-1.5 rounded">
                       OWNED
                     </span>
                   ) : (
-                    <span className="font-mono text-[10px] uppercase tracking-widest text-red-500 bg-red-500/10 border border-red-500/20 px-1.5 rounded">
+                    <span className="font-mono text-[12px] uppercase tracking-widest text-red-500 bg-red-500/10 border border-red-500/20 px-1.5 rounded">
                       YOU MISSED THIS
                     </span>
                   )}
@@ -256,14 +256,14 @@ export default function BadgeRegistryPage() {
                   {badge.description}
                 </p>
                 
-                <div className="font-mono text-[10px] uppercase tracking-widest" style={{ color: userHasIt ? badge.color : '#555' }}>
+                <div className="font-mono text-[12px] uppercase tracking-widest" style={{ color: userHasIt ? badge.color : '#555' }}>
                   Closed at {badge.max_slots} slots
                 </div>
               </div>
             )})}
           </div>
           <div className="text-center mt-8">
-            <p className="font-mono text-[10px] uppercase tracking-widest text-text-muted">
+            <p className="font-mono text-[12px] uppercase tracking-widest text-text-muted">
               More exclusive honors will be announced via the Council.
             </p>
           </div>

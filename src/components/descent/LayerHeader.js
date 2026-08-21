@@ -73,8 +73,8 @@ export default function LayerHeader({ layerNum, layerName, title, description, m
 
         .layer-kicker {
           font-family: var(--font-mono);
-          font-size: 11px;
-          letter-spacing: 0.22em;
+          font-size: 12px;
+          letter-spacing: 0.12em;
           color: var(--accent);
           text-transform: uppercase;
           display: inline-block;
@@ -121,8 +121,8 @@ export default function LayerHeader({ layerNum, layerName, title, description, m
 
         .layer-mission-label {
           font-family: var(--font-mono);
-          font-size: 10px;
-          letter-spacing: 0.15em;
+          font-size: 12px;
+          letter-spacing: 0.12em;
           color: var(--accent);
           text-transform: uppercase;
           margin-bottom: 8px;
@@ -139,8 +139,8 @@ export default function LayerHeader({ layerNum, layerName, title, description, m
         .layer-primary-cta {
           display: inline-block;
           font-family: var(--font-mono);
-          font-size: 11px;
-          letter-spacing: 0.18em;
+          font-size: 12px;
+          letter-spacing: 0.12em;
           text-transform: uppercase;
           color: var(--accent);
           border: 1px solid rgba(232, 174, 60, 0.4);

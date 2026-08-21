@@ -21,7 +21,7 @@ const STATUS_STYLES = {
   new: "bg-amber-400/10 text-amber-300 border-amber-400/20",
   in_progress: "bg-sky-400/10 text-sky-300 border-sky-400/20",
   resolved: "bg-emerald-400/10 text-emerald-300 border-emerald-400/20",
-  spam: "bg-white/5 text-white/40 border-white/10",
+  spam: "bg-white/5 text-white/70 border-white/10",
 };
 
 const NEXT_ACTIONS = {
@@ -62,7 +62,7 @@ export default async function ContactQueuePage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Contact Queue</h1>
-          <p className="text-sm text-white/40 mt-1">
+          <p className="text-sm text-white/70 mt-1">
             Messages from <span className="text-white/60">/contact</span> on the public site.
           </p>
         </div>
@@ -80,8 +80,8 @@ export default async function ContactQueuePage() {
       )}
 
       {!error && rows.length === 0 && (
-        <div className="bg-[#121212] border border-white/5 rounded-xl text-sm text-white/50 p-8 text-center flex flex-col items-center gap-2">
-          <Inbox className="w-5 h-5 text-white/30" />
+        <div className="bg-[#121212] border border-white/5 rounded-xl text-sm text-white/70 p-8 text-center flex flex-col items-center gap-2">
+          <Inbox className="w-5 h-5 text-white/70" />
           Nothing waiting. Messages sent through the public contact form land here.
         </div>
       )}
@@ -94,7 +94,7 @@ export default async function ContactQueuePage() {
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="font-medium">{m.name}</span>
                   <span
-                    className={`text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full border ${
+                    className={`text-[12px] uppercase tracking-wide px-2 py-0.5 rounded-full border ${
                       STATUS_STYLES[m.status] || STATUS_STYLES.spam
                     }`}
                   >
@@ -103,13 +103,13 @@ export default async function ContactQueuePage() {
                 </div>
                 <a
                   href={`mailto:${m.email}`}
-                  className="text-sm text-white/50 hover:text-white/80 inline-flex items-center gap-1.5 mt-1"
+                  className="text-sm text-white/70 hover:text-white/80 inline-flex items-center gap-1.5 mt-1"
                 >
                   <Mail className="w-3.5 h-3.5" />
                   {m.email}
                 </a>
               </div>
-              <span className="text-xs text-white/30 inline-flex items-center gap-1.5 shrink-0">
+              <span className="text-xs text-white/70 inline-flex items-center gap-1.5 shrink-0">
                 <Clock className="w-3.5 h-3.5" />
                 {formatWhen(m.created_at)}
               </span>
@@ -166,7 +166,7 @@ ${m.message}`,
                 </form>
               ))}
               {m.handled_at && (
-                <span className="text-xs text-white/25">handled {formatWhen(m.handled_at)}</span>
+                <span className="text-xs text-white/70">handled {formatWhen(m.handled_at)}</span>
               )}
             </div>
           </div>

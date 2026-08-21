@@ -53,8 +53,8 @@ export default function OffMarketPage() {
   return (
     <main className="min-h-screen bg-background text-on-surface px-4 py-16 md:px-8">
       <div className="mx-auto max-w-5xl">
-        <Link href="/property" className="font-label-caps text-xs tracking-[0.2em] text-gold-accent">← LIVE DIRECTORY</Link>
-        <p className="mt-10 font-label-caps text-xs tracking-[0.25em] text-gold-accent">AUTHENTICATED OFF-MARKET</p>
+        <Link href="/property" className="font-label-caps text-xs tracking-[0.12em] text-gold-accent">← LIVE DIRECTORY</Link>
+        <p className="mt-10 font-label-caps text-xs tracking-[0.12em] text-gold-accent">AUTHENTICATED OFF-MARKET</p>
         <h1 className="mt-3 font-display-md text-4xl md:text-6xl">Quiet inventory, kept private.</h1>
         <p className="mt-4 max-w-2xl text-text-secondary">Withdrawn listings are not part of the ordinary directory. This surface is limited to entitled Cluster and Universe seekers, with contact shown only when the owner has enabled Quietly open to offers.</p>
 
@@ -67,15 +67,15 @@ export default function OffMarketPage() {
           <div className="mt-10 grid gap-5 md:grid-cols-2">
             {properties.map((property) => (
               <article key={property.id} className="rounded border border-surface-variant bg-surface-alt/80 p-5 shadow-[0_0_28px_rgba(232,174,60,0.05)]">
-                <p className="font-label-caps text-[10px] tracking-[0.2em] text-text-secondary">OFF-MARKET · {property.spaceCategory || property.type || "PROPERTY"}</p>
+                <p className="font-label-caps text-[12px] tracking-[0.12em] text-text-secondary">OFF-MARKET · {property.spaceCategory || property.type || "PROPERTY"}</p>
                 <h2 className="mt-3 text-2xl text-on-surface">{property.title}</h2>
                 <p className="mt-2 text-sm text-text-secondary">{property.location || "Philippines"}</p>
                 <div className="mt-6 flex flex-wrap items-center gap-3">
-                  <span className="rounded border border-surface-variant px-3 py-2 font-label-caps text-[10px] tracking-widest text-text-secondary">VIEW-ONLY BRIEFING</span>
+                  <span className="rounded border border-surface-variant px-3 py-2 font-label-caps text-[12px] tracking-widest text-text-secondary">VIEW-ONLY BRIEFING</span>
                   {property.contactAvailable ? (
-                    <button type="button" className="min-h-11 rounded border border-gold-accent/60 px-3 py-2 font-label-caps text-[10px] tracking-widest text-gold-accent" onClick={() => { setSelected(property); setSendState("idle"); }}>REQUEST CONTACT · 1 CONNECT</button>
+                    <button type="button" className="min-h-11 rounded border border-gold-accent/60 px-3 py-2 font-label-caps text-[12px] tracking-widest text-gold-accent" onClick={() => { setSelected(property); setSendState("idle"); }}>REQUEST CONTACT · 1 CONNECT</button>
                   ) : (
-                    <span className="rounded border border-surface-variant px-3 py-2 font-label-caps text-[10px] tracking-widest text-text-secondary">CONTACT DISABLED</span>
+                    <span className="rounded border border-surface-variant px-3 py-2 font-label-caps text-[12px] tracking-widest text-text-secondary">CONTACT DISABLED</span>
                   )}
                 </div>
               </article>
@@ -87,7 +87,7 @@ export default function OffMarketPage() {
           <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/80 p-4 md:items-center" role="dialog" aria-modal="true" aria-labelledby="off-market-contact-title">
             <form onSubmit={sendContact} className="w-full max-w-lg rounded border border-gold-accent/50 bg-surface p-5 shadow-[0_0_35px_rgba(232,174,60,0.12)]">
               <div className="flex items-start justify-between gap-4">
-                <div><p className="font-label-caps text-[10px] tracking-[0.2em] text-gold-accent">ONE-CONNECT CONTACT</p><h2 id="off-market-contact-title" className="mt-2 text-xl">{selected.title}</h2></div>
+                <div><p className="font-label-caps text-[12px] tracking-[0.12em] text-gold-accent">ONE-CONNECT CONTACT</p><h2 id="off-market-contact-title" className="mt-2 text-xl">{selected.title}</h2></div>
                 <button type="button" className="min-h-11 min-w-11 text-2xl text-text-secondary" aria-label="Close contact form" onClick={() => setSelected(null)}>×</button>
               </div>
               <p className="mt-4 text-sm text-text-secondary">The owner has enabled Quietly open to offers. Decline, non-response, or timeout does not create an automatic refund.</p>

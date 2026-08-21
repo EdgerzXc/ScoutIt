@@ -485,7 +485,7 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
               <span
                 style={{
                   fontFamily: "var(--font-mono)",
-                  fontSize: "8.5px",
+                  fontSize: "12px",
                   color: "#c8c8c8",
                   letterSpacing: "0.12em",
                   textTransform: "uppercase",
@@ -706,7 +706,7 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
 
         .hud-card-cat {
           font-family: var(--font-mono);
-          font-size: 9px;
+          font-size: 12px;
           color: #E8AE3C;
           letter-spacing: 0.08em;
           text-transform: uppercase;
@@ -714,14 +714,14 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
 
         .hud-card-dist {
           font-family: var(--font-mono);
-          font-size: 10px;
+          font-size: 12px;
           color: #f0ede8;
           font-weight: 600;
         }
 
         .hud-card-name {
           font-family: system-ui, -apple-system, sans-serif;
-          font-size: 10px;
+          font-size: 12px;
           color: #f0ede8;
           font-weight: 500;
           white-space: nowrap;
@@ -731,7 +731,7 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
 
         .hud-card-coords {
           font-family: var(--font-mono);
-          font-size: 9px;
+          font-size: 12px;
           color: #777;
           margin-top: 2px;
           border-top: 0.5px solid #222;
@@ -746,8 +746,8 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
           justify-content: center;
           background: #0d0d0d;
           font-family: var(--font-mono);
-          font-size: 10px;
-          letter-spacing: 0.15em;
+          font-size: 12px;
+          letter-spacing: 0.12em;
           color: #6a6a6a;
           z-index: 2;
         }
@@ -778,7 +778,7 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
         }
         .map-route-label .route-time {
           font-family: var(--font-mono);
-          font-size: 11px;
+          font-size: 12px;
           color: #E8AE3C;
           font-weight: 600;
           letter-spacing: 0.04em;
@@ -786,7 +786,7 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
         }
         .map-route-label .route-dest {
           font-family: system-ui, -apple-system, sans-serif;
-          font-size: 11px;
+          font-size: 12px;
           color: #f0ede8;
           white-space: nowrap;
           overflow: hidden;
@@ -794,7 +794,7 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
         }
         .map-route-label .route-km {
           font-family: var(--font-mono);
-          font-size: 10px;
+          font-size: 12px;
           color: #c8c8c8;
           white-space: nowrap;
         }
@@ -871,7 +871,7 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
           border: 0.5px solid #2d2a24 !important;
           border-radius: 4px !important;
           font-family: system-ui, -apple-system, sans-serif !important;
-          font-size: 11px !important;
+          font-size: 12px !important;
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
         }
 

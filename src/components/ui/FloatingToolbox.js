@@ -439,7 +439,7 @@ export default function FloatingToolbox({ showTrigger = true }) {
           >
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <span style={{ cursor: "grab", opacity: 0.5, fontSize: 12, color: "var(--accent)" }}>⠿</span>
-              <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--accent, #E8AE3C)", letterSpacing: "0.18em", textTransform: "uppercase", fontWeight: 700 }}>
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--accent, #E8AE3C)", letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: 700 }}>
                 Display Settings
               </span>
             </div>
@@ -495,11 +495,11 @@ export default function FloatingToolbox({ showTrigger = true }) {
                   <div style={{ fontFamily: "var(--font-body)", fontSize: 12, color: mode === key ? "#E8AE3C" : "#e5e2e1", fontWeight: mode === key ? 600 : 400, lineHeight: 1.3 }}>
                     {label}
                   </div>
-                  <div style={{ fontFamily: "var(--font-body)", fontSize: 10, color: "rgba(255,255,255,0.3)", lineHeight: 1.3, marginTop: 1 }}>
+                  <div style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "rgba(255,255,255,0.3)", lineHeight: 1.3, marginTop: 1 }}>
                     {desc}
                   </div>
                 </div>
-                {mode === key && <span style={{ color: "#E8AE3C", fontSize: 11, marginLeft: "auto" }}>✓</span>}
+                {mode === key && <span style={{ color: "#E8AE3C", fontSize: 12, marginLeft: "auto" }}>✓</span>}
               </button>
             ))}
           </div>
@@ -521,7 +521,7 @@ export default function FloatingToolbox({ showTrigger = true }) {
                 <div style={{ fontFamily: "var(--font-body)", fontSize: 12, color: lite ? "#E8AE3C" : "#e5e2e1", fontWeight: lite ? 600 : 400, lineHeight: 1.3 }}>
                   Lite Mode {lite ? "· On" : "· Off"}
                 </div>
-                <div style={{ fontFamily: "var(--font-body)", fontSize: 10, color: "rgba(255,255,255,0.3)", lineHeight: 1.3, marginTop: 1 }}>
+                <div style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "rgba(255,255,255,0.3)", lineHeight: 1.3, marginTop: 1 }}>
                   Stops animations for older devices
                 </div>
               </div>
@@ -556,7 +556,7 @@ export default function FloatingToolbox({ showTrigger = true }) {
               }}
             >
               <span style={{ fontSize: 13 }}>◈</span>
-              <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase" }}>
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, letterSpacing: "0.14em", textTransform: "uppercase" }}>
                 Wizard Guide
               </span>
             </button>
@@ -575,7 +575,7 @@ export default function FloatingToolbox({ showTrigger = true }) {
               }}
             >
               <span style={{ fontSize: 13 }}>⚑</span>
-              <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase" }}>
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, letterSpacing: "0.14em", textTransform: "uppercase" }}>
                 Report Issue
               </span>
             </button>
@@ -587,33 +587,33 @@ export default function FloatingToolbox({ showTrigger = true }) {
               <div style={{ height: 1, background: "rgba(232, 174, 60,0.18)", margin: "0 9px" }} />
               <div style={{ padding: "9px 11px 11px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 7 }}>
-                  <span style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "#E8AE3C", letterSpacing: "0.2em", textTransform: "uppercase" }}>Dev · Tier</span>
-                  <button onClick={turnOffDev} aria-label="Hide Developer Options" style={{ background: "none", border: "none", color: "rgba(255,255,255,0.4)", cursor: "pointer", fontFamily: "var(--font-mono)", fontSize: 8.5, letterSpacing: "0.12em", textTransform: "uppercase" }}>Hide ✕</button>
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#E8AE3C", letterSpacing: "0.12em", textTransform: "uppercase" }}>Dev · Tier</span>
+                  <button onClick={turnOffDev} aria-label="Hide Developer Options" style={{ background: "none", border: "none", color: "rgba(255,255,255,0.4)", cursor: "pointer", fontFamily: "var(--font-mono)", fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase" }}>Hide ✕</button>
                 </div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 9 }}>
                   {TIERS.map((t) => {
                     const on = t === devTier;
                     return (
-                      <button key={t} onClick={() => applyDev(t, devRole)} style={{ fontFamily: "var(--font-mono)", fontSize: 9.5, padding: "4px 7px", borderRadius: 4, cursor: "pointer", textTransform: "capitalize", border: "1px solid " + (on ? "#E8AE3C" : "rgba(255,255,255,0.12)"), background: on ? "#E8AE3C" : "transparent", color: on ? "#0e0e0e" : "#c8c8c8" }}>{TIER_LABELS[t]}</button>
+                      <button key={t} onClick={() => applyDev(t, devRole)} style={{ fontFamily: "var(--font-mono)", fontSize: 12, padding: "4px 7px", borderRadius: 4, cursor: "pointer", textTransform: "capitalize", border: "1px solid " + (on ? "#E8AE3C" : "rgba(255,255,255,0.12)"), background: on ? "#E8AE3C" : "transparent", color: on ? "#0e0e0e" : "#c8c8c8" }}>{TIER_LABELS[t]}</button>
                     );
                   })}
                 </div>
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "rgba(255,255,255,0.4)", letterSpacing: "0.2em", textTransform: "uppercase", display: "block", marginBottom: 6 }}>Role</span>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "rgba(255,255,255,0.4)", letterSpacing: "0.12em", textTransform: "uppercase", display: "block", marginBottom: 6 }}>Role</span>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
                   {DEV_ROLES.map((r) => {
                     const on = r === devRole;
                     return (
-                      <button key={r} onClick={() => applyDev(devTier, r)} style={{ fontFamily: "var(--font-mono)", fontSize: 9.5, padding: "4px 7px", borderRadius: 4, cursor: "pointer", textTransform: "capitalize", border: "1px solid " + (on ? "#E8AE3C" : "rgba(255,255,255,0.12)"), background: on ? "#E8AE3C" : "transparent", color: on ? "#0e0e0e" : "#c8c8c8" }}>{r}</button>
+                      <button key={r} onClick={() => applyDev(devTier, r)} style={{ fontFamily: "var(--font-mono)", fontSize: 12, padding: "4px 7px", borderRadius: 4, cursor: "pointer", textTransform: "capitalize", border: "1px solid " + (on ? "#E8AE3C" : "rgba(255,255,255,0.12)"), background: on ? "#E8AE3C" : "transparent", color: on ? "#0e0e0e" : "#c8c8c8" }}>{r}</button>
                     );
                   })}
                 </div>
 
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "rgba(255,255,255,0.4)", letterSpacing: "0.2em", textTransform: "uppercase", display: "block", margin: "10px 0 6px" }}>In-app console previews</span>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "rgba(255,255,255,0.4)", letterSpacing: "0.12em", textTransform: "uppercase", display: "block", margin: "10px 0 6px" }}>In-app console previews</span>
                 <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                  <button onClick={() => enterMissionControl("mc_staff")} style={{ fontFamily: "var(--font-mono)", fontSize: 9.5, padding: "6px 8px", borderRadius: 4, cursor: "pointer", textAlign: "left", border: "1px solid rgba(255,255,255,0.12)", background: "transparent", color: "#c8c8c8" }}>
+                  <button onClick={() => enterMissionControl("mc_staff")} style={{ fontFamily: "var(--font-mono)", fontSize: 12, padding: "6px 8px", borderRadius: 4, cursor: "pointer", textAlign: "left", border: "1px solid rgba(255,255,255,0.12)", background: "transparent", color: "#c8c8c8" }}>
                     Staff Console — simulated (not the real one)
                   </button>
-                  <button onClick={() => enterMissionControl("mc_enterprise")} style={{ fontFamily: "var(--font-mono)", fontSize: 9.5, padding: "6px 8px", borderRadius: 4, cursor: "pointer", textAlign: "left", border: "1px solid rgba(255,255,255,0.12)", background: "transparent", color: "#c8c8c8" }}>
+                  <button onClick={() => enterMissionControl("mc_enterprise")} style={{ fontFamily: "var(--font-mono)", fontSize: 12, padding: "6px 8px", borderRadius: 4, cursor: "pointer", textAlign: "left", border: "1px solid rgba(255,255,255,0.12)", background: "transparent", color: "#c8c8c8" }}>
                     Enterprise Console — preview (scoped to own)
                   </button>
                 </div>
@@ -638,7 +638,7 @@ export default function FloatingToolbox({ showTrigger = true }) {
             {/* Wizard header */}
             <div style={{ padding: "20px 24px 14px", borderBottom: "1px solid rgba(255,255,255,0.05)", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
               <div>
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "#E8AE3C", letterSpacing: "0.22em", textTransform: "uppercase", display: "block", marginBottom: 6 }}>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#E8AE3C", letterSpacing: "0.12em", textTransform: "uppercase", display: "block", marginBottom: 6 }}>
                   Guide // {wizardStep + 1} of {WIZARD_STEPS.length}
                 </span>
                 <h2 style={{ fontFamily: "var(--font-display)", fontSize: 24, color: "#f0ede8", fontWeight: 400, lineHeight: 1.2 }}>

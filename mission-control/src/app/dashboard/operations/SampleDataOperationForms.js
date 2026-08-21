@@ -7,7 +7,7 @@ function OperationForm({ action, confirmation, buttonLabel, pendingLabel, disabl
   const [state, formAction, isPending] = useActionState(action, null);
   return (
     <form action={formAction} className="space-y-4">
-      <p className="text-sm leading-6 text-white/55">{help}</p>
+      <p className="text-sm leading-6 text-white/70">{help}</p>
       <label className="block text-sm text-white/75">
         Change reason
         <textarea name="reason" required minLength={12} rows={2}

@@ -6,7 +6,7 @@ export default function DashboardError({ error, reset }) {
   return (
     <div className="bg-[rgba(248,113,113,0.08)] border border-[rgba(248,113,113,0.2)] rounded-xl p-6 max-w-xl">
       <h2 className="text-sm font-medium text-danger mb-1">This module hit an error</h2>
-      <p className="text-xs text-white/50 mb-4 break-words">{error?.message || "Unknown error"}</p>
+      <p className="text-xs text-white/70 mb-4 break-words">{error?.message || "Unknown error"}</p>
       <div className="flex gap-2">
         <button
           onClick={reset}

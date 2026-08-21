@@ -231,7 +231,7 @@ export default function CalendarShell() {
       {/* Calendar surface */}
       <div className="flex-1 min-h-0 bg-[#121212] border border-surface-variant rounded-lg overflow-hidden relative">
         {loading && (
-          <div className="absolute top-2 right-3 text-[10px] uppercase tracking-wider font-mono text-text-muted animate-pulse z-30">
+          <div className="absolute top-2 right-3 text-[12px] uppercase tracking-wider font-mono text-text-muted animate-pulse z-30">
             Loading…
           </div>
         )}

@@ -54,7 +54,7 @@ export default function ConnectsReceipt({ receipt, propertyTitle, recipientLabel
         </div>
       </div>
 
-      <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-gold-accent">
+      <p className="font-mono text-[12px] tracking-[0.12em] uppercase text-gold-accent">
         Connect sent
       </p>
 
@@ -110,7 +110,7 @@ function ReceiptRow({ label, value, mono = false }) {
   if (!value) return null; // Honest Blank Rule — no "—" placeholders on a receipt.
   return (
     <div className="flex justify-between items-baseline gap-4">
-      <span className="font-mono text-[10px] uppercase tracking-widest text-[#f0ede8]/40 shrink-0">
+      <span className="font-mono text-[12px] uppercase tracking-widest text-[#f0ede8]/40 shrink-0">
         {label}
       </span>
       <span className={`text-sm text-white text-right ${mono ? "font-data-tabular" : ""}`}>

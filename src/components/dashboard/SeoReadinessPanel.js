@@ -84,8 +84,8 @@ export default function SeoReadinessPanel({ propertyId }) {
         }
         .sr-h {
           font-family: ${MONO};
-          font-size: 11px;
-          letter-spacing: 0.16em;
+          font-size: 12px;
+          letter-spacing: 0.12em;
           text-transform: uppercase;
           color: var(--text-secondary);
         }
@@ -95,7 +95,7 @@ export default function SeoReadinessPanel({ propertyId }) {
           padding: 8px 0 8px 12px;
           min-height: 36px;
           font-family: ${MONO};
-          font-size: 9px;
+          font-size: 12px;
           letter-spacing: 0.12em;
           text-transform: uppercase;
           color: var(--text-muted);
@@ -130,13 +130,13 @@ export default function SeoReadinessPanel({ propertyId }) {
         }
         .sr-of {
           font-family: ${MONO};
-          font-size: 9px;
+          font-size: 12px;
           color: var(--text-muted);
           letter-spacing: 0.1em;
         }
         .sr-state {
           font-family: ${MONO};
-          font-size: 9.5px;
+          font-size: 12px;
           letter-spacing: 0.14em;
           text-transform: uppercase;
           padding: 5px 10px;
@@ -186,7 +186,7 @@ export default function SeoReadinessPanel({ propertyId }) {
         }
         .sr-err {
           font-family: ${MONO};
-          font-size: 10px;
+          font-size: 12px;
           color: var(--red);
           line-height: 1.7;
           letter-spacing: 0.04em;

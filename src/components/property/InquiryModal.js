@@ -202,7 +202,7 @@ export default function InquiryModal({ isOpen, onClose, propertyTitle, propertyS
                     exit="exit"
                   >
                     <div className="mb-6">
-                      <span className="font-mono text-[10px] text-gold-accent tracking-[0.15em] uppercase block mb-2">
+                      <span className="font-mono text-[12px] text-gold-accent tracking-[0.12em] uppercase block mb-2">
                         1 Connect Required
                       </span>
                       <h2 id="inquiry-modal-title" className="font-serif text-[28px] text-[#f0ede8] font-normal mb-1.5">Contact the Property Recipient</h2>
@@ -215,8 +215,8 @@ export default function InquiryModal({ isOpen, onClose, propertyTitle, propertyS
                       </p>
 
                       {/* Transaction Integrity & Security Protocol Warning */}
-                      <div className="my-4 p-3.5 bg-white/[0.02] border border-gold-accent/20 rounded-md text-[11px] leading-relaxed text-[#a0a0a0]">
-                        <div className="flex items-center gap-1.5 text-gold-accent font-mono font-semibold uppercase tracking-wider mb-1.5 text-[10px]">
+                      <div className="my-4 p-3.5 bg-white/[0.02] border border-gold-accent/20 rounded-md text-[12px] leading-relaxed text-[#a0a0a0]">
+                        <div className="flex items-center gap-1.5 text-gold-accent font-mono font-semibold uppercase tracking-wider mb-1.5 text-[12px]">
                           <span>⚠️ TRANSACTION INTEGRITY & SECURITY PROTOCOL</span>
                         </div>
                         <p className="mb-1.5">
@@ -235,7 +235,7 @@ export default function InquiryModal({ isOpen, onClose, propertyTitle, propertyS
                         <p className="mb-1.5">
                           ⏱️ <strong>No deadline on their reply.</strong> Your request stays open until they answer, and you can withdraw it any time from your inbox. Connects are spent when you send the request, not when it&apos;s accepted — they aren&apos;t returned.
                         </p>
-                        <div className="pt-1.5 border-t border-white/5 font-mono text-[9px] text-[#888]">
+                        <div className="pt-1.5 border-t border-white/5 font-mono text-[12px] text-[#888]">
                           Display-only platform operating in compliance with <strong>RA 9646 (Real Estate Service Act of the Philippines)</strong>.
                         </div>
                       </div>
@@ -252,11 +252,11 @@ export default function InquiryModal({ isOpen, onClose, propertyTitle, propertyS
                         placeholder="Hi, I am interested in viewing this property. Are there any available schedules this week?"
                       />
                       <div className="flex justify-between items-center -mt-2">
-                        <p className="text-[10px] text-text-muted">
+                        <p className="text-[12px] text-text-muted">
                           They see this before deciding whether to reply.
                         </p>
                         <span
-                          className={`text-[10px] font-mono tabular-nums ${
+                          className={`text-[12px] font-mono tabular-nums ${
                             message.length > INTRO_MAX - 40 ? "text-gold-accent" : "text-text-muted"
                           }`}
                         >

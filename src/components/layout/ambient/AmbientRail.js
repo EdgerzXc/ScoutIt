@@ -326,7 +326,7 @@ export default function AmbientRail({ user, context = null }) {
           }
           .ambient-nav svg { width: 10px; height: 10px; }
           .ambient-copy {
-            font-size: 11.5px;
+            font-size: 12px;
             letter-spacing: .075em;
           }
           .ambient-track { --ambient-travel: 76px; width: 100px; }
@@ -360,7 +360,7 @@ export default function AmbientRail({ user, context = null }) {
           }
           .ambient-nav svg { width: 9px; height: 9px; }
           .ambient-copy {
-            font-size: 11px;
+            font-size: 12px;
             letter-spacing: .06em;
           }
         }
@@ -380,7 +380,7 @@ export default function AmbientRail({ user, context = null }) {
           .ambient-nav { display: none; }
 
           .ambient-copy {
-            font-size: 10px;
+            font-size: 12px;
             letter-spacing: .01em;
           }
           .ambient-rail {

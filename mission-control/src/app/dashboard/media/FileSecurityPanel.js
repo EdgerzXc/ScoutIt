@@ -16,7 +16,7 @@ export default function FileSecurityPanel({ scans, tableReady }) {
     return (
       <div className="bg-[#121212] border border-white/5 rounded-xl p-6">
         <PanelHeader />
-        <p className="text-xs text-white/40 mt-2">
+        <p className="text-xs text-white/70 mt-2">
           Scan pipeline code is live, waiting on the database migration
           (<span className="font-mono">0004_file_scan_pipeline.sql</span>) to create the
           quarantine bucket + <span className="font-mono">file_scans</span> table.
@@ -74,7 +74,7 @@ export default function FileSecurityPanel({ scans, tableReady }) {
         </button>
       </div>
 
-      <div className="flex flex-wrap gap-2 text-[10px] uppercase tracking-wide">
+      <div className="flex flex-wrap gap-2 text-[12px] uppercase tracking-wide">
         <span className="px-2 py-1 rounded-full bg-white/5 border border-white/10 text-white/60">
           {pending} awaiting scan
         </span>
@@ -93,7 +93,7 @@ export default function FileSecurityPanel({ scans, tableReady }) {
       )}
 
       {scans.length === 0 ? (
-        <p className="text-xs text-white/40">
+        <p className="text-xs text-white/70">
           No files in the pipeline yet. Once uploads route through quarantine, they appear here.
         </p>
       ) : (
@@ -105,7 +105,7 @@ export default function FileSecurityPanel({ scans, tableReady }) {
                 <div className="text-white/80 text-xs truncate">
                   {s.original_filename || s.storage_path}
                 </div>
-                <div className="text-[10px] text-white/40 truncate">
+                <div className="text-[12px] text-white/70 truncate">
                   {s.detected_mime || s.declared_mime || "type unknown"}
                   {s.scan_engine && ` · ${s.scan_engine}`}
                   {s.scanned_at && ` · scanned ${new Date(s.scanned_at).toLocaleString()}`}
@@ -122,7 +122,7 @@ export default function FileSecurityPanel({ scans, tableReady }) {
                   Secure download
                 </button>
               ) : (
-                <span className="text-[10px] uppercase tracking-wide text-white/30">
+                <span className="text-[12px] uppercase tracking-wide text-white/70">
                   {s.scan_status === "scanned" ? "no access" : "in queue"}
                 </span>
               )}
@@ -141,7 +141,7 @@ function PanelHeader() {
         <ShieldCheck className="w-4 h-4 text-[#E8AE3C]" />
         File Security
       </h2>
-      <p className="text-[10px] uppercase tracking-wide text-white/40 mt-0.5">
+      <p className="text-[12px] uppercase tracking-wide text-white/70 mt-0.5">
         Quarantine → scan → clean-only access → re-check on download
       </p>
     </div>
@@ -150,7 +150,7 @@ function PanelHeader() {
 
 function VerdictBadge({ scan }) {
   if (scan.scan_status !== "scanned") {
-    return <Loader2 className="w-4 h-4 text-white/40 shrink-0" />;
+    return <Loader2 className="w-4 h-4 text-white/70 shrink-0" />;
   }
   if (scan.scan_verdict === "clean") {
     return <ShieldCheck className="w-4 h-4 text-green-400 shrink-0" />;

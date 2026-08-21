@@ -134,7 +134,7 @@ export default function MetropolisLayer() {
       <style dangerouslySetInnerHTML={{ __html: `
         /* ── SIDEBAR EXTRAS ── */
         .metro-browse {
-          font-size: 11px !important;
+          font-size: 12px !important;
           padding: 11px 20px !important;
           margin-top: 20px;
           display: inline-block;
@@ -155,8 +155,8 @@ export default function MetropolisLayer() {
         }
         .metro-content-sub {
           font-family: var(--font-mono);
-          font-size: 10px;
-          letter-spacing: 0.16em;
+          font-size: 12px;
+          letter-spacing: 0.12em;
           text-transform: uppercase;
           color: var(--text-secondary);
         }
@@ -224,8 +224,8 @@ export default function MetropolisLayer() {
         .metro-tag-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
         .metro-tag-label {
           font-family: var(--font-mono);
-          font-size: 10px;
-          letter-spacing: 0.16em;
+          font-size: 12px;
+          letter-spacing: 0.12em;
           text-transform: uppercase;
           color: var(--accent);
           margin-bottom: 2px;

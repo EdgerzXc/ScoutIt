@@ -155,7 +155,7 @@ export default function EventEditorModal({ seed, onSave, onDelete, onClose, savi
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className={form.allDay ? "sm:col-span-3" : ""}>
-              <label className="block text-[11px] uppercase tracking-wider font-mono text-text-muted mb-1">
+              <label className="block text-[12px] uppercase tracking-wider font-mono text-text-muted mb-1">
                 Date
               </label>
               <input
@@ -168,7 +168,7 @@ export default function EventEditorModal({ seed, onSave, onDelete, onClose, savi
             {!form.allDay && (
               <>
                 <div>
-                  <label className="block text-[11px] uppercase tracking-wider font-mono text-text-muted mb-1">
+                  <label className="block text-[12px] uppercase tracking-wider font-mono text-text-muted mb-1">
                     Start
                   </label>
                   <input
@@ -179,7 +179,7 @@ export default function EventEditorModal({ seed, onSave, onDelete, onClose, savi
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] uppercase tracking-wider font-mono text-text-muted mb-1">
+                  <label className="block text-[12px] uppercase tracking-wider font-mono text-text-muted mb-1">
                     End
                   </label>
                   <input
@@ -209,7 +209,7 @@ export default function EventEditorModal({ seed, onSave, onDelete, onClose, savi
           />
 
           <div>
-            <label className="block text-[11px] uppercase tracking-wider font-mono text-text-muted mb-2">
+            <label className="block text-[12px] uppercase tracking-wider font-mono text-text-muted mb-2">
               Color
             </label>
             <div className="flex items-center gap-2">

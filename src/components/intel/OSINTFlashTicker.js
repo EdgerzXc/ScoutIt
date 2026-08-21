@@ -146,17 +146,17 @@ export default function OSINTFlashTicker({ customFeed = null, onSelectArticle = 
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-gold-accent opacity-75"></span>
           <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-gold-accent"></span>
         </span>
-        <span className="font-mono text-[10px] font-bold text-gold-accent uppercase tracking-[0.15em] bg-gold-accent/10 px-2 py-0.5 rounded-xs border border-gold-accent/30">
+        <span className="font-mono text-[12px] font-bold text-gold-accent uppercase tracking-[0.12em] bg-gold-accent/10 px-2 py-0.5 rounded-xs border border-gold-accent/30">
           LIVE OSINT FEED
         </span>
       </div>
 
       {/* Ticker Headline Content */}
       <div className="flex-1 overflow-hidden flex items-center gap-3 font-mono text-xs">
-        <span className="text-text-muted text-[10px] uppercase shrink-0">
+        <span className="text-text-muted text-[12px] uppercase shrink-0">
           [{activeItem.timestamp}]
         </span>
-        <span className="text-gold-accent font-semibold text-[10px] uppercase border border-gold-accent/30 px-1.5 py-0.2 rounded-xs bg-gold-accent/5 shrink-0 hidden sm:inline-block">
+        <span className="text-gold-accent font-semibold text-[12px] uppercase border border-gold-accent/30 px-1.5 py-0.2 rounded-xs bg-gold-accent/5 shrink-0 hidden sm:inline-block">
           {activeItem.type}
         </span>
         <Link
@@ -165,13 +165,13 @@ export default function OSINTFlashTicker({ customFeed = null, onSelectArticle = 
         >
           {activeItem.headline}
         </Link>
-        <span className="text-text-secondary text-[10px] uppercase shrink-0 hidden md:inline-block border border-surface-variant px-1.5 py-0.2 rounded-xs">
+        <span className="text-text-secondary text-[12px] uppercase shrink-0 hidden md:inline-block border border-surface-variant px-1.5 py-0.2 rounded-xs">
           📍 {activeItem.city}
         </span>
       </div>
 
       {/* Controls & Counter */}
-      <div className="flex items-center gap-2 shrink-0 font-mono text-[10px] text-text-muted">
+      <div className="flex items-center gap-2 shrink-0 font-mono text-[12px] text-text-muted">
         <span>
           {currentIndex + 1}/{feedItems.length}
         </span>

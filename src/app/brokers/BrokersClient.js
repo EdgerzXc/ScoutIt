@@ -389,7 +389,7 @@ export default function BrokersClient({ initialBrokers = [] }) {
 
         {/* Dev source indicator — remove before final prod */}
         {source && process.env.NODE_ENV === "development" && (
-          <div style={{ textAlign: "center", padding: "16px", fontSize: "11px", color: "#444", fontFamily: "monospace" }}>
+          <div style={{ textAlign: "center", padding: "16px", fontSize: "12px", color: "#444", fontFamily: "monospace" }}>
             data source: {source}
           </div>
         )}
@@ -463,7 +463,7 @@ export default function BrokersClient({ initialBrokers = [] }) {
           align-items: center;
           margin-bottom: 6px;
           font-family: var(--font-mono), monospace;
-          font-size: 11px;
+          font-size: 12px;
         }
 
         .hotmap-dot {
@@ -493,7 +493,7 @@ export default function BrokersClient({ initialBrokers = [] }) {
 
         .hotmap-stat {
           color: var(--text-muted, var(--text-muted));
-          font-size: 10px;
+          font-size: 12px;
           letter-spacing: 0.05em;
         }
 
@@ -577,9 +577,9 @@ export default function BrokersClient({ initialBrokers = [] }) {
           position: absolute;
           top: 12px;
           left: 12px;
-          font-size: 10px;
+          font-size: 12px;
           font-weight: 500;
-          letter-spacing: 0.18em;
+          letter-spacing: 0.12em;
           text-transform: uppercase;
           color: var(--text-primary);
           background: var(--surface);
@@ -643,7 +643,7 @@ export default function BrokersClient({ initialBrokers = [] }) {
 
         .broker-location {
           font-family: var(--font-mono);
-          font-size: 10px;
+          font-size: 12px;
           color: var(--accent);
           text-transform: uppercase;
           letter-spacing: 0.1em;
@@ -692,7 +692,7 @@ export default function BrokersClient({ initialBrokers = [] }) {
           background: rgba(232, 174, 60, 0.08);
           border: 1px solid rgba(232, 174, 60, 0.2);
           color: var(--accent);
-          font-size: 10px;
+          font-size: 12px;
           padding: 3px 8px;
           border-radius: 4px;
           font-family: var(--font-mono), monospace;
@@ -723,7 +723,7 @@ export default function BrokersClient({ initialBrokers = [] }) {
 
         .scout-rating-label {
           font-family: var(--font-mono);
-          font-size: 10px;
+          font-size: 12px;
           text-transform: uppercase;
           letter-spacing: 0.08em;
           color: var(--text-muted);
@@ -750,7 +750,7 @@ export default function BrokersClient({ initialBrokers = [] }) {
           padding: 8px 16px;
           border-radius: 4px;
           color: var(--accent);
-          font-size: 11px;
+          font-size: 12px;
           font-weight: 600;
           text-transform: uppercase;
           letter-spacing: 0.1em;
@@ -770,7 +770,7 @@ export default function BrokersClient({ initialBrokers = [] }) {
           position: absolute;
           top: 12px;
           right: 12px;
-          font-size: 10px;
+          font-size: 12px;
           font-weight: 700;
           letter-spacing: 1px;
           padding: 4px 10px;

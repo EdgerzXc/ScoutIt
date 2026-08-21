@@ -47,12 +47,12 @@ export default async function MediaIngestPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Concierge Ingest</h1>
-          <p className="text-xs text-white/40 mt-1">
+          <p className="text-xs text-white/70 mt-1">
             Raw uploads awaiting synthesis. Hand each to your AI with the schema prompt, paste the
             result back, then send it to the review queue. Rawest drafts first.
           </p>
         </div>
-        <span className="text-xs text-white/40 flex items-center gap-1.5">
+        <span className="text-xs text-white/70 flex items-center gap-1.5">
           <Inbox className="w-3.5 h-3.5" />
           {rows.length} in queue
         </span>
@@ -68,8 +68,8 @@ export default async function MediaIngestPage() {
 
       {rows.length === 0 && !error ? (
         <div className="bg-[#121212] border border-white/5 rounded-xl p-12 text-center flex flex-col items-center gap-3">
-          <Video className="w-6 h-6 text-white/30" />
-          <div className="text-sm text-white/50">
+          <Video className="w-6 h-6 text-white/70" />
+          <div className="text-sm text-white/70">
             Nothing waiting. New owner submissions land here for synthesis.
           </div>
         </div>
@@ -84,25 +84,25 @@ export default async function MediaIngestPage() {
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <h2 className="text-base font-medium text-white truncate">
-                        {p.title || <span className="text-white/40 italic">Untitled draft</span>}
+                        {p.title || <span className="text-white/70 italic">Untitled draft</span>}
                       </h2>
                       {p.space_category && (
-                        <span className="text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-white/60">
+                        <span className="text-[12px] uppercase tracking-wide px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-white/60">
                           {p.space_category}
                         </span>
                       )}
-                      <span className="text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-white/50 font-mono">
+                      <span className="text-[12px] uppercase tracking-wide px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-white/70 font-mono">
                         {p.pipeline_status || "raw"}
                       </span>
                     </div>
-                    <div className="text-xs text-white/40 mt-1">
+                    <div className="text-xs text-white/70 mt-1">
                       {p.location || "No location yet"}
                       {p.price != null && ` · ₱${Number(p.price).toLocaleString()}`}
                       {" · "}
                       {new Date(p.created_at).toLocaleDateString()}
                     </div>
                   </div>
-                  <div className="flex items-center gap-1.5 text-xs text-white/50 shrink-0">
+                  <div className="flex items-center gap-1.5 text-xs text-white/70 shrink-0">
                     <Gauge className="w-3.5 h-3.5" />
                     <span className={completenessColor(p.completeness_score)}>
                       {p.completeness_score != null ? `${p.completeness_score}%` : "—"}
@@ -111,18 +111,18 @@ export default async function MediaIngestPage() {
                 </div>
 
                 {p.description && (
-                  <p className="text-xs text-white/50 mt-3 line-clamp-2">{p.description}</p>
+                  <p className="text-xs text-white/70 mt-3 line-clamp-2">{p.description}</p>
                 )}
 
                 {(confidence != null || gaps.length > 0) && (
-                  <div className="mt-3 flex flex-wrap items-center gap-2 text-[10px]">
+                  <div className="mt-3 flex flex-wrap items-center gap-2 text-[12px]">
                     {confidence != null && (
                       <span className="px-2 py-0.5 rounded-full bg-[#E8AE3C]/10 border border-[#E8AE3C]/20 text-[#E8AE3C]">
                         confidence {Number(confidence).toFixed(2)}
                       </span>
                     )}
                     {gaps.length > 0 && (
-                      <span className="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-white/50">
+                      <span className="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-white/70">
                         {gaps.length} gap{gaps.length === 1 ? "" : "s"}: {gaps.slice(0, 4).join(", ")}
                         {gaps.length > 4 ? "…" : ""}
                       </span>
@@ -141,7 +141,7 @@ export default async function MediaIngestPage() {
 }
 
 function completenessColor(score) {
-  if (score == null) return "text-white/40";
+  if (score == null) return "text-white/70";
   if (score >= 75) return "text-green-400";
   if (score >= 40) return "text-[#E8AE3C]";
   return "text-red-400";

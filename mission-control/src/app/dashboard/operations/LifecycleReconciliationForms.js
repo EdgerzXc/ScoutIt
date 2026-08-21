@@ -13,13 +13,13 @@ function CandidateForm({ candidate, operation }) {
       <input type="hidden" name="airtableRecordId" value={candidate.airtableRecordId} />
       <input type="hidden" name="reviewHash" value={candidate.reviewHash} />
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <div><h3 className="font-medium text-white">{candidate.title}</h3><p className="mt-1 font-mono text-[10px] text-white/40">{candidate.slug}</p></div>
+        <div><h3 className="font-medium text-white">{candidate.title}</h3><p className="mt-1 font-mono text-[12px] text-white/70">{candidate.slug}</p></div>
         <span className="label-mono rounded border border-warn/30 bg-warn/10 px-2 py-1 text-warn">{candidate.state.replaceAll("_", " ")}</span>
       </div>
-      <dl className="grid gap-2 text-xs text-white/55 sm:grid-cols-3">
-        <div><dt className="text-white/30">Supabase</dt><dd>{candidate.propertyId ? candidate.lifecycle : "Missing"}</dd></div>
-        <div><dt className="text-white/30">Canonical URL</dt><dd>{candidate.canonicalSlug || "Not locked"}</dd></div>
-        <div><dt className="text-white/30">Recipient routing</dt><dd>{candidate.routingState}</dd></div>
+      <dl className="grid gap-2 text-xs text-white/70 sm:grid-cols-3">
+        <div><dt className="text-white/70">Supabase</dt><dd>{candidate.propertyId ? candidate.lifecycle : "Missing"}</dd></div>
+        <div><dt className="text-white/70">Canonical URL</dt><dd>{candidate.canonicalSlug || "Not locked"}</dd></div>
+        <div><dt className="text-white/70">Recipient routing</dt><dd>{candidate.routingState}</dd></div>
       </dl>
       <label className="block text-sm text-white/75">Reviewed resolution
         <select name="decision" value={decision} onChange={(event) => setDecision(event.target.value)}

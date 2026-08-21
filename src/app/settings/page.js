@@ -356,11 +356,11 @@ export default function SettingsPage() {
                 {tags.map(t => {
                   const tag = INTENT_TAGS.find(x => x.id === t);
                   return tag ? (
-                    <span key={t} className="font-label-caps text-[10px] tracking-widest uppercase text-gold-accent border border-gold-accent/30 px-2 py-0.5 rounded-full">{tag.label}</span>
+                    <span key={t} className="font-label-caps text-[12px] tracking-widest uppercase text-gold-accent border border-gold-accent/30 px-2 py-0.5 rounded-full">{tag.label}</span>
                   ) : null;
                 })}
                 {publicProfile.location && (
-                  <span className="font-label-caps text-[10px] tracking-widest uppercase text-text-secondary border border-surface-variant px-2 py-0.5 rounded-full">📍 {publicProfile.location}</span>
+                  <span className="font-label-caps text-[12px] tracking-widest uppercase text-text-secondary border border-surface-variant px-2 py-0.5 rounded-full">📍 {publicProfile.location}</span>
                 )}
               </div>
               {publicProfile.bio && <p className="text-xs text-text-secondary mt-2 italic line-clamp-2">{publicProfile.bio}</p>}
@@ -387,7 +387,7 @@ export default function SettingsPage() {
               return (
                 <div key={b.id} className="flex items-center gap-2 px-3 py-2 rounded border" style={{ borderColor: `${def.color}30`, background: `${def.color}10` }}>
                   <ShieldCheck size={14} color={def.color} />
-                  <span className="font-mono text-[10px] tracking-widest uppercase" style={{ color: def.color }}>{def.name}</span>
+                  <span className="font-mono text-[12px] tracking-widest uppercase" style={{ color: def.color }}>{def.name}</span>
                 </div>
               );
             })}

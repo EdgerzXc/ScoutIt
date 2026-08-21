@@ -133,7 +133,7 @@ export default function ConnectsRefundPanel() {
               ["Earned", wallet.balance.earned_balance],
             ].map(([label, value]) => (
               <div key={label} className="rounded border border-surface-variant bg-surface p-3">
-                <p className="text-[10px] font-mono uppercase tracking-widest text-text-muted">{label}</p>
+                <p className="text-[12px] font-mono uppercase tracking-widest text-text-muted">{label}</p>
                 <p className="font-data-tabular text-xl text-on-surface mt-1">{value}</p>
               </div>
             ))}
@@ -149,7 +149,7 @@ export default function ConnectsRefundPanel() {
           )}
 
           <div>
-            <p className="text-[10px] font-mono uppercase tracking-widest text-text-muted mb-2">
+            <p className="text-[12px] font-mono uppercase tracking-widest text-text-muted mb-2">
               Recent ledger
             </p>
             <div className="max-h-56 overflow-y-auto rounded border border-surface-variant divide-y divide-surface-variant">
@@ -160,7 +160,7 @@ export default function ConnectsRefundPanel() {
                   <div key={t.id} className="p-3 flex justify-between gap-3 text-xs">
                     <div className="min-w-0">
                       <p className="text-on-surface truncate">{t.reason}</p>
-                      <p className="text-[10px] font-mono uppercase tracking-wider text-text-muted mt-0.5">
+                      <p className="text-[12px] font-mono uppercase tracking-wider text-text-muted mt-0.5">
                         {t.kind} · {t.bucket} · {new Date(t.created_at).toLocaleString()}
                       </p>
                     </div>
@@ -182,7 +182,7 @@ export default function ConnectsRefundPanel() {
           <div className="space-y-3 rounded-lg border border-surface-variant p-4">
             <div className="flex flex-col sm:flex-row gap-3">
               <label className="flex-1">
-                <span className="block text-[10px] font-mono uppercase tracking-widest text-text-muted mb-1">
+                <span className="block text-[12px] font-mono uppercase tracking-widest text-text-muted mb-1">
                   Connects to credit
                 </span>
                 <input
@@ -195,7 +195,7 @@ export default function ConnectsRefundPanel() {
                 />
               </label>
               <label className="flex-1">
-                <span className="block text-[10px] font-mono uppercase tracking-widest text-text-muted mb-1">
+                <span className="block text-[12px] font-mono uppercase tracking-widest text-text-muted mb-1">
                   Related deal / incident ID (optional)
                 </span>
                 <input
@@ -207,7 +207,7 @@ export default function ConnectsRefundPanel() {
             </div>
 
             <label className="block">
-              <span className="block text-[10px] font-mono uppercase tracking-widest text-text-muted mb-1">
+              <span className="block text-[12px] font-mono uppercase tracking-widest text-text-muted mb-1">
                 What went wrong? (required, min {MIN_REASON} characters)
               </span>
               <textarea
@@ -218,7 +218,7 @@ export default function ConnectsRefundPanel() {
                 className="w-full bg-surface border border-surface-variant rounded px-3 py-2.5 text-base sm:text-sm text-on-surface focus:outline-none focus:border-gold-accent/50"
               />
               <span
-                className={`block text-[10px] font-mono mt-1 ${
+                className={`block text-[12px] font-mono mt-1 ${
                   reasonOk ? "text-text-muted" : "text-gold-accent"
                 }`}
               >

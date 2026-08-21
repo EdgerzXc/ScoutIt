@@ -141,9 +141,9 @@ export default function FAQPreflightPanel({ propertySlug, onProgressChange }) {
         }
         .pf-eyebrow {
           font-family: ${MONO};
-          font-size: 9px;
+          font-size: 12px;
           color: var(--accent, var(--accent));
-          letter-spacing: 0.2em;
+          letter-spacing: 0.12em;
           text-transform: uppercase;
           margin-bottom: 8px;
         }
@@ -169,7 +169,7 @@ export default function FAQPreflightPanel({ propertySlug, onProgressChange }) {
           justify-content: space-between;
           align-items: baseline;
           font-family: ${MONO};
-          font-size: 9px;
+          font-size: 12px;
           letter-spacing: 0.14em;
           text-transform: uppercase;
           color: var(--text-secondary);
@@ -189,7 +189,7 @@ export default function FAQPreflightPanel({ propertySlug, onProgressChange }) {
         }
         .pf-meter__note {
           font-family: ${MONO};
-          font-size: 9px;
+          font-size: 12px;
           color: var(--text-muted);
           letter-spacing: 0.08em;
           margin-top: 8px;
@@ -224,7 +224,7 @@ export default function FAQPreflightPanel({ propertySlug, onProgressChange }) {
         }
         .pf-q__hint {
           font-family: ${MONO};
-          font-size: 9px;
+          font-size: 12px;
           color: var(--text-muted);
           letter-spacing: 0.06em;
           line-height: 1.6;
@@ -250,7 +250,7 @@ export default function FAQPreflightPanel({ propertySlug, onProgressChange }) {
         }
         .pf-q__skip {
           font-family: ${MONO};
-          font-size: 8.5px;
+          font-size: 12px;
           color: var(--text-muted);
           letter-spacing: 0.1em;
           text-transform: uppercase;
@@ -273,16 +273,16 @@ export default function FAQPreflightPanel({ propertySlug, onProgressChange }) {
           background: var(--accent-bright, var(--accent-fill));
           color: var(--on-accent);
           font-family: ${MONO};
-          font-size: 11px;
+          font-size: 12px;
           font-weight: bold;
-          letter-spacing: 0.15em;
+          letter-spacing: 0.12em;
           text-transform: uppercase;
           cursor: pointer;
         }
         .pf-btn:disabled { opacity: 0.35; cursor: not-allowed; }
         .pf-status {
           font-family: ${MONO};
-          font-size: 9px;
+          font-size: 12px;
           letter-spacing: 0.1em;
           text-transform: uppercase;
           color: var(--text-muted);
@@ -292,7 +292,7 @@ export default function FAQPreflightPanel({ propertySlug, onProgressChange }) {
         }
         .pf-error {
           font-family: ${MONO};
-          font-size: 10px;
+          font-size: 12px;
           color: var(--red);
           letter-spacing: 0.05em;
           line-height: 1.6;

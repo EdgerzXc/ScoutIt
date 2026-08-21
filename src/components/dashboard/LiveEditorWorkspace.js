@@ -526,16 +526,16 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
           <input type="file" accept="application/pdf" className="hidden" ref={fileInputRef} onChange={handleFileUpload} />
           <button 
             onClick={() => fileInputRef.current?.click()} 
-            className="text-gold-accent hover:text-gold-accent/80 text-[10px] uppercase font-label-caps tracking-wider transition border border-gold-accent/30 rounded px-2 py-1"
+            className="text-gold-accent hover:text-gold-accent/80 text-[12px] uppercase font-label-caps tracking-wider transition border border-gold-accent/30 rounded px-2 py-1"
           >
             Upload PDF (Auto-fill)
           </button>
           {!isEditing && lastSaved && (
-            <button onClick={clearDraft} className="text-error/80 hover:text-error text-[10px] uppercase font-label-caps tracking-wider transition">
+            <button onClick={clearDraft} className="text-error/80 hover:text-error text-[12px] uppercase font-label-caps tracking-wider transition">
               Clear Draft
             </button>
           )}
-          <span className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase">
+          <span className="font-label-caps text-[12px] tracking-widest text-gold-accent uppercase">
             {isEditing ? "Edit Dossier" : "New Property Draft"}
           </span>
         </div>
@@ -619,7 +619,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
                   <button 
                     onClick={handleSeoOptimize}
                     disabled={isOptimizing || !formData.description}
-                    className="text-[10px] font-label-caps tracking-widest text-gold-accent uppercase hover:text-gold-bright transition disabled:opacity-50 flex items-center gap-1 bg-gold-accent/10 border border-gold-accent/30 px-2 py-1 rounded"
+                    className="text-[12px] font-label-caps tracking-widest text-gold-accent uppercase hover:text-gold-bright transition disabled:opacity-50 flex items-center gap-1 bg-gold-accent/10 border border-gold-accent/30 px-2 py-1 rounded"
                   >
                     {isOptimizing ? "Optimizing..." : "✨ SEO Optimize Description"}
                   </button>
@@ -653,7 +653,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
                 </div>
                 <div className="flex flex-col items-end">
                   <span className={`text-xl font-headline-editorial ${completionPercentage >= 70 ? 'text-success' : 'text-gold-accent'}`}>{completionPercentage}%</span>
-                  <span className="text-[10px] font-label-caps text-text-secondary tracking-widest uppercase">Completeness</span>
+                  <span className="text-[12px] font-label-caps text-text-secondary tracking-widest uppercase">Completeness</span>
                 </div>
               </div>
 
@@ -744,7 +744,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
                       onChange={(e) => setIsVerified(e.target.checked)} 
                       className="accent-gold-accent shrink-0" 
                     />
-                    <span className="text-[10px] text-text-secondary leading-tight">
+                    <span className="text-[12px] text-text-secondary leading-tight">
                       I legally assert I am the direct owner or an authorized licensed broker (RA 9646) for this property.
                     </span>
                   </label>
@@ -756,9 +756,9 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
                     Publish to Directory
                   </button>
                   {completionPercentage >= 70 ? (
-                    <span className="text-[10px] text-success font-medium">Ready to publish! Fill more to boost visibility.</span>
+                    <span className="text-[12px] text-success font-medium">Ready to publish! Fill more to boost visibility.</span>
                   ) : (
-                    <span className="text-[10px] text-error font-medium">Reach 70% to publish ({completionPercentage}%)</span>
+                    <span className="text-[12px] text-error font-medium">Reach 70% to publish ({completionPercentage}%)</span>
                   )}
                 </div>
               )}
@@ -778,7 +778,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
       
       {/* Preview Pane (Right on Desktop) */}
       <div className={`${mobileTab === 'preview' ? 'block' : 'hidden'} md:block md:col-start-3 md:row-span-2 relative bg-surface-alt md:border-l border-surface-variant overflow-y-auto custom-scrollbar pointer-events-auto flex-1`}>
-        <div className="absolute top-0 left-0 w-full z-50 bg-gold-accent text-background text-center py-1.5 font-label-caps text-[10px] tracking-[0.3em] font-bold shadow-md pointer-events-none">
+        <div className="absolute top-0 left-0 w-full z-50 bg-gold-accent text-background text-center py-1.5 font-label-caps text-[12px] tracking-[0.12em] font-bold shadow-md pointer-events-none">
           LIVE PREVIEW / DRAFT MODE
         </div>
         <div className="mt-10 opacity-90 md:scale-[0.98] origin-top transition pointer-events-auto">

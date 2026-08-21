@@ -147,7 +147,7 @@ export default async function MetricsPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold tracking-tight">Metrics</h1>
       </div>
-      <p className="text-xs text-white/30 -mt-4">
+      <p className="text-xs text-white/70 -mt-4">
         Computed live from the current tables, capped at 5,000 rows per query for now — fine at
         today&apos;s volume, worth moving to real SQL aggregates once any of these tables grow
         past that.
@@ -182,7 +182,7 @@ export default async function MetricsPage() {
         <BreakdownList title="By active role" counts={roleCounts} />
         <BreakdownList title="By subscription_tier (user_profiles cache)" counts={subTierCounts} />
         {subscriptions.error ? (
-          <p className="text-xs text-white/30">subscriptions table: {subscriptions.error}</p>
+          <p className="text-xs text-white/70">subscriptions table: {subscriptions.error}</p>
         ) : (
           <BreakdownList title="Subscriptions by status" counts={subStatusCounts} />
         )}
@@ -197,7 +197,7 @@ export default async function MetricsPage() {
           />
         </div>
         {connectTx.error ? (
-          <p className="text-xs text-white/30">connect_transactions table: {connectTx.error}</p>
+          <p className="text-xs text-white/70">connect_transactions table: {connectTx.error}</p>
         ) : (
           <BreakdownList
             title="Volume by kind, 30d"
@@ -218,7 +218,7 @@ export default async function MetricsPage() {
           />
         </div>
         {actions7d.error ? (
-          <p className="text-xs text-white/30">mission_control_actions: {actions7d.error}</p>
+          <p className="text-xs text-white/70">mission_control_actions: {actions7d.error}</p>
         ) : (
           <BreakdownList title="By action type, 7d" counts={actionsByType} />
         )}
@@ -231,7 +231,7 @@ export default async function MetricsPage() {
 function MetricSection({ icon: Icon, title, error, children }) {
   return (
     <section className="space-y-3">
-      <h2 className="text-sm font-medium text-white/50 uppercase tracking-wide flex items-center gap-2">
+      <h2 className="text-sm font-medium text-white/70 uppercase tracking-wide flex items-center gap-2">
         <Icon className="w-4 h-4" />
         {title}
       </h2>
@@ -248,7 +248,7 @@ function MetricSection({ icon: Icon, title, error, children }) {
 function Card({ label, value }) {
   return (
     <div className="bg-[#121212] border border-white/5 rounded-xl p-4">
-      <div className="text-[10.5px] text-white/40 mb-2">{label}</div>
+      <div className="text-[12px] text-white/70 mb-2">{label}</div>
       <div className="text-xl font-medium text-white">{value}</div>
     </div>
   );
@@ -261,7 +261,7 @@ function BreakdownList({ title, counts }) {
 
   return (
     <div className="bg-[#121212] border border-white/5 rounded-xl p-4">
-      <div className="text-xs text-white/50 mb-3">{title}</div>
+      <div className="text-xs text-white/70 mb-3">{title}</div>
       <div className="space-y-2">
         {entries.map(([key, value]) => (
           <div key={key} className="flex items-center gap-3">
@@ -272,7 +272,7 @@ function BreakdownList({ title, counts }) {
                 style={{ width: `${max ? (value / max) * 100 : 0}%` }}
               />
             </div>
-            <span className="text-xs text-white/40 w-8 text-right shrink-0">{value}</span>
+            <span className="text-xs text-white/70 w-8 text-right shrink-0">{value}</span>
           </div>
         ))}
       </div>

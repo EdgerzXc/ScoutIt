@@ -168,7 +168,7 @@ export default function FAQReviewQueue({ onPendingCount }) {
           border-radius: 999px;
           color: var(--text-secondary);
           font-family: ${MONO};
-          font-size: 9.5px;
+          font-size: 12px;
           letter-spacing: 0.12em;
           text-transform: uppercase;
           white-space: nowrap;
@@ -188,7 +188,7 @@ export default function FAQReviewQueue({ onPendingCount }) {
         }
         .fq-card__prop {
           font-family: ${MONO};
-          font-size: 8.5px;
+          font-size: 12px;
           color: var(--text-muted);
           letter-spacing: 0.14em;
           text-transform: uppercase;
@@ -216,7 +216,7 @@ export default function FAQReviewQueue({ onPendingCount }) {
         }
         .fq-badge {
           font-family: ${MONO};
-          font-size: 8px;
+          font-size: 12px;
           letter-spacing: 0.13em;
           text-transform: uppercase;
           padding: 3px 7px;
@@ -236,7 +236,7 @@ export default function FAQReviewQueue({ onPendingCount }) {
         }
         .fq-ans__meta {
           font-family: ${MONO};
-          font-size: 8.5px;
+          font-size: 12px;
           color: var(--text-muted);
           letter-spacing: 0.08em;
           line-height: 1.6;
@@ -248,7 +248,7 @@ export default function FAQReviewQueue({ onPendingCount }) {
           width: 100%;
           border-radius: 3px;
           font-family: ${MONO};
-          font-size: 9.5px;
+          font-size: 12px;
           letter-spacing: 0.14em;
           text-transform: uppercase;
           cursor: pointer;
@@ -276,7 +276,7 @@ export default function FAQReviewQueue({ onPendingCount }) {
         .fq-override__input:focus { outline: none; border-color: var(--accent-muted); }
         .fq-override__hint {
           font-family: ${MONO};
-          font-size: 8.5px;
+          font-size: 12px;
           color: var(--text-muted);
           letter-spacing: 0.08em;
           line-height: 1.6;
@@ -290,14 +290,14 @@ export default function FAQReviewQueue({ onPendingCount }) {
           border-radius: 3px;
           text-align: center;
           font-family: ${MONO};
-          font-size: 10px;
+          font-size: 12px;
           color: var(--text-secondary);
           letter-spacing: 0.12em;
           line-height: 1.9;
         }
         .fq-error {
           font-family: ${MONO};
-          font-size: 10px;
+          font-size: 12px;
           color: var(--red);
           letter-spacing: 0.05em;
           line-height: 1.6;

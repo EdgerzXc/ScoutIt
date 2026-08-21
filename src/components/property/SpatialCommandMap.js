@@ -545,7 +545,7 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
         .setLngLat([targetLng, targetLat])
         .setPopup(
           new maplibregl.Popup({ offset: 25, className: "scoutit-popup" }).setHTML(
-            `<strong style="color:var(--accent)">${propertyTitle}</strong><br/><span style="color:var(--text-secondary);font-size:11px;">Target Space</span>`
+            `<strong style="color:var(--accent)">${propertyTitle}</strong><br/><span style="color:var(--text-secondary);font-size:12px;">Target Space</span>`
           )
         )
         .addTo(map);
@@ -874,7 +874,7 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
           padding: "10px 12px",
           color: visualMode === "CRT" ? "var(--green)" : "var(--text-primary)",
           fontFamily: "var(--font-mono, monospace)",
-          fontSize: "11px",
+          fontSize: "12px",
           boxShadow: "0 8px 32px rgba(0, 0, 0, 0.75)",
           width: "calc(100% - 24px)",
           maxWidth: "420px",
@@ -901,7 +901,7 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
                 color: "var(--accent-bright)",
                 borderRadius: "4px",
                 padding: "2px 4px",
-                fontSize: "10px",
+                fontSize: "12px",
                 fontFamily: "var(--font-mono, monospace)",
                 cursor: "pointer",
               }}
@@ -914,18 +914,18 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
             <button
               onClick={() => setShowDossierModal(true)}
               className="scm-hud-btn"
-              style={{ background: "var(--surface2)", border: "1px solid var(--border-mid)", color: "var(--text-secondary)", borderRadius: "4px", padding: "2px 8px", fontSize: "10px", cursor: "pointer", transition: "all 0.2s ease" }}
+              style={{ background: "var(--surface2)", border: "1px solid var(--border-mid)", color: "var(--text-secondary)", borderRadius: "4px", padding: "2px 8px", fontSize: "12px", cursor: "pointer", transition: "all 0.2s ease" }}
             >
               📍 DOSSIER
             </button>
             <button
               onClick={() => setShowEntityGraph(!showEntityGraph)}
               className="scm-hud-btn"
-              style={{ background: showEntityGraph ? "color-mix(in srgb, var(--accent) 30%, transparent)" : "var(--surface2)", border: "1px solid var(--accent)", color: "var(--accent-bright)", borderRadius: "4px", padding: "2px 8px", fontSize: "10px", cursor: "pointer", transition: "all 0.2s ease" }}
+              style={{ background: showEntityGraph ? "color-mix(in srgb, var(--accent) 30%, transparent)" : "var(--surface2)", border: "1px solid var(--accent)", color: "var(--accent-bright)", borderRadius: "4px", padding: "2px 8px", fontSize: "12px", cursor: "pointer", transition: "all 0.2s ease" }}
             >
               🕸️ GRAPH
             </button>
-            <button onClick={() => setHudExpanded(!hudExpanded)} className="scm-hud-toggle" aria-label={hudExpanded ? "Collapse spatial HUD" : "Expand spatial HUD"} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: "11px" }}>
+            <button onClick={() => setHudExpanded(!hudExpanded)} className="scm-hud-toggle" aria-label={hudExpanded ? "Collapse spatial HUD" : "Expand spatial HUD"} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: "12px" }}>
               {hudExpanded ? "▲" : "▼"}
             </button>
           </div>
@@ -946,7 +946,7 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
                 borderRadius: "4px",
                 padding: "6px 10px",
                 color: "var(--text-primary)",
-                fontSize: "11px",
+                fontSize: "12px",
                 fontFamily: "var(--font-mono, monospace)",
                 outline: "none",
                 transition: "border-color 0.2s ease, box-shadow 0.2s ease",
@@ -954,7 +954,7 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
               onFocus={(e) => { e.target.style.borderColor = 'var(--accent)'; e.target.style.boxShadow = '0 0 8px color-mix(in srgb, var(--accent) 30%, transparent)'; }}
               onBlur={(e) => { e.target.style.borderColor = 'rgba(232, 174, 60, 0.3)'; e.target.style.boxShadow = 'none'; }}
             />
-            {aiFilterStatus && <div style={{ fontSize: "9px", color: "var(--green)", marginTop: "3px" }}>✓ {aiFilterStatus}</div>}
+            {aiFilterStatus && <div style={{ fontSize: "12px", color: "var(--green)", marginTop: "3px" }}>✓ {aiFilterStatus}</div>}
           </form>
         )}
 
@@ -981,7 +981,7 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
                 border: activeLayer === btn.id ? "1px solid var(--accent)" : "1px solid var(--border-mid)",
                 background: activeLayer === btn.id ? "rgba(232, 174, 60, 0.25)" : "var(--surface2)",
                 color: activeLayer === btn.id ? "var(--accent-bright)" : "var(--text-secondary)",
-                fontSize: "10px",
+                fontSize: "12px",
                 cursor: "pointer",
                 fontWeight: "bold",
                 transition: "all 0.2s ease",
@@ -1063,24 +1063,24 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
           }}
         >
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
-            <span style={{ color: "var(--accent)", fontWeight: "bold", fontSize: "11px" }}>🕸️ ENTITY & COMPLEX GRAPH</span>
+            <span style={{ color: "var(--accent)", fontWeight: "bold", fontSize: "12px" }}>🕸️ ENTITY & COMPLEX GRAPH</span>
             <button onClick={() => setShowEntityGraph(false)} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer" }}>✕</button>
           </div>
 
-          <div style={{ fontSize: "11px", display: "flex", flexDirection: "column", gap: "8px" }}>
+          <div style={{ fontSize: "12px", display: "flex", flexDirection: "column", gap: "8px" }}>
             <div style={{ borderBottom: "1px solid var(--surface2)", paddingBottom: "6px" }}>
-              <div style={{ color: "var(--text-muted)", fontSize: "9px" }}>TARGET ASSET</div>
+              <div style={{ color: "var(--text-muted)", fontSize: "12px" }}>TARGET ASSET</div>
               <div style={{ color: "var(--accent-bright)", fontWeight: "bold" }}>{propertyTitle}</div>
             </div>
 
             <div>
-              <div style={{ color: "var(--text-muted)", fontSize: "9px", marginBottom: "4px" }}>CONNECTED INFRASTRUCTURE</div>
+              <div style={{ color: "var(--text-muted)", fontSize: "12px", marginBottom: "4px" }}>CONNECTED INFRASTRUCTURE</div>
               {entityNodes.length > 0 ? entityNodes.map((node, i) => (
                 <div key={i} style={{ display: "flex", gap: "6px", marginBottom: "5px", alignItems: "flex-start" }}>
                   <span>{node.icon}</span>
                   <div>
                     <div style={{ color: "var(--text-secondary)" }}>{node.label}</div>
-                    <div style={{ color: "var(--text-muted)", fontSize: "9px" }}>{node.sub}</div>
+                    <div style={{ color: "var(--text-muted)", fontSize: "12px" }}>{node.sub}</div>
                   </div>
                 </div>
               )) : (
@@ -1090,7 +1090,7 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
 
             {spatialIntel?.peza?.is_accredited && (
               <div>
-                <div style={{ color: "var(--text-muted)", fontSize: "9px" }}>PEZA ECOZONE NODE</div>
+                <div style={{ color: "var(--text-muted)", fontSize: "12px" }}>PEZA ECOZONE NODE</div>
                 <div style={{ color: "var(--green)" }}>{spatialIntel.peza.zone_name}</div>
               </div>
             )}
@@ -1135,7 +1135,7 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
               <button onClick={() => setShowDossierModal(false)} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer" }}>✕</button>
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "10px", fontSize: "11px" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px", fontSize: "12px" }}>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <span style={{ color: "var(--text-muted)" }}>Coordinates:</span>
                 <span style={{ color: "var(--accent-bright)" }}>{dossierData.lat.toFixed(4)}°N, {dossierData.lng.toFixed(4)}°E</span>
@@ -1188,7 +1188,7 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
                 color: "var(--intel-cyan)",
                 borderRadius: "4px",
                 textAlign: "center",
-                fontSize: "10px",
+                fontSize: "12px",
                 fontWeight: "bold",
                 textDecoration: "none",
               }}
@@ -1208,7 +1208,7 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
                 borderRadius: "4px",
                 fontWeight: "bold",
                 cursor: "pointer",
-                fontSize: "11px",
+                fontSize: "12px",
               }}
             >
               CLOSE DOSSIER

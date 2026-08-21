@@ -138,7 +138,7 @@ function buildPopupNode({ title, titleColor, subtitle, href, hrefLabel }) {
     const span = document.createElement("span");
     span.textContent = subtitle;
     span.style.cssText =
-      "color:var(--accent,#E8AE3C);font-family:var(--font-mono,monospace);font-size:9.5px;text-transform:uppercase;letter-spacing:0.08em;";
+      "color:var(--accent,#E8AE3C);font-family:var(--font-mono,monospace);font-size:12px;text-transform:uppercase;letter-spacing:0.08em;";
     root.appendChild(span);
   }
 
@@ -149,7 +149,7 @@ function buildPopupNode({ title, titleColor, subtitle, href, hrefLabel }) {
     a.href = href;
     a.textContent = hrefLabel;
     a.style.cssText =
-      "color:var(--accent-bright,#F7C64E);font-size:10px;font-family:var(--font-mono,monospace);text-decoration:none;letter-spacing:0.05em;";
+      "color:var(--accent-bright,#F7C64E);font-size:12px;font-family:var(--font-mono,monospace);text-decoration:none;letter-spacing:0.05em;";
     wrap.appendChild(a);
     root.appendChild(wrap);
   }
@@ -382,7 +382,7 @@ export const locationLens = {
         // than showing nothing means the popup never looks broken while it waits.
         const travel = document.createElement("div");
         travel.style.cssText =
-          "margin-top:6px;font-family:var(--font-mono,monospace);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-secondary,#c8c8c8);";
+          "margin-top:6px;font-family:var(--font-mono,monospace);font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-secondary,#c8c8c8);";
         travel.textContent = "Measuring route…";
         node.appendChild(travel);
 

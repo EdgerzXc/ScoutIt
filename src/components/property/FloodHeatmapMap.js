@@ -201,7 +201,7 @@ export default function FloodHeatmapMap({ lat, lng, propertyTitle }) {
         }
         .flood-heatmap-period-tab {
           font-family: var(--font-mono);
-          font-size: 9.5px;
+          font-size: 12px;
           letter-spacing: 0.06em;
           text-transform: uppercase;
           padding: 6px 10px;
@@ -233,7 +233,7 @@ export default function FloodHeatmapMap({ lat, lng, propertyTitle }) {
           border-radius: 4px;
           padding: 6px 12px;
           font-family: var(--font-mono);
-          font-size: 10px;
+          font-size: 12px;
           letter-spacing: 0.08em;
           text-transform: uppercase;
           color: #c8c8c8;
@@ -252,7 +252,7 @@ export default function FloodHeatmapMap({ lat, lng, propertyTitle }) {
         }
         .flood-heatmap-legend-title {
           font-family: var(--font-mono);
-          font-size: 10px;
+          font-size: 12px;
           letter-spacing: 0.1em;
           text-transform: uppercase;
           color: #c8c8c8;
@@ -276,7 +276,7 @@ export default function FloodHeatmapMap({ lat, lng, propertyTitle }) {
         }
         .flood-heatmap-disclaimer {
           font-family: var(--font-mono);
-          font-size: 10px;
+          font-size: 12px;
           letter-spacing: 0.04em;
           color: #888;
           line-height: 1.5;

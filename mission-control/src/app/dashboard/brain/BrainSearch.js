@@ -14,7 +14,7 @@ export default function BrainSearch({ aiAvailable }) {
     <div className="space-y-4">
       <form action={formAction} className="flex flex-col sm:flex-row gap-2">
         <div className="relative flex-1">
-          <Search className="w-4 h-4 text-white/30 absolute left-3 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-white/70 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             name="question"
             required
@@ -23,7 +23,7 @@ export default function BrainSearch({ aiAvailable }) {
                 ? "Ask anything… e.g. What's our playbook when an owner can't upload a commercial property?"
                 : "Search the knowledge base by keyword…"
             }
-            className="w-full bg-black/50 border border-white/10 rounded-lg pl-9 pr-3 py-3 text-sm text-white placeholder:text-white/25 focus:border-[rgba(232,174,60,0.4)] outline-none"
+            className="w-full bg-black/50 border border-white/10 rounded-lg pl-9 pr-3 py-3 text-sm text-white placeholder:text-white/70 focus:border-[rgba(232,174,60,0.4)] outline-none"
           />
         </div>
         <button
@@ -51,7 +51,7 @@ export default function BrainSearch({ aiAvailable }) {
       )}
 
       {state?.empty && (
-        <div className="text-sm text-white/50 bg-white/5 border border-white/10 rounded-xl p-5">
+        <div className="text-sm text-white/70 bg-white/5 border border-white/10 rounded-xl p-5">
           Nothing in the Brain matches that yet. Add the relevant playbook or SOP below and ask again.
         </div>
       )}
@@ -60,7 +60,7 @@ export default function BrainSearch({ aiAvailable }) {
         <div className="bg-[#121212] border border-[rgba(232,174,60,0.20)] rounded-xl p-5">
           <div className="flex items-center gap-2 mb-2">
             <Sparkles className="w-4 h-4 text-[#E8AE3C]" />
-            <span className="text-[10px] uppercase tracking-wide text-[#E8AE3C]">Brain answer</span>
+            <span className="text-[12px] uppercase tracking-wide text-[#E8AE3C]">Brain answer</span>
           </div>
           <p className="text-sm text-white/85 whitespace-pre-wrap leading-relaxed">{state.answer}</p>
         </div>
@@ -68,11 +68,11 @@ export default function BrainSearch({ aiAvailable }) {
 
       {state?.sources?.length > 0 && (
         <div className="space-y-2">
-          <div className="text-[10px] uppercase tracking-wide text-white/40 flex items-center gap-2">
+          <div className="text-[12px] uppercase tracking-wide text-white/70 flex items-center gap-2">
             <FileText className="w-3.5 h-3.5" />
             {state.answer ? "Sources" : "Top matches"}
             {!state.aiAvailable && (
-              <span className="text-white/25 normal-case tracking-normal">
+              <span className="text-white/70 normal-case tracking-normal">
                 · keyword mode (add GEMINI_API_KEY for AI answers)
               </span>
             )}
@@ -82,12 +82,12 @@ export default function BrainSearch({ aiAvailable }) {
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-sm font-medium text-white/90 truncate">{s.title}</span>
                 {typeof s.similarity === "number" && (
-                  <span className="text-[10px] font-mono text-[#E8AE3C]/70">
+                  <span className="text-[12px] font-mono text-[#E8AE3C]/70">
                     {(s.similarity * 100).toFixed(0)}%
                   </span>
                 )}
               </div>
-              <p className="text-xs text-white/55 leading-relaxed">{s.snippet}</p>
+              <p className="text-xs text-white/70 leading-relaxed">{s.snippet}</p>
             </div>
           ))}
         </div>

@@ -75,9 +75,9 @@ export default function IntelDoorCard({
             <span
               style={{
                 fontFamily: "var(--font-mono)",
-                fontSize: "10px",
+                fontSize: "12px",
                 fontWeight: 600,
-                letterSpacing: "0.18em",
+                letterSpacing: "0.12em",
                 textTransform: "uppercase",
                 color: "#E8AE3C",
                 display: "inline-flex",
@@ -94,7 +94,7 @@ export default function IntelDoorCard({
             <span
               style={{
                 fontFamily: "var(--font-mono)",
-                fontSize: "9px",
+                fontSize: "12px",
                 fontWeight: 600,
                 letterSpacing: "0.1em",
                 textTransform: "uppercase",
@@ -110,7 +110,7 @@ export default function IntelDoorCard({
             <span
               style={{
                 fontFamily: "var(--font-mono)",
-                fontSize: "9px",
+                fontSize: "12px",
                 color: "rgba(240, 237, 232, 0.5)",
                 display: "inline-flex",
                 alignItems: "center",
@@ -164,7 +164,7 @@ export default function IntelDoorCard({
               padding: "6px 12px",
               marginBottom: "18px",
               fontFamily: "var(--font-mono)",
-              fontSize: "11px",
+              fontSize: "12px",
               color: "#F7C64E",
             }}
           >
@@ -185,7 +185,7 @@ export default function IntelDoorCard({
             paddingTop: "16px",
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "11px", fontFamily: "var(--font-mono)", color: "rgba(240, 237, 232, 0.5)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", fontFamily: "var(--font-mono)", color: "rgba(240, 237, 232, 0.5)" }}>
             <ShieldCheck size={13} style={{ color: "#E8AE3C" }} />
             <span>{signal.provenanceCompact || "Verified Primary Records"}</span>
           </div>
@@ -200,7 +200,7 @@ export default function IntelDoorCard({
               background: "#E8AE3C",
               color: "#0e0e0e",
               fontFamily: "var(--font-mono)",
-              fontSize: "11px",
+              fontSize: "12px",
               fontWeight: 700,
               letterSpacing: "0.06em",
               textTransform: "uppercase",

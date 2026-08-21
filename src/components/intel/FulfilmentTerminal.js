@@ -95,9 +95,9 @@ export default function FulfilmentTerminal({
           <span
             style={{
               fontFamily: "var(--font-mono)",
-              fontSize: "10px",
+              fontSize: "12px",
               fontWeight: 600,
-              letterSpacing: "0.2em",
+              letterSpacing: "0.12em",
               textTransform: "uppercase",
               color: "#E8AE3C",
             }}
@@ -106,7 +106,7 @@ export default function FulfilmentTerminal({
           </span>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "6px", fontFamily: "var(--font-mono)", fontSize: "11px", color: "rgba(240, 237, 232, 0.6)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "6px", fontFamily: "var(--font-mono)", fontSize: "12px", color: "rgba(240, 237, 232, 0.6)" }}>
           <ShieldCheck size={12} style={{ color: "#E8AE3C" }} />
           <span>Investigation Complete</span>
         </div>
@@ -172,7 +172,7 @@ export default function FulfilmentTerminal({
                 <span
                   style={{
                     fontFamily: "var(--font-mono)",
-                    fontSize: "10px",
+                    fontSize: "12px",
                     fontWeight: 700,
                     letterSpacing: "0.12em",
                     textTransform: "uppercase",
@@ -182,9 +182,9 @@ export default function FulfilmentTerminal({
                     gap: "5px",
                   }}
                 >
-                  <span style={{ fontSize: "11px" }}>{item.glyph}</span> {item.name}
+                  <span style={{ fontSize: "12px" }}>{item.glyph}</span> {item.name}
                 </span>
-                {isSelected && <span style={{ fontSize: "10px", fontFamily: "var(--font-mono)", color: item.color }}>● ACTIVE</span>}
+                {isSelected && <span style={{ fontSize: "12px", fontFamily: "var(--font-mono)", color: item.color }}>● ACTIVE</span>}
               </div>
               <div
                 style={{
@@ -216,7 +216,7 @@ export default function FulfilmentTerminal({
           <span
             style={{
               fontFamily: "var(--font-mono)",
-              fontSize: "11px",
+              fontSize: "12px",
               fontWeight: 600,
               letterSpacing: "0.1em",
               textTransform: "uppercase",
@@ -256,7 +256,7 @@ export default function FulfilmentTerminal({
           <span
             style={{
               fontFamily: "var(--font-mono)",
-              fontSize: "11px",
+              fontSize: "12px",
               color: "rgba(240, 237, 232, 0.7)",
             }}
           >
@@ -275,7 +275,7 @@ export default function FulfilmentTerminal({
               background: "#E8AE3C",
               color: "#0e0e0e",
               fontFamily: "var(--font-mono)",
-              fontSize: "11px",
+              fontSize: "12px",
               fontWeight: 700,
               letterSpacing: "0.06em",
               textTransform: "uppercase",

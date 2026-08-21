@@ -129,9 +129,9 @@ export default function ListerDeclarationModal({
 
         .ld-eyebrow {
           font-family: ${MONO};
-          font-size: 9px;
+          font-size: 12px;
           color: var(--accent, var(--accent));
-          letter-spacing: 0.22em;
+          letter-spacing: 0.12em;
           text-transform: uppercase;
           margin-bottom: 8px;
         }
@@ -152,7 +152,7 @@ export default function ListerDeclarationModal({
         }
         .ld-listing {
           font-family: ${MONO};
-          font-size: 9px;
+          font-size: 12px;
           color: var(--text-muted);
           letter-spacing: 0.12em;
           text-transform: uppercase;
@@ -162,9 +162,9 @@ export default function ListerDeclarationModal({
 
         .ld-legend {
           font-family: ${MONO};
-          font-size: 9px;
+          font-size: 12px;
           color: var(--text-secondary);
-          letter-spacing: 0.16em;
+          letter-spacing: 0.12em;
           text-transform: uppercase;
           padding: 0;
           margin-bottom: 10px;
@@ -227,15 +227,15 @@ export default function ListerDeclarationModal({
         }
         .ld-disclaimer__head {
           font-family: ${MONO};
-          font-size: 9px;
+          font-size: 12px;
           color: var(--accent, var(--accent));
-          letter-spacing: 0.16em;
+          letter-spacing: 0.12em;
           text-transform: uppercase;
           margin-bottom: 7px;
         }
         .ld-version {
           font-family: ${MONO};
-          font-size: 8.5px;
+          font-size: 12px;
           color: #5a5a5a;
           letter-spacing: 0.1em;
           margin-top: 9px;
@@ -266,7 +266,7 @@ export default function ListerDeclarationModal({
 
         .ld-hint {
           font-family: ${MONO};
-          font-size: 9.5px;
+          font-size: 12px;
           color: var(--text-secondary);
           letter-spacing: 0.06em;
           line-height: 1.7;
@@ -274,7 +274,7 @@ export default function ListerDeclarationModal({
         }
         .ld-error {
           font-family: ${MONO};
-          font-size: 10px;
+          font-size: 12px;
           color: var(--red);
           letter-spacing: 0.05em;
           line-height: 1.7;
@@ -296,8 +296,8 @@ export default function ListerDeclarationModal({
           width: 100%;
           border-radius: 3px;
           font-family: ${MONO};
-          font-size: 10px;
-          letter-spacing: 0.15em;
+          font-size: 12px;
+          letter-spacing: 0.12em;
           text-transform: uppercase;
           cursor: pointer;
           transition: transform 140ms ease-out, opacity 140ms ease-out;

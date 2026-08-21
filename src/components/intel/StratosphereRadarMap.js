@@ -152,7 +152,7 @@ export default function StratosphereRadarMap({
       <div className="radar-fallback-deck">
         <div className="radar-fallback-grid" />
         <div className="radar-fallback-reticle">
-          <span className="text-gold font-mono text-[9px]">
+          <span className="text-gold font-mono text-[12px]">
             {currentSignal?.coords?.lat?.toFixed(4)}°N, {currentSignal?.coords?.lng?.toFixed(4)}°E
           </span>
         </div>
@@ -243,7 +243,7 @@ export default function StratosphereRadarMap({
 
         .signal-pin-label {
           font-family: var(--font-mono);
-          font-size: 7.5px;
+          font-size: 12px;
           font-weight: 700;
           color: var(--accent-bright);
           background: rgba(13, 13, 16, 0.9);
@@ -279,7 +279,7 @@ export default function StratosphereRadarMap({
 
         .property-pin-callout {
           font-family: var(--font-mono);
-          font-size: 7px;
+          font-size: 12px;
           font-weight: 600;
           color: #c8c6be;
           background: rgba(18, 18, 22, 0.9);
@@ -327,7 +327,7 @@ export default function StratosphereRadarMap({
 
         .telemetry-coords {
           font-family: var(--font-mono);
-          font-size: 8px;
+          font-size: 12px;
           font-weight: 700;
           letter-spacing: 0.1em;
           color: var(--accent);
@@ -352,7 +352,7 @@ export default function StratosphereRadarMap({
           align-items: center;
           gap: 4px;
           font-family: var(--font-mono);
-          font-size: 7.5px;
+          font-size: 12px;
           font-weight: 600;
           color: var(--text-secondary);
           letter-spacing: 0.08em;

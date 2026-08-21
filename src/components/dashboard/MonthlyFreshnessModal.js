@@ -149,9 +149,9 @@ export default function MonthlyFreshnessModal({ onOpenEditor }) {
         }
         .mf-eyebrow {
           font-family: ${MONO};
-          font-size: 9px;
+          font-size: 12px;
           color: var(--accent, var(--accent));
-          letter-spacing: 0.22em;
+          letter-spacing: 0.12em;
           text-transform: uppercase;
           margin-bottom: 8px;
         }
@@ -196,7 +196,7 @@ export default function MonthlyFreshnessModal({ onOpenEditor }) {
         }
         .mf-row__loc {
           font-family: ${MONO};
-          font-size: 8.5px;
+          font-size: 12px;
           color: var(--text-muted);
           letter-spacing: 0.1em;
           text-transform: uppercase;
@@ -208,7 +208,7 @@ export default function MonthlyFreshnessModal({ onOpenEditor }) {
           padding: 8px 0 0;
           color: var(--text-secondary);
           font-family: ${MONO};
-          font-size: 9px;
+          font-size: 12px;
           letter-spacing: 0.12em;
           text-transform: uppercase;
           cursor: pointer;
@@ -242,8 +242,8 @@ export default function MonthlyFreshnessModal({ onOpenEditor }) {
           width: 100%;
           border-radius: 3px;
           font-family: ${MONO};
-          font-size: 10px;
-          letter-spacing: 0.15em;
+          font-size: 12px;
+          letter-spacing: 0.12em;
           text-transform: uppercase;
           cursor: pointer;
         }
@@ -252,7 +252,7 @@ export default function MonthlyFreshnessModal({ onOpenEditor }) {
         .mf-btn--ghost { background: transparent; border: 0.5px solid var(--border-solid); color: var(--text-secondary); }
         .mf-error {
           font-family: ${MONO};
-          font-size: 10px;
+          font-size: 12px;
           color: var(--red);
           letter-spacing: 0.05em;
           line-height: 1.6;

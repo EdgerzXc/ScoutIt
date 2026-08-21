@@ -121,7 +121,7 @@ export default function LeadExportButton({ lead, leads, label = "Export", compac
         .lx-root { display: flex; flex-direction: column; gap: 7px; }
         .lx-label {
           font-family: ${MONO};
-          font-size: 9px;
+          font-size: 12px;
           color: var(--text-muted);
           letter-spacing: 0.14em;
           text-transform: uppercase;
@@ -135,7 +135,7 @@ export default function LeadExportButton({ lead, leads, label = "Export", compac
           border: 0.5px solid var(--border-solid);
           color: var(--text-secondary);
           font-family: ${MONO};
-          font-size: 9.5px;
+          font-size: 12px;
           letter-spacing: 0.14em;
           text-transform: uppercase;
           cursor: pointer;
@@ -151,14 +151,14 @@ export default function LeadExportButton({ lead, leads, label = "Export", compac
         .lx-btn--ok { border-color: rgba(127,191,127,0.4); color: var(--green); }
         .lx-hint {
           font-family: ${MONO};
-          font-size: 8.5px;
+          font-size: 12px;
           color: var(--text-muted);
           letter-spacing: 0.08em;
           line-height: 1.6;
         }
         .lx-error {
           font-family: ${MONO};
-          font-size: 9px;
+          font-size: 12px;
           color: var(--red);
           letter-spacing: 0.05em;
           line-height: 1.5;

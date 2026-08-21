@@ -14,7 +14,7 @@ export default function DashboardLayout({ children }) {
             <span className="relative">S<span className="text-on-surface">cout</span>IT</span>
           </Link>
         </div>
-        <div className="flex gap-6 items-center font-label-caps text-[10px] md:text-xs">
+        <div className="flex gap-6 items-center font-label-caps text-[12px] md:text-xs">
           <Link href="/dashboard" className="text-text-secondary hover:text-on-surface active:scale-[0.98] transition-all duration-300 ease-out">
             Dashboard
           </Link>

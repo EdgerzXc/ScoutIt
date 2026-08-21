@@ -262,7 +262,7 @@ export default function WishlistPage() {
           font-family: var(--font-mono), monospace;
           font-size: 12px;
           text-transform: uppercase;
-          letter-spacing: 3px;
+          letter-spacing: 0.12em;
           color: var(--accent);
           margin-bottom: 16px;
         }
@@ -296,9 +296,9 @@ export default function WishlistPage() {
 
         .merge-label {
           font-family: var(--font-mono), monospace;
-          font-size: 11px;
+          font-size: 12px;
           text-transform: uppercase;
-          letter-spacing: 2px;
+          letter-spacing: 0.12em;
           color: #E8AE3C;
         }
 
@@ -419,9 +419,9 @@ export default function WishlistPage() {
 
         .group-label {
           font-family: var(--font-mono), monospace;
-          font-size: 11px;
+          font-size: 12px;
           text-transform: uppercase;
-          letter-spacing: 2px;
+          letter-spacing: 0.12em;
           color: var(--accent);
           margin: 0 0 4px;
           padding-bottom: 8px;
@@ -494,7 +494,7 @@ export default function WishlistPage() {
           background: rgba(232, 174, 60, 0.1);
           border: 1px solid rgba(232, 174, 60, 0.3);
           color: #E8AE3C;
-          font-size: 10px;
+          font-size: 12px;
           font-weight: 700;
           letter-spacing: 1px;
           padding: 2px 6px;
@@ -516,7 +516,7 @@ export default function WishlistPage() {
 
         .reaction-badge {
           font-family: var(--font-mono), monospace;
-          font-size: 10px;
+          font-size: 12px;
           text-transform: uppercase;
           letter-spacing: 1px;
           color: #E8AE3C;
@@ -547,7 +547,7 @@ export default function WishlistPage() {
 
         .board-footer {
           font-family: var(--font-mono), monospace;
-          font-size: 11px;
+          font-size: 12px;
           color: #c8c8c8;
           text-align: center;
           padding-top: 24px;

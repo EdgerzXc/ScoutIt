@@ -203,7 +203,7 @@ export default function OwnerMode() {
           >
              <div className="flex items-center gap-3 mb-4">
                <span className="text-3xl">📄</span>
-               <span className="text-gold-accent font-mono text-[10px] tracking-widest uppercase border border-gold-accent/30 bg-gold-accent/10 px-2.5 py-1 rounded">Fastest Route</span>
+               <span className="text-gold-accent font-mono text-[12px] tracking-widest uppercase border border-gold-accent/30 bg-gold-accent/10 px-2.5 py-1 rounded">Fastest Route</span>
              </div>
              <h3 className="font-working-title text-2xl text-on-surface mb-3 group-hover:text-gold-accent transition-colors duration-300">I already have property materials</h3>
              <p className="text-sm text-text-secondary leading-relaxed">Upload a PDF brochure, flyer, or pitch deck. ScoutIt reads the key specs and structures your draft automatically for review.</p>
@@ -217,7 +217,7 @@ export default function OwnerMode() {
           >
              <div className="flex items-center gap-3 mb-4">
                <span className="text-3xl">✍️</span>
-               <span className="text-text-muted font-mono text-[10px] tracking-widest uppercase border border-white/10 bg-white/5 px-2.5 py-1 rounded">Guided Builder</span>
+               <span className="text-text-muted font-mono text-[12px] tracking-widest uppercase border border-white/10 bg-white/5 px-2.5 py-1 rounded">Guided Builder</span>
              </div>
              <h3 className="font-working-title text-2xl text-on-surface mb-3 group-hover:text-gold-accent transition-colors duration-300">I&apos;ll build it myself</h3>
              <p className="text-sm text-text-secondary leading-relaxed">Enter property specifications, address, pricing, and photos step by step in the guided property editor.</p>
@@ -233,7 +233,7 @@ export default function OwnerMode() {
           >
             <div className="flex items-center gap-3">
               <span className="font-mono text-xs uppercase tracking-[0.14em] text-text-muted">More ways to add</span>
-              <span className="text-[11px] text-text-muted font-body">(Bulk CSV, Advanced Matrix, 3D Spatial)</span>
+              <span className="text-[12px] text-text-muted font-body">(Bulk CSV, Advanced Matrix, 3D Spatial)</span>
             </div>
             <span className="text-text-muted text-sm transition-transform duration-200" style={{ transform: showAdvancedIngest ? "rotate(180deg)" : "rotate(0deg)" }}>
               ▼
@@ -248,7 +248,7 @@ export default function OwnerMode() {
                 onClick={() => setShowWizard('bulk')}
                 className="bg-surface/50 border border-white/[0.06] rounded-lg p-5 text-left hover:border-gold-accent/40 hover:bg-surface-alt transition cursor-pointer group"
               >
-                <div className="font-mono text-[10px] text-gold-accent uppercase tracking-widest mb-2">Portfolio Import</div>
+                <div className="font-mono text-[12px] text-gold-accent uppercase tracking-widest mb-2">Portfolio Import</div>
                 <div className="font-working-title text-lg text-on-surface mb-2 group-hover:text-gold-accent transition-colors">Spreadsheet (CSV)</div>
                 <p className="text-xs text-text-secondary leading-relaxed">Upload a multi-property CSV file to generate several drafts simultaneously.</p>
               </button>
@@ -259,7 +259,7 @@ export default function OwnerMode() {
                 onClick={() => setShowWizard('deep_intel')}
                 className="bg-surface/50 border border-white/[0.06] rounded-lg p-5 text-left hover:border-gold-accent/40 hover:bg-surface-alt transition cursor-pointer group"
               >
-                <div className="font-mono text-[10px] text-gold-accent uppercase tracking-widest mb-2">Direct Spec Matrix</div>
+                <div className="font-mono text-[12px] text-gold-accent uppercase tracking-widest mb-2">Direct Spec Matrix</div>
                 <div className="font-working-title text-lg text-on-surface mb-2 group-hover:text-gold-accent transition-colors">Advanced Studio</div>
                 <p className="text-xs text-text-secondary leading-relaxed">Directly input zoning, ceiling clearance, structural load, and financial models.</p>
               </button>
@@ -276,8 +276,8 @@ export default function OwnerMode() {
                 }`}
               >
                 <div className="flex items-center justify-between mb-2">
-                  <span className="font-mono text-[10px] text-gold-accent uppercase tracking-widest">3D Spatial</span>
-                  {!canUseVault && <span className="font-mono text-[9px] text-text-muted uppercase tracking-wider">Cluster+</span>}
+                  <span className="font-mono text-[12px] text-gold-accent uppercase tracking-widest">3D Spatial</span>
+                  {!canUseVault && <span className="font-mono text-[12px] text-text-muted uppercase tracking-wider">Cluster+</span>}
                 </div>
                 <div className="font-working-title text-lg text-on-surface mb-2 group-hover:text-gold-accent transition-colors">The Spatial Vault</div>
                 <p className="text-xs text-text-secondary leading-relaxed">Integrate Matterport, Luma 3D maps, drone heatmaps, and spatial scans.</p>
@@ -300,12 +300,12 @@ export default function OwnerMode() {
 
         {/* Accepted Formats Chips */}
         <div className="flex flex-wrap items-center gap-2 mb-6">
-          <span className="font-mono text-[10px] text-gold-accent uppercase tracking-wider font-semibold">Accepted:</span>
-          <span className="px-2 py-0.5 rounded bg-surface border border-white/10 font-mono text-[10px] text-text-secondary">PDF Brochures</span>
-          <span className="px-2 py-0.5 rounded bg-surface border border-white/10 font-mono text-[10px] text-text-secondary">Pitch Decks</span>
-          <span className="px-2 py-0.5 rounded bg-surface border border-white/10 font-mono text-[10px] text-text-secondary">Rent Rolls</span>
-          <span className="px-2 py-0.5 rounded bg-surface border border-white/10 font-mono text-[10px] text-text-secondary">Floor Plans</span>
-          <span className="font-mono text-[9px] text-text-muted ml-auto">Max 25MB</span>
+          <span className="font-mono text-[12px] text-gold-accent uppercase tracking-wider font-semibold">Accepted:</span>
+          <span className="px-2 py-0.5 rounded bg-surface border border-white/10 font-mono text-[12px] text-text-secondary">PDF Brochures</span>
+          <span className="px-2 py-0.5 rounded bg-surface border border-white/10 font-mono text-[12px] text-text-secondary">Pitch Decks</span>
+          <span className="px-2 py-0.5 rounded bg-surface border border-white/10 font-mono text-[12px] text-text-secondary">Rent Rolls</span>
+          <span className="px-2 py-0.5 rounded bg-surface border border-white/10 font-mono text-[12px] text-text-secondary">Floor Plans</span>
+          <span className="font-mono text-[12px] text-text-muted ml-auto">Max 25MB</span>
         </div>
         
         <div className="bg-surface/40 backdrop-blur-xl border border-white/[0.04] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] rounded-2xl p-10 text-center flex flex-col items-center relative transition-all duration-300 hover:bg-surface/60 overflow-hidden">
@@ -316,7 +316,7 @@ export default function OwnerMode() {
               <div className="bg-surface-alt/50 p-4 rounded-xl border border-white/10 flex items-center justify-between backdrop-blur-md shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]">
                 <div className="flex flex-col text-left truncate mr-2">
                   <span className="text-on-surface font-working-title text-sm truncate">{selectedFile.name}</span>
-                  <span className="text-[10px] font-mono text-text-muted">{(selectedFile.size / (1024 * 1024)).toFixed(2)} MB</span>
+                  <span className="text-[12px] font-mono text-text-muted">{(selectedFile.size / (1024 * 1024)).toFixed(2)} MB</span>
                 </div>
                 <button onClick={() => setSelectedFile(null)} className="text-xs font-bold text-error hover:text-red-400 uppercase tracking-widest transition-colors duration-200">Remove</button>
               </div>
@@ -423,7 +423,7 @@ export default function OwnerMode() {
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--accent-muted)" strokeWidth="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
           </div>
           <div>
-            <p className="font-label-caps text-[11px] tracking-widest text-gold-accent/60 uppercase mb-2">Cluster tier required</p>
+            <p className="font-label-caps text-[12px] tracking-widest text-gold-accent/60 uppercase mb-2">Cluster tier required</p>
             <h2 className="font-display-md text-3xl text-on-surface mb-3">The Spatial Vault</h2>
             <p className="text-text-secondary text-sm leading-relaxed max-w-sm">360° tours, 3D spatial maps, and drone heatmaps are a Cluster+ feature. Upgrade your Owner plan to unlock the full Vault experience for your listing.</p>
           </div>
@@ -503,13 +503,13 @@ export default function OwnerMode() {
         <div className="flex gap-0 mb-8 rounded-lg overflow-hidden border border-surface-variant">
           <button
             onClick={() => { setVaultTab("url"); setVaultBuildOption(null); }}
-            className={`flex-1 py-3 font-label-caps text-[11px] tracking-widest uppercase transition duration-200 ${vaultTab === "url" ? "bg-gold-accent text-background font-bold" : "bg-surface-alt text-text-secondary hover:text-on-surface"}`}
+            className={`flex-1 py-3 font-label-caps text-[12px] tracking-widest uppercase transition duration-200 ${vaultTab === "url" ? "bg-gold-accent text-background font-bold" : "bg-surface-alt text-text-secondary hover:text-on-surface"}`}
           >
             I already have a tour URL
           </button>
           <button
             onClick={() => { setVaultTab("build"); setVaultBuildOption(null); }}
-            className={`flex-1 py-3 font-label-caps text-[11px] tracking-widest uppercase transition duration-200 ${vaultTab === "build" ? "bg-gold-accent text-background font-bold" : "bg-surface-alt text-text-secondary hover:text-on-surface"}`}
+            className={`flex-1 py-3 font-label-caps text-[12px] tracking-widest uppercase transition duration-200 ${vaultTab === "build" ? "bg-gold-accent text-background font-bold" : "bg-surface-alt text-text-secondary hover:text-on-surface"}`}
           >
             Build one for me
           </button>
@@ -587,7 +587,7 @@ export default function OwnerMode() {
                 <div>
                   <h3 className="font-working-title text-lg text-on-surface group-hover:text-gold-accent transition mb-1">Send a QuestIT Professional</h3>
                   <p className="text-sm text-text-secondary leading-relaxed">Book one of our vetted spatial capture experts. They&apos;ll shoot the property and we&apos;ll build the vault. Available in Metro Manila.</p>
-                  <span className="inline-block mt-3 text-[10px] font-label-caps tracking-widest text-gold-accent/70 border border-gold-accent/30 bg-gold-accent/10 px-2.5 py-1 rounded-full">QUEUE — TYPICALLY 3–5 DAYS</span>
+                  <span className="inline-block mt-3 text-[12px] font-label-caps tracking-widest text-gold-accent/70 border border-gold-accent/30 bg-gold-accent/10 px-2.5 py-1 rounded-full">QUEUE — TYPICALLY 3–5 DAYS</span>
                 </div>
               </div>
             </button>
@@ -606,7 +606,7 @@ export default function OwnerMode() {
               <div className="w-full bg-surface-alt/80 p-5 rounded-lg border border-gold-accent/40 flex items-center justify-between">
                 <div>
                   <p className="text-gold-accent font-working-title text-sm truncate">{selectedFile.name}</p>
-                  <p className="text-[11px] text-text-secondary mt-0.5">{(selectedFile.size / (1024 * 1024)).toFixed(1)} MB</p>
+                  <p className="text-[12px] text-text-secondary mt-0.5">{(selectedFile.size / (1024 * 1024)).toFixed(1)} MB</p>
                 </div>
                 <button onClick={() => setSelectedFile(null)} className="text-xs font-bold text-error hover:text-red-400 uppercase tracking-widest transition">Remove</button>
               </div>
@@ -622,7 +622,7 @@ export default function OwnerMode() {
                 <label htmlFor="video-upload" className="cursor-pointer border-2 border-gold-accent text-gold-accent font-label-caps uppercase tracking-widest font-bold px-8 py-3 rounded hover:bg-gold-accent hover:text-background transition duration-300">
                   Select Video File
                 </label>
-                <p className="text-[10px] text-text-secondary tracking-widest uppercase">Supported: .mp4, .mov — any file size</p>
+                <p className="text-[12px] text-text-secondary tracking-widest uppercase">Supported: .mp4, .mov — any file size</p>
               </div>
             )}
 
@@ -867,7 +867,7 @@ export default function OwnerMode() {
               ← Back to Active Files
             </button>
           )}
-          <span className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase mb-1 block">Property Dossier</span>
+          <span className="font-label-caps text-[12px] tracking-widest text-gold-accent uppercase mb-1 block">Property Dossier</span>
           <h1 className="font-display-md text-3xl md:text-5xl text-on-surface">{activeListing.title || 'Untitled Property'}</h1>
         </div>
         <div className="flex flex-wrap gap-3">
@@ -918,10 +918,10 @@ export default function OwnerMode() {
       <section className="mt-6 rounded border border-surface-variant bg-surface-alt/70 p-4 md:p-5" aria-labelledby="listing-lifecycle-heading">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="font-label-caps text-[10px] tracking-[0.2em] text-text-secondary">LIFECYCLE</p>
+            <p className="font-label-caps text-[12px] tracking-[0.12em] text-text-secondary">LIFECYCLE</p>
             <h2 id="listing-lifecycle-heading" className="mt-1 text-sm text-on-surface">{activeListing.lifecycleState === "off_market" ? "OFF-MARKET / RECOVERABLE" : "LIVE MARKET ACCESS"}</h2>
           </div>
-          <span className="rounded border border-surface-variant px-3 py-2 font-label-caps text-[10px] tracking-widest text-text-secondary">{activeListing.lifecycleState || activeListing.pipelineStatus || "DRAFT"}</span>
+          <span className="rounded border border-surface-variant px-3 py-2 font-label-caps text-[12px] tracking-widest text-text-secondary">{activeListing.lifecycleState || activeListing.pipelineStatus || "DRAFT"}</span>
         </div>
         {activeListing.lifecycleState === "off_market" && (
           <label className="mt-4 flex min-h-11 cursor-pointer items-center gap-3 text-sm text-text-secondary">
@@ -935,12 +935,12 @@ export default function OwnerMode() {
           </label>
         )}
         <div className="mt-5 border-t border-surface-variant pt-4">
-          <button type="button" className="min-h-11 w-full text-left font-label-caps text-[10px] tracking-[0.2em] text-error hover:text-on-surface" aria-expanded={dangerOpen} aria-controls="listing-danger-zone" onClick={() => setDangerOpen((open) => { if (open) { setRemovalTitle(""); setRemovalPassword(""); setRemovalCaptchaToken(""); removalTurnstileRef.current?.reset(); } return !open; })}>
+          <button type="button" className="min-h-11 w-full text-left font-label-caps text-[12px] tracking-[0.12em] text-error hover:text-on-surface" aria-expanded={dangerOpen} aria-controls="listing-danger-zone" onClick={() => setDangerOpen((open) => { if (open) { setRemovalTitle(""); setRemovalPassword(""); setRemovalCaptchaToken(""); removalTurnstileRef.current?.reset(); } return !open; })}>
             {dangerOpen ? "▾ CLOSE DANGER ZONE" : "▸ OPEN DANGER ZONE"}
           </button>
           {dangerOpen && (
             <div id="listing-danger-zone" className="mt-3 rounded border border-error/40 bg-background/60 p-4">
-              <p className="font-label-caps text-[10px] tracking-[0.16em] text-error">PERMANENTLY REMOVE LISTING</p>
+              <p className="font-label-caps text-[12px] tracking-[0.12em] text-error">PERMANENTLY REMOVE LISTING</p>
               <p className="mt-2 text-sm leading-relaxed text-text-secondary">This ends public and premium market access. ScoutIt retains the historical row, reserved URL, audit history, FAQs, units, and ScoutIt-owned Spatial Vault/3D assets. Open deals, active viewings, delegations, or unresolved disputes block removal.</p>
               <label className="mt-4 block text-xs text-text-secondary" htmlFor="permanent-removal-title">Type the exact property title to continue</label>
               <input id="permanent-removal-title" value={removalTitle} onChange={(event) => setRemovalTitle(event.target.value)} className="mt-2 min-h-11 w-full rounded border border-surface-variant bg-surface px-3 py-2 text-sm text-on-surface" autoComplete="off" />
@@ -954,7 +954,7 @@ export default function OwnerMode() {
                   onError={(message) => addToast(message, "❌")}
                 />
               </div>
-              <button type="button" disabled={isRemoving || !removalPassword || !removalCaptchaToken || removalTitle.trim() !== String(activeListing.title || "").trim()} className="mt-4 min-h-11 w-full rounded border border-error px-4 py-3 font-label-caps text-[10px] tracking-widest text-error transition hover:bg-error hover:text-white disabled:cursor-not-allowed disabled:opacity-40" onClick={async () => {
+              <button type="button" disabled={isRemoving || !removalPassword || !removalCaptchaToken || removalTitle.trim() !== String(activeListing.title || "").trim()} className="mt-4 min-h-11 w-full rounded border border-error px-4 py-3 font-label-caps text-[12px] tracking-widest text-error transition hover:bg-error hover:text-white disabled:cursor-not-allowed disabled:opacity-40" onClick={async () => {
                 setIsRemoving(true);
                 const removed = await permanentlyRemoveListing(activeListing.id, removalTitle, removalPassword, removalCaptchaToken);
                 if (removed) { setRemovalTitle(""); setRemovalPassword(""); setRemovalCaptchaToken(""); setDangerOpen(false); }
@@ -1055,7 +1055,7 @@ export default function OwnerMode() {
                      <span className="font-data-tabular text-lg font-bold text-gold-accent">{incomingPitches.length}</span>
                    </div>
                  </div>
-                 <p className="text-[10px] text-text-muted mt-4 text-center">View tracking arrives once page instrumentation ships — no invented numbers until then.</p>
+                 <p className="text-[12px] text-text-muted mt-4 text-center">View tracking arrives once page instrumentation ships — no invented numbers until then.</p>
                </>
             )}
           </div>
@@ -1094,7 +1094,7 @@ export default function OwnerMode() {
           <div className="card-atmosphere rounded-lg p-5 mb-4">
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-working-title text-base text-on-surface">Invite an advisor</h3>
-              <span className="font-label-caps text-[10px] tracking-widest text-gold-accent">◈ 1 CONNECT · {connects} LEFT</span>
+              <span className="font-label-caps text-[12px] tracking-widest text-gold-accent">◈ 1 CONNECT · {connects} LEFT</span>
             </div>
             <p className="text-xs text-text-secondary mb-3">You control who represents this property. Sending a handshake spends 1 Connect — whether or not they accept.</p>
             <div className="flex flex-col sm:flex-row gap-2">
@@ -1121,7 +1121,7 @@ export default function OwnerMode() {
               Active Inquiries
             </h2>
             {incomingPitches.filter(p => p.status === 'pending').length > 0 && (
-              <span className="bg-gold-accent/10 text-gold-accent font-label-caps text-[10px] px-2 py-1 rounded-sm tracking-wider">
+              <span className="bg-gold-accent/10 text-gold-accent font-label-caps text-[12px] px-2 py-1 rounded-sm tracking-wider">
                 {incomingPitches.filter(p => p.status === 'pending').length} PENDING
               </span>
             )}
@@ -1161,17 +1161,17 @@ export default function OwnerMode() {
                               VERIFIED" (a broker-only credential) was
                               previously shown unconditionally on both. */}
                           {pitch.otherPartyRole === 'Broker' ? (
-                            <span className="bg-gold-accent/10 text-gold-accent text-[10px] font-label-caps px-1.5 py-0.5 rounded tracking-widest">PRC VERIFIED</span>
+                            <span className="bg-gold-accent/10 text-gold-accent text-[12px] font-label-caps px-1.5 py-0.5 rounded tracking-widest">PRC VERIFIED</span>
                           ) : (
-                            <span className="bg-surface-variant text-text-secondary text-[10px] font-label-caps px-1.5 py-0.5 rounded tracking-widest">PROSPECTIVE BUYER</span>
+                            <span className="bg-surface-variant text-text-secondary text-[12px] font-label-caps px-1.5 py-0.5 rounded tracking-widest">PROSPECTIVE BUYER</span>
                           )}
                         </h4>
                         <span className="text-xs text-text-secondary">{pitch.otherPartyRole === 'Broker' ? pitch.brokerFirm : 'Direct inquiry'}</span>
                       </div>
                     </div>
                     <div className="text-right">
-                      <span className="font-label-caps text-[10px] tracking-widest text-text-muted uppercase block">{pitch.timeRemaining}</span>
-                      {pitch.status === 'pending' && <span className="text-[10px] text-gold-accent">AWAITING RESPONSE</span>}
+                      <span className="font-label-caps text-[12px] tracking-widest text-text-muted uppercase block">{pitch.timeRemaining}</span>
+                      {pitch.status === 'pending' && <span className="text-[12px] text-gold-accent">AWAITING RESPONSE</span>}
                     </div>
                   </div>
                   
@@ -1184,7 +1184,7 @@ export default function OwnerMode() {
                   {/* Private scratchpad -- only you see this, shared with your
                       own view of this deal across sessions (deals.private_notes) */}
                   <div className="mb-4">
-                    <span className="block font-label-caps text-[10px] tracking-widest text-text-muted uppercase mb-1">Private Notes</span>
+                    <span className="block font-label-caps text-[12px] tracking-widest text-text-muted uppercase mb-1">Private Notes</span>
                     <textarea
                       className="w-full bg-background border border-surface-alt rounded p-3 text-xs text-text-secondary focus:outline-none focus:border-gold-accent/50 transition resize-y min-h-[60px]"
                       placeholder="Jot down anything about this inquiry — only visible to you..."
@@ -1213,14 +1213,14 @@ export default function OwnerMode() {
       
                   {pitch.status === 'accepted' && pitch.brokerContact && (
                     <div className="mt-2 p-4 bg-success/5 border border-success/20 rounded">
-                      <div className="font-label-caps text-[10px] tracking-widest text-success uppercase mb-3">Intelligence Unlocked</div>
+                      <div className="font-label-caps text-[12px] tracking-widest text-success uppercase mb-3">Intelligence Unlocked</div>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <span className="block text-[10px] text-text-secondary mb-1">Direct Phone</span>
+                          <span className="block text-[12px] text-text-secondary mb-1">Direct Phone</span>
                           <span className="font-working-title text-on-surface text-sm">{pitch.brokerContact.phone}</span>
                         </div>
                         <div>
-                          <span className="block text-[10px] text-text-secondary mb-1">Direct Email</span>
+                          <span className="block text-[12px] text-text-secondary mb-1">Direct Email</span>
                           <span className="font-working-title text-on-surface text-sm">{pitch.brokerContact.email}</span>
                         </div>
                       </div>

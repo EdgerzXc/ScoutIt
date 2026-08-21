@@ -138,7 +138,7 @@ export default async function IntelArticlePage({ params, searchParams }) {
             <div className="flex items-center gap-3 mb-3">
               <span className="article-category-tag" style={{ margin: 0 }}>{article.category}</span>
               {article.city ? (
-                <span className="font-mono text-[10px] text-text-secondary border border-surface-variant/80 px-2 py-0.5 rounded-xs uppercase bg-black/40 backdrop-blur-sm">
+                <span className="font-mono text-[12px] text-text-secondary border border-surface-variant/80 px-2 py-0.5 rounded-xs uppercase bg-black/40 backdrop-blur-sm">
                   📍 {article.city}
                 </span>
               ) : null}
@@ -154,7 +154,7 @@ export default async function IntelArticlePage({ params, searchParams }) {
             {/* Insight disclaimer banner */}
             {["INSIGHT", "Insight"].includes(article.category) || ["INSIGHT", "Insight"].includes(article.intelType) || ["INSIGHT", "Insight"].includes(article.type) ? (
               <GlassPanel className="p-4 mb-8 border-l-2 border-l-gold-accent bg-gold-accent/5">
-                <span className="font-mono text-[10px] text-gold-accent tracking-[0.15em] uppercase block mb-1">ScoutIt Insight</span>
+                <span className="font-mono text-[12px] text-gold-accent tracking-[0.12em] uppercase block mb-1">ScoutIt Insight</span>
                 <p className="font-serif text-sm text-text-secondary m-0">This is a ScoutIt Insight — a projection based on available data, not a verified fact.</p>
               </GlassPanel>
             ) : null}
@@ -169,7 +169,7 @@ export default async function IntelArticlePage({ params, searchParams }) {
             {/* Advisory Note */}
             {article.recommendation ? (
               <GlassPanel className="p-6 mt-12 bg-surface-alt border-surface-variant">
-                <span className="font-mono text-[10px] text-gold-accent tracking-[0.15em] uppercase block mb-3">SCOUTIT BRIEFING RECOMMENDATION</span>
+                <span className="font-mono text-[12px] text-gold-accent tracking-[0.12em] uppercase block mb-3">SCOUTIT BRIEFING RECOMMENDATION</span>
                 <p className="font-serif text-sm text-text-primary leading-relaxed m-0">{article.recommendation}</p>
               </GlassPanel>
             ) : null}
@@ -179,11 +179,11 @@ export default async function IntelArticlePage({ params, searchParams }) {
               <GlassPanel className="p-6 mt-6 bg-surface-alt/70 border border-surface-variant">
                 <div className="flex items-center justify-between gap-4 flex-wrap">
                   <div>
-                    <span className="font-mono text-[10px] text-gold-accent tracking-[0.15em] uppercase block mb-1">OSINT SOURCE & PROVENANCE</span>
+                    <span className="font-mono text-[12px] text-gold-accent tracking-[0.12em] uppercase block mb-1">OSINT SOURCE & PROVENANCE</span>
                     <p className="font-sans text-xs text-text-secondary m-0">Synthesized from primary filing &bull; <strong className="text-text-primary">{article.sourceName}</strong></p>
                   </div>
                   {article.sourceUrl ? (
-                    <a href={article.sourceUrl} target="_blank" rel="noopener noreferrer" className="font-mono text-[11px] text-gold-accent hover:underline flex items-center gap-1.5 no-underline border border-gold-accent/30 px-3 py-1.5 rounded-sm hover:bg-gold-accent/10 transition-colors">
+                    <a href={article.sourceUrl} target="_blank" rel="noopener noreferrer" className="font-mono text-[12px] text-gold-accent hover:underline flex items-center gap-1.5 no-underline border border-gold-accent/30 px-3 py-1.5 rounded-sm hover:bg-gold-accent/10 transition-colors">
                       <span>View Source Gazette</span>
                       <span>↗</span>
                     </a>
@@ -197,7 +197,7 @@ export default async function IntelArticlePage({ params, searchParams }) {
               <div className="absolute top-0 right-0 w-48 h-48 bg-gold-accent/5 rounded-full blur-3xl pointer-events-none" />
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
                 <div>
-                  <span className="font-mono text-[10px] text-gold-accent tracking-[0.15em] uppercase block mb-1">
+                  <span className="font-mono text-[12px] text-gold-accent tracking-[0.12em] uppercase block mb-1">
                     APPLY THIS INTELLIGENCE
                   </span>
                   <h4 className="font-serif text-lg text-text-primary mb-1">
@@ -211,7 +211,7 @@ export default async function IntelArticlePage({ params, searchParams }) {
                 </div>
                 <Link
                   href={article.city ? `/property?q=${encodeURIComponent(article.city)}` : `/property?type=${encodeURIComponent(article.category || 'Commercial')}`}
-                  className="font-mono text-[11px] tracking-wider uppercase font-semibold text-background bg-gold-accent hover:opacity-90 px-5 py-3 rounded transition-all active:scale-95 text-center shrink-0 shadow-[0_0_15px_rgba(232,174,60,0.25)]"
+                  className="font-mono text-[12px] tracking-wider uppercase font-semibold text-background bg-gold-accent hover:opacity-90 px-5 py-3 rounded transition-all active:scale-95 text-center shrink-0 shadow-[0_0_15px_rgba(232,174,60,0.25)]"
                 >
                   Explore Affected Spaces →
                 </Link>

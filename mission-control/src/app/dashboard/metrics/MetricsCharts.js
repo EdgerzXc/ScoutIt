@@ -71,9 +71,9 @@ function Chart({ title, data, unit }) {
   const isEmpty = data.every((d) => d.value === 0);
   return (
     <div className="bg-surface border border-line rounded-xl p-4">
-      <div className="text-xs text-white/50 mb-3">{title}</div>
+      <div className="text-xs text-white/70 mb-3">{title}</div>
       {isEmpty ? (
-        <div className="h-[180px] flex items-center justify-center text-xs text-white/30">
+        <div className="h-[180px] flex items-center justify-center text-xs text-white/70">
           No activity in this window yet.
         </div>
       ) : (
@@ -82,12 +82,12 @@ function Chart({ title, data, unit }) {
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
             <XAxis
               dataKey="name"
-              tick={{ fill: "rgba(255,255,255,0.35)", fontSize: 10 }}
+              tick={{ fill: "rgba(255,255,255,0.35)", fontSize: 12 }}
               axisLine={{ stroke: "rgba(255,255,255,0.1)" }}
               tickLine={false}
             />
             <YAxis
-              tick={{ fill: "rgba(255,255,255,0.35)", fontSize: 10 }}
+              tick={{ fill: "rgba(255,255,255,0.35)", fontSize: 12 }}
               axisLine={false}
               tickLine={false}
               allowDecimals={false}
@@ -131,7 +131,7 @@ export default function MetricsCharts({ series }) {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <div className="text-xs text-white/50">Trends</div>
+        <div className="text-xs text-white/70">Trends</div>
         <div className="flex gap-1 bg-surface border border-line rounded-lg p-1">
           {Object.entries(PERIODS).map(([key, p]) => (
             <button
@@ -140,7 +140,7 @@ export default function MetricsCharts({ series }) {
               className={`px-3 py-1.5 rounded-md text-xs transition-colors ${
                 period === key
                   ? "bg-[rgba(232,174,60,0.15)] text-[#F7C64E]"
-                  : "text-white/50 hover:text-white hover:bg-white/5"
+                  : "text-white/70 hover:text-white hover:bg-white/5"
               }`}
             >
               {p.label}

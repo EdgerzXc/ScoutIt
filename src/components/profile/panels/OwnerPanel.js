@@ -50,7 +50,7 @@ export default function OwnerPanel({ listings = [], inquiryCount = 0 }) {
                 <span style={{ fontFamily: "var(--font-body)", fontSize: 13, color: "#e5e2e1" }}>
                   {l.title}
                 </span>
-                <span style={{ fontFamily: "var(--font-body)", fontSize: 11, color: "var(--text-secondary)" }}>
+                <span style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "var(--text-secondary)" }}>
                   {l.location} · {l.type}
                 </span>
               </div>
@@ -58,7 +58,7 @@ export default function OwnerPanel({ listings = [], inquiryCount = 0 }) {
                 <span
                   style={{
                     fontFamily: "var(--font-body)",
-                    fontSize: 9,
+                    fontSize: 12,
                     letterSpacing: "0.08em",
                     textTransform: "uppercase",
                     color: l.verified ? "#4caf7d" : "var(--text-secondary)",
@@ -73,7 +73,7 @@ export default function OwnerPanel({ listings = [], inquiryCount = 0 }) {
             </div>
           ))}
           {listings.length > 3 && (
-            <Link href="/dashboard" style={{ fontFamily: "var(--font-body)", fontSize: 11, color: "#E8AE3C", marginTop: 4 }}>
+            <Link href="/dashboard" style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "#E8AE3C", marginTop: 4 }}>
               +{listings.length - 3} more listings
             </Link>
           )}
@@ -100,7 +100,7 @@ const panelHeader = {
 
 const panelLabel = {
   fontFamily: "var(--font-mono)",
-  fontSize: 10,
+  fontSize: 12,
   fontWeight: 700,
   letterSpacing: "0.14em",
   textTransform: "uppercase",
@@ -109,7 +109,7 @@ const panelLabel = {
 
 const privateBadge = {
   fontFamily: "var(--font-mono)",
-  fontSize: 9,
+  fontSize: 12,
   letterSpacing: "0.1em",
   textTransform: "uppercase",
   color: "var(--text-secondary)",
@@ -145,7 +145,7 @@ const statValue = {
 
 const statLabel = {
   fontFamily: "var(--font-mono)",
-  fontSize: 9,
+  fontSize: 12,
   color: "var(--text-secondary)",
   letterSpacing: "0.06em",
   marginTop: 2,

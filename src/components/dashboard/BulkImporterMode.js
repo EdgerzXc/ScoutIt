@@ -184,9 +184,9 @@ export default function BulkImporterMode({ onClose }) {
                   <table className="w-full text-left border-collapse min-w-max">
                     <thead>
                       <tr className="bg-surface/60 backdrop-blur-md border-b border-white/[0.04] sticky top-0 z-10">
-                        <th className="p-3 text-[10px] font-label-caps text-gold-accent uppercase tracking-widest w-12 text-center">#</th>
+                        <th className="p-3 text-[12px] font-label-caps text-gold-accent uppercase tracking-widest w-12 text-center">#</th>
                         {columns.map(col => (
-                          <th key={col} className="p-3 text-[10px] font-label-caps text-gold-accent uppercase tracking-widest border-l border-white/[0.04]">
+                          <th key={col} className="p-3 text-[12px] font-label-caps text-gold-accent uppercase tracking-widest border-l border-white/[0.04]">
                             {col}
                           </th>
                         ))}
@@ -215,12 +215,12 @@ export default function BulkImporterMode({ onClose }) {
                 <div className="lg:hidden flex-1 overflow-auto flex flex-col gap-4 p-4 custom-scrollbar">
                   {csvData.map((row, idx) => (
                     <div key={row._id} className="bg-surface/40 backdrop-blur-xl border border-white/[0.04] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] rounded-2xl p-5 flex flex-col gap-3 relative transition-all duration-300 hover:shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
-                      <div className="absolute top-5 right-5 bg-gold-accent/10 text-gold-accent text-[10px] font-label-caps px-2 py-0.5 rounded uppercase tracking-widest">
+                      <div className="absolute top-5 right-5 bg-gold-accent/10 text-gold-accent text-[12px] font-label-caps px-2 py-0.5 rounded uppercase tracking-widest">
                         Row {idx + 1}
                       </div>
                       {columns.map(col => (
                         <div key={col} className="flex flex-col gap-1 pr-16">
-                          <label className="text-[10px] font-label-caps text-text-secondary uppercase tracking-widest">
+                          <label className="text-[12px] font-label-caps text-text-secondary uppercase tracking-widest">
                             {col}
                           </label>
                           <input 

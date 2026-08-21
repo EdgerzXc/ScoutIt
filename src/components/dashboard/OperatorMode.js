@@ -75,7 +75,7 @@ export default function OperatorMode() {
   return (
     <div className="w-full flex flex-col gap-6">
       <div>
-        <span className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase mb-1 block">
+        <span className="font-label-caps text-[12px] tracking-widest text-gold-accent uppercase mb-1 block">
           Operator Dashboard
         </span>
         <h1 className="font-display-md text-3xl md:text-4xl text-on-surface">Operated Spaces</h1>

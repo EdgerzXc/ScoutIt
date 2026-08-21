@@ -42,12 +42,12 @@ function CopyBox({ label, text }) {
   return (
     <div className="mb-6">
       <div className="flex justify-between items-center mb-2">
-        <div className="text-[11px] font-label-caps tracking-widest text-gold-accent uppercase">
+        <div className="text-[12px] font-label-caps tracking-widest text-gold-accent uppercase">
           {label}
         </div>
         <button
           onClick={handleCopy}
-          className="text-xs text-on-surface/50 hover:text-gold-accent flex items-center gap-1 transition-colors"
+          className="text-xs text-on-surface/70 hover:text-gold-accent flex items-center gap-1 transition-colors"
         >
           {copied ? <Check size={14} /> : <Copy size={14} />}
           {copied ? "Copied" : "Copy"}
@@ -127,7 +127,7 @@ export default function PromoteModal({ isOpen, onClose, propertyData, link }) {
           <div className="flex items-center justify-between p-5 border-b border-white/5 bg-[#0e0e0e]/40">
             <div className="flex items-center gap-2 text-gold-accent">
               <Sparkles size={18} />
-              <h2 className="font-mono text-sm uppercase tracking-[0.15em] font-semibold text-gold-accent">1-Click AI Promote</h2>
+              <h2 className="font-mono text-sm uppercase tracking-[0.12em] font-semibold text-gold-accent">1-Click AI Promote</h2>
             </div>
             <button onClick={onClose} className="p-1 text-[#f0ede8]/50 hover:text-white transition-colors rounded">
               <X size={20} />
@@ -140,7 +140,7 @@ export default function PromoteModal({ isOpen, onClose, propertyData, link }) {
           {loading && !data && (
             <div className="flex flex-col items-center justify-center py-20">
               <div className="w-12 h-12 rounded-full border-2 border-gold-accent/20 border-t-gold-accent animate-spin mb-4" />
-              <div className="text-[11px] font-label-caps tracking-widest text-gold-accent uppercase animate-pulse">
+              <div className="text-[12px] font-label-caps tracking-widest text-gold-accent uppercase animate-pulse">
                 Assimilating Intelligence...
               </div>
             </div>
@@ -157,7 +157,7 @@ export default function PromoteModal({ isOpen, onClose, propertyData, link }) {
               <p className="text-sm text-text-secondary mb-2">
                 Promotional copy built strictly from this listing&apos;s recorded specs — nothing invented, ready to share.
               </p>
-              <p className="text-[10px] font-label-caps tracking-widest uppercase text-text-secondary/70 mb-6">
+              <p className="text-[12px] font-label-caps tracking-widest uppercase text-text-secondary/70 mb-6">
                 {source === "ai" ? "AI-drafted · grounded in verified listing data" : "Composed from verified listing data"}
               </p>
 

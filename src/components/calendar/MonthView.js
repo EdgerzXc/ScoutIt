@@ -44,7 +44,7 @@ export default function MonthView({ viewDate, events, onSelectEvent, onSelectDay
         {WEEKDAY_LABELS.map((d) => (
           <div
             key={d}
-            className="px-2 py-2 text-[11px] uppercase tracking-wider font-mono text-text-muted text-center"
+            className="px-2 py-2 text-[12px] uppercase tracking-wider font-mono text-text-muted text-center"
           >
             {d}
           </div>
@@ -80,7 +80,7 @@ export default function MonthView({ viewDate, events, onSelectEvent, onSelectDay
                   <EventChip key={ev.id} event={ev} onClick={() => onSelectEvent(ev)} />
                 ))}
                 {overflow > 0 && (
-                  <span className="text-[10px] font-mono text-text-muted pl-1">+{overflow} more</span>
+                  <span className="text-[12px] font-mono text-text-muted pl-1">+{overflow} more</span>
                 )}
               </div>
             </div>

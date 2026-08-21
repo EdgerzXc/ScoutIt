@@ -111,9 +111,9 @@ export default function TrustBadge({
            every button min-height/min-width 48px under
            `(hover: none) and (pointer: coarse)`, so the tap target is met
            site-wide; adding padding here only double-pays it. */
-        className="relative inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-gold-accent/40 bg-gold-accent/10 hover:bg-gold-accent/20 transition-colors font-mono text-[10px] uppercase tracking-wider text-gold-accent cursor-pointer focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-accent"
+        className="relative inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-gold-accent/40 bg-gold-accent/10 hover:bg-gold-accent/20 transition-colors font-mono text-[12px] uppercase tracking-wider text-gold-accent cursor-pointer focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-accent"
       >
-        <span className="text-[10px] leading-none">{badge.icon || "🛡️"}</span>
+        <span className="text-[12px] leading-none">{badge.icon || "🛡️"}</span>
         <span className="font-semibold">{badge.name}</span>
       </button>
 
@@ -130,22 +130,22 @@ export default function TrustBadge({
           className="fixed block p-3 bg-surface/95 backdrop-blur-xl border border-white/10 rounded-lg shadow-2xl z-50 text-left pointer-events-none motion-safe:animate-[badgePopIn_150ms_cubic-bezier(0.23,1,0.32,1)]"
         >
           <span className="flex items-center justify-between gap-2 mb-1.5 pb-1 border-b border-white/[0.08]">
-            <span className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-gold-accent font-bold">
+            <span className="flex items-center gap-1.5 font-mono text-[12px] uppercase tracking-widest text-gold-accent font-bold">
               <span>{badge.icon || "🛡️"}</span>
               <span>{badge.name}</span>
             </span>
-            <span className="font-mono text-[10px] text-muted uppercase tracking-wider shrink-0">
+            <span className="font-mono text-[12px] text-muted uppercase tracking-wider shrink-0">
               {verifiedDate}
             </span>
           </span>
-          <span className="block font-sans text-[11px] text-text-secondary leading-relaxed mb-2">
+          <span className="block font-sans text-[12px] text-text-secondary leading-relaxed mb-2">
             {badge.description}
           </span>
           <span className="block bg-black/30 p-1.5 rounded border border-white/[0.04]">
-            <span className="block font-mono text-[10px] uppercase tracking-widest text-muted mb-0.5">
+            <span className="block font-mono text-[12px] uppercase tracking-widest text-muted mb-0.5">
               Verification Proof
             </span>
-            <span className="block font-sans text-[10px] text-text-primary leading-tight">
+            <span className="block font-sans text-[12px] text-text-primary leading-tight">
               {badge.criteria}
             </span>
           </span>

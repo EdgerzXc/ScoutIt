@@ -36,7 +36,7 @@ export default function EventChip({ event, onClick, showTime = true }) {
         onClick?.(e);
       }}
       title={event.title}
-      className={`w-full text-left px-1.5 py-0.5 rounded border text-[11px] leading-tight truncate
+      className={`w-full text-left px-1.5 py-0.5 rounded border text-[12px] leading-tight truncate
         transition-colors hover:brightness-125 focus:outline-none focus:ring-1 focus:ring-gold-accent
         ${eventStyle(event)} ${cancelled ? "line-through opacity-50" : ""}`}
     >

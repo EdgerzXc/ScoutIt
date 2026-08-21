@@ -27,7 +27,7 @@ export default function PostMoveEcosystem() {
       <div className="border-b border-surface-variant pb-2">
         <h2 className="font-headline-editorial text-2xl text-on-surface flex items-center justify-between">
           Post-Move Ecosystem
-          <span className="font-label-caps tracking-widest text-[10px] text-gold-accent px-2 py-1 bg-gold-accent/10 rounded">THE WIRE</span>
+          <span className="font-label-caps tracking-widest text-[12px] text-gold-accent px-2 py-1 bg-gold-accent/10 rounded">THE WIRE</span>
         </h2>
         <p className="text-xs text-text-secondary mt-1">Settle in. Connect your utilities, track your move-in steps, and activate essential services.</p>
       </div>
@@ -39,7 +39,7 @@ export default function PostMoveEcosystem() {
           <div className="card-atmosphere hov-card rounded-lg p-6 transition h-full">
             <div className="flex justify-between items-end mb-6">
               <div>
-                <span className="font-label-caps text-[10px] tracking-widest uppercase text-gold-accent block mb-1">Logistics</span>
+                <span className="font-label-caps text-[12px] tracking-widest uppercase text-gold-accent block mb-1">Logistics</span>
                 <h3 className="font-working-title text-lg text-on-surface">Move-In Checklist</h3>
               </div>
               <div className="font-mono text-sm text-gold-accent">{progress}%</div>
@@ -79,7 +79,7 @@ export default function PostMoveEcosystem() {
             <div className="absolute inset-0 bg-gradient-to-br from-gold-accent/10 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
             
             <div className="flex flex-col gap-3 relative z-10 w-full max-w-sm">
-              <span className="font-label-caps text-[10px] tracking-widest uppercase text-gold-accent block">The Wire</span>
+              <span className="font-label-caps text-[12px] tracking-widest uppercase text-gold-accent block">The Wire</span>
               <h3 className="font-headline-editorial text-2xl text-on-surface group-hover:text-gold-accent transition">Access the Utilities Hub</h3>
               <p className="text-sm text-text-secondary leading-relaxed">
                 Connect your fiber internet, transfer Meralco power accounts, setup water supply, and hire logistics guilds directly from our public Trust layer.

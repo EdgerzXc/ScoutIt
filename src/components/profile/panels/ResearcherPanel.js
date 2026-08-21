@@ -71,7 +71,7 @@ const panelHeader = {
 
 const panelLabel = {
   fontFamily: "var(--font-body)",
-  fontSize: 10,
+  fontSize: 12,
   fontWeight: 700,
   letterSpacing: "0.14em",
   textTransform: "uppercase",
@@ -80,7 +80,7 @@ const panelLabel = {
 
 const anonBadge = {
   fontFamily: "var(--font-body)",
-  fontSize: 10,
+  fontSize: 12,
   color: "var(--text-secondary)",
   border: "1px solid rgba(255,255,255,0.1)",
   padding: "2px 8px",
@@ -114,7 +114,7 @@ const statValue = {
 
 const statLabel = {
   fontFamily: "var(--font-body)",
-  fontSize: 10,
+  fontSize: 12,
   color: "var(--text-secondary)",
   letterSpacing: "0.06em",
   marginTop: 2,

@@ -83,7 +83,7 @@ export default function SeekerPricingPage() {
         <div className="absolute bottom-[-10%] right-[10%] w-[600px] h-[600px] bg-surface-alt/20 rounded-full blur-[100px] pointer-events-none"></div>
 
         <header className="pricing-header z-10 relative">
-          <span className="vector-label text-gold-accent tracking-[0.3em] uppercase text-xs font-bold mb-4 block drop-shadow-md">
+          <span className="vector-label text-gold-accent tracking-[0.12em] uppercase text-xs font-bold mb-4 block drop-shadow-md">
             LAYER 08 // SEEKER INTELLIGENCE
           </span>
           <h1 className="page-title text-5xl md:text-6xl font-display-md text-white mb-6 drop-shadow-lg">
@@ -109,7 +109,7 @@ export default function SeekerPricingPage() {
               {tier.highlight && (
                 <>
                   <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-gold-accent to-gold-bright shadow-[0_0_15px_rgba(232,174,60,0.8)]"></div>
-                  <div className="absolute top-4 right-4 bg-gold-accent text-background text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-[0_0_10px_rgba(232,174,60,0.3)]">
+                  <div className="absolute top-4 right-4 bg-gold-accent text-background text-[12px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-[0_0_10px_rgba(232,174,60,0.3)]">
                     Most Popular
                   </div>
                   <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-gold-accent/10 rounded-full blur-3xl"></div>

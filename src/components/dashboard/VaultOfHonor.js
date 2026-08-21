@@ -18,7 +18,7 @@ export default function VaultOfHonor() {
         <div>
           <h2 className="font-headline-editorial text-2xl text-on-surface flex items-center gap-3">
             Milestones & Achievements
-            <span className="font-label-caps tracking-widest text-[10px] text-gold-accent px-2 py-1 bg-gold-accent/10 border border-gold-accent/30 rounded">
+            <span className="font-label-caps tracking-widest text-[12px] text-gold-accent px-2 py-1 bg-gold-accent/10 border border-gold-accent/30 rounded">
               {unlockedBadges.length} / {BADGE_REGISTRY.length} UNLOCKED
             </span>
           </h2>
@@ -32,7 +32,7 @@ export default function VaultOfHonor() {
           onClick={() => setIsLoaded(true)}
           className="w-full rounded-xl border border-surface-variant hover:border-gold-accent/50 bg-background py-10 flex flex-col items-center justify-center gap-2 transition group"
         >
-          <span className="font-label-caps tracking-widest text-[10px] text-gold-accent group-hover:text-gold-accent-bright">
+          <span className="font-label-caps tracking-widest text-[12px] text-gold-accent group-hover:text-gold-accent-bright">
             Tap to Load
           </span>
           <span className="text-sm text-text-secondary">View your milestones & achievements</span>
@@ -91,13 +91,13 @@ export default function VaultOfHonor() {
                 
                 {/* Rarity Label (Unlocked only) */}
                 {isUnlocked && (
-                  <span className="font-label-caps text-[10px] tracking-widest uppercase text-gold-accent/80 block mb-2">
+                  <span className="font-label-caps text-[12px] tracking-widest uppercase text-gold-accent/80 block mb-2">
                     {badge.rarity}
                   </span>
                 )}
 
                 {/* Description (Visible on unlocked, hidden on locked until hover) */}
-                <div className={`text-[10px] leading-relaxed transition duration-300 ${isUnlocked ? 'text-text-secondary' : 'text-text-muted/50 group-hover:text-text-secondary group-hover:-translate-y-1'}`}>
+                <div className={`text-[12px] leading-relaxed transition duration-300 ${isUnlocked ? 'text-text-secondary' : 'text-text-muted/50 group-hover:text-text-secondary group-hover:-translate-y-1'}`}>
                   {isUnlocked ? badge.description : badge.unlockCondition}
                 </div>
               </div>

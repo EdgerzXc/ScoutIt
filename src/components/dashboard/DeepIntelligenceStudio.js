@@ -491,11 +491,11 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
         
         <div className="flex items-center gap-4">
           {!isEditing && lastSaved && (
-            <button onClick={clearDraft} className="text-error/80 hover:text-error text-[10px] uppercase font-label-caps tracking-wider transition">
+            <button onClick={clearDraft} className="text-error/80 hover:text-error text-[12px] uppercase font-label-caps tracking-wider transition">
               Delete draft
             </button>
           )}
-          <span className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase">
+          <span className="font-label-caps text-[12px] tracking-widest text-gold-accent uppercase">
             {isEditing ? "Edit Deep Intel" : "New Deep Intel Dossier"}
           </span>
         </div>
@@ -509,12 +509,12 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
         <div className="bg-gold-accent/40 h-3 transition duration-300 absolute top-0 left-0" style={{ width: `${(step / 6) * 100}%` }}></div>
         <div className="bg-success h-3 transition duration-300 relative z-10" style={{ width: `${completionStats.percentage}%` }}></div>
         <div className="absolute inset-0 bg-white/0 hover:bg-white/10 transition z-20 flex items-center justify-center opacity-0 group-hover:opacity-100">
-          <span className="text-[10px] font-mono text-white bg-black/50 px-2 rounded backdrop-blur">JUMP TO NEXT EMPTY FIELD</span>
+          <span className="text-[12px] font-mono text-white bg-black/50 px-2 rounded backdrop-blur">JUMP TO NEXT EMPTY FIELD</span>
         </div>
       </button>
       
       <div className="w-full bg-surface text-center py-1 border-b border-surface-variant">
-        <span className="text-[10px] font-mono text-text-secondary">
+        <span className="text-[12px] font-mono text-text-secondary">
           VAULT COMPLETION: <span className={completionStats.percentage >= 100 ? "text-success" : "text-gold-accent"}>{completionStats.percentage}%</span>
         </span>
       </div>
@@ -718,7 +718,7 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
       
       {/* Preview Pane (Right on Desktop) */}
       <div className={`${mobileTab === 'preview' ? 'block' : 'hidden'} md:block md:col-start-3 md:row-span-2 relative bg-surface-alt md:border-l border-surface-variant overflow-y-auto custom-scrollbar pointer-events-auto flex-1`}>
-        <div className="absolute top-0 left-0 w-full z-50 bg-gold-accent text-background text-center py-1.5 font-label-caps text-[10px] tracking-[0.3em] font-bold shadow-md pointer-events-none">
+        <div className="absolute top-0 left-0 w-full z-50 bg-gold-accent text-background text-center py-1.5 font-label-caps text-[12px] tracking-[0.12em] font-bold shadow-md pointer-events-none">
           LIVE PREVIEW / DRAFT MODE
         </div>
         <div className="mt-10 opacity-90 md:scale-[0.98] origin-top transition pointer-events-auto">

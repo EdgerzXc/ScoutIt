@@ -55,7 +55,7 @@ export default function BrokerPanel({ data, isPublic = false, prcVerified = fals
         {!isPublic && data?.profile_views_this_month != null && (
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <Eye size={12} strokeWidth={1.5} color="var(--text-secondary)" />
-            <span style={{ fontFamily: "var(--font-body)", fontSize: 11, color: "var(--text-secondary)" }}>
+            <span style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "var(--text-secondary)" }}>
               {data.profile_views_this_month} profile views this month
             </span>
           </div>
@@ -78,7 +78,7 @@ export default function BrokerPanel({ data, isPublic = false, prcVerified = fals
                 {Number(data.scout_rating ?? 0).toFixed(1)}
               </span>
               <div style={{ display: "flex", flexDirection: "column", paddingBottom: 8 }}>
-                <span style={{ fontFamily: "var(--font-body)", fontSize: 11, color: "var(--text-secondary)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+                <span style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "var(--text-secondary)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
                   out of 5.0
                 </span>
                 <div style={{ display: "flex", gap: 3, marginTop: 4 }}>
@@ -108,7 +108,7 @@ export default function BrokerPanel({ data, isPublic = false, prcVerified = fals
               <summary
                 style={{
                   fontFamily: "var(--font-body)",
-                  fontSize: 11,
+                  fontSize: 12,
                   color: "#E8AE3C",
                   cursor: "pointer",
                   letterSpacing: "0.04em",
@@ -166,7 +166,7 @@ const panelHeader = {
 
 const panelLabel = {
   fontFamily: "var(--font-mono)",
-  fontSize: 10,
+  fontSize: 12,
   fontWeight: 700,
   letterSpacing: "0.14em",
   textTransform: "uppercase",
@@ -178,7 +178,7 @@ const prcBadge = {
   alignItems: "center",
   gap: 4,
   fontFamily: "var(--font-mono)",
-  fontSize: 9,
+  fontSize: 12,
   fontWeight: 700,
   letterSpacing: "0.1em",
   color: "#4caf7d",
@@ -221,7 +221,7 @@ const statValue = {
 
 const statLabel = {
   fontFamily: "var(--font-mono)",
-  fontSize: 10,
+  fontSize: 12,
   color: "var(--text-secondary)",
   letterSpacing: "0.06em",
   marginTop: 2,

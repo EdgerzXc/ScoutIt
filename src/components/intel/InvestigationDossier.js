@@ -273,7 +273,7 @@ export default function InvestigationDossier({ dossier }) {
       {/* ── 08 — THE IMPACT ── */}
       <article id="chapter-8" className="dossier-chapter">
         <ChapterHeading num="08" label="The Impact" />
-        <div className="dossier-table-scroll">
+        <div className="dossier-table-scroll" tabIndex={0} aria-label="Scrollable impact matrix">
           <table className="dossier-table">
             <thead>
               <tr>

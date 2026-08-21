@@ -81,7 +81,7 @@ export default function IngestPanel({ property }) {
           onChange={(e) => setJson(e.target.value)}
           rows={5}
           placeholder='Paste the AI JSON output here, e.g. { "title": "...", "space_category": "commercial", "price": 45000000, ... }'
-          className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-white font-mono placeholder:text-white/30"
+          className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-white font-mono placeholder:text-white/70"
         />
         <div className="flex items-center gap-3">
           <button
@@ -91,7 +91,7 @@ export default function IngestPanel({ property }) {
             <Sparkles className="w-3.5 h-3.5" />
             {saving ? "Applying…" : "Apply synthesis"}
           </button>
-          <span className="text-[10px] text-white/30">
+          <span className="text-[12px] text-white/70">
             Maps fields onto the draft and marks it ready for review. Nothing publishes yet.
           </span>
         </div>
@@ -100,12 +100,12 @@ export default function IngestPanel({ property }) {
       {/* Inline media / Vault link editor */}
       <form action={updateMedia} className="flex items-center gap-2 pt-2 border-t border-white/5">
         <input type="hidden" name="propertyId" value={property.id} />
-        <Link2 className="w-3.5 h-3.5 text-white/40 shrink-0" />
+        <Link2 className="w-3.5 h-3.5 text-white/70 shrink-0" />
         <input
           name="media_link"
           defaultValue={property.media_link || ""}
           placeholder="Media / Spatial Vault URL"
-          className="flex-1 bg-black/50 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white placeholder:text-white/30"
+          className="flex-1 bg-black/50 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white placeholder:text-white/70"
         />
         <button className="px-3 py-1.5 text-xs text-white/70 hover:text-white border border-white/10 rounded-lg hover:bg-white/5 transition-colors whitespace-nowrap">
           Save link

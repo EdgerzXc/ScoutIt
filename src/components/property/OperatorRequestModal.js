@@ -148,7 +148,7 @@ export default function OperatorRequestModal({ isOpen, onClose, propertyTitle, p
                     exit="exit"
                   >
                     <div className="mb-6">
-                      <span className="font-mono text-[10px] text-gold-accent tracking-[0.15em] uppercase block mb-2">
+                      <span className="font-mono text-[12px] text-gold-accent tracking-[0.12em] uppercase block mb-2">
                         1 Connect Required
                       </span>
                       <h2 className="font-serif text-[28px] text-[#f0ede8] font-normal mb-1.5">Request to Operate This Building</h2>

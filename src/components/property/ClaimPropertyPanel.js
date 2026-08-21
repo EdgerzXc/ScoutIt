@@ -337,9 +337,9 @@ function ClaimStyles() {
       }
       .cp-eyebrow {
         font-family: ${MONO};
-        font-size: 9px;
+        font-size: 12px;
         color: #E8AE3C;
-        letter-spacing: 0.22em;
+        letter-spacing: 0.12em;
         text-transform: uppercase;
         margin-bottom: 9px;
       }
@@ -369,7 +369,7 @@ function ClaimStyles() {
       }
       .cp-meta {
         font-family: ${MONO};
-        font-size: 9px;
+        font-size: 12px;
         color: var(--text-muted, #5a5a5a);
         letter-spacing: 0.1em;
         text-transform: uppercase;
@@ -379,9 +379,9 @@ function ClaimStyles() {
       .cp-fieldset { border: none; padding: 0; margin: 0 0 4px; }
       .cp-legend {
         font-family: ${MONO};
-        font-size: 9px;
+        font-size: 12px;
         color: var(--text-muted, #8a8a8a);
-        letter-spacing: 0.16em;
+        letter-spacing: 0.12em;
         text-transform: uppercase;
         padding: 0;
         margin-bottom: 10px;
@@ -463,7 +463,7 @@ function ClaimStyles() {
 
       .cp-hint {
         font-family: ${MONO};
-        font-size: 9.5px;
+        font-size: 12px;
         color: #8a8a8a;
         letter-spacing: 0.06em;
         line-height: 1.7;
@@ -471,7 +471,7 @@ function ClaimStyles() {
       }
       .cp-error {
         font-family: ${MONO};
-        font-size: 10px;
+        font-size: 12px;
         color: #e8644a;
         letter-spacing: 0.05em;
         line-height: 1.7;
@@ -493,8 +493,8 @@ function ClaimStyles() {
         padding: 0 18px;
         border-radius: 3px;
         font-family: ${MONO};
-        font-size: 10px;
-        letter-spacing: 0.15em;
+        font-size: 12px;
+        letter-spacing: 0.12em;
         text-transform: uppercase;
         text-decoration: none;
         cursor: pointer;

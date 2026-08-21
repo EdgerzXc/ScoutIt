@@ -239,7 +239,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
     <div className="w-full flex flex-col gap-5">
       {/* Toolbar */}
       <div className="flex flex-col lg:flex-row lg:items-center gap-3 lg:gap-4 bg-surface border border-surface-variant rounded-lg p-3">
-        <div className="flex items-center gap-2 font-label-caps text-[10px] tracking-widest text-gold-accent uppercase shrink-0">
+        <div className="flex items-center gap-2 font-label-caps text-[12px] tracking-widest text-gold-accent uppercase shrink-0">
           <Layers size={14} />
           <span>{units.length} {units.length === 1 ? "unit" : "units"}</span>
           <span className="text-text-muted">·</span>
@@ -266,7 +266,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
         {/* Bulk add — owner only, operators can't add units */}
         {!isOperatorMode && (
           <div className="flex items-center gap-2 shrink-0">
-            <span className="font-label-caps text-[10px] tracking-widest text-text-secondary uppercase hidden sm:block">Bulk add</span>
+            <span className="font-label-caps text-[12px] tracking-widest text-text-secondary uppercase hidden sm:block">Bulk add</span>
             <input
               type="number"
               min={1}
@@ -328,8 +328,8 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                   className="flex items-center gap-2 text-gold-accent hover:text-gold-accent-hover transition"
                 >
                   {collapsed ? <ChevronRight size={16} /> : <ChevronDown size={16} />}
-                  <span className="font-label-caps text-[11px] tracking-widest uppercase">{floorLabel(floorKey)}</span>
-                  <span className="font-label-caps text-[10px] tracking-widest text-text-muted uppercase">
+                  <span className="font-label-caps text-[12px] tracking-widest uppercase">{floorLabel(floorKey)}</span>
+                  <span className="font-label-caps text-[12px] tracking-widest text-text-muted uppercase">
                     · {floorUnits.length} {floorUnits.length === 1 ? "unit" : "units"}
                   </span>
                 </button>
@@ -350,13 +350,13 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                   <table className="w-full text-left border-collapse min-w-[820px]">
                     <thead>
                       <tr className="border-b border-white/[0.04]">
-                        <th className="p-3 font-label-caps text-[10px] tracking-widest text-text-secondary uppercase w-[20%]">Unit Identifier</th>
-                        <th className="p-3 font-label-caps text-[10px] tracking-widest text-text-secondary uppercase w-[10%]">Size (sqm)</th>
-                        <th className="p-3 font-label-caps text-[10px] tracking-widest text-text-secondary uppercase w-[10%]">Floor</th>
-                        <th className="p-3 font-label-caps text-[10px] tracking-widest text-text-secondary uppercase w-[24%]">Tags &amp; Features</th>
-                        <th className="p-3 font-label-caps text-[10px] tracking-widest text-text-secondary uppercase text-center w-[8%]">Media</th>
-                        <th className="p-3 font-label-caps text-[10px] tracking-widest text-text-secondary uppercase w-[10%]">Availability</th>
-                        <th className="p-3 font-label-caps text-[10px] tracking-widest text-text-secondary uppercase w-[10%]">Operator</th>
+                        <th className="p-3 font-label-caps text-[12px] tracking-widest text-text-secondary uppercase w-[20%]">Unit Identifier</th>
+                        <th className="p-3 font-label-caps text-[12px] tracking-widest text-text-secondary uppercase w-[10%]">Size (sqm)</th>
+                        <th className="p-3 font-label-caps text-[12px] tracking-widest text-text-secondary uppercase w-[10%]">Floor</th>
+                        <th className="p-3 font-label-caps text-[12px] tracking-widest text-text-secondary uppercase w-[24%]">Tags &amp; Features</th>
+                        <th className="p-3 font-label-caps text-[12px] tracking-widest text-text-secondary uppercase text-center w-[8%]">Media</th>
+                        <th className="p-3 font-label-caps text-[12px] tracking-widest text-text-secondary uppercase w-[10%]">Availability</th>
+                        <th className="p-3 font-label-caps text-[12px] tracking-widest text-text-secondary uppercase w-[10%]">Operator</th>
                         <th className="p-3 w-[8%]" />
                       </tr>
                     </thead>
@@ -382,7 +382,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                               {lockedForOwner ? (
                                 <div className="px-2 py-1">
                                   <div className="text-sm text-text-primary">{unit.name || "Unnamed unit"}</div>
-                                  <div className="flex items-center gap-1 text-[10px] text-gold-accent font-label-caps tracking-wide uppercase mt-0.5">
+                                  <div className="flex items-center gap-1 text-[12px] text-gold-accent font-label-caps tracking-wide uppercase mt-0.5">
                                     <Lock size={9} /> Operated by {unit.operatorDisplayName || "another party"}
                                   </div>
                                 </div>
@@ -435,7 +435,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                               {(unit.features || []).length > 0 && (
                                 <div className="flex flex-wrap gap-1.5 mb-2">
                                   {(unit.features || []).map((feature, idx) => (
-                                    <span key={idx} className="inline-flex items-center gap-1 px-2 py-1 bg-surface-variant border border-gold-accent/20 text-[11px] text-text-primary rounded uppercase tracking-wide font-working-title">
+                                    <span key={idx} className="inline-flex items-center gap-1 px-2 py-1 bg-surface-variant border border-gold-accent/20 text-[12px] text-text-primary rounded uppercase tracking-wide font-working-title">
                                       {feature}
                                       {!structuralReadOnly && (
                                         <button onClick={() => removeFeature(unit.id, feature)} aria-label={`Remove ${feature}`} className="text-text-muted hover:text-error transition">
@@ -491,7 +491,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                               >
                                 <Upload size={18} />
                               </button>
-                              <div className="text-[10px] text-text-secondary mt-1 flex items-center justify-center gap-1">
+                              <div className="text-[12px] text-text-secondary mt-1 flex items-center justify-center gap-1">
                                 {!isPro && atPhotoLimit && <Lock size={9} className="text-text-muted" />}
                                 {photoCount}/{maxPhotos}
                               </div>
@@ -602,11 +602,11 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                         {/* Name & Actions Header */}
                         <div className="flex justify-between items-start gap-2">
                           <div className="flex-1">
-                            <span className="font-label-caps text-[10px] text-text-secondary uppercase tracking-widest block mb-1">Unit Name</span>
+                            <span className="font-label-caps text-[12px] text-text-secondary uppercase tracking-widest block mb-1">Unit Name</span>
                             {lockedForOwner ? (
                                 <div>
                                   <div className="text-sm text-text-primary font-working-title">{unit.name || "Unnamed unit"}</div>
-                                  <div className="flex items-center gap-1 text-[10px] text-gold-accent font-label-caps tracking-wide uppercase mt-1">
+                                  <div className="flex items-center gap-1 text-[12px] text-gold-accent font-label-caps tracking-wide uppercase mt-1">
                                     <Lock size={9} /> Operated by {unit.operatorDisplayName || "another party"}
                                   </div>
                                 </div>
@@ -660,7 +660,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                         {/* Size and Floor */}
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <span className="font-label-caps text-[10px] text-text-secondary uppercase tracking-widest block mb-1">Size (sqm)</span>
+                                <span className="font-label-caps text-[12px] text-text-secondary uppercase tracking-widest block mb-1">Size (sqm)</span>
                                 {structuralReadOnly ? (
                                     <span className="text-sm text-text-secondary block">{unit.size || "—"}</span>
                                 ) : (
@@ -676,7 +676,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                                 )}
                             </div>
                             <div>
-                                <span className="font-label-caps text-[10px] text-text-secondary uppercase tracking-widest block mb-1">Floor</span>
+                                <span className="font-label-caps text-[12px] text-text-secondary uppercase tracking-widest block mb-1">Floor</span>
                                 {structuralReadOnly ? (
                                     <span className="text-sm text-text-secondary block">{unit.floor || "—"}</span>
                                 ) : (
@@ -695,11 +695,11 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
 
                         {/* Features */}
                         <div>
-                            <span className="font-label-caps text-[10px] text-text-secondary uppercase tracking-widest block mb-2">Tags & Features</span>
+                            <span className="font-label-caps text-[12px] text-text-secondary uppercase tracking-widest block mb-2">Tags & Features</span>
                             {(unit.features || []).length > 0 && (
                               <div className="flex flex-wrap gap-1.5 mb-2">
                                 {(unit.features || []).map((feature, idx) => (
-                                  <span key={idx} className="inline-flex items-center gap-1 px-2 py-1 bg-surface-alt border border-gold-accent/20 text-[11px] text-text-primary rounded uppercase tracking-wide font-working-title">
+                                  <span key={idx} className="inline-flex items-center gap-1 px-2 py-1 bg-surface-alt border border-gold-accent/20 text-[12px] text-text-primary rounded uppercase tracking-wide font-working-title">
                                     {feature}
                                     {!structuralReadOnly && (
                                       <button onClick={() => removeFeature(unit.id, feature)} className="text-text-muted hover:text-error transition">
@@ -732,7 +732,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                         {/* Media, Availability, Operator Grid */}
                         <div className="grid grid-cols-2 gap-4 mt-2 border-t border-surface-variant/40 pt-4">
                             <div>
-                                <span className="font-label-caps text-[10px] text-text-secondary uppercase tracking-widest block mb-1">Availability</span>
+                                <span className="font-label-caps text-[12px] text-text-secondary uppercase tracking-widest block mb-1">Availability</span>
                                 <select
                                     value={unit.availabilityStatus || "available"}
                                     onChange={(e) => updateUnit(unit.id, "availabilityStatus", e.target.value, true)}
@@ -744,7 +744,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                                 </select>
                             </div>
                             <div>
-                                <span className="font-label-caps text-[10px] text-text-secondary uppercase tracking-widest block mb-1">Operator</span>
+                                <span className="font-label-caps text-[12px] text-text-secondary uppercase tracking-widest block mb-1">Operator</span>
                                 <select
                                     value={unit.operatorId || ""}
                                     onChange={(e) => {
@@ -762,7 +762,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                             </div>
                         </div>
                         <div className="mt-2">
-                            <span className="font-label-caps text-[10px] text-text-secondary uppercase tracking-widest block mb-1">Media ({photoCount}/{maxPhotos})</span>
+                            <span className="font-label-caps text-[12px] text-text-secondary uppercase tracking-widest block mb-1">Media ({photoCount}/{maxPhotos})</span>
                             <div className={`flex items-center gap-3 transition ${uploadingUnitId === unit.id ? "opacity-50" : ""}`}
                                 onDragOver={(e) => !lockedForOwner && e.preventDefault()}
                                 onDrop={(e) => !lockedForOwner && handleDirectDrop(e, unit.id)}
@@ -899,7 +899,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
           <div className="bg-surface border border-gold-accent/30 rounded-lg p-6 max-w-sm w-full shadow-2xl">
             <h3 className="font-display-md text-xl text-gold-accent mb-4">Subdivide Space</h3>
             <div className="mb-4">
-              <label className="block text-[11px] text-text-secondary uppercase tracking-widest font-label-caps mb-1">How many spaces are you dividing this into?</label>
+              <label className="block text-[12px] text-text-secondary uppercase tracking-widest font-label-caps mb-1">How many spaces are you dividing this into?</label>
               <input
                 type="number"
                 min={2}
@@ -910,7 +910,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
               />
             </div>
             <div className="mb-6">
-              <label className="block text-[11px] text-text-secondary uppercase tracking-widest font-label-caps mb-1">Average Sqm per space?</label>
+              <label className="block text-[12px] text-text-secondary uppercase tracking-widest font-label-caps mb-1">Average Sqm per space?</label>
               <input
                 type="text"
                 maxLength={50}

@@ -188,7 +188,7 @@ export default function CinematicJourney() {
                 left: `${loop.x + 80}px`,
                 maxWidth: "280px",
                 fontFamily: "var(--font-mono)",
-                fontSize: "11px",
+                fontSize: "12px",
                 color: "var(--accent)", // Gold
                 letterSpacing: "0.08em",
                 lineHeight: "1.6",

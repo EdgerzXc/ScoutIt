@@ -70,7 +70,7 @@ const OwnerListingCard = memo(({
                 <path className="text-gold-accent" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeDasharray={`${completeness}, 100`} strokeWidth="3"></path>
               </svg>
               <div className="absolute inset-0 flex items-center justify-center">
-                <span className="font-data-tabular font-bold text-[10px] text-text-primary leading-none">{completeness}%</span>
+                <span className="font-data-tabular font-bold text-[12px] text-text-primary leading-none">{completeness}%</span>
               </div>
             </div>
           )}
@@ -81,25 +81,25 @@ const OwnerListingCard = memo(({
             <div className="bg-surface-alt/50 p-2.5 rounded border border-surface-variant flex items-center justify-center gap-2 relative overflow-hidden">
               <div className="absolute inset-0 bg-gold-accent/5 opacity-50 animate-pulse"></div>
               <span className="animate-spin text-gold-accent text-xs">⚙️</span>
-              <span className="text-[10px] text-text-secondary font-label-caps uppercase tracking-widest z-10">COUNCIL AI IS DRAFTING...</span>
+              <span className="text-[12px] text-text-secondary font-label-caps uppercase tracking-widest z-10">COUNCIL AI IS DRAFTING...</span>
             </div>
           </div>
         ) : (
           <div className="grid grid-cols-3 gap-2 border-t border-surface-variant pt-4 mt-4">
             <div>
-              <span className="block font-label-caps text-[10px] tracking-widest text-text-muted uppercase mb-1">Inquiries</span>
+              <span className="block font-label-caps text-[12px] tracking-widest text-text-muted uppercase mb-1">Inquiries</span>
               <span className={`font-data-tabular text-lg ${pendingPitchesCount > 0 ? 'text-gold-accent font-bold' : 'text-text-secondary'}`}>
                 {pendingPitchesCount}
               </span>
             </div>
             <div>
-              <span className="block font-label-caps text-[10px] tracking-widest text-text-muted uppercase mb-1">Views</span>
+              <span className="block font-label-caps text-[12px] tracking-widest text-text-muted uppercase mb-1">Views</span>
               <span className="font-data-tabular text-lg text-text-muted" title="View tracking arrives once page instrumentation ships">—</span>
             </div>
             <div className="flex items-end justify-end">
               {!listing.is_sample && (
                 <button 
-                  className="text-gold-accent border border-gold-accent/30 rounded px-3 py-1.5 text-[10px] uppercase font-label-caps tracking-widest hover:bg-gold-accent hover:text-background transition"
+                  className="text-gold-accent border border-gold-accent/30 rounded px-3 py-1.5 text-[12px] uppercase font-label-caps tracking-widest hover:bg-gold-accent hover:text-background transition"
                   onClick={handleShare}
                 >
                   Share

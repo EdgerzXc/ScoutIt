@@ -231,7 +231,7 @@ export default function IntelPage() {
               </span>
               <button
                 onClick={() => setSelectedCity(null)}
-                className="hover:bg-gold-accent/20 text-[10px] uppercase cursor-pointer border border-gold-accent/40 px-3 py-1 rounded-xs transition-colors"
+                className="hover:bg-gold-accent/20 text-[12px] uppercase cursor-pointer border border-gold-accent/40 px-3 py-1 rounded-xs transition-colors"
               >
                 ✕ Clear Location Filter
               </button>
@@ -248,7 +248,7 @@ export default function IntelPage() {
           >
             {/* Left Featured Card (Carousel) */}
             <div className="featured-card-wrapper flex flex-col flex-1 relative">
-              <div className="carousel-header-controls flex items-center justify-between mb-2 px-1 font-mono text-[10px] uppercase tracking-widest text-text-muted">
+              <div className="carousel-header-controls flex items-center justify-between mb-2 px-1 font-mono text-[12px] uppercase tracking-widest text-text-muted">
                 <span className="flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-gold-accent animate-pulse"></span>
                   <span className="text-gold-accent font-bold">OUR TAKE</span>
@@ -288,15 +288,15 @@ export default function IntelPage() {
                 <div className="featured-content-new">
                   <div className="featured-badge-row flex flex-wrap items-center gap-2 mb-3">
                     <span className="featured-tag-new" style={{ margin: 0 }}>{featuredArticle.category}</span>
-                    <span className={`article-type-badge ${getArticleType(featuredArticle).toLowerCase()}`} style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', padding: '2px 6px', borderRadius: '2px', textTransform: 'uppercase' }}>{getArticleType(featuredArticle)}</span>
-                    <span className="featured-read-time" style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>{Math.max(1, Math.round((featuredArticle.excerpt || "").split(/\s+/).length / 20))} min read</span>
+                    <span className={`article-type-badge ${getArticleType(featuredArticle).toLowerCase()}`} style={{ fontSize: '12px', fontFamily: 'var(--font-mono)', padding: '2px 6px', borderRadius: '2px', textTransform: 'uppercase' }}>{getArticleType(featuredArticle)}</span>
+                    <span className="featured-read-time" style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{Math.max(1, Math.round((featuredArticle.excerpt || "").split(/\s+/).length / 20))} min read</span>
                     {featuredArticle.city ? (
-                      <span className="font-mono text-[9px] text-text-secondary border border-surface-variant px-2 py-0.5 rounded-xs uppercase">
+                      <span className="font-mono text-[12px] text-text-secondary border border-surface-variant px-2 py-0.5 rounded-xs uppercase">
                         📍 {featuredArticle.city}
                       </span>
                     ) : null}
                     {featuredArticle.sourceName ? (
-                      <span className="ml-auto font-mono text-[9px] text-gold-accent border border-gold-accent/40 px-2 py-0.5 rounded-xs tracking-wider uppercase bg-gold-accent/10">
+                      <span className="ml-auto font-mono text-[12px] text-gold-accent border border-gold-accent/40 px-2 py-0.5 rounded-xs tracking-wider uppercase bg-gold-accent/10">
                         🌐 {featuredArticle.sourceName}
                       </span>
                     ) : null}
@@ -315,7 +315,7 @@ export default function IntelPage() {
             <div className="trending-list">
               <div className="flex items-center justify-between mb-2">
                 <span className="vector-label block" style={{ margin: 0 }}>Briefings Archive</span>
-                <span className="font-mono text-[10px] text-text-muted uppercase">Past Dispatches</span>
+                <span className="font-mono text-[12px] text-text-muted uppercase">Past Dispatches</span>
               </div>
               {trendingArticles.length > 0 ? (
                 trendingArticles.map((art, idx) => (
@@ -323,7 +323,7 @@ export default function IntelPage() {
                     <div className="flex items-center justify-between gap-2 mb-1">
                       <span className="trending-meta">0{idx + 1} &middot; {art.category} &middot; {art.date}</span>
                       {art.city ? (
-                        <span className="font-mono text-[8px] text-text-muted border border-surface-variant px-1.5 py-0.2 rounded-xs uppercase">
+                        <span className="font-mono text-[12px] text-text-muted border border-surface-variant px-1.5 py-0.2 rounded-xs uppercase">
                           📍 {art.city.split(',')[0]}
                         </span>
                       ) : null}
@@ -431,8 +431,8 @@ export default function IntelPage() {
                   <div className="article-content">
                     <div className="article-header" style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '12px' }}>
                       <span className="article-category" style={{ marginRight: 'auto' }}>{art.category}</span>
-                      <span className={`article-type-badge ${getArticleType(art).toLowerCase()}`} style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', padding: '2px 6px', borderRadius: '2px', textTransform: 'uppercase' }}>{getArticleType(art)}</span>
-                      <span className="article-read-time" style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>{Math.max(1, Math.round((art.excerpt || "").split(/\s+/).length / 20))} min read</span>
+                      <span className={`article-type-badge ${getArticleType(art).toLowerCase()}`} style={{ fontSize: '12px', fontFamily: 'var(--font-mono)', padding: '2px 6px', borderRadius: '2px', textTransform: 'uppercase' }}>{getArticleType(art)}</span>
+                      <span className="article-read-time" style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{Math.max(1, Math.round((art.excerpt || "").split(/\s+/).length / 20))} min read</span>
                     </div>
                     <h3 className="article-title">{art.title}</h3>
                     <p className="article-excerpt">{art.excerpt}</p>
@@ -443,7 +443,7 @@ export default function IntelPage() {
                       if (!linkedProp) return null;
                       return (
                         <div style={{ marginTop: "12px", borderTop: "1px dashed var(--border)", paddingTop: "12px" }}>
-                          <span style={{ fontSize: "10px", fontFamily: "var(--font-mono)", color: "var(--accent)" }}>
+                          <span style={{ fontSize: "12px", fontFamily: "var(--font-mono)", color: "var(--accent)" }}>
                             FEATURED SPACE:{" "}
                             <span
                               onClick={(e) => {
@@ -486,12 +486,12 @@ export default function IntelPage() {
             <div className="side-panel-body">
               <div className="side-panel-badge-row" style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px' }}>
                 <span className="side-panel-cat">{sidePanelArticle.category}</span>
-                <span className={`article-type-badge ${getArticleType(sidePanelArticle).toLowerCase()}`} style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', padding: '2px 6px', borderRadius: '2px', textTransform: 'uppercase' }}>{getArticleType(sidePanelArticle)}</span>
-                <span className="side-panel-read-time" style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{Math.max(1, Math.round((sidePanelArticle.excerpt || "").split(/\s+/).length / 20))} min read</span>
+                <span className={`article-type-badge ${getArticleType(sidePanelArticle).toLowerCase()}`} style={{ fontSize: '12px', fontFamily: 'var(--font-mono)', padding: '2px 6px', borderRadius: '2px', textTransform: 'uppercase' }}>{getArticleType(sidePanelArticle)}</span>
+                <span className="side-panel-read-time" style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{Math.max(1, Math.round((sidePanelArticle.excerpt || "").split(/\s+/).length / 20))} min read</span>
               </div>
               
               <div className="scan-progress-wrapper" style={{ marginTop: '4px', marginBottom: '8px' }}>
-                <div className="scan-progress-label" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', marginBottom: '4px', textTransform: 'uppercase' }}>
+                <div className="scan-progress-label" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', marginBottom: '4px', textTransform: 'uppercase' }}>
                   <span>Briefing Integrity Deep Scan</span>
                   <span style={{ color: 'var(--accent)' }}>92% SECURE</span>
                 </div>
@@ -536,9 +536,9 @@ export default function IntelPage() {
 
         .vector-label {
           font-family: var(--font-mono);
-          font-size: 11px;
+          font-size: 12px;
           color: var(--accent);
-          letter-spacing: 0.15em;
+          letter-spacing: 0.12em;
           text-transform: uppercase;
         }
 
@@ -573,7 +573,7 @@ export default function IntelPage() {
         }
         .mode-jump-box .jump-here {
           font-family: var(--font-mono);
-          font-size: 11px;
+          font-size: 12px;
           letter-spacing: 0.12em;
           text-transform: uppercase;
           color: var(--accent);
@@ -586,7 +586,7 @@ export default function IntelPage() {
         .mode-jump-box:hover .jump-arrow { transform: translateX(3px); }
         .mode-jump-box .jump-there {
           font-family: var(--font-mono);
-          font-size: 11px;
+          font-size: 12px;
           letter-spacing: 0.12em;
           text-transform: uppercase;
           color: var(--text-secondary);
@@ -738,7 +738,7 @@ export default function IntelPage() {
 
         .featured-tag-new {
           font-family: var(--font-mono);
-          font-size: 10px;
+          font-size: 12px;
           color: var(--accent);
           text-transform: uppercase;
           letter-spacing: 0.1em;
@@ -815,7 +815,7 @@ export default function IntelPage() {
 
         .trending-meta {
           font-family: var(--font-mono);
-          font-size: 10px;
+          font-size: 12px;
           color: var(--accent);
           text-transform: uppercase;
           letter-spacing: 0.05em;
@@ -832,7 +832,7 @@ export default function IntelPage() {
         }
 
         .trending-excerpt {
-          font-size: 11px;
+          font-size: 12px;
           color: var(--text-secondary);
           line-height: 1.45;
           display: -webkit-box;
@@ -876,8 +876,8 @@ export default function IntelPage() {
           align-items: baseline;
           gap: 8px;
           font-family: var(--font-mono);
-          font-size: 10px;
-          letter-spacing: 0.16em;
+          font-size: 12px;
+          letter-spacing: 0.12em;
           text-transform: uppercase;
           color: var(--text-secondary);
           white-space: nowrap;
@@ -898,7 +898,7 @@ export default function IntelPage() {
 
         .intel-radar-result {
           font-family: var(--font-mono);
-          font-size: 10px;
+          font-size: 12px;
           letter-spacing: 0.14em;
           text-transform: uppercase;
           color: var(--accent);
@@ -910,7 +910,7 @@ export default function IntelPage() {
           padding: 9px 16px;
           border-radius: var(--radius-sm);
           font-family: var(--font-mono);
-          font-size: 10px;
+          font-size: 12px;
           letter-spacing: 0.14em;
           text-transform: uppercase;
           cursor: pointer;
@@ -955,7 +955,7 @@ export default function IntelPage() {
         .intel-radar-search-link {
           margin-left: auto;
           font-family: var(--font-mono);
-          font-size: 10px;
+          font-size: 12px;
           letter-spacing: 0.12em;
           text-transform: uppercase;
           color: var(--text-secondary);
@@ -1219,14 +1219,14 @@ export default function IntelPage() {
 
         .article-category {
           font-family: var(--font-mono);
-          font-size: 10px;
+          font-size: 12px;
           color: var(--accent);
           text-transform: uppercase;
           letter-spacing: 0.05em;
         }
 
         .article-date {
-          font-size: 11px;
+          font-size: 12px;
           color: var(--text-muted);
         }
 
@@ -1249,7 +1249,7 @@ export default function IntelPage() {
         }
 
         .read-more-btn {
-          font-size: 11px;
+          font-size: 12px;
           font-weight: 600;
           color: var(--accent);
           text-transform: uppercase;
@@ -1334,7 +1334,7 @@ export default function IntelPage() {
 
         .side-panel-cat {
           font-family: var(--font-mono);
-          font-size: 10px;
+          font-size: 12px;
           color: var(--accent);
           text-transform: uppercase;
           letter-spacing: 0.12em;
@@ -1350,7 +1350,7 @@ export default function IntelPage() {
 
         .side-panel-insight-note span {
           font-family: var(--font-mono);
-          font-size: 10px;
+          font-size: 12px;
           color: var(--accent);
           text-transform: uppercase;
           letter-spacing: 0.1em;
@@ -1389,7 +1389,7 @@ export default function IntelPage() {
           border: 1px solid var(--accent);
           color: var(--accent);
           font-family: var(--font-mono);
-          font-size: 11px;
+          font-size: 12px;
           font-weight: 600;
           text-transform: uppercase;
           letter-spacing: 0.08em;

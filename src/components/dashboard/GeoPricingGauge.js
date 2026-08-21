@@ -115,7 +115,7 @@ export default function GeoPricingGauge({ location, category, price }) {
 
         .scoutit-badge {
           font-family: var(--font-mono, monospace);
-          font-size: 0.7rem;
+          font-size: 0.75rem;
           letter-spacing: 0.1em;
           color: var(--accent, var(--accent));
           text-transform: uppercase;
@@ -125,7 +125,7 @@ export default function GeoPricingGauge({ location, category, price }) {
         }
 
         .loading-pulse {
-          font-size: 0.8rem;
+          font-size: 0.75rem;
           color: #aaa;
           animation: pulse 1.5s infinite ease-in-out;
         }
@@ -142,7 +142,7 @@ export default function GeoPricingGauge({ location, category, price }) {
         }
 
         .metric-label {
-          font-size: 0.7rem;
+          font-size: 0.75rem;
           text-transform: uppercase;
           color: #888;
           margin-bottom: 4px;
@@ -157,7 +157,7 @@ export default function GeoPricingGauge({ location, category, price }) {
         .verdict-banner {
           padding: 8px 12px;
           border-radius: 4px;
-          font-size: 0.85rem;
+          font-size: 0.75rem;
           font-weight: 500;
           display: flex;
           align-items: center;

@@ -86,7 +86,7 @@ export default function DealTimeline({ dealId = null, propertyId = null, mockUse
         return (
           <div key={item.id} className="relative">
             <div className={`absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full border-2 border-surface ${idx === 0 ? "bg-gold-accent" : "bg-surface-variant"}`}></div>
-            <p className="text-[11px] text-text-muted font-data-tabular mb-0.5">
+            <p className="text-[12px] text-text-muted font-data-tabular mb-0.5">
               {new Date(item.createdAt).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
             </p>
             <p className="text-sm text-on-surface flex items-center gap-1.5">

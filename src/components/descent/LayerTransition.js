@@ -57,8 +57,8 @@ export default function LayerTransition({ nextNum, nextName, nextHref, teaser, a
         }
         .layer-transition-kicker {
           font-family: var(--font-mono);
-          font-size: 10px;
-          letter-spacing: 0.28em;
+          font-size: 12px;
+          letter-spacing: 0.12em;
           text-transform: uppercase;
           color: var(--accent);
           opacity: 1;
@@ -89,15 +89,15 @@ export default function LayerTransition({ nextNum, nextName, nextHref, teaser, a
         }
         .layer-transition-num {
           font-family: var(--font-mono);
-          font-size: 10px;
-          letter-spacing: 0.2em;
+          font-size: 12px;
+          letter-spacing: 0.12em;
           text-transform: uppercase;
           color: var(--accent);
           opacity: 1;
         }
         .layer-transition-alt-tag {
           font-family: var(--font-mono);
-          font-size: 9px;
+          font-size: 12px;
           color: var(--text-muted);
           background: rgba(255, 255, 255, 0.05);
           border: 1px solid rgba(255, 255, 255, 0.08);

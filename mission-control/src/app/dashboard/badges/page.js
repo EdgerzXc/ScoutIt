@@ -40,7 +40,7 @@ export default async function BadgesPage() {
         <h1 className="text-2xl font-semibold tracking-tight">Badges</h1>
       </div>
 
-      <div className="text-xs text-white/40 bg-[#121212] border border-white/5 rounded-xl p-4">
+      <div className="text-xs text-white/70 bg-[#121212] border border-white/5 rounded-xl p-4">
         Badges created or edited here don&apos;t automatically appear on the public site yet —
         scoutit.ph still reads its badge catalog from <code>src/lib/badges.js</code> and{" "}
         <code>src/lib/BadgeEngine.js</code>. This screen manages the catalog and who&apos;s been
@@ -49,7 +49,7 @@ export default async function BadgesPage() {
       </div>
 
       <section className="space-y-3">
-        <h2 className="text-sm font-medium text-white/50 uppercase tracking-wide">
+        <h2 className="text-sm font-medium text-white/70 uppercase tracking-wide">
           Award a badge
         </h2>
         <form action={awardBadge} className="bg-[#121212] border border-white/5 rounded-xl p-5 flex flex-wrap gap-2">
@@ -58,7 +58,7 @@ export default async function BadgesPage() {
             type="email"
             required
             placeholder="user@email.com"
-            className="flex-1 min-w-[180px] bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-white/30"
+            className="flex-1 min-w-[180px] bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-white/70"
           />
           <select
             name="badgeId"
@@ -81,14 +81,14 @@ export default async function BadgesPage() {
             Award
           </button>
         </form>
-        <p className="text-xs text-white/30">
+        <p className="text-xs text-white/70">
           Looks up a real Supabase Auth account by email — the user must have signed in at least
           once. This is a different id space than User CRM&apos;s user_profiles search.
         </p>
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-sm font-medium text-white/50 uppercase tracking-wide">Catalog</h2>
+        <h2 className="text-sm font-medium text-white/70 uppercase tracking-wide">Catalog</h2>
         {badgesError && (
           <div className="text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-xl p-4">
             Failed to load badge catalog: {badgesError.message}
@@ -110,12 +110,12 @@ export default async function BadgesPage() {
                     <div className="text-sm font-medium text-white flex items-center gap-2">
                       {badge.name}
                       {!badge.is_active && (
-                        <span className="text-[10px] uppercase tracking-wide bg-white/5 text-white/40 border border-white/10 rounded-full px-2 py-0.5">
+                        <span className="text-[12px] uppercase tracking-wide bg-white/5 text-white/70 border border-white/10 rounded-full px-2 py-0.5">
                           Inactive
                         </span>
                       )}
                     </div>
-                    <div className="text-xs text-white/40 truncate">
+                    <div className="text-xs text-white/70 truncate">
                       {badge.rarity} - {badge.category}
                       {badge.max_slots != null && ` - ${claimed}/${badge.max_slots} claimed`}
                       {badge.max_slots == null && claimed > 0 && ` - ${claimed} awarded`}
@@ -139,12 +139,12 @@ export default async function BadgesPage() {
 
       {canManageCatalog && (
         <section className="space-y-3">
-          <h2 className="text-sm font-medium text-white/50 uppercase tracking-wide flex items-center gap-2">
+          <h2 className="text-sm font-medium text-white/70 uppercase tracking-wide flex items-center gap-2">
             <Plus className="w-3.5 h-3.5" />
             Create a new badge type
           </h2>
           <form action={createBadge} className="bg-[#121212] border border-white/5 rounded-xl p-5 grid grid-cols-2 gap-3">
-            <label className="text-xs text-white/50">
+            <label className="text-xs text-white/70">
               Badge id (slug)
               <input
                 name="id"
@@ -153,7 +153,7 @@ export default async function BadgesPage() {
                 className="mt-1 w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white"
               />
             </label>
-            <label className="text-xs text-white/50">
+            <label className="text-xs text-white/70">
               Display name
               <input
                 name="name"
@@ -162,7 +162,7 @@ export default async function BadgesPage() {
                 className="mt-1 w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white"
               />
             </label>
-            <label className="text-xs text-white/50 col-span-2">
+            <label className="text-xs text-white/70 col-span-2">
               Description
               <input
                 name="description"
@@ -170,7 +170,7 @@ export default async function BadgesPage() {
                 className="mt-1 w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white"
               />
             </label>
-            <label className="text-xs text-white/50">
+            <label className="text-xs text-white/70">
               Rarity
               <select
                 name="rarity"
@@ -183,7 +183,7 @@ export default async function BadgesPage() {
                 <option value="legendary">Legendary</option>
               </select>
             </label>
-            <label className="text-xs text-white/50">
+            <label className="text-xs text-white/70">
               Category
               <select
                 name="category"
@@ -195,7 +195,7 @@ export default async function BadgesPage() {
                 <option value="custom">Custom</option>
               </select>
             </label>
-            <label className="text-xs text-white/50">
+            <label className="text-xs text-white/70">
               Max slots (blank = unlimited)
               <input
                 name="maxSlots"
@@ -205,7 +205,7 @@ export default async function BadgesPage() {
                 className="mt-1 w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white"
               />
             </label>
-            <label className="text-xs text-white/50">
+            <label className="text-xs text-white/70">
               Color (hex)
               <input
                 name="color"
@@ -221,7 +221,7 @@ export default async function BadgesPage() {
       )}
 
       <section className="space-y-3">
-        <h2 className="text-sm font-medium text-white/50 uppercase tracking-wide">
+        <h2 className="text-sm font-medium text-white/70 uppercase tracking-wide">
           Recent grants
         </h2>
         {grantsError && (
@@ -235,8 +235,8 @@ export default async function BadgesPage() {
               <div className="text-xs text-white/60 min-w-0 truncate">
                 <span className="text-white">{badgesById[g.badge_id]?.name || g.badge_id}</span>
                 {" -> "}
-                <span className="font-mono text-white/40">{g.user_id.slice(0, 8)}...</span>
-                <span className="text-white/30"> via {g.granted_by}</span>
+                <span className="font-mono text-white/70">{g.user_id.slice(0, 8)}...</span>
+                <span className="text-white/70"> via {g.granted_by}</span>
               </div>
               {canRevoke && (
                 <form action={revokeBadge}>
@@ -250,7 +250,7 @@ export default async function BadgesPage() {
             </div>
           ))}
           {grants && grants.length === 0 && (
-            <div className="text-sm text-white/50 p-8 text-center">No badges awarded yet.</div>
+            <div className="text-sm text-white/70 p-8 text-center">No badges awarded yet.</div>
           )}
         </div>
       </section>

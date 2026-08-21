@@ -215,12 +215,12 @@ function CRMPageInner() {
           {pricedDeals.length > 0 ? (
             <>
               <div className="text-2xl font-working-title text-on-surface text-glow">₱{pipelineValue.toLocaleString()}</div>
-              <div className="text-[10px] text-text-muted mt-1">Listed prices on {pricedDeals.length} of {activeDeals} active deals</div>
+              <div className="text-[12px] text-text-muted mt-1">Listed prices on {pricedDeals.length} of {activeDeals} active deals</div>
             </>
           ) : (
             <>
               <div className="text-2xl font-working-title text-text-secondary">—</div>
-              <div className="text-[10px] text-text-muted mt-1">No priced listings in your active pipeline yet</div>
+              <div className="text-[12px] text-text-muted mt-1">No priced listings in your active pipeline yet</div>
             </>
           )}
         </div>
@@ -231,7 +231,7 @@ function CRMPageInner() {
           ) : (
             <>
               <div className="text-2xl font-working-title text-text-secondary">—</div>
-              <div className="text-[10px] text-text-muted mt-1">No closed deals yet</div>
+              <div className="text-[12px] text-text-muted mt-1">No closed deals yet</div>
             </>
           )}
         </div>
@@ -269,13 +269,13 @@ function CRMPageInner() {
             onClick={() => triggerLockedToast("Mass Email", "Cluster")}
             className="border border-dashed border-text-muted text-text-muted hover:text-on-surface hover:border-surface-variant rounded-full px-3 py-1 flex items-center gap-1.5 text-xs font-working-title transition"
           >
-            <Mail size={12} /> Mass Email <span className="text-[10px] ml-1">🔒</span>
+            <Mail size={12} /> Mass Email <span className="text-[12px] ml-1">🔒</span>
           </button>
           <button
             onClick={() => triggerLockedToast("Automations", "Universe")}
             className="border border-dashed border-text-muted text-text-muted hover:text-on-surface hover:border-surface-variant rounded-full px-3 py-1 flex items-center gap-1.5 text-xs font-working-title transition"
           >
-            <Zap size={12} /> Automations <span className="text-[10px] ml-1">🔒</span>
+            <Zap size={12} /> Automations <span className="text-[12px] ml-1">🔒</span>
           </button>
         </div>
       </div>

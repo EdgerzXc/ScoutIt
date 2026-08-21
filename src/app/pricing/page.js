@@ -74,7 +74,7 @@ export default function PricingHubPage() {
         <div className="absolute bottom-[-10%] right-[10%] w-[600px] h-[600px] bg-surface-alt/20 rounded-full blur-[100px] pointer-events-none"></div>
 
         <header className="pricing-header z-10 relative text-center mb-16">
-          <span className="vector-label text-gold-accent tracking-[0.3em] uppercase text-xs font-bold mb-4 block drop-shadow-md">
+          <span className="vector-label text-gold-accent tracking-[0.12em] uppercase text-xs font-bold mb-4 block drop-shadow-md">
             LAYER 08 // INTELLIGENCE TIERS
           </span>
           <h1 className="page-title text-4xl md:text-5xl font-display-md text-white mb-6 drop-shadow-lg max-w-3xl mx-auto">
@@ -126,7 +126,7 @@ export default function PricingHubPage() {
                   <h2 className="text-2xl font-working-title text-white group-hover:text-gold-accent transition-colors duration-300">
                     {BUNDLE_CARD.title}
                   </h2>
-                  <span className="text-[10px] font-mono font-bold uppercase tracking-widest px-2 py-0.5 rounded bg-gold-accent/20 text-gold-accent border border-gold-accent/30">
+                  <span className="text-[12px] font-mono font-bold uppercase tracking-widest px-2 py-0.5 rounded bg-gold-accent/20 text-gold-accent border border-gold-accent/30">
                     Save up to 20%
                   </span>
                 </div>

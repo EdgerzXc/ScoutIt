@@ -86,7 +86,7 @@ function LoginForm() {
         <h1 className="text-2xl font-semibold text-white text-center tracking-tight mb-2">
           Mission Control
         </h1>
-        <p className="text-white/50 text-center text-sm mb-8">
+        <p className="text-white/70 text-center text-sm mb-8">
           Secure staff access only. Enter your email to receive a magic link.
         </p>
 
@@ -105,7 +105,7 @@ function LoginForm() {
             </p>
             <button
               onClick={() => setStatus("idle")}
-              className="text-xs text-white/50 hover:text-white mt-2 transition-colors"
+              className="text-xs text-white/70 hover:text-white mt-2 transition-colors"
             >
               Try another email
             </button>
@@ -123,7 +123,7 @@ function LoginForm() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="staff@scoutit.com"
-                className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:border-[#E8AE3C]/50 focus:ring-1 focus:ring-[#E8AE3C]/50 transition-all"
+                className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-white/70 focus:outline-none focus:border-[#E8AE3C]/50 focus:ring-1 focus:ring-[#E8AE3C]/50 transition-all"
               />
             </div>
 
@@ -152,7 +152,7 @@ function LoginForm() {
               <>
                 <div className="flex items-center gap-3 py-1">
                   <div className="flex-1 h-px bg-white/10" />
-                  <span className="text-[10px] uppercase tracking-widest text-white/30">or</span>
+                  <span className="text-[12px] uppercase tracking-widest text-white/70">or</span>
                   <div className="flex-1 h-px bg-white/10" />
                 </div>
 
@@ -177,7 +177,7 @@ function LoginForm() {
       </div>
 
       <div className="mt-8 text-center">
-        <p className="text-white/30 text-xs font-mono uppercase tracking-widest">
+        <p className="text-white/70 text-xs font-mono uppercase tracking-widest">
           ScoutIt Space Intelligence
         </p>
       </div>

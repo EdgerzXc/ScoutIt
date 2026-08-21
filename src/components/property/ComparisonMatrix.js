@@ -229,7 +229,7 @@ export default function ComparisonMatrix({ properties, onClose }) {
 
         .no-image {
           font-family: var(--font-mono);
-          font-size: 10px;
+          font-size: 12px;
           text-transform: uppercase;
           color: #555;
         }
@@ -244,7 +244,7 @@ export default function ComparisonMatrix({ properties, onClose }) {
 
         .matrix-link {
           font-family: var(--font-mono, monospace);
-          font-size: 0.7rem;
+          font-size: 0.75rem;
           text-transform: uppercase;
           letter-spacing: 0.1em;
           color: #E8AE3C;
@@ -258,7 +258,7 @@ export default function ComparisonMatrix({ properties, onClose }) {
 
         .data-cell {
           font-family: var(--font-body, sans-serif);
-          font-size: 0.95rem;
+          font-size: 0.75rem;
           color: #ccc;
           justify-content: center;
         }
@@ -272,7 +272,7 @@ export default function ComparisonMatrix({ properties, onClose }) {
         .spec-badge {
           display: inline-block;
           font-family: var(--font-mono, monospace);
-          font-size: 0.65rem;
+          font-size: 0.75rem;
           letter-spacing: 0.1em;
           text-transform: uppercase;
           background: rgba(255, 255, 255, 0.05);

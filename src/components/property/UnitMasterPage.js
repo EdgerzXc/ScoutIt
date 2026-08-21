@@ -29,7 +29,7 @@ const SpatialCommandMap = dynamic(() => import("@/components/property/SpatialCom
   ssr: false,
   loading: () => (
     <div style={{ height: "300px", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" }}>Loading spatial command map…</span>
+      <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" }}>Loading spatial command map…</span>
     </div>
   ),
 });
@@ -37,7 +37,7 @@ const SpatialCanvas = dynamic(() => import("@/components/maps/SpatialCanvas"), {
   ssr: false,
   loading: () => (
     <div style={{ height: "300px", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" }}>Loading spatial canvas…</span>
+      <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" }}>Loading spatial canvas…</span>
     </div>
   ),
 });
@@ -287,7 +287,7 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
         {/* Back Link Overlay */}
         <Link
           href={`/property/${property.slug}`}
-          style={{ position: "absolute", top: "24px", left: "24px", zIndex: 100, color: "var(--text-muted)", fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", background: "var(--surface-var)", padding: "8px 12px", borderRadius: "4px", backdropFilter: "blur(4px)", textDecoration: "none", border: "0.5px solid var(--border)" }}
+          style={{ position: "absolute", top: "24px", left: "24px", zIndex: 100, color: "var(--text-muted)", fontFamily: "var(--font-mono)", fontSize: "12px", letterSpacing: "0.12em", textTransform: "uppercase", background: "var(--surface-var)", padding: "8px 12px", borderRadius: "4px", backdropFilter: "blur(4px)", textDecoration: "none", border: "0.5px solid var(--border)" }}
         >
           ← Back to {property.title}
         </Link>
@@ -323,7 +323,7 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
                   itemProp="image"
                 />
               ) : (
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-muted)", letterSpacing: "0.15em", textTransform: "uppercase" }}>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-muted)", letterSpacing: "0.12em", textTransform: "uppercase" }}>
                   Unit imagery pending
                 </span>
               )}
@@ -423,7 +423,7 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
           <div className={`chapter-panel ${activeTab === "space" ? "active" : ""}`} id="panel-space">
             <div className="panel-content">
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-secondary)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>01 — The Space</div>
+                <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-secondary)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"10px"}}>01 — The Space</div>
                 <div style={{height:"1px", background:"var(--border-solid)"}}/>
               </div>
 
@@ -440,7 +440,7 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
               {/* Interactive "This space flexes" */}
               {scenarios.length > 0 && activeScenario && (
                 <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "8px", padding: "22px" }}>
-                  <div style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: ACCENT, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "14px" }}>
+                  <div style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: ACCENT, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "14px" }}>
                     This space flexes ✦
                   </div>
                   <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "20px" }}>
@@ -450,7 +450,7 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
                         <button
                           key={s.id} onClick={() => setActiveScenarioId(s.id)}
                           style={{
-                            fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.06em", textTransform: "uppercase",
+                            fontFamily: "var(--font-mono)", fontSize: "12px", letterSpacing: "0.06em", textTransform: "uppercase",
                             padding: "8px 14px", borderRadius: "4px", cursor: "pointer",
                             background: active ? ACCENT : "transparent", color: active ? "var(--bg)" : "var(--text-secondary)",
                             border: active ? `1px solid ${ACCENT}` : "0.5px solid var(--border)", fontWeight: active ? 700 : 400,
@@ -495,7 +495,7 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
             <div className={`chapter-panel ${activeTab === "diff" ? "active" : ""}`} id="panel-diff">
               <div className="panel-content">
                 <div style={{marginBottom:"32px"}}>
-                  <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>02 — The Differentiator</div>
+                  <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"10px"}}>02 — The Differentiator</div>
                   <div style={{height:"1px", background:"var(--border)"}}/>
                 </div>
                 <p style={{ fontFamily: "var(--font-body)", fontSize: "17px", color: "var(--text-primary)", lineHeight: 1.75, margin: "0 0 16px 0", maxWidth: "680px" }}>
@@ -510,7 +510,7 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
           <div className={`chapter-panel ${activeTab === "vault" ? "active" : ""}`} id="panel-vault">
             <div className="panel-content" style={{ maxWidth: "100%" }} tabIndex={0} aria-label="Scrollable Spatial Vault content">
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:ACCENT, letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>PREMIUM — THE SPATIAL VAULT</div>
+                <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:ACCENT, letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"10px"}}>PREMIUM — THE SPATIAL VAULT</div>
                 <div style={{height:"1px", background:ACCENT}}/>
               </div>
 
@@ -530,7 +530,7 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
                     <span style={{ fontFamily: "var(--font-body)", fontSize: "15px", color: "var(--text-primary)", maxWidth: "360px", lineHeight: 1.5 }}>
                       Interactive 3D floor plan {"&"} unit-specific spatial media are locked.
                     </span>
-                    <a href="/pricing/seeker" className="hover-glow" style={{ textDecoration: "none", fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", background: "transparent", border: "1px solid var(--accent)", color: "var(--accent)", padding: "12px 20px", borderRadius: "4px", fontWeight: "bold", transition: "all 0.3s ease" }}>
+                    <a href="/pricing/seeker" className="hover-glow" style={{ textDecoration: "none", fontFamily: "var(--font-mono)", fontSize: "12px", letterSpacing: "0.1em", textTransform: "uppercase", background: "transparent", border: "1px solid var(--accent)", color: "var(--accent)", padding: "12px 20px", borderRadius: "4px", fontWeight: "bold", transition: "all 0.3s ease" }}>
                       Unlock the Unit Vault // Cluster+
                     </a>
                   </div>
@@ -543,13 +543,13 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
           <div className={`chapter-panel ${activeTab === "terms" ? "active" : ""}`} id="panel-terms">
             <div className="panel-content">
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>04 — Terms & Fit-Out</div>
+                <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"10px"}}>04 — Terms & Fit-Out</div>
                 <div style={{height:"1px", background:"var(--border)"}}/>
               </div>
 
               {inclusions.length > 0 && (
                 <div style={{ marginBottom: "24px" }}>
-                  <div style={{ fontFamily:"var(--font-mono)", fontSize:"11px", color:ACCENT, letterSpacing:"0.15em", textTransform:"uppercase", marginBottom:"10px" }}>What&apos;s Included</div>
+                  <div style={{ fontFamily:"var(--font-mono)", fontSize:"12px", color:ACCENT, letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"10px" }}>What&apos;s Included</div>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
                     {inclusions.map((inc) => (
                       <span key={inc} style={{ fontFamily: "var(--font-body)", fontSize: "13px", color: "var(--text-primary)", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "4px", padding: "7px 13px" }}>
@@ -561,7 +561,7 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
               )}
               {d.house_rules && (
                 <div>
-                  <div style={{ fontFamily:"var(--font-mono)", fontSize:"11px", color:ACCENT, letterSpacing:"0.15em", textTransform:"uppercase", marginBottom:"10px" }}>House Rules</div>
+                  <div style={{ fontFamily:"var(--font-mono)", fontSize:"12px", color:ACCENT, letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"10px" }}>House Rules</div>
                   <p style={{ fontFamily: "var(--font-body)", fontSize: "14px", color: "var(--text-secondary)", lineHeight: 1.75, maxWidth: "680px", margin: 0 }}>
                     {d.house_rules}
                   </p>
@@ -580,7 +580,7 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
           <div className={`chapter-panel ${activeTab === "building" ? "active" : ""}`} id="panel-building">
             <div className="panel-content">
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>05 — Spatial Intelligence & Building</div>
+                <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"10px"}}>05 — Spatial Intelligence & Building</div>
                 <div style={{height:"1px", background:"var(--border)"}}/>
               </div>
               <p style={{ fontFamily: "var(--font-body)", fontSize: "18px", color: "var(--text-primary)", margin: "0 0 14px 0" }}>{property.title}</p>
@@ -588,17 +588,17 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
               <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", marginBottom: "16px" }}>
                 <FloodRiskBadge floodRiskScore={property.flood_risk_score} floodZoneStatus={property.flood_zone_status} />
                 {property.details?.spatial_intel?.peza?.is_accredited && (
-                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--green)", background: "color-mix(in srgb, var(--green) 12%, transparent)", border: "1px solid color-mix(in srgb, var(--green) 30%, transparent)", borderRadius: "4px", padding: "6px 12px", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--green)", background: "color-mix(in srgb, var(--green) 12%, transparent)", border: "1px solid color-mix(in srgb, var(--green) 30%, transparent)", borderRadius: "4px", padding: "6px 12px", textTransform: "uppercase", letterSpacing: "0.08em" }}>
                     🏢 PEZA Certified ({property.details.spatial_intel.peza.zone_name})
                   </span>
                 )}
                 {property.details?.spatial_intel?.transit && (
-                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--accent-bright)", background: "color-mix(in srgb, var(--accent) 12%, transparent)", border: "1px solid color-mix(in srgb, var(--accent) 30%, transparent)", borderRadius: "4px", padding: "6px 12px", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--accent-bright)", background: "color-mix(in srgb, var(--accent) 12%, transparent)", border: "1px solid color-mix(in srgb, var(--accent) 30%, transparent)", borderRadius: "4px", padding: "6px 12px", textTransform: "uppercase", letterSpacing: "0.08em" }}>
                     🚆 {property.details.spatial_intel.transit.walk_minutes}m walk ({property.details.spatial_intel.transit.station_name})
                   </span>
                 )}
                 {property.details?.spatial_intel?.seismic && (
-                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-secondary)", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "4px", padding: "6px 12px", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-secondary)", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "4px", padding: "6px 12px", textTransform: "uppercase", letterSpacing: "0.08em" }}>
                     📐 Fault Buffer: {property.details.spatial_intel.seismic.status}
                   </span>
                 )}
@@ -608,7 +608,7 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
                 style={{ marginTop: "20px", marginBottom: "20px" }}
                 fallback={
                   <div style={{ height: "420px", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "4px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" }}>Spatial command HUD</span>
+                    <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" }}>Spatial command HUD</span>
                   </div>
                 }
               >
@@ -630,7 +630,7 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
               </InViewport>
 
               <div style={{ marginTop: "24px" }}>
-                <Link href={`/property/${property.slug}`} style={{ color: ACCENT, fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+                <Link href={`/property/${property.slug}`} style={{ color: ACCENT, fontFamily: "var(--font-mono)", fontSize: "12px", letterSpacing: "0.1em", textTransform: "uppercase" }}>
                   View full building intelligence →
                 </Link>
               </div>
@@ -648,7 +648,7 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
           <div className={`chapter-panel ${activeTab === "yourmove" ? "active" : ""}`} id="panel-yourmove">
             <div className="panel-content">
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"10px"}}>06 — Your Move</div>
+                <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"10px"}}>06 — Your Move</div>
                 <div style={{height:"1px", background:"var(--border)"}}/>
               </div>
               
@@ -683,7 +683,7 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
               {scenarios.length > 0 && (
                 <button
                   onClick={() => openInquiry("I'd like to request a custom cut / configuration for this space that isn't listed.")}
-                  style={{ display: "block", marginTop: "12px", maxWidth: "400px", width: "100%", background: "transparent", border: "0.5px solid var(--border)", color: "var(--text-muted)", fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.08em", textTransform: "uppercase", padding: "12px", borderRadius: "4px", cursor: "pointer" }}
+                  style={{ display: "block", marginTop: "12px", maxWidth: "400px", width: "100%", background: "transparent", border: "0.5px solid var(--border)", color: "var(--text-muted)", fontFamily: "var(--font-mono)", fontSize: "12px", letterSpacing: "0.08em", textTransform: "uppercase", padding: "12px", borderRadius: "4px", cursor: "pointer" }}
                 >
                   None of these fit? Request a custom cut →
                 </button>

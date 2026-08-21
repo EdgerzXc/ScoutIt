@@ -110,13 +110,13 @@ function PropertyCard({ property: p, staff }) {
       <div className="grid grid-cols-1 lg:grid-cols-2">
       {/* Left: public-facing preview */}
       <div className="p-6 border-b lg:border-b-0 lg:border-r border-white/5">
-        <div className="text-[10px] uppercase tracking-wide text-white/30 mb-3">
+        <div className="text-[12px] uppercase tracking-wide text-white/70 mb-3">
           Live site preview
         </div>
         <h2 className="text-lg font-medium text-white mb-1">
           {p.title || "Untitled property"}
         </h2>
-        <div className="flex items-center gap-1.5 text-sm text-white/50 mb-3">
+        <div className="flex items-center gap-1.5 text-sm text-white/70 mb-3">
           <MapPin className="w-3.5 h-3.5" />
           {p.location || "No location set"}
         </div>
@@ -126,7 +126,7 @@ function PropertyCard({ property: p, staff }) {
         <p className="text-sm text-white/60 leading-relaxed mb-4">
           {p.description || "No description provided."}
         </p>
-        <div className="flex flex-wrap gap-2 text-xs text-white/40">
+        <div className="flex flex-wrap gap-2 text-xs text-white/70">
           <span className="bg-white/5 border border-white/10 rounded-full px-2 py-0.5">
             {p.type || "Uncategorized"}
           </span>
@@ -140,7 +140,7 @@ function PropertyCard({ property: p, staff }) {
           )}
         </div>
         {p.media_link && (
-          <div className="mt-3 text-xs text-white/40 truncate">
+          <div className="mt-3 text-xs text-white/70 truncate">
             3D / media: <span className="text-white/60">{p.media_link}</span>
           </div>
         )}
@@ -148,7 +148,7 @@ function PropertyCard({ property: p, staff }) {
 
       {/* Right: action panel */}
       <div className="p-6 space-y-4">
-        <div className="text-[10px] uppercase tracking-wide text-white/30">Actions</div>
+        <div className="text-[12px] uppercase tracking-wide text-white/70">Actions</div>
 
         {p.rejection_reason && (
           <div className="text-xs text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg p-3">
@@ -186,7 +186,7 @@ function PropertyCard({ property: p, staff }) {
         </div>
 
         <form action={rejectProperty} className="space-y-2 pt-2 border-t border-white/5">
-          <label className="text-xs text-white/50 block">
+          <label className="text-xs text-white/70 block">
             Reject with reason
             <select
               name="reasonLabel"

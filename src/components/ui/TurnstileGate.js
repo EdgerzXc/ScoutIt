@@ -96,7 +96,7 @@ const TurnstileGate = forwardRef(function TurnstileGate(
         className={className}
         style={{
           fontFamily: "'Courier New',monospace",
-          fontSize: "10px",
+          fontSize: "12px",
           letterSpacing: "0.08em",
           color: "#e06c6c",
           lineHeight: 1.6,
@@ -137,7 +137,7 @@ const TurnstileGate = forwardRef(function TurnstileGate(
         <div
           style={{
             fontFamily: "'Courier New',monospace",
-            fontSize: "9.5px",
+            fontSize: "12px",
             letterSpacing: "0.06em",
             color: "#e06c6c",
             marginTop: "6px",
