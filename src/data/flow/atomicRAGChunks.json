@@ -9879,7 +9879,7 @@
     "chunkType": "NODE_FACT",
     "canonical_id": "deal.offer.modal",
     "canonicalId": "deal.offer.modal",
-    "title": "Deal Negotiation & Offer Proposal",
+    "title": "AI-Assisted Counter-Offer Draft",
     "domain": "deal",
     "layer": "core",
     "route": "/dashboard/crm",
@@ -9891,66 +9891,64 @@
       "SEEKER",
       "ENTERPRISE"
     ],
-    "securityClassification": "PUBLIC",
-    "status": "VERIFIED",
+    "securityClassification": "AUTHENTICATED",
+    "status": "PARTIAL",
     "productStatus": "APPROVED",
-    "implementationStatus": "VERIFIED",
+    "implementationStatus": "PARTIAL",
     "evidenceStatus": "CODE_GROUNDED",
-    "releaseStatus": "PUBLIC_LIVE",
-    "purpose": "Negotiation workspace for proposing deal terms, counter-offers, and transaction parameters in the active Deal Room.",
-    "description": "Enables deal parties to draft, submit, and review structured proposal terms with AI counter-offer suggestions and status mutations.",
+    "releaseStatus": "LIMITED_LIVE",
+    "purpose": "AI-assisted counter-offer drafting inside private chat; structured offer persistence is not implemented.",
+    "description": "Parties can request drafting assistance, but ScoutIt does not yet persist an offer lifecycle or structured proposal record.",
     "available_actions": [
-      "Input Offer Amount",
-      "Select Payment Terms (Cash / Bank Financing)",
-      "Sign Digital LOI"
+      "Request an AI-assisted counter-offer draft",
+      "Review and edit the draft in private chat"
     ],
     "entry_conditions": [
-      "Authenticated verified Seeker account"
+      "Authenticated participant in a private inquiry conversation"
     ],
     "source_type": "MASTER_FLOW_GRAPH",
     "sourceType": "MASTER_FLOW_GRAPH",
     "evidence": [
       {
         "kind": "COMPONENT",
-        "path": "src/components/dashboard/crm/NewDealModal.js",
+        "path": "src/components/dashboard/ChatBox.js",
+        "symbol": "ChatBox",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
       },
       {
-        "kind": "SCOUTIT_BRAIN",
-        "path": "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_FLOWS.md",
+        "kind": "API",
+        "path": "src/app/api/ai/counter-offer/route.js",
+        "symbol": "POST",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
       }
     ],
     "claims": [
       {
         "id": "claim_offer_modal_negotiation",
-        "text": "Parties negotiate terms within the Deal Room and submit proposals with real-time status transitions (pending, accepted, declined, withdrawn).",
+        "text": "Authenticated deal participants can request AI assistance drafting counter-offer language in private chat; structured offer persistence and status transitions are not implemented.",
         "kind": "PRODUCT_BEHAVIOR",
         "status": "VERIFIED",
         "evidence": [
           {
-            "kind": "CODE",
-            "path": "src/components/dashboard/crm/DealRoom.js",
-            "symbol": "DealRoom",
-            "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43",
-            "confidence": 0.95,
-            "provenance": "Observed DealRoom negotiation implementation"
+            "kind": "COMPONENT",
+            "path": "src/components/dashboard/ChatBox.js",
+            "symbol": "ChatBox",
+            "provenance": "EXTRACTED",
+            "confidence": 1
           },
           {
             "kind": "API",
             "path": "src/app/api/ai/counter-offer/route.js",
             "symbol": "POST",
-            "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43",
-            "confidence": 0.95,
-            "provenance": "AI Counter-offer generation endpoint"
+            "provenance": "EXTRACTED",
+            "confidence": 1
           }
         ],
-        "confidence": 0.95,
-        "reviewedBy": null,
+        "confidence": 1,
         "machineVerifiedBy": "Automated Grounding Engine",
         "humanReviewedBy": null,
         "reviewStatus": "RESEARCHED",
@@ -9971,18 +9969,18 @@
     "chunkType": "RECOVERY",
     "canonical_id": "deal.offer.modal",
     "canonicalId": "deal.offer.modal",
-    "title": "Recovery Protocol: Deal Negotiation & Offer Proposal",
+    "title": "Recovery Protocol: AI-Assisted Counter-Offer Draft",
     "domain": "deal",
-    "status": "VERIFIED",
+    "status": "PARTIAL",
     "productStatus": "APPROVED",
-    "implementationStatus": "VERIFIED",
+    "implementationStatus": "PARTIAL",
     "evidenceStatus": "CODE_GROUNDED",
-    "releaseStatus": "PUBLIC_LIVE",
+    "releaseStatus": "LIMITED_LIVE",
     "visibility": [
       "SEEKER",
       "ENTERPRISE"
     ],
-    "securityClassification": "PUBLIC",
+    "securityClassification": "AUTHENTICATED",
     "exceptions": [
       "Offer submitted on off-market property not open to offers"
     ],
@@ -9994,60 +9992,19 @@
     "evidence": [
       {
         "kind": "COMPONENT",
-        "path": "src/components/dashboard/crm/NewDealModal.js",
+        "path": "src/components/dashboard/ChatBox.js",
+        "symbol": "ChatBox",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
       },
       {
-        "kind": "SCOUTIT_BRAIN",
-        "path": "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_FLOWS.md",
+        "kind": "API",
+        "path": "src/app/api/ai/counter-offer/route.js",
+        "symbol": "POST",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
-      }
-    ],
-    "graph_version": "2.1.0",
-    "graphVersion": "2.1.0",
-    "last_verified_at": "2026-08-19",
-    "lastVerifiedAt": "2026-08-19"
-  },
-  {
-    "chunk_id": "guide_deal.offer.modal",
-    "chunk_type": "UI_GUIDE",
-    "chunkType": "UI_GUIDE",
-    "canonical_id": "deal.offer.modal",
-    "canonicalId": "deal.offer.modal",
-    "title": "User Walkthrough: Deal Negotiation & Offer Proposal",
-    "domain": "deal",
-    "status": "VERIFIED",
-    "productStatus": "APPROVED",
-    "implementationStatus": "VERIFIED",
-    "evidenceStatus": "CODE_GROUNDED",
-    "releaseStatus": "PUBLIC_LIVE",
-    "visibility": [
-      "SEEKER",
-      "ENTERPRISE"
-    ],
-    "securityClassification": "PUBLIC",
-    "instruction": "Encrypts proposed terms into the private Deal Room and notifies the owner and verified broker.",
-    "ui_target": "submit-offer-form-btn",
-    "source_type": "WIZARD_SYSTEM",
-    "sourceType": "WIZARD_SYSTEM",
-    "evidence": [
-      {
-        "kind": "COMPONENT",
-        "path": "src/components/dashboard/crm/NewDealModal.js",
-        "provenance": "EXTRACTED",
-        "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
-      },
-      {
-        "kind": "SCOUTIT_BRAIN",
-        "path": "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_FLOWS.md",
-        "provenance": "EXTRACTED",
-        "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
       }
     ],
     "graph_version": "2.1.0",
@@ -10061,74 +10018,70 @@
     "chunkType": "IMPLEMENTATION_REFERENCE",
     "canonical_id": "deal.offer.modal",
     "canonicalId": "deal.offer.modal",
-    "title": "Implementation Evidence: Deal Negotiation & Offer Proposal",
+    "title": "Implementation Evidence: AI-Assisted Counter-Offer Draft",
     "domain": "deal",
-    "status": "VERIFIED",
+    "status": "PARTIAL",
     "productStatus": "APPROVED",
-    "implementationStatus": "VERIFIED",
+    "implementationStatus": "PARTIAL",
     "evidenceStatus": "CODE_GROUNDED",
-    "releaseStatus": "PUBLIC_LIVE",
+    "releaseStatus": "LIMITED_LIVE",
     "visibility": [
       "STAFF",
       "ADMIN"
     ],
     "securityClassification": "INTERNAL",
     "systems": [
-      "src/components/dashboard/crm/DealRoom.js",
+      "src/components/dashboard/ChatBox.js",
       "src/app/api/ai/counter-offer/route.js"
     ],
     "components": [
-      "DealRoom.js",
       "ChatBox.js"
     ],
     "apis": [
-      "/api/ai/counter-offer",
-      "/api/deals/[id]",
-      "/api/deals/handshake"
+      "/api/ai/counter-offer"
     ],
-    "database": "Supabase deals & offers",
+    "database": "No structured offer record is persisted",
     "evidence": [
       {
         "kind": "COMPONENT",
-        "path": "src/components/dashboard/crm/NewDealModal.js",
+        "path": "src/components/dashboard/ChatBox.js",
+        "symbol": "ChatBox",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
       },
       {
-        "kind": "SCOUTIT_BRAIN",
-        "path": "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_FLOWS.md",
+        "kind": "API",
+        "path": "src/app/api/ai/counter-offer/route.js",
+        "symbol": "POST",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
       }
     ],
     "claims": [
       {
         "id": "claim_offer_modal_negotiation",
-        "text": "Parties negotiate terms within the Deal Room and submit proposals with real-time status transitions (pending, accepted, declined, withdrawn).",
+        "text": "Authenticated deal participants can request AI assistance drafting counter-offer language in private chat; structured offer persistence and status transitions are not implemented.",
         "kind": "PRODUCT_BEHAVIOR",
         "status": "VERIFIED",
         "evidence": [
           {
-            "kind": "CODE",
-            "path": "src/components/dashboard/crm/DealRoom.js",
-            "symbol": "DealRoom",
-            "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43",
-            "confidence": 0.95,
-            "provenance": "Observed DealRoom negotiation implementation"
+            "kind": "COMPONENT",
+            "path": "src/components/dashboard/ChatBox.js",
+            "symbol": "ChatBox",
+            "provenance": "EXTRACTED",
+            "confidence": 1
           },
           {
             "kind": "API",
             "path": "src/app/api/ai/counter-offer/route.js",
             "symbol": "POST",
-            "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43",
-            "confidence": 0.95,
-            "provenance": "AI Counter-offer generation endpoint"
+            "provenance": "EXTRACTED",
+            "confidence": 1
           }
         ],
-        "confidence": 0.95,
-        "reviewedBy": null,
+        "confidence": 1,
         "machineVerifiedBy": "Automated Grounding Engine",
         "humanReviewedBy": null,
         "reviewStatus": "RESEARCHED",
@@ -12575,7 +12528,7 @@
     "title": "Decision Gate: Viewing Attendance Confirmation",
     "domain": "deal",
     "layer": "core",
-    "route": "/api/deals/viewing-status",
+    "route": "/dashboard/inbox",
     "roles": [
       "seeker",
       "broker",
@@ -12592,8 +12545,8 @@
     "implementationStatus": "NOT_STARTED",
     "evidenceStatus": "UNVERIFIED",
     "releaseStatus": "NOT_DEPLOYED",
-    "purpose": "Verifies whether a scheduled viewing was attended in person or if an exception (No-Show) occurred.",
-    "description": "Routes viewing outcome to deal progression or to the viewing reschedule recovery modal.",
+    "purpose": "Planned decision point for recording whether a confirmed viewing was completed, cancelled, or missed.",
+    "description": "The runtime supports confirmed, completed, and cancelled viewing states; a distinct no-show state and recovery branch are not implemented.",
     "available_actions": [
       "Check Broker & Buyer Attendance Check-in",
       "Trigger Milestone Update"
@@ -12664,7 +12617,7 @@
       "Buyer or broker fails to attend scheduled viewing"
     ],
     "recovery_mechanisms": [
-      "Route to Reschedule Modal for alternative slot selection"
+      "Planned: propose another slot after no-show handling exists"
     ],
     "source_type": "BEHAVIORAL_FAILSAFE",
     "sourceType": "BEHAVIORAL_FAILSAFE",
@@ -12701,12 +12654,9 @@
     ],
     "securityClassification": "INTERNAL",
     "systems": [
-      "ViewingCalendar.js",
-      "deal_milestones"
+      "Planned viewing outcome decision"
     ],
-    "components": [
-      "ViewingCalendar.js"
-    ],
+    "components": [],
     "apis": [],
     "database": "Supabase deals & viewing_schedules",
     "evidence": [
@@ -15973,7 +15923,7 @@
     "evidenceStatus": "DOCUMENTED",
     "releaseStatus": "LIMITED_LIVE",
     "purpose": "Summarizes today's viewing appointments, pending client representation responses, and active deal milestones.",
-    "description": "Focuses broker attention on time-critical viewing logistics and active buyer negotiations.",
+    "description": "Focuses broker attention on currently available appointment and inquiry information; a dedicated viewing-calendar component is not implemented.",
     "available_actions": [
       "Check Today's Viewing Agenda",
       "Open Pending Client Deal Rooms",
@@ -16080,12 +16030,10 @@
     ],
     "securityClassification": "INTERNAL",
     "systems": [
-      "BrokerMode.js",
-      "ViewingCalendar.js"
+      "BrokerMode.js"
     ],
     "components": [
-      "BrokerMode.js",
-      "ViewingCalendar.js"
+      "BrokerMode.js"
     ],
     "apis": [],
     "database": "Supabase deals & viewing_schedules",
@@ -16345,7 +16293,7 @@
     "chunkType": "NODE_FACT",
     "canonical_id": "deal.room.chat",
     "canonicalId": "deal.room.chat",
-    "title": "Private Deal Room & Scheduling Cockpit",
+    "title": "Private Inquiry Workspace & Scheduling",
     "domain": "deal",
     "layer": "core",
     "route": "/dashboard/inbox",
@@ -16366,14 +16314,14 @@
     "productStatus": "APPROVED",
     "implementationStatus": "VERIFIED",
     "evidenceStatus": "CODE_GROUNDED",
-    "releaseStatus": "PUBLIC_LIVE",
-    "purpose": "End-to-end deal management cockpit: viewing calendar, chat messages, offer negotiation, and milestone tracking.",
-    "description": "Encrypted workspace where buyer, broker, and owner coordinate viewings, review terms, and finalize handshakes.",
+    "releaseStatus": "LIMITED_LIVE",
+    "purpose": "Private inquiry workspace for chat, viewing coordination, and current deal status.",
+    "description": "Authenticated parties communicate and coordinate appointments here. Structured offer negotiation remains planned.",
     "available_actions": [
-      "Confirm Viewing Appointment",
-      "Exchange In-App Chat Messages",
-      "Counter Offer Terms",
-      "Complete Two-Sided Handshake"
+      "Exchange in-app chat messages",
+      "Coordinate viewing appointments",
+      "Review current inquiry status",
+      "Complete the existing two-sided handshake when eligible"
     ],
     "entry_conditions": [
       "Authorized participant on private deal"
@@ -16384,22 +16332,31 @@
       {
         "kind": "COMPONENT",
         "path": "src/components/dashboard/ChatBox.js",
+        "symbol": "ChatBox",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
       },
       {
         "kind": "API",
         "path": "src/app/api/deals/[id]/messages/route.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "COMPONENT",
+        "path": "src/components/dashboard/crm/AppointmentsSheet.js",
+        "symbol": "AppointmentsSheet",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
       }
     ],
     "claims": [
       {
         "id": "claim_deal_room_behavior",
-        "text": "Private Deal Room & Scheduling Cockpit enforces defined deal behavioral contracts and access rules.",
+        "text": "Authorized deal participants can exchange private messages and coordinate viewing appointments; structured offer negotiation is not implemented.",
         "kind": "PRODUCT_BEHAVIOR",
         "status": "VERIFIED",
         "evidence": [
@@ -16437,13 +16394,13 @@
     "chunkType": "RECOVERY",
     "canonical_id": "deal.room.chat",
     "canonicalId": "deal.room.chat",
-    "title": "Recovery Protocol: Private Deal Room & Scheduling Cockpit",
+    "title": "Recovery Protocol: Private Inquiry Workspace & Scheduling",
     "domain": "deal",
     "status": "VERIFIED",
     "productStatus": "APPROVED",
     "implementationStatus": "VERIFIED",
     "evidenceStatus": "CODE_GROUNDED",
-    "releaseStatus": "PUBLIC_LIVE",
+    "releaseStatus": "LIMITED_LIVE",
     "visibility": [
       "SEEKER",
       "BROKER",
@@ -16463,61 +16420,25 @@
       {
         "kind": "COMPONENT",
         "path": "src/components/dashboard/ChatBox.js",
+        "symbol": "ChatBox",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
       },
       {
         "kind": "API",
         "path": "src/app/api/deals/[id]/messages/route.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
-      }
-    ],
-    "graph_version": "2.1.0",
-    "graphVersion": "2.1.0",
-    "last_verified_at": "2026-08-19",
-    "lastVerifiedAt": "2026-08-19"
-  },
-  {
-    "chunk_id": "guide_deal.room.chat",
-    "chunk_type": "UI_GUIDE",
-    "chunkType": "UI_GUIDE",
-    "canonical_id": "deal.room.chat",
-    "canonicalId": "deal.room.chat",
-    "title": "User Walkthrough: Private Deal Room & Scheduling Cockpit",
-    "domain": "deal",
-    "status": "VERIFIED",
-    "productStatus": "APPROVED",
-    "implementationStatus": "VERIFIED",
-    "evidenceStatus": "CODE_GROUNDED",
-    "releaseStatus": "PUBLIC_LIVE",
-    "visibility": [
-      "SEEKER",
-      "BROKER",
-      "OWNER",
-      "PROVIDER"
-    ],
-    "securityClassification": "AUTHENTICATED",
-    "instruction": "Encrypted workspace where buyer, broker, and owner coordinate viewings, review terms, and finalize handshakes.",
-    "ui_target": "deal-room-negotiation-panel",
-    "source_type": "WIZARD_SYSTEM",
-    "sourceType": "WIZARD_SYSTEM",
-    "evidence": [
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
       {
         "kind": "COMPONENT",
-        "path": "src/components/dashboard/ChatBox.js",
+        "path": "src/components/dashboard/crm/AppointmentsSheet.js",
+        "symbol": "AppointmentsSheet",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
-      },
-      {
-        "kind": "API",
-        "path": "src/app/api/deals/[id]/messages/route.js",
-        "provenance": "EXTRACTED",
-        "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
       }
     ],
     "graph_version": "2.1.0",
@@ -16531,27 +16452,25 @@
     "chunkType": "IMPLEMENTATION_REFERENCE",
     "canonical_id": "deal.room.chat",
     "canonicalId": "deal.room.chat",
-    "title": "Implementation Evidence: Private Deal Room & Scheduling Cockpit",
+    "title": "Implementation Evidence: Private Inquiry Workspace & Scheduling",
     "domain": "deal",
     "status": "VERIFIED",
     "productStatus": "APPROVED",
     "implementationStatus": "VERIFIED",
     "evidenceStatus": "CODE_GROUNDED",
-    "releaseStatus": "PUBLIC_LIVE",
+    "releaseStatus": "LIMITED_LIVE",
     "visibility": [
       "STAFF",
       "ADMIN"
     ],
     "securityClassification": "INTERNAL",
     "systems": [
-      "DealRoomCockpit.js",
-      "ChatBox.js",
-      "ViewingCalendar.js"
+      "src/components/dashboard/ChatBox.js",
+      "src/components/dashboard/crm/AppointmentsSheet.js"
     ],
     "components": [
-      "DealRoomCockpit.js",
       "ChatBox.js",
-      "ViewingCalendar.js"
+      "AppointmentsSheet.js"
     ],
     "apis": [
       "/api/deals",
@@ -16565,22 +16484,31 @@
       {
         "kind": "COMPONENT",
         "path": "src/components/dashboard/ChatBox.js",
+        "symbol": "ChatBox",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
       },
       {
         "kind": "API",
         "path": "src/app/api/deals/[id]/messages/route.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "COMPONENT",
+        "path": "src/components/dashboard/crm/AppointmentsSheet.js",
+        "symbol": "AppointmentsSheet",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
       }
     ],
     "claims": [
       {
         "id": "claim_deal_room_behavior",
-        "text": "Private Deal Room & Scheduling Cockpit enforces defined deal behavioral contracts and access rules.",
+        "text": "Authorized deal participants can exchange private messages and coordinate viewing appointments; structured offer negotiation is not implemented.",
         "kind": "PRODUCT_BEHAVIOR",
         "status": "VERIFIED",
         "evidence": [
@@ -17958,16 +17886,16 @@
       "PROVIDER"
     ],
     "securityClassification": "PUBLIC",
-    "status": "PARTIAL",
+    "status": "NOT_STARTED",
     "productStatus": "APPROVED",
-    "implementationStatus": "PARTIAL",
+    "implementationStatus": "NOT_STARTED",
     "evidenceStatus": "DOCUMENTED",
-    "releaseStatus": "LIMITED_LIVE",
-    "purpose": "Triggered when either buyer or broker cannot attend the confirmed viewing appointment.",
-    "description": "Flags the viewing record and launches the Reschedule Recovery Modal.",
+    "releaseStatus": "NOT_DEPLOYED",
+    "purpose": "Planned no-show outcome for a confirmed viewing.",
+    "description": "No runtime status or mutation path exists yet; this remains a documented recovery requirement.",
     "available_actions": [
-      "Record Cancellation / Missed Check-in",
-      "Notify Both Parties"
+      "Planned: record cancellation or missed check-in",
+      "Planned: notify both parties"
     ],
     "entry_conditions": [
       "Appointment missed or canceled before arrival"
@@ -17986,9 +17914,9 @@
     "claims": [
       {
         "id": "claim_exc_viewing_noshow_behavior",
-        "text": "Exception: Viewing No-Show / Cancellation enforces defined deal behavioral contracts and access rules.",
+        "text": "A viewing no-show outcome is a documented recovery requirement and is not implemented in the runtime.",
         "kind": "PRODUCT_BEHAVIOR",
-        "status": "VERIFIED",
+        "status": "PROPOSED",
         "evidence": [
           {
             "kind": "SCOUTIT_BRAIN",
@@ -18020,11 +17948,11 @@
     "canonicalId": "deal.viewing.exc.noshow",
     "title": "Recovery Protocol: Exception: Viewing No-Show / Cancellation",
     "domain": "deal",
-    "status": "PARTIAL",
+    "status": "NOT_STARTED",
     "productStatus": "APPROVED",
-    "implementationStatus": "PARTIAL",
+    "implementationStatus": "NOT_STARTED",
     "evidenceStatus": "DOCUMENTED",
-    "releaseStatus": "LIMITED_LIVE",
+    "releaseStatus": "NOT_DEPLOYED",
     "visibility": [
       "SEEKER",
       "BROKER",
@@ -18061,23 +17989,20 @@
     "canonicalId": "deal.viewing.exc.noshow",
     "title": "Implementation Evidence: Exception: Viewing No-Show / Cancellation",
     "domain": "deal",
-    "status": "PARTIAL",
+    "status": "NOT_STARTED",
     "productStatus": "APPROVED",
-    "implementationStatus": "PARTIAL",
+    "implementationStatus": "NOT_STARTED",
     "evidenceStatus": "DOCUMENTED",
-    "releaseStatus": "LIMITED_LIVE",
+    "releaseStatus": "NOT_DEPLOYED",
     "visibility": [
       "STAFF",
       "ADMIN"
     ],
     "securityClassification": "INTERNAL",
     "systems": [
-      "ViewingCalendar.js",
-      "deal_milestones"
+      "Planned viewing outcome lifecycle"
     ],
-    "components": [
-      "ViewingCalendar.js"
-    ],
+    "components": [],
     "apis": [],
     "database": "Supabase deals & viewing_schedules",
     "evidence": [
@@ -18092,9 +18017,9 @@
     "claims": [
       {
         "id": "claim_exc_viewing_noshow_behavior",
-        "text": "Exception: Viewing No-Show / Cancellation enforces defined deal behavioral contracts and access rules.",
+        "text": "A viewing no-show outcome is a documented recovery requirement and is not implemented in the runtime.",
         "kind": "PRODUCT_BEHAVIOR",
-        "status": "VERIFIED",
+        "status": "PROPOSED",
         "evidence": [
           {
             "kind": "SCOUTIT_BRAIN",
@@ -18123,7 +18048,7 @@
     "chunkType": "NODE_FACT",
     "canonical_id": "deal.viewing.reschedule",
     "canonicalId": "deal.viewing.reschedule",
-    "title": "Recovery: Viewing Reschedule Modal",
+    "title": "Viewing Reschedule Coordination",
     "domain": "deal",
     "layer": "core",
     "route": "/dashboard/inbox",
@@ -18138,17 +18063,16 @@
       "PROVIDER"
     ],
     "securityClassification": "AUTHENTICATED",
-    "status": "VERIFIED",
+    "status": "PARTIAL",
     "productStatus": "APPROVED",
-    "implementationStatus": "VERIFIED",
+    "implementationStatus": "PARTIAL",
     "evidenceStatus": "CODE_GROUNDED",
-    "releaseStatus": "PUBLIC_LIVE",
-    "purpose": "Allows parties to mutually agree on a new date and time slot without losing deal context.",
-    "description": "Re-opens the calendar scheduler and updates the private deal room schedule record.",
+    "releaseStatus": "LIMITED_LIVE",
+    "purpose": "Existing chat and booking controls can propose another slot; a dedicated persisted reschedule lifecycle is not implemented.",
+    "description": "The current UI supports appointment coordination, but there is no RescheduleModal component or RESCHEDULE_PENDING status.",
     "available_actions": [
-      "Select New Date & Slot",
-      "Submit Reschedule Proposal",
-      "Confirm Updated Appointment"
+      "Use existing booking controls to propose another slot",
+      "Coordinate the change in private chat"
     ],
     "entry_conditions": [
       "Active deal room session"
@@ -18159,23 +18083,24 @@
       {
         "kind": "COMPONENT",
         "path": "src/components/dashboard/BookingModal.js",
+        "symbol": "BookingModal",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
       },
       {
-        "kind": "API",
-        "path": "src/app/api/viewing-appointments/[id]/route.js",
-        "symbol": "PATCH",
+        "kind": "COMPONENT",
+        "path": "src/components/dashboard/ChatBox.js",
+        "symbol": "ChatBox",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
       }
     ],
     "claims": [
       {
         "id": "claim_reschedule_modal_behavior",
-        "text": "Recovery: Viewing Reschedule Modal enforces defined deal behavioral contracts and access rules.",
+        "text": "Existing booking and chat controls support coordinating another viewing slot; a dedicated persisted reschedule lifecycle is not implemented.",
         "kind": "PRODUCT_BEHAVIOR",
         "status": "VERIFIED",
         "evidence": [
@@ -18214,49 +18139,50 @@
     "chunkType": "IMPLEMENTATION_REFERENCE",
     "canonical_id": "deal.viewing.reschedule",
     "canonicalId": "deal.viewing.reschedule",
-    "title": "Implementation Evidence: Recovery: Viewing Reschedule Modal",
+    "title": "Implementation Evidence: Viewing Reschedule Coordination",
     "domain": "deal",
-    "status": "VERIFIED",
+    "status": "PARTIAL",
     "productStatus": "APPROVED",
-    "implementationStatus": "VERIFIED",
+    "implementationStatus": "PARTIAL",
     "evidenceStatus": "CODE_GROUNDED",
-    "releaseStatus": "PUBLIC_LIVE",
+    "releaseStatus": "LIMITED_LIVE",
     "visibility": [
       "STAFF",
       "ADMIN"
     ],
     "securityClassification": "INTERNAL",
     "systems": [
-      "RescheduleModal.js",
-      "ViewingCalendar.js"
+      "src/components/dashboard/BookingModal.js",
+      "src/components/dashboard/ChatBox.js"
     ],
     "components": [
-      "RescheduleModal.js",
-      "ViewingCalendar.js"
+      "BookingModal.js",
+      "ChatBox.js"
     ],
     "apis": [],
-    "database": "Supabase viewing_schedules",
+    "database": "Supabase viewing appointments",
     "evidence": [
       {
         "kind": "COMPONENT",
         "path": "src/components/dashboard/BookingModal.js",
+        "symbol": "BookingModal",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
       },
       {
-        "kind": "API",
-        "path": "src/app/api/viewing-appointments/[id]/route.js",
-        "symbol": "PATCH",
+        "kind": "COMPONENT",
+        "path": "src/components/dashboard/ChatBox.js",
+        "symbol": "ChatBox",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
       }
     ],
     "claims": [
       {
         "id": "claim_reschedule_modal_behavior",
-        "text": "Recovery: Viewing Reschedule Modal enforces defined deal behavioral contracts and access rules.",
+        "text": "Existing booking and chat controls support coordinating another viewing slot; a dedicated persisted reschedule lifecycle is not implemented.",
         "kind": "PRODUCT_BEHAVIOR",
         "status": "VERIFIED",
         "evidence": [
@@ -20615,11 +20541,9 @@
     ],
     "securityClassification": "INTERNAL",
     "systems": [
-      "DealRoomCockpit.js"
+      "src/app/api/deals/[id]/close/route.js"
     ],
-    "components": [
-      "DealRoomCockpit.js"
-    ],
+    "components": [],
     "apis": [],
     "database": "Supabase deals",
     "evidence": [
@@ -23681,6 +23605,1370 @@
     "graphVersion": "2.1.0",
     "last_verified_at": "2026-08-19",
     "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "fact_deal.inquiry.state.pending",
+    "chunk_type": "NODE_FACT",
+    "chunkType": "NODE_FACT",
+    "canonical_id": "deal.inquiry.state.pending",
+    "canonicalId": "deal.inquiry.state.pending",
+    "title": "INQUIRY · PENDING",
+    "domain": "deal",
+    "layer": "Private transaction runtime",
+    "route": "/api/deals/[id]",
+    "roles": [
+      "staff",
+      "admin"
+    ],
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "LIMITED_LIVE",
+    "purpose": "Persisted inquiry runtime state PENDING.",
+    "description": "This state is accepted and enforced by src/app/api/deals/[id]/route.js.",
+    "available_actions": [],
+    "entry_conditions": [],
+    "source_type": "MASTER_FLOW_GRAPH",
+    "sourceType": "MASTER_FLOW_GRAPH",
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "WORKFLOW_STATE_MACHINES",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/deals/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/workflowStateMachines.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "claims": [],
+    "humanReviewedBy": null,
+    "productReviewStatus": "PRODUCT_APPROVED",
+    "legalReviewStatus": "RESEARCHED",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-21",
+    "lastVerifiedAt": "2026-08-21"
+  },
+  {
+    "chunk_id": "impl_deal.inquiry.state.pending",
+    "chunk_type": "IMPLEMENTATION_REFERENCE",
+    "chunkType": "IMPLEMENTATION_REFERENCE",
+    "canonical_id": "deal.inquiry.state.pending",
+    "canonicalId": "deal.inquiry.state.pending",
+    "title": "Implementation Evidence: INQUIRY · PENDING",
+    "domain": "deal",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "LIMITED_LIVE",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "systems": [
+      "src/lib/workflowStateMachines.js",
+      "src/app/api/deals/[id]/route.js"
+    ],
+    "components": [],
+    "apis": [
+      "/api/deals/[id]"
+    ],
+    "database": "Supabase deals",
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "WORKFLOW_STATE_MACHINES",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/deals/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/workflowStateMachines.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "claims": [],
+    "source_type": "CODEBASE_EVIDENCE",
+    "sourceType": "CODEBASE_EVIDENCE",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-21",
+    "lastVerifiedAt": "2026-08-21"
+  },
+  {
+    "chunk_id": "fact_deal.inquiry.state.connected",
+    "chunk_type": "NODE_FACT",
+    "chunkType": "NODE_FACT",
+    "canonical_id": "deal.inquiry.state.connected",
+    "canonicalId": "deal.inquiry.state.connected",
+    "title": "INQUIRY · CONNECTED",
+    "domain": "deal",
+    "layer": "Private transaction runtime",
+    "route": "/api/deals/[id]",
+    "roles": [
+      "staff",
+      "admin"
+    ],
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "LIMITED_LIVE",
+    "purpose": "Persisted inquiry runtime state CONNECTED.",
+    "description": "This state is accepted and enforced by src/app/api/deals/[id]/route.js.",
+    "available_actions": [],
+    "entry_conditions": [],
+    "source_type": "MASTER_FLOW_GRAPH",
+    "sourceType": "MASTER_FLOW_GRAPH",
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "WORKFLOW_STATE_MACHINES",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/deals/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/workflowStateMachines.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "claims": [],
+    "humanReviewedBy": null,
+    "productReviewStatus": "PRODUCT_APPROVED",
+    "legalReviewStatus": "RESEARCHED",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-21",
+    "lastVerifiedAt": "2026-08-21"
+  },
+  {
+    "chunk_id": "impl_deal.inquiry.state.connected",
+    "chunk_type": "IMPLEMENTATION_REFERENCE",
+    "chunkType": "IMPLEMENTATION_REFERENCE",
+    "canonical_id": "deal.inquiry.state.connected",
+    "canonicalId": "deal.inquiry.state.connected",
+    "title": "Implementation Evidence: INQUIRY · CONNECTED",
+    "domain": "deal",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "LIMITED_LIVE",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "systems": [
+      "src/lib/workflowStateMachines.js",
+      "src/app/api/deals/[id]/route.js"
+    ],
+    "components": [],
+    "apis": [
+      "/api/deals/[id]"
+    ],
+    "database": "Supabase deals",
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "WORKFLOW_STATE_MACHINES",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/deals/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/workflowStateMachines.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "claims": [],
+    "source_type": "CODEBASE_EVIDENCE",
+    "sourceType": "CODEBASE_EVIDENCE",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-21",
+    "lastVerifiedAt": "2026-08-21"
+  },
+  {
+    "chunk_id": "fact_deal.inquiry.state.accepted",
+    "chunk_type": "NODE_FACT",
+    "chunkType": "NODE_FACT",
+    "canonical_id": "deal.inquiry.state.accepted",
+    "canonicalId": "deal.inquiry.state.accepted",
+    "title": "INQUIRY · ACCEPTED",
+    "domain": "deal",
+    "layer": "Private transaction runtime",
+    "route": "/api/deals/[id]",
+    "roles": [
+      "staff",
+      "admin"
+    ],
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "LIMITED_LIVE",
+    "purpose": "Persisted inquiry runtime state ACCEPTED.",
+    "description": "This state is accepted and enforced by src/app/api/deals/[id]/route.js.",
+    "available_actions": [],
+    "entry_conditions": [],
+    "source_type": "MASTER_FLOW_GRAPH",
+    "sourceType": "MASTER_FLOW_GRAPH",
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "WORKFLOW_STATE_MACHINES",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/deals/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/workflowStateMachines.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "claims": [],
+    "humanReviewedBy": null,
+    "productReviewStatus": "PRODUCT_APPROVED",
+    "legalReviewStatus": "RESEARCHED",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-21",
+    "lastVerifiedAt": "2026-08-21"
+  },
+  {
+    "chunk_id": "impl_deal.inquiry.state.accepted",
+    "chunk_type": "IMPLEMENTATION_REFERENCE",
+    "chunkType": "IMPLEMENTATION_REFERENCE",
+    "canonical_id": "deal.inquiry.state.accepted",
+    "canonicalId": "deal.inquiry.state.accepted",
+    "title": "Implementation Evidence: INQUIRY · ACCEPTED",
+    "domain": "deal",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "LIMITED_LIVE",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "systems": [
+      "src/lib/workflowStateMachines.js",
+      "src/app/api/deals/[id]/route.js"
+    ],
+    "components": [],
+    "apis": [
+      "/api/deals/[id]"
+    ],
+    "database": "Supabase deals",
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "WORKFLOW_STATE_MACHINES",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/deals/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/workflowStateMachines.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "claims": [],
+    "source_type": "CODEBASE_EVIDENCE",
+    "sourceType": "CODEBASE_EVIDENCE",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-21",
+    "lastVerifiedAt": "2026-08-21"
+  },
+  {
+    "chunk_id": "fact_deal.inquiry.state.declined",
+    "chunk_type": "NODE_FACT",
+    "chunkType": "NODE_FACT",
+    "canonical_id": "deal.inquiry.state.declined",
+    "canonicalId": "deal.inquiry.state.declined",
+    "title": "INQUIRY · DECLINED",
+    "domain": "deal",
+    "layer": "Private transaction runtime",
+    "route": "/api/deals/[id]",
+    "roles": [
+      "staff",
+      "admin"
+    ],
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "LIMITED_LIVE",
+    "purpose": "Persisted inquiry runtime state DECLINED.",
+    "description": "This state is accepted and enforced by src/app/api/deals/[id]/route.js.",
+    "available_actions": [],
+    "entry_conditions": [],
+    "source_type": "MASTER_FLOW_GRAPH",
+    "sourceType": "MASTER_FLOW_GRAPH",
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "WORKFLOW_STATE_MACHINES",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/deals/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/workflowStateMachines.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "claims": [],
+    "humanReviewedBy": null,
+    "productReviewStatus": "PRODUCT_APPROVED",
+    "legalReviewStatus": "RESEARCHED",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-21",
+    "lastVerifiedAt": "2026-08-21"
+  },
+  {
+    "chunk_id": "impl_deal.inquiry.state.declined",
+    "chunk_type": "IMPLEMENTATION_REFERENCE",
+    "chunkType": "IMPLEMENTATION_REFERENCE",
+    "canonical_id": "deal.inquiry.state.declined",
+    "canonicalId": "deal.inquiry.state.declined",
+    "title": "Implementation Evidence: INQUIRY · DECLINED",
+    "domain": "deal",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "LIMITED_LIVE",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "systems": [
+      "src/lib/workflowStateMachines.js",
+      "src/app/api/deals/[id]/route.js"
+    ],
+    "components": [],
+    "apis": [
+      "/api/deals/[id]"
+    ],
+    "database": "Supabase deals",
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "WORKFLOW_STATE_MACHINES",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/deals/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/workflowStateMachines.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "claims": [],
+    "source_type": "CODEBASE_EVIDENCE",
+    "sourceType": "CODEBASE_EVIDENCE",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-21",
+    "lastVerifiedAt": "2026-08-21"
+  },
+  {
+    "chunk_id": "fact_deal.inquiry.state.withdrawn",
+    "chunk_type": "NODE_FACT",
+    "chunkType": "NODE_FACT",
+    "canonical_id": "deal.inquiry.state.withdrawn",
+    "canonicalId": "deal.inquiry.state.withdrawn",
+    "title": "INQUIRY · WITHDRAWN",
+    "domain": "deal",
+    "layer": "Private transaction runtime",
+    "route": "/api/deals/[id]",
+    "roles": [
+      "staff",
+      "admin"
+    ],
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "LIMITED_LIVE",
+    "purpose": "Persisted inquiry runtime state WITHDRAWN.",
+    "description": "This state is accepted and enforced by src/app/api/deals/[id]/route.js.",
+    "available_actions": [],
+    "entry_conditions": [],
+    "source_type": "MASTER_FLOW_GRAPH",
+    "sourceType": "MASTER_FLOW_GRAPH",
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "WORKFLOW_STATE_MACHINES",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/deals/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/workflowStateMachines.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "claims": [],
+    "humanReviewedBy": null,
+    "productReviewStatus": "PRODUCT_APPROVED",
+    "legalReviewStatus": "RESEARCHED",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-21",
+    "lastVerifiedAt": "2026-08-21"
+  },
+  {
+    "chunk_id": "impl_deal.inquiry.state.withdrawn",
+    "chunk_type": "IMPLEMENTATION_REFERENCE",
+    "chunkType": "IMPLEMENTATION_REFERENCE",
+    "canonical_id": "deal.inquiry.state.withdrawn",
+    "canonicalId": "deal.inquiry.state.withdrawn",
+    "title": "Implementation Evidence: INQUIRY · WITHDRAWN",
+    "domain": "deal",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "LIMITED_LIVE",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "systems": [
+      "src/lib/workflowStateMachines.js",
+      "src/app/api/deals/[id]/route.js"
+    ],
+    "components": [],
+    "apis": [
+      "/api/deals/[id]"
+    ],
+    "database": "Supabase deals",
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "WORKFLOW_STATE_MACHINES",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/deals/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/workflowStateMachines.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "claims": [],
+    "source_type": "CODEBASE_EVIDENCE",
+    "sourceType": "CODEBASE_EVIDENCE",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-21",
+    "lastVerifiedAt": "2026-08-21"
+  },
+  {
+    "chunk_id": "fact_deal.inquiry.state.reported",
+    "chunk_type": "NODE_FACT",
+    "chunkType": "NODE_FACT",
+    "canonical_id": "deal.inquiry.state.reported",
+    "canonicalId": "deal.inquiry.state.reported",
+    "title": "INQUIRY · REPORTED",
+    "domain": "deal",
+    "layer": "Private transaction runtime",
+    "route": "/api/deals/[id]",
+    "roles": [
+      "staff",
+      "admin"
+    ],
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "LIMITED_LIVE",
+    "purpose": "Persisted inquiry runtime state REPORTED.",
+    "description": "This state is accepted and enforced by src/app/api/deals/[id]/route.js.",
+    "available_actions": [],
+    "entry_conditions": [],
+    "source_type": "MASTER_FLOW_GRAPH",
+    "sourceType": "MASTER_FLOW_GRAPH",
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "WORKFLOW_STATE_MACHINES",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/deals/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/workflowStateMachines.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "claims": [],
+    "humanReviewedBy": null,
+    "productReviewStatus": "PRODUCT_APPROVED",
+    "legalReviewStatus": "RESEARCHED",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-21",
+    "lastVerifiedAt": "2026-08-21"
+  },
+  {
+    "chunk_id": "impl_deal.inquiry.state.reported",
+    "chunk_type": "IMPLEMENTATION_REFERENCE",
+    "chunkType": "IMPLEMENTATION_REFERENCE",
+    "canonical_id": "deal.inquiry.state.reported",
+    "canonicalId": "deal.inquiry.state.reported",
+    "title": "Implementation Evidence: INQUIRY · REPORTED",
+    "domain": "deal",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "LIMITED_LIVE",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "systems": [
+      "src/lib/workflowStateMachines.js",
+      "src/app/api/deals/[id]/route.js"
+    ],
+    "components": [],
+    "apis": [
+      "/api/deals/[id]"
+    ],
+    "database": "Supabase deals",
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "WORKFLOW_STATE_MACHINES",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/deals/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/workflowStateMachines.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "claims": [],
+    "source_type": "CODEBASE_EVIDENCE",
+    "sourceType": "CODEBASE_EVIDENCE",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-21",
+    "lastVerifiedAt": "2026-08-21"
+  },
+  {
+    "chunk_id": "fact_deal.inquiry.state.closed",
+    "chunk_type": "NODE_FACT",
+    "chunkType": "NODE_FACT",
+    "canonical_id": "deal.inquiry.state.closed",
+    "canonicalId": "deal.inquiry.state.closed",
+    "title": "INQUIRY · CLOSED",
+    "domain": "deal",
+    "layer": "Private transaction runtime",
+    "route": "/api/deals/[id]",
+    "roles": [
+      "staff",
+      "admin"
+    ],
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "LIMITED_LIVE",
+    "purpose": "Persisted inquiry runtime state CLOSED.",
+    "description": "This state is accepted and enforced by src/app/api/deals/[id]/route.js.",
+    "available_actions": [],
+    "entry_conditions": [],
+    "source_type": "MASTER_FLOW_GRAPH",
+    "sourceType": "MASTER_FLOW_GRAPH",
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "WORKFLOW_STATE_MACHINES",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/deals/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/workflowStateMachines.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "claims": [],
+    "humanReviewedBy": null,
+    "productReviewStatus": "PRODUCT_APPROVED",
+    "legalReviewStatus": "RESEARCHED",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-21",
+    "lastVerifiedAt": "2026-08-21"
+  },
+  {
+    "chunk_id": "impl_deal.inquiry.state.closed",
+    "chunk_type": "IMPLEMENTATION_REFERENCE",
+    "chunkType": "IMPLEMENTATION_REFERENCE",
+    "canonical_id": "deal.inquiry.state.closed",
+    "canonicalId": "deal.inquiry.state.closed",
+    "title": "Implementation Evidence: INQUIRY · CLOSED",
+    "domain": "deal",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "LIMITED_LIVE",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "systems": [
+      "src/lib/workflowStateMachines.js",
+      "src/app/api/deals/[id]/route.js"
+    ],
+    "components": [],
+    "apis": [
+      "/api/deals/[id]"
+    ],
+    "database": "Supabase deals",
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "WORKFLOW_STATE_MACHINES",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/deals/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/workflowStateMachines.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "claims": [],
+    "source_type": "CODEBASE_EVIDENCE",
+    "sourceType": "CODEBASE_EVIDENCE",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-21",
+    "lastVerifiedAt": "2026-08-21"
+  },
+  {
+    "chunk_id": "fact_deal.viewing.state.pending",
+    "chunk_type": "NODE_FACT",
+    "chunkType": "NODE_FACT",
+    "canonical_id": "deal.viewing.state.pending",
+    "canonicalId": "deal.viewing.state.pending",
+    "title": "VIEWING · PENDING",
+    "domain": "deal",
+    "layer": "Private transaction runtime",
+    "route": "/api/viewing-appointments/[id]",
+    "roles": [
+      "staff",
+      "admin"
+    ],
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "LIMITED_LIVE",
+    "purpose": "Persisted viewing runtime state PENDING.",
+    "description": "This state is accepted and enforced by src/app/api/viewing-appointments/[id]/route.js.",
+    "available_actions": [],
+    "entry_conditions": [],
+    "source_type": "MASTER_FLOW_GRAPH",
+    "sourceType": "MASTER_FLOW_GRAPH",
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "WORKFLOW_STATE_MACHINES",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/viewing-appointments/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/workflowStateMachines.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "claims": [],
+    "humanReviewedBy": null,
+    "productReviewStatus": "PRODUCT_APPROVED",
+    "legalReviewStatus": "RESEARCHED",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-21",
+    "lastVerifiedAt": "2026-08-21"
+  },
+  {
+    "chunk_id": "impl_deal.viewing.state.pending",
+    "chunk_type": "IMPLEMENTATION_REFERENCE",
+    "chunkType": "IMPLEMENTATION_REFERENCE",
+    "canonical_id": "deal.viewing.state.pending",
+    "canonicalId": "deal.viewing.state.pending",
+    "title": "Implementation Evidence: VIEWING · PENDING",
+    "domain": "deal",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "LIMITED_LIVE",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "systems": [
+      "src/lib/workflowStateMachines.js",
+      "src/app/api/viewing-appointments/[id]/route.js"
+    ],
+    "components": [],
+    "apis": [
+      "/api/viewing-appointments/[id]"
+    ],
+    "database": "Supabase viewing_appointments",
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "WORKFLOW_STATE_MACHINES",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/viewing-appointments/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/workflowStateMachines.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "claims": [],
+    "source_type": "CODEBASE_EVIDENCE",
+    "sourceType": "CODEBASE_EVIDENCE",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-21",
+    "lastVerifiedAt": "2026-08-21"
+  },
+  {
+    "chunk_id": "fact_deal.viewing.state.confirmed",
+    "chunk_type": "NODE_FACT",
+    "chunkType": "NODE_FACT",
+    "canonical_id": "deal.viewing.state.confirmed",
+    "canonicalId": "deal.viewing.state.confirmed",
+    "title": "VIEWING · CONFIRMED",
+    "domain": "deal",
+    "layer": "Private transaction runtime",
+    "route": "/api/viewing-appointments/[id]",
+    "roles": [
+      "staff",
+      "admin"
+    ],
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "LIMITED_LIVE",
+    "purpose": "Persisted viewing runtime state CONFIRMED.",
+    "description": "This state is accepted and enforced by src/app/api/viewing-appointments/[id]/route.js.",
+    "available_actions": [],
+    "entry_conditions": [],
+    "source_type": "MASTER_FLOW_GRAPH",
+    "sourceType": "MASTER_FLOW_GRAPH",
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "WORKFLOW_STATE_MACHINES",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/viewing-appointments/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/workflowStateMachines.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "claims": [],
+    "humanReviewedBy": null,
+    "productReviewStatus": "PRODUCT_APPROVED",
+    "legalReviewStatus": "RESEARCHED",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-21",
+    "lastVerifiedAt": "2026-08-21"
+  },
+  {
+    "chunk_id": "impl_deal.viewing.state.confirmed",
+    "chunk_type": "IMPLEMENTATION_REFERENCE",
+    "chunkType": "IMPLEMENTATION_REFERENCE",
+    "canonical_id": "deal.viewing.state.confirmed",
+    "canonicalId": "deal.viewing.state.confirmed",
+    "title": "Implementation Evidence: VIEWING · CONFIRMED",
+    "domain": "deal",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "LIMITED_LIVE",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "systems": [
+      "src/lib/workflowStateMachines.js",
+      "src/app/api/viewing-appointments/[id]/route.js"
+    ],
+    "components": [],
+    "apis": [
+      "/api/viewing-appointments/[id]"
+    ],
+    "database": "Supabase viewing_appointments",
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "WORKFLOW_STATE_MACHINES",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/viewing-appointments/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/workflowStateMachines.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "claims": [],
+    "source_type": "CODEBASE_EVIDENCE",
+    "sourceType": "CODEBASE_EVIDENCE",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-21",
+    "lastVerifiedAt": "2026-08-21"
+  },
+  {
+    "chunk_id": "fact_deal.viewing.state.cancelled",
+    "chunk_type": "NODE_FACT",
+    "chunkType": "NODE_FACT",
+    "canonical_id": "deal.viewing.state.cancelled",
+    "canonicalId": "deal.viewing.state.cancelled",
+    "title": "VIEWING · CANCELLED",
+    "domain": "deal",
+    "layer": "Private transaction runtime",
+    "route": "/api/viewing-appointments/[id]",
+    "roles": [
+      "staff",
+      "admin"
+    ],
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "LIMITED_LIVE",
+    "purpose": "Persisted viewing runtime state CANCELLED.",
+    "description": "This state is accepted and enforced by src/app/api/viewing-appointments/[id]/route.js.",
+    "available_actions": [],
+    "entry_conditions": [],
+    "source_type": "MASTER_FLOW_GRAPH",
+    "sourceType": "MASTER_FLOW_GRAPH",
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "WORKFLOW_STATE_MACHINES",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/viewing-appointments/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/workflowStateMachines.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "claims": [],
+    "humanReviewedBy": null,
+    "productReviewStatus": "PRODUCT_APPROVED",
+    "legalReviewStatus": "RESEARCHED",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-21",
+    "lastVerifiedAt": "2026-08-21"
+  },
+  {
+    "chunk_id": "impl_deal.viewing.state.cancelled",
+    "chunk_type": "IMPLEMENTATION_REFERENCE",
+    "chunkType": "IMPLEMENTATION_REFERENCE",
+    "canonical_id": "deal.viewing.state.cancelled",
+    "canonicalId": "deal.viewing.state.cancelled",
+    "title": "Implementation Evidence: VIEWING · CANCELLED",
+    "domain": "deal",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "LIMITED_LIVE",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "systems": [
+      "src/lib/workflowStateMachines.js",
+      "src/app/api/viewing-appointments/[id]/route.js"
+    ],
+    "components": [],
+    "apis": [
+      "/api/viewing-appointments/[id]"
+    ],
+    "database": "Supabase viewing_appointments",
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "WORKFLOW_STATE_MACHINES",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/viewing-appointments/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/workflowStateMachines.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "claims": [],
+    "source_type": "CODEBASE_EVIDENCE",
+    "sourceType": "CODEBASE_EVIDENCE",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-21",
+    "lastVerifiedAt": "2026-08-21"
+  },
+  {
+    "chunk_id": "fact_deal.viewing.state.completed",
+    "chunk_type": "NODE_FACT",
+    "chunkType": "NODE_FACT",
+    "canonical_id": "deal.viewing.state.completed",
+    "canonicalId": "deal.viewing.state.completed",
+    "title": "VIEWING · COMPLETED",
+    "domain": "deal",
+    "layer": "Private transaction runtime",
+    "route": "/api/viewing-appointments/[id]",
+    "roles": [
+      "staff",
+      "admin"
+    ],
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "LIMITED_LIVE",
+    "purpose": "Persisted viewing runtime state COMPLETED.",
+    "description": "This state is accepted and enforced by src/app/api/viewing-appointments/[id]/route.js.",
+    "available_actions": [],
+    "entry_conditions": [],
+    "source_type": "MASTER_FLOW_GRAPH",
+    "sourceType": "MASTER_FLOW_GRAPH",
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "WORKFLOW_STATE_MACHINES",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/viewing-appointments/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/workflowStateMachines.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "claims": [],
+    "humanReviewedBy": null,
+    "productReviewStatus": "PRODUCT_APPROVED",
+    "legalReviewStatus": "RESEARCHED",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-21",
+    "lastVerifiedAt": "2026-08-21"
+  },
+  {
+    "chunk_id": "impl_deal.viewing.state.completed",
+    "chunk_type": "IMPLEMENTATION_REFERENCE",
+    "chunkType": "IMPLEMENTATION_REFERENCE",
+    "canonical_id": "deal.viewing.state.completed",
+    "canonicalId": "deal.viewing.state.completed",
+    "title": "Implementation Evidence: VIEWING · COMPLETED",
+    "domain": "deal",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "LIMITED_LIVE",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "systems": [
+      "src/lib/workflowStateMachines.js",
+      "src/app/api/viewing-appointments/[id]/route.js"
+    ],
+    "components": [],
+    "apis": [
+      "/api/viewing-appointments/[id]"
+    ],
+    "database": "Supabase viewing_appointments",
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "WORKFLOW_STATE_MACHINES",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/viewing-appointments/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/workflowStateMachines.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "claims": [],
+    "source_type": "CODEBASE_EVIDENCE",
+    "sourceType": "CODEBASE_EVIDENCE",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-21",
+    "lastVerifiedAt": "2026-08-21"
   },
   {
     "chunk_id": "edge_e_hero_to_sys_edge_ip_masking_1",
@@ -28230,7 +29518,7 @@
     "source": "pep_ch10_your_move",
     "target": "offer_modal",
     "transition_type": "ACTION",
-    "label": "Chapter 10 — Your Move (Action Cockpit) → Make Offer & Intent Submission Modal",
+    "label": "Planned: Start Structured Offer Flow",
     "branchKey": "BRANCH_PEP_CH10_YOUR_MOVE_TO_OFFER_MODAL",
     "predicate": {
       "field": "navigation.action",
@@ -28244,27 +29532,21 @@
     "postconditions": [
       "Transition from property.pep.ch10_your_move to deal.offer.modal"
     ],
-    "status": "VERIFIED",
+    "status": "NOT_STARTED",
     "visibility": [
-      "PUBLIC"
+      "INTERNAL",
+      "STAFF",
+      "ADMIN"
     ],
     "securityClassification": "PUBLIC",
     "source_type": "TRANSITION_CONTRACT",
     "sourceType": "TRANSITION_CONTRACT",
     "evidence": [
       {
-        "kind": "COMPONENT",
-        "path": "src/components/property/chapterConfig.js",
-        "symbol": "CHAPTER_IDS.YOURMOVE",
-        "provenance": "EXTRACTED",
-        "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
-      },
-      {
-        "kind": "COMPONENT",
-        "path": "src/components/property/InquiryModal.js",
-        "provenance": "EXTRACTED",
-        "confidence": 1,
+        "kind": "SCOUTIT_BRAIN",
+        "path": "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_FLOWS.md",
+        "provenance": "INFERRED",
+        "confidence": 0.8,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
       }
     ],
@@ -28608,10 +29890,6 @@
       "connects.balance -= 1",
       "deal.status = \"OPEN\""
     ],
-    "stateTransition": {
-      "fromState": "DRAFT",
-      "toState": "SUBMITTED"
-    },
     "status": "VERIFIED",
     "visibility": [
       "SEEKER",
@@ -28671,10 +29949,6 @@
     "postconditions": [
       "workflow.blockedReason = \"INSUFFICIENT_CONNECTS\""
     ],
-    "stateTransition": {
-      "fromState": "DRAFT",
-      "toState": "BLOCKED"
-    },
     "status": "VERIFIED",
     "visibility": [
       "SEEKER",
@@ -29049,10 +30323,6 @@
     "postconditions": [
       "Transition from deal.viewing.modal to deal.viewing.exc.slot_conflict"
     ],
-    "stateTransition": {
-      "fromState": "REQUESTED",
-      "toState": "RESCHEDULE_PENDING"
-    },
     "status": "VERIFIED",
     "visibility": [
       "SEEKER",
@@ -29189,10 +30459,6 @@
     "postconditions": [
       "Transition from deal.viewing.modal to deal.room.chat"
     ],
-    "stateTransition": {
-      "fromState": "REQUESTED",
-      "toState": "CONFIRMED"
-    },
     "status": "VERIFIED",
     "visibility": [
       "SEEKER",
@@ -31039,10 +32305,6 @@
     "postconditions": [
       "Transition from deal.transaction.handshake to deal.terminal.handshake_success"
     ],
-    "stateTransition": {
-      "fromState": "HANDSHAKE_PENDING",
-      "toState": "CLOSED"
-    },
     "status": "VERIFIED",
     "visibility": [
       "SEEKER",
@@ -34199,7 +35461,7 @@
     "source": "comp_return_brief_owner",
     "target": "deal_room",
     "transition_type": "ACTION",
-    "label": "Open Lead in Deal Room",
+    "label": "Planned: Open Owner Inquiry Workspace",
     "branchKey": "OPEN_DEAL_ROOM",
     "predicate": {
       "field": "lead.hasActiveInquiry",
@@ -34208,29 +35470,26 @@
       "quality": "GENERIC_NAVIGATION"
     },
     "preconditions": [
-      "lead.hasActiveInquiry == true"
+      "Owner inquiry workspace navigation has been implemented"
     ],
     "postconditions": [
-      "workflow.currentWorkspace = \"DEAL_ROOM\""
+      "Planned private inquiry workspace opened"
     ],
-    "stateTransition": {
-      "fromState": "SUBMITTED",
-      "toState": "OPEN"
-    },
-    "status": "VERIFIED",
+    "status": "NOT_STARTED",
     "visibility": [
-      "PUBLIC"
+      "INTERNAL",
+      "STAFF",
+      "ADMIN"
     ],
     "securityClassification": "PUBLIC",
     "source_type": "TRANSITION_CONTRACT",
     "sourceType": "TRANSITION_CONTRACT",
     "evidence": [
       {
-        "kind": "COMPONENT",
-        "provenance": "src/components/dashboard/panels/OwnerWorkspace.js",
-        "path": "src/components/dashboard/panels/OwnerWorkspace.js",
-        "symbol": "OwnerWorkspace",
-        "confidence": 1,
+        "kind": "SCOUTIT_BRAIN",
+        "path": "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_FLOWS.md",
+        "provenance": "INFERRED",
+        "confidence": 0.8,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
       }
     ],
@@ -34359,7 +35618,7 @@
     "source": "deal_room",
     "target": "offer_modal",
     "transition_type": "ACTION",
-    "label": "Propose Deal Terms & Counter-Offer",
+    "label": "Planned: Open Structured Offer Flow",
     "predicate": {
       "field": "navigation.action",
       "operator": "==",
@@ -34367,30 +35626,27 @@
       "quality": "GENERIC_NAVIGATION"
     },
     "preconditions": [
-      "Deal Room session is active"
+      "Structured offer lifecycle has been implemented"
     ],
     "postconditions": [
-      "Offer proposal modal opened"
+      "Planned offer flow opened"
     ],
-    "status": "VERIFIED",
+    "status": "NOT_STARTED",
     "visibility": [
-      "PUBLIC",
-      "AUTHENTICATED",
-      "SEEKER",
-      "OWNER",
-      "BROKER"
+      "INTERNAL",
+      "STAFF",
+      "ADMIN"
     ],
     "securityClassification": "PUBLIC",
     "source_type": "TRANSITION_CONTRACT",
     "sourceType": "TRANSITION_CONTRACT",
     "evidence": [
       {
-        "kind": "CODE",
-        "path": "src/components/dashboard/crm/DealRoom.js",
-        "symbol": "DealRoom",
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43",
-        "confidence": 0.95,
-        "provenance": "DealRoom negotiation panel action"
+        "kind": "SCOUTIT_BRAIN",
+        "path": "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_FLOWS.md",
+        "provenance": "INFERRED",
+        "confidence": 0.8,
+        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
       }
     ],
     "graph_version": "2.2.0",
@@ -34405,7 +35661,7 @@
     "source": "offer_modal",
     "target": "deal_room",
     "transition_type": "SUBMIT",
-    "label": "Submit Proposal to Deal Room",
+    "label": "Planned: Persist Structured Proposal",
     "predicate": {
       "field": "deal.status",
       "operator": "in",
@@ -34417,22 +35673,52 @@
       "quality": "DOMAIN_DECISION"
     },
     "preconditions": [
-      "Valid proposal terms provided"
+      "Structured offer persistence has been implemented"
     ],
     "postconditions": [
-      "Proposal recorded in Deal Room audit stream"
+      "Planned proposal record persisted"
     ],
+    "status": "NOT_STARTED",
+    "visibility": [
+      "INTERNAL",
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [
+      {
+        "kind": "SCOUTIT_BRAIN",
+        "path": "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_FLOWS.md",
+        "provenance": "INFERRED",
+        "confidence": 0.8,
+        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      }
+    ],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_runtime_inquiry_pending_to_accepted",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "state_runtime_inquiry_pending",
+    "target": "state_runtime_inquiry_accepted",
+    "transition_type": "SYSTEM",
+    "label": "INQUIRY: PENDING -> ACCEPTED",
+    "preconditions": [],
+    "postconditions": [],
     "stateTransition": {
       "fromState": "PENDING",
       "toState": "ACCEPTED"
     },
     "status": "VERIFIED",
     "visibility": [
-      "PUBLIC",
-      "AUTHENTICATED",
-      "SEEKER",
-      "OWNER",
-      "BROKER"
+      "STAFF",
+      "ADMIN"
     ],
     "securityClassification": "PUBLIC",
     "source_type": "TRANSITION_CONTRACT",
@@ -34440,11 +35726,559 @@
     "evidence": [
       {
         "kind": "CODE",
-        "path": "src/components/dashboard/crm/DealRoom.js",
-        "symbol": "DealRoom",
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43",
-        "confidence": 0.95,
-        "provenance": "Proposal submission and update in DealRoom"
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "canTransitionWorkflow",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/deals/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_runtime_inquiry_pending_to_declined",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "state_runtime_inquiry_pending",
+    "target": "state_runtime_inquiry_declined",
+    "transition_type": "SYSTEM",
+    "label": "INQUIRY: PENDING -> DECLINED",
+    "preconditions": [],
+    "postconditions": [],
+    "stateTransition": {
+      "fromState": "PENDING",
+      "toState": "DECLINED"
+    },
+    "status": "VERIFIED",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "canTransitionWorkflow",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/deals/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_runtime_inquiry_pending_to_withdrawn",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "state_runtime_inquiry_pending",
+    "target": "state_runtime_inquiry_withdrawn",
+    "transition_type": "SYSTEM",
+    "label": "INQUIRY: PENDING -> WITHDRAWN",
+    "preconditions": [],
+    "postconditions": [],
+    "stateTransition": {
+      "fromState": "PENDING",
+      "toState": "WITHDRAWN"
+    },
+    "status": "VERIFIED",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "canTransitionWorkflow",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/deals/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_runtime_inquiry_pending_to_reported",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "state_runtime_inquiry_pending",
+    "target": "state_runtime_inquiry_reported",
+    "transition_type": "SYSTEM",
+    "label": "INQUIRY: PENDING -> REPORTED",
+    "preconditions": [],
+    "postconditions": [],
+    "stateTransition": {
+      "fromState": "PENDING",
+      "toState": "REPORTED"
+    },
+    "status": "VERIFIED",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "canTransitionWorkflow",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/deals/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_runtime_inquiry_connected_to_accepted",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "state_runtime_inquiry_connected",
+    "target": "state_runtime_inquiry_accepted",
+    "transition_type": "SYSTEM",
+    "label": "INQUIRY: CONNECTED -> ACCEPTED",
+    "preconditions": [],
+    "postconditions": [],
+    "stateTransition": {
+      "fromState": "CONNECTED",
+      "toState": "ACCEPTED"
+    },
+    "status": "VERIFIED",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "canTransitionWorkflow",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/deals/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_runtime_inquiry_connected_to_declined",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "state_runtime_inquiry_connected",
+    "target": "state_runtime_inquiry_declined",
+    "transition_type": "SYSTEM",
+    "label": "INQUIRY: CONNECTED -> DECLINED",
+    "preconditions": [],
+    "postconditions": [],
+    "stateTransition": {
+      "fromState": "CONNECTED",
+      "toState": "DECLINED"
+    },
+    "status": "VERIFIED",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "canTransitionWorkflow",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/deals/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_runtime_inquiry_connected_to_reported",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "state_runtime_inquiry_connected",
+    "target": "state_runtime_inquiry_reported",
+    "transition_type": "SYSTEM",
+    "label": "INQUIRY: CONNECTED -> REPORTED",
+    "preconditions": [],
+    "postconditions": [],
+    "stateTransition": {
+      "fromState": "CONNECTED",
+      "toState": "REPORTED"
+    },
+    "status": "VERIFIED",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "canTransitionWorkflow",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/deals/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_runtime_inquiry_accepted_to_closed",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "state_runtime_inquiry_accepted",
+    "target": "state_runtime_inquiry_closed",
+    "transition_type": "SYSTEM",
+    "label": "INQUIRY: ACCEPTED -> CLOSED",
+    "preconditions": [],
+    "postconditions": [],
+    "stateTransition": {
+      "fromState": "ACCEPTED",
+      "toState": "CLOSED"
+    },
+    "status": "VERIFIED",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "canTransitionWorkflow",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/deals/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_runtime_inquiry_accepted_to_reported",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "state_runtime_inquiry_accepted",
+    "target": "state_runtime_inquiry_reported",
+    "transition_type": "SYSTEM",
+    "label": "INQUIRY: ACCEPTED -> REPORTED",
+    "preconditions": [],
+    "postconditions": [],
+    "stateTransition": {
+      "fromState": "ACCEPTED",
+      "toState": "REPORTED"
+    },
+    "status": "VERIFIED",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "canTransitionWorkflow",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/deals/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_runtime_viewing_pending_to_confirmed",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "state_runtime_viewing_pending",
+    "target": "state_runtime_viewing_confirmed",
+    "transition_type": "SYSTEM",
+    "label": "VIEWING: PENDING -> CONFIRMED",
+    "preconditions": [],
+    "postconditions": [],
+    "stateTransition": {
+      "fromState": "PENDING",
+      "toState": "CONFIRMED"
+    },
+    "status": "VERIFIED",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "canTransitionWorkflow",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/viewing-appointments/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_runtime_viewing_pending_to_cancelled",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "state_runtime_viewing_pending",
+    "target": "state_runtime_viewing_cancelled",
+    "transition_type": "SYSTEM",
+    "label": "VIEWING: PENDING -> CANCELLED",
+    "preconditions": [],
+    "postconditions": [],
+    "stateTransition": {
+      "fromState": "PENDING",
+      "toState": "CANCELLED"
+    },
+    "status": "VERIFIED",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "canTransitionWorkflow",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/viewing-appointments/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_runtime_viewing_confirmed_to_completed",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "state_runtime_viewing_confirmed",
+    "target": "state_runtime_viewing_completed",
+    "transition_type": "SYSTEM",
+    "label": "VIEWING: CONFIRMED -> COMPLETED",
+    "preconditions": [],
+    "postconditions": [],
+    "stateTransition": {
+      "fromState": "CONFIRMED",
+      "toState": "COMPLETED"
+    },
+    "status": "VERIFIED",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "canTransitionWorkflow",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/viewing-appointments/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_runtime_viewing_confirmed_to_cancelled",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "state_runtime_viewing_confirmed",
+    "target": "state_runtime_viewing_cancelled",
+    "transition_type": "SYSTEM",
+    "label": "VIEWING: CONFIRMED -> CANCELLED",
+    "preconditions": [],
+    "postconditions": [],
+    "stateTransition": {
+      "fromState": "CONFIRMED",
+      "toState": "CANCELLED"
+    },
+    "status": "VERIFIED",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "canTransitionWorkflow",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/viewing-appointments/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
       }
     ],
     "graph_version": "2.2.0",

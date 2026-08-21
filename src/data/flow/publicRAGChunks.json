@@ -4912,148 +4912,6 @@
     "lastVerifiedAt": "2026-08-19"
   },
   {
-    "chunk_id": "fact_deal.offer.modal",
-    "chunk_type": "NODE_FACT",
-    "chunkType": "NODE_FACT",
-    "canonical_id": "deal.offer.modal",
-    "canonicalId": "deal.offer.modal",
-    "title": "Deal Negotiation & Offer Proposal",
-    "domain": "deal",
-    "layer": "core",
-    "route": "/dashboard/crm",
-    "roles": [
-      "seeker",
-      "enterprise"
-    ],
-    "visibility": [
-      "SEEKER",
-      "ENTERPRISE"
-    ],
-    "securityClassification": "PUBLIC",
-    "status": "VERIFIED",
-    "productStatus": "APPROVED",
-    "implementationStatus": "VERIFIED",
-    "evidenceStatus": "CODE_GROUNDED",
-    "releaseStatus": "PUBLIC_LIVE",
-    "purpose": "Negotiation workspace for proposing deal terms, counter-offers, and transaction parameters in the active Deal Room.",
-    "description": "Enables deal parties to draft, submit, and review structured proposal terms with AI counter-offer suggestions and status mutations.",
-    "available_actions": [
-      "Input Offer Amount",
-      "Select Payment Terms (Cash / Bank Financing)",
-      "Sign Digital LOI"
-    ],
-    "entry_conditions": [
-      "Authenticated verified Seeker account"
-    ],
-    "source_type": "MASTER_FLOW_GRAPH",
-    "sourceType": "MASTER_FLOW_GRAPH",
-    "evidence": [
-      {
-        "kind": "PRODUCT_BEHAVIOR",
-        "provenance": "SCOUTIT_PRODUCT_GRAPH",
-        "confidence": 1
-      }
-    ],
-    "claims": [
-      {
-        "id": "claim_offer_modal_negotiation",
-        "text": "Parties negotiate terms within the Deal Room and submit proposals with real-time status transitions (pending, accepted, declined, withdrawn).",
-        "kind": "PRODUCT_BEHAVIOR",
-        "status": "VERIFIED",
-        "evidence": [
-          {
-            "kind": "PRODUCT_BEHAVIOR",
-            "provenance": "SCOUTIT_PRODUCT_GRAPH",
-            "confidence": 0.95
-          }
-        ],
-        "confidence": 0.95,
-        "humanReviewedBy": null,
-        "reviewStatus": "RESEARCHED",
-        "legalReviewStatus": "RESEARCHED"
-      }
-    ],
-    "humanReviewedBy": null,
-    "productReviewStatus": "RESEARCHED",
-    "legalReviewStatus": "RESEARCHED",
-    "graph_version": "2.1.0",
-    "graphVersion": "2.1.0",
-    "last_verified_at": "2026-08-19",
-    "lastVerifiedAt": "2026-08-19"
-  },
-  {
-    "chunk_id": "rec_deal.offer.modal",
-    "chunk_type": "RECOVERY",
-    "chunkType": "RECOVERY",
-    "canonical_id": "deal.offer.modal",
-    "canonicalId": "deal.offer.modal",
-    "title": "Recovery Protocol: Deal Negotiation & Offer Proposal",
-    "domain": "deal",
-    "status": "VERIFIED",
-    "productStatus": "APPROVED",
-    "implementationStatus": "VERIFIED",
-    "evidenceStatus": "CODE_GROUNDED",
-    "releaseStatus": "PUBLIC_LIVE",
-    "visibility": [
-      "SEEKER",
-      "ENTERPRISE"
-    ],
-    "securityClassification": "PUBLIC",
-    "exceptions": [
-      "Offer submitted on off-market property not open to offers"
-    ],
-    "recovery_mechanisms": [
-      "Reject offer with notice that property is strictly in dormant archive mode"
-    ],
-    "source_type": "BEHAVIORAL_FAILSAFE",
-    "sourceType": "BEHAVIORAL_FAILSAFE",
-    "evidence": [
-      {
-        "kind": "PRODUCT_BEHAVIOR",
-        "provenance": "SCOUTIT_PRODUCT_GRAPH",
-        "confidence": 1
-      }
-    ],
-    "graph_version": "2.1.0",
-    "graphVersion": "2.1.0",
-    "last_verified_at": "2026-08-19",
-    "lastVerifiedAt": "2026-08-19"
-  },
-  {
-    "chunk_id": "guide_deal.offer.modal",
-    "chunk_type": "UI_GUIDE",
-    "chunkType": "UI_GUIDE",
-    "canonical_id": "deal.offer.modal",
-    "canonicalId": "deal.offer.modal",
-    "title": "User Walkthrough: Deal Negotiation & Offer Proposal",
-    "domain": "deal",
-    "status": "VERIFIED",
-    "productStatus": "APPROVED",
-    "implementationStatus": "VERIFIED",
-    "evidenceStatus": "CODE_GROUNDED",
-    "releaseStatus": "PUBLIC_LIVE",
-    "visibility": [
-      "SEEKER",
-      "ENTERPRISE"
-    ],
-    "securityClassification": "PUBLIC",
-    "instruction": "Encrypts proposed terms into the private Deal Room and notifies the owner and verified broker.",
-    "ui_target": "submit-offer-form-btn",
-    "source_type": "WIZARD_SYSTEM",
-    "sourceType": "WIZARD_SYSTEM",
-    "evidence": [
-      {
-        "kind": "PRODUCT_BEHAVIOR",
-        "provenance": "SCOUTIT_PRODUCT_GRAPH",
-        "confidence": 1
-      }
-    ],
-    "graph_version": "2.1.0",
-    "graphVersion": "2.1.0",
-    "last_verified_at": "2026-08-19",
-    "lastVerifiedAt": "2026-08-19"
-  },
-  {
     "chunk_id": "fact_owner.claim_listing.modal",
     "chunk_type": "NODE_FACT",
     "chunkType": "NODE_FACT",
@@ -8520,46 +8378,6 @@
     "lastVerifiedAt": "2026-08-19"
   },
   {
-    "chunk_id": "edge_e_pep_ch10_your_move_to_offer_modal_92",
-    "chunk_type": "EDGE_TRANSITION",
-    "chunkType": "EDGE_TRANSITION",
-    "source": "pep_ch10_your_move",
-    "target": "offer_modal",
-    "transition_type": "ACTION",
-    "label": "Chapter 10 — Your Move (Action Cockpit) → Make Offer & Intent Submission Modal",
-    "branchKey": "BRANCH_PEP_CH10_YOUR_MOVE_TO_OFFER_MODAL",
-    "predicate": {
-      "field": "navigation.action",
-      "operator": "==",
-      "value": "navigated",
-      "quality": "GENERIC_NAVIGATION"
-    },
-    "preconditions": [
-      "Public reactions open; direct broker contact requires 1 Connect"
-    ],
-    "postconditions": [
-      "Transition from property.pep.ch10_your_move to deal.offer.modal"
-    ],
-    "status": "VERIFIED",
-    "visibility": [
-      "PUBLIC"
-    ],
-    "securityClassification": "PUBLIC",
-    "source_type": "TRANSITION_CONTRACT",
-    "sourceType": "TRANSITION_CONTRACT",
-    "evidence": [
-      {
-        "kind": "PRODUCT_BEHAVIOR",
-        "provenance": "SCOUTIT_PRODUCT_GRAPH",
-        "confidence": 1
-      }
-    ],
-    "graph_version": "2.2.0",
-    "graphVersion": "2.2.0",
-    "last_verified_at": "2026-08-19",
-    "lastVerifiedAt": "2026-08-19"
-  },
-  {
     "chunk_id": "edge_e_pep_ch10_your_move_to_claim_listing_modal_93",
     "chunk_type": "EDGE_TRANSITION",
     "chunkType": "EDGE_TRANSITION",
@@ -8660,10 +8478,6 @@
     "postconditions": [
       "workflow.blockedReason = \"INSUFFICIENT_CONNECTS\""
     ],
-    "stateTransition": {
-      "fromState": "DRAFT",
-      "toState": "BLOCKED"
-    },
     "status": "VERIFIED",
     "visibility": [
       "SEEKER",
@@ -8705,10 +8519,6 @@
     "postconditions": [
       "Transition from deal.viewing.modal to deal.viewing.exc.slot_conflict"
     ],
-    "stateTransition": {
-      "fromState": "REQUESTED",
-      "toState": "RESCHEDULE_PENDING"
-    },
     "status": "VERIFIED",
     "visibility": [
       "SEEKER",

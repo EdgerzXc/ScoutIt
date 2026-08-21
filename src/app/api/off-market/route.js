@@ -15,7 +15,7 @@ export async function GET(request) {
     let query = supabaseAdmin
       .from("properties")
       .select("id, owner_id, slug, canonical_slug, title, location, type, space_category, lifecycle_state, pipeline_status, quietly_open_to_offers, withdrawn_at, last_verified_date")
-      .in("lifecycle_state", ["off_market"])
+      .eq("pipeline_status", "off_market")
       .order("withdrawn_at", { ascending: false });
 
     if (slug) query = query.eq("canonical_slug", slug);

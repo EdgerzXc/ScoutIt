@@ -49,7 +49,7 @@ export const coverageReport = coverageReportData;
 export const auditReport = auditReportData;
 export const flowSchema = schemaData;
 
-export default {
+const flowBundle = {
   masterFlowGraph,
   masterFlowLayout,
   atomicRAGChunks,
@@ -60,3 +60,5 @@ export default {
   auditReport,
   flowSchema
 };
+
+export default flowBundle;

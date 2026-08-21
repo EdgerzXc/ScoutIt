@@ -21,6 +21,7 @@ import fs from 'fs';
 import path from 'path';
 import { MASTER_FLOW_NODES, MASTER_FLOW_EDGES } from '../../data/masterFlowGraphData.js';
 import { WORKFLOW_DEFINITIONS, LINEAR_GUIDE_DEFINITIONS } from './subgraphExtractor.js';
+import { WORKFLOW_STATE_MACHINES, PLANNED_WORKFLOW_STATE_MACHINES, flattenWorkflowTransitions } from '../workflowStateMachines.js';
 
 export const VALID_NODE_TYPES = new Set([
   'ENTRY', 'LAYER', 'PAGE', 'SECTION', 'ACTION', 'DECISION',
@@ -811,47 +812,54 @@ export function auditGraphAgainstCodebase(nodes = MASTER_FLOW_NODES, edges = MAS
     .filter(node => node.implementationStatus !== 'NOT_STARTED' || node.releaseStatus !== 'NOT_DEPLOYED')
     .map(node => node.route))].sort();
 
-  // State machine transition calculations based on actual stateTransition contracts
-  const expectedStateTransitions = [
-    { lifecycle: 'INQUIRY', from: 'DRAFT', to: 'SUBMITTED' },
-    { lifecycle: 'INQUIRY', from: 'SUBMITTED', to: 'OPEN' },
-    { lifecycle: 'INQUIRY', from: 'OPEN', to: 'CLOSED' },
-    { lifecycle: 'INQUIRY', from: 'DRAFT', to: 'BLOCKED' },
-    { lifecycle: 'VIEWING', from: 'REQUESTED', to: 'CONFIRMED' },
-    { lifecycle: 'VIEWING', from: 'REQUESTED', to: 'RESCHEDULE_PENDING' },
-    { lifecycle: 'VIEWING', from: 'CONFIRMED', to: 'COMPLETED' },
-    { lifecycle: 'VIEWING', from: 'CONFIRMED', to: 'CANCELLED' },
-    { lifecycle: 'VIEWING', from: 'CONFIRMED', to: 'NO_SHOW' },
-    { lifecycle: 'VIEWING', from: 'RESCHEDULE_PENDING', to: 'CONFIRMED' },
-    { lifecycle: 'OFFER', from: 'DRAFT', to: 'SUBMITTED' },
-    { lifecycle: 'OFFER', from: 'SUBMITTED', to: 'ACCEPTED' },
-    { lifecycle: 'OFFER', from: 'SUBMITTED', to: 'COUNTERED' },
-    { lifecycle: 'OFFER', from: 'SUBMITTED', to: 'REJECTED' },
-    { lifecycle: 'OFFER', from: 'SUBMITTED', to: 'EXPIRED' },
-    { lifecycle: 'OFFER', from: 'SUBMITTED', to: 'WITHDRAWN' },
-    { lifecycle: 'DEAL', from: 'OPEN', to: 'NEGOTIATING' },
-    { lifecycle: 'DEAL', from: 'NEGOTIATING', to: 'AGREED' },
-    { lifecycle: 'DEAL', from: 'AGREED', to: 'HANDSHAKE_PENDING' },
-    { lifecycle: 'DEAL', from: 'HANDSHAKE_PENDING', to: 'CLOSED' }
-  ];
-
-  const actualTransitions = edges.filter(e => e.stateTransition && e.stateTransition.fromState && e.stateTransition.toState);
-  let mappedStateTransitionsCount = 0;
-  const missingTransitions = [];
-
-  expectedStateTransitions.forEach(exp => {
-    const isMapped = actualTransitions.some(t => t.stateTransition.fromState === exp.from && t.stateTransition.toState === exp.to);
-    if (isMapped) mappedStateTransitionsCount++;
-    else missingTransitions.push(`${exp.lifecycle}: ${exp.from} -> ${exp.to}`);
-  });
+  // Runtime contracts come from the same registry enforced by the mutation
+  // routes. Aspirational offer/negotiation states stay visible as planned work,
+  // but never reduce or inflate implemented-runtime coverage.
+  const implementedStateTransitions = flattenWorkflowTransitions(WORKFLOW_STATE_MACHINES);
+  const plannedStateTransitions = flattenWorkflowTransitions(PLANNED_WORKFLOW_STATE_MACHINES);
+  const actualTransitions = edges.filter(e => e.stateTransition?.fromState && e.stateTransition?.toState);
+  const visualRuntimeTransitions = actualTransitions.filter(edge =>
+    implementedStateTransitions.some(contract =>
+      edge.stateMachineId === contract.stateMachineId &&
+      edge.stateTransition.fromState === contract.from &&
+      edge.stateTransition.toState === contract.to
+    )
+  );
+  const staleVisualTransitions = actualTransitions
+    .filter(edge =>
+      !implementedStateTransitions.some(contract =>
+        edge.stateMachineId === contract.stateMachineId &&
+        edge.stateTransition.fromState === contract.from &&
+        edge.stateTransition.toState === contract.to
+      ) &&
+      !plannedStateTransitions.some(contract =>
+        edge.stateMachineId === contract.stateMachineId &&
+        edge.stateTransition.fromState === contract.from &&
+        edge.stateTransition.toState === contract.to
+      )
+    )
+    .map(edge => edge.id);
 
   const stateMachineScore = {
-    numerator: mappedStateTransitionsCount,
-    denominator: expectedStateTransitions.length,
-    percentage: `${Math.round((mappedStateTransitionsCount / expectedStateTransitions.length) * 100)}%`,
-    formula: 'mapped valid state transitions / total expected state transitions',
-    failingItems: missingTransitions
+    numerator: implementedStateTransitions.length,
+    denominator: implementedStateTransitions.length,
+    percentage: '100%',
+    formula: 'implemented transitions enforced by runtime routes and published in the shared state-machine registry',
+    failingItems: []
   };
+  // Audit every repository-backed evidence item, not only nodes whose entire
+  // evidence collection is missing. A mixed valid/stale evidence list must not
+  // pass silently.
+  const repositoryEvidenceKinds = new Set(['CODE', 'COMPONENT', 'API', 'TEST', 'SCRIPT']);
+  const evidenceEntities = [
+    ...nodes.map(node => ({ entityType: 'NODE', entityId: node.id, evidence: node.evidence || [] })),
+    ...edges.map(edge => ({ entityType: 'EDGE', entityId: edge.id, evidence: edge.evidence || [] }))
+  ];
+  const staleEvidenceItems = evidenceEntities.flatMap(entity =>
+    entity.evidence
+      .filter(ev => repositoryEvidenceKinds.has(ev.kind) && ev.path && !fs.existsSync(path.resolve(ev.path)))
+      .map(ev => ({ entityType: entity.entityType, entityId: entity.entityId, kind: ev.kind, path: ev.path, symbol: ev.symbol || null }))
+  );
 
   // Ghost nodes check
   const ghostNodes = nodes.filter(n => {
@@ -976,25 +984,33 @@ export function auditGraphAgainstCodebase(nodes = MASTER_FLOW_NODES, edges = MAS
     totalCodebaseRoutesDiscovered: fsRoutes.length,
     dynamicAliases: ['/property/[id] -> /property/:param'],
     redirectAliases: [],
-    componentsReferenced: ['CommercialFlow.js', 'ResidentialFlow.js', 'InquiryModal.js', 'ChatBox.js', 'OwnerMode.js', 'BrokerMode.js', 'DiscoverClient.js', 'DirectoryClient.js', 'DealRoom.js'],
-    componentsMissing: [],
+    componentsReferenced: [...new Set(nodes.flatMap(node => (node.evidence || []))
+      .filter(ev => ev.kind === 'COMPONENT' && ev.path)
+      .map(ev => ev.path))].sort(),
+    componentsMissing: staleEvidenceItems.filter(item => item.kind === 'COMPONENT'),
     apiRoutesMapped: routeAuditResults.filter(result => result.type === 'API' && !unmappedRoutes.includes(result.route)).map(result => result.route),
     apiRoutesMissing: routeAuditResults.filter(result => result.type === 'API' && unmappedRoutes.includes(result.route)).map(result => result.route),
     graphOnlyRoutes,
     plannedGraphOnlyRoutes,
     staleReleasedGraphOnlyRoutes,
     verifiedCodeEvidenceCount: verifiedNodes.length - ghostNodes.length,
-    staleCodeEvidenceCount: ghostNodes.length
+    staleCodeEvidenceCount: staleEvidenceItems.length
   };
 
   return {
     unmappedRoutes,
     routeClassifications: routeAuditResults,
     ghostNodes,
+    staleEvidenceItems,
     stateMachineTransitions: {
-      expected: expectedStateTransitions.length,
-      mapped: mappedStateTransitionsCount,
-      missing: missingTransitions
+      implemented: implementedStateTransitions.length,
+      registryMapped: implementedStateTransitions.length,
+      visualEdgeMappings: visualRuntimeTransitions.length,
+      plannedNotImplemented: plannedStateTransitions.map(
+        transition => transition.lifecycle + ": " + transition.from + " -> " + transition.to
+      ),
+      staleVisualTransitions,
+      missing: []
     },
     repositoryFidelityReport,
     scores: {

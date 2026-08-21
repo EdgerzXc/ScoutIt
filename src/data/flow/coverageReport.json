@@ -117,7 +117,7 @@
     }
   },
   "VIEWING_TRANSACTION": {
-    "totalNodes": 13,
+    "totalNodes": 24,
     "happyPathCoverage": {
       "numerator": 3,
       "denominator": 4,
@@ -137,9 +137,9 @@
       "formula": "mapped failures with valid recovery or terminal resolution / mapped failures"
     },
     "guideCoverage": {
-      "numerator": 3,
+      "numerator": 2,
       "denominator": 3,
-      "percentage": "100%",
+      "percentage": "67%",
       "formula": "VERIFIED guideable actions with real UI targets / total guideable actions"
     },
     "telemetryCoverage": {
@@ -149,14 +149,14 @@
       "formula": "runtime transitions requiring telemetry with verified instrumentation / runtime transitions requiring telemetry"
     },
     "evidenceCoverage": {
-      "numerator": 3,
+      "numerator": 2,
       "denominator": 3,
-      "percentage": "100%",
+      "percentage": "67%",
       "formula": "VERIFIED atomic claims with valid evidence / total required atomic claims"
     }
   },
   "OFFER_NEGOTIATION": {
-    "totalNodes": 13,
+    "totalNodes": 24,
     "happyPathCoverage": {
       "numerator": 3,
       "denominator": 4,
@@ -176,9 +176,9 @@
       "formula": "mapped failures with valid recovery or terminal resolution / mapped failures"
     },
     "guideCoverage": {
-      "numerator": 3,
+      "numerator": 2,
       "denominator": 3,
-      "percentage": "100%",
+      "percentage": "67%",
       "formula": "VERIFIED guideable actions with real UI targets / total guideable actions"
     },
     "telemetryCoverage": {
@@ -188,14 +188,14 @@
       "formula": "runtime transitions requiring telemetry with verified instrumentation / runtime transitions requiring telemetry"
     },
     "evidenceCoverage": {
-      "numerator": 3,
+      "numerator": 2,
       "denominator": 3,
-      "percentage": "100%",
+      "percentage": "67%",
       "formula": "VERIFIED atomic claims with valid evidence / total required atomic claims"
     }
   },
   "HANDSHAKE_CLOSURE": {
-    "totalNodes": 13,
+    "totalNodes": 24,
     "happyPathCoverage": {
       "numerator": 3,
       "denominator": 4,
@@ -227,9 +227,9 @@
       "formula": "runtime transitions requiring telemetry with verified instrumentation / runtime transitions requiring telemetry"
     },
     "evidenceCoverage": {
-      "numerator": 3,
+      "numerator": 2,
       "denominator": 3,
-      "percentage": "100%",
+      "percentage": "67%",
       "formula": "VERIFIED atomic claims with valid evidence / total required atomic claims"
     }
   },

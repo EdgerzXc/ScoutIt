@@ -650,7 +650,8 @@ export const MASTER_FLOW_NODES = [
     "x": 80,
     "y": 1200,
     "parents": [
-      "hero"
+      "hero",
+      "gate_auth"
     ],
     "children": [
       "gate_adult_age",
@@ -660,7 +661,9 @@ export const MASTER_FLOW_NODES = [
       "dashboard_provider",
       "mission_control",
       "auth_enterprise_sso",
-      "sys_ephemeral_secret_engine"
+      "sys_ephemeral_secret_engine",
+      "inquiry_modal",
+      "booking_modal"
     ],
     "actorRoles": [
       "visitor",
@@ -3741,7 +3744,8 @@ export const MASTER_FLOW_NODES = [
     "y": 3250,
     "parents": [
       "hero",
-      "crust"
+      "crust",
+      "dashboard_broker"
     ],
     "children": [
       "pep",
@@ -6647,7 +6651,8 @@ export const MASTER_FLOW_NODES = [
       "inquiry_modal",
       "booking_modal",
       "offer_modal",
-      "claim_listing_modal"
+      "claim_listing_modal",
+      "gate_auth"
     ],
     "actorRoles": [
       "visitor",
@@ -7139,7 +7144,9 @@ export const MASTER_FLOW_NODES = [
     "parents": [
       "pep_ch10_your_move",
       "rec_topup_connects",
-      "compare_specs_matrix"
+      "compare_specs_matrix",
+      "gate_auth",
+      "login"
     ],
     "children": [
       "sys_connect_wallet",
@@ -7337,7 +7344,9 @@ export const MASTER_FLOW_NODES = [
     "y": 1000,
     "parents": [
       "pep_ch10_your_move",
-      "rec_propose_alt_slot"
+      "rec_propose_alt_slot",
+      "gate_auth",
+      "login"
     ],
     "children": [
       "exc_slot_conflict",
@@ -7425,8 +7434,8 @@ export const MASTER_FLOW_NODES = [
   {
     "id": "offer_modal",
     "canonicalId": "deal.offer.modal",
-    "name": "Deal Negotiation & Offer Proposal",
-    "label": "Deal Negotiation & Offer Proposal",
+    "name": "AI-Assisted Counter-Offer Draft",
+    "label": "AI-Assisted Counter-Offer Draft",
     "type": "ACTION",
     "nodeType": "ACTION",
     "domain": "deal",
@@ -7445,34 +7454,30 @@ export const MASTER_FLOW_NODES = [
       "submit_offer",
       "negotiate_terms"
     ],
-    "implementationStatus": "VERIFIED",
-    "purpose": "Negotiation workspace for proposing deal terms, counter-offers, and transaction parameters in the active Deal Room.",
-    "description": "Enables deal parties to draft, submit, and review structured proposal terms with AI counter-offer suggestions and status mutations.",
+    "implementationStatus": "PARTIAL",
+    "purpose": "AI-assisted counter-offer drafting inside private chat; structured offer persistence is not implemented.",
+    "description": "Parties can request drafting assistance, but ScoutIt does not yet persist an offer lifecycle or structured proposal record.",
     "actions": [
-      "Input Offer Amount",
-      "Select Payment Terms (Cash / Bank Financing)",
-      "Sign Digital LOI"
+      "Request an AI-assisted counter-offer draft",
+      "Review and edit the draft in private chat"
     ],
     "conditions": [
-      "Authenticated verified Seeker account"
+      "Authenticated participant in a private inquiry conversation"
     ],
     "systems": [
-      "src/components/dashboard/crm/DealRoom.js",
+      "src/components/dashboard/ChatBox.js",
       "src/app/api/ai/counter-offer/route.js"
     ],
     "components": [
-      "DealRoom.js",
       "ChatBox.js"
     ],
     "apis": [
-      "/api/ai/counter-offer",
-      "/api/deals/[id]",
-      "/api/deals/handshake"
+      "/api/ai/counter-offer"
     ],
     "dataRefs": [
-      "Supabase deals & offers"
+      "Private deal messages and user-entered draft context"
     ],
-    "database": "Supabase deals & offers",
+    "database": "No structured offer record is persisted",
     "auth": "seeker",
     "exceptions": [
       "Offer submitted on off-market property not open to offers"
@@ -7483,31 +7488,21 @@ export const MASTER_FLOW_NODES = [
     "evidence": [
       {
         "kind": "COMPONENT",
-        "path": "src/components/dashboard/crm/NewDealModal.js",
+        "path": "src/components/dashboard/ChatBox.js",
+        "symbol": "ChatBox",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
       },
       {
-        "kind": "SCOUTIT_BRAIN",
-        "path": "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_FLOWS.md",
+        "kind": "API",
+        "path": "src/app/api/ai/counter-offer/route.js",
+        "symbol": "POST",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
       }
     ],
-    "guide": {
-      "instruction": "Encrypts proposed terms into the private Deal Room and notifies the owner and verified broker.",
-      "target": "submit-offer-form-btn",
-      "sequenceOrder": 1
-    },
-    "telemetry": {
-      "eventName": "flow_offer_modal_viewed",
-      "properties": {
-        "domain": "deal",
-        "route": "/api/deals/make-offer"
-      }
-    },
     "brainRefs": [
       "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_FLOWS.md",
       "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_EXPERIENCES.md",
@@ -7519,10 +7514,12 @@ export const MASTER_FLOW_NODES = [
     "x": 2250,
     "y": 1300,
     "parents": [
-      "pep_ch10_your_move"
+      "pep_ch10_your_move",
+      "deal_room"
     ],
     "children": [
-      "gate_offer"
+      "gate_offer",
+      "deal_room"
     ],
     "actorRoles": [
       "seeker",
@@ -7533,35 +7530,32 @@ export const MASTER_FLOW_NODES = [
       "ENTERPRISE"
     ],
     "knowledgeScope": [
-      "PUBLIC"
+      "AUTHENTICATED"
     ],
-    "securityClassification": "PUBLIC",
+    "securityClassification": "AUTHENTICATED",
     "claims": [
       {
         "id": "claim_offer_modal_negotiation",
-        "text": "Parties negotiate terms within the Deal Room and submit proposals with real-time status transitions (pending, accepted, declined, withdrawn).",
+        "text": "Authenticated deal participants can request AI assistance drafting counter-offer language in private chat; structured offer persistence and status transitions are not implemented.",
         "kind": "PRODUCT_BEHAVIOR",
         "status": "VERIFIED",
         "evidence": [
           {
-            "kind": "CODE",
-            "path": "src/components/dashboard/crm/DealRoom.js",
-            "symbol": "DealRoom",
-            "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43",
-            "confidence": 0.95,
-            "provenance": "Observed DealRoom negotiation implementation"
+            "kind": "COMPONENT",
+            "path": "src/components/dashboard/ChatBox.js",
+            "symbol": "ChatBox",
+            "provenance": "EXTRACTED",
+            "confidence": 1
           },
           {
             "kind": "API",
             "path": "src/app/api/ai/counter-offer/route.js",
             "symbol": "POST",
-            "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43",
-            "confidence": 0.95,
-            "provenance": "AI Counter-offer generation endpoint"
+            "provenance": "EXTRACTED",
+            "confidence": 1
           }
         ],
-        "confidence": 0.95,
-        "reviewedBy": null,
+        "confidence": 1,
         "machineVerifiedBy": "Automated Grounding Engine",
         "humanReviewedBy": null,
         "reviewStatus": "RESEARCHED",
@@ -7588,7 +7582,7 @@ export const MASTER_FLOW_NODES = [
       "deprecatedBy": null,
       "changeReason": null
     },
-    "guideability": "EXECUTABLE",
+    "guideability": "NONE",
     "isTerminal": false,
     "machineVerifiedBy": "Automated Grounding Engine",
     "humanReviewedBy": null,
@@ -7599,7 +7593,7 @@ export const MASTER_FLOW_NODES = [
     "securityReviewStatus": "RESEARCHED",
     "productStatus": "APPROVED",
     "evidenceStatus": "CODE_GROUNDED",
-    "releaseStatus": "PUBLIC_LIVE"
+    "releaseStatus": "LIMITED_LIVE"
   },
   {
     "id": "claim_listing_modal",
@@ -8961,8 +8955,14 @@ export const MASTER_FLOW_NODES = [
     "lastVerifiedAt": "2026-08-19",
     "x": 3050,
     "y": 150,
-    "parents": [],
-    "children": [],
+    "parents": [
+      "pep_ch10_your_move"
+    ],
+    "children": [
+      "login",
+      "inquiry_modal",
+      "booking_modal"
+    ],
     "actorRoles": [
       "seeker",
       "owner",
@@ -9562,7 +9562,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "GATE",
     "domain": "deal",
     "category": "architecture",
-    "route": "/api/deals/viewing-status",
+    "route": "/dashboard/inbox",
     "layer": "core",
     "roles": [
       "seeker",
@@ -9578,8 +9578,8 @@ export const MASTER_FLOW_NODES = [
       "deal"
     ],
     "implementationStatus": "NOT_STARTED",
-    "purpose": "Verifies whether a scheduled viewing was attended in person or if an exception (No-Show) occurred.",
-    "description": "Routes viewing outcome to deal progression or to the viewing reschedule recovery modal.",
+    "purpose": "Planned decision point for recording whether a confirmed viewing was completed, cancelled, or missed.",
+    "description": "The runtime supports confirmed, completed, and cancelled viewing states; a distinct no-show state and recovery branch are not implemented.",
     "actions": [
       "Check Broker & Buyer Attendance Check-in",
       "Trigger Milestone Update"
@@ -9588,12 +9588,9 @@ export const MASTER_FLOW_NODES = [
       "Viewing scheduled time elapsed"
     ],
     "systems": [
-      "ViewingCalendar.js",
-      "deal_milestones"
+      "Planned viewing outcome decision"
     ],
-    "components": [
-      "ViewingCalendar.js"
-    ],
+    "components": [],
     "apis": [],
     "dataRefs": [
       "Supabase deals & viewing_schedules"
@@ -9604,7 +9601,7 @@ export const MASTER_FLOW_NODES = [
       "Buyer or broker fails to attend scheduled viewing"
     ],
     "recovery": [
-      "Route to Reschedule Modal for alternative slot selection"
+      "Planned: propose another slot after no-show handling exists"
     ],
     "evidence": [
       {
@@ -9615,13 +9612,6 @@ export const MASTER_FLOW_NODES = [
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
       }
     ],
-    "telemetry": {
-      "eventName": "flow_gate_viewing_viewed",
-      "properties": {
-        "domain": "deal",
-        "route": "/api/deals/viewing-status"
-      }
-    },
     "brainRefs": [
       "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_FLOWS.md",
       "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_EXPERIENCES.md",
@@ -11329,7 +11319,7 @@ export const MASTER_FLOW_NODES = [
     "securityReviewStatus": "RESEARCHED",
     "productStatus": "PROPOSED",
     "evidenceStatus": "UNVERIFIED",
-    "releaseStatus": "NOT_DEPLOYED",
+    "releaseStatus": "NOT_DEPLOYED"
   },
   {
     "id": "exc_bot_quarantine",
@@ -12027,7 +12017,9 @@ export const MASTER_FLOW_NODES = [
     "parents": [
       "dashboard_owner"
     ],
-    "children": [],
+    "children": [
+      "deal_room"
+    ],
     "actorRoles": [
       "owner"
     ],
@@ -12192,7 +12184,8 @@ export const MASTER_FLOW_NODES = [
       "comp_return_brief_broker",
       "broker_field_briefing",
       "sys_monthly_scout_wrap",
-      "sys_freshness_staleness_engine"
+      "sys_freshness_staleness_engine",
+      "brokers_roster"
     ],
     "actorRoles": [
       "broker"
@@ -12281,7 +12274,7 @@ export const MASTER_FLOW_NODES = [
     ],
     "implementationStatus": "PARTIAL",
     "purpose": "Summarizes today's viewing appointments, pending client representation responses, and active deal milestones.",
-    "description": "Focuses broker attention on time-critical viewing logistics and active buyer negotiations.",
+    "description": "Focuses broker attention on currently available appointment and inquiry information; a dedicated viewing-calendar component is not implemented.",
     "actions": [
       "Check Today's Viewing Agenda",
       "Open Pending Client Deal Rooms",
@@ -12291,12 +12284,10 @@ export const MASTER_FLOW_NODES = [
       "Broker has active deals or representation"
     ],
     "systems": [
-      "BrokerMode.js",
-      "ViewingCalendar.js"
+      "BrokerMode.js"
     ],
     "components": [
-      "BrokerMode.js",
-      "ViewingCalendar.js"
+      "BrokerMode.js"
     ],
     "apis": [],
     "dataRefs": [
@@ -12562,8 +12553,8 @@ export const MASTER_FLOW_NODES = [
   {
     "id": "deal_room",
     "canonicalId": "deal.room.chat",
-    "name": "Private Deal Room & Scheduling Cockpit",
-    "label": "Private Deal Room & Scheduling Cockpit",
+    "name": "Private Inquiry Workspace & Scheduling",
+    "label": "Private Inquiry Workspace & Scheduling",
     "type": "PAGE",
     "nodeType": "PAGE",
     "domain": "deal",
@@ -12586,26 +12577,24 @@ export const MASTER_FLOW_NODES = [
       "deal"
     ],
     "implementationStatus": "VERIFIED",
-    "purpose": "End-to-end deal management cockpit: viewing calendar, chat messages, offer negotiation, and milestone tracking.",
-    "description": "Encrypted workspace where buyer, broker, and owner coordinate viewings, review terms, and finalize handshakes.",
+    "purpose": "Private inquiry workspace for chat, viewing coordination, and current deal status.",
+    "description": "Authenticated parties communicate and coordinate appointments here. Structured offer negotiation remains planned.",
     "actions": [
-      "Confirm Viewing Appointment",
-      "Exchange In-App Chat Messages",
-      "Counter Offer Terms",
-      "Complete Two-Sided Handshake"
+      "Exchange in-app chat messages",
+      "Coordinate viewing appointments",
+      "Review current inquiry status",
+      "Complete the existing two-sided handshake when eligible"
     ],
     "conditions": [
       "Authorized participant on private deal"
     ],
     "systems": [
-      "DealRoomCockpit.js",
-      "ChatBox.js",
-      "ViewingCalendar.js"
+      "src/components/dashboard/ChatBox.js",
+      "src/components/dashboard/crm/AppointmentsSheet.js"
     ],
     "components": [
-      "DealRoomCockpit.js",
       "ChatBox.js",
-      "ViewingCalendar.js"
+      "AppointmentsSheet.js"
     ],
     "apis": [
       "/api/deals",
@@ -12629,30 +12618,27 @@ export const MASTER_FLOW_NODES = [
       {
         "kind": "COMPONENT",
         "path": "src/components/dashboard/ChatBox.js",
+        "symbol": "ChatBox",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
       },
       {
         "kind": "API",
         "path": "src/app/api/deals/[id]/messages/route.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "COMPONENT",
+        "path": "src/components/dashboard/crm/AppointmentsSheet.js",
+        "symbol": "AppointmentsSheet",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
       }
     ],
-    "guide": {
-      "instruction": "Encrypted workspace where buyer, broker, and owner coordinate viewings, review terms, and finalize handshakes.",
-      "target": "deal-room-negotiation-panel",
-      "sequenceOrder": 1
-    },
-    "telemetry": {
-      "eventName": "flow_deal_room_viewed",
-      "properties": {
-        "domain": "deal",
-        "route": "/deal/[id]"
-      }
-    },
     "brainRefs": [
       "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_FLOWS.md",
       "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_EXPERIENCES.md",
@@ -12670,13 +12656,16 @@ export const MASTER_FLOW_NODES = [
       "dashboard_provider",
       "reschedule_modal",
       "scenario_broker_lead_collision",
-      "broker_field_briefing"
+      "broker_field_briefing",
+      "comp_return_brief_owner",
+      "offer_modal"
     ],
     "children": [
       "gate_viewing",
       "sys_transaction_handshake",
       "terminal_deal_closed",
-      "sys_zero_log_ai_crm"
+      "sys_zero_log_ai_crm",
+      "offer_modal"
     ],
     "actorRoles": [
       "seeker",
@@ -12697,7 +12686,7 @@ export const MASTER_FLOW_NODES = [
     "claims": [
       {
         "id": "claim_deal_room_behavior",
-        "text": "Private Deal Room & Scheduling Cockpit enforces defined deal behavioral contracts and access rules.",
+        "text": "Authorized deal participants can exchange private messages and coordinate viewing appointments; structured offer negotiation is not implemented.",
         "kind": "PRODUCT_BEHAVIOR",
         "status": "VERIFIED",
         "evidence": [
@@ -12741,7 +12730,7 @@ export const MASTER_FLOW_NODES = [
       "deprecatedBy": null,
       "changeReason": null
     },
-    "guideability": "EXECUTABLE",
+    "guideability": "NONE",
     "isTerminal": false,
     "machineVerifiedBy": "Automated Grounding Engine",
     "humanReviewedBy": null,
@@ -12752,7 +12741,7 @@ export const MASTER_FLOW_NODES = [
     "securityReviewStatus": "RESEARCHED",
     "productStatus": "APPROVED",
     "evidenceStatus": "CODE_GROUNDED",
-    "releaseStatus": "PUBLIC_LIVE"
+    "releaseStatus": "LIMITED_LIVE"
   },
   {
     "id": "mission_control",
@@ -12932,7 +12921,7 @@ export const MASTER_FLOW_NODES = [
     "securityReviewStatus": "RESEARCHED",
     "productStatus": "APPROVED",
     "evidenceStatus": "CODE_GROUNDED",
-    "releaseStatus": "PRIVATE_PILOT",
+    "releaseStatus": "PRIVATE_PILOT"
   },
   {
     "id": "exc_insufficient_connects",
@@ -13266,7 +13255,7 @@ export const MASTER_FLOW_NODES = [
     "securityReviewStatus": "RESEARCHED",
     "productStatus": "APPROVED",
     "evidenceStatus": "UNVERIFIED",
-    "releaseStatus": "NOT_DEPLOYED",
+    "releaseStatus": "NOT_DEPLOYED"
   },
   {
     "id": "exc_slot_conflict",
@@ -13882,23 +13871,20 @@ export const MASTER_FLOW_NODES = [
     "goals": [
       "deal"
     ],
-    "implementationStatus": "PARTIAL",
-    "purpose": "Triggered when either buyer or broker cannot attend the confirmed viewing appointment.",
-    "description": "Flags the viewing record and launches the Reschedule Recovery Modal.",
+    "implementationStatus": "NOT_STARTED",
+    "purpose": "Planned no-show outcome for a confirmed viewing.",
+    "description": "No runtime status or mutation path exists yet; this remains a documented recovery requirement.",
     "actions": [
-      "Record Cancellation / Missed Check-in",
-      "Notify Both Parties"
+      "Planned: record cancellation or missed check-in",
+      "Planned: notify both parties"
     ],
     "conditions": [
       "Appointment missed or canceled before arrival"
     ],
     "systems": [
-      "ViewingCalendar.js",
-      "deal_milestones"
+      "Planned viewing outcome lifecycle"
     ],
-    "components": [
-      "ViewingCalendar.js"
-    ],
+    "components": [],
     "apis": [],
     "dataRefs": [
       "Supabase deals & viewing_schedules"
@@ -13920,13 +13906,6 @@ export const MASTER_FLOW_NODES = [
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
       }
     ],
-    "telemetry": {
-      "eventName": "flow_exc_viewing_noshow_viewed",
-      "properties": {
-        "domain": "deal",
-        "route": "/api/deals/viewing-noshow"
-      }
-    },
     "brainRefs": [
       "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_FLOWS.md",
       "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_EXPERIENCES.md",
@@ -13960,9 +13939,9 @@ export const MASTER_FLOW_NODES = [
     "claims": [
       {
         "id": "claim_exc_viewing_noshow_behavior",
-        "text": "Exception: Viewing No-Show / Cancellation enforces defined deal behavioral contracts and access rules.",
+        "text": "A viewing no-show outcome is a documented recovery requirement and is not implemented in the runtime.",
         "kind": "PRODUCT_BEHAVIOR",
-        "status": "VERIFIED",
+        "status": "PROPOSED",
         "evidence": [
           {
             "kind": "SCOUTIT_BRAIN",
@@ -14008,13 +13987,13 @@ export const MASTER_FLOW_NODES = [
     "securityReviewStatus": "RESEARCHED",
     "productStatus": "APPROVED",
     "evidenceStatus": "DOCUMENTED",
-    "releaseStatus": "LIMITED_LIVE"
+    "releaseStatus": "NOT_DEPLOYED"
   },
   {
     "id": "reschedule_modal",
     "canonicalId": "deal.viewing.reschedule",
-    "name": "Recovery: Viewing Reschedule Modal",
-    "label": "Recovery: Viewing Reschedule Modal",
+    "name": "Viewing Reschedule Coordination",
+    "label": "Viewing Reschedule Coordination",
     "type": "ACTION",
     "nodeType": "ACTION",
     "domain": "deal",
@@ -14034,30 +14013,29 @@ export const MASTER_FLOW_NODES = [
     "goals": [
       "deal"
     ],
-    "implementationStatus": "VERIFIED",
-    "purpose": "Allows parties to mutually agree on a new date and time slot without losing deal context.",
-    "description": "Re-opens the calendar scheduler and updates the private deal room schedule record.",
+    "implementationStatus": "PARTIAL",
+    "purpose": "Existing chat and booking controls can propose another slot; a dedicated persisted reschedule lifecycle is not implemented.",
+    "description": "The current UI supports appointment coordination, but there is no RescheduleModal component or RESCHEDULE_PENDING status.",
     "actions": [
-      "Select New Date & Slot",
-      "Submit Reschedule Proposal",
-      "Confirm Updated Appointment"
+      "Use existing booking controls to propose another slot",
+      "Coordinate the change in private chat"
     ],
     "conditions": [
       "Active deal room session"
     ],
     "systems": [
-      "RescheduleModal.js",
-      "ViewingCalendar.js"
+      "src/components/dashboard/BookingModal.js",
+      "src/components/dashboard/ChatBox.js"
     ],
     "components": [
-      "RescheduleModal.js",
-      "ViewingCalendar.js"
+      "BookingModal.js",
+      "ChatBox.js"
     ],
     "apis": [],
     "dataRefs": [
-      "Supabase viewing_schedules"
+      "Existing viewing appointments"
     ],
-    "database": "Supabase viewing_schedules",
+    "database": "Supabase viewing appointments",
     "auth": "seeker",
     "exceptions": [
       "None"
@@ -14069,31 +14047,20 @@ export const MASTER_FLOW_NODES = [
       {
         "kind": "COMPONENT",
         "path": "src/components/dashboard/BookingModal.js",
+        "symbol": "BookingModal",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
       },
       {
-        "kind": "API",
-        "path": "src/app/api/viewing-appointments/[id]/route.js",
-        "symbol": "PATCH",
+        "kind": "COMPONENT",
+        "path": "src/components/dashboard/ChatBox.js",
+        "symbol": "ChatBox",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
       }
     ],
-    "guide": {
-      "instruction": "Re-opens the calendar scheduler and updates the private deal room schedule record.",
-      "target": "reschedule_modal",
-      "sequenceOrder": 1
-    },
-    "telemetry": {
-      "eventName": "flow_reschedule_modal_viewed",
-      "properties": {
-        "domain": "deal",
-        "route": "/deal/[id]/reschedule"
-      }
-    },
     "brainRefs": [
       "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_FLOWS.md",
       "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_EXPERIENCES.md",
@@ -14127,7 +14094,7 @@ export const MASTER_FLOW_NODES = [
     "claims": [
       {
         "id": "claim_reschedule_modal_behavior",
-        "text": "Recovery: Viewing Reschedule Modal enforces defined deal behavioral contracts and access rules.",
+        "text": "Existing booking and chat controls support coordinating another viewing slot; a dedicated persisted reschedule lifecycle is not implemented.",
         "kind": "PRODUCT_BEHAVIOR",
         "status": "VERIFIED",
         "evidence": [
@@ -14176,14 +14143,13 @@ export const MASTER_FLOW_NODES = [
     "isTerminal": false,
     "machineVerifiedBy": "Automated Grounding Engine",
     "humanReviewedBy": null,
-    "pilotState": "RESCHEDULE_PENDING",
     "machineVerificationStatus": "VERIFIED",
     "approvedAt": null,
     "productReviewStatus": "RESEARCHED",
     "securityReviewStatus": "RESEARCHED",
     "productStatus": "APPROVED",
     "evidenceStatus": "CODE_GROUNDED",
-    "releaseStatus": "PUBLIC_LIVE"
+    "releaseStatus": "LIMITED_LIVE"
   },
   {
     "id": "exc_missing_pdf_metric",
@@ -16145,11 +16111,9 @@ export const MASTER_FLOW_NODES = [
       "Deal concluded"
     ],
     "systems": [
-      "DealRoomCockpit.js"
+      "src/app/api/deals/[id]/close/route.js"
     ],
-    "components": [
-      "DealRoomCockpit.js"
-    ],
+    "components": [],
     "apis": [],
     "dataRefs": [
       "Supabase deals"
@@ -18001,7 +17965,7 @@ export const MASTER_FLOW_NODES = [
     "securityReviewStatus": "RESEARCHED",
     "productStatus": "PLANNED",
     "evidenceStatus": "UNVERIFIED",
-    "releaseStatus": "NOT_DEPLOYED",
+    "releaseStatus": "NOT_DEPLOYED"
   },
   {
     "id": "exc_sso_domain_mismatch",
@@ -18763,6 +18727,1266 @@ export const MASTER_FLOW_NODES = [
     "productStatus": "PROPOSED",
     "evidenceStatus": "UNVERIFIED",
     "releaseStatus": "NOT_DEPLOYED"
+  },
+  {
+    "id": "state_runtime_inquiry_pending",
+    "canonicalId": "deal.inquiry.state.pending",
+    "name": "INQUIRY · PENDING",
+    "nodeType": "STATE",
+    "type": "state",
+    "category": "architecture",
+    "domain": "deal",
+    "layer": "Private transaction runtime",
+    "route": "/api/deals/[id]",
+    "routeType": "EXACT_MATCH",
+    "actorRoles": [
+      "staff",
+      "admin"
+    ],
+    "roles": [
+      "staff",
+      "admin"
+    ],
+    "uiAudience": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "knowledgeScope": [
+      "INTERNAL",
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "guideability": "NONE",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "LIMITED_LIVE",
+    "currentState": "PENDING",
+    "purpose": "Persisted inquiry runtime state PENDING.",
+    "description": "This state is accepted and enforced by src/app/api/deals/[id]/route.js.",
+    "actions": [],
+    "conditions": [],
+    "exceptions": [],
+    "recovery": [],
+    "systems": [
+      "src/lib/workflowStateMachines.js",
+      "src/app/api/deals/[id]/route.js"
+    ],
+    "components": [],
+    "apis": [
+      "/api/deals/[id]"
+    ],
+    "dataRefs": [],
+    "brainRefs": [
+      "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_FLOWS.md"
+    ],
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "WORKFLOW_STATE_MACHINES",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/deals/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/workflowStateMachines.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "claims": [],
+    "legalReviewStatus": "RESEARCHED",
+    "machineVerifiedBy": "src/lib/__tests__/workflowStateMachines.test.js",
+    "machineVerificationStatus": "PASS",
+    "humanReviewedBy": null,
+    "approvedAt": null,
+    "productReviewStatus": "PRODUCT_APPROVED",
+    "securityReviewStatus": "RESEARCHED",
+    "isTerminal": false,
+    "terminal": false,
+    "guide": {
+      "instruction": "Internal runtime state; no public guide action.",
+      "target": "#node-state_runtime_inquiry_pending"
+    },
+    "telemetry": {
+      "eventName": "flow_state_runtime_inquiry_pending_observed",
+      "properties": {
+        "state": "pending"
+      }
+    },
+    "version": "2.2.0",
+    "lastVerifiedAt": "2026-08-21",
+    "x": 400,
+    "y": 6200,
+    "parents": [],
+    "children": [
+      "state_runtime_inquiry_accepted",
+      "state_runtime_inquiry_declined",
+      "state_runtime_inquiry_withdrawn",
+      "state_runtime_inquiry_reported"
+    ],
+    "auth": "staff",
+    "database": "Supabase deals"
+  },
+  {
+    "id": "state_runtime_inquiry_connected",
+    "canonicalId": "deal.inquiry.state.connected",
+    "name": "INQUIRY · CONNECTED",
+    "nodeType": "STATE",
+    "type": "state",
+    "category": "architecture",
+    "domain": "deal",
+    "layer": "Private transaction runtime",
+    "route": "/api/deals/[id]",
+    "routeType": "EXACT_MATCH",
+    "actorRoles": [
+      "staff",
+      "admin"
+    ],
+    "roles": [
+      "staff",
+      "admin"
+    ],
+    "uiAudience": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "knowledgeScope": [
+      "INTERNAL",
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "guideability": "NONE",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "LIMITED_LIVE",
+    "currentState": "CONNECTED",
+    "purpose": "Persisted inquiry runtime state CONNECTED.",
+    "description": "This state is accepted and enforced by src/app/api/deals/[id]/route.js.",
+    "actions": [],
+    "conditions": [],
+    "exceptions": [],
+    "recovery": [],
+    "systems": [
+      "src/lib/workflowStateMachines.js",
+      "src/app/api/deals/[id]/route.js"
+    ],
+    "components": [],
+    "apis": [
+      "/api/deals/[id]"
+    ],
+    "dataRefs": [],
+    "brainRefs": [
+      "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_FLOWS.md"
+    ],
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "WORKFLOW_STATE_MACHINES",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/deals/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/workflowStateMachines.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "claims": [],
+    "legalReviewStatus": "RESEARCHED",
+    "machineVerifiedBy": "src/lib/__tests__/workflowStateMachines.test.js",
+    "machineVerificationStatus": "PASS",
+    "humanReviewedBy": null,
+    "approvedAt": null,
+    "productReviewStatus": "PRODUCT_APPROVED",
+    "securityReviewStatus": "RESEARCHED",
+    "isTerminal": false,
+    "terminal": false,
+    "guide": {
+      "instruction": "Internal runtime state; no public guide action.",
+      "target": "#node-state_runtime_inquiry_connected"
+    },
+    "telemetry": {
+      "eventName": "flow_state_runtime_inquiry_connected_observed",
+      "properties": {
+        "state": "connected"
+      }
+    },
+    "version": "2.2.0",
+    "lastVerifiedAt": "2026-08-21",
+    "x": 670,
+    "y": 6200,
+    "parents": [],
+    "children": [
+      "state_runtime_inquiry_accepted",
+      "state_runtime_inquiry_declined",
+      "state_runtime_inquiry_reported"
+    ],
+    "auth": "staff",
+    "database": "Supabase deals"
+  },
+  {
+    "id": "state_runtime_inquiry_accepted",
+    "canonicalId": "deal.inquiry.state.accepted",
+    "name": "INQUIRY · ACCEPTED",
+    "nodeType": "STATE",
+    "type": "state",
+    "category": "architecture",
+    "domain": "deal",
+    "layer": "Private transaction runtime",
+    "route": "/api/deals/[id]",
+    "routeType": "EXACT_MATCH",
+    "actorRoles": [
+      "staff",
+      "admin"
+    ],
+    "roles": [
+      "staff",
+      "admin"
+    ],
+    "uiAudience": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "knowledgeScope": [
+      "INTERNAL",
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "guideability": "NONE",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "LIMITED_LIVE",
+    "currentState": "ACCEPTED",
+    "purpose": "Persisted inquiry runtime state ACCEPTED.",
+    "description": "This state is accepted and enforced by src/app/api/deals/[id]/route.js.",
+    "actions": [],
+    "conditions": [],
+    "exceptions": [],
+    "recovery": [],
+    "systems": [
+      "src/lib/workflowStateMachines.js",
+      "src/app/api/deals/[id]/route.js"
+    ],
+    "components": [],
+    "apis": [
+      "/api/deals/[id]"
+    ],
+    "dataRefs": [],
+    "brainRefs": [
+      "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_FLOWS.md"
+    ],
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "WORKFLOW_STATE_MACHINES",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/deals/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/workflowStateMachines.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "claims": [],
+    "legalReviewStatus": "RESEARCHED",
+    "machineVerifiedBy": "src/lib/__tests__/workflowStateMachines.test.js",
+    "machineVerificationStatus": "PASS",
+    "humanReviewedBy": null,
+    "approvedAt": null,
+    "productReviewStatus": "PRODUCT_APPROVED",
+    "securityReviewStatus": "RESEARCHED",
+    "isTerminal": false,
+    "terminal": false,
+    "guide": {
+      "instruction": "Internal runtime state; no public guide action.",
+      "target": "#node-state_runtime_inquiry_accepted"
+    },
+    "telemetry": {
+      "eventName": "flow_state_runtime_inquiry_accepted_observed",
+      "properties": {
+        "state": "accepted"
+      }
+    },
+    "version": "2.2.0",
+    "lastVerifiedAt": "2026-08-21",
+    "x": 940,
+    "y": 6200,
+    "parents": [
+      "state_runtime_inquiry_pending",
+      "state_runtime_inquiry_connected"
+    ],
+    "children": [
+      "state_runtime_inquiry_closed",
+      "state_runtime_inquiry_reported"
+    ],
+    "auth": "staff",
+    "database": "Supabase deals"
+  },
+  {
+    "id": "state_runtime_inquiry_declined",
+    "canonicalId": "deal.inquiry.state.declined",
+    "name": "INQUIRY · DECLINED",
+    "nodeType": "STATE",
+    "type": "state",
+    "category": "architecture",
+    "domain": "deal",
+    "layer": "Private transaction runtime",
+    "route": "/api/deals/[id]",
+    "routeType": "EXACT_MATCH",
+    "actorRoles": [
+      "staff",
+      "admin"
+    ],
+    "roles": [
+      "staff",
+      "admin"
+    ],
+    "uiAudience": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "knowledgeScope": [
+      "INTERNAL",
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "guideability": "NONE",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "LIMITED_LIVE",
+    "currentState": "DECLINED",
+    "purpose": "Persisted inquiry runtime state DECLINED.",
+    "description": "This state is accepted and enforced by src/app/api/deals/[id]/route.js.",
+    "actions": [],
+    "conditions": [],
+    "exceptions": [],
+    "recovery": [],
+    "systems": [
+      "src/lib/workflowStateMachines.js",
+      "src/app/api/deals/[id]/route.js"
+    ],
+    "components": [],
+    "apis": [
+      "/api/deals/[id]"
+    ],
+    "dataRefs": [],
+    "brainRefs": [
+      "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_FLOWS.md"
+    ],
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "WORKFLOW_STATE_MACHINES",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/deals/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/workflowStateMachines.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "claims": [],
+    "legalReviewStatus": "RESEARCHED",
+    "machineVerifiedBy": "src/lib/__tests__/workflowStateMachines.test.js",
+    "machineVerificationStatus": "PASS",
+    "humanReviewedBy": null,
+    "approvedAt": null,
+    "productReviewStatus": "PRODUCT_APPROVED",
+    "securityReviewStatus": "RESEARCHED",
+    "isTerminal": true,
+    "terminal": true,
+    "guide": {
+      "instruction": "Internal runtime state; no public guide action.",
+      "target": "#node-state_runtime_inquiry_declined"
+    },
+    "telemetry": {
+      "eventName": "flow_state_runtime_inquiry_declined_observed",
+      "properties": {
+        "state": "declined"
+      }
+    },
+    "version": "2.2.0",
+    "lastVerifiedAt": "2026-08-21",
+    "x": 1210,
+    "y": 6200,
+    "parents": [
+      "state_runtime_inquiry_pending",
+      "state_runtime_inquiry_connected"
+    ],
+    "children": [],
+    "auth": "staff",
+    "database": "Supabase deals"
+  },
+  {
+    "id": "state_runtime_inquiry_withdrawn",
+    "canonicalId": "deal.inquiry.state.withdrawn",
+    "name": "INQUIRY · WITHDRAWN",
+    "nodeType": "STATE",
+    "type": "state",
+    "category": "architecture",
+    "domain": "deal",
+    "layer": "Private transaction runtime",
+    "route": "/api/deals/[id]",
+    "routeType": "EXACT_MATCH",
+    "actorRoles": [
+      "staff",
+      "admin"
+    ],
+    "roles": [
+      "staff",
+      "admin"
+    ],
+    "uiAudience": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "knowledgeScope": [
+      "INTERNAL",
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "guideability": "NONE",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "LIMITED_LIVE",
+    "currentState": "WITHDRAWN",
+    "purpose": "Persisted inquiry runtime state WITHDRAWN.",
+    "description": "This state is accepted and enforced by src/app/api/deals/[id]/route.js.",
+    "actions": [],
+    "conditions": [],
+    "exceptions": [],
+    "recovery": [],
+    "systems": [
+      "src/lib/workflowStateMachines.js",
+      "src/app/api/deals/[id]/route.js"
+    ],
+    "components": [],
+    "apis": [
+      "/api/deals/[id]"
+    ],
+    "dataRefs": [],
+    "brainRefs": [
+      "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_FLOWS.md"
+    ],
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "WORKFLOW_STATE_MACHINES",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/deals/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/workflowStateMachines.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "claims": [],
+    "legalReviewStatus": "RESEARCHED",
+    "machineVerifiedBy": "src/lib/__tests__/workflowStateMachines.test.js",
+    "machineVerificationStatus": "PASS",
+    "humanReviewedBy": null,
+    "approvedAt": null,
+    "productReviewStatus": "PRODUCT_APPROVED",
+    "securityReviewStatus": "RESEARCHED",
+    "isTerminal": true,
+    "terminal": true,
+    "guide": {
+      "instruction": "Internal runtime state; no public guide action.",
+      "target": "#node-state_runtime_inquiry_withdrawn"
+    },
+    "telemetry": {
+      "eventName": "flow_state_runtime_inquiry_withdrawn_observed",
+      "properties": {
+        "state": "withdrawn"
+      }
+    },
+    "version": "2.2.0",
+    "lastVerifiedAt": "2026-08-21",
+    "x": 1480,
+    "y": 6200,
+    "parents": [
+      "state_runtime_inquiry_pending"
+    ],
+    "children": [],
+    "auth": "staff",
+    "database": "Supabase deals"
+  },
+  {
+    "id": "state_runtime_inquiry_reported",
+    "canonicalId": "deal.inquiry.state.reported",
+    "name": "INQUIRY · REPORTED",
+    "nodeType": "STATE",
+    "type": "state",
+    "category": "architecture",
+    "domain": "deal",
+    "layer": "Private transaction runtime",
+    "route": "/api/deals/[id]",
+    "routeType": "EXACT_MATCH",
+    "actorRoles": [
+      "staff",
+      "admin"
+    ],
+    "roles": [
+      "staff",
+      "admin"
+    ],
+    "uiAudience": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "knowledgeScope": [
+      "INTERNAL",
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "guideability": "NONE",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "LIMITED_LIVE",
+    "currentState": "REPORTED",
+    "purpose": "Persisted inquiry runtime state REPORTED.",
+    "description": "This state is accepted and enforced by src/app/api/deals/[id]/route.js.",
+    "actions": [],
+    "conditions": [],
+    "exceptions": [],
+    "recovery": [],
+    "systems": [
+      "src/lib/workflowStateMachines.js",
+      "src/app/api/deals/[id]/route.js"
+    ],
+    "components": [],
+    "apis": [
+      "/api/deals/[id]"
+    ],
+    "dataRefs": [],
+    "brainRefs": [
+      "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_FLOWS.md"
+    ],
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "WORKFLOW_STATE_MACHINES",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/deals/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/workflowStateMachines.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "claims": [],
+    "legalReviewStatus": "RESEARCHED",
+    "machineVerifiedBy": "src/lib/__tests__/workflowStateMachines.test.js",
+    "machineVerificationStatus": "PASS",
+    "humanReviewedBy": null,
+    "approvedAt": null,
+    "productReviewStatus": "PRODUCT_APPROVED",
+    "securityReviewStatus": "RESEARCHED",
+    "isTerminal": true,
+    "terminal": true,
+    "guide": {
+      "instruction": "Internal runtime state; no public guide action.",
+      "target": "#node-state_runtime_inquiry_reported"
+    },
+    "telemetry": {
+      "eventName": "flow_state_runtime_inquiry_reported_observed",
+      "properties": {
+        "state": "reported"
+      }
+    },
+    "version": "2.2.0",
+    "lastVerifiedAt": "2026-08-21",
+    "x": 1750,
+    "y": 6200,
+    "parents": [
+      "state_runtime_inquiry_pending",
+      "state_runtime_inquiry_connected",
+      "state_runtime_inquiry_accepted"
+    ],
+    "children": [],
+    "auth": "staff",
+    "database": "Supabase deals"
+  },
+  {
+    "id": "state_runtime_inquiry_closed",
+    "canonicalId": "deal.inquiry.state.closed",
+    "name": "INQUIRY · CLOSED",
+    "nodeType": "STATE",
+    "type": "state",
+    "category": "architecture",
+    "domain": "deal",
+    "layer": "Private transaction runtime",
+    "route": "/api/deals/[id]",
+    "routeType": "EXACT_MATCH",
+    "actorRoles": [
+      "staff",
+      "admin"
+    ],
+    "roles": [
+      "staff",
+      "admin"
+    ],
+    "uiAudience": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "knowledgeScope": [
+      "INTERNAL",
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "guideability": "NONE",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "LIMITED_LIVE",
+    "currentState": "CLOSED",
+    "purpose": "Persisted inquiry runtime state CLOSED.",
+    "description": "This state is accepted and enforced by src/app/api/deals/[id]/route.js.",
+    "actions": [],
+    "conditions": [],
+    "exceptions": [],
+    "recovery": [],
+    "systems": [
+      "src/lib/workflowStateMachines.js",
+      "src/app/api/deals/[id]/route.js"
+    ],
+    "components": [],
+    "apis": [
+      "/api/deals/[id]"
+    ],
+    "dataRefs": [],
+    "brainRefs": [
+      "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_FLOWS.md"
+    ],
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "WORKFLOW_STATE_MACHINES",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/deals/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/workflowStateMachines.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "claims": [],
+    "legalReviewStatus": "RESEARCHED",
+    "machineVerifiedBy": "src/lib/__tests__/workflowStateMachines.test.js",
+    "machineVerificationStatus": "PASS",
+    "humanReviewedBy": null,
+    "approvedAt": null,
+    "productReviewStatus": "PRODUCT_APPROVED",
+    "securityReviewStatus": "RESEARCHED",
+    "isTerminal": true,
+    "terminal": true,
+    "guide": {
+      "instruction": "Internal runtime state; no public guide action.",
+      "target": "#node-state_runtime_inquiry_closed"
+    },
+    "telemetry": {
+      "eventName": "flow_state_runtime_inquiry_closed_observed",
+      "properties": {
+        "state": "closed"
+      }
+    },
+    "version": "2.2.0",
+    "lastVerifiedAt": "2026-08-21",
+    "x": 2020,
+    "y": 6200,
+    "parents": [
+      "state_runtime_inquiry_accepted"
+    ],
+    "children": [],
+    "auth": "staff",
+    "database": "Supabase deals"
+  },
+  {
+    "id": "state_runtime_viewing_pending",
+    "canonicalId": "deal.viewing.state.pending",
+    "name": "VIEWING · PENDING",
+    "nodeType": "STATE",
+    "type": "state",
+    "category": "architecture",
+    "domain": "deal",
+    "layer": "Private transaction runtime",
+    "route": "/api/viewing-appointments/[id]",
+    "routeType": "EXACT_MATCH",
+    "actorRoles": [
+      "staff",
+      "admin"
+    ],
+    "roles": [
+      "staff",
+      "admin"
+    ],
+    "uiAudience": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "knowledgeScope": [
+      "INTERNAL",
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "guideability": "NONE",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "LIMITED_LIVE",
+    "currentState": "PENDING",
+    "purpose": "Persisted viewing runtime state PENDING.",
+    "description": "This state is accepted and enforced by src/app/api/viewing-appointments/[id]/route.js.",
+    "actions": [],
+    "conditions": [],
+    "exceptions": [],
+    "recovery": [],
+    "systems": [
+      "src/lib/workflowStateMachines.js",
+      "src/app/api/viewing-appointments/[id]/route.js"
+    ],
+    "components": [],
+    "apis": [
+      "/api/viewing-appointments/[id]"
+    ],
+    "dataRefs": [],
+    "brainRefs": [
+      "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_FLOWS.md"
+    ],
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "WORKFLOW_STATE_MACHINES",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/viewing-appointments/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/workflowStateMachines.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "claims": [],
+    "legalReviewStatus": "RESEARCHED",
+    "machineVerifiedBy": "src/lib/__tests__/workflowStateMachines.test.js",
+    "machineVerificationStatus": "PASS",
+    "humanReviewedBy": null,
+    "approvedAt": null,
+    "productReviewStatus": "PRODUCT_APPROVED",
+    "securityReviewStatus": "RESEARCHED",
+    "isTerminal": false,
+    "terminal": false,
+    "guide": {
+      "instruction": "Internal runtime state; no public guide action.",
+      "target": "#node-state_runtime_viewing_pending"
+    },
+    "telemetry": {
+      "eventName": "flow_state_runtime_viewing_pending_observed",
+      "properties": {
+        "state": "pending"
+      }
+    },
+    "version": "2.2.0",
+    "lastVerifiedAt": "2026-08-21",
+    "x": 400,
+    "y": 6500,
+    "parents": [],
+    "children": [
+      "state_runtime_viewing_confirmed",
+      "state_runtime_viewing_cancelled"
+    ],
+    "auth": "staff",
+    "database": "Supabase viewing_appointments"
+  },
+  {
+    "id": "state_runtime_viewing_confirmed",
+    "canonicalId": "deal.viewing.state.confirmed",
+    "name": "VIEWING · CONFIRMED",
+    "nodeType": "STATE",
+    "type": "state",
+    "category": "architecture",
+    "domain": "deal",
+    "layer": "Private transaction runtime",
+    "route": "/api/viewing-appointments/[id]",
+    "routeType": "EXACT_MATCH",
+    "actorRoles": [
+      "staff",
+      "admin"
+    ],
+    "roles": [
+      "staff",
+      "admin"
+    ],
+    "uiAudience": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "knowledgeScope": [
+      "INTERNAL",
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "guideability": "NONE",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "LIMITED_LIVE",
+    "currentState": "CONFIRMED",
+    "purpose": "Persisted viewing runtime state CONFIRMED.",
+    "description": "This state is accepted and enforced by src/app/api/viewing-appointments/[id]/route.js.",
+    "actions": [],
+    "conditions": [],
+    "exceptions": [],
+    "recovery": [],
+    "systems": [
+      "src/lib/workflowStateMachines.js",
+      "src/app/api/viewing-appointments/[id]/route.js"
+    ],
+    "components": [],
+    "apis": [
+      "/api/viewing-appointments/[id]"
+    ],
+    "dataRefs": [],
+    "brainRefs": [
+      "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_FLOWS.md"
+    ],
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "WORKFLOW_STATE_MACHINES",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/viewing-appointments/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/workflowStateMachines.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "claims": [],
+    "legalReviewStatus": "RESEARCHED",
+    "machineVerifiedBy": "src/lib/__tests__/workflowStateMachines.test.js",
+    "machineVerificationStatus": "PASS",
+    "humanReviewedBy": null,
+    "approvedAt": null,
+    "productReviewStatus": "PRODUCT_APPROVED",
+    "securityReviewStatus": "RESEARCHED",
+    "isTerminal": false,
+    "terminal": false,
+    "guide": {
+      "instruction": "Internal runtime state; no public guide action.",
+      "target": "#node-state_runtime_viewing_confirmed"
+    },
+    "telemetry": {
+      "eventName": "flow_state_runtime_viewing_confirmed_observed",
+      "properties": {
+        "state": "confirmed"
+      }
+    },
+    "version": "2.2.0",
+    "lastVerifiedAt": "2026-08-21",
+    "x": 670,
+    "y": 6500,
+    "parents": [
+      "state_runtime_viewing_pending"
+    ],
+    "children": [
+      "state_runtime_viewing_completed",
+      "state_runtime_viewing_cancelled"
+    ],
+    "auth": "staff",
+    "database": "Supabase viewing_appointments"
+  },
+  {
+    "id": "state_runtime_viewing_cancelled",
+    "canonicalId": "deal.viewing.state.cancelled",
+    "name": "VIEWING · CANCELLED",
+    "nodeType": "STATE",
+    "type": "state",
+    "category": "architecture",
+    "domain": "deal",
+    "layer": "Private transaction runtime",
+    "route": "/api/viewing-appointments/[id]",
+    "routeType": "EXACT_MATCH",
+    "actorRoles": [
+      "staff",
+      "admin"
+    ],
+    "roles": [
+      "staff",
+      "admin"
+    ],
+    "uiAudience": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "knowledgeScope": [
+      "INTERNAL",
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "guideability": "NONE",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "LIMITED_LIVE",
+    "currentState": "CANCELLED",
+    "purpose": "Persisted viewing runtime state CANCELLED.",
+    "description": "This state is accepted and enforced by src/app/api/viewing-appointments/[id]/route.js.",
+    "actions": [],
+    "conditions": [],
+    "exceptions": [],
+    "recovery": [],
+    "systems": [
+      "src/lib/workflowStateMachines.js",
+      "src/app/api/viewing-appointments/[id]/route.js"
+    ],
+    "components": [],
+    "apis": [
+      "/api/viewing-appointments/[id]"
+    ],
+    "dataRefs": [],
+    "brainRefs": [
+      "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_FLOWS.md"
+    ],
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "WORKFLOW_STATE_MACHINES",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/viewing-appointments/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/workflowStateMachines.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "claims": [],
+    "legalReviewStatus": "RESEARCHED",
+    "machineVerifiedBy": "src/lib/__tests__/workflowStateMachines.test.js",
+    "machineVerificationStatus": "PASS",
+    "humanReviewedBy": null,
+    "approvedAt": null,
+    "productReviewStatus": "PRODUCT_APPROVED",
+    "securityReviewStatus": "RESEARCHED",
+    "isTerminal": true,
+    "terminal": true,
+    "guide": {
+      "instruction": "Internal runtime state; no public guide action.",
+      "target": "#node-state_runtime_viewing_cancelled"
+    },
+    "telemetry": {
+      "eventName": "flow_state_runtime_viewing_cancelled_observed",
+      "properties": {
+        "state": "cancelled"
+      }
+    },
+    "version": "2.2.0",
+    "lastVerifiedAt": "2026-08-21",
+    "x": 940,
+    "y": 6500,
+    "parents": [
+      "state_runtime_viewing_pending",
+      "state_runtime_viewing_confirmed"
+    ],
+    "children": [],
+    "auth": "staff",
+    "database": "Supabase viewing_appointments"
+  },
+  {
+    "id": "state_runtime_viewing_completed",
+    "canonicalId": "deal.viewing.state.completed",
+    "name": "VIEWING · COMPLETED",
+    "nodeType": "STATE",
+    "type": "state",
+    "category": "architecture",
+    "domain": "deal",
+    "layer": "Private transaction runtime",
+    "route": "/api/viewing-appointments/[id]",
+    "routeType": "EXACT_MATCH",
+    "actorRoles": [
+      "staff",
+      "admin"
+    ],
+    "roles": [
+      "staff",
+      "admin"
+    ],
+    "uiAudience": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "knowledgeScope": [
+      "INTERNAL",
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "guideability": "NONE",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "LIMITED_LIVE",
+    "currentState": "COMPLETED",
+    "purpose": "Persisted viewing runtime state COMPLETED.",
+    "description": "This state is accepted and enforced by src/app/api/viewing-appointments/[id]/route.js.",
+    "actions": [],
+    "conditions": [],
+    "exceptions": [],
+    "recovery": [],
+    "systems": [
+      "src/lib/workflowStateMachines.js",
+      "src/app/api/viewing-appointments/[id]/route.js"
+    ],
+    "components": [],
+    "apis": [
+      "/api/viewing-appointments/[id]"
+    ],
+    "dataRefs": [],
+    "brainRefs": [
+      "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_FLOWS.md"
+    ],
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "WORKFLOW_STATE_MACHINES",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/viewing-appointments/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/workflowStateMachines.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "claims": [],
+    "legalReviewStatus": "RESEARCHED",
+    "machineVerifiedBy": "src/lib/__tests__/workflowStateMachines.test.js",
+    "machineVerificationStatus": "PASS",
+    "humanReviewedBy": null,
+    "approvedAt": null,
+    "productReviewStatus": "PRODUCT_APPROVED",
+    "securityReviewStatus": "RESEARCHED",
+    "isTerminal": true,
+    "terminal": true,
+    "guide": {
+      "instruction": "Internal runtime state; no public guide action.",
+      "target": "#node-state_runtime_viewing_completed"
+    },
+    "telemetry": {
+      "eventName": "flow_state_runtime_viewing_completed_observed",
+      "properties": {
+        "state": "completed"
+      }
+    },
+    "version": "2.2.0",
+    "lastVerifiedAt": "2026-08-21",
+    "x": 1210,
+    "y": 6500,
+    "parents": [
+      "state_runtime_viewing_confirmed"
+    ],
+    "children": [],
+    "auth": "staff",
+    "database": "Supabase viewing_appointments"
   }
 ];
 
@@ -24557,48 +25781,35 @@ export const MASTER_FLOW_EDGES = [
     "source": "pep_ch10_your_move",
     "target": "offer_modal",
     "type": "ACTION",
-    "label": "Chapter 10 — Your Move (Action Cockpit) → Make Offer & Intent Submission Modal",
+    "label": "Planned: Start Structured Offer Flow",
     "trigger": "User Click / Action",
     "conditions": [
       "Chapter 10 — Your Move (Action Cockpit) → Make Offer & Intent Submission Modal",
       "navigation.action == \"navigated\""
     ],
     "roles": [
-      "visitor",
-      "seeker",
-      "owner",
-      "broker",
-      "provider"
+      "staff",
+      "admin"
     ],
     "visibility": [
-      "PUBLIC"
+      "INTERNAL",
+      "STAFF",
+      "ADMIN"
     ],
     "effects": [
-      "Transition from property.pep.ch10_your_move to deal.offer.modal"
+      "Planned transition from property action chapter to structured offer flow"
     ],
-    "apiRefs": [
-      "/api/deals/make-offer"
-    ],
+    "apiRefs": [],
     "reversible": false,
     "recoveryTarget": null,
-    "guideInstruction": "Navigate from Chapter 10 — Your Move (Action Cockpit) to Make Offer & Intent Submission Modal",
-    "guideTarget": "submit-offer-form-btn",
-    "telemetryEvent": "flow_transition_pep_ch10_your_move_offer_modal",
-    "implementationStatus": "VERIFIED",
+    "guideInstruction": "Planned structured offer entry point",
+    "implementationStatus": "NOT_STARTED",
     "evidence": [
       {
-        "kind": "COMPONENT",
-        "path": "src/components/property/chapterConfig.js",
-        "symbol": "CHAPTER_IDS.YOURMOVE",
-        "provenance": "EXTRACTED",
-        "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
-      },
-      {
-        "kind": "COMPONENT",
-        "path": "src/components/property/InquiryModal.js",
-        "provenance": "EXTRACTED",
-        "confidence": 1,
+        "kind": "SCOUTIT_BRAIN",
+        "path": "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_FLOWS.md",
+        "provenance": "INFERRED",
+        "confidence": 0.8,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
       }
     ],
@@ -25085,16 +26296,11 @@ export const MASTER_FLOW_EDGES = [
       "connects.balance -= 1",
       "deal.status = \"OPEN\""
     ],
-    "stateTransition": {
-      "fromState": "DRAFT",
-      "toState": "SUBMITTED"
-    },
     "temporal": {
       "idempotencyKey": "inq_submit_{userId}_{propertyId}",
       "timeout": "15s"
     },
-    "quality": "DOMAIN_DECISION",
-    "stateMachineId": "inquiry.lifecycle"
+    "quality": "DOMAIN_DECISION"
   },
   {
     "id": "e_inquiry_modal_to_exc_insufficient_connects_101",
@@ -25170,12 +26376,7 @@ export const MASTER_FLOW_EDGES = [
         "maxRetries": 1
       }
     },
-    "stateTransition": {
-      "fromState": "DRAFT",
-      "toState": "BLOCKED"
-    },
     "quality": "DOMAIN_DECISION",
-    "stateMachineId": "inquiry.lifecycle",
     "errorClass": "BUSINESS_RULE_VIOLATION"
   },
   {
@@ -25635,16 +26836,11 @@ export const MASTER_FLOW_EDGES = [
       "Transition from deal.viewing.modal to deal.viewing.exc.slot_conflict"
     ],
     "failureReason": "Requested viewing appointment slot is already booked by another seeker",
-    "stateTransition": {
-      "fromState": "REQUESTED",
-      "toState": "RESCHEDULE_PENDING"
-    },
     "temporal": {
       "timeout": "30s",
       "conflictPolicy": "FIRST_CLAIM_WINS"
     },
     "quality": "DOMAIN_DECISION",
-    "stateMachineId": "viewing.lifecycle",
     "errorClass": "BUSINESS_RULE_VIOLATION"
   },
   {
@@ -25815,16 +27011,11 @@ export const MASTER_FLOW_EDGES = [
     "postconditions": [
       "Transition from deal.viewing.modal to deal.room.chat"
     ],
-    "stateTransition": {
-      "fromState": "REQUESTED",
-      "toState": "CONFIRMED"
-    },
     "temporal": {
       "timeout": "30s",
       "conflictPolicy": "FIRST_CLAIM_WINS"
     },
-    "quality": "GENERIC_NAVIGATION",
-    "stateMachineId": "viewing.lifecycle"
+    "quality": "GENERIC_NAVIGATION"
   },
   {
     "id": "e_offer_modal_to_gate_offer_112",
@@ -28146,16 +29337,11 @@ export const MASTER_FLOW_EDGES = [
     "postconditions": [
       "Transition from deal.transaction.handshake to deal.terminal.handshake_success"
     ],
-    "stateTransition": {
-      "fromState": "HANDSHAKE_PENDING",
-      "toState": "CLOSED"
-    },
     "temporal": {
       "timeout": "60s",
       "idempotencyKey": "handshake_sign_{dealId}_{partyId}"
     },
-    "quality": "GENERIC_NAVIGATION",
-    "stateMachineId": "deal.lifecycle"
+    "quality": "GENERIC_NAVIGATION"
   },
   {
     "id": "e_terminal_deal_closed_to_scenario_chat_purge_155",
@@ -32080,8 +33266,8 @@ export const MASTER_FLOW_EDGES = [
     "source": "comp_return_brief_owner",
     "target": "deal_room",
     "type": "ACTION",
-    "label": "Open Lead in Deal Room",
-    "action": "open_deal_room",
+    "label": "Planned: Open Owner Inquiry Workspace",
+    "action": "planned_open_owner_inquiry_workspace",
     "branchKey": "OPEN_DEAL_ROOM",
     "predicate": {
       "field": "lead.hasActiveInquiry",
@@ -32090,31 +33276,34 @@ export const MASTER_FLOW_EDGES = [
       "quality": "GENERIC_NAVIGATION"
     },
     "preconditions": [
-      "lead.hasActiveInquiry == true"
+      "Owner inquiry workspace navigation has been implemented"
     ],
     "postconditions": [
-      "workflow.currentWorkspace = \"DEAL_ROOM\""
+      "Planned private inquiry workspace opened"
     ],
     "conditions": [
-      "Open Lead in Deal Room",
-      "lead.hasActiveInquiry == true"
+      "Planned owner-to-inbox navigation"
     ],
-    "stateTransition": {
-      "fromState": "SUBMITTED",
-      "toState": "OPEN"
-    },
     "evidence": [
       {
-        "kind": "COMPONENT",
-        "provenance": "src/components/dashboard/panels/OwnerWorkspace.js",
-        "path": "src/components/dashboard/panels/OwnerWorkspace.js",
-        "symbol": "OwnerWorkspace",
-        "confidence": 1,
+        "kind": "SCOUTIT_BRAIN",
+        "path": "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_FLOWS.md",
+        "provenance": "INFERRED",
+        "confidence": 0.8,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
       }
     ],
     "quality": "GENERIC_NAVIGATION",
-    "stateMachineId": "deal.lifecycle"
+    "implementationStatus": "NOT_STARTED",
+    "roles": [
+      "staff",
+      "admin"
+    ],
+    "visibility": [
+      "INTERNAL",
+      "STAFF",
+      "ADMIN"
+    ]
   },
   {
     "id": "e_dashboard_broker_to_brokers_roster",
@@ -32217,20 +33406,16 @@ export const MASTER_FLOW_EDGES = [
     "source": "deal_room",
     "target": "offer_modal",
     "type": "ACTION",
-    "label": "Propose Deal Terms & Counter-Offer",
+    "label": "Planned: Open Structured Offer Flow",
     "trigger": "click_propose_terms",
     "roles": [
-      "visitor",
-      "seeker",
-      "owner",
-      "broker"
+      "staff",
+      "admin"
     ],
     "visibility": [
-      "PUBLIC",
-      "AUTHENTICATED",
-      "SEEKER",
-      "OWNER",
-      "BROKER"
+      "INTERNAL",
+      "STAFF",
+      "ADMIN"
     ],
     "quality": "GENERIC_NAVIGATION",
     "predicate": {
@@ -32240,20 +33425,19 @@ export const MASTER_FLOW_EDGES = [
       "quality": "GENERIC_NAVIGATION"
     },
     "preconditions": [
-      "Deal Room session is active"
+      "Structured offer lifecycle has been implemented"
     ],
     "postconditions": [
-      "Offer proposal modal opened"
+      "Planned offer flow opened"
     ],
-    "implementationStatus": "VERIFIED",
+    "implementationStatus": "NOT_STARTED",
     "evidence": [
       {
-        "kind": "CODE",
-        "path": "src/components/dashboard/crm/DealRoom.js",
-        "symbol": "DealRoom",
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43",
-        "confidence": 0.95,
-        "provenance": "DealRoom negotiation panel action"
+        "kind": "SCOUTIT_BRAIN",
+        "path": "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_FLOWS.md",
+        "provenance": "INFERRED",
+        "confidence": 0.8,
+        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
       }
     ]
   },
@@ -32262,29 +33446,19 @@ export const MASTER_FLOW_EDGES = [
     "source": "offer_modal",
     "target": "deal_room",
     "type": "SUBMIT",
-    "label": "Submit Proposal to Deal Room",
+    "label": "Planned: Persist Structured Proposal",
     "trigger": "submit_proposal",
     "roles": [
-      "visitor",
-      "seeker",
-      "owner",
-      "broker"
+      "staff",
+      "admin"
     ],
     "visibility": [
-      "PUBLIC",
-      "AUTHENTICATED",
-      "SEEKER",
-      "OWNER",
-      "BROKER"
+      "INTERNAL",
+      "STAFF",
+      "ADMIN"
     ],
-    "mutationApi": "/api/deals",
     "idempotent": true,
     "quality": "DOMAIN_DECISION",
-    "stateMachineId": "offer.lifecycle",
-    "stateTransition": {
-      "fromState": "PENDING",
-      "toState": "ACCEPTED"
-    },
     "predicate": {
       "field": "deal.status",
       "operator": "in",
@@ -32296,21 +33470,696 @@ export const MASTER_FLOW_EDGES = [
       "quality": "DOMAIN_DECISION"
     },
     "preconditions": [
-      "Valid proposal terms provided"
+      "Structured offer persistence has been implemented"
     ],
     "postconditions": [
-      "Proposal recorded in Deal Room audit stream"
+      "Planned proposal record persisted"
     ],
+    "implementationStatus": "NOT_STARTED",
+    "evidence": [
+      {
+        "kind": "SCOUTIT_BRAIN",
+        "path": "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_FLOWS.md",
+        "provenance": "INFERRED",
+        "confidence": 0.8,
+        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      }
+    ]
+  },
+  {
+    "id": "e_runtime_inquiry_pending_to_accepted",
+    "source": "state_runtime_inquiry_pending",
+    "target": "state_runtime_inquiry_accepted",
+    "type": "SYSTEM",
+    "label": "INQUIRY: PENDING -> ACCEPTED",
+    "trigger": "Authorized PATCH state mutation",
+    "conditions": [],
+    "roles": [
+      "staff",
+      "admin"
+    ],
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "effects": [
+      "Persist ACCEPTED after validating current state PENDING"
+    ],
+    "apiRefs": [
+      "src/app/api/deals/[id]/route.js"
+    ],
+    "reversible": false,
+    "recoveryTarget": null,
+    "guideInstruction": "Internal state transition enforced by the mutation route.",
+    "guideTarget": "#node-state_runtime_inquiry_accepted",
+    "telemetryEvent": "flow_runtime_inquiry_pending_accepted",
     "implementationStatus": "VERIFIED",
     "evidence": [
       {
         "kind": "CODE",
-        "path": "src/components/dashboard/crm/DealRoom.js",
-        "symbol": "DealRoom",
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43",
-        "confidence": 0.95,
-        "provenance": "Proposal submission and update in DealRoom"
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "canTransitionWorkflow",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/deals/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
       }
-    ]
+    ],
+    "stateMachineId": "inquiry.lifecycle",
+    "stateTransition": {
+      "fromState": "PENDING",
+      "toState": "ACCEPTED"
+    }
+  },
+  {
+    "id": "e_runtime_inquiry_pending_to_declined",
+    "source": "state_runtime_inquiry_pending",
+    "target": "state_runtime_inquiry_declined",
+    "type": "SYSTEM",
+    "label": "INQUIRY: PENDING -> DECLINED",
+    "trigger": "Authorized PATCH state mutation",
+    "conditions": [],
+    "roles": [
+      "staff",
+      "admin"
+    ],
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "effects": [
+      "Persist DECLINED after validating current state PENDING"
+    ],
+    "apiRefs": [
+      "src/app/api/deals/[id]/route.js"
+    ],
+    "reversible": false,
+    "recoveryTarget": null,
+    "guideInstruction": "Internal state transition enforced by the mutation route.",
+    "guideTarget": "#node-state_runtime_inquiry_declined",
+    "telemetryEvent": "flow_runtime_inquiry_pending_declined",
+    "implementationStatus": "VERIFIED",
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "canTransitionWorkflow",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/deals/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "stateMachineId": "inquiry.lifecycle",
+    "stateTransition": {
+      "fromState": "PENDING",
+      "toState": "DECLINED"
+    }
+  },
+  {
+    "id": "e_runtime_inquiry_pending_to_withdrawn",
+    "source": "state_runtime_inquiry_pending",
+    "target": "state_runtime_inquiry_withdrawn",
+    "type": "SYSTEM",
+    "label": "INQUIRY: PENDING -> WITHDRAWN",
+    "trigger": "Authorized PATCH state mutation",
+    "conditions": [],
+    "roles": [
+      "staff",
+      "admin"
+    ],
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "effects": [
+      "Persist WITHDRAWN after validating current state PENDING"
+    ],
+    "apiRefs": [
+      "src/app/api/deals/[id]/route.js"
+    ],
+    "reversible": false,
+    "recoveryTarget": null,
+    "guideInstruction": "Internal state transition enforced by the mutation route.",
+    "guideTarget": "#node-state_runtime_inquiry_withdrawn",
+    "telemetryEvent": "flow_runtime_inquiry_pending_withdrawn",
+    "implementationStatus": "VERIFIED",
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "canTransitionWorkflow",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/deals/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "stateMachineId": "inquiry.lifecycle",
+    "stateTransition": {
+      "fromState": "PENDING",
+      "toState": "WITHDRAWN"
+    }
+  },
+  {
+    "id": "e_runtime_inquiry_pending_to_reported",
+    "source": "state_runtime_inquiry_pending",
+    "target": "state_runtime_inquiry_reported",
+    "type": "SYSTEM",
+    "label": "INQUIRY: PENDING -> REPORTED",
+    "trigger": "Authorized PATCH state mutation",
+    "conditions": [],
+    "roles": [
+      "staff",
+      "admin"
+    ],
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "effects": [
+      "Persist REPORTED after validating current state PENDING"
+    ],
+    "apiRefs": [
+      "src/app/api/deals/[id]/route.js"
+    ],
+    "reversible": false,
+    "recoveryTarget": null,
+    "guideInstruction": "Internal state transition enforced by the mutation route.",
+    "guideTarget": "#node-state_runtime_inquiry_reported",
+    "telemetryEvent": "flow_runtime_inquiry_pending_reported",
+    "implementationStatus": "VERIFIED",
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "canTransitionWorkflow",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/deals/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "stateMachineId": "inquiry.lifecycle",
+    "stateTransition": {
+      "fromState": "PENDING",
+      "toState": "REPORTED"
+    }
+  },
+  {
+    "id": "e_runtime_inquiry_connected_to_accepted",
+    "source": "state_runtime_inquiry_connected",
+    "target": "state_runtime_inquiry_accepted",
+    "type": "SYSTEM",
+    "label": "INQUIRY: CONNECTED -> ACCEPTED",
+    "trigger": "Authorized PATCH state mutation",
+    "conditions": [],
+    "roles": [
+      "staff",
+      "admin"
+    ],
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "effects": [
+      "Persist ACCEPTED after validating current state CONNECTED"
+    ],
+    "apiRefs": [
+      "src/app/api/deals/[id]/route.js"
+    ],
+    "reversible": false,
+    "recoveryTarget": null,
+    "guideInstruction": "Internal state transition enforced by the mutation route.",
+    "guideTarget": "#node-state_runtime_inquiry_accepted",
+    "telemetryEvent": "flow_runtime_inquiry_connected_accepted",
+    "implementationStatus": "VERIFIED",
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "canTransitionWorkflow",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/deals/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "stateMachineId": "inquiry.lifecycle",
+    "stateTransition": {
+      "fromState": "CONNECTED",
+      "toState": "ACCEPTED"
+    }
+  },
+  {
+    "id": "e_runtime_inquiry_connected_to_declined",
+    "source": "state_runtime_inquiry_connected",
+    "target": "state_runtime_inquiry_declined",
+    "type": "SYSTEM",
+    "label": "INQUIRY: CONNECTED -> DECLINED",
+    "trigger": "Authorized PATCH state mutation",
+    "conditions": [],
+    "roles": [
+      "staff",
+      "admin"
+    ],
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "effects": [
+      "Persist DECLINED after validating current state CONNECTED"
+    ],
+    "apiRefs": [
+      "src/app/api/deals/[id]/route.js"
+    ],
+    "reversible": false,
+    "recoveryTarget": null,
+    "guideInstruction": "Internal state transition enforced by the mutation route.",
+    "guideTarget": "#node-state_runtime_inquiry_declined",
+    "telemetryEvent": "flow_runtime_inquiry_connected_declined",
+    "implementationStatus": "VERIFIED",
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "canTransitionWorkflow",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/deals/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "stateMachineId": "inquiry.lifecycle",
+    "stateTransition": {
+      "fromState": "CONNECTED",
+      "toState": "DECLINED"
+    }
+  },
+  {
+    "id": "e_runtime_inquiry_connected_to_reported",
+    "source": "state_runtime_inquiry_connected",
+    "target": "state_runtime_inquiry_reported",
+    "type": "SYSTEM",
+    "label": "INQUIRY: CONNECTED -> REPORTED",
+    "trigger": "Authorized PATCH state mutation",
+    "conditions": [],
+    "roles": [
+      "staff",
+      "admin"
+    ],
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "effects": [
+      "Persist REPORTED after validating current state CONNECTED"
+    ],
+    "apiRefs": [
+      "src/app/api/deals/[id]/route.js"
+    ],
+    "reversible": false,
+    "recoveryTarget": null,
+    "guideInstruction": "Internal state transition enforced by the mutation route.",
+    "guideTarget": "#node-state_runtime_inquiry_reported",
+    "telemetryEvent": "flow_runtime_inquiry_connected_reported",
+    "implementationStatus": "VERIFIED",
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "canTransitionWorkflow",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/deals/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "stateMachineId": "inquiry.lifecycle",
+    "stateTransition": {
+      "fromState": "CONNECTED",
+      "toState": "REPORTED"
+    }
+  },
+  {
+    "id": "e_runtime_inquiry_accepted_to_closed",
+    "source": "state_runtime_inquiry_accepted",
+    "target": "state_runtime_inquiry_closed",
+    "type": "SYSTEM",
+    "label": "INQUIRY: ACCEPTED -> CLOSED",
+    "trigger": "Authorized PATCH state mutation",
+    "conditions": [],
+    "roles": [
+      "staff",
+      "admin"
+    ],
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "effects": [
+      "Persist CLOSED after validating current state ACCEPTED"
+    ],
+    "apiRefs": [
+      "src/app/api/deals/[id]/route.js"
+    ],
+    "reversible": false,
+    "recoveryTarget": null,
+    "guideInstruction": "Internal state transition enforced by the mutation route.",
+    "guideTarget": "#node-state_runtime_inquiry_closed",
+    "telemetryEvent": "flow_runtime_inquiry_accepted_closed",
+    "implementationStatus": "VERIFIED",
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "canTransitionWorkflow",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/deals/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "stateMachineId": "inquiry.lifecycle",
+    "stateTransition": {
+      "fromState": "ACCEPTED",
+      "toState": "CLOSED"
+    }
+  },
+  {
+    "id": "e_runtime_inquiry_accepted_to_reported",
+    "source": "state_runtime_inquiry_accepted",
+    "target": "state_runtime_inquiry_reported",
+    "type": "SYSTEM",
+    "label": "INQUIRY: ACCEPTED -> REPORTED",
+    "trigger": "Authorized PATCH state mutation",
+    "conditions": [],
+    "roles": [
+      "staff",
+      "admin"
+    ],
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "effects": [
+      "Persist REPORTED after validating current state ACCEPTED"
+    ],
+    "apiRefs": [
+      "src/app/api/deals/[id]/route.js"
+    ],
+    "reversible": false,
+    "recoveryTarget": null,
+    "guideInstruction": "Internal state transition enforced by the mutation route.",
+    "guideTarget": "#node-state_runtime_inquiry_reported",
+    "telemetryEvent": "flow_runtime_inquiry_accepted_reported",
+    "implementationStatus": "VERIFIED",
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "canTransitionWorkflow",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/deals/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "stateMachineId": "inquiry.lifecycle",
+    "stateTransition": {
+      "fromState": "ACCEPTED",
+      "toState": "REPORTED"
+    }
+  },
+  {
+    "id": "e_runtime_viewing_pending_to_confirmed",
+    "source": "state_runtime_viewing_pending",
+    "target": "state_runtime_viewing_confirmed",
+    "type": "SYSTEM",
+    "label": "VIEWING: PENDING -> CONFIRMED",
+    "trigger": "Authorized PATCH state mutation",
+    "conditions": [],
+    "roles": [
+      "staff",
+      "admin"
+    ],
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "effects": [
+      "Persist CONFIRMED after validating current state PENDING"
+    ],
+    "apiRefs": [
+      "src/app/api/viewing-appointments/[id]/route.js"
+    ],
+    "reversible": false,
+    "recoveryTarget": null,
+    "guideInstruction": "Internal state transition enforced by the mutation route.",
+    "guideTarget": "#node-state_runtime_viewing_confirmed",
+    "telemetryEvent": "flow_runtime_viewing_pending_confirmed",
+    "implementationStatus": "VERIFIED",
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "canTransitionWorkflow",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/viewing-appointments/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "stateMachineId": "viewing.lifecycle",
+    "stateTransition": {
+      "fromState": "PENDING",
+      "toState": "CONFIRMED"
+    }
+  },
+  {
+    "id": "e_runtime_viewing_pending_to_cancelled",
+    "source": "state_runtime_viewing_pending",
+    "target": "state_runtime_viewing_cancelled",
+    "type": "SYSTEM",
+    "label": "VIEWING: PENDING -> CANCELLED",
+    "trigger": "Authorized PATCH state mutation",
+    "conditions": [],
+    "roles": [
+      "staff",
+      "admin"
+    ],
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "effects": [
+      "Persist CANCELLED after validating current state PENDING"
+    ],
+    "apiRefs": [
+      "src/app/api/viewing-appointments/[id]/route.js"
+    ],
+    "reversible": false,
+    "recoveryTarget": null,
+    "guideInstruction": "Internal state transition enforced by the mutation route.",
+    "guideTarget": "#node-state_runtime_viewing_cancelled",
+    "telemetryEvent": "flow_runtime_viewing_pending_cancelled",
+    "implementationStatus": "VERIFIED",
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "canTransitionWorkflow",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/viewing-appointments/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "stateMachineId": "viewing.lifecycle",
+    "stateTransition": {
+      "fromState": "PENDING",
+      "toState": "CANCELLED"
+    }
+  },
+  {
+    "id": "e_runtime_viewing_confirmed_to_completed",
+    "source": "state_runtime_viewing_confirmed",
+    "target": "state_runtime_viewing_completed",
+    "type": "SYSTEM",
+    "label": "VIEWING: CONFIRMED -> COMPLETED",
+    "trigger": "Authorized PATCH state mutation",
+    "conditions": [],
+    "roles": [
+      "staff",
+      "admin"
+    ],
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "effects": [
+      "Persist COMPLETED after validating current state CONFIRMED"
+    ],
+    "apiRefs": [
+      "src/app/api/viewing-appointments/[id]/route.js"
+    ],
+    "reversible": false,
+    "recoveryTarget": null,
+    "guideInstruction": "Internal state transition enforced by the mutation route.",
+    "guideTarget": "#node-state_runtime_viewing_completed",
+    "telemetryEvent": "flow_runtime_viewing_confirmed_completed",
+    "implementationStatus": "VERIFIED",
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "canTransitionWorkflow",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/viewing-appointments/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "stateMachineId": "viewing.lifecycle",
+    "stateTransition": {
+      "fromState": "CONFIRMED",
+      "toState": "COMPLETED"
+    }
+  },
+  {
+    "id": "e_runtime_viewing_confirmed_to_cancelled",
+    "source": "state_runtime_viewing_confirmed",
+    "target": "state_runtime_viewing_cancelled",
+    "type": "SYSTEM",
+    "label": "VIEWING: CONFIRMED -> CANCELLED",
+    "trigger": "Authorized PATCH state mutation",
+    "conditions": [],
+    "roles": [
+      "staff",
+      "admin"
+    ],
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "effects": [
+      "Persist CANCELLED after validating current state CONFIRMED"
+    ],
+    "apiRefs": [
+      "src/app/api/viewing-appointments/[id]/route.js"
+    ],
+    "reversible": false,
+    "recoveryTarget": null,
+    "guideInstruction": "Internal state transition enforced by the mutation route.",
+    "guideTarget": "#node-state_runtime_viewing_cancelled",
+    "telemetryEvent": "flow_runtime_viewing_confirmed_cancelled",
+    "implementationStatus": "VERIFIED",
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/workflowStateMachines.js",
+        "symbol": "canTransitionWorkflow",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/viewing-appointments/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "stateMachineId": "viewing.lifecycle",
+    "stateTransition": {
+      "fromState": "CONFIRMED",
+      "toState": "CANCELLED"
+    }
   }
 ];

@@ -38,6 +38,12 @@ const {
   auditGraphAgainstCodebase
 } = await import(pathToFileURL(path.join(rootDir, 'src', 'lib', 'flow', 'graphValidator.js')).href);
 
+const {
+  WORKFLOW_STATE_MACHINES,
+  PLANNED_WORKFLOW_STATE_MACHINES,
+  flattenWorkflowTransitions
+} = await import(pathToFileURL(path.join(rootDir, 'src', 'lib', 'workflowStateMachines.js')).href);
+
 const targetDir = path.join(rootDir, 'src', 'data', 'flow');
 
 if (!fs.existsSync(targetDir)) {
@@ -103,6 +109,10 @@ const masterGraphJson = {
   generator: {
     version: BUNDLE_VERSION,
     commitSha: currentCommit
+  },
+  runtimeStateMachines: {
+    implemented: flattenWorkflowTransitions(WORKFLOW_STATE_MACHINES),
+    plannedNotImplemented: flattenWorkflowTransitions(PLANNED_WORKFLOW_STATE_MACHINES)
   },
   stats: {
     totalNodes: behavioralNodes.length,

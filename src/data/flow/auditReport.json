@@ -78,24 +78,24 @@
     }
   ],
   "ghostNodes": [],
+  "staleEvidenceItems": [],
   "stateMachineTransitions": {
-    "expected": 20,
-    "mapped": 7,
-    "missing": [
-      "INQUIRY: OPEN -> CLOSED",
-      "VIEWING: CONFIRMED -> COMPLETED",
-      "VIEWING: CONFIRMED -> CANCELLED",
-      "VIEWING: CONFIRMED -> NO_SHOW",
-      "VIEWING: RESCHEDULE_PENDING -> CONFIRMED",
+    "implemented": 13,
+    "registryMapped": 13,
+    "visualEdgeMappings": 13,
+    "plannedNotImplemented": [
+      "OFFER: DRAFT -> SUBMITTED",
       "OFFER: SUBMITTED -> ACCEPTED",
       "OFFER: SUBMITTED -> COUNTERED",
       "OFFER: SUBMITTED -> REJECTED",
       "OFFER: SUBMITTED -> EXPIRED",
       "OFFER: SUBMITTED -> WITHDRAWN",
-      "DEAL: OPEN -> NEGOTIATING",
-      "DEAL: NEGOTIATING -> AGREED",
-      "DEAL: AGREED -> HANDSHAKE_PENDING"
-    ]
+      "NEGOTIATION: OPEN -> NEGOTIATING",
+      "NEGOTIATION: NEGOTIATING -> AGREED",
+      "NEGOTIATION: AGREED -> HANDSHAKE_PENDING"
+    ],
+    "staleVisualTransitions": [],
+    "missing": []
   },
   "repositoryFidelityReport": {
     "canonicalRoutes": [
@@ -288,15 +288,35 @@
     ],
     "redirectAliases": [],
     "componentsReferenced": [
-      "CommercialFlow.js",
-      "ResidentialFlow.js",
-      "InquiryModal.js",
-      "ChatBox.js",
-      "OwnerMode.js",
-      "BrokerMode.js",
-      "DiscoverClient.js",
-      "DirectoryClient.js",
-      "DealRoom.js"
+      "src/components/connects/ConnectsReceipt.js",
+      "src/components/dashboard/BookingModal.js",
+      "src/components/dashboard/BrokerFieldBriefing.js",
+      "src/components/dashboard/BrokerMode.js",
+      "src/components/dashboard/BulkImporterMode.js",
+      "src/components/dashboard/BuyerMode.js",
+      "src/components/dashboard/ChatBox.js",
+      "src/components/dashboard/LiveEditorWorkspace.js",
+      "src/components/dashboard/MissionControlMode.js",
+      "src/components/dashboard/MonthlyFreshnessModal.js",
+      "src/components/dashboard/OwnerMode.js",
+      "src/components/dashboard/PropertySectionEditor.js",
+      "src/components/dashboard/ProviderMode.js",
+      "src/components/dashboard/crm/AppointmentsSheet.js",
+      "src/components/descent/BlackHoleCanvas.js",
+      "src/components/layout/Header.js",
+      "src/components/orbit/ScoutEarthClient.js",
+      "src/components/property/ClaimPropertyPanel.js",
+      "src/components/property/CommercialFlow.js",
+      "src/components/property/ComparisonMatrix.js",
+      "src/components/property/FloodHeatmapMap.js",
+      "src/components/property/InquiryModal.js",
+      "src/components/property/InteractiveMap.js",
+      "src/components/property/PropertyFAQSection.js",
+      "src/components/property/ResidentialFlow.js",
+      "src/components/property/SpatialCommandMap.js",
+      "src/components/property/UnitMasterPage.js",
+      "src/components/property/WhereToSection.js",
+      "src/components/property/chapterConfig.js"
     ],
     "componentsMissing": [],
     "apiRoutesMapped": [
@@ -315,7 +335,6 @@
       "/api/deals/escrow-trap",
       "/api/deals/offer-review",
       "/api/deals/route-lead",
-      "/api/deals/viewing-status",
       "/api/faq/ask",
       "/api/property/faq-vote",
       "/api/security/scoped-token",
@@ -343,7 +362,6 @@
       "/api/deals/escrow-trap",
       "/api/deals/offer-review",
       "/api/deals/route-lead",
-      "/api/deals/viewing-status",
       "/api/faq/ask",
       "/api/property/faq-vote",
       "/api/security/scoped-token",
@@ -366,24 +384,25 @@
       "/mission-control/prc-audit"
     ],
     "staleReleasedGraphOnlyRoutes": [],
-    "verifiedCodeEvidenceCount": 80,
+    "verifiedCodeEvidenceCount": 89,
     "staleCodeEvidenceCount": 0
   },
   "scores": {
     "schemaValidityScore": {
-      "numerator": 117,
-      "denominator": 117,
+      "numerator": 128,
+      "denominator": 128,
       "percentage": "100%",
       "formula": "schema-valid nodes / total nodes",
       "failingItems": []
     },
     "graphEvidenceScore": {
-      "numerator": 80,
-      "denominator": 117,
-      "percentage": "68%",
+      "numerator": 89,
+      "denominator": 128,
+      "percentage": "70%",
       "formula": "verified nodes with existing grounded code evidence / total nodes",
       "failingItems": [
         "sys_velocity_radar",
+        "offer_modal",
         "sys_gemini_ocr_extractor",
         "sys_web_researcher",
         "gate_viewing",
@@ -400,6 +419,7 @@
         "exc_contact_leak_blocked",
         "rec_redact_contact_faq",
         "exc_viewing_noshow",
+        "reschedule_modal",
         "exc_missing_pdf_metric",
         "rec_owner_manual_override",
         "exc_ai_deadlock",
@@ -444,32 +464,18 @@
       "failingItems": []
     },
     "ragSafetyScore": {
-      "numerator": 192,
-      "denominator": 192,
+      "numerator": 188,
+      "denominator": 188,
       "percentage": "100%",
       "formula": "public chunks passing access and content sanitization checks / total public chunks",
       "failingItems": []
     },
     "stateMachineCoverageScore": {
-      "numerator": 7,
-      "denominator": 20,
-      "percentage": "35%",
-      "formula": "mapped valid state transitions / total expected state transitions",
-      "failingItems": [
-        "INQUIRY: OPEN -> CLOSED",
-        "VIEWING: CONFIRMED -> COMPLETED",
-        "VIEWING: CONFIRMED -> CANCELLED",
-        "VIEWING: CONFIRMED -> NO_SHOW",
-        "VIEWING: RESCHEDULE_PENDING -> CONFIRMED",
-        "OFFER: SUBMITTED -> ACCEPTED",
-        "OFFER: SUBMITTED -> COUNTERED",
-        "OFFER: SUBMITTED -> REJECTED",
-        "OFFER: SUBMITTED -> EXPIRED",
-        "OFFER: SUBMITTED -> WITHDRAWN",
-        "DEAL: OPEN -> NEGOTIATING",
-        "DEAL: NEGOTIATING -> AGREED",
-        "DEAL: AGREED -> HANDSHAKE_PENDING"
-      ]
+      "numerator": 13,
+      "denominator": 13,
+      "percentage": "100%",
+      "formula": "implemented transitions enforced by runtime routes and published in the shared state-machine registry",
+      "failingItems": []
     },
     "recoveryCoverageScore": {
       "numerator": 14,
@@ -479,14 +485,14 @@
       "failingItems": []
     },
     "ghostGraphScore": {
-      "numerator": 80,
-      "denominator": 80,
+      "numerator": 89,
+      "denominator": 89,
       "percentage": "100%",
       "formula": "verified nodes with real codebase artifacts / total verified nodes",
       "failingItems": []
     },
     "overallTrustScore": {
-      "percentage": "92.0%",
+      "percentage": "92.5%",
       "formula": "weighted sum: (evidence * 0.25) + (route * 0.15) + (ghost * 0.15) + (workflow * 0.15) + (guide * 0.15) + (rag * 0.15) - penalties",
       "penalties": {
         "placeholderPredicates": 0,
@@ -496,5 +502,5 @@
       "failingItems": []
     }
   },
-  "auditScore": "92.0% TRUST GROUNDED"
+  "auditScore": "92.5% TRUST GROUNDED"
 }

@@ -22,6 +22,7 @@ describe("ScoutIt Master Directed System Graph Integrity (Full Recorded Scenario
       "DECISION",
       "GATE",
       "SYSTEM",
+      "state",
       "EXCEPTION",
       "RECOVERY",
       "OUTCOME",

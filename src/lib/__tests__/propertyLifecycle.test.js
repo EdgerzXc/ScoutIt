@@ -7,14 +7,21 @@ import {
   canContactProperty,
   getRedirectSlug,
   isEntitledOffMarketViewer,
+  isMarketVisible,
   normalizeLifecycleState,
 } from "../propertyLifecycle";
 
 describe("property lifecycle contract", () => {
-  it("maps legacy pipeline values without treating archived as deletion", () => {
-    expect(normalizeLifecycleState({ pipeline_status: "approved" })).toBe(PROPERTY_LIFECYCLE_STATES.LIVE);
-    expect(normalizeLifecycleState({ pipeline_status: "archived" })).toBe(PROPERTY_LIFECYCLE_STATES.OFF_MARKET);
-    expect(normalizeLifecycleState({ pipeline_status: "draft" })).toBe(PROPERTY_LIFECYCLE_STATES.DRAFT);
+  it("uses pipeline_status as the listing-live authority", () => {
+    expect(normalizeLifecycleState({ pipeline_status: "approved", lifecycle_state: "draft" })).toBe(PROPERTY_LIFECYCLE_STATES.LIVE);
+    expect(normalizeLifecycleState({ pipeline_status: "archived", lifecycle_state: "live" })).toBe(PROPERTY_LIFECYCLE_STATES.OFF_MARKET);
+    expect(normalizeLifecycleState({ pipeline_status: "pending", lifecycle_state: "live" })).toBe(PROPERTY_LIFECYCLE_STATES.DRAFT);
+    expect(normalizeLifecycleState({ pipeline_status: "unexpected", lifecycle_state: "live" })).toBe(PROPERTY_LIFECYCLE_STATES.DRAFT);
+  });
+
+  it("uses lifecycle_state only for pre-pipeline legacy rows", () => {
+    expect(normalizeLifecycleState({ lifecycle_state: "live" })).toBe(PROPERTY_LIFECYCLE_STATES.LIVE);
+    expect(normalizeLifecycleState({ lifecycle_state: "off_market" })).toBe(PROPERTY_LIFECYCLE_STATES.OFF_MARKET);
   });
 
   it("uses Airtable's computed slug only once and then freezes it", () => {
@@ -42,8 +49,11 @@ describe("property lifecycle contract", () => {
     });
   });
 
-  it("only allows contact for live or explicitly quiet-offer listings", () => {
-    expect(canContactProperty({ lifecycle_state: "live" })).toBe(true);
+  it("requires pipeline approval for public visibility and contact", () => {
+    expect(isMarketVisible({ pipeline_status: "approved", lifecycle_state: "draft" })).toBe(true);
+    expect(isMarketVisible({ lifecycle_state: "live" })).toBe(false);
+    expect(canContactProperty({ pipeline_status: "approved" })).toBe(true);
+    expect(canContactProperty({ lifecycle_state: "live" })).toBe(false);
     expect(canContactProperty({ lifecycle_state: "off_market" })).toBe(false);
     expect(canContactProperty({ lifecycle_state: "off_market", quietly_open_to_offers: true })).toBe(true);
     expect(canContactProperty({ lifecycle_state: "permanently_removed", quietly_open_to_offers: true })).toBe(false);

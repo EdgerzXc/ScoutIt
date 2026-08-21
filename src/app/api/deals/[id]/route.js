@@ -5,6 +5,7 @@ import { z } from "zod";
 import { logActivity } from "@/lib/crmActivity";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { isRoutedDealRecipient } from "@/lib/dealParty";
+import { canTransitionWorkflow } from "@/lib/workflowStateMachines";
 
 // 'withdrawn' = the SENDER took their own pending request back (§40.15).
 // Kept distinct from 'declined' on purpose: declined means the recipient said
@@ -75,6 +76,13 @@ export async function PATCH(request, { params }) {
           { status: 409 },
         );
       }
+    }
+
+    if (!canTransitionWorkflow("inquiry", deal.status, status)) {
+      return NextResponse.json(
+        { error: "Inquiry cannot move from " + deal.status + " to " + status },
+        { status: 409 },
+      );
     }
 
     const updateData = { status };

@@ -92,7 +92,7 @@ export default function OnboardingPage() {
   const [useOtp, setUseOtp] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [otpCode, setOtpCode] = useState("");
-  const [confirmNewAccount, setConfirmNewAccount] = useState(false);
+  const [authIntent, setAuthIntent] = useState("signin");
   const [emailConfirmationSent, setEmailConfirmationSent] = useState(false);
   const [confirmationBusy, setConfirmationBusy] = useState(false);
   const [captchaToken, setCaptchaToken] = useState("");
@@ -152,7 +152,6 @@ export default function OnboardingPage() {
   }, []);
 
   const setEmail = (email) => {
-    setConfirmNewAccount(false);
     setEmailConfirmationSent(false);
     setFormData((current) => ({ ...current, email }));
   };
@@ -174,30 +173,24 @@ export default function OnboardingPage() {
         return;
       }
 
-      const { data: signInData, error: signInError } = await signInWithPassword(
-        formData.email,
-        formData.password,
-        captchaToken,
-      );
-      if (!signInError && signInData?.user) {
-        await continueAuthenticatedUser(signInData.user);
-        return;
-      }
+      if (authIntent === "signin") {
+        const { data: signInData, error: signInError } = await signInWithPassword(
+          formData.email,
+          formData.password,
+          captchaToken,
+        );
+        if (!signInError && signInData?.user) {
+          await continueAuthenticatedUser(signInData.user);
+          return;
+        }
 
-      if (signInError?.message?.toLowerCase().includes("email not confirmed")) {
-        setEmailConfirmationSent(true);
-        setConfirmNewAccount(false);
-        resetCaptcha();
-        return;
-      }
+        if (signInError?.message?.toLowerCase().includes("email not confirmed")) {
+          setEmailConfirmationSent(true);
+          resetCaptcha();
+          return;
+        }
 
-      // Supabase deliberately returns the same failure for an unknown email and
-      // a wrong password. Require a second, explicit click before signup so a
-      // typo cannot silently create a separate empty account.
-      if (!confirmNewAccount) {
-        setConfirmNewAccount(true);
-        resetCaptcha();
-        return;
+        throw signInError || new Error("The email or password is incorrect.");
       }
 
       const freshToken = await turnstileRef.current?.refresh();
@@ -214,7 +207,7 @@ export default function OnboardingPage() {
         await continueAuthenticatedUser(signUpData.session.user);
       } else {
         setEmailConfirmationSent(true);
-        setConfirmNewAccount(false);
+
         resetCaptcha();
       }
     } catch (error) {
@@ -244,7 +237,7 @@ export default function OnboardingPage() {
 
   const handleDifferentEmail = () => {
     setEmailConfirmationSent(false);
-    setConfirmNewAccount(false);
+    setAuthIntent("signin");
     setOtpSent(false);
     setOtpCode("");
     setFormData((current) => ({ ...current, email: "", password: "" }));
@@ -371,10 +364,10 @@ export default function OnboardingPage() {
         </label>
       </div>
 
-      {confirmNewAccount && (
+      {authIntent === "signup" && (
         <div className="mb-4 rounded border border-gold-accent/30 bg-gold-accent/5 p-4">
-          <p className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase mb-2">Confirm new account</p>
-          <p className="text-sm text-text-secondary leading-relaxed">We could not sign in <strong className="text-on-surface break-all">{formData.email}</strong>. Correct the password if this account exists, or press the button again to create a new account at this exact address.</p>
+          <p className="font-label-caps text-[10px] tracking-widest text-gold-accent uppercase mb-2">Create a new account</p>
+          <p className="text-sm text-text-secondary leading-relaxed">A new ScoutIt account will be created for <strong className="text-on-surface break-all">{formData.email}</strong>.</p>
           <p className="text-xs text-text-muted leading-relaxed mt-3">Email confirmation is required before private profile setup. Confirm that this address is correct; the link can expire and account access cannot continue until it is verified.</p>
         </div>
       )}
@@ -386,7 +379,7 @@ export default function OnboardingPage() {
           <p className="text-xs text-text-muted leading-relaxed mt-3">If your link expired, request a fresh one. If this is the wrong address, change it before creating another account.</p>
           <div className="flex flex-wrap gap-3 mt-4">
             <button type="button" className="min-h-11 px-4 rounded border border-success/40 text-success text-xs font-bold disabled:opacity-50" disabled={confirmationBusy || !captchaToken} onClick={handleResendConfirmation}>
-              {confirmationBusy ? "Sendingâ€¦" : "Resend confirmation email"}
+              {confirmationBusy ? "Sending…" : "Resend confirmation email"}
             </button>
             <button type="button" className="min-h-11 px-4 rounded border border-surface-variant text-on-surface text-xs font-bold" onClick={handleDifferentEmail}>
               Use a different email
@@ -399,11 +392,16 @@ export default function OnboardingPage() {
         <TurnstileGate ref={turnstileRef} onToken={setCaptchaToken} onError={showToast} />
       </div>
       <button className="w-full bg-gold-accent text-background font-working-title font-bold py-4 px-6 rounded disabled:opacity-50 mb-3" onClick={handleAuth} disabled={!formData.email.includes("@") || (!useOtp && formData.password.length < 8) || (useOtp && otpSent && otpCode.length !== 6) || !captchaToken}>
-        {useOtp && !otpSent ? "Send verification code →" : useOtp && otpSent ? "Verify and continue →" : confirmNewAccount ? "Yes — create my account →" : "Sign in with email →"}
+        {useOtp && !otpSent ? "Send verification code →" : useOtp && otpSent ? "Verify and continue →" : authIntent === "signup" ? "Create my account →" : "Sign in with email →"}
       </button>
       {!otpSent && (
-        <button className="w-full text-text-secondary text-sm font-bold hover:text-gold-accent mb-6" onClick={() => { setUseOtp(!useOtp); setConfirmNewAccount(false); }}>
+        <button className="w-full text-text-secondary text-sm font-bold hover:text-gold-accent mb-3" onClick={() => { setUseOtp(!useOtp); setAuthIntent("signin"); }}>
           {useOtp ? "Sign in with a password" : "Sign in with a code"}
+        </button>
+      )}
+      {!useOtp && !otpSent && (
+        <button className="w-full text-text-secondary text-sm font-bold hover:text-gold-accent mb-6" onClick={() => { setAuthIntent((current) => current === "signin" ? "signup" : "signin"); setEmailConfirmationSent(false); resetCaptcha(); }}>
+          {authIntent === "signin" ? "Create a new ScoutIt account" : "I already have an account"}
         </button>
       )}
       <div className="flex items-center text-text-secondary text-sm my-5 gap-4"><div className="flex-1 h-px bg-surface-variant" /><span className="uppercase tracking-widest text-[10px]">Or</span><div className="flex-1 h-px bg-surface-variant" /></div>

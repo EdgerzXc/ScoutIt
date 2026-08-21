@@ -186,7 +186,7 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
 
   if (loading) {
     return (
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg, #0e0e0e)" }}>
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg)" }}>
         <h1 className="sr-only">Child-space Intelligence</h1>
         <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-muted)", letterSpacing: "0.12em", textTransform: "uppercase" }}>
           Loading Child-space Intelligence…
@@ -197,10 +197,10 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
 
   if (!property || !unit) {
     return (
-      <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "var(--bg, #0e0e0e)", gap: "16px" }}>
+      <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "var(--bg)", gap: "16px" }}>
         <h1 style={{ fontFamily: "var(--font-body)", fontSize: "20px", color: "var(--text-primary)" }}>This {hierarchy.childLabel.toLowerCase()} could not be found.</h1>
         {property?.slug && (
-          <Link href={`/property/${property.slug}`} style={{ color: "var(--accent, #E8AE3C)", fontFamily: "var(--font-mono)", fontSize: "12px", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+          <Link href={`/property/${property.slug}`} style={{ color: "var(--accent)", fontFamily: "var(--font-mono)", fontSize: "12px", letterSpacing: "0.1em", textTransform: "uppercase" }}>
             ← Back to {property.title}
           </Link>
         )}
@@ -277,7 +277,7 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
       }, 50);
     }
   };
-  const ACCENT = "var(--accent, #E8AE3C)";
+  const ACCENT = "var(--accent)";
 
   return (
     <>
@@ -313,7 +313,7 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
               className={`photo-slide ${photoMode} ${currentImageIndex === i ? "active" : ""}`}
               style={url
                 ? { backgroundImage: `url(${url})`, backgroundPosition: "center", backgroundSize: "cover" }
-                : { background: "linear-gradient(160deg, #141414, #0d0d0d)", display: "flex", alignItems: "center", justifyContent: "center" }}
+                : { background: "linear-gradient(160deg, var(--surface2), var(--bg))", display: "flex", alignItems: "center", justifyContent: "center" }}
             >
               {url ? (
                 <img
@@ -452,7 +452,7 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
                           style={{
                             fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.06em", textTransform: "uppercase",
                             padding: "8px 14px", borderRadius: "4px", cursor: "pointer",
-                            background: active ? ACCENT : "transparent", color: active ? "var(--bg, #0e0e0e)" : "var(--text-secondary)",
+                            background: active ? ACCENT : "transparent", color: active ? "var(--bg)" : "var(--text-secondary)",
                             border: active ? `1px solid ${ACCENT}` : "0.5px solid var(--border)", fontWeight: active ? 700 : 400,
                           }}
                         >
@@ -521,16 +521,16 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
                   heatmapUrl={d.floor_plan_2d_url || unit.heatmap_url}
                 />
               ) : (
-                <div style={{ position: "relative", width: "100%", padding: "24px", borderRadius: "8px", background: "linear-gradient(160deg, #111, #0a0a0a)", border: "0.5px solid var(--border)", overflow: "hidden", minHeight: "220px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+                <div style={{ position: "relative", width: "100%", padding: "24px", borderRadius: "8px", background: "linear-gradient(160deg, var(--surface), var(--bg))", border: "0.5px solid var(--border)", overflow: "hidden", minHeight: "220px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
                   <div style={{ position: "absolute", inset: 0, backgroundImage: "url(/grid-pattern.svg)", opacity: 0.05 }} />
                   <div style={{ position: "relative", zIndex: 2, display: "flex", flexDirection: "column", alignItems: "center", gap: "16px", textAlign: "center", padding: "20px" }}>
-                    <div style={{ width: "48px", height: "48px", borderRadius: "50%", background: "rgba(232, 174, 60, 0.1)", border: "1px solid rgba(232, 174, 60, 0.3)", display: "flex", alignItems: "center", justifyContent: "center", color: "#E8AE3C" }}>
+                    <div style={{ width: "48px", height: "48px", borderRadius: "50%", background: "color-mix(in srgb, var(--accent) 10%, transparent)", border: "1px solid color-mix(in srgb, var(--accent) 30%, transparent)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--accent)" }}>
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
                     </div>
                     <span style={{ fontFamily: "var(--font-body)", fontSize: "15px", color: "var(--text-primary)", maxWidth: "360px", lineHeight: 1.5 }}>
                       Interactive 3D floor plan {"&"} unit-specific spatial media are locked.
                     </span>
-                    <a href="/pricing/seeker" className="hover-glow" style={{ textDecoration: "none", fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", background: "transparent", border: "1px solid #E8AE3C", color: "#E8AE3C", padding: "12px 20px", borderRadius: "4px", fontWeight: "bold", transition: "all 0.3s ease" }}>
+                    <a href="/pricing/seeker" className="hover-glow" style={{ textDecoration: "none", fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", background: "transparent", border: "1px solid var(--accent)", color: "var(--accent)", padding: "12px 20px", borderRadius: "4px", fontWeight: "bold", transition: "all 0.3s ease" }}>
                       Unlock the Unit Vault // Cluster+
                     </a>
                   </div>
@@ -588,12 +588,12 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
               <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", marginBottom: "16px" }}>
                 <FloodRiskBadge floodRiskScore={property.flood_risk_score} floodZoneStatus={property.flood_zone_status} />
                 {property.details?.spatial_intel?.peza?.is_accredited && (
-                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#10B981", background: "rgba(16, 185, 129, 0.12)", border: "1px solid rgba(16, 185, 129, 0.3)", borderRadius: "4px", padding: "6px 12px", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--green)", background: "color-mix(in srgb, var(--green) 12%, transparent)", border: "1px solid color-mix(in srgb, var(--green) 30%, transparent)", borderRadius: "4px", padding: "6px 12px", textTransform: "uppercase", letterSpacing: "0.08em" }}>
                     🏢 PEZA Certified ({property.details.spatial_intel.peza.zone_name})
                   </span>
                 )}
                 {property.details?.spatial_intel?.transit && (
-                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#F7C64E", background: "rgba(232, 174, 60, 0.12)", border: "1px solid rgba(232, 174, 60, 0.3)", borderRadius: "4px", padding: "6px 12px", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--accent-bright)", background: "color-mix(in srgb, var(--accent) 12%, transparent)", border: "1px solid color-mix(in srgb, var(--accent) 30%, transparent)", borderRadius: "4px", padding: "6px 12px", textTransform: "uppercase", letterSpacing: "0.08em" }}>
                     🚆 {property.details.spatial_intel.transit.walk_minutes}m walk ({property.details.spatial_intel.transit.station_name})
                   </span>
                 )}
@@ -668,14 +668,14 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
                 onClick={() => setIsPromoteOpen(true)}
                 style={{
                   marginTop: "10px", maxWidth: "400px", width: "100%", background: "transparent",
-                  border: "0.5px solid rgba(232,174,60,0.6)", color: "#E8AE3C",
+                  border: "0.5px solid color-mix(in srgb, var(--accent) 60%, transparent)", color: "var(--accent)",
                   fontFamily: "var(--font-mono)", fontSize: "12px",
                   letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: "bold",
                   padding: "12px 16px", borderRadius: "4px", cursor: "pointer",
                   display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
                   boxShadow: "0 0 10px rgba(232,174,60,0.15)"
                 }}
-                className="hover:bg-gold-accent hover:text-[#0e0e0e] transition-colors"
+                className="hover:bg-gold-accent hover:text-background transition-colors"
               >
                 Promote ✦
               </button>

@@ -1,6 +1,6 @@
 {
   "version": "2.2.0",
-  "generatedAt": "2026-08-21T06:35:44.659Z",
+  "generatedAt": "2026-08-21T07:42:33.656Z",
   "positions": {
     "hero": {
       "x": 80,
@@ -469,6 +469,50 @@
     "rec_silent_token_refresh": {
       "x": 1280,
       "y": 650
+    },
+    "state_runtime_inquiry_pending": {
+      "x": 400,
+      "y": 6200
+    },
+    "state_runtime_inquiry_connected": {
+      "x": 670,
+      "y": 6200
+    },
+    "state_runtime_inquiry_accepted": {
+      "x": 940,
+      "y": 6200
+    },
+    "state_runtime_inquiry_declined": {
+      "x": 1210,
+      "y": 6200
+    },
+    "state_runtime_inquiry_withdrawn": {
+      "x": 1480,
+      "y": 6200
+    },
+    "state_runtime_inquiry_reported": {
+      "x": 1750,
+      "y": 6200
+    },
+    "state_runtime_inquiry_closed": {
+      "x": 2020,
+      "y": 6200
+    },
+    "state_runtime_viewing_pending": {
+      "x": 400,
+      "y": 6500
+    },
+    "state_runtime_viewing_confirmed": {
+      "x": 670,
+      "y": 6500
+    },
+    "state_runtime_viewing_cancelled": {
+      "x": 940,
+      "y": 6500
+    },
+    "state_runtime_viewing_completed": {
+      "x": 1210,
+      "y": 6500
     }
   }
 }

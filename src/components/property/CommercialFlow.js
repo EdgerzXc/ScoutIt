@@ -158,7 +158,7 @@ function DeepIntelWidget({ open, onToggle, fields, values }) {
         <span className="font-mono text-[10px] text-gold-accent tracking-[0.18em] uppercase">
           DEEP INTELLIGENCE // {unlocked ? "UNLOCKED" : "VERIFIED SCOUT"}
         </span>
-        <svg viewBox="0 0 10 6" width="10" height="6" fill="none" stroke="#E8AE3C" strokeWidth="1.5" className="transition-transform duration-300" style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }}>
+        <svg viewBox="0 0 10 6" width="10" height="6" fill="none" stroke="var(--accent)" strokeWidth="1.5" className="transition-transform duration-300" style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }}>
           <path d="M1 1L5 5L9 1" />
         </svg>
       </button>
@@ -212,22 +212,22 @@ function EngineRoomPanel({ property: d }) {
       <button
         onClick={() => setOpen(v => !v)}
         style={{
-          width:"100%", background:"var(--surface)", border:"0.5px solid #2a2a2a",
+          width:"100%", background:"var(--surface)", border:"0.5px solid var(--border)",
           padding:"14px 20px", cursor:"pointer", display:"flex",
           justifyContent:"space-between", alignItems:"center", borderRadius:"2px",
           marginBottom: open ? "0" : "0"
         }}
       >
-        <span style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"#E8AE3C", letterSpacing:"0.18em", textTransform:"uppercase"}}>
+        <span style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--accent)", letterSpacing:"0.18em", textTransform:"uppercase"}}>
           For Operators — Technical Specs
         </span>
-        <svg viewBox="0 0 10 6" width="10" height="6" fill="none" stroke="#E8AE3C" strokeWidth="1.5">
+        <svg viewBox="0 0 10 6" width="10" height="6" fill="none" stroke="var(--accent)" strokeWidth="1.5">
           <path d={open ? "M1 5L5 1L9 5" : "M1 1L5 5L9 1"}/>
         </svg>
       </button>
 
       {open && (
-        <div style={{background:"var(--surface)", border:"0.5px solid #2a2a2a", borderTop:"none", padding:"20px", borderRadius:"0 0 2px 2px"}}>
+        <div style={{background:"var(--surface)", border:"0.5px solid var(--border)", borderTop:"none", padding:"20px", borderRadius:"0 0 2px 2px"}}>
           <div style={{display:"flex", flexDirection:"column"}}>
             {d.structural_notes && (
               <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid var(--border)", gap:"20px"}}>
@@ -280,21 +280,21 @@ function BackOfHousePanel({ property: d }) {
       <button
         onClick={() => setOpen(v => !v)}
         style={{
-          width:"100%", background:"var(--surface)", border:"0.5px solid #2a2a2a",
+          width:"100%", background:"var(--surface)", border:"0.5px solid var(--border)",
           padding:"14px 20px", cursor:"pointer", display:"flex",
           justifyContent:"space-between", alignItems:"center", borderRadius:"2px"
         }}
       >
-        <span style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"#E8AE3C", letterSpacing:"0.18em", textTransform:"uppercase"}}>
+        <span style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--accent)", letterSpacing:"0.18em", textTransform:"uppercase"}}>
           For Operators — Back of House
         </span>
-        <svg viewBox="0 0 10 6" width="10" height="6" fill="none" stroke="#E8AE3C" strokeWidth="1.5">
+        <svg viewBox="0 0 10 6" width="10" height="6" fill="none" stroke="var(--accent)" strokeWidth="1.5">
           <path d={open ? "M1 5L5 1L9 5" : "M1 1L5 5L9 1"}/>
         </svg>
       </button>
 
       {open && (
-        <div style={{background:"var(--surface)", border:"0.5px solid #2a2a2a", borderTop:"none", padding:"20px", borderRadius:"0 0 2px 2px"}}>
+        <div style={{background:"var(--surface)", border:"0.5px solid var(--border)", borderTop:"none", padding:"20px", borderRadius:"0 0 2px 2px"}}>
           <div style={{display:"flex", flexDirection:"column"}}>
             {d.structural_notes && (
               <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"11px 0", borderBottom:"1px solid var(--border)", gap:"20px"}}>
@@ -1359,7 +1359,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
           <p className="mobile-hero-hook">{d.hook}</p>
           {isOwner && (
             <div style={{ marginTop: '20px' }}>
-              <Link href={`/dashboard?edit=${d.id}`} className="font-working-title text-xs tracking-widest text-[#0e0e0e] bg-gold-accent px-5 py-3 rounded hover:bg-[#e6a600] transition-colors uppercase font-bold inline-block border border-gold-accent w-full text-center">
+              <Link href={`/dashboard?edit=${d.id}`} className="font-working-title text-xs tracking-widest text-background bg-gold-accent px-5 py-3 rounded hover:bg-gold-accent-bright transition-colors uppercase font-bold inline-block border border-gold-accent w-full text-center">
                 Edit Property Dossier
               </Link>
             </div>
@@ -1510,7 +1510,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                 <div style={{marginBottom:"36px"}}>
                   {d.aesthetic_tag && (
                     <div style={{marginBottom:"24px"}}>
-                      <span style={{fontFamily:"var(--font-body)", fontStyle:"italic", fontSize:"clamp(22px,3vw,30px)", fontWeight:400, color:"#E8AE3C", letterSpacing:"0.01em", lineHeight:1.2}}>
+                      <span style={{fontFamily:"var(--font-body)", fontStyle:"italic", fontSize:"clamp(22px,3vw,30px)", fontWeight:400, color:"var(--accent)", letterSpacing:"0.01em", lineHeight:1.2}}>
                         {d.aesthetic_tag || d.accordion_3_rating}
                       </span>
                     </div>
@@ -1563,7 +1563,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                 <div style={{marginBottom:"36px"}}>
                   {d.aesthetic_tag && (
                     <div style={{marginBottom:"24px"}}>
-                      <span style={{fontFamily:"var(--font-body)", fontStyle:"italic", fontSize:"clamp(22px,3vw,30px)", fontWeight:400, color:"#E8AE3C", letterSpacing:"0.01em", lineHeight:1.2}}>
+                      <span style={{fontFamily:"var(--font-body)", fontStyle:"italic", fontSize:"clamp(22px,3vw,30px)", fontWeight:400, color:"var(--accent)", letterSpacing:"0.01em", lineHeight:1.2}}>
                         {d.aesthetic_tag || d.accordion_3_rating}
                       </span>
                     </div>
@@ -1610,7 +1610,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                 <>
                   {(d.aesthetic_tag || d.accordion_3_rating) && (
                     <div style={{marginBottom:"30px"}}>
-                      <span style={{fontFamily:"var(--font-body)", fontStyle:"italic", fontSize:"clamp(22px,3vw,30px)", fontWeight:400, color:"#E8AE3C", letterSpacing:"0.01em", lineHeight:1.2}}>
+                      <span style={{fontFamily:"var(--font-body)", fontStyle:"italic", fontSize:"clamp(22px,3vw,30px)", fontWeight:400, color:"var(--accent)", letterSpacing:"0.01em", lineHeight:1.2}}>
                         {d.aesthetic_tag || d.accordion_3_rating}
                       </span>
                     </div>
@@ -1696,9 +1696,9 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
           <div className={`chapter-panel ${activeTab === "vault" ? "active" : ""}`} id="panel-vault">
             <div className="panel-content" style={{ maxWidth: "100%" }} tabIndex={0} aria-label="Scrollable Spatial Vault content">
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"#E8AE3C", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"6px"}}>THE VAULT</div>
+                <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--accent)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"6px"}}>THE VAULT</div>
                 <div style={{fontFamily:"var(--font-body)", fontSize:"13px", color:"var(--text-secondary)", marginBottom:"10px", letterSpacing:"0.01em"}}>Floor plans, scans & spatial records</div>
-                <div style={{height:"1px", background:"#E8AE3C"}}/>
+                <div style={{height:"1px", background:"var(--accent)"}}/>
               </div>
 
               <div style={{marginBottom:"30px"}}>
@@ -1721,7 +1721,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
               />
             </div>
             <div className="panel-sidebar">
-              <div className="sidebar-block"><div className="sidebar-accent-line" style={{background: "#E8AE3C"}}/><div className="sidebar-label" style={{color: "#E8AE3C"}}>Vault Status</div><div className="sidebar-value">Secured</div></div>
+              <div className="sidebar-block"><div className="sidebar-accent-line" style={{background: "var(--accent)"}}/><div className="sidebar-label" style={{color: "var(--accent)"}}>Vault Status</div><div className="sidebar-value">Secured</div></div>
               <div className="sidebar-block"><div className="sidebar-label">Verification</div><div className="sidebar-value">ScoutIT Pros</div></div>
               <div className="sidebar-block"><div className="sidebar-label">Access</div><div className="sidebar-value">Cluster Tier Only</div></div>
             </div>
@@ -1786,7 +1786,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
               {locTab === "map" && hasCoords && (
                 <InViewport
                   className="map-frame"
-                  style={{flex:"0 0 auto", borderRadius:"4px", overflow:"hidden", border:"0.5px solid #262626", marginBottom:"20px"}}
+                  style={{flex:"0 0 auto", borderRadius:"4px", overflow:"hidden", border:"0.5px solid var(--border)", marginBottom:"20px"}}
                   fallback={mapPlaceholder("100%", "Tactical map")}
                 >
                   {USE_SPATIAL_CANVAS ? (
@@ -1818,9 +1818,9 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
 
 
               {locTab === "map" && !hasCoords && (
-                <div className="map-frame" style={{display:"flex", flexDirection:"column", justifyContent:"center", alignItems:"center", gap:"10px", textAlign:"center", padding:"28px", borderRadius:"4px", border:"0.5px dashed var(--border-mid, #333)", background:"var(--surface, #161616)", marginBottom:"20px"}}>
-                  <div style={{fontFamily:"var(--font-mono, monospace)", fontSize:"11px", letterSpacing:"0.2em", textTransform:"uppercase", color:"var(--accent, #E8AE3C)"}}>Position not verified</div>
-                  <div style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"var(--text-secondary, #c8c8c8)", maxWidth:"46ch", lineHeight:1.6}}>
+                <div className="map-frame" style={{display:"flex", flexDirection:"column", justifyContent:"center", alignItems:"center", gap:"10px", textAlign:"center", padding:"28px", borderRadius:"4px", border:"0.5px dashed var(--border-mid)", background:"var(--surface)", marginBottom:"20px"}}>
+                  <div style={{fontFamily:"var(--font-mono, monospace)", fontSize:"11px", letterSpacing:"0.2em", textTransform:"uppercase", color:"var(--accent)"}}>Position not verified</div>
+                  <div style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"var(--text-secondary)", maxWidth:"46ch", lineHeight:1.6}}>
                     This listing has no confirmed coordinates yet, so there is no map to show. The written detail below is unaffected.
                   </div>
                 </div>
@@ -1830,7 +1830,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                   {d.whereTo.map((item, idx) => (
                     <div key={idx} style={{display:"flex", justifyContent:"space-between", alignItems:"center", padding:"13px 0", borderBottom:"1px solid var(--border)"}}>
                       <div style={{display:"flex", alignItems:"center", gap:"12px"}}>
-                        <div style={{width:"5px", height:"5px", borderRadius:"50%", background:"#E8AE3C", flexShrink:0}}/>
+                        <div style={{width:"5px", height:"5px", borderRadius:"50%", background:"var(--accent)", flexShrink:0}}/>
                         <div>
                           <div style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"var(--text-primary)"}}>{item.name}</div>
                           {item.category && <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.1em", textTransform:"uppercase", marginTop:"2px"}}>{item.category}</div>}
@@ -1947,7 +1947,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                     </div>
                     <div style={{display:"flex", flexWrap:"wrap", gap:"10px"}}>
                       {tags.map((t, i) => (
-                        <span key={i} style={{fontFamily:"var(--font-body)", fontSize:"15px", color:"#E8AE3C", border:"0.5px solid rgba(232, 174, 60,0.4)", padding:"7px 18px", borderRadius:"4px", letterSpacing:"0.02em"}}>{t}</span>
+                        <span key={i} style={{fontFamily:"var(--font-body)", fontSize:"15px", color:"var(--accent)", border:"0.5px solid color-mix(in srgb, var(--accent) 40%, transparent)", padding:"7px 18px", borderRadius:"4px", letterSpacing:"0.02em"}}>{t}</span>
                       ))}
                     </div>
                   </div>
@@ -2093,7 +2093,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
 
               {whereToTab === "map" && hasCoords && openedChapters.has("whereto") && (
                 <InViewport
-                  style={{height:"clamp(420px, 70vh, 850px)", minHeight:"420px", flexShrink:0, borderRadius:"4px", overflow:"hidden", border:"0.5px solid #262626", marginBottom:"clamp(32px, 9vw, 120px)"}}
+                  style={{height:"clamp(420px, 70vh, 850px)", minHeight:"420px", flexShrink:0, borderRadius:"4px", overflow:"hidden", border:"0.5px solid var(--border)", marginBottom:"clamp(32px, 9vw, 120px)"}}
                   fallback={mapPlaceholder("100%", "Tactical map")}
                 >
                   {USE_SPATIAL_CANVAS ? (
@@ -2127,7 +2127,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                   {d.whereTo.map((item, idx) => (
                     <div key={idx} style={{display:"flex", justifyContent:"space-between", alignItems:"center", padding:"13px 0", borderBottom:"1px solid var(--border)"}}>
                       <div style={{display:"flex", alignItems:"center", gap:"12px"}}>
-                        <div style={{width:"5px", height:"5px", borderRadius:"50%", background:"#E8AE3C", flexShrink:0}}/>
+                        <div style={{width:"5px", height:"5px", borderRadius:"50%", background:"var(--accent)", flexShrink:0}}/>
                         <div>
                           <div style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"var(--text-primary)"}}>{item.name}</div>
                           {item.category && <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.1em", textTransform:"uppercase", marginTop:"2px"}}>{item.category}</div>}
@@ -2140,7 +2140,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
               )}
 
               {whereToTab === "list" && (!d.whereTo || d.whereTo.length === 0) && (
-                <div style={{padding:"32px", background:"var(--surface)", border:"0.5px dashed #262626", borderRadius:"2px", textAlign:"center", fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.12em", marginBottom:"24px"}}>
+                <div style={{padding:"32px", background:"var(--surface)", border:"0.5px dashed var(--border)", borderRadius:"2px", textAlign:"center", fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.12em", marginBottom:"24px"}}>
                   [ LOCATION DETAILS N/A — NO DATA IN CMS ]
                 </div>
               )}
@@ -2233,11 +2233,11 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                     </div>
                   )}
                   {d.developer_name && (
-                    <div style={{background:"var(--surface)", border:"0.5px solid #262626", borderRadius:"4px", padding:"18px 20px", marginBottom:"24px"}}>
+                    <div style={{background:"var(--surface)", border:"0.5px solid var(--border)", borderRadius:"4px", padding:"18px 20px", marginBottom:"24px"}}>
                       <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.18em", textTransform:"uppercase", marginBottom:"8px"}}>Developer</div>
                       <div style={{fontFamily:"var(--font-body)", fontSize:"18px", color:"var(--text-primary)", marginBottom: d.developer_notes ? "8px" : "0"}}>{d.developer_name}</div>
                       {d.developer_notes && (
-                        <div style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"#a0a0a0", lineHeight:1.7}}>{d.developer_notes}</div>
+                        <div style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"var(--text-secondary)", lineHeight:1.7}}>{d.developer_notes}</div>
                       )}
                     </div>
                   )}
@@ -2311,7 +2311,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
             </div>
 
             <div className="panel-sidebar">
-              <div className="sidebar-block"><div className="sidebar-accent-line" style={{background:"#E8AE3C"}}/><div className="sidebar-label">Zoning Status</div><div className="sidebar-value">{d.zoning_type || "Verified Commercial"}</div></div>
+              <div className="sidebar-block"><div className="sidebar-accent-line" style={{background:"var(--accent)"}}/><div className="sidebar-label">Zoning Status</div><div className="sidebar-value">{d.zoning_type || "Verified Commercial"}</div></div>
               <div className="sidebar-block"><div className="sidebar-label">Intel source</div><div className="sidebar-value">ScoutIt Verified</div></div>
             </div>
           </div>
@@ -2336,7 +2336,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
             </div>
 
             <div className="panel-sidebar">
-              <div className="sidebar-block"><div className="sidebar-accent-line" style={{background:"#E8AE3C"}}/><div className="sidebar-label">Cap rate est.</div><div className="sidebar-value" style={{color:"var(--text-muted)"}}><Lock size={13} strokeWidth={1.5} style={{verticalAlign:"-2px", marginRight:"5px"}} />Locked</div></div>
+              <div className="sidebar-block"><div className="sidebar-accent-line" style={{background:"var(--accent)"}}/><div className="sidebar-label">Cap rate est.</div><div className="sidebar-value" style={{color:"var(--text-muted)"}}><Lock size={13} strokeWidth={1.5} style={{verticalAlign:"-2px", marginRight:"5px"}} />Locked</div></div>
               <div className="sidebar-block"><div className="sidebar-label">Price trend</div><div className="sidebar-value" style={{color:"var(--text-muted)"}}><Lock size={13} strokeWidth={1.5} style={{verticalAlign:"-2px", marginRight:"5px"}} />Locked</div></div>
               <div className="sidebar-block"><div className="sidebar-label">Intel source</div><div className="sidebar-value">ScoutIt Verified</div></div>
             </div>
@@ -2419,7 +2419,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
 
               {/* Photo preview thumbnail */}
               {photos && photos.length > 0 && photos[0] && (
-                <div style={{width:"100%", height:"120px", minHeight:"120px", flexShrink:0, borderRadius:"4px", overflow:"hidden", border:"0.5px solid #262626", backgroundImage:`url(${photos[currentImageIndex] || photos[0]})`, backgroundSize:"cover", backgroundPosition:"center"}}/>
+                <div style={{width:"100%", height:"120px", minHeight:"120px", flexShrink:0, borderRadius:"4px", overflow:"hidden", border:"0.5px solid var(--border)", backgroundImage:`url(${photos[currentImageIndex] || photos[0]})`, backgroundSize:"cover", backgroundPosition:"center"}}/>
               )}
 
               {/* Totals */}
@@ -2479,14 +2479,14 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
 
               {d.building_style && (
                 <div style={{marginBottom:"24px"}}>
-                  <span style={{fontFamily:"var(--font-body)", fontStyle:"italic", fontSize:"clamp(22px,3vw,30px)", fontWeight:400, color:"#E8AE3C", letterSpacing:"0.01em"}}>
+                  <span style={{fontFamily:"var(--font-body)", fontStyle:"italic", fontSize:"clamp(22px,3vw,30px)", fontWeight:400, color:"var(--accent)", letterSpacing:"0.01em"}}>
                     {d.building_style}
                   </span>
                 </div>
               )}
 
               {d.architect_designer && (
-                <div style={{background:"var(--surface)", border:"0.5px solid #262626", borderRadius:"4px", padding:"16px 20px", marginBottom:"28px"}}>
+                <div style={{background:"var(--surface)", border:"0.5px solid var(--border)", borderRadius:"4px", padding:"16px 20px", marginBottom:"28px"}}>
                   <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.18em", textTransform:"uppercase", marginBottom:"8px"}}>Architect / Designer</div>
                   <div style={{fontFamily:"var(--font-body)", fontSize:"18px", color:"var(--text-primary)"}}>{d.architect_designer}</div>
                 </div>
@@ -2537,15 +2537,15 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
               {/* Verdict — the ScoutIt editorial stamp, premium & final */}
               {d.scoutit_verdict && (
                 <div className="sidebar-block" style={{paddingBottom:"22px", borderBottom:"1px solid var(--border)", marginBottom:"4px"}}>
-                  <div className="sidebar-accent-line" style={{background:"#E8AE3C"}}/>
-                  <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"#E8AE3C", letterSpacing:"0.18em", textTransform:"uppercase", marginBottom:"10px"}}>ScoutIt Verdict</div>
-                  <div style={{fontFamily:"var(--font-body)", fontSize:"20px", color:"#E8AE3C", lineHeight:1.35}}>{d.scoutit_verdict}</div>
+                  <div className="sidebar-accent-line" style={{background:"var(--accent)"}}/>
+                  <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--accent)", letterSpacing:"0.18em", textTransform:"uppercase", marginBottom:"10px"}}>ScoutIt Verdict</div>
+                  <div style={{fontFamily:"var(--font-body)", fontSize:"20px", color:"var(--accent)", lineHeight:1.35}}>{d.scoutit_verdict}</div>
                 </div>
               )}
               {d.building_style && <div className="sidebar-block"><div className="sidebar-label">Building Style</div><div className="sidebar-value">{d.building_style}</div></div>}
               {d.architect_designer && <div className="sidebar-block"><div className="sidebar-label">Architect</div><div className="sidebar-value">{d.architect_designer}</div></div>}
               {d.year_built && <div className="sidebar-block"><div className="sidebar-label">Year Built</div><div className="sidebar-value">{d.year_built}</div></div>}
-              {d.title_status && <div className="sidebar-block"><div className="sidebar-label">Title Status</div><div className="sidebar-value" style={{color:"#4caf7d"}}>{d.title_status}</div></div>}
+              {d.title_status && <div className="sidebar-block"><div className="sidebar-label">Title Status</div><div className="sidebar-value" style={{color:"var(--green)"}}>{d.title_status}</div></div>}
               {d.spaceCategory && <div className="sidebar-block"><div className="sidebar-label">Space Category</div><div className="sidebar-value">{d.spaceCategory}</div></div>}
             </div>
           </div>
@@ -2577,14 +2577,14 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                   <Link
                     key={svc.title}
                     href={svc.href}
-                    style={{textDecoration:"none", display:"flex", alignItems:"center", gap:"16px", padding:"18px 20px", background:"var(--surface)", border:"0.5px solid #262626", borderRadius:"4px", transition:"border-color 0.2s ease"}}
+                    style={{textDecoration:"none", display:"flex", alignItems:"center", gap:"16px", padding:"18px 20px", background:"var(--surface)", border:"0.5px solid var(--border)", borderRadius:"4px", transition:"border-color 0.2s ease"}}
                   >
                     <span style={{fontSize:"22px", flexShrink:0, lineHeight:1}}>{svc.icon}</span>
                     <span style={{flex:1, minWidth:0}}>
                       <span style={{display:"block", fontFamily:"var(--font-body)", fontSize:"17px", color:"var(--text-primary)", marginBottom:"3px"}}>{svc.title}</span>
                       <span style={{display:"block", fontFamily:"system-ui,-apple-system,sans-serif", fontSize:"12.5px", color:"var(--text-muted)", lineHeight:1.5}}>{svc.desc}</span>
                     </span>
-                    <span style={{fontFamily:"var(--font-body)", fontSize:"16px", color:"#E8AE3C", flexShrink:0}}>→</span>
+                    <span style={{fontFamily:"var(--font-body)", fontSize:"16px", color:"var(--accent)", flexShrink:0}}>→</span>
                   </Link>
                 ))}
               </div>
@@ -2592,7 +2592,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
             </div>
 
             <div className="panel-sidebar">
-              <div className="sidebar-block"><div className="sidebar-accent-line" style={{background:"#E8AE3C"}}/><div className="sidebar-label">Ecosystem</div><div className="sidebar-value">5 services live</div><div className="sidebar-sub">Vetted ScoutIt partners</div></div>
+              <div className="sidebar-block"><div className="sidebar-accent-line" style={{background:"var(--accent)"}}/><div className="sidebar-label">Ecosystem</div><div className="sidebar-value">5 services live</div><div className="sidebar-sub">Vetted ScoutIt partners</div></div>
               <div className="sidebar-block"><div className="sidebar-label">Fulfilment</div><div className="sidebar-value">Partner-direct</div></div>
             </div>
           </div>
@@ -2645,8 +2645,8 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                         <div style={{fontFamily:"var(--font-body)", fontSize:"clamp(30px,4.2vw,44px)", fontWeight:400, color:"var(--text-primary)", lineHeight:1.1}}>{d.listed_price}</div>
                         {/* Verified-by badge — the confirmation the buyer can trust */}
                         <div style={{display:"inline-flex", alignItems:"center", gap:"7px", marginTop:"14px", padding:"6px 12px", border:"0.5px solid rgba(76,175,125,0.4)", borderRadius:"4px", background:"rgba(76,175,125,0.06)"}}>
-                          <svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="#4caf7d" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M2.5 7.5L6 11l5.5-7"/></svg>
-                          <span style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"#4caf7d", letterSpacing:"0.12em", textTransform:"uppercase"}}>Verified by {verifiedBy}</span>
+                          <svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="var(--green)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M2.5 7.5L6 11l5.5-7"/></svg>
+                          <span style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--green)", letterSpacing:"0.12em", textTransform:"uppercase"}}>Verified by {verifiedBy}</span>
                         </div>
                         {d.price_source && (
                           <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", letterSpacing:"0.1em", color:"var(--text-muted)", marginTop:"12px"}}>
@@ -2654,7 +2654,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                           </div>
                         )}
                         {d.price_notes && (
-                          <div style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"#a0a0a0", lineHeight: 1.75, marginTop:"10px"}}>{d.price_notes}</div>
+                          <div style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"var(--text-secondary)", lineHeight: 1.75, marginTop:"10px"}}>{d.price_notes}</div>
                         )}
                         <p style={{fontFamily:"system-ui,-apple-system,sans-serif", fontSize:"11.5px", color:"var(--text-muted)", lineHeight:1.7, marginTop:"16px"}}>
                           Price is provided and confirmed by the listing&apos;s authorized owner, property manager, or broker. ScoutIt displays it as confirmed by that party. For inquiries, speak directly with an authorized representative.
@@ -2663,10 +2663,10 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                     ) : (
                       <GlassPanel className="p-6 rounded-md">
                         <div style={{fontFamily:"var(--font-body)", fontSize:"clamp(20px,2.6vw,26px)", fontWeight:400, color:"var(--text-primary)", lineHeight:1.2}}>Price on request</div>
-                        <p style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"#a0a0a0", lineHeight:1.7, margin:"10px 0 16px", maxWidth:"480px"}}>
+                        <p style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"var(--text-secondary)", lineHeight:1.7, margin:"10px 0 16px", maxWidth:"480px"}}>
                           No confirmed rate has been published for this space. Inquire with the owner, property manager, or broker for current pricing.
                         </p>
-                        <Link href={`/property/${slug || "batasan-hills"}/brokers`} style={{display:"inline-block", fontFamily:"var(--font-body)", fontSize:"16px", color:"#E8AE3C", textDecoration:"none", letterSpacing:"0.01em"}}>
+                        <Link href={`/property/${slug || "batasan-hills"}/brokers`} style={{display:"inline-block", fontFamily:"var(--font-body)", fontSize:"16px", color:"var(--accent)", textDecoration:"none", letterSpacing:"0.01em"}}>
                           Inquire with an authorized broker →
                         </Link>
                       </GlassPanel>
@@ -2776,8 +2776,8 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                       className="move-cta hover-glow active:scale-[0.98] transition-all"
                       style={{
                         width: "100%",
-                        background: "#E8AE3C",
-                        color: "#000",
+                        background: "var(--accent)",
+                        color: "var(--on-accent)",
                         border: "none",
                         padding: "16px",
                         fontFamily: "var(--font-body)",
@@ -2823,8 +2823,8 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
 
               {/* RA 9646 compliance badge */}
               <div style={{display:"inline-flex", alignItems:"center", gap:"8px", marginTop:"20px", padding:"8px 14px", border:"0.5px solid rgba(76,175,125,0.4)", borderRadius:"4px", background:"rgba(76,175,125,0.06)"}}>
-                <span style={{width:"7px", height:"7px", borderRadius:"50%", background:"#4caf7d", flexShrink:0}}/>
-                <span style={{fontFamily:"var(--font-mono)", fontSize:"9.5px", color:"#4caf7d", letterSpacing:"0.14em", textTransform:"uppercase"}}>RA 9646 Compliant · Display-Only</span>
+                <span style={{width:"7px", height:"7px", borderRadius:"50%", background:"var(--green)", flexShrink:0}}/>
+                <span style={{fontFamily:"var(--font-mono)", fontSize:"9.5px", color:"var(--green)", letterSpacing:"0.14em", textTransform:"uppercase"}}>RA 9646 Compliant · Display-Only</span>
               </div>
 
               <p style={{fontFamily:"var(--font-body)", fontSize:"13px", color:"var(--text-muted)", lineHeight:1.7, marginTop:"16px", maxWidth:"600px"}}>
@@ -2835,7 +2835,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
 
             <div className="panel-sidebar">
               {d.tenure && <div className="sidebar-block"><div className="sidebar-accent-line"/><div className="sidebar-label">Acquisition</div><div className="sidebar-value">{d.tenure}</div>{d.title_status && <div className="sidebar-sub">{d.title_status}</div>}</div>}
-              {d.scoutit_verdict && <div className="sidebar-block"><div className="sidebar-label">ScoutIt verdict</div><div className="sidebar-value" style={{color:"#4caf7d", fontSize:"12px", lineHeight:1.4}}>{d.scoutit_verdict}</div></div>}
+              {d.scoutit_verdict && <div className="sidebar-block"><div className="sidebar-label">ScoutIt verdict</div><div className="sidebar-value" style={{color:"var(--green)", fontSize:"12px", lineHeight:1.4}}>{d.scoutit_verdict}</div></div>}
             </div>
           </div>
 
@@ -2851,8 +2851,8 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
             bottom: '24px',
             right: '24px',
             zIndex: 9999,
-            background: '#E8AE3C',
-            color: '#0A0908',
+            background: 'var(--accent)',
+            color: 'var(--on-accent)',
             border: 'none',
             padding: '14px 24px',
             borderRadius: '4px',

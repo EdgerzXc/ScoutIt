@@ -177,12 +177,18 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
       // light-mode overrides in globals.css are scoped to `body.light-mode`,
       // so :root always resolves to the dark values. This map is always dark.
       const rootStyle = getComputedStyle(document.documentElement);
-      const token = (name, fallback) =>
-        (rootStyle.getPropertyValue(name) || "").trim() || fallback;
-      const INK_SURFACE = token("--surface", "#121212");
-      const GOLD_MUTED = token("--accent-muted", "#6E531A");
-      const GOLD = token("--accent", "#E8AE3C");
-      const GOLD_BRIGHT = token("--accent-bright", "#F7C64E");
+      const token = (name) => (rootStyle.getPropertyValue(name) || "").trim();
+      const INK_SURFACE = token("--surface");
+      const GOLD_MUTED = token("--accent-muted");
+      const GOLD = token("--accent");
+      const GOLD_BRIGHT = token("--accent-bright");
+      const PAPER_WHITE = token("--text-primary");
+      const GREEN = token("--green");
+      const RED = token("--red");
+      const SAPPHIRE = token("--sapphire");
+      const INTEL_CYAN = token("--intel-cyan");
+      const INTEL_MAGENTA = token("--intel-magenta");
+      const YELLOW = token("--yellow");
 
       const reduceMotion =
         typeof window !== "undefined" &&
@@ -192,10 +198,10 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
       // Without directional light every face shades identically and the massing
       // collapses into a single silhouette. This is the line that makes a cube
       // read as a cube.
-      // Paper White rather than #ffffff: DESIGN.md forbids pure white, and a
+      // The paper-white token avoids pure white and keeps the map highlights warm; a
       // warm light is the right call anyway — white light over gold massing
       // pushes the highlights green.
-      const PAPER_WHITE = token("--text-primary", "#f0ede8");
+
       try {
         map.setLight({ anchor: "viewport", position: [1.4, 210, 30], color: PAPER_WHITE, intensity: 0.4 });
       } catch (err) {}
@@ -526,12 +532,12 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
         <div style="
           width: 26px; height: 26px;
           border-radius: 50%;
-          background: rgba(232, 174, 60, 0.3);
-          border: 2px solid #E8AE3C;
-          box-shadow: 0 0 20px rgba(232, 174, 60, 0.95);
+          background: color-mix(in srgb, var(--accent) 30%, transparent);
+          border: 2px solid var(--accent);
+          box-shadow: 0 0 20px color-mix(in srgb, var(--accent) 95%, transparent);
           display: flex; align-items: center; justify-content: center;
         ">
-          <div style="width: 10px; height: 10px; border-radius: 50%; background: #F7C64E;"></div>
+          <div style="width: 10px; height: 10px; border-radius: 50%; background: var(--accent-bright);"></div>
         </div>
       `;
 
@@ -539,7 +545,7 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
         .setLngLat([targetLng, targetLat])
         .setPopup(
           new maplibregl.Popup({ offset: 25, className: "scoutit-popup" }).setHTML(
-            `<strong style="color:#E8AE3C">${propertyTitle}</strong><br/><span style="color:#ccc;font-size:11px;">Target Space</span>`
+            `<strong style="color:var(--accent)">${propertyTitle}</strong><br/><span style="color:var(--text-secondary);font-size:11px;">Target Space</span>`
           )
         )
         .addTo(map);
@@ -551,14 +557,14 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
         type: "line",
         source: "fault-line-trace",
         layout: { visibility: "visible" },
-        paint: { "line-color": "#FF3B30", "line-width": 7, "line-opacity": 0.25, "line-blur": 3 },
+        paint: { "line-color": RED, "line-width": 7, "line-opacity": 0.25, "line-blur": 3 },
       });
       map.addLayer({
         id: "fault-line-layer",
         type: "line",
         source: "fault-line-trace",
         layout: { visibility: "visible" },
-        paint: { "line-color": "#FF3B30", "line-width": 2, "line-dasharray": [2, 2], "line-opacity": 0.95 },
+        paint: { "line-color": RED, "line-width": 2, "line-dasharray": [2, 2], "line-opacity": 0.95 },
       });
 
       // 4. PEZA IT Park Zone Layer
@@ -570,10 +576,10 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
         layout: { visibility: "visible" },
         paint: {
           "circle-radius": 20,
-          "circle-color": "#10B981",
+          "circle-color": GREEN,
           "circle-opacity": 0.18,
           "circle-stroke-width": 2,
-          "circle-stroke-color": "#10B981",
+          "circle-stroke-color": GREEN,
           "circle-stroke-opacity": 0.8,
         },
       });
@@ -589,7 +595,7 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
           "text-offset": [0, 1.2],
           "text-anchor": "top",
         },
-        paint: { "text-color": "#10B981", "text-halo-color": "#0d0d0d", "text-halo-width": 2 },
+        paint: { "text-color": GREEN, "text-halo-color": INK_SURFACE, "text-halo-width": 2 },
       });
 
       // 5. Office Density Clusters
@@ -601,10 +607,10 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
         layout: { visibility: "visible" },
         paint: {
           "circle-radius": 24,
-          "circle-color": "#3B82F6",
+          "circle-color": SAPPHIRE,
           "circle-opacity": 0.15,
           "circle-stroke-width": 2,
-          "circle-stroke-color": "#60A5FA",
+          "circle-stroke-color": SAPPHIRE,
         },
       });
 
@@ -652,7 +658,7 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
         source: "infra-projects",
         filter: ["==", "$type", "LineString"],
         layout: { visibility: "visible" },
-        paint: { "line-color": "#06B6D4", "line-width": 3, "line-dasharray": [3, 2], "line-opacity": 0.85 },
+        paint: { "line-color": INTEL_CYAN, "line-width": 3, "line-dasharray": [3, 2], "line-opacity": 0.85 },
       });
       map.addLayer({
         id: "infra-points-layer",
@@ -662,9 +668,9 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
         layout: { visibility: "visible" },
         paint: {
           "circle-radius": 8,
-          "circle-color": "#EC4899",
+          "circle-color": INTEL_MAGENTA,
           "circle-stroke-width": 2,
-          "circle-stroke-color": "#F472B6",
+          "circle-stroke-color": INTEL_MAGENTA,
         },
       });
 
@@ -683,10 +689,10 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
               layout: { visibility: "visible" },
               paint: {
                 "circle-radius": ["interpolate", ["linear"], ["get", "mag"], 3, 5, 5, 12, 7, 22],
-                "circle-color": ["step", ["get", "mag"], "#F7C64E", 4.0, "#F97316", 5.5, "#EF4444"],
+                "circle-color": ["step", ["get", "mag"], GOLD_BRIGHT, 4.0, YELLOW, 5.5, RED],
                 "circle-opacity": 0.7,
                 "circle-stroke-width": 1.5,
-                "circle-stroke-color": "#ffffff",
+                "circle-stroke-color": PAPER_WHITE,
               },
             });
           }
@@ -711,10 +717,10 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
         layout: { visibility: "visible" },
         paint: {
           "circle-radius": 6,
-          "circle-color": "#EF4444",
+          "circle-color": RED,
           "circle-opacity": 0.8,
           "circle-stroke-width": 2,
-          "circle-stroke-color": "#F59E0B",
+          "circle-stroke-color": YELLOW,
         },
       });
 
@@ -866,7 +872,7 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
           border: "1px solid rgba(232, 174, 60, 0.4)",
           borderRadius: "8px",
           padding: "10px 12px",
-          color: visualMode === "CRT" ? "#00FF66" : "#fff",
+          color: visualMode === "CRT" ? "var(--green)" : "var(--text-primary)",
           fontFamily: "var(--font-mono, monospace)",
           fontSize: "11px",
           boxShadow: "0 8px 32px rgba(0, 0, 0, 0.75)",
@@ -876,7 +882,7 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
         }}
       >
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "10px" }}>
-          <span style={{ color: "#E8AE3C", fontWeight: "bold", letterSpacing: "1px" }}>
+          <span style={{ color: "var(--accent)", fontWeight: "bold", letterSpacing: "1px" }}>
             🛡️ SPATIAL HUD COMMAND
           </span>
           {/* Wraps because on a touch screen these controls grow to a 44px
@@ -890,9 +896,9 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
               value={visualMode}
               onChange={(e) => setVisualMode(e.target.value)}
               style={{
-                background: "#1a1a1a",
-                border: "1px solid #E8AE3C",
-                color: "#F7C64E",
+                background: "var(--surface2)",
+                border: "1px solid var(--accent)",
+                color: "var(--accent-bright)",
                 borderRadius: "4px",
                 padding: "2px 4px",
                 fontSize: "10px",
@@ -908,18 +914,18 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
             <button
               onClick={() => setShowDossierModal(true)}
               className="scm-hud-btn"
-              style={{ background: "#222", border: "1px solid #444", color: "#ccc", borderRadius: "4px", padding: "2px 8px", fontSize: "10px", cursor: "pointer", transition: "all 0.2s ease" }}
+              style={{ background: "var(--surface2)", border: "1px solid var(--border-mid)", color: "var(--text-secondary)", borderRadius: "4px", padding: "2px 8px", fontSize: "10px", cursor: "pointer", transition: "all 0.2s ease" }}
             >
               📍 DOSSIER
             </button>
             <button
               onClick={() => setShowEntityGraph(!showEntityGraph)}
               className="scm-hud-btn"
-              style={{ background: showEntityGraph ? "rgba(232,174,60,0.3)" : "#222", border: "1px solid #E8AE3C", color: "#F7C64E", borderRadius: "4px", padding: "2px 8px", fontSize: "10px", cursor: "pointer", transition: "all 0.2s ease" }}
+              style={{ background: showEntityGraph ? "color-mix(in srgb, var(--accent) 30%, transparent)" : "var(--surface2)", border: "1px solid var(--accent)", color: "var(--accent-bright)", borderRadius: "4px", padding: "2px 8px", fontSize: "10px", cursor: "pointer", transition: "all 0.2s ease" }}
             >
               🕸️ GRAPH
             </button>
-            <button onClick={() => setHudExpanded(!hudExpanded)} className="scm-hud-toggle" aria-label={hudExpanded ? "Collapse spatial HUD" : "Expand spatial HUD"} style={{ background: "none", border: "none", color: "#888", cursor: "pointer", fontSize: "11px" }}>
+            <button onClick={() => setHudExpanded(!hudExpanded)} className="scm-hud-toggle" aria-label={hudExpanded ? "Collapse spatial HUD" : "Expand spatial HUD"} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: "11px" }}>
               {hudExpanded ? "▲" : "▼"}
             </button>
           </div>
@@ -935,20 +941,20 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
               onChange={(e) => setAiQuery(e.target.value)}
               style={{
                 width: "100%",
-                background: "#161616",
+                background: "var(--surface)",
                 border: "1px solid rgba(232, 174, 60, 0.3)",
                 borderRadius: "4px",
                 padding: "6px 10px",
-                color: "#fff",
+                color: "var(--text-primary)",
                 fontSize: "11px",
                 fontFamily: "var(--font-mono, monospace)",
                 outline: "none",
                 transition: "border-color 0.2s ease, box-shadow 0.2s ease",
               }}
-              onFocus={(e) => { e.target.style.borderColor = '#E8AE3C'; e.target.style.boxShadow = '0 0 8px rgba(232,174,60,0.3)'; }}
+              onFocus={(e) => { e.target.style.borderColor = 'var(--accent)'; e.target.style.boxShadow = '0 0 8px color-mix(in srgb, var(--accent) 30%, transparent)'; }}
               onBlur={(e) => { e.target.style.borderColor = 'rgba(232, 174, 60, 0.3)'; e.target.style.boxShadow = 'none'; }}
             />
-            {aiFilterStatus && <div style={{ fontSize: "9px", color: "#10B981", marginTop: "3px" }}>✓ {aiFilterStatus}</div>}
+            {aiFilterStatus && <div style={{ fontSize: "9px", color: "var(--green)", marginTop: "3px" }}>✓ {aiFilterStatus}</div>}
           </form>
         )}
 
@@ -972,9 +978,9 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
               style={{
                 padding: "4px 8px",
                 borderRadius: "4px",
-                border: activeLayer === btn.id ? "1px solid #E8AE3C" : "1px solid #333",
-                background: activeLayer === btn.id ? "rgba(232, 174, 60, 0.25)" : "#1a1a1a",
-                color: activeLayer === btn.id ? "#F7C64E" : "#aaa",
+                border: activeLayer === btn.id ? "1px solid var(--accent)" : "1px solid var(--border-mid)",
+                background: activeLayer === btn.id ? "rgba(232, 174, 60, 0.25)" : "var(--surface2)",
+                color: activeLayer === btn.id ? "var(--accent-bright)" : "var(--text-secondary)",
                 fontSize: "10px",
                 cursor: "pointer",
                 fontWeight: "bold",
@@ -991,43 +997,43 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
           <div style={{ borderTop: "1px dashed rgba(255,255,255,0.15)", paddingTop: "10px", display: "flex", flexDirection: "column", gap: "6px" }}>
             {continuity && (
               <div style={{ display: "flex", justifyContent: "space-between", background: "rgba(232, 174, 60, 0.1)", padding: "4px 8px", borderRadius: "4px", border: `1px solid ${continuity.badge_color}` }}>
-                <span style={{ color: "#E8AE3C", fontWeight: "bold" }}>🛡️ Continuity Index:</span>
+                <span style={{ color: "var(--accent)", fontWeight: "bold" }}>🛡️ Continuity Index:</span>
                 <span style={{ color: continuity.badge_color, fontWeight: "bold" }}>{continuity.score}/100 ({continuity.grade})</span>
               </div>
             )}
 
             {spatialIntel.infra && (
               <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ color: "#888" }}>Infra Megaproject:</span>
-                <span style={{ color: "#06B6D4" }}>{spatialIntel.infra.name} ({spatialIntel.infra.distance_km}km)</span>
+                <span style={{ color: "var(--text-muted)" }}>Infra Megaproject:</span>
+                <span style={{ color: "var(--intel-cyan)" }}>{spatialIntel.infra.name} ({spatialIntel.infra.distance_km}km)</span>
               </div>
             )}
 
             {spatialIntel.transit && (
               <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ color: "#888" }}>Nearest Transit:</span>
-                <span style={{ color: "#F7C64E" }}>{spatialIntel.transit.station_name} ({spatialIntel.transit.walk_minutes}m walk)</span>
+                <span style={{ color: "var(--text-muted)" }}>Nearest Transit:</span>
+                <span style={{ color: "var(--accent-bright)" }}>{spatialIntel.transit.station_name} ({spatialIntel.transit.walk_minutes}m walk)</span>
               </div>
             )}
 
             <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span style={{ color: "#888" }}>PEZA Status:</span>
-              <span style={{ color: spatialIntel.peza?.is_accredited ? "#10B981" : "#888" }}>
+              <span style={{ color: "var(--text-muted)" }}>PEZA Status:</span>
+              <span style={{ color: spatialIntel.peza?.is_accredited ? "var(--green)" : "var(--text-muted)" }}>
                 {spatialIntel.peza?.is_accredited ? `Certified (${spatialIntel.peza.zone_name})` : "Standard Zone"}
               </span>
             </div>
 
             {spatialIntel.seismic && (
               <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ color: "#888" }}>Fault Proximity:</span>
-                <span style={{ color: "#ccc" }}>{spatialIntel.seismic.status}</span>
+                <span style={{ color: "var(--text-muted)" }}>Fault Proximity:</span>
+                <span style={{ color: "var(--text-secondary)" }}>{spatialIntel.seismic.status}</span>
               </div>
             )}
 
             {spatialIntel.solar && (
               <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ color: "#888" }}>Solar Aspect:</span>
-                <span style={{ color: "#F7C64E" }}>{spatialIntel.solar.orientation}</span>
+                <span style={{ color: "var(--text-muted)" }}>Solar Aspect:</span>
+                <span style={{ color: "var(--accent-bright)" }}>{spatialIntel.solar.orientation}</span>
               </div>
             )}
           </div>
@@ -1047,45 +1053,45 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
             background: "rgba(13, 13, 13, 0.95)",
             backdropFilter: "blur(16px)",
             WebkitBackdropFilter: "blur(16px)",
-            border: "1px solid #E8AE3C",
+            border: "1px solid var(--accent)",
             borderRadius: "8px",
             padding: "14px",
-            color: "#fff",
+            color: "var(--text-primary)",
             fontFamily: "var(--font-mono, monospace)",
             boxShadow: "0 12px 40px rgba(0,0,0,0.8)",
             animation: "scmFadeIn 0.25s ease-out",
           }}
         >
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
-            <span style={{ color: "#E8AE3C", fontWeight: "bold", fontSize: "11px" }}>🕸️ ENTITY & COMPLEX GRAPH</span>
-            <button onClick={() => setShowEntityGraph(false)} style={{ background: "none", border: "none", color: "#888", cursor: "pointer" }}>✕</button>
+            <span style={{ color: "var(--accent)", fontWeight: "bold", fontSize: "11px" }}>🕸️ ENTITY & COMPLEX GRAPH</span>
+            <button onClick={() => setShowEntityGraph(false)} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer" }}>✕</button>
           </div>
 
           <div style={{ fontSize: "11px", display: "flex", flexDirection: "column", gap: "8px" }}>
-            <div style={{ borderBottom: "1px solid #222", paddingBottom: "6px" }}>
-              <div style={{ color: "#888", fontSize: "9px" }}>TARGET ASSET</div>
-              <div style={{ color: "#F7C64E", fontWeight: "bold" }}>{propertyTitle}</div>
+            <div style={{ borderBottom: "1px solid var(--surface2)", paddingBottom: "6px" }}>
+              <div style={{ color: "var(--text-muted)", fontSize: "9px" }}>TARGET ASSET</div>
+              <div style={{ color: "var(--accent-bright)", fontWeight: "bold" }}>{propertyTitle}</div>
             </div>
 
             <div>
-              <div style={{ color: "#888", fontSize: "9px", marginBottom: "4px" }}>CONNECTED INFRASTRUCTURE</div>
+              <div style={{ color: "var(--text-muted)", fontSize: "9px", marginBottom: "4px" }}>CONNECTED INFRASTRUCTURE</div>
               {entityNodes.length > 0 ? entityNodes.map((node, i) => (
                 <div key={i} style={{ display: "flex", gap: "6px", marginBottom: "5px", alignItems: "flex-start" }}>
                   <span>{node.icon}</span>
                   <div>
-                    <div style={{ color: "#ccc" }}>{node.label}</div>
-                    <div style={{ color: "#666", fontSize: "9px" }}>{node.sub}</div>
+                    <div style={{ color: "var(--text-secondary)" }}>{node.label}</div>
+                    <div style={{ color: "var(--text-muted)", fontSize: "9px" }}>{node.sub}</div>
                   </div>
                 </div>
               )) : (
-                <div style={{ color: "#555" }}>No nearby infrastructure detected</div>
+                <div style={{ color: "var(--text-muted)" }}>No nearby infrastructure detected</div>
               )}
             </div>
 
             {spatialIntel?.peza?.is_accredited && (
               <div>
-                <div style={{ color: "#888", fontSize: "9px" }}>PEZA ECOZONE NODE</div>
-                <div style={{ color: "#10B981" }}>{spatialIntel.peza.zone_name}</div>
+                <div style={{ color: "var(--text-muted)", fontSize: "9px" }}>PEZA ECOZONE NODE</div>
+                <div style={{ color: "var(--green)" }}>{spatialIntel.peza.zone_name}</div>
               </div>
             )}
           </div>
@@ -1113,58 +1119,58 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
             style={{
               width: "100%",
               maxWidth: "440px",
-              background: "#0d0d0d",
-              border: "1px solid #E8AE3C",
+              background: "var(--bg)",
+              border: "1px solid var(--accent)",
               borderRadius: "10px",
               padding: "20px",
-              color: "#fff",
+              color: "var(--text-primary)",
               fontFamily: "var(--font-mono, monospace)",
               boxShadow: "0 16px 48px rgba(0,0,0,0.9)",
             }}
           >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px", borderBottom: "1px solid #262626", paddingBottom: "8px" }}>
-              <span style={{ color: "#E8AE3C", fontWeight: "bold", fontSize: "12px", letterSpacing: "1px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px", borderBottom: "1px solid var(--border)", paddingBottom: "8px" }}>
+              <span style={{ color: "var(--accent)", fontWeight: "bold", fontSize: "12px", letterSpacing: "1px" }}>
                 📍 SPATIAL LOCATION DOSSIER
               </span>
-              <button onClick={() => setShowDossierModal(false)} style={{ background: "none", border: "none", color: "#888", cursor: "pointer" }}>✕</button>
+              <button onClick={() => setShowDossierModal(false)} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer" }}>✕</button>
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "10px", fontSize: "11px" }}>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ color: "#888" }}>Coordinates:</span>
-                <span style={{ color: "#F7C64E" }}>{dossierData.lat.toFixed(4)}°N, {dossierData.lng.toFixed(4)}°E</span>
+                <span style={{ color: "var(--text-muted)" }}>Coordinates:</span>
+                <span style={{ color: "var(--accent-bright)" }}>{dossierData.lat.toFixed(4)}°N, {dossierData.lng.toFixed(4)}°E</span>
               </div>
               {dossierData.intel?.infra && (
                 <div style={{ display: "flex", justifyContent: "space-between" }}>
-                  <span style={{ color: "#888" }}>Infra Megaproject:</span>
-                  <span style={{ color: "#06B6D4" }}>{dossierData.intel.infra.name} ({dossierData.intel.infra.distance_km}km)</span>
+                  <span style={{ color: "var(--text-muted)" }}>Infra Megaproject:</span>
+                  <span style={{ color: "var(--intel-cyan)" }}>{dossierData.intel.infra.name} ({dossierData.intel.infra.distance_km}km)</span>
                 </div>
               )}
               <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ color: "#888" }}>Solar & Heat Aspect:</span>
-                <span style={{ color: "#F7C64E" }}>{dossierData.intel?.solar?.orientation}</span>
+                <span style={{ color: "var(--text-muted)" }}>Solar & Heat Aspect:</span>
+                <span style={{ color: "var(--accent-bright)" }}>{dossierData.intel?.solar?.orientation}</span>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ color: "#888" }}>Solar Thermal Load:</span>
-                <span style={{ color: "#10B981" }}>{dossierData.intel?.solar?.heat_load}</span>
+                <span style={{ color: "var(--text-muted)" }}>Solar Thermal Load:</span>
+                <span style={{ color: "var(--green)" }}>{dossierData.intel?.solar?.heat_load}</span>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ color: "#888" }}>PEZA Ecozone Status:</span>
-                <span style={{ color: dossierData.intel?.peza?.is_accredited ? "#10B981" : "#aaa" }}>
+                <span style={{ color: "var(--text-muted)" }}>PEZA Ecozone Status:</span>
+                <span style={{ color: dossierData.intel?.peza?.is_accredited ? "var(--green)" : "var(--text-secondary)" }}>
                   {dossierData.intel?.peza?.is_accredited ? `Certified (${dossierData.intel.peza.zone_name})` : "Standard Commercial Zone"}
                 </span>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ color: "#888" }}>Nearest Mass Transit:</span>
-                <span style={{ color: "#F7C64E" }}>{dossierData.intel?.transit?.station_name} ({dossierData.intel?.transit?.walk_minutes}m walk)</span>
+                <span style={{ color: "var(--text-muted)" }}>Nearest Mass Transit:</span>
+                <span style={{ color: "var(--accent-bright)" }}>{dossierData.intel?.transit?.station_name} ({dossierData.intel?.transit?.walk_minutes}m walk)</span>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ color: "#888" }}>Nearest Active Fault:</span>
-                <span style={{ color: "#ccc" }}>{dossierData.intel?.seismic?.status}</span>
+                <span style={{ color: "var(--text-muted)" }}>Nearest Active Fault:</span>
+                <span style={{ color: "var(--text-secondary)" }}>{dossierData.intel?.seismic?.status}</span>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ color: "#888" }}>Copernicus Sentinel-2:</span>
-                <span style={{ color: "#10B981" }}>10m Optical Stream Ready</span>
+                <span style={{ color: "var(--text-muted)" }}>Copernicus Sentinel-2:</span>
+                <span style={{ color: "var(--green)" }}>10m Optical Stream Ready</span>
               </div>
             </div>
 
@@ -1178,8 +1184,8 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
                 marginTop: "14px",
                 padding: "8px",
                 background: "rgba(6, 182, 212, 0.15)",
-                border: "1px solid #06B6D4",
-                color: "#67E8F9",
+                border: "1px solid var(--intel-cyan)",
+                color: "var(--intel-cyan)",
                 borderRadius: "4px",
                 textAlign: "center",
                 fontSize: "10px",
@@ -1196,8 +1202,8 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
                 marginTop: "8px",
                 width: "100%",
                 padding: "8px",
-                background: "#E8AE3C",
-                color: "#0d0d0d",
+                background: "var(--accent)",
+                color: "var(--bg)",
                 border: "none",
                 borderRadius: "4px",
                 fontWeight: "bold",

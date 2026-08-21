@@ -70,8 +70,8 @@ export function getRoleSubgraph(role, nodes = MASTER_FLOW_NODES, edges = MASTER_
 export const WORKFLOW_DEFINITIONS = {
   deal_room_lifecycle: {
     id: "deal_room_lifecycle",
-    name: "Deal Room Lifecycle (Viewing → Offer → Handshake)",
-    description: "End-to-end seeker transaction journey from property detail through two-sided handshake closure.",
+    name: "Private Inquiry Lifecycle (Viewing → Handshake)",
+    description: "Implemented private inquiry journey through viewing coordination and two-sided handshake closure.",
     goal: "complete_deal",
     role: "seeker",
     startNodes: ["deal_room"],
@@ -80,7 +80,6 @@ export const WORKFLOW_DEFINITIONS = {
     requiredOrderedMilestones: [
       "inquiry_modal",
       "booking_modal",
-      "offer_modal",
       "deal_room",
       "sys_transaction_handshake"
     ],
@@ -91,7 +90,7 @@ export const WORKFLOW_DEFINITIONS = {
     },
     allowedEdgeTypes: ["NAVIGATE", "ACTION", "SUBMIT", "SUCCESS", "FAILURE", "RECOVERY", "AUTH_GATE", "CONDITION_TRUE", "SYSTEM"],
     nodeIds: [
-      "inquiry_modal", "booking_modal", "offer_modal", "deal_room", "gate_viewing", "exc_viewing_noshow", "reschedule_modal",
+      "inquiry_modal", "booking_modal", "deal_room", "gate_viewing", "exc_viewing_noshow", "reschedule_modal",
       "gate_offer", "sys_double_optin_handshake", "sys_transaction_handshake", "terminal_handshake_success"
     ]
   },
@@ -289,9 +288,8 @@ export const LINEAR_GUIDE_DEFINITIONS = {
       { step: 3, nodeId: "pep", title: "Property Detail Exploration", action: "Review chapters, verified title documents, and pricing.", tip: "Scroll to Chapter 10: Your Move.", guideTarget: "property-detail-container" },
       { step: 4, nodeId: "pep_ch10_your_move", title: "Initiate Deal or Inquiry", action: "Click 'Inquire' or 'Schedule Viewing'.", tip: "Requires 1 Connect token.", guideTarget: "property-your-move-actions" },
       { step: 5, nodeId: "inquiry_modal", title: "Direct Connect Authorization", action: "Authorize 1 Connect to establish private communication.", tip: "Protected by Zero-Knowledge masking.", guideTarget: "send-inquiry-modal-btn" },
-      { step: 6, nodeId: "deal_room", title: "Deal Room Negotiation", action: "Enter the private transaction workspace with owner/broker.", tip: "All offers recorded in audit log.", guideTarget: "deal-room-negotiation-panel" },
-      { step: 7, nodeId: "offer_modal", title: "Formal Offer Submission", action: "Submit formal purchase price and terms.", tip: "Valid for 72 hours.", guideTarget: "submit-offer-form-btn" },
-      { step: 8, nodeId: "sys_transaction_handshake", title: "Two-Sided Deal Handshake", action: "Co-confirm two-sided deal closure and transaction milestones.", tip: "Boosts Scout Trust Rating.", guideTarget: "deal-handshake-two-sided-signature" }
+      { step: 6, nodeId: "deal_room", title: "Private Inquiry Workspace", action: "Enter the private workspace with the owner or broker.", tip: "Coordinate messages and viewing appointments here.", guideTarget: "deal-room-negotiation-panel" },
+      { step: 7, nodeId: "sys_transaction_handshake", title: "Two-Sided Deal Handshake", action: "When eligible, co-confirm the transaction milestone.", tip: "Both parties must confirm.", guideTarget: "deal-handshake-two-sided-signature" }
     ]
   },
   owner_guide: {
@@ -304,7 +302,7 @@ export const LINEAR_GUIDE_DEFINITIONS = {
       { step: 1, nodeId: "dashboard_owner", title: "Owner Workspace", action: "View current property listings and performance metrics.", tip: "Check inquiry response rates.", guideTarget: "owner-portfolio-table" },
       { step: 2, nodeId: "owner_creation_pipeline", title: "Create Property Listing", action: "Configure property details, unit types, pricing, and amenities.", tip: "Automated OCR extracts building data.", guideTarget: "owner-claim-submit-btn" },
       { step: 3, nodeId: "comp_return_brief_owner", title: "Leads & Freshness Intelligence", action: "Review active buyer leads and freshness metrics.", tip: "Keep listing fresh to rank higher.", guideTarget: "owner-leads-brief" },
-      { step: 4, nodeId: "deal_room", title: "Review Inquiries & Offers", action: "Accept, counter, or decline buyer offers directly.", tip: "Counter-offers keep original deal terms intact.", guideTarget: "deal-room-negotiation-panel" },
+      { step: 4, nodeId: "deal_room", title: "Review Private Inquiries", action: "Respond to buyer inquiries and coordinate viewing details.", tip: "Structured offer negotiation remains planned.", guideTarget: "deal-room-negotiation-panel" },
       { step: 5, nodeId: "sys_transaction_handshake", title: "Two-Sided Deal Handshake", action: "Co-confirm two-sided deal closure and transaction milestones.", tip: "Unlocks seller rating reward.", guideTarget: "deal-handshake-two-sided-signature" }
     ]
   },
@@ -318,7 +316,7 @@ export const LINEAR_GUIDE_DEFINITIONS = {
       { step: 1, nodeId: "dashboard_broker", title: "Broker Command Hub", action: "View assigned leads, roster listings, and client communications.", tip: "RESA Law compliant.", guideTarget: "broker-lead-roster-view" },
       { step: 2, nodeId: "brokers_roster", title: "Verified Broker Directory", action: "View verified broker directory and client representation roster.", tip: "PRC accredited.", guideTarget: "broker-prc-license-form" },
       { step: 3, nodeId: "broker_field_briefing", title: "Field Briefing & Client Management", action: "Access tactical property briefing notes and verified clients.", tip: "Ensures legal compliance.", guideTarget: "broker-client-agreement-panel" },
-      { step: 4, nodeId: "deal_room", title: "Facilitate Deal Room Negotiations", action: "Guide buyer and seller through offer terms.", tip: "Maintain fiduciary duty.", guideTarget: "deal-room-negotiation-panel" },
+      { step: 4, nodeId: "deal_room", title: "Coordinate Private Inquiries", action: "Guide parties through communication and viewing logistics.", tip: "Structured offer negotiation remains planned.", guideTarget: "deal-room-negotiation-panel" },
       { step: 5, nodeId: "sys_transaction_handshake", title: "Two-Sided Deal Handshake", action: "Co-confirm two-sided deal closure and transaction milestones.", tip: "Boosts public broker trust score.", guideTarget: "deal-handshake-two-sided-signature" }
     ]
   }
@@ -357,9 +355,8 @@ export function resolveContextualGuide({ route = '/', role = 'seeker', isAuthent
       resolvedGuideSteps = [
         { step: 1, nodeId: 'pep', title: 'Property Detail', action: 'Explore listing chapters and specifications', guideTarget: '#node-pep' },
         { step: 2, nodeId: 'pep_ch10_your_move', title: 'Your Move', action: 'Select Inquire or Schedule Viewing', guideTarget: '#node-pep_ch10_your_move' },
-        { step: 3, nodeId: 'deal_room', title: 'Deal Room', action: 'Enter transaction workspace', guideTarget: '#node-deal_room' },
-        { step: 4, nodeId: 'offer_modal', title: 'Submit Offer', action: 'Enter offer terms and price', guideTarget: '#node-offer_modal' },
-        { step: 5, nodeId: 'sys_transaction_handshake', title: 'Two-Sided Handshake', action: 'Co-sign deal to close transaction', guideTarget: '#node-sys_transaction_handshake' }
+        { step: 3, nodeId: 'deal_room', title: 'Private Inquiry Workspace', action: 'Coordinate messages and viewing details', guideTarget: '#node-deal_room' },
+        { step: 4, nodeId: 'sys_transaction_handshake', title: 'Two-Sided Handshake', action: 'When eligible, co-confirm the transaction milestone', guideTarget: '#node-sys_transaction_handshake' }
       ];
     }
   } else {

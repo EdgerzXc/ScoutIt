@@ -49,25 +49,17 @@
       {
         "step": 6,
         "nodeId": "deal_room",
-        "title": "Deal Room Negotiation",
-        "action": "Enter the private transaction workspace with owner/broker.",
-        "tip": "All offers recorded in audit log.",
+        "title": "Private Inquiry Workspace",
+        "action": "Enter the private workspace with the owner or broker.",
+        "tip": "Coordinate messages and viewing appointments here.",
         "guideTarget": "deal-room-negotiation-panel"
       },
       {
         "step": 7,
-        "nodeId": "offer_modal",
-        "title": "Formal Offer Submission",
-        "action": "Submit formal purchase price and terms.",
-        "tip": "Valid for 72 hours.",
-        "guideTarget": "submit-offer-form-btn"
-      },
-      {
-        "step": 8,
         "nodeId": "sys_transaction_handshake",
         "title": "Two-Sided Deal Handshake",
-        "action": "Co-confirm two-sided deal closure and transaction milestones.",
-        "tip": "Boosts Scout Trust Rating.",
+        "action": "When eligible, co-confirm the transaction milestone.",
+        "tip": "Both parties must confirm.",
         "guideTarget": "deal-handshake-two-sided-signature"
       }
     ]
@@ -106,9 +98,9 @@
       {
         "step": 4,
         "nodeId": "deal_room",
-        "title": "Review Inquiries & Offers",
-        "action": "Accept, counter, or decline buyer offers directly.",
-        "tip": "Counter-offers keep original deal terms intact.",
+        "title": "Review Private Inquiries",
+        "action": "Respond to buyer inquiries and coordinate viewing details.",
+        "tip": "Structured offer negotiation remains planned.",
         "guideTarget": "deal-room-negotiation-panel"
       },
       {
@@ -155,9 +147,9 @@
       {
         "step": 4,
         "nodeId": "deal_room",
-        "title": "Facilitate Deal Room Negotiations",
-        "action": "Guide buyer and seller through offer terms.",
-        "tip": "Maintain fiduciary duty.",
+        "title": "Coordinate Private Inquiries",
+        "action": "Guide parties through communication and viewing logistics.",
+        "tip": "Structured offer negotiation remains planned.",
         "guideTarget": "deal-room-negotiation-panel"
       },
       {

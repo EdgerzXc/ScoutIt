@@ -1110,7 +1110,7 @@ END:HISTORICAL_CATEGORY_PRECEDENCE_DEFECT -->
       only because none of the 15 currently sits beside a Suspense boundary; adding
       one reproduces the freeze. Sweep them to `<style jsx>`
 END:HISTORICAL_RAW_STYLE_DEFECT -->
-- [x] Closed silent typo-account creation: onboarding now requires an explicit second confirmation before signup and handles unconfirmed email separately.
+- [x] Closed silent typo-account creation (tightened 2026-08-21): onboarding now has explicit Sign in and Create account modes. A failed sign-in never calls signup; new account creation requires deliberate mode selection, and unconfirmed email is handled separately.
 <!-- BEGIN:HISTORICAL_SIGNIN_SIGNUP_DEFECT
 - [ ] 🟠 **Sign-in-then-sign-up creates an account on a typo** (L3).
       `src/app/onboarding/page.js` calls `signInWithPassword` and falls through to
@@ -1124,16 +1124,14 @@ END:HISTORICAL_SIGNIN_SIGNUP_DEFECT -->
 
 ### Decisions that block other work (owner)
 
-- [ ] 🔴 **L1 — seven overlapping "is this listing real?" fields across two
-      systems.** Supabase: `verified` (TRUE on 0 of 20 — dead), `moderation_status`
-      ('pending' on all 20 including live ones — dead), `pipeline_status` (the only
-      one doing real work), `archived_at` (a second way to archive),
-      `last_verified_date`. Airtable adds `Verification_Status` and `Pipeline_Status`,
-      **neither of which any code reads**. Different parts of the codebase already
-      guess differently. **Recommendation: declare `pipeline_status` the single
-      source of truth.** ⚠️ Decide before building search ranking, trust badges, or
-      the AEO schema — and do **not** wire `Verification_Status` into a public badge
-      first, which would add a seventh reader to a contradictory set
+- [x] 🔴 **L1 closed 2026-08-21 — `pipeline_status` is the Supabase listing-live authority.**
+      `normalizeLifecycleState()` now reads `pipeline_status` first, unknown values
+      fail closed to draft, and `lifecycle_state` is a compatibility mirror only
+      when a legacy row has no pipeline value. Off-market reads filter
+      `pipeline_status='off_market'`; publish, withdrawal, removal, contact, and
+      title-lock decisions share the same normalizer. Airtable approval remains
+      the public CMS mirror required by the dual-CMS contract, not a competing
+      Supabase authority. Guarded by `propertyLifecycle.test.js`.
 - [ ] 🟠 **L5 — a blocked FAQ answer has no appeal path**
 - [ ] 🔵 **L12 — lead export moves PII with no record.** Ties to §3.4's
       "log exports of lead PII with actor, subject, time, purpose"
@@ -1151,10 +1149,20 @@ END:HISTORICAL_SIGNIN_SIGNUP_DEFECT -->
       and `/api/calendar/callback` to confirm the callback uses `getSiteUrl()`
       dynamically. Pairs with the owner's Google Cloud Console step (Owner Actions §1.8)
 END:HISTORICAL_GOOGLE_OAUTH_REDIRECT_AUDIT -->
-- [ ] **649 inline `style={{ color: "#…" }}` colours** remain from the light-mode
-      migration — 420 in `CommercialFlow.js` (225) and `ResidentialFlow.js` (195),
-      then `SpatialCommandMap.js` (48), `UnitMasterPage.js` (37). The CSS-file half
-      is done and measures zero. Inline `style` accepts `var()` fine
+- [x] **Closed scoped inline-color migration 2026-08-21.** The focused raw-hex
+      scan now measures zero across `CommercialFlow.js`, `ResidentialFlow.js`,
+      `SpatialCommandMap.js`, and `UnitMasterPage.js`. DOM styles use semantic CSS
+      variables; MapLibre paint values resolve the same tokens to concrete runtime
+      colours before layer creation.
+- [x] **Master Flow state paths reconciled 2026-08-21.** Inquiry and viewing
+      mutations now enforce the shared runtime registry. The staff-only visual graph
+      contains 11 runtime state nodes and all 13 enforced transition edges
+      (`visualEdgeMappings: 13`), separately from nine planned offer and negotiation
+      transitions. Unbuilt structured offers, no-show handling, persisted rescheduling,
+      and owner-to-inbox navigation are labelled partial/not started. Per-item node and
+      edge evidence validation reports zero stale repository artifacts; executable
+      guides no longer instruct users to open a nonexistent offer form. Mock and sample
+      property data remains preserved for human testing.
 - [x] **SCANNED 2026-08-20 — 10 public routes, both themes, WCAG contrast at
       390px.** The headline result is worth stating plainly:
 

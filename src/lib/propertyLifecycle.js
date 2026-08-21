@@ -10,24 +10,37 @@ export const PROPERTY_LIFECYCLE_STATES = Object.freeze({
 const VALID_STATES = new Set(Object.values(PROPERTY_LIFECYCLE_STATES));
 const ENTITLED_TIERS = new Set(["cluster", "universe"]);
 
-export function normalizeLifecycleState(property = {}) {
-  const explicit = String(property.lifecycle_state || "").toLowerCase();
-  if (VALID_STATES.has(explicit)) return explicit;
+const PIPELINE_LIFECYCLE_MAP = Object.freeze({
+  approved: PROPERTY_LIFECYCLE_STATES.LIVE,
+  archived: PROPERTY_LIFECYCLE_STATES.OFF_MARKET,
+  off_market: PROPERTY_LIFECYCLE_STATES.OFF_MARKET,
+  ai_drafting: PROPERTY_LIFECYCLE_STATES.PDF_VERIFICATION,
+  pdf_verification: PROPERTY_LIFECYCLE_STATES.PDF_VERIFICATION,
+  staff_suspended: PROPERTY_LIFECYCLE_STATES.STAFF_SUSPENDED,
+  suspended: PROPERTY_LIFECYCLE_STATES.STAFF_SUSPENDED,
+  permanently_removed: PROPERTY_LIFECYCLE_STATES.PERMANENTLY_REMOVED,
+  draft: PROPERTY_LIFECYCLE_STATES.DRAFT,
+  pending: PROPERTY_LIFECYCLE_STATES.DRAFT,
+  rejected: PROPERTY_LIFECYCLE_STATES.DRAFT,
+});
 
-  // Compatibility mapping for rows created before the lifecycle migration.
-  const pipelineStatus = String(property.pipeline_status || "").toLowerCase();
-  if (pipelineStatus === "approved") return PROPERTY_LIFECYCLE_STATES.LIVE;
-  if (pipelineStatus === "archived" || pipelineStatus === "off_market") {
-    return PROPERTY_LIFECYCLE_STATES.OFF_MARKET;
+export function normalizeLifecycleState(property = {}) {
+  const pipelineStatus = String(property.pipeline_status || "").trim().toLowerCase();
+  if (pipelineStatus) {
+    // pipeline_status is the only authority for whether a Supabase listing is
+    // live. Unknown values fail closed instead of trusting a stale mirror.
+    return PIPELINE_LIFECYCLE_MAP[pipelineStatus] || PROPERTY_LIFECYCLE_STATES.DRAFT;
   }
-  if (pipelineStatus === "ai_drafting") {
-    return PROPERTY_LIFECYCLE_STATES.PDF_VERIFICATION;
-  }
+
+  // Compatibility only for rows that predate pipeline_status. New writes keep
+  // lifecycle_state as a descriptive mirror, never as public-live authority.
+  const legacyState = String(property.lifecycle_state || "").trim().toLowerCase();
+  if (VALID_STATES.has(legacyState)) return legacyState;
   return PROPERTY_LIFECYCLE_STATES.DRAFT;
 }
 
 export function isMarketVisible(property = {}) {
-  return normalizeLifecycleState(property) === PROPERTY_LIFECYCLE_STATES.LIVE;
+  return String(property.pipeline_status || "").trim().toLowerCase() === "approved";
 }
 
 export function isOffMarket(property = {}) {
@@ -50,9 +63,8 @@ export function canChangeDisplayTitle(property = {}) {
 }
 
 export function canContactProperty(property = {}) {
-  const state = normalizeLifecycleState(property);
-  if (state === PROPERTY_LIFECYCLE_STATES.LIVE) return true;
-  return state === PROPERTY_LIFECYCLE_STATES.OFF_MARKET && property.quietly_open_to_offers === true;
+  if (isMarketVisible(property)) return true;
+  return isOffMarket(property) && property.quietly_open_to_offers === true;
 }
 
 export function isEntitledOffMarketViewer({ tier, isOwner = false, lockerOpen = false } = {}) {

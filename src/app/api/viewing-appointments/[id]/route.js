@@ -5,6 +5,7 @@ import { logActivity, createTask } from "@/lib/crmActivity";
 import { resolveUserId } from "@/lib/serverAuth";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { cancelViewingMeet } from "@/lib/calendar/meetLink";
+import { canTransitionWorkflow } from "@/lib/workflowStateMachines";
 
 const schema = z.object({
   status: z.enum(["confirmed", "cancelled", "completed"]),
@@ -26,7 +27,7 @@ export async function PATCH(request, { params }) {
 
     const { data: appt, error: fetchError } = await supabaseAdmin
       .from("viewing_appointments")
-      .select("host_id, guest_id, deal_id, google_event_id, deals(property_id, properties(title))")
+      .select("host_id, guest_id, deal_id, status, google_event_id, deals(property_id, properties(title))")
       .eq("id", id)
       .single();
 
@@ -41,6 +42,13 @@ export async function PATCH(request, { params }) {
       if (appt.host_id !== userId) {
         return NextResponse.json({ error: "Only the host can confirm or complete an appointment" }, { status: 403 });
       }
+    }
+
+    if (!canTransitionWorkflow("viewing", appt.status, status)) {
+      return NextResponse.json(
+        { error: "Viewing cannot move from " + appt.status + " to " + status },
+        { status: 409 },
+      );
     }
 
     const { error: updateError } = await supabaseAdmin

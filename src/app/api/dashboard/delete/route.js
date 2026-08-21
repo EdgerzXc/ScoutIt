@@ -104,7 +104,7 @@ export async function POST(request) {
     // record: it remains the historical/public-CMS record with approval false.
     const apiKey = process.env.AIRTABLE_API_KEY;
     const baseId = process.env.AIRTABLE_BASE_ID;
-    if (state === PROPERTY_LIFECYCLE_STATES.LIVE || property.pipeline_status === "approved") {
+    if (state === PROPERTY_LIFECYCLE_STATES.LIVE) {
       const slug = property.canonical_slug || property.slug;
       if (!apiKey || !baseId) return NextResponse.json({ error: "Removal is unavailable while the Airtable CMS is unavailable" }, { status: 503 });
       if (!slug) return NextResponse.json({ error: "Live property is missing its canonical slug" }, { status: 409 });

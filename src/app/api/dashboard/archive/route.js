@@ -45,7 +45,7 @@ export async function POST(request) {
     if (apiKey && baseId) {
       for (const property of owned) {
         const state = normalizeLifecycleState(property);
-        if (state !== PROPERTY_LIFECYCLE_STATES.LIVE && property.pipeline_status !== "approved") continue;
+        if (state !== PROPERTY_LIFECYCLE_STATES.LIVE) continue;
         const slug = property.canonical_slug || property.slug;
         if (!slug) return NextResponse.json({ error: "Live property is missing its canonical slug" }, { status: 409 });
         try {
@@ -55,7 +55,7 @@ export async function POST(request) {
           return NextResponse.json({ error: "Airtable unpublish failed; retry the withdrawal", retryable: true }, { status: 502 });
         }
       }
-    } else if (owned.some((property) => normalizeLifecycleState(property) === PROPERTY_LIFECYCLE_STATES.LIVE || property.pipeline_status === "approved")) {
+    } else if (owned.some((property) => normalizeLifecycleState(property) === PROPERTY_LIFECYCLE_STATES.LIVE)) {
       return NextResponse.json({ error: "Withdrawal is unavailable while the Airtable CMS is unavailable" }, { status: 503 });
     }
 

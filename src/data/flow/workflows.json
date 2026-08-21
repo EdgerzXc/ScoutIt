@@ -1,8 +1,8 @@
 {
   "deal_room_lifecycle": {
     "id": "deal_room_lifecycle",
-    "name": "Deal Room Lifecycle (Viewing → Offer → Handshake)",
-    "description": "End-to-end seeker transaction journey from property detail through two-sided handshake closure.",
+    "name": "Private Inquiry Lifecycle (Viewing → Handshake)",
+    "description": "Implemented private inquiry journey through viewing coordination and two-sided handshake closure.",
     "goal": "complete_deal",
     "role": "seeker",
     "startNodes": [
@@ -17,7 +17,6 @@
     "requiredOrderedMilestones": [
       "inquiry_modal",
       "booking_modal",
-      "offer_modal",
       "deal_room",
       "sys_transaction_handshake"
     ],
@@ -40,7 +39,6 @@
     "nodeIds": [
       "inquiry_modal",
       "booking_modal",
-      "offer_modal",
       "deal_room",
       "gate_viewing",
       "exc_viewing_noshow",

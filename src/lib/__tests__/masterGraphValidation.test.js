@@ -121,10 +121,11 @@ describe("ScoutIt Master Flow Graph Schema V2.2 — Deep Research Remediation Su
     const report = validateMasterGraph(MASTER_FLOW_NODES, MASTER_FLOW_EDGES);
     expect(report.valid).toBe(true);
     expect(report.errors).toEqual([]);
-    expect(report.stats.totalNodes).toBe(117);
-    expect(report.stats.totalEdges).toBeGreaterThanOrEqual(227);
-    expect(report.stats.verifiedCount).toBeGreaterThanOrEqual(80);
-    expect(report.stats.uniqueCanonicalIds).toBe(117);
+    expect(report.stats.totalNodes).toBe(128);
+    expect(report.stats.totalEdges).toBeGreaterThanOrEqual(246);
+    // Truth reconciliation lowered overstated nodes instead of preserving an artificial score.
+    expect(report.stats.verifiedCount).toBeGreaterThanOrEqual(78);
+    expect(report.stats.uniqueCanonicalIds).toBe(128);
   });
 
   // 7. Predicate Quality & Machine-Readable Conditions
@@ -145,12 +146,16 @@ describe("ScoutIt Master Flow Graph Schema V2.2 — Deep Research Remediation Su
     });
   });
 
-  // 8. Reconciled Offer Node Negotiation Semantics (G-03)
-  it("verifies offer_modal is grounded in DealRoom negotiation protocol with real evidence", () => {
+  // 8. Reconciled Offer Assistance Semantics (G-03)
+  it("labels offer assistance partial and never claims structured persistence", () => {
     const offerNode = MASTER_FLOW_NODES.find(n => n.id === "offer_modal");
     expect(offerNode).toBeDefined();
-    expect(offerNode.systems).toContain("src/components/dashboard/crm/DealRoom.js");
-    expect(offerNode.claims[0].evidence.some(ev => ev.path.includes("DealRoom.js"))).toBe(true);
+    expect(offerNode.implementationStatus).toBe("PARTIAL");
+    expect(offerNode.releaseStatus).toBe("LIMITED_LIVE");
+    expect(offerNode.description).toContain("does not yet persist an offer lifecycle");
+    expect(offerNode.evidence.some(ev => ev.path.endsWith("ChatBox.js"))).toBe(true);
+    expect(offerNode.evidence.some(ev => ev.path.endsWith("counter-offer/route.js"))).toBe(true);
+    expect(offerNode.evidence.some(ev => ev.path.includes("DealRoom.js"))).toBe(false);
   });
 
   // 9. Actor-Aware Guide Traversal (G-04)
@@ -234,8 +239,13 @@ describe("ScoutIt Master Flow Graph Schema V2.2 — Deep Research Remediation Su
   it("calculates real state transitions and outputs repository fidelity report", () => {
     const audit = auditGraphAgainstCodebase(MASTER_FLOW_NODES, MASTER_FLOW_EDGES, publicRAGChunks);
     expect(audit.ghostNodes).toEqual([]);
-    expect(audit.stateMachineTransitions.expected).toBe(20);
-    expect(audit.stateMachineTransitions.mapped).toBe(7);
+    expect(audit.staleEvidenceItems).toEqual([]);
+    expect(audit.stateMachineTransitions.implemented).toBe(13);
+    expect(audit.stateMachineTransitions.registryMapped).toBe(13);
+    expect(audit.stateMachineTransitions.visualEdgeMappings).toBe(13);
+    expect(audit.stateMachineTransitions.plannedNotImplemented).toHaveLength(9);
+    expect(audit.stateMachineTransitions.staleVisualTransitions).toEqual([]);
+    expect(audit.stateMachineTransitions.missing).toEqual([]);
     expect(audit.repositoryFidelityReport.canonicalRoutes.length).toBeGreaterThan(0);
     expect(audit.repositoryFidelityReport.apiRoutesMapped.length).toBeGreaterThan(0);
     expect(audit.scores.overallTrustScore.penalties).toBeDefined();
